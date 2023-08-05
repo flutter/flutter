@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -46,20 +47,23 @@ void main() {
   testWidgets('PhysicalModel - clips when overflows and elevation is 0', (WidgetTester tester) async {
     const Key key = Key('test');
     await tester.pumpWidget(
-      MediaQuery(
-        key: key,
-        data: const MediaQueryData(),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Padding(
-            padding: const EdgeInsets.all(50),
-            child: Row(
-              children: const <Widget>[
-                Material(child: Text('A long long long long long long long string')),
-                Material(child: Text('A long long long long long long long string')),
-                Material(child: Text('A long long long long long long long string')),
-                Material(child: Text('A long long long long long long long string')),
-              ],
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: const MediaQuery(
+          key: key,
+          data: MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Padding(
+              padding: EdgeInsets.all(50),
+              child: Row(
+                children: <Widget>[
+                  Material(child: Text('A long long long long long long long string')),
+                  Material(child: Text('A long long long long long long long string')),
+                  Material(child: Text('A long long long long long long long string')),
+                  Material(child: Text('A long long long long long long long string')),
+                ],
+              ),
             ),
           ),
         ),

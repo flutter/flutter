@@ -2,9 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../foundation/leak_tracking.dart';
 
 void main() {
   test('copyWith, ==, hashCode basics', () {
@@ -12,7 +20,13 @@ void main() {
     expect(const NavigationBarThemeData().hashCode, const NavigationBarThemeData().copyWith().hashCode);
   });
 
-  testWidgets('Default debugFillProperties', (WidgetTester tester) async {
+  test('NavigationBarThemeData lerp special cases', () {
+    expect(NavigationBarThemeData.lerp(null, null, 0), null);
+    const NavigationBarThemeData data = NavigationBarThemeData();
+    expect(identical(NavigationBarThemeData.lerp(data, data, 0.5), data), true);
+  });
+
+  testWidgetsWithLeakTracking('Default debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const NavigationBarThemeData().debugFillProperties(builder);
 
@@ -24,7 +38,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('Custom debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Custom debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const NavigationBarThemeData(
       height: 200.0,
@@ -56,7 +70,7 @@ void main() {
     expect(description[7], 'labelBehavior: NavigationDestinationLabelBehavior.alwaysHide');
   });
 
-  testWidgets('NavigationBarThemeData values are used when no NavigationBar properties are specified', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NavigationBarThemeData values are used when no NavigationBar properties are specified', (WidgetTester tester) async {
     const double height = 200.0;
     const Color backgroundColor = Color(0x00000001);
     const double elevation = 42.0;
@@ -128,7 +142,7 @@ void main() {
     expect(_labelBehavior(tester), labelBehavior);
   });
 
-  testWidgets('NavigationBar values take priority over NavigationBarThemeData values when both properties are specified', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NavigationBar values take priority over NavigationBarThemeData values when both properties are specified', (WidgetTester tester) async {
     const double height = 200.0;
     const Color backgroundColor = Color(0x00000001);
     const double elevation = 42.0;
@@ -160,6 +174,48 @@ void main() {
     expect(_barMaterial(tester).color, backgroundColor);
     expect(_barMaterial(tester).elevation, elevation);
     expect(_labelBehavior(tester), labelBehavior);
+  });
+
+  testWidgetsWithLeakTracking('Custom label style renders ink ripple properly', (WidgetTester tester) async {
+    Widget buildWidget({ NavigationDestinationLabelBehavior? labelBehavior }) {
+      return MaterialApp(
+        theme: ThemeData(
+          navigationBarTheme: const NavigationBarThemeData(
+            labelTextStyle: MaterialStatePropertyAll<TextStyle>(
+              TextStyle(fontSize: 25, color: Color(0xff0000ff)),
+            ),
+          ),
+          useMaterial3: true,
+        ),
+        home: Scaffold(
+          bottomNavigationBar: Center(
+            child: NavigationBar(
+              labelBehavior: labelBehavior,
+              destinations: const <Widget>[
+                NavigationDestination(
+                  icon: SizedBox(),
+                  label: 'AC',
+                ),
+                NavigationDestination(
+                  icon: SizedBox(),
+                  label: 'Alarm',
+                ),
+              ],
+              onDestinationSelected: (int i) { },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidget());
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(NavigationDestination).last));
+    await tester.pumpAndSettle();
+
+    await expectLater(find.byType(NavigationBar), matchesGoldenFile('indicator_custom_label_style.png'));
   });
 }
 

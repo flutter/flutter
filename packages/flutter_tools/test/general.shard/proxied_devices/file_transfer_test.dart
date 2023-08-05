@@ -21,7 +21,7 @@ void main() {
 
       // Full chunk.
       controller.add(Uint8List.fromList(<int>[1, 2, 3, 4]));
-      // Multiple of full chunks, on chunk bounraries.
+      // Multiple of full chunks, on chunk boundaries.
       controller.add(Uint8List.fromList(<int>[5, 6, 7, 8, 9, 10, 11, 12]));
       // Larger than one chunk, starts on chunk boundary, ends not on chunk boundary.
       controller.add(Uint8List.fromList(<int>[13, 14, 15, 16, 17, 18]));

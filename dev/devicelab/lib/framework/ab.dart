@@ -49,7 +49,7 @@ class ABTest {
   static Map<String, List<double>> _convertFrom(dynamic results) {
     final Map<String, dynamic> resultMap = results as Map<String, dynamic>;
     return <String, List<double>> {
-      for (String key in resultMap.keys)
+      for (final String key in resultMap.keys)
         key: (resultMap[key] as List<dynamic>).cast<double>(),
     };
   }
@@ -114,14 +114,11 @@ class ABTest {
         switch (aligns[column]) {
           case FieldJustification.LEFT:
             value = value.padRight(len);
-            break;
           case FieldJustification.RIGHT:
             value = value.padLeft(len);
-            break;
           case FieldJustification.CENTER:
             value = value.padLeft((len + value.length) ~/2);
             value = value.padRight(len);
-            break;
         }
       }
       if (column > 0) {

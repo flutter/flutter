@@ -20,9 +20,7 @@ class _CupertinoSliverRefresh extends SingleChildRenderObjectWidget {
     this.refreshIndicatorLayoutExtent = 0.0,
     this.hasLayoutExtent = false,
     super.child,
-  }) : assert(refreshIndicatorLayoutExtent != null),
-       assert(refreshIndicatorLayoutExtent >= 0.0),
-       assert(hasLayoutExtent != null);
+  }) : assert(refreshIndicatorLayoutExtent >= 0.0);
 
   // The amount of space the indicator should occupy in the sliver in a
   // resting state when in the refreshing mode.
@@ -61,9 +59,7 @@ class _RenderCupertinoSliverRefresh extends RenderSliver
     required double refreshIndicatorExtent,
     required bool hasLayoutExtent,
     RenderBox? child,
-  }) : assert(refreshIndicatorExtent != null),
-       assert(refreshIndicatorExtent >= 0.0),
-       assert(hasLayoutExtent != null),
+  }) : assert(refreshIndicatorExtent >= 0.0),
        _refreshIndicatorExtent = refreshIndicatorExtent,
        _hasLayoutExtent = hasLayoutExtent {
     this.child = child;
@@ -74,7 +70,6 @@ class _RenderCupertinoSliverRefresh extends RenderSliver
   double get refreshIndicatorLayoutExtent => _refreshIndicatorExtent;
   double _refreshIndicatorExtent;
   set refreshIndicatorLayoutExtent(double value) {
-    assert(value != null);
     assert(value >= 0.0);
     if (value == _refreshIndicatorExtent) {
       return;
@@ -89,7 +84,6 @@ class _RenderCupertinoSliverRefresh extends RenderSliver
   bool get hasLayoutExtent => _hasLayoutExtent;
   bool _hasLayoutExtent;
   set hasLayoutExtent(bool value) {
-    assert(value != null);
     if (value == _hasLayoutExtent) {
       return;
     }
@@ -303,9 +297,7 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
     this.refreshIndicatorExtent = _defaultRefreshIndicatorExtent,
     this.builder = buildRefreshIndicator,
     this.onRefresh,
-  }) : assert(refreshTriggerPullDistance != null),
-       assert(refreshTriggerPullDistance > 0.0),
-       assert(refreshIndicatorExtent != null),
+  }) : assert(refreshTriggerPullDistance > 0.0),
        assert(refreshIndicatorExtent >= 0.0),
        assert(
          refreshTriggerPullDistance >= refreshIndicatorExtent,
@@ -406,7 +398,7 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
     switch (refreshState) {
       case RefreshIndicatorMode.drag:
         // While we're dragging, we draw individual ticks of the spinner while simultaneously
-        // easing the opacity in. Note that the opacity curve values here were derived using
+        // easing the opacity in. The opacity curve values here were derived using
         // Xcode through inspecting a native app running on iOS 13.5.
         const Curve opacityCurve = Interval(0.0, 0.35, curve: Curves.easeInOut);
         return Opacity(
@@ -541,7 +533,6 @@ class _CupertinoSliverRefreshControlState extends State<CupertinoSliverRefreshCo
         } else {
           nextState = RefreshIndicatorMode.inactive;
         }
-        break;
     }
 
     return nextState;

@@ -43,6 +43,9 @@ class MenuThemeData with Diagnosticable {
 
   /// Linearly interpolate between two menu button themes.
   static MenuThemeData? lerp(MenuThemeData? a, MenuThemeData? b, double t) {
+    if (identical(a, b)) {
+      return a;
+    }
     return MenuThemeData(style: MenuStyle.lerp(a?.style, b?.style, t));
   }
 
@@ -91,7 +94,7 @@ class MenuTheme extends InheritedTheme {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// The properties for [MenuBar] and [MenuItemButton] in this widget's
   /// descendants.

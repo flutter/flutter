@@ -2,12 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=123"
-@Tags(<String>['no-shuffle'])
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' as ui;
@@ -123,9 +117,17 @@ Future<Map<String, dynamic>> hasReassemble(Future<Map<String, dynamic>> pendingR
 
 void main() {
   final List<String?> console = <String?>[];
+  late PipelineOwner owner;
 
   setUpAll(() async {
-    binding = TestServiceExtensionsBinding()..scheduleFrame();
+    binding = TestServiceExtensionsBinding();
+    final RenderView view = RenderView(view: binding.platformDispatcher.views.single);
+    owner = PipelineOwner(onSemanticsUpdate: (ui.SemanticsUpdate _) { })
+      ..rootNode = view;
+    binding.rootPipelineOwner.adoptChild(owner);
+    binding.addRenderView(view);
+    view.prepareInitialFrame();
+    binding.scheduleFrame();
     expect(binding.frameScheduled, isTrue);
 
     // We need to test this service extension here because the result is true
@@ -160,7 +162,7 @@ void main() {
   tearDownAll(() async {
     // See widget_inspector_test.dart for tests of the ext.flutter.inspector
     // service extensions included in this count.
-    int widgetInspectorExtensionCount = 22;
+    int widgetInspectorExtensionCount = 20;
     if (WidgetInspectorService.instance.isWidgetCreationTracked()) {
       // Some inspector extensions are only exposed if widget creation locations
       // are tracked.
@@ -176,12 +178,16 @@ void main() {
     // framework, excluding any that are for the widget inspector
     // (see widget_inspector_test.dart for tests of the ext.flutter.inspector
     // service extensions).
-    const int serviceExtensionCount = 37;
+    const int serviceExtensionCount = 38;
 
     expect(binding.extensions.length, serviceExtensionCount + widgetInspectorExtensionCount - disabledExtensions);
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;
+    binding.rootPipelineOwner.dropChild(owner);
+    owner
+      ..rootNode = null
+      ..dispose();
   });
 
   // The following list is alphabetical, one test per extension.
@@ -217,6 +223,19 @@ void main() {
     });
   });
 
+  test('Service extensions - debugDumpFocusTree', () async {
+    final Map<String, dynamic> result = await binding.testExtension(WidgetsServiceExtensions.debugDumpFocusTree.name, <String, String>{});
+
+    expect(result, <String, dynamic>{
+      'data': matches(
+        r'^'
+        r'FocusManager#[0-9a-f]{5}\n'
+        r' └─rootScope: FocusScopeNode#[0-9a-f]{5}\(Root Focus Scope\)\n'
+        r'$',
+      ),
+    });
+  });
+
   test('Service extensions - debugDumpRenderTree', () async {
     await binding.doFrame();
     final Map<String, dynamic> result = await binding.testExtension(RenderingServiceExtensions.debugDumpRenderTree.name, <String, String>{});
@@ -226,7 +245,7 @@ void main() {
         r'^'
         r'RenderView#[0-9a-f]{5}\n'
         r'   debug mode enabled - [a-zA-Z]+\n'
-        r'   window size: Size\(2400\.0, 1800\.0\) \(in physical pixels\)\n'
+        r'   view size: Size\(2400\.0, 1800\.0\) \(in physical pixels\)\n'
         r'   device pixel ratio: 3\.0 \(physical pixels per logical pixel\)\n'
         r'   configuration: Size\(800\.0, 600\.0\) at 3\.0x \(in logical pixels\)\n'
         r'$',
@@ -261,11 +280,13 @@ void main() {
     await binding.doFrame();
     final Map<String, dynamic> result = await binding.testExtension(RenderingServiceExtensions.debugDumpSemanticsTreeInTraversalOrder.name, <String, String>{});
 
-    expect(result, <String, String>{
-      'data': 'Semantics not generated.\n'
-        'For performance reasons, the framework only generates semantics when asked to do so by the platform.\n'
-        'Usually, platforms only ask for semantics when assistive technologies (like screen readers) are running.\n'
-        'To generate semantics, try turning on an assistive technology (like VoiceOver or TalkBack) on your device.'
+    expect(result, <String, Object>{
+      'data': matches(
+        r'Semantics not generated for RenderView#[0-9a-f]{5}\.\n'
+        r'For performance reasons, the framework only generates semantics when asked to do so by the platform.\n'
+        r'Usually, platforms only ask for semantics when assistive technologies \(like screen readers\) are running.\n'
+        r'To generate semantics, try turning on an assistive technology \(like VoiceOver or TalkBack\) on your device.'
+      )
     });
   });
 
@@ -273,11 +294,13 @@ void main() {
     await binding.doFrame();
     final Map<String, dynamic> result = await binding.testExtension(RenderingServiceExtensions.debugDumpSemanticsTreeInInverseHitTestOrder.name, <String, String>{});
 
-    expect(result, <String, String>{
-      'data': 'Semantics not generated.\n'
-        'For performance reasons, the framework only generates semantics when asked to do so by the platform.\n'
-        'Usually, platforms only ask for semantics when assistive technologies (like screen readers) are running.\n'
-        'To generate semantics, try turning on an assistive technology (like VoiceOver or TalkBack) on your device.'
+    expect(result, <String, Object>{
+      'data': matches(
+        r'Semantics not generated for RenderView#[0-9a-f]{5}\.\n'
+        r'For performance reasons, the framework only generates semantics when asked to do so by the platform.\n'
+        r'Usually, platforms only ask for semantics when assistive technologies \(like screen readers\) are running.\n'
+        r'To generate semantics, try turning on an assistive technology \(like VoiceOver or TalkBack\) on your device.'
+      )
     });
   });
 
@@ -545,7 +568,7 @@ void main() {
     bool completed;
 
     completed = false;
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) async {
       expect(utf8.decode(message!.buffer.asUint8List()), 'test');
       completed = true;
       return ByteData(5); // 0x0000000000
@@ -572,7 +595,7 @@ void main() {
     });
     expect(data, isFalse);
     expect(completed, isTrue);
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', null);
   });
 
   test('Service extensions - exit', () async {
@@ -856,6 +879,7 @@ void main() {
     result = await pendingResult;
     expect(result, <String, String>{});
     expect(binding.reassembled, 1);
+    binding.reassembled = 0;
   });
 
   test('Service extensions - showPerformanceOverlay', () async {

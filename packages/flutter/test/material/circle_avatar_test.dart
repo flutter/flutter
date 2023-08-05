@@ -5,17 +5,20 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
+
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
 import '../image_data.dart';
 import '../painting/mocks_for_image_cache.dart';
 
 void main() {
-  testWidgets('CircleAvatar with dark background color', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CircleAvatar with dark background color', (WidgetTester tester) async {
     final Color backgroundColor = Colors.blue.shade900;
     await tester.pumpWidget(
       wrap(
@@ -37,7 +40,7 @@ void main() {
     expect(paragraph.text.style!.color, equals(ThemeData.fallback().primaryColorLight));
   });
 
-  testWidgets('CircleAvatar with light background color', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CircleAvatar with light background color', (WidgetTester tester) async {
     final Color backgroundColor = Colors.blue.shade100;
     await tester.pumpWidget(
       wrap(
@@ -59,7 +62,7 @@ void main() {
     expect(paragraph.text.style!.color, equals(ThemeData.fallback().primaryColorDark));
   });
 
-  testWidgets('CircleAvatar with image background', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CircleAvatar with image background', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
         child: CircleAvatar(
@@ -76,7 +79,7 @@ void main() {
     expect(decoration.image!.fit, equals(BoxFit.cover));
   });
 
-  testWidgets('CircleAvatar with image foreground', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CircleAvatar with image foreground', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
         child: CircleAvatar(
@@ -93,7 +96,7 @@ void main() {
     expect(decoration.image!.fit, equals(BoxFit.cover));
   });
 
-  testWidgets('CircleAvatar backgroundImage is used as a fallback for foregroundImage', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CircleAvatar backgroundImage is used as a fallback for foregroundImage', (WidgetTester tester) async {
     final ErrorImageProvider errorImage = ErrorImageProvider();
     bool caughtForegroundImageError = false;
     await tester.pumpWidget(
@@ -121,7 +124,7 @@ void main() {
     );
   });
 
-  testWidgets('CircleAvatar with foreground color', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CircleAvatar with foreground color', (WidgetTester tester) async {
     final Color foregroundColor = Colors.red.shade100;
     await tester.pumpWidget(
       wrap(
@@ -144,7 +147,7 @@ void main() {
     expect(paragraph.text.style!.color, equals(foregroundColor));
   });
 
-  testWidgets('CircleAvatar default colors', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CircleAvatar default colors', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
       wrap(
@@ -166,7 +169,7 @@ void main() {
     expect(paragraph.text.style!.color, equals(theme.colorScheme.onPrimaryContainer));
   });
 
-  testWidgets('CircleAvatar text does not expand with textScaleFactor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CircleAvatar text does not expand with textScaleFactor', (WidgetTester tester) async {
     final Color foregroundColor = Colors.red.shade100;
     await tester.pumpWidget(
       wrap(
@@ -210,7 +213,7 @@ void main() {
     expect(tester.getSize(find.text('Z')), equals(const Size(16.0, 16.0)));
   });
 
-  testWidgets('CircleAvatar respects minRadius', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CircleAvatar respects minRadius', (WidgetTester tester) async {
     final Color backgroundColor = Colors.blue.shade900;
     await tester.pumpWidget(
       wrap(
@@ -234,7 +237,7 @@ void main() {
     expect(paragraph.text.style!.color, equals(ThemeData.fallback().primaryColorLight));
   });
 
-  testWidgets('CircleAvatar respects maxRadius', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CircleAvatar respects maxRadius', (WidgetTester tester) async {
     final Color backgroundColor = Colors.blue.shade900;
     await tester.pumpWidget(
       wrap(
@@ -256,7 +259,7 @@ void main() {
     expect(paragraph.text.style!.color, equals(ThemeData.fallback().primaryColorLight));
   });
 
-  testWidgets('CircleAvatar respects setting both minRadius and maxRadius', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CircleAvatar respects setting both minRadius and maxRadius', (WidgetTester tester) async {
     final Color backgroundColor = Colors.blue.shade900;
     await tester.pumpWidget(
       wrap(
@@ -280,14 +283,12 @@ void main() {
   });
 
   group('Material 2', () {
-    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
-    // is turned on by default, these tests can be removed.
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
 
-    testWidgets('CircleAvatar default colors with light theme', (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(
-        primaryColor: Colors.grey.shade100,
-        primaryColorBrightness: Brightness.light,
-      );
+    testWidgetsWithLeakTracking('CircleAvatar default colors with light theme', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData(useMaterial3: false, primaryColor: Colors.grey.shade100);
       await tester.pumpWidget(
         wrap(
           child: Theme(
@@ -308,11 +309,8 @@ void main() {
       expect(paragraph.text.style!.color, equals(theme.primaryTextTheme.titleLarge!.color));
     });
 
-    testWidgets('CircleAvatar default colors with dark theme', (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(
-        primaryColor: Colors.grey.shade800,
-        primaryColorBrightness: Brightness.dark,
-      );
+    testWidgetsWithLeakTracking('CircleAvatar default colors with dark theme', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData(useMaterial3: false, primaryColor: Colors.grey.shade800);
       await tester.pumpWidget(
         wrap(
           child: Theme(
@@ -340,7 +338,9 @@ Widget wrap({ required Widget child }) {
     textDirection: TextDirection.ltr,
     child: MediaQuery(
       data: const MediaQueryData(),
-      child: Center(child: child),
+      child: MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Center(child: child)),
     ),
   );
 }

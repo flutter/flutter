@@ -5,6 +5,7 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/update_packages.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
@@ -12,7 +13,6 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 import 'package:yaml/yaml.dart';
 
-import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/test_flutter_command_runner.dart';
 
@@ -23,7 +23,7 @@ description: A framework for writing Flutter applications
 homepage: http://flutter.dev
 
 environment:
-  sdk: ">=2.2.2 <3.0.0"
+  sdk: '>=3.0.0-0 <4.0.0'
 
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
@@ -60,7 +60,7 @@ homepage: http://flutter.dev
 version: 1.0.0
 
 environment:
-  sdk: ">=2.14.0-383.0.dev <3.0.0"
+  sdk: '>=3.0.0-0 <4.0.0'
   flutter: ">=2.5.0-6.0.pre.30 <3.0.0"
 
 dependencies:
@@ -74,23 +74,17 @@ dependencies:
 ''';
 
 void main() {
-  testWithoutContext('kManuallyPinnedDependencies pins are actually pins', () {
-    expect(
-      kManuallyPinnedDependencies.values,
-      isNot(contains(anyOf('any', startsWith('^'), startsWith('>'), startsWith('<')))),
-      reason: 'Version pins in kManuallyPinnedDependencies must be specific pins, not ranges.',
-    );
-  });
-
   group('update-packages', () {
     late FileSystem fileSystem;
     late Directory flutterSdk;
     late Directory flutter;
     late FakePub pub;
     late FakeProcessManager processManager;
+    late BufferLogger logger;
 
     setUpAll(() {
       Cache.disableLocking();
+      logger = BufferLogger.test();
     });
 
     setUp(() {
@@ -174,6 +168,102 @@ void main() {
       ),
     });
 
+    testUsingContext('--transitive-closure --consumer-only', () async {
+      final UpdatePackagesCommand command = UpdatePackagesCommand();
+      await createTestCommandRunner(command).run(<String>[
+        'update-packages',
+        '--transitive-closure',
+        '--consumer-only',
+      ]);
+      expect(pub.pubGetDirectories, equals(<String>[
+        '/.tmp_rand0/flutter_update_packages.rand0/synthetic_package',
+      ]));
+      expect(pub.pubBatchDirectories, equals(<String>[
+        '/.tmp_rand0/flutter_update_packages.rand0/synthetic_package',
+      ]));
+      // Expecting a line like:
+      //   'flutter -> {collection, meta, typed_data, vector_math}'
+      expect(
+        logger.statusText,
+        contains(RegExp(r'flutter -> {([a-z_]+, )*([a-z_]+)+}')),
+      );
+    }, overrides: <Type, Generator>{
+      Pub: () => pub,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Cache: () => Cache.test(
+        processManager: processManager,
+      ),
+      Logger: () => logger,
+    });
+
+    testUsingContext('--cherry-pick-package', () async {
+      final UpdatePackagesCommand command = UpdatePackagesCommand();
+      await createTestCommandRunner(command).run(<String>[
+        'update-packages',
+        '--cherry-pick-package=vector_math',
+        '--cherry-pick-version=2.0.9',
+      ]);
+      expect(pub.pubGetDirectories, equals(<String>[
+        '/.tmp_rand0/flutter_update_packages.rand0/synthetic_package',
+        '/flutter/examples',
+        '/flutter/packages/flutter',
+      ]));
+      expect(pub.pubBatchDirectories, equals(<String>[
+        '/.tmp_rand0/flutter_update_packages.rand0/synthetic_package',
+      ]));
+      expect(pub.pubspecYamls, hasLength(3));
+      final String output = pub.pubspecYamls.first;
+      expect(output, isNotNull);
+      expect(output, contains('collection: 1.14.11\n'));
+      expect(output, contains('meta: 1.1.8\n'));
+      expect(output, contains('typed_data: 1.1.6\n'));
+      expect(output, contains('vector_math: 2.0.9\n'));
+      expect(output, isNot(contains('vector_math: 2.0.8')));
+      expect(output, isNot(contains('vector_math: ">= 2.0.8"')));
+      expect(output, isNot(contains("vector_math: '>= 2.0.8'")));
+    }, overrides: <Type, Generator>{
+      Pub: () => pub,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Cache: () => Cache.test(
+        processManager: processManager,
+      ),
+      Logger: () => logger,
+    });
+
+    testUsingContext('--force-upgrade', () async {
+      final UpdatePackagesCommand command = UpdatePackagesCommand();
+      await createTestCommandRunner(command).run(<String>[
+        'update-packages',
+        '--force-upgrade',
+      ]);
+      expect(pub.pubGetDirectories, equals(<String>[
+        '/.tmp_rand0/flutter_update_packages.rand0/synthetic_package',
+        '/flutter/examples',
+        '/flutter/packages/flutter',
+      ]));
+      expect(pub.pubBatchDirectories, equals(<String>[
+        '/.tmp_rand0/flutter_update_packages.rand0/synthetic_package',
+      ]));
+      expect(pub.pubspecYamls, hasLength(3));
+      final String output = pub.pubspecYamls.first;
+      expect(output, isNotNull);
+      expect(output, contains("collection: '>= 1.14.11'\n"));
+      expect(output, contains("meta: '>= 1.1.8'\n"));
+      expect(output, contains("typed_data: '>= 1.1.6'\n"));
+      expect(output, contains("vector_math: '>= 2.0.8'\n"));
+      expect(output, isNot(contains('vector_math: 2.0.8')));
+    }, overrides: <Type, Generator>{
+      Pub: () => pub,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Cache: () => Cache.test(
+        processManager: processManager,
+      ),
+      Logger: () => logger,
+    });
+
     testUsingContext('force updates packages --synthetic-package-path', () async {
       final UpdatePackagesCommand command = UpdatePackagesCommand();
       const String dir = '/path/to/synthetic/package';
@@ -213,6 +303,7 @@ void main() {
             sourcePath: '/path/to/pubspec.yaml',
             kind: DependencyKind.normal,
             isTransitive: false,
+            isDevDependency: false,
           ),
         ],
         doUpgrade: true,
@@ -232,6 +323,7 @@ void main() {
             sourcePath: '/path/to/pubspec.yaml',
             kind: DependencyKind.normal,
             isTransitive: false,
+            isDevDependency: false,
           ),
         ],
       );
@@ -247,12 +339,12 @@ class FakePub extends Fake implements Pub {
   final FileSystem fileSystem;
   final List<String> pubGetDirectories = <String>[];
   final List<String> pubBatchDirectories = <String>[];
+  final List<String> pubspecYamls = <String>[];
 
   @override
   Future<void> get({
     required PubContext context,
     required FlutterProject project,
-    bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
     bool generateSyntheticPackage = false,
@@ -260,9 +352,10 @@ class FakePub extends Fake implements Pub {
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
-    bool printProgress = true,
+    PubOutputMode outputMode = PubOutputMode.all,
   }) async {
     pubGetDirectories.add(project.directory.path);
+    pubspecYamls.add(project.directory.childFile('pubspec.yaml').readAsStringSync());
     project.directory.childFile('pubspec.lock')
       ..createSync(recursive: true)
       ..writeAsStringSync('''

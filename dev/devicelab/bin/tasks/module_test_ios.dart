@@ -27,8 +27,8 @@ Future<void> main() async {
       },
     );
 
-    // this variable cannot be `late`, as we reference it in the `finally` block
-    // which may execute before this field has been initialized
+    // This variable cannot be `late`, as we reference it in the `finally` block
+    // which may execute before this field has been initialized.
     String? simulatorDeviceId;
     section('Create Flutter module project');
 
@@ -51,7 +51,7 @@ Future<void> main() async {
       final Directory flutterModuleLibSource = Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'ios_host_app', 'flutterapp', 'lib'));
       final Directory flutterModuleLibDestination = Directory(path.join(projectDir.path, 'lib'));
 
-      // These test files don't have a .dart prefix so the analyzer will ignore them. They aren't in a
+      // These test files don't have a .dart extension so the analyzer will ignore them. They aren't in a
       // package and don't work on their own outside of the test module just created.
       final File main = File(path.join(flutterModuleLibSource.path, 'main'));
       main.copySync(path.join(flutterModuleLibDestination.path, 'main.dart'));
@@ -170,7 +170,7 @@ Future<void> main() async {
         '''
 dependencies:
   url_launcher: 6.0.20
-  android_alarm_manager: 0.4.5+11
+  android_alarm_manager: 2.0.2
   google_sign_in_ios: 5.5.0
   $dartPluginName:
     path: ../$dartPluginName

@@ -545,10 +545,8 @@ void main() {
         case Clip.antiAlias:
         case Clip.antiAliasWithSaveLayer:
           box = RenderFittedBox(child: box200x200, fit: BoxFit.none, clipBehavior: clip!);
-          break;
         case null:
           box = RenderFittedBox(child: box200x200, fit: BoxFit.none);
-          break;
       }
       layout(box, constraints: viewport, phase: EnginePhase.composite, onErrors: expectNoFlutterErrors);
       box.paint(context, Offset.zero);
@@ -805,10 +803,10 @@ void main() {
   });
 
   test('Offstage implements paintsChild correctly', () {
-    final RenderBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
-    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderConstrainedBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
+    final RenderConstrainedBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
     final RenderOffstage offstage = RenderOffstage(offstage: false, child: box);
-    parent.adoptChild(offstage);
+    parent.child = offstage;
 
     expect(offstage.paintsChild(box), true);
 
@@ -819,9 +817,7 @@ void main() {
 
   test('Opacity implements paintsChild correctly', () {
     final RenderBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
-    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
     final RenderOpacity opacity = RenderOpacity(child: box);
-    parent.adoptChild(opacity);
 
     expect(opacity.paintsChild(box), true);
 
@@ -832,10 +828,8 @@ void main() {
 
   test('AnimatedOpacity sets paint matrix to zero when alpha == 0', () {
     final RenderBox box = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
-    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
     final AnimationController opacityAnimation = AnimationController(value: 1, vsync: FakeTickerProvider());
     final RenderAnimatedOpacity opacity = RenderAnimatedOpacity(opacity: opacityAnimation, child: box);
-    parent.adoptChild(opacity);
 
     // Make it listen to the animation.
     opacity.attach(PipelineOwner());
@@ -849,10 +843,8 @@ void main() {
 
   test('AnimatedOpacity sets paint matrix to zero when alpha == 0 (sliver)', () {
     final RenderSliver sliver = RenderSliverToBoxAdapter(child: RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20)));
-    final RenderBox parent = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20));
     final AnimationController opacityAnimation = AnimationController(value: 1, vsync: FakeTickerProvider());
     final RenderSliverAnimatedOpacity opacity = RenderSliverAnimatedOpacity(opacity: opacityAnimation, sliver: sliver);
-    parent.adoptChild(opacity);
 
     // Make it listen to the animation.
     opacity.attach(PipelineOwner());
@@ -963,6 +955,17 @@ void main() {
     expect(debugPaintClipOval(Clip.none), paintsExactlyCountTimes(#drawPath, 0));
     expect(debugPaintClipOval(Clip.none), paintsExactlyCountTimes(#drawParagraph, 0));
   });
+
+  test('RenderProxyBox behavior can be mixed in along with another base class', () {
+    final RenderFancyProxyBox fancyProxyBox = RenderFancyProxyBox(fancy: 6);
+    // Box has behavior from its base class:
+    expect(fancyProxyBox.fancyMethod(), 36);
+    // Box has behavior from RenderProxyBox:
+    expect(
+      fancyProxyBox.computeDryLayout(const BoxConstraints(minHeight: 8)),
+      const Size(0, 8),
+    );
+  });
 }
 
 class _TestRectClipper extends CustomClipper<Rect> {
@@ -1060,6 +1063,21 @@ class ConditionalRepaintBoundary extends RenderProxyBox {
 }
 
 class TestOffsetLayerA extends OffsetLayer {}
+
+class RenderFancyBox extends RenderBox {
+  RenderFancyBox({required this.fancy}) : super();
+
+  late int fancy;
+
+  int fancyMethod() {
+    return fancy * fancy;
+  }
+}
+
+class RenderFancyProxyBox extends RenderFancyBox
+    with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin<RenderBox> {
+  RenderFancyProxyBox({required super.fancy});
+}
 
 void expectAssertionError() {
   final FlutterErrorDetails errorDetails = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails()!;

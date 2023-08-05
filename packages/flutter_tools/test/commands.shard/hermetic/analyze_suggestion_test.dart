@@ -98,6 +98,7 @@ void main() {
           ProjectValidatorDummy(),
           ProjectValidatorSecondDummy()
         ],
+        suppressAnalytics: true,
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
@@ -129,6 +130,7 @@ void main() {
           allProjectValidators: <ProjectValidator>[
             ProjectValidatorCrash(),
           ],
+          suppressAnalytics: true,
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
@@ -149,6 +151,7 @@ void main() {
         terminal: terminal,
         processManager: processManager,
         allProjectValidators: <ProjectValidator>[],
+        suppressAnalytics: true,
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
       Future<void> result () => runner.run(<String>['analyze', '--suggestions', '--watch']);

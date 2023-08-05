@@ -86,7 +86,7 @@ class _TextMagnifierState extends State<TextMagnifier> {
   // Should _only_ be null on construction. This is because of the animation logic.
   //
   // Animations are added when `last_build_y != current_build_y`. This condition
-  // is true on the inital render, which would mean that the inital
+  // is true on the initial render, which would mean that the initial
   // build would be animated - this is undesired. Thus, this is null for the
   // first frame and the condition becomes `magnifierPosition != null && last_build_y != this_build_y`.
   Offset? _magnifierPosition;
@@ -134,7 +134,7 @@ class _TextMagnifierState extends State<TextMagnifier> {
   void _determineMagnifierPositionAndFocalPoint() {
     final MagnifierInfo selectionInfo =
         widget.magnifierInfo.value;
-    final Rect screenRect = Offset.zero & MediaQuery.of(context).size;
+    final Rect screenRect = Offset.zero & MediaQuery.sizeOf(context);
 
     // Since by default we draw at the top left corner, this offset
     // shifts the magnifier so we draw at the center, and then also includes

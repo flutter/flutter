@@ -3,10 +3,13 @@
 // found in the LICENSE file.
 
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../foundation/leak_tracking.dart';
 
 void main() {
   final MagnifierController magnifierController = MagnifierController();
@@ -109,7 +112,7 @@ void main() {
 
   group('magnifier', () {
     group('position', () {
-      testWidgets(
+      testWidgetsWithLeakTracking(
           'should be at gesture position if does not violate any positioning rules',
           (WidgetTester tester) async {
         final Key textField = UniqueKey();
@@ -119,17 +122,18 @@ void main() {
         ));
 
         await tester.pumpWidget(
-          Container(
+          ColoredBox(
             color: const Color.fromARGB(255, 0, 255, 179),
             child: MaterialApp(
               home: Center(
-                  child: Container(
-                key: textField,
-                width: 10,
-                height: 10,
-                color: Colors.red,
-                child: const Placeholder(),
-              )),
+                child: Container(
+                  key: textField,
+                  width: 10,
+                  height: 10,
+                  color: Colors.red,
+                  child: const Placeholder(),
+                ),
+              ),
             ),
           ),
         );
@@ -164,7 +168,7 @@ void main() {
         );
       });
 
-      testWidgets(
+      testWidgetsWithLeakTracking(
           'should never move outside the right bounds of the editing line',
           (WidgetTester tester) async {
         const double gestureOutsideLine = 100;
@@ -197,7 +201,7 @@ void main() {
             lessThanOrEqualTo(reasonableTextField.right));
       });
 
-      testWidgets(
+      testWidgetsWithLeakTracking(
           'should never move outside the left bounds of the editing line',
           (WidgetTester tester) async {
         const double gestureOutsideLine = 100;
@@ -229,7 +233,7 @@ void main() {
             greaterThanOrEqualTo(reasonableTextField.left));
       });
 
-      testWidgets('should position vertically at the center of the line', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('should position vertically at the center of the line', (WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(
           home: Placeholder(),
         ));
@@ -252,7 +256,7 @@ void main() {
             reasonableTextField.center.dy - basicOffset.dy);
       });
 
-      testWidgets('should reposition vertically if mashed against the ceiling',
+      testWidgetsWithLeakTracking('should reposition vertically if mashed against the ceiling',
           (WidgetTester tester) async {
         final Rect topOfScreenTextFieldRect =
             Rect.fromPoints(Offset.zero, const Offset(200, 0));
@@ -287,7 +291,7 @@ void main() {
         return magnifier.additionalFocalPointOffset;
       }
 
-      testWidgets(
+      testWidgetsWithLeakTracking(
           'should shift focal point so that the lens sees nothing out of bounds',
           (WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(
@@ -315,7 +319,7 @@ void main() {
             lessThan(reasonableTextField.left));
       });
 
-      testWidgets(
+      testWidgetsWithLeakTracking(
           'focal point should shift if mashed against the top to always point to text',
           (WidgetTester tester) async {
         final Rect topOfScreenTextFieldRect =
@@ -352,7 +356,7 @@ void main() {
         return animatedPositioned.duration.compareTo(Duration.zero) != 0;
       }
 
-      testWidgets('should not be animated on the inital state',
+      testWidgetsWithLeakTracking('should not be animated on the initial state',
           (WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(
           home: Placeholder(),
@@ -377,7 +381,7 @@ void main() {
         expect(getIsAnimated(tester), false);
       });
 
-      testWidgets('should not be animated on horizontal shifts',
+      testWidgetsWithLeakTracking('should not be animated on horizontal shifts',
           (WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(
           home: Placeholder(),
@@ -411,7 +415,7 @@ void main() {
         expect(getIsAnimated(tester), false);
       });
 
-      testWidgets('should be animated on vertical shifts',
+      testWidgetsWithLeakTracking('should be animated on vertical shifts',
           (WidgetTester tester) async {
         const Offset verticalShift = Offset(0, 200);
 
@@ -447,7 +451,7 @@ void main() {
         expect(getIsAnimated(tester), true);
       });
 
-      testWidgets('should stop being animated when timer is up',
+      testWidgetsWithLeakTracking('should stop being animated when timer is up',
           (WidgetTester tester) async {
         const Offset verticalShift = Offset(0, 200);
 

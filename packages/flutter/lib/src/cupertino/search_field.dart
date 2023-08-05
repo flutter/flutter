@@ -122,18 +122,12 @@ class CupertinoSearchTextField extends StatefulWidget {
     this.focusNode,
     this.smartQuotesType,
     this.smartDashesType,
+    this.enableIMEPersonalizedLearning = true,
     this.autofocus = false,
     this.onTap,
     this.autocorrect = true,
     this.enabled,
-  })  : assert(padding != null),
-        assert(itemColor != null),
-        assert(itemSize != null),
-        assert(prefixInsets != null),
-        assert(suffixInsets != null),
-        assert(suffixIcon != null),
-        assert(suffixMode != null),
-        assert(
+  })  : assert(
           !((decoration != null) && (backgroundColor != null)),
           'Cannot provide both a background color and a decoration\n'
           'To provide both, use "decoration: BoxDecoration(color: '
@@ -318,6 +312,9 @@ class CupertinoSearchTextField extends StatefulWidget {
   ///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
   final SmartDashesType? smartDashesType;
 
+  /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
+  final bool enableIMEPersonalizedLearning;
+
   /// Disables the text field when false.
   ///
   /// Text fields in disabled states have a light grey background and don't
@@ -403,8 +400,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
 
     // The icon size will be scaled by a factor of the accessibility text scale,
     // to follow the behavior of `UISearchTextField`.
-    final double scaledIconSize =
-        MediaQuery.textScaleFactorOf(context) * widget.itemSize;
+    final double scaledIconSize = MediaQuery.textScalerOf(context).textScaleFactor * widget.itemSize;
 
     // If decoration was not provided, create a decoration with the provided
     // background color and border radius.
@@ -460,6 +456,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       autocorrect: widget.autocorrect,
       smartQuotesType: widget.smartQuotesType,
       smartDashesType: widget.smartDashesType,
+      enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
       textInputAction: TextInputAction.search,
     );
   }

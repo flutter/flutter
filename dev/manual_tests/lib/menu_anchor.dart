@@ -481,13 +481,10 @@ class _TestMenusState extends State<_TestMenus> {
       switch (checkboxState) {
         case false:
           checkboxState = true;
-          break;
         case true:
           checkboxState = null;
-          break;
         case null:
           checkboxState = false;
-          break;
       }
     });
   }
@@ -506,10 +503,8 @@ class _TestMenusState extends State<_TestMenus> {
         case TestMenu.radioMenu2:
         case TestMenu.radioMenu3:
           shortcuts[item.shortcut!] = VoidCallbackIntent(() => _setRadio(item));
-          break;
         case TestMenu.subMenu1:
           shortcuts[item.shortcut!] = VoidCallbackIntent(() => _setCheck(item));
-          break;
         case TestMenu.mainMenu1:
         case TestMenu.mainMenu2:
         case TestMenu.mainMenu3:
@@ -529,7 +524,6 @@ class _TestMenusState extends State<_TestMenus> {
         case TestMenu.standaloneMenu1:
         case TestMenu.standaloneMenu2:
           shortcuts[item.shortcut!] = VoidCallbackIntent(() => _itemSelected(item));
-          break;
       }
     }
     _shortcutsEntry = ShortcutRegistry.of(context).addAll(shortcuts);
@@ -712,6 +706,12 @@ List<Widget> createTestMenus({
       TestMenu.mainMenu3,
       menuChildren: <Widget>[
         menuItemButton(TestMenu.subMenu8),
+        MenuItemButton(
+          onPressed: () {
+            debugPrint('Focused Item: $primaryFocus');
+          },
+          child: const Text('Print Focused Item'),
+        )
       ],
     ),
     submenuButton(
@@ -740,7 +740,11 @@ List<Widget> createTestMenus({
               submenuButton(
                 TestMenu.subSubMenu3,
                 menuChildren: <Widget>[
-                  menuItemButton(TestMenu.subSubSubMenu1),
+                  for (int i=0; i < 100; ++i)
+                    MenuItemButton(
+                      onPressed: () {},
+                      child: Text('Menu Item $i'),
+                    ),
                 ],
               ),
           ],
@@ -784,9 +788,4 @@ enum TestMenu {
   final String acceleratorLabel;
   // Strip the accelerator markers.
   String get label => MenuAcceleratorLabel.stripAcceleratorMarkers(acceleratorLabel);
-  int get acceleratorIndex {
-    int index = -1;
-    MenuAcceleratorLabel.stripAcceleratorMarkers(acceleratorLabel, setIndex: (int i) => index = i);
-    return index;
-  }
 }

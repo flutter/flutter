@@ -162,7 +162,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
         diff.write(currentDiff);
       }
       return diff.toString();
-    } catch(e) {
+    } catch (e) {
       return e.toString();
     }
   }

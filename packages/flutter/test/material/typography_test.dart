@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 void main() {
   test('Typography is defined for all target platforms', () {
     for (final TargetPlatform platform in TargetPlatform.values) {
@@ -14,6 +16,11 @@ void main() {
       expect(typography.black, isNotNull, reason: 'null black typography for $platform');
       expect(typography.white, isNotNull, reason: 'null white typography for $platform');
     }
+  });
+
+  test('Typography lerp special cases', () {
+    final Typography typography = Typography();
+    expect(identical(Typography.lerp(typography, typography, 0.5), typography), true);
   });
 
   test('Typography on non-Apple platforms defaults to the correct font', () {
@@ -84,7 +91,7 @@ void main() {
     }
   });
 
-  testWidgets('Typography implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Typography implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     Typography.material2014(
       black: Typography.blackCupertino,
@@ -109,10 +116,10 @@ void main() {
     ];
 
     for (final Typography fromTypography in all) {
-      for (final Typography toTypegraphy in all) {
+      for (final Typography toTypography in all) {
         Object? error;
         try {
-          Typography.lerp(fromTypography, toTypegraphy, 0.5);
+          Typography.lerp(fromTypography, toTypography, 0.5);
         } catch (e) {
           error = e;
         }

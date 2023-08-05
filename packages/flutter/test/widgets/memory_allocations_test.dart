@@ -58,7 +58,7 @@ class _TestLeafRenderObjectWidget extends LeafRenderObjectWidget {
   }
 }
 
-class _TestElement extends RootRenderObjectElement{
+class _TestElement extends RenderObjectElement with RootElementMixin {
   _TestElement(): super(_TestLeafRenderObjectWidget());
 
   void makeInactive() {
@@ -66,6 +66,15 @@ class _TestElement extends RootRenderObjectElement{
     mount(null, null);
     deactivate();
   }
+
+  @override
+  void insertRenderObjectChild(covariant RenderObject child, covariant Object? slot) { }
+
+  @override
+  void moveRenderObjectChild(covariant RenderObject child, covariant Object? oldSlot, covariant Object? newSlot) { }
+
+  @override
+  void removeRenderObjectChild(covariant RenderObject child, covariant Object? slot) { }
 }
 
 class _TestRenderObject extends RenderObject {

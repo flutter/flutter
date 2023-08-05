@@ -15,9 +15,7 @@ import '../painting/image_test_utils.dart';
 const Duration animationDuration = Duration(milliseconds: 50);
 
 class FadeInImageParts {
-  const FadeInImageParts(this.fadeInImageElement, this.placeholder, this.target)
-      : assert(fadeInImageElement != null),
-        assert(target != null);
+  const FadeInImageParts(this.fadeInImageElement, this.placeholder, this.target);
 
   final ComponentElement fadeInImageElement;
   final FadeInImageElements? placeholder;
@@ -31,16 +29,6 @@ class FadeInImageParts {
     });
     expect(animatedFadeOutFadeInElement, isNotNull);
     return animatedFadeOutFadeInElement!.state;
-  }
-
-  Element? get semanticsElement {
-    Element? result;
-    fadeInImageElement.visitChildren((Element child) {
-      if (child.widget is Semantics) {
-        result = child;
-      }
-    });
-    return result;
   }
 }
 

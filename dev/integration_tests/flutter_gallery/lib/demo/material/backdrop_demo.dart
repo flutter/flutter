@@ -358,7 +358,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
       );
     }).toList();
 
-    return Container(
+    return ColoredBox(
       key: _backdropKey,
       color: theme.primaryColor,
       child: Stack(

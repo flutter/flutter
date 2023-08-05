@@ -4,10 +4,14 @@
 
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 Widget boilerplate({required Widget child}) {
@@ -18,6 +22,35 @@ Widget boilerplate({required Widget child}) {
 }
 
 void main() {
+
+  testWidgetsWithLeakTracking('SegmentedButton is built with Material of type MaterialType.transparency', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: SegmentedButton<int>(
+              segments: const <ButtonSegment<int>>[
+                ButtonSegment<int>(value: 1, label: Text('1')),
+                ButtonSegment<int>(value: 2, label: Text('2')),
+                ButtonSegment<int>(value: 3, label: Text('3'), enabled: false),
+              ],
+              selected: const <int>{2},
+              onSelectionChanged: (Set<int> selected) { },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Expect SegmentedButton to be built with type MaterialType.transparency.
+    final Finder text = find.text('1');
+    final Finder parent = find.ancestor(of: text, matching: find.byType(Material)).first;
+    final Finder parentMaterial = find.ancestor(of: parent, matching: find.byType(Material)).first;
+    final Material material = tester.widget<Material>(parentMaterial);
+    expect(material.type, MaterialType.transparency);
+  });
 
   testWidgets('SegmentedButton supports exclusive choice by default', (WidgetTester tester) async {
     int callbackCount = 0;
@@ -298,7 +331,7 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
 
   });
 
-  testWidgets('SegmentedButtons have correct semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SegmentedButtons have correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -377,7 +410,7 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
   });
 
 
-  testWidgets('Multi-select SegmentedButtons have correct semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Multi-select SegmentedButtons have correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -452,5 +485,108 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
     );
 
     semantics.dispose();
+  });
+
+  testWidgetsWithLeakTracking('SegmentedButton default overlayColor and foregroundColor resolve pressed state', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: SegmentedButton<int>(
+              segments: const <ButtonSegment<int>>[
+                ButtonSegment<int>(value: 1, label: Text('1')),
+                ButtonSegment<int>(value: 2, label: Text('2')),
+              ],
+              selected: const <int>{1},
+              onSelectionChanged: (Set<int> selected) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    RenderObject overlayColor() {
+      return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    }
+
+    final Material material = tester.widget<Material>(find.descendant(
+      of: find.byType(TextButton),
+      matching: find.byType(Material),
+    ));
+
+    // Hovered.
+    final Offset center = tester.getCenter(find.text('2'));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.08)));
+    expect(material.textStyle?.color, theme.colorScheme.onSurface);
+
+    // Highlighted (pressed).
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSurface.withOpacity(0.12)));
+    expect(material.textStyle?.color, theme.colorScheme.onSurface);
+  });
+
+  testWidgetsWithLeakTracking('SegmentedButton has no tooltips by default', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: SegmentedButton<int>(
+              segments: const <ButtonSegment<int>>[
+                ButtonSegment<int>(value: 1, label: Text('1')),
+                ButtonSegment<int>(value: 2, label: Text('2')),
+                ButtonSegment<int>(value: 3, label: Text('3'), enabled: false),
+              ],
+              selected: const <int>{2},
+              onSelectionChanged: (Set<int> selected) { },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(Tooltip), findsNothing);
+  });
+
+  testWidgetsWithLeakTracking('SegmentedButton has correct tooltips', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: SegmentedButton<int>(
+              segments: const <ButtonSegment<int>>[
+                ButtonSegment<int>(value: 1, label: Text('1')),
+                ButtonSegment<int>(value: 2, label: Text('2'), tooltip: 't2'),
+                ButtonSegment<int>(
+                    value: 3,
+                    label: Text('3'),
+                    tooltip: 't3',
+                    enabled: false,
+                ),
+              ],
+              selected: const <int>{2},
+              onSelectionChanged: (Set<int> selected) { },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(Tooltip), findsNWidgets(2));
+    expect(find.byTooltip('t2'), findsOneWidget);
+    expect(find.byTooltip('t3'), findsOneWidget);
   });
 }

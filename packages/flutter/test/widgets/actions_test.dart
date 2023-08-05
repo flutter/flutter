@@ -74,6 +74,7 @@ void main() {
       expect(result, isTrue);
       expect(invoked, isTrue);
     });
+
     testWidgets('Actions widget can invoke actions with default dispatcher and maybeInvoke', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
@@ -862,10 +863,10 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: FocusableActionDetector(
-              child: MaterialButton(
+              child: ElevatedButton(
+                onPressed: () {},
                 focusNode: buttonNode,
                 child: const Text('Test'),
-                onPressed: () {},
               ),
             ),
           ),
@@ -881,10 +882,10 @@ void main() {
           MaterialApp(
             home: FocusableActionDetector(
               descendantsAreFocusable: false,
-              child: MaterialButton(
+              child: ElevatedButton(
+                onPressed: () {},
                 focusNode: buttonNode,
                 child: const Text('Test'),
-                onPressed: () {},
               ),
             ),
           ),
@@ -907,17 +908,18 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: FocusableActionDetector(
+              focusNode: FocusNode(skipTraversal: true),
               child: Column(
                 children: <Widget>[
-                  MaterialButton(
+                  ElevatedButton(
+                    onPressed: () {},
                     focusNode: buttonNode1,
                     child: const Text('Node 1'),
-                    onPressed: () {},
                   ),
-                  MaterialButton(
+                  ElevatedButton(
+                    onPressed: () {},
                     focusNode: buttonNode2,
                     child: const Text('Node 2'),
-                    onPressed: () {},
                   ),
                 ],
               ),
@@ -937,18 +939,19 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: FocusableActionDetector(
+              focusNode: FocusNode(skipTraversal: true),
               descendantsAreTraversable: false,
               child: Column(
                 children: <Widget>[
-                  MaterialButton(
+                  ElevatedButton(
+                    onPressed: () {},
                     focusNode: buttonNode1,
                     child: const Text('Node 1'),
-                    onPressed: () {},
                   ),
-                  MaterialButton(
+                  ElevatedButton(
+                    onPressed: () {},
                     focusNode: buttonNode2,
                     child: const Text('Node 2'),
-                    onPressed: () {},
                   ),
                 ],
               ),
@@ -1083,6 +1086,7 @@ void main() {
       action._testInvoke(intent);
       expect(passedIntent, equals(intent));
     });
+
     testWidgets('VoidCallbackAction', (WidgetTester tester) async {
       bool called = false;
       void testCallback() {
@@ -1092,6 +1096,16 @@ void main() {
       final VoidCallbackIntent intent = VoidCallbackIntent(testCallback);
       action.invoke(intent);
       expect(called, isTrue);
+    });
+    testWidgets('Base Action class default toKeyEventResult delegates to consumesKey', (WidgetTester tester) async {
+      expect(
+        DefaultToKeyEventResultAction(consumesKey: false).toKeyEventResult(const DefaultToKeyEventResultIntent(), null),
+        KeyEventResult.skipRemainingHandlers,
+      );
+      expect(
+        DefaultToKeyEventResultAction(consumesKey: true).toKeyEventResult(const DefaultToKeyEventResultIntent(), null),
+        KeyEventResult.handled,
+      );
     });
   });
 
@@ -1111,6 +1125,7 @@ void main() {
 
       expect(description, isEmpty);
     });
+
     testWidgets('default Actions debugFillProperties', (WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
@@ -1136,6 +1151,7 @@ void main() {
         ]),
       );
     });
+
     testWidgets('Actions implements debugFillProperties', (WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
@@ -1855,8 +1871,7 @@ class ThirdTestIntent extends SecondTestIntent {
 class TestAction extends CallbackAction<TestIntent> {
   TestAction({
     required OnInvokeCallback onInvoke,
-  })  : assert(onInvoke != null),
-        super(onInvoke: onInvoke);
+  })  : super(onInvoke: onInvoke);
 
   @override
   bool isEnabled(TestIntent intent) => enabled;
@@ -1999,4 +2014,22 @@ class RedirectOutputAction extends LogInvocationAction {
 
   @override
   void invoke(LogIntent intent) => super.invoke(LogIntent(log: newLog));
+}
+
+class DefaultToKeyEventResultIntent extends Intent {
+  const DefaultToKeyEventResultIntent();
+}
+
+class DefaultToKeyEventResultAction extends Action<DefaultToKeyEventResultIntent> {
+  DefaultToKeyEventResultAction({
+    required bool consumesKey
+  }) : _consumesKey = consumesKey;
+
+  final bool _consumesKey;
+
+  @override
+  bool consumesKey(DefaultToKeyEventResultIntent intent) => _consumesKey;
+
+  @override
+  void invoke(DefaultToKeyEventResultIntent intent) {}
 }

@@ -227,7 +227,7 @@ void main() {
                   ),
                   child: page1Center,
                 )
-                : Stack();
+                : const Stack();
           },
         ),
       ),
@@ -270,7 +270,7 @@ void main() {
                       ],
                     ),
                   )
-                  : Stack();
+                  : const Stack();
             },
           ),
         ),
@@ -364,7 +364,7 @@ void main() {
     // Navigate in tab 2.
     await tester.tap(find.text('Next'));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     expect(find.text('Page 2 of tab 2'), isOnstage);
     expect(find.text('Page 1 of tab 1', skipOffstage: false), isOffstage);
@@ -379,7 +379,7 @@ void main() {
     // Navigate in tab 1.
     await tester.tap(find.text('Next'));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     expect(find.text('Page 2 of tab 1'), isOnstage);
     expect(find.text('Page 2 of tab 2', skipOffstage: false), isOffstage);
@@ -393,7 +393,7 @@ void main() {
     // Pop in tab 2
     await tester.tap(find.text('Back'));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 600));
 
     expect(find.text('Page 1 of tab 2'), isOnstage);
     expect(find.text('Page 2 of tab 1', skipOffstage: false), isOffstage);
@@ -554,6 +554,6 @@ void main() {
     expect(richTextList.length, greaterThan(0));
     expect(richTextList.any((RichText text) => text.textScaleFactor != 1), isFalse);
 
-    expect(tester.widget<RichText>(find.descendant(of: find.text('content'), matching: find.byType(RichText))).textScaleFactor, 99);
+    expect(tester.widget<RichText>(find.descendant(of: find.text('content'), matching: find.byType(RichText))).textScaler, const TextScaler.linear(99.0));
   });
 }

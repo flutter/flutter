@@ -1,7 +1,7 @@
 {
-  "version": "v0_143",
+  "version": "v0_162",
 
-  "md.comp.time-picker.clock-dial.color": "onSurfaceVariant",
+  "md.comp.time-picker.clock-dial.color": "surfaceVariant",
   "md.comp.time-picker.clock-dial.container.size": 256.0,
   "md.comp.time-picker.clock-dial.label-text.text-style": "bodyLarge",
   "md.comp.time-picker.clock-dial.selected.label-text.color": "onPrimary",

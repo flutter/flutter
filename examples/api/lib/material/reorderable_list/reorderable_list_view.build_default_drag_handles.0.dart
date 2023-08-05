@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [ReorderableListView.buildDefaultDragHandles].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [ReorderableListView.buildDefaultDragHandles].
 
 void main() => runApp(const ReorderableApp());
 
@@ -42,7 +42,7 @@ class _ReorderableExampleState extends State<ReorderableExample> {
       buildDefaultDragHandles: false,
       children: <Widget>[
         for (int index = 0; index < _items.length; index++)
-          Container(
+          ColoredBox(
             key: Key('$index'),
             color: _items[index].isOdd ? oddItemColor : evenItemColor,
             child: Row(

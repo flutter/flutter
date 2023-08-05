@@ -185,7 +185,7 @@ class Matrix4Tween extends Tween<Matrix4> {
     end!.decompose(endTranslation, endRotation, endScale);
     final Vector3 lerpTranslation =
         beginTranslation * (1.0 - t) + endTranslation * t;
-    // TODO(alangardner): Implement slerp for constant rotation
+    // TODO(alangardner): Implement lerp for constant rotation
     final Quaternion lerpRotation =
         (beginRotation.scaled(1.0 - t) + endRotation.scaled(t)).normalized();
     final Vector3 lerpScale = beginScale * (1.0 - t) + endScale * t;
@@ -281,8 +281,7 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
     this.curve = Curves.linear,
     required this.duration,
     this.onEnd,
-  }) : assert(curve != null),
-       assert(duration != null);
+  });
 
   /// The curve to apply when animating the parameters of this container.
   final Curve curve;
@@ -369,7 +368,6 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
       switch (status) {
         case AnimationStatus.completed:
           widget.onEnd?.call();
-          break;
         case AnimationStatus.dismissed:
         case AnimationStatus.forward:
         case AnimationStatus.reverse:
@@ -816,8 +814,7 @@ class AnimatedPadding extends ImplicitlyAnimatedWidget {
     super.curve,
     required super.duration,
     super.onEnd,
-  }) : assert(padding != null),
-       assert(padding.isNonNegative);
+  }) : assert(padding.isNonNegative);
 
   /// The amount of space by which to inset the child.
   final EdgeInsetsGeometry padding;
@@ -907,8 +904,7 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
     super.curve,
     required super.duration,
     super.onEnd,
-  }) : assert(alignment != null),
-       assert(widthFactor == null || widthFactor >= 0.0),
+  }) : assert(widthFactor == null || widthFactor >= 0.0),
        assert(heightFactor == null || heightFactor >= 0.0);
 
   /// How to align the child.
@@ -962,10 +958,10 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
     _alignment = visitor(_alignment, widget.alignment, (dynamic value) => AlignmentGeometryTween(begin: value as AlignmentGeometry)) as AlignmentGeometryTween?;
-    if(widget.heightFactor != null) {
+    if (widget.heightFactor != null) {
       _heightFactorTween = visitor(_heightFactorTween, widget.heightFactor, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
     }
-    if(widget.widthFactor != null) {
+    if (widget.widthFactor != null) {
       _widthFactorTween = visitor(_widthFactorTween, widget.widthFactor, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
     }
   }
@@ -1361,7 +1357,7 @@ class AnimatedScale extends ImplicitlyAnimatedWidget {
     super.curve,
     required super.duration,
     super.onEnd,
-  }) : assert(scale != null);
+  });
 
   /// The widget below this widget in the tree.
   ///
@@ -1488,7 +1484,7 @@ class AnimatedRotation extends ImplicitlyAnimatedWidget {
     super.curve,
     required super.duration,
     super.onEnd,
-  }) : assert(turns != null);
+  });
 
   /// The widget below this widget in the tree.
   ///
@@ -1678,13 +1674,31 @@ class _AnimatedSlideState extends ImplicitlyAnimatedWidgetState<AnimatedSlide> {
 /// ```
 /// {@end-tool}
 ///
+/// ## Hit testing
+///
+/// Setting the [opacity] to zero does not prevent hit testing from being
+/// applied to the descendants of the [AnimatedOpacity] widget. This can be
+/// confusing for the user, who may not see anything, and may believe the area
+/// of the interface where the [AnimatedOpacity] is hiding a widget to be
+/// non-interactive.
+///
+/// With certain widgets, such as [Flow], that compute their positions only when
+/// they are painted, this can actually lead to bugs (from unexpected geometry
+/// to exceptions), because those widgets are not painted by the [AnimatedOpacity]
+/// widget at all when the [opacity] animation reaches zero.
+///
+/// To avoid such problems, it is generally a good idea to use an
+/// [IgnorePointer] widget when setting the [opacity] to zero. This prevents
+/// interactions with any children in the subtree when the [child] is animating
+/// away.
+///
 /// See also:
 ///
 ///  * [AnimatedCrossFade], for fading between two children.
 ///  * [AnimatedSwitcher], for fading between many children in sequence.
 ///  * [FadeTransition], an explicitly animated version of this widget, where
 ///    an [Animation] is provided by the caller instead of being built in.
-///  * [SliverAnimatedOpacity], for automatically transitioning a sliver's
+///  * [SliverAnimatedOpacity], for automatically transitioning a _sliver's_
 ///    opacity over a given duration whenever the given opacity changes.
 class AnimatedOpacity extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates its opacity implicitly.
@@ -1699,7 +1713,7 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
     required super.duration,
     super.onEnd,
     this.alwaysIncludeSemantics = false,
-  }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0);
+  }) : assert(opacity >= 0.0 && opacity <= 1.0);
 
   /// The widget below this widget in the tree.
   ///
@@ -1775,6 +1789,25 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
 /// ** See code in examples/api/lib/widgets/implicit_animations/sliver_animated_opacity.0.dart **
 /// {@end-tool}
 ///
+/// ## Hit testing
+///
+/// Setting the [opacity] to zero does not prevent hit testing from being
+/// applied to the descendants of the [SliverAnimatedOpacity] widget. This can
+/// be confusing for the user, who may not see anything, and may believe the
+/// area of the interface where the [SliverAnimatedOpacity] is hiding a widget
+/// to be non-interactive.
+///
+/// With certain widgets, such as [Flow], that compute their positions only when
+/// they are painted, this can actually lead to bugs (from unexpected geometry
+/// to exceptions), because those widgets are not painted by the
+/// [SliverAnimatedOpacity] widget at all when the [opacity] animation reaches
+/// zero.
+///
+/// To avoid such problems, it is generally a good idea to use a
+/// [SliverIgnorePointer] widget when setting the [opacity] to zero. This
+/// prevents interactions with any children in the subtree when the [sliver] is
+/// animating away.
+///
 /// See also:
 ///
 ///  * [SliverFadeTransition], an explicitly animated version of this widget, where
@@ -1794,7 +1827,7 @@ class SliverAnimatedOpacity extends ImplicitlyAnimatedWidget {
     required super.duration,
     super.onEnd,
     this.alwaysIncludeSemantics = false,
-  }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0);
+  }) : assert(opacity >= 0.0 && opacity <= 1.0);
 
   /// The sliver below this widget in the tree.
   final Widget? sliver;
@@ -1889,12 +1922,7 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
     super.curve,
     required super.duration,
     super.onEnd,
-  }) : assert(style != null),
-       assert(child != null),
-       assert(softWrap != null),
-       assert(overflow != null),
-       assert(maxLines == null || maxLines > 0),
-       assert(textWidthBasis != null);
+  }) : assert(maxLines == null || maxLines > 0);
 
   /// The widget below this widget in the tree.
   ///
@@ -2017,15 +2045,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
     super.curve,
     required super.duration,
     super.onEnd,
-  }) : assert(child != null),
-       assert(shape != null),
-       assert(clipBehavior != null),
-       assert(borderRadius != null),
-       assert(elevation != null && elevation >= 0.0),
-       assert(color != null),
-       assert(shadowColor != null),
-       assert(animateColor != null),
-       assert(animateShadowColor != null);
+  }) : assert(elevation >= 0.0);
 
   /// The widget below this widget in the tree.
   ///
@@ -2151,8 +2171,7 @@ class AnimatedFractionallySizedBox extends ImplicitlyAnimatedWidget {
     super.curve,
     required super.duration,
     super.onEnd,
-  }) : assert(alignment != null),
-       assert(widthFactor == null || widthFactor >= 0.0),
+  }) : assert(widthFactor == null || widthFactor >= 0.0),
        assert(heightFactor == null || heightFactor >= 0.0);
 
   /// The widget below this widget in the tree.
@@ -2189,10 +2208,10 @@ class _AnimatedFractionallySizedBoxState extends AnimatedWidgetBaseState<Animate
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
     _alignment = visitor(_alignment, widget.alignment, (dynamic value) => AlignmentGeometryTween(begin: value as AlignmentGeometry)) as AlignmentGeometryTween?;
-    if(widget.heightFactor != null) {
+    if (widget.heightFactor != null) {
       _heightFactorTween = visitor(_heightFactorTween, widget.heightFactor, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
     }
-    if(widget.widthFactor != null) {
+    if (widget.widthFactor != null) {
       _widthFactorTween = visitor(_widthFactorTween, widget.widthFactor, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>?;
     }
   }

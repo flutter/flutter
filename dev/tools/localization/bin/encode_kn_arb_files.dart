@@ -69,18 +69,23 @@ void _rewriteBundle(File file, Map<String, dynamic> bundle) {
 }
 
 void encodeKnArbFiles(Directory directory) {
+  final File widgetsArbFile = File(path.join(directory.path, 'widgets_kn.arb'));
   final File materialArbFile = File(path.join(directory.path, 'material_kn.arb'));
   final File cupertinoArbFile = File(path.join(directory.path, 'cupertino_kn.arb'));
 
+  final Map<String, dynamic> widgetsBundle = _loadBundle(widgetsArbFile);
   final Map<String, dynamic> materialBundle = _loadBundle(materialArbFile);
   final Map<String, dynamic> cupertinoBundle = _loadBundle(cupertinoArbFile);
 
+  _encodeBundleTranslations(widgetsBundle);
   _encodeBundleTranslations(materialBundle);
   _encodeBundleTranslations(cupertinoBundle);
 
+  _checkEncodedTranslations(widgetsBundle, _loadBundle(widgetsArbFile));
   _checkEncodedTranslations(materialBundle, _loadBundle(materialArbFile));
   _checkEncodedTranslations(cupertinoBundle, _loadBundle(cupertinoArbFile));
 
+  _rewriteBundle(widgetsArbFile, widgetsBundle);
   _rewriteBundle(materialArbFile, materialBundle);
   _rewriteBundle(cupertinoArbFile, cupertinoBundle);
 }

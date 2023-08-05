@@ -47,7 +47,7 @@ void main() {
     testWithoutContext('no device', () async {
       final FlutterTesterDevices discoverer = setUpFlutterTesterDevices();
 
-      final List<Device> devices = await discoverer.devices;
+      final List<Device> devices = await discoverer.devices();
       expect(devices, isEmpty);
     });
 
@@ -55,7 +55,7 @@ void main() {
       FlutterTesterDevices.showFlutterTesterDevice = true;
       final FlutterTesterDevices discoverer = setUpFlutterTesterDevices();
 
-      final List<Device> devices = await discoverer.devices;
+      final List<Device> devices = await discoverer.devices();
       expect(devices, hasLength(1));
 
       final Device device = devices.single;
@@ -140,7 +140,7 @@ void main() {
 
     testUsingContext('performs a build and starts in debug mode', () async {
       final FlutterTesterApp app = FlutterTesterApp.fromCurrentDirectory(fileSystem);
-      final Uri observatoryUri = Uri.parse('http://127.0.0.1:6666/');
+      final Uri vmServiceUri = Uri.parse('http://127.0.0.1:6666/');
       final Completer<void> completer = Completer<void>();
       fakeProcessManager.addCommand(FakeCommand(
         command: const <String>[
@@ -155,7 +155,7 @@ void main() {
         completer: completer,
         stdout:
         '''
-The Dart VM service is listening on $observatoryUri
+The Dart VM service is listening on $vmServiceUri
 Hello!
 ''',
       ));
@@ -166,14 +166,14 @@ Hello!
       );
 
       expect(result.started, isTrue);
-      expect(result.observatoryUri, observatoryUri);
+      expect(result.vmServiceUri, vmServiceUri);
       expect(logLines.last, 'Hello!');
       expect(fakeProcessManager, hasNoRemainingExpectations);
     }, overrides: startOverrides);
 
     testUsingContext('performs a build and starts in debug mode with track-widget-creation', () async {
       final FlutterTesterApp app = FlutterTesterApp.fromCurrentDirectory(fileSystem);
-      final Uri observatoryUri = Uri.parse('http://127.0.0.1:6666/');
+      final Uri vmServiceUri = Uri.parse('http://127.0.0.1:6666/');
       final Completer<void> completer = Completer<void>();
       fakeProcessManager.addCommand(FakeCommand(
         command: const <String>[
@@ -188,7 +188,7 @@ Hello!
         completer: completer,
         stdout:
         '''
-The Dart VM service is listening on $observatoryUri
+The Dart VM service is listening on $vmServiceUri
 Hello!
 ''',
       ));
@@ -199,7 +199,7 @@ Hello!
       );
 
       expect(result.started, isTrue);
-      expect(result.observatoryUri, observatoryUri);
+      expect(result.vmServiceUri, vmServiceUri);
       expect(logLines.last, 'Hello!');
       expect(fakeProcessManager, hasNoRemainingExpectations);
     }, overrides: startOverrides);

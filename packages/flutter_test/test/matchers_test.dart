@@ -214,6 +214,9 @@ void main() {
 
     expect(11.0, moreOrLessEquals(-11.0, epsilon: 100.0));
     expect(-11.0, moreOrLessEquals(11.0, epsilon: 100.0));
+
+    expect(0, moreOrLessEquals(0.0));
+    expect(0.0, moreOrLessEquals(0));
   });
 
   test('matrixMoreOrLessEquals', () {
@@ -485,8 +488,8 @@ void main() {
       });
 
       testWidgets('if finder finds multiple widgets', (WidgetTester tester) async {
-        await tester.pumpWidget(boilerplate(Column(
-          children: const <Widget>[Text('hello'), Text('world')],
+        await tester.pumpWidget(boilerplate(const Column(
+          children: <Widget>[Text('hello'), Text('world')],
         )));
         final Finder finder = find.byType(Text);
         await expectLater(
@@ -613,11 +616,11 @@ void main() {
       int actions = 0;
       int flags = 0;
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
-      for (final int index in SemanticsAction.values.keys) {
-        actions |= index;
+      for (final SemanticsAction action in SemanticsAction.values) {
+        actions |= action.index;
       }
-      for (final int index in SemanticsFlag.values.keys) {
-        flags |= index;
+      for (final SemanticsFlag flag in SemanticsFlag.values) {
+        flags |= flag.index;
       }
       final SemanticsData data = SemanticsData(
         flags: flags,
@@ -680,6 +683,8 @@ void main() {
          hasToggledState: true,
          isToggled: true,
          hasImplicitScrolling: true,
+         hasExpandedState: true,
+         isExpanded: true,
          /* Actions */
          hasTapAction: true,
          hasLongPressAction: true,
@@ -737,7 +742,6 @@ void main() {
 
     testWidgets('failure does not throw unexpected errors', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      addTearDown(() => handle.dispose());
 
       const Key key = Key('semantics');
       await tester.pumpWidget(Semantics(
@@ -789,13 +793,13 @@ void main() {
       );
 
       expect(failedExpectation, throwsA(isA<TestFailure>()));
+      handle.dispose();
     });
   });
 
   group('containsSemantics', () {
     testWidgets('matches SemanticsData', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      addTearDown(() => handle.dispose());
 
       const Key key = Key('semantics');
       await tester.pumpWidget(Semantics(
@@ -889,17 +893,18 @@ void main() {
         )),
         reason: 'onTapHint "scans" should not have matched "scan".',
       );
+      handle.dispose();
     });
 
     testWidgets('can match all semantics flags and actions enabled', (WidgetTester tester) async {
       int actions = 0;
       int flags = 0;
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
-      for (final int index in SemanticsAction.values.keys) {
-        actions |= index;
+      for (final SemanticsAction action in SemanticsAction.values) {
+        actions |= action.index;
       }
-      for (final int index in SemanticsFlag.values.keys) {
-        flags |= index;
+      for (final SemanticsFlag flag in SemanticsFlag.values) {
+        flags |= flag.index;
       }
       final SemanticsData data = SemanticsData(
         flags: flags,
@@ -963,6 +968,8 @@ void main() {
           hasToggledState: true,
           isToggled: true,
           hasImplicitScrolling: true,
+          hasExpandedState: true,
+          isExpanded: true,
           /* Actions */
           hasTapAction: true,
           hasLongPressAction: true,
@@ -1052,6 +1059,8 @@ void main() {
           hasToggledState: false,
           isToggled: false,
           hasImplicitScrolling: false,
+          hasExpandedState: false,
+          isExpanded: false,
           /* Actions */
           hasTapAction: false,
           hasLongPressAction: false,
@@ -1081,11 +1090,11 @@ void main() {
     testWidgets('only matches given flags and actions', (WidgetTester tester) async {
       int allActions = 0;
       int allFlags = 0;
-      for (final int index in SemanticsAction.values.keys) {
-        allActions |= index;
+      for (final SemanticsAction action in SemanticsAction.values) {
+        allActions |= action.index;
       }
-      for (final int index in SemanticsFlag.values.keys) {
-        allFlags |= index;
+      for (final SemanticsFlag flag in SemanticsFlag.values) {
+        allFlags |= flag.index;
       }
       final SemanticsData emptyData = SemanticsData(
         flags: 0,
@@ -1233,7 +1242,6 @@ void main() {
 
     testWidgets('failure does not throw unexpected errors', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
-      addTearDown(() => handle.dispose());
 
       const Key key = Key('semantics');
       await tester.pumpWidget(Semantics(
@@ -1283,6 +1291,7 @@ void main() {
       );
 
       expect(failedExpectation, throwsA(isA<TestFailure>()));
+      handle.dispose();
     });
   });
 
@@ -1296,8 +1305,8 @@ void main() {
 
     testWidgets('succeeds when finds more then the specified count',
         (WidgetTester tester) async {
-      await tester.pumpWidget(boilerplate(Column(
-        children: const <Widget>[Text('1'), Text('2'), Text('3')],
+      await tester.pumpWidget(boilerplate(const Column(
+        children: <Widget>[Text('1'), Text('2'), Text('3')],
       )));
 
       expect(find.byType(Text), findsAtLeastNWidgets(2));
@@ -1305,8 +1314,8 @@ void main() {
 
     testWidgets('succeeds when finds the exact specified count',
         (WidgetTester tester) async {
-      await tester.pumpWidget(boilerplate(Column(
-        children: const <Widget>[Text('1'), Text('2')],
+      await tester.pumpWidget(boilerplate(const Column(
+        children: <Widget>[Text('1'), Text('2')],
       )));
 
       expect(find.byType(Text), findsAtLeastNWidgets(2));
@@ -1314,8 +1323,8 @@ void main() {
 
     testWidgets('fails when finds less then specified count',
         (WidgetTester tester) async {
-      await tester.pumpWidget(boilerplate(Column(
-        children: const <Widget>[Text('1'), Text('2')],
+      await tester.pumpWidget(boilerplate(const Column(
+        children: <Widget>[Text('1'), Text('2')],
       )));
 
       expect(find.byType(Text), isNot(findsAtLeastNWidgets(3)));

@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 @TestOn('chrome')
+library;
+
 import 'dart:async';
 
 import 'package:flutter/rendering.dart';
@@ -67,6 +69,42 @@ void main() {
         viewsController.views,
         unorderedEquals(<FakeHtmlPlatformView>[
           FakeHtmlPlatformView(currentViewId + 1, 'webview'),
+        ]),
+      );
+    });
+
+    testWidgets('Create HTML view with creation params', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeHtmlPlatformViewsController viewsController = FakeHtmlPlatformViewsController();
+      viewsController.registerViewType('webview');
+      await tester.pumpWidget(
+        const Column(
+          children: <Widget>[
+            SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: HtmlElementView(
+                viewType: 'webview',
+                creationParams: 'foobar',
+              ),
+            ),
+            SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: HtmlElementView(
+                viewType: 'webview',
+                creationParams: 123,
+              ),
+            ),
+          ],
+        ),
+      );
+
+      expect(
+        viewsController.views,
+        unorderedEquals(<FakeHtmlPlatformView>[
+          FakeHtmlPlatformView(currentViewId + 1, 'webview', 'foobar'),
+          FakeHtmlPlatformView(currentViewId + 2, 'webview', 123),
         ]),
       );
     });

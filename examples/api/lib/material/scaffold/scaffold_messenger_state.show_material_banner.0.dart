@@ -2,33 +2,30 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [ScaffoldMessengerState.showMaterialBanner].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [ScaffoldMessengerState.showMaterialBanner].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const ShowMaterialBannerExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class ShowMaterialBannerExampleApp extends StatelessWidget {
+  const ShowMaterialBannerExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('ScaffoldMessengerState Sample')),
         body: const Center(
-          child: MyStatelessWidget(),
+          child: ShowMaterialBannerExample(),
         ),
       ),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class ShowMaterialBannerExample extends StatelessWidget {
+  const ShowMaterialBannerExample({super.key});
 
   @override
   Widget build(BuildContext context) {

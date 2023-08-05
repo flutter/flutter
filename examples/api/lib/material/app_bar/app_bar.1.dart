@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [AppBar].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [AppBar].
 
 final List<int> _items = List<int>.generate(51, (int index) => index);
 
@@ -98,7 +98,7 @@ class _AppBarExampleState extends State<AppBarExample> {
                 label: const Text('shadow color'),
               ),
               const SizedBox(width: 5),
-              ElevatedButton.icon(
+              ElevatedButton(
                 onPressed: () {
                   if (scrolledUnderElevation == null) {
                     setState(() {
@@ -111,8 +111,7 @@ class _AppBarExampleState extends State<AppBarExample> {
                     });
                   }
                 },
-                icon: const Icon(Icons.add),
-                label: Text(
+                child: Text(
                   'scrolledUnderElevation: ${scrolledUnderElevation ?? 'default'}',
                 ),
               ),

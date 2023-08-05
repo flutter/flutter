@@ -10,10 +10,8 @@ import 'package:flutter/material.dart' show Card;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test_api/src/expect/async_matcher.dart'; // ignore: implementation_imports
-// This import is discouraged in general, but we need it to implement flutter_test.
-// ignore: deprecated_member_use
-import 'package:test_api/test_api.dart';
+import 'package:matcher/expect.dart';
+import 'package:matcher/src/expect/async_matcher.dart'; // ignore: implementation_imports
 
 import '_matchers_io.dart' if (dart.library.html) '_matchers_web.dart' show MatchesGoldenFile, captureImage;
 import 'accessibility.dart';
@@ -438,7 +436,7 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 ///   });
 ///
 ///   await testMain();
-/// });
+/// }
 /// ```
 /// {@end-tool}
 /// {@endtemplate}
@@ -566,6 +564,8 @@ Matcher matchesSemantics({
   bool hasToggledState = false,
   bool isToggled = false,
   bool hasImplicitScrolling = false,
+  bool hasExpandedState = false,
+  bool isExpanded = false,
   // Actions //
   bool hasTapAction = false,
   bool hasLongPressAction = false,
@@ -642,6 +642,8 @@ Matcher matchesSemantics({
     hasToggledState: hasToggledState,
     isToggled: isToggled,
     hasImplicitScrolling: hasImplicitScrolling,
+    hasExpandedState: hasExpandedState,
+    isExpanded: isExpanded,
     // Actions
     hasTapAction: hasTapAction,
     hasLongPressAction: hasLongPressAction,
@@ -739,6 +741,8 @@ Matcher containsSemantics({
   bool? hasToggledState,
   bool? isToggled,
   bool? hasImplicitScrolling,
+  bool? hasExpandedState,
+  bool? isExpanded,
   // Actions
   bool? hasTapAction,
   bool? hasLongPressAction,
@@ -815,6 +819,8 @@ Matcher containsSemantics({
     hasToggledState: hasToggledState,
     isToggled: isToggled,
     hasImplicitScrolling: hasImplicitScrolling,
+    hasExpandedState: hasExpandedState,
+    isExpanded: isExpanded,
     // Actions
     hasTapAction: hasTapAction,
     hasLongPressAction: hasLongPressAction,
@@ -1446,7 +1452,7 @@ class _MoreOrLessEquals extends Matcher {
 
   @override
   bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
-    if (object is! double) {
+    if (object is! num) {
       return false;
     }
     if (object == value) {
@@ -1626,10 +1632,10 @@ class _MatchAnythingExceptClip extends _FailWithDescriptionMatcher {
     final RenderObject renderObject = nodes.single.renderObject!;
 
     switch (renderObject.runtimeType) {
-      case RenderClipPath:
-      case RenderClipOval:
-      case RenderClipRect:
-      case RenderClipRRect:
+      case const (RenderClipPath):
+      case const (RenderClipOval):
+      case const (RenderClipRect):
+      case const (RenderClipRRect):
         return failWithDescription(matchState, 'had a root render object of type: ${renderObject.runtimeType}');
       default:
         return true;
@@ -1981,7 +1987,7 @@ class _CoversSameAreaAs extends Matcher {
 class _ColorMatcher extends Matcher {
   const _ColorMatcher({
     required this.targetColor,
-  }) : assert(targetColor != null);
+  });
 
   final Color targetColor;
 
@@ -2056,7 +2062,7 @@ class _MatchesReferenceImage extends AsyncMatcher {
         Uint8List.view(referenceBytes.buffer),
       );
       return countDifferentPixels == 0 ? null : 'does not match on $countDifferentPixels pixels';
-    }, additionalTime: const Duration(minutes: 1));
+    });
   }
 
   @override
@@ -2113,6 +2119,8 @@ class _MatchesSemanticsData extends Matcher {
     required bool? hasToggledState,
     required bool? isToggled,
     required bool? hasImplicitScrolling,
+    required bool? hasExpandedState,
+    required bool? isExpanded,
     // Actions
     required bool? hasTapAction,
     required bool? hasLongPressAction,
@@ -2168,6 +2176,8 @@ class _MatchesSemanticsData extends Matcher {
           if (isToggled != null) SemanticsFlag.isToggled: isToggled,
           if (hasImplicitScrolling != null) SemanticsFlag.hasImplicitScrolling: hasImplicitScrolling,
           if (isSlider != null) SemanticsFlag.isSlider: isSlider,
+          if (hasExpandedState != null) SemanticsFlag.hasExpandedState: hasExpandedState,
+          if (isExpanded != null) SemanticsFlag.isExpanded: isExpanded,
         },
         actions = <SemanticsAction, bool>{
           if (hasTapAction != null) SemanticsAction.tap: hasTapAction,
@@ -2447,7 +2457,7 @@ class _MatchesSemanticsData extends Matcher {
         final bool actionExpected = actionEntry.value;
         final bool actionPresent = (action.index & data.actions) == action.index;
         if (actionPresent != actionExpected) {
-          if(actionExpected) {
+          if (actionExpected) {
             missingActions.add(action);
           } else {
             unexpectedActions.add(action);
@@ -2492,7 +2502,7 @@ class _MatchesSemanticsData extends Matcher {
         final bool flagExpected = flagEntry.value;
         final bool flagPresent = flag.index & data.flags == flag.index;
         if (flagPresent != flagExpected) {
-          if(flagExpected) {
+          if (flagExpected) {
             missingFlags.add(flag);
           } else {
             unexpectedFlags.add(flag);
@@ -2533,7 +2543,11 @@ class _MatchesSemanticsData extends Matcher {
 
   static String _createEnumsSummary<T extends Object>(List<T> enums) {
     assert(T == SemanticsAction || T == SemanticsFlag, 'This method is only intended for lists of SemanticsActions or SemanticsFlags.');
-    return '[${enums.map(describeEnum).join(', ')}]';
+    if (T == SemanticsAction) {
+      return '[${(enums as List<SemanticsAction>).map((SemanticsAction d) => d.name).join(', ')}]';
+    } else {
+      return '[${(enums as List<SemanticsFlag>).map((SemanticsFlag d) => d.name).join(', ')}]';
+    }
   }
 }
 

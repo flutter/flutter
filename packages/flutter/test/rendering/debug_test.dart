@@ -261,4 +261,15 @@ void main() {
     expect(() => debugAssertAllRenderVarsUnset('ERROR'), throwsFlutterError);
     debugDisableOpacityLayers = false;
   });
+
+  test('debugCheckHasBoundedAxis warns for vertical and horizontal axis', () {
+    expect(
+      () => debugCheckHasBoundedAxis(Axis.vertical, const BoxConstraints()),
+      throwsFlutterError,
+    );
+    expect(
+      () => debugCheckHasBoundedAxis(Axis.horizontal, const BoxConstraints()),
+      throwsFlutterError,
+    );
+  });
 }

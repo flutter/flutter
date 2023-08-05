@@ -73,10 +73,9 @@ class TextSelectionThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static TextSelectionThemeData? lerp(TextSelectionThemeData? a, TextSelectionThemeData? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
-    assert(t != null);
     return TextSelectionThemeData(
       cursorColor: Color.lerp(a?.cursorColor, b?.cursorColor, t),
       selectionColor: Color.lerp(a?.selectionColor, b?.selectionColor, t),
@@ -147,8 +146,7 @@ class TextSelectionTheme extends InheritedTheme {
     super.key,
     required this.data,
     required Widget child,
-  }) : assert(data != null),
-       _child = child,
+  }) : _child = child,
        // See `get child` override below.
        super(child: const _NullWidget());
 

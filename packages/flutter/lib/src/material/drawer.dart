@@ -53,6 +53,10 @@ const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 /// A Material Design panel that slides in horizontally from the edge of a
 /// [Scaffold] to show navigation links in an application.
 ///
+/// There is a Material 3 version of this component, [NavigationDrawer],
+/// that's preferred for applications that are configured for Material 3
+/// (see [ThemeData.useMaterial3]).
+///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=WRj86iHihgY}
 ///
 /// Drawers are typically used with the [Scaffold.drawer] property. The child of
@@ -67,6 +71,18 @@ const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 ///
 /// {@animation 350 622 https://flutter.github.io/assets-for-api-docs/assets/material/drawer.mp4}
 ///
+/// ## Updating to [NavigationDrawer]
+///
+/// There is a Material 3 version of this component, [NavigationDrawer],
+/// that's preferred for applications that are configured for Material 3
+/// (see [ThemeData.useMaterial3]). The [NavigationDrawer] widget's visual
+/// are a little bit different, see the Material 3 spec at
+/// <https://m3.material.io/components/navigation-drawer/overview> for
+/// more details. While the [Drawer] widget can have only one child, the
+/// [NavigationDrawer] widget can have list of widgets, which typically contains
+/// [NavigationDrawerDestination] widgets and/or customized widgets like headlines
+/// and dividers.
+///
 /// {@tool snippet}
 /// This example shows how to create a [Scaffold] that contains an [AppBar] and
 /// a [Drawer]. A user taps the "menu" icon in the [AppBar] to open the
@@ -74,48 +90,17 @@ const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 /// The [Drawer] displays the four items using a [ListView], which allows the
 /// user to scroll through the items if need be.
 ///
-/// ```dart
-/// Scaffold(
-///   appBar: AppBar(
-///     title: const Text('Drawer Demo'),
-///   ),
-///   drawer: Drawer(
-///     child: ListView(
-///       padding: EdgeInsets.zero,
-///       children: const <Widget>[
-///         DrawerHeader(
-///           decoration: BoxDecoration(
-///             color: Colors.blue,
-///           ),
-///           child: Text(
-///             'Drawer Header',
-///             style: TextStyle(
-///               color: Colors.white,
-///               fontSize: 24,
-///             ),
-///           ),
-///         ),
-///         ListTile(
-///           leading: Icon(Icons.message),
-///           title: Text('Messages'),
-///         ),
-///         ListTile(
-///           leading: Icon(Icons.account_circle),
-///           title: Text('Profile'),
-///         ),
-///         ListTile(
-///           leading: Icon(Icons.settings),
-///           title: Text('Settings'),
-///         ),
-///       ],
-///     ),
-///   ),
-/// )
-/// ```
+/// ** See code in examples/api/lib/material/drawer/drawer.0.dart **
+/// {@end-tool}
+///
+/// {@tool snippet}
+/// This example shows how to migrate the above [Drawer] to a [NavigationDrawer].
+///
+/// ** See code in examples/api/lib/material/navigation_drawer/navigation_drawer.1.dart **
 /// {@end-tool}
 ///
 /// An open drawer may be closed with a swipe to close gesture, pressing the
-/// the escape key, by tapping the scrim, or by calling pop route function such as
+/// escape key, by tapping the scrim, or by calling pop route function such as
 /// [Navigator.pop]. For example a drawer item might close the drawer when tapped:
 ///
 /// ```dart
@@ -153,6 +138,7 @@ class Drawer extends StatelessWidget {
     this.width,
     this.child,
     this.semanticLabel,
+    this.clipBehavior,
   }) : assert(elevation == null || elevation >= 0.0);
 
   /// Sets the color of the [Material] that holds all of the [Drawer]'s
@@ -237,6 +223,14 @@ class Drawer extends StatelessWidget {
   ///    value is used.
   final String? semanticLabel;
 
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// The [clipBehavior] argument specifies how to clip the drawer's [shape].
+  ///
+  /// If the drawer has a [shape], it defaults to [Clip.hardEdge]. Otherwise,
+  /// defaults to [Clip.none].
+  final Clip? clipBehavior;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
@@ -255,6 +249,9 @@ class Drawer extends StatelessWidget {
     final bool useMaterial3 = Theme.of(context).useMaterial3;
     final bool isDrawerStart = DrawerController.maybeOf(context)?.alignment != DrawerAlignment.end;
     final DrawerThemeData defaults= useMaterial3 ? _DrawerDefaultsM3(context): _DrawerDefaultsM2(context);
+    final ShapeBorder? effectiveShape = shape ?? (isDrawerStart
+      ? (drawerTheme.shape ?? defaults.shape)
+      : (drawerTheme.endShape ?? defaults.endShape));
     return Semantics(
       scopesRoute: true,
       namesRoute: true,
@@ -267,9 +264,8 @@ class Drawer extends StatelessWidget {
           elevation: elevation ?? drawerTheme.elevation ?? defaults.elevation!,
           shadowColor: shadowColor ?? drawerTheme.shadowColor ?? defaults.shadowColor,
           surfaceTintColor: surfaceTintColor ?? drawerTheme.surfaceTintColor ?? defaults.surfaceTintColor,
-          shape: shape ?? (isDrawerStart
-            ? (drawerTheme.shape ?? defaults.shape)
-            : (drawerTheme.endShape ?? defaults.endShape)),
+          shape: effectiveShape,
+          clipBehavior: effectiveShape != null ? (clipBehavior ?? Clip.hardEdge) : Clip.none,
           child: child,
         ),
       ),
@@ -325,10 +321,7 @@ class DrawerController extends StatefulWidget {
     this.scrimColor,
     this.edgeDragWidth,
     this.enableOpenDragGesture = true,
-  }) : assert(child != null),
-       assert(dragStartBehavior != null),
-       assert(alignment != null),
-       super(key: key);
+  }) : super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -382,11 +375,11 @@ class DrawerController extends StatefulWidget {
   /// drawer.
   ///
   /// By default, the value used is 20.0 added to the padding edge of
-  /// `MediaQuery.of(context).padding` that corresponds to [alignment].
+  /// `MediaQuery.paddingOf(context)` that corresponds to [alignment].
   /// This ensures that the drag area for notched devices is not obscured. For
   /// example, if [alignment] is set to [DrawerAlignment.start] and
   /// `TextDirection.of(context)` is set to [TextDirection.ltr],
-  /// 20.0 will be added to `MediaQuery.of(context).padding.left`.
+  /// 20.0 will be added to `MediaQuery.paddingOf(context).left`.
   final double? edgeDragWidth;
 
   /// Whether or not the drawer is opened or closed.
@@ -494,11 +487,10 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       _scrimColorTween = _buildScrimColorTween();
     }
     if (widget.isDrawerOpen != oldWidget.isDrawerOpen) {
-      switch(_controller.status) {
+      switch (_controller.status) {
         case AnimationStatus.completed:
         case AnimationStatus.dismissed:
           _controller.value = widget.isDrawerOpen ? 1.0 : 0.0;
-          break;
         case AnimationStatus.forward:
         case AnimationStatus.reverse:
           break;
@@ -530,11 +522,9 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     switch (status) {
       case AnimationStatus.forward:
         _ensureHistoryEntry();
-        break;
       case AnimationStatus.reverse:
         _historyEntry?.remove();
         _historyEntry = null;
-        break;
       case AnimationStatus.dismissed:
         break;
       case AnimationStatus.completed:
@@ -584,15 +574,12 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         break;
       case DrawerAlignment.end:
         delta = -delta;
-        break;
     }
     switch (Directionality.of(context)) {
       case TextDirection.rtl:
         _controller.value -= delta;
-        break;
       case TextDirection.ltr:
         _controller.value += delta;
-        break;
     }
 
     final bool opened = _controller.value > 0.5;
@@ -613,17 +600,14 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           break;
         case DrawerAlignment.end:
           visualVelocity = -visualVelocity;
-          break;
       }
       switch (Directionality.of(context)) {
         case TextDirection.rtl:
           _controller.fling(velocity: -visualVelocity);
           widget.drawerCallback?.call(visualVelocity < 0.0);
-          break;
         case TextDirection.ltr:
           _controller.fling(velocity: visualVelocity);
           widget.drawerCallback?.call(visualVelocity > 0.0);
-          break;
       }
     } else if (_controller.value < 0.5) {
       close();
@@ -659,7 +643,6 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   AlignmentDirectional get _drawerOuterAlignment {
-    assert(widget.alignment != null);
     switch (widget.alignment) {
       case DrawerAlignment.start:
         return AlignmentDirectional.centerStart;
@@ -669,7 +652,6 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   AlignmentDirectional get _drawerInnerAlignment {
-    assert(widget.alignment != null);
     switch (widget.alignment) {
       case DrawerAlignment.start:
         return AlignmentDirectional.centerEnd;
@@ -680,7 +662,6 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
   Widget _buildDrawer(BuildContext context) {
     final bool drawerIsStart = widget.alignment == DrawerAlignment.start;
-    final EdgeInsets padding = MediaQuery.of(context).padding;
     final TextDirection textDirection = Directionality.of(context);
     final bool isDesktop;
     switch (Theme.of(context).platform) {
@@ -688,25 +669,22 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
         isDesktop = false;
-        break;
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         isDesktop = true;
-        break;
     }
 
     double? dragAreaWidth = widget.edgeDragWidth;
     if (widget.edgeDragWidth == null) {
+      final EdgeInsets padding = MediaQuery.paddingOf(context);
       switch (textDirection) {
         case TextDirection.ltr:
           dragAreaWidth = _kEdgeDragWidth +
             (drawerIsStart ? padding.left : padding.right);
-          break;
         case TextDirection.rtl:
           dragAreaWidth = _kEdgeDragWidth +
             (drawerIsStart ? padding.right : padding.left);
-          break;
       }
     }
 
@@ -732,16 +710,13 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       switch (Theme.of(context).platform) {
         case TargetPlatform.android:
           platformHasBackButton = true;
-          break;
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
         case TargetPlatform.fuchsia:
         case TargetPlatform.linux:
         case TargetPlatform.windows:
           platformHasBackButton = false;
-          break;
       }
-      assert(platformHasBackButton != null);
 
       final Widget child = _DrawerControllerScope(
         controller: widget,
@@ -827,13 +802,12 @@ class _DrawerDefaultsM2 extends DrawerThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_143
-
 class _DrawerDefaultsM3 extends DrawerThemeData {
-  const _DrawerDefaultsM3(this.context)
+  _DrawerDefaultsM3(this.context)
       : super(elevation: 1.0);
 
   final BuildContext context;
+  late final TextDirection direction = Directionality.of(context);
 
   @override
   Color? get backgroundColor => Theme.of(context).colorScheme.surface;
@@ -844,18 +818,22 @@ class _DrawerDefaultsM3 extends DrawerThemeData {
   @override
   Color? get shadowColor => Colors.transparent;
 
-  // This don't appear to be tokens for this value, but it is
-  // shown in the spec.
+  // There isn't currently a token for this value, but it is shown in the spec,
+  // so hard coding here for now.
   @override
-  ShapeBorder? get shape => const RoundedRectangleBorder(
-    borderRadius: BorderRadius.horizontal(right: Radius.circular(16.0)),
+  ShapeBorder? get shape => RoundedRectangleBorder(
+    borderRadius: const BorderRadiusDirectional.horizontal(
+      end: Radius.circular(16.0),
+    ).resolve(direction),
   );
 
-  // This don't appear to be tokens for this value, but it is
-  // shown in the spec.
+  // There isn't currently a token for this value, but it is shown in the spec,
+  // so hard coding here for now.
   @override
-  ShapeBorder? get endShape => const RoundedRectangleBorder(
-    borderRadius: BorderRadius.horizontal(left: Radius.circular(16.0)),
+  ShapeBorder? get endShape => RoundedRectangleBorder(
+    borderRadius: const BorderRadiusDirectional.horizontal(
+      start: Radius.circular(16.0),
+    ).resolve(direction),
   );
 }
 

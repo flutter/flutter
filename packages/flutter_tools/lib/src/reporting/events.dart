@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of reporting;
+part of 'reporting.dart';
 
 /// A generic usage even that does not involve custom dimensions.
 ///
@@ -54,7 +54,9 @@ class HotEvent extends UsageEvent {
     this.scannedSourcesCount,
     this.reassembleTimeInMs,
     this.reloadVMTimeInMs,
-  }) : super('hot', parameter, flutterUsage: globals.flutterUsage);
+    // TODO(fujino): make this required
+    Usage? usage,
+  }) : super('hot', parameter, flutterUsage: usage ?? globals.flutterUsage);
 
   final String? reason;
   final String targetPlatform;
@@ -191,9 +193,7 @@ class BuildEvent extends UsageEvent {
 /// An event that reports the result of a top-level command.
 class CommandResultEvent extends UsageEvent {
   CommandResultEvent(super.commandPath, super.result)
-      : assert(commandPath != null),
-        assert(result != null),
-        super(flutterUsage: globals.flutterUsage);
+      : super(flutterUsage: globals.flutterUsage);
 
   @override
   void send() {

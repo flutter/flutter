@@ -59,12 +59,12 @@ class LinuxDoctorValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    ValidationType validationType = ValidationType.installed;
+    ValidationType validationType = ValidationType.success;
     final List<ValidationMessage> messages = <ValidationMessage>[];
 
     final Map<String, _VersionInfo?> installedVersions = <String, _VersionInfo?>{
       // Sort the check to make the call order predictable for unit tests.
-      for (String binary in _requiredBinaryVersions.keys.toList()..sort())
+      for (final String binary in _requiredBinaryVersions.keys.toList()..sort())
         binary: await _getBinaryVersion(binary),
     };
 

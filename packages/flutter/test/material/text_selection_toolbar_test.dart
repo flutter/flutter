@@ -6,10 +6,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
 import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
 
-const double _kHandleSize = 22.0;
-const double _kToolbarContentDistanceBelow = _kHandleSize - 2.0;
 const double _kToolbarContentDistance = 8.0;
 
 // A custom text selection menu that just displays a single custom button.
@@ -22,7 +21,7 @@ class _CustomMaterialTextSelectionControls extends MaterialTextSelectionControls
     Offset selectionMidpoint,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ClipboardStatusNotifier? clipboardStatus,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     final TextSelectionPoint startTextSelectionPoint = endpoints[0];
@@ -35,7 +34,7 @@ class _CustomMaterialTextSelectionControls extends MaterialTextSelectionControls
     );
     final Offset anchorBelow = Offset(
       globalEditableRegion.left + selectionMidpoint.dx,
-      globalEditableRegion.top + endTextSelectionPoint.point.dy + _kToolbarContentDistanceBelow,
+      globalEditableRegion.top + endTextSelectionPoint.point.dy + TextSelectionToolbar.kToolbarContentDistanceBelow,
     );
 
     return TextSelectionToolbar(
@@ -77,7 +76,7 @@ void main() {
 
   Finder findOverflowButton() => findPrivate('_TextSelectionToolbarOverflowButton');
 
-  testWidgets('puts children in an overflow menu if they overflow', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('puts children in an overflow menu if they overflow', (WidgetTester tester) async {
     late StateSetter setState;
     final List<Widget> children = List<Widget>.generate(7, (int i) => const TestBox());
 
@@ -155,7 +154,7 @@ void main() {
     // When the toolbar doesn't fit above aboveAnchor, it positions itself below
     // belowAnchor.
     double toolbarY = tester.getTopLeft(findToolbar()).dy;
-    expect(toolbarY, equals(anchorBelowY + _kToolbarContentDistanceBelow));
+    expect(toolbarY, equals(anchorBelowY + TextSelectionToolbar.kToolbarContentDistanceBelow));
 
     // Even when it barely doesn't fit.
     setState(() {
@@ -163,7 +162,7 @@ void main() {
     });
     await tester.pump();
     toolbarY = tester.getTopLeft(findToolbar()).dy;
-    expect(toolbarY, equals(anchorBelowY + _kToolbarContentDistanceBelow));
+    expect(toolbarY, equals(anchorBelowY + TextSelectionToolbar.kToolbarContentDistanceBelow));
 
     // When it does fit above aboveAnchor, it positions itself there.
     setState(() {
@@ -174,7 +173,7 @@ void main() {
     expect(toolbarY, equals(anchorAboveY - height - _kToolbarContentDistance));
   });
 
-  testWidgets('can create and use a custom toolbar', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can create and use a custom toolbar', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(

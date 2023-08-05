@@ -5,11 +5,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart' show LogicalKeyboardKey;
 
 import 'framework.dart';
 import 'overscroll_indicator.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
+import 'scrollable_helpers.dart';
 import 'scrollbar.dart';
 
 const Color _kDefaultGlowColor = Color(0xFFFFFFFF);
@@ -100,6 +102,7 @@ class ScrollBehavior {
     bool? scrollbars,
     bool? overscroll,
     Set<PointerDeviceKind>? dragDevices,
+    Set<LogicalKeyboardKey>? pointerAxisModifiers,
     ScrollPhysics? physics,
     TargetPlatform? platform,
     @Deprecated(
@@ -112,9 +115,10 @@ class ScrollBehavior {
       delegate: this,
       scrollbars: scrollbars ?? true,
       overscroll: overscroll ?? true,
+      dragDevices: dragDevices,
+      pointerAxisModifiers: pointerAxisModifiers,
       physics: physics,
       platform: platform,
-      dragDevices: dragDevices,
       androidOverscrollIndicator: androidOverscrollIndicator
     );
   }
@@ -132,6 +136,25 @@ class ScrollBehavior {
   /// impossible to select text in scrollable containers and is not recommended.
   Set<PointerDeviceKind> get dragDevices => _kTouchLikeDeviceTypes;
 
+  /// A set of [LogicalKeyboardKey]s that, when any or all are pressed in
+  /// combination with a [PointerDeviceKind.mouse] pointer scroll event, will
+  /// flip the axes of the scroll input.
+  ///
+  /// This will for example, result in the input of a vertical mouse wheel, to
+  /// move the [ScrollPosition] of a [ScrollView] with an [Axis.horizontal]
+  /// scroll direction.
+  ///
+  /// If other keys exclusive of this set are pressed during a scroll event, in
+  /// conjunction with keys from this set, the scroll input will still be
+  /// flipped.
+  ///
+  /// Defaults to [LogicalKeyboardKey.shiftLeft],
+  /// [LogicalKeyboardKey.shiftRight].
+  Set<LogicalKeyboardKey> get pointerAxisModifiers => <LogicalKeyboardKey>{
+    LogicalKeyboardKey.shiftLeft,
+    LogicalKeyboardKey.shiftRight,
+  };
+
   /// Applies a [RawScrollbar] to the child widget on desktop platforms.
   Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in
@@ -140,6 +163,7 @@ class ScrollBehavior {
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
+        assert(details.controller != null);
         return RawScrollbar(
           controller: details.controller,
           child: child,
@@ -170,16 +194,16 @@ class ScrollBehavior {
               child: child,
             );
           case AndroidOverscrollIndicator.glow:
-            continue glow;
+            break;
         }
-      glow:
       case TargetPlatform.fuchsia:
-        return GlowingOverscrollIndicator(
-          axisDirection: details.direction,
-          color: _kDefaultGlowColor,
-          child: child,
-        );
+        break;
     }
+    return GlowingOverscrollIndicator(
+      axisDirection: details.direction,
+      color: _kDefaultGlowColor,
+      child: child,
+    );
   }
 
   /// Specifies the type of velocity tracker to use in the descendant
@@ -261,12 +285,14 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     required this.delegate,
     this.scrollbars = true,
     this.overscroll = true,
+    Set<PointerDeviceKind>? dragDevices,
+    Set<LogicalKeyboardKey>? pointerAxisModifiers,
     this.physics,
     this.platform,
-    Set<PointerDeviceKind>? dragDevices,
     AndroidOverscrollIndicator? androidOverscrollIndicator,
   }) : _androidOverscrollIndicator = androidOverscrollIndicator,
-       _dragDevices = dragDevices;
+       _dragDevices = dragDevices,
+       _pointerAxisModifiers = pointerAxisModifiers;
 
   final ScrollBehavior delegate;
   final bool scrollbars;
@@ -274,11 +300,15 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   final ScrollPhysics? physics;
   final TargetPlatform? platform;
   final Set<PointerDeviceKind>? _dragDevices;
+  final Set<LogicalKeyboardKey>? _pointerAxisModifiers;
   @override
   final AndroidOverscrollIndicator? _androidOverscrollIndicator;
 
   @override
   Set<PointerDeviceKind> get dragDevices => _dragDevices ?? delegate.dragDevices;
+
+  @override
+  Set<LogicalKeyboardKey> get pointerAxisModifiers => _pointerAxisModifiers ?? delegate.pointerAxisModifiers;
 
   @override
   AndroidOverscrollIndicator get androidOverscrollIndicator => _androidOverscrollIndicator ?? delegate.androidOverscrollIndicator;
@@ -303,17 +333,19 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   ScrollBehavior copyWith({
     bool? scrollbars,
     bool? overscroll,
+    Set<PointerDeviceKind>? dragDevices,
+    Set<LogicalKeyboardKey>? pointerAxisModifiers,
     ScrollPhysics? physics,
     TargetPlatform? platform,
-    Set<PointerDeviceKind>? dragDevices,
     AndroidOverscrollIndicator? androidOverscrollIndicator
   }) {
     return delegate.copyWith(
       scrollbars: scrollbars ?? this.scrollbars,
       overscroll: overscroll ?? this.overscroll,
+      dragDevices: dragDevices ?? this.dragDevices,
+      pointerAxisModifiers: pointerAxisModifiers ?? this.pointerAxisModifiers,
       physics: physics ?? this.physics,
       platform: platform ?? this.platform,
-      dragDevices: dragDevices ?? this.dragDevices,
       androidOverscrollIndicator: androidOverscrollIndicator ?? this.androidOverscrollIndicator,
     );
   }
@@ -333,9 +365,10 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     return oldDelegate.delegate.runtimeType != delegate.runtimeType
         || oldDelegate.scrollbars != scrollbars
         || oldDelegate.overscroll != overscroll
+        || !setEquals<PointerDeviceKind>(oldDelegate.dragDevices, dragDevices)
+        || !setEquals<LogicalKeyboardKey>(oldDelegate.pointerAxisModifiers, pointerAxisModifiers)
         || oldDelegate.physics != physics
         || oldDelegate.platform != platform
-        || !setEquals<PointerDeviceKind>(oldDelegate.dragDevices, dragDevices)
         || delegate.shouldNotify(oldDelegate.delegate);
   }
 
@@ -376,7 +409,6 @@ class ScrollConfiguration extends InheritedWidget {
 
   @override
   bool updateShouldNotify(ScrollConfiguration oldWidget) {
-    assert(behavior != null);
     return behavior.runtimeType != oldWidget.behavior.runtimeType
         || (behavior != oldWidget.behavior && behavior.shouldNotify(oldWidget.behavior));
   }

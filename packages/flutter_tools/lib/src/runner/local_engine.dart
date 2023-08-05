@@ -46,17 +46,26 @@ class LocalEngineLocator {
   final UserMessages _userMessages;
 
   /// Returns the engine build path of a local engine if one is located, otherwise `null`.
-  Future<EngineBuildPaths?> findEnginePath(String? engineSourcePath, String? localEngine, String? packagePath) async {
+  Future<EngineBuildPaths?> findEnginePath({String? engineSourcePath, String? localEngine, String? localWebSdk, String? packagePath}) async {
     engineSourcePath ??= _platform.environment[kFlutterEngineEnvironmentVariableName];
+    if (engineSourcePath == null && localEngine == null && localWebSdk == null && packagePath == null) {
+      return null;
+    }
 
-    if (engineSourcePath == null && localEngine != null) {
+    if (engineSourcePath == null) {
       try {
-        engineSourcePath = _findEngineSourceByLocalEngine(localEngine);
+        if (localEngine != null) {
+          engineSourcePath = _findEngineSourceByBuildPath(localEngine);
+        }
+        if (localWebSdk != null) {
+          engineSourcePath ??= _findEngineSourceByBuildPath(localWebSdk);
+        }
         engineSourcePath ??= await _findEngineSourceByPackageConfig(packagePath);
       } on FileSystemException catch (e) {
         _logger.printTrace('Local engine auto-detection file exception: $e');
         engineSourcePath = null;
       }
+
       // If engineSourcePath is still not set, try to determine it by flutter root.
       engineSourcePath ??= _tryEnginePath(
         _fileSystem.path.join(_fileSystem.directory(_flutterRoot).parent.path, 'engine', 'src'),
@@ -72,9 +81,9 @@ class LocalEngineLocator {
 
     if (engineSourcePath != null) {
       _logger.printTrace('Local engine source at $engineSourcePath');
-      return _findEngineBuildPath(localEngine, engineSourcePath);
+      return _findEngineBuildPath(localEngine, localWebSdk, engineSourcePath);
     }
-    if (localEngine != null) {
+    if (localEngine != null || localWebSdk != null) {
       throwToolExit(
         _userMessages.runnerNoEngineSrcDir(
           kFlutterEnginePackageName,
@@ -86,15 +95,15 @@ class LocalEngineLocator {
     return null;
   }
 
-  String? _findEngineSourceByLocalEngine(String localEngine) {
+  String? _findEngineSourceByBuildPath(String buildPath) {
     // When the local engine is an absolute path to a variant inside the
     // out directory, parse the engine source.
     // --local-engine /path/to/cache/builder/src/out/host_debug_unopt
-    if (_fileSystem.path.isAbsolute(localEngine)) {
-      final Directory localEngineDirectory = _fileSystem.directory(localEngine);
-      final Directory outDirectory = localEngineDirectory.parent;
+    if (_fileSystem.path.isAbsolute(buildPath)) {
+      final Directory buildDirectory = _fileSystem.directory(buildPath);
+      final Directory outDirectory = buildDirectory.parent;
       final Directory srcDirectory = outDirectory.parent;
-      if (localEngineDirectory.existsSync() && outDirectory.basename == 'out' && srcDirectory.basename == 'src') {
+      if (buildDirectory.existsSync() && outDirectory.basename == 'out' && srcDirectory.basename == 'src') {
         _logger.printTrace('Parsed engine source from local engine as ${srcDirectory.path}.');
         return srcDirectory.path;
       }
@@ -133,7 +142,7 @@ class LocalEngineLocator {
         .parent
         .parent
         .path;
-      if (engineSourcePath != null && (engineSourcePath == _fileSystem.path.dirname(engineSourcePath) || engineSourcePath.isEmpty)) {
+      if (engineSourcePath == _fileSystem.path.dirname(engineSourcePath) || engineSourcePath.isEmpty) {
         engineSourcePath = null;
         throwToolExit(
           _userMessages.runnerNoEngineSrcDir(
@@ -148,7 +157,7 @@ class LocalEngineLocator {
   }
 
   // Determine the host engine directory associated with the local engine:
-  // Strip '_sim_' since there are no host simulator builds.
+  // Strip '_sim' since there are no host simulator builds.
   String _getHostEngineBasename(String localEngineBasename) {
     if (localEngineBasename.startsWith('web_') ||
         localEngineBasename.startsWith('wasm_') ||
@@ -157,7 +166,7 @@ class LocalEngineLocator {
       return localEngineBasename;
     }
 
-    String tmpBasename = localEngineBasename.replaceFirst('_sim_', '_');
+    String tmpBasename = localEngineBasename.replaceFirst('_sim', '');
     tmpBasename = tmpBasename.substring(tmpBasename.indexOf('_') + 1);
     // Strip suffix for various archs.
     const List<String> suffixes = <String>['_arm', '_arm64', '_x86', '_x64'];
@@ -167,26 +176,38 @@ class LocalEngineLocator {
     return 'host_$tmpBasename';
   }
 
-  EngineBuildPaths _findEngineBuildPath(String? localEngine, String enginePath) {
-    if (localEngine == null) {
-      throwToolExit(_userMessages.runnerLocalEngineRequired, exitCode: 2);
+  EngineBuildPaths _findEngineBuildPath(String? localEngine, String? localWebSdk, String enginePath) {
+    if (localEngine == null && localWebSdk == null) {
+      throwToolExit(_userMessages.runnerLocalEngineOrWebSdkRequired, exitCode: 2);
     }
 
-    final String engineBuildPath = _fileSystem.path.normalize(_fileSystem.path.join(enginePath, 'out', localEngine));
-    if (!_fileSystem.isDirectorySync(engineBuildPath)) {
-      throwToolExit(_userMessages.runnerNoEngineBuild(engineBuildPath), exitCode: 2);
+    String? engineBuildPath;
+    String? engineHostBuildPath;
+    if (localEngine != null) {
+      engineBuildPath = _fileSystem.path.normalize(_fileSystem.path.join(enginePath, 'out', localEngine));
+      if (!_fileSystem.isDirectorySync(engineBuildPath)) {
+        throwToolExit(_userMessages.runnerNoEngineBuild(engineBuildPath), exitCode: 2);
+      }
+
+      final String basename = _fileSystem.path.basename(engineBuildPath);
+      final String hostBasename = _getHostEngineBasename(basename);
+      engineHostBuildPath = _fileSystem.path.normalize(
+        _fileSystem.path.join(_fileSystem.path.dirname(engineBuildPath), hostBasename),
+      );
+      if (!_fileSystem.isDirectorySync(engineHostBuildPath)) {
+        throwToolExit(_userMessages.runnerNoEngineBuild(engineHostBuildPath), exitCode: 2);
+      }
     }
 
-    final String basename = _fileSystem.path.basename(engineBuildPath);
-    final String hostBasename = _getHostEngineBasename(basename);
-    final String engineHostBuildPath = _fileSystem.path.normalize(
-      _fileSystem.path.join(_fileSystem.path.dirname(engineBuildPath), hostBasename),
-    );
-    if (!_fileSystem.isDirectorySync(engineHostBuildPath)) {
-      throwToolExit(_userMessages.runnerNoEngineBuild(engineHostBuildPath), exitCode: 2);
+    String? webSdkPath;
+    if (localWebSdk != null) {
+      webSdkPath = _fileSystem.path.normalize(_fileSystem.path.join(enginePath, 'out', localWebSdk));
+      if (!_fileSystem.isDirectorySync(webSdkPath)) {
+        throwToolExit(_userMessages.runnerNoWebSdk(webSdkPath), exitCode: 2);
+      }
     }
 
-    return EngineBuildPaths(targetEngine: engineBuildPath, hostEngine: engineHostBuildPath);
+    return EngineBuildPaths(targetEngine: engineBuildPath, webSdk: webSdkPath, hostEngine: engineHostBuildPath);
   }
 
   String? _tryEnginePath(String enginePath) {

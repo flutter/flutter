@@ -21,6 +21,7 @@
   "closeButtonLabel": "关闭",
   "copyButtonLabel": "复制",
   "cutButtonLabel": "剪切",
+  "scanTextButtonLabel": "扫描文本",
   "okButtonLabel": "确定",
   "pasteButtonLabel": "粘贴",
   "selectAllButtonLabel": "全选",
@@ -129,5 +130,18 @@
   "keyboardKeySpace": "空格键",
   "keyboardKeyMetaMacOs": "⌘",
   "keyboardKeyMetaWindows": "Win",
-  "menuBarMenuLabel": "菜单栏的菜单"
+  "menuBarMenuLabel": "菜单栏的菜单",
+  "currentDateLabel": "今天",
+  "scrimLabel": "纱罩",
+  "bottomSheetLabel": "底部动作条",
+  "scrimOnTapHint": "关闭 $modalRouteContentName",
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu",
+  "lookUpButtonLabel": "Look Up"
 }

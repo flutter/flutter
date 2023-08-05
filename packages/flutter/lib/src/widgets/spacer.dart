@@ -18,8 +18,8 @@ import 'framework.dart';
 /// {@tool snippet}
 ///
 /// ```dart
-/// Row(
-///   children: const <Widget>[
+/// const Row(
+///   children: <Widget>[
 ///     Text('Begin'),
 ///     Spacer(), // Defaults to a flex of one.
 ///     Text('Middle'),
@@ -43,8 +43,7 @@ class Spacer extends StatelessWidget {
   ///
   /// The [flex] parameter may not be null or less than one.
   const Spacer({super.key, this.flex = 1})
-    : assert(flex != null),
-      assert(flex > 0);
+    : assert(flex > 0);
 
   /// The flex factor to use in determining how much space to take up.
   ///

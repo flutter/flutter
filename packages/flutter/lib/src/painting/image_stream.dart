@@ -23,9 +23,7 @@ class ImageInfo {
   /// Both the [image] and the [scale] must not be null.
   ///
   /// The [debugLabel] may be used to identify the source of this image.
-  const ImageInfo({ required this.image, this.scale = 1.0, this.debugLabel })
-    : assert(image != null),
-      assert(scale != null);
+  const ImageInfo({ required this.image, this.scale = 1.0, this.debugLabel });
 
   /// Creates an [ImageInfo] with a cloned [image].
   ///
@@ -167,7 +165,7 @@ class ImageStreamListener {
     this.onImage, {
     this.onChunk,
     this.onError,
-  }) : assert(onImage != null);
+  });
 
   /// Callback for getting notified that an image is available.
   ///
@@ -623,7 +621,6 @@ abstract class ImageStreamCompleter with Diagnosticable {
   ///
   /// This callback will never fire if [removeListener] is never called.
   void addOnLastListenerRemovedCallback(VoidCallback callback) {
-    assert(callback != null);
     _checkDisposed();
     _onLastListenerRemovedCallbacks.add(callback);
   }
@@ -631,7 +628,6 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// Removes a callback previously supplied to
   /// [addOnLastListenerRemovedCallback].
   void removeOnLastListenerRemovedCallback(VoidCallback callback) {
-    assert(callback != null);
     _checkDisposed();
     _onLastListenerRemovedCallbacks.remove(callback);
   }
@@ -789,8 +785,7 @@ class OneFrameImageStreamCompleter extends ImageStreamCompleter {
   /// argument on [FlutterErrorDetails] set to true, meaning that by default the
   /// message is only dumped to the console in debug mode (see [
   /// FlutterErrorDetails]).
-  OneFrameImageStreamCompleter(Future<ImageInfo> image, { InformationCollector? informationCollector })
-      : assert(image != null) {
+  OneFrameImageStreamCompleter(Future<ImageInfo> image, { InformationCollector? informationCollector }) {
     image.then<void>(setImage, onError: (Object error, StackTrace stack) {
       reportError(
         context: ErrorDescription('resolving a single-frame image stream'),
@@ -859,8 +854,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     String? debugLabel,
     Stream<ImageChunkEvent>? chunkEvents,
     InformationCollector? informationCollector,
-  }) : assert(codec != null),
-       _informationCollector = informationCollector,
+  }) : _informationCollector = informationCollector,
        _scale = scale {
     this.debugLabel = debugLabel;
     codec.then<void>(_handleCodecReady, onError: (Object error, StackTrace stack) {

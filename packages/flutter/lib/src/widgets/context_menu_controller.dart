@@ -10,7 +10,8 @@ import 'overlay.dart';
 /// Builds and manages a context menu at a given location.
 ///
 /// There can only ever be one context menu shown at a given time in the entire
-/// app.
+/// app. Calling [show] on one instance of this class will hide any other
+/// shown instances.
 ///
 /// {@tool dartpad}
 /// This example shows how to use a GestureDetector to show a context menu
@@ -18,6 +19,11 @@ import 'overlay.dart';
 ///
 /// ** See code in examples/api/lib/material/context_menu/context_menu_controller.0.dart **
 /// {@end-tool}
+///
+/// See also:
+///
+///   * [BrowserContextMenu], which allows the browser's context menu on web to
+///     be disabled and Flutter-rendered context menus to appear.
 class ContextMenuController {
   /// Creates a context menu that can be shown with [show].
   ContextMenuController({

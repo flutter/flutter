@@ -57,11 +57,9 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
           case AnimationStatus.dismissed:
           case AnimationStatus.forward:
             _controller.forward();
-            break;
           case AnimationStatus.reverse:
           case AnimationStatus.completed:
             _controller.reverse();
-            break;
         }
       }
     });

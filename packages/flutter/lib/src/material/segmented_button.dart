@@ -17,16 +17,18 @@ import 'segmented_button_theme.dart';
 import 'text_button.dart';
 import 'text_button_theme.dart';
 import 'theme.dart';
+import 'tooltip.dart';
 
 /// Data describing a segment of a [SegmentedButton].
 class ButtonSegment<T> {
-  /// Construct a SegmentData
+  /// Construct a [ButtonSegment].
   ///
   /// One of [icon] or [label] must be non-null.
   const ButtonSegment({
     required this.value,
     this.icon,
     this.label,
+    this.tooltip,
     this.enabled = true,
   }) : assert(icon != null || label != null);
 
@@ -40,6 +42,9 @@ class ButtonSegment<T> {
 
   /// Optional label displayed in the segment.
   final Widget? label;
+
+  /// Optional tooltip for the segment
+  final String? tooltip;
 
   /// Determines if the segment is available for selection.
   final bool enabled;
@@ -100,7 +105,7 @@ class SegmentedButton<T> extends StatelessWidget {
   /// more than five options, consider using [FilterChip] or [ChoiceChip]
   /// widgets.
   ///
-  /// If [onSelectionChanged] is null, then the entire segemented button will
+  /// If [onSelectionChanged] is null, then the entire segmented button will
   /// be disabled.
   ///
   /// By default [selected] must only contain one entry. However, if
@@ -116,9 +121,7 @@ class SegmentedButton<T> extends StatelessWidget {
     this.style,
     this.showSelectedIcon = true,
     this.selectedIcon,
-  })  : assert(segments != null),
-        assert(segments.length > 0),
-        assert(selected != null),
+  })  : assert(segments.length > 0),
         assert(selected.length > 0 || emptySelectionAllowed),
         assert(selected.length < 2 || multiSelectionEnabled);
 
@@ -165,7 +168,7 @@ class SegmentedButton<T> extends StatelessWidget {
 
   /// Determines if having no selected segments is allowed.
   ///
-  /// If true, then it is acceptable for none of the segements to be selected.
+  /// If true, then it is acceptable for none of the segments to be selected.
   /// This means that [selected] can be empty. If the user taps on a
   /// selected segment, it will be removed from the selection set passed into
   /// [onSelectionChanged].
@@ -185,7 +188,7 @@ class SegmentedButton<T> extends StatelessWidget {
   ///     dividers between segments.
   ///   * [ButtonStyle.shape]
   ///
-  /// The following style properties are applied to each of the invidual
+  /// The following style properties are applied to each of the individual
   /// button segments. For properties that are a [MaterialStateProperty],
   /// they will be resolved with the current state of the segment:
   ///
@@ -337,11 +340,18 @@ class SegmentedButton<T> extends StatelessWidget {
             child: label,
           );
 
+      final Widget buttonWithTooltip = segment.tooltip != null
+        ? Tooltip(
+            message: segment.tooltip,
+            child: button,
+          )
+        : button;
+
       return MergeSemantics(
         child: Semantics(
           checked: segmentSelected,
           inMutuallyExclusiveGroup: multiSelectionEnabled ? null : true,
-          child: button,
+          child: buttonWithTooltip,
         ),
       );
     }
@@ -356,6 +366,7 @@ class SegmentedButton<T> extends StatelessWidget {
     final List<Widget> buttons = segments.map(buttonFor).toList();
 
     return Material(
+      type: MaterialType.transparency,
       shape: enabledBorder.copyWith(side: BorderSide.none),
       elevation: resolve<double?>((ButtonStyle? style) => style?.elevation)!,
       shadowColor: resolve<Color?>((ButtonStyle? style) => style?.shadowColor),
@@ -374,7 +385,7 @@ class SegmentedButton<T> extends StatelessWidget {
   }
 }
 class _SegmentedButtonRenderWidget<T> extends MultiChildRenderObjectWidget {
-  _SegmentedButtonRenderWidget({
+  const _SegmentedButtonRenderWidget({
     super.key,
     required this.segments,
     required this.enabledBorder,
@@ -597,14 +608,12 @@ class _RenderSegmentedButton<T> extends RenderBox with
           lastChild,
           firstChild,
         );
-        break;
       case TextDirection.ltr:
         _layoutRects(
           childAfter,
           firstChild,
           lastChild,
         );
-        break;
     }
 
     size = _computeOverallSizeFromChildSize(childSize);
@@ -640,12 +649,10 @@ class _RenderSegmentedButton<T> extends RenderBox with
           segmentLeft = child == lastChild ? borderRect.left - borderOutset : childRect.left;
           segmentRight = child == firstChild ? borderRect.right + borderOutset : childRect.right;
           dividerPos = segmentRight;
-          break;
         case TextDirection.ltr:
           segmentLeft = child == firstChild ? borderRect.left - borderOutset : childRect.left;
           segmentRight = child == lastChild ? borderRect.right + borderOutset : childRect.right;
           dividerPos = segmentLeft;
-          break;
       }
       final Rect segmentClipRect = Rect.fromLTRB(
         segmentLeft, borderRect.top - borderOutset,
@@ -693,7 +700,6 @@ class _RenderSegmentedButton<T> extends RenderBox with
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    assert(position != null);
     RenderBox? child = lastChild;
     while (child != null) {
       final _SegmentedButtonContainerBoxParentData childParentData = child.parentData! as _SegmentedButtonContainerBoxParentData;
@@ -720,15 +726,11 @@ class _RenderSegmentedButton<T> extends RenderBox with
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_143
-
 class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
   _SegmentedButtonDefaultsM3(this.context);
-
   final BuildContext context;
   late final ThemeData _theme = Theme.of(context);
   late final ColorScheme _colors = _theme.colorScheme;
-
   @override ButtonStyle? get style {
     return ButtonStyle(
       textStyle: MaterialStatePropertyAll<TextStyle?>(Theme.of(context).textTheme.labelLarge),
@@ -766,28 +768,28 @@ class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
           if (states.contains(MaterialState.focused)) {
             return _colors.onSurface;
           }
-          return null;
+          return _colors.onSurface;
         }
       }),
       overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
         if (states.contains(MaterialState.selected)) {
+          if (states.contains(MaterialState.pressed)) {
+            return _colors.onSecondaryContainer.withOpacity(0.12);
+          }
           if (states.contains(MaterialState.hovered)) {
             return _colors.onSecondaryContainer.withOpacity(0.08);
           }
           if (states.contains(MaterialState.focused)) {
             return _colors.onSecondaryContainer.withOpacity(0.12);
           }
-          if (states.contains(MaterialState.pressed)) {
-            return _colors.onSecondaryContainer.withOpacity(0.12);
-          }
         } else {
+          if (states.contains(MaterialState.pressed)) {
+            return _colors.onSurface.withOpacity(0.12);
+          }
           if (states.contains(MaterialState.hovered)) {
             return _colors.onSurface.withOpacity(0.08);
           }
           if (states.contains(MaterialState.focused)) {
-            return _colors.onSurface.withOpacity(0.12);
-          }
-          if (states.contains(MaterialState.pressed)) {
             return _colors.onSurface.withOpacity(0.12);
           }
         }
@@ -803,9 +805,9 @@ class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
         return BorderSide(color: _colors.outline);
       }),
       shape: const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder()),
+      minimumSize: const MaterialStatePropertyAll<Size?>(Size.fromHeight(40.0)),
     );
   }
-
   @override
   Widget? get selectedIcon => const Icon(Icons.check);
 }

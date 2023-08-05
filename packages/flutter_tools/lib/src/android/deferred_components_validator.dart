@@ -122,7 +122,7 @@ abstract class DeferredComponentsValidator {
         }
       }
       // Log diff file contents, with color highlighting
-      if (diffLines != null && diffLines.isNotEmpty) {
+      if (diffLines.isNotEmpty) {
         logger.printStatus('Diff between `android` and expected files:', emphasis: true);
         logger.printStatus('');
         for (final String line in diffLines) {
@@ -163,7 +163,7 @@ abstract class DeferredComponentsValidator {
 The above files have been placed into `build/$kDeferredComponentsTempDirectory`,
 a temporary directory. The files should be reviewed and moved into the project's
 `android` directory.''');
-        if (diffLines != null && diffLines.isNotEmpty && !platform.isWindows) {
+        if (diffLines.isNotEmpty && !platform.isWindows) {
           logger.printStatus(r'''
 
 The recommended changes can be quickly applied by running:

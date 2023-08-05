@@ -24,6 +24,8 @@ import 'scroll_position.dart';
 /// manages [ScrollActivity] instances, which change what content is visible in
 /// the [Scrollable]'s [Viewport].
 ///
+/// {@macro flutter.widgets.scrollPosition.listening}
+///
 /// See also:
 ///
 ///  * [ScrollPosition], which defines the underlying model for a position
@@ -162,7 +164,6 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   @protected
   @visibleForTesting
   void updateUserScrollDirection(ScrollDirection value) {
-    assert(value != null);
     if (userScrollDirection == value) {
       return;
     }
@@ -176,7 +177,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     required Duration duration,
     required Curve curve,
   }) {
-    if (nearEqual(to, pixels, physics.tolerance.distance)) {
+    if (nearEqual(to, pixels, physics.toleranceFor(this).distance)) {
       // Skip the animation, go straight to the position as we are already close.
       jumpTo(to);
       return Future<void>.value();

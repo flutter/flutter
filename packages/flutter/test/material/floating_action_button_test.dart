@@ -5,24 +5,25 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
-
 @TestOn('!chrome')
+library;
+
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
 void main() {
+  final ThemeData material3Theme = ThemeData(useMaterial3: true);
+  final ThemeData material2Theme = ThemeData(useMaterial3: false);
 
-  final ThemeData material3Theme = ThemeData.light().copyWith(useMaterial3: true);
-  final ThemeData material2Theme = ThemeData.light().copyWith(useMaterial3: false);
-
-  testWidgets('Floating Action Button control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Floating Action Button control test', (WidgetTester tester) async {
     bool didPressButton = false;
     await tester.pumpWidget(
       Directionality(
@@ -43,7 +44,7 @@ void main() {
     expect(didPressButton, isTrue);
   });
 
-  testWidgets('Floating Action Button tooltip', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Floating Action Button tooltip', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -61,7 +62,7 @@ void main() {
   });
 
   // Regression test for: https://github.com/flutter/flutter/pull/21084
-  testWidgets('Floating Action Button tooltip (long press button edge)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Floating Action Button tooltip (long press button edge)', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -82,7 +83,7 @@ void main() {
   });
 
   // Regression test for: https://github.com/flutter/flutter/pull/21084
-  testWidgets('Floating Action Button tooltip (long press button edge - no child)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Floating Action Button tooltip (long press button edge - no child)', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -101,7 +102,7 @@ void main() {
     expect(find.text('Add'), findsOneWidget);
   });
 
-  testWidgets('Floating Action Button tooltip (no child)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Floating Action Button tooltip (no child)', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -136,7 +137,7 @@ void main() {
     expect(find.text('Add'), findsOneWidget);
   });
 
-  testWidgets('Floating Action Button tooltip reacts when disabled', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Floating Action Button tooltip reacts when disabled', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -172,7 +173,7 @@ void main() {
     expect(find.text('Add'), findsOneWidget);
   });
 
-  testWidgets('Floating Action Button elevation when highlighted - effect', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Floating Action Button elevation when highlighted - effect', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: material3Theme,
@@ -210,7 +211,7 @@ void main() {
     expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 6.0);
   });
 
-  testWidgets('Floating Action Button elevation when disabled - defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Floating Action Button elevation when disabled - defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -225,7 +226,7 @@ void main() {
     expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 6.0);
   });
 
-  testWidgets('Floating Action Button elevation when disabled - override', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Floating Action Button elevation when disabled - override', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -240,7 +241,7 @@ void main() {
     expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 0.0);
   });
 
-  testWidgets('Floating Action Button elevation when disabled - effect', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Floating Action Button elevation when disabled - effect', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -279,7 +280,7 @@ void main() {
     expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 6.0);
   });
 
-  testWidgets('Floating Action Button elevation when disabled while highlighted - effect', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Floating Action Button elevation when disabled while highlighted - effect', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: material3Theme,
@@ -326,7 +327,7 @@ void main() {
     expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 6.0);
   });
 
-  testWidgets('Floating Action Button states elevation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Floating Action Button states elevation', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
@@ -370,7 +371,7 @@ void main() {
     expect(getFABWidget(fabFinder).elevation, 6);
   });
 
-  testWidgets('FlatActionButton mini size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('FlatActionButton mini size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
     final Key key1 = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -408,7 +409,7 @@ void main() {
     expect(tester.getSize(find.byKey(key2)), const Size(40.0, 40.0));
   });
 
-  testWidgets('FloatingActionButton.isExtended', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('FloatingActionButton.isExtended', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: material3Theme,
@@ -480,7 +481,7 @@ void main() {
     expect(tester.getSize(fabFinder).width, 168);
   });
 
-  testWidgets('FloatingActionButton.isExtended (without icon)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('FloatingActionButton.isExtended (without icon)', (WidgetTester tester) async {
     final Finder fabFinder = find.byType(FloatingActionButton);
 
     FloatingActionButton getFabWidget() {
@@ -533,7 +534,7 @@ void main() {
     expect(tester.getSize(fabFinder).width, 140);
   });
 
-  testWidgets('Floating Action Button heroTag', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Floating Action Button heroTag', (WidgetTester tester) async {
     late BuildContext theContext;
     await tester.pumpWidget(
       MaterialApp(
@@ -556,7 +557,7 @@ void main() {
     await tester.pump(); // this would fail if heroTag was the same on both FloatingActionButtons (see below).
   });
 
-  testWidgets('Floating Action Button heroTag - with duplicate', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Floating Action Button heroTag - with duplicate', (WidgetTester tester) async {
     late BuildContext theContext;
     await tester.pumpWidget(
       MaterialApp(
@@ -580,7 +581,7 @@ void main() {
     expect(tester.takeException().toString(), contains('FloatingActionButton'));
   });
 
-  testWidgets('Floating Action Button heroTag - with duplicate', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Floating Action Button heroTag - with duplicate', (WidgetTester tester) async {
     late BuildContext theContext;
     await tester.pumpWidget(
       MaterialApp(
@@ -604,7 +605,7 @@ void main() {
     expect(tester.takeException().toString(), contains('xyzzy'));
   });
 
-  testWidgets('Floating Action Button semantics (enabled)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Floating Action Button semantics (enabled)', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -639,7 +640,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Floating Action Button semantics (disabled)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Floating Action Button semantics (disabled)', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -669,7 +670,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Tooltip is used as semantics tooltip', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip is used as semantics tooltip', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -785,7 +786,7 @@ void main() {
   });
 
   // This test prevents https://github.com/flutter/flutter/issues/20483
-  testWidgets('Floating Action Button clips ink splash and highlight', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Floating Action Button clips ink splash and highlight', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -813,7 +814,7 @@ void main() {
     );
   });
 
-  testWidgets('Floating Action Button changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Floating Action Button changes mouse cursor when hovered', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -890,7 +891,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
-  testWidgets('Floating Action Button has no clip by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Floating Action Button has no clip by default', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     await tester.pumpWidget(
       Directionality(
@@ -911,7 +912,7 @@ void main() {
     );
   });
 
-  testWidgets('Can find FloatingActionButton semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can find FloatingActionButton semantics', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: FloatingActionButton(onPressed: () {}),
     ));
@@ -928,7 +929,7 @@ void main() {
     );
   });
 
-  testWidgets('Foreground color applies to icon on fab', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Foreground color applies to icon on fab', (WidgetTester tester) async {
     const Color foregroundColor = Color(0xcafefeed);
 
     await tester.pumpWidget(MaterialApp(
@@ -945,10 +946,11 @@ void main() {
     expect(iconRichText.text.style!.color, foregroundColor);
   });
 
-  testWidgets('FloatingActionButton uses custom splash color', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('FloatingActionButton uses custom splash color', (WidgetTester tester) async {
     const Color splashColor = Color(0xcafefeed);
 
     await tester.pumpWidget(MaterialApp(
+      theme: material2Theme,
       home: FloatingActionButton(
         onPressed: () {},
         splashColor: splashColor,
@@ -965,7 +967,7 @@ void main() {
     );
   });
 
-  testWidgets('extended FAB does not show label when isExtended is false', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('extended FAB does not show label when isExtended is false', (WidgetTester tester) async {
     const Key iconKey = Key('icon');
     const Key labelKey = Key('label');
 
@@ -986,7 +988,7 @@ void main() {
     expect(find.byKey(labelKey), findsNothing);
   });
 
-  testWidgets('FloatingActionButton.small configures correct size', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('FloatingActionButton.small configures correct size', (WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -1003,7 +1005,7 @@ void main() {
     expect(tester.getSize(find.byKey(key)), const Size(40.0, 40.0));
   });
 
-  testWidgets('FloatingActionButton.large configures correct size', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('FloatingActionButton.large configures correct size', (WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -1019,7 +1021,7 @@ void main() {
     expect(tester.getSize(find.byKey(key)), const Size(96.0, 96.0));
   });
 
-  testWidgets('FloatingActionButton.extended can customize spacing', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('FloatingActionButton.extended can customize spacing', (WidgetTester tester) async {
     const Key iconKey = Key('icon');
     const Key labelKey = Key('label');
     const double spacing = 33.0;
@@ -1044,12 +1046,13 @@ void main() {
     expect(tester.getTopRight(find.byType(FloatingActionButton)).dx - tester.getTopRight(find.byKey(labelKey)).dx, padding.end);
   });
 
-  testWidgets('FloatingActionButton.extended can customize text style', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('FloatingActionButton.extended can customize text style', (WidgetTester tester) async {
     const Key labelKey = Key('label');
     const TextStyle style = TextStyle(letterSpacing: 2.0);
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: material2Theme,
         home: Scaffold(
           floatingActionButton: FloatingActionButton.extended(
             label: const Text('', key: labelKey),
@@ -1072,10 +1075,11 @@ void main() {
   });
 
   group('Material 2', () {
-    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
-    // is turned on by default, these tests can be removed.
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
 
-    testWidgets('Floating Action Button elevation when highlighted - effect', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Floating Action Button elevation when highlighted - effect', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: material2Theme,
@@ -1114,7 +1118,7 @@ void main() {
       expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 6.0);
     });
 
-    testWidgets('Floating Action Button elevation when disabled while highlighted - effect', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Floating Action Button elevation when disabled while highlighted - effect', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: material2Theme,
@@ -1161,7 +1165,7 @@ void main() {
       expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 6.0);
     });
 
-    testWidgets('Floating Action Button states elevation', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Floating Action Button states elevation', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
 
       await tester.pumpWidget(
@@ -1205,7 +1209,7 @@ void main() {
       expect(getFABWidget(fabFinder).elevation, 12);
     });
 
-    testWidgets('FloatingActionButton.isExtended', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('FloatingActionButton.isExtended', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: material2Theme,
@@ -1272,7 +1276,7 @@ void main() {
       expect(tester.getSize(fabFinder).width, 168);
     });
 
-    testWidgets('FloatingActionButton.isExtended (without icon)', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('FloatingActionButton.isExtended (without icon)', (WidgetTester tester) async {
       final Finder fabFinder = find.byType(FloatingActionButton);
 
       FloatingActionButton getFabWidget() {
@@ -1324,7 +1328,7 @@ void main() {
 
 
     // This test prevents https://github.com/flutter/flutter/issues/20483
-    testWidgets('Floating Action Button clips ink splash and highlight', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Floating Action Button clips ink splash and highlight', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(
         MaterialApp(
@@ -1364,7 +1368,7 @@ void main() {
       feedback.dispose();
     });
 
-    testWidgets('FloatingActionButton with enabled feedback', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('FloatingActionButton with enabled feedback', (WidgetTester tester) async {
       const bool enableFeedback = true;
 
       await tester.pumpWidget(MaterialApp(
@@ -1381,7 +1385,7 @@ void main() {
       expect(feedback.hapticCount, 0);
     });
 
-    testWidgets('FloatingActionButton with disabled feedback', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('FloatingActionButton with disabled feedback', (WidgetTester tester) async {
       const bool enableFeedback = false;
 
       await tester.pumpWidget(MaterialApp(
@@ -1398,7 +1402,7 @@ void main() {
       expect(feedback.hapticCount, 0);
     });
 
-    testWidgets('FloatingActionButton with enabled feedback by default', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('FloatingActionButton with enabled feedback by default', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: FloatingActionButton(
           onPressed: () {},
@@ -1412,7 +1416,7 @@ void main() {
       expect(feedback.hapticCount, 0);
     });
 
-    testWidgets('FloatingActionButton with disabled feedback using FloatingActionButtonTheme', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('FloatingActionButton with disabled feedback using FloatingActionButtonTheme', (WidgetTester tester) async {
       const bool enableFeedbackTheme = false;
       final ThemeData theme = ThemeData(
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
@@ -1436,7 +1440,7 @@ void main() {
       expect(feedback.hapticCount, 0);
     });
 
-    testWidgets('FloatingActionButton.enableFeedback is overridden by FloatingActionButtonThemeData.enableFeedback', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('FloatingActionButton.enableFeedback is overridden by FloatingActionButtonThemeData.enableFeedback', (WidgetTester tester) async {
       const bool enableFeedbackTheme = false;
       const bool enableFeedback = true;
       final ThemeData theme = ThemeData(

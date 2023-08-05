@@ -39,7 +39,7 @@ void main() {
     androidEnvironment = Environment.test(
       fileSystem.currentDirectory,
       defines: <String, String>{
-        kBuildMode: getNameForBuildMode(BuildMode.profile),
+        kBuildMode: BuildMode.profile.cliName,
         kTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
       },
       inputs: <String, String>{},
@@ -52,7 +52,7 @@ void main() {
     iosEnvironment = Environment.test(
       fileSystem.currentDirectory,
       defines: <String, String>{
-        kBuildMode: getNameForBuildMode(BuildMode.profile),
+        kBuildMode: BuildMode.profile.cliName,
         kTargetPlatform: getNameForTargetPlatform(TargetPlatform.ios),
       },
       inputs: <String, String>{},
@@ -83,7 +83,7 @@ void main() {
     );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+        artifacts.getArtifactPath(Artifact.engineDartBinary),
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
@@ -94,6 +94,8 @@ void main() {
         '--track-widget-creation',
         '--aot',
         '--tfa',
+        '--target-os',
+        'android',
         '--packages',
         '/.dart_tool/package_config.json',
         '--output-dill',
@@ -121,7 +123,7 @@ void main() {
     );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+        artifacts.getArtifactPath(Artifact.engineDartBinary),
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
@@ -132,6 +134,8 @@ void main() {
         '--track-widget-creation',
         '--aot',
         '--tfa',
+        '--target-os',
+        'android',
         '--packages',
         '/.dart_tool/package_config.json',
         '--output-dill',
@@ -160,7 +164,7 @@ void main() {
     );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+        artifacts.getArtifactPath(Artifact.engineDartBinary),
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
@@ -171,6 +175,8 @@ void main() {
         '--track-widget-creation',
         '--aot',
         '--tfa',
+        '--target-os',
+        'android',
         '--packages',
         '/.dart_tool/package_config.json',
         '--output-dill',
@@ -200,7 +206,7 @@ void main() {
     );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+        artifacts.getArtifactPath(Artifact.engineDartBinary),
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
@@ -211,6 +217,8 @@ void main() {
         '--track-widget-creation',
         '--aot',
         '--tfa',
+        '--target-os',
+        'android',
         '--packages',
         '/.dart_tool/package_config.json',
         '--output-dill',
@@ -242,7 +250,7 @@ void main() {
     );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+        artifacts.getArtifactPath(Artifact.engineDartBinary),
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
@@ -266,7 +274,7 @@ void main() {
     ]);
 
     await const KernelSnapshot().build(androidEnvironment
-      ..defines[kBuildMode] = getNameForBuildMode(BuildMode.debug)
+      ..defines[kBuildMode] = BuildMode.debug.cliName
       ..defines[kTrackWidgetCreation] = 'false');
 
     expect(processManager, hasNoRemainingExpectations);
@@ -284,7 +292,7 @@ void main() {
     );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+        artifacts.getArtifactPath(Artifact.engineDartBinary),
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
@@ -308,7 +316,7 @@ void main() {
 
     await const KernelSnapshot().build(androidEnvironment
       ..defines[kTargetPlatform]  = getNameForTargetPlatform(TargetPlatform.darwin)
-      ..defines[kBuildMode] = getNameForBuildMode(BuildMode.debug)
+      ..defines[kBuildMode] = BuildMode.debug.cliName
       ..defines[kTrackWidgetCreation] = 'false'
     );
 
@@ -322,7 +330,7 @@ void main() {
     final Environment testEnvironment = Environment.test(
       fileSystem.currentDirectory,
       defines: <String, String>{
-        kBuildMode: getNameForBuildMode(BuildMode.debug),
+        kBuildMode: BuildMode.debug.cliName,
         kTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
       },
       processManager: processManager,
@@ -338,7 +346,7 @@ void main() {
     );
     processManager.addCommands(<FakeCommand>[
       FakeCommand(command: <String>[
-        artifacts.getHostArtifact(HostArtifact.engineDartBinary).path,
+        artifacts.getArtifactPath(Artifact.engineDartBinary),
         '--disable-dart-dev',
         artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
         '--sdk-root',
@@ -511,6 +519,7 @@ void main() {
         '-rpath',
         '-Xlinker',
         '@loader_path/Frameworks',
+        '-fapplication-extension',
         '-install_name',
         '@rpath/App.framework/App',
         '-o',
@@ -552,7 +561,7 @@ void main() {
 
   testUsingContext('kExtraGenSnapshotOptions passes values to gen_snapshot', () async {
     androidEnvironment.defines[kExtraGenSnapshotOptions] = 'foo,bar,baz=2';
-    androidEnvironment.defines[kBuildMode] = getNameForBuildMode(BuildMode.profile);
+    androidEnvironment.defines[kBuildMode] = BuildMode.profile.cliName;
     final String build = androidEnvironment.buildDir.path;
 
     processManager.addCommands(<FakeCommand>[

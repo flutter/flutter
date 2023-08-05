@@ -24,8 +24,7 @@ baz=qux
 
   group('Version', () {
     testWithoutContext('can parse and compare', () {
-      expect(Version.unknown.toString(), equals('unknown'));
-      expect(Version(null, null, null).toString(), equals('0'));
+      expect(Version(0, null, null).toString(), equals('0'));
       expect(const Version.withText(1, 2, 3, 'versionText').toString(), 'versionText');
 
       final Version v1 = Version.parse('1')!;
@@ -33,7 +32,7 @@ baz=qux
       expect(v1.minor, equals(0));
       expect(v1.patch, equals(0));
 
-      expect(v1, greaterThan(Version.unknown));
+      expect(v1, greaterThan(Version(0, 0, 0)));
 
       final Version v2 = Version.parse('1.2')!;
       expect(v2.major, equals(1));
@@ -56,6 +55,57 @@ baz=qux
 
       expect(Version.parse('Preview2.2'), isNull);
     });
+
+    group('isWithinVersionRange', () {
+      test('unknown not included', () {
+        expect(isWithinVersionRange('unknown', min: '1.0.0', max: '1.1.3'),
+            isFalse);
+      });
+
+      test('pre java 8 format included', () {
+        expect(isWithinVersionRange('1.0.0_201', min: '1.0.0', max: '1.1.3'),
+            isTrue);
+      });
+
+      test('min included by default', () {
+        expect(
+            isWithinVersionRange('1.0.0', min: '1.0.0', max: '1.1.3'), isTrue);
+      });
+
+      test('max included by default', () {
+        expect(
+            isWithinVersionRange('1.1.3', min: '1.0.0', max: '1.1.3'), isTrue);
+      });
+
+      test('inclusive min excluded', () {
+        expect(
+            isWithinVersionRange('1.0.0',
+                min: '1.0.0', max: '1.1.3', inclusiveMin: false),
+            isFalse);
+      });
+
+      test('inclusive max excluded', () {
+        expect(
+            isWithinVersionRange('1.1.3',
+                min: '1.0.0', max: '1.1.3', inclusiveMax: false),
+            isFalse);
+      });
+
+      test('lower value excluded', () {
+        expect(
+            isWithinVersionRange('0.1.0', min: '1.0.0', max: '1.1.3'), isFalse);
+      });
+
+      test('higher value excluded', () {
+        expect(
+            isWithinVersionRange('1.1.4', min: '1.0.0', max: '1.1.3'), isFalse);
+      });
+
+      test('middle value included', () {
+        expect(
+            isWithinVersionRange('1.1.0', min: '1.0.0', max: '1.1.3'), isTrue);
+      });
+    });
   });
 
   group('Misc', () {
@@ -68,6 +118,17 @@ baz=qux
       expect(snakeCase('AbC'), equals('ab_c'));
       expect(snakeCase('ABc'), equals('a_bc'));
       expect(snakeCase('ABC'), equals('a_b_c'));
+    });
+
+    testWithoutContext('kebabCase', () async {
+      expect(kebabCase('abc'), equals('abc'));
+      expect(kebabCase('abC'), equals('ab-c'));
+      expect(kebabCase('aBc'), equals('a-bc'));
+      expect(kebabCase('aBC'), equals('a-b-c'));
+      expect(kebabCase('Abc'), equals('abc'));
+      expect(kebabCase('AbC'), equals('ab-c'));
+      expect(kebabCase('ABc'), equals('a-bc'));
+      expect(kebabCase('ABC'), equals('a-b-c'));
     });
 
     testWithoutContext('sentenceCase', () async {

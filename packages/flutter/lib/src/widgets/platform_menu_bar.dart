@@ -738,7 +738,8 @@ class PlatformMenuItem with Diagnosticable {
   /// An optional callback that is called when this [PlatformMenuItem] is
   /// selected.
   ///
-  /// If unset, this menu item will be disabled.
+  /// At most one of [onSelected] and [onSelectedIntent] may be set. If neither
+  /// field is set, this menu item will be disabled.
   final VoidCallback? onSelected;
 
   /// Returns a callback, if any, to be invoked if the platform menu receives a
@@ -760,7 +761,8 @@ class PlatformMenuItem with Diagnosticable {
   /// An optional intent that is invoked when this [PlatformMenuItem] is
   /// selected.
   ///
-  /// If unset, this menu item will be disabled.
+  /// At most one of [onSelected] and [onSelectedIntent] may be set. If neither
+  /// field is set, this menu item will be disabled.
   final Intent? onSelectedIntent;
 
   /// Returns all descendant [PlatformMenuItem]s of this item.
@@ -805,7 +807,7 @@ class PlatformMenuItem with Diagnosticable {
     return <String, Object?>{
       _kIdKey: getId(item),
       _kLabelKey: item.label,
-      _kEnabledKey: item.onSelected != null,
+      _kEnabledKey: item.onSelected != null || item.onSelectedIntent != null,
       if (shortcut != null)...shortcut.serializeForMenu().toChannelRepresentation(),
     };
   }
@@ -954,7 +956,7 @@ enum PlatformProvidedMenuItemType {
   ///
   /// On macOS, this is the `terminate` default menu.
   ///
-  /// This menu item will simply exit the application when activated.
+  /// This menu item will exit the application when activated.
   quit,
 
   /// The system provided "Services" submenu.

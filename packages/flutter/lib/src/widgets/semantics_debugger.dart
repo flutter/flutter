@@ -12,6 +12,7 @@ import 'basic.dart';
 import 'binding.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
+import 'view.dart';
 
 /// A widget that visualizes the semantics for the child.
 ///
@@ -31,8 +32,7 @@ class SemanticsDebugger extends StatefulWidget {
       fontSize: 10.0,
       height: 0.8,
     ),
-  }) : assert(child != null),
-       assert(labelStyle != null);
+  });
 
   /// The widget below this widget in the tree.
   ///
@@ -47,25 +47,31 @@ class SemanticsDebugger extends StatefulWidget {
 }
 
 class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindingObserver {
-  late _SemanticsClient _client;
+  _SemanticsClient? _client;
+  PipelineOwner? _pipelineOwner;
 
   @override
   void initState() {
     super.initState();
-    // TODO(abarth): We shouldn't reach out to the WidgetsBinding.instance
-    // static here because we might not be in a tree that's attached to that
-    // binding. Instead, we should find a way to get to the PipelineOwner from
-    // the BuildContext.
-    _client = _SemanticsClient(WidgetsBinding.instance.pipelineOwner)
-      ..addListener(_update);
     WidgetsBinding.instance.addObserver(this);
   }
 
   @override
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final PipelineOwner newOwner = View.pipelineOwnerOf(context);
+    if (newOwner != _pipelineOwner) {
+      _client?.dispose();
+      _client = _SemanticsClient(newOwner)
+        ..addListener(_update);
+      _pipelineOwner = newOwner;
+    }
+  }
+
+  @override
   void dispose() {
-    _client
-      ..removeListener(_update)
-      ..dispose();
+    _client?.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -96,7 +102,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
   Offset? _lastPointerDownLocation;
   void _handlePointerDown(PointerDownEvent event) {
     setState(() {
-      _lastPointerDownLocation = event.position * WidgetsBinding.instance.window.devicePixelRatio;
+      _lastPointerDownLocation = event.position * View.of(context).devicePixelRatio;
     });
     // TODO(ianh): Use a gesture recognizer so that we can reset the
     // _lastPointerDownLocation when none of the other gesture recognizers win.
@@ -145,21 +151,17 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
   }
 
   void _performAction(Offset position, SemanticsAction action) {
-    _pipelineOwner.semanticsOwner?.performActionAt(position, action);
+    _pipelineOwner?.semanticsOwner?.performActionAt(position, action);
   }
-
-  // TODO(abarth): This shouldn't be a static. We should get the pipeline owner
-  // from [context] somehow.
-  PipelineOwner get _pipelineOwner => WidgetsBinding.instance.pipelineOwner;
 
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
       foregroundPainter: _SemanticsDebuggerPainter(
-        _pipelineOwner,
-        _client.generation,
+        _pipelineOwner!,
+        _client!.generation,
         _lastPointerDownLocation, // in physical pixels
-        WidgetsBinding.instance.window.devicePixelRatio,
+        View.of(context).devicePixelRatio,
         widget.labelStyle,
       ),
       child: GestureDetector(
@@ -171,8 +173,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
         child: Listener(
           onPointerDown: _handlePointerDown,
           behavior: HitTestBehavior.opaque,
-          child: IgnorePointer(
-            ignoringSemantics: false,
+          child: _IgnorePointerWithSemantics(
             child: widget.child,
           ),
         ),
@@ -286,12 +287,15 @@ class _SemanticsDebuggerPainter extends CustomPainter {
       annotations.add('adjustable');
     }
 
-    assert(data.attributedLabel != null);
     final String message;
+    // Android will avoid pronouncing duplicating tooltip and label.
+    // Therefore, having two identical strings is the same as having a single
+    // string.
+    final bool shouldIgnoreDuplicatedLabel = defaultTargetPlatform == TargetPlatform.android && data.attributedLabel.string == data.tooltip;
     final String tooltipAndLabel = <String>[
       if (data.tooltip.isNotEmpty)
         data.tooltip,
-      if (data.attributedLabel.string.isNotEmpty)
+      if (data.attributedLabel.string.isNotEmpty && !shouldIgnoreDuplicatedLabel)
         data.attributedLabel.string,
     ].join('\n');
     if (tooltipAndLabel.isEmpty) {
@@ -305,10 +309,8 @@ class _SemanticsDebuggerPainter extends CustomPainter {
         switch (data.textDirection!) {
           case TextDirection.rtl:
             effectivelabel = '${Unicode.RLI}$tooltipAndLabel${Unicode.PDF}';
-            break;
           case TextDirection.ltr:
             effectivelabel = tooltipAndLabel;
-            break;
         }
       }
       if (annotations.isEmpty) {
@@ -391,4 +393,23 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     }
     canvas.restore();
   }
+}
+
+/// A widget ignores pointer event but still keeps semantics actions.
+class _IgnorePointerWithSemantics extends SingleChildRenderObjectWidget {
+  const _IgnorePointerWithSemantics({
+    super.child,
+  });
+
+  @override
+  _RenderIgnorePointerWithSemantics createRenderObject(BuildContext context) {
+    return _RenderIgnorePointerWithSemantics();
+  }
+}
+
+class _RenderIgnorePointerWithSemantics extends RenderProxyBox {
+  _RenderIgnorePointerWithSemantics();
+
+  @override
+  bool hitTest(BoxHitTestResult result, { required Offset position }) => false;
 }

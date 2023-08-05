@@ -157,6 +157,7 @@ String generateMainModule({
   required bool nativeNullAssertions,
   String bootstrapModule = 'main_module.bootstrap',
 }) {
+  // The typo below in "EXTENTION" is load-bearing, package:build depends on it.
   return '''
 /* ENTRYPOINT_EXTENTION_MARKER */
 // Disable require module timeout
@@ -195,6 +196,12 @@ define("$bootstrapModule", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) 
       return dart.getSourceMap(url);
     });
   }
+  // Prevent DDC's requireJS to interfere with modern bundling.
+  if (typeof define === 'function' && define.amd) {
+    // Preserve a copy just in case...
+    define._amd = define.amd;
+    delete define.amd;
+  }
 });
 ''';
 }
@@ -212,17 +219,16 @@ String generateTestEntrypoint({
   // @dart = ${languageVersion.major}.${languageVersion.minor}
   import 'org-dartlang-app:///$relativeTestPath' as test;
   import 'dart:ui' as ui;
+  import 'dart:ui_web' as ui_web;
   import 'dart:html';
   import 'dart:js';
   ${testConfigPath != null ? "import '${Uri.file(testConfigPath)}' as test_config;" : ""}
   import 'package:stream_channel/stream_channel.dart';
   import 'package:flutter_test/flutter_test.dart';
-  import 'package:test_api/src/backend/stack_trace_formatter.dart'; // ignore: implementation_imports
-  import 'package:test_api/src/remote_listener.dart'; // ignore: implementation_imports
-  import 'package:test_api/src/backend/suite_channel_manager.dart'; // ignore: implementation_imports
+  import 'package:test_api/backend.dart';
 
   Future<void> main() async {
-    ui.debugEmulateFlutterTesterEnvironment = true;
+    ui_web.debugEmulateFlutterTesterEnvironment = true;
     await ui.webOnlyInitializePlatform();
     webGoldenComparator = DefaultWebGoldenComparator(Uri.parse('${Uri.file(absolutePath)}'));
     (ui.window as dynamic).debugOverrideDevicePixelRatio(3.0);

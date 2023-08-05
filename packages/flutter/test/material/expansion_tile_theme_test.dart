@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 class TestIcon extends StatefulWidget {
   const TestIcon({super.key});
 
@@ -47,6 +49,12 @@ void main() {
     expect(const ExpansionTileThemeData().hashCode, const ExpansionTileThemeData().copyWith().hashCode);
   });
 
+  test('ExpansionTileThemeData lerp special cases', () {
+    expect(ExpansionTileThemeData.lerp(null, null, 0), null);
+    const ExpansionTileThemeData data = ExpansionTileThemeData();
+    expect(identical(ExpansionTileThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('ExpansionTileThemeData defaults', () {
     const ExpansionTileThemeData theme = ExpansionTileThemeData();
     expect(theme.backgroundColor, null);
@@ -63,7 +71,7 @@ void main() {
     expect(theme.clipBehavior, null);
   });
 
-  testWidgets('Default ExpansionTileThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default ExpansionTileThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const TooltipThemeData().debugFillProperties(builder);
 
@@ -75,7 +83,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('ExpansionTileThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ExpansionTileThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ExpansionTileThemeData(
       backgroundColor: Color(0xff000000),
@@ -113,7 +121,7 @@ void main() {
     ]);
   });
 
-  testWidgets('ExpansionTileTheme - collapsed', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ExpansionTileTheme - collapsed', (WidgetTester tester) async {
     final Key tileKey = UniqueKey();
     final Key titleKey = UniqueKey();
     final Key iconKey = UniqueKey();
@@ -205,7 +213,7 @@ void main() {
     expect(shapeDecoration.shape, collapsedShape);
   });
 
-  testWidgets('ExpansionTileTheme - expanded', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ExpansionTileTheme - expanded', (WidgetTester tester) async {
     final Key tileKey = UniqueKey();
     final Key titleKey = UniqueKey();
     final Key iconKey = UniqueKey();
@@ -284,7 +292,7 @@ void main() {
     // Check the expanded text color when textColor is applied.
     expect(getTextColor(), textColor);
     // Check the expanded ShapeBorder when shape is applied.
-    expect(shapeDecoration.shape, collapsedShape);
+    expect(shapeDecoration.shape, shape);
 
     // Check the child position when expandedAlignment is applied.
     final Rect childRect = tester.getRect(find.text('Tile 1'));

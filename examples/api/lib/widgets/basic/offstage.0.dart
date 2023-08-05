@@ -2,45 +2,41 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [Offstage].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [Offstage].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const OffstageApp());
 
-  static const String _title = 'Flutter Code Sample';
+class OffstageApp extends StatelessWidget {
+  const OffstageApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
+        appBar: AppBar(title: const Text('Offstage Sample')),
         body: const Center(
-          child: MyStatefulWidget(),
+          child: OffstageExample(),
         ),
       ),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class OffstageExample extends StatefulWidget {
+  const OffstageExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<OffstageExample> createState() => _OffstageExampleState();
 }
 
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
+class _OffstageExampleState extends State<OffstageExample> {
   final GlobalKey _key = GlobalKey();
   bool _offstage = true;
 
   Size _getFlutterLogoSize() {
-    final RenderBox renderLogo =
-        _key.currentContext!.findRenderObject()! as RenderBox;
+    final RenderBox renderLogo = _key.currentContext!.findRenderObject()! as RenderBox;
     return renderLogo.size;
   }
 
@@ -71,8 +67,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content:
-                        Text('Flutter Logo size is ${_getFlutterLogoSize()}'),
+                    content: Text('Flutter Logo size is ${_getFlutterLogoSize()}'),
                   ),
                 );
               }),

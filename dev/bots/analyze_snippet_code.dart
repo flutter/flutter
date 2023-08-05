@@ -5,7 +5,7 @@
 // To run this, from the root of the Flutter repository:
 //   bin/cache/dart-sdk/bin/dart --enable-asserts dev/bots/analyze_snippet_code.dart
 
-// In general, please prefer using full inline examples in API docs.
+// In general, please prefer using full linked examples in API docs.
 //
 // For documentation on creating sample code, see ../../examples/api/README.md
 // See also our style guide's discussion on documentation and sample code:
@@ -13,7 +13,7 @@
 //
 // This tool is used to analyze smaller snippets of code in the API docs.
 // Such snippets are wrapped in ```dart ... ``` blocks, which may themselves
-// be wrapped in {@tool snippet} ... {@endtool} blocks to set them apart
+// be wrapped in {@tool snippet} ... {@end-tool} blocks to set them apart
 // in the rendered output.
 //
 // Such snippets:
@@ -385,7 +385,7 @@ class _SnippetChecker {
 
   /// A RegExp that matches the start of a code block within a regular comment.
   /// Such blocks are not analyzed. They can be used to give sample code for
-  /// internal (private) APIs where visibilty would make analyzing the sample
+  /// internal (private) APIs where visibility would make analyzing the sample
   /// code problematic.
   static final RegExp _uncheckedCodeBlockStartRegex = RegExp(r'^ *// *```dart$');
 
@@ -419,7 +419,7 @@ class _SnippetChecker {
   /// A RegExp that matches a line that ends with a semicolon (and maybe a comment)
   static final RegExp _trailingSemicolonRegExp = RegExp(r'^(.*);(| *//.*)$');
 
-  /// A RegExp that matches a line that ends with a closing blace (and maybe a comment)
+  /// A RegExp that matches a line that ends with a closing brace (and maybe a comment)
   static final RegExp _trailingCloseBraceRegExp = RegExp(r'^(.*)}(| *//.*)$');
 
   /// A RegExp that matches a line that only contains a commented-out ellipsis
@@ -457,7 +457,9 @@ class _SnippetChecker {
     '// ignore_for_file: directives_ordering',
     '// ignore_for_file: prefer_final_locals',
     '// ignore_for_file: unnecessary_import',
+    '// ignore_for_file: unreachable_from_main',
     '// ignore_for_file: unused_element',
+    '// ignore_for_file: unused_element_parameter',
     '// ignore_for_file: unused_local_variable',
   ];
 
@@ -923,7 +925,7 @@ class _SnippetChecker {
         continue;
       }
 
-      final _SnippetFile snippet = snippets[file.path]!;
+      final _SnippetFile? snippet = snippets[file.path];
       if (snippet == null) {
         errors.add(_SnippetCheckerException(
           "Unknown section for ${file.path}. Maybe the temporary directory wasn't empty?",
@@ -1147,7 +1149,6 @@ Future<void> _runInteractive({
         if (!busy) {
           rerun();
         }
-        break;
     }
   });
   Watcher(file.absolute.path).events.listen((_) => rerun());

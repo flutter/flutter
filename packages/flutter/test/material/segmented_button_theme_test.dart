@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 void main() {
 
   test('SegmentedButtonThemeData copyWith, ==, hashCode basics', () {
@@ -23,7 +25,13 @@ void main() {
     expect(copy, custom);
   });
 
-  testWidgets('Default SegmentedButtonThemeData debugFillProperties', (WidgetTester tester) async {
+  test('SegmentedButtonThemeData lerp special cases', () {
+    expect(SegmentedButtonThemeData.lerp(null, null, 0), const SegmentedButtonThemeData());
+    const SegmentedButtonThemeData theme = SegmentedButtonThemeData();
+    expect(identical(SegmentedButtonThemeData.lerp(theme, theme, 0.5), theme), true);
+  });
+
+  testWidgetsWithLeakTracking('Default SegmentedButtonThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SegmentedButtonThemeData().debugFillProperties(builder);
 
@@ -35,7 +43,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('With no other configuration, defaults are used', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('With no other configuration, defaults are used', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
       MaterialApp(
@@ -64,7 +72,7 @@ void main() {
       final Material material = tester.widget<Material>(parent);
       expect(material.color, Colors.transparent);
       expect(material.shape, const RoundedRectangleBorder());
-      expect(material.textStyle!.color, theme.colorScheme.primary);
+      expect(material.textStyle!.color, theme.colorScheme.onSurface);
       expect(material.textStyle!.fontFamily, 'Roboto');
       expect(material.textStyle!.fontSize, 14);
       expect(material.textStyle!.fontWeight, FontWeight.w500);
@@ -102,7 +110,7 @@ void main() {
     }
   });
 
-  testWidgets('ThemeData.segmentedButtonTheme overrides defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ThemeData.segmentedButtonTheme overrides defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       useMaterial3: true,
       segmentedButtonTheme: SegmentedButtonThemeData(
@@ -195,7 +203,7 @@ void main() {
     }
   });
 
-  testWidgets('SegmentedButtonTheme overrides ThemeData and defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SegmentedButtonTheme overrides ThemeData and defaults', (WidgetTester tester) async {
     final SegmentedButtonThemeData global = SegmentedButtonThemeData(
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
@@ -322,7 +330,7 @@ void main() {
     }
   });
 
-  testWidgets('Widget parameters overrides SegmentedTheme, ThemeData and defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Widget parameters overrides SegmentedTheme, ThemeData and defaults', (WidgetTester tester) async {
     final SegmentedButtonThemeData global = SegmentedButtonThemeData(
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {

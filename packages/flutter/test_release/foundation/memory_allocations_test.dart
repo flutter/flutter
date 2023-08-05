@@ -22,8 +22,8 @@ void main() {
   testWidgets(
     '$MemoryAllocations is noop when kFlutterMemoryAllocationsEnabled is false.',
     (WidgetTester tester) async {
-      ObjectEvent? recievedEvent;
-      ObjectEvent listener(ObjectEvent event) => recievedEvent = event;
+      ObjectEvent? receivedEvent;
+      ObjectEvent listener(ObjectEvent event) => receivedEvent = event;
 
       ma.addListener(listener);
       _checkSdkHandlersNotSet();
@@ -31,7 +31,7 @@ void main() {
 
       await _activateFlutterObjects(tester);
       _checkSdkHandlersNotSet();
-      expect(recievedEvent, isNull);
+      expect(receivedEvent, isNull);
       expect(ma.hasListeners, isFalse);
 
       ma.removeListener(listener);
@@ -57,12 +57,8 @@ Future<void> _activateFlutterObjects(WidgetTester tester) async {
   changeNotifier.dispose();
   picture.dispose();
 
-  // TODO(polina-c): Remove the condition after
-  // https://github.com/flutter/flutter/issues/110599 is fixed.
-  if (!kIsWeb) {
-    final Image image = await _createImage();
-    image.dispose();
-  }
+  final Image image = await _createImage();
+  image.dispose();
 }
 
 Future<Image> _createImage() async {

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' show Tooltip;
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'all_elements.dart';
@@ -74,7 +74,7 @@ class CommonFinders {
   /// [Text] and [Text.rich] widgets) are matched by comparing the
   /// [InlineSpan.toPlainText] with the given `pattern`.
   ///
-  /// For [EditableText] widgets, the `pattern` is always compared to the currentt
+  /// For [EditableText] widgets, the `pattern` is always compared to the current
   /// value of the [EditableText.controller].
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
@@ -435,7 +435,7 @@ class CommonFinders {
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder bySemanticsLabel(Pattern label, { bool skipOffstage = true }) {
-    if (WidgetsBinding.instance.pipelineOwner.semanticsOwner == null) {
+    if (!SemanticsBinding.instance.semanticsEnabled) {
       throw StateError('Semantics are not enabled. '
                        'Make sure to call tester.ensureSemantics() before using '
                        'this finder, and call dispose on its return value after.');
@@ -489,11 +489,14 @@ abstract class Finder {
 
   /// Returns all the [Element]s that will be considered by this finder.
   ///
+  /// This is the internal API for the [Finder]. To obtain the elements from
+  /// a [Finder] in a test, consider [WidgetTester.elementList].
+  ///
   /// See [collectAllElementsFrom].
   @protected
   Iterable<Element> get allCandidates {
     return collectAllElementsFrom(
-      WidgetsBinding.instance.renderViewElement!,
+      WidgetsBinding.instance.rootElement!,
       skipOffstage: skipOffstage,
     );
   }
@@ -567,7 +570,7 @@ abstract class Finder {
 /// Applies additional filtering against a [parent] [Finder].
 abstract class ChainedFinder extends Finder {
   /// Create a Finder chained against the candidates of another [Finder].
-  ChainedFinder(this.parent) : assert(parent != null);
+  ChainedFinder(this.parent);
 
   /// Another [Finder] that will run first.
   final Finder parent;
@@ -636,10 +639,11 @@ class _HitTestableFinder extends ChainedFinder {
   @override
   Iterable<Element> filter(Iterable<Element> parentCandidates) sync* {
     for (final Element candidate in parentCandidates) {
+      final int viewId = candidate.findAncestorWidgetOfExactType<View>()!.view.viewId;
       final RenderBox box = candidate.renderObject! as RenderBox;
       final Offset absoluteOffset = box.localToGlobal(alignment.alongSize(box.size));
       final HitTestResult hitResult = HitTestResult();
-      WidgetsBinding.instance.hitTest(hitResult, absoluteOffset);
+      WidgetsBinding.instance.hitTestInView(hitResult, absoluteOffset, viewId);
       for (final HitTestEntry entry in hitResult.path) {
         if (entry.target == candidate.renderObject) {
           yield candidate;

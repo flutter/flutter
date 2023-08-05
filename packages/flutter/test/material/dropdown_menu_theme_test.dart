@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 void main() {
   test('DropdownMenuThemeData copyWith, ==, hashCode basics', () {
     expect(const DropdownMenuThemeData(), const DropdownMenuThemeData().copyWith());
@@ -24,7 +26,13 @@ void main() {
     expect(copy, custom);
   });
 
-  testWidgets('Default DropdownMenuThemeData debugFillProperties', (WidgetTester tester) async {
+  test('DropdownMenuThemeData lerp special cases', () {
+    expect(DropdownMenuThemeData.lerp(null, null, 0), const DropdownMenuThemeData());
+    const DropdownMenuThemeData data = DropdownMenuThemeData();
+    expect(identical(DropdownMenuThemeData.lerp(data, data, 0.5), data), true);
+  });
+
+  testWidgetsWithLeakTracking('Default DropdownMenuThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DropdownMenuThemeData().debugFillProperties(builder);
 
@@ -36,7 +44,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('With no other configuration, defaults are used', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('With no other configuration, defaults are used', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
@@ -93,7 +101,7 @@ void main() {
     expect(material.textStyle?.color, themeData.colorScheme.onSurface);
   });
 
-  testWidgets('ThemeData.dropdownMenuTheme overrides defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ThemeData.dropdownMenuTheme overrides defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       dropdownMenuTheme: DropdownMenuThemeData(
         textStyle: TextStyle(
@@ -172,7 +180,7 @@ void main() {
     expect(material.textStyle?.color, theme.colorScheme.onSurface);
   });
 
-  testWidgets('DropdownMenuTheme overrides ThemeData and defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownMenuTheme overrides ThemeData and defaults', (WidgetTester tester) async {
     final DropdownMenuThemeData global = DropdownMenuThemeData(
       textStyle: TextStyle(
         color: Colors.orange,
@@ -275,7 +283,7 @@ void main() {
     expect(material.textStyle?.color, theme.colorScheme.onSurface);
   });
 
-  testWidgets('Widget parameters overrides DropdownMenuTheme, ThemeData and defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Widget parameters overrides DropdownMenuTheme, ThemeData and defaults', (WidgetTester tester) async {
     final DropdownMenuThemeData global = DropdownMenuThemeData(
       textStyle: TextStyle(
         color: Colors.orange,

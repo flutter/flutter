@@ -77,7 +77,7 @@ void main() {
       );
     expect(1, installed.length);
     final ValidationResult result = await installed.toList()[0].validate();
-    expect(ValidationType.installed, result.type);
+    expect(ValidationType.success, result.type);
   });
 
   testWithoutContext('intellij(2020.1) plugins check on linux (installed via JetBrains ToolBox app)', () async {
@@ -104,7 +104,7 @@ void main() {
     );
     expect(1, installed.length);
     final ValidationResult result = await installed.toList()[0].validate();
-    expect(ValidationType.installed, result.type);
+    expect(ValidationType.success, result.type);
   });
 
   testWithoutContext('intellij(>=2020.2) plugins check on linux (installed via JetBrains ToolBox app)', () async {
@@ -131,7 +131,7 @@ void main() {
     );
     expect(1, installed.length);
     final ValidationResult result = await installed.toList()[0].validate();
-    expect(ValidationType.installed, result.type);
+    expect(ValidationType.success, result.type);
   });
 
   testWithoutContext('intellij(2020.1~) plugins check on linux (installed via tar.gz)', () async {
@@ -158,7 +158,7 @@ void main() {
     );
     expect(1, installed.length);
     final ValidationResult result = await installed.toList()[0].validate();
-    expect(ValidationType.installed, result.type);
+    expect(ValidationType.success, result.type);
   });
 
   testWithoutContext('legacy intellij(<2020) plugins check on windows', () async {
@@ -185,7 +185,7 @@ void main() {
     );
     expect(1, installed.length);
     final ValidationResult result = await installed.toList()[0].validate();
-    expect(ValidationType.installed, result.type);
+    expect(ValidationType.success, result.type);
   });
 
   testWithoutContext('intellij(2020.1 ~ 2020.2) plugins check on windows (installed via JetBrains ToolBox app)', () async {
@@ -212,7 +212,7 @@ void main() {
     );
     expect(1, installed.length);
     final ValidationResult result = await installed.toList()[0].validate();
-    expect(ValidationType.installed, result.type);
+    expect(ValidationType.success, result.type);
   });
 
   testWithoutContext('intellij(>=2020.3) plugins check on windows (installed via JetBrains ToolBox app and plugins)', () async {
@@ -239,7 +239,7 @@ void main() {
     );
     expect(1, installed.length);
     final ValidationResult result = await installed.toList()[0].validate();
-    expect(ValidationType.installed, result.type);
+    expect(ValidationType.success, result.type);
   });
 
   testWithoutContext('intellij(2020.1~) plugins check on windows (installed via installer)', () async {
@@ -266,7 +266,7 @@ void main() {
     );
     expect(1, installed.length);
     final ValidationResult result = await installed.toList()[0].validate();
-    expect(ValidationType.installed, result.type);
+    expect(ValidationType.success, result.type);
   });
 
   testWithoutContext('can locate installations on macOS from Spotlight', () {
@@ -305,6 +305,7 @@ void main() {
       processManager: processManager,
       plistParser: FakePlistParser(<String, String>{
         PlistParser.kCFBundleShortVersionStringKey: '2020.10',
+        PlistParser.kCFBundleIdentifierKey: 'com.jetbrains.intellij',
       }),
     ).whereType<IntelliJValidatorOnMac>();
     expect(validators.length, 2);
@@ -370,6 +371,47 @@ void main() {
     );
 
     expect(validator.pluginsPath, '/path/to/JetBrainsToolboxApp.plugins');
+  });
+
+  testWithoutContext('Remove JetBrains Toolbox', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final List<String> installPaths = <String>[
+      fileSystem.path.join('/', 'foo', 'bar', 'Applications',
+          'JetBrains Toolbox', 'IntelliJ IDEA Ultimate.app'),
+      fileSystem.path.join('/', 'foo', 'bar', 'Applications',
+          'JetBrains Toolbox', 'IntelliJ IDEA Community Edition.app')
+    ];
+
+    for (final String installPath in installPaths) {
+      fileSystem.directory(installPath).createSync(recursive: true);
+    }
+
+    final FakeProcessManager processManager =
+    FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(command: <String>[
+        'mdfind',
+        'kMDItemCFBundleIdentifier="com.jetbrains.intellij.ce"',
+      ], stdout: 'skip'),
+      const FakeCommand(command: <String>[
+        'mdfind',
+        'kMDItemCFBundleIdentifier="com.jetbrains.intellij*"',
+      ], stdout: 'skip')
+    ]);
+
+    final Iterable<DoctorValidator> installed =
+    IntelliJValidatorOnMac.installed(
+      fileSystem: fileSystem,
+      fileSystemUtils:
+      FileSystemUtils(fileSystem: fileSystem, platform: macPlatform),
+      userMessages: UserMessages(),
+      plistParser: FakePlistParser(<String, String>{
+        'JetBrainsToolboxApp': '/path/to/JetBrainsToolboxApp',
+        'CFBundleIdentifier': 'com.jetbrains.toolbox.linkapp',
+      }),
+      processManager: processManager,
+    );
+
+    expect(installed.length, 0);
   });
 }
 

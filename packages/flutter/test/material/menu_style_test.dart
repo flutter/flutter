@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 void main() {
   Finder findMenuPanels() {
     return find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_MenuPanel');
@@ -35,7 +37,13 @@ void main() {
   }
 
   group('MenuStyle', () {
-    testWidgets('fixedSize affects geometry', (WidgetTester tester) async {
+    test('MenuStyle lerp special cases', () {
+      expect(MenuStyle.lerp(null, null, 0), null);
+      const MenuStyle data = MenuStyle();
+      expect(identical(MenuStyle.lerp(data, data, 0.5), data), true);
+    });
+
+    testWidgetsWithLeakTracking('fixedSize affects geometry', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -78,7 +86,7 @@ void main() {
       expect(tester.getRect(findMenuPanels().at(1)).size, equals(const Size(100.0, 100.0)));
     });
 
-    testWidgets('maximumSize affects geometry', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('maximumSize affects geometry', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -121,7 +129,7 @@ void main() {
       expect(tester.getRect(findMenuPanels().at(1)).size, equals(const Size(100.0, 100.0)));
     });
 
-    testWidgets('minimumSize affects geometry', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('minimumSize affects geometry', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -164,7 +172,7 @@ void main() {
       expect(tester.getRect(findMenuPanels().at(1)).size, equals(const Size(300.0, 300.0)));
     });
 
-    testWidgets('Material parameters are honored', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Material parameters are honored', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -230,9 +238,10 @@ void main() {
       expect(panelPadding.padding, equals(const EdgeInsets.all(20)));
     });
 
-    testWidgets('visual density', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('visual density', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Material(
             child: Column(
               children: <Widget>[

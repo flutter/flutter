@@ -8,7 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Finder findKey(int i) => find.byKey(ValueKey<int>(i));
+Finder findKey(int i) => find.byKey(ValueKey<int>(i), skipOffstage: false);
 
 Widget buildSingleChildScrollView(Axis scrollDirection, { bool reverse = false }) {
   return Directionality(
@@ -147,6 +147,47 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 1020));
       expect(tester.getBottomRight(findKey(3)).dy, equals(500.0));
+
+      // Regression test for https://github.com/flutter/flutter/issues/128749
+      // Reset to zero position.
+      tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(0.0);
+      await tester.pump();
+      // 4 is not currently visible as the SingleChildScrollView is contained
+      // within a centered SizedBox.
+      expect(tester.getBottomLeft(findKey(4)).dy, equals(100.0));
+      expect(tester.getBottomLeft(findKey(6)).dy, equals(500.0));
+      Scrollable.ensureVisible(
+        findContext(6),
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+      );
+      await tester.pump();
+      Scrollable.ensureVisible(
+        findContext(5),
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+      );
+      await tester.pump();
+      // 5 and 6 are already visible beyond the top edge, so no change.
+      expect(tester.getBottomLeft(findKey(4)).dy, equals(100.0));
+      expect(tester.getBottomLeft(findKey(6)).dy, equals(500.0));
+      Scrollable.ensureVisible(
+        findContext(4),
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+      );
+      await tester.pump();
+      // Since it is reversed, 4 should have come into view at the top
+      // edge of the scrollable, matching the alignment expectation.
+      expect(tester.getBottomLeft(findKey(4)).dy, equals(300.0));
+      expect(tester.getBottomLeft(findKey(6)).dy, equals(700.0));
+
+      // Bring 6 back into view at the trailing edge, checking the other
+      // alignment.
+      Scrollable.ensureVisible(
+        findContext(6),
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+      );
+      await tester.pump();
+      expect(tester.getBottomLeft(findKey(4)).dy, equals(100.0));
+      expect(tester.getBottomLeft(findKey(6)).dy, equals(500.0));
     });
 
     testWidgets('SingleChildScrollView ensureVisible Axis.horizontal reverse', (WidgetTester tester) async {
@@ -174,6 +215,52 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 1020));
       expect(tester.getBottomRight(findKey(3)).dx, equals(700.0));
+
+      // Regression test for https://github.com/flutter/flutter/issues/128749
+      // Reset to zero position.
+      tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(0.0);
+      await tester.pump();
+      // 4 is not currently visible as the SingleChildScrollView is contained
+      // within a centered SizedBox.
+      expect(tester.getBottomLeft(findKey(3)).dx, equals(-100.0));
+      expect(tester.getBottomLeft(findKey(6)).dx, equals(500.0));
+      Scrollable.ensureVisible(
+        findContext(6),
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+      );
+      await tester.pump();
+      Scrollable.ensureVisible(
+        findContext(5),
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+      );
+      await tester.pump();
+      Scrollable.ensureVisible(
+        findContext(4),
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+      );
+      await tester.pump();
+      // 4, 5 and 6 are already visible beyond the left edge, so no change.
+      expect(tester.getBottomLeft(findKey(3)).dx, equals(-100.0));
+      expect(tester.getBottomLeft(findKey(6)).dx, equals(500.0));
+      Scrollable.ensureVisible(
+        findContext(3),
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+      );
+      await tester.pump();
+      // Since it is reversed, 3 should have come into view at the leading
+      // edge of the scrollable, matching the alignment expectation.
+      expect(tester.getBottomLeft(findKey(3)).dx, equals(100.0));
+      expect(tester.getBottomLeft(findKey(6)).dx, equals(700.0));
+
+      // Bring 6 back into view at the trailing edge, checking the other
+      // alignment.
+      Scrollable.ensureVisible(
+        findContext(6),
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+      );
+      await tester.pump();
+      expect(tester.getBottomLeft(findKey(3)).dx, equals(-100.0));
+      expect(tester.getBottomLeft(findKey(6)).dx, equals(500.0));
     });
 
     testWidgets('SingleChildScrollView ensureVisible rotated child', (WidgetTester tester) async {
@@ -407,6 +494,46 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 1020));
       expect(tester.getBottomRight(findKey(3)).dy, equals(500.0));
+
+      // Regression test for https://github.com/flutter/flutter/issues/128749
+      // Reset to zero position.
+      await prepare(0.0);
+      // 2 is not currently visible as the ListView is contained
+      // within a centered SizedBox.
+      expect(tester.getBottomLeft(findKey(2)).dy, equals(100.0));
+      expect(tester.getBottomLeft(findKey(0)).dy, equals(500.0));
+      Scrollable.ensureVisible(
+        findContext(0),
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+      );
+      await tester.pump();
+      Scrollable.ensureVisible(
+        findContext(1),
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+      );
+      await tester.pump();
+      // 0 and 1 are already visible beyond the top edge, so no change.
+      expect(tester.getBottomLeft(findKey(2)).dy, equals(100.0));
+      expect(tester.getBottomLeft(findKey(0)).dy, equals(500.0));
+      Scrollable.ensureVisible(
+        findContext(2),
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+      );
+      await tester.pump();
+      // Since it is reversed, 2 should have come into view at the top
+      // edge of the scrollable, matching the alignment expectation.
+      expect(tester.getBottomLeft(findKey(2)).dy, equals(300.0));
+      expect(tester.getBottomLeft(findKey(0)).dy, equals(700.0));
+
+      // Bring 0 back into view at the trailing edge, checking the other
+      // alignment.
+      Scrollable.ensureVisible(
+        findContext(0),
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+      );
+      await tester.pump();
+      expect(tester.getBottomLeft(findKey(2)).dy, equals(100.0));
+      expect(tester.getBottomLeft(findKey(0)).dy, equals(500.0));
     });
 
     testWidgets('ListView ensureVisible Axis.horizontal reverse', (WidgetTester tester) async {
@@ -443,6 +570,51 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 1020));
       expect(tester.getBottomRight(findKey(3)).dx, equals(700.0));
+
+      // Regression test for https://github.com/flutter/flutter/issues/128749
+      // Reset to zero position.
+      await prepare(0.0);
+      // 3 is not currently visible as the ListView is contained
+      // within a centered SizedBox.
+      expect(tester.getBottomLeft(findKey(3)).dx, equals(-100.0));
+      expect(tester.getBottomLeft(findKey(0)).dx, equals(500.0));
+      Scrollable.ensureVisible(
+        findContext(0),
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+      );
+      await tester.pump();
+      Scrollable.ensureVisible(
+        findContext(1),
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+      );
+      await tester.pump();
+      Scrollable.ensureVisible(
+        findContext(2),
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+      );
+      await tester.pump();
+      // 0, 1 and 2 are already visible beyond the left edge, so no change.
+      expect(tester.getBottomLeft(findKey(3)).dx, equals(-100.0));
+      expect(tester.getBottomLeft(findKey(0)).dx, equals(500.0));
+      Scrollable.ensureVisible(
+        findContext(3),
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+      );
+      await tester.pump();
+      // Since it is reversed, 3 should have come into view at the leading
+      // edge of the scrollable, matching the alignment expectation.
+      expect(tester.getBottomLeft(findKey(3)).dx, equals(100.0));
+      expect(tester.getBottomLeft(findKey(0)).dx, equals(700.0));
+
+      // Bring 0 back into view at the trailing edge, checking the other
+      // alignment.
+      Scrollable.ensureVisible(
+        findContext(0),
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+      );
+      await tester.pump();
+      expect(tester.getBottomLeft(findKey(3)).dx, equals(-100.0));
+      expect(tester.getBottomLeft(findKey(0)).dx, equals(500.0));
     });
 
     testWidgets('ListView ensureVisible negative child', (WidgetTester tester) async {
@@ -662,6 +834,46 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 1020));
       expect(tester.getBottomRight(findKey(3)).dy, equals(500.0));
+
+      // Regression test for https://github.com/flutter/flutter/issues/128749
+      // Reset to zero position.
+      await prepare(0.0);
+      // 2 is not currently visible as the ListView is contained
+      // within a centered SizedBox.
+      expect(tester.getBottomLeft(findKey(2)).dy, equals(100.0));
+      expect(tester.getBottomLeft(findKey(0)).dy, equals(500.0));
+      Scrollable.ensureVisible(
+        findContext(0),
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+      );
+      await tester.pump();
+      Scrollable.ensureVisible(
+        findContext(1),
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+      );
+      await tester.pump();
+      // 0 and 1 are already visible beyond the top edge, so no change.
+      expect(tester.getBottomLeft(findKey(2)).dy, equals(100.0));
+      expect(tester.getBottomLeft(findKey(0)).dy, equals(500.0));
+      Scrollable.ensureVisible(
+        findContext(2),
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+      );
+      await tester.pump();
+      // Since it is reversed, 2 should have come into view at the top
+      // edge of the scrollable, matching the alignment expectation.
+      expect(tester.getBottomLeft(findKey(2)).dy, equals(300.0));
+      expect(tester.getBottomLeft(findKey(0)).dy, equals(700.0));
+
+      // Bring 0 back into view at the trailing edge, checking the other
+      // alignment.
+      Scrollable.ensureVisible(
+        findContext(0),
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+      );
+      await tester.pump();
+      expect(tester.getBottomLeft(findKey(2)).dy, equals(100.0));
+      expect(tester.getBottomLeft(findKey(0)).dy, equals(500.0));
     });
 
     testWidgets('ListView ensureVisible Axis.horizontal reverse', (WidgetTester tester) async {
@@ -698,6 +910,51 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 1020));
       expect(tester.getBottomRight(findKey(3)).dx, equals(700.0));
+
+      // Regression test for https://github.com/flutter/flutter/issues/128749
+      // Reset to zero position.
+      await prepare(0.0);
+      // 3 is not currently visible as the ListView is contained
+      // within a centered SizedBox.
+      expect(tester.getBottomLeft(findKey(3)).dx, equals(-100.0));
+      expect(tester.getBottomLeft(findKey(0)).dx, equals(500.0));
+      Scrollable.ensureVisible(
+        findContext(0),
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+      );
+      await tester.pump();
+      Scrollable.ensureVisible(
+        findContext(1),
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+      );
+      await tester.pump();
+      Scrollable.ensureVisible(
+        findContext(2),
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+      );
+      await tester.pump();
+      // 0, 1 and 2 are already visible beyond the left edge, so no change.
+      expect(tester.getBottomLeft(findKey(3)).dx, equals(-100.0));
+      expect(tester.getBottomLeft(findKey(0)).dx, equals(500.0));
+      Scrollable.ensureVisible(
+        findContext(3),
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+      );
+      await tester.pump();
+      // Since it is reversed, 3 should have come into view at the leading
+      // edge of the scrollable, matching the alignment expectation.
+      expect(tester.getBottomLeft(findKey(3)).dx, equals(100.0));
+      expect(tester.getBottomLeft(findKey(0)).dx, equals(700.0));
+
+      // Bring 0 back into view at the trailing edge, checking the other
+      // alignment.
+      Scrollable.ensureVisible(
+        findContext(0),
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+      );
+      await tester.pump();
+      expect(tester.getBottomLeft(findKey(3)).dx, equals(-100.0));
+      expect(tester.getBottomLeft(findKey(0)).dx, equals(500.0));
     });
   });
 

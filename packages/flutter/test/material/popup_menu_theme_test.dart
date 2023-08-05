@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 PopupMenuThemeData _popupMenuThemeM2() {
   return PopupMenuThemeData(
     color: Colors.orange,
@@ -50,6 +52,12 @@ void main() {
     expect(const PopupMenuThemeData().hashCode, const PopupMenuThemeData().copyWith().hashCode);
   });
 
+  test('PopupMenuThemeData lerp special cases', () {
+    expect(PopupMenuThemeData.lerp(null, null, 0), null);
+    const PopupMenuThemeData data = PopupMenuThemeData();
+    expect(identical(PopupMenuThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('PopupMenuThemeData null fields by default', () {
     const PopupMenuThemeData popupMenuTheme = PopupMenuThemeData();
     expect(popupMenuTheme.color, null);
@@ -63,7 +71,7 @@ void main() {
     expect(popupMenuTheme.mouseCursor, null);
   });
 
-  testWidgets('Default PopupMenuThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default PopupMenuThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const PopupMenuThemeData().debugFillProperties(builder);
 
@@ -75,7 +83,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('PopupMenuThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PopupMenuThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
      PopupMenuThemeData(
       color: const Color(0xFFFFFFFF),
@@ -110,7 +118,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Passing no PopupMenuThemeData returns defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Passing no PopupMenuThemeData returns defaults', (WidgetTester tester) async {
     final Key popupButtonKey = UniqueKey();
     final Key popupButtonApp = UniqueKey();
     final Key enabledPopupItemKey = UniqueKey();
@@ -140,6 +148,13 @@ void main() {
                       key: disabledPopupItemKey,
                       enabled: false,
                       child: const Text('Disabled PopupMenuItem'),
+                    ),
+                    const CheckedPopupMenuItem<void>(
+                      child: Text('Unchecked item'),
+                    ),
+                    const CheckedPopupMenuItem<void>(
+                      checked: true,
+                      child: Text('Checked item'),
                     ),
                   ];
                 },
@@ -173,22 +188,23 @@ void main() {
     /// [PopupMenuItem] specified above, so by finding the last descendent of
     /// popupItemKey that is of type DefaultTextStyle, this code retrieves the
     /// built [PopupMenuItem].
-    final DefaultTextStyle enabledText = tester.widget<DefaultTextStyle>(
+    DefaultTextStyle popupMenuItemLabel = tester.widget<DefaultTextStyle>(
       find.descendant(
         of: find.byKey(enabledPopupItemKey),
         matching: find.byType(DefaultTextStyle),
       ).last,
     );
-    expect(enabledText.style.fontFamily, 'Roboto');
-    expect(enabledText.style.color, theme.colorScheme.onSurface);
+    expect(popupMenuItemLabel.style.fontFamily, 'Roboto');
+    expect(popupMenuItemLabel.style.color, theme.colorScheme.onSurface);
+
     /// Test disabled text color
-    final DefaultTextStyle disabledText = tester.widget<DefaultTextStyle>(
+    popupMenuItemLabel = tester.widget<DefaultTextStyle>(
       find.descendant(
         of: find.byKey(disabledPopupItemKey),
         matching: find.byType(DefaultTextStyle),
       ).last,
     );
-    expect(disabledText.style.color, theme.colorScheme.onSurface.withOpacity(0.38));
+    expect(popupMenuItemLabel.style.color, theme.colorScheme.onSurface.withOpacity(0.38));
 
     final Offset topLeftButton = tester.getTopLeft(find.byType(PopupMenuButton<void>));
     final Offset topLeftMenu = tester.getTopLeft(find.byWidget(button));
@@ -209,9 +225,17 @@ void main() {
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       SystemMouseCursors.click,
     );
+
+    // Test unchecked CheckedPopupMenuItem label.
+    ListTile listTile = tester.widget<ListTile>(find.byType(ListTile).first);
+    expect(listTile.titleTextStyle?.color, theme.colorScheme.onSurface);
+
+    // Test checked CheckedPopupMenuItem label.
+    listTile = tester.widget<ListTile>(find.byType(ListTile).last);
+    expect(listTile.titleTextStyle?.color, theme.colorScheme.onSurface);
   });
 
-  testWidgets('Popup menu uses values from PopupMenuThemeData', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Popup menu uses values from PopupMenuThemeData', (WidgetTester tester) async {
     final PopupMenuThemeData popupMenuTheme = _popupMenuThemeM3();
     final Key popupButtonKey = UniqueKey();
     final Key popupButtonApp = UniqueKey();
@@ -243,6 +267,13 @@ void main() {
                     onTap: () { },
                     child: const Text('enabled'),
                   ),
+                  const CheckedPopupMenuItem<Object>(
+                    child: Text('Unchecked item'),
+                  ),
+                  const CheckedPopupMenuItem<Object>(
+                    checked: true,
+                    child: Text('Checked item'),
+                  ),
                 ];
               },
             ),
@@ -270,25 +301,25 @@ void main() {
     expect(button.shape, const BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))));
     expect(button.elevation, 12.0);
 
-    final DefaultTextStyle enabledText = tester.widget<DefaultTextStyle>(
+    DefaultTextStyle popupMenuItemLabel = tester.widget<DefaultTextStyle>(
       find.descendant(
         of: find.byKey(enabledPopupItemKey),
         matching: find.byType(DefaultTextStyle),
       ).last,
     );
     expect(
-      enabledText.style,
+      popupMenuItemLabel.style,
       popupMenuTheme.labelTextStyle?.resolve(enabled),
     );
     /// Test disabled text color
-    final DefaultTextStyle disabledText = tester.widget<DefaultTextStyle>(
+    popupMenuItemLabel = tester.widget<DefaultTextStyle>(
       find.descendant(
         of: find.byKey(disabledPopupItemKey),
         matching: find.byType(DefaultTextStyle),
       ).last,
     );
     expect(
-      disabledText.style,
+      popupMenuItemLabel.style,
       popupMenuTheme.labelTextStyle?.resolve(disabled),
     );
 
@@ -307,9 +338,17 @@ void main() {
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       popupMenuTheme.mouseCursor?.resolve(enabled),
     );
+
+    // Test unchecked CheckedPopupMenuItem label.
+    ListTile listTile = tester.widget<ListTile>(find.byType(ListTile).first);
+    expect(listTile.titleTextStyle, popupMenuTheme.labelTextStyle?.resolve(enabled));
+
+    // Test checked CheckedPopupMenuItem label.
+    listTile = tester.widget<ListTile>(find.byType(ListTile).last);
+    expect(listTile.titleTextStyle, popupMenuTheme.labelTextStyle?.resolve(enabled));
   });
 
-  testWidgets('Popup menu widget properties take priority over theme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Popup menu widget properties take priority over theme', (WidgetTester tester) async {
     final PopupMenuThemeData popupMenuTheme = _popupMenuThemeM3();
     final Key popupButtonKey = UniqueKey();
     final Key popupButtonApp = UniqueKey();
@@ -346,6 +385,11 @@ void main() {
                     mouseCursor: cursor,
                     child: const Text('Example'),
                   ),
+                  CheckedPopupMenuItem<void>(
+                    checked: true,
+                    labelTextStyle: MaterialStateProperty.all<TextStyle>(textStyle),
+                    child: const Text('Checked item'),
+                  )
                 ];
               },
             ),
@@ -391,18 +435,23 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byKey(popupItemKey)));
     await tester.pumpAndSettle();
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), cursor);
+
+    // Test CheckedPopupMenuItem label.
+    final ListTile listTile = tester.widget<ListTile>(find.byType(ListTile).first);
+    expect(listTile.titleTextStyle, textStyle);
   });
 
   group('Material 2', () {
-    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
-    // is turned on by default, these tests can be removed.
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
 
-    testWidgets('Passing no PopupMenuThemeData returns defaults', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Passing no PopupMenuThemeData returns defaults', (WidgetTester tester) async {
      final Key popupButtonKey = UniqueKey();
       final Key popupButtonApp = UniqueKey();
       final Key enabledPopupItemKey = UniqueKey();
       final Key disabledPopupItemKey = UniqueKey();
-      final ThemeData theme = ThemeData();
+      final ThemeData theme = ThemeData(useMaterial3: false);
 
       await tester.pumpWidget(MaterialApp(
         theme: theme,
@@ -496,7 +545,7 @@ void main() {
       );
     });
 
-    testWidgets('Popup menu uses values from PopupMenuThemeData', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Popup menu uses values from PopupMenuThemeData', (WidgetTester tester) async {
       final PopupMenuThemeData popupMenuTheme = _popupMenuThemeM2();
       final Key popupButtonKey = UniqueKey();
       final Key popupButtonApp = UniqueKey();
@@ -504,7 +553,7 @@ void main() {
       final Key disabledPopupItemKey = UniqueKey();
 
       await tester.pumpWidget(MaterialApp(
-        theme: ThemeData(popupMenuTheme: popupMenuTheme),
+        theme: ThemeData(popupMenuTheme: popupMenuTheme, useMaterial3: false),
         key: popupButtonApp,
         home: Material(
           child: Column(
@@ -582,7 +631,7 @@ void main() {
       );
     });
 
-    testWidgets('Popup menu widget properties take priority over theme', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Popup menu widget properties take priority over theme', (WidgetTester tester) async {
       final PopupMenuThemeData popupMenuTheme = _popupMenuThemeM2();
       final Key popupButtonKey = UniqueKey();
       final Key popupButtonApp = UniqueKey();

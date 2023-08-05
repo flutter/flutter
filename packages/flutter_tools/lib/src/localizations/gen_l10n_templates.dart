@@ -157,6 +157,9 @@ const String selectVariableTemplate = '''
       },
     );''';
 
+const String dateVariableTemplate = '''
+    String @(varName) = intl.DateFormat.@(formatType)(localeName).format(@(argument));''';
+
 const String classFileTemplate = '''
 @(header)@(requiresIntlImport)import '@(fileName)';
 
@@ -179,14 +182,14 @@ class @(class) extends @(baseLanguageClassName) {
 ''';
 
 const String baseClassGetterTemplate = '''
-  /// @(comment)
+@(comment)
   ///
 @(templateLocaleTranslationComment)
   String get @(name);
 ''';
 
 const String baseClassMethodTemplate = '''
-  /// @(comment)
+@(comment)
   ///
 @(templateLocaleTranslationComment)
   String @(name)(@(parameters));

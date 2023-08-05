@@ -36,9 +36,9 @@ import 'icon_theme_data.dart';
 /// ![The following code snippet would generate a row of icons consisting of a pink heart, a green musical note, and a blue umbrella, each progressively bigger than the last.](https://flutter.github.io/assets-for-api-docs/assets/widgets/icon.png)
 ///
 /// ```dart
-/// Row(
+/// const Row(
 ///   mainAxisAlignment: MainAxisAlignment.spaceAround,
-///   children: const <Widget>[
+///   children: <Widget>[
 ///     Icon(
 ///       Icons.favorite,
 ///       color: Colors.pink,
@@ -280,6 +280,7 @@ class Icon extends StatelessWidget {
           fontSize: iconSize,
           fontFamily: icon!.fontFamily,
           package: icon!.fontPackage,
+          fontFamilyFallback: icon!.fontFamilyFallback,
           shadows: iconShadows,
         ),
       ),
@@ -294,7 +295,6 @@ class Icon extends StatelessWidget {
             transformHitTests: false,
             child: iconWidget,
           );
-          break;
         case TextDirection.ltr:
           break;
       }

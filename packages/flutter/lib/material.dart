@@ -10,18 +10,16 @@
 ///
 /// See also:
 ///
-///  * [flutter.dev/widgets/material](https://flutter.dev/widgets/material)
+///  * [docs.flutter.dev/ui/widgets/material](https://docs.flutter.dev/ui/widgets/material)
 ///    for a catalog of commonly-used Material component widgets.
-///  * [material.io/design](https://material.io/design/)
-///    for an introduction to Material Design.
-///  * [material.io/components](https://material.io/components?platform=flutter)
-///    for the Material 2 specification.
-///  * [m3.material.io](https://m3.material.io)
-///    for the Material 3 specification.
+///  * [m3.material.io](https://m3.material.io/) for the Material 3 specification
+///  * [m2.material.io](https://m2.material.io/) for the Material 2 specification
 library material;
 
 export 'src/material/about.dart';
+export 'src/material/action_buttons.dart';
 export 'src/material/action_chip.dart';
+export 'src/material/action_icons_theme.dart';
 export 'src/material/adaptive_text_selection_toolbar.dart';
 export 'src/material/animated_icons.dart';
 export 'src/material/app.dart';
@@ -29,7 +27,6 @@ export 'src/material/app_bar.dart';
 export 'src/material/app_bar_theme.dart';
 export 'src/material/arc.dart';
 export 'src/material/autocomplete.dart';
-export 'src/material/back_button.dart';
 export 'src/material/badge.dart';
 export 'src/material/badge_theme.dart';
 export 'src/material/banner.dart';
@@ -65,6 +62,7 @@ export 'src/material/data_table_source.dart';
 export 'src/material/data_table_theme.dart';
 export 'src/material/date.dart';
 export 'src/material/date_picker.dart';
+export 'src/material/date_picker_theme.dart';
 export 'src/material/debug.dart';
 export 'src/material/desktop_text_selection.dart';
 export 'src/material/desktop_text_selection_toolbar.dart';
@@ -124,6 +122,7 @@ export 'src/material/menu_button_theme.dart';
 export 'src/material/menu_style.dart';
 export 'src/material/menu_theme.dart';
 export 'src/material/mergeable_material.dart';
+export 'src/material/motion.dart';
 export 'src/material/navigation_bar.dart';
 export 'src/material/navigation_bar_theme.dart';
 export 'src/material/navigation_drawer.dart';
@@ -150,6 +149,9 @@ export 'src/material/scaffold.dart';
 export 'src/material/scrollbar.dart';
 export 'src/material/scrollbar_theme.dart';
 export 'src/material/search.dart';
+export 'src/material/search_anchor.dart';
+export 'src/material/search_bar_theme.dart';
+export 'src/material/search_view_theme.dart';
 export 'src/material/segmented_button.dart';
 export 'src/material/segmented_button_theme.dart';
 export 'src/material/selectable_text.dart';
@@ -159,6 +161,8 @@ export 'src/material/slider.dart';
 export 'src/material/slider_theme.dart';
 export 'src/material/snack_bar.dart';
 export 'src/material/snack_bar_theme.dart';
+export 'src/material/spell_check_suggestions_toolbar.dart';
+export 'src/material/spell_check_suggestions_toolbar_layout_delegate.dart';
 export 'src/material/stepper.dart';
 export 'src/material/switch.dart';
 export 'src/material/switch_list_tile.dart';

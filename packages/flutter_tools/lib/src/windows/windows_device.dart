@@ -49,8 +49,7 @@ class WindowsDevice extends DesktopDevice {
   }
 
   @override
-  Future<void> buildForDevice(
-    covariant WindowsApp package, {
+  Future<void> buildForDevice({
     String? mainPath,
     required BuildInfo buildInfo,
   }) async {
@@ -62,8 +61,8 @@ class WindowsDevice extends DesktopDevice {
   }
 
   @override
-  String executablePathForDevice(covariant WindowsApp package, BuildMode buildMode) {
-    return package.executable(buildMode);
+  String executablePathForDevice(covariant WindowsApp package, BuildInfo buildInfo) {
+    return package.executable(buildInfo.mode);
   }
 }
 

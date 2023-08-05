@@ -2,36 +2,32 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [GlowingOverscrollIndicator].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [GlowingOverscrollIndicator].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const GlowingOverscrollIndicatorExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class GlowingOverscrollIndicatorExampleApp extends StatelessWidget {
+  const GlowingOverscrollIndicatorExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: _title,
       home: Scaffold(
-        appBar: AppBar(title: const Text(_title)),
-        body: const MyStatelessWidget(),
+        appBar: AppBar(title: const Text('GlowingOverscrollIndicator Sample')),
+        body: const GlowingOverscrollIndicatorExample(),
       ),
     );
   }
 }
 
-class MyStatelessWidget extends StatelessWidget {
-  const MyStatelessWidget({super.key});
+class GlowingOverscrollIndicatorExample extends StatelessWidget {
+  const GlowingOverscrollIndicatorExample({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final double leadingPaintOffset =
-        MediaQuery.of(context).padding.top + AppBar().preferredSize.height;
+    final double leadingPaintOffset = MediaQuery.of(context).padding.top + AppBar().preferredSize.height;
     return NotificationListener<OverscrollIndicatorNotification>(
       onNotification: (OverscrollIndicatorNotification notification) {
         if (notification.leading) {

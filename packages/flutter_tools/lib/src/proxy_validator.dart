@@ -34,7 +34,7 @@ class ProxyValidator extends DoctorValidator {
   Future<ValidationResult> validate() async {
     if (_httpProxy.isEmpty) {
       return const ValidationResult(
-          ValidationType.installed, <ValidationMessage>[]);
+          ValidationType.success, <ValidationMessage>[]);
     }
 
     final List<ValidationMessage> messages = <ValidationMessage>[
@@ -56,7 +56,7 @@ class ProxyValidator extends DoctorValidator {
       (ValidationMessage msg) => msg.isHint || msg.isError);
 
     return ValidationResult(
-      hasIssues ? ValidationType.partial : ValidationType.installed,
+      hasIssues ? ValidationType.partial : ValidationType.success,
       messages,
     );
   }

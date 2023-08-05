@@ -37,11 +37,7 @@ import 'theme.dart';
 /// ### Background Colors
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/cupertino/cupertino_background_colors.png)
 ///
-class CupertinoColors {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  CupertinoColors._();
-
+abstract final class CupertinoColors {
   /// iOS 13's default blue color. Used to indicate active elements such as
   /// buttons, selected tabs and your own chat bubbles.
   ///
@@ -144,6 +140,21 @@ class CupertinoColors {
     darkHighContrastColor: Color.fromARGB(255, 48, 219, 91),
   );
 
+  /// A mint color that can adapt to the given [BuildContext].
+  ///
+  /// See also:
+  ///
+  ///  * [UIColor.systemMint](https://developer.apple.com/documentation/uikit/uicolor/3852741-systemmint),
+  ///    the `UIKit` equivalent.
+  static const CupertinoDynamicColor systemMint =
+      CupertinoDynamicColor.withBrightnessAndContrast(
+    debugLabel: 'systemMint',
+    color: Color.fromARGB(255, 0, 199, 190),
+    darkColor: Color.fromARGB(255, 99, 230, 226),
+    highContrastColor: Color.fromARGB(255, 12, 129, 123),
+    darkHighContrastColor: Color.fromARGB(255, 102, 212, 207),
+  );
+
   /// An indigo color that can adapt to the given [BuildContext].
   ///
   /// See also:
@@ -186,6 +197,21 @@ class CupertinoColors {
     darkHighContrastColor: Color.fromARGB(255, 255, 100, 130),
   );
 
+  /// A brown color that can adapt to the given [BuildContext].
+  ///
+  /// See also:
+  ///
+  ///  * [UIColor.systemBrown](https://developer.apple.com/documentation/uikit/uicolor/3173142-systembrown),
+  ///    the `UIKit` equivalent.
+  static const CupertinoDynamicColor systemBrown =
+      CupertinoDynamicColor.withBrightnessAndContrast(
+    debugLabel: 'systemBrown',
+    color: Color.fromARGB(255, 162, 132, 94),
+    darkColor: Color.fromARGB(255, 172, 142, 104),
+    highContrastColor: Color.fromARGB(255, 127, 101, 69),
+    darkHighContrastColor: Color.fromARGB(255, 181, 148, 105),
+  );
+
   /// A purple color that can adapt to the given [BuildContext].
   ///
   /// See also:
@@ -223,6 +249,21 @@ class CupertinoColors {
   static const CupertinoDynamicColor systemTeal = CupertinoDynamicColor.withBrightnessAndContrast(
     debugLabel: 'systemTeal',
     color: Color.fromARGB(255, 90, 200, 250),
+    darkColor: Color.fromARGB(255, 100, 210, 255),
+    highContrastColor: Color.fromARGB(255, 0, 113, 164),
+    darkHighContrastColor: Color.fromARGB(255, 112, 215, 255),
+  );
+
+  /// A cyan color that can adapt to the given [BuildContext].
+  ///
+  /// See also:
+  ///
+  ///  * [UIColor.systemCyan](https://developer.apple.com/documentation/uikit/uicolor/3852740-systemcyan),
+  ///    the `UIKit` equivalent.
+  static const CupertinoDynamicColor systemCyan =
+      CupertinoDynamicColor.withBrightnessAndContrast(
+    debugLabel: 'systemCyan',
+    color: Color.fromARGB(255, 50, 173, 230),
     darkColor: Color.fromARGB(255, 100, 210, 255),
     highContrastColor: Color.fromARGB(255, 0, 113, 164),
     darkHighContrastColor: Color.fromARGB(255, 112, 215, 255),
@@ -780,16 +821,7 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
     this.darkHighContrastElevatedColor,
     this._debugResolveContext,
     this._debugLabel,
-  ) : assert(color != null),
-      assert(darkColor != null),
-      assert(highContrastColor != null),
-      assert(darkHighContrastColor != null),
-      assert(elevatedColor != null),
-      assert(darkElevatedColor != null),
-      assert(highContrastElevatedColor != null),
-      assert(darkHighContrastElevatedColor != null),
-      assert(_effectiveColor != null),
-      // The super constructor has to be called with a dummy value in order to mark
+  ) : // The super constructor has to be called with a dummy value in order to mark
       // this constructor const.
       // The field `value` is overridden in the class implementation.
       super(0);
@@ -908,7 +940,6 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
   ///  * [maybeResolve], which is similar to this function, but will allow a
   ///    null `resolvable` color.
   static Color resolve(Color resolvable, BuildContext context) {
-    assert(context != null);
     return (resolvable is CupertinoDynamicColor)
       ? resolvable.resolveFrom(context)
       : resolvable;
@@ -931,7 +962,6 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
     if (resolvable == null) {
       return null;
     }
-    assert(context != null);
     return (resolvable is CupertinoDynamicColor)
       ? resolvable.resolveFrom(context)
       : resolvable;
@@ -990,11 +1020,11 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
   CupertinoDynamicColor resolveFrom(BuildContext context) {
     Brightness brightness = Brightness.light;
     if (_isPlatformBrightnessDependent) {
-      brightness =  CupertinoTheme.maybeBrightnessOf(context) ?? Brightness.light;
+      brightness = CupertinoTheme.maybeBrightnessOf(context) ?? Brightness.light;
     }
     bool isHighContrastEnabled = false;
     if (_isHighContrastDependent) {
-      isHighContrastEnabled = MediaQuery.maybeOf(context)?.highContrast ?? false;
+      isHighContrastEnabled = MediaQuery.maybeHighContrastOf(context) ?? false;
     }
 
     final CupertinoUserInterfaceLevelData level = _isInterfaceElevationDependent
@@ -1007,20 +1037,15 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
         switch (level) {
           case CupertinoUserInterfaceLevelData.base:
             resolved = isHighContrastEnabled ? highContrastColor : color;
-            break;
           case CupertinoUserInterfaceLevelData.elevated:
             resolved = isHighContrastEnabled ? highContrastElevatedColor : elevatedColor;
-            break;
         }
-        break;
       case Brightness.dark:
         switch (level) {
           case CupertinoUserInterfaceLevelData.base:
             resolved = isHighContrastEnabled ? darkHighContrastColor : darkColor;
-            break;
           case CupertinoUserInterfaceLevelData.elevated:
             resolved = isHighContrastEnabled ? darkHighContrastElevatedColor : darkElevatedColor;
-            break;
         }
     }
 

@@ -21,5 +21,8 @@
   "selectAllButtonLabel": "Hamısını seçin",
   "tabSemanticsLabel": "Tab $tabIndex/$tabCount",
   "modalBarrierDismissLabel": "İmtina edin",
-  "searchTextFieldPlaceholderLabel": "Axtarın"
+  "searchTextFieldPlaceholderLabel": "Axtarın",
+  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "menuDismissLabel": "Dismiss menu",
+  "lookUpButtonLabel": "Look Up"
 }

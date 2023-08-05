@@ -33,6 +33,8 @@ const double _kNavBarShowLargeTitleThreshold = 10.0;
 
 const double _kNavBarEdgePadding = 16.0;
 
+const double _kNavBarBottomPadding = 8.0;
+
 const double _kNavBarBackButtonTapWidth = 50.0;
 
 /// Title text transfer fade.
@@ -142,13 +144,23 @@ Widget _wrapWithBackground({
     switch (newBrightness) {
       case Brightness.dark:
         overlayStyle = SystemUiOverlayStyle.light;
-        break;
       case Brightness.light:
         overlayStyle = SystemUiOverlayStyle.dark;
-        break;
     }
+    // [SystemUiOverlayStyle.light] and [SystemUiOverlayStyle.dark] set some system
+    // navigation bar properties,
+    // Before https://github.com/flutter/flutter/pull/104827 those properties
+    // had no effect, now they are used if there is no AnnotatedRegion on the
+    // bottom of the screen.
+    // For backward compatibility, create a `SystemUiOverlayStyle` without the
+    // system navigation bar properties.
     result = AnnotatedRegion<SystemUiOverlayStyle>(
-      value: overlayStyle,
+      value: SystemUiOverlayStyle(
+        statusBarColor: overlayStyle.statusBarColor,
+        statusBarBrightness: overlayStyle.statusBarBrightness,
+        statusBarIconBrightness: overlayStyle.statusBarIconBrightness,
+        systemStatusBarContrastEnforced: overlayStyle.systemStatusBarContrastEnforced,
+      ),
       child: result,
     );
   }
@@ -217,12 +229,9 @@ bool _isTransitionable(BuildContext context) {
 /// behavior for multiple navigation bars per route.
 ///
 /// When used in a [CupertinoPageScaffold], [CupertinoPageScaffold.navigationBar]
-/// has its text scale factor set to 1.0 and does not respond to text scale factor
-/// changes from the operating system, to match the native iOS behavior. To override
-/// this behavior, wrap each of the `navigationBar`'s components inside a [MediaQuery]
-/// with the desired [MediaQueryData.textScaleFactor] value. The text scale factor
-/// value from the operating system can be retrieved in many ways, such as querying
-/// [MediaQuery.textScaleFactorOf] against [CupertinoApp]'s [BuildContext].
+/// disables text scaling to match the native iOS behavior. To override
+/// this behavior, wrap each of the `navigationBar`'s components inside a
+/// [MediaQuery] with the desired [TextScaler].
 ///
 /// {@tool dartpad}
 /// This example shows a [CupertinoNavigationBar] placed in a [CupertinoPageScaffold].
@@ -255,15 +264,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
     this.padding,
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
-  }) : assert(automaticallyImplyLeading != null),
-       assert(automaticallyImplyMiddle != null),
-       assert(transitionBetweenRoutes != null),
-       assert(
-         heroTag != null,
-         'heroTag cannot be null. Use transitionBetweenRoutes = false to '
-         'disable Hero transition on this navigation bar.',
-       ),
-       assert(
+  }) : assert(
          !transitionBetweenRoutes || identical(heroTag, _defaultHeroTag),
          'Cannot specify a heroTag override if this navigation bar does not '
          'transition due to transitionBetweenRoutes = false.',
@@ -551,13 +552,10 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 /// Use [transitionBetweenRoutes] or [heroTag] to customize the transition
 /// behavior for multiple navigation bars per route.
 ///
-/// [CupertinoSliverNavigationBar] has its text scale factor set to 1.0 by default
-/// and does not respond to text scale factor changes from the operating system,
-/// to match the native iOS behavior. To override this behavior, wrap each of the
+/// [CupertinoSliverNavigationBar] by default disables text scaling to match the
+/// native iOS behavior. To override this behavior, wrap each of the
 /// [CupertinoSliverNavigationBar]'s components inside a [MediaQuery] with the
-/// desired [MediaQueryData.textScaleFactor] value. The text scale factor value
-/// from the operating system can be retrieved in many ways, such as querying
-/// [MediaQuery.textScaleFactorOf] against [CupertinoApp]'s [BuildContext].
+/// desired [TextScaler].
 ///
 /// The [stretch] parameter determines whether the nav bar should stretch to
 /// fill the over-scroll area. The nav bar can still expand and contract as the
@@ -597,10 +595,8 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
     this.stretch = false,
-  }) : assert(automaticallyImplyLeading != null),
-       assert(automaticallyImplyTitle != null),
-       assert(
-         automaticallyImplyTitle == true || largeTitle != null,
+  }) : assert(
+         automaticallyImplyTitle || largeTitle != null,
          'No largeTitle has been provided but automaticallyImplyTitle is also '
          'false. Either provide a largeTitle or set automaticallyImplyTitle to '
          'true.',
@@ -739,8 +735,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
       large: true,
     );
 
-    return MediaQuery(
-      data: MediaQuery.of(context).copyWith(textScaleFactor: 1),
+    return MediaQuery.withNoTextScaling(
       child: SliverPersistentHeader(
         pinned: true, // iOS navigation bars are always pinned.
         delegate: _LargeTitleNavigationBarSliverDelegate(
@@ -754,7 +749,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
           actionsForegroundColor: CupertinoTheme.of(context).primaryColor,
           transitionBetweenRoutes: widget.transitionBetweenRoutes,
           heroTag: widget.heroTag,
-          persistentHeight: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
+          persistentHeight: _kNavBarPersistentHeight + MediaQuery.paddingOf(context).top,
           alwaysShowMiddle: widget.alwaysShowMiddle && widget.middle != null,
           stretchConfiguration: widget.stretch ? OverScrollHeaderStretchConfiguration() : null,
         ),
@@ -779,9 +774,7 @@ class _LargeTitleNavigationBarSliverDelegate
     required this.persistentHeight,
     required this.alwaysShowMiddle,
     required this.stretchConfiguration,
-  }) : assert(persistentHeight != null),
-       assert(alwaysShowMiddle != null),
-       assert(transitionBetweenRoutes != null);
+  });
 
   final _NavigationBarStaticComponentsKeys keys;
   final _NavigationBarStaticComponents components;
@@ -833,31 +826,27 @@ class _LargeTitleNavigationBarSliverDelegate
               right: 0.0,
               bottom: 0.0,
               child: ClipRect(
-                // The large title starts at the persistent bar.
-                // It's aligned with the bottom of the sliver and expands clipped
-                // and behind the persistent bar.
-                child: OverflowBox(
-                  minHeight: 0.0,
-                  maxHeight: double.infinity,
-                  alignment: AlignmentDirectional.bottomStart,
-                  child: Padding(
-                    padding: const EdgeInsetsDirectional.only(
-                      start: _kNavBarEdgePadding,
-                      bottom: 8.0, // Bottom has a different padding.
-                    ),
-                    child: SafeArea(
-                      top: false,
-                      bottom: false,
-                      child: AnimatedOpacity(
-                        opacity: showLargeTitle ? 1.0 : 0.0,
-                        duration: _kNavBarTitleFadeDuration,
-                        child: Semantics(
-                          header: true,
-                          child: DefaultTextStyle(
-                            style: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            child: components.largeTitle!,
+                child: Padding(
+                  padding: const EdgeInsetsDirectional.only(
+                    start: _kNavBarEdgePadding,
+                    bottom: _kNavBarBottomPadding
+                  ),
+                  child: SafeArea(
+                    top: false,
+                    bottom: false,
+                    child: AnimatedOpacity(
+                      opacity: showLargeTitle ? 1.0 : 0.0,
+                      duration: _kNavBarTitleFadeDuration,
+                      child: Semantics(
+                        header: true,
+                        child: DefaultTextStyle(
+                          style: CupertinoTheme.of(context)
+                              .textTheme
+                              .navLargeTitleTextStyle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          child: _LargeTitle(
+                            child: components.largeTitle,
                           ),
                         ),
                       ),
@@ -899,7 +888,7 @@ class _LargeTitleNavigationBarSliverDelegate
         titleTextStyle: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
         largeTitleTextStyle: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle,
         border: border,
-        hasUserMiddle: userMiddle != null,
+        hasUserMiddle: userMiddle != null && (alwaysShowMiddle || !showLargeTitle),
         largeExpanded: showLargeTitle,
         child: navBar,
       ),
@@ -918,6 +907,123 @@ class _LargeTitleNavigationBarSliverDelegate
         || persistentHeight != oldDelegate.persistentHeight
         || alwaysShowMiddle != oldDelegate.alwaysShowMiddle
         || heroTag != oldDelegate.heroTag;
+  }
+}
+
+/// The large title of the navigation bar.
+///
+/// Magnifies on over-scroll when [CupertinoSliverNavigationBar.stretch]
+/// parameter is true.
+class _LargeTitle extends SingleChildRenderObjectWidget {
+  const _LargeTitle({ super.child });
+
+  @override
+  _RenderLargeTitle createRenderObject(BuildContext context) {
+    return _RenderLargeTitle(alignment: AlignmentDirectional.bottomStart.resolve(Directionality.of(context)));
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderLargeTitle renderObject) {
+    renderObject.alignment = AlignmentDirectional.bottomStart.resolve(Directionality.of(context));
+  }
+}
+
+class _RenderLargeTitle extends RenderShiftedBox {
+  _RenderLargeTitle({
+    required Alignment alignment,
+  })  : _alignment = alignment,
+        super(null);
+
+  Alignment get alignment => _alignment;
+  Alignment _alignment;
+  set alignment(Alignment value) {
+    if (_alignment == value) {
+      return;
+    }
+    _alignment = value;
+
+    markNeedsLayout();
+  }
+
+  double _scale = 1.0;
+
+  @override
+  void performLayout() {
+    final RenderBox? child = this.child;
+    Size childSize = Size.zero;
+
+    size = constraints.biggest;
+
+    if (child == null) {
+      return;
+    }
+
+    final BoxConstraints childConstraints = constraints.widthConstraints().loosen();
+    child.layout(childConstraints, parentUsesSize: true);
+
+    final double maxScale = child.size.width != 0.0
+      ? clampDouble(constraints.maxWidth / child.size.width, 1.0, 1.1)
+      : 1.1;
+    _scale = clampDouble(
+      1.0 + (constraints.maxHeight - (_kNavBarLargeTitleHeightExtension - _kNavBarBottomPadding)) / (_kNavBarLargeTitleHeightExtension - _kNavBarBottomPadding) * 0.03,
+      1.0,
+      maxScale,
+    );
+
+    childSize = child.size * _scale;
+    final BoxParentData childParentData = child.parentData! as BoxParentData;
+    childParentData.offset = alignment.alongOffset(size - childSize as Offset);
+  }
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    assert(child == this.child);
+
+    super.applyPaintTransform(child, transform);
+
+    transform.scale(_scale, _scale);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final RenderBox? child = this.child;
+
+    if (child == null) {
+      layer = null;
+    } else {
+      final BoxParentData childParentData = child.parentData! as BoxParentData;
+
+      layer = context.pushTransform(
+        needsCompositing,
+        offset + childParentData.offset,
+        Matrix4.diagonal3Values(_scale, _scale, 1.0),
+        (PaintingContext context, Offset offset) => context.paintChild(child, offset),
+        oldLayer: layer as TransformLayer?,
+      );
+    }
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    final RenderBox? child = this.child;
+
+    if (child == null) {
+      return false;
+    }
+
+    final Offset childOffset = (child.parentData! as BoxParentData).offset;
+
+    final Matrix4 transform = Matrix4.identity()
+      ..scale(1.0/_scale, 1.0/_scale, 1.0)
+      ..translate(-childOffset.dx, -childOffset.dy);
+
+    return result.addWithRawTransform(
+      transform: transform,
+      position: position,
+      hitTest: (BoxHitTestResult result, Offset transformed) {
+        return child.hitTest(result, position: transformed);
+      }
+    );
   }
 }
 
@@ -989,7 +1095,7 @@ class _PersistentNavigationBar extends StatelessWidget {
     }
 
     return SizedBox(
-      height: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
+      height: _kNavBarPersistentHeight + MediaQuery.paddingOf(context).top,
       child: SafeArea(
         bottom: false,
         child: paddedToolbar,
@@ -1429,7 +1535,6 @@ class _BackChevron extends StatelessWidget {
           transformHitTests: false,
           child: iconWidget,
         );
-        break;
       case TextDirection.ltr:
         break;
     }
@@ -1453,7 +1558,7 @@ class _BackLabel extends StatelessWidget {
   // null here and unused.
   Widget _buildPreviousTitleWidget(BuildContext context, String? previousTitle, Widget? child) {
     if (previousTitle == null) {
-      return const SizedBox(height: 0.0, width: 0.0);
+      return const SizedBox.shrink();
     }
 
     Text textWidget = Text(
@@ -1487,7 +1592,7 @@ class _BackLabel extends StatelessWidget {
         builder: _buildPreviousTitleWidget,
       );
     } else {
-      return const SizedBox(height: 0.0, width: 0.0);
+      return const SizedBox.shrink();
     }
   }
 }
@@ -1511,9 +1616,7 @@ class _TransitionableNavigationBar extends StatelessWidget {
     required this.hasUserMiddle,
     required this.largeExpanded,
     required this.child,
-  }) : assert(componentsKeys != null),
-       assert(largeExpanded != null),
-       assert(!largeExpanded || largeTitleTextStyle != null),
+  }) : assert(!largeExpanded || largeTitleTextStyle != null),
        super(key: componentsKeys.navBarBoxKey);
 
   final _NavigationBarStaticComponentsKeys componentsKeys;
@@ -1655,12 +1758,15 @@ class _NavigationBarTransition extends StatelessWidget {
     // The actual outer box is big enough to contain both the bottom and top
     // navigation bars. It's not a direct Rect lerp because some components
     // can actually be outside the linearly lerp'ed Rect in the middle of
-    // the animation, such as the topLargeTitle.
-    return SizedBox(
-      height: math.max(heightTween.begin!, heightTween.end!) + MediaQuery.of(context).padding.top,
-      width: double.infinity,
-      child: Stack(
-        children: children,
+    // the animation, such as the topLargeTitle. The text scaling is disabled to
+    // avoid odd transitions between pages.
+    return MediaQuery.withNoTextScaling(
+      child: SizedBox(
+        height: math.max(heightTween.begin!, heightTween.end!) + MediaQuery.paddingOf(context).top,
+        width: double.infinity,
+        child: Stack(
+          children: children,
+        ),
       ),
     );
   }
@@ -1981,7 +2087,7 @@ class _NavigationBarComponentsTransition {
       return null;
     }
 
-    if (bottomLargeTitle != null && topBackLabel != null) {
+    if (topBackLabel != null) {
       // Move from current position to the top page's back label position.
       return slideFromLeadingEdge(
         fromKey: bottomComponents.largeTitleKey,
@@ -2008,7 +2114,7 @@ class _NavigationBarComponentsTransition {
       );
     }
 
-    if (bottomLargeTitle != null && topLeading != null) {
+    if (topLeading != null) {
       // Unlike bottom middle, the bottom large title moves when it can't
       // transition to the top back label position.
       final RelativeRect from = positionInTransitionBox(bottomComponents.largeTitleKey, from: bottomNavBarBox);
@@ -2139,7 +2245,6 @@ class _NavigationBarComponentsTransition {
     // text is too long, the topBackLabel will say 'Back' instead of the original
     // text.
     if (bottomLargeTitle != null &&
-        topBackLabel != null &&
         bottomLargeExpanded) {
       return slideFromLeadingEdge(
         fromKey: bottomComponents.largeTitleKey,
@@ -2163,7 +2268,7 @@ class _NavigationBarComponentsTransition {
 
     // The topBackLabel always comes from the large title first if available
     // and expanded instead of middle.
-    if (bottomMiddle != null && topBackLabel != null) {
+    if (bottomMiddle != null) {
       return slideFromLeadingEdge(
         fromKey: bottomComponents.middleKey,
         fromNavBarBox: bottomNavBarBox,
@@ -2333,10 +2438,6 @@ Widget _navBarHeroFlightShuttleBuilder(
   BuildContext fromHeroContext,
   BuildContext toHeroContext,
 ) {
-  assert(animation != null);
-  assert(flightDirection != null);
-  assert(fromHeroContext != null);
-  assert(toHeroContext != null);
   assert(fromHeroContext.widget is Hero);
   assert(toHeroContext.widget is Hero);
 
@@ -2349,8 +2450,6 @@ Widget _navBarHeroFlightShuttleBuilder(
   final _TransitionableNavigationBar fromNavBar = fromHeroWidget.child as _TransitionableNavigationBar;
   final _TransitionableNavigationBar toNavBar = toHeroWidget.child as _TransitionableNavigationBar;
 
-  assert(fromNavBar.componentsKeys != null);
-  assert(toNavBar.componentsKeys != null);
 
   assert(
     fromNavBar.componentsKeys.navBarBoxKey.currentContext!.owner != null,
