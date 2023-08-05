@@ -1916,9 +1916,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   @override
   @protected
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+    final Offset effectivePosition = position - _paintOffset;
     final InlineSpan? textSpan = _textPainter.text;
     if (textSpan != null) {
-      final Offset effectivePosition = position - _paintOffset;
       final TextPosition textPosition = _textPainter.getPositionForOffset(effectivePosition);
       final Object? span = textSpan.getSpanForPosition(textPosition);
       if (span is HitTestTarget) {
@@ -1926,7 +1926,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
         return true;
       }
     }
-    return hitTestInlineChildren(result, position);
+    return hitTestInlineChildren(result, effectivePosition);
   }
 
   late TapGestureRecognizer _tap;
