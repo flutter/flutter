@@ -4,11 +4,30 @@
 
 import 'package:flutter/material.dart';
 
-class StaticPathTessellationPage extends StatelessWidget {
-  const StaticPathTessellationPage({super.key});
+class PathTessellationPage extends StatefulWidget {
+  const PathTessellationPage({super.key});
+
+  @override
+  State<PathTessellationPage> createState() => _PathTessellationPageState();
+}
+
+class _PathTessellationPageState extends State<PathTessellationPage>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller =
+        AnimationController(vsync: this, lowerBound: 1.0, upperBound: 1.3);
+    _controller.addListener(() {
+      setState(() {});
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final double scale = _controller.value;
     return SafeArea(
       child: ColoredBox(
         color: Colors.black,
@@ -24,7 +43,7 @@ class StaticPathTessellationPage extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.2),
                   ),
-                  child: IconRow(iconSize: 30 + 0.5 * (index % 10)),
+                  child: IconRow(iconSize: (30 + 0.5 * (index % 10)) * scale),
                 );
               },
               itemCount: 200,
@@ -37,17 +56,40 @@ class StaticPathTessellationPage extends StatelessWidget {
               child: Container(
                 color: Colors.black.withOpacity(0.7),
                 height: 100,
-                child: const IconRow(iconSize: 50),
+                child: IconRow(iconSize: 50.0 * scale),
               ),
             ),
             Positioned(
               bottom: 0,
               left: 0,
               right: 0,
-              child: Container(
+              child: ColoredBox(
                 color: Colors.black.withOpacity(0.7),
-                height: 100,
-                child: const IconRow(iconSize: 55),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    SizedBox(
+                      height: 100,
+                      child: IconRow(iconSize: 55.0 * scale),
+                    ),
+                    MaterialButton(
+                      textColor: Colors.white,
+                      key: const Key(
+                          'animate_button'), // this key is used by the driver test
+                      child: const Text('Animate'),
+                      onPressed: () {
+                        if (_controller.isAnimating) {
+                          _controller.stop();
+                        } else {
+                          _controller.repeat(
+                            period: const Duration(seconds: 1),
+                            reverse: true,
+                          );
+                        }
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -74,30 +116,35 @@ class IconRow extends StatelessWidget {
           dimension: iconSize,
           child: CustomPaint(
             painter: _SettingsIconPainter(),
+            willChange: true,
           ),
         ),
         SizedBox.square(
           dimension: iconSize,
           child: CustomPaint(
             painter: _CameraIconPainter(),
+            willChange: true,
           ),
         ),
         SizedBox.square(
           dimension: iconSize,
           child: CustomPaint(
             painter: _CalendarIconPainter(),
+            willChange: true,
           ),
         ),
         SizedBox.square(
           dimension: iconSize,
           child: CustomPaint(
             painter: _ConversationIconPainter(),
+            willChange: true,
           ),
         ),
         SizedBox.square(
           dimension: iconSize,
           child: CustomPaint(
             painter: _GeometryIconPainter(),
+            willChange: true,
           ),
         ),
       ],

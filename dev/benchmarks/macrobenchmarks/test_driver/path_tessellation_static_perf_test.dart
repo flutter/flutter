@@ -9,14 +9,14 @@ import 'util.dart';
 
 void main() {
   macroPerfTest(
-    'tessellation_perf',
-    kStaticPathTessellationRouteName,
+    'tessellation_perf_static',
+    kPathTessellationRouteName,
     pageDelay: const Duration(seconds: 1),
     driverOps: (FlutterDriver driver) async {
-      final SerializableFinder tabBarView = find.byValueKey('list_view');
+      final SerializableFinder listView = find.byValueKey('list_view');
       Future<void> scrollOnce(double offset) async {
         await driver.scroll(
-            tabBarView, 0.0, offset, const Duration(milliseconds: 450));
+            listView, 0.0, offset, const Duration(milliseconds: 450));
         await Future<void>.delayed(const Duration(milliseconds: 500));
       }
 

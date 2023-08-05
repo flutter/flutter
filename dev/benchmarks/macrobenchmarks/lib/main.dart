@@ -28,6 +28,7 @@ import 'src/large_images.dart';
 import 'src/list_text_layout.dart';
 import 'src/multi_widget_construction.dart';
 import 'src/opacity_peephole.dart';
+import 'src/path_tessellation.dart';
 import 'src/picture_cache.dart';
 import 'src/picture_cache_complexity_scoring.dart';
 import 'src/post_backdrop_filter.dart';
@@ -37,7 +38,6 @@ import 'src/simple_animation.dart';
 import 'src/simple_scroll.dart';
 import 'src/sliders.dart';
 import 'src/stack_size.dart';
-import 'src/static_path_tessellation.dart';
 import 'src/text.dart';
 
 const String kMacrobenchmarks = 'Macrobenchmarks';
@@ -64,7 +64,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kLargeImageChangerRouteName: (BuildContext context) => const LargeImageChangerPage(),
         kLargeImagesRouteName: (BuildContext context) => const LargeImagesPage(),
         kTextRouteName: (BuildContext context) => const TextPage(),
-        kStaticPathTessellationRouteName: (BuildContext context) => const StaticPathTessellationPage(),
+        kPathTessellationRouteName: (BuildContext context) => const PathTessellationPage(),
         kFullscreenTextRouteName: (BuildContext context) => const TextFieldPage(),
         kAnimatedPlaceholderRouteName: (BuildContext context) => const AnimatedPlaceholderPage(),
         kClipperCacheRouteName: (BuildContext context) => const ClipperCachePage(),
@@ -165,10 +165,10 @@ class HomePage extends StatelessWidget {
             },
           ),
           ElevatedButton(
-            key: const Key(kStaticPathTessellationRouteName),
-            child: const Text('Static Path Tessellation'),
+            key: const Key(kPathTessellationRouteName),
+            child: const Text('Path Tessellation'),
             onPressed: () {
-              Navigator.pushNamed(context, kStaticPathTessellationRouteName);
+              Navigator.pushNamed(context, kPathTessellationRouteName);
             },
           ),
           ElevatedButton(
