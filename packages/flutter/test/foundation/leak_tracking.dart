@@ -18,7 +18,9 @@ void _flutterEventToLeakTracker(ObjectEvent event) {
 
 void _setUpTestingWithLeakTracking() {
   _printPlatformWarningIfNeeded();
-  if (!_isPlatformSupported) return;
+  if (!_isPlatformSupported) {
+    return;
+  }
 
   LeakTracking.phase = const PhaseSettings.paused();
   LeakTracking.start(config: LeakTrackingConfig.passive());
@@ -35,22 +37,28 @@ void configureLeakTrackingTearDown({
     throw StateError('Leak tracking tear down is already configured.');
   }
   if (_isPlatformSupported) {
-    tearDownAll(() async => await _tearDownTestingWithLeakTracking(onLeaks));
+    tearDownAll(() => _tearDownTestingWithLeakTracking(onLeaks));
   }
   _tearDownConfigured = true;
 }
 
 Future<void> _tearDownTestingWithLeakTracking(LeaksCallback? onLeaks) async {
-  if (!LeakTracking.isStarted) return;
-  if (!_isPlatformSupported) return;
+  if (!LeakTracking.isStarted) {
+    return;
+  }
+  if (!_isPlatformSupported) {
+    return;
+  }
 
   MemoryAllocations.instance.removeListener(_flutterEventToLeakTracker);
   await forceGC(fullGcCycles: 3);
-  final leaks = await LeakTracking.collectLeaks();
+  final Leaks leaks = await LeakTracking.collectLeaks();
 
   LeakTracking.stop();
 
-  if (leaks.total == 0) return;
+  if (leaks.total == 0) {
+    return;
+  }
   if (onLeaks == null) {
     expect(leaks, isLeakFree);
   } else {
@@ -81,10 +89,14 @@ void testWidgetsWithLeakTracking(
   LeakTrackingTestConfig leakTrackingTestConfig =
       const LeakTrackingTestConfig(),
 }) {
-  if (!_tearDownConfigured) configureLeakTrackingTearDown();
-  if (!LeakTracking.isStarted) _setUpTestingWithLeakTracking();
+  if (!_tearDownConfigured) {
+    configureLeakTrackingTearDown();
+  }
+  if (!LeakTracking.isStarted) {
+    _setUpTestingWithLeakTracking();
+  }
 
-  final phase = PhaseSettings(
+  final PhaseSettings phase = PhaseSettings(
     name: description,
     leakDiagnosticConfig: leakTrackingTestConfig.leakDiagnosticConfig,
     notGCedAllowList: leakTrackingTestConfig.notGCedAllowList,

@@ -8,37 +8,37 @@ import 'package:leak_tracker/leak_tracker.dart';
 import '../leak_tracking.dart';
 import 'leaking_widget.dart';
 
-const _test0TrackingOffLeaks = 'test0, tracking-off';
-const _test1TrackingOn = 'test1, tracking-on';
-const _test2TrackingOffLeaks = 'test2, tracking-off';
-const _test3TrackingOn = 'test3, tracking-on';
+const String _test0TrackingOffLeaks = 'test0, tracking-off';
+const String _test1TrackingOn = 'test1, tracking-on';
+const String _test2TrackingOffLeaks = 'test2, tracking-off';
+const String _test3TrackingOn = 'test3, tracking-on';
 
 /// Tests with default leak tracking configuration.
 ///
 /// This set of tests verifies that if `testWidgetsWithLeakTracking` is used at least once,
 /// leak tracking is configured as expected, and is noop for `testWidgets`.
 void main() {
-  testWidgets(_test0TrackingOffLeaks, (widgetTester) async {
+  testWidgets(_test0TrackingOffLeaks, (WidgetTester widgetTester) async {
     expect(LeakTracking.isStarted, true);
     expect(LeakTracking.phase.name, null);
     expect(LeakTracking.phase.isPaused, true);
     await widgetTester.pumpWidget(StatelessLeakingWidget());
   });
 
-  testWidgetsWithLeakTracking(_test1TrackingOn, (widgetTester) async {
+  testWidgetsWithLeakTracking(_test1TrackingOn, (WidgetTester widgetTester) async {
     expect(LeakTracking.isStarted, true);
     expect(LeakTracking.phase.name, _test1TrackingOn);
     expect(LeakTracking.phase.isPaused, false);
   });
 
-  testWidgets(_test2TrackingOffLeaks, (widgetTester) async {
+  testWidgets(_test2TrackingOffLeaks, (WidgetTester widgetTester) async {
     expect(LeakTracking.isStarted, true);
     expect(LeakTracking.phase.name, null);
     expect(LeakTracking.phase.isPaused, true);
     await widgetTester.pumpWidget(StatelessLeakingWidget());
   });
 
-  testWidgetsWithLeakTracking(_test3TrackingOn, (widgetTester) async {
+  testWidgetsWithLeakTracking(_test3TrackingOn, (WidgetTester widgetTester) async {
     expect(LeakTracking.isStarted, true);
     expect(LeakTracking.phase.name, _test3TrackingOn);
     expect(LeakTracking.phase.isPaused, false);

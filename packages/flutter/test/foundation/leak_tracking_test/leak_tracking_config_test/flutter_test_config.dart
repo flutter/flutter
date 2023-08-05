@@ -16,7 +16,7 @@ import 'leak_tracking_config_test.dart';
 ///
 /// See https://api.flutter.dev/flutter/flutter_test/flutter_test-library.html.
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
-  var leaksDetected = false;
+  bool leaksDetected = false;
 
   // This tear down should be set before leak tracking tear down in
   // order to happen after it and verify that leaks are found.
@@ -25,7 +25,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   });
 
   configureLeakTrackingTearDown(
-    onLeaks: (leaks) {
+    onLeaks: (Leaks leaks) {
       expect(leaks.total, greaterThan(0));
       leaksDetected = true;
 
@@ -77,10 +77,10 @@ void _verifyLeaks(
 }) {
   const String linkToLeakTracker = 'https://github.com/dart-lang/leak_tracker';
 
-  final leaks = Leaks(
+  final Leaks leaks = Leaks(
     allLeaks.byType.map(
-      (key, value) =>
-          MapEntry(key, value.where((leak) => leak.phase == testName).toList()),
+      (LeakType key, List<LeakReport> value) =>
+          MapEntry<LeakType, List<LeakReport>>(key, value.where((LeakReport leak) => leak.phase == testName).toList()),
     ),
   );
 

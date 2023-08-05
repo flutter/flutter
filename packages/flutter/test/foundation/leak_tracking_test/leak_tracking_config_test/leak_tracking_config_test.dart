@@ -9,28 +9,28 @@ import 'package:leak_tracker/leak_tracker.dart';
 import '../../leak_tracking.dart';
 import '../leaking_widget.dart';
 
-const test1TrackingOnNoLeaks = 'test1, tracking-on, no leaks';
-const test2TrackingOffLeaks = 'test2, tracking-off, leaks';
-const test3TrackingOnLeaks = 'test3, tracking-on, leaks';
-const test4TrackingOnWithStackTrace = 'test4, tracking-on, with stack trace';
+const String test1TrackingOnNoLeaks = 'test1, tracking-on, no leaks';
+const String test2TrackingOffLeaks = 'test2, tracking-off, leaks';
+const String test3TrackingOnLeaks = 'test3, tracking-on, leaks';
+const String test4TrackingOnWithStackTrace = 'test4, tracking-on, with stack trace';
 
 /// For these tests `expect` for found leaks happens in flutter_test_config.dart.
 void main() {
-  testWidgetsWithLeakTracking(test1TrackingOnNoLeaks, (widgetTester) async {
+  testWidgetsWithLeakTracking(test1TrackingOnNoLeaks, (WidgetTester widgetTester) async {
     expect(LeakTracking.isStarted, true);
     expect(LeakTracking.phase.name, test1TrackingOnNoLeaks);
     expect(LeakTracking.phase.isPaused, false);
     await widgetTester.pumpWidget(Container());
   });
 
-  testWidgets(test2TrackingOffLeaks, (widgetTester) async {
+  testWidgets(test2TrackingOffLeaks, (WidgetTester widgetTester) async {
     expect(LeakTracking.isStarted, true);
     expect(LeakTracking.phase.name, null);
     expect(LeakTracking.phase.isPaused, true);
     await widgetTester.pumpWidget(StatelessLeakingWidget());
   });
 
-  testWidgetsWithLeakTracking(test3TrackingOnLeaks, (widgetTester) async {
+  testWidgetsWithLeakTracking(test3TrackingOnLeaks, (WidgetTester widgetTester) async {
     expect(LeakTracking.isStarted, true);
     expect(LeakTracking.phase.name, test3TrackingOnLeaks);
     expect(LeakTracking.phase.isPaused, false);
@@ -39,7 +39,7 @@ void main() {
 
   testWidgetsWithLeakTracking(
     test4TrackingOnWithStackTrace,
-    (widgetTester) async {
+    (WidgetTester widgetTester) async {
       expect(LeakTracking.isStarted, true);
       expect(LeakTracking.phase.name, test4TrackingOnWithStackTrace);
       expect(LeakTracking.phase.isPaused, false);

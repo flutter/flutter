@@ -10,7 +10,7 @@ import 'leaking_widget.dart';
 void main() {
   testWidgets(
       'Leak tracking is not started without `testWidgetsWithLeakTracking`',
-      (widgetTester) async {
+      (WidgetTester widgetTester) async {
     expect(LeakTracking.isStarted, false);
     expect(LeakTracking.phase.name, null);
     await widgetTester.pumpWidget(StatelessLeakingWidget());
