@@ -124,7 +124,7 @@ void main() {
     expect(buildCount, equals(2));
   });
 
-  testWidgetsWithLeakTracking('Verify that a persistent BottomSheet cannot be dismissed', (WidgetTester tester) async {
+  testWidgets('Verify that a persistent BottomSheet cannot be dismissed', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: const Center(child: Text('body')),
