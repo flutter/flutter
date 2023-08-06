@@ -18,7 +18,7 @@ Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('SelectionArea uses correct selection controls', (WidgetTester tester) async {
+  testWidgets('SelectionArea uses correct selection controls', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: SelectionArea(
         child: Text('abc'),
@@ -40,7 +40,7 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 
-  testWidgetsWithLeakTracking('Does not crash when long pressing on padding after dragging', (WidgetTester tester) async {
+  testWidgets('Does not crash when long pressing on padding after dragging', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/123378
     await tester.pumpWidget(
       const MaterialApp(
@@ -71,7 +71,7 @@ void main() {
   });
 
 
-  testWidgetsWithLeakTracking('builds the default context menu by default', (WidgetTester tester) async {
+  testWidgets('builds the default context menu by default', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: SelectionArea(
@@ -98,7 +98,7 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
-  testWidgetsWithLeakTracking('builds a custom context menu if provided', (WidgetTester tester) async {
+  testWidgets('builds a custom context menu if provided', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -134,7 +134,7 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
-  testWidgetsWithLeakTracking('onSelectionChange is called when the selection changes', (WidgetTester tester) async {
+  testWidgets('onSelectionChange is called when the selection changes', (WidgetTester tester) async {
     SelectedContent? content;
 
     await tester.pumpWidget(MaterialApp(

@@ -81,7 +81,7 @@ void main() {
     expect(box.size.height, equals(0));
   });
 
-  testWidgetsWithLeakTracking('MergeableMaterial update slice', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial update slice', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -1331,7 +1331,7 @@ void main() {
     expect(decoration.border!.top.color, dividerColor);
   });
 
-  testWidgetsWithLeakTracking('MergeableMaterial respects MaterialSlice.color', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial respects MaterialSlice.color', (WidgetTester tester) async {
     const Color themeCardColor = Colors.red;
     const Color materialSliceColor = Colors.green;
 
