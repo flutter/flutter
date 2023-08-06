@@ -11,7 +11,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../foundation/leak_tracking.dart';
 import '../rendering/mock_canvas.dart';
-import '../widgets/editable_text_test.dart';
 import 'feedback_tester.dart';
 
 Widget wrap({ required Widget child }) {
@@ -499,7 +498,6 @@ void main() {
     expect(gotFocus, isFalse);
     expect(node.hasFocus, isFalse);
 
-    focusNode.dispose();
     node.dispose();
   });
 
