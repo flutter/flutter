@@ -500,6 +500,7 @@ void main() {
     expect(node.hasFocus, isFalse);
 
     focusNode.dispose();
+    node.dispose();
   });
 
     testWidgetsWithLeakTracking('CheckboxListTile can be disabled', (WidgetTester tester) async {

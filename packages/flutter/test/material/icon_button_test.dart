@@ -101,13 +101,14 @@ void main() {
 
   testWidgetsWithLeakTracking('when both iconSize and IconTheme.of(context).size are null, size falls back to 24.0', (WidgetTester tester) async {
     final bool material3 = theme.useMaterial3;
+    final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
     await tester.pumpWidget(
       wrap(
         useMaterial3: material3,
         child: IconTheme(
           data: const IconThemeData(),
           child: IconButton(
-            focusNode: FocusNode(debugLabel: 'Ink Focus'),
+            focusNode: focusNode,
             onPressed: mockOnPressedFunction.handler,
             icon: const Icon(Icons.link),
           ),
@@ -117,6 +118,8 @@ void main() {
 
     final RenderBox icon = tester.renderObject(find.byType(Icon));
     expect(icon.size, const Size(24.0, 24.0));
+
+    focusNode.dispose();
   });
 
   testWidgets('when null, iconSize is overridden by closest IconTheme', (WidgetTester tester) async {
@@ -784,6 +787,8 @@ void main() {
     );
     await tester.pump();
     expect(focusNode.hasPrimaryFocus, isTrue);
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking("Disabled IconButton can't be traversed to when disabled.", (WidgetTester tester) async {

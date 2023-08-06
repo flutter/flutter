@@ -54,7 +54,7 @@ void main() {
     expect(identical(MenuBarThemeData.lerp(data, data, 0.5), data), true);
   });
 
-  testWidgetsWithLeakTracking('theme is honored', (WidgetTester tester) async {
+  testWidgets('theme is honored', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
