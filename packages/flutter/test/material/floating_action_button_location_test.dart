@@ -185,7 +185,7 @@ void main() {
         await tester.pumpAndSettle();
       });
 
-      testWidgetsWithLeakTracking('interrupting motion towards the StartTop location.', (WidgetTester tester) async {
+      testWidgets('interrupting motion towards the StartTop location.', (WidgetTester tester) async {
         await tester.pumpWidget(_buildFrame(location: FloatingActionButtonLocation.centerFloat, listener: geometryListener));
         setupListener(tester);
 
