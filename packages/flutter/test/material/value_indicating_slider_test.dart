@@ -98,7 +98,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Slider value indicator large text scale', (WidgetTester tester) async {
+  testWidgets('Slider value indicator large text scale', (WidgetTester tester) async {
     await _buildValueIndicatorStaticSlider(
       tester,
       value: 0,
@@ -274,7 +274,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Slider value indicator large text scale', (WidgetTester tester) async {
+    testWidgets('Slider value indicator large text scale', (WidgetTester tester) async {
       await _buildValueIndicatorStaticSlider(
         tester,
         value: 0,

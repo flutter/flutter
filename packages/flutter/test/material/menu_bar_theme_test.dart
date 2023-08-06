@@ -107,7 +107,7 @@ void main() {
     expect(subMenuMaterial.color, equals(Colors.green));
   });
 
-  testWidgetsWithLeakTracking('Constructor parameters override theme parameters', (WidgetTester tester) async {
+  testWidgets('Constructor parameters override theme parameters', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
