@@ -823,7 +823,7 @@ class _IndicatorInkWell extends InkResponse {
         return Rect.fromLTWH(
           indicatorOffset.dx - (_kCircularIndicatorDiameter / 2),
           indicatorHorizontalCenter - (_kCircularIndicatorDiameter / 2),
-          _kIndicatorHeight,
+          _kIndicatorHeight
      ) };
     }
     return null;
