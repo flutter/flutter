@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(polina-c): start referencing this code in leak_tracker_flutter
+// https://github.com/dart-lang/leak_tracker/issues/52
+
 import 'dart:core';
 
 import 'package:flutter/foundation.dart';
