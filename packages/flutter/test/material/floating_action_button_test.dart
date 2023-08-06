@@ -369,6 +369,8 @@ void main() {
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     expect(getFABWidget(fabFinder).elevation, 6);
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('FlatActionButton mini size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
@@ -910,6 +912,8 @@ void main() {
       tester.renderObject(find.byType(FloatingActionButton)),
       paintsExactlyCountTimes(#clipPath, 0),
     );
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Can find FloatingActionButton semantics', (WidgetTester tester) async {
@@ -1207,6 +1211,8 @@ void main() {
       await tester.pump(); // Start the splash and highlight animations.
       await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
       expect(getFABWidget(fabFinder).elevation, 12);
+
+      focusNode.dispose();
     });
 
     testWidgetsWithLeakTracking('FloatingActionButton.isExtended', (WidgetTester tester) async {

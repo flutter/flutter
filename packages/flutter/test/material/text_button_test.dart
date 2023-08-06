@@ -1644,7 +1644,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
-  testWidgetsWithLeakTracking('TextButton in SelectionArea changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgets('TextButton in SelectionArea changes mouse cursor when hovered', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/104595.
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
@@ -1797,15 +1797,15 @@ void main() {
     await gesture.removePointer();
   }
 
-  testWidgetsWithLeakTracking('TextButton statesController', (WidgetTester tester) async {
+  testWidgets('TextButton statesController', (WidgetTester tester) async {
     testStatesController(null, tester);
   });
 
-  testWidgetsWithLeakTracking('TextButton.icon statesController', (WidgetTester tester) async {
+  testWidgets('TextButton.icon statesController', (WidgetTester tester) async {
     testStatesController(const Icon(Icons.add), tester);
   });
 
-  testWidgetsWithLeakTracking('Disabled TextButton statesController', (WidgetTester tester) async {
+  testWidgets('Disabled TextButton statesController', (WidgetTester tester) async {
     int count = 0;
     void valueChanged() {
       count += 1;

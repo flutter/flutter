@@ -137,7 +137,7 @@ void main() {
     expect(cancelCalled, isFalse);
   });
 
-  testWidgetsWithLeakTracking('Splash should never be created or canceled', (WidgetTester tester) async {
+  testWidgets('Splash should never be created or canceled', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Theme(

@@ -89,7 +89,7 @@ void main() {
     expect(topAfterScroll.dy, equals(-100.0));
   }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.fuchsia }));
 
-  testWidgetsWithLeakTracking('FlexibleSpaceBar collapse mode parallax', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar collapse mode parallax', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: debugDefaultTargetPlatformOverride),
