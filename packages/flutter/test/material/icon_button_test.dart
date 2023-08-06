@@ -740,6 +740,8 @@ void main() {
     );
     await tester.pump();
     expect(focusNode.hasPrimaryFocus, isFalse);
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('IconButton keeps focus when disabled in directional navigation mode.', (WidgetTester tester) async {
@@ -818,6 +820,9 @@ void main() {
 
     expect(focusNode1.hasPrimaryFocus, isTrue);
     expect(focusNode2.hasPrimaryFocus, isFalse);
+
+    focusNode1.dispose();
+    focusNode2.dispose();
   });
 
   group('feedback', () {
@@ -1241,6 +1246,8 @@ void main() {
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(overlayColor(), paints..rect(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.12)));
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('IconButton.fill defaults - M3', (WidgetTester tester) async {
@@ -1380,6 +1387,8 @@ void main() {
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(overlayColor(), paints..rect(color: theme.colorScheme.onPrimary.withOpacity(0.12)));
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Toggleable IconButton.fill defaults - M3', (WidgetTester tester) async {
@@ -1634,6 +1643,8 @@ void main() {
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(overlayColor(), paints..rect(color: theme.colorScheme.onSecondaryContainer.withOpacity(0.12)));
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Toggleable IconButton.filledTonal defaults - M3', (WidgetTester tester) async {
@@ -1888,6 +1899,8 @@ void main() {
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(overlayColor(), paints..rect(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.08)));
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Toggleable IconButton.outlined defaults - M3', (WidgetTester tester) async {
@@ -2048,6 +2061,8 @@ void main() {
     await expectLater(tester, meetsGuideline(textContrastGuideline));
 
     await gesture.removePointer();
+
+    focusNode.dispose();
   },
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
@@ -2136,6 +2151,8 @@ void main() {
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     expect(iconColor(), pressedColor);
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Does IconButton contribute semantics - M3', (WidgetTester tester) async {
