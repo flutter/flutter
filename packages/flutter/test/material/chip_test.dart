@@ -702,7 +702,7 @@ void main() {
     expect(calledDelete, isFalse);
   });
 
-  testWidgetsWithLeakTracking('Chip elements are ordered horizontally for locale', (WidgetTester tester) async {
+  testWidgets('Chip elements are ordered horizontally for locale', (WidgetTester tester) async {
     final UniqueKey iconKey = UniqueKey();
     final Widget test = Overlay(
       initialEntries: <OverlayEntry>[
@@ -878,7 +878,7 @@ void main() {
     expect(tester.getSize(find.byKey(keyA)), equals(const Size(20.0, 20.0)));
   });
 
-  testWidgetsWithLeakTracking('Chip padding - LTR', (WidgetTester tester) async {
+  testWidgets('Chip padding - LTR', (WidgetTester tester) async {
     final GlobalKey keyA = GlobalKey();
     final GlobalKey keyB = GlobalKey();
     await tester.pumpWidget(
@@ -914,7 +914,7 @@ void main() {
     expect(tester.getBottomRight(find.byType(Icon)), const Offset(457.0, 309.0));
   });
 
-  testWidgetsWithLeakTracking('Chip padding - RTL', (WidgetTester tester) async {
+  testWidgets('Chip padding - RTL', (WidgetTester tester) async {
     final GlobalKey keyA = GlobalKey();
     final GlobalKey keyB = GlobalKey();
     await tester.pumpWidget(
