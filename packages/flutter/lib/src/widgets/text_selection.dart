@@ -561,17 +561,18 @@ class TextSelectionOverlay {
   /// Whether the handles are currently visible.
   bool get handlesAreVisible => _selectionOverlay._handles != null && handlesVisible;
 
-  /// {@macro flutter.widgets.SelectionOverlay.toolbarIsVisible}
+  /// Whether the toolbar is currently visible.
+  ///
+  /// Includes both the text selection toolbar and the spell check menu.
   ///
   /// See also:
   ///
   ///   * [spellCheckToolbarIsVisible], which is only whether the spell check menu
   ///     specifically is visible.
+
   bool get toolbarIsVisible => _selectionOverlay.toolbarIsVisible;
-
-  /// Whether the magnifier is currently visible.
+  bool get toolbarIsVisible => _selectionOverlay._toolbarIsVisible;
   bool get magnifierIsVisible => _selectionOverlay._magnifierController.shown;
-
   /// Whether the spell check menu is currently visible.
   ///
   /// See also:
@@ -981,12 +982,7 @@ class SelectionOverlay {
   /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
   final TextMagnifierConfiguration magnifierConfiguration;
 
-  /// {@template flutter.widgets.SelectionOverlay.toolbarIsVisible}
-  /// Whether the toolbar is currently visible.
-  ///
-  /// Includes both the text selection toolbar and the spell check menu.
-  /// {@endtemplate}
-  bool get toolbarIsVisible {
+  bool get _toolbarIsVisible {
     return selectionControls is TextSelectionHandleControls
         ? _contextMenuController.isShown || _spellCheckToolbarController.isShown
         : _toolbar != null || _spellCheckToolbarController.isShown;
@@ -1003,16 +999,12 @@ class SelectionOverlay {
   /// [MagnifierController.shown].
   /// {@endtemplate}
   void showMagnifier(MagnifierInfo initialMagnifierInfo) {
-    if (toolbarIsVisible) {
+    if (_toolbarIsVisible) {
       hideToolbar();
     }
 
     // Start from empty, so we don't utilize any remnant values.
-    _magnifierInfo.value = initialMagnifierInfo;
-
-    // Pre-build the magnifiers so we can tell if we've built something
     // or not. If we don't build a magnifiers, then we should not
-    // insert anything in the overlay.
     final Widget? builtMagnifier = magnifierConfiguration.magnifierBuilder(
       context,
       _magnifierController,
@@ -2276,6 +2268,7 @@ class TextSelectionGestureDetectorBuilder {
           break;
           // On desktop platforms the selection is set on tap down.
         case TargetPlatform.android:
+          editableText.hideToolbar();
           if (isShiftPressedValid) {
             _extendSelection(details.globalPosition, SelectionChangedCause.tap);
             return;

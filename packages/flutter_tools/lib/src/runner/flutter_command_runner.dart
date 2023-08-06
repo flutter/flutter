@@ -103,7 +103,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     argParser.addFlag(FlutterGlobalOptions.kSuppressAnalyticsFlag,
         negatable: false,
         help: 'Suppress analytics reporting for the current CLI invocation.');
-    argParser.addFlag(FlutterGlobalOptions.kDisableTelemetryFlag,
+    argParser.addFlag('disable-telemetry',
         negatable: false,
         help: 'Disable telemetry reporting each time a flutter or dart '
               'command runs, until it is re-enabled.');

@@ -80,6 +80,22 @@ final RegExp gradleOrgVersionMatch =
 final RegExp jellyBeanMinSdkVersionMatch =
   RegExp(r'(?<=^\s*)minSdkVersion 1[678](?=\s*(?://|$))', multiLine: true);
 
+// Expected content format (with lines above and below).
+// Version can have 2 or 3 numbers.
+// 'distributionUrl=https\://services.gradle.org/distributions/gradle-7.4.2-all.zip'
+// '^\s*' protects against commented out lines.
+final RegExp distributionUrlRegex =
+    RegExp(r'^\s*distributionUrl\s*=\s*.*\.zip', multiLine: true);
+
+// Modified version of the gradle distribution url match designed to only match
+// gradle.org urls so that we can guarantee any modifications to the url
+// still points to a hosted zip.
+final RegExp gradleOrgVersionMatch =
+RegExp(
+    r'^\s*distributionUrl\s*=\s*https\\://services\.gradle\.org/distributions/gradle-((?:\d|\.)+)-(.*)\.zip',
+    multiLine: true
+);
+
 // From https://docs.gradle.org/current/userguide/command_line_interface.html#command_line_interface
 const String gradleVersionFlag = r'--version';
 
@@ -225,7 +241,6 @@ Future<String?> getGradleVersion(
 
   if (propertiesFile.existsSync()) {
     final String wrapperFileContent = propertiesFile.readAsStringSync();
-
     final RegExpMatch? distributionUrl =
         distributionUrlRegex.firstMatch(wrapperFileContent);
     if (distributionUrl != null) {

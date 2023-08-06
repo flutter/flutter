@@ -22,7 +22,5 @@
   "tabSemanticsLabel": "Skeda $tabIndex nga $tabCount",
   "modalBarrierDismissLabel": "Hiq",
   "searchTextFieldPlaceholderLabel": "Kërko",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "menuDismissLabel": "Dismiss menu",
-  "lookUpButtonLabel": "Look Up"
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

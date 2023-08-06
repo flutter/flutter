@@ -22,7 +22,5 @@
   "tabSemanticsLabel": "Pestanya $tabIndex de $tabCount",
   "modalBarrierDismissLabel": "Ignora",
   "searchTextFieldPlaceholderLabel": "Cerca",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "menuDismissLabel": "Dismiss menu",
-  "lookUpButtonLabel": "Look Up"
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

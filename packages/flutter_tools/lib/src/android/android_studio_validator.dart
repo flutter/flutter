@@ -50,9 +50,9 @@ class AndroidStudioValidator extends DoctorValidator {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     ValidationType type = ValidationType.missing;
 
-    final String studioVersionText = _studio.version == null
-      ? _userMessages.androidStudioVersion('unknown')
-      : _userMessages.androidStudioVersion(_studio.version.toString());
+    final String? studioVersionText = _studio.version == null
+      ? null
+      : userMessages.androidStudioVersion(_studio.version.toString());
     messages.add(ValidationMessage(
       _userMessages.androidStudioLocation(_studio.directory),
     ));
@@ -90,9 +90,9 @@ class AndroidStudioValidator extends DoctorValidator {
       messages.addAll(_studio.validationMessages.map<ValidationMessage>(
         (String m) => ValidationMessage.error(m),
       ));
-      messages.add(ValidationMessage(_userMessages.androidStudioNeedsUpdate));
+      messages.add(ValidationMessage(userMessages.androidStudioNeedsUpdate));
       if (_studio.configuredPath != null) {
-        messages.add(ValidationMessage(_userMessages.androidStudioResetDir));
+        messages.add(ValidationMessage(userMessages.androidStudioResetDir));
       }
     }
 

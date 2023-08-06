@@ -22,7 +22,5 @@
   "tabSemanticsLabel": "$tabCount ਵਿੱਚੋਂ $tabIndex ਟੈਬ",
   "modalBarrierDismissLabel": "ਖਾਰਜ ਕਰੋ",
   "searchTextFieldPlaceholderLabel": "ਖੋਜੋ",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "menuDismissLabel": "Dismiss menu",
-  "lookUpButtonLabel": "Look Up"
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

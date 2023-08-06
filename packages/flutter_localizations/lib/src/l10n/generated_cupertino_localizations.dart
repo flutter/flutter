@@ -9752,7 +9752,7 @@ class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Zamknij';
 
   @override
-  String get noSpellCheckReplacementsLabel => 'Nie znaleziono zastąpień';
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
 
   @override
   String get pasteButtonLabel => 'Wklej';

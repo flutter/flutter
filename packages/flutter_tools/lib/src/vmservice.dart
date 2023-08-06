@@ -22,7 +22,7 @@ import 'project.dart';
 import 'version.dart';
 
 const String kResultType = 'type';
-const String kResultTypeSuccess = 'Success';
+const StringkResultTypeSuccess = 'Success';
 
 const String kGetSkSLsMethod = '_flutter.getSkSLs';
 const String kSetAssetBundlePathMethod = '_flutter.setAssetBundlePath';
@@ -44,8 +44,6 @@ const String kFlutterMemoryInfoServiceName = 'flutterMemoryInfo';
 const String kFlutterGetSkSLServiceName = 'flutterGetSkSL';
 const String kFlutterGetIOSBuildOptionsServiceName = 'flutterGetIOSBuildOptions';
 const String kFlutterGetAndroidBuildVariantsServiceName = 'flutterGetAndroidBuildVariants';
-const String kFlutterGetIOSUniversalLinkSettingsServiceName = 'flutterGetIOSUniversalLinkSettings';
-const String kFlutterGetAndroidAppLinkSettingsName = 'flutterGetAndroidAppLinkSettings';
 
 /// The error response code from an unrecoverable compilation failure.
 const int kIsolateReloadBarred = 1005;
@@ -246,10 +244,7 @@ Future<vm_service.VmService> setUpVmService({
   }
 
   vmService.registerServiceCallback(kFlutterVersionServiceName, (Map<String, Object?> params) async {
-    final FlutterVersion version = context.get<FlutterVersion>() ?? FlutterVersion(
-      fs: globals.fs,
-      flutterRoot: Cache.flutterRoot!,
-    );
+    final FlutterVersion version = context.get<FlutterVersion>() ?? FlutterVersion();
     final Map<String, Object> versionJson = version.toJson();
     versionJson['frameworkRevisionShort'] = version.frameworkRevisionShort;
     versionJson['engineRevisionShort'] = version.engineRevisionShort;
@@ -352,40 +347,6 @@ Future<vm_service.VmService> setUpVmService({
     });
     registrationRequests.add(
       vmService.registerService(kFlutterGetAndroidBuildVariantsServiceName, kFlutterToolAlias),
-    );
-
-    vmService.registerServiceCallback(kFlutterGetIOSUniversalLinkSettingsServiceName, (Map<String, Object?> params) async {
-      final XcodeUniversalLinkSettings settings = await flutterProject.ios.universalLinkSettings(
-        configuration: params['configuration']! as String,
-        scheme: params['scheme']! as String,
-        target: params['target']! as String,
-      );
-      return <String, Object>{
-        'result': <String, Object>{
-          kResultType: kResultTypeSuccess,
-          'bundleIdentifier': settings.bundleIdentifier ?? '',
-          'teamIdentifier': settings.teamIdentifier ?? '',
-          'associatedDomains': settings.associatedDomains,
-        },
-      };
-    });
-    registrationRequests.add(
-      vmService.registerService(kFlutterGetIOSUniversalLinkSettingsServiceName, kFlutterToolAlias),
-    );
-
-    vmService.registerServiceCallback(kFlutterGetAndroidAppLinkSettingsName, (Map<String, Object?> params) async {
-      final String variant = params['variant']! as String;
-      final AndroidAppLinkSettings settings = await flutterProject.android.getAppLinksSettings(variant: variant);
-      return <String, Object>{
-        'result': <String, Object>{
-          kResultType: kResultTypeSuccess,
-          'applicationId': settings.applicationId,
-          'domains': settings.domains,
-        },
-      };
-    });
-    registrationRequests.add(
-      vmService.registerService(kFlutterGetAndroidAppLinkSettingsName, kFlutterToolAlias),
     );
   }
 

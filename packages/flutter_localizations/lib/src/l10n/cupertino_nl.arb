@@ -22,7 +22,5 @@
   "tabSemanticsLabel": "Tabblad $tabIndex van $tabCount",
   "modalBarrierDismissLabel": "Sluiten",
   "searchTextFieldPlaceholderLabel": "Zoeken",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "menuDismissLabel": "Dismiss menu",
-  "lookUpButtonLabel": "Look Up"
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

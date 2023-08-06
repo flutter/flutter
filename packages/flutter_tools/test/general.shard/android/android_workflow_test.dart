@@ -546,7 +546,8 @@ Review licenses that have not been accepted (y/N)?
       java: FakeJava(version: const Version.withText(1, 7, 0, javaVersionText)),
       androidSdk: sdk,
       logger: logger,
-      platform: platform,
+      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', AndroidSdk.javaHomeEnvironmentVariable: 'home/java'},
+      processManager: processManager,
       userMessages: UserMessages(),
     ).validate();
     expect(validationResult.type, ValidationType.partial);
@@ -567,7 +568,8 @@ Review licenses that have not been accepted (y/N)?
       java: FakeJava(),
       androidSdk: null,
       logger: logger,
-      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', Java.javaHomeEnvironmentVariable: 'home/java'},
+      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', AndroidSdk.javaHomeEnvironmentVariable: 'home/java'},
+      processManager: processManager,
       userMessages: UserMessages(),
     ).validate();
 
