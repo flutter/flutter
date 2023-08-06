@@ -16,18 +16,20 @@ const String test4TrackingOnWithStackTrace = 'test4, tracking-on, with stack tra
 
 /// For these tests `expect` for found leaks happens in flutter_test_config.dart.
 void main() {
-  testWidgetsWithLeakTracking(test1TrackingOnNoLeaks, (WidgetTester widgetTester) async {
-    expect(LeakTracking.isStarted, true);
-    expect(LeakTracking.phase.name, test1TrackingOnNoLeaks);
-    expect(LeakTracking.phase.isPaused, false);
-    await widgetTester.pumpWidget(Container());
-  });
+  group('group', () {
+    testWidgetsWithLeakTracking(test1TrackingOnNoLeaks, (WidgetTester widgetTester) async {
+      expect(LeakTracking.isStarted, true);
+      expect(LeakTracking.phase.name, test1TrackingOnNoLeaks);
+      expect(LeakTracking.phase.isPaused, false);
+      await widgetTester.pumpWidget(Container());
+    });
 
-  testWidgets(test2TrackingOffLeaks, (WidgetTester widgetTester) async {
-    expect(LeakTracking.isStarted, true);
-    expect(LeakTracking.phase.name, null);
-    expect(LeakTracking.phase.isPaused, true);
-    await widgetTester.pumpWidget(StatelessLeakingWidget());
+    testWidgets(test2TrackingOffLeaks, (WidgetTester widgetTester) async {
+      expect(LeakTracking.isStarted, true);
+      expect(LeakTracking.phase.name, null);
+      expect(LeakTracking.phase.isPaused, true);
+      await widgetTester.pumpWidget(StatelessLeakingWidget());
+    });
   });
 
   testWidgetsWithLeakTracking(test3TrackingOnLeaks, (WidgetTester widgetTester) async {

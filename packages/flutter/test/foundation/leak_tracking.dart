@@ -12,6 +12,7 @@ import 'package:meta/meta.dart';
 
 export 'package:leak_tracker/leak_tracker.dart' show LeakDiagnosticConfig;
 
+
 void _flutterEventToLeakTracker(ObjectEvent event) {
   return LeakTracking.dispatchObjectEvent(event.toMap());
 }
@@ -28,18 +29,28 @@ void _setUpTestingWithLeakTracking() {
   MemoryAllocations.instance.addListener(_flutterEventToLeakTracker);
 }
 
-bool _tearDownConfigured = false;
+bool _stopConfiguringTearDown = false;
 
+/// Sets [tearDownAll] to tear down leak tracking if it is started.
+///
+/// [configureOnce] is true tear down will be created just once,
+/// not for every test.
+/// Multiple [tearDownAll] is needed to handle test groups that have
+/// own [tearDownAll].
 void configureLeakTrackingTearDown({
   LeaksCallback? onLeaks,
+  bool configureOnce = false,
 }) {
-  if (_tearDownConfigured) {
-    throw StateError('Leak tracking tear down is already configured.');
+  if (_isPlatformSupported && !_stopConfiguringTearDown) {
+    tearDownAll(() async {
+      if (LeakTracking.isStarted) {
+        await _tearDownTestingWithLeakTracking(onLeaks);
+      }
+    });
   }
-  if (_isPlatformSupported) {
-    tearDownAll(() => _tearDownTestingWithLeakTracking(onLeaks));
+  if (configureOnce) {
+    _stopConfiguringTearDown = true;
   }
-  _tearDownConfigured = true;
 }
 
 Future<void> _tearDownTestingWithLeakTracking(LeaksCallback? onLeaks) async {
@@ -89,12 +100,7 @@ void testWidgetsWithLeakTracking(
   LeakTrackingTestConfig leakTrackingTestConfig =
       const LeakTrackingTestConfig(),
 }) {
-  if (!_tearDownConfigured) {
-    configureLeakTrackingTearDown();
-  }
-  if (!LeakTracking.isStarted) {
-    _setUpTestingWithLeakTracking();
-  }
+  configureLeakTrackingTearDown();
 
   final PhaseSettings phase = PhaseSettings(
     name: description,
@@ -106,8 +112,9 @@ void testWidgetsWithLeakTracking(
   );
 
   Future<void> wrappedCallBack(WidgetTester tester) async {
-    assert(LeakTracking.isStarted);
-    assert(_tearDownConfigured);
+    if (!LeakTracking.isStarted) {
+      _setUpTestingWithLeakTracking();
+    }
     LeakTracking.phase = phase;
     await callback(tester);
     LeakTracking.phase = const PhaseSettings.paused();
