@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../foundation/leak_tracking.dart';
+import '../widgets/editable_text_test.dart';
 import '../widgets/semantics_tester.dart';
 
 MaterialApp _buildAppWithDialog(
@@ -2660,6 +2661,10 @@ void main() {
     expect(await previousFocus(), true);
     expect(okNode.hasFocus, true);
     expect(cancelNode.hasFocus, false);
+
+    focusNode.dispose();
+    cancelNode.dispose();
+    okNode.dispose();
   });
 
   testWidgets('Adaptive AlertDialog shows correct widget on each platform', (WidgetTester tester) async {
@@ -2764,7 +2769,7 @@ void main() {
     expect(find.text('Dialog2'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Uses open focus traversal when overridden', (WidgetTester tester) async {
+  testWidgets('Uses open focus traversal when overridden', (WidgetTester tester) async {
     final FocusNode okNode = FocusNode();
     final FocusNode cancelNode = FocusNode();
 

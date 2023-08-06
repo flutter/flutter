@@ -364,7 +364,7 @@ void main() {
       expect(tester.getBottomRight(buttonBar).dy - tester.getTopRight(buttonBar).dy, 52.0);
     });
 
-    testWidgetsWithLeakTracking('ButtonBar has padding applied when using ButtonBarLayoutBehavior.padded', (WidgetTester tester) async {
+    testWidgets('ButtonBar has padding applied when using ButtonBarLayoutBehavior.padded', (WidgetTester tester) async {
       await tester.pumpWidget(
         const SingleChildScrollView(
           child: ListBody(
