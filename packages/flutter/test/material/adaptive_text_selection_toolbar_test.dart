@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../foundation/leak_tracking.dart';
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart';
+import '../widgets/live_text_utils.dart';
 
 void main() {
   final MockClipboard mockClipboard = MockClipboard();
@@ -184,6 +185,8 @@ void main() {
               onCut: () {},
               onPaste: () {},
               onSelectAll: () {},
+              onLiveTextInput: () {},
+              onLookUp: () {},
             ),
           ),
         ),
@@ -199,17 +202,18 @@ void main() {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         expect(find.text('Select all'), findsOneWidget);
-        expect(find.byType(TextSelectionToolbarTextButton), findsNWidgets(4));
+        expect(find.byType(TextSelectionToolbarTextButton), findsNWidgets(6));
       case TargetPlatform.iOS:
         expect(find.text('Select All'), findsOneWidget);
-        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(4));
+        expect(findLiveTextButton(), findsOneWidget);
+        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(6));
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         expect(find.text('Select all'), findsOneWidget);
-        expect(find.byType(DesktopTextSelectionToolbarButton), findsNWidgets(4));
+        expect(find.byType(DesktopTextSelectionToolbarButton), findsNWidgets(6));
       case TargetPlatform.macOS:
         expect(find.text('Select All'), findsOneWidget);
-        expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(4));
+        expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(6));
     }
   },
     skip: kIsWeb, // [intended] on web the browser handles the context menu.

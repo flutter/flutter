@@ -63,11 +63,6 @@ class Context {
     }
   }
 
-  bool existsDir(String path) {
-    final Directory dir = Directory(path);
-    return dir.existsSync();
-  }
-
   bool existsFile(String path) {
     final File file = File(path);
     return file.existsSync();

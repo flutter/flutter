@@ -205,7 +205,7 @@ void main() {
     );
     // The important lines below are the ones marked with "<----"
     expect(tester.binding.renderView.toStringDeep(minLevel: DiagnosticLevel.info), equalsIgnoringHashCodes(
-      'RenderView#00000\n'
+      '_ReusableRenderView#00000\n'
       ' │ debug mode enabled - ${Platform.operatingSystem}\n'
       ' │ view size: Size(2400.0, 1800.0) (in physical pixels)\n'
       ' │ device pixel ratio: 3.0 (physical pixels per logical pixel)\n'
@@ -379,7 +379,7 @@ void main() {
     await tester.drag(find.byType(ListView), const Offset(0.0, -1000.0));
     await tester.pump();
     expect(tester.binding.renderView.toStringDeep(minLevel: DiagnosticLevel.info), equalsIgnoringHashCodes(
-      'RenderView#00000\n'
+      '_ReusableRenderView#00000\n'
       ' │ debug mode enabled - ${Platform.operatingSystem}\n'
       ' │ view size: Size(2400.0, 1800.0) (in physical pixels)\n'
       ' │ device pixel ratio: 3.0 (physical pixels per logical pixel)\n'

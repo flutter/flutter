@@ -4,12 +4,10 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
-import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -424,13 +422,3 @@ ro.build.version.incremental=1624448
 ro.build.version.sdk=24
 ro.build.version.codename=REL
 ''';
-
-class FakeAndroidStudioWithJdk extends Fake implements AndroidStudio {
-  @override
-  String? get javaPath => '/fake/android_studio/java/path/';
-}
-
-class FakeAndroidStudioWithoutJdk extends Fake implements AndroidStudio {
-  @override
-  String? get javaPath => null;
-}

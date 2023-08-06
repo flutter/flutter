@@ -43,8 +43,6 @@ class TestHttpRequest {
         setRequestHeader: setRequestHeader.toJS,
         addEventListener: addEventListener.toJS,
     );
-    // TODO(srujzs): This is needed for when we reify JS types. Right now, JSAny
-    // is a typedef for Object?, but when we reify, it'll be its own type.
     final JSAny mock = _mock as JSAny;
     createGetter(mock, 'headers', () => headers.jsify());
     createGetter(mock,

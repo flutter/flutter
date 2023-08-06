@@ -103,6 +103,8 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
     required VoidCallback? onCut,
     required VoidCallback? onPaste,
     required VoidCallback? onSelectAll,
+    required VoidCallback? onLookUp,
+    required VoidCallback? onLiveTextInput,
     required this.anchors,
   }) : children = null,
        buttonItems = EditableText.getEditableButtonItems(
@@ -111,6 +113,8 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
          onCut: onCut,
          onPaste: onPaste,
          onSelectAll: onSelectAll,
+         onLookUp: onLookUp,
+         onLiveTextInput: onLiveTextInput
        );
 
   /// Create an instance of [AdaptiveTextSelectionToolbar] with the default
@@ -213,6 +217,10 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
             return localizations.selectAllButtonLabel;
           case ContextMenuButtonType.delete:
             return localizations.deleteButtonTooltip.toUpperCase();
+          case ContextMenuButtonType.lookUp:
+            return localizations.lookUpButtonLabel;
+          case ContextMenuButtonType.liveTextInput:
+            return localizations.scanTextButtonLabel;
           case ContextMenuButtonType.custom:
             return '';
         }
@@ -242,9 +250,8 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
         return buttonItems.map((ContextMenuButtonItem buttonItem) {
-            return CupertinoTextSelectionToolbarButton.text(
-              onPressed: buttonItem.onPressed,
-              text: getButtonLabel(context, buttonItem),
+            return CupertinoTextSelectionToolbarButton.buttonItem(
+              buttonItem: buttonItem,
             );
           });
       case TargetPlatform.fuchsia:

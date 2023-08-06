@@ -330,7 +330,13 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lisensies';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Kieslysbalkkieslys';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Maak toe';
@@ -415,6 +421,9 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Stoor';
+
+  @override
+  String get scanTextButtonLabel => 'Skena umbhalo';
 
   @override
   String get scrimLabel => 'Skerm';
@@ -805,7 +814,13 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'ፈቃዶች';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'የምናሌ አሞሌ ምናሌ';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'አሰናብት';
@@ -890,6 +905,9 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'አስቀምጥ';
+
+  @override
+  String get scanTextButtonLabel => 'ጽሑፍ ይቃኙ';
 
   @override
   String get scrimLabel => 'ገዳቢ';
@@ -1280,7 +1298,13 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'التراخيص';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'قائمة شريط القوائم';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'رفض';
@@ -1365,6 +1389,9 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'الحفظ';
+
+  @override
+  String get scanTextButtonLabel => 'مسح النص';
 
   @override
   String get scrimLabel => 'تمويه';
@@ -1755,7 +1782,13 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'অনুজ্ঞাপত্ৰসমূহ';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'মেনু বাৰ মেনু';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'অগ্ৰাহ্য কৰক';
@@ -1840,6 +1873,9 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'ছেভ কৰক';
+
+  @override
+  String get scanTextButtonLabel => 'স্কেন টেক্সট';
 
   @override
   String get scrimLabel => 'স্ক্ৰিম';
@@ -2230,7 +2266,13 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lisenziyalar';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menyu paneli menyusu';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'İmtina edin';
@@ -2315,6 +2357,9 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Yadda saxlayın';
+
+  @override
+  String get scanTextButtonLabel => 'Mətni skan edin';
 
   @override
   String get scrimLabel => 'Kətan';
@@ -2705,7 +2750,13 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Ліцэнзіі';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Меню "Панэль меню"';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Адхіліць';
@@ -2790,6 +2841,9 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Захаваць';
+
+  @override
+  String get scanTextButtonLabel => 'Сканаваць тэкст';
 
   @override
   String get scrimLabel => 'Палатно';
@@ -3180,7 +3234,13 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Лицензи';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Меню на лентата с менюта';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Отхвърляне';
@@ -3265,6 +3325,9 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Запазване';
+
+  @override
+  String get scanTextButtonLabel => 'Сканиране на текст';
 
   @override
   String get scrimLabel => 'Скрим';
@@ -3655,7 +3718,13 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'লাইসেন্স';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'মেনু বার মেনু';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'খারিজ করুন';
@@ -3740,6 +3809,9 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'সেভ করুন';
+
+  @override
+  String get scanTextButtonLabel => 'পাঠ্য স্ক্যান করুন';
 
   @override
   String get scrimLabel => 'স্ক্রিম';
@@ -4130,7 +4202,13 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licence';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Meni trake menija';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Odbaci';
@@ -4215,6 +4293,9 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Sačuvaj';
+
+  @override
+  String get scanTextButtonLabel => 'Skeniraj tekst';
 
   @override
   String get scrimLabel => 'Rubno';
@@ -4605,7 +4686,13 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Llicències';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menú de la barra de menú';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Ignora';
@@ -4690,6 +4777,9 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Desa';
+
+  @override
+  String get scanTextButtonLabel => 'Escaneja el text';
 
   @override
   String get scrimLabel => 'Fons atenuat';
@@ -5080,7 +5170,13 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licence';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Nabídka na liště s nabídkou';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Zavřít';
@@ -5165,6 +5261,9 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Uložit';
+
+  @override
+  String get scanTextButtonLabel => 'Naskenujte text';
 
   @override
   String get scrimLabel => 'Scrim';
@@ -5555,7 +5654,13 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Trwyddedau';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Dewislen bar dewislen';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Diystyru';
@@ -5640,6 +5745,9 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Cadw';
+
+  @override
+  String get scanTextButtonLabel => 'Scan text';
 
   @override
   String get scrimLabel => 'Scrim';
@@ -6030,7 +6138,13 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licenser';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menuen for menulinjen';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Afvis';
@@ -6117,6 +6231,9 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'Gem';
 
   @override
+  String get scanTextButtonLabel => 'Scan tekst';
+
+  @override
   String get scrimLabel => 'Dæmpeskærm';
 
   @override
@@ -6165,7 +6282,7 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String get tabLabelRaw => r'Fane $tabIndex af $tabCount';
 
   @override
-  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_dot_mm;
 
   @override
   String get timePickerDialHelpText => 'Vælg tidspunkt';
@@ -6505,7 +6622,13 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lizenzen';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menü in der Menüleiste';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Schließen';
@@ -6590,6 +6713,9 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Speichern';
+
+  @override
+  String get scanTextButtonLabel => 'Text scannen';
 
   @override
   String get scrimLabel => 'Gitter';
@@ -7044,7 +7170,13 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Άδειες';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Μενού γραμμής μενού';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Παράβλεψη';
@@ -7129,6 +7261,9 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Αποθήκευση';
+
+  @override
+  String get scanTextButtonLabel => 'Σάρωση κειμένου';
 
   @override
   String get scrimLabel => 'Επικάλυψη';
@@ -7519,7 +7654,13 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licenses';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menu bar menu';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Dismiss';
@@ -7604,6 +7745,9 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Save';
+
+  @override
+  String get scanTextButtonLabel => 'Scan text';
 
   @override
   String get scrimLabel => 'Scrim';
@@ -8728,7 +8872,13 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licencias';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menú de la barra de menú';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Cerrar';
@@ -8813,6 +8963,9 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Guardar';
+
+  @override
+  String get scanTextButtonLabel => 'Escanear texto';
 
   @override
   String get scrimLabel => 'Sombreado';
@@ -12586,7 +12739,13 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Litsentsid';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menüüriba menüü';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Loobu';
@@ -12671,6 +12830,9 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Salvesta';
+
+  @override
+  String get scanTextButtonLabel => 'Skanni teksti';
 
   @override
   String get scrimLabel => 'Sirm';
@@ -13061,7 +13223,13 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lizentziak';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menu-barraren menua';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Baztertu';
@@ -13146,6 +13314,9 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Gorde';
+
+  @override
+  String get scanTextButtonLabel => 'Eskaneatu testua';
 
   @override
   String get scrimLabel => 'Barrera';
@@ -13536,7 +13707,13 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'مجوزها';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'منوی نوار منو';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'نپذیرفتن';
@@ -13621,6 +13798,9 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'ذخیره';
+
+  @override
+  String get scanTextButtonLabel => 'اسکن متن';
 
   @override
   String get scrimLabel => 'رویه';
@@ -14011,7 +14191,13 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lisenssit';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Valikkopalkki';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Ohita';
@@ -14098,6 +14284,9 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'Tallenna';
 
   @override
+  String get scanTextButtonLabel => 'Skannaa tekstiä';
+
+  @override
   String get scrimLabel => 'Sermi';
 
   @override
@@ -14143,7 +14332,7 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
   String get signedInLabel => 'Kirjautunut sisään';
 
   @override
-  String get tabLabelRaw => r'Välilehti $tabIndex/$tabCount';
+  String get tabLabelRaw => r'Välilehti $tabIndex kautta $tabCount';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_dot_mm;
@@ -14486,7 +14675,13 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Mga Lisensya';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menu sa menu bar';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'I-dismiss';
@@ -14571,6 +14766,9 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'I-save';
+
+  @override
+  String get scanTextButtonLabel => 'I-scan ang text';
 
   @override
   String get scrimLabel => 'Scrim';
@@ -14961,7 +15159,13 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licences';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menu de la barre de menu';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Ignorer';
@@ -15046,6 +15250,9 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Enregistrer';
+
+  @override
+  String get scanTextButtonLabel => 'Numériser du texte';
 
   @override
   String get scrimLabel => 'Fond';
@@ -15578,7 +15785,13 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licenzas';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menú da barra de menú';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Ignorar';
@@ -15663,6 +15876,9 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Gardar';
+
+  @override
+  String get scanTextButtonLabel => 'Escanear texto';
 
   @override
   String get scrimLabel => 'Sombreado';
@@ -16053,7 +16269,13 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lizenzen';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menü in der Menüleiste';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Schließen';
@@ -16138,6 +16360,9 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Speichern';
+
+  @override
+  String get scanTextButtonLabel => 'Text scannen';
 
   @override
   String get scrimLabel => 'Gitter';
@@ -16528,7 +16753,13 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'લાઇસન્સ';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'મેનૂ બાર મેનૂ';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'છોડી દો';
@@ -16613,6 +16844,9 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'સાચવો';
+
+  @override
+  String get scanTextButtonLabel => 'ટેક્સ્ટ સ્કેન કરો';
 
   @override
   String get scrimLabel => 'સ્ક્રિમ';
@@ -17003,7 +17237,13 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'רישיונות';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'תפריט בסרגל התפריטים';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'סגירה';
@@ -17088,6 +17328,9 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'שמירה';
+
+  @override
+  String get scanTextButtonLabel => 'סרוק טקסט';
 
   @override
   String get scrimLabel => 'מיסוך';
@@ -17478,7 +17721,13 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'लाइसेंस';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'मेन्यू बार का मेन्यू';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'खारिज करें';
@@ -17563,6 +17812,9 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'सेव करें';
+
+  @override
+  String get scanTextButtonLabel => 'पाठ स्कैन करें';
 
   @override
   String get scrimLabel => 'स्क्रिम';
@@ -17953,7 +18205,13 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licence';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Izbornik trake izbornika';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Odbaci';
@@ -18038,6 +18296,9 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Spremi';
+
+  @override
+  String get scanTextButtonLabel => 'Skeniraj tekst';
 
   @override
   String get scrimLabel => 'Rubno';
@@ -18428,7 +18689,13 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licencek';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menüsor menüje';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Elvetés';
@@ -18513,6 +18780,9 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Mentés';
+
+  @override
+  String get scanTextButtonLabel => 'Szöveg beolvasása';
 
   @override
   String get scrimLabel => 'Borítás';
@@ -18903,7 +19173,13 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Արտոնագրեր';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Ընտրացանկի գոտու ընտրացանկ';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Փակել';
@@ -18988,6 +19264,9 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Պահել';
+
+  @override
+  String get scanTextButtonLabel => 'Սկանավորեք տեքստը';
 
   @override
   String get scrimLabel => 'Դիմակ';
@@ -19378,7 +19657,13 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lisensi';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menu panel menu';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Tutup';
@@ -19463,6 +19748,9 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Simpan';
+
+  @override
+  String get scanTextButtonLabel => 'Pindai teks';
 
   @override
   String get scrimLabel => 'Scrim';
@@ -19853,7 +20141,13 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Leyfi';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Valmyndarstika';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Hunsa';
@@ -19938,6 +20232,9 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Vista';
+
+  @override
+  String get scanTextButtonLabel => 'Skannaðu texta';
 
   @override
   String get scrimLabel => 'Möskvi';
@@ -20328,7 +20625,13 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licenze';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menu barra dei menu';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Ignora';
@@ -20413,6 +20716,9 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Salva';
+
+  @override
+  String get scanTextButtonLabel => 'Scansiona il testo';
 
   @override
   String get scrimLabel => 'Rete';
@@ -20803,7 +21109,13 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'ライセンス';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'メニューバーのメニュー';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => '閉じる';
@@ -20888,6 +21200,9 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => '保存';
+
+  @override
+  String get scanTextButtonLabel => 'テキストをスキャン';
 
   @override
   String get scrimLabel => 'スクリム';
@@ -21278,7 +21593,13 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'ლიცენზიები';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'მენიუს ზოლის მენიუ';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'დახურვა';
@@ -21363,6 +21684,9 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'შენახვა';
+
+  @override
+  String get scanTextButtonLabel => 'ტექსტის სკანირება';
 
   @override
   String get scrimLabel => 'სკრიმი';
@@ -21753,7 +22077,13 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Лицензиялар';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Мәзір жолағының мәзірі';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Жабу';
@@ -21838,6 +22168,9 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Сақтау';
+
+  @override
+  String get scanTextButtonLabel => 'Мәтінді сканерлеу';
 
   @override
   String get scrimLabel => 'Кенеп';
@@ -22228,7 +22561,13 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'អាជ្ញាបណ្ណ';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'ម៉ឺនុយរបារម៉ឺនុយ';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'ច្រាន​ចោល';
@@ -22313,6 +22652,9 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'រក្សាទុក';
+
+  @override
+  String get scanTextButtonLabel => 'ស្កេនអត្ថបទ';
 
   @override
   String get scrimLabel => 'ផ្ទាំងស្រអាប់';
@@ -22703,7 +23045,13 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
   String get licensesPageTitle => '\u{caa}\u{cb0}\u{cb5}\u{cbe}\u{ca8}\u{c97}\u{cbf}\u{c97}\u{cb3}\u{cc1}';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => '\u{cae}\u{cc6}\u{ca8}\u{cc1}\u{20}\u{cac}\u{cbe}\u{cb0}\u{ccd}\u{200c}\u{20}\u{cae}\u{cc6}\u{ca8}\u{cc1}';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => '\u{cb5}\u{c9c}\u{cbe}\u{c97}\u{cca}\u{cb3}\u{cbf}\u{cb8}\u{cbf}';
@@ -22788,6 +23136,9 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => '\u{c89}\u{cb3}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get scanTextButtonLabel => '\u{caa}\u{ca0}\u{ccd}\u{caf}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{cb8}\u{ccd}\u{c95}\u{ccd}\u{caf}\u{cbe}\u{ca8}\u{ccd}\u{20}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
 
   @override
   String get scrimLabel => '\u{cb8}\u{ccd}\u{c95}\u{ccd}\u{cb0}\u{cbf}\u{cae}\u{ccd}';
@@ -23178,7 +23529,13 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String get licensesPageTitle => '라이선스';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => '메뉴 바 메뉴';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => '닫기';
@@ -23263,6 +23620,9 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => '저장';
+
+  @override
+  String get scanTextButtonLabel => '스캔 텍스트';
 
   @override
   String get scrimLabel => '스크림';
@@ -23653,7 +24013,13 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Уруксаттамалар';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Меню тилкеси менюсу';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Жабуу';
@@ -23738,6 +24104,9 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Сактоо';
+
+  @override
+  String get scanTextButtonLabel => 'Текстти скандоо';
 
   @override
   String get scrimLabel => 'Кенеп';
@@ -24128,7 +24497,13 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'ໃບອະນຸຍາດ';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'ເມນູແຖບເມນູ';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'ປິດໄວ້';
@@ -24213,6 +24588,9 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'ບັນທຶກ';
+
+  @override
+  String get scanTextButtonLabel => 'ສະແກນຂໍ້ຄວາມ';
 
   @override
   String get scrimLabel => 'Scrim';
@@ -24603,7 +24981,13 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licencijos';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Meniu juostos meniu';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Atsisakyti';
@@ -24688,6 +25072,9 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Išsaugoti';
+
+  @override
+  String get scanTextButtonLabel => 'Nuskaityti tekstą';
 
   @override
   String get scrimLabel => 'Užsklanda';
@@ -25078,7 +25465,13 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licences';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Izvēļņu joslas izvēlne';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Nerādīt';
@@ -25163,6 +25556,9 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Saglabāt';
+
+  @override
+  String get scanTextButtonLabel => 'Skenēt tekstu';
 
   @override
   String get scrimLabel => 'Pārklājums';
@@ -25553,7 +25949,13 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Лиценци';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Мени на лентата со мени';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Отфрли';
@@ -25638,6 +26040,9 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Зачувај';
+
+  @override
+  String get scanTextButtonLabel => 'Скенирајте текст';
 
   @override
   String get scrimLabel => 'Скрим';
@@ -26028,7 +26433,13 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'ലൈസൻസുകൾ';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'മെനു ബാർ മെനു';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'നിരസിക്കുക';
@@ -26113,6 +26524,9 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'സംരക്ഷിക്കുക';
+
+  @override
+  String get scanTextButtonLabel => 'ടെക്സ്റ്റ് സ്കാൻ ചെയ്യുക';
 
   @override
   String get scrimLabel => 'സ്ക്രിം';
@@ -26503,7 +26917,13 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Лиценз';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Цэсний талбарын цэс';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Үл хэрэгсэх';
@@ -26588,6 +27008,9 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Хадгалах';
+
+  @override
+  String get scanTextButtonLabel => 'Текст сканнердах';
 
   @override
   String get scrimLabel => 'Скрим';
@@ -26978,7 +27401,13 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'परवाने';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'मेनू बार मेनू';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'डिसमिस करा';
@@ -27063,6 +27492,9 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'सेव्ह करा';
+
+  @override
+  String get scanTextButtonLabel => 'मजकूर स्कॅन करा';
 
   @override
   String get scrimLabel => 'स्क्रिम';
@@ -27453,7 +27885,13 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lesen';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menu bar menu';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Tolak';
@@ -27538,6 +27976,9 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Simpan';
+
+  @override
+  String get scanTextButtonLabel => 'Pindai teks';
 
   @override
   String get scrimLabel => 'Scrim';
@@ -27928,7 +28369,13 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'လိုင်စင်များ';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'မီနူးဘား မီနူး';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'ပယ်ရန်';
@@ -28013,6 +28460,9 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'သိမ်းရန်';
+
+  @override
+  String get scanTextButtonLabel => 'စာသားကို စကင်ဖတ်ပါ။';
 
   @override
   String get scrimLabel => 'Scrim';
@@ -28403,7 +28853,13 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lisenser';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Meny med menylinje';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Avvis';
@@ -28488,6 +28944,9 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Lagre';
+
+  @override
+  String get scanTextButtonLabel => 'Scan tekst';
 
   @override
   String get scrimLabel => 'Vev';
@@ -28878,7 +29337,13 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'इजाजतपत्रहरू';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => '"मेनु बार" मेनु';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'खारेज गर्नुहोस्';
@@ -28963,6 +29428,9 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'सेभ गर्नुहोस्';
+
+  @override
+  String get scanTextButtonLabel => 'पाठ स्क्यान गर्नुहोस्';
 
   @override
   String get scrimLabel => 'स्क्रिम';
@@ -29353,7 +29821,13 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licenties';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menu van menubalk';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Sluiten';
@@ -29438,6 +29912,9 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Opslaan';
+
+  @override
+  String get scanTextButtonLabel => 'Tekst scannen';
 
   @override
   String get scrimLabel => 'Scrim';
@@ -29828,7 +30305,13 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lisenser';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Meny med menylinje';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Avvis';
@@ -29913,6 +30396,9 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Lagre';
+
+  @override
+  String get scanTextButtonLabel => 'Skann tekst';
 
   @override
   String get scrimLabel => 'Vev';
@@ -30303,7 +30789,13 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'ଲାଇସେନ୍ସଗୁଡ଼କ';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'ମେନୁ ବାର ମେନୁ';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'ଖାରଜ କରନ୍ତୁ';
@@ -30388,6 +30880,9 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'ସେଭ କରନ୍ତୁ';
+
+  @override
+  String get scanTextButtonLabel => 'ପାଠ୍ୟ ସ୍କାନ୍ କରନ୍ତୁ';
 
   @override
   String get scrimLabel => 'ସ୍କ୍ରିମ';
@@ -30778,7 +31273,13 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'ਲਾਇਸੰਸ';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'ਮੀਨੂ ਬਾਰ ਮੀਨੂ';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'ਖਾਰਜ ਕਰੋ';
@@ -30863,6 +31364,9 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'ਰੱਖਿਅਤ ਕਰੋ';
+
+  @override
+  String get scanTextButtonLabel => 'ਟੈਕਸਟ ਸਕੈਨ ਕਰੋ';
 
   @override
   String get scrimLabel => 'ਸਕ੍ਰਿਮ';
@@ -31253,7 +31757,13 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licencje';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Pasek menu';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Zamknij';
@@ -31338,6 +31848,9 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Zapisz';
+
+  @override
+  String get scanTextButtonLabel => 'Zeskanuj tekst';
 
   @override
   String get scrimLabel => 'Siatka';
@@ -31728,7 +32241,13 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'جوازونه';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menu bar menu';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'رد کړه';
@@ -31813,6 +32332,9 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'SAVE';
+
+  @override
+  String get scanTextButtonLabel => 'متن سکین کړئ';
 
   @override
   String get scrimLabel => 'Scrim';
@@ -32203,7 +32725,13 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licenças';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menu da barra de menus';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Dispensar';
@@ -32288,6 +32816,9 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Salvar';
+
+  @override
+  String get scanTextButtonLabel => 'Digitalizar texto';
 
   @override
   String get scrimLabel => 'Scrim';
@@ -32829,7 +33360,13 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licențe';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Bară de meniu';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Închideți';
@@ -32914,6 +33451,9 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Salvați';
+
+  @override
+  String get scanTextButtonLabel => 'Scanați textul';
 
   @override
   String get scrimLabel => 'Material';
@@ -33304,7 +33844,13 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Лицензии';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Строка меню';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Закрыть';
@@ -33389,6 +33935,9 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Сохранить';
+
+  @override
+  String get scanTextButtonLabel => 'Сканировать текст';
 
   @override
   String get scrimLabel => 'Маска';
@@ -33779,7 +34328,13 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'බලපත්‍ර';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'මෙනු තීරු මෙනුව';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'ඉවත ලන්න';
@@ -33864,6 +34419,9 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'සුරකින්න';
+
+  @override
+  String get scanTextButtonLabel => 'පෙළ පරිලෝකනය කරන්න';
 
   @override
   String get scrimLabel => 'ස්ක්‍රිම්';
@@ -34254,7 +34812,13 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licencie';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Ponuka panela s ponukami';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Odmietnuť';
@@ -34339,6 +34903,9 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Uložiť';
+
+  @override
+  String get scanTextButtonLabel => 'Naskenujte text';
 
   @override
   String get scrimLabel => 'Scrim';
@@ -34729,7 +35296,13 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licence';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Meni menijske vrstice';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Opusti';
@@ -34814,6 +35387,9 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Shrani';
+
+  @override
+  String get scanTextButtonLabel => 'Skeniraj besedilo';
 
   @override
   String get scrimLabel => 'Scrim';
@@ -35204,7 +35780,13 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licencat';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menyja e shiritit të menysë';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Hiq';
@@ -35289,6 +35871,9 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Ruaj';
+
+  @override
+  String get scanTextButtonLabel => 'Skanoni tekstin';
 
   @override
   String get scrimLabel => 'Kanavacë';
@@ -35679,7 +36264,13 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Лиценце';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Мени трака менија';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Одбаци';
@@ -35764,6 +36355,9 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Сачувај';
+
+  @override
+  String get scanTextButtonLabel => 'Скенирајте текст';
 
   @override
   String get scrimLabel => 'Скрим';
@@ -36468,7 +37062,13 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Licenser';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menyrad';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Stäng';
@@ -36553,6 +37153,9 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Spara';
+
+  @override
+  String get scanTextButtonLabel => 'Skanna text';
 
   @override
   String get scrimLabel => 'Scrim';
@@ -36943,7 +37546,13 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Leseni';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menyu ya upau wa menyu';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Ondoa';
@@ -37028,6 +37637,9 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Hifadhi';
+
+  @override
+  String get scanTextButtonLabel => 'Changanua maandishi';
 
   @override
   String get scrimLabel => 'Scrim';
@@ -37418,7 +38030,13 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'உரிமங்கள்';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'மெனு பட்டியின் மெனு';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'நிராகரிக்கும்';
@@ -37503,6 +38121,9 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'சேமி';
+
+  @override
+  String get scanTextButtonLabel => 'உரையை ஸ்கேன் செய்யவும்';
 
   @override
   String get scrimLabel => 'ஸ்க்ரிம்';
@@ -37893,7 +38514,13 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'లైసెన్స్‌లు';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'మెనూ బార్ మెనూ';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'విస్మరించు';
@@ -37978,6 +38605,9 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'సేవ్ చేయండి';
+
+  @override
+  String get scanTextButtonLabel => 'వచనాన్ని స్కాన్ చేయండి';
 
   @override
   String get scrimLabel => 'స్క్రిమ్';
@@ -38368,7 +38998,13 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'ใบอนุญาต';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'เมนูในแถบเมนู';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'ปิด';
@@ -38453,6 +39089,9 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'บันทึก';
+
+  @override
+  String get scanTextButtonLabel => 'สแกนข้อความ';
 
   @override
   String get scrimLabel => 'Scrim';
@@ -38843,7 +39482,13 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Mga Lisensya';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menu sa menu bar';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'I-dismiss';
@@ -38928,6 +39573,9 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'I-save';
+
+  @override
+  String get scanTextButtonLabel => 'I-scan ang text';
 
   @override
   String get scrimLabel => 'Scrim';
@@ -39318,7 +39966,13 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Lisanslar';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menü çubuğu menüsü';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Kapat';
@@ -39403,6 +40057,9 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Kaydet';
+
+  @override
+  String get scanTextButtonLabel => 'Metni tara';
 
   @override
   String get scrimLabel => 'opaklık katmanı';
@@ -39793,7 +40450,13 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Ліцензії';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Панель меню';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Закрити';
@@ -39878,6 +40541,9 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Зберегти';
+
+  @override
+  String get scanTextButtonLabel => 'Сканувати текст';
 
   @override
   String get scrimLabel => 'Маскувальний фон';
@@ -40268,7 +40934,13 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'لائسنسز';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'مینیو بار کا مینیو';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'برخاست کریں';
@@ -40353,6 +41025,9 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'محفوظ کریں';
+
+  @override
+  String get scanTextButtonLabel => 'متن کو اسکین کریں';
 
   @override
   String get scrimLabel => 'اسکریم';
@@ -40743,7 +41418,13 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Litsenziyalar';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Menyu paneli';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Yopish';
@@ -40828,6 +41509,9 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Saqlash';
+
+  @override
+  String get scanTextButtonLabel => 'Matnni skanerlash';
 
   @override
   String get scrimLabel => 'Kanop';
@@ -41218,7 +41902,13 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Giấy phép';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Trình đơn của thanh trình đơn';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Bỏ qua';
@@ -41303,6 +41993,9 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Lưu';
+
+  @override
+  String get scanTextButtonLabel => 'Quét văn bản';
 
   @override
   String get scrimLabel => 'Scrim';
@@ -41693,7 +42386,13 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
   String get licensesPageTitle => '许可';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => '菜单栏的菜单';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => '关闭';
@@ -41778,6 +42477,9 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => '保存';
+
+  @override
+  String get scanTextButtonLabel => '扫描文本';
 
   @override
   String get scrimLabel => '纱罩';
@@ -42661,7 +43363,13 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
   String get licensesPageTitle => 'Amalayisense';
 
   @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
   String get menuBarMenuLabel => 'Imenyu yebha yemenyu';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   @override
   String get modalBarrierDismissLabel => 'Cashisa';
@@ -42746,6 +43454,9 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
 
   @override
   String get saveButtonLabel => 'Londoloza';
+
+  @override
+  String get scanTextButtonLabel => 'Skena umbhalo';
 
   @override
   String get scrimLabel => 'I-Scrim';

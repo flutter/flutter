@@ -178,6 +178,13 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 ///
 /// {@macro flutter.widgets.editableText.accessibility}
 ///
+/// {@tool dartpad}
+/// This sample shows how to style a text field to match a filled or outlined
+/// Material Design 3 text field.
+///
+/// ** See code in examples/api/lib/material/text_field/text_field.2.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [TextFormField], which integrates with the [Form] widget.
@@ -307,6 +314,10 @@ class TextField extends StatefulWidget {
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
     this.contextMenuBuilder = _defaultContextMenuBuilder,
+    @Deprecated(
+      'Use `focusNode` instead. '
+      'This feature was deprecated after v3.12.0-14.0.pre.',
+    )
     this.canRequestFocus = true,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
@@ -769,6 +780,10 @@ class TextField extends StatefulWidget {
   /// Defaults to true. If false, the text field will not request focus
   /// when tapped, or when its context menu is displayed. If false it will not
   /// be possible to move the focus to the text field with tab key.
+  @Deprecated(
+    'Use `focusNode` instead. '
+    'This feature was deprecated after v3.12.0-14.0.pre.',
+  )
   final bool canRequestFocus;
 
   /// {@macro flutter.widgets.undoHistory.controller}
@@ -798,7 +813,7 @@ class TextField extends StatefulWidget {
       decoration: TextDecoration.underline,
       decorationColor: Colors.red,
       decorationStyle: TextDecorationStyle.wavy,
-  );
+    );
 
   /// Default builder for [TextField]'s spell check suggestions toolbar.
   ///
@@ -1019,7 +1034,9 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     if (widget.controller == null) {
       _createLocalController();
     }
-    _effectiveFocusNode.canRequestFocus = widget.canRequestFocus && _isEnabled;
+    _effectiveFocusNode.canRequestFocus = widget.focusNode == null
+      ? widget.canRequestFocus && _isEnabled
+      : widget.focusNode!.canRequestFocus && _isEnabled;
     _effectiveFocusNode.addListener(_handleFocusChanged);
   }
 
@@ -1027,7 +1044,9 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
     switch (mode) {
       case NavigationMode.traditional:
-        return widget.canRequestFocus && _isEnabled;
+        return widget.focusNode == null
+          ? widget.canRequestFocus && _isEnabled
+          : widget.focusNode!.canRequestFocus && _isEnabled;
       case NavigationMode.directional:
         return true;
     }
@@ -1079,8 +1098,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   void _createLocalController([TextEditingValue? value]) {
     assert(_controller == null);
     _controller = value == null
-        ? RestorableTextEditingController()
-        : RestorableTextEditingController.fromValue(value);
+      ? RestorableTextEditingController()
+      : RestorableTextEditingController.fromValue(value);
     if (!restorePending) {
       _registerController();
     }
@@ -1283,6 +1302,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     Color? autocorrectionTextRectColor;
     Radius? cursorRadius = widget.cursorRadius;
     VoidCallback? handleDidGainAccessibilityFocus;
+    VoidCallback? handleDidLoseAccessibilityFocus;
 
     switch (theme.platform) {
       case TargetPlatform.iOS:
@@ -1313,6 +1333,9 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
             _effectiveFocusNode.requestFocus();
           }
         };
+        handleDidLoseAccessibilityFocus = () {
+          _effectiveFocusNode.unfocus();
+        };
 
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -1330,6 +1353,15 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         cursorOpacityAnimates ??= false;
         cursorColor = _hasError ? _errorColor : widget.cursorColor ?? selectionStyle.cursorColor ?? theme.colorScheme.primary;
         selectionColor = selectionStyle.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
+        handleDidGainAccessibilityFocus = () {
+          // Automatically activate the TextField when it receives accessibility focus.
+          if (!_effectiveFocusNode.hasFocus && _effectiveFocusNode.canRequestFocus) {
+            _effectiveFocusNode.requestFocus();
+          }
+        };
+        handleDidLoseAccessibilityFocus = () {
+          _effectiveFocusNode.unfocus();
+        };
 
       case TargetPlatform.windows:
         forcePressEnabled = false;
@@ -1343,6 +1375,9 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           if (!_effectiveFocusNode.hasFocus && _effectiveFocusNode.canRequestFocus) {
             _effectiveFocusNode.requestFocus();
           }
+        };
+        handleDidLoseAccessibilityFocus = () {
+          _effectiveFocusNode.unfocus();
         };
     }
 
@@ -1471,6 +1506,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
                   _requestKeyboard();
                 },
                 onDidGainAccessibilityFocus: handleDidGainAccessibilityFocus,
+                onDidLoseAccessibilityFocus: handleDidLoseAccessibilityFocus,
                 child: child,
               );
             },

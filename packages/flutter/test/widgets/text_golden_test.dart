@@ -191,6 +191,7 @@ void main() {
   testWidgets('Text Fade', (WidgetTester tester) async {
     await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Scaffold(
             backgroundColor: Colors.transparent,
             body: RepaintBoundary(
@@ -520,7 +521,7 @@ void main() {
 
   testWidgets('Text Inline widget', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Center(
+      Theme(data: ThemeData(useMaterial3: false), child: Center(
         child: RepaintBoundary(
           child: Material(
             child: Directionality(
@@ -604,7 +605,7 @@ void main() {
             ),
           ),
         ),
-      ),
+      )),
     );
     await expectLater(
       find.byType(Container),
@@ -616,6 +617,7 @@ void main() {
     await tester.pumpWidget(
       Center(
         child: MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: RepaintBoundary(
             child: Material(
               child: Container(
@@ -662,6 +664,7 @@ void main() {
     await tester.pumpWidget(
       Center(
         child: MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: RepaintBoundary(
             child: Material(
               child: Container(

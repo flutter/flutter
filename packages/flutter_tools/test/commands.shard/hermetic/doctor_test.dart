@@ -831,41 +831,6 @@ class FakeAndroidWorkflow extends Fake implements AndroidWorkflow {
   final bool appliesToHostPlatform;
 }
 
-class NoOpDoctor implements Doctor {
-  @override
-  bool get canLaunchAnything => true;
-
-  @override
-  bool get canListAnything => true;
-
-  @override
-  Future<bool> checkRemoteArtifacts(String engineRevision) async => true;
-
-  @override
-  Future<bool> diagnose({
-    bool androidLicenses = false,
-    bool verbose = true,
-    bool showColor = true,
-    AndroidLicenseValidator? androidLicenseValidator,
-    bool showPii = true,
-    List<ValidatorTask>? startedValidatorTasks,
-    bool sendEvent = true,
-    FlutterVersion? version,
-  }) async => true;
-
-  @override
-  List<ValidatorTask> startValidatorTasks() => <ValidatorTask>[];
-
-  @override
-  Future<void> summary() async { }
-
-  @override
-  List<DoctorValidator> get validators => <DoctorValidator>[];
-
-  @override
-  List<Workflow> get workflows => <Workflow>[];
-}
-
 class PassingValidator extends DoctorValidator {
   PassingValidator(super.title);
 

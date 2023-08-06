@@ -87,6 +87,19 @@ typedef ViewBuilder = Widget Function(Iterable<Widget> suggestions);
 /// ** See code in examples/api/lib/material/search_anchor/search_anchor.1.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example shows how to fetch the search suggestions from a remote API.
+///
+/// ** See code in examples/api/lib/material/search_anchor/search_anchor.3.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example demonstrates fetching the search suggestions asynchronously and
+/// debouncing network calls.
+///
+/// ** See code in examples/api/lib/material/search_anchor/search_anchor.4.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 /// * [SearchBar], a widget that defines a search bar.
