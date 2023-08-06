@@ -124,7 +124,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking("should not paint when there isn't enough space", (WidgetTester tester) async {
+  testWidgets("should not paint when there isn't enough space", (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: MediaQuery(
         data: const MediaQueryData(
