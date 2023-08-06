@@ -561,6 +561,7 @@ void main() {
     await tester.pump();
     expect(gotFocus, isFalse);
     expect(node.hasFocus, isFalse);
+    node.dispose();
   });
 
   testWidgetsWithLeakTracking('SwitchListTile.adaptive onFocusChange Callback', (WidgetTester tester) async {
@@ -590,6 +591,7 @@ void main() {
     await tester.pump();
     expect(gotFocus, isFalse);
     expect(node.hasFocus, isFalse);
+    node.dispose();
   });
 
   group('feedback', () {

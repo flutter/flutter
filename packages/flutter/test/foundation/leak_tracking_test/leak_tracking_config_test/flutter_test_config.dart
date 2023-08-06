@@ -25,6 +25,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   });
 
   configureLeakTrackingTearDown(
+    configureOnce: true,
     onLeaks: (Leaks leaks) {
       expect(leaks.total, greaterThan(0));
       leaksDetected = true;
