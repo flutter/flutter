@@ -31,6 +31,7 @@ class EntityPass {
   /// When the element is a child `EntityPass`, it may be rendered to an
   /// offscreen texture and converted into an `Entity` that draws the texture
   /// into the current pass, or its children may be collapsed into the current
+  ///
   /// `EntityPass`. Elements are converted to Entities in
   /// `GetEntityForElement()`.
   using Element = std::variant<Entity, std::unique_ptr<EntityPass>>;

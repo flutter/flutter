@@ -8,7 +8,6 @@
 #include <optional>
 #include <utility>
 
-#include "display_list/geometry/dl_rtree.h"
 #include "flutter/fml/logging.h"
 #include "impeller/aiks/paint_pass_delegate.h"
 #include "impeller/entity/contents/atlas_contents.h"
@@ -20,7 +19,6 @@
 #include "impeller/entity/contents/vertices_contents.h"
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/geometry/path_builder.h"
-#include "include/core/SkRect.h"
 
 namespace impeller {
 
@@ -494,19 +492,6 @@ void Canvas::DrawImageRect(const std::shared_ptr<Image>& image,
 Picture Canvas::EndRecordingAsPicture() {
   Picture picture;
   picture.pass = std::move(base_pass_);
-
-  std::vector<SkRect> rects;
-  picture.pass->IterateAllEntities([&rects](const Entity& entity) {
-    auto coverage = entity.GetCoverage();
-    if (coverage.has_value()) {
-      rects.push_back(SkRect::MakeLTRB(coverage->GetLeft(), coverage->GetTop(),
-                                       coverage->GetRight(),
-                                       coverage->GetBottom()));
-    }
-    return true;
-  });
-  picture.rtree =
-      std::make_shared<flutter::DlRTree>(rects.data(), rects.size());
 
   Reset();
   Initialize(initial_cull_rect_);

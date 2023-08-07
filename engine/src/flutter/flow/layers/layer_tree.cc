@@ -155,69 +155,6 @@ void LayerTree::Paint(CompositorContext::ScopedFrame& frame,
   }
 }
 
-std::shared_ptr<const impeller::Picture> LayerTree::FlattenToImpellerPicture(
-    const SkRect& bounds,
-    const std::shared_ptr<TextureRegistry>& texture_registry) {
-#if IMPELLER_SUPPORTS_RENDERING
-  TRACE_EVENT0("flutter", "LayerTree::FlattenToImpellerPicture");
-
-  impeller::DlAiksCanvas canvas(bounds);
-
-  const FixedRefreshRateStopwatch unused_stopwatch;
-
-  LayerStateStack preroll_state_stack;
-  // No root surface transformation. So assume identity.
-  preroll_state_stack.set_preroll_delegate(bounds);
-  PrerollContext preroll_context{
-      // clang-format off
-      .raster_cache                  = nullptr,
-      .gr_context                    = nullptr,
-      .view_embedder                 = nullptr,
-      .state_stack                   = preroll_state_stack,
-      .dst_color_space               = nullptr,
-      .surface_needs_readback        = false,
-      .raster_time                   = unused_stopwatch,
-      .ui_time                       = unused_stopwatch,
-      .texture_registry              = texture_registry,
-      // clang-format on
-  };
-
-  LayerStateStack paint_state_stack;
-  paint_state_stack.set_delegate(&canvas);
-  PaintContext paint_context = {
-      // clang-format off
-      .state_stack                   = paint_state_stack,
-      .canvas                        = &canvas,
-      .gr_context                    = nullptr,
-      .dst_color_space               = nullptr,
-      .view_embedder                 = nullptr,
-      .raster_time                   = unused_stopwatch,
-      .ui_time                       = unused_stopwatch,
-      .texture_registry              = texture_registry,
-      .raster_cache                  = nullptr,
-      .layer_snapshot_store          = nullptr,
-      .enable_leaf_layer_tracing     = false,
-      // clang-format on
-  };
-
-  // Even if we don't have a root layer, we still need to create an empty
-  // picture.
-  if (root_layer_) {
-    root_layer_->Preroll(&preroll_context);
-
-    // The needs painting flag may be set after the preroll. So check it after.
-    if (root_layer_->needs_painting(paint_context)) {
-      root_layer_->Paint(paint_context);
-    }
-  }
-
-  return std::make_shared<const impeller::Picture>(
-      canvas.EndRecordingAsPicture());
-#else   // IMPELLER_SUPPORTS_RENDERING
-  return nullptr;
-#endif  // !IMPELLER_SUPPORTS_RENDERING
-}
-
 sk_sp<DisplayList> LayerTree::Flatten(
     const SkRect& bounds,
     const std::shared_ptr<TextureRegistry>& texture_registry,

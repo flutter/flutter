@@ -32,10 +32,7 @@ impeller_component("aiks") {
     "../geometry",
   ]
 
-  deps = [
-    "//flutter/display_list",
-    "//flutter/fml",
-  ]
+  deps = [ "//flutter/fml" ]
 }
 
 impeller_component("aiks_playground") {
