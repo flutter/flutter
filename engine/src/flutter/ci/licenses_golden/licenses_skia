@@ -1,4 +1,4 @@
-Signature: d9e3faec5f5cb255a4a508372422ec22
+Signature: f41393ae817eba4a38186953dd38746e
 
 ====================================================================================================
 LIBRARY: etc1
@@ -386,6 +386,7 @@ FILE: ../../../third_party/skia/modules/skparagraph/test.html
 FILE: ../../../third_party/skia/package-lock.json
 FILE: ../../../third_party/skia/relnotes/allow_jit.md
 FILE: ../../../third_party/skia/relnotes/asyncyuva420.md
+FILE: ../../../third_party/skia/relnotes/autographics.md
 FILE: ../../../third_party/skia/relnotes/canvas_flush.md
 FILE: ../../../third_party/skia/relnotes/const_context.md
 FILE: ../../../third_party/skia/relnotes/mesh_ganesh.md
