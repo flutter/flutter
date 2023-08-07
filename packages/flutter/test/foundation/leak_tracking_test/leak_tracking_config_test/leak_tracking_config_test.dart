@@ -30,14 +30,18 @@ void main() {
       expect(LeakTracking.phase.isPaused, true);
       await widgetTester.pumpWidget(StatelessLeakingWidget());
     });
-  });
+  },
+  skip: isBrowser,
+  );
 
   testWidgetsWithLeakTracking(test3TrackingOnLeaks, (WidgetTester widgetTester) async {
     expect(LeakTracking.isStarted, true);
     expect(LeakTracking.phase.name, test3TrackingOnLeaks);
     expect(LeakTracking.phase.isPaused, false);
     await widgetTester.pumpWidget(StatelessLeakingWidget());
-  });
+  },
+  skip: isBrowser,
+  );
 
   testWidgetsWithLeakTracking(
     test4TrackingOnWithStackTrace,
@@ -52,5 +56,6 @@ void main() {
         collectStackTraceOnStart: true,
       ),
     ),
+    skip: isBrowser,
   );
 }
