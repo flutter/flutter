@@ -159,6 +159,11 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
         minimumSize: const Size(kMinInteractiveDimension, kMinInteractiveDimension),
         padding: padding,
         alignment: alignment,
+        textStyle: const TextStyle(
+          // This value was eyeballed from a screenshot of a Pixel 6 emulator
+          // running Android API level 34.
+          fontWeight: FontWeight.w400,
+        ),
       ),
       onPressed: onPressed,
       child: child,
