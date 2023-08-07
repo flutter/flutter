@@ -458,8 +458,9 @@ class _SnippetChecker {
   }
 
   static const List<String> ignoresDirectives = <String>[
-    '// ignore_for_file: duplicate_ignore',
     '// ignore_for_file: directives_ordering',
+    '// ignore_for_file: duplicate_ignore',
+    '// ignore_for_file: no_leading_underscores_for_local_identifiers',
     '// ignore_for_file: prefer_final_locals',
     '// ignore_for_file: unnecessary_import',
     '// ignore_for_file: unreachable_from_main',
