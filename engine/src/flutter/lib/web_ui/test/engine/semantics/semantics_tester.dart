@@ -353,27 +353,6 @@ class SemanticsTester {
 /// Verifies the HTML structure of the current semantics tree.
 void expectSemanticsTree(String semanticsHtml) {
   const List<String> ignoredAttributes = <String>['pointer-events'];
-//   print('\n============================================================================');
-//   print('''
-// semanticsHtml:
-//   $semanticsHtml
-// '''.trim());
-//   print('----------------------------------------------------------------------------');
-//   print('''
-// canonicalizeHtml(semanticsHtml):
-//   ${canonicalizeHtml(semanticsHtml)}
-// '''.trim());
-//   print('----------------------------------------------------------------------------');
-//   print('''
-// canonicalizeHtml(appHostNode.querySelector('flt-semantics')!.outerHTML!, ignoredAttributes: ignoredAttributes):
-//   ${canonicalizeHtml(appHostNode.querySelector('flt-semantics')!.outerHTML!, ignoredAttributes: ignoredAttributes)}
-// '''.trim());
-//   print('''
-// appHostNode.querySelector('flt-semantics')!.outerHTML!:
-//   ${appHostNode.querySelector('flt-semantics')!.outerHTML!}
-// '''.trim());
-//   print('============================================================================\n');
-
   expect(
     canonicalizeHtml(appHostNode.querySelector('flt-semantics')!.outerHTML!, ignoredAttributes: ignoredAttributes),
     canonicalizeHtml(semanticsHtml),
