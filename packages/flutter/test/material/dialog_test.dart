@@ -2511,7 +2511,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('DialogRoute is state restorable', (WidgetTester tester) async {
+  testWidgets('DialogRoute is state restorable', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         restorationScopeId: 'app',

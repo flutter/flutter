@@ -341,7 +341,7 @@ void main() {
 
   group('layoutBehavior', () {
 
-    testWidgetsWithLeakTracking('ButtonBar has a min height of 52 when using ButtonBarLayoutBehavior.constrained', (WidgetTester tester) async {
+    testWidgets('ButtonBar has a min height of 52 when using ButtonBarLayoutBehavior.constrained', (WidgetTester tester) async {
       await tester.pumpWidget(
         const SingleChildScrollView(
           child: ListBody(

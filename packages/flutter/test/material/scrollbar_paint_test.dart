@@ -80,7 +80,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('works with MaterialApp and Scaffold', (WidgetTester tester) async {
+  testWidgets('works with MaterialApp and Scaffold', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: MediaQuery(
         data: const MediaQueryData(

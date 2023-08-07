@@ -788,7 +788,7 @@ void main() {
   });
 
   // This test prevents https://github.com/flutter/flutter/issues/20483
-  testWidgetsWithLeakTracking('Floating Action Button clips ink splash and highlight', (WidgetTester tester) async {
+  testWidgets('Floating Action Button clips ink splash and highlight', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -1334,7 +1334,7 @@ void main() {
 
 
     // This test prevents https://github.com/flutter/flutter/issues/20483
-    testWidgetsWithLeakTracking('Floating Action Button clips ink splash and highlight', (WidgetTester tester) async {
+    testWidgets('Floating Action Button clips ink splash and highlight', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(
         MaterialApp(

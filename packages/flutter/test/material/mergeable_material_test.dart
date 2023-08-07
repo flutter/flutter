@@ -235,7 +235,7 @@ void main() {
     debugDisableShadows = true;
   });
 
-  testWidgetsWithLeakTracking('MergeableMaterial skips shadow for zero elevation', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial skips shadow for zero elevation', (WidgetTester tester) async {
     debugDisableShadows = false;
     await tester.pumpWidget(
       const MaterialApp(

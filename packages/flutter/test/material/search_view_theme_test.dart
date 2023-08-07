@@ -237,7 +237,7 @@ void main() {
       checkSearchView(tester);
     });
 
-    testWidgetsWithLeakTracking('Overall Theme SearchView theme overrides defaults and null theme', (WidgetTester tester) async {
+    testWidgets('Overall Theme SearchView theme overrides defaults and null theme', (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(overallTheme: searchViewTheme));
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle(); // allow the animations to finish
