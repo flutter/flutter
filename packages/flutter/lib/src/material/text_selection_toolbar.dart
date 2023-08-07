@@ -658,7 +658,7 @@ class _TextSelectionToolbarContainer extends StatelessWidget {
   static const Color _defaultColorDark = Color(0xff424242);
 
   static Color _getColor(ColorScheme colorScheme) {
-    final bool isDefaultSurface = switch(colorScheme.brightness) {
+    final bool isDefaultSurface = switch (colorScheme.brightness) {
       Brightness.light => identical(ThemeData().colorScheme.surface, colorScheme.surface),
       Brightness.dark => identical(ThemeData.dark().colorScheme.surface, colorScheme.surface),
     };
