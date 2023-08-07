@@ -51,7 +51,6 @@ class BuildPreviewCommand extends BuildSubCommand {
     //final Directory targetDir = fs.systemTempDirectory.createTempSync('flutter-build-preview');
     final Directory targetDir = fs.directory(flutterRoot).parent.createTempSync('flutter-build-preview-');
     final FlutterProject flutterProject = await _createProject(targetDir);
-    print('about to build project at ${flutterProject.directory.path}');
     if (!globals.platform.isWindows) {
       throwToolExit('"build _preview" is only supported on Windows hosts.');
     }
