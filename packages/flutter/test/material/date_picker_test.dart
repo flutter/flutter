@@ -335,6 +335,190 @@ void main() {
       expect(tester.getBottomLeft(find.text('OK')).dx, 800 - ltrOkRight);
     });
 
+    group('Barrier dismissible', () {
+      late _DatePickerObserver rootObserver;
+
+      setUp(() {
+        rootObserver = _DatePickerObserver();
+      });
+
+      testWidgets('Barrier is dismissible with default parameter', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            navigatorObservers: <NavigatorObserver>[rootObserver],
+            home: Material(
+              child: Center(
+                child: Builder(
+                  builder: (BuildContext context) {
+                    return ElevatedButton(
+                      child: const Text('X'),
+                      onPressed: () =>
+                          showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(2018),
+                            lastDate: DateTime(2030),
+                            builder: (BuildContext context,
+                                Widget? child) => const SizedBox(),
+                          ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // Open the dialog.
+        await tester.tap(find.byType(ElevatedButton));
+        await tester.pumpAndSettle();
+        expect(rootObserver.datePickerCount, 1);
+
+        // Tap on the barrier.
+        await tester.tapAt(const Offset(10.0, 10.0));
+        await tester.pumpAndSettle();
+        expect(rootObserver.datePickerCount, 0);
+      });
+
+      testWidgets('Barrier is not dismissible with barrierDismissible is false', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            navigatorObservers: <NavigatorObserver>[rootObserver],
+            home: Material(
+              child: Center(
+                child: Builder(
+                  builder: (BuildContext context) {
+                    return ElevatedButton(
+                      child: const Text('X'),
+                      onPressed: () =>
+                          showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(2018),
+                            lastDate: DateTime(2030),
+                            barrierDismissible: false,
+                            builder: (BuildContext context,
+                                Widget? child) => const SizedBox(),
+                          ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // Open the dialog.
+        await tester.tap(find.byType(ElevatedButton));
+        await tester.pumpAndSettle();
+        expect(rootObserver.datePickerCount, 1);
+
+        // Tap on the barrier, which shouldn't do anything this time.
+        await tester.tapAt(const Offset(10.0, 10.0));
+        await tester.pumpAndSettle();
+        expect(rootObserver.datePickerCount, 1);
+      });
+    });
+
+    testWidgets('Barrier color', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: Builder(
+                builder: (BuildContext context) {
+                  return ElevatedButton(
+                    child: const Text('X'),
+                    onPressed: () =>
+                        showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(2018),
+                          lastDate: DateTime(2030),
+                          builder: (BuildContext context,
+                              Widget? child) => const SizedBox(),
+                        ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Open the dialog.
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+      expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, Colors.black54);
+
+      // Dismiss the dialog.
+      await tester.tapAt(const Offset(10.0, 10.0));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: Builder(
+                builder: (BuildContext context) {
+                  return ElevatedButton(
+                    child: const Text('X'),
+                    onPressed: () =>
+                        showDatePicker(
+                          context: context,
+                          barrierColor: Colors.pink,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(2018),
+                          lastDate: DateTime(2030),
+                          builder: (BuildContext context,
+                              Widget? child) => const SizedBox(),
+                        ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Open the dialog.
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+      expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, Colors.pink);
+    });
+
+    testWidgets('Barrier Label', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: Builder(
+                builder: (BuildContext context) {
+                  return ElevatedButton(
+                    child: const Text('X'),
+                    onPressed: () =>
+                        showDatePicker(
+                          context: context,
+                          barrierLabel: 'Custom Label',
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(2018),
+                          lastDate: DateTime(2030),
+                          builder: (BuildContext context,
+                              Widget? child) => const SizedBox(),
+                        ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Open the dialog.
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+      expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).semanticsLabel, 'Custom Label');
+    });
+
     testWidgets('uses nested navigator if useRootNavigator is false', (WidgetTester tester) async {
       final _DatePickerObserver rootObserver = _DatePickerObserver();
       final _DatePickerObserver nestedObserver = _DatePickerObserver();
@@ -2034,5 +2218,13 @@ class _DatePickerObserver extends NavigatorObserver {
       datePickerCount++;
     }
     super.didPush(route, previousRoute);
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (route is DialogRoute) {
+      datePickerCount--;
+    }
+    super.didPop(route, previousRoute);
   }
 }
