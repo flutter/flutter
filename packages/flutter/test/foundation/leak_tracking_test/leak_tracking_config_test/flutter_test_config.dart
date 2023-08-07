@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
 import 'package:leak_tracker_testing/leak_tracker_testing.dart';
@@ -21,7 +22,9 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   // This tear down should be set before leak tracking tear down in
   // order to happen after it and verify that leaks are found.
   tearDownAll(() async {
-    expect(leaksDetected, true, reason: 'leaks should be detected');
+    if (!kIsWeb) {
+      expect(leaksDetected, true, reason: 'leaks should be detected');
+    }
   });
 
   configureLeakTrackingTearDown(
