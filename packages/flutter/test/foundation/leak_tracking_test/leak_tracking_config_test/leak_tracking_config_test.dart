@@ -26,9 +26,9 @@ void main() {
     });
 
     testWidgets(test2TrackingOffLeaks, (WidgetTester widgetTester) async {
-      expect(LeakTracking.isStarted, true);
       expect(LeakTracking.phase.name, null);
-      expect(LeakTracking.phase.isPaused, true);
+      // Flutter test engine may change test order.
+      expect(LeakTracking.phase.isPaused || !LeakTracking.isStarted, true);
       await widgetTester.pumpWidget(StatelessLeakingWidget());
     });
   },
