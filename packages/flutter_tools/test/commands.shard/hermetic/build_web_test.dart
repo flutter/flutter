@@ -73,7 +73,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
   });
 
   testUsingContext('Refuses to build a debug build for web', () async {
@@ -91,7 +91,7 @@ void main() {
   }, overrides: <Type, Generator>{
     Platform: () => fakePlatform,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
   });
 
   testUsingContext('Refuses to build for web when feature is disabled', () async {
@@ -112,7 +112,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
   });
 
   testUsingContext('Setup for a web build with default output directory', () async {
@@ -135,7 +135,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
       expect(environment.defines, <String, String>{
         'TargetFile': 'lib/main.dart',
@@ -234,7 +234,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
       expect(environment.defines, <String, String>{
         'TargetFile': 'lib/main.dart',
@@ -261,7 +261,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
   });
 
   testUsingContext('not hidden if feature flag is enabled', () async {
@@ -270,7 +270,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
   });
 
   testUsingContext('Defaults to web renderer auto mode when no option is specified', () async {
@@ -285,7 +285,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
   });
 
@@ -310,7 +310,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
   });
 
@@ -326,7 +326,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
   });
 
@@ -342,7 +342,7 @@ void main() {
     Platform: () => fakePlatform,
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => processManager,
     BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
   });
 }
