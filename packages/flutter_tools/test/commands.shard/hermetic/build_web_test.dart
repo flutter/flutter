@@ -7,6 +7,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -28,6 +29,9 @@ void main() {
       'FLUTTER_ROOT': '/',
     },
   );
+  late ProcessUtils processUtils;
+  late BufferLogger logger;
+  late ProcessManager processManager;
 
   setUpAll(() {
     Cache.flutterRoot = '';
@@ -42,6 +46,12 @@ void main() {
     fileSystem.file('.packages').createSync();
     fileSystem.file(fileSystem.path.join('web', 'index.html')).createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+    logger = BufferLogger.test();
+    processManager = FakeProcessManager.empty();
+    processUtils = ProcessUtils(
+      logger: logger,
+      processManager: processManager,
+    );
   });
 
   testUsingContext('Refuses to build for web when missing index.html', () async {
@@ -49,8 +59,9 @@ void main() {
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      fileSystem: fileSystem,
+      logger: logger,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     ));
 
@@ -70,7 +81,8 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
-      logger: BufferLogger.test(),
+      logger: logger,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     ));
 
@@ -87,7 +99,8 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     ));
 
@@ -107,7 +120,8 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
-      logger: BufferLogger.test(),
+      logger: logger,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
@@ -194,7 +208,8 @@ void main() {
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
-      logger: BufferLogger.test(),
+      logger: logger,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
