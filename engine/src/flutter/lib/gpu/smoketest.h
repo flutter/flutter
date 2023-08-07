@@ -2,21 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_LIB_GPU_GPU_H_
-#define FLUTTER_LIB_GPU_GPU_H_
+#pragma once
 
 #include <cstdint>
 
+#include "flutter/lib/gpu/export.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/tonic/dart_state.h"
 #include "third_party/tonic/dart_wrapper_info.h"
-
-#if FML_OS_WIN
-#define FLUTTER_EXPORT __declspec(dllexport)
-#else  // FML_OS_WIN
-#define FLUTTER_EXPORT __attribute__((visibility("default")))
-#endif  // FML_OS_WIN
 
 namespace flutter {
 
@@ -32,26 +26,28 @@ class FlutterGpuTestClass
 
 }  // namespace flutter
 
+//----------------------------------------------------------------------------
+/// Exports
+///
+
 extern "C" {
 
 // TODO(131346): Remove this once we migrate the Dart GPU API into this space.
-FLUTTER_EXPORT
+FLUTTER_GPU_EXPORT
 extern uint32_t InternalFlutterGpuTestProc();
 
 // TODO(131346): Remove this once we migrate the Dart GPU API into this space.
-FLUTTER_EXPORT
+FLUTTER_GPU_EXPORT
 extern Dart_Handle InternalFlutterGpuTestProcWithCallback(Dart_Handle callback);
 
 // TODO(131346): Remove this once we migrate the Dart GPU API into this space.
-FLUTTER_EXPORT
+FLUTTER_GPU_EXPORT
 extern void InternalFlutterGpuTestClass_Create(Dart_Handle wrapper);
 
 // TODO(131346): Remove this once we migrate the Dart GPU API into this space.
-FLUTTER_EXPORT
+FLUTTER_GPU_EXPORT
 extern void InternalFlutterGpuTestClass_Method(
     flutter::FlutterGpuTestClass* self,
     int something);
 
 }  // extern "C"
-
-#endif  // FLUTTER_LIB_GPU_GPU_H_

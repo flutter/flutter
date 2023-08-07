@@ -2,27 +2,35 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/lib/ui/gpu/context.h"
+#include "flutter/lib/gpu/context.h"
 
-#include <memory>
-#include <sstream>
+#include <future>
 
-#include "flutter/fml/log_level.h"
-#include "flutter/fml/logging.h"
-#include "flutter/fml/make_copyable.h"
-#include "flutter/fml/memory/ref_ptr.h"
+#include "dart_api.h"
 #include "flutter/lib/ui/ui_dart_state.h"
-#include "third_party/tonic/dart_wrappable.h"
+#include "fml/make_copyable.h"
+#include "tonic/converter/dart_converter.h"
 
 namespace flutter {
 
-IMPLEMENT_WRAPPERTYPEINFO(ui, GpuContext);
+IMPLEMENT_WRAPPERTYPEINFO(gpu, Context);
 
-std::string GpuContext::InitializeDefault(Dart_Handle wrapper) {
-  auto dart_state = UIDartState::Current();
+Context::Context(std::shared_ptr<impeller::Context> context)
+    : context_(std::move(context)) {}
+
+Context::~Context() = default;
+
+}  // namespace flutter
+
+//----------------------------------------------------------------------------
+/// Exports
+///
+
+Dart_Handle InternalFlutterGpu_Context_InitializeDefault(Dart_Handle wrapper) {
+  auto dart_state = flutter::UIDartState::Current();
   if (!dart_state->IsImpellerEnabled()) {
-    return "The GpuContext API requires the Impeller rendering backend to be "
-           "enabled.";
+    return tonic::ToDart(
+        "Flutter GPU requires the Impeller rendering backend to be enabled.");
   }
 
   // Grab the Impeller context from the IO manager.
@@ -38,17 +46,10 @@ std::string GpuContext::InitializeDefault(Dart_Handle wrapper) {
 
   auto impeller_context = impeller_context_future.get();
   if (!impeller_context) {
-    return "Unable to retrieve the Impeller context.";
+    return tonic::ToDart("Unable to retrieve the Impeller context.");
   }
-  auto res = fml::MakeRefCounted<GpuContext>(impeller_context);
+  auto res = fml::MakeRefCounted<flutter::Context>(impeller_context);
   res->AssociateWithDartWrapper(wrapper);
 
-  return "";
+  return Dart_Null();
 }
-
-GpuContext::GpuContext(std::shared_ptr<impeller::Context> context)
-    : context_(std::move(context)) {}
-
-GpuContext::~GpuContext() = default;
-
-}  // namespace flutter

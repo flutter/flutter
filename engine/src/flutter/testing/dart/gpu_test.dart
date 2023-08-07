@@ -5,11 +5,11 @@
 // ignore_for_file: avoid_relative_lib_imports
 
 import 'package:litetest/litetest.dart';
-import '../../lib/gpu/gpu.dart' as gpu;
+import '../../lib/gpu/lib/gpu.dart' as gpu;
 
 void main() {
   // TODO(131346): Remove this once we migrate the Dart GPU API into this space.
-  test('no crash', () async {
+  test('smoketest', () async {
     final int result = gpu.testProc();
     expect(result, 1);
 
@@ -20,5 +20,18 @@ void main() {
 
     final gpu.FlutterGpuTestClass a = gpu.FlutterGpuTestClass();
     a.coolMethod(9847);
+  });
+
+  test('gpu.context throws exception for incompatible embedders', () async {
+    try {
+      // ignore: unnecessary_statements
+      gpu.gpuContext; // Force the
+      fail('Exception not thrown');
+    } catch (e) {
+      expect(
+          e.toString(),
+          contains(
+              'Flutter GPU requires the Impeller rendering backend to be enabled.'));
+    }
   });
 }

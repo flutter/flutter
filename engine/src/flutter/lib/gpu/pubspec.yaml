@@ -1,0 +1,14 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+name: flutter_gpu
+description: A framework for writing Flutter applications
+homepage: https://flutter.dev
+
+environment:
+  sdk: '>=3.0.0-0 <4.0.0'
+
+dependencies:
+  sky_engine:
+    sdk: flutter
