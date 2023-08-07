@@ -20,7 +20,8 @@ const String _test3TrackingOn = 'test3, tracking-on';
 void main() {
   group('groups are handled', () {
     testWidgets(_test0TrackingOffLeaks, (WidgetTester widgetTester) async {
-      expect(LeakTracking.isStarted, false);
+      // Flutter test engine may change test order.
+      expect(LeakTracking.phase.isPaused || !LeakTracking.isStarted, true);
       expect(LeakTracking.phase.name, null);
       await widgetTester.pumpWidget(StatelessLeakingWidget());
     });
