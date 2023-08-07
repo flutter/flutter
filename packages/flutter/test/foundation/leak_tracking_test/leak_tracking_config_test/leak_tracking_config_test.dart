@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/src/foundation/constants.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
@@ -31,7 +32,7 @@ void main() {
       await widgetTester.pumpWidget(StatelessLeakingWidget());
     });
   },
-  skip: isBrowser); // Leak tracking is off for web.
+  skip: kIsWeb); // Leak tracking is off for web.
 
   testWidgetsWithLeakTracking(test3TrackingOnLeaks, (WidgetTester widgetTester) async {
     expect(LeakTracking.isStarted, true);
@@ -39,7 +40,7 @@ void main() {
     expect(LeakTracking.phase.isPaused, false);
     await widgetTester.pumpWidget(StatelessLeakingWidget());
   },
-  skip: isBrowser); // Leak tracking is off for web.
+  skip: kIsWeb); // Leak tracking is off for web.
 
   testWidgetsWithLeakTracking(
     test4TrackingOnWithStackTrace,
@@ -54,5 +55,5 @@ void main() {
         collectStackTraceOnStart: true,
       ),
     ),
-  skip: isBrowser); // Leak tracking is off for web.
+  skip: kIsWeb); // Leak tracking is off for web.
 }
