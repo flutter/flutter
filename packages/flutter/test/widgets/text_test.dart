@@ -266,6 +266,23 @@ void main() {
     expect(renderText.size.height, singleLineHeight * textScaleFactor * 3);
   });
 
+  testWidgets("Inline widgets' scaled sizes are constrained", (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/130588
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 502.5454545454545,
+            child: Text.rich(WidgetSpan(child: Row()), textScaleFactor: 0.95),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('semanticsLabel can override text label', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
