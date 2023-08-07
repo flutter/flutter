@@ -185,11 +185,13 @@ bool HasException(JNIEnv* env) {
   return env->ExceptionCheck() != JNI_FALSE;
 }
 
-bool ClearException(JNIEnv* env) {
+bool ClearException(JNIEnv* env, bool silent) {
   if (!HasException(env)) {
     return false;
   }
-  env->ExceptionDescribe();
+  if (!silent) {
+    env->ExceptionDescribe();
+  }
   env->ExceptionClear();
   return true;
 }

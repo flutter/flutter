@@ -1194,7 +1194,7 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
 
   if (g_image_get_hardware_buffer_method == nullptr) {
     // Continue on as this method may not exist at API <= 29.
-    fml::jni::ClearException(env);
+    fml::jni::ClearException(env, true);
   }
 
   g_image_close_method = env->GetMethodID(g_image_class->obj(), "close", "()V");
@@ -1214,11 +1214,11 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
         env->GetMethodID(g_hardware_buffer_class->obj(), "close", "()V");
     if (g_hardware_buffer_close_method == nullptr) {
       // Continue on as this class may not exist at API <= 26.
-      fml::jni::ClearException(env);
+      fml::jni::ClearException(env, true);
     }
   } else {
     // Continue on as this class may not exist at API <= 26.
-    fml::jni::ClearException(env);
+    fml::jni::ClearException(env, true);
   }
 
   g_compute_platform_resolved_locale_method = env->GetMethodID(
