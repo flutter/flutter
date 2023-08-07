@@ -204,10 +204,6 @@ class RenderSliverOpacity extends RenderProxySliver {
 /// to hit testing. It still consumes space during layout and paints its sliver
 /// child as usual. It just cannot be the target of located events, because its
 /// render object returns false from [hitTest].
-/// ## Semantics
-///
-/// Using this class may also affect how the semantics subtree underneath is
-/// collected.
 ///
 /// ## Semantics
 ///
