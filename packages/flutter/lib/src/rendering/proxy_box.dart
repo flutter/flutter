@@ -3547,7 +3547,14 @@ class RenderRepaintBoundary extends RenderProxyBox {
 /// as usual. It just cannot be the target of located events, because its render
 /// object returns false from [hitTest].
 ///
+/// ## Semantics
+///
+/// Using this class may also affect how the semantics subtree underneath is
+/// collected.
+///
 /// {@macro flutter.widgets.IgnorePointer.Semantics}
+///
+/// {@macro flutter.widgets.IgnorePointer.ignoreSemantics}
 ///
 /// See also:
 ///
@@ -3589,7 +3596,7 @@ class RenderIgnorePointer extends RenderProxyBox {
 
   /// Whether the semantics of this render object is ignored when compiling the semantics tree.
   ///
-  /// {@macro flutter.widgets.IgnorePointer.Semantics}
+  /// {@macro flutter.widgets.IgnorePointer.ignoreSemantics}
   ///
   /// See [SemanticsNode] for additional information about the semantics tree.
   @Deprecated(
@@ -3790,7 +3797,14 @@ class RenderOffstage extends RenderProxyBox {
 /// its children from being the target of located events, because its render
 /// object returns true from [hitTest].
 ///
+/// ## Semantics
+///
+/// Using this class may also affect how the semantics subtree underneath is
+/// collected.
+///
 /// {@macro flutter.widgets.AbsorbPointer.Semantics}
+///
+/// {@macro flutter.widgets.AbsorbPointer.ignoreSemantics}
 ///
 /// See also:
 ///
@@ -3834,7 +3848,7 @@ class RenderAbsorbPointer extends RenderProxyBox {
   /// Whether the semantics of this render object is ignored when compiling the
   /// semantics tree.
   ///
-  /// {@macro flutter.widgets.AbsorbPointer.Semantics}
+  /// {@macro flutter.widgets.AbsorbPointer.ignoreSemantics}
   ///
   /// See [SemanticsNode] for additional information about the semantics tree.
   @Deprecated(
