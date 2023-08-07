@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
+import 'color_scheme.dart';
 import 'constants.dart';
 import 'text_button.dart';
 import 'theme.dart';
@@ -129,13 +130,31 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
     );
   }
 
+  // These colors were taken from a screenshot of a Pixel 6 emulator running
+  // Android API level 34.
+  static const Color _defaultForegroundColorLight = Color(0xff000000);
+  static const Color _defaultForegroundColorDark = Color(0xffffffff);
+
+  static Color _getForegroundColor(ColorScheme colorScheme) {
+    final bool isDefaultOnSurface = switch(colorScheme.brightness) {
+      Brightness.light => identical(ThemeData().colorScheme.onSurface, colorScheme.onSurface),
+      Brightness.dark => identical(ThemeData.dark().colorScheme.onSurface, colorScheme.onSurface),
+    };
+    if (!isDefaultOnSurface) {
+      return colorScheme.onSurface;
+    }
+    return switch (colorScheme.brightness) {
+      Brightness.light => _defaultForegroundColorLight,
+      Brightness.dark => _defaultForegroundColorDark,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return TextButton(
       style: TextButton.styleFrom(
-        foregroundColor: theme.colorScheme.onSurface,
+        foregroundColor: _getForegroundColor(colorScheme),
         shape: const RoundedRectangleBorder(),
         minimumSize: const Size(kMinInteractiveDimension, kMinInteractiveDimension),
         padding: padding,
