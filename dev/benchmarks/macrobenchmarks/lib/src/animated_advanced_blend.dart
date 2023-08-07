@@ -11,15 +11,28 @@ class _MultiplyPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Rect rect = Offset.zero & size;
+    const int xDenominator = 2;
+    const int yDenominator = 10;
+    final double width = size.width / xDenominator;
+    final double height = size.height / yDenominator;
 
-    final Paint yellowPaint = Paint()..color = Colors.yellow;
-    canvas.drawRect(rect, yellowPaint);
+    for (int y = 0; y < yDenominator; y++) {
+      for (int x = 0; x < xDenominator; x++) {
+        final Rect rect = Offset(x * width, y * height) & Size(width, height);
+        final Paint basePaint = Paint()
+          ..color = Color.fromARGB(
+              (((x + 1) * width) / size.width * 255.0).floor(),
+              (((y + 1) * height) / size.height * 255.0).floor(),
+              255,
+              127);
+        canvas.drawRect(rect, basePaint);
 
-    final Paint purplePaint = Paint()
-      ..color = _color
-      ..blendMode = BlendMode.multiply;
-    canvas.drawRect(rect, purplePaint);
+        final Paint multiplyPaint = Paint()
+          ..color = _color
+          ..blendMode = BlendMode.multiply;
+        canvas.drawRect(rect, multiplyPaint);
+      }
+    }
   }
 
   @override
@@ -29,13 +42,13 @@ class _MultiplyPainter extends CustomPainter {
 }
 
 class AnimatedAdvancedBlend extends StatefulWidget {
-  const AnimatedAdvancedBlend({ super.key });
+  const AnimatedAdvancedBlend({super.key});
 
   @override
-  State<AnimatedAdvancedBlend> createState() => _AnimatedBlurBackdropFilterState();
+  State<AnimatedAdvancedBlend> createState() => _AnimatedAdvancedBlendState();
 }
 
-class _AnimatedBlurBackdropFilterState extends State<AnimatedAdvancedBlend> with SingleTickerProviderStateMixin {
+class _AnimatedAdvancedBlendState extends State<AnimatedAdvancedBlend> with SingleTickerProviderStateMixin {
   late final AnimationController controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 5000));
   late final Animation<double> animation = controller.drive(Tween<double>(begin: 0.0, end: 1.0));
   Color _color = const Color.fromARGB(255, 255, 0, 255);
