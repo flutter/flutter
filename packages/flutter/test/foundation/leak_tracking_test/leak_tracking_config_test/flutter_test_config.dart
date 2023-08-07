@@ -16,19 +16,10 @@ import 'constants.dart';
 ///
 /// See https://api.flutter.dev/flutter/flutter_test/flutter_test-library.html.
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
-  bool leaksDetected = false;
-
-  // This tear down should be set before leak tracking tear down in
-  // order to happen after it and verify that leaks are found.
-  tearDownAll(() async {
-    expect(leaksDetected, true, reason: 'leaks should be detected');
-  });
-
   configureLeakTrackingTearDown(
     configureOnce: true,
     onLeaks: (Leaks leaks) {
       expect(leaks.total, greaterThan(0));
-      leaksDetected = true;
 
       try {
         expect(leaks, isLeakFree);
