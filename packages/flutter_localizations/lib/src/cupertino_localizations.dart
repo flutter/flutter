@@ -107,7 +107,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
     // locale's symbols.
     //
     // Because this will be used without specifying any day of month,
-    // in most cases it should be capitalized (according to rules in specific language)
+    // in most cases it should be capitalized (according to rules in specific language).
     return intl.toBeginningOfSentenceCase(_fullYearFormat.dateSymbols.STANDALONEMONTHS[monthIndex - 1]) ??
         _fullYearFormat.dateSymbols.STANDALONEMONTHS[monthIndex - 1];
   }

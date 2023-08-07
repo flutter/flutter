@@ -493,10 +493,9 @@ class CupertinoDatePicker extends StatefulWidget {
         }
       case _PickerColumnType.month:
         for (int i = 1; i <= 12; i++) {
-          String month = localizations.datePickerMonth(i);
-          if (standaloneMonth) {
-            month = localizations.datePickerStandaloneMonth(i);
-          }
+          final String month = standaloneMonth
+              ? localizations.datePickerStandaloneMonth(i)
+              : localizations.datePickerMonth(i);
           if (longestText.length < month.length) {
             longestText = month;
           }
