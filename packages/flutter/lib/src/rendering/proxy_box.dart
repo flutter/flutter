@@ -842,6 +842,19 @@ class RenderIntrinsicHeight extends RenderProxyBox {
   }
 }
 
+/// Excludes the child from baseline computations in the parent.
+class RenderIgnoreBaseline extends RenderProxyBox {
+  /// Create a render object that causes the parent to ignore the child for baseline computations.
+  RenderIgnoreBaseline({
+    RenderBox? child,
+  }) : super(child);
+
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    return null;
+  }
+}
+
 /// Makes its child partially transparent.
 ///
 /// This class paints its child into an intermediate buffer and then blends the
@@ -4305,6 +4318,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     }
     if (_properties.button != null) {
       config.isButton = _properties.button!;
+    }
+    if (_properties.expanded != null) {
+      config.isExpanded = _properties.expanded;
     }
     if (_properties.link != null) {
       config.isLink = _properties.link!;

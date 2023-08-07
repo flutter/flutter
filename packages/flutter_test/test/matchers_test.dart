@@ -683,6 +683,8 @@ void main() {
          hasToggledState: true,
          isToggled: true,
          hasImplicitScrolling: true,
+         hasExpandedState: true,
+         isExpanded: true,
          /* Actions */
          hasTapAction: true,
          hasLongPressAction: true,
@@ -966,6 +968,8 @@ void main() {
           hasToggledState: true,
           isToggled: true,
           hasImplicitScrolling: true,
+          hasExpandedState: true,
+          isExpanded: true,
           /* Actions */
           hasTapAction: true,
           hasLongPressAction: true,
@@ -1055,6 +1059,8 @@ void main() {
           hasToggledState: false,
           isToggled: false,
           hasImplicitScrolling: false,
+          hasExpandedState: false,
+          isExpanded: false,
           /* Actions */
           hasTapAction: false,
           hasLongPressAction: false,

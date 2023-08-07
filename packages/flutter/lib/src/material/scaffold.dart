@@ -1162,9 +1162,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         || FloatingActionButtonLocation.miniCenterFloat
         || FloatingActionButtonLocation.miniEndDocked
         || FloatingActionButtonLocation.miniEndFloat => true,
-        FloatingActionButtonLocation() => throw FlutterError(
-          '$currentFloatingActionButtonLocation is an unknown FloatingActionButtonLocation value.'
-        ),
+        FloatingActionButtonLocation() => true,
       };
       if (floatingActionButtonRect.size != Size.zero && isSnackBarFloating && showAboveFab) {
         snackBarYOffsetBase = floatingActionButtonRect.top;

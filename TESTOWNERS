@@ -92,6 +92,7 @@
 /dev/devicelab/bin/tasks/web_size__compile_test.dart @yjbanov @flutter/web
 /dev/devicelab/bin/tasks/wide_gamut_ios.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/animated_blur_backdrop_filter_perf__timeline_summary.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/animated_blur_backdrop_filter_perf_opengles__timeline_summary.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/slider_perf_android.dart @tahatesser @flutter/framework
 
 ## Windows Android DeviceLab tests
@@ -137,6 +138,7 @@
 /dev/devicelab/bin/tasks/microbenchmarks.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/new_gallery__transition_perf.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/new_gallery_impeller__transition_perf.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/new_gallery_opengles_impeller__transition_perf.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/picture_cache_perf__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/platform_channel_sample_test.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/platform_interaction_test.dart @stuartmorgan @flutter/plugin
@@ -154,7 +156,6 @@
 /dev/devicelab/bin/tasks/channels_integration_test_ios.dart @cyanglaz @flutter/engine
 /dev/devicelab/bin/tasks/codegen_integration_mac.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/color_filter_and_fade_perf_ios__e2e_summary.dart @cyanglaz @flutter/engine
-/dev/devicelab/bin/tasks/complex_layout_ios__compile.dart @cyanglaz @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_ios__start_up.dart @cyanglaz @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_scroll_perf_bad_ios__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_scroll_perf_ios__timeline_summary.dart @cyanglaz @flutter/engine

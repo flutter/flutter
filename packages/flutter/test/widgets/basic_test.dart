@@ -1135,6 +1135,62 @@ void main() {
       contains('verticalDirection: up'),
     ]));
   });
+
+  testWidgets('Row and IgnoreBaseline (control -- with baseline)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Row(
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic,
+        textDirection: TextDirection.ltr,
+        children: <Widget>[
+          Text(
+            'a',
+            textDirection: TextDirection.ltr,
+            style: TextStyle(fontSize: 128.0, fontFamily: 'FlutterTest'), // places baseline at y=96
+          ),
+          Text(
+            'b',
+            textDirection: TextDirection.ltr,
+            style: TextStyle(fontSize: 32.0, fontFamily: 'FlutterTest'), // 24 above baseline, 8 below baseline
+          ),
+        ],
+      ),
+    );
+
+    final Offset aPos = tester.getTopLeft(find.text('a'));
+    final Offset bPos = tester.getTopLeft(find.text('b'));
+    expect(aPos.dy, 0.0);
+    expect(bPos.dy, 96.0 - 24.0);
+  });
+
+  testWidgets('Row and IgnoreBaseline (with ignored baseline)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Row(
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic,
+        textDirection: TextDirection.ltr,
+        children: <Widget>[
+          IgnoreBaseline(
+            child: Text(
+              'a',
+              textDirection: TextDirection.ltr,
+              style: TextStyle(fontSize: 128.0, fontFamily: 'FlutterTest'), // places baseline at y=96
+            ),
+          ),
+          Text(
+            'b',
+            textDirection: TextDirection.ltr,
+            style: TextStyle(fontSize: 32.0, fontFamily: 'FlutterTest'), // 24 above baseline, 8 below baseline
+          ),
+        ],
+      ),
+    );
+
+    final Offset aPos = tester.getTopLeft(find.text('a'));
+    final Offset bPos = tester.getTopLeft(find.text('b'));
+    expect(aPos.dy, 0.0);
+    expect(bPos.dy, 0.0);
+  });
 }
 
 HitsRenderBox hits(RenderBox renderBox) => HitsRenderBox(renderBox);
