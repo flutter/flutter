@@ -1093,12 +1093,15 @@ void main() {
             decoratorPaint.foregroundPainter;
         // ignore: avoid_dynamic_calls
         final dynamic /*_InputBorderTween*/ inputBorderTween =
+            // ignore: avoid_dynamic_calls
             inputBorderPainter.border;
         // ignore: avoid_dynamic_calls
         final Animation<double> animation =
+            // ignore: avoid_dynamic_calls
             inputBorderPainter.borderAnimation as Animation<double>;
         // ignore: avoid_dynamic_calls
         final InputBorder actualBorder =
+            // ignore: avoid_dynamic_calls
             inputBorderTween.evaluate(animation) as InputBorder;
         // ignore: avoid_dynamic_calls
         final Color containerColor = inputBorderPainter.blendedColor as Color;
