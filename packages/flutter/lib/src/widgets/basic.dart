@@ -6893,7 +6893,7 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
   /// Regardless of whether this widget is ignored during hit testing, it will
   /// still consume space during layout and be visible during painting.
   ///
-  /// {@macro flutter.widgets.IgnorePointer.Semantics}
+  /// {@macro flutter.widgets.IgnorePointer.semantics}
   ///
   /// Defaults to true.
   final bool ignoring;
@@ -7010,7 +7010,7 @@ class AbsorbPointer extends SingleChildRenderObjectWidget {
   /// testing, it will still consume space during layout and be visible during
   /// painting.
   ///
-  /// {@macro flutter.widgets.AbsorbPointer.Semantics}
+  /// {@macro flutter.widgets.AbsorbPointer.semantics}
   ///
   /// Defaults to true.
   final bool absorbing;
@@ -7018,7 +7018,7 @@ class AbsorbPointer extends SingleChildRenderObjectWidget {
   /// Whether the semantics of this render object is ignored when compiling the
   /// semantics tree.
   ///
-  /// {@macro flutter.widgets.AbsorbPointer.ignoreSemantics}
+  /// {@macro flutter.widgets.AbsorbPointer.ignoringSemantics}
   ///
   /// See [SemanticsNode] for additional information about the semantics tree.
   @Deprecated(

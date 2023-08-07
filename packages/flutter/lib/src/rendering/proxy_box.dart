@@ -3552,9 +3552,9 @@ class RenderRepaintBoundary extends RenderProxyBox {
 /// Using this class may also affect how the semantics subtree underneath is
 /// collected.
 ///
-/// {@macro flutter.widgets.IgnorePointer.Semantics}
+/// {@macro flutter.widgets.IgnorePointer.semantics}
 ///
-/// {@macro flutter.widgets.IgnorePointer.ignoreSemantics}
+/// {@macro flutter.widgets.IgnorePointer.ignoringSemantics}
 ///
 /// See also:
 ///
@@ -3581,7 +3581,7 @@ class RenderIgnorePointer extends RenderProxyBox {
   /// Regardless of whether this render object is ignored during hit testing, it
   /// will still consume space during layout and be visible during painting.
   ///
-  /// {@macro flutter.widgets.IgnorePointer.Semantics}
+  /// {@macro flutter.widgets.IgnorePointer.semantics}
   bool get ignoring => _ignoring;
   bool _ignoring;
   set ignoring(bool value) {
@@ -3596,7 +3596,7 @@ class RenderIgnorePointer extends RenderProxyBox {
 
   /// Whether the semantics of this render object is ignored when compiling the semantics tree.
   ///
-  /// {@macro flutter.widgets.IgnorePointer.ignoreSemantics}
+  /// {@macro flutter.widgets.IgnorePointer.ignoringSemantics}
   ///
   /// See [SemanticsNode] for additional information about the semantics tree.
   @Deprecated(
@@ -3802,9 +3802,9 @@ class RenderOffstage extends RenderProxyBox {
 /// Using this class may also affect how the semantics subtree underneath is
 /// collected.
 ///
-/// {@macro flutter.widgets.AbsorbPointer.Semantics}
+/// {@macro flutter.widgets.AbsorbPointer.semantics}
 ///
-/// {@macro flutter.widgets.AbsorbPointer.ignoreSemantics}
+/// {@macro flutter.widgets.AbsorbPointer.ignoringSemantics}
 ///
 /// See also:
 ///
@@ -3832,7 +3832,7 @@ class RenderAbsorbPointer extends RenderProxyBox {
   /// testing, it will still consume space during layout and be visible during
   /// painting.
   ///
-  /// {@macro flutter.widgets.AbsorbPointer.Semantics}
+  /// {@macro flutter.widgets.AbsorbPointer.semantics}
   bool get absorbing => _absorbing;
   bool _absorbing;
   set absorbing(bool value) {
@@ -3848,7 +3848,7 @@ class RenderAbsorbPointer extends RenderProxyBox {
   /// Whether the semantics of this render object is ignored when compiling the
   /// semantics tree.
   ///
-  /// {@macro flutter.widgets.AbsorbPointer.ignoreSemantics}
+  /// {@macro flutter.widgets.AbsorbPointer.ignoringSemantics}
   ///
   /// See [SemanticsNode] for additional information about the semantics tree.
   @Deprecated(

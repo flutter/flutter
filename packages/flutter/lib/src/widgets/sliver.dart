@@ -1183,9 +1183,9 @@ class SliverOpacity extends SingleChildRenderObjectWidget {
 /// Using this class may also affect how the semantics subtree underneath is
 /// collected.
 ///
-/// {@macro flutter.widgets.IgnorePointer.Semantics}
+/// {@macro flutter.widgets.IgnorePointer.semantics}
 ///
-/// {@macro flutter.widgets.IgnorePointer.ignoreSemantics}
+/// {@macro flutter.widgets.IgnorePointer.ignoringSemantics}
 ///
 /// See also:
 ///
@@ -1210,13 +1210,13 @@ class SliverIgnorePointer extends SingleChildRenderObjectWidget {
   /// Regardless of whether this sliver is ignored during hit testing, it will
   /// still consume space during layout and be visible during painting.
   ///
-  /// {@macro flutter.widgets.IgnorePointer.Semantics}
+  /// {@macro flutter.widgets.IgnorePointer.semantics}
   final bool ignoring;
 
   /// Whether the semantics of this sliver is ignored when compiling the
   /// semantics tree.
   ///
-  /// {@macro flutter.widgets.IgnorePointer.ignoreSemantics}
+  /// {@macro flutter.widgets.IgnorePointer.ignoringSemantics}
   @Deprecated(
     'Create a custom sliver ignore pointer widget instead. '
     'This feature was deprecated after v3.8.0-12.0.pre.'
