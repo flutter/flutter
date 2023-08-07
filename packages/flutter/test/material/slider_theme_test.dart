@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
+import '../foundation/leak_tracking.dart';
 
 void main() {
   test('SliderThemeData copyWith, ==, hashCode basics', () {

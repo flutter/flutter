@@ -10,6 +10,7 @@ import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
+import '../foundation/leak_tracking.dart';
 
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/105833
