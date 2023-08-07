@@ -27,10 +27,12 @@ void main() {
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
 
-  Finder findOverflowNextButton() => find.byWidgetPredicate((Widget widget) =>
-  widget is CustomPaint &&
-      '${widget.painter?.runtimeType}' == '_RightCupertinoChevronPainter',
-  );
+  Finder findOverflowNextButton() {
+    return find.byWidgetPredicate((Widget widget) =>
+    widget is CustomPaint &&
+        '${widget.painter?.runtimeType}' == '_RightCupertinoChevronPainter',
+    );
+  }
 
   testWidgetsWithLeakTracking('Builds the right toolbar on each platform, including web, and shows buttonItems', (WidgetTester tester) async {
     const String buttonText = 'Click me';

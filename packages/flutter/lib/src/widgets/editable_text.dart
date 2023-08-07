@@ -2446,20 +2446,25 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     );
   }
 
-  /// Launch a web search on the current selection, as in the "Search Web" edit menu button on iOS.
+  /// Launch a web search on the current selection,
+  ///   as in the "Search Web" edit menu button on iOS.
+  ///
   /// Currently this is only implemented for iOS.
-  /// Throws an error if the selection is empty or collapsed.
+  /// When 'obscureText' is true or the selection is empty,
+  /// this function will not do anything
   Future<void> searchWebForSelection(SelectionChangedCause cause) async {
     assert(!widget.obscureText);
-
-    final String text = textEditingValue.selection.textInside(textEditingValue.text);
-    if (widget.obscureText || text.isEmpty) {
+    if (widget.obscureText) {
       return;
     }
-    await SystemChannels.platform.invokeMethod(
-      'SearchWeb.invoke',
-      text,
-    );
+
+    final String text = textEditingValue.selection.textInside(textEditingValue.text);
+    if (text.isNotEmpty) {
+      await SystemChannels.platform.invokeMethod(
+        'SearchWeb.invoke',
+        text,
+      );
+    }
   }
 
   void _startLiveTextInput(SelectionChangedCause cause) {

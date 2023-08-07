@@ -179,10 +179,13 @@ void main() {
   });
 
   group('Text selection menu overflow (iOS)', () {
-    Finder findOverflowNextButton() => find.byWidgetPredicate((Widget widget) =>
+    Finder findOverflowNextButton() {
+      return find.byWidgetPredicate((Widget widget) =>
       widget is CustomPaint &&
-      '${widget.painter?.runtimeType}' == '_RightCupertinoChevronPainter',
-    );
+          '${widget.painter?.runtimeType}' == '_RightCupertinoChevronPainter',
+      );
+    }
+
     Finder findOverflowBackButton() => find.byWidgetPredicate((Widget widget) =>
       widget is CustomPaint &&
       '${widget.painter?.runtimeType}' == '_LeftCupertinoChevronPainter',
