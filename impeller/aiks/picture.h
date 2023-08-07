@@ -8,7 +8,6 @@
 #include <memory>
 #include <optional>
 
-#include "display_list/geometry/dl_rtree.h"
 #include "flutter/fml/macros.h"
 #include "impeller/aiks/aiks_context.h"
 #include "impeller/aiks/image.h"
@@ -19,7 +18,6 @@ namespace impeller {
 
 struct Picture {
   std::unique_ptr<EntityPass> pass;
-  std::shared_ptr<const flutter::DlRTree> rtree;
 
   std::optional<Snapshot> Snapshot(AiksContext& context);
 

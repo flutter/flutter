@@ -16,10 +16,8 @@ namespace flutter {
 EmbedderExternalViewEmbedder::EmbedderExternalViewEmbedder(
     bool avoid_backing_store_cache,
     const CreateRenderTargetCallback& create_render_target_callback,
-    const PresentCallback& present_callback,
-    bool enable_impeller)
-    : enable_impeller_(enable_impeller),
-      avoid_backing_store_cache_(avoid_backing_store_cache),
+    const PresentCallback& present_callback)
+    : avoid_backing_store_cache_(avoid_backing_store_cache),
       create_render_target_callback_(create_render_target_callback),
       present_callback_(present_callback) {
   FML_DCHECK(create_render_target_callback_);
@@ -67,7 +65,7 @@ void EmbedderExternalViewEmbedder::BeginFrame(
       EmbedderExternalView::ViewIdentifier{};
 
   pending_views_[kRootViewIdentifier] = std::make_unique<EmbedderExternalView>(
-      pending_frame_size_, pending_surface_transformation_, enable_impeller_);
+      pending_frame_size_, pending_surface_transformation_);
   composition_order_.push_back(kRootViewIdentifier);
 }
 
@@ -82,8 +80,7 @@ void EmbedderExternalViewEmbedder::PrerollCompositeEmbeddedView(
       pending_frame_size_,              // frame size
       pending_surface_transformation_,  // surface xformation
       vid,                              // view identifier
-      std::move(params),                // embedded view params
-      enable_impeller_                  // enable_impeller
+      std::move(params)                 // embedded view params
   );
   composition_order_.push_back(vid);
 }

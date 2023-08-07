@@ -58,8 +58,7 @@ class EmbedderExternalViewEmbedder final : public ExternalViewEmbedder {
   EmbedderExternalViewEmbedder(
       bool avoid_backing_store_cache,
       const CreateRenderTargetCallback& create_render_target_callback,
-      const PresentCallback& present_callback,
-      bool enable_impeller);
+      const PresentCallback& present_callback);
 
   //----------------------------------------------------------------------------
   /// @brief      Collects the external view embedder.
@@ -105,7 +104,6 @@ class EmbedderExternalViewEmbedder final : public ExternalViewEmbedder {
   DlCanvas* GetRootCanvas() override;
 
  private:
-  bool enable_impeller_ = false;
   const bool avoid_backing_store_cache_;
   const CreateRenderTargetCallback create_render_target_callback_;
   const PresentCallback present_callback_;

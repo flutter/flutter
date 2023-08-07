@@ -70,10 +70,6 @@ class SnapshotDelegate {
   virtual sk_sp<DlImage> MakeRasterSnapshot(sk_sp<DisplayList> display_list,
                                             SkISize picture_size) = 0;
 
-  virtual sk_sp<DlImage> MakeRasterSnapshot(
-      const std::shared_ptr<const impeller::Picture>& picture,
-      SkISize picture_size) = 0;
-
   virtual sk_sp<SkImage> ConvertToRasterImage(sk_sp<SkImage> image) = 0;
 };
 
