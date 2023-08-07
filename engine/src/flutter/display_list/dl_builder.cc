@@ -1208,13 +1208,6 @@ void DisplayListBuilder::DrawAtlas(const sk_sp<DlImage>& atlas,
   }
 }
 
-void DisplayListBuilder::DrawImpellerPicture(
-    const std::shared_ptr<const impeller::Picture>& picture,
-    SkScalar opacity) {
-  FML_LOG(ERROR) << "Cannot draw Impeller Picture in to a a display list.";
-  FML_DCHECK(false);
-}
-
 void DisplayListBuilder::DrawDisplayList(const sk_sp<DisplayList> display_list,
                                          SkScalar opacity) {
   if (!SkScalarIsFinite(opacity) || opacity <= SK_ScalarNearlyZero ||

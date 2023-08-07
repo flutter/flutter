@@ -20,19 +20,13 @@ class DlDeferredImageGPUImpeller final : public DlImage {
   static sk_sp<DlDeferredImageGPUImpeller> Make(
       std::unique_ptr<LayerTree> layer_tree,
       fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
-      const fml::RefPtr<fml::TaskRunner>& raster_task_runner);
+      fml::RefPtr<fml::TaskRunner> raster_task_runner);
 
   static sk_sp<DlDeferredImageGPUImpeller> Make(
       sk_sp<DisplayList> display_list,
       const SkISize& size,
       fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
-      const fml::RefPtr<fml::TaskRunner>& raster_task_runner);
-
-  static sk_sp<DlDeferredImageGPUImpeller> Make(
-      const std::shared_ptr<const impeller::Picture>& impeller_picture,
-      const SkISize& size,
-      fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
-      const fml::RefPtr<fml::TaskRunner>& raster_task_runner);
+      fml::RefPtr<fml::TaskRunner> raster_task_runner);
 
   // |DlImage|
   ~DlDeferredImageGPUImpeller() override;
@@ -73,18 +67,12 @@ class DlDeferredImageGPUImpeller final : public DlImage {
         sk_sp<DisplayList> display_list,
         const SkISize& size,
         fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
-        const fml::RefPtr<fml::TaskRunner>& raster_task_runner);
-
-    static std::shared_ptr<ImageWrapper> Make(
-        const std::shared_ptr<const impeller::Picture>& impeller_picture,
-        const SkISize& size,
-        fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
-        const fml::RefPtr<fml::TaskRunner>& raster_task_runner);
+        fml::RefPtr<fml::TaskRunner> raster_task_runner);
 
     static std::shared_ptr<ImageWrapper> Make(
         std::unique_ptr<LayerTree> layer_tree,
         fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
-        const fml::RefPtr<fml::TaskRunner>& raster_task_runner);
+        fml::RefPtr<fml::TaskRunner> raster_task_runner);
 
     bool isTextureBacked() const;
 
@@ -112,18 +100,6 @@ class DlDeferredImageGPUImpeller final : public DlImage {
         const SkISize& size,
         fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
         fml::RefPtr<fml::TaskRunner> raster_task_runner);
-
-    explicit ImageWrapper(const SkISize& size);
-
-    void SnapshotPicture(
-        const std::shared_ptr<const impeller::Picture>& impeller_picture,
-        fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
-        const fml::RefPtr<fml::TaskRunner>& raster_task_runner);
-
-    void SnapshotLayer(
-        std::unique_ptr<LayerTree> layer_tree,
-        fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
-        const fml::RefPtr<fml::TaskRunner>& raster_task_runner);
 
     // If a layer tree is provided, it will be flattened during the raster
     // thread task spawned by this method. After being flattened into a display

@@ -45,9 +45,9 @@ txt::FontStyle GetTxtFontStyle(SkFontStyle::Slant font_slant) {
 
 class DisplayListParagraphPainter : public skt::ParagraphPainter {
  public:
-  DisplayListParagraphPainter(DlCanvas* canvas,
+  DisplayListParagraphPainter(DisplayListBuilder* builder,
                               const std::vector<DlPaint>& dl_paints)
-      : canvas_(canvas), dl_paints_(dl_paints) {}
+      : builder_(builder), dl_paints_(dl_paints) {}
 
   DlPaint toDlPaint(const DecorationStyle& decor_style,
                     DlDrawStyle draw_style = DlDrawStyle::kStroke) {
@@ -76,7 +76,7 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
     }
     size_t paint_id = std::get<PaintID>(paint);
     FML_DCHECK(paint_id < dl_paints_.size());
-    canvas_->DrawTextBlob(blob, x, y, dl_paints_[paint_id]);
+    builder_->DrawTextBlob(blob, x, y, dl_paints_[paint_id]);
   }
 
   void drawTextShadow(const sk_sp<SkTextBlob>& blob,
@@ -93,24 +93,24 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
       DlBlurMaskFilter filter(DlBlurStyle::kNormal, blur_sigma, false);
       paint.setMaskFilter(&filter);
     }
-    canvas_->DrawTextBlob(blob, x, y, paint);
+    builder_->DrawTextBlob(blob, x, y, paint);
   }
 
   void drawRect(const SkRect& rect, const SkPaintOrID& paint) override {
     size_t paint_id = std::get<PaintID>(paint);
     FML_DCHECK(paint_id < dl_paints_.size());
-    canvas_->DrawRect(rect, dl_paints_[paint_id]);
+    builder_->DrawRect(rect, dl_paints_[paint_id]);
   }
 
   void drawFilledRect(const SkRect& rect,
                       const DecorationStyle& decor_style) override {
     DlPaint paint = toDlPaint(decor_style, DlDrawStyle::kFill);
-    canvas_->DrawRect(rect, paint);
+    builder_->DrawRect(rect, paint);
   }
 
   void drawPath(const SkPath& path,
                 const DecorationStyle& decor_style) override {
-    canvas_->DrawPath(path, toDlPaint(decor_style));
+    builder_->DrawPath(path, toDlPaint(decor_style));
   }
 
   void drawLine(SkScalar x0,
@@ -118,24 +118,24 @@ class DisplayListParagraphPainter : public skt::ParagraphPainter {
                 SkScalar x1,
                 SkScalar y1,
                 const DecorationStyle& decor_style) override {
-    canvas_->DrawLine(SkPoint::Make(x0, y0), SkPoint::Make(x1, y1),
-                      toDlPaint(decor_style));
+    builder_->DrawLine(SkPoint::Make(x0, y0), SkPoint::Make(x1, y1),
+                       toDlPaint(decor_style));
   }
 
   void clipRect(const SkRect& rect) override {
-    canvas_->ClipRect(rect, DlCanvas::ClipOp::kIntersect, false);
+    builder_->ClipRect(rect, DlCanvas::ClipOp::kIntersect, false);
   }
 
   void translate(SkScalar dx, SkScalar dy) override {
-    canvas_->Translate(dx, dy);
+    builder_->Translate(dx, dy);
   }
 
-  void save() override { canvas_->Save(); }
+  void save() override { builder_->Save(); }
 
-  void restore() override { canvas_->Restore(); }
+  void restore() override { builder_->Restore(); }
 
  private:
-  DlCanvas* canvas_;
+  DisplayListBuilder* builder_;
   const std::vector<DlPaint>& dl_paints_;
 };
 
@@ -222,7 +222,7 @@ void ParagraphSkia::Layout(double width) {
   paragraph_->layout(width);
 }
 
-bool ParagraphSkia::Paint(DlCanvas* builder, double x, double y) {
+bool ParagraphSkia::Paint(DisplayListBuilder* builder, double x, double y) {
   DisplayListParagraphPainter painter(builder, dl_paints_);
   paragraph_->paint(&painter, x, y);
   return true;

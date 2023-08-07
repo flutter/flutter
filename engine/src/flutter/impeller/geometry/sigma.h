@@ -20,7 +20,7 @@ namespace impeller {
 /// quality blurs (with exponentially diminishing returns for the same sigma
 /// input). Making this value any lower results in a noticable loss of
 /// quality in the blur.
-constexpr static float kKernelRadiusPerSigma = 1.73205080757f;
+constexpr static float kKernelRadiusPerSigma = 1.73205080757;
 
 struct Radius;
 
@@ -29,7 +29,7 @@ struct Radius;
 ///         the filter input. In other words, this determines how wide the
 ///         distribution stretches.
 struct Sigma {
-  Scalar sigma = 0.0f;
+  Scalar sigma = 0.0;
 
   constexpr Sigma() = default;
 
@@ -45,7 +45,7 @@ struct Sigma {
 ///         relationship with `Sigma`. See `kKernelRadiusPerSigma` for
 ///         details on how this relationship works.
 struct Radius {
-  Scalar radius = 0.0f;
+  Scalar radius = 0.0;
 
   constexpr Radius() = default;
 

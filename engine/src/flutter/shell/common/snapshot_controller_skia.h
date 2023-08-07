@@ -18,10 +18,6 @@ class SnapshotControllerSkia : public SnapshotController {
   sk_sp<DlImage> MakeRasterSnapshot(sk_sp<DisplayList> display_list,
                                     SkISize size) override;
 
-  sk_sp<DlImage> MakeRasterSnapshot(
-      const std::shared_ptr<const impeller::Picture>& picture,
-      SkISize size) override;
-
   virtual sk_sp<SkImage> ConvertToRasterImage(sk_sp<SkImage> image) override;
 
  private:

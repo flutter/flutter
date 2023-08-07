@@ -5,28 +5,14 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_PICTURE_H_
 #define FLUTTER_LIB_UI_PAINTING_PICTURE_H_
 
-#include <variant>
-
 #include "flutter/display_list/display_list.h"
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/lib/ui/ui_dart_state.h"
-#include "third_party/skia/include/core/SkPicture.h"
-
-#if IMPELLER_SUPPORTS_RENDERING
-#include "impeller/aiks/picture.h"  // nogncheck
-#else                               // IMPELLER_SUPPORTS_RENDERING
-namespace impeller {
-struct Picture;
-}  // namespace impeller
-#endif                              // !IMPELLER_SUPPORTS_RENDERING
 
 namespace flutter {
 class Canvas;
-
-using DisplayListOrPicture =
-    std::variant<sk_sp<DisplayList>, std::shared_ptr<const impeller::Picture>>;
 
 class Picture : public RefCountedDartWrappable<Picture> {
   DEFINE_WRAPPERTYPEINFO();
@@ -35,22 +21,9 @@ class Picture : public RefCountedDartWrappable<Picture> {
  public:
   ~Picture() override;
   static fml::RefPtr<Picture> Create(Dart_Handle dart_handle,
-                                     DisplayListOrPicture picture);
+                                     sk_sp<DisplayList> display_list);
 
-  const sk_sp<DisplayList> display_list() const {
-    if (std::holds_alternative<sk_sp<DisplayList>>(picture_)) {
-      return std::get<sk_sp<DisplayList>>(picture_);
-    }
-    return nullptr;
-  }
-
-  std::shared_ptr<const impeller::Picture> impeller_picture() const {
-    if (std::holds_alternative<std::shared_ptr<const impeller::Picture>>(
-            picture_)) {
-      return std::get<std::shared_ptr<const impeller::Picture>>(picture_);
-    }
-    return nullptr;
-  }
+  sk_sp<DisplayList> display_list() const { return display_list_; }
 
   Dart_Handle toImage(uint32_t width,
                       uint32_t height,
@@ -64,26 +37,34 @@ class Picture : public RefCountedDartWrappable<Picture> {
 
   size_t GetAllocationSize() const;
 
+  static void RasterizeToImageSync(sk_sp<DisplayList> display_list,
+                                   uint32_t width,
+                                   uint32_t height,
+                                   Dart_Handle raw_image_handle);
+
+  static Dart_Handle RasterizeToImage(const sk_sp<DisplayList>& display_list,
+                                      uint32_t width,
+                                      uint32_t height,
+                                      Dart_Handle raw_image_callback);
+
   static Dart_Handle RasterizeLayerTreeToImage(
       std::unique_ptr<LayerTree> layer_tree,
       Dart_Handle raw_image_callback);
 
+  // Callers may provide either a display list or a layer tree, but not both.
+  //
+  // If a layer tree is provided, it will be flattened on the raster thread, and
+  // picture_bounds should be the layer tree's frame_size().
+  static Dart_Handle DoRasterizeToImage(const sk_sp<DisplayList>& display_list,
+                                        std::unique_ptr<LayerTree> layer_tree,
+                                        uint32_t width,
+                                        uint32_t height,
+                                        Dart_Handle raw_image_callback);
+
  private:
-  explicit Picture(DisplayListOrPicture picture);
+  explicit Picture(sk_sp<DisplayList> display_list);
 
-  DisplayListOrPicture picture_;
-
-  void RasterizeToImageSync(uint32_t width,
-                            uint32_t height,
-                            Dart_Handle raw_image_handle);
-
-  Dart_Handle RasterizeToImage(uint32_t width,
-                               uint32_t height,
-                               Dart_Handle raw_image_callback);
-
-  Dart_Handle DoRasterizeToImage(uint32_t width,
-                                 uint32_t height,
-                                 Dart_Handle raw_image_callback);
+  sk_sp<DisplayList> display_list_;
 };
 
 }  // namespace flutter

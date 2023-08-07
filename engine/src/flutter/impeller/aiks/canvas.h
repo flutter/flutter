@@ -64,8 +64,6 @@ class Canvas {
 
   ~Canvas();
 
-  std::optional<Rect> BaseCullRect() const { return initial_cull_rect_; }
-
   void Save();
 
   void SaveLayer(const Paint& paint,
