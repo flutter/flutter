@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:clock/clock.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -809,5 +810,75 @@ void main() {
       final Offset right = tester.getTopLeft(find.byType(CupertinoContextMenuAction));
       expect(right.dx, lessThan(left.dx));
     });
+  });
+
+  testWidgets('Conflicting gesture detectors', (WidgetTester tester) async {
+    int? onPointerDownTime;
+    int? onPointerUpTime;
+    bool insideTapTriggered = false;
+    // The required duration of the route to be pushed in is [500, 900]ms.
+    // 500ms is calculated from kPressTimeout+_previewLongPressTimeout/2.
+    // 900ms is calculated from kPressTimeout+_previewLongPressTimeout.
+    const Duration pressDuration = Duration(milliseconds: 501);
+
+    int now() => clock.now().millisecondsSinceEpoch;
+
+    await tester.pumpWidget(Listener(
+      onPointerDown: (PointerDownEvent event) => onPointerDownTime = now(),
+      onPointerUp: (PointerUpEvent event) => onPointerUpTime = now(),
+      child: CupertinoApp(
+        home: Align(
+          child: CupertinoContextMenu(
+            actions: const <CupertinoContextMenuAction>[
+              CupertinoContextMenuAction(
+                child: Text('CupertinoContextMenuAction'),
+              ),
+            ],
+            child: GestureDetector(
+              onTap: () => insideTapTriggered = true,
+              child: Container(
+                width: 200,
+                height: 200,
+                key: const Key('container'),
+                color: const Color(0xFF00FF00),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    // Start a press on the child.
+    final TestGesture gesture = await tester.createGesture();
+    await gesture.down(tester.getCenter(find.byKey(const Key('container'))));
+    // Simulate the actual situation:
+    // the user keeps pressing and requesting frames.
+    // If there is only one frame,
+    // the animation is mutant and cannot drive the value of the animation controller.
+    for (int i = 0; i < 100; i++) {
+      await tester.pump(pressDuration ~/ 100);
+    }
+    await gesture.up();
+    // Await pushing route.
+    await tester.pumpAndSettle();
+
+    // Judge whether _ContextMenuRouteStatic present on the screen.
+    final Finder routeStatic = find.byWidgetPredicate(
+          (Widget w) => '${w.runtimeType}' == '_ContextMenuRouteStatic',
+    );
+
+    // The insideTap and the route should not be triggered at the same time.
+    if (insideTapTriggered) {
+      // Calculate the actual duration.
+      final int actualDuration = onPointerUpTime! - onPointerDownTime!;
+
+      expect(routeStatic, findsNothing,
+          reason: 'When actualDuration($actualDuration) is in the range of 500ms~900ms, '
+              'which means the route is pushed, '
+              'but insideTap should not be triggered at the same time.');
+    } else {
+      // The route should be pushed when the insideTap is not triggered.
+      expect(routeStatic, findsOneWidget);
+    }
   });
 }
