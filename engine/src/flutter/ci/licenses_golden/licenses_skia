@@ -1,4 +1,4 @@
-Signature: f41393ae817eba4a38186953dd38746e
+Signature: 83a685d9827469a1c523769f6c843e71
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8920,6 +8920,9 @@ ORIGIN: ../../../third_party/skia/src/base/SkSafeMath.cpp + ../../../third_party
 ORIGIN: ../../../third_party/skia/src/core/SkBitmapProcState_opts.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkBitmapProcState_opts_hsw.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkBitmapProcState_opts_ssse3.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/core/SkBlitMask.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/core/SkBlitMask_opts.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/core/SkBlitMask_opts_ssse3.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkBlitter_A8.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkBlurMaskFilterImpl.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkCanvas_Raster.cpp + ../../../third_party/skia/LICENSE
@@ -9141,6 +9144,9 @@ FILE: ../../../third_party/skia/src/base/SkSafeMath.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapProcState_opts.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapProcState_opts_hsw.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapProcState_opts_ssse3.cpp
+FILE: ../../../third_party/skia/src/core/SkBlitMask.h
+FILE: ../../../third_party/skia/src/core/SkBlitMask_opts.cpp
+FILE: ../../../third_party/skia/src/core/SkBlitMask_opts_ssse3.cpp
 FILE: ../../../third_party/skia/src/core/SkBlitter_A8.h
 FILE: ../../../third_party/skia/src/core/SkBlurMaskFilterImpl.h
 FILE: ../../../third_party/skia/src/core/SkCanvas_Raster.cpp
