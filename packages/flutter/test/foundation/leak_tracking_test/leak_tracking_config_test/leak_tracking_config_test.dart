@@ -31,7 +31,7 @@ void main() {
       await widgetTester.pumpWidget(StatelessLeakingWidget());
     });
   },
-  skip: isBrowser,
+  skip: isBrowser, // Leak tracling is off for web.
   );
 
   testWidgetsWithLeakTracking(test3TrackingOnLeaks, (WidgetTester widgetTester) async {
@@ -40,7 +40,7 @@ void main() {
     expect(LeakTracking.phase.isPaused, false);
     await widgetTester.pumpWidget(StatelessLeakingWidget());
   },
-  skip: isBrowser,
+  skip: isBrowser, // Leak tracling is off for web.
   );
 
   testWidgetsWithLeakTracking(
@@ -56,6 +56,6 @@ void main() {
         collectStackTraceOnStart: true,
       ),
     ),
-    skip: isBrowser,
+    skip: isBrowser, // Leak tracling is off for web.
   );
 }
