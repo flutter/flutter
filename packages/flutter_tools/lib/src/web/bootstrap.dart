@@ -229,7 +229,6 @@ String generateTestEntrypoint({
 
   Future<void> main() async {
     ui_web.debugEmulateFlutterTesterEnvironment = true;
-    // await ui.webOnlyInitializePlatform();
     await ui_web.bootstrapEngine();
     webGoldenComparator = DefaultWebGoldenComparator(Uri.parse('${Uri.file(absolutePath)}'));
     (ui.window as dynamic).debugOverrideDevicePixelRatio(3.0);
