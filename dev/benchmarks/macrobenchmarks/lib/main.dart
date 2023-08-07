@@ -18,7 +18,9 @@ import 'src/color_filter_cache.dart';
 import 'src/color_filter_with_unstable_child.dart';
 import 'src/cubic_bezier.dart';
 import 'src/cull_opacity.dart';
+import 'src/draw_atlas.dart';
 import 'src/draw_points.dart';
+import 'src/draw_vertices.dart';
 import 'src/filtered_child_animation.dart';
 import 'src/fullscreen_textfield.dart';
 import 'src/gradient_perf.dart';
@@ -89,6 +91,8 @@ class MacrobenchmarksApp extends StatelessWidget {
         kAnimatedBlurBackdropFilter: (BuildContext context) => const AnimatedBlurBackdropFilter(),
         kSlidersRouteName: (BuildContext context) => const SlidersPage(),
         kDrawPointsPageRougeName: (BuildContext context) => const DrawPointsPage(),
+        kDrawVerticesPageRouteName: (BuildContext context) => const DrawVerticesPage(),
+        kDrawAtlasPageRouteName: (BuildContext context) => const DrawAtlasPage(),
       },
     );
   }
@@ -336,7 +340,21 @@ class HomePage extends StatelessWidget {
             onPressed: () {
               Navigator.pushNamed(context, kDrawPointsPageRougeName);
             },
-          )
+          ),
+          ElevatedButton(
+            key: const Key(kDrawVerticesPageRouteName),
+            child: const Text('Draw Vertices'),
+            onPressed: () {
+              Navigator.pushNamed(context, kDrawVerticesPageRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kDrawAtlasPageRouteName),
+            child: const Text('Draw Atlas'),
+            onPressed: () {
+              Navigator.pushNamed(context, kDrawAtlasPageRouteName);
+            },
+          ),
         ],
       ),
     );
