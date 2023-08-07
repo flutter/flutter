@@ -16603,6 +16603,56 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
   },
     skip: kIsWeb, // [intended]
   );
+
+  group('hasStrings', () {
+    late int calls;
+    setUp(() {
+      calls = 0;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) {
+          if (methodCall.method == 'Clipboard.hasStrings') {
+            calls += 1;
+          }
+          return Future<void>.value();
+        });
+    });
+    tearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.platform, null);
+    });
+
+    testWidgets('web avoids the paste permissions prompt by not calling hasStrings', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: TextEditingController(),
+            focusNode: focusNode,
+            obscureText: true,
+            toolbarOptions: const ToolbarOptions(
+              copy: true,
+              cut: true,
+              paste: true,
+              selectAll: true,
+            ),
+            style: textStyle,
+            cursorColor: cursorColor,
+            selectionControls: materialTextSelectionControls,
+          ),
+        ),
+      );
+
+      expect(calls, equals(kIsWeb ? 0 : 1));
+
+      // Long-press to bring up the context menu.
+      final Finder textFinder = find.byType(EditableText);
+      await tester.longPress(textFinder);
+      tester.state<EditableTextState>(textFinder).showToolbar();
+      await tester.pumpAndSettle();
+
+      expect(calls, equals(kIsWeb ? 0 : 2));
+    });
+  });
 }
 
 class UnsettableController extends TextEditingController {
