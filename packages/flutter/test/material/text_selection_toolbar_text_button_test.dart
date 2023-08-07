@@ -64,7 +64,7 @@ void main() {
   });
 
   for (final ColorScheme colorScheme in <ColorScheme>[ThemeData.light().colorScheme, ThemeData.dark().colorScheme]) {
-    testWidgetsWithLeakTracking('theme color by default', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('foreground color by default', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
@@ -84,22 +84,25 @@ void main() {
       expect(find.byType(TextButton), findsOneWidget);
 
       final TextButton textButton = tester.widget(find.byType(TextButton));
+      // The foreground color is hardcoded to black or white by default, not the
+      // default value from ColorScheme.onSurface.
       expect(
         textButton.style!.foregroundColor!.resolve(<MaterialState>{}),
-        colorScheme.onSurface,
+        switch (colorScheme.brightness) {
+          Brightness.light => const Color(0xff000000),
+          Brightness.dark => const Color(0xffffffff),
+        },
       );
     });
-  }
 
-  for (final ColorScheme colorScheme in <ColorScheme>[ThemeData.light().colorScheme, ThemeData.dark().colorScheme]) {
-    testWidgetsWithLeakTracking('custom theme foreground color', (WidgetTester tester) async {
-      const Color foregroundColor = Colors.red;
+    testWidgetsWithLeakTracking('custom foreground color', (WidgetTester tester) async {
+      const Color customForegroundColor = Colors.red;
 
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
             colorScheme: colorScheme.copyWith(
-              onSurface: foregroundColor,
+              onSurface: customForegroundColor,
             ),
           ),
           home: Scaffold(
@@ -118,7 +121,7 @@ void main() {
       final TextButton textButton = tester.widget(find.byType(TextButton));
       expect(
         textButton.style!.foregroundColor!.resolve(<MaterialState>{}),
-        foregroundColor,
+        customForegroundColor,
       );
     });
   }
