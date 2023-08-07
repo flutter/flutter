@@ -64,10 +64,24 @@ then
   FELT_DEBUG_FLAGS="--enable-vm-service --pause-isolates-on-start"
 fi
 
+SILENT_LOG=/tmp/felt_pub_get_silent_log.txt
+trap "rm -f $SILENT_LOG" EXIT
+
+verbose_on_failure() {
+  echo "FAILED with the following output:"
+  cat $SILENT_LOG
+  exit 1
+}
+
+silent_on_success() {
+  COMMAND=${1+"$@"}
+  $COMMAND > $SILENT_LOG 2>&1 || verbose_on_failure
+}
+
 install_deps() {
   # We need to run pub get here before we actually invoke felt.
   echo "Running \`dart pub get\` in 'engine/src/flutter/lib/web_ui'"
-  (cd "$WEB_UI_DIR"; $DART_PATH pub get)
+  (cd "$WEB_UI_DIR"; silent_on_success $DART_PATH pub get)
 }
 
 if [[ $KERNEL_NAME == *"Darwin"* ]]
