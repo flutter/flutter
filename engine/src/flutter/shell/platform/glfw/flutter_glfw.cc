@@ -12,6 +12,7 @@
 #include <cstdlib>
 #include <filesystem>
 #include <iostream>
+#include <string>
 
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/plugin_registrar.h"
 #include "flutter/shell/platform/common/incoming_message_dispatcher.h"
@@ -755,10 +756,12 @@ static bool RunFlutterEngine(
   if (engine_state->window_controller != nullptr) {
     config.open_gl.gl_proc_resolver = EngineProcResolver;
   }
+  const std::string assets_path_string = assets_path.string();
+  const std::string icu_path_string = icu_path.string();
   FlutterProjectArgs args = {};
   args.struct_size = sizeof(FlutterProjectArgs);
-  args.assets_path = assets_path.string().c_str();
-  args.icu_data_path = icu_path.string().c_str();
+  args.assets_path = assets_path_string.c_str();
+  args.icu_data_path = icu_path_string.c_str();
   args.command_line_argc = static_cast<int>(argv.size());
   args.command_line_argv = &argv[0];
   args.platform_message_callback = EngineOnFlutterPlatformMessage;
