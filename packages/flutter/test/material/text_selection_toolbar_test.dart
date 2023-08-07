@@ -243,7 +243,7 @@ void main() {
         toolbarContainer.color,
         // The default colors are hardcoded and don't take the default value of
         // the theme's surface color.
-        switch(colorScheme.brightness) {
+        switch (colorScheme.brightness) {
           Brightness.light => const Color(0xffffffff),
           Brightness.dark => const Color(0xff424242),
         },
