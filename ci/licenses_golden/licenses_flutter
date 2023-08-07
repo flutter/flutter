@@ -1725,9 +1725,15 @@ ORIGIN: ../../../flutter/impeller/typographer/text_run.cc + ../../../flutter/LIC
 ORIGIN: ../../../flutter/impeller/typographer/text_run.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/typographer/typeface.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/typographer/typeface.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/lib/gpu/gpu.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/lib/gpu/gpu.dart + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/lib/gpu/gpu.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/gpu/context.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/gpu/context.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/gpu/export.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/gpu/export.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/gpu/lib/gpu.dart + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/gpu/lib/src/context.dart + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/gpu/lib/src/smoketest.dart + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/gpu/smoketest.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/lib/gpu/smoketest.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/io/dart_io.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/io/dart_io.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/snapshot/snapshot.h + ../../../flutter/LICENSE
@@ -1749,8 +1755,6 @@ ORIGIN: ../../../flutter/lib/ui/experiments/setup_hooks.dart + ../../../flutter/
 ORIGIN: ../../../flutter/lib/ui/experiments/ui.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/ui/floating_point.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/ui/geometry.dart + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/lib/ui/gpu/context.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/lib/ui/gpu/context.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/ui/hash_codes.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/ui/hooks.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/ui/io_manager.cc + ../../../flutter/LICENSE
@@ -4445,9 +4449,15 @@ FILE: ../../../flutter/impeller/typographer/text_run.cc
 FILE: ../../../flutter/impeller/typographer/text_run.h
 FILE: ../../../flutter/impeller/typographer/typeface.cc
 FILE: ../../../flutter/impeller/typographer/typeface.h
-FILE: ../../../flutter/lib/gpu/gpu.cc
-FILE: ../../../flutter/lib/gpu/gpu.dart
-FILE: ../../../flutter/lib/gpu/gpu.h
+FILE: ../../../flutter/lib/gpu/context.cc
+FILE: ../../../flutter/lib/gpu/context.h
+FILE: ../../../flutter/lib/gpu/export.cc
+FILE: ../../../flutter/lib/gpu/export.h
+FILE: ../../../flutter/lib/gpu/lib/gpu.dart
+FILE: ../../../flutter/lib/gpu/lib/src/context.dart
+FILE: ../../../flutter/lib/gpu/lib/src/smoketest.dart
+FILE: ../../../flutter/lib/gpu/smoketest.cc
+FILE: ../../../flutter/lib/gpu/smoketest.h
 FILE: ../../../flutter/lib/io/dart_io.cc
 FILE: ../../../flutter/lib/io/dart_io.h
 FILE: ../../../flutter/lib/snapshot/libraries_experimental.json
@@ -4470,8 +4480,6 @@ FILE: ../../../flutter/lib/ui/experiments/setup_hooks.dart
 FILE: ../../../flutter/lib/ui/experiments/ui.dart
 FILE: ../../../flutter/lib/ui/floating_point.h
 FILE: ../../../flutter/lib/ui/geometry.dart
-FILE: ../../../flutter/lib/ui/gpu/context.cc
-FILE: ../../../flutter/lib/ui/gpu/context.h
 FILE: ../../../flutter/lib/ui/hash_codes.dart
 FILE: ../../../flutter/lib/ui/hooks.dart
 FILE: ../../../flutter/lib/ui/io_manager.cc

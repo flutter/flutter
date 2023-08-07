@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/lib/gpu/gpu.h"
+#include "flutter/lib/gpu/smoketest.h"
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/ui_dart_state.h"
@@ -22,6 +22,10 @@ IMPLEMENT_WRAPPERTYPEINFO(gpu, FlutterGpuTestClass);
 FlutterGpuTestClass::~FlutterGpuTestClass() = default;
 
 }  // namespace flutter
+
+//----------------------------------------------------------------------------
+/// Exports
+///
 
 // TODO(131346): Remove this once we migrate the Dart GPU API into this space.
 uint32_t InternalFlutterGpuTestProc() {
@@ -51,10 +55,4 @@ void InternalFlutterGpuTestClass_Create(Dart_Handle wrapper) {
 void InternalFlutterGpuTestClass_Method(flutter::FlutterGpuTestClass* self,
                                         int something) {
   FML_LOG(INFO) << "Something: " << something;
-}
-
-// TODO(131346): Remove this once we migrate the Dart GPU API into this space.
-void FlutterGpuTestClass_Dispose(flutter::FlutterGpuTestClass* self,
-                                 int something) {
-  self->ClearDartWrapper();
 }
