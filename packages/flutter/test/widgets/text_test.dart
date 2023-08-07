@@ -273,8 +273,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: SizedBox(
-            width: 100.3,
-            child: Text.rich(WidgetSpan(child: Row()), textScaleFactor: 0.3),
+            width: 502.5454545454545,
+            child: Text.rich(WidgetSpan(child: Row()), textScaleFactor: 0.95),
           ),
         ),
       ),
