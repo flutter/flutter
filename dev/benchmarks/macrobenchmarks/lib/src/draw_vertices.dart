@@ -7,7 +7,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 Future<ui.Image> loadImage(String asset) async {
-  print('load: $asset');
   final ui.ImmutableBuffer buffer =  await ui.ImmutableBuffer.fromAsset(asset);
   final ui.Codec codec = await PaintingBinding.instance.instantiateImageCodecWithSize(buffer);
   final ui.FrameInfo frameInfo = await codec.getNextFrame();
