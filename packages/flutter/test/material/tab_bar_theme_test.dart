@@ -14,8 +14,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 const String _tab1Text = 'tab 1';
 const String _tab2Text = 'tab 2';
 const String _tab3Text = 'tab 3';

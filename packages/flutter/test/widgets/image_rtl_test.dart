@@ -8,8 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 class TestImageProvider extends ImageProvider<TestImageProvider> {
   const TestImageProvider(this.image);
 

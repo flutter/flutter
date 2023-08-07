@@ -5,8 +5,6 @@
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 void main() {
   test('Border.lerp identical a,b', () {
     expect(Border.lerp(null, null, 0), null);

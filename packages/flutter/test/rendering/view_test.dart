@@ -5,7 +5,6 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'mock_canvas.dart';
 import 'rendering_tester.dart';
 
 void main() {

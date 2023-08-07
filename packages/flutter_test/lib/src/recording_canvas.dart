@@ -26,7 +26,8 @@ class RecordedInvocation {
   @override
   String toString() => _describeInvocation(invocation);
 
-  /// Converts [stack] to a string using the [FlutterError.defaultStackFilter] logic.
+  /// Converts [stack] to a string using the [FlutterError.defaultStackFilter]
+  /// logic.
   String stackToString({ String indent = '' }) {
     return indent + FlutterError.defaultStackFilter(
       stack.toString().trimRight().split('\n'),
