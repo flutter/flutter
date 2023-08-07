@@ -2378,7 +2378,7 @@ void main() {
       expect(box.localToGlobal(Offset.zero), equals(originalOffset.translate(0.0, -200.0)));
     });
 
-    testWidgetsWithLeakTracking('Title and content are scrollable', (WidgetTester tester) async {
+    testWidgets('Title and content are scrollable', (WidgetTester tester) async {
       final Key titleKey = UniqueKey();
       final Key contentKey = UniqueKey();
       final AlertDialog dialog = AlertDialog(
