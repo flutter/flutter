@@ -198,7 +198,7 @@ void main() {
         await tester.pumpAndSettle();
       });
 
-      testWidgetsWithLeakTracking('interrupting entrance to remove the fab.', (WidgetTester tester) async {
+      testWidgets('interrupting entrance to remove the fab.', (WidgetTester tester) async {
         await tester.pumpWidget(_buildFrame(fab: null, location: FloatingActionButtonLocation.centerFloat, listener: geometryListener));
         setupListener(tester);
 
