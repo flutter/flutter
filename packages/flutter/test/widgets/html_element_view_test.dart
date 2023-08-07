@@ -6,20 +6,45 @@
 library;
 
 import 'dart:async';
+import 'dart:ui_web' as ui_web;
 
+import 'package:collection/collection.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/src/widgets/_html_element_view_web.dart'
+    show debugOverridePlatformViewRegistry;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:web/web.dart' as web;
 
-import '../services/fake_platform_views.dart';
+final Object _mockHtmlElement = Object();
+Object _mockViewFactory(int id, {Object? params}) {
+  return _mockHtmlElement;
+}
 
 void main() {
+  late FakePlatformViewRegistry fakePlatformViewRegistry;
+
+  setUp(() {
+    fakePlatformViewRegistry = FakePlatformViewRegistry();
+
+    // Simulate the engine registering default factores.
+    fakePlatformViewRegistry.registerViewFactory(ui_web.PlatformViewRegistry.defaultVisibleViewType, (int viewId, {Object? params}) {
+      params!;
+      params as Map<Object?, Object?>;
+      return web.document.createElement(params['tagName']! as String);
+    });
+    fakePlatformViewRegistry.registerViewFactory(ui_web.PlatformViewRegistry.defaultInvisibleViewType, (int viewId, {Object? params}) {
+      params!;
+      params as Map<Object?, Object?>;
+      return web.document.createElement(params['tagName']! as String);
+    });
+  });
+
   group('HtmlElementView', () {
     testWidgets('Create HTML view', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeHtmlPlatformViewsController viewsController = FakeHtmlPlatformViewsController();
-      viewsController.registerViewType('webview');
+      fakePlatformViewRegistry.registerViewFactory('webview', _mockViewFactory);
 
       await tester.pumpWidget(
         const Center(
@@ -32,17 +57,16 @@ void main() {
       );
 
       expect(
-        viewsController.views,
-        unorderedEquals(<FakeHtmlPlatformView>[
-          FakeHtmlPlatformView(currentViewId + 1, 'webview'),
+        fakePlatformViewRegistry.views,
+        unorderedEquals(<FakePlatformView>[
+          (id: currentViewId + 1, viewType: 'webview', params: null, htmlElement: _mockHtmlElement),
         ]),
       );
     });
 
     testWidgets('Create HTML view with PlatformViewCreatedCallback', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeHtmlPlatformViewsController viewsController = FakeHtmlPlatformViewsController();
-      viewsController.registerViewType('webview');
+      fakePlatformViewRegistry.registerViewFactory('webview', _mockViewFactory);
 
       bool hasPlatformViewCreated = false;
       void onPlatformViewCreatedCallBack(int id) {
@@ -66,17 +90,16 @@ void main() {
       expect(hasPlatformViewCreated, true);
 
       expect(
-        viewsController.views,
-        unorderedEquals(<FakeHtmlPlatformView>[
-          FakeHtmlPlatformView(currentViewId + 1, 'webview'),
+        fakePlatformViewRegistry.views,
+        unorderedEquals(<FakePlatformView>[
+          (id: currentViewId + 1, viewType: 'webview', params: null, htmlElement: _mockHtmlElement),
         ]),
       );
     });
 
     testWidgets('Create HTML view with creation params', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeHtmlPlatformViewsController viewsController = FakeHtmlPlatformViewsController();
-      viewsController.registerViewType('webview');
+      fakePlatformViewRegistry.registerViewFactory('webview', _mockViewFactory);
       await tester.pumpWidget(
         const Column(
           children: <Widget>[
@@ -101,18 +124,17 @@ void main() {
       );
 
       expect(
-        viewsController.views,
-        unorderedEquals(<FakeHtmlPlatformView>[
-          FakeHtmlPlatformView(currentViewId + 1, 'webview', 'foobar'),
-          FakeHtmlPlatformView(currentViewId + 2, 'webview', 123),
+        fakePlatformViewRegistry.views,
+        unorderedEquals(<FakePlatformView>[
+          (id: currentViewId + 1, viewType: 'webview', params: 'foobar', htmlElement: _mockHtmlElement),
+          (id: currentViewId + 2, viewType: 'webview', params: 123, htmlElement: _mockHtmlElement),
         ]),
       );
     });
 
     testWidgets('Resize HTML view', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeHtmlPlatformViewsController viewsController = FakeHtmlPlatformViewsController();
-      viewsController.registerViewType('webview');
+      fakePlatformViewRegistry.registerViewFactory('webview', _mockViewFactory);
       await tester.pumpWidget(
         const Center(
           child: SizedBox(
@@ -123,7 +145,7 @@ void main() {
         ),
       );
 
-      viewsController.resizeCompleter = Completer<void>();
+      final Completer<void> resizeCompleter = Completer<void>();
 
       await tester.pumpWidget(
         const Center(
@@ -135,22 +157,21 @@ void main() {
         ),
       );
 
-      viewsController.resizeCompleter.complete();
+      resizeCompleter.complete();
       await tester.pump();
 
       expect(
-        viewsController.views,
-        unorderedEquals(<FakeHtmlPlatformView>[
-          FakeHtmlPlatformView(currentViewId + 1, 'webview'),
+        fakePlatformViewRegistry.views,
+        unorderedEquals(<FakePlatformView>[
+          (id: currentViewId + 1, viewType: 'webview', params: null, htmlElement: _mockHtmlElement),
         ]),
       );
     });
 
     testWidgets('Change HTML view type', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeHtmlPlatformViewsController viewsController = FakeHtmlPlatformViewsController();
-      viewsController.registerViewType('webview');
-      viewsController.registerViewType('maps');
+      fakePlatformViewRegistry.registerViewFactory('webview', _mockViewFactory);
+      fakePlatformViewRegistry.registerViewFactory('maps', _mockViewFactory);
       await tester.pumpWidget(
         const Center(
           child: SizedBox(
@@ -172,16 +193,15 @@ void main() {
       );
 
       expect(
-        viewsController.views,
-        unorderedEquals(<FakeHtmlPlatformView>[
-          FakeHtmlPlatformView(currentViewId + 2, 'maps'),
+        fakePlatformViewRegistry.views,
+        unorderedEquals(<FakePlatformView>[
+          (id: currentViewId + 2, viewType: 'maps', params: null, htmlElement: _mockHtmlElement),
         ]),
       );
     });
 
     testWidgets('Dispose HTML view', (WidgetTester tester) async {
-      final FakeHtmlPlatformViewsController viewsController = FakeHtmlPlatformViewsController();
-      viewsController.registerViewType('webview');
+      fakePlatformViewRegistry.registerViewFactory('webview', _mockViewFactory);
       await tester.pumpWidget(
         const Center(
           child: SizedBox(
@@ -202,15 +222,14 @@ void main() {
       );
 
       expect(
-        viewsController.views,
+        fakePlatformViewRegistry.views,
         isEmpty,
       );
     });
 
     testWidgets('HTML view survives widget tree change', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeHtmlPlatformViewsController viewsController = FakeHtmlPlatformViewsController();
-      viewsController.registerViewType('webview');
+      fakePlatformViewRegistry.registerViewFactory('webview', _mockViewFactory);
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(
         Center(
@@ -233,9 +252,9 @@ void main() {
       );
 
       expect(
-        viewsController.views,
-        unorderedEquals(<FakeHtmlPlatformView>[
-          FakeHtmlPlatformView(currentViewId + 1, 'webview'),
+        fakePlatformViewRegistry.views,
+        unorderedEquals(<FakePlatformView>[
+          (id: currentViewId + 1, viewType: 'webview', params: null, htmlElement: _mockHtmlElement),
         ]),
       );
     });
@@ -244,8 +263,7 @@ void main() {
       final SemanticsHandle handle = tester.ensureSemantics();
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       expect(currentViewId, greaterThanOrEqualTo(0));
-      final FakeHtmlPlatformViewsController viewsController = FakeHtmlPlatformViewsController();
-      viewsController.registerViewType('webview');
+      fakePlatformViewRegistry.registerViewFactory('webview', _mockViewFactory);
 
       await tester.pumpWidget(
         Semantics(
@@ -278,4 +296,206 @@ void main() {
       handle.dispose();
     });
   });
+
+  group('HtmlElementView.fromTagName', () {
+    setUp(() {
+      debugOverridePlatformViewRegistry = fakePlatformViewRegistry;
+    });
+
+    tearDown(() {
+      debugOverridePlatformViewRegistry = null;
+    });
+
+    testWidgets('Create platform view from tagName', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+
+      await tester.pumpWidget(
+        Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: HtmlElementView.fromTagName(tagName: 'div'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(fakePlatformViewRegistry.views, hasLength(1));
+      final FakePlatformView fakePlatformView = fakePlatformViewRegistry.views.single;
+      expect(fakePlatformView.id, currentViewId + 1);
+      expect(fakePlatformView.viewType, ui_web.PlatformViewRegistry.defaultVisibleViewType);
+      expect(fakePlatformView.params, <dynamic, dynamic>{'tagName': 'div'});
+
+      // The HTML element should be a div.
+      final web.HTMLElement htmlElement = fakePlatformView.htmlElement as web.HTMLElement;
+      expect(htmlElement.tagName, equalsIgnoringCase('div'));
+    });
+
+    testWidgets('Create invisible platform view', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+
+      await tester.pumpWidget(
+        Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: HtmlElementView.fromTagName(tagName: 'script', isVisible: false),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(fakePlatformViewRegistry.views, hasLength(1));
+      final FakePlatformView fakePlatformView = fakePlatformViewRegistry.views.single;
+      expect(fakePlatformView.id, currentViewId + 1);
+      // The view should be invisible.
+      expect(fakePlatformView.viewType, ui_web.PlatformViewRegistry.defaultInvisibleViewType);
+      expect(fakePlatformView.params, <dynamic, dynamic>{'tagName': 'script'});
+
+      // The HTML element should be a script.
+      final web.HTMLElement htmlElement = fakePlatformView.htmlElement as web.HTMLElement;
+      expect(htmlElement.tagName, equalsIgnoringCase('script'));
+    });
+
+    testWidgets('onElementCreated', (WidgetTester tester) async {
+      final List<Object> createdElements = <Object>[];
+      void onElementCreated(Object element) {
+        createdElements.add(element);
+      }
+
+      await tester.pumpWidget(
+        Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: HtmlElementView.fromTagName(
+              tagName: 'table',
+              onElementCreated: onElementCreated,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(fakePlatformViewRegistry.views, hasLength(1));
+      final FakePlatformView fakePlatformView = fakePlatformViewRegistry.views.single;
+
+      expect(createdElements, hasLength(1));
+      final Object createdElement = createdElements.single;
+
+      expect(createdElement, fakePlatformView.htmlElement);
+    });
+  });
+}
+
+typedef FakeViewFactory = ({
+  String viewType,
+  bool isVisible,
+  Function viewFactory,
+});
+
+typedef FakePlatformView = ({
+  int id,
+  String viewType,
+  Object? params,
+  Object htmlElement,
+});
+
+class FakePlatformViewRegistry implements ui_web.PlatformViewRegistry {
+  FakePlatformViewRegistry() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
+  }
+
+  Set<FakePlatformView> get views => Set<FakePlatformView>.unmodifiable(_views);
+  final Set<FakePlatformView> _views = <FakePlatformView>{};
+
+  final Set<FakeViewFactory> _registeredViewTypes = <FakeViewFactory>{};
+
+  @override
+  bool registerViewFactory(String viewType, Function viewFactory, {bool isVisible = true}) {
+    if (_findRegisteredViewFactory(viewType) != null) {
+      return false;
+    }
+    _registeredViewTypes.add((
+      viewType: viewType,
+      isVisible: isVisible,
+      viewFactory: viewFactory,
+    ));
+    return true;
+  }
+
+  @override
+  Object getViewById(int viewId) {
+    return _findViewById(viewId)!.htmlElement;
+  }
+
+  FakeViewFactory? _findRegisteredViewFactory(String viewType) {
+    return _registeredViewTypes.singleWhereOrNull(
+      (FakeViewFactory registered) => registered.viewType == viewType,
+    );
+  }
+
+  FakePlatformView? _findViewById(int viewId) {
+    return _views.singleWhereOrNull(
+      (FakePlatformView view) => view.id == viewId,
+    );
+  }
+
+  Future<dynamic> _onMethodCall(MethodCall call) {
+    switch (call.method) {
+      case 'create':
+        return _create(call);
+      case 'dispose':
+        return _dispose(call);
+    }
+    return Future<dynamic>.sync(() => null);
+  }
+
+  Future<dynamic> _create(MethodCall call) async {
+    final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
+    final int id = args['id'] as int;
+    final String viewType = args['viewType'] as String;
+    final Object? params = args['params'];
+
+    if (_findViewById(id) != null) {
+      throw PlatformException(
+        code: 'error',
+        message: 'Trying to create an already created platform view, view id: $id',
+      );
+    }
+
+    final FakeViewFactory? registered = _findRegisteredViewFactory(viewType);
+    if (registered == null) {
+      throw PlatformException(
+        code: 'error',
+        message: 'Trying to create a platform view of unregistered type: $viewType',
+      );
+    }
+
+    final ui_web.ParameterizedPlatformViewFactory viewFactory =
+        registered.viewFactory as ui_web.ParameterizedPlatformViewFactory;
+
+    _views.add((
+      id: id,
+      viewType: viewType,
+      params: params,
+      htmlElement: viewFactory(id, params: params),
+    ));
+    return null;
+  }
+
+  Future<dynamic> _dispose(MethodCall call) async {
+    final int id = call.arguments as int;
+
+    final FakePlatformView? view = _findViewById(id);
+    if (view == null) {
+      throw PlatformException(
+        code: 'error',
+        message: 'Trying to dispose a platform view with unknown id: $id',
+      );
+    }
+
+    _views.remove(view);
+    return null;
+  }
 }
