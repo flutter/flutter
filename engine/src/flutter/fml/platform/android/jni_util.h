@@ -42,7 +42,7 @@ ScopedJavaLocalRef<jobjectArray> VectorToBufferArray(
 
 bool HasException(JNIEnv* env);
 
-bool ClearException(JNIEnv* env);
+bool ClearException(JNIEnv* env, bool silent = false);
 
 bool CheckException(JNIEnv* env);
 std::string GetJavaExceptionInfo(JNIEnv* env, jthrowable java_throwable);
