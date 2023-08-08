@@ -8,8 +8,8 @@ import 'package:flutter_api_samples/material/input_chip/input_chip.1.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final String replacementChar =
-      String.fromCharCode(example.ChipsInputState.kObjectReplacementChar);
+  final String replacementChar = String.fromCharCode(
+      example.ChipsInputEditingController.kObjectReplacementChar);
 
   testWidgets('User input generates InputChips', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -23,7 +23,7 @@ void main() {
 
     example.ChipsInputState<String> state =
         tester.state(find.byType(example.ChipsInput<String>));
-    expect(state.text.isEmpty, true);
+    expect(state.controller.textWithoutReplacements.isEmpty, true);
 
     await tester.tap(find.byType(example.ChipsInput<String>));
     await tester.pumpAndSettle();
@@ -35,12 +35,12 @@ void main() {
 
     state = tester.state(find.byType(example.ChipsInput<String>));
     await tester.pumpAndSettle();
-    expect(state.text, 'ham');
+    expect(state.controller.textWithoutReplacements, 'ham');
 
     // Add new InputChip by sending the "done" action.
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle();
-    expect(state.text.isEmpty, true);
+    expect(state.controller.textWithoutReplacements.isEmpty, true);
 
     expect(find.byType(InputChip), findsNWidgets(2));
 

@@ -5,14 +5,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 const List<String> _pizzaToppings = <String>[
-  'Avocado',
+  'Olives',
   'Tomato',
   'Cheese',
   'Pepperoni',
-  'Pickles',
+  'Bacon',
   'Onion',
   'Jalapeno',
   'Mushrooms',
@@ -43,7 +42,7 @@ class EditableChipFieldExample extends StatefulWidget {
 
 class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
   final FocusNode _chipFocusNode = FocusNode();
-  Set<String> _toppings = <String>{_pizzaToppings.first};
+  List<String> _toppings = <String>[_pizzaToppings.first];
   List<String> _suggestions = <String>[];
 
   @override
@@ -62,7 +61,6 @@ class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
                 prefixIcon: Icon(Icons.local_pizza_rounded),
                 hintText: 'Search for toppings',
               ),
-              focusNode: _chipFocusNode,
               onChanged: _onChanged,
               onSubmitted: _onSubmitted,
               chipBuilder: _chipBuilder,
@@ -93,16 +91,19 @@ class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
   }
 
   Widget _chipBuilder(BuildContext context, String topping) {
-    return InputChip(
-      key: ObjectKey(topping),
-      label: Text(topping),
-      avatar: CircleAvatar(
-        child: Text(topping[0].toUpperCase()),
+    return Container(
+      margin: const EdgeInsets.only(right: 3),
+      child: InputChip(
+        key: ObjectKey(topping),
+        label: Text(topping),
+        avatar: CircleAvatar(
+          child: Text(topping[0].toUpperCase()),
+        ),
+        onDeleted: () => _deleteChip(topping),
+        onSelected: (_) => _onChipTapped(topping),
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        padding: const EdgeInsets.all(2),
       ),
-      onDeleted: () => _deleteChip(topping),
-      onSelected: (_) => _onChipTapped(topping),
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      padding: const EdgeInsets.all(2),
     );
   }
 
@@ -136,17 +137,17 @@ class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
   void _onSubmitted(String text) {
     if (text.trim().isNotEmpty) {
       setState(() {
-        _toppings = <String>{..._toppings, text.trim()};
+        _toppings = <String>[..._toppings, text.trim()];
       });
     } else {
       _chipFocusNode.unfocus();
       setState(() {
-        _toppings = <String>{};
+        _toppings = <String>[];
       });
     }
   }
 
-  void _onChanged(Set<String> data) {
+  void _onChanged(List<String> data) {
     setState(() {
       _toppings = data;
     });
@@ -172,14 +173,12 @@ class ChipsInput<T> extends StatefulWidget {
     this.onChipTapped,
     this.onSubmitted,
     this.onTextChanged,
-    this.focusNode,
   });
 
-  final Set<T> values;
+  final List<T> values;
   final InputDecoration decoration;
-  final FocusNode? focusNode;
 
-  final ValueChanged<Set<T>> onChanged;
+  final ValueChanged<List<T>> onChanged;
   final ValueChanged<T>? onChipTapped;
   final ValueChanged<String>? onSubmitted;
   final ValueChanged<String>? onTextChanged;
@@ -190,245 +189,160 @@ class ChipsInput<T> extends StatefulWidget {
   ChipsInputState<T> createState() => ChipsInputState<T>();
 }
 
-class ChipsInputState<T> extends State<ChipsInput<T>>
-    implements TextInputClient {
-  static const int kObjectReplacementChar = 0xFFFE;
+class ChipsInputState<T> extends State<ChipsInput<T>> {
+  @visibleForTesting
+  late final ChipsInputEditingController<T> controller;
 
-  FocusNode? _lastChipFocusNode;
-
-  late final FocusNode _focusNode;
-  TextEditingValue _value = TextEditingValue.empty;
-  TextInputConnection? _connection;
+  String _previousText = '';
+  TextSelection? _previousSelection;
+  bool needTextUpdate = true;
 
   @override
   void initState() {
     super.initState();
-    _focusNode = widget.focusNode ?? FocusNode();
-    _focusNode.addListener(_onFocusChanged);
+    controller = ChipsInputEditingController<T>(
+        <T>[...widget.values], widget.chipBuilder);
+    controller.addListener(_textListener);
   }
 
   @override
   void dispose() {
-    _focusNode.dispose();
-    _closeInputConnectionIfNeeded();
+    controller.removeListener(_textListener);
+    controller.dispose();
     super.dispose();
   }
 
-  @override
-  TextEditingValue get currentTextEditingValue => _value;
+  void _textListener() {
+    final String currentText = controller.text;
 
-  @override
-  void updateEditingValue(TextEditingValue value) {
-    final int oldCount = _countReplacements(_value);
-    final int newCount = _countReplacements(value);
+    if (_previousSelection != null) {
+      final int currentNumber = countReplacements(currentText);
+      final int previousNumber = countReplacements(_previousText);
 
-    setState(() {
-      if (newCount < oldCount) {
-        widget.onChanged(widget.values.take(newCount).toSet());
-      }
-      _value = value;
-    });
-    widget.onTextChanged?.call(text);
-  }
+      final int cursorEnd = _previousSelection!.extentOffset;
+      final int cursorStart = _previousSelection!.baseOffset;
 
-  @override
-  void updateFloatingCursor(RawFloatingCursorPoint point) {}
+      final List<T> values = <T>[...widget.values];
 
-  @override
-  void connectionClosed() {
-    _focusNode.unfocus();
-  }
-
-  @override
-  void performAction(TextInputAction action) {
-    widget.onSubmitted?.call(text);
-  }
-
-  @override
-  AutofillScope? get currentAutofillScope => throw UnimplementedError();
-
-  @override
-  void didChangeInputControl(
-      TextInputControl? oldControl, TextInputControl? newControl) {}
-
-  @override
-  void insertContent(KeyboardInsertedContent content) {}
-
-  @override
-  void insertTextPlaceholder(Size size) {}
-
-  @override
-  void performPrivateCommand(String action, Map<String, dynamic> data) {}
-
-  @override
-  void performSelector(String selectorName) {}
-
-  @override
-  void removeTextPlaceholder() {}
-
-  @override
-  void showAutocorrectionPromptRect(int start, int end) {}
-
-  @override
-  void showToolbar() {}
-
-  @override
-  Widget build(BuildContext context) {
-    _syncTextValue();
-
-    final List<Widget> chipsChildren = widget.values.map<Widget>(
-      (T data) {
-        final Widget child = widget.chipBuilder(context, data);
-        if (_lastChipFocusNode != null) {
-          _lastChipFocusNode!.requestFocus();
-          return Focus(focusNode: _lastChipFocusNode, child: child);
+      if (currentNumber < previousNumber &&
+          cursorStart >= 0 &&
+          cursorEnd >= 0 &&
+          cursorStart <= cursorEnd &&
+          cursorEnd <= values.length) {
+        if (cursorStart == cursorEnd) {
+          values.removeRange(cursorStart - 1, cursorEnd);
+        } else {
+          values.removeRange(cursorStart, cursorEnd);
         }
-        return child;
-      },
-    ).toList();
-
-    chipsChildren.add(Row(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.end,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: <Widget>[
-        Text(text),
-        TextCaret(
-          resumed: _focusNode.hasFocus,
-        ),
-      ],
-    ));
-
-    return GestureDetector(
-      onTap: _requestKeyboard,
-      child: InputDecorator(
-        decoration: widget.decoration,
-        isFocused: _focusNode.hasFocus,
-        isEmpty: _value.text.isEmpty,
-        textAlignVertical: TextAlignVertical.center,
-        child: Wrap(
-          crossAxisAlignment: WrapCrossAlignment.center,
-          runSpacing: 4,
-          spacing: 4,
-          children: chipsChildren,
-        ),
-      ),
-    );
-  }
-
-  String get text {
-    return String.fromCharCodes(
-      _value.text.codeUnits.where((int ch) => ch != kObjectReplacementChar),
-    );
-  }
-
-  bool get _hasInputConnection => _connection?.attached ?? false;
-
-  void _requestKeyboard() {
-    if (_focusNode.hasFocus) {
-      _openInputConnection();
-    } else {
-      FocusScope.of(context).requestFocus(_focusNode);
+        widget.onChanged(values);
+      }
     }
+
+    _previousText = currentText;
+    _previousSelection = controller.selection;
   }
 
-  void _onFocusChanged() {
-    if (_focusNode.hasFocus) {
-      _openInputConnection();
-    } else {
-      _closeInputConnectionIfNeeded();
-    }
-  }
-
-  void _openInputConnection() {
-    if (!_hasInputConnection) {
-      _connection = TextInput.attach(this, const TextInputConfiguration());
-      _connection!.setEditingState(_value);
-    }
-    _connection?.show();
-  }
-
-  void _closeInputConnectionIfNeeded() {
-    if (_hasInputConnection) {
-      _connection!.close();
-      _connection = null;
-    }
-  }
-
-  int _countReplacements(TextEditingValue value) {
-    return _countReplacementsInString(value.text);
-  }
-
-  int _countReplacementsInString(String value) {
-    return value.codeUnits
-        .where((int ch) => ch == kObjectReplacementChar)
+  static int countReplacements(String text) {
+    return text.codeUnits
+        .where(
+            (int u) => u == ChipsInputEditingController.kObjectReplacementChar)
         .length;
   }
 
-  int get currentReplacementCount => _countReplacements(_value);
-
-  void _syncTextValue() {
-    final TextEditingValue currentTextEditingValue = _value;
-    final int newChipCount = widget.values.length;
-    final int oldChipCount = _countReplacements(currentTextEditingValue);
-
-    String text = String.fromCharCodes(
-        List<int>.filled(newChipCount, kObjectReplacementChar));
-    if (newChipCount == oldChipCount) {
-      text += this.text;
-    }
-    _value = TextEditingValue(
-      text: text,
-      selection: TextSelection.collapsed(offset: text.length),
-    );
-    _connection?.setEditingState(_value);
-  }
-}
-
-class TextCaret extends StatefulWidget {
-  const TextCaret({super.key, this.resumed = false});
-
-  final bool resumed;
-
-  @override
-  TextCursorState createState() => TextCursorState();
-}
-
-class TextCursorState extends State<TextCaret>
-    with SingleTickerProviderStateMixin {
-  final Duration _duration = const Duration(milliseconds: 500);
-  bool _displayed = false;
-  Timer? _timer;
-
-  @override
-  void initState() {
-    super.initState();
-    _timer = Timer.periodic(_duration, _onTimer);
-  }
-
-  void _onTimer(Timer timer) {
-    setState(() {
-      _displayed = !_displayed;
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    _timer = null;
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    return Opacity(
-      opacity: _displayed && widget.resumed ? 1.0 : 0.0,
-      child: Container(
-        width: 2.0,
-        height: 20,
-        color: theme.primaryColor,
+    controller.updateValues(<T>[...widget.values]);
+
+    return TextField(
+      minLines: 1,
+      maxLines: 10,
+      style: const TextStyle(
+        height: 2.5,
       ),
+      controller: controller,
+      onChanged: (_) =>
+          widget.onTextChanged?.call(controller.textWithoutReplacements),
+      onSubmitted: (_) =>
+          widget.onSubmitted?.call(controller.textWithoutReplacements),
+    );
+  }
+}
+
+class ChipsInputEditingController<T> extends TextEditingController {
+  ChipsInputEditingController(this.values, this.chipBuilder)
+      : super(
+            text: String.fromCharCode(kObjectReplacementChar) * values.length);
+
+  static const int kObjectReplacementChar = 0xFFFE;
+
+  List<T> values;
+
+  final Widget Function(BuildContext context, T data) chipBuilder;
+
+  /// called whenever chip is either added or removed
+  /// from the outside the context of the text field
+  void updateValues(List<T> values) {
+    if (values.length != this.values.length) {
+      final String char = String.fromCharCode(kObjectReplacementChar);
+      final int length = values.length;
+      value = TextEditingValue(
+          text: char * length,
+          selection: TextSelection.collapsed(offset: length));
+      this.values = values;
+    }
+  }
+
+  String get textWithoutReplacements {
+    final String char = String.fromCharCode(kObjectReplacementChar);
+    return text.replaceAll(RegExp(char), '');
+  }
+
+  String get textWithReplacements => text;
+
+  @override
+  TextSpan buildTextSpan(
+      {required BuildContext context,
+      TextStyle? style,
+      required bool withComposing}) {
+    assert(!value.composing.isValid ||
+        !withComposing ||
+        value.isComposingRangeValid);
+
+    final Iterable<WidgetSpan> chipWidgets =
+        values.map((T v) => WidgetSpan(child: chipBuilder(context, v)));
+
+    // If the composing range is out of range for the current text, ignore it to
+    // preserve the tree integrity, otherwise in release mode a RangeError will
+    // be thrown and this EditableText will be built with a broken subtree.
+    final bool composingRegionOutOfRange =
+        !value.isComposingRangeValid || !withComposing;
+
+    if (composingRegionOutOfRange) {
+      return TextSpan(style: style, children: <InlineSpan>[
+        ...chipWidgets,
+        TextSpan(text: textWithoutReplacements)
+      ]);
+    }
+
+    //print("Before: ${value.composing.textBefore(textWithoutReplacements)}");
+    //print("Inside: ${value.composing.textInside(textWithoutReplacements)}");
+    //print("After: ${value.composing.textAfter(textWithoutReplacements)}");
+
+    final TextStyle composingStyle =
+        style?.merge(const TextStyle(decoration: TextDecoration.underline)) ??
+            const TextStyle(decoration: TextDecoration.underline);
+
+    return TextSpan(
+      style: style,
+      children: <InlineSpan>[
+        TextSpan(text: value.composing.textBefore(text)),
+        ...chipWidgets,
+        TextSpan(
+          style: composingStyle,
+          text: value.composing.textInside(text),
+        ),
+        TextSpan(text: value.composing.textAfter(text)),
+      ],
     );
   }
 }
