@@ -242,10 +242,10 @@ void ensureNoLinkModeStatic(List<Asset> nativeAssets) {
   final Iterable<Asset> staticAssets =
       nativeAssets.whereLinkMode(LinkMode.static);
   if (staticAssets.isNotEmpty) {
-    final String assetNames =
-        staticAssets.map((Asset a) => a.name).toSet().join(', ');
+    final String assetIds =
+        staticAssets.map((Asset a) => a.id).toSet().join(', ');
     throwToolExit(
-      'Native asset(s) $assetNames have their link mode set to static, '
+      'Native asset(s) $assetIds have their link mode set to static, '
       'but this is not yet supported. '
       'For more info see https://github.com/dart-lang/sdk/issues/49418.',
     );

@@ -154,13 +154,13 @@ void main() {
         dryRunResult: FakeNativeAssetsBuilderResult(
           assets: <Asset>[
           Asset(
-            name: 'package:bar/bar.dart',
+            id: 'package:bar/bar.dart',
             linkMode: LinkMode.dynamic,
             target: native_assets_cli.Target.macOSArm64,
             path: AssetAbsolutePath(Uri.file('bar.dylib')),
           ),
           Asset(
-            name: 'package:bar/bar.dart',
+            id: 'package:bar/bar.dart',
             linkMode: LinkMode.dynamic,
             target: native_assets_cli.Target.macOSX64,
             path: AssetAbsolutePath(Uri.file('bar.dylib')),
@@ -273,7 +273,7 @@ InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault
           buildResult: FakeNativeAssetsBuilderResult(
             assets: <Asset>[
               Asset(
-                name: 'package:bar/bar.dart',
+                id: 'package:bar/bar.dart',
                 linkMode: LinkMode.dynamic,
                 target: native_assets_cli.Target.macOSArm64,
                 path: AssetAbsolutePath(Uri.file('bar.dylib')),

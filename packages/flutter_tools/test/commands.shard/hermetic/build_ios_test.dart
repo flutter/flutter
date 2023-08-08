@@ -1106,7 +1106,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         dryRunResult: FakeNativeAssetsBuilderResult(
           assets: <Asset>[
           Asset(
-            name: 'package:bar/bar.dart',
+            id: 'package:bar/bar.dart',
             linkMode: LinkMode.dynamic,
             target: native_assets_cli.Target.macOSArm64,
             path: AssetAbsolutePath(Uri.file('bar.dylib')),
