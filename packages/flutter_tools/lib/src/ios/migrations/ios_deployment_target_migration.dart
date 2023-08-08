@@ -20,7 +20,7 @@ class IOSDeploymentTargetMigration extends ProjectMigrator {
   final File _appFrameworkInfoPlist;
 
   @override
-  bool migrate() {
+  void migrate() {
     if (_xcodeProjectInfoFile.existsSync()) {
       processFileLines(_xcodeProjectInfoFile);
     } else {
@@ -38,8 +38,6 @@ class IOSDeploymentTargetMigration extends ProjectMigrator {
     } else {
       logger.printTrace('Podfile not found, skipping global platform iOS version migration.');
     }
-
-    return true;
   }
 
   @override

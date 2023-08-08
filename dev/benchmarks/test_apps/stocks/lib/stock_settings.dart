@@ -63,7 +63,6 @@ class StockSettingsState extends State<StockSettings> {
     switch (widget.configuration.stockMode) {
       case StockMode.optimistic:
         _handleOptimismChanged(false);
-        break;
       case StockMode.pessimistic:
         showDialog<bool>(
           context: context,
@@ -88,14 +87,11 @@ class StockSettingsState extends State<StockSettings> {
             );
           },
         ).then<void>(_handleOptimismChanged);
-        break;
     }
   }
 
   void sendUpdates(StockConfiguration value) {
-    if (widget.updater != null) {
-      widget.updater(value);
-    }
+    widget.updater(value);
   }
 
   AppBar buildAppBar(BuildContext context) {

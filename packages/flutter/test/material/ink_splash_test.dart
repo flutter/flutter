@@ -5,11 +5,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
+import '../foundation/leak_tracking.dart';
 
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/21506.
-  testWidgets('InkSplash receives textDirection', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('InkSplash receives textDirection', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Button Border Test')),
@@ -27,9 +27,10 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('InkWell with NoSplash splashFactory paints nothing', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('InkWell with NoSplash splashFactory paints nothing', (WidgetTester tester) async {
     Widget buildFrame({ InteractiveInkFeatureFactory? splashFactory }) {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Center(
             child: Material(
@@ -48,7 +49,7 @@ void main() {
     await tester.pumpWidget(buildFrame(splashFactory: NoSplash.splashFactory));
     {
       final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('test')));
-      final MaterialInkController material = Material.of(tester.element(find.text('test')))!;
+      final MaterialInkController material = Material.of(tester.element(find.text('test')));
       await tester.pump(const Duration(milliseconds: 200));
       expect(material, paintsExactlyCountTimes(#drawCircle, 0));
       await gesture.up();
@@ -59,7 +60,7 @@ void main() {
     await tester.pumpWidget(buildFrame());
     {
       final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('test')));
-      final MaterialInkController material = Material.of(tester.element(find.text('test')))!;
+      final MaterialInkController material = Material.of(tester.element(find.text('test')));
       await tester.pump(const Duration(milliseconds: 200));
       expect(material, paintsExactlyCountTimes(#drawCircle, 1));
       await gesture.up();

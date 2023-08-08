@@ -130,7 +130,7 @@ typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
 ///
 /// {@tool snippet}
 ///
-/// This example defines a `MaterialStateColor` with a const constructor.
+/// This example defines a [MaterialStateColor] with a const constructor.
 ///
 /// ```dart
 /// class MyColor extends MaterialStateColor {
@@ -409,7 +409,6 @@ abstract class MaterialStateOutlinedBorder extends OutlinedBorder implements Mat
   OutlinedBorder? resolve(Set<MaterialState> states);
 }
 
-
 /// Defines a [TextStyle] that is also a [MaterialStateProperty].
 ///
 /// This class exists to enable widgets with [TextStyle] valued properties
@@ -603,9 +602,11 @@ class _MaterialStateUnderlineInputBorder extends MaterialStateUnderlineInputBord
 /// on a widget's interactive "state", which is defined as a set
 /// of [MaterialState]s.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=CylXr3AF3uU}
+///
 /// Material state properties represent values that depend on a widget's material
-/// "state".  The state is encoded as a set of [MaterialState] values, like
-/// [MaterialState.focused], [MaterialState.hovered], [MaterialState.pressed].  For
+/// "state". The state is encoded as a set of [MaterialState] values, like
+/// [MaterialState.focused], [MaterialState.hovered], [MaterialState.pressed]. For
 /// example the [InkWell.overlayColor] defines the color that fills the ink well
 /// when it's pressed (the "splash color"), focused, or hovered. The [InkWell]
 /// uses the overlay color's [resolve] method to compute the color for the
@@ -613,7 +614,7 @@ class _MaterialStateUnderlineInputBorder extends MaterialStateUnderlineInputBord
 ///
 /// [ButtonStyle], which is used to configure the appearance of
 /// buttons like [TextButton], [ElevatedButton], and [OutlinedButton],
-/// has many material state properties.  The button widgets keep track
+/// has many material state properties. The button widgets keep track
 /// of their current material state and [resolve] the button style's
 /// material state properties when their value is needed.
 ///
@@ -631,7 +632,6 @@ class _MaterialStateUnderlineInputBorder extends MaterialStateUnderlineInputBord
 ///
 /// {@macro flutter.material.MaterialStateProperty.implementations}
 abstract class MaterialStateProperty<T> {
-
   /// Returns a value of type `T` that depends on [states].
   ///
   /// Widgets like [TextButton] and [ElevatedButton] apply this method to their

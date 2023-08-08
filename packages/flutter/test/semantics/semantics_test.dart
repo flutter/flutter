@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart';
@@ -271,7 +273,8 @@ void main() {
     });
 
     test('after markNeedsSemanticsUpdate() all render objects between two semantic boundaries are asked for annotations', () {
-      TestRenderingFlutterBinding.instance.pipelineOwner.ensureSemantics();
+      final SemanticsHandle handle = TestRenderingFlutterBinding.instance.ensureSemantics();
+      addTearDown(handle.dispose);
 
       TestRender middle;
       final TestRender root = TestRender(
@@ -628,6 +631,30 @@ void main() {
     );
   });
 
+  test('blocked actions debug properties', () {
+    final SemanticsConfiguration config = SemanticsConfiguration()
+      ..isBlockingUserActions = true
+      ..onScrollUp = () { }
+      ..onLongPress = () { }
+      ..onShowOnScreen = () { }
+      ..onDidGainAccessibilityFocus = () { };
+    final SemanticsNode blocked = SemanticsNode()
+      ..rect = const Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
+      ..transform = Matrix4.translation(Vector3(10.0, 10.0, 0.0))
+      ..updateWith(config: config);
+    expect(
+      blocked.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'SemanticsNode#1\n'
+        '   STALE\n'
+        '   owner: null\n'
+        '   Rect.fromLTRB(60.0, 20.0, 80.0, 50.0)\n'
+        '   actions: didGainAccessibilityFocus, longPress🚫️, scrollUp🚫️,\n'
+        '     showOnScreen🚫️\n',
+      ),
+    );
+  });
+
   test('Custom actions debug properties', () {
     final SemanticsConfiguration configuration = SemanticsConfiguration();
     const CustomSemanticsAction action1 = CustomSemanticsAction(label: 'action1');
@@ -676,7 +703,7 @@ void main() {
     );
   });
 
-  test('Attributed String can concate', () {
+  test('Attributed String can concat', () {
     final AttributedString string1 = AttributedString(
       'string1',
       attributes: <StringAttribute>[
@@ -698,7 +725,9 @@ void main() {
   });
 
   test('Semantics id does not repeat', () {
-    final SemanticsOwner owner = SemanticsOwner();
+    final SemanticsOwner owner = SemanticsOwner(
+      onSemanticsUpdate: (SemanticsUpdate update) {},
+    );
     const int expectId = 1400;
     SemanticsNode? nodeToRemove;
     for (int i = 0; i < kMaxFrameworkAccessibilityIdentifier; i++) {

@@ -7,11 +7,19 @@ import 'package:flutter/rendering.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 void main() {
   test('ButtonStyle copyWith, merge, ==, hashCode basics', () {
     expect(const ButtonStyle(), const ButtonStyle().copyWith());
     expect(const ButtonStyle().merge(const ButtonStyle()), const ButtonStyle());
     expect(const ButtonStyle().hashCode, const ButtonStyle().copyWith().hashCode);
+  });
+
+  test('ButtonStyle lerp special cases', () {
+    expect(ButtonStyle.lerp(null, null, 0), null);
+    const ButtonStyle data = ButtonStyle();
+    expect(identical(ButtonStyle.lerp(data, data, 0.5), data), true);
   });
 
   test('ButtonStyle defaults', () {
@@ -27,6 +35,7 @@ void main() {
     expect(style.minimumSize, null);
     expect(style.fixedSize, null);
     expect(style.maximumSize, null);
+    expect(style.iconColor, null);
     expect(style.iconSize, null);
     expect(style.side, null);
     expect(style.shape, null);
@@ -37,7 +46,7 @@ void main() {
     expect(style.enableFeedback, null);
   });
 
-  testWidgets('Default ButtonStyle debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default ButtonStyle debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ButtonStyle().debugFillProperties(builder);
 
@@ -49,7 +58,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('ButtonStyle debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ButtonStyle debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ButtonStyle(
       textStyle: MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 10.0)),
@@ -63,6 +72,7 @@ void main() {
       minimumSize: MaterialStatePropertyAll<Size>(Size(1.0, 2.0)),
       side: MaterialStatePropertyAll<BorderSide>(BorderSide(width: 4.0, color: Color(0xfffffff6))),
       maximumSize: MaterialStatePropertyAll<Size>(Size(100.0, 200.0)),
+      iconColor: MaterialStatePropertyAll<Color>(Color(0xfffffff6)),
       iconSize: MaterialStatePropertyAll<double>(48.1),
       shape: MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder()),
       mouseCursor: MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.forbidden),
@@ -87,6 +97,7 @@ void main() {
       'padding: MaterialStatePropertyAll(EdgeInsets.all(1.0))',
       'minimumSize: MaterialStatePropertyAll(Size(1.0, 2.0))',
       'maximumSize: MaterialStatePropertyAll(Size(100.0, 200.0))',
+      'iconColor: MaterialStatePropertyAll(Color(0xfffffff6))',
       'iconSize: MaterialStatePropertyAll(48.1)',
       'side: MaterialStatePropertyAll(BorderSide(color: Color(0xfffffff6), width: 4.0))',
       'shape: MaterialStatePropertyAll(StadiumBorder(BorderSide(width: 0.0, style: none)))',
@@ -97,7 +108,7 @@ void main() {
     ]);
   });
 
-  testWidgets('ButtonStyle copyWith, merge', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ButtonStyle copyWith, merge', (WidgetTester tester) async {
     const MaterialStateProperty<TextStyle> textStyle = MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 10));
     const MaterialStateProperty<Color> backgroundColor = MaterialStatePropertyAll<Color>(Color(0xfffffff1));
     const MaterialStateProperty<Color> foregroundColor = MaterialStatePropertyAll<Color>(Color(0xfffffff2));
@@ -109,6 +120,7 @@ void main() {
     const MaterialStateProperty<Size> minimumSize = MaterialStatePropertyAll<Size>(Size(1, 2));
     const MaterialStateProperty<Size> fixedSize = MaterialStatePropertyAll<Size>(Size(3, 4));
     const MaterialStateProperty<Size> maximumSize = MaterialStatePropertyAll<Size>(Size(5, 6));
+    const MaterialStateProperty<Color> iconColor = MaterialStatePropertyAll<Color>(Color(0xfffffff6));
     const MaterialStateProperty<double> iconSize = MaterialStatePropertyAll<double>(48.0);
     const MaterialStateProperty<BorderSide> side = MaterialStatePropertyAll<BorderSide>(BorderSide());
     const MaterialStateProperty<OutlinedBorder> shape = MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder());
@@ -130,6 +142,7 @@ void main() {
       minimumSize: minimumSize,
       fixedSize: fixedSize,
       maximumSize: maximumSize,
+      iconColor: iconColor,
       iconSize: iconSize,
       side: side,
       shape: shape,
@@ -154,6 +167,7 @@ void main() {
         minimumSize: minimumSize,
         fixedSize: fixedSize,
         maximumSize: maximumSize,
+        iconColor: iconColor,
         iconSize: iconSize,
         side: side,
         shape: shape,

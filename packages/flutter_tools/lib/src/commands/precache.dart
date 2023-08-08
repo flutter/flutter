@@ -14,7 +14,7 @@ import '../runner/flutter_command.dart';
 class PrecacheCommand extends FlutterCommand {
   PrecacheCommand({
     bool verboseHelp = false,
-    required Cache? cache,
+    required Cache cache,
     required Platform platform,
     required Logger logger,
     required FeatureFlags featureFlags,
@@ -22,8 +22,11 @@ class PrecacheCommand extends FlutterCommand {
        _platform = platform,
        _logger = logger,
        _featureFlags = featureFlags {
-    argParser.addFlag('all-platforms', abbr: 'a', negatable: false,
-        help: 'Precache artifacts for all host platforms.');
+    argParser.addFlag('all-platforms',
+        abbr: 'a',
+        negatable: false,
+        help: 'Precache artifacts for all host platforms.',
+        aliases: const <String>['all']);
     argParser.addFlag('force', abbr: 'f', negatable: false,
         help: 'Force re-downloading of artifacts.');
     argParser.addFlag('android',
@@ -58,7 +61,7 @@ class PrecacheCommand extends FlutterCommand {
         help: 'Precache the unsigned macOS binaries when available.', hide: !verboseHelp);
   }
 
-  final Cache? _cache;
+  final Cache _cache;
   final Logger _logger;
   final Platform _platform;
   final FeatureFlags _featureFlags;
@@ -102,7 +105,7 @@ class PrecacheCommand extends FlutterCommand {
   Set<String> _explicitArtifactSelections() {
     final Map<String, String> umbrellaForArtifact = _umbrellaForArtifactMap();
     final Set<String> selections = <String>{};
-    bool explicitlySelected(String name) => boolArgDeprecated(name) && argResults!.wasParsed(name);
+    bool explicitlySelected(String name) => boolArg(name) && argResults!.wasParsed(name);
     for (final DevelopmentArtifact artifact in DevelopmentArtifact.values) {
       final String? umbrellaName = umbrellaForArtifact[artifact.name];
       if (explicitlySelected(artifact.name) ||
@@ -133,21 +136,21 @@ class PrecacheCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     // Re-lock the cache.
     if (_platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
-      await _cache!.lock();
+      await _cache.lock();
     }
-    if (boolArgDeprecated('force')) {
-      _cache!.clearStampFiles();
+    if (boolArg('force')) {
+      _cache.clearStampFiles();
     }
 
-    final bool includeAllPlatforms = boolArgDeprecated('all-platforms');
+    final bool includeAllPlatforms = boolArg('all-platforms');
     if (includeAllPlatforms) {
-      _cache!.includeAllPlatforms = true;
+      _cache.includeAllPlatforms = true;
     }
-    if (boolArgDeprecated('use-unsigned-mac-binaries')) {
-      _cache!.useUnsignedMacBinaries = true;
+    if (boolArg('use-unsigned-mac-binaries')) {
+      _cache.useUnsignedMacBinaries = true;
     }
     final Set<String> explicitlyEnabled = _explicitArtifactSelections();
-    _cache!.platformOverrideArtifacts = explicitlyEnabled;
+    _cache.platformOverrideArtifacts = explicitlyEnabled;
 
     // If the user did not provide any artifact flags, then download
     // all artifacts that correspond to an enabled platform.
@@ -160,12 +163,12 @@ class PrecacheCommand extends FlutterCommand {
       }
 
       final String argumentName = umbrellaForArtifact[artifact.name] ?? artifact.name;
-      if (includeAllPlatforms || boolArgDeprecated(argumentName) || downloadDefaultArtifacts) {
+      if (includeAllPlatforms || boolArg(argumentName) || downloadDefaultArtifacts) {
         requiredArtifacts.add(artifact);
       }
     }
-    if (!await _cache!.isUpToDate()) {
-      await _cache!.updateAll(requiredArtifacts);
+    if (!await _cache.isUpToDate()) {
+      await _cache.updateAll(requiredArtifacts);
     } else {
       _logger.printStatus('Already up-to-date.');
     }

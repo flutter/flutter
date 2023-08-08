@@ -3,12 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:flutter/services.dart';
 import 'package:flutter_driver/driver_extension.dart';
 
-void drawHelloWorld() {
+import 'windows.dart';
+
+void drawHelloWorld(ui.FlutterView view) {
   final ui.ParagraphStyle style = ui.ParagraphStyle();
   final ui.ParagraphBuilder paragraphBuilder = ui.ParagraphBuilder(style)
     ..addText('Hello world');
@@ -26,41 +28,69 @@ void drawHelloWorld() {
     ..addPicture(ui.Offset.zero, picture)
     ..pop();
 
-  ui.window.render(sceneBuilder.build());
+  view.render(sceneBuilder.build());
 }
 
 void main() async {
-  // Create a completer to send the result back to the integration test.
-  final Completer<String> completer = Completer<String>();
-  enableFlutterDriverExtension(handler: (String? message) => completer.future);
+  // TODO(goderbauer): Create a window if embedder doesn't provide an implicit view to draw into.
+  assert(ui.PlatformDispatcher.instance.implicitView != null);
+  final ui.FlutterView view = ui.PlatformDispatcher.instance.implicitView!;
 
-  try {
-    const MethodChannel methodChannel =
-        MethodChannel('tests.flutter.dev/windows_startup_test');
+  // Create a completer to send the window visibility result back to the
+  // integration test.
+  final Completer<String> visibilityCompleter = Completer<String>();
+  enableFlutterDriverExtension(handler: (String? message) async {
+    if (message == 'verifyWindowVisibility') {
+      return visibilityCompleter.future;
+    } else if (message == 'verifyTheme') {
+      final bool app = await isAppDarkModeEnabled();
+      final bool system = await isSystemDarkModeEnabled();
 
-    // TODO(loic-sharma): Make the window invisible until after the first frame.
-    // https://github.com/flutter/flutter/issues/41980
-    final bool? visible = await methodChannel.invokeMethod('isWindowVisible');
-    if (visible == null || visible == false) {
-      throw 'Window should be visible at startup';
+      return (app == system)
+        ? 'success'
+        : 'error: app dark mode ($app) does not match system dark mode ($system)';
+    } else if (message == 'verifyStringConversion') {
+      // Use a test string that contains code points that fit in both 8 and 16 bits.
+      // The code points are passed a list of integers through the method channel,
+      // which will use the UTF16 to UTF8 utility function to convert them to a
+      // std::string, which should equate to the original expected string.
+      const String expected = 'ABCℵ';
+      final Int32List codePoints = Int32List.fromList(expected.codeUnits);
+      final String converted = await testStringConversion(codePoints);
+      return (converted == expected)
+        ? 'success'
+        : 'error: conversion of UTF16 string to UTF8 failed, expected "${expected.codeUnits}" but got "${converted.codeUnits}"';
     }
 
+    throw 'Unrecognized message: $message';
+  });
+
+  try {
+    if (await isWindowVisible()) {
+      throw 'Window should be hidden at startup';
+    }
+
+    bool firstFrame = true;
     ui.PlatformDispatcher.instance.onBeginFrame = (Duration duration) async {
-      final bool? visible = await methodChannel.invokeMethod('isWindowVisible');
-      if (visible == null || visible == false) {
-        throw 'Window should be visible';
+      if (await isWindowVisible()) {
+        if (firstFrame) {
+          throw 'Window should be hidden on first frame';
+        }
+
+        if (!visibilityCompleter.isCompleted) {
+          visibilityCompleter.complete('success');
+        }
       }
 
-      if (!completer.isCompleted) {
-        completer.complete('success');
-      }
-
-      drawHelloWorld();
+      // Draw something to trigger the first frame callback that displays the
+      // window.
+      drawHelloWorld(view);
+      firstFrame = false;
     };
 
     ui.PlatformDispatcher.instance.scheduleFrame();
   } catch (e) {
-    completer.completeError(e);
+    visibilityCompleter.completeError(e);
     rethrow;
   }
 }

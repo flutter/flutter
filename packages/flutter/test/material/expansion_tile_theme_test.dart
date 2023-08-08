@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 class TestIcon extends StatefulWidget {
   const TestIcon({super.key});
 
@@ -47,6 +49,12 @@ void main() {
     expect(const ExpansionTileThemeData().hashCode, const ExpansionTileThemeData().copyWith().hashCode);
   });
 
+  test('ExpansionTileThemeData lerp special cases', () {
+    expect(ExpansionTileThemeData.lerp(null, null, 0), null);
+    const ExpansionTileThemeData data = ExpansionTileThemeData();
+    expect(identical(ExpansionTileThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('ExpansionTileThemeData defaults', () {
     const ExpansionTileThemeData theme = ExpansionTileThemeData();
     expect(theme.backgroundColor, null);
@@ -58,9 +66,12 @@ void main() {
     expect(theme.collapsedIconColor, null);
     expect(theme.textColor, null);
     expect(theme.collapsedTextColor, null);
+    expect(theme.shape, null);
+    expect(theme.collapsedShape, null);
+    expect(theme.clipBehavior, null);
   });
 
-  testWidgets('Default ExpansionTileThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default ExpansionTileThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const TooltipThemeData().debugFillProperties(builder);
 
@@ -72,7 +83,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('ExpansionTileThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ExpansionTileThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ExpansionTileThemeData(
       backgroundColor: Color(0xff000000),
@@ -84,6 +95,9 @@ void main() {
       collapsedIconColor: Color(0xffdd0b1f),
       textColor: Color(0xffffffff),
       collapsedTextColor: Color(0xff522bab),
+      shape: Border(),
+      collapsedShape: Border(),
+      clipBehavior: Clip.antiAlias,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -101,10 +115,13 @@ void main() {
       'collapsedIconColor: Color(0xffdd0b1f)',
       'textColor: Color(0xffffffff)',
       'collapsedTextColor: Color(0xff522bab)',
+      'shape: Border.all(BorderSide(width: 0.0, style: none))',
+      'collapsedShape: Border.all(BorderSide(width: 0.0, style: none))',
+      'clipBehavior: Clip.antiAlias',
     ]);
   });
 
-  testWidgets('ExpansionTileTheme - collapsed', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ExpansionTileTheme - collapsed', (WidgetTester tester) async {
     final Key tileKey = UniqueKey();
     final Key titleKey = UniqueKey();
     final Key iconKey = UniqueKey();
@@ -114,6 +131,15 @@ void main() {
     const Color collapsedIconColor = Colors.blue;
     const Color textColor = Colors.black;
     const Color collapsedTextColor = Colors.white;
+    const ShapeBorder shape = Border(
+      top: BorderSide(color: Colors.red),
+      bottom: BorderSide(color: Colors.red),
+    );
+    const ShapeBorder collapsedShape = Border(
+      top: BorderSide(color: Colors.green),
+      bottom: BorderSide(color: Colors.green),
+    );
+    const Clip clipBehavior = Clip.antiAlias;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -128,6 +154,9 @@ void main() {
             collapsedIconColor: collapsedIconColor,
             textColor: textColor,
             collapsedTextColor: collapsedTextColor,
+            shape: shape,
+            collapsedShape: collapsedShape,
+            clipBehavior: clipBehavior,
           ),
         ),
         home: Material(
@@ -143,12 +172,21 @@ void main() {
       ),
     );
 
-    final BoxDecoration boxDecoration =  tester.firstWidget<Container>(find.descendant(
+    final ShapeDecoration shapeDecoration =  tester.firstWidget<Container>(find.descendant(
       of: find.byKey(tileKey),
       matching: find.byType(Container),
-    )).decoration! as BoxDecoration;
+    )).decoration! as ShapeDecoration;
+
+    final Clip tileClipBehavior = tester.firstWidget<Container>(find.descendant(
+      of: find.byKey(tileKey),
+      matching: find.byType(Container),
+    )).clipBehavior;
+
+    // expansionTile should have Clip.antiAlias as clipBehavior
+    expect(tileClipBehavior, clipBehavior);
+
     // Check the tile's collapsed background color when collapsedBackgroundColor is applied.
-    expect(boxDecoration.color, collapsedBackgroundColor);
+    expect(shapeDecoration.color, collapsedBackgroundColor);
 
     final Rect titleRect = tester.getRect(find.text('Collapsed Tile'));
     final Rect trailingRect = tester.getRect(find.byIcon(Icons.expand_more));
@@ -171,9 +209,11 @@ void main() {
     expect(getIconColor(), collapsedIconColor);
     // Check the collapsed text color when textColor is applied.
     expect(getTextColor(), collapsedTextColor);
+    // Check the collapsed ShapeBorder when shape is applied.
+    expect(shapeDecoration.shape, collapsedShape);
   });
 
-  testWidgets('ExpansionTileTheme - expanded', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ExpansionTileTheme - expanded', (WidgetTester tester) async {
     final Key tileKey = UniqueKey();
     final Key titleKey = UniqueKey();
     final Key iconKey = UniqueKey();
@@ -183,6 +223,14 @@ void main() {
     const Color collapsedIconColor = Colors.blue;
     const Color textColor = Colors.black;
     const Color collapsedTextColor = Colors.white;
+    const ShapeBorder shape = Border(
+      top: BorderSide(color: Colors.red),
+      bottom: BorderSide(color: Colors.red),
+    );
+    const ShapeBorder collapsedShape = Border(
+      top: BorderSide(color: Colors.green),
+      bottom: BorderSide(color: Colors.green),
+    );
 
     await tester.pumpWidget(
       MaterialApp(
@@ -197,6 +245,8 @@ void main() {
             collapsedIconColor: collapsedIconColor,
             textColor: textColor,
             collapsedTextColor: collapsedTextColor,
+            shape: shape,
+            collapsedShape: collapsedShape,
           ),
         ),
         home: Material(
@@ -213,12 +263,12 @@ void main() {
       ),
     );
 
-    final BoxDecoration boxDecoration =  tester.firstWidget<Container>(find.descendant(
+    final ShapeDecoration shapeDecoration =  tester.firstWidget<Container>(find.descendant(
       of: find.byKey(tileKey),
       matching: find.byType(Container),
-    )).decoration! as BoxDecoration;
+    )).decoration! as ShapeDecoration;
     // Check the tile's background color when backgroundColor is applied.
-    expect(boxDecoration.color, backgroundColor);
+    expect(shapeDecoration.color, backgroundColor);
 
     final Rect titleRect = tester.getRect(find.text('Expanded Tile'));
     final Rect trailingRect = tester.getRect(find.byIcon(Icons.expand_more));
@@ -241,6 +291,8 @@ void main() {
     expect(getIconColor(), iconColor);
     // Check the expanded text color when textColor is applied.
     expect(getTextColor(), textColor);
+    // Check the expanded ShapeBorder when shape is applied.
+    expect(shapeDecoration.shape, shape);
 
     // Check the child position when expandedAlignment is applied.
     final Rect childRect = tester.getRect(find.text('Tile 1'));

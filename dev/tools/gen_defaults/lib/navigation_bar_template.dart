@@ -15,7 +15,7 @@ class NavigationBarTemplate extends TokenTemplate {
 class _${blockName}DefaultsM3 extends NavigationBarThemeData {
   _${blockName}DefaultsM3(this.context)
       : super(
-          height: ${tokens["md.comp.navigation-bar.container.height"]},
+          height: ${getToken("md.comp.navigation-bar.container.height")},
           elevation: ${elevation("md.comp.navigation-bar.container")},
           labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         );
@@ -26,12 +26,14 @@ class _${blockName}DefaultsM3 extends NavigationBarThemeData {
 
   @override Color? get backgroundColor => ${componentColor("md.comp.navigation-bar.container")};
 
-  @override Color? get surfaceTintColor => ${color("md.comp.navigation-bar.container.surface-tint-layer.color")};
+  @override Color? get shadowColor => ${colorOrTransparent("md.comp.navigation-bar.container.shadow-color")};
+
+  @override Color? get surfaceTintColor => ${colorOrTransparent("md.comp.navigation-bar.container.surface-tint-layer.color")};
 
   @override MaterialStateProperty<IconThemeData?>? get iconTheme {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       return IconThemeData(
-        size: ${tokens["md.comp.navigation-bar.icon.size"]},
+        size: ${getToken("md.comp.navigation-bar.icon.size")},
         color: states.contains(MaterialState.selected)
           ? ${componentColor("md.comp.navigation-bar.active.icon")}
           : ${componentColor("md.comp.navigation-bar.inactive.icon")},

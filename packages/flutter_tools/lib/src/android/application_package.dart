@@ -27,8 +27,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
     required this.applicationPackage,
     required this.versionCode,
     required this.launchActivity,
-  }) : assert(applicationPackage != null),
-       assert(launchActivity != null);
+  });
 
   /// Creates a new AndroidApk from an existing APK.
   ///
@@ -103,11 +102,26 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
     required ProcessUtils processUtils,
     required Logger logger,
     required FileSystem fileSystem,
+    BuildInfo? buildInfo,
   }) async {
-    File apkFile;
+    final File apkFile;
+    final String filename;
+    if (buildInfo == null) {
+      filename = 'app.apk';
+    } else if (buildInfo.flavor == null) {
+      filename = 'app-${buildInfo.mode.cliName}.apk';
+    } else {
+      filename = 'app-${buildInfo.lowerCasedFlavor}-${buildInfo.mode.cliName}.apk';
+    }
 
     if (androidProject.isUsingGradle && androidProject.isSupportedVersion) {
-      apkFile = getApkDirectory(androidProject.parent).childFile('app.apk');
+      Directory apkDirectory = getApkDirectory(androidProject.parent);
+      if (androidProject.parent.isModule) {
+        // Module builds output the apk in a subdirectory that corresponds
+        // to the buildmode of the apk.
+        apkDirectory = apkDirectory.childDirectory(buildInfo!.mode.cliName);
+      }
+      apkFile = apkDirectory.childFile(filename);
       if (apkFile.existsSync()) {
         // Grab information from the .apk. The gradle build script might alter
         // the application Id, so we need to look at what was actually built.
@@ -124,7 +138,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
       // command will grab a new AndroidApk after building, to get the updated
       // IDs.
     } else {
-      apkFile = fileSystem.file(fileSystem.path.join(getAndroidBuildDirectory(), 'app.apk'));
+      apkFile = fileSystem.file(fileSystem.path.join(getAndroidBuildDirectory(), filename));
     }
 
     final File manifest = androidProject.appManifestFile;
@@ -157,7 +171,10 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
       logger.printError('Please check ${manifest.path} for errors.');
       return null;
     }
-    final String? packageId = manifests.first.getAttribute('package');
+
+    // Starting from AGP version 7.3, the `package` attribute in Manifest.xml
+    // can be replaced with the `namespace` attribute under the `android` section in `android/app/build.gradle`.
+    final String? packageId = manifests.first.getAttribute('package') ?? androidProject.namespace;
 
     String? launchActivity;
     for (final XmlElement activity in document.findAllElements('activity')) {
@@ -285,7 +302,7 @@ class ApkManifestData {
   }
 
   static ApkManifestData? parseFromXmlDump(String data, Logger logger) {
-    if (data == null || data.trim().isEmpty) {
+    if (data.trim().isEmpty) {
       return null;
     }
 
@@ -310,7 +327,6 @@ class ApkManifestData {
           case 'A':
             currentElement
                 .addChild(_Attribute.fromLine(line, currentElement));
-            break;
           case 'E':
             final _Element element = _Element.fromLine(line, currentElement);
             currentElement.addChild(element);

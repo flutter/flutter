@@ -12,6 +12,8 @@ import 'package:flutter/widgets.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'constants.dart';
+import 'icon_button.dart';
+import 'icon_button_theme.dart';
 import 'input_border.dart';
 import 'material.dart';
 import 'material_state.dart';
@@ -22,7 +24,9 @@ import 'theme_data.dart';
 // Examples can assume:
 // late Widget _myIcon;
 
-const Duration _kTransitionDuration = Duration(milliseconds: 200);
+// The duration value extracted from:
+// https://github.com/material-components/material-components-android/blob/master/lib/java/com/google/android/material/textfield/TextInputLayout.java
+const Duration _kTransitionDuration = Duration(milliseconds: 167);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 const double _kFinalLabelScale = 0.75;
 
@@ -152,9 +156,7 @@ class _BorderContainer extends StatefulWidget {
     required this.fillColor,
     required this.hoverColor,
     required this.isHovering,
-  }) : assert(border != null),
-       assert(gap != null),
-       assert(fillColor != null);
+  });
 
   final InputBorder border;
   final _InputBorderGap gap;
@@ -192,6 +194,7 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
     _borderAnimation = CurvedAnimation(
       parent: _controller,
       curve: _kTransitionCurve,
+      reverseCurve: _kTransitionCurve.flipped,
     );
     _border = _InputBorderTween(
       begin: widget.border,
@@ -299,6 +302,7 @@ class _HelperError extends StatefulWidget {
     this.helperText,
     this.helperStyle,
     this.helperMaxLines,
+    this.error,
     this.errorText,
     this.errorStyle,
     this.errorMaxLines,
@@ -308,6 +312,7 @@ class _HelperError extends StatefulWidget {
   final String? helperText;
   final TextStyle? helperStyle;
   final int? helperMaxLines;
+  final Widget? error;
   final String? errorText;
   final TextStyle? errorStyle;
   final int? errorMaxLines;
@@ -325,6 +330,8 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   Widget? _helper;
   Widget? _error;
 
+  bool get _hasError => widget.errorText != null || widget.error != null;
+
   @override
   void initState() {
     super.initState();
@@ -332,7 +339,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
       duration: _kTransitionDuration,
       vsync: this,
     );
-    if (widget.errorText != null) {
+    if (_hasError) {
       _error = _buildError();
       _controller.value = 1.0;
     } else if (widget.helperText != null) {
@@ -357,16 +364,19 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   void didUpdateWidget(_HelperError old) {
     super.didUpdateWidget(old);
 
+    final Widget? newError = widget.error;
     final String? newErrorText = widget.errorText;
     final String? newHelperText = widget.helperText;
+    final Widget? oldError = old.error;
     final String? oldErrorText = old.errorText;
     final String? oldHelperText = old.helperText;
 
+    final bool errorStateChanged = (newError != null) != (oldError != null);
     final bool errorTextStateChanged = (newErrorText != null) != (oldErrorText != null);
     final bool helperTextStateChanged = newErrorText == null && (newHelperText != null) != (oldHelperText != null);
 
-    if (errorTextStateChanged || helperTextStateChanged) {
-      if (newErrorText != null) {
+    if (errorStateChanged || errorTextStateChanged || helperTextStateChanged) {
+      if (newError != null || newErrorText != null) {
         _error = _buildError();
         _controller.forward();
       } else if (newHelperText != null) {
@@ -396,10 +406,9 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   }
 
   Widget _buildError() {
-    assert(widget.errorText != null);
+    assert(widget.error != null || widget.errorText != null);
     return Semantics(
       container: true,
-      liveRegion: true,
       child: FadeTransition(
         opacity: _controller,
         child: FractionalTranslation(
@@ -407,7 +416,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
             begin: const Offset(0.0, -0.25),
             end: Offset.zero,
           ).evaluate(_controller.view),
-          child: Text(
+          child: widget.error ?? Text(
             widget.errorText!,
             style: widget.errorStyle,
             textAlign: widget.textAlign,
@@ -433,7 +442,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
 
     if (_controller.isCompleted) {
       _helper = null;
-      if (widget.errorText != null) {
+      if (_hasError) {
         return _error = _buildError();
       } else {
         _error = null;
@@ -441,7 +450,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
       }
     }
 
-    if (_helper == null && widget.errorText != null) {
+    if (_helper == null && _hasError) {
       return _buildError();
     }
 
@@ -449,7 +458,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
       return _buildHelper();
     }
 
-    if (widget.errorText != null) {
+    if (_hasError) {
       return Stack(
         children: <Widget>[
           FadeTransition(
@@ -505,8 +514,7 @@ enum FloatingLabelBehavior {
 ///    behave.
 @immutable
 class FloatingLabelAlignment {
-  const FloatingLabelAlignment._(this._x) : assert(_x != null),
-       assert(_x >= -1.0 && _x <= 1.0);
+  const FloatingLabelAlignment._(this._x) : assert(_x >= -1.0 && _x <= 1.0);
 
   // -1 denotes start, 0 denotes center, and 1 denotes end.
   final double _x;
@@ -589,11 +597,7 @@ class _Decoration {
     this.helperError,
     this.counter,
     this.container,
-  }) : assert(contentPadding != null),
-       assert(isCollapsed != null),
-       assert(floatingLabelHeight != null),
-       assert(floatingLabelProgress != null),
-       assert(floatingLabelAlignment != null);
+  });
 
   final EdgeInsetsGeometry contentPadding;
   final bool isCollapsed;
@@ -696,24 +700,22 @@ class _RenderDecorationLayout {
 }
 
 // The workhorse: layout and paint a _Decorator widget's _Decoration.
-class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin<_DecorationSlot> {
+class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin<_DecorationSlot, RenderBox> {
   _RenderDecoration({
     required _Decoration decoration,
     required TextDirection textDirection,
     required TextBaseline textBaseline,
     required bool isFocused,
     required bool expands,
+    required bool material3,
     TextAlignVertical? textAlignVertical,
-  }) : assert(decoration != null),
-       assert(textDirection != null),
-       assert(textBaseline != null),
-       assert(expands != null),
-       _decoration = decoration,
+  }) : _decoration = decoration,
        _textDirection = textDirection,
        _textBaseline = textBaseline,
        _textAlignVertical = textAlignVertical,
        _isFocused = isFocused,
-       _expands = expands;
+       _expands = expands,
+       _material3 = material3;
 
   static const double subtextGap = 8.0;
 
@@ -761,7 +763,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   _Decoration get decoration => _decoration;
   _Decoration _decoration;
   set decoration(_Decoration value) {
-    assert(value != null);
     if (_decoration == value) {
       return;
     }
@@ -772,7 +773,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
-    assert(value != null);
     if (_textDirection == value) {
       return;
     }
@@ -783,7 +783,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   TextBaseline get textBaseline => _textBaseline;
   TextBaseline _textBaseline;
   set textBaseline(TextBaseline value) {
-    assert(value != null);
     if (_textBaseline == value) {
       return;
     }
@@ -812,7 +811,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   bool get isFocused => _isFocused;
   bool _isFocused;
   set isFocused(bool value) {
-    assert(value != null);
     if (_isFocused == value) {
       return;
     }
@@ -823,11 +821,20 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   bool get expands => _expands;
   bool _expands = false;
   set expands(bool value) {
-    assert(value != null);
     if (_expands == value) {
       return;
     }
     _expands = value;
+    markNeedsLayout();
+  }
+
+  bool get material3 => _material3;
+  bool _material3 = false;
+  set material3(bool value) {
+    if (_material3 == value) {
+      return;
+    }
+    _material3 = value;
     markNeedsLayout();
   }
 
@@ -957,7 +964,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     boxToBaseline[prefixIcon] = _layoutLineBox(prefixIcon, containerConstraints);
     boxToBaseline[suffixIcon] = _layoutLineBox(suffixIcon, containerConstraints);
     final BoxConstraints contentConstraints = containerConstraints.copyWith(
-      maxWidth: containerConstraints.maxWidth - contentPadding.horizontal,
+      maxWidth: math.max(0.0, containerConstraints.maxWidth - contentPadding.horizontal),
     );
     boxToBaseline[prefix] = _layoutLineBox(prefix, contentConstraints);
     boxToBaseline[suffix] = _layoutLineBox(suffix, contentConstraints);
@@ -966,12 +973,12 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       0.0,
       constraints.maxWidth - (
         _boxSize(icon).width
-        + contentPadding.left
+        + (prefixIcon != null ? 0 : (textDirection == TextDirection.ltr ? contentPadding.left : contentPadding.right))
         + _boxSize(prefixIcon).width
         + _boxSize(prefix).width
         + _boxSize(suffix).width
         + _boxSize(suffixIcon).width
-        + contentPadding.right),
+        + (suffixIcon != null ? 0 : (textDirection == TextDirection.ltr ? contentPadding.right : contentPadding.left))),
     );
     // Increase the available width for the label when it is scaled down.
     final double invertedLabelScale = lerpDouble(1.00, 1 / _kFinalLabelScale, decoration.floatingLabelProgress)!;
@@ -1086,7 +1093,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final double minContainerHeight = decoration.isDense! || decoration.isCollapsed || expands
       ? 0.0
       : kMinInteractiveDimension;
-    final double maxContainerHeight = boxConstraints.maxHeight - bottomHeight;
+    final double maxContainerHeight = math.max(0.0, boxConstraints.maxHeight - bottomHeight);
     final double containerHeight = expands
       ? maxContainerHeight
       : math.min(math.max(contentHeight, minContainerHeight), maxContainerHeight);
@@ -1114,15 +1121,13 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       + topHeight
       + inputInternalBaseline
       + baselineAdjustment
-      + interactiveAdjustment;
-    final double maxContentHeight = containerHeight
-      - contentPadding.top
-      - topHeight
-      - contentPadding.bottom;
+      + interactiveAdjustment
+      + densityOffset.dy / 2.0;
+    final double maxContentHeight = containerHeight - contentPadding.vertical - topHeight - densityOffset.dy;
     final double alignableHeight = fixAboveInput + inputHeight + fixBelowInput;
     final double maxVerticalOffset = maxContentHeight - alignableHeight;
     final double textAlignVerticalOffset = maxVerticalOffset * textAlignVerticalFactor;
-    final double inputBaseline = topInputBaseline + textAlignVerticalOffset + densityOffset.dy / 2.0;
+    final double inputBaseline = topInputBaseline + textAlignVerticalOffset;
 
     // The three main alignments for the baseline when an outline is present are
     //
@@ -1302,7 +1307,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
-    return _boxParentData(input!).offset.dy + input!.computeDistanceToActualBaseline(baseline)!;
+    return _boxParentData(input!).offset.dy + (input?.computeDistanceToActualBaseline(baseline) ?? 0.0);
   }
 
   // Records where the label was painted.
@@ -1316,6 +1321,35 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     return Size.zero;
   }
 
+  ChildSemanticsConfigurationsResult _childSemanticsConfigurationDelegate(List<SemanticsConfiguration> childConfigs) {
+    final ChildSemanticsConfigurationsResultBuilder builder = ChildSemanticsConfigurationsResultBuilder();
+    List<SemanticsConfiguration>? prefixMergeGroup;
+    List<SemanticsConfiguration>? suffixMergeGroup;
+    for (final SemanticsConfiguration childConfig in childConfigs) {
+      if (childConfig.tagsChildrenWith(_InputDecoratorState._kPrefixSemanticsTag)) {
+        prefixMergeGroup ??= <SemanticsConfiguration>[];
+        prefixMergeGroup.add(childConfig);
+      } else if (childConfig.tagsChildrenWith(_InputDecoratorState._kSuffixSemanticsTag)) {
+        suffixMergeGroup ??= <SemanticsConfiguration>[];
+        suffixMergeGroup.add(childConfig);
+      } else {
+        builder.markAsMergeUp(childConfig);
+      }
+    }
+    if (prefixMergeGroup != null) {
+      builder.markAsSiblingMergeGroup(prefixMergeGroup);
+    }
+    if (suffixMergeGroup != null) {
+      builder.markAsSiblingMergeGroup(suffixMergeGroup);
+    }
+    return builder.build();
+  }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    config.childConfigurationsDelegate = _childSemanticsConfigurationDelegate;
+  }
+
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
@@ -1325,22 +1359,21 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
     final double overallWidth = constraints.maxWidth;
     final double overallHeight = layout.containerHeight + layout.subtextHeight;
 
+    final RenderBox? container = this.container;
     if (container != null) {
       final BoxConstraints containerConstraints = BoxConstraints.tightFor(
         height: layout.containerHeight,
         width: overallWidth - _boxSize(icon).width,
       );
-      container!.layout(containerConstraints, parentUsesSize: true);
+      container.layout(containerConstraints, parentUsesSize: true);
       final double x;
       switch (textDirection) {
         case TextDirection.rtl:
           x = 0.0;
-          break;
         case TextDirection.ltr:
           x = _boxSize(icon).width;
-          break;
        }
-      _boxParentData(container!).offset = Offset(x, 0.0);
+      _boxParentData(container).offset = Offset(x, 0.0);
     }
 
     late double height;
@@ -1366,10 +1399,8 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       switch (textDirection) {
         case TextDirection.rtl:
           x = overallWidth - icon!.size.width;
-          break;
         case TextDirection.ltr:
           x = 0.0;
-          break;
        }
       centerLayout(icon!, x);
     }
@@ -1379,7 +1410,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
         double start = right - _boxSize(icon).width;
         double end = left;
         if (prefixIcon != null) {
-          start += contentPadding.left;
+          start += contentPadding.right;
           start -= centerLayout(prefixIcon!, start - prefixIcon!.size.width);
         }
         if (label != null) {
@@ -1453,7 +1484,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
           if (counter != null) {
             baselineLayout(counter!, left);
           }
-          break;
         case TextDirection.ltr:
           if (helperError != null) {
             baselineLayout(helperError!, left + _boxSize(icon).width);
@@ -1461,7 +1491,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
           if (counter != null) {
             baselineLayout(counter!, right - counter!.size.width);
           }
-          break;
       }
     }
 
@@ -1474,19 +1503,25 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       // _BorderContainer's x and is independent of label's x.
       switch (textDirection) {
         case TextDirection.rtl:
-          decoration.borderGap.start = lerpDouble(labelX + _boxSize(label).width,
-              _boxSize(container).width / 2.0 + floatWidth / 2.0,
-              floatAlign);
+          double offsetToPrefixIcon = 0.0;
+          if (prefixIcon != null && !decoration.alignLabelWithHint) {
+            offsetToPrefixIcon = material3 ? _boxSize(prefixIcon).width - left : 0;
+          }
+          decoration.borderGap.start = lerpDouble(labelX + _boxSize(label).width + offsetToPrefixIcon,
+            _boxSize(container).width / 2.0 + floatWidth / 2.0,
+            floatAlign);
 
-          break;
         case TextDirection.ltr:
           // The value of _InputBorderGap.start is relative to the origin of the
           // _BorderContainer which is inset by the icon's width. Although, when
           // floating label is centered, it's already relative to _BorderContainer.
-          decoration.borderGap.start = lerpDouble(labelX - _boxSize(icon).width,
-              _boxSize(container).width / 2.0 - floatWidth / 2.0,
-              floatAlign);
-          break;
+          double offsetToPrefixIcon = 0.0;
+          if (prefixIcon != null && !decoration.alignLabelWithHint) {
+            offsetToPrefixIcon = material3 ? (-_boxSize(prefixIcon).width + left) : 0;
+          }
+          decoration.borderGap.start = lerpDouble(labelX - _boxSize(icon).width + offsetToPrefixIcon,
+            _boxSize(container).width / 2.0 - floatWidth / 2.0,
+            floatAlign);
       }
       decoration.borderGap.extent = label!.size.width * _kFinalLabelScale;
     } else {
@@ -1523,24 +1558,31 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
       final double t = decoration.floatingLabelProgress;
       // The center of the outline border label ends up a little below the
       // center of the top border line.
-      final bool isOutlineBorder = decoration.border != null && decoration.border.isOutline;
+      final bool isOutlineBorder = decoration.border.isOutline;
       // Temporary opt-in fix for https://github.com/flutter/flutter/issues/54028
       // Center the scaled label relative to the border.
       final double floatingY = isOutlineBorder ? (-labelHeight * _kFinalLabelScale) / 2.0 + borderWeight / 2.0 : contentPadding.top;
       final double scale = lerpDouble(1.0, _kFinalLabelScale, t)!;
       final double centeredFloatX = _boxParentData(container!).offset.dx +
           _boxSize(container).width / 2.0 - floatWidth / 2.0;
-      final double floatStartX;
+      final double startX;
+      double floatStartX;
       switch (textDirection) {
         case TextDirection.rtl: // origin is on the right
-          floatStartX = labelOffset.dx + labelWidth * (1.0 - scale);
-          break;
+          startX = labelOffset.dx + labelWidth * (1.0 - scale);
+          floatStartX = startX;
+          if (prefixIcon != null && !decoration.alignLabelWithHint && isOutlineBorder) {
+            floatStartX += material3 ? _boxSize(prefixIcon).width - contentPadding.left : 0.0;
+          }
         case TextDirection.ltr: // origin on the left
-          floatStartX = labelOffset.dx;
-          break;
+          startX = labelOffset.dx;
+          floatStartX = startX;
+          if (prefixIcon != null && !decoration.alignLabelWithHint && isOutlineBorder) {
+            floatStartX += material3 ? -_boxSize(prefixIcon).width + contentPadding.left : 0.0;
+          }
       }
       final double floatEndX = lerpDouble(floatStartX, centeredFloatX, floatAlign)!;
-      final double dx = lerpDouble(floatStartX, floatEndX, t)!;
+      final double dx = lerpDouble(startX, floatEndX, t)!;
       final double dy = lerpDouble(0.0, floatingY - labelOffset.dy, t)!;
       _labelTransform = Matrix4.identity()
         ..translate(dx, labelOffset.dy + dy)
@@ -1572,7 +1614,6 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    assert(position != null);
     for (final RenderBox child in children) {
       // The label must be handled specially since we've transformed it.
       final Offset offset = _boxParentData(child).offset;
@@ -1603,7 +1644,7 @@ class _RenderDecoration extends RenderBox with SlottedContainerRenderObjectMixin
   }
 }
 
-class _Decorator extends RenderObjectWidget with SlottedMultiChildRenderObjectWidgetMixin<_DecorationSlot> {
+class _Decorator extends SlottedMultiChildRenderObjectWidget<_DecorationSlot, RenderBox> {
   const _Decorator({
     required this.textAlignVertical,
     required this.decoration,
@@ -1611,10 +1652,7 @@ class _Decorator extends RenderObjectWidget with SlottedMultiChildRenderObjectWi
     required this.textBaseline,
     required this.isFocused,
     required this.expands,
-  }) : assert(decoration != null),
-       assert(textDirection != null),
-       assert(textBaseline != null),
-       assert(expands != null);
+  });
 
   final _Decoration decoration;
   final TextDirection textDirection;
@@ -1663,6 +1701,7 @@ class _Decorator extends RenderObjectWidget with SlottedMultiChildRenderObjectWi
       textAlignVertical: textAlignVertical,
       isFocused: isFocused,
       expands: expands,
+      material3: Theme.of(context).useMaterial3,
     );
   }
 
@@ -1684,12 +1723,16 @@ class _AffixText extends StatelessWidget {
     this.text,
     this.style,
     this.child,
+    this.semanticsSortKey,
+    required this.semanticsTag,
   });
 
   final bool labelIsFloating;
   final String? text;
   final TextStyle? style;
   final Widget? child;
+  final SemanticsSortKey? semanticsSortKey;
+  final SemanticsTag semanticsTag;
 
   @override
   Widget build(BuildContext context) {
@@ -1699,7 +1742,11 @@ class _AffixText extends StatelessWidget {
         duration: _kTransitionDuration,
         curve: _kTransitionCurve,
         opacity: labelIsFloating ? 1.0 : 0.0,
-        child: child ?? (text == null ? null : Text(text!, style: style)),
+        child: Semantics(
+          sortKey: semanticsSortKey,
+          tagForChildren: semanticsTag,
+          child: child ?? (text == null ? null : Text(text!, style: style)),
+        ),
       ),
     );
   }
@@ -1744,11 +1791,7 @@ class InputDecorator extends StatefulWidget {
     this.expands = false,
     this.isEmpty = false,
     this.child,
-  }) : assert(decoration != null),
-       assert(isFocused != null),
-       assert(isHovering != null),
-       assert(expands != null),
-       assert(isEmpty != null);
+  });
 
   /// The text and styles to use when decorating the child.
   ///
@@ -1761,7 +1804,7 @@ class InputDecorator extends StatefulWidget {
   /// The style on which to base the label, hint, counter, and error styles
   /// if the [decoration] does not provide explicit styles.
   ///
-  /// If null, `baseStyle` defaults to the `titleMedium` style from the
+  /// If null, [baseStyle] defaults to the `titleMedium` style from the
   /// current [Theme], see [ThemeData.textTheme].
   ///
   /// The [TextStyle.textBaseline] of the [baseStyle] is used to determine
@@ -1867,9 +1910,15 @@ class InputDecorator extends StatefulWidget {
 }
 
 class _InputDecoratorState extends State<InputDecorator> with TickerProviderStateMixin {
-  late AnimationController _floatingLabelController;
-  late AnimationController _shakingLabelController;
+  late final AnimationController _floatingLabelController;
+  late final Animation<double> _floatingLabelAnimation;
+  late final AnimationController _shakingLabelController;
   final _InputBorderGap _borderGap = _InputBorderGap();
+  static const OrdinalSortKey _kPrefixSemanticsSortOrder = OrdinalSortKey(0);
+  static const OrdinalSortKey _kInputSemanticsSortOrder = OrdinalSortKey(1);
+  static const OrdinalSortKey _kSuffixSemanticsSortOrder = OrdinalSortKey(2);
+  static const SemanticsTag _kPrefixSemanticsTag = SemanticsTag('_InputDecoratorState.prefix');
+  static const SemanticsTag _kSuffixSemanticsTag = SemanticsTag('_InputDecoratorState.suffix');
 
   @override
   void initState() {
@@ -1885,6 +1934,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       value: labelIsInitiallyFloating ? 1.0 : 0.0,
     );
     _floatingLabelController.addListener(_handleChange);
+    _floatingLabelAnimation = CurvedAnimation(
+      parent: _floatingLabelController,
+      curve: _kTransitionCurve,
+      reverseCurve: _kTransitionCurve.flipped,
+    );
 
     _shakingLabelController = AnimationController(
       duration: _kTransitionDuration,
@@ -1957,7 +2011,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           : themeData.disabledColor;
     }
     if (decoration.errorText != null) {
-      return  themeData.errorColor;
+      return themeData.colorScheme.error;
     }
     if (isFocused) {
       return themeData.colorScheme.primary;
@@ -2137,12 +2191,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       opacity: (isEmpty && !_hasInlineLabel) ? 1.0 : 0.0,
       duration: _kTransitionDuration,
       curve: _kTransitionCurve,
-      alwaysIncludeSemantics: true,
       child: Text(
         hintText,
         style: hintStyle,
         textDirection: decoration.hintTextDirection,
-        overflow: TextOverflow.ellipsis,
+        overflow: hintStyle.overflow ?? TextOverflow.ellipsis,
         textAlign: textAlign,
         maxLines: decoration.hintMaxLines,
       ),
@@ -2162,7 +2215,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final Widget container = _BorderContainer(
       border: border,
       gap: _borderGap,
-      gapAnimation: _floatingLabelController.view,
+      gapAnimation: _floatingLabelAnimation,
       fillColor: _getFillColor(themeData, defaults),
       hoverColor: _getHoverColor(themeData),
       isHovering: isHovering,
@@ -2189,35 +2242,58 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       ),
     );
 
-    final Widget? prefix = decoration.prefix == null && decoration.prefixText == null ? null :
-      _AffixText(
-        labelIsFloating: widget._labelShouldWithdraw,
-        text: decoration.prefixText,
-        style: MaterialStateProperty.resolveAs(decoration.prefixStyle, materialState) ?? hintStyle,
-        child: decoration.prefix,
-      );
+    final bool hasPrefix = decoration.prefix != null || decoration.prefixText != null;
+    final bool hasSuffix = decoration.suffix != null || decoration.suffixText != null;
 
-    final Widget? suffix = decoration.suffix == null && decoration.suffixText == null ? null :
-      _AffixText(
-        labelIsFloating: widget._labelShouldWithdraw,
-        text: decoration.suffixText,
-        style: MaterialStateProperty.resolveAs(decoration.suffixStyle, materialState) ?? hintStyle,
-        child: decoration.suffix,
-      );
+    Widget? input = widget.child;
+    // If at least two out of the three are visible, it needs semantics sort
+    // order.
+    final bool needsSemanticsSortOrder = widget._labelShouldWithdraw && (input != null ? (hasPrefix || hasSuffix) : (hasPrefix && hasSuffix));
 
+    final Widget? prefix = hasPrefix
+      ? _AffixText(
+          labelIsFloating: widget._labelShouldWithdraw,
+          text: decoration.prefixText,
+          style: MaterialStateProperty.resolveAs(decoration.prefixStyle, materialState) ?? hintStyle,
+          semanticsSortKey: needsSemanticsSortOrder ? _kPrefixSemanticsSortOrder : null,
+          semanticsTag: _kPrefixSemanticsTag,
+          child: decoration.prefix,
+        )
+      : null;
+
+    final Widget? suffix = hasSuffix
+      ? _AffixText(
+          labelIsFloating: widget._labelShouldWithdraw,
+          text: decoration.suffixText,
+          style: MaterialStateProperty.resolveAs(decoration.suffixStyle, materialState) ?? hintStyle,
+          semanticsSortKey: needsSemanticsSortOrder ? _kSuffixSemanticsSortOrder : null,
+          semanticsTag: _kSuffixSemanticsTag,
+          child: decoration.suffix,
+        )
+      : null;
+
+    if (input != null && needsSemanticsSortOrder) {
+      input = Semantics(
+        sortKey: _kInputSemanticsSortOrder,
+        child: input,
+      );
+    }
 
     final bool decorationIsDense = decoration.isDense ?? false;
     final double iconSize = decorationIsDense ? 18.0 : 24.0;
 
     final Widget? icon = decoration.icon == null ? null :
-      Padding(
-        padding: const EdgeInsetsDirectional.only(end: 16.0),
-        child: IconTheme.merge(
-          data: IconThemeData(
-            color: _getIconColor(themeData, defaults),
-            size: iconSize,
+      MouseRegion(
+        cursor: SystemMouseCursors.basic,
+        child: Padding(
+          padding: const EdgeInsetsDirectional.only(end: 16.0),
+          child: IconTheme.merge(
+            data: IconThemeData(
+              color: _getIconColor(themeData, defaults),
+              size: iconSize,
+            ),
+            child: decoration.icon!,
           ),
-          child: decoration.icon!,
         ),
       );
 
@@ -2225,19 +2301,33 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       Center(
         widthFactor: 1.0,
         heightFactor: 1.0,
-        child: ConstrainedBox(
-          constraints: decoration.prefixIconConstraints ?? themeData.visualDensity.effectiveConstraints(
-            const BoxConstraints(
-              minWidth: kMinInteractiveDimension,
-              minHeight: kMinInteractiveDimension,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.basic,
+          child: ConstrainedBox(
+            constraints: decoration.prefixIconConstraints ??
+              themeData.visualDensity.effectiveConstraints(
+                const BoxConstraints(
+                  minWidth: kMinInteractiveDimension,
+                  minHeight: kMinInteractiveDimension,
+                ),
+              ),
+            child: IconTheme.merge(
+              data: IconThemeData(
+                color: _getPrefixIconColor(themeData, defaults),
+                size: iconSize,
+              ),
+              child: IconButtonTheme(
+                data: IconButtonThemeData(
+                style: IconButton.styleFrom(
+                  foregroundColor: _getPrefixIconColor(themeData, defaults),
+                  iconSize: iconSize,
+                  ),
+                ),
+                child: Semantics(
+                  child: decoration.prefixIcon,
+                ),
+              ),
             ),
-          ),
-          child: IconTheme.merge(
-            data: IconThemeData(
-              color: _getPrefixIconColor(themeData, defaults),
-              size: iconSize,
-            ),
-            child: decoration.prefixIcon!,
           ),
         ),
       );
@@ -2246,28 +2336,43 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       Center(
         widthFactor: 1.0,
         heightFactor: 1.0,
-        child: ConstrainedBox(
-          constraints: decoration.suffixIconConstraints ?? themeData.visualDensity.effectiveConstraints(
-            const BoxConstraints(
-              minWidth: kMinInteractiveDimension,
-              minHeight: kMinInteractiveDimension,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.basic,
+          child: ConstrainedBox(
+            constraints: decoration.suffixIconConstraints ??
+              themeData.visualDensity.effectiveConstraints(
+                const BoxConstraints(
+                  minWidth: kMinInteractiveDimension,
+                  minHeight: kMinInteractiveDimension,
+                ),
+              ),
+              child: IconTheme.merge(
+                data: IconThemeData(
+                  color: _getSuffixIconColor(themeData, defaults),
+                  size: iconSize,
+                ),
+                child: IconButtonTheme(
+                  data: IconButtonThemeData(
+                  style: IconButton.styleFrom(
+                    foregroundColor: _getSuffixIconColor(themeData, defaults),
+                    iconSize: iconSize,
+                    ),
+                  ),
+                  child: Semantics(
+                    child: decoration.suffixIcon,
+                  ),
+                ),
+              ),
             ),
           ),
-          child: IconTheme.merge(
-            data: IconThemeData(
-              color: _getSuffixIconColor(themeData, defaults),
-              size: iconSize,
-            ),
-            child: decoration.suffixIcon!,
-          ),
-        ),
-      );
+        );
 
     final Widget helperError = _HelperError(
       textAlign: textAlign,
       helperText: decoration.helperText,
       helperStyle: _getHelperStyle(themeData, defaults),
       helperMaxLines: decoration.helperMaxLines,
+      error: decoration.error,
       errorText: decoration.errorText,
       errorStyle: _getErrorStyle(themeData, defaults),
       errorMaxLines: decoration.errorMaxLines,
@@ -2301,22 +2406,18 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       contentPadding = decorationContentPadding ?? EdgeInsets.zero;
     } else if (!border.isOutline) {
       // 4.0: the vertical gap between the inline elements and the floating label.
-      floatingLabelHeight = (4.0 + 0.75 * labelStyle.fontSize!) * MediaQuery.textScaleFactorOf(context);
+      floatingLabelHeight = (4.0 + 0.75 * labelStyle.fontSize!) * MediaQuery.textScalerOf(context).textScaleFactor;
       if (decoration.filled ?? false) {
         contentPadding = decorationContentPadding ?? (decorationIsDense
           ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
-          : themeData.useMaterial3
-            ? const EdgeInsets.fromLTRB(12.0, 12.75, 12.0, 12.75)
-            : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0));
+          : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0));
       } else {
         // Not left or right padding for underline borders that aren't filled
         // is a small concession to backwards compatibility. This eliminates
         // the most noticeable layout change introduced by #13734.
         contentPadding = decorationContentPadding ?? (decorationIsDense
           ? const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0)
-          : themeData.useMaterial3
-            ? const EdgeInsets.fromLTRB(0.0, 12.75, 0.0, 12.75)
-            : const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 12.0));
+          : const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 12.0));
       }
     } else {
       floatingLabelHeight = 0.0;
@@ -2331,14 +2432,14 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         isCollapsed: decoration.isCollapsed,
         floatingLabelHeight: floatingLabelHeight,
         floatingLabelAlignment: decoration.floatingLabelAlignment!,
-        floatingLabelProgress: _floatingLabelController.value,
+        floatingLabelProgress: _floatingLabelAnimation.value,
         border: border,
         borderGap: _borderGap,
         alignLabelWithHint: decoration.alignLabelWithHint ?? false,
         isDense: decoration.isDense,
         visualDensity: themeData.visualDensity,
         icon: icon,
-        input: widget.child,
+        input: input,
         label: label,
         hint: hint,
         prefix: prefix,
@@ -2399,7 +2500,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 /// {@tool dartpad}
 /// This sample shows how to create a `TextField` with hint text, a red border
 /// on all sides, and an error message. To display a red border and error
-/// message, provide `errorText` to the `InputDecoration` constructor.
+/// message, provide `errorText` to the [InputDecoration] constructor.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/input_decoration_error.png)
 ///
@@ -2469,6 +2570,7 @@ class InputDecoration {
     this.hintStyle,
     this.hintTextDirection,
     this.hintMaxLines,
+    this.error,
     this.errorText,
     this.errorStyle,
     this.errorMaxLines,
@@ -2506,10 +2608,10 @@ class InputDecoration {
     this.semanticCounterText,
     this.alignLabelWithHint,
     this.constraints,
-  }) : assert(enabled != null),
-       assert(!(label != null && labelText != null), 'Declaring both label and labelText is not supported.'),
+  }) : assert(!(label != null && labelText != null), 'Declaring both label and labelText is not supported.'),
        assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not supported.'),
-       assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.');
+       assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.'),
+       assert(!(error != null && errorText != null), 'Declaring both error and errorText is not supported.');
 
   /// Defines an [InputDecorator] that is the same size as the input field.
   ///
@@ -2528,8 +2630,7 @@ class InputDecoration {
     this.hoverColor,
     this.border = InputBorder.none,
     this.enabled = true,
-  }) : assert(enabled != null),
-       icon = null,
+  }) : icon = null,
        iconColor = null,
        label = null,
        labelText = null,
@@ -2539,6 +2640,7 @@ class InputDecoration {
        helperStyle = null,
        helperMaxLines = null,
        hintMaxLines = null,
+       error = null,
        errorText = null,
        errorStyle = null,
        errorMaxLines = null,
@@ -2639,9 +2741,9 @@ class InputDecoration {
   /// If null, defaults to a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
   ///
-  /// Note that if you specify this style it will override the default behavior
+  /// Specifying this style will override the default behavior
   /// of [InputDecoration] that changes the color of the label to the
-  /// [InputDecoration.errorStyle] color or [ThemeData.errorColor].
+  /// [InputDecoration.errorStyle] color or [ColorScheme.error].
   ///
   /// {@tool dartpad}
   /// It's possible to override the label style for just the error state, or
@@ -2669,9 +2771,9 @@ class InputDecoration {
   ///
   /// If null, defaults to [labelStyle].
   ///
-  /// Note that if you specify this style it will override the default behavior
+  /// Specifying this style will override the default behavior
   /// of [InputDecoration] that changes the color of the label to the
-  /// [InputDecoration.errorStyle] color or [ThemeData.errorColor].
+  /// [InputDecoration.errorStyle] color or [ColorScheme.error].
   ///
   /// {@tool dartpad}
   /// It's possible to override the label style for just the error state, or
@@ -2751,6 +2853,13 @@ class InputDecoration {
   /// used to handle the overflow when it is limited to single line.
   final int? hintMaxLines;
 
+  /// Optional widget that appears below the [InputDecorator.child] and the border.
+  ///
+  /// If non-null, the border's color animates to red and the [helperText] is not shown.
+  ///
+  /// Only one of [error] and [errorText] can be specified.
+  final Widget? error;
+
   /// Text that appears below the [InputDecorator.child] and the border.
   ///
   /// If non-null, the border's color animates to red and the [helperText] is
@@ -2758,6 +2867,10 @@ class InputDecoration {
   ///
   /// In a [TextFormField], this is overridden by the value returned from
   /// [TextFormField.validator], if that is not null.
+  ///
+  /// If a more elaborate error is required, consider using [error] instead.
+  ///
+  /// Only one of [error] and [errorText] can be specified.
   final String? errorText;
 
   /// {@template flutter.material.inputDecoration.errorStyle}
@@ -2769,8 +2882,8 @@ class InputDecoration {
   /// By default the color of style will be used by the label of
   /// [InputDecoration] if [InputDecoration.errorText] is not null. See
   /// [InputDecoration.labelStyle] or [InputDecoration.floatingLabelStyle] for
-  /// an example of how to replicate this behavior if you have specified either
-  /// style.
+  /// an example of how to replicate this behavior when specifying those
+  /// styles.
   /// {@endtemplate}
   final TextStyle? errorStyle;
 
@@ -2838,23 +2951,21 @@ class InputDecoration {
 
   /// The padding for the input decoration's container.
   ///
-  /// The decoration's container is the area which is filled if [filled] is true
-  /// and bordered per the [border]. It's the area adjacent to [icon] and above
-  /// the widgets that contain [helperText], [errorText], and [counterText].
+  /// {@macro flutter.material.input_decorator.container_description}
   ///
-  /// By default the `contentPadding` reflects [isDense] and the type of the
+  /// By default the [contentPadding] reflects [isDense] and the type of the
   /// [border].
   ///
-  /// If [isCollapsed] is true then `contentPadding` is [EdgeInsets.zero].
+  /// If [isCollapsed] is true then [contentPadding] is [EdgeInsets.zero].
   ///
   /// If `isOutline` property of [border] is false and if [filled] is true then
-  /// `contentPadding` is `EdgeInsets.fromLTRB(12, 8, 12, 8)` when [isDense]
+  /// [contentPadding] is `EdgeInsets.fromLTRB(12, 8, 12, 8)` when [isDense]
   /// is true and `EdgeInsets.fromLTRB(12, 12, 12, 12)` when [isDense] is false.
   /// If `isOutline` property of [border] is false and if [filled] is false then
-  /// `contentPadding` is `EdgeInsets.fromLTRB(0, 8, 0, 8)` when [isDense] is
+  /// [contentPadding] is `EdgeInsets.fromLTRB(0, 8, 0, 8)` when [isDense] is
   /// true and `EdgeInsets.fromLTRB(0, 12, 0, 12)` when [isDense] is false.
   ///
-  /// If `isOutline` property of [border] is true then `contentPadding` is
+  /// If `isOutline` property of [border] is true then [contentPadding] is
   /// `EdgeInsets.fromLTRB(12, 20, 12, 12)` when [isDense] is true
   /// and `EdgeInsets.fromLTRB(12, 24, 12, 16)` when [isDense] is false.
   final EdgeInsetsGeometry? contentPadding;
@@ -2887,12 +2998,9 @@ class InputDecoration {
   /// )
   /// ```
   ///
-  /// The decoration's container is the area which is filled if [filled] is
-  /// true and bordered per the [border]. It's the area adjacent to
-  /// [icon] and above the widgets that contain [helperText],
-  /// [errorText], and [counterText].
+  /// {@macro flutter.material.input_decorator.container_description}
   ///
-  /// The prefix icon aligment can be changed using [Align] with a fixed `widthFactor` and
+  /// The prefix icon alignment can be changed using [Align] with a fixed `widthFactor` and
   /// `heightFactor`.
   ///
   /// {@tool dartpad}
@@ -2925,7 +3033,7 @@ class InputDecoration {
   /// This example shows the differences between two `TextField` widgets when
   /// [prefixIconConstraints] is set to the default value and when one is not.
   ///
-  /// Note that [isDense] must be set to true to be able to
+  /// The [isDense] property must be set to true to be able to
   /// set the constraints smaller than 48px.
   ///
   /// If null, [BoxConstraints] with a minimum width and height of 48px is
@@ -3014,7 +3122,7 @@ class InputDecoration {
   /// [icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
   ///
-  /// The suffix icon aligment can be changed using [Align] with a fixed `widthFactor` and
+  /// The suffix icon alignment can be changed using [Align] with a fixed `widthFactor` and
   /// `heightFactor`.
   ///
   /// {@tool dartpad}
@@ -3066,9 +3174,9 @@ class InputDecoration {
 
   /// The style to use for the [suffixText].
   ///
-  /// If [suffixStyle] is a [MaterialStateTextStyle], then the effective
-  /// text style can depend on the [MaterialState.focused] state, i.e.
-  /// if the [TextField] is focused or not.
+  /// If [suffixStyle] is a [MaterialStateTextStyle], then the effective text
+  /// style can depend on the [MaterialState.focused] state, i.e. if the
+  /// [TextField] is focused or not.
   ///
   /// If null, defaults to the [hintStyle].
   ///
@@ -3077,7 +3185,7 @@ class InputDecoration {
   ///  * [prefixStyle], the equivalent but on the leading edge.
   final TextStyle? suffixStyle;
 
-  /// Optional color of the suffixIcon
+  /// Optional color of the [suffixIcon].
   ///
   /// Defaults to [iconColor]
   ///
@@ -3102,7 +3210,7 @@ class InputDecoration {
   /// This example shows the differences between two `TextField` widgets when
   /// [suffixIconConstraints] is set to the default value and when one is not.
   ///
-  /// Note that [isDense] must be set to true to be able to
+  /// The [isDense] property must be set to true to be able to
   /// set the constraints smaller than 48px.
   ///
   /// If null, [BoxConstraints] with a minimum width and height of 48px is
@@ -3124,7 +3232,7 @@ class InputDecoration {
   final String? counterText;
 
   /// Optional custom counter widget to go in the place otherwise occupied by
-  /// [counterText].  If this property is non null, then [counterText] is
+  /// [counterText]. If this property is non null, then [counterText] is
   /// ignored.
   final Widget? counter;
 
@@ -3142,52 +3250,53 @@ class InputDecoration {
   /// When [InputDecorator.isHovering] is true, the [hoverColor] is also blended
   /// into the final fill color.
   ///
-  /// Typically this field set to true if [border] is an
-  /// [UnderlineInputBorder].
+  /// Typically this field set to true if [border] is an [UnderlineInputBorder].
   ///
-  /// The decoration's container is the area which is filled if [filled] is
-  /// true and bordered per the [border]. It's the area adjacent to
-  /// [icon] and above the widgets that contain [helperText],
-  /// [errorText], and [counterText].
+  /// {@template flutter.material.input_decorator.container_description}
+  /// The decoration's container is the area which is filled if [filled] is true
+  /// and bordered per the [border]. It's the area adjacent to [icon] and above
+  /// the widgets that contain [helperText], [errorText], and [counterText].
+  /// {@endtemplate}
   ///
   /// This property is false by default.
   final bool? filled;
 
   /// The base fill color of the decoration's container color.
   ///
-  /// When [InputDecorator.isHovering] is true, the
-  /// [hoverColor] is also blended into the final fill color.
+  /// When [InputDecorator.isHovering] is true, the [hoverColor] is also blended
+  /// into the final fill color.
   ///
-  /// By default the fillColor is based on the current [Theme].
+  /// By default the [fillColor] is based on the current
+  /// [InputDecorationTheme.fillColor].
   ///
-  /// The decoration's container is the area which is filled if [filled] is true
-  /// and bordered per the [border]. It's the area adjacent to [icon] and above
-  /// the widgets that contain [helperText], [errorText], and [counterText].
+  /// {@macro flutter.material.input_decorator.container_description}
   final Color? fillColor;
 
-  /// By default the [focusColor] is based on the current [Theme].
+  /// The fill color of the decoration's container when it has the input focus.
   ///
-  /// The decoration's container is the area which is filled if [filled] is
-  /// true and bordered per the [border]. It's the area adjacent to
-  /// [icon] and above the widgets that contain [helperText],
-  /// [errorText], and [counterText].
+  /// By default the [focusColor] is based on the current
+  /// [InputDecorationTheme.focusColor].
+  ///
+  /// This [focusColor] is ignored by [TextField] and [TextFormField] because
+  /// they don't respond to focus changes by changing their decorator's
+  /// container color, they respond by changing their border to the
+  /// [focusedBorder], which you can change the color of.
+  ///
+  /// {@macro flutter.material.input_decorator.container_description}
   final Color? focusColor;
 
-  /// The color of the focus highlight for the decoration shown if the container
+  /// The color of the highlight for the decoration shown if the container
   /// is being hovered over by a mouse.
   ///
-  /// If [filled] is true, the color is blended with [fillColor] and fills the
-  /// decoration's container.
+  /// If [filled] is true, the [hoverColor] is blended with [fillColor] and
+  /// fills the decoration's container.
   ///
   /// If [filled] is false, and [InputDecorator.isFocused] is false, the color
   /// is blended over the [enabledBorder]'s color.
   ///
   /// By default the [hoverColor] is based on the current [Theme].
   ///
-  /// The decoration's container is the area which is filled if [filled] is
-  /// true and bordered per the [border]. It's the area adjacent to
-  /// [icon] and above the widgets that contain [helperText],
-  /// [errorText], and [counterText].
+  /// {@macro flutter.material.input_decorator.container_description}
   final Color? hoverColor;
 
   /// The border to display when the [InputDecorator] does not have the focus and
@@ -3317,7 +3426,7 @@ class InputDecoration {
   /// If [border] derives from [InputBorder] the border's [InputBorder.borderSide],
   /// i.e. the border's color and width, will be overridden to reflect the input
   /// decorator's state. Only the border's shape is used. If custom  [BorderSide]
-  /// values are desired for  a given state, all four borders – [errorBorder],
+  /// values are desired for a given state, all four borders – [errorBorder],
   /// [focusedBorder], [enabledBorder], [disabledBorder] – must be set.
   ///
   /// The decoration's container is the area which is filled if [filled] is
@@ -3398,6 +3507,7 @@ class InputDecoration {
     TextStyle? hintStyle,
     TextDirection? hintTextDirection,
     int? hintMaxLines,
+    Widget? error,
     String? errorText,
     TextStyle? errorStyle,
     int? errorMaxLines,
@@ -3450,6 +3560,7 @@ class InputDecoration {
       hintStyle: hintStyle ?? this.hintStyle,
       hintTextDirection: hintTextDirection ?? this.hintTextDirection,
       hintMaxLines: hintMaxLines ?? this.hintMaxLines,
+      error: error ?? this.error,
       errorText: errorText ?? this.errorText,
       errorStyle: errorStyle ?? this.errorStyle,
       errorMaxLines: errorMaxLines ?? this.errorMaxLines,
@@ -3506,11 +3617,14 @@ class InputDecoration {
       errorMaxLines: errorMaxLines ?? theme.errorMaxLines,
       floatingLabelBehavior: floatingLabelBehavior ?? theme.floatingLabelBehavior,
       floatingLabelAlignment: floatingLabelAlignment ?? theme.floatingLabelAlignment,
-      isCollapsed: isCollapsed,
       isDense: isDense ?? theme.isDense,
       contentPadding: contentPadding ?? theme.contentPadding,
+      isCollapsed: isCollapsed,
+      iconColor: iconColor ?? theme.iconColor,
       prefixStyle: prefixStyle ?? theme.prefixStyle,
+      prefixIconColor: prefixIconColor ?? theme.prefixIconColor,
       suffixStyle: suffixStyle ?? theme.suffixStyle,
+      suffixIconColor: suffixIconColor ?? theme.suffixIconColor,
       counterStyle: counterStyle ?? theme.counterStyle,
       filled: filled ?? theme.filled,
       fillColor: fillColor ?? theme.fillColor,
@@ -3549,6 +3663,7 @@ class InputDecoration {
         && other.hintStyle == hintStyle
         && other.hintTextDirection == hintTextDirection
         && other.hintMaxLines == hintMaxLines
+        && other.error == error
         && other.errorText == errorText
         && other.errorStyle == errorStyle
         && other.errorMaxLines == errorMaxLines
@@ -3604,6 +3719,7 @@ class InputDecoration {
       hintStyle,
       hintTextDirection,
       hintMaxLines,
+      error,
       errorText,
       errorStyle,
       errorMaxLines,
@@ -3657,6 +3773,7 @@ class InputDecoration {
       if (helperMaxLines != null) 'helperMaxLines: "$helperMaxLines"',
       if (hintText != null) 'hintText: "$hintText"',
       if (hintMaxLines != null) 'hintMaxLines: "$hintMaxLines"',
+      if (error != null) 'error: "$error"',
       if (errorText != null) 'errorText: "$errorText"',
       if (errorStyle != null) 'errorStyle: "$errorStyle"',
       if (errorMaxLines != null) 'errorMaxLines: "$errorMaxLines"',
@@ -3748,11 +3865,7 @@ class InputDecorationTheme with Diagnosticable {
     this.border,
     this.alignLabelWithHint = false,
     this.constraints,
-  }) : assert(isDense != null),
-       assert(isCollapsed != null),
-       assert(floatingLabelAlignment != null),
-       assert(filled != null),
-       assert(alignLabelWithHint != null);
+  });
 
   /// {@macro flutter.material.inputDecoration.labelStyle}
   final TextStyle? labelStyle;
@@ -3836,8 +3949,8 @@ class InputDecorationTheme with Diagnosticable {
   /// [InputDecoration.helperText], [InputDecoration.errorText], and
   /// [InputDecoration.counterText].
   ///
-  /// By default the `contentPadding` reflects [isDense] and the type of the
-  /// [border]. If [isCollapsed] is true then `contentPadding` is
+  /// By default the [contentPadding] reflects [isDense] and the type of the
+  /// [border]. If [isCollapsed] is true then [contentPadding] is
   /// [EdgeInsets.zero].
   final EdgeInsetsGeometry? contentPadding;
 
@@ -4196,6 +4309,49 @@ class InputDecorationTheme with Diagnosticable {
     );
   }
 
+  /// Returns a copy of this InputDecorationTheme where the non-null fields in
+  /// the given InputDecorationTheme override the corresponding nullable fields
+  /// in this InputDecorationTheme.
+  ///
+  /// The non-nullable fields of InputDecorationTheme, such as [floatingLabelBehavior],
+  /// [isDense], [isCollapsed], [filled], and [alignLabelWithHint] cannot be overridden.
+  ///
+  /// In other words, the fields of the provided [InputDecorationTheme] are used to
+  /// fill in the unspecified and nullable fields of this InputDecorationTheme.
+  InputDecorationTheme merge(InputDecorationTheme? inputDecorationTheme) {
+    if (inputDecorationTheme == null) {
+      return this;
+    }
+    return copyWith(
+      labelStyle: labelStyle ?? inputDecorationTheme.labelStyle,
+      floatingLabelStyle: floatingLabelStyle ?? inputDecorationTheme.floatingLabelStyle,
+      helperStyle: helperStyle ?? inputDecorationTheme.helperStyle,
+      helperMaxLines: helperMaxLines ?? inputDecorationTheme.helperMaxLines,
+      hintStyle: hintStyle ?? inputDecorationTheme.hintStyle,
+      errorStyle: errorStyle ?? inputDecorationTheme.errorStyle,
+      errorMaxLines: errorMaxLines ?? inputDecorationTheme.errorMaxLines,
+      contentPadding: contentPadding ?? inputDecorationTheme.contentPadding,
+      iconColor: iconColor ?? inputDecorationTheme.iconColor,
+      prefixStyle: prefixStyle ?? inputDecorationTheme.prefixStyle,
+      prefixIconColor: prefixIconColor ?? inputDecorationTheme.prefixIconColor,
+      suffixStyle: suffixStyle ?? inputDecorationTheme.suffixStyle,
+      suffixIconColor: suffixIconColor ?? inputDecorationTheme.suffixIconColor,
+      counterStyle: counterStyle ?? inputDecorationTheme.counterStyle,
+      fillColor: fillColor ?? inputDecorationTheme.fillColor,
+      activeIndicatorBorder: activeIndicatorBorder ?? inputDecorationTheme.activeIndicatorBorder,
+      outlineBorder: outlineBorder ?? inputDecorationTheme.outlineBorder,
+      focusColor: focusColor ?? inputDecorationTheme.focusColor,
+      hoverColor: hoverColor ?? inputDecorationTheme.hoverColor,
+      errorBorder: errorBorder ?? inputDecorationTheme.errorBorder,
+      focusedBorder: focusedBorder ?? inputDecorationTheme.focusedBorder,
+      focusedErrorBorder: focusedErrorBorder ?? inputDecorationTheme.focusedErrorBorder,
+      disabledBorder: disabledBorder ?? inputDecorationTheme.disabledBorder,
+      enabledBorder: enabledBorder ?? inputDecorationTheme.enabledBorder,
+      border: border ?? inputDecorationTheme.border,
+      constraints: constraints ?? inputDecorationTheme.constraints,
+    );
+  }
+
   @override
   int get hashCode => Object.hash(
     labelStyle,
@@ -4345,7 +4501,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
       return TextStyle(color: Theme.of(context).disabledColor);
     }
     if (states.contains(MaterialState.error)) {
-      return TextStyle(color: Theme.of(context).errorColor);
+      return TextStyle(color: Theme.of(context).colorScheme.error);
     }
     if (states.contains(MaterialState.focused)) {
       return TextStyle(color: Theme.of(context).colorScheme.primary);
@@ -4369,7 +4525,7 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
     if (states.contains(MaterialState.disabled)) {
       return themeData.textTheme.bodySmall!.copyWith(color: Colors.transparent);
     }
-    return themeData.textTheme.bodySmall!.copyWith(color: themeData.errorColor);
+    return themeData.textTheme.bodySmall!.copyWith(color: themeData.colorScheme.error);
   });
 
   @override
@@ -4448,9 +4604,6 @@ class _InputDecoratorDefaultsM2 extends InputDecorationTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_101
-
-// Generated version v0_101
 class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
    _InputDecoratorDefaultsM3(this.context)
     : super();
@@ -4478,130 +4631,130 @@ class _InputDecoratorDefaultsM3 extends InputDecorationTheme {
 
   @override
   BorderSide? get activeIndicatorBorder => MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.error)) {
-        if (states.contains(MaterialState.hovered)) {
-          return BorderSide(color: _colors.onErrorContainer);
-        }
-        return BorderSide(color: _colors.error);
-      }
+    if (states.contains(MaterialState.disabled)) {
+      return BorderSide(color: _colors.onSurface.withOpacity(0.38));
+    }
+    if (states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.hovered)) {
-        return BorderSide(color: _colors.onSurface);
+        return BorderSide(color: _colors.onErrorContainer);
       }
       if (states.contains(MaterialState.focused)) {
-        return BorderSide(color: _colors.primary);
+        return BorderSide(color: _colors.error, width: 2.0);
       }
-      if (states.contains(MaterialState.disabled)) {
-        return BorderSide(color: _colors.onSurface.withOpacity(0.38));
-      }
-      return BorderSide(color: _colors.onSurfaceVariant);
+      return BorderSide(color: _colors.error);
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return BorderSide(color: _colors.onSurface);
+    }
+    if (states.contains(MaterialState.focused)) {
+      return BorderSide(color: _colors.primary, width: 2.0);
+    }
+    return BorderSide(color: _colors.onSurfaceVariant);
     });
 
   @override
   BorderSide? get outlineBorder => MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.error)) {
-        if (states.contains(MaterialState.hovered)) {
-          return BorderSide(color: _colors.onErrorContainer);
-        }
-        return BorderSide(color: _colors.error);
-      }
+    if (states.contains(MaterialState.disabled)) {
+      return BorderSide(color: _colors.onSurface.withOpacity(0.12));
+    }
+    if (states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.hovered)) {
-        return BorderSide(color: _colors.onSurface);
+        return BorderSide(color: _colors.onErrorContainer);
       }
       if (states.contains(MaterialState.focused)) {
-        return BorderSide(color: _colors.primary, width: 2.0);
+        return BorderSide(color: _colors.error, width: 2.0);
       }
-      if (states.contains(MaterialState.disabled)) {
-        return BorderSide(color: _colors.onSurface.withOpacity(0.12));
-      }
-      return BorderSide(color: _colors.outline);
-    });
+      return BorderSide(color: _colors.error);
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return BorderSide(color: _colors.onSurface);
+    }
+    if (states.contains(MaterialState.focused)) {
+      return BorderSide(color: _colors.primary, width: 2.0);
+    }
+    return BorderSide(color: _colors.outline);
+  });
 
   @override
   Color? get iconColor => _colors.onSurfaceVariant;
 
   @override
   Color? get prefixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
-      return _colors.onSurface.withOpacity(0.38);
-    }
     return _colors.onSurfaceVariant;
   });
 
   @override
   Color? get suffixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
-    if(states.contains(MaterialState.error)) {
-      if (states.contains(MaterialState.hovered)) {
-        return _colors.onErrorContainer;
-      }
-      return _colors.error;
-    }
     if (states.contains(MaterialState.disabled)) {
       return _colors.onSurface.withOpacity(0.38);
+    }
+    if (states.contains(MaterialState.error)) {
+      return _colors.error;
     }
     return _colors.onSurfaceVariant;
   });
 
   @override
   TextStyle? get labelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final TextStyle textStyle= _textTheme.bodyLarge ?? const TextStyle();
-    if(states.contains(MaterialState.error)) {
+    final TextStyle textStyle = _textTheme.bodyLarge ?? const TextStyle();
+    if (states.contains(MaterialState.disabled)) {
+      return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
+    }
+    if (states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.hovered)) {
-        return textStyle.copyWith(color:_colors.onErrorContainer);
+        return textStyle.copyWith(color: _colors.onErrorContainer);
       }
       if (states.contains(MaterialState.focused)) {
-        return textStyle.copyWith(color:_colors.error);
+        return textStyle.copyWith(color: _colors.error);
       }
-      return textStyle.copyWith(color:_colors.error);
+      return textStyle.copyWith(color: _colors.error);
     }
     if (states.contains(MaterialState.hovered)) {
-      return textStyle.copyWith(color:_colors.onSurfaceVariant);
+      return textStyle.copyWith(color: _colors.onSurfaceVariant);
     }
     if (states.contains(MaterialState.focused)) {
-      return textStyle.copyWith(color:_colors.primary);
+      return textStyle.copyWith(color: _colors.primary);
     }
-    if (states.contains(MaterialState.disabled)) {
-      return textStyle.copyWith(color:_colors.onSurface.withOpacity(0.38));
-    }
-    return textStyle.copyWith(color:_colors.onSurfaceVariant);
+    return textStyle.copyWith(color: _colors.onSurfaceVariant);
   });
 
   @override
   TextStyle? get floatingLabelStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final TextStyle textStyle= _textTheme.bodyLarge ?? const TextStyle();
-    if(states.contains(MaterialState.error)) {
+    final TextStyle textStyle = _textTheme.bodyLarge ?? const TextStyle();
+    if (states.contains(MaterialState.disabled)) {
+      return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
+    }
+    if (states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.hovered)) {
-        return textStyle.copyWith(color:_colors.onErrorContainer);
+        return textStyle.copyWith(color: _colors.onErrorContainer);
       }
       if (states.contains(MaterialState.focused)) {
-        return textStyle.copyWith(color:_colors.error);
+        return textStyle.copyWith(color: _colors.error);
       }
-      return textStyle.copyWith(color:_colors.error);
+      return textStyle.copyWith(color: _colors.error);
     }
     if (states.contains(MaterialState.hovered)) {
-      return textStyle.copyWith(color:_colors.onSurfaceVariant);
+      return textStyle.copyWith(color: _colors.onSurfaceVariant);
     }
     if (states.contains(MaterialState.focused)) {
-      return textStyle.copyWith(color:_colors.primary);
+      return textStyle.copyWith(color: _colors.primary);
     }
-    if (states.contains(MaterialState.disabled)) {
-      return textStyle.copyWith(color:_colors.onSurface.withOpacity(0.38));
-    }
-    return textStyle.copyWith(color:_colors.onSurfaceVariant);
+    return textStyle.copyWith(color: _colors.onSurfaceVariant);
   });
 
   @override
   TextStyle? get helperStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final TextStyle textStyle= _textTheme.bodySmall ?? const TextStyle();
+    final TextStyle textStyle = _textTheme.bodySmall ?? const TextStyle();
     if (states.contains(MaterialState.disabled)) {
-      return textStyle.copyWith(color:_colors.onSurface.withOpacity(0.38));
+      return textStyle.copyWith(color: _colors.onSurface.withOpacity(0.38));
     }
-    return textStyle.copyWith(color:_colors.onSurfaceVariant);
+    return textStyle.copyWith(color: _colors.onSurfaceVariant);
   });
 
   @override
   TextStyle? get errorStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-    final TextStyle textStyle= _textTheme.bodySmall ?? const TextStyle();
-    return textStyle.copyWith(color:_colors.error);
+    final TextStyle textStyle = _textTheme.bodySmall ?? const TextStyle();
+    return textStyle.copyWith(color: _colors.error);
   });
 }
 

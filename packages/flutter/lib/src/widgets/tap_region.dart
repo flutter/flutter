@@ -77,7 +77,7 @@ abstract class TapRegionRegistry {
 ///
 /// The regions are defined by adding [TapRegion] widgets to the widget tree
 /// around the regions of interest, and they will register with this
-/// `TapRegionSurface`. Each of the tap regions can optionally belong to a group
+/// [TapRegionSurface]. Each of the tap regions can optionally belong to a group
 /// by assigning a [TapRegion.groupId], where all the regions with the same
 /// groupId act as if they were all one region.
 ///
@@ -89,12 +89,12 @@ abstract class TapRegionRegistry {
 /// [TapRegion.onTapInside] callback is called. If the tap is inside one member
 /// of a group, all members are notified.
 ///
-/// The `TapRegionSurface` should be defined at the highest level needed to
+/// The [TapRegionSurface] should be defined at the highest level needed to
 /// encompass the entire area where taps should be monitored. This is typically
 /// around the entire app. If the entire app isn't covered, then taps outside of
-/// the `TapRegionSurface` will be ignored and no [TapRegion.onTapOutside] calls
-/// wil be made for those events. The [WidgetsApp], [MaterialApp] and
-/// [CupertinoApp] automatically include a `TapRegionSurface` around their
+/// the [TapRegionSurface] will be ignored and no [TapRegion.onTapOutside] calls
+/// will be made for those events. The [WidgetsApp], [MaterialApp] and
+/// [CupertinoApp] automatically include a [TapRegionSurface] around their
 /// entire app.
 ///
 /// [TapRegionSurface] does not participate in the [gesture
@@ -103,7 +103,7 @@ abstract class TapRegionRegistry {
 /// will all fire, and so will any other gestures recognized by a
 /// [GestureDetector] or other pointer event handlers.
 ///
-/// [TapRegion]s register only with the nearest ancestor `TapRegionSurface`.
+/// [TapRegion]s register only with the nearest ancestor [TapRegionSurface].
 ///
 /// See also:
 ///
@@ -139,7 +139,7 @@ class TapRegionSurface extends SingleChildRenderObjectWidget {
 ///
 /// The regions are defined by adding [RenderTapRegion] render objects in the
 /// render tree around the regions of interest, and they will register with this
-/// `RenderTapRegionSurface`. Each of the tap regions can optionally belong to a
+/// [RenderTapRegionSurface]. Each of the tap regions can optionally belong to a
 /// group by assigning a [RenderTapRegion.groupId], where all the regions with
 /// the same groupId act as if they were all one region.
 ///
@@ -151,30 +151,30 @@ class TapRegionSurface extends SingleChildRenderObjectWidget {
 /// [TapRegion.onTapInside] callback is called. If the tap is inside one member
 /// of a group, all members are notified.
 ///
-/// The `RenderTapRegionSurface` should be defined at the highest level needed
+/// The [RenderTapRegionSurface] should be defined at the highest level needed
 /// to encompass the entire area where taps should be monitored. This is
 /// typically around the entire app. If the entire app isn't covered, then taps
-/// outside of the `RenderTapRegionSurface` will be ignored and no
-/// [RenderTapRegion.onTapOutside] calls wil be made for those events. The
+/// outside of the [RenderTapRegionSurface] will be ignored and no
+/// [RenderTapRegion.onTapOutside] calls will be made for those events. The
 /// [WidgetsApp], [MaterialApp] and [CupertinoApp] automatically include a
-/// `RenderTapRegionSurface` around the entire app.
+/// [RenderTapRegionSurface] around the entire app.
 ///
-/// `RenderTapRegionSurface` does not participate in the [gesture
+/// [RenderTapRegionSurface] does not participate in the [gesture
 /// disambiguation](https://flutter.dev/gestures/#gesture-disambiguation)
-/// system, so if multiple `RenderTapRegionSurface`s are active at the same
+/// system, so if multiple [RenderTapRegionSurface]s are active at the same
 /// time, they will all fire, and so will any other gestures recognized by a
 /// [GestureDetector] or other pointer event handlers.
 ///
 /// [RenderTapRegion]s register only with the nearest ancestor
-/// `RenderTapRegionSurface`.
+/// [RenderTapRegionSurface].
 ///
 /// See also:
 ///
-///  * [TapRegionSurface], a widget that inserts a `RenderTapRegionSurface` into
+///  * [TapRegionSurface], a widget that inserts a [RenderTapRegionSurface] into
 ///    the render tree.
 ///  * [TapRegionRegistry.of], which can find the nearest ancestor
 ///    [RenderTapRegionSurface], which is a [TapRegionRegistry].
-class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior with TapRegionRegistry {
+class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior implements TapRegionRegistry {
   final Expando<BoxHitTestResult> _cachedResults = Expando<BoxHitTestResult>();
   final Set<RenderTapRegion> _registeredRegions = <RenderTapRegion>{};
   final Map<Object?, Set<RenderTapRegion>> _groupIdToRegions = <Object?, Set<RenderTapRegion>>{};
@@ -312,6 +312,7 @@ class TapRegion extends SingleChildRenderObjectWidget {
     super.key,
     required super.child,
     this.enabled = true,
+    this.behavior = HitTestBehavior.deferToChild,
     this.onTapOutside,
     this.onTapInside,
     this.groupId,
@@ -320,6 +321,14 @@ class TapRegion extends SingleChildRenderObjectWidget {
 
   /// Whether or not this [TapRegion] is enabled as part of the composite region.
   final bool enabled;
+
+  /// How to behave during hit testing when deciding how the hit test propagates
+  /// to children and whether to consider targets behind this [TapRegion].
+  ///
+  /// Defaults to [HitTestBehavior.deferToChild].
+  ///
+  /// See [HitTestBehavior] for the allowed values and their meanings.
+  final HitTestBehavior behavior;
 
   /// A callback to be invoked when a tap is detected outside of this
   /// [TapRegion] and any other region with the same [groupId], if any.
@@ -358,6 +367,7 @@ class TapRegion extends SingleChildRenderObjectWidget {
     return RenderTapRegion(
       registry: TapRegionRegistry.maybeOf(context),
       enabled: enabled,
+      behavior: behavior,
       onTapOutside: onTapOutside,
       onTapInside: onTapInside,
       groupId: groupId,
@@ -367,12 +377,14 @@ class TapRegion extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, covariant RenderTapRegion renderObject) {
-    renderObject.registry = TapRegionRegistry.maybeOf(context);
-    renderObject.enabled = enabled;
-    renderObject.groupId = groupId;
-    renderObject.onTapOutside = onTapOutside;
-    renderObject.onTapInside = onTapInside;
-    if (kReleaseMode) {
+    renderObject
+      ..registry = TapRegionRegistry.maybeOf(context)
+      ..enabled = enabled
+      ..behavior = behavior
+      ..groupId = groupId
+      ..onTapOutside = onTapOutside
+      ..onTapInside = onTapInside;
+    if (!kReleaseMode) {
       renderObject.debugLabel = debugLabel;
     }
   }
@@ -380,9 +392,10 @@ class TapRegion extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'DISABLED', defaultValue: true));
+    properties.add(DiagnosticsProperty<HitTestBehavior>('behavior', behavior, defaultValue: HitTestBehavior.deferToChild));
     properties.add(DiagnosticsProperty<Object?>('debugLabel', debugLabel, defaultValue: null));
     properties.add(DiagnosticsProperty<Object?>('groupId', groupId, defaultValue: null));
-    properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'DISABLED', defaultValue: true));
   }
 }
 
@@ -393,26 +406,33 @@ class TapRegion extends SingleChildRenderObjectWidget {
 /// system.
 ///
 /// This render object indicates to the nearest ancestor [TapRegionSurface] that
-/// the region occupied by its child will participate in the tap detection for
-/// that surface.
+/// the region occupied by its child (or itself if [behavior] is
+/// [HitTestBehavior.opaque]) will participate in the tap detection for that
+/// surface.
 ///
 /// If this region belongs to a group (by virtue of its [groupId]), all the
 /// regions in the group will act as one.
 ///
 /// If there is no [RenderTapRegionSurface] ancestor in the render tree,
-/// `RenderTapRegion` will do nothing.
+/// [RenderTapRegion] will do nothing.
+///
+/// The [behavior] attribute describes how to behave during hit testing when
+/// deciding how the hit test propagates to children and whether to consider
+/// targets behind the tap region. Defaults to [HitTestBehavior.deferToChild].
+/// See [HitTestBehavior] for the allowed values and their meanings.
 ///
 /// See also:
 ///
 ///  * [TapRegion], a widget that inserts a [RenderTapRegion] into the render
 ///    tree.
-class RenderTapRegion extends RenderProxyBox with Diagnosticable {
+class RenderTapRegion extends RenderProxyBoxWithHitTestBehavior {
   /// Creates a [RenderTapRegion].
   RenderTapRegion({
     TapRegionRegistry? registry,
     bool enabled = true,
     this.onTapOutside,
     this.onTapInside,
+    super.behavior = HitTestBehavior.deferToChild,
     Object? groupId,
     String? debugLabel,
   })  : _registry = registry,
@@ -464,6 +484,12 @@ class RenderTapRegion extends RenderProxyBox with Diagnosticable {
   Object? _groupId;
   set groupId(Object? value) {
     if (_groupId != value) {
+      // If the group changes, we need to unregister and re-register under the
+      // new group. The re-registration happens automatically in layout().
+      if (_isRegistered) {
+        _registry!.unregisterTapRegion(this);
+        _isRegistered = false;
+      }
       _groupId = value;
       markNeedsLayout();
     }
@@ -471,7 +497,7 @@ class RenderTapRegion extends RenderProxyBox with Diagnosticable {
 
   /// The registry that this [RenderTapRegion] should register with.
   ///
-  /// If the `registry` is null, then this region will not be registered
+  /// If the [registry] is null, then this region will not be registered
   /// anywhere, and will not do any tap detection.
   ///
   /// A [RenderTapRegionSurface] is a [TapRegionRegistry].
@@ -515,7 +541,7 @@ class RenderTapRegion extends RenderProxyBox with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Object?>('debugLabel', debugLabel, defaultValue: null));
+    properties.add(DiagnosticsProperty<String?>('debugLabel', debugLabel, defaultValue: null));
     properties.add(DiagnosticsProperty<Object?>('groupId', groupId, defaultValue: null));
     properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'DISABLED', defaultValue: true));
   }
@@ -525,7 +551,7 @@ class RenderTapRegion extends RenderProxyBox with Diagnosticable {
 /// based on the [EditableText] text editing widget, such as [TextField] and
 /// [CupertinoTextField].
 ///
-/// Widgets that are wrapped with a `TextFieldTapRegion` are considered to be
+/// Widgets that are wrapped with a [TextFieldTapRegion] are considered to be
 /// part of a text field for purposes of unfocus behavior. So, when the user
 /// taps on them, the currently focused text field won't be unfocused by
 /// default. This allows controls like spinners, copy buttons, and formatting
@@ -533,7 +559,7 @@ class RenderTapRegion extends RenderProxyBox with Diagnosticable {
 /// lose focus when they are interacted with.
 ///
 /// {@tool dartpad}
-/// This example shows how to use a `TextFieldTapRegion` to wrap a set of
+/// This example shows how to use a [TextFieldTapRegion] to wrap a set of
 /// "spinner" buttons that increment and decrement a value in the text field
 /// without causing the text field to lose keyboard focus.
 ///

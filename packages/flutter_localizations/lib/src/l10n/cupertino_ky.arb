@@ -21,5 +21,9 @@
   "selectAllButtonLabel": "Баарын тандоо",
   "tabSemanticsLabel": "$tabCount ичинен $tabIndex-өтмөк",
   "modalBarrierDismissLabel": "Жабуу",
-  "searchTextFieldPlaceholderLabel": "Издөө"
+  "searchTextFieldPlaceholderLabel": "Издөө",
+  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "menuDismissLabel": "Dismiss menu",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web"
 }

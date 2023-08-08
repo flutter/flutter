@@ -7,6 +7,7 @@ import 'package:package_config/package_config.dart';
 import '../../artifacts.dart';
 import '../../base/build.dart';
 import '../../base/file_system.dart';
+import '../../base/io.dart';
 import '../../build_info.dart';
 import '../../compile.dart';
 import '../../dart/package_map.dart';
@@ -55,7 +56,7 @@ class CopyFlutterBundle extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'copy_flutter_bundle');
     }
-    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     environment.outputDir.createSync(recursive: true);
 
     // Only copy the prebuilt runtimes and kernel blob in debug mode.
@@ -76,11 +77,7 @@ class CopyFlutterBundle extends Target {
       buildMode: buildMode,
       shaderTarget: ShaderTarget.sksl,
     );
-    final DepfileService depfileService = DepfileService(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-    );
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       assetDepfile,
       environment.buildDir.childFile('flutter_assets.d'),
     );
@@ -116,7 +113,7 @@ class ReleaseCopyFlutterBundle extends CopyFlutterBundle {
 
 /// Generate a snapshot of the dart code used in the program.
 ///
-/// Note that this target depends on the `.dart_tool/package_config.json` file
+/// This target depends on the `.dart_tool/package_config.json` file
 /// even though it is not listed as an input. Pub inserts a timestamp into
 /// the file which causes unnecessary rebuilds, so instead a subset of the contents
 /// are used an input instead.
@@ -131,7 +128,7 @@ class KernelSnapshot extends Target {
     Source.pattern('{PROJECT_DIR}/.dart_tool/package_config_subset'),
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/common.dart'),
     Source.artifact(Artifact.platformKernelDill),
-    Source.hostArtifact(HostArtifact.engineDartBinary),
+    Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.frontendServerSnapshotForEngineDartSdk),
   ];
 
@@ -166,7 +163,7 @@ class KernelSnapshot extends Target {
     if (targetPlatformEnvironment == null) {
       throw MissingDefineException(kTargetPlatform, 'kernel_snapshot');
     }
-    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final String targetFile = environment.defines[kTargetFile] ?? environment.fileSystem.path.join('lib', 'main.dart');
     final File packagesFile = environment.projectDir
       .childDirectory('.dart_tool')
@@ -189,13 +186,12 @@ class KernelSnapshot extends Target {
     // Force linking of the platform for desktop embedder targets since these
     // do not correctly load the core snapshots in debug mode.
     // See https://github.com/flutter/flutter/issues/44724
-    bool forceLinkPlatform;
+    final bool forceLinkPlatform;
     switch (targetPlatform) {
       case TargetPlatform.darwin:
       case TargetPlatform.windows_x64:
       case TargetPlatform.linux_x64:
         forceLinkPlatform = true;
-        break;
       case TargetPlatform.android:
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
@@ -208,8 +204,22 @@ class KernelSnapshot extends Target {
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
         forceLinkPlatform = false;
-        break;
     }
+
+    final String? targetOS = switch (targetPlatform) {
+      TargetPlatform.fuchsia_arm64 || TargetPlatform.fuchsia_x64 => 'fuchsia',
+      TargetPlatform.android ||
+      TargetPlatform.android_arm ||
+      TargetPlatform.android_arm64 ||
+      TargetPlatform.android_x64 ||
+      TargetPlatform.android_x86 =>
+        'android',
+      TargetPlatform.darwin => 'macos',
+      TargetPlatform.ios => 'ios',
+      TargetPlatform.linux_arm64 || TargetPlatform.linux_x64 => 'linux',
+      TargetPlatform.windows_x64 => 'windows',
+      TargetPlatform.tester || TargetPlatform.web_javascript => null,
+    };
 
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       packagesFile,
@@ -239,6 +249,7 @@ class KernelSnapshot extends Target {
       dartDefines: decodeDartDefines(environment.defines, kDartDefines),
       packageConfig: packageConfig,
       buildDir: environment.buildDir,
+      targetOS: targetOS,
       checkDartPluginRegistry: environment.generateDartPluginRegistry,
     );
     if (output == null || output.errorCount != 0) {
@@ -273,7 +284,7 @@ abstract class AotElfBase extends Target {
       throw MissingDefineException(kTargetPlatform, 'aot_elf');
     }
     final List<String> extraGenSnapshotOptions = decodeCommaSeparated(environment.defines, kExtraGenSnapshotOptions);
-    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final TargetPlatform targetPlatform = getTargetPlatformForName(targetPlatformEnvironment);
     final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
     final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
@@ -295,7 +306,6 @@ abstract class AotElfBase extends Target {
       buildMode: buildMode,
       mainPath: environment.buildDir.childFile('app.dill').path,
       outputPath: outputPath,
-      bitcode: false,
       extraGenSnapshotOptions: extraGenSnapshotOptions,
       splitDebugInfo: splitDebugInfo,
       dartObfuscation: dartObfuscation,
@@ -317,7 +327,7 @@ class AotElfProfile extends AotElfBase {
   List<Source> get inputs => <Source>[
     const Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/common.dart'),
     const Source.pattern('{BUILD_DIR}/app.dill'),
-    const Source.hostArtifact(HostArtifact.engineDartBinary),
+    const Source.artifact(Artifact.engineDartBinary),
     const Source.artifact(Artifact.skyEnginePath),
     Source.artifact(Artifact.genSnapshot,
       platform: targetPlatform,
@@ -349,7 +359,7 @@ class AotElfRelease extends AotElfBase {
   List<Source> get inputs => <Source>[
     const Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/common.dart'),
     const Source.pattern('{BUILD_DIR}/app.dill'),
-    const Source.hostArtifact(HostArtifact.engineDartBinary),
+    const Source.artifact(Artifact.engineDartBinary),
     const Source.artifact(Artifact.skyEnginePath),
     Source.artifact(Artifact.genSnapshot,
       platform: targetPlatform,
@@ -392,5 +402,47 @@ abstract class CopyFlutterAotBundle extends Target {
       outputFile.parent.createSync(recursive: true);
     }
     environment.buildDir.childFile('app.so').copySync(outputFile.path);
+  }
+}
+
+/// Lipo CLI tool wrapper shared by iOS and macOS builds.
+abstract final class Lipo {
+  /// Create a "fat" binary by combining multiple architecture-specific ones.
+  /// `skipMissingInputs` can be changed to `true` to first check whether
+  /// the expected input paths exist and ignore the command if they don't.
+  /// Otherwise, `lipo` would fail if the given paths didn't exist.
+  static Future<void> create(
+    Environment environment,
+    List<DarwinArch> darwinArchs, {
+    required String relativePath,
+    required String inputDir,
+    bool skipMissingInputs = false,
+  }) async {
+
+    final String resultPath = environment.fileSystem.path.join(environment.buildDir.path, relativePath);
+    environment.fileSystem.directory(resultPath).parent.createSync(recursive: true);
+
+    Iterable<String> inputPaths = darwinArchs.map(
+      (DarwinArch iosArch) => environment.fileSystem.path.join(inputDir, iosArch.name, relativePath)
+    );
+    if (skipMissingInputs) {
+      inputPaths = inputPaths.where(environment.fileSystem.isFileSync);
+      if (inputPaths.isEmpty) {
+        return;
+      }
+    }
+
+    final List<String> lipoArgs = <String>[
+      'lipo',
+      ...inputPaths,
+      '-create',
+      '-output',
+      resultPath,
+    ];
+
+    final ProcessResult result = await environment.processManager.run(lipoArgs);
+    if (result.exitCode != 0) {
+      throw Exception('lipo exited with code ${result.exitCode}.\n${result.stderr}');
+    }
   }
 }

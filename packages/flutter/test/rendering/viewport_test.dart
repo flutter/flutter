@@ -8,8 +8,7 @@
 // (or vice versa).
 
 @Tags(<String>['reduced-test-set'])
-
-import 'dart:ui' as ui;
+library;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -781,19 +780,14 @@ void main() {
     }
 
     testWidgets('Reverse List showOnScreen', (WidgetTester tester) async {
-      final ui.Size originalScreenSize = tester.binding.window.physicalSize;
-      final double originalDevicePixelRatio = tester.binding.window.devicePixelRatio;
-      addTearDown(() {
-        tester.binding.window.devicePixelRatioTestValue = originalDevicePixelRatio;
-        tester.binding.window.physicalSizeTestValue = originalScreenSize;
-      });
+      addTearDown(tester.view.reset);
       const double screenHeight = 400.0;
       const double screenWidth = 400.0;
       const double itemHeight = screenHeight / 10.0;
       const ValueKey<String> centerKey = ValueKey<String>('center');
 
-      tester.binding.window.devicePixelRatioTestValue = 1.0;
-      tester.binding.window.physicalSizeTestValue = const Size(screenWidth, screenHeight);
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(screenWidth, screenHeight);
 
       await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
@@ -1874,7 +1868,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: MediaQuery(
           data: const MediaQueryData(),
-          child: Container(
+          child: ColoredBox(
             color: const Color(0xFF000000),
             child: Column(
               children: <Widget>[
@@ -2193,5 +2187,77 @@ void main() {
       expect(viewport.describeApproximatePaintClip(child as RenderSliver), Offset.zero & viewport.size);
     });
     expect(visited, true);
+  });
+
+  testWidgets('Shrinkwrapping viewport asserts bounded cross axis', (WidgetTester tester) async {
+    final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
+    FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
+    // Vertical
+    await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          children: <Widget>[
+            ListView(
+              shrinkWrap: true,
+              children: const <Widget>[ SizedBox.square(dimension: 500) ],
+            ),
+          ],
+        ),
+      ));
+
+    expect(errors, isNotEmpty);
+    expect(errors.first.exception, isFlutterError);
+    FlutterError error = errors.first.exception as FlutterError;
+    expect(
+      error.toString(),
+      contains('Viewports expand in the cross axis to fill their container'),
+    );
+    errors.clear();
+
+    // Horizontal
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListView(
+        children: <Widget>[
+          ListView(
+            scrollDirection: Axis.horizontal,
+            shrinkWrap: true,
+            children: const <Widget>[ SizedBox.square(dimension: 500) ],
+          ),
+        ],
+      ),
+    ));
+
+    expect(errors, isNotEmpty);
+    expect(errors.first.exception, isFlutterError);
+    error = errors.first.exception as FlutterError;
+    expect(
+      error.toString(),
+      contains('Viewports expand in the cross axis to fill their container'),
+    );
+    errors.clear();
+
+    // No children
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: <Widget>[
+          ListView(
+            shrinkWrap: true,
+          ),
+        ],
+      ),
+    ));
+
+    expect(errors, isNotEmpty);
+    expect(errors.first.exception, isFlutterError);
+    error = errors.first.exception as FlutterError;
+    expect(
+      error.toString(),
+      contains('Viewports expand in the cross axis to fill their container'),
+    );
+    errors.clear();
   });
 }

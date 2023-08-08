@@ -34,13 +34,9 @@ class BouncingScrollSimulation extends Simulation {
     required this.leadingExtent,
     required this.trailingExtent,
     required this.spring,
+    double constantDeceleration = 0,
     super.tolerance,
-  }) : assert(position != null),
-       assert(velocity != null),
-       assert(leadingExtent != null),
-       assert(trailingExtent != null),
-       assert(leadingExtent <= trailingExtent),
-       assert(spring != null) {
+  }) : assert(leadingExtent <= trailingExtent) {
     if (position < leadingExtent) {
       _springSimulation = _underscrollSimulation(position, velocity);
       _springTime = double.negativeInfinity;
@@ -50,7 +46,7 @@ class BouncingScrollSimulation extends Simulation {
     } else {
       // Taken from UIScrollView.decelerationRate (.normal = 0.998)
       // 0.998^1000 = ~0.135
-      _frictionSimulation = FrictionSimulation(0.135, position, velocity);
+      _frictionSimulation = FrictionSimulation(0.135, position, velocity, constantDeceleration: constantDeceleration);
       final double finalX = _frictionSimulation.finalX;
       if (velocity > 0.0 && finalX > trailingExtent) {
         _springTime = _frictionSimulation.timeAtX(trailingExtent);
@@ -70,7 +66,6 @@ class BouncingScrollSimulation extends Simulation {
         _springTime = double.infinity;
       }
     }
-    assert(_springTime != null);
   }
 
   /// The maximum velocity that can be transferred from the inertia of a ballistic
@@ -128,231 +123,133 @@ class BouncingScrollSimulation extends Simulation {
   }
 }
 
-/// An implementation of scroll physics that matches Android.
+/// An implementation of scroll physics that aligns with Android.
+///
+/// For any value of [velocity], this travels the same total distance as the
+/// Android scroll physics.
+///
+/// This scroll physics has been adjusted relative to Android's in order to make
+/// it ballistic, meaning that the deceleration at any moment is a function only
+/// of the current velocity [dx] and does not depend on how long ago the
+/// simulation was started.  (This is required by Flutter's scrolling protocol,
+/// where [ScrollActivityDelegate.goBallistic] may restart a scroll activity
+/// using only its current velocity and the scroll position's own state.)
+/// Compared to this scroll physics, Android's moves faster at the very
+/// beginning, then slower, and it ends at the same place but a little later.
+///
+/// Times are measured in seconds, and positions in logical pixels.
 ///
 /// See also:
 ///
 ///  * [BouncingScrollSimulation], which implements iOS scroll physics.
 //
-// This class is based on Scroller.java from Android:
-//   https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/widget
+// This class is based on OverScroller.java from Android:
+//   https://android.googlesource.com/platform/frameworks/base/+/android-13.0.0_r24/core/java/android/widget/OverScroller.java#738
+// and in particular class SplineOverScroller (at the end of the file), starting
+// at method "fling".  (A very similar algorithm is in Scroller.java in the same
+// directory, but OverScroller is what's used by RecyclerView.)
 //
-// The "See..." comments below refer to Scroller methods and values. Some
-// simplifications have been made.
+// In the Android implementation, times are in milliseconds, positions are in
+// physical pixels, but velocity is in physical pixels per whole second.
+//
+// The "See..." comments below refer to SplineOverScroller methods and values.
 class ClampingScrollSimulation extends Simulation {
-  /// Creates a scroll physics simulation that matches Android scrolling.
+  /// Creates a scroll physics simulation that aligns with Android scrolling.
   ClampingScrollSimulation({
     required this.position,
     required this.velocity,
     this.friction = 0.015,
     super.tolerance,
   }) {
-    _duration = _splineFlingDuration(velocity);
-    _distance = _splineFlingDistance(velocity);
+    _duration = _flingDuration();
+    _distance = _flingDistance();
   }
 
-  final double _inflexion = 0.35;
-
-  /// The position of the particle at the beginning of the simulation.
+  /// The position of the particle at the beginning of the simulation, in
+  /// logical pixels.
   final double position;
 
   /// The velocity at which the particle is traveling at the beginning of the
-  /// simulation.
+  /// simulation, in logical pixels per second.
   final double velocity;
 
   /// The amount of friction the particle experiences as it travels.
   ///
-  /// The more friction the particle experiences, the sooner it stops.
+  /// The more friction the particle experiences, the sooner it stops and the
+  /// less far it travels.
+  ///
+  /// The default value causes the particle to travel the same total distance
+  /// as in the Android scroll physics.
+  // See mFlingFriction.
   final double friction;
 
-  late int _duration;
+  /// The total time the simulation will run, in seconds.
+  late double _duration;
+
+  /// The total, signed, distance the simulation will travel, in logical pixels.
   late double _distance;
 
   // See DECELERATION_RATE.
   static final double _kDecelerationRate = math.log(0.78) / math.log(0.9);
 
-  // See computeDeceleration().
-  static double _decelerationForFriction(double friction) {
-    return 9.80665 *
-      39.37 *
-      friction *
-      1.0 * // Flutter operates on logical pixels so the DPI should be 1.0.
-      160.0;
-  }
+  // See INFLEXION.
+  static const double _kInflexion = 0.35;
 
-  // See getSplineDeceleration().
-  double _splineDeceleration(double velocity) {
-    return math.log(_inflexion *
-      velocity.abs() /
-      (friction * _decelerationForFriction(0.84)));
-  }
+  // See mPhysicalCoeff.  This has a value of 0.84 times Earth gravity,
+  // expressed in units of logical pixels per second^2.
+  static const double _physicalCoeff =
+      9.80665 // g, in meters per second^2
+        * 39.37 // 1 meter / 1 inch
+        * 160.0 // 1 inch / 1 logical pixel
+        * 0.84; // "look and feel tuning"
 
   // See getSplineFlingDuration().
-  int _splineFlingDuration(double velocity) {
-    final double deceleration = _splineDeceleration(velocity);
-    return (1000 * math.exp(deceleration / (_kDecelerationRate - 1.0))).round();
+  double _flingDuration() {
+    // See getSplineDeceleration().  That function's value is
+    // math.log(velocity.abs() / referenceVelocity).
+    final double referenceVelocity = friction * _physicalCoeff / _kInflexion;
+
+    // This is the value getSplineFlingDuration() would return, but in seconds.
+    final double androidDuration =
+        math.pow(velocity.abs() / referenceVelocity,
+                 1 / (_kDecelerationRate - 1.0)) as double;
+
+    // We finish a bit sooner than Android, in order to travel the
+    // same total distance.
+    return _kDecelerationRate * _kInflexion * androidDuration;
   }
 
-  // See getSplineFlingDistance().
-  double _splineFlingDistance(double velocity) {
-    final double l = _splineDeceleration(velocity);
-    final double decelMinusOne = _kDecelerationRate - 1.0;
-    return friction *
-      _decelerationForFriction(0.84) *
-      math.exp(_kDecelerationRate / decelMinusOne * l);
+  // See getSplineFlingDistance().  This returns the same value but with the
+  // sign of [velocity], and in logical pixels.
+  double _flingDistance() {
+    final double distance = velocity * _duration / _kDecelerationRate;
+    assert(() {
+      // This is the more complicated calculation that getSplineFlingDistance()
+      // actually performs, which boils down to the much simpler formula above.
+      final double referenceVelocity = friction * _physicalCoeff / _kInflexion;
+      final double logVelocity = math.log(velocity.abs() / referenceVelocity);
+      final double distanceAgain =
+          friction * _physicalCoeff
+            * math.exp(logVelocity * _kDecelerationRate / (_kDecelerationRate - 1.0));
+      return (distance.abs() - distanceAgain).abs() < tolerance.distance;
+    }());
+    return distance;
   }
 
   @override
   double x(double time) {
-    if (time == 0) {
-      return position;
-    }
-    final _NBSample sample = _NBSample(time, _duration);
-    return position + (sample.distanceCoef * _distance) * velocity.sign;
+    final double t = clampDouble(time / _duration, 0.0, 1.0);
+    return position + _distance * (1.0 - math.pow(1.0 - t, _kDecelerationRate));
   }
 
   @override
   double dx(double time) {
-    if (time == 0) {
-      return velocity;
-    }
-    final _NBSample sample = _NBSample(time, _duration);
-    return sample.velocityCoef * _distance / _duration * velocity.sign * 1000.0;
+    final double t = clampDouble(time / _duration, 0.0, 1.0);
+    return velocity * math.pow(1.0 - t, _kDecelerationRate - 1.0);
   }
 
   @override
   bool isDone(double time) {
-    return time * 1000.0 >= _duration;
+    return time >= _duration;
   }
-}
-
-class _NBSample {
-  _NBSample(double time, int duration) {
-    // See computeScrollOffset().
-    final double t = time * 1000.0 / duration;
-    final int index = (_nbSamples * t).clamp(0, _nbSamples).round(); // ignore_clamp_double_lint
-    _distanceCoef = 1.0;
-    _velocityCoef = 0.0;
-    if (index < _nbSamples) {
-      final double tInf = index / _nbSamples;
-      final double tSup = (index + 1) / _nbSamples;
-      final double dInf = _splinePosition[index];
-      final double dSup = _splinePosition[index + 1];
-      _velocityCoef = (dSup - dInf) / (tSup - tInf);
-      _distanceCoef = dInf + (t - tInf) * _velocityCoef;
-    }
-  }
-
-  late double _velocityCoef;
-  double get velocityCoef => _velocityCoef;
-
-  late double _distanceCoef;
-  double get distanceCoef => _distanceCoef;
-
-  static const int _nbSamples = 100;
-
-  // Generated from dev/tools/generate_android_spline_data.dart.
-  static const List<double> _splinePosition = <double>[
-    0.000022888183591973643,
-    0.028561000304762274,
-    0.05705195792956655,
-    0.08538917797618413,
-    0.11349556286812107,
-    0.14129881694635613,
-    0.16877157254923383,
-    0.19581093511175632,
-    0.22239649722992452,
-    0.24843841866631658,
-    0.2740024733220569,
-    0.298967680744136,
-    0.32333234658228116,
-    0.34709556909569184,
-    0.3702249257894571,
-    0.39272483400399893,
-    0.41456988647721615,
-    0.43582889025419114,
-    0.4564192786416,
-    0.476410299013587,
-    0.4957560715637827,
-    0.5145493169954743,
-    0.5327205670880077,
-    0.5502846891191615,
-    0.5673274324802855,
-    0.583810881323224,
-    0.5997478744397482,
-    0.615194045299478,
-    0.6301165005270208,
-    0.6445484042257972,
-    0.6585198219185201,
-    0.6720397744233084,
-    0.6850997688076114,
-    0.6977281404741683,
-    0.7099506591298411,
-    0.7217749311525871,
-    0.7331784038850426,
-    0.7442308394229518,
-    0.7549087205105974,
-    0.7652471277371271,
-    0.7752251637549381,
-    0.7848768260203478,
-    0.7942056937103814,
-    0.8032299679689082,
-    0.8119428702388629,
-    0.8203713516576219,
-    0.8285187880808974,
-    0.8363794492831295,
-    0.8439768562813565,
-    0.851322799855549,
-    0.8584111051351724,
-    0.8652534074722162,
-    0.8718525580962131,
-    0.8782333271742155,
-    0.8843892099362031,
-    0.8903155590440985,
-    0.8960465359221951,
-    0.9015574505919048,
-    0.9068736766459904,
-    0.9119951682409297,
-    0.9169321898723632,
-    0.9216747065581234,
-    0.9262420604674766,
-    0.9306331858366086,
-    0.9348476990715433,
-    0.9389007110754832,
-    0.9427903495057521,
-    0.9465220679845756,
-    0.9500943036519721,
-    0.9535176728088761,
-    0.9567898524767604,
-    0.959924306623116,
-    0.9629127700159108,
-    0.9657622101750765,
-    0.9684818726275105,
-    0.9710676079044347,
-    0.9735231939498,
-    0.9758514437576309,
-    0.9780599066560445,
-    0.9801485715370128,
-    0.9821149805689633,
-    0.9839677526782791,
-    0.9857085499421516,
-    0.9873347811966005,
-    0.9888547171706613,
-    0.9902689443512227,
-    0.9915771042095881,
-    0.9927840651641069,
-    0.9938913963715834,
-    0.9948987305580712,
-    0.9958114963810524,
-    0.9966274782266875,
-    0.997352148697352,
-    0.9979848677523623,
-    0.9985285021374979,
-    0.9989844084453229,
-    0.9993537595844986,
-    0.999638729860106,
-    0.9998403888004533,
-    0.9999602810470701,
-    1.0
-  ];
 }

@@ -5,19 +5,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-// This example app demonstrates a use case of patching
-// `KeyEventManager.keyMessageHandler`: be notified of key events that are not
-// handled by any focus handlers (such as shortcuts).
+/// Flutter code sample for [KeyEventManager.keyMessageHandler].
 
-void main() => runApp(
-  const MaterialApp(
-    home: Scaffold(
-      body: Center(
-        child: FallbackDemo(),
-      )
+void main() {
+  runApp(
+    const MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: FallbackDemo(),
+        ),
+      ),
     ),
-  ),
-);
+  );
+}
 
 class FallbackDemo extends StatefulWidget {
   const FallbackDemo({super.key});
@@ -40,7 +40,7 @@ class FallbackDemoState extends State<FallbackDemo> {
       // to type text, because these key events will no longer be sent to the
       // text input system.
       return false;
-    }
+    },
   );
 
   @override
@@ -53,8 +53,8 @@ class FallbackDemoState extends State<FallbackDemo> {
         constraints: const BoxConstraints(maxWidth: 500, maxHeight: 400),
         child: Column(
           children: <Widget>[
-            const Text('This area handles key pressses that are unhandled by any shortcuts by displaying them below. '
-              'Try text shortcuts such as Ctrl-A!'),
+            const Text('This area handles key presses that are unhandled by any shortcuts, by '
+                'displaying them below. Try text shortcuts such as Ctrl-A!'),
             Text(_capture == null ? '' : '$_capture is not handled by shortcuts.'),
             const TextField(decoration: InputDecoration(label: Text('Text field 1'))),
             Shortcuts(
@@ -62,12 +62,14 @@ class FallbackDemoState extends State<FallbackDemo> {
                 const SingleActivator(LogicalKeyboardKey.keyQ): VoidCallbackIntent(() {}),
               },
               child: const TextField(
-                decoration: InputDecoration(label: Text('This field also considers key Q as a shortcut (that does nothing).')),
+                decoration: InputDecoration(
+                  label: Text('This field also considers key Q as a shortcut (that does nothing).'),
+                ),
               ),
             ),
           ],
         ),
-      )
+      ),
     );
   }
 }
@@ -75,7 +77,7 @@ class FallbackDemoState extends State<FallbackDemo> {
 /// A node used by [FallbackKeyEventRegistrar] to register fallback key handlers.
 ///
 /// This class must not be replaced by bare [KeyEventCallback] because Dart
-/// does not allow comparing with `==` on annonymous functions (always returns
+/// does not allow comparing with `==` on anonymous functions (always returns
 /// false.)
 class FallbackFocusNode {
   FallbackFocusNode({required this.onKeyEvent});
@@ -91,7 +93,7 @@ class FallbackFocusNode {
 ///
 /// A global registrar like [FallbackKeyEventRegistrar] is almost always needed
 /// when patching [KeyEventManager.keyMessageHandler]. This is because
-/// [FallbackFocus] will add and and remove callbacks constantly, but
+/// [FallbackFocus] will add and remove callbacks constantly, but
 /// [KeyEventManager.keyMessageHandler] can only be patched once, and can not
 /// be unpatched. Therefore [FallbackFocus] must not directly interact with
 /// [KeyEventManager.keyMessageHandler], but through a separate registrar that
@@ -113,6 +115,7 @@ class FallbackKeyEventRegistrar {
     }
     return _instance;
   }
+
   static bool _initialized = false;
   static final FallbackKeyEventRegistrar _instance = FallbackKeyEventRegistrar._();
 

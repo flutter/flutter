@@ -70,7 +70,7 @@ class ProfilingSummarizer {
   final Map<ProfileType, List<TimelineEvent>> eventByType;
 
   /// Returns the average, 90th and 99th percentile summary of CPU, GPU and Memory
-  /// usage from the recorded events. Note: If a given profile type isn't available
+  /// usage from the recorded events. If a given profile type isn't available
   /// for any reason, the map will not contain the said profile type.
   Map<String, dynamic> summarize() {
     final Map<String, dynamic> summary = <String, dynamic>{};

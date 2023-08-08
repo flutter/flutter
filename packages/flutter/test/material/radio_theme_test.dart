@@ -7,12 +7,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
+import '../foundation/leak_tracking.dart';
 
 void main() {
   test('RadioThemeData copyWith, ==, hashCode basics', () {
     expect(const RadioThemeData(), const RadioThemeData().copyWith());
     expect(const RadioThemeData().hashCode, const RadioThemeData().copyWith().hashCode);
+  });
+
+  test('RadioThemeData lerp special cases', () {
+    expect(RadioThemeData.lerp(null, null, 0), const RadioThemeData());
+    const RadioThemeData data = RadioThemeData();
+    expect(identical(RadioThemeData.lerp(data, data, 0.5), data), true);
   });
 
   test('RadioThemeData defaults', () {
@@ -33,7 +39,7 @@ void main() {
     expect(theme.data.visualDensity, null);
   });
 
-  testWidgets('Default RadioThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default RadioThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const RadioThemeData().debugFillProperties(builder);
 
@@ -45,7 +51,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('RadioThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RadioThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const RadioThemeData(
       mouseCursor: MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.click),
@@ -74,7 +80,7 @@ void main() {
     );
   });
 
-  testWidgets('Radio is themeable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Radio is themeable', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const MouseCursor mouseCursor = SystemMouseCursors.text;
@@ -147,7 +153,7 @@ void main() {
     expect(_getRadioMaterial(tester), paints..circle(color: focusOverlayColor, radius: splashRadius));
   });
 
-  testWidgets('Radio properties are taken over the theme values', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Radio properties are taken over the theme values', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const MouseCursor themeMouseCursor = SystemMouseCursors.click;
@@ -241,7 +247,7 @@ void main() {
     expect(_getRadioMaterial(tester), paints..circle(color: focusColor, radius: splashRadius));
   });
 
-  testWidgets('Radio activeColor property is taken over the theme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Radio activeColor property is taken over the theme', (WidgetTester tester) async {
     const Color themeDefaultFillColor = Color(0xfffffff0);
     const Color themeSelectedFillColor = Color(0xfffffff1);
 
@@ -282,7 +288,7 @@ void main() {
     expect(_getRadioMaterial(tester), paints..circle(color: selectedFillColor));
   });
 
-  testWidgets('Radio theme overlay color resolves in active/pressed states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Radio theme overlay color resolves in active/pressed states', (WidgetTester tester) async {
     const Color activePressedOverlayColor = Color(0xFF000001);
     const Color inactivePressedOverlayColor = Color(0xFF000002);
 
@@ -344,7 +350,7 @@ void main() {
     );
   });
 
-  testWidgets('Local RadioTheme can override global RadioTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Local RadioTheme can override global RadioTheme', (WidgetTester tester) async {
     const Color globalThemeFillColor = Color(0xfffffff1);
     const Color localThemeFillColor = Color(0xffff0000);
 

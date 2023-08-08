@@ -82,12 +82,17 @@ abstract class CupertinoLocalizations {
   /// Day of month that is shown in [CupertinoDatePicker] spinner corresponding
   /// to the given day index.
   ///
+  /// If weekDay is provided then it will also show weekday name alongside the numerical day.
+  ///
   /// Examples: datePickerDayOfMonth(1) in:
   ///
   ///  - US English: 1
   ///  - Korean: 1일
+  /// Examples: datePickerDayOfMonth(1, 1) in:
+  ///
+  ///  - US English: Mon 1
   // The global version uses date symbols data from the intl package.
-  String datePickerDayOfMonth(int dayIndex);
+  String datePickerDayOfMonth(int dayIndex, [int? weekDay]);
 
   /// The medium-width date format that is shown in [CupertinoDatePicker]
   /// spinner. Abbreviates month and days of week.
@@ -231,9 +236,22 @@ abstract class CupertinoLocalizations {
   // The global version uses the translated string from the arb file.
   String get pasteButtonLabel;
 
+  /// Label that appears in the Cupertino toolbar when the spell checker
+  /// couldn't find any replacements for the current word.
+  // The global version uses the translated string from the arb file.
+  String get noSpellCheckReplacementsLabel;
+
   /// The term used for selecting everything.
   // The global version uses the translated string from the arb file.
   String get selectAllButtonLabel;
+
+  /// The term used for looking up a selection.
+  // The global version uses the translated string from the arb file.
+  String get lookUpButtonLabel;
+
+  /// The term used for launching a web search on a selection.
+  // The global version uses the translated string from the arb file.
+  String get searchWebButtonLabel;
 
   /// The default placeholder used in [CupertinoSearchTextField].
   // The global version uses the translated string from the arb file.
@@ -245,6 +263,10 @@ abstract class CupertinoLocalizations {
   /// A modal barrier can for example be found behind an alert or popup to block
   /// user interaction with elements behind it.
   String get modalBarrierDismissLabel;
+
+  /// Label read out by accessibility tools (VoiceOver) for a context menu to
+  /// indicate that a tap outside dismisses the context menu.
+  String get menuDismissLabel;
 
   /// The `CupertinoLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
@@ -292,7 +314,8 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   /// function, rather than constructing this class directly.
   const DefaultCupertinoLocalizations();
 
-  static const List<String> _shortWeekdays = <String>[
+  /// Short version of days of week.
+  static const List<String> shortWeekdays = <String>[
     'Mon',
     'Tue',
     'Wed',
@@ -341,7 +364,13 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   String datePickerMonth(int monthIndex) => _months[monthIndex - 1];
 
   @override
-  String datePickerDayOfMonth(int dayIndex) => dayIndex.toString();
+  String datePickerDayOfMonth(int dayIndex, [int? weekDay]) {
+    if (weekDay != null) {
+      return ' ${shortWeekdays[weekDay - DateTime.monday]} $dayIndex ';
+    }
+
+    return dayIndex.toString();
+  }
 
   @override
   String datePickerHour(int hour) => hour.toString();
@@ -362,7 +391,7 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
 
   @override
   String datePickerMediumDate(DateTime date) {
-    return '${_shortWeekdays[date.weekday - DateTime.monday]} '
+    return '${shortWeekdays[date.weekday - DateTime.monday]} '
       '${_shortMonths[date.month - DateTime.january]} '
       '${date.day.toString().padRight(2)}';
   }
@@ -429,13 +458,25 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   String get pasteButtonLabel => 'Paste';
 
   @override
+  String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+
+  @override
   String get selectAllButtonLabel => 'Select All';
+
+  @override
+  String get lookUpButtonLabel => 'Look Up';
+
+  @override
+  String get searchWebButtonLabel => 'Search Web';
 
   @override
   String get searchTextFieldPlaceholderLabel => 'Search';
 
   @override
   String get modalBarrierDismissLabel => 'Dismiss';
+
+  @override
+  String get menuDismissLabel => 'Dismiss menu';
 
   /// Creates an object that provides US English resource values for the
   /// cupertino library widgets.

@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:html' as html;
-// platformViewRegistry is exposed in the web version
-import 'dart:ui' as ui show platformViewRegistry; // ignore: undefined_shown_name
+import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,7 +20,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // TODO(nurhan): https://github.com/flutter/flutter/issues/51885
-    SystemChannels.textInput.setMockMethodCallHandler(null);
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, null);
     // Focus on a TextFormField.
     final Finder finder = find.byKey(const Key('input'));
     expect(finder, findsOneWidget);
@@ -37,9 +36,8 @@ void main() {
     int viewInstanceCount = 0;
 
     platformViewsRegistry.getNextPlatformViewId();
-    // ignore: undefined_prefixed_name, avoid_dynamic_calls
-    ui.platformViewRegistry.registerViewFactory('MyView', (int viewId) {
-      ++viewInstanceCount;
+    ui_web.platformViewRegistry.registerViewFactory('MyView', (int viewId) {
+      viewInstanceCount += 1;
       return html.DivElement();
     });
 

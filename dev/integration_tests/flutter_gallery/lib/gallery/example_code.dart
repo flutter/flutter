@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Note: This code is not runnable, it contains code snippets displayed in the
-// gallery.
+// This code is not runnable, it contains code snippets displayed in the Gallery.
 
 import 'package:flutter/material.dart';
 
@@ -117,7 +116,7 @@ DropdownButton<String>(
 
 // START buttons_icon
 // Member variable holding toggle value.
-late bool value;
+late bool value = true;
 
 // Toggleable icon button.
 IconButton(

@@ -21,16 +21,14 @@ class RemoveMacOSFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
   final Usage _usage;
 
   @override
-  bool migrate() {
+  void migrate() {
     if (!_xcodeProjectInfoFile.existsSync()) {
       logger.printTrace(
           'Xcode project not found, skipping framework link and embedding migration');
-      return true;
+      return;
     }
 
     processFileLines(_xcodeProjectInfoFile);
-
-    return true;
   }
 
   @override

@@ -59,7 +59,7 @@ Future<void> main(List<String> arguments) async {
   buf.writeln('homepage: https://flutter.dev');
   buf.writeln('version: 0.0.0');
   buf.writeln('environment:');
-  buf.writeln("  sdk: '>=2.10.0 <3.0.0'");
+  buf.writeln("  sdk: '>=3.0.0-0 <4.0.0'");
   buf.writeln('dependencies:');
   for (final String package in findPackageNames()) {
     buf.writeln('  $package:');
@@ -116,7 +116,7 @@ Future<void> main(List<String> arguments) async {
   final List<String> dartdocBaseArgs = <String>[
     'global',
     'run',
-    if (args['checked'] as bool) '-c',
+    if (args['checked'] as bool) '--enable-asserts',
     'dartdoc',
   ];
 
@@ -143,11 +143,12 @@ Future<void> main(List<String> arguments) async {
 
   // Dartdoc warnings and errors in these packages are considered fatal.
   // All packages owned by flutter should be in the list.
-  // TODO(goderbauer): Figure out how to add 'dart:ui'.
   final List<String> flutterPackages = <String>[
     kDummyPackageName,
     kPlatformIntegrationPackageName,
     ...findPackageNames(),
+    // TODO(goderbauer): Figure out how to only include `dart:ui` of `sky_engine` below, https://github.com/dart-lang/dartdoc/issues/2278.
+    // 'sky_engine',
   ];
 
   // Generate the documentation.
@@ -228,8 +229,7 @@ Future<void> main(List<String> arguments) async {
   ));
   printStream(process.stdout, prefix: args['json'] as bool ? '' : 'dartdoc:stdout: ',
     filter: args['verbose'] as bool ? const <Pattern>[] : <Pattern>[
-      RegExp(r'^generating docs for library '), // unnecessary verbosity
-      RegExp(r'^pars'), // unnecessary verbosity
+      RegExp(r'^Generating docs for library '), // unnecessary verbosity
     ],
   );
   printStream(process.stderr, prefix: args['json'] as bool ? '' : 'dartdoc:stderr: ',
@@ -255,10 +255,10 @@ ArgParser _createArgsParser() {
       help: 'Show command help.');
   parser.addFlag('verbose', defaultsTo: true,
       help: 'Whether to report all error messages (on) or attempt to '
-          'filter out some known false positives (off).  Shut this off '
+          'filter out some known false positives (off). Shut this off '
           'locally if you want to address Flutter-specific issues.');
   parser.addFlag('checked', abbr: 'c',
-      help: 'Run dartdoc in checked mode.');
+      help: 'Run dartdoc with asserts enabled.');
   parser.addFlag('json',
       help: 'Display json-formatted output from dartdoc and skip stdout/stderr prefixing.');
   parser.addFlag('validate-links',
@@ -388,26 +388,22 @@ void cleanOutSnippets() {
   }
 }
 
-void _sanityCheckExample(File file, RegExp regExp) {
+void _sanityCheckExample(String fileString, String regExpString) {
+  final File file = File(fileString);
   if (file.existsSync()) {
-    final List<String> contents = file.readAsLinesSync();
-    bool found = false;
-    for (final String line in contents) {
-      if (regExp.matchAsPrefix(line) != null) {
-        found = true;
-        break;
-      }
-    }
-    if (!found) {
-      throw Exception("Missing example code in ${file.path}. Either it didn't get published, publishing has changed, or the example no longer exists.");
+    final RegExp regExp = RegExp(regExpString, dotAll: true);
+    final String contents = file.readAsStringSync();
+    if (!regExp.hasMatch(contents)) {
+      throw Exception("Missing example code matching '$regExpString' in ${file.path}.");
     }
   } else {
-    throw Exception("Missing example code sanity test file ${file.path}. Either it didn't get published, or you might have to update the test to look at a different file.");
+    throw Exception(
+        "Missing example code sanity test file ${file.path}. Either it didn't get published, or you might have to update the test to look at a different file.");
   }
 }
 
 /// Runs a sanity check by running a test.
-void sanityCheckDocs() {
+void sanityCheckDocs([Platform platform = const LocalPlatform()]) {
   final List<String> canaries = <String>[
     '$kPublishRoot/assets/overrides.css',
     '$kPublishRoot/api/dart-io/File-class.html',
@@ -418,6 +414,7 @@ void sanityCheckDocs() {
     '$kPublishRoot/api/material/Material-class.html',
     '$kPublishRoot/api/material/Tooltip-class.html',
     '$kPublishRoot/api/widgets/Widget-class.html',
+    '$kPublishRoot/api/widgets/Listener-class.html',
   ];
   for (final String canary in canaries) {
     if (!File(canary).existsSync()) {
@@ -427,19 +424,38 @@ void sanityCheckDocs() {
   // Make sure at least one example of each kind includes source code.
 
   // Check a "sample" example, any one will do.
-  final File sampleExample = File('$kPublishRoot/api/widgets/showGeneralDialog.html');
-  final RegExp sampleRegExp = RegExp(r'\s*<pre id="longSnippet1" class="language-dart">\s*<code class="language-dart">\s*import &#39;package:flutter&#47;material.dart&#39;;');
-  _sanityCheckExample(sampleExample, sampleRegExp);
+  _sanityCheckExample(
+    '$kPublishRoot/api/widgets/showGeneralDialog.html',
+    r'\s*<pre\s+id="longSnippet1".*<code\s+class="language-dart">\s*import &#39;package:flutter&#47;material.dart&#39;;',
+  );
 
   // Check a "snippet" example, any one will do.
-  final File snippetExample = File('$kPublishRoot/api/widgets/ModalRoute/barrierColor.html');
-  final RegExp snippetRegExp = RegExp(r'\s*<pre class="language-dart" id="sample-code">.*Color get barrierColor =&gt; Theme\.of\(navigator\.context\)\.backgroundColor;.*</pre>');
-  _sanityCheckExample(snippetExample, snippetRegExp);
+  _sanityCheckExample(
+    '$kPublishRoot/api/widgets/ModalRoute/barrierColor.html',
+    r'\s*<pre.*id="sample-code">.*Color\s+get\s+barrierColor.*</pre>',
+  );
 
-  // Check a "dartpad" example, any one will do.
-  final File dartpadExample = File('$kPublishRoot/api/widgets/PhysicalShape-class.html');
-  final RegExp dartpadRegExp = RegExp(r'\s*<iframe class="snippet-dartpad" src="https://dartpad\.dev.*sample_id=widgets\.PhysicalShape\.\d+.*">\s*</iframe>');
-  _sanityCheckExample(dartpadExample, dartpadRegExp);
+  // Check a "dartpad" example, any one will do, and check for the correct URL
+  // arguments.
+  // Just use "master" for any branch other than the LUCI_BRANCH.
+  final String? luciBranch = platform.environment['LUCI_BRANCH']?.trim();
+  final String expectedBranch = luciBranch != null && luciBranch.isNotEmpty ? luciBranch : 'master';
+  final List<String> argumentRegExps = <String>[
+    r'split=\d+',
+    r'run=true',
+    r'sample_id=widgets\.Listener\.\d+',
+    'sample_channel=$expectedBranch',
+    'channel=$expectedBranch',
+  ];
+  for (final String argumentRegExp in argumentRegExps) {
+    _sanityCheckExample(
+      '$kPublishRoot/api/widgets/Listener-class.html',
+      r'\s*<iframe\s+class="snippet-dartpad"\s+src="'
+      r'https:\/\/dartpad.dev\/embed-flutter.html\?.*?\b'
+      '$argumentRegExp'
+      r'\b.*">\s*<\/iframe>',
+    );
+  }
 }
 
 /// Creates a custom index.html because we try to maintain old
@@ -564,8 +580,6 @@ Iterable<String> libraryRefs() sync* {
 }
 
 void printStream(Stream<List<int>> stream, { String prefix = '', List<Pattern> filter = const <Pattern>[] }) {
-  assert(prefix != null);
-  assert(filter != null);
   stream
     .transform<String>(utf8.decoder)
     .transform<String>(const LineSplitter())

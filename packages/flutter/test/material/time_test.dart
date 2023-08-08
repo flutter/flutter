@@ -5,9 +5,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 void main() {
   group('TimeOfDay.format', () {
-    testWidgets('respects alwaysUse24HourFormat option', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('respects alwaysUse24HourFormat option', (WidgetTester tester) async {
       Future<String> pumpTest(bool alwaysUse24HourFormat) async {
         late String formattedValue;
         await tester.pumpWidget(MaterialApp(
@@ -27,7 +29,7 @@ void main() {
     });
   });
 
-  testWidgets('hourOfPeriod returns correct value', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('hourOfPeriod returns correct value', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/59158.
     expect(const TimeOfDay(minute: 0, hour:  0).hourOfPeriod, 12);
     expect(const TimeOfDay(minute: 0, hour:  1).hourOfPeriod,  1);
@@ -56,7 +58,7 @@ void main() {
   });
 
   group('RestorableTimeOfDay tests', () {
-    testWidgets('value is not accessible when not registered', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('value is not accessible when not registered', (WidgetTester tester) async {
       expect(() => RestorableTimeOfDay(const TimeOfDay(hour: 20, minute: 4)).value, throwsAssertionError);
     });
 

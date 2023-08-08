@@ -44,15 +44,18 @@ class Utf8Codec extends Encoding {
 
 const Encoding utf8 = Utf8Codec();
 
-class Utf8Decoder extends cnv.Utf8Decoder {
-  const Utf8Decoder({this.reportErrors = true}) : super(allowMalformed: true);
+class Utf8Decoder extends Converter<List<int>, String> {
+  const Utf8Decoder({this.reportErrors = true});
+
+  static const cnv.Utf8Decoder _systemDecoder =
+      cnv.Utf8Decoder(allowMalformed: true);
 
   final bool reportErrors;
 
   @override
-  String convert(List<int> codeUnits, [ int start = 0, int? end ]) {
-    final String result = super.convert(codeUnits, start, end);
-    // Finding a unicode replacement character indicates that the input
+  String convert(List<int> input, [int start = 0, int? end]) {
+    final String result = _systemDecoder.convert(input, start, end);
+    // Finding a Unicode replacement character indicates that the input
     // was malformed.
     if (reportErrors && result.contains('\u{FFFD}')) {
       throwToolExit(
@@ -60,8 +63,19 @@ class Utf8Decoder extends cnv.Utf8Decoder {
         'The Flutter team would greatly appreciate if you could file a bug explaining '
         'exactly what you were doing when this happened:\n'
         'https://github.com/flutter/flutter/issues/new/choose\n'
-        'The source bytes were:\n$codeUnits\n\n');
+        'The source bytes were:\n$input\n\n');
     }
     return result;
   }
+
+  @override
+  ByteConversionSink startChunkedConversion(Sink<String> sink) =>
+      _systemDecoder.startChunkedConversion(sink);
+
+  @override
+  Stream<String> bind(Stream<List<int>> stream) => _systemDecoder.bind(stream);
+
+  @override
+  Converter<List<int>, T> fuse<T>(Converter<String, T> other) =>
+      _systemDecoder.fuse(other);
 }

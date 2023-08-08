@@ -2755,6 +2755,7 @@ const Map<String, List<LogicalKeyboardKey?>> kWebLocationMap = <String, List<Log
   '8': <LogicalKeyboardKey?>[LogicalKeyboardKey.digit8, null, null, LogicalKeyboardKey.numpad8],
   '9': <LogicalKeyboardKey?>[LogicalKeyboardKey.digit9, null, null, LogicalKeyboardKey.numpad9],
   'Alt': <LogicalKeyboardKey?>[LogicalKeyboardKey.altLeft, LogicalKeyboardKey.altLeft, LogicalKeyboardKey.altRight, null],
+  'AltGraph': <LogicalKeyboardKey?>[LogicalKeyboardKey.altGraph, null, LogicalKeyboardKey.altGraph, null],
   'ArrowDown': <LogicalKeyboardKey?>[LogicalKeyboardKey.arrowDown, null, null, LogicalKeyboardKey.numpad2],
   'ArrowLeft': <LogicalKeyboardKey?>[LogicalKeyboardKey.arrowLeft, null, null, LogicalKeyboardKey.numpad4],
   'ArrowRight': <LogicalKeyboardKey?>[LogicalKeyboardKey.arrowRight, null, null, LogicalKeyboardKey.numpad6],

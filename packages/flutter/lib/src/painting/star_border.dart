@@ -88,8 +88,9 @@ class StarBorder extends OutlinedBorder {
   /// This is a floating point number: if this is not a whole number, then an
   /// additional star point or corner shorter than the others will be added to
   /// finish the shape. Only whole-numbered values will yield a symmetric shape.
+  /// (This enables the number of points to be animated smoothly.)
   ///
-  /// For stars created with [StarBorder], this the number of points on
+  /// For stars created with [StarBorder], this is the number of points on
   /// the star. For polygons created with [StarBorder.polygon], this is the
   /// number of sides on the polygon.
   ///
@@ -122,7 +123,7 @@ class StarBorder extends OutlinedBorder {
   /// and a value of one means that the entire point or corner is a portion of a
   /// circle.
   ///
-  /// Defaults to zero. The sum of `pointRounding` and [valleyRounding] must be
+  /// Defaults to zero. The sum of [pointRounding] and [valleyRounding] must be
   /// less than or equal to one.
   final double pointRounding;
 
@@ -133,7 +134,7 @@ class StarBorder extends OutlinedBorder {
   /// means no rounding (sharp corners), and a value of one means that the
   /// entire corner is a portion of a circle.
   ///
-  /// Defaults to zero. The sum of [pointRounding] and `valleyRounding` must be
+  /// Defaults to zero. The sum of [pointRounding] and [valleyRounding] must be
   /// less than or equal to one. For polygons created with [StarBorder.polygon],
   /// this will always be zero.
   final double valleyRounding;
@@ -149,17 +150,17 @@ class StarBorder extends OutlinedBorder {
 
   /// How much of the aspect ratio of the attached widget to take on.
   ///
-  /// If `squash` is non-zero, the border will match the aspect ratio of the
+  /// If [squash] is non-zero, the border will match the aspect ratio of the
   /// bounding box of the widget that it is attached to, which can give a
   /// squashed appearance.
   ///
-  /// The `squash` parameter lets you control how much of that aspect ratio this
+  /// The [squash] parameter lets you control how much of that aspect ratio this
   /// border takes on.
   ///
   /// A value of zero means that the border will be drawn with a square aspect
   /// ratio at the size of the shortest side of the bounding rectangle, ignoring
   /// the aspect ratio of the widget, and a value of one means it will be drawn
-  /// with the aspect ratio of the widget. The value of `squash` has no effect
+  /// with the aspect ratio of the widget. The value of [squash] has no effect
   /// if the widget is square to begin with.
   ///
   /// Defaults to zero, and must be between zero and one, inclusive.
@@ -422,7 +423,14 @@ class StarBorder extends OutlinedBorder {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is StarBorder && other.side == side;
+    return other is StarBorder
+        && other.side == side
+        && other.points == points
+        && other._innerRadiusRatio == _innerRadiusRatio
+        && other.pointRounding == pointRounding
+        && other.valleyRounding == valleyRounding
+        && other._rotationRadians == _rotationRadians
+        && other.squash == squash;
   }
 
   @override
@@ -461,8 +469,8 @@ class _StarGenerator {
     required this.rotation,
     required this.squash,
   })  : assert(points > 1),
-        assert(innerRadiusRatio == null || innerRadiusRatio <= 1),
-        assert(innerRadiusRatio == null || innerRadiusRatio >= 0),
+        assert(innerRadiusRatio <= 1),
+        assert(innerRadiusRatio >= 0),
         assert(squash >= 0),
         assert(squash <= 1),
         assert(pointRounding >= 0),
@@ -477,7 +485,6 @@ class _StarGenerator {
   final double valleyRounding;
   final double rotation;
   final double squash;
-  bool get isStar => innerRadiusRatio != null;
 
   Path generate(Rect rect) {
     final double radius = rect.shortestSide / 2;

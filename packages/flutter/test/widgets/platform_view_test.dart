@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('!chrome')
+library;
 
 import 'dart:async';
 import 'dart:ui';
@@ -41,7 +42,6 @@ void main() {
             'webview',
             const Size(200.0, 100.0),
             AndroidViewController.kAndroidLayoutDirectionLtr,
-            null,
           ),
         ]),
       );
@@ -85,8 +85,7 @@ void main() {
             'webview',
             const Size(200.0, 100.0),
             AndroidViewController.kAndroidLayoutDirectionLtr,
-            null,
-            fakeView.creationParams,
+            creationParams: fakeView.creationParams,
           ),
         ]),
       );
@@ -98,9 +97,7 @@ void main() {
 
       await tester.pumpWidget(
         const Center(
-          child: SizedBox(
-            width: 0.0,
-            height: 0.0,
+          child: SizedBox.shrink(
             child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr),
           ),
         ),
@@ -150,7 +147,6 @@ void main() {
             'webview',
             const Size(200.0, 100.0),
             AndroidViewController.kAndroidLayoutDirectionLtr,
-            null,
           ),
         ]),
       );
@@ -166,7 +162,6 @@ void main() {
             'webview',
             const Size(100.0, 50.0),
             AndroidViewController.kAndroidLayoutDirectionLtr,
-            null,
           ),
         ]),
       );
@@ -205,7 +200,6 @@ void main() {
             'maps',
             const Size(200.0, 100.0),
             AndroidViewController.kAndroidLayoutDirectionLtr,
-            null,
           ),
         ]),
       );
@@ -272,7 +266,6 @@ void main() {
             'webview',
             const Size(200.0, 100.0),
             AndroidViewController.kAndroidLayoutDirectionLtr,
-            null,
           ),
         ]),
       );
@@ -495,7 +488,6 @@ void main() {
             'maps',
             const Size(200.0, 100.0),
             AndroidViewController.kAndroidLayoutDirectionRtl,
-            null,
           ),
         ]),
       );
@@ -518,7 +510,6 @@ void main() {
             'maps',
             const Size(200.0, 100.0),
             AndroidViewController.kAndroidLayoutDirectionLtr,
-            null,
           ),
         ]),
       );
@@ -549,7 +540,6 @@ void main() {
             'maps',
             const Size(200.0, 100.0),
             AndroidViewController.kAndroidLayoutDirectionRtl,
-            null,
           ),
         ]),
       );
@@ -575,7 +565,6 @@ void main() {
             'maps',
             const Size(200.0, 100.0),
             AndroidViewController.kAndroidLayoutDirectionLtr,
-            null,
           ),
         ]),
       );
@@ -1256,6 +1245,63 @@ void main() {
       );
       await tester.pumpWidget(surface);
       expect(controller.pointTransformer, isNotNull);
+    });
+
+    testWidgets('AndroidViewSurface defaults to texture-based rendering', (WidgetTester tester) async {
+      final AndroidViewSurface surface = AndroidViewSurface(
+        controller: controller,
+        hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+        gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+      );
+      await tester.pumpWidget(surface);
+
+      expect(find.byWidgetPredicate(
+        (Widget widget) => widget.runtimeType.toString() == '_TextureBasedAndroidViewSurface',
+      ), findsOneWidget);
+    });
+
+    testWidgets('AndroidViewSurface uses view-based rendering when initially required', (WidgetTester tester) async {
+      controller.requiresViewComposition = true;
+      final AndroidViewSurface surface = AndroidViewSurface(
+        controller: controller,
+        hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+        gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+      );
+      await tester.pumpWidget(surface);
+
+      expect(find.byWidgetPredicate(
+        (Widget widget) => widget.runtimeType.toString() == '_PlatformLayerBasedAndroidViewSurface',
+      ), findsOneWidget);
+    });
+
+    testWidgets('AndroidViewSurface can switch to view-based rendering after creation', (WidgetTester tester) async {
+      final AndroidViewSurface surface = AndroidViewSurface(
+        controller: controller,
+        hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+        gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+      );
+      await tester.pumpWidget(surface);
+
+      expect(find.byWidgetPredicate(
+        (Widget widget) => widget.runtimeType.toString() == '_TextureBasedAndroidViewSurface',
+      ), findsOneWidget);
+      expect(find.byWidgetPredicate(
+        (Widget widget) => widget.runtimeType.toString() == '_PlatformLayerBasedAndroidViewSurface',
+      ), findsNothing);
+
+      // Simulate a creation-time switch to view composition.
+      controller.requiresViewComposition = true;
+      for (final PlatformViewCreatedCallback callback in controller.createdCallbacks) {
+        callback(controller.viewId);
+      }
+      await tester.pumpWidget(surface);
+
+      expect(find.byWidgetPredicate(
+        (Widget widget) => widget.runtimeType.toString() == '_TextureBasedAndroidViewSurface',
+      ), findsNothing);
+      expect(find.byWidgetPredicate(
+        (Widget widget) => widget.runtimeType.toString() == '_PlatformLayerBasedAndroidViewSurface',
+      ), findsOneWidget);
     });
   });
 
@@ -2104,6 +2150,34 @@ void main() {
       expect(channelArguments['platformViewId'], currentViewId + 1);
     });
 
+    testWidgets('FocusNode is disposed on UIView dispose', (WidgetTester tester) async {
+      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      await tester.pumpWidget(
+        const Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+          ),
+        ),
+      );
+      // casting to dynamic is required since the state class is private.
+      // ignore: avoid_dynamic_calls, invalid_assignment
+      final FocusNode node = (tester.state(find.byType(UiKitView)) as dynamic).focusNode;
+      expect(() => ChangeNotifier.debugAssertNotDisposed(node), isNot(throwsAssertionError));
+      await tester.pumpWidget(
+        const Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+          ),
+        ),
+      );
+      expect(() => ChangeNotifier.debugAssertNotDisposed(node), throwsAssertionError);
+    });
+
     testWidgets('UiKitView has correct semantics', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
@@ -2439,7 +2513,7 @@ void main() {
 
         expect(
           tester.allWidgets.map((Widget widget) => widget.runtimeType.toString()).toList(),
-          equals(<String>['PlatformViewLink', '_PlatformViewPlaceHolder']),
+          containsAllInOrder(<String>['PlatformViewLink', '_PlatformViewPlaceHolder']),
         );
 
         onPlatformViewCreatedCallBack(createdPlatformViewId);
@@ -2448,10 +2522,52 @@ void main() {
 
         expect(
           tester.allWidgets.map((Widget widget) => widget.runtimeType.toString()).toList(),
-          equals(<String>['PlatformViewLink', 'Focus', '_FocusMarker', 'Semantics', 'PlatformViewSurface']),
+          containsAllInOrder(<String>['PlatformViewLink', 'Focus', '_FocusInheritedScope', 'Semantics', 'PlatformViewSurface']),
         );
 
         expect(createdPlatformViewId, currentViewId + 1);
+      },
+    );
+
+    testWidgets(
+      'PlatformViewLink widget should not trigger creation with an empty size',
+      (WidgetTester tester) async {
+        late PlatformViewController controller;
+
+        final Widget widget = Center(child: SizedBox(
+          height: 0,
+          child: PlatformViewLink(
+            viewType: 'webview',
+            onCreatePlatformView: (PlatformViewCreationParams params) {
+              controller = FakeAndroidViewController(params.id, requiresSize: true);
+              controller.create();
+              // This test should be simulating one of the texture-based display
+              // modes, where `create` is a no-op when not provided a size, and
+              // creation is triggered via a later call to setSize, or to `create`
+              // with a size.
+              expect(controller.awaitingCreation, true);
+              return controller;
+            },
+            surfaceFactory: (BuildContext context, PlatformViewController controller) {
+              return PlatformViewSurface(
+                gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+                controller: controller,
+                hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+              );
+            },
+          )
+        ));
+
+        await tester.pumpWidget(widget);
+
+        expect(
+          tester.allWidgets.map((Widget widget) => widget.runtimeType.toString()).toList(),
+          containsAllInOrder(<String>['Center', 'SizedBox', 'PlatformViewLink', '_PlatformViewPlaceHolder']),
+        );
+
+        // 'create' should not have been called by PlatformViewLink, since its
+        // size is empty.
+        expect(controller.awaitingCreation, true);
       },
     );
 
@@ -2491,22 +2607,68 @@ void main() {
 
         expect(
           tester.allWidgets.map((Widget widget) => widget.runtimeType.toString()).toList(),
-          equals(<String>['PlatformViewLink', '_PlatformViewPlaceHolder']),
+          containsAllInOrder(<String>['PlatformViewLink', '_PlatformViewPlaceHolder']),
         );
 
+        // Layout should have triggered a create call. Simulate the callback
+        // that the real controller would make after creation.
+        expect(controller.awaitingCreation, false);
         onPlatformViewCreatedCallBack(createdPlatformViewId);
 
         await tester.pump();
 
         expect(
           tester.allWidgets.map((Widget widget) => widget.runtimeType.toString()).toList(),
-          equals(<String>['PlatformViewLink', 'Focus', '_FocusMarker', 'Semantics', 'PlatformViewSurface']),
+          containsAllInOrder(<String>['PlatformViewLink', 'Focus', '_FocusInheritedScope', 'Semantics', 'PlatformViewSurface']),
         );
 
         expect(createdPlatformViewId, currentViewId + 1);
-        expect(controller.awaitingCreation, false);
       },
     );
+
+    testWidgets('PlatformViewLink includes offset in create call when using texture layer', (WidgetTester tester) async {
+      addTearDown(tester.view.reset);
+
+      late FakeAndroidViewController controller;
+
+      final PlatformViewLink platformViewLink = PlatformViewLink(
+        viewType: 'webview',
+        onCreatePlatformView: (PlatformViewCreationParams params) {
+          controller = FakeAndroidViewController(params.id, requiresSize: true);
+          controller.create();
+          // This test should be simulating one of the texture-based display
+          // modes, where `create` is a no-op when not provided a size, and
+          // creation is triggered via a later call to setSize, or to `create`
+          // with a size.
+          expect(controller.awaitingCreation, true);
+          return controller;
+        },
+        surfaceFactory: (BuildContext context, PlatformViewController controller) {
+          return PlatformViewSurface(
+            gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+            controller: controller,
+            hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+          );
+        },
+      );
+
+      tester.view.physicalSize= const Size(400, 200);
+      tester.view.devicePixelRatio = 1.0;
+
+      await tester.pumpWidget(
+        Container(
+          constraints: const BoxConstraints.expand(),
+          alignment: Alignment.center,
+          child: SizedBox(
+            width: 100,
+            height: 50,
+            child: platformViewLink,
+          ),
+        )
+      );
+
+      expect(controller.createPosition, const Offset(150, 75));
+    });
 
     testWidgets(
       'PlatformViewLink does not double-call create for Android Hybrid Composition',
@@ -2525,7 +2687,7 @@ void main() {
             controller = FakeAndroidViewController(params.id);
             controller.create();
             // This test should be simulating Hybrid Composition mode, where
-            // `create` takes effect immidately.
+            // `create` takes effect immediately.
             expect(controller.awaitingCreation, false);
             return controller;
           },
@@ -2542,7 +2704,7 @@ void main() {
 
         expect(
           tester.allWidgets.map((Widget widget) => widget.runtimeType.toString()).toList(),
-          equals(<String>['PlatformViewLink', '_PlatformViewPlaceHolder']),
+          containsAllInOrder(<String>['PlatformViewLink', '_PlatformViewPlaceHolder']),
         );
 
         onPlatformViewCreatedCallBack(createdPlatformViewId);
@@ -2551,7 +2713,7 @@ void main() {
 
         expect(
           tester.allWidgets.map((Widget widget) => widget.runtimeType.toString()).toList(),
-          equals(<String>['PlatformViewLink', 'Focus', '_FocusMarker', 'Semantics', 'PlatformViewSurface']),
+          containsAllInOrder(<String>['PlatformViewLink', 'Focus', '_FocusInheritedScope', 'Semantics', 'PlatformViewSurface']),
         );
 
         expect(createdPlatformViewId, currentViewId + 1);
@@ -2581,6 +2743,32 @@ void main() {
       await tester.pumpWidget(Container());
 
       expect(disposedController.disposed, true);
+    });
+
+    testWidgets('PlatformViewLink handles onPlatformViewCreated when disposed', (WidgetTester tester) async {
+      late PlatformViewCreationParams creationParams;
+      late FakePlatformViewController controller;
+      final PlatformViewLink platformViewLink = PlatformViewLink(
+        viewType: 'webview',
+        onCreatePlatformView: (PlatformViewCreationParams params) {
+          creationParams = params;
+          return controller = FakePlatformViewController(params.id);
+        },
+        surfaceFactory: (BuildContext context, PlatformViewController controller) {
+          return PlatformViewSurface(
+            gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+            controller: controller,
+            hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+          );
+        },
+      );
+
+      await tester.pumpWidget(platformViewLink);
+
+      await tester.pumpWidget(Container());
+
+      expect(controller.disposed, true);
+      expect(() => creationParams.onPlatformViewCreated(creationParams.id), returnsNormally);
     });
 
     testWidgets('PlatformViewLink widget survives widget tree change', (WidgetTester tester) async {
@@ -2979,5 +3167,29 @@ void main() {
     expect(logs, isEmpty);
     expect(controller.dispatchedPointerEvents, hasLength(1));
     expect(controller.dispatchedPointerEvents[0], isA<PointerHoverEvent>());
+  });
+
+  testWidgets('HtmlElementView can be instantiated', (WidgetTester tester) async {
+    late final Widget htmlElementView;
+    expect(() {
+      htmlElementView = const HtmlElementView(viewType: 'webview');
+    }, returnsNormally);
+
+    await tester.pumpWidget(
+      Center(
+        child: SizedBox(
+          width: 100,
+          height: 100,
+          child: htmlElementView,
+        ),
+      )
+    );
+    await tester.pumpAndSettle();
+
+    // This file runs on non-web platforms, so we expect `HtmlElementView` to
+    // fail.
+    final dynamic exception = tester.takeException();
+    expect(exception, isUnimplementedError);
+    expect(exception.toString(), contains('HtmlElementView is only available on Flutter Web'));
   });
 }

@@ -81,13 +81,12 @@ Future<void> runSmokeTests({
 // A class to hold information related to an example, used to generate names
 // from for the tests.
 class ExampleInfo {
-  ExampleInfo(this.file, Directory examplesLibDir)
+  ExampleInfo(File file, Directory examplesLibDir)
       : importPath = _getImportPath(file, examplesLibDir),
         importName = '' {
     importName = importPath.replaceAll(RegExp(r'\.dart$'), '').replaceAll(RegExp(r'\W'), '_');
   }
 
-  final File file;
   final String importPath;
   String importName;
 
@@ -119,6 +118,7 @@ Future<File> generateTest(Directory apiDir) async {
   // Collect the examples, and import them all as separate symbols.
   final List<String> imports = <String>[];
   imports.add('''import 'package:flutter/widgets.dart';''');
+  imports.add('''import 'package:flutter/scheduler.dart';''');
   imports.add('''import 'package:flutter_test/flutter_test.dart';''');
   imports.add('''import 'package:integration_test/integration_test.dart';''');
   final List<ExampleInfo> infoList = <ExampleInfo>[];
@@ -165,6 +165,7 @@ void main() {
         expect(find.byType(WidgetsApp), findsOneWidget);
       } finally {
         ErrorWidget.builder = originalBuilder;
+        timeDilation = 1.0;
       }
     },
   );

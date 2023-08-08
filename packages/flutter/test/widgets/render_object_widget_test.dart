@@ -6,8 +6,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/recording_canvas.dart';
-
 final BoxDecoration kBoxDecorationA = BoxDecoration(border: nonconst(null));
 final BoxDecoration kBoxDecorationB = BoxDecoration(border: nonconst(null));
 final BoxDecoration kBoxDecorationC = BoxDecoration(border: nonconst(null));
@@ -28,7 +26,7 @@ class TestOrientedBox extends SingleChildRenderObjectWidget {
   const TestOrientedBox({ super.key, super.child });
 
   Decoration _getDecoration(BuildContext context) {
-    final Orientation orientation = MediaQuery.of(context).orientation;
+    final Orientation orientation = MediaQuery.orientationOf(context);
     switch (orientation) {
       case Orientation.landscape:
         return const BoxDecoration(color: Color(0xFF00FF00));

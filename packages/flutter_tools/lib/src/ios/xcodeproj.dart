@@ -185,6 +185,7 @@ class XcodeProjectInterpreter {
     final Status status = _logger.startSpinner();
     final String? scheme = buildContext.scheme;
     final String? configuration = buildContext.configuration;
+    final String? target = buildContext.target;
     final String? deviceId = buildContext.deviceId;
     final List<String> showBuildSettingsCommand = <String>[
       ...xcrunCommand(),
@@ -195,10 +196,16 @@ class XcodeProjectInterpreter {
         ...<String>['-scheme', scheme],
       if (configuration != null)
         ...<String>['-configuration', configuration],
+      if (target != null)
+        ...<String>['-target', target],
       if (buildContext.environmentType == EnvironmentType.simulator)
         ...<String>['-sdk', 'iphonesimulator'],
       '-destination',
-      if (deviceId != null)
+      if (buildContext.isWatch && buildContext.environmentType == EnvironmentType.physical)
+        'generic/platform=watchOS'
+      else if (buildContext.isWatch)
+        'generic/platform=watchOS Simulator'
+      else if (deviceId != null)
         'id=$deviceId'
       else if (buildContext.environmentType == EnvironmentType.physical)
         'generic/platform=iOS'
@@ -306,7 +313,7 @@ class XcodeProjectInterpreter {
     ], workingDirectory: _fileSystem.currentDirectory.path);
   }
 
-  Future<XcodeProjectInfo> getInfo(String projectPath, {String? projectFilename}) async {
+  Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async {
     // The exit code returned by 'xcodebuild -list' when either:
     // * -project is passed and the given project isn't there, or
     // * no -project is passed and there isn't a project.
@@ -376,15 +383,19 @@ class XcodeProjectBuildContext {
     this.configuration,
     this.environmentType = EnvironmentType.physical,
     this.deviceId,
+    this.target,
+    this.isWatch = false,
   });
 
   final String? scheme;
   final String? configuration;
   final EnvironmentType environmentType;
   final String? deviceId;
+  final String? target;
+  final bool isWatch;
 
   @override
-  int get hashCode => Object.hash(scheme, configuration, environmentType, deviceId);
+  int get hashCode => Object.hash(scheme, configuration, environmentType, deviceId, target);
 
   @override
   bool operator ==(Object other) {
@@ -395,9 +406,26 @@ class XcodeProjectBuildContext {
         other.scheme == scheme &&
         other.configuration == configuration &&
         other.deviceId == deviceId &&
-        other.environmentType == environmentType;
+        other.environmentType == environmentType &&
+        other.isWatch == isWatch &&
+        other.target == target;
   }
 }
+
+/// The settings that are relevant for setting up universal links
+@immutable
+class XcodeUniversalLinkSettings {
+  const XcodeUniversalLinkSettings({
+    this.bundleIdentifier,
+    this.teamIdentifier,
+    this.associatedDomains = const <String>[],
+  });
+
+  final String? bundleIdentifier;
+  final String? teamIdentifier;
+  final List<String> associatedDomains;
+}
+
 
 /// Information about an Xcode project.
 ///
@@ -470,6 +498,7 @@ class XcodeProjectInfo {
     }
     return false;
   }
+
   /// Returns unique scheme matching [buildInfo], or null, if there is no unique
   /// best match.
   String? schemeFor(BuildInfo? buildInfo) {

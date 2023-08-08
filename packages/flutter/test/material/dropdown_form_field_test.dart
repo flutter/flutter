@@ -7,8 +7,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
 void onChanged<T>(T _) { }
 final Type dropdownButtonType = DropdownButton<String>(
@@ -90,7 +88,7 @@ class _TestAppState extends State<TestApp> {
         DefaultMaterialLocalizations.delegate,
       ],
       child: MediaQuery(
-        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(size: widget.mediaSize),
+        data: const MediaQueryData().copyWith(size: widget.mediaSize),
         child: Directionality(
           textDirection: widget.textDirection,
           child: Navigator(

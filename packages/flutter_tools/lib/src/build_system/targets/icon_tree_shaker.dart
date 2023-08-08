@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
 import 'package:process/process.dart';
 
@@ -41,16 +42,13 @@ class IconTreeShaker {
     required Logger logger,
     required FileSystem fileSystem,
     required Artifacts artifacts,
-  }) : assert(_environment != null),
-       assert(processManager != null),
-       assert(logger != null),
-       assert(fileSystem != null),
-       assert(artifacts != null),
-       _processManager = processManager,
+    required TargetPlatform targetPlatform,
+  }) : _processManager = processManager,
        _logger = logger,
        _fs = fileSystem,
        _artifacts = artifacts,
-       _fontManifest = fontManifest?.string {
+       _fontManifest = fontManifest?.string,
+       _targetPlatform = targetPlatform {
     if (_environment.defines[kIconTreeShakerFlag] == 'true' &&
         _environment.defines[kBuildMode] == 'debug') {
       logger.printError('Font subsetting is not supported in debug mode. The '
@@ -86,6 +84,7 @@ class IconTreeShaker {
   final Logger _logger;
   final FileSystem _fs;
   final Artifacts _artifacts;
+  final TargetPlatform _targetPlatform;
 
   /// Whether font subsetting should be used for this [Environment].
   bool get enabled => _fontManifest != null
@@ -106,7 +105,7 @@ class IconTreeShaker {
       _artifacts.getArtifactPath(Artifact.constFinder),
     );
     final File dart = _fs.file(
-      _artifacts.getHostArtifact(HostArtifact.engineDartBinary),
+      _artifacts.getArtifactPath(Artifact.engineDartBinary),
     );
 
     final Map<String, List<int>> iconData = await _findConstants(
@@ -133,10 +132,16 @@ class IconTreeShaker {
     }
 
     final Map<String, _IconTreeShakerData> result = <String, _IconTreeShakerData>{};
+    const int kSpacePoint = 32;
     for (final MapEntry<String, String> entry in fonts.entries) {
       final List<int>? codePoints = iconData[entry.key];
       if (codePoints == null) {
         throw IconTreeShakerException._('Expected to font code points for ${entry.key}, but none were found.');
+      }
+      if (_targetPlatform == TargetPlatform.web_javascript) {
+        if (!codePoints.contains(kSpacePoint)) {
+          codePoints.add(kSpacePoint);
+        }
       }
       result[entry.value] = _IconTreeShakerData(
         family: entry.key,
@@ -149,8 +154,6 @@ class IconTreeShaker {
 
   /// Calls font-subset, which transforms the [input] font file to a
   /// subsetted version at [outputPath].
-  ///
-  /// All parameters are required.
   ///
   /// If [enabled] is false, or the relative path is not recognized as an icon
   /// font used in the Flutter application, this returns false.
@@ -212,7 +215,21 @@ class IconTreeShaker {
       _logger.printError(await utf8.decodeStream(fontSubsetProcess.stderr));
       throw IconTreeShakerException._('Font subsetting failed with exit code $code.');
     }
+    _logger.printStatus(getSubsetSummaryMessage(input, _fs.file(outputPath)));
     return true;
+  }
+
+  @visibleForTesting
+  String getSubsetSummaryMessage(File inputFont, File outputFont) {
+    final String fontName = inputFont.basename;
+    final double inputSize = inputFont.lengthSync().toDouble();
+    final double outputSize = outputFont.lengthSync().toDouble();
+    final double reductionBytes = inputSize - outputSize;
+    final String reductionPercentage = (reductionBytes / inputSize * 100).toStringAsFixed(1);
+    return 'Font asset "$fontName" was tree-shaken, reducing it from '
+        '${inputSize.ceil()} to ${outputSize.ceil()} bytes '
+        '($reductionPercentage% reduction). Tree-shaking can be disabled '
+        'by providing the --no-tree-shake-icons flag when building your app.';
   }
 
   /// Returns a map of { fontFamily: relativePath } pairs.
@@ -268,6 +285,8 @@ class IconTreeShaker {
       '--kernel-file', appDill.path,
       '--class-library-uri', 'package:flutter/src/widgets/icon_data.dart',
       '--class-name', 'IconData',
+      '--annotation-class-name', '_StaticIconProvider',
+      '--annotation-class-library-uri', 'package:flutter/src/widgets/icon_data.dart',
     ];
     _logger.printTrace('Running command: ${cmd.join(' ')}');
     final ProcessResult constFinderProcessResult = await _processManager.run(cmd);
@@ -350,9 +369,7 @@ class _IconTreeShakerData {
     required this.family,
     required this.relativePath,
     required this.codePoints,
-  }) : assert(family != null),
-       assert(relativePath != null),
-       assert(codePoints != null);
+  });
 
   /// The font family name, e.g. "MaterialIcons".
   final String family;

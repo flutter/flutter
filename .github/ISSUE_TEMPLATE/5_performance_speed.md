@@ -1,9 +1,9 @@
 ---
-name: My app is slow or missing frames.
+name: My app is slow or missing frames
 about: You are writing an application but have discovered that it is slow, you are
   not hitting 60Hz, or you are getting jank (missed frames).
 title: ''
-labels: 'created via performance template'
+labels: 'from: performance template'
 assignees: ''
 
 ---
@@ -41,7 +41,7 @@ assignees: ''
      can have an intuitive understanding of what happened. Don’t use
      "adb screenrecord", as that affects the performance of the profile run.
 
-5.  Open Observatory and save a timeline trace of the performance issue
+5.  Open Flutter DevTools and save a timeline trace of the performance issue
      so we know which functions might be causing it. See "How to Collect
      and Read Timeline Traces" on this blog post:
        https://medium.com/flutter/profiling-flutter-applications-using-the-timeline-a1a434964af3#a499

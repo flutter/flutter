@@ -36,6 +36,18 @@ class MissingSetSizeRenderBox extends RenderBox {
   void performLayout() { }
 }
 
+class BadBaselineRenderBox extends RenderBox {
+  @override
+  void performLayout() {
+    size = constraints.biggest;
+  }
+
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    throw Exception();
+  }
+}
+
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
@@ -324,8 +336,8 @@ void main() {
   });
 
   test('UnconstrainedBox expands to fit children', () {
-    final RenderUnconstrainedBox unconstrained = RenderUnconstrainedBox(
-      constrainedAxis: Axis.horizontal, // This is reset to null below.
+    final RenderConstraintsTransformBox unconstrained = RenderConstraintsTransformBox(
+      constraintsTransform: ConstraintsTransformBox.widthUnconstrained,
       textDirection: TextDirection.ltr,
       child: RenderConstrainedBox(
         additionalConstraints: const BoxConstraints.tightFor(width: 200.0, height: 200.0),
@@ -342,7 +354,7 @@ void main() {
       ),
     );
     // Check that we can update the constrained axis to null.
-    unconstrained.constrainedAxis = null;
+    unconstrained.constraintsTransform = ConstraintsTransformBox.unconstrained;
     TestRenderingFlutterBinding.instance.reassembleApplication();
 
     expect(unconstrained.size.width, equals(200.0), reason: 'unconstrained width');
@@ -350,7 +362,8 @@ void main() {
   });
 
   test('UnconstrainedBox handles vertical overflow', () {
-    final RenderUnconstrainedBox unconstrained = RenderUnconstrainedBox(
+    final RenderConstraintsTransformBox unconstrained = RenderConstraintsTransformBox(
+      constraintsTransform: ConstraintsTransformBox.unconstrained,
       textDirection: TextDirection.ltr,
       child: RenderConstrainedBox(
         additionalConstraints: const BoxConstraints.tightFor(height: 200.0),
@@ -366,7 +379,8 @@ void main() {
   });
 
   test('UnconstrainedBox handles horizontal overflow', () {
-    final RenderUnconstrainedBox unconstrained = RenderUnconstrainedBox(
+    final RenderConstraintsTransformBox unconstrained = RenderConstraintsTransformBox(
+      constraintsTransform: ConstraintsTransformBox.unconstrained,
       textDirection: TextDirection.ltr,
       child: RenderConstrainedBox(
         additionalConstraints: const BoxConstraints.tightFor(width: 200.0),
@@ -437,7 +451,6 @@ void main() {
                 ),
               ),
             );
-            break;
           case null:
             box = RenderConstraintsTransformBox(
               alignment: Alignment.center,
@@ -450,7 +463,6 @@ void main() {
                 ),
               ),
             );
-            break;
         }
         layout(box, constraints: const BoxConstraints(), phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
         context.paintChild(box, Offset.zero);
@@ -460,12 +472,10 @@ void main() {
           case null:
           case Clip.none:
             expect(hadErrors, isTrue, reason: 'Should have had overflow errors for $clip');
-            break;
           case Clip.hardEdge:
           case Clip.antiAlias:
           case Clip.antiAliasWithSaveLayer:
             expect(hadErrors, isFalse, reason: 'Should not have had overflow errors for $clip');
-            break;
         }
         hadErrors = false;
       }
@@ -496,7 +506,8 @@ void main() {
   });
 
   test ('getMinIntrinsicWidth error handling', () {
-    final RenderUnconstrainedBox unconstrained = RenderUnconstrainedBox(
+    final RenderConstraintsTransformBox unconstrained = RenderConstraintsTransformBox(
+      constraintsTransform: ConstraintsTransformBox.unconstrained,
       textDirection: TextDirection.ltr,
       child: RenderConstrainedBox(
         additionalConstraints: const BoxConstraints.tightFor(width: 200.0),
@@ -620,7 +631,8 @@ void main() {
   });
 
   test('UnconstrainedBox.toStringDeep returns useful information', () {
-    final RenderUnconstrainedBox unconstrained = RenderUnconstrainedBox(
+    final RenderConstraintsTransformBox unconstrained = RenderConstraintsTransformBox(
+      constraintsTransform: ConstraintsTransformBox.unconstrained,
       textDirection: TextDirection.ltr,
       alignment: Alignment.center,
     );
@@ -630,7 +642,7 @@ void main() {
     expect(
       unconstrained.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
-        'RenderUnconstrainedBox#00000 NEEDS-LAYOUT NEEDS-PAINT DETACHED\n'
+        'RenderConstraintsTransformBox#00000 NEEDS-LAYOUT NEEDS-PAINT DETACHED\n'
           '   parentData: MISSING\n'
           '   constraints: MISSING\n'
           '   size: MISSING\n'
@@ -643,8 +655,8 @@ void main() {
   test('UnconstrainedBox honors constrainedAxis=Axis.horizontal', () {
     final RenderConstrainedBox flexible =
         RenderConstrainedBox(additionalConstraints: const BoxConstraints.expand(height: 200.0));
-    final RenderUnconstrainedBox unconstrained = RenderUnconstrainedBox(
-      constrainedAxis: Axis.horizontal,
+    final RenderConstraintsTransformBox unconstrained = RenderConstraintsTransformBox(
+      constraintsTransform: ConstraintsTransformBox.heightUnconstrained,
       textDirection: TextDirection.ltr,
       child: RenderFlex(
         textDirection: TextDirection.ltr,
@@ -666,8 +678,8 @@ void main() {
   test('UnconstrainedBox honors constrainedAxis=Axis.vertical', () {
     final RenderConstrainedBox flexible =
     RenderConstrainedBox(additionalConstraints: const BoxConstraints.expand(width: 200.0));
-    final RenderUnconstrainedBox unconstrained = RenderUnconstrainedBox(
-      constrainedAxis: Axis.vertical,
+    final RenderConstraintsTransformBox unconstrained = RenderConstraintsTransformBox(
+      constraintsTransform: ConstraintsTransformBox.widthUnconstrained,
       textDirection: TextDirection.ltr,
       child: RenderFlex(
         direction: Axis.vertical,
@@ -698,38 +710,36 @@ void main() {
     }
 
     for (final Clip? clip in <Clip?>[null, ...Clip.values]) {
-      final RenderUnconstrainedBox box;
+      final RenderConstraintsTransformBox box;
       switch (clip) {
         case Clip.none:
         case Clip.hardEdge:
         case Clip.antiAlias:
         case Clip.antiAliasWithSaveLayer:
-          box = RenderUnconstrainedBox(
+          box = RenderConstraintsTransformBox(
+            constraintsTransform: ConstraintsTransformBox.unconstrained,
             alignment: Alignment.center,
             textDirection: TextDirection.ltr,
             child: box200x200,
             clipBehavior: clip!,
           );
-          break;
         case null:
-          box = RenderUnconstrainedBox(
+          box = RenderConstraintsTransformBox(
+            constraintsTransform: ConstraintsTransformBox.unconstrained,
             alignment: Alignment.center,
             textDirection: TextDirection.ltr,
             child: box200x200,
           );
-          break;
       }
       layout(box, constraints: viewport, phase: EnginePhase.composite, onErrors: expectOverflowedErrors);
       switch (clip) {
         case null:
         case Clip.none:
           expect(hadErrors, isTrue, reason: 'Should have had overflow errors for $clip');
-          break;
         case Clip.hardEdge:
         case Clip.antiAlias:
         case Clip.antiAliasWithSaveLayer:
           expect(hadErrors, isFalse, reason: 'Should not have had overflow errors for $clip');
-          break;
       }
       hadErrors = false;
       context.paintChild(box, Offset.zero);
@@ -1195,6 +1205,27 @@ void main() {
           'set its size in performLayout().',
       ),
     );
+  });
+
+  test('debugDoingBaseline flag is cleared after exception', () {
+    final BadBaselineRenderBox badChild = BadBaselineRenderBox();
+    final RenderBox badRoot = RenderBaseline(
+      child: badChild,
+      baseline: 0.0,
+      baselineType: TextBaseline.alphabetic,
+    );
+    final List<dynamic> exceptions = <dynamic>[];
+    layout(badRoot, onErrors: () {
+      exceptions.addAll(TestRenderingFlutterBinding.instance.takeAllFlutterExceptions());
+    });
+    expect(exceptions, isNotEmpty);
+
+    final RenderBox goodRoot = RenderBaseline(
+      child: RenderDecoratedBox(decoration: const BoxDecoration()),
+      baseline: 0.0,
+      baselineType: TextBaseline.alphabetic,
+    );
+    layout(goodRoot, onErrors: () { assert(false); });
   });
 }
 

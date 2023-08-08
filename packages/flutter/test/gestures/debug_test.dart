@@ -6,8 +6,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 void main() {
-  testWidgets('debugPrintGestureArenaDiagnostics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('debugPrintGestureArenaDiagnostics', (WidgetTester tester) async {
     PointerEvent event;
     debugPrintGestureArenaDiagnostics = true;
     final DebugPrintCallback oldCallback = debugPrint;
@@ -53,7 +55,7 @@ void main() {
     debugPrint = oldCallback;
   });
 
-  testWidgets('debugPrintRecognizerCallbacksTrace', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('debugPrintRecognizerCallbacksTrace', (WidgetTester tester) async {
     PointerEvent event;
     debugPrintRecognizerCallbacksTrace = true;
     final DebugPrintCallback oldCallback = debugPrint;
@@ -95,7 +97,7 @@ void main() {
     debugPrint = oldCallback;
   });
 
-  testWidgets('debugPrintGestureArenaDiagnostics and debugPrintRecognizerCallbacksTrace', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('debugPrintGestureArenaDiagnostics and debugPrintRecognizerCallbacksTrace', (WidgetTester tester) async {
     PointerEvent event;
     debugPrintGestureArenaDiagnostics = true;
     debugPrintRecognizerCallbacksTrace = true;

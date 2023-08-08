@@ -13,6 +13,7 @@ import 'debug.dart';
 import 'framework.dart';
 import 'media_query.dart';
 import 'overlay.dart';
+import 'view.dart';
 
 /// Signature for determining whether the given data will be accepted by a [DragTarget].
 ///
@@ -86,7 +87,7 @@ typedef DragAnchorStrategy = Offset Function(Draggable<Object> draggable, BuildC
 /// If feedback is identical to the child, then this means the feedback will
 /// exactly overlap the original child when the drag starts.
 ///
-/// This is the default [DragAnchorStrategy] and replaces [DragAnchor.child].
+/// This is the default [DragAnchorStrategy].
 ///
 /// See also:
 ///
@@ -110,42 +111,12 @@ Offset childDragAnchorStrategy(Draggable<Object> draggable, BuildContext context
 /// weird for it to appear offset from the original child if it's anchored to
 /// the child and not the finger.)
 ///
-/// This replaces [DragAnchor.pointer], which has been deprecated.
-///
 /// See also:
 ///
 ///  * [DragAnchorStrategy], the typedef that this function implements.
 ///  * [Draggable.dragAnchorStrategy], for which this is a built-in value.
 Offset pointerDragAnchorStrategy(Draggable<Object> draggable, BuildContext context, Offset position) {
   return Offset.zero;
-}
-
-/// Where the [Draggable] should be anchored during a drag.
-///
-/// This has been replaced by the more configurable [DragAnchorStrategy].
-@Deprecated(
-  'Use dragAnchorStrategy instead. '
-  'This feature was deprecated after v2.1.0-10.0.pre.',
-)
-enum DragAnchor {
-  /// Display the feedback anchored at the position of the original child.
-  ///
-  /// Replaced by [childDragAnchorStrategy].
-  @Deprecated(
-    'Use childDragAnchorStrategy instead. '
-    'This feature was deprecated after v2.1.0-10.0.pre.',
-  )
-  child,
-
-  /// Display the feedback anchored at the position of the touch that started
-  /// the drag.
-  ///
-  /// Replaced by [pointerDragAnchorStrategy].
-  @Deprecated(
-    'Use pointerDragAnchorStrategy instead. '
-    'This feature was deprecated after v2.1.0-10.0.pre.',
-  )
-  pointer,
 }
 
 /// A widget that can be dragged from to a [DragTarget].
@@ -170,7 +141,7 @@ enum DragAnchor {
 /// [childWhenDragging] when one or more drags are underway. Otherwise, this
 /// widget always displays [child].
 ///
-/// {@youtube 560 315 https://www.youtube.com/watch?v=QzA4c4QHZCY}
+/// {@youtube 560 315 https://www.youtube.com/watch?v=q4x2G_9-Mu0}
 ///
 /// {@tool dartpad}
 /// The following example has a [Draggable] widget along with a [DragTarget]
@@ -197,14 +168,7 @@ class Draggable<T extends Object> extends StatefulWidget {
     this.axis,
     this.childWhenDragging,
     this.feedbackOffset = Offset.zero,
-    @Deprecated(
-      'Use dragAnchorStrategy instead. '
-      'Replace "dragAnchor: DragAnchor.child" with "dragAnchorStrategy: childDragAnchorStrategy". '
-      'Replace "dragAnchor: DragAnchor.pointer" with "dragAnchorStrategy: pointerDragAnchorStrategy". '
-      'This feature was deprecated after v2.1.0-10.0.pre.',
-    )
-    this.dragAnchor = DragAnchor.child,
-    this.dragAnchorStrategy,
+    this.dragAnchorStrategy = childDragAnchorStrategy,
     this.affinity,
     this.maxSimultaneousDrags,
     this.onDragStarted,
@@ -216,11 +180,8 @@ class Draggable<T extends Object> extends StatefulWidget {
     this.ignoringFeedbackPointer = true,
     this.rootOverlay = false,
     this.hitTestBehavior = HitTestBehavior.deferToChild,
-  }) : assert(child != null),
-       assert(feedback != null),
-       assert(ignoringFeedbackSemantics != null),
-       assert(ignoringFeedbackPointer != null),
-       assert(maxSimultaneousDrags == null || maxSimultaneousDrags >= 0);
+    this.allowedButtonsFilter,
+  }) : assert(maxSimultaneousDrags == null || maxSimultaneousDrags >= 0);
 
   /// The data that will be dropped by this draggable.
   final T? data;
@@ -276,17 +237,6 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// is transformed compared to the child.
   final Offset feedbackOffset;
 
-  /// Where this widget should be anchored during a drag.
-  ///
-  /// This property is overridden by the [dragAnchorStrategy] if the latter is provided.
-  ///
-  /// Defaults to [DragAnchor.child].
-  @Deprecated(
-    'Use dragAnchorStrategy instead. '
-    'This feature was deprecated after v2.1.0-10.0.pre.',
-  )
-  final DragAnchor dragAnchor;
-
   /// A strategy that is used by this draggable to get the anchor offset when it
   /// is dragged.
   ///
@@ -302,16 +252,14 @@ class Draggable<T extends Object> extends StatefulWidget {
   ///  * [pointerDragAnchorStrategy], which displays the feedback anchored at the
   ///    position of the touch that started the drag.
   ///
-  /// Defaults to [childDragAnchorStrategy] if the deprecated [dragAnchor]
-  /// property is set to [DragAnchor.child], and [pointerDragAnchorStrategy] if
-  /// the [dragAnchor] is set to [DragAnchor.pointer].
-  final DragAnchorStrategy? dragAnchorStrategy;
+  /// Defaults to [childDragAnchorStrategy].
+  final DragAnchorStrategy dragAnchorStrategy;
 
   /// Whether the semantics of the [feedback] widget is ignored when building
   /// the semantics tree.
   ///
   /// This value should be set to false when the [feedback] widget is intended
-  /// to be the same object as the [child].  Placing a [GlobalKey] on this
+  /// to be the same object as the [child]. Placing a [GlobalKey] on this
   /// widget will ensure semantic focus is kept on the element as it moves in
   /// and out of the feedback position.
   ///
@@ -408,6 +356,9 @@ class Draggable<T extends Object> extends StatefulWidget {
   /// Defaults to [HitTestBehavior.deferToChild].
   final HitTestBehavior hitTestBehavior;
 
+  /// {@macro flutter.gestures.multidrag._allowedButtonsFilter}
+  final AllowedButtonsFilter? allowedButtonsFilter;
+
   /// Creates a gesture recognizer that recognizes the start of the drag.
   ///
   /// Subclasses can override this function to customize when they start
@@ -416,11 +367,11 @@ class Draggable<T extends Object> extends StatefulWidget {
   MultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
     switch (affinity) {
       case Axis.horizontal:
-        return HorizontalMultiDragGestureRecognizer()..onStart = onStart;
+        return HorizontalMultiDragGestureRecognizer(allowedButtonsFilter: allowedButtonsFilter)..onStart = onStart;
       case Axis.vertical:
-        return VerticalMultiDragGestureRecognizer()..onStart = onStart;
+        return VerticalMultiDragGestureRecognizer(allowedButtonsFilter: allowedButtonsFilter)..onStart = onStart;
       case null:
-        return ImmediateMultiDragGestureRecognizer()..onStart = onStart;
+        return ImmediateMultiDragGestureRecognizer(allowedButtonsFilter: allowedButtonsFilter)..onStart = onStart;
     }
   }
 
@@ -447,13 +398,6 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
     super.axis,
     super.childWhenDragging,
     super.feedbackOffset,
-    @Deprecated(
-      'Use dragAnchorStrategy instead. '
-      'Replace "dragAnchor: DragAnchor.child" with "dragAnchorStrategy: childDragAnchorStrategy". '
-      'Replace "dragAnchor: DragAnchor.pointer" with "dragAnchorStrategy: pointerDragAnchorStrategy". '
-      'This feature was deprecated after v2.1.0-10.0.pre.',
-    )
-    super.dragAnchor,
     super.dragAnchorStrategy,
     super.maxSimultaneousDrags,
     super.onDragStarted,
@@ -465,6 +409,7 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
     super.ignoringFeedbackSemantics,
     super.ignoringFeedbackPointer,
     this.delay = kLongPressTimeout,
+    super.allowedButtonsFilter,
   });
 
   /// Whether haptic feedback should be triggered on drag start.
@@ -477,7 +422,7 @@ class LongPressDraggable<T extends Object> extends Draggable<T> {
 
   @override
   DelayedMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
-    return DelayedMultiDragGestureRecognizer(delay: delay)
+    return DelayedMultiDragGestureRecognizer(delay: delay, allowedButtonsFilter: allowedButtonsFilter)
       ..onStart = (Offset position) {
         final Drag? result = onStart(position);
         if (result != null && hapticFeedbackOnStart) {
@@ -503,7 +448,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
 
   @override
   void didChangeDependencies() {
-    _recognizer!.gestureSettings = MediaQuery.maybeOf(context)?.gestureSettings;
+    _recognizer!.gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
     super.didChangeDependencies();
   }
 
@@ -539,23 +484,12 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
       return null;
     }
     final Offset dragStartPoint;
-    if (widget.dragAnchorStrategy == null) {
-      switch (widget.dragAnchor) {
-        case DragAnchor.child:
-          dragStartPoint = childDragAnchorStrategy(widget, context, position);
-          break;
-        case DragAnchor.pointer:
-          dragStartPoint = pointerDragAnchorStrategy(widget, context, position);
-          break;
-      }
-    } else {
-      dragStartPoint = widget.dragAnchorStrategy!(widget, context, position);
-    }
+    dragStartPoint = widget.dragAnchorStrategy(widget, context, position);
     setState(() {
       _activeCount += 1;
     });
     final _DragAvatar<T> avatar = _DragAvatar<T>(
-      overlayState: Overlay.of(context, debugRequiredFor: widget, rootOverlay: widget.rootOverlay)!,
+      overlayState: Overlay.of(context, debugRequiredFor: widget, rootOverlay: widget.rootOverlay),
       data: widget.data,
       axis: widget.axis,
       initialPosition: position,
@@ -564,6 +498,7 @@ class _DraggableState<T extends Object> extends State<Draggable<T>> {
       feedbackOffset: widget.feedbackOffset,
       ignoringFeedbackSemantics: widget.ignoringFeedbackSemantics,
       ignoringFeedbackPointer: widget.ignoringFeedbackPointer,
+      viewId: View.of(context).viewId,
       onDragUpdate: (DragUpdateDetails details) {
         if (mounted && widget.onDragUpdate != null) {
           widget.onDragUpdate!(details);
@@ -628,8 +563,7 @@ class DraggableDetails {
     this.wasAccepted = false,
     required this.velocity,
     required this.offset,
-  }) : assert(velocity != null),
-       assert(offset != null);
+  });
 
   /// Determines whether the [DragTarget] accepted this draggable.
   final bool wasAccepted;
@@ -648,7 +582,7 @@ class DragTargetDetails<T> {
   /// Creates details for a [DragTarget] callback.
   ///
   /// The [offset] must not be null.
-  DragTargetDetails({required this.data, required this.offset}) : assert(offset != null);
+  DragTargetDetails({required this.data, required this.offset});
 
   /// The data that was dropped onto this [DragTarget].
   final T data;
@@ -716,7 +650,7 @@ class DragTarget<T extends Object> extends StatefulWidget {
 
   /// Called when a [Draggable] moves within this [DragTarget].
   ///
-  /// Note that this includes entering and leaving the target.
+  /// This includes entering and leaving the target.
   final DragTargetMove<T>? onMove;
 
   /// How to behave during hit testing.
@@ -796,7 +730,6 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
 
   @override
   Widget build(BuildContext context) {
-    assert(widget.builder != null);
     return MetaData(
       metaData: this,
       behavior: widget.hitTestBehavior,
@@ -825,12 +758,8 @@ class _DragAvatar<T extends Object> extends Drag {
     this.onDragEnd,
     required this.ignoringFeedbackSemantics,
     required this.ignoringFeedbackPointer,
-  }) : assert(overlayState != null),
-       assert(ignoringFeedbackSemantics != null),
-       assert(ignoringFeedbackPointer != null),
-       assert(dragStartPoint != null),
-       assert(feedbackOffset != null),
-       _position = initialPosition {
+    required this.viewId,
+  }) : _position = initialPosition {
     _entry = OverlayEntry(builder: _build);
     overlayState.insert(_entry!);
     updateDrag(initialPosition);
@@ -846,6 +775,7 @@ class _DragAvatar<T extends Object> extends Drag {
   final OverlayState overlayState;
   final bool ignoringFeedbackSemantics;
   final bool ignoringFeedbackPointer;
+  final int viewId;
 
   _DragTargetState<Object>? _activeTarget;
   final List<_DragTargetState<Object>> _enteredTargets = <_DragTargetState<Object>>[];
@@ -878,7 +808,7 @@ class _DragAvatar<T extends Object> extends Drag {
     _lastOffset = globalPosition - dragStartPoint;
     _entry!.markNeedsBuild();
     final HitTestResult result = HitTestResult();
-    WidgetsBinding.instance.hitTest(result, globalPosition + feedbackOffset);
+    WidgetsBinding.instance.hitTestInView(result, globalPosition + feedbackOffset, viewId);
 
     final List<_DragTargetState<Object>> targets = _getDragTargets(result.path).toList();
 
@@ -959,6 +889,7 @@ class _DragAvatar<T extends Object> extends Drag {
     _leaveAllEntered();
     _activeTarget = null;
     _entry!.remove();
+    _entry!.dispose();
     _entry = null;
     // TODO(ianh): consider passing _entry as well so the client can perform an animation.
     onDragEnd?.call(velocity ?? Velocity.zero, _lastOffset!, wasAccepted);
@@ -970,10 +901,12 @@ class _DragAvatar<T extends Object> extends Drag {
     return Positioned(
       left: _lastOffset!.dx - overlayTopLeft.dx,
       top: _lastOffset!.dy - overlayTopLeft.dy,
-      child: IgnorePointer(
-        ignoring: ignoringFeedbackPointer,
-        ignoringSemantics: ignoringFeedbackSemantics,
-        child: feedback,
+      child: ExcludeSemantics(
+        excluding: ignoringFeedbackSemantics,
+        child: IgnorePointer(
+          ignoring: ignoringFeedbackPointer,
+          child: feedback,
+        ),
       ),
     );
   }

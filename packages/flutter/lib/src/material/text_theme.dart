@@ -82,9 +82,9 @@ class TextTheme with Diagnosticable {
   /// If you do decide to create your own text theme, consider using one of
   /// those predefined themes as a starting point for [copyWith] or [apply].
   ///
-  /// Please note that you can not mix and match the 2018 styles with the 2021
-  /// styles. Only one or the other is allowed in this constructor. The 2018
-  /// styles will be deprecated and removed eventually.
+  /// The 2018 styles cannot be mixed with the 2021 styles. Only one or the
+  /// other is allowed in this constructor. The 2018 styles are deprecated and
+  /// will eventually be removed.
   const TextTheme({
     TextStyle? displayLarge,
     TextStyle? displayMedium,
@@ -616,6 +616,8 @@ class TextTheme with Diagnosticable {
   /// point.
   TextTheme apply({
     String? fontFamily,
+    List<String>? fontFamilyFallback,
+    String? package,
     double fontSizeFactor = 1.0,
     double fontSizeDelta = 0.0,
     Color? displayColor,
@@ -631,8 +633,10 @@ class TextTheme with Diagnosticable {
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
         fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        package: package,
       ),
       displayMedium: displayMedium?.apply(
         color: displayColor,
@@ -640,8 +644,10 @@ class TextTheme with Diagnosticable {
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
         fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        package: package,
       ),
       displaySmall: displaySmall?.apply(
         color: displayColor,
@@ -649,8 +655,10 @@ class TextTheme with Diagnosticable {
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
         fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        package: package,
       ),
       headlineLarge: headlineLarge?.apply(
         color: displayColor,
@@ -658,8 +666,10 @@ class TextTheme with Diagnosticable {
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
         fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        package: package,
       ),
       headlineMedium: headlineMedium?.apply(
         color: displayColor,
@@ -667,8 +677,10 @@ class TextTheme with Diagnosticable {
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
         fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        package: package,
       ),
       headlineSmall: headlineSmall?.apply(
         color: bodyColor,
@@ -676,8 +688,10 @@ class TextTheme with Diagnosticable {
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
         fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        package: package,
       ),
       titleLarge: titleLarge?.apply(
         color: bodyColor,
@@ -685,8 +699,10 @@ class TextTheme with Diagnosticable {
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
         fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        package: package,
       ),
       titleMedium: titleMedium?.apply(
         color: bodyColor,
@@ -694,8 +710,10 @@ class TextTheme with Diagnosticable {
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
         fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        package: package,
       ),
       titleSmall: titleSmall?.apply(
         color: bodyColor,
@@ -703,8 +721,10 @@ class TextTheme with Diagnosticable {
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
         fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        package: package,
       ),
       bodyLarge: bodyLarge?.apply(
         color: bodyColor,
@@ -712,8 +732,10 @@ class TextTheme with Diagnosticable {
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
         fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        package: package,
       ),
       bodyMedium: bodyMedium?.apply(
         color: bodyColor,
@@ -721,8 +743,10 @@ class TextTheme with Diagnosticable {
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
         fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        package: package,
       ),
       bodySmall: bodySmall?.apply(
         color: displayColor,
@@ -730,8 +754,10 @@ class TextTheme with Diagnosticable {
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
         fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        package: package,
       ),
       labelLarge: labelLarge?.apply(
         color: bodyColor,
@@ -739,8 +765,10 @@ class TextTheme with Diagnosticable {
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
         fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        package: package,
       ),
       labelMedium: labelMedium?.apply(
         color: bodyColor,
@@ -748,8 +776,10 @@ class TextTheme with Diagnosticable {
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
         fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        package: package,
       ),
       labelSmall: labelSmall?.apply(
         color: bodyColor,
@@ -757,8 +787,10 @@ class TextTheme with Diagnosticable {
         decorationColor: decorationColor,
         decorationStyle: decorationStyle,
         fontFamily: fontFamily,
+        fontFamilyFallback: fontFamilyFallback,
         fontSizeFactor: fontSizeFactor,
         fontSizeDelta: fontSizeDelta,
+        package: package,
       ),
     );
   }
@@ -767,7 +799,9 @@ class TextTheme with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static TextTheme lerp(TextTheme? a, TextTheme? b, double t) {
-    assert(t != null);
+    if (identical(a, b) && a != null) {
+      return a;
+    }
     return TextTheme(
       displayLarge: TextStyle.lerp(a?.displayLarge, b?.displayLarge, t),
       displayMedium: TextStyle.lerp(a?.displayMedium, b?.displayMedium, t),

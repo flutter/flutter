@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for FontFeature.FontFeature.swash
 import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
+
+/// Flutter code sample for [FontFeature.FontFeature.swash].
 
 void main() => runApp(const ExampleApp());
 
@@ -26,7 +27,8 @@ class ExampleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The BioRhyme Expanded font can be downloaded from Google Fonts (https://www.google.com/fonts).
+    // The BioRhyme Expanded font can be downloaded from Google Fonts
+    // (https://www.google.com/fonts).
     return const Text(
       'Queer & Romantic',
       style: TextStyle(

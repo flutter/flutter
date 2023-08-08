@@ -18,7 +18,7 @@ import '../base/version.dart';
 import '../build_info.dart';
 import '../ios/xcodeproj.dart';
 
-Version get xcodeRequiredVersion => Version(13, null, null);
+Version get xcodeRequiredVersion => Version(14, null, null);
 
 /// Diverging this number from the minimum required version will provide a doctor
 /// warning, not error, that users should upgrade Xcode.
@@ -48,7 +48,8 @@ class Xcode {
         _fileSystem = fileSystem,
         _xcodeProjectInterpreter = xcodeProjectInterpreter,
         _processUtils =
-            ProcessUtils(logger: logger, processManager: processManager);
+            ProcessUtils(logger: logger, processManager: processManager),
+        _logger = logger;
 
   /// Create an [Xcode] for testing.
   ///
@@ -60,16 +61,18 @@ class Xcode {
     XcodeProjectInterpreter? xcodeProjectInterpreter,
     Platform? platform,
     FileSystem? fileSystem,
+    Logger? logger,
   }) {
     platform ??= FakePlatform(
       operatingSystem: 'macos',
       environment: <String, String>{},
     );
+    logger ??= BufferLogger.test();
     return Xcode(
       platform: platform,
       processManager: processManager,
       fileSystem: fileSystem ?? MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      logger: logger,
       xcodeProjectInterpreter: xcodeProjectInterpreter ?? XcodeProjectInterpreter.test(processManager: processManager),
     );
   }
@@ -78,6 +81,7 @@ class Xcode {
   final ProcessUtils _processUtils;
   final FileSystem _fileSystem;
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
+  final Logger _logger;
 
   bool get isInstalledAndMeetsVersionCheck => _platform.isMacOS && isInstalled && isRequiredVersionSatisfactory;
 
@@ -113,9 +117,9 @@ class Xcode {
         final RunResult result = _processUtils.runSync(
           <String>[...xcrunCommand(), 'clang'],
         );
-        if (result.stdout != null && result.stdout.contains('license')) {
+        if (result.stdout.contains('license')) {
           _eulaSigned = false;
-        } else if (result.stderr != null && result.stderr.contains('license')) {
+        } else if (result.stderr.contains('license')) {
           _eulaSigned = false;
         } else {
           _eulaSigned = true;
@@ -165,22 +169,22 @@ class Xcode {
   /// See [XcodeProjectInterpreter.xcrunCommand].
   List<String> xcrunCommand() => _xcodeProjectInterpreter.xcrunCommand();
 
-  Future<RunResult> cc(List<String> args) {
-    return _processUtils.run(
-      <String>[...xcrunCommand(), 'cc', ...args],
-      throwOnError: true,
-    );
-  }
+  Future<RunResult> cc(List<String> args) => _run('cc', args);
 
-  Future<RunResult> clang(List<String> args) {
+  Future<RunResult> clang(List<String> args) => _run('clang', args);
+
+  Future<RunResult> dsymutil(List<String> args) => _run('dsymutil', args);
+
+  Future<RunResult> strip(List<String> args) => _run('strip', args);
+
+  Future<RunResult> _run(String command, List<String> args) {
     return _processUtils.run(
-      <String>[...xcrunCommand(), 'clang', ...args],
+      <String>[...xcrunCommand(), command, ...args],
       throwOnError: true,
     );
   }
 
   Future<String> sdkLocation(EnvironmentType environmentType) async {
-    assert(environmentType != null);
     final RunResult runResult = await _processUtils.run(
       <String>[...xcrunCommand(), '--sdk', getSDKNameForIOSEnvironmentType(environmentType), '--show-sdk-path'],
     );
@@ -198,10 +202,22 @@ class Xcode {
     final String appPath = _fileSystem.path.join(selectPath, 'Applications', 'Simulator.app');
     return _fileSystem.directory(appPath).existsSync() ? appPath : null;
   }
+
+  /// Gets the version number of the platform for the selected SDK.
+  Future<Version?> sdkPlatformVersion(EnvironmentType environmentType) async {
+    final RunResult runResult = await _processUtils.run(
+      <String>[...xcrunCommand(), '--sdk', getSDKNameForIOSEnvironmentType(environmentType), '--show-sdk-platform-version'],
+    );
+    if (runResult.exitCode != 0) {
+      _logger.printError('Could not find SDK Platform Version: ${runResult.stderr}');
+      return null;
+    }
+    final String versionString = runResult.stdout.trim();
+    return Version.parse(versionString);
+  }
 }
 
 EnvironmentType? environmentTypeFromSdkroot(String sdkroot, FileSystem fileSystem) {
-  assert(sdkroot != null);
   // iPhoneSimulator.sdk or iPhoneOS.sdk
   final String sdkName = fileSystem.path.basename(sdkroot).toLowerCase();
   if (sdkName.contains('iphone')) {

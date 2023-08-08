@@ -20,6 +20,14 @@ import 'selection_container.dart';
 /// The text style to apply to descendant [Text] widgets which don't have an
 /// explicit style.
 ///
+/// {@tool dartpad}
+/// This example shows how to use [DefaultTextStyle.merge] to create a default
+/// text style that inherits styling information from the current default text
+/// style and overrides some properties.
+///
+/// ** See code in examples/api/lib/widgets/text/text.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [AnimatedDefaultTextStyle], which animates changes in the text style
@@ -49,12 +57,7 @@ class DefaultTextStyle extends InheritedTheme {
     this.textWidthBasis = TextWidthBasis.parent,
     this.textHeightBehavior,
     required super.child,
-  }) : assert(style != null),
-       assert(softWrap != null),
-       assert(overflow != null),
-       assert(maxLines == null || maxLines > 0),
-       assert(child != null),
-       assert(textWidthBasis != null);
+  }) : assert(maxLines == null || maxLines > 0);
 
   /// A const-constructable default text style that provides fallback values.
   ///
@@ -98,7 +101,6 @@ class DefaultTextStyle extends InheritedTheme {
     TextWidthBasis? textWidthBasis,
     required Widget child,
   }) {
-    assert(child != null);
     return Builder(
       builder: (BuildContext context) {
         final DefaultTextStyle parent = DefaultTextStyle.of(context);
@@ -239,23 +241,70 @@ class DefaultTextHeightBehavior extends InheritedTheme {
     super.key,
     required this.textHeightBehavior,
     required super.child,
-  }) :  assert(textHeightBehavior != null),
-        assert(child != null);
+  });
 
   /// {@macro dart.ui.textHeightBehavior}
   final TextHeightBehavior textHeightBehavior;
 
-  /// The closest instance of this class that encloses the given context.
+  /// The closest instance of [DefaultTextHeightBehavior] that encloses the
+  /// given context, or null if none is found.
   ///
   /// If no such instance exists, this method will return `null`.
+  ///
+  /// Calling this method will create a dependency on the closest
+  /// [DefaultTextHeightBehavior] in the [context], if there is one.
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// TextHeightBehavior defaultTextHeightBehavior = DefaultTextHeightBehavior.of(context)!;
+  /// TextHeightBehavior? defaultTextHeightBehavior = DefaultTextHeightBehavior.of(context);
   /// ```
-  static TextHeightBehavior? of(BuildContext context) {
+  ///
+  /// See also:
+  ///
+  /// * [DefaultTextHeightBehavior.maybeOf], which is similar to this method,
+  ///   but asserts if no [DefaultTextHeightBehavior] ancestor is found.
+  static TextHeightBehavior? maybeOf(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<DefaultTextHeightBehavior>()?.textHeightBehavior;
+  }
+
+  /// The closest instance of [DefaultTextHeightBehavior] that encloses the
+  /// given context.
+  ///
+  /// If no such instance exists, this method will assert in debug mode, and
+  /// throw an exception in release mode.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// TextHeightBehavior defaultTextHeightBehavior = DefaultTextHeightBehavior.of(context);
+  /// ```
+  ///
+  /// Calling this method will create a dependency on the closest
+  /// [DefaultTextHeightBehavior] in the [context].
+  ///
+  /// See also:
+  ///
+  /// * [DefaultTextHeightBehavior.maybeOf], which is similar to this method,
+  ///   but returns null if no [DefaultTextHeightBehavior] ancestor is found.
+  static TextHeightBehavior of(BuildContext context) {
+    final TextHeightBehavior? behavior = maybeOf(context);
+    assert(() {
+      if (behavior == null) {
+        throw FlutterError(
+          'DefaultTextHeightBehavior.of() was called with a context that does not contain a '
+          'DefaultTextHeightBehavior widget.\n'
+          'No DefaultTextHeightBehavior widget ancestor could be found starting from the '
+          'context that was passed to DefaultTextHeightBehavior.of(). This can happen '
+          'because you are using a widget that looks for a DefaultTextHeightBehavior '
+          'ancestor, but no such ancestor exists.\n'
+          'The context used was:\n'
+          '  $context',
+        );
+      }
+      return true;
+    }());
+    return behavior!;
   }
 
   @override
@@ -356,7 +405,7 @@ class DefaultTextHeightBehavior extends InheritedTheme {
 /// This sample demonstrates how to disable selection for a Text under a
 /// SelectionArea.
 ///
-/// ** See code in examples/api/lib/material/selection_area/disable_partial_selection.dart **
+/// ** See code in examples/api/lib/material/selection_container/selection_container_disabled.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -373,8 +422,9 @@ class Text extends StatelessWidget {
   /// The [data] parameter must not be null.
   ///
   /// The [overflow] property's behavior is affected by the [softWrap] argument.
-  /// If the [softWrap] is true or null, the glyph causing overflow, and those that follow,
-  /// will not be rendered. Otherwise, it will be shown with the given overflow option.
+  /// If the [softWrap] is true or null, the glyph causing overflow, and those
+  /// that follow, will not be rendered. Otherwise, it will be shown with the
+  /// given overflow option.
   const Text(
     String this.data, {
     super.key,
@@ -385,17 +435,23 @@ class Text extends StatelessWidget {
     this.locale,
     this.softWrap,
     this.overflow,
+    @Deprecated(
+      'Use textScaler instead. '
+      'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+      'This feature was deprecated after v3.12.0-2.0.pre.',
+    )
     this.textScaleFactor,
+    this.textScaler,
     this.maxLines,
     this.semanticsLabel,
     this.textWidthBasis,
     this.textHeightBehavior,
     this.selectionColor,
-  }) : assert(
-         data != null,
-         'A non-null String must be provided to a Text widget.',
-       ),
-       textSpan = null;
+  }) : textSpan = null,
+       assert(
+         textScaler == null || textScaleFactor == null,
+         'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
+       );
 
   /// Creates a text widget with a [InlineSpan].
   ///
@@ -417,17 +473,23 @@ class Text extends StatelessWidget {
     this.locale,
     this.softWrap,
     this.overflow,
+    @Deprecated(
+      'Use textScaler instead. '
+      'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+      'This feature was deprecated after v3.12.0-2.0.pre.',
+    )
     this.textScaleFactor,
+    this.textScaler,
     this.maxLines,
     this.semanticsLabel,
     this.textWidthBasis,
     this.textHeightBehavior,
     this.selectionColor,
-  }) : assert(
-         textSpan != null,
-         'A non-null TextSpan must be provided to a Text.rich widget.',
-       ),
-       data = null;
+  }) : data = null,
+       assert(
+         textScaler == null || textScaleFactor == null,
+         'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
+       );
 
   /// The text to display.
   ///
@@ -487,6 +549,9 @@ class Text extends StatelessWidget {
   /// from the nearest [DefaultTextStyle] ancestor will be used.
   final TextOverflow? overflow;
 
+  /// Deprecated. Will be removed in a future version of Flutter. Use
+  /// [textScaler] instead.
+  ///
   /// The number of font pixels for each logical pixel.
   ///
   /// For example, if the text scale factor is 1.5, text will be 50% larger than
@@ -495,7 +560,15 @@ class Text extends StatelessWidget {
   /// The value given to the constructor as textScaleFactor. If null, will
   /// use the [MediaQueryData.textScaleFactor] obtained from the ambient
   /// [MediaQuery], or 1.0 if there is no [MediaQuery] in scope.
+  @Deprecated(
+    'Use textScaler instead. '
+    'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+    'This feature was deprecated after v3.12.0-2.0.pre.',
+  )
   final double? textScaleFactor;
+
+  /// {@macro flutter.painting.textPainter.textScaler}
+  final TextScaler? textScaler;
 
   /// An optional maximum number of lines for the text to span, wrapping if necessary.
   /// If the text exceeds the given number of lines, it will be truncated according
@@ -549,21 +622,28 @@ class Text extends StatelessWidget {
     if (style == null || style!.inherit) {
       effectiveTextStyle = defaultTextStyle.style.merge(style);
     }
-    if (MediaQuery.boldTextOverride(context)) {
+    if (MediaQuery.boldTextOf(context)) {
       effectiveTextStyle = effectiveTextStyle!.merge(const TextStyle(fontWeight: FontWeight.bold));
     }
     final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
+    final TextScaler textScaler = switch ((this.textScaler, textScaleFactor)) {
+      (final TextScaler textScaler, _)     => textScaler,
+      // For unmigrated apps, fall back to textScaleFactor.
+      (null, final double textScaleFactor) => TextScaler.linear(textScaleFactor),
+      (null, null)                         => MediaQuery.textScalerOf(context),
+    };
+
     Widget result = RichText(
       textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
       textDirection: textDirection, // RichText uses Directionality.of to obtain a default if this is null.
       locale: locale, // RichText uses Localizations.localeOf to obtain a default if this is null
       softWrap: softWrap ?? defaultTextStyle.softWrap,
       overflow: overflow ?? effectiveTextStyle?.overflow ?? defaultTextStyle.overflow,
-      textScaleFactor: textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
+      textScaler: textScaler,
       maxLines: maxLines ?? defaultTextStyle.maxLines,
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
-      textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.of(context),
+      textHeightBehavior: textHeightBehavior ?? defaultTextStyle.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
       selectionRegistrar: registrar,
       selectionColor: selectionColor ?? DefaultSelectionStyle.of(context).selectionColor ?? DefaultSelectionStyle.defaultColor,
       text: TextSpan(
@@ -574,7 +654,7 @@ class Text extends StatelessWidget {
     );
     if (registrar != null) {
       result = MouseRegion(
-        cursor: SystemMouseCursors.text,
+        cursor: DefaultSelectionStyle.of(context).mouseCursor ?? SystemMouseCursors.text,
         child: result,
       );
     }

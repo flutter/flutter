@@ -68,7 +68,7 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
 
   late TestScenario currentValue;
   bool get resample {
-    switch(currentValue) {
+    switch (currentValue) {
       case TestScenario.resampleOn90Hz:
       case TestScenario.resampleOn59Hz:
         return true;
@@ -78,7 +78,7 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
     }
   }
   double get frequency {
-    switch(currentValue) {
+    switch (currentValue) {
       case TestScenario.resampleOn90Hz:
       case TestScenario.resampleOff90Hz:
         return 90.0;
@@ -92,7 +92,7 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
 
   @override
   String describeValue(TestScenario value) {
-    switch(value) {
+    switch (value) {
       case TestScenario.resampleOn90Hz:
         return 'resample on with 90Hz input';
       case TestScenario.resampleOn59Hz:
@@ -181,7 +181,7 @@ Future<void> main() async {
 
 /// Calculates the smoothness measure from `scrollOffset` and `delays` list.
 ///
-/// Smoothness (`abs_jerk`) is measured by  the absolute value of the discrete
+/// Smoothness (`abs_jerk`) is measured by the absolute value of the discrete
 /// 2nd derivative of the scroll offset.
 ///
 /// It was experimented that jerk (3rd derivative of the position) is a good

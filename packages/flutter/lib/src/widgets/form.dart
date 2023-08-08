@@ -2,11 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
+
+import 'basic.dart';
 import 'framework.dart';
 import 'navigator.dart';
+import 'pop_scope.dart';
 import 'restoration.dart';
 import 'restoration_properties.dart';
+import 'routes.dart';
 import 'will_pop_scope.dart';
+
+// Duration for delay before announcement in IOS so that the announcement won't be interrupted.
+const Duration _kIOSAnnouncementDelayDuration = Duration(seconds: 1);
 
 // Examples can assume:
 // late BuildContext context;
@@ -43,24 +54,76 @@ class Form extends StatefulWidget {
   const Form({
     super.key,
     required this.child,
+    this.canPop,
+    this.onPopInvoked,
+    @Deprecated(
+      'Use canPop and/or onPopInvoked instead. '
+      'This feature was deprecated after v3.12.0-1.0.pre.',
+    )
     this.onWillPop,
     this.onChanged,
     AutovalidateMode? autovalidateMode,
-  }) : assert(child != null),
-       autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled;
+  }) : autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled,
+       assert((onPopInvoked == null && canPop == null) || onWillPop == null, 'onWillPop is deprecated; use canPop and/or onPopInvoked.');
 
-  /// Returns the closest [FormState] which encloses the given context,
-  /// or null if there is no such form.
+  /// Returns the [FormState] of the closest [Form] widget which encloses the
+  /// given context, or null if none is found.
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// FormState form = Form.of(context)!;
-  /// form.save();
+  /// FormState? form = Form.maybeOf(context);
+  /// form?.save();
   /// ```
-  static FormState? of(BuildContext context) {
+  ///
+  /// Calling this method will create a dependency on the closest [Form] in the
+  /// [context], if there is one.
+  ///
+  /// See also:
+  ///
+  /// * [Form.of], which is similar to this method, but asserts if no [Form]
+  ///   ancestor is found.
+  static FormState? maybeOf(BuildContext context) {
     final _FormScope? scope = context.dependOnInheritedWidgetOfExactType<_FormScope>();
     return scope?._formState;
+  }
+
+  /// Returns the [FormState] of the closest [Form] widget which encloses the
+  /// given context.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// FormState form = Form.of(context);
+  /// form.save();
+  /// ```
+  ///
+  /// If no [Form] ancestor is found, this will assert in debug mode, and throw
+  /// an exception in release mode.
+  ///
+  /// Calling this method will create a dependency on the closest [Form] in the
+  /// [context].
+  ///
+  /// See also:
+  ///
+  /// * [Form.maybeOf], which is similar to this method, but returns null if no
+  ///   [Form] ancestor is found.
+  static FormState of(BuildContext context) {
+    final FormState? formState = maybeOf(context);
+    assert(() {
+      if (formState == null) {
+        throw FlutterError(
+          'Form.of() was called with a context that does not contain a Form widget.\n'
+          'No Form widget ancestor could be found starting from the context that '
+          'was passed to Form.of(). This can happen because you are using a widget '
+          'that looks for a Form ancestor, but no such ancestor exists.\n'
+          'The context used was:\n'
+          '  $context',
+        );
+      }
+      return true;
+    }());
+    return formState!;
   }
 
   /// The widget below this widget in the tree.
@@ -80,7 +143,43 @@ class Form extends StatefulWidget {
   ///
   ///  * [WillPopScope], another widget that provides a way to intercept the
   ///    back button.
+  @Deprecated(
+    'Use canPop and/or onPopInvoked instead. '
+    'This feature was deprecated after v3.12.0-1.0.pre.',
+  )
   final WillPopCallback? onWillPop;
+
+  /// {@macro flutter.widgets.PopScope.canPop}
+  ///
+  /// {@tool dartpad}
+  /// This sample demonstrates how to use this parameter to show a confirmation
+  /// dialog when a navigation pop would cause form data to be lost.
+  ///
+  /// ** See code in examples/api/lib/widgets/form/form.1.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [onPopInvoked], which also comes from [PopScope] and is often used in
+  ///    conjunction with this parameter.
+  ///  * [PopScope.canPop], which is what [Form] delegates to internally.
+  final bool? canPop;
+
+  /// {@macro flutter.widgets.navigator.onPopInvoked}
+  ///
+  /// {@tool dartpad}
+  /// This sample demonstrates how to use this parameter to show a confirmation
+  /// dialog when a navigation pop would cause form data to be lost.
+  ///
+  /// ** See code in examples/api/lib/widgets/form/form.1.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [canPop], which also comes from [PopScope] and is often used in
+  ///    conjunction with this parameter.
+  ///  * [PopScope.onPopInvoked], which is what [Form] delegates to internally.
+  final PopInvokedCallback? onPopInvoked;
 
   /// Called when one of the form fields changes.
   ///
@@ -138,14 +237,24 @@ class FormState extends State<Form> {
     switch (widget.autovalidateMode) {
       case AutovalidateMode.always:
         _validate();
-        break;
       case AutovalidateMode.onUserInteraction:
         if (_hasInteractedByUser) {
           _validate();
         }
-        break;
       case AutovalidateMode.disabled:
         break;
+    }
+
+    if (widget.canPop != null || widget.onPopInvoked != null) {
+      return PopScope(
+        canPop: widget.canPop ?? true,
+        onPopInvoked: widget.onPopInvoked,
+        child: _FormScope(
+          formState: this,
+          generation: _generation,
+          child: widget.child,
+        ),
+      );
     }
 
     return WillPopScope(
@@ -192,8 +301,22 @@ class FormState extends State<Form> {
 
   bool _validate() {
     bool hasError = false;
+    String errorMessage = '';
     for (final FormFieldState<dynamic> field in _fields) {
       hasError = !field.validate() || hasError;
+      errorMessage += field.errorText ?? '';
+    }
+
+    if (errorMessage.isNotEmpty) {
+      final TextDirection directionality = Directionality.of(context);
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        unawaited(Future<void>(() async {
+          await Future<void>.delayed(_kIOSAnnouncementDelayDuration);
+          SemanticsService.announce(errorMessage, directionality, assertiveness: Assertiveness.assertive);
+        }));
+      } else {
+        SemanticsService.announce(errorMessage, directionality, assertiveness: Assertiveness.assertive);
+      }
     }
     return !hasError;
   }
@@ -250,7 +373,7 @@ typedef FormFieldBuilder<T> = Widget Function(FormFieldState<T> field);
 /// Use a [GlobalKey] with [FormField] if you want to retrieve its current
 /// state, for example if you want one form field to depend on another.
 ///
-/// A [Form] ancestor is not required. The [Form] simply makes it easier to
+/// A [Form] ancestor is not required. The [Form] allows one to
 /// save, reset, or validate multiple fields at once. To use without a [Form],
 /// pass a [GlobalKey] to the constructor and use [GlobalKey.currentState] to
 /// save or reset the form field.
@@ -272,8 +395,7 @@ class FormField<T> extends StatefulWidget {
     this.enabled = true,
     AutovalidateMode? autovalidateMode,
     this.restorationId,
-  }) : assert(builder != null),
-       autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled;
+  }) : autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled;
 
   /// An optional method to call with the final value when the form is saved via
   /// [FormState.save].
@@ -380,7 +502,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
       _hasInteractedByUser.value = false;
       _errorText.value = null;
     });
-    Form.of(context)?._fieldDidChange();
+    Form.maybeOf(context)?._fieldDidChange();
   }
 
   /// Calls [FormField.validator] to set the [errorText]. Returns true if there
@@ -414,7 +536,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
       _value = value;
       _hasInteractedByUser.value = true;
     });
-    Form.of(context)?._fieldDidChange();
+    Form.maybeOf(context)?._fieldDidChange();
   }
 
   /// Sets the value associated with this form field.
@@ -441,7 +563,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
 
   @override
   void deactivate() {
-    Form.of(context)?._unregister(this);
+    Form.maybeOf(context)?._unregister(this);
     super.deactivate();
   }
 
@@ -451,17 +573,15 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
       switch (widget.autovalidateMode) {
         case AutovalidateMode.always:
           _validate();
-          break;
         case AutovalidateMode.onUserInteraction:
           if (_hasInteractedByUser.value) {
             _validate();
           }
-          break;
         case AutovalidateMode.disabled:
           break;
       }
     }
-    Form.of(context)?._register(this);
+    Form.maybeOf(context)?._register(this);
     return widget.builder(this);
   }
 }

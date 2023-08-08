@@ -2,8 +2,7 @@
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file. -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="io.flutter.integration.deferred_components_test">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- ${applicationName} is used by the Flutter tool to select the Application
          class to use. For most apps, this is the default Android application.
          In most cases you can leave this as-is, but you if you want to provide
@@ -28,15 +27,6 @@ found in the LICENSE file. -->
             <meta-data
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
-              />
-            <!-- Displays an Android View that continues showing the launch screen
-                 Drawable until Flutter paints its first frame, then this splash
-                 screen fades out. A splash screen is useful to avoid any visual
-                 gap between the end of Android's launch screen and the painting of
-                 Flutter's first frame. -->
-            <meta-data
-              android:name="io.flutter.embedding.android.SplashScreenDrawable"
-              android:resource="@drawable/launch_background"
               />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

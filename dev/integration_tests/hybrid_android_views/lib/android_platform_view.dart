@@ -19,7 +19,7 @@ class AndroidPlatformView extends StatelessWidget {
     this.onPlatformViewCreated,
     this.useHybridComposition = false,
     required this.viewType,
-  })  : assert(viewType != null);
+  });
 
   /// The unique identifier for the view type to be embedded by this widget.
   ///

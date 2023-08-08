@@ -25,6 +25,7 @@ import '../emulator.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
+import '../proxied_devices/debounce_data_stream.dart';
 import '../proxied_devices/file_transfer.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
@@ -67,7 +68,7 @@ class DaemonCommand extends FlutterCommand {
     if (argResults!['listen-on-tcp-port'] != null) {
       int? port;
       try {
-        port = int.parse(stringArgDeprecated('listen-on-tcp-port')!);
+        port = int.parse(stringArg('listen-on-tcp-port')!);
       } on FormatException catch (error) {
         throwToolExit('Invalid port for `--listen-on-tcp-port`: $error');
       }
@@ -102,35 +103,37 @@ class DaemonCommand extends FlutterCommand {
 class _DaemonServer {
   _DaemonServer({
     this.port,
-    this.logger,
+    required this.logger,
     this.notifyingLogger,
   });
 
   final int? port;
 
   /// Stdout logger used to print general server-related errors.
-  final Logger? logger;
+  final Logger logger;
 
   // Logger that sends the message to the other end of daemon connection.
   final NotifyingLogger? notifyingLogger;
 
   Future<void> run() async {
     final ServerSocket serverSocket = await ServerSocket.bind(InternetAddress.loopbackIPv4, port!);
-    logger!.printStatus('Daemon server listening on ${serverSocket.port}');
+    logger.printStatus('Daemon server listening on ${serverSocket.port}');
 
     final StreamSubscription<Socket> subscription = serverSocket.listen(
       (Socket socket) async {
         // We have to listen to socket.done. Otherwise when the connection is
         // reset, we will receive an uncatchable exception.
         // https://github.com/dart-lang/sdk/issues/25518
-        final Future<void> socketDone = socket.done.catchError((Object error, StackTrace stackTrace) {
-          logger!.printError('Socket error: $error');
-          logger!.printTrace('$stackTrace');
-        });
+        final Future<void> socketDone = socket.done.then<void>(
+          (_) {},
+          onError: (Object error, StackTrace stackTrace) {
+            logger.printError('Socket error: $error');
+            logger.printTrace('$stackTrace');
+          });
         final Daemon daemon = Daemon(
           DaemonConnection(
-            daemonStreams: DaemonStreams.fromSocket(socket, logger: logger!),
-            logger: logger!,
+            daemonStreams: DaemonStreams.fromSocket(socket, logger: logger),
+            logger: logger,
           ),
           notifyingLogger: notifyingLogger,
         );
@@ -210,7 +213,6 @@ class Daemon {
 
     try {
       final String method = request.data['method']! as String;
-      assert(method != null);
       if (!method.contains('.')) {
         throw DaemonException('method not understood: $method');
       }
@@ -279,8 +281,9 @@ abstract class Domain {
     }).then<Object?>((Object? result) {
       daemon.connection.sendResponse(id, _toJsonable(result));
       return null;
-    }).catchError((Object error, StackTrace stackTrace) {
+    }, onError: (Object error, StackTrace stackTrace) {
       daemon.connection.sendErrorResponse(id, _toJsonable(error), stackTrace);
+      return null;
     });
   }
 
@@ -501,6 +504,7 @@ class AppDomain extends Domain {
     String? isolateFilter,
     bool machine = true,
     String? userIdentifier,
+    bool enableDevTools = true,
   }) async {
     if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
       throw Exception(
@@ -573,7 +577,7 @@ class AppDomain extends Domain {
         return runner.run(
           connectionInfoCompleter: connectionInfoCompleter,
           appStartedCompleter: appStartedCompleter,
-          enableDevTools: true,
+          enableDevTools: enableDevTools,
           route: route,
         );
       },
@@ -610,6 +614,7 @@ class AppDomain extends Domain {
       'directory': projectDirectory,
       'supportsRestart': isRestartSupported(enableHotReload, device),
       'launchMode': launchMode.toString(),
+      'mode': runner.debuggingOptions.buildInfo.modeName,
     });
 
     Completer<DebugConnectionInfo>? connectionInfoCompleter;
@@ -835,6 +840,9 @@ class DeviceDomain extends Domain {
     registerHandler('startApp', startApp);
     registerHandler('stopApp', stopApp);
     registerHandler('takeScreenshot', takeScreenshot);
+    registerHandler('startDartDevelopmentService', startDartDevelopmentService);
+    registerHandler('shutdownDartDevelopmentService', shutdownDartDevelopmentService);
+    registerHandler('setExternalDevToolsUriForDartDevelopmentService', setExternalDevToolsUriForDartDevelopmentService);
 
     // Use the device manager discovery so that client provided device types
     // are usable via the daemon protocol.
@@ -875,12 +883,12 @@ class DeviceDomain extends Domain {
 
   final List<PollingDeviceDiscovery> _discoverers = <PollingDeviceDiscovery>[];
 
-  /// Return a list of the current devices, with each device represented as a map
-  /// of properties (id, name, platform, ...).
+  /// Return a list of the currently connected devices, with each device
+  /// represented as a map of properties (id, name, platform, ...).
   Future<List<Map<String, Object?>>> getDevices([ Map<String, Object?>? args ]) async {
     return <Map<String, Object?>>[
       for (final PollingDeviceDiscovery discoverer in _discoverers)
-        for (final Device device in await discoverer.devices)
+        for (final Device device in await discoverer.devices(filter: DeviceDiscoveryFilter()))
           await _deviceToMap(device),
     ];
   }
@@ -946,7 +954,7 @@ class DeviceDomain extends Domain {
       throw DaemonException("device '$deviceId' not found");
     }
     final String buildMode = _getStringArg(args, 'buildMode', required: true)!;
-    return await device.supportsRuntimeMode(getBuildModeForName(buildMode));
+    return await device.supportsRuntimeMode(BuildMode.fromCliName(buildMode));
   }
 
   /// Creates an application package from a file in the temp directory.
@@ -1013,7 +1021,9 @@ class DeviceDomain extends Domain {
     );
     return <String, Object?>{
       'started': result.started,
-      'observatoryUri': result.observatoryUri?.toString(),
+      'vmServiceUri': result.vmServiceUri?.toString(),
+      // TODO(bkonyi): remove once clients have migrated to relying on vmServiceUri.
+      'observatoryUri': result.vmServiceUri?.toString(),
     };
   }
 
@@ -1024,8 +1034,11 @@ class DeviceDomain extends Domain {
     if (device == null) {
       throw DaemonException("device '$deviceId' not found");
     }
-    final String? applicationPackageId = _getStringArg(args, 'applicationPackageId', required: true);
-    final ApplicationPackage applicationPackage = _applicationPackages[applicationPackageId!]!;
+    final String? applicationPackageId = _getStringArg(args, 'applicationPackageId');
+    ApplicationPackage? applicationPackage;
+    if (applicationPackageId != null) {
+      applicationPackage = _applicationPackages[applicationPackageId];
+    }
     return device.stopApp(
       applicationPackage,
       userIdentifier: _getStringArg(args, 'userIdentifier'),
@@ -1050,6 +1063,50 @@ class DeviceDomain extends Domain {
     }
   }
 
+  /// Starts DDS for the device.
+  Future<String?> startDartDevelopmentService(Map<String, Object?> args) async {
+    final String? deviceId = _getStringArg(args, 'deviceId', required: true);
+    final bool? disableServiceAuthCodes = _getBoolArg(args, 'disableServiceAuthCodes');
+    final String vmServiceUriStr = _getStringArg(args, 'vmServiceUri', required: true)!;
+
+    final Device? device = await daemon.deviceDomain._getDevice(deviceId);
+    if (device == null) {
+      throw DaemonException("device '$deviceId' not found");
+    }
+
+    await device.dds.startDartDevelopmentService(
+      Uri.parse(vmServiceUriStr),
+      logger: globals.logger,
+      disableServiceAuthCodes: disableServiceAuthCodes,
+    );
+    unawaited(device.dds.done.whenComplete(() => sendEvent('device.dds.done.$deviceId')));
+    return device.dds.uri?.toString();
+  }
+
+  /// Starts DDS for the device.
+  Future<void> shutdownDartDevelopmentService(Map<String, Object?> args) async {
+    final String? deviceId = _getStringArg(args, 'deviceId', required: true);
+
+    final Device? device = await daemon.deviceDomain._getDevice(deviceId);
+    if (device == null) {
+      throw DaemonException("device '$deviceId' not found");
+    }
+
+    await device.dds.shutdown();
+  }
+
+  Future<void> setExternalDevToolsUriForDartDevelopmentService(Map<String, Object?> args) async {
+    final String? deviceId = _getStringArg(args, 'deviceId', required: true);
+    final String uri = _getStringArg(args, 'uri', required: true)!;
+
+    final Device? device = await daemon.deviceDomain._getDevice(deviceId);
+    if (device == null) {
+      throw DaemonException("device '$deviceId' not found");
+    }
+
+    device.dds.setExternalDevToolsUri(Uri.parse(uri));
+  }
+
   @override
   Future<void> dispose() {
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
@@ -1058,10 +1115,12 @@ class DeviceDomain extends Domain {
     return Future<void>.value();
   }
 
-  /// Return the device matching the deviceId field in the args.
+  /// Return the connected device matching the deviceId field in the args.
   Future<Device?> _getDevice(String? deviceId) async {
     for (final PollingDeviceDiscovery discoverer in _discoverers) {
-      final List<Device> devices = await discoverer.devices;
+      final List<Device> devices = await discoverer.devices(
+        filter: DeviceDiscoveryFilter(),
+      );
       Device? device;
       for (final Device localDevice in devices) {
         if (localDevice.id == deviceId) {
@@ -1191,6 +1250,7 @@ class NotifyingLogger extends DelegatingLogger {
     int? indent,
     int? hangingIndent,
     bool? wrap,
+    bool fatal = true,
   }) {
     _sendMessage(LogMessage('warning', message));
   }
@@ -1254,7 +1314,7 @@ class NotifyingLogger extends DelegatingLogger {
   void sendEvent(String name, [Map<String, Object?>? args]) { }
 
   @override
-  bool get supportsColor => throw UnimplementedError();
+  bool get supportsColor => false;
 
   @override
   bool get hasTerminal => false;
@@ -1301,6 +1361,7 @@ class EmulatorDomain extends Domain {
   EmulatorManager emulators = EmulatorManager(
     fileSystem: globals.fs,
     logger: globals.logger,
+    java: globals.java,
     androidSdk: globals.androidSdk,
     processManager: globals.processManager,
     androidWorkflow: androidWorkflow!,
@@ -1405,14 +1466,16 @@ class ProxyDomain extends Domain {
     }
 
     _forwardedConnections[id] = socket;
-    socket.listen((List<int> data) {
+    debounceDataStream(socket).listen((List<int> data) {
       sendEvent('proxy.data.$id', null, data);
     }, onError: (Object error, StackTrace stackTrace) {
       // Socket error, probably disconnected.
       globals.logger.printTrace('Socket error: $error, $stackTrace');
     });
 
-    unawaited(socket.done.catchError((Object error, StackTrace stackTrace) {
+    unawaited(socket.done.then<Object?>(
+      (Object? obj) => obj,
+      onError: (Object error, StackTrace stackTrace) {
       // Socket error, probably disconnected.
       globals.logger.printTrace('Socket error: $error, $stackTrace');
     }).then((Object? _) {
@@ -1524,7 +1587,7 @@ class AppRunLogger extends DelegatingLogger {
         'id': eventId,
         'progressId': eventType,
         if (message != null) 'message': message,
-        if (finished != null) 'finished': finished,
+        'finished': finished,
       };
 
       domain!._sendAppEvent(app, 'progress', event);
@@ -1541,7 +1604,7 @@ class AppRunLogger extends DelegatingLogger {
   }
 
   @override
-  bool get supportsColor => throw UnimplementedError();
+  bool get supportsColor => false;
 
   @override
   bool get hasTerminal => false;
@@ -1560,14 +1623,11 @@ class LogMessage {
 }
 
 /// The method by which the Flutter app was launched.
-class LaunchMode {
+enum LaunchMode {
+  run._('run'),
+  attach._('attach');
+
   const LaunchMode._(this._value);
-
-  /// The app was launched via `flutter run`.
-  static const LaunchMode run = LaunchMode._('run');
-
-  /// The app was launched via `flutter attach`.
-  static const LaunchMode attach = LaunchMode._('attach');
 
   final String _value;
 
@@ -1590,7 +1650,7 @@ class DebounceOperationQueue<T, K> {
   final Map<K, Future<T>> _operationQueue = <K, Future<T>>{};
   Future<void>? _inProgressAction;
 
-  Future<T>? queueAndDebounce(
+  Future<T> queueAndDebounce(
     K operationType,
     Duration debounceDuration,
     Future<T> Function() action,
@@ -1599,7 +1659,7 @@ class DebounceOperationQueue<T, K> {
     // debounce timer and return its future.
     if (_operationQueue[operationType] != null) {
       _debounceTimers[operationType]?.reset();
-      return _operationQueue[operationType];
+      return _operationQueue[operationType]!;
     }
 
     // Otherwise, put one in the queue with a timer.

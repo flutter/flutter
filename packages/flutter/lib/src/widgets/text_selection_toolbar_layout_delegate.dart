@@ -41,9 +41,9 @@ class TextSelectionToolbarLayoutDelegate extends SingleChildLayoutDelegate {
   /// If not provided, it will be calculated.
   final bool? fitsAbove;
 
-  // Return the value that centers width as closely as possible to position
-  // while fitting inside of min and max.
-  static double _centerOn(double position, double width, double max) {
+  /// Return the value that centers width as closely as possible to position
+  /// while fitting inside of min and max.
+  static double centerOn(double position, double width, double max) {
     // If it overflows on the left, put it as far left as possible.
     if (position - width / 2.0 < 0.0) {
       return 0.0;
@@ -69,7 +69,7 @@ class TextSelectionToolbarLayoutDelegate extends SingleChildLayoutDelegate {
     final Offset anchor = fitsAbove ? anchorAbove : anchorBelow;
 
     return Offset(
-      _centerOn(
+      centerOn(
         anchor.dx,
         childSize.width,
         size.width,

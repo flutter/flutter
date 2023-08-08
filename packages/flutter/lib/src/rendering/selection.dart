@@ -58,7 +58,7 @@ enum SelectionResult {
 /// The abstract interface to handle [SelectionEvent]s.
 ///
 /// This interface is extended by [Selectable] and [SelectionContainerDelegate]
-/// and is typically not use directly.
+/// and is typically not used directly.
 ///
 /// {@template flutter.rendering.SelectionHandler}
 /// This class returns a [SelectionGeometry] as its [value], and is responsible
@@ -206,9 +206,7 @@ mixin SelectionRegistrant on Selectable {
 }
 
 /// A utility class that provides useful methods for handling selection events.
-class SelectionUtils {
-  SelectionUtils._();
-
+abstract final class SelectionUtils {
   /// Determines [SelectionResult] purely based on the target rectangle.
   ///
   /// This method returns [SelectionResult.end] if the `point` is inside the
@@ -296,6 +294,30 @@ enum SelectionEventType {
   ///
   /// Used by [SelectWordSelectionEvent].
   selectWord,
+
+  /// An event that extends the selection by a specific [TextGranularity].
+  granularlyExtendSelection,
+
+  /// An event that extends the selection in a specific direction.
+  directionallyExtendSelection,
+}
+
+/// The unit of how selection handles move in text.
+///
+/// The [GranularlyExtendSelectionEvent] uses this enum to describe how
+/// [Selectable] should extend its selection.
+enum TextGranularity {
+  /// Treats each character as an atomic unit when moving the selection handles.
+  character,
+
+  /// Treats word as an atomic unit when moving the selection handles.
+  word,
+
+  /// Treats each line break as an atomic unit when moving the selection handles.
+  line,
+
+  /// Treats the entire document as an atomic unit when moving the selection handles.
+  document,
 }
 
 /// An abstract base class for selection events.
@@ -375,6 +397,127 @@ class SelectionEdgeUpdateEvent extends SelectionEvent {
   final Offset globalPosition;
 }
 
+/// Extends the start or end of the selection by a given [TextGranularity].
+///
+/// To handle this event, move the associated selection edge, as dictated by
+/// [isEnd], according to the [granularity].
+class GranularlyExtendSelectionEvent extends SelectionEvent {
+  /// Creates a [GranularlyExtendSelectionEvent].
+  ///
+  /// All parameters are required and must not be null.
+  const GranularlyExtendSelectionEvent({
+    required this.forward,
+    required this.isEnd,
+    required this.granularity,
+  }) : super._(SelectionEventType.granularlyExtendSelection);
+
+  /// Whether to extend the selection forward.
+  final bool forward;
+
+  /// Whether this event is updating the end selection edge.
+  final bool isEnd;
+
+  /// The granularity for which the selection extend.
+  final TextGranularity granularity;
+}
+
+/// The direction to extend a selection.
+///
+/// The [DirectionallyExtendSelectionEvent] uses this enum to describe how
+/// [Selectable] should extend their selection.
+enum SelectionExtendDirection {
+  /// Move one edge of the selection vertically to the previous adjacent line.
+  ///
+  /// For text selection, it should consider both soft and hard linebreak.
+  ///
+  /// See [DirectionallyExtendSelectionEvent.dx] on how to
+  /// calculate the horizontal offset.
+  previousLine,
+
+  /// Move one edge of the selection vertically to the next adjacent line.
+  ///
+  /// For text selection, it should consider both soft and hard linebreak.
+  ///
+  /// See [DirectionallyExtendSelectionEvent.dx] on how to
+  /// calculate the horizontal offset.
+  nextLine,
+
+  /// Move the selection edges forward to a certain horizontal offset in the
+  /// same line.
+  ///
+  /// If there is no on-going selection, the selection must start with the first
+  /// line (or equivalence of first line in a non-text selectable) and select
+  /// toward the horizontal offset in the same line.
+  ///
+  /// The selectable that receives [DirectionallyExtendSelectionEvent] with this
+  /// enum must return [SelectionResult.end].
+  ///
+  /// See [DirectionallyExtendSelectionEvent.dx] on how to
+  /// calculate the horizontal offset.
+  forward,
+
+  /// Move the selection edges backward to a certain horizontal offset in the
+  /// same line.
+  ///
+  /// If there is no on-going selection, the selection must start with the last
+  /// line (or equivalence of last line in a non-text selectable) and select
+  /// backward the horizontal offset in the same line.
+  ///
+  /// The selectable that receives [DirectionallyExtendSelectionEvent] with this
+  /// enum must return [SelectionResult.end].
+  ///
+  /// See [DirectionallyExtendSelectionEvent.dx] on how to
+  /// calculate the horizontal offset.
+  backward,
+}
+
+/// Extends the current selection with respect to a [direction].
+///
+/// To handle this event, move the associated selection edge, as dictated by
+/// [isEnd], according to the [direction].
+///
+/// The movements are always based on [dx]. The value is in
+/// global coordinates and is the horizontal offset the selection edge should
+/// move to when moving to across lines.
+class DirectionallyExtendSelectionEvent extends SelectionEvent {
+  /// Creates a [DirectionallyExtendSelectionEvent].
+  ///
+  /// All parameters are required and must not be null.
+  const DirectionallyExtendSelectionEvent({
+    required this.dx,
+    required this.isEnd,
+    required this.direction,
+  }) : super._(SelectionEventType.directionallyExtendSelection);
+
+  /// The horizontal offset the selection should move to.
+  ///
+  /// The offset is in global coordinates.
+  final double dx;
+
+  /// Whether this event is updating the end selection edge.
+  final bool isEnd;
+
+  /// The directional movement of this event.
+  ///
+  /// See also:
+  ///  * [SelectionExtendDirection], which explains how to handle each enum.
+  final SelectionExtendDirection direction;
+
+  /// Makes a copy of this object with its property replaced with the new
+  /// values.
+  DirectionallyExtendSelectionEvent copyWith({
+    double? dx,
+    bool? isEnd,
+    SelectionExtendDirection? direction,
+  }) {
+    return DirectionallyExtendSelectionEvent(
+      dx: dx ?? this.dx,
+      isEnd: isEnd ?? this.isEnd,
+      direction: direction ?? this.direction,
+    );
+  }
+}
+
 /// A registrar that keeps track of [Selectable]s in the subtree.
 ///
 /// A [Selectable] is only included in the [SelectableRegion] if they are
@@ -433,8 +576,8 @@ enum SelectionStatus {
 /// The geometry of the current selection.
 ///
 /// This includes details such as the locations of the selection start and end,
-/// line height, etc. This information is used for drawing selection controls
-/// for mobile platforms.
+/// line height, the rects that encompass the selection, etc. This information
+/// is used for drawing selection controls for mobile platforms.
 ///
 /// The positions in geometry are in local coordinates of the [SelectionHandler]
 /// or [Selectable].
@@ -447,6 +590,7 @@ class SelectionGeometry {
   const SelectionGeometry({
     this.startSelectionPoint,
     this.endSelectionPoint,
+    this.selectionRects = const <Rect>[],
     required this.status,
     required this.hasContent,
   }) : assert((startSelectionPoint == null && endSelectionPoint == null) || status != SelectionStatus.none);
@@ -484,6 +628,10 @@ class SelectionGeometry {
   /// The status of ongoing selection in the [Selectable] or [SelectionHandler].
   final SelectionStatus status;
 
+  /// The rects in the local coordinates of the containing [Selectable] that
+  /// represent the selection if there is any.
+  final List<Rect> selectionRects;
+
   /// Whether there is any selectable content in the [Selectable] or
   /// [SelectionHandler].
   final bool hasContent;
@@ -495,12 +643,14 @@ class SelectionGeometry {
   SelectionGeometry copyWith({
     SelectionPoint? startSelectionPoint,
     SelectionPoint? endSelectionPoint,
+    List<Rect>? selectionRects,
     SelectionStatus? status,
     bool? hasContent,
   }) {
     return SelectionGeometry(
       startSelectionPoint: startSelectionPoint ?? this.startSelectionPoint,
       endSelectionPoint: endSelectionPoint ?? this.endSelectionPoint,
+      selectionRects: selectionRects ?? this.selectionRects,
       status: status ?? this.status,
       hasContent: hasContent ?? this.hasContent,
     );
@@ -517,6 +667,7 @@ class SelectionGeometry {
     return other is SelectionGeometry
         && other.startSelectionPoint == startSelectionPoint
         && other.endSelectionPoint == endSelectionPoint
+        && other.selectionRects == selectionRects
         && other.status == status
         && other.hasContent == hasContent;
   }
@@ -526,6 +677,7 @@ class SelectionGeometry {
     return Object.hash(
       startSelectionPoint,
       endSelectionPoint,
+      selectionRects,
       status,
       hasContent,
     );
@@ -542,9 +694,7 @@ class SelectionPoint {
     required this.localPosition,
     required this.lineHeight,
     required this.handleType,
-  }) : assert(localPosition != null),
-       assert(lineHeight != null),
-       assert(handleType != null);
+  });
 
   /// The position of the selection point in the local coordinates of the
   /// containing [Selectable].

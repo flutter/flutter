@@ -5,8 +5,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 void main() {
-  testWidgets('Passing no IconButtonTheme returns defaults', (WidgetTester tester) async {
+  test('IconButtonThemeData lerp special cases', () {
+    expect(IconButtonThemeData.lerp(null, null, 0), null);
+    const IconButtonThemeData data = IconButtonThemeData();
+    expect(identical(IconButtonThemeData.lerp(data, data, 0.5), data), true);
+  });
+
+  testWidgetsWithLeakTracking('Passing no IconButtonTheme returns defaults', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     await tester.pumpWidget(
       MaterialApp(
@@ -32,7 +40,7 @@ void main() {
     expect(material.borderRadius, null);
     expect(material.color, Colors.transparent);
     expect(material.elevation, 0.0);
-    expect(material.shadowColor, null);
+    expect(material.shadowColor, Colors.transparent);
     expect(material.shape, const StadiumBorder());
     expect(material.textStyle, null);
     expect(material.type, MaterialType.button);
@@ -140,19 +148,19 @@ void main() {
       expect(align.alignment, alignment);
     }
 
-    testWidgets('Button style overrides defaults', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Button style overrides defaults', (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(buttonStyle: style));
       await tester.pumpAndSettle(); // allow the animations to finish
       checkButton(tester);
     });
 
-    testWidgets('Button theme style overrides defaults', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Button theme style overrides defaults', (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(themeStyle: style));
       await tester.pumpAndSettle();
       checkButton(tester);
     });
 
-    testWidgets('Overall Theme button theme style overrides defaults', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Overall Theme button theme style overrides defaults', (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(overallStyle: style));
       await tester.pumpAndSettle();
       checkButton(tester);
@@ -160,26 +168,26 @@ void main() {
 
     // Same as the previous tests with empty ButtonStyle's instead of null.
 
-    testWidgets('Button style overrides defaults, empty theme and overall styles', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Button style overrides defaults, empty theme and overall styles', (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(buttonStyle: style, themeStyle: const ButtonStyle(), overallStyle: const ButtonStyle()));
       await tester.pumpAndSettle(); // allow the animations to finish
       checkButton(tester);
     });
 
-    testWidgets('Button theme style overrides defaults, empty button and overall styles', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Button theme style overrides defaults, empty button and overall styles', (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(buttonStyle: const ButtonStyle(), themeStyle: style, overallStyle: const ButtonStyle()));
       await tester.pumpAndSettle(); // allow the animations to finish
       checkButton(tester);
     });
 
-    testWidgets('Overall Theme button theme style overrides defaults, null theme and empty overall style', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Overall Theme button theme style overrides defaults, null theme and empty overall style', (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(buttonStyle: const ButtonStyle(), overallStyle: style));
       await tester.pumpAndSettle(); // allow the animations to finish
       checkButton(tester);
     });
   });
 
-  testWidgets('Theme shadowColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Theme shadowColor', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     const Color shadowColor = Color(0xff000001);
     const Color overriddenColor = Color(0xff000002);
@@ -221,12 +229,12 @@ void main() {
 
     await tester.pumpWidget(buildFrame());
     Material material = tester.widget<Material>(buttonMaterialFinder);
-    expect(material.shadowColor, null); //default
+    expect(material.shadowColor, Colors.transparent); //default
 
     await tester.pumpWidget(buildFrame(overallShadowColor: shadowColor));
     await tester.pumpAndSettle(); // theme animation
     material = tester.widget<Material>(buttonMaterialFinder);
-    expect(material.shadowColor, null);
+    expect(material.shadowColor, Colors.transparent);
 
     await tester.pumpWidget(buildFrame(themeShadowColor: shadowColor));
     await tester.pumpAndSettle(); // theme animation

@@ -21,5 +21,9 @@
   "selectAllButtonLabel": "سبھی منتخب کریں",
   "tabSemanticsLabel": "$tabCount میں سے $tabIndex ٹیب",
   "modalBarrierDismissLabel": "برخاست کریں",
-  "searchTextFieldPlaceholderLabel": "تلاش کریں"
+  "searchTextFieldPlaceholderLabel": "تلاش کریں",
+  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "menuDismissLabel": "Dismiss menu",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web"
 }

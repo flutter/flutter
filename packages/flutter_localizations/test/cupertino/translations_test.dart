@@ -38,6 +38,11 @@ void main() {
       expect(localizations.datePickerDayOfMonth(2), isNotNull);
       expect(localizations.datePickerDayOfMonth(10), isNotNull);
 
+      expect(localizations.datePickerDayOfMonth(0, 1), isNotNull);
+      expect(localizations.datePickerDayOfMonth(1, 2), isNotNull);
+      expect(localizations.datePickerDayOfMonth(2, 3), isNotNull);
+      expect(localizations.datePickerDayOfMonth(10, 4), isNotNull);
+
       expect(localizations.datePickerMediumDate(DateTime(2019, 3, 25)), isNotNull);
 
       expect(localizations.datePickerHour(0), isNotNull);
@@ -188,5 +193,14 @@ void main() {
     } else {
       expect(file.readAsStringSync(), encodedArbFile);
     }
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/110451.
+  testWidgets('Finnish translation for tab label', (WidgetTester tester) async {
+    const Locale locale = Locale('fi');
+    expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
+    final CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(locale);
+    expect(localizations, isA<CupertinoLocalizationFi>());
+    expect(localizations.tabSemanticsLabel(tabIndex: 1, tabCount: 2), 'Välilehti 1 kautta 2');
   });
 }

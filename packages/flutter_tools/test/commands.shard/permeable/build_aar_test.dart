@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 2.8
-
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_aar.dart';
@@ -16,21 +15,25 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 
 import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fakes.dart';
+import '../../src/fakes.dart' hide FakeFlutterProjectFactory;
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   Cache.disableLocking();
 
-  Future<BuildAarCommand> runCommandIn(String target, { List<String> arguments }) async {
-    final BuildAarCommand command = BuildAarCommand(verboseHelp: false);
+  Future<BuildAarCommand> runCommandIn(String target, { List<String>? arguments }) async {
+    final BuildAarCommand command = BuildAarCommand(
+      androidSdk: FakeAndroidSdk(),
+      fileSystem: globals.fs,
+      logger: BufferLogger.test(),
+      verboseHelp: false,
+    );
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>[
       'aar',
@@ -42,8 +45,8 @@ void main() {
   }
 
   group('Usage', () {
-    Directory tempDir;
-    TestUsage testUsage;
+    late Directory tempDir;
+    late TestUsage testUsage;
 
     setUp(() {
       testUsage = TestUsage();
@@ -110,8 +113,8 @@ void main() {
   });
 
   group('flag parsing', () {
-    Directory tempDir;
-    FakeAndroidBuilder fakeAndroidBuilder;
+    late Directory tempDir;
+    late FakeAndroidBuilder fakeAndroidBuilder;
 
     setUp(() {
       fakeAndroidBuilder = FakeAndroidBuilder();
@@ -193,11 +196,11 @@ void main() {
   });
 
   group('Gradle', () {
-    Directory tempDir;
-    AndroidSdk mockAndroidSdk;
-    String gradlew;
-    FakeProcessManager processManager;
-    String flutterRoot;
+    late Directory tempDir;
+    late AndroidSdk mockAndroidSdk;
+    late String gradlew;
+    late FakeProcessManager processManager;
+    late String flutterRoot;
 
     setUp(() {
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
@@ -220,6 +223,7 @@ void main() {
         await expectLater(() async {
           await runBuildAarCommand(
             projectPath,
+            null,
             arguments: <String>['--no-pub'],
           );
         }, throwsToolExit(
@@ -227,9 +231,33 @@ void main() {
         ));
       },
       overrides: <Type, Generator>{
-        AndroidSdk: () => null,
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         ProcessManager: () => FakeProcessManager.any(),
+      });
+    });
+
+    group('throws ToolExit', () {
+      testUsingContext('main.dart not found', () async {
+        await expectLater(() async {
+          await runBuildAarCommand(
+            'missing_project',
+            mockAndroidSdk,
+            arguments: <String>['--no-pub'],
+          );
+        }, throwsToolExit(
+          message: 'main.dart does not exist',
+        ));
+      });
+
+      testUsingContext('flutter project not valid', () async {
+        await expectLater(() async {
+          await runCommandIn(
+            tempDir.path,
+            arguments: <String>['--no-pub'],
+          );
+        }, throwsToolExit(
+          message: 'is not a valid flutter project',
+        ));
       });
     });
 
@@ -257,7 +285,7 @@ void main() {
         exitCode: 1,
       ));
 
-      await expectLater(() => runBuildAarCommand(projectPath, arguments: <String>[
+      await expectLater(() => runBuildAarCommand(projectPath, mockAndroidSdk, arguments: <String>[
         '--no-debug',
         '--no-profile',
         '--extra-front-end-options=foo',
@@ -266,7 +294,6 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => processManager,
       FeatureFlags: () => TestFeatureFlags(isIOSEnabled: false),
@@ -276,10 +303,15 @@ void main() {
 }
 
 Future<BuildAarCommand> runBuildAarCommand(
-  String target, {
-  List<String> arguments,
+  String target, AndroidSdk? androidSdk, {
+  List<String>? arguments,
 }) async {
-  final BuildAarCommand command = BuildAarCommand(verboseHelp: false);
+  final BuildAarCommand command = BuildAarCommand(
+    androidSdk: androidSdk,
+    fileSystem: globals.fs,
+    logger: BufferLogger.test(),
+    verboseHelp: false,
+  );
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>[
     'aar',
@@ -291,19 +323,19 @@ Future<BuildAarCommand> runBuildAarCommand(
 }
 
 class FakeAndroidBuilder extends Fake implements AndroidBuilder {
-  FlutterProject project;
-  Set<AndroidBuildInfo> androidBuildInfo;
-  String target;
-  String outputDirectoryPath;
-  String buildNumber;
+  late FlutterProject project;
+  late Set<AndroidBuildInfo> androidBuildInfo;
+  late String target;
+  String? outputDirectoryPath;
+  late String buildNumber;
 
   @override
   Future<void> buildAar({
-    @required FlutterProject project,
-    @required Set<AndroidBuildInfo> androidBuildInfo,
-    @required String target,
-    @required String outputDirectoryPath,
-    @required String buildNumber,
+    required FlutterProject project,
+    required Set<AndroidBuildInfo> androidBuildInfo,
+    required String target,
+    String? outputDirectoryPath,
+    required String buildNumber,
   }) async {
     this.project = project;
     this.androidBuildInfo = androidBuildInfo;

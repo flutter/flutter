@@ -22,12 +22,12 @@ import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../build_system/targets/web.dart';
 import '../cache.dart';
 import '../dart/language_version.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../flutter_plugins.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../resident_devtools_handler.dart';
@@ -36,6 +36,7 @@ import '../run_hot.dart';
 import '../vmservice.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
+import '../web/file_generators/flutter_service_worker_js.dart';
 import '../web/file_generators/main_dart.dart' as main_dart;
 import '../web/web_device.dart';
 import '../web/web_runner.dart';
@@ -51,8 +52,8 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     required FlutterProject flutterProject,
     required bool? ipv6,
     required DebuggingOptions debuggingOptions,
-    required UrlTunneller? urlTunneller,
-    required Logger? logger,
+    UrlTunneller? urlTunneller,
+    required Logger logger,
     required FileSystem fileSystem,
     required SystemClock systemClock,
     required Usage usage,
@@ -89,7 +90,7 @@ class ResidentWebRunner extends ResidentRunner {
     required bool? ipv6,
     required DebuggingOptions debuggingOptions,
     required FileSystem fileSystem,
-    required Logger? logger,
+    required Logger logger,
     required SystemClock systemClock,
     required Usage usage,
     UrlTunneller? urlTunneller,
@@ -110,13 +111,13 @@ class ResidentWebRunner extends ResidentRunner {
         );
 
   final FileSystem _fileSystem;
-  final Logger? _logger;
+  final Logger _logger;
   final SystemClock _systemClock;
   final Usage _usage;
   final UrlTunneller? _urlTunneller;
 
   @override
-  Logger? get logger => _logger;
+  Logger get logger => _logger;
 
   @override
   FileSystem get fileSystem => _fileSystem;
@@ -190,7 +191,7 @@ class ResidentWebRunner extends ResidentRunner {
       _generatedEntrypointDirectory?.deleteSync(recursive: true);
     } on FileSystemException {
       // Best effort to clean up temp dirs.
-      _logger!.printTrace(
+      _logger.printTrace(
         'Failed to clean up temp directory: ${_generatedEntrypointDirectory!.path}',
       );
     }
@@ -210,14 +211,14 @@ class ResidentWebRunner extends ResidentRunner {
     const String fire = '🔥';
     const String rawMessage =
         '  To hot restart changes while running, press "r" or "R".';
-    final String message = _logger!.terminal.color(
-      fire + _logger!.terminal.bolden(rawMessage),
+    final String message = _logger.terminal.color(
+      fire + _logger.terminal.bolden(rawMessage),
       TerminalColor.red,
     );
-    _logger!.printStatus(message);
+    _logger.printStatus(message);
     const String quitMessage = 'To quit, press "q".';
-    _logger!.printStatus('For a more detailed help message, press "h". $quitMessage');
-    _logger!.printStatus('');
+    _logger.printStatus('For a more detailed help message, press "h". $quitMessage');
+    _logger.printStatus('');
     printDebuggerList();
   }
 
@@ -240,11 +241,11 @@ class ResidentWebRunner extends ResidentRunner {
       buildInfo: debuggingOptions.buildInfo,
     );
     if (package == null) {
-      _logger!.printStatus('This application is not configured to build on the web.');
-      _logger!.printStatus('To add web support to a project, run `flutter create .`.');
+      _logger.printStatus('This application is not configured to build on the web.');
+      _logger.printStatus('To add web support to a project, run `flutter create .`.');
     }
     final String modeName = debuggingOptions.buildInfo.friendlyModeName;
-    _logger!.printStatus(
+    _logger.printStatus(
       'Launching ${getDisplayPath(target, _fileSystem)} '
       'on ${device!.device!.name} in $modeName mode...',
     );
@@ -254,15 +255,38 @@ class ResidentWebRunner extends ResidentRunner {
 
     try {
       return await asyncGuard(() async {
+        Future<int> getPort() async {
+          if (debuggingOptions.port == null) {
+            return globals.os.findFreePort();
+          }
+
+          final int? port = int.tryParse(debuggingOptions.port ?? '');
+
+          if (port == null) {
+            logger.printError('''
+Received a non-integer value for port: ${debuggingOptions.port}
+A randomly-chosen available port will be used instead.
+''');
+            return globals.os.findFreePort();
+          }
+
+          if (port < 0 || port > 65535) {
+            throwToolExit('''
+Invalid port: ${debuggingOptions.port}
+Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
+    ''');
+          }
+
+          return port;
+        }
+
         final ExpressionCompiler? expressionCompiler =
           debuggingOptions.webEnableExpressionEvaluation
               ? WebExpressionCompiler(device!.generator!, fileSystem: _fileSystem)
               : null;
         device!.devFS = WebDevFS(
           hostname: debuggingOptions.hostname ?? 'localhost',
-          port: debuggingOptions.port != null
-            ? int.tryParse(debuggingOptions.port!)
-            : null,
+          port: await getPort(),
           packagesFilePath: packagesFilePath,
           urlTunneller: _urlTunneller,
           useSseForDebugProxy: debuggingOptions.webUseSseForDebugProxy,
@@ -280,25 +304,30 @@ class ResidentWebRunner extends ResidentRunner {
         );
         final Uri url = await device!.devFS!.create();
         if (debuggingOptions.buildInfo.isDebug) {
+          await runSourceGenerators();
           final UpdateFSReport report = await _updateDevFS(fullRestart: true);
           if (!report.success) {
-            _logger!.printError('Failed to compile application.');
+            _logger.printError('Failed to compile application.');
             appFailedToStart();
             return 1;
           }
           device!.generator!.accept();
           cacheInitialDillCompilation();
         } else {
-          await buildWeb(
+          final WebBuilder webBuilder = WebBuilder(
+            logger: _logger,
+            processManager: globals.processManager,
+            buildSystem: globals.buildSystem,
+            fileSystem: _fileSystem,
+            flutterVersion: globals.flutterVersion,
+            usage: globals.flutterUsage,
+          );
+          await webBuilder.buildWeb(
             flutterProject,
             target,
             debuggingOptions.buildInfo,
-            false,
-            kNoneWorker,
-            true,
-            debuggingOptions.nativeNullAssertions,
-            null,
-            null,
+            ServiceWorkerStrategy.none,
+            compilerConfig: JsCompilerConfig.run(nativeNullAssertions: debuggingOptions.nativeNullAssertions)
           );
         }
         await device!.device!.startApp(
@@ -317,19 +346,19 @@ class ResidentWebRunner extends ResidentRunner {
       });
     } on WebSocketException catch (error, stackTrace) {
       appFailedToStart();
-      _logger!.printError('$error', stackTrace: stackTrace);
+      _logger.printError('$error', stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on ChromeDebugException catch (error, stackTrace) {
       appFailedToStart();
-      _logger!.printError('$error', stackTrace: stackTrace);
+      _logger.printError('$error', stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on AppConnectionException catch (error, stackTrace) {
       appFailedToStart();
-      _logger!.printError('$error', stackTrace: stackTrace);
+      _logger.printError('$error', stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on SocketException catch (error, stackTrace) {
       appFailedToStart();
-      _logger!.printError('$error', stackTrace: stackTrace);
+      _logger.printError('$error', stackTrace: stackTrace);
       throwToolExit(kExitMessage);
     } on Exception {
       appFailedToStart();
@@ -345,7 +374,7 @@ class ResidentWebRunner extends ResidentRunner {
     bool benchmarkMode = false,
   }) async {
     final DateTime start = _systemClock.now();
-    final Status status = _logger!.startProgress(
+    final Status status = _logger.startProgress(
       'Performing hot restart...',
       progressId: 'hot.restart',
     );
@@ -363,16 +392,20 @@ class ResidentWebRunner extends ResidentRunner {
       }
     } else {
       try {
-        await buildWeb(
+        final WebBuilder webBuilder = WebBuilder(
+          logger: _logger,
+          processManager: globals.processManager,
+          buildSystem: globals.buildSystem,
+          fileSystem: _fileSystem,
+          flutterVersion: globals.flutterVersion,
+          usage: globals.flutterUsage,
+        );
+        await webBuilder.buildWeb(
           flutterProject,
           target,
           debuggingOptions.buildInfo,
-          false,
-          kNoneWorker,
-          true,
-          debuggingOptions.nativeNullAssertions,
-          kBaseHref,
-          null,
+          ServiceWorkerStrategy.none,
+          compilerConfig: JsCompilerConfig.run(nativeNullAssertions: debuggingOptions.nativeNullAssertions),
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');
@@ -381,7 +414,7 @@ class ResidentWebRunner extends ResidentRunner {
 
     try {
       if (!deviceIsDebuggable) {
-        _logger!.printStatus('Recompile complete. Page requires refresh.');
+        _logger.printStatus('Recompile complete. Page requires refresh.');
       } else if (isRunningDebug) {
         await _vmService.service.callMethod('hotRestart');
       } else {
@@ -399,7 +432,7 @@ class ResidentWebRunner extends ResidentRunner {
 
     final Duration elapsed = _systemClock.now().difference(start);
     final String elapsedMS = getElapsedAsMilliseconds(elapsed);
-    _logger!.printStatus('Restarted application in $elapsedMS.');
+    _logger.printStatus('Restarted application in $elapsedMS.');
     unawaited(residentDevtoolsHandler!.hotRestart(flutterDevices));
 
     // Don't track restart times for dart2js builds or web-server devices.
@@ -467,7 +500,7 @@ class ResidentWebRunner extends ResidentRunner {
     final bool isFirstUpload = !assetBundle.wasBuiltOnce();
     final bool rebuildBundle = assetBundle.needsBuild();
     if (rebuildBundle) {
-      _logger!.printTrace('Updating assets');
+      _logger.printTrace('Updating assets');
       final int result = await assetBundle.build(
         packagesPath: debuggingOptions.buildInfo.packagesPath,
         targetPlatform: TargetPlatform.web_javascript,
@@ -483,7 +516,7 @@ class ResidentWebRunner extends ResidentRunner {
       packageConfig: device!.devFS!.lastPackageConfig
         ?? debuggingOptions.buildInfo.packageConfig,
     );
-    final Status devFSStatus = _logger!.startProgress(
+    final Status devFSStatus = _logger.startProgress(
       'Waiting for connection from debug service on ${device!.device!.name}...',
     );
     final UpdateFSReport report = await device!.devFS!.update(
@@ -506,7 +539,7 @@ class ResidentWebRunner extends ResidentRunner {
       shaderCompiler: device!.developmentShaderCompiler,
     );
     devFSStatus.stop();
-    _logger!.printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');
+    _logger.printTrace('Synced ${getSizeAsMB(report.syncedBytes)}.');
     return report;
   }
 
@@ -520,9 +553,9 @@ class ResidentWebRunner extends ResidentRunner {
   }) async {
     if (_chromiumLauncher != null) {
       final Chromium chrome = await _chromiumLauncher!.connectedInstance;
-      final ChromeTab chromeTab = await (chrome.chromeConnection.getTab((ChromeTab chromeTab) {
+      final ChromeTab? chromeTab = await chrome.chromeConnection.getTab((ChromeTab chromeTab) {
         return !chromeTab.url.startsWith('chrome-extension');
-      }, retryFor: const Duration(seconds: 5)) as FutureOr<ChromeTab>);
+      }, retryFor: const Duration(seconds: 5));
       if (chromeTab == null) {
         throwToolExit('Failed to connect to Chrome instance.');
       }
@@ -537,7 +570,7 @@ class ResidentWebRunner extends ResidentRunner {
 
       void onLogEvent(vmservice.Event event)  {
         final String message = processVmServiceMessage(event);
-        _logger!.printStatus(message);
+        _logger.printStatus(message);
       }
 
       _stdOutSub = _vmService.service.onStdoutEvent.listen(onLogEvent);
@@ -561,18 +594,13 @@ class ResidentWebRunner extends ResidentRunner {
         // thrown if we're not already subscribed.
       }
       await setUpVmService(
-        (String isolateId, {
-          bool? force,
-          bool? pause,
-        }) async {
+        reloadSources: (String isolateId, {bool? force, bool? pause}) async {
           await restart(pause: pause);
         },
-        null,
-        null,
-        device!.device,
-        null,
-        printStructuredErrorLog,
-        _vmService.service,
+        device: device!.device,
+        flutterProject: flutterProject,
+        printStructuredErrorLogMethod: printStructuredErrorLog,
+        vmService: _vmService.service,
       );
 
 
@@ -608,17 +636,15 @@ class ResidentWebRunner extends ResidentRunner {
           ..createSync(recursive: true)
           ..writeAsStringSync(websocketUri.toString());
       }
-      _logger!.printStatus('Debug service listening on $websocketUri');
-      _logger!.printStatus('');
-      if (debuggingOptions.buildInfo.nullSafetyMode ==  NullSafetyMode.sound) {
-        _logger!.printStatus('💪 Running with sound null safety 💪', emphasis: true);
-      } else {
-        _logger!.printStatus(
-          'Running with unsound null safety',
+      _logger.printStatus('Debug service listening on $websocketUri');
+      if (debuggingOptions.buildInfo.nullSafetyMode !=  NullSafetyMode.sound) {
+        _logger.printStatus('');
+        _logger.printStatus(
+          'Running without sound null safety ⚠️',
           emphasis: true,
         );
-        _logger!.printStatus(
-          'For more information see https://dart.dev/null-safety/unsound-null-safety',
+        _logger.printStatus(
+          'Dart 3 will only support sound null safety, see https://dart.dev/null-safety',
         );
       }
     }

@@ -5,6 +5,7 @@
 // This test clones the framework and downloads pre-built binaries; it sometimes
 // times out with the default 5 minutes: https://github.com/flutter/flutter/issues/100937
 @Timeout(Duration(minutes: 10))
+library;
 
 import 'package:args/command_runner.dart';
 import 'package:conductor_core/src/codesign.dart' show CodesignCommand;

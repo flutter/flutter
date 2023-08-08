@@ -1088,7 +1088,7 @@ void main() {
     expect(paintCount, 1);
   });
 
-  testWidgets('A MouseRegion mounted under the pointer should should take effect in the next postframe', (WidgetTester tester) async {
+  testWidgets('A MouseRegion mounted under the pointer should take effect in the next postframe', (WidgetTester tester) async {
     bool hovered = false;
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -1930,7 +1930,7 @@ class _HoverClientWithClosuresState extends State<_HoverClientWithClosures> {
 class _ColumnContainer extends StatelessWidget {
   const _ColumnContainer({
     required this.children,
-  }) : assert(children != null);
+  });
 
   final List<Widget> children;
 

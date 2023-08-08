@@ -93,9 +93,7 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
   /// Creates a gesture recognizer factory with the given callbacks.
   ///
   /// The arguments must not be null.
-  const GestureRecognizerFactoryWithHandlers(this._constructor, this._initializer)
-    : assert(_constructor != null),
-      assert(_initializer != null);
+  const GestureRecognizerFactoryWithHandlers(this._constructor, this._initializer);
 
   final GestureRecognizerFactoryConstructor<T> _constructor;
 
@@ -215,11 +213,11 @@ class GestureDetector extends StatelessWidget {
   /// Creates a widget that detects gestures.
   ///
   /// Pan and scale callbacks cannot be used simultaneously because scale is a
-  /// superset of pan. Simply use the scale callbacks instead.
+  /// superset of pan. Use the scale callbacks instead.
   ///
   /// Horizontal and vertical drag callbacks cannot be used simultaneously
-  /// because a combination of a horizontal and vertical drag is a pan. Simply
-  /// use the pan callbacks instead.
+  /// because a combination of a horizontal and vertical drag is a pan.
+  /// Use the pan callbacks instead.
   ///
   /// {@youtube 560 315 https://www.youtube.com/watch?v=WhVXkCFPmK4}
   ///
@@ -288,10 +286,10 @@ class GestureDetector extends StatelessWidget {
     this.behavior,
     this.excludeFromSemantics = false,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.trackpadScrollCausesScale = false,
+    this.trackpadScrollToScaleFactor = kDefaultTrackpadScrollToScaleFactor,
     this.supportedDevices,
-  }) : assert(excludeFromSemantics != null),
-       assert(dragStartBehavior != null),
-       assert(() {
+  }) : assert(() {
          final bool haveVerticalDrag = onVerticalDragStart != null || onVerticalDragUpdate != null || onVerticalDragEnd != null;
          final bool haveHorizontalDrag = onHorizontalDragStart != null || onHorizontalDragUpdate != null || onHorizontalDragEnd != null;
          final bool havePan = onPanStart != null || onPanUpdate != null || onPanEnd != null;
@@ -943,7 +941,7 @@ class GestureDetector extends StatelessWidget {
   /// force to initiate a force press. The amount of force is at least
   /// [ForcePressGestureRecognizer.startPressure].
   ///
-  /// Note that this callback will only be fired on devices with pressure
+  /// This callback will only be fired on devices with pressure
   /// detecting screens.
   final GestureForcePressStartCallback? onForcePressStart;
 
@@ -951,7 +949,7 @@ class GestureDetector extends StatelessWidget {
   /// force. The amount of force is at least
   /// [ForcePressGestureRecognizer.peakPressure].
   ///
-  /// Note that this callback will only be fired on devices with pressure
+  /// This callback will only be fired on devices with pressure
   /// detecting screens.
   final GestureForcePressPeakCallback? onForcePressPeak;
 
@@ -960,20 +958,24 @@ class GestureDetector extends StatelessWidget {
   /// plane of the screen, pressing the screen with varying forces or both
   /// simultaneously.
   ///
-  /// Note that this callback will only be fired on devices with pressure
+  /// This callback will only be fired on devices with pressure
   /// detecting screens.
   final GestureForcePressUpdateCallback? onForcePressUpdate;
 
-  /// The pointer is no longer in contact with the screen.
+  /// The pointer tracked by [onForcePressStart] is no longer in contact with the screen.
   ///
-  /// Note that this callback will only be fired on devices with pressure
+  /// This callback will only be fired on devices with pressure
   /// detecting screens.
   final GestureForcePressEndCallback? onForcePressEnd;
 
-  /// How this gesture detector should behave during hit testing.
+  /// How this gesture detector should behave during hit testing when deciding
+  /// how the hit test propagates to children and whether to consider targets
+  /// behind this one.
   ///
   /// This defaults to [HitTestBehavior.deferToChild] if [child] is not null and
   /// [HitTestBehavior.translucent] if child is null.
+  ///
+  /// See [HitTestBehavior] for the allowed values and their meanings.
   final HitTestBehavior? behavior;
 
   /// Whether to exclude these gestures from the semantics tree. For
@@ -1010,10 +1012,16 @@ class GestureDetector extends StatelessWidget {
   /// If set to null, events from all device types will be recognized. Defaults to null.
   final Set<PointerDeviceKind>? supportedDevices;
 
+  /// {@macro flutter.gestures.scale.trackpadScrollCausesScale}
+  final bool trackpadScrollCausesScale;
+
+  /// {@macro flutter.gestures.scale.trackpadScrollToScaleFactor}
+  final Offset trackpadScrollToScaleFactor;
+
   @override
   Widget build(BuildContext context) {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
-    final DeviceGestureSettings? gestureSettings = MediaQuery.maybeOf(context)?.gestureSettings;
+    final DeviceGestureSettings? gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
 
     if (onTapDown != null ||
         onTapUp != null ||
@@ -1042,7 +1050,8 @@ class GestureDetector extends StatelessWidget {
             ..onTertiaryTapDown = onTertiaryTapDown
             ..onTertiaryTapUp = onTertiaryTapUp
             ..onTertiaryTapCancel = onTertiaryTapCancel
-            ..gestureSettings = gestureSettings;
+            ..gestureSettings = gestureSettings
+            ..supportedDevices = supportedDevices;
         },
       );
     }
@@ -1057,7 +1066,8 @@ class GestureDetector extends StatelessWidget {
             ..onDoubleTapDown = onDoubleTapDown
             ..onDoubleTap = onDoubleTap
             ..onDoubleTapCancel = onDoubleTapCancel
-            ..gestureSettings = gestureSettings;
+            ..gestureSettings = gestureSettings
+            ..supportedDevices = supportedDevices;
         },
       );
     }
@@ -1108,7 +1118,8 @@ class GestureDetector extends StatelessWidget {
             ..onTertiaryLongPressMoveUpdate = onTertiaryLongPressMoveUpdate
             ..onTertiaryLongPressUp = onTertiaryLongPressUp
             ..onTertiaryLongPressEnd = onTertiaryLongPressEnd
-            ..gestureSettings = gestureSettings;
+            ..gestureSettings = gestureSettings
+            ..supportedDevices = supportedDevices;
         },
       );
     }
@@ -1128,7 +1139,8 @@ class GestureDetector extends StatelessWidget {
             ..onEnd = onVerticalDragEnd
             ..onCancel = onVerticalDragCancel
             ..dragStartBehavior = dragStartBehavior
-            ..gestureSettings = gestureSettings;
+            ..gestureSettings = gestureSettings
+            ..supportedDevices = supportedDevices;
         },
       );
     }
@@ -1148,7 +1160,8 @@ class GestureDetector extends StatelessWidget {
             ..onEnd = onHorizontalDragEnd
             ..onCancel = onHorizontalDragCancel
             ..dragStartBehavior = dragStartBehavior
-            ..gestureSettings = gestureSettings;
+            ..gestureSettings = gestureSettings
+            ..supportedDevices = supportedDevices;
         },
       );
     }
@@ -1168,7 +1181,8 @@ class GestureDetector extends StatelessWidget {
             ..onEnd = onPanEnd
             ..onCancel = onPanCancel
             ..dragStartBehavior = dragStartBehavior
-            ..gestureSettings = gestureSettings;
+            ..gestureSettings = gestureSettings
+            ..supportedDevices = supportedDevices;
         },
       );
     }
@@ -1182,7 +1196,10 @@ class GestureDetector extends StatelessWidget {
             ..onUpdate = onScaleUpdate
             ..onEnd = onScaleEnd
             ..dragStartBehavior = dragStartBehavior
-            ..gestureSettings = gestureSettings;
+            ..gestureSettings = gestureSettings
+            ..trackpadScrollCausesScale = trackpadScrollCausesScale
+            ..trackpadScrollToScaleFactor = trackpadScrollToScaleFactor
+            ..supportedDevices = supportedDevices;
         },
       );
     }
@@ -1199,7 +1216,8 @@ class GestureDetector extends StatelessWidget {
             ..onPeak = onForcePressPeak
             ..onUpdate = onForcePressUpdate
             ..onEnd = onForcePressEnd
-            ..gestureSettings = gestureSettings;
+            ..gestureSettings = gestureSettings
+            ..supportedDevices = supportedDevices;
         },
       );
     }
@@ -1222,7 +1240,7 @@ class GestureDetector extends StatelessWidget {
 /// A widget that detects gestures described by the given gesture
 /// factories.
 ///
-/// For common gestures, use a [GestureRecognizer].
+/// For common gestures, use a [GestureDetector].
 /// [RawGestureDetector] is useful primarily when developing your
 /// own gesture recognizers.
 ///
@@ -1272,8 +1290,7 @@ class RawGestureDetector extends StatefulWidget {
     this.behavior,
     this.excludeFromSemantics = false,
     this.semantics,
-  }) : assert(gestures != null),
-       assert(excludeFromSemantics != null);
+  });
 
   /// The widget below this widget in the tree.
   ///
@@ -1555,7 +1572,7 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
     super.child,
     required this.behavior,
     required this.assignSemantics,
-  }) : assert(assignSemantics != null);
+  });
 
   final HitTestBehavior behavior;
   final _AssignSemantics assignSemantics;
@@ -1628,7 +1645,6 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
     }
 
     return () {
-      assert(tap != null);
       tap.onTapDown?.call(TapDownDetails());
       tap.onTapUp?.call(TapUpDetails(kind: PointerDeviceKind.unknown));
       tap.onTap?.call();

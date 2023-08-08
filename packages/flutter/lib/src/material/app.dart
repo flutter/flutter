@@ -214,6 +214,7 @@ class MaterialApp extends StatefulWidget {
     this.onGenerateRoute,
     this.onGenerateInitialRoutes,
     this.onUnknownRoute,
+    this.onNavigationNotification = WidgetsApp.defaultOnNavigationNotification,
     List<NavigatorObserver> this.navigatorObservers = const <NavigatorObserver>[],
     this.builder,
     this.title = '',
@@ -241,17 +242,13 @@ class MaterialApp extends StatefulWidget {
     this.actions,
     this.restorationScopeId,
     this.scrollBehavior,
+    @Deprecated(
+      'Remove this parameter as it is now ignored. '
+      'MaterialApp never introduces its own MediaQuery; the View widget takes care of that. '
+      'This feature was deprecated after v3.7.0-29.0.pre.'
+    )
     this.useInheritedMediaQuery = false,
-  }) : assert(routes != null),
-       assert(navigatorObservers != null),
-       assert(title != null),
-       assert(debugShowMaterialGrid != null),
-       assert(showPerformanceOverlay != null),
-       assert(checkerboardRasterCacheImages != null),
-       assert(checkerboardOffscreenLayers != null),
-       assert(showSemanticsDebugger != null),
-       assert(debugShowCheckedModeBanner != null),
-       routeInformationProvider = null,
+  }) : routeInformationProvider = null,
        routeInformationParser = null,
        routerDelegate = null,
        backButtonDispatcher = null,
@@ -271,6 +268,7 @@ class MaterialApp extends StatefulWidget {
     this.builder,
     this.title = '',
     this.onGenerateTitle,
+    this.onNavigationNotification = WidgetsApp.defaultOnNavigationNotification,
     this.color,
     this.theme,
     this.darkTheme,
@@ -294,15 +292,13 @@ class MaterialApp extends StatefulWidget {
     this.actions,
     this.restorationScopeId,
     this.scrollBehavior,
+    @Deprecated(
+      'Remove this parameter as it is now ignored. '
+      'MaterialApp never introduces its own MediaQuery; the View widget takes care of that. '
+      'This feature was deprecated after v3.7.0-29.0.pre.'
+    )
     this.useInheritedMediaQuery = false,
   }) : assert(routerDelegate != null || routerConfig != null),
-       assert(title != null),
-       assert(debugShowMaterialGrid != null),
-       assert(showPerformanceOverlay != null),
-       assert(checkerboardRasterCacheImages != null),
-       assert(checkerboardOffscreenLayers != null),
-       assert(showSemanticsDebugger != null),
-       assert(debugShowCheckedModeBanner != null),
        navigatorObservers = null,
        navigatorKey = null,
        onGenerateRoute = null,
@@ -348,6 +344,9 @@ class MaterialApp extends StatefulWidget {
 
   /// {@macro flutter.widgets.widgetsApp.onUnknownRoute}
   final RouteFactory? onUnknownRoute;
+
+  /// {@macro flutter.widgets.widgetsApp.onNavigationNotification}
+  final NotificationListenerCallback<NavigationNotification>? onNavigationNotification;
 
   /// {@macro flutter.widgets.widgetsApp.navigatorObservers}
   final List<NavigatorObserver>? navigatorObservers;
@@ -749,6 +748,11 @@ class MaterialApp extends StatefulWidget {
   final bool debugShowMaterialGrid;
 
   /// {@macro flutter.widgets.widgetsApp.useInheritedMediaQuery}
+  @Deprecated(
+    'This setting is now ignored. '
+    'MaterialApp never introduces its own MediaQuery; the View widget takes care of that. '
+    'This feature was deprecated after v3.7.0-29.0.pre.'
+  )
   final bool useInheritedMediaQuery;
 
   @override
@@ -817,7 +821,7 @@ class MaterialScrollBehavior extends ScrollBehavior {
   @override
   Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in
-    // the base class as well.
+    // the base class ScrollBehavior as well.
     switch (axisDirectionToAxis(details.direction)) {
       case Axis.horizontal:
         return child;
@@ -826,6 +830,7 @@ class MaterialScrollBehavior extends ScrollBehavior {
           case TargetPlatform.linux:
           case TargetPlatform.macOS:
           case TargetPlatform.windows:
+            assert(details.controller != null);
             return Scrollbar(
               controller: details.controller,
               child: child,
@@ -841,7 +846,7 @@ class MaterialScrollBehavior extends ScrollBehavior {
   @override
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in
-    // the base class as well.
+    // the base class ScrollBehavior as well.
     late final AndroidOverscrollIndicator indicator;
     if (Theme.of(context).useMaterial3) {
       indicator = AndroidOverscrollIndicator.stretch;
@@ -865,16 +870,16 @@ class MaterialScrollBehavior extends ScrollBehavior {
               child: child,
             );
           case AndroidOverscrollIndicator.glow:
-            continue glow;
+            break;
         }
-      glow:
       case TargetPlatform.fuchsia:
-        return GlowingOverscrollIndicator(
-          axisDirection: details.direction,
-          color: Theme.of(context).colorScheme.secondary,
-          child: child,
-        );
+        break;
     }
+    return GlowingOverscrollIndicator(
+      axisDirection: details.direction,
+      color: Theme.of(context).colorScheme.secondary,
+      child: child,
+    );
   }
 }
 
@@ -911,15 +916,14 @@ class _MaterialAppState extends State<MaterialApp> {
     );
   }
 
-  Widget _materialBuilder(BuildContext context, Widget? child) {
+  ThemeData _themeBuilder(BuildContext context) {
+    ThemeData? theme;
     // Resolve which theme to use based on brightness and high contrast.
     final ThemeMode mode = widget.themeMode ?? ThemeMode.system;
     final Brightness platformBrightness = MediaQuery.platformBrightnessOf(context);
     final bool useDarkTheme = mode == ThemeMode.dark
       || (mode == ThemeMode.system && platformBrightness == ui.Brightness.dark);
     final bool highContrast = MediaQuery.highContrastOf(context);
-    ThemeData? theme;
-
     if (useDarkTheme && highContrast && widget.highContrastDarkTheme != null) {
       theme = widget.highContrastDarkTheme;
     } else if (useDarkTheme && widget.darkTheme != null) {
@@ -928,6 +932,11 @@ class _MaterialAppState extends State<MaterialApp> {
       theme = widget.highContrastTheme;
     }
     theme ??= widget.theme ?? ThemeData.light();
+    return theme;
+  }
+
+  Widget _materialBuilder(BuildContext context, Widget? child) {
+    final ThemeData theme = _themeBuilder(context);
     final Color effectiveSelectionColor = theme.textSelectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
     final Color effectiveCursorColor = theme.textSelectionTheme.cursorColor ?? theme.colorScheme.primary;
 
@@ -999,7 +1008,6 @@ class _MaterialAppState extends State<MaterialApp> {
         shortcuts: widget.shortcuts,
         actions: widget.actions,
         restorationScopeId: widget.restorationScopeId,
-        useInheritedMediaQuery: widget.useInheritedMediaQuery,
       );
     }
 
@@ -1016,6 +1024,7 @@ class _MaterialAppState extends State<MaterialApp> {
       onGenerateRoute: widget.onGenerateRoute,
       onGenerateInitialRoutes: widget.onGenerateInitialRoutes,
       onUnknownRoute: widget.onUnknownRoute,
+      onNavigationNotification: widget.onNavigationNotification,
       builder: _materialBuilder,
       title: widget.title,
       onGenerateTitle: widget.onGenerateTitle,
@@ -1035,7 +1044,6 @@ class _MaterialAppState extends State<MaterialApp> {
       shortcuts: widget.shortcuts,
       actions: widget.actions,
       restorationScopeId: widget.restorationScopeId,
-      useInheritedMediaQuery: widget.useInheritedMediaQuery,
     );
   }
 

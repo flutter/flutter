@@ -29,13 +29,15 @@ class AnalyzeCommand extends FlutterCommand {
     required ProcessManager processManager,
     required Artifacts artifacts,
     required List<ProjectValidator> allProjectValidators,
+    required bool suppressAnalytics,
   }) : _artifacts = artifacts,
        _fileSystem = fileSystem,
        _processManager = processManager,
        _logger = logger,
        _terminal = terminal,
        _allProjectValidators = allProjectValidators,
-       _platform = platform {
+       _platform = platform,
+       _suppressAnalytics = suppressAnalytics {
     argParser.addFlag('flutter-repo',
         negatable: false,
         help: 'Include all the examples and tests from the Flutter repository.',
@@ -65,6 +67,12 @@ class AnalyzeCommand extends FlutterCommand {
         hide: !verboseHelp);
     argParser.addFlag('suggestions',
         help: 'Show suggestions about the current flutter project.'
+    );
+    argParser.addFlag('machine',
+        negatable: false,
+        help: 'Dumps a JSON with a subset of relevant data about the tool, project, '
+              'and environment.',
+        hide: !verboseHelp,
     );
 
     // Hidden option to enable a benchmarking mode.
@@ -103,6 +111,7 @@ class AnalyzeCommand extends FlutterCommand {
   final ProcessManager _processManager;
   final Platform _platform;
   final List<ProjectValidator> _allProjectValidators;
+  final bool _suppressAnalytics;
 
   @override
   String get name => 'analyze';
@@ -119,7 +128,7 @@ class AnalyzeCommand extends FlutterCommand {
   @override
   bool get shouldRunPub {
     // If they're not analyzing the current project.
-    if (!boolArgDeprecated('current-package')) {
+    if (!boolArg('current-package')) {
       return false;
     }
 
@@ -128,16 +137,19 @@ class AnalyzeCommand extends FlutterCommand {
       return false;
     }
 
+    // Don't run pub if asking for machine output.
+    if (boolArg('machine')) {
+      return false;
+    }
+
     return super.shouldRunPub;
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final bool? suggestionFlag = boolArg('suggestions');
-    if (suggestionFlag != null && suggestionFlag == true) {
+    if (boolArg('suggestions')) {
       final String directoryPath;
-      final bool? watchFlag = boolArg('watch');
-      if (watchFlag != null && watchFlag) {
+      if (boolArg('watch')) {
         throwToolExit('flag --watch is not compatible with --suggestions');
       }
       if (workingDirectory == null) {
@@ -159,11 +171,11 @@ class AnalyzeCommand extends FlutterCommand {
         allProjectValidators: _allProjectValidators,
         userPath: directoryPath,
         processManager: _processManager,
+        machine: boolArg('machine'),
       ).run();
-    } else if (boolArgDeprecated('watch')) {
+    } else if (boolArg('watch')) {
       await AnalyzeContinuously(
         argResults!,
-        runner!.getRepoRoots(),
         runner!.getRepoPackages(),
         fileSystem: _fileSystem,
         logger: _logger,
@@ -171,11 +183,11 @@ class AnalyzeCommand extends FlutterCommand {
         processManager: _processManager,
         terminal: _terminal,
         artifacts: _artifacts,
+        suppressAnalytics: _suppressAnalytics,
       ).analyze();
     } else {
       await AnalyzeOnce(
         argResults!,
-        runner!.getRepoRoots(),
         runner!.getRepoPackages(),
         workingDirectory: workingDirectory,
         fileSystem: _fileSystem,
@@ -184,6 +196,7 @@ class AnalyzeCommand extends FlutterCommand {
         processManager: _processManager,
         terminal: _terminal,
         artifacts: _artifacts,
+        suppressAnalytics: _suppressAnalytics,
       ).analyze();
     }
     return FlutterCommandResult.success();

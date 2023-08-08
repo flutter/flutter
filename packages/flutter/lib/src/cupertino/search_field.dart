@@ -108,10 +108,11 @@ class CupertinoSearchTextField extends StatefulWidget {
     this.decoration,
     this.backgroundColor,
     this.borderRadius,
-    this.padding = const EdgeInsetsDirectional.fromSTEB(3.8, 8, 5, 8),
+    this.keyboardType = TextInputType.text,
+    this.padding = const EdgeInsetsDirectional.fromSTEB(5.5, 8, 5.5, 8),
     this.itemColor = CupertinoColors.secondaryLabel,
     this.itemSize = 20.0,
-    this.prefixInsets = const EdgeInsetsDirectional.fromSTEB(6, 0, 0, 4),
+    this.prefixInsets = const EdgeInsetsDirectional.fromSTEB(6, 0, 0, 3),
     this.prefixIcon = const Icon(CupertinoIcons.search),
     this.suffixInsets = const EdgeInsetsDirectional.fromSTEB(0, 0, 5, 2),
     this.suffixIcon = const Icon(CupertinoIcons.xmark_circle_fill),
@@ -121,18 +122,12 @@ class CupertinoSearchTextField extends StatefulWidget {
     this.focusNode,
     this.smartQuotesType,
     this.smartDashesType,
+    this.enableIMEPersonalizedLearning = true,
     this.autofocus = false,
     this.onTap,
     this.autocorrect = true,
     this.enabled,
-  })  : assert(padding != null),
-        assert(itemColor != null),
-        assert(itemSize != null),
-        assert(prefixInsets != null),
-        assert(suffixInsets != null),
-        assert(suffixIcon != null),
-        assert(suffixMode != null),
-        assert(
+  })  : assert(
           !((decoration != null) && (backgroundColor != null)),
           'Cannot provide both a background color and a decoration\n'
           'To provide both, use "decoration: BoxDecoration(color: '
@@ -194,6 +189,11 @@ class CupertinoSearchTextField extends StatefulWidget {
   // TODO(DanielEdrisian): Must make border radius continuous, see
   // https://github.com/flutter/flutter/issues/13914.
   final BorderRadius? borderRadius;
+
+  /// The keyboard type for this search field.
+  ///
+  /// Defaults to [TextInputType.text].
+  final TextInputType? keyboardType;
 
   /// Sets the padding insets for the text and placeholder.
   ///
@@ -312,6 +312,9 @@ class CupertinoSearchTextField extends StatefulWidget {
   ///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
   final SmartDashesType? smartDashesType;
 
+  /// {@macro flutter.services.TextInputConfiguration.enableIMEPersonalizedLearning}
+  final bool enableIMEPersonalizedLearning;
+
   /// Disables the text field when false.
   ///
   /// Text fields in disabled states have a light grey background and don't
@@ -397,8 +400,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
 
     // The icon size will be scaled by a factor of the accessibility text scale,
     // to follow the behavior of `UISearchTextField`.
-    final double scaledIconSize =
-        MediaQuery.textScaleFactorOf(context) * widget.itemSize;
+    final double scaledIconSize = MediaQuery.textScalerOf(context).textScaleFactor * widget.itemSize;
 
     // If decoration was not provided, create a decoration with the provided
     // background color and border radius.
@@ -440,6 +442,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       style: widget.style,
       prefix: prefix,
       suffix: suffix,
+      keyboardType: widget.keyboardType,
       onTap: widget.onTap,
       enabled: widget.enabled,
       suffixMode: widget.suffixMode,
@@ -453,6 +456,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       autocorrect: widget.autocorrect,
       smartQuotesType: widget.smartQuotesType,
       smartDashesType: widget.smartDashesType,
+      enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
       textInputAction: TextInputAction.search,
     );
   }
