@@ -32,12 +32,11 @@ void main() {
     testWidgetsWithLeakTracking(_test1TrackingOn, (WidgetTester widgetTester) async {
       expect(_isTrackingOn, true);
       expect(LeakTracking.phase.name, _test1TrackingOn);
-      expect(LeakTracking.phase.isPaused, false);
     });
 
     testWidgets(_test2TrackingOffLeaks, (WidgetTester widgetTester) async {
       expect(_isTrackingOn, false);
-      expect(LeakTracking.phase.isPaused, true);
+      expect(LeakTracking.phase.name, null);
       await widgetTester.pumpWidget(StatelessLeakingWidget());
     });
   },
@@ -47,7 +46,6 @@ void main() {
     expect(_isTrackingOn, true);
     expect(LeakTracking.phase.name, _test3TrackingOn);
     expect(LeakTracking.phase.isPaused, false);
-
   },
   skip: kIsWeb); // [intended] Leak tracking is off for web.
 }
