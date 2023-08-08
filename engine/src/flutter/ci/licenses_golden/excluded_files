@@ -2691,6 +2691,10 @@
 ../../../third_party/skia/include/utils/BUILD.bazel
 ../../../third_party/skia/include/utils/mac/BUILD.bazel
 ../../../third_party/skia/infra
+../../../third_party/skia/modules/bentleyottmann/BUILD.bazel
+../../../third_party/skia/modules/bentleyottmann/include/BUILD.bazel
+../../../third_party/skia/modules/bentleyottmann/src/BUILD.bazel
+../../../third_party/skia/modules/bentleyottmann/tests
 ../../../third_party/skia/modules/canvaskit/.gitignore
 ../../../third_party/skia/modules/canvaskit/BUILD.bazel
 ../../../third_party/skia/modules/canvaskit/CHANGELOG.md
