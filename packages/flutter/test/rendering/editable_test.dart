@@ -9,8 +9,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/src/services/text_input.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'mock_canvas.dart';
-import 'recording_canvas.dart';
 import 'rendering_tester.dart';
 
 void _applyParentData(List<RenderBox> inlineRenderBoxes, InlineSpan span) {

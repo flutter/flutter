@@ -10,8 +10,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-import '../rendering/recording_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
@@ -489,7 +487,6 @@ void main() {
     expect(tabBarBox.size.height, 48.0);
 
     const double indicatorWeight = 3.0;
-
 
     final RRect rrect = ui.ParagraphBuilder.shouldDisableRoundingHack
       ? RRect.fromLTRBAndCorners(

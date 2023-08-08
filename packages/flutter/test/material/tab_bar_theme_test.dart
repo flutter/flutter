@@ -14,8 +14,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 const String _tab1Text = 'tab 1';
 const String _tab2Text = 'tab 2';
 const String _tab3Text = 'tab 3';
@@ -1133,5 +1131,91 @@ void main() {
       final double tabTwoRight = (800 / 2) + tabTwoRect.width + kTabLabelPadding.right;
       expect(tabTwoRect.right, equals(tabTwoRight));
     });
+  });
+
+  testWidgets('Material3 - TabBar indicator respects TabBarTheme.indicatorColor', (WidgetTester tester) async {
+    final List<Widget> tabs = List<Widget>.generate(4, (int index) {
+      return Tab(text: 'Tab $index');
+    });
+
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    const Color tabBarThemeIndicatorColor = Color(0xffff0000);
+
+    Widget buildTabBar({ required ThemeData theme }) {
+      return MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Container(
+            alignment: Alignment.topLeft,
+            child: TabBar(
+              controller: controller,
+              tabs: tabs,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTabBar(theme: ThemeData(useMaterial3: true)));
+
+    RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    expect(tabBarBox,paints..rrect(color: ThemeData(useMaterial3: true).colorScheme.primary));
+
+    await tester.pumpWidget(buildTabBar(theme: ThemeData(
+      useMaterial3: true,
+      tabBarTheme: const TabBarTheme(indicatorColor: tabBarThemeIndicatorColor)
+    )));
+    await tester.pumpAndSettle();
+
+    tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    expect(tabBarBox,paints..rrect(color: tabBarThemeIndicatorColor));
+  });
+
+  testWidgets('Material2 - TabBar indicator respects TabBarTheme.indicatorColor', (WidgetTester tester) async {
+    final List<Widget> tabs = List<Widget>.generate(4, (int index) {
+      return Tab(text: 'Tab $index');
+    });
+
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    const Color themeIndicatorColor = Color(0xffff0000);
+    const Color tabBarThemeIndicatorColor = Color(0xffffff00);
+
+    Widget buildTabBar({ Color? themeIndicatorColor, Color? tabBarThemeIndicatorColor }) {
+      return MaterialApp(
+        theme: ThemeData(
+          indicatorColor: themeIndicatorColor,
+          tabBarTheme: TabBarTheme(indicatorColor: tabBarThemeIndicatorColor),
+          useMaterial3: false,
+        ),
+        home: Material(
+          child: Container(
+            alignment: Alignment.topLeft,
+            child: TabBar(
+              controller: controller,
+              tabs: tabs,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTabBar(themeIndicatorColor: themeIndicatorColor));
+
+    RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    expect(tabBarBox,paints..line(color: themeIndicatorColor));
+
+    await tester.pumpWidget(buildTabBar(tabBarThemeIndicatorColor: tabBarThemeIndicatorColor));
+    await tester.pumpAndSettle();
+
+    tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    expect(tabBarBox,paints..line(color: tabBarThemeIndicatorColor));
   });
 }
