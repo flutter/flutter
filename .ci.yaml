@@ -2665,7 +2665,7 @@ targets:
       ignore_flakiness: "true"
       tags: >
         ["devicelab", "android", "linux", "samsung", "s10"]
-      task_name: draw_vertices_atlas_opengles__timeline_summary
+      task_name: draw_atlas_perf_opengles__timeline_summary
 
   - name: Linux_samsung_s10 draw_atlas_perf__timeline_summary
     recipe: devicelab/devicelab_drone
