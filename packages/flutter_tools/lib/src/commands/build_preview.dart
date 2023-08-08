@@ -1,6 +1,5 @@
 import 'package:file/file.dart';
 
-import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/process.dart';
 import '../build_info.dart';
