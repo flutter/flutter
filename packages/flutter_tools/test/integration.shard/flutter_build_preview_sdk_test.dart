@@ -56,6 +56,7 @@ void main() {
         'build',
         'apk',
         '--debug',
+        '-v',
       ], workingDirectory: exampleAppDir.path);
       expect(result.stdout, contains('Built build/app/outputs/flutter-apk/app-debug.apk.'));
       expect(exampleAppDir.childDirectory('build')
@@ -84,6 +85,7 @@ void main() {
         'build',
         'apk',
         '--debug',
+        '-v',
       ], workingDirectory: exampleAppDir.path);
       expect(result.stdout, contains('Built build/app/outputs/flutter-apk/app-debug.apk.'));
       expect(exampleAppDir.childDirectory('build')
@@ -120,6 +122,7 @@ void main() {
         'build',
         'apk',
         '--debug',
+        '-v',
       ], workingDirectory: exampleAppDir.path);
       expect(result.stdout, contains('Built build/app/outputs/flutter-apk/app-debug.apk.'));
       expect(exampleAppDir.childDirectory('build')
