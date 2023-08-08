@@ -156,7 +156,7 @@ class PopupMenuThemeData with Diagnosticable {
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
       position: t < 0.5 ? a?.position : b?.position,
       iconColor: Color.lerp(a?.iconColor, b?.iconColor, t),
-      iconSize: t < 0.5 ? a?.iconSize : b?.iconSize,
+      iconSize: lerpDouble(a?.iconSize, b?.iconSize, t),
     );
   }
 
