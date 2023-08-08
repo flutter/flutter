@@ -49,7 +49,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
 // run m3 applications.
 #ifdef FML_OS_ANDROID
   return true;
-#endif
+#else
 
   auto context = renderer.GetContext();
   auto library = context->GetShaderLibrary();
@@ -261,6 +261,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
     return restore.Render(renderer, entity, pass);
   }
   return true;
+#endif  // FML_OS_ANDROID
 }
 
 }  // namespace impeller

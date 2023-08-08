@@ -96,7 +96,7 @@ TEST_F(EmbedderTest, CannotProvideMultipleSemanticsCallbacks) {
 TEST_F(EmbedderA11yTest, A11yTreeIsConsistent) {
 #if defined(OS_FUCHSIA)
   GTEST_SKIP() << "This test crashes on Fuchsia. https://fxbug.dev/87493 ";
-#endif  // OS_FUCHSIA
+#else
 
   auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
 
@@ -269,12 +269,13 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistent) {
   result = FlutterEngineUpdateSemanticsEnabled(engine.get(), false);
   ASSERT_EQ(result, FlutterEngineResult::kSuccess);
   notify_semantics_enabled_latch_3.Wait();
+#endif  // OS_FUCHSIA
 }
 
 TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingUnstableCallbacks) {
 #if defined(OS_FUCHSIA)
   GTEST_SKIP() << "This test crashes on Fuchsia. https://fxbug.dev/87493 ";
-#endif  // OS_FUCHSIA
+#else
 
   auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
 
@@ -445,6 +446,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingUnstableCallbacks) {
   result = FlutterEngineUpdateSemanticsEnabled(engine.get(), false);
   ASSERT_EQ(result, FlutterEngineResult::kSuccess);
   notify_semantics_enabled_latch_3.Wait();
+#endif  // OS_FUCHSIA
 }
 
 TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingLegacyCallbacks) {

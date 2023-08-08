@@ -104,7 +104,7 @@ static void TestPerformanceOverlayLayerGold(int refresh_rate) {
   // platforms.
 #if !defined(FML_OS_LINUX)
   GTEST_SKIP() << "Skipping golden tests on non-Linux OSes";
-#endif  // FML_OS_LINUX
+#else
   const bool golden_data_matches = golden_data->equals(snapshot_data.get());
   if (!golden_data_matches) {
     SkFILEWStream wstream(new_golden_file_path.c_str());
@@ -126,6 +126,7 @@ static void TestPerformanceOverlayLayerGold(int refresh_rate) {
         << "See also the base64 encoded " << new_golden_file_path << ":\n"
         << b64_char;
   }
+#endif  // FML_OS_LINUX
 }
 
 }  // namespace
