@@ -2230,4 +2230,28 @@ testWidgetsWithLeakTracking('InkResponse radius can be updated', (WidgetTester t
 
     await gesture.up();
   });
+
+  testWidgetsWithLeakTracking('try out hoverDuration property', (WidgetTester tester) async {
+    final List<String> log = <String>[];
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: Center(
+          child: InkWell(
+            hoverDuration: const Duration(milliseconds: 1000),
+            onTap: () {
+              log.add('tap');
+            },
+          ),
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byType(InkWell), pointer: 1);
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(log, equals(<String>['tap']));
+    log.clear();
+  });
 }
