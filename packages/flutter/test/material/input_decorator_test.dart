@@ -388,7 +388,7 @@ void runAllTests({ required bool useMaterial3 }) {
       expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
     }
 
-    //InputDecorator input/label text layout with floatingLabelGap: appears above input text
+    // InputDecorator input/label text layout with floatingLabelGap: appears above input text
     // The label appears above the input text.
     await tester.pumpWidget(
       buildInputDecorator(
@@ -549,7 +549,7 @@ void runAllTests({ required bool useMaterial3 }) {
       ),
     );
 
-    // The label animates upwards from it's initial position
+    // The label animates upwards from its initial position
     // above the input text. The animation's duration is 167ms.
     await tester.pump(const Duration(milliseconds: 50));
     final double labelY50ms = tester.getTopLeft(find.text('label')).dy;
