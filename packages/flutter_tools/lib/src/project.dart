@@ -602,7 +602,7 @@ class AndroidProject extends FlutterProjectPlatform {
         hostAppGradleRoot, globals.logger, globals.processManager);
     final String? agpVersion =
         gradle.getAgpVersion(hostAppGradleRoot, globals.logger);
-    final String? javaVersion = _versionToParsableString(globals.java?.version);
+    final String? javaVersion = versionToParsableString(globals.java?.version);
 
     // Assume valid configuration.
     String description = validJavaGradleAgpString;
@@ -926,7 +926,7 @@ class CompatibilityResult {
 }
 
 /// Converts a [Version] to a string that can be parsed by [Version.parse].
-String? _versionToParsableString(Version? version) {
+String? versionToParsableString(Version? version) {
   if (version == null) {
     return null;
   }

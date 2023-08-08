@@ -482,8 +482,13 @@ Your $application code is in $relativeAppMain.
     }
 
     if(includeAndroid && globals.java?.version != null) {
-      _printWarningIncompatibleJavaGradleVersions(javaVersion: globals.java?.version as String, templateGradleVersion: templateContext['gradleVersion'] as String, projectType: template);
-      _printWarningIncompatibleJavaAgpVersions(javaVersion: globals.java?.version as String, templateAgpVersion: templateContext['agpVersion'] as String, projectType: template);
+      _printIncompatibleJavaAgpGradleVersionsWarning(
+        javaVersion: versionToParsableString(globals.java?.version),
+        templateGradleVersion: templateContext['gradleVersion']! as String,
+        templateAgpVersion: templateContext['agpVersion']! as String,
+        projectType: template,
+        projectDirPath: projectDirPath,
+      );
     }
 
     return FlutterCommandResult.success();
@@ -797,56 +802,74 @@ For more details, see: https://flutter.dev/docs/get-started/web
   }
 }
 
-// TODO(camsim99): combine warnings into one
-void _printWarningIncompatibleJavaGradleVersions({required String javaVersion, required String templateGradleVersion, required FlutterProjectType projectType}) {
-  if (gradle.validateJavaGradle(globals.logger, javaV: javaVersion, gradleV: templateGradleVersion)) {
-    // Java version and Gradle versions are compatible.
+void _printIncompatibleJavaAgpGradleVersionsWarning({
+  required String? javaVersion,
+  required String templateGradleVersion,
+  required String templateAgpVersion,
+  required FlutterProjectType projectType,
+  required String projectDirPath}) {
+  // print(javaVersion);
+  // print(templateAgpVersion);
+  // print(templateAgpVersion);
+  final bool javaGradleVersionsCompatible = gradle.validateJavaGradle(globals.logger, javaV: javaVersion, gradleV: templateGradleVersion);
+  final bool javaAgpVersionsCompatible = gradle.validateJavaAgp(globals.logger, javaV: javaVersion, agpV: templateAgpVersion);
+  final bool javaVersionNotFound = javaVersion == null;
+  // TODO(camsim99): Need?
+  final bool packageGenerated = projectType == FlutterProjectType.package;
+  final bool pluginOrPackageGenerated = packageGenerated || projectType == FlutterProjectType.plugin || projectType == FlutterProjectType.pluginFfi;
+
+  if (javaGradleVersionsCompatible && javaAgpVersionsCompatible || javaVersionNotFound) {
+    // Java/AGP template/Gradle template versions compatible.
     return;
   }
 
-  //TODO(camsim99): try different styles
-  //TODO(camsim99): Get actual path(s)? for gradle properties files.
-  //TODO(camsim99): For update Gradle option, link to help docs if they run into errors, include gradlew update -d ... command they can use, link to docs
-  //TOOD: Also link to Java/Gradle incompatibility docs on flutter.dev and mention range of gradle versions they can update to
-  globals.printWarning('''
-The version of Java detected conflicts with the Gradle version used in your new
-Flutter $projectType.
+  // Assumes only one of template Java or AGP versions can be incompatible with Java version because:
+  //   * Minimum Java version for a given AGP version is less than the maximum Java version compatible for the minimum Gradle version
+  //     required for that AGP version (too low a Java version will fail AGP compatibility test, but not Gradle compatibility).
+  //   * Maximum Java version compatible with minimum Gradle version for a given AGP version is higher than minimum Java version
+  //     required for that AGP version (too high a Java version will fail Gradle compatibility test, but not AGP compatibility test).
+  final String incompatibleGradleOrAgpVersion = javaGradleVersionsCompatible ? 'Gradle version' : 'Android Gradle Plugin (AGP) version';
+  final String incompatibleVersionsAndRecommendedOptionMessage = '''
+The configured version of Java detected conflicts with the $incompatibleGradleOrAgpVersion in your new Flutter $projectType.
 
-[RECOMMENDED] To keep the default Gradle version $templateGradleVersion, make
+[RECOMMENDED] To keep the default AGP version $templateAgpVersion, make
 sure to download a compatible Java version. You may configure this compatible
-Java version by running: `flutter config --jdk-dir=<JDK_DIRECTORY>`.
+Java version by running: `flutter config --jdk-dir=<JDK_DIRECTORY>`. Note that
+this is a global configuration.
+''';
+
+  if (!javaGradleVersionsCompatible) {
+    // Gradle template version incompatible with Java version.
+    globals.printWarning('''
+$incompatibleVersionsAndRecommendedOptionMessage
 
 Alternatively, to continue using your configured Java version, update the Gradle
-version specified in any `android/gradle/wrapper/gradle-wrapper.properties`
-files to a compatible Gradle version.
+version specified in the following files to a compatible Gradle version:
+${_getBuildGradleWrapperPropertiesFilePath(projectType, projectDirPath)}
+
+You may also update the Gradle version used by running
+`./gradlew wrapper --gradle-version=<COMPATIBLE_GRADLE_VERSION>`.
 
 See
 https://docs.gradle.org/current/userguide/compatibility.html#java for more
-details on compatible Java/Gradle versions.
+details on compatible Java/Gradle versions. See
+https://docs.gradle.org/current/userguide/gradle_wrapper.html#sec:upgrading_wrapper
+for more details on using the Gradle Wrapper command to update the Gradle version
+used.
 ''',
-    emphasis: true
-  );
-}
-
-void _printWarningIncompatibleJavaAgpVersions({required String javaVersion, required String templateAgpVersion, required FlutterProjectType projectType}) {
-  if (gradle.validateJavaAgp(globals.logger, javaV: javaVersion, agpV: templateAgpVersion)) {
-    // Java version and AGP versions are compatible.
+      emphasis: true
+    );
     return;
   }
 
-  //TODO(camsim99): try different styles
-  //TODO(camsim99): Get path(s)? based on project type
+  // AGP template version incompatible with Java version.
   globals.printWarning('''
-The version of Java detected conflicts with the Android Gradle Plugin (AGP)
-version used in your new Flutter $projectType.
-
-[STRONGLY RECOMMENDED] To keep the default AGP version $templateAgpVersion, make
-sure to download a compatible Java version. You may configure this compatible
-Java version by running: `flutter config --jdk-dir=<JDK_DIRECTORY>`.
+$incompatibleVersionsAndRecommendedOptionMessage
 
 Alternatively, you may attempt to continue using your configured Java version,
-update the AGP version specified in any `android/build.gradle` files to a
-compatible AGP version.
+update the AGP version specified in the following files to a compatible AGP
+version:
+${_getBuildGradleConfigurationFilePath(projectType, projectDirPath)}
 
 See
 https://developer.android.com/build/releases/gradle-plugin for more details on
@@ -855,3 +878,49 @@ compatible Java/AGP versions.
     emphasis: true
   );
 }
+
+// todo(camsim99): throw error?
+String? _getBuildGradleWrapperPropertiesFilePath(FlutterProjectType projectType, String projectDirPath) {
+  String gradleWrapperPropertiesFilePath = '';
+  switch(projectType) {
+      case FlutterProjectType.app:
+      case FlutterProjectType.skeleton:
+        gradleWrapperPropertiesFilePath = globals.fs.path.join(projectDirPath, 'android/gradle/wrapper/gradle-wrapper.properties');
+      case FlutterProjectType.module:
+        gradleWrapperPropertiesFilePath = globals.fs.path.join(projectDirPath, '.android/gradle/wrapper/gradle-wrapper.properties');
+      case FlutterProjectType.package:
+      case FlutterProjectType.plugin:
+      case FlutterProjectType.pluginFfi:
+        // No gradle-wrapper.properties files not involved in sample code.
+        return null;
+  }
+  return gradleWrapperPropertiesFilePath;
+}
+
+// todo(camsim99): throw error?
+List<String>? _getBuildGradleConfigurationFilePath(FlutterProjectType projectType, String projectDirPath) {
+  final List<String> buildGradleConfigurationFilePaths = <String>[];
+  switch(projectType) {
+      case FlutterProjectType.app:
+      case FlutterProjectType.skeleton:
+      case FlutterProjectType.pluginFfi:
+        buildGradleConfigurationFilePaths.add(globals.fs.path.join(projectDirPath, 'android/build.gradle'));
+      case FlutterProjectType.module:
+        const String moduleBuildGradleFilePath = '.android/build.gradle';
+        const String moduleAppBuildGradleFlePath = '.android/app/build.gradle';
+        const String moduleFlutterBuildGradleFilePath = '.android/Flutter/build.gradle';
+        buildGradleConfigurationFilePaths.addAll(<String>[
+          globals.fs.path.join(projectDirPath, moduleBuildGradleFilePath),
+          globals.fs.path.join(projectDirPath, moduleAppBuildGradleFlePath),
+          globals.fs.path.join(projectDirPath, moduleFlutterBuildGradleFilePath),
+        ]);
+      case FlutterProjectType.plugin:
+        buildGradleConfigurationFilePaths.add(globals.fs.path.join(projectDirPath, 'android/app/build.gradle'));
+      case FlutterProjectType.package:
+        // No build.gradle file because there is no platfrom-specific implementation.
+        return null;
+  }
+  return buildGradleConfigurationFilePaths;
+}
+
+  //TODO(camsim99): Mention range of gradle + agp versions they can update to -- this will require major refactor (3)
