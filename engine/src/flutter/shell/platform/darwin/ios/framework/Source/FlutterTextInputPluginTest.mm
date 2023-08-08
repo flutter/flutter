@@ -12,6 +12,7 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h"
 
 FLUTTER_ASSERT_ARC
 
@@ -62,6 +63,7 @@ FLUTTER_ASSERT_ARC
 @property(nonatomic, assign) FlutterTextInputView* activeView;
 @property(nonatomic, readonly) UIView* keyboardViewContainer;
 @property(nonatomic, readonly) UIView* keyboardView;
+@property(nonatomic, assign) UIView* cachedFirstResponder;
 @property(nonatomic, readonly) CGRect keyboardRect;
 @property(nonatomic, readonly)
     NSMutableDictionary<NSString*, FlutterTextInputView*>* autofillContext;
@@ -2449,6 +2451,7 @@ FLUTTER_ASSERT_ARC
                              result:^(id _Nullable result){
                              }];
   XCTAssertFalse(inputView.isFirstResponder);
+  textInputPlugin.cachedFirstResponder = nil;
 }
 
 - (void)testInteractiveKeyboardAfterUserScrollToTopOfKeyboardWillTakeScreenshot {
@@ -2491,6 +2494,7 @@ FLUTTER_ASSERT_ARC
   for (UIView* subView in textInputPlugin.keyboardViewContainer.subviews) {
     [subView removeFromSuperview];
   }
+  textInputPlugin.cachedFirstResponder = nil;
 }
 
 - (void)testInteractiveKeyboardScreenshotWillBeMovedDownAfterUserScroll {
@@ -2540,6 +2544,7 @@ FLUTTER_ASSERT_ARC
   for (UIView* subView in textInputPlugin.keyboardViewContainer.subviews) {
     [subView removeFromSuperview];
   }
+  textInputPlugin.cachedFirstResponder = nil;
 }
 
 - (void)testInteractiveKeyboardScreenshotWillBeMovedToOrginalPositionAfterUserScroll {
@@ -2595,6 +2600,7 @@ FLUTTER_ASSERT_ARC
   for (UIView* subView in textInputPlugin.keyboardViewContainer.subviews) {
     [subView removeFromSuperview];
   }
+  textInputPlugin.cachedFirstResponder = nil;
 }
 
 - (void)testInteractiveKeyboardFindFirstResponderRecursive {
@@ -2606,6 +2612,7 @@ FLUTTER_ASSERT_ARC
 
   UIView* firstResponder = UIApplication.sharedApplication.keyWindow.flutterFirstResponder;
   XCTAssertEqualObjects(inputView, firstResponder);
+  textInputPlugin.cachedFirstResponder = nil;
 }
 
 - (void)testInteractiveKeyboardFindFirstResponderRecursiveInMultipleSubviews {
@@ -2631,6 +2638,7 @@ FLUTTER_ASSERT_ARC
 
   UIView* firstResponder = UIApplication.sharedApplication.keyWindow.flutterFirstResponder;
   XCTAssertEqualObjects(subFirstResponderInputView, firstResponder);
+  textInputPlugin.cachedFirstResponder = nil;
 }
 
 - (void)testInteractiveKeyboardFindFirstResponderIsNilRecursive {
@@ -2641,6 +2649,246 @@ FLUTTER_ASSERT_ARC
 
   UIView* firstResponder = UIApplication.sharedApplication.keyWindow.flutterFirstResponder;
   XCTAssertNil(firstResponder);
+  textInputPlugin.cachedFirstResponder = nil;
+}
+
+- (void)testInteractiveKeyboardDidResignFirstResponderDelegateisCalledAfterDismissedKeyboard {
+  XCTestExpectation* expectation = [[XCTestExpectation alloc]
+      initWithDescription:
+          @"didResignFirstResponder is called after screenshot keyboard dismissed."];
+  OCMStub([engine flutterTextInputView:[OCMArg any] didResignFirstResponderWithTextInputClient:0])
+      .andDo(^(NSInvocation* invocation) {
+        [expectation fulfill];
+      });
+  CGRect keyboardFrame = CGRectMake(0, 500, 500, 500);
+  [NSNotificationCenter.defaultCenter
+      postNotificationName:UIKeyboardWillShowNotification
+                    object:nil
+                  userInfo:@{UIKeyboardFrameEndUserInfoKey : @(keyboardFrame)}];
+  FlutterMethodCall* initialMoveCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.onPointerMoveForInteractiveKeyboard"
+                                        arguments:@{@"pointerY" : @(500)}];
+  [textInputPlugin handleMethodCall:initialMoveCall
+                             result:^(id _Nullable result){
+                             }];
+  FlutterMethodCall* subsequentMoveCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.onPointerMoveForInteractiveKeyboard"
+                                        arguments:@{@"pointerY" : @(1000)}];
+  [textInputPlugin handleMethodCall:subsequentMoveCall
+                             result:^(id _Nullable result){
+                             }];
+
+  FlutterMethodCall* pointerUpCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.onPointerUpForInteractiveKeyboard"
+                                        arguments:@{@"pointerY" : @(1000)}];
+  [textInputPlugin handleMethodCall:pointerUpCall
+                             result:^(id _Nullable result){
+                             }];
+
+  [self waitForExpectations:@[ expectation ] timeout:1.0];
+  textInputPlugin.cachedFirstResponder = nil;
+}
+
+- (void)testInteractiveKeyboardScreenshotDismissedAfterPointerLiftedAboveMiddleYOfKeyboard {
+  NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
+  XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
+  UIScene* scene = scenes.anyObject;
+  XCTAssert([scene isKindOfClass:[UIWindowScene class]], @"Must be a window scene for test");
+  UIWindowScene* windowScene = (UIWindowScene*)scene;
+  XCTAssert(windowScene.windows.count > 0, @"There must be at least 1 window for test");
+  UIWindow* window = windowScene.windows[0];
+  [window addSubview:viewController.view];
+
+  [viewController loadView];
+
+  CGRect keyboardFrame = CGRectMake(0, 500, 500, 500);
+  [NSNotificationCenter.defaultCenter
+      postNotificationName:UIKeyboardWillShowNotification
+                    object:nil
+                  userInfo:@{UIKeyboardFrameEndUserInfoKey : @(keyboardFrame)}];
+  FlutterMethodCall* initialMoveCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.onPointerMoveForInteractiveKeyboard"
+                                        arguments:@{@"pointerY" : @(500)}];
+  [textInputPlugin handleMethodCall:initialMoveCall
+                             result:^(id _Nullable result){
+                             }];
+  FlutterMethodCall* subsequentMoveCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.onPointerMoveForInteractiveKeyboard"
+                                        arguments:@{@"pointerY" : @(1000)}];
+  [textInputPlugin handleMethodCall:subsequentMoveCall
+                             result:^(id _Nullable result){
+                             }];
+
+  FlutterMethodCall* subsequentMoveBackUpCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.onPointerMoveForInteractiveKeyboard"
+                                        arguments:@{@"pointerY" : @(0)}];
+  [textInputPlugin handleMethodCall:subsequentMoveBackUpCall
+                             result:^(id _Nullable result){
+                             }];
+
+  FlutterMethodCall* pointerUpCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.onPointerUpForInteractiveKeyboard"
+                                        arguments:@{@"pointerY" : @(0)}];
+  [textInputPlugin handleMethodCall:pointerUpCall
+                             result:^(id _Nullable result){
+                             }];
+  NSPredicate* predicate = [NSPredicate predicateWithBlock:^BOOL(id item, NSDictionary* bindings) {
+    return textInputPlugin.keyboardViewContainer.subviews.count == 0;
+  }];
+  XCTNSPredicateExpectation* expectation =
+      [[XCTNSPredicateExpectation alloc] initWithPredicate:predicate object:nil];
+  [self waitForExpectations:@[ expectation ] timeout:10.0];
+  textInputPlugin.cachedFirstResponder = nil;
+}
+
+- (void)testInteractiveKeyboardKeyboardReappearsAfterPointerLiftedAboveMiddleYOfKeyboard {
+  NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
+  XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
+  UIScene* scene = scenes.anyObject;
+  XCTAssert([scene isKindOfClass:[UIWindowScene class]], @"Must be a window scene for test");
+  UIWindowScene* windowScene = (UIWindowScene*)scene;
+  XCTAssert(windowScene.windows.count > 0, @"There must be at least 1 window for test");
+  UIWindow* window = windowScene.windows[0];
+  [window addSubview:viewController.view];
+
+  [viewController loadView];
+
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [UIApplication.sharedApplication.keyWindow addSubview:inputView];
+
+  [inputView setTextInputClient:123];
+  [inputView reloadInputViews];
+  [inputView becomeFirstResponder];
+
+  CGRect keyboardFrame = CGRectMake(0, 500, 500, 500);
+  [NSNotificationCenter.defaultCenter
+      postNotificationName:UIKeyboardWillShowNotification
+                    object:nil
+                  userInfo:@{UIKeyboardFrameEndUserInfoKey : @(keyboardFrame)}];
+  FlutterMethodCall* initialMoveCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.onPointerMoveForInteractiveKeyboard"
+                                        arguments:@{@"pointerY" : @(500)}];
+  [textInputPlugin handleMethodCall:initialMoveCall
+                             result:^(id _Nullable result){
+                             }];
+  FlutterMethodCall* subsequentMoveCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.onPointerMoveForInteractiveKeyboard"
+                                        arguments:@{@"pointerY" : @(1000)}];
+  [textInputPlugin handleMethodCall:subsequentMoveCall
+                             result:^(id _Nullable result){
+                             }];
+
+  FlutterMethodCall* subsequentMoveBackUpCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.onPointerMoveForInteractiveKeyboard"
+                                        arguments:@{@"pointerY" : @(0)}];
+  [textInputPlugin handleMethodCall:subsequentMoveBackUpCall
+                             result:^(id _Nullable result){
+                             }];
+
+  FlutterMethodCall* pointerUpCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.onPointerUpForInteractiveKeyboard"
+                                        arguments:@{@"pointerY" : @(0)}];
+  [textInputPlugin handleMethodCall:pointerUpCall
+                             result:^(id _Nullable result){
+                             }];
+  NSPredicate* predicate = [NSPredicate predicateWithBlock:^BOOL(id item, NSDictionary* bindings) {
+    return textInputPlugin.cachedFirstResponder.isFirstResponder;
+  }];
+  XCTNSPredicateExpectation* expectation =
+      [[XCTNSPredicateExpectation alloc] initWithPredicate:predicate object:nil];
+  [self waitForExpectations:@[ expectation ] timeout:10.0];
+  textInputPlugin.cachedFirstResponder = nil;
+}
+
+- (void)testInteractiveKeyboardKeyboardAnimatesToOriginalPositionalOnPointerUp {
+  NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
+  XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
+  UIScene* scene = scenes.anyObject;
+  XCTAssert([scene isKindOfClass:[UIWindowScene class]], @"Must be a window scene for test");
+  UIWindowScene* windowScene = (UIWindowScene*)scene;
+  XCTAssert(windowScene.windows.count > 0, @"There must be at least 1 window for test");
+  UIWindow* window = windowScene.windows[0];
+  [window addSubview:viewController.view];
+
+  [viewController loadView];
+
+  XCTestExpectation* expectation =
+      [[XCTestExpectation alloc] initWithDescription:@"Keyboard animates to proper position."];
+  CGRect keyboardFrame = CGRectMake(0, 500, 500, 500);
+  [NSNotificationCenter.defaultCenter
+      postNotificationName:UIKeyboardWillShowNotification
+                    object:nil
+                  userInfo:@{UIKeyboardFrameEndUserInfoKey : @(keyboardFrame)}];
+  FlutterMethodCall* initialMoveCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.onPointerMoveForInteractiveKeyboard"
+                                        arguments:@{@"pointerY" : @(500)}];
+  [textInputPlugin handleMethodCall:initialMoveCall
+                             result:^(id _Nullable result){
+                             }];
+  FlutterMethodCall* subsequentMoveCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.onPointerMoveForInteractiveKeyboard"
+                                        arguments:@{@"pointerY" : @(1000)}];
+  [textInputPlugin handleMethodCall:subsequentMoveCall
+                             result:^(id _Nullable result){
+                             }];
+
+  FlutterMethodCall* pointerUpCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.onPointerUpForInteractiveKeyboard"
+                                        arguments:@{@"pointerY" : @(0)}];
+  [textInputPlugin
+      handleMethodCall:pointerUpCall
+                result:^(id _Nullable result) {
+                  XCTAssertEqual(textInputPlugin.keyboardViewContainer.frame.origin.y,
+                                 viewController.flutterScreenIfViewLoaded.bounds.size.height -
+                                     keyboardFrame.origin.y);
+                  [expectation fulfill];
+                }];
+  textInputPlugin.cachedFirstResponder = nil;
+}
+
+- (void)testInteractiveKeyboardKeyboardAnimatesToDismissalPositionalOnPointerUp {
+  NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
+  XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
+  UIScene* scene = scenes.anyObject;
+  XCTAssert([scene isKindOfClass:[UIWindowScene class]], @"Must be a window scene for test");
+  UIWindowScene* windowScene = (UIWindowScene*)scene;
+  XCTAssert(windowScene.windows.count > 0, @"There must be at least 1 window for test");
+  UIWindow* window = windowScene.windows[0];
+  [window addSubview:viewController.view];
+
+  [viewController loadView];
+
+  XCTestExpectation* expectation =
+      [[XCTestExpectation alloc] initWithDescription:@"Keyboard animates to proper position."];
+  CGRect keyboardFrame = CGRectMake(0, 500, 500, 500);
+  [NSNotificationCenter.defaultCenter
+      postNotificationName:UIKeyboardWillShowNotification
+                    object:nil
+                  userInfo:@{UIKeyboardFrameEndUserInfoKey : @(keyboardFrame)}];
+  FlutterMethodCall* initialMoveCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.onPointerMoveForInteractiveKeyboard"
+                                        arguments:@{@"pointerY" : @(500)}];
+  [textInputPlugin handleMethodCall:initialMoveCall
+                             result:^(id _Nullable result){
+                             }];
+  FlutterMethodCall* subsequentMoveCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.onPointerMoveForInteractiveKeyboard"
+                                        arguments:@{@"pointerY" : @(1000)}];
+  [textInputPlugin handleMethodCall:subsequentMoveCall
+                             result:^(id _Nullable result){
+                             }];
+
+  FlutterMethodCall* pointerUpCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.onPointerUpForInteractiveKeyboard"
+                                        arguments:@{@"pointerY" : @(1000)}];
+  [textInputPlugin
+      handleMethodCall:pointerUpCall
+                result:^(id _Nullable result) {
+                  XCTAssertEqual(textInputPlugin.keyboardViewContainer.frame.origin.y,
+                                 viewController.flutterScreenIfViewLoaded.bounds.size.height);
+                  [expectation fulfill];
+                }];
+  textInputPlugin.cachedFirstResponder = nil;
 }
 
 @end
