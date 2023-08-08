@@ -419,9 +419,8 @@ TEST_P(AiksTest, CanRenderLinearGradientDecalWithColorFilter) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-namespace {
-void CanRenderLinearGradientWithDithering(AiksTest* aiks_test,
-                                          bool use_dithering) {
+static void CanRenderLinearGradientWithDithering(AiksTest* aiks_test,
+                                                 bool use_dithering) {
   Canvas canvas;
   Paint paint;
   canvas.Translate({100.0, 100.0, 0});
@@ -439,7 +438,6 @@ void CanRenderLinearGradientWithDithering(AiksTest* aiks_test,
   canvas.DrawRect({0, 0, 800, 500}, paint);
   ASSERT_TRUE(aiks_test->OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
-}  // namespace
 
 TEST_P(AiksTest, CanRenderLinearGradientWithDitheringDisabled) {
   CanRenderLinearGradientWithDithering(this, false);
@@ -448,6 +446,91 @@ TEST_P(AiksTest, CanRenderLinearGradientWithDitheringDisabled) {
 TEST_P(AiksTest, CanRenderLinearGradientWithDitheringEnabled) {
   CanRenderLinearGradientWithDithering(this, true);
 }  // namespace
+
+static void CanRenderRadialGradientWithDithering(AiksTest* aiks_test,
+                                                 bool use_dithering) {
+  Canvas canvas;
+  Paint paint;
+  canvas.Translate({100.0, 100.0, 0});
+
+  // #FFF -> #000
+  std::vector<Color> colors = {Color{1.0, 1.0, 1.0, 1.0},
+                               Color{0.0, 0.0, 0.0, 1.0}};
+  std::vector<Scalar> stops = {0.0, 1.0};
+
+  paint.color_source = ColorSource::MakeRadialGradient(
+      {600, 600}, 600, std::move(colors), std::move(stops),
+      Entity::TileMode::kClamp, {});
+  paint.dither = use_dithering;
+  canvas.DrawRect({0, 0, 1200, 1200}, paint);
+  ASSERT_TRUE(aiks_test->OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_P(AiksTest, CanRenderRadialGradientWithDitheringDisabled) {
+  CanRenderRadialGradientWithDithering(this, false);
+}
+
+TEST_P(AiksTest, CanRenderRadialGradientWithDitheringEnabled) {
+  CanRenderRadialGradientWithDithering(this, true);
+}
+
+static void CanRenderSweepGradientWithDithering(AiksTest* aiks_test,
+                                                bool use_dithering) {
+  Canvas canvas;
+  canvas.Scale(aiks_test->GetContentScale());
+  Paint paint;
+  canvas.Translate({100.0, 100.0, 0});
+
+  // #FFF -> #000
+  std::vector<Color> colors = {Color{1.0, 1.0, 1.0, 1.0},
+                               Color{0.0, 0.0, 0.0, 1.0}};
+  std::vector<Scalar> stops = {0.0, 1.0};
+
+  paint.color_source = ColorSource::MakeSweepGradient(
+      {100, 100}, Degrees(45), Degrees(135), std::move(colors),
+      std::move(stops), Entity::TileMode::kMirror, {});
+  paint.dither = use_dithering;
+
+  canvas.DrawRect({0, 0, 600, 600}, paint);
+  ASSERT_TRUE(aiks_test->OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_P(AiksTest, CanRenderSweepGradientWithDitheringDisabled) {
+  CanRenderSweepGradientWithDithering(this, false);
+}
+
+TEST_P(AiksTest, CanRenderSweepGradientWithDitheringEnabled) {
+  CanRenderSweepGradientWithDithering(this, true);
+}
+
+static void CanRenderConicalGradientWithDithering(AiksTest* aiks_test,
+                                                  bool use_dithering) {
+  Canvas canvas;
+  canvas.Scale(aiks_test->GetContentScale());
+  Paint paint;
+  canvas.Translate({100.0, 100.0, 0});
+
+  // #FFF -> #000
+  std::vector<Color> colors = {Color{1.0, 1.0, 1.0, 1.0},
+                               Color{0.0, 0.0, 0.0, 1.0}};
+  std::vector<Scalar> stops = {0.0, 1.0};
+
+  paint.color_source = ColorSource::MakeConicalGradient(
+      {100, 100}, 100, std::move(colors), std::move(stops), {0, 1}, 0,
+      Entity::TileMode::kMirror, {});
+  paint.dither = use_dithering;
+
+  canvas.DrawRect({0, 0, 600, 600}, paint);
+  ASSERT_TRUE(aiks_test->OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_P(AiksTest, CanRenderConicalGradientWithDitheringDisabled) {
+  CanRenderConicalGradientWithDithering(this, false);
+}
+
+TEST_P(AiksTest, CanRenderConicalGradientWithDitheringEnabled) {
+  CanRenderConicalGradientWithDithering(this, true);
+}
 
 namespace {
 void CanRenderLinearGradientWithOverlappingStops(AiksTest* aiks_test,
