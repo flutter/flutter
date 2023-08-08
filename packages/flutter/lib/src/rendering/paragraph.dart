@@ -21,7 +21,7 @@ import 'selection.dart';
 const String _kEllipsis = '\u2026';
 
 /// Signature for the callback that reports when a selection event was received.
-typedef SelectionEventCallback = void Function(TextSelection selection, SelectionEvent event);
+typedef SelectionEventCallback = void Function(TextSelection? selection, SelectionEvent event);
 
 /// Used by the [RenderParagraph] to map its rendering children to their
 /// corresponding semantics nodes.
@@ -1434,10 +1434,13 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     if (existingSelectionStart != _textSelectionStart ||
         existingSelectionEnd != _textSelectionEnd) {
       _didChangeSelection();
-      if (onSelectionEvent != null && _textSelectionStart != null && _textSelectionEnd != null) {
-        final int start = math.min(_textSelectionStart!.offset, _textSelectionEnd!.offset);
-        final int end = math.max(_textSelectionStart!.offset, _textSelectionEnd!.offset);
-        final TextSelection selection = TextSelection(baseOffset: start, extentOffset: end);
+      if (onSelectionEvent != null) {
+        TextSelection? selection;
+        if(_textSelectionStart != null && _textSelectionEnd != null) {
+          final int start = math.min(_textSelectionStart!.offset, _textSelectionEnd!.offset);
+          final int end = math.max(_textSelectionStart!.offset, _textSelectionEnd!.offset);
+          selection = TextSelection(baseOffset: start, extentOffset: end);
+        }
         onSelectionEvent!.call(selection, event);
       }
     }
