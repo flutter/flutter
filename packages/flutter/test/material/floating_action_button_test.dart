@@ -326,7 +326,7 @@ void main() {
     expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 6.0);
   });
 
-  testWidgetsWithLeakTracking('Floating Action Button states elevation', (WidgetTester tester) async {
+  testWidgets('Floating Action Button states elevation', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
@@ -368,6 +368,8 @@ void main() {
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     expect(getFABWidget(fabFinder).elevation, 6);
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('FlatActionButton mini size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
@@ -785,7 +787,7 @@ void main() {
   });
 
   // This test prevents https://github.com/flutter/flutter/issues/20483
-  testWidgetsWithLeakTracking('Floating Action Button clips ink splash and highlight', (WidgetTester tester) async {
+  testWidgets('Floating Action Button clips ink splash and highlight', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -909,6 +911,8 @@ void main() {
       tester.renderObject(find.byType(FloatingActionButton)),
       paintsExactlyCountTimes(#clipPath, 0),
     );
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Can find FloatingActionButton semantics', (WidgetTester tester) async {
@@ -1164,7 +1168,7 @@ void main() {
       expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 6.0);
     });
 
-    testWidgetsWithLeakTracking('Floating Action Button states elevation', (WidgetTester tester) async {
+    testWidgets('Floating Action Button states elevation', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
 
       await tester.pumpWidget(
@@ -1206,6 +1210,8 @@ void main() {
       await tester.pump(); // Start the splash and highlight animations.
       await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
       expect(getFABWidget(fabFinder).elevation, 12);
+
+      focusNode.dispose();
     });
 
     testWidgetsWithLeakTracking('FloatingActionButton.isExtended', (WidgetTester tester) async {
@@ -1327,7 +1333,7 @@ void main() {
 
 
     // This test prevents https://github.com/flutter/flutter/issues/20483
-    testWidgetsWithLeakTracking('Floating Action Button clips ink splash and highlight', (WidgetTester tester) async {
+    testWidgets('Floating Action Button clips ink splash and highlight', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(
         MaterialApp(

@@ -302,7 +302,7 @@ void main() {
     expect(_getCheckboxMaterial(tester), paints..path(color: selectedFillColor));
   });
 
-  testWidgetsWithLeakTracking('Checkbox theme overlay color resolves in active/pressed states', (WidgetTester tester) async {
+  testWidgets('Checkbox theme overlay color resolves in active/pressed states', (WidgetTester tester) async {
     const Color activePressedOverlayColor = Color(0xFF000001);
     const Color inactivePressedOverlayColor = Color(0xFF000002);
 

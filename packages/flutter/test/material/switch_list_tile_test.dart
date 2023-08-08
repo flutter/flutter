@@ -560,6 +560,7 @@ void main() {
     await tester.pump();
     expect(gotFocus, isFalse);
     expect(node.hasFocus, isFalse);
+    node.dispose();
   });
 
   testWidgetsWithLeakTracking('SwitchListTile.adaptive onFocusChange Callback', (WidgetTester tester) async {
@@ -589,6 +590,7 @@ void main() {
     await tester.pump();
     expect(gotFocus, isFalse);
     expect(node.hasFocus, isFalse);
+    node.dispose();
   });
 
   group('feedback', () {
@@ -863,7 +865,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Material3 - SwitchListTile respects thumbColor in hovered/pressed states', (WidgetTester tester) async {
+  testWidgets('Material3 - SwitchListTile respects thumbColor in hovered/pressed states', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Color hoveredThumbColor = Color(0xFF4caf50);
     const Color pressedThumbColor = Color(0xFFF44336);

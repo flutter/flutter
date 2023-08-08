@@ -23,7 +23,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
   // receive the event.
   WidgetController.hitTestWarningShouldBeFatal = true;
 
-  LeakTrackerGlobalSettings.warnForNonSupportedPlatforms = false;
+  LeakTracking.warnForUnsupportedPlatforms = false;
 
   // Enable golden file testing using Skia Gold.
   return flutter_goldens.testExecutable(testMain);

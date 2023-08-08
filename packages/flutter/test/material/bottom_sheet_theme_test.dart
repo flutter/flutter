@@ -171,7 +171,7 @@ void main() {
     expect(material.clipBehavior, clipBehavior);
   });
 
-  testWidgetsWithLeakTracking('Modal bottom sheet-specific parameters are used for modal bottom sheets', (WidgetTester tester) async {
+  testWidgets('Modal bottom sheet-specific parameters are used for modal bottom sheets', (WidgetTester tester) async {
     const double modalElevation = 5.0;
     const double persistentElevation = 7.0;
     const Color modalBackgroundColor = Colors.yellow;
@@ -250,7 +250,7 @@ void main() {
     expect(material.color, null);
   });
 
-  testWidgetsWithLeakTracking('Modal bottom sheets respond to theme changes', (WidgetTester tester) async {
+  testWidgets('Modal bottom sheets respond to theme changes', (WidgetTester tester) async {
     const double lightElevation = 5.0;
     const double darkElevation = 3.0;
     const Color lightBackgroundColor = Colors.green;

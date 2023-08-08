@@ -185,7 +185,7 @@ void main() {
         await tester.pumpAndSettle();
       });
 
-      testWidgetsWithLeakTracking('interrupting motion towards the StartTop location.', (WidgetTester tester) async {
+      testWidgets('interrupting motion towards the StartTop location.', (WidgetTester tester) async {
         await tester.pumpWidget(_buildFrame(location: FloatingActionButtonLocation.centerFloat, listener: geometryListener));
         setupListener(tester);
 
@@ -198,7 +198,7 @@ void main() {
         await tester.pumpAndSettle();
       });
 
-      testWidgetsWithLeakTracking('interrupting entrance to remove the fab.', (WidgetTester tester) async {
+      testWidgets('interrupting entrance to remove the fab.', (WidgetTester tester) async {
         await tester.pumpWidget(_buildFrame(fab: null, location: FloatingActionButtonLocation.centerFloat, listener: geometryListener));
         setupListener(tester);
 
@@ -217,7 +217,7 @@ void main() {
         await tester.pumpAndSettle();
       });
 
-      testWidgetsWithLeakTracking('interrupting entrance of a new fab.', (WidgetTester tester) async {
+      testWidgets('interrupting entrance of a new fab.', (WidgetTester tester) async {
         await tester.pumpWidget(
           _buildFrame(
             fab: null,

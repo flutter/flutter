@@ -904,6 +904,8 @@ void main() {
             rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0),
           ),
     );
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('ListTile can be hovered and has correct hover color', (WidgetTester tester) async {
@@ -1234,6 +1236,8 @@ void main() {
     await tester.pump();
     expect(gotFocus, isFalse);
     expect(node.hasFocus, isFalse);
+
+    node.dispose();
   });
 
   testWidgetsWithLeakTracking('ListTile respects tileColor & selectedTileColor', (WidgetTester tester) async {
