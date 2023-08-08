@@ -3363,7 +3363,7 @@ TEST_F(DisplayListCanvas, DrawTextBlob) {
   // default.
 #if defined(OS_FUCHSIA)
   GTEST_SKIP() << "Rendering comparisons require a valid default font manager";
-#endif  // OS_FUCHSIA
+#else
   sk_sp<SkTextBlob> blob =
       CanvasCompareTester::MakeTextBlob("Testing", kRenderHeight * 0.33f);
   SkScalar render_y_1_3 = kRenderTop + kRenderHeight * 0.3;
@@ -3388,6 +3388,7 @@ TEST_F(DisplayListCanvas, DrawTextBlob) {
       // padding to the tolerance
       CanvasCompareTester::DefaultTolerance.addBoundsPadding(33, 13));
   EXPECT_TRUE(blob->unique());
+#endif  // OS_FUCHSIA
 }
 
 TEST_F(DisplayListCanvas, DrawShadow) {

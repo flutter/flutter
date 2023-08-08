@@ -302,8 +302,8 @@ int VariantVector::Compare(SAFEARRAY* safearray, bool ignore_case) const {
     // VARTYPES. For example a value within VT_TYPEMASK that's joined something
     // outside the typemask like VT_ARRAY or VT_BYREF.
     default:
-      BASE_UNREACHABLE();
       compare_result = 1;
+      BASE_UNREACHABLE();
       break;
   }
 

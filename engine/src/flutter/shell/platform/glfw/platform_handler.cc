@@ -87,7 +87,6 @@ void PlatformHandler::HandleMethodCall(
     result->Success();
   } else if (method.compare(kSystemNavigatorPopMethod) == 0) {
     exit(EXIT_SUCCESS);
-    result->Success();
   } else {
     result->NotImplemented();
   }

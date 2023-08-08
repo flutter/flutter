@@ -498,13 +498,13 @@ bool RenderPassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
 #if TARGET_OS_SIMULATOR
         VALIDATION_LOG << "iOS Simulator does not support instanced rendering.";
         return false;
-#endif
+#else   // TARGET_OS_SIMULATOR
         [encoder drawPrimitives:ToMTLPrimitiveType(primitive_type)
                     vertexStart:command.base_vertex
                     vertexCount:command.vertex_count
                   instanceCount:command.instance_count
                    baseInstance:0u];
-
+#endif  // TARGET_OS_SIMULATOR
       } else {
         [encoder drawPrimitives:ToMTLPrimitiveType(primitive_type)
                     vertexStart:command.base_vertex
@@ -538,7 +538,7 @@ bool RenderPassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
 #if TARGET_OS_SIMULATOR
       VALIDATION_LOG << "iOS Simulator does not support instanced rendering.";
       return false;
-#endif
+#else   // TARGET_OS_SIMULATOR
       [encoder drawIndexedPrimitives:ToMTLPrimitiveType(primitive_type)
                           indexCount:command.vertex_count
                            indexType:ToMTLIndexType(command.index_type)
@@ -547,6 +547,7 @@ bool RenderPassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
                        instanceCount:command.instance_count
                           baseVertex:command.base_vertex
                         baseInstance:0u];
+#endif  // TARGET_OS_SIMULATOR
     } else {
       [encoder drawIndexedPrimitives:ToMTLPrimitiveType(primitive_type)
                           indexCount:command.vertex_count

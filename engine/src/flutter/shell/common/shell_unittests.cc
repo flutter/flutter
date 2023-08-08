@@ -578,7 +578,7 @@ TEST_F(ShellTest, LastEntrypointArgs) {
 TEST_F(ShellTest, DisallowedDartVMFlag) {
 #if defined(OS_FUCHSIA)
   GTEST_SKIP() << "This test flakes on Fuchsia. https://fxbug.dev/110006 ";
-#endif  // OS_FUCHSIA
+#else
 
   // Run this test in a thread-safe manner, otherwise gtest will complain.
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
@@ -591,6 +591,7 @@ TEST_F(ShellTest, DisallowedDartVMFlag) {
   const char* expected =
       "Encountered disallowed Dart VM flag: --verify_after_gc";
   ASSERT_DEATH(flutter::SettingsFromCommandLine(command_line), expected);
+#endif  // OS_FUCHSIA
 }
 
 TEST_F(ShellTest, AllowedDartVMFlag) {
@@ -843,7 +844,7 @@ TEST_F(ShellTest, PushBackdropFilterToVisitedPlatformViews) {
 #if defined(OS_FUCHSIA)
   GTEST_SKIP() << "RasterThreadMerger flakes on Fuchsia. "
                   "https://github.com/flutter/flutter/issues/59816 ";
-#endif
+#else
 
   auto settings = CreateSettingsForFixture();
 
@@ -922,6 +923,7 @@ TEST_F(ShellTest, PushBackdropFilterToVisitedPlatformViews) {
             SkRect::MakeLTRB(1, 1, 31, 31));
 
   DestroyShell(std::move(shell));
+#endif  // OS_FUCHSIA
 }
 
 // TODO(https://github.com/flutter/flutter/issues/59816): Enable on fuchsia.
@@ -930,7 +932,7 @@ TEST_F(ShellTest,
 #if defined(OS_FUCHSIA)
   GTEST_SKIP() << "RasterThreadMerger flakes on Fuchsia. "
                   "https://github.com/flutter/flutter/issues/59816 ";
-#endif
+#else
 
   auto settings = CreateSettingsForFixture();
   fml::AutoResetWaitableEvent end_frame_latch;
@@ -972,13 +974,14 @@ TEST_F(ShellTest,
   ASSERT_TRUE(end_frame_called);
 
   DestroyShell(std::move(shell));
+#endif  // OS_FUCHSIA
 }
 
 TEST_F(ShellTest, OnPlatformViewDestroyDisablesThreadMerger) {
 #if defined(OS_FUCHSIA)
   GTEST_SKIP() << "RasterThreadMerger flakes on Fuchsia. "
                   "https://github.com/flutter/flutter/issues/59816 ";
-#endif
+#else
 
   auto settings = CreateSettingsForFixture();
   fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger;
@@ -1026,13 +1029,14 @@ TEST_F(ShellTest, OnPlatformViewDestroyDisablesThreadMerger) {
   ValidateShell(shell.get());
   ASSERT_TRUE(raster_thread_merger->IsEnabled());
   DestroyShell(std::move(shell));
+#endif  // OS_FUCHSIA
 }
 
 TEST_F(ShellTest, OnPlatformViewDestroyAfterMergingThreads) {
 #if defined(OS_FUCHSIA)
   GTEST_SKIP() << "RasterThreadMerger flakes on Fuchsia. "
                   "https://github.com/flutter/flutter/issues/59816 ";
-#endif
+#else
 
   const int ThreadMergingLease = 10;
   auto settings = CreateSettingsForFixture();
@@ -1099,13 +1103,14 @@ TEST_F(ShellTest, OnPlatformViewDestroyAfterMergingThreads) {
   ValidateShell(shell.get());
 
   DestroyShell(std::move(shell));
+#endif  // OS_FUCHSIA
 }
 
 TEST_F(ShellTest, OnPlatformViewDestroyWhenThreadsAreMerging) {
 #if defined(OS_FUCHSIA)
   GTEST_SKIP() << "RasterThreadMerger flakes on Fuchsia. "
                   "https://github.com/flutter/flutter/issues/59816 ";
-#endif
+#else
 
   const int kThreadMergingLease = 10;
   auto settings = CreateSettingsForFixture();
@@ -1173,6 +1178,7 @@ TEST_F(ShellTest, OnPlatformViewDestroyWhenThreadsAreMerging) {
   ValidateShell(shell.get());
 
   DestroyShell(std::move(shell));
+#endif  // OS_FUCHSIA
 }
 
 TEST_F(ShellTest,
@@ -1180,7 +1186,7 @@ TEST_F(ShellTest,
 #if defined(OS_FUCHSIA)
   GTEST_SKIP() << "RasterThreadMerger flakes on Fuchsia. "
                   "https://github.com/flutter/flutter/issues/59816 ";
-#endif
+#else
 
   auto settings = CreateSettingsForFixture();
   fml::AutoResetWaitableEvent end_frame_latch;
@@ -1229,6 +1235,7 @@ TEST_F(ShellTest,
   ValidateShell(shell.get());
 
   DestroyShell(std::move(shell));
+#endif  // OS_FUCHSIA
 }
 
 TEST_F(ShellTest, OnPlatformViewDestroyWithoutRasterThreadMerger) {
@@ -1273,7 +1280,7 @@ TEST_F(ShellTest, OnPlatformViewDestroyWithStaticThreadMerging) {
 #if defined(OS_FUCHSIA)
   GTEST_SKIP() << "RasterThreadMerger flakes on Fuchsia. "
                   "https://github.com/flutter/flutter/issues/59816 ";
-#endif
+#else
 
   auto settings = CreateSettingsForFixture();
   fml::AutoResetWaitableEvent end_frame_latch;
@@ -1324,6 +1331,7 @@ TEST_F(ShellTest, OnPlatformViewDestroyWithStaticThreadMerging) {
   ValidateShell(shell.get());
 
   DestroyShell(std::move(shell), task_runners);
+#endif  // OS_FUCHSIA
 }
 
 TEST_F(ShellTest, GetUsedThisFrameShouldBeSetBeforeEndFrame) {
@@ -1376,7 +1384,7 @@ TEST_F(ShellTest, DISABLED_SkipAndSubmitFrame) {
 #if defined(OS_FUCHSIA)
   GTEST_SKIP() << "RasterThreadMerger flakes on Fuchsia. "
                   "https://github.com/flutter/flutter/issues/59816 ";
-#endif
+#else
 
   auto settings = CreateSettingsForFixture();
   fml::AutoResetWaitableEvent end_frame_latch;
@@ -1424,6 +1432,7 @@ TEST_F(ShellTest, DISABLED_SkipAndSubmitFrame) {
 
   PlatformViewNotifyDestroyed(shell.get());
   DestroyShell(std::move(shell));
+#endif  // OS_FUCHSIA
 }
 
 TEST(SettingsTest, FrameTimingSetsAndGetsProperly) {
@@ -3665,7 +3674,7 @@ TEST_F(ShellTest, CanCreateShellsWithGLBackend) {
 #if !SHELL_ENABLE_GL
   // GL emulation does not exist on Fuchsia.
   GTEST_SKIP();
-#endif  // !SHELL_ENABLE_GL
+#else
   auto settings = CreateSettingsForFixture();
   std::unique_ptr<Shell> shell = CreateShell({
       .settings = settings,
@@ -3682,12 +3691,13 @@ TEST_F(ShellTest, CanCreateShellsWithGLBackend) {
   PumpOneFrame(shell.get());
   PlatformViewNotifyDestroyed(shell.get());
   DestroyShell(std::move(shell));
+#endif  // !SHELL_ENABLE_GL
 }
 
 TEST_F(ShellTest, CanCreateShellsWithVulkanBackend) {
 #if !SHELL_ENABLE_VULKAN
   GTEST_SKIP();
-#endif  // !SHELL_ENABLE_VULKAN
+#else
   auto settings = CreateSettingsForFixture();
   std::unique_ptr<Shell> shell = CreateShell({
       .settings = settings,
@@ -3705,12 +3715,13 @@ TEST_F(ShellTest, CanCreateShellsWithVulkanBackend) {
   PumpOneFrame(shell.get());
   PlatformViewNotifyDestroyed(shell.get());
   DestroyShell(std::move(shell));
+#endif  // !SHELL_ENABLE_VULKAN
 }
 
 TEST_F(ShellTest, CanCreateShellsWithMetalBackend) {
 #if !SHELL_ENABLE_METAL
   GTEST_SKIP();
-#endif  // !SHELL_ENABLE_METAL
+#else
   auto settings = CreateSettingsForFixture();
   std::unique_ptr<Shell> shell = CreateShell({
       .settings = settings,
@@ -3728,6 +3739,7 @@ TEST_F(ShellTest, CanCreateShellsWithMetalBackend) {
   PumpOneFrame(shell.get());
   PlatformViewNotifyDestroyed(shell.get());
   DestroyShell(std::move(shell));
+#endif  // !SHELL_ENABLE_METAL
 }
 
 TEST_F(ShellTest, UserTagSetOnStartup) {
@@ -4010,7 +4022,7 @@ TEST_F(ShellTest, PictureToImageSync) {
 #if !SHELL_ENABLE_GL
   // This test uses the GL backend.
   GTEST_SKIP();
-#endif  // !SHELL_ENABLE_GL
+#else
   auto settings = CreateSettingsForFixture();
   std::unique_ptr<Shell> shell = CreateShell({
       .settings = settings,
@@ -4044,13 +4056,14 @@ TEST_F(ShellTest, PictureToImageSync) {
 
   PlatformViewNotifyDestroyed(shell.get());
   DestroyShell(std::move(shell));
+#endif  // !SHELL_ENABLE_GL
 }
 
 TEST_F(ShellTest, PictureToImageSyncImpellerNoSurface) {
 #if !SHELL_ENABLE_METAL
   // This test uses the Metal backend.
   GTEST_SKIP();
-#endif  // !SHELL_ENABLE_METAL
+#else
   auto settings = CreateSettingsForFixture();
   settings.enable_impeller = true;
   std::unique_ptr<Shell> shell = CreateShell({
@@ -4090,6 +4103,7 @@ TEST_F(ShellTest, PictureToImageSyncImpellerNoSurface) {
 
   PlatformViewNotifyDestroyed(shell.get());
   DestroyShell(std::move(shell));
+#endif  // !SHELL_ENABLE_METAL
 }
 
 #if SHELL_ENABLE_GL
@@ -4297,7 +4311,7 @@ TEST_F(ShellTest, NotifyDestroyed) {
 TEST_F(ShellTest, PrintsErrorWhenPlatformMessageSentFromWrongThread) {
 #if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG || OS_FUCHSIA
   GTEST_SKIP() << "Test is for debug mode only on non-fuchsia targets.";
-#endif
+#else
   Settings settings = CreateSettingsForFixture();
   ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
                          ThreadHost::Type::Platform);
@@ -4340,12 +4354,13 @@ TEST_F(ShellTest, PrintsErrorWhenPlatformMessageSentFromWrongThread) {
 
   DestroyShell(std::move(shell), task_runners);
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+#endif
 }
 
 TEST_F(ShellTest, DiesIfSoftwareRenderingAndImpellerAreEnabledDeathTest) {
 #if defined(OS_FUCHSIA)
   GTEST_SKIP() << "Fuchsia";
-#endif  // OS_FUCHSIA
+#else
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
   Settings settings = CreateSettingsForFixture();
   settings.enable_impeller = true;
@@ -4358,6 +4373,7 @@ TEST_F(ShellTest, DiesIfSoftwareRenderingAndImpellerAreEnabledDeathTest) {
   EXPECT_DEATH_IF_SUPPORTED(
       CreateShell(settings, task_runners),
       "Software rendering is incompatible with Impeller.");
+#endif  // OS_FUCHSIA
 }
 
 }  // namespace testing

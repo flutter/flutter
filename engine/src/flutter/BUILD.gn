@@ -20,10 +20,14 @@ declare_args() {
 
 config("config") {
   include_dirs = [ ".." ]
+  cflags = []
   if (is_win) {
     if (current_cpu != "x86") {
-      cflags = [ "/WX" ]  # Treat warnings as errors.
+      cflags += [ "/WX" ]  # Treat warnings as errors.
     }
+  }
+  if (is_clang) {
+    cflags += [ "-Wunreachable-code" ]
   }
 }
 

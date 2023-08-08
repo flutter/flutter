@@ -5567,8 +5567,10 @@ TEST_F(AXPositionTest,
 
 TEST_F(AXPositionTest,
        AsLeafTextPositionBeforeAndAfterCharacterAtInvalidGraphemeBoundary) {
+#if true
   GTEST_SKIP()
       << "Skipping, current accessibility library cannot handle grapheme";
+#else
   std::vector<int> text_offsets;
   SetTree(CreateMultilingualDocument(&text_offsets));
 
@@ -5608,6 +5610,7 @@ TEST_F(AXPositionTest,
   // should have been reset in order to provide consistent output from the
   // method regardless of input affinity.
   EXPECT_EQ(ax::mojom::TextAffinity::kDownstream, test_position->affinity());
+#endif  // true
 }
 
 TEST_F(AXPositionTest, AsLeafTextPositionBeforeCharacterNoAdjustment) {
@@ -6396,8 +6399,10 @@ TEST_F(AXPositionTest, CreatePreviousCharacterPosition) {
 }
 
 TEST_F(AXPositionTest, CreateNextCharacterPositionAtGraphemeBoundary) {
+#if true
   GTEST_SKIP()
       << "Skipping, current accessibility library cannot handle grapheme";
+#else
   std::vector<int> text_offsets;
   SetTree(CreateMultilingualDocument(&text_offsets));
 
@@ -6469,11 +6474,14 @@ TEST_F(AXPositionTest, CreateNextCharacterPositionAtGraphemeBoundary) {
   EXPECT_EQ(12, test_position->text_offset());
   // Affinity should have been reset to downstream because there was a move.
   EXPECT_EQ(ax::mojom::TextAffinity::kDownstream, test_position->affinity());
+#endif  // true
 }
 
 TEST_F(AXPositionTest, CreatePreviousCharacterPositionAtGraphemeBoundary) {
+#if true
   GTEST_SKIP()
       << "Skipping, current accessibility library cannot handle grapheme";
+#else
   std::vector<int> text_offsets;
   SetTree(CreateMultilingualDocument(&text_offsets));
 
@@ -6546,6 +6554,7 @@ TEST_F(AXPositionTest, CreatePreviousCharacterPositionAtGraphemeBoundary) {
   EXPECT_EQ(9, test_position->text_offset());
   // Affinity should have been reset to downstream because there was a move.
   EXPECT_EQ(ax::mojom::TextAffinity::kDownstream, test_position->affinity());
+#endif  // true
 }
 
 TEST_F(AXPositionTest, ReciprocalCreateNextAndPreviousCharacterPosition) {

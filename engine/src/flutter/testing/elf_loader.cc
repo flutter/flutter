@@ -30,14 +30,15 @@ ELFAOTSymbols LoadELFSymbolFromFixturesIfNeccessary(std::string elf_filename) {
 
   ELFAOTSymbols symbols;
 
-  // Must not be freed.
-  const char* error = nullptr;
-
 #if OS_FUCHSIA
   // TODO(gw280): https://github.com/flutter/flutter/issues/50285
   // Dart doesn't implement Dart_LoadELF on Fuchsia
-  auto loaded_elf = nullptr;
+  FML_LOG(ERROR) << "Dart doesn't implement Dart_LoadELF on Fuchsia";
+  return {};
 #else
+  // Must not be freed.
+  const char* error = nullptr;
+
   auto loaded_elf =
       Dart_LoadELF(elf_path.c_str(),             // file path
                    0,                            // file offset
@@ -47,7 +48,6 @@ ELFAOTSymbols LoadELFSymbolFromFixturesIfNeccessary(std::string elf_filename) {
                    &symbols.vm_isolate_data,     // vm isolate data (out)
                    &symbols.vm_isolate_instrs    // vm isolate instr (out)
       );
-#endif
 
   if (loaded_elf == nullptr) {
     FML_LOG(ERROR)
@@ -60,6 +60,7 @@ ELFAOTSymbols LoadELFSymbolFromFixturesIfNeccessary(std::string elf_filename) {
   symbols.loaded_elf.reset(loaded_elf);
 
   return symbols;
+#endif  // OS_FUCHSIA
 }
 
 ELFAOTSymbols LoadELFSplitSymbolFromFixturesIfNeccessary(
@@ -79,14 +80,15 @@ ELFAOTSymbols LoadELFSplitSymbolFromFixturesIfNeccessary(
 
   ELFAOTSymbols symbols;
 
-  // Must not be freed.
-  const char* error = nullptr;
-
 #if OS_FUCHSIA
   // TODO(gw280): https://github.com/flutter/flutter/issues/50285
   // Dart doesn't implement Dart_LoadELF on Fuchsia
-  auto loaded_elf = nullptr;
+  FML_LOG(ERROR) << "Dart doesn't implement Dart_LoadELF on Fuchsia";
+  return {};
 #else
+  // Must not be freed.
+  const char* error = nullptr;
+
   auto loaded_elf =
       Dart_LoadELF(elf_path.c_str(),             // file path
                    0,                            // file offset
@@ -96,7 +98,6 @@ ELFAOTSymbols LoadELFSplitSymbolFromFixturesIfNeccessary(
                    &symbols.vm_isolate_data,     // vm isolate data (out)
                    &symbols.vm_isolate_instrs    // vm isolate instr (out)
       );
-#endif
 
   if (loaded_elf == nullptr) {
     FML_LOG(ERROR)
@@ -109,6 +110,7 @@ ELFAOTSymbols LoadELFSplitSymbolFromFixturesIfNeccessary(
   symbols.loaded_elf.reset(loaded_elf);
 
   return symbols;
+#endif
 }
 
 bool PrepareSettingsForAOTWithSymbols(Settings& settings,
