@@ -26,6 +26,7 @@
   "continueButtonLabel": "Continuar",
   "copyButtonLabel": "Copiar",
   "cutButtonLabel": "Cortar",
+  "scanTextButtonLabel": "Escanear texto",
   "okButtonLabel": "ACEPTAR",
   "pasteButtonLabel": "Pegar",
   "selectAllButtonLabel": "Seleccionar todo",
@@ -141,5 +142,8 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web"
 }

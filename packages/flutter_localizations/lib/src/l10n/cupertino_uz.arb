@@ -22,5 +22,8 @@
   "tabSemanticsLabel": "$tabCount varaqdan $tabIndex",
   "modalBarrierDismissLabel": "Yopish",
   "searchTextFieldPlaceholderLabel": "Qidiruv",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "menuDismissLabel": "Dismiss menu",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web"
 }

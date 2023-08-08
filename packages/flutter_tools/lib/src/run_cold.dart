@@ -86,6 +86,7 @@ class ColdRunner extends ResidentRunner {
         unawaited(residentDevtoolsHandler!.serveAndAnnounceDevTools(
           devToolsServerAddress: debuggingOptions.devToolsServerAddress,
           flutterDevices: flutterDevices,
+          isStartPaused: debuggingOptions.startPaused,
         ));
       }
       if (debuggingOptions.serveObservatory) {
@@ -173,6 +174,7 @@ class ColdRunner extends ResidentRunner {
         unawaited(residentDevtoolsHandler!.serveAndAnnounceDevTools(
           devToolsServerAddress: debuggingOptions.devToolsServerAddress,
           flutterDevices: flutterDevices,
+          isStartPaused: debuggingOptions.startPaused,
         ));
       }
       if (debuggingOptions.serveObservatory) {

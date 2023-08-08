@@ -22,5 +22,8 @@
   "tabSemanticsLabel": "Tab $tabIndex daripada $tabCount",
   "modalBarrierDismissLabel": "Tolak",
   "searchTextFieldPlaceholderLabel": "Cari",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "menuDismissLabel": "Dismiss menu",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web"
 }

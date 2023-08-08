@@ -3189,7 +3189,7 @@ void main() {
     // This file runs on non-web platforms, so we expect `HtmlElementView` to
     // fail.
     final dynamic exception = tester.takeException();
-    expect(exception, isAssertionError);
+    expect(exception, isUnimplementedError);
     expect(exception.toString(), contains('HtmlElementView is only available on Flutter Web'));
   });
 }

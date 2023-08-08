@@ -35,6 +35,7 @@ import 'gradle_errors.dart';
 import 'gradle_utils.dart';
 import 'java.dart';
 import 'migrations/android_studio_java_gradle_conflict_migration.dart';
+import 'migrations/min_sdk_version_migration.dart';
 import 'migrations/top_level_gradle_build_file_migration.dart';
 import 'multidex.dart';
 
@@ -330,8 +331,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
       AndroidStudioJavaGradleConflictMigration(_logger,
           project: project.android,
           androidStudio: _androidStudio,
-          java: globals.java)
-      ,
+          java: globals.java),
+      MinSdkVersionMigration(project.android, _logger),
     ];
 
     final ProjectMigration migration = ProjectMigration(migrators);

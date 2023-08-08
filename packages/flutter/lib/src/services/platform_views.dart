@@ -1313,11 +1313,13 @@ class _HybridAndroidViewControllerInternals extends _AndroidViewControllerIntern
   }
 }
 
-/// Controls an iOS UIView.
+/// Base class for iOS and macOS view controllers.
 ///
-/// Typically created with [PlatformViewsService.initUiKitView].
-class UiKitViewController {
-  UiKitViewController._(
+/// View controllers are used to create and interact with the UIView or NSView
+/// underlying a platform view.
+abstract class DarwinPlatformViewController {
+  /// Public default for subclasses to override.
+  DarwinPlatformViewController(
     this.id,
     TextDirection layoutDirection,
   ) : _layoutDirection = layoutDirection;
@@ -1380,6 +1382,18 @@ class UiKitViewController {
     await SystemChannels.platform_views.invokeMethod<void>('dispose', id);
     PlatformViewsService._instance._focusCallbacks.remove(id);
   }
+}
+
+/// Controller for an iOS platform view.
+///
+/// View controllers create and interact with the underlying UIView.
+///
+/// Typically created with [PlatformViewsService.initUiKitView].
+class UiKitViewController extends DarwinPlatformViewController {
+  UiKitViewController._(
+    super.id,
+    super.layoutDirection,
+  );
 }
 
 /// An interface for controlling a single platform view.

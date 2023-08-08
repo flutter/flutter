@@ -52,7 +52,8 @@ class ProductCard extends StatelessWidget {
                 child: imageWidget,
               ),
               SizedBox(
-                height: kTextBoxHeight * MediaQuery.of(context).textScaleFactor,
+                // ignore: deprecated_member_use, https://github.com/flutter/flutter/issues/128825
+                height: kTextBoxHeight * MediaQuery.textScalerOf(context).textScaleFactor,
                 width: 121.0,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,

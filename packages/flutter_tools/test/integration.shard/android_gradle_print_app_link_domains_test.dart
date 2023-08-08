@@ -147,7 +147,7 @@ void main() {
       tempDir.path,
       '--project-name=testapp',
     ], workingDirectory: tempDir.path);
-    expect(result.exitCode, 0);
+    expect(result, const ProcessResultMatcher());
     // Adds intent filters for app links
     final String androidManifestPath =  fileSystem.path.join(tempDir.path, 'android', 'app', 'src', 'main', 'AndroidManifest.xml');
     final io.File androidManifestFile = io.File(androidManifestPath);
@@ -166,7 +166,7 @@ void main() {
       'apk',
       '--config-only',
     ], workingDirectory: tempDir.path);
-    expect(result.exitCode, 0);
+    expect(result, const ProcessResultMatcher());
 
     final Directory androidApp = tempDir.childDirectory('android');
     result = await processManager.run(<String>[
@@ -176,7 +176,7 @@ void main() {
       'printDebugAppLinkDomains',
     ], workingDirectory: androidApp.path);
 
-    expect(result.exitCode, 0);
+    expect(result, const ProcessResultMatcher());
 
     const List<String> expectedLines = <String>[
       // Should only pick up the pure and hybrid intent filters

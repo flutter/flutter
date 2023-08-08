@@ -16,7 +16,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -1180,7 +1179,7 @@ void main() {
     expect(tester.getRect(find.byType(Placeholder)), placeholderRectWithoutInsets.translate(10, 10));
   });
 
-  testWidgets('Default cupertino dialog golden', (WidgetTester tester) async {
+  testWidgets('Material2 - Default cupertino dialog golden', (WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesDialog(
         useMaterial3: false,
@@ -1207,7 +1206,38 @@ void main() {
 
     await expectLater(
       find.byType(CupertinoAlertDialog),
-      matchesGoldenFile('dialog_test.cupertino.default.png'),
+      matchesGoldenFile('m2_dialog_test.cupertino.default.png'),
+    );
+  });
+
+  testWidgets('Material3 - Default cupertino dialog golden', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        useMaterial3: true,
+        dialogBuilder: (BuildContext context) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
+            child: const RepaintBoundary(
+              child: CupertinoAlertDialog(
+                title: Text('Title'),
+                content: Text('text'),
+                actions: <Widget>[
+                  CupertinoDialogAction(child: Text('No')),
+                  CupertinoDialogAction(child: Text('OK')),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byType(CupertinoAlertDialog),
+      matchesGoldenFile('m3_dialog_test.cupertino.default.png'),
     );
   });
 

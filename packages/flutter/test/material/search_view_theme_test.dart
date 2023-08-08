@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 void main() {
   test('SearchViewThemeData copyWith, ==, hashCode basics', () {
     expect(const SearchViewThemeData(), const SearchViewThemeData().copyWith());
@@ -44,7 +46,7 @@ void main() {
     expect(theme.data.dividerColor, null);
   });
 
-  testWidgets('Default SearchViewThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default SearchViewThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SearchViewThemeData().debugFillProperties(builder);
 
@@ -56,7 +58,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('SearchViewThemeData implements debugFillProperties', (
+  testWidgetsWithLeakTracking('SearchViewThemeData implements debugFillProperties', (
       WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SearchViewThemeData(

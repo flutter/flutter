@@ -971,6 +971,7 @@ Future<void> _runFrameworkTests() async {
     await runTracingTests();
     await runFixTests('flutter');
     await runFixTests('flutter_test');
+    await runFixTests('integration_test');
     await runPrivateTests();
   }
 
@@ -978,6 +979,10 @@ Future<void> _runFrameworkTests() async {
     printProgress('${green}Running package tests$reset for directories other than packages/flutter');
     await _runTestHarnessTests();
     await runExampleTests();
+    await _runFlutterTest(
+      path.join(flutterRoot, 'dev', 'a11y_assessments'),
+      tests: <String>[ 'test' ],
+    );
     await _runDartTest(path.join(flutterRoot, 'dev', 'bots'));
     await _runDartTest(path.join(flutterRoot, 'dev', 'devicelab'), ensurePrecompiledTool: false); // See https://github.com/flutter/flutter/issues/86209
     await _runDartTest(path.join(flutterRoot, 'dev', 'conductor', 'core'), forceSingleCore: true);
@@ -1360,7 +1365,7 @@ Future<void> _runWebTreeshakeTest() async {
   final String javaScript = mainDartJs.readAsStringSync();
 
   // Check that we're not looking at minified JS. Otherwise this test would result in false positive.
-  expect(javaScript.contains('RenderObjectToWidgetElement'), true);
+  expect(javaScript.contains('RootElement'), true);
 
   const String word = 'debugFillProperties';
   int count = 0;
@@ -1459,6 +1464,13 @@ Future<void> _runFlutterPackagesTests() async {
         'run',
         toolScript,
         'analyze',
+        // Fetch the oldest possible dependencies, rather than the newest, to
+        // insulate flutter/flutter from out-of-band failures when new versions
+        // of dependencies are published. This compensates for the fact that
+        // flutter/packages doesn't use pinned dependencies, and for the
+        // purposes of this test using old dependencies is fine. See
+        // https://github.com/flutter/flutter/issues/129633
+        '--downgrade',
         '--custom-analysis=script/configs/custom_analysis.yaml',
       ],
       workingDirectory: checkout.path,
