@@ -12,7 +12,7 @@
 FLUTTER_DARWIN_EXPORT
 #endif
 @interface FlutterBinaryMessengerRelay : NSObject <FlutterBinaryMessenger>
-@property(nonatomic, assign) NSObject<FlutterBinaryMessenger>* parent;
+@property(nonatomic, weak) NSObject<FlutterBinaryMessenger>* parent;
 - (instancetype)initWithParent:(NSObject<FlutterBinaryMessenger>*)parent;
 @end
 

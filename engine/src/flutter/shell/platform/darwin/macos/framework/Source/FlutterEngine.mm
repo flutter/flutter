@@ -13,6 +13,7 @@
 #include "flutter/shell/platform/common/engine_switches.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
+#import "flutter/shell/platform/darwin/common/framework/Source/FlutterBinaryMessengerRelay.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterAppDelegate.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterAppDelegate_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterCompositor.h"
@@ -402,6 +403,9 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 
   // Whether any portion of the application is currently visible.
   BOOL _visible;
+
+  // Proxy to allow plugins, channels to hold a weak reference to the binary messenger (self).
+  FlutterBinaryMessengerRelay* _binaryMessenger;
 }
 
 - (instancetype)initWithName:(NSString*)labelPrefix project:(FlutterDartProject*)project {
@@ -420,6 +424,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   _currentMessengerConnection = 1;
   _allowHeadlessExecution = allowHeadlessExecution;
   _semanticsEnabled = NO;
+  _binaryMessenger = [[FlutterBinaryMessengerRelay alloc] initWithParent:self];
   _isResponseValid = [[NSMutableArray alloc] initWithCapacity:1];
   [_isResponseValid addObject:@YES];
   // kFlutterImplicitViewId is reserved for the implicit view.
@@ -723,9 +728,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 }
 
 - (id<FlutterBinaryMessenger>)binaryMessenger {
-  // TODO(stuartmorgan): Switch to FlutterBinaryMessengerRelay to avoid plugins
-  // keeping the engine alive.
-  return self;
+  return _binaryMessenger;
 }
 
 #pragma mark - Framework-internal methods

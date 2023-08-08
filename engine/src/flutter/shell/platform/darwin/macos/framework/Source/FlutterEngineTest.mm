@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <objc/objc.h>
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
-#include "gtest/gtest.h"
+
+#include <objc/objc.h>
 
 #include <functional>
 #include <thread>
@@ -14,6 +14,7 @@
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/shell/platform/common/accessibility_bridge.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
+#import "flutter/shell/platform/darwin/common/framework/Source/FlutterBinaryMessengerRelay.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterAppDelegate.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngineTestUtils.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewControllerTestUtils.h"
@@ -21,6 +22,7 @@
 #include "flutter/shell/platform/embedder/embedder_engine.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/testing/test_dart_native_resolver.h"
+#include "gtest/gtest.h"
 
 // CREATE_NATIVE_ENTRY and MOCK_ENGINE_PROC are leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
@@ -494,6 +496,38 @@ TEST_F(FlutterEngineTest, DartEntrypointArguments) {
 
   EXPECT_TRUE([engine runWithEntrypoint:@"main"]);
   EXPECT_TRUE(called);
+}
+
+// Verify that the engine is not retained indirectly via the binary messenger held by channels and
+// plugins. Previously, FlutterEngine.binaryMessenger returned the engine itself, and thus plugins
+// could cause a retain cycle, preventing the engine from being deallocated.
+// FlutterEngine.binaryMessenger now returns a FlutterBinaryMessengerRelay whose pointer back to
+// the engine is cleared when the engine is deallocated.
+// Issue: https://github.com/flutter/flutter/issues/116445
+TEST_F(FlutterEngineTest, FlutterBinaryMessengerNullsParentOnEngineRelease) {
+  FlutterBinaryMessengerRelay* relay = nil;
+  @autoreleasepool {
+    // Create a test engine.
+    NSString* fixtures = @(flutter::testing::GetFixturesPath());
+    FlutterDartProject* project = [[FlutterDartProject alloc]
+        initWithAssetsPath:fixtures
+               ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
+    FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test"
+                                                        project:project
+                                         allowHeadlessExecution:true];
+
+    // Get the binary messenger for the engine.
+    id<FlutterBinaryMessenger> binaryMessenger = engine.binaryMessenger;
+    ASSERT_TRUE([binaryMessenger isKindOfClass:[FlutterBinaryMessengerRelay class]]);
+    relay = (FlutterBinaryMessengerRelay*)binaryMessenger;
+
+    // Verify the relay parent (the engine) is non-nil.
+    EXPECT_NE(relay.parent, nil);
+  }
+
+  // Once the engine has been deallocated, verify the relay parent is nil, and thus the engine is
+  // not retained by the holder of the relay.
+  EXPECT_EQ(relay.parent, nil);
 }
 
 // If a channel overrides a previous channel with the same name, cleaning
