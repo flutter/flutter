@@ -16,8 +16,8 @@ AndroidNativeWindow::~AndroidNativeWindow() {
   if (window_ != nullptr) {
 #if FML_OS_ANDROID
     ANativeWindow_release(window_);
-#endif  // FML_OS_ANDROID
     window_ = nullptr;
+#endif  // FML_OS_ANDROID
   }
 }
 

@@ -100,6 +100,8 @@ class FuchsiaShellTest : public ShellTest {
   fuchsia::settings::IntlSettings save_settings_;
 };
 
+// These functions are used by tests that are currently disabled.
+#if false
 static bool ValidateShell(Shell* shell) {
   if (!shell) {
     return false;
@@ -145,6 +147,7 @@ static void RunCoroutineWithRetry(int retries,
     sleep(1);
   }
 }
+#endif  // false
 
 // Verifies that changing the Fuchsia settings timezone through the FIDL
 // settings interface results in a change of the reported local time in the
@@ -165,7 +168,7 @@ TEST_F(FuchsiaShellTest, LocaltimesVaryOnTimezoneChanges) {
 #if defined(OS_FUCHSIA)
   GTEST_SKIP()
       << "This test fails after the CF V2 migration. https://fxbug.dev/110019 ";
-#endif  // OS_FUCHSIA
+#else
 
   // See fixtures/shell_test.dart, the callback NotifyLocalTime is declared
   // there.
@@ -258,6 +261,7 @@ TEST_F(FuchsiaShellTest, LocaltimesVaryOnTimezoneChanges) {
   continue_fixture = false;
   fixture_latch.Signal();
   DestroyShell(std::move(shell));
+#endif  // OS_FUCHSIA
 }
 
 }  // namespace testing
