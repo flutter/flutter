@@ -27,6 +27,13 @@ void main() {
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
 
+  Finder findOverflowNextButton() {
+    return find.byWidgetPredicate((Widget widget) =>
+    widget is CustomPaint &&
+        '${widget.painter?.runtimeType}' == '_RightCupertinoChevronPainter',
+    );
+  }
+
   testWidgetsWithLeakTracking('Builds the right toolbar on each platform, including web, and shows buttonItems', (WidgetTester tester) async {
     const String buttonText = 'Click me';
 
@@ -187,6 +194,7 @@ void main() {
               onSelectAll: () {},
               onLiveTextInput: () {},
               onLookUp: () {},
+              onSearchWeb: () {},
             ),
           ),
         ),
@@ -200,20 +208,24 @@ void main() {
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
         expect(find.text('Select all'), findsOneWidget);
         expect(find.byType(TextSelectionToolbarTextButton), findsNWidgets(6));
+      case TargetPlatform.fuchsia:
+        expect(find.text('Select all'), findsOneWidget);
+        expect(find.byType(TextSelectionToolbarTextButton), findsNWidgets(7));
       case TargetPlatform.iOS:
         expect(find.text('Select All'), findsOneWidget);
-        expect(findLiveTextButton(), findsOneWidget);
         expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(6));
+        await tester.tapAt(tester.getCenter(findOverflowNextButton()));
+        await tester.pumpAndSettle();
+        expect(findLiveTextButton(), findsOneWidget);
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         expect(find.text('Select all'), findsOneWidget);
-        expect(find.byType(DesktopTextSelectionToolbarButton), findsNWidgets(6));
+        expect(find.byType(DesktopTextSelectionToolbarButton), findsNWidgets(7));
       case TargetPlatform.macOS:
         expect(find.text('Select All'), findsOneWidget);
-        expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(6));
+        expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(7));
     }
   },
     skip: kIsWeb, // [intended] on web the browser handles the context menu.

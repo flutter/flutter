@@ -154,6 +154,7 @@ void main() {
                     onPaste: null,
                     onSelectAll: null,
                     onLookUp: null,
+                    onSearchWeb: null,
                     onLiveTextInput: () {
                       invokedLiveTextInputSuccessfully = true;
                     },

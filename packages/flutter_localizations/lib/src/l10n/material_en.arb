@@ -202,6 +202,11 @@
     "description": "The label for the Look Up button and menu items on iOS."
   },
 
+  "searchWebButtonLabel": "Search Web",
+  "@searchWebButtonLabel": {
+    "description": "The label for the Search Web button and menu items on iOS."
+  },
+
   "okButtonLabel": "OK",
   "@okButtonLabel": {
     "description": "The label for OK buttons and menu items."

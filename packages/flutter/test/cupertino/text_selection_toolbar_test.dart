@@ -92,14 +92,19 @@ void main() {
     ..line(p1: const Offset(7.5, 0), p2: const Offset(2.5, 5))
     ..line(p1: const Offset(2.5, 5), p2: const Offset(7.5, 10));
 
-  Finder findOverflowNextButton() => find.byWidgetPredicate((Widget widget) =>
+  Finder findOverflowNextButton() {
+    return find.byWidgetPredicate((Widget widget) =>
     widget is CustomPaint &&
-    '${widget.painter?.runtimeType}' == '_RightCupertinoChevronPainter',
-  );
-  Finder findOverflowBackButton() => find.byWidgetPredicate((Widget widget) =>
+        '${widget.painter?.runtimeType}' == '_RightCupertinoChevronPainter',
+    );
+  }
+
+  Finder findOverflowBackButton() {
+    return find.byWidgetPredicate((Widget widget) =>
     widget is CustomPaint &&
-    '${widget.painter?.runtimeType}' == '_LeftCupertinoChevronPainter',
-  );
+        '${widget.painter?.runtimeType}' == '_LeftCupertinoChevronPainter',
+    );
+  }
 
   testWidgets('chevrons point to the correct side', (WidgetTester tester) async {
     // Add enough TestBoxes to need 3 pages.
