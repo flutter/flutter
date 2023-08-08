@@ -470,8 +470,7 @@ class IOSDevice extends Device {
     bool ipv6 = false,
     String? userIdentifier,
     @visibleForTesting Duration? discoveryTimeout,
-    @visibleForTesting
-    ShutdownHooks? shutdownHooks,
+    @visibleForTesting ShutdownHooks? shutdownHooks,
   }) async {
     String? packageId;
     if (isWirelesslyConnected &&
@@ -480,7 +479,10 @@ class IOSDevice extends Device {
       throwToolExit('Cannot start app on wirelessly tethered iOS device. Try running again with the --publish-port flag');
     }
 
-    // Used in CI to test XcodeDebug workflow from older versions of iOS and Xcode.
+    // TODO(vashworth): Remove after Xcode 15 and iOS 17 are in CI (https://github.com/flutter/flutter/issues/132128)
+    // XcodeDebug workflow is used for CoreDevices (iOS 17+ and Xcode 15+).
+    // Force the use of XcodeDebug workflow in CI to test from older versions
+    // since devicelab has not yet been updated to iOS 17 and Xcode 15.
     bool forceXcodeDebugWorkflow = false;
     if (debuggingOptions.usingCISystem &&
         debuggingOptions.debuggingEnabled &&
@@ -614,7 +616,13 @@ class IOSDevice extends Device {
 
       final Timer timer = Timer(discoveryTimeout ?? Duration(seconds: defaultTimeout), () {
         _logger.printError('The Dart VM Service was not discovered after $defaultTimeout seconds. This is taking much longer than expected...');
-
+        if (isCoreDevice && debuggingOptions.debuggingEnabled) {
+          _logger.printError(
+            'Open the Xcode window the project is opened in to ensure the app '
+            'is running. If the app is not running, try selecting "Product > Run" '
+            'to fix the problem.',
+          );
+        }
         // If debugging with a wireless device and the timeout is reached, remind the
         // user to allow local network permissions.
         if (isWirelesslyConnected) {
@@ -632,6 +640,17 @@ class IOSDevice extends Device {
 
       Uri? localUri;
       if (isWirelesslyConnected) {
+        // When using a CoreDevice, device logs are unavailable and therefore
+        // cannot be used to get the Dart VM url. Instead, get the Dart VM
+        // Service by finding services matching the app bundle id and the
+        // device name.
+        //
+        // If not using a CoreDevice, wait for the Dart VM url to be discovered
+        // via logs and then get the Dart VM Service by finding services matching
+        // the app bundle id and the Dart VM port.
+        //
+        // Then in both cases, get the device IP from the Dart VM Service to
+        // construct the Dart VM url using the device IP as the host.
         if (isCoreDevice) {
           localUri = await MDnsVmServiceDiscovery.instance!.getVMServiceUriForLaunch(
             packageId,
@@ -690,6 +709,16 @@ class IOSDevice extends Device {
     }
   }
 
+  /// Starting with Xcode 15 and iOS 17, `ios-deploy` stopped working due to
+  /// the new CoreDevice connectivity stack. Previously, `ios-deploy` was used
+  /// to install the app, launch the app, and start `debugserver`.
+  /// Xcode 15 introduced a new command line tool called `devicectl` that
+  /// includes much of the functionality supplied by `ios-deploy`. However,
+  /// `devicectl` lacks the ability to start a `debugserver` and therefore `ptrace`, which are needed
+  /// for debug mode due to using a JIT Dart VM.
+  ///
+  /// Therefore, when starting an app on a CoreDevice, use `devicectl` when
+  /// debugging is not enabled. Otherwise, use Xcode automation.
   Future<bool> _startAppOnCoreDevice({
     required DebuggingOptions debuggingOptions,
     required IOSApp package,
@@ -718,6 +747,11 @@ class IOSDevice extends Device {
 
       return launchSuccess;
     } else {
+      _logger.printStatus(
+        'You may be prompted to give access to control Xcode. Flutter uses Xcode '
+        'to run your app. If access is not allowed, you can change this through '
+        'your Settings > Privacy & Security > Automation.',
+      );
       final int launchTimeout = isWirelesslyConnected ? 45 : 30;
       final Timer timer = Timer(discoveryTimeout ?? Duration(seconds: launchTimeout), () {
         _logger.printError(
@@ -732,7 +766,7 @@ class IOSDevice extends Device {
         debugProject = await _xcodeDebug.createXcodeProjectWithCustomBundle(
           package.deviceBundlePath,
           templateRenderer: globals.templateRenderer,
-          verboseLogging: debuggingOptions.usingCISystem,
+          verboseLogging: _logger.isVerbose,
         );
       } else if (package is BuildableIOSApp) {
         final IosProject project = package.project;
@@ -754,7 +788,7 @@ class IOSDevice extends Device {
           scheme: scheme,
           xcodeProject: project.xcodeProject,
           xcodeWorkspace: project.xcodeWorkspace!,
-          verboseLogging: debuggingOptions.usingCISystem,
+          verboseLogging: _logger.isVerbose,
         );
       } else {
         // This should not happen. Currently, only PrebuiltIOSApp and
@@ -840,6 +874,8 @@ class IOSDevice extends Device {
   @override
   bool get supportsScreenshot {
     if (isCoreDevice) {
+      // `idevicescreenshot` stopped working with iOS 17 / Xcode 15
+      // (https://github.com/flutter/flutter/issues/128598).
       return false;
     }
     return _iMobileDevice.isInstalled;
@@ -934,13 +970,15 @@ class IOSDeviceLogReader extends DeviceLogReader {
     this._isWirelesslyConnected,
     this._isCoreDevice,
     String appName,
-    bool usingCISystem,
-  ) : // Match for lines for the runner in syslog.
+    bool usingCISystem, {
+    bool forceXcodeDebug = false,
+  }) : // Match for lines for the runner in syslog.
       //
       // iOS 9 format:  Runner[297] <Notice>:
       // iOS 10 format: Runner(Flutter)[297] <Notice>:
       _runnerLineRegex = RegExp(appName + r'(\(Flutter\))?\[[\d]+\] <[A-Za-z]+>: '),
-      _usingCISystem = usingCISystem;
+      _usingCISystem = usingCISystem,
+      _forceXcodeDebug = forceXcodeDebug;
 
   /// Create a new [IOSDeviceLogReader].
   factory IOSDeviceLogReader.create({
@@ -959,6 +997,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
       device.isCoreDevice,
       appName,
       usingCISystem,
+      forceXcodeDebug: device._platform.environment['FORCE_XCODE_DEBUG']?.toLowerCase() == 'true',
     );
   }
 
@@ -989,6 +1028,10 @@ class IOSDeviceLogReader extends DeviceLogReader {
   final bool _isCoreDevice;
   final IMobileDevice _iMobileDevice;
   final bool _usingCISystem;
+
+  // TODO(vashworth): Remove after Xcode 15 and iOS 17 are in CI (https://github.com/flutter/flutter/issues/132128)
+  /// Whether XcodeDebug workflow is being forced.
+  final bool _forceXcodeDebug;
 
   // Matches a syslog line from the runner.
   RegExp _runnerLineRegex;
@@ -1027,9 +1070,11 @@ class IOSDeviceLogReader extends DeviceLogReader {
   /// is true.
   final List<String> _streamFlutterMessages = <String>[];
 
-  /// When using multiple logging sources, exclude logs with a `flutter:` prefix
-  /// if they have already been added to the stream. This is to prevent duplicates
-  /// from being printed.
+  /// There are three potential logging sources: `idevicesyslog`, `ios-deploy`,
+  /// and Unified Logging (Dart VM). When using more than one of these logging
+  /// sources at a time, exclude logs with a `flutter:` prefix if they have
+  /// already been added to the stream. This is to prevent duplicates from
+  /// being printed.
   bool _excludeLog(String message, IOSDeviceLogSource source) {
     if (!usingMultipleLoggingSources) {
       return false;
@@ -1040,10 +1085,11 @@ class IOSDeviceLogReader extends DeviceLogReader {
       }
       _streamFlutterMessages.add(message);
     } else if (useIOSDeployLogging && source == IOSDeviceLogSource.idevicesyslog) {
-      // If using both ios-deploy and `idevicesyslog`, exclude it if the message's
-      // source is `idevicesyslog`. This is done because `ios-deploy` and
-      // `idevicesyslog` often have different prefixes on non-flutter messages
-      // and are not critical for CI tests.
+      // If using both `ios-deploy` and `idevicesyslog` simultaneously, exclude
+      // the message if its source is `idevicesyslog`. This is done because
+      //`ios-deploy` and `idevicesyslog` often have different prefixes, which
+      // makes duplicate matching difficult. Instead, exclude any non-flutter-prefixed
+      // `idevicesyslog` messages, which are not critical for CI tests.
       return true;
     }
     return false;
@@ -1080,6 +1126,11 @@ class IOSDeviceLogReader extends DeviceLogReader {
   /// why it started working again.
   @visibleForTesting
   bool get useSyslogLogging {
+    // When forcing XcodeDebug workflow, use `idevicesyslog`.
+    if (_forceXcodeDebug) {
+      return true;
+    }
+
     // `ios-deploy` stopped working with iOS 17 / Xcode 15, so use `idevicesyslog` instead.
     // However, `idevicesyslog` does not work with iOS 17 wireless devices.
     if (_isCoreDevice && !_isWirelesslyConnected) {
@@ -1108,6 +1159,11 @@ class IOSDeviceLogReader extends DeviceLogReader {
   /// This value may change if [_iosDeployDebugger] changes.
   @visibleForTesting
   bool get useUnifiedLogging {
+    // Can't use Unified Logging if it's not going to listen to the Dart VM.
+    if (!_shouldListenForUnifiedLoggingEvents) {
+      return false;
+    }
+
     // `idevicesyslog` doesn't work on wireless devices, so use logs from Dart VM instead.
     if (_isCoreDevice) {
       if (_isWirelesslyConnected) {
@@ -1116,7 +1172,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
       return false;
     }
 
-    // Prefer the more complete logs from the attached debugger.
+    // Prefer the more complete logs from the attached debugger, if they are available.
     if (_majorSdkVersion >= minimumUniversalLoggingSdkVersion && (_iosDeployDebugger == null || !_iosDeployDebugger!.debuggerAttached)) {
       return true;
     }

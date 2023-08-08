@@ -7,14 +7,11 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
-import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/template.dart';
-import '../base/user_messages.dart';
-import '../cache.dart';
 import '../convert.dart';
 import '../macos/xcode.dart';
 import '../template.dart';
@@ -27,21 +24,15 @@ class XcodeDebug {
     required ProcessManager processManager,
     required Xcode xcode,
     required FileSystem fileSystem,
-    required UserMessages userMessages,
-    String? flutterRoot,
   })  : _logger = logger,
         _processUtils = ProcessUtils(logger: logger, processManager: processManager),
         _xcode = xcode,
-        _fileSystem = fileSystem,
-        _userMessage = userMessages,
-        _flutterRoot = flutterRoot ?? Cache.flutterRoot!;
+        _fileSystem = fileSystem;
 
   final ProcessUtils _processUtils;
   final Logger _logger;
   final Xcode _xcode;
   final FileSystem _fileSystem;
-  final UserMessages _userMessage;
-  final String _flutterRoot;
 
   /// Process to start Xcode's debug action.
   @visibleForTesting
@@ -53,30 +44,6 @@ class XcodeDebug {
 
   /// Whether the debug action has been started.
   bool get debugStarted => currentDebuggingProject != null;
-
-  String get pathToXcodeApp {
-    // If the Xcode Select Path is /Applications/Xcode.app/Contents/Developer,
-    // the path to Xcode App is /Applications/Xcode.app
-
-    final String? pathToXcode = _xcode.xcodeSelectPath;
-    if (pathToXcode == null || pathToXcode.isEmpty) {
-      throwToolExit(_userMessage.xcodeMissing);
-    }
-    final int index = pathToXcode.indexOf('.app');
-    if (index == -1) {
-      throwToolExit(_userMessage.xcodeMissing);
-    }
-    return pathToXcode.substring(0, index + 4);
-  }
-
-  String get pathToXcodeAutomationScript {
-    final String flutterToolsAbsolutePath = _fileSystem.path.join(
-      _flutterRoot,
-      'packages',
-      'flutter_tools',
-    );
-    return '$flutterToolsAbsolutePath/bin/xcode_debug.js';
-  }
 
   /// Install, launch, and start a debug session for app through Xcode interface,
   /// automated by OSA scripting. First checks if the project is opened in
@@ -109,10 +76,10 @@ class XcodeDebug {
           'osascript',
           '-l',
           'JavaScript',
-          pathToXcodeAutomationScript,
+          _xcode.xcodeAutomationScriptPath,
           'debug',
           '--xcode-path',
-          pathToXcodeApp,
+          _xcode.xcodeAppPath,
           '--project-path',
           project.xcodeProject.path,
           '--workspace-path',
@@ -128,23 +95,34 @@ class XcodeDebug {
         ],
       );
 
-      String stdout = '';
+      final StringBuffer stdoutBuffer = StringBuffer();
       stdoutSubscription = startDebugActionProcess!.stdout
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
           .listen((String line) {
             _logger.printTrace(line);
-            stdout += line;
+            stdoutBuffer.write(line);
       });
 
-      String stderr = '';
+      final StringBuffer stderrBuffer = StringBuffer();
+      bool permissionWarningPrinted = false;
       // console.log from the script are found in the stderr
       stderrSubscription = startDebugActionProcess!.stderr
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
           .listen((String line) {
             _logger.printTrace('stderr: $line');
-            stderr += line;
+            stderrBuffer.write(line);
+
+          // This error may occur if Xcode automation has not been allowed.
+          // Example: Failed to get workspace: Error: An error occurred.
+          if (!permissionWarningPrinted && line.contains('Failed to get workspace') && line.contains('An error occurred')) {
+            _logger.printError(
+              'There was an error finding the project in Xcode. Ensure permission '
+              'has been given to control Xcode in Settings > Privacy & Security > Automation.',
+            );
+            permissionWarningPrinted = true;
+          }
       });
 
       final int exitCode = await startDebugActionProcess!.exitCode.whenComplete(() async {
@@ -154,11 +132,13 @@ class XcodeDebug {
       });
 
       if (exitCode != 0) {
-        _logger.printError('Error executing osascript: $exitCode\n$stderr');
+        _logger.printError('Error executing osascript: $exitCode\n$stderrBuffer');
         return false;
       }
 
-      final XcodeAutomationScriptResponse? response = parseScriptResponse(stdout);
+      final XcodeAutomationScriptResponse? response = parseScriptResponse(
+        stdoutBuffer.toString(),
+      );
       if (response == null) {
         return false;
       }
@@ -167,7 +147,7 @@ class XcodeDebug {
         return false;
       }
       if (response.debugResult == null) {
-        _logger.printError('Unable to get debug results from response: $stdout');
+        _logger.printError('Unable to get debug results from response: $stdoutBuffer');
         return false;
       }
       if (response.debugResult?.status != 'running') {
@@ -266,10 +246,10 @@ class XcodeDebug {
         'osascript',
         '-l',
         'JavaScript',
-        pathToXcodeAutomationScript,
-        'project-opened',
+        _xcode.xcodeAutomationScriptPath,
+        'check-workspace-opened',
         '--xcode-path',
-        pathToXcodeApp,
+        _xcode.xcodeAppPath,
         '--project-path',
         project.xcodeProject.path,
         '--workspace-path',
@@ -321,7 +301,7 @@ class XcodeDebug {
         <String>[
           'open',
           '-a',
-          pathToXcodeApp,
+          _xcode.xcodeAppPath,
           '-g', // Do not bring the application to the foreground.
           '-j', // Launches the app hidden.
           xcodeWorkspace.path
@@ -351,10 +331,10 @@ class XcodeDebug {
         'osascript',
         '-l',
         'JavaScript',
-        pathToXcodeAutomationScript,
+        _xcode.xcodeAutomationScriptPath,
         'stop',
         '--xcode-path',
-        pathToXcodeApp,
+        _xcode.xcodeAppPath,
         '--project-path',
         project.xcodeProject.path,
         '--workspace-path',
@@ -461,7 +441,8 @@ class XcodeAutomationScriptDebugResult {
     );
   }
 
-  /// Whether this scheme action has completed (sucessfully or otherwise) or not. Will be false if still running
+  /// Whether this scheme action has completed (sucessfully or otherwise). Will
+  /// be false if still running.
   final bool? completed;
 
   /// The status of the debug action. Potential statuses include:

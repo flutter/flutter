@@ -8,7 +8,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcode_debug.dart';
@@ -25,111 +24,14 @@ void main() {
     late MemoryFileSystem fileSystem;
     late BufferLogger logger;
     late FakeProcessManager fakeProcessManager;
-    late UserMessages userMessages;
 
     const String flutterRoot = '/path/to/flutter';
+    const String pathToXcodeAutomationScript = '$flutterRoot/packages/flutter_tools/bin/xcode_debug.js';
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
       logger = BufferLogger.test();
       fakeProcessManager = FakeProcessManager.empty();
-      userMessages = UserMessages();
-    });
-
-    group('pathToXcodeApp', () {
-      late XcodeProjectInterpreter xcodeProjectInterpreter;
-
-      setUp(() {
-        xcodeProjectInterpreter = XcodeProjectInterpreter.test(
-          processManager: fakeProcessManager,
-          version: Version(14, 0, 0),
-        );
-      });
-
-      testWithoutContext('parses correctly', () {
-        final Xcode xcode = setupXcode(fakeProcessManager: fakeProcessManager);
-
-        final XcodeDebug xcodeDebug = XcodeDebug(
-          logger: logger,
-          processManager: fakeProcessManager,
-          xcode: xcode,
-          fileSystem: fileSystem,
-          userMessages: userMessages,
-          flutterRoot: flutterRoot,
-        );
-
-        expect(xcodeDebug.pathToXcodeApp, '/Applications/Xcode.app');
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-      });
-
-      testWithoutContext('throws error if not found', () {
-        final Xcode xcode = Xcode.test(
-          processManager: FakeProcessManager.any(),
-          xcodeProjectInterpreter: xcodeProjectInterpreter,
-        );
-
-        final XcodeDebug xcodeDebug = XcodeDebug(
-          logger: logger,
-          processManager: fakeProcessManager,
-          xcode: xcode,
-          fileSystem: fileSystem,
-          userMessages: userMessages,
-          flutterRoot: flutterRoot,
-        );
-
-        expect(
-          () => xcodeDebug.pathToXcodeApp,
-          throwsToolExit(message: userMessages.xcodeMissing),
-        );
-      });
-
-      testWithoutContext('throws error with unexpected outcome', () {
-        fakeProcessManager.addCommand(const FakeCommand(
-          command: <String>[
-            '/usr/bin/xcode-select',
-            '--print-path',
-          ],
-          stdout: '/Library/Developer/CommandLineTools',
-        ));
-
-        final Xcode xcode = Xcode.test(
-          processManager: fakeProcessManager,
-          xcodeProjectInterpreter: xcodeProjectInterpreter,
-        );
-
-        final XcodeDebug xcodeDebug = XcodeDebug(
-          logger: logger,
-          processManager: fakeProcessManager,
-          xcode: xcode,
-          fileSystem: fileSystem,
-          userMessages: userMessages,
-          flutterRoot: flutterRoot,
-        );
-
-        expect(
-          () => xcodeDebug.pathToXcodeApp,
-          throwsToolExit(message: userMessages.xcodeMissing),
-        );
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-      });
-    });
-
-    testWithoutContext('pathToXcodeAutomationScript', () {
-      final Xcode xcode = setupXcode(fakeProcessManager: fakeProcessManager);
-
-      final XcodeDebug xcodeDebug = XcodeDebug(
-        logger: logger,
-        processManager: fakeProcessManager,
-        xcode: xcode,
-        fileSystem: fileSystem,
-        userMessages: userMessages,
-        flutterRoot: flutterRoot,
-      );
-
-      expect(
-        xcodeDebug.pathToXcodeAutomationScript,
-        '$flutterRoot/packages/flutter_tools/bin/xcode_debug.js',
-      );
     });
 
     group('debugApp', () {
@@ -137,14 +39,17 @@ void main() {
       const String deviceId = '0000001234';
 
       late Xcode xcode;
-      late String pathToXcodeAutomationScript;
       late Directory xcodeproj;
       late Directory xcworkspace;
       late XcodeDebugProject project;
 
       setUp(() {
-        xcode = setupXcode(fakeProcessManager: fakeProcessManager);
-        pathToXcodeAutomationScript = '$flutterRoot/packages/flutter_tools/bin/xcode_debug.js';
+        xcode = setupXcode(
+          fakeProcessManager: fakeProcessManager,
+          fileSystem: fileSystem,
+          flutterRoot: flutterRoot,
+        );
+
         xcodeproj = fileSystem.directory('Runner.xcodeproj');
         xcworkspace = fileSystem.directory('Runner.xcworkspace');
         project = XcodeDebugProject(
@@ -163,7 +68,7 @@ void main() {
               '-l',
               'JavaScript',
               pathToXcodeAutomationScript,
-              'project-opened',
+              'check-workspace-opened',
               '--xcode-path',
               pathToXcodeApp,
               '--project-path',
@@ -220,8 +125,6 @@ void main() {
           processManager: fakeProcessManager,
           xcode: xcode,
           fileSystem: fileSystem,
-          userMessages: userMessages,
-          flutterRoot: flutterRoot,
         );
 
         project = XcodeDebugProject(
@@ -256,7 +159,7 @@ void main() {
               '-l',
               'JavaScript',
               pathToXcodeAutomationScript,
-              'project-opened',
+              'check-workspace-opened',
               '--xcode-path',
               pathToXcodeApp,
               '--project-path',
@@ -311,8 +214,6 @@ void main() {
           processManager: fakeProcessManager,
           xcode: xcode,
           fileSystem: fileSystem,
-          userMessages: userMessages,
-          flutterRoot: flutterRoot,
         );
 
         final bool status = await xcodeDebug.debugApp(
@@ -337,7 +238,7 @@ void main() {
               '-l',
               'JavaScript',
               pathToXcodeAutomationScript,
-              'project-opened',
+              'check-workspace-opened',
               '--xcode-path',
               pathToXcodeApp,
               '--project-path',
@@ -377,8 +278,6 @@ void main() {
           processManager: fakeProcessManager,
           xcode: xcode,
           fileSystem: fileSystem,
-          userMessages: userMessages,
-          flutterRoot: flutterRoot,
         );
 
         final bool status = await xcodeDebug.debugApp(
@@ -407,7 +306,7 @@ void main() {
               '-l',
               'JavaScript',
               pathToXcodeAutomationScript,
-              'project-opened',
+              'check-workspace-opened',
               '--xcode-path',
               pathToXcodeApp,
               '--project-path',
@@ -451,8 +350,6 @@ void main() {
           processManager: fakeProcessManager,
           xcode: xcode,
           fileSystem: fileSystem,
-          userMessages: userMessages,
-          flutterRoot: flutterRoot,
         );
 
         final bool status = await xcodeDebug.debugApp(
@@ -478,7 +375,7 @@ void main() {
               '-l',
               'JavaScript',
               pathToXcodeAutomationScript,
-              'project-opened',
+              'check-workspace-opened',
               '--xcode-path',
               pathToXcodeApp,
               '--project-path',
@@ -523,8 +420,6 @@ void main() {
           processManager: fakeProcessManager,
           xcode: xcode,
           fileSystem: fileSystem,
-          userMessages: userMessages,
-          flutterRoot: flutterRoot,
         );
 
         final bool status = await xcodeDebug.debugApp(
@@ -553,7 +448,7 @@ void main() {
               '-l',
               'JavaScript',
               pathToXcodeAutomationScript,
-              'project-opened',
+              'check-workspace-opened',
               '--xcode-path',
               pathToXcodeApp,
               '--project-path',
@@ -598,8 +493,6 @@ void main() {
           processManager: fakeProcessManager,
           xcode: xcode,
           fileSystem: fileSystem,
-          userMessages: userMessages,
-          flutterRoot: flutterRoot,
         );
 
         final bool status = await xcodeDebug.debugApp(
@@ -628,7 +521,7 @@ void main() {
               '-l',
               'JavaScript',
               pathToXcodeAutomationScript,
-              'project-opened',
+              'check-workspace-opened',
               '--xcode-path',
               pathToXcodeApp,
               '--project-path',
@@ -673,8 +566,6 @@ void main() {
           processManager: fakeProcessManager,
           xcode: xcode,
           fileSystem: fileSystem,
-          userMessages: userMessages,
-          flutterRoot: flutterRoot,
         );
 
         final bool status = await xcodeDebug.debugApp(
@@ -694,14 +585,16 @@ void main() {
 
     group('parse script response', () {
       testWithoutContext('fails if osascript output returns non-json output', () async {
-        final Xcode xcode = setupXcode(fakeProcessManager: FakeProcessManager.any());
+        final Xcode xcode = setupXcode(
+          fakeProcessManager: FakeProcessManager.any(),
+          fileSystem: fileSystem,
+          flutterRoot: flutterRoot,
+        );
         final XcodeDebug xcodeDebug = XcodeDebug(
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
           fileSystem: fileSystem,
-          userMessages: userMessages,
-          flutterRoot: flutterRoot,
         );
 
         final XcodeAutomationScriptResponse? response = xcodeDebug.parseScriptResponse('not json');
@@ -714,14 +607,16 @@ void main() {
       });
 
       testWithoutContext('fails if osascript output returns unexpected json', () async {
-        final Xcode xcode = setupXcode(fakeProcessManager: FakeProcessManager.any());
+        final Xcode xcode = setupXcode(
+          fakeProcessManager: FakeProcessManager.any(),
+          fileSystem: fileSystem,
+          flutterRoot: flutterRoot,
+        );
         final XcodeDebug xcodeDebug = XcodeDebug(
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
           fileSystem: fileSystem,
-          userMessages: userMessages,
-          flutterRoot: flutterRoot,
         );
 
         final XcodeAutomationScriptResponse? response = xcodeDebug.parseScriptResponse('[]');
@@ -734,14 +629,16 @@ void main() {
       });
 
       testWithoutContext('fails if osascript output is missing status field', () async {
-        final Xcode xcode = setupXcode(fakeProcessManager: FakeProcessManager.any());
+        final Xcode xcode = setupXcode(
+          fakeProcessManager: FakeProcessManager.any(),
+          fileSystem: fileSystem,
+          flutterRoot: flutterRoot,
+        );
         final XcodeDebug xcodeDebug = XcodeDebug(
           logger: logger,
           processManager: fakeProcessManager,
           xcode: xcode,
           fileSystem: fileSystem,
-          userMessages: userMessages,
-          flutterRoot: flutterRoot,
         );
 
         final XcodeAutomationScriptResponse? response = xcodeDebug.parseScriptResponse('{}');
@@ -757,20 +654,22 @@ void main() {
     group('exit', () {
       const String pathToXcodeApp = '/Applications/Xcode.app';
 
-      late String pathToXcodeAutomationScript;
       late Directory projectDirectory;
       late Directory xcodeproj;
       late Directory xcworkspace;
 
       setUp(() {
-        pathToXcodeAutomationScript = '$flutterRoot/packages/flutter_tools/bin/xcode_debug.js';
         projectDirectory = fileSystem.directory('FlutterApp');
         xcodeproj = projectDirectory.childDirectory('Runner.xcodeproj');
         xcworkspace = projectDirectory.childDirectory('Runner.xcworkspace');
       });
 
       testWithoutContext('exits when waiting for debug session to start', () async {
-        final Xcode xcode = setupXcode(fakeProcessManager: fakeProcessManager);
+        final Xcode xcode = setupXcode(
+          fakeProcessManager: fakeProcessManager,
+          fileSystem: fileSystem,
+          flutterRoot: flutterRoot,
+        );
         final XcodeDebugProject project = XcodeDebugProject(
           scheme: 'Runner',
           xcodeProject: xcodeproj,
@@ -781,8 +680,6 @@ void main() {
           processManager: fakeProcessManager,
           xcode: xcode,
           fileSystem: fileSystem,
-          userMessages: userMessages,
-          flutterRoot: flutterRoot,
         );
         fakeProcessManager.addCommands(<FakeCommand>[
           FakeCommand(
@@ -822,7 +719,11 @@ void main() {
       });
 
       testWithoutContext('exits and deletes temporary directory', () async {
-        final Xcode xcode = setupXcode(fakeProcessManager: fakeProcessManager);
+        final Xcode xcode = setupXcode(
+          fakeProcessManager: fakeProcessManager,
+          fileSystem: fileSystem,
+          flutterRoot: flutterRoot,
+        );
         xcodeproj.createSync(recursive: true);
         xcworkspace.createSync(recursive: true);
 
@@ -838,8 +739,6 @@ void main() {
           processManager: fakeProcessManager,
           xcode: xcode,
           fileSystem: fileSystem,
-          userMessages: userMessages,
-          flutterRoot: flutterRoot,
         );
         fakeProcessManager.addCommands(<FakeCommand>[
           FakeCommand(
@@ -887,8 +786,9 @@ void main() {
 
       testWithoutContext('kill Xcode when force exit', () async {
         final Xcode xcode = setupXcode(
-          fakeProcessManager: fakeProcessManager,
-          xcodeSelect: false,
+          fakeProcessManager: FakeProcessManager.any(),
+          fileSystem: fileSystem,
+          flutterRoot: flutterRoot,
         );
         final XcodeDebugProject project = XcodeDebugProject(
           scheme: 'Runner',
@@ -900,8 +800,6 @@ void main() {
           processManager: fakeProcessManager,
           xcode: xcode,
           fileSystem: fileSystem,
-          userMessages: userMessages,
-          flutterRoot: flutterRoot,
         );
         fakeProcessManager.addCommands(<FakeCommand>[
           const FakeCommand(
@@ -933,14 +831,16 @@ void main() {
       const String pathToXcodeApp = '/Applications/Xcode.app';
 
       late Xcode xcode;
-      late String pathToXcodeAutomationScript;
       late Directory xcodeproj;
       late Directory xcworkspace;
       late XcodeDebugProject project;
 
       setUp(() {
-        xcode = setupXcode(fakeProcessManager: fakeProcessManager);
-        pathToXcodeAutomationScript = '$flutterRoot/packages/flutter_tools/bin/xcode_debug.js';
+        xcode = setupXcode(
+          fakeProcessManager: fakeProcessManager,
+          fileSystem: fileSystem,
+          flutterRoot: flutterRoot,
+        );
         xcodeproj = fileSystem.directory('Runner.xcodeproj');
         xcworkspace = fileSystem.directory('Runner.xcworkspace');
         project = XcodeDebugProject(
@@ -956,8 +856,6 @@ void main() {
           processManager: fakeProcessManager,
           xcode: xcode,
           fileSystem: fileSystem,
-          userMessages: userMessages,
-          flutterRoot: flutterRoot,
         );
         fakeProcessManager.addCommands(<FakeCommand>[
           FakeCommand(
@@ -1000,8 +898,6 @@ void main() {
           processManager: fakeProcessManager,
           xcode: xcode,
           fileSystem: fileSystem,
-          userMessages: userMessages,
-          flutterRoot: flutterRoot,
         );
         fakeProcessManager.addCommands(<FakeCommand>[
           FakeCommand(
@@ -1043,23 +939,28 @@ void main() {
   group('Debug project through Xcode with app bundle', () {
     late BufferLogger logger;
     late FakeProcessManager fakeProcessManager;
-    late UserMessages userMessages;
+    late MemoryFileSystem fileSystem;
+
+    const String flutterRoot = '/path/to/flutter';
 
     setUp(() {
       logger = BufferLogger.test();
       fakeProcessManager = FakeProcessManager.empty();
-      userMessages = UserMessages();
+      fileSystem = MemoryFileSystem.test();
     });
 
     testUsingContext('creates temporary xcode project', () async {
-      final Xcode xcode = setupXcode(fakeProcessManager: fakeProcessManager);
+      final Xcode xcode = setupXcode(
+        fakeProcessManager: fakeProcessManager,
+        fileSystem: fileSystem,
+        flutterRoot: flutterRoot,
+      );
 
       final XcodeDebug xcodeDebug = XcodeDebug(
         logger: logger,
         processManager: fakeProcessManager,
         xcode: xcode,
         fileSystem: globals.fs,
-        userMessages: userMessages,
       );
 
       final Directory projectDirectory = globals.fs.systemTempDirectory.createTempSync('flutter_empty_xcode.');
@@ -1097,22 +998,27 @@ void main() {
 
 Xcode setupXcode({
   required FakeProcessManager fakeProcessManager,
+  required FileSystem fileSystem,
+  required String flutterRoot,
   bool xcodeSelect = true,
 }) {
-  if (xcodeSelect) {
-    fakeProcessManager.addCommand(const FakeCommand(
-      command: <String>['/usr/bin/xcode-select', '--print-path'],
-      stdout: '/Applications/Xcode.app/Contents/Developer',
-    ));
-  }
+  fakeProcessManager.addCommand(const FakeCommand(
+    command: <String>['/usr/bin/xcode-select', '--print-path'],
+    stdout: '/Applications/Xcode.app/Contents/Developer',
+  ));
+
+  fileSystem.file('$flutterRoot/packages/flutter_tools/bin/xcode_debug.js').createSync(recursive: true);
 
   final XcodeProjectInterpreter xcodeProjectInterpreter = XcodeProjectInterpreter.test(
     processManager: FakeProcessManager.any(),
     version: Version(14, 0, 0),
   );
+
   return Xcode.test(
     processManager: fakeProcessManager,
     xcodeProjectInterpreter: xcodeProjectInterpreter,
+    fileSystem: fileSystem,
+    flutterRoot: flutterRoot,
   );
 }
 

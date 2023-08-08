@@ -10,12 +10,20 @@
 
 'use strict';
 
+/**
+ * OSA Script `run` handler that is called when the script is run. When ran
+ * with `osascript`, arguments are passed from the command line to the direct
+ * parameter of the `run` handler as a list of strings.
+ *
+ * @param {?Array<string>=} args_array
+ * @returns {!RunJsonResponse} The validated command.
+ */
 function run(args_array = []) {
   let args;
   try {
     args = new CommandArguments(args_array);
   } catch (e) {
-    return new RunJsonResponse(false, `Failed to parse arguments: ${e}`);
+    return new RunJsonResponse(false, `Failed to parse arguments: ${e}`).stringify();
   }
 
   const xcodeResult = getXcode(args);
@@ -24,8 +32,8 @@ function run(args_array = []) {
   }
   const xcode = xcodeResult.result;
 
-  if (args.command === 'project-opened') {
-    const result = getWorkspace(xcode, args);
+  if (args.command === 'check-workspace-opened') {
+    const result = getWorkspaceDocument(xcode, args);
     return new RunJsonResponse(result.error == null, result.error).stringify();
   } else if (args.command === 'debug') {
     const result = debugApp(xcode, args);
@@ -75,23 +83,24 @@ class CommandArguments {
    * @throws Will throw an error if command is not recognized.
    */
   validatedCommand(command) {
-    switch (command) {
-      case 'project-opened':
-      case 'debug':
-      case 'stop':
-        return command;
-      default:
-        throw `Unrecognized Command: ${command}`;
+    const allowedCommands = ['check-workspace-opened', 'debug', 'stop'];
+    if (allowedCommands.includes(command) === false) {
+      throw `Unrecognized Command: ${command}`;
     }
+
+    return command;
   }
 
   /**
    * Validates the flag is allowed for the current command.
    *
    * @param {!string} flag
-   * @returns {!bool} The validated command.
+   * @param {?string} value
+   * @returns {!bool}
+   * @throws Will throw an error if the flag is not allowed for the current
+   *     command and the value is not null, undefined, or empty.
    */
-  isArgumentAllowed(flag) {
+  isArgumentAllowed(flag, value) {
     const allowedArguments = {
       'common': {
         '--xcode-path': true,
@@ -99,7 +108,7 @@ class CommandArguments {
         '--workspace-path': true,
         '--verbose': true,
       },
-      'project-opened': {},
+      'check-workspace-opened': {},
       'debug': {
         '--device-id': true,
         '--scheme': true,
@@ -112,10 +121,11 @@ class CommandArguments {
       },
     }
 
-    if (allowedArguments['common'][flag] === true || allowedArguments[this.command][flag] === true) {
-      return true;
+    const isAllowed = allowedArguments['common'][flag] === true || allowedArguments[this.command][flag] === true;
+    if (isAllowed === false && (value != null && value !== '')) {
+      throw `The flag ${flag} is not allowed for the command ${this.command}.`;
     }
-    return false;
+    return isAllowed;
   }
 
   /**
@@ -136,9 +146,10 @@ class CommandArguments {
         flag = entry;
         value = args[index + 1];
 
-        // If next value in the array is also a flag or the next value is
-        // null/undefined, treat the flag like a boolean flag and set the value to 'true'.
-        if ((value != null && value.startsWith('--')) || value == null) {
+        // If the flag is allowed for the command, and the next value in the
+        // array is null/undefined or also a flag, treat the flag like a boolean
+        // flag and set the value to 'true'.
+        if (this.isArgumentAllowed(flag) && (value == null || value.startsWith('--'))) {
           value = 'true';
         } else {
           index++;
@@ -168,7 +179,7 @@ class CommandArguments {
    *     undefined, or empty.
    */
   validatedStringArgument(flag, value) {
-    if (this.isArgumentAllowed(flag) === false) {
+    if (this.isArgumentAllowed(flag, value) === false) {
       return null;
     }
     if (value == null || value === '') {
@@ -189,7 +200,7 @@ class CommandArguments {
    *     null, undefined, empty, 'true', or 'false'.
    */
   validatedBoolArgument(flag, value) {
-    if (this.isArgumentAllowed(flag) === false) {
+    if (this.isArgumentAllowed(flag, value) === false) {
       return null;
     }
     if (value == null || value === '') {
@@ -212,7 +223,7 @@ class CommandArguments {
    *     null, undefined, or empty. Will also throw an error if parsing fails.
    */
   validatedJsonArgument(flag, value) {
-    if (this.isArgumentAllowed(flag) === false) {
+    if (this.isArgumentAllowed(flag, value) === false) {
       return null;
     }
     if (value == null || value === '') {
@@ -325,7 +336,7 @@ function debugApp(xcode, args) {
   if (workspaceResult.error != null) {
     return new FunctionResult(null, workspaceResult.error);
   }
-	const targetWorkspace = workspaceResult.result;
+  const targetWorkspace = workspaceResult.result;
 
   const destinationResult = getTargetDestination(
     targetWorkspace,
@@ -429,7 +440,7 @@ function waitForWorkspaceToLoad(xcode, args) {
       // Every 10 seconds, print the list of workspaces if verbose
       const verbose = args.verbose && i % verboseLogInterval === 0;
 
-      const workspaceResult = getWorkspace(xcode, args, verbose);
+      const workspaceResult = getWorkspaceDocument(xcode, args, verbose);
       if (workspaceResult.error == null) {
         const document = workspaceResult.result;
         if (document.loaded() === true) {
@@ -457,7 +468,7 @@ function waitForWorkspaceToLoad(xcode, args) {
  * @returns {!FunctionResult} Return either a `WorkspaceDocument` (Xcode Mac
  *     Scripting class) or null as the `result`.
  */
-function getWorkspace(xcode, args, verbose = false) {
+function getWorkspaceDocument(xcode, args, verbose = false) {
   const privatePrefix = '/private';
 
   try {
@@ -494,7 +505,7 @@ function getWorkspace(xcode, args, verbose = false) {
  * @returns {!FunctionResult} Always returns null as the `result`.
  */
 function stopApp(xcode, args) {
-  const workspaceResult = getWorkspace(xcode, args);
+  const workspaceResult = getWorkspaceDocument(xcode, args);
   if (workspaceResult.error != null) {
     return new FunctionResult(null, workspaceResult.error);
   }

@@ -14,8 +14,10 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/user_messages.dart';
 import '../base/version.dart';
 import '../build_info.dart';
+import '../cache.dart';
 import '../ios/xcodeproj.dart';
 
 Version get xcodeRequiredVersion => Version(14, null, null);
@@ -44,9 +46,13 @@ class Xcode {
     required Logger logger,
     required FileSystem fileSystem,
     required XcodeProjectInterpreter xcodeProjectInterpreter,
+    required UserMessages userMessages,
+    String? flutterRoot,
   })  : _platform = platform,
         _fileSystem = fileSystem,
         _xcodeProjectInterpreter = xcodeProjectInterpreter,
+        _userMessage = userMessages,
+        _flutterRoot = flutterRoot,
         _processUtils =
             ProcessUtils(logger: logger, processManager: processManager);
 
@@ -60,6 +66,7 @@ class Xcode {
     XcodeProjectInterpreter? xcodeProjectInterpreter,
     Platform? platform,
     FileSystem? fileSystem,
+    String? flutterRoot,
   }) {
     platform ??= FakePlatform(
       operatingSystem: 'macos',
@@ -70,6 +77,8 @@ class Xcode {
       processManager: processManager,
       fileSystem: fileSystem ?? MemoryFileSystem.test(),
       logger: BufferLogger.test(),
+      userMessages: UserMessages(),
+      flutterRoot: flutterRoot,
       xcodeProjectInterpreter: xcodeProjectInterpreter ?? XcodeProjectInterpreter.test(processManager: processManager),
     );
   }
@@ -78,6 +87,8 @@ class Xcode {
   final ProcessUtils _processUtils;
   final FileSystem _fileSystem;
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
+  final UserMessages _userMessage;
+  final String? _flutterRoot;
 
   bool get isInstalledAndMeetsVersionCheck => _platform.isMacOS && isInstalled && isRequiredVersionSatisfactory;
 
@@ -95,6 +106,38 @@ class Xcode {
       }
     }
     return _xcodeSelectPath;
+  }
+
+  String get xcodeAppPath {
+    // If the Xcode Select Path is /Applications/Xcode.app/Contents/Developer,
+    // the path to Xcode App is /Applications/Xcode.app
+
+    final String? pathToXcode = xcodeSelectPath;
+    if (pathToXcode == null || pathToXcode.isEmpty) {
+      throwToolExit(_userMessage.xcodeMissing);
+    }
+    final int index = pathToXcode.indexOf('.app');
+    if (index == -1) {
+      throwToolExit(_userMessage.xcodeMissing);
+    }
+    return pathToXcode.substring(0, index + 4);
+  }
+
+  /// Path to script to automate debugging through Xcode. Used in xcode_debug.dart.
+  /// Located in this file to make it easily overrideable in google3.
+  String get xcodeAutomationScriptPath {
+    final String flutterRoot = _flutterRoot ?? Cache.flutterRoot!;
+    final String flutterToolsAbsolutePath = _fileSystem.path.join(
+      flutterRoot,
+      'packages',
+      'flutter_tools',
+    );
+
+    final String filePath = '$flutterToolsAbsolutePath/bin/xcode_debug.js';
+    if (!_fileSystem.file(filePath).existsSync()) {
+      throwToolExit('Unable to find Xcode automation script at $filePath');
+    }
+    return filePath;
   }
 
   bool get isInstalled => _xcodeProjectInterpreter.isInstalled;

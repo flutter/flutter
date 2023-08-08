@@ -359,6 +359,7 @@ Future<T> runInContext<T>(
         platform: globals.platform,
         fileSystem: globals.fs,
         xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
+        userMessages: globals.userMessages,
       ),
       XCDevice: () => XCDevice(
         processManager: globals.processManager,
@@ -376,7 +377,6 @@ Future<T> runInContext<T>(
           dyLdLibEntry: globals.cache.dyLdLibEntry,
         ),
         fileSystem: globals.fs,
-        userMessages: globals.userMessages,
       ),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(
         logger: globals.logger,

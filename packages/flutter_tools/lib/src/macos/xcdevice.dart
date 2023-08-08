@@ -13,7 +13,6 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
-import '../base/user_messages.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -70,7 +69,6 @@ class XCDevice {
     required Platform platform,
     required IProxy iproxy,
     required FileSystem fileSystem,
-    required UserMessages userMessages,
     @visibleForTesting
     IOSCoreDeviceControl? coreDeviceControl,
     XcodeDebug? xcodeDebug,
@@ -100,7 +98,6 @@ class XCDevice {
         processManager: processManager,
         xcode: xcode,
         fileSystem: fileSystem,
-        userMessages: userMessages,
       ),
       _iProxy = iproxy,
       _xcode = xcode {

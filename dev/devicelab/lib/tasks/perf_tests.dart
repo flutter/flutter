@@ -847,7 +847,8 @@ class StartupTest {
             'screenshot_startup_${DateTime.now().toLocal().toIso8601String()}.png',
           );
         });
-        final int result = await flutter('run',
+        final int result = await flutter(
+          'run',
           options: <String>[
             '--no-android-gradle-daemon',
             '--no-publish-port',

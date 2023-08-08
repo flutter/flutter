@@ -112,7 +112,7 @@ class IOSCoreDeviceControl {
     final List<Object?> devicesSection = await _listCoreDevices(timeout: timeout);
     for (final Object? deviceObject in devicesSection) {
       if (deviceObject is Map<String, Object?>) {
-        devices.add(IOSCoreDevice.fromPreviewJson(deviceObject, logger: _logger));
+        devices.add(IOSCoreDevice.fromBetaJson(deviceObject, logger: _logger));
       }
     }
     return devices;
@@ -187,7 +187,7 @@ class IOSCoreDeviceControl {
     final List<Object?> appsData = await _listInstalledApps(deviceId: deviceId, bundleId: bundleId);
     for (final Object? appObject in appsData) {
       if (appObject is Map<String, Object?>) {
-        apps.add(IOSCoreDeviceInstalledApp.fromPreviewJson(appObject));
+        apps.add(IOSCoreDeviceInstalledApp.fromBetaJson(appObject));
       }
     }
     return apps;
@@ -372,7 +372,7 @@ class IOSCoreDevice {
     required this.visibilityClass,
   });
 
-  /// Parse JSON from `devicectl` while it's in preview mode.
+  /// Parse JSON from `devicectl list devices --json-output` while it's in beta preview mode.
   ///
   /// Example:
   /// {
@@ -387,7 +387,7 @@ class IOSCoreDevice {
   ///   "identifier" : "123456BB5-AEDE-7A22-B890-1234567890DD",
   ///   "visibilityClass" : "default"
   /// }
-  factory IOSCoreDevice.fromPreviewJson(
+  factory IOSCoreDevice.fromBetaJson(
     Map<String, Object?> data, {
     required Logger logger,
   }) {
@@ -396,7 +396,7 @@ class IOSCoreDevice {
       final List<Object?> capabilitiesData = data['capabilities']! as List<Object?>;
       for (final Object? capabilityData in capabilitiesData) {
         if (capabilityData != null && capabilityData is Map<String, Object?>) {
-          capabilitiesList.add(_IOSCoreDeviceCapability.fromPreviewJson(capabilityData));
+          capabilitiesList.add(_IOSCoreDeviceCapability.fromBetaJson(capabilityData));
         }
       }
     }
@@ -404,7 +404,7 @@ class IOSCoreDevice {
     _IOSCoreDeviceConnectionProperties? connectionProperties;
     if (data['connectionProperties'] is Map<String, Object?>) {
       final Map<String, Object?> connectionPropertiesData = data['connectionProperties']! as Map<String, Object?>;
-      connectionProperties = _IOSCoreDeviceConnectionProperties.fromPreviewJson(
+      connectionProperties = _IOSCoreDeviceConnectionProperties.fromBetaJson(
         connectionPropertiesData,
         logger: logger,
       );
@@ -413,13 +413,13 @@ class IOSCoreDevice {
     IOSCoreDeviceProperties? deviceProperties;
     if (data['deviceProperties'] is Map<String, Object?>) {
       final Map<String, Object?> devicePropertiesData = data['deviceProperties']! as Map<String, Object?>;
-      deviceProperties = IOSCoreDeviceProperties.fromPreviewJson(devicePropertiesData);
+      deviceProperties = IOSCoreDeviceProperties.fromBetaJson(devicePropertiesData);
     }
 
     _IOSCoreDeviceHardwareProperties? hardwareProperties;
     if (data['hardwareProperties'] is Map<String, Object?>) {
       final Map<String, Object?> hardwarePropertiesData = data['hardwareProperties']! as Map<String, Object?>;
-      hardwareProperties = _IOSCoreDeviceHardwareProperties.fromPreviewJson(
+      hardwareProperties = _IOSCoreDeviceHardwareProperties.fromBetaJson(
         hardwarePropertiesData,
         logger: logger,
       );
@@ -471,7 +471,8 @@ class _IOSCoreDeviceCapability {
     required this.name,
   });
 
-  /// Parse JSON from `devicectl` while it's in preview mode.
+  /// Parse `capabilities` section of JSON from `devicectl list devices --json-output`
+  /// while it's in beta preview mode.
   ///
   /// Example:
   /// "capabilities" : [
@@ -484,7 +485,7 @@ class _IOSCoreDeviceCapability {
   ///     "name" : "Launch Application"
   ///   }
   /// ]
-  factory _IOSCoreDeviceCapability.fromPreviewJson(Map<String, Object?> data) {
+  factory _IOSCoreDeviceCapability.fromBetaJson(Map<String, Object?> data) {
     return _IOSCoreDeviceCapability._(
       featureIdentifier: data['featureIdentifier']?.toString(),
       name: data['name']?.toString(),
@@ -509,7 +510,8 @@ class _IOSCoreDeviceConnectionProperties {
     required this.tunnelTransportProtocol,
   });
 
-  /// Parse JSON from `devicectl` while it's in preview mode.
+  /// Parse `connectionProperties` section of JSON from `devicectl list devices --json-output`
+  /// while it's in beta preview mode.
   ///
   /// Example:
   /// "connectionProperties" : {
@@ -531,7 +533,7 @@ class _IOSCoreDeviceConnectionProperties {
   ///   "tunnelState" : "connected",
   ///   "tunnelTransportProtocol" : "tcp"
   /// }
-  factory _IOSCoreDeviceConnectionProperties.fromPreviewJson(
+  factory _IOSCoreDeviceConnectionProperties.fromBetaJson(
     Map<String, Object?> data, {
     required Logger logger,
   }) {
@@ -596,7 +598,8 @@ class IOSCoreDeviceProperties {
     required this.screenViewingURL,
   });
 
-  /// Parse JSON from `devicectl` while it's in preview mode.
+  /// Parse `deviceProperties` section of JSON from `devicectl list devices --json-output`
+  /// while it's in beta preview mode.
   ///
   /// Example:
   /// "deviceProperties" : {
@@ -612,7 +615,7 @@ class IOSCoreDeviceProperties {
   ///   "rootFileSystemIsWritable" : false,
   ///   "screenViewingURL" : "coredevice-devices:/viewDeviceByUUID?uuid=123456BB5-AEDE-7A22-B890-1234567890DD"
   /// }
-  factory IOSCoreDeviceProperties.fromPreviewJson(Map<String, Object?> data) {
+  factory IOSCoreDeviceProperties.fromBetaJson(Map<String, Object?> data) {
     return IOSCoreDeviceProperties._(
       bootedFromSnapshot: data['bootedFromSnapshot'] is bool? ? data['bootedFromSnapshot'] as bool? : null,
       bootedSnapshotName: data['bootedSnapshotName']?.toString(),
@@ -658,7 +661,8 @@ class _IOSCoreDeviceHardwareProperties {
     required this.udid,
   });
 
-  /// Parse JSON from `devicectl` while it's in preview mode.
+  /// Parse `hardwareProperties` section of JSON from `devicectl list devices --json-output`
+  /// while it's in beta preview mode.
   ///
   /// Example:
   /// "hardwareProperties" : {
@@ -694,13 +698,13 @@ class _IOSCoreDeviceHardwareProperties {
   ///   "thinningProductType" : "iPad14,3-A",
   ///   "udid" : "00001234-0001234A3C03401E"
   /// }
-  factory _IOSCoreDeviceHardwareProperties.fromPreviewJson(
+  factory _IOSCoreDeviceHardwareProperties.fromBetaJson(
     Map<String, Object?> data, {
     required Logger logger,
   }) {
     _IOSCoreDeviceCPUType? cpuType;
     if (data['cpuType'] is Map<String, Object?>) {
-      cpuType = _IOSCoreDeviceCPUType.fromPreviewJson(data['cpuType']! as Map<String, Object?>);
+      cpuType = _IOSCoreDeviceCPUType.fromBetaJson(data['cpuType']! as Map<String, Object?>);
     }
 
     List<_IOSCoreDeviceCPUType>? supportedCPUTypes;
@@ -709,7 +713,7 @@ class _IOSCoreDeviceHardwareProperties {
       final List<_IOSCoreDeviceCPUType> cpuTypes = <_IOSCoreDeviceCPUType>[];
       for (final Object? cpuTypeData in values) {
         if (cpuTypeData is Map<String, Object?>) {
-          cpuTypes.add(_IOSCoreDeviceCPUType.fromPreviewJson(cpuTypeData));
+          cpuTypes.add(_IOSCoreDeviceCPUType.fromBetaJson(cpuTypeData));
         }
       }
       supportedCPUTypes = cpuTypes;
@@ -764,7 +768,8 @@ class _IOSCoreDeviceCPUType {
     this.cpuType,
   });
 
-  /// Parse JSON from `devicectl` while it's in preview mode.
+  /// Parse `hardwareProperties.cpuType` and `hardwareProperties.supportedCPUTypes`
+  /// sections of JSON from `devicectl list devices --json-output` while it's in beta preview mode.
   ///
   /// Example:
   /// "cpuType" : {
@@ -772,7 +777,7 @@ class _IOSCoreDeviceCPUType {
   ///   "subType" : 2,
   ///   "type" : 16777228
   /// }
-  factory _IOSCoreDeviceCPUType.fromPreviewJson(Map<String, Object?> data) {
+  factory _IOSCoreDeviceCPUType.fromBetaJson(Map<String, Object?> data) {
     return _IOSCoreDeviceCPUType._(
       name: data['name']?.toString(),
       subType: data['subType'] is int? ? data['subType'] as int? : null,
@@ -801,7 +806,8 @@ class IOSCoreDeviceInstalledApp {
     required this.version,
   });
 
-  /// Parse JSON from `devicectl` while it's in preview mode.
+  /// Parse JSON from `devicectl device info apps --json-output` while it's in
+  /// beta preview mode.
   ///
   /// Example:
   /// {
@@ -817,7 +823,7 @@ class IOSCoreDeviceInstalledApp {
   ///   "url" : "file:///private/var/containers/Bundle/Application/12345E6A-7F89-0C12-345E-F6A7E890CFF1/Runner.app/",
   ///   "version" : "1.0.0"
   /// }
-  factory IOSCoreDeviceInstalledApp.fromPreviewJson(Map<String, Object?> data) {
+  factory IOSCoreDeviceInstalledApp.fromBetaJson(Map<String, Object?> data) {
     return IOSCoreDeviceInstalledApp._(
       appClip: data['appClip'] is bool? ? data['appClip'] as bool? : null,
       builtByDeveloper: data['builtByDeveloper'] is bool? ? data['builtByDeveloper'] as bool? : null,

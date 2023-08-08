@@ -155,6 +155,102 @@ void main() {
         });
       });
 
+      group('pathToXcodeApp', () {
+        late UserMessages userMessages;
+
+        setUp(() {
+          userMessages = UserMessages();
+        });
+
+        testWithoutContext('parses correctly', () {
+          final Xcode xcode = Xcode.test(
+            processManager: fakeProcessManager,
+            xcodeProjectInterpreter: xcodeProjectInterpreter,
+          );
+
+          fakeProcessManager.addCommand(const FakeCommand(
+            command: <String>['/usr/bin/xcode-select', '--print-path'],
+            stdout: '/Applications/Xcode.app/Contents/Developer',
+          ));
+
+          expect(xcode.xcodeAppPath, '/Applications/Xcode.app');
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+        });
+
+        testWithoutContext('throws error if not found', () {
+          final Xcode xcode = Xcode.test(
+            processManager: FakeProcessManager.any(),
+            xcodeProjectInterpreter: xcodeProjectInterpreter,
+          );
+
+          expect(
+            () => xcode.xcodeAppPath,
+            throwsToolExit(message: userMessages.xcodeMissing),
+          );
+        });
+
+        testWithoutContext('throws error with unexpected outcome', () {
+          final Xcode xcode = Xcode.test(
+            processManager: fakeProcessManager,
+            xcodeProjectInterpreter: xcodeProjectInterpreter,
+          );
+
+          fakeProcessManager.addCommand(const FakeCommand(
+            command: <String>[
+              '/usr/bin/xcode-select',
+              '--print-path',
+            ],
+            stdout: '/Library/Developer/CommandLineTools',
+          ));
+
+          expect(
+            () => xcode.xcodeAppPath,
+            throwsToolExit(message: userMessages.xcodeMissing),
+          );
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+        });
+      });
+
+      group('pathToXcodeAutomationScript', () {
+        const String flutterRoot = '/path/to/flutter';
+
+        late MemoryFileSystem fileSystem;
+
+        setUp(() {
+          fileSystem = MemoryFileSystem.test();
+        });
+
+        testWithoutContext('returns path when file is found', () {
+          final Xcode xcode = Xcode.test(
+            processManager: fakeProcessManager,
+            xcodeProjectInterpreter: xcodeProjectInterpreter,
+            fileSystem: fileSystem,
+            flutterRoot: flutterRoot,
+          );
+
+          fileSystem.file('$flutterRoot/packages/flutter_tools/bin/xcode_debug.js').createSync(recursive: true);
+
+          expect(
+            xcode.xcodeAutomationScriptPath,
+            '$flutterRoot/packages/flutter_tools/bin/xcode_debug.js',
+          );
+        });
+
+        testWithoutContext('throws error when not found', () {
+          final Xcode xcode = Xcode.test(
+            processManager: fakeProcessManager,
+            xcodeProjectInterpreter: xcodeProjectInterpreter,
+            fileSystem: fileSystem,
+            flutterRoot: flutterRoot,
+          );
+
+          expect(() =>
+            xcode.xcodeAutomationScriptPath,
+            throwsToolExit()
+          );
+        });
+      });
+
       group('macOS', () {
         late Xcode xcode;
 
@@ -361,7 +457,6 @@ void main() {
           cache: Cache.test(processManager: FakeProcessManager.any()),
           iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
           fileSystem: fileSystem,
-          userMessages: UserMessages(),
           coreDeviceControl: FakeIOSCoreDeviceControl(),
           xcodeDebug: FakeXcodeDebug(),
         );
@@ -397,7 +492,6 @@ void main() {
           cache: Cache.test(processManager: FakeProcessManager.any()),
           iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
           fileSystem: fileSystem,
-          userMessages: UserMessages(),
           coreDeviceControl: coreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
         );
