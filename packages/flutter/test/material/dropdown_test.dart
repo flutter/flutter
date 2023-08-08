@@ -2359,14 +2359,14 @@ testWidgets('DropdownButton hint is selected item', (WidgetTester tester) async 
 
   await tester.pumpWidget(buildFrame());
   // Checking if label for the dropdown menu is aligned to the left.
-  expect(tester.getTopLeft(find.text('-item0-')).dx, 0); 
+  expect(tester.getTopLeft(find.text('-item0-')).dx, 0);
 
   // Show the popup menu.
   await tester.tap(find.text('-item0-', skipOffstage: false), warnIfMissed: false);
   await tester.pumpAndSettle();
 
   // Checking if the content of the dropdown menu is aligned to the left.
-  expect(tester.getTopLeft(find.text('-item0-')).dx, 0); 
+  expect(tester.getTopLeft(find.text('-item0-')).dx, 0);
 });
 
   testWidgets('DropdownButton can be focused, and has focusColor', (WidgetTester tester) async {
