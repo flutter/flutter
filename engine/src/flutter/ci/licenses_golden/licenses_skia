@@ -1,4 +1,4 @@
-Signature: 87554b9df868245af39cc4fdb24879be
+Signature: 492e2550b0c4959c3f078476896746db
 
 ====================================================================================================
 LIBRARY: etc1
@@ -394,6 +394,7 @@ FILE: ../../../third_party/skia/relnotes/path_715M.md
 FILE: ../../../third_party/skia/relnotes/runtimeeffect_const.md
 FILE: ../../../third_party/skia/relnotes/runtimeeffect_image.md
 FILE: ../../../third_party/skia/relnotes/skgl_backend_surface.md
+FILE: ../../../third_party/skia/relnotes/sksl_comma_array.md
 FILE: ../../../third_party/skia/relnotes/tiledimages.md
 FILE: ../../../third_party/skia/src/core/SkOrderedReadBuffer.h
 FILE: ../../../third_party/skia/src/gpu/gpu_workaround_list.txt
