@@ -1,4 +1,4 @@
-Signature: 00f567236d70e92eab0195772b83d528
+Signature: 87554b9df868245af39cc4fdb24879be
 
 ====================================================================================================
 LIBRARY: etc1
@@ -5136,7 +5136,6 @@ ORIGIN: ../../../third_party/skia/src/codec/SkParseEncodedOrigin.cpp + ../../../
 ORIGIN: ../../../third_party/skia/src/codec/SkWuffsCodec.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/codec/SkWuffsCodec.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkCanvasPriv.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/core/SkChromeRemoteGlyphCache.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkColorSpaceXformSteps.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkColorSpaceXformSteps.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkContourMeasure.cpp + ../../../third_party/skia/LICENSE
@@ -5238,6 +5237,7 @@ ORIGIN: ../../../third_party/skia/src/ports/SkFontMgr_fuchsia.cpp + ../../../thi
 ORIGIN: ../../../third_party/skia/src/sksl/codegen/SkSLPipelineStageCodeGenerator.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLVariableReference.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/text/gpu/SDFMaskFilter.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/text/gpu/SkChromeRemoteGlyphCache.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/utils/SkAnimCodecPlayer.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/utils/SkCallableTraits.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/utils/SkJSON.cpp + ../../../third_party/skia/LICENSE
@@ -5351,7 +5351,6 @@ FILE: ../../../third_party/skia/src/codec/SkParseEncodedOrigin.cpp
 FILE: ../../../third_party/skia/src/codec/SkWuffsCodec.cpp
 FILE: ../../../third_party/skia/src/codec/SkWuffsCodec.h
 FILE: ../../../third_party/skia/src/core/SkCanvasPriv.cpp
-FILE: ../../../third_party/skia/src/core/SkChromeRemoteGlyphCache.cpp
 FILE: ../../../third_party/skia/src/core/SkColorSpaceXformSteps.cpp
 FILE: ../../../third_party/skia/src/core/SkColorSpaceXformSteps.h
 FILE: ../../../third_party/skia/src/core/SkContourMeasure.cpp
@@ -5453,6 +5452,7 @@ FILE: ../../../third_party/skia/src/ports/SkFontMgr_fuchsia.cpp
 FILE: ../../../third_party/skia/src/sksl/codegen/SkSLPipelineStageCodeGenerator.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLVariableReference.cpp
 FILE: ../../../third_party/skia/src/text/gpu/SDFMaskFilter.cpp
+FILE: ../../../third_party/skia/src/text/gpu/SkChromeRemoteGlyphCache.cpp
 FILE: ../../../third_party/skia/src/utils/SkAnimCodecPlayer.cpp
 FILE: ../../../third_party/skia/src/utils/SkCallableTraits.h
 FILE: ../../../third_party/skia/src/utils/SkJSON.cpp
