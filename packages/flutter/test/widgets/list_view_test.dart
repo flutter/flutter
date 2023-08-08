@@ -809,6 +809,7 @@ void main() {
         crossAxisExtent: 800.0,
       )
     );
+    // viewport(600.0) + cache extent after(250.0)
     expect(buildLog.length, 9);
     expect(buildLog.min, 0);
     expect(buildLog.max, 8);
@@ -828,6 +829,7 @@ void main() {
           crossAxisExtent: 800.0,
         )
     );
+    // cache extent before(250.0) + viewport(600.0) + cache extent after(250.0)
     expect(buildLog.length, 12);
     expect(buildLog.min, 97);
     expect(buildLog.max, 108);
