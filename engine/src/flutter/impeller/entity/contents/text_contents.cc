@@ -212,7 +212,7 @@ bool TextContents::Render(const ContentContext& renderer,
       .index_type = IndexType::kNone,
   });
 
-  return pass.AddCommand(cmd);
+  return pass.AddCommand(std::move(cmd));
 }
 
 }  // namespace impeller

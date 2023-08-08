@@ -303,7 +303,7 @@ std::optional<Entity> DirectionalGaussianBlurFilterContents::RenderFilter(
       FS::BindMaskInfo(cmd, host_buffer.EmplaceUniform(mask_info));
     }
 
-    return pass.AddCommand(cmd);
+    return pass.AddCommand(std::move(cmd));
   };
 
   Vector2 scale;

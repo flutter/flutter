@@ -180,7 +180,7 @@ static std::optional<Entity> AdvancedBlend(
 
     auto uniform_view = host_buffer.EmplaceUniform(frame_info);
     VS::BindFrameInfo(cmd, uniform_view);
-    pass.AddCommand(cmd);
+    pass.AddCommand(std::move(cmd));
 
     return true;
   };
@@ -336,7 +336,7 @@ std::optional<Entity> BlendFilterContents::CreateForegroundAdvancedBlend(
     auto uniform_view = host_buffer.EmplaceUniform(frame_info);
     VS::BindFrameInfo(cmd, uniform_view);
 
-    return pass.AddCommand(cmd);
+    return pass.AddCommand(std::move(cmd));
   };
   CoverageProc coverage_proc =
       [coverage](const Entity& entity) -> std::optional<Rect> {
@@ -476,7 +476,7 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
     auto uniform_view = host_buffer.EmplaceUniform(frame_info);
     VS::BindFrameInfo(cmd, uniform_view);
 
-    return pass.AddCommand(cmd);
+    return pass.AddCommand(std::move(cmd));
   };
 
   CoverageProc coverage_proc =
@@ -573,7 +573,7 @@ static std::optional<Entity> PipelineBlend(
       FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
       VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
 
-      pass.AddCommand(cmd);
+      pass.AddCommand(std::move(cmd));
       return true;
     };
 
