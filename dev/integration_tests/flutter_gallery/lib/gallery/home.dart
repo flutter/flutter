@@ -325,14 +325,14 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
       backgroundColor: isDark ? _kFlutterBlue : theme.primaryColor,
       body: SafeArea(
         bottom: false,
-        child: PopScope(
-          canPop: _category == null,
-          onPopInvoked: (bool didPop) {
-            if (didPop) {
-              return;
-            }
+        child: WillPopScope(
+          onWillPop: () {
             // Pop the category page if Android back button is pressed.
-            setState(() => _category = null);
+            if (_category != null) {
+              setState(() => _category = null);
+              return Future<bool>.value(false);
+            }
+            return Future<bool>.value(true);
           },
           child: Backdrop(
             backTitle: const Text('Options'),

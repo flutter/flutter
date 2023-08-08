@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 import 'colors.dart';
@@ -360,12 +361,14 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerP
 
   // Closes the cart if the cart is open, otherwise exits the app (this should
   // only be relevant for Android).
-  void _handlePopInvoked(bool didPop) {
-    if (didPop) {
-      return;
+  Future<bool> _onWillPop() async {
+    if (!_isOpen) {
+      await SystemNavigator.pop();
+      return true;
     }
 
     close();
+    return true;
   }
 
   @override
@@ -375,9 +378,8 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerP
       duration: const Duration(milliseconds: 225),
       curve: Curves.easeInOut,
       alignment: FractionalOffset.topLeft,
-      child: PopScope(
-        canPop: !_isOpen,
-        onPopInvoked: _handlePopInvoked,
+      child: WillPopScope(
+        onWillPop: _onWillPop,
         child: AnimatedBuilder(
           animation: widget.hideController,
           builder: _buildSlideAnimation,

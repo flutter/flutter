@@ -143,9 +143,10 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
     return null;
   }
 
-  Future<void> _handlePopInvoked(bool didPop) async {
-    if (didPop) {
-      return;
+  Future<bool> _warnUserAboutInvalidData() async {
+    final FormState? form = _formKey.currentState;
+    if (form == null || !_formWasEdited || form.validate()) {
+      return true;
     }
 
     final bool? result = await showDialog<bool>(
@@ -167,14 +168,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
         );
       },
     );
-
-    if (result ?? false) {
-      // Since this is the root route, quit the app where possible by invoking
-      // the SystemNavigator. If this wasn't the root route, then
-      // Navigator.maybePop could be used instead.
-      // See https://github.com/flutter/flutter/issues/11490
-      SystemNavigator.pop();
-    }
+    return result!;
   }
 
   @override
@@ -191,8 +185,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
         child: Form(
           key: _formKey,
           autovalidateMode: _autovalidateMode,
-          canPop: _formKey.currentState == null || !_formWasEdited || _formKey.currentState!.validate(),
-          onPopInvoked: _handlePopInvoked,
+          onWillPop: _warnUserAboutInvalidData,
           child: Scrollbar(
             child: SingleChildScrollView(
               primary: true,

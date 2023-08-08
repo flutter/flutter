@@ -196,8 +196,7 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
     }
     // If attempts to dismiss this route might be vetoed such as in a page
     // with forms, then do not allow the user to dismiss the route with a swipe.
-    if (route.hasScopedWillPopCallback
-        || route.popDisposition == RoutePopDisposition.doNotPop) {
+    if (route.hasScopedWillPopCallback) {
       return false;
     }
     // Fullscreen dialogs aren't dismissible by back swipe.
