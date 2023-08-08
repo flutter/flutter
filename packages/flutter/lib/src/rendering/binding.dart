@@ -487,7 +487,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   ///
   ///  * [deferFirstFrame], which defers when the first frame is sent to the
   ///    engine.
-  bool get sendFramesToEngine => _firstFrameSent || _firstFrameDeferredCount == 0;
+  bool get sendFramesToEngine => (_firstFrameSent || _firstFrameDeferredCount == 0) && !duringWarmUpFrame;
 
   /// Tell the framework to not send the first frames to the engine until there
   /// is a corresponding call to [allowFirstFrame].

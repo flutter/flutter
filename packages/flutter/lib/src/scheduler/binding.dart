@@ -916,6 +916,8 @@ mixin SchedulerBinding on BindingBase {
     _hasScheduledFrame = true;
   }
 
+  @protected
+  bool get duringWarmUpFrame => _warmUpFrame;
   bool _warmUpFrame = false;
 
   /// Schedule a frame to run as soon as possible, rather than waiting for
