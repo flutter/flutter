@@ -92,7 +92,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('FlexibleSpaceBar stretch mode fadeTitle', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar stretch mode fadeTitle', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -136,7 +136,7 @@ void main() {
     expect(opacityWidget.opacity, equals(0.0));
   });
 
-  testWidgetsWithLeakTracking('FlexibleSpaceBar stretch mode ignored for non-overscroll physics', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar stretch mode ignored for non-overscroll physics', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
