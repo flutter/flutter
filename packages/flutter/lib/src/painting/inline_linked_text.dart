@@ -148,7 +148,18 @@ class InlineLinkedText extends TextSpan {
     required this.recognizers,
   });
 
-  // TODO(justinmc): Document.
+  // TODO(justinmc): Add this disposing process to the examples, and reference one of them here in these docs.
+
+  /// Any [TapGestureRecognizer]s that have been generated for handling taps on
+  /// the links and whose lifecycle must be maintained by the
+  /// [InlineLinkedText]'s owner.
+  ///
+  /// Call [dispose] on these recognizers before throwing away this
+  /// [InlineLinkedText].
+  ///
+  /// See also:
+  ///  * [TextSpan.recognizer], which explains the need to manage the lifecycle
+  ///    of [GestureRecognizer]s created in [InlineSpan]s.
   final Iterable<TapGestureRecognizer> recognizers;
 
   static final RegExp _urlRegExp = RegExp(r'(?<!@[a-zA-Z0-9-]*)(?<![\/\.a-zA-Z0-9-])((https?:\/\/)?(([a-zA-Z0-9-]*\.)*[a-zA-Z0-9-]+(\.[a-zA-Z]+)+))(?::\d{1,5})?(?:\/[^\s]*)?(?:\?[^\s#]*)?(?:#[^\s]*)?(?![a-zA-Z0-9-]*@)');
@@ -421,15 +432,6 @@ class _TextLinkerMatch {
           );
       spans.add(nextChild);
       recognizers.add(recognizer);
-        /*
-      spans.add(textLinkerMatch.linkBuilder(
-        text.substring(
-          textLinkerMatch.textRange.start,
-          textLinkerMatch.textRange.end,
-        ),
-        textLinkerMatch.linkString,
-      ));
-      */
 
       index = textLinkerMatch.textRange.end;
     }

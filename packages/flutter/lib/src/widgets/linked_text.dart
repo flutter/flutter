@@ -53,12 +53,6 @@ class LinkedText extends StatefulWidget {
     LinkBuilder? linkBuilder,
   }) : assert(text != null || spans != null, 'Must specify something to link: either text or spans.'),
        assert(text == null || spans == null, 'Pass one of spans or text, not both.'),
-       /*
-       recognizers = <GestureRecognizer>[
-         // TODO(justinmc): LinkTapCallback needs to be given the linked string.
-         (TapGestureRecognizer()..onTap = onTap),
-       ],
-       */
        textLinkers = <TextLinker>[
          TextLinker(
            rangesFinder: ranges == null
@@ -72,18 +66,6 @@ class LinkedText extends StatefulWidget {
            text: text,
          ),
        ];
-         /*
-       ] {
-         textLinkers = <TextLinker>[
-           TextLinker(
-             rangesFinder: ranges == null
-                 ? InlineLinkedText.defaultRangesFinder
-                 : (String text) => ranges,
-             linkBuilder: linkBuilder ?? InlineLinkedText.getDefaultLinkBuilder(recognizers.first),
-           ),
-         ];
-       }
-       */
 
   /// Create an instance of [LinkedText] where text matched by the given
   /// [RegExp] is made interactive.
@@ -171,20 +153,26 @@ class LinkedText extends StatefulWidget {
 class _LinkedTextState extends State<LinkedText> {
   final GlobalKey _textKey = GlobalKey();
 
-  @override
-  void dispose() {
-    final Text? text = _textKey.currentWidget as Text?;
-    // TODO(justinmc): Analyzer.
-    // TODO(justinmc): Actually you may miss some on rebuild.
-    final InlineLinkedText inlineLinkedText = text!.textSpan as InlineLinkedText;
+  static void _disposeRecognizers(Text text) {
+    final InlineLinkedText inlineLinkedText = text.textSpan! as InlineLinkedText;
     for (final GestureRecognizer recognizer in inlineLinkedText.recognizers) {
       recognizer.dispose();
     }
+  }
+
+  @override
+  void dispose() {
+    _disposeRecognizers(_textKey.currentWidget! as Text);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final Text? text = _textKey.currentWidget as Text?;
+    if (text != null) {
+      _disposeRecognizers(text);
+    }
+
     if (widget.spans.isEmpty) {
       return const SizedBox.shrink();
     }
