@@ -11,6 +11,7 @@ const String kPictureCacheRouteName = '/picture_cache';
 const String kPictureCacheComplexityScoringRouteName = '/picture_cache_complexity_scoring';
 const String kLargeImageChangerRouteName = '/large_image_changer';
 const String kLargeImagesRouteName = '/large_images';
+const String kPathTessellationRouteName = '/path_tessellation';
 const String kTextRouteName = '/text';
 const String kFullscreenTextRouteName = '/fullscreen_text';
 const String kAnimatedPlaceholderRouteName = '/animated_placeholder';
