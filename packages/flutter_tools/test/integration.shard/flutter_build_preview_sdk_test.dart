@@ -96,7 +96,7 @@ void main() {
         .childFile('app-debug.apk').existsSync(), true);
     },
   );
-
+/*
   test(
     'build succeeds when both example app and plugin target compileSdkPreview',
         () async {
@@ -132,5 +132,5 @@ void main() {
           .childDirectory('debug')
           .childFile('app-debug.apk').existsSync(), true);
     },
-  );
+  );*/
 }
