@@ -690,7 +690,21 @@ class IOSDevice extends Device {
           mDNSLookupTimer.cancel();
         }
       } else {
-        localUri = await vmServiceDiscovery?.uri;
+        if (isCoreDevice && vmServiceDiscovery != null) {
+          // When searching for the Dart VM url, search for it via ProtocolDiscovery
+          // (device logs) and mDNS simultaneously, since both can be flaky at times.
+          final Future<Uri?> vmUrlFromMDns = MDnsVmServiceDiscovery.instance!.getVMServiceUriForLaunch(
+            packageId,
+            this,
+            usesIpv6: ipv6,
+          );
+          final Future<Uri?> vmUrlFromLogs = vmServiceDiscovery.uri;
+          localUri = await Future.any(
+            <Future<Uri?>>[vmUrlFromMDns, vmUrlFromLogs]
+          );
+        } else {
+          localUri = await vmServiceDiscovery?.uri;
+        }
       }
       timer.cancel();
       if (localUri == null) {
@@ -1166,10 +1180,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
 
     // `idevicesyslog` doesn't work on wireless devices, so use logs from Dart VM instead.
     if (_isCoreDevice) {
-      if (_isWirelesslyConnected) {
-        return true;
-      }
-      return false;
+      return true;
     }
 
     // Prefer the more complete logs from the attached debugger, if they are available.
@@ -1188,10 +1199,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
   bool get _shouldListenForUnifiedLoggingEvents {
     // `idevicesyslog` doesn't work on wireless devices, so use logs from Dart VM instead.
     if (_isCoreDevice) {
-      if (_isWirelesslyConnected) {
-        return true;
-      }
-      return false;
+      return true;
     }
 
     if (_majorSdkVersion >= minimumUniversalLoggingSdkVersion) {

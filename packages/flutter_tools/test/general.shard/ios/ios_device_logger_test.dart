@@ -363,9 +363,9 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       );
 
       expect(logReader.useSyslogLogging, isTrue);
-      expect(logReader.useUnifiedLogging, isFalse);
+      expect(logReader.useUnifiedLogging, isTrue);
       expect(logReader.useIOSDeployLogging, isFalse);
-      expect(logReader.usingMultipleLoggingSources, isFalse);
+      expect(logReader.usingMultipleLoggingSources, isTrue);
     });
 
     testWithoutContext('for wirelessly attached CoreDevice', () {

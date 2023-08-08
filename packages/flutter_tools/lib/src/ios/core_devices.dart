@@ -80,6 +80,7 @@ class IOSCoreDeviceControl {
       await _processUtils.run(command, throwOnError: true);
 
       final String stringOutput = output.readAsStringSync();
+      _logger.printTrace(stringOutput);
 
       try {
         final Object? decodeResult = (json.decode(stringOutput) as Map<String, Object?>)['result'];

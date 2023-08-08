@@ -764,6 +764,52 @@ void main() {
         expect(launchResult.started, true);
         expect(shutDownHooks.hooks.length, 1);
       });
+
+      testUsingContext('IOSDevice.startApp attaches in debug mode via mDNS when device logging fails', () async {
+        final FileSystem fileSystem = MemoryFileSystem.test();
+        final FakeProcessManager processManager = FakeProcessManager.empty();
+
+        final Directory temporaryXcodeProjectDirectory = fileSystem.systemTempDirectory.childDirectory('flutter_empty_xcode.rand0');
+        final Directory bundleLocation = fileSystem.currentDirectory;
+        final IOSDevice device = setUpIOSDevice(
+          processManager: processManager,
+          fileSystem: fileSystem,
+          isCoreDevice: true,
+          coreDeviceControl: FakeIOSCoreDeviceControl(),
+          xcodeDebug: FakeXcodeDebug(
+            expectedProject: XcodeDebugProject(
+              scheme: 'Runner',
+              xcodeWorkspace: temporaryXcodeProjectDirectory.childDirectory('Runner.xcworkspace'),
+              xcodeProject: temporaryXcodeProjectDirectory.childDirectory('Runner.xcodeproj'),
+            ),
+            expectedDeviceId: '123',
+            expectedLaunchArguments: <String>['--enable-dart-profiling'],
+            expectedBundlePath: bundleLocation.path,
+          )
+        );
+        final IOSApp iosApp = PrebuiltIOSApp(
+          projectBundleId: 'app',
+          bundleName: 'Runner',
+          uncompressedBundle: bundleLocation,
+          applicationPackage: bundleLocation,
+        );
+        final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+
+        device.portForwarder = const NoOpDevicePortForwarder();
+        device.setLogReader(iosApp, deviceLogReader);
+
+        final LaunchResult launchResult = await device.startApp(iosApp,
+          prebuiltApplication: true,
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+          platformArgs: <String, dynamic>{},
+        );
+
+        expect(launchResult.started, true);
+        expect(launchResult.hasVmService, true);
+        expect(await device.stopApp(iosApp), true);
+      }, overrides: <Type, Generator>{
+        MDnsVmServiceDiscovery: () => FakeMDnsVmServiceDiscovery(),
+      });
     });
   });
 }
