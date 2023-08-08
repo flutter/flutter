@@ -29,5 +29,6 @@
   "searchTextFieldPlaceholderLabel": "Meklēšana",
   "noSpellCheckReplacementsLabel": "No Replacements Found",
   "menuDismissLabel": "Dismiss menu",
-  "lookUpButtonLabel": "Look Up"
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web"
 }
