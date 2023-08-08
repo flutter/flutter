@@ -488,7 +488,6 @@ void main() {
 
     const double indicatorWeight = 3.0;
 
-
     final RRect rrect = ui.ParagraphBuilder.shouldDisableRoundingHack
       ? RRect.fromLTRBAndCorners(
           64.75,
