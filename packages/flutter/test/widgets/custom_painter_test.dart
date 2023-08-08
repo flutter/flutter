@@ -440,6 +440,7 @@ void _defineTests() {
             image: true,
             liveRegion: true,
             toggled: true,
+            expanded: true,
           ),
         ),
       ),
@@ -494,6 +495,7 @@ void _defineTests() {
             namesRoute: true,
             image: true,
             liveRegion: true,
+            expanded: true,
           ),
         ),
       ),
@@ -520,7 +522,7 @@ void _defineTests() {
     );
     expect(semantics, hasSemantics(expectedSemantics, ignoreRect: true, ignoreTransform: true));
     semantics.dispose();
-  }, skip: true); // https://github.com/flutter/flutter/issues/127617
+  });
 
   group('diffing', () {
     testWidgets('complains about duplicate keys', (WidgetTester tester) async {
