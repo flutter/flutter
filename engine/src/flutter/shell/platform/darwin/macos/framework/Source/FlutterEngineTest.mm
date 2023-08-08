@@ -501,11 +501,12 @@ TEST_F(FlutterEngineTest, DartEntrypointArguments) {
 // Verify that the engine is not retained indirectly via the binary messenger held by channels and
 // plugins. Previously, FlutterEngine.binaryMessenger returned the engine itself, and thus plugins
 // could cause a retain cycle, preventing the engine from being deallocated.
-// FlutterEngine.binaryMessenger now returns a FlutterBinaryMessengerRelay whose pointer back to
-// the engine is cleared when the engine is deallocated.
+// FlutterEngine.binaryMessenger now returns a FlutterBinaryMessengerRelay whose weak pointer back
+// to the engine is cleared when the engine is deallocated.
 // Issue: https://github.com/flutter/flutter/issues/116445
-TEST_F(FlutterEngineTest, FlutterBinaryMessengerNullsParentOnEngineRelease) {
-  FlutterBinaryMessengerRelay* relay = nil;
+TEST_F(FlutterEngineTest, FlutterBinaryMessengerDoesNotRetainEngine) {
+  __weak FlutterEngine* weakEngine;
+  id<FlutterBinaryMessenger> binaryMessenger = nil;
   @autoreleasepool {
     // Create a test engine.
     NSString* fixtures = @(flutter::testing::GetFixturesPath());
@@ -515,19 +516,38 @@ TEST_F(FlutterEngineTest, FlutterBinaryMessengerNullsParentOnEngineRelease) {
     FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test"
                                                         project:project
                                          allowHeadlessExecution:true];
-
-    // Get the binary messenger for the engine.
-    id<FlutterBinaryMessenger> binaryMessenger = engine.binaryMessenger;
-    ASSERT_TRUE([binaryMessenger isKindOfClass:[FlutterBinaryMessengerRelay class]]);
-    relay = (FlutterBinaryMessengerRelay*)binaryMessenger;
-
-    // Verify the relay parent (the engine) is non-nil.
-    EXPECT_NE(relay.parent, nil);
+    weakEngine = engine;
+    binaryMessenger = engine.binaryMessenger;
   }
 
-  // Once the engine has been deallocated, verify the relay parent is nil, and thus the engine is
-  // not retained by the holder of the relay.
-  EXPECT_EQ(relay.parent, nil);
+  // Once the engine has been deallocated, verify the weak engine pointer is nil, and thus not
+  // retained by the relay.
+  EXPECT_NE(binaryMessenger, nil);
+  EXPECT_EQ(weakEngine, nil);
+}
+
+// Verify that the engine is not retained indirectly via the texture registry held by plugins.
+// Issue: https://github.com/flutter/flutter/issues/116445
+TEST_F(FlutterEngineTest, FlutterTextureRegistryDoesNotReturnEngine) {
+  __weak FlutterEngine* weakEngine;
+  id<FlutterTextureRegistry> textureRegistry;
+  @autoreleasepool {
+    // Create a test engine.
+    NSString* fixtures = @(flutter::testing::GetFixturesPath());
+    FlutterDartProject* project = [[FlutterDartProject alloc]
+        initWithAssetsPath:fixtures
+               ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
+    FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test"
+                                                        project:project
+                                         allowHeadlessExecution:true];
+    id<FlutterPluginRegistrar> registrar = [engine registrarForPlugin:@"MyPlugin"];
+    textureRegistry = registrar.textures;
+  }
+
+  // Once the engine has been deallocated, verify the weak engine pointer is nil, and thus not
+  // retained via the texture registry.
+  EXPECT_NE(textureRegistry, nil);
+  EXPECT_EQ(weakEngine, nil);
 }
 
 // If a channel overrides a previous channel with the same name, cleaning
