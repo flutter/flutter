@@ -6,4 +6,5 @@
 // not migrated to the declarative apply of the Flutter Gradle Plugin.
 
 def pathToThisDirectory = buildscript.sourceFile.parentFile
+apply from: "$pathToThisDirectory/src/main/groovy/app_link_settings.groovy"
 apply from: "$pathToThisDirectory/src/main/groovy/flutter.groovy"
