@@ -2624,6 +2624,112 @@ targets:
         ["devicelab", "android", "linux", "samsung", "s10"]
       task_name: animated_blur_backdrop_filter_perf_opengles__timeline_summary
 
+  - name: Linux_samsung_s10 draw_vertices_perf_opengles__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      ignore_flakiness: "true"
+      tags: >
+        ["devicelab", "android", "linux", "samsung", "s10"]
+      task_name: draw_vertices_perf_opengles__timeline_summary
+
+  - name: Linux_samsung_s10 draw_vertices_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      ignore_flakiness: "true"
+      tags: >
+        ["devicelab", "android", "linux", "samsung", "s10"]
+      task_name: draw_vertices_perf__timeline_summary
+
+  - name: Mac_ios draw_vertices_perf_ios__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    bringup: true
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: draw_vertices_perf_ios__timeline_summary
+
+  - name: Linux_samsung_s10 draw_atlas_perf_opengles__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      ignore_flakiness: "true"
+      tags: >
+        ["devicelab", "android", "linux", "samsung", "s10"]
+      task_name: draw_vertices_atlas_opengles__timeline_summary
+
+  - name: Linux_samsung_s10 draw_atlas_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      ignore_flakiness: "true"
+      tags: >
+        ["devicelab", "android", "linux", "samsung", "s10"]
+      task_name: draw_atlas_perf__timeline_summary
+
+  - name: Mac_ios draw_atlas_perf_ios__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    bringup: true
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: draw_atlas_perf_ios__timeline_summary
+
+  - name: Linux_samsung_s10 path_tessellation_static_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      ignore_flakiness: "true"
+      tags: >
+        ["devicelab", "android", "linux", "samsung", "s10"]
+      task_name: path_tessellation_static_perf__timeline_summary
+
+  - name: Mac_ios path_tessellation_static_ios__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    bringup: true
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: path_tessellation_static_ios__timeline_summary
+
+  - name: Linux_samsung_s10 path_tessellation_dynamic_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      ignore_flakiness: "true"
+      tags: >
+        ["devicelab", "android", "linux", "samsung", "s10"]
+      task_name: path_tessellation_dynamic_perf__timeline_summary
+
+  - name: Mac_ios path_tessellation_dynamic_ios__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    bringup: true
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: path_tessellation_dynamic_ios__timeline_summary
+
   - name: Staging_build_linux analyze
     presubmit: false
     bringup: true
