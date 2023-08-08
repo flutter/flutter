@@ -130,6 +130,8 @@ import 'scrollable.dart';
 /// ** See code in examples/api/lib/widgets/single_child_scroll_view/single_child_scroll_view.1.dart **
 /// {@end-tool}
 ///
+/// {@macro flutter.widgets.ScrollView.PageStorage}
+///
 /// See also:
 ///
 ///  * [ListView], which handles multiple children in a scrolling list.

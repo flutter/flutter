@@ -72,6 +72,14 @@ typedef TwoDimensionalViewportBuilder = Widget Function(BuildContext context, Vi
 ///    [PageController], which creates a page-oriented scroll position subclass
 ///    that keeps the same page visible when the [Scrollable] resizes.
 ///
+/// ## Persisting the scroll position during a session
+///
+/// Scrollables attempt to persist their scroll position using [PageStorage].
+/// This can be disabled by setting [ScrollController.keepScrollOffset] to false
+/// on the [controller]. If it is enabled, using a [PageStorageKey] for the
+/// [key] of this widget (or one of its ancestors, e.g. a [ScrollView]) is
+/// recommended to help disambiguate different [Scrollable]s from each other.
+///
 /// See also:
 ///
 ///  * [ListView], which is a commonly used [ScrollView] that displays a
