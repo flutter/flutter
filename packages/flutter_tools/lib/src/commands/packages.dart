@@ -289,6 +289,7 @@ class PackagesGetCommand extends FlutterCommand {
       _rootProject = rootProject;
 
       if (rootProject.manifest.generateSyntheticPackage) {
+        print('should generate');
         final Environment environment = Environment(
           artifacts: globals.artifacts!,
           logger: globals.logger,
@@ -308,35 +309,32 @@ class PackagesGetCommand extends FlutterCommand {
           environment: environment,
           buildSystem: globals.buildSystem,
         );
-      }
-    } else if (flutterProject!.directory.childFile('l10n.yaml').existsSync()) {
-      final Environment environment = Environment(
-        artifacts: globals.artifacts!,
-        logger: globals.logger,
-        cacheDir: globals.cache.getRoot(),
-        engineVersion: globals.flutterVersion.engineRevision,
-        fileSystem: globals.fs,
-        flutterRootDir: globals.fs.directory(Cache.flutterRoot),
-        outputDir: globals.fs.directory(getBuildDirectory()),
-        processManager: globals.processManager,
-        platform: globals.platform,
-        usage: globals.flutterUsage,
-        projectDir: flutterProject.directory,
-        generateDartPluginRegistry: true,
-      );
-      final BuildResult result = await globals.buildSystem.build(
-        const GenerateLocalizationsTarget(),
-        environment,
-      );
-      if (result == null) {
-        throwToolExit('Generating synthetic localizations package failed: result is null.');
-      }
-      if (result.hasException) {
-        throwToolExit(
-          'Generating synthetic localizations package failed with ${result.exceptions.length} ${pluralize('error', result.exceptions.length)}:'
-          '\n\n'
-          '${result.exceptions.values.map<Object?>((ExceptionMeasurement e) => e.exception).join('\n\n')}',
+      } else if (rootProject!.directory.childFile('l10n.yaml').existsSync()) {
+        final Environment environment = Environment(
+          artifacts: globals.artifacts!,
+          logger: globals.logger,
+          cacheDir: globals.cache.getRoot(),
+          engineVersion: globals.flutterVersion.engineRevision,
+          fileSystem: globals.fs,
+          flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+          outputDir: globals.fs.directory(getBuildDirectory()),
+          processManager: globals.processManager,
+          platform: globals.platform,
+          usage: globals.flutterUsage,
+          projectDir: rootProject.directory,
+          generateDartPluginRegistry: true,
         );
+        final BuildResult result = await globals.buildSystem.build(
+          const GenerateLocalizationsTarget(),
+          environment,
+        );
+        if (result.hasException) {
+          throwToolExit(
+            'Generating synthetic localizations package failed with ${result.exceptions.length} ${pluralize('error', result.exceptions.length)}:'
+            '\n\n'
+            '${result.exceptions.values.map<Object?>((ExceptionMeasurement e) => e.exception).join('\n\n')}',
+          );
+        }
       }
     }
     final String? relativeTarget = target == null ? null : globals.fs.path.relative(target);
