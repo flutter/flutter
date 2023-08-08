@@ -833,6 +833,60 @@ void main() {
     expect(buildLog.length, 12);
     expect(buildLog.min, 97);
     expect(buildLog.max, 108);
+
+    buildLog.clear();
+    controller.jumpTo(5000.0);
+    await tester.pump();
+
+    expect(
+        sliverLayoutDimensions,
+        const SliverLayoutDimensions(
+          scrollOffset: 5000.0,
+          precedingScrollExtent: 0.0,
+          viewportMainAxisExtent: 600.0,
+          crossAxisExtent: 800.0,
+        )
+    );
+    // cache extent before(250.0) + viewport(600.0) + cache extent after(250.0)
+    expect(buildLog.length, 12);
+    expect(buildLog.min, 47);
+    expect(buildLog.max, 58);
+
+    buildLog.clear();
+    controller.jumpTo(4700.0);
+    await tester.pump();
+
+    expect(
+        sliverLayoutDimensions,
+        const SliverLayoutDimensions(
+          scrollOffset: 4700.0,
+          precedingScrollExtent: 0.0,
+          viewportMainAxisExtent: 600.0,
+          crossAxisExtent: 800.0,
+        )
+    );
+    // Only newly entered cached area items need to be loaded.
+    expect(buildLog.length, 3);
+    expect(buildLog.min, 44);
+    expect(buildLog.max, 46);
+
+    buildLog.clear();
+    controller.jumpTo(5300.0);
+    await tester.pump();
+
+    expect(
+        sliverLayoutDimensions,
+        const SliverLayoutDimensions(
+          scrollOffset: 5300.0,
+          precedingScrollExtent: 0.0,
+          viewportMainAxisExtent: 600.0,
+          crossAxisExtent: 800.0,
+        )
+    );
+    // Only newly entered cached area items need to be loaded.
+    expect(buildLog.length, 6);
+    expect(buildLog.min, 56);
+    expect(buildLog.max, 61);
   });
 
   testWidgets('itemExtent, prototypeItem and itemExtentCallback conflicts test', (WidgetTester tester) async {
