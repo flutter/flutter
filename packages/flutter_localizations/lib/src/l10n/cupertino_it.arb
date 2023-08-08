@@ -22,7 +22,8 @@
   "tabSemanticsLabel": "Scheda $tabIndex di $tabCount",
   "modalBarrierDismissLabel": "Ignora",
   "searchTextFieldPlaceholderLabel": "Cerca",
-  "noSpellCheckReplacementsLabel": "Nessuna sostituzione trovata",
-  "menuDismissLabel": "Ignora menu",
-  "lookUpButtonLabel": "Look Up"
+  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "menuDismissLabel": "Dismiss menu",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web"
 }

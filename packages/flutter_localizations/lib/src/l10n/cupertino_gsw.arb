@@ -22,7 +22,8 @@
   "tabSemanticsLabel": "Tab $tabIndex von $tabCount",
   "modalBarrierDismissLabel": "Schließen",
   "searchTextFieldPlaceholderLabel": "Suche",
-  "noSpellCheckReplacementsLabel": "Keine Ersetzungen gefunden",
-  "menuDismissLabel": "Menü schließen",
-  "lookUpButtonLabel": "Look Up"
+  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "menuDismissLabel": "Dismiss menu",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web"
 }

@@ -42,7 +42,8 @@
   "tabSemanticsLabel": "علامة التبويب $tabIndex من $tabCount",
   "modalBarrierDismissLabel": "رفض",
   "searchTextFieldPlaceholderLabel": "بحث",
-  "noSpellCheckReplacementsLabel": "لم يتم العثور على بدائل",
-  "menuDismissLabel": "إغلاق القائمة",
-  "lookUpButtonLabel": "Look Up"
+  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "menuDismissLabel": "Dismiss menu",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web"
 }

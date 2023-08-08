@@ -8,7 +8,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../foundation/leak_tracking.dart';
-import '../rendering/mock_canvas.dart';
 
 void main() {
   test('CheckboxThemeData copyWith, ==, hashCode basics', () {
@@ -303,7 +302,7 @@ void main() {
     expect(_getCheckboxMaterial(tester), paints..path(color: selectedFillColor));
   });
 
-  testWidgetsWithLeakTracking('Checkbox theme overlay color resolves in active/pressed states', (WidgetTester tester) async {
+  testWidgets('Checkbox theme overlay color resolves in active/pressed states', (WidgetTester tester) async {
     const Color activePressedOverlayColor = Color(0xFF000001);
     const Color inactivePressedOverlayColor = Color(0xFF000002);
 

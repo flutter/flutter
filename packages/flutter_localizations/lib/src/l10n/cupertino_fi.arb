@@ -22,7 +22,8 @@
   "tabSemanticsLabel": "Välilehti $tabIndex kautta $tabCount",
   "modalBarrierDismissLabel": "Ohita",
   "searchTextFieldPlaceholderLabel": "Hae",
-  "noSpellCheckReplacementsLabel": "Korvaavia sanoja ei löydy",
-  "menuDismissLabel": "Hylkää valikko",
-  "lookUpButtonLabel": "Look Up"
+  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "menuDismissLabel": "Dismiss menu",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web"
 }

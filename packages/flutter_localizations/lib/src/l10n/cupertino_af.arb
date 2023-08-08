@@ -22,7 +22,8 @@
   "tabSemanticsLabel": "Oortjie $tabIndex van $tabCount",
   "modalBarrierDismissLabel": "Maak toe",
   "searchTextFieldPlaceholderLabel": "Soek",
-  "noSpellCheckReplacementsLabel": "Geen plaasvervangers gevind nie",
-  "menuDismissLabel": "Maak kieslys toe",
-  "lookUpButtonLabel": "Look Up"
+  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "menuDismissLabel": "Dismiss menu",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web"
 }

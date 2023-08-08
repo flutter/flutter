@@ -18,11 +18,12 @@
   "cutButtonLabel": "Ebaki",
   "copyButtonLabel": "Kopiatu",
   "pasteButtonLabel": "Itsatsi",
-  "selectAllButtonLabel": "Hautatu dena",
+  "selectAllButtonLabel": "Hautatu guztiak",
   "tabSemanticsLabel": "$tabIndex/$tabCount fitxa",
   "modalBarrierDismissLabel": "Baztertu",
   "searchTextFieldPlaceholderLabel": "Bilatu",
-  "noSpellCheckReplacementsLabel": "Ez da aurkitu ordezteko hitzik",
-  "menuDismissLabel": "Baztertu menua",
-  "lookUpButtonLabel": "Look Up"
+  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "menuDismissLabel": "Dismiss menu",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web"
 }

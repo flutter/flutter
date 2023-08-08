@@ -1,6 +1,4 @@
 {
-  "noSpellCheckReplacementsLabel": "Aucun remplacement trouvé",
-  "menuDismissLabel": "Ignorer le menu",
   "searchTextFieldPlaceholderLabel": "Rechercher",
   "tabSemanticsLabel": "Onglet $tabIndex sur $tabCount",
   "datePickerHourSemanticsLabelOne": "$hour heure",

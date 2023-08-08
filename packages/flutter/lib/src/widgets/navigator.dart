@@ -3354,7 +3354,7 @@ typedef _IndexWhereCallback = bool Function(_RouteEntry element);
 ///
 /// Acts as a ChangeNotifier and notifies after its List of _RouteEntries is
 /// mutated.
-class _History extends Iterable<_RouteEntry> with ChangeNotifier implements Iterator<_RouteEntry> {
+class _History extends Iterable<_RouteEntry> with ChangeNotifier {
   final List<_RouteEntry> _value = <_RouteEntry>[];
 
   int indexWhere(_IndexWhereCallback test, [int start = 0]) {
@@ -3398,10 +3398,6 @@ class _History extends Iterable<_RouteEntry> with ChangeNotifier implements Iter
     return entry;
   }
 
-  // Begin Iterator.
-
-  int _i = 0;
-
   _RouteEntry operator [](int index) {
     return _value[index];
   }
@@ -3410,17 +3406,6 @@ class _History extends Iterable<_RouteEntry> with ChangeNotifier implements Iter
   Iterator<_RouteEntry> get iterator {
     return _value.iterator;
   }
-
-  @override
-  _RouteEntry get current => _value[_i];
-
-  @override
-  bool moveNext() {
-    _i++;
-    return _i <= _value.length - 1;
-  }
-
-  // End Iterator.
 
   @override
   String toString() {

@@ -32,7 +32,8 @@
   "tabSemanticsLabel": "Вкладка $tabIndex з $tabCount",
   "modalBarrierDismissLabel": "Закрити",
   "searchTextFieldPlaceholderLabel": "Шукайте",
-  "noSpellCheckReplacementsLabel": "Замін не знайдено",
-  "menuDismissLabel": "Закрити меню",
-  "lookUpButtonLabel": "Look Up"
+  "noSpellCheckReplacementsLabel": "No Replacements Found",
+  "menuDismissLabel": "Dismiss menu",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web"
 }
