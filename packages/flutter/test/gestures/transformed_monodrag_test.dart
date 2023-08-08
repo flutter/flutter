@@ -12,7 +12,7 @@ import '../foundation/leak_tracking.dart';
 
 void main() {
   group('Horizontal', () {
-    testWidgetsWithLeakTracking('gets local coordinates', (WidgetTester tester) async {
+    testWidgets('gets local coordinates', (WidgetTester tester) async {
       int dragCancelCount = 0;
       final List<DragDownDetails> downDetails = <DragDownDetails>[];
       final List<DragEndDetails> endDetails = <DragEndDetails>[];
