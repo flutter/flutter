@@ -326,7 +326,7 @@ void main() {
     expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 6.0);
   });
 
-  testWidgetsWithLeakTracking('Floating Action Button states elevation', (WidgetTester tester) async {
+  testWidgets('Floating Action Button states elevation', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
@@ -1168,7 +1168,7 @@ void main() {
       expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 6.0);
     });
 
-    testWidgetsWithLeakTracking('Floating Action Button states elevation', (WidgetTester tester) async {
+    testWidgets('Floating Action Button states elevation', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
 
       await tester.pumpWidget(
