@@ -2617,6 +2617,7 @@
 ../../../third_party/skia/fuzz/README.md
 ../../../third_party/skia/gm/BUILD.bazel
 ../../../third_party/skia/gm/android_gm_test.bzl
+../../../third_party/skia/gm/png_codec.bzl
 ../../../third_party/skia/gm/surface_manager/BUILD.bazel
 ../../../third_party/skia/gm/vias/BUILD.bazel
 ../../../third_party/skia/gn/BUILD.bazel
