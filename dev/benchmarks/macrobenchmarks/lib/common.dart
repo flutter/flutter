@@ -37,6 +37,8 @@ const String kListTextLayoutRouteName = '/list_text_layout';
 const String kAnimatedBlurBackdropFilter = '/animated_blur_backdrop_filter';
 const String kSlidersRouteName = '/sliders';
 const String kDrawPointsPageRougeName = '/draw_points';
+const String kDrawVerticesPageRouteName = '/draw_vertices';
+const String kDrawAtlasPageRouteName = '/draw_atlas';
 
 const String kOpacityPeepholeOneRectRouteName = '$kOpacityPeepholeRouteName/one_big_rect';
 const String kOpacityPeepholeColumnOfOpacityRouteName = '$kOpacityPeepholeRouteName/column_of_opacity';
