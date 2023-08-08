@@ -26,6 +26,7 @@
   "continueButtonLabel": "Endelea",
   "copyButtonLabel": "Nakili",
   "cutButtonLabel": "Kata",
+  "scanTextButtonLabel": "Changanua maandishi",
   "okButtonLabel": "Sawa",
   "pasteButtonLabel": "Bandika",
   "selectAllButtonLabel": "Chagua vyote",
@@ -141,5 +142,8 @@
   "expansionTileExpandedTapHint": "Collapse",
   "expansionTileCollapsedTapHint": "Expand for more details",
   "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "collapsedHint": "Expanded",
+  "menuDismissLabel": "Dismiss menu",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web"
 }

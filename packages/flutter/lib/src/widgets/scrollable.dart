@@ -72,6 +72,14 @@ typedef TwoDimensionalViewportBuilder = Widget Function(BuildContext context, Vi
 ///    [PageController], which creates a page-oriented scroll position subclass
 ///    that keeps the same page visible when the [Scrollable] resizes.
 ///
+/// ## Persisting the scroll position during a session
+///
+/// Scrollables attempt to persist their scroll position using [PageStorage].
+/// This can be disabled by setting [ScrollController.keepScrollOffset] to false
+/// on the [controller]. If it is enabled, using a [PageStorageKey] for the
+/// [key] of this widget (or one of its ancestors, e.g. a [ScrollView]) is
+/// recommended to help disambiguate different [Scrollable]s from each other.
+///
 /// See also:
 ///
 ///  * [ListView], which is a commonly used [ScrollView] that displays a
@@ -320,6 +328,10 @@ class Scrollable extends StatefulWidget {
   /// the nearest enclosing [ScrollableState] in that [Axis] is returned, or
   /// null if there is none.
   ///
+  /// This finds the nearest _ancestor_ [Scrollable] of the `context`. This
+  /// means that if the `context` is that of a [Scrollable], it will _not_ find
+  /// _that_ [Scrollable].
+  ///
   /// See also:
   ///
   /// * [Scrollable.of], which is similar to this method, but asserts
@@ -358,6 +370,10 @@ class Scrollable extends StatefulWidget {
   /// Using the optional [Axis] is useful when Scrollables are nested and the
   /// target [Scrollable] is not the closest instance. When [axis] is provided,
   /// the nearest enclosing [ScrollableState] in that [Axis] is returned.
+  ///
+  /// This finds the nearest _ancestor_ [Scrollable] of the `context`. This
+  /// means that if the `context` is that of a [Scrollable], it will _not_ find
+  /// _that_ [Scrollable].
   ///
   /// If no [Scrollable] ancestor is found, then this method will assert in
   /// debug mode, and throw an exception in release mode.
@@ -943,7 +959,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     Widget result = _ScrollableScope(
       scrollable: this,
       position: position,
-      // TODO(ianh): Having all these global keys is sad.
       child: Listener(
         onPointerSignal: _receivedPointerSignal,
         child: RawGestureDetector(

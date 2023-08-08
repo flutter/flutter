@@ -117,7 +117,7 @@ void main() {
         'xcresulttool',
         'get',
         '--path',
-        _xcBundleFilePath,
+        _xcBundleDirectoryPath,
         '--format',
         'json',
       ],
@@ -173,7 +173,7 @@ void main() {
           '-destination',
           'generic/platform=iOS',
         ],
-        '-resultBundlePath', _xcBundleFilePath,
+        '-resultBundlePath', _xcBundleDirectoryPath,
         '-resultBundleVersion', '3',
         'FLUTTER_SUPPRESS_ANALYTICS=true',
         'COMPILER_INDEX_STORE_ENABLE=NO',
@@ -461,7 +461,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         xattrCommand,
         setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
-          fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+          fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
         }),
         setUpXCResultCommand(),
         setUpRsyncCommand(),
@@ -495,7 +495,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         xattrCommand,
         setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
-          fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+          fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
         }, stdout: 'Lots of spew from Xcode',
         ),
         setUpXCResultCommand(stdout: kSampleResultJsonWithIssues),
@@ -530,7 +530,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         xattrCommand,
         setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
-          fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+          fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
         }),
         setUpXCResultCommand(stdout: kSampleResultJsonWithIssuesToBeDiscarded),
         setUpRsyncCommand(),
@@ -594,7 +594,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         xattrCommand,
         setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
-          fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+          fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
         }),
         setUpXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
         setUpRsyncCommand(),
@@ -628,10 +628,41 @@ void main() {
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
           onRun: () {
-            fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+            fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
           }
         ),
         setUpXCResultCommand(stdout: kSampleResultJsonWithNoProvisioningProfileIssue),
+        setUpRsyncCommand(),
+      ]),
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    });
+
+    testUsingContext('Extra error message for missing simulator platform in xcresult bundle.', () async {
+      final BuildCommand command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        osUtils: FakeOperatingSystemUtils(),
+      );
+
+      createMinimalMockProjectFiles();
+
+      await expectLater(
+        createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']),
+        throwsToolExit(),
+      );
+
+      expect(testLogger.errorText, contains(missingPlatformInstructions('iOS 17.0')));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        xattrCommand,
+        setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
+          fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
+        }),
+        setUpXCResultCommand(stdout: kSampleResultJsonWithActionIssues),
         setUpRsyncCommand(),
       ]),
       Platform: () => macosPlatform,
@@ -661,17 +692,17 @@ void main() {
           exitCode: 1,
           stdout: '$kConcurrentRunFailureMessage1 $kConcurrentRunFailureMessage2',
           onRun: () {
-            fileSystem.systemTempDirectory.childFile(_xcBundleFilePath).createSync();
+            fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).childFile('result.xcresult').createSync(recursive: true);
           }
         ),
         // The second xcodebuild is triggered due to above concurrent run failure message.
         setUpFakeXcodeBuildHandler(
           onRun: () {
             // If the file is not cleaned, throw an error, test failure.
-            if (fileSystem.systemTempDirectory.childFile(_xcBundleFilePath).existsSync()) {
+            if (fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).existsSync()) {
               throwToolExit('xcresult bundle file existed.', exitCode: 2);
             }
-            fileSystem.systemTempDirectory.childFile(_xcBundleFilePath).createSync();
+            fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).childFile('result.xcresult').createSync(recursive: true);
           }
         ),
         setUpXCResultCommand(stdout: kSampleResultJsonNoIssues),
@@ -709,7 +740,7 @@ void main() {
 Runner requires a provisioning profile. Select a provisioning profile in the Signing & Capabilities editor
 ''',
           onRun: () {
-            fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+            fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
           }
         ),
         setUpXCResultCommand(stdout: kSampleResultJsonInvalidIssuesMap),
@@ -743,7 +774,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
           onRun: () {
-            fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+            fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
           }
         ),
         setUpXCResultCommand(stdout: kSampleResultJsonInvalidIssuesMap),
@@ -780,7 +811,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
 Runner requires a provisioning profile. Select a provisioning profile in the Signing & Capabilities editor
 ''',
           onRun: () {
-            fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+            fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
           }
         ),
         setUpXCResultCommand(stdout: kSampleResultJsonNoIssues),
@@ -815,7 +846,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
           onRun: () {
-            fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+            fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
           }
         ),
         setUpXCResultCommand(stdout: kSampleResultJsonInvalidIssuesMap),
@@ -850,7 +881,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
           onRun: () {
-            fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+            fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
           }
         ),
         setUpXCResultCommand(stdout: kSampleResultJsonWithNoProvisioningProfileIssue),
@@ -885,7 +916,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         setUpFakeXcodeBuildHandler(
           exitCode: 1,
           onRun: () {
-            fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+            fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
           }
         ),
         setUpXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
@@ -922,7 +953,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           simulator: true,
           exitCode: 1,
           onRun: () {
-            fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+            fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
           },
         ),
         setUpXCResultCommand(),
@@ -958,7 +989,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           simulator: true,
           exitCode: 1,
           onRun: () {
-            fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+            fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
           },
         ),
         setUpXCResultCommand(stdout: kSampleResultJsonWithIssues),
@@ -996,7 +1027,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           simulator: true,
           exitCode: 1,
           onRun: () {
-            fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+            fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
           },
         ),
         setUpXCResultCommand(stdout: kSampleResultJsonWithIssuesToBeDiscarded),
@@ -1040,7 +1071,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
   });
 }
 
-const String _xcBundleFilePath = '/.tmp_rand0/flutter_ios_build_temp_dirrand0/temporary_xcresult_bundle';
+const String _xcBundleDirectoryPath = '/.tmp_rand0/flutter_ios_build_temp_dirrand0/temporary_xcresult_bundle';
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {
   @override

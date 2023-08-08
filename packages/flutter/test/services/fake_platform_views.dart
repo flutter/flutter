@@ -471,76 +471,6 @@ class FakeIosPlatformViewsController {
   }
 }
 
-class FakeHtmlPlatformViewsController {
-  FakeHtmlPlatformViewsController() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform_views, _onMethodCall);
-  }
-
-  Iterable<FakeHtmlPlatformView> get views => _views.values;
-  final Map<int, FakeHtmlPlatformView> _views = <int, FakeHtmlPlatformView>{};
-
-  final Set<String> _registeredViewTypes = <String>{};
-
-  late Completer<void> resizeCompleter;
-
-  Completer<void>? createCompleter;
-
-  void registerViewType(String viewType) {
-    _registeredViewTypes.add(viewType);
-  }
-
-  Future<dynamic> _onMethodCall(MethodCall call) {
-    switch (call.method) {
-      case 'create':
-        return _create(call);
-      case 'dispose':
-        return _dispose(call);
-    }
-    return Future<dynamic>.sync(() => null);
-  }
-
-  Future<dynamic> _create(MethodCall call) async {
-    final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
-    final int id = args['id'] as int;
-    final String viewType = args['viewType'] as String;
-
-    if (_views.containsKey(id)) {
-      throw PlatformException(
-        code: 'error',
-        message: 'Trying to create an already created platform view, view id: $id',
-      );
-    }
-
-    if (!_registeredViewTypes.contains(viewType)) {
-      throw PlatformException(
-        code: 'error',
-        message: 'Trying to create a platform view of unregistered type: $viewType',
-      );
-    }
-
-    if (createCompleter != null) {
-      await createCompleter!.future;
-    }
-
-    _views[id] = FakeHtmlPlatformView(id, viewType);
-    return Future<int?>.sync(() => null);
-  }
-
-  Future<dynamic> _dispose(MethodCall call) {
-    final int id = call.arguments as int;
-
-    if (!_views.containsKey(id)) {
-      throw PlatformException(
-        code: 'error',
-        message: 'Trying to dispose a platform view with unknown id: $id',
-      );
-    }
-
-    _views.remove(id);
-    return Future<dynamic>.sync(() => null);
-  }
-}
-
 @immutable
 class FakeAndroidPlatformView {
   const FakeAndroidPlatformView(this.id, this.type, this.size, this.layoutDirection,
@@ -653,31 +583,5 @@ class FakeUiKitView {
   @override
   String toString() {
     return 'FakeUiKitView(id: $id, type: $type, creationParams: $creationParams)';
-  }
-}
-
-@immutable
-class FakeHtmlPlatformView {
-  const FakeHtmlPlatformView(this.id, this.type);
-
-  final int id;
-  final String type;
-
-  @override
-  bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
-    return other is FakeHtmlPlatformView
-        && other.id == id
-        && other.type == type;
-  }
-
-  @override
-  int get hashCode => Object.hash(id, type);
-
-  @override
-  String toString() {
-    return 'FakeHtmlPlatformView(id: $id, type: $type)';
   }
 }

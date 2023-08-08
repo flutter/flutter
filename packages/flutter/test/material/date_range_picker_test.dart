@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
 import 'feedback_tester.dart';
 
 void main() {
@@ -132,7 +133,10 @@ void main() {
       final Offset entryButtonBottomLeft = tester.getBottomLeft(
         find.widgetWithIcon(IconButton, Icons.edit_outlined),
       );
-      expect(saveButtonBottomLeft.dx, 800 - 89.0);
+      expect(
+        saveButtonBottomLeft.dx,
+        ParagraphBuilder.shouldDisableRoundingHack ? moreOrLessEquals(711.6, epsilon: 1e-5) : (800 - 89.0),
+      );
       expect(saveButtonBottomLeft.dy, helpTextTopLeft.dy);
       expect(entryButtonBottomLeft.dx, saveButtonBottomLeft.dx - 48.0);
       expect(entryButtonBottomLeft.dy, helpTextTopLeft.dy);
@@ -247,12 +251,18 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets('landscape', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('landscape', (WidgetTester tester) async {
       await showPicker(tester, kCommonScreenSizeLandscape);
       expect(tester.widget<Text>(find.text('Jan 15 – Jan 25, 2016')).style?.fontSize, 24);
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
-    });
+    },
+    // TODO(polina-c): remove after resolving
+    // https://github.com/flutter/flutter/issues/130354
+    leakTrackingTestConfig: const LeakTrackingTestConfig(
+      allowAllNotGCed: true,
+      allowAllNotDisposed: true,
+    ));
   });
 
   testWidgets('Save and help text is used', (WidgetTester tester) async {
@@ -501,6 +511,7 @@ void main() {
   testWidgets('OK Cancel button layout', (WidgetTester tester) async {
      Widget buildFrame(TextDirection textDirection) {
        return MaterialApp(
+         theme: ThemeData(useMaterial3: false),
          home: Material(
            child: Center(
              child: Builder(
@@ -1059,9 +1070,10 @@ void main() {
 
   testWidgets('DatePickerDialog is state restorable', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         restorationScopeId: 'app',
-        home: _RestorableDateRangePickerDialogTestWidget(),
+        home: const _RestorableDateRangePickerDialogTestWidget(),
       ),
     );
 

@@ -639,10 +639,11 @@ class _HitTestableFinder extends ChainedFinder {
   @override
   Iterable<Element> filter(Iterable<Element> parentCandidates) sync* {
     for (final Element candidate in parentCandidates) {
+      final int viewId = candidate.findAncestorWidgetOfExactType<View>()!.view.viewId;
       final RenderBox box = candidate.renderObject! as RenderBox;
       final Offset absoluteOffset = box.localToGlobal(alignment.alongSize(box.size));
       final HitTestResult hitResult = HitTestResult();
-      WidgetsBinding.instance.hitTest(hitResult, absoluteOffset);
+      WidgetsBinding.instance.hitTestInView(hitResult, absoluteOffset, viewId);
       for (final HitTestEntry entry in hitResult.path) {
         if (entry.target == candidate.renderObject) {
           yield candidate;

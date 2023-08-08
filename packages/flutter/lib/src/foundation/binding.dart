@@ -20,8 +20,9 @@ import 'object.dart';
 import 'platform.dart';
 import 'print.dart';
 import 'service_extensions.dart';
+import 'timeline.dart';
 
-export 'dart:ui' show PlatformDispatcher, SingletonFlutterWindow; // ignore: deprecated_member_use
+export 'dart:ui' show PlatformDispatcher, SingletonFlutterWindow, clampDouble; // ignore: deprecated_member_use
 
 export 'basic_types.dart' show AsyncCallback, AsyncValueGetter, AsyncValueSetter;
 
@@ -141,7 +142,9 @@ abstract class BindingBase {
   /// [initServiceExtensions] to have bindings initialize their
   /// VM service extensions, if any.
   BindingBase() {
-    developer.Timeline.startSync('Framework initialization');
+    if (!kReleaseMode) {
+      FlutterTimeline.startSync('Framework initialization');
+    }
     assert(() {
       _debugConstructed = true;
       return true;
@@ -155,9 +158,10 @@ abstract class BindingBase {
     initServiceExtensions();
     assert(_debugServiceExtensionsRegistered);
 
-    developer.postEvent('Flutter.FrameworkInitialization', <String, String>{});
-
-    developer.Timeline.finishSync();
+    if (!kReleaseMode) {
+      developer.postEvent('Flutter.FrameworkInitialization', <String, String>{});
+      FlutterTimeline.finishSync();
+    }
   }
 
   bool _debugConstructed = false;
@@ -221,11 +225,12 @@ abstract class BindingBase {
   /// [BindingBase], e.g., [ServicesBinding], [RendererBinding], and
   /// [WidgetsBinding]. Each of these bindings define behaviors that interact
   /// with a [ui.PlatformDispatcher], e.g., [ServicesBinding] registers
-  /// listeners with the [ChannelBuffers], and [RendererBinding]
+  /// listeners with the [ChannelBuffers], [RendererBinding]
   /// registers [ui.PlatformDispatcher.onMetricsChanged],
-  /// [ui.PlatformDispatcher.onTextScaleFactorChanged],
-  /// [ui.PlatformDispatcher.onSemanticsEnabledChanged], and
-  /// [ui.PlatformDispatcher.onSemanticsAction] handlers.
+  /// [ui.PlatformDispatcher.onTextScaleFactorChanged], and [SemanticsBinding]
+  /// registers [ui.PlatformDispatcher.onSemanticsEnabledChanged],
+  /// [ui.PlatformDispatcher.onSemanticsActionEvent], and
+  /// [ui.PlatformDispatcher.onAccessibilityFeaturesChanged] handlers.
   ///
   /// Each of these other bindings could individually access a
   /// [ui.PlatformDispatcher] statically, but that would preclude the ability to
@@ -651,14 +656,19 @@ abstract class BindingBase {
   /// [locked].
   @protected
   Future<void> lockEvents(Future<void> Function() callback) {
-    final developer.TimelineTask timelineTask = developer.TimelineTask()..start('Lock events');
+    developer.TimelineTask? debugTimelineTask;
+    if (!kReleaseMode) {
+      debugTimelineTask = developer.TimelineTask()..start('Lock events');
+    }
 
     _lockCount += 1;
     final Future<void> future = callback();
     future.whenComplete(() {
       _lockCount -= 1;
       if (!locked) {
-        timelineTask.finish();
+        if (!kReleaseMode) {
+          debugTimelineTask!.finish();
+        }
         try {
           unlocked();
         } catch (error, stack) {

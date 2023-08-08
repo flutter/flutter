@@ -111,6 +111,78 @@ void main() {
         );
       }, variant: TargetPlatformVariant.all());
 
+      test('maxXIndex and maxYIndex assertions', () {
+        final TwoDimensionalChildBuilderDelegate delegate = TwoDimensionalChildBuilderDelegate(
+          maxXIndex: 0,
+          maxYIndex: 0,
+          builder: (BuildContext context, ChildVicinity vicinity) {
+            return const SizedBox.shrink();
+          }
+        );
+        // Update
+        expect(
+          () {
+            delegate.maxXIndex = -1;
+          },
+          throwsA(
+            isA<AssertionError>().having(
+              (AssertionError error) => error.toString(),
+              'description',
+              contains('value == null || value >= 0'),
+            ),
+          ),
+        );
+        expect(
+          () {
+            delegate.maxYIndex = -1;
+          },
+          throwsA(
+            isA<AssertionError>().having(
+              (AssertionError error) => error.toString(),
+              'description',
+              contains('value == null || value >= 0'),
+            ),
+          ),
+        );
+        // Constructor
+        expect(
+          () {
+            TwoDimensionalChildBuilderDelegate(
+              maxXIndex: -1,
+              maxYIndex: 0,
+              builder: (BuildContext context, ChildVicinity vicinity) {
+                return const SizedBox.shrink();
+              }
+            );
+          },
+          throwsA(
+            isA<AssertionError>().having(
+              (AssertionError error) => error.toString(),
+              'description',
+              contains('maxXIndex == null || maxXIndex >= 0'),
+            ),
+          ),
+        );
+        expect(
+          () {
+            TwoDimensionalChildBuilderDelegate(
+              maxXIndex: 0,
+              maxYIndex: -1,
+              builder: (BuildContext context, ChildVicinity vicinity) {
+                return const SizedBox.shrink();
+              }
+            );
+          },
+          throwsA(
+            isA<AssertionError>().having(
+              (AssertionError error) => error.toString(),
+              'description',
+              contains('maxYIndex == null || maxYIndex >= 0'),
+            ),
+          ),
+        );
+      });
+
       testWidgets('throws an error when builder throws', (WidgetTester tester) async {
         final List<Object> exceptions = <Object>[];
         final FlutterExceptionHandler? oldHandler = FlutterError.onError;
@@ -161,14 +233,27 @@ void main() {
         ));
         await tester.pumpAndSettle();
 
+        // In the tests below the number of RepaintBoundary widgets depends on:
+        // ModalRoute - builds 2
+        // GlowingOverscrollIndicator - builds 2
+        // TwoDimensionalChildListDelegate - builds 1 unless addRepaintBoundaries is false
+
+        void expectModalRoute() {
+          expect(ModalRoute.of(tester.element(find.byType(SimpleListTableViewport))), isA<MaterialPageRoute<void>>());
+        }
+
         switch (defaultTargetPlatform) {
-          case TargetPlatform.android:
           case TargetPlatform.fuchsia:
+            expectModalRoute();
+            expect(find.byType(GlowingOverscrollIndicator), findsNWidgets(2));
             expect(find.byType(RepaintBoundary), findsNWidgets(7));
+
+          case TargetPlatform.android:
           case TargetPlatform.iOS:
           case TargetPlatform.linux:
           case TargetPlatform.macOS:
           case TargetPlatform.windows:
+            expectModalRoute();
             expect(find.byType(RepaintBoundary), findsNWidgets(3));
         }
 
@@ -183,13 +268,17 @@ void main() {
         await tester.pumpAndSettle();
 
         switch (defaultTargetPlatform) {
-          case TargetPlatform.android:
           case TargetPlatform.fuchsia:
+            expectModalRoute();
+            expect(find.byType(GlowingOverscrollIndicator), findsNWidgets(2));
             expect(find.byType(RepaintBoundary), findsNWidgets(6));
+
+          case TargetPlatform.android:
           case TargetPlatform.iOS:
           case TargetPlatform.linux:
           case TargetPlatform.macOS:
           case TargetPlatform.windows:
+            expectModalRoute();
             expect(find.byType(RepaintBoundary), findsNWidgets(2));
         }
       }, variant: TargetPlatformVariant.all());
@@ -1172,7 +1261,8 @@ void main() {
     }, variant: TargetPlatformVariant.all());
 
     testWidgets('sets up parent data', (WidgetTester tester) async {
-      // Also tests computeChildPaintOffset & computeChildPaintExtent
+      // Also tests computeAbsolutePaintOffsetFor & computeChildPaintExtent
+      // Regression test for https://github.com/flutter/flutter/issues/128723
       final Map<ChildVicinity, UniqueKey> childKeys = <ChildVicinity, UniqueKey>{};
       final TwoDimensionalChildBuilderDelegate delegate = TwoDimensionalChildBuilderDelegate(
         maxXIndex: 5,
@@ -1233,7 +1323,7 @@ void main() {
       childParentData = parentDataOf(viewport.lastChild!);
       expect(childParentData.vicinity, const ChildVicinity(xIndex: 5, yIndex: 5));
       expect(childParentData.isVisible, isFalse);
-      expect(childParentData.paintOffset, const Offset(1000.0, -400.0));
+      expect(childParentData.paintOffset, const Offset(1000.0, -600.0));
       expect(childParentData.layoutOffset, const Offset(1000.0, 1000.0));
 
       // - horizontal reverse
@@ -1254,7 +1344,7 @@ void main() {
       childParentData = parentDataOf(viewport.lastChild!);
       expect(childParentData.vicinity, const ChildVicinity(xIndex: 5, yIndex: 5));
       expect(childParentData.isVisible, isFalse);
-      expect(childParentData.paintOffset, const Offset(-200.0, 1000.0));
+      expect(childParentData.paintOffset, const Offset(-400.0, 1000.0));
       expect(childParentData.layoutOffset, const Offset(1000.0, 1000.0));
 
       // - both reverse
@@ -1276,7 +1366,7 @@ void main() {
       childParentData = parentDataOf(viewport.lastChild!);
       expect(childParentData.vicinity, const ChildVicinity(xIndex: 5, yIndex: 5));
       expect(childParentData.isVisible, isFalse);
-      expect(childParentData.paintOffset, const Offset(-200.0, -400.0));
+      expect(childParentData.paintOffset, const Offset(-400.0, -600.0));
       expect(childParentData.layoutOffset, const Offset(1000.0, 1000.0));
 
       // Change the scroll positions to test partially visible.
@@ -1803,4 +1893,29 @@ Future<void> restoreScrollAndVerify(WidgetTester tester) async {
     tester.state<TwoDimensionalScrollableState>(findScrollable).verticalScrollable.position.pixels,
     100.0,
   );
+}
+
+// Validates covariant through analysis.
+mixin _SomeDelegateMixin on TwoDimensionalChildDelegate {}
+
+class _SomeRenderTwoDimensionalViewport extends RenderTwoDimensionalViewport { // ignore: unused_element
+  _SomeRenderTwoDimensionalViewport({
+    required super.horizontalOffset,
+    required super.horizontalAxisDirection,
+    required super.verticalOffset,
+    required super.verticalAxisDirection,
+    required _SomeDelegateMixin super.delegate,
+    required super.mainAxis,
+    required super.childManager,
+  });
+
+  @override
+  _SomeDelegateMixin get delegate => super.delegate as _SomeDelegateMixin;
+  @override
+  set delegate(_SomeDelegateMixin value) { // Analysis would fail without covariant
+    super.delegate = value;
+  }
+
+  @override
+  void layoutChildSequence() {}
 }

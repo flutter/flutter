@@ -90,44 +90,13 @@ const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 /// The [Drawer] displays the four items using a [ListView], which allows the
 /// user to scroll through the items if need be.
 ///
-/// ```dart
-/// Scaffold(
-///   appBar: AppBar(
-///     title: const Text('Drawer Demo'),
-///   ),
-///   drawer: Drawer(
-///     child: ListView(
-///       padding: EdgeInsets.zero,
-///       children: const <Widget>[
-///         DrawerHeader(
-///           decoration: BoxDecoration(
-///             color: Colors.blue,
-///           ),
-///           child: Text(
-///             'Drawer Header',
-///             style: TextStyle(
-///               color: Colors.white,
-///               fontSize: 24,
-///             ),
-///           ),
-///         ),
-///         ListTile(
-///           leading: Icon(Icons.message),
-///           title: Text('Messages'),
-///         ),
-///         ListTile(
-///           leading: Icon(Icons.account_circle),
-///           title: Text('Profile'),
-///         ),
-///         ListTile(
-///           leading: Icon(Icons.settings),
-///           title: Text('Settings'),
-///         ),
-///       ],
-///     ),
-///   ),
-/// )
-/// ```
+/// ** See code in examples/api/lib/material/drawer/drawer.0.dart **
+/// {@end-tool}
+///
+/// {@tool snippet}
+/// This example shows how to migrate the above [Drawer] to a [NavigationDrawer].
+///
+/// ** See code in examples/api/lib/material/navigation_drawer/navigation_drawer.1.dart **
 /// {@end-tool}
 ///
 /// An open drawer may be closed with a swipe to close gesture, pressing the
@@ -832,8 +801,6 @@ class _DrawerDefaultsM2 extends DrawerThemeData {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _DrawerDefaultsM3 extends DrawerThemeData {
   _DrawerDefaultsM3(this.context)

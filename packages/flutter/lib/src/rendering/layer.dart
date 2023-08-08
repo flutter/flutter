@@ -136,7 +136,7 @@ const String _flutterRenderingLibrary = 'package:flutter/rendering.dart';
 ///
 ///  * [RenderView.compositeFrame], which implements this recomposition protocol
 ///    for painting [RenderObject] trees on the display.
-abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
+abstract class Layer with DiagnosticableTreeMixin {
   /// Creates an instance of Layer.
   Layer() {
     if (kFlutterMemoryAllocationsEnabled) {
@@ -172,6 +172,9 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   }
 
   void _fireCompositionCallbacks({required bool includeChildren}) {
+    if (_callbacks.isEmpty) {
+      return;
+    }
     for (final VoidCallback callback in List<VoidCallback>.of(_callbacks.values)) {
       callback();
     }
@@ -344,8 +347,8 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// Only subclasses of [ContainerLayer] can have children in the layer tree.
   /// All other layer classes are used for leaves in the layer tree.
-  @override
-  ContainerLayer? get parent => super.parent as ContainerLayer?;
+  ContainerLayer? get parent => _parent;
+  ContainerLayer? _parent;
 
   // Whether this layer has any changes since its last call to [addToScene].
   //
@@ -495,6 +498,70 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     _needsAddToScene = _needsAddToScene || alwaysNeedsAddToScene;
   }
 
+  /// The owner for this layer (null if unattached).
+  ///
+  /// The entire layer tree that this layer belongs to will have the same owner.
+  ///
+  /// Typically the owner is a [RenderView].
+  Object? get owner => _owner;
+  Object? _owner;
+
+  /// Whether the layer tree containing this layer is attached to an owner.
+  ///
+  /// This becomes true during the call to [attach].
+  ///
+  /// This becomes false during the call to [detach].
+  bool get attached => _owner != null;
+
+  /// Mark this layer as attached to the given owner.
+  ///
+  /// Typically called only from the [parent]'s [attach] method, and by the
+  /// [owner] to mark the root of a tree as attached.
+  ///
+  /// Subclasses with children should override this method to
+  /// [attach] all their children to the same [owner]
+  /// after calling the inherited method, as in `super.attach(owner)`.
+  @mustCallSuper
+  void attach(covariant Object owner) {
+    assert(_owner == null);
+    _owner = owner;
+  }
+
+  /// Mark this layer as detached from its owner.
+  ///
+  /// Typically called only from the [parent]'s [detach], and by the [owner] to
+  /// mark the root of a tree as detached.
+  ///
+  /// Subclasses with children should override this method to
+  /// [detach] all their children after calling the inherited method,
+  /// as in `super.detach()`.
+  @mustCallSuper
+  void detach() {
+    assert(_owner != null);
+    _owner = null;
+    assert(parent == null || attached == parent!.attached);
+  }
+
+  /// The depth of this layer in the layer tree.
+  ///
+  /// The depth of nodes in a tree monotonically increases as you traverse down
+  /// the tree.  There's no guarantee regarding depth between siblings.
+  ///
+  /// The depth is used to ensure that nodes are processed in depth order.
+  int get depth => _depth;
+  int _depth = 0;
+
+  /// Adjust the [depth] of this node's children, if any.
+  ///
+  /// Override this method in subclasses with child nodes to call
+  /// [ContainerLayer.redepthChild] for each child. Do not call this method
+  /// directly.
+  @protected
+  void redepthChildren() {
+    // ContainerLayer provides an implementation since its the only one that
+    // can actually have children.
+  }
+
   /// This layer's next sibling in the parent layer's child list.
   Layer? get nextSibling => _nextSibling;
   Layer? _nextSibling;
@@ -502,30 +569,6 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// This layer's previous sibling in the parent layer's child list.
   Layer? get previousSibling => _previousSibling;
   Layer? _previousSibling;
-
-  @override
-  void dropChild(Layer child) {
-    assert(!_debugMutationsLocked);
-    if (!alwaysNeedsAddToScene) {
-      markNeedsAddToScene();
-    }
-    if (child._compositionCallbackCount != 0) {
-      _updateSubtreeCompositionObserverCount(-child._compositionCallbackCount);
-    }
-    super.dropChild(child);
-  }
-
-  @override
-  void adoptChild(Layer child) {
-    assert(!_debugMutationsLocked);
-    if (!alwaysNeedsAddToScene) {
-      markNeedsAddToScene();
-    }
-    if (child._compositionCallbackCount != 0) {
-      _updateSubtreeCompositionObserverCount(child._compositionCallbackCount);
-    }
-    super.adoptChild(child);
-  }
 
   /// Removes this layer from its parent layer's child list.
   ///
@@ -1198,7 +1241,7 @@ class ContainerLayer extends Layer {
       assert(node != child); // indicates we are about to create a cycle
       return true;
     }());
-    adoptChild(child);
+    _adoptChild(child);
     child._previousSibling = lastChild;
     if (lastChild != null) {
       lastChild!._nextSibling = child;
@@ -1207,6 +1250,52 @@ class ContainerLayer extends Layer {
     _firstChild ??= child;
     child._parentHandle.layer = child;
     assert(child.attached == attached);
+  }
+
+  void _adoptChild(Layer child) {
+    assert(!_debugMutationsLocked);
+    if (!alwaysNeedsAddToScene) {
+      markNeedsAddToScene();
+    }
+    if (child._compositionCallbackCount != 0) {
+      _updateSubtreeCompositionObserverCount(child._compositionCallbackCount);
+    }
+    assert(child._parent == null);
+    assert(() {
+      Layer node = this;
+      while (node.parent != null) {
+        node = node.parent!;
+      }
+      assert(node != child); // indicates we are about to create a cycle
+      return true;
+    }());
+    child._parent = this;
+    if (attached) {
+      child.attach(_owner!);
+    }
+    redepthChild(child);
+  }
+
+  @override
+  void redepthChildren() {
+    Layer? child = firstChild;
+    while (child != null) {
+      redepthChild(child);
+      child = child.nextSibling;
+    }
+  }
+
+  /// Adjust the [depth] of the given [child] to be greater than this node's own
+  /// [depth].
+  ///
+  /// Only call this method from overrides of [redepthChildren].
+  @protected
+  void redepthChild(Layer child) {
+    assert(child.owner == owner);
+    if (child._depth <= _depth) {
+      child._depth = _depth + 1;
+      child.redepthChildren();
+    }
   }
 
   // Implementation of [Layer.remove].
@@ -1235,9 +1324,25 @@ class ContainerLayer extends Layer {
     assert(lastChild == null || _debugUltimatePreviousSiblingOf(lastChild!, equals: firstChild));
     child._previousSibling = null;
     child._nextSibling = null;
-    dropChild(child);
+    _dropChild(child);
     child._parentHandle.layer = null;
     assert(!child.attached);
+  }
+
+  void _dropChild(Layer child) {
+    assert(!_debugMutationsLocked);
+    if (!alwaysNeedsAddToScene) {
+      markNeedsAddToScene();
+    }
+    if (child._compositionCallbackCount != 0) {
+      _updateSubtreeCompositionObserverCount(-child._compositionCallbackCount);
+    }
+    assert(child._parent == this);
+    assert(child.attached == attached);
+    child._parent = null;
+    if (attached) {
+      child.detach();
+    }
   }
 
   /// Removes all of this layer's children from its child list.
@@ -1249,7 +1354,7 @@ class ContainerLayer extends Layer {
       child._previousSibling = null;
       child._nextSibling = null;
       assert(child.attached == attached);
-      dropChild(child);
+      _dropChild(child);
       child._parentHandle.layer = null;
       child = next;
     }

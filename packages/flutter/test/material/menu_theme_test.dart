@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+
 void main() {
   void onPressed(TestMenu item) {}
 
@@ -55,6 +56,7 @@ void main() {
   testWidgets('theme is honored', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Material(
           child: Builder(builder: (BuildContext context) {
             return MenuBarTheme(
@@ -107,6 +109,7 @@ void main() {
   testWidgets('Constructor parameters override theme parameters', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Material(
           child: Builder(
             builder: (BuildContext context) {

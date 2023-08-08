@@ -504,12 +504,13 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
     if (_timer == null) {
       deviceNotifier ??= ItemListNotifier<Device>();
       // Make initial population the default, fast polling timeout.
-      _timer = _initTimer(null);
+      _timer = _initTimer(null, initialCall: true);
     }
   }
 
-  Timer _initTimer(Duration? pollingTimeout) {
-    return Timer(_pollingInterval, () async {
+  Timer _initTimer(Duration? pollingTimeout, {bool initialCall = false}) {
+    // Poll for devices immediately on the initial call for faster initial population.
+    return Timer(initialCall ? Duration.zero : _pollingInterval, () async {
       try {
         final List<Device> devices = await pollingGetDevices(timeout: pollingTimeout);
         deviceNotifier!.updateWithNewList(devices);
@@ -848,8 +849,10 @@ abstract class Device {
     ];
   }
 
-  static Future<void> printDevices(List<Device> devices, Logger logger) async {
-    (await descriptions(devices)).forEach(logger.printStatus);
+  static Future<void> printDevices(List<Device> devices, Logger logger, { String prefix = '' }) async {
+    for (final String line in await descriptions(devices)) {
+      logger.printStatus('$prefix$line');
+    }
   }
 
   static List<String> devicesPlatformTypes(List<Device> devices) {
@@ -971,6 +974,7 @@ class DebuggingOptions {
     this.serveObservatory = false,
     this.enableDartProfiling = true,
     this.enableEmbedderApi = false,
+    this.usingCISystem = false,
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo, {
@@ -993,6 +997,7 @@ class DebuggingOptions {
       this.uninstallFirst = false,
       this.enableDartProfiling = true,
       this.enableEmbedderApi = false,
+      this.usingCISystem = false,
     }) : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
@@ -1069,6 +1074,7 @@ class DebuggingOptions {
     required this.serveObservatory,
     required this.enableDartProfiling,
     required this.enableEmbedderApi,
+    required this.usingCISystem,
   });
 
   final bool debuggingEnabled;
@@ -1109,6 +1115,7 @@ class DebuggingOptions {
   final bool serveObservatory;
   final bool enableDartProfiling;
   final bool enableEmbedderApi;
+  final bool usingCISystem;
 
   /// Whether the tool should try to uninstall a previously installed version of the app.
   ///
@@ -1243,6 +1250,7 @@ class DebuggingOptions {
     'serveObservatory': serveObservatory,
     'enableDartProfiling': enableDartProfiling,
     'enableEmbedderApi': enableEmbedderApi,
+    'usingCISystem': usingCISystem,
   };
 
   static DebuggingOptions fromJson(Map<String, Object?> json, BuildInfo buildInfo) =>
@@ -1294,6 +1302,7 @@ class DebuggingOptions {
       serveObservatory: (json['serveObservatory'] as bool?) ?? false,
       enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
       enableEmbedderApi: (json['enableEmbedderApi'] as bool?) ?? false,
+      usingCISystem: (json['usingCISystem'] as bool?) ?? false,
     );
 }
 

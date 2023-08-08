@@ -190,7 +190,16 @@ Future<void> _runBuild(
 
   // MSBuild sends all output to stdout, including build errors. This surfaces
   // known error patterns.
-  final RegExp errorMatcher = RegExp(r':\s*(?:warning|(?:fatal )?error).*?:');
+  final RegExp errorMatcher = RegExp(
+    <String>[
+      // Known error messages
+      r'(:\s*(?:warning|(?:fatal )?error).*?:)',
+      r'Error detected in pubspec\.yaml:',
+
+      // Known secondary error lines for pubspec.yaml
+      r'No file or variants found for asset:',
+    ].join('|'),
+  );
 
   int result;
   try {
@@ -242,7 +251,7 @@ void _writeGeneratedFlutterConfig(
     environment['FLUTTER_ENGINE'] = globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath));
     environment['LOCAL_ENGINE'] = localEngineInfo.localEngineName;
   }
-  writeGeneratedCmakeConfig(Cache.flutterRoot!, windowsProject, buildInfo, environment);
+  writeGeneratedCmakeConfig(Cache.flutterRoot!, windowsProject, buildInfo, environment, globals.logger);
 }
 
 // Works around the Visual Studio 17.1.0 CMake bug described in

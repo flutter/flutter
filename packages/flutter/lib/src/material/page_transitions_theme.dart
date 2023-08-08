@@ -202,7 +202,7 @@ class _ZoomPageTransition extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///  * [TransitionRoute.allowSnapshotting], which defines wether the route
+  ///  * [TransitionRoute.allowSnapshotting], which defines whether the route
   ///    transition will prefer to animate a snapshot of the entering and exiting
   ///    routes.
   final bool allowSnapshotting;

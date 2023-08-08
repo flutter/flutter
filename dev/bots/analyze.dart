@@ -187,6 +187,13 @@ Future<void> run(List<String> arguments) async {
     workingDirectory: flutterRoot,
   );
 
+  // Make sure that all of the existing samples are linked from at least one API doc comment.
+  printProgress('Code sample link validation...');
+  await runCommand(dart,
+    <String>['--enable-asserts', path.join(flutterRoot, 'dev', 'bots', 'check_code_samples.dart')],
+    workingDirectory: flutterRoot,
+  );
+
   // Try analysis against a big version of the gallery; generate into a temporary directory.
   printProgress('Dart analysis (mega gallery)...');
   final Directory outDir = Directory.systemTemp.createTempSync('flutter_mega_gallery.');
@@ -239,7 +246,15 @@ class _DoubleClampVisitor extends RecursiveAstVisitor<CompilationUnit> {
 
   @override
   CompilationUnit? visitMethodInvocation(MethodInvocation node) {
-    if (node.methodName.name == 'clamp') {
+    final NodeList<Expression> arguments = node.argumentList.arguments;
+    // This may produce false positives when `node.target` is not a subtype of
+    // num. The static type of `node.target` isn't guaranteed to be resolved at
+    // this time. Check whether the argument list consists of 2 positional args
+    // to reduce false positives.
+    final bool isNumClampInvocation = node.methodName.name == 'clamp'
+                                   && arguments.length == 2
+                                   && !arguments.any((Expression exp) => exp is NamedExpression);
+    if (isNumClampInvocation) {
       final _Line line = _getLine(parseResult, node.function.offset);
       if (!line.content.contains('// ignore_clamp_double_lint')) {
         clamps.add(line);

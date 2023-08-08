@@ -59,20 +59,23 @@ Widget overlay({ Widget? child }) {
 }
 
 Widget overlayWithEntry(OverlayEntry entry) {
-  return Localizations(
-    locale: const Locale('en', 'US'),
-    delegates: <LocalizationsDelegate<dynamic>>[
-      WidgetsLocalizationsDelegate(),
-      MaterialLocalizationsDelegate(),
-    ],
-    child: Directionality(
-      textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: const MediaQueryData(size: Size(800.0, 600.0)),
-        child: Overlay(
-          initialEntries: <OverlayEntry>[
-            entry,
-          ],
+  return Theme(
+    data: ThemeData(useMaterial3: false),
+    child: Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: <LocalizationsDelegate<dynamic>>[
+        WidgetsLocalizationsDelegate(),
+        MaterialLocalizationsDelegate(),
+      ],
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(size: Size(800.0, 600.0)),
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              entry,
+            ],
+          ),
         ),
       ),
     ),
@@ -80,25 +83,29 @@ Widget overlayWithEntry(OverlayEntry entry) {
 }
 
 Widget boilerplate({ Widget? child }) {
-  return Localizations(
-    locale: const Locale('en', 'US'),
-    delegates: <LocalizationsDelegate<dynamic>>[
-      WidgetsLocalizationsDelegate(),
-      MaterialLocalizationsDelegate(),
-    ],
-    child: Directionality(
-      textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: const MediaQueryData(size: Size(800.0, 600.0)),
-        child: Center(
-          child: Material(
-            child: child,
+  return Theme(
+    data: ThemeData(useMaterial3: false),
+    child:Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: <LocalizationsDelegate<dynamic>>[
+        WidgetsLocalizationsDelegate(),
+        MaterialLocalizationsDelegate(),
+      ],
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(size: Size(800.0, 600.0)),
+          child: Center(
+            child: Material(
+              child: child,
+            ),
           ),
         ),
       ),
     ),
   );
 }
+
 
 Future<void> skipPastScrollingAnimation(WidgetTester tester) async {
   await tester.pump();
@@ -2923,6 +2930,7 @@ void main() {
         ),
       );
 
+      final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
       final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
 
       // This tap just puts the cursor somewhere different than where the double
@@ -2950,8 +2958,8 @@ void main() {
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
 
-      // Selected text shows 1 toolbar buttons.
-      expect(find.byType(CupertinoButton), findsNWidgets(1));
+      // Selected text shows 1 toolbar buttons on MacOS, 2 on iOS.
+      expect(find.byType(CupertinoButton), isTargetPlatformIOS ? findsNWidgets(3) : findsNWidgets(1));
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
@@ -3064,6 +3072,7 @@ void main() {
       );
 
       final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
+      final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
 
       await tester.tapAt(selectableTextStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
@@ -3080,8 +3089,8 @@ void main() {
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
 
-      // Selected text shows 1 toolbar buttons.
-      expect(find.byType(CupertinoButton), findsNWidgets(1));
+      // Selected text shows 2 toolbar buttons for iOS, 1 for macOS.
+      expect(find.byType(CupertinoButton), isTargetPlatformIOS ? findsNWidgets(3) : findsNWidgets(1));
 
       await gesture.up();
       await tester.pump();
@@ -3092,7 +3101,7 @@ void main() {
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
       // The toolbar is still showing.
-      expect(find.byType(CupertinoButton), findsNWidgets(1));
+      expect(find.byType(CupertinoButton), isTargetPlatformIOS ? findsNWidgets(3) : findsNWidgets(1));
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
@@ -3191,6 +3200,7 @@ void main() {
       );
 
       final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
+      final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
 
       await tester.longPressAt(selectableTextStart + const Offset(50.0, 5.0));
       await tester.pump();
@@ -3208,7 +3218,7 @@ void main() {
       );
 
       // Toolbar shows one button.
-      expect(find.byType(CupertinoButton), findsNWidgets(1));
+      expect(find.byType(CupertinoButton), isTargetPlatformIOS ? findsNWidgets(3) : findsNWidgets(1));
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
@@ -3473,6 +3483,7 @@ void main() {
           await tester.startGesture(textOffsetToPosition(tester, 18));
       await tester.pump(const Duration(milliseconds: 500));
 
+      final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
       final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
       final TextEditingController controller = editableTextWidget.controller;
 
@@ -3543,7 +3554,7 @@ void main() {
         ),
       );
       // The toolbar now shows up.
-      expect(find.byType(CupertinoButton), findsNWidgets(1));
+      expect(find.byType(CupertinoButton), isTargetPlatformIOS ? findsNWidgets(3) : findsNWidgets(1));
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
@@ -3771,7 +3782,7 @@ void main() {
       );
 
       // Long press toolbar.
-      expect(find.byType(CupertinoButton), findsNWidgets(1));
+      expect(find.byType(CupertinoButton), findsNWidgets(3));
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
@@ -3834,6 +3845,7 @@ void main() {
       );
 
       final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
+      final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
 
       await tester.longPressAt(selectableTextStart + const Offset(50.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
@@ -3863,7 +3875,8 @@ void main() {
         controller.selection,
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
-      expect(find.byType(CupertinoButton), findsNWidgets(1));
+
+      expect(find.byType(CupertinoButton), isTargetPlatformIOS ? findsNWidgets(3) : findsNWidgets(1));
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
 
@@ -3880,6 +3893,7 @@ void main() {
         ),
       );
       final Offset selectableTextStart = tester.getTopLeft(find.byType(SelectableText));
+      final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
 
       await tester.tapAt(selectableTextStart + const Offset(50.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
@@ -3897,7 +3911,7 @@ void main() {
         controller.selection,
         const TextSelection(baseOffset: 0, extentOffset: 7),
       );
-      expect(find.byType(CupertinoButton), findsNWidgets(1));
+      expect(find.byType(CupertinoButton), isTargetPlatformIOS ? findsNWidgets(3) : findsNWidgets(1));
 
       // Double tap selecting the same word somewhere else is fine.
       await tester.pumpAndSettle(kDoubleTapTimeout);
@@ -3914,7 +3928,7 @@ void main() {
         controller.selection,
         const TextSelection(baseOffset: 0, extentOffset: 7),
       );
-      expect(find.byType(CupertinoButton), findsNWidgets(1));
+      expect(find.byType(CupertinoButton), isTargetPlatformIOS ? findsNWidgets(3) : findsNWidgets(1));
 
       // Hide the toolbar so it doesn't interfere with taps on the text.
       final EditableTextState editableTextState =
@@ -3936,7 +3950,7 @@ void main() {
         controller.selection,
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
-      expect(find.byType(CupertinoButton), findsNWidgets(1));
+      expect(find.byType(CupertinoButton), isTargetPlatformIOS ? findsNWidgets(3) : findsNWidgets(1));
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
@@ -4015,7 +4029,7 @@ void main() {
 
     await gesture.up();
     await tester.pump();
-    expect(find.byType(CupertinoButton), findsNWidgets(1));
+    expect(find.byType(CupertinoButton), findsNWidgets(3));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('tap on non-force-press-supported devices work', (WidgetTester tester) async {
@@ -4087,7 +4101,7 @@ void main() {
       style: TextStyle(color: Color(0xff00ff00)),
       textAlign: TextAlign.end,
       textDirection: TextDirection.ltr,
-      textScaleFactor: 1.0,
+      textScaler: TextScaler.noScaling,
       autofocus: true,
       showCursor: true,
       minLines: 2,
@@ -4115,7 +4129,7 @@ void main() {
       'maxLines: 10',
       'textAlign: end',
       'textDirection: ltr',
-      'textScaleFactor: 1.0',
+      'textScaler: no scaling',
       'cursorWidth: 1.0',
       'cursorHeight: 1.0',
       'cursorRadius: Radius.circular(0.0)',
@@ -4130,7 +4144,7 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.android),
+          theme: ThemeData(platform: TargetPlatform.android, useMaterial3: false),
           home: const Material(
             child: Center(
               child: SelectableText('something'),
@@ -4153,7 +4167,7 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.android),
+          theme: ThemeData(platform: TargetPlatform.android, useMaterial3: false),
           home: const Material(
             child: Center(
               child: SelectableText(
@@ -4174,7 +4188,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.android),
+          theme: ThemeData(platform: TargetPlatform.android, useMaterial3: false),
           home: const Material(
             child: Center(
               child: SelectableText(
@@ -4200,7 +4214,7 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.android),
+          theme: ThemeData(platform: TargetPlatform.android, useMaterial3: false),
           home: const Material(
             child: Center(
               child: SelectableText(
@@ -4224,7 +4238,7 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.android),
+          theme: ThemeData(platform: TargetPlatform.android, useMaterial3: false),
           home: const Material(
             child: Center(
               child: SelectableText(
@@ -4256,7 +4270,7 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.android),
+          theme: ThemeData(platform: TargetPlatform.android, useMaterial3: false),
           home: const Material(
             child: Center(
               child: SelectableText(
@@ -4285,7 +4299,7 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.android),
+          theme: ThemeData(platform: TargetPlatform.android, useMaterial3: false),
           home: const Material(
             child: Center(
               child: SelectableText(
@@ -4314,7 +4328,7 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(platform: TargetPlatform.android),
+          theme: ThemeData(platform: TargetPlatform.android, useMaterial3: false),
           home: const Material(
             child: Center(
               child: SelectableText(
@@ -5019,6 +5033,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Material(
           child: Center(
             child: SelectableText(
@@ -5080,8 +5095,9 @@ void main() {
 
   testWidgets('text selection style 1', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Material(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: const Material(
           child: Center(
             child: Column(
               children: <Widget>[
@@ -5132,8 +5148,9 @@ void main() {
 
   testWidgets('text selection style 2', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
-        home: Material(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: const Material(
           child: Center(
             child: Column(
               children: <Widget>[
@@ -5184,6 +5201,7 @@ void main() {
   testWidgets('keeps alive when has focus', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: DefaultTabController(
           length: 2,
           child: Scaffold(
@@ -5347,8 +5365,9 @@ void main() {
     const TextStyle textStyle = TextStyle(color: Color(0xff00ff00), fontSize: 12.0);
 
     await tester.pumpWidget(
-      const MaterialApp(
-        home: SelectableText.rich(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: const SelectableText.rich(
           TextSpan(
             text: 'Abcd',
             style: textStyle,
@@ -5367,6 +5386,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: SelectableText(
           'I love Flutter!',
           onSelectionChanged: (TextSelection s, _) {
@@ -5406,6 +5426,7 @@ void main() {
     TextSelection? selection;
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Material(
           child: Builder(
             builder: (BuildContext context) {

@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 void main() {
 
   test('SegmentedButtonThemeData copyWith, ==, hashCode basics', () {
@@ -29,7 +31,7 @@ void main() {
     expect(identical(SegmentedButtonThemeData.lerp(theme, theme, 0.5), theme), true);
   });
 
-  testWidgets('Default SegmentedButtonThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default SegmentedButtonThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SegmentedButtonThemeData().debugFillProperties(builder);
 

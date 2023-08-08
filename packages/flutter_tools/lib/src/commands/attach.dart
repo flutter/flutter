@@ -33,6 +33,7 @@ import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
+import '../runner/flutter_command_runner.dart';
 import '../vmservice.dart';
 
 /// A Flutter-command that attaches to applications that have been launched
@@ -501,6 +502,13 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       for (final ForwardedPort port in ports) {
         await device.portForwarder!.unforward(port);
       }
+      // However we exited from the runner, ensure the terminal has line mode
+      // and echo mode enabled before we return the user to the shell.
+      try {
+        _terminal.singleCharMode = false;
+      } on StdinException {
+        // Do nothing, if the STDIN handle is no longer available, there is nothing actionable for us to do at this point
+      }
     }
   }
 
@@ -528,6 +536,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       ddsPort: ddsPort,
       devToolsServerAddress: devToolsServerAddress,
       serveObservatory: serveObservatory,
+      usingCISystem: usingCISystem,
     );
 
     return buildInfo.isDebug
@@ -535,7 +544,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           flutterDevices,
           target: targetFile,
           debuggingOptions: debuggingOptions,
-          packagesFilePath: globalResults!['packages'] as String?,
+          packagesFilePath: globalResults![FlutterGlobalOptions.kPackagesOption] as String?,
           projectRootPath: stringArg('project-root'),
           dillOutputPath: stringArg('output-dill'),
           ipv6: usesIpv6,

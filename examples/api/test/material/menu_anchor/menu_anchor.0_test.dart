@@ -41,7 +41,7 @@ void main() {
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(find.text(example.MenuApp.kMessage), findsOneWidget);
     expect(find.text('Last Selected: ${example.MenuEntry.showMessage.label}'), findsOneWidget);

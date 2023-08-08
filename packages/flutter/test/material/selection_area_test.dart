@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+
 Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
   const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
   final Offset localOffset = paragraph.getOffsetForCaret(TextPosition(offset: offset), caret);
@@ -167,6 +168,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/119314
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Padding(
             padding: const EdgeInsets.only(top: 64),

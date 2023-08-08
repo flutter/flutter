@@ -13,13 +13,13 @@ void main() {
     );
 
     await tester.tap(find.byType(TextButton));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(find.text('Show Message'), findsOneWidget);
     expect(find.text(example.MenuApp.kMessage), findsNothing);
 
     await tester.tap(find.text('Show Message'));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(find.text('Show Message'), findsNothing);
     expect(find.text(example.MenuApp.kMessage), findsOneWidget);

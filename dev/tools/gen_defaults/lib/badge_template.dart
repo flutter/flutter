@@ -13,8 +13,8 @@ class BadgeTemplate extends TokenTemplate {
   String generate() => '''
 class _${blockName}DefaultsM3 extends BadgeThemeData {
   _${blockName}DefaultsM3(this.context) : super(
-    smallSize: ${tokens["md.comp.badge.size"]},
-    largeSize: ${tokens["md.comp.badge.large.size"]},
+    smallSize: ${getToken("md.comp.badge.size")},
+    largeSize: ${getToken("md.comp.badge.large.size")},
     padding: const EdgeInsets.symmetric(horizontal: 4),
     alignment: AlignmentDirectional.topEnd,
   );

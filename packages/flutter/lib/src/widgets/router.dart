@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -1466,12 +1467,18 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
     required RouteInformation initialRouteInformation,
   }) : _value = initialRouteInformation;
 
+  static bool _equals(Uri a, Uri b) {
+    return a.path == b.path
+        && a.fragment == b.fragment
+        && const DeepCollectionEquality.unordered().equals(a.queryParametersAll, b.queryParametersAll);
+  }
+
   @override
   void routerReportsNewRouteInformation(RouteInformation routeInformation, {RouteInformationReportingType type = RouteInformationReportingType.none}) {
     final bool replace =
       type == RouteInformationReportingType.neglect ||
       (type == RouteInformationReportingType.none &&
-       _valueInEngine.uri == routeInformation.uri);
+      _equals(_valueInEngine.uri, routeInformation.uri));
     SystemNavigator.selectMultiEntryHistory();
     SystemNavigator.routeInformationUpdated(
       uri: routeInformation.uri,

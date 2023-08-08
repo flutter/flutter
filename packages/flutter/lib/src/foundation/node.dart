@@ -8,6 +8,10 @@ import 'package:meta/meta.dart';
 // during device lab performance tests. When editing this file, check to make sure
 // that it didn't break that test.
 
+/// Deprecated. Unused by the framework and will be removed in a future version
+/// of Flutter. If needed, inline any required functionality of this class
+/// directly in the subclass.
+///
 /// An abstract node in a tree.
 ///
 /// AbstractNode has as notion of depth, attachment, and parent, but does not
@@ -39,6 +43,10 @@ import 'package:meta/meta.dart';
 /// moved to be a child of A, sibling of B, then the numbers won't change. C's
 /// [depth] will still be 2. The [depth] is automatically maintained by the
 /// [adoptChild] and [dropChild] methods.
+@Deprecated(
+  'If needed, inline any required functionality of AbstractNode in your class directly. '
+  'This feature was deprecated after v3.12.0-4.0.pre.',
+)
 class AbstractNode {
   /// The depth of this node in the tree.
   ///
@@ -84,12 +92,9 @@ class AbstractNode {
   /// Typically called only from the [parent]'s [attach] method, and by the
   /// [owner] to mark the root of a tree as attached.
   ///
-  /// Subclasses with children should override this method to first call their
-  /// inherited [attach] method, and then [attach] all their children to the
-  /// same [owner].
-  ///
-  /// Implementations of this method should start with a call to the inherited
-  /// method, as in `super.attach(owner)`.
+  /// Subclasses with children should override this method to
+  /// [attach] all their children to the same [owner]
+  /// after calling the inherited method, as in `super.attach(owner)`.
   @mustCallSuper
   void attach(covariant Object owner) {
     assert(_owner == null);
@@ -101,11 +106,9 @@ class AbstractNode {
   /// Typically called only from the [parent]'s [detach], and by the [owner] to
   /// mark the root of a tree as detached.
   ///
-  /// Subclasses with children should override this method to first call their
-  /// inherited [detach] method, and then [detach] all their children.
-  ///
-  /// Implementations of this method should end with a call to the inherited
-  /// method, as in `super.detach()`.
+  /// Subclasses with children should override this method to
+  /// [detach] all their children after calling the inherited method,
+  /// as in `super.detach()`.
   @mustCallSuper
   void detach() {
     assert(_owner != null);

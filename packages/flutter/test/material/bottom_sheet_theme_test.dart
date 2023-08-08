@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
+
 void main() {
   test('BottomSheetThemeData copyWith, ==, hashCode basics', () {
     expect(const BottomSheetThemeData(), const BottomSheetThemeData().copyWith());
@@ -36,7 +38,7 @@ void main() {
     expect(bottomSheetTheme.dragHandleSize, null);
   });
 
-  testWidgets('Default BottomSheetThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default BottomSheetThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const BottomSheetThemeData().debugFillProperties(builder);
 
@@ -48,7 +50,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('BottomSheetThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('BottomSheetThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const BottomSheetThemeData(
       backgroundColor: Color(0xFFFFFFFF),
@@ -78,8 +80,9 @@ void main() {
     ]);
   });
 
-  testWidgets('Passing no BottomSheetThemeData returns defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Passing no BottomSheetThemeData returns defaults', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
       home: Scaffold(
         body: BottomSheet(
           onClosing: () {},
@@ -102,7 +105,7 @@ void main() {
     expect(material.clipBehavior, Clip.none);
   });
 
-  testWidgets('BottomSheet uses values from BottomSheetThemeData', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('BottomSheet uses values from BottomSheetThemeData', (WidgetTester tester) async {
     final BottomSheetThemeData bottomSheetTheme = _bottomSheetTheme();
 
     await tester.pumpWidget(MaterialApp(
@@ -129,7 +132,7 @@ void main() {
     expect(material.clipBehavior, bottomSheetTheme.clipBehavior);
   });
 
-  testWidgets('BottomSheet widget properties take priority over theme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('BottomSheet widget properties take priority over theme', (WidgetTester tester) async {
     const Color backgroundColor = Colors.purple;
     const Color shadowColor = Colors.blue;
     const double elevation = 7.0;
@@ -199,7 +202,7 @@ void main() {
     expect(modalBarrier.color, modalBarrierColor);
   });
 
-  testWidgets('General bottom sheet parameters take priority over modal bottom sheet-specific parameters for persistent bottom sheets', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('General bottom sheet parameters take priority over modal bottom sheet-specific parameters for persistent bottom sheets', (WidgetTester tester) async {
     const double modalElevation = 5.0;
     const double persistentElevation = 7.0;
     const Color modalBackgroundColor = Colors.yellow;
@@ -225,7 +228,7 @@ void main() {
     expect(material.color, persistentBackgroundColor);
   });
 
-  testWidgets("Modal bottom sheet-specific parameters don't apply to persistent bottom sheets", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Modal bottom sheet-specific parameters don't apply to persistent bottom sheets", (WidgetTester tester) async {
     const double modalElevation = 5.0;
     const Color modalBackgroundColor = Colors.yellow;
     const BottomSheetThemeData bottomSheetTheme = BottomSheetThemeData(
@@ -256,14 +259,14 @@ void main() {
     const Color darkShadowColor = Colors.purple;
 
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData.light().copyWith(
+      theme: ThemeData.light(useMaterial3: false).copyWith(
         bottomSheetTheme: const BottomSheetThemeData(
           elevation: lightElevation,
           backgroundColor: lightBackgroundColor,
           shadowColor: lightShadowColor,
         ),
       ),
-      darkTheme: ThemeData.dark().copyWith(
+      darkTheme: ThemeData.dark(useMaterial3: false).copyWith(
         bottomSheetTheme: const BottomSheetThemeData(
           elevation: darkElevation,
           backgroundColor: darkBackgroundColor,
@@ -323,7 +326,7 @@ void main() {
 
 Widget bottomSheetWithElevations(BottomSheetThemeData bottomSheetTheme) {
   return MaterialApp(
-    theme: ThemeData(bottomSheetTheme: bottomSheetTheme),
+    theme: ThemeData(bottomSheetTheme: bottomSheetTheme, useMaterial3: false),
     home: Scaffold(
       body: Builder(
         builder: (BuildContext context) {

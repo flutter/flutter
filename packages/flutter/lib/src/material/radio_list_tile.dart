@@ -437,8 +437,7 @@ class RadioListTile<T> extends StatelessWidget {
 
   final _RadioType _radioType;
 
-  /// Determines wether or not to use the checkbox style for the [CupertinoRadio]
-  /// control.
+  /// Whether to use the checkbox style for the [CupertinoRadio] control.
   ///
   /// Only usable under the [RadioListTile.adaptive] constructor. If set to
   /// true, on Apple platforms the radio button will appear as an iOS styled

@@ -12,7 +12,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
+import '../foundation/leak_tracking.dart';
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart';
 
@@ -103,7 +103,7 @@ void main() {
     skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
   );
 
-  testWidgets('can use the desktop cut/copy/paste buttons on Windows and Linux', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can use the desktop cut/copy/paste buttons on Windows and Linux', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );
@@ -247,6 +247,9 @@ void main() {
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux, TargetPlatform.windows }),
     skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
+    // TODO(polina-c): remove after fixing
+    // https://github.com/flutter/flutter/issues/130467
+    leakTrackingTestConfig: const LeakTrackingTestConfig(allowAllNotDisposed: true, allowAllNotGCed: true),
   );
 
   testWidgets('the desktop cut/copy/paste buttons are disabled for read-only obscured form fields', (WidgetTester tester) async {
@@ -591,12 +594,13 @@ void main() {
   });
 
 
-  testWidgets('Disabled field hides helper and counter', (WidgetTester tester) async {
+  testWidgets('Disabled field hides helper and counter in M2', (WidgetTester tester) async {
     const String helperText = 'helper text';
     const String counterText = 'counter text';
     const String errorText = 'error text';
     Widget buildFrame(bool enabled, bool hasError) {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Material(
           child: Center(
             child: TextFormField(
