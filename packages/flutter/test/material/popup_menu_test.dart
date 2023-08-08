@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
@@ -200,7 +199,7 @@ void main() {
     expect(cancels, equals(2));
   });
 
-  testWidgets('disabled PopupMenuButton will not call itemBuilder, onOpened, onSelected or onCanceled', (WidgetTester tester) async {
+  testWidgets('Disabled PopupMenuButton will not call itemBuilder, onOpened, onSelected or onCanceled', (WidgetTester tester) async {
     final GlobalKey popupButtonKey = GlobalKey();
     bool itemBuilderCalled = false;
     bool onOpenedCalled = false;
@@ -327,7 +326,7 @@ void main() {
     expect(onSelectedCalled, isFalse);
   });
 
-  testWidgets('disabled PopupMenuButton is focusable with directional navigation', (WidgetTester tester) async {
+  testWidgets('Disabled PopupMenuButton is focusable with directional navigation', (WidgetTester tester) async {
     final Key popupButtonKey = UniqueKey();
     final GlobalKey childKey = GlobalKey();
 
@@ -1085,7 +1084,7 @@ void main() {
     expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(50.0, 50.0));
   });
 
-  testWidgets('open PopupMenu has correct semantics', (WidgetTester tester) async {
+  testWidgets('Opened PopupMenu has correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       MaterialApp(
@@ -1297,7 +1296,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('disabled PopupMenuItem has correct semantics', (WidgetTester tester) async {
+  testWidgets('Disabled PopupMenuItem has correct semantics', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/45044.
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
@@ -2577,32 +2576,30 @@ void main() {
     });
   });
 
-  testWidgets('iconSize parameter tests', (WidgetTester tester) async {
-    Future<void> buildFrame({double? iconSize}) {
-      return tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: PopupMenuButton<String>(
-                iconSize: iconSize,
-                itemBuilder: (_) => <PopupMenuEntry<String>>[
-                  const PopupMenuItem<String>(
-                    value: 'value',
-                    child: Text('child'),
-                  ),
-                ],
-              ),
+  testWidgets('Can customize PopupMenuButton icon', (WidgetTester tester) async {
+    const Color iconColor = Color(0xffffff00);
+    const double iconSize = 29.5;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              iconColor: iconColor,
+              iconSize: iconSize,
+              itemBuilder: (_) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  value: 'value',
+                  child: Text('child'),
+                ),
+              ],
             ),
           ),
         ),
-      );
-    }
+      ),
+    );
 
-    await buildFrame();
-    expect(tester.getSize(find.byIcon(Icons.adaptive.more)), const Size(24, 24));
-
-    await buildFrame(iconSize: 50);
-    expect(tester.getSize(find.byIcon(Icons.adaptive.more)), const Size(50, 50));
+    expect(_iconStyle(tester, Icons.adaptive.more)?.color, iconColor);
+    expect(tester.getSize(find.byIcon(Icons.adaptive.more)), const Size(iconSize, iconSize));
   });
 
   testWidgets('does not crash in small overlay', (WidgetTester tester) async {
@@ -3266,7 +3263,7 @@ void main() {
     expect(childBottomLeft, menuTopLeft);
   });
 
-  testWidgets('PopupmenuItem onTap should be calling after Navigator.pop', (WidgetTester tester) async {
+  testWidgets('PopupMenuItem onTap should be calling after Navigator.pop', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -3492,6 +3489,13 @@ class _ClosureNavigatorObserver extends NavigatorObserver {
 TextStyle? _labelStyle(WidgetTester tester, String label) {
   return tester.widget<RichText>(find.descendant(
     of: find.text(label),
+    matching: find.byType(RichText),
+  )).text.style;
+}
+
+TextStyle? _iconStyle(WidgetTester tester, IconData icon) {
+  return tester.widget<RichText>(find.descendant(
+    of: find.byIcon(icon),
     matching: find.byType(RichText),
   )).text.style;
 }

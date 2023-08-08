@@ -5,8 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'mock_canvas.dart';
-
 class MyPainter extends CustomPainter {
   const MyPainter({
     required this.color,
@@ -131,7 +129,7 @@ void main() {
               return false;
             }
             if (method == #drawColor) {
-              throw 'fail';
+              fail('fail');
             }
             return true;
           }),
@@ -225,7 +223,7 @@ void main() {
           paints..everything((Symbol method, List<dynamic> arguments) {
             methodsAndArguments.add(MethodAndArguments(method, arguments));
             if (method == #drawColor) {
-              throw 'failed ';
+              fail('failed ');
             }
             return true;
           }),
