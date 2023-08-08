@@ -30,11 +30,8 @@ static zx_koid_t GetCurrentProcessId() {
 }
 
 VulkanSurfacePool::VulkanSurfacePool(vulkan::VulkanProvider& vulkan_provider,
-                                     sk_sp<GrDirectContext> context,
-                                     scenic::Session* scenic_session)
-    : vulkan_provider_(vulkan_provider),
-      context_(std::move(context)),
-      scenic_session_(scenic_session) {
+                                     sk_sp<GrDirectContext> context)
+    : vulkan_provider_(vulkan_provider), context_(std::move(context)) {
   FML_CHECK(context_ != nullptr);
 
   zx_status_t status = fdio_service_connect(
@@ -44,12 +41,10 @@ VulkanSurfacePool::VulkanSurfacePool(vulkan::VulkanProvider& vulkan_provider,
                                         GetCurrentProcessId());
   FML_DCHECK(status == ZX_OK);
 
-  if (!scenic_session_) {
-    status = fdio_service_connect(
-        "/svc/fuchsia.ui.composition.Allocator",
-        flatland_allocator_.NewRequest().TakeChannel().release());
-    FML_DCHECK(status == ZX_OK);
-  }
+  status = fdio_service_connect(
+      "/svc/fuchsia.ui.composition.Allocator",
+      flatland_allocator_.NewRequest().TakeChannel().release());
+  FML_DCHECK(status == ZX_OK);
 }
 
 VulkanSurfacePool::~VulkanSurfacePool() {}
@@ -124,8 +119,7 @@ std::unique_ptr<VulkanSurface> VulkanSurfacePool::CreateSurface(
   TRACE_EVENT2("flutter", "VulkanSurfacePool::CreateSurface", "width",
                size.width(), "height", size.height());
   auto surface = std::make_unique<VulkanSurface>(
-      vulkan_provider_, sysmem_allocator_, flatland_allocator_, context_,
-      scenic_session_, size, buffer_id_++);
+      vulkan_provider_, sysmem_allocator_, flatland_allocator_, context_, size);
   if (!surface->IsValid()) {
     FML_LOG(ERROR) << "VulkanSurfaceProducer: Created surface is invalid";
     return nullptr;

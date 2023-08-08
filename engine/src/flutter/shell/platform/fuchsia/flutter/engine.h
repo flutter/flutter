@@ -11,7 +11,6 @@
 #include <fuchsia/io/cpp/fidl.h>
 #include <fuchsia/memorypressure/cpp/fidl.h>
 #include <fuchsia/ui/composition/cpp/fidl.h>
-#include <fuchsia/ui/gfx/cpp/fidl.h>
 #include <fuchsia/ui/views/cpp/fidl.h>
 #include <lib/async-loop/cpp/loop.h>
 #include <lib/sys/cpp/service_directory.h>
@@ -25,11 +24,9 @@
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/platform/fuchsia/flutter/accessibility_bridge.h"
 
+#include "external_view_embedder.h"
 #include "flatland_connection.h"
-#include "flatland_external_view_embedder.h"
 #include "flutter_runner_product_configuration.h"
-#include "gfx_external_view_embedder.h"
-#include "gfx_session_connection.h"
 #include "isolate_configurator.h"
 #include "surface_producer.h"
 
@@ -52,21 +49,6 @@ class Engine final : public fuchsia::memorypressure::Watcher {
       const std::string& name_prefix,
       const std::shared_ptr<sys::ServiceDirectory>& runner_services = nullptr);
 
-  // Gfx connection ctor.
-  Engine(Delegate& delegate,
-         std::string thread_label,
-         std::shared_ptr<sys::ServiceDirectory> svc,
-         std::shared_ptr<sys::ServiceDirectory> runner_services,
-         flutter::Settings settings,
-         fuchsia::ui::views::ViewToken view_token,
-         scenic::ViewRefPair view_ref_pair,
-         UniqueFDIONS fdio_ns,
-         fidl::InterfaceRequest<fuchsia::io::Directory> directory_request,
-         FlutterRunnerProductConfiguration product_config,
-         const std::vector<std::string>& dart_entrypoint_args,
-         bool for_v1_component);
-
-  // Flatland connection ctor.
   Engine(Delegate& delegate,
          std::string thread_label,
          std::shared_ptr<sys::ServiceDirectory> svc,
@@ -92,7 +74,6 @@ class Engine final : public fuchsia::memorypressure::Watcher {
 
  private:
   void Initialize(
-      bool use_flatland,
       scenic::ViewRefPair view_ref_pair,
       std::shared_ptr<sys::ServiceDirectory> svc,
       std::shared_ptr<sys::ServiceDirectory> runner_services,
@@ -120,24 +101,16 @@ class Engine final : public fuchsia::memorypressure::Watcher {
   void Terminate();
 
   void DebugWireframeSettingsChanged(bool enabled);
-  void CreateGfxView(int64_t view_id,
-                     ViewCallback on_view_created,
-                     GfxViewIdCallback on_view_bound,
-                     bool hit_testable,
-                     bool focusable);
-  void CreateFlatlandView(int64_t view_id,
-                          ViewCallback on_view_created,
-                          FlatlandViewCreatedCallback on_view_bound,
-                          bool hit_testable,
-                          bool focusable);
+  void CreateView(int64_t view_id,
+                  ViewCallback on_view_created,
+                  ViewCreatedCallback on_view_bound,
+                  bool hit_testable,
+                  bool focusable);
   void UpdateView(int64_t view_id,
                   SkRect occlusion_hint,
                   bool hit_testable,
-                  bool focusable,
-                  bool use_flatland);
-  void DestroyGfxView(int64_t view_id, GfxViewIdCallback on_view_unbound);
-  void DestroyFlatlandView(int64_t view_id,
-                           FlatlandViewIdCallback on_view_unbound);
+                  bool focusable);
+  void DestroyView(int64_t view_id, ViewIdCallback on_view_unbound);
 
   // |fuchsia::memorypressure::Watcher|
   void OnLevelChanged(fuchsia::memorypressure::Level level,
@@ -153,15 +126,11 @@ class Engine final : public fuchsia::memorypressure::Watcher {
   const std::string thread_label_;
   flutter::ThreadHost thread_host_;
 
-  fuchsia::ui::views::ViewToken view_token_;
   fuchsia::ui::views::ViewCreationToken view_creation_token_;
-  std::shared_ptr<GfxSessionConnection>
-      session_connection_;  // Must come before surface_producer_
   std::shared_ptr<FlatlandConnection>
       flatland_connection_;  // Must come before surface_producer_
   std::shared_ptr<SurfaceProducer> surface_producer_;
-  std::shared_ptr<GfxExternalViewEmbedder> external_view_embedder_;
-  std::shared_ptr<FlatlandExternalViewEmbedder> flatland_view_embedder_;
+  std::shared_ptr<ExternalViewEmbedder> view_embedder_;
 
   std::unique_ptr<IsolateConfigurator> isolate_configurator_;
   std::unique_ptr<flutter::Shell> shell_;

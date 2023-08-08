@@ -46,16 +46,12 @@ uint32_t BytesPerRow(const fuchsia::sysmem::SingleBufferSettings& settings,
 
 }  // namespace
 
-uint32_t SoftwareSurface::sNextBufferId = 1;  // 0 is invalid; start at 1.
-
 SoftwareSurface::SoftwareSurface(
     fuchsia::sysmem::AllocatorSyncPtr& sysmem_allocator,
     fuchsia::ui::composition::AllocatorPtr& flatland_allocator,
-    scenic::Session* session,
     const SkISize& size)
-    : session_(session), wait_for_surface_read_finished_(this) {
-  FML_CHECK((session_ || flatland_allocator.is_bound()) &&
-            !(session_ && flatland_allocator.is_bound()));
+    : wait_for_surface_read_finished_(this) {
+  FML_CHECK(flatland_allocator.is_bound());
 
   if (!SetupSkiaSurface(sysmem_allocator, flatland_allocator, size)) {
     FML_LOG(ERROR) << "Could not create render surface.";
@@ -67,14 +63,6 @@ SoftwareSurface::SoftwareSurface(
     return;
   }
 
-  if (session) {
-    if (image_id_ == 0) {
-      image_id_ = session->AllocResourceId();
-    }
-    session->Enqueue(scenic::NewCreateImage2Cmd(
-        image_id_, sk_surface_->width(), sk_surface_->height(), buffer_id_, 0));
-  }
-
   wait_for_surface_read_finished_.set_object(release_event_.get());
   wait_for_surface_read_finished_.set_trigger(ZX_EVENT_SIGNALED);
   Reset();
@@ -83,16 +71,7 @@ SoftwareSurface::SoftwareSurface(
 }
 
 SoftwareSurface::~SoftwareSurface() {
-  if (session_) {
-    if (image_id_) {
-      session_->Enqueue(scenic::NewReleaseResourceCmd(image_id_));
-    }
-    if (buffer_id_) {
-      session_->DeregisterBufferCollection(buffer_id_);
-    }
-  } else {
-    release_image_callback_();
-  }
+  release_image_callback_();
   wait_for_surface_read_finished_.Cancel();
   wait_for_surface_read_finished_.set_object(ZX_HANDLE_INVALID);
 }
@@ -160,41 +139,33 @@ bool SoftwareSurface::SetupSkiaSurface(
   }
   auto scenic_token = std::move(duplicate_tokens[0]);
 
-  // Register the sysmem token with flatland (or scenic's legacy gfx interface).
+  // Register the sysmem token with flatland.
   //
   // This binds the sysmem token to a composition token, which is used later
   // to associate the rendering surface with a specific flatland Image.
-  //
-  // Under gfx, scenic uses an integral `buffer_id` instead of the composition
-  // token.
-  if (session_) {
-    buffer_id_ = sNextBufferId++;
-    session_->RegisterBufferCollection(buffer_id_, std::move(scenic_token));
-  } else {
-    fuchsia::ui::composition::BufferCollectionExportToken export_token;
-    zx_status_t token_create_status =
-        zx::eventpair::create(0, &export_token.value, &import_token_.value);
-    if (token_create_status != ZX_OK) {
-      FML_LOG(ERROR) << "Failed to create flatland export token: "
-                     << zx_status_get_string(token_create_status);
-      return false;
-    }
-
-    fuchsia::ui::composition::RegisterBufferCollectionArgs args;
-    args.set_export_token(std::move(export_token));
-    args.set_buffer_collection_token(std::move(scenic_token));
-    args.set_usage(
-        fuchsia::ui::composition::RegisterBufferCollectionUsage::DEFAULT);
-    flatland_allocator->RegisterBufferCollection(
-        std::move(args),
-        [](fuchsia::ui::composition::Allocator_RegisterBufferCollection_Result
-               result) {
-          if (result.is_err()) {
-            FML_LOG(ERROR)
-                << "RegisterBufferCollection call to Scenic Allocator failed.";
-          }
-        });
+  fuchsia::ui::composition::BufferCollectionExportToken export_token;
+  zx_status_t token_create_status =
+      zx::eventpair::create(0, &export_token.value, &import_token_.value);
+  if (token_create_status != ZX_OK) {
+    FML_LOG(ERROR) << "Failed to create flatland export token: "
+                   << zx_status_get_string(token_create_status);
+    return false;
   }
+
+  fuchsia::ui::composition::RegisterBufferCollectionArgs args;
+  args.set_export_token(std::move(export_token));
+  args.set_buffer_collection_token(std::move(scenic_token));
+  args.set_usage(
+      fuchsia::ui::composition::RegisterBufferCollectionUsage::DEFAULT);
+  flatland_allocator->RegisterBufferCollection(
+      std::move(args),
+      [](fuchsia::ui::composition::Allocator_RegisterBufferCollection_Result
+             result) {
+        if (result.is_err()) {
+          FML_LOG(ERROR)
+              << "RegisterBufferCollection call to Scenic Allocator failed.";
+        }
+      });
 
   // Acquire flutter's local handle to the sysmem buffer.
   fuchsia::sysmem::BufferCollectionSyncPtr buffer_collection;
@@ -309,7 +280,6 @@ bool SoftwareSurface::SetupSkiaSurface(
 
 void SoftwareSurface::SetImageId(uint32_t image_id) {
   FML_CHECK(image_id_ == 0);
-  FML_CHECK(!session_);
   image_id_ = image_id;
 }
 
@@ -323,28 +293,24 @@ sk_sp<SkSurface> SoftwareSurface::GetSkiaSurface() const {
 
 fuchsia::ui::composition::BufferCollectionImportToken
 SoftwareSurface::GetBufferCollectionImportToken() {
-  FML_CHECK(!session_);
   fuchsia::ui::composition::BufferCollectionImportToken import_dup;
   import_token_.value.duplicate(ZX_RIGHT_SAME_RIGHTS, &import_dup.value);
   return import_dup;
 }
 
 zx::event SoftwareSurface::GetAcquireFence() {
-  FML_CHECK(!session_);
   zx::event fence;
   acquire_event_.duplicate(ZX_RIGHT_SAME_RIGHTS, &fence);
   return fence;
 }
 
 zx::event SoftwareSurface::GetReleaseFence() {
-  FML_CHECK(!session_);
   zx::event fence;
   release_event_.duplicate(ZX_RIGHT_SAME_RIGHTS, &fence);
   return fence;
 }
 void SoftwareSurface::SetReleaseImageCallback(
     ReleaseImageCallback release_image_callback) {
-  FML_CHECK(!session_);
   release_image_callback_ = release_image_callback;
 }
 
@@ -353,16 +319,6 @@ size_t SoftwareSurface::AdvanceAndGetAge() {
 }
 
 bool SoftwareSurface::FlushSessionAcquireAndReleaseEvents() {
-  if (session_) {
-    zx::event acquire, release;
-    if (acquire_event_.duplicate(ZX_RIGHT_SAME_RIGHTS, &acquire) != ZX_OK ||
-        release_event_.duplicate(ZX_RIGHT_SAME_RIGHTS, &release) != ZX_OK) {
-      return false;
-    }
-    session_->EnqueueAcquireFence(std::move(acquire));
-    session_->EnqueueReleaseFence(std::move(release));
-  }
-
   age_ = 0;
   return true;
 }

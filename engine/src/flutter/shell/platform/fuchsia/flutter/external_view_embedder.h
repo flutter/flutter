@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_FLATLAND_EXTERNAL_VIEW_EMBEDDER_H_
-#define FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_FLATLAND_EXTERNAL_VIEW_EMBEDDER_H_
+#ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_EXTERNAL_VIEW_EMBEDDER_H_
+#define FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_EXTERNAL_VIEW_EMBEDDER_H_
 
 #include <fuchsia/ui/composition/cpp/fidl.h>
 #include <fuchsia/ui/views/cpp/fidl.h>
@@ -33,21 +33,19 @@
 namespace flutter_runner {
 
 using ViewCallback = std::function<void()>;
-using FlatlandViewCreatedCallback = std::function<void(
+using ViewCreatedCallback = std::function<void(
     fuchsia::ui::composition::ContentId,
     fuchsia::ui::composition::ChildViewWatcherHandle child_view_watcher)>;
-using FlatlandViewIdCallback =
-    std::function<void(fuchsia::ui::composition::ContentId)>;
+using ViewIdCallback = std::function<void(fuchsia::ui::composition::ContentId)>;
 
-// This class orchestrates interaction with the Scenic's Flatland compositor on
+// This class orchestrates interaction with the Scenic's compositor on
 // Fuchsia. It ensures that flutter content and platform view content are both
 // rendered correctly in a unified scene.
-class FlatlandExternalViewEmbedder final
-    : public flutter::ExternalViewEmbedder {
+class ExternalViewEmbedder final : public flutter::ExternalViewEmbedder {
  public:
-  constexpr static uint32_t kFlatlandDefaultViewportSize = 32;
+  constexpr static uint32_t kDefaultViewportSize = 32;
 
-  FlatlandExternalViewEmbedder(
+  ExternalViewEmbedder(
       fuchsia::ui::views::ViewCreationToken view_creation_token,
       fuchsia::ui::views::ViewIdentityOnCreation view_identity,
       fuchsia::ui::composition::ViewBoundProtocols endpoints,
@@ -56,7 +54,7 @@ class FlatlandExternalViewEmbedder final
       std::shared_ptr<FlatlandConnection> flatland,
       std::shared_ptr<SurfaceProducer> surface_producer,
       bool intercept_all_input = false);
-  ~FlatlandExternalViewEmbedder();
+  ~ExternalViewEmbedder();
 
   // |ExternalViewEmbedder|
   flutter::DlCanvas* GetRootCanvas() override;
@@ -101,14 +99,14 @@ class FlatlandExternalViewEmbedder final
   // properties for the next |UpdateView| call.
   void CreateView(int64_t view_id,
                   ViewCallback on_view_created,
-                  FlatlandViewCreatedCallback on_view_bound);
-  void DestroyView(int64_t view_id, FlatlandViewIdCallback on_view_unbound);
+                  ViewCreatedCallback on_view_bound);
+  void DestroyView(int64_t view_id, ViewIdCallback on_view_unbound);
   void SetViewProperties(int64_t view_id,
                          const SkRect& occlusion_hint,
                          bool hit_testable,
                          bool focusable);
 
-  // Holds the clip transform that may be applied on a FlatlandView.
+  // Holds the clip transform that may be applied on a View.
   struct ClipTransform {
     fuchsia::ui::composition::TransformId transform_id;
     std::vector<fuchsia::ui::composition::TransformId> children;
@@ -174,7 +172,7 @@ class FlatlandExternalViewEmbedder final
   using EmbedderLayerId = std::optional<uint32_t>;
   constexpr static EmbedderLayerId kRootLayerId = EmbedderLayerId{};
 
-  struct FlatlandView {
+  struct View {
     std::vector<ClipTransform> clip_transforms;
     fuchsia::ui::composition::TransformId transform_id;
     fuchsia::ui::composition::ContentId viewport_id;
@@ -186,7 +184,7 @@ class FlatlandExternalViewEmbedder final
         pending_create_viewport_callback;
   };
 
-  struct FlatlandLayer {
+  struct Layer {
     // Transform on which Images are set.
     fuchsia::ui::composition::TransformId transform_id;
   };
@@ -198,8 +196,8 @@ class FlatlandExternalViewEmbedder final
 
   fuchsia::ui::composition::TransformId root_transform_id_;
 
-  std::unordered_map<int64_t, FlatlandView> flatland_views_;
-  std::vector<FlatlandLayer> flatland_layers_;
+  std::unordered_map<int64_t, View> views_;
+  std::vector<Layer> layers_;
 
   std::unordered_map<EmbedderLayerId, EmbedderLayer> frame_layers_;
   std::vector<EmbedderLayerId> frame_composition_order_;
@@ -212,9 +210,9 @@ class FlatlandExternalViewEmbedder final
   std::optional<fuchsia::ui::composition::TransformId>
       input_interceptor_transform_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(FlatlandExternalViewEmbedder);
+  FML_DISALLOW_COPY_AND_ASSIGN(ExternalViewEmbedder);
 };
 
 }  // namespace flutter_runner
 
-#endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_FLATLAND_EXTERNAL_VIEW_EMBEDDER_H_
+#endif  // FLUTTER_SHELL_PLATFORM_FUCHSIA_FLUTTER_EXTERNAL_VIEW_EMBEDDER_H_

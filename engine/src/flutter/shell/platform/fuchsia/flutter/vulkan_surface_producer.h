@@ -7,8 +7,6 @@
 #include <lib/async/cpp/time.h>
 #include <lib/async/default.h>
 #include <lib/syslog/global.h>
-#include <lib/ui/scenic/cpp/resources.h>
-#include <lib/ui/scenic/cpp/session.h>
 
 #include "flutter/flutter_vma/flutter_skia_vma.h"
 #include "flutter/fml/macros.h"
@@ -28,7 +26,7 @@ namespace flutter_runner {
 class VulkanSurfaceProducer final : public SurfaceProducer,
                                     public vulkan::VulkanProvider {
  public:
-  explicit VulkanSurfaceProducer(scenic::Session* scenic_session);
+  explicit VulkanSurfaceProducer();
   ~VulkanSurfaceProducer() override;
 
   bool IsValid() const { return valid_; }
@@ -55,7 +53,7 @@ class VulkanSurfaceProducer final : public SurfaceProducer,
     return logical_device_->GetHandle();
   }
 
-  bool Initialize(scenic::Session* scenic_session);
+  bool Initialize();
 
   void SubmitSurface(std::unique_ptr<SurfaceProducerSurface> surface);
   bool TransitionSurfacesToExternal(

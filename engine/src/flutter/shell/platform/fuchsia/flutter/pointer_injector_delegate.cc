@@ -107,30 +107,6 @@ bool PointerInjectorDelegate::HandlePlatformMessage(
     return false;
   }
 
-  // For GFX, the viewRef for the view is provided through the platform
-  // message. For flatland, the viewRef is provided through |OnCreateView|.
-  std::optional<fuv_ViewRef> view_ref;
-  if (!is_flatland_) {
-    auto view_ref_arg = args.FindMember("viewRef");
-    if (!view_ref_arg->value.IsUint64()) {
-      FML_LOG(ERROR) << "Argument 'viewRef' is not a uint64";
-      return false;
-    }
-
-    zx_handle_t handle = view_ref_arg->value.GetUint64();
-    zx_handle_t out_handle;
-    zx_status_t status =
-        zx_handle_duplicate(handle, ZX_RIGHT_SAME_RIGHTS, &out_handle);
-    if (status != ZX_OK) {
-      FML_LOG(ERROR) << "Argument 'viewRef' is not valid";
-      return false;
-    }
-    auto ref = fuv_ViewRef({
-        .reference = zx::eventpair(out_handle),
-    });
-    view_ref = std::move(ref);
-  }
-
   auto width = args.FindMember("logicalWidth");
   if (!width->value.IsFloat() && !width->value.IsInt()) {
     FML_LOG(ERROR) << "Argument 'logicalWidth' is not a float";
@@ -155,7 +131,6 @@ bool PointerInjectorDelegate::HandlePlatformMessage(
       .pointer_id = pointer_id->value.GetUint(),
       .phase = static_cast<fup_EventPhase>(phase->value.GetInt()),
       .trace_flow_id = trace_flow_id->value.GetUint64(),
-      .view_ref = std::move(view_ref),
       .logical_size = {width->value.GetFloat(), height->value.GetFloat()},
       .timestamp = timestamp->value.GetInt()};
 
@@ -282,18 +257,11 @@ void PointerInjectorDelegate::PointerInjectorEndpoint::RegisterInjector(
   context.set_view(std::move(context_clone));
   config.set_context(std::move(context));
 
-  FML_CHECK(request.view_ref.has_value() || view_ref_.has_value());
+  FML_CHECK(view_ref_.has_value());
   fup_Target target;
   fuv_ViewRef target_clone;
 
-  // GFX.
-  if (request.view_ref.has_value()) {
-    fidl::Clone(*request.view_ref, &target_clone);
-  }
-  // Flatland.
-  else {
-    fidl::Clone(*view_ref_, &target_clone);
-  }
+  fidl::Clone(*view_ref_, &target_clone);
   target.set_view(std::move(target_clone));
   config.set_target(std::move(target));
 

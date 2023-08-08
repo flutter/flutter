@@ -284,7 +284,8 @@ class PlatformViewBuilder {
     return *this;
   }
 
-  PlatformViewBuilder& SetEnableWireframeCallback(OnEnableWireframe callback) {
+  PlatformViewBuilder& SetEnableWireframeCallback(
+      OnEnableWireframeCallback callback) {
     wireframe_enabled_callback_ = std::move(callback);
     return *this;
   }
@@ -309,7 +310,8 @@ class PlatformViewBuilder {
     return *this;
   }
 
-  PlatformViewBuilder& SetShaderWarmupCallback(OnShaderWarmup callback) {
+  PlatformViewBuilder& SetShaderWarmupCallback(
+      OnShaderWarmupCallback callback) {
     on_shader_warmup_callback_ = std::move(callback);
     return *this;
   }
@@ -356,14 +358,12 @@ class PlatformViewBuilder {
   fidl::InterfaceRequest<fuchsia::ui::scenic::SessionListener>
       session_listener_request_;
   fit::closure on_session_listener_error_callback_;
-  OnEnableWireframe wireframe_enabled_callback_;
-  OnCreateGfxView on_create_view_callback_;
-  OnUpdateView on_update_view_callback_;
-  OnDestroyGfxView on_destroy_view_callback_;
-  OnCreateSurface on_create_surface_callback_;
-  OnSemanticsNodeUpdate on_semantics_node_update_callback_;
-  OnRequestAnnounce on_request_announce_callback_;
-  OnShaderWarmup on_shader_warmup_callback_;
+  OnEnableWireframeCallback wireframe_enabled_callback_;
+  OnUpdateViewCallback on_update_view_callback_;
+  OnCreateSurfaceCallback on_create_surface_callback_;
+  OnSemanticsNodeUpdateCallback on_semantics_node_update_callback_;
+  OnRequestAnnounceCallback on_request_announce_callback_;
+  OnShaderWarmupCallback on_shader_warmup_callback_;
 
   bool built_{false};
 };
@@ -1330,7 +1330,7 @@ TEST_F(PlatformViewTests, OnShaderWarmup) {
   uint64_t height = 100;
   std::vector<std::string> shaders = {"foo.skp", "bar.skp", "baz.skp"};
 
-  OnShaderWarmup on_shader_warmup =
+  OnShaderWarmupCallback on_shader_warmup_callback =
       [&](const std::vector<std::string>& shaders_in,
           std::function<void(uint32_t)> completion_callback, uint64_t width_in,
           uint64_t height_in) {
@@ -1346,7 +1346,7 @@ TEST_F(PlatformViewTests, OnShaderWarmup) {
 
   flutter_runner::GfxPlatformView platform_view =
       PlatformViewBuilder(delegate, std::move(task_runners))
-          .SetShaderWarmupCallback(on_shader_warmup)
+          .SetShaderWarmupCallback(on_shader_warmup_callback)
           .Build();
 
   std::ostringstream shaders_array_ostream;
