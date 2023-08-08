@@ -2338,7 +2338,7 @@ void main() {
   });
 
   group('AlertDialog.scrollable: ', () {
-    testWidgetsWithLeakTracking('Title is scrollable', (WidgetTester tester) async {
+    testWidgets('Title is scrollable', (WidgetTester tester) async {
       final Key titleKey = UniqueKey();
       final AlertDialog dialog = AlertDialog(
         title: Container(

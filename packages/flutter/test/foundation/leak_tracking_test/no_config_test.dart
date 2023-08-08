@@ -14,6 +14,8 @@ const String _test1TrackingOn = 'test1, tracking-on';
 const String _test2TrackingOffLeaks = 'test2, tracking-off';
 const String _test3TrackingOn = 'test3, tracking-on';
 
+bool get _isTrackingOn => !LeakTracking.phase.isPaused && LeakTracking.isStarted;
+
 /// Tests with default leak tracking configuration.
 ///
 /// This set of tests verifies that if `testWidgetsWithLeakTracking` is used at least once,
@@ -22,19 +24,19 @@ void main() {
   group('groups are handled', () {
     testWidgets(_test0TrackingOffLeaks, (WidgetTester widgetTester) async {
       // Flutter test engine may change test order.
-      expect(LeakTracking.phase.isPaused || !LeakTracking.isStarted, true);
+      expect(_isTrackingOn, false);
       expect(LeakTracking.phase.name, null);
       await widgetTester.pumpWidget(StatelessLeakingWidget());
     });
 
     testWidgetsWithLeakTracking(_test1TrackingOn, (WidgetTester widgetTester) async {
-      expect(LeakTracking.isStarted, true);
+      expect(_isTrackingOn, true);
       expect(LeakTracking.phase.name, _test1TrackingOn);
       expect(LeakTracking.phase.isPaused, false);
     });
 
     testWidgets(_test2TrackingOffLeaks, (WidgetTester widgetTester) async {
-      expect(LeakTracking.isStarted, true);
+      expect(_isTrackingOn, false);
       expect(LeakTracking.phase.isPaused, true);
       await widgetTester.pumpWidget(StatelessLeakingWidget());
     });
@@ -42,7 +44,7 @@ void main() {
   skip: kIsWeb); // [intended] Leak tracking is off for web.
 
   testWidgetsWithLeakTracking(_test3TrackingOn, (WidgetTester widgetTester) async {
-    expect(LeakTracking.isStarted, true);
+    expect(_isTrackingOn, true);
     expect(LeakTracking.phase.name, _test3TrackingOn);
     expect(LeakTracking.phase.isPaused, false);
 

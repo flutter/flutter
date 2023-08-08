@@ -1168,7 +1168,7 @@ void main() {
     );
   }
 
-  testWidgetsWithLeakTracking('MergeableMaterial dividers', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial dividers', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),

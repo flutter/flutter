@@ -15,11 +15,13 @@ const String test2TrackingOffLeaks = 'test2, tracking-off, leaks';
 const String test3TrackingOnLeaks = 'test3, tracking-on, leaks';
 const String test4TrackingOnWithStackTrace = 'test4, tracking-on, with stack trace';
 
+bool get _isTrackingOn => !LeakTracking.phase.isPaused && LeakTracking.isStarted;
+
 /// For these tests `expect` for found leaks happens in flutter_test_config.dart.
 void main() {
   group('group', () {
     testWidgetsWithLeakTracking(test1TrackingOnNoLeaks, (WidgetTester widgetTester) async {
-      expect(LeakTracking.isStarted, true);
+      expect(_isTrackingOn, true);
       expect(LeakTracking.phase.name, test1TrackingOnNoLeaks);
       expect(LeakTracking.phase.isPaused, false);
       await widgetTester.pumpWidget(Container());
@@ -27,15 +29,14 @@ void main() {
 
     testWidgets(test2TrackingOffLeaks, (WidgetTester widgetTester) async {
       expect(LeakTracking.phase.name, null);
-      // Flutter test engine may change test order.
-      expect(LeakTracking.phase.isPaused || !LeakTracking.isStarted, true);
+      expect(_isTrackingOn, false);
       await widgetTester.pumpWidget(StatelessLeakingWidget());
     });
   },
   skip: kIsWeb); // [intended] Leak tracking is off for web.
 
   testWidgetsWithLeakTracking(test3TrackingOnLeaks, (WidgetTester widgetTester) async {
-    expect(LeakTracking.isStarted, true);
+    expect(_isTrackingOn, true);
     expect(LeakTracking.phase.name, test3TrackingOnLeaks);
     expect(LeakTracking.phase.isPaused, false);
     await widgetTester.pumpWidget(StatelessLeakingWidget());
@@ -45,9 +46,8 @@ void main() {
   testWidgetsWithLeakTracking(
     test4TrackingOnWithStackTrace,
     (WidgetTester widgetTester) async {
-      expect(LeakTracking.isStarted, true);
+      expect(_isTrackingOn, true);
       expect(LeakTracking.phase.name, test4TrackingOnWithStackTrace);
-      expect(LeakTracking.phase.isPaused, false);
       await widgetTester.pumpWidget(StatelessLeakingWidget());
     },
     leakTrackingTestConfig: const LeakTrackingTestConfig(
