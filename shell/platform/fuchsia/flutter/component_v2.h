@@ -111,11 +111,6 @@ class ComponentV2 final
   void Stop() override;
 
   // |fuchsia::ui::app::ViewProvider|
-  void CreateViewWithViewRef(zx::eventpair view_token,
-                             fuchsia::ui::views::ViewRefControl control_ref,
-                             fuchsia::ui::views::ViewRef view_ref) override;
-
-  // |fuchsia::ui::app::ViewProvider|
   void CreateView2(fuchsia::ui::app::CreateView2Args view_args) override;
 
   // |flutter::Engine::Delegate|

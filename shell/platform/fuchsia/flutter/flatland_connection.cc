@@ -91,7 +91,7 @@ void FlatlandConnection::AwaitVsync(FireCallbackCallback callback) {
 
   // Immediately fire callbacks until the first Present. We might receive
   // multiple requests for AwaitVsync() until the first Present, which relies on
-  // receiving size on FlatlandPlatformView::OnGetLayout() at an uncertain time.
+  // receiving size on PlatformView::OnGetLayout() at an uncertain time.
   if (!threadsafe_state_.first_present_called_) {
     callback(now, now + kDefaultFlatlandPresentationInterval);
     return;
