@@ -46,19 +46,27 @@ const String ndkVersion = '23.1.7779620';
 
 // Update these when new major versions of Java are supported by android.
 // Supported means Java <-> Gradle support.
-const String oneMajorVersionHigherJavaVersion = '20'; //TODO(camsim99): check if 20 is supported; if so, change to 21
+const String oneMajorVersionHigherJavaVersion = '21';
 
 // Update this when new versions of Gradle come out including minor versions
 //
 // Supported here means supported by the tooling for
 // flutter analyze --suggestions and does not imply broader flutter support.
-const String _maxKnownAndSupportedGradleVersion = '8.0.2'; //TODO(camsim99): Check if 8.1.* supported and update this and maxKnownAgpVersion if so.
+const String _maxKnownAndSupportedGradleVersion = '8.2.1';
+
 // Update this when new versions of AGP come out.
+//
+// Supported here means supported by the tooling for
+// flutter analyze --suggestions and does not imply broader flutter support.
 @visibleForTesting
 const String maxKnownAndSupportedAgpVersion = '8.0';
-  const String oldestDocumentedJavaAgpCompatibility = '4.2'; // TODO(camsim99): Use this and make a constant + document as oldest documented
 
-const String maxKnownAgpVersion = '8.2';
+// Update this when new versions of AGP come out.
+const String maxKnownAgpVersion = '8.2.0';
+
+// Oldest documented version of AGP that has a listed minimum
+// compatible Java version.
+const String oldestDocumentedJavaAgpCompatibility = '4.2';
 
 // Expected content:
 // "classpath 'com.android.tools.build:gradle:7.3.0'"
@@ -589,26 +597,41 @@ bool validateJavaGradle(Logger logger,
   return false;
 }
 
-//TODO(camsim99): Add doc
+// Validate that the specified Java and Gradle version are compatible with
+// each other.
+//
+// Source of truth are the AGP release notes:
+// https://developer.android.com/build/releases/gradle-plugin
 bool validateJavaAgp(Logger logger,
     {required String? javaV, required String? agpV}) {
-
+  String minimumKnownCompatibleJavaVersion = '17';
   if (javaV == null || agpV == null) {
     logger.printTrace(
         'Java version or AGP version unknown ($javaV, $agpV).');
     return false;
   }
 
+  // Check if AGP version is too old to perform validation.
   if (isWithinVersionRange(agpV,
       min: '1.0', max: oldestDocumentedJavaAgpCompatibility, inclusiveMax: false)) {
-    logger.printTrace('Gradle Version: $agpV is too old to determine Java compatibility.'); //TODO(camsim99): MAke sure
+    logger.printTrace('AGP Version: $agpV is too old to determine Java compatibility.');
     return false;
+  }
+
+  if (isWithinVersionRange(agpV,
+        min: maxKnownAgpVersion, max: '100.100')) {
+      logger.printTrace('AGP Version: $agpV is too new to determine Java compatibility.');
+  }
+
+  if (isWithinVersionRange(javaV,
+      min: minimumKnownCompatibleJavaVersion, max: '100.100')) {
+      return true;
   }
 
   // Begin known Java <-> AGP evaluation.
   final List<JavaAgpCompat> compatList = <JavaAgpCompat>[
     JavaAgpCompat(
-      javaMin: '17',
+      javaMin: minimumKnownCompatibleJavaVersion,
       javaDefault: '17',
       agpMin: '8.0',
       agpMax: maxKnownAgpVersion,
@@ -620,7 +643,10 @@ bool validateJavaAgp(Logger logger,
       agpMax: '7.4',
     ),
     JavaAgpCompat(
-      javaMin: '1.7',
+      // You may use JDK 1.7 but we treat 1.8 as the default since it is used by
+      // default for this AGP version.
+      // make this null ??
+      javaMin: '1.8',
       javaDefault: '1.8',
       agpMin: '4.2',
       agpMax: '4.2',
@@ -628,8 +654,8 @@ bool validateJavaAgp(Logger logger,
   ];
 
   for (final JavaAgpCompat data in compatList) {
-    if (isWithinVersionRange(javaV, min: data.javaMin, max: '20')) {//TODO(camsim99): make isWithinVersionRange have optional max
-      return isWithinVersionRange(agpV, min: data.agpMin, max: data.agpMax);
+    if (isWithinVersionRange(agpV, min: data.agpMin, max: data.agpMax)) {
+      return isWithinVersionRange(javaV, min: data.javaMin, max: '100.100');
     }
   }
 

@@ -656,54 +656,51 @@ allprojects {
 
 
   group('validates java/AGP versions', () {
-    //TODO(camsim99): Add patch versions for testing.
     final List<JavaAgpTestData> testData = <JavaAgpTestData>[
-      // strictly too old cases
+      // Strictly too old cases -- Java
       JavaAgpTestData(false, javaVersion: '1.6', agpVersion: maxKnownAgpVersion),
       JavaAgpTestData(false, javaVersion: '1.6', agpVersion: maxKnownAndSupportedAgpVersion),
       JavaAgpTestData(false, javaVersion: '1.6', agpVersion: '4.1'),
-      // strictly too new cases
-      // If you're running java 19, first supported gradle is 7.6. first AGP version to support 7.6 or higher is agp 8.0 which has min gradle version 8
+      // Strictly too old cases -- AGP
+      JavaAgpTestData(false, javaVersion: '1.8', agpVersion: '1.0'),
+      JavaAgpTestData(false, javaVersion: '1.8', agpVersion: '4.1'),
+      JavaAgpTestData(false, javaVersion: '1.8', agpVersion: '2.3'),
+      // Strictly too new cases -- Java
       JavaAgpTestData(true, javaVersion: '19', agpVersion: '8.0'),
-      // todo: (new = newer than we know about) new java versions should be okay, new agp versions should fail because we can't validate
-
       JavaAgpTestData(true, javaVersion: '20', agpVersion: '7.4'),
-
-
-      JavaAgpTestData(true, javaVersion: '17', agpVersion: maxKnownAgpVersion),
-      // java 17 compatibility cases
+      // Strictly too new cases -- AGP
+      JavaAgpTestData(true, javaVersion: '17', agpVersion: '8.2'),
+      JavaAgpTestData(true, javaVersion: '17', agpVersion: '8.1'),
+      // Java 17 & patch versions compatibility cases
       JavaAgpTestData(true, javaVersion: '17', agpVersion: '8.0'),
       JavaAgpTestData(true, javaVersion: '17', agpVersion: maxKnownAndSupportedAgpVersion),
       JavaAgpTestData(true, javaVersion: '17', agpVersion: '8.1'),
-      JavaAgpTestData(false, javaVersion: '17', agpVersion: '7.4'),
+      JavaAgpTestData(true, javaVersion: '17', agpVersion: '7.4'),
       JavaAgpTestData(true, javaVersion: '17.0.3', agpVersion: '8.0'),
       JavaAgpTestData(true, javaVersion: '17.0.3', agpVersion: maxKnownAndSupportedAgpVersion),
       JavaAgpTestData(true, javaVersion: '17.0.3', agpVersion: '8.1'),
-      JavaAgpTestData(false, javaVersion: '17.0.3', agpVersion: '7.4'),
-      // java 11
+      JavaAgpTestData(true, javaVersion: '17.0.3', agpVersion: '7.4'),
+      // Java 11 & patch versions compatibility cases
       JavaAgpTestData(true, javaVersion: '11', agpVersion: '7.0'),
       JavaAgpTestData(true, javaVersion: '11', agpVersion: '7.4'),
       JavaAgpTestData(true, javaVersion: '11', agpVersion: '7.2'),
-      JavaAgpTestData(false, javaVersion: '11', agpVersion: '4.2'),
+      JavaAgpTestData(true, javaVersion: '11', agpVersion: '4.2'),
       JavaAgpTestData(false, javaVersion: '11', agpVersion: '8.0'),
       JavaAgpTestData(true, javaVersion: '11.0.18', agpVersion: '7.0'),
       JavaAgpTestData(true, javaVersion: '11.0.18', agpVersion: '7.4'),
       JavaAgpTestData(true, javaVersion: '11.0.18', agpVersion: '7.2'),
-      JavaAgpTestData(false, javaVersion: '11.0.18', agpVersion: '4.2'),
+      JavaAgpTestData(true, javaVersion: '11.0.18', agpVersion: '4.2'),
       JavaAgpTestData(false, javaVersion: '11.0.18', agpVersion: '8.0'),
-      // java 8
+      // Java 8 compatibility cases
       JavaAgpTestData(true, javaVersion: '1.8', agpVersion: '4.2'),
       // If we remove support for AGP version 4.2, bump the minimum Java version to 11.
       JavaAgpTestData(true, javaVersion: '1.8', agpVersion: oldestDocumentedJavaAgpCompatibility),
       JavaAgpTestData(false, javaVersion: '1.8', agpVersion: '4.1'),
       JavaAgpTestData(false, javaVersion: '1.8', agpVersion: '7.0'),
-      // null value cases
+      // Null value cases
       JavaAgpTestData(false, javaVersion: null, agpVersion: '4.2'),
       JavaAgpTestData(false, javaVersion: '1.8', agpVersion: null),
       JavaAgpTestData(false, javaVersion: null, agpVersion: null),
-
-
-      // java 7 --> if using below java 7 and agp below 4.2 we can't validate, if using below java 7 and agp 4.2, we expect false
     ];
 
       for (final JavaAgpTestData data in testData) {
