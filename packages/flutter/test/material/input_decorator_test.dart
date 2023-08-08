@@ -389,9 +389,8 @@ void runAllTests({ required bool useMaterial3 }) {
       expect(tester.getTopLeft(find.text('label')).dy, tester.getTopLeft(find.text('hint')).dy);
       expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
     }
-  //});
-//
-  //testWidgets('InputDecorator input/label text layout with floatingLabelGap: appears above input text', (WidgetTester tester) async {
+
+    //InputDecorator input/label text layout with floatingLabelGap: appears above input text
     // The label appears above the input text.
     await tester.pumpWidget(
       buildInputDecorator(
@@ -420,9 +419,8 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 1.0);
-  //});
-//
-  //testWidgets('InputDecorator input/label text layout with floatingLabelGap: appears within the input when there is no text content', (WidgetTester tester) async {
+
+    //InputDecorator input/label text layout with floatingLabelGap: appears within the input when there is no text content
     // The label appears within the input when there is no text content.
     await tester.pumpWidget(
       buildInputDecorator(
@@ -438,9 +436,8 @@ void runAllTests({ required bool useMaterial3 }) {
     await tester.pumpAndSettle();
 
     expect(tester.getTopLeft(find.text('label')).dy, 20.0);
-  //});
-//
-  //testWidgets('InputDecorator input/label text layout with floatingLabelGap: floatingLabelBehavior - always', (WidgetTester tester) async {
+
+    //InputDecorator input/label text layout with floatingLabelGap: floatingLabelBehavior - always
     // The label appears above the input text when there is no content and floatingLabelBehavior is FloatingLabelBehavior.always.
     await tester.pumpWidget(
       buildInputDecorator(
@@ -457,9 +454,8 @@ void runAllTests({ required bool useMaterial3 }) {
     await tester.pumpAndSettle();
 
     expect(tester.getTopLeft(find.text('label')).dy, 12.0);
-  //});
-//
-  //testWidgets('InputDecorator input/label text layout with floatingLabelGap: floatingLabelBehavior - never', (WidgetTester tester) async {
+
+    //InputDecorator input/label text layout with floatingLabelGap: floatingLabelBehavior - never
     // The label appears within the input text when there is content and floatingLabelBehavior is FloatingLabelBehavior.never.
     await tester.pumpWidget(
       buildInputDecorator(
@@ -508,9 +504,8 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 2.0);
-  //});
-//
-  //testWidgets('InputDecorator input/label text layout with floatingLabelGap: isEmpty - true causes the label to be aligned with the input text', (WidgetTester tester) async {
+
+    //InputDecorator input/label text layout with floatingLabelGap: isEmpty - true causes the label to be aligned with the input text
     // isEmpty: true causes the label to be aligned with the input text.
     await tester.pumpWidget(
       buildInputDecorator(
@@ -541,9 +536,8 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 1.0);
-  //});
-//
-  //testWidgets('InputDecorator input/label text layout with floatingLabelGap: isFocused - true causes the label to move back up above the input text', (WidgetTester tester) async {
+
+    //InputDecorator input/label text layout with floatingLabelGap: isFocused - true causes the label to move back up above the input text
     // isFocused: true causes the label to move back up above the input text.
     await tester.pumpWidget(
       buildInputDecorator(
@@ -574,9 +568,8 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 2.0);
-  //});
-//
-  //testWidgets('InputDecorator input/label text layout with floatingLabelGap: enabled - false produces a hairline border', (WidgetTester tester) async {
+
+    //InputDecorator input/label text layout with floatingLabelGap: enabled - false produces a hairline border
     // enabled: false produces a hairline border if filled: false (the default)
     // The widget's size and layout is the same as for enabled: true.
     await tester.pumpWidget(
@@ -597,9 +590,8 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(tester.getTopLeft(find.text('label')).dy, 20.0);
     expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
     expect(getBorderWeight(tester), useMaterial3 ? 1.0 : 0.0);
-  //});
-//
-  //testWidgets('InputDecorator input/label text layout with floatingLabelGap: enabled - false produces a transparent border', (WidgetTester tester) async {
+
+    //InputDecorator input/label text layout with floatingLabelGap: enabled - false produces a transparent border
     // enabled: false produces a transparent border if filled: true.
     // The widget's size and layout is the same as for enabled: true.
     await tester.pumpWidget(
@@ -622,9 +614,8 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
     final ThemeData theme = ThemeData.from(colorScheme: const ColorScheme.light());
     expect(getBorderColor(tester), useMaterial3 ? theme.colorScheme.onSurface.withOpacity(0.38) : Colors.transparent);
-  //});
-//
-  //testWidgets('InputDecorator input/label text layout with floatingLabelGap: alignLabelWithHint - true positions the label at the text baseline', (WidgetTester tester) async {
+
+    //InputDecorator input/label text layout with floatingLabelGap: alignLabelWithHint - true positions the label at the text baseline
     // alignLabelWithHint: true positions the label at the text baseline,
     // aligned with the hint.
     await tester.pumpWidget(
