@@ -755,8 +755,12 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   }
 
   void _dragEnd(_DragInfo item) {
+
     setState(() {
       if (_insertIndex == item.index) {
+        if(_insertIndex! + 1 == _items.length){
+          return;
+        }
         _finalDropPosition = _itemOffsetAt(_insertIndex! + (_reverse ? 1 : 0));
       } else if (_insertIndex! < widget.itemCount - 1) {
         // Find the location of the item we want to insert before
