@@ -45,6 +45,8 @@ class SweepGradientContents final : public ColorSourceContents {
 
   void SetTileMode(Entity::TileMode tile_mode);
 
+  void SetDither(bool dither);
+
   const std::vector<Color>& GetColors() const;
 
   const std::vector<Scalar>& GetStops() const;
@@ -65,6 +67,7 @@ class SweepGradientContents final : public ColorSourceContents {
   std::vector<Scalar> stops_;
   Entity::TileMode tile_mode_;
   Color decal_border_color_ = Color::BlackTransparent();
+  bool dither_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(SweepGradientContents);
 };
