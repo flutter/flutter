@@ -758,6 +758,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
 
     setState(() {
       if (_insertIndex == item.index) {
+        //No changes required if last child is being inserted into the last position
         if(_insertIndex! + 1 == _items.length){
           return;
         }
