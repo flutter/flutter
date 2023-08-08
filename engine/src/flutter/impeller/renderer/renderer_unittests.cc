@@ -270,7 +270,7 @@ TEST_P(RendererTest, CanRenderMultiplePrimitives) {
                        Matrix::MakeTranslation({i * 50.0f, j * 50.0f, 0.0f});
         VS::BindUniformBuffer(
             cmd, pass.GetTransientsBuffer().EmplaceUniform(uniforms));
-        if (!pass.AddCommand(cmd)) {
+        if (!pass.AddCommand(std::move(cmd))) {
           return false;
         }
       }
@@ -445,7 +445,7 @@ TEST_P(RendererTest, CanRenderInstanced) {
     cmd.BindVertices(builder.CreateVertexBuffer(pass.GetTransientsBuffer()));
 
     cmd.instance_count = kInstancesCount;
-    pass.AddCommand(cmd);
+    pass.AddCommand(std::move(cmd));
     return true;
   }));
 }
@@ -863,7 +863,7 @@ TEST_P(RendererTest, TheImpeller) {
     FS::BindBlueNoise(cmd, blue_noise, noise_sampler);
     FS::BindCubeMap(cmd, cube_map, cube_map_sampler);
 
-    pass.AddCommand(cmd);
+    pass.AddCommand(std::move(cmd));
     return true;
   };
   OpenPlaygroundHere(callback);
@@ -919,7 +919,7 @@ TEST_P(RendererTest, ArrayUniforms) {
     FS::BindFragInfo(cmd,
                      pass.GetTransientsBuffer().EmplaceUniform(fs_uniform));
 
-    pass.AddCommand(cmd);
+    pass.AddCommand(std::move(cmd));
     return true;
   };
   OpenPlaygroundHere(callback);
@@ -964,7 +964,7 @@ TEST_P(RendererTest, InactiveUniforms) {
     FS::BindFragInfo(cmd,
                      pass.GetTransientsBuffer().EmplaceUniform(fs_uniform));
 
-    pass.AddCommand(cmd);
+    pass.AddCommand(std::move(cmd));
     return true;
   };
   OpenPlaygroundHere(callback);

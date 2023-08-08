@@ -47,7 +47,7 @@ class RenderPass {
   ///
   /// @return     If the command was valid for subsequent commitment.
   ///
-  bool AddCommand(Command command);
+  bool AddCommand(Command&& command);
 
   //----------------------------------------------------------------------------
   /// @brief      Encode the recorded commands to the underlying command buffer.

@@ -107,7 +107,7 @@ bool ClipContents::Render(const ContentContext& renderer,
 
       options.primitive_type = PrimitiveType::kTriangleStrip;
       cmd.pipeline = renderer.GetClipPipeline(options);
-      pass.AddCommand(cmd);
+      pass.AddCommand(Command(cmd));
     }
 
     {

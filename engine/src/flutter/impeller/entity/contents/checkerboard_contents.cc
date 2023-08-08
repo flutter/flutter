@@ -49,7 +49,7 @@ bool CheckerboardContents::Render(const ContentContext& renderer,
   frag_info.square_size = square_size_;
   FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
 
-  pass.AddCommand(cmd);
+  pass.AddCommand(std::move(cmd));
 
   return true;
 }
