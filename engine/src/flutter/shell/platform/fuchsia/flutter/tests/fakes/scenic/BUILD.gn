@@ -12,18 +12,12 @@ source_set("scenic") {
     "fake_flatland.h",
     "fake_flatland_types.cc",
     "fake_flatland_types.h",
-    "fake_resources.cc",
-    "fake_resources.h",
-    "fake_session.cc",
-    "fake_session.h",
   ]
 
   public_deps = [
     "//build/fuchsia/fidl:fuchsia.images",
     "//build/fuchsia/fidl:fuchsia.scenic.scheduling",
     "//build/fuchsia/fidl:fuchsia.ui.composition",
-    "//build/fuchsia/fidl:fuchsia.ui.gfx",
-    "//build/fuchsia/fidl:fuchsia.ui.scenic",
     "//build/fuchsia/fidl:fuchsia.ui.views",
     "//build/fuchsia/pkg:async-cpp",
     "//build/fuchsia/pkg:async-testing",

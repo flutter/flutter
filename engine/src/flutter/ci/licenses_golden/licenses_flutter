@@ -2935,14 +2935,12 @@ ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/component_v2.cc + ../../
 ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/component_v2.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/engine.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/engine.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/external_view_embedder.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/external_view_embedder.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/file_in_namespace_buffer.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/file_in_namespace_buffer.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/flatland_connection.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/flatland_connection.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/flatland_external_view_embedder.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/flatland_external_view_embedder.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/flatland_platform_view.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/flatland_platform_view.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/flutter_runner_fakes.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/flutter_runner_product_configuration.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/flutter_runner_product_configuration.h + ../../../flutter/LICENSE
@@ -5676,14 +5674,12 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/component_v2.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/component_v2.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/engine.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/engine.h
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/external_view_embedder.cc
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/external_view_embedder.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/file_in_namespace_buffer.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/file_in_namespace_buffer.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/flatland_connection.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/flatland_connection.h
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/flatland_external_view_embedder.cc
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/flatland_external_view_embedder.h
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/flatland_platform_view.cc
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/flatland_platform_view.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/flutter_runner_fakes.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/flutter_runner_product_configuration.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/flutter_runner_product_configuration.h

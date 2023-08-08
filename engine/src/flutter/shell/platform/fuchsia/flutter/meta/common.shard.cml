@@ -47,7 +47,6 @@
                 "fuchsia.ui.input.ImeService",
                 "fuchsia.ui.input3.Keyboard",
                 "fuchsia.ui.pointerinjector.Registry",
-                "fuchsia.ui.scenic.Scenic",
                 "fuchsia.vulkan.loader.Loader", // Copied from vulkan/client.shard.cml.
             ],
         },

@@ -47,9 +47,7 @@ zx_koid_t GetCurrentProcessId() {
 
 }  // namespace
 
-SoftwareSurfaceProducer::SoftwareSurfaceProducer(
-    scenic::Session* scenic_session)
-    : scenic_session_(scenic_session) {
+SoftwareSurfaceProducer::SoftwareSurfaceProducer() {
   zx_status_t status = fdio_service_connect(
       "/svc/fuchsia.sysmem.Allocator",
       sysmem_allocator_.NewRequest().TakeChannel().release());
@@ -57,12 +55,10 @@ SoftwareSurfaceProducer::SoftwareSurfaceProducer(
                                         GetCurrentProcessId());
   FML_DCHECK(status == ZX_OK);
 
-  if (!scenic_session_) {
-    status = fdio_service_connect(
-        "/svc/fuchsia.ui.composition.Allocator",
-        flatland_allocator_.NewRequest().TakeChannel().release());
-    FML_DCHECK(status == ZX_OK);
-  }
+  status = fdio_service_connect(
+      "/svc/fuchsia.ui.composition.Allocator",
+      flatland_allocator_.NewRequest().TakeChannel().release());
+  FML_DCHECK(status == ZX_OK);
 
   valid_ = true;
 }
@@ -152,8 +148,8 @@ std::unique_ptr<SoftwareSurface> SoftwareSurfaceProducer::CreateSurface(
     const SkISize& size) {
   TRACE_EVENT2("flutter", "SoftwareSurfacePool::CreateSurface", "width",
                size.width(), "height", size.height());
-  auto surface = std::make_unique<SoftwareSurface>(
-      sysmem_allocator_, flatland_allocator_, scenic_session_, size);
+  auto surface = std::make_unique<SoftwareSurface>(sysmem_allocator_,
+                                                   flatland_allocator_, size);
   if (!surface->IsValid()) {
     FML_LOG(ERROR) << "Created surface is invalid.";
     return nullptr;

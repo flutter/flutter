@@ -627,36 +627,6 @@ void ComponentV2::OnEngineTerminate(const Engine* shell_holder) {
   }
 }
 
-void ComponentV2::CreateViewWithViewRef(
-    zx::eventpair view_token,
-    fuchsia::ui::views::ViewRefControl control_ref,
-    fuchsia::ui::views::ViewRef view_ref) {
-  if (!svc_) {
-    FML_LOG(ERROR)
-        << "Component incoming services was invalid when attempting to "
-           "create a shell for a view provider request.";
-    return;
-  }
-
-  shell_holders_.emplace(std::make_unique<Engine>(
-      *this,                      // delegate
-      debug_label_,               // thread label
-      svc_,                       // Component incoming services
-      runner_incoming_services_,  // Runner incoming services
-      settings_,                  // settings
-      scenic::ToViewToken(std::move(view_token)),  // view token
-      scenic::ViewRefPair{
-          .control_ref = std::move(control_ref),
-          .view_ref = std::move(view_ref),
-      },
-      std::move(fdio_ns_),            // FDIO namespace
-      std::move(directory_request_),  // outgoing request
-      product_config_,                // product configuration
-      std::vector<std::string>(),     // dart entrypoint args
-      false                           // not a v1 component
-      ));
-}
-
 void ComponentV2::CreateView2(fuchsia::ui::app::CreateView2Args view_args) {
   if (!svc_) {
     FML_LOG(ERROR)

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flatland_external_view_embedder.h"
+#include "external_view_embedder.h"
 #include <algorithm>
 #include <cstdint>
 
@@ -17,7 +17,7 @@ namespace {
 
 void AttachClipTransformChild(
     FlatlandConnection* flatland,
-    FlatlandExternalViewEmbedder::ClipTransform* parent_clip_transform,
+    ExternalViewEmbedder::ClipTransform* parent_clip_transform,
     const fuchsia::ui::composition::TransformId& child_transform_id) {
   flatland->flatland()->AddChild(parent_clip_transform->transform_id,
                                  child_transform_id);
@@ -26,7 +26,7 @@ void AttachClipTransformChild(
 
 void DetachClipTransformChildren(
     FlatlandConnection* flatland,
-    FlatlandExternalViewEmbedder::ClipTransform* clip_transform) {
+    ExternalViewEmbedder::ClipTransform* clip_transform) {
   for (auto& child : clip_transform->children) {
     flatland->flatland()->RemoveChild(clip_transform->transform_id, child);
   }
@@ -35,7 +35,7 @@ void DetachClipTransformChildren(
 
 }  // namespace
 
-FlatlandExternalViewEmbedder::FlatlandExternalViewEmbedder(
+ExternalViewEmbedder::ExternalViewEmbedder(
     fuchsia::ui::views::ViewCreationToken view_creation_token,
     fuchsia::ui::views::ViewIdentityOnCreation view_identity,
     fuchsia::ui::composition::ViewBoundProtocols view_protocols,
@@ -66,9 +66,9 @@ FlatlandExternalViewEmbedder::FlatlandExternalViewEmbedder(
   }
 }
 
-FlatlandExternalViewEmbedder::~FlatlandExternalViewEmbedder() = default;
+ExternalViewEmbedder::~ExternalViewEmbedder() = default;
 
-flutter::DlCanvas* FlatlandExternalViewEmbedder::GetRootCanvas() {
+flutter::DlCanvas* ExternalViewEmbedder::GetRootCanvas() {
   auto found = frame_layers_.find(kRootLayerId);
   if (found == frame_layers_.end()) {
     FML_LOG(WARNING)
@@ -81,7 +81,7 @@ flutter::DlCanvas* FlatlandExternalViewEmbedder::GetRootCanvas() {
   return found->second.canvas_spy->GetSpyingCanvas();
 }
 
-void FlatlandExternalViewEmbedder::PrerollCompositeEmbeddedView(
+void ExternalViewEmbedder::PrerollCompositeEmbeddedView(
     int64_t view_id,
     std::unique_ptr<flutter::EmbeddedViewParams> params) {
   zx_handle_t handle = static_cast<zx_handle_t>(view_id);
@@ -93,7 +93,7 @@ void FlatlandExternalViewEmbedder::PrerollCompositeEmbeddedView(
   frame_composition_order_.push_back(handle);
 }
 
-flutter::DlCanvas* FlatlandExternalViewEmbedder::CompositeEmbeddedView(
+flutter::DlCanvas* ExternalViewEmbedder::CompositeEmbeddedView(
     int64_t view_id) {
   zx_handle_t handle = static_cast<zx_handle_t>(view_id);
   auto found = frame_layers_.find(handle);
@@ -102,17 +102,17 @@ flutter::DlCanvas* FlatlandExternalViewEmbedder::CompositeEmbeddedView(
   return found->second.canvas_spy->GetSpyingCanvas();
 }
 
-flutter::PostPrerollResult FlatlandExternalViewEmbedder::PostPrerollAction(
+flutter::PostPrerollResult ExternalViewEmbedder::PostPrerollAction(
     fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
   return flutter::PostPrerollResult::kSuccess;
 }
 
-void FlatlandExternalViewEmbedder::BeginFrame(
+void ExternalViewEmbedder::BeginFrame(
     SkISize frame_size,
     GrDirectContext* context,
     double device_pixel_ratio,
     fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
-  TRACE_EVENT0("flutter", "FlatlandExternalViewEmbedder::BeginFrame");
+  TRACE_EVENT0("flutter", "ExternalViewEmbedder::BeginFrame");
 
   // Reset for new frame.
   Reset();
@@ -126,17 +126,17 @@ void FlatlandExternalViewEmbedder::BeginFrame(
   frame_composition_order_.push_back(kRootLayerId);
 }
 
-void FlatlandExternalViewEmbedder::EndFrame(
+void ExternalViewEmbedder::EndFrame(
     bool should_resubmit_frame,
     fml::RefPtr<fml::RasterThreadMerger> raster_thread_merger) {
-  TRACE_EVENT0("flutter", "FlatlandExternalViewEmbedder::EndFrame");
+  TRACE_EVENT0("flutter", "ExternalViewEmbedder::EndFrame");
 }
 
-void FlatlandExternalViewEmbedder::SubmitFrame(
+void ExternalViewEmbedder::SubmitFrame(
     GrDirectContext* context,
     const std::shared_ptr<impeller::AiksContext>& aiks_context,
     std::unique_ptr<flutter::SurfaceFrame> frame) {
-  TRACE_EVENT0("flutter", "FlatlandExternalViewEmbedder::SubmitFrame");
+  TRACE_EVENT0("flutter", "ExternalViewEmbedder::SubmitFrame");
   std::vector<std::unique_ptr<SurfaceProducerSurface>> frame_surfaces;
   std::unordered_map<EmbedderLayerId, size_t> frame_surface_indices;
 
@@ -211,7 +211,7 @@ void FlatlandExternalViewEmbedder::SubmitFrame(
     const float inv_dpr = 1.0f / frame_dpr_;
     flatland_->flatland()->SetScale(root_transform_id_, {inv_dpr, inv_dpr});
 
-    size_t flatland_layer_index = 0;
+    size_t layer_index = 0;
     for (const auto& layer_id : frame_composition_order_) {
       const auto& layer = frame_layers_.find(layer_id);
       FML_CHECK(layer != frame_layers_.end());
@@ -221,10 +221,10 @@ void FlatlandExternalViewEmbedder::SubmitFrame(
         FML_CHECK(layer->second.embedded_view_params.has_value());
         auto& view_params = layer->second.embedded_view_params.value();
 
-        // Get the FlatlandView structure corresponding to the platform view.
-        auto found = flatland_views_.find(layer_id.value());
-        FML_CHECK(found != flatland_views_.end())
-            << "No FlatlandView for layer_id = " << layer_id.value()
+        // Get the View structure corresponding to the platform view.
+        auto found = views_.find(layer_id.value());
+        FML_CHECK(found != views_.end())
+            << "No View for layer_id = " << layer_id.value()
             << ". This typically indicates that the Dart code in "
                "Fuchsia's fuchsia_scenic_flutter library failed to create "
                "the platform view, leading to a crash later down the road in "
@@ -355,7 +355,7 @@ void FlatlandExternalViewEmbedder::SubmitFrame(
           viewport.occlusion_hint = viewport.pending_occlusion_hint;
         }
 
-        // Attach the FlatlandView to the main scene graph.
+        // Attach the View to the main scene graph.
         const auto main_child_transform =
             viewport.mutators.clips.empty()
                 ? viewport.transform_id
@@ -386,17 +386,16 @@ void FlatlandExternalViewEmbedder::SubmitFrame(
       // Draw the layer if we acquired a surface for it successfully.
       if (surface_for_layer != nullptr) {
         // Create a new layer if needed for the surface.
-        FML_CHECK(flatland_layer_index <= flatland_layers_.size());
-        if (flatland_layer_index == flatland_layers_.size()) {
-          FlatlandLayer new_layer{.transform_id = flatland_->NextTransformId()};
+        FML_CHECK(layer_index <= layers_.size());
+        if (layer_index == layers_.size()) {
+          Layer new_layer{.transform_id = flatland_->NextTransformId()};
           flatland_->flatland()->CreateTransform(new_layer.transform_id);
-          flatland_layers_.emplace_back(std::move(new_layer));
+          layers_.emplace_back(std::move(new_layer));
         }
 
         // Update the image content and set size.
-        flatland_->flatland()->SetContent(
-            flatland_layers_[flatland_layer_index].transform_id,
-            {surface_for_layer->GetImageId()});
+        flatland_->flatland()->SetContent(layers_[layer_index].transform_id,
+                                          {surface_for_layer->GetImageId()});
         flatland_->flatland()->SetImageDestinationSize(
             {surface_for_layer->GetImageId()},
             {static_cast<uint32_t>(surface_for_layer->GetSize().width()),
@@ -406,9 +405,8 @@ void FlatlandExternalViewEmbedder::SubmitFrame(
         // For now, we assume any layer beyond the first has alpha.
         flatland_->flatland()->SetImageBlendingFunction(
             {surface_for_layer->GetImageId()},
-            flatland_layer_index == 0
-                ? fuchsia::ui::composition::BlendMode::SRC
-                : fuchsia::ui::composition::BlendMode::SRC_OVER);
+            layer_index == 0 ? fuchsia::ui::composition::BlendMode::SRC
+                             : fuchsia::ui::composition::BlendMode::SRC_OVER);
 
         // Set hit regions for this layer; these hit regions correspond to the
         // portions of the layer on which skia drew content.
@@ -431,20 +429,17 @@ void FlatlandExternalViewEmbedder::SubmitFrame(
           }
 
           flatland_->flatland()->SetHitRegions(
-              flatland_layers_[flatland_layer_index].transform_id,
-              std::move(hit_regions));
+              layers_[layer_index].transform_id, std::move(hit_regions));
         }
 
-        // Attach the FlatlandLayer to the main scene graph.
-        flatland_->flatland()->AddChild(
-            root_transform_id_,
-            flatland_layers_[flatland_layer_index].transform_id);
-        child_transforms_.emplace_back(
-            flatland_layers_[flatland_layer_index].transform_id);
+        // Attach the Layer to the main scene graph.
+        flatland_->flatland()->AddChild(root_transform_id_,
+                                        layers_[layer_index].transform_id);
+        child_transforms_.emplace_back(layers_[layer_index].transform_id);
       }
 
       // Reset for the next pass:
-      flatland_layer_index++;
+      layer_index++;
     }
 
     // Set up the input interceptor at the top of the scene, if applicable. It
@@ -507,16 +502,14 @@ void FlatlandExternalViewEmbedder::SubmitFrame(
   frame->Submit();
 }
 
-void FlatlandExternalViewEmbedder::CreateView(
-    int64_t view_id,
-    ViewCallback on_view_created,
-    FlatlandViewCreatedCallback on_view_bound) {
-  FML_CHECK(flatland_views_.find(view_id) == flatland_views_.end());
+void ExternalViewEmbedder::CreateView(int64_t view_id,
+                                      ViewCallback on_view_created,
+                                      ViewCreatedCallback on_view_bound) {
+  FML_CHECK(views_.find(view_id) == views_.end());
 
   const auto transform_id = flatland_->NextTransformId();
   const auto viewport_id = flatland_->NextContentId();
-  FlatlandView new_view = {.transform_id = transform_id,
-                           .viewport_id = viewport_id};
+  View new_view = {.transform_id = transform_id, .viewport_id = viewport_id};
   flatland_->flatland()->CreateTransform(new_view.transform_id);
   fuchsia::ui::composition::ChildViewWatcherHandle child_view_watcher;
   new_view.pending_create_viewport_callback =
@@ -538,19 +531,18 @@ void FlatlandExternalViewEmbedder::CreateView(
 
   on_view_created();
   on_view_bound(new_view.viewport_id, std::move(child_view_watcher));
-  flatland_views_.emplace(std::make_pair(view_id, std::move(new_view)));
+  views_.emplace(std::make_pair(view_id, std::move(new_view)));
 }
 
-void FlatlandExternalViewEmbedder::DestroyView(
-    int64_t view_id,
-    FlatlandViewIdCallback on_view_unbound) {
-  auto flatland_view = flatland_views_.find(view_id);
-  FML_CHECK(flatland_view != flatland_views_.end());
+void ExternalViewEmbedder::DestroyView(int64_t view_id,
+                                       ViewIdCallback on_view_unbound) {
+  auto view = views_.find(view_id);
+  FML_CHECK(view != views_.end());
 
-  auto viewport_id = flatland_view->second.viewport_id;
-  auto transform_id = flatland_view->second.transform_id;
-  auto& clip_transforms = flatland_view->second.clip_transforms;
-  if (!flatland_view->second.pending_create_viewport_callback) {
+  auto viewport_id = view->second.viewport_id;
+  auto transform_id = view->second.transform_id;
+  auto& clip_transforms = view->second.clip_transforms;
+  if (!view->second.pending_create_viewport_callback) {
     flatland_->flatland()->ReleaseViewport(viewport_id, [](auto) {});
   }
   auto itr = std::find_if(
@@ -573,17 +565,16 @@ void FlatlandExternalViewEmbedder::DestroyView(
     flatland_->flatland()->ReleaseTransform(clip_transform.transform_id);
   }
 
-  flatland_views_.erase(flatland_view);
+  views_.erase(view);
   on_view_unbound(viewport_id);
 }
 
-void FlatlandExternalViewEmbedder::SetViewProperties(
-    int64_t view_id,
-    const SkRect& occlusion_hint,
-    bool hit_testable,
-    bool focusable) {
-  auto found = flatland_views_.find(view_id);
-  FML_CHECK(found != flatland_views_.end());
+void ExternalViewEmbedder::SetViewProperties(int64_t view_id,
+                                             const SkRect& occlusion_hint,
+                                             bool hit_testable,
+                                             bool focusable) {
+  auto found = views_.find(view_id);
+  FML_CHECK(found != views_.end());
 
   // Note that pending_create_viewport_callback might not have run at this
   // point.
@@ -591,7 +582,7 @@ void FlatlandExternalViewEmbedder::SetViewProperties(
   viewport.pending_occlusion_hint = occlusion_hint;
 }
 
-void FlatlandExternalViewEmbedder::Reset() {
+void ExternalViewEmbedder::Reset() {
   frame_layers_.clear();
   frame_composition_order_.clear();
   frame_size_ = SkISize::Make(0, 0);
@@ -604,13 +595,12 @@ void FlatlandExternalViewEmbedder::Reset() {
   child_transforms_.clear();
 
   // Clear images on all layers so they aren't cached unnecessarily.
-  for (const auto& layer : flatland_layers_) {
+  for (const auto& layer : layers_) {
     flatland_->flatland()->SetContent(layer.transform_id, {0});
   }
 }
 
-FlatlandExternalViewEmbedder::ViewMutators
-FlatlandExternalViewEmbedder::ParseMutatorStack(
+ExternalViewEmbedder::ViewMutators ExternalViewEmbedder::ParseMutatorStack(
     const flutter::MutatorsStack& mutators_stack) {
   ViewMutators mutators;
   SkMatrix total_transform = SkMatrix::I();

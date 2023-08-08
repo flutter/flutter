@@ -24,6 +24,7 @@
 #include "third_party/rapidjson/include/rapidjson/stringbuffer.h"
 #include "third_party/rapidjson/include/rapidjson/writer.h"
 
+#include "flutter/fml/make_copyable.h"
 #include "logging.h"
 #include "pointer_injector_delegate.h"
 #include "runtime/dart/utils/inlines.h"
@@ -54,9 +55,9 @@ static constexpr char kFlutterPlatformViewsChannel[] = "flutter/platform_views";
 static constexpr char kFuchsiaShaderWarmupChannel[] = "fuchsia/shader_warmup";
 static constexpr char kFuchsiaInputTestChannel[] = "fuchsia/input_test";
 static constexpr char kFuchsiaChildViewChannel[] = "fuchsia/child_view";
+static constexpr int64_t kFlutterImplicitViewId = 0ll;
 
 PlatformView::PlatformView(
-    bool is_flatland,
     flutter::PlatformView::Delegate& delegate,
     flutter::TaskRunners task_runners,
     fuchsia::ui::views::ViewRef view_ref,
@@ -67,13 +68,17 @@ PlatformView::PlatformView(
     fuchsia::ui::pointer::MouseSourceHandle mouse_source,
     fuchsia::ui::views::FocuserHandle focuser,
     fuchsia::ui::views::ViewRefFocusedHandle view_ref_focused,
+    fuchsia::ui::composition::ParentViewportWatcherHandle
+        parent_viewport_watcher,
     fuchsia::ui::pointerinjector::RegistryHandle pointerinjector_registry,
-    OnEnableWireframe wireframe_enabled_callback,
-    OnUpdateView on_update_view_callback,
-    OnCreateSurface on_create_surface_callback,
-    OnSemanticsNodeUpdate on_semantics_node_update_callback,
-    OnRequestAnnounce on_request_announce_callback,
-    OnShaderWarmup on_shader_warmup,
+    OnEnableWireframeCallback wireframe_enabled_callback,
+    OnCreateViewCallback on_create_view_callback,
+    OnUpdateViewCallback on_update_view_callback,
+    OnDestroyViewCallback on_destroy_view_callback,
+    OnCreateSurfaceCallback on_create_surface_callback,
+    OnSemanticsNodeUpdateCallback on_semantics_node_update_callback,
+    OnRequestAnnounceCallback on_request_announce_callback,
+    OnShaderWarmupCallback on_shader_warmup_callback,
     AwaitVsyncCallback await_vsync_callback,
     AwaitVsyncForSecondaryCallbackCallback
         await_vsync_for_secondary_callback_callback,
@@ -92,11 +97,14 @@ PlatformView::PlatformView(
       on_semantics_node_update_callback_(
           std::move(on_semantics_node_update_callback)),
       on_request_announce_callback_(std::move(on_request_announce_callback)),
-      on_shader_warmup_(std::move(on_shader_warmup)),
+      on_create_view_callback_(std::move(on_create_view_callback)),
+      on_destroy_view_callback_(std::move(on_destroy_view_callback)),
+      on_shader_warmup_callback_(std::move(on_shader_warmup_callback)),
       await_vsync_callback_(await_vsync_callback),
       await_vsync_for_secondary_callback_callback_(
           await_vsync_for_secondary_callback_callback),
       dart_application_svc_(dart_application_svc),
+      parent_viewport_watcher_(parent_viewport_watcher.Bind()),
       weak_factory_(this) {
   fuchsia::ui::views::ViewRef view_ref_clone;
   fidl::Clone(view_ref, &view_ref_clone);
@@ -159,8 +167,7 @@ PlatformView::PlatformView(
 
   // Configure the pointer injector delegate.
   pointer_injector_delegate_ = std::make_unique<PointerInjectorDelegate>(
-      std::move(pointerinjector_registry), std::move(view_ref_clone),
-      is_flatland);
+      std::move(pointerinjector_registry), std::move(view_ref_clone));
 
   // This is only used by the integration tests.
   if (dart_application_svc) {
@@ -209,6 +216,16 @@ PlatformView::PlatformView(
 
   // Finally! Register the native platform message handlers.
   RegisterPlatformMessageHandlers();
+
+  parent_viewport_watcher_.set_error_handler([](zx_status_t status) {
+    FML_LOG(ERROR) << "Interface error on: ParentViewportWatcher status: "
+                   << status;
+  });
+
+  parent_viewport_watcher_->GetLayout(
+      fit::bind_member(this, &PlatformView::OnGetLayout));
+  parent_viewport_watcher_->GetStatus(
+      fit::bind_member(this, &PlatformView::OnParentViewportStatus));
 }
 
 PlatformView::~PlatformView() = default;
@@ -228,7 +245,7 @@ void PlatformView::RegisterPlatformMessageHandlers() {
                 this, std::placeholders::_1);
   platform_message_handlers_[kFuchsiaShaderWarmupChannel] =
       std::bind(&HandleFuchsiaShaderWarmupChannelPlatformMessage,
-                on_shader_warmup_, std::placeholders::_1);
+                on_shader_warmup_callback_, std::placeholders::_1);
   platform_message_handlers_[kFuchsiaInputTestChannel] =
       std::bind(&PlatformView::HandleFuchsiaInputTestChannelPlatformMessage,
                 this, std::placeholders::_1);
@@ -307,6 +324,230 @@ std::array<float, 2> PlatformView::ClampToViewSpace(const float x,
   FML_LOG(INFO) << "Clamped (" << x << ", " << y << ") to (" << clamped_x
                 << ", " << clamped_y << ").";
   return {clamped_x, clamped_y};
+}
+
+void PlatformView::OnGetLayout(fuchsia::ui::composition::LayoutInfo info) {
+  view_logical_size_ = {static_cast<float>(info.logical_size().width),
+                        static_cast<float>(info.logical_size().height)};
+
+  if (info.has_device_pixel_ratio()) {
+    // Both values should be identical for the Vec2 for DPR.
+    FML_DCHECK(info.device_pixel_ratio().x == info.device_pixel_ratio().y);
+    view_pixel_ratio_ = info.device_pixel_ratio().x;
+  }
+
+  float pixel_ratio = view_pixel_ratio_ ? *view_pixel_ratio_ : 1.0f;
+  flutter::ViewportMetrics metrics{
+      pixel_ratio,  // device_pixel_ratio
+      std::round(view_logical_size_.value()[0] *
+                 pixel_ratio),  // physical_width
+      std::round(view_logical_size_.value()[1] *
+                 pixel_ratio),  // physical_height
+      0.0f,                     // physical_padding_top
+      0.0f,                     // physical_padding_right
+      0.0f,                     // physical_padding_bottom
+      0.0f,                     // physical_padding_left
+      0.0f,                     // physical_view_inset_top
+      0.0f,                     // physical_view_inset_right
+      0.0f,                     // physical_view_inset_bottom
+      0.0f,                     // physical_view_inset_left
+      0.0f,                     // p_physical_system_gesture_inset_top
+      0.0f,                     // p_physical_system_gesture_inset_right
+      0.0f,                     // p_physical_system_gesture_inset_bottom
+      0.0f,                     // p_physical_system_gesture_inset_left,
+      -1.0,                     // p_physical_touch_slop,
+      {},                       // p_physical_display_features_bounds
+      {},                       // p_physical_display_features_type
+      {},                       // p_physical_display_features_state
+      0,                        // p_display_id
+  };
+  SetViewportMetrics(kFlutterImplicitViewId, metrics);
+
+  parent_viewport_watcher_->GetLayout(
+      fit::bind_member(this, &PlatformView::OnGetLayout));
+}
+
+void PlatformView::OnParentViewportStatus(
+    fuchsia::ui::composition::ParentViewportStatus status) {
+  // TODO(fxbug.dev/116001): Investigate if it is useful to send hidden/shown
+  // signals.
+  parent_viewport_status_ = status;
+  parent_viewport_watcher_->GetStatus(
+      fit::bind_member(this, &PlatformView::OnParentViewportStatus));
+}
+
+void PlatformView::OnChildViewStatus(
+    uint64_t content_id,
+    fuchsia::ui::composition::ChildViewStatus status) {
+  FML_DCHECK(child_view_info_.count(content_id) == 1);
+
+  std::ostringstream out;
+  out << "{"
+      << "\"method\":\"View.viewStateChanged\","
+      << "\"args\":{"
+      << "  \"viewId\":" << child_view_info_.at(content_id).view_id
+      << ","                         // ViewId
+      << "  \"is_rendering\":true,"  // IsViewRendering
+      << "  \"state\":true"          // IsViewRendering
+      << "  }"
+      << "}";
+  auto call = out.str();
+
+  std::unique_ptr<flutter::PlatformMessage> message =
+      std::make_unique<flutter::PlatformMessage>(
+          "flutter/platform_views",
+          fml::MallocMapping::Copy(call.c_str(), call.size()), nullptr);
+  DispatchPlatformMessage(std::move(message));
+
+  child_view_info_.at(content_id)
+      .child_view_watcher->GetStatus(
+          [this, content_id](fuchsia::ui::composition::ChildViewStatus status) {
+            OnChildViewStatus(content_id, status);
+          });
+}
+
+void PlatformView::OnChildViewViewRef(uint64_t content_id,
+                                      uint64_t view_id,
+                                      fuchsia::ui::views::ViewRef view_ref) {
+  FML_CHECK(child_view_info_.count(content_id) == 1);
+
+  fuchsia::ui::views::ViewRef view_ref_clone;
+  fidl::Clone(view_ref, &view_ref_clone);
+
+  focus_delegate_->OnChildViewViewRef(view_id, std::move(view_ref));
+
+  pointer_injector_delegate_->OnCreateView(view_id, std::move(view_ref_clone));
+  OnChildViewConnected(content_id);
+}
+
+void PlatformView::OnCreateView(ViewCallback on_view_created,
+                                int64_t view_id_raw,
+                                bool hit_testable,
+                                bool focusable) {
+  auto on_view_bound = [weak = weak_factory_.GetWeakPtr(),
+                        platform_task_runner =
+                            task_runners_.GetPlatformTaskRunner(),
+                        view_id = view_id_raw](
+                           fuchsia::ui::composition::ContentId content_id,
+                           fuchsia::ui::composition::ChildViewWatcherHandle
+                               child_view_watcher_handle) {
+    FML_CHECK(weak);
+    FML_CHECK(weak->child_view_info_.count(content_id.value) == 0);
+
+    platform_task_runner->PostTask(fml::MakeCopyable(
+        [weak, view_id, content_id,
+         watcher_handle = std::move(child_view_watcher_handle)]() mutable {
+          if (!weak) {
+            FML_LOG(WARNING)
+                << "View bound to PlatformView after PlatformView was "
+                   "destroyed; ignoring.";
+            return;
+          }
+
+          // Bind the child view watcher to the platform thread so that the FIDL
+          // calls are handled on the platform thread.
+          fuchsia::ui::composition::ChildViewWatcherPtr child_view_watcher =
+              watcher_handle.Bind();
+          FML_CHECK(child_view_watcher);
+
+          child_view_watcher.set_error_handler([weak, view_id, content_id](
+                                                   zx_status_t status) {
+            FML_LOG(WARNING)
+                << "Child disconnected. ChildViewWatcher status: " << status;
+
+            if (!weak) {
+              FML_LOG(WARNING) << "View bound to PlatformView after "
+                                  "PlatformView was "
+                                  "destroyed; ignoring.";
+              return;
+            }
+
+            // Disconnected views cannot listen to pointer events.
+            weak->pointer_injector_delegate_->OnDestroyView(view_id);
+
+            weak->OnChildViewDisconnected(content_id.value);
+          });
+
+          weak->child_view_info_.emplace(
+              std::piecewise_construct, std::forward_as_tuple(content_id.value),
+              std::forward_as_tuple(view_id, std::move(child_view_watcher)));
+
+          weak->child_view_info_.at(content_id.value)
+              .child_view_watcher->GetStatus(
+                  [weak, id = content_id.value](
+                      fuchsia::ui::composition::ChildViewStatus status) {
+                    weak->OnChildViewStatus(id, status);
+                  });
+
+          weak->child_view_info_.at(content_id.value)
+              .child_view_watcher->GetViewRef(
+                  [weak, content_id = content_id.value,
+                   view_id](fuchsia::ui::views::ViewRef view_ref) {
+                    weak->OnChildViewViewRef(content_id, view_id,
+                                             std::move(view_ref));
+                  });
+        }));
+  };
+
+  on_create_view_callback_(view_id_raw, std::move(on_view_created),
+                           std::move(on_view_bound), hit_testable, focusable);
+}
+
+void PlatformView::OnDisposeView(int64_t view_id_raw) {
+  auto on_view_unbound =
+      [weak = weak_factory_.GetWeakPtr(),
+       platform_task_runner = task_runners_.GetPlatformTaskRunner(),
+       view_id_raw](fuchsia::ui::composition::ContentId content_id) {
+        platform_task_runner->PostTask([weak, content_id, view_id_raw]() {
+          if (!weak) {
+            FML_LOG(WARNING)
+                << "View unbound from PlatformView after PlatformView"
+                   "was destroyed; ignoring.";
+            return;
+          }
+
+          FML_DCHECK(weak->child_view_info_.count(content_id.value) == 1);
+          weak->OnChildViewDisconnected(content_id.value);
+          weak->child_view_info_.erase(content_id.value);
+          weak->focus_delegate_->OnDisposeChildView(view_id_raw);
+          weak->pointer_injector_delegate_->OnDestroyView(view_id_raw);
+        });
+      };
+  on_destroy_view_callback_(view_id_raw, std::move(on_view_unbound));
+}
+
+void PlatformView::OnChildViewConnected(uint64_t content_id) {
+  FML_CHECK(child_view_info_.count(content_id) == 1);
+  std::ostringstream out;
+  out << "{"
+      << "\"method\":\"View.viewConnected\","
+      << "\"args\":{"
+      << "  \"viewId\":" << child_view_info_.at(content_id).view_id << "  }"
+      << "}";
+  auto call = out.str();
+
+  std::unique_ptr<flutter::PlatformMessage> message =
+      std::make_unique<flutter::PlatformMessage>(
+          "flutter/platform_views",
+          fml::MallocMapping::Copy(call.c_str(), call.size()), nullptr);
+  DispatchPlatformMessage(std::move(message));
+}
+
+void PlatformView::OnChildViewDisconnected(uint64_t content_id) {
+  FML_CHECK(child_view_info_.count(content_id) == 1);
+  std::ostringstream out;
+  out << "{"
+      << "\"method\":\"View.viewDisconnected\","
+      << "\"args\":{"
+      << "  \"viewId\":" << child_view_info_.at(content_id).view_id << "  }"
+      << "}";
+  auto call = out.str();
+
+  std::unique_ptr<flutter::PlatformMessage> message =
+      std::make_unique<flutter::PlatformMessage>(
+          "flutter/platform_views",
+          fml::MallocMapping::Copy(call.c_str(), call.size()), nullptr);
+  DispatchPlatformMessage(std::move(message));
 }
 
 bool PlatformView::OnHandlePointerEvent(
@@ -667,11 +908,11 @@ bool PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
 }
 
 bool PlatformView::HandleFuchsiaShaderWarmupChannelPlatformMessage(
-    OnShaderWarmup on_shader_warmup,
+    OnShaderWarmupCallback on_shader_warmup_callback,
     std::unique_ptr<flutter::PlatformMessage> message) {
   FML_DCHECK(message->channel() == kFuchsiaShaderWarmupChannel);
 
-  if (!on_shader_warmup) {
+  if (!on_shader_warmup_callback) {
     FML_LOG(ERROR) << "No shader warmup callback set!";
     std::string result = "[0]";
     message->response()->Complete(
@@ -741,7 +982,7 @@ bool PlatformView::HandleFuchsiaShaderWarmupChannelPlatformMessage(
         (const uint8_t*)result.c_str() + result.length())));
   };
 
-  on_shader_warmup(skp_paths, completion_callback, width, height);
+  on_shader_warmup_callback(skp_paths, completion_callback, width, height);
   // The response has already been completed by us.
   return true;
 }
@@ -876,14 +1117,13 @@ bool PlatformView::HandleFuchsiaChildViewChannelPlatformMessage(
   FML_DCHECK(message->channel() == kFuchsiaChildViewChannel);
 
   if (message->data().GetSize() != 1 ||
-      (message->data().GetMapping()[0] != '0' &&
-       message->data().GetMapping()[0] != '1')) {
+      (message->data().GetMapping()[0] != '1')) {
     FML_LOG(ERROR) << kFuchsiaChildViewChannel
-                   << " data must be '0' (for gfx) or '1' (for flatland).";
+                   << " data must be singularly '1'.";
     return false;
   }
 
-  bool flatland = message->data().GetMapping()[0] == '1';
+  FML_DCHECK(message->data().GetMapping()[0] == '1');
 
   if (!message->response()) {
     FML_LOG(ERROR) << kFuchsiaChildViewChannel
@@ -908,52 +1148,21 @@ bool PlatformView::HandleFuchsiaChildViewChannelPlatformMessage(
 
   zx::handle view_id;
 
-  if (flatland) {
-    zx::channel view_tokens[2];
-    fuchsia::ui::views::ViewportCreationToken viewport_creation_token;
-    fuchsia::ui::views::ViewCreationToken view_creation_token;
-    status = zx::channel::create(0, &viewport_creation_token.value,
-                                 &view_creation_token.value);
-    if (status != ZX_OK) {
-      FML_LOG(ERROR) << "Creating view tokens: "
-                     << zx_status_get_string(status);
-      return false;
-    }
-
-    fuchsia::ui::app::CreateView2Args create_view_args;
-    create_view_args.set_view_creation_token(std::move(view_creation_token));
-    view_provider->CreateView2(std::move(create_view_args));
-
-    view_id = std::move(viewport_creation_token.value);
-  } else {
-    zx::eventpair view_tokens[2];
-    status = zx::eventpair::create(0, &view_tokens[0], &view_tokens[1]);
-    if (status != ZX_OK) {
-      FML_LOG(ERROR) << "Creating view tokens: "
-                     << zx_status_get_string(status);
-      return false;
-    }
-    fuchsia::ui::views::ViewHolderToken view_holder_token;
-    view_holder_token.value = std::move(view_tokens[0]);
-
-    zx::eventpair view_refs[2];
-    status = zx::eventpair::create(0, &view_refs[0], &view_refs[1]);
-    if (status != ZX_OK) {
-      FML_LOG(ERROR) << "Creating view refs: " << zx_status_get_string(status);
-      return false;
-    }
-    fuchsia::ui::views::ViewRefControl view_ref_control;
-    view_refs[0].duplicate(ZX_DEFAULT_EVENTPAIR_RIGHTS & ~ZX_RIGHT_DUPLICATE,
-                           &view_ref_control.reference);
-    fuchsia::ui::views::ViewRef view_ref;
-    view_refs[1].duplicate(ZX_RIGHTS_BASIC, &view_ref.reference);
-
-    view_provider->CreateViewWithViewRef(std::move(view_tokens[1]),
-                                         std::move(view_ref_control),
-                                         std::move(view_ref));
-
-    view_id = std::move(view_holder_token.value);
+  zx::channel view_tokens[2];
+  fuchsia::ui::views::ViewportCreationToken viewport_creation_token;
+  fuchsia::ui::views::ViewCreationToken view_creation_token;
+  status = zx::channel::create(0, &viewport_creation_token.value,
+                               &view_creation_token.value);
+  if (status != ZX_OK) {
+    FML_LOG(ERROR) << "Creating view tokens: " << zx_status_get_string(status);
+    return false;
   }
+
+  fuchsia::ui::app::CreateView2Args create_view_args;
+  create_view_args.set_view_creation_token(std::move(view_creation_token));
+  view_provider->CreateView2(std::move(create_view_args));
+
+  view_id = std::move(viewport_creation_token.value);
 
   if (view_id) {
     message->response()->Complete(

@@ -40,8 +40,8 @@ constexpr size_t kGrCacheMaxByteSize = 1024 * 600 * 12 * 4;
 
 }  // namespace
 
-VulkanSurfaceProducer::VulkanSurfaceProducer(scenic::Session* scenic_session) {
-  valid_ = Initialize(scenic_session);
+VulkanSurfaceProducer::VulkanSurfaceProducer() {
+  valid_ = Initialize();
 
   if (!valid_) {
     FML_LOG(FATAL) << "VulkanSurfaceProducer: Initialization failed";
@@ -57,7 +57,7 @@ VulkanSurfaceProducer::~VulkanSurfaceProducer() {
   }
 };
 
-bool VulkanSurfaceProducer::Initialize(scenic::Session* scenic_session) {
+bool VulkanSurfaceProducer::Initialize() {
   vk_ = fml::MakeRefCounted<vulkan::VulkanProcTable>();
 
   std::vector<std::string> extensions = {
@@ -163,8 +163,7 @@ bool VulkanSurfaceProducer::Initialize(scenic::Session* scenic_session) {
   // Use local limits specified in this file above instead of flutter defaults.
   context_->setResourceCacheLimit(kGrCacheMaxByteSize);
 
-  surface_pool_ =
-      std::make_unique<VulkanSurfacePool>(*this, context_, scenic_session);
+  surface_pool_ = std::make_unique<VulkanSurfacePool>(*this, context_);
 
   return true;
 }
