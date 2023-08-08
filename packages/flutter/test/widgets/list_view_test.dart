@@ -800,6 +800,9 @@ void main() {
       ),
     );
 
+    expect(find.text('Item 0'), findsOneWidget);
+    expect(find.text('Item 5'), findsOneWidget);
+    expect(find.text('Item 6'), findsNothing);
     expect(
       sliverLayoutDimensions,
       const SliverLayoutDimensions(
@@ -816,10 +819,14 @@ void main() {
 
     buildLog.clear();
 
+    // Scrolling drastically.
     controller.jumpTo(10000.0);
     await tester.pump();
 
-    // Scrolling drastically only loading the visible and cached area items.
+    expect(find.text('Item 99'), findsNothing);
+    expect(find.text('Item 100'), findsOneWidget);
+    expect(find.text('Item 105'), findsOneWidget);
+    expect(find.text('Item 106'), findsNothing);
     expect(
         sliverLayoutDimensions,
         const SliverLayoutDimensions(
@@ -829,6 +836,7 @@ void main() {
           crossAxisExtent: 800.0,
         )
     );
+    // Scrolling drastically only loading the visible and cached area items.
     // cache extent before(250.0) + viewport(600.0) + cache extent after(250.0)
     expect(buildLog.length, 12);
     expect(buildLog.min, 97);
@@ -838,6 +846,10 @@ void main() {
     controller.jumpTo(5000.0);
     await tester.pump();
 
+    expect(find.text('Item 49'), findsNothing);
+    expect(find.text('Item 50'), findsOneWidget);
+    expect(find.text('Item 55'), findsOneWidget);
+    expect(find.text('Item 56'), findsNothing);
     expect(
         sliverLayoutDimensions,
         const SliverLayoutDimensions(
@@ -856,6 +868,10 @@ void main() {
     controller.jumpTo(4700.0);
     await tester.pump();
 
+    expect(find.text('Item 46'), findsNothing);
+    expect(find.text('Item 47'), findsOneWidget);
+    expect(find.text('Item 52'), findsOneWidget);
+    expect(find.text('Item 53'), findsNothing);
     expect(
         sliverLayoutDimensions,
         const SliverLayoutDimensions(
@@ -874,6 +890,10 @@ void main() {
     controller.jumpTo(5300.0);
     await tester.pump();
 
+    expect(find.text('Item 52'), findsNothing);
+    expect(find.text('Item 53'), findsOneWidget);
+    expect(find.text('Item 58'), findsOneWidget);
+    expect(find.text('Item 59'), findsNothing);
     expect(
         sliverLayoutDimensions,
         const SliverLayoutDimensions(
