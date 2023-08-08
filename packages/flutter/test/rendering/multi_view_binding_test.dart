@@ -116,24 +116,25 @@ void main() {
     expect(flutterView1.renderedScenes, isEmpty);
     expect(flutterView2.renderedScenes, isEmpty);
 
-    binding.handleBeginFrame(Duration.zero);
-    binding.handleDrawFrame();
+    binding.ensureFrameCallbacksRegistered();
+    PlatformDispatcher.instance.onBeginFrame!.call(Duration.zero);
+    PlatformDispatcher.instance.onDrawFrame!.call();
 
     expect(flutterView1.renderedScenes, hasLength(1));
     expect(flutterView2.renderedScenes, hasLength(1));
 
     binding.removeRenderView(renderView1);
 
-    binding.handleBeginFrame(Duration.zero);
-    binding.handleDrawFrame();
+    PlatformDispatcher.instance.onBeginFrame!.call(Duration.zero);
+    PlatformDispatcher.instance.onDrawFrame!.call();
 
     expect(flutterView1.renderedScenes, hasLength(1));
     expect(flutterView2.renderedScenes, hasLength(2));
 
     binding.removeRenderView(renderView2);
 
-    binding.handleBeginFrame(Duration.zero);
-    binding.handleDrawFrame();
+    PlatformDispatcher.instance.onBeginFrame!.call(Duration.zero);
+    PlatformDispatcher.instance.onDrawFrame!.call();
 
     expect(flutterView1.renderedScenes, hasLength(1));
     expect(flutterView2.renderedScenes, hasLength(2));

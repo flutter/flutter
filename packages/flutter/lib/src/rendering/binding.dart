@@ -487,7 +487,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   ///
   ///  * [deferFirstFrame], which defers when the first frame is sent to the
   ///    engine.
-  bool get sendFramesToEngine => (_firstFrameSent || _firstFrameDeferredCount == 0) && !duringWarmUpFrame;
+  bool get sendFramesToEngine => _firstFrameSent || _firstFrameDeferredCount == 0;
 
   /// Tell the framework to not send the first frames to the engine until there
   /// is a corresponding call to [allowFirstFrame].
@@ -592,6 +592,9 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     rootPipelineOwner.flushCompositingBits();
     rootPipelineOwner.flushPaint();
     if (sendFramesToEngine) {
+      if (!duringBeginOrDrawFrame) {
+        return;
+      }
       for (final RenderView renderView in renderViews) {
         renderView.compositeFrame(); // this sends the bits to the GPU
       }

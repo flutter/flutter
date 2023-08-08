@@ -807,7 +807,7 @@ mixin SchedulerBinding on BindingBase {
 
   /// Ensures callbacks for [PlatformDispatcher.onBeginFrame] and
   /// [PlatformDispatcher.onDrawFrame] are registered.
-  @protected
+  // @protected
   void ensureFrameCallbacksRegistered() {
     platformDispatcher.onBeginFrame ??= _handleBeginFrame;
     platformDispatcher.onDrawFrame ??= _handleDrawFrame;
@@ -1058,6 +1058,10 @@ mixin SchedulerBinding on BindingBase {
   // engine frame.
   bool _rescheduleAfterWarmUpFrame = false;
 
+  @protected
+  bool get duringBeginOrDrawFrame => _duringBeginOrDrawFrame;
+  bool _duringBeginOrDrawFrame = false;
+
   void _handleBeginFrame(Duration rawTimeStamp) {
     if (_warmUpFrame) {
       // "begin frame" and "draw frame" must strictly alternate. Therefore
@@ -1067,7 +1071,9 @@ mixin SchedulerBinding on BindingBase {
       _rescheduleAfterWarmUpFrame = true;
       return;
     }
+    _duringBeginOrDrawFrame = true;
     handleBeginFrame(rawTimeStamp);
+    _duringBeginOrDrawFrame = false;
   }
 
   void _handleDrawFrame() {
@@ -1088,7 +1094,9 @@ mixin SchedulerBinding on BindingBase {
       });
       return;
     }
+    _duringBeginOrDrawFrame = true;
     handleDrawFrame();
+    _duringBeginOrDrawFrame = false;
   }
 
   final TimelineTask? _frameTimelineTask = kReleaseMode ? null : TimelineTask();
