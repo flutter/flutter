@@ -94,6 +94,32 @@ Future<void> testMain() async {
     }
   });
 
+  test('Can disable rounding hack', () {
+    if (!ParagraphBuilder.shouldDisableRoundingHack) {
+      ParagraphBuilder.setDisableRoundingHack(true);
+      addTearDown(() => ParagraphBuilder.setDisableRoundingHack(false));
+    }
+    assert(ParagraphBuilder.shouldDisableRoundingHack);
+    const double fontSize = 1;
+    const String text = '12345';
+    const double letterSpacing = 0.25;
+    const double expectedIntrinsicWidth = text.length * (fontSize + letterSpacing);
+    assert(expectedIntrinsicWidth.truncate() != expectedIntrinsicWidth);
+    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(fontSize: fontSize, fontFamily: 'FlutterTest'));
+    builder.pushStyle(TextStyle(letterSpacing: letterSpacing));
+    builder.addText(text);
+    final Paragraph paragraph = builder.build()
+      ..layout(const ParagraphConstraints(width: expectedIntrinsicWidth));
+
+    expect(paragraph.maxIntrinsicWidth, expectedIntrinsicWidth);
+    switch (paragraph.computeLineMetrics()) {
+      case [LineMetrics(width: final double width)]:
+        expect(width, expectedIntrinsicWidth);
+      case final List<LineMetrics> metrics:
+        expect(metrics, hasLength(1));
+    }
+  });
+
   test('lay out unattached paragraph', () {
     final CanvasParagraph paragraph = plain(EngineParagraphStyle(
       fontFamily: 'sans-serif',
