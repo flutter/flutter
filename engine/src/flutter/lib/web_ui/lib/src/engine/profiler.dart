@@ -6,13 +6,18 @@ import 'dart:async';
 import 'dart:js_interop';
 
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import 'dom.dart';
 import 'platform_dispatcher.dart';
-import 'safe_browser_api.dart';
+import 'util.dart';
 
+// TODO(mdebbar): Deprecate this and remove it.
+// https://github.com/flutter/flutter/issues/127395
 @JS('window._flutter_internal_on_benchmark')
-external JSExportedDartFunction? get onBenchmark;
+external JSExportedDartFunction? get jsBenchmarkValueCallback;
+
+ui_web.BenchmarkValueCallback? engineBenchmarkValueCallback;
 
 /// A function that computes a value of type [R].
 ///
@@ -105,9 +110,19 @@ class Profiler {
   void benchmark(String name, double value) {
     _checkBenchmarkMode();
 
-    final OnBenchmark? callback = onBenchmark?.toDart as OnBenchmark?;
+    final ui_web.BenchmarkValueCallback? callback =
+        jsBenchmarkValueCallback?.toDart as ui_web.BenchmarkValueCallback?;
     if (callback != null) {
+      printWarning(
+        'The JavaScript benchmarking API (i.e. `window._flutter_internal_on_benchmark`) '
+        'is deprecated and will be removed in a future release. Please use '
+        '`benchmarkValueCallback` from `dart:ui_web` instead.',
+      );
       callback(name, value);
+    }
+
+    if (engineBenchmarkValueCallback != null) {
+      engineBenchmarkValueCallback!(name, value);
     }
   }
 }

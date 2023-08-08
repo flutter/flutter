@@ -66,9 +66,6 @@ Future<T> promiseToFuture<T>(Object jsPromise) {
   return js_util.promiseToFuture<T>(jsPromise);
 }
 
-/// A function that receives a benchmark [value] labeleb by [name].
-typedef OnBenchmark = void Function(String name, double value);
-
 /// Parses a string [source] into a double.
 ///
 /// Uses the JavaScript `parseFloat` function instead of Dart's [double.parse]

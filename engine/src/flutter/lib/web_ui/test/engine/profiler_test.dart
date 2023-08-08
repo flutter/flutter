@@ -7,11 +7,12 @@ import 'dart:js_interop';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../common/spy.dart';
 
 @JS('window._flutter_internal_on_benchmark')
-external set onBenchmark(JSAny? object);
+external set jsBenchmarkValueCallback(JSAny? object);
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -28,13 +29,29 @@ void testMain() {
 }
 
 void _profilerTests() {
+  final List<String> warnings = <String>[];
+  late void Function(String) oldPrintWarning;
+
+  setUpAll(() {
+    oldPrintWarning = printWarning;
+    printWarning = (String warning) {
+      warnings.add(warning);
+    };
+  });
+
   setUp(() {
+    warnings.clear();
     Profiler.isBenchmarkMode = true;
     Profiler.ensureInitialized();
   });
 
+  tearDownAll(() {
+    printWarning = oldPrintWarning;
+  });
+
   tearDown(() {
-    onBenchmark = null;
+    jsBenchmarkValueCallback = null;
+    ui_web.benchmarkValueCallback = null;
     Profiler.isBenchmarkMode = false;
   });
 
@@ -44,49 +61,116 @@ void _profilerTests() {
 
   test('can listen to benchmarks', () {
     final List<BenchmarkDatapoint> data = <BenchmarkDatapoint>[];
-    onBenchmark = (String name, num value) {
-      data.add(BenchmarkDatapoint(name, value));
-    }.toJS;
+    ui_web.benchmarkValueCallback = (String name, double value) {
+      data.add((name, value));
+    };
 
     Profiler.instance.benchmark('foo', 123);
-    expect(data, <BenchmarkDatapoint>[BenchmarkDatapoint('foo', 123)]);
+    expect(data, <BenchmarkDatapoint>[('foo', 123)]);
     data.clear();
 
     Profiler.instance.benchmark('bar', 0.0125);
-    expect(data, <BenchmarkDatapoint>[BenchmarkDatapoint('bar', 0.0125)]);
+    expect(data, <BenchmarkDatapoint>[('bar', 0.0125)]);
     data.clear();
 
     // Remove listener and make sure nothing breaks and the data isn't being
     // sent to the old callback anymore.
-    onBenchmark = null;
+    ui_web.benchmarkValueCallback = null;
     expect(() => Profiler.instance.benchmark('baz', 99.999), returnsNormally);
     expect(data, isEmpty);
   });
 
-  test('throws on wrong listener type', () {
-    final List<BenchmarkDatapoint> data = <BenchmarkDatapoint>[];
+  // TODO(mdebbar): Remove this group once the JS API is removed.
+  // https://github.com/flutter/flutter/issues/127395
+  group('[JS API]', () {
+    test('can listen to benchmarks', () {
+      final List<BenchmarkDatapoint> data = <BenchmarkDatapoint>[];
+      jsBenchmarkValueCallback = (String name, double value) {
+        data.add((name, value));
+      }.toJS;
 
-    // Wrong callback signature.
-    onBenchmark = (num value) {
-      data.add(BenchmarkDatapoint('bad', value));
-    }.toJS;
-    expect(
-      () => Profiler.instance.benchmark('foo', 123),
+      Profiler.instance.benchmark('foo', 123);
+      expect(warnings, hasLength(1));
+      expect(warnings.single, contains('deprecated'));
+      expect(warnings.single, contains('benchmarkValueCallback'));
+      expect(warnings.single, contains('dart:ui_web'));
+      warnings.clear();
 
-      // dart2js throws a NoSuchMethodError, dart2wasm throws a TypeError here.
-      // Just make sure it throws an error in this case.
-      throwsA(isA<Error>()),
-    );
-    expect(data, isEmpty);
+      expect(data, <BenchmarkDatapoint>[('foo', 123)]);
+      data.clear();
 
-    // Not even a callback.
-    onBenchmark = 'string'.toJS;
-    expect(
-      () => Profiler.instance.benchmark('foo', 123),
-      // dart2js throws a TypeError, while dart2wasm throws an explicit
-      // exception.
-      throwsA(anything),
-    );
+      Profiler.instance.benchmark('bar', 0.0125);
+      expect(data, <BenchmarkDatapoint>[('bar', 0.0125)]);
+      data.clear();
+
+      // Remove listener and make sure nothing breaks and the data isn't being
+      // sent to the old callback anymore.
+      jsBenchmarkValueCallback = null;
+      expect(() => Profiler.instance.benchmark('baz', 99.999), returnsNormally);
+      expect(data, isEmpty);
+    });
+
+    test('throws on wrong listener type', () {
+      final List<BenchmarkDatapoint> data = <BenchmarkDatapoint>[];
+
+      // Wrong callback signature.
+      jsBenchmarkValueCallback = (double value) {
+        data.add(('bad', value));
+      }.toJS;
+      expect(
+        () => Profiler.instance.benchmark('foo', 123),
+
+        // dart2js throws a NoSuchMethodError, dart2wasm throws a TypeError here.
+        // Just make sure it throws an error in this case.
+        throwsA(isA<Error>()),
+      );
+      expect(data, isEmpty);
+
+      // Not even a callback.
+      jsBenchmarkValueCallback = 'string'.toJS;
+      expect(
+        () => Profiler.instance.benchmark('foo', 123),
+        // dart2js throws a TypeError, while dart2wasm throws an explicit
+        // exception.
+        throwsA(anything),
+      );
+    });
+
+    test('can be combined with ui_web API', () {
+      final List<BenchmarkDatapoint> uiWebData = <BenchmarkDatapoint>[];
+      final List<BenchmarkDatapoint> jsData = <BenchmarkDatapoint>[];
+
+      ui_web.benchmarkValueCallback = (String name, double value) {
+        uiWebData.add((name, value));
+      };
+      jsBenchmarkValueCallback = (String name, double value) {
+        jsData.add((name, value));
+      }.toJS;
+
+      Profiler.instance.benchmark('foo', 123);
+      expect(warnings, hasLength(1));
+      expect(warnings.single, contains('deprecated'));
+      expect(warnings.single, contains('benchmarkValueCallback'));
+      expect(warnings.single, contains('dart:ui_web'));
+      warnings.clear();
+
+      expect(uiWebData, <BenchmarkDatapoint>[('foo', 123)]);
+      expect(jsData, <BenchmarkDatapoint>[('foo', 123)]);
+      uiWebData.clear();
+      jsData.clear();
+
+      Profiler.instance.benchmark('bar', 0.0125);
+      expect(uiWebData, <BenchmarkDatapoint>[('bar', 0.0125)]);
+      expect(jsData, <BenchmarkDatapoint>[('bar', 0.0125)]);
+      uiWebData.clear();
+      jsData.clear();
+
+      ui_web.benchmarkValueCallback = null;
+      jsBenchmarkValueCallback = null;
+      expect(() => Profiler.instance.benchmark('baz', 99.999), returnsNormally);
+      expect(uiWebData, isEmpty);
+      expect(jsData, isEmpty);
+    });
   });
 }
 
@@ -136,30 +220,4 @@ void _instrumentationTests() {
   });
 }
 
-class BenchmarkDatapoint {
-  BenchmarkDatapoint(this.name, this.value);
-
-  final String name;
-  final num value;
-
-  @override
-  int get hashCode => Object.hash(name, value);
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) {
-      return true;
-    }
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
-    return other is BenchmarkDatapoint
-        && other.name == name
-        && other.value == value;
-  }
-
-  @override
-  String toString() {
-    return '$runtimeType("$name", $value)';
-  }
-}
+typedef BenchmarkDatapoint = (String, double);
