@@ -597,14 +597,17 @@ bool validateJavaGradle(Logger logger,
   return false;
 }
 
-// Validate that the specified Java and Gradle version are compatible with
-// each other.
+// Validate that the specified Java and Android Gradle Plugin (AGP) versions are
+// compatible with each other.
 //
 // Source of truth are the AGP release notes:
 // https://developer.android.com/build/releases/gradle-plugin
 bool validateJavaAgp(Logger logger,
     {required String? javaV, required String? agpV}) {
-  String minimumKnownCompatibleJavaVersion = '17';
+  // The minimum Java version known that to be compatible with the highest known
+  // version of AGP.
+  const String highestMinimumCompatibleJavaVersion = '17';
+
   if (javaV == null || agpV == null) {
     logger.printTrace(
         'Java version or AGP version unknown ($javaV, $agpV).');
@@ -624,14 +627,14 @@ bool validateJavaAgp(Logger logger,
   }
 
   if (isWithinVersionRange(javaV,
-      min: minimumKnownCompatibleJavaVersion, max: '100.100')) {
+      min: highestMinimumCompatibleJavaVersion, max: '100.100')) {
       return true;
   }
 
   // Begin known Java <-> AGP evaluation.
   final List<JavaAgpCompat> compatList = <JavaAgpCompat>[
     JavaAgpCompat(
-      javaMin: minimumKnownCompatibleJavaVersion,
+      javaMin: highestMinimumCompatibleJavaVersion,
       javaDefault: '17',
       agpMin: '8.0',
       agpMax: maxKnownAgpVersion,
@@ -644,8 +647,8 @@ bool validateJavaAgp(Logger logger,
     ),
     JavaAgpCompat(
       // You may use JDK 1.7 but we treat 1.8 as the default since it is used by
-      // default for this AGP version.
-      // make this null ??
+      // default for this AGP version and lower versions of Java are deprecated
+      // for executing Gradle.
       javaMin: '1.8',
       javaDefault: '1.8',
       agpMin: '4.2',
