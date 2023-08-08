@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -310,7 +309,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   int? currentHighlight;
   double? leadingPadding;
   bool _menuHasEnabledItem = false;
-  late final FocusNode _focusNode;
 
   @override
   void initState() {
@@ -328,18 +326,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           TextSelection.collapsed(offset: _textEditingController.text.length);
     }
     refreshLeadingPadding();
-    _focusNode = FocusNode(
-      canRequestFocus: canRequestFocus(),
-    );
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final bool widgetCanRequestFocus = canRequestFocus();
-    if (widgetCanRequestFocus != _focusNode.canRequestFocus) {
-      _focusNode.canRequestFocus = widgetCanRequestFocus;
-    }
   }
 
   @override
@@ -367,10 +353,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
             TextSelection.collapsed(offset: _textEditingController.text.length);
       }
     }
-    final bool widgetCanRequestFocus = canRequestFocus();
-    if (widgetCanRequestFocus != _focusNode.canRequestFocus) {
-      _focusNode.canRequestFocus = widgetCanRequestFocus;
-    }
   }
 
   bool canRequestFocus() {
@@ -378,7 +360,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       return widget.requestFocusOnTap!;
     }
 
-    switch (defaultTargetPlatform) {
+    switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -610,8 +592,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         final Widget textField = TextField(
             key: _anchorKey,
             mouseCursor: effectiveMouseCursor,
-            focusNode: _focusNode,
-            readOnly: !canRequestFocus(),
+            canRequestFocus: canRequestFocus(),
             enableInteractiveSelection: canRequestFocus(),
             textAlignVertical: TextAlignVertical.center,
             style: effectiveTextStyle,

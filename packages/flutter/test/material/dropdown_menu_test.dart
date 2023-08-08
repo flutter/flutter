@@ -1232,7 +1232,7 @@ void main() {
 
     final Finder textFieldFinder = find.byType(TextField);
     final TextField result = tester.widget<TextField>(textFieldFinder);
-    expect(result.focusNode!.canRequestFocus, false);
+    expect(result.canRequestFocus, false);
   }, variant: TargetPlatformVariant.mobile());
 
   testWidgets('The text input field should be focused on desktop platforms '
@@ -1300,7 +1300,7 @@ void main() {
 
     final Finder textFieldFinder1 = find.byType(TextField);
     final TextField textField1 = tester.widget<TextField>(textFieldFinder1);
-    expect(textField1.focusNode!.canRequestFocus, false);
+    expect(textField1.canRequestFocus, false);
     // Open the dropdown menu.
     await tester.tap(textFieldFinder1);
     await tester.pump();
@@ -1329,7 +1329,7 @@ void main() {
 
     final Finder textFieldFinder = find.byType(TextField);
     final TextField textField = tester.widget<TextField>(textFieldFinder);
-    expect(textField.focusNode!.canRequestFocus, false);
+    expect(textField.canRequestFocus, false);
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.moveTo(tester.getCenter(textFieldFinder));
@@ -1526,6 +1526,7 @@ void main() {
     // Item 5 should show up.
     expect(find.text('Item 5').hitTestable(), findsOneWidget);
   });
+
 }
 
 enum TestMenu {
