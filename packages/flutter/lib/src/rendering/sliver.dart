@@ -47,12 +47,34 @@ class SliverLayoutDimensions {
   final double crossAxisExtent;
 
   @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! SliverLayoutDimensions) {
+      return false;
+    }
+    return other.scrollOffset == scrollOffset &&
+      other.precedingScrollExtent == precedingScrollExtent &&
+      other.viewportMainAxisExtent == viewportMainAxisExtent &&
+      other.crossAxisExtent == crossAxisExtent;
+  }
+
+  @override
   String toString() {
     return 'scrollOffset: $scrollOffset'
-        ' precedingScrollExtent: $precedingScrollExtent'
-        ' viewportMainAxisExtent: $viewportMainAxisExtent'
-        ' crossAxisExtent: $crossAxisExtent';
+      ' precedingScrollExtent: $precedingScrollExtent'
+      ' viewportMainAxisExtent: $viewportMainAxisExtent'
+      ' crossAxisExtent: $crossAxisExtent';
   }
+
+  @override
+  int get hashCode => Object.hash(
+    scrollOffset,
+    precedingScrollExtent,
+    viewportMainAxisExtent,
+    viewportMainAxisExtent
+  );
 }
 
 /// The direction in which a sliver's contents are ordered, relative to the

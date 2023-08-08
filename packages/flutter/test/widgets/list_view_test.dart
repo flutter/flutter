@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -775,5 +776,114 @@ void main() {
     );
     final RenderViewport renderObject = tester.allRenderObjects.whereType<RenderViewport>().first;
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
+  });
+
+  // Regression test for https://github.com/flutter/flutter/pull/131393
+  testWidgets('itemExtentCallback test', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    final List<int> buildLog = <int>[];
+    late SliverLayoutDimensions sliverLayoutDimensions;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.builder(
+          controller: controller,
+          itemExtentCallback: (int index, SliverLayoutDimensions dimensions) {
+            sliverLayoutDimensions = dimensions;
+            return 100.0;
+          },
+          itemBuilder: (BuildContext context, int index) {
+            buildLog.insert(0, index);
+            return Text('Item $index');
+          },
+        ),
+      ),
+    );
+
+    expect(
+      sliverLayoutDimensions,
+      const SliverLayoutDimensions(
+        scrollOffset: 0.0,
+        precedingScrollExtent: 0.0,
+        viewportMainAxisExtent: 600.0,
+        crossAxisExtent: 800.0,
+      )
+    );
+    expect(buildLog.length, 9);
+    expect(buildLog.min, 0);
+    expect(buildLog.max, 8);
+
+    buildLog.clear();
+
+    controller.jumpTo(10000.0);
+    await tester.pump();
+
+    // Scrolling drastically only loading the visible and cached area items.
+    expect(
+        sliverLayoutDimensions,
+        const SliverLayoutDimensions(
+          scrollOffset: 10000.0,
+          precedingScrollExtent: 0.0,
+          viewportMainAxisExtent: 600.0,
+          crossAxisExtent: 800.0,
+        )
+    );
+    expect(buildLog.length, 12);
+    expect(buildLog.min, 97);
+    expect(buildLog.max, 108);
+  });
+
+  testWidgets('itemExtent, prototypeItem and itemExtentCallback conflicts test', (WidgetTester tester) async {
+    Object? error;
+    try {
+      await tester.pumpWidget(
+        ListView.builder(
+          itemExtentCallback: (int index, SliverLayoutDimensions dimensions) {
+            return 100.0;
+          },
+          itemExtent: 100.0,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
+        ),
+      );
+    } catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+
+    error = null;
+    try {
+      await tester.pumpWidget(
+        ListView.builder(
+          itemExtentCallback: (int index, SliverLayoutDimensions dimensions) {
+            return 100.0;
+          },
+          prototypeItem: Container(),
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
+        ),
+      );
+    } catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+
+    error = null;
+    try {
+      await tester.pumpWidget(
+        ListView.builder(
+          itemExtent: 100.0,
+          prototypeItem: Container(),
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
+        ),
+      );
+    } catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
   });
 }
