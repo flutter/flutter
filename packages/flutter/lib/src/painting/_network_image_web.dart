@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:js_interop';
 import 'dart:ui' as ui;
+import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/foundation.dart';
 
@@ -117,8 +118,8 @@ class NetworkImage
   }
 
   // Html renderer does not support decoding network images to a specified size. The decode parameter
-  // here is ignored and the web-only `ui.webOnlyInstantiateImageCodecFromUrl` will be used
-  // directly in place of the typical `instantiateImageCodec` method.
+  // here is ignored and `ui_web.createImageCodecFromUrl` will be used directly
+  // in place of the typical `instantiateImageCodec` method.
   Future<ui.Codec> _loadAsync(
     NetworkImage key,
     image_provider.ImageDecoderCallback? decode,
@@ -133,7 +134,7 @@ class NetworkImage
     final bool containsNetworkImageHeaders = key.headers?.isNotEmpty ?? false;
 
     // We use a different method when headers are set because the
-    // `ui.webOnlyInstantiateImageCodecFromUrl` method is not capable of handling headers.
+    // `ui_web.createImageCodecFromUrl` method is not capable of handling headers.
     if (isCanvasKit || containsNetworkImageHeaders) {
       final Completer<DomXMLHttpRequest> completer =
           Completer<DomXMLHttpRequest>();
@@ -193,7 +194,7 @@ class NetworkImage
       // This API only exists in the web engine implementation and is not
       // contained in the analyzer summary for Flutter.
       // ignore: undefined_function, avoid_dynamic_calls
-      return ui.webOnlyInstantiateImageCodecFromUrl(
+      return ui_web.createImageCodecFromUrl(
         resolved,
         chunkCallback: (int bytes, int total) {
           chunkEvents.add(ImageChunkEvent(

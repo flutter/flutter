@@ -231,8 +231,8 @@ String generateTestEntrypoint({
     ui_web.debugEmulateFlutterTesterEnvironment = true;
     await ui_web.bootstrapEngine();
     webGoldenComparator = DefaultWebGoldenComparator(Uri.parse('${Uri.file(absolutePath)}'));
-    (ui.window as dynamic).debugOverrideDevicePixelRatio(3.0);
-    (ui.window as dynamic).webOnlyDebugPhysicalSizeOverride = const ui.Size(2400, 1800);
+    ui.window.debugOverrideDevicePixelRatio(3.0);
+    ui.window.debugPhysicalSizeOverride = const ui.Size(2400, 1800);
 
     internalBootstrapBrowserTest(() {
       return ${testConfigPath != null ? "() => test_config.testExecutable(test.main)" : "test.main"};
