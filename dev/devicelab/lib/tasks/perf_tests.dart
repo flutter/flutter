@@ -628,6 +628,21 @@ TaskFunction createGradientStaticPerfE2ETest() {
   ).run;
 }
 
+TaskFunction createAnimatedAdvancedBlendPerfTest({
+  bool? enableImpeller,
+  bool? forceOpenGLES,
+}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'animated_advanced_blend_perf',
+    enableImpeller: enableImpeller,
+    forceOpenGLES: forceOpenGLES,
+    testDriver: 'test_driver/animated_advanced_blend_perf_test.dart',
+    saveTraceFile: true,
+  ).run;
+}
+
 TaskFunction createAnimatedBlurBackropFilterPerfTest({
   bool? enableImpeller,
   bool? forceOpenGLES,
