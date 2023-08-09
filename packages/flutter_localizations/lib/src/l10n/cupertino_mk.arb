@@ -22,8 +22,8 @@
   "tabSemanticsLabel": "Картичка $tabIndex од $tabCount",
   "modalBarrierDismissLabel": "Отфрли",
   "searchTextFieldPlaceholderLabel": "Пребарувајте",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "menuDismissLabel": "Dismiss menu",
+  "noSpellCheckReplacementsLabel": "Не се најдени заменски зборови",
+  "menuDismissLabel": "Отфрлете го менито",
   "lookUpButtonLabel": "Look Up",
   "searchWebButtonLabel": "Search Web"
 }
