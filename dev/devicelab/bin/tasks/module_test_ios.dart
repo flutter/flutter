@@ -199,6 +199,11 @@ dependencies:
         );
       });
 
+      final File mainDart = File(path.join(projectDir.path, 'lib/main.dart'));
+      String mainDartContent = await mainDart.readAsString();
+      mainDartContent = mainDartContent.replaceAll('// UNCOMMENT: ', '');
+      await mainDart.writeAsString(mainDartContent, flush: true);
+
       section('Build ephemeral host app with CocoaPods');
 
       await inDirectory(projectDir, () async {

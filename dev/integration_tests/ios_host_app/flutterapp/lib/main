@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+// UNCOMMENT: import 'package:ffi_package/ffi_package.dart';
 
 import 'marquee.dart';
 
@@ -116,10 +117,15 @@ class _MyHomePageState extends State<MyHomePage> {
   // button on the Flutter page has been tapped.
   int _counter = 0;
 
+  // UNCOMMENT: late int sumResult;
+  // UNCOMMENT: late Future<int> sumAsyncResult;
+
   @override
   void initState() {
     super.initState();
     _platform.setMessageHandler(_handlePlatformIncrement);
+    // UNCOMMENT: sumResult = sum(1, 2);
+    // UNCOMMENT: sumAsyncResult = sumAsync(3, 4);
   }
 
   /// Directly increments our internal counter and rebuilds the UI.
@@ -162,7 +168,9 @@ class _MyHomePageState extends State<MyHomePage> {
               children: <Widget>[
                 Center(
                   child: Text(
-                    '$buttonName tapped $_counter time${_counter == 1 ? '' : 's'}.',
+                    '$buttonName tapped $_counter time${_counter == 1 ? '' : 's'}.\n'
+                    // UNCOMMENT: 'sum(1, 2) = $sumResult'
+                    ,
                     style: const TextStyle(fontSize: 17.0),
                   ),
                 ),
