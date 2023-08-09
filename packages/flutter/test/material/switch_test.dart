@@ -701,8 +701,6 @@ void main() {
     expect(getSwitchMaterial(tester),
       paints..circle(color: theme.hoverColor)
     );
-
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Material3 - Switch default overlayColor resolves hovered/focused state', (WidgetTester tester) async {
@@ -748,8 +746,6 @@ void main() {
     expect(getSwitchMaterial(tester),
       paints..circle(color: theme.colorScheme.primary.withOpacity(0.08))
     );
-
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Material2 - Switch can be set color', (WidgetTester tester) async {
@@ -1242,8 +1238,6 @@ void main() {
         ..rrect(color: const Color(0x1f000000))
         ..rrect(color: const Color(0xffbdbdbd)),
     );
-
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Material3 - Switch is focusable and has correct focus color', (WidgetTester tester) async {
@@ -1331,8 +1325,6 @@ void main() {
         )
         ..rrect(color: Color.alphaBlend(colors.onSurface.withOpacity(0.38), colors.surface)),
     );
-
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Switch with splash radius set', (WidgetTester tester) async {
@@ -1993,8 +1985,6 @@ void main() {
         ..rrect(color: hoveredThumbColor),
       reason: 'Inactive disabled switch should default track and custom thumb color',
     );
-
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Material3 - Switch thumb color resolves in hovered/focused states', (WidgetTester tester) async {
@@ -2071,8 +2061,6 @@ void main() {
         ..rrect(color: hoveredThumbColor),
       reason: 'active enabled switch should default track and custom thumb color',
     );
-
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Material2 - Track color resolves in active/enabled states', (WidgetTester tester) async {
@@ -2324,8 +2312,6 @@ void main() {
           ),
       reason: 'Inactive enabled switch should match these colors',
     );
-
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Material3 - Switch track color resolves in hovered/focused states', (WidgetTester tester) async {
@@ -2396,8 +2382,6 @@ void main() {
         ),
       reason: 'Active enabled switch should match these colors',
     );
-
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Material2 - Switch thumb color is blended against surface color', (WidgetTester tester) async {
@@ -2650,8 +2634,6 @@ void main() {
         ),
       reason: 'Hovered Switch should use overlay color $hoverOverlayColor over $hoverColor',
     );
-
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Do not crash when widget disappears while pointer is down', (WidgetTester tester) async {
@@ -3205,8 +3187,6 @@ void main() {
           ..rrect(color: hoveredTrackOutlineColor, style: PaintingStyle.stroke),
         reason: 'Active enabled switch track outline should match this color',
       );
-
-      focusNode.dispose();
     });
 
     testWidgetsWithLeakTracking('Track outline width resolves in active/enabled states', (WidgetTester tester) async {
@@ -3342,8 +3322,6 @@ void main() {
           ..rrect(strokeWidth: hoveredTrackOutlineWidth, style: PaintingStyle.stroke),
         reason: 'Active enabled switch track outline width should be 4.0',
       );
-
-      focusNode.dispose();
     });
 
     testWidgetsWithLeakTracking('Switch can set icon - M3', (WidgetTester tester) async {
@@ -3508,8 +3486,6 @@ void main() {
         ..rrect(color: const Color(0x0a000000))
         ..rrect(color: const Color(0xffffffff)),
     );
-
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Switch.onFocusChange callback', (WidgetTester tester) async {
@@ -3539,8 +3515,6 @@ void main() {
     await tester.pump();
     expect(focused, isFalse);
     expect(focusNode.hasFocus, isFalse);
-
-    focusNode.dispose();
   });
 }
 
