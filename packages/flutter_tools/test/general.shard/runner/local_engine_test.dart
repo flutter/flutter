@@ -119,6 +119,32 @@ void main() {
     expect(logger.traceText, contains('Local engine source at /arbitrary/engine/src'));
   });
 
+  testWithoutContext('works but produces a warning if --local-engine is specified but not --local-host-engine', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Directory localEngine = fileSystem
+        .directory('$kArbitraryEngineRoot/src/out/android_debug_unopt_arm64/')
+        ..createSync(recursive: true);
+    fileSystem.directory('$kArbitraryEngineRoot/src/out/host_debug_unopt/').createSync(recursive: true);
+
+    final BufferLogger logger = BufferLogger.test();
+    final LocalEngineLocator localEngineLocator = LocalEngineLocator(
+      fileSystem: fileSystem,
+      flutterRoot: 'flutter/flutter',
+      logger: logger,
+      userMessages: UserMessages(),
+      platform: FakePlatform(environment: <String, String>{}),
+    );
+
+    expect(
+      await localEngineLocator.findEnginePath(localEngine: localEngine.path),
+      matchesEngineBuildPaths(
+        hostEngine: '/arbitrary/engine/src/out/host_debug_unopt',
+        targetEngine: '/arbitrary/engine/src/out/android_debug_unopt_arm64',
+      ),
+    );
+    expect(logger.statusText, contains('Warning! You are using a locally built engine (--local-engine) but have not specified --local-host-engine'));
+  });
+
   testWithoutContext('works if --local-engine is specified and --local-engine-src-path '
       'is determined by --local-engine', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();

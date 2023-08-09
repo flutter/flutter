@@ -205,6 +205,10 @@ class LocalEngineLocator {
         throwToolExit(_userMessages.runnerNoEngineBuild(engineBuildPath), exitCode: 2);
       }
 
+      if (localHostEngine == null) {
+        // TODO(https://github.com/flutter/flutter/issues/132245): Change to throwToolExit.
+        _logger.printStatus(_userMessages.runnerLocalEngineRequiresHostEngine);
+      }
       final String basename = localHostEngine ?? _fileSystem.path.basename(engineBuildPath);
       final String hostBasename = _getHostEngineBasename(basename);
       engineHostBuildPath = _fileSystem.path.normalize(
