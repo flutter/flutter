@@ -513,7 +513,11 @@ class TextPainter {
        _locale = locale,
        _strutStyle = strutStyle,
        _textWidthBasis = textWidthBasis,
-       _textHeightBehavior = textHeightBehavior;
+       _textHeightBehavior = textHeightBehavior,
+       assert(() {
+         ui.ParagraphBuilder.setDisableRoundingHack(true);
+         return true;
+       }());
 
   /// Computes the width of a configured [TextPainter].
   ///
