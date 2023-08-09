@@ -113,8 +113,7 @@ void main() {
     notDisposedAllowList: <String, int?>{
       'ValueNotifier<MagnifierInfo>': 1,
       'ValueNotifier<_OverlayEntryWidgetState?>': 2,
-      'ValueNotifier<bool>': 2,
-      '_InputBorderGap': 1,
+      'ValueNotifier<bool>': 1,
     },
     // TODO(polina-c): investigate notGCed, if it does not disappear after fixing notDisposed.
     allowAllNotGCed: true,
@@ -174,8 +173,7 @@ void main() {
     notDisposedAllowList: <String, int?>{
       'ValueNotifier<MagnifierInfo>': 1,
       'ValueNotifier<_OverlayEntryWidgetState?>': 2,
-      'ValueNotifier<bool>': 2,
-      '_InputBorderGap': 1,
+      'ValueNotifier<bool>': 1,
     },
     // TODO(polina-c): investigate notGCed, if it does not disappear after fixing notDisposed.
     allowAllNotGCed: true,
