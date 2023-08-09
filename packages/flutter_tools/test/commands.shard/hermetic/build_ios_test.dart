@@ -660,7 +660,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         xattrCommand,
         setUpFakeXcodeBuildHandler(exitCode: 1, onRun: () {
-          fileSystem.systemTempDirectory.childDirectory(_xcBundleDirectoryPath).createSync();
+          fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
         }),
         setUpXCResultCommand(stdout: kSampleResultJsonWithActionIssues),
         setUpRsyncCommand(),
