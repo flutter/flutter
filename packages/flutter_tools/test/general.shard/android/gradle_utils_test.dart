@@ -580,11 +580,11 @@ allprojects {
         // Values too new *these need to update* when
         // max supported java and max known gradle versions are updated:
         // Newer tools version does not even meet current gradle version requiremnts.
-        JavaGradleTestData(false, javaVersion: '20', gradleVersion: '7.5'),
+        JavaGradleTestData(false, javaVersion: '21', gradleVersion: '7.5'),
         // Newer tools version requires newer gradle version.
-        JavaGradleTestData(true, javaVersion: '20', gradleVersion: '8.1'),
+        JavaGradleTestData(true, javaVersion: '21', gradleVersion: '8.2.1'),
         // Max known unsupported java version.
-        JavaGradleTestData(true, javaVersion: '24', gradleVersion: '8.1'),
+        JavaGradleTestData(true, javaVersion: '24', gradleVersion: '8.2.1'),
 
         // Minimims as defined in
         // https://docs.gradle.org/current/userguide/compatibility.html#java
