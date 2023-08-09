@@ -30,6 +30,7 @@ abstract final class FlutterGlobalOptions {
   static const String kEnableTelemetryFlag = 'enable-telemetry';
   static const String kLocalEngineOption = 'local-engine';
   static const String kLocalEngineSrcPathOption = 'local-engine-src-path';
+  static const String kLocalEngineHostOption = 'local-engine-host';
   static const String kLocalWebSDKOption = 'local-web-sdk';
   static const String kMachineFlag = 'machine';
   static const String kPackagesOption = 'packages';
@@ -273,6 +274,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     final EngineBuildPaths? engineBuildPaths = await globals.localEngineLocator?.findEnginePath(
       engineSourcePath: topLevelResults[FlutterGlobalOptions.kLocalEngineSrcPathOption] as String?,
       localEngine: topLevelResults[FlutterGlobalOptions.kLocalEngineOption] as String?,
+      localHostEngine: topLevelResults[FlutterGlobalOptions.kLocalEngineHostOption] as String?,
       localWebSdk: topLevelResults[FlutterGlobalOptions.kLocalWebSDKOption] as String?,
       packagePath: topLevelResults[FlutterGlobalOptions.kPackagesOption] as String?,
     );

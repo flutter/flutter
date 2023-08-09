@@ -49,6 +49,7 @@ class LocalEngineLocator {
   Future<EngineBuildPaths?> findEnginePath({
     String? engineSourcePath,
     String? localEngine,
+    String? localHostEngine,
     String? localWebSdk,
     String? packagePath,
   }) async {
@@ -96,6 +97,7 @@ class LocalEngineLocator {
         engineSourcePath: engineSourcePath,
         localEngine: localEngine,
         localWebSdk: localWebSdk,
+        localHostEngine: localHostEngine,
       );
     }
     if (localEngine != null || localWebSdk != null) {
@@ -203,6 +205,7 @@ class LocalEngineLocator {
     required String engineSourcePath,
     String? localEngine,
     String? localWebSdk,
+    String? localHostEngine,
   }) {
     if (localEngine == null && localWebSdk == null) {
       throwToolExit(_userMessages.runnerLocalEngineOrWebSdkRequired,
@@ -219,7 +222,8 @@ class LocalEngineLocator {
             exitCode: 2);
       }
 
-      final String basename = _fileSystem.path.basename(engineBuildPath);
+      final String basename =
+          localHostEngine ?? _fileSystem.path.basename(engineBuildPath);
       final String hostBasename = _getHostEngineBasename(basename);
       engineHostBuildPath = _fileSystem.path.normalize(
         _fileSystem.path
