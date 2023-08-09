@@ -1006,14 +1006,11 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'));
     const String httpClientWarning =
-      'Warning: At least one test in this suite creates an HttpClient. When\n'
-      'running a test suite that uses TestWidgetsFlutterBinding, all HTTP\n'
-      'requests will return status code 400, and no network request will\n'
-      'actually be made. Any test expecting a real network connection and\n'
-      'status code will fail.\n'
-      'To test code that needs an HttpClient, provide your own HttpClient\n'
-      'implementation to the code under test, so that your test can\n'
-      'consistently provide a testable response to the code under test.';
+      'Warning: At least one test in this suite creates an HttpClient. When running a test suite that uses\n'
+      'TestWidgetsFlutterBinding, all HTTP requests will return status code 400, and no network request\n'
+      'will actually be made. Any test expecting a real network connection and status code will fail.\n'
+      'To test code that needs an HttpClient, provide your own HttpClient implementation to the code under\n'
+      'test, so that your test can consistently provide a testable response to the code under test.';
     await _runFlutterTest(
       path.join(flutterRoot, 'packages', 'flutter_test'),
       script: path.join('test', 'bindings_test_failure.dart'),
