@@ -9,7 +9,7 @@ void main(List<String> args) async {
   final buildOutput = BuildOutput();
   final cbuilder = CBuilder.library(
     name: packageName,
-    assetName:
+    assetId:
         'package:$packageName/${packageName}_bindings_generated.dart',
     sources: [
       'src/$packageName.c',
