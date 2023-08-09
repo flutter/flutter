@@ -814,9 +814,6 @@ void _printIncompatibleJavaAgpGradleVersionsWarning({
   final bool javaGradleVersionsCompatible = gradle.validateJavaGradle(globals.logger, javaV: javaVersion, gradleV: templateGradleVersion);
   final bool javaAgpVersionsCompatible = gradle.validateJavaAgp(globals.logger, javaV: javaVersion, agpV: templateAgpVersion);
   final bool javaVersionNotFound = javaVersion == null;
-  // TODO(camsim99): Need?
-  final bool packageGenerated = projectType == FlutterProjectType.package;
-  final bool pluginOrPackageGenerated = packageGenerated || projectType == FlutterProjectType.plugin || projectType == FlutterProjectType.pluginFfi;
 
   if (javaGradleVersionsCompatible && javaAgpVersionsCompatible || javaVersionNotFound) {
     // Java/AGP template/Gradle template versions compatible.
@@ -840,11 +837,14 @@ this is a global configuration.
 
   if (!javaGradleVersionsCompatible) {
     // Gradle template version incompatible with Java version.
+    final gradle.JavaGradleCompat? validCompatibleGradleVersionRange = gradle.getValidGradleVersionRangeForJavaVersion(globals.logger, javaV: javaVersion);
+    final String compatibleGradleVersionMessage = validCompatibleGradleVersionRange == null ? '' : '(Compatible Gradle version range: ${validCompatibleGradleVersionRange.gradleMin} - ${validCompatibleGradleVersionRange.gradleMax})';
+
     globals.printWarning('''
 $incompatibleVersionsAndRecommendedOptionMessage
 
 Alternatively, to continue using your configured Java version, update the Gradle
-version specified in the following files to a compatible Gradle version:
+version specified in the following files to a compatible Gradle version $compatibleGradleVersionMessage:
 ${_getBuildGradleWrapperPropertiesFilePath(projectType, projectDirPath)}
 
 You may also update the Gradle version used by running
@@ -863,12 +863,15 @@ used.
   }
 
   // AGP template version incompatible with Java version.
+  final gradle.JavaAgpCompat? minimumCompatibleAgpVersion = gradle.getMinimumAgpVersionForJavaVersion(globals.logger, javaV: javaVersion);
+  final String comptaibleAgpVersionMessage = minimumCompatibleAgpVersion == null ? '' : '(Minimum compatible AGP version: ${minimumCompatibleAgpVersion.agpMin})';
+
   globals.printWarning('''
 $incompatibleVersionsAndRecommendedOptionMessage
 
 Alternatively, you may attempt to continue using your configured Java version,
 update the AGP version specified in the following files to a compatible AGP
-version:
+version $comptaibleAgpVersionMessage:
 ${_getBuildGradleConfigurationFilePath(projectType, projectDirPath)}
 
 See
@@ -879,7 +882,7 @@ compatible Java/AGP versions.
   );
 }
 
-// todo(camsim99): throw error?
+// TODO(camsim99): throw error?
 String? _getBuildGradleWrapperPropertiesFilePath(FlutterProjectType projectType, String projectDirPath) {
   String gradleWrapperPropertiesFilePath = '';
   switch(projectType) {
@@ -897,7 +900,7 @@ String? _getBuildGradleWrapperPropertiesFilePath(FlutterProjectType projectType,
   return gradleWrapperPropertiesFilePath;
 }
 
-// todo(camsim99): throw error?
+// TODO(camsim99): throw error?
 List<String>? _getBuildGradleConfigurationFilePath(FlutterProjectType projectType, String projectDirPath) {
   final List<String> buildGradleConfigurationFilePaths = <String>[];
   switch(projectType) {
@@ -922,5 +925,3 @@ List<String>? _getBuildGradleConfigurationFilePath(FlutterProjectType projectTyp
   }
   return buildGradleConfigurationFilePaths;
 }
-
-  //TODO(camsim99): Mention range of gradle + agp versions they can update to -- this will require major refactor (3)
