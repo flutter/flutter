@@ -62,7 +62,7 @@ void main() {
       expect(() => RestorableTimeOfDay(const TimeOfDay(hour: 20, minute: 4)).value, throwsAssertionError);
     });
 
-    testWidgets('work when not in restoration scope', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('work when not in restoration scope', (WidgetTester tester) async {
       await tester.pumpWidget(const _RestorableWidget());
 
       final _RestorableWidgetState state = tester.state(find.byType(_RestorableWidget));
@@ -107,7 +107,7 @@ void main() {
       expect(state.timeOfDay.value, const TimeOfDay(hour: 2, minute: 2));
     });
 
-    testWidgets('restore to older state', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('restore to older state', (WidgetTester tester) async {
       await tester.pumpWidget(const RootRestorationScope(
         restorationId: 'root-child',
         child: _RestorableWidget(),
@@ -138,7 +138,7 @@ void main() {
       expect(state.timeOfDay.value, const TimeOfDay(hour: 10, minute: 5));
     });
 
-    testWidgets('call notifiers when value changes', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('call notifiers when value changes', (WidgetTester tester) async {
       await tester.pumpWidget(const RootRestorationScope(
         restorationId: 'root-child',
         child: _RestorableWidget(),
