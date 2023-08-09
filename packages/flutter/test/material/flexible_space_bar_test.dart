@@ -910,21 +910,17 @@ class _SubCategoryScreenViewState extends State<SubCategoryScreenView>
             ),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 12)),
-          SliverToBoxAdapter(
-            child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-              ),
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: 300,
-              itemBuilder: (BuildContext context, int index) {
-                return Card(
-                  color: Colors.amber,
-                  child: Center(child: Text('$index')),
-                );
-              },
+          SliverGrid.builder(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
             ),
+            itemCount: 300,
+            itemBuilder: (BuildContext context, int index) {
+              return Card(
+                color: Colors.amber,
+                child: Center(child: Text('$index')),
+              );
+            },
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 12)),
         ],
