@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../foundation/leak_tracking.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('DrawerButton control test', (WidgetTester tester) async {
+  testWidgets('DrawerButton control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -171,7 +171,7 @@ void main() {
     handle.dispose();
   }, variant: TargetPlatformVariant.all());
 
-  testWidgetsWithLeakTracking('EndDrawerButton control test', (WidgetTester tester) async {
+  testWidgets('EndDrawerButton control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(

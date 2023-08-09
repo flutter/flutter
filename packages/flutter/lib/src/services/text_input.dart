@@ -1053,6 +1053,9 @@ mixin TextSelectionDelegate {
   /// Whether look up is enabled, must not be null.
   bool get lookUpEnabled => true;
 
+  /// Whether search web is enabled, must not be null.
+  bool get searchWebEnabled => true;
+
   /// Whether Live Text input is enabled.
   ///
   /// See also:

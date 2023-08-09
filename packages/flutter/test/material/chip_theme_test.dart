@@ -8,7 +8,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../foundation/leak_tracking.dart';
-import '../rendering/mock_canvas.dart';
 
 RenderBox getMaterialBox(WidgetTester tester) {
   return tester.firstRenderObject<RenderBox>(
@@ -642,6 +641,8 @@ void main() {
     await tester.pumpWidget(chipWidget(enabled: false));
     await tester.pumpAndSettle();
     expect(textColor(), disabledColor);
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Chip uses stateful border side from resolveWith pattern', (WidgetTester tester) async {
