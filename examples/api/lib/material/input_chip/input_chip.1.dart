@@ -72,7 +72,10 @@ class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
               child: ListView.builder(
                 itemCount: _suggestions.length,
                 itemBuilder: (BuildContext context, int index) {
-                  return _suggestionBuilder(context, _suggestions[index]);
+                  return ToppingSuggestion(
+                    _suggestions[index],
+                    onTap: _selectSuggestion,
+                  );
                 },
               ),
             ),
@@ -104,17 +107,6 @@ class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         padding: const EdgeInsets.all(2),
       ),
-    );
-  }
-
-  Widget _suggestionBuilder(BuildContext context, String topping) {
-    return ListTile(
-      key: ObjectKey(topping),
-      leading: CircleAvatar(
-        child: Text(topping[0].toUpperCase()),
-      ),
-      title: Text(topping),
-      onTap: () => _selectSuggestion(topping),
     );
   }
 
@@ -195,7 +187,6 @@ class ChipsInputState<T> extends State<ChipsInput<T>> {
 
   String _previousText = '';
   TextSelection? _previousSelection;
-  bool needTextUpdate = true;
 
   @override
   void initState() {
@@ -324,10 +315,6 @@ class ChipsInputEditingController<T> extends TextEditingController {
       ]);
     }
 
-    //print("Before: ${value.composing.textBefore(textWithoutReplacements)}");
-    //print("Inside: ${value.composing.textInside(textWithoutReplacements)}");
-    //print("After: ${value.composing.textAfter(textWithoutReplacements)}");
-
     final TextStyle composingStyle =
         style?.merge(const TextStyle(decoration: TextDecoration.underline)) ??
             const TextStyle(decoration: TextDecoration.underline);
@@ -343,6 +330,25 @@ class ChipsInputEditingController<T> extends TextEditingController {
         ),
         TextSpan(text: value.composing.textAfter(text)),
       ],
+    );
+  }
+}
+
+class ToppingSuggestion extends StatelessWidget {
+  const ToppingSuggestion(this.topping, {super.key, this.onTap});
+
+  final String topping;
+  final ValueChanged<String>? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      key: ObjectKey(topping),
+      leading: CircleAvatar(
+        child: Text(topping[0].toUpperCase()),
+      ),
+      title: Text(topping),
+      onTap: () => onTap?.call(topping),
     );
   }
 }
