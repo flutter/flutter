@@ -21,6 +21,10 @@ static const char kTextAffinityUpstream[] = "TextAffinity.upstream";
 // it is activated.
 static constexpr double kUITextInputAccessibilityEnablingDelaySeconds = 0.5;
 
+// A delay before reenabling the UIView areAnimationsEnabled to YES
+// in order for becomeFirstResponder to receive the proper value
+static const NSTimeInterval kKeyboardAnimationDelaySeconds = 0.1;
+
 // The "canonical" invalid CGRect, similar to CGRectNull, used to
 // indicate a CGRect involved in firstRectForRange calculation is
 // invalid. The specific value is chosen so that if firstRectForRange
@@ -2369,8 +2373,13 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 - (void)showKeyboardAndRemoveScreenshot {
   [UIView setAnimationsEnabled:NO];
   [_cachedFirstResponder becomeFirstResponder];
-  [UIView setAnimationsEnabled:YES];
-  [self dismissKeyboardScreenshot];
+  // UIKit does not immediately access the areAnimationsEnabled Boolean so a delay is needed before
+  // returned
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, kKeyboardAnimationDelaySeconds * NSEC_PER_SEC),
+                 dispatch_get_main_queue(), ^{
+                   [UIView setAnimationsEnabled:YES];
+                   [self dismissKeyboardScreenshot];
+                 });
 }
 
 - (void)handlePointerMove:(CGFloat)pointerY {
