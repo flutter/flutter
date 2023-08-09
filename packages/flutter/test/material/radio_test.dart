@@ -584,7 +584,6 @@ void main() {
         ..circle(color: const Color(0x61000000))
         ..circle(color: const Color(0x61000000)),
     );
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Material3 - Radio is focusable and has correct focus color', (WidgetTester tester) async {
@@ -663,7 +662,6 @@ void main() {
         ..circle(color: theme.colorScheme.onSurface.withOpacity(0.38))
         ..circle(color: theme.colorScheme.onSurface.withOpacity(0.38)),
     );
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Material2 - Radio can be hovered and has correct hover color', (WidgetTester tester) async {
@@ -910,8 +908,6 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
     await tester.pumpAndSettle();
     expect(groupValue, equals(2));
-
-    focusNode2.dispose();
   });
 
   testWidgetsWithLeakTracking('Radio responds to density changes.', (WidgetTester tester) async {
@@ -1228,8 +1224,6 @@ void main() {
         ..circle(color: theme.hoverColor)
         ..circle(color: hoveredFillColor),
     );
-
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Material3 - Radio fill color resolves in hovered/focused states', (WidgetTester tester) async {
@@ -1308,8 +1302,6 @@ void main() {
         ..circle(color: theme.colorScheme.primary.withOpacity(0.08))
         ..circle(color: hoveredFillColor),
     );
-
-    focusNode.dispose();
   });
 
   testWidgets('Radio overlay color resolves in active/pressed/focused/hovered states', (WidgetTester tester) async {
@@ -1455,8 +1447,6 @@ void main() {
         ),
       reason: 'Hovered Radio should use overlay color $hoverOverlayColor over $hoverColor',
     );
-
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Do not crash when widget disappears while pointer is down', (WidgetTester tester) async {
@@ -1720,8 +1710,6 @@ void main() {
       Material.of(tester.element(find.byType(Radio<bool>))),
       paints..circle(color: theme.hoverColor)..circle(color: colors.secondary)
     );
-
-    focusNode.dispose();
   });
 
   testWidgets('Material3 - Radio button default overlay colors in hover/focus/press states', (WidgetTester tester) async {
@@ -1808,8 +1796,6 @@ void main() {
       Material.of(tester.element(find.byType(Radio<bool>))),
       paints..circle(color: colors.primary.withOpacity(0.08))..circle(color: colors.primary.withOpacity(1))
     );
-
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Radio.adaptive shows the correct platform widget', (WidgetTester tester) async {
@@ -1906,7 +1892,6 @@ void main() {
         ..circle(color: theme.focusColor)
         ..circle(color: theme.colorScheme.secondary)
     );
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Material3 - Radio default overlayColor and fillColor resolves pressed state', (WidgetTester tester) async {
@@ -1972,6 +1957,5 @@ void main() {
         ..circle(color: theme.colorScheme.primary.withOpacity(0.12))
         ..circle(color: theme.colorScheme.primary)
     );
-    focusNode.dispose();
   });
 }
