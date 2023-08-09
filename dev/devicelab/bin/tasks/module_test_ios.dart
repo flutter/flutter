@@ -315,9 +315,6 @@ end
 
         section('Build iOS Objective-C host app');
 
-        // TODO(dacoharkes): It doesn't look like the xcconfig with NATIVE_ASSETS= is respected.
-        // The native asssets mapping will likely not be embedded in the kernel compilation.
-        // We either need to make sure the mapping is passed, _or_ re-run dry run in the KernelSnapshot target (breaking caching).
         await exec(
           'xcodebuild',
           <String>[

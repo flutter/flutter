@@ -25,17 +25,16 @@ import 'common.dart';
 ///
 /// All the other invocations for native assets should be dry runs.
 ///
-/// This step needs to be consistent with the other invocations so that the
-/// kernel mapping of asset id to dylib lines up after hot restart, and so
-/// that the dylibs are bundled by the native build.
+/// This step needs to be consistent with the dry run invocations in `flutter
+/// run`s so that the kernel mapping of asset id to dylib lines up after hot
+/// restart.
 ///
-/// We don't have [NativeAssets] as a dependency of [KernelSnapshot], because
-/// it would cause rebuilds of the kernel snapshot due to native assets being
-/// rebuilt. The native assets build caching is inside
-/// `package:native_assets_builder` and not visible to the flutter targets.
-/// This means we don't produce a native_assets.yaml here, and instead rely on
-/// the file being pointed to in the native build properties file which is set
-/// by build_macos.dart and friends.
+/// [KernelSnapshot] depends on this target. We produce a native_assets.yaml
+/// here, and embed that mapping inside the kernel snapshot.
+///
+/// The build always produces a valid native_assets.yaml and a native_assets.d
+/// even if there are no native assets. This way the caching logic won't try to
+/// rebuild.
 class NativeAssets extends Target {
   const NativeAssets();
 
@@ -53,9 +52,6 @@ class NativeAssets extends Target {
     final FileSystem fileSystem = globals.fs;
     final NativeAssetsBuildRunner buildRunner =
         NativeAssetsBuildRunnerImpl(projectUri, fileSystem);
-
-    globals.logger.printTrace(
-        'Potentially writing native_assets.yaml to: ${environment.buildDir.path}');
 
     List<Uri> dependencies = <Uri>[];
     switch (targetPlatform) {

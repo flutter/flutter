@@ -35,7 +35,6 @@ Future<void> updateGeneratedXcodeProperties({
   String? targetOverride,
   bool useMacOSConfig = false,
   String? buildDirOverride,
-  Uri? nativeAssets,
 }) async {
   final List<String> xcodeBuildSettings = await _xcodeBuildSettingsLines(
     project: project,
@@ -43,7 +42,6 @@ Future<void> updateGeneratedXcodeProperties({
     targetOverride: targetOverride,
     useMacOSConfig: useMacOSConfig,
     buildDirOverride: buildDirOverride,
-    nativeAssets: nativeAssets,
   );
 
   _updateGeneratedXcodePropertiesFile(
@@ -145,7 +143,6 @@ Future<List<String>> _xcodeBuildSettingsLines({
   String? targetOverride,
   bool useMacOSConfig = false,
   String? buildDirOverride,
-  Uri? nativeAssets,
 }) async {
   final List<String> xcodeBuildSettings = <String>[];
 
@@ -224,10 +221,5 @@ Future<List<String>> _xcodeBuildSettingsLines({
   for (final MapEntry<String, String> config in buildInfo.toEnvironmentConfig().entries) {
     xcodeBuildSettings.add('${config.key}=${config.value}');
   }
-
-  if (nativeAssets != null) {
-    xcodeBuildSettings.add('NATIVE_ASSETS=${nativeAssets.toFilePath()}');
-  }
-
   return xcodeBuildSettings;
 }

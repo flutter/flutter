@@ -22,7 +22,6 @@ import '../exceptions.dart';
 import 'assets.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
-import 'native_assets.dart';
 import 'shader_compiler.dart';
 
 /// Supports compiling a dart kernel file to an assembly file.
@@ -567,7 +566,6 @@ class DebugIosApplicationBundle extends IosAssetBundle {
 
   @override
   List<Target> get dependencies => <Target>[
-    const NativeAssets(),
     const DebugUniversalFramework(),
     ...super.dependencies,
   ];
@@ -599,7 +597,6 @@ class ProfileIosApplicationBundle extends _IosAssetBundleWithDSYM {
 
   @override
   List<Target> get dependencies => const <Target>[
-    NativeAssets(),
     AotAssemblyProfile(),
   ];
 }
@@ -613,7 +610,6 @@ class ReleaseIosApplicationBundle extends _IosAssetBundleWithDSYM {
 
   @override
   List<Target> get dependencies => const <Target>[
-    NativeAssets(),
     AotAssemblyRelease(),
   ];
 

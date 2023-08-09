@@ -15,13 +15,11 @@ import '../ios/xcodeproj.dart';
 import '../migrations/xcode_project_object_version_migration.dart';
 import '../migrations/xcode_script_build_phase_migration.dart';
 import '../migrations/xcode_thin_binary_build_phase_input_paths_migration.dart';
-import '../native_assets.dart';
 import '../project.dart';
 import 'cocoapod_utils.dart';
 import 'migrations/flutter_application_migration.dart';
 import 'migrations/macos_deployment_target_migration.dart';
 import 'migrations/remove_macos_framework_link_and_embedding_migration.dart';
-import 'native_assets.dart';
 
 /// When run in -quiet mode, Xcode should only print from the underlying tasks to stdout.
 /// Passing this regexp to trace moves the stdout output to stderr.
@@ -42,8 +40,6 @@ Future<void> buildMacOS({
   required bool verboseLogging,
   bool configOnly = false,
   SizeAnalyzer? sizeAnalyzer,
-  required FileSystem fileSystem,
-  required NativeAssetsBuildRunner buildRunner,
 }) async {
   final Directory? xcodeWorkspace = flutterProject.macos.xcodeWorkspace;
   if (xcodeWorkspace == null) {
@@ -72,25 +68,12 @@ Future<void> buildMacOS({
   if (!flutterBuildDir.existsSync()) {
     flutterBuildDir.createSync(recursive: true);
   }
-
-  /// The native assets yaml is needed here to add it to the Xcode properties so
-  /// that it can be read by the kernel target in `flutter assemble`. See
-  /// lib/src/build_system/targets/native_assets.dart for why we don't embed the
-  /// native assets yaml produced inside `flutter assemble` itself.
-  final Uri projectUri = flutterProject.directory.uri;
-  final Uri? nativeAssetsYaml = await dryRunNativeAssetsMacOS(
-    projectUri: projectUri,
-    fileSystem: fileSystem,
-    buildRunner: buildRunner,
-  );
-
   // Write configuration to an xconfig file in a standard location.
   await updateGeneratedXcodeProperties(
     project: flutterProject,
     buildInfo: buildInfo,
     targetOverride: targetOverride,
     useMacOSConfig: true,
-    nativeAssets: nativeAssetsYaml,
   );
   await processPodsIfNeeded(flutterProject.macos, getMacOSBuildDirectory(), buildInfo.mode);
   // If the xcfilelists do not exist, create empty version.

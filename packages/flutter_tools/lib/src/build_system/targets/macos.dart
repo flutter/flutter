@@ -16,7 +16,6 @@ import '../exceptions.dart';
 import 'assets.dart';
 import 'common.dart';
 import 'icon_tree_shaker.dart';
-import 'native_assets.dart';
 import 'shader_compiler.dart';
 
 /// Copy the macOS framework to the correct copy dir by invoking 'rsync'.
@@ -533,7 +532,6 @@ class DebugMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
 
   @override
   List<Target> get dependencies => const <Target>[
-    NativeAssets(),
     KernelSnapshot(),
     DebugMacOSFramework(),
     DebugUnpackMacOS(),
@@ -565,7 +563,6 @@ class ProfileMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
 
   @override
   List<Target> get dependencies => const <Target>[
-    NativeAssets(),
     CompileMacOSFramework(),
     ProfileUnpackMacOS(),
   ];
@@ -593,7 +590,6 @@ class ReleaseMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
 
   @override
   List<Target> get dependencies => const <Target>[
-    NativeAssets(),
     CompileMacOSFramework(),
     ReleaseUnpackMacOS(),
   ];

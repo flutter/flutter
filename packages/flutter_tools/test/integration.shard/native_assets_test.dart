@@ -256,10 +256,11 @@ void main() {
             flutterBin,
             'build',
             buildSubcommand,
+            if (buildSubcommand == 'ios') '--no-codesign',
           ],
           workingDirectory: exampleDirectory.path,
         );
-        expect(result.exitCode, 1);
+        expect(result.exitCode, isNot(0));
         expect(result.stderr,
             contains('link mode set to static, but this is not yet supported'));
       });

@@ -143,10 +143,10 @@ class KernelSnapshot extends Target {
   ];
 
   @override
-  List<Target> get dependencies => <Target>[
-    const NativeAssets(),
-    const GenerateLocalizationsTarget(),
-    const DartPluginRegistrantTarget(),
+  List<Target> get dependencies => const <Target>[
+    NativeAssets(),
+    GenerateLocalizationsTarget(),
+    DartPluginRegistrantTarget(),
   ];
 
   @override
@@ -180,21 +180,9 @@ class KernelSnapshot extends Target {
     final List<String> extraFrontEndOptions = decodeCommaSeparated(environment.defines, kExtraFrontEndOptions);
     final List<String>? fileSystemRoots = environment.defines[kFileSystemRoots]?.split(',');
     final String? fileSystemScheme = environment.defines[kFileSystemScheme];
-    final File nativeAssetsFile =
-        environment.buildDir.childFile('native_assets.yaml');
-    String? nativeAssets;
-    if (await nativeAssetsFile.exists()) {
-      nativeAssets = nativeAssetsFile.path;
-      environment.logger.printTrace(
-          'Embedding native assets mapping $nativeAssets in kernel.');
-    }
-    {
-      // TODO(dacoharkes): Remove the threading of the native_assets from frontend to backend via xcconfig.
-      String? nativeAssets = environment.defines[kNativeAssets];
-      nativeAssets = nativeAssets?.isEmpty ?? true ? null : nativeAssets;
-      environment.logger
-          .printTrace('Ignoring native assets mapping $nativeAssets.');
-    }
+
+    final String nativeAssets = environment.buildDir.childFile('native_assets.yaml').path;
+    environment.logger.printTrace('Embedding native assets mapping $nativeAssets in kernel.');
 
     TargetModel targetModel = TargetModel.flutter;
     if (targetPlatform == TargetPlatform.fuchsia_x64 ||

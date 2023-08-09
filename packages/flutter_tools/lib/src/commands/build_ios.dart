@@ -20,19 +20,13 @@ import '../globals.dart' as globals;
 import '../ios/application_package.dart';
 import '../ios/mac.dart';
 import '../ios/plist_parser.dart';
-import '../native_assets.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
 
 /// Builds an .app for an iOS app to be used for local testing on an iOS device
 /// or simulator. Can only be run on a macOS host.
 class BuildIOSCommand extends _BuildIOSSubCommand {
-  BuildIOSCommand({
-    required super.logger,
-    required super.verboseHelp,
-    required super.fileSystem,
-    required super.buildRunner,
-  }) {
+  BuildIOSCommand({ required super.logger, required super.verboseHelp }) {
     argParser
       ..addFlag('config-only',
         help: 'Update the project configuration without performing a build. '
@@ -97,12 +91,7 @@ class _ImageAssetFileKey {
 ///
 /// Can only be run on a macOS host.
 class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
-  BuildIOSArchiveCommand({
-    required super.logger,
-    required super.verboseHelp,
-    required super.fileSystem,
-    required super.buildRunner,
-  }) {
+  BuildIOSArchiveCommand({required super.logger, required super.verboseHelp}) {
     argParser.addOption(
       'export-method',
       defaultsTo: 'app-store',
@@ -570,9 +559,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 abstract class _BuildIOSSubCommand extends BuildSubCommand {
   _BuildIOSSubCommand({
     required super.logger,
-    required bool verboseHelp,
-    required this.fileSystem,
-    required this.buildRunner,
+    required bool verboseHelp
   }) : super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     addSplitDebugInfoOption();
@@ -595,9 +582,6 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       help: 'Codesign the application bundle (only available on device builds).',
     );
   }
-
-  final FileSystem fileSystem;
-  final NativeAssetsBuildRunner buildRunner;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
@@ -673,8 +657,6 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       configOnly: configOnly,
       buildAction: xcodeBuildAction,
       deviceID: globals.deviceManager?.specifiedDeviceId,
-      fileSystem: fileSystem,
-      buildRunner: buildRunner,
     );
     xcodeBuildResult = result;
 

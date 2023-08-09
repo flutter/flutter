@@ -23,7 +23,6 @@ import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../globals.dart' as globals;
 import '../macos/xcode.dart';
-import '../native_assets.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import 'application_package.dart';
@@ -566,11 +565,6 @@ class IOSSimulator extends Device {
       targetOverride: mainPath,
       environmentType: EnvironmentType.simulator,
       deviceID: id,
-      fileSystem: globals.fs,
-      buildRunner: NativeAssetsBuildRunnerImpl(
-        FlutterProject.current().directory.uri,
-        globals.fs,
-      ),
     );
     if (!buildResult.success) {
       await diagnoseXcodeBuildFailure(buildResult, globals.flutterUsage, globals.logger);

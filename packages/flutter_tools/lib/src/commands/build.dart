@@ -13,8 +13,6 @@ import '../build_system/build_system.dart';
 import '../commands/build_linux.dart';
 import '../commands/build_macos.dart';
 import '../commands/build_windows.dart';
-import '../native_assets.dart';
-import '../project.dart';
 import '../runner/flutter_command.dart';
 import 'build_aar.dart';
 import 'build_apk.dart';
@@ -33,12 +31,7 @@ class BuildCommand extends FlutterCommand {
     required Logger logger,
     required AndroidSdk? androidSdk,
     bool verboseHelp = false,
-    NativeAssetsBuildRunner? buildRunner,
   }){
-    buildRunner ??= NativeAssetsBuildRunnerImpl(
-      FlutterProject.current().directory.uri,
-      fileSystem,
-    );
     _addSubcommand(
         BuildAarCommand(
           fileSystem: fileSystem,
@@ -49,12 +42,7 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(BuildApkCommand(logger: logger, verboseHelp: verboseHelp));
     _addSubcommand(BuildAppBundleCommand(logger: logger, verboseHelp: verboseHelp));
-    _addSubcommand(BuildIOSCommand(
-      logger: logger,
-      verboseHelp: verboseHelp,
-      fileSystem: fileSystem,
-      buildRunner: buildRunner,
-    ));
+    _addSubcommand(BuildIOSCommand(logger: logger, verboseHelp: verboseHelp));
     _addSubcommand(BuildIOSFrameworkCommand(
       logger: logger,
       buildSystem: buildSystem,
@@ -65,24 +53,14 @@ class BuildCommand extends FlutterCommand {
       buildSystem: buildSystem,
       verboseHelp: verboseHelp,
     ));
-    _addSubcommand(BuildIOSArchiveCommand(
-      logger: logger,
-      verboseHelp: verboseHelp,
-      fileSystem: fileSystem,
-      buildRunner: buildRunner,
-    ));
+    _addSubcommand(BuildIOSArchiveCommand(logger: logger, verboseHelp: verboseHelp));
     _addSubcommand(BuildBundleCommand(logger: logger, verboseHelp: verboseHelp));
     _addSubcommand(BuildWebCommand(
       fileSystem: fileSystem,
       logger: logger,
       verboseHelp: verboseHelp,
     ));
-    _addSubcommand(BuildMacosCommand(
-      logger: logger,
-      verboseHelp: verboseHelp,
-      fileSystem: fileSystem,
-      buildRunner: buildRunner,
-    ));
+    _addSubcommand(BuildMacosCommand(logger: logger, verboseHelp: verboseHelp));
     _addSubcommand(BuildLinuxCommand(
       logger: logger,
       operatingSystemUtils: osUtils,

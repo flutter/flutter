@@ -25,7 +25,6 @@ import 'package:flutter_tools/src/commands/build_linux.dart';
 import 'package:flutter_tools/src/commands/build_macos.dart';
 import 'package:flutter_tools/src/commands/build_web.dart';
 import 'package:flutter_tools/src/commands/build_windows.dart';
-import 'package:flutter_tools/src/native_assets.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/fake.dart';
 
@@ -54,26 +53,11 @@ void main() {
     final List<FlutterCommand> commands = <FlutterCommand>[
       BuildWindowsCommand(logger: BufferLogger.test()),
       BuildLinuxCommand(logger: BufferLogger.test(), operatingSystemUtils: FakeOperatingSystemUtils()),
-      BuildMacosCommand(
-        logger: BufferLogger.test(),
-        verboseHelp: false,
-        fileSystem: MemoryFileSystem.test(),
-        buildRunner: FakeNativeAssetsBuildRunner(),
-      ),
+      BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false),
       BuildWebCommand(fileSystem: fileSystem, logger: BufferLogger.test(), verboseHelp: false),
       BuildApkCommand(logger: BufferLogger.test()),
-      BuildIOSCommand(
-        logger: BufferLogger.test(),
-        verboseHelp: false,
-        fileSystem: MemoryFileSystem.test(),
-        buildRunner: FakeNativeAssetsBuildRunner(),
-      ),
-      BuildIOSArchiveCommand(
-        logger: BufferLogger.test(),
-        verboseHelp: false,
-        fileSystem: MemoryFileSystem.test(),
-        buildRunner: FakeNativeAssetsBuildRunner(),
-      ),
+      BuildIOSCommand(logger: BufferLogger.test(), verboseHelp: false),
+      BuildIOSArchiveCommand(logger: BufferLogger.test(), verboseHelp: false),
       BuildAppBundleCommand(logger: BufferLogger.test()),
       BuildAarCommand(
         logger: BufferLogger.test(),
