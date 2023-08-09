@@ -233,10 +233,11 @@ TaskFunction createOpenPayScrollPerfTest({bool measureCpuGpu = true}) {
   ).run;
 }
 
-TaskFunction createFlutterGalleryStartupTest({String target = 'lib/main.dart'}) {
+TaskFunction createFlutterGalleryStartupTest({String target = 'lib/main.dart', Map<String, String>? runEnvironment}) {
   return StartupTest(
     '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
     target: target,
+    runEnvironment: runEnvironment,
   ).run;
 }
 
@@ -628,6 +629,21 @@ TaskFunction createGradientStaticPerfE2ETest() {
   ).run;
 }
 
+TaskFunction createAnimatedAdvancedBlendPerfTest({
+  bool? enableImpeller,
+  bool? forceOpenGLES,
+}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'animated_advanced_blend_perf',
+    enableImpeller: enableImpeller,
+    forceOpenGLES: forceOpenGLES,
+    testDriver: 'test_driver/animated_advanced_blend_perf_test.dart',
+    saveTraceFile: true,
+  ).run;
+}
+
 TaskFunction createAnimatedBlurBackropFilterPerfTest({
   bool? enableImpeller,
   bool? forceOpenGLES,
@@ -803,11 +819,17 @@ Future<void> _resetManifest(String testDirectory) async {
 
 /// Measure application startup performance.
 class StartupTest {
-  const StartupTest(this.testDirectory, { this.reportMetrics = true, this.target = 'lib/main.dart' });
+  const StartupTest(
+    this.testDirectory, {
+    this.reportMetrics = true,
+    this.target = 'lib/main.dart',
+    this.runEnvironment,
+  });
 
   final String testDirectory;
   final bool reportMetrics;
   final String target;
+  final Map<String, String>? runEnvironment;
 
   Future<TaskResult> run() async {
     return inDirectory<TaskResult>(testDirectory, () async {
@@ -890,21 +912,26 @@ class StartupTest {
             'screenshot_startup_${DateTime.now().toLocal().toIso8601String()}.png',
           );
         });
-        final int result = await flutter('run', options: <String>[
-          '--no-android-gradle-daemon',
-          '--no-publish-port',
-          '--verbose',
-          '--profile',
-          '--trace-startup',
-          // TODO(vashworth): Remove once done debugging https://github.com/flutter/flutter/issues/129836
-          if (device is IosDevice)
-            '--verbose-system-logs',
-          '--target=$target',
-          '-d',
-          device.deviceId,
-          if (applicationBinaryPath != null)
-            '--use-application-binary=$applicationBinaryPath',
-        ], canFail: true);
+        final int result = await flutter(
+          'run',
+          options: <String>[
+            '--no-android-gradle-daemon',
+            '--no-publish-port',
+            '--verbose',
+            '--profile',
+            '--trace-startup',
+            // TODO(vashworth): Remove once done debugging https://github.com/flutter/flutter/issues/129836
+            if (device is IosDevice)
+              '--verbose-system-logs',
+            '--target=$target',
+            '-d',
+            device.deviceId,
+            if (applicationBinaryPath != null)
+              '--use-application-binary=$applicationBinaryPath',
+          ],
+          environment: runEnvironment,
+          canFail: true,
+        );
         timer.cancel();
         if (result == 0) {
           final Map<String, dynamic> data = json.decode(
