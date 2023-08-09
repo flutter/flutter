@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
@@ -18,10 +19,12 @@ import '../cache.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
+import '../ios/core_devices.dart';
 import '../ios/devices.dart';
 import '../ios/ios_deploy.dart';
 import '../ios/iproxy.dart';
 import '../ios/mac.dart';
+import '../ios/xcode_debug.dart';
 import '../reporting/reporting.dart';
 import 'xcode.dart';
 
@@ -65,6 +68,10 @@ class XCDevice {
     required Xcode xcode,
     required Platform platform,
     required IProxy iproxy,
+    required FileSystem fileSystem,
+    @visibleForTesting
+    IOSCoreDeviceControl? coreDeviceControl,
+    XcodeDebug? xcodeDebug,
   }) : _processUtils = ProcessUtils(logger: logger, processManager: processManager),
       _logger = logger,
       _iMobileDevice = IMobileDevice(
@@ -79,6 +86,18 @@ class XCDevice {
         logger: logger,
         platform: platform,
         processManager: processManager,
+      ),
+      _coreDeviceControl = coreDeviceControl ?? IOSCoreDeviceControl(
+        logger: logger,
+        processManager: processManager,
+        xcode: xcode,
+        fileSystem: fileSystem,
+      ),
+      _xcodeDebug = xcodeDebug ?? XcodeDebug(
+        logger: logger,
+        processManager: processManager,
+        xcode: xcode,
+        fileSystem: fileSystem,
       ),
       _iProxy = iproxy,
       _xcode = xcode {
@@ -99,6 +118,8 @@ class XCDevice {
   final IOSDeploy _iosDeploy;
   final Xcode _xcode;
   final IProxy _iProxy;
+  final IOSCoreDeviceControl _coreDeviceControl;
+  final XcodeDebug _xcodeDebug;
 
   List<Object>? _cachedListResults;
 
@@ -457,6 +478,17 @@ class XCDevice {
       return const <IOSDevice>[];
     }
 
+    final Map<String, IOSCoreDevice> coreDeviceMap = <String, IOSCoreDevice>{};
+    if (_xcode.isDevicectlInstalled) {
+      final List<IOSCoreDevice> coreDevices = await _coreDeviceControl.getCoreDevices();
+      for (final IOSCoreDevice device in coreDevices) {
+        if (device.udid == null) {
+          continue;
+        }
+        coreDeviceMap[device.udid!] = device;
+      }
+    }
+
     // [
     //  {
     //    "simulator" : true,
@@ -565,11 +597,27 @@ class XCDevice {
           }
         }
 
+        DeviceConnectionInterface connectionInterface = _interfaceType(device);
+
+        // CoreDevices (devices with iOS 17 and greater) no longer reflect the
+        // correct connection interface or developer mode status in `xcdevice`.
+        // Use `devicectl` to get that information for CoreDevices.
+        final IOSCoreDevice? coreDevice = coreDeviceMap[identifier];
+        if (coreDevice != null) {
+          if (coreDevice.connectionInterface != null) {
+            connectionInterface = coreDevice.connectionInterface!;
+          }
+
+          if (coreDevice.deviceProperties?.developerModeStatus != 'enabled') {
+            devModeEnabled = false;
+          }
+        }
+
         deviceMap[identifier] = IOSDevice(
           identifier,
           name: name,
           cpuArchitecture: _cpuArchitecture(device),
-          connectionInterface: _interfaceType(device),
+          connectionInterface: connectionInterface,
           isConnected: isConnected,
           sdkVersion: sdkVersionString,
           iProxy: _iProxy,
@@ -577,8 +625,11 @@ class XCDevice {
           logger: _logger,
           iosDeploy: _iosDeploy,
           iMobileDevice: _iMobileDevice,
+          coreDeviceControl: _coreDeviceControl,
+          xcodeDebug: _xcodeDebug,
           platform: globals.platform,
           devModeEnabled: devModeEnabled,
+          isCoreDevice: coreDevice != null,
         );
       }
     }
