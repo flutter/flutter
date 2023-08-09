@@ -7,13 +7,15 @@
 
 #include <windows.h>
 #include <deque>
+#include <map>
 #include <memory>
 #include <string>
 
 #include "flutter/fml/macros.h"
-#include "flutter/shell/platform/common/client_wrapper/include/flutter/basic_message_channel.h"
+#include "flutter/shell/platform/common/client_wrapper/include/flutter/binary_messenger.h"
+#include "flutter/shell/platform/common/client_wrapper/include/flutter/encodable_value.h"
+#include "flutter/shell/platform/common/client_wrapper/include/flutter/method_channel.h"
 #include "flutter/shell/platform/windows/keyboard_handler_base.h"
-#include "rapidjson/document.h"
 
 namespace flutter {
 
@@ -50,13 +52,19 @@ class KeyboardKeyHandler : public KeyboardHandlerBase {
 
     virtual void SyncModifiersIfNeeded(int modifiers_state) = 0;
 
+    virtual std::map<uint64_t, uint64_t> GetPressedState() = 0;
+
     virtual ~KeyboardKeyHandlerDelegate();
   };
 
-  // Create a KeyboardKeyHandler.
-  explicit KeyboardKeyHandler();
+  // Create a |KeyboardKeyHandler| by specifying the messenger
+  // through which the messages are sent.
+  explicit KeyboardKeyHandler(flutter::BinaryMessenger* messenger);
 
   ~KeyboardKeyHandler();
+
+  // Init the keyboard channel used to answer to pressed state queries.
+  void InitKeyboardChannel();
 
   // Add a delegate that handles events received by |KeyboardHook|.
   void AddDelegate(std::unique_ptr<KeyboardKeyHandlerDelegate> delegate);
@@ -97,6 +105,12 @@ class KeyboardKeyHandler : public KeyboardHandlerBase {
                     bool was_down,
                     KeyEventCallback callback) override;
 
+  // Returns the keyboard pressed state.
+  //
+  // Returns the keyboard pressed state. The dictionary contains one entry per
+  // pressed keys, mapping from the logical key to the physical key.
+  std::map<uint64_t, uint64_t> GetPressedState() override;
+
  private:
   struct PendingEvent {
     // Self-incrementing ID attached to an event sent to the framework.
@@ -114,6 +128,11 @@ class KeyboardKeyHandler : public KeyboardHandlerBase {
 
   void ResolvePendingEvent(uint64_t sequence_id, bool handled);
 
+  // Called when a method is called on |channel_|;
+  void HandleMethodCall(
+      const flutter::MethodCall<EncodableValue>& method_call,
+      std::unique_ptr<flutter::MethodResult<EncodableValue>> result);
+
   std::vector<std::unique_ptr<KeyboardKeyHandlerDelegate>> delegates_;
 
   // The queue of key events that have been sent to the framework but have not
@@ -122,6 +141,9 @@ class KeyboardKeyHandler : public KeyboardHandlerBase {
 
   // The sequence_id attached to the last event sent to the framework.
   uint64_t last_sequence_id_;
+
+  // The Flutter system channel for keyboard state messages.
+  std::unique_ptr<flutter::MethodChannel<EncodableValue>> channel_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(KeyboardKeyHandler);
 };

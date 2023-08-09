@@ -73,6 +73,8 @@ class KeyboardKeyEmbedderHandler
 
   void SyncModifiersIfNeeded(int modifiers_state) override;
 
+  std::map<uint64_t, uint64_t> GetPressedState() override;
+
  private:
   struct PendingResponse {
     std::function<void(bool, uint64_t)> callback;

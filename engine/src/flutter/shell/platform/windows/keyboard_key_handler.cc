@@ -7,6 +7,7 @@
 #include <windows.h>
 
 #include "flutter/fml/logging.h"
+#include "flutter/shell/platform/common/client_wrapper/include/flutter/standard_method_codec.h"
 #include "flutter/shell/platform/windows/keyboard_utils.h"
 
 namespace flutter {
@@ -17,14 +18,50 @@ namespace {
 // emitting a warning on the console about unhandled events.
 static constexpr int kMaxPendingEvents = 1000;
 
+// The name of the channel for keyboard state queries.
+static constexpr char kChannelName[] = "flutter/keyboard";
+
+static constexpr char kGetKeyboardStateMethod[] = "getKeyboardState";
+
 }  // namespace
 
 KeyboardKeyHandler::KeyboardKeyHandlerDelegate::~KeyboardKeyHandlerDelegate() =
     default;
 
-KeyboardKeyHandler::KeyboardKeyHandler() : last_sequence_id_(1) {}
+KeyboardKeyHandler::KeyboardKeyHandler(flutter::BinaryMessenger* messenger)
+    : last_sequence_id_(1),
+      channel_(std::make_unique<MethodChannel<EncodableValue>>(
+          messenger,
+          kChannelName,
+          &StandardMethodCodec::GetInstance())) {}
 
 KeyboardKeyHandler::~KeyboardKeyHandler() = default;
+
+void KeyboardKeyHandler::InitKeyboardChannel() {
+  channel_->SetMethodCallHandler(
+      [this](const MethodCall<EncodableValue>& call,
+             std::unique_ptr<MethodResult<EncodableValue>> result) {
+        HandleMethodCall(call, std::move(result));
+      });
+}
+
+void KeyboardKeyHandler::HandleMethodCall(
+    const MethodCall<EncodableValue>& method_call,
+    std::unique_ptr<MethodResult<EncodableValue>> result) {
+  const std::string& method = method_call.method_name();
+  if (method.compare(kGetKeyboardStateMethod) == 0) {
+    EncodableMap value;
+    const auto& pressed_state = GetPressedState();
+    for (const auto& pressed_key : pressed_state) {
+      EncodableValue physical_value(static_cast<long long>(pressed_key.first));
+      EncodableValue logical_value(static_cast<long long>(pressed_key.second));
+      value[physical_value] = logical_value;
+    }
+    result->Success(EncodableValue(value));
+  } else {
+    result->NotImplemented();
+  }
+}
 
 void KeyboardKeyHandler::AddDelegate(
     std::unique_ptr<KeyboardKeyHandlerDelegate> delegate) {
@@ -35,6 +72,12 @@ void KeyboardKeyHandler::SyncModifiersIfNeeded(int modifiers_state) {
   // Only call SyncModifierIfNeeded on the key embedder handler.
   auto& key_embedder_handler = delegates_.front();
   key_embedder_handler->SyncModifiersIfNeeded(modifiers_state);
+}
+
+std::map<uint64_t, uint64_t> KeyboardKeyHandler::GetPressedState() {
+  // The embedder responder is the first element in delegates_.
+  auto& key_embedder_handler = delegates_.front();
+  return key_embedder_handler->GetPressedState();
 }
 
 void KeyboardKeyHandler::KeyboardHook(int key,

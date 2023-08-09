@@ -631,7 +631,7 @@ FlutterWindowsEngine::CreateKeyboardKeyHandler(
     BinaryMessenger* messenger,
     KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state,
     KeyboardKeyEmbedderHandler::MapVirtualKeyToScanCode map_vk_to_scan) {
-  auto keyboard_key_handler = std::make_unique<KeyboardKeyHandler>();
+  auto keyboard_key_handler = std::make_unique<KeyboardKeyHandler>(messenger);
   keyboard_key_handler->AddDelegate(
       std::make_unique<KeyboardKeyEmbedderHandler>(
           [this](const FlutterKeyEvent& event, FlutterKeyEventCallback callback,
@@ -641,6 +641,7 @@ FlutterWindowsEngine::CreateKeyboardKeyHandler(
           get_key_state, map_vk_to_scan));
   keyboard_key_handler->AddDelegate(
       std::make_unique<KeyboardKeyChannelHandler>(messenger));
+  keyboard_key_handler->InitKeyboardChannel();
   return keyboard_key_handler;
 }
 

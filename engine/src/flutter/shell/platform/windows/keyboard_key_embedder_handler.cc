@@ -350,6 +350,10 @@ void KeyboardKeyEmbedderHandler::KeyboardHook(
   }
 }
 
+std::map<uint64_t, uint64_t> KeyboardKeyEmbedderHandler::GetPressedState() {
+  return pressingRecords_;
+}
+
 void KeyboardKeyEmbedderHandler::UpdateLastSeenCriticalKey(
     int virtual_key,
     uint64_t physical_key,
