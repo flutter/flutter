@@ -238,6 +238,8 @@ static UniqueGLFWwindowPtr CreateShareWindowForWindow(GLFWwindow* window) {
   glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 #if defined(__linux__)
   glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
+  glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
 #endif
   GLFWwindow* share_window = glfwCreateWindow(1, 1, "", NULL, window);
   glfwDefaultWindowHints();
