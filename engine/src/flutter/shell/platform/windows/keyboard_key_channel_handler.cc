@@ -110,7 +110,15 @@ KeyboardKeyChannelHandler::KeyboardKeyChannelHandler(
 KeyboardKeyChannelHandler::~KeyboardKeyChannelHandler() = default;
 
 void KeyboardKeyChannelHandler::SyncModifiersIfNeeded(int modifiers_state) {
-  // Do nothing
+  // Do nothing.
+}
+
+std::map<uint64_t, uint64_t> KeyboardKeyChannelHandler::GetPressedState() {
+  // Returns an empty state because it will never be called.
+  // KeyboardKeyEmbedderHandler is the only KeyboardKeyHandlerDelegate to handle
+  // GetPressedState() calls.
+  std::map<uint64_t, uint64_t> empty_state;
+  return empty_state;
 }
 
 void KeyboardKeyChannelHandler::KeyboardHook(

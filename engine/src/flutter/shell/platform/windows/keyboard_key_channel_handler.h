@@ -41,6 +41,8 @@ class KeyboardKeyChannelHandler
 
   void SyncModifiersIfNeeded(int modifiers_state);
 
+  std::map<uint64_t, uint64_t> GetPressedState();
+
  private:
   // The Flutter system channel for key event messages.
   std::unique_ptr<flutter::BasicMessageChannel<rapidjson::Document>> channel_;
