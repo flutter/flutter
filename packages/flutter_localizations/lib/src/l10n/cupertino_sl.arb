@@ -32,8 +32,8 @@
   "tabSemanticsLabel": "Zavihek $tabIndex od $tabCount",
   "modalBarrierDismissLabel": "Opusti",
   "searchTextFieldPlaceholderLabel": "Iskanje",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "menuDismissLabel": "Dismiss menu",
+  "noSpellCheckReplacementsLabel": "Ni zamenjav",
+  "menuDismissLabel": "Opusti meni",
   "lookUpButtonLabel": "Look Up",
   "searchWebButtonLabel": "Search Web"
 }

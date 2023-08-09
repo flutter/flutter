@@ -22,8 +22,8 @@
   "tabSemanticsLabel": "Flik $tabIndex av $tabCount",
   "modalBarrierDismissLabel": "Stäng",
   "searchTextFieldPlaceholderLabel": "Sök",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "menuDismissLabel": "Dismiss menu",
+  "noSpellCheckReplacementsLabel": "Inga ersättningar hittades",
+  "menuDismissLabel": "Stäng menyn",
   "lookUpButtonLabel": "Look Up",
   "searchWebButtonLabel": "Search Web"
 }

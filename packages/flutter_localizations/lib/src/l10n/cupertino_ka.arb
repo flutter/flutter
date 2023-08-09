@@ -22,8 +22,8 @@
   "tabSemanticsLabel": "ჩანართი $tabIndex / $tabCount-დან",
   "modalBarrierDismissLabel": "დახურვა",
   "searchTextFieldPlaceholderLabel": "ძიება",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "menuDismissLabel": "Dismiss menu",
+  "noSpellCheckReplacementsLabel": "ჩანაცვლება არ მოიძებნა",
+  "menuDismissLabel": "მენიუს უარყოფა",
   "lookUpButtonLabel": "Look Up",
   "searchWebButtonLabel": "Search Web"
 }
