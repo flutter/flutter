@@ -817,6 +817,8 @@ void main() {
     expect(inkFeatures, paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.12)));
 
     await hoverGesture.removePointer();
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Default InkWell colors - selected', (WidgetTester tester) async {
@@ -882,6 +884,8 @@ void main() {
     expect(inkFeatures, paints..rect(color: theme.colorScheme.primary.withOpacity(0.12)));
 
     await hoverGesture.removePointer();
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Custom InkWell colors', (WidgetTester tester) async {
@@ -951,6 +955,8 @@ void main() {
     expect(inkFeatures, paints..rect(color: focusColor));
 
     await hoverGesture.removePointer();
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking(
@@ -1863,6 +1869,10 @@ void main() {
     expect(toggleButtonElevation('two'), 0);
 
     await hoverGesture.removePointer();
+
+    for (final FocusNode n in focusNodes) {
+      n.dispose();
+    }
   });
 
   testWidgetsWithLeakTracking('Toggle buttons height matches MaterialTapTargetSize.padded height', (WidgetTester tester) async {
