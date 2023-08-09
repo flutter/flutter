@@ -30,10 +30,8 @@ Future<Uri?> dryRunNativeAssetsMacOS({
   bool flutterTester = false,
   required FileSystem fileSystem,
 }) async {
-  if (await hasNoPackageConfig(buildRunner)) {
-    return null;
-  }
-  if (await isDisabledAndNoNativeAssets(buildRunner)) {
+  if (await hasNoPackageConfig(buildRunner) ||
+      await isDisabledAndNoNativeAssets(buildRunner)) {
     return null;
   }
 
@@ -55,10 +53,8 @@ Future<Uri?> dryRunNativeAssetsMultipeOSes({
   required FileSystem fileSystem,
   required Iterable<TargetPlatform> targetPlatforms,
 }) async {
-  if (await hasNoPackageConfig(buildRunner)) {
-    return null;
-  }
-  if (await isDisabledAndNoNativeAssets(buildRunner)) {
+  if (await hasNoPackageConfig(buildRunner) ||
+      await isDisabledAndNoNativeAssets(buildRunner)) {
     return null;
   }
 
@@ -122,9 +118,13 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsMacOS({
   Uri? writeYamlFileTo,
   required FileSystem fileSystem,
 }) async {
+  const OS targetOs = OS.macOS;
+  final Uri buildUri_ = buildUri(projectUri, targetOs);
   if (await hasNoPackageConfig(buildRunner) ||
       await isDisabledAndNoNativeAssets(buildRunner)) {
-    return (null, <Uri>[]);
+    final Uri nativeAssetsYaml = await writeNativeAssetsYaml(
+        <Asset>[], writeYamlFileTo ?? buildUri_, fileSystem);
+    return (nativeAssetsYaml, <Uri>[]);
   }
 
   final List<Target> targets = darwinArchs != null
@@ -132,8 +132,7 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsMacOS({
       : <Target>[Target.current];
   final native_assets_cli.BuildMode buildModeCli = getBuildMode(buildMode);
 
-  const OS targetOs = OS.macOS;
-  final Uri buildUri_ = buildUri(projectUri, targetOs);
+
 
   globals.logger
       .printTrace('Building native assets for $targets $buildModeCli.');
