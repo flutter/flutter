@@ -787,7 +787,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
   void _dragEnd(_DragInfo item) {
     // No changes required if last child is being inserted into the last position.
     if (_insertIndex! + 1 == _items.length) {
-      return
+      return;
     }
     setState(() {
       if (_insertIndex == item.index) {
