@@ -14154,7 +14154,9 @@ void main() {
     expect(calledGetData, false);
     // hasStrings is checked in order to decide if the content can be pasted.
     expect(calledHasStrings, true);
-  });
+  },
+    skip: kIsWeb, // [intended] web doesn't call hasStrings.
+  );
 
   testWidgets('TextField changes mouse cursor when hovered', (WidgetTester tester) async {
     await tester.pumpWidget(
