@@ -75,6 +75,8 @@ FLUTTER_ASSERT_ARC
 - (UIView*)hostView;
 - (void)addToInputParentViewIfNeeded:(FlutterTextInputView*)inputView;
 - (void)startLiveTextInput;
+- (void)showKeyboardAndRemoveScreenshot;
+
 @end
 
 @interface FlutterTextInputPluginTest : XCTestCase
@@ -2889,6 +2891,26 @@ FLUTTER_ASSERT_ARC
                   [expectation fulfill];
                 }];
   textInputPlugin.cachedFirstResponder = nil;
+}
+- (void)testInteractiveKeyboardShowKeyboardAndRemoveScreenshotAnimationIsNotImmediatelyEnable {
+  [UIView setAnimationsEnabled:YES];
+  [textInputPlugin showKeyboardAndRemoveScreenshot];
+  XCTAssertFalse(
+      UIView.areAnimationsEnabled,
+      @"The animation should still be disabled following showKeyboardAndRemoveScreenshot");
+}
+
+- (void)testInteractiveKeyboardShowKeyboardAndRemoveScreenshotAnimationIsReenabledAfterDelay {
+  [UIView setAnimationsEnabled:YES];
+  [textInputPlugin showKeyboardAndRemoveScreenshot];
+
+  NSPredicate* predicate = [NSPredicate predicateWithBlock:^BOOL(id item, NSDictionary* bindings) {
+    // This will be enabled after a delay
+    return UIView.areAnimationsEnabled;
+  }];
+  XCTNSPredicateExpectation* expectation =
+      [[XCTNSPredicateExpectation alloc] initWithPredicate:predicate object:nil];
+  [self waitForExpectations:@[ expectation ] timeout:10.0];
 }
 
 @end
