@@ -4,6 +4,7 @@
 
 import 'package:native_assets_cli/native_assets_cli.dart' show Asset;
 
+import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/platform.dart';
 import '../../build_info.dart';
@@ -144,12 +145,14 @@ class NativeAssets extends Target {
             <Asset>[], environment.buildDir.uri, fileSystem);
     }
 
+
+    final File nativeAssetsFile = environment.buildDir.childFile('native_assets.yaml');
     final Depfile depfile = Depfile(
       <File>[
         for (final Uri dependency in dependencies) fileSystem.file(dependency),
       ],
       <File>[
-        environment.buildDir.childFile('native_assets.yaml'),
+        nativeAssetsFile,
       ],
     );
     final File outputDepfile =
@@ -158,6 +161,12 @@ class NativeAssets extends Target {
       outputDepfile.parent.createSync(recursive: true);
     }
     environment.depFileService.writeToFile(depfile, outputDepfile);
+    if (!await nativeAssetsFile.exists()) {
+      throwToolExit("${nativeAssetsFile.path} doesn't exist.");
+    }
+    if (!await outputDepfile.exists()) {
+      throwToolExit("${outputDepfile.path} doesn't exist.");
+    }
   }
 
   @override

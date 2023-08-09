@@ -6,6 +6,7 @@ import 'package:package_config/package_config.dart';
 
 import '../../artifacts.dart';
 import '../../base/build.dart';
+import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../build_info.dart';
@@ -181,7 +182,11 @@ class KernelSnapshot extends Target {
     final List<String>? fileSystemRoots = environment.defines[kFileSystemRoots]?.split(',');
     final String? fileSystemScheme = environment.defines[kFileSystemScheme];
 
-    final String nativeAssets = environment.buildDir.childFile('native_assets.yaml').path;
+    final File nativeAssetsFile = environment.buildDir.childFile('native_assets.yaml');
+    final String nativeAssets = nativeAssetsFile.path;
+    if (!await nativeAssetsFile.exists()) {
+      throwToolExit("$nativeAssets doesn't exist.");
+    }
     environment.logger.printTrace('Embedding native assets mapping $nativeAssets in kernel.');
 
     TargetModel targetModel = TargetModel.flutter;
