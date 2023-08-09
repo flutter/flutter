@@ -205,7 +205,14 @@ class RenderSliverOpacity extends RenderProxySliver {
 /// child as usual. It just cannot be the target of located events, because its
 /// render object returns false from [hitTest].
 ///
-/// {@macro flutter.widgets.IgnorePointer.Semantics}
+/// ## Semantics
+///
+/// Using this class may also affect how the semantics subtree underneath is
+/// collected.
+///
+/// {@macro flutter.widgets.IgnorePointer.semantics}
+///
+/// {@macro flutter.widgets.IgnorePointer.ignoringSemantics}
 class RenderSliverIgnorePointer extends RenderProxySliver {
   /// Creates a render object that is invisible to hit testing.
   ///
@@ -228,7 +235,7 @@ class RenderSliverIgnorePointer extends RenderProxySliver {
   /// Regardless of whether this render object is ignored during hit testing, it
   /// will still consume space during layout and be visible during painting.
   ///
-  /// {@macro flutter.widgets.IgnorePointer.Semantics}
+  /// {@macro flutter.widgets.IgnorePointer.semantics}
   bool get ignoring => _ignoring;
   bool _ignoring;
   set ignoring(bool value) {
@@ -244,7 +251,7 @@ class RenderSliverIgnorePointer extends RenderProxySliver {
   /// Whether the semantics of this render object is ignored when compiling the
   /// semantics tree.
   ///
-  /// {@macro flutter.widgets.IgnorePointer.Semantics}
+  /// {@macro flutter.widgets.IgnorePointer.ignoringSemantics}
   @Deprecated(
     'Create a custom sliver ignore pointer widget instead. '
     'This feature was deprecated after v3.8.0-12.0.pre.'

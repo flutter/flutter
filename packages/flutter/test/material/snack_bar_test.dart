@@ -2125,6 +2125,74 @@ void main() {
     );
 
     testWidgets(
+      '${SnackBarBehavior.floating} should align SnackBar with the top of FloatingActionButton '
+      'when Scaffold has a FloatingActionButton and floatingActionButtonLocation is not set to a top position',
+      (WidgetTester tester) async {
+        Future<void> pumpApp({required FloatingActionButtonLocation fabLocation}) async {
+          return tester.pumpWidget(MaterialApp(
+            home: Scaffold(
+              floatingActionButton: FloatingActionButton(
+                child: const Icon(Icons.send),
+                onPressed: () {},
+              ),
+              floatingActionButtonLocation: fabLocation,
+              body: Builder(
+                builder: (BuildContext context) {
+                  return GestureDetector(
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: const Text('I am a snack bar.'),
+                        duration: const Duration(seconds: 2),
+                        action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+                        behavior: SnackBarBehavior.floating,
+                      ));
+                    },
+                    child: const Text('X'),
+                  );
+                },
+              ),
+            ),
+          ));
+        }
+
+        const List<FloatingActionButtonLocation> nonTopLocations = <FloatingActionButtonLocation>[
+          FloatingActionButtonLocation.startDocked,
+          FloatingActionButtonLocation.startFloat,
+          FloatingActionButtonLocation.centerDocked,
+          FloatingActionButtonLocation.centerFloat,
+          FloatingActionButtonLocation.endContained,
+          FloatingActionButtonLocation.endDocked,
+          FloatingActionButtonLocation.endFloat,
+          FloatingActionButtonLocation.miniStartDocked,
+          FloatingActionButtonLocation.miniStartFloat,
+          FloatingActionButtonLocation.miniCenterDocked,
+          FloatingActionButtonLocation.miniCenterFloat,
+          FloatingActionButtonLocation.miniEndDocked,
+          FloatingActionButtonLocation.miniEndFloat,
+          // Regression test related to https://github.com/flutter/flutter/pull/131303.
+          _CustomFloatingActionButtonLocation(),
+        ];
+
+
+        for (final FloatingActionButtonLocation location in nonTopLocations) {
+          await pumpApp(fabLocation: location);
+
+          await tester.tap(find.text('X'));
+          await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
+
+          final Offset snackBarBottomLeft = tester.getBottomLeft(find.byType(SnackBar));
+          final Offset floatingActionButtonTopLeft = tester.getTopLeft(
+            find.byType(FloatingActionButton),
+          );
+
+          // Since padding between the SnackBar and the FAB is created by the SnackBar,
+          // the bottom offset of the SnackBar should be equal to the top offset of the FAB
+          expect(snackBarBottomLeft.dy, floatingActionButtonTopLeft.dy);
+        }
+      },
+    );
+
+    testWidgets(
       '${SnackBarBehavior.fixed} should align SnackBar with the top of BottomNavigationBar '
       'when Scaffold has a BottomNavigationBar and FloatingActionButton',
       (WidgetTester tester) async {
@@ -3801,4 +3869,9 @@ class _TestMaterialStateColor extends MaterialStateColor {
 
     return const Color(_colorRed);
   }
+}
+
+class _CustomFloatingActionButtonLocation extends StandardFabLocation
+    with FabEndOffsetX, FabFloatOffsetY {
+  const _CustomFloatingActionButtonLocation();
 }

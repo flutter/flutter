@@ -12,7 +12,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../widgets/clipboard_utils.dart';
 import 'editable_text_utils.dart';
 import 'live_text_utils.dart';
@@ -154,6 +153,8 @@ void main() {
                     onCut: null,
                     onPaste: null,
                     onSelectAll: null,
+                    onLookUp: null,
+                    onSearchWeb: null,
                     onLiveTextInput: () {
                       invokedLiveTextInputSuccessfully = true;
                     },

@@ -23,5 +23,7 @@
   "modalBarrierDismissLabel": "Stäng",
   "searchTextFieldPlaceholderLabel": "Sök",
   "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "menuDismissLabel": "Dismiss menu"
+  "menuDismissLabel": "Dismiss menu",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web"
 }

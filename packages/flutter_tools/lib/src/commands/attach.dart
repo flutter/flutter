@@ -502,6 +502,13 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       for (final ForwardedPort port in ports) {
         await device.portForwarder!.unforward(port);
       }
+      // However we exited from the runner, ensure the terminal has line mode
+      // and echo mode enabled before we return the user to the shell.
+      try {
+        _terminal.singleCharMode = false;
+      } on StdinException {
+        // Do nothing, if the STDIN handle is no longer available, there is nothing actionable for us to do at this point
+      }
     }
   }
 

@@ -6,8 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 void main() {
   test('TimePickerThemeData copyWith, ==, hashCode basics', () {
     expect(const TimePickerThemeData(), const TimePickerThemeData().copyWith());
@@ -249,8 +247,8 @@ void main() {
     final RenderParagraph hourText = _textRenderParagraph(tester, '7');
     expect(
       hourText.text.style,
-      Typography.material2021().englishLike.displayLarge!
-        .merge(Typography.material2021().black.displayLarge)
+      Typography.material2021().englishLike.displayMedium!
+        .merge(Typography.material2021().black.displayMedium)
         .copyWith(
           color: defaultTheme.colorScheme.onPrimaryContainer,
           decorationColor: defaultTheme.colorScheme.onSurface
@@ -260,8 +258,8 @@ void main() {
     final RenderParagraph minuteText = _textRenderParagraph(tester, '15');
     expect(
       minuteText.text.style,
-      Typography.material2021().englishLike.displayLarge!
-        .merge(Typography.material2021().black.displayLarge)
+      Typography.material2021().englishLike.displayMedium!
+        .merge(Typography.material2021().black.displayMedium)
         .copyWith(
           color: defaultTheme.colorScheme.onSurface,
           decorationColor: defaultTheme.colorScheme.onSurface
@@ -275,7 +273,7 @@ void main() {
         .merge(Typography.material2021().black.titleMedium)
         .copyWith(
           color: defaultTheme.colorScheme.onTertiaryContainer,
-          decorationColor: defaultTheme.colorScheme.onSurface
+          decorationColor: defaultTheme.colorScheme.onSurface,
         ),
     );
 
@@ -285,8 +283,8 @@ void main() {
       Typography.material2021().englishLike.titleMedium!
         .merge(Typography.material2021().black.titleMedium)
         .copyWith(
-          color: defaultTheme.colorScheme.onTertiaryContainer,
-          decorationColor: defaultTheme.colorScheme.onSurface
+          color: defaultTheme.colorScheme.onSurfaceVariant,
+          decorationColor: defaultTheme.colorScheme.onSurface,
         )
     );
 
@@ -297,7 +295,7 @@ void main() {
         .merge(Typography.material2021().black.bodyMedium)
         .copyWith(
           color: defaultTheme.colorScheme.onSurface,
-          decorationColor: defaultTheme.colorScheme.onSurface
+          decorationColor: defaultTheme.colorScheme.onSurface,
         ),
     );
 
@@ -312,7 +310,7 @@ void main() {
         .merge(Typography.material2021().black.bodyLarge)
         .copyWith(
           color: defaultTheme.colorScheme.onSurface,
-          decorationColor: defaultTheme.colorScheme.onSurface
+          decorationColor: defaultTheme.colorScheme.onSurface,
         ),
     );
     // ignore: avoid_dynamic_calls

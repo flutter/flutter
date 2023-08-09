@@ -33,5 +33,7 @@
   "modalBarrierDismissLabel": "Zamknij",
   "searchTextFieldPlaceholderLabel": "Szukaj",
   "noSpellCheckReplacementsLabel": "Nie znaleziono zastąpień",
-  "menuDismissLabel": "Dismiss menu"
+  "menuDismissLabel": "Dismiss menu",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web"
 }
