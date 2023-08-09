@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
@@ -256,17 +255,12 @@ abstract class BoxBorder extends ShapeBorder {
     required BorderRadius? borderRadius,
     required TextDirection? textDirection,
     BoxShape shape = BoxShape.rectangle,
-    BorderSide? top,
-    BorderSide? right,
-    BorderSide? bottom,
-    BorderSide? left,
+    BorderSide top = BorderSide.none,
+    BorderSide right = BorderSide.none,
+    BorderSide bottom = BorderSide.none,
+    BorderSide left = BorderSide.none,
     required Color color,
   }) {
-    top ??= BorderSide.none;
-    right ??= BorderSide.none;
-    bottom ??= BorderSide.none;
-    left ??= BorderSide.none;
-
     final RRect borderRect;
     switch (shape) {
       case BoxShape.rectangle:
@@ -503,16 +497,26 @@ class Border extends BoxBorder {
         && right.strokeAlign == topStrokeAlign;
   }
 
-  Set<Color> get _distinctVisibleColors => <Color?>{
-        if (top.style == BorderStyle.none) null else top.color,
-        if (right.style == BorderStyle.none) null else right.color,
-        if (bottom.style == BorderStyle.none) null else bottom.color,
-        if (left.style == BorderStyle.none) null else left.color,
-      }.whereNotNull().toSet();
+  Set<Color> _distinctVisibleColors() {
+    final Set<Color> distinctVisibleColors = <Color>{};
+    if (top.style != BorderStyle.none) {
+      distinctVisibleColors.add(top.color);
+    }
+    if (right.style != BorderStyle.none) {
+      distinctVisibleColors.add(right.color);
+    }
+    if (bottom.style != BorderStyle.none) {
+      distinctVisibleColors.add(bottom.color);
+    }
+    if (left.style != BorderStyle.none) {
+      distinctVisibleColors.add(left.color);
+    }
+    return distinctVisibleColors;
+  }
 
-  /// [BoxBorder.paintNonUniformBorder] is about 20% faster than [paintBorder],
-  /// but [paintBorder] is able to draw hairline borders when width is zero
-  /// and style is [BorderStyle.solid].
+  // [BoxBorder.paintNonUniformBorder] is about 20% faster than [paintBorder],
+  // but [paintBorder] is able to draw hairline borders when width is zero
+  // and style is [BorderStyle.solid].
   bool get _hasHairlineBorder =>
       (top.style == BorderStyle.solid && top.width == 0.0) ||
       (right.style == BorderStyle.solid && right.width == 0.0) ||
@@ -638,7 +642,7 @@ class Border extends BoxBorder {
     }
 
     // Allow painting non-uniform borders if the visible colors are uniform.
-    final Set<Color> visibleColors = _distinctVisibleColors;
+    final Set<Color> visibleColors = _distinctVisibleColors();
     final bool hasHairlineBorder = _hasHairlineBorder;
     // Paint a non uniform border if a single color is visible
     // and (borderRadius is present) or (border is visible and width != 0.0).
@@ -647,10 +651,10 @@ class Border extends BoxBorder {
           shape: shape,
           borderRadius: borderRadius,
           textDirection: textDirection,
-          top: top.style == BorderStyle.none ? null : top,
-          right: right.style == BorderStyle.none ? null : right,
-          bottom: bottom.style == BorderStyle.none ? null : bottom,
-          left: left.style == BorderStyle.none ? null : left,
+          top: top.style == BorderStyle.none ? BorderSide.none : top,
+          right: right.style == BorderStyle.none ? BorderSide.none : right,
+          bottom: bottom.style == BorderStyle.none ? BorderSide.none : bottom,
+          left: left.style == BorderStyle.none ? BorderSide.none : left,
           color: visibleColors.first);
       return;
     }
@@ -842,12 +846,24 @@ class BorderDirectional extends BoxBorder {
         && end.strokeAlign == topStrokeAlign;
   }
 
-  Set<Color> get _distinctVisibleColors => <Color?>{
-        if (top.style == BorderStyle.none) null else top.color,
-        if (end.style == BorderStyle.none) null else end.color,
-        if (bottom.style == BorderStyle.none) null else bottom.color,
-        if (start.style == BorderStyle.none) null else start.color,
-      }.whereNotNull().toSet();
+  Set<Color> _distinctVisibleColors() {
+    final Set<Color> distinctVisibleColors = <Color>{};
+    if (top.style != BorderStyle.none) {
+      distinctVisibleColors.add(top.color);
+    }
+    if (end.style != BorderStyle.none) {
+      distinctVisibleColors.add(end.color);
+    }
+    if (bottom.style != BorderStyle.none) {
+      distinctVisibleColors.add(bottom.color);
+    }
+    if (start.style != BorderStyle.none) {
+      distinctVisibleColors.add(start.color);
+    }
+
+    return distinctVisibleColors;
+  }
+
 
   bool get _hasHairlineBorder =>
       (top.style == BorderStyle.solid && top.width == 0.0) ||
@@ -1016,17 +1032,17 @@ class BorderDirectional extends BoxBorder {
     }
 
     // Allow painting non-uniform borders if the visible colors are uniform.
-    final Set<Color> visibleColors = _distinctVisibleColors;
+    final Set<Color> visibleColors = _distinctVisibleColors();
     final bool hasHairlineBorder = _hasHairlineBorder;
     if (visibleColors.length == 1 && !hasHairlineBorder) {
       BoxBorder.paintNonUniformBorder(canvas, rect,
           shape: shape,
           borderRadius: borderRadius,
           textDirection: textDirection,
-          top: top.style == BorderStyle.none ? null : top,
-          right: right.style == BorderStyle.none ? null : right,
-          bottom: bottom.style == BorderStyle.none ? null : bottom,
-          left: left.style == BorderStyle.none ? null : left,
+          top: top.style == BorderStyle.none ? BorderSide.none : top,
+          right: right.style == BorderStyle.none ? BorderSide.none : right,
+          bottom: bottom.style == BorderStyle.none ? BorderSide.none : bottom,
+          left: left.style == BorderStyle.none ? BorderSide.none : left,
           color: visibleColors.first);
       return;
     }
