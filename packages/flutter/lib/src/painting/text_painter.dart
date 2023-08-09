@@ -515,7 +515,9 @@ class TextPainter {
        _textWidthBasis = textWidthBasis,
        _textHeightBehavior = textHeightBehavior,
        assert(() {
-         ui.ParagraphBuilder.setDisableRoundingHack(true);
+         if (const bool.fromEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')) {
+           ui.ParagraphBuilder.setDisableRoundingHack(true);
+         }
          return true;
        }());
 

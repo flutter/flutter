@@ -101,7 +101,7 @@ final String flutterTester = path.join(flutterRoot, 'bin', 'cache', 'artifacts',
 
 /// The arguments to pass to `flutter test` (typically the local engine
 /// configuration) -- prefilled with the arguments passed to test.dart.
-final List<String> flutterTestArgs = <String>[];
+final List<String> flutterTestArgs = <String>['--dart-define="SKPARAGRAPH_REMOVE_ROUNDING_HACK=true"'];
 
 /// Environment variables to override the local engine when running `pub test`,
 /// if such flags are provided to `test.dart`.
