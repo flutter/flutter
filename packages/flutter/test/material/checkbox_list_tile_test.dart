@@ -496,8 +496,6 @@ void main() {
     await tester.pump();
     expect(gotFocus, isFalse);
     expect(node.hasFocus, isFalse);
-
-    node.dispose();
   });
 
     testWidgetsWithLeakTracking('CheckboxListTile can be disabled', (WidgetTester tester) async {
