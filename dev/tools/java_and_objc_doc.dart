@@ -15,11 +15,15 @@ const String kDocRoot = 'dev/docs/doc';
 /// the artifact store and extracts them to the location used for Dartdoc.
 Future<void> main(List<String> args) async {
   final String engineVersion = File('bin/internal/engine.version').readAsStringSync().trim();
+  String engineRealm = File('bin/internal/engine.realm').readAsStringSync().trim();
+  if (engineRealm.isNotEmpty) {
+    engineRealm = '$engineRealm/';
+  }
 
-  final String javadocUrl = 'https://storage.googleapis.com/flutter_infra_release/flutter/$engineVersion/android-javadoc.zip';
+  final String javadocUrl = 'https://storage.googleapis.com/${engineRealm}flutter_infra_release/flutter/$engineVersion/android-javadoc.zip';
   generateDocs(javadocUrl, 'javadoc', 'io/flutter/view/FlutterView.html');
 
-  final String objcdocUrl = 'https://storage.googleapis.com/flutter_infra_release/flutter/$engineVersion/ios-objcdoc.zip';
+  final String objcdocUrl = 'https://storage.googleapis.com/${engineRealm}flutter_infra_release/flutter/$engineVersion/ios-objcdoc.zip';
   generateDocs(objcdocUrl, 'objcdoc', 'Classes/FlutterViewController.html');
 }
 
