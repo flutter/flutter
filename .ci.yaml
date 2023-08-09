@@ -2720,7 +2720,7 @@ targets:
         ["devicelab", "android", "linux", "samsung", "s10"]
       task_name: dynamic_path_tessellation_perf__timeline_summary
 
-  - name: Mac_ios dynamic_path_tessellation_ios__timeline_summary
+  - name: Mac_ios dynamic_path_tessellation_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2728,7 +2728,7 @@ targets:
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
-      task_name: dynamic_path_tessellation_ios__timeline_summary
+      task_name: dynamic_path_tessellation_perf_ios__timeline_summary
 
   - name: Staging_build_linux analyze
     presubmit: false
