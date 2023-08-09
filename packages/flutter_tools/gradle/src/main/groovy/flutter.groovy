@@ -2,18 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-apply from: "app_link_settings.groovy"
-
-import static groovy.io.FileType.FILES
-
 import com.android.build.OutputFile
 import groovy.json.JsonSlurper
 import groovy.json.JsonGenerator
 import groovy.xml.QName
-import java.nio.file.Path
 import java.nio.file.Paths
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 import java.util.Set
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.DefaultTask
@@ -35,7 +28,6 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
-import org.gradle.util.VersionNumber
 
 /**
  * For apps only. Provides the flutter extension used in app/build.gradle.
@@ -1236,6 +1228,24 @@ class FlutterPlugin implements Plugin<Project> {
         }
         configurePlugins()
         detectLowCompileSdkVersionOrNdkVersion()
+    }
+}
+
+class AppLinkSettings {
+    String applicationId
+    Set<Deeplink> deeplinks
+}
+
+class Deeplink {
+    String scheme, host, path
+    boolean equals(o) {
+        if (o == null)
+            throw new NullPointerException()
+        if (o.getClass() != getClass())
+            return false
+        return scheme == o.scheme &&
+                host == o.host &&
+                path == o.path
     }
 }
 
