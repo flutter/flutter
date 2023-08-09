@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -65,6 +66,8 @@ void main() {
   late FileSystem fileSystem;
   late TestUsage usage;
   late FakeProcessManager fakeProcessManager;
+  late ProcessUtils processUtils;
+  late BufferLogger logger;
   late XcodeProjectInterpreter xcodeProjectInterpreter;
 
   setUpAll(() {
@@ -73,8 +76,13 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
+    logger = BufferLogger.test();
     usage = TestUsage();
     fakeProcessManager = FakeProcessManager.empty();
+    processUtils = ProcessUtils(
+      logger: logger,
+      processManager: fakeProcessManager,
+    );
     xcodeProjectInterpreter = FakeXcodeProjectInterpreter();
   });
 
@@ -141,8 +149,9 @@ STDERR STUFF
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      fileSystem: fileSystem,
+      logger: logger,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     createCoreMockProjectFiles();
@@ -163,8 +172,9 @@ STDERR STUFF
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      fileSystem: fileSystem,
+      logger: logger,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
 
@@ -186,8 +196,9 @@ STDERR STUFF
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      fileSystem: fileSystem,
+      logger: logger,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     fileSystem.file('pubspec.yaml').createSync();
@@ -208,8 +219,9 @@ STDERR STUFF
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      fileSystem: fileSystem,
+      logger: logger,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     fileSystem.file('pubspec.yaml').createSync();
@@ -230,8 +242,9 @@ STDERR STUFF
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      fileSystem: fileSystem,
+      logger: logger,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -260,8 +273,9 @@ STDERR STUFF
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      fileSystem: fileSystem,
+      logger: logger,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -282,8 +296,9 @@ STDERR STUFF
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      fileSystem: fileSystem,
+      logger: logger,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -305,8 +320,9 @@ STDERR STUFF
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      fileSystem: fileSystem,
+      logger: logger,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -328,8 +344,9 @@ STDERR STUFF
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      fileSystem: fileSystem,
+      logger: logger,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -350,8 +367,9 @@ STDERR STUFF
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      fileSystem: fileSystem,
+      logger: logger,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -442,7 +460,8 @@ STDERR STUFF
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
-      logger: BufferLogger.test(),
+      logger: logger,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
 
@@ -463,8 +482,9 @@ STDERR STUFF
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      fileSystem: fileSystem,
+      logger: logger,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -498,8 +518,9 @@ STDERR STUFF
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      fileSystem: fileSystem,
+      logger: logger,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     ));
 
@@ -528,8 +549,9 @@ STDERR STUFF
     final BuildCommand command = BuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
+      fileSystem: fileSystem,
+      logger: logger,
+      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
