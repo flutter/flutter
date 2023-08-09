@@ -250,7 +250,6 @@ void main() {
       inkFeatures,
       paints ..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff0000ff)),
     );
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('ink response changes color on focus with overlayColor', (WidgetTester tester) async {
@@ -299,7 +298,6 @@ void main() {
       inkFeatures,
       paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff0000ff)),
     );
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('ink well changes color on pressed with overlayColor', (WidgetTester tester) async {
@@ -372,7 +370,6 @@ void main() {
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..circle(x: 50, y: 50, color: splashColor));
     await gesture.up();
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('ink response splashColor matches resolved overlayColor for MaterialState.pressed', (WidgetTester tester) async {
@@ -422,7 +419,6 @@ void main() {
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..circle(x: 50, y: 50, color: splashColor));
     await gesture.up();
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('ink response uses radius for focus highlight', (WidgetTester tester) async {
@@ -453,7 +449,6 @@ void main() {
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(inkFeatures, paints..circle(radius: 20, color: const Color(0xff0000ff)));
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('InkWell uses borderRadius for focus highlight', (WidgetTester tester) async {
@@ -490,7 +485,6 @@ void main() {
       rrect: RRect.fromLTRBR(350.0, 250.0, 450.0, 350.0, const Radius.circular(10)),
       color: const Color(0xff0000ff),
     ));
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('InkWell uses borderRadius for hover highlight', (WidgetTester tester) async {
@@ -582,7 +576,6 @@ void main() {
         sampleSize: 100,
       )),
     );
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('InkWell customBorder clips for hover highlight', (WidgetTester tester) async {
@@ -674,7 +667,6 @@ testWidgetsWithLeakTracking('InkResponse radius can be updated', (WidgetTester t
     await tester.pumpAndSettle();
     expect(inkFeatures, paintsExactlyCountTimes(#drawCircle, 1));
     expect(inkFeatures, paints..circle(radius: 20, color: const Color(0xff0000ff)));
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('InkResponse highlightShape can be updated', (WidgetTester tester) async {
@@ -716,7 +708,6 @@ testWidgetsWithLeakTracking('InkResponse radius can be updated', (WidgetTester t
     await tester.pumpAndSettle();
     expect(inkFeatures, paintsExactlyCountTimes(#drawCircle, 0));
     expect(inkFeatures, paintsExactlyCountTimes(#drawRRect, 1));
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('InkWell borderRadius can be updated', (WidgetTester tester) async {
@@ -762,7 +753,6 @@ testWidgetsWithLeakTracking('InkResponse radius can be updated', (WidgetTester t
       rrect: RRect.fromLTRBR(350.0, 250.0, 450.0, 350.0, const Radius.circular(30)),
       color: const Color(0xff0000ff),
     ));
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('InkWell customBorder can be updated', (WidgetTester tester) async {
@@ -830,7 +820,6 @@ testWidgetsWithLeakTracking('InkResponse radius can be updated', (WidgetTester t
         sampleSize: 100,
       )),
     );
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('InkWell splash customBorder can be updated', (WidgetTester tester) async {
@@ -919,7 +908,6 @@ testWidgetsWithLeakTracking('InkResponse radius can be updated', (WidgetTester t
     );
 
     await gesture.up();
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking("ink response doesn't change color on focus when on touch device", (WidgetTester tester) async {
@@ -952,7 +940,6 @@ testWidgetsWithLeakTracking('InkResponse radius can be updated', (WidgetTester t
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(inkFeatures, paintsExactlyCountTimes(#drawRect, 0));
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('InkWell.mouseCursor changes cursor on hover', (WidgetTester tester) async {
@@ -1042,7 +1029,7 @@ testWidgetsWithLeakTracking('InkResponse radius can be updated', (WidgetTester t
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
-  testWidgets('InkResponse containing selectable text changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('InkResponse containing selectable text changes mouse cursor when hovered', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/104595.
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
@@ -1231,7 +1218,6 @@ testWidgetsWithLeakTracking('InkResponse radius can be updated', (WidgetTester t
     );
     await tester.pumpAndSettle();
     expect(focusNode.hasPrimaryFocus, isFalse);
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('ink response accepts focus when disabled in directional navigation mode', (WidgetTester tester) async {
@@ -1278,7 +1264,6 @@ testWidgetsWithLeakTracking('InkResponse radius can be updated', (WidgetTester t
     );
     await tester.pumpAndSettle();
     expect(focusNode.hasPrimaryFocus, isTrue);
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking("ink response doesn't hover when disabled", (WidgetTester tester) async {
@@ -1332,7 +1317,6 @@ testWidgetsWithLeakTracking('InkResponse radius can be updated', (WidgetTester t
 
     await tester.pumpAndSettle();
     expect(focusNode.hasPrimaryFocus, isFalse);
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('When ink wells are nested, only the inner one is triggered by tap splash', (WidgetTester tester) async {
@@ -2087,7 +2071,7 @@ testWidgetsWithLeakTracking('InkResponse radius can be updated', (WidgetTester t
     expect(inkFeatures, paintsExactlyCountTimes(#drawCircle, 0));
   });
 
-  testWidgets('InkWell disposes statesController', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('InkWell dispose statesController', (WidgetTester tester) async {
     int tapCount = 0;
     Widget buildFrame(MaterialStatesController? statesController) {
       return MaterialApp(

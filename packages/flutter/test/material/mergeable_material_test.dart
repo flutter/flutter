@@ -80,7 +80,7 @@ void main() {
     expect(box.size.height, equals(0));
   });
 
-  testWidgets('MergeableMaterial update slice', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MergeableMaterial update slice', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -234,7 +234,7 @@ void main() {
     debugDisableShadows = true;
   });
 
-  testWidgets('MergeableMaterial skips shadow for zero elevation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MergeableMaterial skips shadow for zero elevation', (WidgetTester tester) async {
     debugDisableShadows = false;
     await tester.pumpWidget(
       const MaterialApp(
@@ -1168,7 +1168,7 @@ void main() {
     );
   }
 
-  testWidgets('MergeableMaterial dividers', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MergeableMaterial dividers', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -1330,7 +1330,7 @@ void main() {
     expect(decoration.border!.top.color, dividerColor);
   });
 
-  testWidgets('MergeableMaterial respects MaterialSlice.color', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MergeableMaterial respects MaterialSlice.color', (WidgetTester tester) async {
     const Color themeCardColor = Colors.red;
     const Color materialSliceColor = Colors.green;
 

@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(polina-c): start referencing this code in leak_tracker_flutter
-// https://github.com/dart-lang/leak_tracker/issues/52
-
 import 'dart:core';
 
 import 'package:flutter/foundation.dart';
@@ -13,84 +10,41 @@ import 'package:leak_tracker/leak_tracker.dart';
 import 'package:leak_tracker_testing/leak_tracker_testing.dart';
 import 'package:meta/meta.dart';
 
-export 'package:leak_tracker/leak_tracker.dart' show LeakDiagnosticConfig;
+export 'package:leak_tracker/leak_tracker.dart' show LeakDiagnosticConfig, LeakTrackingTestConfig;
 
-
-void _flutterEventToLeakTracker(ObjectEvent event) {
-  return LeakTracking.dispatchObjectEvent(event.toMap());
-}
-
-void _setUpTestingWithLeakTracking() {
-  _printPlatformWarningIfNeeded();
-  if (!_isPlatformSupported) {
-    return;
-  }
-
-  LeakTracking.phase = const PhaseSettings.paused();
-  LeakTracking.start(config: LeakTrackingConfig.passive());
-
-  MemoryAllocations.instance.addListener(_flutterEventToLeakTracker);
-}
-
-bool _stopConfiguringTearDown = false;
-
-/// Sets [tearDownAll] to tear down leak tracking if it is started.
+/// Set of objects, that does not hold the objects from garbage collection.
 ///
-/// [configureOnce] is true tear down will be created just once,
-/// not for every test.
-/// Multiple [tearDownAll] is needed to handle test groups that have
-/// own [tearDownAll].
-void configureLeakTrackingTearDown({
-  LeaksCallback? onLeaks,
-  bool configureOnce = false,
-}) {
-  if (_isPlatformSupported && !_stopConfiguringTearDown) {
-    tearDownAll(() async {
-      if (LeakTracking.isStarted) {
-        await _tearDownTestingWithLeakTracking(onLeaks);
-      }
-    });
-  }
-  if (configureOnce) {
-    _stopConfiguringTearDown = true;
-  }
-}
+/// The objects are referenced by hash codes and can duplicate with low probability.
+@visibleForTesting
+class WeakSet {
+  final Set<String> _objectCodes = <String>{};
 
-Future<void> _tearDownTestingWithLeakTracking(LeaksCallback? onLeaks) async {
-  if (!LeakTracking.isStarted) {
-    return;
-  }
-  if (!_isPlatformSupported) {
-    return;
+  String _toCode(int hashCode, String type) => '$type-$hashCode';
+
+  void add(Object object) {
+    _objectCodes.add(_toCode(identityHashCode(object), object.runtimeType.toString()));
   }
 
-  MemoryAllocations.instance.removeListener(_flutterEventToLeakTracker);
-  await forceGC(fullGcCycles: 3);
-  final Leaks leaks = await LeakTracking.collectLeaks();
-
-  LeakTracking.stop();
-
-  if (leaks.total == 0) {
-    return;
+  void addByCode(int hashCode, String type) {
+    _objectCodes.add(_toCode(hashCode, type));
   }
-  if (onLeaks == null) {
-    expect(leaks, isLeakFree);
-  } else {
-    onLeaks(leaks);
+
+  bool contains(int hashCode, String type) {
+    final bool result = _objectCodes.contains(_toCode(hashCode, type));
+    return result;
   }
 }
 
 /// Wrapper for [testWidgets] with memory leak tracking.
 ///
-/// The test will fail if instrumented objects in [callback] are
-/// garbage collected without being disposed or not garbage
-/// collected soon after disposal.
-///
-/// [testExecutableWithLeakTracking] must be invoked
-/// for this test run.
+/// The method will fail if instrumented objects in [callback] are
+/// garbage collected without being disposed.
 ///
 /// More about leak tracking:
 /// https://github.com/dart-lang/leak_tracker.
+///
+/// See https://github.com/flutter/devtools/issues/3951 for plans
+/// on leak tracking.
 @isTest
 void testWidgetsWithLeakTracking(
   String description,
@@ -100,32 +54,19 @@ void testWidgetsWithLeakTracking(
   bool semanticsEnabled = true,
   TestVariant<Object?> variant = const DefaultTestVariant(),
   dynamic tags,
-  LeakTrackingTestConfig leakTrackingTestConfig =
-      const LeakTrackingTestConfig(),
+  LeakTrackingTestConfig leakTrackingTestConfig = const LeakTrackingTestConfig(),
 }) {
-  configureLeakTrackingTearDown();
-
-  final PhaseSettings phase = PhaseSettings(
-    name: description,
-    leakDiagnosticConfig: leakTrackingTestConfig.leakDiagnosticConfig,
-    notGCedAllowList: leakTrackingTestConfig.notGCedAllowList,
-    notDisposedAllowList: leakTrackingTestConfig.notDisposedAllowList,
-    allowAllNotDisposed: leakTrackingTestConfig.allowAllNotDisposed,
-    allowAllNotGCed: leakTrackingTestConfig.allowAllNotGCed,
-  );
-
-  Future<void> wrappedCallBack(WidgetTester tester) async {
-    if (!LeakTracking.isStarted) {
-      _setUpTestingWithLeakTracking();
-    }
-    LeakTracking.phase = phase;
-    await callback(tester);
-    LeakTracking.phase = const PhaseSettings.paused();
+  Future<void> wrappedCallback(WidgetTester tester) async {
+    await _withFlutterLeakTracking(
+      () async => callback(tester),
+      tester,
+      leakTrackingTestConfig,
+    );
   }
 
   testWidgets(
     description,
-    wrappedCallBack,
+    wrappedCallback,
     skip: skip,
     timeout: timeout,
     semanticsEnabled: semanticsEnabled,
@@ -134,92 +75,132 @@ void testWidgetsWithLeakTracking(
   );
 }
 
-bool _notSupportedWarningPrinted = false;
-bool get _isPlatformSupported => !kIsWeb;
-void _printPlatformWarningIfNeeded() {
+bool _webWarningPrinted = false;
+
+/// Runs [callback] with leak tracking.
+///
+/// Wrapper for [withLeakTracking] with Flutter specific functionality.
+///
+/// The method will fail if wrapped code contains memory leaks.
+///
+/// See details in documentation for `withLeakTracking` at
+/// https://github.com/dart-lang/leak_tracker/blob/main/lib/src/leak_tracking/orchestration.dart
+///
+/// The Flutter related enhancements are:
+/// 1. Listens to [MemoryAllocations] events.
+/// 2. Uses `tester.runAsync` for leak detection if [tester] is provided.
+///
+/// Pass [config] to troubleshoot or exempt leaks. See [LeakTrackingTestConfig]
+/// for details.
+Future<void> _withFlutterLeakTracking(
+  DartAsyncCallback callback,
+  WidgetTester tester,
+  LeakTrackingTestConfig config,
+) async {
+  // Leak tracker does not work for web platform.
   if (kIsWeb) {
-    final bool shouldPrintWarning = !_notSupportedWarningPrinted &&
-        LeakTracking.warnForUnsupportedPlatforms;
+    final bool shouldPrintWarning = !_webWarningPrinted && LeakTrackerGlobalSettings.warnForNonSupportedPlatforms;
     if (shouldPrintWarning) {
-      _notSupportedWarningPrinted = true;
-      debugPrint(
-        'Leak tracking is not supported on web platform.\nTo turn off this message, set `LeakTracking.warnForNotSupportedPlatforms` to false.',
-      );
+      _webWarningPrinted = true;
+      debugPrint('Leak tracking is not supported on web platform.\nTo turn off this message, set `LeakTrackingTestConfig.warnForNonSupportedPlatforms` to false.');
     }
+    await callback();
     return;
   }
-  assert(_isPlatformSupported);
+
+  void flutterEventToLeakTracker(ObjectEvent event) {
+    return dispatchObjectEvent(event.toMap());
+  }
+
+  return TestAsyncUtils.guard<void>(() async {
+    MemoryAllocations.instance.addListener(flutterEventToLeakTracker);
+    Future<void> asyncCodeRunner(DartAsyncCallback action) async => tester.runAsync(action);
+
+    try {
+      Leaks leaks = await withLeakTracking(
+        callback,
+        asyncCodeRunner: asyncCodeRunner,
+        leakDiagnosticConfig: config.leakDiagnosticConfig,
+        shouldThrowOnLeaks: false,
+      );
+
+      leaks = LeakCleaner(config).clean(leaks);
+
+      if (leaks.total > 0) {
+        config.onLeaks?.call(leaks);
+        if (config.failTestOnLeaks) {
+          expect(leaks, isLeakFree);
+        }
+      }
+    } finally {
+      MemoryAllocations.instance.removeListener(flutterEventToLeakTracker);
+    }
+  });
 }
 
-/// Configuration for leak tracking in unit tests.
-///
-/// Customized configuration is needed only for test debugging,
-/// not for regular test runs.
-class LeakTrackingTestConfig {
-  /// Creates a new instance of [LeakTrackingTestConfig].
-  const LeakTrackingTestConfig({
-    this.leakDiagnosticConfig = const LeakDiagnosticConfig(),
-    this.notGCedAllowList = const <String, int>{},
-    this.notDisposedAllowList = const <String, int>{},
-    this.allowAllNotDisposed = false,
-    this.allowAllNotGCed = false,
-  });
+/// Cleans leaks that are allowed by [config].
+@visibleForTesting
+class LeakCleaner {
+  LeakCleaner(this.config);
 
-  /// Creates a new instance of [LeakTrackingTestConfig] for debugging leaks.
-  ///
-  /// This configuration will collect stack traces on start and disposal,
-  /// and retaining path for notGCed objects.
-  LeakTrackingTestConfig.debug({
-    this.leakDiagnosticConfig = const LeakDiagnosticConfig(
-      collectStackTraceOnStart: true,
-      collectStackTraceOnDisposal: true,
-      collectRetainingPathForNotGCed: true,
-    ),
-    this.notGCedAllowList = const <String, int>{},
-    this.notDisposedAllowList = const <String, int>{},
-    this.allowAllNotDisposed = false,
-    this.allowAllNotGCed = false,
-  });
+  final LeakTrackingTestConfig config;
 
-  /// Creates a new instance of [LeakTrackingTestConfig] to collect retaining path.
-  ///
-  /// This configuration will not collect stack traces,
-  /// and will collect retaining path for notGCed objects.
-  LeakTrackingTestConfig.retainingPath({
-    this.leakDiagnosticConfig = const LeakDiagnosticConfig(
-      collectRetainingPathForNotGCed: true,
-    ),
-    this.notGCedAllowList = const <String, int>{},
-    this.notDisposedAllowList = const <String, int>{},
-    this.allowAllNotDisposed = false,
-    this.allowAllNotGCed = false,
-  });
+  static Map<(String, LeakType), int> _countByClassAndType(Leaks leaks) {
+    final Map<(String, LeakType), int> result = <(String, LeakType), int>{};
 
-  /// Classes that are allowed to be not garbage collected after disposal.
-  ///
-  /// Maps name of the class, as returned by `object.runtimeType.toString()`,
-  /// to the number of instances of the class that are allowed to be not GCed.
-  ///
-  /// If number of instances is [null], any number of instances is allowed.
-  final Map<String, int?> notGCedAllowList;
+    for (final MapEntry<LeakType, List<LeakReport>> entry in leaks.byType.entries) {
+      for (final LeakReport leak in entry.value) {
+        final (String, LeakType) classAndType = (leak.type, entry.key);
+        result[classAndType] = (result[classAndType] ?? 0) + 1;
+      }
+    }
+    return result;
+  }
 
-  /// Classes that are allowed to be garbage collected without being disposed.
-  ///
-  /// Maps name of the class, as returned by `object.runtimeType.toString()`,
-  /// to the number of instances of the class that are allowed to be not disposed.
-  ///
-  /// If number of instances is [null], any number of instances is allowed.
-  final Map<String, int?> notDisposedAllowList;
+  Leaks clean(Leaks leaks) {
+    final Map<(String, LeakType), int> countByClassAndType = _countByClassAndType(leaks);
 
-  /// If true, all notDisposed leaks will be allowed.
-  final bool allowAllNotDisposed;
+    final Leaks result =  Leaks(<LeakType, List<LeakReport>>{
+      for (final LeakType leakType in leaks.byType.keys)
+        leakType: leaks.byType[leakType]!.where((LeakReport leak) => _shouldReportLeak(leakType, leak, countByClassAndType)).toList()
+    });
+    return result;
+  }
 
-  /// If true, all notGCed leaks will be allowed.
-  final bool allowAllNotGCed;
+  /// Returns true if [leak] should be reported as failure.
+  bool _shouldReportLeak(LeakType leakType, LeakReport leak, Map<(String, LeakType), int> countByClassAndType) {
+    switch (leakType) {
+      case LeakType.notDisposed:
+        if (config.allowAllNotDisposed) {
+          return false;
+        }
+      case LeakType.notGCed:
+      case LeakType.gcedLate:
+        if (config.allowAllNotGCed) {
+          return false;
+        }
+    }
 
-  /// When to collect stack trace information.
-  ///
-  /// Knowing call stack may help to troubleshoot memory leaks.
-  /// Customize this parameter to collect stack traces when needed.
-  final LeakDiagnosticConfig leakDiagnosticConfig;
+    final String leakingClass = leak.type;
+    final (String, LeakType) classAndType = (leakingClass, leakType);
+
+    bool isAllowedForClass(Map<String, int?> allowList) {
+      if (!allowList.containsKey(leakingClass)) {
+        return false;
+      }
+      final int? allowedCount = allowList[leakingClass];
+      if (allowedCount == null) {
+        return true;
+      }
+      return allowedCount >= countByClassAndType[classAndType]!;
+    }
+
+    switch (leakType) {
+      case LeakType.notDisposed:
+        return !isAllowedForClass(config.notDisposedAllowList);
+      case LeakType.notGCed:
+      case LeakType.gcedLate:
+        return !isAllowedForClass(config.notGCedAllowList);
+    }
+  }
 }

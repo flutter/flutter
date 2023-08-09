@@ -112,7 +112,7 @@ void main() {
     expect(find.byKey(key), findsOneWidget);
   });
 
-  testWidgets('Can build from EditableTextState', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can build from EditableTextState', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -233,7 +233,7 @@ void main() {
   );
 
   group('buttonItems', () {
-    testWidgets('getEditableTextButtonItems builds the correct button items per-platform', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('getEditableTextButtonItems builds the correct button items per-platform', (WidgetTester tester) async {
       // Fill the clipboard so that the Paste option is available in the text
       // selection menu.
       await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
@@ -328,7 +328,7 @@ void main() {
       skip: kIsWeb, // [intended]
     );
 
-    testWidgets('getAdaptiveButtons builds the correct button widgets per-platform', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('getAdaptiveButtons builds the correct button widgets per-platform', (WidgetTester tester) async {
       const String buttonText = 'Click me';
 
       await tester.pumpWidget(

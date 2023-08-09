@@ -271,7 +271,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('The InkWell widget renders an SelectAction or ActivateAction-induced ink ripple', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('The InkWell widget renders an SelectAction or ActivateAction-induced ink ripple', (WidgetTester tester) async {
     const Color highlightColor = Color(0xAAFF0000);
     const Color splashColor = Color(0xB40000FF);
     const BorderRadius borderRadius = BorderRadius.all(Radius.circular(6.0));
@@ -454,7 +454,7 @@ void main() {
     }));
   });
 
-  testWidgets('The InkWell widget on OverlayPortal does not throw', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('The InkWell widget on OverlayPortal does not throw', (WidgetTester tester) async {
     final OverlayPortalController controller = OverlayPortalController();
     controller.show();
     await tester.pumpWidget(

@@ -341,7 +341,7 @@ void main() {
 
   group('layoutBehavior', () {
 
-    testWidgets('ButtonBar has a min height of 52 when using ButtonBarLayoutBehavior.constrained', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ButtonBar has a min height of 52 when using ButtonBarLayoutBehavior.constrained', (WidgetTester tester) async {
       await tester.pumpWidget(
         const SingleChildScrollView(
           child: ListBody(
@@ -364,7 +364,7 @@ void main() {
       expect(tester.getBottomRight(buttonBar).dy - tester.getTopRight(buttonBar).dy, 52.0);
     });
 
-    testWidgets('ButtonBar has padding applied when using ButtonBarLayoutBehavior.padded', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ButtonBar has padding applied when using ButtonBarLayoutBehavior.padded', (WidgetTester tester) async {
       await tester.pumpWidget(
         const SingleChildScrollView(
           child: ListBody(

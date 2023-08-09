@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
 import '../widgets/semantics_tester.dart';
 
 Widget boilerplate({required Widget child}) {
@@ -21,7 +22,7 @@ Widget boilerplate({required Widget child}) {
 
 void main() {
 
-  testWidgets('SegmentedButton is built with Material of type MaterialType.transparency', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SegmentedButton is built with Material of type MaterialType.transparency', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
       MaterialApp(
@@ -329,7 +330,7 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
 
   });
 
-  testWidgets('SegmentedButtons have correct semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SegmentedButtons have correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -408,7 +409,7 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
   });
 
 
-  testWidgets('Multi-select SegmentedButtons have correct semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Multi-select SegmentedButtons have correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -485,7 +486,7 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
     semantics.dispose();
   });
 
-  testWidgets('SegmentedButton default overlayColor and foregroundColor resolve pressed state', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SegmentedButton default overlayColor and foregroundColor resolve pressed state', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
 
     await tester.pumpWidget(
@@ -533,7 +534,7 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
     expect(material.textStyle?.color, theme.colorScheme.onSurface);
   });
 
-  testWidgets('SegmentedButton has no tooltips by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SegmentedButton has no tooltips by default', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
       MaterialApp(
@@ -557,7 +558,7 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
     expect(find.byType(Tooltip), findsNothing);
   });
 
-  testWidgets('SegmentedButton has correct tooltips', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SegmentedButton has correct tooltips', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
       MaterialApp(
