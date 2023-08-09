@@ -108,7 +108,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(pressed, isTrue);
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('materialTapTargetSize.padded expands hit test area', (WidgetTester tester) async {
@@ -346,7 +345,6 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
     expect(box, paints..rect(color: focusColor));
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('RawMaterialButton loses focus when disabled.', (WidgetTester tester) async {
@@ -381,7 +379,6 @@ void main() {
 
     await tester.pump();
     expect(focusNode.hasPrimaryFocus, isFalse);
-    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking("Disabled RawMaterialButton can't be traversed to.", (WidgetTester tester) async {
@@ -422,9 +419,6 @@ void main() {
 
     expect(focusNode1.hasPrimaryFocus, isTrue);
     expect(focusNode2.hasPrimaryFocus, isFalse);
-
-    focusNode1.dispose();
-    focusNode2.dispose();
   });
 
   testWidgetsWithLeakTracking('RawMaterialButton handles hover', (WidgetTester tester) async {
