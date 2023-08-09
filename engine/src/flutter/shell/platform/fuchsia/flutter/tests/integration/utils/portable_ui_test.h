@@ -7,10 +7,9 @@
 
 #include <fuchsia/sysmem/cpp/fidl.h>
 #include <fuchsia/ui/app/cpp/fidl.h>
+#include <fuchsia/ui/composition/cpp/fidl.h>
 #include <fuchsia/ui/display/singleton/cpp/fidl.h>
 #include <fuchsia/ui/input/cpp/fidl.h>
-#include <fuchsia/ui/policy/cpp/fidl.h>
-#include <fuchsia/ui/scenic/cpp/fidl.h>
 #include <fuchsia/ui/test/input/cpp/fidl.h>
 #include <fuchsia/ui/test/scene/cpp/fidl.h>
 #include <lib/async-loop/testing/cpp/real_loop.h>
@@ -100,7 +99,6 @@ class PortableUITest : public ::loop_fixture::RealLoop {
   component_testing::RealmBuilder* realm_builder() { return &realm_builder_; }
   component_testing::RealmRoot* realm_root() { return realm_.get(); }
 
-  fuchsia::ui::scenic::ScenicPtr scenic_;
   uint32_t display_width_ = 0;
   uint32_t display_height_ = 0;
 

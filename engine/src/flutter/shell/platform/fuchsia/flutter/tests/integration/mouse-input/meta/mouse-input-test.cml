@@ -33,7 +33,6 @@
                 "fuchsia.tracing.provider.Registry",
                 "fuchsia.ui.input.ImeService",
                 "fuchsia.vulkan.loader.Loader",
-                "fuchsia.ui.scenic.Scenic",
                 "fuchsia.ui.composition.Allocator",
                 "fuchsia.ui.composition.Flatland",
                 "fuchsia.ui.test.input.MouseInputListener",

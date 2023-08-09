@@ -33,7 +33,6 @@
                 "fuchsia.tracing.provider.Registry",
                 "fuchsia.ui.input.ImeService",
                 "fuchsia.vulkan.loader.Loader",
-                "fuchsia.ui.scenic.Scenic",
                 "fuchsia.ui.test.input.TouchInputListener",
                 "fuchsia.intl.PropertyProvider",
                 "fuchsia.posix.socket.Provider",
