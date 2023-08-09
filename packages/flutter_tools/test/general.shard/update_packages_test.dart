@@ -109,6 +109,7 @@ void main() {
         'url_launcher_android',
         'archive',
         'leak_tracker',
+        'leak_tracker_testing',
       ]),
     );
   });
