@@ -1309,7 +1309,7 @@ void main() {
 
     expect(offsetForFastScroller / offsetForSlowScroller, fastVelocityScalar / slowVelocityScalar);
   });
-  
+
   testWidgets('Null check error when dragging and dropping last element into last index with reverse:true', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/132077
     const int itemCount = 5;
