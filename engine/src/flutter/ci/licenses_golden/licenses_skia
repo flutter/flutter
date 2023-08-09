@@ -1,4 +1,4 @@
-Signature: 21914be2d9d25acf11d4b7bf1fb26cde
+Signature: 73cde3cf1f92192edf67bc5318a1fd8e
 
 ====================================================================================================
 LIBRARY: etc1
@@ -384,18 +384,7 @@ FILE: ../../../third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../third_party/skia/modules/skparagraph/test.html
 FILE: ../../../third_party/skia/package-lock.json
-FILE: ../../../third_party/skia/relnotes/allow_jit.md
-FILE: ../../../third_party/skia/relnotes/asyncyuva420.md
-FILE: ../../../third_party/skia/relnotes/autographics.md
-FILE: ../../../third_party/skia/relnotes/canvas_flush.md
-FILE: ../../../third_party/skia/relnotes/const_context.md
-FILE: ../../../third_party/skia/relnotes/mesh_ganesh.md
-FILE: ../../../third_party/skia/relnotes/path_715M.md
-FILE: ../../../third_party/skia/relnotes/runtimeeffect_const.md
-FILE: ../../../third_party/skia/relnotes/runtimeeffect_image.md
-FILE: ../../../third_party/skia/relnotes/skgl_backend_surface.md
 FILE: ../../../third_party/skia/relnotes/sksl_comma_array.md
-FILE: ../../../third_party/skia/relnotes/tiledimages.md
 FILE: ../../../third_party/skia/src/core/SkOrderedReadBuffer.h
 FILE: ../../../third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
@@ -8758,7 +8747,6 @@ ORIGIN: ../../../third_party/skia/modules/skottie/src/SlotManager.cpp + ../../..
 ORIGIN: ../../../third_party/skia/modules/skunicode/src/SkUnicode_hardcoded.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skunicode/src/SkUnicode_hardcoded.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skunicode/src/SkUnicode_icu_bidi.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/modules/skunicode/src/work_around_bazel_issues_1431.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/codec/SkJpegConstants.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/codec/SkJpegMultiPicture.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/codec/SkJpegMultiPicture.h + ../../../third_party/skia/LICENSE
@@ -8800,7 +8788,6 @@ FILE: ../../../third_party/skia/modules/skottie/src/SlotManager.cpp
 FILE: ../../../third_party/skia/modules/skunicode/src/SkUnicode_hardcoded.cpp
 FILE: ../../../third_party/skia/modules/skunicode/src/SkUnicode_hardcoded.h
 FILE: ../../../third_party/skia/modules/skunicode/src/SkUnicode_icu_bidi.h
-FILE: ../../../third_party/skia/modules/skunicode/src/work_around_bazel_issues_1431.h
 FILE: ../../../third_party/skia/src/codec/SkJpegConstants.h
 FILE: ../../../third_party/skia/src/codec/SkJpegMultiPicture.cpp
 FILE: ../../../third_party/skia/src/codec/SkJpegMultiPicture.h
