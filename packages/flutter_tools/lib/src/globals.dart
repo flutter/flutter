@@ -88,7 +88,7 @@ final BotDetector _defaultBotDetector = BotDetector(
 );
 Future<bool> get isRunningOnBot => botDetector.isRunningOnBot;
 
-// Analytics instance for package:unified_analytics for telemetry
+// Analytics instance for package:unified_analytics for analytics
 // reporting for all Flutter and Dart related tooling
 Analytics get analytics => context.get<Analytics>()!;
 

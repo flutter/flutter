@@ -26,8 +26,8 @@ abstract final class FlutterGlobalOptions {
   static const String kColorFlag = 'color';
   static const String kContinuousIntegrationFlag = 'ci';
   static const String kDeviceIdOption = 'device-id';
-  static const String kDisableTelemetryFlag = 'disable-telemetry';
-  static const String kEnableTelemetryFlag = 'enable-telemetry';
+  static const String kDisableAnalyticsFlag = 'disable-analytics';
+  static const String kEnableAnalyticsFlag = 'enable-analytics';
   static const String kLocalEngineOption = 'local-engine';
   static const String kLocalEngineSrcPathOption = 'local-engine-src-path';
   static const String kLocalWebSDKOption = 'local-web-sdk';
@@ -100,17 +100,17 @@ class FlutterCommandRunner extends CommandRunner<void> {
         defaultsTo: true,
         hide: !verboseHelp,
         help: 'Allow Flutter to check for updates when this command runs.');
-    argParser.addFlag(FlutterGlobalOptions.kSuppressAnalyticsFlag,
-        negatable: false,
-        help: 'Suppress analytics reporting for the current CLI invocation.');
-    argParser.addFlag(FlutterGlobalOptions.kDisableTelemetryFlag,
-        negatable: false,
-        help: 'Disable telemetry reporting each time a flutter or dart '
-              'command runs, until it is re-enabled.');
-    argParser.addFlag(FlutterGlobalOptions.kEnableTelemetryFlag,
+    argParser.addFlag(FlutterGlobalOptions.kEnableAnalyticsFlag,
         negatable: false,
         help: 'Enable telemetry reporting each time a flutter or dart '
               'command runs.');
+    argParser.addFlag(FlutterGlobalOptions.kDisableAnalyticsFlag,
+        negatable: false,
+        help: 'Disable telemetry reporting each time a flutter or dart '
+              'command runs, until it is re-enabled.');
+    argParser.addFlag(FlutterGlobalOptions.kSuppressAnalyticsFlag,
+        negatable: false,
+        help: 'Suppress analytics reporting for the current CLI invocation.');
     argParser.addOption(FlutterGlobalOptions.kPackagesOption,
         hide: !verboseHelp,
         help: 'Path to your "package_config.json" file.');
@@ -229,8 +229,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
     // If the flag for enabling or disabling telemetry is passed in,
     // we will return out
-    if (topLevelResults.wasParsed(FlutterGlobalOptions.kDisableTelemetryFlag) ||
-        topLevelResults.wasParsed(FlutterGlobalOptions.kEnableTelemetryFlag)) {
+    if (topLevelResults.wasParsed(FlutterGlobalOptions.kDisableAnalyticsFlag) ||
+        topLevelResults.wasParsed(FlutterGlobalOptions.kEnableAnalyticsFlag)) {
       return;
     }
 

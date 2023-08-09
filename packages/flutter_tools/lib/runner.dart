@@ -63,20 +63,20 @@ Future<int> run(
     StackTrace? firstStackTrace;
     return runZoned<Future<int>>(() async {
       try {
-        if (args.contains('--disable-telemetry') &&
-            args.contains('--enable-telemetry')) {
+        if (args.contains('--disable-analytics') &&
+            args.contains('--enable-analytics')) {
           throwToolExit(
-              'Both enable and disable telemetry commands were detected '
+              'Both enable and disable analytics commands were detected '
               'when only one can be supplied per invocation.',
               exitCode: 1);
         }
 
-        // Disable analytics if user passes in the `--disable-telemetry` option
-        // `flutter --disable-telemetry`
+        // Disable analytics if user passes in the `--disable-analytics` option
+        // `flutter --disable-analytics`
         //
         // Same functionality as `flutter config --no-analytics` for disabling
         // except with the `value` hard coded as false
-        if (args.contains('--disable-telemetry')) {
+        if (args.contains('--disable-analytics')) {
           // The tool sends the analytics event *before* toggling the flag
           // intentionally to be sure that opt-out events are sent correctly.
           AnalyticsConfigEvent(enabled: false).send();
@@ -95,12 +95,12 @@ Future<int> run(
           await globals.analytics.setTelemetry(false);
         }
 
-        // Enable analytics if user passes in the `--enable-telemetry` option
-        // `flutter --enable-telemetry`
+        // Enable analytics if user passes in the `--enable-analytics` option
+        // `flutter --enable-analytics`
         //
         // Same functionality as `flutter config --analytics` for enabling
         // except with the `value` hard coded as true
-        if (args.contains('--enable-telemetry')) {
+        if (args.contains('--enable-analytics')) {
           // The tool sends the analytics event *before* toggling the flag
           // intentionally to be sure that opt-out events are sent correctly.
           AnalyticsConfigEvent(enabled: true).send();
@@ -317,7 +317,7 @@ Future<int> _exit(int code, {required ShutdownHooks shutdownHooks}) async {
               'the flutter tool is migrating to a new analytics system. '
               'Disabling analytics collection will disable both the legacy '
               'and new analytics collection systems. '
-              'You can disable analytics reporting by running `flutter --disable-telemetry`\n');
+              'You can disable analytics reporting by running `flutter --disable-analytics`\n');
     }
 
     // Invoking this will onboard the flutter tool onto
