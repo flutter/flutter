@@ -612,6 +612,14 @@ const PageScrollPhysics _kPagePhysics = PageScrollPhysics();
 /// ** See code in examples/api/lib/widgets/page_view/page_view.0.dart **
 /// {@end-tool}
 ///
+/// ## Persisting the scroll position during a session
+///
+/// Scroll views attempt to persist their scroll position using [PageStorage].
+/// For a [PageView], this can be disabled by setting [PageController.keepPage]
+/// to false on the [controller]. If it is enabled, using a [PageStorageKey] for
+/// the [key] of this widget is recommended to help disambiguate different
+/// scroll views from each other.
+///
 /// See also:
 ///
 ///  * [PageController], which controls which page is visible in the view.

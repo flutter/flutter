@@ -14,7 +14,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 // A thumb shape that also logs its repaint center.
@@ -3654,16 +3653,22 @@ void main() {
                   child: ValueListenableBuilder<bool>(
                     valueListenable: shouldShowSliderListenable,
                     builder: (BuildContext context, bool shouldShowSlider, _) {
-                      return shouldShowSlider
-                          ? Slider(
-                              value: value,
-                              onChanged: (double newValue) {
-                                setState(() {
-                                  value = newValue;
-                                });
-                              },
-                            )
-                          : const SizedBox.shrink();
+                      return GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        // Note: it is important that `onTap` is non-null so
+                        // [GestureDetector] will register tap events.
+                        onTap: () {},
+                        child: shouldShowSlider
+                            ? Slider(
+                                value: value,
+                                onChanged: (double newValue) {
+                                  setState(() {
+                                    value = newValue;
+                                  });
+                                },
+                              )
+                            : const SizedBox.expand(),
+                      );
                     },
                   ),
                 ),
@@ -3674,20 +3679,19 @@ void main() {
       ),
     );
 
+    // Move Slider.
     final TestGesture gesture = await tester
-        .startGesture(tester.getRect(find.byType(Slider)).centerLeft);
-
-    // Intentionally not calling `await tester.pumpAndSettle()` to allow drag
-    // event performed on `Slider` before it is about to get unmounted.
-    shouldShowSliderListenable.value = false;
-
-    await tester.drag(find.byType(Slider), const Offset(1.0, 0.0));
+        .startGesture(tester.getRect(find.byType(Slider)).center);
+    await gesture.moveBy(const Offset(1.0, 0.0));
     await tester.pumpAndSettle();
 
-    expect(value, equals(0.0));
+    // Hide Slider. Slider will dispose and unmount.
+    shouldShowSliderListenable.value = false;
+    await tester.pumpAndSettle();
 
-    // This is supposed to trigger animation on `Slider` if it is mounted.
-    await gesture.up();
+    // Move Slider after unmounted.
+    await gesture.moveBy(const Offset(1.0, 0.0));
+    await tester.pumpAndSettle();
 
     expect(tester.takeException(), null);
   });
