@@ -848,6 +848,8 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     RenderBox? child = _firstChild;
     while (child != null) {
       final TwoDimensionalViewportParentData childParentData = parentDataOf(child);
+      // TODO(Piinks): When ensure visible is supported, remove this isVisible
+      //  condition.
       if (childParentData.isVisible) {
         visitor(child);
       }
@@ -1128,10 +1130,16 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     return true;
   }
 
-  /// Returns the child for a given [ChildVicinity].
+  /// Returns the child for a given [ChildVicinity], should be called during
+  /// [layoutChildSequence] in order to instantiate or retrieve children.
   ///
   /// This method will build the child if it has not been already, or will reuse
-  /// it if it already exists.
+  /// it if it already exists, whether it was part of the previous frame or kept
+  /// alive.
+  ///
+  /// Children for the given [ChildVicinity] will be inserted into the active
+  /// children list, and so should be visible, or contained within the
+  /// [cacheExtent].
   RenderBox? buildOrObtainChildFor(ChildVicinity vicinity) {
     assert(vicinity != ChildVicinity.invalid);
     // This should only be called during layout.
@@ -1160,9 +1168,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
         _childManager._buildChild(vicinity);
       });
     } else {
-      if (_keepAliveBucket.containsKey(vicinity)) {
-        _keepAliveBucket.remove(vicinity)!;
-      }
+      _keepAliveBucket.remove(vicinity)!;
       _childManager._reuseChild(vicinity);
     }
     if (!_children.containsKey(vicinity)) {
