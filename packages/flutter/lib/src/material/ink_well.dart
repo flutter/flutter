@@ -332,7 +332,7 @@ class InkResponse extends StatelessWidget {
     this.onFocusChange,
     this.autofocus = false,
     this.statesController,
-    this.hoverDuration = const Duration(milliseconds: 50),
+    this.hoverDuration,
   });
 
   /// The widget below this widget in the tree.
@@ -623,7 +623,7 @@ class InkResponse extends StatelessWidget {
   final MaterialStatesController? statesController;
 
   /// The duration of the animation that animates the hover effect.
-  final Duration hoverDuration;
+  final Duration? hoverDuration;
 
   @override
   Widget build(BuildContext context) {
@@ -720,7 +720,7 @@ class _InkResponseStateWidget extends StatefulWidget {
     this.getRectCallback,
     required this.debugCheckContext,
     this.statesController,
-    this.hoverDuration = const Duration(milliseconds: 50),
+    this.hoverDuration,
   });
 
   final Widget? child;
@@ -758,7 +758,7 @@ class _InkResponseStateWidget extends StatefulWidget {
   final _GetRectCallback? getRectCallback;
   final _CheckContext debugCheckContext;
   final MaterialStatesController? statesController;
-  final Duration hoverDuration;
+  final Duration? hoverDuration;
 
   @override
   _InkResponseState createState() => _InkResponseState();
@@ -927,7 +927,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         return const Duration(milliseconds: 200);
       case _HighlightType.hover:
       case _HighlightType.focus:
-        return widget.hoverDuration;
+        return widget.hoverDuration ?? const Duration(milliseconds: 50);
     }
   }
 
