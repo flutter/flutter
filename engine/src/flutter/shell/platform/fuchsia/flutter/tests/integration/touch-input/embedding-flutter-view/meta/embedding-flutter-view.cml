@@ -25,7 +25,6 @@
         {
             protocol: [
                 "fuchsia.ui.app.ViewProvider",
-                "fuchsia.ui.scenic.Scenic",
                 "fuchsia.ui.test.input.TouchInputListener",
             ]
         },
