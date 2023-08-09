@@ -136,7 +136,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         hide: !verboseHelp,
         help: 'The host operating system for which engine artifacts should be selected, if you are building Flutter locally.\n'
               'This is only used when "--local-engine" is also specified.\n'
-              'By default, the host is determined automatically, but you may need to specify this if you are building on one\n'
+              'By default, the host is determined automatically, but you may need to specify this if you are building on one '
               'platform (e.g. MacOS ARM64) but intend to run Flutter on another (e.g. Android).');
 
     argParser.addOption(FlutterGlobalOptions.kLocalWebSDKOption,
