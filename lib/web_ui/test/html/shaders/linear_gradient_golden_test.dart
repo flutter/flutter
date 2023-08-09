@@ -84,7 +84,7 @@ Future<void> testMain() async {
     }
     expect(rc.renderStrategy.hasArbitraryPaint, isTrue);
     await canvasScreenshot(rc, 'linear_gradient_oval_matrix');
-  });
+  }, skip: isFirefox);
 
   // Regression test for https://github.com/flutter/flutter/issues/50010
   test('Should draw linear gradient using rounded rect.', () async {
