@@ -71,6 +71,9 @@ class _SearchBarDefaultsM3 extends SearchBarThemeData {
   @override
   BoxConstraints get constraints =>
     const BoxConstraints(minWidth: 360.0, maxWidth: 800.0, minHeight: ${getToken('md.comp.search-bar.container.height')});
+
+  @override
+  TextCapitalization get textCapitalization => TextCapitalization.none;
 }
 ''';
 }
