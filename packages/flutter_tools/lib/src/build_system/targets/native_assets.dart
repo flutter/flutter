@@ -8,7 +8,6 @@ import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/platform.dart';
 import '../../build_info.dart';
-import '../../globals.dart' as globals;
 import '../../ios/native_assets.dart';
 import '../../macos/native_assets.dart';
 import '../../macos/xcode.dart';
