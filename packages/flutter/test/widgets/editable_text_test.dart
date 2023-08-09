@@ -63,11 +63,10 @@ TextEditingValue collapsedAtEnd(String text) {
 }
 
 void main() {
-  final MockClipboard mockClipboard = MockClipboard();
-  TestWidgetsFlutterBinding.ensureInitialized()
-    .defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
-
   setUp(() async {
+    final MockClipboard mockClipboard = MockClipboard();
+    TestWidgetsFlutterBinding.ensureInitialized()
+      .defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
     debugResetSemanticsIdCounter();
     controller = TextEditingController();
     // Fill the clipboard so that the Paste option is available in the text
@@ -76,6 +75,8 @@ void main() {
   });
 
   tearDown(() {
+    TestWidgetsFlutterBinding.ensureInitialized()
+      .defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
     controller.dispose();
   });
 
@@ -2145,7 +2146,7 @@ void main() {
     );
 
     final EditableTextState state =
-    tester.state<EditableTextState>(find.byType(EditableText));
+        tester.state<EditableTextState>(find.byType(EditableText));
 
     // Show the toolbar.
     state.renderEditable.selectWordsInRange(
@@ -2156,9 +2157,11 @@ void main() {
 
     final TextSelection copySelectionRange = localController.selection;
 
+    expect(find.byType(TextSelectionToolbar), findsNothing);
     state.showToolbar();
     await tester.pumpAndSettle();
 
+    expect(find.byType(TextSelectionToolbar), findsOneWidget);
     expect(find.text('Copy'), findsOneWidget);
 
     await tester.tap(find.text('Copy'));
@@ -16617,8 +16620,8 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         });
     });
     tearDown(() {
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(SystemChannels.platform, null);
+      TestWidgetsFlutterBinding.ensureInitialized()
+        .defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
     });
 
     testWidgets('web avoids the paste permissions prompt by not calling hasStrings', (WidgetTester tester) async {
