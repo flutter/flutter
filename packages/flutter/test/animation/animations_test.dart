@@ -14,6 +14,13 @@ class BogusCurve extends Curve {
   double transform(double t) => 100.0;
 }
 
+class ReverseCurve extends Curve {
+  const ReverseCurve();
+
+  @override
+  double transform(double t) => 1.0 - t;
+}
+
 void main() {
   setUp(() {
     WidgetsFlutterBinding.ensureInitialized();
@@ -301,6 +308,33 @@ FlutterError
     expect(curved.value, moreOrLessEquals(0.2));
     tick(const Duration(milliseconds: 160));
     expect(curved.value, moreOrLessEquals(0.0));
+  });
+
+  test('CurvedAnimation, correctly apply reverseCurve when playing through repeat.', () {
+    const Curve forwardCurve = Curves.linear;
+    const Curve reverseCurve = ReverseCurve();
+    final AnimationController controller = AnimationController(
+      duration: const Duration(milliseconds: 100),
+      reverseDuration: const Duration(milliseconds: 100),
+      vsync: const TestVSync(),
+    );
+    final CurvedAnimation curved = CurvedAnimation(
+      parent: controller,
+      curve: forwardCurve,
+      reverseCurve: reverseCurve,
+    );
+
+    controller.repeat(reverse: true);
+    tick(Duration.zero);
+    tick(const Duration(milliseconds: 25));
+    expect(controller.value, equals(0.25));
+    expect(curved.value, equals(0.25));
+    expect(controller.status, equals(AnimationStatus.forward));
+
+    tick(const Duration(milliseconds: 125));
+    expect(controller.value, equals(0.75));
+    expect(curved.value, equals(0.25));
+    expect(controller.status, equals(AnimationStatus.reverse));
   });
 
   test('CurvedAnimation stops listening to parent when disposed.', () async {
