@@ -1853,6 +1853,7 @@ class EditableText extends StatefulWidget {
     required final VoidCallback? onPaste,
     required final VoidCallback? onSelectAll,
     required final VoidCallback? onLookUp,
+    required final VoidCallback? onSearchWeb,
     required final VoidCallback? onLiveTextInput,
   }) {
     final List<ContextMenuButtonItem> resultButtonItem = <ContextMenuButtonItem>[];
@@ -1887,6 +1888,11 @@ class EditableText extends StatefulWidget {
           ContextMenuButtonItem(
             onPressed: onLookUp,
             type: ContextMenuButtonType.lookUp,
+          ),
+        if (onSearchWeb != null)
+          ContextMenuButtonItem(
+            onPressed: onSearchWeb,
+            type: ContextMenuButtonType.searchWeb,
           ),
       ]);
     }
@@ -2250,7 +2256,19 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return false;
     }
     return !widget.obscureText
-        && !textEditingValue.selection.isCollapsed;
+        && !textEditingValue.selection.isCollapsed
+        && textEditingValue.selection.textInside(textEditingValue.text).trim() != '';
+  }
+
+  @override
+  bool get searchWebEnabled {
+    if (defaultTargetPlatform != TargetPlatform.iOS) {
+      return false;
+    }
+
+    return !widget.obscureText
+        && !textEditingValue.selection.isCollapsed
+        && textEditingValue.selection.textInside(textEditingValue.text).trim() != '';
   }
 
   @override
@@ -2432,6 +2450,27 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       'LookUp.invoke',
       text,
     );
+  }
+
+  /// Launch a web search on the current selection,
+  ///   as in the "Search Web" edit menu button on iOS.
+  ///
+  /// Currently this is only implemented for iOS.
+  /// When 'obscureText' is true or the selection is empty,
+  /// this function will not do anything
+  Future<void> searchWebForSelection(SelectionChangedCause cause) async {
+    assert(!widget.obscureText);
+    if (widget.obscureText) {
+      return;
+    }
+
+    final String text = textEditingValue.selection.textInside(textEditingValue.text);
+    if (text.isNotEmpty) {
+      await SystemChannels.platform.invokeMethod(
+        'SearchWeb.invoke',
+        text,
+      );
+    }
   }
 
   void _startLiveTextInput(SelectionChangedCause cause) {
@@ -2662,6 +2701,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           : null,
       onLookUp: lookUpEnabled
           ? () => lookUpSelection(SelectionChangedCause.toolbar)
+          : null,
+      onSearchWeb: searchWebEnabled
+          ? () => searchWebForSelection(SelectionChangedCause.toolbar)
           : null,
       onLiveTextInput: liveTextInputEnabled
           ? () => _startLiveTextInput(SelectionChangedCause.toolbar)
