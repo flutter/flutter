@@ -50,9 +50,9 @@ class NativeAssets extends Target {
         getTargetPlatformForName(targetPlatformEnvironment);
 
     final Uri projectUri = environment.projectDir.uri;
-    final FileSystem fileSystem = globals.fs;
+    final FileSystem fileSystem = environment.fileSystem;
     final NativeAssetsBuildRunner buildRunner =
-        NativeAssetsBuildRunnerImpl(projectUri, fileSystem);
+        NativeAssetsBuildRunnerImpl(projectUri, fileSystem, environment.logger);
 
     List<Uri> dependencies = <Uri>[];
     switch (targetPlatform) {

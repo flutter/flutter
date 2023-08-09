@@ -9,8 +9,8 @@ import 'package:native_assets_cli/native_assets_cli.dart';
 import 'package:package_config/package_config_types.dart';
 
 import 'base/file_system.dart';
+import 'base/logger.dart';
 import 'cache.dart';
-import 'globals.dart' as globals;
 
 /// Programmatic API to be used by Dart launchers to invoke native builds.
 abstract class NativeAssetsBuildRunner {
@@ -46,23 +46,24 @@ abstract class NativeAssetsBuildRunner {
 
 /// Uses `package:native_assets_builder` for its implementation.
 class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
-  NativeAssetsBuildRunnerImpl(this.projectUri, this.fileSystem);
+  NativeAssetsBuildRunnerImpl(this.projectUri, this.fileSystem, this.logger);
 
   final Uri projectUri;
   final FileSystem fileSystem;
+  final Logger logger;
 
-  final logging.Logger _logger = logging.Logger('')
+  late final logging.Logger _logger = logging.Logger('')
     ..onRecord.listen((logging.LogRecord record) {
       final int levelValue = record.level.value;
       final String message = record.message;
       if (levelValue >= logging.Level.SEVERE.value) {
-        globals.logger.printError(message);
+        logger.printError(message);
       } else if (levelValue >= logging.Level.WARNING.value) {
-        globals.logger.printWarning(message);
+        logger.printWarning(message);
       } else if (levelValue >= logging.Level.INFO.value) {
-        globals.logger.printTrace(message);
+        logger.printTrace(message);
       } else {
-        globals.logger.printTrace(message);
+        logger.printTrace(message);
       }
     });
 
