@@ -1168,7 +1168,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
         _childManager._buildChild(vicinity);
       });
     } else {
-      _keepAliveBucket.remove(vicinity)!;
+      _keepAliveBucket.remove(vicinity);
       _childManager._reuseChild(vicinity);
     }
     if (!_children.containsKey(vicinity)) {
