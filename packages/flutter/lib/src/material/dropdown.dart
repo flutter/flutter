@@ -1642,14 +1642,15 @@ class DropdownButtonFormField<T> extends FormField<T> {
              canRequestFocus: false,
              skipTraversal: true,
              child: Builder(builder: (BuildContext context) {
+                final bool isFocused = Focus.of(context).hasFocus;
                 InputBorder? resolveInputBorder() {
                   if (hasError) {
-                    if (Focus.of(context).hasFocus) {
+                    if (isFocused) {
                       return effectiveDecoration.focusedErrorBorder;
                     }
                     return effectiveDecoration.errorBorder;
                   }
-                  if (Focus.of(context).hasFocus) {
+                  if (isFocused) {
                     return effectiveDecoration.focusedBorder;
                   }
                   if (effectiveDecoration.enabled) {
@@ -1696,7 +1697,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
                    borderRadius: borderRadius ?? effectiveBorderRadius(),
                    inputDecoration: effectiveDecoration.copyWith(errorText: field.errorText),
                    isEmpty: isEmpty,
-                   isFocused: Focus.of(context).hasFocus,
+                   isFocused: isFocused,
                    padding: padding,
                  ),
                );
