@@ -6,10 +6,6 @@
 ///
 /// To use, import `package:flutter/animation.dart`.
 ///
-/// ```dart
-/// String a = 1;
-/// ```
-///
 /// This library provides basic building blocks for implementing animations in
 /// Flutter. Other layers of the framework use these building blocks to provide
 /// advanced animation support for applications. For example, the widget library

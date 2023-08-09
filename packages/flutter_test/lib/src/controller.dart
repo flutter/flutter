@@ -24,6 +24,9 @@ const double kDragSlopDefault = 20.0;
 
 const String _defaultPlatform = kIsWeb ? 'web' : 'android';
 
+// Examples can assume:
+// typedef MyWidget = Placeholder;
+
 /// Class that programmatically interacts with the [Semantics] tree.
 ///
 /// Allows for testing of the [Semantics] tree, which is used by assistive
@@ -123,13 +126,13 @@ class SemanticsController {
   ///
   /// ## Sample Code
   ///
-  /// ```
+  /// ```dart
   /// testWidgets('MyWidget', (WidgetTester tester) async {
-  ///   await tester.pumpWidget(MyWidget());
+  ///   await tester.pumpWidget(const MyWidget());
   ///
   ///   expect(
   ///     tester.semantics.simulatedAccessibilityTraversal(),
-  ///     containsAllInOrder([
+  ///     containsAllInOrder(<Matcher>[
   ///       containsSemantics(label: 'My Widget'),
   ///       containsSemantics(label: 'is awesome!', isChecked: true),
   ///     ]),

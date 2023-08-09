@@ -4,10 +4,6 @@
 
 /// Testing library for flutter, built on top of `package:test`.
 ///
-/// ```dart
-/// String a = 1;
-/// ```
-///
 /// ## Test Configuration
 ///
 /// The testing library exposes a few constructs by which projects may configure
@@ -31,7 +27,7 @@
 /// with the following signature:
 ///
 /// ```dart
-/// Future<void> testExecutable(FutureOr<void> Function() testMain);
+/// Future<void> testExecutable(FutureOr<void> Function() testMain) async { }
 /// ```
 ///
 /// The test framework will execute that method and pass it the `main()` method

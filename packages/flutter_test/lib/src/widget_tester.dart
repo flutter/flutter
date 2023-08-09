@@ -81,6 +81,9 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
   return null;
 }
 
+// Examples can assume:
+// typedef MyWidget = Placeholder;
+
 /// Runs the [callback] inside the Flutter test environment.
 ///
 /// Use this function for testing custom [StatelessWidget]s and
@@ -117,7 +120,7 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 ///
 /// ```dart
 /// testWidgets('MyWidget', (WidgetTester tester) async {
-///   await tester.pumpWidget(MyWidget());
+///   await tester.pumpWidget(const MyWidget());
 ///   await tester.tap(find.text('Save'));
 ///   expect(find.text('Success'), findsOneWidget);
 /// });
@@ -319,12 +322,13 @@ class TargetPlatformVariant extends TestVariant<TargetPlatform> {
 /// }
 ///
 /// final ValueVariant<TestScenario> variants = ValueVariant<TestScenario>(
-///   <TestScenario>{value1, value2},
+///   <TestScenario>{TestScenario.value1, TestScenario.value2},
 /// );
-///
-/// testWidgets('Test handling of TestScenario', (WidgetTester tester) {
-///   expect(variants.currentValue, equals(value1));
-/// }, variant: variants);
+/// void main() {
+///   testWidgets('Test handling of TestScenario', (WidgetTester tester) async {
+///     expect(variants.currentValue, equals(TestScenario.value1));
+///   }, variant: variants);
+/// }
 /// ```
 /// {@end-tool}
 class ValueVariant<T> extends TestVariant<T> {
@@ -507,7 +511,7 @@ Future<void> expectLater(
 ///
 /// ```dart
 /// testWidgets('MyWidget', (WidgetTester tester) async {
-///   await tester.pumpWidget(MyWidget());
+///   await tester.pumpWidget(const MyWidget());
 ///   await tester.tap(find.text('Save'));
 ///   await tester.pump(); // allow the application to handle
 ///   await tester.pump(const Duration(seconds: 1)); // skip past the animation
@@ -555,7 +559,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// {@tool snippet}
   /// ```dart
   /// testWidgets('MyWidget asserts invalid bounds', (WidgetTester tester) async {
-  ///   await tester.pumpWidget(MyWidget(-1));
+  ///   await tester.pumpWidget(const MyWidget());
   ///   expect(tester.takeException(), isAssertionError); // or isNull, as appropriate.
   /// });
   /// ```
