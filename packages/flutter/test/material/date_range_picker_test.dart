@@ -261,6 +261,7 @@ void main() {
     // https://github.com/flutter/flutter/issues/130354
     leakTrackingTestConfig: const LeakTrackingTestConfig(
       allowAllNotGCed: true,
+      allowAllNotDisposed: true,
     ));
   });
 

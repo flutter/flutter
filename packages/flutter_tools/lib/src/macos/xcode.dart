@@ -54,7 +54,8 @@ class Xcode {
         _userMessage = userMessages,
         _flutterRoot = flutterRoot,
         _processUtils =
-            ProcessUtils(logger: logger, processManager: processManager);
+            ProcessUtils(logger: logger, processManager: processManager),
+        _logger = logger;
 
   /// Create an [Xcode] for testing.
   ///
@@ -67,18 +68,20 @@ class Xcode {
     Platform? platform,
     FileSystem? fileSystem,
     String? flutterRoot,
+    Logger? logger,
   }) {
     platform ??= FakePlatform(
       operatingSystem: 'macos',
       environment: <String, String>{},
     );
+    logger ??= BufferLogger.test();
     return Xcode(
       platform: platform,
       processManager: processManager,
       fileSystem: fileSystem ?? MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
       userMessages: UserMessages(),
       flutterRoot: flutterRoot,
+      logger: logger,
       xcodeProjectInterpreter: xcodeProjectInterpreter ?? XcodeProjectInterpreter.test(processManager: processManager),
     );
   }
@@ -89,6 +92,7 @@ class Xcode {
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
   final UserMessages _userMessage;
   final String? _flutterRoot;
+  final Logger _logger;
 
   bool get isInstalledAndMeetsVersionCheck => _platform.isMacOS && isInstalled && isRequiredVersionSatisfactory;
 
@@ -262,6 +266,19 @@ class Xcode {
     }
     final String appPath = _fileSystem.path.join(selectPath, 'Applications', 'Simulator.app');
     return _fileSystem.directory(appPath).existsSync() ? appPath : null;
+  }
+
+  /// Gets the version number of the platform for the selected SDK.
+  Future<Version?> sdkPlatformVersion(EnvironmentType environmentType) async {
+    final RunResult runResult = await _processUtils.run(
+      <String>[...xcrunCommand(), '--sdk', getSDKNameForIOSEnvironmentType(environmentType), '--show-sdk-platform-version'],
+    );
+    if (runResult.exitCode != 0) {
+      _logger.printError('Could not find SDK Platform Version: ${runResult.stderr}');
+      return null;
+    }
+    final String versionString = runResult.stdout.trim();
+    return Version.parse(versionString);
   }
 }
 
