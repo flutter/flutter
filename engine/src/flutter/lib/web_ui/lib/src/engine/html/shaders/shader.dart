@@ -98,13 +98,23 @@ class GradientSweep extends EngineGradient {
     final double centerX = (center.dx - shaderBounds.left) / (shaderBounds.width);
     final double centerY = (center.dy - shaderBounds.top) / (shaderBounds.height);
     gl.setUniform2f(tileOffset, 2 * (shaderBounds.width * (centerX - 0.5)),
-        2 * (shaderBounds.height * (centerY - 0.5)));
+        2 * (shaderBounds.height * (0.5 - centerY)));
     final Object angleRange = gl.getUniformLocation(glProgram.program, 'angle_range');
     gl.setUniform2f(angleRange, startAngle, endAngle);
     normalizedGradient.setupUniforms(gl, glProgram);
+
     final Object gradientMatrix =
           gl.getUniformLocation(glProgram.program, 'm_gradient');
-    gl.setUniformMatrix4fv(gradientMatrix, false, matrix4 ?? Matrix4.identity().storage);
+    final Matrix4 gradientTransform = Matrix4.identity();
+    if (matrix4 != null) {
+      final Matrix4 m4 = Matrix4.zero()
+        ..copyInverse(Matrix4.fromFloat32List(matrix4!));
+      gradientTransform.translate(-center.dx, -center.dy);
+      gradientTransform.multiply(m4);
+      gradientTransform.translate(center.dx, center.dy);
+    }
+    gl.setUniformMatrix4fv(gradientMatrix, false, gradientTransform.storage);
+
     final Object result = () {
       if (createDataUrl) {
         return glRenderer!.drawRectToImageUrl(
@@ -149,7 +159,7 @@ class GradientSweep extends EngineGradient {
     // Sweep gradient
     method.addStatement('vec2 center = 0.5 * (u_resolution + u_tile_offset);');
     method.addStatement(
-        'vec4 localCoord = vec4(gl_FragCoord.x - center.x, center.y - gl_FragCoord.y, 0, 1) * m_gradient;');
+        'vec4 localCoord = m_gradient * vec4(gl_FragCoord.x - center.x, center.y - gl_FragCoord.y, 0, 1);');
     method.addStatement(
         'float angle = atan(-localCoord.y, -localCoord.x) + ${math.pi};');
     method.addStatement('float sweep = angle_range.y - angle_range.x;');
@@ -317,14 +327,12 @@ class GradientLinear extends EngineGradient {
       // with flipped y axis.
       // We flip y axis, translate to center, multiply matrix and translate
       // and flip back so it is applied correctly.
-      final Matrix4 m4 = Matrix4.fromFloat32List(matrix4!.matrix);
-      gradientTransform.scale(1, -1);
-      gradientTransform.translate(
-          -shaderBounds.center.dx, -shaderBounds.center.dy);
+      final Matrix4 m4 = Matrix4.zero()
+        ..copyInverse(Matrix4.fromFloat32List(matrix4!.matrix));
+      final ui.Offset center = shaderBounds.center;
+      gradientTransform.translate(-center.dx, -center.dy);
       gradientTransform.multiply(m4);
-      gradientTransform.translate(
-          shaderBounds.center.dx, shaderBounds.center.dy);
-      gradientTransform.scale(1, -1);
+      gradientTransform.translate(center.dx, center.dy);
     }
 
     gradientTransform.multiply(rotationZ);
@@ -465,6 +473,12 @@ String _writeSharedGradientShader(ShaderBuilder builder, ShaderMethod method,
       sourcePrefix: 'threshold',
       biasName: 'bias',
       scaleName: 'scale');
+  if (tileMode == ui.TileMode.decal) {
+    method.addStatement('if (st < 0.0 || st > 1.0) {');
+    method.addStatement('  ${builder.fragmentColor.name} = vec4(0, 0, 0, 0);');
+    method.addStatement('  return;');
+    method.addStatement('}');
+  }
   return probeName;
 }
 
@@ -483,7 +497,7 @@ class GradientRadial extends EngineGradient {
   @override
   Object createPaintStyle(DomCanvasRenderingContext2D? ctx,
       ui.Rect? shaderBounds, double density) {
-    if (tileMode == ui.TileMode.clamp || tileMode == ui.TileMode.decal) {
+    if (matrix4 == null && (tileMode == ui.TileMode.clamp || tileMode == ui.TileMode.decal)) {
       return _createCanvasGradient(ctx, shaderBounds, density);
     } else {
       return _createGlGradient(ctx, shaderBounds, density);
@@ -533,15 +547,24 @@ class GradientRadial extends EngineGradient {
     final double centerX = (center.dx - shaderBounds.left) / (shaderBounds.width);
     final double centerY = (center.dy - shaderBounds.top) / (shaderBounds.height);
     gl.setUniform2f(tileOffset, 2 * (shaderBounds.width * (centerX - 0.5)),
-        2 * (shaderBounds.height * (centerY - 0.5)));
+        2 * (shaderBounds.height * (0.5 - centerY)));
     final Object radiusUniform = gl.getUniformLocation(glProgram.program, 'u_radius');
     gl.setUniform1f(radiusUniform, radius);
     normalizedGradient.setupUniforms(gl, glProgram);
 
     final Object gradientMatrix =
         gl.getUniformLocation(glProgram.program, 'm_gradient');
-    gl.setUniformMatrix4fv(gradientMatrix, false,
-        matrix4 == null ? Matrix4.identity().storage : matrix4!);
+
+    final Matrix4 gradientTransform = Matrix4.identity();
+
+    if (matrix4 != null) {
+      final Matrix4 m4 = Matrix4.zero()
+        ..copyInverse(Matrix4.fromFloat32List(matrix4!));
+      gradientTransform.translate(-center.dx, -center.dy);
+      gradientTransform.multiply(m4);
+      gradientTransform.translate(center.dx, center.dy);
+    }
+    gl.setUniformMatrix4fv(gradientMatrix, false, gradientTransform.storage);
 
     final Object result = () {
       if (createDataUrl) {
@@ -587,7 +610,7 @@ class GradientRadial extends EngineGradient {
     // Sweep gradient
     method.addStatement('vec2 center = 0.5 * (u_resolution + u_tile_offset);');
     method.addStatement(
-        'vec4 localCoord = vec4(gl_FragCoord.x - center.x, center.y - gl_FragCoord.y, 0, 1) * m_gradient;');
+        'vec4 localCoord = m_gradient * vec4(gl_FragCoord.x - center.x, center.y - gl_FragCoord.y, 0, 1);');
     method.addStatement('float dist = length(localCoord);');
     method.addStatement(
         'float st = abs(dist / u_radius);');
@@ -666,7 +689,7 @@ class GradientConical extends GradientRadial {
     // Sweep gradient
     method.addStatement('vec2 center = 0.5 * (u_resolution + u_tile_offset);');
     method.addStatement(
-        'vec4 localCoord = vec4(gl_FragCoord.x - center.x, center.y - gl_FragCoord.y, 0, 1) * m_gradient;');
+        'vec4 localCoord = m_gradient * vec4(gl_FragCoord.x - center.x, center.y - gl_FragCoord.y, 0, 1);');
     method.addStatement('float dist = length(localCoord);');
     final String f = (focalRadius /
             (math.min(shaderBounds.width, shaderBounds.height) / 2.0))
