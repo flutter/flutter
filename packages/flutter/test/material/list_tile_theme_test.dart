@@ -8,7 +8,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../foundation/leak_tracking.dart';
-import '../rendering/mock_canvas.dart';
 
 class TestIcon extends StatefulWidget {
   const TestIcon({ super.key });
@@ -569,7 +568,7 @@ void main() {
     expect(find.byType(Material), paints..rect(color: selectedTileColor));
   });
 
-  testWidgetsWithLeakTracking('ListTile uses ListTileTheme shape in a drawer', (WidgetTester tester) async {
+  testWidgets('ListTile uses ListTileTheme shape in a drawer', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/106303
 
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
