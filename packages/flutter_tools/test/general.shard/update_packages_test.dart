@@ -108,6 +108,7 @@ void main() {
         'material_color_utilities',
         'url_launcher_android',
         'archive',
+        'leak_tracker',
       ]),
     );
   });
