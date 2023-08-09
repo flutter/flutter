@@ -67,14 +67,14 @@ void main() {
     );
   }
 
-  BoxDecoration? findTextDecoration(WidgetTester tester, String date) {
+  ShapeDecoration? findTextDecoration(WidgetTester tester, String date) {
     final Container container = tester.widget<Container>(
       find.ancestor(
         of: find.text(date),
         matching: find.byType(Container)
       ).first,
     );
-    return container.decoration as BoxDecoration?;
+    return container.decoration as ShapeDecoration?;
   }
 
   const Size wideWindowSize = Size(1920.0, 1080.0);
@@ -378,18 +378,17 @@ void main() {
     expect(selectedDate.style?.fontSize, datePickerTheme.headerHeadlineStyle?.fontSize);
 
     final Text day31 = tester.widget<Text>(find.text('31'));
-    final BoxDecoration day31Decoration = findTextDecoration(tester, '31')!;
+    final ShapeDecoration day31Decoration = findTextDecoration(tester, '31')!;
     expect(day31.style?.color, datePickerTheme.dayForegroundColor?.resolve(<MaterialState>{}));
     expect(day31.style?.fontSize, datePickerTheme.dayStyle?.fontSize);
     expect(day31Decoration.color, datePickerTheme.dayBackgroundColor?.resolve(<MaterialState>{}));
 
     final Text day24 = tester.widget<Text>(find.text('24')); // DatePickerDialog.currentDate
-    final BoxDecoration day24Decoration = findTextDecoration(tester, '24')!;
+    final ShapeDecoration day24Decoration = findTextDecoration(tester, '24')!;
     expect(day24.style?.fontSize, datePickerTheme.dayStyle?.fontSize);
     expect(day24.style?.color, datePickerTheme.todayForegroundColor?.resolve(<MaterialState>{}));
     expect(day24Decoration.color, datePickerTheme.todayBackgroundColor?.resolve(<MaterialState>{}));
-    expect(day24Decoration.border?.top.width, datePickerTheme.todayBorder?.width);
-    expect(day24Decoration.border?.bottom.width, datePickerTheme.todayBorder?.width);
+    expect((day24Decoration.shape as CircleBorder?)?.side.width, datePickerTheme.todayBorder?.width);
 
     // Test the day overlay color.
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
@@ -407,20 +406,18 @@ void main() {
     await tester.pumpAndSettle();
 
     final Text year2022 = tester.widget<Text>(find.text('2022'));
-    final BoxDecoration year2022Decoration = findTextDecoration(tester, '2022')!;
+    final ShapeDecoration year2022Decoration = findTextDecoration(tester, '2022')!;
     expect(year2022.style?.fontSize, datePickerTheme.yearStyle?.fontSize);
     expect(year2022.style?.color, datePickerTheme.yearForegroundColor?.resolve(<MaterialState>{}));
     expect(year2022Decoration.color, datePickerTheme.yearBackgroundColor?.resolve(<MaterialState>{}));
 
     final Text year2023 = tester.widget<Text>(find.text('2023')); // DatePickerDialog.currentDate
-    final BoxDecoration year2023Decoration = findTextDecoration(tester, '2023')!;
+    final ShapeDecoration year2023Decoration = findTextDecoration(tester, '2023')!;
     expect(year2023.style?.fontSize, datePickerTheme.yearStyle?.fontSize);
     expect(year2023.style?.color, datePickerTheme.todayForegroundColor?.resolve(<MaterialState>{}));
     expect(year2023Decoration.color, datePickerTheme.todayBackgroundColor?.resolve(<MaterialState>{}));
-    expect(year2023Decoration.border?.top.width, datePickerTheme.todayBorder?.width);
-    expect(year2023Decoration.border?.bottom.width, datePickerTheme.todayBorder?.width);
-    expect(year2023Decoration.border?.top.color, datePickerTheme.todayForegroundColor?.resolve(<MaterialState>{}));
-    expect(year2023Decoration.border?.bottom.color, datePickerTheme.todayForegroundColor?.resolve(<MaterialState>{}));
+    expect((year2023Decoration.shape as RoundedRectangleBorder?)?.side.width, datePickerTheme.todayBorder?.width);
+    expect((year2023Decoration.shape as RoundedRectangleBorder?)?.side.color, datePickerTheme.todayForegroundColor?.resolve(<MaterialState>{}));
 
     // Test the year overlay color.
     await gesture.moveTo(tester.getCenter(find.text('2024')));

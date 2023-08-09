@@ -1206,17 +1206,19 @@ class _YearPickerState extends State<YearPicker> {
         effectiveValue((DatePickerThemeData? theme) => theme?.yearOverlayColor?.resolve(states)),
       );
 
-    BoxBorder? border;
+    BorderSide? borderSide;
     if (isCurrentYear) {
       final BorderSide? todayBorder = datePickerTheme.todayBorder ?? defaults.todayBorder;
       if (todayBorder != null) {
-        border = Border.fromBorderSide(todayBorder.copyWith(color: textColor));
+        borderSide = todayBorder.copyWith(color: textColor);
       }
     }
-    final BoxDecoration decoration = BoxDecoration(
-      border: border,
+    final ShapeDecoration decoration = ShapeDecoration(
       color: background,
-      borderRadius: BorderRadius.circular(decorationHeight / 2),
+      shape: RoundedRectangleBorder(
+        side: borderSide ?? BorderSide.none,
+        borderRadius: BorderRadius.circular(decorationHeight / 2),
+      ),
     );
 
     final TextStyle? itemStyle = (datePickerTheme.yearStyle ?? defaults.yearStyle)?.apply(color: textColor);
