@@ -900,9 +900,11 @@ void main() {
 
     await tester.pumpWidget(widget);
 
-    await tester.enterText(find.byType(TextFormField), 'foo');
-    await tester.pump();
+    // initially, the field has not been interacted with
+    expect(fieldKey.currentState!.hasInteractedByUser, isFalse);
 
+    // after entering text, the field has been interacted with
+    await tester.enterText(find.byType(TextFormField), 'foo');
     expect(fieldKey.currentState!.hasInteractedByUser, isTrue);
   });
 
@@ -927,11 +929,15 @@ void main() {
 
     await tester.pumpWidget(widget);
 
+    // initially, the field has not been interacted with
+    expect(fieldKey.currentState!.hasInteractedByUser, isFalse);
+
+    // after entering text, the field has been interacted with
     await tester.enterText(find.byType(TextFormField), 'foo');
-    await tester.pump();
+    expect(fieldKey.currentState!.hasInteractedByUser, isTrue);
 
+    // after resetting the field, it has not been interacted with again
     fieldKey.currentState!.reset();
-
     expect(fieldKey.currentState!.hasInteractedByUser, isFalse);
   });
 }
