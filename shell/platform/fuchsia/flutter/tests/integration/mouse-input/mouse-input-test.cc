@@ -15,8 +15,8 @@
 #include <fuchsia/sys/cpp/fidl.h>
 #include <fuchsia/tracing/provider/cpp/fidl.h>
 #include <fuchsia/ui/app/cpp/fidl.h>
+#include <fuchsia/ui/display/singleton/cpp/fidl.h>
 #include <fuchsia/ui/input/cpp/fidl.h>
-#include <fuchsia/ui/scenic/cpp/fidl.h>
 #include <fuchsia/ui/test/input/cpp/fidl.h>
 #include <fuchsia/web/cpp/fidl.h>
 #include <lib/async/cpp/task.h>
@@ -170,14 +170,19 @@ class MouseInputTest : public PortableUITest,
     RegisterMouse();
 
     // Get the display dimensions.
-    FML_LOG(INFO) << "Waiting for scenic display info";
-    scenic_ = realm_root()->component().Connect<fuchsia::ui::scenic::Scenic>();
-    scenic_->GetDisplayInfo([this](fuchsia::ui::gfx::DisplayInfo display_info) {
-      display_width_ = display_info.width_in_px;
-      display_height_ = display_info.height_in_px;
-      FML_LOG(INFO) << "Got display_width = " << display_width_
-                    << " and display_height = " << display_height_;
-    });
+    FML_LOG(INFO)
+        << "Waiting for display info from fuchsia.ui.display.singleton.Info";
+    fuchsia::ui::display::singleton::InfoPtr display_info =
+        realm_root()
+            ->component()
+            .Connect<fuchsia::ui::display::singleton::Info>();
+    display_info->GetMetrics(
+        [this](fuchsia::ui::display::singleton::Metrics metrics) {
+          display_width_ = metrics.extent_in_px().width;
+          display_height_ = metrics.extent_in_px().height;
+          FML_LOG(INFO) << "Got display_width = " << display_width_
+                        << " and display_height = " << display_height_;
+        });
     RunLoopUntil(
         [this] { return display_width_ != 0 && display_height_ != 0; });
   }
@@ -284,7 +289,6 @@ class MouseInputTest : public PortableUITest,
 
   MouseInputListenerServer* mouse_input_listener_;
 
-  fuchsia::ui::scenic::ScenicPtr scenic_;
   uint32_t display_width_ = 0;
   uint32_t display_height_ = 0;
 };
