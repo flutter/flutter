@@ -473,6 +473,13 @@ end
           throw TaskResult.failure('Unexpected armv7 architecture slice in $builtAppBinary');
         }
 
+        // Check native assets are bundled.
+        checkFileExists(path.join(
+          archivedAppPath,
+          'Frameworks',
+          'lib$ffiPackageName.dylib',
+        ));
+
         // The host app example builds plugins statically, url_launcher_ios.framework
         // should not exist.
         checkDirectoryNotExists(path.join(
