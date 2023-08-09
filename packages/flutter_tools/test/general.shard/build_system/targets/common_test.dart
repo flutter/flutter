@@ -75,6 +75,15 @@ void main() {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
+    androidEnvironment.buildDir.childFile('native_assets.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+format-version:
+  - 1
+  - 0
+  - 0
+native-assets: {}
+''');
     final String build = androidEnvironment.buildDir.path;
     final String flutterPatchedSdkPath = artifacts.getArtifactPath(
       Artifact.flutterPatchedSdkPath,
@@ -117,6 +126,15 @@ void main() {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
+    androidEnvironment.buildDir.childFile('native_assets.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+format-version:
+  - 1
+  - 0
+  - 0
+native-assets: {}
+''');
     final String build = androidEnvironment.buildDir.path;
     final String flutterPatchedSdkPath = artifacts.getArtifactPath(
       Artifact.flutterPatchedSdkPath,
@@ -160,6 +178,15 @@ void main() {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
+    androidEnvironment.buildDir.childFile('native_assets.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+format-version:
+  - 1
+  - 0
+  - 0
+native-assets: {}
+''');
     final String build = androidEnvironment.buildDir.path;
     final String flutterPatchedSdkPath = artifacts.getArtifactPath(
       Artifact.flutterPatchedSdkPath,
@@ -204,6 +231,15 @@ void main() {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
+    androidEnvironment.buildDir.childFile('native_assets.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+format-version:
+  - 1
+  - 0
+  - 0
+native-assets: {}
+''');
     final String build = androidEnvironment.buildDir.path;
     final String flutterPatchedSdkPath = artifacts.getArtifactPath(
       Artifact.flutterPatchedSdkPath,
@@ -250,6 +286,15 @@ void main() {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
+    androidEnvironment.buildDir.childFile('native_assets.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+format-version:
+  - 1
+  - 0
+  - 0
+native-assets: {}
+''');
     final String build = androidEnvironment.buildDir.path;
     final String flutterPatchedSdkPath = artifacts.getArtifactPath(
       Artifact.flutterPatchedSdkPath,
@@ -294,6 +339,15 @@ void main() {
     fileSystem.file('.dart_tool/package_config.json')
       ..createSync(recursive: true)
       ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
+    androidEnvironment.buildDir.childFile('native_assets.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+format-version:
+  - 1
+  - 0
+  - 0
+native-assets: {}
+''');
     final String build = androidEnvironment.buildDir.path;
     final String flutterPatchedSdkPath = artifacts.getArtifactPath(
       Artifact.flutterPatchedSdkPath,
@@ -350,6 +404,15 @@ void main() {
       fileSystem: fileSystem,
       logger: logger,
     );
+    testEnvironment.buildDir.childFile('native_assets.yaml')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
+format-version:
+  - 1
+  - 0
+  - 0
+native-assets: {}
+''');
     final String build = testEnvironment.buildDir.path;
     final String flutterPatchedSdkPath = artifacts.getArtifactPath(
       Artifact.flutterPatchedSdkPath,
