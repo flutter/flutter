@@ -1309,6 +1309,51 @@ void main() {
 
     expect(offsetForFastScroller / offsetForSlowScroller, fastVelocityScalar / slowVelocityScalar);
   });
+  
+  testWidgets('Null check error when dragging and dropping last element into last index with reverse:true', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/132077
+    const int itemCount = 5;
+    final List<String> items = List<String>.generate(itemCount, (int index) => 'Item ${index+1}');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ReorderableList(
+          onReorder: (int oldIndex, int newIndex) {
+                if (newIndex > oldIndex) {
+                  newIndex -= 1;
+                }
+                final String item = items.removeAt(oldIndex);
+                items.insert(newIndex, item);
+          },
+          itemCount: items.length,
+          reverse: true,
+          itemBuilder: (BuildContext context, int index) {
+            return ReorderableDragStartListener(
+              key: Key('$index'),
+              index: index,
+              child: Material(
+                child: ListTile(
+                  title: Text(items[index]),
+                ),
+              ),
+            );
+          },
+        ),
+      )
+    );
+
+    // Start gesture on last item
+    final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('Item 5')));
+    await tester.pump(kLongPressTimeout);
+
+    // Drag to move up the last item, and drop at the last index
+    await drag.moveBy(const Offset(0, -50));
+    await tester.pump();
+    await drag.up();
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), null);
+  });
 }
 
 class TestList extends StatelessWidget {
