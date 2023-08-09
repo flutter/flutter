@@ -2688,7 +2688,7 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: draw_atlas_perf_ios__timeline_summary
 
-  - name: Linux_samsung_s10 path_tessellation_static_perf__timeline_summary
+  - name: Linux_samsung_s10 static_path_tessellation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     bringup: true
@@ -2697,9 +2697,9 @@ targets:
       ignore_flakiness: "true"
       tags: >
         ["devicelab", "android", "linux", "samsung", "s10"]
-      task_name: path_tessellation_static_perf__timeline_summary
+      task_name: static_path_tessellation_perf__timeline_summary
 
-  - name: Mac_ios path_tessellation_static_ios__timeline_summary
+  - name: Mac_ios static_path_tessellation_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2707,9 +2707,9 @@ targets:
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
-      task_name: path_tessellation_static_ios__timeline_summary
+      task_name: static_path_tessellation_ios__timeline_summary
 
-  - name: Linux_samsung_s10 path_tessellation_dynamic_perf__timeline_summary
+  - name: Linux_samsung_s10 dynamic_path_tessellation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     bringup: true
@@ -2718,9 +2718,9 @@ targets:
       ignore_flakiness: "true"
       tags: >
         ["devicelab", "android", "linux", "samsung", "s10"]
-      task_name: path_tessellation_dynamic_perf__timeline_summary
+      task_name: dynamic_path_tessellation_perf__timeline_summary
 
-  - name: Mac_ios path_tessellation_dynamic_ios__timeline_summary
+  - name: Mac_ios dynamic_path_tessellation_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2728,7 +2728,7 @@ targets:
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
-      task_name: path_tessellation_dynamic_ios__timeline_summary
+      task_name: dynamic_path_tessellation_ios__timeline_summary
 
   - name: Staging_build_linux analyze
     presubmit: false
