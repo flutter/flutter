@@ -172,6 +172,7 @@ void main() {
       logger: BufferLogger.test(),
       processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
+      processUtils: processUtils,
     );
     final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
     setupFileSystemForEndToEndTest(fileSystem);
