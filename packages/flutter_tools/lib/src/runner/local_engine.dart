@@ -206,7 +206,7 @@ class LocalEngineLocator {
       }
 
       if (localHostEngine == null) {
-        // TODO(https://github.com/flutter/flutter/issues/132245): Change to throwToolExit.
+        // TODO(matanlurey): https://github.com/flutter/flutter/issues/132245, change to throwToolExit.
         _logger.printStatus(_userMessages.runnerLocalEngineRequiresHostEngine);
       }
       final String basename = localHostEngine ?? _fileSystem.path.basename(engineBuildPath);
