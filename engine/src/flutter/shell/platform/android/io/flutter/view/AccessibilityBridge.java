@@ -576,6 +576,11 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   }
 
   @VisibleForTesting
+  public AccessibilityNodeInfo obtainAccessibilityNodeInfo(View rootView) {
+    return AccessibilityNodeInfo.obtain(rootView);
+  }
+
+  @VisibleForTesting
   public AccessibilityNodeInfo obtainAccessibilityNodeInfo(View rootView, int virtualViewId) {
     return AccessibilityNodeInfo.obtain(rootView, virtualViewId);
   }
@@ -616,12 +621,15 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
 
     if (virtualViewId == View.NO_ID) {
-      AccessibilityNodeInfo result = AccessibilityNodeInfo.obtain(rootAccessibilityView);
+      AccessibilityNodeInfo result = obtainAccessibilityNodeInfo(rootAccessibilityView);
       rootAccessibilityView.onInitializeAccessibilityNodeInfo(result);
       // TODO(mattcarroll): what does it mean for the semantics tree to contain or not contain
       //                    the root node ID?
       if (flutterSemanticsTree.containsKey(ROOT_NODE_ID)) {
         result.addChild(rootAccessibilityView, ROOT_NODE_ID);
+      }
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        result.setImportantForAccessibility(false);
       }
       return result;
     }
@@ -653,6 +661,13 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
     AccessibilityNodeInfo result =
         obtainAccessibilityNodeInfo(rootAccessibilityView, virtualViewId);
+
+    // Accessibility Scanner uses isImportantForAccessibility to decide whether to check
+    // or skip this node.
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+      result.setImportantForAccessibility(isImportant(semanticsNode));
+    }
+
     // Work around for https://github.com/flutter/flutter/issues/2101
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
       result.setViewIdResourceName("");
@@ -981,6 +996,19 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       result.addChild(rootAccessibilityView, child.id);
     }
     return result;
+  }
+
+  private boolean isImportant(SemanticsNode node) {
+    if (node.hasFlag(Flag.SCOPES_ROUTE)) {
+      return false;
+    }
+
+    if (node.getValueLabelHint() != null) {
+      return true;
+    }
+
+    // Return true if the node has had any user action (not including system actions)
+    return (node.actions & ~systemAction) != 0;
   }
 
   /**
@@ -2140,6 +2168,14 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       this.value = value;
     }
   }
+
+  // Actions that are triggered by Android OS, as opposed to user-triggered actions.
+  //
+  // This int is intended to be use in a bitwise comparison.
+  static int systemAction =
+      Action.DID_GAIN_ACCESSIBILITY_FOCUS.value
+          & Action.DID_LOSE_ACCESSIBILITY_FOCUS.value
+          & Action.SHOW_ON_SCREEN.value;
 
   // Must match SemanticsFlag in semantics.dart
   // https://github.com/flutter/engine/blob/main/lib/ui/semantics.dart
