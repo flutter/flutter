@@ -799,13 +799,13 @@ abstract class FinderBase<CandidateType> {
   ///   // await tester.pumpWidget(...)
   ///
   ///   // Wait until at least one loaded widget is available
-  ///   WidgetFinder loadedFinder = find.textContaining('loaded');
+  ///   Finder loadedFinder = find.textContaining('loaded');
   ///   while (!loadedFinder.tryEvaluate()) {
   ///     await tester.pump(const Duration(milliseconds: 100));
   ///   }
   ///
   ///   expect(loadedFinder.found, hasLength(1));
-  ///   expect(tester.widget<Text>(loadedFinder.found).data, contains('Top'));
+  ///   expect(tester.widget<Text>(loadedFinder).data, contains('Top'));
   /// });
   /// ```
   bool tryEvaluate() {
