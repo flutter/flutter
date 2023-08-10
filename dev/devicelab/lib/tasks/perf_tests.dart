@@ -784,9 +784,10 @@ class StartupTest {
 
   Future<TaskResult> run() async {
     return inDirectory<TaskResult>(testDirectory, () async {
-      // if (runEnvironment?['FORCE_XCODE_DEBUG'] == 'true') {
-      //   await debugAutomation();
-      // }
+      if (runEnvironment?['FORCE_XCODE_DEBUG'] == 'true') {
+        await debugAutomation();
+        return TaskResult.failure('debugging');
+      }
       final Device device = await devices.workingDevice;
       await device.unlock();
       const int iterations = 5;
@@ -971,6 +972,102 @@ class StartupTest {
       print('List Result: ${listResult.exitCode}');
       print('[stdout]: ${listResult.stdout.toString().trim()}');
       print('[stderr]: ${listResult.stderr.toString().trim()}');
+
+      if (listResult.exitCode == 0) {
+        final ProcessResult accessResult = await processManager.run(
+          <String>[
+            'sqlite3',
+            path.join(tccDir.path, 'TCC.db'),
+            'SELECT service, client, client_type, auth_value, indirect_object_identifier_type, indirect_object_identifier, last_modified  FROM access WHERE service = "kTCCServiceAppleEvents"'
+          ],
+        );
+        print('Access Result: ${accessResult.exitCode}');
+        print('[stdout]: ${accessResult.stdout.toString().trim()}');
+        print('[stderr]: ${accessResult.stderr.toString().trim()}');
+      }
+
+    //   final Process process = await processManager.start(<String>['top']);
+    //   print(process.pid);
+
+    //   String pid = process.pid.toString();
+    //   for (int i = 0; i < 10; i++) {
+    //     final ProcessResult processResult = await processManager.run(
+    //       <String>[
+    //         'ps',
+    //         '-p',
+    //         pid,
+    //         '-o',
+    //         'ppid=',
+    //         '-o',
+    //         'command=',
+    //       ],
+    //     );
+
+    //     print('Parent Process Result: ${processResult.exitCode}');
+    //     print('[stdout]: ${processResult.stdout.toString().trim()}');
+    //     print('[stderr]: ${processResult.stderr.toString().trim()}');
+    //     if (processResult.exitCode != 0) {
+    //       break;
+    //     }
+
+    //     final String processAndCommand = processResult.stdout.toString().trim();
+    //     if (processAndCommand.contains('.app') && processAndCommand.contains('/Applications')) {
+    //       break;
+    //     }
+
+    //     final List<String> parts = processAndCommand.split(' ');
+    //     if (parts.isEmpty) {
+    //       break;
+    //     }
+    //     pid = parts[0];
+    //   }
+
+    //   final ProcessResult parentProcessResult = await processManager.run(
+    //     <String>[
+    //       'ps',
+    //       '-p',
+    //       pid,
+    //       '-o',
+    //       'command=',
+    //     ]
+    //   );
+    //   print('Process Result: ${parentProcessResult.exitCode}');
+    //   print('[stdout]: ${parentProcessResult.stdout.toString().trim()}');
+    //   print('[stderr]: ${parentProcessResult.stderr.toString().trim()}');
+
+    //   process.kill();
+
+    //   if (parentProcessResult.exitCode != 0) {
+    //     return;
+    //   }
+
+    //   final String processCommand = parentProcessResult.stdout.toString().trim();
+    //   if (processCommand.contains('.app') && processCommand.contains('/Applications')) {
+    //     int startIndex = processCommand.indexOf('/System/Applications');
+    //     if (startIndex == -1) {
+    //       startIndex = processCommand.indexOf('/Applications');
+    //     }
+    //     if (startIndex == -1) {
+    //       return;
+    //     }
+    //     final int endIndex = processCommand.indexOf('.app');
+    //     final String appPath = path.join(processCommand.substring(startIndex, endIndex + 4), 'Contents', 'Info.plist');
+    //     print(appPath);
+    //     final File plist = file(appPath);
+    //     final ProcessResult bundleResult = await processManager.run(
+    //       <String>[
+    //         'defaults',
+    //         'read',
+    //         plist.path,
+    //         'CFBundleIdentifier',
+    //       ]
+    //     );
+    //     print('Bundle Result: ${bundleResult.exitCode}');
+    //     print('[stdout]: ${bundleResult.stdout.toString().trim()}');
+    //     print('[stderr]: ${bundleResult.stderr.toString().trim()}');
+    //   }
+    } else {
+      print('Unable to find HOME');
     }
   }
 }
