@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -10,9 +11,13 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
+import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/native_assets.dart';
+import 'package:native_assets_cli/native_assets_cli.dart' as native_assets_cli;
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
+import '../../../src/fakes.dart';
 
 void main() {
   late FakeProcessManager processManager;
@@ -62,16 +67,81 @@ void main() {
         throwsA(isA<MissingDefineException>()));
   });
 
-  testUsingContext('NativeAssets no throw if all info is supplied', () async {
-    // Won't build any native assets as there aren't any in the test project dir.
-    await const NativeAssets().build(iosEnvironment);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
-  });
+  // The NativeAssets Target should _always_ be creating a yaml an d file.
+  // The caching logic depends on this.
+  for (final bool isNativeAssetsEnabled in <bool>[true, false]) {
+    final String postFix = isNativeAssetsEnabled ? 'enabled' : 'disabled';
+    testUsingContext(
+      'Successfull native_assets.yaml and native_assets.d creation with feature $postFix',
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        FeatureFlags: () => TestFeatureFlags(
+              isNativeAssetsEnabled: isNativeAssetsEnabled,
+            ),
+      },
+      () async {
+        final NativeAssetsBuildRunner buildRunner =
+            FakeNativeAssetsBuildRunner();
+        await NativeAssets(buildRunner: buildRunner).build(iosEnvironment);
 
-  // TODO(dacoharkes): Use dependency injection to use FakeNativeAssetsBuildRunner
-  // for testing the NativeAssets Target.
-  // [Target] mentions dependency injection, but doesn't detail how to
-  // inject a dependency.
+        expect(iosEnvironment.buildDir.childFile('native_assets.d'), exists);
+        expect(iosEnvironment.buildDir.childFile('native_assets.yaml'), exists);
+      },
+    );
+  }
+
+  testUsingContext(
+    'NativeAssets with an asset',
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+    },
+    () async {
+      final NativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
+        buildResult:
+            FakeNativeAssetsBuilderResult(assets: <native_assets_cli.Asset>[
+          native_assets_cli.Asset(
+            id: 'package:foo/foo.dart',
+            linkMode: native_assets_cli.LinkMode.dynamic,
+            target: native_assets_cli.Target.iOSArm64,
+            path: native_assets_cli.AssetAbsolutePath(
+              Uri.file('libfoo.dylib'),
+            ),
+          )
+        ], dependencies: <Uri>[
+          Uri.file('src/foo.c'),
+        ]),
+      );
+      await NativeAssets(buildRunner: buildRunner).build(iosEnvironment);
+
+      final File nativeAssetsYaml =
+          iosEnvironment.buildDir.childFile('native_assets.yaml');
+      final File depsFile =
+          iosEnvironment.buildDir.childFile('native_assets.d');
+      expect(depsFile, exists);
+      // We don't care about the specific format, but it should contain the
+      // yaml as the file depending on the source files that went in to the
+      // build.
+      expect(
+        depsFile.readAsStringSync(),
+        stringContainsInOrder(<String>[
+          nativeAssetsYaml.path,
+          ':',
+          'src/foo.c',
+        ]),
+      );
+      expect(nativeAssetsYaml, exists);
+      // We don't care about the specific format, but it should contain the
+      // asset id and the path to the dylib.
+      expect(
+        nativeAssetsYaml.readAsStringSync(),
+        stringContainsInOrder(<String>[
+          'package:foo/foo.dart',
+          'libfoo.dylib',
+        ]),
+      );
+    },
+  );
 }

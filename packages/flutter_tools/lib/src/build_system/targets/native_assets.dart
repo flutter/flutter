@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:native_assets_cli/native_assets_cli.dart' show Asset;
 
 import '../../base/common.dart';
@@ -36,7 +37,11 @@ import 'common.dart';
 /// even if there are no native assets. This way the caching logic won't try to
 /// rebuild.
 class NativeAssets extends Target {
-  const NativeAssets();
+  const NativeAssets({
+    @visibleForTesting NativeAssetsBuildRunner? buildRunner,
+  }) : _buildRunner = buildRunner;
+
+  final NativeAssetsBuildRunner? _buildRunner;
 
   @override
   Future<void> build(Environment environment) async {
@@ -50,7 +55,7 @@ class NativeAssets extends Target {
 
     final Uri projectUri = environment.projectDir.uri;
     final FileSystem fileSystem = environment.fileSystem;
-    final NativeAssetsBuildRunner buildRunner =
+    final NativeAssetsBuildRunner buildRunner = _buildRunner ??
         NativeAssetsBuildRunnerImpl(projectUri, fileSystem, environment.logger);
 
     List<Uri> dependencies = <Uri>[];
