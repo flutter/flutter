@@ -10,10 +10,16 @@
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/surface_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain_image_vk.h"
+#include "vulkan/vulkan_structs.hpp"
 
 namespace impeller {
 
 static constexpr size_t kMaxFramesInFlight = 3u;
+
+// Number of frames to poll for orientation changes. For example `1u` means
+// that the orientation will be polled every frame, while `2u` means that the
+// orientation will be polled every other frame.
+static constexpr size_t kPollFramesForOrientation = 1u;
 
 struct FrameSynchronizer {
   vk::UniqueFence acquire;
@@ -124,16 +130,17 @@ static std::optional<vk::Queue> ChoosePresentQueue(
 std::shared_ptr<SwapchainImplVK> SwapchainImplVK::Create(
     const std::shared_ptr<Context>& context,
     vk::UniqueSurfaceKHR surface,
-    bool was_rotated,
-    vk::SwapchainKHR old_swapchain) {
+    vk::SwapchainKHR old_swapchain,
+    vk::SurfaceTransformFlagBitsKHR last_transform) {
   return std::shared_ptr<SwapchainImplVK>(new SwapchainImplVK(
-      context, std::move(surface), was_rotated, old_swapchain));
+      context, std::move(surface), old_swapchain, last_transform));
 }
 
-SwapchainImplVK::SwapchainImplVK(const std::shared_ptr<Context>& context,
-                                 vk::UniqueSurfaceKHR surface,
-                                 bool was_rotated,
-                                 vk::SwapchainKHR old_swapchain) {
+SwapchainImplVK::SwapchainImplVK(
+    const std::shared_ptr<Context>& context,
+    vk::UniqueSurfaceKHR surface,
+    vk::SwapchainKHR old_swapchain,
+    vk::SurfaceTransformFlagBitsKHR last_transform) {
   if (!context) {
     return;
   }
@@ -278,8 +285,7 @@ SwapchainImplVK::SwapchainImplVK(const std::shared_ptr<Context>& context,
   synchronizers_ = std::move(synchronizers);
   current_frame_ = synchronizers_.size() - 1u;
   is_valid_ = true;
-  was_rotated_ = was_rotated;
-  is_rotated_ = was_rotated;
+  transform_if_changed_discard_swapchain_ = last_transform;
 }
 
 SwapchainImplVK::~SwapchainImplVK() {
@@ -311,6 +317,10 @@ vk::Format SwapchainImplVK::GetSurfaceFormat() const {
   return surface_format_;
 }
 
+vk::SurfaceTransformFlagBitsKHR SwapchainImplVK::GetLastTransform() const {
+  return transform_if_changed_discard_swapchain_;
+}
+
 std::shared_ptr<Context> SwapchainImplVK::GetContext() const {
   return context_.lock();
 }
@@ -319,10 +329,6 @@ SwapchainImplVK::AcquireResult SwapchainImplVK::AcquireNextDrawable() {
   auto context_strong = context_.lock();
   if (!context_strong) {
     return {};
-  }
-
-  if (was_rotated_ != is_rotated_) {
-    return AcquireResult{true /* out of date */};
   }
 
   const auto& context = ContextVK::Cast(*context_strong);
@@ -340,6 +346,26 @@ SwapchainImplVK::AcquireResult SwapchainImplVK::AcquireNextDrawable() {
   }
 
   //----------------------------------------------------------------------------
+  /// Poll to see if the orientation has changed.
+  ///
+  /// https://developer.android.com/games/optimize/vulkan-prerotation#using_polling
+  current_transform_poll_count_++;
+  if (current_transform_poll_count_ >= kPollFramesForOrientation) {
+    current_transform_poll_count_ = 0u;
+    auto [caps_result, caps] =
+        context.GetPhysicalDevice().getSurfaceCapabilitiesKHR(*surface_);
+    if (caps_result != vk::Result::eSuccess) {
+      VALIDATION_LOG << "Could not get surface capabilities: "
+                     << vk::to_string(caps_result);
+      return {};
+    }
+    if (caps.currentTransform != transform_if_changed_discard_swapchain_) {
+      transform_if_changed_discard_swapchain_ = caps.currentTransform;
+      return AcquireResult{true /* out of date */};
+    }
+  }
+
+  //----------------------------------------------------------------------------
   /// Get the next image index.
   ///
   auto [acq_result, index] = context.GetDevice().acquireNextImageKHR(
@@ -348,11 +374,6 @@ SwapchainImplVK::AcquireResult SwapchainImplVK::AcquireNextDrawable() {
       *sync->render_ready,  // signal semaphore
       nullptr               // fence
   );
-
-  if (acq_result == vk::Result::eSuboptimalKHR) {
-    is_rotated_ = true;
-    return AcquireResult{true /* out of date */};
-  }
 
   if (acq_result == vk::Result::eErrorOutOfDateKHR) {
     return AcquireResult{true /* out of date */};
@@ -470,11 +491,13 @@ bool SwapchainImplVK::Present(const std::shared_ptr<SwapchainImageVK>& image,
             // Vulkan guarantees that the set of queue operations will still
             // complete successfully.
             [[fallthrough]];
-          case vk::Result::eSuccess:
-            is_rotated_ = false;
-            return;
           case vk::Result::eSuboptimalKHR:
-            is_rotated_ = true;
+            // Even though we're handling rotation changes via polling, we
+            // still need to handle the case where the swapchain signals that
+            // it's suboptimal (i.e. every frame when we are rotated given we
+            // aren't doing Vulkan pre-rotation).
+            [[fallthrough]];
+          case vk::Result::eSuccess:
             return;
           default:
             VALIDATION_LOG << "Could not present queue: "
