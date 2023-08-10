@@ -2071,4 +2071,3 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
   @override
   TextRange getWordBoundary(TextPosition position) => paragraph.getWordBoundary(position);
 }
-
