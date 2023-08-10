@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -186,7 +187,7 @@ class XcodeDebug {
       if (currentDebuggingProject != null) {
         final XcodeDebugProject project = currentDebuggingProject!;
         if (project.isTemporaryProject) {
-          project.xcodeProject.parent.deleteSync(recursive: true);
+          ErrorHandlingFileSystem.deleteIfExists(project.xcodeProject.parent, recursive: true);
         }
         currentDebuggingProject = null;
       }
@@ -208,7 +209,7 @@ class XcodeDebug {
         }
 
         try {
-          project.xcodeProject.parent.deleteSync(recursive: true);
+          ErrorHandlingFileSystem.deleteIfExists(project.xcodeProject.parent, recursive: true);
         } on FileSystemException {
           _logger.printError('Failed to delete temporary Xcode project: ${project.xcodeProject.parent.path}');
         }
