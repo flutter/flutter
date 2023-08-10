@@ -211,6 +211,9 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
     return accessibility_bridge_;
   }
 
+  // |WindowBindingHandlerDelegate|
+  void OnWindowStateEvent(HWND hwnd, WindowStateEvent event) override;
+
  protected:
   virtual void NotifyWinEventWrapper(ui::AXPlatformNodeWin* node,
                                      ax::mojom::Event event);

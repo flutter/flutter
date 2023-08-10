@@ -66,6 +66,8 @@ class MockWindow : public Window {
 
   MOCK_METHOD3(OnGetObject, LRESULT(UINT, WPARAM, LPARAM));
 
+  MOCK_METHOD1(OnWindowStateEvent, void(WindowStateEvent));
+
   void CallOnImeComposition(UINT const message,
                             WPARAM const wparam,
                             LPARAM const lparam);
