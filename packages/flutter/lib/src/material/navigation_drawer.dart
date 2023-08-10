@@ -193,6 +193,7 @@ class NavigationDrawerDestination extends StatelessWidget {
     required this.icon,
     this.selectedIcon,
     required this.label,
+    this.disabled = false,
   });
 
   /// Sets the color of the [Material] that holds all of the [Drawer]'s
@@ -228,6 +229,9 @@ class NavigationDrawerDestination extends StatelessWidget {
   /// [NavigationDrawerThemeData.labelTextStyle]. If this are null, the default
   /// text style would use [TextTheme.labelLarge] with [ColorScheme.onSurfaceVariant].
   final Widget label;
+
+  /// Indicates that this destination is inaccessible.
+  final bool disabled;
 
   @override
   Widget build(BuildContext context) {
@@ -275,6 +279,7 @@ class NavigationDrawerDestination extends StatelessWidget {
           child: label,
         );
       },
+      disabled: disabled,
     );
   }
 }
@@ -296,6 +301,7 @@ class _NavigationDestinationBuilder extends StatelessWidget {
   const _NavigationDestinationBuilder({
     required this.buildIcon,
     required this.buildLabel,
+    this.disabled = false,
   });
 
   /// Builds the icon for a destination in a [NavigationDrawer].
@@ -322,11 +328,22 @@ class _NavigationDestinationBuilder extends StatelessWidget {
   /// animation is decreasing or dismissed.
   final WidgetBuilder buildLabel;
 
+  final bool disabled;
+
   @override
   Widget build(BuildContext context) {
     final _NavigationDrawerDestinationInfo info = _NavigationDrawerDestinationInfo.of(context);
     final NavigationDrawerThemeData navigationDrawerTheme = NavigationDrawerTheme.of(context);
     final NavigationDrawerThemeData defaults = _NavigationDrawerDefaultsM3(context);
+
+    final Row destinationBody = Row(
+      children: <Widget>[
+        const SizedBox(width: 16),
+        buildIcon(context),
+        const SizedBox(width: 12),
+        buildLabel(context),
+      ],
+    );
 
     return Padding(
       padding: info.tilePadding,
@@ -335,7 +352,7 @@ class _NavigationDestinationBuilder extends StatelessWidget {
           height: navigationDrawerTheme.tileHeight ?? defaults.tileHeight,
           child: InkWell(
             highlightColor: Colors.transparent,
-            onTap: info.onTap,
+            onTap: disabled ? null : info.onTap,
             customBorder: info.indicatorShape ?? navigationDrawerTheme.indicatorShape ?? defaults.indicatorShape!,
             child: Stack(
               alignment: Alignment.center,
@@ -347,14 +364,14 @@ class _NavigationDestinationBuilder extends StatelessWidget {
                   width: (navigationDrawerTheme.indicatorSize ?? defaults.indicatorSize!).width,
                   height: (navigationDrawerTheme.indicatorSize ?? defaults.indicatorSize!).height,
                 ),
-                Row(
-                  children: <Widget>[
-                    const SizedBox(width: 16),
-                    buildIcon(context),
-                    const SizedBox(width: 12),
-                    buildLabel(context),
-                  ],
-                ),
+
+                if(disabled)
+                  Opacity(
+                    opacity: 0.38,
+                    child: destinationBody,
+                  )
+                else
+                  destinationBody,
               ],
             ),
           ),
