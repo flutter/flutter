@@ -212,6 +212,18 @@ FLUTTER_EXPORT HWND FlutterDesktopViewGetHWND(FlutterDesktopViewRef view);
 FLUTTER_EXPORT IDXGIAdapter* FlutterDesktopViewGetGraphicsAdapter(
     FlutterDesktopViewRef view);
 
+// Called to pass an external window message to the engine for lifecycle
+// state updates. Non-Flutter windows must call this method in their WndProc
+// in order to be included in the logic for application lifecycle state
+// updates. Returns a result if the message should be consumed.
+FLUTTER_EXPORT bool FlutterDesktopEngineProcessExternalWindowMessage(
+    FlutterDesktopEngineRef engine,
+    HWND hwnd,
+    UINT message,
+    WPARAM wparam,
+    LPARAM lparam,
+    LRESULT* result);
+
 // ========== Plugin Registrar (extensions) ==========
 // These are Windows-specific extensions to flutter_plugin_registrar.h
 
