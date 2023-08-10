@@ -218,7 +218,7 @@ class FakeNativeAssetsBuildRunner implements NativeAssetsBuildRunner {
     packagesWithNativeAssetsInvocations++;
     return packagesWithNativeAssetsResult;
   }
-  
+
   @override
   Future<CCompilerConfig> get cCompilerConfig async => cCompilerConfigResult;
 }
