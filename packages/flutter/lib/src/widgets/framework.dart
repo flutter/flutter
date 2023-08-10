@@ -1843,16 +1843,20 @@ abstract class InheritedWidget extends ProxyWidget {
   bool updateShouldNotify(covariant InheritedWidget oldWidget);
 }
 
-/// RenderObjectWidgets provide the configuration for [RenderObjectElement]s,
+/// [RenderObjectWidget]s provide the configuration for [RenderObjectElement]s,
 /// which wrap [RenderObject]s, which provide the actual rendering of the
 /// application.
 ///
-/// See also:
+/// Usually, rather than subclassing [RenderObjectWidget] directly, render
+/// object widgets subclass one of:
 ///
-///  * [MultiChildRenderObjectWidget], which configures a [RenderObject] with
-///    a single list of children.
-///  * [SlottedMultiChildRenderObjectWidget], which configures a
-///    [RenderObject] that organizes its children in different named slots.
+///  * [LeafRenderObjectWidget], if the widget has no children.
+///  * [SingleChildRenderObjectElement], if the widget has exactly one child.
+///  * [MultiChildRenderObjectWidget], if the widget takes a list of children.
+///  * [SlottedMultiChildRenderObjectWidget], if the widget organizes its
+///    children in different named slots.
+///
+/// Subclasses must implement [createRenderObject] and [updateRenderObject].
 abstract class RenderObjectWidget extends Widget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1895,8 +1899,10 @@ abstract class RenderObjectWidget extends Widget {
   void didUnmountRenderObject(covariant RenderObject renderObject) { }
 }
 
-/// A superclass for RenderObjectWidgets that configure RenderObject subclasses
+/// A superclass for [RenderObjectWidget]s that configure [RenderObject] subclasses
 /// that have no children.
+///
+/// Subclasses must implement [createRenderObject] and [updateRenderObject].
 abstract class LeafRenderObjectWidget extends RenderObjectWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1907,13 +1913,14 @@ abstract class LeafRenderObjectWidget extends RenderObjectWidget {
 }
 
 /// A superclass for [RenderObjectWidget]s that configure [RenderObject] subclasses
-/// that have a single child slot. (This superclass only provides the storage
-/// for that child, it doesn't actually provide the updating logic.)
+/// that have a single child slot.
 ///
-/// Typically, the render object assigned to this widget will make use of
+/// The render object assigned to this widget should make use of
 /// [RenderObjectWithChildMixin] to implement a single-child model. The mixin
-/// exposes a [RenderObjectWithChildMixin.child] property that allows
-/// retrieving the render object belonging to the [child] widget.
+/// exposes a [RenderObjectWithChildMixin.child] property that allows retrieving
+/// the render object belonging to the [child] widget.
+///
+/// Subclasses must implement [createRenderObject] and [updateRenderObject].
 abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1933,12 +1940,14 @@ abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
 /// storage for that child list, it doesn't actually provide the updating
 /// logic.)
 ///
-/// Subclasses must return a [RenderObject] that mixes in
+/// Subclasses must use a [RenderObject] that mixes in
 /// [ContainerRenderObjectMixin], which provides the necessary functionality to
 /// visit the children of the container render object (the render object
-/// belonging to the [children] widgets). Typically, subclasses will return a
+/// belonging to the [children] widgets). Typically, subclasses will use a
 /// [RenderBox] that mixes in both [ContainerRenderObjectMixin] and
 /// [RenderBoxContainerDefaultsMixin].
+///
+/// Subclasses must implement [createRenderObject] and [updateRenderObject].
 ///
 /// See also:
 ///
@@ -6603,8 +6612,8 @@ class LeafRenderObjectElement extends RenderObjectElement {
 ///
 /// The child is optional.
 ///
-/// This element subclass can be used for RenderObjectWidgets whose
-/// RenderObjects use the [RenderObjectWithChildMixin] mixin. Such widgets are
+/// This element subclass can be used for [RenderObjectWidget]s whose
+/// [RenderObject]s use the [RenderObjectWithChildMixin] mixin. Such widgets are
 /// expected to inherit from [SingleChildRenderObjectWidget].
 class SingleChildRenderObjectElement extends RenderObjectElement {
   /// Creates an element that uses the given widget as its configuration.
@@ -6665,8 +6674,8 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
 
 /// An [Element] that uses a [MultiChildRenderObjectWidget] as its configuration.
 ///
-/// This element subclass can be used for RenderObjectWidgets whose
-/// RenderObjects use the [ContainerRenderObjectMixin] mixin with a parent data
+/// This element subclass can be used for [RenderObjectWidget]s whose
+/// [RenderObject]s use the [ContainerRenderObjectMixin] mixin with a parent data
 /// type that implements [ContainerParentDataMixin<RenderObject>]. Such widgets
 /// are expected to inherit from [MultiChildRenderObjectWidget].
 ///
