@@ -140,7 +140,7 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
   ///
   /// Use the `clang`, `ar`, and `ld` that would be used if run with `xcrun`.
   @override
-  final Future<CCompilerConfig> cCompilerConfig = () async {
+  late final Future<CCompilerConfig> cCompilerConfig = () async {
     final ProcessResult xcrunResult = await globals.processManager
         .run(<String>['xcrun', 'clang', '--version']);
     if (xcrunResult.exitCode != 0) {
