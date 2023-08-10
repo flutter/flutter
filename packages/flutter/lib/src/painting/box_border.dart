@@ -646,7 +646,10 @@ class Border extends BoxBorder {
     final bool hasHairlineBorder = _hasHairlineBorder;
     // Paint a non uniform border if a single color is visible
     // and (borderRadius is present) or (border is visible and width != 0.0).
-    if (visibleColors.length == 1 && !hasHairlineBorder) {
+    if (visibleColors.length == 1 &&
+        !hasHairlineBorder &&
+        (shape == BoxShape.circle ||
+            (borderRadius != null && borderRadius != BorderRadius.zero))) {
       BoxBorder.paintNonUniformBorder(canvas, rect,
           shape: shape,
           borderRadius: borderRadius,
@@ -1034,7 +1037,10 @@ class BorderDirectional extends BoxBorder {
     // Allow painting non-uniform borders if the visible colors are uniform.
     final Set<Color> visibleColors = _distinctVisibleColors();
     final bool hasHairlineBorder = _hasHairlineBorder;
-    if (visibleColors.length == 1 && !hasHairlineBorder) {
+    if (visibleColors.length == 1 &&
+        !hasHairlineBorder &&
+        (shape == BoxShape.circle ||
+            (borderRadius != null && borderRadius != BorderRadius.zero))) {
       BoxBorder.paintNonUniformBorder(canvas, rect,
           shape: shape,
           borderRadius: borderRadius,

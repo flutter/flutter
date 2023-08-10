@@ -1541,7 +1541,7 @@ void main() {
     expect(
       Material.of(tester.element(find.byType(Checkbox).last)),
       paints
-        ..drrect()
+        ..path()
         ..path(color: fillColor)
         ..path(color: checkColor),
     );
@@ -1750,7 +1750,7 @@ void main() {
     );
     expect(
       find.ancestor(of: find.byType(Table), matching: find.byType(Container)),
-      paints..drrect(color: borderColor),
+      paints..path(color: borderColor),
     );
     expect(
       tester.getTopLeft(find.byType(Table)),

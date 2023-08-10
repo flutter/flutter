@@ -341,8 +341,8 @@ void main() {
 
     // This falls into non-uniform border because of strokeAlign.
     await tester.pumpWidget(buildWidget(border: allowedBorderVariations));
-    expect(tester.takeException(), isNull,
-        reason: 'Border with non-uniform strokeAlign should not fail.');
+    expect(tester.takeException(), isAssertionError,
+        reason: 'Border with non-uniform strokeAlign should fail.');
 
     await tester.pumpWidget(buildWidget(
       border: allowedBorderVariations,
@@ -408,7 +408,7 @@ void main() {
     );
 
     await tester.pumpWidget(buildWidget(border: allowedBorderDirectionalVariations));
-    expect(tester.takeException(), isNull);
+    expect(tester.takeException(), isAssertionError);
 
     await tester.pumpWidget(buildWidget(
       border: allowedBorderDirectionalVariations,

@@ -145,16 +145,16 @@ Future<void> main() async {
     const BorderSide greenSide = BorderSide(color: green, width: 10.0);
 
     await tester.pumpWidget(buildFrame(const Border(top: greenSide)));
-    expect(find.byKey(key), paints..drrect(color: green, style: PaintingStyle.fill));
+    expect(find.byKey(key), paints..path(color: green, style: PaintingStyle.fill));
 
     await tester.pumpWidget(buildFrame(const Border(left: greenSide)));
-    expect(find.byKey(key), paints..drrect(color: green, style: PaintingStyle.fill));
+    expect(find.byKey(key), paints..path(color: green, style: PaintingStyle.fill));
 
     await tester.pumpWidget(buildFrame(const Border(right: greenSide)));
-    expect(find.byKey(key), paints..drrect(color: green, style: PaintingStyle.fill));
+    expect(find.byKey(key), paints..path(color: green, style: PaintingStyle.fill));
 
     await tester.pumpWidget(buildFrame(const Border(bottom: greenSide)));
-    expect(find.byKey(key), paints..drrect(color: green, style: PaintingStyle.fill));
+    expect(find.byKey(key), paints..path(color: green, style: PaintingStyle.fill));
 
     const Color blue = Color(0xFF0000FF);
     const BorderSide blueSide = BorderSide(color: blue, width: 0.0);
