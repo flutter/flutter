@@ -443,7 +443,7 @@ class _SnippetChecker {
   /// automatically if there are no errors unless _keepTmp is true.
   final Directory _tempDirectory;
 
-  /// The package directory for the flutter package within the flutter root dir.
+  /// The package directories within the flutter root dir that will be checked.
   final List<Directory> _flutterPackages;
 
   /// The directory for the dart:ui code to be analyzed with the flutter code.
