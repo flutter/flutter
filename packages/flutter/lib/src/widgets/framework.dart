@@ -3252,14 +3252,13 @@ class BuildOwner {
   /// changed implementations.
   ///
   /// This is expensive and should not be called except during development.
-  void reassemble(Element root, DebugReassembleConfig? reassembleConfig) {
+  void reassemble(Element root) {
     if (!kReleaseMode) {
       FlutterTimeline.startSync('Preparing Hot Reload (widgets)');
     }
     try {
       assert(root._parent == null);
       assert(root.owner == this);
-      root._debugReassembleConfig = reassembleConfig;
       root.reassemble();
     } finally {
       if (!kReleaseMode) {
@@ -3374,7 +3373,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   Element? _parent;
-  DebugReassembleConfig? _debugReassembleConfig;
   _NotificationNode? _notificationTree;
 
   /// Compare two widgets for equality.
@@ -3526,15 +3524,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @mustCallSuper
   @protected
   void reassemble() {
-    if (_debugShouldReassemble(_debugReassembleConfig, _widget)) {
-      markNeedsBuild();
-      _debugReassembleConfig = null;
-    }
+    markNeedsBuild();
     visitChildren((Element child) {
-      child._debugReassembleConfig = _debugReassembleConfig;
       child.reassemble();
     });
-    _debugReassembleConfig = null;
   }
 
   bool _debugIsInScope(Element target) {
@@ -5585,9 +5578,7 @@ class StatefulElement extends ComponentElement {
 
   @override
   void reassemble() {
-    if (_debugShouldReassemble(_debugReassembleConfig, _widget)) {
-      state.reassemble();
-    }
+    state.reassemble();
     super.reassemble();
   }
 
@@ -6951,10 +6942,4 @@ class _NullWidget extends Widget {
 
   @override
   Element createElement() => throw UnimplementedError();
-}
-
-// Whether a [DebugReassembleConfig] indicates that an element holding [widget] can skip
-// a reassemble.
-bool _debugShouldReassemble(DebugReassembleConfig? config, Widget? widget) {
-  return config == null || config.widgetName == null || widget?.runtimeType.toString() == config.widgetName;
 }
