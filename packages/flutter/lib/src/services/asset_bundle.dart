@@ -57,11 +57,10 @@ abstract class AssetBundle {
   /// Throws an exception if the asset is not found.
   ///
   /// The returned [ByteData] can be converted to a [Uint8List] (a list of bytes)
-  /// using [ByteData.buffer] to obtain a [ByteBuffer], and then
-  /// [ByteBuffer.asUint8List] to obtain the byte list. Lists of bytes can be
-  /// used with APIs that accept [Uint8List] objects, such as
-  /// [decodeImageFromList], as well as any API that accepts a [List<int>], such
-  /// as [File.writeAsBytes] or [Utf8Codec.decode] (accessible via [utf8]).
+  /// using [Uint8List.sublistView]. Lists of bytes can be used with APIs that
+  /// accept [Uint8List] objects, such as [decodeImageFromList], as well as any
+  /// API that accepts a [List<int>], such as [File.writeAsBytes] or
+  /// [Utf8Codec.decode] (accessible via [utf8]).
   Future<ByteData> load(String key);
 
   /// Retrieve a binary resource from the asset bundle as an immutable
@@ -70,7 +69,7 @@ abstract class AssetBundle {
   /// Throws an exception if the asset is not found.
   Future<ui.ImmutableBuffer> loadBuffer(String key) async {
     final ByteData data = await load(key);
-    return ui.ImmutableBuffer.fromUint8List(data.buffer.asUint8List());
+    return ui.ImmutableBuffer.fromUint8List(Uint8List.sublistView(data));
   }
 
   /// Retrieve a string from the asset bundle.
@@ -91,7 +90,7 @@ abstract class AssetBundle {
     // 50 KB of data should take 2-3 ms to parse on a Moto G4, and about 400 μs
     // on a Pixel 4.
     if (data.lengthInBytes < 50 * 1024) {
-      return utf8.decode(data.buffer.asUint8List());
+      return utf8.decode(Uint8List.sublistView(data));
     }
     // For strings larger than 50 KB, run the computation in an isolate to
     // avoid causing main thread jank.
@@ -99,7 +98,7 @@ abstract class AssetBundle {
   }
 
   static String _utf8decode(ByteData data) {
-    return utf8.decode(data.buffer.asUint8List());
+    return utf8.decode(Uint8List.sublistView(data));
   }
 
   /// Retrieve a string from the asset bundle, parse it with the given function,
@@ -161,7 +160,7 @@ class NetworkAssetBundle extends AssetBundle {
       ]);
     }
     final Uint8List bytes = await consolidateHttpClientResponseBytes(response);
-    return bytes.buffer.asByteData();
+    return ByteData.sublistView(bytes);
   }
 
   // TODO(ianh): Once the underlying network logic learns about caching, we
@@ -308,7 +307,7 @@ abstract class CachingAssetBundle extends AssetBundle {
   @override
   Future<ui.ImmutableBuffer> loadBuffer(String key) async {
     final ByteData data = await load(key);
-    return ui.ImmutableBuffer.fromUint8List(data.buffer.asUint8List());
+    return ui.ImmutableBuffer.fromUint8List(Uint8List.sublistView(data));
   }
 }
 
@@ -316,10 +315,10 @@ abstract class CachingAssetBundle extends AssetBundle {
 class PlatformAssetBundle extends CachingAssetBundle {
   @override
   Future<ByteData> load(String key) {
-    final Uint8List encoded = utf8.encoder.convert(Uri(path: Uri.encodeFull(key)).path);
+    final Uint8List encoded = utf8.encode(Uri(path: Uri.encodeFull(key)).path);
     final Future<ByteData>? future = ServicesBinding.instance.defaultBinaryMessenger.send(
       'flutter/assets',
-      encoded.buffer.asByteData(),
+      ByteData.sublistView(encoded),
     )?.then((ByteData? asset) {
       if (asset == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -342,7 +341,7 @@ class PlatformAssetBundle extends CachingAssetBundle {
   Future<ui.ImmutableBuffer> loadBuffer(String key) async {
     if (kIsWeb) {
       final ByteData bytes = await load(key);
-      return ui.ImmutableBuffer.fromUint8List(bytes.buffer.asUint8List());
+      return ui.ImmutableBuffer.fromUint8List(Uint8List.sublistView(bytes));
     }
     bool debugUsePlatformChannel = false;
     assert(() {
@@ -358,7 +357,7 @@ class PlatformAssetBundle extends CachingAssetBundle {
     }());
     if (debugUsePlatformChannel) {
       final ByteData bytes = await load(key);
-      return ui.ImmutableBuffer.fromUint8List(bytes.buffer.asUint8List());
+      return ui.ImmutableBuffer.fromUint8List(Uint8List.sublistView(bytes));
     }
     try {
       return await ui.ImmutableBuffer.fromAsset(key);

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ParagraphBuilder;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +9,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../foundation/leak_tracking.dart';
-import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -1069,10 +1066,7 @@ void main() {
     );
 
     expect(tester.getSize(find.byType(OutlinedButton)), equals(const Size(88.0, 48.0)));
-    expect(tester.getSize(find.byType(Text)), Size(
-      ui.ParagraphBuilder.shouldDisableRoundingHack ? 52.5 : 53.0,
-      18.0,
-    ));
+    expect(tester.getSize(find.byType(Text)), const Size(52.5, 18.0));
 
     // Set text scale large enough to expand text and button.
     await tester.pumpWidget(

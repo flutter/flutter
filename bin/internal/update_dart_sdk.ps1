@@ -20,6 +20,7 @@ $cachePath = "$flutterRoot\bin\cache"
 $dartSdkPath = "$cachePath\dart-sdk"
 $engineStamp = "$cachePath\engine-dart-sdk.stamp"
 $engineVersion = (Get-Content "$flutterRoot\bin\internal\engine.version")
+$engineRealm = (Get-Content "$flutterRoot\bin\internal\engine.realm")
 
 $oldDartSdkPrefix = "dart-sdk.old"
 
@@ -41,6 +42,9 @@ if ((Test-Path $engineStamp) -and ($engineVersion -eq (Get-Content $engineStamp)
 $dartSdkBaseUrl = $Env:FLUTTER_STORAGE_BASE_URL
 if (-not $dartSdkBaseUrl) {
     $dartSdkBaseUrl = "https://storage.googleapis.com"
+}
+if ($engineRealm) {
+    $dartSdkBaseUrl = "$dartSdkBaseUrl/$engineRealm"
 }
 $dartZipName = "dart-sdk-windows-x64.zip"
 $dartSdkUrl = "$dartSdkBaseUrl/flutter_infra_release/flutter/$engineVersion/$dartZipName"

@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import 'semantics_tester.dart';
 
 void main() {
@@ -273,8 +272,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: SizedBox(
-            width: 100.3,
-            child: Text.rich(WidgetSpan(child: Row()), textScaleFactor: 0.3),
+            width: 502.5454545454545,
+            child: Text.rich(WidgetSpan(child: Row()), textScaleFactor: 0.95),
           ),
         ),
       ),

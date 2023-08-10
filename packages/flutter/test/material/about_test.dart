@@ -583,7 +583,7 @@ void main() {
       tester.getTopLeft(find.text('Licenses')),
       const Offset(16.0 + safeareaPadding, 14.0 + safeareaPadding),
     );
-  });
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
 
   testWidgetsWithLeakTracking('LicensePage returns early if unmounted', (WidgetTester tester) async {
     final Completer<LicenseEntry> licenseCompleter = Completer<LicenseEntry>();
@@ -740,6 +740,160 @@ void main() {
 
     expect(rootObserver.licensePageCount, 1);
     expect(nestedObserver.licensePageCount, 0);
+  });
+
+  group('Barrier dismissible', () {
+    late AboutDialogObserver rootObserver;
+
+    setUp(() {
+      rootObserver = AboutDialogObserver();
+    });
+
+    testWidgets('Barrier is dismissible with default parameter', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorObservers: <NavigatorObserver>[rootObserver],
+          home: Material(
+            child: Center(
+              child: Builder(
+                builder: (BuildContext context) {
+                  return ElevatedButton(
+                    child: const Text('X'),
+                    onPressed: () => showAboutDialog(
+                      context: context,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Open the dialog.
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+      expect(rootObserver.dialogCount, 1);
+
+      // Tap on the barrier.
+      await tester.tapAt(const Offset(10.0, 10.0));
+      await tester.pumpAndSettle();
+      expect(rootObserver.dialogCount, 0);
+    });
+
+    testWidgets('Barrier is not dismissible with barrierDismissible is false', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorObservers: <NavigatorObserver>[rootObserver],
+          home: Material(
+            child: Center(
+              child: Builder(
+                builder: (BuildContext context) {
+                  return ElevatedButton(
+                    child: const Text('X'),
+                    onPressed: () => showAboutDialog(
+                        context: context,
+                        barrierDismissible: false
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Open the dialog.
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+      expect(rootObserver.dialogCount, 1);
+
+      // Tap on the barrier, which shouldn't do anything this time.
+      await tester.tapAt(const Offset(10.0, 10.0));
+      await tester.pumpAndSettle();
+      expect(rootObserver.dialogCount, 1);
+    });
+  });
+
+  testWidgets('Barrier color', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return ElevatedButton(
+                  child: const Text('X'),
+                  onPressed: () => showAboutDialog(
+                    context: context,
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Open the dialog.
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, Colors.black54);
+
+    // Dismiss the dialog.
+    await tester.tapAt(const Offset(10.0, 10.0));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return ElevatedButton(
+                  child: const Text('X'),
+                  onPressed: () => showAboutDialog(
+                    context: context,
+                    barrierColor: Colors.pink,
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Open the dialog.
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, Colors.pink);
+  });
+
+  testWidgets('Barrier Label', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return ElevatedButton(
+                  child: const Text('X'),
+                  onPressed: () => showAboutDialog(
+                    context: context,
+                    barrierLabel: 'Custom Label',
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Open the dialog.
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).semanticsLabel, 'Custom Label');
   });
 
   testWidgetsWithLeakTracking('showAboutDialog uses root navigator by default', (WidgetTester tester) async {
@@ -1424,7 +1578,9 @@ void main() {
     // If the layout width is less than 840.0 pixels, nested layout is
     // used which positions license page title at the top center.
     Offset titleOffset = tester.getCenter(find.text(title));
-    expect(titleOffset, Offset(defaultSize.width / 2, 96.0));
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(titleOffset, Offset(defaultSize.width / 2, 96.0));
+    }
     expect(tester.getCenter(find.byType(ListView)), Offset(defaultSize.width / 2, 328.0));
 
     // Configure a wide window to show the lateral UI.
@@ -1554,7 +1710,9 @@ void main() {
     // If the layout width is less than 840.0 pixels, nested layout is
     // used which positions license page title at the top center.
     Offset titleOffset = tester.getCenter(find.text(title));
-    expect(titleOffset, Offset(defaultSize.width / 2, 96.0));
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(titleOffset, Offset(defaultSize.width / 2, 96.0));
+    }
     expect(tester.getCenter(find.byType(ListView)), Offset(defaultSize.width / 2, 328.0));
 
     // Configure a wide window to show the lateral UI.
@@ -1740,5 +1898,13 @@ class AboutDialogObserver extends NavigatorObserver {
       dialogCount++;
     }
     super.didPush(route, previousRoute);
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (route is DialogRoute) {
+      dialogCount--;
+    }
+    super.didPop(route, previousRoute);
   }
 }

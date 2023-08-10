@@ -748,7 +748,7 @@ class RawChip extends StatefulWidget
     this.surfaceTintColor,
     this.iconTheme,
     this.selectedShadowColor,
-    this.showCheckmark = true,
+    this.showCheckmark,
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
     @Deprecated(

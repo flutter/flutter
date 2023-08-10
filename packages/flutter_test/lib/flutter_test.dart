@@ -27,7 +27,7 @@
 /// with the following signature:
 ///
 /// ```dart
-/// Future<void> testExecutable(FutureOr<void> Function() testMain);
+/// Future<void> testExecutable(FutureOr<void> Function() testMain) async { }
 /// ```
 ///
 /// The test framework will execute that method and pass it the `main()` method
@@ -69,9 +69,11 @@ export 'src/frame_timing_summarizer.dart';
 export 'src/goldens.dart';
 export 'src/image.dart';
 export 'src/matchers.dart';
+export 'src/mock_canvas.dart';
 export 'src/mock_event_channel.dart';
 export 'src/nonconst.dart';
 export 'src/platform.dart';
+export 'src/recording_canvas.dart';
 export 'src/restoration.dart';
 export 'src/stack_manipulation.dart';
 export 'src/test_async_utils.dart';
