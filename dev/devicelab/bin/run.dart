@@ -148,7 +148,7 @@ Future<void> _runABTest({
   assert(localEngine != null || localWebSdk != null);
 
   final ABTest abTest = ABTest(
-    localEngine: (localEngine ?? localWebSdk)!, 
+    localEngine: (localEngine ?? localWebSdk)!,
     localEngineHost: localEngineHost,
     taskName: taskName,
   );

@@ -27,7 +27,7 @@ String? get localEngineFromEnv {
 }
 
 /// The local engine host to use for [flutter] and [evalFlutter], if any.
-/// 
+///
 /// This is set as an environment variable when running the task, see runTask in runner.dart.
 String? get localEngineHostFromEnv {
   const bool isDefined = bool.hasEnvironment('localEngineHost');
