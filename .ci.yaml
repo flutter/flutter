@@ -3687,12 +3687,16 @@ targets:
 
   - name: Mac_ios flutter_gallery_ios__start_up_xcode_debug
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery_ios__start_up_xcode_debug
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "14c18"
+        }
     bringup: true
 
   - name: Mac_ios flutter_view_ios__start_up

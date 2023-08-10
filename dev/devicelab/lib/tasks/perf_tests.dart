@@ -9,6 +9,7 @@ import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
+import 'package:process/process.dart';
 import 'package:xml/xml.dart';
 
 import '../framework/devices.dart';
@@ -783,6 +784,9 @@ class StartupTest {
 
   Future<TaskResult> run() async {
     return inDirectory<TaskResult>(testDirectory, () async {
+      if (runEnvironment?['FORCE_XCODE_DEBUG'] == 'true') {
+        await debugAutomation();
+      }
       final Device device = await devices.workingDevice;
       await device.unlock();
       const int iterations = 5;
@@ -934,6 +938,122 @@ class StartupTest {
         ],
         canFail: true,
       );
+    }
+  }
+
+  Future<void> debugAutomation() async {
+    print('Debugging automation...');
+    const ProcessManager processManager = LocalProcessManager();
+
+    final String? home = Platform.environment['HOME'];
+    if (home != null && home.isNotEmpty) {
+      print('Home: $home');
+
+      final Directory tccDir = dir(path.join(home, 'Library', 'Application Support', 'com.apple.TCC'));
+
+      try {
+        if (tccDir.existsSync()) {
+          final List<FileSystemEntity> files = tccDir.listSync();
+          for (final FileSystemEntity file in files) {
+            print(file.path);
+          }
+        }
+      } on PathAccessException {
+        print('Path Access to ${tccDir.path} failed');
+      }
+
+      final ProcessResult listResult = await processManager.run(
+        <String>[
+          'ls',
+          tccDir.path
+        ],
+      );
+      print('List Result: ${listResult.exitCode}');
+      print('[stdout]: ${listResult.stdout.toString().trim()}');
+      print('[stderr]: ${listResult.stderr.toString().trim()}');
+
+      final Process process = await processManager.start(<String>['top']);
+      print(process.pid);
+
+      String pid = process.pid.toString();
+      for (int i = 0; i < 10; i++) {
+        final ProcessResult processResult = await processManager.run(
+          <String>[
+            'ps',
+            '-p',
+            pid,
+            '-o',
+            'ppid=',
+            '-o',
+            'command=',
+          ],
+        );
+
+        print('Parent Process Result: ${processResult.exitCode}');
+        print('[stdout]: ${processResult.stdout.toString().trim()}');
+        print('[stderr]: ${processResult.stderr.toString().trim()}');
+        if (processResult.exitCode != 0) {
+          break;
+        }
+
+        final String processAndCommand = processResult.stdout.toString().trim();
+        if (processAndCommand.contains('.app')) {
+          break;
+        }
+
+        final List<String> parts = processAndCommand.split(' ');
+        if (parts.isEmpty) {
+          break;
+        }
+        pid = parts[0];
+      }
+
+      final ProcessResult parentProcessResult = await processManager.run(
+        <String>[
+          'ps',
+          '-p',
+          pid,
+          '-o',
+          'command=',
+        ]
+      );
+      print('Process Result: ${parentProcessResult.exitCode}');
+      print('[stdout]: ${parentProcessResult.stdout.toString().trim()}');
+      print('[stderr]: ${parentProcessResult.stderr.toString().trim()}');
+
+      process.kill();
+
+      if (parentProcessResult.exitCode != 0) {
+        return;
+      }
+
+      final String processCommand = parentProcessResult.stdout.toString().trim();
+      if (processCommand.contains('.app')) {
+        int startIndex = processCommand.indexOf('/System/Applications');
+        if (startIndex == -1) {
+          startIndex = processCommand.indexOf('/Applications');
+        }
+        if (startIndex == -1) {
+          return;
+        }
+        final int endIndex = processCommand.indexOf('.app');
+        final String appPath = path.join(processCommand.substring(startIndex, endIndex + 4), 'Contents', 'Info.plist');
+        print(appPath);
+        final File plist = file(appPath);
+        final ProcessResult bundleResult = await processManager.run(
+          <String>[
+            'defaults',
+            'read',
+            plist.path,
+            'CFBundleIdentifier',
+          ]
+        );
+        print('Bundle Result: ${bundleResult.exitCode}');
+        print('[stdout]: ${bundleResult.stdout.toString().trim()}');
+        print('[stderr]: ${bundleResult.stderr.toString().trim()}');
+      }
+    } else {
+      print('Unable to find HOME');
     }
   }
 }
