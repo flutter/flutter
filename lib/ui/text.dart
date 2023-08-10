@@ -3026,11 +3026,14 @@ abstract class ParagraphBuilder {
   ///
   /// Do not rely on this getter as it exists for migration purposes only and
   /// will soon be removed.
+  @Deprecated('''
+    The shouldDisableRoundingHack flag is for internal migration purposes only and should not be used.
+  ''')
   static bool get shouldDisableRoundingHack {
-    return const bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')
+    return const bool.fromEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK', defaultValue: true)
         || _roundingHackDisabledInDebugMode;
   }
-  static bool _roundingHackDisabledInDebugMode = false;
+  static bool _roundingHackDisabledInDebugMode = true;
 
   /// Only works in debug mode. Do not call this method as it is for migration
   /// purposes only and will soon be removed.

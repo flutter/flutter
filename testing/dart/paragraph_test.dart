@@ -246,6 +246,7 @@ void main() {
     const double fontSize = 1.25;
     const String text = '12345';
     assert((fontSize * text.length).truncate() != fontSize * text.length);
+    // ignore: deprecated_member_use
     final bool roundingHackWasDisabled = ParagraphBuilder.shouldDisableRoundingHack;
     ParagraphBuilder.setDisableRoundingHack(true);
     final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(fontSize: fontSize));
@@ -263,15 +264,16 @@ void main() {
     ParagraphBuilder.setDisableRoundingHack(roundingHackWasDisabled);
   });
 
-  test('rounding hack applied by default', () {
+  test('rounding hack disabled by default', () {
     const double fontSize = 1.25;
     const String text = '12345';
     assert((fontSize * text.length).truncate() != fontSize * text.length);
-    expect(ParagraphBuilder.shouldDisableRoundingHack, isFalse);
+    // ignore: deprecated_member_use
+    expect(ParagraphBuilder.shouldDisableRoundingHack, isTrue);
     final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(fontSize: fontSize));
     builder.addText(text);
     final Paragraph paragraph = builder.build()
       ..layout(const ParagraphConstraints(width: text.length * fontSize));
-    expect(paragraph.computeLineMetrics().length, greaterThan(1));
+    expect(paragraph.computeLineMetrics().length, 1);
   });
 }
