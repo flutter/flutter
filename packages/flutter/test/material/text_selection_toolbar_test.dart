@@ -204,4 +204,93 @@ void main() {
     expect(find.text('Paste'), findsNothing);
     expect(find.text('Select all'), findsNothing);
   }, skip: kIsWeb); // [intended] We don't show the toolbar on the web.
+
+  for (final ColorScheme colorScheme in <ColorScheme>[ThemeData.light().colorScheme, ThemeData.dark().colorScheme]) {
+    testWidgetsWithLeakTracking('default background color', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            colorScheme: colorScheme,
+          ),
+          home: Scaffold(
+            body: Center(
+              child: TextSelectionToolbar(
+                anchorAbove: Offset.zero,
+                anchorBelow: Offset.zero,
+                children: <Widget>[
+                  TextSelectionToolbarTextButton(
+                    padding: TextSelectionToolbarTextButton.getPadding(0, 1),
+                    onPressed: () {},
+                    child: const Text('Custom button'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      Finder findToolbarContainer() {
+        return find.descendant(
+          of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TextSelectionToolbarContainer'),
+          matching: find.byType(Material),
+        );
+      }
+      expect(findToolbarContainer(), findsAtLeastNWidgets(1));
+
+      final Material toolbarContainer = tester.widget(findToolbarContainer().first);
+      expect(
+        toolbarContainer.color,
+        // The default colors are hardcoded and don't take the default value of
+        // the theme's surface color.
+        switch (colorScheme.brightness) {
+          Brightness.light => const Color(0xffffffff),
+          Brightness.dark => const Color(0xff424242),
+        },
+      );
+    });
+
+    testWidgetsWithLeakTracking('custom background color', (WidgetTester tester) async {
+      const Color customBackgroundColor = Colors.red;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            colorScheme: colorScheme.copyWith(
+              surface: customBackgroundColor,
+            ),
+          ),
+          home: Scaffold(
+            body: Center(
+              child: TextSelectionToolbar(
+                anchorAbove: Offset.zero,
+                anchorBelow: Offset.zero,
+                children: <Widget>[
+                  TextSelectionToolbarTextButton(
+                    padding: TextSelectionToolbarTextButton.getPadding(0, 1),
+                    onPressed: () {},
+                    child: const Text('Custom button'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      Finder findToolbarContainer() {
+        return find.descendant(
+          of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_TextSelectionToolbarContainer'),
+          matching: find.byType(Material),
+        );
+      }
+      expect(findToolbarContainer(), findsAtLeastNWidgets(1));
+
+      final Material toolbarContainer = tester.widget(findToolbarContainer().first);
+      expect(
+        toolbarContainer.color,
+        customBackgroundColor,
+      );
+    });
+  }
 }

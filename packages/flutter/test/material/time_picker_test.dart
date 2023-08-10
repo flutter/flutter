@@ -225,6 +225,70 @@ void main() {
     expect(selectedLabels.map<bool>((dynamic tp) => tp.inner as bool), inner0To23);
   });
 
+  testWidgets('Material3 - Dial background uses correct default color', (WidgetTester tester) async {
+    ThemeData theme = ThemeData(useMaterial3: true);
+    Widget buildTimePicker(ThemeData themeData) {
+      return MaterialApp(
+        theme: themeData,
+        home: Material(
+          child: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return ElevatedButton(
+                  child: const Text('X'),
+                  onPressed: () {
+                    showTimePicker(
+                      context: context,
+                      initialTime: const TimeOfDay(hour: 7, minute: 0),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTimePicker(theme));
+
+    // Open the time picker dialog.
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    // Test default dial background color.
+    RenderBox dial = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
+    expect(
+      dial,
+      paints
+        ..circle(color: theme.colorScheme.surfaceVariant) // Dial background color.
+        ..circle(color: Color(theme.colorScheme.primary.value)), // Dial hand color.
+    );
+
+    await tester.tap(find.text(okString)); // dismiss the dialog
+    await tester.pumpAndSettle();
+
+    // Test dial background color when theme color scheme is changed.
+    theme = theme.copyWith(
+      colorScheme: theme.colorScheme.copyWith(
+        surfaceVariant: const Color(0xffff0000),
+      ),
+    );
+    await tester.pumpWidget(buildTimePicker(theme));
+
+    // Open the time picker dialog.
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    dial = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
+    expect(
+      dial,
+      paints
+        ..circle(color: const Color(0xffff0000)) // Dial background color.
+        ..circle(color: Color(theme.colorScheme.primary.value)), // Dial hand color.
+    );
+  });
+
   for (final MaterialType materialType in MaterialType.values) {
     group('Dial (${materialType.name})', () {
       testWidgets('tap-select an hour', (WidgetTester tester) async {
@@ -603,6 +667,167 @@ void main() {
         expect(tester.getBottomLeft(find.text(okString)).dx, 800 - ltrOkRight);
       });
 
+      group('Barrier dismissible', () {
+        late PickerObserver rootObserver;
+
+        setUp(() {
+          rootObserver = PickerObserver();
+        });
+
+        testWidgets('Barrier is dismissible with default parameter', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            MaterialApp(
+              navigatorObservers: <NavigatorObserver>[rootObserver],
+              home: Material(
+                child: Center(
+                  child: Builder(
+                    builder: (BuildContext context) {
+                      return ElevatedButton(
+                        child: const Text('X'),
+                        onPressed: () =>
+                            showTimePicker(
+                              context: context,
+                              initialTime: const TimeOfDay(hour: 7, minute: 0),
+                            ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          );
+
+          // Open the dialog.
+          await tester.tap(find.byType(ElevatedButton));
+          await tester.pumpAndSettle();
+          expect(rootObserver.pickerCount, 1);
+
+          // Tap on the barrier.
+          await tester.tapAt(const Offset(10.0, 10.0));
+          await tester.pumpAndSettle();
+          expect(rootObserver.pickerCount, 0);
+        });
+
+        testWidgets('Barrier is not dismissible with barrierDismissible is false', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            MaterialApp(
+              navigatorObservers: <NavigatorObserver>[rootObserver],
+              home: Material(
+                child: Center(
+                  child: Builder(
+                    builder: (BuildContext context) {
+                      return ElevatedButton(
+                        child: const Text('X'),
+                        onPressed: () =>
+                            showTimePicker(
+                              context: context,
+                              barrierDismissible: false,
+                              initialTime: const TimeOfDay(hour: 7, minute: 0),
+                            ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          );
+
+          // Open the dialog.
+          await tester.tap(find.byType(ElevatedButton));
+          await tester.pumpAndSettle();
+          expect(rootObserver.pickerCount, 1);
+
+          // Tap on the barrier, which shouldn't do anything this time.
+          await tester.tapAt(const Offset(10.0, 10.0));
+          await tester.pumpAndSettle();
+          expect(rootObserver.pickerCount, 1);
+        });
+      });
+
+      testWidgets('Barrier color', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Material(
+              child: Center(
+                child: Builder(
+                  builder: (BuildContext context) {
+                    return ElevatedButton(
+                      child: const Text('X'),
+                      onPressed: () => showTimePicker(
+                        context: context,
+                        initialTime: const TimeOfDay(hour: 7, minute: 0),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // Open the dialog.
+        await tester.tap(find.byType(ElevatedButton));
+        await tester.pumpAndSettle();
+        expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, Colors.black54);
+
+        // Dismiss the dialog.
+        await tester.tapAt(const Offset(10.0, 10.0));
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Material(
+              child: Center(
+                child: Builder(
+                  builder: (BuildContext context) {
+                    return ElevatedButton(
+                      child: const Text('X'),
+                      onPressed: () => showTimePicker(
+                        context: context,
+                        barrierColor: Colors.pink,
+                        initialTime: const TimeOfDay(hour: 7, minute: 0),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // Open the dialog.
+        await tester.tap(find.byType(ElevatedButton));
+        await tester.pumpAndSettle();
+        expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, Colors.pink);
+      });
+
+      testWidgets('Barrier Label', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Material(
+              child: Center(
+                child: Builder(
+                  builder: (BuildContext context) {
+                    return ElevatedButton(
+                      child: const Text('X'),
+                      onPressed: () => showTimePicker(
+                        context: context,
+                        barrierLabel: 'Custom Label',
+                        initialTime: const TimeOfDay(hour: 7, minute: 0),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // Open the dialog.
+        await tester.tap(find.byType(ElevatedButton));
+        await tester.pumpAndSettle();
+        expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).semanticsLabel, 'Custom Label');
+      });
+
       testWidgets('uses root navigator by default', (WidgetTester tester) async {
         final PickerObserver rootObserver = PickerObserver();
         final PickerObserver nestedObserver = PickerObserver();
@@ -744,7 +969,7 @@ void main() {
 
         expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(154, 155)));
         expect(tester.getBottomRight(find.text(selectTimeString)), equals(
-          ParagraphBuilder.shouldDisableRoundingHack ? const Offset(280.5, 165) : const Offset(281, 165),
+          const Offset(280.5, 165),
         ));
         expect(tester.getBottomRight(find.text(okString)).dx, 644);
         expect(tester.getBottomLeft(find.text(okString)).dx, 616);
@@ -758,7 +983,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(tester.getTopLeft(find.text(selectTimeString)), equals(
-          ParagraphBuilder.shouldDisableRoundingHack ? const Offset(519.5, 155) : const Offset(519, 155),
+          const Offset(519.5, 155),
         ));
         expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(646, 165)));
         expect(tester.getBottomLeft(find.text(okString)).dx, 156);
@@ -806,8 +1031,14 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(138, 129)));
-        expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(295.0, 149.0)));
-        expect(tester.getBottomLeft(find.text(okString)).dx, 615.5);
+        expect(
+          tester.getBottomRight(find.text(selectTimeString)),
+          const Offset(294.75, 149.0),
+        );
+        expect(
+          tester.getBottomLeft(find.text(okString)).dx,
+          moreOrLessEquals(615.9, epsilon: 0.001),
+        );
         expect(tester.getBottomRight(find.text(cancelString)).dx, 578);
 
         await tester.tap(find.text(okString));
@@ -817,10 +1048,19 @@ void main() {
         await tester.tap(find.text('X'));
         await tester.pumpAndSettle();
 
-        expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(505.0, 129.0)));
+        expect(
+          tester.getTopLeft(find.text(selectTimeString)),
+          equals(const Offset(505.25, 129.0)),
+        );
         expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(662, 149)));
-        expect(tester.getBottomLeft(find.text(okString)).dx, 155.5);
-        expect(tester.getBottomRight(find.text(okString)).dx, 184.5);
+        expect(
+          tester.getBottomLeft(find.text(okString)).dx,
+          moreOrLessEquals(155.9, epsilon: 0.001),
+        );
+        expect(
+          tester.getBottomRight(find.text(okString)).dx,
+          moreOrLessEquals(184.1, epsilon: 0.001),
+        );
         expect(tester.getBottomLeft(find.text(cancelString)).dx, 222);
 
         await tester.tap(find.text(okString));
@@ -1741,6 +1981,14 @@ class PickerObserver extends NavigatorObserver {
       pickerCount++;
     }
     super.didPush(route, previousRoute);
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (route is DialogRoute) {
+      pickerCount--;
+    }
+    super.didPop(route, previousRoute);
   }
 }
 

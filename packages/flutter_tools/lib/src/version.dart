@@ -689,6 +689,7 @@ class VersionUpstreamValidator {
   static final List<String> _standardRemotes = <String>[
     'https://github.com/flutter/flutter.git',
     'git@github.com:flutter/flutter.git',
+    'ssh://git@github.com/flutter/flutter.git',
   ];
 
   // Strips ".git" suffix from a given string, preferably an url.

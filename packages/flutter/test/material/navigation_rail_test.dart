@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ParagraphBuilder;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +9,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../foundation/leak_tracking.dart';
-import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -545,48 +542,54 @@ void main() {
     // The second destination is below the first with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-    expect(
-      secondIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - secondIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - secondIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        secondIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - secondIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - secondIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
+    }
 
     // The third destination is below the second with some spacing.
     nextDestinationY += destinationHeight + destinationSpacing;
     final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
-    expect(
-      thirdIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - thirdIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - thirdIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        thirdIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - thirdIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - thirdIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
+    }
 
     // The fourth destination is below the third with some spacing.
     nextDestinationY += destinationHeight + destinationSpacing;
     final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
-    expect(
-      fourthIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - fourthIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - fourthIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        fourthIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - fourthIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - fourthIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
+    }
   });
 
   testWidgetsWithLeakTracking('Destination spacing is correct - [labelType]=selected, [textScaleFactor]=3.0', (WidgetTester tester) async {
     // Padding at the top of the rail.
     const double topPadding = 8.0;
     // Width of a destination.
-    final double destinationWidth = ui.ParagraphBuilder.shouldDisableRoundingHack ? 125.5 : 126.0;
+    const double destinationWidth = 125.5;
     // Height of a destination indicator with icon.
     const double destinationHeight = 32.0;
     // Space between the indicator and label.
@@ -637,41 +640,47 @@ void main() {
     // The second destination is below the first with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-    expect(
-      secondIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - secondIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - secondIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        secondIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - secondIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - secondIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
+    }
 
     // The third destination is below the second with some spacing.
     nextDestinationY += destinationHeight + destinationSpacing;
     final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
-    expect(
-      thirdIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - thirdIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - thirdIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        thirdIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - thirdIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - thirdIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
+    }
 
     // The fourth destination is below the third with some spacing.
     nextDestinationY += destinationHeight + destinationSpacing;
     final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
-    expect(
-      fourthIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - fourthIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - fourthIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        fourthIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - fourthIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - fourthIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
+    }
   });
 
   testWidgetsWithLeakTracking('Destination spacing is correct - [labelType]=selected, [textScaleFactor]=0.75', (WidgetTester tester) async {
@@ -729,41 +738,47 @@ void main() {
     // The second destination is below the first with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-    expect(
-      secondIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - secondIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - secondIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        secondIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - secondIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - secondIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
+    }
 
     // The third destination is below the second with some spacing.
     nextDestinationY += destinationHeight + destinationSpacing;
     final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
-    expect(
-      thirdIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - thirdIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - thirdIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        thirdIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - thirdIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - thirdIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
+    }
 
     // The fourth destination is below the third with some spacing.
     nextDestinationY += destinationHeight + destinationSpacing;
     final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
-    expect(
-      fourthIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - fourthIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - fourthIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        fourthIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - fourthIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - fourthIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
+    }
   });
 
   testWidgetsWithLeakTracking('Destination spacing is correct - [labelType]=all, [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
@@ -820,48 +835,54 @@ void main() {
     // The second destination is below the first with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-    expect(
-      secondIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - secondIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - secondIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        secondIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - secondIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - secondIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
+    }
 
     // The third destination is below the second with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
-    expect(
-      thirdIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - thirdIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - thirdIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        thirdIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - thirdIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - thirdIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
+    }
 
     // The fourth destination is below the third with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
-    expect(
-      fourthIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - fourthIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - fourthIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        fourthIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - fourthIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - fourthIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
+    }
   });
 
   testWidgetsWithLeakTracking('Destination spacing is correct - [labelType]=all, [textScaleFactor]=3.0', (WidgetTester tester) async {
     // Padding at the top of the rail.
     const double topPadding = 8.0;
     // Width of a destination.
-    final double destinationWidth = ui.ParagraphBuilder.shouldDisableRoundingHack ? 125.5 : 126.0;
+    const double destinationWidth = 125.5;
     // Height of a destination indicator with icon.
     const double destinationHeight = 32.0;
     // Space between the indicator and label.
@@ -912,41 +933,47 @@ void main() {
     // The second destination is below the first with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-    expect(
-      secondIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - secondIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - secondIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        secondIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - secondIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - secondIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
+    }
 
     // The third destination is below the second with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
-    expect(
-      thirdIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - thirdIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - thirdIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        thirdIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - thirdIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - thirdIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
+    }
 
     // The fourth destination is below the third with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
-    expect(
-      fourthIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - fourthIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - fourthIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        fourthIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - fourthIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - fourthIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
+    }
   });
 
   testWidgetsWithLeakTracking('Destination spacing is correct - [labelType]=all, [textScaleFactor]=0.75', (WidgetTester tester) async {
@@ -1004,41 +1031,47 @@ void main() {
     // The second destination is below the first with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-    expect(
-      secondIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - secondIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - secondIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        secondIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - secondIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - secondIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
+    }
 
     // The third destination is below the second with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
-    expect(
-      thirdIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - thirdIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - thirdIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        thirdIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - thirdIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - thirdIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
+    }
 
     // The fourth destination is below the third with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
-    expect(
-      fourthIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - fourthIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - fourthIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        fourthIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - fourthIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - fourthIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
+    }
   });
 
   testWidgetsWithLeakTracking('Destination spacing is correct for a compact rail - [preferredWidth]=56, [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
@@ -2791,7 +2824,7 @@ void main() {
           color: const Color(0xffe8def8),
         ),
     );
-  });
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
 
   testWidgetsWithLeakTracking('NavigationRail indicator renders ripple - extended', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/117126
@@ -3124,7 +3157,7 @@ void main() {
           color: const Color(0xffe8def8),
         ),
     );
-  });
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
 
   testWidgetsWithLeakTracking('NavigationRail indicator scale transform', (WidgetTester tester) async {
     int selectedIndex = 0;
@@ -3372,7 +3405,7 @@ void main() {
           ),
         ),
       );
-    });
+    }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
 
     testWidgetsWithLeakTracking('Destination spacing is correct - [labelType]=none (default), [textScaleFactor]=3.0', (WidgetTester tester) async {
       // Since the rail is icon only, its destinations should not be affected by
@@ -3442,7 +3475,7 @@ void main() {
           ),
         ),
       );
-    });
+    }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
 
     testWidgetsWithLeakTracking('Destination spacing is correct - [labelType]=none (default), [textScaleFactor]=0.75', (WidgetTester tester) async {
       // Since the rail is icon only, its destinations should not be affected by
@@ -3512,7 +3545,7 @@ void main() {
           ),
         ),
       );
-    });
+    }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
 
     testWidgetsWithLeakTracking('Destination spacing is correct - [labelType]=selected, [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
       await _pumpNavigationRail(

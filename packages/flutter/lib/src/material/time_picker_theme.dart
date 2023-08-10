@@ -136,8 +136,14 @@ class TimePickerThemeData with Diagnosticable {
   /// The background color of the time picker dial when the entry mode is
   /// [TimePickerEntryMode.dial] or [TimePickerEntryMode.dialOnly].
   ///
-  /// If this is null, the time picker defaults to the overall theme's
-  /// [ColorScheme.primary].
+  /// If this is null and [ThemeData.useMaterial3] is true, the time picker
+  /// dial background color defaults [ColorScheme.surfaceVariant] color.
+  ///
+  /// If this is null and [ThemeData.useMaterial3] is false, the time picker
+  /// dial background color defaults to [ColorScheme.onSurface] color with
+  /// an opacity of 0.08 when the overall theme's brightness is [Brightness.light]
+  /// and [ColorScheme.onSurface] color with an opacity of 0.12 when the overall
+  /// theme's brightness is [Brightness.dark].
   final Color? dialBackgroundColor;
 
   /// The color of the time picker dial's hand when the entry mode is
