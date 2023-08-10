@@ -287,10 +287,12 @@ class EngineBuildPaths {
 class LocalEngineInfo {
   const LocalEngineInfo({
     required this.engineOutPath,
+    required this.engineHostOutPath,
     required this.localEngineName,
   });
 
   final String engineOutPath;
+  final String engineHostOutPath;
   final String localEngineName;
 }
 
@@ -300,14 +302,20 @@ abstract class Artifacts {
   /// all artifacts.
   ///
   /// If a [fileSystem] is not provided, creates a new [MemoryFileSystem] instance.
-  ///
-  /// Creates a [LocalEngineArtifacts] if `localEngine` is non-null
-  factory Artifacts.test({String? localEngine, FileSystem? fileSystem}) {
-    fileSystem ??= MemoryFileSystem.test();
-    if (localEngine != null) {
-      return _TestLocalEngine(localEngine, fileSystem);
-    }
-    return _TestArtifacts(fileSystem);
+  factory Artifacts.test({FileSystem? fileSystem}) {
+    return _TestArtifacts(fileSystem ?? MemoryFileSystem.test());
+  }
+
+  /// A test-specific implementation of artifacts that returns stable paths for
+  /// all artifacts, and uses a local engine.
+  /// 
+  /// If a [fileSystem] is not provided, creates a new [MemoryFileSystem] instance.
+  factory Artifacts.testLocalEngine({
+    required String localEngine,
+    required String localEngineHost,
+    FileSystem? fileSystem, 
+  }) {
+    return _TestLocalEngine(localEngine, localEngineHost, fileSystem ?? MemoryFileSystem.test());
   }
 
   static Artifacts getLocalEngine(EngineBuildPaths engineBuildPaths) {
@@ -811,6 +819,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
        localEngineInfo =
          LocalEngineInfo(
            engineOutPath: engineOutPath,
+           engineHostOutPath: _hostEngineOutPath,
            localEngineName: fileSystem.path.basename(engineOutPath)
          ),
        _cache = cache,
@@ -1365,10 +1374,11 @@ class _TestArtifacts implements Artifacts {
 }
 
 class _TestLocalEngine extends _TestArtifacts {
-  _TestLocalEngine(String engineOutPath, super.fileSystem) :
+  _TestLocalEngine(String engineOutPath, String engineHostOutPath, super.fileSystem) :
     localEngineInfo =
       LocalEngineInfo(
         engineOutPath: engineOutPath,
+        engineHostOutPath: engineHostOutPath,
         localEngineName: fileSystem.path.basename(engineOutPath)
       );
 

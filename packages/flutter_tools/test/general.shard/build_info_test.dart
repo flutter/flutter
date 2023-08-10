@@ -17,43 +17,55 @@ void main() {
 
   group('Validate build number', () {
     testWithoutContext('CFBundleVersion for iOS', () async {
-      String? buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, 'xyz', logger);
+      String? buildName =
+          validatedBuildNumberForPlatform(TargetPlatform.ios, 'xyz', logger);
       expect(buildName, isNull);
-      buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, '0.0.1', logger);
+      buildName =
+          validatedBuildNumberForPlatform(TargetPlatform.ios, '0.0.1', logger);
       expect(buildName, '0.0.1');
-      buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, '123.xyz', logger);
+      buildName = validatedBuildNumberForPlatform(
+          TargetPlatform.ios, '123.xyz', logger);
       expect(buildName, '123');
-      buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, '123.456.xyz', logger);
+      buildName = validatedBuildNumberForPlatform(
+          TargetPlatform.ios, '123.456.xyz', logger);
       expect(buildName, '123.456');
     });
 
     testWithoutContext('versionCode for Android', () async {
-      String? buildName = validatedBuildNumberForPlatform(TargetPlatform.android_arm, '123.abc+-', logger);
+      String? buildName = validatedBuildNumberForPlatform(
+          TargetPlatform.android_arm, '123.abc+-', logger);
       expect(buildName, '123');
-      buildName = validatedBuildNumberForPlatform(TargetPlatform.android_arm, 'abc', logger);
+      buildName = validatedBuildNumberForPlatform(
+          TargetPlatform.android_arm, 'abc', logger);
       expect(buildName, '1');
     });
   });
 
   group('Validate build name', () {
     testWithoutContext('CFBundleShortVersionString for iOS', () async {
-      String? buildName = validatedBuildNameForPlatform(TargetPlatform.ios, 'xyz', logger);
+      String? buildName =
+          validatedBuildNameForPlatform(TargetPlatform.ios, 'xyz', logger);
       expect(buildName, isNull);
-      buildName = validatedBuildNameForPlatform(TargetPlatform.ios, '0.0.1', logger);
+      buildName =
+          validatedBuildNameForPlatform(TargetPlatform.ios, '0.0.1', logger);
       expect(buildName, '0.0.1');
 
-      buildName = validatedBuildNameForPlatform(TargetPlatform.ios, '123.456.xyz', logger);
+      buildName = validatedBuildNameForPlatform(
+          TargetPlatform.ios, '123.456.xyz', logger);
       expect(logger.traceText, contains('Invalid build-name'));
       expect(buildName, '123.456.0');
 
-      buildName = validatedBuildNameForPlatform(TargetPlatform.ios, '123.xyz', logger);
+      buildName =
+          validatedBuildNameForPlatform(TargetPlatform.ios, '123.xyz', logger);
       expect(buildName, '123.0.0');
     });
 
     testWithoutContext('versionName for Android', () async {
-      String? buildName = validatedBuildNameForPlatform(TargetPlatform.android_arm, '123.abc+-', logger);
+      String? buildName = validatedBuildNameForPlatform(
+          TargetPlatform.android_arm, '123.abc+-', logger);
       expect(buildName, '123.abc+-');
-      buildName = validatedBuildNameForPlatform(TargetPlatform.android_arm, 'abc+-', logger);
+      buildName = validatedBuildNameForPlatform(
+          TargetPlatform.android_arm, 'abc+-', logger);
       expect(buildName, 'abc+-');
     });
 
@@ -82,62 +94,101 @@ void main() {
     });
   });
 
-  testWithoutContext('getDartNameForDarwinArch returns name used in Dart SDK', () {
-    expect(DarwinArch.armv7.dartName,  'armv7');
-    expect(DarwinArch.arm64.dartName,  'arm64');
+  testWithoutContext('getDartNameForDarwinArch returns name used in Dart SDK',
+      () {
+    expect(DarwinArch.armv7.dartName, 'armv7');
+    expect(DarwinArch.arm64.dartName, 'arm64');
     expect(DarwinArch.x86_64.dartName, 'x64');
   });
 
   testWithoutContext('getNameForDarwinArch returns Apple names', () {
-    expect(DarwinArch.armv7.name,  'armv7');
-    expect(DarwinArch.arm64.name,  'arm64');
+    expect(DarwinArch.armv7.name, 'armv7');
+    expect(DarwinArch.arm64.name, 'arm64');
     expect(DarwinArch.x86_64.name, 'x86_64');
   });
 
   testWithoutContext('getNameForTargetPlatform on Darwin arches', () {
-    expect(getNameForTargetPlatform(TargetPlatform.ios, darwinArch: DarwinArch.arm64), 'ios-arm64');
-    expect(getNameForTargetPlatform(TargetPlatform.ios, darwinArch: DarwinArch.armv7), 'ios-armv7');
-    expect(getNameForTargetPlatform(TargetPlatform.ios, darwinArch: DarwinArch.x86_64), 'ios-x86_64');
-    expect(getNameForTargetPlatform(TargetPlatform.android), isNot(contains('ios')));
+    expect(
+        getNameForTargetPlatform(TargetPlatform.ios,
+            darwinArch: DarwinArch.arm64),
+        'ios-arm64');
+    expect(
+        getNameForTargetPlatform(TargetPlatform.ios,
+            darwinArch: DarwinArch.armv7),
+        'ios-armv7');
+    expect(
+        getNameForTargetPlatform(TargetPlatform.ios,
+            darwinArch: DarwinArch.x86_64),
+        'ios-x86_64');
+    expect(getNameForTargetPlatform(TargetPlatform.android),
+        isNot(contains('ios')));
   });
 
   testWithoutContext('defaultIOSArchsForEnvironment', () {
-    expect(defaultIOSArchsForEnvironment(
-      EnvironmentType.physical,
-      Artifacts.test(localEngine: 'ios_debug_unopt'),
-    ).single, DarwinArch.arm64);
+    expect(
+        defaultIOSArchsForEnvironment(
+          EnvironmentType.physical,
+          Artifacts.testLocalEngine(
+              localEngine: 'ios_debug_unopt',
+              localEngineHost: 'host_debug_unopt'),
+        ).single,
+        DarwinArch.arm64);
 
-    expect(defaultIOSArchsForEnvironment(
-      EnvironmentType.simulator,
-      Artifacts.test(localEngine: 'ios_debug_sim_unopt'),
-    ).single, DarwinArch.x86_64);
+    expect(
+        defaultIOSArchsForEnvironment(
+          EnvironmentType.simulator,
+          Artifacts.testLocalEngine(
+              localEngine: 'ios_debug_sim_unopt',
+              localEngineHost: 'host_debug_unopt'),
+        ).single,
+        DarwinArch.x86_64);
 
-    expect(defaultIOSArchsForEnvironment(
-      EnvironmentType.simulator,
-      Artifacts.test(localEngine: 'ios_debug_sim_unopt_arm64'),
-    ).single, DarwinArch.arm64);
+    expect(
+        defaultIOSArchsForEnvironment(
+          EnvironmentType.simulator,
+          Artifacts.testLocalEngine(
+              localEngine: 'ios_debug_sim_unopt_arm64',
+              localEngineHost: 'host_debug_unopt_arm64'),
+        ).single,
+        DarwinArch.arm64);
 
-    expect(defaultIOSArchsForEnvironment(
-      EnvironmentType.physical, Artifacts.test(),
-    ).single, DarwinArch.arm64);
+    expect(
+        defaultIOSArchsForEnvironment(
+          EnvironmentType.physical,
+          Artifacts.test(),
+        ).single,
+        DarwinArch.arm64);
 
-    expect(defaultIOSArchsForEnvironment(
-      EnvironmentType.simulator, Artifacts.test(),
-    ), <DarwinArch>[ DarwinArch.x86_64, DarwinArch.arm64 ]);
+    expect(
+        defaultIOSArchsForEnvironment(
+          EnvironmentType.simulator,
+          Artifacts.test(),
+        ),
+        <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64]);
   });
 
   testWithoutContext('defaultMacOSArchsForEnvironment', () {
-    expect(defaultMacOSArchsForEnvironment(
-      Artifacts.test(localEngine: 'host_debug_unopt'),
-    ).single, DarwinArch.x86_64);
+    expect(
+        defaultMacOSArchsForEnvironment(
+          Artifacts.testLocalEngine(
+              localEngine: 'host_debug_unopt',
+              localEngineHost: 'host_debug_unopt'),
+        ).single,
+        DarwinArch.x86_64);
 
-    expect(defaultMacOSArchsForEnvironment(
-      Artifacts.test(localEngine: 'host_debug_unopt_arm64'),
-    ).single, DarwinArch.arm64);
+    expect(
+        defaultMacOSArchsForEnvironment(
+          Artifacts.testLocalEngine(
+              localEngine: 'host_debug_unopt_arm64',
+              localEngineHost: 'host_debug_unopt_arm64'),
+        ).single,
+        DarwinArch.arm64);
 
-    expect(defaultMacOSArchsForEnvironment(
-      Artifacts.test(),
-    ), <DarwinArch>[ DarwinArch.x86_64, DarwinArch.arm64 ]);
+    expect(
+        defaultMacOSArchsForEnvironment(
+          Artifacts.test(),
+        ),
+        <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64]);
   });
 
   testWithoutContext('getIOSArchForName on Darwin arches', () {
@@ -159,23 +210,29 @@ void main() {
     expect(BuildInfo.release.trackWidgetCreation, false);
   });
 
-  testWithoutContext('toBuildSystemEnvironment encoding of standard values', () {
+  testWithoutContext('toBuildSystemEnvironment encoding of standard values',
+      () {
     const BuildInfo buildInfo = BuildInfo(BuildMode.debug, '',
-      treeShakeIcons: true,
-      trackWidgetCreation: true,
-      dartDefines: <String>['foo=2', 'bar=2'],
-      dartObfuscation: true,
-      splitDebugInfoPath: 'foo/',
-      extraFrontEndOptions: <String>['--enable-experiment=non-nullable', 'bar'],
-      extraGenSnapshotOptions: <String>['--enable-experiment=non-nullable', 'fizz'],
-      bundleSkSLPath: 'foo/bar/baz.sksl.json',
-      packagesPath: 'foo/.dart_tool/package_config.json',
-      codeSizeDirectory: 'foo/code-size',
-      fileSystemRoots: <String>['test5', 'test6'],
-      fileSystemScheme: 'scheme',
-      buildName: '122',
-      buildNumber: '22'
-    );
+        treeShakeIcons: true,
+        trackWidgetCreation: true,
+        dartDefines: <String>['foo=2', 'bar=2'],
+        dartObfuscation: true,
+        splitDebugInfoPath: 'foo/',
+        extraFrontEndOptions: <String>[
+          '--enable-experiment=non-nullable',
+          'bar'
+        ],
+        extraGenSnapshotOptions: <String>[
+          '--enable-experiment=non-nullable',
+          'fizz'
+        ],
+        bundleSkSLPath: 'foo/bar/baz.sksl.json',
+        packagesPath: 'foo/.dart_tool/package_config.json',
+        codeSizeDirectory: 'foo/code-size',
+        fileSystemRoots: <String>['test5', 'test6'],
+        fileSystemScheme: 'scheme',
+        buildName: '122',
+        buildNumber: '22');
 
     expect(buildInfo.toBuildSystemEnvironment(), <String, String>{
       'BuildMode': 'debug',
@@ -197,19 +254,24 @@ void main() {
 
   testWithoutContext('toEnvironmentConfig encoding of standard values', () {
     const BuildInfo buildInfo = BuildInfo(BuildMode.debug, '',
-      treeShakeIcons: true,
-      trackWidgetCreation: true,
-      dartDefines: <String>['foo=2', 'bar=2'],
-      dartObfuscation: true,
-      splitDebugInfoPath: 'foo/',
-      extraFrontEndOptions: <String>['--enable-experiment=non-nullable', 'bar'],
-      extraGenSnapshotOptions: <String>['--enable-experiment=non-nullable', 'fizz'],
-      bundleSkSLPath: 'foo/bar/baz.sksl.json',
-      packagesPath: 'foo/.dart_tool/package_config.json',
-      codeSizeDirectory: 'foo/code-size',
-      // These values are ignored by toEnvironmentConfig
-      androidProjectArgs: <String>['foo=bar', 'fizz=bazz']
-    );
+        treeShakeIcons: true,
+        trackWidgetCreation: true,
+        dartDefines: <String>['foo=2', 'bar=2'],
+        dartObfuscation: true,
+        splitDebugInfoPath: 'foo/',
+        extraFrontEndOptions: <String>[
+          '--enable-experiment=non-nullable',
+          'bar'
+        ],
+        extraGenSnapshotOptions: <String>[
+          '--enable-experiment=non-nullable',
+          'fizz'
+        ],
+        bundleSkSLPath: 'foo/bar/baz.sksl.json',
+        packagesPath: 'foo/.dart_tool/package_config.json',
+        codeSizeDirectory: 'foo/code-size',
+        // These values are ignored by toEnvironmentConfig
+        androidProjectArgs: <String>['foo=bar', 'fizz=bazz']);
 
     expect(buildInfo.toEnvironmentConfig(), <String, String>{
       'TREE_SHAKE_ICONS': 'true',
@@ -227,19 +289,24 @@ void main() {
 
   testWithoutContext('toGradleConfig encoding of standard values', () {
     const BuildInfo buildInfo = BuildInfo(BuildMode.debug, '',
-      treeShakeIcons: true,
-      trackWidgetCreation: true,
-      dartDefines: <String>['foo=2', 'bar=2'],
-      dartDefineConfigJsonMap: <String, Object>{'baz': '2'},
-      dartObfuscation: true,
-      splitDebugInfoPath: 'foo/',
-      extraFrontEndOptions: <String>['--enable-experiment=non-nullable', 'bar'],
-      extraGenSnapshotOptions: <String>['--enable-experiment=non-nullable', 'fizz'],
-      bundleSkSLPath: 'foo/bar/baz.sksl.json',
-      packagesPath: 'foo/.dart_tool/package_config.json',
-      codeSizeDirectory: 'foo/code-size',
-      androidProjectArgs: <String>['foo=bar', 'fizz=bazz']
-    );
+        treeShakeIcons: true,
+        trackWidgetCreation: true,
+        dartDefines: <String>['foo=2', 'bar=2'],
+        dartDefineConfigJsonMap: <String, Object>{'baz': '2'},
+        dartObfuscation: true,
+        splitDebugInfoPath: 'foo/',
+        extraFrontEndOptions: <String>[
+          '--enable-experiment=non-nullable',
+          'bar'
+        ],
+        extraGenSnapshotOptions: <String>[
+          '--enable-experiment=non-nullable',
+          'fizz'
+        ],
+        bundleSkSLPath: 'foo/bar/baz.sksl.json',
+        packagesPath: 'foo/.dart_tool/package_config.json',
+        codeSizeDirectory: 'foo/code-size',
+        androidProjectArgs: <String>['foo=bar', 'fizz=bazz']);
 
     expect(buildInfo.toGradleConfig(), <String>[
       '-Pdart-defines=Zm9vPTI=,YmFyPTI=',
@@ -257,95 +324,155 @@ void main() {
     ]);
   });
 
-  testWithoutContext('encodeDartDefines encodes define values with base64 encoded components', () {
+  testWithoutContext(
+      'encodeDartDefines encodes define values with base64 encoded components',
+      () {
     expect(encodeDartDefines(<String>['"hello"']), 'ImhlbGxvIg==');
-    expect(encodeDartDefines(<String>['https://www.google.com']), 'aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbQ==');
+    expect(encodeDartDefines(<String>['https://www.google.com']),
+        'aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbQ==');
     expect(encodeDartDefines(<String>['2,3,4', '5']), 'MiwzLDQ=,NQ==');
-    expect(encodeDartDefines(<String>['true', 'false', 'flase']), 'dHJ1ZQ==,ZmFsc2U=,Zmxhc2U=');
+    expect(encodeDartDefines(<String>['true', 'false', 'flase']),
+        'dHJ1ZQ==,ZmFsc2U=,Zmxhc2U=');
     expect(encodeDartDefines(<String>['1232,456', '2']), 'MTIzMiw0NTY=,Mg==');
   });
 
-  testWithoutContext('decodeDartDefines decodes base64 encoded dart defines', () {
-    expect(decodeDartDefines(<String, String>{
-      kDartDefines: 'ImhlbGxvIg==',
-    }, kDartDefines), <String>['"hello"']);
-    expect(decodeDartDefines(<String, String>{
-      kDartDefines: 'aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbQ==',
-    }, kDartDefines), <String>['https://www.google.com']);
-    expect(decodeDartDefines(<String, String>{
-      kDartDefines: 'MiwzLDQ=,NQ==',
-    }, kDartDefines), <String>['2,3,4', '5']);
-    expect(decodeDartDefines(<String, String>{
-      kDartDefines: 'dHJ1ZQ==,ZmFsc2U=,Zmxhc2U=',
-    }, kDartDefines), <String>['true', 'false', 'flase']);
-    expect(decodeDartDefines(<String, String>{
-      kDartDefines: 'MTIzMiw0NTY=,Mg==',
-    }, kDartDefines), <String>['1232,456', '2']);
+  testWithoutContext('decodeDartDefines decodes base64 encoded dart defines',
+      () {
+    expect(
+        decodeDartDefines(<String, String>{
+          kDartDefines: 'ImhlbGxvIg==',
+        }, kDartDefines),
+        <String>['"hello"']);
+    expect(
+        decodeDartDefines(<String, String>{
+          kDartDefines: 'aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbQ==',
+        }, kDartDefines),
+        <String>['https://www.google.com']);
+    expect(
+        decodeDartDefines(<String, String>{
+          kDartDefines: 'MiwzLDQ=,NQ==',
+        }, kDartDefines),
+        <String>['2,3,4', '5']);
+    expect(
+        decodeDartDefines(<String, String>{
+          kDartDefines: 'dHJ1ZQ==,ZmFsc2U=,Zmxhc2U=',
+        }, kDartDefines),
+        <String>['true', 'false', 'flase']);
+    expect(
+        decodeDartDefines(<String, String>{
+          kDartDefines: 'MTIzMiw0NTY=,Mg==',
+        }, kDartDefines),
+        <String>['1232,456', '2']);
   });
 
   group('Check repeated buildInfo variables', () {
     testUsingContext('toEnvironmentConfig repeated variable', () async {
-      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, '',
-          treeShakeIcons: true,
-          trackWidgetCreation: true,
-          dartDefines: <String>['foo=2', 'bar=2'],
-          dartDefineConfigJsonMap: <String, Object>{'DART_DEFINES': 'Define a variable, but it occupies the variable name of the system'},
-          dartObfuscation: true,
+      const BuildInfo buildInfo = BuildInfo(
+        BuildMode.debug,
+        '',
+        treeShakeIcons: true,
+        trackWidgetCreation: true,
+        dartDefines: <String>['foo=2', 'bar=2'],
+        dartDefineConfigJsonMap: <String, Object>{
+          'DART_DEFINES':
+              'Define a variable, but it occupies the variable name of the system'
+        },
+        dartObfuscation: true,
       );
       buildInfo.toEnvironmentConfig();
-      expect(testLogger.warningText, contains('The key: [DART_DEFINES] already exists, you cannot use environment variables that have been used by the system'));
+      expect(
+          testLogger.warningText,
+          contains(
+              'The key: [DART_DEFINES] already exists, you cannot use environment variables that have been used by the system'));
     });
 
-    testUsingContext('toEnvironmentConfig repeated variable with DART_DEFINES not set', () async {
+    testUsingContext(
+        'toEnvironmentConfig repeated variable with DART_DEFINES not set',
+        () async {
       // Simulate operation flutterCommand.getBuildInfo  with `dart-define-from-file` set dartDefines
-      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, '',
-          treeShakeIcons: true,
-          dartDefines: <String>['DART_DEFINES=Define a variable, but it occupies the variable name of the system'],
-          trackWidgetCreation: true,
-          dartDefineConfigJsonMap: <String, Object>{ 'DART_DEFINES' : 'Define a variable, but it occupies the variable name of the system'},
-          dartObfuscation: true,
+      const BuildInfo buildInfo = BuildInfo(
+        BuildMode.debug,
+        '',
+        treeShakeIcons: true,
+        dartDefines: <String>[
+          'DART_DEFINES=Define a variable, but it occupies the variable name of the system'
+        ],
+        trackWidgetCreation: true,
+        dartDefineConfigJsonMap: <String, Object>{
+          'DART_DEFINES':
+              'Define a variable, but it occupies the variable name of the system'
+        },
+        dartObfuscation: true,
       );
       buildInfo.toEnvironmentConfig();
-      expect(testLogger.warningText, contains('The key: [DART_DEFINES] already exists, you cannot use environment variables that have been used by the system'));
-
+      expect(
+          testLogger.warningText,
+          contains(
+              'The key: [DART_DEFINES] already exists, you cannot use environment variables that have been used by the system'));
     });
 
     testUsingContext('toGradleConfig repeated variable', () async {
-      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, '',
-          treeShakeIcons: true,
-          trackWidgetCreation: true,
-          dartDefines: <String>['foo=2', 'bar=2'],
-          dartDefineConfigJsonMap: <String, Object>{'dart-defines': 'Define a variable, but it occupies the variable name of the system'},
-          dartObfuscation: true,
+      const BuildInfo buildInfo = BuildInfo(
+        BuildMode.debug,
+        '',
+        treeShakeIcons: true,
+        trackWidgetCreation: true,
+        dartDefines: <String>['foo=2', 'bar=2'],
+        dartDefineConfigJsonMap: <String, Object>{
+          'dart-defines':
+              'Define a variable, but it occupies the variable name of the system'
+        },
+        dartObfuscation: true,
       );
       buildInfo.toGradleConfig();
-      expect(testLogger.warningText, contains('The key: [dart-defines] already exists, you cannot use gradle variables that have been used by the system'));
+      expect(
+          testLogger.warningText,
+          contains(
+              'The key: [dart-defines] already exists, you cannot use gradle variables that have been used by the system'));
     });
 
     testUsingContext('toGradleConfig repeated variable with not set', () async {
       // Simulate operation flutterCommand.getBuildInfo  with `dart-define-from-file` set dartDefines
-      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, '',
-          treeShakeIcons: true,
-          trackWidgetCreation: true,
-          dartDefines: <String>['dart-defines=Define a variable, but it occupies the variable name of the system'],
-          dartDefineConfigJsonMap: <String, Object>{'dart-defines': 'Define a variable, but it occupies the variable name of the system'},
-          dartObfuscation: true,
+      const BuildInfo buildInfo = BuildInfo(
+        BuildMode.debug,
+        '',
+        treeShakeIcons: true,
+        trackWidgetCreation: true,
+        dartDefines: <String>[
+          'dart-defines=Define a variable, but it occupies the variable name of the system'
+        ],
+        dartDefineConfigJsonMap: <String, Object>{
+          'dart-defines':
+              'Define a variable, but it occupies the variable name of the system'
+        },
+        dartObfuscation: true,
       );
       buildInfo.toGradleConfig();
-      expect(testLogger.warningText, contains('The key: [dart-defines] already exists, you cannot use gradle variables that have been used by the system'));
+      expect(
+          testLogger.warningText,
+          contains(
+              'The key: [dart-defines] already exists, you cannot use gradle variables that have been used by the system'));
     });
 
-    testUsingContext('toGradleConfig with androidProjectArgs override gradle project variant', () async {
-      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, '',
-          treeShakeIcons: true,
-          trackWidgetCreation: true,
-          androidProjectArgs: <String>['applicationId=com.google'],
-          dartDefineConfigJsonMap: <String, Object>{'applicationId': 'override applicationId'},
-          dartObfuscation: true,
+    testUsingContext(
+        'toGradleConfig with androidProjectArgs override gradle project variant',
+        () async {
+      const BuildInfo buildInfo = BuildInfo(
+        BuildMode.debug,
+        '',
+        treeShakeIcons: true,
+        trackWidgetCreation: true,
+        androidProjectArgs: <String>['applicationId=com.google'],
+        dartDefineConfigJsonMap: <String, Object>{
+          'applicationId': 'override applicationId'
+        },
+        dartObfuscation: true,
       );
       buildInfo.toGradleConfig();
-      expect(testLogger.warningText, contains('The key: [applicationId] already exists, you cannot use gradle variables that have been used by the system'));
+      expect(
+          testLogger.warningText,
+          contains(
+              'The key: [applicationId] already exists, you cannot use gradle variables that have been used by the system'));
     });
-
   });
 }
