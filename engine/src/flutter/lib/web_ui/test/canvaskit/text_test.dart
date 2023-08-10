@@ -156,16 +156,16 @@ void testMain() {
       ui.ParagraphBuilder.setDisableRoundingHack(roundingHackWasDisabled);
     });
 
-    test('rounding hack applied by default', () {
+    test('rounding hack disabled by default', () {
       const double fontSize = 1.25;
       const String text = '12345';
       assert((fontSize * text.length).truncate() != fontSize * text.length);
-      expect(ui.ParagraphBuilder.shouldDisableRoundingHack, isFalse);
+      expect(ui.ParagraphBuilder.shouldDisableRoundingHack, isTrue);
       final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle(fontSize: fontSize, fontFamily: 'FlutterTest'));
       builder.addText(text);
       final ui.Paragraph paragraph = builder.build()
         ..layout(const ui.ParagraphConstraints(width: text.length * fontSize));
-      expect(paragraph.computeLineMetrics().length, greaterThan(1));
+      expect(paragraph.computeLineMetrics().length, 1);
     });
 
     // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
