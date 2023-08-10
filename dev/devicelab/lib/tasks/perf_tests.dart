@@ -784,10 +784,6 @@ class StartupTest {
 
   Future<TaskResult> run() async {
     return inDirectory<TaskResult>(testDirectory, () async {
-      if (runEnvironment?['FORCE_XCODE_DEBUG'] == 'true') {
-        await debugAutomation();
-        return TaskResult.failure('debugging');
-      }
       final Device device = await devices.workingDevice;
       await device.unlock();
       const int iterations = 5;
