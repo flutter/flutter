@@ -41,9 +41,6 @@ impeller_component("playground") {
   }
 
   public_deps = [
-    "../entity:entity_shaders",
-    "../entity:framebuffer_blend_entity_shaders",
-    "../entity:modern_entity_shaders",
     "../fixtures:shader_fixtures",
     "../image:image_skia_backend",
     "../renderer",
@@ -53,6 +50,14 @@ impeller_component("playground") {
     "//third_party/glfw",
     "//third_party/imgui:imgui_glfw",
   ]
+
+  if (impeller_supports_rendering) {
+    public_deps += [
+      "../entity:entity_shaders",
+      "../entity:framebuffer_blend_entity_shaders",
+      "../entity:modern_entity_shaders",
+    ]
+  }
 
   if (is_mac) {
     frameworks = [

@@ -16,6 +16,7 @@
 #include "impeller/base/strings.h"
 #include "impeller/base/validation.h"
 #include "impeller/compiler/code_gen_template.h"
+#include "impeller/compiler/types.h"
 #include "impeller/compiler/uniform_sorter.h"
 #include "impeller/compiler/utilities.h"
 #include "impeller/geometry/half.h"

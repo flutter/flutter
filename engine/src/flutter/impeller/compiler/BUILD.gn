@@ -36,6 +36,8 @@ impeller_component("compiler_lib") {
     "compiler.h",
     "compiler_backend.cc",
     "compiler_backend.h",
+    "constants.cc",
+    "constants.h",
     "include_dir.h",
     "includer.cc",
     "includer.h",

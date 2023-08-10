@@ -9,6 +9,7 @@
 #include <optional>
 
 #include "flutter/fml/macros.h"
+#include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/geometry/color.h"
@@ -367,6 +368,9 @@ constexpr MTLTextureType ToMTLTextureType(TextureType type) {
       return MTLTextureType2DMultisample;
     case TextureType::kTextureCube:
       return MTLTextureTypeCube;
+    case TextureType::kTextureExternalOES:
+      VALIDATION_LOG
+          << "kTextureExternalOES can not be used with the Metal backend.";
   }
   return MTLTextureType2D;
 }
