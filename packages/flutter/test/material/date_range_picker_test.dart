@@ -133,22 +133,21 @@ void main() {
       final Offset entryButtonBottomLeft = tester.getBottomLeft(
         find.widgetWithIcon(IconButton, Icons.edit_outlined),
       );
-      expect(
-        saveButtonBottomLeft.dx,
-        ParagraphBuilder.shouldDisableRoundingHack ? moreOrLessEquals(711.6, epsilon: 1e-5) : (800 - 89.0),
-      );
-      expect(saveButtonBottomLeft.dy, helpTextTopLeft.dy);
+      expect(saveButtonBottomLeft.dx, moreOrLessEquals(711.6, epsilon: 1e-5));
+      if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+        expect(saveButtonBottomLeft.dy, helpTextTopLeft.dy);
+      }
       expect(entryButtonBottomLeft.dx, saveButtonBottomLeft.dx - 48.0);
-      expect(entryButtonBottomLeft.dy, helpTextTopLeft.dy);
+      if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+        expect(entryButtonBottomLeft.dy, helpTextTopLeft.dy);
+      }
 
       // Test help text position.
       final Offset helpTextBottomLeft = tester.getBottomLeft(helpText);
       expect(helpTextBottomLeft.dx, 72.0);
-      // TODO(tahatesser): https://github.com/flutter/flutter/issues/99933
-      // A bug in the HTML renderer and/or Chrome 96+ causes a
-      // discrepancy in the paragraph height.
-      const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
-      expect(helpTextBottomLeft.dy, closeButtonBottomRight.dy + 20.0 + (hasIssue99933 ? 1.0 : 0.0));
+      if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+        expect(helpTextBottomLeft.dy, closeButtonBottomRight.dy + 20.0);
+      }
 
       // Test the header position.
       final Offset firstDateHeaderTopLeft = tester.getTopLeft(firstDateHeaderText);
@@ -261,7 +260,6 @@ void main() {
     // https://github.com/flutter/flutter/issues/130354
     leakTrackingTestConfig: const LeakTrackingTestConfig(
       allowAllNotGCed: true,
-      allowAllNotDisposed: true,
     ));
   });
 

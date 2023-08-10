@@ -58,7 +58,7 @@ void main() {
     expect(find.text('View licenses'), findsOneWidget);
   });
 
-  testWidgets('Material2 - AboutListTile control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - AboutListTile control test', (WidgetTester tester) async {
     const FlutterLogo logo = FlutterLogo();
 
     await tester.pumpWidget(
@@ -141,7 +141,7 @@ void main() {
     expect(find.text('Pirate license'), findsOneWidget);
   });
 
-  testWidgets('Material3 - AboutListTile control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - AboutListTile control test', (WidgetTester tester) async {
     const FlutterLogo logo = FlutterLogo();
 
     await tester.pumpWidget(
@@ -583,7 +583,7 @@ void main() {
       tester.getTopLeft(find.text('Licenses')),
       const Offset(16.0 + safeareaPadding, 14.0 + safeareaPadding),
     );
-  });
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
 
   testWidgetsWithLeakTracking('LicensePage returns early if unmounted', (WidgetTester tester) async {
     final Completer<LicenseEntry> licenseCompleter = Completer<LicenseEntry>();
@@ -1477,7 +1477,7 @@ void main() {
     expect(find.text('Exception: Injected failure'), findsOneWidget);
   });
 
-  testWidgets('Material2 - LicensePage master view layout position - ltr', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - LicensePage master view layout position - ltr', (WidgetTester tester) async {
     const TextDirection textDirection = TextDirection.ltr;
     const Size defaultSize = Size(800.0, 600.0);
     const Size wideSize = Size(1200.0, 600.0);
@@ -1542,7 +1542,7 @@ void main() {
     expect(tester.getCenter(find.byType(ListView)), const Offset(160, 356));
   });
 
-  testWidgets('Material3 - LicensePage master view layout position - ltr', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - LicensePage master view layout position - ltr', (WidgetTester tester) async {
     const TextDirection textDirection = TextDirection.ltr;
     const Size defaultSize = Size(800.0, 600.0);
     const Size wideSize = Size(1200.0, 600.0);
@@ -1578,7 +1578,9 @@ void main() {
     // If the layout width is less than 840.0 pixels, nested layout is
     // used which positions license page title at the top center.
     Offset titleOffset = tester.getCenter(find.text(title));
-    expect(titleOffset, Offset(defaultSize.width / 2, 96.0));
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(titleOffset, Offset(defaultSize.width / 2, 96.0));
+    }
     expect(tester.getCenter(find.byType(ListView)), Offset(defaultSize.width / 2, 328.0));
 
     // Configure a wide window to show the lateral UI.
@@ -1607,7 +1609,7 @@ void main() {
     expect(tester.getCenter(find.byType(ListView)), const Offset(160, 356));
   });
 
-  testWidgets('Material2 - LicensePage master view layout position - rtl', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - LicensePage master view layout position - rtl', (WidgetTester tester) async {
     const TextDirection textDirection = TextDirection.rtl;
     const Size defaultSize = Size(800.0, 600.0);
     const Size wideSize = Size(1200.0, 600.0);
@@ -1672,7 +1674,7 @@ void main() {
     expect(tester.getCenter(find.byType(ListView)), const Offset(1040.0, 356.0));
   });
 
-  testWidgets('Material3 - LicensePage master view layout position - rtl', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - LicensePage master view layout position - rtl', (WidgetTester tester) async {
     const TextDirection textDirection = TextDirection.rtl;
     const Size defaultSize = Size(800.0, 600.0);
     const Size wideSize = Size(1200.0, 600.0);
@@ -1708,7 +1710,9 @@ void main() {
     // If the layout width is less than 840.0 pixels, nested layout is
     // used which positions license page title at the top center.
     Offset titleOffset = tester.getCenter(find.text(title));
-    expect(titleOffset, Offset(defaultSize.width / 2, 96.0));
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(titleOffset, Offset(defaultSize.width / 2, 96.0));
+    }
     expect(tester.getCenter(find.byType(ListView)), Offset(defaultSize.width / 2, 328.0));
 
     // Configure a wide window to show the lateral UI.
@@ -1737,7 +1741,7 @@ void main() {
     expect(tester.getCenter(find.byType(ListView)), const Offset(1040.0, 356.0));
   });
 
-  testWidgets('License page title in lateral UI does not use AppBarTheme.foregroundColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('License page title in lateral UI does not use AppBarTheme.foregroundColor', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/108991
     final ThemeData theme = ThemeData(
       appBarTheme: const AppBarTheme(foregroundColor: Color(0xFFFFFFFF)),

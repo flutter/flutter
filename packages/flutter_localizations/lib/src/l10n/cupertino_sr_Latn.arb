@@ -1,4 +1,6 @@
 {
+  "noSpellCheckReplacementsLabel": "Nisu pronađene zamene",
+  "menuDismissLabel": "Odbacite meni",
   "searchTextFieldPlaceholderLabel": "Pretražite",
   "tabSemanticsLabel": "$tabIndex. kartica od $tabCount",
   "datePickerHourSemanticsLabelFew": "$hour sata",

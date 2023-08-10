@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 
 import 'common.dart';
+import 'src/animated_advanced_blend.dart';
 import 'src/animated_blur_backdrop_filter.dart';
 import 'src/animated_complex_image_filtered.dart';
 import 'src/animated_complex_opacity.dart';
@@ -95,6 +96,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kDrawPointsPageRougeName: (BuildContext context) => const DrawPointsPage(),
         kDrawVerticesPageRouteName: (BuildContext context) => const DrawVerticesPage(),
         kDrawAtlasPageRouteName: (BuildContext context) => const DrawAtlasPage(),
+        kAnimatedAdvancedBlend: (BuildContext context) => const AnimatedAdvancedBlend(),
       },
     );
   }
@@ -362,6 +364,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Draw Atlas'),
             onPressed: () {
               Navigator.pushNamed(context, kDrawAtlasPageRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kAnimatedAdvancedBlend),
+            child: const Text('Animated Advanced Blend'),
+            onPressed: () {
+              Navigator.pushNamed(context, kAnimatedAdvancedBlend);
             },
           ),
         ],
