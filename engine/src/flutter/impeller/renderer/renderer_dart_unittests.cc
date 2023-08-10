@@ -10,6 +10,7 @@
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/backtrace.h"
 #include "flutter/fml/command_line.h"
+#include "flutter/lib/gpu/context.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/runtime/dart_isolate.h"
 #include "flutter/runtime/dart_vm_lifecycle.h"
@@ -46,7 +47,13 @@ class RendererDartTest : public PlaygroundTest,
     assert(isolate_->get()->GetPhase() == flutter::DartIsolate::Phase::Running);
   }
 
-  flutter::testing::AutoIsolateShutdown* GetIsolate() { return isolate_.get(); }
+  flutter::testing::AutoIsolateShutdown* GetIsolate() {
+    // Sneak the context into the Flutter GPU API.
+    assert(GetContext() != nullptr);
+    flutter::Context::SetOverrideContext(GetContext());
+
+    return isolate_.get();
+  }
 
  private:
   std::unique_ptr<flutter::testing::AutoIsolateShutdown> CreateDartIsolate() {
@@ -88,6 +95,20 @@ TEST_P(RendererDartTest, CanRunDartInPlaygroundFrame) {
     });
   };
   OpenPlaygroundHere(callback);
+}
+
+TEST_P(RendererDartTest, CanInstantiateFlutterGPUContext) {
+  auto isolate = GetIsolate();
+  bool result = isolate->RunInIsolateScope([]() -> bool {
+    if (tonic::CheckAndHandleError(::Dart_Invoke(
+            Dart_RootLibrary(), tonic::ToDart("instantiateDefaultContext"), 0,
+            nullptr))) {
+      return false;
+    }
+    return true;
+  });
+
+  ASSERT_TRUE(result);
 }
 
 }  // namespace testing
