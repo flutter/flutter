@@ -102,7 +102,7 @@ final String flutterTester = path.join(flutterRoot, 'bin', 'cache', 'artifacts',
 
 /// The arguments to pass to `flutter test` (typically the local engine
 /// configuration) -- prefilled with the arguments passed to test.dart.
-final List<String> flutterTestArgs = <String>[];
+final List<String> flutterTestArgs = <String>['--dart-define=SKPARAGRAPH_REMOVE_ROUNDING_HACK=true'];
 
 /// Environment variables to override the local engine when running `pub test`,
 /// if such flags are provided to `test.dart`.
@@ -1309,8 +1309,8 @@ Future<void> _runFlutterDriverWebTest({
   await runCommand(
     flutter,
     <String>[
-      ...flutterTestArgs,
       'drive',
+      ...flutterTestArgs,
       if (driver != null) '--driver=$driver',
       '--target=$target',
       '--browser-name=chrome',
@@ -1584,8 +1584,8 @@ Future<void> _runGalleryE2eWebTest(String buildMode, { bool canvasKit = false })
   await runCommand(
     flutter,
     <String>[
-      ...flutterTestArgs,
       'drive',
+      ...flutterTestArgs,
       if (canvasKit)
         '--dart-define=FLUTTER_WEB_USE_SKIA=true',
       if (!canvasKit)
@@ -1665,10 +1665,10 @@ Future<void> _runWebReleaseTest(String target, {
   await runCommand(
     flutter,
     <String>[
-      ...flutterTestArgs,
       'build',
       'web',
       '--release',
+      ...flutterTestArgs,
       ...additionalArguments,
       '-t',
       target,

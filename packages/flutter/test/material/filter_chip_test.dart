@@ -135,7 +135,10 @@ void main() {
     );
 
     // Test default chip size.
-    expect(tester.getSize(find.byType(FilterChip)), const Size(190.0, 48.0));
+    expect(
+      tester.getSize(find.byType(FilterChip)),
+      within(distance: 0.001, from: const Size(189.1, 48.0)),
+    );
     // Test default label style.
     expect(
       getLabelStyle(tester, label).style.color!.value,
@@ -267,7 +270,10 @@ void main() {
     );
 
     // Test default chip size.
-    expect(tester.getSize(find.byType(FilterChip)), const Size(190.0, 48.0));
+    expect(
+      tester.getSize(find.byType(FilterChip)),
+      within(distance: 0.001, from: const Size(189.1, 48.0)),
+    );
     // Test default label style.
     expect(
       getLabelStyle(tester, 'filter chip').style.color!.value,

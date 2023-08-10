@@ -42,7 +42,7 @@ void main() {
 
     final Finder extendedFABMaterialButton = find.byType(RawMaterialButton).at(3);
     final RenderBox extendedFABRenderBox = tester.renderObject(extendedFABMaterialButton);
-    expect(extendedFABRenderBox.size, const Size(111.0, 56.0));
+    expect(extendedFABRenderBox.size, within(distance: 0.01, from: const Size(110.3, 56.0)));
     expect(getRawMaterialButtonWidget(extendedFABMaterialButton).fillColor, theme.colorScheme.primaryContainer);
     expect(getRawMaterialButtonWidget(extendedFABMaterialButton).shape, RoundedRectangleBorder(borderRadius:  BorderRadius.circular(16.0)));
   });

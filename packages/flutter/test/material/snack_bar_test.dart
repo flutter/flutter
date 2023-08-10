@@ -2788,11 +2788,9 @@ void main() {
     await expectLater(find.byType(MaterialApp), matchesGoldenFile('m3_snack_bar.scaffold.nested.png'));
     final Offset snackBarTopRight = tester.getTopRight(find.byType(SnackBar));
 
-    // TODO(bleroux): https://github.com/flutter/flutter/issues/99933
-    // A bug in the HTML renderer and/or Chrome 96+ causes a
-    // discrepancy in the paragraph height.
-    const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
-    expect(snackBarTopRight.dy, hasIssue99933 ? 464.0 : 465.0);
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(snackBarTopRight.dy, 465.0);
+    }
   });
 
 

@@ -969,7 +969,7 @@ void main() {
 
         expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(154, 155)));
         expect(tester.getBottomRight(find.text(selectTimeString)), equals(
-          ParagraphBuilder.shouldDisableRoundingHack ? const Offset(280.5, 165) : const Offset(281, 165),
+          const Offset(280.5, 165),
         ));
         expect(tester.getBottomRight(find.text(okString)).dx, 644);
         expect(tester.getBottomLeft(find.text(okString)).dx, 616);
@@ -983,7 +983,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(tester.getTopLeft(find.text(selectTimeString)), equals(
-          ParagraphBuilder.shouldDisableRoundingHack ? const Offset(519.5, 155) : const Offset(519, 155),
+          const Offset(519.5, 155),
         ));
         expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(646, 165)));
         expect(tester.getBottomLeft(find.text(okString)).dx, 156);
@@ -1031,8 +1031,14 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(138, 129)));
-        expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(295.0, 149.0)));
-        expect(tester.getBottomLeft(find.text(okString)).dx, 615.5);
+        expect(
+          tester.getBottomRight(find.text(selectTimeString)),
+          const Offset(294.75, 149.0),
+        );
+        expect(
+          tester.getBottomLeft(find.text(okString)).dx,
+          moreOrLessEquals(615.9, epsilon: 0.001),
+        );
         expect(tester.getBottomRight(find.text(cancelString)).dx, 578);
 
         await tester.tap(find.text(okString));
@@ -1042,10 +1048,19 @@ void main() {
         await tester.tap(find.text('X'));
         await tester.pumpAndSettle();
 
-        expect(tester.getTopLeft(find.text(selectTimeString)), equals(const Offset(505.0, 129.0)));
+        expect(
+          tester.getTopLeft(find.text(selectTimeString)),
+          equals(const Offset(505.25, 129.0)),
+        );
         expect(tester.getBottomRight(find.text(selectTimeString)), equals(const Offset(662, 149)));
-        expect(tester.getBottomLeft(find.text(okString)).dx, 155.5);
-        expect(tester.getBottomRight(find.text(okString)).dx, 184.5);
+        expect(
+          tester.getBottomLeft(find.text(okString)).dx,
+          moreOrLessEquals(155.9, epsilon: 0.001),
+        );
+        expect(
+          tester.getBottomRight(find.text(okString)).dx,
+          moreOrLessEquals(184.1, epsilon: 0.001),
+        );
         expect(tester.getBottomLeft(find.text(cancelString)).dx, 222);
 
         await tester.tap(find.text(okString));

@@ -29,7 +29,7 @@ void main() {
     expect(find.text('About', findRichText: true), findsOneWidget);
     expect(
       tester.getRect(findMenu('About')),
-      equals(const Rect.fromLTRB(4.0, 48.0, 111.0, 208.0)),
+      equals(const Rect.fromLTRB(4.0, 48.0, 110.5, 208.0)),
     );
     expect(find.text('Save', findRichText: true), findsOneWidget);
     expect(find.text('Quit', findRichText: true), findsOneWidget);
