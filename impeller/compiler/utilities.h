@@ -29,5 +29,7 @@ std::string ConvertToCamelCase(std::string_view string);
 ///         language.
 std::string ConvertToEntrypointName(std::string_view string);
 
+bool StringStartsWith(const std::string& target, const std::string& prefix);
+
 }  // namespace compiler
 }  // namespace impeller

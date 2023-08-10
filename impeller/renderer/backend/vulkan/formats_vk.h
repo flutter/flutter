@@ -5,6 +5,7 @@
 #pragma once
 
 #include "flutter/fml/macros.h"
+#include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/shader_types.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
@@ -587,6 +588,9 @@ constexpr uint32_t ToArrayLayerCount(TextureType type) {
       return 1u;
     case TextureType::kTextureCube:
       return 6u;
+    case TextureType::kTextureExternalOES:
+      VALIDATION_LOG
+          << "kTextureExternalOES can not be used with the Vulkan backend.";
   }
   FML_UNREACHABLE();
 }
@@ -598,6 +602,9 @@ constexpr vk::ImageViewType ToVKImageViewType(TextureType type) {
       return vk::ImageViewType::e2D;
     case TextureType::kTextureCube:
       return vk::ImageViewType::eCube;
+    case TextureType::kTextureExternalOES:
+      VALIDATION_LOG
+          << "kTextureExternalOES can not be used with the Vulkan backend.";
   }
   FML_UNREACHABLE();
 }
@@ -609,6 +616,9 @@ constexpr vk::ImageCreateFlags ToVKImageCreateFlags(TextureType type) {
       return {};
     case TextureType::kTextureCube:
       return vk::ImageCreateFlagBits::eCubeCompatible;
+    case TextureType::kTextureExternalOES:
+      VALIDATION_LOG
+          << "kTextureExternalOES can not be used with the Vulkan backend.";
   }
   FML_UNREACHABLE();
 }

@@ -234,6 +234,7 @@ enum class TextureType {
   kTexture2D,
   kTexture2DMultisample,
   kTextureCube,
+  kTextureExternalOES,
 };
 
 constexpr const char* TextureTypeToString(TextureType type) {
@@ -244,6 +245,8 @@ constexpr const char* TextureTypeToString(TextureType type) {
       return "Texture2DMultisample";
     case TextureType::kTextureCube:
       return "TextureCube";
+    case TextureType::kTextureExternalOES:
+      return "TextureExternalOES";
   }
   FML_UNREACHABLE();
 }
@@ -252,6 +255,7 @@ constexpr bool IsMultisampleCapable(TextureType type) {
   switch (type) {
     case TextureType::kTexture2D:
     case TextureType::kTextureCube:
+    case TextureType::kTextureExternalOES:
       return false;
     case TextureType::kTexture2DMultisample:
       return true;

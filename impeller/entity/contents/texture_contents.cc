@@ -149,7 +149,12 @@ bool TextureContents::Render(const ContentContext& renderer,
   }
   pipeline_options.primitive_type = PrimitiveType::kTriangleStrip;
 
-  cmd.pipeline = renderer.GetTexturePipeline(pipeline_options);
+  if (texture_->GetTextureDescriptor().type ==
+      TextureType::kTextureExternalOES) {
+    cmd.pipeline = renderer.GetTextureExternalPipeline(pipeline_options);
+  } else {
+    cmd.pipeline = renderer.GetTexturePipeline(pipeline_options);
+  }
   cmd.stencil_reference = entity.GetStencilDepth();
   cmd.BindVertices(vertex_builder.CreateVertexBuffer(host_buffer));
   VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
