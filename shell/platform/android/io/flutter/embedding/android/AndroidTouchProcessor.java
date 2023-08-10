@@ -224,12 +224,6 @@ public class AndroidTouchProcessor {
       return;
     }
 
-    long motionEventId = 0;
-    if (trackMotionEvents) {
-      MotionEventTracker.MotionEventId trackedEvent = motionEventTracker.track(event);
-      motionEventId = trackedEvent.getId();
-    }
-
     int pointerKind = getPointerDeviceTypeForToolType(event.getToolType(pointerIndex));
     // We use this in lieu of using event.getRawX and event.getRawY as we wish to support
     // earlier versions than API level 29.
@@ -252,7 +246,20 @@ public class AndroidTouchProcessor {
       buttons = 0;
     }
 
+    int panZoomType = -1;
     boolean isTrackpadPan = ongoingPans.containsKey(event.getPointerId(pointerIndex));
+    if (isTrackpadPan) {
+      panZoomType = getPointerChangeForPanZoom(pointerChange);
+      if (panZoomType == -1) {
+        return;
+      }
+    }
+
+    long motionEventId = 0;
+    if (trackMotionEvents) {
+      MotionEventTracker.MotionEventId trackedEvent = motionEventTracker.track(event);
+      motionEventId = trackedEvent.getId();
+    }
 
     int signalKind =
         event.getActionMasked() == MotionEvent.ACTION_SCROLL
@@ -264,7 +271,7 @@ public class AndroidTouchProcessor {
     packet.putLong(motionEventId); // motionEventId
     packet.putLong(timeStamp); // time_stamp
     if (isTrackpadPan) {
-      packet.putLong(getPointerChangeForPanZoom(pointerChange)); // change
+      packet.putLong(panZoomType); // change
       packet.putLong(PointerDeviceKind.TRACKPAD); // kind
     } else {
       packet.putLong(pointerChange); // change
@@ -355,7 +362,7 @@ public class AndroidTouchProcessor {
     packet.putDouble(1.0); // scale
     packet.putDouble(0.0); // rotation
 
-    if (isTrackpadPan && getPointerChangeForPanZoom(pointerChange) == PointerChange.PAN_ZOOM_END) {
+    if (isTrackpadPan && (panZoomType == PointerChange.PAN_ZOOM_END)) {
       ongoingPans.remove(event.getPointerId(pointerIndex));
     }
   }
@@ -401,7 +408,7 @@ public class AndroidTouchProcessor {
     } else if (pointerChange == PointerChange.UP || pointerChange == PointerChange.CANCEL) {
       return PointerChange.PAN_ZOOM_END;
     }
-    throw new AssertionError("Unexpected pointer change");
+    return -1;
   }
 
   @PointerDeviceKind
