@@ -1069,19 +1069,34 @@ void main() {
     testWidgets('check onSelectionEvent callback is called correctly', (WidgetTester tester) async {
       const String text1 = 'How are you?';
       TextSelection? selection1;
-      void onSelectionEvent1(TextSelection selection, SelectionEvent event) {
+      bool isAfterFirstCall1 = false;
+      void onSelectionEvent1(TextSelection? selection, SelectionEvent event) {
+        if(isAfterFirstCall1) {
+          expect(selection1, isNot(selection));
+        }
+        isAfterFirstCall1 = true;
         selection1 = selection;
       }
 
       const String text2 = 'Good, and you?';
       TextSelection? selection2;
-      void onSelectionEvent2(TextSelection selection, SelectionEvent event) {
+      bool isAfterFirstCall2 = false;
+      void onSelectionEvent2(TextSelection? selection, SelectionEvent event) {
+        if(isAfterFirstCall2) {
+          expect(selection2, isNot(selection));
+        }
+        isAfterFirstCall2 = true;
         selection2 = selection;
       }
 
       const String text3 = 'Fine, thank you.';
       TextSelection? selection3;
-      void onSelectionEvent3(TextSelection selection, SelectionEvent event) {
+      bool isAfterFirstCall3 = false;
+      void onSelectionEvent3(TextSelection? selection, SelectionEvent event) {
+        if(isAfterFirstCall3) {
+          expect(selection3, isNot(selection));
+        }
+        isAfterFirstCall3 = true;
         selection3 = selection;
       }
 
