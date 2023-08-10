@@ -70,4 +70,25 @@ void main() {
       ),
     );
   });
+
+  testWithoutContext('tool_backend.dart exits if local engine host does not match build mode', () async {
+    final ProcessResult result = await processManager.run(<String>[
+      dart,
+      toolBackend,
+      'linux-x64',
+      'debug',
+    ], environment: <String, String>{
+      'PROJECT_DIR': examplePath,
+      'LOCAL_ENGINE': 'debug_foo_bar', // OK
+      'LOCAL_ENGINE_HOST': 'release_foo_bar', // Does not contain "debug",
+    });
+
+    expect(
+      result,
+      const ProcessResultMatcher(
+        exitCode: 1,
+        stderrPattern: "ERROR: Requested build with Flutter local engine host at 'release_foo_bar'",
+      ),
+    );
+  });
 }
