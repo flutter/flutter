@@ -18,6 +18,8 @@
 #include "flutter/shell/platform/android/android_surface_gl_skia.h"
 #include "flutter/shell/platform/android/android_surface_software.h"
 #include "flutter/shell/platform/android/hardware_buffer_external_texture_gl.h"
+#include "flutter/shell/platform/android/hardware_buffer_external_texture_vk.h"
+#include "shell/platform/android/android_context_vulkan_impeller.h"
 #if IMPELLER_ENABLE_VULKAN  // b/258506856 for why this is behind an if
 #include "flutter/shell/platform/android/android_surface_vulkan_impeller.h"
 #endif
@@ -313,8 +315,14 @@ void PlatformViewAndroid::RegisterImageTexture(
     RegisterTexture(std::make_shared<HardwareBufferExternalTextureGL>(
         std::static_pointer_cast<AndroidContextGLSkia>(android_context_),
         texture_id, image_texture_entry, jni_facade_));
+  } else if (android_context_->RenderingApi() == AndroidRenderingAPI::kVulkan) {
+    RegisterTexture(std::make_shared<HardwareBufferExternalTextureVK>(
+        std::static_pointer_cast<impeller::ContextVK>(
+            android_context_->GetImpellerContext()),
+        texture_id, image_texture_entry, jni_facade_));
   } else {
-    FML_LOG(INFO) << "Attempted to use a GL texture in a non GL context.";
+    FML_LOG(INFO) << "Attempted to use a HardwareBuffer texture with an "
+                     "unsupported rendering API.";
   }
 }
 

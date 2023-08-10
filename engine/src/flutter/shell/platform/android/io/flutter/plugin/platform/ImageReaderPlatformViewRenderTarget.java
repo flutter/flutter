@@ -53,9 +53,12 @@ public class ImageReaderPlatformViewRenderTarget implements PlatformViewRenderTa
   protected ImageReader createImageReader33() {
     final ImageReader.Builder builder = new ImageReader.Builder(bufferWidth, bufferHeight);
     // Allow for double buffering.
-    builder.setMaxImages(2);
-    // Assume that we will be producing 32-bit RGBA values.
-    builder.setDefaultHardwareBufferFormat(HardwareBuffer.RGBA_8888);
+    builder.setMaxImages(3);
+    // Use PRIVATE image format so that we can support video decoding.
+    // TODO(johnmccutchan): Should we always use PRIVATE here? It may impact our ability
+    // to read back texture data. If we don't always want to use it, how do we decide when
+    // to use it or not? Perhaps PlatformViews can indicate if they may contain DRM'd content.
+    builder.setImageFormat(ImageFormat.PRIVATE);
     // Hint that consumed images will only be read by GPU.
     builder.setUsage(HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE);
     final ImageReader reader = builder.build();
@@ -66,12 +69,12 @@ public class ImageReaderPlatformViewRenderTarget implements PlatformViewRenderTa
   @TargetApi(29)
   protected ImageReader createImageReader29() {
     return ImageReader.newInstance(
-        bufferWidth, bufferHeight, ImageFormat.UNKNOWN, 2, HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE);
+        bufferWidth, bufferHeight, ImageFormat.PRIVATE, 2, HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE);
   }
 
   @TargetApi(26)
   protected ImageReader createImageReader26() {
-    return ImageReader.newInstance(bufferWidth, bufferHeight, ImageFormat.UNKNOWN, 2);
+    return ImageReader.newInstance(bufferWidth, bufferHeight, ImageFormat.PRIVATE, 2);
   }
 
   protected ImageReader createImageReader() {

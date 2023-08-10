@@ -25,6 +25,8 @@ class NDKHelpers {
       jobject hardwareBufferObj);
   static void AHardwareBuffer_acquire(AHardwareBuffer* buffer);
   static void AHardwareBuffer_release(AHardwareBuffer* buffer);
+  static void AHardwareBuffer_describe(AHardwareBuffer* buffer,
+                                       AHardwareBuffer_Desc* desc);
   static EGLClientBuffer eglGetNativeClientBufferANDROID(
       AHardwareBuffer* buffer);
 
