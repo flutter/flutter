@@ -28,8 +28,8 @@ SPEC CHECKSUMS:
   connectivity_macos: 5dae6ee11d320fac7c05f0d08bd08fc32b5514d9
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
-  url_launcher_macos: 5335912b679c073563f29d89d33d10d459f95451
+  url_launcher_macos: d2691c7dd33ed713bf3544850a623080ec693d95
 
 PODFILE CHECKSUM: 2e6060c123c393d6beb3ee5b7beaf789de4d2e47
 
-COCOAPODS: 1.12.0
+COCOAPODS: 1.12.1
