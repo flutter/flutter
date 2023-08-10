@@ -809,19 +809,6 @@ class FlutterVmService {
     );
   }
 
-  Future<Map<String, Object?>?> flutterFastReassemble({
-   required String isolateId,
-   required String className,
-  }) {
-    return invokeFlutterExtensionRpcRaw(
-      'ext.flutter.fastReassemble',
-      isolateId: isolateId,
-      args: <String, Object>{
-        'className': className,
-      },
-    );
-  }
-
   Future<bool> flutterAlreadyPaintedFirstUsefulFrame({
     required String isolateId,
   }) async {
