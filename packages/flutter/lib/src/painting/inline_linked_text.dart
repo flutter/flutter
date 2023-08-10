@@ -36,6 +36,23 @@ typedef LinkBuilder = (InlineSpan, TapGestureRecognizer) Function(
 typedef RangesFinder = Iterable<TextRange> Function(String text);
 
 /// A [TextSpan] that makes parts of the [text] interactive.
+///
+/// This class generates [TapGestureRecognizer]s to handle taps on any links,
+/// and the owning widget is responsible for managing the lifecycle of these
+/// recognizers. Access the recognizers at [InlineLinkedText.recognizers] and
+/// call [TapGestureRecognizer.dispose] whenever the owning widget is rebuilt or
+/// disposed.
+///
+/// {@tool dartpad}
+/// This example shows how to create an [InlineLinkedText] and manage its
+/// [InlineLinkedText.recognizers].
+///
+/// ** See code in examples/api/lib/painting/inline_linked_text/inline_linked_text.0.dart **
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [LinkedText], which is a widget that performs the same functionality.
 class InlineLinkedText extends TextSpan {
   /// Create an instance of [InlineLinkedText].
   ///
@@ -148,8 +165,6 @@ class InlineLinkedText extends TextSpan {
     required this.recognizers,
   });
 
-  // TODO(justinmc): Add this disposing process to the examples, and reference one of them here in these docs.
-
   /// Any [TapGestureRecognizer]s that have been generated for handling taps on
   /// the links and whose lifecycle must be maintained by the
   /// [InlineLinkedText]'s owner.
@@ -160,6 +175,8 @@ class InlineLinkedText extends TextSpan {
   /// See also:
   ///  * [TextSpan.recognizer], which explains the need to manage the lifecycle
   ///    of [GestureRecognizer]s created in [InlineSpan]s.
+  ///  * [InlineLinkedText], which has a full example of managing these
+  ///    recognizers.
   final Iterable<TapGestureRecognizer> recognizers;
 
   static final RegExp _urlRegExp = RegExp(r'(?<!@[a-zA-Z0-9-]*)(?<![\/\.a-zA-Z0-9-])((https?:\/\/)?(([a-zA-Z0-9-]*\.)*[a-zA-Z0-9-]+(\.[a-zA-Z]+)+))(?::\d{1,5})?(?:\/[^\s]*)?(?:\?[^\s#]*)?(?:#[^\s]*)?(?![a-zA-Z0-9-]*@)');
