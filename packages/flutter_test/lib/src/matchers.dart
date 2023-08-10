@@ -331,6 +331,13 @@ Matcher isMethodCall(String name, { required dynamic arguments }) {
 Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int sampleSize = 20 })
   => _CoversSameAreaAs(expectedPath, areaToCompare: areaToCompare, sampleSize: sampleSize);
 
+// Examples can assume:
+// late Image image;
+// late Future<Image> imageFuture;
+// typedef MyWidget = Placeholder;
+// late Future<ByteData> someFont;
+// late WidgetTester tester;
+
 /// Asserts that a [Finder], [Future<ui.Image>], or [ui.Image] matches the
 /// golden image file identified by [key], with an optional [version] number.
 ///
@@ -404,18 +411,18 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 /// {@tool snippet}
 /// How to load a custom font for golden images.
 /// ```dart
-/// testWidgets('Creating a golden image with a custom font', (tester) async {
+/// testWidgets('Creating a golden image with a custom font', (WidgetTester tester) async {
 ///   // Assuming the 'Roboto.ttf' file is declared in the pubspec.yaml file
-///   final font = rootBundle.load('path/to/font-file/Roboto.ttf');
+///   final Future<ByteData> font = rootBundle.load('path/to/font-file/Roboto.ttf');
 ///
-///   final fontLoader = FontLoader('Roboto')..addFont(font);
+///   final FontLoader fontLoader = FontLoader('Roboto')..addFont(font);
 ///   await fontLoader.load();
 ///
-///   await tester.pumpWidget(const SomeWidget());
+///   await tester.pumpWidget(const MyWidget());
 ///
 ///   await expectLater(
-///     find.byType(SomeWidget),
-///     matchesGoldenFile('someWidget.png'),
+///     find.byType(MyWidget),
+///     matchesGoldenFile('myWidget.png'),
 ///   );
 /// });
 /// ```
@@ -431,7 +438,7 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 /// ```dart
 /// Future<void> testExecutable(FutureOr<void> Function() testMain) async {
 ///   setUpAll(() async {
-///     final fontLoader = FontLoader('SomeFont')..addFont(someFont);
+///     final FontLoader fontLoader = FontLoader('SomeFont')..addFont(someFont);
 ///     await fontLoader.load();
 ///   });
 ///
@@ -473,18 +480,20 @@ AsyncMatcher matchesGoldenFile(Object key, {int? version}) {
 /// ## Sample code
 ///
 /// ```dart
-/// final ui.Paint paint = ui.Paint()
-///   ..style = ui.PaintingStyle.stroke
-///   ..strokeWidth = 1.0;
-/// final ui.PictureRecorder recorder = ui.PictureRecorder();
-/// final ui.Canvas pictureCanvas = ui.Canvas(recorder);
-/// pictureCanvas.drawCircle(Offset.zero, 20.0, paint);
-/// final ui.Picture picture = recorder.endRecording();
-/// ui.Image referenceImage = picture.toImage(50, 50);
+/// testWidgets('matchesReferenceImage', (WidgetTester tester) async {
+///   final ui.Paint paint = ui.Paint()
+///     ..style = ui.PaintingStyle.stroke
+///     ..strokeWidth = 1.0;
+///   final ui.PictureRecorder recorder = ui.PictureRecorder();
+///   final ui.Canvas pictureCanvas = ui.Canvas(recorder);
+///   pictureCanvas.drawCircle(Offset.zero, 20.0, paint);
+///   final ui.Picture picture = recorder.endRecording();
+///   ui.Image referenceImage = await picture.toImage(50, 50);
 ///
-/// await expectLater(find.text('Save'), matchesReferenceImage(referenceImage));
-/// await expectLater(image, matchesReferenceImage(referenceImage);
-/// await expectLater(imageFuture, matchesReferenceImage(referenceImage));
+///   await expectLater(find.text('Save'), matchesReferenceImage(referenceImage));
+///   await expectLater(image, matchesReferenceImage(referenceImage));
+///   await expectLater(imageFuture, matchesReferenceImage(referenceImage));
+/// });
 /// ```
 ///
 /// See also:
@@ -508,9 +517,12 @@ AsyncMatcher matchesReferenceImage(ui.Image image) {
 /// ## Sample code
 ///
 /// ```dart
-/// final SemanticsHandle handle = tester.ensureSemantics();
-/// expect(tester.getSemantics(find.text('hello')), matchesSemantics(label: 'hello'));
-/// handle.dispose();
+/// testWidgets('matchesSemantics', (WidgetTester tester) async {
+///   final SemanticsHandle handle = tester.ensureSemantics();
+///   // ...
+///   expect(tester.getSemantics(find.text('hello')), matchesSemantics(label: 'hello'));
+///   handle.dispose();
+/// });
 /// ```
 ///
 /// See also:
@@ -685,9 +697,12 @@ Matcher matchesSemantics({
 /// ## Sample code
 ///
 /// ```dart
-/// final SemanticsHandle handle = tester.ensureSemantics();
-/// expect(tester.getSemantics(find.text('hello')), hasSemantics(label: 'hello'));
-/// handle.dispose();
+/// testWidgets('containsSemantics', (WidgetTester tester) async {
+///   final SemanticsHandle handle = tester.ensureSemantics();
+///   // ...
+///   expect(tester.getSemantics(find.text('hello')), containsSemantics(label: 'hello'));
+///   handle.dispose();
+/// });
 /// ```
 ///
 /// See also:
@@ -859,9 +874,12 @@ Matcher containsSemantics({
 /// ## Sample code
 ///
 /// ```dart
-/// final SemanticsHandle handle = tester.ensureSemantics();
-/// await expectLater(tester, meetsGuideline(textContrastGuideline));
-/// handle.dispose();
+/// testWidgets('containsSemantics', (WidgetTester tester) async {
+///   final SemanticsHandle handle = tester.ensureSemantics();
+///   // ...
+///   await expectLater(tester, meetsGuideline(textContrastGuideline));
+///   handle.dispose();
+/// });
 /// ```
 ///
 /// Supported accessibility guidelines:

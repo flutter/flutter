@@ -55,14 +55,14 @@ import 'package:flutter/widgets.dart';
 ///   // Start recording (`recording` is true)
 ///   await tester.pumpFrames(animationSheet.record(
 ///     target,
-///     recording: true,
+///     recording: true, // ignore: avoid_redundant_argument_values
 ///   ), const Duration(seconds: 1));
 ///
 ///   await gesture.up();
 ///
 ///   await tester.pumpFrames(animationSheet.record(
 ///     target,
-///     recording: true,
+///     recording: true, // ignore: avoid_redundant_argument_values
 ///   ), const Duration(seconds: 1));
 ///
 ///   // Compare against golden file

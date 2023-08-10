@@ -35,6 +35,9 @@ class RecordedInvocation {
   }
 }
 
+// Examples can assume:
+// late WidgetTester tester;
+
 /// A [Canvas] for tests that records its method calls.
 ///
 /// This class can be used in conjunction with [TestRecordingPaintingContext]

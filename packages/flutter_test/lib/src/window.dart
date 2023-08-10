@@ -1173,7 +1173,7 @@ class _UnsupportedDisplay implements TestDisplay {
 ///   // Fake the desired properties of the TestWindow. All code running
 ///   // within this test will perceive the following fake text scale
 ///   // factor as the real text scale factor of the window.
-///   testBinding.window.textScaleFactorFakeValue = 2.5;
+///   testBinding.window.textScaleFactorTestValue = 2.5; // ignore: deprecated_member_use
 ///
 ///   // Test code that depends on text scale factor here.
 /// });

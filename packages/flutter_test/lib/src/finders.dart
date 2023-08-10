@@ -17,6 +17,12 @@ typedef ElementPredicate = bool Function(Element element);
 /// Some frequently used widget [Finder]s.
 const CommonFinders find = CommonFinders._();
 
+// Examples can assume:
+// typedef Button = Placeholder;
+// late WidgetTester tester;
+// late String filePath;
+// late Key backKey;
+
 /// Provides lightweight syntax for getting frequently used widget [Finder]s.
 ///
 /// This class is instantiated once, as [find].
@@ -116,9 +122,9 @@ class CommonFinders {
   ///
   /// ```dart
   /// // Suppose you have a button with text 'Update' in it:
-  /// Button(
+  /// const Button(
   ///   child: Text('Update')
-  /// )
+  /// );
   ///
   /// // You can find and tap on it like this:
   /// tester.tap(find.widgetWithText(Button, 'Update'));
@@ -217,9 +223,9 @@ class CommonFinders {
   ///
   /// ```dart
   /// // Suppose you have a button with icon 'arrow_forward' in it:
-  /// Button(
+  /// const Button(
   ///   child: Icon(Icons.arrow_forward)
-  /// )
+  /// );
   ///
   /// // You can find and tap on it like this:
   /// tester.tap(find.widgetWithIcon(Button, Icons.arrow_forward));
@@ -242,11 +248,11 @@ class CommonFinders {
   /// ```dart
   /// // Suppose you have a button with image in it:
   /// Button(
-  ///   child: Image.file(filePath)
-  /// )
+  ///   child: Image.file(File(filePath))
+  /// );
   ///
   /// // You can find and tap on it like this:
-  /// tester.tap(find.widgetWithImage(Button, FileImage(filePath)));
+  /// tester.tap(find.widgetWithImage(Button, FileImage(File(filePath))));
   /// ```
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
@@ -283,7 +289,7 @@ class CommonFinders {
   ///
   /// ```dart
   /// // Suppose you have a button created like this:
-  /// Widget myButton = Button(
+  /// Widget myButton = const Button(
   ///   child: Text('Update')
   /// );
   ///
@@ -396,7 +402,7 @@ class CommonFinders {
   ///   tester.widget<Opacity>(
   ///     find.ancestor(
   ///       of: find.text('faded'),
-  ///       matching: find.byType('Opacity'),
+  ///       matching: find.byType(Opacity),
   ///     )
   ///   ).opacity,
   ///   0.5
