@@ -325,7 +325,7 @@ abstract class RenderTextFlow extends RenderBox
   }
 
   // This is the core of the layout logic. Most of the time, this is the only
-  // function that will be called. It computers the size and position of each
+  // function that will be called. It computes the size and position of each
   // child, and stores it (in the parent data, as it happens!) for use during
   // the paint phase.
 
