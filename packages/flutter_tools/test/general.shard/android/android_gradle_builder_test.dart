@@ -885,7 +885,7 @@ Gradle Crashed
         command: <String>[
           'gradlew',
           '-q',
-          'outputsFreeDebugAppLinkSettings',
+          'outputFreeDebugAppLinkSettings',
         ],
       ));
       await builder.outputsAppLinkSettings(
