@@ -585,7 +585,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     required this.buildMode,
     required Logger logger,
     required ProcessManager processManager,
-    required Artifacts artifacts,
+    required this.artifacts,
     required Platform platform,
     required FileSystem fileSystem,
     this.testCompilation = false,
@@ -604,7 +604,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
     @visibleForTesting StdoutHandler? stdoutHandler,
   }) : _logger = logger,
        _processManager = processManager,
-       _artifacts = artifacts,
        _stdoutHandler = stdoutHandler ?? StdoutHandler(logger: logger, fileSystem: fileSystem),
        _platform = platform,
        dartDefines = dartDefines ?? const <String>[],
@@ -615,7 +614,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
 
   final Logger _logger;
   final ProcessManager _processManager;
-  final Artifacts _artifacts;
+  final Artifacts artifacts;
   final Platform _platform;
 
   final bool testCompilation;
@@ -751,12 +750,12 @@ class DefaultResidentCompiler implements ResidentCompiler {
     {String? additionalSourceUri}
   ) async {
     final TargetPlatform? platform = (targetModel == TargetModel.dartdevc) ? TargetPlatform.web_javascript : null;
-    final String frontendServer = _artifacts.getArtifactPath(
+    final String frontendServer = artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk,
       platform: platform,
     );
     final List<String> command = <String>[
-      _artifacts.getArtifactPath(Artifact.engineDartBinary, platform: platform),
+      artifacts.getArtifactPath(Artifact.engineDartBinary, platform: platform),
       '--disable-dart-dev',
       frontendServer,
       '--sdk-root',
