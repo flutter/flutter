@@ -282,6 +282,7 @@ class _TextLayout {
   // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/31707
   // remove this hack as well as the flooring in `layout`.
   @pragma('vm:prefer-inline')
+  // ignore: deprecated_member_use
   static double _applyFloatingPointHack(double layoutValue) => ui.ParagraphBuilder.shouldDisableRoundingHack ? layoutValue : layoutValue.ceilToDouble();
 
   /// Whether this layout has been invalidated and disposed.
@@ -360,6 +361,7 @@ class _TextPainterLayoutCacheWithOffset {
   static double _contentWidthFor(double minWidth, double maxWidth, TextWidthBasis widthBasis, _TextLayout layout) {
     // TODO(LongCatIsLooong): remove the rounding when _applyFloatingPointHack
     // is removed.
+    // ignore: deprecated_member_use
     if (!ui.ParagraphBuilder.shouldDisableRoundingHack) {
       minWidth = minWidth.floorToDouble();
       maxWidth = maxWidth.floorToDouble();
