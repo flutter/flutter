@@ -466,7 +466,6 @@ class _SnippetChecker {
     '// ignore_for_file: unused_element',
     '// ignore_for_file: unused_element_parameter',
     '// ignore_for_file: unused_local_variable',
-    '// ignore_for_file: unused_import',
   ];
 
   /// Computes the headers needed for each snippet file.
@@ -479,6 +478,7 @@ class _SnippetChecker {
   List<_Line> get headersWithImports {
     return _headersWithImports ??= <String>[
       ...ignoresDirectives,
+      '// ignore_for_file: unused_import',
       "import 'dart:async';",
       "import 'dart:convert';",
       "import 'dart:io';",
