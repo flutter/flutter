@@ -132,8 +132,6 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsMacOS({
       : <Target>[Target.current];
   final native_assets_cli.BuildMode buildModeCli = getBuildMode(buildMode);
 
-
-
   globals.logger
       .printTrace('Building native assets for $targets $buildModeCli.');
   final List<Asset> nativeAssets = <Asset>[];
@@ -145,7 +143,7 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsMacOS({
       buildMode: buildModeCli,
       workingDirectory: projectUri,
       includeParentEnvironment: true,
-      cCompilerConfig: await cCompilerConfig,
+      cCompilerConfig: await buildRunner.cCompilerConfig,
     );
     nativeAssets.addAll(result.assets);
     dependencies.addAll(result.dependencies);
@@ -485,24 +483,3 @@ final logging.Logger loggingLogger = logging.Logger('')
       globals.logger.printTrace(message);
     }
   });
-
-/// Flutter expects `xcrun` to be on the path.
-///
-/// Use the `clang`, `ar`, and `ld` that would be used if run with `xcrun`.
-final Future<CCompilerConfig> cCompilerConfig = () async {
-  final ProcessResult xcrunResult =
-      await globals.processManager.run(<String>['xcrun', 'clang', '--version']);
-  if (xcrunResult.exitCode != 0) {
-    throwToolExit('Failed to find clang with xcrun:\n${xcrunResult.stderr}');
-  }
-  final String installPath = (xcrunResult.stdout as String)
-      .split('\n')
-      .firstWhere((String s) => s.startsWith('InstalledDir: '))
-      .split(' ')
-      .last;
-  return CCompilerConfig(
-    cc: Uri.file('$installPath/clang'),
-    ar: Uri.file('$installPath/ar'),
-    ld: Uri.file('$installPath/ld'),
-  );
-}();

@@ -97,7 +97,7 @@ Future<List<Uri>> buildNativeAssetsiOS({
       buildMode: buildModeCli,
       workingDirectory: projectUri,
       includeParentEnvironment: true,
-      cCompilerConfig: await cCompilerConfig,
+      cCompilerConfig: await buildRunner.cCompilerConfig,
     );
     nativeAssets.addAll(result.assets);
     dependencies.addAll(result.dependencies);

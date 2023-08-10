@@ -8,9 +8,12 @@ import 'package:native_assets_builder/native_assets_builder.dart'
 import 'package:native_assets_cli/native_assets_cli.dart';
 import 'package:package_config/package_config_types.dart';
 
+import 'base/common.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'base/logger.dart';
 import 'cache.dart';
+import 'globals.dart' as globals;
 
 /// Programmatic API to be used by Dart launchers to invoke native builds.
 abstract class NativeAssetsBuildRunner {
@@ -42,6 +45,9 @@ abstract class NativeAssetsBuildRunner {
     int? targetAndroidNdkApi,
     IOSSdk? targetIOSSdk,
   });
+
+  /// The C compiler config to use for compilation.
+  Future<CCompilerConfig> get cCompilerConfig;
 }
 
 /// Uses `package:native_assets_builder` for its implementation.
@@ -129,6 +135,28 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
       workingDirectory: workingDirectory,
     );
   }
+
+  /// Flutter expects `xcrun` to be on the path.
+  ///
+  /// Use the `clang`, `ar`, and `ld` that would be used if run with `xcrun`.
+  @override
+  final Future<CCompilerConfig> cCompilerConfig = () async {
+    final ProcessResult xcrunResult = await globals.processManager
+        .run(<String>['xcrun', 'clang', '--version']);
+    if (xcrunResult.exitCode != 0) {
+      throwToolExit('Failed to find clang with xcrun:\n${xcrunResult.stderr}');
+    }
+    final String installPath = (xcrunResult.stdout as String)
+        .split('\n')
+        .firstWhere((String s) => s.startsWith('InstalledDir: '))
+        .split(' ')
+        .last;
+    return CCompilerConfig(
+      cc: Uri.file('$installPath/clang'),
+      ar: Uri.file('$installPath/ar'),
+      ld: Uri.file('$installPath/ld'),
+    );
+  }();
 }
 
 /// Mocks all logic instead of using `package:native_assets_builder`, which
@@ -139,12 +167,14 @@ class FakeNativeAssetsBuildRunner implements NativeAssetsBuildRunner {
     this.packagesWithNativeAssetsResult = const <Package>[],
     this.dryRunResult = const FakeNativeAssetsBuilderResult(),
     this.buildResult = const FakeNativeAssetsBuilderResult(),
-  });
+    CCompilerConfig? cCompilerConfigResult,
+  }) : cCompilerConfigResult = cCompilerConfigResult ?? CCompilerConfig();
 
   final native_assets_builder.BuildResult buildResult;
   final native_assets_builder.DryRunResult dryRunResult;
   final bool hasPackageConfigResult;
   final List<Package> packagesWithNativeAssetsResult;
+  final CCompilerConfig cCompilerConfigResult;
 
   int buildInvocations = 0;
   int dryRunInvocations = 0;
@@ -188,6 +218,9 @@ class FakeNativeAssetsBuildRunner implements NativeAssetsBuildRunner {
     packagesWithNativeAssetsInvocations++;
     return packagesWithNativeAssetsResult;
   }
+  
+  @override
+  Future<CCompilerConfig> get cCompilerConfig async => cCompilerConfigResult;
 }
 
 final class FakeNativeAssetsBuilderResult

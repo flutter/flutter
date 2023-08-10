@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(dacoharkes): Remove this tag once the xcrun clang --version state doesn't leak.
-@Tags(<String>['no-shuffle'])
-library;
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -209,18 +205,7 @@ void main() {
 
   testUsingContext('build no assets', overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-    ProcessManager: () => FakeProcessManager.list(
-          <FakeCommand>[
-            const FakeCommand(
-              command: <Pattern>['xcrun', 'clang', '--version'],
-              stdout: '''
-Apple clang version 14.0.0 (clang-1400.0.29.202)
-Target: arm64-apple-darwin22.6.0
-Thread model: posix
-InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin''',
-            )
-          ],
-        ),
+    ProcessManager: () => FakeProcessManager.any(),
   }, () async {
     final File packageConfig =
         environment.projectDir.childFile('.dart_tool/package_config.json');
@@ -300,4 +285,34 @@ InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault
       );
     });
   }
+
+  // This logic is mocked in the other tests to avoid having test order
+  // randomization causing issues with what processes are invoked.
+  // Exercise the parsing of the process output in this separate test.
+  testUsingContext('NativeAssetsBuildRunnerImpl.cCompilerConfig',
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+        ProcessManager: () => FakeProcessManager.list(
+              <FakeCommand>[
+                const FakeCommand(
+                  command: <Pattern>['xcrun', 'clang', '--version'],
+                  stdout: '''
+Apple clang version 14.0.0 (clang-1400.0.29.202)
+Target: arm64-apple-darwin22.6.0
+Thread model: posix
+InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin''',
+                )
+              ],
+            ),
+      }, () async {
+    final NativeAssetsBuildRunner runner =
+        NativeAssetsBuildRunnerImpl(projectUri, fileSystem, logger);
+    final CCompilerConfig result = await runner.cCompilerConfig;
+    expect(
+      result.cc,
+      Uri.file(
+        '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang',
+      ),
+    );
+  });
 }
