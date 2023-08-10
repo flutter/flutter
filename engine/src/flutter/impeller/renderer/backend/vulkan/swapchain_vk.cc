@@ -12,8 +12,7 @@ namespace impeller {
 std::shared_ptr<SwapchainVK> SwapchainVK::Create(
     const std::shared_ptr<Context>& context,
     vk::UniqueSurfaceKHR surface) {
-  auto impl = SwapchainImplVK::Create(context, std::move(surface),
-                                      /*was_rotated=*/false);
+  auto impl = SwapchainImplVK::Create(context, std::move(surface));
   if (!impl || !impl->IsValid()) {
     return nullptr;
   }
@@ -46,13 +45,12 @@ std::unique_ptr<Surface> SwapchainVK::AcquireNextDrawable() {
   // This swapchain implementation indicates that it is out of date. Tear it
   // down and make a new one.
   auto context = impl_->GetContext();
-  auto was_rotated = impl_->GetIsRotated();
   auto [surface, old_swapchain] = impl_->DestroySwapchain();
 
-  auto new_impl = SwapchainImplVK::Create(context,             //
-                                          std::move(surface),  //
-                                          was_rotated,         //
-                                          *old_swapchain       //
+  auto new_impl = SwapchainImplVK::Create(context,                   //
+                                          std::move(surface),        //
+                                          *old_swapchain,            //
+                                          impl_->GetLastTransform()  //
   );
   if (!new_impl || !new_impl->IsValid()) {
     VALIDATION_LOG << "Could not update swapchain.";
