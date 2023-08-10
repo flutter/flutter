@@ -334,6 +334,37 @@ void main() {
       expect(logger.warningText, contains('Flutter assets will be downloaded from $baseUrl'));
       expect(logger.statusText, isEmpty);
     });
+
+    testWithoutContext('a non-empty realm is included in the storage url', () async {
+      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+      final Directory internalDir = fileSystem.currentDirectory
+        .childDirectory('cache')
+        .childDirectory('bin')
+        .childDirectory('internal');
+      final File engineVersionFile = internalDir.childFile('engine.version');
+      engineVersionFile.createSync(recursive: true);
+      engineVersionFile.writeAsStringSync('abcdef');
+
+      final File engineRealmFile = internalDir.childFile('engine.realm');
+      engineRealmFile.createSync(recursive: true);
+      engineRealmFile.writeAsStringSync('flutter_archives_v2');
+
+      final Cache cache = Cache.test(
+        processManager: FakeProcessManager.any(),
+        fileSystem: fileSystem,
+      );
+
+      expect(cache.storageBaseUrl, contains('flutter_archives_v2'));
+    });
+
+    test('bin/internal/engine.realm is empty', () async {
+      final FileSystem fileSystem = globals.fs;
+      final String realmFilePath = fileSystem.path.join(
+        getFlutterRoot(), 'bin', 'internal', 'engine.realm');
+      final String realm = fileSystem.file(realmFilePath).readAsStringSync().trim();
+      expect(realm, isEmpty,
+        reason: 'The checked-in engine.realm file must be empty.');
+    });
   });
 
   testWithoutContext('flattenNameSubdirs', () {

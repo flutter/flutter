@@ -1179,10 +1179,9 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
     _builtLayout = _LayoutMode.nested;
     final MaterialPageRoute<void> masterPageRoute = _masterPageRoute(context);
 
-    return NavigatorPopHandler(
-      onPop: () {
-        _navigatorKey.currentState!.maybePop();
-      },
+    return WillPopScope(
+      // Push pop check into nested navigator.
+      onWillPop: () async => !(await _navigatorKey.currentState!.maybePop()),
       child: Navigator(
         key: _navigatorKey,
         initialRoute: 'initial',
@@ -1235,10 +1234,12 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
 
   MaterialPageRoute<void> _detailPageRoute(Object? arguments) {
     return MaterialPageRoute<dynamic>(builder: (BuildContext context) {
-      return PopScope(
-        onPopInvoked: (bool didPop) {
+      return WillPopScope(
+        onWillPop: () async {
           // No need for setState() as rebuild happens on navigation pop.
           focus = _Focus.master;
+          Navigator.of(context).pop();
+          return false;
         },
         child: BlockSemantics(child: widget.detailPageBuilder(context, arguments, null)),
       );

@@ -28,6 +28,9 @@ import 'theme.dart';
 /// Data is read lazily from a [DataTableSource]. The widget is presented
 /// as a [Card].
 ///
+/// If the [key] is a [PageStorageKey], the [initialFirstRowIndex] is persisted
+/// to [PageStorage].
+///
 /// See also:
 ///
 ///  * [DataTable], which is not paginated.
@@ -456,7 +459,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
       Text(
         localizations.pageRowsInfoTitle(
           _firstRowIndex + 1,
-          _firstRowIndex + widget.rowsPerPage,
+          math.min(_firstRowIndex + widget.rowsPerPage, _rowCount),
           _rowCount,
           _rowCountApproximate,
         ),
