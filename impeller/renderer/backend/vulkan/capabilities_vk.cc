@@ -206,6 +206,18 @@ CapabilitiesVK::GetEnabledDeviceExtensions(
     enabled.push_back("VK_KHR_portability_subset");
   }
 
+#ifdef FML_OS_ANDROID
+  if (exts->find("VK_ANDROID_external_memory_android_hardware_buffer") ==
+      exts->end()) {
+    VALIDATION_LOG
+        << "Device does not support "
+           "VK_ANDROID_external_memory_android_hardware_buffer extension.";
+    return std::nullopt;
+  }
+  enabled.push_back("VK_ANDROID_external_memory_android_hardware_buffer");
+  enabled.push_back("VK_EXT_queue_family_foreign");
+#endif
+
   // Enable all optional extensions if the device supports it.
   IterateOptionalDeviceExtensions([&](auto ext) {
     auto ext_name = GetDeviceExtensionName(ext);

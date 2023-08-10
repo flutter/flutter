@@ -9,6 +9,7 @@
 
 #include "flutter/fml/logging.h"
 
+#include <android/hardware_buffer.h>
 #include <dlfcn.h>
 
 namespace flutter {
@@ -20,6 +21,8 @@ typedef AHardwareBuffer* (*fp_AHardwareBuffer_fromHardwareBuffer)(
     jobject hardwareBufferObj);
 typedef void (*fp_AHardwareBuffer_acquire)(AHardwareBuffer* buffer);
 typedef void (*fp_AHardwareBuffer_release)(AHardwareBuffer* buffer);
+typedef void (*fp_AHardwareBuffer_describe)(AHardwareBuffer* buffer,
+                                            AHardwareBuffer_Desc* desc);
 typedef EGLClientBuffer (*fp_eglGetNativeClientBufferANDROID)(
     AHardwareBuffer* buffer);
 
@@ -28,6 +31,8 @@ AHardwareBuffer* (*_AHardwareBuffer_fromHardwareBuffer)(
     jobject hardwareBufferObj) = nullptr;
 void (*_AHardwareBuffer_acquire)(AHardwareBuffer* buffer) = nullptr;
 void (*_AHardwareBuffer_release)(AHardwareBuffer* buffer) = nullptr;
+void (*_AHardwareBuffer_describe)(AHardwareBuffer* buffer,
+                                  AHardwareBuffer_Desc* desc) = nullptr;
 EGLClientBuffer (*_eglGetNativeClientBufferANDROID)(AHardwareBuffer* buffer) =
     nullptr;
 
@@ -57,6 +62,11 @@ void InitOnceCallback() {
                                  ->ResolveFunction<fp_AHardwareBuffer_release>(
                                      "AHardwareBuffer_release")
                                  .value_or(nullptr);
+  _AHardwareBuffer_describe =
+      android
+          ->ResolveFunction<fp_AHardwareBuffer_describe>(
+              "AHardwareBuffer_describe")
+          .value_or(nullptr);
 }
 
 }  // namespace
@@ -89,6 +99,13 @@ void NDKHelpers::AHardwareBuffer_release(AHardwareBuffer* buffer) {
   NDKHelpers::Init();
   FML_CHECK(_AHardwareBuffer_release != nullptr);
   _AHardwareBuffer_release(buffer);
+}
+
+void NDKHelpers::AHardwareBuffer_describe(AHardwareBuffer* buffer,
+                                          AHardwareBuffer_Desc* desc) {
+  NDKHelpers::Init();
+  FML_CHECK(_AHardwareBuffer_describe != nullptr);
+  _AHardwareBuffer_describe(buffer, desc);
 }
 
 EGLClientBuffer NDKHelpers::eglGetNativeClientBufferANDROID(
