@@ -126,11 +126,11 @@ class _LiveWidgetController extends LiveWidgetController {
   }
 
   /// Runs `finder` repeatedly until it finds one or more [Element]s.
-  Future<Finder> _waitForElement(Finder finder) async {
+  Future<FinderBase<Element>> _waitForElement(FinderBase<Element> finder) async {
     if (frameSync) {
       await _waitUntilFrame(() => binding.transientCallbackCount == 0);
     }
-    await _waitUntilFrame(() => finder.precache());
+    await _waitUntilFrame(() => finder.tryEvaluate());
     if (frameSync) {
       await _waitUntilFrame(() => binding.transientCallbackCount == 0);
     }
@@ -138,12 +138,12 @@ class _LiveWidgetController extends LiveWidgetController {
   }
 
   @override
-  Future<void> tap(Finder finder, { int? pointer, int buttons = kPrimaryButton, bool warnIfMissed = true }) async {
+  Future<void> tap(FinderBase<Element> finder, { int? pointer, int buttons = kPrimaryButton, bool warnIfMissed = true }) async {
     await super.tap(await _waitForElement(finder), pointer: pointer, buttons: buttons, warnIfMissed: warnIfMissed);
   }
 
-  Future<void> scrollIntoView(Finder finder, {required double alignment}) async {
-    final Finder target = await _waitForElement(finder);
+  Future<void> scrollIntoView(FinderBase<Element> finder, {required double alignment}) async {
+    final FinderBase<Element> target = await _waitForElement(finder);
     await Scrollable.ensureVisible(target.evaluate().single, duration: const Duration(milliseconds: 100), alignment: alignment);
   }
 }

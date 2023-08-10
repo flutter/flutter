@@ -1330,6 +1330,72 @@ void main() {
       expect(find.byType(Text), isNot(findsAtLeastNWidgets(3)));
     });
   });
+
+  group('findsOneWidget', () {
+    testWidgets('finds exactly one widget', (WidgetTester tester) async {
+      await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
+      expect(find.text('foo'), findsOneWidget);
+    });
+
+    testWidgets('fails with a descriptive message', (WidgetTester tester) async {
+      late TestFailure failure;
+      try {
+        expect(find.text('foo', skipOffstage: false), findsOneWidget);
+      } on TestFailure catch (e) {
+        failure = e;
+      }
+
+      expect(failure, isNotNull);
+      final String? message = failure.message;
+      expect(message, contains('Expected: exactly one matching candidate\n'));
+      expect(message, contains('Actual: _TextWidgetFinder:<Found 0 widgets with text "foo"'));
+      expect(message, contains('Which: means none were found but one was expected\n'));
+    });
+  });
+
+  group('findsNothing', () {
+    testWidgets('finds no widgets', (WidgetTester tester) async {
+      expect(find.text('foo'), findsNothing);
+    });
+
+    testWidgets('fails with a descriptive message', (WidgetTester tester) async {
+      await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
+
+      late TestFailure failure;
+      try {
+        expect(find.text('foo', skipOffstage: false), findsNothing);
+      } on TestFailure catch (e) {
+        failure = e;
+      }
+
+      expect(failure, isNotNull);
+      final String? message = failure.message;
+
+      expect(message, contains('Expected: no matching candidates\n'));
+      expect(message, contains('Actual: _TextWidgetFinder:<Found 1 widget with text "foo"'));
+      expect(message, contains('Text("foo", textDirection: ltr, dependencies: [MediaQuery])'));
+      expect(message, contains('Which: means one was found but none were expected\n'));
+    });
+
+    testWidgets('fails with a descriptive message when skipping', (WidgetTester tester) async {
+      await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
+
+      late TestFailure failure;
+      try {
+        expect(find.text('foo'), findsNothing);
+      } on TestFailure catch (e) {
+        failure = e;
+      }
+
+      expect(failure, isNotNull);
+      final String? message = failure.message;
+
+      expect(message, contains('Expected: no matching candidates\n'));
+      expect(message, contains('Actual: _TextWidgetFinder:<Found 1 widget with text "foo"'));
+      expect(message, contains('Text("foo", textDirection: ltr, dependencies: [MediaQuery])'));
+      expect(message, contains('Which: means one was found but none were expected\n'));
+    });
+  });
 }
 
 enum _ComparatorBehavior {
