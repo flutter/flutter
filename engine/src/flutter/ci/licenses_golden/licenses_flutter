@@ -1082,6 +1082,8 @@ ORIGIN: ../../../flutter/impeller/compiler/compiler_backend.cc + ../../../flutte
 ORIGIN: ../../../flutter/impeller/compiler/compiler_backend.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/compiler/compiler_test.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/compiler/compiler_test.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/compiler/constants.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/compiler/constants.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/compiler/impellerc_main.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/compiler/include_dir.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/compiler/includer.cc + ../../../flutter/LICENSE
@@ -1348,6 +1350,7 @@ ORIGIN: ../../../flutter/impeller/entity/shaders/sweep_gradient_fill.frag + ../.
 ORIGIN: ../../../flutter/impeller/entity/shaders/sweep_gradient_ssbo_fill.frag + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/texture_fill.frag + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/texture_fill.vert + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/shaders/texture_fill_external.frag + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/tiled_texture_fill.frag + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/vertices.frag + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/yuv_to_rgb_filter.frag + ../../../flutter/LICENSE
@@ -3797,6 +3800,8 @@ FILE: ../../../flutter/impeller/compiler/compiler_backend.cc
 FILE: ../../../flutter/impeller/compiler/compiler_backend.h
 FILE: ../../../flutter/impeller/compiler/compiler_test.cc
 FILE: ../../../flutter/impeller/compiler/compiler_test.h
+FILE: ../../../flutter/impeller/compiler/constants.cc
+FILE: ../../../flutter/impeller/compiler/constants.h
 FILE: ../../../flutter/impeller/compiler/impellerc_main.cc
 FILE: ../../../flutter/impeller/compiler/include_dir.h
 FILE: ../../../flutter/impeller/compiler/includer.cc
@@ -4063,6 +4068,7 @@ FILE: ../../../flutter/impeller/entity/shaders/sweep_gradient_fill.frag
 FILE: ../../../flutter/impeller/entity/shaders/sweep_gradient_ssbo_fill.frag
 FILE: ../../../flutter/impeller/entity/shaders/texture_fill.frag
 FILE: ../../../flutter/impeller/entity/shaders/texture_fill.vert
+FILE: ../../../flutter/impeller/entity/shaders/texture_fill_external.frag
 FILE: ../../../flutter/impeller/entity/shaders/tiled_texture_fill.frag
 FILE: ../../../flutter/impeller/entity/shaders/vertices.frag
 FILE: ../../../flutter/impeller/entity/shaders/yuv_to_rgb_filter.frag

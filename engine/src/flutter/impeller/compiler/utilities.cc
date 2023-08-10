@@ -61,5 +61,17 @@ std::string ConvertToEntrypointName(std::string_view string) {
   return stream.str();
 }
 
+bool StringStartsWith(const std::string& target, const std::string& prefix) {
+  if (prefix.length() > target.length()) {
+    return false;
+  }
+  for (size_t i = 0; i < prefix.length(); i++) {
+    if (target[i] != prefix[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
 }  // namespace compiler
 }  // namespace impeller

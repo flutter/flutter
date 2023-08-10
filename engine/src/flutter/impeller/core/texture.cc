@@ -62,6 +62,7 @@ bool Texture::IsSliceValid(size_t slice) const {
   switch (desc_.type) {
     case TextureType::kTexture2D:
     case TextureType::kTexture2DMultisample:
+    case TextureType::kTextureExternalOES:
       return slice == 0;
     case TextureType::kTextureCube:
       return slice <= 5;
