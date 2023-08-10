@@ -61,6 +61,8 @@ class MockWindowBindingHandlerDelegate : public WindowBindingHandlerDelegate {
 
   MOCK_METHOD0(GetAxFragmentRootDelegate, ui::AXFragmentRootDelegateWin*());
 
+  MOCK_METHOD2(OnWindowStateEvent, void(HWND, WindowStateEvent));
+
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockWindowBindingHandlerDelegate);
 };

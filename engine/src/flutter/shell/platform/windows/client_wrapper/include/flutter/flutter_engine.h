@@ -9,6 +9,7 @@
 
 #include <chrono>
 #include <memory>
+#include <optional>
 #include <string>
 
 #include "binary_messenger.h"
@@ -83,6 +84,15 @@ class FlutterEngine : public PluginRegistry {
   // This must be called from the platform thread. The callback is executed only
   // once on the platform thread.
   void SetNextFrameCallback(std::function<void()> callback);
+
+  // Called to pass an external window message to the engine for lifecycle
+  // state updates. Non-Flutter windows must call this method in their WndProc
+  // in order to be included in the logic for application lifecycle state
+  // updates. Returns a result if the message should be consumed.
+  std::optional<LRESULT> ProcessExternalWindowMessage(HWND hwnd,
+                                                      UINT message,
+                                                      WPARAM wparam,
+                                                      LPARAM lparam);
 
  private:
   // For access to RelinquishEngine.
