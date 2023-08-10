@@ -18,9 +18,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart' show OverflowWidgetTextEditingController;
+import '../widgets/live_text_utils.dart';
 import '../widgets/semantics_tester.dart';
 
 // On web, the context menu (aka toolbar) is provided by the browser.
@@ -199,11 +199,252 @@ void main() {
   Offset textOffsetToPosition(WidgetTester tester, int offset) => textOffsetToBottomLeftPosition(tester, offset) + const Offset(kIsWeb ? 1 : 0, -2);
 
   setUp(() async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
+
     EditableText.debugDeterministicCursor = false;
     // Fill the clipboard so that the Paste option is available in the text
     // selection menu.
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
+
+
+  testWidgets(
+    'Live Text button shows and hides correctly when LiveTextStatus changes',
+    (WidgetTester tester) async {
+      final LiveTextInputTester liveTextInputTester = LiveTextInputTester();
+      addTearDown(liveTextInputTester.dispose);
+
+      final TextEditingController controller = TextEditingController(text: '');
+      const Key key = ValueKey<String>('TextField');
+      final FocusNode focusNode = FocusNode();
+      final Widget app = MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: Scaffold(
+          body: Center(
+            child: CupertinoTextField(
+              key: key,
+              controller: controller,
+              focusNode: focusNode,
+            ),
+          ),
+        ),
+      );
+
+      liveTextInputTester.mockLiveTextInputEnabled = true;
+      await tester.pumpWidget(app);
+      focusNode.requestFocus();
+      await tester.pumpAndSettle();
+
+      final Finder textFinder = find.byType(EditableText);
+      await tester.longPress(textFinder);
+      await tester.pumpAndSettle();
+      expect(
+        findLiveTextButton(),
+        kIsWeb ? findsNothing : findsOneWidget,
+      );
+
+      liveTextInputTester.mockLiveTextInputEnabled = false;
+      await tester.longPress(textFinder);
+      await tester.pumpAndSettle();
+      expect(findLiveTextButton(), findsNothing);
+    },
+  );
+
+  testWidgets('Look Up shows up on iOS only (CupertinoTextField)', (WidgetTester tester) async {
+    String? lastLookUp;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+      if (methodCall.method == 'LookUp.invoke') {
+        expect(methodCall.arguments, isA<String>());
+        lastLookUp = methodCall.arguments as String;
+      }
+      return null;
+    });
+
+      final TextEditingController controller = TextEditingController(
+        text: 'Test',
+      );
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              controller: controller,
+            ),
+          ),
+        ),
+      );
+
+      final bool isTargetPlatformiOS = defaultTargetPlatform == TargetPlatform.iOS;
+
+      // Long press to put the cursor after the "s".
+      const int index = 3;
+      await tester.longPressAt(textOffsetToPosition(tester, index));
+      await tester.pump();
+
+      // Double tap on the same location to select the word around the cursor.
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pumpAndSettle();
+
+      expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 4));
+      expect(find.text('Look Up'), isTargetPlatformiOS? findsOneWidget : findsNothing);
+
+      if (isTargetPlatformiOS) {
+        await tester.tap(find.text('Look Up'));
+        expect(lastLookUp, 'Test');
+      }
+    },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
+      skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+    );
+
+  testWidgets('Look Up shows up on iOS only (TextField)', (WidgetTester tester) async {
+    String? lastLookUp;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+      if (methodCall.method == 'LookUp.invoke') {
+        expect(methodCall.arguments, isA<String>());
+        lastLookUp = methodCall.arguments as String;
+      }
+      return null;
+    });
+
+    final TextEditingController controller = TextEditingController(
+      text: 'Test ',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    final bool isTargetPlatformiOS = defaultTargetPlatform == TargetPlatform.iOS;
+
+    // Long press to put the cursor after the "s".
+    const int index = 3;
+    await tester.longPressAt(textOffsetToPosition(tester, index));
+    await tester.pump();
+
+    // Double tap on the same location to select the word around the cursor.
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pumpAndSettle();
+
+    expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 4));
+    expect(find.text('Look Up'), isTargetPlatformiOS? findsOneWidget : findsNothing);
+
+    if (isTargetPlatformiOS) {
+      await tester.tap(find.text('Look Up'));
+      expect(lastLookUp, 'Test');
+    }
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+  );
+
+  testWidgets('Search Web shows up on iOS only (CupertinoTextField)', (WidgetTester tester) async {
+    String? lastLookUp;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+      if (methodCall.method == 'SearchWeb.invoke') {
+        expect(methodCall.arguments, isA<String>());
+        lastLookUp = methodCall.arguments as String;
+      }
+      return null;
+    });
+
+    final TextEditingController controller = TextEditingController(
+      text: 'Test',
+    );
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    final bool isTargetPlatformiOS = defaultTargetPlatform == TargetPlatform.iOS;
+
+    // Long press to put the cursor after the "s".
+    const int index = 3;
+    await tester.longPressAt(textOffsetToPosition(tester, index));
+    await tester.pump();
+
+    // Double tap on the same location to select the word around the cursor.
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pumpAndSettle();
+
+    expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 4));
+    expect(find.text('Search Web'), isTargetPlatformiOS? findsOneWidget : findsNothing);
+
+    if (isTargetPlatformiOS) {
+      await tester.tap(find.text('Search Web'));
+      expect(lastLookUp, 'Test');
+    }
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+  );
+
+  testWidgets('Search Web shows up on iOS only (TextField)', (WidgetTester tester) async {
+    String? lastLookUp;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+      if (methodCall.method == 'SearchWeb.invoke') {
+        expect(methodCall.arguments, isA<String>());
+        lastLookUp = methodCall.arguments as String;
+      }
+      return null;
+    });
+
+    final TextEditingController controller = TextEditingController(
+      text: 'Test ',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    final bool isTargetPlatformiOS = defaultTargetPlatform == TargetPlatform.iOS;
+
+    // Long press to put the cursor after the "s".
+    const int index = 3;
+    await tester.longPressAt(textOffsetToPosition(tester, index));
+    await tester.pump();
+
+    // Double tap on the same location to select the word around the cursor.
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pumpAndSettle();
+
+    expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 4));
+    expect(find.text('Search Web'), isTargetPlatformiOS? findsOneWidget : findsNothing);
+
+    if (isTargetPlatformiOS) {
+      await tester.tap(find.text('Search Web'));
+      expect(lastLookUp, 'Test');
+    }
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
+    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
+  );
 
   testWidgets('can use the desktop cut/copy/paste buttons on Mac', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
@@ -1814,7 +2055,7 @@ void main() {
       );
       // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
       // On macOS, we select the precise position of the tap.
-      final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.iOS;
+      final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -1834,10 +2075,10 @@ void main() {
 
       // Plain collapsed selection.
       expect(controller.selection.isCollapsed, isTrue);
-      expect(controller.selection.baseOffset, isTargetPlatformMobile ? 7 : 6);
+      expect(controller.selection.baseOffset, isTargetPlatformIOS ? 7 : 6);
 
       // Toolbar shows on mobile.
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : isTargetPlatformMobile ? findsNWidgets(2) : findsNothing);
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : isTargetPlatformIOS ? findsNWidgets(2) : findsNothing);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
@@ -1968,8 +2209,8 @@ void main() {
         const TextSelection(baseOffset: 24, extentOffset: 35),
       );
 
-      // Selected text shows 3 toolbar buttons.
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+      // Selected text shows 5 toolbar buttons.
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(5));
 
       // Tap the selected word to hide the toolbar and retain the selection.
       await tester.tapAt(vPos);
@@ -1987,7 +2228,7 @@ void main() {
         controller.selection,
         const TextSelection(baseOffset: 24, extentOffset: 35),
       );
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(5));
 
       // Tap past the selected word to move the cursor and hide the toolbar.
       await tester.tapAt(ePos);
@@ -2043,7 +2284,7 @@ void main() {
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
 
-      // Selected text shows 3 toolbar buttons.
+      // Selected text shows 4 toolbar buttons.
       expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(4));
 
       // Tap somewhere else to move the cursor.
@@ -2100,13 +2341,13 @@ void main() {
       } else {
         switch (defaultTargetPlatform) {
           case TargetPlatform.macOS:
-          case TargetPlatform.iOS:
             expect(find.byType(CupertinoButton), findsNWidgets(3));
+          case TargetPlatform.iOS:
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
-            expect(find.byType(CupertinoButton), findsNWidgets(4));
+            expect(find.byType(CupertinoButton), findsNWidgets(5));
         }
       }
     },
@@ -2284,7 +2525,7 @@ void main() {
       );
       // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
       // On macOS, we select the precise position of the tap.
-      final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.iOS;
+      final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -2306,7 +2547,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
       // First tap moved the cursor.
       expect(controller.selection.isCollapsed, isTrue);
-      expect(controller.selection.baseOffset, isTargetPlatformMobile ? 12 : 9);
+      expect(controller.selection.baseOffset, isTargetPlatformIOS ? 12 : 9);
 
       await tester.tapAt(pPos);
       await tester.pumpAndSettle();
@@ -2318,7 +2559,7 @@ void main() {
       );
 
       // Selected text shows 3 toolbar buttons.
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : (isTargetPlatformIOS ? findsNWidgets(5) : findsNWidgets(3)));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
@@ -2388,7 +2629,7 @@ void main() {
       );
       // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
       // On macOS, we select the precise position of the tap.
-      final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.iOS;
+      final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -2406,7 +2647,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
       // First tap moved the cursor.
       expect(controller.selection.isCollapsed, isTrue);
-      expect(controller.selection.baseOffset, isTargetPlatformMobile ? 12 : 9);
+      expect(controller.selection.baseOffset, isTargetPlatformIOS ? 12 : 9);
 
       await tester.tapAt(pPos);
       await tester.pump(const Duration(milliseconds: 500));
@@ -2419,7 +2660,7 @@ void main() {
       // you tapped instead of the edge like every other single tap. This is
       // likely a bug in iOS 12 and not present in other versions.
       expect(controller.selection.isCollapsed, isTrue);
-      expect(controller.selection.baseOffset, isTargetPlatformMobile ? 7 : 6);
+      expect(controller.selection.baseOffset, isTargetPlatformIOS ? 7 : 6);
 
       // No toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
@@ -2904,18 +3145,18 @@ void main() {
       await tester.longPressAt(ePos);
       await tester.pump(const Duration(milliseconds: 50));
 
-      final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.iOS;
+      final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
       if (kIsWeb) {
         expect(find.byType(CupertinoButton), findsNothing);
       } else {
-        expect(find.byType(CupertinoButton), findsNWidgets(isTargetPlatformMobile ? 2 : 1));
+        expect(find.byType(CupertinoButton), findsNWidgets(isTargetPlatformIOS ? 2 : 1));
       }
       expect(controller.selection.isCollapsed, isTrue);
       expect(controller.selection.baseOffset, 6);
 
       // Tap in a slightly different position to avoid hitting the context menu
       // on desktop.
-      final Offset secondTapPos = isTargetPlatformMobile
+      final Offset secondTapPos = isTargetPlatformIOS
           ? ePos
           : ePos + const Offset(-1.0, 0.0);
       await tester.tapAt(secondTapPos);
@@ -3263,7 +3504,7 @@ void main() {
       );
       // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
       // On macOS, we select the precise position of the tap.
-      final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.iOS;
+      final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -3281,7 +3522,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
       // First tap moved the cursor to the beginning of the second word.
       expect(controller.selection.isCollapsed, isTrue);
-      expect(controller.selection.baseOffset, isTargetPlatformMobile ? 12 : 9);
+      expect(controller.selection.baseOffset, isTargetPlatformIOS ? 12 : 9);
       await tester.tapAt(pPos);
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -3315,7 +3556,7 @@ void main() {
       );
       // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
       // On macOS, we select the precise position of the tap.
-      final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.iOS;
+      final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -3343,7 +3584,7 @@ void main() {
       if (isContextMenuProvidedByPlatform) {
         expect(find.byType(CupertinoButton), findsNothing);
       } else {
-        expect(find.byType(CupertinoButton), isTargetPlatformMobile ? findsNWidgets(2) : findsNWidgets(1));
+        expect(find.byType(CupertinoButton), isTargetPlatformIOS ? findsNWidgets(2) : findsNWidgets(1));
       }
 
       await tester.tapAt(pPos);
@@ -3352,7 +3593,7 @@ void main() {
       // First tap moved the cursor.
       expect(find.byType(CupertinoButton), findsNothing);
       expect(controller.selection.isCollapsed, isTrue);
-      expect(controller.selection.baseOffset, isTargetPlatformMobile ? 12 : 9);
+      expect(controller.selection.baseOffset, isTargetPlatformIOS ? 12 : 9);
 
       await tester.tapAt(pPos);
       await tester.pumpAndSettle();
@@ -3363,7 +3604,7 @@ void main() {
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
       // Shows toolbar.
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : (isTargetPlatformIOS ? findsNWidgets(5) : findsNWidgets(3)));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
@@ -3383,6 +3624,7 @@ void main() {
       );
 
       final Offset textFieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
+      final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
 
       await tester.tapAt(textFieldStart + const Offset(50.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
@@ -3396,7 +3638,7 @@ void main() {
         controller.selection,
         const TextSelection(baseOffset: 0, extentOffset: 7),
       );
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(5));
 
       // Double tap selecting the same word somewhere else is fine.
       await tester.tapAt(textFieldStart + const Offset(100.0, 5.0));
@@ -3416,7 +3658,7 @@ void main() {
         controller.selection,
         const TextSelection(baseOffset: 0, extentOffset: 7),
       );
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : (isTargetPlatformIOS ? findsNWidgets(5) : findsNWidgets(3)));
 
       await tester.tapAt(textFieldStart + const Offset(150.0, 5.0));
       await tester.pump(const Duration(milliseconds: 50));
@@ -3432,7 +3674,7 @@ void main() {
         controller.selection,
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
-      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : (isTargetPlatformIOS ? findsNWidgets(5) : findsNWidgets(3)));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   group('Triple tap/click', () {
@@ -3672,6 +3914,7 @@ void main() {
         );
 
         final Offset textfieldStart = tester.getTopLeft(find.byType(CupertinoTextField));
+        final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
 
         await tester.tapAt(textfieldStart + const Offset(50.0, 9.0));
         await tester.pump(const Duration(milliseconds: 50));
@@ -3684,7 +3927,7 @@ void main() {
           controller.selection,
           const TextSelection(baseOffset: 0, extentOffset: 7),
         );
-        expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+        expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(5));
 
         await tester.tapAt(textfieldStart + const Offset(50.0, 9.0));
         await tester.pumpAndSettle(kDoubleTapTimeout);
@@ -3710,7 +3953,7 @@ void main() {
           controller.selection,
           const TextSelection(baseOffset: 0, extentOffset: 7),
         );
-        expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+        expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : (isTargetPlatformIOS ? findsNWidgets(5) : findsNWidgets(3)));
 
         // Third tap shows the toolbar and selects the paragraph.
         await tester.tapAt(textfieldStart + const Offset(100.0, 9.0));
@@ -3719,7 +3962,7 @@ void main() {
           controller.selection,
           const TextSelection(baseOffset: 0, extentOffset: 36),
         );
-        expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+        expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : (isTargetPlatformIOS ? findsNWidgets(5) : findsNWidgets(3)));
 
         await tester.tapAt(textfieldStart + const Offset(150.0, 25.0));
         await tester.pump(const Duration(milliseconds: 50));
@@ -3737,7 +3980,7 @@ void main() {
           controller.selection,
           const TextSelection(baseOffset: 44, extentOffset: 50),
         );
-        expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+        expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : (isTargetPlatformIOS ? findsNWidgets(5) : findsNWidgets(3)));
 
         // Third tap selects the paragraph and shows the toolbar.
         await tester.tapAt(textfieldStart + const Offset(150.0, 25.0));
@@ -3746,7 +3989,7 @@ void main() {
           controller.selection,
           const TextSelection(baseOffset: 36, extentOffset: 66),
         );
-        expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(3));
+        expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : (isTargetPlatformIOS ? findsNWidgets(5) : findsNWidgets(3)));
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
     );
@@ -4749,7 +4992,7 @@ void main() {
     );
     // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
     // On macOS, we select the precise position of the tap.
-    final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.iOS;
+    final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -4779,7 +5022,7 @@ void main() {
     // Fall back to a single tap which selects the edge of the word on iOS, and
     // a precise position on macOS.
     expect(controller.selection.isCollapsed, isTrue);
-    expect(controller.selection.baseOffset, isTargetPlatformMobile ? 12 : 9);
+    expect(controller.selection.baseOffset, isTargetPlatformIOS ? 12 : 9);
 
     await tester.pump();
     // Falling back to a single tap doesn't trigger a toolbar.
@@ -4792,7 +5035,7 @@ void main() {
     );
     // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
     // On macOS, we select the precise position of the tap.
-    final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.iOS;
+    final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -4811,7 +5054,7 @@ void main() {
     await tester.tapAt(ePos, pointer: 7);
     await tester.pump(const Duration(milliseconds: 50));
     expect(controller.selection.isCollapsed, isTrue);
-    expect(controller.selection.baseOffset, isTargetPlatformMobile ? 7 : 5);
+    expect(controller.selection.baseOffset, isTargetPlatformIOS ? 7 : 5);
     await tester.tapAt(ePos, pointer: 7);
     await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 4);
@@ -8097,7 +8340,7 @@ void main() {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
-    final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.iOS;
+    final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -8122,7 +8365,7 @@ void main() {
           kind: PointerDeviceKind.mouse,
         );
     await tester.pumpAndSettle();
-    if (isTargetPlatformMobile) {
+    if (isTargetPlatformIOS) {
       await gesture.up();
       // Not a double tap + drag.
       await tester.pumpAndSettle(kDoubleTapTimeout);
@@ -8131,7 +8374,7 @@ void main() {
     expect(controller.selection.extentOffset, 23);
 
     // Expand the selection a bit.
-    if (isTargetPlatformMobile) {
+    if (isTargetPlatformIOS) {
       await gesture.down(textOffsetToPosition(tester, 24));
       await tester.pumpAndSettle();
     }
@@ -8310,7 +8553,7 @@ void main() {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
-    final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.iOS;
+    final bool isTargetPlatformIOS = defaultTargetPlatform == TargetPlatform.iOS;
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -8335,7 +8578,7 @@ void main() {
           kind: PointerDeviceKind.mouse,
         );
     await tester.pumpAndSettle();
-    if (isTargetPlatformMobile) {
+    if (isTargetPlatformIOS) {
       await gesture.up();
       // Not a double tap + drag.
       await tester.pumpAndSettle(kDoubleTapTimeout);
@@ -8345,7 +8588,7 @@ void main() {
     expect(controller.selection.extentOffset, 8);
 
     // Expand the selection a bit.
-    if (isTargetPlatformMobile) {
+    if (isTargetPlatformIOS) {
       await gesture.down(textOffsetToPosition(tester, 7));
       await tester.pumpAndSettle();
     }

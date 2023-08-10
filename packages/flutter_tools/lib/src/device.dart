@@ -504,12 +504,13 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
     if (_timer == null) {
       deviceNotifier ??= ItemListNotifier<Device>();
       // Make initial population the default, fast polling timeout.
-      _timer = _initTimer(null);
+      _timer = _initTimer(null, initialCall: true);
     }
   }
 
-  Timer _initTimer(Duration? pollingTimeout) {
-    return Timer(_pollingInterval, () async {
+  Timer _initTimer(Duration? pollingTimeout, {bool initialCall = false}) {
+    // Poll for devices immediately on the initial call for faster initial population.
+    return Timer(initialCall ? Duration.zero : _pollingInterval, () async {
       try {
         final List<Device> devices = await pollingGetDevices(timeout: pollingTimeout);
         deviceNotifier!.updateWithNewList(devices);
@@ -848,8 +849,10 @@ abstract class Device {
     ];
   }
 
-  static Future<void> printDevices(List<Device> devices, Logger logger) async {
-    (await descriptions(devices)).forEach(logger.printStatus);
+  static Future<void> printDevices(List<Device> devices, Logger logger, { String prefix = '' }) async {
+    for (final String line in await descriptions(devices)) {
+      logger.printStatus('$prefix$line');
+    }
   }
 
   static List<String> devicesPlatformTypes(List<Device> devices) {
@@ -1156,6 +1159,7 @@ class DebuggingOptions {
     Map<String, Object?> platformArgs, {
     bool ipv6 = false,
     DeviceConnectionInterface interfaceType = DeviceConnectionInterface.attached,
+    bool isCoreDevice = false,
   }) {
     final String dartVmFlags = computeDartVmFlags(this);
     return <String>[
@@ -1169,7 +1173,10 @@ class DebuggingOptions {
       if (environmentType == EnvironmentType.simulator && dartVmFlags.isNotEmpty)
         '--dart-flags=$dartVmFlags',
       if (useTestFonts) '--use-test-fonts',
-      if (debuggingEnabled) ...<String>[
+      // Core Devices (iOS 17 devices) are debugged through Xcode so don't
+      // include these flags, which are used to check if the app was launched
+      // via Flutter CLI and `ios-deploy`.
+      if (debuggingEnabled && !isCoreDevice) ...<String>[
         '--enable-checked-mode',
         '--verify-entry-points',
       ],

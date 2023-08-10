@@ -1355,9 +1355,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   // Similarly, we don't reduce the height of the button so much that its icon
   // would be clipped.
   double get _denseButtonHeight {
-    final double textScaleFactor = MediaQuery.textScaleFactorOf(context);
     final double fontSize = _textStyle!.fontSize ?? Theme.of(context).textTheme.titleMedium!.fontSize!;
-    final double scaledFontSize = textScaleFactor * fontSize;
+    final double scaledFontSize = MediaQuery.textScalerOf(context).scale(fontSize);
     return math.max(scaledFontSize, math.max(widget.iconSize, _kDenseButtonHeight));
   }
 

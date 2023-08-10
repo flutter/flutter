@@ -639,11 +639,11 @@ class _HitTestableFinder extends ChainedFinder {
   @override
   Iterable<Element> filter(Iterable<Element> parentCandidates) sync* {
     for (final Element candidate in parentCandidates) {
+      final int viewId = candidate.findAncestorWidgetOfExactType<View>()!.view.viewId;
       final RenderBox box = candidate.renderObject! as RenderBox;
       final Offset absoluteOffset = box.localToGlobal(alignment.alongSize(box.size));
       final HitTestResult hitResult = HitTestResult();
-      // TODO(goderbauer): Support multiple views in flutter_test pointer event handling, https://github.com/flutter/flutter/issues/128281
-      WidgetsBinding.instance.hitTest(hitResult, absoluteOffset); // ignore: deprecated_member_use
+      WidgetsBinding.instance.hitTestInView(hitResult, absoluteOffset, viewId);
       for (final HitTestEntry entry in hitResult.path) {
         if (entry.target == candidate.renderObject) {
           yield candidate;

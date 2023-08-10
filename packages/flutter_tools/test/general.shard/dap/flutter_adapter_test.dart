@@ -44,7 +44,7 @@ void main() {
         final Completer<void> responseCompleter = Completer<void>();
 
         final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
-          cwd: '/project',
+          cwd: '.',
           program: 'foo.dart',
         );
 
@@ -63,7 +63,7 @@ void main() {
         final Completer<void> responseCompleter = Completer<void>();
 
         final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
-          cwd: '/project',
+          cwd: '.',
           program: 'foo.dart',
           env: <String, String>{
             'MY_TEST_ENV': 'MY_TEST_VALUE',
@@ -85,7 +85,7 @@ void main() {
         final Completer<void> responseCompleter = Completer<void>();
 
         final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
-          cwd: '/project',
+          cwd: '.',
           program: 'foo.dart',
         );
 
@@ -112,7 +112,7 @@ void main() {
             );
 
             final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
-              cwd: '/project',
+              cwd: '.',
               program: 'foo.dart',
             );
 
@@ -146,7 +146,7 @@ void main() {
         );
 
         final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
-          cwd: '/project',
+          cwd: '.',
           program: 'foo.dart',
         );
 
@@ -170,7 +170,7 @@ void main() {
         );
 
         final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
-          cwd: '/project',
+          cwd: '.',
           program: 'foo.dart',
         );
 
@@ -195,7 +195,7 @@ void main() {
 
         final Completer<void> launchCompleter = Completer<void>();
          final FlutterLaunchRequestArguments launchArgs = FlutterLaunchRequestArguments(
-          cwd: '/project',
+          cwd: '.',
           program: 'foo.dart',
         );
         final Completer<void> restartCompleter = Completer<void>();
@@ -221,7 +221,7 @@ void main() {
         final Completer<void> responseCompleter = Completer<void>();
 
         final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
-          cwd: '/project',
+          cwd: '.',
           program: 'foo.dart',
         );
 
@@ -261,7 +261,7 @@ void main() {
         final Completer<void> responseCompleter = Completer<void>();
 
         final FlutterAttachRequestArguments args = FlutterAttachRequestArguments(
-          cwd: '/project',
+          cwd: '.',
         );
 
         await adapter.configurationDoneRequest(MockRequest(), null, () {});
@@ -280,7 +280,7 @@ void main() {
 
         final FlutterAttachRequestArguments args =
             FlutterAttachRequestArguments(
-          cwd: '/project',
+          cwd: '.',
           program: 'program/main.dart',
         );
 
@@ -308,7 +308,7 @@ void main() {
 
         final FlutterAttachRequestArguments args =
             FlutterAttachRequestArguments(
-          cwd: '/project',
+          cwd: '.',
           program: 'program/main.dart',
           vmServiceUri: 'ws://1.2.3.4/ws'
         );
@@ -340,7 +340,7 @@ void main() {
 
         final FlutterAttachRequestArguments args =
             FlutterAttachRequestArguments(
-          cwd: '/project',
+          cwd: '.',
           program: 'program/main.dart',
           vmServiceInfoFile: serviceInfoFile.path,
         );
@@ -374,7 +374,7 @@ void main() {
 
         final FlutterAttachRequestArguments args =
             FlutterAttachRequestArguments(
-          cwd: '/project',
+          cwd: '.',
           program: 'program/main.dart',
           vmServiceInfoFile: serviceInfoFile.path,
         );
@@ -408,7 +408,7 @@ void main() {
         final Completer<void> responseCompleter = Completer<void>();
 
         final FlutterAttachRequestArguments args = FlutterAttachRequestArguments(
-          cwd: '/project',
+          cwd: '.',
         );
 
         await adapter.configurationDoneRequest(MockRequest(), null, () {});
@@ -430,7 +430,7 @@ void main() {
         );
 
         final FlutterAttachRequestArguments args = FlutterAttachRequestArguments(
-          cwd: '/project',
+          cwd: '.',
         );
 
         await adapter.configurationDoneRequest(MockRequest(), null, () {});
@@ -518,7 +518,7 @@ void main() {
         final Completer<void> responseCompleter = Completer<void>();
 
         final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
-          cwd: '/project',
+          cwd: '.',
           program: 'foo.dart',
         );
 
@@ -537,7 +537,7 @@ void main() {
         final Completer<void> responseCompleter = Completer<void>();
 
         final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
-          cwd: '/project',
+          cwd: '.',
           program: 'foo.dart',
           noDebug: true,
         );
@@ -557,7 +557,7 @@ void main() {
         final Completer<void> responseCompleter = Completer<void>();
 
         final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
-          cwd: '/project',
+          cwd: '.',
           program: 'foo.dart',
           toolArgs: <String>['--profile'],
         );
@@ -577,7 +577,7 @@ void main() {
         final Completer<void> responseCompleter = Completer<void>();
 
         final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
-          cwd: '/project',
+          cwd: '.',
           program: 'foo.dart',
           toolArgs: <String>['--release'],
         );
@@ -598,7 +598,7 @@ void main() {
       final Completer<void> responseCompleter = Completer<void>();
 
       final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
-        cwd: '/project',
+        cwd: '.',
         program: 'foo.dart',
         toolArgs: <String>['tool_arg'],
         noDebug: true,
@@ -659,7 +659,7 @@ void main() {
           platform: platform,
         );
         final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
-          cwd: '/project',
+          cwd: '.',
           program: 'foo.dart',
           customTool: '/custom/flutter',
           noDebug: true,
@@ -681,7 +681,7 @@ void main() {
           platform: platform,
         );
         final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
-          cwd: '/project',
+          cwd: '.',
           program: 'foo.dart',
           customTool: '/custom/flutter',
           customToolReplacesArgs: 9999, // replaces all built-in args

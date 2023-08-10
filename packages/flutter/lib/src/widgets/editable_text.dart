@@ -752,7 +752,13 @@ class EditableText extends StatefulWidget {
     this.textAlign = TextAlign.start,
     this.textDirection,
     this.locale,
+    @Deprecated(
+      'Use textScaler instead. '
+      'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+      'This feature was deprecated after v3.12.0-2.0.pre.',
+    )
     this.textScaleFactor,
+    this.textScaler,
     this.maxLines = 1,
     this.minLines,
     this.expands = false,
@@ -1054,6 +1060,9 @@ class EditableText extends StatefulWidget {
   final Locale? locale;
 
   /// {@template flutter.widgets.editableText.textScaleFactor}
+  /// Deprecated. Will be removed in a future version of Flutter. Use
+  /// [textScaler] instead.
+  ///
   /// The number of font pixels for each logical pixel.
   ///
   /// For example, if the text scale factor is 1.5, text will be 50% larger than
@@ -1062,7 +1071,15 @@ class EditableText extends StatefulWidget {
   /// Defaults to the [MediaQueryData.textScaleFactor] obtained from the ambient
   /// [MediaQuery], or 1.0 if there is no [MediaQuery] in scope.
   /// {@endtemplate}
+  @Deprecated(
+    'Use textScaler instead. '
+    'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+    'This feature was deprecated after v3.12.0-2.0.pre.',
+  )
   final double? textScaleFactor;
+
+  /// {@macro flutter.painting.textPainter.textScaler}
+  final TextScaler? textScaler;
 
   /// The color to use when painting the cursor.
   ///
@@ -1835,36 +1852,60 @@ class EditableText extends StatefulWidget {
     required final VoidCallback? onCut,
     required final VoidCallback? onPaste,
     required final VoidCallback? onSelectAll,
+    required final VoidCallback? onLookUp,
+    required final VoidCallback? onSearchWeb,
+    required final VoidCallback? onLiveTextInput,
   }) {
-    // If the paste button is enabled, don't render anything until the state
-    // of the clipboard is known, since it's used to determine if paste is
-    // shown.
-    if (onPaste != null && clipboardStatus == ClipboardStatus.unknown) {
-      return <ContextMenuButtonItem>[];
+    final List<ContextMenuButtonItem> resultButtonItem = <ContextMenuButtonItem>[];
+
+    // Configure button items with clipboard.
+    if (onPaste == null || clipboardStatus != ClipboardStatus.unknown) {
+      // If the paste button is enabled, don't render anything until the state
+      // of the clipboard is known, since it's used to determine if paste is
+      // shown.
+      resultButtonItem.addAll(<ContextMenuButtonItem>[
+        if (onCut != null)
+          ContextMenuButtonItem(
+            onPressed: onCut,
+            type: ContextMenuButtonType.cut,
+          ),
+        if (onCopy != null)
+          ContextMenuButtonItem(
+            onPressed: onCopy,
+            type: ContextMenuButtonType.copy,
+          ),
+        if (onPaste != null)
+          ContextMenuButtonItem(
+            onPressed: onPaste,
+            type: ContextMenuButtonType.paste,
+          ),
+        if (onSelectAll != null)
+          ContextMenuButtonItem(
+            onPressed: onSelectAll,
+            type: ContextMenuButtonType.selectAll,
+          ),
+        if (onLookUp != null)
+          ContextMenuButtonItem(
+            onPressed: onLookUp,
+            type: ContextMenuButtonType.lookUp,
+          ),
+        if (onSearchWeb != null)
+          ContextMenuButtonItem(
+            onPressed: onSearchWeb,
+            type: ContextMenuButtonType.searchWeb,
+          ),
+      ]);
     }
 
-    return <ContextMenuButtonItem>[
-      if (onCut != null)
-        ContextMenuButtonItem(
-          onPressed: onCut,
-          type: ContextMenuButtonType.cut,
-        ),
-      if (onCopy != null)
-        ContextMenuButtonItem(
-          onPressed: onCopy,
-          type: ContextMenuButtonType.copy,
-        ),
-      if (onPaste != null)
-        ContextMenuButtonItem(
-          onPressed: onPaste,
-          type: ContextMenuButtonType.paste,
-        ),
-      if (onSelectAll != null)
-        ContextMenuButtonItem(
-          onPressed: onSelectAll,
-          type: ContextMenuButtonType.selectAll,
-        ),
-    ];
+    // Config button items with Live Text.
+    if (onLiveTextInput != null) {
+      resultButtonItem.add(ContextMenuButtonItem(
+        onPressed: onLiveTextInput,
+        type: ContextMenuButtonType.liveTextInput,
+      ));
+    }
+
+    return resultButtonItem;
   }
 
   // Infer the keyboard type of an `EditableText` if it's not specified.
@@ -2027,7 +2068,7 @@ class EditableText extends StatefulWidget {
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
-    properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextScaler>('textScaler', textScaler, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
     properties.add(IntProperty('minLines', minLines, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
@@ -2061,7 +2102,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   final GlobalKey _editableKey = GlobalKey();
 
   /// Detects whether the clipboard can paste.
-  final ClipboardStatusNotifier clipboardStatus = ClipboardStatusNotifier();
+  final ClipboardStatusNotifier clipboardStatus = kIsWeb
+      // Web browsers will show a permission dialog when Clipboard.hasStrings is
+      // called. In an EditableText, this will happen before the paste button is
+      // clicked, often before the context menu is even shown. To avoid this
+      // poor user experience, always show the paste button on web.
+      ? _WebClipboardStatusNotifier()
+      : ClipboardStatusNotifier();
+
+  /// Detects whether the Live Text input is enabled.
+  ///
+  /// See also:
+  ///  * [LiveText], where the availability of Live Text input can be obtained.
+  final LiveTextInputStatusNotifier? _liveTextInputStatus =
+      kIsWeb ? null : LiveTextInputStatusNotifier();
 
   TextInputConnection? _textInputConnection;
   bool get _hasInputConnection => _textInputConnection?.attached ?? false;
@@ -2196,9 +2250,44 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  @override
+  bool get lookUpEnabled {
+    if (defaultTargetPlatform != TargetPlatform.iOS) {
+      return false;
+    }
+    return !widget.obscureText
+        && !textEditingValue.selection.isCollapsed
+        && textEditingValue.selection.textInside(textEditingValue.text).trim() != '';
+  }
+
+  @override
+  bool get searchWebEnabled {
+    if (defaultTargetPlatform != TargetPlatform.iOS) {
+      return false;
+    }
+
+    return !widget.obscureText
+        && !textEditingValue.selection.isCollapsed
+        && textEditingValue.selection.textInside(textEditingValue.text).trim() != '';
+  }
+
+  @override
+  bool get liveTextInputEnabled {
+    return _liveTextInputStatus?.value == LiveTextInputStatus.enabled &&
+        !widget.obscureText &&
+        !widget.readOnly &&
+        textEditingValue.selection.isCollapsed;
+  }
+
   void _onChangedClipboardStatus() {
     setState(() {
       // Inform the widget that the value of clipboardStatus has changed.
+    });
+  }
+
+  void _onChangedLiveTextInputStatus() {
+    setState(() {
+      // Inform the widget that the value of liveTextInputStatus has changed.
     });
   }
 
@@ -2344,6 +2433,55 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         case TargetPlatform.iOS:
           break;
       }
+    }
+  }
+
+  /// Look up the current selection, as in the "Look Up" edit menu button on iOS.
+  /// Currently this is only implemented for iOS.
+  /// Throws an error if the selection is empty or collapsed.
+  Future<void> lookUpSelection(SelectionChangedCause cause) async {
+    assert(!widget.obscureText);
+
+    final String text = textEditingValue.selection.textInside(textEditingValue.text);
+    if (widget.obscureText || text.isEmpty) {
+      return;
+    }
+    await SystemChannels.platform.invokeMethod(
+      'LookUp.invoke',
+      text,
+    );
+  }
+
+  /// Launch a web search on the current selection,
+  ///   as in the "Search Web" edit menu button on iOS.
+  ///
+  /// Currently this is only implemented for iOS.
+  /// When 'obscureText' is true or the selection is empty,
+  /// this function will not do anything
+  Future<void> searchWebForSelection(SelectionChangedCause cause) async {
+    assert(!widget.obscureText);
+    if (widget.obscureText) {
+      return;
+    }
+
+    final String text = textEditingValue.selection.textInside(textEditingValue.text);
+    if (text.isNotEmpty) {
+      await SystemChannels.platform.invokeMethod(
+        'SearchWeb.invoke',
+        text,
+      );
+    }
+  }
+
+  void _startLiveTextInput(SelectionChangedCause cause) {
+    if (!liveTextInputEnabled) {
+      return;
+    }
+    if (_hasInputConnection) {
+      LiveText.startLiveTextInput();
+    }
+    if (cause == SelectionChangedCause.toolbar) {
+      hideToolbar();
     }
   }
 
@@ -2561,6 +2699,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       onSelectAll: selectAllEnabled
           ? () => selectAll(SelectionChangedCause.toolbar)
           : null,
+      onLookUp: lookUpEnabled
+          ? () => lookUpSelection(SelectionChangedCause.toolbar)
+          : null,
+      onSearchWeb: searchWebEnabled
+          ? () => searchWebForSelection(SelectionChangedCause.toolbar)
+          : null,
+      onLiveTextInput: liveTextInputEnabled
+          ? () => _startLiveTextInput(SelectionChangedCause.toolbar)
+          : null,
     );
   }
 
@@ -2569,6 +2716,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   void initState() {
     super.initState();
+    _liveTextInputStatus?.addListener(_onChangedLiveTextInputStatus);
     clipboardStatus.addListener(_onChangedClipboardStatus);
     widget.controller.addListener(_didChangeTextEditingValue);
     widget.focusNode.addListener(_handleFocusChanged);
@@ -2734,6 +2882,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _selectionOverlay = null;
     widget.focusNode.removeListener(_handleFocusChanged);
     WidgetsBinding.instance.removeObserver(this);
+    _liveTextInputStatus?.removeListener(_onChangedLiveTextInputStatus);
+    _liveTextInputStatus?.dispose();
     clipboardStatus.removeListener(_onChangedClipboardStatus);
     clipboardStatus.dispose();
     _cursorVisibilityNotifier.dispose();
@@ -3839,11 +3989,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
 
     final InlineSpan inlineSpan = renderEditable.text!;
+    final TextScaler effectiveTextScaler = switch ((widget.textScaler, widget.textScaleFactor)) {
+      (final TextScaler textScaler, _)     => textScaler,
+      (null, final double textScaleFactor) => TextScaler.linear(textScaleFactor),
+      (null, null)                         => MediaQuery.textScalerOf(context),
+    };
+
     final _ScribbleCacheKey newCacheKey = _ScribbleCacheKey(
       inlineSpan: inlineSpan,
       textAlign: widget.textAlign,
       textDirection: _textDirection,
-      textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
+      textScaler: effectiveTextScaler,
       textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
       locale: widget.locale,
       structStyle: widget.strutStyle,
@@ -3986,6 +4142,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_selectionOverlay == null) {
       return false;
     }
+    _liveTextInputStatus?.update();
     clipboardStatus.update();
     _selectionOverlay!.showToolbar();
     return true;
@@ -4536,6 +4693,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
     final TextSelectionControls? controls = widget.selectionControls;
+    final TextScaler effectiveTextScaler = switch ((widget.textScaler, widget.textScaleFactor)) {
+      (final TextScaler textScaler, _)     => textScaler,
+      (null, final double textScaleFactor) => TextScaler.linear(textScaleFactor),
+      (null, null)                         => MediaQuery.textScalerOf(context),
+    };
+
     return _CompositionCallback(
       compositeCallback: _compositeCallback,
       enabled: _hasInputConnection,
@@ -4636,7 +4799,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                             selectionColor: _selectionOverlay?.spellCheckToolbarIsVisible ?? false
                                 ? _spellCheckConfiguration.misspelledSelectionColor ?? widget.selectionColor
                                 : widget.selectionColor,
-                            textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
+                            textScaler: effectiveTextScaler,
                             textAlign: widget.textAlign,
                             textDirection: _textDirection,
                             locale: widget.locale,
@@ -4762,7 +4925,7 @@ class _Editable extends MultiChildRenderObjectWidget {
     required this.expands,
     this.strutStyle,
     this.selectionColor,
-    required this.textScaleFactor,
+    required this.textScaler,
     required this.textAlign,
     required this.textDirection,
     this.locale,
@@ -4783,7 +4946,7 @@ class _Editable extends MultiChildRenderObjectWidget {
     this.promptRectRange,
     this.promptRectColor,
     required this.clipBehavior,
-  }) : super(children: WidgetSpan.extractFromInlineSpan(inlineSpan, textScaleFactor));
+  }) : super(children: WidgetSpan.extractFromInlineSpan(inlineSpan, textScaler));
 
   final InlineSpan inlineSpan;
   final TextEditingValue value;
@@ -4800,7 +4963,7 @@ class _Editable extends MultiChildRenderObjectWidget {
   final bool expands;
   final StrutStyle? strutStyle;
   final Color? selectionColor;
-  final double textScaleFactor;
+  final TextScaler textScaler;
   final TextAlign textAlign;
   final TextDirection textDirection;
   final Locale? locale;
@@ -4841,7 +5004,7 @@ class _Editable extends MultiChildRenderObjectWidget {
       expands: expands,
       strutStyle: strutStyle,
       selectionColor: selectionColor,
-      textScaleFactor: textScaleFactor,
+      textScaler: textScaler,
       textAlign: textAlign,
       textDirection: textDirection,
       locale: locale ?? Localizations.maybeLocaleOf(context),
@@ -4885,7 +5048,7 @@ class _Editable extends MultiChildRenderObjectWidget {
       ..expands = expands
       ..strutStyle = strutStyle
       ..selectionColor = selectionColor
-      ..textScaleFactor = textScaleFactor
+      ..textScaler = textScaler
       ..textAlign = textAlign
       ..textDirection = textDirection
       ..locale = locale ?? Localizations.maybeLocaleOf(context)
@@ -4918,7 +5081,7 @@ class _ScribbleCacheKey  {
     required this.inlineSpan,
     required this.textAlign,
     required this.textDirection,
-    required this.textScaleFactor,
+    required this.textScaler,
     required this.textHeightBehavior,
     required this.locale,
     required this.structStyle,
@@ -4928,7 +5091,7 @@ class _ScribbleCacheKey  {
 
   final TextAlign textAlign;
   final TextDirection textDirection;
-  final double textScaleFactor;
+  final TextScaler textScaler;
   final TextHeightBehavior? textHeightBehavior;
   final Locale? locale;
   final StrutStyle structStyle;
@@ -4942,7 +5105,7 @@ class _ScribbleCacheKey  {
     }
     final bool needsLayout = textAlign != other.textAlign
                           || textDirection != other.textDirection
-                          || textScaleFactor != other.textScaleFactor
+                          || textScaler != other.textScaler
                           || (textHeightBehavior ?? const TextHeightBehavior()) != (other.textHeightBehavior ?? const TextHeightBehavior())
                           || locale != other.locale
                           || structStyle != other.structStyle
@@ -5059,17 +5222,19 @@ class _ScribblePlaceholder extends WidgetSpan {
   final Size size;
 
   @override
-  void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions>? dimensions }) {
+  void build(ui.ParagraphBuilder builder, {
+    TextScaler textScaler = TextScaler.noScaling,
+    List<PlaceholderDimensions>? dimensions,
+  }) {
     assert(debugAssertIsValid());
     final bool hasStyle = style != null;
     if (hasStyle) {
-      builder.pushStyle(style!.getTextStyle(textScaleFactor: textScaleFactor));
+      builder.pushStyle(style!.getTextStyle(textScaler: textScaler));
     }
     builder.addPlaceholder(
-      size.width,
-      size.height,
+      size.width * textScaler.textScaleFactor,
+      size.height * textScaler.textScaleFactor,
       alignment,
-      scale: textScaleFactor,
     );
     if (hasStyle) {
       builder.pop();
@@ -5401,4 +5566,19 @@ class _GlyphHeights {
 
   /// The glyph height of the last line.
   final double end;
+}
+
+/// A [ClipboardStatusNotifier] whose [value] is hardcoded to
+/// [ClipboardStatus.pasteable].
+///
+/// Useful to avoid showing a permission dialog on web, which happens when
+/// [Clipboard.hasStrings] is called.
+class _WebClipboardStatusNotifier extends ClipboardStatusNotifier {
+  @override
+  ClipboardStatus value = ClipboardStatus.pasteable;
+
+  @override
+  Future<void> update() {
+    return Future<void>.value();
+  }
 }

@@ -219,6 +219,7 @@ String generateTestEntrypoint({
   // @dart = ${languageVersion.major}.${languageVersion.minor}
   import 'org-dartlang-app:///$relativeTestPath' as test;
   import 'dart:ui' as ui;
+  import 'dart:ui_web' as ui_web;
   import 'dart:html';
   import 'dart:js';
   ${testConfigPath != null ? "import '${Uri.file(testConfigPath)}' as test_config;" : ""}
@@ -227,8 +228,8 @@ String generateTestEntrypoint({
   import 'package:test_api/backend.dart';
 
   Future<void> main() async {
-    ui.debugEmulateFlutterTesterEnvironment = true;
-    await ui.webOnlyInitializePlatform();
+    ui_web.debugEmulateFlutterTesterEnvironment = true;
+    await ui_web.bootstrapEngine();
     webGoldenComparator = DefaultWebGoldenComparator(Uri.parse('${Uri.file(absolutePath)}'));
     (ui.window as dynamic).debugOverrideDevicePixelRatio(3.0);
     (ui.window as dynamic).webOnlyDebugPhysicalSizeOverride = const ui.Size(2400, 1800);

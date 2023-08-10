@@ -83,6 +83,7 @@ final String flutter = path.join(flutterRoot, 'bin', 'flutter$bat');
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dart$exe');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
 final String engineVersionFile = path.join(flutterRoot, 'bin', 'internal', 'engine.version');
+final String engineRealmFile = path.join(flutterRoot, 'bin', 'internal', 'engine.realm');
 final String flutterPackagesVersionFile = path.join(flutterRoot, 'bin', 'internal', 'flutter_packages.version');
 
 String get platformFolderName {
@@ -101,7 +102,7 @@ final String flutterTester = path.join(flutterRoot, 'bin', 'cache', 'artifacts',
 
 /// The arguments to pass to `flutter test` (typically the local engine
 /// configuration) -- prefilled with the arguments passed to test.dart.
-final List<String> flutterTestArgs = <String>[];
+final List<String> flutterTestArgs = <String>['--dart-define=SKPARAGRAPH_REMOVE_ROUNDING_HACK=true'];
 
 /// Environment variables to override the local engine when running `pub test`,
 /// if such flags are provided to `test.dart`.
@@ -979,6 +980,10 @@ Future<void> _runFrameworkTests() async {
     printProgress('${green}Running package tests$reset for directories other than packages/flutter');
     await _runTestHarnessTests();
     await runExampleTests();
+    await _runFlutterTest(
+      path.join(flutterRoot, 'dev', 'a11y_assessments'),
+      tests: <String>[ 'test' ],
+    );
     await _runDartTest(path.join(flutterRoot, 'dev', 'bots'));
     await _runDartTest(path.join(flutterRoot, 'dev', 'devicelab'), ensurePrecompiledTool: false); // See https://github.com/flutter/flutter/issues/86209
     await _runDartTest(path.join(flutterRoot, 'dev', 'conductor', 'core'), forceSingleCore: true);
@@ -1002,14 +1007,11 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'));
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'));
     const String httpClientWarning =
-      'Warning: At least one test in this suite creates an HttpClient. When\n'
-      'running a test suite that uses TestWidgetsFlutterBinding, all HTTP\n'
-      'requests will return status code 400, and no network request will\n'
-      'actually be made. Any test expecting a real network connection and\n'
-      'status code will fail.\n'
-      'To test code that needs an HttpClient, provide your own HttpClient\n'
-      'implementation to the code under test, so that your test can\n'
-      'consistently provide a testable response to the code under test.';
+      'Warning: At least one test in this suite creates an HttpClient. When running a test suite that uses\n'
+      'TestWidgetsFlutterBinding, all HTTP requests will return status code 400, and no network request\n'
+      'will actually be made. Any test expecting a real network connection and status code will fail.\n'
+      'To test code that needs an HttpClient, provide your own HttpClient implementation to the code under\n'
+      'test, so that your test can consistently provide a testable response to the code under test.';
     await _runFlutterTest(
       path.join(flutterRoot, 'packages', 'flutter_test'),
       script: path.join('test', 'bindings_test_failure.dart'),
@@ -1137,6 +1139,10 @@ Future<void> _runWebUnitTests(String webRenderer) async {
 /// Coarse-grained integration tests running on the Web.
 Future<void> _runWebLongRunningTests() async {
   final String engineVersion = File(engineVersionFile).readAsStringSync().trim();
+  final String engineRealm = File(engineRealmFile).readAsStringSync().trim();
+  if (engineRealm.isNotEmpty) {
+    return;
+  }
   final List<ShardRunner> tests = <ShardRunner>[
     for (final String buildMode in _kAllBuildModes) ...<ShardRunner>[
       () => _runFlutterDriverWebTest(
@@ -1303,8 +1309,8 @@ Future<void> _runFlutterDriverWebTest({
   await runCommand(
     flutter,
     <String>[
-      ...flutterTestArgs,
       'drive',
+      ...flutterTestArgs,
       if (driver != null) '--driver=$driver',
       '--target=$target',
       '--browser-name=chrome',
@@ -1361,7 +1367,7 @@ Future<void> _runWebTreeshakeTest() async {
   final String javaScript = mainDartJs.readAsStringSync();
 
   // Check that we're not looking at minified JS. Otherwise this test would result in false positive.
-  expect(javaScript.contains('RenderObjectToWidgetElement'), true);
+  expect(javaScript.contains('RootElement'), true);
 
   const String word = 'debugFillProperties';
   int count = 0;
@@ -1460,6 +1466,13 @@ Future<void> _runFlutterPackagesTests() async {
         'run',
         toolScript,
         'analyze',
+        // Fetch the oldest possible dependencies, rather than the newest, to
+        // insulate flutter/flutter from out-of-band failures when new versions
+        // of dependencies are published. This compensates for the fact that
+        // flutter/packages doesn't use pinned dependencies, and for the
+        // purposes of this test using old dependencies is fine. See
+        // https://github.com/flutter/flutter/issues/129633
+        '--downgrade',
         '--custom-analysis=script/configs/custom_analysis.yaml',
       ],
       workingDirectory: checkout.path,
@@ -1571,8 +1584,8 @@ Future<void> _runGalleryE2eWebTest(String buildMode, { bool canvasKit = false })
   await runCommand(
     flutter,
     <String>[
-      ...flutterTestArgs,
       'drive',
+      ...flutterTestArgs,
       if (canvasKit)
         '--dart-define=FLUTTER_WEB_USE_SKIA=true',
       if (!canvasKit)
@@ -1652,10 +1665,10 @@ Future<void> _runWebReleaseTest(String target, {
   await runCommand(
     flutter,
     <String>[
-      ...flutterTestArgs,
       'build',
       'web',
       '--release',
+      ...flutterTestArgs,
       ...additionalArguments,
       '-t',
       target,

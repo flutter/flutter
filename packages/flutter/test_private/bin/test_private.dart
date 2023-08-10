@@ -195,7 +195,13 @@ class TestCase {
 
     // Use Flutter's analysis_options.yaml file from packages/flutter.
     File(path.join(tmpdir.absolute.path, 'analysis_options.yaml'))
-        .writeAsStringSync('include: ${path.toUri(path.join(flutterRoot.path, 'packages', 'flutter', 'analysis_options.yaml'))}');
+        .writeAsStringSync(
+          'include: ${path.toUri(path.join(flutterRoot.path, 'packages', 'flutter', 'analysis_options.yaml'))}\n'
+          'linter:\n'
+          '  rules:\n'
+          // The code does wonky things with the part-of directive that cause false positives.
+          '    unreachable_from_main: false'
+    );
 
     return true;
   }
