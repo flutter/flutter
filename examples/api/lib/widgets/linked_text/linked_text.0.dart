@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 // This example demonstrates using LinkedText to make URLs open on tap.
 
 void main() {
-  runApp(const MyApp());
+  runApp(const LinkedTextApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({
+class LinkedTextApp extends StatelessWidget {
+  const LinkedTextApp({
     super.key,
   });
 
