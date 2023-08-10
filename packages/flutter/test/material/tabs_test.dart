@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ParagraphBuilder;
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -328,7 +326,10 @@ void main() {
       MaterialApp(theme: theme, home: const Center(child: Material(child: Tab(text: 'x')))),
     );
     expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style!.fontFamily, 'FlutterTest');
-    expect(tester.getSize(find.byType(Tab)), material3 ? const Size(15.0, 46.0) : const Size(14.0, 46.0));
+    expect(
+      tester.getSize(find.byType(Tab)),
+      material3 ? const Size(14.25, 46.0) : const Size(14.0, 46.0),
+    );
   });
 
   testWidgets('Tab sizing - icon and text', (WidgetTester tester) async {
@@ -338,7 +339,9 @@ void main() {
       MaterialApp(theme: theme, home: const Center(child: Material(child: Tab(icon: SizedBox(width: 10.0, height: 10.0), text: 'x')))),
     );
     expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style!.fontFamily, 'FlutterTest');
-    expect(tester.getSize(find.byType(Tab)), material3 ? const Size(15.0, 72.0) : const Size(14.0, 72.0));
+    expect(
+      tester.getSize(find.byType(Tab)),
+      material3 ? const Size(14.25, 72.0) : const Size(14.0, 72.0));
   });
 
   testWidgets('Tab sizing - icon, iconMargin and text', (WidgetTester tester) async {
@@ -372,7 +375,9 @@ void main() {
       MaterialApp(theme: theme, home: const Center(child: Material(child: Tab(icon: SizedBox(width: 10.0, height: 10.0), child: Text('x'))))),
     );
     expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style!.fontFamily, 'FlutterTest');
-    expect(tester.getSize(find.byType(Tab)), material3 ? const Size(15.0, 72.0) : const Size(14.0, 72.0));
+    expect(
+      tester.getSize(find.byType(Tab)),
+      material3 ? const Size(14.25, 72.0) : const Size(14.0, 72.0));
   });
 
   testWidgets('Tab color - normal', (WidgetTester tester) async {
@@ -488,24 +493,14 @@ void main() {
 
     const double indicatorWeight = 3.0;
 
-
-    final RRect rrect = ui.ParagraphBuilder.shouldDisableRoundingHack
-      ? RRect.fromLTRBAndCorners(
-          64.75,
-          tabBarBox.size.height - indicatorWeight,
-          135.25,
-          tabBarBox.size.height,
-          topLeft: const Radius.circular(3.0),
-          topRight: const Radius.circular(3.0),
-        )
-      : RRect.fromLTRBAndCorners(
-          64.5,
-          tabBarBox.size.height - indicatorWeight,
-          135.5,
-          tabBarBox.size.height,
-          topLeft: const Radius.circular(3.0),
-          topRight: const Radius.circular(3.0),
-        );
+    final RRect rrect = RRect.fromLTRBAndCorners(
+      64.75,
+      tabBarBox.size.height - indicatorWeight,
+      135.25,
+      tabBarBox.size.height,
+      topLeft: const Radius.circular(3.0),
+      topRight: const Radius.circular(3.0),
+    );
 
     expect(
       tabBarBox,
@@ -2417,7 +2412,7 @@ void main() {
     // that. Tabs are padded horizontally with kTabLabelPadding.
     final double tabRight = 800.0 - kTabLabelPadding.right;
 
-    expect(tester.getTopRight(find.widgetWithText(Tab, 'TAB #19')).dx, tabRight);
+    expect(tester.getTopRight(find.widgetWithText(Tab, 'TAB #19')).dx, moreOrLessEquals(tabRight));
   });
 
   testWidgets('TabBar with indicatorWeight, indicatorPadding (LTR)', (WidgetTester tester) async {
@@ -6090,9 +6085,9 @@ void main() {
 
     // Tabs should fill the width of the TabBar.
     double tabOneLeft = ((tabBar.width / 2) - tabOneRect.width) / 2;
-    expect(tabOneRect.left, equals(tabOneLeft));
+    expect(tabOneRect.left, moreOrLessEquals(tabOneLeft));
     double tabTwoRight = tabBar.width - ((tabBar.width / 2) - tabTwoRect.width) / 2;
-    expect(tabTwoRect.right, equals(tabTwoRight));
+    expect(tabTwoRect.right, moreOrLessEquals(tabTwoRight));
 
     // Test default TabAlignment when isScrollable is true.
     await tester.pumpWidget(buildFrame(
@@ -6107,9 +6102,9 @@ void main() {
 
     // Tabs should be aligned to the start of the TabBar.
     tabOneLeft = kTabLabelPadding.left + tabStartOffset;
-    expect(tabOneRect.left, equals(tabOneLeft));
+    expect(tabOneRect.left, moreOrLessEquals(tabOneLeft));
     tabTwoRight = kTabLabelPadding.horizontal + tabStartOffset + tabOneRect.width + kTabLabelPadding.left + tabTwoRect.width;
-    expect(tabTwoRect.right, equals(tabTwoRight));
+    expect(tabTwoRect.right, moreOrLessEquals(tabTwoRight));
   });
 
   testWidgets('TabAlignment.fill only supports non-scrollable tab bar', (WidgetTester tester) async {
@@ -6182,9 +6177,9 @@ void main() {
 
     // By defaults tabs should fill the width of the TabBar.
     double tabOneLeft = ((availableWidth / 2) - tabOneRect.width) / 2;
-    expect(tabOneRect.left, equals(tabOneLeft));
+    expect(tabOneRect.left, moreOrLessEquals(tabOneLeft));
     double tabTwoRight = availableWidth - ((availableWidth / 2) - tabTwoRect.width) / 2;
-    expect(tabTwoRect.right, equals(tabTwoRight));
+    expect(tabTwoRect.right, moreOrLessEquals(tabTwoRight));
 
     // Test TabAlignment.center when isScrollable is false.
     await tester.pumpWidget(buildFrame(
@@ -6200,9 +6195,9 @@ void main() {
 
     // Tabs should not fill the width of the TabBar.
     tabOneLeft = kTabLabelPadding.left;
-    expect(tabOneRect.left, equals(tabOneLeft));
+    expect(tabOneRect.left, moreOrLessEquals(tabOneLeft));
     tabTwoRight = kTabLabelPadding.horizontal + tabOneRect.width + kTabLabelPadding.left + tabTwoRect.width;
-    expect(tabTwoRect.right, equals(tabTwoRight));
+    expect(tabTwoRect.right, moreOrLessEquals(tabTwoRight));
   });
 
   testWidgets('Material3 - TabAlignment updates tabs alignment (scrollable TabBar)', (WidgetTester tester) async {
@@ -6691,9 +6686,9 @@ void main() {
 
       // By default tabs should fill the width of the TabBar.
       double tabOneLeft = ((tabBar.width / 2) - tabOneRect.width) / 2;
-      expect(tabOneRect.left, equals(tabOneLeft));
+      expect(tabOneRect.left, moreOrLessEquals(tabOneLeft));
       double tabTwoRight = tabBar.width - ((tabBar.width / 2) - tabTwoRect.width) / 2;
-      expect(tabTwoRect.right, equals(tabTwoRight));
+      expect(tabTwoRect.right, moreOrLessEquals(tabTwoRight));
 
       // Test TabAlignment.center when isScrollable is false.
       await tester.pumpWidget(MaterialApp(
@@ -6707,9 +6702,9 @@ void main() {
 
       // Tabs should not fill the width of the TabBar.
       tabOneLeft = kTabLabelPadding.left;
-      expect(tabOneRect.left, equals(tabOneLeft));
+      expect(tabOneRect.left, moreOrLessEquals(tabOneLeft));
       tabTwoRight = kTabLabelPadding.horizontal + tabOneRect.width + kTabLabelPadding.left + tabTwoRect.width;
-      expect(tabTwoRect.right, equals(tabTwoRight));
+      expect(tabTwoRect.right, moreOrLessEquals(tabTwoRight));
     });
   });
 }

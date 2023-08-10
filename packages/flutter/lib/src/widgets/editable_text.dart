@@ -1853,6 +1853,7 @@ class EditableText extends StatefulWidget {
     required final VoidCallback? onPaste,
     required final VoidCallback? onSelectAll,
     required final VoidCallback? onLookUp,
+    required final VoidCallback? onSearchWeb,
     required final VoidCallback? onLiveTextInput,
   }) {
     final List<ContextMenuButtonItem> resultButtonItem = <ContextMenuButtonItem>[];
@@ -1887,6 +1888,11 @@ class EditableText extends StatefulWidget {
           ContextMenuButtonItem(
             onPressed: onLookUp,
             type: ContextMenuButtonType.lookUp,
+          ),
+        if (onSearchWeb != null)
+          ContextMenuButtonItem(
+            onPressed: onSearchWeb,
+            type: ContextMenuButtonType.searchWeb,
           ),
       ]);
     }
@@ -2096,7 +2102,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   final GlobalKey _editableKey = GlobalKey();
 
   /// Detects whether the clipboard can paste.
-  final ClipboardStatusNotifier clipboardStatus = ClipboardStatusNotifier();
+  final ClipboardStatusNotifier clipboardStatus = kIsWeb
+      // Web browsers will show a permission dialog when Clipboard.hasStrings is
+      // called. In an EditableText, this will happen before the paste button is
+      // clicked, often before the context menu is even shown. To avoid this
+      // poor user experience, always show the paste button on web.
+      ? _WebClipboardStatusNotifier()
+      : ClipboardStatusNotifier();
 
   /// Detects whether the Live Text input is enabled.
   ///
@@ -2244,7 +2256,19 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return false;
     }
     return !widget.obscureText
-        && !textEditingValue.selection.isCollapsed;
+        && !textEditingValue.selection.isCollapsed
+        && textEditingValue.selection.textInside(textEditingValue.text).trim() != '';
+  }
+
+  @override
+  bool get searchWebEnabled {
+    if (defaultTargetPlatform != TargetPlatform.iOS) {
+      return false;
+    }
+
+    return !widget.obscureText
+        && !textEditingValue.selection.isCollapsed
+        && textEditingValue.selection.textInside(textEditingValue.text).trim() != '';
   }
 
   @override
@@ -2426,6 +2450,27 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       'LookUp.invoke',
       text,
     );
+  }
+
+  /// Launch a web search on the current selection,
+  ///   as in the "Search Web" edit menu button on iOS.
+  ///
+  /// Currently this is only implemented for iOS.
+  /// When 'obscureText' is true or the selection is empty,
+  /// this function will not do anything
+  Future<void> searchWebForSelection(SelectionChangedCause cause) async {
+    assert(!widget.obscureText);
+    if (widget.obscureText) {
+      return;
+    }
+
+    final String text = textEditingValue.selection.textInside(textEditingValue.text);
+    if (text.isNotEmpty) {
+      await SystemChannels.platform.invokeMethod(
+        'SearchWeb.invoke',
+        text,
+      );
+    }
   }
 
   void _startLiveTextInput(SelectionChangedCause cause) {
@@ -2656,6 +2701,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           : null,
       onLookUp: lookUpEnabled
           ? () => lookUpSelection(SelectionChangedCause.toolbar)
+          : null,
+      onSearchWeb: searchWebEnabled
+          ? () => searchWebForSelection(SelectionChangedCause.toolbar)
           : null,
       onLiveTextInput: liveTextInputEnabled
           ? () => _startLiveTextInput(SelectionChangedCause.toolbar)
@@ -5518,4 +5566,19 @@ class _GlyphHeights {
 
   /// The glyph height of the last line.
   final double end;
+}
+
+/// A [ClipboardStatusNotifier] whose [value] is hardcoded to
+/// [ClipboardStatus.pasteable].
+///
+/// Useful to avoid showing a permission dialog on web, which happens when
+/// [Clipboard.hasStrings] is called.
+class _WebClipboardStatusNotifier extends ClipboardStatusNotifier {
+  @override
+  ClipboardStatus value = ClipboardStatus.pasteable;
+
+  @override
+  Future<void> update() {
+    return Future<void>.value();
+  }
 }

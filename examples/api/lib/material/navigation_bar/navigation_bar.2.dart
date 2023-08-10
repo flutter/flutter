@@ -71,10 +71,14 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
 
   @override
   Widget build(BuildContext context) {
-    return NavigatorPopHandler(
-      onPop: () {
+    return WillPopScope(
+      onWillPop: () async {
         final NavigatorState navigator = navigatorKeys[selectedIndex].currentState!;
+        if (!navigator.canPop()) {
+          return true;
+        }
         navigator.pop();
+        return false;
       },
       child: Scaffold(
         body: SafeArea(
