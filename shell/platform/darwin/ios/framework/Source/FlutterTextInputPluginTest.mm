@@ -2655,6 +2655,17 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)testInteractiveKeyboardDidResignFirstResponderDelegateisCalledAfterDismissedKeyboard {
+  NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
+  XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
+  UIScene* scene = scenes.anyObject;
+  XCTAssert([scene isKindOfClass:[UIWindowScene class]], @"Must be a window scene for test");
+  UIWindowScene* windowScene = (UIWindowScene*)scene;
+  XCTAssert(windowScene.windows.count > 0, @"There must be at least 1 window for test");
+  UIWindow* window = windowScene.windows[0];
+  [window addSubview:viewController.view];
+
+  [viewController loadView];
+
   XCTestExpectation* expectation = [[XCTestExpectation alloc]
       initWithDescription:
           @"didResignFirstResponder is called after screenshot keyboard dismissed."];
@@ -2687,7 +2698,7 @@ FLUTTER_ASSERT_ARC
                              result:^(id _Nullable result){
                              }];
 
-  [self waitForExpectations:@[ expectation ] timeout:1.0];
+  [self waitForExpectations:@[ expectation ] timeout:2.0];
   textInputPlugin.cachedFirstResponder = nil;
 }
 
@@ -2831,6 +2842,12 @@ FLUTTER_ASSERT_ARC
       [FlutterMethodCall methodCallWithMethodName:@"TextInput.onPointerMoveForInteractiveKeyboard"
                                         arguments:@{@"pointerY" : @(1000)}];
   [textInputPlugin handleMethodCall:subsequentMoveCall
+                             result:^(id _Nullable result){
+                             }];
+  FlutterMethodCall* upwardVelocityMoveCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.onPointerMoveForInteractiveKeyboard"
+                                        arguments:@{@"pointerY" : @(500)}];
+  [textInputPlugin handleMethodCall:upwardVelocityMoveCall
                              result:^(id _Nullable result){
                              }];
 
