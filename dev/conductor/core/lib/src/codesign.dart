@@ -125,7 +125,15 @@ class CodesignCommand extends Command<void> {
     await framework.checkout(revision);
 
     // Ensure artifacts present
-    await framework.runFlutter(<String>['precache', '--android', '--ios', '--macos']);
+    final io.ProcessResult result = await framework.runFlutter(
+      <String>['precache', '--android', '--ios', '--macos'],
+    );
+    if (result.exitCode != 0) {
+      stdio.printError(
+        'flutter precache: exitCode: ${result.exitCode}\n'
+        'stdout:\n${result.stdout}\nstderr:\n${result.stderr}',
+      );
+    }
 
     await verifyExist();
     if (argResults![kSignatures] as bool) {
