@@ -61,7 +61,7 @@ class MyHomePage extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  LinkedText.spans(
+                  LinkedText(
                     onTap: (String urlString) => _onTapUrl(context, urlString),
                     spans: <InlineSpan>[
                       TextSpan(
