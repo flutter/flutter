@@ -16,6 +16,13 @@ import 'text.dart';
 /// Works with either a flat [String] ([text]) or a list of [InlineSpans]
 /// ([spans]).
 ///
+/// {@tool dartpad}
+/// This example shows how to create a [LinkedText] that turns URLs into
+/// working links.
+///
+/// ** See code in examples/api/lib/painting/linked_text/linked_text.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [InlineLinkedText], which is like this but is an inline TextSpan instead
@@ -34,6 +41,20 @@ class LinkedText extends StatefulWidget {
   /// [linkBuilder] can be used to specify a custom [InlineSpan] for each
   /// [TextRange] in [ranges].
   /// {@endtemplate}
+  ///
+  /// {@tool dartpad}
+  /// This example shows how to create a [LinkedText] that turns URLs into
+  /// working links.
+  ///
+  /// ** See code in examples/api/lib/painting/linked_text/linked_text.0.dart **
+  /// {@end-tool}
+  ///
+  /// {@tool dartpad}
+  /// This example shows how to use [LinkedText] to link URLs in a TextSpan tree
+  /// instead of in a flat string.
+  ///
+  /// ** See code in examples/api/lib/painting/linked_text/linked_text.3.dart **
+  /// {@end-tool}
   ///
   /// See also:
   ///
@@ -69,6 +90,12 @@ class LinkedText extends StatefulWidget {
 
   /// Create an instance of [LinkedText] where text matched by the given
   /// [RegExp] is made interactive.
+  ///
+  /// {@tool dartpad}
+  /// This example shows how to use [LinkedText.regExp] to link Twitter handles.
+  ///
+  /// ** See code in examples/api/lib/painting/linked_text/linked_text.1.dart **
+  /// {@end-tool}
   ///
   /// See also:
   ///
@@ -107,6 +134,13 @@ class LinkedText extends StatefulWidget {
   /// different behaviors. For example, highlighting both URLs and Twitter
   /// handles with different style and/or behavior.
   /// {@endtemplate}
+  ///
+  /// {@tool dartpad}
+  /// This example shows how to use [LinkedText.textLinkers] to link both URLs
+  /// and Twitter handles independently.
+  ///
+  /// ** See code in examples/api/lib/painting/linked_text/linked_text.2.dart **
+  /// {@end-tool}
   ///
   /// See also:
   ///
