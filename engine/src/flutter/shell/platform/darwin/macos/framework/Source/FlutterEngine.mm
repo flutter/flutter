@@ -90,6 +90,11 @@ constexpr char kTextPlainFormat[] = "text/plain";
  */
 @property(nonatomic, strong) NSMutableArray<NSNumber*>* isResponseValid;
 
+/**
+ * All delegates added via plugin calls to addApplicationDelegate.
+ */
+@property(nonatomic, strong) NSPointerArray* pluginAppDelegates;
+
 - (nullable FlutterViewController*)viewControllerForId:(FlutterViewId)viewId;
 
 /**
@@ -165,7 +170,7 @@ constexpr char kTextPlainFormat[] = "text/plain";
 #pragma mark -
 
 @implementation FlutterEngineTerminationHandler {
-  FlutterEngine* _engine;
+  __weak FlutterEngine* _engine;
   FlutterTerminationCallback _terminator;
 }
 
@@ -320,6 +325,16 @@ constexpr char kTextPlainFormat[] = "text/plain";
   }];
 }
 
+- (void)addApplicationDelegate:(NSObject<FlutterAppLifecycleDelegate>*)delegate {
+  id<NSApplicationDelegate> appDelegate = [[NSApplication sharedApplication] delegate];
+  if ([appDelegate conformsToProtocol:@protocol(FlutterAppLifecycleProvider)]) {
+    id<FlutterAppLifecycleProvider> lifeCycleProvider =
+        static_cast<id<FlutterAppLifecycleProvider>>(appDelegate);
+    [lifeCycleProvider addApplicationLifecycleDelegate:delegate];
+    [_flutterEngine.pluginAppDelegates addPointer:(__bridge void*)delegate];
+  }
+}
+
 - (void)registerViewFactory:(nonnull NSObject<FlutterPlatformViewFactory>*)factory
                      withId:(nonnull NSString*)factoryId {
   [[_flutterEngine platformViewController] registerViewFactory:factory withId:factoryId];
@@ -421,6 +436,8 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   _visible = NO;
   _project = project ?: [[FlutterDartProject alloc] init];
   _messengerHandlers = [[NSMutableDictionary alloc] init];
+  _binaryMessenger = [[FlutterBinaryMessengerRelay alloc] initWithParent:self];
+  _pluginAppDelegates = [NSPointerArray weakObjectsPointerArray];
   _currentMessengerConnection = 1;
   _allowHeadlessExecution = allowHeadlessExecution;
   _semanticsEnabled = NO;
@@ -448,12 +465,12 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   [self setUpAccessibilityChannel];
   [self setUpNotificationCenterListeners];
   id<NSApplicationDelegate> appDelegate = [[NSApplication sharedApplication] delegate];
-  const SEL selector = @selector(addApplicationLifecycleDelegate:);
-  if ([appDelegate respondsToSelector:selector]) {
+  if ([appDelegate conformsToProtocol:@protocol(FlutterAppLifecycleProvider)]) {
     _terminationHandler = [[FlutterEngineTerminationHandler alloc] initWithEngine:self
                                                                        terminator:nil];
-    FlutterAppDelegate* flutterAppDelegate = reinterpret_cast<FlutterAppDelegate*>(appDelegate);
-    [flutterAppDelegate addApplicationLifecycleDelegate:self];
+    id<FlutterAppLifecycleProvider> lifecycleProvider =
+        static_cast<id<FlutterAppLifecycleProvider>>(appDelegate);
+    [lifecycleProvider addApplicationLifecycleDelegate:self];
   } else {
     _terminationHandler = nil;
   }
@@ -462,10 +479,20 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 }
 
 - (void)dealloc {
-  FlutterAppDelegate* appDelegate =
-      reinterpret_cast<FlutterAppDelegate*>([[NSApplication sharedApplication] delegate]);
-  if (appDelegate != nil) {
-    [appDelegate removeApplicationLifecycleDelegate:self];
+  id<NSApplicationDelegate> appDelegate = [[NSApplication sharedApplication] delegate];
+  if ([appDelegate conformsToProtocol:@protocol(FlutterAppLifecycleProvider)]) {
+    id<FlutterAppLifecycleProvider> lifecycleProvider =
+        static_cast<id<FlutterAppLifecycleProvider>>(appDelegate);
+    [lifecycleProvider removeApplicationLifecycleDelegate:self];
+
+    // Unregister any plugins that registered as app delegates, since they are not guaranteed to
+    // live after the engine is destroyed, and their delegation registration is intended to be bound
+    // to the engine and its lifetime.
+    for (id<FlutterAppLifecycleDelegate> delegate in _pluginAppDelegates) {
+      if (delegate) {
+        [lifecycleProvider removeApplicationLifecycleDelegate:delegate];
+      }
+    }
   }
   @synchronized(_isResponseValid) {
     [_isResponseValid removeAllObjects];

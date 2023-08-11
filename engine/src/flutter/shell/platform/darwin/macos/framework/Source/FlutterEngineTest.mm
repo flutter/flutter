@@ -7,8 +7,10 @@
 
 #include <objc/objc.h>
 
+#include <algorithm>
 #include <functional>
 #include <thread>
+#include <vector>
 
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/lib/ui/window/platform_message.h"
@@ -16,6 +18,8 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/common/framework/Source/FlutterBinaryMessengerRelay.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterAppDelegate.h"
+#import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterAppLifecycleDelegate.h"
+#import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterPluginMacOS.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngineTestUtils.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewControllerTestUtils.h"
 #include "flutter/shell/platform/embedder/embedder.h"
@@ -58,6 +62,60 @@ constexpr int64_t kImplicitViewId = 0ll;
   return NSTerminateCancel;
 }
 @end
+
+#pragma mark -
+
+@interface FakeLifecycleProvider : NSObject <FlutterAppLifecycleProvider, NSApplicationDelegate>
+
+@property(nonatomic, strong, readonly) NSPointerArray* registeredDelegates;
+
+// True if the given delegate is currently registered.
+- (BOOL)hasDelegate:(nonnull NSObject<FlutterAppLifecycleDelegate>*)delegate;
+@end
+
+@implementation FakeLifecycleProvider {
+  /**
+   * All currently registered delegates.
+   *
+   * This does not use NSPointerArray or any other weak-pointer
+   * system, because a weak pointer will be nil'd out at the start of dealloc, which will break
+   * queries. E.g., if a delegate is dealloc'd without being unregistered, a weak pointer array
+   * would no longer contain that pointer even though removeApplicationLifecycleDelegate: was never
+   * called, causing tests to pass incorrectly.
+   */
+  std::vector<void*> _delegates;
+}
+
+- (void)addApplicationLifecycleDelegate:(nonnull NSObject<FlutterAppLifecycleDelegate>*)delegate {
+  _delegates.push_back((__bridge void*)delegate);
+}
+
+- (void)removeApplicationLifecycleDelegate:
+    (nonnull NSObject<FlutterAppLifecycleDelegate>*)delegate {
+  auto delegateIndex = std::find(_delegates.begin(), _delegates.end(), (__bridge void*)delegate);
+  NSAssert(delegateIndex != _delegates.end(),
+           @"Attempting to unregister a delegate that was not registered.");
+  _delegates.erase(delegateIndex);
+}
+
+- (BOOL)hasDelegate:(nonnull NSObject<FlutterAppLifecycleDelegate>*)delegate {
+  return std::find(_delegates.begin(), _delegates.end(), (__bridge void*)delegate) !=
+         _delegates.end();
+}
+
+@end
+
+#pragma mark -
+
+@interface FakeAppDelegatePlugin : NSObject <FlutterPlugin>
+@end
+
+@implementation FakeAppDelegatePlugin
++ (void)registerWithRegistrar:(id<FlutterPluginRegistrar>)registrar {
+}
+@end
+
+#pragma mark -
 
 namespace flutter::testing {
 
@@ -515,7 +573,7 @@ TEST_F(FlutterEngineTest, FlutterBinaryMessengerDoesNotRetainEngine) {
                ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
     FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test"
                                                         project:project
-                                         allowHeadlessExecution:true];
+                                         allowHeadlessExecution:YES];
     weakEngine = engine;
     binaryMessenger = engine.binaryMessenger;
   }
@@ -539,7 +597,7 @@ TEST_F(FlutterEngineTest, FlutterTextureRegistryDoesNotReturnEngine) {
                ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
     FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test"
                                                         project:project
-                                         allowHeadlessExecution:true];
+                                         allowHeadlessExecution:YES];
     id<FlutterPluginRegistrar> registrar = [engine registrarForPlugin:@"MyPlugin"];
     textureRegistry = registrar.textures;
   }
@@ -954,6 +1012,42 @@ TEST_F(FlutterEngineTest, HandleLifecycleStates) API_AVAILABLE(macos(10.9)) {
   EXPECT_EQ(sentState, flutter::AppLifecycleState::kHidden);
 
   [mockApplication stopMocking];
+}
+
+TEST_F(FlutterEngineTest, ForwardsPluginDelegateRegistration) {
+  id<NSApplicationDelegate> previousDelegate = [[NSApplication sharedApplication] delegate];
+  FakeLifecycleProvider* fakeAppDelegate = [[FakeLifecycleProvider alloc] init];
+  [NSApplication sharedApplication].delegate = fakeAppDelegate;
+
+  FakeAppDelegatePlugin* plugin = [[FakeAppDelegatePlugin alloc] init];
+  FlutterEngine* engine = CreateMockFlutterEngine(nil);
+
+  [[engine registrarForPlugin:@"TestPlugin"] addApplicationDelegate:plugin];
+
+  EXPECT_TRUE([fakeAppDelegate hasDelegate:plugin]);
+
+  [NSApplication sharedApplication].delegate = previousDelegate;
+}
+
+TEST_F(FlutterEngineTest, UnregistersPluginsOnEngineDestruction) {
+  id<NSApplicationDelegate> previousDelegate = [[NSApplication sharedApplication] delegate];
+  FakeLifecycleProvider* fakeAppDelegate = [[FakeLifecycleProvider alloc] init];
+  [NSApplication sharedApplication].delegate = fakeAppDelegate;
+
+  FakeAppDelegatePlugin* plugin = [[FakeAppDelegatePlugin alloc] init];
+
+  @autoreleasepool {
+    FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
+
+    [[engine registrarForPlugin:@"TestPlugin"] addApplicationDelegate:plugin];
+    EXPECT_TRUE([fakeAppDelegate hasDelegate:plugin]);
+  }
+
+  // When the engine is released, it should unregister any plugins it had
+  // registered on its behalf.
+  EXPECT_FALSE([fakeAppDelegate hasDelegate:plugin]);
+
+  [NSApplication sharedApplication].delegate = previousDelegate;
 }
 
 }  // namespace flutter::testing

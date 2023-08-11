@@ -14,7 +14,7 @@ FLUTTER_ASSERT_ARC
 - (instancetype)initWithParent:(NSObject<FlutterBinaryMessenger>*)parent {
   self = [super init];
   if (self != nil) {
-    self.parent = parent;
+    _parent = parent;
   }
   return self;
 }

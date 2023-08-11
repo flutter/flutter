@@ -11,6 +11,30 @@
 #import "FlutterMacros.h"
 
 /**
+ * A protocol to be implemented by the `NSApplicationDelegate` of an application to enable the
+ * Flutter framework and any Flutter plugins to register to receive application life cycle events.
+ *
+ * Implementers should forward all of the `NSApplicationDelegate` methods corresponding to the
+ * handlers in FlutterAppLifecycleDelegate to any registered delegates.
+ */
+FLUTTER_DARWIN_EXPORT
+@protocol FlutterAppLifecycleProvider <NSObject>
+
+/**
+ * Adds an object implementing |FlutterAppLifecycleDelegate| to the list of
+ * delegates to be informed of application lifecycle events.
+ */
+- (void)addApplicationLifecycleDelegate:(nonnull NSObject<FlutterAppLifecycleDelegate>*)delegate;
+
+/**
+ * Removes an object implementing |FlutterAppLifecycleDelegate| to the list of
+ * delegates to be informed of application lifecycle events.
+ */
+- (void)removeApplicationLifecycleDelegate:(nonnull NSObject<FlutterAppLifecycleDelegate>*)delegate;
+
+@end
+
+/**
  * |NSApplicationDelegate| subclass for simple apps that want default behavior.
  *
  * This class implements the following behaviors:
@@ -20,13 +44,14 @@
  *   * Updates the main Flutter window's title to match the name in the app's Info.plist.
  *     |mainFlutterWindow| must be set before the application finishes launching for this to take
  *     effect.
+ *   * Forwards `NSApplicationDelegate` callbacks to plugins that register for them.
  *
  * App delegates for Flutter applications are *not* required to inherit from
  * this class. Developers of custom app delegate classes should copy and paste
  * code as necessary from FlutterAppDelegate.mm.
  */
 FLUTTER_DARWIN_EXPORT
-@interface FlutterAppDelegate : NSObject <NSApplicationDelegate>
+@interface FlutterAppDelegate : NSObject <NSApplicationDelegate, FlutterAppLifecycleProvider>
 
 /**
  * The application menu in the menu bar.
@@ -38,18 +63,6 @@ FLUTTER_DARWIN_EXPORT
  * primarily intended for use in single-window applications.
  */
 @property(weak, nonatomic) IBOutlet NSWindow* mainFlutterWindow;
-
-/**
- * Adds an object implementing |FlutterAppLifecycleDelegate| to the list of
- * delegates to be informed of application lifecycle events.
- */
-- (void)addApplicationLifecycleDelegate:(NSObject<FlutterAppLifecycleDelegate>*)delegate;
-
-/**
- * Removes an object implementing |FlutterAppLifecycleDelegate| to the list of
- * delegates to be informed of application lifecycle events.
- */
-- (void)removeApplicationLifecycleDelegate:(NSObject<FlutterAppLifecycleDelegate>*)delegate;
 
 @end
 

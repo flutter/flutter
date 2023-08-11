@@ -4,6 +4,7 @@
 
 #import <Foundation/Foundation.h>
 
+#import "FlutterAppLifecycleDelegate.h"
 #import "FlutterChannels.h"
 #import "FlutterCodecs.h"
 #import "FlutterMacros.h"
@@ -22,7 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
  * expand over time to more closely match the functionality of the iOS FlutterPlugin.
  */
 FLUTTER_DARWIN_EXPORT
-@protocol FlutterPlugin <NSObject>
+@protocol FlutterPlugin <NSObject, FlutterAppLifecycleDelegate>
 
 /**
  * Creates an instance of the plugin to register with |registrar| using the desired
