@@ -365,7 +365,7 @@ class _NavigationDestinationBuilder extends StatelessWidget {
                   height: (navigationDrawerTheme.indicatorSize ?? defaults.indicatorSize!).height,
                 ),
 
-                if(disabled)
+                if (disabled)
                   Opacity(
                     opacity: 0.38,
                     child: destinationBody,

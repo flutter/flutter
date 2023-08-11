@@ -395,13 +395,13 @@ void main() {
     final NavigationDrawer drawer = tester.widget(find.byType(NavigationDrawer));
     expect(drawer.tilePadding, const EdgeInsets.symmetric(horizontal: 12.0));
   });
-  
+
   testWidgetsWithLeakTracking('Destinations respect their disabled state', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     int selectedIndex = 0;
 
     widgetSetup(tester, 800);
-    
+
     final Widget widget = _buildWidget(
       scaffoldKey,
       NavigationDrawer(
