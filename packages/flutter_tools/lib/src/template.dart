@@ -361,21 +361,24 @@ class Template {
           context['androidIdentifier'] = _escapeKotlinKeywords(androidIdentifier);
         }
 
-        final bool web = (context['web'] as bool?) ?? false;
+        Map<String, Object?> localContext = context;
 
-        if (web) {
-          // The index.html and manifest.json outputs already have quotes in the template,
-          // so extra quotes are not needed.
-          if (finalDestinationFile.basename == 'index.html' || finalDestinationFile.basename =='manifest.json') {
-            final String? description = context['description'] as String?;
+        // YAML files require that their input is properly escaped with quotes.
+        // Adjust the current context to escape the needed inputs, before writing to the template.
+        if (finalDestinationFile.path.endsWith('.yaml')) {
+          if (finalDestinationFile.path.endsWith('pubspec.yaml')) {
+            // Grab a copy of the context, since it is used to render other templates as well.
+            localContext = Map<String, Object?>.of(localContext);
+
+            final String? description = localContext['description'] as String?;
 
             if (description != null && description.isNotEmpty) {
-              context['description'] = description.replaceAll('"', '');
+              localContext['description'] = escapeYamlString(description);
             }
           }
         }
 
-        final String renderedContents = _templateRenderer.renderString(templateContents, context);
+        final String renderedContents = _templateRenderer.renderString(templateContents, localContext);
 
         finalDestinationFile.writeAsStringSync(renderedContents);
 
