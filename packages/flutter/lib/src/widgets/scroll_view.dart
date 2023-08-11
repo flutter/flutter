@@ -1231,7 +1231,7 @@ class ListView extends BoxScrollView {
     super.shrinkWrap,
     super.padding,
     this.itemExtent,
-    this.itemExtentCallback,
+    this.itemExtentBuilder,
     this.prototypeItem,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
@@ -1245,9 +1245,9 @@ class ListView extends BoxScrollView {
     super.clipBehavior,
   }) : assert(
          (itemExtent == null && prototypeItem == null) ||
-         (itemExtent == null && itemExtentCallback == null) ||
-         (prototypeItem == null && itemExtentCallback == null),
-         'You can only pass one of itemExtent, prototypeItem and itemExtentCallback.',
+         (itemExtent == null && itemExtentBuilder == null) ||
+         (prototypeItem == null && itemExtentBuilder == null),
+         'You can only pass one of itemExtent, prototypeItem and itemExtentBuilder.',
        ),
        childrenDelegate = SliverChildListDelegate(
          children,
@@ -1307,7 +1307,7 @@ class ListView extends BoxScrollView {
     super.shrinkWrap,
     super.padding,
     this.itemExtent,
-    this.itemExtentCallback,
+    this.itemExtentBuilder,
     this.prototypeItem,
     required NullableIndexedWidgetBuilder itemBuilder,
     ChildIndexGetter? findChildIndexCallback,
@@ -1325,9 +1325,9 @@ class ListView extends BoxScrollView {
        assert(semanticChildCount == null || semanticChildCount <= itemCount!),
        assert(
          (itemExtent == null && prototypeItem == null) ||
-         (itemExtent == null && itemExtentCallback == null) ||
-         (prototypeItem == null && itemExtentCallback == null),
-         'You can only pass one of itemExtent, prototypeItem and itemExtentCallback.',
+         (itemExtent == null && itemExtentBuilder == null) ||
+         (prototypeItem == null && itemExtentBuilder == null),
+         'You can only pass one of itemExtent, prototypeItem and itemExtentBuilder.',
        ),
        childrenDelegate = SliverChildBuilderDelegate(
          itemBuilder,
@@ -1415,7 +1415,7 @@ class ListView extends BoxScrollView {
     super.clipBehavior,
   }) : assert(itemCount >= 0),
        itemExtent = null,
-       itemExtentCallback = null,
+       itemExtentBuilder = null,
        prototypeItem = null,
        childrenDelegate = SliverChildBuilderDelegate(
          (BuildContext context, int index) {
@@ -1536,7 +1536,7 @@ class ListView extends BoxScrollView {
     super.padding,
     this.itemExtent,
     this.prototypeItem,
-    this.itemExtentCallback,
+    this.itemExtentBuilder,
     required this.childrenDelegate,
     super.cacheExtent,
     super.semanticChildCount,
@@ -1546,9 +1546,9 @@ class ListView extends BoxScrollView {
     super.clipBehavior,
   }) : assert(
          (itemExtent == null && prototypeItem == null) ||
-         (itemExtent == null && itemExtentCallback == null) ||
-         (prototypeItem == null && itemExtentCallback == null),
-         'You can only pass one of itemExtent, prototypeItem and itemExtentCallback.',
+         (itemExtent == null && itemExtentBuilder == null) ||
+         (prototypeItem == null && itemExtentBuilder == null),
+         'You can only pass one of itemExtent, prototypeItem and itemExtentBuilder.',
        );
 
   /// {@template flutter.widgets.list_view.itemExtent}
@@ -1567,16 +1567,16 @@ class ListView extends BoxScrollView {
   ///    extent along the main axis.
   ///  * The [prototypeItem] property, which allows forcing the children's
   ///    extent to be the same as the given widget.
-  ///  * The [itemExtentCallback] property, which allows forcing the children's
+  ///  * The [itemExtentBuilder] property, which allows forcing the children's
   ///    extent to be the value returned by the callback.
   /// {@endtemplate}
   final double? itemExtent;
 
-  /// {@template flutter.widgets.list_view.itemExtentCallback}
+  /// {@template flutter.widgets.list_view.itemExtentBuilder}
   /// If non-null, forces the children to have the corresponding extent returned
-  /// by the callback.
+  /// by the builder.
   ///
-  /// Specifying an [itemExtentCallback] is more efficient than letting the children
+  /// Specifying an [itemExtentBuilder] is more efficient than letting the children
   /// determine their own extent because the scrolling machinery can make use of
   /// the foreknowledge of the children's extent to save work, for example when
   /// the scroll position changes drastically.
@@ -1594,7 +1594,7 @@ class ListView extends BoxScrollView {
   ///  * The [prototypeItem] property, which allows forcing the children's
   ///    extent to be the same as the given widget.
   /// {@endtemplate}
-  final ItemExtentGetter? itemExtentCallback;
+  final ItemExtentGetter? itemExtentBuilder;
 
   /// {@template flutter.widgets.list_view.prototypeItem}
   /// If non-null, forces the children to have the same extent as the given
@@ -1612,7 +1612,7 @@ class ListView extends BoxScrollView {
   ///    extent as a prototype item along the main axis.
   ///  * The [itemExtent] property, which allows forcing the children's extent
   ///    to a given value.
-  ///  * The [itemExtentCallback] property, which allows forcing the children's
+  ///  * The [itemExtentBuilder] property, which allows forcing the children's
   ///    extent to be the value returned by the callback.
   /// {@endtemplate}
   final Widget? prototypeItem;
@@ -1632,10 +1632,10 @@ class ListView extends BoxScrollView {
         delegate: childrenDelegate,
         itemExtent: itemExtent!,
       );
-    } else if (itemExtentCallback != null) {
+    } else if (itemExtentBuilder != null) {
       return SliverExplicitExtentList(
         delegate: childrenDelegate,
-        itemExtentCallback: itemExtentCallback!,
+        itemExtentBuilder: itemExtentBuilder!,
       );
     } else if (prototypeItem != null) {
       return SliverPrototypeExtentList(

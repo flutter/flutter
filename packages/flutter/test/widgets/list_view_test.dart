@@ -779,7 +779,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/pull/131393
-  testWidgets('itemExtentCallback test', (WidgetTester tester) async {
+  testWidgets('itemExtentBuilder test', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     final List<int> buildLog = <int>[];
     late SliverLayoutDimensions sliverLayoutDimensions;
@@ -788,7 +788,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView.builder(
           controller: controller,
-          itemExtentCallback: (int index, SliverLayoutDimensions dimensions) {
+          itemExtentBuilder: (int index, SliverLayoutDimensions dimensions) {
             sliverLayoutDimensions = dimensions;
             return 100.0;
           },
@@ -909,12 +909,12 @@ void main() {
     expect(buildLog.max, 61);
   });
 
-  testWidgets('itemExtent, prototypeItem and itemExtentCallback conflicts test', (WidgetTester tester) async {
+  testWidgets('itemExtent, prototypeItem and itemExtentBuilder conflicts test', (WidgetTester tester) async {
     Object? error;
     try {
       await tester.pumpWidget(
         ListView.builder(
-          itemExtentCallback: (int index, SliverLayoutDimensions dimensions) {
+          itemExtentBuilder: (int index, SliverLayoutDimensions dimensions) {
             return 100.0;
           },
           itemExtent: 100.0,
@@ -932,7 +932,7 @@ void main() {
     try {
       await tester.pumpWidget(
         ListView.builder(
-          itemExtentCallback: (int index, SliverLayoutDimensions dimensions) {
+          itemExtentBuilder: (int index, SliverLayoutDimensions dimensions) {
             return 100.0;
           },
           prototypeItem: Container(),

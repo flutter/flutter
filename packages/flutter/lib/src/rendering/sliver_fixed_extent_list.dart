@@ -15,7 +15,7 @@ import 'sliver_multi_box_adaptor.dart';
 ///
 /// [RenderSliverFixedExtentBoxAdaptor] places its children in a linear array
 /// along the main axis. Each child is forced to have the [itemExtent] or the
-/// returned value of [itemExtentCallback] in the
+/// returned value of [itemExtentBuilder] in the
 /// main axis and the [SliverConstraints.crossAxisExtent] in the cross axis.
 ///
 /// Subclasses should override [itemExtent] to control the size of the children
@@ -47,8 +47,8 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   /// The main-axis extent of each item.
   double get itemExtent;
 
-  /// The main-axis extent callback of each item.
-  ItemExtentGetter? get itemExtentCallback => null;
+  /// The main-axis extent builder of each item.
+  ItemExtentGetter? get itemExtentBuilder => null;
 
   /// The layout offset for the child with the given index.
   ///
@@ -59,12 +59,12 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   /// layout offset zero.
   @protected
   double indexToLayoutOffset(double itemExtent, int index) {
-    if (itemExtentCallback == null) {
+    if (itemExtentBuilder == null) {
       return itemExtent * index;
     } else {
       double offset = 0.0;
       for (int i = 0; i < index; i++) {
-        offset += itemExtentCallback!(i, _currentLayoutDimensions);
+        offset += itemExtentBuilder!(i, _currentLayoutDimensions);
       }
       return offset;
     }
@@ -79,7 +79,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   /// order, without gaps, starting from layout offset zero.
   @protected
   int getMinChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
-    if (itemExtentCallback == null) {
+    if (itemExtentBuilder == null) {
       if (itemExtent > 0.0) {
         final double actual = scrollOffset / itemExtent;
         final int round = actual.round();
@@ -90,7 +90,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       }
       return 0;
     } else {
-      return _getChildIndexForScrollOffset(scrollOffset, itemExtentCallback!);
+      return _getChildIndexForScrollOffset(scrollOffset, itemExtentBuilder!);
     }
   }
 
@@ -103,7 +103,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   /// order, without gaps, starting from layout offset zero.
   @protected
   int getMaxChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
-    if (itemExtentCallback == null) {
+    if (itemExtentBuilder == null) {
       if (itemExtent > 0.0) {
         final double actual = scrollOffset / itemExtent - 1;
         final int round = actual.round();
@@ -114,7 +114,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       }
       return 0;
     } else {
-      return _getChildIndexForScrollOffset(scrollOffset, itemExtentCallback!);
+      return _getChildIndexForScrollOffset(scrollOffset, itemExtentBuilder!);
     }
   }
 
@@ -169,12 +169,12 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   ///    values.
   @protected
   double computeMaxScrollOffset(SliverConstraints constraints, double itemExtent) {
-    if (itemExtentCallback == null) {
+    if (itemExtentBuilder == null) {
       return childManager.childCount * itemExtent;
     } else {
       double offset = 0.0;
       for (int i = 0; i < childManager.childCount; i++) {
-        offset += itemExtentCallback!(i, _currentLayoutDimensions);
+        offset += itemExtentBuilder!(i, _currentLayoutDimensions);
       }
       return offset;
     }
@@ -218,10 +218,10 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
 
   BoxConstraints _getChildConstraints(int index) {
     double extent;
-    if (itemExtentCallback == null) {
+    if (itemExtentBuilder == null) {
       extent = itemExtent;
     } else {
-      extent = itemExtentCallback!(index, _currentLayoutDimensions);
+      extent = itemExtentBuilder!(index, _currentLayoutDimensions);
     }
     return constraints.asBoxConstraints(
       minExtent: extent,

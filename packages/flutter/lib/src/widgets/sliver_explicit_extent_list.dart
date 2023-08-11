@@ -9,7 +9,7 @@ import 'scroll_delegate.dart';
 import 'sliver.dart';
 
 /// A sliver that places its box children in a linear array and constrains them
-/// to have the extent returned by [itemExtentCallback].
+/// to have the extent returned by [itemExtentBuilder].
 ///
 /// _To learn more about slivers, see [CustomScrollView.slivers]._
 ///
@@ -37,7 +37,7 @@ class SliverExplicitExtentList extends SliverMultiBoxAdaptorWidget {
   const SliverExplicitExtentList({
     super.key,
     required super.delegate,
-    required this.itemExtentCallback,
+    required this.itemExtentBuilder,
   });
 
   /// A sliver that places multiple box children in a linear array along the main
@@ -45,7 +45,7 @@ class SliverExplicitExtentList extends SliverMultiBoxAdaptorWidget {
   ///
   /// [SliverFixedExtentList] places its children in a linear array along the main
   /// axis starting at offset zero and without gaps. Each child is forced to have
-  /// the returned extent of [itemExtentCallback] in the main axis and the
+  /// the returned extent of [itemExtentBuilder] in the main axis and the
   /// [SliverConstraints.crossAxisExtent] in the cross axis.
   ///
   /// This constructor is appropriate for sliver lists with a large (or
@@ -56,7 +56,7 @@ class SliverExplicitExtentList extends SliverMultiBoxAdaptorWidget {
   SliverExplicitExtentList.builder({
     super.key,
     required NullableIndexedWidgetBuilder itemBuilder,
-    required this.itemExtentCallback,
+    required this.itemExtentBuilder,
     ChildIndexGetter? findChildIndexCallback,
     int? itemCount,
     bool addAutomaticKeepAlives = true,
@@ -76,14 +76,14 @@ class SliverExplicitExtentList extends SliverMultiBoxAdaptorWidget {
   ///
   /// [SliverFixedExtentList] places its children in a linear array along the main
   /// axis starting at offset zero and without gaps. Each child is forced to have
-  /// the returned extent of [itemExtentCallback] in the main axis and the
+  /// the returned extent of [itemExtentBuilder] in the main axis and the
   /// [SliverConstraints.crossAxisExtent] in the cross axis.
   ///
   /// This constructor uses a list of [Widget]s to build the sliver.
   SliverExplicitExtentList.list({
     super.key,
     required List<Widget> children,
-    required this.itemExtentCallback,
+    required this.itemExtentBuilder,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
@@ -94,18 +94,18 @@ class SliverExplicitExtentList extends SliverMultiBoxAdaptorWidget {
     addSemanticIndexes: addSemanticIndexes,
   ));
 
-  /// The children extent callback.
-  final ItemExtentGetter itemExtentCallback;
+  /// The children extent builder.
+  final ItemExtentGetter itemExtentBuilder;
 
   @override
   RenderSliverExplicitExtentList createRenderObject(BuildContext context) {
     final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
-    return RenderSliverExplicitExtentList(childManager: element, itemExtentCallback: itemExtentCallback);
+    return RenderSliverExplicitExtentList(childManager: element, itemExtentBuilder: itemExtentBuilder);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderSliverExplicitExtentList renderObject) {
-    renderObject.itemExtentCallback = itemExtentCallback;
+    renderObject.itemExtentBuilder = itemExtentBuilder;
   }
 }
 
@@ -118,17 +118,17 @@ class RenderSliverExplicitExtentList extends RenderSliverFixedExtentBoxAdaptor {
   /// The [childManager] argument must not be null.
   RenderSliverExplicitExtentList({
     required super.childManager,
-    required ItemExtentGetter itemExtentCallback,
-  }) : _itemExtentCallback = itemExtentCallback;
+    required ItemExtentGetter itemExtentBuilder,
+  }) : _itemExtentBuilder = itemExtentBuilder;
 
   @override
-  ItemExtentGetter get itemExtentCallback => _itemExtentCallback;
-  ItemExtentGetter _itemExtentCallback;
-  set itemExtentCallback(ItemExtentGetter value) {
-    if (_itemExtentCallback == value) {
+  ItemExtentGetter get itemExtentBuilder => _itemExtentBuilder;
+  ItemExtentGetter _itemExtentBuilder;
+  set itemExtentBuilder(ItemExtentGetter value) {
+    if (_itemExtentBuilder == value) {
       return;
     }
-    _itemExtentCallback = value;
+    _itemExtentBuilder = value;
     markNeedsLayout();
   }
 

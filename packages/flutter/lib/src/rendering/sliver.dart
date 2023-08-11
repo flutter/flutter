@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
@@ -19,7 +20,9 @@ import 'viewport_offset.dart';
 /// Called to get the item extent by the index of item.
 typedef ItemExtentGetter = double Function(int index, SliverLayoutDimensions dimensions);
 
-/// Holds the relation dimensions of the [RenderSliver] during layout.
+/// Relates the dimensions of the [RenderSliver] during layout.
+///
+/// Used by [ListView.itemExtentBuilder] and [SliverExplicitExtentList.itemExtentBuilder].
 @immutable
 class SliverLayoutDimensions {
   /// Constructs a [SliverLayoutDimensions] with the specified parameters.
