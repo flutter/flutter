@@ -9,7 +9,7 @@ import 'common.dart';
 
 void main() {
   test('ABTest', () {
-    final ABTest ab = ABTest('engine', 'test');
+    final ABTest ab = ABTest(localEngine: 'engine', localEngineHost: 'engine', taskName: 'test');
 
     for (int i = 0; i < 5; i++) {
       final TaskResult aResult = TaskResult.fromJson(<String, dynamic>{

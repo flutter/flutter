@@ -1169,6 +1169,7 @@ class PerfTest {
       await selectedDevice.unlock();
       final String deviceId = selectedDevice.deviceId;
       final String? localEngine = localEngineFromEnv;
+      final String? localEngineHost = localEngineHostFromEnv;
       final String? localEngineSrcPath = localEngineSrcPathFromEnv;
 
       Future<void> Function()? manifestReset;
@@ -1181,6 +1182,10 @@ class PerfTest {
       try {
         final List<String> options = <String>[
           if (localEngine != null) ...<String>['--local-engine', localEngine],
+          if (localEngineHost != null) ...<String>[
+            '--local-engine-host',
+            localEngineHost
+          ],
           if (localEngineSrcPath != null) ...<String>[
             '--local-engine-src-path',
             localEngineSrcPath
