@@ -295,6 +295,7 @@ class NavigationDestination extends StatelessWidget {
     this.selectedIcon,
     required this.label,
     this.tooltip,
+    this.disabled = false,
   });
 
   /// The [Widget] (usually an [Icon]) that's displayed for this
@@ -333,6 +334,11 @@ class NavigationDestination extends StatelessWidget {
   /// Defaults to null, in which case the [label] text will be used.
   final String? tooltip;
 
+  /// Indicates that this destination is inaccessible.
+  /// 
+  /// Defaults to false.
+  final bool disabled;
+
   @override
   Widget build(BuildContext context) {
     final _NavigationDestinationInfo info = _NavigationDestinationInfo.of(context);
@@ -346,15 +352,26 @@ class NavigationDestination extends StatelessWidget {
     return _NavigationDestinationBuilder(
       label: label,
       tooltip: tooltip,
-      buildIcon: (BuildContext context) {
+      disabled: disabled,
+      buildIcon: (BuildContext context) {        
+        IconThemeData selectedIconTheme =
+          navigationBarTheme.iconTheme?.resolve(selectedState) ??
+          defaults.iconTheme!.resolve(selectedState)!;
+        IconThemeData unselectedIconTheme =
+          navigationBarTheme.iconTheme?.resolve(unselectedState)
+          ?? defaults.iconTheme!.resolve(unselectedState)!;
+
+        if(disabled) {
+          selectedIconTheme = selectedIconTheme.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38));
+          unselectedIconTheme = unselectedIconTheme.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38));
+        }
+
         final Widget selectedIconWidget = IconTheme.merge(
-          data: navigationBarTheme.iconTheme?.resolve(selectedState)
-            ?? defaults.iconTheme!.resolve(selectedState)!,
+          data: selectedIconTheme,
           child: selectedIcon ?? icon,
         );
         final Widget unselectedIconWidget = IconTheme.merge(
-          data: navigationBarTheme.iconTheme?.resolve(unselectedState)
-            ?? defaults.iconTheme!.resolve(unselectedState)!,
+          data: unselectedIconTheme,
           child: icon,
         );
 
@@ -378,11 +395,20 @@ class NavigationDestination extends StatelessWidget {
         );
       },
       buildLabel: (BuildContext context) {
-        final TextStyle? effectiveSelectedLabelTextStyle = navigationBarTheme.labelTextStyle?.resolve(selectedState)
+        TextStyle? effectiveSelectedLabelTextStyle = navigationBarTheme.labelTextStyle?.resolve(selectedState)
           ?? defaults.labelTextStyle!.resolve(selectedState);
-        final TextStyle? effectiveUnselectedLabelTextStyle = navigationBarTheme.labelTextStyle?.resolve(unselectedState)
+        TextStyle? effectiveUnselectedLabelTextStyle = navigationBarTheme.labelTextStyle?.resolve(unselectedState)
           ?? defaults.labelTextStyle!.resolve(unselectedState);
+
+        if(disabled) {
+          effectiveSelectedLabelTextStyle = effectiveSelectedLabelTextStyle
+            ?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38));
+          effectiveUnselectedLabelTextStyle = effectiveUnselectedLabelTextStyle
+            ?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38));
+        }
+        
         final TextStyle? textStyle = _isForwardOrCompleted(animation) ? effectiveSelectedLabelTextStyle : effectiveUnselectedLabelTextStyle;
+
         return Padding(
           padding: const EdgeInsets.only(top: 4),
           child: MediaQuery.withClampedTextScaling(
@@ -416,6 +442,7 @@ class _NavigationDestinationBuilder extends StatefulWidget {
     required this.buildLabel,
     required this.label,
     this.tooltip,
+    this.disabled = false,
   });
 
   /// Builds the icon for a destination in a [NavigationBar].
@@ -454,6 +481,11 @@ class _NavigationDestinationBuilder extends StatefulWidget {
   /// Defaults to null, in which case the [label] text will be used.
   final String? tooltip;
 
+  /// Indicates that this destination is inaccessible.
+  /// 
+  /// Defaults to false.
+  final bool disabled;
+
   @override
   State<_NavigationDestinationBuilder> createState() => _NavigationDestinationBuilderState();
 }
@@ -474,7 +506,7 @@ class _NavigationDestinationBuilderState extends State<_NavigationDestinationBui
           iconKey: iconKey,
           labelBehavior: info.labelBehavior,
           customBorder: navigationBarTheme.indicatorShape ?? defaults.indicatorShape,
-          onTap: info.onTap,
+          onTap: widget.disabled ? null : info.onTap,
           child: Row(
             children: <Widget>[
               Expanded(
