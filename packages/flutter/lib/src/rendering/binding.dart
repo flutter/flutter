@@ -595,13 +595,13 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       if (!kReleaseMode) {
         FlutterTimeline.startSync('COMPOSITING');
       }
-      final Map<ui.FlutterView, ui.Scene> tasks = <ui.FlutterView, ui.Scene>{};
+      final Map<ui.FlutterView, ui.Scene> scenes = <ui.FlutterView, ui.Scene>{};
       try {
         for (final RenderView renderView in renderViews) {
-          tasks[renderView.flutterView] = renderView.compositeFrame();
+          scenes[renderView.flutterView] = renderView.compositeFrame();
         }
         // this sends the bits to the GPU
-        PlatformDispatcher.instance.render(tasks);
+        PlatformDispatcher.instance.renderScenes(scenes);
       } finally {
         for (final ui.Scene scene in tasks.values) {
           scene.dispose();
