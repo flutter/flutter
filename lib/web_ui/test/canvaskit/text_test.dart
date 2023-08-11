@@ -124,21 +124,12 @@ void testMain() {
       });
     });
 
-    test('applyRoundingHack works', () {
-      bool assertsEnabled = false;
-      assert(() {
-        assertsEnabled = true;
-        return true;
-      }());
-      if (!assertsEnabled){
-        return;
-      }
+    test('rounding hack disabled by default', () {
+      expect(ui.ParagraphBuilder.shouldDisableRoundingHack, isTrue);
 
       const double fontSize = 1.25;
       const String text = '12345';
       assert((fontSize * text.length).truncate() != fontSize * text.length);
-      final bool roundingHackWasDisabled = ui.ParagraphBuilder.shouldDisableRoundingHack;
-      ui.ParagraphBuilder.setDisableRoundingHack(true);
       final ui.ParagraphBuilder builder = ui.ParagraphBuilder(
         ui.ParagraphStyle(fontSize: fontSize, fontFamily: 'FlutterTest'),
       );
@@ -153,19 +144,32 @@ void testMain() {
         case final List<ui.LineMetrics> metrics:
           expect(metrics, hasLength(1));
       }
-      ui.ParagraphBuilder.setDisableRoundingHack(roundingHackWasDisabled);
     });
 
-    test('rounding hack disabled by default', () {
+    test('setDisableRoundinghHack to false works in tests', () {
+      bool assertsEnabled = false;
+      assert(() {
+        assertsEnabled = true;
+        return true;
+      }());
+      if (!assertsEnabled){
+        return;
+      }
+
+      if (ui.ParagraphBuilder.shouldDisableRoundingHack) {
+        ui.ParagraphBuilder.setDisableRoundingHack(false);
+        addTearDown(() => ui.ParagraphBuilder.setDisableRoundingHack(true));
+      }
+
+      assert(!ui.ParagraphBuilder.shouldDisableRoundingHack);
       const double fontSize = 1.25;
       const String text = '12345';
       assert((fontSize * text.length).truncate() != fontSize * text.length);
-      expect(ui.ParagraphBuilder.shouldDisableRoundingHack, isTrue);
       final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle(fontSize: fontSize, fontFamily: 'FlutterTest'));
       builder.addText(text);
       final ui.Paragraph paragraph = builder.build()
         ..layout(const ui.ParagraphConstraints(width: text.length * fontSize));
-      expect(paragraph.computeLineMetrics().length, 1);
+      expect(paragraph.computeLineMetrics().length, greaterThan(1));
     });
 
     // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
