@@ -1,4 +1,4 @@
-Signature: 26c5c3ab3135db1a839447b044aa65e0
+Signature: 8ffb2b8dc428de21926e0bad37e681e8
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8893,6 +8893,7 @@ ORIGIN: ../../../third_party/skia/include/gpu/graphite/BackendSemaphore.h + ../.
 ORIGIN: ../../../third_party/skia/include/gpu/graphite/Image.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/graphite/Surface.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/graphite/YUVABackendTextures.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/include/private/base/SkAnySubclass.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/base/SkCPUTypes.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/chromium/GrDeferredDisplayList.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/chromium/GrDeferredDisplayListRecorder.h + ../../../third_party/skia/LICENSE
@@ -9122,6 +9123,7 @@ FILE: ../../../third_party/skia/include/gpu/graphite/BackendSemaphore.h
 FILE: ../../../third_party/skia/include/gpu/graphite/Image.h
 FILE: ../../../third_party/skia/include/gpu/graphite/Surface.h
 FILE: ../../../third_party/skia/include/gpu/graphite/YUVABackendTextures.h
+FILE: ../../../third_party/skia/include/private/base/SkAnySubclass.h
 FILE: ../../../third_party/skia/include/private/base/SkCPUTypes.h
 FILE: ../../../third_party/skia/include/private/chromium/GrDeferredDisplayList.h
 FILE: ../../../third_party/skia/include/private/chromium/GrDeferredDisplayListRecorder.h
