@@ -335,7 +335,7 @@ class NavigationDestination extends StatelessWidget {
   final String? tooltip;
 
   /// Indicates that this destination is inaccessible.
-  /// 
+  ///
   /// Defaults to false.
   final bool disabled;
 
@@ -353,7 +353,7 @@ class NavigationDestination extends StatelessWidget {
       label: label,
       tooltip: tooltip,
       disabled: disabled,
-      buildIcon: (BuildContext context) {        
+      buildIcon: (BuildContext context) {
         IconThemeData selectedIconTheme =
           navigationBarTheme.iconTheme?.resolve(selectedState) ??
           defaults.iconTheme!.resolve(selectedState)!;
@@ -361,7 +361,7 @@ class NavigationDestination extends StatelessWidget {
           navigationBarTheme.iconTheme?.resolve(unselectedState)
           ?? defaults.iconTheme!.resolve(unselectedState)!;
 
-        if(disabled) {
+        if (disabled) {
           selectedIconTheme = selectedIconTheme.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38));
           unselectedIconTheme = unselectedIconTheme.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38));
         }
@@ -400,13 +400,13 @@ class NavigationDestination extends StatelessWidget {
         TextStyle? effectiveUnselectedLabelTextStyle = navigationBarTheme.labelTextStyle?.resolve(unselectedState)
           ?? defaults.labelTextStyle!.resolve(unselectedState);
 
-        if(disabled) {
+        if (disabled) {
           effectiveSelectedLabelTextStyle = effectiveSelectedLabelTextStyle
             ?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38));
           effectiveUnselectedLabelTextStyle = effectiveUnselectedLabelTextStyle
             ?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38));
         }
-        
+
         final TextStyle? textStyle = _isForwardOrCompleted(animation) ? effectiveSelectedLabelTextStyle : effectiveUnselectedLabelTextStyle;
 
         return Padding(
@@ -482,7 +482,7 @@ class _NavigationDestinationBuilder extends StatefulWidget {
   final String? tooltip;
 
   /// Indicates that this destination is inaccessible.
-  /// 
+  ///
   /// Defaults to false.
   final bool disabled;
 
