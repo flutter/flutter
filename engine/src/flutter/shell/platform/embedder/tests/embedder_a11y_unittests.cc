@@ -93,7 +93,7 @@ TEST_F(EmbedderTest, CannotProvideMultipleSemanticsCallbacks) {
   }
 }
 
-TEST_F(EmbedderA11yTest, A11yTreeIsConsistent) {
+TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV3Callbacks) {
 #if defined(OS_FUCHSIA)
   GTEST_SKIP() << "This test crashes on Fuchsia. https://fxbug.dev/87493 ";
 #else
@@ -272,7 +272,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistent) {
 #endif  // OS_FUCHSIA
 }
 
-TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingUnstableCallbacks) {
+TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV2Callbacks) {
 #if defined(OS_FUCHSIA)
   GTEST_SKIP() << "This test crashes on Fuchsia. https://fxbug.dev/87493 ";
 #else
@@ -449,7 +449,7 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingUnstableCallbacks) {
 #endif  // OS_FUCHSIA
 }
 
-TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingLegacyCallbacks) {
+TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV1Callbacks) {
   auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
 
   fml::AutoResetWaitableEvent signal_native_latch;
