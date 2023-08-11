@@ -9,7 +9,6 @@ import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
-import 'package:process/process.dart';
 import 'package:xml/xml.dart';
 
 import '../framework/devices.dart';

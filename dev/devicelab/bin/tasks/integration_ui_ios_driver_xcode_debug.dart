@@ -5,6 +5,7 @@
 import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/tasks/integration_tests.dart';
+import 'package:flutter_devicelab/tasks/xcode_automation_permission.dart';
 
 Future<void> main() async {
   // TODO(vashworth): Remove after Xcode 15 and iOS 17 are in CI (https://github.com/flutter/flutter/issues/132128)
@@ -13,9 +14,12 @@ Future<void> main() async {
   // workflow in CI to test from older versions since devicelab has not yet been
   // updated to iOS 17 and Xcode 15.
   deviceOperatingSystem = DeviceOperatingSystem.ios;
+  final XcodeAutomationPermission automationPermission = XcodeAutomationPermission();
+  await automationPermission.updatePermission();
   await task(createEndToEndDriverTest(
     environment: <String, String>{
       'FORCE_XCODE_DEBUG': 'true',
     },
   ));
+  automationPermission.resetPermissions();
 }
