@@ -1,10 +1,17 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:io';
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:process/process.dart';
 
-
+/// Dismiss Automation Control dialog and temporarily give permission to Automate Xcode.
+///
+// TODO(vashworth): Move to recipes before putting iOS 17 device in CI:
+// https://github.com/flutter/flutter/issues/132251
 class XcodeAutomationPermission {
 
   File? db;
@@ -54,7 +61,7 @@ class XcodeAutomationPermission {
       }
 
       // Run an arbitrary AppleScript Xcode command to trigger permissions dialog.
-      final Directory tempDirectory = fileSystem.systemTempDirectory.createTempSync('temp_automation.');
+      // The AppleScript just counts how many Xcode windows are open.
       final Process scriptProcess = await processManager.start(
         <String>[
           'osascript',
@@ -63,7 +70,7 @@ class XcodeAutomationPermission {
           '-e',
           'launch',
           '-e',
-          'make "${tempDirectory.childFile('empty.txt').path}"',
+          'count window',
           '-e',
           'end tell',
         ],
@@ -77,9 +84,6 @@ class XcodeAutomationPermission {
 
       // The Applescript will hang if permission hasn't been given, so kill it.
       scriptProcess.kill();
-      if (tempDirectory.existsSync()) {
-        tempDirectory.deleteSync();
-      }
 
       // Kill the dialog. After killing the dialog, an entry for the app requesting
       // control of Xcode should automatically be added to the DB.
