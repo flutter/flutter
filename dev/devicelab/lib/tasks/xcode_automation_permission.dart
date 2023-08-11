@@ -60,6 +60,8 @@ class XcodeAutomationPermission {
         localDB.copySync(backup!.path);
       }
 
+      print('Triggering dialog...');
+
       // Run an arbitrary AppleScript Xcode command to trigger permissions dialog.
       // The AppleScript just counts how many Xcode windows are open.
       final Process scriptProcess = await processManager.start(
@@ -101,7 +103,7 @@ class XcodeAutomationPermission {
       await _queryDB(db: localDB, processManager: processManager);
 
       // Update the DB to make it think permission was given.
-      print('Updating real db...');
+      print('Updating db...');
       final ProcessResult updateResult = await processManager.run(
         <String>[
           'sqlite3',
