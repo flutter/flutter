@@ -193,7 +193,7 @@ class NavigationDrawerDestination extends StatelessWidget {
     required this.icon,
     this.selectedIcon,
     required this.label,
-    this.disabled = false,
+    this.enabled = true,
   });
 
   /// Sets the color of the [Material] that holds all of the [Drawer]'s
@@ -230,8 +230,8 @@ class NavigationDrawerDestination extends StatelessWidget {
   /// text style would use [TextTheme.labelLarge] with [ColorScheme.onSurfaceVariant].
   final Widget label;
 
-  /// Indicates that this destination is inaccessible.
-  final bool disabled;
+  /// Indicates that this destination is accessible.
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -279,7 +279,7 @@ class NavigationDrawerDestination extends StatelessWidget {
           child: label,
         );
       },
-      disabled: disabled,
+      enabled: enabled,
     );
   }
 }
@@ -301,7 +301,7 @@ class _NavigationDestinationBuilder extends StatelessWidget {
   const _NavigationDestinationBuilder({
     required this.buildIcon,
     required this.buildLabel,
-    this.disabled = false,
+    this.enabled = true,
   });
 
   /// Builds the icon for a destination in a [NavigationDrawer].
@@ -328,7 +328,7 @@ class _NavigationDestinationBuilder extends StatelessWidget {
   /// animation is decreasing or dismissed.
   final WidgetBuilder buildLabel;
 
-  final bool disabled;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -352,7 +352,7 @@ class _NavigationDestinationBuilder extends StatelessWidget {
           height: navigationDrawerTheme.tileHeight ?? defaults.tileHeight,
           child: InkWell(
             highlightColor: Colors.transparent,
-            onTap: disabled ? null : info.onTap,
+            onTap: enabled ? info.onTap : null,
             customBorder: info.indicatorShape ?? navigationDrawerTheme.indicatorShape ?? defaults.indicatorShape!,
             child: Stack(
               alignment: Alignment.center,
@@ -365,13 +365,13 @@ class _NavigationDestinationBuilder extends StatelessWidget {
                   height: (navigationDrawerTheme.indicatorSize ?? defaults.indicatorSize!).height,
                 ),
 
-                if (disabled)
+                if (enabled)
+                  destinationBody
+                else
                   Opacity(
                     opacity: 0.38,
                     child: destinationBody,
-                  )
-                else
-                  destinationBody,
+                  ),
               ],
             ),
           ),
