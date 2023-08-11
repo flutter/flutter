@@ -107,7 +107,9 @@ void main() {
     expect(subMenuMaterial.color, equals(Colors.red));
   });
 
-  testWidgetsWithLeakTracking('Constructor parameters override theme parameters', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Constructor parameters override theme parameters',
+
+  (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -198,7 +200,8 @@ void main() {
             .first)
         .style;
     expect(textButtonStyle?.overlayColor?.resolve(<MaterialState>{MaterialState.hovered}), equals(Colors.blueGrey));
-  });
+  },leakTrackingTestConfig: LeakTrackingTestConfig.retainingPath()
+  ,);
 }
 
 List<Widget> createTestMenus({
