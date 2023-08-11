@@ -28,7 +28,8 @@ cd myapp
 cp ../../main.dart lib/main.dart
 flutter build bundle \
         --local-engine-src-path ../../../../../ \
-        --local-engine=$variant
+        --local-engine=$variant \
+        --local-engine-host=$variant
 cd -
 
 #################################################################
