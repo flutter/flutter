@@ -163,6 +163,7 @@ List<FlutterCommand> generateCommands({
     platform: globals.platform,
     processInfo: globals.processInfo,
     fileSystem: globals.fs,
+    noOp: true,
   ),
   BuildCommand(
     fileSystem: globals.fs,

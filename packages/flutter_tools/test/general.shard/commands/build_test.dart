@@ -74,6 +74,7 @@ void main() {
         ),
       ),
       AttachCommand(
+        noOp: true,
         stdio: FakeStdio(),
         logger: logger,
         terminal: FakeTerminal(),

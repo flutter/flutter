@@ -70,6 +70,7 @@ class AttachCommand extends FlutterCommand {
     required Platform platform,
     required ProcessInfo processInfo,
     required FileSystem fileSystem,
+    required bool noOp,
   }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(),
        _stdio = stdio,
        _logger = logger,
@@ -77,7 +78,8 @@ class AttachCommand extends FlutterCommand {
        _signals = signals,
        _platform = platform,
        _processInfo = processInfo,
-       _fileSystem = fileSystem {
+       _fileSystem = fileSystem,
+       assert(noOp) {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false, excludeRelease: true);
     usesTargetOption();
     usesPortOptions(verboseHelp: verboseHelp);
