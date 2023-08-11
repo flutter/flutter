@@ -19,6 +19,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
+
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.android.FlutterFragment;
 import io.flutter.embedding.android.FlutterFragmentActivity;
@@ -53,7 +55,8 @@ class FlutterDeviceScreenshot {
    * @return the Flutter view.
    */
   @Nullable
-  private static FlutterView getFlutterView(@NonNull Activity activity) {
+  @VisibleForTesting
+  public static FlutterView getFlutterView(@NonNull Activity activity) {
     if (activity instanceof FlutterActivity) {
       return (FlutterView)activity.findViewById(FlutterActivity.FLUTTER_VIEW_ID);
     } else if (activity instanceof FlutterFragmentActivity) {
@@ -118,7 +121,7 @@ class FlutterDeviceScreenshot {
     }
   }
 
-  // Handlers use to capture a view.
+  // Handlers used to capture a view.
   private static Handler backgroundHandler;
   private static Handler mainHandler;
 
