@@ -5,6 +5,7 @@
 import 'dart:collection' show Queue;
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
@@ -229,6 +230,7 @@ class BottomNavigationBar extends StatefulWidget {
     Color? fixedColor,
     this.backgroundColor,
     this.iconSize = 24.0,
+    this.splashRadius = 25.0,
     Color? selectedItemColor,
     this.unselectedItemColor,
     this.selectedIconTheme,
@@ -303,6 +305,8 @@ class BottomNavigationBar extends StatefulWidget {
   ///
   /// See [BottomNavigationBarItem.icon] for more information.
   final double iconSize;
+
+  final double splashRadius;
 
   /// The color of the selected [BottomNavigationBarItem.icon] and
   /// [BottomNavigationBarItem.label].
@@ -448,7 +452,8 @@ class _BottomNavigationTile extends StatelessWidget {
     this.type,
     this.item,
     this.animation,
-    this.iconSize, {
+    this.iconSize,
+    this.splashRadius, {
     this.onTap,
     this.labelColorTween,
     this.iconColorTween,
@@ -470,6 +475,7 @@ class _BottomNavigationTile extends StatelessWidget {
   final BottomNavigationBarItem item;
   final Animation<double> animation;
   final double iconSize;
+  final double splashRadius;
   final VoidCallback? onTap;
   final ColorTween? labelColorTween;
   final ColorTween? iconColorTween;
@@ -566,6 +572,7 @@ class _BottomNavigationTile extends StatelessWidget {
 
     Widget result = InkResponse(
       onTap: onTap,
+      radius: splashRadius,
       mouseCursor: mouseCursor,
       enableFeedback: enableFeedback,
       child: Padding(
@@ -1094,6 +1101,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         widget.items[i],
         _animations[i],
         widget.iconSize,
+        widget.splashRadius,
         selectedIconTheme: widget.useLegacyColorScheme ? widget.selectedIconTheme ?? bottomTheme.selectedIconTheme : effectiveSelectedIconTheme,
         unselectedIconTheme: widget.useLegacyColorScheme ? widget.unselectedIconTheme ?? bottomTheme.unselectedIconTheme : effectiveUnselectedIconTheme,
         selectedLabelStyle: effectiveSelectedLabelStyle,
