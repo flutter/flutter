@@ -618,18 +618,16 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @override
   Future<void> performReassemble() async {
     await super.performReassemble();
-    if (BindingBase.debugReassembleConfig?.widgetName == null) {
-      if (!kReleaseMode) {
-        FlutterTimeline.startSync('Preparing Hot Reload (layout)');
+    if (!kReleaseMode) {
+      FlutterTimeline.startSync('Preparing Hot Reload (layout)');
+    }
+    try {
+      for (final RenderView renderView in renderViews) {
+        renderView.reassemble();
       }
-      try {
-        for (final RenderView renderView in renderViews) {
-          renderView.reassemble();
-        }
-      } finally {
-        if (!kReleaseMode) {
-          FlutterTimeline.finishSync();
-        }
+    } finally {
+      if (!kReleaseMode) {
+        FlutterTimeline.finishSync();
       }
     }
     scheduleWarmUpFrame();

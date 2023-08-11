@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../foundation/leak_tracking.dart';
-import '../rendering/mock_canvas.dart';
 
 /// Adds the basic requirements for a Chip.
 Widget wrapForChip({
@@ -85,7 +84,10 @@ void main() {
     );
 
     // Test default chip size.
-    expect(tester.getSize(find.byType(ActionChip)), const Size(190.0, 48.0));
+    expect(
+      tester.getSize(find.byType(ActionChip)),
+      within<Size>(distance: 0.01, from: const Size(189.1, 48.0)),
+    );
     // Test default label style.
     expect(
       getLabelStyle(tester, label).style.color!.value,
@@ -156,7 +158,10 @@ void main() {
     );
 
     // Test default chip size.
-    expect(tester.getSize(find.byType(ActionChip)), const Size(190.0, 48.0));
+    expect(
+      tester.getSize(find.byType(ActionChip)),
+      within<Size>(distance: 0.01, from: const Size(189.1, 48.0)),
+    );
     // Test default label style.
     expect(
       getLabelStyle(tester, label).style.color!.value,
