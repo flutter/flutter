@@ -29,7 +29,7 @@ class XcodeAutomationPermission {
         'com.apple.TCC',
       ));
 
-      final File localDB = db!;
+      final File localDB = tccDir.childFile('TCC.db');
       try {
         if (!localDB.existsSync()) {
           print('File ${localDB.path} does not exist');
@@ -39,7 +39,7 @@ class XcodeAutomationPermission {
         print('Path Access to ${localDB.path} failed');
         return;
       }
-      db = tccDir.childFile('TCC.db');
+      db = localDB;
 
       // Print contents of DB.
       await _queryDB(db: localDB, processManager: processManager);
