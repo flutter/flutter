@@ -778,17 +778,12 @@ Future<void> testMain() async {
 
   test('$CanvasParagraph.width should be a whole integer when shouldDisableRoundingHack is false', () {
     if (ui.ParagraphBuilder.shouldDisableRoundingHack) {
-      // Try applying the rounding hack if it's disabled. This may not work if
-      // the 'SKPARAGRAPH_REMOVE_ROUNDING_HACK' dart environment declaration
-      // is set to 'false'.
       ui.ParagraphBuilder.setDisableRoundingHack(false);
       addTearDown(() => ui.ParagraphBuilder.setDisableRoundingHack(true));
     }
     // The paragraph width is only rounded to a whole integer if
     // shouldDisableRoundingHack is false.
-    if (ui.ParagraphBuilder.shouldDisableRoundingHack) {
-      return;
-    }
+    assert(!ui.ParagraphBuilder.shouldDisableRoundingHack);
     final ui.Paragraph paragraph = plain(ahemStyle, 'abc');
     paragraph.layout(const ui.ParagraphConstraints(width: 30.8));
 

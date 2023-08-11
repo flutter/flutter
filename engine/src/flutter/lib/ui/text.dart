@@ -3029,21 +3029,13 @@ abstract class ParagraphBuilder {
   @Deprecated('''
     The shouldDisableRoundingHack flag is for internal migration purposes only and should not be used.
   ''')
-  static bool get shouldDisableRoundingHack {
-    return const bool.fromEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK', defaultValue: true)
-        || _roundingHackDisabledInDebugMode;
-  }
-  static bool _roundingHackDisabledInDebugMode = true;
-
-  /// Only works in debug mode. Do not call this method as it is for migration
-  /// purposes only and will soon be removed.
+  static bool get shouldDisableRoundingHack => _shouldDisableRoundingHack;
+  static bool _shouldDisableRoundingHack = true;
+  /// Do not call this method as it is for migration purposes only and will soon
+  /// be removed.
+  // ignore: use_setters_to_change_properties
   static void setDisableRoundingHack(bool disableRoundingHack) {
-    // bool.hasEnvironment does not work in internal tests so an additional flag
-    // is needed for tests.
-    assert(() {
-      _roundingHackDisabledInDebugMode = disableRoundingHack;
-      return true;
-    }());
+    _shouldDisableRoundingHack = disableRoundingHack;
   }
 
   /// The number of placeholders currently in the paragraph.
