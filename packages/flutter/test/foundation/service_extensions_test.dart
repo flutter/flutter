@@ -1049,7 +1049,7 @@ void main() {
       calledCount += 1;
     });
 
-    result = await binding.testExtension('invokePreHotRestartCallbacks', <String, String>{});
+    result = await binding.testExtension(FoundationServiceExtensions.invokePreHotRestartCallbacks.name, <String, String>{});
 
     expect(result, isNotNull);
     expect(calledCount, 1);
@@ -1067,7 +1067,7 @@ void main() {
       throw Exception();
     }, debugLabel: 'foo');
 
-    result = await binding.testExtension('invokePreHotRestartCallbacks', <String, String>{});
+    result = await binding.testExtension(FoundationServiceExtensions.invokePreHotRestartCallbacks.name, <String, String>{});
 
     expect(result, isNotNull);
     expect(lastError.toString(), contains(
@@ -1090,7 +1090,7 @@ void main() {
       throw Exception();
     }, debugLabel: 'foo');
 
-    result = await binding.testExtension('invokePreHotRestartCallbacks', <String, String>{});
+    result = await binding.testExtension(FoundationServiceExtensions.invokePreHotRestartCallbacks.name, <String, String>{});
 
     expect(result, isNotNull);
     expect(lastError.toString(), contains(
