@@ -200,8 +200,7 @@ void main() {
             .first)
         .style;
     expect(textButtonStyle?.overlayColor?.resolve(<MaterialState>{MaterialState.hovered}), equals(Colors.blueGrey));
-  },leakTrackingTestConfig: LeakTrackingTestConfig.retainingPath()
-  ,);
+  });
 }
 
 List<Widget> createTestMenus({
