@@ -157,6 +157,7 @@ void main() {
 
     // Backwards selection.
     await gesture.down(textOffsetToPosition(paragraph, 3));
+    await tester.pumpAndSettle();
     expect(content, isNull);
     await gesture.moveTo(textOffsetToPosition(paragraph, 0));
     await gesture.up();
