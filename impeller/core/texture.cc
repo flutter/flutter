@@ -23,7 +23,7 @@ bool Texture::SetContents(const uint8_t* contents,
   if (!OnSetContents(contents, length, slice)) {
     return false;
   }
-  intent_ = TextureIntent::kUploadFromHost;
+  coordinate_system_ = TextureCoordinateSystem::kUploadFromHost;
   is_opaque_ = is_opaque;
   return true;
 }
@@ -41,7 +41,7 @@ bool Texture::SetContents(std::shared_ptr<const fml::Mapping> mapping,
   if (!OnSetContents(std::move(mapping), slice)) {
     return false;
   }
-  intent_ = TextureIntent::kUploadFromHost;
+  coordinate_system_ = TextureCoordinateSystem::kUploadFromHost;
   is_opaque_ = is_opaque;
   return true;
 }
@@ -70,12 +70,12 @@ bool Texture::IsSliceValid(size_t slice) const {
   FML_UNREACHABLE();
 }
 
-void Texture::SetIntent(TextureIntent intent) {
-  intent_ = intent;
+void Texture::SetCoordinateSystem(TextureCoordinateSystem coordinate_system) {
+  coordinate_system_ = coordinate_system;
 }
 
-TextureIntent Texture::GetIntent() const {
-  return intent_;
+TextureCoordinateSystem Texture::GetCoordinateSystem() const {
+  return coordinate_system_;
 }
 
 Scalar Texture::GetYCoordScale() const {

@@ -196,7 +196,7 @@ FLUTTER_ASSERT_ARC
     yDesc.size = {textureSize.width(), textureSize.height()};
     yDesc.mip_count = 1;
     auto yTexture = impeller::TextureMTL::Wrapper(yDesc, yTex);
-    yTexture->SetIntent(impeller::TextureIntent::kUploadFromHost);
+    yTexture->SetCoordinateSystem(impeller::TextureCoordinateSystem::kUploadFromHost);
 
     impeller::TextureDescriptor uvDesc;
     uvDesc.storage_mode = impeller::StorageMode::kHostVisible;
@@ -204,7 +204,7 @@ FLUTTER_ASSERT_ARC
     uvDesc.size = {textureSize.width() / 2, textureSize.height() / 2};
     uvDesc.mip_count = 1;
     auto uvTexture = impeller::TextureMTL::Wrapper(uvDesc, uvTex);
-    uvTexture->SetIntent(impeller::TextureIntent::kUploadFromHost);
+    uvTexture->SetCoordinateSystem(impeller::TextureCoordinateSystem::kUploadFromHost);
 
     impeller::YUVColorSpace yuvColorSpace =
         _pixelFormat == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange
@@ -263,7 +263,7 @@ FLUTTER_ASSERT_ARC
     desc.size = {textureSize.width(), textureSize.height()};
     desc.mip_count = 1;
     auto texture = impeller::TextureMTL::Wrapper(desc, rgbaTex);
-    texture->SetIntent(impeller::TextureIntent::kUploadFromHost);
+    texture->SetCoordinateSystem(impeller::TextureCoordinateSystem::kUploadFromHost);
     return impeller::DlImageImpeller::Make(texture);
   }
 

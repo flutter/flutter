@@ -153,7 +153,8 @@ void HardwareBufferExternalTextureImpellerGL::ProcessFrame(
   auto texture = std::make_shared<impeller::TextureGLES>(
       impeller_context_->GetReactor(), desc,
       impeller::TextureGLES::IsWrapped::kWrapped);
-  texture->SetIntent(impeller::TextureIntent::kUploadFromHost);
+  texture->SetCoordinateSystem(
+      impeller::TextureCoordinateSystem::kUploadFromHost);
   if (!texture->Bind()) {
     FML_LOG(ERROR) << "Could not bind texture.";
     NDKHelpers::AHardwareBuffer_release(latest_hardware_buffer);
