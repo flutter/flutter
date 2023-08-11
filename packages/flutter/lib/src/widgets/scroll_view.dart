@@ -1586,7 +1586,7 @@ class ListView extends BoxScrollView {
   ///
   /// See also:
   ///
-  ///  * [SliverFixedExtentList], the sliver used internally when this property
+  ///  * [SliverExplicitExtentList], the sliver used internally when this property
   ///    is provided. It constrains its box children to have a specific given
   ///    extent along the main axis.
   ///  * The [itemExtent] property, which allows forcing the children's extent
