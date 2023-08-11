@@ -269,6 +269,8 @@ ContentContext::ContentContext(std::shared_ptr<Context> context)
       CreateDefaultPipeline<BlendPipeline>(*context_);
   texture_pipelines_[default_options_] =
       CreateDefaultPipeline<TexturePipeline>(*context_);
+  texture_external_pipelines_[default_options_] =
+      CreateDefaultPipeline<TextureExternalPipeline>(*context_);
   position_uv_pipelines_[default_options_] =
       CreateDefaultPipeline<PositionUVPipeline>(*context_);
   tiled_texture_pipelines_[default_options_] =
