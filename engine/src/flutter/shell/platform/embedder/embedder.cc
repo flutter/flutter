@@ -56,6 +56,7 @@ extern const intptr_t kPlatformStrongDillSize;
 #include "flutter/shell/platform/embedder/embedder_platform_message_response.h"
 #include "flutter/shell/platform/embedder/embedder_render_target.h"
 #include "flutter/shell/platform/embedder/embedder_render_target_skia.h"
+#include "flutter/shell/platform/embedder/embedder_semantics_update.h"
 #include "flutter/shell/platform/embedder/embedder_struct_macros.h"
 #include "flutter/shell/platform/embedder/embedder_task_runner.h"
 #include "flutter/shell/platform/embedder/embedder_thread_host.h"
@@ -1494,214 +1495,11 @@ void PopulateAOTSnapshotMappingCallbacks(
   }
 }
 
-// Translates engine semantic nodes to embedder semantic nodes.
-FlutterSemanticsNode CreateEmbedderSemanticsNode(
-    const flutter::SemanticsNode& node) {
-  SkMatrix transform = node.transform.asM33();
-  FlutterTransformation flutter_transform{
-      transform.get(SkMatrix::kMScaleX), transform.get(SkMatrix::kMSkewX),
-      transform.get(SkMatrix::kMTransX), transform.get(SkMatrix::kMSkewY),
-      transform.get(SkMatrix::kMScaleY), transform.get(SkMatrix::kMTransY),
-      transform.get(SkMatrix::kMPersp0), transform.get(SkMatrix::kMPersp1),
-      transform.get(SkMatrix::kMPersp2)};
-
-  // Do not add new members to FlutterSemanticsNode.
-  // This would break the forward compatibility of FlutterSemanticsUpdate.
-  // All new members must be added to FlutterSemanticsNode2 instead.
-  return {
-      sizeof(FlutterSemanticsNode),
-      node.id,
-      static_cast<FlutterSemanticsFlag>(node.flags),
-      static_cast<FlutterSemanticsAction>(node.actions),
-      node.textSelectionBase,
-      node.textSelectionExtent,
-      node.scrollChildren,
-      node.scrollIndex,
-      node.scrollPosition,
-      node.scrollExtentMax,
-      node.scrollExtentMin,
-      node.elevation,
-      node.thickness,
-      node.label.c_str(),
-      node.hint.c_str(),
-      node.value.c_str(),
-      node.increasedValue.c_str(),
-      node.decreasedValue.c_str(),
-      static_cast<FlutterTextDirection>(node.textDirection),
-      FlutterRect{node.rect.fLeft, node.rect.fTop, node.rect.fRight,
-                  node.rect.fBottom},
-      flutter_transform,
-      node.childrenInTraversalOrder.size(),
-      node.childrenInTraversalOrder.data(),
-      node.childrenInHitTestOrder.data(),
-      node.customAccessibilityActions.size(),
-      node.customAccessibilityActions.data(),
-      node.platformViewId,
-      node.tooltip.c_str(),
-  };
-}
-
-// Translates engine semantic nodes to embedder semantic nodes.
-FlutterSemanticsNode2 CreateEmbedderSemanticsNode2(
-    const flutter::SemanticsNode& node) {
-  SkMatrix transform = node.transform.asM33();
-  FlutterTransformation flutter_transform{
-      transform.get(SkMatrix::kMScaleX), transform.get(SkMatrix::kMSkewX),
-      transform.get(SkMatrix::kMTransX), transform.get(SkMatrix::kMSkewY),
-      transform.get(SkMatrix::kMScaleY), transform.get(SkMatrix::kMTransY),
-      transform.get(SkMatrix::kMPersp0), transform.get(SkMatrix::kMPersp1),
-      transform.get(SkMatrix::kMPersp2)};
-  return {
-      sizeof(FlutterSemanticsNode2),
-      node.id,
-      static_cast<FlutterSemanticsFlag>(node.flags),
-      static_cast<FlutterSemanticsAction>(node.actions),
-      node.textSelectionBase,
-      node.textSelectionExtent,
-      node.scrollChildren,
-      node.scrollIndex,
-      node.scrollPosition,
-      node.scrollExtentMax,
-      node.scrollExtentMin,
-      node.elevation,
-      node.thickness,
-      node.label.c_str(),
-      node.hint.c_str(),
-      node.value.c_str(),
-      node.increasedValue.c_str(),
-      node.decreasedValue.c_str(),
-      static_cast<FlutterTextDirection>(node.textDirection),
-      FlutterRect{node.rect.fLeft, node.rect.fTop, node.rect.fRight,
-                  node.rect.fBottom},
-      flutter_transform,
-      node.childrenInTraversalOrder.size(),
-      node.childrenInTraversalOrder.data(),
-      node.childrenInHitTestOrder.data(),
-      node.customAccessibilityActions.size(),
-      node.customAccessibilityActions.data(),
-      node.platformViewId,
-      node.tooltip.c_str(),
-  };
-}
-
-// Translates engine semantic custom actions to embedder semantic custom
-// actions.
-FlutterSemanticsCustomAction CreateEmbedderSemanticsCustomAction(
-    const flutter::CustomAccessibilityAction& action) {
-  // Do not add new members to FlutterSemanticsCustomAction.
-  // This would break the forward compatibility of FlutterSemanticsUpdate.
-  // All new members must be added to FlutterSemanticsCustomAction2 instead.
-  return {
-      sizeof(FlutterSemanticsCustomAction),
-      action.id,
-      static_cast<FlutterSemanticsAction>(action.overrideId),
-      action.label.c_str(),
-      action.hint.c_str(),
-  };
-}
-
-// Translates engine semantic custom actions to embedder semantic custom
-// actions.
-FlutterSemanticsCustomAction2 CreateEmbedderSemanticsCustomAction2(
-    const flutter::CustomAccessibilityAction& action) {
-  return {
-      sizeof(FlutterSemanticsCustomAction2),
-      action.id,
-      static_cast<FlutterSemanticsAction>(action.overrideId),
-      action.label.c_str(),
-      action.hint.c_str(),
-  };
-}
-
-// Create a callback to notify the embedder of semantic updates
-// using the deprecated embedder callback 'update_semantics_callback'.
-flutter::PlatformViewEmbedder::UpdateSemanticsCallback
-CreateNewEmbedderSemanticsUpdateCallback(
-    FlutterUpdateSemanticsCallback update_semantics_callback,
-    void* user_data) {
-  return [update_semantics_callback, user_data](
-             const flutter::SemanticsNodeUpdates& nodes,
-             const flutter::CustomAccessibilityActionUpdates& actions) {
-    std::vector<FlutterSemanticsNode> embedder_nodes;
-    for (const auto& value : nodes) {
-      embedder_nodes.push_back(CreateEmbedderSemanticsNode(value.second));
-    }
-
-    std::vector<FlutterSemanticsCustomAction> embedder_custom_actions;
-    for (const auto& value : actions) {
-      embedder_custom_actions.push_back(
-          CreateEmbedderSemanticsCustomAction(value.second));
-    }
-
-    FlutterSemanticsUpdate update{
-        .struct_size = sizeof(FlutterSemanticsUpdate),
-        .nodes_count = embedder_nodes.size(),
-        .nodes = embedder_nodes.data(),
-        .custom_actions_count = embedder_custom_actions.size(),
-        .custom_actions = embedder_custom_actions.data(),
-    };
-
-    update_semantics_callback(&update, user_data);
-  };
-}
-
-// Create a callback to notify the embedder of semantic updates
-// using the new embedder callback 'update_semantics_callback2'.
-flutter::PlatformViewEmbedder::UpdateSemanticsCallback
-CreateNewEmbedderSemanticsUpdateCallback2(
-    FlutterUpdateSemanticsCallback2 update_semantics_callback,
-    void* user_data) {
-  return [update_semantics_callback, user_data](
-             const flutter::SemanticsNodeUpdates& nodes,
-             const flutter::CustomAccessibilityActionUpdates& actions) {
-    std::vector<FlutterSemanticsNode2> embedder_nodes;
-    std::vector<FlutterSemanticsCustomAction2> embedder_custom_actions;
-
-    embedder_nodes.reserve(nodes.size());
-    embedder_custom_actions.reserve(actions.size());
-
-    for (const auto& value : nodes) {
-      embedder_nodes.push_back(CreateEmbedderSemanticsNode2(value.second));
-    }
-
-    for (const auto& value : actions) {
-      embedder_custom_actions.push_back(
-          CreateEmbedderSemanticsCustomAction2(value.second));
-    }
-
-    // Provide the embedder an array of pointers to maintain full forward and
-    // backward compatibility even if new members are added to semantic structs.
-    std::vector<FlutterSemanticsNode2*> embedder_node_pointers;
-    std::vector<FlutterSemanticsCustomAction2*> embedder_custom_action_pointers;
-
-    embedder_node_pointers.reserve(embedder_nodes.size());
-    embedder_custom_action_pointers.reserve(embedder_custom_actions.size());
-
-    for (auto& node : embedder_nodes) {
-      embedder_node_pointers.push_back(&node);
-    }
-
-    for (auto& action : embedder_custom_actions) {
-      embedder_custom_action_pointers.push_back(&action);
-    }
-
-    FlutterSemanticsUpdate2 update{
-        .struct_size = sizeof(FlutterSemanticsUpdate2),
-        .node_count = embedder_node_pointers.size(),
-        .nodes = embedder_node_pointers.data(),
-        .custom_action_count = embedder_custom_action_pointers.size(),
-        .custom_actions = embedder_custom_action_pointers.data(),
-    };
-
-    update_semantics_callback(&update, user_data);
-  };
-}
-
 // Create a callback to notify the embedder of semantic updates
 // using the legacy embedder callbacks 'update_semantics_node_callback' and
 // 'update_semantics_custom_action_callback'.
 flutter::PlatformViewEmbedder::UpdateSemanticsCallback
-CreateLegacyEmbedderSemanticsUpdateCallback(
+CreateEmbedderSemanticsUpdateCallbackV1(
     FlutterUpdateSemanticsNodeCallback update_semantics_node_callback,
     FlutterUpdateSemanticsCustomActionCallback
         update_semantics_custom_action_callback,
@@ -1710,20 +1508,20 @@ CreateLegacyEmbedderSemanticsUpdateCallback(
           update_semantics_custom_action_callback,
           user_data](const flutter::SemanticsNodeUpdates& nodes,
                      const flutter::CustomAccessibilityActionUpdates& actions) {
+    flutter::EmbedderSemanticsUpdate update{nodes, actions};
+    FlutterSemanticsUpdate* update_ptr = update.get();
+
     // First, queue all node and custom action updates.
     if (update_semantics_node_callback != nullptr) {
-      for (const auto& value : nodes) {
-        const FlutterSemanticsNode embedder_node =
-            CreateEmbedderSemanticsNode(value.second);
-        update_semantics_node_callback(&embedder_node, user_data);
+      for (size_t i = 0; i < update_ptr->nodes_count; i++) {
+        update_semantics_node_callback(&update_ptr->nodes[i], user_data);
       }
     }
 
     if (update_semantics_custom_action_callback != nullptr) {
-      for (const auto& value : actions) {
-        const FlutterSemanticsCustomAction embedder_action =
-            CreateEmbedderSemanticsCustomAction(value.second);
-        update_semantics_custom_action_callback(&embedder_action, user_data);
+      for (size_t i = 0; i < update_ptr->custom_actions_count; i++) {
+        update_semantics_custom_action_callback(&update_ptr->custom_actions[i],
+                                                user_data);
       }
     }
 
@@ -1747,26 +1545,62 @@ CreateLegacyEmbedderSemanticsUpdateCallback(
   };
 }
 
+// Create a callback to notify the embedder of semantic updates
+// using the deprecated embedder callback 'update_semantics_callback'.
+flutter::PlatformViewEmbedder::UpdateSemanticsCallback
+CreateEmbedderSemanticsUpdateCallbackV2(
+    FlutterUpdateSemanticsCallback update_semantics_callback,
+    void* user_data) {
+  return [update_semantics_callback, user_data](
+             const flutter::SemanticsNodeUpdates& nodes,
+             const flutter::CustomAccessibilityActionUpdates& actions) {
+    flutter::EmbedderSemanticsUpdate update{nodes, actions};
+
+    update_semantics_callback(update.get(), user_data);
+  };
+}
+
+// Create a callback to notify the embedder of semantic updates
+// using the new embedder callback 'update_semantics_callback2'.
+flutter::PlatformViewEmbedder::UpdateSemanticsCallback
+CreateEmbedderSemanticsUpdateCallbackV3(
+    FlutterUpdateSemanticsCallback2 update_semantics_callback,
+    void* user_data) {
+  return [update_semantics_callback, user_data](
+             const flutter::SemanticsNodeUpdates& nodes,
+             const flutter::CustomAccessibilityActionUpdates& actions) {
+    flutter::EmbedderSemanticsUpdate2 update{nodes, actions};
+
+    update_semantics_callback(update.get(), user_data);
+  };
+}
+
 // Creates a callback that receives semantic updates from the engine
 // and notifies the embedder's callback(s). Returns null if the embedder
 // did not register any callbacks.
 flutter::PlatformViewEmbedder::UpdateSemanticsCallback
 CreateEmbedderSemanticsUpdateCallback(const FlutterProjectArgs* args,
                                       void* user_data) {
-  // The embedder can register the new callback, or the legacy callbacks, or
-  // nothing at all. Handle the case where the embedder registered the 'new'
-  // callback.
+  // There are three variants for the embedder API's semantic update callbacks.
+  // Create a callback that maps to the embedder's desired semantic update API.
+  //
+  // Handle the case where the embedder registered the callback
+  // 'updated_semantics_callback2'
   if (SAFE_ACCESS(args, update_semantics_callback2, nullptr) != nullptr) {
-    return CreateNewEmbedderSemanticsUpdateCallback2(
+    return CreateEmbedderSemanticsUpdateCallbackV3(
         args->update_semantics_callback2, user_data);
   }
 
+  // Handle the case where the embedder registered the deprecated callback
+  // 'update_semantics_callback'.
   if (SAFE_ACCESS(args, update_semantics_callback, nullptr) != nullptr) {
-    return CreateNewEmbedderSemanticsUpdateCallback(
+    return CreateEmbedderSemanticsUpdateCallbackV2(
         args->update_semantics_callback, user_data);
   }
 
-  // Handle the case where the embedder registered 'legacy' callbacks.
+  // Handle the case where the embedder registered the deprecated callbacks
+  // 'update_semantics_node_callback' and
+  // 'update_semantics_custom_action_callback'.
   FlutterUpdateSemanticsNodeCallback update_semantics_node_callback = nullptr;
   if (SAFE_ACCESS(args, update_semantics_node_callback, nullptr) != nullptr) {
     update_semantics_node_callback = args->update_semantics_node_callback;
@@ -1782,7 +1616,7 @@ CreateEmbedderSemanticsUpdateCallback(const FlutterProjectArgs* args,
 
   if (update_semantics_node_callback != nullptr ||
       update_semantics_custom_action_callback != nullptr) {
-    return CreateLegacyEmbedderSemanticsUpdateCallback(
+    return CreateEmbedderSemanticsUpdateCallbackV1(
         update_semantics_node_callback, update_semantics_custom_action_callback,
         user_data);
   }

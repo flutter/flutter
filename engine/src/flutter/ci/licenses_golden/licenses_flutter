@@ -2852,6 +2852,8 @@ ORIGIN: ../../../flutter/shell/platform/embedder/embedder_render_target_impeller
 ORIGIN: ../../../flutter/shell/platform/embedder/embedder_render_target_impeller.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/embedder/embedder_render_target_skia.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/embedder/embedder_render_target_skia.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/embedder/embedder_semantics_update.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/embedder/embedder_semantics_update.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/embedder/embedder_struct_macros.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/embedder/embedder_surface.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/embedder/embedder_surface.h + ../../../flutter/LICENSE
@@ -5597,6 +5599,8 @@ FILE: ../../../flutter/shell/platform/embedder/embedder_render_target_impeller.c
 FILE: ../../../flutter/shell/platform/embedder/embedder_render_target_impeller.h
 FILE: ../../../flutter/shell/platform/embedder/embedder_render_target_skia.cc
 FILE: ../../../flutter/shell/platform/embedder/embedder_render_target_skia.h
+FILE: ../../../flutter/shell/platform/embedder/embedder_semantics_update.cc
+FILE: ../../../flutter/shell/platform/embedder/embedder_semantics_update.h
 FILE: ../../../flutter/shell/platform/embedder/embedder_struct_macros.h
 FILE: ../../../flutter/shell/platform/embedder/embedder_surface.cc
 FILE: ../../../flutter/shell/platform/embedder/embedder_surface.h
