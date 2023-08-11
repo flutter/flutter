@@ -512,10 +512,10 @@ bool TextureGLES::SetAsFramebufferAttachment(GLenum target,
 
 // |Texture|
 Scalar TextureGLES::GetYCoordScale() const {
-  switch (GetIntent()) {
-    case TextureIntent::kUploadFromHost:
+  switch (GetCoordinateSystem()) {
+    case TextureCoordinateSystem::kUploadFromHost:
       return 1.0;
-    case TextureIntent::kRenderToTexture:
+    case TextureCoordinateSystem::kRenderToTexture:
       return -1.0;
   }
   FML_UNREACHABLE();

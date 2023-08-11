@@ -39,9 +39,9 @@ class Texture {
 
   const TextureDescriptor& GetTextureDescriptor() const;
 
-  void SetIntent(TextureIntent intent);
+  void SetCoordinateSystem(TextureCoordinateSystem coordinate_system);
 
-  TextureIntent GetIntent() const;
+  TextureCoordinateSystem GetCoordinateSystem() const;
 
   virtual Scalar GetYCoordScale() const;
 
@@ -61,7 +61,8 @@ class Texture {
   bool mipmap_generated_ = false;
 
  private:
-  TextureIntent intent_ = TextureIntent::kRenderToTexture;
+  TextureCoordinateSystem coordinate_system_ =
+      TextureCoordinateSystem::kRenderToTexture;
   const TextureDescriptor desc_;
   bool is_opaque_ = false;
 
