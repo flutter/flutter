@@ -3314,7 +3314,7 @@ void main() {
     );
 
     await tester.pump();
-    
+
     final double? abcLabelOpacity = tester.widget<DefaultTextStyle>(
       find.ancestor(
         of: find.text('Abc'),
@@ -3329,6 +3329,7 @@ void main() {
     ).style.color?.opacity;
 
     expect(abcLabelOpacity, 1.0);
+
     if(bcdLabelOpacity == 1.0) {
       fail('Bcd''s opacity should be lower than 1.0 since it is disabled');
     }
