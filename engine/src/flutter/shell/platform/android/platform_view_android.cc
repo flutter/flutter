@@ -312,9 +312,18 @@ void PlatformViewAndroid::RegisterImageTexture(
     int64_t texture_id,
     const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry) {
   if (android_context_->RenderingApi() == AndroidRenderingAPI::kOpenGLES) {
-    RegisterTexture(std::make_shared<HardwareBufferExternalTextureGL>(
-        std::static_pointer_cast<AndroidContextGLSkia>(android_context_),
-        texture_id, image_texture_entry, jni_facade_));
+    if (android_context_->GetImpellerContext() != nullptr) {
+      // Impeller GLES.
+      RegisterTexture(std::make_shared<HardwareBufferExternalTextureImpellerGL>(
+          std::static_pointer_cast<impeller::ContextGLES>(
+              android_context_->GetImpellerContext()),
+          texture_id, image_texture_entry, jni_facade_));
+    } else {
+      // Legacy GL.
+      RegisterTexture(std::make_shared<HardwareBufferExternalTextureGL>(
+          std::static_pointer_cast<AndroidContextGLSkia>(android_context_),
+          texture_id, image_texture_entry, jni_facade_));
+    }
   } else if (android_context_->RenderingApi() == AndroidRenderingAPI::kVulkan) {
     RegisterTexture(std::make_shared<HardwareBufferExternalTextureVK>(
         std::static_pointer_cast<impeller::ContextVK>(

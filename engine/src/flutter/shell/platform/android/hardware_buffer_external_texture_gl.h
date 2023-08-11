@@ -7,6 +7,9 @@
 
 #include "flutter/shell/platform/android/hardware_buffer_external_texture.h"
 
+#include "flutter/impeller/renderer/backend/gles/context_gles.h"
+#include "flutter/impeller/renderer/backend/gles/gles.h"
+#include "flutter/impeller/renderer/backend/gles/texture_gles.h"
 #include "flutter/impeller/toolkit/egl/egl.h"
 #include "flutter/impeller/toolkit/egl/image.h"
 #include "flutter/impeller/toolkit/gles/texture.h"
@@ -34,6 +37,29 @@ class HardwareBufferExternalTextureGL : public HardwareBufferExternalTexture {
   impeller::UniqueGLTexture texture_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(HardwareBufferExternalTextureGL);
+};
+
+class HardwareBufferExternalTextureImpellerGL
+    : public HardwareBufferExternalTexture {
+ public:
+  HardwareBufferExternalTextureImpellerGL(
+      const std::shared_ptr<impeller::ContextGLES>& context,
+      int64_t id,
+      const fml::jni::ScopedJavaGlobalRef<jobject>&
+          hardware_buffer_texture_entry,
+      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade);
+
+  ~HardwareBufferExternalTextureImpellerGL() override;
+
+ private:
+  void ProcessFrame(PaintContext& context, const SkRect& bounds) override;
+  void Detach() override;
+
+  const std::shared_ptr<impeller::ContextGLES> impeller_context_;
+
+  impeller::UniqueEGLImageKHR egl_image_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(HardwareBufferExternalTextureImpellerGL);
 };
 
 }  // namespace flutter

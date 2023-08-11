@@ -54,6 +54,9 @@ void HardwareBufferExternalTextureVK::ProcessFrame(PaintContext& context,
       std::make_shared<impeller::TextureVK>(impeller_context_, texture_source);
 
   dl_image_ = impeller::DlImageImpeller::Make(texture);
+
+  // GetLatestHardwareBuffer keeps a reference on the hardware buffer, drop it.
+  NDKHelpers::AHardwareBuffer_release(latest_hardware_buffer);
 }
 
 void HardwareBufferExternalTextureVK::Detach() {}

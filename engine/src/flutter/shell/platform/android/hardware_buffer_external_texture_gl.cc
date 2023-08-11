@@ -6,6 +6,10 @@
 
 #include <android/hardware_buffer_jni.h>
 #include <android/sensor.h>
+#include "flutter/common/graphics/texture.h"
+#include "impeller/core/formats.h"
+#include "impeller/display_list/dl_image_impeller.h"
+#include "impeller/renderer/backend/gles/texture_gles.h"
 #include "impeller/toolkit/egl/image.h"
 #include "impeller/toolkit/gles/texture.h"
 #include "shell/platform/android/ndk_helpers.h"
@@ -53,6 +57,7 @@ void HardwareBufferExternalTextureGL::ProcessFrame(PaintContext& context,
       NDKHelpers::eglGetNativeClientBufferANDROID(latest_hardware_buffer);
   if (client_buffer == nullptr) {
     FML_LOG(WARNING) << "eglGetNativeClientBufferAndroid returned null.";
+    NDKHelpers::AHardwareBuffer_release(latest_hardware_buffer);
     return;
   }
   FML_CHECK(client_buffer != nullptr);
@@ -85,5 +90,83 @@ HardwareBufferExternalTextureGL::HardwareBufferExternalTextureGL(
     : HardwareBufferExternalTexture(id, image_texture_entry, jni_facade) {}
 
 HardwareBufferExternalTextureGL::~HardwareBufferExternalTextureGL() {}
+
+HardwareBufferExternalTextureImpellerGL::
+    HardwareBufferExternalTextureImpellerGL(
+        const std::shared_ptr<impeller::ContextGLES>& context,
+        int64_t id,
+        const fml::jni::ScopedJavaGlobalRef<jobject>&
+            hardware_buffer_texture_entry,
+        const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade)
+    : HardwareBufferExternalTexture(id,
+                                    hardware_buffer_texture_entry,
+                                    jni_facade),
+      impeller_context_(context) {}
+
+HardwareBufferExternalTextureImpellerGL::
+    ~HardwareBufferExternalTextureImpellerGL() {}
+
+void HardwareBufferExternalTextureImpellerGL::Detach() {
+  egl_image_.reset();
+}
+
+void HardwareBufferExternalTextureImpellerGL::ProcessFrame(
+    PaintContext& context,
+    const SkRect& bounds) {
+  EGLDisplay display = eglGetCurrentDisplay();
+  FML_CHECK(display != EGL_NO_DISPLAY);
+
+  if (state_ == AttachmentState::kUninitialized) {
+    // First processed frame we are attached.
+    state_ = AttachmentState::kAttached;
+  }
+
+  AHardwareBuffer* latest_hardware_buffer = GetLatestHardwareBuffer();
+  if (latest_hardware_buffer == nullptr) {
+    FML_LOG(ERROR) << "GetLatestHardwareBuffer returned null.";
+    return;
+  }
+
+  EGLClientBuffer client_buffer =
+      NDKHelpers::eglGetNativeClientBufferANDROID(latest_hardware_buffer);
+  if (client_buffer == nullptr) {
+    FML_LOG(ERROR) << "eglGetNativeClientBufferAndroid returned null.";
+    NDKHelpers::AHardwareBuffer_release(latest_hardware_buffer);
+    return;
+  }
+
+  FML_CHECK(client_buffer != nullptr);
+  egl_image_.reset(impeller::EGLImageKHRWithDisplay{
+      eglCreateImageKHR(display, EGL_NO_CONTEXT, EGL_NATIVE_BUFFER_ANDROID,
+                        client_buffer, 0),
+      display});
+  FML_CHECK(egl_image_.get().image != EGL_NO_IMAGE_KHR);
+
+  // Create the texture.
+  impeller::TextureDescriptor desc;
+  desc.type = impeller::TextureType::kTextureExternalOES;
+  desc.storage_mode = impeller::StorageMode::kDevicePrivate;
+  desc.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
+  desc.size = {static_cast<int>(bounds.width()),
+               static_cast<int>(bounds.height())};
+  desc.mip_count = 1;
+  auto texture = std::make_shared<impeller::TextureGLES>(
+      impeller_context_->GetReactor(), desc,
+      impeller::TextureGLES::IsWrapped::kWrapped);
+  texture->SetIntent(impeller::TextureIntent::kUploadFromHost);
+  if (!texture->Bind()) {
+    FML_LOG(ERROR) << "Could not bind texture.";
+    NDKHelpers::AHardwareBuffer_release(latest_hardware_buffer);
+    return;
+  }
+  // Associate the hardware buffer image with the texture.
+  glEGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES,
+                               (GLeglImageOES)egl_image_.get().image);
+
+  dl_image_ = impeller::DlImageImpeller::Make(texture);
+
+  // Release the reference acquired by GetLatestHardwareBuffer.
+  NDKHelpers::AHardwareBuffer_release(latest_hardware_buffer);
+}
 
 }  // namespace flutter
