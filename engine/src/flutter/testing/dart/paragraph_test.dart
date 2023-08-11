@@ -234,7 +234,7 @@ void main() {
     }
   });
 
-  test('disableRoundingHack works in tests', () {
+  test('can set disableRoundingHack to false in tests', () {
     bool assertsEnabled = false;
     assert(() {
       assertsEnabled = true;
@@ -248,20 +248,20 @@ void main() {
     assert((fontSize * text.length).truncate() != fontSize * text.length);
     // ignore: deprecated_member_use
     final bool roundingHackWasDisabled = ParagraphBuilder.shouldDisableRoundingHack;
-    ParagraphBuilder.setDisableRoundingHack(true);
+    if (roundingHackWasDisabled) {
+      ParagraphBuilder.setDisableRoundingHack(false);
+    }
+    // ignore: deprecated_member_use
+    assert(!ParagraphBuilder.shouldDisableRoundingHack);
     final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(fontSize: fontSize));
     builder.addText(text);
     final Paragraph paragraph = builder.build()
       ..layout(const ParagraphConstraints(width: text.length * fontSize));
+    expect(paragraph.computeLineMetrics().length, greaterThan(1));
 
-    expect(paragraph.maxIntrinsicWidth, text.length * fontSize);
-    switch (paragraph.computeLineMetrics()) {
-      case [LineMetrics(width: final double width)]:
-        expect(width, text.length * fontSize);
-      case final List<LineMetrics> metrics:
-        expect(metrics, hasLength(1));
+    if (roundingHackWasDisabled) {
+      ParagraphBuilder.setDisableRoundingHack(true);
     }
-    ParagraphBuilder.setDisableRoundingHack(roundingHackWasDisabled);
   });
 
   test('rounding hack disabled by default', () {
@@ -274,6 +274,12 @@ void main() {
     builder.addText(text);
     final Paragraph paragraph = builder.build()
       ..layout(const ParagraphConstraints(width: text.length * fontSize));
-    expect(paragraph.computeLineMetrics().length, 1);
+    expect(paragraph.maxIntrinsicWidth, text.length * fontSize);
+    switch (paragraph.computeLineMetrics()) {
+      case [LineMetrics(width: final double width)]:
+        expect(width, text.length * fontSize);
+      case final List<LineMetrics> metrics:
+        expect(metrics, hasLength(1));
+    }
   });
 }
