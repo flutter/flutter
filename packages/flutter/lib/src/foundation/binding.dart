@@ -620,7 +620,7 @@ abstract class BindingBase {
       );
 
       registerServiceExtension(
-        name: FoundationServiceExtensions.invokePreHotRestartCallbacks.name, 
+        name: FoundationServiceExtensions.invokePreHotRestartCallbacks.name,
         callback: (Map<String, Object> params) async {
           Future<void> invokeAndWait(DebugPreHotRestartCallback callback, String label) async {
             try {
