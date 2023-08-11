@@ -53,6 +53,13 @@ FLUTTER_DARWIN_EXPORT
                       channel:(nonnull FlutterMethodChannel*)channel;
 
 /**
+ * Registers the plugin as a receiver of `NSApplicationDelegate` calls.
+ *
+ * @param delegate The receiving object, such as the plugin's main class.
+ */
+- (void)addApplicationDelegate:(nonnull NSObject<FlutterAppLifecycleDelegate>*)delegate;
+
+/**
  * Registers a `FlutterPlatformViewFactory` for creation of platform views.
  *
  * Plugins expose `NSView` for embedding in Flutter apps by registering a view factory.

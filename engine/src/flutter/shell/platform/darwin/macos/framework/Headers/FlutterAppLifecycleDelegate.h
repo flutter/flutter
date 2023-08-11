@@ -9,7 +9,6 @@
 #include <Foundation/Foundation.h>
 
 #import "FlutterMacros.h"
-#import "FlutterPluginMacOS.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -18,6 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
  * Protocol for listener of lifecycle events from the NSApplication, typically a
  * FlutterPlugin.
  */
+FLUTTER_DARWIN_EXPORT
 @protocol FlutterAppLifecycleDelegate <NSObject>
 
 @optional
