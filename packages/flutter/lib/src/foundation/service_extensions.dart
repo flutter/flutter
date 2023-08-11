@@ -74,4 +74,13 @@ enum FoundationServiceExtensions {
   /// * [BindingBase.initServiceExtensions], where the service extension is
   ///   registered.
   brightnessOverride,
+
+  /// Name of service extension that, when called, will invoke all registered pre
+  /// hot restart callbacks. It is meant to be called before a hot restart.
+  ///
+  /// See also:
+  ///
+  /// * [BindingBase.initServiceExtensions], where the service extension is
+  ///   registered.
+  invokePreHotRestartCallbacks,
 }

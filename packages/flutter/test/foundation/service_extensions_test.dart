@@ -183,7 +183,7 @@ void main() {
     // framework, excluding any that are for the widget inspector (see
     // widget_inspector_test.dart for tests of the ext.flutter.inspector service
     // extensions). Any test counted here must be tested in this file!
-    const int serviceExtensionCount = 29;
+    const int serviceExtensionCount = 30;
 
     expect(binding.extensions.length, serviceExtensionCount + widgetInspectorExtensionCount - disabledExtensions);
     expect(testedExtensions, hasLength(serviceExtensionCount));
@@ -1053,6 +1053,8 @@ void main() {
 
     expect(result, isNotNull);
     expect(calledCount, 1);
+
+    testedExtensions.add(FoundationServiceExtensions.invokePreHotRestartCallbacks.name);
   });
 
   test('Service extensions - preHotRestartCallback that throws sync expection', () async {
@@ -1072,6 +1074,8 @@ void main() {
       'The following _Exception was thrown Failed to invoke\n'
       'preHotRestartCallback "foo":\n'
     ));
+
+    testedExtensions.add(FoundationServiceExtensions.invokePreHotRestartCallbacks.name);
   });
 
   test('Service extensions - preHotRestartCallback that throws async expection', () async {
@@ -1093,5 +1097,7 @@ void main() {
       'The following _Exception was thrown Failed to invoke\n'
       'preHotRestartCallback "foo":\n'
     ));
+
+    testedExtensions.add(FoundationServiceExtensions.invokePreHotRestartCallbacks.name);
   });
 }

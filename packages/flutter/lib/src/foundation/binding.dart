@@ -619,10 +619,12 @@ abstract class BindingBase {
         },
       );
 
-      registerServiceExtension(name: 'invokePreHotRestartCallbacks', callback: (Map<String, Object> params) async {
-        Future<void> invokeAndWait(DebugPreHotRestartCallback callback, String label) async {
-          try {
-            await Future<Object?>.value(callback());
+      registerServiceExtension(
+        name: FoundationServiceExtensions.invokePreHotRestartCallbacks.name, 
+        callback: (Map<String, Object> params) async {
+          Future<void> invokeAndWait(DebugPreHotRestartCallback callback, String label) async {
+            try {
+              await Future<Object?>.value(callback());
             } catch (error, stack) {
               FlutterError.reportError(
                 FlutterErrorDetails(
@@ -636,10 +638,11 @@ abstract class BindingBase {
 
           await Future.wait(<Future<void>>[
             for (final MapEntry<DebugPreHotRestartCallback, String> entry in _hotRestartCallbacks.entries)
-            invokeAndWait(entry.key, entry.value),
-        ]);
-        return <String, Object>{};
-      });
+              invokeAndWait(entry.key, entry.value),
+          ]);
+          return <String, Object>{};
+        },
+      );
       return true;
     }());
     assert(() {
