@@ -119,7 +119,7 @@ void main() {
     expect(logger.traceText, contains('Local engine source at /arbitrary/engine/src'));
   });
 
-  testWithoutContext('works but produces a warning if --local-engine is specified but not --local-host-engine', () async {
+  testWithoutContext('works but produces a warning if --local-engine is specified but not --local-engine-host', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Directory localEngine = fileSystem
         .directory('$kArbitraryEngineRoot/src/out/android_debug_unopt_arm64/')
@@ -142,7 +142,7 @@ void main() {
         targetEngine: '/arbitrary/engine/src/out/android_debug_unopt_arm64',
       ),
     );
-    expect(logger.statusText, contains('Warning! You are using a locally built engine (--local-engine) but have not specified --local-host-engine'));
+    expect(logger.statusText, contains('Warning! You are using a locally built engine (--local-engine) but have not specified --local-engine-host'));
   });
 
   testWithoutContext('works if --local-engine is specified and --local-engine-src-path '
