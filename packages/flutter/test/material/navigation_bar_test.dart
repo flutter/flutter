@@ -995,7 +995,7 @@ void main() {
             NavigationDestination(
               icon: Icon(Icons.bookmark),
               label: 'Bookmark',
-              disabled: true,
+              enabled: false,
             ),
           ],
           onDestinationSelected: (int i) => selectedIndex = i,

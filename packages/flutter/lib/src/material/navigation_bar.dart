@@ -295,7 +295,7 @@ class NavigationDestination extends StatelessWidget {
     this.selectedIcon,
     required this.label,
     this.tooltip,
-    this.disabled = false,
+    this.enabled = true,
   });
 
   /// The [Widget] (usually an [Icon]) that's displayed for this
@@ -334,10 +334,10 @@ class NavigationDestination extends StatelessWidget {
   /// Defaults to null, in which case the [label] text will be used.
   final String? tooltip;
 
-  /// Indicates that this destination is inaccessible.
+  /// Indicates that this destination is accessible.
   ///
-  /// Defaults to false.
-  final bool disabled;
+  /// Defaults to true.
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -352,7 +352,7 @@ class NavigationDestination extends StatelessWidget {
     return _NavigationDestinationBuilder(
       label: label,
       tooltip: tooltip,
-      disabled: disabled,
+      enabled: enabled,
       buildIcon: (BuildContext context) {
         IconThemeData selectedIconTheme =
           navigationBarTheme.iconTheme?.resolve(selectedState) ??
@@ -361,7 +361,7 @@ class NavigationDestination extends StatelessWidget {
           navigationBarTheme.iconTheme?.resolve(unselectedState)
           ?? defaults.iconTheme!.resolve(unselectedState)!;
 
-        if (disabled) {
+        if (!enabled) {
           selectedIconTheme = selectedIconTheme.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38));
           unselectedIconTheme = unselectedIconTheme.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38));
         }
@@ -400,7 +400,7 @@ class NavigationDestination extends StatelessWidget {
         TextStyle? effectiveUnselectedLabelTextStyle = navigationBarTheme.labelTextStyle?.resolve(unselectedState)
           ?? defaults.labelTextStyle!.resolve(unselectedState);
 
-        if (disabled) {
+        if (!enabled) {
           effectiveSelectedLabelTextStyle = effectiveSelectedLabelTextStyle
             ?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38));
           effectiveUnselectedLabelTextStyle = effectiveUnselectedLabelTextStyle
@@ -442,7 +442,7 @@ class _NavigationDestinationBuilder extends StatefulWidget {
     required this.buildLabel,
     required this.label,
     this.tooltip,
-    this.disabled = false,
+    this.enabled = true,
   });
 
   /// Builds the icon for a destination in a [NavigationBar].
@@ -481,10 +481,10 @@ class _NavigationDestinationBuilder extends StatefulWidget {
   /// Defaults to null, in which case the [label] text will be used.
   final String? tooltip;
 
-  /// Indicates that this destination is inaccessible.
+  /// Indicates that this destination is accessible.
   ///
-  /// Defaults to false.
-  final bool disabled;
+  /// Defaults to true.
+  final bool enabled;
 
   @override
   State<_NavigationDestinationBuilder> createState() => _NavigationDestinationBuilderState();
@@ -506,7 +506,7 @@ class _NavigationDestinationBuilderState extends State<_NavigationDestinationBui
           iconKey: iconKey,
           labelBehavior: info.labelBehavior,
           customBorder: navigationBarTheme.indicatorShape ?? defaults.indicatorShape,
-          onTap: widget.disabled ? null : info.onTap,
+          onTap: widget.enabled ? info.onTap : null,
           child: Row(
             children: <Widget>[
               Expanded(
