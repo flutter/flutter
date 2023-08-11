@@ -3330,7 +3330,7 @@ void main() {
 
     expect(abcLabelOpacity, 1.0);
 
-    if(bcdLabelOpacity == 1.0) {
+    if (bcdLabelOpacity == 1.0) {
       fail('Bcd''s opacity should be lower than 1.0 since it is disabled');
     }
 
