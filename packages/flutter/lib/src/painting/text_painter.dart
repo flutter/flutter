@@ -515,7 +515,11 @@ class TextPainter {
        _locale = locale,
        _strutStyle = strutStyle,
        _textWidthBasis = textWidthBasis,
-       _textHeightBehavior = textHeightBehavior;
+       _textHeightBehavior = textHeightBehavior {
+    if (!const bool.fromEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK', defaultValue: true)) {
+      ui.ParagraphBuilder.setDisableRoundingHack(false);
+    }
+  }
 
   /// Computes the width of a configured [TextPainter].
   ///
