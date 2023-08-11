@@ -70,7 +70,9 @@ import 'package:path/path.dart' as path;
 import 'package:watcher/watcher.dart';
 
 final String _flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
-final String _defaultFlutterPackage = path.join(_flutterRoot, 'packages', 'flutter', 'lib');
+final String _packageFlutter = path.join(_flutterRoot, 'packages', 'flutter', 'lib');
+final String _packageFlutterTest = path.join(_flutterRoot, 'packages', 'flutter_test', 'lib');
+final String _packageIntegrationTest = path.join(_flutterRoot, 'packages', 'integration_test', 'lib');
 final String _defaultDartUiLocation = path.join(_flutterRoot, 'bin', 'cache', 'pkg', 'sky_engine', 'lib', 'ui');
 final String _flutter = path.join(_flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
 
@@ -142,12 +144,17 @@ Future<void> main(List<String> arguments) async {
     exit(0);
   }
 
-  Directory flutterPackage;
+  List<Directory> flutterPackages;
   if (parsedArguments.rest.length == 1) {
     // Used for testing.
-    flutterPackage = Directory(parsedArguments.rest.single);
+    flutterPackages = <Directory>[Directory(parsedArguments.rest.single)];
   } else {
-    flutterPackage = Directory(_defaultFlutterPackage);
+    flutterPackages = <Directory>[
+      Directory(_packageFlutter),
+      Directory(_packageFlutterTest),
+      Directory(_packageIntegrationTest),
+      // TODO(goderbauer): Add all other packages.
+    ];
   }
 
   final bool includeDartUi = parsedArguments.wasParsed('dart-ui-location') || parsedArguments['include-dart-ui'] as bool;
@@ -165,14 +172,14 @@ Future<void> main(List<String> arguments) async {
 
   if (parsedArguments['interactive'] != null) {
     await _runInteractive(
-      flutterPackage: flutterPackage,
+      flutterPackages: flutterPackages,
       tempDirectory: parsedArguments['temp'] as String?,
       filePath: parsedArguments['interactive'] as String,
       dartUiLocation: includeDartUi ? dartUiLocation : null,
     );
   } else {
     if (await _SnippetChecker(
-        flutterPackage,
+        flutterPackages,
         tempDirectory: parsedArguments['temp'] as String?,
         verbose: parsedArguments['verbose'] as bool,
         dartUiLocation: includeDartUi ? dartUiLocation : null,
@@ -360,7 +367,7 @@ class _SnippetChecker {
   /// supplied, the default location of the `dart:ui` code in the Flutter
   /// repository is used (i.e. "<flutter repo>/bin/cache/pkg/sky_engine/lib/ui").
   _SnippetChecker(
-    this._flutterPackage, {
+    this._flutterPackages, {
     String? tempDirectory,
     this.verbose = false,
     Directory? dartUiLocation,
@@ -438,8 +445,8 @@ class _SnippetChecker {
   /// automatically if there are no errors unless _keepTmp is true.
   final Directory _tempDirectory;
 
-  /// The package directory for the flutter package within the flutter root dir.
-  final Directory _flutterPackage;
+  /// The package directories within the flutter root dir that will be checked.
+  final List<Directory> _flutterPackages;
 
   /// The directory for the dart:ui code to be analyzed with the flutter code.
   ///
@@ -453,8 +460,9 @@ class _SnippetChecker {
   }
 
   static const List<String> ignoresDirectives = <String>[
-    '// ignore_for_file: duplicate_ignore',
     '// ignore_for_file: directives_ordering',
+    '// ignore_for_file: duplicate_ignore',
+    '// ignore_for_file: no_leading_underscores_for_local_identifiers',
     '// ignore_for_file: prefer_final_locals',
     '// ignore_for_file: unnecessary_import',
     '// ignore_for_file: unreachable_from_main',
@@ -481,7 +489,7 @@ class _SnippetChecker {
       "import 'dart:typed_data';",
       "import 'dart:ui' as ui;",
       "import 'package:flutter_test/flutter_test.dart';",
-      for (final File file in _listDartFiles(Directory(_defaultFlutterPackage)))
+      for (final File file in _listDartFiles(Directory(_packageFlutter)))
         "import 'package:flutter/${path.basename(file.path)}';",
     ].map<_Line>((String code) => _Line.generated(code: code)).toList();
   }
@@ -495,7 +503,8 @@ class _SnippetChecker {
       stderr.writeln('Unable to analyze engine dart snippets at ${_dartUiLocation!.path}.');
     }
     final List<File> filesToAnalyze = <File>[
-      ..._listDartFiles(_flutterPackage, recursive: true),
+      for (final Directory flutterPackage in _flutterPackages)
+        ..._listDartFiles(flutterPackage, recursive: true),
       if (_dartUiLocation != null && _dartUiLocation!.existsSync())
         ..._listDartFiles(_dartUiLocation!, recursive: true),
     ];
@@ -1084,7 +1093,7 @@ class _SnippetFile {
 
 Future<void> _runInteractive({
   required String? tempDirectory,
-  required Directory flutterPackage,
+  required List<Directory> flutterPackages,
   required String filePath,
   required Directory? dartUiLocation,
 }) async {
@@ -1106,7 +1115,7 @@ Future<void> _runInteractive({
   print('Starting up in interactive mode on ${path.relative(filePath, from: _flutterRoot)} ...');
   print('Type "q" to quit, or "r" to force a reload.');
 
-  final _SnippetChecker checker = _SnippetChecker(flutterPackage, tempDirectory: tempDirectory)
+  final _SnippetChecker checker = _SnippetChecker(flutterPackages, tempDirectory: tempDirectory)
     .._createConfigurationFiles();
 
   ProcessSignal.sigint.watch().listen((_) {

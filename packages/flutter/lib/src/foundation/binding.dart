@@ -171,13 +171,6 @@ abstract class BindingBase {
   static Type? _debugInitializedType;
   static bool _debugServiceExtensionsRegistered = false;
 
-  /// Additional configuration used by the framework during hot reload.
-  ///
-  /// See also:
-  ///
-  ///  * [DebugReassembleConfig], which describes the configuration.
-  static DebugReassembleConfig? debugReassembleConfig;
-
   /// Deprecated. Will be removed in a future version of Flutter.
   ///
   /// This property has been deprecated to prepare for Flutter's upcoming
@@ -630,19 +623,19 @@ abstract class BindingBase {
         Future<void> invokeAndWait(DebugPreHotRestartCallback callback, String label) async {
           try {
             await Future<Object?>.value(callback());
-          } catch (error, stack) {
-            FlutterError.reportError(
-              FlutterErrorDetails(
-                exception: error,
-                stack: stack,
-                context: ErrorSummary('Failed to invoke preHotRestartCallback "$label"'),
-              )
-            );
+            } catch (error, stack) {
+              FlutterError.reportError(
+                FlutterErrorDetails(
+                  exception: error,
+                  stack: stack,
+                  context: ErrorSummary('Failed to invoke preHotRestartCallback "$label"'),
+                )
+              );
+            }
           }
-        }
 
-        await Future.wait(<Future<void>>[
-          for (final MapEntry<DebugPreHotRestartCallback, String> entry in _hotRestartCallbacks.entries)
+          await Future.wait(<Future<void>>[
+            for (final MapEntry<DebugPreHotRestartCallback, String> entry in _hotRestartCallbacks.entries)
             invokeAndWait(entry.key, entry.value),
         ]);
         return <String, Object>{};
@@ -1066,24 +1059,4 @@ abstract class BindingBase {
 /// Terminate the Flutter application.
 Future<void> _exitApplication() async {
   exit(0);
-}
-
-/// Additional configuration used for hot reload reassemble optimizations.
-///
-/// Do not extend, implement, or mixin this class. This may only be instantiated
-/// in debug mode.
-class DebugReassembleConfig {
-  /// Create a new [DebugReassembleConfig].
-  ///
-  /// Throws a [FlutterError] if this is called in profile or release mode.
-  DebugReassembleConfig({
-    this.widgetName,
-  }) {
-    if (!kDebugMode) {
-      throw FlutterError('Cannot instantiate DebugReassembleConfig in profile or release mode.');
-    }
-  }
-
-  /// The name of the widget that was modified, or `null` if the change was elsewhere.
-  final String? widgetName;
 }

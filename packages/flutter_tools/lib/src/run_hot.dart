@@ -20,7 +20,6 @@ import 'convert.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
-import 'features.dart';
 import 'globals.dart' as globals;
 import 'project.dart';
 import 'reporting/reporting.dart';
@@ -415,7 +414,6 @@ class HotRunner extends ResidentRunner {
       sdkName: _sdkName!,
       emulator: _emulator!,
       fullRestart: false,
-      fastReassemble: false,
       overallTimeInMs: appStartedTimer.elapsed.inMilliseconds,
       compileTimeInMs: totalCompileTime.inMilliseconds,
       transferTimeInMs: totalLaunchAppTime.inMilliseconds,
@@ -783,7 +781,6 @@ class HotRunner extends ResidentRunner {
           emulator: emulator!,
           fullRestart: true,
           reason: reason,
-          fastReassemble: false,
           overallTimeInMs: restartTimer.elapsed.inMilliseconds,
           syncedBytes: result.updateFSReport?.syncedBytes,
           invalidatedSourcesCount: result.updateFSReport?.invalidatedSourcesCount,
@@ -809,7 +806,6 @@ class HotRunner extends ResidentRunner {
           emulator: emulator!,
           fullRestart: true,
           reason: reason,
-          fastReassemble: false,
         ).send();
       }
       status?.cancel();
@@ -859,7 +855,6 @@ class HotRunner extends ResidentRunner {
           emulator: emulator!,
           fullRestart: false,
           reason: reason,
-          fastReassemble: false,
         ).send();
       } else {
         HotEvent('exception',
@@ -868,7 +863,6 @@ class HotRunner extends ResidentRunner {
           emulator: emulator!,
           fullRestart: false,
           reason: reason,
-          fastReassemble: false,
         ).send();
       }
       return OperationResult(errorCode, errorMessage, fatal: true);
@@ -952,7 +946,6 @@ class HotRunner extends ResidentRunner {
       viewCache,
       onSlow,
       reloadMessage,
-      updatedDevFS.fastReassembleClassName,
     );
     shouldReportReloadTime = reassembleResult.shouldReportReloadTime;
     if (reassembleResult.reassembleViews.isEmpty) {
@@ -986,7 +979,6 @@ class HotRunner extends ResidentRunner {
       syncedBytes: updatedDevFS.syncedBytes,
       invalidatedSourcesCount: updatedDevFS.invalidatedSourcesCount,
       transferTimeInMs: updatedDevFS.transferDuration.inMilliseconds,
-      fastReassemble: featureFlags.isSingleWidgetReloadEnabled && updatedDevFS.fastReassembleClassName != null,
       compileTimeInMs: updatedDevFS.compileDuration.inMilliseconds,
       findInvalidatedTimeInMs: updatedDevFS.findInvalidatedDuration.inMilliseconds,
       scannedSourcesCount: updatedDevFS.scannedSourcesCount,
@@ -1206,7 +1198,6 @@ Future<OperationResult> defaultReloadSourcesHelper(
       emulator: emulator!,
       fullRestart: false,
       reason: reason,
-      fastReassemble: false,
       usage: usage,
     ).send();
     // Reset devFS lastCompileTime to ensure the file will still be marked
@@ -1269,7 +1260,6 @@ typedef ReassembleHelper = Future<ReassembleResult> Function(
   Map<FlutterDevice?, List<FlutterView>> viewCache,
   void Function(String message)? onSlow,
   String reloadMessage,
-  String? fastReassembleClassName,
 );
 
 Future<ReassembleResult> _defaultReassembleHelper(
@@ -1277,7 +1267,6 @@ Future<ReassembleResult> _defaultReassembleHelper(
   Map<FlutterDevice?, List<FlutterView>> viewCache,
   void Function(String message)? onSlow,
   String reloadMessage,
-  String? fastReassembleClassName,
 ) async {
   // Check if any isolates are paused and reassemble those that aren't.
   final Map<FlutterView, FlutterVmService?> reassembleViews = <FlutterView, FlutterVmService?>{};
@@ -1306,17 +1295,9 @@ Future<ReassembleResult> _defaultReassembleHelper(
         reassembleViews[view] = device.vmService;
         // If the tool identified a change in a single widget, do a fast instead
         // of a full reassemble.
-        Future<void> reassembleWork;
-        if (fastReassembleClassName != null) {
-          reassembleWork = device.vmService!.flutterFastReassemble(
-            isolateId: view.uiIsolate!.id!,
-            className: fastReassembleClassName,
-          );
-        } else {
-          reassembleWork = device.vmService!.flutterReassemble(
-            isolateId: view.uiIsolate!.id!,
-          );
-        }
+        final Future<void> reassembleWork = device.vmService!.flutterReassemble(
+          isolateId: view.uiIsolate!.id!,
+        );
         reassembleFutures.add(reassembleWork.then(
           (Object? obj) => obj,
           onError: (Object error, StackTrace stackTrace) {
