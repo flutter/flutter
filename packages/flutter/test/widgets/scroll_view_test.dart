@@ -961,10 +961,9 @@ void main() {
 
     expect(isPointerMoveCalled, isTrue);
     expect(point, 0.0);
-
   });
 
-    testWidgets('Interactive Test ListView sends y coordinate on mouse up', (WidgetTester tester) async {
+  testWidgets('Interactive Test ListView sends y coordinate on mouse up', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
 
     await tester.pumpWidget(textFieldBoilerplate(

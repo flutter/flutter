@@ -40,7 +40,7 @@ enum ScrollViewKeyboardDismissBehavior {
   /// when a drag begins.
   onDrag,
   /// `interactive` means that the [ScrollView] will move the on-screen keyboard
-  /// relative to the pointer when a drag begins
+  /// relative to the pointer when a drag begins.
   interactive,
 }
 
@@ -502,15 +502,15 @@ abstract class ScrollView extends StatelessWidget {
           double ypos = details.position.dy;
 
           SystemChannels.textInput.invokeMethod<void>(
-          'TextInput.onPointerMoveForInteractiveKeyboard',
-          <String, dynamic>{'pointerY': ypos});
+            'TextInput.onPointerMoveForInteractiveKeyboard',
+            <String, dynamic>{'pointerY': ypos});
         },
         onPointerUp: (PointerUpEvent details) {
           double ypos = details.position.dy;
 
           SystemChannels.textInput.invokeMethod<void>(
-          'TextInput.onPointerUpForInteractiveKeyboard',
-          <String, dynamic>{'pointerY': ypos});
+            'TextInput.onPointerUpForInteractiveKeyboard',
+            <String, dynamic>{'pointerY': ypos});
         }
       );
     } else {
