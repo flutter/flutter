@@ -1,4 +1,4 @@
-Signature: 036307bad1ad4b3816c55f53343f67e0
+Signature: b0e79187f9516041869ed61f4d773e0d
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -4250,6 +4250,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/symlink.fidl + ../../../fuchs
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.lowpan.thread/feature.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/ipv4.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/ipv6.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.stackmigrationdeprecated/stackmigrationdeprecated.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.session/lifecycle.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.session/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.session/restarter.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -4305,6 +4306,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/symlink.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.lowpan.thread/feature.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/ipv4.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/ipv6.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.stackmigrationdeprecated/stackmigrationdeprecated.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.session/lifecycle.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.session/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.session/restarter.fidl
