@@ -204,7 +204,6 @@ Runner::Runner(fml::RefPtr<fml::TaskRunner> task_runner,
 }
 
 Runner::~Runner() {
-  context_->outgoing()->RemovePublicService<fuchsia::sys::Runner>();
   context_->outgoing()
       ->RemovePublicService<fuchsia::component::runner::ComponentRunner>();
 

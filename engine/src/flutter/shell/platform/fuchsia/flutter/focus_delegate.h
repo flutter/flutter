@@ -5,7 +5,6 @@
 #ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_FOCUS_DELEGATE_H_
 #define FLUTTER_SHELL_PLATFORM_FUCHSIA_FOCUS_DELEGATE_H_
 
-#include <fuchsia/sys/cpp/fidl.h>
 #include <fuchsia/ui/views/cpp/fidl.h>
 
 #include <unordered_map>

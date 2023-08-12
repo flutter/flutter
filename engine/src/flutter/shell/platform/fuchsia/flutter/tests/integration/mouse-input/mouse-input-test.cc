@@ -12,7 +12,6 @@
 #include <fuchsia/memorypressure/cpp/fidl.h>
 #include <fuchsia/metrics/cpp/fidl.h>
 #include <fuchsia/net/interfaces/cpp/fidl.h>
-#include <fuchsia/sys/cpp/fidl.h>
 #include <fuchsia/tracing/provider/cpp/fidl.h>
 #include <fuchsia/ui/app/cpp/fidl.h>
 #include <fuchsia/ui/display/singleton/cpp/fidl.h>

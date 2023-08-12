@@ -7,7 +7,6 @@
 
 #include <dart/test/cpp/fidl.h>
 #include <fuchsia/component/runner/cpp/fidl.h>
-#include <fuchsia/sys/cpp/fidl.h>
 #include <lib/async-loop/cpp/loop.h>
 #include <lib/async/cpp/wait.h>
 #include <lib/fdio/namespace.h>

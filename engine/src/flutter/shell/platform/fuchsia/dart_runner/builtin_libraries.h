@@ -5,22 +5,20 @@
 #ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_DART_RUNNER_BUILTIN_LIBRARIES_H_
 #define FLUTTER_SHELL_PLATFORM_FUCHSIA_DART_RUNNER_BUILTIN_LIBRARIES_H_
 
-#include <fuchsia/sys/cpp/fidl.h>
 #include <lib/fdio/namespace.h>
+#include <lib/zx/channel.h>
 
 #include <memory>
 #include <string>
 
 namespace dart_runner {
 
-void InitBuiltinLibrariesForIsolate(
-    const std::string& script_uri,
-    fdio_ns_t* namespc,
-    int stdoutfd,
-    int stderrfd,
-    fidl::InterfaceHandle<fuchsia::sys::Environment> environment,
-    zx::channel directory_request,
-    bool service_isolate);
+void InitBuiltinLibrariesForIsolate(const std::string& script_uri,
+                                    fdio_ns_t* namespc,
+                                    int stdoutfd,
+                                    int stderrfd,
+                                    zx::channel directory_request,
+                                    bool service_isolate);
 
 }  // namespace dart_runner
 
