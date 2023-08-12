@@ -110,7 +110,7 @@ class Template {
     };
     for (final FileSystemEntity entity in templateFiles.keys.whereType<File>()) {
       if (_templateManifest.isNotEmpty && !_templateManifest.contains(Uri.file(entity.absolute.path))) {
-        print('Skipping ${entity.absolute.path}, missing from the template manifest.');
+        _logger.printTrace('Skipping ${entity.absolute.path}, missing from the template manifest.');
         // Skip stale files in the flutter_tools directory.
         continue;
       }
@@ -279,7 +279,6 @@ class Template {
     }
 
     _templateFilePaths.forEach((String relativeDestinationPath, String absoluteSourcePath) {
-      print('Template:render(), in loop for: $absoluteSourcePath}');
       final bool withRootModule = context['withRootModule'] as bool? ?? false;
       if (!withRootModule && absoluteSourcePath.contains('flutter_root')) {
         return;
