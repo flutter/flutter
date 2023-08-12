@@ -207,8 +207,7 @@ Engine::Engine(Delegate& delegate,
                UniqueFDIONS fdio_ns,
                fidl::InterfaceRequest<fuchsia::io::Directory> directory_request,
                FlutterRunnerProductConfiguration product_config,
-               const std::vector<std::string>& dart_entrypoint_args,
-               bool for_v1_component)
+               const std::vector<std::string>& dart_entrypoint_args)
     : delegate_(delegate),
       thread_label_(std::move(thread_label)),
       thread_host_(CreateThreadHost(thread_label_, runner_services)),
@@ -220,7 +219,7 @@ Engine::Engine(Delegate& delegate,
   Initialize(std::move(view_ref_pair), std::move(svc),
              std::move(runner_services), std::move(settings),
              std::move(fdio_ns), std::move(directory_request),
-             std::move(product_config), dart_entrypoint_args, for_v1_component);
+             std::move(product_config), dart_entrypoint_args);
 }
 
 void Engine::Initialize(
@@ -231,8 +230,7 @@ void Engine::Initialize(
     UniqueFDIONS fdio_ns,
     fidl::InterfaceRequest<fuchsia::io::Directory> directory_request,
     FlutterRunnerProductConfiguration product_config,
-    const std::vector<std::string>& dart_entrypoint_args,
-    bool for_v1_component) {
+    const std::vector<std::string>& dart_entrypoint_args) {
   // Flatland uses |view_creation_token_| for linking.
   FML_CHECK(view_creation_token_.value.is_valid());
 
@@ -584,18 +582,9 @@ void Engine::Initialize(
 
   // Shell has been created. Before we run the engine, set up the isolate
   // configurator.
-  {
-    fuchsia::sys::EnvironmentPtr environment;
-    if (for_v1_component) {
-      svc->Connect(environment.NewRequest());
-    }
-
-    isolate_configurator_ = std::make_unique<IsolateConfigurator>(
-        std::move(fdio_ns),
-        // v2 components do not use fuchsia.sys.Environment.
-        for_v1_component ? std::move(environment) : nullptr,
-        directory_request.TakeChannel(), std::move(isolate_view_ref.reference));
-  }
+  isolate_configurator_ = std::make_unique<IsolateConfigurator>(
+      std::move(fdio_ns), directory_request.TakeChannel(),
+      std::move(isolate_view_ref.reference));
 
   //  This platform does not get a separate surface platform view creation
   //  notification. Fire one eagerly.

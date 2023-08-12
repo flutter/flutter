@@ -9,7 +9,6 @@
 #include <unordered_map>
 
 #include <fuchsia/component/runner/cpp/fidl.h>
-#include <fuchsia/sys/cpp/fidl.h>
 #include <lib/async-loop/cpp/loop.h>
 #include <lib/sys/cpp/component_context.h>
 #include <lib/trace-engine/instrumentation.h>

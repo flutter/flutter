@@ -6,7 +6,6 @@
 #define FLUTTER_SHELL_PLATFORM_FUCHSIA_DART_RUNNER_DART_RUNNER_H_
 
 #include <fuchsia/component/runner/cpp/fidl.h>
-#include <fuchsia/sys/cpp/fidl.h>
 #include <lib/fidl/cpp/binding_set.h>
 #include <lib/sys/cpp/component_context.h>
 
