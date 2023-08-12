@@ -34,7 +34,7 @@ pluginManagement {
 
 plugins {
     id "dev.flutter.flutter-plugin-loader" version "1.0.0"
-    id "com.android.application" version "7.2.0" apply false
+    id "com.android.application" version "7.4.2" apply false
 }
 
 include ':app'
