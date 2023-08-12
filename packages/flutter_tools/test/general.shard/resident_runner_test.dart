@@ -2210,9 +2210,11 @@ flutter:
 
   testUsingContext('nextPlatform moves through expected platforms', () {
     expect(nextPlatform('android'), 'iOS');
-    expect(nextPlatform('iOS'), 'fuchsia');
-    expect(nextPlatform('fuchsia'), 'macOS');
-    expect(nextPlatform('macOS'), 'android');
+    expect(nextPlatform('iOS'), 'windows');
+    expect(nextPlatform('windows'), 'macOS');
+    expect(nextPlatform('macOS'), 'linux');
+    expect(nextPlatform('linux'), 'fuchsia');
+    expect(nextPlatform('fuchsia'), 'android');
     expect(() => nextPlatform('unknown'), throwsAssertionError);
   });
 
