@@ -367,9 +367,8 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
           row ??= _getProgressIndicatorRowFor(index);
           haveProgressIndicator = true;
         }
+      result.add(row!);
       }
-      row ??= _getBlankRowFor(index);
-      result.add(row);
     }
     return result;
   }
@@ -560,6 +559,10 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                   ),
                 ),
               ),
+              SizedBox(
+                  height: widget.dataRowMaxHeight *
+                      (widget.rowsPerPage - _rowCount + _firstRowIndex)
+                          .clamp(0, widget.rowsPerPage)),
               DefaultTextStyle(
                 style: footerTextStyle!,
                 child: IconTheme.merge(
