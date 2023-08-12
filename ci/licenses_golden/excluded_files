@@ -561,6 +561,7 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.net.mdns/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.net.reachability/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.net.routes/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.net.stackmigrationdeprecated/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.net/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.power.clientlevel/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.power.profile/meta.json
