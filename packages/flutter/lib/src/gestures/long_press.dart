@@ -645,7 +645,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
       _initialButtons = event.buttons;
       _checkLongPressDown(event);
     } else if (event is PointerMoveEvent) {
-      if (event.buttons != _initialButtons) {
+      if (event.buttons != _initialButtons && !_longPressAccepted) {
         resolve(GestureDisposition.rejected);
         stopTrackingPointer(primaryPointer!);
       } else if (_longPressAccepted) {

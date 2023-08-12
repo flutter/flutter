@@ -167,8 +167,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
       : null;
   }
 
-  final Map<Object, TestFlutterView> _testViews = <Object, TestFlutterView>{};
-  final Map<Object, TestDisplay> _testDisplays = <Object, TestDisplay>{};
+  final Map<int, TestFlutterView> _testViews = <int, TestFlutterView>{};
+  final Map<int, TestDisplay> _testDisplays = <int, TestDisplay>{};
 
   @override
   VoidCallback? get onMetricsChanged => _platformDispatcher.onMetricsChanged;
@@ -395,10 +395,10 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  SemanticsActionCallback? get onSemanticsAction => _platformDispatcher.onSemanticsAction;
+  SemanticsActionEventCallback? get onSemanticsActionEvent => _platformDispatcher.onSemanticsActionEvent;
   @override
-  set onSemanticsAction(SemanticsActionCallback? callback) {
-    _platformDispatcher.onSemanticsAction = callback;
+  set onSemanticsActionEvent(SemanticsActionEventCallback? callback) {
+    _platformDispatcher.onSemanticsActionEvent = callback;
   }
 
   @override
@@ -509,6 +509,9 @@ class TestPlatformDispatcher implements PlatformDispatcher {
 
   @override
   Iterable<TestFlutterView> get views => _testViews.values;
+
+  @override
+  FlutterView? view({required int id}) => _testViews[id];
 
   @override
   Iterable<TestDisplay> get displays => _testDisplays.values;
@@ -678,7 +681,7 @@ class TestFlutterView implements FlutterView {
   final TestDisplay _display;
 
   @override
-  Object get viewId => _view.viewId;
+  int get viewId => _view.viewId;
 
   /// The device pixel ratio to use for this test.
   ///
@@ -1170,7 +1173,7 @@ class _UnsupportedDisplay implements TestDisplay {
 ///   // Fake the desired properties of the TestWindow. All code running
 ///   // within this test will perceive the following fake text scale
 ///   // factor as the real text scale factor of the window.
-///   testBinding.window.textScaleFactorFakeValue = 2.5;
+///   testBinding.window.textScaleFactorTestValue = 2.5; // ignore: deprecated_member_use
 ///
 ///   // Test code that depends on text scale factor here.
 /// });
@@ -1880,23 +1883,6 @@ class TestWindow implements SingletonFlutterWindow {
   }
 
   @Deprecated(
-    'Use WidgetTester.platformDispatcher.onSemanticsAction instead. '
-    'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
-  )
-  @override
-  SemanticsActionCallback? get onSemanticsAction => platformDispatcher.onSemanticsAction;
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.onSemanticsAction instead. '
-    'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
-  )
-  @override
-  set onSemanticsAction(SemanticsActionCallback? callback) {
-    platformDispatcher.onSemanticsAction = callback;
-  }
-
-  @Deprecated(
     'Use WidgetTester.platformDispatcher.accessibilityFeatures instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
     'This feature was deprecated after v3.9.0-0.1.pre.'
@@ -2105,7 +2091,7 @@ class TestWindow implements SingletonFlutterWindow {
     'This feature was deprecated after v3.9.0-0.1.pre.'
   )
   @override
-  Object get viewId => _view.viewId;
+  int get viewId => _view.viewId;
 
   /// This gives us some grace time when the dart:ui side adds something to
   /// [SingletonFlutterWindow], and makes things easier when we do rolls to give

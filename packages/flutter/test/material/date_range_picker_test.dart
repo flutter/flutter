@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../foundation/leak_tracking.dart';
 import 'feedback_tester.dart';
 
 void main() {
@@ -132,19 +133,21 @@ void main() {
       final Offset entryButtonBottomLeft = tester.getBottomLeft(
         find.widgetWithIcon(IconButton, Icons.edit_outlined),
       );
-      expect(saveButtonBottomLeft.dx, 800 - 89.0);
-      expect(saveButtonBottomLeft.dy, helpTextTopLeft.dy);
+      expect(saveButtonBottomLeft.dx, moreOrLessEquals(711.6, epsilon: 1e-5));
+      if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+        expect(saveButtonBottomLeft.dy, helpTextTopLeft.dy);
+      }
       expect(entryButtonBottomLeft.dx, saveButtonBottomLeft.dx - 48.0);
-      expect(entryButtonBottomLeft.dy, helpTextTopLeft.dy);
+      if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+        expect(entryButtonBottomLeft.dy, helpTextTopLeft.dy);
+      }
 
       // Test help text position.
       final Offset helpTextBottomLeft = tester.getBottomLeft(helpText);
       expect(helpTextBottomLeft.dx, 72.0);
-      // TODO(tahatesser): https://github.com/flutter/flutter/issues/99933
-      // A bug in the HTML renderer and/or Chrome 96+ causes a
-      // discrepancy in the paragraph height.
-      const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
-      expect(helpTextBottomLeft.dy, closeButtonBottomRight.dy + 20.0 + (hasIssue99933 ? 1.0 : 0.0));
+      if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+        expect(helpTextBottomLeft.dy, closeButtonBottomRight.dy + 20.0);
+      }
 
       // Test the header position.
       final Offset firstDateHeaderTopLeft = tester.getTopLeft(firstDateHeaderText);
@@ -247,12 +250,17 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets('landscape', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('landscape', (WidgetTester tester) async {
       await showPicker(tester, kCommonScreenSizeLandscape);
       expect(tester.widget<Text>(find.text('Jan 15 – Jan 25, 2016')).style?.fontSize, 24);
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
-    });
+    },
+    // TODO(polina-c): remove after resolving
+    // https://github.com/flutter/flutter/issues/130354
+    leakTrackingTestConfig: const LeakTrackingTestConfig(
+      allowAllNotGCed: true,
+    ));
   });
 
   testWidgets('Save and help text is used', (WidgetTester tester) async {
@@ -501,6 +509,7 @@ void main() {
   testWidgets('OK Cancel button layout', (WidgetTester tester) async {
      Widget buildFrame(TextDirection textDirection) {
        return MaterialApp(
+         theme: ThemeData(useMaterial3: false),
          home: Material(
            child: Center(
              child: Builder(
@@ -1059,9 +1068,10 @@ void main() {
 
   testWidgets('DatePickerDialog is state restorable', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         restorationScopeId: 'app',
-        home: _RestorableDateRangePickerDialogTestWidget(),
+        home: const _RestorableDateRangePickerDialogTestWidget(),
       ),
     );
 

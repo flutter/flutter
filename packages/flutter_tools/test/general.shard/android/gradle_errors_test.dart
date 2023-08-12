@@ -6,6 +6,7 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/gradle_errors.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
+import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -50,6 +51,7 @@ void main() {
           zipExceptionHandler,
           incompatibleJavaAndGradleVersionsHandler,
           remoteTerminatedHandshakeHandler,
+          couldNotOpenCacheDirectoryHandler,
         ])
       );
     });
@@ -133,6 +135,7 @@ Caused by: java.io.EOFException: SSL peer shut down incorrectly
         )
       );
     });
+
     testUsingContext('retries if gradle fails downloading with proxy error', () async {
       const String errorMessage = r'''
 Exception in thread "main" java.io.IOException: Unable to tunnel through proxy. Proxy returns "HTTP/1.1 400 Bad Request"
@@ -626,9 +629,7 @@ Command: /home/android/gradlew assembleRelease
         )
       );
     });
-  });
 
-  group('permission errors', () {
     testUsingContext('pattern', () async {
       const String errorMessage = '''
 Permission denied
@@ -774,6 +775,7 @@ assembleFooTest
       );
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
+      Java: () => FakeJava(),
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
       FileSystem: () => fileSystem,
@@ -816,6 +818,7 @@ assembleProfile
       );
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
+      Java: () => FakeJava(),
       GradleUtils: () => FakeGradleUtils(),
       Platform: () => fakePlatform('android'),
       FileSystem: () => fileSystem,
@@ -1382,6 +1385,32 @@ Could not compile build file '…/example/android/build.gradle'.
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
     });
+  });
+
+  testUsingContext('couldNotOpenCacheDirectoryHandler', () async {
+    final GradleBuildStatus status = await couldNotOpenCacheDirectoryHandler.handler(
+      line: '''
+FAILURE: Build failed with an exception.
+
+* Where:
+Script '/Volumes/Work/s/w/ir/x/w/flutter/packages/flutter_tools/gradle/src/main/groovy/flutter.groovy' line: 276
+
+* What went wrong:
+A problem occurred evaluating script.
+> Failed to apply plugin class 'FlutterPlugin'.
+   > Could not open cache directory 41rl0ui7kgmsyfwn97o2jypl6 (/Volumes/Work/s/w/ir/cache/gradle/caches/6.7/gradle-kotlin-dsl/41rl0ui7kgmsyfwn97o2jypl6).
+      > Failed to create Jar file /Volumes/Work/s/w/ir/cache/gradle/caches/6.7/generated-gradle-jars/gradle-api-6.7.jar.''',
+      project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      usesAndroidX: true,
+      multidexEnabled: true,
+    );
+    expect(testLogger.errorText, contains('Gradle threw an error while resolving dependencies'));
+    expect(status, GradleBuildStatus.retry);
+  }, overrides: <Type, Generator>{
+    GradleUtils: () => FakeGradleUtils(),
+    Platform: () => fakePlatform('android'),
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
   });
 }
 

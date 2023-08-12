@@ -15,6 +15,7 @@ import 'constants.dart';
 import 'debug.dart';
 import 'icons.dart';
 import 'ink_well.dart';
+import 'input_border.dart';
 import 'input_decorator.dart';
 import 'material.dart';
 import 'material_localizations.dart';
@@ -788,6 +789,44 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 /// shows the currently selected item as well as an arrow that opens a menu for
 /// selecting another item.
 ///
+/// ## Updating to [DropdownMenu]
+///
+/// There is a Material 3 version of this component,
+/// [DropdownMenu] that is preferred for applications that are configured
+/// for Material 3 (see [ThemeData.useMaterial3]).
+/// The [DropdownMenu] widget's visuals
+/// are a little bit different, see the Material 3 spec at
+/// <https://m3.material.io/components/menus/guidelines> for
+/// more details.
+///
+/// The [DropdownMenu] widget's API is also slightly different.
+/// To update from [DropdownButton] to [DropdownMenu], you will
+/// need to make the following changes:
+///
+/// 1. Instead of using [DropdownButton.items], which
+/// takes a list of [DropdownMenuItem]s, use
+/// [DropdownMenu.dropdownMenuEntries], which
+/// takes a list of [DropdownMenuEntry]'s.
+///
+/// 2. Instead of using [DropdownButton.onChanged],
+/// use [DropdownMenu.onSelected], which is also
+/// a callback that is called when the user selects an entry.
+///
+/// 3. In [DropdownMenu] it is not required to track
+/// the current selection in your app's state.
+/// So, instead of tracking the current selection in
+/// the [DropdownButton.value] property, you can set the
+/// [DropdownMenu.initialSelection] property to the
+/// item that should be selected before there is any user action.
+///
+/// 4. You may also need to make changes to the styling of the
+/// [DropdownMenu], see the properties in the [DropdownMenu]
+/// constructor for more details.
+///
+/// See the sample below for an example of migrating
+/// from [DropdownButton] to [DropdownMenu].
+///
+/// ## Using [DropdownButton]
 /// {@youtube 560 315 https://www.youtube.com/watch?v=ZzQ_PWrFihg}
 ///
 /// One ancestor must be a [Material] widget and typically this is
@@ -801,6 +840,7 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 /// The [onChanged] callback should update a state variable that defines the
 /// dropdown's value. It should also call [State.setState] to rebuild the
 /// dropdown with the new value.
+///
 ///
 /// {@tool dartpad}
 /// This sample shows a [DropdownButton] with a large arrow icon,
@@ -819,9 +859,13 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 /// [disabledHint] is null and [hint] is non-null, the [hint] widget will
 /// instead be displayed.
 ///
-/// Requires one of its ancestors to be a [Material] widget.
+/// {@tool dartpad}
+/// This sample shows how you would rewrite the above [DropdownButton]
+/// to use the [DropdownMenu].
 ///
-/// {@youtube 560 315 https://www.youtube.com/watch?v=ZzQ_PWrFihg}
+/// ** See code in examples/api/lib/material/dropdown_menu/dropdown_menu.1.dart **
+/// {@end-tool}
+///
 ///
 /// See also:
 ///
@@ -1178,7 +1222,6 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   Orientation? _lastOrientation;
   FocusNode? _internalNode;
   FocusNode? get focusNode => widget.focusNode ?? _internalNode;
-  bool _hasPrimaryFocus = false;
   late Map<Type, Action<Intent>> _actionMap;
 
   // Only used if needed to create _internalNode.
@@ -1201,14 +1244,12 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         onInvoke: (ButtonActivateIntent intent) => _handleTap(),
       ),
     };
-    focusNode!.addListener(_handleFocusChanged);
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _removeDropdownRoute();
-    focusNode!.removeListener(_handleFocusChanged);
     _internalNode?.dispose();
     super.dispose();
   }
@@ -1219,25 +1260,11 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     _lastOrientation = null;
   }
 
-  void _handleFocusChanged() {
-    if (_hasPrimaryFocus != focusNode!.hasPrimaryFocus) {
-      setState(() {
-        _hasPrimaryFocus = focusNode!.hasPrimaryFocus;
-      });
-    }
-  }
-
-
   @override
   void didUpdateWidget(DropdownButton<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.focusNode != oldWidget.focusNode) {
-      oldWidget.focusNode?.removeListener(_handleFocusChanged);
-      if (widget.focusNode == null) {
-        _internalNode ??= _createFocusNode();
-      }
-      _hasPrimaryFocus = focusNode!.hasPrimaryFocus;
-      focusNode!.addListener(_handleFocusChanged);
+    if (widget.focusNode == null) {
+      _internalNode ??= _createFocusNode();
     }
     _updateSelectedIndex();
   }
@@ -1329,9 +1356,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   // Similarly, we don't reduce the height of the button so much that its icon
   // would be clipped.
   double get _denseButtonHeight {
-    final double textScaleFactor = MediaQuery.textScaleFactorOf(context);
     final double fontSize = _textStyle!.fontSize ?? Theme.of(context).textTheme.titleMedium!.fontSize!;
-    final double scaledFontSize = textScaleFactor * fontSize;
+    final double scaledFontSize = MediaQuery.textScalerOf(context).scale(fontSize);
     return math.max(scaledFontSize, math.max(widget.iconSize, _kDenseButtonHeight));
   }
 
@@ -1608,6 +1634,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
              }
            }
            final bool isEmpty = !showSelectedItem && !isHintOrDisabledHintAvailable();
+           final bool hasError = effectiveDecoration.errorText != null;
 
            // An unfocusable Focus widget so that this widget can detect if its
            // descendants have focus or not.
@@ -1615,6 +1642,33 @@ class DropdownButtonFormField<T> extends FormField<T> {
              canRequestFocus: false,
              skipTraversal: true,
              child: Builder(builder: (BuildContext context) {
+                final bool isFocused = Focus.of(context).hasFocus;
+                InputBorder? resolveInputBorder() {
+                  if (hasError) {
+                    if (isFocused) {
+                      return effectiveDecoration.focusedErrorBorder;
+                    }
+                    return effectiveDecoration.errorBorder;
+                  }
+                  if (isFocused) {
+                    return effectiveDecoration.focusedBorder;
+                  }
+                  if (effectiveDecoration.enabled) {
+                    return effectiveDecoration.enabledBorder;
+                  }
+                  return effectiveDecoration.border;
+                }
+                BorderRadius? effectiveBorderRadius() {
+                  final InputBorder? inputBorder = resolveInputBorder();
+                  if (inputBorder is OutlineInputBorder) {
+                    return inputBorder.borderRadius;
+                  }
+                  if (inputBorder is UnderlineInputBorder) {
+                    return inputBorder.borderRadius;
+                  }
+                  return null;
+                }
+
                return DropdownButtonHideUnderline(
                  child: DropdownButton<T>._formField(
                    items: items,
@@ -1640,10 +1694,10 @@ class DropdownButtonFormField<T> extends FormField<T> {
                    menuMaxHeight: menuMaxHeight,
                    enableFeedback: enableFeedback,
                    alignment: alignment,
-                   borderRadius: borderRadius,
+                   borderRadius: borderRadius ?? effectiveBorderRadius(),
                    inputDecoration: effectiveDecoration.copyWith(errorText: field.errorText),
                    isEmpty: isEmpty,
-                   isFocused: Focus.of(context).hasFocus,
+                   isFocused: isFocused,
                    padding: padding,
                  ),
                );

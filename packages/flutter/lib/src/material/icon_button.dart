@@ -874,8 +874,17 @@ class _SelectableIconButtonState extends State<_SelectableIconButton> {
       onPressed: widget.onPressed,
       variant: widget.variant,
       toggleable: toggleable,
-      child: widget.child,
+      child: Semantics(
+        selected: widget.isSelected,
+        child: widget.child,
+      ),
     );
+  }
+
+  @override
+  void dispose() {
+    statesController.dispose();
+    super.dispose();
   }
 }
 
@@ -960,9 +969,9 @@ class _IconButtonM3 extends ButtonStyleButton {
 
     bool isIconThemeDefault(Color? color) {
       if (isDark) {
-        return color == kDefaultIconLightColor;
+        return identical(color, kDefaultIconLightColor);
       }
-      return color == kDefaultIconDarkColor;
+      return identical(color, kDefaultIconDarkColor);
     }
     final bool isDefaultColor = isIconThemeDefault(iconTheme.color);
     final bool isDefaultSize = iconTheme.size == const IconThemeData.fallback().size;
@@ -1080,8 +1089,6 @@ class _IconButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor?> 
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _IconButtonDefaultsM3 extends ButtonStyle {
   _IconButtonDefaultsM3(this.context, this.toggleable)
@@ -1203,8 +1210,6 @@ class _IconButtonDefaultsM3 extends ButtonStyle {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _FilledIconButtonDefaultsM3 extends ButtonStyle {
   _FilledIconButtonDefaultsM3(this.context, this.toggleable)
@@ -1352,8 +1357,6 @@ class _FilledIconButtonDefaultsM3 extends ButtonStyle {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
-
 class _FilledTonalIconButtonDefaultsM3 extends ButtonStyle {
   _FilledTonalIconButtonDefaultsM3(this.context, this.toggleable)
     : super(
@@ -1499,8 +1502,6 @@ class _FilledTonalIconButtonDefaultsM3 extends ButtonStyle {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _OutlinedIconButtonDefaultsM3 extends ButtonStyle {
   _OutlinedIconButtonDefaultsM3(this.context, this.toggleable)

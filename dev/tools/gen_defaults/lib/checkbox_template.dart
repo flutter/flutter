@@ -24,26 +24,26 @@ class _${blockName}DefaultsM3 extends CheckboxThemeData {
     return MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         if (states.contains(MaterialState.selected)) {
-          return const BorderSide(width: ${tokens['md.comp.checkbox.unselected.disabled.outline.width']}, color: Colors.transparent);
+          return const BorderSide(width: ${getToken('md.comp.checkbox.unselected.disabled.outline.width')}, color: Colors.transparent);
         }
-        return BorderSide(width: ${tokens['md.comp.checkbox.unselected.disabled.outline.width']}, color: ${componentColor('md.comp.checkbox.unselected.disabled.outline')}.withOpacity(${tokens['md.comp.checkbox.unselected.disabled.container.opacity']}));
+        return BorderSide(width: ${getToken('md.comp.checkbox.unselected.disabled.outline.width')}, color: ${componentColor('md.comp.checkbox.unselected.disabled.outline')}.withOpacity(${getToken('md.comp.checkbox.unselected.disabled.container.opacity')}));
       }
       if (states.contains(MaterialState.selected)) {
-        return const BorderSide(width: ${tokens['md.comp.checkbox.selected.outline.width']}, color: Colors.transparent);
+        return const BorderSide(width: ${getToken('md.comp.checkbox.selected.outline.width')}, color: Colors.transparent);
       }
       if (states.contains(MaterialState.error)) {
-        return BorderSide(width: ${tokens['md.comp.checkbox.unselected.disabled.outline.width']}, color: ${componentColor('md.comp.checkbox.unselected.error.outline')});
+        return BorderSide(width: ${getToken('md.comp.checkbox.unselected.disabled.outline.width')}, color: ${componentColor('md.comp.checkbox.unselected.error.outline')});
       }
       if (states.contains(MaterialState.pressed)) {
-        return BorderSide(width: ${tokens['md.comp.checkbox.unselected.pressed.outline.width']}, color: ${componentColor('md.comp.checkbox.unselected.pressed.outline')});
+        return BorderSide(width: ${getToken('md.comp.checkbox.unselected.pressed.outline.width')}, color: ${componentColor('md.comp.checkbox.unselected.pressed.outline')});
       }
       if (states.contains(MaterialState.hovered)) {
-        return BorderSide(width: ${tokens['md.comp.checkbox.unselected.hover.outline.width']}, color: ${componentColor('md.comp.checkbox.unselected.hover.outline')});
+        return BorderSide(width: ${getToken('md.comp.checkbox.unselected.hover.outline.width')}, color: ${componentColor('md.comp.checkbox.unselected.hover.outline')});
       }
       if (states.contains(MaterialState.focused)) {
-        return BorderSide(width: ${tokens['md.comp.checkbox.unselected.focus.outline.width']}, color: ${componentColor('md.comp.checkbox.unselected.focus.outline')});
+        return BorderSide(width: ${getToken('md.comp.checkbox.unselected.focus.outline.width')}, color: ${componentColor('md.comp.checkbox.unselected.focus.outline')});
       }
-      return BorderSide(width: ${tokens['md.comp.checkbox.unselected.outline.width']}, color: ${componentColor('md.comp.checkbox.unselected.outline')});
+      return BorderSide(width: ${getToken('md.comp.checkbox.unselected.outline.width')}, color: ${componentColor('md.comp.checkbox.unselected.outline')});
     });
   }
 
@@ -125,7 +125,7 @@ class _${blockName}DefaultsM3 extends CheckboxThemeData {
   }
 
   @override
-  double get splashRadius => ${tokens['md.comp.checkbox.state-layer.size']} / 2;
+  double get splashRadius => ${getToken('md.comp.checkbox.state-layer.size')} / 2;
 
   @override
   MaterialTapTargetSize get materialTapTargetSize => _theme.materialTapTargetSize;
@@ -135,7 +135,7 @@ class _${blockName}DefaultsM3 extends CheckboxThemeData {
 
   @override
   OutlinedBorder get shape => const RoundedRectangleBorder(
-    borderRadius: BorderRadius.all(Radius.circular(${tokens['md.comp.checkbox.unselected.outline.width']})),
+    borderRadius: BorderRadius.all(Radius.circular(${getToken('md.comp.checkbox.unselected.outline.width')})),
   );
 }
 ''';

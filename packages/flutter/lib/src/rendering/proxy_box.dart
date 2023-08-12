@@ -842,6 +842,19 @@ class RenderIntrinsicHeight extends RenderProxyBox {
   }
 }
 
+/// Excludes the child from baseline computations in the parent.
+class RenderIgnoreBaseline extends RenderProxyBox {
+  /// Create a render object that causes the parent to ignore the child for baseline computations.
+  RenderIgnoreBaseline({
+    RenderBox? child,
+  }) : super(child);
+
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    return null;
+  }
+}
+
 /// Makes its child partially transparent.
 ///
 /// This class paints its child into an intermediate buffer and then blends the
@@ -1908,8 +1921,6 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
   }
 }
 
-final Paint _transparentPaint = Paint()..color = const Color(0x00000000);
-
 /// Creates a physical model layer that clips its child to a rounded
 /// rectangle.
 ///
@@ -1999,7 +2010,6 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
 
     _updateClip();
     final RRect offsetRRect = _clip!.shift(offset);
-    final Rect offsetBounds = offsetRRect.outerRect;
     final Path offsetRRectAsPath = Path()..addRRect(offsetRRect);
     bool paintShadows = true;
     assert(() {
@@ -2020,14 +2030,6 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
 
     final Canvas canvas = context.canvas;
     if (elevation != 0.0 && paintShadows) {
-      // The drawShadow call doesn't add the region of the shadow to the
-      // picture's bounds, so we draw a hardcoded amount of extra space to
-      // account for the maximum potential area of the shadow.
-      // TODO(jsimmons): remove this when Skia does it for us.
-      canvas.drawRect(
-        offsetBounds.inflate(20.0),
-        _transparentPaint,
-      );
       canvas.drawShadow(
         offsetRRectAsPath,
         shadowColor,
@@ -2122,7 +2124,6 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
     }
 
     _updateClip();
-    final Rect offsetBounds = offset & size;
     final Path offsetPath = _clip!.shift(offset);
     bool paintShadows = true;
     assert(() {
@@ -2143,14 +2144,6 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
 
     final Canvas canvas = context.canvas;
     if (elevation != 0.0 && paintShadows) {
-      // The drawShadow call doesn't add the region of the shadow to the
-      // picture's bounds, so we draw a hardcoded amount of extra space to
-      // account for the maximum potential area of the shadow.
-      // TODO(jsimmons): remove this when Skia does it for us.
-      canvas.drawRect(
-        offsetBounds.inflate(20.0),
-        _transparentPaint,
-      );
       canvas.drawShadow(
         offsetPath,
         shadowColor,
@@ -3554,7 +3547,14 @@ class RenderRepaintBoundary extends RenderProxyBox {
 /// as usual. It just cannot be the target of located events, because its render
 /// object returns false from [hitTest].
 ///
-/// {@macro flutter.widgets.IgnorePointer.Semantics}
+/// ## Semantics
+///
+/// Using this class may also affect how the semantics subtree underneath is
+/// collected.
+///
+/// {@macro flutter.widgets.IgnorePointer.semantics}
+///
+/// {@macro flutter.widgets.IgnorePointer.ignoringSemantics}
 ///
 /// See also:
 ///
@@ -3581,7 +3581,7 @@ class RenderIgnorePointer extends RenderProxyBox {
   /// Regardless of whether this render object is ignored during hit testing, it
   /// will still consume space during layout and be visible during painting.
   ///
-  /// {@macro flutter.widgets.IgnorePointer.Semantics}
+  /// {@macro flutter.widgets.IgnorePointer.semantics}
   bool get ignoring => _ignoring;
   bool _ignoring;
   set ignoring(bool value) {
@@ -3596,7 +3596,7 @@ class RenderIgnorePointer extends RenderProxyBox {
 
   /// Whether the semantics of this render object is ignored when compiling the semantics tree.
   ///
-  /// {@macro flutter.widgets.IgnorePointer.Semantics}
+  /// {@macro flutter.widgets.IgnorePointer.ignoringSemantics}
   ///
   /// See [SemanticsNode] for additional information about the semantics tree.
   @Deprecated(
@@ -3797,7 +3797,14 @@ class RenderOffstage extends RenderProxyBox {
 /// its children from being the target of located events, because its render
 /// object returns true from [hitTest].
 ///
-/// {@macro flutter.widgets.AbsorbPointer.Semantics}
+/// ## Semantics
+///
+/// Using this class may also affect how the semantics subtree underneath is
+/// collected.
+///
+/// {@macro flutter.widgets.AbsorbPointer.semantics}
+///
+/// {@macro flutter.widgets.AbsorbPointer.ignoringSemantics}
 ///
 /// See also:
 ///
@@ -3825,7 +3832,7 @@ class RenderAbsorbPointer extends RenderProxyBox {
   /// testing, it will still consume space during layout and be visible during
   /// painting.
   ///
-  /// {@macro flutter.widgets.AbsorbPointer.Semantics}
+  /// {@macro flutter.widgets.AbsorbPointer.semantics}
   bool get absorbing => _absorbing;
   bool _absorbing;
   set absorbing(bool value) {
@@ -3841,7 +3848,7 @@ class RenderAbsorbPointer extends RenderProxyBox {
   /// Whether the semantics of this render object is ignored when compiling the
   /// semantics tree.
   ///
-  /// {@macro flutter.widgets.AbsorbPointer.Semantics}
+  /// {@macro flutter.widgets.AbsorbPointer.ignoringSemantics}
   ///
   /// See [SemanticsNode] for additional information about the semantics tree.
   @Deprecated(
@@ -4325,6 +4332,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     }
     if (_properties.button != null) {
       config.isButton = _properties.button!;
+    }
+    if (_properties.expanded != null) {
+      config.isExpanded = _properties.expanded;
     }
     if (_properties.link != null) {
       config.isLink = _properties.link!;

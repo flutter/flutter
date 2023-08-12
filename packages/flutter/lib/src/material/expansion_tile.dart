@@ -184,9 +184,9 @@ class ExpansionTileController {
 /// A single-line [ListTile] with an expansion arrow icon that expands or collapses
 /// the tile to reveal or hide the [children].
 ///
-/// This widget is typically used with [ListView] to create an
-/// "expand / collapse" list entry. When used with scrolling widgets like
-/// [ListView], a unique [PageStorageKey] must be specified to enable the
+/// This widget is typically used with [ListView] to create an "expand /
+/// collapse" list entry. When used with scrolling widgets like [ListView], a
+/// unique [PageStorageKey] must be specified as the [key], to enable the
 /// [ExpansionTile] to save and restore its expanded state when it is scrolled
 /// in and out of view.
 ///
@@ -683,7 +683,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
           bottom: BorderSide(color: Colors.transparent),
         )
       ..end = widget.shape
-        ?? expansionTileTheme.collapsedShape
+        ?? expansionTileTheme.shape
         ?? Border(
           top: BorderSide(color: theme.dividerColor),
           bottom: BorderSide(color: theme.dividerColor),
@@ -758,8 +758,6 @@ class _ExpansionTileDefaultsM2 extends ExpansionTileThemeData {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _ExpansionTileDefaultsM3 extends ExpansionTileThemeData {
   _ExpansionTileDefaultsM3(this.context);

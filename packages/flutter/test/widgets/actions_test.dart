@@ -863,10 +863,10 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: FocusableActionDetector(
-              child: MaterialButton(
+              child: ElevatedButton(
+                onPressed: () {},
                 focusNode: buttonNode,
                 child: const Text('Test'),
-                onPressed: () {},
               ),
             ),
           ),
@@ -882,10 +882,10 @@ void main() {
           MaterialApp(
             home: FocusableActionDetector(
               descendantsAreFocusable: false,
-              child: MaterialButton(
+              child: ElevatedButton(
+                onPressed: () {},
                 focusNode: buttonNode,
                 child: const Text('Test'),
-                onPressed: () {},
               ),
             ),
           ),
@@ -908,17 +908,18 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: FocusableActionDetector(
+              focusNode: FocusNode(skipTraversal: true),
               child: Column(
                 children: <Widget>[
-                  MaterialButton(
+                  ElevatedButton(
+                    onPressed: () {},
                     focusNode: buttonNode1,
                     child: const Text('Node 1'),
-                    onPressed: () {},
                   ),
-                  MaterialButton(
+                  ElevatedButton(
+                    onPressed: () {},
                     focusNode: buttonNode2,
                     child: const Text('Node 2'),
-                    onPressed: () {},
                   ),
                 ],
               ),
@@ -938,18 +939,19 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: FocusableActionDetector(
+              focusNode: FocusNode(skipTraversal: true),
               descendantsAreTraversable: false,
               child: Column(
                 children: <Widget>[
-                  MaterialButton(
+                  ElevatedButton(
+                    onPressed: () {},
                     focusNode: buttonNode1,
                     child: const Text('Node 1'),
-                    onPressed: () {},
                   ),
-                  MaterialButton(
+                  ElevatedButton(
+                    onPressed: () {},
                     focusNode: buttonNode2,
                     child: const Text('Node 2'),
-                    onPressed: () {},
                   ),
                 ],
               ),

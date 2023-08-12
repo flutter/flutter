@@ -5,7 +5,7 @@
 import 'package:flutter_web_plugins/url_strategy.dart';
 
 /// A mock implementation of [PlatformLocation] that doesn't access the browser.
-class TestPlatformLocation extends PlatformLocation {
+class TestPlatformLocation implements PlatformLocation {
   @override
   String pathname = '';
 

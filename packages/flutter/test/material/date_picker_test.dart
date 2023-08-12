@@ -9,8 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -332,7 +330,191 @@ void main() {
       // We expect the left edge of the 'OK' button in the RTL
       // layout to match the gap between right edge of the 'OK'
       // button and the right edge of the 800 wide view.
-      expect(tester.getBottomLeft(find.text('OK')).dx, 800 - ltrOkRight);
+      expect(tester.getBottomLeft(find.text('OK')).dx, moreOrLessEquals(800 - ltrOkRight));
+    });
+
+    group('Barrier dismissible', () {
+      late _DatePickerObserver rootObserver;
+
+      setUp(() {
+        rootObserver = _DatePickerObserver();
+      });
+
+      testWidgets('Barrier is dismissible with default parameter', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            navigatorObservers: <NavigatorObserver>[rootObserver],
+            home: Material(
+              child: Center(
+                child: Builder(
+                  builder: (BuildContext context) {
+                    return ElevatedButton(
+                      child: const Text('X'),
+                      onPressed: () =>
+                          showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(2018),
+                            lastDate: DateTime(2030),
+                            builder: (BuildContext context,
+                                Widget? child) => const SizedBox(),
+                          ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // Open the dialog.
+        await tester.tap(find.byType(ElevatedButton));
+        await tester.pumpAndSettle();
+        expect(rootObserver.datePickerCount, 1);
+
+        // Tap on the barrier.
+        await tester.tapAt(const Offset(10.0, 10.0));
+        await tester.pumpAndSettle();
+        expect(rootObserver.datePickerCount, 0);
+      });
+
+      testWidgets('Barrier is not dismissible with barrierDismissible is false', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            navigatorObservers: <NavigatorObserver>[rootObserver],
+            home: Material(
+              child: Center(
+                child: Builder(
+                  builder: (BuildContext context) {
+                    return ElevatedButton(
+                      child: const Text('X'),
+                      onPressed: () =>
+                          showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(2018),
+                            lastDate: DateTime(2030),
+                            barrierDismissible: false,
+                            builder: (BuildContext context,
+                                Widget? child) => const SizedBox(),
+                          ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // Open the dialog.
+        await tester.tap(find.byType(ElevatedButton));
+        await tester.pumpAndSettle();
+        expect(rootObserver.datePickerCount, 1);
+
+        // Tap on the barrier, which shouldn't do anything this time.
+        await tester.tapAt(const Offset(10.0, 10.0));
+        await tester.pumpAndSettle();
+        expect(rootObserver.datePickerCount, 1);
+      });
+    });
+
+    testWidgets('Barrier color', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: Builder(
+                builder: (BuildContext context) {
+                  return ElevatedButton(
+                    child: const Text('X'),
+                    onPressed: () =>
+                        showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(2018),
+                          lastDate: DateTime(2030),
+                          builder: (BuildContext context,
+                              Widget? child) => const SizedBox(),
+                        ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Open the dialog.
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+      expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, Colors.black54);
+
+      // Dismiss the dialog.
+      await tester.tapAt(const Offset(10.0, 10.0));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: Builder(
+                builder: (BuildContext context) {
+                  return ElevatedButton(
+                    child: const Text('X'),
+                    onPressed: () =>
+                        showDatePicker(
+                          context: context,
+                          barrierColor: Colors.pink,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(2018),
+                          lastDate: DateTime(2030),
+                          builder: (BuildContext context,
+                              Widget? child) => const SizedBox(),
+                        ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Open the dialog.
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+      expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, Colors.pink);
+    });
+
+    testWidgets('Barrier Label', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: Builder(
+                builder: (BuildContext context) {
+                  return ElevatedButton(
+                    child: const Text('X'),
+                    onPressed: () =>
+                        showDatePicker(
+                          context: context,
+                          barrierLabel: 'Custom Label',
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(2018),
+                          lastDate: DateTime(2030),
+                          builder: (BuildContext context,
+                              Widget? child) => const SizedBox(),
+                        ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Open the dialog.
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+      expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).semanticsLabel, 'Custom Label');
     });
 
     testWidgets('uses nested navigator if useRootNavigator is false', (WidgetTester tester) async {
@@ -382,6 +564,7 @@ void main() {
       );
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Center(
             child: Builder(
               builder: (BuildContext context) {
@@ -417,7 +600,7 @@ void main() {
       );
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData.fallback().copyWith(dialogTheme: customDialogTheme),
+          theme: ThemeData.fallback(useMaterial3: false).copyWith(dialogTheme: customDialogTheme),
           home: Center(
             child: Builder(
               builder: (BuildContext context) {
@@ -447,6 +630,7 @@ void main() {
     testWidgets('OK Cancel button layout', (WidgetTester tester) async {
        Widget buildFrame(TextDirection textDirection) {
          return MaterialApp(
+           theme: ThemeData(useMaterial3: false),
            home: Material(
              child: Center(
                child: Builder(
@@ -692,11 +876,9 @@ void main() {
       final Offset subHeaderTextTopLeft = tester.getTopLeft(subHeaderText);
       final Offset dividerTopRight = tester.getTopRight(divider);
       expect(subHeaderTextTopLeft.dx, dividerTopRight.dx + 24.0);
-      // TODO(tahatesser): https://github.com/flutter/flutter/issues/99933
-      // A bug in the HTML renderer and/or Chrome 96+ causes a
-      // discrepancy in the paragraph height.
-      const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
-      expect(subHeaderTextTopLeft.dy,  dialogTopLeft.dy + 16.0 - (hasIssue99933 ? 0.5 : 0.0));
+      if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+        expect(subHeaderTextTopLeft.dy,  dialogTopLeft.dy + 16.0);
+      }
 
       // Test sub header icon position.
       final Finder subHeaderIcon = find.byIcon(Icons.arrow_drop_down);
@@ -710,7 +892,9 @@ void main() {
       final Offset calendarPageViewTopLeft = tester.getTopLeft(calendarPageView);
       final Offset subHeaderTextBottomLeft = tester.getBottomLeft(subHeaderText);
       expect(calendarPageViewTopLeft.dx, dividerTopRight.dx);
-      expect(calendarPageViewTopLeft.dy, subHeaderTextBottomLeft.dy + 16.0 - (hasIssue99933 ? 0.5 : 0.0));
+      if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+        expect(calendarPageViewTopLeft.dy, subHeaderTextBottomLeft.dy + 16.0);
+      }
 
       // Test month navigation icons position.
       final Finder previousMonthButton = find.widgetWithIcon(IconButton, Icons.chevron_left);
@@ -770,11 +954,9 @@ void main() {
       final Offset headerTextTextTopLeft = tester.getTopLeft(headerText);
       final Offset helpTextBottomLeft = tester.getBottomLeft(helpText);
       expect(headerTextTextTopLeft.dx, dialogTopLeft.dx + 24.0);
-      // TODO(tahatesser): https://github.com/flutter/flutter/issues/99933
-      // A bug in the HTML renderer and/or Chrome 96+ causes a
-      // discrepancy in the paragraph height.
-      const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
-      expect(headerTextTextTopLeft.dy, helpTextBottomLeft.dy + 28.0 - (hasIssue99933 ? 1.0 : 0.0));
+      if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+        expect(headerTextTextTopLeft.dy, helpTextBottomLeft.dy + 28.0);
+      }
 
       // Test switch button position.
       final Finder switchButtonM3 = find.widgetWithIcon(IconButton, Icons.edit_outlined);
@@ -794,7 +976,9 @@ void main() {
       final Offset subHeaderTextTopLeft = tester.getTopLeft(subHeaderText);
       final Offset dividerBottomLeft = tester.getBottomLeft(divider);
       expect(subHeaderTextTopLeft.dx, dialogTopLeft.dx + 24.0);
-      expect(subHeaderTextTopLeft.dy, dividerBottomLeft.dy + 16.0 - (hasIssue99933 ? 0.5 : 0.0));
+      if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+        expect(subHeaderTextTopLeft.dy, dividerBottomLeft.dy + 16.0);
+      }
 
       // Test sub header icon position.
       final Finder subHeaderIcon = find.byIcon(Icons.arrow_drop_down);
@@ -817,7 +1001,9 @@ void main() {
       final Offset calendarPageViewTopLeft = tester.getTopLeft(calendarPageView);
       final Offset subHeaderTextBottomLeft = tester.getBottomLeft(subHeaderText);
       expect(calendarPageViewTopLeft.dx, dialogTopLeft.dx);
-      expect(calendarPageViewTopLeft.dy, subHeaderTextBottomLeft.dy + 16.0 - (hasIssue99933 ? 0.5 : 0.0));
+      if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+        expect(calendarPageViewTopLeft.dy, subHeaderTextBottomLeft.dy + 16.0);
+      }
 
       // Test action buttons position.
       final Offset dialogBottomRight = tester.getBottomRight(find.byType(AnimatedContainer));
@@ -872,14 +1058,14 @@ void main() {
       });
     });
 
-    testWidgets('Changing year does not change selected date', (WidgetTester tester) async {
+    testWidgets('Changing year does change selected date', (WidgetTester tester) async {
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
         await tester.tap(find.text('January 2016'));
         await tester.pump();
         await tester.tap(find.text('2018'));
         await tester.pump();
         await tester.tap(find.text('OK'));
-        expect(await date, equals(DateTime(2016, DateTime.january, 15)));
+        expect(await date, equals(DateTime(2018, DateTime.january, 15)));
       });
     });
 
@@ -1266,6 +1452,7 @@ void main() {
 
         expect(tester.getSemantics(find.text('3')), matchesSemantics(
           label: '3, Sunday, January 3, 2016, Today',
+          isButton: true,
           hasTapAction: true,
           isFocusable: true,
         ));
@@ -2031,5 +2218,13 @@ class _DatePickerObserver extends NavigatorObserver {
       datePickerCount++;
     }
     super.didPush(route, previousRoute);
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (route is DialogRoute) {
+      datePickerCount--;
+    }
+    super.didPop(route, previousRoute);
   }
 }

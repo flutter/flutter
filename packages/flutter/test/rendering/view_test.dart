@@ -69,4 +69,86 @@ void main() {
     expect(viewConfigurationA.hashCode, viewConfigurationB.hashCode);
     expect(viewConfigurationA.hashCode != viewConfigurationC.hashCode, true);
   });
+
+  test('invokes DebugPaintCallback', () {
+    final PaintPattern paintsOrangeRect = paints..rect(
+      color: orange,
+      rect: orangeRect,
+    );
+    final PaintPattern paintsGreenRect = paints..rect(
+      color: green,
+      rect: greenRect,
+    );
+    final PaintPattern paintOrangeAndGreenRect = paints
+      ..rect(
+        color: orange,
+        rect: orangeRect,
+      )
+      ..rect(
+        color: green,
+        rect: greenRect,
+      );
+    void paintCallback(PaintingContext context, Offset offset, RenderView renderView) {
+      context.canvas.drawRect(
+        greenRect,
+        Paint()..color = green,
+      );
+    }
+
+    layout(TestRenderObject());
+    expect(
+      TestRenderingFlutterBinding.instance.renderView,
+      paintsOrangeRect,
+    );
+    expect(
+      TestRenderingFlutterBinding.instance.renderView,
+      isNot(paintsGreenRect),
+    );
+
+    RenderView.debugAddPaintCallback(paintCallback);
+    expect(
+      TestRenderingFlutterBinding.instance.renderView,
+      paintOrangeAndGreenRect,
+    );
+
+    RenderView.debugRemovePaintCallback(paintCallback);
+    expect(
+      TestRenderingFlutterBinding.instance.renderView,
+      paintsOrangeRect,
+    );
+    expect(
+      TestRenderingFlutterBinding.instance.renderView,
+      isNot(paintsGreenRect),
+    );
+  });
+
+  test('Config can be set and changed after instantiation without calling prepareInitialFrame first', () {
+    final RenderView view = RenderView(
+      view: RendererBinding.instance.platformDispatcher.views.single,
+    );
+    view.configuration = const ViewConfiguration(size: Size(100, 200), devicePixelRatio: 3.0);
+    view.configuration = const ViewConfiguration(size: Size(200, 300), devicePixelRatio: 2.0);
+    PipelineOwner().rootNode = view;
+    view.prepareInitialFrame();
+  });
+}
+
+const Color orange = Color(0xFFFF9000);
+const Color green = Color(0xFF0FF900);
+const Rect orangeRect = Rect.fromLTWH(10, 10, 50, 75);
+const Rect greenRect = Rect.fromLTWH(20, 20, 100, 150);
+
+class TestRenderObject extends RenderBox {
+  @override
+  void performLayout() {
+    size = constraints.biggest;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    context.canvas.drawRect(
+      orangeRect,
+      Paint()..color = orange,
+    );
+  }
 }

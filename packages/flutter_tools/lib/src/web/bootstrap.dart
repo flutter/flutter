@@ -196,6 +196,12 @@ define("$bootstrapModule", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) 
       return dart.getSourceMap(url);
     });
   }
+  // Prevent DDC's requireJS to interfere with modern bundling.
+  if (typeof define === 'function' && define.amd) {
+    // Preserve a copy just in case...
+    define._amd = define.amd;
+    delete define.amd;
+  }
 });
 ''';
 }
@@ -213,6 +219,7 @@ String generateTestEntrypoint({
   // @dart = ${languageVersion.major}.${languageVersion.minor}
   import 'org-dartlang-app:///$relativeTestPath' as test;
   import 'dart:ui' as ui;
+  import 'dart:ui_web' as ui_web;
   import 'dart:html';
   import 'dart:js';
   ${testConfigPath != null ? "import '${Uri.file(testConfigPath)}' as test_config;" : ""}
@@ -221,8 +228,8 @@ String generateTestEntrypoint({
   import 'package:test_api/backend.dart';
 
   Future<void> main() async {
-    ui.debugEmulateFlutterTesterEnvironment = true;
-    await ui.webOnlyInitializePlatform();
+    ui_web.debugEmulateFlutterTesterEnvironment = true;
+    await ui_web.bootstrapEngine();
     webGoldenComparator = DefaultWebGoldenComparator(Uri.parse('${Uri.file(absolutePath)}'));
     (ui.window as dynamic).debugOverrideDevicePixelRatio(3.0);
     (ui.window as dynamic).webOnlyDebugPhysicalSizeOverride = const ui.Size(2400, 1800);
@@ -240,25 +247,16 @@ String generateTestEntrypoint({
   StreamChannel serializeSuite(Function getMain(), {bool hidePrints = true}) => RemoteListener.start(getMain, hidePrints: hidePrints);
 
   StreamChannel postMessageChannel() {
-    var controller = StreamChannelController(sync: true);
-    window.onMessage.firstWhere((message) {
-      return message.origin == window.location.origin && message.data == "port";
-    }).then((message) {
-      var port = message.ports.first;
-      var portSubscription = port.onMessage.listen((message) {
-        controller.local.sink.add(message.data);
-      });
-      controller.local.stream.listen((data) {
-        port.postMessage({"data": data});
-      }, onDone: () {
-        port.postMessage({"event": "done"});
-        portSubscription.cancel();
-      });
+    var controller = StreamChannelController<Object?>(sync: true);
+    var channel = MessageChannel();
+    window.parent!.postMessage('port', window.location.origin, [channel.port2]);
+
+    var portSubscription = channel.port1.onMessage.listen((message) {
+      controller.local.sink.add(message.data);
     });
-    context['parent'].callMethod('postMessage', [
-      JsObject.jsify({"href": window.location.href, "ready": true}),
-      window.location.origin,
-    ]);
+    controller.local.stream
+        .listen(channel.port1.postMessage, onDone: portSubscription.cancel);
+
     return controller.foreign;
   }
   ''';

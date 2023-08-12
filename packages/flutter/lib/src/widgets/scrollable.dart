@@ -72,6 +72,14 @@ typedef TwoDimensionalViewportBuilder = Widget Function(BuildContext context, Vi
 ///    [PageController], which creates a page-oriented scroll position subclass
 ///    that keeps the same page visible when the [Scrollable] resizes.
 ///
+/// ## Persisting the scroll position during a session
+///
+/// Scrollables attempt to persist their scroll position using [PageStorage].
+/// This can be disabled by setting [ScrollController.keepScrollOffset] to false
+/// on the [controller]. If it is enabled, using a [PageStorageKey] for the
+/// [key] of this widget (or one of its ancestors, e.g. a [ScrollView]) is
+/// recommended to help disambiguate different [Scrollable]s from each other.
+///
 /// See also:
 ///
 ///  * [ListView], which is a commonly used [ScrollView] that displays a
@@ -320,6 +328,10 @@ class Scrollable extends StatefulWidget {
   /// the nearest enclosing [ScrollableState] in that [Axis] is returned, or
   /// null if there is none.
   ///
+  /// This finds the nearest _ancestor_ [Scrollable] of the `context`. This
+  /// means that if the `context` is that of a [Scrollable], it will _not_ find
+  /// _that_ [Scrollable].
+  ///
   /// See also:
   ///
   /// * [Scrollable.of], which is similar to this method, but asserts
@@ -358,6 +370,10 @@ class Scrollable extends StatefulWidget {
   /// Using the optional [Axis] is useful when Scrollables are nested and the
   /// target [Scrollable] is not the closest instance. When [axis] is provided,
   /// the nearest enclosing [ScrollableState] in that [Axis] is returned.
+  ///
+  /// This finds the nearest _ancestor_ [Scrollable] of the `context`. This
+  /// means that if the `context` is that of a [Scrollable], it will _not_ find
+  /// _that_ [Scrollable].
   ///
   /// If no [Scrollable] ancestor is found, then this method will assert in
   /// debug mode, and throw an exception in release mode.
@@ -943,7 +959,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     Widget result = _ScrollableScope(
       scrollable: this,
       position: position,
-      // TODO(ianh): Having all these global keys is sad.
       child: Listener(
         onPointerSignal: _receivedPointerSignal,
         child: RawGestureDetector(
@@ -1162,11 +1177,11 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
     if (event.type == SelectionEventType.endEdgeUpdate) {
       _currentDragEndRelatedToOrigin = _inferPositionRelatedToOrigin(event.globalPosition);
       final Offset endOffset = _currentDragEndRelatedToOrigin!.translate(-deltaToOrigin.dx, -deltaToOrigin.dy);
-      event = SelectionEdgeUpdateEvent.forEnd(globalPosition: endOffset);
+      event = SelectionEdgeUpdateEvent.forEnd(globalPosition: endOffset, granularity: event.granularity);
     } else {
       _currentDragStartRelatedToOrigin = _inferPositionRelatedToOrigin(event.globalPosition);
       final Offset startOffset = _currentDragStartRelatedToOrigin!.translate(-deltaToOrigin.dx, -deltaToOrigin.dy);
-      event = SelectionEdgeUpdateEvent.forStart(globalPosition: startOffset);
+      event = SelectionEdgeUpdateEvent.forStart(globalPosition: startOffset, granularity: event.granularity);
     }
     final SelectionResult result = super.handleSelectionEdgeUpdate(event);
 
@@ -1415,6 +1430,9 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       final Offset deltaToOrigin = _getDeltaToScrollOrigin(state);
       final Offset startOffset = _currentDragStartRelatedToOrigin!.translate(-deltaToOrigin.dx, -deltaToOrigin.dy);
       selectable.dispatchSelectionEvent(SelectionEdgeUpdateEvent.forStart(globalPosition: startOffset));
+      // Make sure we track that we have synthesized a start event for this selectable,
+      // so we don't synthesize events unnecessarily.
+      _selectableStartEdgeUpdateRecords[selectable] = state.position.pixels;
     }
     final double? previousEndRecord = _selectableEndEdgeUpdateRecords[selectable];
     if (_currentDragEndRelatedToOrigin != null &&
@@ -1423,6 +1441,9 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       final Offset deltaToOrigin = _getDeltaToScrollOrigin(state);
       final Offset endOffset = _currentDragEndRelatedToOrigin!.translate(-deltaToOrigin.dx, -deltaToOrigin.dy);
       selectable.dispatchSelectionEvent(SelectionEdgeUpdateEvent.forEnd(globalPosition: endOffset));
+      // Make sure we track that we have synthesized an end event for this selectable,
+      // so we don't synthesize events unnecessarily.
+      _selectableEndEdgeUpdateRecords[selectable] = state.position.pixels;
     }
   }
 

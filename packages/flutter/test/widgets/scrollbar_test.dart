@@ -9,8 +9,6 @@ import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 const Color _kScrollbarColor = Color(0xFF123456);
 const double _kThickness = 2.5;
 const double _kMinThumbExtent = 18.0;
@@ -693,7 +691,7 @@ void main() {
         child: MediaQuery(
           data: const MediaQueryData(),
           child: RawScrollbar(
-            isAlwaysShown: true,
+            thumbVisibility: true,
             controller: scrollController,
             child: SingleChildScrollView(
               controller: scrollController,
@@ -958,7 +956,7 @@ void main() {
           child: PrimaryScrollController(
             controller: scrollController,
             child: RawScrollbar(
-              isAlwaysShown: true,
+              thumbVisibility: true,
               controller: scrollController,
               child: const SingleChildScrollView(
                 child: SizedBox(width: 4000.0, height: 4000.0),
@@ -1013,7 +1011,7 @@ void main() {
           child: PrimaryScrollController(
             controller: scrollController,
             child: RawScrollbar(
-              isAlwaysShown: true,
+              thumbVisibility: true,
               controller: scrollController,
               child: const SingleChildScrollView(
                 child: SizedBox(width: 4000.0, height: 4000.0),
@@ -1071,7 +1069,7 @@ void main() {
             child: PrimaryScrollController(
               controller: scrollController,
               child: RawScrollbar(
-                isAlwaysShown: true,
+                thumbVisibility: true,
                 controller: scrollController,
                 child: const SingleChildScrollView(
                   primary: true,
@@ -1139,7 +1137,7 @@ void main() {
             child: PrimaryScrollController(
               controller: scrollController,
               child: RawScrollbar(
-                isAlwaysShown: true,
+                thumbVisibility: true,
                 controller: scrollController,
                 child: const SingleChildScrollView(
                   child: SizedBox(width: 4000.0, height: 4000.0),
@@ -1262,7 +1260,7 @@ void main() {
           child: PrimaryScrollController(
             controller: scrollController,
             child: RawScrollbar(
-              isAlwaysShown: true,
+              thumbVisibility: true,
               controller: scrollController,
               child: const SingleChildScrollView(
                 child: SizedBox(width: 4000.0, height: 4000.0),
@@ -1428,7 +1426,7 @@ void main() {
     FlutterError.onError = handler;
   });
 
-  testWidgets('RawScrollbar.isAlwaysShown asserts that a ScrollPosition is attached', (WidgetTester tester) async {
+  testWidgets('RawScrollbar.thumbVisibility asserts that a ScrollPosition is attached', (WidgetTester tester) async {
     final FlutterExceptionHandler? handler = FlutterError.onError;
     FlutterErrorDetails? error;
     FlutterError.onError = (FlutterErrorDetails details) {
@@ -1441,7 +1439,7 @@ void main() {
         child: MediaQuery(
           data: const MediaQueryData(),
           child: RawScrollbar(
-            isAlwaysShown: true,
+            thumbVisibility: true,
             controller: ScrollController(),
             thumbColor: const Color(0x11111111),
             child: const SingleChildScrollView(
@@ -1518,7 +1516,7 @@ void main() {
           child: PrimaryScrollController(
             controller: scrollController,
             child: RawScrollbar(
-              isAlwaysShown: true,
+              thumbVisibility: true,
               controller: scrollController,
               child: const SingleChildScrollView(
                 child: SizedBox(width: 4000.0, height: 4000.0),
@@ -1691,7 +1689,7 @@ void main() {
           child: PrimaryScrollController(
             controller: scrollController,
             child: RawScrollbar(
-              isAlwaysShown: true,
+              thumbVisibility: true,
               controller: scrollController,
               child: const SingleChildScrollView(
                 reverse: true,
@@ -1764,7 +1762,7 @@ void main() {
           data: const MediaQueryData(),
           child: RawScrollbar(
             mainAxisMargin: 10,
-            isAlwaysShown: true,
+            thumbVisibility: true,
             controller: scrollController,
             child: SingleChildScrollView(
               controller: scrollController,
@@ -1797,7 +1795,7 @@ void main() {
               borderRadius: BorderRadius.all(Radius.circular(8.0))
             ),
             controller: scrollController,
-            isAlwaysShown: true,
+            thumbVisibility: true,
             child: SingleChildScrollView(
               controller: scrollController,
               child: const SizedBox(height: 1000.0),
@@ -1833,7 +1831,7 @@ void main() {
             controller: scrollController,
             minThumbLength: 21,
             minOverscrollLength: 8,
-            isAlwaysShown: true,
+            thumbVisibility: true,
             child: SingleChildScrollView(
               controller: scrollController,
               child: const SizedBox(width: 1000.0, height: 50000.0),
@@ -1859,7 +1857,7 @@ void main() {
             shape: const CircleBorder(side: BorderSide(width: 2.0)),
             thickness: 36.0,
             controller: scrollController,
-            isAlwaysShown: true,
+            thumbVisibility: true,
             child: SingleChildScrollView(
               controller: scrollController,
               child: const SizedBox(height: 1000.0, width: 1000),
@@ -1894,7 +1892,7 @@ void main() {
           child: RawScrollbar(
             controller: scrollController,
             crossAxisMargin: 30,
-            isAlwaysShown: true,
+            thumbVisibility: true,
             child: SingleChildScrollView(
               controller: scrollController,
               child: const SizedBox(width: 1000.0, height: 1000.0),
@@ -1920,7 +1918,7 @@ void main() {
             thickness: 20,
             shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(8))),
             controller: scrollController,
-            isAlwaysShown: true,
+            thumbVisibility: true,
             child: SingleChildScrollView(
               controller: scrollController,
               child: const SizedBox(height: 1000.0, width: 1000.0),
@@ -1952,7 +1950,7 @@ void main() {
           data: const MediaQueryData(),
           child: RawScrollbar(
             controller: scrollController,
-            isAlwaysShown: true,
+              thumbVisibility: true,
             minOverscrollLength: 8.0,
             minThumbLength: 36.0,
             child: SingleChildScrollView(
@@ -1984,7 +1982,7 @@ void main() {
           data: const MediaQueryData(),
           child: RawScrollbar(
             controller: scrollController,
-            isAlwaysShown: true,
+            thumbVisibility: true,
             child: SingleChildScrollView(
               controller: scrollController,
               child: const SizedBox(height: 1000.0),
@@ -2010,7 +2008,7 @@ void main() {
           data: const MediaQueryData(),
           child: RawScrollbar(
             controller: scrollController,
-            isAlwaysShown: true,
+            thumbVisibility: true,
             child: SingleChildScrollView(
                 controller: scrollController,
                 child: SizedBox(width: double.infinity, height: height)
@@ -2044,7 +2042,7 @@ void main() {
           child: PrimaryScrollController(
             controller: scrollController,
             child: RawScrollbar(
-              isAlwaysShown: true,
+              thumbVisibility: true,
               controller: scrollController,
               child: const SingleChildScrollView(
                 child: SizedBox(
@@ -2084,7 +2082,7 @@ void main() {
         child: MediaQuery(
           data: const MediaQueryData(),
           child: RawScrollbar(
-            isAlwaysShown: true,
+            thumbVisibility: true,
             controller: verticalScrollController,
             // This scrollbar will receive scroll notifications from both nested
             // scroll views of opposite axes, but should stay on the vertical
@@ -2149,7 +2147,7 @@ void main() {
               return notification.depth == 0;
             },
             controller: scrollController,
-            isAlwaysShown: true,
+            thumbVisibility: true,
             child: SingleChildScrollView(
               controller: scrollController,
               child: const SingleChildScrollView(),
@@ -2179,7 +2177,7 @@ void main() {
           child: RawScrollbar(
             controller: scrollController,
             interactive: true,
-            isAlwaysShown: true,
+            thumbVisibility: true,
             child: SingleChildScrollView(
               controller: scrollController,
               child: Container(
@@ -2222,7 +2220,7 @@ void main() {
             child: PrimaryScrollController(
               controller: scrollController,
               child: RawScrollbar(
-                isAlwaysShown: true,
+                thumbVisibility: true,
                 controller: scrollController,
                 child: CustomScrollView(
                   primary: true,
@@ -2304,7 +2302,7 @@ void main() {
             child: PrimaryScrollController(
               controller: scrollController,
               child: RawScrollbar(
-                isAlwaysShown: true,
+                thumbVisibility: true,
                 controller: scrollController,
                 child: CustomScrollView(
                   center: uniqueKey,
@@ -2730,7 +2728,7 @@ void main() {
           child: PrimaryScrollController(
             controller: scrollController,
             child: RawScrollbar(
-              isAlwaysShown: true,
+              thumbVisibility: true,
               controller: scrollController,
               child: CustomScrollView(
                 controller: scrollController,
@@ -2800,7 +2798,7 @@ void main() {
           child: PrimaryScrollController(
             controller: scrollController,
             child: RawScrollbar(
-              isAlwaysShown: true,
+              thumbVisibility: true,
               controller: scrollController,
               child: CustomScrollView(
                 controller: scrollController,

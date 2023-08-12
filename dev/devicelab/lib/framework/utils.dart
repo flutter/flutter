@@ -26,6 +26,14 @@ String? get localEngineFromEnv {
   return isDefined ? const String.fromEnvironment('localEngine') : null;
 }
 
+/// The local engine host to use for [flutter] and [evalFlutter], if any.
+///
+/// This is set as an environment variable when running the task, see runTask in runner.dart.
+String? get localEngineHostFromEnv {
+  const bool isDefined = bool.hasEnvironment('localEngineHost');
+  return isDefined ? const String.fromEnvironment('localEngineHost') : null;
+}
+
 /// The local engine source path to use if a local engine is used for [flutter]
 /// and [evalFlutter].
 ///
@@ -453,6 +461,7 @@ List<String> _flutterCommandArgs(String command, List<String> options) {
     'screenshot',
   };
   final String? localEngine = localEngineFromEnv;
+  final String? localEngineHost = localEngineHostFromEnv;
   final String? localEngineSrcPath = localEngineSrcPathFromEnv;
   final String? localWebSdk = localWebSdkFromEnv;
   return <String>[
@@ -468,9 +477,14 @@ List<String> _flutterCommandArgs(String command, List<String> options) {
       hostAgent.dumpDirectory!.path,
     ],
     if (localEngine != null) ...<String>['--local-engine', localEngine],
+    if (localEngineHost != null) ...<String>['--local-engine-host', localEngineHost],
     if (localEngineSrcPath != null) ...<String>['--local-engine-src-path', localEngineSrcPath],
     if (localWebSdk != null) ...<String>['--local-web-sdk', localWebSdk],
     ...options,
+    // Use CI flag when running devicelab tests, except for `packages`/`pub` commands.
+    // `packages`/`pub` commands effectively runs the `pub` tool, which does not have
+    // the same allowed args.
+    if (!command.startsWith('packages') && !command.startsWith('pub')) '--ci',
   ];
 }
 

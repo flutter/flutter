@@ -54,9 +54,8 @@ class MacOSDevice extends DesktopDevice {
   Future<String> get targetPlatformDisplayName async {
     if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64) {
       return 'darwin-arm64';
-    } else {
-      return 'darwin-x64';
     }
+    return 'darwin-x64';
   }
 
   @override

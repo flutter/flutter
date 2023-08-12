@@ -75,8 +75,8 @@ void main () {
         '  });\n'
         '\n'
         '  // Flutter can complete the first frame before the "show window" callback is\n'
-        '  // registered. Ensure a frame is pending to ensure the window is shown.\n'
-        "  // This no-ops if the first frame hasn't completed yet.\n"
+        '  // registered. The following call ensures a frame is pending to ensure the\n'
+        "  // window is shown. It is a no-op if the first frame hasn't completed yet.\n"
         '  flutter_controller_->ForceRedraw();\n'
         '\n'
         '  return true;\n';
@@ -103,8 +103,8 @@ void main () {
         '  });\r\n'
         '\r\n'
         '  // Flutter can complete the first frame before the "show window" callback is\r\n'
-        '  // registered. Ensure a frame is pending to ensure the window is shown.\r\n'
-        "  // This no-ops if the first frame hasn't completed yet.\r\n"
+        '  // registered. The following call ensures a frame is pending to ensure the\r\n'
+        "  // window is shown. It is a no-op if the first frame hasn't completed yet.\r\n"
         '  flutter_controller_->ForceRedraw();\r\n'
         '\r\n'
         '  return true;\r\n';
@@ -145,8 +145,8 @@ void main () {
         '  });\n'
         '\n'
         '  // Flutter can complete the first frame before the "show window" callback is\n'
-        '  // registered. Ensure a frame is pending to ensure the window is shown.\n'
-        "  // This no-ops if the first frame hasn't completed yet.\n"
+        '  // registered. The following call ensures a frame is pending to ensure the\n'
+        "  // window is shown. It is a no-op if the first frame hasn't completed yet.\n"
         '  flutter_controller_->ForceRedraw();\n'
         '\n'
         '  return true;\n'
@@ -176,8 +176,8 @@ void main () {
         '  });\r\n'
         '\r\n'
         '  // Flutter can complete the first frame before the "show window" callback is\r\n'
-        '  // registered. Ensure a frame is pending to ensure the window is shown.\r\n'
-        "  // This no-ops if the first frame hasn't completed yet.\r\n"
+        '  // registered. The following call ensures a frame is pending to ensure the\r\n'
+        "  // window is shown. It is a no-op if the first frame hasn't completed yet.\r\n"
         '  flutter_controller_->ForceRedraw();\r\n'
         '\r\n'
         '  return true;\r\n'

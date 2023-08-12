@@ -14,7 +14,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 // A thumb shape that also logs its repaint center.
@@ -829,6 +828,7 @@ void main() {
         ShowValueIndicator show = ShowValueIndicator.onlyForDiscrete,
       }) {
         return MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Directionality(
             textDirection: TextDirection.ltr,
             child: StatefulBuilder(
@@ -1944,6 +1944,7 @@ void main() {
     double value = 0.5;
     final ThemeData theme = ThemeData(useMaterial3: true);
     final Key sliderKey = UniqueKey();
+    final FocusNode focusNode = FocusNode();
 
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
@@ -1952,8 +1953,9 @@ void main() {
           child: Center(
             child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
               return Slider(
-                value: value,
                 key: sliderKey,
+                value: value,
+                focusNode: focusNode,
                 onChanged: enabled
                   ? (double newValue) {
                       setState(() {
@@ -1993,7 +1995,18 @@ void main() {
     await drag.up();
     await tester.pumpAndSettle();
 
-    // Slider still has overlay when stopped dragging.
+    // Slider without focus doesn't have overlay when enabled and dragged.
+    expect(focusNode.hasFocus, false);
+    expect(
+      Material.of(tester.element(find.byType(Slider))),
+      isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.12))),
+    );
+
+    // Slider has overlay when enabled, dragged and focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    expect(focusNode.hasFocus, true);
     expect(
       Material.of(tester.element(find.byType(Slider))),
       paints..circle(color: theme.colorScheme.primary.withOpacity(0.12)),
@@ -2004,6 +2017,7 @@ void main() {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     double value = 0.5;
     final Key sliderKey = UniqueKey();
+    final FocusNode focusNode = FocusNode();
 
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
@@ -2011,8 +2025,9 @@ void main() {
           child: Center(
             child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
               return Slider(
-                value: value,
                 key: sliderKey,
+                value: value,
+                focusNode: focusNode,
                 overlayColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
                   if (states.contains(MaterialState.dragged)) {
                     return Colors.lime[500]!;
@@ -2059,10 +2074,11 @@ void main() {
     await drag.up();
     await tester.pumpAndSettle();
 
-    // Slider still has overlay when stopped dragging.
+    // Slider without focus doesn't have overlay when enabled and dragged.
+    expect(focusNode.hasFocus, false);
     expect(
       Material.of(tester.element(find.byType(Slider))),
-      paints..circle(color: Colors.lime[500]),
+      isNot(paints..circle(color: Colors.lime[500])),
     );
   });
 
@@ -2670,6 +2686,7 @@ void main() {
       bool enabled = true,
     }) {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Builder(
             // The builder is used to pass the context from the MaterialApp widget
@@ -3493,19 +3510,62 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
     expect(focusNode.hasFocus, true);
-    expect(
-      Material.of(tester.element(find.byType(Slider))),
-      paints..circle(color: overlayColor),
-    );
-
-    focusNode.unfocus();
-    await tester.pumpAndSettle();
-    expect(focusNode.hasFocus, false);
+    // Overlay is removed when adjusted with a tap.
     expect(
       Material.of(tester.element(find.byType(Slider))),
       isNot(paints..circle(color: overlayColor)),
     );
   }, variant: TargetPlatformVariant.desktop());
+
+  testWidgets('Value indicator disappears after adjusting the slider', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/123313.
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    const double currentValue = 0.5;
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: Material(
+        child: Center(
+          child: Slider(
+            value: currentValue,
+            divisions: 5,
+            label: currentValue.toStringAsFixed(1),
+            onChanged: (double value) {},
+          ),
+        ),
+      ),
+    ));
+
+    // Slider does not show value indicator initially.
+    await tester.pumpAndSettle();
+    RenderBox valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    expect(
+      valueIndicatorBox,
+      isNot(paints..scale()..path(color: theme.colorScheme.primary)),
+    );
+
+    final Offset sliderCenter = tester.getCenter(find.byType(Slider));
+    final Offset tapLocation = Offset(sliderCenter.dx + 50, sliderCenter.dy);
+
+    // Tap the slider to bring up the value indicator.
+    await tester.tapAt(tapLocation);
+    await tester.pumpAndSettle();
+
+    // Value indicator is visible.
+    valueIndicatorBox = tester.renderObject(find.byType(Overlay));
+    expect(
+      valueIndicatorBox,
+      paints..scale()..path(color: theme.colorScheme.primary),
+    );
+
+    // Wait for the value indicator to disappear.
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+
+    // Value indicator is no longer visible.
+    expect(
+      valueIndicatorBox,
+      isNot(paints..scale()..path(color: theme.colorScheme.primary)),
+    );
+  });
 
   testWidgets('Value indicator remains when Slider is in focus on desktop', (WidgetTester tester) async {
     double value = 0.5;
@@ -3593,16 +3653,22 @@ void main() {
                   child: ValueListenableBuilder<bool>(
                     valueListenable: shouldShowSliderListenable,
                     builder: (BuildContext context, bool shouldShowSlider, _) {
-                      return shouldShowSlider
-                          ? Slider(
-                              value: value,
-                              onChanged: (double newValue) {
-                                setState(() {
-                                  value = newValue;
-                                });
-                              },
-                            )
-                          : const SizedBox.shrink();
+                      return GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        // Note: it is important that `onTap` is non-null so
+                        // [GestureDetector] will register tap events.
+                        onTap: () {},
+                        child: shouldShowSlider
+                            ? Slider(
+                                value: value,
+                                onChanged: (double newValue) {
+                                  setState(() {
+                                    value = newValue;
+                                  });
+                                },
+                              )
+                            : const SizedBox.expand(),
+                      );
                     },
                   ),
                 ),
@@ -3613,20 +3679,19 @@ void main() {
       ),
     );
 
+    // Move Slider.
     final TestGesture gesture = await tester
-        .startGesture(tester.getRect(find.byType(Slider)).centerLeft);
-
-    // Intentionally not calling `await tester.pumpAndSettle()` to allow drag
-    // event performed on `Slider` before it is about to get unmounted.
-    shouldShowSliderListenable.value = false;
-
-    await tester.drag(find.byType(Slider), const Offset(1.0, 0.0));
+        .startGesture(tester.getRect(find.byType(Slider)).center);
+    await gesture.moveBy(const Offset(1.0, 0.0));
     await tester.pumpAndSettle();
 
-    expect(value, equals(0.0));
+    // Hide Slider. Slider will dispose and unmount.
+    shouldShowSliderListenable.value = false;
+    await tester.pumpAndSettle();
 
-    // This is supposed to trigger animation on `Slider` if it is mounted.
-    await gesture.up();
+    // Move Slider after unmounted.
+    await gesture.moveBy(const Offset(1.0, 0.0));
+    await tester.pumpAndSettle();
 
     expect(tester.takeException(), null);
   });
@@ -3638,10 +3703,11 @@ void main() {
 
     testWidgets('Slider can be hovered and has correct hover color', (WidgetTester tester) async {
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-      final ThemeData theme = ThemeData();
+      final ThemeData theme = ThemeData(useMaterial3: false);
       double value = 0.5;
       Widget buildApp({bool enabled = true}) {
         return MaterialApp(
+          theme: theme,
           home: Material(
             child: Center(
               child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
@@ -3743,6 +3809,7 @@ void main() {
       double value = 0.5;
       final ThemeData theme = ThemeData();
       final Key sliderKey = UniqueKey();
+      final FocusNode focusNode = FocusNode();
 
       Widget buildApp({bool enabled = true}) {
         return MaterialApp(
@@ -3750,8 +3817,9 @@ void main() {
             child: Center(
               child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
                 return Slider(
-                  value: value,
                   key: sliderKey,
+                  value: value,
+                  focusNode: focusNode,
                   onChanged: enabled
                     ? (double newValue) {
                         setState(() {
@@ -3791,10 +3859,11 @@ void main() {
       await drag.up();
       await tester.pumpAndSettle();
 
-      // Slider still has overlay when stopped dragging.
+      // Slider without focus doesn't have overlay when enabled and dragged.
+      expect(focusNode.hasFocus, false);
       expect(
         Material.of(tester.element(find.byType(Slider))),
-        paints..circle(color: theme.colorScheme.primary.withOpacity(0.12)),
+        isNot(paints..circle(color: theme.colorScheme.primary.withOpacity(0.12))),
       );
     });
   });

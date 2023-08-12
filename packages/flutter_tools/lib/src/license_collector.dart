@@ -82,11 +82,10 @@ class LicenseCollector {
       }
     }
 
-    final List<String> combinedLicensesList = packageLicenses.keys
-      .map<String>((String license) {
-        final List<String> packageNames = packageLicenses[license]!.toList()
-          ..sort();
-        return '${packageNames.join('\n')}\n\n$license';
+    final List<String> combinedLicensesList = packageLicenses.entries
+      .map<String>((MapEntry<String, Set<String>> entry) {
+        final List<String> packageNames = entry.value.toList()..sort();
+        return '${packageNames.join('\n')}\n\n${entry.key}';
       }).toList();
     combinedLicensesList.sort();
 

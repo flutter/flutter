@@ -237,6 +237,10 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
   void _handleYearChanged(DateTime value) {
     _vibrate();
 
+    final int daysInMonth = DateUtils.getDaysInMonth(value.year, value.month);
+    final int preferredDay = math.min(_selectedDate.day, daysInMonth);
+    value = value.copyWith(day: preferredDay);
+
     if (value.isBefore(widget.firstDate)) {
       value = widget.firstDate;
     } else if (value.isAfter(widget.lastDate)) {
@@ -246,6 +250,11 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
     setState(() {
       _mode = DatePickerMode.day;
       _handleMonthChanged(value);
+
+      if (_isSelectable(value)) {
+        _selectedDate = value;
+        widget.onDateChanged(_selectedDate);
+      }
     });
   }
 
@@ -255,6 +264,10 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
       _selectedDate = value;
       widget.onDateChanged(_selectedDate);
     });
+  }
+
+  bool _isSelectable(DateTime date) {
+    return widget.selectableDayPredicate == null || widget.selectableDayPredicate!.call(date);
   }
 
   Widget _buildPicker() {
@@ -1013,6 +1026,8 @@ class _DayPickerState extends State<_DayPicker> {
               // for the day of month. To do that we prepend day of month to the
               // formatted full date.
               label: '${localizations.formatDecimal(day)}, ${localizations.formatFullDate(dayToBuild)}$semanticLabelSuffix',
+              // Set button to true to make the date selectable.
+              button: true,
               selected: isSelectedDay,
               excludeSemantics: true,
               child: dayWidget,
@@ -1189,7 +1204,7 @@ class _YearPickerState extends State<YearPicker> {
     final Color? background = resolve<Color?>((DatePickerThemeData? theme) => isCurrentYear ? theme?.todayBackgroundColor : theme?.yearBackgroundColor, states);
     final MaterialStateProperty<Color?> overlayColor =
       MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) =>
-        effectiveValue((DatePickerThemeData? theme) => theme?.dayOverlayColor?.resolve(states)),
+        effectiveValue((DatePickerThemeData? theme) => theme?.yearOverlayColor?.resolve(states)),
       );
 
     BoxBorder? border;

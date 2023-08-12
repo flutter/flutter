@@ -7,6 +7,7 @@ import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
 
 import '../src/convert.dart';
+import 'android/android_app_link_settings.dart';
 import 'android/android_builder.dart';
 import 'android/gradle_utils.dart' as gradle;
 import 'base/common.dart';
@@ -14,6 +15,7 @@ import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
+import 'base/version.dart';
 import 'bundle.dart' as bundle;
 import 'cmake_project.dart';
 import 'features.dart';
@@ -476,11 +478,28 @@ class AndroidProject extends FlutterProjectPlatform {
   /// Returns true if the current version of the Gradle plugin is supported.
   late final bool isSupportedVersion = _computeSupportedVersion();
 
+  /// Gets all build variants of this project.
   Future<List<String>> getBuildVariants() async {
     if (!existsSync() || androidBuilder == null) {
       return const <String>[];
     }
     return androidBuilder!.getBuildVariants(project: parent);
+  }
+
+  /// Returns app link related project settings for a given build variant.
+  ///
+  /// Use [getBuildVariants] to get all of the available build variants.
+  Future<AndroidAppLinkSettings> getAppLinksSettings({required String variant}) async {
+    if (!existsSync() || androidBuilder == null) {
+      return const AndroidAppLinkSettings(
+        applicationId: '',
+        domains: <String>[],
+      );
+    }
+    return AndroidAppLinkSettings(
+      applicationId: await androidBuilder!.getApplicationIdForVariant(variant, project: parent),
+      domains: await androidBuilder!.getAppLinkDomainsForVariant(variant, project: parent),
+    );
   }
 
   bool _computeSupportedVersion() {
@@ -490,29 +509,44 @@ class AndroidProject extends FlutterProjectPlatform {
     if (plugin.existsSync()) {
       return false;
     }
-    final File appGradle = hostAppGradleRoot.childFile(
-        fileSystem.path.join('app', 'build.gradle'));
-    if (!appGradle.existsSync()) {
-      return false;
-    }
-    for (final String line in appGradle.readAsLinesSync()) {
-      final bool fileBasedApply = line.contains(RegExp(r'apply from: .*/flutter.gradle'));
-      final bool declarativeApply = line.contains('dev.flutter.flutter-gradle-plugin');
-      final bool managed = line.contains("def flutterPluginVersion = 'managed'");
-      if (fileBasedApply || declarativeApply || managed) {
-        return true;
+    try {
+      for (final String line in appGradleFile.readAsLinesSync()) {
+        // This syntax corresponds to applying the Flutter Gradle Plugin with a
+        // script.
+        // See https://docs.gradle.org/current/userguide/plugins.html#sec:script_plugins.
+        final bool fileBasedApply = line.contains(RegExp(r'apply from: .*/flutter.gradle'));
+
+        // This syntax corresponds to applying the Flutter Gradle Plugin using
+        // the declarative "plugins {}" block after including it in the
+        // pluginManagement block of the settings.gradle file.
+        // See https://docs.gradle.org/current/userguide/composite_builds.html#included_plugin_builds,
+        // as well as the settings.gradle and build.gradle templates.
+        final bool declarativeApply = line.contains('dev.flutter.flutter-gradle-plugin');
+
+        // This case allows for flutter run/build to work for modules. It does
+        // not guarantee the Flutter Gradle Plugin is applied.
+        final bool managed = line.contains("def flutterPluginVersion = 'managed'");
+        if (fileBasedApply || declarativeApply || managed) {
+          return true;
+        }
       }
+    } on FileSystemException {
+      return false;
     }
     return false;
   }
 
   /// True, if the app project is using Kotlin.
   bool get isKotlin {
-    final File gradleFile = hostAppGradleRoot.childDirectory('app').childFile('build.gradle');
-    final bool imperativeMatch = firstMatchInFile(gradleFile, _imperativeKotlinPluginPattern) != null;
-    final bool declarativeMatch = firstMatchInFile(gradleFile, _declarativeKotlinPluginPattern) != null;
+    final bool imperativeMatch = firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null;
+    final bool declarativeMatch = firstMatchInFile(appGradleFile, _declarativeKotlinPluginPattern) != null;
     return imperativeMatch || declarativeMatch;
   }
+
+  /// Gets the module-level build.gradle file.
+  /// See https://developer.android.com/build#module-level.
+  File get appGradleFile => hostAppGradleRoot.childDirectory('app')
+      .childFile('build.gradle');
 
   File get appManifestFile {
     if (isUsingGradle) {
@@ -568,7 +602,7 @@ class AndroidProject extends FlutterProjectPlatform {
         hostAppGradleRoot, globals.logger, globals.processManager);
     final String? agpVersion =
         gradle.getAgpVersion(hostAppGradleRoot, globals.logger);
-    final String? javaVersion = globals.java?.version?.number;
+    final String? javaVersion = _versionToParsableString(globals.java?.version);
 
     // Assume valid configuration.
     String description = validJavaGradleAgpString;
@@ -608,21 +642,18 @@ $javaGradleCompatUrl
   }
 
   String? get applicationId {
-    final File gradleFile = hostAppGradleRoot.childDirectory('app').childFile('build.gradle');
-    return firstMatchInFile(gradleFile, _applicationIdPattern)?.group(1);
+    return firstMatchInFile(appGradleFile, _applicationIdPattern)?.group(1);
   }
 
   /// Get the namespace for newer Android projects,
   /// which replaces the `package` attribute in the Manifest.xml.
   String? get namespace {
-    final File gradleFile = hostAppGradleRoot.childDirectory('app').childFile('build.gradle');
-
-    if (!gradleFile.existsSync()) {
+    try {
+      // firstMatchInFile() reads per line but `_androidNamespacePattern` matches a multiline pattern.
+      return _androidNamespacePattern.firstMatch(appGradleFile.readAsStringSync())?.group(1);
+    } on FileSystemException {
       return null;
     }
-
-    // firstMatchInFile() reads per line but `_androidNamespacePattern` matches a multiline pattern.
-    return _androidNamespacePattern.firstMatch(gradleFile.readAsStringSync())?.group(1);
   }
 
   String? get group {
@@ -892,4 +923,13 @@ class CompatibilityResult {
   CompatibilityResult(this.success, this.description);
   final bool success;
   final String description;
+}
+
+/// Converts a [Version] to a string that can be parsed by [Version.parse].
+String? _versionToParsableString(Version? version) {
+  if (version == null) {
+    return null;
+  }
+
+  return '${version.major}.${version.minor}.${version.patch}';
 }

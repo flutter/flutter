@@ -69,6 +69,13 @@ enum _SwitchType { material, adaptive }
 /// ** See code in examples/api/lib/material/switch/switch.2.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example shows how to use the ambient [CupertinoThemeData] to style all
+/// widgets which would otherwise use iOS defaults.
+///
+/// ** See code in examples/api/lib/material/switch/switch.3.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [SwitchListTile], which combines this widget with a [ListTile] so that
@@ -1756,8 +1763,6 @@ class _SwitchDefaultsM2 extends SwitchThemeData {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _SwitchDefaultsM3 extends SwitchThemeData {
   _SwitchDefaultsM3(this.context);

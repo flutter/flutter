@@ -9,8 +9,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 const CupertinoDynamicColor _kScrollbarColor = CupertinoDynamicColor.withBrightness(
   color: Color(0x59000000),
   darkColor: Color(0x80FFFFFF),
@@ -400,14 +398,14 @@ void main() {
     },
   );
 
-  testWidgets('When isAlwaysShown is true, must pass a controller or find PrimaryScrollController', (WidgetTester tester) async {
+  testWidgets('When thumbVisibility is true, must pass a controller or find PrimaryScrollController', (WidgetTester tester) async {
       Widget viewWithScroll() {
         return const Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
             data: MediaQueryData(),
             child: CupertinoScrollbar(
-              isAlwaysShown: true,
+              thumbVisibility: true,
               child: SingleChildScrollView(
                 child: SizedBox(
                   width: 4000.0,
@@ -425,7 +423,7 @@ void main() {
     },
   );
 
-  testWidgets('When isAlwaysShown is true, must pass a controller or find PrimaryScrollController that is attached to a scroll view', (WidgetTester tester) async {
+  testWidgets('When thumbVisibility is true, must pass a controller or find PrimaryScrollController that is attached to a scroll view', (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
       Widget viewWithScroll() {
         return Directionality(
@@ -434,7 +432,7 @@ void main() {
             data: const MediaQueryData(),
             child: CupertinoScrollbar(
               controller: controller,
-              isAlwaysShown: true,
+              thumbVisibility: true,
               child: const SingleChildScrollView(
                 child: SizedBox(
                   width: 4000.0,
@@ -526,7 +524,7 @@ void main() {
     expect(find.byType(CupertinoScrollbar), paints..rrect());
   });
 
-  testWidgets('On first render with isAlwaysShown: true, the thumb shows with PrimaryScrollController', (WidgetTester tester) async {
+  testWidgets('On first render with thumbVisibility: true, the thumb shows with PrimaryScrollController', (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
       Widget viewWithScroll() {
         return Directionality(
@@ -538,7 +536,7 @@ void main() {
               child: Builder(
                 builder: (BuildContext context) {
                   return const CupertinoScrollbar(
-                    isAlwaysShown: true,
+                    thumbVisibility: true,
                     child: SingleChildScrollView(
                       primary: true,
                       child: SizedBox(
@@ -560,7 +558,7 @@ void main() {
     },
   );
 
-  testWidgets('On first render with isAlwaysShown: true, the thumb shows', (WidgetTester tester) async {
+  testWidgets('On first render with thumbVisibility: true, the thumb shows', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     Widget viewWithScroll() {
       return Directionality(
@@ -570,7 +568,7 @@ void main() {
           child: PrimaryScrollController(
             controller: controller,
             child: CupertinoScrollbar(
-              isAlwaysShown: true,
+              thumbVisibility: true,
               controller: controller,
               child: const SingleChildScrollView(
                 child: SizedBox(
@@ -593,7 +591,7 @@ void main() {
     expect(find.byType(CupertinoScrollbar), paints..rrect());
   });
 
-  testWidgets('On first render with isAlwaysShown: false, the thumb is hidden', (WidgetTester tester) async {
+  testWidgets('On first render with thumbVisibility: false, the thumb is hidden', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     Widget viewWithScroll() {
       return Directionality(
@@ -621,9 +619,9 @@ void main() {
     expect(find.byType(CupertinoScrollbar), isNot(paints..rect()));
   });
 
-  testWidgets('With isAlwaysShown: true, fling a scroll. While it is still scrolling, set isAlwaysShown: false. The thumb should not fade out until the scrolling stops.', (WidgetTester tester) async {
+  testWidgets('With thumbVisibility: true, fling a scroll. While it is still scrolling, set thumbVisibility: false. The thumb should not fade out until the scrolling stops.', (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
-      bool isAlwaysShown = true;
+      bool thumbVisibility = true;
       Widget viewWithScroll() {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
@@ -634,7 +632,7 @@ void main() {
                 child: Stack(
                   children: <Widget>[
                     CupertinoScrollbar(
-                      isAlwaysShown: isAlwaysShown,
+                      thumbVisibility: thumbVisibility,
                       controller: controller,
                       child: SingleChildScrollView(
                         controller: controller,
@@ -649,10 +647,10 @@ void main() {
                       child: CupertinoButton(
                         onPressed: () {
                           setState(() {
-                            isAlwaysShown = !isAlwaysShown;
+                            thumbVisibility = !thumbVisibility;
                           });
                         },
-                        child: const Text('change isAlwaysShown'),
+                        child: const Text('change thumbVisibility'),
                       ),
                     ),
                   ],
@@ -679,10 +677,10 @@ void main() {
   );
 
   testWidgets(
-    'With isAlwaysShown: false, set isAlwaysShown: true. The thumb should be always shown directly',
+    'With thumbVisibility: false, set thumbVisibility: true. The thumb should be always shown directly',
     (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
-      bool isAlwaysShown = false;
+      bool thumbVisibility = false;
       Widget viewWithScroll() {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
@@ -693,7 +691,7 @@ void main() {
                 child: Stack(
                   children: <Widget>[
                     CupertinoScrollbar(
-                      isAlwaysShown: isAlwaysShown,
+                      thumbVisibility: thumbVisibility,
                       controller: controller,
                       child: SingleChildScrollView(
                         controller: controller,
@@ -708,10 +706,10 @@ void main() {
                       child: CupertinoButton(
                         onPressed: () {
                           setState(() {
-                            isAlwaysShown = !isAlwaysShown;
+                            thumbVisibility = !thumbVisibility;
                           });
                         },
-                        child: const Text('change isAlwaysShown'),
+                        child: const Text('change thumbVisibility'),
                       ),
                     ),
                   ],
@@ -733,11 +731,11 @@ void main() {
   );
 
   testWidgets(
-    'With isAlwaysShown: false, fling a scroll. While it is still scrolling, set isAlwaysShown: true. '
+    'With thumbVisibility: false, fling a scroll. While it is still scrolling, set thumbVisibility: true. '
     'The thumb should not fade even after the scrolling stops',
     (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
-      bool isAlwaysShown = false;
+      bool thumbVisibility = false;
       Widget viewWithScroll() {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
@@ -748,7 +746,7 @@ void main() {
                 child: Stack(
                   children: <Widget>[
                     CupertinoScrollbar(
-                      isAlwaysShown: isAlwaysShown,
+                      thumbVisibility: thumbVisibility,
                       controller: controller,
                       child: SingleChildScrollView(
                         controller: controller,
@@ -763,10 +761,10 @@ void main() {
                       child: CupertinoButton(
                         onPressed: () {
                           setState(() {
-                            isAlwaysShown = !isAlwaysShown;
+                            thumbVisibility = !thumbVisibility;
                           });
                         },
-                        child: const Text('change isAlwaysShown'),
+                        child: const Text('change thumbVisibility'),
                       ),
                     ),
                   ],
@@ -800,11 +798,11 @@ void main() {
   );
 
   testWidgets(
-    'Toggling isAlwaysShown while not scrolling fades the thumb in/out. '
+    'Toggling thumbVisibility while not scrolling fades the thumb in/out. '
     'This works even when you have never scrolled at all yet',
     (WidgetTester tester) async {
       final ScrollController controller = ScrollController();
-      bool isAlwaysShown = true;
+      bool thumbVisibility = true;
       Widget viewWithScroll() {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
@@ -815,7 +813,7 @@ void main() {
                 child: Stack(
                   children: <Widget>[
                     CupertinoScrollbar(
-                      isAlwaysShown: isAlwaysShown,
+                      thumbVisibility: thumbVisibility,
                       controller: controller,
                       child: SingleChildScrollView(
                         controller: controller,
@@ -830,10 +828,10 @@ void main() {
                       child: CupertinoButton(
                         onPressed: () {
                           setState(() {
-                            isAlwaysShown = !isAlwaysShown;
+                            thumbVisibility = !thumbVisibility;
                           });
                         },
-                        child: const Text('change isAlwaysShown'),
+                        child: const Text('change thumbVisibility'),
                       ),
                     ),
                   ],
@@ -1011,7 +1009,7 @@ void main() {
         child: MediaQuery(
           data: const MediaQueryData(),
           child: CupertinoScrollbar(
-            isAlwaysShown: true,
+            thumbVisibility: true,
             controller: scrollController,
             child: SingleChildScrollView(
               controller: scrollController,
@@ -1155,7 +1153,7 @@ void main() {
         home: PrimaryScrollController(
           controller: scrollController,
           child: CupertinoScrollbar(
-            isAlwaysShown: true,
+            thumbVisibility: true,
             controller: scrollController,
             child: const SingleChildScrollView(
               child: SizedBox(width: 4000.0, height: 4000.0),
@@ -1266,7 +1264,7 @@ void main() {
         home: PrimaryScrollController(
           controller: scrollController,
           child: CupertinoScrollbar(
-            isAlwaysShown: true,
+            thumbVisibility: true,
             controller: scrollController,
             scrollbarOrientation: ScrollbarOrientation.left,
             child: const SingleChildScrollView(

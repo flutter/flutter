@@ -1,0 +1,222 @@
+name: Report a bug in one of Flutter's first-party packages
+description: |
+  You found a bug in one of Flutter's first-party packages.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for using Flutter!
+
+        If you are looking for support, please check out our documentation
+        or consider asking a question on Stack Overflow:
+
+          - https://flutter.dev/
+          - https://api.flutter.dev/
+          - https://stackoverflow.com/questions/tagged/flutter?sort=frequent
+  - type: checkboxes
+    attributes:
+      label: Is there an existing issue for this?
+      options:
+      - label: I have searched the [existing package issues](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3Apackage)
+        required: true
+      - label: I have read the [guide to filing a bug](https://flutter.dev/docs/resources/bug-reports)
+        required: true
+  - type: dropdown
+    id: packages
+    attributes:
+      label: What package does this bug report belong to?
+      description: |
+        If the package you are reporting a bug for is not listed here,
+        it could be a third party package's issue.
+        In that case, you should report the issue to the package's developers.
+      options:
+        - animations
+        - camera
+        - cross_file
+        - css_colors
+        - dynamic_layouts
+        - espresso
+        - extension_google_sign_in_as_googleapis_auth
+        - file_selector
+        - flutter_adaptive_scaffold
+        - flutter_image
+        - flutter_lints
+        - flutter_markdown
+        - flutter_migrate
+        - flutter_plugin_android_lifecycle
+        - flutter_template_images
+        - go_router
+        - go_router_builder
+        - google_identity_services_web
+        - google_maps_flutter
+        - google_sign_in
+        - image_picker
+        - in_app_purchase
+        - ios_platform_images
+        - local_auth
+        - metrics_center
+        - multicast_dns
+        - palette_generator
+        - path_provider
+        - pigeon
+        - plugin_platform_interface
+        - pointer_interceptor
+        - quick_actions
+        - rfw
+        - shared_preferences
+        - standard_message_codec
+        - url_launcher
+        - video_player
+        - web_benchmarks
+        - webview_flutter
+        - xdg_directories
+    validations:
+      required: true
+  - type: dropdown
+    id: target_platforms
+    attributes:
+      label: What target platforms are you seeing this bug on?
+      description: Have you confirmed that package supports the platform you are reporting against?
+      multiple: true
+      options:
+        - Android
+        - iOS
+        - Web
+        - macOS
+        - Linux
+        - Windows
+    validations:
+      required: true
+  - type: dropdown
+    id: pub_upgrade
+    attributes:
+      label: Have you already upgraded your packages?
+      description: |
+        Please check if the issue still persists or not after running `flutter pub upgrade`.
+      options:
+        - "Yes"
+        - "No"
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Dependency versions
+      description: |
+        `pubspec.lock` file content that includes the package and its dependencies.
+
+        You can remove private dependencies from the file if they are sensitive.
+
+        If the file is too large to be uploaded to GitHub or the content is too long,
+        you may use online tools like https://pastebin.com and share the url here.
+
+        Note: Please do not upload screenshots of text. Instead, use code blocks
+        or the above mentioned ways to upload this.
+      value: |
+        <details><summary>pubspec.lock</summary>
+
+        ```lock
+        [Paste file content here]
+        ```
+
+        </details>
+  - type: textarea
+    attributes:
+      label: Steps to reproduce
+      description: Please tell us exactly how to reproduce the problem you are running into.
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Expected results
+      description: Please tell us what is expected to happen.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Actual results
+      description: Please tell us what is actually happening.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Code sample
+      description: |
+        Please create a minimal reproducible sample that shows the problem
+        and attach it below between the lines with the backticks.
+
+        To create it, use the `flutter create bug` command and update the `main.dart` file.
+
+        Alternatively, you can create a public GitHub repository to share your sample.
+
+        Without this we will unlikely be able to progress on the issue, and because of that
+        we regretfully will have to close it.
+
+        You can also refer to the package's example project if it is simple enough
+        to reproduce the bug.
+
+        Note: Please do not upload screenshots of text. Instead, use code blocks
+        or the above mentioned ways to upload your code sample.
+      value: |
+        <details><summary>Code sample</summary>
+
+        ```dart
+        [Paste your code here]
+        ```
+
+        </details>
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Screenshots or Videos
+      description: |
+        Upload any screenshots or videos of the bug if applicable.
+      value: |
+        <details>
+        <summary>Screenshots / Video demonstration</summary>
+
+        [Upload media here]
+
+        </details>
+  - type: textarea
+    attributes:
+      label: Logs
+      description: |
+        Include the full logs of the commands you are running between the lines
+        with the backticks below. If you are running any `flutter` commands,
+        please include the output of running them with `--verbose`; for example,
+        the output of running `flutter --verbose create foo`.
+
+        If the logs are too large to be uploaded to GitHub, you may upload
+        them as a `txt` file or use online tools like https://pastebin.com to
+        share it.
+
+        Note: Please do not upload screenshots of text. Instead, use code blocks
+        or the above mentioned ways to upload logs.
+      value: |
+        <details><summary>Logs</summary>
+
+        ```console
+        [Paste your logs here]
+        ```
+
+        </details>
+  - type: textarea
+    attributes:
+      label: Flutter Doctor output
+      description: |
+        Please provide the full output of running `flutter doctor -v`
+      value: |
+        <details><summary>Doctor output</summary>
+
+        ```console
+        [Paste your output here]
+        ```
+
+        </details>
+    validations:
+      required: true

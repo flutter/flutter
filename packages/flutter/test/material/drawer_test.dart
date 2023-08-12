@@ -14,6 +14,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           drawer: Drawer(
             child: ListView(
