@@ -106,10 +106,11 @@ TaskFunction createEndToEndFrameNumberTest() {
   ).call;
 }
 
-TaskFunction createEndToEndDriverTest() {
+TaskFunction createEndToEndDriverTest({Map<String, String>? environment}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/driver.dart',
+    environment: environment,
   ).call;
 }
 
@@ -173,6 +174,7 @@ class DriverTest {
     this.testTarget, {
       this.extraOptions = const <String>[],
       this.deviceIdOverride,
+      this.environment,
     }
   );
 
@@ -180,6 +182,7 @@ class DriverTest {
   final String testTarget;
   final List<String> extraOptions;
   final String? deviceIdOverride;
+  final Map<String, String>? environment;
 
   Future<TaskResult> call() {
     return inDirectory<TaskResult>(testDirectory, () async {
@@ -202,7 +205,7 @@ class DriverTest {
         deviceId,
         ...extraOptions,
       ];
-      await flutter('drive', options: options);
+      await flutter('drive', options: options, environment: environment);
 
       return TaskResult.success(null);
     });
