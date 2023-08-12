@@ -108,7 +108,6 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Constructor parameters override theme parameters',
-
   (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
