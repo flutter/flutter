@@ -5,14 +5,16 @@
 #ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_DART_PKG_FUCHSIA_SDK_EXT_FUCHSIA_H_
 #define FLUTTER_SHELL_PLATFORM_FUCHSIA_DART_PKG_FUCHSIA_SDK_EXT_FUCHSIA_H_
 
-#include <fuchsia/sys/cpp/fidl.h>
+#include <lib/zx/channel.h>
+#include <lib/zx/eventpair.h>
+
+#include <optional>
 
 namespace fuchsia {
 namespace dart {
 
 /// Initializes Dart bindings for the Fuchsia application model.
-void Initialize(fidl::InterfaceHandle<fuchsia::sys::Environment> environment,
-                zx::channel directory_request,
+void Initialize(zx::channel directory_request,
                 std::optional<zx::eventpair> view_ref);
 
 }  // namespace dart

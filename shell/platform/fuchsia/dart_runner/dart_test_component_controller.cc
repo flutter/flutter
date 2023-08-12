@@ -523,9 +523,9 @@ fpromise::promise<> DartTestComponentController::RunDartMain() {
 
   fidl::InterfaceRequest<fuchsia::io::Directory> outgoing_dir =
       std::move(*start_info_.mutable_outgoing_dir());
-  InitBuiltinLibrariesForIsolate(
-      url_, namespace_, stdout_fd_, stderr_fd_, nullptr /* environment */,
-      outgoing_dir.TakeChannel(), false /* service_isolate */);
+  InitBuiltinLibrariesForIsolate(url_, namespace_, stdout_fd_, stderr_fd_,
+                                 outgoing_dir.TakeChannel(),
+                                 false /* service_isolate */);
 
   Dart_ExitScope();
   Dart_ExitIsolate();

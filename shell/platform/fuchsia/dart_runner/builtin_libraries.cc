@@ -96,19 +96,16 @@ void ScheduleMicrotask(Dart_NativeArguments args) {
 
 }  // namespace
 
-void InitBuiltinLibrariesForIsolate(
-    const std::string& script_uri,
-    fdio_ns_t* namespc,
-    int stdoutfd,
-    int stderrfd,
-    fidl::InterfaceHandle<fuchsia::sys::Environment> environment,
-    zx::channel directory_request,
-    bool service_isolate) {
+void InitBuiltinLibrariesForIsolate(const std::string& script_uri,
+                                    fdio_ns_t* namespc,
+                                    int stdoutfd,
+                                    int stderrfd,
+                                    zx::channel directory_request,
+                                    bool service_isolate) {
   // dart:fuchsia --------------------------------------------------------------
   // dart runner doesn't care about scenic view ref.
   if (!service_isolate) {
-    fuchsia::dart::Initialize(std::move(environment),
-                              std::move(directory_request), std::nullopt);
+    fuchsia::dart::Initialize(std::move(directory_request), std::nullopt);
   }
 
   // dart:fuchsia.builtin ------------------------------------------------------

@@ -100,8 +100,7 @@ void SetReturnCode(Dart_NativeArguments arguments) {
 
 }  // namespace
 
-void Initialize(fidl::InterfaceHandle<fuchsia::sys::Environment> environment,
-                zx::channel directory_request,
+void Initialize(zx::channel directory_request,
                 std::optional<zx::eventpair> view_ref) {
   zircon::dart::Initialize();
 
@@ -116,14 +115,6 @@ void Initialize(fidl::InterfaceHandle<fuchsia::sys::Environment> environment,
       new tonic::DartClassProvider(dart_state, "dart:fuchsia"));
   dart_state->class_library().add_provider("fuchsia",
                                            std::move(fuchsia_class_provider));
-
-  // V2 components do not use the environment.
-  if (environment) {
-    result = Dart_SetField(
-        library, ToDart("_environment"),
-        ToDart(zircon::dart::Handle::Create(environment.TakeChannel())));
-    FML_CHECK(!tonic::CheckAndHandleError(result));
-  }
 
   if (directory_request) {
     result = Dart_SetField(

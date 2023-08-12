@@ -466,9 +466,9 @@ bool DartComponentController::RunDartMain() {
   stdout_fd_ = fileno(stdout);
   stderr_fd_ = fileno(stderr);
 
-  InitBuiltinLibrariesForIsolate(
-      url_, namespace_, stdout_fd_, stderr_fd_, nullptr /* environment */,
-      dart_outgoing_dir_request_.TakeChannel(), false /* service_isolate */);
+  InitBuiltinLibrariesForIsolate(url_, namespace_, stdout_fd_, stderr_fd_,
+                                 dart_outgoing_dir_request_.TakeChannel(),
+                                 false /* service_isolate */);
 
   Dart_ExitScope();
   Dart_ExitIsolate();
