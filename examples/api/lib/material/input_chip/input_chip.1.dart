@@ -61,6 +61,7 @@ class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
                 prefixIcon: Icon(Icons.local_pizza_rounded),
                 hintText: 'Search for toppings',
               ),
+              strutStyle: const StrutStyle(fontSize: 15),
               onChanged: _onChanged,
               onSubmitted: _onSubmitted,
               chipBuilder: _chipBuilder,
@@ -160,6 +161,8 @@ class ChipsInput<T> extends StatefulWidget {
     super.key,
     required this.values,
     this.decoration = const InputDecoration(),
+    this.style,
+    this.strutStyle,
     required this.chipBuilder,
     required this.onChanged,
     this.onChipTapped,
@@ -169,6 +172,8 @@ class ChipsInput<T> extends StatefulWidget {
 
   final List<T> values;
   final InputDecoration decoration;
+  final TextStyle? style;
+  final StrutStyle? strutStyle;
 
   final ValueChanged<List<T>> onChanged;
   final ValueChanged<T>? onChipTapped;
@@ -191,6 +196,7 @@ class ChipsInputState<T> extends State<ChipsInput<T>> {
   @override
   void initState() {
     super.initState();
+
     controller = ChipsInputEditingController<T>(
         <T>[...widget.values], widget.chipBuilder);
     controller.addListener(_textListener);
@@ -200,6 +206,7 @@ class ChipsInputState<T> extends State<ChipsInput<T>> {
   void dispose() {
     controller.removeListener(_textListener);
     controller.dispose();
+
     super.dispose();
   }
 
@@ -215,15 +222,19 @@ class ChipsInputState<T> extends State<ChipsInput<T>> {
 
       final List<T> values = <T>[...widget.values];
 
-      if (currentNumber < previousNumber &&
-          cursorStart >= 0 &&
-          cursorEnd >= 0 &&
-          cursorStart <= cursorEnd &&
-          cursorEnd <= values.length) {
+      //If the current number and the previous number of replacements are different than
+      //the user has deleted the InputChip using the keyboard. In this case, we trigger
+      //the onChanged callback. We need to be sure also that the current number of
+      //replacements is different from the input chip to avoid double-deletion.
+      if (currentNumber < previousNumber && currentNumber != values.length) {
         if (cursorStart == cursorEnd) {
           values.removeRange(cursorStart - 1, cursorEnd);
         } else {
-          values.removeRange(cursorStart, cursorEnd);
+          if (cursorStart > cursorEnd) {
+            values.removeRange(cursorEnd, cursorStart);
+          } else {
+            values.removeRange(cursorStart, cursorEnd);
+          }
         }
         widget.onChanged(values);
       }
@@ -245,12 +256,11 @@ class ChipsInputState<T> extends State<ChipsInput<T>> {
     controller.updateValues(<T>[...widget.values]);
 
     return TextField(
+      maxLines: 3,
       minLines: 1,
-      maxLines: 10,
       textInputAction: TextInputAction.done,
-      style: const TextStyle(
-        height: 2.5,
-      ),
+      style: widget.style,
+      strutStyle: widget.strutStyle,
       controller: controller,
       onChanged: (_) =>
           widget.onTextChanged?.call(controller.textWithoutReplacements),
@@ -296,42 +306,14 @@ class ChipsInputEditingController<T> extends TextEditingController {
       {required BuildContext context,
       TextStyle? style,
       required bool withComposing}) {
-    assert(!value.composing.isValid ||
-        !withComposing ||
-        value.isComposingRangeValid);
-
     final Iterable<WidgetSpan> chipWidgets =
         values.map((T v) => WidgetSpan(child: chipBuilder(context, v)));
 
-    // If the composing range is out of range for the current text, ignore it to
-    // preserve the tree integrity, otherwise in release mode a RangeError will
-    // be thrown and this EditableText will be built with a broken subtree.
-    final bool composingRegionOutOfRange =
-        !value.isComposingRangeValid || !withComposing;
-
-    if (composingRegionOutOfRange) {
-      return TextSpan(style: style, children: <InlineSpan>[
-        ...chipWidgets,
+    return TextSpan(style: style, children: <InlineSpan>[
+      ...chipWidgets,
+      if (textWithoutReplacements.isNotEmpty)
         TextSpan(text: textWithoutReplacements)
-      ]);
-    }
-
-    final TextStyle composingStyle =
-        style?.merge(const TextStyle(decoration: TextDecoration.underline)) ??
-            const TextStyle(decoration: TextDecoration.underline);
-
-    return TextSpan(
-      style: style,
-      children: <InlineSpan>[
-        TextSpan(text: value.composing.textBefore(text)),
-        ...chipWidgets,
-        TextSpan(
-          style: composingStyle,
-          text: value.composing.textInside(text),
-        ),
-        TextSpan(text: value.composing.textAfter(text)),
-      ],
-    );
+    ]);
   }
 }
 
