@@ -95,19 +95,10 @@ class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
   }
 
   Widget _chipBuilder(BuildContext context, String topping) {
-    return Container(
-      margin: const EdgeInsets.only(right: 3),
-      child: InputChip(
-        key: ObjectKey(topping),
-        label: Text(topping),
-        avatar: CircleAvatar(
-          child: Text(topping[0].toUpperCase()),
-        ),
-        onDeleted: () => _deleteChip(topping),
-        onSelected: (_) => _onChipTapped(topping),
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        padding: const EdgeInsets.all(2),
-      ),
+    return ToppingInputChip(
+      topping: topping,
+      onDeleted: _onChipDeleted,
+      onSelected: _onChipTapped,
     );
   }
 
@@ -120,7 +111,7 @@ class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
 
   void _onChipTapped(String topping) {}
 
-  void _deleteChip(String topping) {
+  void _onChipDeleted(String topping) {
     setState(() {
       _toppings.remove(topping);
       _suggestions = <String>[];
@@ -332,6 +323,36 @@ class ToppingSuggestion extends StatelessWidget {
       ),
       title: Text(topping),
       onTap: () => onTap?.call(topping),
+    );
+  }
+}
+
+class ToppingInputChip extends StatelessWidget {
+  const ToppingInputChip(
+      {super.key,
+      required this.topping,
+      required this.onDeleted,
+      required this.onSelected});
+
+  final String topping;
+  final ValueChanged<String> onDeleted;
+  final ValueChanged<String> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(right: 3),
+      child: InputChip(
+        key: ObjectKey(topping),
+        label: Text(topping),
+        avatar: CircleAvatar(
+          child: Text(topping[0].toUpperCase()),
+        ),
+        onDeleted: () => onDeleted(topping),
+        onSelected: (_) => onSelected(topping),
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        padding: const EdgeInsets.all(2),
+      ),
     );
   }
 }
