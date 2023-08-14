@@ -32,6 +32,11 @@ class ScheduledFrameTrackingBindings extends AutomatedTestWidgetsFlutterBinding 
 
   @override
   ScheduledFrameTrackingPlatformDispatcher get platformDispatcher => _platformDispatcher;
+
+  @override
+  void compositeFrame() {
+    // Don't draw to ui.window
+  }
 }
 
 class OffscreenRenderView extends RenderView {

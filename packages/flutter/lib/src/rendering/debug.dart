@@ -53,7 +53,7 @@ bool debugRepaintTextRainbowEnabled = false;
 /// This is used by painting debug code that implements
 /// [debugRepaintRainbowEnabled] or [debugRepaintTextRainbowEnabled].
 ///
-/// The value is incremented by [RenderView.compositeFrame] if either of those
+/// The value is incremented by [RendererBinding.compositeFrame] if either of those
 /// flags is enabled.
 HSVColor debugCurrentRepaintColor = _kDebugDefaultRepaintColor;
 

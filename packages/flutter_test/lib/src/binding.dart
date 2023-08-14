@@ -49,8 +49,8 @@ enum EnginePhase {
   paint,
 
   /// The compositing phase in the rendering library. See
-  /// [RenderView.compositeFrame]. This is the phase in which data is sent to
-  /// the GPU. If semantics are not enabled, then this is the last phase.
+  /// [RendererBinding.compositeFrame]. This is the phase in which data is sent
+  /// to the GPU. If semantics are not enabled, then this is the last phase.
   composite,
 
   /// The semantics building phase in the rendering library. See
@@ -1414,9 +1414,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
             rootPipelineOwner.flushPaint();
             if (_phase != EnginePhase.paint && sendFramesToEngine) {
               _firstFrameSent = true;
-              for (final RenderView renderView in renderViews) {
-                renderView.compositeFrame(); // this sends the bits to the GPU
-              }
+              compositeFrame(); // this sends the bits to the GPU
               if (_phase != EnginePhase.composite) {
                 rootPipelineOwner.flushSemantics(); // this sends the semantics to the OS.
                 assert(_phase == EnginePhase.flushSemantics ||

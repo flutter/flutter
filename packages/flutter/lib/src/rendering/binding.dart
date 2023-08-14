@@ -314,8 +314,8 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// The binding will interact with the [RenderView] in the following ways:
   ///
   ///  * setting and updating [RenderView.configuration],
-  ///  * calling [RenderView.compositeFrame] when it is time to produce a new
-  ///    frame, and
+  ///  * getting a scene from [RenderView.buildCompositeFrame] and uploading it
+  ///    to the engine when it is time to produce a new frame, and
   ///  * forwarding relevant pointer events to the [RenderView] for hit testing.
   ///
   /// To remove a [RenderView] from the binding, call [removeRenderView].
@@ -532,6 +532,36 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     _firstFrameSent = false;
   }
 
+  /// Uploads the composited layer trees of all views to the engine.
+  ///
+  /// Actually causes the output of the rendering pipeline to appear on screen.
+  void compositeFrame() {
+    if (!kReleaseMode) {
+      FlutterTimeline.startSync('COMPOSITING');
+    }
+    final Map<ui.FlutterView, ui.Scene> scenes = <ui.FlutterView, ui.Scene>{};
+    try {
+      for (final RenderView renderView in renderViews) {
+        scenes[renderView.flutterView] = renderView.buildCompositeFrame();
+      }
+      // this sends the bits to the GPU
+      PlatformDispatcher.instance.renderScenes(scenes);
+      assert(() {
+        if (debugRepaintRainbowEnabled || debugRepaintTextRainbowEnabled) {
+          debugCurrentRepaintColor = debugCurrentRepaintColor.withHue((debugCurrentRepaintColor.hue + 2.0) % 360.0);
+        }
+        return true;
+      }());
+    } finally {
+      for (final ui.Scene scene in scenes.values) {
+        scene.dispose();
+      }
+      if (!kReleaseMode) {
+        FlutterTimeline.finishSync();
+      }
+    }
+  }
+
   /// Pump the rendering pipeline to generate a frame.
   ///
   /// This method is called by [handleDrawFrame], which itself is called
@@ -592,24 +622,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     rootPipelineOwner.flushCompositingBits();
     rootPipelineOwner.flushPaint();
     if (sendFramesToEngine) {
-      if (!kReleaseMode) {
-        FlutterTimeline.startSync('COMPOSITING');
-      }
-      final Map<ui.FlutterView, ui.Scene> scenes = <ui.FlutterView, ui.Scene>{};
-      try {
-        for (final RenderView renderView in renderViews) {
-          scenes[renderView.flutterView] = renderView.compositeFrame();
-        }
-        // this sends the bits to the GPU
-        PlatformDispatcher.instance.renderScenes(scenes);
-      } finally {
-        for (final ui.Scene scene in tasks.values) {
-          scene.dispose();
-        }
-        if (!kReleaseMode) {
-          FlutterTimeline.finishSync();
-        }
-      }
+      compositeFrame();
       rootPipelineOwner.flushSemantics(); // this sends the semantics to the OS.
       _firstFrameSent = true;
     }

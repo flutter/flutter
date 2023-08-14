@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' show SemanticsUpdate;
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -75,7 +75,7 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
       onSemanticsOwnerCreated: () {
         renderView.scheduleInitialSemantics();
       },
-      onSemanticsUpdate: (SemanticsUpdate update) {
+      onSemanticsUpdate: (ui.SemanticsUpdate update) {
         renderView.updateSemantics(update);
       },
       onSemanticsOwnerDisposed: () {
@@ -190,9 +190,7 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
       if (phase == EnginePhase.paint) {
         return;
       }
-      for (final RenderView renderView in renderViews) {
-        renderView.compositeFrame();
-      }
+      compositeFrame();
       if (phase == EnginePhase.composite) {
         return;
       }

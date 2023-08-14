@@ -134,8 +134,8 @@ const String _flutterRenderingLibrary = 'package:flutter/rendering.dart';
 /// {@end-tool}
 /// See also:
 ///
-///  * [RenderView.compositeFrame], which implements this recomposition protocol
-///    for painting [RenderObject] trees on the display.
+///  * [RenderView.buildCompositeFrame], which implements this recomposition protocol
+///    for building a scene for the [RenderObject] tree.
 abstract class Layer with DiagnosticableTreeMixin {
   /// Creates an instance of Layer.
   Layer() {
