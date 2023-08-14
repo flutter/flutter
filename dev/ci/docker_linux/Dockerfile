@@ -65,7 +65,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   ruby-dev && \
   apt-get clean
 
-#RUN ls /usr/lib/jvm/java-11-openjdk-amd64
 ENV JAVA_HOME="/usr/lib/jvm/java-11-openjdk-amd64"
 
 # Install the Android SDK Dependency.
