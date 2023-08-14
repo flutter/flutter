@@ -1196,7 +1196,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
     // CoreDevice and has iOS 13 or greater.
     // When using `ios-deploy` and the Dart VM, prefer the more complete logs
     // from the attached debugger, if available.
-    if (_iosDeployDebugger == null || !_iosDeployDebugger!.debuggerAttached) {
+    if (connectedVMService != null && (_iosDeployDebugger == null || !_iosDeployDebugger!.debuggerAttached)) {
       return _IOSDeviceLogSources(
         primarySource: IOSDeviceLogSource.unifiedLogging,
         fallbackSource: IOSDeviceLogSource.iosDeploy,

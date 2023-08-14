@@ -421,6 +421,38 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       expect(logReader.useSyslogLogging, isFalse);
       expect(logReader.useUnifiedLogging, isTrue);
       expect(logReader.useIOSDeployLogging, isTrue);
+      expect(logReader.logSources.primarySource, IOSDeviceLogSource.iosDeploy);
+      expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.unifiedLogging);
+    });
+
+    testWithoutContext('for iOS 13 or greater non-CoreDevice, _iosDeployDebugger not attached, and VM is connected', () {
+      final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+        iMobileDevice: IMobileDevice(
+          artifacts: artifacts,
+          processManager: processManager,
+          cache: fakeCache,
+          logger: logger,
+        ),
+        majorSdkVersion: 13,
+      );
+
+      final FlutterVmService vmService = FakeVmServiceHost(requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+          'streamId': 'Debug',
+        }),
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+          'streamId': 'Stdout',
+        }),
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+          'streamId': 'Stderr',
+        }),
+      ]).vmService;
+
+      logReader.connectedVMService = vmService;
+
+      expect(logReader.useSyslogLogging, isFalse);
+      expect(logReader.useUnifiedLogging, isTrue);
+      expect(logReader.useIOSDeployLogging, isTrue);
       expect(logReader.logSources.primarySource, IOSDeviceLogSource.unifiedLogging);
       expect(logReader.logSources.fallbackSource, IOSDeviceLogSource.iosDeploy);
     });
@@ -439,6 +471,20 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
       iosDeployDebugger.debuggerAttached = true;
       logReader.debuggerStream = iosDeployDebugger;
+
+      final FlutterVmService vmService = FakeVmServiceHost(requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+          'streamId': 'Debug',
+        }),
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+          'streamId': 'Stdout',
+        }),
+        const FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+          'streamId': 'Stderr',
+        }),
+      ]).vmService;
+
+      logReader.connectedVMService = vmService;
 
       expect(logReader.useSyslogLogging, isFalse);
       expect(logReader.useUnifiedLogging, isTrue);
@@ -738,6 +784,54 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
           'flutter: The Dart VM service is listening on http://127.0.0.1:63098/35ZezGIQLnw=/', // from idevicesyslog
           'A second non-flutter message', // from iosDeploy
           'flutter: Another flutter message', // from iosDeploy
+        ]));
+      });
+
+      testWithoutContext('all primary messages are included when there is no fallback', () async {
+        final IOSDeviceLogReader logReader = IOSDeviceLogReader.test(
+          iMobileDevice: IMobileDevice(
+            artifacts: artifacts,
+            processManager: FakeProcessManager.any(),
+            cache: fakeCache,
+            logger: logger,
+          ),
+          majorSdkVersion: 12,
+        );
+
+        expect(logReader.useSyslogLogging, isTrue);
+        expect(logReader.logSources.primarySource, IOSDeviceLogSource.idevicesyslog);
+        expect(logReader.logSources.fallbackSource, isNull);
+
+        final Future<List<String>> logLines = logReader.logLines.toList();
+
+        logReader.addToLinesController(
+          'flutter: The Dart VM service is listening on http://127.0.0.1:63098/35ZezGIQLnw=/',
+          IOSDeviceLogSource.idevicesyslog,
+        );
+        logReader.addToLinesController(
+          'A non-flutter message',
+          IOSDeviceLogSource.idevicesyslog,
+        );
+        logReader.addToLinesController(
+          'A non-flutter message',
+          IOSDeviceLogSource.idevicesyslog,
+        );
+        logReader.addToLinesController(
+          'flutter: A flutter message',
+          IOSDeviceLogSource.idevicesyslog,
+        );
+        logReader.addToLinesController(
+          'flutter: A flutter message',
+          IOSDeviceLogSource.idevicesyslog,
+        );
+        final List<String> lines = await logLines;
+
+        expect(lines, containsAllInOrder(<String>[
+          'flutter: The Dart VM service is listening on http://127.0.0.1:63098/35ZezGIQLnw=/',
+          'A non-flutter message',
+          'A non-flutter message',
+          'flutter: A flutter message',
+          'flutter: A flutter message',
         ]));
       });
 
