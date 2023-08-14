@@ -106,7 +106,7 @@ Future<void> testMain() async {
     });
 
     group('determine composition state', () {
-      test('should return new composition state if valid new composition', () {
+      test('should return new composition state - compositing middle of text', () {
         const int baseOffset = 100;
         const String composingText = 'composeMe';
 
@@ -127,6 +127,30 @@ Future<void> testMain() async {
             editingState.copyWith(
                 composingBaseOffset: expectedComposingBase,
                 composingExtentOffset: expectedComposingBase + composingText.length));
+      });
+
+      test('should return new composition state - compositing from beginning of text', () {
+        const String composingText = '今日は';
+
+        final EditingState editingState = EditingState(
+          text: '今日は',
+          baseOffset: 0,
+          extentOffset: 3,
+        );
+
+        final _MockWithCompositionAwareMixin mockWithCompositionAwareMixin =
+            _MockWithCompositionAwareMixin();
+        mockWithCompositionAwareMixin.composingText = composingText;
+
+        const int expectedComposingBase = 0;
+
+        expect(
+            mockWithCompositionAwareMixin
+                .determineCompositionState(editingState),
+            editingState.copyWith(
+                composingBaseOffset: expectedComposingBase,
+                composingExtentOffset:
+                    expectedComposingBase + composingText.length));
       });
     });
   });
