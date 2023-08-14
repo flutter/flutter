@@ -145,18 +145,20 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       )
       ..addFlag('enable-software-rendering',
         negatable: false,
-        help: 'Enable rendering using the Skia software backend. '
+        help: '(deprecated) Enable rendering using the Skia software backend. '
             'This is useful when testing Flutter on emulators. By default, '
             'Flutter will attempt to either use OpenGL or Vulkan and fall back '
-            'to software when neither is available.',
-        hide: true,
+            'to software when neither is available. This option is not supported '
+            'when using the Impeller rendering engine.',
+        hide: !verboseHelp,
       )
       ..addFlag('skia-deterministic-rendering',
         negatable: false,
-        help: 'When combined with "--enable-software-rendering", this should provide completely '
+        help: '(deprecated) When combined with "--enable-software-rendering", this should provide completely '
             'deterministic (i.e. reproducible) Skia rendering. This is useful for testing purposes '
-            '(e.g. when comparing screenshots).',
-        hide: true,
+            '(e.g. when comparing screenshots). This option is not supported '
+            'when using the Impeller rendering engine.',
+        hide: !verboseHelp,
       )
       ..addMultiOption('dart-entrypoint-args',
         abbr: 'a',
