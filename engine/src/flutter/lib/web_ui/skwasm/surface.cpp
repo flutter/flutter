@@ -6,6 +6,7 @@
 
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
+#include "third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h"
 
 using namespace Skwasm;
 
@@ -155,8 +156,8 @@ void Surface::_setCanvasSize(int width, int height) {
 // Worker thread only
 void Surface::_recreateSurface() {
   makeCurrent(_glContext);
-  GrBackendRenderTarget target(_canvasWidth, _canvasHeight, _sampleCount,
-                               _stencil, _fbInfo);
+  auto target = GrBackendRenderTargets::MakeGL(_canvasWidth, _canvasHeight,
+                                               _sampleCount, _stencil, _fbInfo);
   _surface = SkSurfaces::WrapBackendRenderTarget(
       _grContext.get(), target, kBottomLeft_GrSurfaceOrigin,
       kRGBA_8888_SkColorType, SkColorSpace::MakeSRGB(), nullptr);
