@@ -17,6 +17,7 @@
 #include "third_party/skia/include/gpu/ganesh/GrExternalTextureGenerator.h"
 #include "third_party/skia/include/gpu/ganesh/SkImageGanesh.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
+#include "third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h"
 #include "third_party/skia/include/gpu/gl/GrGLInterface.h"
 #include "third_party/skia/include/gpu/gl/GrGLTypes.h"
 
@@ -100,8 +101,8 @@ class VideoFrameImageGenerator : public GrExternalTextureGenerator {
     glInfo.fFormat = GL_RGBA8_OES;
     glInfo.fTarget = GL_TEXTURE_2D;
 
-    GrBackendTexture backendTexture(fInfo.width(), fInfo.height(), mipmapped,
-                                    glInfo);
+    auto backendTexture = GrBackendTextures::MakeGL(
+        fInfo.width(), fInfo.height(), mipmapped, glInfo);
     return std::make_unique<ExternalWebGLTexture>(
         backendTexture, glInfo.fID, emscripten_webgl_get_current_context());
   }
