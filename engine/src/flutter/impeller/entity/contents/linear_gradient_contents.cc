@@ -100,7 +100,7 @@ bool LinearGradientContents::RenderTexture(const ContentContext& renderer,
   frame_info.matrix = GetInverseEffectTransform();
 
   Command cmd;
-  cmd.label = "LinearGradientFill";
+  DEBUG_COMMAND_INFO(cmd, "LinearGradientFill");
   cmd.stencil_reference = entity.GetStencilDepth();
 
   auto options = OptionsFromPassAndEntity(pass, entity);
@@ -161,7 +161,7 @@ bool LinearGradientContents::RenderSSBO(const ContentContext& renderer,
   frame_info.matrix = GetInverseEffectTransform();
 
   Command cmd;
-  cmd.label = "LinearGradientSSBOFill";
+  DEBUG_COMMAND_INFO(cmd, "LinearGradientSSBOFill");
   cmd.stencil_reference = entity.GetStencilDepth();
 
   auto geometry_result =

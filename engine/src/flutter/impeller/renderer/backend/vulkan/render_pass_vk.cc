@@ -452,6 +452,7 @@ static bool EncodeCommand(const Context& context,
     return true;
   }
 
+#ifdef IMPELLER_DEBUG
   fml::ScopedCleanupClosure pop_marker(
       [&encoder]() { encoder.PopDebugGroup(); });
   if (!command.label.empty()) {
@@ -459,6 +460,7 @@ static bool EncodeCommand(const Context& context,
   } else {
     pop_marker.Release();
   }
+#endif  // IMPELLER_DEBUG
 
   const auto& cmd_buffer = encoder.GetCommandBuffer();
 

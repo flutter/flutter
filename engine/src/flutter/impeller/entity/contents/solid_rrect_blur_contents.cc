@@ -87,7 +87,7 @@ bool SolidRRectBlurContents::Render(const ContentContext& renderer,
   }
 
   Command cmd;
-  cmd.label = "RRect Shadow";
+  DEBUG_COMMAND_INFO(cmd, "RRect Shadow");
   auto opts = OptionsFromPassAndEntity(pass, entity);
   opts.primitive_type = PrimitiveType::kTriangle;
   cmd.pipeline = renderer.GetRRectBlurPipeline(opts);

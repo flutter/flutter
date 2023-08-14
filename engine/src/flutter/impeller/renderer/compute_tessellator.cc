@@ -122,7 +122,7 @@ ComputeTessellator::Status ComputeTessellator::Tessellate(
     pass->SetThreadGroupSize(ISize(line_count, 1));
 
     ComputeCommand cmd;
-    cmd.label = "Generate Polyline";
+    DEBUG_COMMAND_INFO(cmd, "Generate Polyline");
     cmd.pipeline = compute_pipeline;
 
     PS::BindConfig(cmd, pass->GetTransientsBuffer().EmplaceUniform(config));
@@ -152,7 +152,7 @@ ComputeTessellator::Status ComputeTessellator::Tessellate(
     pass->SetThreadGroupSize(ISize(line_count, 1));
 
     ComputeCommand cmd;
-    cmd.label = "Compute Stroke";
+    DEBUG_COMMAND_INFO(cmd, "Compute Stroke");
     cmd.pipeline = compute_pipeline;
 
     SS::Config config{

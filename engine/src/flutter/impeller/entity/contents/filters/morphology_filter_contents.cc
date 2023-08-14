@@ -116,7 +116,7 @@ std::optional<Entity> DirectionalMorphologyFilterContents::RenderFilter(
         Point(transformed_texture_width, transformed_texture_height);
 
     Command cmd;
-    cmd.label = "Morphology Filter";
+    DEBUG_COMMAND_INFO(cmd, "Morphology Filter");
     auto options = OptionsFromPass(pass);
     options.blend_mode = BlendMode::kSource;
     cmd.pipeline = renderer.GetMorphologyFilterPipeline(options);

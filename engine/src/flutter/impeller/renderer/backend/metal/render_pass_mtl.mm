@@ -448,12 +448,14 @@ bool RenderPassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
       continue;
     }
 
+#ifdef IMPELLER_DEBUG
     fml::ScopedCleanupClosure auto_pop_debug_marker(pop_debug_marker);
     if (!command.label.empty()) {
       [encoder pushDebugGroup:@(command.label.c_str())];
     } else {
       auto_pop_debug_marker.Release();
     }
+#endif  // IMPELLER_DEBUG
 
     const auto& pipeline_desc = command.pipeline->GetDescriptor();
     if (target_sample_count != pipeline_desc.GetSampleCount()) {

@@ -93,7 +93,7 @@ bool ClipContents::Render(const ContentContext& renderer,
 
   if (clip_op_ == Entity::ClipOperation::kDifference) {
     {
-      cmd.label = "Difference Clip (Increment)";
+      DEBUG_COMMAND_INFO(cmd, "Difference Clip (Increment)");
 
       auto points = Rect(Size(pass.GetRenderTargetSize())).GetPoints();
       auto vertices =
@@ -111,14 +111,14 @@ bool ClipContents::Render(const ContentContext& renderer,
     }
 
     {
-      cmd.label = "Difference Clip (Punch)";
+      DEBUG_COMMAND_INFO(cmd, "Difference Clip (Punch)");
 
       cmd.stencil_reference = entity.GetStencilDepth() + 1;
       options.stencil_compare = CompareFunction::kEqual;
       options.stencil_operation = StencilOperation::kDecrementClamp;
     }
   } else {
-    cmd.label = "Intersect Clip";
+    DEBUG_COMMAND_INFO(cmd, "Intersect Clip");
     options.stencil_compare = CompareFunction::kEqual;
     options.stencil_operation = StencilOperation::kIncrementClamp;
   }
@@ -179,7 +179,7 @@ bool ClipRestoreContents::Render(const ContentContext& renderer,
   using VS = ClipPipeline::VertexShader;
 
   Command cmd;
-  cmd.label = "Restore Clip";
+  DEBUG_COMMAND_INFO(cmd, "Restore Clip");
   auto options = OptionsFromPass(pass);
   options.blend_mode = BlendMode::kDestination;
   options.stencil_compare = CompareFunction::kLess;

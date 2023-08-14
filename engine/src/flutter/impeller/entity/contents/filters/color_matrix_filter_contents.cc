@@ -55,7 +55,7 @@ std::optional<Entity> ColorMatrixFilterContents::RenderFilter(
                                const ContentContext& renderer,
                                const Entity& entity, RenderPass& pass) -> bool {
     Command cmd;
-    cmd.label = "Color Matrix Filter";
+    DEBUG_COMMAND_INFO(cmd, "Color Matrix Filter");
     cmd.stencil_reference = entity.GetStencilDepth();
 
     auto options = OptionsFromPassAndEntity(pass, entity);

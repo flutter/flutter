@@ -244,6 +244,7 @@ struct RenderPassData {
       return false;
     }
 
+#ifdef IMPELLER_DEBUG
     fml::ScopedCleanupClosure pop_cmd_debug_marker(
         [&gl]() { gl.PopDebugGroup(); });
     if (!command.label.empty()) {
@@ -251,6 +252,7 @@ struct RenderPassData {
     } else {
       pop_cmd_debug_marker.Release();
     }
+#endif  // IMPELLER_DEBUG
 
     const auto& pipeline = PipelineGLES::Cast(*command.pipeline);
 

@@ -133,7 +133,7 @@ TEST_P(ComputeSubgroupTest, PathPlayground) {
     using VS = SolidFillPipeline::VertexShader;
 
     Command cmd;
-    cmd.label = "Draw Stroke";
+    DEBUG_COMMAND_INFO(cmd, "Draw Stroke");
     cmd.stencil_reference = 0;
 
     ContentContextOptions options;
@@ -337,7 +337,7 @@ TEST_P(ComputeSubgroupTest, LargePath) {
     using VS = SolidFillPipeline::VertexShader;
 
     Command cmd;
-    cmd.label = "Draw Stroke";
+    DEBUG_COMMAND_INFO(cmd, "Draw Stroke");
     cmd.stencil_reference = 0;
 
     ContentContextOptions options;
@@ -421,7 +421,7 @@ TEST_P(ComputeSubgroupTest, QuadAndCubicInOnePath) {
     using VS = SolidFillPipeline::VertexShader;
 
     Command cmd;
-    cmd.label = "Draw Stroke";
+    DEBUG_COMMAND_INFO(cmd, "Draw Stroke");
     cmd.stencil_reference = 0;
 
     ContentContextOptions options;

@@ -143,9 +143,10 @@ bool TextureContents::Render(const ContentContext& renderer,
   frame_info.alpha = GetOpacity();
 
   Command cmd;
-  cmd.label = "Texture Fill";
-  if (!label_.empty()) {
-    cmd.label += ": " + label_;
+  if (label_.empty()) {
+    DEBUG_COMMAND_INFO(cmd, "Texture Fill");
+  } else {
+    DEBUG_COMMAND_INFO(cmd, "Texture Fill: " + label_);
   }
 
   auto pipeline_options = OptionsFromPassAndEntity(pass, entity);

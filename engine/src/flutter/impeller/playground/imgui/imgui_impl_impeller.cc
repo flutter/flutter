@@ -238,8 +238,9 @@ void ImGui_ImplImpeller_RenderDrawData(ImDrawData* draw_data,
         }
 
         impeller::Command cmd;
-        cmd.label = impeller::SPrintF("ImGui draw list %d (command %d)",
-                                      draw_list_i, cmd_i);
+        DEBUG_COMMAND_INFO(cmd,
+                           impeller::SPrintF("ImGui draw list %d (command %d)",
+                                             draw_list_i, cmd_i));
 
         cmd.viewport = viewport;
         cmd.scissor = impeller::IRect(clip_rect);

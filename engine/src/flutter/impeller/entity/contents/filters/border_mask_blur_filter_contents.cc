@@ -109,7 +109,7 @@ std::optional<Entity> BorderMaskBlurFilterContents::RenderFilter(
     auto vtx_buffer = vtx_builder.CreateVertexBuffer(host_buffer);
 
     Command cmd;
-    cmd.label = "Border Mask Blur Filter";
+    DEBUG_COMMAND_INFO(cmd, "Border Mask Blur Filter");
     auto options = OptionsFromPassAndEntity(pass, entity);
 
     cmd.pipeline = renderer.GetBorderMaskBlurPipeline(options);

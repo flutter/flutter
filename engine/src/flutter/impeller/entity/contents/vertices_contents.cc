@@ -124,7 +124,7 @@ bool VerticesUVContents::Render(const ContentContext& renderer,
   }
 
   Command cmd;
-  cmd.label = "VerticesUV";
+  DEBUG_COMMAND_INFO(cmd, "VerticesUV");
   auto& host_buffer = pass.GetTransientsBuffer();
   auto geometry = parent_.GetGeometry();
 
@@ -178,7 +178,7 @@ bool VerticesColorContents::Render(const ContentContext& renderer,
   using FS = GeometryColorPipeline::FragmentShader;
 
   Command cmd;
-  cmd.label = "VerticesColors";
+  DEBUG_COMMAND_INFO(cmd, "VerticesColors");
   auto& host_buffer = pass.GetTransientsBuffer();
   auto geometry = parent_.GetGeometry();
 

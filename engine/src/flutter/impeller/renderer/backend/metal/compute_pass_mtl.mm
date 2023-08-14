@@ -219,12 +219,14 @@ bool ComputePassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
 
   fml::closure pop_debug_marker = [encoder]() { [encoder popDebugGroup]; };
   for (const auto& command : commands_) {
+#ifdef IMPELLER_DEBUG
     fml::ScopedCleanupClosure auto_pop_debug_marker(pop_debug_marker);
     if (!command.label.empty()) {
       [encoder pushDebugGroup:@(command.label.c_str())];
     } else {
       auto_pop_debug_marker.Release();
     }
+#endif
 
     pass_bindings.SetComputePipelineState(
         ComputePipelineMTL::Cast(*command.pipeline)

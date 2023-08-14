@@ -99,7 +99,7 @@ bool ConicalGradientContents::RenderSSBO(const ContentContext& renderer,
   frame_info.matrix = GetInverseEffectTransform();
 
   Command cmd;
-  cmd.label = "ConicalGradientSSBOFill";
+  DEBUG_COMMAND_INFO(cmd, "ConicalGradientSSBOFill");
   cmd.stencil_reference = entity.GetStencilDepth();
 
   auto geometry_result =
@@ -167,7 +167,7 @@ bool ConicalGradientContents::RenderTexture(const ContentContext& renderer,
   frame_info.matrix = GetInverseEffectTransform();
 
   Command cmd;
-  cmd.label = "ConicalGradientFill";
+  DEBUG_COMMAND_INFO(cmd, "ConicalGradientFill");
   cmd.stencil_reference = entity.GetStencilDepth();
 
   auto options = OptionsFromPassAndEntity(pass, entity);
