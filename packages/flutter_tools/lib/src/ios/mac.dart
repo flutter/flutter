@@ -116,6 +116,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   DarwinArch? activeArch,
   bool codesign = true,
   String? deviceID,
+  bool isCoreDevice = false,
   bool configOnly = false,
   XcodeBuildAction buildAction = XcodeBuildAction.build,
 }) async {
@@ -224,6 +225,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     project: project,
     targetOverride: targetOverride,
     buildInfo: buildInfo,
+    usingCoreDevice: isCoreDevice,
   );
   await processPodsIfNeeded(project.ios, getIosBuildDirectory(), buildInfo.mode);
   if (configOnly) {
