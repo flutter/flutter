@@ -7,13 +7,12 @@
 #include <fuchsia/ui/input/cpp/fidl.h>
 #include <fuchsia/ui/input3/cpp/fidl.h>
 #include <fuchsia/ui/input3/cpp/fidl_test_base.h>
-#include <fuchsia/ui/scenic/cpp/fidl.h>
 #include <fuchsia/ui/views/cpp/fidl.h>
 #include <lib/async-loop/cpp/loop.h>
 #include <lib/async-loop/default.h>
 #include <lib/async/default.h>
 #include <lib/fidl/cpp/binding_set.h>
-#include <lib/ui/scenic/cpp/view_ref_pair.h>
+#include <lib/zx/eventpair.h>
 
 #include <memory>
 #include <ostream>
@@ -244,9 +243,17 @@ class MockChildViewWatcher
   void GetViewRef(GetViewRefCallback callback) override {
     // GetViewRef only returns once as per flatland.fidl comments
     ASSERT_FALSE(control_ref_.reference);
-    auto pair = scenic::ViewRefPair::New();
-    control_ref_ = std::move(pair.control_ref);
-    callback(std::move(pair.view_ref));
+    fuchsia::ui::views::ViewRefControl view_ref_control;
+    fuchsia::ui::views::ViewRef view_ref;
+    auto status = zx::eventpair::create(
+        /*options*/ 0u, &view_ref_control.reference, &view_ref.reference);
+    ZX_ASSERT(status == ZX_OK);
+    view_ref_control.reference.replace(
+        ZX_DEFAULT_EVENTPAIR_RIGHTS & (~ZX_RIGHT_DUPLICATE),
+        &view_ref_control.reference);
+    view_ref.reference.replace(ZX_RIGHTS_BASIC, &view_ref.reference);
+    control_ref_ = std::move(view_ref_control);
+    callback(std::move(view_ref));
   }
 
   void NotImplemented_(const std::string& name) override { FAIL(); }
@@ -332,9 +339,20 @@ class PlatformViewBuilder {
  public:
   PlatformViewBuilder(flutter::PlatformView::Delegate& delegate,
                       flutter::TaskRunners task_runners)
-      : delegate_(delegate),
-        task_runners_(task_runners),
-        view_ref_pair_(scenic::ViewRefPair::New()) {}
+      : delegate_(delegate), task_runners_(task_runners) {
+    fuchsia::ui::views::ViewRefControl view_ref_control;
+    fuchsia::ui::views::ViewRef view_ref;
+    auto status = zx::eventpair::create(
+        /*options*/ 0u, &view_ref_control.reference, &view_ref.reference);
+    ZX_ASSERT(status == ZX_OK);
+    view_ref_control.reference.replace(
+        ZX_DEFAULT_EVENTPAIR_RIGHTS & (~ZX_RIGHT_DUPLICATE),
+        &view_ref_control.reference);
+    view_ref.reference.replace(ZX_RIGHTS_BASIC, &view_ref.reference);
+    auto view_ref_pair =
+        std::make_pair(std::move(view_ref_control), std::move(view_ref));
+    view_ref_pair_ = std::move(view_ref_pair);
+  }
 
   PlatformViewBuilder& SetExternalViewEmbedder(
       std::shared_ptr<flutter::ExternalViewEmbedder> embedder) {
@@ -428,7 +446,7 @@ class PlatformViewBuilder {
     EXPECT_FALSE(std::exchange(built_, true))
         << "Build() was already called, this builder is good for one use only.";
     return PlatformView(
-        delegate_, task_runners_, std::move(view_ref_pair_.view_ref),
+        delegate_, task_runners_, std::move(view_ref_pair_.second),
         external_external_view_embedder_, std::move(ime_service_),
         std::move(keyboard_), std::move(touch_source_),
         std::move(mouse_source_), std::move(focuser_),
@@ -450,7 +468,8 @@ class PlatformViewBuilder {
 
   flutter::PlatformView::Delegate& delegate_;
   flutter::TaskRunners task_runners_;
-  scenic::ViewRefPair view_ref_pair_;
+  std::pair<fuchsia::ui::views::ViewRefControl, fuchsia::ui::views::ViewRef>
+      view_ref_pair_;
 
   std::shared_ptr<flutter::ExternalViewEmbedder>
       external_external_view_embedder_;
@@ -653,7 +672,6 @@ TEST_F(PlatformViewTests, SetViewportMetrics) {
   EXPECT_EQ(delegate.metrics(), flutter::ViewportMetrics());
 
   MockParentViewportWatcher watcher;
-  std::vector<fuchsia::ui::scenic::Event> events;
   flutter::TaskRunners task_runners("test_runners", nullptr, nullptr, nullptr,
                                     nullptr);
   auto platform_view = PlatformViewBuilder(delegate, std::move(task_runners))

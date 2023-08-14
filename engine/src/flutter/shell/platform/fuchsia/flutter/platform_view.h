@@ -13,7 +13,6 @@
 #include <lib/fidl/cpp/binding.h>
 #include <lib/fit/function.h>
 #include <lib/sys/cpp/service_directory.h>
-#include <lib/ui/scenic/cpp/id.h>
 
 #include <array>
 #include <functional>

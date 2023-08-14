@@ -140,7 +140,6 @@ template("runner_sources") {
 
     public_deps = [
                     "$fuchsia_sdk_root/pkg:inspect",
-                    "$fuchsia_sdk_root/pkg:scenic_cpp",
                     "$fuchsia_sdk_root/pkg:sys_cpp",
                     "$fuchsia_sdk_root/pkg:sys_inspect_cpp",
                     "//flutter/shell/platform/fuchsia/runtime/dart/utils",
@@ -157,6 +156,8 @@ template("runner_sources") {
              "$fuchsia_sdk_root/fidl:fuchsia.memorypressure",
              "$fuchsia_sdk_root/fidl:fuchsia.ui.app",
              "$fuchsia_sdk_root/fidl:fuchsia.ui.composition",
+             "$fuchsia_sdk_root/fidl:fuchsia.ui.input",
+             "$fuchsia_sdk_root/fidl:fuchsia.ui.input3",
              "$fuchsia_sdk_root/fidl:fuchsia.ui.pointer",
              "$fuchsia_sdk_root/fidl:fuchsia.ui.pointerinjector",
              "$fuchsia_sdk_root/fidl:fuchsia.ui.test.input",

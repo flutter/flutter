@@ -5,7 +5,6 @@
 #include "software_surface.h"
 
 #include <lib/async/default.h>
-#include <lib/ui/scenic/cpp/commands.h>
 #include <zircon/rights.h>
 #include <zircon/status.h>
 #include <zircon/types.h>

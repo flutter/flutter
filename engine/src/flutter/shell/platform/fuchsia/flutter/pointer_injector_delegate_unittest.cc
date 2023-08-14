@@ -9,9 +9,9 @@
 #include <lib/async-loop/cpp/loop.h>
 #include <lib/async-loop/default.h>
 #include <lib/async/cpp/task.h>
+#include <lib/zx/eventpair.h>
 
 #include <lib/fidl/cpp/binding_set.h>
-#include <lib/ui/scenic/cpp/view_ref_pair.h>
 
 #include "pointer_injector_delegate.h"
 #include "tests/fakes/mock_injector_registry.h"
@@ -204,9 +204,17 @@ class PointerInjectorDelegateTest : public ::testing::Test,
   }
 
   void SetUp() override {
-    auto view_ref_pair = scenic::ViewRefPair::New();
+    fuchsia::ui::views::ViewRefControl view_ref_control;
+    fuchsia::ui::views::ViewRef view_ref;
+    auto status = zx::eventpair::create(
+        /*options*/ 0u, &view_ref_control.reference, &view_ref.reference);
+    ASSERT_EQ(status, ZX_OK);
+    view_ref_control.reference.replace(
+        ZX_DEFAULT_EVENTPAIR_RIGHTS & (~ZX_RIGHT_DUPLICATE),
+        &view_ref_control.reference);
+    view_ref.reference.replace(ZX_RIGHTS_BASIC, &view_ref.reference);
 
-    host_view_ref_ = std::move(view_ref_pair.view_ref);
+    host_view_ref_ = std::move(view_ref);
 
     fup_RegistryHandle registry;
     registry_ = std::make_unique<MockInjectorRegistry>(registry.NewRequest());
@@ -224,8 +232,17 @@ class PointerInjectorDelegateTest : public ::testing::Test,
     if (view_ref.has_value()) {
       ref = std::move(*view_ref);
     } else {
-      auto view_ref_pair = scenic::ViewRefPair::New();
-      ref = std::move(view_ref_pair.view_ref);
+      fuchsia::ui::views::ViewRefControl view_ref_control;
+      fuchsia::ui::views::ViewRef view_ref;
+      auto status = zx::eventpair::create(
+          /*options*/ 0u, &view_ref_control.reference, &view_ref.reference);
+      ASSERT_EQ(status, ZX_OK);
+      view_ref_control.reference.replace(
+          ZX_DEFAULT_EVENTPAIR_RIGHTS & (~ZX_RIGHT_DUPLICATE),
+          &view_ref_control.reference);
+      view_ref.reference.replace(ZX_RIGHTS_BASIC, &view_ref.reference);
+
+      ref = std::move(view_ref);
     }
     pointer_injector_delegate_->OnCreateView(view_id, std::move(ref));
   }
@@ -281,7 +298,15 @@ TEST_P(PointerInjectorDelegateTest, ViewsReceiveInjectedEvents) {
 
     CreateView(view_id);
 
-    auto view_ref_pair = scenic::ViewRefPair::New();
+    fuchsia::ui::views::ViewRefControl view_ref_control;
+    fuchsia::ui::views::ViewRef view_ref;
+    auto status = zx::eventpair::create(
+        /*options*/ 0u, &view_ref_control.reference, &view_ref.reference);
+    ASSERT_EQ(status, ZX_OK);
+    view_ref_control.reference.replace(
+        ZX_DEFAULT_EVENTPAIR_RIGHTS & (~ZX_RIGHT_DUPLICATE),
+        &view_ref_control.reference);
+    view_ref.reference.replace(ZX_RIGHTS_BASIC, &view_ref.reference);
 
     for (size_t i = 0; i < num_events; i++) {
       auto response = FakePlatformMessageResponse::Create();
@@ -299,7 +324,15 @@ TEST_P(PointerInjectorDelegateTest, ViewsReceiveInjectedEvents) {
 
     CreateView(view_id);
 
-    auto view_ref_pair = scenic::ViewRefPair::New();
+    fuchsia::ui::views::ViewRefControl view_ref_control;
+    fuchsia::ui::views::ViewRef view_ref;
+    auto status = zx::eventpair::create(
+        /*options*/ 0u, &view_ref_control.reference, &view_ref.reference);
+    ASSERT_EQ(status, ZX_OK);
+    view_ref_control.reference.replace(
+        ZX_DEFAULT_EVENTPAIR_RIGHTS & (~ZX_RIGHT_DUPLICATE),
+        &view_ref_control.reference);
+    view_ref.reference.replace(ZX_RIGHTS_BASIC, &view_ref.reference);
 
     for (size_t i = 0; i < num_events; i++) {
       auto response = FakePlatformMessageResponse::Create();
@@ -328,7 +361,15 @@ TEST_P(PointerInjectorDelegateTest,
 
   // Inject |num_events| platform messages for |view_id_1|.
   {
-    auto view_ref_pair = scenic::ViewRefPair::New();
+    fuchsia::ui::views::ViewRefControl view_ref_control;
+    fuchsia::ui::views::ViewRef view_ref;
+    auto status = zx::eventpair::create(
+        /*options*/ 0u, &view_ref_control.reference, &view_ref.reference);
+    ASSERT_EQ(status, ZX_OK);
+    view_ref_control.reference.replace(
+        ZX_DEFAULT_EVENTPAIR_RIGHTS & (~ZX_RIGHT_DUPLICATE),
+        &view_ref_control.reference);
+    view_ref.reference.replace(ZX_RIGHTS_BASIC, &view_ref.reference);
 
     for (size_t i = 0; i < num_events; i++) {
       auto response = FakePlatformMessageResponse::Create();
@@ -346,7 +387,15 @@ TEST_P(PointerInjectorDelegateTest,
 
   // Inject |num_events| platform messages for |view_id_2|.
   {
-    auto view_ref_pair = scenic::ViewRefPair::New();
+    fuchsia::ui::views::ViewRefControl view_ref_control;
+    fuchsia::ui::views::ViewRef view_ref;
+    auto status = zx::eventpair::create(
+        /*options*/ 0u, &view_ref_control.reference, &view_ref.reference);
+    ASSERT_EQ(status, ZX_OK);
+    view_ref_control.reference.replace(
+        ZX_DEFAULT_EVENTPAIR_RIGHTS & (~ZX_RIGHT_DUPLICATE),
+        &view_ref_control.reference);
+    view_ref.reference.replace(ZX_RIGHTS_BASIC, &view_ref.reference);
 
     for (size_t i = 0; i < num_events; i++) {
       auto response = FakePlatformMessageResponse::Create();
@@ -376,12 +425,20 @@ TEST_P(PointerInjectorDelegateTest, ValidRegistrationConfigTest) {
 
   auto response = FakePlatformMessageResponse::Create();
 
-  auto view_ref_pair = scenic::ViewRefPair::New();
+  fuchsia::ui::views::ViewRefControl view_ref_control;
+  fuchsia::ui::views::ViewRef view_ref;
+  auto status = zx::eventpair::create(
+      /*options*/ 0u, &view_ref_control.reference, &view_ref.reference);
+  ZX_ASSERT(status == ZX_OK);
+  view_ref_control.reference.replace(
+      ZX_DEFAULT_EVENTPAIR_RIGHTS & (~ZX_RIGHT_DUPLICATE),
+      &view_ref_control.reference);
+  view_ref.reference.replace(ZX_RIGHTS_BASIC, &view_ref.reference);
 
   // Create the view.
-  fuv_ViewRef view_ref;
-  fidl::Clone(view_ref_pair.view_ref, &view_ref);
-  CreateView(view_id, std::move(view_ref));
+  fuv_ViewRef view_ref_clone;
+  fidl::Clone(view_ref, &view_ref_clone);
+  CreateView(view_id, std::move(view_ref_clone));
 
   // Inject a platform message.
   EXPECT_TRUE(pointer_injector_delegate_->HandlePlatformMessage(
@@ -425,8 +482,7 @@ TEST_P(PointerInjectorDelegateTest, ValidRegistrationConfigTest) {
 
   ASSERT_TRUE(config.has_target());
   ASSERT_TRUE(config.target().is_view());
-  EXPECT_EQ(ExtractKoid(config.target().view()),
-            ExtractKoid(view_ref_pair.view_ref));
+  EXPECT_EQ(ExtractKoid(config.target().view()), ExtractKoid(view_ref));
 
   ASSERT_TRUE(config.has_viewport());
   ASSERT_TRUE(config.viewport().has_viewport_to_context_transform());
@@ -447,12 +503,20 @@ TEST_P(PointerInjectorDelegateTest, ValidPointerEventTest) {
 
   auto response = FakePlatformMessageResponse::Create();
 
-  auto view_ref_pair = scenic::ViewRefPair::New();
+  fuchsia::ui::views::ViewRefControl view_ref_control;
+  fuchsia::ui::views::ViewRef view_ref;
+  auto status = zx::eventpair::create(
+      /*options*/ 0u, &view_ref_control.reference, &view_ref.reference);
+  ZX_ASSERT(status == ZX_OK);
+  view_ref_control.reference.replace(
+      ZX_DEFAULT_EVENTPAIR_RIGHTS & (~ZX_RIGHT_DUPLICATE),
+      &view_ref_control.reference);
+  view_ref.reference.replace(ZX_RIGHTS_BASIC, &view_ref.reference);
 
   // Create the view.
-  fuv_ViewRef view_ref;
-  fidl::Clone(view_ref_pair.view_ref, &view_ref);
-  CreateView(view_id, std::move(view_ref));
+  fuv_ViewRef view_ref_clone;
+  fidl::Clone(view_ref, &view_ref_clone);
+  CreateView(view_id, std::move(view_ref_clone));
 
   // Inject a platform message.
   EXPECT_TRUE(pointer_injector_delegate_->HandlePlatformMessage(
@@ -508,7 +572,15 @@ TEST_P(PointerInjectorDelegateTest, ValidPointerEventTest) {
 TEST_P(PointerInjectorDelegateTest, DestroyedViewsDontGetPointerEvents) {
   const uint64_t view_id = 1, num_events = 150;
 
-  auto view_ref_pair = scenic::ViewRefPair::New();
+  fuchsia::ui::views::ViewRefControl view_ref_control;
+  fuchsia::ui::views::ViewRef view_ref;
+  auto status = zx::eventpair::create(
+      /*options*/ 0u, &view_ref_control.reference, &view_ref.reference);
+  ZX_ASSERT(status == ZX_OK);
+  view_ref_control.reference.replace(
+      ZX_DEFAULT_EVENTPAIR_RIGHTS & (~ZX_RIGHT_DUPLICATE),
+      &view_ref_control.reference);
+  view_ref.reference.replace(ZX_RIGHTS_BASIC, &view_ref.reference);
 
   // Create the view.
   CreateView(view_id);
@@ -539,7 +611,15 @@ TEST_P(PointerInjectorDelegateTest, DestroyedViewsDontGetPointerEvents) {
 TEST_P(PointerInjectorDelegateTest, ViewsGetPointerEventsInFIFO) {
   const uint64_t view_id = 1, num_events = 150;
 
-  auto view_ref_pair = scenic::ViewRefPair::New();
+  fuchsia::ui::views::ViewRefControl view_ref_control;
+  fuchsia::ui::views::ViewRef view_ref;
+  auto status = zx::eventpair::create(
+      /*options*/ 0u, &view_ref_control.reference, &view_ref.reference);
+  ZX_ASSERT(status == ZX_OK);
+  view_ref_control.reference.replace(
+      ZX_DEFAULT_EVENTPAIR_RIGHTS & (~ZX_RIGHT_DUPLICATE),
+      &view_ref_control.reference);
+  view_ref.reference.replace(ZX_RIGHTS_BASIC, &view_ref.reference);
 
   // Create the view.
   CreateView(view_id);
@@ -591,15 +671,23 @@ TEST_P(PointerInjectorDelegateTest, ViewsGetPointerEventsInFIFO) {
 TEST_P(PointerInjectorDelegateTest, DeviceRetriesRegisterWhenClosed) {
   const uint64_t view_id = 1;
   const int pointer_id = 1;
-  auto view_ref_pair = scenic::ViewRefPair::New();
+  fuchsia::ui::views::ViewRefControl view_ref_control;
+  fuchsia::ui::views::ViewRef view_ref;
+  auto status = zx::eventpair::create(
+      /*options*/ 0u, &view_ref_control.reference, &view_ref.reference);
+  ZX_ASSERT(status == ZX_OK);
+  view_ref_control.reference.replace(
+      ZX_DEFAULT_EVENTPAIR_RIGHTS & (~ZX_RIGHT_DUPLICATE),
+      &view_ref_control.reference);
+  view_ref.reference.replace(ZX_RIGHTS_BASIC, &view_ref.reference);
 
   auto response = FakePlatformMessageResponse::Create();
   auto response_2 = FakePlatformMessageResponse::Create();
 
   // Create the view.
-  fuv_ViewRef view_ref;
-  fidl::Clone(view_ref_pair.view_ref, &view_ref);
-  CreateView(view_id, std::move(view_ref));
+  fuv_ViewRef view_ref_clone;
+  fidl::Clone(view_ref, &view_ref_clone);
+  CreateView(view_id, std::move(view_ref_clone));
 
   EXPECT_TRUE(pointer_injector_delegate_->HandlePlatformMessage(
       PlatformMessageBuilder()

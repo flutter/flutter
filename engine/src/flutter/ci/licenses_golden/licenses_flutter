@@ -2959,12 +2959,6 @@ ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/focus_delegate.cc + ../.
 ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/focus_delegate.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/fuchsia_intl.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/fuchsia_intl.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/gfx_external_view_embedder.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/gfx_external_view_embedder.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/gfx_platform_view.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/gfx_platform_view.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/gfx_session_connection.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/gfx_session_connection.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/isolate_configurator.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/isolate_configurator.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/fuchsia/flutter/kernel/framework_shim.dart + ../../../flutter/LICENSE
@@ -5711,12 +5705,6 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/focus_delegate.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/focus_delegate.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/fuchsia_intl.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/fuchsia_intl.h
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/gfx_external_view_embedder.cc
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/gfx_external_view_embedder.h
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/gfx_platform_view.cc
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/gfx_platform_view.h
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/gfx_session_connection.cc
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/gfx_session_connection.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/isolate_configurator.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/isolate_configurator.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/kernel/framework_shim.dart

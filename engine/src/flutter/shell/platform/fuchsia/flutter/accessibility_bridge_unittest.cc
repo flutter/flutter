@@ -4,6 +4,7 @@
 
 #include "accessibility_bridge.h"
 
+#include <fuchsia/ui/views/cpp/fidl.h>
 #include <lib/async-loop/cpp/loop.h>
 #include <lib/async-loop/default.h>
 #include <lib/async/cpp/executor.h>
@@ -13,7 +14,7 @@
 #include <lib/inspect/cpp/inspector.h>
 #include <lib/inspect/cpp/reader.h>
 #include <lib/sys/cpp/testing/service_directory_provider.h>
-#include <lib/ui/scenic/cpp/view_ref_pair.h>
+#include <lib/zx/eventpair.h>
 #include <zircon/status.h>
 #include <zircon/types.h>
 
@@ -112,7 +113,16 @@ class AccessibilityBridgeTest : public testing::Test {
             [this](int32_t node_id, flutter::SemanticsAction action) {
               accessibility_delegate_.DispatchSemanticsAction(node_id, action);
             };
-    auto [view_ref_control, view_ref] = scenic::ViewRefPair::New();
+
+    fuchsia::ui::views::ViewRefControl view_ref_control;
+    fuchsia::ui::views::ViewRef view_ref;
+    auto status = zx::eventpair::create(
+        /*options*/ 0u, &view_ref_control.reference, &view_ref.reference);
+    ASSERT_EQ(status, ZX_OK);
+    view_ref_control.reference.replace(
+        ZX_DEFAULT_EVENTPAIR_RIGHTS & (~ZX_RIGHT_DUPLICATE),
+        &view_ref_control.reference);
+    view_ref.reference.replace(ZX_RIGHTS_BASIC, &view_ref.reference);
     accessibility_bridge_ =
         std::make_unique<flutter_runner::AccessibilityBridge>(
             std::move(set_semantics_enabled_callback),
