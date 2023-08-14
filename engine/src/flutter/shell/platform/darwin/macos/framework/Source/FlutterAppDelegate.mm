@@ -9,6 +9,7 @@
 
 #include "flutter/fml/logging.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterAppLifecycleDelegate.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterAppLifecycleDelegate_Internal.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
 @interface FlutterAppDelegate ()
@@ -44,11 +45,11 @@
 #pragma mark - Delegate handling
 
 - (void)addApplicationLifecycleDelegate:(NSObject<FlutterAppLifecycleDelegate>*)delegate {
-  [[self lifecycleRegistrar] addDelegate:delegate];
+  [self.lifecycleRegistrar addDelegate:delegate];
 }
 
 - (void)removeApplicationLifecycleDelegate:(NSObject<FlutterAppLifecycleDelegate>*)delegate {
-  [[self lifecycleRegistrar] removeDelegate:delegate];
+  [self.lifecycleRegistrar removeDelegate:delegate];
 }
 
 #pragma mark Private Methods
@@ -60,6 +61,17 @@
     applicationName = [NSBundle.mainBundle objectForInfoDictionaryKey:@"CFBundleName"];
   }
   return applicationName;
+}
+
+#pragma mark NSApplicationDelegate
+
+- (void)application:(NSApplication*)application openURLs:(NSArray<NSURL*>*)urls {
+  for (NSObject<FlutterAppLifecycleDelegate>* delegate in self.lifecycleRegistrar.delegates) {
+    if ([delegate respondsToSelector:@selector(handleOpenURLs:)] &&
+        [delegate handleOpenURLs:urls]) {
+      return;
+    }
+  }
 }
 
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication* _Nonnull)sender {

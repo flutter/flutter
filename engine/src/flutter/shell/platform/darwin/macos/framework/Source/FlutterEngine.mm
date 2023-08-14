@@ -1232,7 +1232,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
  * Called when the |FlutterAppDelegate| gets the applicationDidUnhide
  * notification.
  */
-- (void)handleDidChangeOcclusionState:(NSNotification*)notification API_AVAILABLE(macos(10.9)) {
+- (void)handleDidChangeOcclusionState:(NSNotification*)notification {
   NSApplicationOcclusionState occlusionState = [[NSApplication sharedApplication] occlusionState];
   if (occlusionState & NSApplicationOcclusionStateVisible) {
     _visible = YES;
