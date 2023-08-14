@@ -137,7 +137,7 @@ void main() {
       expect((await command.usageValues).commandCreateProjectType, 'plugin_ffi');
     }),
     overrides: <Type, Generator>{
-      Java: () => FakeJava(),
+      Java: () => null,
     });
 
     testUsingContext('set iOS host language type as usage value', () => testbed.run(() async {
@@ -159,7 +159,7 @@ void main() {
       expect((await command.usageValues).commandCreateIosLanguage, 'objc');
     }),
     overrides: <Type, Generator>{
-      Java: () => FakeJava(),
+      Java: () => null,
     });
 
     testUsingContext('set Android host language type as usage value', () => testbed.run(() async {
@@ -178,7 +178,7 @@ void main() {
       ]);
       expect((await command.usageValues).commandCreateAndroidLanguage, 'java');
     }), overrides: <Type, Generator>{
-      Java: () => FakeJava(),
+      Java: () => null,
     });
 
     testUsingContext('create --offline', () => testbed.run(() async {
@@ -190,7 +190,7 @@ void main() {
       expect(command.argParser.options.containsKey('offline'), true);
       expect(command.shouldUpdateCache, true);
     }, overrides: <Type, Generator>{
-      Java: () => FakeJava(),
+      Java: () => null,
       Pub: () => fakePub,
     }));
   });

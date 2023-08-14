@@ -1421,7 +1421,7 @@ void main() {
     expect(xcodeProject, contains('DEVELOPMENT_TEAM = 3333CCCC33;'));
   }, overrides: <Type, Generator>{
     FlutterVersion: () => fakeFlutterVersion,
-    Java: () => FakeJava(),
+    Java: () => null,
     Platform: _kNoColorTerminalMacOSPlatform,
     ProcessManager: () => fakeProcessManager,
   });
