@@ -8,7 +8,6 @@
 #include <fuchsia/ui/composition/cpp/fidl.h>
 #include <fuchsia/ui/views/cpp/fidl.h>
 #include <lib/fit/function.h>
-#include <lib/ui/scenic/cpp/view_ref_pair.h>
 
 #include <cstdint>  // For uint32_t & uint64_t
 #include <memory>

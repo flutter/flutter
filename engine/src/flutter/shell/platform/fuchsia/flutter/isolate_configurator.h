@@ -5,8 +5,8 @@
 #ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_ISOLATE_CONFIGURATOR_H_
 #define FLUTTER_SHELL_PLATFORM_FUCHSIA_ISOLATE_CONFIGURATOR_H_
 
-#include <fuchsia/ui/scenic/cpp/fidl.h>
-
+#include <lib/zx/channel.h>
+#include <lib/zx/eventpair.h>
 #include "flutter/fml/macros.h"
 #include "unique_fdio_ns.h"
 

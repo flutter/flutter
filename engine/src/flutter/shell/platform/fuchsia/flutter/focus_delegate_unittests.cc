@@ -7,7 +7,7 @@
 #include <lib/async-loop/cpp/loop.h>
 #include <lib/async-loop/default.h>
 #include <lib/fidl/cpp/binding_set.h>
-#include <lib/ui/scenic/cpp/view_ref_pair.h>
+#include <lib/zx/eventpair.h>
 
 #include "focus_delegate.h"
 #include "tests/fakes/focuser.h"
@@ -131,14 +131,22 @@ TEST_F(FocusDelegateTest, WatchCallbackSeries) {
 // with a non-error status code.
 TEST_F(FocusDelegateTest, RequestFocusTest) {
   // This "Mock" ViewRef serves as the target for the RequestFocus operation.
-  auto mock_view_ref_pair = scenic::ViewRefPair::New();
+  fuchsia::ui::views::ViewRefControl view_ref_control;
+  fuchsia::ui::views::ViewRef view_ref;
+  auto status = zx::eventpair::create(
+      /*options*/ 0u, &view_ref_control.reference, &view_ref.reference);
+  ZX_ASSERT(status == ZX_OK);
+  view_ref_control.reference.replace(
+      ZX_DEFAULT_EVENTPAIR_RIGHTS & (~ZX_RIGHT_DUPLICATE),
+      &view_ref_control.reference);
+  view_ref.reference.replace(ZX_RIGHTS_BASIC, &view_ref.reference);
+
   // Create the platform message request.
   std::ostringstream message;
   message << "{"
           << "    \"method\":\"View.focus.request\","
           << "    \"args\": {"
-          << "       \"viewRef\":"
-          << mock_view_ref_pair.view_ref.reference.get() << "    }"
+          << "       \"viewRef\":" << view_ref.reference.get() << "    }"
           << "}";
 
   // Dispatch the plaform message request with an expected completion response.
@@ -155,7 +163,15 @@ TEST_F(FocusDelegateTest, RequestFocusTest) {
 // with a Error::DENIED status code.
 TEST_F(FocusDelegateTest, RequestFocusFailTest) {
   // This "Mock" ViewRef serves as the target for the RequestFocus operation.
-  auto mock_view_ref_pair = scenic::ViewRefPair::New();
+  fuchsia::ui::views::ViewRefControl view_ref_control;
+  fuchsia::ui::views::ViewRef view_ref;
+  auto status = zx::eventpair::create(
+      /*options*/ 0u, &view_ref_control.reference, &view_ref.reference);
+  ZX_ASSERT(status == ZX_OK);
+  view_ref_control.reference.replace(
+      ZX_DEFAULT_EVENTPAIR_RIGHTS & (~ZX_RIGHT_DUPLICATE),
+      &view_ref_control.reference);
+  view_ref.reference.replace(ZX_RIGHTS_BASIC, &view_ref.reference);
   // We're testing the focus failure case.
   focuser_->fail_request_focus();
   // Create the platform message request.
@@ -163,8 +179,7 @@ TEST_F(FocusDelegateTest, RequestFocusFailTest) {
   message << "{"
           << "    \"method\":\"View.focus.request\","
           << "    \"args\": {"
-          << "       \"viewRef\":"
-          << mock_view_ref_pair.view_ref.reference.get() << "    }"
+          << "       \"viewRef\":" << view_ref.reference.get() << "    }"
           << "}";
 
   // Dispatch the plaform message request with an expected completion response.
