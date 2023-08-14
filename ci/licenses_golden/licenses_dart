@@ -1,4 +1,4 @@
-Signature: d251396b2bff525b4027ef0c9d8f0307
+Signature: 740e3d724719ea44fe6bd145977947b4
 
 ====================================================================================================
 LIBRARY: dart
@@ -4322,7 +4322,7 @@ ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/convert_patch.dart 
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/core_patch.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/deferred.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/developer.dart + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/double.dart + ../../../third_party/dart/LICENSE
+ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/double_patch.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/errors_patch.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/growable_list.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/hash_factories.dart + ../../../third_party/dart/LICENSE
@@ -4402,7 +4402,7 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/convert_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/core_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/deferred.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/developer.dart
-FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/double.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/double_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/errors_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/growable_list.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/hash_factories.dart
@@ -4491,8 +4491,6 @@ ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/boxed_double.dart +
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/boxed_int.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/closure.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/date_patch_patch.dart + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/double_helper.dart + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/int_helper.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/int_patch.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/js_array.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/js_interop_patch.dart + ../../../third_party/dart/LICENSE
@@ -4510,7 +4508,7 @@ ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/string_stringref_pa
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/sync_star_patch.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/typed_data.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/weak_patch.dart + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm_js_compatibility/lib/typed_data_helper.dart + ../../../third_party/dart/LICENSE
+ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm_js_compatibility/lib/typed_data.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/_internal/wasm_js_compatibility/lib/typed_data_patch.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/async/future_extensions.dart + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/sdk/lib/js_interop/js_interop.dart + ../../../third_party/dart/LICENSE
@@ -4541,8 +4539,6 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/boxed_double.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/boxed_int.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/closure.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/date_patch_patch.dart
-FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/double_helper.dart
-FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/int_helper.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/int_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/js_array.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/js_interop_patch.dart
@@ -4560,7 +4556,7 @@ FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/string_stringref_patc
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/sync_star_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/typed_data.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm/lib/weak_patch.dart
-FILE: ../../../third_party/dart/sdk/lib/_internal/wasm_js_compatibility/lib/typed_data_helper.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/wasm_js_compatibility/lib/typed_data.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/wasm_js_compatibility/lib/typed_data_patch.dart
 FILE: ../../../third_party/dart/sdk/lib/async/future_extensions.dart
 FILE: ../../../third_party/dart/sdk/lib/js_interop/js_interop.dart
