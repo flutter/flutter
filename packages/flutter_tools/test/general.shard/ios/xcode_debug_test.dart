@@ -784,6 +784,69 @@ void main() {
         expect(status, isTrue);
       });
 
+      testWithoutContext('prints error message when deleting temporary directory that is nonexistant', () async {
+        final Xcode xcode = setupXcode(
+          fakeProcessManager: fakeProcessManager,
+          fileSystem: fileSystem,
+          flutterRoot: flutterRoot,
+        );
+        final XcodeDebugProject project = XcodeDebugProject(
+          scheme: 'Runner',
+          xcodeProject: xcodeproj,
+          xcodeWorkspace: xcworkspace,
+          isTemporaryProject: true,
+        );
+        final XcodeDebug xcodeDebug = XcodeDebug(
+          logger: logger,
+          processManager: fakeProcessManager,
+          xcode: xcode,
+          fileSystem: fileSystem,
+        );
+
+        fakeProcessManager.addCommands(<FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'osascript',
+              '-l',
+              'JavaScript',
+              pathToXcodeAutomationScript,
+              'stop',
+              '--xcode-path',
+              pathToXcodeApp,
+              '--project-path',
+              project.xcodeProject.path,
+              '--workspace-path',
+              project.xcodeWorkspace.path,
+              '--close-window'
+            ],
+            stdout: '''
+  {"status":true,"errorMessage":null,"debugResult":null}
+  ''',
+          ),
+        ]);
+
+        xcodeDebug.startDebugActionProcess = FakeProcess();
+        xcodeDebug.currentDebuggingProject = project;
+
+        expect(xcodeDebug.startDebugActionProcess, isNotNull);
+        expect(xcodeDebug.currentDebuggingProject, isNotNull);
+        expect(projectDirectory.existsSync(), isFalse);
+        expect(xcodeproj.existsSync(), isFalse);
+        expect(xcworkspace.existsSync(), isFalse);
+
+        final bool status = await xcodeDebug.exit(skipDelay: true);
+
+        expect((xcodeDebug.startDebugActionProcess! as FakeProcess).killed, isTrue);
+        expect(xcodeDebug.currentDebuggingProject, isNull);
+        expect(projectDirectory.existsSync(), isFalse);
+        expect(xcodeproj.existsSync(), isFalse);
+        expect(xcworkspace.existsSync(), isFalse);
+        expect(logger.errorText, contains('Failed to delete temporary Xcode project'));
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(status, isTrue);
+      });
+
       testWithoutContext('kill Xcode when force exit', () async {
         final Xcode xcode = setupXcode(
           fakeProcessManager: FakeProcessManager.any(),
@@ -824,6 +887,46 @@ void main() {
         expect(logger.errorText, isEmpty);
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(exitStatus, isTrue);
+      });
+
+      testWithoutContext('does not crash when deleting temporary directory that is nonexistant when force exiting', () async {
+        final Xcode xcode = setupXcode(
+          fakeProcessManager: FakeProcessManager.any(),
+          fileSystem: fileSystem,
+          flutterRoot: flutterRoot,
+        );
+        final XcodeDebugProject project = XcodeDebugProject(
+          scheme: 'Runner',
+          xcodeProject: xcodeproj,
+          xcodeWorkspace: xcworkspace,
+          isTemporaryProject: true,
+        );
+        final XcodeDebug xcodeDebug = XcodeDebug(
+          logger: logger,
+          processManager:FakeProcessManager.any(),
+          xcode: xcode,
+          fileSystem: fileSystem,
+        );
+
+        xcodeDebug.startDebugActionProcess = FakeProcess();
+        xcodeDebug.currentDebuggingProject = project;
+
+        expect(xcodeDebug.startDebugActionProcess, isNotNull);
+        expect(xcodeDebug.currentDebuggingProject, isNotNull);
+        expect(projectDirectory.existsSync(), isFalse);
+        expect(xcodeproj.existsSync(), isFalse);
+        expect(xcworkspace.existsSync(), isFalse);
+
+        final bool status = await xcodeDebug.exit(force: true);
+
+        expect((xcodeDebug.startDebugActionProcess! as FakeProcess).killed, isTrue);
+        expect(xcodeDebug.currentDebuggingProject, isNull);
+        expect(projectDirectory.existsSync(), isFalse);
+        expect(xcodeproj.existsSync(), isFalse);
+        expect(xcworkspace.existsSync(), isFalse);
+        expect(logger.errorText, isEmpty);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(status, isTrue);
       });
     });
 
