@@ -12,7 +12,7 @@
 #include <lib/async-loop/default.h>
 #include <lib/fidl/cpp/binding.h>
 #include <lib/fidl/cpp/binding_set.h>
-#include <lib/ui/scenic/cpp/view_ref_pair.h>
+#include <lib/zx/eventpair.h>
 
 #include "tests/fakes/platform_message.h"
 
@@ -89,10 +89,15 @@ class TextDelegateTest : public ::testing::Test {
     fidl::InterfaceHandle<fuchsia::ui::input::ImeService> ime_service_handle;
     ime_service_binding_.Bind(ime_service_handle.NewRequest().TakeChannel());
 
-    auto fake_view_ref_pair = scenic::ViewRefPair::New();
+    fuchsia::ui::views::ViewRefControl view_ref_control;
+    fuchsia::ui::views::ViewRef view_ref;
+    auto status = zx::eventpair::create(
+        /*options*/ 0u, &view_ref_control.reference, &view_ref.reference);
+    ZX_ASSERT(status == ZX_OK);
+    view_ref.reference.replace(ZX_RIGHTS_BASIC, &view_ref.reference);
 
     text_delegate_ = std::make_unique<TextDelegate>(
-        std::move(fake_view_ref_pair.view_ref), std::move(ime_service_handle),
+        std::move(view_ref), std::move(ime_service_handle),
         std::move(keyboard_handle),
         // Should this be accessed through a weak pointer?
         [this](std::unique_ptr<flutter::PlatformMessage> message) {

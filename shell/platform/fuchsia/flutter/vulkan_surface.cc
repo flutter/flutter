@@ -6,7 +6,6 @@
 
 #include <fuchsia/sysmem/cpp/fidl.h>
 #include <lib/async/default.h>
-#include <lib/ui/scenic/cpp/commands.h>
 
 #include <algorithm>
 

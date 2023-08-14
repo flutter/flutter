@@ -7,6 +7,7 @@
 #include <fuchsia/accessibility/semantics/cpp/fidl.h>
 #include <fuchsia/media/cpp/fidl.h>
 #include <lib/async/cpp/task.h>
+#include <lib/zx/eventpair.h>
 #include <lib/zx/thread.h>
 #include <zircon/rights.h>
 #include <zircon/status.h>
@@ -203,7 +204,8 @@ Engine::Engine(Delegate& delegate,
                std::shared_ptr<sys::ServiceDirectory> runner_services,
                flutter::Settings settings,
                fuchsia::ui::views::ViewCreationToken view_creation_token,
-               scenic::ViewRefPair view_ref_pair,
+               std::pair<fuchsia::ui::views::ViewRefControl,
+                         fuchsia::ui::views::ViewRef> view_ref_pair,
                UniqueFDIONS fdio_ns,
                fidl::InterfaceRequest<fuchsia::io::Directory> directory_request,
                FlutterRunnerProductConfiguration product_config,
@@ -223,7 +225,8 @@ Engine::Engine(Delegate& delegate,
 }
 
 void Engine::Initialize(
-    scenic::ViewRefPair view_ref_pair,
+    std::pair<fuchsia::ui::views::ViewRefControl, fuchsia::ui::views::ViewRef>
+        view_ref_pair,
     std::shared_ptr<sys::ServiceDirectory> svc,
     std::shared_ptr<sys::ServiceDirectory> runner_services,
     flutter::Settings settings,
@@ -313,11 +316,11 @@ void Engine::Initialize(
 
   // Make clones of the `ViewRef` before sending it to various places.
   fuchsia::ui::views::ViewRef platform_view_ref;
-  view_ref_pair.view_ref.Clone(&platform_view_ref);
+  view_ref_pair.second.Clone(&platform_view_ref);
   fuchsia::ui::views::ViewRef accessibility_view_ref;
-  view_ref_pair.view_ref.Clone(&accessibility_view_ref);
+  view_ref_pair.second.Clone(&accessibility_view_ref);
   fuchsia::ui::views::ViewRef isolate_view_ref;
-  view_ref_pair.view_ref.Clone(&isolate_view_ref);
+  view_ref_pair.second.Clone(&isolate_view_ref);
 
   // Session is terminated on the raster thread, but we must terminate ourselves
   // on the platform thread.
@@ -366,8 +369,8 @@ void Engine::Initialize(
             max_frames_in_flight, vsync_offset);
 
         fuchsia::ui::views::ViewIdentityOnCreation view_identity = {
-            .view_ref = std::move(view_ref_pair.view_ref),
-            .view_ref_control = std::move(view_ref_pair.control_ref)};
+            .view_ref = std::move(view_ref_pair.second),
+            .view_ref_control = std::move(view_ref_pair.first)};
         view_embedder_ = std::make_shared<ExternalViewEmbedder>(
             std::move(view_creation_token), std::move(view_identity),
             std::move(view_protocols), std::move(request), flatland_connection_,
