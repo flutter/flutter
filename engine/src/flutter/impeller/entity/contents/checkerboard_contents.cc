@@ -26,7 +26,7 @@ bool CheckerboardContents::Render(const ContentContext& renderer,
   using FS = CheckerboardPipeline::FragmentShader;
 
   Command cmd;
-  cmd.label = "Checkerboard";
+  DEBUG_COMMAND_INFO(cmd, "Checkerboard");
 
   auto options = OptionsFromPass(pass);
   options.blend_mode = BlendMode::kSourceOver;

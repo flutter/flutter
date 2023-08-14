@@ -228,8 +228,8 @@ std::optional<Entity> DirectionalGaussianBlurFilterContents::RenderFilter(
         Point(input_snapshot->GetCoverage().value().size);
 
     Command cmd;
-    cmd.label = SPrintF("Gaussian Blur Filter (Radius=%.2f)",
-                        transformed_blur_radius_length);
+    DEBUG_COMMAND_INFO(cmd, SPrintF("Gaussian Blur Filter (Radius=%.2f)",
+                                    transformed_blur_radius_length));
     cmd.BindVertices(vtx_buffer);
 
     auto options = OptionsFromPass(pass);

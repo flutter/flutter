@@ -330,7 +330,7 @@ bool AtlasTextureContents::Render(const ContentContext& renderer,
   }
 
   Command cmd;
-  cmd.label = "AtlasTexture";
+  DEBUG_COMMAND_INFO(cmd, "AtlasTexture");
 
   auto& host_buffer = pass.GetTransientsBuffer();
 
@@ -418,7 +418,7 @@ bool AtlasColorContents::Render(const ContentContext& renderer,
   }
 
   Command cmd;
-  cmd.label = "AtlasColors";
+  DEBUG_COMMAND_INFO(cmd, "AtlasColors");
 
   auto& host_buffer = pass.GetTransientsBuffer();
 

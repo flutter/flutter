@@ -167,7 +167,7 @@ GeometryResult PointFieldGeometry::GetPositionBufferGPU(
   {
     using PS = PointsComputeShader;
     ComputeCommand cmd;
-    cmd.label = "Points Geometry";
+    DEBUG_COMMAND_INFO(cmd, "Points Geometry");
     cmd.pipeline = renderer.GetPointComputePipeline();
 
     PS::FrameInfo frame_info;
@@ -201,7 +201,7 @@ GeometryResult PointFieldGeometry::GetPositionBufferGPU(
     using UV = UvComputeShader;
 
     ComputeCommand cmd;
-    cmd.label = "UV Geometry";
+    DEBUG_COMMAND_INFO(cmd, "UV Geometry");
     cmd.pipeline = renderer.GetUvComputePipeline();
 
     UV::FrameInfo frame_info;

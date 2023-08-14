@@ -132,8 +132,8 @@ static std::optional<Entity> AdvancedBlend(
         std::invoke(pipeline_proc, renderer, options);
 
     Command cmd;
-    cmd.label =
-        SPrintF("Advanced Blend Filter (%s)", BlendModeToString(blend_mode));
+    DEBUG_COMMAND_INFO(cmd, SPrintF("Advanced Blend Filter (%s)",
+                                    BlendModeToString(blend_mode)));
     cmd.BindVertices(vtx_buffer);
     cmd.pipeline = std::move(pipeline);
 
@@ -249,8 +249,8 @@ std::optional<Entity> BlendFilterContents::CreateForegroundAdvancedBlend(
     auto vtx_buffer = vtx_builder.CreateVertexBuffer(host_buffer);
 
     Command cmd;
-    cmd.label = SPrintF("Foreground Advanced Blend Filter (%s)",
-                        BlendModeToString(blend_mode));
+    DEBUG_COMMAND_INFO(cmd, SPrintF("Foreground Advanced Blend Filter (%s)",
+                                    BlendModeToString(blend_mode)));
     cmd.BindVertices(vtx_buffer);
     cmd.stencil_reference = entity.GetStencilDepth();
     auto options = OptionsFromPass(pass);
@@ -435,8 +435,8 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
     auto vtx_buffer = vtx_builder.CreateVertexBuffer(host_buffer);
 
     Command cmd;
-    cmd.label = SPrintF("Foreground PorterDuff Blend Filter (%s)",
-                        BlendModeToString(blend_mode));
+    DEBUG_COMMAND_INFO(cmd, SPrintF("Foreground PorterDuff Blend Filter (%s)",
+                                    BlendModeToString(blend_mode)));
     cmd.BindVertices(vtx_buffer);
     cmd.stencil_reference = entity.GetStencilDepth();
     auto options = OptionsFromPass(pass);
@@ -531,8 +531,8 @@ static std::optional<Entity> PipelineBlend(
     auto& host_buffer = pass.GetTransientsBuffer();
 
     Command cmd;
-    cmd.label =
-        SPrintF("Pipeline Blend Filter (%s)", BlendModeToString(blend_mode));
+    DEBUG_COMMAND_INFO(cmd, SPrintF("Pipeline Blend Filter (%s)",
+                                    BlendModeToString(blend_mode)));
     auto options = OptionsFromPass(pass);
 
     auto add_blend_command = [&](std::optional<Snapshot> input) {

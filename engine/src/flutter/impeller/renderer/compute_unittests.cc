@@ -56,7 +56,6 @@ TEST_P(ComputeTest, CanCreateComputePass) {
   pass->SetThreadGroupSize(ISize(kCount, 1));
 
   ComputeCommand cmd;
-  cmd.label = "Compute";
   cmd.pipeline = compute_pipeline;
 
   CS::Info info{.count = kCount};
@@ -135,7 +134,6 @@ TEST_P(ComputeTest, CanComputePrefixSum) {
   pass->SetThreadGroupSize(ISize(kCount, 1));
 
   ComputeCommand cmd;
-  cmd.label = "Compute";
   cmd.pipeline = compute_pipeline;
 
   CS::InputData<kCount> input_data;
@@ -201,7 +199,6 @@ TEST_P(ComputeTest, 1DThreadgroupSizingIsCorrect) {
   pass->SetThreadGroupSize(ISize(kCount, 1));
 
   ComputeCommand cmd;
-  cmd.label = "Compute";
   cmd.pipeline = compute_pipeline;
 
   auto output_buffer = CreateHostVisibleDeviceBuffer<CS::OutputData<kCount>>(
@@ -252,7 +249,6 @@ TEST_P(ComputeTest, CanComputePrefixSumLargeInteractive) {
     pass->SetGridSize(ISize(kCount, 1));
 
     ComputeCommand cmd;
-    cmd.label = "Compute";
     cmd.pipeline = compute_pipeline;
 
     CS::InputData<kCount> input_data;
@@ -328,7 +324,6 @@ TEST_P(ComputeTest, MultiStageInputAndOutput) {
 
   {
     ComputeCommand cmd;
-    cmd.label = "Compute1";
     cmd.pipeline = compute_pipeline_1;
 
     CS1::BindInput(cmd,
@@ -340,7 +335,6 @@ TEST_P(ComputeTest, MultiStageInputAndOutput) {
 
   {
     ComputeCommand cmd;
-    cmd.label = "Compute2";
     cmd.pipeline = compute_pipeline_2;
 
     CS1::BindInput(cmd, output_buffer_1->AsBufferView());
@@ -399,7 +393,6 @@ TEST_P(ComputeTest, CanCompute1DimensionalData) {
   pass->SetGridSize(ISize(kCount, 1));
 
   ComputeCommand cmd;
-  cmd.label = "Compute";
   cmd.pipeline = compute_pipeline;
 
   CS::Info info{.count = kCount};
@@ -480,7 +473,6 @@ TEST_P(ComputeTest, ReturnsEarlyWhenAnyGridDimensionIsZero) {
   pass->SetThreadGroupSize(ISize(0, 1));
 
   ComputeCommand cmd;
-  cmd.label = "Compute";
   cmd.pipeline = compute_pipeline;
 
   CS::Info info{.count = kCount};

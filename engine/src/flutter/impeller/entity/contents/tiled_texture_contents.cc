@@ -139,7 +139,12 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
   frame_info.alpha = GetOpacityFactor();
 
   Command cmd;
-  cmd.label = uses_emulated_tile_mode ? "TiledTextureFill" : "TextureFill";
+  if (uses_emulated_tile_mode) {
+    DEBUG_COMMAND_INFO(cmd, "TiledTextureFill");
+  } else {
+    DEBUG_COMMAND_INFO(cmd, "TextureFill");
+  }
+
   cmd.stencil_reference = entity.GetStencilDepth();
 
   auto options = OptionsFromPassAndEntity(pass, entity);
