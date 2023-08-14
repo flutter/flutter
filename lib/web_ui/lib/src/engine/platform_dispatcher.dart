@@ -580,6 +580,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
           case 'Clipboard.getData':
             ClipboardMessageHandler().getDataMethodCall(callback);
             return;
+          case 'Clipboard.hasStrings':
+            ClipboardMessageHandler().hasStringsMethodCall(callback);
+            return;
         }
 
       // Dispatched by the bindings to delay service worker initialization.
