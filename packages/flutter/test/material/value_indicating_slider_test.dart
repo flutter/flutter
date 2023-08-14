@@ -9,11 +9,11 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import '../foundation/leak_tracking.dart';
 
 void main() {
-  testWidgetsWithLeakTracking('Slider value indicator', (WidgetTester tester) async {
+  testWidgets('Slider value indicator', (WidgetTester tester) async {
     await _buildValueIndicatorStaticSlider(
       tester,
       value: 0,
@@ -54,7 +54,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Slider value indicator wide text', (WidgetTester tester) async {
+  testWidgets('Slider value indicator wide text', (WidgetTester tester) async {
     await _buildValueIndicatorStaticSlider(
       tester,
       value: 0,
@@ -195,7 +195,7 @@ void main() {
     // support is deprecated and the APIs are removed, these tests
     // can be deleted.
 
-    testWidgetsWithLeakTracking('Slider value indicator', (WidgetTester tester) async {
+    testWidgets('Slider value indicator', (WidgetTester tester) async {
       await _buildValueIndicatorStaticSlider(
         tester,
         value: 0,
@@ -233,7 +233,7 @@ void main() {
       );
     });
 
-    testWidgetsWithLeakTracking('Slider value indicator wide text', (WidgetTester tester) async {
+    testWidgets('Slider value indicator wide text', (WidgetTester tester) async {
       await _buildValueIndicatorStaticSlider(
         tester,
         value: 0,

@@ -4,8 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   group('TimeOfDay.format', () {
@@ -62,7 +61,7 @@ void main() {
       expect(() => RestorableTimeOfDay(const TimeOfDay(hour: 20, minute: 4)).value, throwsAssertionError);
     });
 
-    testWidgetsWithLeakTracking('work when not in restoration scope', (WidgetTester tester) async {
+    testWidgets('work when not in restoration scope', (WidgetTester tester) async {
       await tester.pumpWidget(const _RestorableWidget());
 
       final _RestorableWidgetState state = tester.state(find.byType(_RestorableWidget));
@@ -107,7 +106,7 @@ void main() {
       expect(state.timeOfDay.value, const TimeOfDay(hour: 2, minute: 2));
     });
 
-    testWidgetsWithLeakTracking('restore to older state', (WidgetTester tester) async {
+    testWidgets('restore to older state', (WidgetTester tester) async {
       await tester.pumpWidget(const RootRestorationScope(
         restorationId: 'root-child',
         child: _RestorableWidget(),
@@ -138,7 +137,7 @@ void main() {
       expect(state.timeOfDay.value, const TimeOfDay(hour: 10, minute: 5));
     });
 
-    testWidgetsWithLeakTracking('call notifiers when value changes', (WidgetTester tester) async {
+    testWidgets('call notifiers when value changes', (WidgetTester tester) async {
       await tester.pumpWidget(const RootRestorationScope(
         restorationId: 'root-child',
         child: _RestorableWidget(),

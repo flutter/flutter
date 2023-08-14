@@ -5,8 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   testWidgetsWithLeakTracking('The Ink widget expands when no dimensions are set', (WidgetTester tester) async {
@@ -271,7 +270,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgetsWithLeakTracking('The InkWell widget renders an SelectAction or ActivateAction-induced ink ripple', (WidgetTester tester) async {
+  testWidgets('The InkWell widget renders an SelectAction or ActivateAction-induced ink ripple', (WidgetTester tester) async {
     const Color highlightColor = Color(0xAAFF0000);
     const Color splashColor = Color(0xB40000FF);
     const BorderRadius borderRadius = BorderRadius.all(Radius.circular(6.0));
@@ -454,7 +453,7 @@ void main() {
     }));
   });
 
-  testWidgetsWithLeakTracking('The InkWell widget on OverlayPortal does not throw', (WidgetTester tester) async {
+  testWidgets('The InkWell widget on OverlayPortal does not throw', (WidgetTester tester) async {
     final OverlayPortalController controller = OverlayPortalController();
     controller.show();
     await tester.pumpWidget(

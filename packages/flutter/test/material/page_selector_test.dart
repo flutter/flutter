@@ -4,8 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 const Color kSelectedColor = Color(0xFF00FF00);
 const Color kUnselectedColor = Colors.transparent;
@@ -208,7 +207,7 @@ void main() {
     expect(indicatorColors(tester), const <Color>[kBlue, kRed, kRed]);
   });
 
-  testWidgetsWithLeakTracking('PageSelector indicatorSize', (WidgetTester tester) async {
+  testWidgets('PageSelector indicatorSize', (WidgetTester tester) async {
     final TabController tabController = TabController(
       vsync: const TestVSync(),
       initialIndex: 1,

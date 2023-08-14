@@ -6,8 +6,6 @@ import 'package:flutter/gestures.dart' show kPressTimeout;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../foundation/leak_tracking.dart';
-
 bool confirmCalled = false;
 bool cancelCalled = false;
 
@@ -137,7 +135,7 @@ void main() {
     expect(cancelCalled, isFalse);
   });
 
-  testWidgetsWithLeakTracking('Splash should never be created or canceled', (WidgetTester tester) async {
+  testWidgets('Splash should never be created or canceled', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Theme(

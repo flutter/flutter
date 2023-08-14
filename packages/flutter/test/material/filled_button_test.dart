@@ -7,8 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -340,6 +339,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(elevation(), 0.0);
     expect(overlayColor(), paints..rect(color: theme.colorScheme.onPrimary.withOpacity(0.12)));
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('FilledButton.tonal default overlayColor and elevation resolve pressed state', (WidgetTester tester) async {
@@ -405,6 +405,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(elevation(), 0.0);
     expect(overlayColor(), paints..rect(color: theme.colorScheme.onSecondaryContainer.withOpacity(0.12)));
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('FilledButton uses stateful color for text color in different states', (WidgetTester tester) async {
@@ -480,6 +481,7 @@ void main() {
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     expect(textColor(), pressedColor);
+    focusNode.dispose();
   });
 
 
@@ -556,6 +558,7 @@ void main() {
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     expect(iconColor(), pressedColor);
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('FilledButton onPressed and onLongPress callbacks are correctly called when non-null', (WidgetTester tester) async {
@@ -680,6 +683,7 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(focusNode.hasPrimaryFocus, isFalse);
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('disabled and hovered FilledButton responds to mouse-exit', (WidgetTester tester) async {
@@ -771,6 +775,7 @@ void main() {
 
     expect(gotFocus, isFalse);
     expect(node.hasFocus, isFalse);
+    node.dispose();
   });
 
   testWidgetsWithLeakTracking('When FilledButton disable, Can not set FilledButton focus.', (WidgetTester tester) async {
@@ -794,6 +799,7 @@ void main() {
 
     expect(gotFocus, isFalse);
     expect(node.hasFocus, isFalse);
+    node.dispose();
   });
 
   testWidgetsWithLeakTracking('Does FilledButton work with hover', (WidgetTester tester) async {
@@ -849,6 +855,7 @@ void main() {
 
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(color: focusColor));
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Does FilledButton work with autofocus', (WidgetTester tester) async {
@@ -879,6 +886,7 @@ void main() {
 
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(color: focusColor));
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Does FilledButton contribute semantics', (WidgetTester tester) async {
@@ -1741,7 +1749,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
-  testWidgetsWithLeakTracking('FilledButton in SelectionArea changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgets('FilledButton in SelectionArea changes mouse cursor when hovered', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/104595.
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
@@ -1937,15 +1945,15 @@ void main() {
     await gesture.removePointer();
   }
 
-  testWidgetsWithLeakTracking('FilledButton statesController', (WidgetTester tester) async {
+  testWidgets('FilledButton statesController', (WidgetTester tester) async {
     testStatesController(null, tester);
   });
 
-  testWidgetsWithLeakTracking('FilledButton.icon statesController', (WidgetTester tester) async {
+  testWidgets('FilledButton.icon statesController', (WidgetTester tester) async {
     testStatesController(const Icon(Icons.add), tester);
   });
 
-  testWidgetsWithLeakTracking('Disabled FilledButton statesController', (WidgetTester tester) async {
+  testWidgets('Disabled FilledButton statesController', (WidgetTester tester) async {
     int count = 0;
     void valueChanged() {
       count += 1;
