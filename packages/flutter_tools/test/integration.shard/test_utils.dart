@@ -67,6 +67,7 @@ Future<void> getPackages(String folder) async {
 }
 
 const String kLocalEngineEnvironment = 'FLUTTER_LOCAL_ENGINE';
+const String kLocalEngineHostEnvironment = 'FLUTTER_LOCAL_ENGINE_HOST';
 const String kLocalEngineLocation = 'FLUTTER_LOCAL_ENGINE_SRC_PATH';
 
 List<String> getLocalEngineArguments() {
@@ -75,6 +76,8 @@ List<String> getLocalEngineArguments() {
       '--local-engine=${platform.environment[kLocalEngineEnvironment]}',
     if (platform.environment.containsKey(kLocalEngineLocation))
       '--local-engine-src-path=${platform.environment[kLocalEngineLocation]}',
+    if (platform.environment.containsKey(kLocalEngineHostEnvironment))
+      '--local-engine-host=${platform.environment[kLocalEngineHostEnvironment]}',
   ];
 }
 
