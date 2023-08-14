@@ -1,4 +1,4 @@
-Signature: 2e68f7484b2ce0b671e307290ef12cc4
+Signature: de691583d11b10b9b377fd89beb89e9b
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8861,6 +8861,7 @@ ORIGIN: ../../../third_party/skia/gm/scaledrects.cpp + ../../../third_party/skia
 ORIGIN: ../../../third_party/skia/gm/surface_manager/GaneshGLSurfaceManager.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/surface_manager/GaneshVulkanSurfaceManager.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/surface_manager/RasterSurfaceManager.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/gm/surface_manager/SurfaceManager.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/vias/SimpleVias.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/android/SkCanvasAndroid.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/android/SkHeifDecoder.h + ../../../third_party/skia/LICENSE
@@ -9097,6 +9098,7 @@ FILE: ../../../third_party/skia/gm/scaledrects.cpp
 FILE: ../../../third_party/skia/gm/surface_manager/GaneshGLSurfaceManager.cpp
 FILE: ../../../third_party/skia/gm/surface_manager/GaneshVulkanSurfaceManager.cpp
 FILE: ../../../third_party/skia/gm/surface_manager/RasterSurfaceManager.cpp
+FILE: ../../../third_party/skia/gm/surface_manager/SurfaceManager.cpp
 FILE: ../../../third_party/skia/gm/vias/SimpleVias.cpp
 FILE: ../../../third_party/skia/include/android/SkCanvasAndroid.h
 FILE: ../../../third_party/skia/include/android/SkHeifDecoder.h
