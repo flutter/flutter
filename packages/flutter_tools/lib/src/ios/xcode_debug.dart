@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -186,7 +187,12 @@ class XcodeDebug {
       if (currentDebuggingProject != null) {
         final XcodeDebugProject project = currentDebuggingProject!;
         if (project.isTemporaryProject) {
-          project.xcodeProject.parent.deleteSync(recursive: true);
+          // Only delete if it exists. This is to prevent crashes when racing
+          // with shutdown hooks to delete temporary files.
+          ErrorHandlingFileSystem.deleteIfExists(
+            project.xcodeProject.parent,
+            recursive: true,
+          );
         }
         currentDebuggingProject = null;
       }
