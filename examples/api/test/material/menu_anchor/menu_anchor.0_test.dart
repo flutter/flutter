@@ -104,4 +104,18 @@ void main() {
 
     expect(find.text('Last Selected: ${example.MenuEntry.colorBlue.label}'), findsOneWidget);
   });
+
+  testWidgets('MenuAnchor is wrapped in a SafeArea', (WidgetTester tester) async {
+    const double safeAreaPadding = 100.0;
+    await tester.pumpWidget(
+      const MediaQuery(
+        data: MediaQueryData(
+          padding: EdgeInsets.symmetric(vertical: safeAreaPadding),
+        ),
+        child: example.MenuApp(),
+      ),
+    );
+
+    expect(tester.getTopLeft(find.byType(MenuAnchor)), const Offset(0.0, safeAreaPadding));
+  });
 }
