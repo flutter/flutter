@@ -5,9 +5,9 @@
 #ifndef FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_SEMANTICS_UPDATE_H_
 #define FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_SEMANTICS_UPDATE_H_
 
+#include "flutter/lib/ui/semantics/custom_accessibility_action.h"
+#include "flutter/lib/ui/semantics/semantics_node.h"
 #include "flutter/shell/platform/embedder/embedder.h"
-#include "lib/ui/semantics/custom_accessibility_action.h"
-#include "lib/ui/semantics/semantics_node.h"
 
 namespace flutter {
 
