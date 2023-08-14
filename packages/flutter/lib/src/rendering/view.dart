@@ -251,9 +251,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// Uploads the composited layer tree to the engine.
   ///
   /// Actually causes the output of the rendering pipeline to appear on screen.
-  // TODO(dkwingsmt)
   @Deprecated(
-    'Use RendererBinding.instance.compositeFrame instead'
+    'Use RendererBinding.instance.compositeFrame instead. '
+    'This feature was deprecated after v????',
   )
   void compositeFrame() {
     RendererBinding.instance.compositeFrame();
