@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterAppLifecycleDelegate.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterAppLifecycleDelegate_Internal.h"
 
 #include <AppKit/AppKit.h>
 #include <AppKit/NSApplication.h>
@@ -12,14 +13,8 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/paths.h"
 
-@interface FlutterAppLifecycleRegistrar ()
-@end
-
 @implementation FlutterAppLifecycleRegistrar {
   NSMutableArray* _notificationUnsubscribers;
-
-  // Weak references to registered plugins.
-  NSPointerArray* _delegates;
 }
 
 - (void)addObserverFor:(NSString*)name selector:(SEL)selector {
@@ -87,7 +82,7 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
 
 - (void)removeDelegate:(NSObject<FlutterAppLifecycleDelegate>*)delegate {
   NSUInteger index = [[_delegates allObjects] indexOfObject:delegate];
-  if (index >= 0) {
+  if (index != NSNotFound) {
     [_delegates removePointerAtIndex:index];
   }
 }
@@ -101,9 +96,6 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
 #define DISTRIBUTE_NOTIFICATION(SELECTOR)                                  \
   -(void)handle##SELECTOR : (NSNotification*)notification {                \
     for (NSObject<FlutterAppLifecycleDelegate> * delegate in _delegates) { \
-      if (!delegate) {                                                     \
-        continue;                                                          \
-      }                                                                    \
       if ([delegate respondsToSelector:@selector(handle##SELECTOR:)]) {    \
         [delegate handle##SELECTOR:notification];                          \
       }                                                                    \

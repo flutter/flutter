@@ -169,6 +169,7 @@ executable("flutter_desktop_darwin_unittests") {
 
   sources = [
     "framework/Source/AccessibilityBridgeMacTest.mm",
+    "framework/Source/FlutterAppDelegateTest.mm",
     "framework/Source/FlutterAppLifecycleDelegateTest.mm",
     "framework/Source/FlutterChannelKeyResponderTest.mm",
     "framework/Source/FlutterCompositorTest.mm",
