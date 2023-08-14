@@ -529,7 +529,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _handleTouchLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
-    _selectEndTo(offset: details.globalPosition);
+    _selectEndTo(offset: details.globalPosition, textGranularity: TextGranularity.word);
   }
 
   void _handleTouchLongPressEnd(LongPressEndDetails details) {
