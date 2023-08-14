@@ -8,18 +8,22 @@ import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart' show templateAndroidGradlePluginVersion, templateDefaultGradleVersion;
+import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/version.dart' as software;
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/commands/create_base.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/flutter_project_metadata.dart' show FlutterProjectType;
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -1417,6 +1421,7 @@ void main() {
     expect(xcodeProject, contains('DEVELOPMENT_TEAM = 3333CCCC33;'));
   }, overrides: <Type, Generator>{
     FlutterVersion: () => fakeFlutterVersion,
+    Java: () => FakeJava(),
     Platform: _kNoColorTerminalMacOSPlatform,
     ProcessManager: () => fakeProcessManager,
   });
@@ -3382,6 +3387,193 @@ void main() {
 
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
+    Logger: () => logger,
+  });
+
+  testUsingContext('should not show warning for incompatible Java/template Gradle versions when Java version not found', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--platforms=android', projectDir.path]);
+
+    expect(logger.statusText, isNot(contains('The configured version of Java detected conflicts with')));
+  }, overrides: <Type, Generator>{
+    Java: () => null,
+    Logger: () => logger,
+  });
+
+  testUsingContext('should not show warning for incompatible Java/template Gradle versions when created project irrelevant', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    // Test not creating a project for Android.
+    await runner.run(<String>['create', '--no-pub', '--platforms=ios,windows,macos,linux', projectDir.path]);
+    tryToDelete(projectDir);
+    // Test creating a package (Dart-only code).
+    await runner.run(<String>['create', '--no-pub', '--template=package', projectDir.path]);
+    tryToDelete(projectDir);
+    // Test creating project types without configured Gradle versions.
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    tryToDelete(projectDir);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin_ffi', projectDir.path]);
+
+    expect(logger.statusText, isNot(contains(getIncompatibleVersionsAndRecommendedOptionMessage(javaGradleVersionsCompatible: false, templateGradleVersion: templateDefaultGradleVersion, templateAgpVersion: templateAndroidGradlePluginVersion, projectType: 'app'))));
+    expect(logger.statusText, isNot(contains(getIncompatibleVersionsAndRecommendedOptionMessage(javaGradleVersionsCompatible: false, templateGradleVersion: templateDefaultGradleVersion, templateAgpVersion: templateAndroidGradlePluginVersion, projectType: 'package'))));
+    expect(logger.statusText, isNot(contains(getIncompatibleVersionsAndRecommendedOptionMessage(javaGradleVersionsCompatible: false, templateGradleVersion: templateDefaultGradleVersion, templateAgpVersion: templateAndroidGradlePluginVersion, projectType: 'plugin'))));
+    expect(logger.statusText, isNot(contains(getIncompatibleVersionsAndRecommendedOptionMessage(javaGradleVersionsCompatible: false, templateGradleVersion: templateDefaultGradleVersion, templateAgpVersion: templateAndroidGradlePluginVersion, projectType: 'pluginFfi'))));
+  }, overrides: <Type, Generator>{
+    Java : () => FakeJava(version: const software.Version.withText(1000, 0, 0, '1000.0.0')), // Too high a version for template Gradle versions.
+    Logger: () => logger,
+  });
+
+  testUsingContext('should not show warning for incompatible Java/template AGP versions when project type unrelated', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    // Test not creating a project for Android.
+    await runner.run(<String>['create', '--no-pub', '--platforms=ios,windows,macos,linux', projectDir.path]);
+    tryToDelete(projectDir);
+    // Test creating a package (Dart-only code).
+    await runner.run(<String>['create', '--no-pub', '--template=package', projectDir.path]);
+
+    expect(logger.statusText, isNot(contains(getIncompatibleVersionsAndRecommendedOptionMessage(javaGradleVersionsCompatible: false, templateGradleVersion: templateDefaultGradleVersion, templateAgpVersion: templateAndroidGradlePluginVersion, projectType: 'app'))));
+    expect(logger.statusText, isNot(contains(getIncompatibleVersionsAndRecommendedOptionMessage(javaGradleVersionsCompatible: false, templateGradleVersion: templateDefaultGradleVersion, templateAgpVersion: templateAndroidGradlePluginVersion, projectType: 'package'))));
+  }, overrides: <Type, Generator>{
+    Java : () => FakeJava(version: const software.Version.withText(0, 0, 0, '0.0.0')), // Too low a version for template AGP versions.
+    Logger: () => logger,
+  });
+
+  testUsingContext('should show warning for incompatible Java/template Gradle versions when detected', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final List<FlutterProjectType> relevantProjectTypes = <FlutterProjectType>[FlutterProjectType.app, FlutterProjectType.skeleton, FlutterProjectType.module];
+
+    for (final FlutterProjectType projectType in relevantProjectTypes) {
+      final String expectedMessage = getIncompatibleVersionsAndRecommendedOptionMessage(javaGradleVersionsCompatible: false, templateGradleVersion: templateDefaultGradleVersion, templateAgpVersion: templateAndroidGradlePluginVersion, projectType: projectType.cliName);
+      final String unexpectedMessage = getIncompatibleVersionsAndRecommendedOptionMessage(javaGradleVersionsCompatible: true, templateGradleVersion: templateDefaultGradleVersion, templateAgpVersion: templateAndroidGradlePluginVersion, projectType: projectType.cliName);
+
+      await runner.run(<String>['create', '--no-pub', '--template=${projectType.cliName}', if (projectType != FlutterProjectType.module) '--platforms=android', projectDir.path]);
+
+      expect(logger.warningText, contains(expectedMessage));
+      expect(logger.warningText, isNot(contains(unexpectedMessage)));
+
+      // Cleanup to reuse projectDir and logger checks.
+      tryToDelete(projectDir);
+      logger.clear();
+    }
+  }, overrides: <Type, Generator>{
+    Java : () => FakeJava(version: const software.Version.withText(500, 0, 0, '500.0.0')), // Too high a version for template Gradle versions.
+    Logger: () => logger,
+  });
+
+  testUsingContext('should show warning for incompatible Java/template AGP versions when detected', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final List<FlutterProjectType> relevantProjectTypes = <FlutterProjectType>[FlutterProjectType.app, FlutterProjectType.skeleton, FlutterProjectType.pluginFfi, FlutterProjectType.module, FlutterProjectType.plugin];
+
+    for (final FlutterProjectType projectType in relevantProjectTypes) {
+      final String expectedMessage = getIncompatibleVersionsAndRecommendedOptionMessage(javaGradleVersionsCompatible: true, templateGradleVersion: templateDefaultGradleVersion, templateAgpVersion: templateAndroidGradlePluginVersion, projectType: projectType.cliName);
+      final String unexpectedMessage = getIncompatibleVersionsAndRecommendedOptionMessage(javaGradleVersionsCompatible: false, templateGradleVersion: templateDefaultGradleVersion, templateAgpVersion: templateAndroidGradlePluginVersion, projectType: projectType.cliName);
+
+      await runner.run(<String>['create', '--no-pub', '--template=${projectType.cliName}', if (projectType != FlutterProjectType.module) '--platforms=android', projectDir.path]);
+
+      expect(logger.warningText, contains(expectedMessage));
+      expect(logger.warningText, isNot(contains(unexpectedMessage)));
+
+      // Cleanup to reuse projectDir and logger checks.
+      tryToDelete(projectDir);
+      logger.clear();
+    }
+  }, overrides: <Type, Generator>{
+    Java : () => FakeJava(version: const software.Version.withText(1, 8, 0, '1.8.0')), // Too low a version for template AGP versions.
+    Logger: () => logger,
+  });
+
+  testUsingContext('should not show warning for incompatible Java/template AGP/Gradle versions when not detected', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final List<FlutterProjectType> relevantProjectTypes = <FlutterProjectType>[FlutterProjectType.app, FlutterProjectType.skeleton, FlutterProjectType.pluginFfi, FlutterProjectType.module, FlutterProjectType.plugin];
+
+    for (final FlutterProjectType projectType in relevantProjectTypes) {
+      final String unexpectedIncompatibleAgpMessage = getIncompatibleVersionsAndRecommendedOptionMessage(javaGradleVersionsCompatible: true, templateGradleVersion: templateDefaultGradleVersion, templateAgpVersion: templateAndroidGradlePluginVersion, projectType: projectType.cliName);
+      final String unexpectedIncompatibleGradleMessage = getIncompatibleVersionsAndRecommendedOptionMessage(javaGradleVersionsCompatible: false, templateGradleVersion: templateDefaultGradleVersion, templateAgpVersion: templateAndroidGradlePluginVersion, projectType: projectType.cliName);
+
+      await runner.run(<String>['create', '--no-pub', '--template=${projectType.cliName}', if (projectType != FlutterProjectType.module) '--platforms=android', projectDir.path]);
+
+      // We do not expect warnings for incompatible Java/template AGP versions if they are in fact, compatible.
+      expect(logger.statusText, isNot(contains(unexpectedIncompatibleAgpMessage)));
+      expect(logger.statusText, isNot(contains(unexpectedIncompatibleGradleMessage)));
+
+      // Cleanup to reuse projectDir and logger checks.
+      tryToDelete(projectDir);
+      logger.clear();
+    }
+  }, overrides: <Type, Generator>{
+    Java : () => FakeJava(version: const software.Version.withText(14, 0, 0, '14.0.0')), // Maximum compatible Java version with current template AGP/Gradle versions.
+    Logger: () => logger,
+  });
+
+  testUsingContext('should not show warning for incompatible Java/template AGP/Gradle versions when not detected -- maximum compatible Java version', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final List<FlutterProjectType> relevantProjectTypes = <FlutterProjectType>[FlutterProjectType.app, FlutterProjectType.skeleton, FlutterProjectType.pluginFfi, FlutterProjectType.module, FlutterProjectType.plugin];
+
+    for (final FlutterProjectType projectType in relevantProjectTypes) {
+      final String unexpectedIncompatibleAgpMessage = getIncompatibleVersionsAndRecommendedOptionMessage(javaGradleVersionsCompatible: true, templateGradleVersion: templateDefaultGradleVersion, templateAgpVersion: templateAndroidGradlePluginVersion, projectType: projectType.cliName);
+      final String unexpectedIncompatibleGradleMessage = getIncompatibleVersionsAndRecommendedOptionMessage(javaGradleVersionsCompatible: false, templateGradleVersion: templateDefaultGradleVersion, templateAgpVersion: templateAndroidGradlePluginVersion, projectType: projectType.cliName);
+
+      await runner.run(<String>['create', '--no-pub', '--template=${projectType.cliName}', if (projectType != FlutterProjectType.module) '--platforms=android', projectDir.path]);
+
+      // We do not expect warnings for incompatible Java/template AGP versions if they are in fact, compatible.
+      expect(logger.statusText, isNot(contains(unexpectedIncompatibleAgpMessage)));
+      expect(logger.statusText, isNot(contains(unexpectedIncompatibleGradleMessage)));
+
+      // Cleanup to reuse projectDir and logger checks.
+      tryToDelete(projectDir);
+      logger.clear();
+    }
+  }, overrides: <Type, Generator>{
+    Java : () => FakeJava(version: const software.Version.withText(17, 0, 0, '17.0.0')), // Maximum compatible Java version with current template AGP/Gradle versions.
+    Logger: () => logger,
+  });
+
+  testUsingContext('should not show warning for incompatible Java/template AGP/Gradle versions when not detected -- minimum compatible Java version', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final List<FlutterProjectType> relevantProjectTypes = <FlutterProjectType>[FlutterProjectType.app, FlutterProjectType.skeleton, FlutterProjectType.pluginFfi, FlutterProjectType.module, FlutterProjectType.plugin];
+
+    for (final FlutterProjectType projectType in relevantProjectTypes) {
+      final String unexpectedIncompatibleAgpMessage = getIncompatibleVersionsAndRecommendedOptionMessage(javaGradleVersionsCompatible: true, templateGradleVersion: templateDefaultGradleVersion, templateAgpVersion: templateAndroidGradlePluginVersion, projectType: projectType.cliName);
+      final String unexpectedIncompatibleGradleMessage = getIncompatibleVersionsAndRecommendedOptionMessage(javaGradleVersionsCompatible: false, templateGradleVersion: templateDefaultGradleVersion, templateAgpVersion: templateAndroidGradlePluginVersion, projectType: projectType.cliName);
+
+      await runner.run(<String>['create', '--no-pub', '--template=${projectType.cliName}', if (projectType != FlutterProjectType.module) '--platforms=android', projectDir.path]);
+
+      // We do not expect warnings for incompatible Java/template AGP versions if they are in fact, compatible.
+      expect(logger.statusText, isNot(contains(unexpectedIncompatibleAgpMessage)));
+      expect(logger.statusText, isNot(contains(unexpectedIncompatibleGradleMessage)));
+
+      // Cleanup to reuse projectDir and logger checks.
+      tryToDelete(projectDir);
+      logger.clear();
+    }
+  }, overrides: <Type, Generator>{
+    Java : () => FakeJava(version: const software.Version.withText(11, 0, 0, '11.0.0')), // Maximum compatible Java version with current template AGP/Gradle versions.
     Logger: () => logger,
   });
 }

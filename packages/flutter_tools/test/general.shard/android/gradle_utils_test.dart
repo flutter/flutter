@@ -697,8 +697,11 @@ allprojects {
       JavaAgpTestData(false, javaVersion: '1.8', agpVersion: '4.1'),
       JavaAgpTestData(false, javaVersion: '1.8', agpVersion: '7.0'),
       // Null value cases
+      // ignore: avoid_redundant_argument_values
       JavaAgpTestData(false, javaVersion: null, agpVersion: '4.2'),
+      // ignore: avoid_redundant_argument_values
       JavaAgpTestData(false, javaVersion: '1.8', agpVersion: null),
+      // ignore: avoid_redundant_argument_values
       JavaAgpTestData(false, javaVersion: null, agpVersion: null),
     ];
 

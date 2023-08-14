@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
@@ -15,6 +16,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 import '../../src/testbed.dart';
 
@@ -170,7 +172,9 @@ void main() {
         'testy',
       ]);
       expect((await command.usageValues).commandCreateAndroidLanguage, 'java');
-    }));
+    }), overrides: <Type, Generator>{
+      Java: () => FakeJava(),
+    });
 
     testUsingContext('create --offline', () => testbed.run(() async {
       final CreateCommand command = CreateCommand();
@@ -181,6 +185,7 @@ void main() {
       expect(command.argParser.options.containsKey('offline'), true);
       expect(command.shouldUpdateCache, true);
     }, overrides: <Type, Generator>{
+      Java: () => FakeJava(),
       Pub: () => fakePub,
     }));
   });
