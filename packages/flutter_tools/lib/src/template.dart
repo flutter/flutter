@@ -363,18 +363,16 @@ class Template {
 
         Map<String, Object?> localContext = context;
 
-        // YAML files require that their input is properly escaped with quotes.
-        // Adjust the current context to escape the needed inputs, before writing to the template.
+        // Ensure inputs are escaped when necessary.
         if (finalDestinationFile.path.endsWith('.yaml')) {
-          if (finalDestinationFile.path.endsWith('pubspec.yaml')) {
-            // Grab a copy of the context, since it is used to render other templates as well.
-            localContext = Map<String, Object?>.of(localContext);
+          // Use a copy of the context,
+          // since the original is used in rendering other templates.
+          localContext = Map<String, Object?>.of(localContext);
 
-            final String? description = localContext['description'] as String?;
+          final String? description = localContext['description'] as String?;
 
-            if (description != null && description.isNotEmpty) {
-              localContext['description'] = escapeYamlString(description);
-            }
+          if (description != null && description.isNotEmpty) {
+            localContext['description'] = escapeYamlString(description);
           }
         }
 
