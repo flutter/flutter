@@ -1333,7 +1333,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
   TextPosition? _textSelectionStart;
   TextPosition? _textSelectionEnd;
 
-  bool _selectableContainsOriginWord = false;
+  bool _selectableContainsOriginBoundary = false;
 
   LayerLink? _startHandleLayerLink;
   LayerLink? _endHandleLayerLink;
@@ -1410,6 +1410,9 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
             result = _updateSelectionEdge(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate);
           case TextGranularity.word:
             result = _updateSelectionEdgeByWord(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate);
+          case TextGranularity.paragraph:
+            result = _updateSelectionEdgeByWord(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate);
+            // result = _updateSelectionEdgeByParagraph(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate);
           case TextGranularity.document:
           case TextGranularity.line:
             assert(false, 'Moving the selection edge by line or document is not supported.');
@@ -1421,6 +1424,9 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
       case SelectionEventType.selectWord:
         final SelectWordSelectionEvent selectWord = event as SelectWordSelectionEvent;
         result = _handleSelectWord(selectWord.globalPosition);
+      case SelectionEventType.selectParagraph:
+        final SelectParagraphSelectionEvent selectParagraph = event as SelectParagraphSelectionEvent;
+        result = _handleSelectParagraph(selectParagraph.globalPosition);
       case SelectionEventType.granularlyExtendSelection:
         final GranularlyExtendSelectionEvent granularlyExtendSelection = event as GranularlyExtendSelectionEvent;
         result = _handleGranularlyExtendSelection(
@@ -1508,7 +1514,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     TextPosition? targetPosition;
     if (wordBoundary != null) {
       assert(wordBoundary.wordStart.offset >= range.start && wordBoundary.wordEnd.offset <= range.end);
-      if (_selectableContainsOriginWord && existingSelectionStart != null && existingSelectionEnd != null) {
+      if (_selectableContainsOriginBoundary && existingSelectionStart != null && existingSelectionEnd != null) {
         final bool isSamePosition = position.offset == existingSelectionEnd.offset;
         final bool isSelectionInverted = existingSelectionStart.offset > existingSelectionEnd.offset;
         final bool shouldSwapEdges = !isSamePosition && (isSelectionInverted != (position.offset > existingSelectionEnd.offset));
@@ -1552,7 +1558,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
       // The position is not contained within the current rect. The targetPosition
       // will either be at the end or beginning of the current rect. See [SelectionUtils.adjustDragOffset]
       // for a more in depth explanation on this adjustment.
-      if (_selectableContainsOriginWord && existingSelectionStart != null && existingSelectionEnd != null) {
+      if (_selectableContainsOriginBoundary && existingSelectionStart != null && existingSelectionEnd != null) {
         // When the selection is inverted by the new position it is necessary to
         // swap the start edge (moving edge) with the end edge (static edge) to
         // maintain the origin word within the selection.
@@ -1579,7 +1585,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     TextPosition? targetPosition;
     if (wordBoundary != null) {
       assert(wordBoundary.wordStart.offset >= range.start && wordBoundary.wordEnd.offset <= range.end);
-      if (_selectableContainsOriginWord && existingSelectionStart != null && existingSelectionEnd != null) {
+      if (_selectableContainsOriginBoundary && existingSelectionStart != null && existingSelectionEnd != null) {
         final bool isSamePosition = position.offset == existingSelectionStart.offset;
         final bool isSelectionInverted = existingSelectionStart.offset > existingSelectionEnd.offset;
         final bool shouldSwapEdges = !isSamePosition && (isSelectionInverted != (position.offset < existingSelectionStart.offset));
@@ -1623,7 +1629,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
       // The position is not contained within the current rect. The targetPosition
       // will either be at the end or beginning of the current rect. See [SelectionUtils.adjustDragOffset]
       // for a more in depth explanation on this adjustment.
-      if (_selectableContainsOriginWord && existingSelectionStart != null && existingSelectionEnd != null) {
+      if (_selectableContainsOriginBoundary && existingSelectionStart != null && existingSelectionEnd != null) {
         // When the selection is inverted by the new position it is necessary to
         // swap the end edge (moving edge) with the start edge (static edge) to
         // maintain the origin word within the selection.
@@ -1706,7 +1712,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
   SelectionResult _handleClearSelection() {
     _textSelectionStart = null;
     _textSelectionEnd = null;
-    _selectableContainsOriginWord = false;
+    _selectableContainsOriginBoundary = false;
     return SelectionResult.none;
   }
 
@@ -1717,7 +1723,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
   }
 
   SelectionResult _handleSelectWord(Offset globalPosition) {
-    _selectableContainsOriginWord = true;
+    _selectableContainsOriginBoundary = true;
 
     final TextPosition position = paragraph.getPositionForOffset(paragraph.globalToLocal(globalPosition));
     if (_positionIsWithinCurrentSelection(position) && _textSelectionStart != _textSelectionEnd) {
@@ -1734,6 +1740,29 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     assert(wordBoundary.wordStart.offset >= range.start && wordBoundary.wordEnd.offset <= range.end);
     _textSelectionStart = wordBoundary.wordStart;
     _textSelectionEnd = wordBoundary.wordEnd;
+    return SelectionResult.end;
+  }
+
+  SelectionResult _handleSelectParagraph(Offset globalPosition) {
+    _selectableContainsOriginBoundary = true;
+
+    final TextPosition position = paragraph.getPositionForOffset(paragraph.globalToLocal(globalPosition));
+    // if (_positionIsWithinCurrentSelection(position)) {
+    //   return SelectionResult.end;
+    // }
+    final ParagraphBoundary paragraphBoundary = ParagraphBoundary(range.textInside(fullText));
+    final TextRange paragraphRange = paragraphBoundary.getTextBoundaryAt(position.offset);
+    assert(paragraphRange.isNormalized);
+    if (paragraphRange.start < range.start && paragraphRange.end < range.start) {
+      return SelectionResult.previous;
+    } else if (paragraphRange.start > range.end && paragraphRange.end > range.end) {
+      return SelectionResult.next;
+    }
+    // Fragments are separated by placeholder span, the paragraph boundary shouldn't
+    // expand across fragments.
+    assert(paragraphRange.start >= range.start && paragraphRange.end <= range.end);
+    _textSelectionStart = TextPosition(offset: paragraphRange.start);
+    _textSelectionEnd = TextPosition(offset: paragraphRange.end);
     return SelectionResult.end;
   }
 
@@ -1825,6 +1854,10 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
       case TextGranularity.word:
         final TextBoundary textBoundary = paragraph._textPainter.wordBoundaries.moveByWordBoundary;
         newPosition = _moveBeyondTextBoundaryAtDirection(targetedEdge, forward, textBoundary);
+        result = SelectionResult.end;
+      case TextGranularity.paragraph:
+        final String text = range.textInside(fullText);
+        newPosition = _moveBeyondTextBoundaryAtDirection(targetedEdge, forward, ParagraphBoundary(text));
         result = SelectionResult.end;
       case TextGranularity.line:
         newPosition = _moveToTextBoundaryAtDirection(targetedEdge, forward, LineBoundary(this));
