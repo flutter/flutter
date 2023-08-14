@@ -7,8 +7,6 @@
 //
 // This script downloads the embedding dependencies into a lib/ directory,
 // extract jar files from AARs, so they can be used in gn.
-def destinationDir = "lib"
-
 buildscript {
     repositories {
         google()
@@ -18,6 +16,12 @@ buildscript {
         classpath "com.android.tools.build:gradle:3.5.0"
     }
 }
+
+plugins {
+    id "com.github.hierynomus.license-report" version "0.16.1"
+}
+
+def destinationDir = "lib"
 
 allprojects {
     repositories {
@@ -36,9 +40,14 @@ configurations {
   embedding
 }
 
+println project.buildDir
+
 // Configure the embedding dependencies.
-apply from: new File(rootDir, '../tools/androidx/configure.gradle').absolutePath;
-configureDependencies(new File(rootDir, '../..')) { dependency ->
+// NB: '../../androidx/configure.gradle' is expected to resolve to the path
+// 'src/flutter/tools/androidx', and '../../..' is expected to resolve to the
+// path 'src/flutter'.
+apply from: new File(rootDir, '../../androidx/configure.gradle').absolutePath;
+configureEmbedderDependencies(new File(rootDir, '../../..')) { dependency ->
   dependencies {
      embedding "$dependency"
   }
@@ -75,4 +84,23 @@ task updateDependencies() {
         println "\"//third_party/robolectric/lib/${dependency.name}\","
       }
   }
+}
+
+downloadLicenses {
+  ext.apacheTwo = license(
+    'The Apache License, Version 2.0',
+    'http://www.apache.org/licenses/LICENSE-2.0.txt',
+  )
+  aliases = [
+    (apacheTwo) : [
+      'The Apache Software License, Version 2.0',
+      'Apache 2',
+      'Apache License Version 2.0',
+      'Apache License, Version 2.0',
+      'Apache License 2.0',
+      license('Apache License', 'http://www.apache.org/licenses/LICENSE-2.0'),
+      license('Apache License, Version 2.0', 'http://opensource.org/licenses/Apache-2.0'),
+    ],
+  ]
+  dependencyConfiguration = 'embedding'
 }
