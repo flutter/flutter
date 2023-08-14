@@ -48,14 +48,14 @@ RUN apt-get update && apt-get install -y google-cloud-sdk && \
     gcloud config set core/disable_usage_reporting true && \
     gcloud config set component_manager/disable_update_check true
 
-# Add repo for OpenJDK from JFrog.io
-RUN wget -q -O - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | apt-key add -
-RUN echo 'deb [arch=amd64] https://adoptopenjdk.jfrog.io/adoptopenjdk/deb bullseye main' | \
-    tee /etc/apt/sources.list.d/adoptopenjdk.list
+# Add repo for OpenJDK from Adoptium.net
+RUN wget -q -O - https://packages.adoptium.net/artifactory/api/gpg/key/public | apt-key add -
+RUN echo 'deb https://packages.adoptium.net/artifactory/deb $(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release) main' | \
+    tee /etc/apt/sources.list.d/adoptium.list
 
 # Install the dependencies needed for the rest of the build.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-  adoptopenjdk-11-hotspot \
+  temurin-20-jdk \
   build-essential \
   default-jdk-headless \
   gcc \
@@ -70,7 +70,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   ruby-dev && \
   apt-get clean
 
-ENV JAVA_HOME="/usr/lib/jvm/adoptopenjdk-11-hotspot-amd64"
+ENV JAVA_HOME="/usr/lib/jvm/temurin-20-jdk-amd64"
 
 # Install the Android SDK Dependency.
 # In the event of an update you can visit this page: https://developer.android.com/studio and scroll to the bottom to find
