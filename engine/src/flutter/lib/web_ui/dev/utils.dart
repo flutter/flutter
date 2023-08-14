@@ -268,29 +268,6 @@ class ProcessOutput {
   final String stderr;
 }
 
-Future<void> runFlutter(
-  String workingDirectory,
-  List<String> arguments, {
-  bool useSystemFlutter = false,
-}) async {
-  final String executable =
-      useSystemFlutter ? 'flutter' : environment.flutterCommand.path;
-  arguments.add('--local-engine=host_debug_unopt');
-  final int exitCode = await runProcess(
-    executable,
-    arguments,
-    workingDirectory: workingDirectory,
-  );
-
-  if (exitCode != 0) {
-    throw ToolExit(
-      'ERROR: Failed to run $executable with '
-      'arguments $arguments. Exited with exit code $exitCode',
-      exitCode: exitCode,
-    );
-  }
-}
-
 /// An exception related to an attempt to spawn a sub-process.
 @immutable
 class ProcessException implements Exception {
