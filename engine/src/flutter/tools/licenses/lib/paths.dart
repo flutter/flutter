@@ -44,7 +44,7 @@ final Set<String> skippedPaths = <String>{
   r'fuchsia/sdk/mac/NOTICE.fuchsia',
   r'fuchsia/sdk/mac/tools',
   r'out', // output of build
-  r'third_party/android_embedding_dependencies', // testing framework for android
+  r'third_party/android_embedding_dependencies', // Not shipped. Used only for the build-time classpath, and for the in-tree testing framework for Android
   r'third_party/android_tools', // excluded on advice
   r'third_party/angle/android',
   r'third_party/angle/doc',

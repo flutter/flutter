@@ -79,5 +79,11 @@
       "androidx.window.layout.WindowLayoutInfo",
       "androidx.window.layout.WindowInfoRepository"
     ]
+  },
+  {
+    "url": "https://dl.google.com/android/maven2/com/google/android/play/core/1.8.0/core-1.8.0.aar",
+    "out_file_name": "core-1.8.0.aar",
+    "maven_dependency": "com.google.android.play:core:1.8.0",
+    "provides": []
   }
 ]
