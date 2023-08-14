@@ -25,6 +25,7 @@ enum _RadioType { material, adaptive }
 
 const double _kOuterRadius = 8.0;
 const double _kInnerRadius = 4.5;
+const double _kOuterStrokeWidth = 2.0;
 
 /// A Material Design radio button.
 ///
@@ -95,6 +96,7 @@ class Radio<T> extends StatefulWidget {
     this.materialTapTargetSize,
     this.visualDensity,
     this.focusNode,
+    this.outerStrokeWidth,
     this.autofocus = false,
   }) : _radioType = _RadioType.material,
        useCupertinoCheckmarkStyle = false;
@@ -131,6 +133,7 @@ class Radio<T> extends StatefulWidget {
     this.materialTapTargetSize,
     this.visualDensity,
     this.focusNode,
+    this.outerStrokeWidth,
     this.autofocus = false,
     this.useCupertinoCheckmarkStyle = false
   }) : _radioType = _RadioType.adaptive;
@@ -358,6 +361,10 @@ class Radio<T> extends StatefulWidget {
   /// Defaults to false.
   final bool useCupertinoCheckmarkStyle;
 
+  /// The width of the outer stroke width.
+  /// If this is null, then [_kOuterStrokeWidth] is used.
+  final double? outerStrokeWidth;
+
   final _RadioType _radioType;
 
   bool get _selected => value == groupValue;
@@ -367,7 +374,12 @@ class Radio<T> extends StatefulWidget {
 }
 
 class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, ToggleableStateMixin {
-  final _RadioPainter _painter = _RadioPainter();
+  late _RadioPainter _painter;
+
+  void initState() {
+    super.initState();
+    _painter = _RadioPainter(widget.outerStrokeWidth ?? _kOuterStrokeWidth);
+  }
 
   void _handleChanged(bool? selected) {
     if (selected == null) {
@@ -557,6 +569,11 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
 }
 
 class _RadioPainter extends ToggleablePainter {
+
+  final double outerStrokeWidth;
+
+  _RadioPainter(this.outerStrokeWidth);
+
   @override
   void paint(Canvas canvas, Size size) {
     paintRadialReaction(canvas: canvas, origin: size.center(Offset.zero));
@@ -567,7 +584,7 @@ class _RadioPainter extends ToggleablePainter {
     final Paint paint = Paint()
       ..color = Color.lerp(inactiveColor, activeColor, position.value)!
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
+      ..strokeWidth = outerStrokeWidth;
     canvas.drawCircle(center, _kOuterRadius, paint);
 
     // Inner circle
