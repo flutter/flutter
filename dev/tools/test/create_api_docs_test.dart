@@ -6,7 +6,7 @@ import 'package:platform/platform.dart';
 import 'package:test/test.dart';
 
 import '../../../packages/flutter_tools/test/src/fake_process_manager.dart';
-import '../dartdoc.dart' as dartdoc;
+import '../create_api_docs.dart' as apidocs;
 
 void main() {
   const String branchName = 'stable';
@@ -40,7 +40,7 @@ void main() {
     );
 
     expect(
-      dartdoc.FlutterInformation(platform: platform, processManager: processManager).getBranchName(),
+      apidocs.FlutterInformation(platform: platform, processManager: processManager).getBranchName(),
       branchName,
     );
     expect(processManager, hasNoRemainingExpectations);
@@ -78,7 +78,7 @@ void main() {
     );
 
     expect(
-      dartdoc.FlutterInformation(platform: platform, processManager: processManager).getBranchName(),
+      apidocs.FlutterInformation(platform: platform, processManager: processManager).getBranchName(),
       branchName,
     );
     expect(processManager, hasNoRemainingExpectations);
@@ -118,7 +118,7 @@ void main() {
     );
 
     expect(
-      dartdoc.FlutterInformation(platform: platform, processManager: processManager).getBranchName(),
+      apidocs.FlutterInformation(platform: platform, processManager: processManager).getBranchName(),
       branchName,
     );
     expect(processManager, hasNoRemainingExpectations);
@@ -137,9 +137,9 @@ void main() {
         ),
       ],
     );
-    dartdoc.FlutterInformation.instance = dartdoc.FlutterInformation(platform: platform, processManager: processManager);
+    apidocs.FlutterInformation.instance = apidocs.FlutterInformation(platform: platform, processManager: processManager);
 
-    dartdoc.runPubProcess(
+    apidocs.runPubProcess(
       arguments: <String>['--one', '--two'],
       processManager: processManager,
     );
