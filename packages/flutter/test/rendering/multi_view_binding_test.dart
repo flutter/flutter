@@ -7,8 +7,26 @@ import 'dart:ui';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+// Record the [PlatformDispatcher.renderScenes] call into a map that record
+// the rendering history for specific views.
+//
+// The `viewIds` and `scenes` must be of equal length and correspond one to one.
+// For each view ID, its scene is appended to viewRenderHistory[viewId] (a
+// new list is created if necessary).
+void _recordViewRendering(Map<int, List<Scene>> viewRenderHistory, List<int> viewIds, List<Scene> scenes) {
+  expect(viewIds.length, scenes.length);
+  for (int taskIdx = 0; taskIdx < viewIds.length; taskIdx += 1) {
+    viewRenderHistory
+      .putIfAbsent(viewIds[taskIdx], () => <Scene>[])
+      .add(scenes[taskIdx]);
+  }
+}
+
 void main() {
   final RendererBinding binding = RenderingFlutterBinding.ensureInitialized();
+  tearDown(() {
+    PlatformDispatcher.instance.debugClearOverride();
+  });
 
   test('Adding/removing renderviews updates renderViews getter', () {
     final FlutterView flutterView = FakeFlutterView();
@@ -100,6 +118,11 @@ void main() {
   });
 
   test('all registered renderviews are asked to composite frame', () {
+    final Map<int, List<Scene>> viewRenderHistory = <int, List<Scene>>{};
+    PlatformDispatcher.instance.debugRenderScenesOverride = (List<int> viewIds, List<Scene> scenes) {
+      _recordViewRendering(viewRenderHistory, viewIds, scenes);
+    };
+
     final FakeFlutterView flutterView1 = FakeFlutterView(viewId: 1);
     final FakeFlutterView flutterView2 = FakeFlutterView(viewId: 2);
     final RenderView renderView1 = RenderView(view: flutterView1);
@@ -113,30 +136,30 @@ void main() {
     renderView1.prepareInitialFrame();
     renderView2.prepareInitialFrame();
 
-    expect(flutterView1.renderedScenes, isEmpty);
-    expect(flutterView2.renderedScenes, isEmpty);
+    expect(viewRenderHistory.containsKey(1), false);
+    expect(viewRenderHistory.containsKey(2), false);
 
     binding.handleBeginFrame(Duration.zero);
     binding.handleDrawFrame();
 
-    expect(flutterView1.renderedScenes, hasLength(1));
-    expect(flutterView2.renderedScenes, hasLength(1));
+    expect(viewRenderHistory[1], hasLength(1));
+    expect(viewRenderHistory[2], hasLength(1));
 
     binding.removeRenderView(renderView1);
 
     binding.handleBeginFrame(Duration.zero);
     binding.handleDrawFrame();
 
-    expect(flutterView1.renderedScenes, hasLength(1));
-    expect(flutterView2.renderedScenes, hasLength(2));
+    expect(viewRenderHistory[1], hasLength(1));
+    expect(viewRenderHistory[2], hasLength(2));
 
     binding.removeRenderView(renderView2);
 
     binding.handleBeginFrame(Duration.zero);
     binding.handleDrawFrame();
 
-    expect(flutterView1.renderedScenes, hasLength(1));
-    expect(flutterView2.renderedScenes, hasLength(2));
+    expect(viewRenderHistory[1], hasLength(1));
+    expect(viewRenderHistory[2], hasLength(2));
   });
 
   test('hit-testing reaches the right view', () {
