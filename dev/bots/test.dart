@@ -1003,7 +1003,7 @@ Future<void> _runFrameworkTests() async {
     ]);
     //Run java unit tests for integration_test
     await runCommand(
-        './gradlew',
+        path.join(flutterRoot, 'packages', 'integration_test', 'example', 'android', 'gradlew'),
         <String>[
           ':integration_test:testDebugUnitTest',
           '--tests "dev.flutter.plugins.integration_test.FlutterDeviceScreenshotTest"'
