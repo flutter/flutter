@@ -221,7 +221,7 @@ Future<void> main(List<String> args) async {
       if (arg.startsWith('--local-engine=')) {
         localEngineEnv['FLUTTER_LOCAL_ENGINE'] = arg.substring('--local-engine='.length);
         flutterTestArgs.add(arg);
-      } else if(arg.startsWith('--local-engine-host=')) {
+      } else if (arg.startsWith('--local-engine-host=')) {
         localEngineEnv['FLUTTER_LOCAL_ENGINE_HOST'] = arg.substring('--local-engine-host='.length);
         flutterTestArgs.add(arg);
       } else if (arg.startsWith('--local-engine-src-path=')) {
