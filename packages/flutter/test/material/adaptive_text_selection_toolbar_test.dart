@@ -7,8 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart';
 import '../widgets/live_text_utils.dart';
@@ -112,7 +111,7 @@ void main() {
     expect(find.byKey(key), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Can build from EditableTextState', (WidgetTester tester) async {
+  testWidgets('Can build from EditableTextState', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -233,7 +232,7 @@ void main() {
   );
 
   group('buttonItems', () {
-    testWidgetsWithLeakTracking('getEditableTextButtonItems builds the correct button items per-platform', (WidgetTester tester) async {
+    testWidgets('getEditableTextButtonItems builds the correct button items per-platform', (WidgetTester tester) async {
       // Fill the clipboard so that the Paste option is available in the text
       // selection menu.
       await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
@@ -328,7 +327,7 @@ void main() {
       skip: kIsWeb, // [intended]
     );
 
-    testWidgetsWithLeakTracking('getAdaptiveButtons builds the correct button widgets per-platform', (WidgetTester tester) async {
+    testWidgets('getAdaptiveButtons builds the correct button widgets per-platform', (WidgetTester tester) async {
       const String buttonText = 'Click me';
 
       await tester.pumpWidget(

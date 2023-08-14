@@ -1,4 +1,12 @@
 {
+  "scanTextButtonLabel": "掃描文字",
+  "menuDismissLabel": "關閉選單",
+  "expansionTileExpandedHint": "輕觸兩下即可收合",
+  "expansionTileCollapsedHint": "輕觸兩下即可展開",
+  "expansionTileExpandedTapHint": "收合",
+  "expansionTileCollapsedTapHint": "展開更多詳細資料",
+  "expandedHint": "已收合",
+  "collapsedHint": "已展開",
   "scrimLabel": "紗罩",
   "bottomSheetLabel": "底部功能表",
   "scrimOnTapHint": "關閉「$modalRouteContentName」",
