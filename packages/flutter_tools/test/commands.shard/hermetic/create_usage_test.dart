@@ -16,7 +16,6 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
 import '../../src/context.dart';
-import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 import '../../src/testbed.dart';
 

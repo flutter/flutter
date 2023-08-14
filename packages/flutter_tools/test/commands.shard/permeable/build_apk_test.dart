@@ -428,6 +428,7 @@ void main() {
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+      Java: () => null,
       ProcessManager: () => processManager,
       Usage: () => testUsage,
       AndroidStudio: () => FakeAndroidStudio(),
