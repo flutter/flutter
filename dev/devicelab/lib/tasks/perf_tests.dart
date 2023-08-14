@@ -700,7 +700,7 @@ TaskFunction createDrawVerticesPerfTest({
   ).run;
 }
 
-TaskFunction createStaticPathTessellationPerfTest() {
+TaskFunction createPathTessellationStaticPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
@@ -711,7 +711,7 @@ TaskFunction createStaticPathTessellationPerfTest() {
   ).run;
 }
 
-TaskFunction createDynamicPathTessellationPerfTest() {
+TaskFunction createPathTessellationDynamicPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
