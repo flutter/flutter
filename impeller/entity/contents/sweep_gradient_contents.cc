@@ -104,7 +104,7 @@ bool SweepGradientContents::RenderSSBO(const ContentContext& renderer,
   frame_info.matrix = GetInverseEffectTransform();
 
   Command cmd;
-  cmd.label = "SweepGradientSSBOFill";
+  DEBUG_COMMAND_INFO(cmd, "SweepGradientSSBOFill");
   cmd.stencil_reference = entity.GetStencilDepth();
   auto geometry_result =
       GetGeometry()->GetPositionBuffer(renderer, entity, pass);
@@ -166,7 +166,7 @@ bool SweepGradientContents::RenderTexture(const ContentContext& renderer,
   frame_info.matrix = GetInverseEffectTransform();
 
   Command cmd;
-  cmd.label = "SweepGradientFill";
+  DEBUG_COMMAND_INFO(cmd, "SweepGradientFill");
   cmd.stencil_reference = entity.GetStencilDepth();
 
   auto options = OptionsFromPassAndEntity(pass, entity);

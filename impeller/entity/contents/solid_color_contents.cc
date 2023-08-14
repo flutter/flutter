@@ -47,7 +47,7 @@ bool SolidColorContents::Render(const ContentContext& renderer,
   using VS = SolidFillPipeline::VertexShader;
 
   Command cmd;
-  cmd.label = "Solid Fill";
+  DEBUG_COMMAND_INFO(cmd, "Solid Fill");
   cmd.stencil_reference = entity.GetStencilDepth();
 
   auto geometry_result =

@@ -25,6 +25,12 @@
 
 namespace impeller {
 
+#ifdef IMPELLER_DEBUG
+#define DEBUG_COMMAND_INFO(obj, arg) obj.label = arg;
+#else
+#define DEBUG_COMMAND_INFO(obj, arg)
+#endif  // IMPELLER_DEBUG
+
 template <class T>
 struct Resource {
   using ResourceType = T;
@@ -116,10 +122,14 @@ struct Command : public ResourceBinder {
   /// packed in the index buffer.
   ///
   IndexType index_type = IndexType::kUnknown;
+
+#ifdef IMPELLER_DEBUG
   //----------------------------------------------------------------------------
   /// The debugging label to use for the command.
   ///
   std::string label;
+#endif  // IMPELLER_DEBUG
+
   //----------------------------------------------------------------------------
   /// The reference value to use in stenciling operations. Stencil configuration
   /// is part of pipeline setup and can be read from the pipelines descriptor.

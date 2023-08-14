@@ -44,6 +44,7 @@
 #include "impeller/geometry/sigma.h"
 #include "impeller/playground/playground.h"
 #include "impeller/playground/widgets.h"
+#include "impeller/renderer/command.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
 #include "impeller/runtime_stage/runtime_stage.h"
@@ -868,7 +869,7 @@ TEST_P(EntityTest, BlendingModeOptions) {
       }
 
       Command cmd;
-      cmd.label = "Blended Rectangle";
+      DEBUG_COMMAND_INFO(cmd, "Blended Rectangle");
       auto options = OptionsFromPass(pass);
       options.blend_mode = blend_mode;
       options.primitive_type = PrimitiveType::kTriangle;

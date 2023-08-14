@@ -46,7 +46,7 @@ std::optional<Entity> LinearToSrgbFilterContents::RenderFilter(
                                const ContentContext& renderer,
                                const Entity& entity, RenderPass& pass) -> bool {
     Command cmd;
-    cmd.label = "Linear to sRGB Filter";
+    DEBUG_COMMAND_INFO(cmd, "Linear to sRGB Filter");
     cmd.stencil_reference = entity.GetStencilDepth();
 
     auto options = OptionsFromPassAndEntity(pass, entity);

@@ -27,7 +27,7 @@ static void EncodeCommand(const SceneContext& scene_context,
   auto& host_buffer = render_pass.GetTransientsBuffer();
 
   Command cmd;
-  cmd.label = scene_command.label;
+  DEBUG_COMMAND_INFO(cmd, scene_command.label);
   cmd.stencil_reference =
       0;  // TODO(bdero): Configurable stencil ref per-command.
 
