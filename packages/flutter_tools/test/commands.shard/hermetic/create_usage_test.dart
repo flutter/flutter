@@ -135,7 +135,10 @@ void main() {
 
       await runner.run(<String>['create', '--no-pub', '--template=plugin_ffi', 'testy5']);
       expect((await command.usageValues).commandCreateProjectType, 'plugin_ffi');
-    }));
+    }),
+    overrides: <Type, Generator>{
+      Java: () => FakeJava(),
+    });
 
     testUsingContext('set iOS host language type as usage value', () => testbed.run(() async {
       final CreateCommand command = CreateCommand();
@@ -154,8 +157,10 @@ void main() {
         'testy',
       ]);
       expect((await command.usageValues).commandCreateIosLanguage, 'objc');
-
-    }));
+    }),
+    overrides: <Type, Generator>{
+      Java: () => FakeJava(),
+    });
 
     testUsingContext('set Android host language type as usage value', () => testbed.run(() async {
       final CreateCommand command = CreateCommand();
