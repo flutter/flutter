@@ -11,6 +11,7 @@ import 'dart:io';
 import 'common.dart';
 
 const List<String> expectedMainErrors = <String>[
+  'dev/bots/test/analyze-snippet-code-test-input/custom_imports_broken.dart:19:11: (statement) (undefined_identifier)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:30:5: (expression) (unnecessary_new)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:103:5: (statement) (always_specify_types)',
   'dev/bots/test/analyze-snippet-code-test-input/known_broken_documentation.dart:111:5: (top-level declaration) (prefer_const_declarations)',
@@ -68,7 +69,7 @@ void main() {
     final List<String> stderrNoDescriptions = stderrLines.map(removeLintDescriptions).toList();
     expect(stderrNoDescriptions, <String>[
       ...expectedMainErrors,
-      'Found 15 snippet code errors.',
+      'Found 16 snippet code errors.',
       'See the documentation at the top of dev/bots/analyze_snippet_code.dart for details.',
       '', // because we end with a newline, split gives us an extra blank line
     ]);
@@ -92,7 +93,7 @@ void main() {
     expect(stderrNoDescriptions, <String>[
       ...expectedUiErrors,
       ...expectedMainErrors,
-      'Found 19 snippet code errors.',
+      'Found 20 snippet code errors.',
       'See the documentation at the top of dev/bots/analyze_snippet_code.dart for details.',
       '', // because we end with a newline, split gives us an extra blank line
     ]);
