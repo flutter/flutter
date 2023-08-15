@@ -1056,6 +1056,9 @@ mixin TextSelectionDelegate {
   /// Whether search web is enabled, must not be null.
   bool get searchWebEnabled => true;
 
+  /// Whether share is enabled, must not be null.
+  bool get shareEnabled => true;
+
   /// Whether Live Text input is enabled.
   ///
   /// See also:
