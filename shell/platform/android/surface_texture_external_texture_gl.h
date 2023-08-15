@@ -23,7 +23,7 @@ class SurfaceTextureExternalTextureGL : public SurfaceTextureExternalTexture {
   SurfaceTextureExternalTextureGL(
       int64_t id,
       const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture,
-      std::shared_ptr<PlatformViewAndroidJNI> jni_facade);
+      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade);
 
   ~SurfaceTextureExternalTextureGL() override;
 
@@ -44,7 +44,7 @@ class SurfaceTextureExternalTextureImpellerGL
       const std::shared_ptr<impeller::ContextGLES>& context,
       int64_t id,
       const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture,
-      std::shared_ptr<PlatformViewAndroidJNI> jni_facade);
+      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade);
 
   ~SurfaceTextureExternalTextureImpellerGL() override;
 
