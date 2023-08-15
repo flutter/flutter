@@ -79,7 +79,6 @@ class AttachCommand extends FlutterCommand {
     usesPortOptions(verboseHelp: verboseHelp);
     usesIpv6Flag(verboseHelp: verboseHelp);
     usesFilesystemOptions(hide: !verboseHelp);
-    usesFuchsiaOptions(hide: !verboseHelp);
     usesDartDefineOption();
     usesDeviceUserOption();
     addEnableExperimentation(hide: !verboseHelp);
