@@ -7,19 +7,19 @@
 #include <memory>
 #include <utility>
 
-#include "common/graphics/texture.h"
+#include "flutter/common/graphics/texture.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/shell/common/shell_io_manager.h"
 #include "flutter/shell/gpu/gpu_surface_gl_delegate.h"
 #include "flutter/shell/platform/android/android_context_gl_impeller.h"
 #include "flutter/shell/platform/android/android_context_gl_skia.h"
+#include "flutter/shell/platform/android/android_context_vulkan_impeller.h"
 #include "flutter/shell/platform/android/android_external_texture_gl.h"
 #include "flutter/shell/platform/android/android_surface_gl_impeller.h"
 #include "flutter/shell/platform/android/android_surface_gl_skia.h"
 #include "flutter/shell/platform/android/android_surface_software.h"
 #include "flutter/shell/platform/android/hardware_buffer_external_texture_gl.h"
 #include "flutter/shell/platform/android/hardware_buffer_external_texture_vk.h"
-#include "shell/platform/android/android_context_vulkan_impeller.h"
 #if IMPELLER_ENABLE_VULKAN  // b/258506856 for why this is behind an if
 #include "flutter/shell/platform/android/android_surface_vulkan_impeller.h"
 #endif

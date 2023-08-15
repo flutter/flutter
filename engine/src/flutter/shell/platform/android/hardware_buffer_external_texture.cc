@@ -3,7 +3,7 @@
 
 #include <android/hardware_buffer_jni.h>
 #include <android/sensor.h>
-#include "shell/platform/android/ndk_helpers.h"
+#include "flutter/shell/platform/android/ndk_helpers.h"
 
 namespace flutter {
 
