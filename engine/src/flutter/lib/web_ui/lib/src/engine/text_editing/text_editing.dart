@@ -1393,9 +1393,9 @@ abstract class DefaultTextEditingStrategy with CompositionAwareMixin implements 
       lastEditingState = newEditingState;
       _editingDeltaState = newTextEditingDeltaState;
       onChange!(lastEditingState, _editingDeltaState);
-      // Flush delta after it has been sent to framework.
-      _editingDeltaState = null;
     }
+    // Flush delta state.
+    _editingDeltaState = null;
   }
 
   void handleBeforeInput(DomEvent event) {
