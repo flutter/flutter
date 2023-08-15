@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 import '../../src/testbed.dart';
 
@@ -136,7 +137,7 @@ void main() {
       expect((await command.usageValues).commandCreateProjectType, 'plugin_ffi');
     }),
     overrides: <Type, Generator>{
-      Java: () => null,
+      Java: () => FakeJava(),
     });
 
     testUsingContext('set iOS host language type as usage value', () => testbed.run(() async {
@@ -158,7 +159,7 @@ void main() {
       expect((await command.usageValues).commandCreateIosLanguage, 'objc');
     }),
     overrides: <Type, Generator>{
-      Java: () => null,
+      Java: () => FakeJava(),
     });
 
     testUsingContext('set Android host language type as usage value', () => testbed.run(() async {
