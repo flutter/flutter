@@ -61,6 +61,11 @@
 // contains no explicit imports, the snippets will implicitly import all the
 // main Flutter packages (including material and flutter_test), as well as most
 // core Dart packages with the usual prefixes.
+//
+// When invoked without an additional path argument, the script will analyze
+// the code snippets for all packages in the "packages" subdirectory that do
+// not specify "nodoc: true" in their pubspec.yaml (i.e. all packages for which
+// we publish docs will have their doc code snippets analyzed).
 
 import 'dart:async';
 import 'dart:convert';
@@ -147,18 +152,28 @@ Future<void> main(List<String> arguments) async {
     exit(0);
   }
 
-  List<Directory> flutterPackages;
+  final List<Directory> flutterPackages;
   if (parsedArguments.rest.length == 1) {
     // Used for testing.
     flutterPackages = <Directory>[Directory(parsedArguments.rest.single)];
   } else {
-    flutterPackages = <Directory>[
-      Directory(_packageFlutter),
-      Directory(_packageFlutterTest),
-      Directory(_packageIntegrationTest),
-      Directory(_packageFlutterDriver),
-      // TODO(goderbauer): Add all other packages for which we publish docs.
-    ];
+    // By default analyze snippets in all packages in the packages subdirectory
+    // that do not specify "nodoc: true" in their pubspec.yaml.
+    flutterPackages = <Directory>[];
+    final String packagesRoot = path.join(_flutterRoot, 'packages');
+    for (final FileSystemEntity entity in Directory(packagesRoot).listSync()) {
+      if (entity is! Directory) {
+        continue;
+      }
+      final File pubspec = File(path.join(entity.path, 'pubspec.yaml'));
+      if (!pubspec.existsSync()) {
+        throw StateError("Unexpected package '${entity.path}' found in packages directory");
+      }
+      if (!pubspec.readAsStringSync().contains('nodoc: true')) {
+        flutterPackages.add(Directory(path.join(entity.path, 'lib')));
+      }
+    }
+    assert(flutterPackages.length >= 4);
   }
 
   final bool includeDartUi = parsedArguments.wasParsed('dart-ui-location') || parsedArguments['include-dart-ui'] as bool;
