@@ -2411,7 +2411,9 @@ void main() {
       );
     });
 
-/*     testWidgets('AppKitView accepts gestures', (WidgetTester tester) async {
+    // TODO(schectman): De-skip the following tests once macOS gesture recognizers are present.
+    // https://github.com/flutter/flutter/issues/128519
+    testWidgets('AppKitView accepts gestures', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -2437,7 +2439,7 @@ void main() {
       await gesture.up();
 
       expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
-    });
+    }, skip: true);
 
     testWidgets('AppKitView transparent hit test behavior', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
@@ -2482,7 +2484,7 @@ void main() {
       expect(viewsController.gesturesAccepted[currentViewId + 1], 0);
 
       expect(numPointerDownsOnParent, 1);
-    });
+    }, skip: true);
 
     testWidgets('AppKitView translucent hit test behavior', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
@@ -2527,7 +2529,7 @@ void main() {
       expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
 
       expect(numPointerDownsOnParent, 1);
-    });
+    }, skip: true);
 
     testWidgets('AppKitView opaque hit test behavior', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
@@ -2570,7 +2572,7 @@ void main() {
 
       expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
       expect(numPointerDownsOnParent, 0);
-    });
+    }, skip: true);
 
     testWidgets('UiKitView can lose gesture arenas', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
@@ -2975,7 +2977,7 @@ void main() {
       );
 
       expect(factoryInvocationCount, 1);
-    }); */
+    });
 
     testWidgets('AppKitView can take input focus', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
