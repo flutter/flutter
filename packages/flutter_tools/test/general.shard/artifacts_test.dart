@@ -556,7 +556,7 @@ void main() {
 
     testUsingContext('determines the target device name from the path', () {
       localEngineInfo = LocalEngineInfo(
-        engineOutPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'android_debug_unopt'), 
+        engineOutPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'android_debug_unopt'),
         engineHostOutPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'host_debug_unopt'),
       );
 
@@ -565,7 +565,7 @@ void main() {
 
     testUsingContext('determines the target device name from the path when using a custom engine path', () {
       localEngineInfo = LocalEngineInfo(
-        engineOutPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'android_debug_unopt'), 
+        engineOutPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'android_debug_unopt'),
         engineHostOutPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'host_debug_unopt'),
       );
 

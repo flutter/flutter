@@ -285,12 +285,12 @@ class EngineBuildPaths {
 }
 
 /// Information about a local engine build (i.e. `--local-engine[-host]=...`).
-/// 
+///
 /// See https://github.com/flutter/flutter/wiki/The-flutter-tool#using-a-locally-built-engine-with-the-flutter-tool
 /// for more information about local engine builds.
 class LocalEngineInfo {
   /// Creates a reference to a local engine build.
-  /// 
+  ///
   /// The [engineOutPath] and [engineHostOutPath] are assumed to be resolvable
   /// paths to the built engine artifacts for the target (device) and host
   /// (build) platforms, respectively.
@@ -300,14 +300,14 @@ class LocalEngineInfo {
   });
 
   /// The path to the engine artifacts for the target (device) platform.
-  /// 
+  ///
   /// For example, if the target platform is Android debug, this would be a path
   /// like `/path/to/engine/src/out/android_debug_unopt`. To retrieve just the
   /// name (platform), see [localEngineName].
   final String engineOutPath;
 
   /// The path to the engine artifacts for the host (build) platform.
-  /// 
+  ///
   /// For example, if the host platform is debug, this would be a path like
   /// `/path/to/engine/src/out/host_debug_unopt`. To retrieve just the name
   /// (platform), see [localEngineHostName].
