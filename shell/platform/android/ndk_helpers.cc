@@ -5,7 +5,6 @@
 #include "flutter/shell/platform/android/ndk_helpers.h"
 
 #include "fml/native_library.h"
-#include "shell/platform/android/ndk_helpers.h"
 
 #include "flutter/fml/logging.h"
 

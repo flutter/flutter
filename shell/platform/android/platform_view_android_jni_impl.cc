@@ -12,8 +12,8 @@
 #include <sstream>
 #include <utility>
 
+#include "flutter/shell/platform/android/ndk_helpers.h"
 #include "include/android/SkImageAndroid.h"
-#include "shell/platform/android/ndk_helpers.h"
 #include "unicode/uchar.h"
 
 #include "flutter/assets/directory_asset_bundle.h"
