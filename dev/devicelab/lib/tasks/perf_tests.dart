@@ -680,7 +680,7 @@ TaskFunction createDrawAtlasPerfTest({
     'test_driver/run_app.dart',
     'draw_atlas_perf',
     enableImpeller: true,
-    testDriver: 'test_driver/draw_atlas_perf.dart',
+    testDriver: 'test_driver/draw_atlas_perf_test.dart',
     saveTraceFile: true,
     forceOpenGLES: forceOpenGLES,
   ).run;
