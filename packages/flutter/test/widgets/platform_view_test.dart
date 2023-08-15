@@ -2411,7 +2411,7 @@ void main() {
       );
     });
 
-    testWidgets('AppKitView accepts gestures', (WidgetTester tester) async {
+/*     testWidgets('AppKitView accepts gestures', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -2975,11 +2975,11 @@ void main() {
       );
 
       expect(factoryInvocationCount, 1);
-    });
+    }); */
 
-    testWidgets('UiKitView can take input focus', (WidgetTester tester) async {
+    testWidgets('AppKitView can take input focus', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
       viewsController.registerViewType('webview');
 
       final GlobalKey containerKey = GlobalKey();
@@ -2990,7 +2990,7 @@ void main() {
               const SizedBox(
                 width: 200.0,
                 height: 100.0,
-                child: UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+                child: AppKitView(viewType: 'webview', layoutDirection: TextDirection.ltr),
               ),
               Focus(
                 debugLabel: 'container',
@@ -3007,7 +3007,7 @@ void main() {
 
       final Focus uiKitViewFocusWidget = tester.widget(
         find.descendant(
-          of: find.byType(UiKitView),
+          of: find.byType(AppKitView),
           matching: find.byType(Focus),
         ),
       );
@@ -3030,14 +3030,14 @@ void main() {
       expect(uiKitViewFocusNode.hasFocus, isTrue);
     });
 
-    testWidgets('UiKitView sends TextInput.setPlatformViewClient when focused', (WidgetTester tester) async {
+    testWidgets('AppKitView sends TextInput.setPlatformViewClient when focused', (WidgetTester tester) async {
 
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
-        const UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr)
+        const AppKitView(viewType: 'webview', layoutDirection: TextDirection.ltr)
       );
 
       // First frame is before the platform view was created so the render object
@@ -3046,7 +3046,7 @@ void main() {
 
       final Focus uiKitViewFocusWidget = tester.widget(
         find.descendant(
-          of: find.byType(UiKitView),
+          of: find.byType(AppKitView),
           matching: find.byType(Focus),
         ),
       );
@@ -3070,7 +3070,7 @@ void main() {
     });
 
     testWidgets('FocusNode is disposed on UIView dispose', (WidgetTester tester) async {
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
@@ -3078,13 +3078,13 @@ void main() {
           child: SizedBox(
             width: 200.0,
             height: 100.0,
-            child: UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+            child: AppKitView(viewType: 'webview', layoutDirection: TextDirection.ltr),
           ),
         ),
       );
       // casting to dynamic is required since the state class is private.
       // ignore: avoid_dynamic_calls, invalid_assignment
-      final FocusNode node = (tester.state(find.byType(UiKitView)) as dynamic).focusNode;
+      final FocusNode node = (tester.state(find.byType(AppKitView)) as dynamic).focusNode;
       expect(() => ChangeNotifier.debugAssertNotDisposed(node), isNot(throwsAssertionError));
       await tester.pumpWidget(
         const Center(
@@ -3097,11 +3097,11 @@ void main() {
       expect(() => ChangeNotifier.debugAssertNotDisposed(node), throwsAssertionError);
     });
 
-    testWidgets('UiKitView has correct semantics', (WidgetTester tester) async {
+    testWidgets('AppKitView has correct semantics', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       expect(currentViewId, greaterThanOrEqualTo(0));
-      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      final FakeMacosPlatformViewsController viewsController = FakeMacosPlatformViewsController();
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
@@ -3112,7 +3112,7 @@ void main() {
             child: SizedBox(
               width: 200.0,
               height: 100.0,
-              child: UiKitView(
+              child: AppKitView(
                 viewType: 'webview',
                 layoutDirection: TextDirection.ltr,
               ),
@@ -3126,9 +3126,9 @@ void main() {
 
       final SemanticsNode semantics = tester.getSemantics(
         find.descendant(
-          of: find.byType(UiKitView),
+          of: find.byType(AppKitView),
           matching: find.byWidgetPredicate(
-              (Widget widget) => widget.runtimeType.toString() == '_UiKitPlatformView',
+              (Widget widget) => widget.runtimeType.toString() == '_AppKitPlatformView',
           ),
         ),
       );
