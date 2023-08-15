@@ -485,7 +485,7 @@ Your $application code is in $relativeAppMain.
     // Android and Java version has been detected.
     if (includeAndroid && globals.java?.version != null) {
       _printIncompatibleJavaAgpGradleVersionsWarning(
-        javaVersion: versionToParsableString(globals.java?.version),
+        javaVersion: versionToParsableString(globals.java?.version)!,
         templateGradleVersion: templateContext['gradleVersion']! as String,
         templateAgpVersion: templateContext['agpVersion']! as String,
         projectType: template,
@@ -804,28 +804,37 @@ For more details, see: https://flutter.dev/docs/get-started/web
   }
 }
 
+// Prints a warning if the specified Java version conflicts with either the
+// template Gradle or AGP version.
+//
+// Assumes the specified templateGradleVersion and templateAgpVersion are
+// compatible, meaning that the Java version may only conflict with one of the
+// template Gradle or AGP versions.
 void _printIncompatibleJavaAgpGradleVersionsWarning({
-  required String? javaVersion,
+  required String javaVersion,
   required String templateGradleVersion,
   required String templateAgpVersion,
   required FlutterProjectType projectType,
   required String projectDirPath}) {
+  // Determine if the Java version specified conflicts with the tempalte Gradle or AGP version.
   final bool javaGradleVersionsCompatible = gradle.validateJavaGradle(globals.logger, javaV: javaVersion, gradleV: templateGradleVersion);
   final bool javaAgpVersionsCompatible = gradle.validateJavaAgp(globals.logger, javaV: javaVersion, agpV: templateAgpVersion);
-  final bool javaVersionNotFound = javaVersion == null;
 
-  if (javaGradleVersionsCompatible && javaAgpVersionsCompatible || javaVersionNotFound) {
-    // Java/AGP template/Gradle template versions compatible.
+  if (javaGradleVersionsCompatible && javaAgpVersionsCompatible) {
     return;
   }
 
-  final String incompatibleVersionsAndRecommendedOptionMessage =
-    getIncompatibleVersionsAndRecommendedOptionMessage(
-      javaGradleVersionsCompatible: javaGradleVersionsCompatible,
-      templateGradleVersion: templateGradleVersion,
-      templateAgpVersion: templateAgpVersion,
-      projectType: projectType.cliName,
-    );
+  // Determine header of warning with recommended fix of re-configuring Java version.
+  final String incompatibleDependency = javaGradleVersionsCompatible ? 'Android Gradle Plugin (AGP)' :'Gradle' ;
+  final String incompatibleDependencyVersion = javaGradleVersionsCompatible ? 'AGP version $templateAgpVersion' : 'Gradle version $templateGradleVersion';
+  final String incompatibleVersionsAndRecommendedOptionMessage = '''
+The configured version of Java detected conflicts with the $incompatibleDependency version in your new Flutter $projectType.
+
+[RECOMMENDED] To keep the default $incompatibleDependencyVersion, make
+sure to download a compatible Java version. You may configure this compatible
+Java version by running: `flutter config --jdk-dir=<JDK_DIRECTORY>`. Note that
+this is a global configuration.
+''';
 
   if (!javaGradleVersionsCompatible) {
     // Gradle template version incompatible with Java version.
@@ -861,8 +870,8 @@ used.
   globals.printWarning('''
 $incompatibleVersionsAndRecommendedOptionMessage
 
-Alternatively, you may attempt to continue using your configured Java version,
-update the AGP version specified in the following files to a compatible AGP
+Alternatively, to continue using your configured Java version, update the AGP
+version specified in the following files to a compatible AGP
 version$compatibleAgpVersionMessage:
 ${_getBuildGradleConfigurationFilePath(projectType, projectDirPath)}
 
@@ -874,25 +883,8 @@ compatible Java/AGP versions.
   );
 }
 
-/// Returns message about Java/Gradle (strictly) or Java/AGP versions being incompatible and recommended option for fixing this issue.
-String getIncompatibleVersionsAndRecommendedOptionMessage({required bool javaGradleVersionsCompatible, required String templateGradleVersion, required String templateAgpVersion, required String projectType}) {
-  // Assumes only one of template Java or AGP versions can be incompatible with Java version because:
-  //   * Minimum Java version for a given AGP version is less than the maximum Java version compatible for the minimum Gradle version
-  //     required for that AGP version (too low a Java version will fail AGP compatibility test, but not Gradle compatibility).
-  //   * Maximum Java version compatible with minimum Gradle version for a given AGP version is higher than minimum Java version
-  //     required for that AGP version (too high a Java version will fail Gradle compatibility test, but not AGP compatibility test).
-  final String incompatibleDependency = javaGradleVersionsCompatible ? 'Android Gradle Plugin (AGP)' :'Gradle' ;
-  final String incompatibleDependencyVersion = javaGradleVersionsCompatible ? 'AGP version $templateAgpVersion' : 'Gradle version $templateGradleVersion';
-  return '''
-The configured version of Java detected conflicts with the $incompatibleDependency version in your new Flutter $projectType.
-
-[RECOMMENDED] To keep the default $incompatibleDependencyVersion, make
-sure to download a compatible Java version. You may configure this compatible
-Java version by running: `flutter config --jdk-dir=<JDK_DIRECTORY>`. Note that
-this is a global configuration.
-''';
-}
-
+// Returns path of the gradle-wrapper.properties file for the specified
+// generated project type.
 String? _getBuildGradleWrapperPropertiesFilePath(FlutterProjectType projectType, String projectDirPath) {
   String gradleWrapperPropertiesFilePath = '';
   switch (projectType) {
@@ -910,6 +902,8 @@ String? _getBuildGradleWrapperPropertiesFilePath(FlutterProjectType projectType,
   return gradleWrapperPropertiesFilePath;
 }
 
+// Returns the path(s) of the build.gradle file(s) for the specified generated
+// project type.
 List<String>? _getBuildGradleConfigurationFilePath(FlutterProjectType projectType, String projectDirPath) {
   final List<String> buildGradleConfigurationFilePaths = <String>[];
   switch (projectType) {
