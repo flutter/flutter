@@ -194,6 +194,7 @@ void main() {
               onLiveTextInput: () {},
               onLookUp: () {},
               onSearchWeb: () {},
+              onShare: () {},
             ),
           ),
         ),
