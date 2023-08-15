@@ -1008,7 +1008,6 @@ Future<void> _runFrameworkTests() async {
           ':integration_test:testDebugUnitTest',
           '--tests "dev.flutter.plugins.integration_test.FlutterDeviceScreenshotTest"'
         ],
-        workingDirectory: path.join(flutterRoot, 'packages', 'integration_test', 'example', 'android')
     );
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'));
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'));
