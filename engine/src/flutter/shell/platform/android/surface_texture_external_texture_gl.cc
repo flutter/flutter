@@ -24,11 +24,13 @@ namespace flutter {
 SurfaceTextureExternalTextureGL::SurfaceTextureExternalTextureGL(
     int64_t id,
     const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture,
-    std::shared_ptr<PlatformViewAndroidJNI> jni_facade)
+    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade)
     : SurfaceTextureExternalTexture(id, surface_texture, jni_facade) {}
 
 SurfaceTextureExternalTextureGL::~SurfaceTextureExternalTextureGL() {
-  Detach();
+  if (texture_name_ != 0) {
+    glDeleteTextures(1, &texture_name_);
+  }
 }
 
 void SurfaceTextureExternalTextureGL::ProcessFrame(PaintContext& context,
@@ -66,14 +68,12 @@ SurfaceTextureExternalTextureImpellerGL::
         const std::shared_ptr<impeller::ContextGLES>& context,
         int64_t id,
         const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture,
-        std::shared_ptr<PlatformViewAndroidJNI> jni_facade)
+        const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade)
     : SurfaceTextureExternalTexture(id, surface_texture, jni_facade),
       impeller_context_(context) {}
 
 SurfaceTextureExternalTextureImpellerGL::
-    ~SurfaceTextureExternalTextureImpellerGL() {
-  Detach();
-}
+    ~SurfaceTextureExternalTextureImpellerGL() {}
 
 void SurfaceTextureExternalTextureImpellerGL::ProcessFrame(
     PaintContext& context,
