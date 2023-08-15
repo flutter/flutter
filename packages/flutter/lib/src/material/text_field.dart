@@ -1147,6 +1147,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   }
 
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
+    debugPrint('$selection');
     final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
     if (willShowSelectionHandles != _showSelectionHandles) {
       setState(() {
