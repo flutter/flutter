@@ -24,6 +24,41 @@
 
 namespace impeller {
 
+std::optional<BlendMode> InvertPorterDuffBlend(BlendMode blend_mode) {
+  switch (blend_mode) {
+    case BlendMode::kClear:
+      return BlendMode::kClear;
+    case BlendMode::kSource:
+      return BlendMode::kDestination;
+    case BlendMode::kDestination:
+      return BlendMode::kSource;
+    case BlendMode::kSourceOver:
+      return BlendMode::kDestinationOver;
+    case BlendMode::kDestinationOver:
+      return BlendMode::kSourceOver;
+    case BlendMode::kSourceIn:
+      return BlendMode::kDestinationIn;
+    case BlendMode::kDestinationIn:
+      return BlendMode::kSourceIn;
+    case BlendMode::kSourceOut:
+      return BlendMode::kDestinationOut;
+    case BlendMode::kDestinationOut:
+      return BlendMode::kSourceOut;
+    case BlendMode::kSourceATop:
+      return BlendMode::kDestinationATop;
+    case BlendMode::kDestinationATop:
+      return BlendMode::kSourceATop;
+    case BlendMode::kXor:
+      return BlendMode::kXor;
+    case BlendMode::kPlus:
+      return BlendMode::kPlus;
+    case BlendMode::kModulate:
+      return BlendMode::kModulate;
+    default:
+      return std::nullopt;
+  }
+}
+
 BlendFilterContents::BlendFilterContents() {
   SetBlendMode(BlendMode::kSourceOver);
 }
@@ -352,24 +387,6 @@ std::optional<Entity> BlendFilterContents::CreateForegroundAdvancedBlend(
   return sub_entity;
 }
 
-constexpr std::array<std::array<Scalar, 5>, 15> kPorterDuffCoefficients = {{
-    {0, 0, 0, 0, 0},    // Clear
-    {1, 0, 0, 0, 0},    // Source
-    {0, 0, 1, 0, 0},    // Destination
-    {1, 0, 1, -1, 0},   // SourceOver
-    {1, -1, 1, 0, 0},   // DestinationOver
-    {0, 1, 0, 0, 0},    // SourceIn
-    {0, 0, 0, 1, 0},    // DestinationIn
-    {1, -1, 0, 0, 0},   // SourceOut
-    {0, 0, 1, -1, 0},   // DestinationOut
-    {0, 1, 1, -1, 0},   // SourceATop
-    {1, -1, 0, 1, 0},   // DestinationATop
-    {1, -1, 1, -1, 0},  // Xor
-    {1, 0, 1, 0, 0},    // Plus
-    {0, 0, 0, 0, 1},    // Modulate
-    {0, 0, 1, 0, -1},   // Screen
-}};
-
 std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
     const std::shared_ptr<FilterInput>& input,
     const ContentContext& renderer,
@@ -423,14 +440,17 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
 
     auto size = coverage.size;
     auto origin = coverage.origin;
+    auto color = foreground_color.Premultiply();
     VertexBufferBuilder<VS::PerVertexData> vtx_builder;
     vtx_builder.AddVertices({
-        {origin, dst_uvs[0]},
-        {Point(origin.x + size.width, origin.y), dst_uvs[1]},
-        {Point(origin.x + size.width, origin.y + size.height), dst_uvs[3]},
-        {origin, dst_uvs[0]},
-        {Point(origin.x + size.width, origin.y + size.height), dst_uvs[3]},
-        {Point(origin.x, origin.y + size.height), dst_uvs[2]},
+        {origin, dst_uvs[0], color},
+        {Point(origin.x + size.width, origin.y), dst_uvs[1], color},
+        {Point(origin.x + size.width, origin.y + size.height), dst_uvs[3],
+         color},
+        {origin, dst_uvs[0], color},
+        {Point(origin.x + size.width, origin.y + size.height), dst_uvs[3],
+         color},
+        {Point(origin.x, origin.y + size.height), dst_uvs[2], color},
     });
     auto vtx_buffer = vtx_builder.CreateVertexBuffer(host_buffer);
 
@@ -456,9 +476,9 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
     frame_info.texture_sampler_y_coord_scale =
         dst_snapshot->texture->GetYCoordScale();
 
-    frag_info.color = foreground_color.Premultiply();
     frag_info.input_alpha =
         absorb_opacity ? dst_snapshot->opacity * alpha.value_or(1.0) : 1.0;
+    frag_info.output_alpha = 1.0;
 
     auto blend_coefficients =
         kPorterDuffCoefficients[static_cast<int>(blend_mode)];

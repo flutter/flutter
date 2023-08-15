@@ -44,6 +44,7 @@
 #include "impeller/entity/morphology_filter.vert.h"
 #include "impeller/entity/points.comp.h"
 #include "impeller/entity/porter_duff_blend.frag.h"
+#include "impeller/entity/porter_duff_blend.vert.h"
 #include "impeller/entity/radial_gradient_fill.frag.h"
 #include "impeller/entity/rrect_blur.frag.h"
 #include "impeller/entity/rrect_blur.vert.h"
@@ -182,7 +183,7 @@ using GlyphAtlasPipeline =
 using GlyphAtlasColorPipeline =
     RenderPipelineT<GlyphAtlasVertexShader, GlyphAtlasColorFragmentShader>;
 using PorterDuffBlendPipeline =
-    RenderPipelineT<BlendVertexShader, PorterDuffBlendFragmentShader>;
+    RenderPipelineT<PorterDuffBlendVertexShader, PorterDuffBlendFragmentShader>;
 // Instead of requiring new shaders for clips, the solid fill stages are used
 // to redirect writing to the stencil instead of color attachments.
 using ClipPipeline = RenderPipelineT<ClipVertexShader, ClipFragmentShader>;
