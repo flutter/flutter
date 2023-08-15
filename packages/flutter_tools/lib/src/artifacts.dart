@@ -59,10 +59,6 @@ enum Artifact {
   /// The root of the sky_engine package.
   skyEnginePath,
 
-  // Fuchsia artifacts from the engine prebuilts.
-  fuchsiaKernelCompiler,
-  fuchsiaFlutterRunner,
-
   /// Tools related to subsetting or icon font files.
   fontSubset,
   constFinder,
@@ -138,8 +134,6 @@ TargetPlatform? _mapTargetPlatform(TargetPlatform? targetPlatform) {
     case TargetPlatform.linux_x64:
     case TargetPlatform.linux_arm64:
     case TargetPlatform.windows_x64:
-    case TargetPlatform.fuchsia_arm64:
-    case TargetPlatform.fuchsia_x64:
     case TargetPlatform.tester:
     case TargetPlatform.web_javascript:
     case TargetPlatform.android_arm:
@@ -201,12 +195,6 @@ String? _artifactToFileName(Artifact artifact, Platform hostPlatform, [ BuildMod
       return '';
     case Artifact.skyEnginePath:
       return 'sky_engine';
-    case Artifact.fuchsiaKernelCompiler:
-      return 'kernel_compiler.snapshot';
-    case Artifact.fuchsiaFlutterRunner:
-      final String jitOrAot = mode!.isJit ? '_jit' : '_aot';
-      final String productOrNo = mode.isRelease ? '_product' : '';
-      return 'flutter$jitOrAot${productOrNo}_runner-0.far';
     case Artifact.fontSubset:
       return 'font-subset$exe';
     case Artifact.constFinder:
@@ -491,9 +479,6 @@ class CachedArtifacts implements Artifacts {
       case TargetPlatform.linux_arm64:
       case TargetPlatform.windows_x64:
         return _getDesktopArtifactPath(artifact, platform, mode);
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
-        return _getFuchsiaArtifactPath(artifact, platform!, mode!);
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
       case null:
@@ -537,8 +522,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.flutterTester:
       case Artifact.flutterXcframework:
       case Artifact.fontSubset:
-      case Artifact.fuchsiaFlutterRunner:
-      case Artifact.fuchsiaKernelCompiler:
       case Artifact.icuData:
       case Artifact.isolateSnapshotData:
       case Artifact.linuxDesktopPath:
@@ -576,64 +559,11 @@ class CachedArtifacts implements Artifacts {
       case Artifact.flutterPatchedSdkPath:
       case Artifact.flutterTester:
       case Artifact.fontSubset:
-      case Artifact.fuchsiaFlutterRunner:
-      case Artifact.fuchsiaKernelCompiler:
       case Artifact.icuData:
       case Artifact.isolateSnapshotData:
       case Artifact.linuxDesktopPath:
       case Artifact.linuxHeaders:
       case Artifact.platformKernelDill:
-      case Artifact.platformLibrariesJson:
-      case Artifact.skyEnginePath:
-      case Artifact.vmSnapshotData:
-      case Artifact.windowsCppClientWrapper:
-      case Artifact.windowsDesktopPath:
-      case Artifact.flutterToolsFileGenerators:
-        return _getHostArtifactPath(artifact, platform, mode);
-    }
-  }
-
-  String _getFuchsiaArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
-    final String root = _fileSystem.path.join(
-      _cache.getArtifactDirectory('flutter_runner').path,
-      'flutter',
-      platform.fuchsiaArchForTargetPlatform,
-      mode.isRelease ? 'release' : mode.toString(),
-    );
-    final String runtime = mode.isJit ? 'jit' : 'aot';
-    switch (artifact) {
-      case Artifact.genSnapshot:
-        final String genSnapshot = mode.isRelease ? 'gen_snapshot_product' : 'gen_snapshot';
-        return _fileSystem.path.join(root, runtime, 'dart_binaries', genSnapshot);
-      case Artifact.flutterPatchedSdkPath:
-        const String artifactFileName = 'flutter_runner_patched_sdk';
-        return _fileSystem.path.join(root, runtime, artifactFileName);
-      case Artifact.platformKernelDill:
-        final String artifactFileName = _artifactToFileName(artifact, _platform, mode)!;
-        return _fileSystem.path.join(root, runtime, 'flutter_runner_patched_sdk', artifactFileName);
-      case Artifact.fuchsiaKernelCompiler:
-        final String artifactFileName = _artifactToFileName(artifact, _platform, mode)!;
-        return _fileSystem.path.join(root, runtime, 'dart_binaries', artifactFileName);
-      case Artifact.fuchsiaFlutterRunner:
-        final String artifactFileName = _artifactToFileName(artifact, _platform, mode)!;
-        return _fileSystem.path.join(root, runtime, artifactFileName);
-      case Artifact.constFinder:
-      case Artifact.flutterFramework:
-      case Artifact.flutterMacOSFramework:
-      case Artifact.flutterTester:
-      case Artifact.flutterXcframework:
-      case Artifact.fontSubset:
-      case Artifact.engineDartSdkPath:
-      case Artifact.engineDartBinary:
-      case Artifact.engineDartAotRuntime:
-      case Artifact.dart2jsSnapshot:
-      case Artifact.dart2wasmSnapshot:
-      case Artifact.wasmOptBinary:
-      case Artifact.frontendServerSnapshotForEngineDartSdk:
-      case Artifact.icuData:
-      case Artifact.isolateSnapshotData:
-      case Artifact.linuxDesktopPath:
-      case Artifact.linuxHeaders:
       case Artifact.platformLibrariesJson:
       case Artifact.skyEnginePath:
       case Artifact.vmSnapshotData:
@@ -717,8 +647,6 @@ class CachedArtifacts implements Artifacts {
                      .path;
       case Artifact.flutterFramework:
       case Artifact.flutterXcframework:
-      case Artifact.fuchsiaFlutterRunner:
-      case Artifact.fuchsiaKernelCompiler:
         throw StateError('Artifact $artifact not available for platform $platform.');
       case Artifact.flutterToolsFileGenerators:
         return _getFileGeneratorsPath();
@@ -741,8 +669,6 @@ class CachedArtifacts implements Artifacts {
         }
         final String suffix = mode != BuildMode.debug ? '-${snakeCase(mode.cliName, '-')}' : '';
         return _fileSystem.path.join(engineDir, platformName + suffix);
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
         assert(mode == null, 'Platform $platform does not support different build modes.');
@@ -943,9 +869,6 @@ class CachedLocalEngineArtifacts implements Artifacts {
       case Artifact.flutterMacOSFramework:
         return _fileSystem.path.join(localEngineInfo.engineOutPath, artifactFileName);
       case Artifact.platformKernelDill:
-        if (platform == TargetPlatform.fuchsia_x64 || platform == TargetPlatform.fuchsia_arm64) {
-          return _fileSystem.path.join(localEngineInfo.engineOutPath, 'flutter_runner_patched_sdk', artifactFileName);
-        }
         return _fileSystem.path.join(_getFlutterPatchedSdkPath(mode), artifactFileName);
       case Artifact.platformLibrariesJson:
         return _fileSystem.path.join(_getFlutterPatchedSdkPath(mode), 'lib', artifactFileName);
@@ -957,21 +880,9 @@ class CachedLocalEngineArtifacts implements Artifacts {
         // what was specified in [mode] argument because local engine will
         // have only one flutter_patched_sdk in standard location, that
         // is happen to be what debug(non-release) mode is using.
-        if (platform == TargetPlatform.fuchsia_x64 || platform == TargetPlatform.fuchsia_arm64) {
-          return _fileSystem.path.join(localEngineInfo.engineOutPath, 'flutter_runner_patched_sdk');
-        }
         return _getFlutterPatchedSdkPath(BuildMode.debug);
       case Artifact.skyEnginePath:
         return _fileSystem.path.join(_hostEngineOutPath, 'gen', 'dart-pkg', artifactFileName);
-      case Artifact.fuchsiaKernelCompiler:
-        final String hostPlatform = getNameForHostPlatform(getCurrentHostPlatform());
-        final String modeName = mode!.isRelease ? 'release' : mode.toString();
-        final String dartBinaries = 'dart_binaries-$modeName-$hostPlatform';
-        return _fileSystem.path.join(localEngineInfo.engineOutPath, 'host_bundle', dartBinaries, 'kernel_compiler.dart.snapshot');
-      case Artifact.fuchsiaFlutterRunner:
-        final String jitOrAot = mode!.isJit ? '_jit' : '_aot';
-        final String productOrNo = mode.isRelease ? '_product' : '';
-        return _fileSystem.path.join(localEngineInfo.engineOutPath, 'flutter$jitOrAot${productOrNo}_runner-0.far');
       case Artifact.fontSubset:
         return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
       case Artifact.constFinder:
@@ -1044,8 +955,6 @@ class CachedLocalEngineArtifacts implements Artifacts {
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
       case TargetPlatform.web_javascript:
       case TargetPlatform.tester:
         throwToolExit('Unsupported host platform: $hostPlatform');
@@ -1142,8 +1051,6 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
         case Artifact.windowsDesktopPath:
         case Artifact.windowsCppClientWrapper:
         case Artifact.skyEnginePath:
-        case Artifact.fuchsiaKernelCompiler:
-        case Artifact.fuchsiaFlutterRunner:
         case Artifact.fontSubset:
         case Artifact.constFinder:
         case Artifact.flutterToolsFileGenerators:
@@ -1242,8 +1149,6 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
       case TargetPlatform.web_javascript:
       case TargetPlatform.tester:
         throwToolExit('Unsupported host platform: $hostPlatform');

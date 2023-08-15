@@ -532,8 +532,6 @@ enum TargetPlatform {
   linux_x64,
   linux_arm64,
   windows_x64,
-  fuchsia_arm64,
-  fuchsia_x64,
   tester,
   web_javascript,
   // The arch specific android target platforms are soft-deprecated.
@@ -544,28 +542,6 @@ enum TargetPlatform {
   android_arm64,
   android_x64,
   android_x86;
-
-  String get fuchsiaArchForTargetPlatform {
-    switch (this) {
-      case TargetPlatform.fuchsia_arm64:
-        return 'arm64';
-      case TargetPlatform.fuchsia_x64:
-        return 'x64';
-      case TargetPlatform.android:
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
-      case TargetPlatform.darwin:
-      case TargetPlatform.ios:
-      case TargetPlatform.linux_arm64:
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.tester:
-      case TargetPlatform.web_javascript:
-      case TargetPlatform.windows_x64:
-        throw UnsupportedError('Unexpected Fuchsia platform $this');
-    }
-  }
 
   String get simpleName {
     switch (this) {
@@ -580,8 +556,6 @@ enum TargetPlatform {
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
       case TargetPlatform.ios:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
@@ -732,10 +706,6 @@ String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch
       return 'linux-arm64';
     case TargetPlatform.windows_x64:
       return 'windows-x64';
-    case TargetPlatform.fuchsia_arm64:
-      return 'fuchsia-arm64';
-    case TargetPlatform.fuchsia_x64:
-      return 'fuchsia-x64';
     case TargetPlatform.tester:
       return 'flutter-tester';
     case TargetPlatform.web_javascript:
@@ -757,10 +727,6 @@ TargetPlatform getTargetPlatformForName(String platform) {
       return TargetPlatform.android_x64;
     case 'android-x86':
       return TargetPlatform.android_x86;
-    case 'fuchsia-arm64':
-      return TargetPlatform.fuchsia_arm64;
-    case 'fuchsia-x64':
-      return TargetPlatform.fuchsia_x64;
     case 'ios':
       return TargetPlatform.ios;
     case 'darwin':
@@ -874,11 +840,6 @@ String getLinuxBuildDirectory([TargetPlatform? targetPlatform]) {
 /// Returns the Windows build output directory.
 String getWindowsBuildDirectory() {
   return globals.fs.path.join(getBuildDirectory(), 'windows');
-}
-
-/// Returns the Fuchsia build output directory.
-String getFuchsiaBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'fuchsia');
 }
 
 /// Defines specified via the `--dart-define` command-line option.

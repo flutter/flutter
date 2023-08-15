@@ -43,8 +43,6 @@ class FlutterCache extends Cache {
     registerArtifact(WindowsEngineArtifacts(this, platform: platform));
     registerArtifact(MacOSEngineArtifacts(this, platform: platform));
     registerArtifact(LinuxEngineArtifacts(this, platform: platform));
-    registerArtifact(LinuxFuchsiaSDKArtifacts(this, platform: platform));
-    registerArtifact(MacOSFuchsiaSDKArtifacts(this, platform: platform));
     registerArtifact(FlutterRunnerSDKArtifacts(this, platform: platform));
     registerArtifact(FlutterRunnerDebugSymbols(this, platform: platform));
     for (final String artifactName in IosUsbArtifacts.artifactNames) {
@@ -560,61 +558,6 @@ class GradleWrapper extends CachedArtifact {
       return false;
     }
     return true;
-  }
-}
-
-/// Common functionality for pulling Fuchsia SDKs.
-abstract class _FuchsiaSDKArtifacts extends CachedArtifact {
-  _FuchsiaSDKArtifacts(Cache cache, String platform) :
-    _path = 'fuchsia/sdk/core/$platform-amd64',
-    super(
-      'fuchsia-$platform',
-      cache,
-      DevelopmentArtifact.fuchsia,
-    );
-
-  final String _path;
-
-  @override
-  Directory get location => cache.getArtifactDirectory('fuchsia');
-
-  Future<void> _doUpdate(ArtifactUpdater artifactUpdater) {
-    final String url = '${cache.cipdBaseUrl}/$_path/+/$version';
-    return artifactUpdater.downloadZipArchive('Downloading package fuchsia SDK...',
-                               Uri.parse(url), location);
-  }
-}
-
-/// The pre-built flutter runner for Fuchsia development.
-class FlutterRunnerSDKArtifacts extends CachedArtifact {
-  FlutterRunnerSDKArtifacts(Cache cache, {
-    required Platform platform,
-  }) : _platform = platform,
-        super(
-        'flutter_runner',
-        cache,
-        DevelopmentArtifact.flutterRunner,
-      );
-
-  final Platform _platform;
-
-  @override
-  Directory get location => cache.getArtifactDirectory('flutter_runner');
-
-  @override
-  String? get version => cache.getVersionFor('engine');
-
-  @override
-  Future<void> updateInner(
-    ArtifactUpdater artifactUpdater,
-    FileSystem fileSystem,
-    OperatingSystemUtils operatingSystemUtils,
-  ) async {
-    if (!_platform.isLinux && !_platform.isMacOS) {
-      return;
-    }
-    final String url = '${cache.cipdBaseUrl}/flutter/fuchsia/+/git_revision:$version';
-    await artifactUpdater.downloadZipArchive('Downloading package flutter runner...', Uri.parse(url), location);
   }
 }
 

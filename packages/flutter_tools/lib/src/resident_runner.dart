@@ -86,9 +86,6 @@ class FlutterDevice {
     String? userIdentifier,
   }) async {
     final TargetPlatform targetPlatform = await device.targetPlatform;
-    if (device.platformType == PlatformType.fuchsia) {
-      targetModel = TargetModel.flutterRunner;
-    }
     final DevelopmentShaderCompiler shaderCompiler = DevelopmentShaderCompiler(
       shaderCompiler: ShaderCompiler(
         artifacts: globals.artifacts!,
@@ -1620,8 +1617,6 @@ Future<String?> getMissingPackageHintForPlatform(TargetPlatform platform) async 
       return 'Is your project missing an ios/Runner/Info.plist?\nConsider running "flutter create ." to create one.';
     case TargetPlatform.android:
     case TargetPlatform.darwin:
-    case TargetPlatform.fuchsia_arm64:
-    case TargetPlatform.fuchsia_x64:
     case TargetPlatform.linux_arm64:
     case TargetPlatform.linux_x64:
     case TargetPlatform.tester:

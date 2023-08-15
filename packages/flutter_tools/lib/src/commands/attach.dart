@@ -20,7 +20,6 @@ import '../compile.dart';
 import '../daemon.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
-import '../fuchsia/fuchsia_device.dart';
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
 import '../macos/macos_ipad_device.dart';
@@ -284,32 +283,14 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       : null;
 
     Stream<Uri>? vmServiceUri;
-    bool usesIpv6 = ipv6!;
+    final bool usesIpv6 = ipv6!;
     final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
     final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
     final String hostname = usesIpv6 ? ipv6Loopback : ipv4Loopback;
     final bool isWirelessIOSDevice = (device is IOSDevice) && device.isWirelesslyConnected;
 
     if ((debugPort == null && debugUri == null) || isWirelessIOSDevice) {
-      if (device is FuchsiaDevice) {
-        final String? module = stringArg('module');
-        if (module == null) {
-          throwToolExit("'--module' is required for attaching to a Fuchsia device");
-        }
-        usesIpv6 = device.ipv6;
-        FuchsiaIsolateDiscoveryProtocol? isolateDiscoveryProtocol;
-        try {
-          isolateDiscoveryProtocol = device.getIsolateDiscoveryProtocol(module);
-          vmServiceUri = Stream<Uri>.value(await isolateDiscoveryProtocol.uri).asBroadcastStream();
-        } on Exception {
-          isolateDiscoveryProtocol?.dispose();
-          final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
-          for (final ForwardedPort port in ports) {
-            await device.portForwarder.unforward(port);
-          }
-          rethrow;
-        }
-      } else if (_isIOSDevice(device)) {
+      if (_isIOSDevice(device)) {
         // Protocol Discovery relies on logging. On iOS earlier than 13, logging is gathered using syslog.
         // syslog is not available for iOS 13+. For iOS 13+, Protocol Discovery gathers logs from the VMService.
         // Since we don't have access to the VMService yet, Protocol Discovery cannot be used for iOS 13+.

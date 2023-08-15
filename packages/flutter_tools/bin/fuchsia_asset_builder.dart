@@ -65,7 +65,7 @@ Future<void> run(List<String> args) async {
     manifestPath: argResults[_kOptionManifest] as String? ?? defaultManifestPath,
     assetDirPath: assetDir,
     packagesPath: argResults[_kOptionPackages] as String?,
-    targetPlatform: TargetPlatform.fuchsia_arm64 // This is not arch specific.
+    targetPlatform: TargetPlatform.linux_arm64 // This is not arch specific.
   );
 
   if (assets == null) {

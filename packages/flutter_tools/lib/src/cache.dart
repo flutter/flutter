@@ -63,12 +63,6 @@ class DevelopmentArtifact {
   /// Artifacts required for desktop Linux.
   static const DevelopmentArtifact linux = DevelopmentArtifact._('linux', feature: flutterLinuxDesktopFeature);
 
-  /// Artifacts required for Fuchsia.
-  static const DevelopmentArtifact fuchsia = DevelopmentArtifact._('fuchsia', feature: flutterFuchsiaFeature);
-
-  /// Artifacts required for the Flutter Runner.
-  static const DevelopmentArtifact flutterRunner = DevelopmentArtifact._('flutter_runner', feature: flutterFuchsiaFeature);
-
   /// Artifacts required for any development platform.
   ///
   /// This does not need to be explicitly returned from requiredArtifacts as
@@ -85,7 +79,6 @@ class DevelopmentArtifact {
     macOS,
     windows,
     linux,
-    fuchsia,
     universal,
     flutterRunner,
   ];
@@ -501,7 +494,7 @@ class Cache {
 
   /// The base for URLs that store Flutter engine artifacts in CIPD.
   ///
-  /// For some platforms, such as Web and Fuchsia, CIPD artifacts are fetched
+  /// For some platforms, such as Web, CIPD artifacts are fetched
   /// during the installation of the Flutter SDK, in addition to those fetched
   /// from [storageBaseUrl].
   ///

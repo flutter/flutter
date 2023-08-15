@@ -26,7 +26,6 @@ import 'custom_devices/custom_device_workflow.dart';
 import 'device.dart';
 import 'doctor_validator.dart';
 import 'features.dart';
-import 'fuchsia/fuchsia_workflow.dart';
 import 'globals.dart' as globals;
 import 'http_host_validator.dart';
 import 'intellij/intellij_validator.dart';
@@ -196,10 +195,6 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
 
       if (androidWorkflow?.appliesToHostPlatform ?? false) {
         _workflows!.add(androidWorkflow!);
-      }
-
-      if (fuchsiaWorkflow?.appliesToHostPlatform ?? false) {
-        _workflows!.add(fuchsiaWorkflow!);
       }
 
       if (linuxWorkflow.appliesToHostPlatform) {

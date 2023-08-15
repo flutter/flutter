@@ -68,7 +68,6 @@ The `getSupportedPlatforms()` command will enumerate all platforms supported by 
    - linux #experimental
    - macos #experimental
    - windows #experimental
-   - fuchsia #experimental
    - web #experimental
 
 #### Events
@@ -188,7 +187,7 @@ Return a list of all connected devices. The `params` field will be a List; each 
 
 `platformType` is a string description of the platform sub-folder the device
 supports. The current categories are "android", "ios", "linux", "macos",
-"fuchsia", "windows", and "web". These are kept in sync with the response from `daemon.getSupportedPlatforms`.
+"windows", and "web". These are kept in sync with the response from `daemon.getSupportedPlatforms`.
 
 `ephemeral` is a boolean which indicates where the device needs to be manually connected to a development machine. For example, a physical Android device is ephemeral, but the "web" device (that is always present) is not.
 

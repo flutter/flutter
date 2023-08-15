@@ -49,9 +49,6 @@ class TargetModel {
   /// The Flutter patched Dart SDK.
   static const TargetModel flutter = TargetModel._('flutter');
 
-  /// The Fuchsia patched SDK.
-  static const TargetModel flutterRunner = TargetModel._('flutter_runner');
-
   /// The Dart VM.
   static const TargetModel vm = TargetModel._('vm');
 
