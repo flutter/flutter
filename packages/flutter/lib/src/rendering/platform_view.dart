@@ -440,6 +440,15 @@ class RenderUiKitView extends RenderDarwinPlatformView<UiKitViewController> {
   }
 }
 
+/// A render object for a macOS platform view.
+class RenderAppKitView extends RenderDarwinPlatformView<AppKitViewController> {
+  /// Creates a render object for a macOS AppKitView.
+  RenderAppKitView({
+    required super.viewController,
+    required super.hitTestBehavior,
+  });
+}
+
 // This recognizer constructs gesture recognizers from a set of gesture recognizer factories
 // it was give, adds all of them to a gesture arena team with the _UiKitViewGestureRecognizer
 // as the team captain.
