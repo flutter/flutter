@@ -1790,8 +1790,11 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
   }
 
   _TextBoundaryRecord _getParagraphBoundaryAtPosition(TextPosition position) {
-    final ParagraphBoundary paragraphBoundary = ParagraphBoundary(range.textInside(fullText));
-    final TextRange paragraphRange = paragraphBoundary.getTextBoundaryAt(position.offset);
+    final String text = range.textInside(fullText);
+    final ParagraphBoundary paragraphBoundary = ParagraphBoundary(text);
+    final int start = paragraphBoundary.getLeadingTextBoundaryAt(position.offset - 1) ?? 0;
+    final int end = paragraphBoundary.getTrailingTextBoundaryAt(position.offset) ?? text.length;
+    final TextRange paragraphRange = TextRange(start: start, end: end);
     assert(paragraphRange.isNormalized);
     return (boundaryStart: TextPosition(offset: paragraphRange.start), boundaryEnd: TextPosition(offset: paragraphRange.end));
   }
