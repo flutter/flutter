@@ -284,17 +284,40 @@ class EngineBuildPaths {
   final String? webSdk;
 }
 
-/// Information about a local engine build
+/// Information about a local engine build (i.e. `--local-engine[-host]=...`).
+/// 
+/// See https://github.com/flutter/flutter/wiki/The-flutter-tool#using-a-locally-built-engine-with-the-flutter-tool
+/// for more information about local engine builds.
 class LocalEngineInfo {
+  /// Creates a reference to a local engine build.
+  /// 
+  /// The [engineOutPath] and [engineHostOutPath] are assumed to be resolvable
+  /// paths to the built engine artifacts for the target (device) and host
+  /// (build) platforms, respectively.
   const LocalEngineInfo({
     required this.engineOutPath,
     required this.engineHostOutPath,
-    required this.localEngineName,
   });
 
+  /// The path to the engine artifacts for the target (device) platform.
+  /// 
+  /// For example, if the target platform is Android debug, this would be a path
+  /// like `/path/to/engine/src/out/android_debug_unopt`. To retrieve just the
+  /// name (platform), see [localEngineName].
   final String engineOutPath;
+
+  /// The path to the engine artifacts for the host (build) platform.
+  /// 
+  /// For example, if the host platform is debug, this would be a path like
+  /// `/path/to/engine/src/out/host_debug_unopt`. To retrieve just the name
+  /// (platform), see [localEngineHostName].
   final String engineHostOutPath;
-  final String localEngineName;
+
+  /// The name of the target (device) platform, i.e. `android_debug_unopt`.
+  String get localEngineName => globals.fs.path.basename(engineOutPath);
+
+  /// The name of the host (build) platform, i.e. `host_debug_unopt`.
+  String get localEngineHostName => globals.fs.path.basename(engineHostOutPath);
 }
 
 // Manages the engine artifacts of Flutter.
@@ -826,7 +849,6 @@ class CachedLocalEngineArtifacts implements Artifacts {
          LocalEngineInfo(
            engineOutPath: engineOutPath,
            engineHostOutPath: _hostEngineOutPath,
-           localEngineName: fileSystem.path.basename(engineOutPath)
          ),
        _cache = cache,
        _processManager = processManager,
@@ -1381,11 +1403,13 @@ class _TestArtifacts implements Artifacts {
 
 class _TestLocalEngine extends _TestArtifacts {
   _TestLocalEngine(
-      String engineOutPath, String engineHostOutPath, super.fileSystem)
-      : localEngineInfo = LocalEngineInfo(
-            engineOutPath: engineOutPath,
-            engineHostOutPath: engineHostOutPath,
-            localEngineName: fileSystem.path.basename(engineOutPath));
+    String engineOutPath,
+    String engineHostOutPath,
+    super.fileSystem,
+  ) : localEngineInfo = LocalEngineInfo(
+        engineOutPath: engineOutPath,
+        engineHostOutPath: engineHostOutPath,
+      );
 
   @override
   bool get isLocalEngine => true;

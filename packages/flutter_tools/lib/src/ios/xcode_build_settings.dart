@@ -187,6 +187,9 @@ Future<List<String>> _xcodeBuildSettingsLines({
     final String localEngineName = localEngineInfo.localEngineName;
     xcodeBuildSettings.add('LOCAL_ENGINE=$localEngineName');
 
+    final String localEngineHostName = localEngineInfo.localEngineHostName;
+    xcodeBuildSettings.add('LOCAL_ENGINE_HOST=$localEngineHostName');
+
     // Tell Xcode not to build universal binaries for local engines, which are
     // single-architecture.
     //
