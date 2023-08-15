@@ -10,6 +10,7 @@ import 'dart:typed_data';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:vector_math/vector_math_64.dart' show Matrix3;
 
 /// Class that makes it easy to mock common toStringDeep behavior.
 class _MockToStringDeep {
@@ -247,6 +248,35 @@ void main() {
         0, -2, 0, 0,
         0,  0, 1, 0,
         0,  0, 0, 1,
+      ])))
+    );
+  });
+
+  test('matrix3MoreOrLessEquals', () {
+    expect(
+      Matrix3.rotationZ(math.pi),
+      matrix3MoreOrLessEquals(Matrix3.fromList(<double>[
+       -1,  0, 0,
+        0, -1, 0,
+        0,  0, 1,
+      ]))
+    );
+
+    expect(
+      Matrix3.rotationZ(math.pi),
+      matrix3MoreOrLessEquals(Matrix3.fromList(<double>[
+       -2,  0, 0,
+        0, -2, 0,
+        0,  0, 1,
+      ]), epsilon: 2)
+    );
+
+    expect(
+      Matrix3.rotationZ(math.pi),
+      isNot(matrix3MoreOrLessEquals(Matrix3.fromList(<double>[
+       -2,  0, 0,
+        0, -2, 0,
+        0,  0, 1,
       ])))
     );
   });
