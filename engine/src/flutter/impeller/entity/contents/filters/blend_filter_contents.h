@@ -4,10 +4,32 @@
 
 #pragma once
 
+#include <optional>
 #include "impeller/entity/contents/filters/color_filter_contents.h"
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
+#include "impeller/geometry/color.h"
 
 namespace impeller {
+
+constexpr std::array<std::array<Scalar, 5>, 15> kPorterDuffCoefficients = {{
+    {0, 0, 0, 0, 0},    // Clear
+    {1, 0, 0, 0, 0},    // Source
+    {0, 0, 1, 0, 0},    // Destination
+    {1, 0, 1, -1, 0},   // SourceOver
+    {1, -1, 1, 0, 0},   // DestinationOver
+    {0, 1, 0, 0, 0},    // SourceIn
+    {0, 0, 0, 1, 0},    // DestinationIn
+    {1, -1, 0, 0, 0},   // SourceOut
+    {0, 0, 1, -1, 0},   // DestinationOut
+    {0, 1, 1, -1, 0},   // SourceATop
+    {1, -1, 0, 1, 0},   // DestinationATop
+    {1, -1, 1, -1, 0},  // Xor
+    {1, 0, 1, 0, 0},    // Plus
+    {0, 0, 0, 0, 1},    // Modulate
+    {0, 0, 1, 0, -1},   // Screen
+}};
+
+std::optional<BlendMode> InvertPorterDuffBlend(BlendMode blend_mode);
 
 class BlendFilterContents : public ColorFilterContents {
  public:
