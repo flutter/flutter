@@ -282,15 +282,7 @@ void main() {
     await tester.tap(find.text('Another package'));
     await tester.pumpAndSettle();
     expect(find.text('Another license'), findsOneWidget);
-  },
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(polina-c): remove after fixing
-    // https://github.com/flutter/flutter/issues/130354
-    notGCedAllowList: <String, int?>{
-      'ValueNotifier<_OverlayEntryWidgetState?>': 2,
-      'ValueNotifier<String?>': 1,
-    },
-  ));
+  });
 
   testWidgetsWithLeakTracking('LicensePage control test with all properties', (WidgetTester tester) async {
     const FlutterLogo logo = FlutterLogo();
@@ -366,15 +358,7 @@ void main() {
     await tester.tap(find.text('Another package'));
     await tester.pumpAndSettle();
     expect(find.text('Another license'), findsOneWidget);
-  },
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(polina-c): remove after fixing
-    // https://github.com/flutter/flutter/issues/130354
-    notGCedAllowList: <String, int?>{
-      'ValueNotifier<_OverlayEntryWidgetState?>':2,
-      'ValueNotifier<String?>': 1,
-    },
-  ));
+  });
 
   testWidgetsWithLeakTracking('Material2 - _PackageLicensePage title style without AppBarTheme', (WidgetTester tester) async {
     LicenseRegistry.addLicense(() {
