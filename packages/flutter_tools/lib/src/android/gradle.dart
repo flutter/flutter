@@ -401,6 +401,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       command.add('-Plocal-engine-repo=${localEngineRepo.path}');
       command.add('-Plocal-engine-build-mode=${buildInfo.modeName}');
       command.add('-Plocal-engine-out=${localEngineInfo.engineOutPath}');
+      command.add('-Plocal-engine-host-out=${localEngineInfo.engineHostOutPath}');
       command.add('-Ptarget-platform=${_getTargetPlatformByLocalEnginePath(
           localEngineInfo.engineOutPath)}');
     } else if (androidBuildInfo.targetArchs.isNotEmpty) {
@@ -726,6 +727,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       command.add('-Plocal-engine-repo=${localEngineRepo.path}');
       command.add('-Plocal-engine-build-mode=${buildInfo.modeName}');
       command.add('-Plocal-engine-out=${localEngineInfo.engineOutPath}');
+      command.add('-Plocal-engine-host-out=${localEngineInfo.engineHostOutPath}');
 
       // Copy the local engine repo in the output directory.
       try {

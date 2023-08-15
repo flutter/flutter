@@ -104,17 +104,17 @@ void main() {
   testWithoutContext('defaultIOSArchsForEnvironment', () {
     expect(defaultIOSArchsForEnvironment(
       EnvironmentType.physical,
-      Artifacts.test(localEngine: 'ios_debug_unopt'),
+      Artifacts.testLocalEngine(localEngineHost: 'host_debug_unopt', localEngine: 'ios_debug_unopt'),
     ).single, DarwinArch.arm64);
 
     expect(defaultIOSArchsForEnvironment(
       EnvironmentType.simulator,
-      Artifacts.test(localEngine: 'ios_debug_sim_unopt'),
+      Artifacts.testLocalEngine(localEngineHost: 'host_debug_unopt', localEngine: 'ios_debug_sim_unopt'),
     ).single, DarwinArch.x86_64);
 
     expect(defaultIOSArchsForEnvironment(
       EnvironmentType.simulator,
-      Artifacts.test(localEngine: 'ios_debug_sim_unopt_arm64'),
+      Artifacts.testLocalEngine(localEngineHost: 'host_debug_unopt', localEngine: 'ios_debug_sim_unopt_arm64'),
     ).single, DarwinArch.arm64);
 
     expect(defaultIOSArchsForEnvironment(
@@ -128,11 +128,11 @@ void main() {
 
   testWithoutContext('defaultMacOSArchsForEnvironment', () {
     expect(defaultMacOSArchsForEnvironment(
-      Artifacts.test(localEngine: 'host_debug_unopt'),
+      Artifacts.testLocalEngine(localEngineHost: 'host_debug_unopt', localEngine: 'host_debug_unopt'),
     ).single, DarwinArch.x86_64);
 
     expect(defaultMacOSArchsForEnvironment(
-      Artifacts.test(localEngine: 'host_debug_unopt_arm64'),
+      Artifacts.testLocalEngine(localEngineHost: 'host_debug_unopt', localEngine: 'host_debug_unopt_arm64'),
     ).single, DarwinArch.arm64);
 
     expect(defaultMacOSArchsForEnvironment(
