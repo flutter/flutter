@@ -14,6 +14,8 @@
 
 namespace flutter {
 
+// External texture peered to a sequence of android.hardware.HardwareBuffers.
+//
 class HardwareBufferExternalTexture : public flutter::Texture {
  public:
   explicit HardwareBufferExternalTexture(
