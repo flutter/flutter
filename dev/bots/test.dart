@@ -1014,8 +1014,6 @@ Future<void> _runFrameworkTests() async {
       <String>['build', 'apk', '--debug', '--flavor=does-not-exist'],
       workingDirectory: path.join(flutterRoot, 'packages', 'integration_test', 'example', 'android'),
     );
-    await runCommand('ls', <String>[path.join(flutterRoot, 'packages', 'integration_test', 'example', 'android')]);
-    await runCommand('ls', <String>[path.join(flutterRoot, 'packages', 'integration_test', 'android', 'src', 'test', 'java', 'dev', 'flutter', 'plugins', 'integration_test')]);
     await runCommand(
       path.join(flutterRoot, 'packages', 'integration_test', 'example', 'android', 'gradlew'),
       <String>[
