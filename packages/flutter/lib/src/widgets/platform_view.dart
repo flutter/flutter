@@ -325,6 +325,7 @@ class UiKitView extends _DarwinView {
   State<UiKitView> createState() => _UiKitViewState();
 }
 
+/// Embeds a MacOS view in the Widget hierarchy.
 class AppKitView extends _DarwinView {
   /// Creates a widget that embeds a macOS view.
   const AppKitView({

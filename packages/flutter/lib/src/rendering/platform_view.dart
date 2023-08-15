@@ -316,7 +316,7 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
 
   PointerEvent? _lastPointerDownEvent;
 
-  _UiKitViewGestureRecognizer? gestureRecognizer;
+  _UiKitViewGestureRecognizer? _gestureRecognizer;
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
@@ -380,6 +380,7 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
     super.detach();
   }
 
+  /// {@macro flutter.rendering.PlatformViewRenderBox.updateGestureRecognizers}
   void updateGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers);
 }
 
@@ -412,17 +413,18 @@ class RenderUiKitView extends RenderDarwinPlatformView<UiKitViewController> {
     });
 
   /// {@macro flutter.rendering.PlatformViewRenderBox.updateGestureRecognizers}
+  @override
   void updateGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {
     assert(
       _factoriesTypeSet(gestureRecognizers).length == gestureRecognizers.length,
       'There were multiple gesture recognizer factories for the same type, there must only be a single '
       'gesture recognizer factory for each gesture recognizer type.',
     );
-    if (_factoryTypesSetEquals(gestureRecognizers, gestureRecognizer?.gestureRecognizerFactories)) {
+    if (_factoryTypesSetEquals(gestureRecognizers, _gestureRecognizer?.gestureRecognizerFactories)) {
       return;
     }
-    gestureRecognizer?.dispose();
-    gestureRecognizer = _UiKitViewGestureRecognizer(viewController, gestureRecognizers);
+    _gestureRecognizer?.dispose();
+    _gestureRecognizer = _UiKitViewGestureRecognizer(viewController, gestureRecognizers);
   }
 
   @override
@@ -430,13 +432,13 @@ class RenderUiKitView extends RenderDarwinPlatformView<UiKitViewController> {
     if (event is! PointerDownEvent) {
       return;
     }
-    gestureRecognizer!.addPointer(event);
+    _gestureRecognizer!.addPointer(event);
     _lastPointerDownEvent = event.original ?? event;
   }
 
   @override
   void detach() {
-    gestureRecognizer!.reset();
+    _gestureRecognizer!.reset();
     super.detach();
   }
 }
@@ -455,6 +457,7 @@ class RenderAppKitView extends RenderDarwinPlatformView<AppKitViewController> {
   // This method will need to behave the same as the same-named method for RenderUiKitView,
   // but use a _AppKitViewGestureRecognizer or equivalent, whose constructor shall accept an
   // AppKitViewController.
+  @override
   void updateGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {}
 }
 
