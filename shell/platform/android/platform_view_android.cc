@@ -14,14 +14,14 @@
 #include "flutter/shell/platform/android/android_context_gl_impeller.h"
 #include "flutter/shell/platform/android/android_context_gl_skia.h"
 #include "flutter/shell/platform/android/android_context_vulkan_impeller.h"
-#include "flutter/shell/platform/android/android_external_texture_gl.h"
 #include "flutter/shell/platform/android/android_surface_gl_impeller.h"
 #include "flutter/shell/platform/android/android_surface_gl_skia.h"
 #include "flutter/shell/platform/android/android_surface_software.h"
 #include "flutter/shell/platform/android/hardware_buffer_external_texture_gl.h"
-#include "flutter/shell/platform/android/hardware_buffer_external_texture_vk.h"
+#include "flutter/shell/platform/android/surface_texture_external_texture_gl.h"
 #if IMPELLER_ENABLE_VULKAN  // b/258506856 for why this is behind an if
 #include "flutter/shell/platform/android/android_surface_vulkan_impeller.h"
+#include "flutter/shell/platform/android/hardware_buffer_external_texture_vk.h"
 #endif
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
@@ -301,10 +301,20 @@ void PlatformViewAndroid::RegisterExternalTexture(
     int64_t texture_id,
     const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture) {
   if (android_context_->RenderingApi() == AndroidRenderingAPI::kOpenGLES) {
-    RegisterTexture(std::make_shared<AndroidExternalTextureGL>(
-        texture_id, surface_texture, jni_facade_));
+    if (android_context_->GetImpellerContext()) {
+      // Impeller GLES.
+      RegisterTexture(std::make_shared<SurfaceTextureExternalTextureImpellerGL>(
+          std::static_pointer_cast<impeller::ContextGLES>(
+              android_context_->GetImpellerContext()),
+          texture_id, surface_texture, jni_facade_));
+    } else {
+      // Legacy GL.
+      RegisterTexture(std::make_shared<SurfaceTextureExternalTextureGL>(
+          texture_id, surface_texture, jni_facade_));
+    }
   } else {
-    FML_LOG(INFO) << "Attempted to use a GL texture in a non GL context.";
+    FML_LOG(INFO) << "Attempted to use a SurfaceTextureExternalTexture with an "
+                     "unsupported rendering API.";
   }
 }
 
@@ -312,7 +322,7 @@ void PlatformViewAndroid::RegisterImageTexture(
     int64_t texture_id,
     const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry) {
   if (android_context_->RenderingApi() == AndroidRenderingAPI::kOpenGLES) {
-    if (android_context_->GetImpellerContext() != nullptr) {
+    if (android_context_->GetImpellerContext()) {
       // Impeller GLES.
       RegisterTexture(std::make_shared<HardwareBufferExternalTextureImpellerGL>(
           std::static_pointer_cast<impeller::ContextGLES>(
