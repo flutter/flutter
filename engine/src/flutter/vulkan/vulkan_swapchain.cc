@@ -242,7 +242,7 @@ sk_sp<SkSurface> VulkanSwapchain::CreateSkiaSurface(
   image_info.fLevelCount = 1;
 
   // TODO(chinmaygarde): Setup the stencil buffer and the sampleCnt.
-  GrBackendRenderTarget backend_render_target(size.fWidth, size.fHeight, 0,
+  GrBackendRenderTarget backend_render_target(size.fWidth, size.fHeight,
                                               image_info);
   SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
 

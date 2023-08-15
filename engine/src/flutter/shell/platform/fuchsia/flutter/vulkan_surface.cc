@@ -408,7 +408,7 @@ bool VulkanSurface::SetupSkiaSurface(sk_sp<GrDirectContext> context,
   image_info.fSampleCount = 1;
   image_info.fLevelCount = image_create_info.mipLevels;
 
-  GrBackendRenderTarget sk_render_target(size.width(), size.height(), 0,
+  GrBackendRenderTarget sk_render_target(size.width(), size.height(),
                                          image_info);
 
   SkSurfaceProps sk_surface_props(0, kUnknown_SkPixelGeometry);
