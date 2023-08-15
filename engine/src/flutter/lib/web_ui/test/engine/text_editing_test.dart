@@ -2793,6 +2793,26 @@ Future<void> testMain() async {
       expect(textEditingDeltaState.composingOffset, -1);
       expect(textEditingDeltaState.composingExtent, -1);
     });
+
+    test('Delta state is cleared after setting editing state', (){
+      editingStrategy!.enable(
+        multilineConfig,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+      final DomHTMLInputElement input = editingStrategy!.domElement! as DomHTMLInputElement;
+      input.value = 'foo bar';
+      input.dispatchEvent(createDomEvent('Event', 'input'));
+      expect(
+        lastEditingState,
+        EditingState(text: 'foo bar', baseOffset: 7, extentOffset: 7),
+      );
+      expect(editingStrategy!.editingDeltaState.oldText, 'foo bar');
+
+      editingStrategy!.setEditingState(EditingState(text: 'foo bar baz', baseOffset: 11, extentOffset: 11));
+      input.dispatchEvent(createDomEvent('Event', 'input'));
+      expect(editingStrategy?.editingDeltaState.oldText, 'foo bar baz');
+    });
   });
 
   group('text editing styles', () {
