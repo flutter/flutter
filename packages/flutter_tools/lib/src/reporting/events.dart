@@ -39,6 +39,7 @@ class HotEvent extends UsageEvent {
     required this.sdkName,
     required this.emulator,
     required this.fullRestart,
+    required this.fastReassemble,
     this.reason,
     this.finalLibraryCount,
     this.syncedLibraryCount,
@@ -62,6 +63,7 @@ class HotEvent extends UsageEvent {
   final String sdkName;
   final bool emulator;
   final bool fullRestart;
+  final bool fastReassemble;
   final int? finalLibraryCount;
   final int? syncedLibraryCount;
   final int? syncedClassesCount;
@@ -92,6 +94,7 @@ class HotEvent extends UsageEvent {
       hotEventInvalidatedSourcesCount: invalidatedSourcesCount,
       hotEventTransferTimeInMs: transferTimeInMs,
       hotEventOverallTimeInMs: overallTimeInMs,
+      fastReassemble: fastReassemble,
       hotEventCompileTimeInMs: compileTimeInMs,
       hotEventFindInvalidatedTimeInMs: findInvalidatedTimeInMs,
       hotEventScannedSourcesCount: scannedSourcesCount,

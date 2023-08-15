@@ -505,6 +505,23 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         },
       );
 
+      registerServiceExtension(
+        name: WidgetsServiceExtensions.fastReassemble.name,
+        callback: (Map<String, Object> params) async {
+          // This mirrors the implementation of the 'reassemble' callback registration
+          // in lib/src/foundation/binding.dart, but with the extra binding config used
+          // to skip some reassemble work.
+          final String? className = params['className'] as String?;
+          BindingBase.debugReassembleConfig = DebugReassembleConfig(widgetName: className);
+          try {
+            await reassembleApplication();
+          } finally {
+            BindingBase.debugReassembleConfig = null;
+          }
+          return <String, String>{'type': 'Success'};
+        },
+      );
+
       // Expose the ability to send Widget rebuilds as [Timeline] events.
       registerBoolServiceExtension(
         name: WidgetsServiceExtensions.profileWidgetBuilds.name,
@@ -543,7 +560,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
   Future<void> _forceRebuild() {
     if (rootElement != null) {
-      buildOwner!.reassemble(rootElement!);
+      buildOwner!.reassemble(rootElement!, null);
       return endOfFrame;
     }
     return Future<void>.value();
@@ -1073,7 +1090,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     }());
 
     if (rootElement != null) {
-      buildOwner!.reassemble(rootElement!);
+      buildOwner!.reassemble(rootElement!, BindingBase.debugReassembleConfig);
     }
     return super.performReassemble();
   }

@@ -33,7 +33,7 @@ String getDefaultCachedKernelPath({
 }) {
   final StringBuffer buffer = StringBuffer();
    final List<String> cacheFrontEndOptions = extraFrontEndOptions.toList()
-     ..removeWhere((String arg) => arg.startsWith('--enable-experiment='));
+     ..removeWhere((String arg) => arg.startsWith('--enable-experiment=') || arg == '--flutter-widget-cache');
   buffer.writeAll(dartDefines);
   buffer.writeAll(cacheFrontEndOptions);
   String buildPrefix = '';

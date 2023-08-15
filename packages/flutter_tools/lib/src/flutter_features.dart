@@ -45,6 +45,9 @@ class FlutterFeatureFlags implements FeatureFlags {
   bool get areCustomDevicesEnabled => isEnabled(flutterCustomDevicesFeature);
 
   @override
+  bool get isSingleWidgetReloadEnabled => isEnabled(singleWidgetReload);
+
+  @override
   bool get isFlutterWebWasmEnabled => isEnabled(flutterWebWasm);
 
   @override

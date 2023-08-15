@@ -443,6 +443,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isMacOSEnabled = false,
     this.isWebEnabled = false,
     this.isWindowsEnabled = false,
+    this.isSingleWidgetReloadEnabled = false,
     this.isAndroidEnabled = true,
     this.isIOSEnabled = true,
     this.isFuchsiaEnabled = false,
@@ -461,6 +462,9 @@ class TestFeatureFlags implements FeatureFlags {
 
   @override
   final bool isWindowsEnabled;
+
+  @override
+  final bool isSingleWidgetReloadEnabled;
 
   @override
   final bool isAndroidEnabled;
@@ -488,6 +492,8 @@ class TestFeatureFlags implements FeatureFlags {
         return isMacOSEnabled;
       case flutterWindowsDesktopFeature:
         return isWindowsEnabled;
+      case singleWidgetReload:
+        return isSingleWidgetReloadEnabled;
       case flutterAndroidFeature:
         return isAndroidEnabled;
       case flutterIOSFeature:

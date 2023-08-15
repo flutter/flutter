@@ -34,6 +34,7 @@ import 'compile.dart';
 import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
+import 'features.dart';
 import 'globals.dart' as globals;
 import 'ios/application_package.dart';
 import 'ios/devices.dart';
@@ -168,8 +169,11 @@ class FlutterDevice {
         platform: platform,
       );
     } else {
+      // The flutter-widget-cache feature only applies to run mode.
       List<String> extraFrontEndOptions = buildInfo.extraFrontEndOptions;
       extraFrontEndOptions = <String>[
+        if (featureFlags.isSingleWidgetReloadEnabled)
+         '--flutter-widget-cache',
         '--enable-experiment=alternative-invalidation-strategy',
         ...extraFrontEndOptions,
       ];

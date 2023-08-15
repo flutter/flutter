@@ -970,7 +970,7 @@ mixin WidgetInspectorService {
   Future<void> forceRebuild() {
     final WidgetsBinding binding = WidgetsBinding.instance;
     if (binding.rootElement != null) {
-      binding.buildOwner!.reassemble(binding.rootElement!);
+      binding.buildOwner!.reassemble(binding.rootElement!, null);
       return binding.endOfFrame;
     }
     return Future<void>.value();

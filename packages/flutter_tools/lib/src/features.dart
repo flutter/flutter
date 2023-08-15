@@ -44,6 +44,9 @@ abstract class FeatureFlags {
   /// Whether custom devices are enabled.
   bool get areCustomDevicesEnabled => false;
 
+  /// Whether fast single widget reloads are enabled.
+  bool get isSingleWidgetReloadEnabled => false;
+
   /// Whether WebAssembly compilation for Flutter Web is enabled.
   bool get isFlutterWebWasmEnabled => false;
 
@@ -59,6 +62,7 @@ const List<Feature> allFeatures = <Feature>[
   flutterLinuxDesktopFeature,
   flutterMacOSDesktopFeature,
   flutterWindowsDesktopFeature,
+  singleWidgetReload,
   flutterAndroidFeature,
   flutterIOSFeature,
   flutterFuchsiaFeature,
@@ -132,6 +136,20 @@ const Feature flutterCustomDevicesFeature = Feature(
     available: true,
   ),
   stable: FeatureChannelSetting(
+    available: true,
+  ),
+);
+
+/// The fast hot reload feature for https://github.com/flutter/flutter/issues/61407.
+const Feature singleWidgetReload = Feature(
+  name: 'Hot reload optimization for changes to class body of a single widget',
+  configSetting: 'single-widget-reload-optimization',
+  environmentOverride: 'FLUTTER_SINGLE_WIDGET_RELOAD',
+  master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: true,
+  ),
+  beta: FeatureChannelSetting(
     available: true,
   ),
 );

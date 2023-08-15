@@ -90,6 +90,7 @@ abstract class FlutterTestDriver {
     List<String> arguments, {
     String? script,
     bool withDebugger = false,
+    bool singleWidgetReloads = false,
   }) async {
     final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     if (withDebugger) {
@@ -113,6 +114,8 @@ abstract class FlutterTestDriver {
       environment: <String, String>{
         'FLUTTER_TEST': 'true',
         'FLUTTER_WEB': 'true',
+        if (singleWidgetReloads)
+          'FLUTTER_SINGLE_WIDGET_RELOAD': 'true',
       },
     );
 
@@ -508,6 +511,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool chrome = false,
     bool expressionEvaluation = true,
     bool structuredErrors = false,
+    bool singleWidgetReloads = false,
     bool serveObservatory = false,
     String? script,
     List<String>? additionalCommandArgs,
@@ -538,6 +542,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       startPaused: startPaused,
       pauseOnExceptions: pauseOnExceptions,
       script: script,
+      singleWidgetReloads: singleWidgetReloads,
     );
   }
 
@@ -546,6 +551,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool withDebugger = false,
     bool startPaused = false,
     bool pauseOnExceptions = false,
+    bool singleWidgetReloads = false,
     bool serveObservatory = false,
     List<String>? additionalCommandArgs,
   }) async {
@@ -567,6 +573,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       withDebugger: withDebugger,
       startPaused: startPaused,
       pauseOnExceptions: pauseOnExceptions,
+      singleWidgetReloads: singleWidgetReloads,
       attachPort: port,
     );
   }
@@ -578,6 +585,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     bool withDebugger = false,
     bool startPaused = false,
     bool pauseOnExceptions = false,
+    bool singleWidgetReloads = false,
     int? attachPort,
   }) async {
     assert(!startPaused || withDebugger);
@@ -585,6 +593,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       args,
       script: script,
       withDebugger: withDebugger,
+      singleWidgetReloads: singleWidgetReloads,
     );
 
     final Completer<void> prematureExitGuard = Completer<void>();
@@ -797,11 +806,13 @@ class FlutterTestTestDriver extends FlutterTestDriver {
     bool withDebugger = false,
     bool pauseOnExceptions = false,
     Future<void> Function()? beforeStart,
+    bool singleWidgetReloads = false,
   }) async {
     await super._setupProcess(
       args,
       script: script,
       withDebugger: withDebugger,
+      singleWidgetReloads: singleWidgetReloads,
     );
 
     // Stash the PID so that we can terminate the VM more reliably than using
