@@ -1255,11 +1255,14 @@ class EditableText extends StatefulWidget {
   final Color? selectionColor;
 
   /// {@template flutter.widgets.editableText.selectionControls}
-  /// Optional delegate for building the text selection handles and toolbar.
+  /// Optional delegate for building the text selection handles.
   ///
-  /// The [EditableText] widget used on its own will not trigger the display
-  /// of the selection toolbar by itself. The toolbar is shown by calling
-  /// [EditableTextState.showToolbar] in response to an appropriate user event.
+  /// Historically, this field also controlled the toolbar. This is now handled
+  /// by [contextMenuBuilder] instead. However, for backwards compatibility, when
+  /// [selectionControls] is set to an object that does not mix in
+  /// [TextSelectionHandleControls], [contextMenuBuilder] is ignored and the
+  /// [TextSelectionControls.buildToolbar] method is used instead.
+  /// {@endtemplate}
   ///
   /// See also:
   ///
@@ -1269,7 +1272,6 @@ class EditableText extends StatefulWidget {
   ///  * [TextField], a Material Design themed wrapper of [EditableText], which
   ///    shows the selection toolbar upon appropriate user events based on the
   ///    user's platform set in [ThemeData.platform].
-  /// {@endtemplate}
   final TextSelectionControls? selectionControls;
 
   /// {@template flutter.widgets.editableText.keyboardType}
@@ -1777,6 +1779,11 @@ class EditableText extends StatefulWidget {
   ///
   /// `buttonItems` represents the buttons that would be built by default for
   /// this widget.
+  ///
+  /// For backwards compatibility, when [selectionControls] is set to an object
+  /// that does not mix in [TextSelectionHandleControls], [contextMenuBuilder]
+  /// is ignored and the [TextSelectionControls.buildToolbar] method is used
+  /// instead.
   ///
   /// {@tool dartpad}
   /// This example shows how to customize the menu, in this case by keeping the
