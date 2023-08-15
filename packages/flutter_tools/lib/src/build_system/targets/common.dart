@@ -178,7 +178,6 @@ class KernelSnapshot extends Target {
     final List<String>? fileSystemRoots = environment.defines[kFileSystemRoots]?.split(',');
     final String? fileSystemScheme = environment.defines[kFileSystemScheme];
 
-    const TargetModel targetModel = TargetModel.flutter;
     // Force linking of the platform for desktop embedder targets since these
     // do not correctly load the core snapshots in debug mode.
     // See https://github.com/flutter/flutter/issues/44724
@@ -228,7 +227,6 @@ class KernelSnapshot extends Target {
       aot: buildMode.isPrecompiled,
       buildMode: buildMode,
       trackWidgetCreation: trackWidgetCreation && buildMode != BuildMode.release,
-      targetModel: targetModel,
       outputFilePath: environment.buildDir.childFile('app.dill').path,
       initializeFromDill: buildMode.isPrecompiled ? null :
           environment.buildDir.childFile('app.dill').path,
