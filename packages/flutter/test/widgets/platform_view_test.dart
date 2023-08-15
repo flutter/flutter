@@ -2439,7 +2439,7 @@ void main() {
       await gesture.up();
 
       expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
-    }, skip: true);
+    }, skip: true); // https://github.com/flutter/flutter/issues/128519
 
     testWidgets('AppKitView transparent hit test behavior', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
@@ -2484,7 +2484,7 @@ void main() {
       expect(viewsController.gesturesAccepted[currentViewId + 1], 0);
 
       expect(numPointerDownsOnParent, 1);
-    }, skip: true);
+    }, skip: true); // https://github.com/flutter/flutter/issues/128519
 
     testWidgets('AppKitView translucent hit test behavior', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
@@ -2529,7 +2529,7 @@ void main() {
       expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
 
       expect(numPointerDownsOnParent, 1);
-    }, skip: true);
+    }, skip: true); // https://github.com/flutter/flutter/issues/128519
 
     testWidgets('AppKitView opaque hit test behavior', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
@@ -2572,7 +2572,7 @@ void main() {
 
       expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
       expect(numPointerDownsOnParent, 0);
-    }, skip: true);
+    }, skip: true); // https://github.com/flutter/flutter/issues/128519
 
     testWidgets('UiKitView can lose gesture arenas', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
