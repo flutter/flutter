@@ -561,6 +561,9 @@ void main() {
       );
 
       expect(localEngineInfo.localEngineName, 'android_debug_unopt');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('determines the target device name from the path when using a custom engine path', () {
@@ -570,6 +573,9 @@ void main() {
       );
 
       expect(localEngineInfo.localEngineHostName, 'host_debug_unopt');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 }
