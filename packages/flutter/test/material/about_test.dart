@@ -10,8 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   tearDown(() {
@@ -283,15 +282,7 @@ void main() {
     await tester.tap(find.text('Another package'));
     await tester.pumpAndSettle();
     expect(find.text('Another license'), findsOneWidget);
-  },
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(polina-c): remove after fixing
-    // https://github.com/flutter/flutter/issues/130354
-    notGCedAllowList: <String, int?>{
-      'ValueNotifier<_OverlayEntryWidgetState?>': 2,
-      'ValueNotifier<String?>': 1,
-    },
-  ));
+  });
 
   testWidgetsWithLeakTracking('LicensePage control test with all properties', (WidgetTester tester) async {
     const FlutterLogo logo = FlutterLogo();
@@ -367,15 +358,7 @@ void main() {
     await tester.tap(find.text('Another package'));
     await tester.pumpAndSettle();
     expect(find.text('Another license'), findsOneWidget);
-  },
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(polina-c): remove after fixing
-    // https://github.com/flutter/flutter/issues/130354
-    notGCedAllowList: <String, int?>{
-      'ValueNotifier<_OverlayEntryWidgetState?>':2,
-      'ValueNotifier<String?>': 1,
-    },
-  ));
+  });
 
   testWidgetsWithLeakTracking('Material2 - _PackageLicensePage title style without AppBarTheme', (WidgetTester tester) async {
     LicenseRegistry.addLicense(() {
@@ -583,7 +566,7 @@ void main() {
       tester.getTopLeft(find.text('Licenses')),
       const Offset(16.0 + safeareaPadding, 14.0 + safeareaPadding),
     );
-  });
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
 
   testWidgetsWithLeakTracking('LicensePage returns early if unmounted', (WidgetTester tester) async {
     final Completer<LicenseEntry> licenseCompleter = Completer<LicenseEntry>();
@@ -1578,7 +1561,9 @@ void main() {
     // If the layout width is less than 840.0 pixels, nested layout is
     // used which positions license page title at the top center.
     Offset titleOffset = tester.getCenter(find.text(title));
-    expect(titleOffset, Offset(defaultSize.width / 2, 96.0));
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(titleOffset, Offset(defaultSize.width / 2, 96.0));
+    }
     expect(tester.getCenter(find.byType(ListView)), Offset(defaultSize.width / 2, 328.0));
 
     // Configure a wide window to show the lateral UI.
@@ -1708,7 +1693,9 @@ void main() {
     // If the layout width is less than 840.0 pixels, nested layout is
     // used which positions license page title at the top center.
     Offset titleOffset = tester.getCenter(find.text(title));
-    expect(titleOffset, Offset(defaultSize.width / 2, 96.0));
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(titleOffset, Offset(defaultSize.width / 2, 96.0));
+    }
     expect(tester.getCenter(find.byType(ListView)), Offset(defaultSize.width / 2, 328.0));
 
     // Configure a wide window to show the lateral UI.

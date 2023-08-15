@@ -91,4 +91,18 @@ void main() {
 
     expect(find.text('Last Selected: Blue Background'), findsOneWidget);
   });
+
+  testWidgets('MenuBar is wrapped in a SafeArea', (WidgetTester tester) async {
+    const double safeAreaPadding = 100.0;
+    await tester.pumpWidget(
+      const MediaQuery(
+        data: MediaQueryData(
+          padding: EdgeInsets.symmetric(vertical: safeAreaPadding),
+        ),
+        child: example.MenuBarApp(),
+      ),
+    );
+
+    expect(tester.getTopLeft(find.byType(MenuBar)), const Offset(0.0, safeAreaPadding));
+  });
 }

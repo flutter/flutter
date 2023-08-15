@@ -135,20 +135,20 @@ class OverlayEntry implements Listenable {
   /// Whether the [OverlayEntry] is currently mounted in the widget tree.
   ///
   /// The [OverlayEntry] notifies its listeners when this value changes.
-  bool get mounted => _overlayEntryStateNotifier.value != null;
+  bool get mounted => _overlayEntryStateNotifier?.value != null;
 
   /// The currently mounted `_OverlayEntryWidgetState` built using this [OverlayEntry].
-  final ValueNotifier<_OverlayEntryWidgetState?> _overlayEntryStateNotifier = ValueNotifier<_OverlayEntryWidgetState?>(null);
+  ValueNotifier<_OverlayEntryWidgetState?>? _overlayEntryStateNotifier = ValueNotifier<_OverlayEntryWidgetState?>(null);
 
   @override
   void addListener(VoidCallback listener) {
     assert(!_disposedByOwner);
-    _overlayEntryStateNotifier.addListener(listener);
+    _overlayEntryStateNotifier?.addListener(listener);
   }
 
   @override
   void removeListener(VoidCallback listener) {
-    _overlayEntryStateNotifier.removeListener(listener);
+    _overlayEntryStateNotifier?.removeListener(listener);
   }
 
   OverlayState? _overlay;
@@ -194,7 +194,8 @@ class OverlayEntry implements Listenable {
   void _didUnmount() {
     assert(!mounted);
     if (_disposedByOwner) {
-      _overlayEntryStateNotifier.dispose();
+      _overlayEntryStateNotifier?.dispose();
+      _overlayEntryStateNotifier = null;
     }
   }
 
@@ -217,12 +218,16 @@ class OverlayEntry implements Listenable {
     assert(_overlay == null, 'An OverlayEntry must first be removed from the Overlay before dispose is called.');
     _disposedByOwner = true;
     if (!mounted) {
-      _overlayEntryStateNotifier.dispose();
+      // If we're still mounted when disposed, then this will be disposed in
+      // _didUnmount, to allow notifications to occur until the entry is
+      // unmounted.
+      _overlayEntryStateNotifier?.dispose();
+      _overlayEntryStateNotifier = null;
     }
   }
 
   @override
-  String toString() => '${describeIdentity(this)}(opaque: $opaque; maintainState: $maintainState)';
+  String toString() => '${describeIdentity(this)}(opaque: $opaque; maintainState: $maintainState)${_disposedByOwner ? "(DISPOSED)" : ""}';
 }
 
 class _OverlayEntryWidget extends StatefulWidget {
@@ -296,7 +301,7 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
   late final Iterable<RenderBox> _hitTestOrderIterable = _createChildIterable(reversed: true);
 
   // The following uses sync* because hit-testing is lazy, and LinkedList as a
-  // Iterable doesn't support current modification.
+  // Iterable doesn't support concurrent modification.
   Iterable<RenderBox> _createChildIterable({ required bool reversed }) sync* {
     final LinkedList<_OverlayEntryLocation>? children = _sortedTheaterSiblings;
     if (children == null || children.isEmpty) {
@@ -315,7 +320,7 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
   @override
   void initState() {
     super.initState();
-    widget.entry._overlayEntryStateNotifier.value = this;
+    widget.entry._overlayEntryStateNotifier!.value = this;
     _theater = context.findAncestorRenderObjectOfType<_RenderTheater>()!;
     assert(_sortedTheaterSiblings == null);
   }
@@ -335,7 +340,7 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 
   @override
   void dispose() {
-    widget.entry._overlayEntryStateNotifier.value = null;
+    widget.entry._overlayEntryStateNotifier?.value = null;
     widget.entry._didUnmount();
     _sortedTheaterSiblings = null;
     super.dispose();
@@ -543,6 +548,55 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     return _entries.length;
   }
 
+  bool _debugCanInsertEntry(OverlayEntry entry) {
+    final List<DiagnosticsNode> operandsInformation = <DiagnosticsNode>[
+      DiagnosticsProperty<OverlayEntry>('The OverlayEntry was', entry, style: DiagnosticsTreeStyle.errorProperty),
+      DiagnosticsProperty<OverlayState>(
+        'The Overlay the OverlayEntry was trying to insert to was', this, style: DiagnosticsTreeStyle.errorProperty,
+      ),
+    ];
+
+    if (!mounted) {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('Attempted to insert an OverlayEntry to an already disposed Overlay.'),
+        ...operandsInformation,
+      ]);
+    }
+
+    final OverlayState? currentOverlay = entry._overlay;
+    final bool alreadyContainsEntry = _entries.contains(entry);
+
+    if (alreadyContainsEntry) {
+      final bool inconsistentOverlayState = !identical(currentOverlay, this);
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('The specified entry is already present in the target Overlay.'),
+        ...operandsInformation,
+        if (inconsistentOverlayState) ErrorHint('This could be an error in the Flutter framework.')
+        else ErrorHint(
+          'Consider calling remove on the OverlayEntry before inserting it to a different Overlay, '
+          'or switching to the OverlayPortal API to avoid manual OverlayEntry management.'
+        ),
+        if (inconsistentOverlayState) DiagnosticsProperty<OverlayState>(
+          "The OverlayEntry's current Overlay was", currentOverlay, style: DiagnosticsTreeStyle.errorProperty,
+        ),
+      ]);
+    }
+
+    if (currentOverlay == null) {
+      return true;
+    }
+
+    throw FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary('The specified entry is already present in a different Overlay.'),
+      ...operandsInformation,
+      DiagnosticsProperty<OverlayState>("The OverlayEntry's current Overlay was", currentOverlay, style: DiagnosticsTreeStyle.errorProperty,),
+      ErrorHint(
+        'Consider calling remove on the OverlayEntry before inserting it to a different Overlay, '
+        'or switching to the OverlayPortal API to avoid manual OverlayEntry management.'
+      )
+    ]);
+  }
+
   /// Insert the given entry into the overlay.
   ///
   /// If `below` is non-null, the entry is inserted just below `below`.
@@ -552,8 +606,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
   /// It is an error to specify both `above` and `below`.
   void insert(OverlayEntry entry, { OverlayEntry? below, OverlayEntry? above }) {
     assert(_debugVerifyInsertPosition(above, below));
-    assert(!_entries.contains(entry), 'The specified entry is already present in the Overlay.');
-    assert(entry._overlay == null, 'The specified entry is already present in another Overlay.');
+    assert(_debugCanInsertEntry(entry));
     entry._overlay = this;
     setState(() {
       _entries.insert(_insertionIndex(below, above), entry);
@@ -569,14 +622,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
   /// It is an error to specify both `above` and `below`.
   void insertAll(Iterable<OverlayEntry> entries, { OverlayEntry? below, OverlayEntry? above }) {
     assert(_debugVerifyInsertPosition(above, below));
-    assert(
-      entries.every((OverlayEntry entry) => !_entries.contains(entry)),
-      'One or more of the specified entries are already present in the Overlay.',
-    );
-    assert(
-      entries.every((OverlayEntry entry) => entry._overlay == null),
-      'One or more of the specified entries are already present in another Overlay.',
-    );
+    assert(entries.every(_debugCanInsertEntry));
     if (entries.isEmpty) {
       return;
     }
@@ -876,9 +922,9 @@ class _TheaterParentData extends StackParentData {
   // _overlayStateMounted is set to null in _OverlayEntryWidgetState's dispose
   // method. This property is only accessed during layout, paint and hit-test so
   // the `value!` should be safe.
-  Iterator<RenderBox>? get paintOrderIterator => overlayEntry?._overlayEntryStateNotifier.value!._paintOrderIterable.iterator;
-  Iterator<RenderBox>? get hitTestOrderIterator => overlayEntry?._overlayEntryStateNotifier.value!._hitTestOrderIterable.iterator;
-  void visitChildrenOfOverlayEntry(RenderObjectVisitor visitor) => overlayEntry?._overlayEntryStateNotifier.value!._paintOrderIterable.forEach(visitor);
+  Iterator<RenderBox>? get paintOrderIterator => overlayEntry?._overlayEntryStateNotifier?.value!._paintOrderIterable.iterator;
+  Iterator<RenderBox>? get hitTestOrderIterator => overlayEntry?._overlayEntryStateNotifier?.value!._hitTestOrderIterable.iterator;
+  void visitChildrenOfOverlayEntry(RenderObjectVisitor visitor) => overlayEntry?._overlayEntryStateNotifier?.value!._paintOrderIterable.forEach(visitor);
 }
 
 class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox, StackParentData>, _RenderTheaterMixin {

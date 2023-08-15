@@ -7,8 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
@@ -3499,7 +3498,7 @@ void main() {
     expect(calledDelete, isFalse);
 
     // Tap after end of the label.
-    await tester.tapAt(Offset(labelCenter.dx + (labelSize.width / 2), labelCenter.dy));
+    await tester.tapAt(Offset(labelCenter.dx + (labelSize.width / 2) + 0.01, labelCenter.dy));
     await tester.pump();
     expect(calledDelete, isTrue);
   });

@@ -10,10 +10,8 @@ import 'package:flutter/rendering.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'navigator.dart';
-import 'pop_scope.dart';
 import 'restoration.dart';
 import 'restoration_properties.dart';
-import 'routes.dart';
 import 'will_pop_scope.dart';
 
 // Duration for delay before announcement in IOS so that the announcement won't be interrupted.
@@ -54,17 +52,10 @@ class Form extends StatefulWidget {
   const Form({
     super.key,
     required this.child,
-    this.canPop,
-    this.onPopInvoked,
-    @Deprecated(
-      'Use canPop and/or onPopInvoked instead. '
-      'This feature was deprecated after v3.12.0-1.0.pre.',
-    )
     this.onWillPop,
     this.onChanged,
     AutovalidateMode? autovalidateMode,
-  }) : autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled,
-       assert((onPopInvoked == null && canPop == null) || onWillPop == null, 'onWillPop is deprecated; use canPop and/or onPopInvoked.');
+  }) : autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled;
 
   /// Returns the [FormState] of the closest [Form] widget which encloses the
   /// given context, or null if none is found.
@@ -143,43 +134,7 @@ class Form extends StatefulWidget {
   ///
   ///  * [WillPopScope], another widget that provides a way to intercept the
   ///    back button.
-  @Deprecated(
-    'Use canPop and/or onPopInvoked instead. '
-    'This feature was deprecated after v3.12.0-1.0.pre.',
-  )
   final WillPopCallback? onWillPop;
-
-  /// {@macro flutter.widgets.PopScope.canPop}
-  ///
-  /// {@tool dartpad}
-  /// This sample demonstrates how to use this parameter to show a confirmation
-  /// dialog when a navigation pop would cause form data to be lost.
-  ///
-  /// ** See code in examples/api/lib/widgets/form/form.1.dart **
-  /// {@end-tool}
-  ///
-  /// See also:
-  ///
-  ///  * [onPopInvoked], which also comes from [PopScope] and is often used in
-  ///    conjunction with this parameter.
-  ///  * [PopScope.canPop], which is what [Form] delegates to internally.
-  final bool? canPop;
-
-  /// {@macro flutter.widgets.navigator.onPopInvoked}
-  ///
-  /// {@tool dartpad}
-  /// This sample demonstrates how to use this parameter to show a confirmation
-  /// dialog when a navigation pop would cause form data to be lost.
-  ///
-  /// ** See code in examples/api/lib/widgets/form/form.1.dart **
-  /// {@end-tool}
-  ///
-  /// See also:
-  ///
-  ///  * [canPop], which also comes from [PopScope] and is often used in
-  ///    conjunction with this parameter.
-  ///  * [PopScope.onPopInvoked], which is what [Form] delegates to internally.
-  final PopInvokedCallback? onPopInvoked;
 
   /// Called when one of the form fields changes.
   ///
@@ -243,18 +198,6 @@ class FormState extends State<Form> {
         }
       case AutovalidateMode.disabled:
         break;
-    }
-
-    if (widget.canPop != null || widget.onPopInvoked != null) {
-      return PopScope(
-        canPop: widget.canPop ?? true,
-        onPopInvoked: widget.onPopInvoked,
-        child: _FormScope(
-          formState: this,
-          generation: _generation,
-          child: widget.child,
-        ),
-      );
     }
 
     return WillPopScope(
@@ -479,6 +422,12 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
 
   /// True if this field has any validation errors.
   bool get hasError => _errorText.value != null;
+
+  /// Returns true if the user has modified the value of this field.
+  ///
+  /// This only updates to true once [didChange] has been called and resets to
+  /// false when [reset] is called.
+  bool get hasInteractedByUser => _hasInteractedByUser.value;
 
   /// True if the current value is valid.
   ///

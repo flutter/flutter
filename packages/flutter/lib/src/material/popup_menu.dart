@@ -1111,6 +1111,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.enabled = true,
     this.shape,
     this.color,
+    this.iconColor,
     this.enableFeedback,
     this.constraints,
     this.position,
@@ -1220,6 +1221,13 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// If [PopupMenuThemeData.color] is also null, then
   /// Theme.of(context).cardColor is used.
   final Color? color;
+
+  /// If provided, this color is used for the button icon.
+  ///
+  /// If this property is null, then [PopupMenuThemeData.iconColor] is used.
+  /// If [PopupMenuThemeData.iconColor] is also null then defaults to
+  /// [IconThemeData.color].
+  final Color? iconColor;
 
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
   ///
@@ -1355,6 +1363,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   @override
   Widget build(BuildContext context) {
     final IconThemeData iconTheme = IconTheme.of(context);
+    final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     final bool enableFeedback = widget.enableFeedback
       ?? PopupMenuTheme.of(context).enableFeedback
       ?? true;
@@ -1378,8 +1387,8 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       icon: widget.icon ?? Icon(Icons.adaptive.more),
       padding: widget.padding,
       splashRadius: widget.splashRadius,
-      iconSize: widget.iconSize ?? iconTheme.size,
-      color: widget.color ?? iconTheme.color,
+      iconSize: widget.iconSize ?? popupMenuTheme.iconSize ?? iconTheme.size,
+      color: widget.iconColor ?? popupMenuTheme.iconColor ?? iconTheme.color,
       tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
       onPressed: widget.enabled ? showButtonMenu : null,
       enableFeedback: enableFeedback,

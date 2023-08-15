@@ -5,7 +5,6 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -75,7 +74,6 @@ void main() {
         ),
       ),
       AttachCommand(
-        artifacts: Artifacts.test(),
         stdio: FakeStdio(),
         logger: logger,
         terminal: FakeTerminal(),
