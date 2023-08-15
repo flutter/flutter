@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_TEXTURE_GL_H_
-#define FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_TEXTURE_GL_H_
+#ifndef FLUTTER_SHELL_PLATFORM_SURFACE_TEXTURE_EXTERNAL_TEXTURE_H_
+#define FLUTTER_SHELL_PLATFORM_SURFACE_TEXTURE_EXTERNAL_TEXTURE_H_
 
 #include <GLES/gl.h>
 
@@ -12,14 +12,15 @@
 
 namespace flutter {
 
-class AndroidExternalTextureGL : public flutter::Texture {
+// External texture peered to an android.graphics.SurfaceTexture.
+class SurfaceTextureExternalTexture : public flutter::Texture {
  public:
-  AndroidExternalTextureGL(
+  SurfaceTextureExternalTexture(
       int64_t id,
       const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture,
       std::shared_ptr<PlatformViewAndroidJNI> jni_facade);
 
-  ~AndroidExternalTextureGL() override;
+  ~SurfaceTextureExternalTexture() override;
 
   void Paint(PaintContext& context,
              const SkRect& bounds,
@@ -34,32 +35,25 @@ class AndroidExternalTextureGL : public flutter::Texture {
 
   void OnTextureUnregistered() override;
 
- private:
-  void Attach(jint textureName);
+ protected:
+  virtual void ProcessFrame(PaintContext& context, const SkRect& bounds) = 0;
+  virtual void Detach();
 
+  void Attach(int gl_tex_id);
   void Update();
-
-  void Detach();
-
-  void UpdateTransform();
 
   enum class AttachmentState { kUninitialized, kAttached, kDetached };
 
   std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
-
   fml::jni::ScopedJavaGlobalRef<jobject> surface_texture_;
-
   AttachmentState state_ = AttachmentState::kUninitialized;
-
+  SkMatrix transform_;
   bool new_frame_ready_ = false;
+  sk_sp<flutter::DlImage> dl_image_;
 
-  GLuint texture_name_ = 0;
-
-  SkMatrix transform;
-
-  FML_DISALLOW_COPY_AND_ASSIGN(AndroidExternalTextureGL);
+  FML_DISALLOW_COPY_AND_ASSIGN(SurfaceTextureExternalTexture);
 };
 
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_TEXTURE_GL_H_
+#endif  // FLUTTER_SHELL_PLATFORM_SURFACE_TEXTURE_EXTERNAL_TEXTURE_H_

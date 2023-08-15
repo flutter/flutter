@@ -2317,8 +2317,6 @@ ORIGIN: ../../../flutter/shell/platform/android/android_egl_surface.h + ../../..
 ORIGIN: ../../../flutter/shell/platform/android/android_environment_gl.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/android_environment_gl.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/android_exports.lst + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/android/android_external_texture_gl.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/android/android_external_texture_gl.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/android_image_generator.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/android_image_generator.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/android_shell_holder.cc + ../../../flutter/LICENSE
@@ -2505,6 +2503,10 @@ ORIGIN: ../../../flutter/shell/platform/android/surface/android_surface_mock.cc 
 ORIGIN: ../../../flutter/shell/platform/android/surface/android_surface_mock.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/surface/snapshot_surface_producer.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/surface/snapshot_surface_producer.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/android/surface_texture_external_texture.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/android/surface_texture_external_texture.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/android/surface_texture_external_texture_gl.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/android/surface_texture_external_texture_gl.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/vsync_waiter_android.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/android/vsync_waiter_android.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/common/accessibility_bridge.cc + ../../../flutter/LICENSE
@@ -5043,8 +5045,6 @@ FILE: ../../../flutter/shell/platform/android/android_egl_surface.h
 FILE: ../../../flutter/shell/platform/android/android_environment_gl.cc
 FILE: ../../../flutter/shell/platform/android/android_environment_gl.h
 FILE: ../../../flutter/shell/platform/android/android_exports.lst
-FILE: ../../../flutter/shell/platform/android/android_external_texture_gl.cc
-FILE: ../../../flutter/shell/platform/android/android_external_texture_gl.h
 FILE: ../../../flutter/shell/platform/android/android_image_generator.cc
 FILE: ../../../flutter/shell/platform/android/android_image_generator.h
 FILE: ../../../flutter/shell/platform/android/android_shell_holder.cc
@@ -5243,6 +5243,10 @@ FILE: ../../../flutter/shell/platform/android/surface/android_surface_mock.cc
 FILE: ../../../flutter/shell/platform/android/surface/android_surface_mock.h
 FILE: ../../../flutter/shell/platform/android/surface/snapshot_surface_producer.cc
 FILE: ../../../flutter/shell/platform/android/surface/snapshot_surface_producer.h
+FILE: ../../../flutter/shell/platform/android/surface_texture_external_texture.cc
+FILE: ../../../flutter/shell/platform/android/surface_texture_external_texture.h
+FILE: ../../../flutter/shell/platform/android/surface_texture_external_texture_gl.cc
+FILE: ../../../flutter/shell/platform/android/surface_texture_external_texture_gl.h
 FILE: ../../../flutter/shell/platform/android/vsync_waiter_android.cc
 FILE: ../../../flutter/shell/platform/android/vsync_waiter_android.h
 FILE: ../../../flutter/shell/platform/common/accessibility_bridge.cc
