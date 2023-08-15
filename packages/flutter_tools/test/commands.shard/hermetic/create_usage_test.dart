@@ -178,7 +178,7 @@ void main() {
       ]);
       expect((await command.usageValues).commandCreateAndroidLanguage, 'java');
     }), overrides: <Type, Generator>{
-      Java: () => null,
+      Java: () => FakeJava(),
     });
 
     testUsingContext('create --offline', () => testbed.run(() async {
