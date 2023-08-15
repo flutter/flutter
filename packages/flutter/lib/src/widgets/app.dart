@@ -1351,6 +1351,14 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     ? WidgetsBinding.instance.platformDispatcher.defaultRouteName
     : widget.initialRoute ?? WidgetsBinding.instance.platformDispatcher.defaultRouteName;
 
+  AppLifecycleState? _appLifecycleState;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _appLifecycleState = state;
+    super.didChangeAppLifecycleState(state);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -1800,7 +1808,15 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
     if (widget.onNavigationNotification != null) {
       child = NotificationListener<NavigationNotification>(
-        onNotification: widget.onNavigationNotification,
+        onNotification: widget.onNavigationNotification == null ? null : (NavigationNotification notification) {
+          // By default, don't do anything with navigation notifications if
+          // there is no engine attached.
+          if (widget.onNavigationNotification == WidgetsApp.defaultOnNavigationNotification
+              && _appLifecycleState == AppLifecycleState.detached) {
+            return true;
+          }
+          return widget.onNavigationNotification!(notification);
+        },
         child: child,
       );
     }
