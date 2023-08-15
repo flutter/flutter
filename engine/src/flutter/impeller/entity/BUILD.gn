@@ -71,6 +71,7 @@ impeller_shaders("entity_shaders") {
     "shaders/yuv_to_rgb_filter.frag",
     "shaders/yuv_to_rgb_filter.vert",
     "shaders/blending/porter_duff_blend.frag",
+    "shaders/blending/porter_duff_blend.vert",
   ]
 
   if (impeller_debug) {
