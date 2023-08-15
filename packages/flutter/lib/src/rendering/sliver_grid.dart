@@ -685,12 +685,12 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
     final double estimatedTotalExtent = reachedEnd
       ? trailingScrollOffset
       : childManager.estimateMaxScrollOffset(
-        constraints,
-        firstIndex: firstIndex,
-        lastIndex: lastIndex,
-        leadingScrollOffset: leadingScrollOffset,
-        trailingScrollOffset: trailingScrollOffset,
-      );
+          constraints,
+          firstIndex: firstIndex,
+          lastIndex: lastIndex,
+          leadingScrollOffset: leadingScrollOffset,
+          trailingScrollOffset: trailingScrollOffset,
+        );
     final double paintExtent = calculatePaintOffset(
       constraints,
       from: math.min(constraints.scrollOffset, leadingScrollOffset),
