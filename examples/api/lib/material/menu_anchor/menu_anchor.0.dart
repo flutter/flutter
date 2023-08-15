@@ -204,7 +204,7 @@ class MenuApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
-      home: const Scaffold(body: MyCascadingMenu(message: kMessage)),
+      home: const Scaffold(body: SafeArea(child: MyCascadingMenu(message: kMessage))),
     );
   }
 }
