@@ -16,7 +16,7 @@ class ConfigCommand extends FlutterCommand {
   ConfigCommand({ bool verboseHelp = false }) {
     argParser.addFlag('analytics',
       help: 'Enable or disable reporting anonymously tool usage statistics and crash reports.\n'
-      '(An alias for `flutter --enable-telemetry)` and `flutter --disable-telemetry`)');
+      '(An alias for "--enable-telemetry" and "--disable-telemetry".)');
     argParser.addFlag('clear-ios-signing-cert',
       negatable: false,
       help: 'Clear the saved development certificate choice used to sign apps for iOS device deployment.');

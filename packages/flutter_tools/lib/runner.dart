@@ -72,9 +72,9 @@ Future<int> run(
         }
 
         // Disable analytics if user passes in the `--disable-analytics` option
-        // `flutter --disable-analytics`
+        // "flutter --disable-analytics"
         //
-        // Same functionality as `flutter config --no-analytics` for disabling
+        // Same functionality as "flutter config --no-analytics" for disabling
         // except with the `value` hard coded as false
         if (args.contains('--disable-analytics')) {
           // The tool sends the analytics event *before* toggling the flag
