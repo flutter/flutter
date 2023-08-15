@@ -80,17 +80,16 @@ function parse_args() {
         ;;
       --keep-temp)
         KEEP_TEMP=1
-        shift
       ;;
       --output)
         DESTINATION="$2"
-        shift 2
+        shift
       ;;
       *)
         args=("${args[@]}" "$1")
-        shift
         ;;
     esac
+    shift
   done
   if [[ ${#args[@]}  != 0 ]]; then
     >&2 echo "ERROR: Unknown arguments: ${args[@]}"
