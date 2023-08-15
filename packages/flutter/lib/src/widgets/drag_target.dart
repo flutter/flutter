@@ -641,7 +641,7 @@ class DragTarget<T extends Object> extends StatefulWidget {
   ///
   /// Equivalent to [onWillAcceptWithDetails], but only includes the data.
   ///
-  /// Should not be provided if [onWillAcceptWithDetails] is provided.
+  /// Must not be provided if [onWillAcceptWithDetails] is provided.
   final DragTargetWillAccept<T>? onWillAccept;
 
   /// Called to determine whether this widget is interested in receiving a given
@@ -654,7 +654,7 @@ class DragTarget<T extends Object> extends StatefulWidget {
   /// Equivalent to [onWillAccept], but with information, including the data,
   /// in a [DragTargetDetails].
   ///
-  /// Should not be provided if [onWillAccept] is provided.
+  /// Must not be provided if [onWillAccept] is provided.
   final DragTargetWillAcceptWithDetails<T>? onWillAcceptWithDetails;
 
   /// Called when an acceptable piece of data was dropped over this drag target.
