@@ -393,7 +393,7 @@ void main() {
       expect(filtered, <Device>[unsupportedForProject]);
     });
 
-    testUsingContext('Removes web and fuchsia from --all', () async {
+    testUsingContext('Removes web from --all', () async {
       final List<Device> devices = <Device>[
         webDevice,
       ];

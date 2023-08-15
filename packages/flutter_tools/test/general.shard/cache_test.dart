@@ -509,27 +509,6 @@ void main() {
     expect(iosUsbArtifacts.archiveUri.toString(), isNot(contains('/unsigned/')));
   });
 
-  testWithoutContext('FlutterRunnerDebugSymbols downloads Flutter runner debug symbols', () async {
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    final Cache cache = FakeSecondaryCache()
-      ..artifactDirectory = fileSystem.currentDirectory
-      ..version = '123456';
-
-    final FakeVersionedPackageResolver packageResolver = FakeVersionedPackageResolver();
-    final FlutterRunnerDebugSymbols flutterRunnerDebugSymbols = FlutterRunnerDebugSymbols(
-      cache,
-      packageResolver: packageResolver,
-      platform: FakePlatform(),
-    );
-
-    await flutterRunnerDebugSymbols.updateInner(FakeArtifactUpdater(), fileSystem, FakeOperatingSystemUtils());
-
-    expect(packageResolver.resolved, <List<String>>[
-      <String>['fuchsia-debug-symbols-x64', '123456'],
-      <String>['fuchsia-debug-symbols-arm64', '123456'],
-    ]);
-  });
-
   testWithoutContext('FontSubset in universal artifacts', () {
     final Cache cache = Cache.test(processManager: FakeProcessManager.any());
     final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform());
@@ -588,16 +567,6 @@ void main() {
     cache.includeAllPlatforms = false;
 
     expect(artifacts.getBinaryDirs(), <List<String>>[<String>['darwin-x64', 'darwin-x64/font-subset.zip']]);
-  });
-
-  testWithoutContext('FontSubset artifacts on fuchsia', () {
-    fakeProcessManager.addCommand(unameCommandForX64);
-
-    final Cache cache = createCache(FakePlatform(operatingSystem: 'fuchsia'));
-    final FontSubsetArtifacts artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'fuchsia'));
-    cache.includeAllPlatforms = false;
-
-    expect(artifacts.getBinaryDirs, throwsToolExit(message: 'Unsupported operating system: fuchsia'));
   });
 
   testWithoutContext('FontSubset artifacts for all platforms on x64 hosts', () {
@@ -1234,16 +1203,6 @@ class FakeSecondaryCache extends Fake implements Cache {
   @override
   void setStampFor(String artifactName, String version) {
     onSetStamp(artifactName, version);
-  }
-}
-
-class FakeVersionedPackageResolver extends Fake implements VersionedPackageResolver {
-  final List<List<String>> resolved = <List<String>>[];
-
-  @override
-  String resolveUrl(String packageName, String version) {
-    resolved.add(<String>[packageName, version]);
-    return '';
   }
 }
 

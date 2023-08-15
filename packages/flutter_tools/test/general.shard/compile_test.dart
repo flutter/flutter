@@ -64,9 +64,6 @@ void main() {
     expect(TargetModel('flutter'), TargetModel.flutter);
     expect(TargetModel.flutter.toString(), 'flutter');
 
-    expect(TargetModel('flutter_runner'), TargetModel.flutterRunner);
-    expect(TargetModel.flutterRunner.toString(), 'flutter_runner');
-
     expect(TargetModel('dartdevc'), TargetModel.dartdevc);
     expect(TargetModel.dartdevc.toString(), 'dartdevc');
 

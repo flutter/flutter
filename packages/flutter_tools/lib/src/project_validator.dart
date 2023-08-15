@@ -101,11 +101,6 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
       value: _toJsonValue(project.windows.existsSync()),
       status: StatusProjectValidator.info,
     ));
-    result.add(ProjectValidatorResult(
-      name: 'FlutterProject.fuchsia.exists',
-      value: _toJsonValue(project.fuchsia.existsSync()),
-      status: StatusProjectValidator.info,
-    ));
 
     result.add(ProjectValidatorResult(
       name: 'FlutterProject.android.isKotlin',
@@ -170,11 +165,6 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
     result.add(ProjectValidatorResult(
       name: 'Platform.isMacOS',
       value: _toJsonValue(platform.isMacOS),
-      status: StatusProjectValidator.info,
-    ));
-    result.add(ProjectValidatorResult(
-      name: 'Platform.isFuchsia',
-      value: _toJsonValue(platform.isFuchsia),
       status: StatusProjectValidator.info,
     ));
     result.add(ProjectValidatorResult(

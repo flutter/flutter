@@ -1876,8 +1876,6 @@ String nextPlatform(String currentPlatform) {
     case 'android':
       return 'iOS';
     case 'iOS':
-      return 'fuchsia';
-    case 'fuchsia':
       return 'macOS';
     case 'macOS':
       return 'android';

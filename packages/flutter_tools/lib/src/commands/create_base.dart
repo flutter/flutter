@@ -562,9 +562,6 @@ abstract class CreateBase extends FlutterCommand {
     if (windowsPlatform) {
       platformsForMigrateConfig.add(SupportedPlatform.windows);
     }
-    if (templateContext['fuchsia'] == true) {
-      platformsForMigrateConfig.add(SupportedPlatform.fuchsia);
-    }
     if (generateMetadata) {
       final File metadataFile = globals.fs
           .file(globals.fs.path.join(projectDir.absolute.path, '.metadata'));

@@ -18,7 +18,7 @@ abstract class Platform {
   /// components in file paths.
   String get pathSeparator;
 
-  /// A string (`linux`, `macos`, `windows`, `android`, `ios`, or `fuchsia`)
+  /// A string (`linux`, `macos`, `windows`, `android` or `ios`)
   /// representing the operating system.
   String get operatingSystem;
 
@@ -42,9 +42,6 @@ abstract class Platform {
 
   /// True if the operating system is iOS.
   bool get isIOS => operatingSystem == 'ios';
-
-  /// True if the operating system is Fuchsia.
-  bool get isFuchsia => operatingSystem == 'fuchsia';
 
   /// The environment for this process.
   ///

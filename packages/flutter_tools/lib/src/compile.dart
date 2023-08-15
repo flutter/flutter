@@ -34,8 +34,6 @@ class TargetModel {
     switch (rawValue) {
       case 'flutter':
         return flutter;
-      case 'flutter_runner':
-        return flutterRunner;
       case 'vm':
         return vm;
       case 'dartdevc':

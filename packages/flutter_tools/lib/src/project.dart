@@ -39,7 +39,6 @@ enum SupportedPlatform {
   macos,
   web,
   windows,
-  fuchsia,
   root, // Special platform to represent the root project directory
 }
 
@@ -200,9 +199,6 @@ class FlutterProject {
   /// The Windows sub project of this project.
   late final WindowsProject windows = WindowsProject.fromFlutter(this);
 
-  /// The Fuchsia sub project of this project.
-  late final FuchsiaProject fuchsia = FuchsiaProject._(this);
-
   /// The `pubspec.yaml` file of this project.
   File get pubspecFile => directory.childFile('pubspec.yaml');
 
@@ -280,9 +276,6 @@ class FlutterProject {
     }
     if (windows.existsSync()) {
       platforms.add(SupportedPlatform.windows);
-    }
-    if (fuchsia.existsSync()) {
-      platforms.add(SupportedPlatform.fuchsia);
     }
     return platforms;
   }
@@ -897,23 +890,6 @@ class WebProject extends FlutterProjectPlatform {
       webPlatform: true,
     );
   }
-}
-
-/// The Fuchsia sub project.
-class FuchsiaProject {
-  FuchsiaProject._(this.project);
-
-  final FlutterProject project;
-
-  Directory? _editableHostAppDirectory;
-  Directory get editableHostAppDirectory =>
-      _editableHostAppDirectory ??= project.directory.childDirectory('fuchsia');
-
-  bool existsSync() => editableHostAppDirectory.existsSync();
-
-  Directory? _meta;
-  Directory get meta =>
-      _meta ??= editableHostAppDirectory.childDirectory('meta');
 }
 
 // Combines success and a description into one object that can be returned

@@ -80,7 +80,6 @@ class DevelopmentArtifact {
     windows,
     linux,
     universal,
-    flutterRunner,
   ];
 
   @override

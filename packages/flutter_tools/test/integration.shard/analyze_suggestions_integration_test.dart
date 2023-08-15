@@ -127,7 +127,6 @@ void main() {
       expect(decoded.containsKey('FlutterProject.macos.exists'), true);
       expect(decoded.containsKey('FlutterProject.linux.exists'), true);
       expect(decoded.containsKey('FlutterProject.windows.exists'), true);
-      expect(decoded.containsKey('FlutterProject.fuchsia.exists'), true);
       expect(decoded.containsKey('FlutterProject.android.isKotlin'), true);
       expect(decoded.containsKey('FlutterProject.ios.isSwift'), true);
       expect(decoded.containsKey('FlutterProject.isModule'), true);
@@ -152,7 +151,6 @@ void main() {
       expect(decoded['FlutterProject.macos.exists'], true);
       expect(decoded['FlutterProject.linux.exists'], true);
       expect(decoded['FlutterProject.windows.exists'], true);
-      expect(decoded['FlutterProject.fuchsia.exists'], false);
       expect(decoded['FlutterProject.android.isKotlin'], true);
       expect(decoded['FlutterProject.ios.isSwift'], true);
       expect(decoded['FlutterProject.isModule'], false);
@@ -163,7 +161,6 @@ void main() {
       expect(decoded['Platform.isIOS'], false);
       expect(decoded['Platform.isWindows'], platform.isWindows);
       expect(decoded['Platform.isMacOS'], platform.isMacOS);
-      expect(decoded['Platform.isFuchsia'], platform.isFuchsia);
       expect(decoded['Platform.pathSeparator'], platform.pathSeparator);
     }, overrides: <Type, Generator>{});
   });

@@ -43,8 +43,6 @@ class FlutterCache extends Cache {
     registerArtifact(WindowsEngineArtifacts(this, platform: platform));
     registerArtifact(MacOSEngineArtifacts(this, platform: platform));
     registerArtifact(LinuxEngineArtifacts(this, platform: platform));
-    registerArtifact(FlutterRunnerSDKArtifacts(this, platform: platform));
-    registerArtifact(FlutterRunnerDebugSymbols(this, platform: platform));
     for (final String artifactName in IosUsbArtifacts.artifactNames) {
       registerArtifact(IosUsbArtifacts(artifactName, this, platform: platform));
     }
@@ -580,92 +578,6 @@ class CipdArchiveResolver extends VersionedPackageResolver {
   @override
   String resolveUrl(String packageName, String version) {
     return '${cache.cipdBaseUrl}/flutter/$packageName/+/git_revision:$version';
-  }
-}
-
-/// The debug symbols for flutter runner for Fuchsia development.
-class FlutterRunnerDebugSymbols extends CachedArtifact {
-  FlutterRunnerDebugSymbols(Cache cache, {
-    required Platform platform,
-    VersionedPackageResolver? packageResolver,
-  }) : _platform = platform,
-       packageResolver = packageResolver ?? CipdArchiveResolver(cache),
-       super('flutter_runner_debug_symbols', cache, DevelopmentArtifact.flutterRunner);
-
-  final VersionedPackageResolver packageResolver;
-  final Platform _platform;
-
-  @override
-  Directory get location => cache.getArtifactDirectory(name);
-
-  @override
-  String? get version => cache.getVersionFor('engine');
-
-  Future<void> _downloadDebugSymbols(String targetArch, ArtifactUpdater artifactUpdater) async {
-    final String packageName = 'fuchsia-debug-symbols-$targetArch';
-    final String url = packageResolver.resolveUrl(packageName, version!);
-    await artifactUpdater.downloadZipArchive(
-      'Downloading debug symbols for flutter runner - arch:$targetArch...',
-      Uri.parse(url),
-      location,
-    );
-  }
-
-  @override
-  Future<void> updateInner(
-    ArtifactUpdater artifactUpdater,
-    FileSystem fileSystem,
-    OperatingSystemUtils operatingSystemUtils,
-  ) async {
-    if (!_platform.isLinux && !_platform.isMacOS) {
-      return;
-    }
-    await _downloadDebugSymbols('x64', artifactUpdater);
-    await _downloadDebugSymbols('arm64', artifactUpdater);
-  }
-}
-
-/// The Fuchsia core SDK for Linux.
-class LinuxFuchsiaSDKArtifacts extends _FuchsiaSDKArtifacts {
-  LinuxFuchsiaSDKArtifacts(Cache cache, {
-    required Platform platform,
-  }) : _platform = platform,
-       super(cache, 'linux');
-
-  final Platform _platform;
-
-  @override
-  Future<void> updateInner(
-    ArtifactUpdater artifactUpdater,
-    FileSystem fileSystem,
-    OperatingSystemUtils operatingSystemUtils,
-  ) async {
-    if (!_platform.isLinux) {
-      return;
-    }
-    return _doUpdate(artifactUpdater);
-  }
-}
-
-/// The Fuchsia core SDK for MacOS.
-class MacOSFuchsiaSDKArtifacts extends _FuchsiaSDKArtifacts {
-  MacOSFuchsiaSDKArtifacts(Cache cache, {
-    required Platform platform,
-  }) : _platform = platform,
-       super(cache, 'mac');
-
-  final Platform _platform;
-
-  @override
-  Future<void> updateInner(
-    ArtifactUpdater artifactUpdater,
-    FileSystem fileSystem,
-    OperatingSystemUtils operatingSystemUtils,
-  ) async {
-    if (!_platform.isMacOS) {
-      return;
-    }
-    return _doUpdate(artifactUpdater);
   }
 }
 

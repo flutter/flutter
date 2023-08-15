@@ -55,9 +55,6 @@ import '../vmservice.dart';
 /// ```
 /// As soon as a new VM Service is detected the command attaches to it and
 /// enables hot reloading.
-///
-/// To attach to a flutter mod running on a fuchsia device, `--module` must
-/// also be provided.
 class AttachCommand extends FlutterCommand {
   AttachCommand({
     bool verboseHelp = false,
