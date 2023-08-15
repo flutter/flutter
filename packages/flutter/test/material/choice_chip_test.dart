@@ -4,8 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 RenderBox getMaterialBox(WidgetTester tester, Finder type) {
   return tester.firstRenderObject<RenderBox>(
@@ -85,7 +84,10 @@ void main() {
     );
 
     // Test default chip size.
-    expect(tester.getSize(find.byType(ChoiceChip)), const Size(190.0, 48.0));
+    expect(
+      tester.getSize(find.byType(ChoiceChip)),
+      within(distance: 0.01, from: const Size(189.1, 48.0)),
+    );
     // Test default label style.
     expect(
       getLabelStyle(tester, label).style.color!.value,
@@ -217,7 +219,10 @@ void main() {
     );
 
     // Test default chip size.
-    expect(tester.getSize(find.byType(ChoiceChip)), const Size(190.0, 48.0));
+    expect(
+      tester.getSize(find.byType(ChoiceChip)),
+      within(distance: 0.01, from: const Size(189.1, 48.0)),
+    );
     // Test default label style.
     expect(
       getLabelStyle(tester, label).style.color!.value,

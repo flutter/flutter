@@ -8,8 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 // The const represents the starting position of the scrollbar thumb for
 // the below tests. The thumb is 90 pixels long, and 8 pixels wide, with a 2
