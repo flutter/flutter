@@ -1005,7 +1005,6 @@ Future<void> _runFrameworkTests() async {
       '--exclude-tags=web',
     ]);
     //Run java unit tests for integration_test
-    await runCommand('pwd', <String>[]);
     await runCommand(
       path.join(flutterRoot, 'packages', 'integration_test', 'example', 'android', 'gradlew'),
       <String>[
