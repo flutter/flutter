@@ -338,6 +338,7 @@ void main() {
       expect(renderSelectionSpy.events[0].type, SelectionEventType.endEdgeUpdate);
       final SelectionEdgeUpdateEvent edgeEvent = renderSelectionSpy.events[0] as SelectionEdgeUpdateEvent;
       expect(edgeEvent.globalPosition, const Offset(200.0, 50.0));
+      expect(edgeEvent.granularity, TextGranularity.word);
     });
 
   testWidgets(
@@ -1656,7 +1657,7 @@ void main() {
       await gesture.up();
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
 
-    testWidgets('long press and drag touch selection', (WidgetTester tester) async {
+    testWidgets('long press and drag touch moves selection word by word', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
@@ -1681,9 +1682,9 @@ void main() {
       expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
 
       final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Good, and you?'), matching: find.byType(RichText)));
-      await gesture.moveTo(textOffsetToPosition(paragraph2, 5));
+      await gesture.moveTo(textOffsetToPosition(paragraph2, 7));
       expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 12));
-      expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 5));
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 9));
       await gesture.up();
     });
 
