@@ -110,6 +110,39 @@ void main() {
       expect(selectionEvent.globalPosition, const Offset(200.0, 200.0));
     });
 
+    testWidgets('mouse triple click sends select-paragraph event', (WidgetTester tester) async {
+      final UniqueKey spy = UniqueKey();
+      await tester.pumpWidget(
+          MaterialApp(
+            home: SelectableRegion(
+              focusNode: FocusNode(),
+              selectionControls: materialTextSelectionControls,
+              child: SelectionSpy(key: spy),
+            ),
+          )
+      );
+
+      final RenderSelectionSpy renderSelectionSpy = tester.renderObject<RenderSelectionSpy>(find.byKey(spy));
+      final TestGesture gesture = await tester.startGesture(const Offset(200.0, 200.0), kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      renderSelectionSpy.events.clear();
+      await gesture.down(const Offset(200.0, 200.0));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+      renderSelectionSpy.events.clear();
+      await gesture.down(const Offset(200.0, 200.0));
+      await tester.pump();
+      await gesture.up();
+      expect(renderSelectionSpy.events.length, 1);
+      expect(renderSelectionSpy.events[0], isA<SelectParagraphSelectionEvent>());
+      final SelectParagraphSelectionEvent selectionEvent = renderSelectionSpy.events[0] as SelectParagraphSelectionEvent;
+      expect(selectionEvent.globalPosition, const Offset(200.0, 200.0));
+    });
+
     testWidgetsWithLeakTracking('Does not crash when using Navigator pages', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/119776
       final FocusNode focusNode = FocusNode();
