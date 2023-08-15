@@ -55,10 +55,12 @@
 //
 // At the top of a file you can say `// Examples can assume:` and then list some
 // commented-out declarations that will be included in the analysis for snippets
-// in that file.
+// in that file. This section may also contain explicit import statements.
 //
-// Snippets generally import all the main Flutter packages (including material
-// and flutter_test), as well as most core Dart packages with the usual prefixes.
+// For files without an `// Examples can assume:` section or if that section
+// contains no explicit imports, the snippets will implicitly import all the
+// main Flutter packages (including material and flutter_test), as well as most
+// core Dart packages with the usual prefixes.
 
 import 'dart:async';
 import 'dart:convert';
@@ -72,6 +74,7 @@ import 'package:watcher/watcher.dart';
 final String _flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String _packageFlutter = path.join(_flutterRoot, 'packages', 'flutter', 'lib');
 final String _packageFlutterTest = path.join(_flutterRoot, 'packages', 'flutter_test', 'lib');
+final String _packageFlutterDriver = path.join(_flutterRoot, 'packages', 'flutter_driver', 'lib');
 final String _packageIntegrationTest = path.join(_flutterRoot, 'packages', 'integration_test', 'lib');
 final String _defaultDartUiLocation = path.join(_flutterRoot, 'bin', 'cache', 'pkg', 'sky_engine', 'lib', 'ui');
 final String _flutter = path.join(_flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
@@ -153,7 +156,8 @@ Future<void> main(List<String> arguments) async {
       Directory(_packageFlutter),
       Directory(_packageFlutterTest),
       Directory(_packageIntegrationTest),
-      // TODO(goderbauer): Add all other packages.
+      Directory(_packageFlutterDriver),
+      // TODO(goderbauer): Add all other packages for which we publish docs.
     ];
   }
 
@@ -574,6 +578,7 @@ class _SnippetChecker {
         final List<String> fileLines = file.readAsLinesSync();
         final List<_Line> ignorePreambleLinesOnly = <_Line>[];
         final List<_Line> preambleLines = <_Line>[];
+        final List<_Line> customImports = <_Line>[];
         bool inExamplesCanAssumePreamble = false; // Whether or not we're in the file-wide preamble section ("Examples can assume").
         bool inToolSection = false; // Whether or not we're in a code snippet
         bool inDartSection = false; // Whether or not we're in a '```dart' segment.
@@ -592,7 +597,11 @@ class _SnippetChecker {
               throw _SnippetCheckerException('Unexpected content in snippet code preamble.', file: relativeFilePath, line: lineNumber);
             } else {
               final _Line newLine = _Line(line: lineNumber, indent: 3, code: line.substring(3));
-              preambleLines.add(newLine);
+              if (newLine.code.startsWith('import ')) {
+               customImports.add(newLine);
+              } else {
+                preambleLines.add(newLine);
+              }
               if (line.startsWith('// // ignore_for_file: ')) {
                 ignorePreambleLinesOnly.add(newLine);
               }
@@ -612,7 +621,7 @@ class _SnippetChecker {
             }
             if (trimmedLine.startsWith(_codeBlockEndRegex)) {
               inDartSection = false;
-              final _SnippetFile snippet = _processBlock(startLine, block, preambleLines, ignorePreambleLinesOnly, relativeFilePath, lastExample);
+              final _SnippetFile snippet = _processBlock(startLine, block, preambleLines, ignorePreambleLinesOnly, relativeFilePath, lastExample, customImports);
               final String path = _writeSnippetFile(snippet).path;
               assert(!snippetMap.containsKey(path));
               snippetMap[path] = snippet;
@@ -655,6 +664,7 @@ class _SnippetChecker {
                        line.contains('```kotlin') ||
                        line.contains('```swift') ||
                        line.contains('```glsl') ||
+                       line.contains('```json') ||
                        line.contains('```csv')) {
               inOtherBlock = true;
             } else if (line.startsWith(_uncheckedCodeBlockStartRegex)) {
@@ -694,7 +704,7 @@ class _SnippetChecker {
   /// a primitive heuristic to make snippet blocks into valid Dart code.
   ///
   /// `block` argument will get mutated, but is copied before this function returns.
-  _SnippetFile _processBlock(_Line startingLine, List<String> block, List<_Line> assumptions, List<_Line> ignoreAssumptionsOnly, String filename, _SnippetFile? lastExample) {
+  _SnippetFile _processBlock(_Line startingLine, List<String> block, List<_Line> assumptions, List<_Line> ignoreAssumptionsOnly, String filename, _SnippetFile? lastExample, List<_Line> customImports) {
     if (block.isEmpty) {
       throw _SnippetCheckerException('${startingLine.asLocation(filename, 0)}: Empty ```dart block in snippet code.');
     }
@@ -755,7 +765,7 @@ class _SnippetChecker {
       return _SnippetFile.fromStrings(
         startingLine,
         block.toList(),
-        importPreviousExample ? <_Line>[] : headersWithoutImports,
+        headersWithoutImports,
         <_Line>[
           ...ignoreAssumptionsOnly,
           if (hasEllipsis)
@@ -764,13 +774,24 @@ class _SnippetChecker {
         'self-contained program',
         filename,
       );
-    } else if (hasStatefulWidgetComment) {
+    }
+
+    final List<_Line> headers = switch ((importPreviousExample, customImports.length)) {
+      (true, _) => <_Line>[],
+      (false, 0) => headersWithImports,
+      (false, _) => <_Line>[
+        ...headersWithoutImports,
+        const _Line.generated(code: '// ignore_for_file: unused_import'),
+        ...customImports,
+      ]
+    };
+    if (hasStatefulWidgetComment) {
       return _SnippetFile.fromStrings(
         startingLine,
         prefix: 'class _State extends State<StatefulWidget> {',
         block.toList(),
         postfix: '}',
-        importPreviousExample ? <_Line>[] : headersWithImports,
+        headers,
         preamble,
         'stateful widget',
         filename,
@@ -782,7 +803,7 @@ class _SnippetChecker {
       return _SnippetFile.fromStrings(
         startingLine,
         block.toList(),
-        importPreviousExample ? <_Line>[] : headersWithImports,
+        headers,
         preamble,
         'top-level declaration',
         filename,
@@ -795,7 +816,7 @@ class _SnippetChecker {
         prefix: 'Future<void> function() async {',
         block.toList(),
         postfix: '}',
-        importPreviousExample ? <_Line>[] : headersWithImports,
+        headers,
         preamble,
         'statement',
         filename,
@@ -807,7 +828,7 @@ class _SnippetChecker {
         prefix: 'class Class {',
         block.toList(),
         postfix: '}',
-        importPreviousExample ? <_Line>[] : headersWithImports,
+        headers,
         <_Line>[
           ...preamble,
           const _Line.generated(code: '// ignore_for_file: avoid_classes_with_only_static_members'),
@@ -849,7 +870,7 @@ class _SnippetChecker {
         prefix: 'dynamic expression = ',
         block.toList(),
         postfix: ';',
-        importPreviousExample ? <_Line>[] : headersWithImports,
+        headers,
         preamble,
         'expression',
         filename,
