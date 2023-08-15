@@ -78,9 +78,6 @@ import 'package:watcher/watcher.dart';
 
 final String _flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String _packageFlutter = path.join(_flutterRoot, 'packages', 'flutter', 'lib');
-final String _packageFlutterTest = path.join(_flutterRoot, 'packages', 'flutter_test', 'lib');
-final String _packageFlutterDriver = path.join(_flutterRoot, 'packages', 'flutter_driver', 'lib');
-final String _packageIntegrationTest = path.join(_flutterRoot, 'packages', 'integration_test', 'lib');
 final String _defaultDartUiLocation = path.join(_flutterRoot, 'bin', 'cache', 'pkg', 'sky_engine', 'lib', 'ui');
 final String _flutter = path.join(_flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
 
