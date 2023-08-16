@@ -556,11 +556,11 @@ void main() {
 
     testUsingContext('determines the target device name from the path', () {
       localEngineInfo = LocalEngineInfo(
-        engineOutPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'android_debug_unopt'),
-        engineHostOutPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'host_debug_unopt'),
+        targetOutPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'android_debug_unopt'),
+        hostOutPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'host_debug_unopt'),
       );
 
-      expect(localEngineInfo.localEngineName, 'android_debug_unopt');
+      expect(localEngineInfo.localTargetName, 'android_debug_unopt');
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
@@ -568,11 +568,11 @@ void main() {
 
     testUsingContext('determines the target device name from the path when using a custom engine path', () {
       localEngineInfo = LocalEngineInfo(
-        engineOutPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'android_debug_unopt'),
-        engineHostOutPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'host_debug_unopt'),
+        targetOutPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'android_debug_unopt'),
+        hostOutPath: fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'host_debug_unopt'),
       );
 
-      expect(localEngineInfo.localEngineHostName, 'host_debug_unopt');
+      expect(localEngineInfo.localHostName, 'host_debug_unopt');
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
