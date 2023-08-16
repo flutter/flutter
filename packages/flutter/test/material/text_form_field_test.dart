@@ -243,12 +243,13 @@ void main() {
     expect(controller.text, ' blah2blah1');
     expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 0));
     expect(find.byType(CupertinoButton), findsNothing);
+    controller.dispose();
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux, TargetPlatform.windows }),
     skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
-    // TODO(polina-c): remove after fixing
-    // https://github.com/flutter/flutter/issues/130467
-    leakTrackingTestConfig: const LeakTrackingTestConfig(allowAllNotDisposed: true, allowAllNotGCed: true),
+    // // TODO(polina-c): remove after fixing
+    // // https://github.com/flutter/flutter/issues/130467
+    // leakTrackingTestConfig: const LeakTrackingTestConfig(allowAllNotDisposed: true, allowAllNotGCed: true),
   );
 
   testWidgetsWithLeakTracking(
