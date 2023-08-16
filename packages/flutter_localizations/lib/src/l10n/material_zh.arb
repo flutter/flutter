@@ -144,5 +144,6 @@
   "collapsedHint": "已展开",
   "menuDismissLabel": "关闭菜单",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }
