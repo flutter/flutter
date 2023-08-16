@@ -119,6 +119,16 @@ class DlColorSource : public DlAttribute<DlColorSource, DlColorSourceType> {
   ///
   virtual bool isUIThreadSafe() const = 0;
 
+  //----------------------------------------------------------------------------
+  /// @brief      If the underlying platform data represents a gradient.
+  ///
+  ///             TODO(matanl): Remove this flag when the Skia backend is
+  ///             removed, https://github.com/flutter/flutter/issues/112498.
+  ///
+  /// @return     True if the class represents the output of a gradient.
+  ///
+  virtual bool isGradient() const { return false; }
+
   // Return a DlColorColorSource pointer to this object iff it is an Color
   // type of ColorSource, otherwise return nullptr.
   virtual const DlColorColorSource* asColor() const { return nullptr; }
@@ -286,6 +296,8 @@ class DlGradientColorSourceBase : public DlMatrixColorSourceBase {
     }
     return true;
   }
+
+  bool isGradient() const override { return true; }
 
   DlTileMode tile_mode() const { return mode_; }
   int stop_count() const { return stop_count_; }
