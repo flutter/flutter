@@ -269,7 +269,6 @@ void main() {
       ),
     );
 
-
     final Offset startBlah1 = textOffsetToPosition(tester, 0);
     await tester.tapAt(startBlah1);
     await tester.pump(const Duration(milliseconds: 100));
@@ -278,7 +277,6 @@ void main() {
     await tester.pump();
     controller.dispose();
   },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }),
     skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
     // TODO(polina-c): remove after fixing
     // https://github.com/flutter/flutter/issues/132620
