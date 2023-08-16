@@ -828,7 +828,7 @@ void _printIncompatibleJavaAgpGradleVersionsWarning({
   final String incompatibleDependency = javaGradleVersionsCompatible ? 'Android Gradle Plugin (AGP)' :'Gradle' ;
   final String incompatibleDependencyVersion = javaGradleVersionsCompatible ? 'AGP version $templateAgpVersion' : 'Gradle version $templateGradleVersion';
   final String incompatibleVersionsAndRecommendedOptionMessage = '''
-The configured version of Java detected conflicts with the $incompatibleDependency version in your new Flutter $projectType.
+The configured version of Java detected conflicts with the $incompatibleDependency version in your new Flutter ${projectType.cliName}.
 
 [RECOMMENDED] To keep the default $incompatibleDependencyVersion, make
 sure to download a compatible Java version. You may configure this compatible
