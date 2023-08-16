@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import 'card.dart';
@@ -114,6 +115,7 @@ class PaginatedDataTable extends StatefulWidget {
     this.checkboxHorizontalMargin,
     this.controller,
     this.primary,
+    this.headingRowColor,
   }) : assert(actions == null || (header != null)),
        assert(columns.isNotEmpty),
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
@@ -287,6 +289,9 @@ class PaginatedDataTable extends StatefulWidget {
 
   /// {@macro flutter.widgets.scroll_view.primary}
   final bool? primary;
+
+  /// {@macro flutter.material.dataTable.headingRowColor}
+  final MaterialStateProperty<Color?>? headingRowColor;
 
   @override
   PaginatedDataTableState createState() => PaginatedDataTableState();
@@ -595,6 +600,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                     showCheckboxColumn: widget.showCheckboxColumn,
                     showBottomBorder: true,
                     rows: _getRows(_firstRowIndex, widget.rowsPerPage),
+                    headingRowColor: widget.headingRowColor,
                   ),
                 ),
               ),
