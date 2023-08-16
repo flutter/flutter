@@ -14,8 +14,8 @@ import 'test_utils.dart';
 final String flutterRootPath = getFlutterRoot();
 final Directory flutterRoot = fileSystem.directory(flutterRootPath);
 
-// Regression test for https://github.com/flutter/flutter/issues/132592
 Future<void> main() async {
+  // Regression test for https://github.com/flutter/flutter/issues/132592
   test('flutter/bin/dart updates the Dart SDK', () async {
     Future runDartBatch() async {
       String stdout = '';
