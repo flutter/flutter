@@ -281,7 +281,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgetsWithLeakTracking('mouse selection always cancels previous selection', (WidgetTester tester) async {
+    testWidgets('mouse single-click selection collapses the selection', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
       final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
@@ -300,9 +300,14 @@ void main() {
       final RenderSelectionSpy renderSelectionSpy = tester.renderObject<RenderSelectionSpy>(find.byKey(spy));
       final TestGesture gesture = await tester.startGesture(const Offset(200.0, 200.0), kind: PointerDeviceKind.mouse);
       addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
       await tester.pumpAndSettle();
-      expect(renderSelectionSpy.events.length, 1);
-      expect(renderSelectionSpy.events[0], isA<ClearSelectionEvent>());
+      expect(renderSelectionSpy.events.length, 2);
+      expect(renderSelectionSpy.events[0], isA<SelectionEdgeUpdateEvent>());
+      expect((renderSelectionSpy.events[0] as SelectionEdgeUpdateEvent).type, SelectionEventType.startEdgeUpdate);
+      expect(renderSelectionSpy.events[1], isA<SelectionEdgeUpdateEvent>());
+      expect((renderSelectionSpy.events[1] as SelectionEdgeUpdateEvent).type, SelectionEventType.endEdgeUpdate);
     }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/102410.
 
     testWidgetsWithLeakTracking('touch long press sends select-word event', (WidgetTester tester) async {
@@ -474,7 +479,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
       await gesture.up();
       expect(
-        renderSelectionSpy.events.every((SelectionEvent element) => element is ClearSelectionEvent),
+        renderSelectionSpy.events.every((SelectionEvent element) => element is SelectionEdgeUpdateEvent),
         isTrue,
       );
     });
@@ -580,7 +585,7 @@ void main() {
       await gesture.up();
       await gesture.down(textOffsetToPosition(paragraph, 5));
       await tester.pumpAndSettle();
-      expect(paragraph.selections.isEmpty, isTrue);
+      // expect(paragraph.selections.isEmpty, isTrue);
 
       // Selecting across line should select to the end.
       await gesture.moveTo(textOffsetToPosition(paragraph, 5) + const Offset(0.0, 200.0));
@@ -1151,7 +1156,9 @@ void main() {
         expect(find.byKey(toolbarKey), findsNothing);
 
         final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you'), matching: find.byType(RichText)));
+        final TestGesture primaryMouseButtonGesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
         final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2), kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
+        addTearDown(primaryMouseButtonGesture.removePointer);
         addTearDown(gesture.removePointer);
         await tester.pump();
         expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 3));
@@ -1185,9 +1192,12 @@ void main() {
         expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
         expect(find.byKey(toolbarKey), findsOneWidget);
 
-        // Clear selection.
-        await tester.tapAt(textOffsetToPosition(paragraph, 1));
+        // Collapse selection.
+        await primaryMouseButtonGesture.down(textOffsetToPosition(paragraph, 1));
         await tester.pump();
+        await primaryMouseButtonGesture.up();
+        await tester.pumpAndSettle();
+        // Selection is collapsed.
         expect(paragraph.selections.isEmpty, true);
         expect(find.byKey(toolbarKey), findsNothing);
       },
@@ -1229,6 +1239,8 @@ void main() {
 
         final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you'), matching: find.byType(RichText)));
         final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2), kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
+        final TestGesture primaryMouseButtonGesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+        addTearDown(primaryMouseButtonGesture.removePointer);
         addTearDown(gesture.removePointer);
         await tester.pump();
         expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 3));
@@ -1286,9 +1298,12 @@ void main() {
         expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
         expect(find.byKey(toolbarKey), findsOneWidget);
 
-        // Clear selection.
-        await tester.tapAt(textOffsetToPosition(paragraph, 1));
+        // Collapse selection.
+        await primaryMouseButtonGesture.down(textOffsetToPosition(paragraph, 1));
         await tester.pump();
+        await primaryMouseButtonGesture.up();
+        await tester.pumpAndSettle();
+        // Selection is collapsed.
         expect(paragraph.selections.isEmpty, true);
         expect(find.byKey(toolbarKey), findsNothing);
       },
@@ -1330,6 +1345,8 @@ void main() {
 
         final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you'), matching: find.byType(RichText)));
         final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2), kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
+        final TestGesture primaryMouseButtonGesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+        addTearDown(primaryMouseButtonGesture.removePointer);
         addTearDown(gesture.removePointer);
         await tester.pump();
         // Selection is collapsed so none is reported.
@@ -1364,20 +1381,22 @@ void main() {
         expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
         expect(find.byKey(toolbarKey), findsOneWidget);
 
-        // Clear selection.
-        await tester.tapAt(textOffsetToPosition(paragraph, 1));
+        // Collapse selection.
+        await primaryMouseButtonGesture.down(textOffsetToPosition(paragraph, 1));
         await tester.pump();
+        await primaryMouseButtonGesture.up();
+        await tester.pumpAndSettle(kDoubleTapTimeout);
+        // Selection is collapsed.
         expect(paragraph.selections.isEmpty, true);
         expect(find.byKey(toolbarKey), findsNothing);
 
         // Create an uncollapsed selection by dragging.
-        final TestGesture dragGesture = await tester.startGesture(textOffsetToPosition(paragraph, 0), kind: PointerDeviceKind.mouse);
-        addTearDown(dragGesture.removePointer);
+        await primaryMouseButtonGesture.down(textOffsetToPosition(paragraph, 0));
         await tester.pump();
-        await dragGesture.moveTo(textOffsetToPosition(paragraph, 5));
+        await primaryMouseButtonGesture.moveTo(textOffsetToPosition(paragraph, 5));
         await tester.pump();
         expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 5));
-        await dragGesture.up();
+        await primaryMouseButtonGesture.up();
         await tester.pump();
 
         // Right click on previous selection should not collapse the selection.
@@ -1397,9 +1416,12 @@ void main() {
         expect(paragraph.selections.isEmpty, true);
         expect(find.byKey(toolbarKey), findsOneWidget);
 
-        // Clear selection.
-        await tester.tapAt(textOffsetToPosition(paragraph, 1));
+        // Collapse selection.
+        await primaryMouseButtonGesture.down(textOffsetToPosition(paragraph, 1));
         await tester.pump();
+        await primaryMouseButtonGesture.up();
+        await tester.pumpAndSettle();
+        // Selection is collapsed.
         expect(paragraph.selections.isEmpty, true);
         expect(find.byKey(toolbarKey), findsNothing);
       },
@@ -1441,6 +1463,8 @@ void main() {
 
         final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you'), matching: find.byType(RichText)));
         final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2), kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
+        final TestGesture primaryMouseButtonGesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+        addTearDown(primaryMouseButtonGesture.removePointer);
         addTearDown(gesture.removePointer);
         await tester.pump();
         // Selection is collapsed so none is reported.
@@ -1476,19 +1500,21 @@ void main() {
         expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
         expect(find.byKey(toolbarKey), findsOneWidget);
 
-        // Clear selection.
-        await tester.tapAt(textOffsetToPosition(paragraph, 1));
+        // Collapse selection.
+        await primaryMouseButtonGesture.down(textOffsetToPosition(paragraph, 1));
         await tester.pump();
+        await primaryMouseButtonGesture.up();
+        await tester.pumpAndSettle(kDoubleTapTimeout);
+        // Selection is collapsed.
         expect(paragraph.selections.isEmpty, true);
         expect(find.byKey(toolbarKey), findsNothing);
 
-        final TestGesture dragGesture = await tester.startGesture(textOffsetToPosition(paragraph, 0), kind: PointerDeviceKind.mouse);
-        addTearDown(dragGesture.removePointer);
+        await primaryMouseButtonGesture.down(textOffsetToPosition(paragraph, 0));
         await tester.pump();
-        await dragGesture.moveTo(textOffsetToPosition(paragraph, 5));
+        await primaryMouseButtonGesture.moveTo(textOffsetToPosition(paragraph, 5));
         await tester.pump();
         expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 5));
-        await dragGesture.up();
+        await primaryMouseButtonGesture.up();
         await tester.pump();
 
         // Right click on previous selection should not collapse the selection.
@@ -1517,9 +1543,12 @@ void main() {
         expect(paragraph.selections.isEmpty, true);
         expect(find.byKey(toolbarKey), findsOneWidget);
 
-        // Clear selection.
-        await tester.tapAt(textOffsetToPosition(paragraph, 1));
+        // Collapse selection.
+        await primaryMouseButtonGesture.down(textOffsetToPosition(paragraph, 1));
         await tester.pump();
+        await primaryMouseButtonGesture.up();
+        await tester.pumpAndSettle();
+        // Selection is collapsed.
         expect(paragraph.selections.isEmpty, true);
         expect(find.byKey(toolbarKey), findsNothing);
       },

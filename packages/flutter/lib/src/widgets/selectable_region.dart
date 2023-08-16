@@ -352,7 +352,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
               _showToolbar(location: details.globalPosition);
             }
           } else {
-            _clearSelection();
+            _selectPositionAt(offset: details.globalPosition);
           }
         };
         instance.onSecondaryTapDown = _handleRightClickDown;
@@ -472,6 +472,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           (TapAndPanGestureRecognizer instance) {
         instance
           ..onTapDown = _startNewMouseSelectionGesture
+          ..onTapUp = _handleMouseTapUp
           ..onDragStart = _handleMouseDragStart
           ..onDragUpdate = _handleMouseDragUpdate
           ..onDragEnd = _handleMouseDragEnd
@@ -498,7 +499,17 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       case 1:
         widget.focusNode.requestFocus();
         hideToolbar();
-        _clearSelection();
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.iOS:
+            // On mobile platforms the selection is set on tap up.
+            break;
+          case TargetPlatform.macOS:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            _selectPositionAt(offset: details.globalPosition);
+        }
       case 2:
         _selectWordAt(offset: details.globalPosition);
     }
@@ -526,6 +537,23 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   void _handleMouseDragEnd(TapDragEndDetails details) {
     _finalizeSelection();
     _updateSelectedContentIfNeeded();
+  }
+
+  void _handleMouseTapUp(TapDragUpDetails details) {
+    switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
+      case 1:
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.iOS:
+            _selectPositionAt(offset: details.globalPosition);
+          case TargetPlatform.macOS:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            // On desktop platforms the selection is set on tap down.
+            break;
+        }
+    }
   }
 
   void _updateSelectedContentIfNeeded() {
@@ -586,8 +614,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         // keep the current selection, if not then collapse it.
         final bool lastSecondaryTapDownPositionWasOnActiveSelection = _positionIsOnActiveSelection(globalPosition: details.globalPosition);
         if (!lastSecondaryTapDownPositionWasOnActiveSelection) {
-          _selectStartTo(offset: lastSecondaryTapDownPosition!);
-          _selectEndTo(offset: lastSecondaryTapDownPosition!);
+          _selectPositionAt(offset: lastSecondaryTapDownPosition!);
         }
         _showHandles();
         _showToolbar(location: lastSecondaryTapDownPosition);
@@ -612,8 +639,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         // keep the current selection, if not then collapse it.
         final bool lastSecondaryTapDownPositionWasOnActiveSelection = _positionIsOnActiveSelection(globalPosition: details.globalPosition);
         if (!lastSecondaryTapDownPositionWasOnActiveSelection) {
-          _selectStartTo(offset: lastSecondaryTapDownPosition!);
-          _selectEndTo(offset: lastSecondaryTapDownPosition!);
+          _selectPositionAt(offset: lastSecondaryTapDownPosition!);
         }
         _showHandles();
         _showToolbar(location: lastSecondaryTapDownPosition);
@@ -976,6 +1002,22 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       _selectionStartPosition = offset;
       _triggerSelectionStartEdgeUpdate(textGranularity: textGranularity);
     }
+  }
+
+  /// Selects a position at the `offset` location.
+  ///
+  /// The selection will be collapsed at the `offset` location.
+  ///
+  /// See also:
+  ///  * [_selectStartTo], which sets or updates selection start edge.
+  ///  * [_selectEndTo], which sets or updates selection end edge.
+  ///  * [_finalizeSelection], which stops the `continuous` updates.
+  ///  * [_clearSelection], which clear the ongoing selection.
+  ///  * [_selectWordAt], which selects a whole word at the location.
+  ///  * [selectAll], which selects the entire content.
+  void _selectPositionAt({required Offset offset}) {
+    _selectStartTo(offset: offset);
+    _selectEndTo(offset: offset);
   }
 
   /// Selects a whole word at the `offset` location.

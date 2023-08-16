@@ -1720,7 +1720,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     _selectableContainsOriginWord = true;
 
     final TextPosition position = paragraph.getPositionForOffset(paragraph.globalToLocal(globalPosition));
-    if (_positionIsWithinCurrentSelection(position)) {
+    if (_positionIsWithinCurrentSelection(position) && _textSelectionStart != _textSelectionEnd) {
       return SelectionResult.end;
     }
     final _WordBoundaryRecord wordBoundary = _getWordBoundaryAtPosition(position);
