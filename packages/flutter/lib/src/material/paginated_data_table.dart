@@ -367,13 +367,6 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     }
   }
 
-  DataRow _getBlankRowFor(int index) {
-    return DataRow.byIndex(
-      index: index,
-      cells: widget.columns.map<DataCell>((DataColumn column) => DataCell.empty).toList(),
-    );
-  }
-
   DataRow _getProgressIndicatorRowFor(int index) {
     bool haveProgressIndicator = false;
     final List<DataCell> cells = widget.columns.map<DataCell>((DataColumn column) {
@@ -597,10 +590,9 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                   ),
                 ),
               ),
+              // ignore_clamp_double_lint
               SizedBox(
-                  height: widget.dataRowMaxHeight *
-                      (widget.rowsPerPage - _rowCount + _firstRowIndex)
-                          .clamp(0, widget.rowsPerPage)),
+                  height: widget.dataRowMaxHeight * (widget.rowsPerPage - _rowCount + _firstRowIndex).clamp(0, widget.rowsPerPage)),
               DefaultTextStyle(
                 style: footerTextStyle!,
                 child: IconTheme.merge(
