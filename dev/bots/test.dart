@@ -1015,7 +1015,7 @@ Future<void> _runFrameworkTests() async {
       workingDirectory: path.join(flutterRoot, 'packages', 'integration_test', 'example', 'android'),
     );
     await runCommand(
-      path.join(flutterRoot, 'packages', 'integration_test', 'example', 'android', 'gradlew'),
+      path.join(flutterRoot, 'packages', 'integration_test', 'example', 'android', 'gradlew$bat'),
       <String>[
         ':integration_test:testDebugUnitTest',
         '--tests',
