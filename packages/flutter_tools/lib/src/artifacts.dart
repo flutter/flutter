@@ -316,7 +316,7 @@ class LocalEngineInfo {
   /// The name of the target (device) platform, i.e. `android_debug_unopt`.
   String get localTargetName => globals.fs.path.basename(targetOutPath);
 
-  /// The name of the host (build) platform, i.e. `host_debug_unopt`.
+  /// The name of the host (build) platform, e.g. `host_debug_unopt`.
   String get localHostName => globals.fs.path.basename(hostOutPath);
 }
 
