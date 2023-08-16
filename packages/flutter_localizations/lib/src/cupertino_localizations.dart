@@ -10,6 +10,10 @@ import 'l10n/generated_cupertino_localizations.dart';
 import 'utils/date_localizations.dart' as util;
 import 'widgets_localizations.dart';
 
+// Examples can assume:
+// import 'package:flutter_localizations/flutter_localizations.dart';
+// import 'package:flutter/cupertino.dart';
+
 /// Implementation of localized strings for Cupertino widgets using the `intl`
 /// package for date and time formatting.
 ///
@@ -32,11 +36,11 @@ import 'widgets_localizations.dart';
 /// app supports with [CupertinoApp.supportedLocales]:
 ///
 /// ```dart
-/// CupertinoApp(
+/// const CupertinoApp(
 ///   localizationsDelegates: GlobalCupertinoLocalizations.delegates,
-///   supportedLocales: [
-///     const Locale('en', 'US'), // American English
-///     const Locale('he', 'IL'), // Israeli Hebrew
+///   supportedLocales: <Locale>[
+///     Locale('en', 'US'), // American English
+///     Locale('he', 'IL'), // Israeli Hebrew
 ///     // ...
 ///   ],
 ///   // ...
@@ -432,11 +436,11 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   /// app supports with [CupertinoApp.supportedLocales]:
   ///
   /// ```dart
-  /// CupertinoApp(
+  /// const CupertinoApp(
   ///   localizationsDelegates: GlobalCupertinoLocalizations.delegates,
-  ///   supportedLocales: [
-  ///     const Locale('en', 'US'), // English
-  ///     const Locale('he', 'IL'), // Hebrew
+  ///   supportedLocales: <Locale>[
+  ///     Locale('en', 'US'), // English
+  ///     Locale('he', 'IL'), // Hebrew
   ///   ],
   ///   // ...
   /// )
