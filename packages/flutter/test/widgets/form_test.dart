@@ -945,4 +945,61 @@ void main() {
     fieldKey.currentState!.reset();
     expect(fieldKey.currentState!.hasInteractedByUser, isFalse);
   });
+
+testWidgets('Validator is nullified and error text behaves accordingly',
+    (WidgetTester tester) async {
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  bool useValidator = false;
+
+  String? errorText(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'test_error';
+    }
+    return null;
+  }
+
+  Widget buildTestApp() {
+    return MaterialApp(
+      home: MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: Material(
+              child: Form(
+                key: formKey,
+                child: TextFormField(
+                  validator: useValidator ? errorText : null,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Start with no validator
+  await tester.pumpWidget(buildTestApp());
+
+  // Enter empty text, expect no error since validator is null
+  await tester.enterText(find.byType(TextFormField), '');
+  formKey.currentState!.validate();
+  await tester.pump();
+  expect(find.text('test_error'), findsNothing);
+
+  // Now use the validator
+  useValidator = true;
+  await tester.pumpWidget(buildTestApp());
+  formKey.currentState!.validate();
+  await tester.pump();
+  expect(find.text('test_error'), findsOneWidget);
+
+  // Remove the validator again and expect the error to disappear
+  useValidator = false;
+  await tester.pumpWidget(buildTestApp());
+  formKey.currentState!.validate();
+  await tester.pump();
+  expect(find.text('test_error'), findsNothing);
+});
 }
