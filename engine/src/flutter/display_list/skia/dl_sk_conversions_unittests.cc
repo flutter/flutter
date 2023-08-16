@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/display_list/skia/dl_sk_conversions.h"
-
 #include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/dl_paint.h"
 #include "flutter/display_list/dl_sampling_options.h"
 #include "flutter/display_list/dl_tile_mode.h"
 #include "flutter/display_list/dl_vertices.h"
+#include "flutter/display_list/effects/dl_color_source.h"
+#include "flutter/display_list/skia/dl_sk_conversions.h"
 #include "gtest/gtest.h"
 #include "third_party/skia/include/core/SkSamplingOptions.h"
 #include "third_party/skia/include/core/SkTileMode.h"
@@ -268,6 +268,44 @@ TEST(DisplayListSkConversions, MatrixColorFilterModifiesTransparency) {
     test_matrix(i, SK_ScalarInfinity);
     test_matrix(i, -SK_ScalarInfinity);
   }
+}
+
+TEST(DisplayListSkConversions, ToSkDitheringDisabledForGradients) {
+  // Test that when using the utility method "ToSk", the resulting SkPaint
+  // does not have "isDither" set to true, even if it's requested by the
+  // Flutter (dart:ui) paint, because it's not a supported feature in the
+  // Impeller backend.
+
+  // Create a new DlPaint with isDither set to true.
+  //
+  // This mimics the behavior of ui.Paint.enableDithering = true.
+  DlPaint dl_paint;
+  dl_paint.setDither(true);
+
+  SkPaint sk_paint = ToSk(dl_paint);
+
+  EXPECT_FALSE(sk_paint.isDither());
+}
+
+TEST(DisplayListSkConversions, ToSkDitheringEnabledForGradients) {
+  // Test that when using the utility method "ToSk", the resulting SkPaint
+  // has "isDither" set to true, if the paint is a gradient, because it's
+  // a supported feature in the Impeller backend.
+
+  // Create a new DlPaint with isDither set to true.
+  //
+  // This mimics the behavior of ui.Paint.enableDithering = true.
+  DlPaint dl_paint;
+  dl_paint.setDither(true);
+
+  // Set the paint to be a gradient.
+  dl_paint.setColorSource(DlColorSource::MakeLinear(SkPoint::Make(0, 0),
+                                                    SkPoint::Make(100, 100), 0,
+                                                    0, 0, DlTileMode::kClamp));
+
+  SkPaint sk_paint = ToSk(dl_paint);
+
+  EXPECT_TRUE(sk_paint.isDither());
 }
 
 }  // namespace testing
