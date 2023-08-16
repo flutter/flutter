@@ -17,7 +17,9 @@ import 'viewport_offset.dart';
 // The RenderSliver base class and its helper types.
 
 /// Called to get the item extent by the index of item.
-typedef ItemExtentGetter = double Function(int index, SliverLayoutDimensions dimensions);
+///
+/// Used by [ListView.itemExtentBuilder] and [SliverExplicitExtentList.itemExtentBuilder].
+typedef ItemExtentBuilder = double Function(int index, SliverLayoutDimensions dimensions);
 
 /// Relates the dimensions of the [RenderSliver] during layout.
 ///

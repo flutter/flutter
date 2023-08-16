@@ -1581,6 +1581,9 @@ class ListView extends BoxScrollView {
   /// the foreknowledge of the children's extent to save work, for example when
   /// the scroll position changes drastically.
   ///
+  /// This will be called multiple times during the layout phase of a frame to find
+  /// the items that should be loaded by the lazy loading process.
+  ///
   /// Unlike [itemExtent] or [prototypeItem], this allows children to have
   /// different extents.
   ///
@@ -1594,7 +1597,7 @@ class ListView extends BoxScrollView {
   ///  * The [prototypeItem] property, which allows forcing the children's
   ///    extent to be the same as the given widget.
   /// {@endtemplate}
-  final ItemExtentGetter? itemExtentBuilder;
+  final ItemExtentBuilder? itemExtentBuilder;
 
   /// {@template flutter.widgets.list_view.prototypeItem}
   /// If non-null, forces the children to have the same extent as the given

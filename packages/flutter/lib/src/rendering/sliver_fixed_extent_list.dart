@@ -6,21 +6,21 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 
-import 'box.dart';
+import 'box.dart';git 
 import 'sliver.dart';
 import 'sliver_multi_box_adaptor.dart';
 
-/// A sliver that contains multiple box children that have the same extent in
+/// A sliver that contains multiple box children that have the explicit extent in
 /// the main axis.
 ///
 /// [RenderSliverFixedExtentBoxAdaptor] places its children in a linear array
-/// along the main axis. Each child is forced to have the [itemExtent] or the
-/// returned value of [itemExtentBuilder] in the
-/// main axis and the [SliverConstraints.crossAxisExtent] in the cross axis.
+/// along the main axis. Each child is forced to have the returned value of [itemExtentBuilder]
+/// when the [itemExtentBuilder] is non-null or the [itemExtent] when [itemExtentBuilder]
+/// is null in the main axis and the [SliverConstraints.crossAxisExtent] in the cross axis.
 ///
-/// Subclasses should override [itemExtent] to control the size of the children
-/// in the main axis. For a concrete subclass with a configurable [itemExtent],
-/// see [RenderSliverFixedExtentList].
+/// Subclasses should override [itemExtent] or [itemExtentBuilder] to control
+/// the size of the children in the main axis. For a concrete subclass with a
+/// configurable [itemExtent], see [RenderSliverFixedExtentList] or [RenderSliverExplicitExtentList].
 ///
 /// [RenderSliverFixedExtentBoxAdaptor] is more efficient than
 /// [RenderSliverList] because [RenderSliverFixedExtentBoxAdaptor] does not need
@@ -45,15 +45,21 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   });
 
   /// The main-axis extent of each item.
-  double get itemExtent;
+  ///
+  /// If this is non-null, the [itemExtentBuilder] must be null.
+  /// If this is null, the [itemExtentBuilder] must be non-null.
+  double? get itemExtent;
 
   /// The main-axis extent builder of each item.
-  ItemExtentGetter? get itemExtentBuilder => null;
+  ///
+  /// If this is non-null, the [itemExtent] must be null.
+  /// If this is null, the [itemExtent] must be non-null.
+  ItemExtentBuilder? get itemExtentBuilder => null;
 
   /// The layout offset for the child with the given index.
   ///
-  /// This function is given the [itemExtent] as an argument to avoid
-  /// recomputing [itemExtent] repeatedly during layout.
+  /// This function uses the returned value of [itemExtentBuilder] or the [itemExtent]
+  /// as an argument to avoid recomputing item size repeatedly during layout.
   ///
   /// By default, places the children in order, without gaps, starting from
   /// layout offset zero.
@@ -72,8 +78,8 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
 
   /// The minimum child index that is visible at the given scroll offset.
   ///
-  /// This function is given the [itemExtent] as an argument to avoid
-  /// recomputing [itemExtent] repeatedly during layout.
+  /// This function uses the returned value of [itemExtentBuilder] or the [itemExtent]
+  /// as an argument to avoid recomputing item size repeatedly during layout.
   ///
   /// By default, returns a value consistent with the children being placed in
   /// order, without gaps, starting from layout offset zero.
@@ -96,8 +102,8 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
 
   /// The maximum child index that is visible at the given scroll offset.
   ///
-  /// This function is given the [itemExtent] as an argument to avoid
-  /// recomputing [itemExtent] repeatedly during layout.
+  /// This function uses the returned value of [itemExtentBuilder] or the [itemExtent]
+  /// as an argument to avoid recomputing item size repeatedly during layout.
   ///
   /// By default, returns a value consistent with the children being placed in
   /// order, without gaps, starting from layout offset zero.
@@ -160,8 +166,10 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   /// [childManager] returns an infinite number of children for positive
   /// indices.
   ///
-  /// By default, multiplies the [itemExtent] by the number of children reported
-  /// by [RenderSliverBoxChildManager.childCount].
+  /// If [itemExtentBuilder] is null, multiplies the [itemExtent] by the number
+  /// of children reported by [RenderSliverBoxChildManager.childCount].
+  /// If [itemExtentBuilder] is non-null, sum the extents of the first
+  /// [RenderSliverBoxChildManager.childCount] children.
   ///
   /// See also:
   ///
@@ -200,16 +208,13 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     return trailingGarbage;
   }
 
-  int _getChildIndexForScrollOffset(double scrollOffset, ItemExtentGetter callback) {
+  int _getChildIndexForScrollOffset(double scrollOffset, ItemExtentBuilder callback) {
     if (scrollOffset == 0.0) {
       return 0;
     }
     double position = 0.0;
     int index = 0;
-    while (true) {
-      if (position >= scrollOffset) {
-        break;
-      }
+    while (position < scrollOffset) {
       position += callback(index, _currentLayoutDimensions);
       ++index;
     }
@@ -219,7 +224,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   BoxConstraints _getChildConstraints(int index) {
     double extent;
     if (itemExtentBuilder == null) {
-      extent = itemExtent;
+      extent = itemExtent!;
     } else {
       extent = itemExtentBuilder!(index, _currentLayoutDimensions);
     }
@@ -233,11 +238,15 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
 
   @override
   void performLayout() {
+    assert((itemExtent != null && itemExtentBuilder == null) ||
+        (itemExtent == null && itemExtentBuilder != null));
+    assert(itemExtentBuilder != null || (itemExtent!.isFinite && itemExtent! > 0));
+
     final SliverConstraints constraints = this.constraints;
     childManager.didStartLayout();
     childManager.setDidUnderflow(false);
 
-    final double itemFixedExtent = itemExtent;
+    final double itemFixedExtent = itemExtent ?? 0;
     final double scrollOffset = constraints.scrollOffset + constraints.cacheOrigin;
     assert(scrollOffset >= 0.0);
     final double remainingExtent = constraints.remainingCacheExtent;

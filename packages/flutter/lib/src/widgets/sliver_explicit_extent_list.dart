@@ -43,7 +43,7 @@ class SliverExplicitExtentList extends SliverMultiBoxAdaptorWidget {
   /// A sliver that places multiple box children in a linear array along the main
   /// axis.
   ///
-  /// [SliverFixedExtentList] places its children in a linear array along the main
+  /// [SliverExplicitExtentList] places its children in a linear array along the main
   /// axis starting at offset zero and without gaps. Each child is forced to have
   /// the returned extent of [itemExtentBuilder] in the main axis and the
   /// [SliverConstraints.crossAxisExtent] in the cross axis.
@@ -74,7 +74,7 @@ class SliverExplicitExtentList extends SliverMultiBoxAdaptorWidget {
   /// A sliver that places multiple box children in a linear array along the main
   /// axis.
   ///
-  /// [SliverFixedExtentList] places its children in a linear array along the main
+  /// [SliverExplicitExtentList] places its children in a linear array along the main
   /// axis starting at offset zero and without gaps. Each child is forced to have
   /// the returned extent of [itemExtentBuilder] in the main axis and the
   /// [SliverConstraints.crossAxisExtent] in the cross axis.
@@ -95,7 +95,7 @@ class SliverExplicitExtentList extends SliverMultiBoxAdaptorWidget {
   ));
 
   /// The children extent builder.
-  final ItemExtentGetter itemExtentBuilder;
+  final ItemExtentBuilder itemExtentBuilder;
 
   @override
   RenderSliverExplicitExtentList createRenderObject(BuildContext context) {
@@ -118,13 +118,13 @@ class RenderSliverExplicitExtentList extends RenderSliverFixedExtentBoxAdaptor {
   /// The [childManager] argument must not be null.
   RenderSliverExplicitExtentList({
     required super.childManager,
-    required ItemExtentGetter itemExtentBuilder,
+    required ItemExtentBuilder itemExtentBuilder,
   }) : _itemExtentBuilder = itemExtentBuilder;
 
   @override
-  ItemExtentGetter get itemExtentBuilder => _itemExtentBuilder;
-  ItemExtentGetter _itemExtentBuilder;
-  set itemExtentBuilder(ItemExtentGetter value) {
+  ItemExtentBuilder get itemExtentBuilder => _itemExtentBuilder;
+  ItemExtentBuilder _itemExtentBuilder;
+  set itemExtentBuilder(ItemExtentBuilder value) {
     if (_itemExtentBuilder == value) {
       return;
     }
@@ -133,5 +133,5 @@ class RenderSliverExplicitExtentList extends RenderSliverFixedExtentBoxAdaptor {
   }
 
   @override
-  double get itemExtent => double.nan;
+  double? get itemExtent => null;
 }

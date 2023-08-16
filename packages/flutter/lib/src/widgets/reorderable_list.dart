@@ -258,7 +258,7 @@ class ReorderableList extends StatefulWidget {
   final double? itemExtent;
 
   /// {@macro flutter.widgets.list_view.itemExtentBuilder}
-  final ItemExtentGetter? itemExtentBuilder;
+  final ItemExtentBuilder? itemExtentBuilder;
 
   /// {@macro flutter.widgets.list_view.prototypeItem}
   final Widget? prototypeItem;
@@ -498,7 +498,7 @@ class SliverReorderableList extends StatefulWidget {
   final double? itemExtent;
 
   /// {@macro flutter.widgets.list_view.itemExtentBuilder}
-  final ItemExtentGetter? itemExtentBuilder;
+  final ItemExtentBuilder? itemExtentBuilder;
 
   /// {@macro flutter.widgets.list_view.prototypeItem}
   final Widget? prototypeItem;
