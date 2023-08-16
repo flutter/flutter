@@ -1956,6 +1956,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   void dispose() {
     _floatingLabelController.dispose();
     _shakingLabelController.dispose();
+    _borderGap.dispose();
     super.dispose();
   }
 
