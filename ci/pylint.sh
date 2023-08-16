@@ -28,8 +28,17 @@ function follow_links() (
 )
 
 SCRIPT_DIR=$(follow_links "$(dirname -- "${BASH_SOURCE[0]}")")
-PYLINT="${SCRIPT_DIR}/pylint.sh"
-CLANG_TIDY="${SCRIPT_DIR}/clang_tidy.sh"
+FLUTTER_DIR="$(cd "$SCRIPT_DIR/.."; pwd -P)"
 
-"${PYLINT}" "$@"
-"${CLANG_TIDY}" "$@"
+echo "$(date +%T) Running pylint"
+
+cd "$FLUTTER_DIR"
+pylint-2.7 --rcfile=.pylintrc \
+  "build/" \
+  "ci/" \
+  "impeller/" \
+  "sky/" \
+  "tools/gn" \
+  "testing/"
+
+echo "$(date +%T) Linting complete"
