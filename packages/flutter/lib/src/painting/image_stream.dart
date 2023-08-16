@@ -583,7 +583,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// See also:
   ///
   ///  * [addListener], which adds a full-featured listener and needs manual
-  ///  removal.
+  ///    removal.
   void addEphemeralErrorListener(ImageErrorListener listener) {
     _checkDisposed();
     if (_currentError != null) {
