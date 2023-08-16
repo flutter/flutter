@@ -53,23 +53,24 @@ if [[ -d "$FLUTTER_PUB_CACHE" ]]; then
   export PUB_CACHE
 fi
 
-OUTPUT_DIR=$(mktemp -d /tmp/dartdoc.XXXXX)
-DOC_DIR="$OUTPUT_DIR/doc"
-
 function usage() {
   echo "Usage: $(basename "${BASH_SOURCE[0]}") [--keep-temp] [--output <output.zip>]"
   echo ""
-  echo "  --keep-temp            Do not delete the temporary output directory created while generating docs."
-  echo "                         Normally the script deletes the temporary directory after generating the"
-  echo "                         output ZIP file."
-  echo "  --output <output.zip>  specifies where the output ZIP file containing the documentation data"
-  echo "                         will be written."
+  echo "  --keep-staging             Do not delete the staging directory created while generating"
+  echo "                             docs. Normally the script deletes the staging directory after"
+  echo "                             generating the output ZIP file."
+  echo "  --output <output.zip>      specifies where the output ZIP file containing the documentation"
+  echo "                             data will be written."
+  echo "  --staging-dir <directory>  specifies where the temporary output files will be written while"
+  echo "                             generating docs. This directory will be deleted after generation"
+  echo "                             unless --keep-staging is also specified."
   echo ""
 }
 
 function parse_args() {
   local arg
   local args=()
+  STAGING_DIR=
   KEEP_TEMP=0
   DESTINATION="$FLUTTER_ROOT/dev/docs/api_docs.zip"
   while (( "$#" )); do
@@ -78,19 +79,27 @@ function parse_args() {
         usage
         exit 0
         ;;
-      --keep-temp)
+      --staging-dir)
+        STAGING_DIR="$2"
+        shift
+        ;;
+      --keep-staging)
         KEEP_TEMP=1
-      ;;
+        ;;
       --output)
         DESTINATION="$2"
         shift
-      ;;
+        ;;
       *)
         args=("${args[@]}" "$1")
         ;;
     esac
     shift
   done
+  if [[ -z $STAGING_DIR ]]; then
+    STAGING_DIR=$(mktemp -d /tmp/dartdoc.XXXXX)
+  fi
+  DOC_DIR="$STAGING_DIR/doc"
   if [[ ${#args[@]}  != 0 ]]; then
     >&2 echo "ERROR: Unknown arguments: ${args[@]}"
     usage
@@ -126,12 +135,12 @@ function main() {
     DESTINATION="$PWD/$DESTINATION"
   fi
   # Zip up doc directory and write the output to the destination.
-  (cd "$OUTPUT_DIR"; zip -r -9 -q "$DESTINATION" ./doc)
+  (cd "$STAGING_DIR"; zip -r -9 -q "$DESTINATION" ./doc)
   if [[ $KEEP_TMP == 1 ]]; then
-    echo "Temporary document generation output left in $OUTPUT_DIR"
+    echo "Temporary document generation output left in $STAGING_DIR"
   else
-    echo "Removing Temporary document generation output from $OUTPUT_DIR"
-    rm -rf "$OUTPUT_DIR"
+    echo "Removing Temporary document generation output from $STAGING_DIR"
+    rm -rf "$STAGING_DIR"
   fi
   echo "Wrote docs ZIP file to $DESTINATION"
 }
