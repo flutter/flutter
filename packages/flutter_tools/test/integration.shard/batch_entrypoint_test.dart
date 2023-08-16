@@ -20,26 +20,38 @@ Future<void> main() async {
     // Run the Dart entrypoint once to ensure the Dart SDK is downloaded.
     await runDartBatch();
 
-    // Remove the Dart SDK stamp to cause the Dart batch entrypoint to
-    // re-download the Dart SDK.
     expect(dartSdkStamp.existsSync(), true);
+
+    // Remove the Dart SDK stamp and run the Dart entrypoint again to trigger
+    // the Dart SDK update.
     dartSdkStamp.deleteSync();
+    Future<String> runFuture = runDartBatch();
+    final Timer timer = Timer(Duration(minutes: 6), () {
+      print(
+        'The Dart batch entrypoint did not complete after 5 minutes. '
+        'Historically this is a sign that 7z zip extraction is waiting for'
+        'the user to confirm they would like to overwrite files. '
+        'This likely means the test isn\'t a flake and will fail. '
+        'See: https://github.com/flutter/flutter/issues/132592'
+      );
+    });
 
-    // Run the Dart batch entrypoint again to trigger the Dart SDK update.
-    final stdout = await runDartBatch();
+    String output = await runFuture;
+    timer.cancel();
 
-    // Check the Dart SDK was re-downloaded and extracted without overwriting
-    // unexpected files.
+    // Check the Dart SDK was re-downloaded and extracted.
+    // If 7-Zip is installed, unexpected overwrites causes this to hang.
+    // If 7-Zip is not installed, unexpected overwrites results in error messages.
     // See: https://github.com/flutter/flutter/issues/132592
-    expect(stdout, contains('Downloading Dart SDK from Flutter engine ...'));
-    expect(stdout, contains('Expanding downloaded archive...'));
-    expect(stdout, isNot(contains('Use the -Force parameter')));
+    expect(output, contains('Downloading Dart SDK from Flutter engine ...'));
+    expect(output, contains('Expanding downloaded archive...'));
+    expect(output, isNot(contains('Use the -Force parameter' /* Luke */)));
   },
   skip: !platform.isWindows); // [intended] Only Windows uses the batch entrypoint
 }
 
 Future<String> runDartBatch() async {
-  String stdout = '';
+  String output = '';
   final Process process = await processManager.start(
       <String>[
         dartBatch.path
@@ -48,30 +60,36 @@ Future<String> runDartBatch() async {
   final Future<Object?> stdoutFuture = process.stdout
       .transform<String>(utf8.decoder)
       .forEach((String str) {
-        stdout += str;
+        output += str;
       });
+  final Future<Object?> stderrFuture = process.stderr
+      .transform<String>(utf8.decoder)
+      .forEach((String str) {
+        output += str;
+      });
+
   // Wait for stdout to complete
-  await stdoutFuture;
+  await Future.wait(<Future>[ stdoutFuture, stderrFuture ]);
   // Ensure child exited successfully
   expect(
       await process.exitCode,
       0,
       reason: 'child process exited with code ${await process.exitCode}, and '
-      'stdout:\n$stdout',
+      'output:\n$output',
   );
 
   // Check the Dart tool prints the expected output.
-  expect(stdout, contains('A command-line utility for Dart development.'));
-  expect(stdout, contains('Usage: dart <command|dart-file> [arguments]'));
+  expect(output, contains('A command-line utility for Dart development.'));
+  expect(output, contains('Usage: dart <command|dart-file> [arguments]'));
 
-  return stdout;
+  return output;
 }
 
 // The executable batch entrypoint for the Dart binary.
 File get dartBatch {
   return flutterRoot
       .childDirectory('bin')
-      .childFile('dart')
+      .childFile('dart.bat')
       .absolute;
 }
 
