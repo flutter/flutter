@@ -17,6 +17,34 @@ namespace impeller {
 
 class Context;
 
+/// @brief a wrapper around the impeller [Allocator] instance that can be used
+///        to provide caching of allocated render target textures.
+class RenderTargetAllocator {
+ public:
+  explicit RenderTargetAllocator(std::shared_ptr<Allocator> allocator);
+
+  virtual ~RenderTargetAllocator() = default;
+
+  /// @brief Create a new render target texture, or recycle a previously
+  /// allocated render
+  ///        target texture.
+  virtual std::shared_ptr<Texture> CreateTexture(const TextureDescriptor& desc);
+
+  /// @brief Mark the beginning of a frame workload.
+  ///
+  ///       This may be used to reset any tracking state on whether or not a
+  ///       particular texture instance is still in use.
+  virtual void Start();
+
+  /// @brief Mark the end of a frame workload.
+  ///
+  ///        This may be used to deallocate any unused textures.
+  virtual void End();
+
+ private:
+  std::shared_ptr<Allocator> allocator_;
+};
+
 class RenderTarget final {
  public:
   struct AttachmentConfig {
@@ -55,6 +83,7 @@ class RenderTarget final {
 
   static RenderTarget CreateOffscreen(
       const Context& context,
+      RenderTargetAllocator& allocator,
       ISize size,
       const std::string& label = "Offscreen",
       AttachmentConfig color_attachment_config = kDefaultColorAttachmentConfig,
@@ -63,6 +92,7 @@ class RenderTarget final {
 
   static RenderTarget CreateOffscreenMSAA(
       const Context& context,
+      RenderTargetAllocator& allocator,
       ISize size,
       const std::string& label = "Offscreen MSAA",
       AttachmentConfigMSAA color_attachment_config =
@@ -77,6 +107,7 @@ class RenderTarget final {
   bool IsValid() const;
 
   void SetupStencilAttachment(const Context& context,
+                              RenderTargetAllocator& allocator,
                               ISize size,
                               bool msaa,
                               const std::string& label = "Offscreen",

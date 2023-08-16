@@ -10,6 +10,7 @@
 #include "impeller/base/strings.h"
 #include "impeller/core/formats.h"
 #include "impeller/entity/entity.h"
+#include "impeller/entity/render_target_cache.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/render_pass.h"
@@ -162,7 +163,9 @@ ContentContext::ContentContext(std::shared_ptr<Context> context)
     : context_(std::move(context)),
       lazy_glyph_atlas_(std::make_shared<LazyGlyphAtlas>()),
       tessellator_(std::make_shared<Tessellator>()),
-      scene_context_(std::make_shared<scene::SceneContext>(context_)) {
+      scene_context_(std::make_shared<scene::SceneContext>(context_)),
+      render_target_cache_(std::make_shared<RenderTargetCache>(
+          context_->GetResourceAllocator())) {
   if (!context_ || !context_->IsValid()) {
     return;
   }
@@ -359,7 +362,8 @@ std::shared_ptr<Texture> ContentContext::MakeSubpass(
   RenderTarget subpass_target;
   if (context->GetCapabilities()->SupportsOffscreenMSAA() && msaa_enabled) {
     subpass_target = RenderTarget::CreateOffscreenMSAA(
-        *context, texture_size, SPrintF("%s Offscreen", label.c_str()),
+        *context, *GetRenderTargetCache().get(), texture_size,
+        SPrintF("%s Offscreen", label.c_str()),
         RenderTarget::kDefaultColorAttachmentConfigMSAA  //
 #ifndef FML_OS_ANDROID  // Reduce PSO variants for Vulkan.
         ,
@@ -368,7 +372,8 @@ std::shared_ptr<Texture> ContentContext::MakeSubpass(
     );
   } else {
     subpass_target = RenderTarget::CreateOffscreen(
-        *context, texture_size, SPrintF("%s Offscreen", label.c_str()),
+        *context, *GetRenderTargetCache().get(), texture_size,
+        SPrintF("%s Offscreen", label.c_str()),
         RenderTarget::kDefaultColorAttachmentConfig  //
 #ifndef FML_OS_ANDROID  // Reduce PSO variants for Vulkan.
         ,

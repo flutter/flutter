@@ -1149,7 +1149,9 @@ TEST_P(RendererTest, StencilMask) {
       stencil_config.load_action = LoadAction::kLoad;
       stencil_config.store_action = StoreAction::kDontCare;
       stencil_config.storage_mode = StorageMode::kHostVisible;
-      render_target.SetupStencilAttachment(*context,
+      auto render_target_allocator =
+          RenderTargetAllocator(context->GetResourceAllocator());
+      render_target.SetupStencilAttachment(*context, render_target_allocator,
                                            render_target.GetRenderTargetSize(),
                                            true, "stencil", stencil_config);
       // Fill the stencil buffer with an checkerboard pattern.

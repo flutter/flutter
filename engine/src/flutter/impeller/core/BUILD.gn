@@ -49,3 +49,15 @@ impeller_component("core") {
     "//flutter/fml",
   ]
 }
+
+impeller_component("allocator_unittests") {
+  testonly = true
+
+  sources = [ "allocator_unittests.cc" ]
+
+  deps = [
+    ":core",
+    "../geometry",
+    "//flutter/testing:testing_lib",
+  ]
+}

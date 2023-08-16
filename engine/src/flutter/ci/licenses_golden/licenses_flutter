@@ -1271,6 +1271,8 @@ ORIGIN: ../../../flutter/impeller/entity/geometry/vertices_geometry.cc + ../../.
 ORIGIN: ../../../flutter/impeller/entity/geometry/vertices_geometry.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/inline_pass_context.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/inline_pass_context.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/render_target_cache.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/entity/render_target_cache.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/blending/advanced_blend.glsl + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/blending/advanced_blend.vert + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_color.frag + ../../../flutter/LICENSE
@@ -3994,6 +3996,8 @@ FILE: ../../../flutter/impeller/entity/geometry/vertices_geometry.cc
 FILE: ../../../flutter/impeller/entity/geometry/vertices_geometry.h
 FILE: ../../../flutter/impeller/entity/inline_pass_context.cc
 FILE: ../../../flutter/impeller/entity/inline_pass_context.h
+FILE: ../../../flutter/impeller/entity/render_target_cache.cc
+FILE: ../../../flutter/impeller/entity/render_target_cache.h
 FILE: ../../../flutter/impeller/entity/shaders/blending/advanced_blend.glsl
 FILE: ../../../flutter/impeller/entity/shaders/blending/advanced_blend.vert
 FILE: ../../../flutter/impeller/entity/shaders/blending/advanced_blend_color.frag
