@@ -1,4 +1,4 @@
-Signature: d46de3ab0200f9f6431bd54c688ea1b7
+Signature: e491a6b9608dbe13051d97fc380c5e03
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -1085,6 +1085,14 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story_state.fidl + ../..
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/surface.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.mdns/mdns.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/flat_namespace.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/commands.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/display_info.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/events.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/nodes.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/renderer.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/resources.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/shapes.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/types.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/ime_service.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/input_device_registry.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/input_reports.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -1124,6 +1132,12 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_wire/include/lib/fidl/cpp/wire/s
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_wire/include/lib/fidl/cpp/wire/vector_view.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/function.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/internal/function.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/commands.cc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/commands.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/resources.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/session.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/resources.cc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/session.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/trace-engine/include/lib/trace-engine/context.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/trace-engine/include/lib/trace-engine/fields.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/trace-engine/include/lib/trace-engine/handler.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -1199,6 +1213,14 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story_state.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/surface.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.mdns/mdns.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/flat_namespace.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/commands.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/display_info.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/events.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/nodes.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/renderer.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/resources.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/shapes.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/types.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/ime_service.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/input_device_registry.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/input_reports.fidl
@@ -1238,6 +1260,12 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_wire/include/lib/fidl/cpp/wire/str
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_wire/include/lib/fidl/cpp/wire/vector_view.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/function.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/internal/function.h
+FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/commands.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/commands.h
+FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/resources.h
+FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/session.h
+FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/resources.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/session.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/include/lib/trace-engine/context.h
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/include/lib/trace-engine/fields.h
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/include/lib/trace-engine/handler.h
@@ -1359,8 +1387,14 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/image_formats.fidl + ../.
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/image_formats_deprecated.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/usages.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.app/view_provider.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/pose_buffer_provider.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/commands.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/display_usage.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/commands.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/events.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/scenic.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/session.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/snapshot.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/commands.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/time.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/trap.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -1457,6 +1491,8 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect/vmo/state.cc + ../../../fuchsia/s
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect/vmo/types.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/media_cpp/include/lib/media/cpp/type_converters.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/media_cpp/type_converters.cc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/id.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/view_token_pair.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/optional.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/queue.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/type_traits.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -1565,8 +1601,14 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/image_formats.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/image_formats_deprecated.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/usages.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.app/view_provider.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/pose_buffer_provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/commands.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/display_usage.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/commands.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/events.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/scenic.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/session.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/snapshot.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/commands.fidl
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/time.h
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/trap.h
@@ -1663,6 +1705,8 @@ FILE: ../../../fuchsia/sdk/linux/pkg/inspect/vmo/state.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/vmo/types.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/media_cpp/include/lib/media/cpp/type_converters.h
 FILE: ../../../fuchsia/sdk/linux/pkg/media_cpp/type_converters.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/id.h
+FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/view_token_pair.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/optional.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/queue.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/type_traits.h
@@ -2373,6 +2417,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/input.dart + ../../../fuchs
 ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/inspect.dart + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/modular.dart + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/performance.dart + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/scenic.dart + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/setui.dart + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/sl4f_client.dart + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/ssh.dart + ../../../fuchsia/sdk/linux/LICENSE
@@ -2383,6 +2428,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/dr
 ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/flutter_frame_stats.dart + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/input_latency.dart + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/memory_metrics.dart + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/scenic_frame_stats.dart + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/temperature_metrics.dart + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics_results.dart + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics_spec.dart + ../../../fuchsia/sdk/linux/LICENSE
@@ -2508,6 +2554,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.app/view.fidl + ../../../fuch
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.app/view_config.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.brightness/brightness.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.brightness/color_adjustment.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/tokens.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/pointer_capture.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/device_listener.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.types/types.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -2577,6 +2624,9 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect_service_cpp/include/lib/inspect/s
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect_service_cpp/reader.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect_service_cpp/service.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/magma_client/include/lib/magma/magma_sysmem.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/view_ref_pair.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/view_token_pair.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/view_ref_pair.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/constructors.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/storage.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/utility.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -2665,6 +2715,7 @@ FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/input.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/inspect.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/modular.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/performance.dart
+FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/scenic.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/setui.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/sl4f_client.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/ssh.dart
@@ -2675,6 +2726,7 @@ FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/drm_
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/flutter_frame_stats.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/input_latency.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/memory_metrics.dart
+FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/scenic_frame_stats.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/temperature_metrics.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics_results.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics_spec.dart
@@ -2800,6 +2852,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.app/view.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.app/view_config.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.brightness/brightness.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.brightness/color_adjustment.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/tokens.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/pointer_capture.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/device_listener.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.types/types.fidl
@@ -2869,6 +2922,9 @@ FILE: ../../../fuchsia/sdk/linux/pkg/inspect_service_cpp/include/lib/inspect/ser
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect_service_cpp/reader.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect_service_cpp/service.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/magma_client/include/lib/magma/magma_sysmem.h
+FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/view_ref_pair.h
+FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/view_token_pair.h
+FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/view_ref_pair.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/constructors.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/storage.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/utility.h
@@ -3113,6 +3169,8 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/internal/compiler.h +
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/internal/result.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/result.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/input_report_reader/include/lib/input_report_reader/reader.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/commands_sizing.cc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/commands_sizing.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/array.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/bit.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/array.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -3285,6 +3343,8 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/internal/compiler.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/internal/result.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/result.h
 FILE: ../../../fuchsia/sdk/linux/pkg/input_report_reader/include/lib/input_report_reader/reader.h
+FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/commands_sizing.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/commands_sizing.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/array.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/bit.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/internal/array.h
@@ -3443,6 +3503,10 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_driver/include/lib/fidl_driver/cpp/w
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_driver/include/lib/fidl_driver/cpp/wire_types.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_driver_transport/include/lib/fidl_driver/cpp/transport.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_driver_transport/transport.cc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/view_creation_tokens.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/view_identity.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/view_creation_tokens.cc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/view_identity.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/algorithm.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/atomic.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/cstddef.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -3587,6 +3651,10 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_driver/include/lib/fidl_driver/cpp/wir
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_driver/include/lib/fidl_driver/cpp/wire_types.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_driver_transport/include/lib/fidl_driver/cpp/transport.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_driver_transport/transport.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/view_creation_tokens.h
+FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/view_identity.h
+FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/view_creation_tokens.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/view_identity.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/algorithm.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/atomic.h
 FILE: ../../../fuchsia/sdk/linux/pkg/stdcompat/include/lib/stdcompat/cstddef.h
@@ -3740,12 +3808,14 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.composition/overview.fidl + .
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.composition/screen_capture.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.composition/screenshot.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.display.singleton/info.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.observation.geometry/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointer/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointerinjector/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.test.input/media_buttons.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.test.input/mouse.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.test.input/overview.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -3985,12 +4055,14 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.composition/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.composition/screen_capture.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.composition/screenshot.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.display.singleton/info.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input3/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.observation.geometry/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointer/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.pointerinjector/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/overview.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/overview.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.test.input/media_buttons.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.test.input/mouse.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.test.input/overview.fidl
