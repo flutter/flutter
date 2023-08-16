@@ -215,10 +215,10 @@ class ChipsInputState<T> extends State<ChipsInput<T>> {
 
       final List<T> values = <T>[...widget.values];
 
-      //If the current number and the previous number of replacements are different than
-      //the user has deleted the InputChip using the keyboard. In this case, we trigger
-      //the onChanged callback. We need to be sure also that the current number of
-      //replacements is different from the input chip to avoid double-deletion.
+      // If the current number and the previous number of replacements are different, then
+      // the user has deleted the InputChip using the keyboard. In this case, we trigger
+      // the onChanged callback. We need to be sure also that the current number of
+      // replacements is different from the input chip to avoid double-deletion.
       if (currentNumber < previousNumber && currentNumber != values.length) {
         if (cursorStart == cursorEnd) {
           values.removeRange(cursorStart - 1, cursorEnd);
