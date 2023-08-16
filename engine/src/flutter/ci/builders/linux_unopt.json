@@ -53,6 +53,10 @@
                     "script": "flutter/ci/analyze.sh"
                 },
                 {
+                    "name": "pylint",
+                    "script": "flutter/ci/pylint.sh"
+                },
+                {
                     "language": "dart",
                     "name": "test: observatory and service protocol",
                     "script": "flutter/shell/testing/observatory/test.dart",

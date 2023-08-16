@@ -61,7 +61,7 @@
                         "--shard-variants=host_debug,host_debug,host_debug"
                     ],
 		    "max_attempts": 1,
-                    "script": "flutter/ci/lint.sh"
+                    "script": "flutter/ci/clang_tidy.sh"
                 }
             ]
         },
@@ -90,7 +90,7 @@
                         "--shard-variants=host_debug,host_debug,host_debug"
                     ],
             "max_attempts": 1,
-                    "script": "flutter/ci/lint.sh"
+                    "script": "flutter/ci/clang_tidy.sh"
                 }
             ]
         },
@@ -120,7 +120,7 @@
                         "--shard-variants=host_debug,host_debug,host_debug"
                     ],
             "max_attempts": 1,
-                    "script": "flutter/ci/lint.sh"
+                    "script": "flutter/ci/clang_tidy.sh"
                 }
             ]
         },
@@ -150,7 +150,7 @@
                         "--shard-variants=host_debug,host_debug,host_debug"
                     ],
             "max_attempts": 1,
-                    "script": "flutter/ci/lint.sh"
+                    "script": "flutter/ci/clang_tidy.sh"
                 }
             ]
         },
@@ -177,7 +177,7 @@
                         "--shard-variants=host_debug,host_debug,host_debug,host_debug"
                     ],
 		    "max_attempts": 1,
-                    "script": "flutter/ci/lint.sh"
+                    "script": "flutter/ci/clang_tidy.sh"
                 }
             ]
         }
