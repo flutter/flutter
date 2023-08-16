@@ -11,10 +11,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix3;
 
-import '../foundation/leak_tracking.dart';
-import '../rendering/mock_canvas.dart';
 import 'data_table_test_utils.dart';
 
 void main() {
@@ -470,11 +469,11 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Material(child: buildTable()),
     ));
-    // The `tester.widget` ensures that there is exactly one upward arrow.
     final Finder iconFinder = find.descendant(
       of: find.byType(DataTable),
       matching: find.widgetWithIcon(Transform, Icons.arrow_upward),
     );
+    // The `tester.widget` ensures that there is exactly one upward arrow.
     Transform transformOfArrow = tester.widget<Transform>(iconFinder);
     expect(
       transformOfArrow.transform.getRotation(),
@@ -522,11 +521,11 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Material(child: buildTable()),
     ));
-    // The `tester.widget` ensures that there is exactly one upward arrow.
     final Finder iconFinder = find.descendant(
       of: find.byType(DataTable),
       matching: find.widgetWithIcon(Transform, Icons.arrow_upward),
     );
+    // The `tester.widget` ensures that there is exactly one upward arrow.
     Transform transformOfArrow = tester.widget<Transform>(iconFinder);
     expect(
       transformOfArrow.transform.getRotation(),
@@ -575,11 +574,11 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Material(child: buildTable()),
     ));
-    // The `tester.widget` ensures that there is exactly one upward arrow.
     final Finder iconFinder = find.descendant(
       of: find.byType(DataTable),
       matching: find.widgetWithIcon(Transform, Icons.arrow_upward),
     );
+    // The `tester.widget` ensures that there is exactly one upward arrow.
     Transform transformOfArrow = tester.widget<Transform>(iconFinder);
     expect(
       transformOfArrow.transform.getRotation(),

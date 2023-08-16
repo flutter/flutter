@@ -22,6 +22,8 @@
   "tabSemanticsLabel": "ແຖບທີ $tabIndex ຈາກທັງໝົດ $tabCount",
   "modalBarrierDismissLabel": "ປິດໄວ້",
   "searchTextFieldPlaceholderLabel": "ຊອກຫາ",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "menuDismissLabel": "Dismiss menu"
+  "noSpellCheckReplacementsLabel": "ບໍ່ພົບການແທນທີ່",
+  "menuDismissLabel": "ປິດເມນູ",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web"
 }
