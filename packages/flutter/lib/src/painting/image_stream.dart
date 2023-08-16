@@ -523,7 +523,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// See also:
   ///
   ///  * [addEphemeralErrorListener], which adds an error listener that is
-  ///  automatically removed after first image load or error.
+  ///    automatically removed after first image load or error.
   void addListener(ImageStreamListener listener) {
     _checkDisposed();
     _hadAtLeastOneListener = true;
