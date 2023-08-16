@@ -21,7 +21,7 @@ class AllocatorGLES final : public Allocator {
   ReactorGLES::Ref reactor_;
   bool is_valid_ = false;
 
-  AllocatorGLES(ReactorGLES::Ref reactor);
+  explicit AllocatorGLES(ReactorGLES::Ref reactor);
 
   // |Allocator|
   bool IsValid() const;

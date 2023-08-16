@@ -17,6 +17,7 @@
 #include "impeller/entity/entity.h"
 #include "impeller/renderer/capabilities.h"
 #include "impeller/renderer/pipeline.h"
+#include "impeller/renderer/render_target.h"
 #include "impeller/scene/scene_context.h"
 
 #ifdef IMPELLER_DEBUG
@@ -334,6 +335,7 @@ struct ContentContextOptions {
 };
 
 class Tessellator;
+class RenderTargetCache;
 
 class ContentContext {
  public:
@@ -708,6 +710,10 @@ class ContentContext {
     return lazy_glyph_atlas_;
   }
 
+  std::shared_ptr<RenderTargetAllocator> GetRenderTargetCache() const {
+    return render_target_cache_;
+  }
+
  private:
   std::shared_ptr<Context> context_;
   std::shared_ptr<LazyGlyphAtlas> lazy_glyph_atlas_;
@@ -865,6 +871,7 @@ class ContentContext {
   bool is_valid_ = false;
   std::shared_ptr<Tessellator> tessellator_;
   std::shared_ptr<scene::SceneContext> scene_context_;
+  std::shared_ptr<RenderTargetAllocator> render_target_cache_;
   bool wireframe_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ContentContext);
