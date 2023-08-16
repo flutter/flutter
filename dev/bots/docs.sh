@@ -71,7 +71,7 @@ function parse_args() {
   local arg
   local args=()
   STAGING_DIR=
-  KEEP_TEMP=0
+  KEEP_STAGING=0
   DESTINATION="$FLUTTER_ROOT/dev/docs/api_docs.zip"
   while (( "$#" )); do
     case "$1" in
@@ -84,7 +84,7 @@ function parse_args() {
         shift
         ;;
       --keep-staging)
-        KEEP_TEMP=1
+        KEEP_STAGING=1
         ;;
       --output)
         DESTINATION="$2"
@@ -136,10 +136,10 @@ function main() {
   fi
   # Zip up doc directory and write the output to the destination.
   (cd "$STAGING_DIR"; zip -r -9 -q "$DESTINATION" ./doc)
-  if [[ $KEEP_TMP == 1 ]]; then
-    echo "Temporary document generation output left in $STAGING_DIR"
+  if [[ $KEEP_STAGING -eq 1 ]]; then
+    echo "Staging documentation output left in $STAGING_DIR"
   else
-    echo "Removing Temporary document generation output from $STAGING_DIR"
+    echo "Removing staging documentation output from $STAGING_DIR"
     rm -rf "$STAGING_DIR"
   fi
   echo "Wrote docs ZIP file to $DESTINATION"

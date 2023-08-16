@@ -55,7 +55,7 @@ Future<void> main(List<String> arguments) async {
     exit(0);
   }
 
-  final Directory publishRoot = filesystem.directory(args['output-dir']! as String);
+  final Directory publishRoot = filesystem.directory(args['output-dir']! as String).absolute;
   final Directory packageRoot = publishRoot.parent;
   if (!filesystem.directory(packageRoot).existsSync()) {
     filesystem.directory(packageRoot).createSync(recursive: true);
