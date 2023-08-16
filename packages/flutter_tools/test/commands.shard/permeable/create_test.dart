@@ -3483,8 +3483,20 @@ void main() {
 
       await runner.run(<String>['create', '--no-pub', '--template=${projectType.cliName}', if (projectType != FlutterProjectType.module) '--platforms=android', projectDir.path]);
 
+      // Check components of expected header warning message are printed.
       expect(logger.warningText, contains(expectedMessage));
       expect(logger.warningText, isNot(contains(unexpectedMessage)));
+      expect(logger.warningText, contains('./gradlew wrapper --gradle-version=<COMPATIBLE_GRADLE_VERSION>'));
+      expect(logger.warningText, contains('https://docs.gradle.org/current/userguide/compatibility.html#java'));
+
+      // Check expected file for updating Gradle version is present.
+      if (projectType == FlutterProjectType.app || projectType == FlutterProjectType.skeleton) {
+        expect(logger.warningText, contains(globals.fs.path.join(projectDir.path, 'android/gradle/wrapper/gradle-wrapper.properties')));
+      }
+      else {
+        // Project type is module.
+        expect(logger.warningText, contains(globals.fs.path.join(projectDir.path, '.android/gradle/wrapper/gradle-wrapper.properties')));
+      }
 
       // Cleanup to reuse projectDir and logger checks.
       tryToDelete(projectDir);
@@ -3508,8 +3520,24 @@ void main() {
 
       await runner.run(<String>['create', '--no-pub', '--template=${projectType.cliName}', if (projectType != FlutterProjectType.module) '--platforms=android', projectDir.path]);
 
+      // Check components of expected header warning message are printed.
       expect(logger.warningText, contains(expectedMessage));
       expect(logger.warningText, isNot(contains(unexpectedMessage)));
+      expect(logger.warningText, contains('https://developer.android.com/build/releases/gradle-plugin'));
+
+        // Check expected file(s) for updating AGP version is/are present.
+      if (projectType == FlutterProjectType.app || projectType == FlutterProjectType.skeleton || projectType == FlutterProjectType.pluginFfi) {
+        expect(logger.warningText, contains(globals.fs.path.join(projectDir.path, 'android/build.gradle')));
+      }
+      else if (projectType == FlutterProjectType.plugin) {
+        expect(logger.warningText, contains(globals.fs.path.join(projectDir.path, 'android/app/build.gradle')));
+      }
+      else {
+        // Project type is module.
+        expect(logger.warningText, contains(globals.fs.path.join(projectDir.path, '.android/build.gradle')));
+        expect(logger.warningText, contains(globals.fs.path.join(projectDir.path, '.android/app/build.gradle')));
+        expect(logger.warningText, contains(globals.fs.path.join(projectDir.path, '.android/Flutter/build.gradle')));
+      }
 
       // Cleanup to reuse projectDir and logger checks.
       tryToDelete(projectDir);
