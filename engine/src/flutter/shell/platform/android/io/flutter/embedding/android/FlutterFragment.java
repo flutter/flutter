@@ -1646,6 +1646,19 @@ public class FlutterFragment extends Fragment
   }
 
   /**
+   * Whether to automatically attach the {@link FlutterView} to the engine.
+   *
+   * <p>Returning {@code false} means that the task of attaching the {@link FlutterView} to the
+   * engine will be taken over by the host application.
+   *
+   * <p>Defaults to {@code true}.
+   */
+  @Override
+  public boolean attachToEngineAutomatically() {
+    return true;
+  }
+
+  /**
    * {@inheritDoc}
    *
    * <p>Avoid overriding this method when using {@code
