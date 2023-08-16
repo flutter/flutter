@@ -1371,7 +1371,9 @@ class SelectionOverlay {
   void hideHandles() {
     if (_handles != null) {
       _handles![0].remove();
+      _handles![0].dispose();
       _handles![1].remove();
+      _handles![1].dispose();
       _handles = null;
     }
   }
@@ -1480,7 +1482,9 @@ class SelectionOverlay {
     _magnifierController.hide();
     if (_handles != null) {
       _handles![0].remove();
+      _handles![0].dispose();
       _handles![1].remove();
+      _handles![1].dispose();
       _handles = null;
     }
     if (_toolbar != null || _contextMenuController.isShown || _spellCheckToolbarController.isShown) {
@@ -1500,6 +1504,7 @@ class SelectionOverlay {
       return;
     }
     _toolbar?.remove();
+    _toolbar?.dispose();
     _toolbar = null;
   }
 
@@ -1508,6 +1513,7 @@ class SelectionOverlay {
   /// {@endtemplate}
   void dispose() {
     hide();
+    _magnifierInfo.dispose();
   }
 
   Widget _buildStartHandle(BuildContext context) {
