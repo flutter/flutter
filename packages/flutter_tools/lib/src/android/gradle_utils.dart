@@ -868,7 +868,7 @@ List<JavaGradleCompat> _javaGradleCompatList = const <JavaGradleCompat>[
     ),
   ];
 
-  // List of compatible Java/AGP versions
+  // List of compatible Java/AGP versions.
   List<JavaAgpCompat> _javaAgpCompatList = const <JavaAgpCompat>[
     JavaAgpCompat(
       javaMin: '17',

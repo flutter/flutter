@@ -44,7 +44,7 @@ const String _kNoPlatformsMessage = "You've created a plugin project that doesn'
 const String frameworkRevision = '12345678';
 const String frameworkChannel = 'omega';
 const String _kDisabledPlatformRequestedMessage = 'currently not supported on your local environment.';
-const String _kIncompatibleJavaVersionMessage = 'The configured version of Java detected conflicts with';
+const String _kIncompatibleJavaVersionMessage = 'The configured version of Java detected may conflict with the';
 
 // Returns incompatible Java/template Gradle/template AGP message header based
 // on incompatibility and project type.
@@ -57,7 +57,7 @@ String getIncompatibleJavaGradleAgpMessageHeader(
   final String incompatibleDependencyVersion = javaGradleVersionsCompatible ? 'AGP version $templateAgpVersion' : 'Gradle version $templateGradleVersion';
 
   return '''
-$_kIncompatibleJavaVersionMessage the $incompatibleDependency version in your new Flutter $projectType.
+$_kIncompatibleJavaVersionMessage $incompatibleDependency version in your new Flutter $projectType.
 
 [RECOMMENDED] To keep the default $incompatibleDependencyVersion, make
 sure to download a compatible Java version. You may configure this compatible

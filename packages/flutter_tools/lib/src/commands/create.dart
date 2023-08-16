@@ -828,9 +828,9 @@ void _printIncompatibleJavaAgpGradleVersionsWarning({
   final String incompatibleDependency = javaGradleVersionsCompatible ? 'Android Gradle Plugin (AGP)' :'Gradle' ;
   final String incompatibleDependencyVersion = javaGradleVersionsCompatible ? 'AGP version $templateAgpVersion' : 'Gradle version $templateGradleVersion';
   final String incompatibleVersionsAndRecommendedOptionMessage = '''
-The configured version of Java detected conflicts with the $incompatibleDependency version in your new Flutter ${projectType.cliName}.
+The configured version of Java may conflict with the $incompatibleDependency version in your new Flutter ${projectType.cliName}.
 
-[RECOMMENDED] To keep the default $incompatibleDependencyVersion, make
+[RECOMMENDED] If so, to keep the default $incompatibleDependencyVersion, make
 sure to download a compatible Java version. You may configure this compatible
 Java version by running: `flutter config --jdk-dir=<JDK_DIRECTORY>`. Note that
 this is a global configuration.
@@ -852,8 +852,8 @@ You may also update the Gradle version used by running
 `./gradlew wrapper --gradle-version=<COMPATIBLE_GRADLE_VERSION>`.
 
 See
-https://docs.gradle.org/current/userguide/compatibility.html#java for more
-details on compatible Java/Gradle versions. See
+https://docs.gradle.org/current/userguide/compatibility.html#java for details
+on compatible Java/Gradle versions, and see
 https://docs.gradle.org/current/userguide/gradle_wrapper.html#sec:upgrading_wrapper
 for more details on using the Gradle Wrapper command to update the Gradle version
 used.
@@ -877,7 +877,7 @@ version$compatibleAgpVersionMessage:
 ${gradleBuildFilePaths}
 
 See
-https://developer.android.com/build/releases/gradle-plugin for more details on
+https://developer.android.com/build/releases/gradle-plugin for details on
 compatible Java/AGP versions.
 ''',
     emphasis: true
