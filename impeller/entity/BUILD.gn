@@ -243,6 +243,8 @@ impeller_component("entity") {
     "geometry/vertices_geometry.h",
     "inline_pass_context.cc",
     "inline_pass_context.h",
+    "render_target_cache.cc",
+    "render_target_cache.h",
   ]
 
   if (impeller_debug) {
@@ -281,5 +283,16 @@ impeller_component("entity_unittests") {
     ":entity",
     "../geometry:geometry_asserts",
     "../playground:playground_test",
+  ]
+}
+
+impeller_component("render_target_cache_unittests") {
+  testonly = true
+
+  sources = [ "render_target_cache_unittests.cc" ]
+
+  deps = [
+    ":entity",
+    "//flutter/testing:testing_lib",
   ]
 }
