@@ -3800,6 +3800,10 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery_ios__start_up_xcode_debug
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "14c18"
+        }
     bringup: true
 
   - name: Mac_ios flutter_view_ios__start_up
@@ -3877,6 +3881,10 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: integration_ui_ios_driver_xcode_debug
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "14c18"
+        }
     bringup: true
 
   - name: Mac_ios integration_ui_ios_frame_number
