@@ -247,9 +247,11 @@ void _writeGeneratedFlutterConfig(
   };
   final LocalEngineInfo? localEngineInfo = globals.artifacts?.localEngineInfo;
   if (localEngineInfo != null) {
-    final String engineOutPath = localEngineInfo.engineOutPath;
-    environment['FLUTTER_ENGINE'] = globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath));
-    environment['LOCAL_ENGINE'] = localEngineInfo.localEngineName;
+    final String targetOutPath = localEngineInfo.targetOutPath;
+    // Get the engine source root $ENGINE/src/out/foo_bar_baz -> $ENGINE/src
+    environment['FLUTTER_ENGINE'] = globals.fs.path.dirname(globals.fs.path.dirname(targetOutPath));
+    environment['LOCAL_ENGINE'] = localEngineInfo.localTargetName;
+    environment['LOCAL_ENGINE_HOST'] = localEngineInfo.localHostName;
   }
   writeGeneratedCmakeConfig(Cache.flutterRoot!, windowsProject, buildInfo, environment, globals.logger);
 }
