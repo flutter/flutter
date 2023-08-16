@@ -59,7 +59,7 @@ String getIncompatibleJavaGradleAgpMessageHeader(
   return '''
 $_kIncompatibleJavaVersionMessage $incompatibleDependency version in your new Flutter $projectType.
 
-[RECOMMENDED] To keep the default $incompatibleDependencyVersion, make
+[RECOMMENDED] If so, to keep the default $incompatibleDependencyVersion, make
 sure to download a compatible Java version. You may configure this compatible
 Java version by running: `flutter config --jdk-dir=<JDK_DIRECTORY>`. Note that
 this is a global configuration.
