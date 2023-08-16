@@ -29,7 +29,11 @@ dev_dependencies:
     sdk: flutter
   flutter_goldens:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   flutter_test:
+    sdk: flutter
+  flutter_web_plugins:
     sdk: flutter
   test: 1.24.6
 
