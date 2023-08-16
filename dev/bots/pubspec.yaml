@@ -14,7 +14,7 @@ dependencies:
   http_parser: 4.0.2
   meta: 1.9.1
   path: 1.8.3
-  platform: 3.1.0
+  platform: 3.1.1
   process: 4.2.4
   test: 1.24.6
 
@@ -74,4 +74,4 @@ dependencies:
 dev_dependencies:
   test_api: 0.6.1
 
-# PUBSPEC CHECKSUM: 117a
+# PUBSPEC CHECKSUM: e77b
