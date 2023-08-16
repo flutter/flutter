@@ -28,14 +28,49 @@
 @end
 
 @implementation FlutterPlatformPluginTest
-- (void)testSearchWebInvoked {
+- (void)testSearchWebInvokedWithEscapedTerm {
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+
   FlutterEngine* engine = [[[FlutterEngine alloc] initWithName:@"test" project:nil] autorelease];
   std::unique_ptr<fml::WeakPtrFactory<FlutterEngine>> _weakFactory =
       std::make_unique<fml::WeakPtrFactory<FlutterEngine>>(engine);
   [engine runWithEntrypoint:nil];
 
   XCTestExpectation* invokeExpectation =
-      [self expectationWithDescription:@"Web search launched with search term"];
+      [self expectationWithDescription:@"Web search launched with escaped search term"];
+
+  FlutterPlatformPlugin* plugin =
+      [[[FlutterPlatformPlugin alloc] initWithEngine:_weakFactory->GetWeakPtr()] autorelease];
+  FlutterPlatformPlugin* mockPlugin = OCMPartialMock(plugin);
+
+  FlutterMethodCall* methodCall = [FlutterMethodCall methodCallWithMethodName:@"SearchWeb.invoke"
+                                                                    arguments:@"Testing Word!"];
+
+  FlutterResult result = ^(id result) {
+    OCMVerify([mockPlugin searchWeb:@"Testing Word!"]);
+    OCMVerify([mockApplication openURL:[NSURL URLWithString:@"x-web-search://?Testing%20Word!"]
+                               options:@{}
+                     completionHandler:nil]);
+    [invokeExpectation fulfill];
+  };
+
+  [mockPlugin handleMethodCall:methodCall result:result];
+  [self waitForExpectationsWithTimeout:1 handler:nil];
+  [mockApplication stopMocking];
+}
+
+- (void)testSearchWebInvokedWithNonEscapedTerm {
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+
+  FlutterEngine* engine = [[[FlutterEngine alloc] initWithName:@"test" project:nil] autorelease];
+  std::unique_ptr<fml::WeakPtrFactory<FlutterEngine>> _weakFactory =
+      std::make_unique<fml::WeakPtrFactory<FlutterEngine>>(engine);
+  [engine runWithEntrypoint:nil];
+
+  XCTestExpectation* invokeExpectation =
+      [self expectationWithDescription:@"Web search launched with non escaped search term"];
 
   FlutterPlatformPlugin* plugin =
       [[[FlutterPlatformPlugin alloc] initWithEngine:_weakFactory->GetWeakPtr()] autorelease];
@@ -46,11 +81,15 @@
 
   FlutterResult result = ^(id result) {
     OCMVerify([mockPlugin searchWeb:@"Test"]);
+    OCMVerify([mockApplication openURL:[NSURL URLWithString:@"x-web-search://?Test"]
+                               options:@{}
+                     completionHandler:nil]);
     [invokeExpectation fulfill];
   };
 
   [mockPlugin handleMethodCall:methodCall result:result];
   [self waitForExpectationsWithTimeout:1 handler:nil];
+  [mockApplication stopMocking];
 }
 
 - (void)testLookUpCallInitiated {
