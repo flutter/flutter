@@ -5,8 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   // Pumps and ensures that the BottomSheet animates non-linearly.
@@ -124,7 +123,7 @@ void main() {
     expect(buildCount, equals(2));
   });
 
-  testWidgetsWithLeakTracking('Verify that a persistent BottomSheet cannot be dismissed', (WidgetTester tester) async {
+  testWidgets('Verify that a persistent BottomSheet cannot be dismissed', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: const Center(child: Text('body')),
@@ -187,7 +186,7 @@ void main() {
     expect(find.text('Two'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('Verify DraggableScrollableSheet.shouldCloseOnMinExtent == false prevents dismissal', (WidgetTester tester) async {
+  testWidgets('Verify DraggableScrollableSheet.shouldCloseOnMinExtent == false prevents dismissal', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(MaterialApp(
@@ -299,7 +298,7 @@ void main() {
     expect(find.text('Two'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('Verify that a persistent BottomSheet can fling up and hide the fab', (WidgetTester tester) async {
+  testWidgets('Verify that a persistent BottomSheet can fling up and hide the fab', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -410,7 +409,7 @@ void main() {
     expect(find.text('Item 22'), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('Verify that a scrollable BottomSheet hides the fab when scrolled up', (WidgetTester tester) async {
+  testWidgets('Verify that a scrollable BottomSheet hides the fab when scrolled up', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(MaterialApp(
@@ -590,7 +589,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/71435
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'Scaffold.bottomSheet should be updated without creating a new RO'
     ' when the new widget has the same key and type.',
     (WidgetTester tester) async {

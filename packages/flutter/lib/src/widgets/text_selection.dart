@@ -61,23 +61,28 @@ class ToolbarItemsParentData extends ContainerBoxParentData<RenderBox> {
 /// An interface for building the selection UI, to be provided by the
 /// implementer of the toolbar widget.
 ///
-/// Override text operations such as [handleCut] if needed.
+/// Parts of this class, including [buildToolbar], have been deprecated in favor
+/// of [EditableText.contextMenuBuilder], which is now the preferred way to
+/// customize the context menus.
 ///
 /// ## Use with [EditableText.contextMenuBuilder]
-/// [buildToolbar] has been deprecated in favor of
-/// [EditableText.contextMenuBuilder], and that is the preferred way to
-/// customize the context menus now. However, both ways will continue to work
-/// during the deprecation period.
 ///
-/// To use both [EditableText.contextMenuBuilder] and [buildHandle], a two-step
-/// migration is necessary. First, migrate to [TextSelectionHandleControls],
-/// using its [TextSelectionHandleControls.buildHandle] method and moving
-/// toolbar code to [EditableText.contextMenuBuilder]. Later, the deprecation
-/// period will expire, [buildToolbar] will be removed, and
-/// [TextSelectionHandleControls] will be deprecated. Migrate back to
-/// [TextSelectionControls.buildHandle], so that the final state is to use
-/// [EditableText.contextMenuBuilder] for the toolbar and
-/// [TextSelectionControls] for the handles.
+/// For backwards compatibility during the deprecation period, when
+/// [EditableText.selectionControls] is set to an object that does not mix in
+/// [TextSelectionHandleControls], [EditableText.contextMenuBuilder] is ignored
+/// in favor of the deprecated [buildToolbar].
+///
+/// To migrate code from [buildToolbar] to the preferred
+/// [EditableText.contextMenuBuilder], while still using [buildHandle], mix in
+/// [TextSelectionHandleControls] into the [TextSelectionControls] subclass when
+/// moving any toolbar code to a callback passed to
+/// [EditableText.contextMenuBuilder].
+///
+/// In due course, [buildToolbar] will be removed, and the mixin will no longer
+/// be necessary as a way to flag to the framework that the code has been
+/// migrated and does not expect [buildToolbar] to be called.
+///
+/// For more information, see <https://docs.flutter.dev/release/breaking-changes/context-menus>.
 ///
 /// See also:
 ///
@@ -1366,7 +1371,9 @@ class SelectionOverlay {
   void hideHandles() {
     if (_handles != null) {
       _handles![0].remove();
+      _handles![0].dispose();
       _handles![1].remove();
+      _handles![1].dispose();
       _handles = null;
     }
   }
@@ -1475,7 +1482,9 @@ class SelectionOverlay {
     _magnifierController.hide();
     if (_handles != null) {
       _handles![0].remove();
+      _handles![0].dispose();
       _handles![1].remove();
+      _handles![1].dispose();
       _handles = null;
     }
     if (_toolbar != null || _contextMenuController.isShown || _spellCheckToolbarController.isShown) {
@@ -1495,6 +1504,7 @@ class SelectionOverlay {
       return;
     }
     _toolbar?.remove();
+    _toolbar?.dispose();
     _toolbar = null;
   }
 
@@ -1503,6 +1513,7 @@ class SelectionOverlay {
   /// {@endtemplate}
   void dispose() {
     hide();
+    _magnifierInfo.dispose();
   }
 
   Widget _buildStartHandle(BuildContext context) {
