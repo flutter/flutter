@@ -3805,6 +3805,121 @@ void main() {
     );
 
     testWidgets(
+      'Triple click at the beginning of a line should not select the previous paragraph',
+      (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/132126
+        final TextEditingController controller = TextEditingController();
+
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: Center(
+              child: CupertinoTextField(
+                dragStartBehavior: DragStartBehavior.down,
+                controller: controller,
+                maxLines: null,
+              ),
+            ),
+          ),
+        );
+
+        await tester.enterText(find.byType(CupertinoTextField), testValueB);
+        // Skip past scrolling animation.
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 200));
+        expect(controller.value.text, testValueB);
+
+        final Offset thirdLinePos = textOffsetToPosition(tester, 38);
+
+        // Click on text field to gain focus, and move the selection.
+        final TestGesture gesture = await tester.startGesture(thirdLinePos, kind: PointerDeviceKind.mouse);
+        await tester.pump();
+        await gesture.up();
+        await tester.pump();
+
+        expect(controller.selection.isCollapsed, true);
+        expect(controller.selection.baseOffset, 38);
+
+        // Here we click on same position again, to register a double click. This will select
+        // the word at the clicked position.
+        await gesture.down(thirdLinePos);
+        await gesture.up();
+
+        expect(controller.selection.baseOffset, 38);
+        expect(controller.selection.extentOffset, 40);
+
+        // Here we click on same position again, to register a triple click. This will select
+        // the paragraph at the clicked position.
+        await gesture.down(thirdLinePos);
+        await tester.pump();
+        await gesture.up();
+        await tester.pump();
+        await tester.pumpAndSettle();
+
+        expect(controller.selection.baseOffset, 38);
+        expect(controller.selection.extentOffset, 57);
+      },
+      variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.linux }),
+    );
+
+    testWidgets(
+      'Triple click at the end of text should select the previous paragraph',
+      (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/132126.
+        final TextEditingController controller = TextEditingController();
+
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: Center(
+              child: CupertinoTextField(
+                dragStartBehavior: DragStartBehavior.down,
+                controller: controller,
+                maxLines: null,
+              ),
+            ),
+          ),
+        );
+
+        await tester.enterText(find.byType(CupertinoTextField), testValueB);
+        // Skip past scrolling animation.
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 200));
+        expect(controller.value.text, testValueB);
+
+        final Offset endOfTextPos = textOffsetToPosition(tester, 74);
+
+        // Click on text field to gain focus, and move the selection.
+        final TestGesture gesture = await tester.startGesture(endOfTextPos, kind: PointerDeviceKind.mouse);
+        await tester.pump();
+        await gesture.up();
+        await tester.pump();
+
+        expect(controller.selection.isCollapsed, true);
+        expect(controller.selection.baseOffset, 74);
+
+        // Here we click on same position again, to register a double click.
+        await gesture.down(endOfTextPos);
+        await tester.pump();
+        await gesture.up();
+        await tester.pump();
+
+        expect(controller.selection.baseOffset, 74);
+        expect(controller.selection.extentOffset, 74);
+
+        // Here we click on same position again, to register a triple click. This will select
+        // the paragraph at the clicked position.
+        await gesture.down(endOfTextPos);
+        await tester.pump();
+        await gesture.up();
+        await tester.pump();
+        await tester.pumpAndSettle();
+
+        expect(controller.selection.baseOffset, 57);
+        expect(controller.selection.extentOffset, 74);
+      },
+      variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.linux }),
+    );
+
+    testWidgets(
       'triple tap chains work on Non-Apple mobile platforms',
       (WidgetTester tester) async {
         final TextEditingController controller = TextEditingController(
