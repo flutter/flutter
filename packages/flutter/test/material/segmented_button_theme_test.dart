@@ -5,8 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
 
@@ -43,7 +42,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgetsWithLeakTracking('With no other configuration, defaults are used', (WidgetTester tester) async {
+  testWidgets('With no other configuration, defaults are used', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
       MaterialApp(
@@ -110,7 +109,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('ThemeData.segmentedButtonTheme overrides defaults', (WidgetTester tester) async {
+  testWidgets('ThemeData.segmentedButtonTheme overrides defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       useMaterial3: true,
       segmentedButtonTheme: SegmentedButtonThemeData(
@@ -203,7 +202,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('SegmentedButtonTheme overrides ThemeData and defaults', (WidgetTester tester) async {
+  testWidgets('SegmentedButtonTheme overrides ThemeData and defaults', (WidgetTester tester) async {
     final SegmentedButtonThemeData global = SegmentedButtonThemeData(
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
@@ -330,7 +329,7 @@ void main() {
     }
   });
 
-  testWidgetsWithLeakTracking('Widget parameters overrides SegmentedTheme, ThemeData and defaults', (WidgetTester tester) async {
+  testWidgets('Widget parameters overrides SegmentedTheme, ThemeData and defaults', (WidgetTester tester) async {
     final SegmentedButtonThemeData global = SegmentedButtonThemeData(
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
