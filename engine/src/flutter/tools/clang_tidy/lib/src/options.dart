@@ -36,6 +36,7 @@ class Options {
     this.warningsAsErrors,
     this.shardId,
     this.shardCommandsPaths = const <io.File>[],
+    this.enableCheckProfile = false,
     StringSink? errSink,
   }) : checks = checksArg.isNotEmpty ? '--checks=$checksArg' : null,
        _errSink = errSink ?? io.stderr;
@@ -82,6 +83,7 @@ class Options {
       warningsAsErrors: _platformSpecificWarningsAsErrors(options),
       shardCommandsPaths: shardCommandsPaths,
       shardId: shardId,
+      enableCheckProfile: options['enable-check-profile'] as bool,
     );
   }
 
@@ -194,6 +196,11 @@ class Options {
       help: 'Perform the given checks on the code. Defaults to the empty '
             'string, indicating all checks should be performed.',
       defaultsTo: '',
+    )
+    ..addFlag(
+      'enable-check-profile',
+      help: 'Enable per-check timing profiles and print a report to stderr.',
+      negatable: false,
     );
 
   /// Whether to print a help message and exit.
@@ -231,6 +238,9 @@ class Options {
 
   /// Whether checks should apply available fix-ups to the working copy.
   final bool fix;
+
+  /// Whether to enable per-check timing profiles and print a report to stderr.
+  final bool enableCheckProfile;
 
   /// If there was a problem with the command line arguments, this string
   /// contains the error message.
