@@ -733,7 +733,7 @@ allprojects {
       // Java version too high.
       expect(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: oneMajorVersionHigherJavaVersion), isNull);
       // Maximum known Java version.
-      // *this needs to be updated* when higher versions of Java are supported:
+      // *This needs to be updated* when higher versions of Java are supported:
       expect(
         getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '20'),
         allOf(
@@ -874,7 +874,7 @@ allprojects {
       // Java version unspecified.
       expect(getMinimumAgpVersionForJavaVersion(testLogger, javaV: null), isNull);
       // Maximum known Java version.
-      // *this will need to be updated* as higher versions of AGP are supported:
+      // *This needs to be updated* as higher versions of AGP are supported:
       expect(
         getMinimumAgpVersionForJavaVersion(testLogger, javaV: oneMajorVersionHigherJavaVersion),
         equals(
