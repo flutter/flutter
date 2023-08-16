@@ -116,6 +116,7 @@ Future<Map<String, dynamic>> hasReassemble(Future<Map<String, dynamic>> pendingR
 }
 
 void main() {
+  final Set<String> testedExtensions = <String>{}; // Add the name of an extension to this set in the test where it is tested.
   final List<String?> console = <String?>[];
   late PipelineOwner owner;
 
@@ -153,6 +154,9 @@ void main() {
 
     expect(binding.frameScheduled, isFalse);
 
+    testedExtensions.add(WidgetsServiceExtensions.didSendFirstFrameEvent.name);
+    testedExtensions.add(WidgetsServiceExtensions.didSendFirstFrameRasterizedEvent.name);
+
     expect(debugPrint, equals(debugPrintThrottled));
     debugPrint = (String? message, { int? wrapWidth }) {
       console.add(message);
@@ -162,12 +166,13 @@ void main() {
   tearDownAll(() async {
     // See widget_inspector_test.dart for tests of the ext.flutter.inspector
     // service extensions included in this count.
-    int widgetInspectorExtensionCount = 20;
+    int widgetInspectorExtensionCount = 28;
     if (WidgetInspectorService.instance.isWidgetCreationTracked()) {
       // Some inspector extensions are only exposed if widget creation locations
       // are tracked.
       widgetInspectorExtensionCount += 2;
     }
+    expect(binding.extensions.keys.where((String name) => name.startsWith('inspector.')), hasLength(widgetInspectorExtensionCount));
 
     // The following service extensions are disabled in web:
     // 1. exit
@@ -175,12 +180,13 @@ void main() {
     const int disabledExtensions = kIsWeb ? 2 : 0;
 
     // The expected number of registered service extensions in the Flutter
-    // framework, excluding any that are for the widget inspector
-    // (see widget_inspector_test.dart for tests of the ext.flutter.inspector
-    // service extensions).
-    const int serviceExtensionCount = 38;
+    // framework, excluding any that are for the widget inspector (see
+    // widget_inspector_test.dart for tests of the ext.flutter.inspector service
+    // extensions). Any test counted here must be tested in this file!
+    const int serviceExtensionCount = 29;
 
     expect(binding.extensions.length, serviceExtensionCount + widgetInspectorExtensionCount - disabledExtensions);
+    expect(testedExtensions, hasLength(serviceExtensionCount));
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;
@@ -213,6 +219,8 @@ void main() {
     expect(result, <String, String>{'enabled': 'true'});
     expect(WidgetsApp.debugAllowBannerOverride, true);
     expect(binding.frameScheduled, isFalse);
+
+    testedExtensions.add(WidgetsServiceExtensions.debugAllowBanner.name);
   });
 
   test('Service extensions - debugDumpApp', () async {
@@ -221,6 +229,8 @@ void main() {
     expect(result, <String, dynamic>{
       'data': matches('TestServiceExtensionsBinding - DEBUG MODE\n<no tree currently mounted>'),
     });
+
+    testedExtensions.add(WidgetsServiceExtensions.debugDumpApp.name);
   });
 
   test('Service extensions - debugDumpFocusTree', () async {
@@ -234,6 +244,8 @@ void main() {
         r'$',
       ),
     });
+
+    testedExtensions.add(WidgetsServiceExtensions.debugDumpFocusTree.name);
   });
 
   test('Service extensions - debugDumpRenderTree', () async {
@@ -251,6 +263,8 @@ void main() {
         r'$',
       ),
     });
+
+    testedExtensions.add(RenderingServiceExtensions.debugDumpRenderTree.name);
   });
 
   test('Service extensions - debugDumpLayerTree', () async {
@@ -274,6 +288,8 @@ void main() {
         r'$',
       ),
     });
+
+    testedExtensions.add(RenderingServiceExtensions.debugDumpLayerTree.name);
   });
 
   test('Service extensions - debugDumpSemanticsTreeInTraversalOrder', () async {
@@ -288,6 +304,8 @@ void main() {
         r'To generate semantics, try turning on an assistive technology \(like VoiceOver or TalkBack\) on your device.'
       )
     });
+
+    testedExtensions.add(RenderingServiceExtensions.debugDumpSemanticsTreeInTraversalOrder.name);
   });
 
   test('Service extensions - debugDumpSemanticsTreeInInverseHitTestOrder', () async {
@@ -302,10 +320,12 @@ void main() {
         r'To generate semantics, try turning on an assistive technology \(like VoiceOver or TalkBack\) on your device.'
       )
     });
+
+    testedExtensions.add(RenderingServiceExtensions.debugDumpSemanticsTreeInInverseHitTestOrder.name);
   });
 
   test('Service extensions - debugPaint', () async {
-    final Iterable<Map<String, dynamic>> extensionChangedEvents = binding.getServiceExtensionStateChangedEvents('ext.flutter.debugPaint');
+    final Iterable<Map<String, dynamic>> extensionChangedEvents = binding.getServiceExtensionStateChangedEvents('ext.flutter.${RenderingServiceExtensions.debugPaint.name}');
     Map<String, dynamic> extensionChangedEvent;
     Map<String, dynamic> result;
     Future<Map<String, dynamic>> pendingResult;
@@ -357,6 +377,8 @@ void main() {
     expect(debugPaintSizeEnabled, false);
     expect(extensionChangedEvents.length, 2);
     expect(binding.frameScheduled, isFalse);
+
+    testedExtensions.add(RenderingServiceExtensions.debugPaint.name);
   });
 
   test('Service extensions - debugPaintBaselinesEnabled', () async {
@@ -399,6 +421,8 @@ void main() {
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugPaintBaselinesEnabled, false);
     expect(binding.frameScheduled, isFalse);
+
+    testedExtensions.add(RenderingServiceExtensions.debugPaintBaselinesEnabled.name);
   });
 
   test('Service extensions - invertOversizedImages', () async {
@@ -445,6 +469,8 @@ void main() {
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugInvertOversizedImages, false);
     expect(binding.frameScheduled, isFalse);
+
+    testedExtensions.add(RenderingServiceExtensions.invertOversizedImages.name);
   });
 
   test('Service extensions - profileWidgetBuilds', () async {
@@ -474,6 +500,8 @@ void main() {
     expect(debugProfileBuildsEnabled, false);
 
     expect(binding.frameScheduled, isFalse);
+
+    testedExtensions.add(WidgetsServiceExtensions.profileWidgetBuilds.name);
   });
 
   test('Service extensions - profileUserWidgetBuilds', () async {
@@ -503,6 +531,8 @@ void main() {
     expect(debugProfileBuildsEnabledUserWidgets, false);
 
     expect(binding.frameScheduled, isFalse);
+
+    testedExtensions.add(WidgetsServiceExtensions.profileUserWidgetBuilds.name);
   });
 
   test('Service extensions - profileRenderObjectPaints', () async {
@@ -532,6 +562,8 @@ void main() {
     expect(debugProfilePaintsEnabled, false);
 
     expect(binding.frameScheduled, isFalse);
+
+    testedExtensions.add(RenderingServiceExtensions.profileRenderObjectPaints.name);
   });
 
   test('Service extensions - profileRenderObjectLayouts', () async {
@@ -561,6 +593,8 @@ void main() {
     expect(debugProfileLayoutsEnabled, false);
 
     expect(binding.frameScheduled, isFalse);
+
+    testedExtensions.add(RenderingServiceExtensions.profileRenderObjectLayouts.name);
   });
 
   test('Service extensions - evict', () async {
@@ -596,12 +630,16 @@ void main() {
     expect(data, isFalse);
     expect(completed, isTrue);
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', null);
+
+    testedExtensions.add(ServicesServiceExtensions.evict.name);
   });
 
   test('Service extensions - exit', () async {
     // no test for _calling_ 'exit', because that should terminate the process!
     // Not expecting extension to be available for web platform.
     expect(binding.extensions.containsKey(FoundationServiceExtensions.exit.name), !isBrowser);
+
+    testedExtensions.add(FoundationServiceExtensions.exit.name);
   });
 
   test('Service extensions - platformOverride', () async {
@@ -688,6 +726,8 @@ void main() {
     expect(extensionChangedEvent['extension'], 'ext.flutter.platformOverride');
     expect(extensionChangedEvent['value'], 'android');
     binding.reassembled = 0;
+
+    testedExtensions.add(FoundationServiceExtensions.platformOverride.name);
   });
 
   test('Service extensions - repaintRainbow', () async {
@@ -731,6 +771,8 @@ void main() {
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugRepaintRainbowEnabled, false);
     expect(binding.frameScheduled, isFalse);
+
+    testedExtensions.add(RenderingServiceExtensions.repaintRainbow.name);
   });
 
   test('Service extensions - debugDisableClipLayers', () async {
@@ -773,6 +815,8 @@ void main() {
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugDisableClipLayers, false);
     expect(binding.frameScheduled, isFalse);
+
+    testedExtensions.add(RenderingServiceExtensions.debugDisableClipLayers.name);
   });
 
   test('Service extensions - debugDisablePhysicalShapeLayers', () async {
@@ -815,6 +859,8 @@ void main() {
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugDisablePhysicalShapeLayers, false);
     expect(binding.frameScheduled, isFalse);
+
+    testedExtensions.add(RenderingServiceExtensions.debugDisablePhysicalShapeLayers.name);
   });
 
   test('Service extensions - debugDisableOpacityLayers', () async {
@@ -857,6 +903,8 @@ void main() {
     expect(result, <String, String>{'enabled': 'false'});
     expect(debugDisableOpacityLayers, false);
     expect(binding.frameScheduled, isFalse);
+
+    testedExtensions.add(RenderingServiceExtensions.debugDisableOpacityLayers.name);
   });
 
   test('Service extensions - reassemble', () async {
@@ -880,6 +928,8 @@ void main() {
     expect(result, <String, String>{});
     expect(binding.reassembled, 1);
     binding.reassembled = 0;
+
+    testedExtensions.add(FoundationServiceExtensions.reassemble.name);
   });
 
   test('Service extensions - showPerformanceOverlay', () async {
@@ -888,6 +938,7 @@ void main() {
     // The performance overlay service extension is disabled on the web.
     if (kIsWeb) {
       expect(binding.extensions.containsKey(WidgetsServiceExtensions.showPerformanceOverlay.name), isFalse);
+      testedExtensions.add(WidgetsServiceExtensions.showPerformanceOverlay.name);
       return;
     }
 
@@ -909,6 +960,8 @@ void main() {
     expect(result, <String, String>{'enabled': 'false'});
     expect(WidgetsApp.showPerformanceOverlayOverride, false);
     expect(binding.frameScheduled, isFalse);
+
+    testedExtensions.add(WidgetsServiceExtensions.showPerformanceOverlay.name);
   });
 
   test('Service extensions - timeDilation', () async {
@@ -945,6 +998,8 @@ void main() {
     expect(timeDilation, 1.0);
     expect(extensionChangedEvents.length, 2);
     expect(binding.frameScheduled, isFalse);
+
+    testedExtensions.add(SchedulerServiceExtensions.timeDilation.name);
   });
 
   test('Service extensions - brightnessOverride', () async {
@@ -953,6 +1008,8 @@ void main() {
     final String brightnessValue = result['value'] as String;
 
     expect(brightnessValue, 'Brightness.light');
+
+    testedExtensions.add(FoundationServiceExtensions.brightnessOverride.name);
   });
 
   test('Service extensions - activeDevToolsServerAddress', () async {
@@ -966,6 +1023,8 @@ void main() {
     result = await binding.testExtension(FoundationServiceExtensions.activeDevToolsServerAddress.name, <String, String>{'value': 'http://127.0.0.1:9102'});
     serverAddress = result['value'] as String;
     expect(serverAddress, 'http://127.0.0.1:9102');
+
+    testedExtensions.add(FoundationServiceExtensions.activeDevToolsServerAddress.name);
   });
 
   test('Service extensions - connectedVmServiceUri', () async {
@@ -979,5 +1038,7 @@ void main() {
     result = await binding.testExtension(FoundationServiceExtensions.connectedVmServiceUri.name, <String, String>{'value': 'http://127.0.0.1:54000/kMUMseKAnog=/'});
     serverAddress = result['value'] as String;
     expect(serverAddress, 'http://127.0.0.1:54000/kMUMseKAnog=/');
+
+    testedExtensions.add(FoundationServiceExtensions.connectedVmServiceUri.name);
   });
 }

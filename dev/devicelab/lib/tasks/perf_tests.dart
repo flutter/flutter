@@ -233,10 +233,11 @@ TaskFunction createOpenPayScrollPerfTest({bool measureCpuGpu = true}) {
   ).run;
 }
 
-TaskFunction createFlutterGalleryStartupTest({String target = 'lib/main.dart'}) {
+TaskFunction createFlutterGalleryStartupTest({String target = 'lib/main.dart', Map<String, String>? runEnvironment}) {
   return StartupTest(
     '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
     target: target,
+    runEnvironment: runEnvironment,
   ).run;
 }
 
@@ -671,6 +672,56 @@ TaskFunction createDrawPointsPerfTest({
   ).run;
 }
 
+TaskFunction createDrawAtlasPerfTest({
+  bool? forceOpenGLES,
+}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'draw_atlas_perf',
+    enableImpeller: true,
+    testDriver: 'test_driver/draw_atlas_perf_test.dart',
+    saveTraceFile: true,
+    forceOpenGLES: forceOpenGLES,
+  ).run;
+}
+
+TaskFunction createDrawVerticesPerfTest({
+  bool? forceOpenGLES,
+}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'draw_vertices_perf',
+    enableImpeller: true,
+    testDriver: 'test_driver/draw_vertices_perf_test.dart',
+    saveTraceFile: true,
+    forceOpenGLES: forceOpenGLES,
+  ).run;
+}
+
+TaskFunction createPathTessellationStaticPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'tessellation_perf_static',
+    enableImpeller: true,
+    testDriver: 'test_driver/path_tessellation_static_perf_test.dart',
+    saveTraceFile: true,
+  ).run;
+}
+
+TaskFunction createPathTessellationDynamicPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'tessellation_perf_dynamic',
+    enableImpeller: true,
+    testDriver: 'test_driver/path_tessellation_dynamic_perf_test.dart',
+    saveTraceFile: true,
+  ).run;
+}
+
 TaskFunction createAnimatedComplexOpacityPerfE2ETest({
   bool? enableImpeller,
 }) {
@@ -768,11 +819,17 @@ Future<void> _resetManifest(String testDirectory) async {
 
 /// Measure application startup performance.
 class StartupTest {
-  const StartupTest(this.testDirectory, { this.reportMetrics = true, this.target = 'lib/main.dart' });
+  const StartupTest(
+    this.testDirectory, {
+    this.reportMetrics = true,
+    this.target = 'lib/main.dart',
+    this.runEnvironment,
+  });
 
   final String testDirectory;
   final bool reportMetrics;
   final String target;
+  final Map<String, String>? runEnvironment;
 
   Future<TaskResult> run() async {
     return inDirectory<TaskResult>(testDirectory, () async {
@@ -855,21 +912,26 @@ class StartupTest {
             'screenshot_startup_${DateTime.now().toLocal().toIso8601String()}.png',
           );
         });
-        final int result = await flutter('run', options: <String>[
-          '--no-android-gradle-daemon',
-          '--no-publish-port',
-          '--verbose',
-          '--profile',
-          '--trace-startup',
-          // TODO(vashworth): Remove once done debugging https://github.com/flutter/flutter/issues/129836
-          if (device is IosDevice)
-            '--verbose-system-logs',
-          '--target=$target',
-          '-d',
-          device.deviceId,
-          if (applicationBinaryPath != null)
-            '--use-application-binary=$applicationBinaryPath',
-        ], canFail: true);
+        final int result = await flutter(
+          'run',
+          options: <String>[
+            '--no-android-gradle-daemon',
+            '--no-publish-port',
+            '--verbose',
+            '--profile',
+            '--trace-startup',
+            // TODO(vashworth): Remove once done debugging https://github.com/flutter/flutter/issues/129836
+            if (device is IosDevice)
+              '--verbose-system-logs',
+            '--target=$target',
+            '-d',
+            device.deviceId,
+            if (applicationBinaryPath != null)
+              '--use-application-binary=$applicationBinaryPath',
+          ],
+          environment: runEnvironment,
+          canFail: true,
+        );
         timer.cancel();
         if (result == 0) {
           final Map<String, dynamic> data = json.decode(
@@ -1157,6 +1219,7 @@ class PerfTest {
       await selectedDevice.unlock();
       final String deviceId = selectedDevice.deviceId;
       final String? localEngine = localEngineFromEnv;
+      final String? localEngineHost = localEngineHostFromEnv;
       final String? localEngineSrcPath = localEngineSrcPathFromEnv;
 
       Future<void> Function()? manifestReset;
@@ -1169,6 +1232,10 @@ class PerfTest {
       try {
         final List<String> options = <String>[
           if (localEngine != null) ...<String>['--local-engine', localEngine],
+          if (localEngineHost != null) ...<String>[
+            '--local-engine-host',
+            localEngineHost
+          ],
           if (localEngineSrcPath != null) ...<String>[
             '--local-engine-src-path',
             localEngineSrcPath
