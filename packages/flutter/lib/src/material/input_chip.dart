@@ -46,8 +46,8 @@ import 'theme_data.dart';
 /// {@tool dartpad}
 /// The following example showcases how to generate [InputChip]s from
 /// user text input. When the user enters a pizza topping in the text field,
-/// user is presented with a list of suggestions when selecting one of the
-/// suggestions an [InputChip] is generated in the text field.
+/// the user is presented with a list of suggestions. When selecting one of the
+/// suggestions, an [InputChip] is generated in the text field.
 ///
 /// ** See code in examples/api/lib/material/input_chip/input_chip.1.dart **
 /// {@end-tool}
