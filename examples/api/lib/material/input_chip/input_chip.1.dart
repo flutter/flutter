@@ -189,7 +189,9 @@ class ChipsInputState<T> extends State<ChipsInput<T>> {
     super.initState();
 
     controller = ChipsInputEditingController<T>(
-        <T>[...widget.values], widget.chipBuilder);
+      <T>[...widget.values],
+      widget.chipBuilder,
+    );
     controller.addListener(_textListener);
   }
 
@@ -247,8 +249,8 @@ class ChipsInputState<T> extends State<ChipsInput<T>> {
     controller.updateValues(<T>[...widget.values]);
 
     return TextField(
-      maxLines: 3,
       minLines: 1,
+      maxLines: 3,
       textInputAction: TextInputAction.done,
       style: widget.style,
       strutStyle: widget.strutStyle,
@@ -264,7 +266,8 @@ class ChipsInputState<T> extends State<ChipsInput<T>> {
 class ChipsInputEditingController<T> extends TextEditingController {
   ChipsInputEditingController(this.values, this.chipBuilder)
       : super(
-            text: String.fromCharCode(kObjectReplacementChar) * values.length);
+          text: String.fromCharCode(kObjectReplacementChar) * values.length,
+        );
 
   static const int kObjectReplacementChar = 0xFFFE;
 
@@ -272,15 +275,16 @@ class ChipsInputEditingController<T> extends TextEditingController {
 
   final Widget Function(BuildContext context, T data) chipBuilder;
 
-  /// called whenever chip is either added or removed
-  /// from the outside the context of the text field
+  /// Called whenever chip is either added or removed
+  /// from the outside the context of the text field.
   void updateValues(List<T> values) {
     if (values.length != this.values.length) {
       final String char = String.fromCharCode(kObjectReplacementChar);
       final int length = values.length;
       value = TextEditingValue(
-          text: char * length,
-          selection: TextSelection.collapsed(offset: length));
+        text: char * length,
+        selection: TextSelection.collapsed(offset: length),
+      );
       this.values = values;
     }
   }
@@ -300,11 +304,14 @@ class ChipsInputEditingController<T> extends TextEditingController {
     final Iterable<WidgetSpan> chipWidgets =
         values.map((T v) => WidgetSpan(child: chipBuilder(context, v)));
 
-    return TextSpan(style: style, children: <InlineSpan>[
-      ...chipWidgets,
-      if (textWithoutReplacements.isNotEmpty)
-        TextSpan(text: textWithoutReplacements)
-    ]);
+    return TextSpan(
+      style: style,
+      children: <InlineSpan>[
+        ...chipWidgets,
+        if (textWithoutReplacements.isNotEmpty)
+          TextSpan(text: textWithoutReplacements)
+      ],
+    );
   }
 }
 
@@ -319,7 +326,9 @@ class ToppingSuggestion extends StatelessWidget {
     return ListTile(
       key: ObjectKey(topping),
       leading: CircleAvatar(
-        child: Text(topping[0].toUpperCase()),
+        child: Text(
+          topping[0].toUpperCase(),
+        ),
       ),
       title: Text(topping),
       onTap: () => onTap?.call(topping),
