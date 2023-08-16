@@ -1247,63 +1247,6 @@ class CanvasCompareTester {
               [=](DlCanvas* cv, DlPaint& p) { dl_aa_setup(cv, p, false); }));
     }
 
-    {
-      // The CPU renderer does not always dither for solid colors and we
-      // need to use a non-default color (default is black) on an opaque
-      // surface, so we use a shader instead of a color. Also, thin stroked
-      // primitives (mainly drawLine and drawPoints) do not show much
-      // dithering so we use a non-trivial stroke width as well.
-      RenderEnvironment dither_env = RenderEnvironment::Make565(env.provider());
-      if (!dither_env.valid()) {
-        // Currently only happens on Metal backend
-        static std::set<std::string> warnings_sent;
-        std::string name = dither_env.backend_name();
-        if (warnings_sent.find(name) == warnings_sent.end()) {
-          warnings_sent.insert(name);
-          FML_LOG(INFO) << "Skipping Dithering tests on " << name;
-        }
-      } else {
-        DlColor dither_bg = DlColor::kBlack();
-        SkSetup sk_dither_setup = [=](SkCanvas*, SkPaint& p) {
-          p.setShader(kTestSkImageColorSource);
-          p.setAlpha(0xf0);
-          p.setStrokeWidth(5.0);
-        };
-        DlSetup dl_dither_setup = [=](DlCanvas*, DlPaint& p) {
-          p.setColorSource(&kTestDlImageColorSource);
-          p.setAlpha(0xf0);
-          p.setStrokeWidth(5.0);
-        };
-        dither_env.init_ref(sk_dither_setup, testP.sk_renderer(),
-                            dl_dither_setup, testP.dl_renderer(), dither_bg);
-        quickCompareToReference(dither_env, "dither");
-        RenderWith(testP, dither_env, tolerance,
-                   CaseParameters(
-                       "Dither == True",
-                       [=](SkCanvas* cv, SkPaint& p) {
-                         sk_dither_setup(cv, p);
-                         p.setDither(true);
-                       },
-                       [=](DlCanvas* cv, DlPaint& p) {
-                         dl_dither_setup(cv, p);
-                         p.setDither(true);
-                       })
-                       .with_bg(dither_bg));
-        RenderWith(testP, dither_env, tolerance,
-                   CaseParameters(
-                       "Dither = False",
-                       [=](SkCanvas* cv, SkPaint& p) {
-                         sk_dither_setup(cv, p);
-                         p.setDither(false);
-                       },
-                       [=](DlCanvas* cv, DlPaint& p) {
-                         dl_dither_setup(cv, p);
-                         p.setDither(false);
-                       })
-                       .with_bg(dither_bg));
-      }
-    }
-
     RenderWith(
         testP, env, tolerance,
         CaseParameters(

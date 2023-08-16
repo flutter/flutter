@@ -10,6 +10,61 @@
 
 namespace flutter {
 
+// clang-format off
+constexpr float kInvertColorMatrix[20] = {
+  -1.0,    0,    0, 1.0, 0,
+     0, -1.0,    0, 1.0, 0,
+     0,    0, -1.0, 1.0, 0,
+   1.0,  1.0,  1.0, 1.0, 0
+};
+// clang-format on
+
+SkPaint ToSk(const DlPaint& paint, bool force_stroke) {
+  SkPaint sk_paint;
+
+  sk_paint.setAntiAlias(paint.isAntiAlias());
+  sk_paint.setColor(paint.getColor());
+  sk_paint.setBlendMode(ToSk(paint.getBlendMode()));
+  sk_paint.setStyle(force_stroke ? SkPaint::kStroke_Style
+                                 : ToSk(paint.getDrawStyle()));
+  sk_paint.setStrokeWidth(paint.getStrokeWidth());
+  sk_paint.setStrokeMiter(paint.getStrokeMiter());
+  sk_paint.setStrokeCap(ToSk(paint.getStrokeCap()));
+  sk_paint.setStrokeJoin(ToSk(paint.getStrokeJoin()));
+  sk_paint.setImageFilter(ToSk(paint.getImageFilterPtr()));
+  auto color_filter = ToSk(paint.getColorFilterPtr());
+  if (paint.isInvertColors()) {
+    auto invert_filter = SkColorFilters::Matrix(kInvertColorMatrix);
+    if (color_filter) {
+      invert_filter = invert_filter->makeComposed(color_filter);
+    }
+    color_filter = invert_filter;
+  }
+  sk_paint.setColorFilter(color_filter);
+
+  auto color_source = paint.getColorSourcePtr();
+  if (color_source) {
+    // On the Impeller backend, we will only support dithering of *gradients*,
+    // and it will be enabled by default (without the option to disable it).
+    // Until Skia support is completely removed, we only want to respect the
+    // dither flag for gradients (otherwise it will also apply to, for example,
+    // images, which is not supported in Impeller).
+    //
+    // See https://github.com/flutter/flutter/issues/112498.
+    if (color_source->isGradient()) {
+      // Originates from `dart:ui#Paint.enableDithering`.
+      auto user_specified_dither = paint.isDither();
+      sk_paint.setDither(user_specified_dither);
+    }
+    sk_paint.setShader(ToSk(color_source));
+  }
+
+  sk_paint.setMaskFilter(ToSk(paint.getMaskFilterPtr()));
+  sk_paint.setPathEffect(ToSk(paint.getPathEffectPtr()));
+
+  return sk_paint;
+}
+
 sk_sp<SkShader> ToSk(const DlColorSource* source) {
   if (!source) {
     return nullptr;
