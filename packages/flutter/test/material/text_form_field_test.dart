@@ -278,11 +278,6 @@ void main() {
     controller.dispose();
   },
     skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
-    // TODO(polina-c): remove after fixing
-    // https://github.com/flutter/flutter/issues/132620
-    leakTrackingTestConfig:  const LeakTrackingTestConfig(
-      notDisposedAllowList: <String, int?>{'_InputBorderGap' : 1},
-    ),
   );
 
   testWidgets('the desktop cut/copy/paste buttons are disabled for read-only obscured form fields', (WidgetTester tester) async {
