@@ -968,12 +968,11 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
   private static PlatformViewRenderTarget makePlatformViewRenderTarget(
       TextureRegistry textureRegistry) {
-    if (Build.VERSION.SDK_INT >= 29) {
-      // Prefer ImageReader-based backend on versions >= 29.
+    // TODO(johnmccutchan): Enable ImageReaderPlatformViewRenderTarget for public use.
+    if (false) {
       final TextureRegistry.ImageTextureEntry textureEntry = textureRegistry.createImageTexture();
       return new ImageReaderPlatformViewRenderTarget(textureEntry);
     }
-    // Fallback to SurfaceTexture support on old phones.
     final TextureRegistry.SurfaceTextureEntry textureEntry = textureRegistry.createSurfaceTexture();
     return new SurfaceTexturePlatformViewRenderTarget(textureEntry);
   }
