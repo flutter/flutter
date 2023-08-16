@@ -647,7 +647,7 @@ List<DarwinArch> defaultIOSArchsForEnvironment(
   // Handle single-arch local engines.
   final LocalEngineInfo? localEngineInfo = artifacts.localEngineInfo;
   if (localEngineInfo != null) {
-    final String localEngineName = localEngineInfo.localEngineName;
+    final String localEngineName = localEngineInfo.localTargetName;
     if (localEngineName.contains('_arm64')) {
       return <DarwinArch>[ DarwinArch.arm64 ];
     }
@@ -670,7 +670,7 @@ List<DarwinArch> defaultMacOSArchsForEnvironment(Artifacts artifacts) {
   // Handle single-arch local engines.
   final LocalEngineInfo? localEngineInfo = artifacts.localEngineInfo;
   if (localEngineInfo != null) {
-    if (localEngineInfo.localEngineName.contains('_arm64')) {
+    if (localEngineInfo.localTargetName.contains('_arm64')) {
       return <DarwinArch>[ DarwinArch.arm64 ];
     }
     return <DarwinArch>[ DarwinArch.x86_64 ];
