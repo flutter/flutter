@@ -165,12 +165,13 @@ class NavigationDrawer extends StatelessWidget {
         destinationIndex += 1;
       }
     }
+    final NavigationDrawerThemeData navigationDrawerTheme = NavigationDrawerTheme.of(context);
 
     return Drawer(
-      backgroundColor: backgroundColor,
-      shadowColor: shadowColor,
-      surfaceTintColor: surfaceTintColor,
-      elevation: elevation,
+      backgroundColor: backgroundColor ?? navigationDrawerTheme.backgroundColor,
+      shadowColor: shadowColor ?? navigationDrawerTheme.shadowColor,
+      surfaceTintColor: surfaceTintColor ?? navigationDrawerTheme.surfaceTintColor,
+      elevation: elevation ?? navigationDrawerTheme.elevation,
       child: SafeArea(
         bottom: false,
         child: ListView(

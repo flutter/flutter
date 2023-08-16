@@ -4,9 +4,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('GridTile control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GridTile control test', (WidgetTester tester) async {
     final Key headerKey = UniqueKey();
     final Key footerKey = UniqueKey();
 

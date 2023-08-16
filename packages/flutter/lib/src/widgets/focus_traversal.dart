@@ -352,7 +352,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   @protected
   Iterable<FocusNode> sortDescendants(Iterable<FocusNode> descendants, FocusNode currentNode);
 
-  Map<FocusNode?, _FocusTraversalGroupInfo> _findGroups(FocusScopeNode scope, _FocusTraversalGroupNode? scopeGroupNode) {
+  Map<FocusNode?, _FocusTraversalGroupInfo> _findGroups(FocusScopeNode scope, _FocusTraversalGroupNode? scopeGroupNode, FocusNode currentNode) {
     final FocusTraversalPolicy defaultPolicy = scopeGroupNode?.policy ?? ReadingOrderTraversalPolicy();
     final Map<FocusNode?, _FocusTraversalGroupInfo> groups = <FocusNode?, _FocusTraversalGroupInfo>{};
     for (final FocusNode node in scope.descendants) {
@@ -374,7 +374,10 @@ abstract class FocusTraversalPolicy with Diagnosticable {
       }
       // Skip non-focusable and non-traversable nodes in the same way that
       // FocusScopeNode.traversalDescendants would.
-      if (node.canRequestFocus && !node.skipTraversal) {
+      //
+      // Current focused node needs to be in the group so that the caller can
+      // find the next traversable node from the current focused node.
+      if (node == currentNode || (node.canRequestFocus && !node.skipTraversal)) {
         groups[groupNode] ??= _FocusTraversalGroupInfo(groupNode, members: <FocusNode>[], defaultPolicy: defaultPolicy);
         assert(!groups[groupNode]!.members.contains(node));
         groups[groupNode]!.members.add(node);
@@ -388,7 +391,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   List<FocusNode> _sortAllDescendants(FocusScopeNode scope, FocusNode currentNode) {
     final _FocusTraversalGroupNode? scopeGroupNode = FocusTraversalGroup._getGroupNode(scope);
     // Build the sorting data structure, separating descendants into groups.
-    final Map<FocusNode?, _FocusTraversalGroupInfo> groups = _findGroups(scope, scopeGroupNode);
+    final Map<FocusNode?, _FocusTraversalGroupInfo> groups = _findGroups(scope, scopeGroupNode, currentNode);
 
     // Sort the member lists using the individual policy sorts.
     for (final FocusNode? key in groups.keys) {
@@ -396,6 +399,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
       groups[key]!.members.clear();
       groups[key]!.members.addAll(sortedMembers);
     }
+
 
     // Traverse the group tree, adding the children of members in the order they
     // appear in the member lists.
@@ -421,17 +425,29 @@ abstract class FocusTraversalPolicy with Diagnosticable {
     // They were left in above because they were needed to find their members
     // during sorting.
     sortedDescendants.removeWhere((FocusNode node) {
-      return !node.canRequestFocus || node.skipTraversal;
+      return node != currentNode && (!node.canRequestFocus || node.skipTraversal);
     });
 
     // Sanity check to make sure that the algorithm above doesn't diverge from
     // the one in FocusScopeNode.traversalDescendants in terms of which nodes it
     // finds.
-    assert(
-      sortedDescendants.length <= scope.traversalDescendants.length && sortedDescendants.toSet().difference(scope.traversalDescendants.toSet()).isEmpty,
-      'Sorted descendants contains different nodes than FocusScopeNode.traversalDescendants would. '
-      'These are the different nodes: ${sortedDescendants.toSet().difference(scope.traversalDescendants.toSet())}',
-    );
+    assert((){
+      final Set<FocusNode> difference = sortedDescendants.toSet().difference(scope.traversalDescendants.toSet());
+      if (currentNode.skipTraversal) {
+        assert(
+         difference.length == 1 && difference.contains(currentNode),
+         'Sorted descendants contains different nodes than FocusScopeNode.traversalDescendants would. '
+         'These are the different nodes: ${difference.where((FocusNode node) => node != currentNode)}',
+        );
+        return true;
+      }
+      assert(
+        difference.isEmpty,
+        'Sorted descendants contains different nodes than FocusScopeNode.traversalDescendants would. '
+        'These are the different nodes: $difference',
+      );
+      return true;
+    }());
     return sortedDescendants;
   }
 
@@ -453,7 +469,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   bool _moveFocus(FocusNode currentNode, {required bool forward}) {
     final FocusScopeNode nearestScope = currentNode.nearestScope!;
     invalidateScopeData(nearestScope);
-    final FocusNode? focusedChild = nearestScope.focusedChild;
+    FocusNode? focusedChild = nearestScope.focusedChild;
     if (focusedChild == null) {
       final FocusNode? firstFocus = forward ? findFirstFocus(currentNode) : findLastFocus(currentNode);
       if (firstFocus != null) {
@@ -464,8 +480,11 @@ abstract class FocusTraversalPolicy with Diagnosticable {
         return true;
       }
     }
-    final List<FocusNode> sortedNodes = _sortAllDescendants(nearestScope, currentNode);
-    if (sortedNodes.isEmpty) {
+    focusedChild ??= nearestScope;
+    final List<FocusNode> sortedNodes = _sortAllDescendants(nearestScope, focusedChild);
+
+    assert(sortedNodes.contains(focusedChild));
+    if (sortedNodes.length < 2) {
       // If there are no nodes to traverse to, like when descendantsAreTraversable
       // is false or skipTraversal for all the nodes is true.
       return false;
@@ -473,7 +492,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
     if (forward && focusedChild == sortedNodes.last) {
       switch (nearestScope.traversalEdgeBehavior) {
         case TraversalEdgeBehavior.leaveFlutterView:
-          focusedChild!.unfocus();
+          focusedChild.unfocus();
           return false;
         case TraversalEdgeBehavior.closedLoop:
           requestFocusCallback(sortedNodes.first, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd);
@@ -483,7 +502,7 @@ abstract class FocusTraversalPolicy with Diagnosticable {
     if (!forward && focusedChild == sortedNodes.first) {
       switch (nearestScope.traversalEdgeBehavior) {
         case TraversalEdgeBehavior.leaveFlutterView:
-          focusedChild!.unfocus();
+          focusedChild.unfocus();
           return false;
         case TraversalEdgeBehavior.closedLoop:
           requestFocusCallback(sortedNodes.last, alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart);

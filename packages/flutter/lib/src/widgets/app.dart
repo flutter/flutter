@@ -725,6 +725,10 @@ class WidgetsApp extends StatefulWidget {
   /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
   /// [initialRoute] must be null and [builder] must not be null.
   ///
+  /// Changing the [initialRoute] will have no effect, as it only controls the
+  /// _initial_ route. To change the route while the application is running, use
+  /// the [Navigator] or [Router] APIs.
+  ///
   /// See also:
   ///
   ///  * [Navigator.initialRoute], which is used to implement this property.

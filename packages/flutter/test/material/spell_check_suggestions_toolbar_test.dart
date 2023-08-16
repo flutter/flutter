@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 // Vertical position at which to anchor the toolbar for testing.
 const double _kAnchor = 200;
@@ -47,7 +48,7 @@ void main() {
     );
   }
 
-  testWidgets('positions toolbar below anchor when it fits above bottom view padding', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('positions toolbar below anchor when it fits above bottom view padding', (WidgetTester tester) async {
     // We expect the toolbar to be positioned right below the anchor with padding accounted for.
     await tester.pumpWidget(
       MaterialApp(
@@ -64,7 +65,7 @@ void main() {
     expect(toolbarY, equals(_kAnchor));
   });
 
-  testWidgets('re-positions toolbar higher below anchor when it does not fit above bottom view padding', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('re-positions toolbar higher below anchor when it does not fit above bottom view padding', (WidgetTester tester) async {
     // We expect the toolbar to be positioned _kTestToolbarOverlap pixels above the anchor.
     const double expectedToolbarY = _kAnchor - _kTestToolbarOverlap;
 
@@ -83,7 +84,7 @@ void main() {
     expect(toolbarY, equals(expectedToolbarY));
   });
 
-  testWidgets('more than three suggestions throws an error', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('more than three suggestions throws an error', (WidgetTester tester) async {
     Future<void> pumpToolbar(List<String> suggestions) async {
       await tester.pumpWidget(
         MaterialApp(

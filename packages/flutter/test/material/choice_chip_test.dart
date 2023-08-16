@@ -4,8 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../rendering/mock_canvas.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 RenderBox getMaterialBox(WidgetTester tester, Finder type) {
   return tester.firstRenderObject<RenderBox>(
@@ -64,7 +63,7 @@ void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
 }
 
 void main() {
-  testWidgets('ChoiceChip defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ChoiceChip defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     const String label = 'choice chip';
 
@@ -85,7 +84,10 @@ void main() {
     );
 
     // Test default chip size.
-    expect(tester.getSize(find.byType(ChoiceChip)), const Size(190.0, 48.0));
+    expect(
+      tester.getSize(find.byType(ChoiceChip)),
+      within(distance: 0.01, from: const Size(189.1, 48.0)),
+    );
     // Test default label style.
     expect(
       getLabelStyle(tester, label).style.color!.value,
@@ -196,7 +198,7 @@ void main() {
     expect(decoration.color, theme.colorScheme.onSurface.withOpacity(0.12));
   });
 
-  testWidgets('ChoiceChip.elevated defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ChoiceChip.elevated defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     const String label = 'choice chip';
 
@@ -217,7 +219,10 @@ void main() {
     );
 
     // Test default chip size.
-    expect(tester.getSize(find.byType(ChoiceChip)), const Size(190.0, 48.0));
+    expect(
+      tester.getSize(find.byType(ChoiceChip)),
+      within(distance: 0.01, from: const Size(189.1, 48.0)),
+    );
     // Test default label style.
     expect(
       getLabelStyle(tester, label).style.color!.value,
@@ -328,7 +333,7 @@ void main() {
     expect(decoration.color, theme.colorScheme.onSurface.withOpacity(0.12));
   });
 
-  testWidgets('ChoiceChip.color resolves material states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ChoiceChip.color resolves material states', (WidgetTester tester) async {
     const Color disabledSelectedColor = Color(0xffffff00);
     const Color disabledColor = Color(0xff00ff00);
     const Color backgroundColor = Color(0xff0000ff);
@@ -427,7 +432,7 @@ void main() {
     );
   });
 
-  testWidgets('ChoiceChip uses provided state color properties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ChoiceChip uses provided state color properties', (WidgetTester tester) async {
     const Color disabledColor = Color(0xff00ff00);
     const Color backgroundColor = Color(0xff0000ff);
     const Color selectedColor = Color(0xffff0000);
@@ -502,7 +507,7 @@ void main() {
     );
   });
 
-  testWidgets('ChoiceChip can be tapped', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ChoiceChip can be tapped', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -518,7 +523,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('ChoiceChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ChoiceChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
     const Text label = Text('label');
     await tester.pumpWidget(wrapForChip(child: const ChoiceChip(label: label, selected: false)));
     checkChipMaterialClipBehavior(tester, Clip.none);
@@ -527,7 +532,7 @@ void main() {
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
 
-  testWidgets('ChoiceChip passes iconTheme property to RawChip', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ChoiceChip passes iconTheme property to RawChip', (WidgetTester tester) async {
     const IconThemeData iconTheme = IconThemeData(color: Colors.red);
     await tester.pumpWidget(wrapForChip(
       child: const ChoiceChip(
@@ -539,7 +544,7 @@ void main() {
     expect(rawChip.iconTheme, iconTheme);
   });
 
-  testWidgets('ChoiceChip passes showCheckmark from ChipTheme to RawChip', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ChoiceChip passes showCheckmark from ChipTheme to RawChip', (WidgetTester tester) async {
     const bool showCheckmark = false;
     await tester.pumpWidget(wrapForChip(
         child: const ChipTheme(
@@ -555,7 +560,7 @@ void main() {
     expect(rawChip.showCheckmark, showCheckmark);
   });
 
-  testWidgets('ChoiceChip passes checkmark properties to RawChip', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ChoiceChip passes checkmark properties to RawChip', (WidgetTester tester) async {
     const bool showCheckmark = false;
     const Color checkmarkColor = Color(0xff0000ff);
     await tester.pumpWidget(wrapForChip(
@@ -575,7 +580,7 @@ void main() {
     // support is deprecated and the APIs are removed, these tests
     // can be deleted.
 
-    testWidgets('ChoiceChip defaults', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ChoiceChip defaults', (WidgetTester tester) async {
       Widget buildFrame(Brightness brightness) {
         return MaterialApp(
           theme: ThemeData(useMaterial3: false, brightness: brightness),
