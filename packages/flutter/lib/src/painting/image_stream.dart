@@ -566,8 +566,8 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// synchronously. If an error has been already reported, the listener
   /// will be notified synchronously.
   ///
-  /// The listener will not affect the lifecycle of this object, neither the
-  /// [hasListeners] property.
+  /// The presence of a listener will affect neither the lifecycle of this object
+  /// nor what [hasListeners] reports.
   ///
   /// It is different from [addListener] in a few points: Firstly, this one only
   /// listens to errors, while [addListener] listens to all kinds of events.
