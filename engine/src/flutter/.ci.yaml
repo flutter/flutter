@@ -246,14 +246,13 @@ targets:
       - .ci.yaml
       - tools/clang_tidy/**
       - ci/builders/**
-      - ci/lint.sh
+      - ci/clang_tidy.sh
       - "**.h"
       - "**.c"
       - "**.cc"
       - "**.fbs"
       - "**.frag"
       - "**.vert"
-      - "**.py"
 
   - name: Linux linux_arm_host_engine
     recipe: engine_v2/engine_v2
@@ -379,7 +378,7 @@ targets:
       - .ci.yaml
       - tools/clang_tidy/**
       - ci/builders/**
-      - ci/lint.sh
+      - ci/clang_tidy.sh
       - "**.h"
       - "**.c"
       - "**.cc"
