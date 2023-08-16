@@ -3148,8 +3148,6 @@ class BuildOwner {
       FlutterTimeline.startSync('FINALIZE TREE');
     }
     try {
-      print('!!!!! finalizing tree...');
-      print (StackTrace.current);
       lockState(_inactiveElements._unmountAll); // this unregisters the GlobalKeys
       assert(() {
         try {

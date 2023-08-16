@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker/leak_tracker.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart';
@@ -249,6 +250,42 @@ void main() {
     // TODO(polina-c): remove after fixing
     // https://github.com/flutter/flutter/issues/130467
     leakTrackingTestConfig: const LeakTrackingTestConfig(allowAllNotDisposed: true, allowAllNotGCed: true),
+  );
+
+  testWidgetsWithLeakTracking(
+    '$SelectionOverlay is not leaking',
+    (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'blah1 blah2',
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              controller: controller,
+            ),
+          ),
+        ),
+      ),
+    );
+
+
+    final Offset startBlah1 = textOffsetToPosition(tester, 0);
+    await tester.tapAt(startBlah1);
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tapAt(startBlah1);
+    await tester.pumpAndSettle();
+    await tester.pump();
+    controller.dispose();
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }),
+    skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
+    // TODO(polina-c): remove after fixing
+    // https://github.com/flutter/flutter/issues/132620
+    leakTrackingTestConfig:  const LeakTrackingTestConfig(
+      notDisposedAllowList: <String, int?>{'_InputBorderGap' : 1},
+    ),
   );
 
   testWidgets('the desktop cut/copy/paste buttons are disabled for read-only obscured form fields', (WidgetTester tester) async {
