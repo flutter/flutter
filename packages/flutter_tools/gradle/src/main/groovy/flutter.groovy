@@ -331,7 +331,7 @@ class FlutterPlugin implements Plugin<Project> {
             if (!engineHostOut.isDirectory()) {
                 throw new GradleException('local-engine-host-out must point to a local engine host build')
             }
-            localEngineHostOut = engineHostOut.name
+            localEngineHost = engineHostOut.name
         }
         project.android.buildTypes.all this.&addFlutterDependencies
     }
