@@ -141,6 +141,8 @@ class Command {
         '--fix',
         '--format-style=file',
       ],
+      if (options.enableCheckProfile)
+        '--enable-check-profile',
       '--',
     ];
     args.addAll(tidyArgs.split(' '));
