@@ -39,7 +39,7 @@ void HardwareBufferExternalTexture::Paint(PaintContext& context,
         flutter::DlCanvas::SrcRectConstraint::kStrict  // enforce edges
     );
   } else {
-    FML_LOG(ERROR) << "No DlImage available.";
+    FML_LOG(WARNING) << "No DlImage available.";
   }
 }
 
