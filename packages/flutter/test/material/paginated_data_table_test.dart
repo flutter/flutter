@@ -1264,4 +1264,33 @@ void main() {
     final Scrollable footerScrollView = tester.widget(find.byType(Scrollable).last);
     expect(footerScrollView.controller, null);
   });
+
+    testWidgets('PaginatedDataTable custom heading row color', (WidgetTester tester) async {
+    const MaterialStateProperty<Color> headingRowColor = MaterialStatePropertyAll<Color>(Color(0xffFF0000));
+    final TestDataSource source = TestDataSource();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: PaginatedDataTable(
+            primary: true,
+            header: const Text('Test table'),
+            source: source,
+            rowsPerPage: 2,
+            headingRowColor: headingRowColor,
+            columns: const <DataColumn>[
+              DataColumn(label: Text('Name')),
+              DataColumn(label: Text('Calories'), numeric: true),
+              DataColumn(label: Text('Generation')),
+            ],
+          ),
+        ),
+      )
+    );
+
+    final Table table = tester.widget(find.byType(Table));
+    final TableRow tableRow = table.children[0];
+    final BoxDecoration tableRowBoxDecoration = tableRow.decoration! as BoxDecoration;
+    expect(tableRowBoxDecoration.color, headingRowColor.resolve(<MaterialState>{}));
+  });
 }
