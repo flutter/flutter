@@ -16,7 +16,7 @@ final Directory flutterRoot = fileSystem.directory(flutterRootPath);
 
 Future<void> main() async {
   // Regression test for https://github.com/flutter/flutter/issues/132592
-  test('flutter/bin/dart updates the Dart SDK', () async {
+  test('flutter/bin/dart updates the Dart SDK without hanging', () async {
     // Run the Dart entrypoint once to ensure the Dart SDK is downloaded.
     await runDartBatch();
 
