@@ -180,7 +180,6 @@ void main() {
             Map<FlutterDevice?, List<FlutterView>> viewCache,
             void Function(String message)? onSlow,
             String reloadMessage,
-            String? fastReassembleClassName,
           ) async => ReassembleResult(
               <FlutterView?, FlutterVmService?>{null: null},
               false,
@@ -298,7 +297,6 @@ void main() {
             hotEventSdkName: 'Tester',
             hotEventEmulator: false,
             hotEventFullRestart: true,
-            fastReassemble: false,
             hotEventOverallTimeInMs: 64000,
             hotEventSyncedBytes: 4,
             hotEventInvalidatedSourcesCount: 2,
@@ -381,7 +379,6 @@ void main() {
             Map<FlutterDevice?, List<FlutterView>> viewCache,
             void Function(String message)? onSlow,
             String reloadMessage,
-            String? fastReassembleClassName,
           ) async => ReassembleResult(
               <FlutterView?, FlutterVmService?>{null: null},
               false,
@@ -404,7 +401,6 @@ void main() {
             hotEventSdkName: 'Tester',
             hotEventEmulator: false,
             hotEventFullRestart: false,
-            fastReassemble: false,
             hotEventCompileTimeInMs: 16000,
             hotEventFindInvalidatedTimeInMs: 64000,
             hotEventScannedSourcesCount: 16,

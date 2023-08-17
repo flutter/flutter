@@ -102,7 +102,7 @@ final String flutterTester = path.join(flutterRoot, 'bin', 'cache', 'artifacts',
 
 /// The arguments to pass to `flutter test` (typically the local engine
 /// configuration) -- prefilled with the arguments passed to test.dart.
-final List<String> flutterTestArgs = <String>['--dart-define=SKPARAGRAPH_REMOVE_ROUNDING_HACK=true'];
+final List<String> flutterTestArgs = <String>[];
 
 /// Environment variables to override the local engine when running `pub test`,
 /// if such flags are provided to `test.dart`.
@@ -213,13 +213,16 @@ String get shuffleSeed {
 ///
 /// Examples:
 /// SHARD=tool_tests bin/cache/dart-sdk/bin/dart dev/bots/test.dart
-/// bin/cache/dart-sdk/bin/dart dev/bots/test.dart --local-engine=host_debug_unopt
+/// bin/cache/dart-sdk/bin/dart dev/bots/test.dart --local-engine=host_debug_unopt --local-engine-host=host_debug_unopt
 Future<void> main(List<String> args) async {
   try {
     printProgress('STARTING ANALYSIS');
     for (final String arg in args) {
       if (arg.startsWith('--local-engine=')) {
         localEngineEnv['FLUTTER_LOCAL_ENGINE'] = arg.substring('--local-engine='.length);
+        flutterTestArgs.add(arg);
+      } else if (arg.startsWith('--local-engine-host=')) {
+        localEngineEnv['FLUTTER_LOCAL_ENGINE_HOST'] = arg.substring('--local-engine-host='.length);
         flutterTestArgs.add(arg);
       } else if (arg.startsWith('--local-engine-src-path=')) {
         localEngineEnv['FLUTTER_LOCAL_ENGINE_SRC_PATH'] = arg.substring('--local-engine-src-path='.length);
@@ -1309,8 +1312,8 @@ Future<void> _runFlutterDriverWebTest({
   await runCommand(
     flutter,
     <String>[
-      'drive',
       ...flutterTestArgs,
+      'drive',
       if (driver != null) '--driver=$driver',
       '--target=$target',
       '--browser-name=chrome',
@@ -1584,8 +1587,8 @@ Future<void> _runGalleryE2eWebTest(String buildMode, { bool canvasKit = false })
   await runCommand(
     flutter,
     <String>[
-      'drive',
       ...flutterTestArgs,
+      'drive',
       if (canvasKit)
         '--dart-define=FLUTTER_WEB_USE_SKIA=true',
       if (!canvasKit)
@@ -1665,10 +1668,10 @@ Future<void> _runWebReleaseTest(String target, {
   await runCommand(
     flutter,
     <String>[
+      ...flutterTestArgs,
       'build',
       'web',
       '--release',
-      ...flutterTestArgs,
       ...additionalArguments,
       '-t',
       target,

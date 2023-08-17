@@ -97,6 +97,12 @@
 /dev/devicelab/bin/tasks/animated_blur_backdrop_filter_perf__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/animated_blur_backdrop_filter_perf_opengles__timeline_summary.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/slider_perf_android.dart @tahatesser @flutter/framework
+/dev/devicelab/bin/tasks/draw_vertices_perf_opengles__timeline_summary.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/draw_atlas_perf_opengles__timeline_summary.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/draw_vertices_perf__timeline_summary.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/draw_atlas_perf__timeline_summary.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/static_path_tessellation_perf__timeline_summary.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/dynamic_path_tessellation_perf__timeline_summary.dart @jonahwilliams @flutter/engine
 
 ## Windows Android DeviceLab tests
 /dev/devicelab/bin/tasks/basic_material_app_win__compile.dart @zanderso @flutter/tool
@@ -210,6 +216,10 @@
 /dev/devicelab/bin/tasks/tiles_scroll_perf_ios__timeline_summary.dart @cyanglaz @flutter/engine
 /dev/devicelab/bin/tasks/animated_blur_backdrop_filter_perf_ios__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/draw_points_perf_ios__timeline_summary.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/draw_vertices_perf_ios__timeline_summary.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/draw_atlas_perf_ios__timeline_summary.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/static_path_tessellation_perf_ios__timeline_summary.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/dynamic_path_tessellation_perf_ios__timeline_summary.dart @jonahwilliams @flutter/engine
 
 ## Host only DeviceLab tests
 /dev/devicelab/bin/tasks/animated_complex_opacity_perf_macos__e2e_summary.dart @cbracken @flutter/desktop
