@@ -33,7 +33,7 @@ Future<void> main() async {
       // ignore: avoid_print
       print(
         'The Dart batch entrypoint did not complete after 5 minutes. '
-        'Historically this is a sign that 7z zip extraction is waiting for '
+        'Historically this is a sign that 7-Zip zip extraction is waiting for '
         'the user to confirm they would like to overwrite files. '
         "This likely means the test isn't a flake and will fail. "
         'See: https://github.com/flutter/flutter/issues/132592'
@@ -47,6 +47,7 @@ Future<void> main() async {
     // If 7-Zip is installed, unexpected overwrites causes this to hang.
     // If 7-Zip is not installed, unexpected overwrites results in error messages.
     // See: https://github.com/flutter/flutter/issues/132592
+    expect(dartSdkStamp.existsSync(), true);
     expect(output, contains('Downloading Dart SDK from Flutter engine ...'));
     expect(output, contains('Expanding downloaded archive...'));
     expect(output, isNot(contains('Use the -Force parameter' /* Luke */)));
