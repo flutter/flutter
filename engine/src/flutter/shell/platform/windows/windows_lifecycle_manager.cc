@@ -14,7 +14,7 @@
 namespace flutter {
 
 WindowsLifecycleManager::WindowsLifecycleManager(FlutterWindowsEngine* engine)
-    : engine_(engine), process_close_(false) {}
+    : engine_(engine) {}
 
 WindowsLifecycleManager::~WindowsLifecycleManager() {}
 
@@ -49,7 +49,7 @@ bool WindowsLifecycleManager::WindowProc(HWND hwnd,
     // is, we re-dispatch a new WM_CLOSE message. In order to allow the new
     // message to reach other delegates, we ignore it here.
     case WM_CLOSE: {
-      if (!process_close_) {
+      if (!process_lifecycle_) {
         return false;
       }
       auto key = std::make_tuple(hwnd, wpar, lpar);
@@ -179,8 +179,8 @@ bool WindowsLifecycleManager::IsLastWindowOfProcess() {
   return num_windows <= 1;
 }
 
-void WindowsLifecycleManager::BeginProcessingClose() {
-  process_close_ = true;
+void WindowsLifecycleManager::BeginProcessingLifecycle() {
+  process_lifecycle_ = true;
 }
 
 // TODO(schectman): Wait until the platform channel is registered to send
@@ -191,7 +191,7 @@ void WindowsLifecycleManager::SetLifecycleState(AppLifecycleState state) {
     return;
   }
   state_ = state;
-  if (engine_) {
+  if (engine_ && process_lifecycle_) {
     const char* state_name = AppLifecycleStateToString(state);
     engine_->SendPlatformMessage("flutter/lifecycle",
                                  reinterpret_cast<const uint8_t*>(state_name),
