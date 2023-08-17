@@ -34,7 +34,7 @@ class CocoaPodsToolchainDirectoryMigration extends ProjectMigrator {
 
     final Version? version = _xcodeProjectInterpreter.version;
 
-    // If Xcode not installed or less than 14.3 with readlink behavior change, skip this migration.
+    // If Xcode not installed or less than 15, skip this migration.
     if (version == null || version < Version(15, 0, 0)) {
       logger.printTrace('Detected Xcode version is $version, below 15.0, skipping TOOLCHAIN_DIR workaround.');
       return;
