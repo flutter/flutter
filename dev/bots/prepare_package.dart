@@ -833,16 +833,8 @@ class ArchivePublisher {
       print('gsutil.py -- $args');
       return '';
     }
-    if (platform.isWindows) {
-      return _processRunner.runProcess(
-        <String>['python3', path.join(platform.environment['DEPOT_TOOLS']!, 'gsutil.py'), '--', ...args],
-        workingDirectory: workingDirectory,
-        failOk: failOk,
-      );
-    }
-
     return _processRunner.runProcess(
-      <String>['gsutil.py', '--', ...args],
+      <String>['python3', path.join(platform.environment['DEPOT_TOOLS']!, 'gsutil.py'), '--', ...args],
       workingDirectory: workingDirectory,
       failOk: failOk,
     );
