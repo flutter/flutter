@@ -2497,8 +2497,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  /// Launch a web search on the current selection,
-  ///   as in the "Search Web" edit menu button on iOS.
+  /// Launch the share interface for the current selection,
+  ///   as in the "Share" edit menu button on iOS.
   ///
   /// Currently this is only implemented for iOS.
   /// When 'obscureText' is true or the selection is empty,

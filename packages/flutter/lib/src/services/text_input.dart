@@ -1050,13 +1050,13 @@ mixin TextSelectionDelegate {
   /// Whether select all is enabled, must not be null.
   bool get selectAllEnabled => true;
 
-  /// Whether look up is enabled, must not be null.
+  /// Whether look up is enabled.
   bool get lookUpEnabled => true;
 
-  /// Whether search web is enabled, must not be null.
+  /// Whether search web is enabled.
   bool get searchWebEnabled => true;
 
-  /// Whether share is enabled, must not be null.
+  /// Whether share is enabled.
   bool get shareEnabled => true;
 
   /// Whether Live Text input is enabled.

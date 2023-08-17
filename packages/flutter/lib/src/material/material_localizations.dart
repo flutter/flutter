@@ -121,7 +121,7 @@ abstract class MaterialLocalizations {
   /// Label for "search web" edit buttons and menu items.
   String get searchWebButtonLabel;
 
-  /// Label for "search web" edit buttons and menu items.
+  /// Label for "share" edit buttons and menu items.
   String get shareButtonLabel;
 
   /// Label for the [AboutDialog] button that shows the [LicensePage].
