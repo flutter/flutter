@@ -62,7 +62,7 @@ class _DateTimePicker extends StatelessWidget {
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: selectedDate!,
+      initialDate: selectedDate,
       firstDate: DateTime(2015, 8),
       lastDate: DateTime(2101),
     );
@@ -120,9 +120,9 @@ class DateAndTimePickerDemo extends StatefulWidget {
 }
 
 class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
-  DateTime _fromDate = DateTime.now();
+  DateTime? _fromDate = DateTime.now();
   TimeOfDay _fromTime = const TimeOfDay(hour: 7, minute: 28);
-  DateTime _toDate = DateTime.now();
+  DateTime? _toDate = DateTime.now();
   TimeOfDay _toTime = const TimeOfDay(hour: 8, minute: 28);
   final List<String> _allActivities = <String>['hiking', 'swimming', 'boating', 'fishing'];
   String? _activity = 'fishing';
