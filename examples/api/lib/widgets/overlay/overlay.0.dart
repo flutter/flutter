@@ -58,57 +58,51 @@ class _OverlayExampleState extends State<OverlayExample> {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   const Text('Tap here for'),
-                  Builder(builder: (BuildContext context) {
-                    switch (currentPageIndex) {
-                      case 0:
-                        return const Column(
-                          children: <Widget>[
-                            Text(
-                              'Explore page',
-                              style: TextStyle(
-                                color: Colors.red,
-                              ),
-                            ),
-                            Icon(
-                              Icons.arrow_downward,
+                  switch (currentPageIndex) {
+                    0 => const Column(
+                        children: <Widget>[
+                          Text(
+                            'Explore page',
+                            style: TextStyle(
                               color: Colors.red,
                             ),
-                          ],
-                        );
-                      case 1:
-                        return const Column(
-                          children: <Widget>[
-                            Text(
-                              'Commute page',
-                              style: TextStyle(
-                                color: Colors.green,
-                              ),
-                            ),
-                            Icon(
-                              Icons.arrow_downward,
+                          ),
+                          Icon(
+                            Icons.arrow_downward,
+                            color: Colors.red,
+                          ),
+                        ],
+                      ),
+                    1 => const Column(
+                        children: <Widget>[
+                          Text(
+                            'Commute page',
+                            style: TextStyle(
                               color: Colors.green,
                             ),
-                          ],
-                        );
-                      case 2:
-                        return const Column(
-                          children: <Widget>[
-                            Text(
-                              'Saved page',
-                              style: TextStyle(
-                                color: Colors.orange,
-                              ),
-                            ),
-                            Icon(
-                              Icons.arrow_downward,
+                          ),
+                          Icon(
+                            Icons.arrow_downward,
+                            color: Colors.green,
+                          ),
+                        ],
+                      ),
+                    2 => const Column(
+                        children: <Widget>[
+                          Text(
+                            'Saved page',
+                            style: TextStyle(
                               color: Colors.orange,
                             ),
-                          ],
-                        );
-                      default:
-                        return const Text('No page selected.');
-                    }
-                  }),
+                          ),
+                          Icon(
+                            Icons.arrow_downward,
+                            color: Colors.orange,
+                          ),
+                        ],
+                      ),
+                    _ => const Text('No page selected.'),
+                  },
                   SizedBox(
                     width: MediaQuery.of(context).size.width / 3,
                     height: 80.0,
