@@ -978,7 +978,7 @@ void main() {
           granularity: TextGranularity.word,
         ),
       );
-      expect(paragraph.selections.length, 0); // how []are you
+      expect(paragraph.selections.length, 1); // how []are you
 
       // Equivalent to sending shift + alt + arrow-left.
       registrar.selectables[0].dispatchSelectionEvent(
