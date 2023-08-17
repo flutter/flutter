@@ -234,13 +234,15 @@ class Configurator {
     for (final String file in files) {
       final File source = docsRoot.childFile(file);
       final File destination = packageRoot.childFile(file);
-      if (source.absolute.path != destination.absolute.path) {
-        filesystem.file(docsRoot.childFile(file)).copySync(packageRoot.childFile(file).path);
+      // Have to canonicalize because otherwise things like /foo/bar/baz and
+      // /foo/../foo/bar/baz won't compare as identical.
+      if (path.canonicalize(source.absolute.path) != path.canonicalize(destination.absolute.path)) {
+        source.copySync(destination.path);
       }
     }
     final Directory assetsDir = filesystem.directory(publishRoot.childDirectory('assets'));
     final Directory assetSource = docsRoot.childDirectory('assets');
-    if (assetSource.absolute.path == assetsDir.absolute.path) {
+    if (path.canonicalize(assetSource.absolute.path) == path.canonicalize(assetsDir.absolute.path)) {
       // Don't try and copy the directory over itself.
       return;
     }
