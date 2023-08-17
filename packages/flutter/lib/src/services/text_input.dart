@@ -1038,16 +1038,16 @@ mixin TextSelectionDelegate {
   /// input.
   void bringIntoView(TextPosition position);
 
-  /// Whether cut is enabled, must not be null.
+  /// Whether cut is enabled.
   bool get cutEnabled => true;
 
-  /// Whether copy is enabled, must not be null.
+  /// Whether copy is enabled.
   bool get copyEnabled => true;
 
-  /// Whether paste is enabled, must not be null.
+  /// Whether paste is enabled.
   bool get pasteEnabled => true;
 
-  /// Whether select all is enabled, must not be null.
+  /// Whether select all is enabled.
   bool get selectAllEnabled => true;
 
   /// Whether look up is enabled.

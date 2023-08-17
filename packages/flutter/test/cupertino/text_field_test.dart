@@ -250,7 +250,7 @@ void main() {
     },
   );
 
-  testWidgets('Look Up shows up on iOS only (CupertinoTextField)', (WidgetTester tester) async {
+  testWidgets('Look Up shows up on iOS only', (WidgetTester tester) async {
     String? lastLookUp;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
@@ -299,56 +299,7 @@ void main() {
       skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
     );
 
-  testWidgets('Look Up shows up on iOS only (TextField)', (WidgetTester tester) async {
-    String? lastLookUp;
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-      if (methodCall.method == 'LookUp.invoke') {
-        expect(methodCall.arguments, isA<String>());
-        lastLookUp = methodCall.arguments as String;
-      }
-      return null;
-    });
-
-    final TextEditingController controller = TextEditingController(
-      text: 'Test ',
-    );
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: TextField(
-            controller: controller,
-          ),
-        ),
-      ),
-    );
-
-    final bool isTargetPlatformiOS = defaultTargetPlatform == TargetPlatform.iOS;
-
-    // Long press to put the cursor after the "s".
-    const int index = 3;
-    await tester.longPressAt(textOffsetToPosition(tester, index));
-    await tester.pump();
-
-    // Double tap on the same location to select the word around the cursor.
-    await tester.tapAt(textOffsetToPosition(tester, index));
-    await tester.pump(const Duration(milliseconds: 50));
-    await tester.tapAt(textOffsetToPosition(tester, index));
-    await tester.pumpAndSettle();
-
-    expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 4));
-    expect(find.text('Look Up'), isTargetPlatformiOS? findsOneWidget : findsNothing);
-
-    if (isTargetPlatformiOS) {
-      await tester.tap(find.text('Look Up'));
-      expect(lastLookUp, 'Test');
-    }
-  },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
-    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
-  );
-
-  testWidgets('Search Web shows up on iOS only (CupertinoTextField)', (WidgetTester tester) async {
+  testWidgets('Search Web shows up on iOS only', (WidgetTester tester) async {
     String? lastSearch;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
@@ -397,56 +348,7 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
   );
 
-  testWidgets('Search Web shows up on iOS only (TextField)', (WidgetTester tester) async {
-    String? lastSearch;
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-      if (methodCall.method == 'SearchWeb.invoke') {
-        expect(methodCall.arguments, isA<String>());
-        lastSearch = methodCall.arguments as String;
-      }
-      return null;
-    });
-
-    final TextEditingController controller = TextEditingController(
-      text: 'Test ',
-    );
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: TextField(
-            controller: controller,
-          ),
-        ),
-      ),
-    );
-
-    final bool isTargetPlatformiOS = defaultTargetPlatform == TargetPlatform.iOS;
-
-    // Long press to put the cursor after the "s".
-    const int index = 3;
-    await tester.longPressAt(textOffsetToPosition(tester, index));
-    await tester.pump();
-
-    // Double tap on the same location to select the word around the cursor.
-    await tester.tapAt(textOffsetToPosition(tester, index));
-    await tester.pump(const Duration(milliseconds: 50));
-    await tester.tapAt(textOffsetToPosition(tester, index));
-    await tester.pumpAndSettle();
-
-    expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 4));
-    expect(find.text('Search Web'), isTargetPlatformiOS? findsOneWidget : findsNothing);
-
-    if (isTargetPlatformiOS) {
-      await tester.tap(find.text('Search Web'));
-      expect(lastSearch, 'Test');
-    }
-  },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
-    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
-  );
-
-  testWidgets('Share shows up on iOS only (CupertinoTextField)', (WidgetTester tester) async {
+  testWidgets('Share shows up on iOS only', (WidgetTester tester) async {
     String? lastShare;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
@@ -464,55 +366,6 @@ void main() {
       CupertinoApp(
         home: Center(
           child: CupertinoTextField(
-            controller: controller,
-          ),
-        ),
-      ),
-    );
-
-    final bool isTargetPlatformiOS = defaultTargetPlatform == TargetPlatform.iOS;
-
-    // Long press to put the cursor after the "s".
-    const int index = 3;
-    await tester.longPressAt(textOffsetToPosition(tester, index));
-    await tester.pump();
-
-    // Double tap on the same location to select the word around the cursor.
-    await tester.tapAt(textOffsetToPosition(tester, index));
-    await tester.pump(const Duration(milliseconds: 50));
-    await tester.tapAt(textOffsetToPosition(tester, index));
-    await tester.pumpAndSettle();
-
-    expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 4));
-    expect(find.text('Share...'), isTargetPlatformiOS? findsOneWidget : findsNothing);
-
-    if (isTargetPlatformiOS) {
-      await tester.tap(find.text('Share...'));
-      expect(lastShare, 'Test');
-    }
-  },
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
-    skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
-  );
-
-  testWidgets('Share shows up on iOS only (TextField)', (WidgetTester tester) async {
-    String? lastShare;
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
-      if (methodCall.method == 'Share.invoke') {
-        expect(methodCall.arguments, isA<String>());
-        lastShare = methodCall.arguments as String;
-      }
-      return null;
-    });
-
-    final TextEditingController controller = TextEditingController(
-      text: 'Test ',
-    );
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: TextField(
             controller: controller,
           ),
         ),

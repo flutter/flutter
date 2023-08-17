@@ -2473,8 +2473,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  /// Look up the current selection, as in the "Look Up" edit menu button on iOS.
+  /// Look up the current selection,
+  /// as in the "Look Up" edit menu button on iOS.
+  /// 
   /// Currently this is only implemented for iOS.
+  ///
   /// Throws an error if the selection is empty or collapsed.
   Future<void> lookUpSelection(SelectionChangedCause cause) async {
     assert(!widget.obscureText);
@@ -2490,9 +2493,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   /// Launch a web search on the current selection,
-  ///   as in the "Search Web" edit menu button on iOS.
+  /// as in the "Search Web" edit menu button on iOS.
   ///
   /// Currently this is only implemented for iOS.
+  ///
   /// When 'obscureText' is true or the selection is empty,
   /// this function will not do anything
   Future<void> searchWebForSelection(SelectionChangedCause cause) async {
@@ -2511,9 +2515,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   /// Launch the share interface for the current selection,
-  ///   as in the "Share" edit menu button on iOS.
+  /// as in the "Share" edit menu button on iOS.
   ///
   /// Currently this is only implemented for iOS.
+  ///
   /// When 'obscureText' is true or the selection is empty,
   /// this function will not do anything
   Future<void> shareSelection(SelectionChangedCause cause) async {
