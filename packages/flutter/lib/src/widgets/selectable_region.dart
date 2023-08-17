@@ -352,6 +352,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
               _showToolbar(location: details.globalPosition);
             }
           } else {
+            hideToolbar();
             _selectPositionAt(offset: details.globalPosition);
           }
         };
