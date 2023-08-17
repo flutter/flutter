@@ -24,21 +24,17 @@ class PlatformConfigurationTest : public ShellTest {};
 TEST_F(PlatformConfigurationTest, Initialization) {
   auto message_latch = std::make_shared<fml::AutoResetWaitableEvent>();
 
-  auto nativeValidateConfiguration = [message_latch](
-                                         Dart_NativeArguments args) {
-    PlatformConfiguration* configuration =
-        UIDartState::Current()->platform_configuration();
-    ASSERT_NE(configuration->get_window(0), nullptr);
-    ASSERT_EQ(
-        configuration->get_window(0)->viewport_metrics().device_pixel_ratio,
-        1.0);
-    ASSERT_EQ(configuration->get_window(0)->viewport_metrics().physical_width,
-              0.0);
-    ASSERT_EQ(configuration->get_window(0)->viewport_metrics().physical_height,
-              0.0);
+  auto nativeValidateConfiguration =
+      [message_latch](Dart_NativeArguments args) {
+        PlatformConfiguration* configuration =
+            UIDartState::Current()->platform_configuration();
+        ASSERT_NE(configuration->GetMetrics(0), nullptr);
+        ASSERT_EQ(configuration->GetMetrics(0)->device_pixel_ratio, 1.0);
+        ASSERT_EQ(configuration->GetMetrics(0)->physical_width, 0.0);
+        ASSERT_EQ(configuration->GetMetrics(0)->physical_height, 0.0);
 
-    message_latch->Signal();
-  };
+        message_latch->Signal();
+      };
 
   Settings settings = CreateSettingsForFixture();
   TaskRunners task_runners("test",                  // label
@@ -68,27 +64,22 @@ TEST_F(PlatformConfigurationTest, Initialization) {
 TEST_F(PlatformConfigurationTest, WindowMetricsUpdate) {
   auto message_latch = std::make_shared<fml::AutoResetWaitableEvent>();
 
-  auto nativeValidateConfiguration = [message_latch](
-                                         Dart_NativeArguments args) {
-    PlatformConfiguration* configuration =
-        UIDartState::Current()->platform_configuration();
+  auto nativeValidateConfiguration =
+      [message_latch](Dart_NativeArguments args) {
+        PlatformConfiguration* configuration =
+            UIDartState::Current()->platform_configuration();
 
-    ASSERT_NE(configuration->get_window(0), nullptr);
-    configuration->get_window(0)->UpdateWindowMetrics(
-        ViewportMetrics{2.0, 10.0, 20.0, 22, 0});
-    ASSERT_EQ(
-        configuration->get_window(0)->viewport_metrics().device_pixel_ratio,
-        2.0);
-    ASSERT_EQ(configuration->get_window(0)->viewport_metrics().physical_width,
-              10.0);
-    ASSERT_EQ(configuration->get_window(0)->viewport_metrics().physical_height,
-              20.0);
-    ASSERT_EQ(
-        configuration->get_window(0)->viewport_metrics().physical_touch_slop,
-        22);
+        ASSERT_NE(configuration->GetMetrics(0), nullptr);
+        bool has_view = configuration->UpdateViewMetrics(
+            0, ViewportMetrics{2.0, 10.0, 20.0, 22, 0});
+        ASSERT_TRUE(has_view);
+        ASSERT_EQ(configuration->GetMetrics(0)->device_pixel_ratio, 2.0);
+        ASSERT_EQ(configuration->GetMetrics(0)->physical_width, 10.0);
+        ASSERT_EQ(configuration->GetMetrics(0)->physical_height, 20.0);
+        ASSERT_EQ(configuration->GetMetrics(0)->physical_touch_slop, 22);
 
-    message_latch->Signal();
-  };
+        message_latch->Signal();
+      };
 
   Settings settings = CreateSettingsForFixture();
   TaskRunners task_runners("test",                  // label
@@ -123,8 +114,8 @@ TEST_F(PlatformConfigurationTest, GetWindowReturnsNullForNonexistentId) {
         PlatformConfiguration* configuration =
             UIDartState::Current()->platform_configuration();
 
-        ASSERT_EQ(configuration->get_window(1), nullptr);
-        ASSERT_EQ(configuration->get_window(2), nullptr);
+        ASSERT_EQ(configuration->GetMetrics(1), nullptr);
+        ASSERT_EQ(configuration->GetMetrics(2), nullptr);
 
         message_latch->Signal();
       };

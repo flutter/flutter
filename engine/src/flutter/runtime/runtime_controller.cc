@@ -6,21 +6,20 @@
 
 #include <utility>
 
+#include "flutter/common/constants.h"
+#include "flutter/common/settings.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/lib/ui/compositing/scene.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/lib/ui/window/platform_configuration.h"
 #include "flutter/lib/ui/window/viewport_metrics.h"
-#include "flutter/lib/ui/window/window.h"
 #include "flutter/runtime/dart_isolate_group_data.h"
 #include "flutter/runtime/isolate_configuration.h"
 #include "flutter/runtime/runtime_delegate.h"
 #include "third_party/tonic/dart_message_handler.h"
 
 namespace flutter {
-
-constexpr uint64_t kFlutterImplicitViewId = 0ll;
 
 RuntimeController::RuntimeController(RuntimeDelegate& p_client,
                                      const TaskRunners& task_runners)
@@ -76,7 +75,6 @@ std::unique_ptr<RuntimeController> RuntimeController::Spawn(
                                           p_persistent_isolate_data,     //
                                           spawned_context);              //
   result->spawning_isolate_ = root_isolate_;
-  result->platform_data_.viewport_metrics = ViewportMetrics();
   return result;
 }
 
@@ -115,11 +113,16 @@ std::unique_ptr<RuntimeController> RuntimeController::Clone() const {
 }
 
 bool RuntimeController::FlushRuntimeStateToIsolate() {
-  // TODO(dkwingsmt): Needs a view ID here (or platform_data should probably
-  // have multiple view metrics).
-  return SetViewportMetrics(kFlutterImplicitViewId,
-                            platform_data_.viewport_metrics) &&
-         SetLocales(platform_data_.locale_data) &&
+  FML_DCHECK(!has_flushed_runtime_state_)
+      << "FlushRuntimeStateToIsolate is called more than once somehow.";
+  has_flushed_runtime_state_ = true;
+  for (auto const& [view_id, viewport_metrics] :
+       platform_data_.viewport_metrics_for_views) {
+    if (!AddView(view_id, viewport_metrics)) {
+      return false;
+    }
+  }
+  return SetLocales(platform_data_.locale_data) &&
          SetSemanticsEnabled(platform_data_.semantics_enabled) &&
          SetAccessibilityFeatures(
              platform_data_.accessibility_feature_flags_) &&
@@ -128,19 +131,35 @@ bool RuntimeController::FlushRuntimeStateToIsolate() {
          SetDisplays(platform_data_.displays);
 }
 
+bool RuntimeController::AddView(int64_t view_id,
+                                const ViewportMetrics& view_metrics) {
+  platform_data_.viewport_metrics_for_views[view_id] = view_metrics;
+  if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
+    platform_configuration->AddView(view_id, view_metrics);
+
+    return true;
+  }
+
+  return false;
+}
+
+bool RuntimeController::RemoveView(int64_t view_id) {
+  platform_data_.viewport_metrics_for_views.erase(view_id);
+  if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
+    platform_configuration->RemoveView(view_id);
+    return true;
+  }
+
+  return false;
+}
+
 bool RuntimeController::SetViewportMetrics(int64_t view_id,
                                            const ViewportMetrics& metrics) {
   TRACE_EVENT0("flutter", "SetViewportMetrics");
-  platform_data_.viewport_metrics = metrics;
 
+  platform_data_.viewport_metrics_for_views[view_id] = metrics;
   if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
-    Window* window = platform_configuration->get_window(view_id);
-    if (window) {
-      window->UpdateWindowMetrics(metrics);
-      return true;
-    } else {
-      FML_LOG(WARNING) << "View ID " << view_id << " does not exist.";
-    }
+    return platform_configuration->UpdateViewMetrics(view_id, metrics);
   }
 
   return false;
@@ -312,11 +331,6 @@ RuntimeController::GetPlatformConfigurationIfAvailable() {
 }
 
 // |PlatformConfigurationClient|
-bool RuntimeController::ImplicitViewEnabled() {
-  return client_.ImplicitViewEnabled();
-}
-
-// |PlatformConfigurationClient|
 std::string RuntimeController::DefaultRouteName() {
   return client_.DefaultRouteName();
 }
@@ -330,15 +344,14 @@ void RuntimeController::ScheduleFrame() {
 void RuntimeController::Render(Scene* scene) {
   // TODO(dkwingsmt): Currently only supports a single window.
   int64_t view_id = kFlutterImplicitViewId;
-  auto window =
-      UIDartState::Current()->platform_configuration()->get_window(view_id);
-  if (window == nullptr) {
+  const ViewportMetrics* view_metrics =
+      UIDartState::Current()->platform_configuration()->GetMetrics(view_id);
+  if (view_metrics == nullptr) {
     return;
   }
-  const auto& viewport_metrics = window->viewport_metrics();
-  client_.Render(scene->takeLayerTree(viewport_metrics.physical_width,
-                                      viewport_metrics.physical_height),
-                 viewport_metrics.device_pixel_ratio);
+  client_.Render(scene->takeLayerTree(view_metrics->physical_width,
+                                      view_metrics->physical_height),
+                 view_metrics->device_pixel_ratio);
 }
 
 // |PlatformConfigurationClient|

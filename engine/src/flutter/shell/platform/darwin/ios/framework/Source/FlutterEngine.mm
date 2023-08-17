@@ -8,6 +8,7 @@
 
 #include <memory>
 
+#include "flutter/common/constants.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/platform/darwin/platform_version.h"
 #include "flutter/fml/trace_event.h"
@@ -38,8 +39,6 @@
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 #import "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 #include "flutter/shell/profiling/sampling_profiler.h"
-
-static constexpr int64_t kFlutterImplicitViewId = 0ll;
 
 /// Inheriting ThreadConfigurer and use iOS platform thread API to configure the thread priorities
 /// Using iOS platform thread API to configure thread priority
@@ -333,7 +332,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   if (!self.platformView) {
     return;
   }
-  self.platformView->SetViewportMetrics(kFlutterImplicitViewId, viewportMetrics);
+  self.platformView->SetViewportMetrics(flutter::kFlutterImplicitViewId, viewportMetrics);
 }
 
 - (void)dispatchPointerDataPacket:(std::unique_ptr<flutter::PointerDataPacket>)packet {

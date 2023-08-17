@@ -482,3 +482,68 @@ Future<void> testThatAssetLoadingHappensOnWorkerThread() async {
   } catch (err) { /* Do nothing */ }
   notifyNative();
 }
+
+@pragma('vm:external-name', 'NativeReportViewIdsCallback')
+external void nativeReportViewIdsCallback(bool hasImplicitView, List<int> viewIds);
+
+List<int> getCurrentViewIds() {
+  final List<int> result = PlatformDispatcher.instance.views
+      .map((FlutterView view) => view.viewId)
+      .toList()
+      ..sort();
+  assert(result.toSet().length == result.length,
+      'Unexpected duplicate view ID found: $result');
+  return result;
+}
+
+bool listEquals<T>(List<T> a, List<T> b) {
+  if (a.length != b.length) {
+    return false;
+  }
+  for (int i = 0; i < a.length; i += 1) {
+    if (a[i] != b[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// This entrypoint reports whether there's an implicit view and the list of view
+// IDs using nativeReportViewIdsCallback on initialization and every time the
+// list of view IDs changes.
+@pragma('vm:entry-point')
+void testReportViewIds() {
+  List<int> viewIds = getCurrentViewIds();
+  nativeReportViewIdsCallback(PlatformDispatcher.instance.implicitView != null, viewIds);
+  PlatformDispatcher.instance.onMetricsChanged = () {
+    final List<int> newViewIds = getCurrentViewIds();
+    if (!listEquals(viewIds, newViewIds)) {
+      viewIds = newViewIds;
+      nativeReportViewIdsCallback(PlatformDispatcher.instance.implicitView != null, viewIds);
+    }
+  };
+}
+
+// Returns a list of [view_id 1, view_width 1, view_id 2, view_width 2, ...]
+// for all views.
+List<int> getCurrentViewWidths() {
+  final List<int> result = <int>[];
+  for (final FlutterView view in PlatformDispatcher.instance.views) {
+    result.add(view.viewId);
+    result.add(view.physicalGeometry.width.round());
+  }
+  return result;
+}
+
+@pragma('vm:external-name', 'NativeReportViewWidthsCallback')
+external void nativeReportViewWidthsCallback(List<int> viewWidthPacket);
+
+// This entrypoint reports the list of views and their widths using
+// nativeReportViewWidthsCallback on initialization and every onMetricsChanged.
+@pragma('vm:entry-point')
+void testReportViewWidths() {
+  nativeReportViewWidthsCallback(getCurrentViewWidths());
+  PlatformDispatcher.instance.onMetricsChanged = () {
+    nativeReportViewWidthsCallback(getCurrentViewWidths());
+  };
+}

@@ -42,6 +42,11 @@ class Window;
 /// used by the engine to copy the currently accumulated window state so it can
 /// be referenced by the new runtime controller.
 ///
+/// When `RuntimeController` is created, it takes some time before the root
+/// isolate becomes ready. Operation during this gap is stored by
+/// `RuntimeController` and flushed to the Dart VM when the isolate becomes
+/// ready before the entrypoint function. See `PlatformData`.
+///
 class RuntimeController : public PlatformConfigurationClient {
  public:
   //----------------------------------------------------------------------------
@@ -162,6 +167,30 @@ class RuntimeController : public PlatformConfigurationClient {
   /// @return     A clone of the existing runtime controller.
   ///
   std::unique_ptr<RuntimeController> Clone() const;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Notify the isolate that a new view is available.
+  ///
+  ///             A view must be added before other methods can refer to it,
+  ///             including the implicit view. Adding a view that already exists
+  ///             triggers an assertion.
+  ///
+  /// @param[in]  view_id           The ID of the new view.
+  /// @param[in]  viewport_metrics  The initial viewport metrics for the view.
+  ///
+  bool AddView(int64_t view_id, const ViewportMetrics& view_metrics);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Notify the isolate that a view is no longer available.
+  ///
+  ///             Removing a view that does not exist triggers an assertion.
+  ///
+  ///             The implicit view (kFlutterImplicitViewId) should never be
+  ///             removed. Doing so triggers an assertion.
+  ///
+  /// @param[in]  view_id  The ID of the view.
+  ///
+  bool RemoveView(int64_t view_id);
 
   //----------------------------------------------------------------------------
   /// @brief      Forward the specified viewport metrics to the running isolate.
@@ -616,13 +645,11 @@ class RuntimeController : public PlatformConfigurationClient {
   const fml::closure isolate_shutdown_callback_;
   std::shared_ptr<const fml::Mapping> persistent_isolate_data_;
   UIDartState::Context context_;
+  bool has_flushed_runtime_state_ = false;
 
   PlatformConfiguration* GetPlatformConfigurationIfAvailable();
 
   bool FlushRuntimeStateToIsolate();
-
-  // |PlatformConfigurationClient|
-  bool ImplicitViewEnabled() override;
 
   // |PlatformConfigurationClient|
   std::string DefaultRouteName() override;
