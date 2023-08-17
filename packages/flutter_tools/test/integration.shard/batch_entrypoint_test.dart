@@ -73,7 +73,7 @@ Future<String> runDartBatch() async {
         output += str;
       });
 
-  // Wait for stdout to complete
+  // Wait for the output to complete
   await Future.wait(<Future<Object?>>[stdoutFuture, stderrFuture]);
   // Ensure child exited successfully
   expect(
