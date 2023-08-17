@@ -1514,7 +1514,7 @@ void main() {
         maxXIndex: 5,
         maxYIndex: 5,
         builder: (BuildContext context, ChildVicinity vicinity) {
-          childKeys[vicinity] = UniqueKey();
+          childKeys[vicinity] = childKeys[vicinity] ?? UniqueKey();
           return SizedBox.square(key: childKeys[vicinity], dimension: 200);
         }
       );
@@ -1602,7 +1602,7 @@ void main() {
         maxXIndex: 5,
         maxYIndex: 5,
         builder: (BuildContext context, ChildVicinity vicinity) {
-          childKeys[vicinity] = UniqueKey();
+          childKeys[vicinity] = childKeys[vicinity] ?? UniqueKey();
           return SizedBox.square(key: childKeys[vicinity], dimension: 200);
         }
       );
@@ -1731,7 +1731,7 @@ void main() {
         maxXIndex: 5,
         maxYIndex: 5,
         builder: (BuildContext context, ChildVicinity vicinity) {
-          childKeys[vicinity] = UniqueKey();
+          childKeys[vicinity] = childKeys[vicinity] ?? UniqueKey();
           return SizedBox.square(key: childKeys[vicinity], dimension: 200);
         }
       );
@@ -1897,7 +1897,7 @@ void main() {
         maxXIndex: 19,
         maxYIndex: 19,
         builder: (BuildContext context, ChildVicinity vicinity) {
-          childKeys[vicinity] = UniqueKey();
+          childKeys[vicinity] = childKeys[vicinity] ?? UniqueKey();
           return SizedBox.square(
             dimension: 200,
             child: Center(
@@ -1965,7 +1965,7 @@ void main() {
         maxXIndex: 5,
         maxYIndex: 5,
         builder: (BuildContext context, ChildVicinity vicinity) {
-          childKeys[vicinity] = UniqueKey();
+          childKeys[vicinity] = childKeys[vicinity] ?? UniqueKey();
           return SizedBox.square(key: childKeys[vicinity], dimension: 200);
         }
       );
@@ -2001,7 +2001,7 @@ void main() {
         maxXIndex: 5,
         maxYIndex: 5,
         builder: (BuildContext context, ChildVicinity vicinity) {
-          childKeys[vicinity] = UniqueKey();
+          childKeys[vicinity] = childKeys[vicinity] ?? UniqueKey();
           return SizedBox.square(key: childKeys[vicinity], dimension: 200);
         }
       );
@@ -2119,7 +2119,7 @@ void main() {
         maxXIndex: 5,
         maxYIndex: 5,
         builder: (BuildContext context, ChildVicinity vicinity) {
-          childKeys[vicinity] = UniqueKey();
+          childKeys[vicinity] = childKeys[vicinity] ?? UniqueKey();
           return SizedBox.square(key: childKeys[vicinity], dimension: 200);
         }
       );
