@@ -250,7 +250,41 @@
                 ],
                 "script": "flutter/testing/symbols/verify_exported.dart",
                 "language": "dart"
+            },
+            {
+                "name": "api-documentation",
+                "parameters": [
+                    "out/docs"
+                ],
+                "script": "flutter/tools/gen_docs.py"
             }
         ]
-    }
+    },
+    "archives": [
+        {
+            "source": "out/docs/ios-docs.zip",
+            "destination": "ios-docs.zip",
+            "realm": "production"
+        },
+        {
+            "source": "out/docs/macos-docs.zip",
+            "destination": "macos-docs.zip",
+            "realm": "production"
+        },
+        {
+            "source": "out/docs/linux-docs.zip",
+            "destination": "linux-docs.zip",
+            "realm": "production"
+        },
+        {
+            "source": "out/docs/windows-docs.zip",
+            "destination": "windows-docs.zip",
+            "realm": "production"
+        },
+        {
+            "source": "out/docs/impeller-docs.zip",
+            "destination": "impeller-docs.zip",
+            "realm": "production"
+        }
+    ]
 }
