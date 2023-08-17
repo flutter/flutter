@@ -4376,6 +4376,197 @@ TEST_F(ShellTest, DiesIfSoftwareRenderingAndImpellerAreEnabledDeathTest) {
 #endif  // OS_FUCHSIA
 }
 
+// Parse the arguments of NativeReportViewIdsCallback and
+// store them in hasImplicitView and viewIds.
+static void ParseViewIdsCallback(const Dart_NativeArguments& args,
+                                 bool* hasImplicitView,
+                                 std::vector<int64_t>* viewIds) {
+  Dart_Handle exception = nullptr;
+  viewIds->clear();
+  *hasImplicitView =
+      tonic::DartConverter<bool>::FromArguments(args, 0, exception);
+  ASSERT_EQ(exception, nullptr);
+  *viewIds = tonic::DartConverter<std::vector<int64_t>>::FromArguments(
+      args, 1, exception);
+  ASSERT_EQ(exception, nullptr);
+}
+
+// Run the given task in the platform runner, and blocks until its finished.
+static void RunOnPlatformTaskRunner(Shell& shell, const fml::closure& task) {
+  fml::AutoResetWaitableEvent latch;
+  fml::TaskRunner::RunNowOrPostTask(
+      shell.GetTaskRunners().GetPlatformTaskRunner(), [&task, &latch]() {
+        task();
+        latch.Signal();
+      });
+  latch.Wait();
+}
+
+TEST_F(ShellTest, ShellStartsWithImplicitView) {
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+  Settings settings = CreateSettingsForFixture();
+  auto task_runner = CreateNewThread();
+  TaskRunners task_runners("test", task_runner, task_runner, task_runner,
+                           task_runner);
+  std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
+  ASSERT_TRUE(shell);
+
+  bool hasImplicitView;
+  std::vector<int64_t> viewIds;
+  fml::AutoResetWaitableEvent reportLatch;
+  auto nativeViewIdsCallback = [&reportLatch, &hasImplicitView,
+                                &viewIds](Dart_NativeArguments args) {
+    ParseViewIdsCallback(args, &hasImplicitView, &viewIds);
+    reportLatch.Signal();
+  };
+  AddNativeCallback("NativeReportViewIdsCallback",
+                    CREATE_NATIVE_ENTRY(nativeViewIdsCallback));
+
+  PlatformViewNotifyCreated(shell.get());
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("testReportViewIds");
+  RunEngine(shell.get(), std::move(configuration));
+  reportLatch.Wait();
+
+  ASSERT_TRUE(hasImplicitView);
+  ASSERT_EQ(viewIds.size(), 1u);
+  ASSERT_EQ(viewIds[0], 0ll);
+
+  PlatformViewNotifyDestroyed(shell.get());
+  DestroyShell(std::move(shell), task_runners);
+}
+
+// Tests that Shell::AddView and Shell::RemoveView works.
+TEST_F(ShellTest, ShellCanAddViewOrRemoveView) {
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+  Settings settings = CreateSettingsForFixture();
+  ThreadHost thread_host(ThreadHost::ThreadHostConfig(
+      "io.flutter.test." + GetCurrentTestName() + ".",
+      ThreadHost::Type::Platform | ThreadHost::Type::RASTER |
+          ThreadHost::Type::IO | ThreadHost::Type::UI));
+  TaskRunners task_runners("test", thread_host.platform_thread->GetTaskRunner(),
+                           thread_host.raster_thread->GetTaskRunner(),
+                           thread_host.ui_thread->GetTaskRunner(),
+                           thread_host.io_thread->GetTaskRunner());
+  std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
+  ASSERT_TRUE(shell);
+
+  bool hasImplicitView;
+  std::vector<int64_t> viewIds;
+  fml::AutoResetWaitableEvent reportLatch;
+  auto nativeViewIdsCallback = [&reportLatch, &hasImplicitView,
+                                &viewIds](Dart_NativeArguments args) {
+    ParseViewIdsCallback(args, &hasImplicitView, &viewIds);
+    reportLatch.Signal();
+  };
+  AddNativeCallback("NativeReportViewIdsCallback",
+                    CREATE_NATIVE_ENTRY(nativeViewIdsCallback));
+
+  PlatformViewNotifyCreated(shell.get());
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("testReportViewIds");
+  RunEngine(shell.get(), std::move(configuration));
+
+  reportLatch.Wait();
+  ASSERT_TRUE(hasImplicitView);
+  ASSERT_EQ(viewIds.size(), 1u);
+  ASSERT_EQ(viewIds[0], 0ll);
+
+  RunOnPlatformTaskRunner(*shell,
+                          [&shell] { shell->AddView(2, ViewportMetrics{}); });
+  reportLatch.Wait();
+  ASSERT_TRUE(hasImplicitView);
+  ASSERT_EQ(viewIds.size(), 2u);
+  ASSERT_EQ(viewIds[1], 2ll);
+
+  RunOnPlatformTaskRunner(*shell, [&shell] { shell->RemoveView(2); });
+  reportLatch.Wait();
+  ASSERT_TRUE(hasImplicitView);
+  ASSERT_EQ(viewIds.size(), 1u);
+  ASSERT_EQ(viewIds[0], 0ll);
+
+  RunOnPlatformTaskRunner(*shell,
+                          [&shell] { shell->AddView(4, ViewportMetrics{}); });
+  reportLatch.Wait();
+  ASSERT_TRUE(hasImplicitView);
+  ASSERT_EQ(viewIds.size(), 2u);
+  ASSERT_EQ(viewIds[1], 4ll);
+
+  PlatformViewNotifyDestroyed(shell.get());
+  DestroyShell(std::move(shell), task_runners);
+}
+
+// Parse the arguments of NativeReportViewWidthsCallback and
+// store them in viewWidths.
+static void ParseViewWidthsCallback(const Dart_NativeArguments& args,
+                                    std::map<int64_t, int64_t>* viewWidths) {
+  Dart_Handle exception = nullptr;
+  viewWidths->clear();
+  std::vector<int64_t> viewWidthPacket =
+      tonic::DartConverter<std::vector<int64_t>>::FromArguments(args, 0,
+                                                                exception);
+  ASSERT_EQ(exception, nullptr);
+  ASSERT_EQ(viewWidthPacket.size() % 2, 0ul);
+  for (size_t packetIndex = 0; packetIndex < viewWidthPacket.size();
+       packetIndex += 2) {
+    (*viewWidths)[viewWidthPacket[packetIndex]] =
+        viewWidthPacket[packetIndex + 1];
+  }
+}
+
+// Ensure that PlatformView::SetViewportMetrics and Shell::AddView that were
+// dispatched before the isolate is run have been flushed to the Dart VM when
+// the main function starts.
+TEST_F(ShellTest, ShellFlushesPlatformStatesByMain) {
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+  Settings settings = CreateSettingsForFixture();
+  ThreadHost thread_host(ThreadHost::ThreadHostConfig(
+      "io.flutter.test." + GetCurrentTestName() + ".",
+      ThreadHost::Type::Platform | ThreadHost::Type::RASTER |
+          ThreadHost::Type::IO | ThreadHost::Type::UI));
+  TaskRunners task_runners("test", thread_host.platform_thread->GetTaskRunner(),
+                           thread_host.raster_thread->GetTaskRunner(),
+                           thread_host.ui_thread->GetTaskRunner(),
+                           thread_host.io_thread->GetTaskRunner());
+  std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
+  ASSERT_TRUE(shell);
+
+  RunOnPlatformTaskRunner(*shell, [&shell] {
+    auto platform_view = shell->GetPlatformView();
+    // The construtor for ViewportMetrics{_, width, _, _, _} (only the 2nd
+    // argument matters in this test).
+    platform_view->SetViewportMetrics(0, ViewportMetrics{1, 10, 1, 0, 0});
+    shell->AddView(1, ViewportMetrics{1, 30, 1, 0, 0});
+    platform_view->SetViewportMetrics(0, ViewportMetrics{1, 20, 1, 0, 0});
+  });
+
+  bool first_report = true;
+  std::map<int64_t, int64_t> viewWidths;
+  fml::AutoResetWaitableEvent reportLatch;
+  auto nativeViewWidthsCallback = [&reportLatch, &viewWidths,
+                                   &first_report](Dart_NativeArguments args) {
+    EXPECT_TRUE(first_report);
+    first_report = false;
+    ParseViewWidthsCallback(args, &viewWidths);
+    reportLatch.Signal();
+  };
+  AddNativeCallback("NativeReportViewWidthsCallback",
+                    CREATE_NATIVE_ENTRY(nativeViewWidthsCallback));
+
+  PlatformViewNotifyCreated(shell.get());
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("testReportViewWidths");
+  RunEngine(shell.get(), std::move(configuration));
+
+  reportLatch.Wait();
+  EXPECT_EQ(viewWidths.size(), 2u);
+  EXPECT_EQ(viewWidths[0], 20ll);
+  EXPECT_EQ(viewWidths[1], 30ll);
+
+  PlatformViewNotifyDestroyed(shell.get());
+  DestroyShell(std::move(shell), task_runners);
+}
+
 }  // namespace testing
 }  // namespace flutter
 

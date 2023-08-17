@@ -13,7 +13,6 @@
 #include "flutter/lib/ui/painting/paint.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/lib/ui/window/platform_configuration.h"
-#include "flutter/lib/ui/window/window.h"
 
 using tonic::ToDart;
 
@@ -621,11 +620,16 @@ void Canvas::drawShadow(const CanvasPath* path,
   }
 
   // Not using SafeNarrow because DPR will always be a relatively small number.
-  SkScalar dpr = static_cast<float>(UIDartState::Current()
-                                        ->platform_configuration()
-                                        ->get_window(0)
-                                        ->viewport_metrics()
-                                        .device_pixel_ratio);
+  const ViewportMetrics* metrics =
+      UIDartState::Current()->platform_configuration()->GetMetrics(0);
+  SkScalar dpr;
+  // TODO(dkwingsmt): We should support rendering shadows on non-implicit views.
+  // However, currently this method has no way to get the target view ID.
+  if (metrics == nullptr) {
+    dpr = 1.0f;
+  } else {
+    dpr = static_cast<float>(metrics->device_pixel_ratio);
+  }
   if (display_list_builder_) {
     // The DrawShadow mechanism results in non-public operations to be
     // performed on the canvas involving an SkDrawShadowRec. Since we

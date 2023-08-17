@@ -155,8 +155,6 @@ source_set("ui") {
     "window/pointer_data_packet_converter.h",
     "window/viewport_metrics.cc",
     "window/viewport_metrics.h",
-    "window/window.cc",
-    "window/window.h",
   ]
 
   public_configs = [ "//flutter:config" ]

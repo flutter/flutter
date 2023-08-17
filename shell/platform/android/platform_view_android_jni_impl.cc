@@ -17,7 +17,7 @@
 #include "unicode/uchar.h"
 
 #include "flutter/assets/directory_asset_bundle.h"
-#include "flutter/common/settings.h"
+#include "flutter/common/constants.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/native_library.h"
@@ -40,8 +40,6 @@
   (reinterpret_cast<AndroidShellHolder*>(shell_holder))
 
 namespace flutter {
-
-static constexpr int64_t kFlutterImplicitViewId = 0ll;
 
 static fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_callback_info_class =
     nullptr;

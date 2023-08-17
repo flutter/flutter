@@ -9,6 +9,7 @@
 
 #include "flutter/fml/message_loop.h"
 #include "flutter/lib/ui/window/platform_configuration.h"
+#include "flutter/lib/ui/window/platform_message.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_message_handler.h"
 

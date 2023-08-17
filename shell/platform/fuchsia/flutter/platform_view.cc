@@ -17,7 +17,6 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/lib/ui/window/pointer_data.h"
-#include "flutter/lib/ui/window/window.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/encodable_value.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/standard_message_codec.h"
 #include "third_party/rapidjson/include/rapidjson/document.h"

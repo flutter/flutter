@@ -14,9 +14,9 @@
 #include "flutter/assets/asset_manager.h"
 #include "flutter/fml/time/time_point.h"
 #include "flutter/lib/ui/semantics/semantics_update.h"
+#include "flutter/lib/ui/window/platform_message_response.h"
 #include "flutter/lib/ui/window/pointer_data_packet.h"
 #include "flutter/lib/ui/window/viewport_metrics.h"
-#include "flutter/lib/ui/window/window.h"
 #include "flutter/shell/common/display.h"
 #include "third_party/tonic/dart_persistent_value.h"
 #include "third_party/tonic/typed_data/dart_byte_data.h"
@@ -50,16 +50,6 @@ enum class AccessibilityFeatureFlag : int32_t {
 ///
 class PlatformConfigurationClient {
  public:
-  //--------------------------------------------------------------------------
-  /// @brief      Whether the platform provides an implicit view. If true,
-  ///             the Framework may assume that it can always render into
-  ///             the view with ID 0.
-  ///
-  ///             This value must not change for the lifetime of the
-  ///             application.
-  ///
-  virtual bool ImplicitViewEnabled() = 0;
-
   //--------------------------------------------------------------------------
   /// @brief      The route or path that the embedder requested when the
   ///             application was launched.
@@ -269,6 +259,42 @@ class PlatformConfiguration final {
   void DidCreateIsolate();
 
   //----------------------------------------------------------------------------
+  /// @brief      Notify the framework that a new view is available.
+  ///
+  ///             A view must be added before other methods can refer to it,
+  ///             including the implicit view. Adding a view that already exists
+  ///             triggers an assertion.
+  ///
+  /// @param[in]  view_id           The ID of the new view.
+  /// @param[in]  viewport_metrics  The initial viewport metrics for the view.
+  ///
+  void AddView(int64_t view_id, const ViewportMetrics& view_metrics);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Notify the framework that a view is no longer available.
+  ///
+  ///             Removing a view that does not exist triggers an assertion.
+  ///
+  ///             The implicit view (kFlutterImplicitViewId) should never be
+  ///             removed. Doing so triggers an assertion.
+  ///
+  /// @param[in]  view_id  The ID of the view.
+  ///
+  void RemoveView(int64_t view_id);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Update the view metrics for the specified view.
+  ///
+  ///             If the view is not found, silently return false.
+  ///
+  /// @param[in]  view_id  The ID of the view.
+  /// @param[in]  metrics  The new metrics of the view.
+  ///
+  /// @return     Whether the view is found.
+  ///
+  bool UpdateViewMetrics(int64_t view_id, const ViewportMetrics& metrics);
+
+  //----------------------------------------------------------------------------
   /// @brief      Update the specified display data in the framework.
   ///
   /// @param[in]  displays  The display data to send to Dart.
@@ -416,7 +442,7 @@ class PlatformConfiguration final {
   /// @return     a pointer to the Window. Returns nullptr if the ID is not
   ///             found.
   ///
-  Window* get_window(int window_id);
+  const ViewportMetrics* GetMetrics(int view_id);
 
   //----------------------------------------------------------------------------
   /// @brief      Responds to a previous platform message to the engine from the
@@ -443,6 +469,9 @@ class PlatformConfiguration final {
  private:
   PlatformConfigurationClient* client_;
   tonic::DartPersistentValue on_error_;
+  tonic::DartPersistentValue add_view_;
+  tonic::DartPersistentValue remove_view_;
+  tonic::DartPersistentValue update_window_metrics_;
   tonic::DartPersistentValue update_displays_;
   tonic::DartPersistentValue update_locales_;
   tonic::DartPersistentValue update_user_settings_data_;
@@ -456,7 +485,8 @@ class PlatformConfiguration final {
   tonic::DartPersistentValue draw_frame_;
   tonic::DartPersistentValue report_timings_;
 
-  std::unordered_map<int64_t, std::unique_ptr<Window>> windows_;
+  // All current views' view metrics mapped from view IDs.
+  std::unordered_map<int64_t, ViewportMetrics> metrics_;
 
   // ID starts at 1 because an ID of 0 indicates that no response is expected.
   int next_response_id_ = 1;
@@ -490,8 +520,6 @@ class PlatformMessageHandlerStorage {
 //----------------------------------------------------------------------------
 class PlatformConfigurationNativeApi {
  public:
-  static Dart_Handle ImplicitViewEnabled();
-
   static std::string DefaultRouteName();
 
   static void ScheduleFrame();
