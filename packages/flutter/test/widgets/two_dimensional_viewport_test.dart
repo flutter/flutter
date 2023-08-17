@@ -1896,3 +1896,28 @@ Future<void> restoreScrollAndVerify(WidgetTester tester) async {
     100.0,
   );
 }
+
+// Validates covariant through analysis.
+mixin _SomeDelegateMixin on TwoDimensionalChildDelegate {}
+
+class _SomeRenderTwoDimensionalViewport extends RenderTwoDimensionalViewport { // ignore: unused_element
+  _SomeRenderTwoDimensionalViewport({
+    required super.horizontalOffset,
+    required super.horizontalAxisDirection,
+    required super.verticalOffset,
+    required super.verticalAxisDirection,
+    required _SomeDelegateMixin super.delegate,
+    required super.mainAxis,
+    required super.childManager,
+  });
+
+  @override
+  _SomeDelegateMixin get delegate => super.delegate as _SomeDelegateMixin;
+  @override
+  set delegate(_SomeDelegateMixin value) { // Analysis would fail without covariant
+    super.delegate = value;
+  }
+
+  @override
+  void layoutChildSequence() {}
+}
