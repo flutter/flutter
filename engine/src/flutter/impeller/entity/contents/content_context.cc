@@ -362,7 +362,7 @@ std::shared_ptr<Texture> ContentContext::MakeSubpass(
   RenderTarget subpass_target;
   if (context->GetCapabilities()->SupportsOffscreenMSAA() && msaa_enabled) {
     subpass_target = RenderTarget::CreateOffscreenMSAA(
-        *context, *GetRenderTargetCache().get(), texture_size,
+        *context, *GetRenderTargetCache(), texture_size,
         SPrintF("%s Offscreen", label.c_str()),
         RenderTarget::kDefaultColorAttachmentConfigMSAA  //
 #ifndef FML_OS_ANDROID  // Reduce PSO variants for Vulkan.
@@ -372,7 +372,7 @@ std::shared_ptr<Texture> ContentContext::MakeSubpass(
     );
   } else {
     subpass_target = RenderTarget::CreateOffscreen(
-        *context, *GetRenderTargetCache().get(), texture_size,
+        *context, *GetRenderTargetCache(), texture_size,
         SPrintF("%s Offscreen", label.c_str()),
         RenderTarget::kDefaultColorAttachmentConfig  //
 #ifndef FML_OS_ANDROID  // Reduce PSO variants for Vulkan.

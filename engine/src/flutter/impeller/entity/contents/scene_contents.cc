@@ -45,10 +45,10 @@ bool SceneContents::Render(const ContentContext& renderer,
   }
 
   RenderTarget subpass_target = RenderTarget::CreateOffscreenMSAA(
-      *renderer.GetContext(),                  // context
-      *renderer.GetRenderTargetCache().get(),  // allocator
-      ISize(coverage.value().size),            // size
-      "SceneContents",                         // label
+      *renderer.GetContext(),            // context
+      *renderer.GetRenderTargetCache(),  // allocator
+      ISize(coverage.value().size),      // size
+      "SceneContents",                   // label
       RenderTarget::AttachmentConfigMSAA{
           .storage_mode = StorageMode::kDeviceTransient,
           .resolve_storage_mode = StorageMode::kDevicePrivate,

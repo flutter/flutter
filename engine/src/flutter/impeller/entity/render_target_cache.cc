@@ -19,7 +19,7 @@ void RenderTargetCache::Start() {
 void RenderTargetCache::End() {
   std::vector<TextureData> retain;
 
-  for (auto td : texture_data_) {
+  for (const auto& td : texture_data_) {
     if (td.used_this_frame) {
       retain.push_back(td);
     }

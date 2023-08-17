@@ -209,10 +209,10 @@ static EntityPassTarget CreateRenderTarget(ContentContext& renderer,
   RenderTarget target;
   if (context->GetCapabilities()->SupportsOffscreenMSAA()) {
     target = RenderTarget::CreateOffscreenMSAA(
-        *context,                                // context
-        *renderer.GetRenderTargetCache().get(),  // allocator
-        size,                                    // size
-        "EntityPass",                            // label
+        *context,                          // context
+        *renderer.GetRenderTargetCache(),  // allocator
+        size,                              // size
+        "EntityPass",                      // label
         RenderTarget::AttachmentConfigMSAA{
             .storage_mode = StorageMode::kDeviceTransient,
             .resolve_storage_mode = StorageMode::kDevicePrivate,
@@ -223,10 +223,10 @@ static EntityPassTarget CreateRenderTarget(ContentContext& renderer,
     );
   } else {
     target = RenderTarget::CreateOffscreen(
-        *context,                                // context
-        *renderer.GetRenderTargetCache().get(),  // allocator
-        size,                                    // size
-        "EntityPass",                            // label
+        *context,                          // context
+        *renderer.GetRenderTargetCache(),  // allocator
+        size,                              // size
+        "EntityPass",                      // label
         RenderTarget::AttachmentConfig{
             .storage_mode = StorageMode::kDevicePrivate,
             .load_action = LoadAction::kDontCare,
@@ -386,7 +386,7 @@ bool EntityPass::Render(ContentContext& renderer,
   // provided by the caller.
   else {
     root_render_target.SetupStencilAttachment(
-        *renderer.GetContext(), *renderer.GetRenderTargetCache().get(),
+        *renderer.GetContext(), *renderer.GetRenderTargetCache(),
         color0.texture->GetSize(),
         renderer.GetContext()->GetCapabilities()->SupportsOffscreenMSAA(),
         "ImpellerOnscreen",
