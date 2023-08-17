@@ -58,29 +58,29 @@ Future<void> main() async {
 Future<String> runDartBatch() async {
   String output = '';
   final Process process = await processManager.start(
-      <String>[
-        dartBatch.path
-      ],
+    <String>[
+      dartBatch.path
+    ],
   );
   final Future<Object?> stdoutFuture = process.stdout
-      .transform<String>(utf8.decoder)
-      .forEach((String str) {
-        output += str;
-      });
+    .transform<String>(utf8.decoder)
+    .forEach((String str) {
+      output += str;
+    });
   final Future<Object?> stderrFuture = process.stderr
-      .transform<String>(utf8.decoder)
-      .forEach((String str) {
-        output += str;
-      });
+    .transform<String>(utf8.decoder)
+    .forEach((String str) {
+      output += str;
+    });
 
   // Wait for the output to complete
   await Future.wait(<Future<Object?>>[stdoutFuture, stderrFuture]);
   // Ensure child exited successfully
   expect(
-      await process.exitCode,
-      0,
-      reason: 'child process exited with code ${await process.exitCode}, and '
-      'output:\n$output',
+    await process.exitCode,
+    0,
+    reason: 'child process exited with code ${await process.exitCode}, and '
+    'output:\n$output',
   );
 
   // Check the Dart tool prints the expected output.
@@ -93,16 +93,16 @@ Future<String> runDartBatch() async {
 // The executable batch entrypoint for the Dart binary.
 File get dartBatch {
   return flutterRoot
-      .childDirectory('bin')
-      .childFile('dart.bat')
-      .absolute;
+    .childDirectory('bin')
+    .childFile('dart.bat')
+    .absolute;
 }
 
 // The Dart SDK's stamp file.
 File get dartSdkStamp {
   return flutterRoot
-      .childDirectory('bin')
-      .childDirectory('cache')
-      .childFile('engine-dart-sdk.stamp')
-      .absolute;
+    .childDirectory('bin')
+    .childDirectory('cache')
+    .childFile('engine-dart-sdk.stamp')
+    .absolute;
 }
