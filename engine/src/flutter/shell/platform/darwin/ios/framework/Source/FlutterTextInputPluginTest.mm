@@ -61,6 +61,7 @@ FLUTTER_ASSERT_ARC
 
 @interface FlutterTextInputPlugin ()
 @property(nonatomic, assign) FlutterTextInputView* activeView;
+@property(nonatomic, readonly) UIView* inputHider;
 @property(nonatomic, readonly) UIView* keyboardViewContainer;
 @property(nonatomic, readonly) UIView* keyboardView;
 @property(nonatomic, assign) UIView* cachedFirstResponder;
@@ -419,6 +420,72 @@ FLUTTER_ASSERT_ARC
     [inputView firstRectForRange:[FlutterTextRange rangeWithNSRange:NSMakeRange(0, 1)]];
     // showAutocorrectionPromptRectForStart fires in response to firstRectForRange.
     XCTAssertEqual(callCount, 3);
+  }
+}
+
+- (void)testInputHiderOverlapWithTextWhenScribbleIsDisabledAfterIOS17AndDoesNotOverlapBeforeIOS17 {
+  FlutterTextInputPlugin* myInputPlugin =
+      [[FlutterTextInputPlugin alloc] initWithDelegate:OCMClassMock([FlutterEngine class])];
+
+  FlutterMethodCall* setClientCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                        arguments:@[ @(123), self.mutableTemplateCopy ]];
+  [myInputPlugin handleMethodCall:setClientCall
+                           result:^(id _Nullable result){
+                           }];
+
+  FlutterTextInputView* mockInputView = OCMPartialMock(myInputPlugin.activeView);
+  OCMStub([mockInputView isScribbleAvailable]).andReturn(NO);
+
+  // yOffset = 200.
+  NSArray* yOffsetMatrix = @[ @1, @0, @0, @0, @0, @1, @0, @0, @0, @0, @1, @0, @0, @200, @0, @1 ];
+
+  FlutterMethodCall* setPlatformViewClientCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.setEditableSizeAndTransform"
+                                        arguments:@{@"transform" : yOffsetMatrix}];
+  [myInputPlugin handleMethodCall:setPlatformViewClientCall
+                           result:^(id _Nullable result){
+                           }];
+
+  if (@available(iOS 17, *)) {
+    XCTAssert(CGRectEqualToRect(myInputPlugin.inputHider.frame, CGRectMake(0, 200, 0, 0)),
+              @"The input hider should overlap with the text on and after iOS 17");
+
+  } else {
+    XCTAssert(CGRectEqualToRect(myInputPlugin.inputHider.frame, CGRectZero),
+              @"The input hider should be on the origin of screen on and before iOS 16.");
+  }
+}
+
+- (void)testSetSelectionRectsNotifiesTextChangeAfterIOS17AndDoesNotNotifyBeforeIOS17 {
+  FlutterTextInputPlugin* myInputPlugin =
+      [[FlutterTextInputPlugin alloc] initWithDelegate:OCMClassMock([FlutterEngine class])];
+
+  FlutterMethodCall* setClientCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                        arguments:@[ @(123), self.mutableTemplateCopy ]];
+  [myInputPlugin handleMethodCall:setClientCall
+                           result:^(id _Nullable result){
+                           }];
+
+  id mockInputDelegate = OCMProtocolMock(@protocol(UITextInputDelegate));
+  myInputPlugin.activeView.inputDelegate = mockInputDelegate;
+
+  NSArray<NSNumber*>* selectionRect = [NSArray arrayWithObjects:@0, @0, @100, @100, @0, @1, nil];
+  NSArray* selectionRects = [NSArray arrayWithObjects:selectionRect, nil];
+  FlutterMethodCall* methodCall =
+      [FlutterMethodCall methodCallWithMethodName:@"Scribble.setSelectionRects"
+                                        arguments:selectionRects];
+  [myInputPlugin handleMethodCall:methodCall
+                           result:^(id _Nullable result){
+                           }];
+
+  if (@available(iOS 17.0, *)) {
+    OCMVerify([mockInputDelegate textWillChange:myInputPlugin.activeView]);
+    OCMVerify([mockInputDelegate textDidChange:myInputPlugin.activeView]);
+  } else {
+    OCMVerify(never(), [mockInputDelegate textWillChange:myInputPlugin.activeView]);
+    OCMVerify(never(), [mockInputDelegate textDidChange:myInputPlugin.activeView]);
   }
 }
 
