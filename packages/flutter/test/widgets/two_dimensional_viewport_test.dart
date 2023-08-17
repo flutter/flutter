@@ -161,7 +161,7 @@ void main() {
             isA<AssertionError>().having(
               (AssertionError error) => error.toString(),
               'description',
-              contains('maxXIndex == null || maxXIndex >= 0'),
+              contains('maxXIndex == null || maxXIndex >= -1'),
             ),
           ),
         );
@@ -179,7 +179,7 @@ void main() {
             isA<AssertionError>().having(
               (AssertionError error) => error.toString(),
               'description',
-              contains('maxYIndex == null || maxYIndex >= 0'),
+              contains('maxYIndex == null || maxYIndex >= -1'),
             ),
           ),
         );
