@@ -36,8 +36,9 @@ class EditableChipFieldExample extends StatefulWidget {
   const EditableChipFieldExample({super.key});
 
   @override
-  EditableChipFieldExampleState createState() =>
-      EditableChipFieldExampleState();
+  EditableChipFieldExampleState createState() {
+    return EditableChipFieldExampleState();
+  }
 }
 
 class EditableChipFieldExampleState extends State<EditableChipFieldExample> {
@@ -238,10 +239,9 @@ class ChipsInputState<T> extends State<ChipsInput<T>> {
   }
 
   static int countReplacements(String text) {
-    return text.codeUnits
-        .where(
-            (int u) => u == ChipsInputEditingController.kObjectReplacementChar)
-        .length;
+    return text.codeUnits.where((int u) {
+      return u == ChipsInputEditingController.kObjectReplacementChar;
+    }).length;
   }
 
   @override
@@ -255,9 +255,9 @@ class ChipsInputState<T> extends State<ChipsInput<T>> {
       style: widget.style,
       strutStyle: widget.strutStyle,
       controller: controller,
-      onChanged: (_) =>
+      onChanged: (String value) =>
           widget.onTextChanged?.call(controller.textWithoutReplacements),
-      onSubmitted: (_) =>
+      onSubmitted: (String value) =>
           widget.onSubmitted?.call(controller.textWithoutReplacements),
     );
   }
@@ -269,6 +269,8 @@ class ChipsInputEditingController<T> extends TextEditingController {
           text: String.fromCharCode(kObjectReplacementChar) * values.length,
         );
 
+  // This constant character acts as a placeholder in the TextField text value.
+  // There will be one character for each of the InputChip displayed.
   static const int kObjectReplacementChar = 0xFFFE;
 
   List<T> values;
@@ -337,11 +339,12 @@ class ToppingSuggestion extends StatelessWidget {
 }
 
 class ToppingInputChip extends StatelessWidget {
-  const ToppingInputChip(
-      {super.key,
-      required this.topping,
-      required this.onDeleted,
-      required this.onSelected});
+  const ToppingInputChip({
+    super.key,
+    required this.topping,
+    required this.onDeleted,
+    required this.onSelected,
+  });
 
   final String topping;
   final ValueChanged<String> onDeleted;
