@@ -359,6 +359,12 @@ class ClangTidy {
         _logWithTimestamp('Still running: $sortedJobs');
       }
       if (job.result.exitCode == 0) {
+        if (options.enableCheckProfile) {
+          // stderr is lazily evaluated, so force it to be evaluated here.
+          final String stderr = job.result.stderr;
+          _errSink.writeln('Results of --enable-check-profile for ${job.name}:');
+          _errSink.writeln(stderr);
+        }
         continue;
       }
       _errSink.writeln('❌ Failures for ${job.name}:');
