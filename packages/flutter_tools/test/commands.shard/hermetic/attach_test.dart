@@ -276,7 +276,7 @@ void main() {
           platform: platform,
           processInfo: processInfo,
           fileSystem: testFileSystem,
-        )).run(<String>['attach', '--local-engine-src-path=$localEngineSrc', '--local-engine=$localEngineDir']);
+        )).run(<String>['attach', '--local-engine-src-path=$localEngineSrc', '--local-engine=$localEngineDir', '--local-engine-host=$localEngineDir']);
         await Future.wait<void>(<Future<void>>[
           completer.future,
           fakeLogReader.dispose(),
