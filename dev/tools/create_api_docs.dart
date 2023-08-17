@@ -232,9 +232,18 @@ class Configurator {
       'dartdoc_options.yaml',
     ];
     for (final String file in files) {
-      filesystem.file(docsRoot.childFile(file)).copySync(packageRoot.childFile(file).path);
+      final File source = docsRoot.childFile(file);
+      final File destination = packageRoot.childFile(file);
+      if (source.absolute.path != destination.absolute.path) {
+        filesystem.file(docsRoot.childFile(file)).copySync(packageRoot.childFile(file).path);
+      }
     }
     final Directory assetsDir = filesystem.directory(publishRoot.childDirectory('assets'));
+    final Directory assetSource = docsRoot.childDirectory('assets');
+    if (assetSource.absolute.path == assetsDir.absolute.path) {
+      // Don't try and copy the directory over itself.
+      return;
+    }
     if (assetsDir.existsSync()) {
       assetsDir.deleteSync(recursive: true);
     }
