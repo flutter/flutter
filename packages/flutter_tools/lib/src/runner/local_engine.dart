@@ -33,17 +33,20 @@ class LocalEngineLocator {
     required FileSystem fileSystem,
     required String flutterRoot,
     required UserMessages userMessages,
+    bool treatMissingLocalEngineHostAsFatal = false,
   }) : _platform = platform,
        _logger = logger,
        _fileSystem = fileSystem,
        _flutterRoot = flutterRoot,
-        _userMessages = userMessages;
+        _userMessages = userMessages,
+        _treatMissingLocalEngineHostAsFatal = treatMissingLocalEngineHostAsFatal;
 
   final Platform _platform;
   final Logger _logger;
   final FileSystem _fileSystem;
   final String _flutterRoot;
   final UserMessages _userMessages;
+  final bool _treatMissingLocalEngineHostAsFatal;
 
   /// Returns the engine build path of a local engine if one is located, otherwise `null`.
   Future<EngineBuildPaths?> findEnginePath({
@@ -206,8 +209,11 @@ class LocalEngineLocator {
       }
 
       if (localHostEngine == null) {
-        // TODO(matanlurey): https://github.com/flutter/flutter/issues/132245, change to throwToolExit.
-        _logger.printStatus(_userMessages.runnerLocalEngineRequiresHostEngine);
+        // TODO(matanlurey): https://github.com/flutter/flutter/issues/132245, always throwToolExit.
+        if (_treatMissingLocalEngineHostAsFatal) {
+          throwToolExit(_userMessages.runnerLocalEngineRequiresHostEngine());
+        }
+        _logger.printStatus(_userMessages.runnerLocalEngineRequiresHostEngine(warning: true));
       }
       final String basename = localHostEngine ?? _fileSystem.path.basename(engineBuildPath);
       final String hostBasename = _getHostEngineBasename(basename);
