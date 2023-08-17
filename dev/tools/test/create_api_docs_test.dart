@@ -10,6 +10,7 @@ import 'package:test/test.dart';
 
 import '../../../packages/flutter_tools/test/src/fake_process_manager.dart';
 import '../create_api_docs.dart' as apidocs;
+import '../examples_smoke_test.dart';
 
 void main() {
   test('getBranchName does not call git if env LUCI_BRANCH provided', () {
@@ -106,6 +107,7 @@ void main() {
     apidocs.runPubProcess(
       arguments: <String>['--one', '--two'],
       processManager: processManager,
+      filesystem: filesystem,
     );
 
     expect(processManager, hasNoRemainingExpectations);

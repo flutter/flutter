@@ -19,9 +19,6 @@ import 'package:process/process.dart';
 import 'package:pub_semver/pub_semver.dart';
 
 import 'dartdoc_checker.dart';
-import 'examples_smoke_test.dart';
-
-FileSystem filesystem = const LocalFileSystem();
 
 const String kDummyPackageName = 'Flutter';
 const String kPlatformIntegrationPackageName = 'platform_integration';
@@ -40,6 +37,10 @@ const String kPlatformIntegrationPackageName = 'platform_integration';
 /// previously. It uses the version of Dart downloaded by the 'flutter' tool in
 /// this repository and will fail if that is absent.
 Future<void> main(List<String> arguments) async {
+  const FileSystem filesystem = LocalFileSystem();
+  const ProcessManager processManager = LocalProcessManager();
+  const Platform platform = LocalPlatform();
+
   // The place to find customization files and configuration files for docs
   // generation.
   final Directory docsRoot = filesystem
@@ -69,16 +70,21 @@ Future<void> main(List<String> arguments) async {
     publishRoot: publishRoot,
     packageRoot: packageRoot,
     docsRoot: docsRoot,
+    filesystem: filesystem,
+    processManager: processManager,
+    platform: platform,
   );
   configurator.generateConfiguration();
 
-  final PlatformDocGenerator platformGenerator = PlatformDocGenerator(outputDir: publishRoot);
+  final PlatformDocGenerator platformGenerator = PlatformDocGenerator(outputDir: publishRoot, filesystem: filesystem);
   platformGenerator.generatePlatformDocs();
 
   final DartdocGenerator dartdocGenerator = DartdocGenerator(
     publishRoot: publishRoot,
     packageRoot: packageRoot,
     docsRoot: docsRoot,
+    filesystem: filesystem,
+    processManager: processManager,
     useJson: args['json'] as bool? ?? true,
     validateLinks: args['validate-links']! as bool,
     verbose: args['verbose'] as bool? ?? false,
@@ -116,7 +122,9 @@ class Configurator {
     required this.docsRoot,
     required this.publishRoot,
     required this.packageRoot,
-    this.filesystem = const LocalFileSystem(),
+    required this.filesystem,
+    required this.processManager,
+    required this.platform,
   });
 
   /// The root of the directory in the Flutter repo where configuration data is
@@ -133,6 +141,16 @@ class Configurator {
 
   /// The [FileSystem] object used to create [File] and [Directory] objects.
   final FileSystem filesystem;
+
+  /// The [ProcessManager] object used to invoke external processes.
+  ///
+  /// Can be replaced by tests to have a fake process manager.
+  final ProcessManager processManager;
+
+  /// The [Platform] to use for this run.
+  ///
+  /// Can be replaced by tests to test behavior on different plaforms.
+  final Platform platform;
 
   void generateConfiguration() {
     final Version version = FlutterInformation.instance.getFlutterVersion();
@@ -157,7 +175,7 @@ class Configurator {
 
   /// Returns import or on-disk paths for all libraries in the Flutter SDK.
   Iterable<String> _libraryRefs() sync* {
-    for (final Directory dir in findPackages()) {
+    for (final Directory dir in findPackages(filesystem)) {
       final String dirName = dir.basename;
       for (final FileSystemEntity file in dir.childDirectory('lib').listSync()) {
         if (file is File && file.path.endsWith('.dart')) {
@@ -180,7 +198,7 @@ class Configurator {
       'environment:',
       "  sdk: '>=3.0.0-0 <4.0.0'",
       'dependencies:',
-      for (final String package in findPackageNames()) '  $package:\n    sdk: flutter',
+      for (final String package in findPackageNames(filesystem)) '  $package:\n    sdk: flutter',
       '  $kPlatformIntegrationPackageName: 0.0.1',
       'dependency_overrides:',
       '  $kPlatformIntegrationPackageName:',
@@ -237,8 +255,8 @@ class Configurator {
       // Have to canonicalize because otherwise things like /foo/bar/baz and
       // /foo/../foo/bar/baz won't compare as identical.
       if (path.canonicalize(source.absolute.path) != path.canonicalize(destination.absolute.path)) {
-        print('Copying ${path.canonicalize(source.absolute.path)} to ${path.canonicalize(destination.absolute.path)}');
         source.copySync(destination.path);
+        print('Copied ${path.canonicalize(source.absolute.path)} to ${path.canonicalize(destination.absolute.path)}');
       }
     }
     final Directory assetsDir = filesystem.directory(publishRoot.childDirectory('assets'));
@@ -250,8 +268,14 @@ class Configurator {
     if (assetsDir.existsSync()) {
       assetsDir.deleteSync(recursive: true);
     }
-    copyDirectorySync(docsRoot.childDirectory('assets'), assetsDir,
-        (File src, File dest) => print('Copied ${path.canonicalize(src.absolute.path)} to ${path.canonicalize(dest.absolute.path)}'));
+    copyDirectorySync(
+      docsRoot.childDirectory('assets'),
+      assetsDir,
+      onFileCopied: (File src, File dest) {
+        print('Copied ${path.canonicalize(src.absolute.path)} to ${path.canonicalize(dest.absolute.path)}');
+      },
+      filesystem: filesystem,
+    );
   }
 
   /// Generates an OpenSearch XML description that can be used to add a custom
@@ -308,7 +332,9 @@ class Configurator {
     final File faviconFile =
         publishRoot.childDirectory('flutter').childDirectory('static-assets').childFile('favicon.png');
     final File iconFile = packageRoot.childDirectory('flutter.docset').childFile('icon.png');
-    faviconFile..createSync(recursive: true)..copySync(iconFile.path);
+    faviconFile
+      ..createSync(recursive: true)
+      ..copySync(iconFile.path);
 
     // Post-process the dashing output.
     final File infoPlist =
@@ -326,7 +352,7 @@ class Configurator {
     if (!offlineDir.existsSync()) {
       offlineDir.createSync(recursive: true);
     }
-    tarDirectory(packageRoot, offlineDir.childFile('flutter.docset.tar.gz'));
+    tarDirectory(packageRoot, offlineDir.childFile('flutter.docset.tar.gz'), processManager: processManager);
 
     // Write the Dash/Zeal XML feed file.
     final bool isStable = platform.environment['LUCI_BRANCH'] == 'stable';
@@ -339,7 +365,7 @@ class Configurator {
   // Creates the offline ZIP file containing all of the website HTML files.
   void _createOfflineZipFile() {
     print('${DateTime.now().toLocal()}: Creating offline docs archive.');
-    zipDirectory(publishRoot, packageRoot.childFile('flutter.docs.zip'));
+    zipDirectory(publishRoot, packageRoot.childFile('flutter.docs.zip'), processManager: processManager);
   }
 
   // Moves the generated offline archives into the publish directory so that
@@ -371,7 +397,8 @@ class DartdocGenerator {
     required this.docsRoot,
     required this.publishRoot,
     required this.packageRoot,
-    this.filesystem = const LocalFileSystem(),
+    required this.filesystem,
+    required this.processManager,
     this.useJson = true,
     this.validateLinks = true,
     this.verbose = false,
@@ -391,6 +418,11 @@ class DartdocGenerator {
 
   /// The [FileSystem] object used to create [File] and [Directory] objects.
   final FileSystem filesystem;
+
+  /// The [ProcessManager] object used to invoke external processes.
+  ///
+  /// Can be replaced by tests to have a fake process manager.
+  final ProcessManager processManager;
 
   /// Whether or not dartdoc should output an index.json file of the
   /// documentation.
@@ -419,6 +451,8 @@ class DartdocGenerator {
       arguments: <String>['get'],
       workingDirectory: packageRoot,
       environment: pubEnvironment,
+      filesystem: filesystem,
+      processManager: processManager,
     ));
     printStream(process.stdout, prefix: 'pub:stdout: ');
     printStream(process.stderr, prefix: 'pub:stderr: ');
@@ -456,7 +490,7 @@ class DartdocGenerator {
     final List<String> flutterPackages = <String>[
       kDummyPackageName,
       kPlatformIntegrationPackageName,
-      ...findPackageNames(),
+      ...findPackageNames(filesystem),
       // TODO(goderbauer): Figure out how to only include `dart:ui` of
       // `sky_engine` below, https://github.com/dart-lang/dartdoc/issues/2278.
       // 'sky_engine',
@@ -736,7 +770,7 @@ class DartdocGenerator {
 /// Unpacks and massages the data so that it can be properly included in the
 /// output archive.
 class PlatformDocGenerator {
-  PlatformDocGenerator({required this.outputDir, this.filesystem = const LocalFileSystem()});
+  PlatformDocGenerator({required this.outputDir, required this.filesystem});
 
   final FileSystem filesystem;
   final Directory outputDir;
@@ -798,7 +832,7 @@ class PlatformDocGenerator {
     /// If object then copy files to old location if the archive is using the new location.
     final Directory objcDocsDir = output.childDirectory('objectc_docs');
     if (objcDocsDir.existsSync()) {
-      copyDirectorySync(objcDocsDir, output);
+      copyDirectorySync(objcDocsDir, output, filesystem: filesystem);
     }
 
     final File testFile = output.childFile(checkFile);
@@ -815,7 +849,7 @@ class PlatformDocGenerator {
 ///
 /// Creates `destDir` if needed.
 void copyDirectorySync(Directory srcDir, Directory destDir,
-    [void Function(File srcFile, File destFile)? onFileCopied]) {
+    {void Function(File srcFile, File destFile)? onFileCopied, required FileSystem filesystem}) {
   if (!srcDir.existsSync()) {
     throw Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
   }
@@ -831,7 +865,7 @@ void copyDirectorySync(Directory srcDir, Directory destDir,
       entity.copySync(newPath);
       onFileCopied?.call(entity, newFile);
     } else if (entity is Directory) {
-      copyDirectorySync(entity, filesystem.directory(newPath));
+      copyDirectorySync(entity, filesystem.directory(newPath), filesystem: filesystem);
     } else {
       throw Exception('${entity.path} is neither File nor Directory');
     }
@@ -846,7 +880,7 @@ void printStream(Stream<List<int>> stream, {String prefix = '', List<Pattern> fi
   });
 }
 
-void zipDirectory(Directory src, File output) {
+void zipDirectory(Directory src, File output, {required ProcessManager processManager}) {
   // We would use the archive package to do this in one line, but it
   // is a lot slower, and doesn't do compression nearly as well.
   final ProcessResult zipProcess = processManager.runSync(
@@ -868,7 +902,7 @@ void zipDirectory(Directory src, File output) {
   }
 }
 
-void tarDirectory(Directory src, File output) {
+void tarDirectory(Directory src, File output, {required ProcessManager processManager}) {
   // We would use the archive package to do this in one line, but it
   // is a lot slower, and doesn't do compression nearly as well.
   final ProcessResult tarProcess = processManager.runSync(
@@ -904,12 +938,12 @@ Future<Process> runPubProcess({
   );
 }
 
-List<String> findPackageNames() {
-  return findPackages().map<String>((FileSystemEntity file) => path.basename(file.path)).toList();
+List<String> findPackageNames(FileSystem filesystem) {
+  return findPackages(filesystem).map<String>((FileSystemEntity file) => path.basename(file.path)).toList();
 }
 
 /// Finds all packages in the Flutter SDK
-List<Directory> findPackages() {
+List<Directory> findPackages(FileSystem filesystem) {
   return FlutterInformation.instance
       .getFlutterRoot()
       .childDirectory('packages')
