@@ -303,6 +303,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
     _anchorChildren.clear();
     _menuController._detach(this);
     _internalMenuController = null;
+    _menuScopeNode.dispose();
     super.dispose();
   }
 
