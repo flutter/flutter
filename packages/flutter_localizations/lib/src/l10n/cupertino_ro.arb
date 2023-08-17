@@ -30,5 +30,6 @@
   "noSpellCheckReplacementsLabel": "Nu s-au găsit înlocuiri",
   "menuDismissLabel": "Respingeți meniul",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

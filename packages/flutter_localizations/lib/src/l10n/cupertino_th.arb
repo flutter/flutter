@@ -25,5 +25,6 @@
   "noSpellCheckReplacementsLabel": "ไม่พบรายการแทนที่",
   "menuDismissLabel": "ปิดเมนู",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

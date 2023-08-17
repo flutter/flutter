@@ -177,6 +177,7 @@ void main() {
           onLiveTextInput: () {},
           onLookUp: () {},
           onSearchWeb: () {},
+          onShare: () {},
         ),
       ),
     ));
@@ -202,7 +203,7 @@ void main() {
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(7));
+        expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(8));
     }
   },
     skip: kIsWeb, // [intended] on web the browser handles the context menu.

@@ -25,5 +25,6 @@
   "noSpellCheckReplacementsLabel": "Nessuna sostituzione trovata",
   "menuDismissLabel": "Ignora menu",
   "lookUpButtonLabel": "Cerca",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

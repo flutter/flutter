@@ -144,5 +144,6 @@
   "collapsedHint": "Đã mở rộng",
   "menuDismissLabel": "Đóng trình đơn",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

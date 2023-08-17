@@ -25,5 +25,6 @@
   "noSpellCheckReplacementsLabel": "बदल्नु पर्ने कुनै पनि कुरा भेटिएन",
   "menuDismissLabel": "मेनु खारेज गर्नुहोस्",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

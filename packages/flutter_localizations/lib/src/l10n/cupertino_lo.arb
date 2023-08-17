@@ -25,5 +25,6 @@
   "noSpellCheckReplacementsLabel": "ບໍ່ພົບການແທນທີ່",
   "menuDismissLabel": "ປິດເມນູ",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

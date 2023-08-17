@@ -143,5 +143,6 @@
   "collapsedHint": "ຂະຫຍາຍແລ້ວ",
   "menuDismissLabel": "ປິດເມນູ",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

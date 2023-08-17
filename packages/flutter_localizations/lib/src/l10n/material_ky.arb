@@ -143,5 +143,6 @@
   "collapsedHint": "Жайылып көрсөтүлдү",
   "menuDismissLabel": "Менюну жабуу",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

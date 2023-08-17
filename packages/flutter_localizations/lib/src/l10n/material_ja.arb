@@ -144,5 +144,6 @@
   "collapsedHint": "開きました",
   "menuDismissLabel": "メニューを閉じる",
   "lookUpButtonLabel": "調べる",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

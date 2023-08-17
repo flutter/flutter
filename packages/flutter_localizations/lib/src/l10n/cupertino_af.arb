@@ -25,5 +25,6 @@
   "noSpellCheckReplacementsLabel": "Geen plaasvervangers gevind nie",
   "menuDismissLabel": "Maak kieslys toe",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

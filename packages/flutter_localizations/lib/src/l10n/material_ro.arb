@@ -148,5 +148,6 @@
   "collapsedHint": "Extins",
   "menuDismissLabel": "Respingeți meniul",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

@@ -25,5 +25,6 @@
   "noSpellCheckReplacementsLabel": "Nem található javítás",
   "menuDismissLabel": "Menü bezárása",
   "lookUpButtonLabel": "Felfelé nézés",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

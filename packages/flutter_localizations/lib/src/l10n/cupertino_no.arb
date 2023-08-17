@@ -25,5 +25,6 @@
   "noSpellCheckReplacementsLabel": "Fant ingen erstatninger",
   "menuDismissLabel": "Lukk menyen",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

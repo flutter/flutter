@@ -143,5 +143,6 @@
   "collapsedHint": "Stækkað",
   "menuDismissLabel": "Loka valmynd",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

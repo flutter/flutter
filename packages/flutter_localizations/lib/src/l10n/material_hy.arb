@@ -149,5 +149,6 @@
   "collapsedHint": "Ծավալված է",
   "menuDismissLabel": "Փակել ընտրացանկը",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

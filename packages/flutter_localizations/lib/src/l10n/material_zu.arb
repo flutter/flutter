@@ -143,5 +143,6 @@
   "collapsedHint": "Kunwetshiwe",
   "menuDismissLabel": "Chitha imenyu",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

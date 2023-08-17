@@ -25,5 +25,6 @@
   "noSpellCheckReplacementsLabel": "置き換えるものがありません",
   "menuDismissLabel": "メニューを閉じる",
   "lookUpButtonLabel": "調べる",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

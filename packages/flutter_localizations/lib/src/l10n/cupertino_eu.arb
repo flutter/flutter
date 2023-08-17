@@ -25,5 +25,6 @@
   "noSpellCheckReplacementsLabel": "Ez da aurkitu ordezteko hitzik",
   "menuDismissLabel": "Baztertu menua",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }
