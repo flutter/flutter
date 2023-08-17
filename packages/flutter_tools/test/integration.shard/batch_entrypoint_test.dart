@@ -25,18 +25,21 @@ Future<void> main() async {
     // Remove the Dart SDK stamp and run the Dart entrypoint again to trigger
     // the Dart SDK update.
     dartSdkStamp.deleteSync();
-    Future<String> runFuture = runDartBatch();
-    final Timer timer = Timer(Duration(minutes: 5), () {
+    final Future<String> runFuture = runDartBatch();
+    final Timer timer = Timer(const Duration(minutes: 5), () {
+      // This print is useful for people debugging this test. Normally we would avoid printing in
+      // a test but this is an exception because it's useful ambient information.
+      // ignore: avoid_print
       print(
         'The Dart batch entrypoint did not complete after 5 minutes. '
-        'Historically this is a sign that 7z zip extraction is waiting for'
+        'Historically this is a sign that 7z zip extraction is waiting for '
         'the user to confirm they would like to overwrite files. '
-        'This likely means the test isn\'t a flake and will fail. '
+        "This likely means the test isn't a flake and will fail. "
         'See: https://github.com/flutter/flutter/issues/132592'
       );
     });
 
-    String output = await runFuture;
+    final String output = await runFuture;
     timer.cancel();
 
     // Check the Dart SDK was re-downloaded and extracted.
@@ -69,7 +72,7 @@ Future<String> runDartBatch() async {
       });
 
   // Wait for stdout to complete
-  await Future.wait(<Future>[ stdoutFuture, stderrFuture ]);
+  await Future.wait(<Future<Object?>>[stdoutFuture, stderrFuture]);
   // Ensure child exited successfully
   expect(
       await process.exitCode,
