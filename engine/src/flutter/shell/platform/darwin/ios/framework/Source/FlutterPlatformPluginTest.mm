@@ -19,6 +19,7 @@
 - (BOOL)isLiveTextInputAvailable;
 - (void)searchWeb:(NSString*)searchTerm;
 - (void)showLookUpViewController:(NSString*)term;
+- (void)showShareViewController:(NSString*)content;
 @end
 
 @interface UIViewController ()
@@ -120,6 +121,36 @@
   };
   [mockPlugin handleMethodCall:methodCall result:result];
   [self waitForExpectationsWithTimeout:2 handler:nil];
+}
+
+- (void)testShareScreenInvoked {
+  FlutterEngine* engine = [[[FlutterEngine alloc] initWithName:@"test" project:nil] autorelease];
+  [engine runWithEntrypoint:nil];
+  std::unique_ptr<fml::WeakPtrFactory<FlutterEngine>> _weakFactory =
+      std::make_unique<fml::WeakPtrFactory<FlutterEngine>>(engine);
+
+  XCTestExpectation* presentExpectation =
+      [self expectationWithDescription:@"Share view controller presented"];
+
+  FlutterViewController* engineViewController =
+      [[[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil] autorelease];
+  FlutterViewController* mockEngineViewController = OCMPartialMock(engineViewController);
+
+  FlutterPlatformPlugin* plugin =
+      [[[FlutterPlatformPlugin alloc] initWithEngine:_weakFactory->GetWeakPtr()] autorelease];
+  FlutterPlatformPlugin* mockPlugin = OCMPartialMock(plugin);
+
+  FlutterMethodCall* methodCall = [FlutterMethodCall methodCallWithMethodName:@"Share.invoke"
+                                                                    arguments:@"Test"];
+  FlutterResult result = ^(id result) {
+    OCMVerify([mockEngineViewController
+        presentViewController:[OCMArg isKindOfClass:[UIActivityViewController class]]
+                     animated:YES
+                   completion:nil]);
+    [presentExpectation fulfill];
+  };
+  [mockPlugin handleMethodCall:methodCall result:result];
+  [self waitForExpectationsWithTimeout:1 handler:nil];
 }
 
 - (void)testClipboardHasCorrectStrings {
