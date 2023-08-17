@@ -38,7 +38,7 @@ void main() {
     final FakePlatform platform = FakePlatform(
       operatingSystem: platformName,
       environment: <String, String>{
-        'DEPOT_TOOLS': path.join('D:', 'depot_tools'),
+        'DEPOT_TOOLS': platformName == Platform.windows ? path.join('D:', 'depot_tools'): '/depot_tools',
       },
     );
     group('ProcessRunner for $platform', () {
@@ -378,7 +378,7 @@ void main() {
       late Directory tempDir;
       final String gsutilCall = platform.isWindows
           ? 'python3 ${path.join("D:", "depot_tools", "gsutil.py")}'
-          : 'gsutil.py';
+          : 'python3 ${path.join("/", "depot_tools", "gsutil.py")}';
       final String releasesName = 'releases_$platformName.json';
       final String archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
       final String archiveMime = platform.isLinux ? 'application/x-gtar' : 'application/zip';
