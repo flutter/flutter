@@ -118,14 +118,14 @@ void main() {
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testWithoutContext('--flutter-widget-cache and --enable-experiment are removed from getDefaultCachedKernelPath hash', () {
+  testWithoutContext('--enable-experiment is removed from getDefaultCachedKernelPath hash', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Config config = Config.test();
 
     expect(getDefaultCachedKernelPath(
       trackWidgetCreation: true,
       dartDefines: <String>[],
-      extraFrontEndOptions: <String>['--enable-experiment=foo', '--flutter-widget-cache'],
+      extraFrontEndOptions: <String>['--enable-experiment=foo'],
       fileSystem: fileSystem,
       config: config,
     ), 'build/cache.dill.track.dill');
@@ -133,7 +133,7 @@ void main() {
     expect(getDefaultCachedKernelPath(
       trackWidgetCreation: true,
       dartDefines: <String>['foo=bar'],
-      extraFrontEndOptions: <String>['--enable-experiment=foo', '--flutter-widget-cache'],
+      extraFrontEndOptions: <String>['--enable-experiment=foo'],
       fileSystem: fileSystem,
       config: config,
     ), 'build/06ad47d8e64bd28de537b62ff85357c4.cache.dill.track.dill');
@@ -141,7 +141,7 @@ void main() {
     expect(getDefaultCachedKernelPath(
       trackWidgetCreation: false,
       dartDefines: <String>[],
-      extraFrontEndOptions: <String>['--enable-experiment=foo', '--flutter-widget-cache'],
+      extraFrontEndOptions: <String>['--enable-experiment=foo'],
       fileSystem: fileSystem,
       config: config,
     ), 'build/cache.dill');
@@ -149,7 +149,7 @@ void main() {
     expect(getDefaultCachedKernelPath(
       trackWidgetCreation: true,
       dartDefines: <String>[],
-      extraFrontEndOptions: <String>['--enable-experiment=foo', '--flutter-widget-cache', '--foo=bar'],
+      extraFrontEndOptions: <String>['--enable-experiment=foo', '--foo=bar'],
       fileSystem: fileSystem,
       config: config,
     ), 'build/95b595cca01caa5f0ca0a690339dd7f6.cache.dill.track.dill');

@@ -7,8 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart';
 import '../widgets/live_text_utils.dart';
@@ -26,6 +25,13 @@ void main() {
     // selection menu.
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
+
+  Finder findOverflowNextButton() {
+    return find.byWidgetPredicate((Widget widget) =>
+    widget is CustomPaint &&
+        '${widget.painter?.runtimeType}' == '_RightCupertinoChevronPainter',
+    );
+  }
 
   testWidgetsWithLeakTracking('Builds the right toolbar on each platform, including web, and shows buttonItems', (WidgetTester tester) async {
     const String buttonText = 'Click me';
@@ -105,7 +111,7 @@ void main() {
     expect(find.byKey(key), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Can build from EditableTextState', (WidgetTester tester) async {
+  testWidgets('Can build from EditableTextState', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -186,6 +192,8 @@ void main() {
               onPaste: () {},
               onSelectAll: () {},
               onLiveTextInput: () {},
+              onLookUp: () {},
+              onSearchWeb: () {},
             ),
           ),
         ),
@@ -199,20 +207,24 @@ void main() {
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
+        expect(find.text('Select all'), findsOneWidget);
+        expect(find.byType(TextSelectionToolbarTextButton), findsNWidgets(6));
       case TargetPlatform.fuchsia:
         expect(find.text('Select all'), findsOneWidget);
-        expect(find.byType(TextSelectionToolbarTextButton), findsNWidgets(5));
+        expect(find.byType(TextSelectionToolbarTextButton), findsNWidgets(7));
       case TargetPlatform.iOS:
         expect(find.text('Select All'), findsOneWidget);
+        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(6));
+        await tester.tapAt(tester.getCenter(findOverflowNextButton()));
+        await tester.pumpAndSettle();
         expect(findLiveTextButton(), findsOneWidget);
-        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(5));
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         expect(find.text('Select all'), findsOneWidget);
-        expect(find.byType(DesktopTextSelectionToolbarButton), findsNWidgets(5));
+        expect(find.byType(DesktopTextSelectionToolbarButton), findsNWidgets(7));
       case TargetPlatform.macOS:
         expect(find.text('Select All'), findsOneWidget);
-        expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(5));
+        expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(7));
     }
   },
     skip: kIsWeb, // [intended] on web the browser handles the context menu.
@@ -220,7 +232,7 @@ void main() {
   );
 
   group('buttonItems', () {
-    testWidgetsWithLeakTracking('getEditableTextButtonItems builds the correct button items per-platform', (WidgetTester tester) async {
+    testWidgets('getEditableTextButtonItems builds the correct button items per-platform', (WidgetTester tester) async {
       // Fill the clipboard so that the Paste option is available in the text
       // selection menu.
       await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
@@ -315,7 +327,7 @@ void main() {
       skip: kIsWeb, // [intended]
     );
 
-    testWidgetsWithLeakTracking('getAdaptiveButtons builds the correct button widgets per-platform', (WidgetTester tester) async {
+    testWidgets('getAdaptiveButtons builds the correct button widgets per-platform', (WidgetTester tester) async {
       const String buttonText = 'Click me';
 
       await tester.pumpWidget(

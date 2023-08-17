@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('MaterialBannerThemeData copyWith, ==, hashCode basics', () {
@@ -24,7 +25,7 @@ void main() {
     expect(bannerTheme.leadingPadding, null);
   });
 
-  testWidgets('Default MaterialBannerThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default MaterialBannerThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const MaterialBannerThemeData().debugFillProperties(builder);
 
@@ -36,7 +37,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('MaterialBannerThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialBannerThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const MaterialBannerThemeData(
       backgroundColor: Color(0xfffffff0),
@@ -66,7 +67,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Passing no MaterialBannerThemeData returns defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - Passing no MaterialBannerThemeData returns defaults', (WidgetTester tester) async {
     const String contentText = 'Content';
     final ThemeData theme = ThemeData(useMaterial3: true);
     late final ThemeData localizedTheme;
@@ -115,7 +116,7 @@ void main() {
     expect(divider.color, theme.colorScheme.outlineVariant);
   });
 
-  testWidgets('Passing no MaterialBannerThemeData returns defaults when presented by ScaffoldMessenger', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - Passing no MaterialBannerThemeData returns defaults when presented by ScaffoldMessenger', (WidgetTester tester) async {
     const String contentText = 'Content';
     const Key tapTarget = Key('tap-target');
     final ThemeData theme = ThemeData(useMaterial3: true);
@@ -178,7 +179,7 @@ void main() {
     expect(divider.color, theme.colorScheme.outlineVariant);
   });
 
-  testWidgets('MaterialBanner uses values from MaterialBannerThemeData', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialBanner uses values from MaterialBannerThemeData', (WidgetTester tester) async {
     final MaterialBannerThemeData bannerTheme = _bannerTheme();
     const String contentText = 'Content';
     await tester.pumpWidget(MaterialApp(
@@ -217,7 +218,7 @@ void main() {
     expect(find.byType(Divider), findsNothing);
   });
 
-  testWidgets('MaterialBanner uses values from MaterialBannerThemeData when presented by ScaffoldMessenger', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialBanner uses values from MaterialBannerThemeData when presented by ScaffoldMessenger', (WidgetTester tester) async {
     final MaterialBannerThemeData bannerTheme = _bannerTheme();
     const String contentText = 'Content';
     const Key tapTarget = Key('tap-target');
@@ -273,7 +274,7 @@ void main() {
     expect(find.byType(Divider), findsNothing);
   });
 
-  testWidgets('MaterialBanner widget properties take priority over theme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialBanner widget properties take priority over theme', (WidgetTester tester) async {
     const Color backgroundColor = Colors.purple;
     const Color surfaceTintColor = Colors.red;
     const Color shadowColor = Colors.orange;
@@ -324,7 +325,7 @@ void main() {
     expect(find.byType(Divider), findsNothing);
   });
 
-  testWidgets('MaterialBanner widget properties take priority over theme when presented by ScaffoldMessenger', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialBanner widget properties take priority over theme when presented by ScaffoldMessenger', (WidgetTester tester) async {
     const Color backgroundColor = Colors.purple;
     const double elevation = 6.0;
     const TextStyle textStyle = TextStyle(color: Colors.green);
@@ -387,7 +388,7 @@ void main() {
     expect(find.byType(Divider), findsNothing);
   });
 
-  testWidgets('MaterialBanner uses color scheme when necessary', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialBanner uses color scheme when necessary', (WidgetTester tester) async {
     final ColorScheme colorScheme = const ColorScheme.light().copyWith(surface: Colors.purple);
     const String contentText = 'Content';
     await tester.pumpWidget(MaterialApp(
@@ -409,7 +410,7 @@ void main() {
     expect(material.color, colorScheme.surface);
   });
 
-  testWidgets('MaterialBanner uses color scheme when necessary when presented by ScaffoldMessenger', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialBanner uses color scheme when necessary when presented by ScaffoldMessenger', (WidgetTester tester) async {
     final ColorScheme colorScheme = const ColorScheme.light().copyWith(surface: Colors.purple);
     const String contentText = 'Content';
     const Key tapTarget = Key('tap-target');
@@ -453,7 +454,7 @@ void main() {
     // support is deprecated and the APIs are removed, these tests
     // can be deleted.
 
-    testWidgets('Passing no MaterialBannerThemeData returns defaults', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Material2 - Passing no MaterialBannerThemeData returns defaults', (WidgetTester tester) async {
       const String contentText = 'Content';
 
       await tester.pumpWidget(MaterialApp(
@@ -499,7 +500,7 @@ void main() {
       expect(divider.color, null);
     });
 
-    testWidgets('Passing no MaterialBannerThemeData returns defaults when presented by ScaffoldMessenger', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Material2 - Passing no MaterialBannerThemeData returns defaults when presented by ScaffoldMessenger', (WidgetTester tester) async {
       const String contentText = 'Content';
       const Key tapTarget = Key('tap-target');
 

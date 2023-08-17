@@ -184,9 +184,9 @@ class ExpansionTileController {
 /// A single-line [ListTile] with an expansion arrow icon that expands or collapses
 /// the tile to reveal or hide the [children].
 ///
-/// This widget is typically used with [ListView] to create an
-/// "expand / collapse" list entry. When used with scrolling widgets like
-/// [ListView], a unique [PageStorageKey] must be specified to enable the
+/// This widget is typically used with [ListView] to create an "expand /
+/// collapse" list entry. When used with scrolling widgets like [ListView], a
+/// unique [PageStorageKey] must be specified as the [key], to enable the
 /// [ExpansionTile] to save and restore its expanded state when it is scrolled
 /// in and out of view.
 ///

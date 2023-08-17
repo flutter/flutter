@@ -30,6 +30,13 @@ void main() {
     );
   });
 
+  Finder findOverflowNextButton() {
+    return find.byWidgetPredicate((Widget widget) =>
+      widget is CustomPaint &&
+          '${widget.painter?.runtimeType}' == '_RightCupertinoChevronPainter',
+      );
+  }
+
   testWidgets('Builds the right toolbar on each platform, including web, and shows buttonItems', (WidgetTester tester) async {
     const String buttonText = 'Click me';
 
@@ -168,6 +175,8 @@ void main() {
           onPaste: () {},
           onSelectAll: () {},
           onLiveTextInput: () {},
+          onLookUp: () {},
+          onSearchWeb: () {},
         ),
       ),
     ));
@@ -177,19 +186,23 @@ void main() {
     expect(find.text('Cut'), findsOneWidget);
     expect(find.text('Select All'), findsOneWidget);
     expect(find.text('Paste'), findsOneWidget);
+    expect(find.text('Look Up'), findsOneWidget);
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(5));
+        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(6));
       case TargetPlatform.fuchsia:
-        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(5));
+        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(6));
       case TargetPlatform.iOS:
-        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(5));
+        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(6));
+        expect(findOverflowNextButton(), findsOneWidget);
+        await tester.tapAt(tester.getCenter(findOverflowNextButton()));
+        await tester.pumpAndSettle();
         expect(findLiveTextButton(), findsOneWidget);
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(5));
+        expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(7));
     }
   },
     skip: kIsWeb, // [intended] on web the browser handles the context menu.
