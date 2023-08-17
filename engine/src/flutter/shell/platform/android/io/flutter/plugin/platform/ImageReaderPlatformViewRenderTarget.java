@@ -11,10 +11,9 @@ import android.os.Handler;
 import android.view.Surface;
 import io.flutter.view.TextureRegistry.ImageTextureEntry;
 
-@TargetApi(26)
+@TargetApi(29)
 public class ImageReaderPlatformViewRenderTarget implements PlatformViewRenderTarget {
   private ImageTextureEntry textureEntry;
-  private boolean mustRecreateImageReader = false;
   private ImageReader reader;
   private int bufferWidth = 0;
   private int bufferHeight = 0;
@@ -22,18 +21,12 @@ public class ImageReaderPlatformViewRenderTarget implements PlatformViewRenderTa
 
   private void closeReader() {
     if (this.reader != null) {
+      // Push a null image, forcing the texture entry to close any cached images.
+      textureEntry.pushImage(null);
+      // Close the reader, which also closes any produced images.
       this.reader.close();
       this.reader = null;
     }
-  }
-
-  private void recreateImageReaderIfNeeded() {
-    if (!mustRecreateImageReader) {
-      return;
-    }
-    mustRecreateImageReader = false;
-    closeReader();
-    this.reader = createImageReader();
   }
 
   private final Handler onImageAvailableHandler = new Handler();
@@ -55,9 +48,12 @@ public class ImageReaderPlatformViewRenderTarget implements PlatformViewRenderTa
     // Allow for double buffering.
     builder.setMaxImages(3);
     // Use PRIVATE image format so that we can support video decoding.
-    // TODO(johnmccutchan): Should we always use PRIVATE here? It may impact our ability
-    // to read back texture data. If we don't always want to use it, how do we decide when
-    // to use it or not? Perhaps PlatformViews can indicate if they may contain DRM'd content.
+    // TODO(johnmccutchan): Should we always use PRIVATE here? It may impact our
+    // ability to read back texture data. If we don't always want to use it, how do we
+    // decide when to use it or not? Perhaps PlatformViews can indicate if they may contain
+    // DRM'd content.
+    // I need to investigate how PRIVATE impacts our ability to take screenshots or capture
+    // the output of Flutter application.
     builder.setImageFormat(ImageFormat.PRIVATE);
     // Hint that consumed images will only be read by GPU.
     builder.setUsage(HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE);
@@ -68,13 +64,15 @@ public class ImageReaderPlatformViewRenderTarget implements PlatformViewRenderTa
 
   @TargetApi(29)
   protected ImageReader createImageReader29() {
-    return ImageReader.newInstance(
-        bufferWidth, bufferHeight, ImageFormat.PRIVATE, 2, HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE);
-  }
-
-  @TargetApi(26)
-  protected ImageReader createImageReader26() {
-    return ImageReader.newInstance(bufferWidth, bufferHeight, ImageFormat.PRIVATE, 2);
+    final ImageReader reader =
+        ImageReader.newInstance(
+            bufferWidth,
+            bufferHeight,
+            ImageFormat.PRIVATE,
+            2,
+            HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE);
+    reader.setOnImageAvailableListener(this.onImageAvailableListener, onImageAvailableHandler);
+    return reader;
   }
 
   protected ImageReader createImageReader() {
@@ -82,15 +80,15 @@ public class ImageReaderPlatformViewRenderTarget implements PlatformViewRenderTa
       return createImageReader33();
     } else if (Build.VERSION.SDK_INT >= 29) {
       return createImageReader29();
-    } else {
-      return createImageReader26();
     }
+    throw new UnsupportedOperationException(
+        "ImageReaderPlatformViewRenderTarget requires API version 29+");
   }
 
   public ImageReaderPlatformViewRenderTarget(ImageTextureEntry textureEntry) {
-    if (Build.VERSION.SDK_INT < 26) {
+    if (Build.VERSION.SDK_INT < 29) {
       throw new UnsupportedOperationException(
-          "ImageReaderPlatformViewRenderTarget requires API version 26+");
+          "ImageReaderPlatformViewRenderTarget requires API version 29+");
     }
     this.textureEntry = textureEntry;
   }
@@ -127,9 +125,9 @@ public class ImageReaderPlatformViewRenderTarget implements PlatformViewRenderTa
   }
 
   public void release() {
+    closeReader();
     // textureEntry has a finalizer attached.
     textureEntry = null;
-    closeReader();
   }
 
   public boolean isReleased() {
@@ -137,7 +135,6 @@ public class ImageReaderPlatformViewRenderTarget implements PlatformViewRenderTa
   }
 
   public Surface getSurface() {
-    recreateImageReaderIfNeeded();
     return this.reader.getSurface();
   }
 }
