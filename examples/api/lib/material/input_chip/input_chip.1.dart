@@ -361,7 +361,7 @@ class ToppingInputChip extends StatelessWidget {
           child: Text(topping[0].toUpperCase()),
         ),
         onDeleted: () => onDeleted(topping),
-        onSelected: (_) => onSelected(topping),
+        onSelected: (bool value) => onSelected(topping),
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         padding: const EdgeInsets.all(2),
       ),
