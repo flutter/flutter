@@ -244,49 +244,20 @@ class UnderlineInputBorder extends InputBorder {
     TextDirection? textDirection,
   }) {
     if (borderRadius.bottomLeft != Radius.zero || borderRadius.bottomRight != Radius.zero) {
-      _drawMultipleWidth(canvas, borderRadius.toRRect(rect), borderSide);
+      // This prevents the border from leaking the color due to anti-aliasing rounding errors.
+      final BorderRadius updatedBorderRadius = BorderRadius.only(
+        bottomLeft: borderRadius.bottomLeft.clamp(maximum: Radius.circular(rect.height / 2)),
+        bottomRight: borderRadius.bottomRight.clamp(maximum: Radius.circular(rect.height / 2)),
+      );
+
+      BoxBorder.paintNonUniformBorder(canvas, rect,
+          textDirection: textDirection,
+          borderRadius: updatedBorderRadius,
+          bottom: borderSide,
+          color: borderSide.color);
     } else {
       canvas.drawLine(rect.bottomLeft, rect.bottomRight, borderSide.toPaint());
     }
-  }
-
-  void _drawMultipleWidth(Canvas canvas, RRect borderRect, BorderSide bottom) {
-    final Paint paint = Paint()..color = bottom.color;
-
-    final RRect inner = _inflateRRect(
-      borderRect,
-      EdgeInsets.fromLTRB(0, 0, 0, bottom.width * (1 - (1 + bottom.strokeAlign) / 2)));
-
-    final RRect outer = _deflateRRect(
-        borderRect,
-        EdgeInsets.fromLTRB(0, 0, 0, bottom.width * (1 + bottom.strokeAlign) / 2));
-    canvas.drawDRRect(outer, inner, paint);
-  }
-
-  static RRect _inflateRRect(RRect rect, EdgeInsets insets) {
-    return RRect.fromLTRBAndCorners(
-      rect.left - insets.left,
-      rect.top - insets.top,
-      rect.right + insets.right,
-      rect.bottom + insets.bottom,
-      topLeft: (rect.tlRadius + Radius.elliptical(insets.left, insets.top)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-      topRight: (rect.trRadius + Radius.elliptical(insets.right, insets.top)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-      bottomRight: (rect.brRadius + Radius.elliptical(insets.right, insets.bottom)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-      bottomLeft: (rect.blRadius + Radius.elliptical(insets.left, insets.bottom)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-    );
-  }
-
-  static RRect _deflateRRect(RRect rect, EdgeInsets insets) {
-    return RRect.fromLTRBAndCorners(
-      rect.left + insets.left,
-      rect.top + insets.top,
-      rect.right - insets.right,
-      rect.bottom - insets.bottom,
-      topLeft: (rect.tlRadius - Radius.elliptical(insets.left, insets.top)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-      topRight: (rect.trRadius - Radius.elliptical(insets.right, insets.top)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-      bottomRight: (rect.brRadius - Radius.elliptical(insets.right, insets.bottom)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-      bottomLeft:(rect.blRadius - Radius.elliptical(insets.left, insets.bottom)).clamp(minimum: Radius.zero), // ignore_clamp_double_lint
-    );
   }
 
   @override

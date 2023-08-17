@@ -6935,24 +6935,39 @@ testWidgetsWithLeakTracking('OutlineInputBorder with BorderRadius.zero should dr
     });
   });
 
-  testWidgets('InputDecorator2 fillColor is clipped by border', (WidgetTester tester) async {
+  testWidgets('InputDecorator fillColor is clipped by border', (WidgetTester tester) async {
     const Rect canvasRect = Rect.fromLTWH(0, 0, 100, 100);
-      const UnderlineInputBorder border = UnderlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(12.0)),
-      );
+    const UnderlineInputBorder border = UnderlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(12.0)),
+    );
+    expect(
+      (Canvas canvas) => border.paint(canvas, canvasRect),
+      paints
+        ..drrect(
+          outer: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 100.0,
+                bottomRight: const Radius.circular(12.0),
+                bottomLeft: const Radius.circular(12.0)),
+          inner: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 99.0,
+                bottomRight: const Radius.elliptical(12.0, 11.0),
+                bottomLeft: const Radius.elliptical(12.0, 11.0)),
+        ),
+    );
 
-      // Fill is the border's outer path, a rounded rectangle
-      expect(
-          (Canvas canvas) => border.paint(canvas, canvasRect),
-          paints
-            ..drrect(
-            inner: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 101.0,
-                topLeft: const Radius.circular(12.0),
-                topRight: const Radius.circular(12.0),
-                bottomRight: const Radius.elliptical(12.0, 13.0),
-                bottomLeft: const Radius.elliptical(12.0, 13.0)),
-            outer: RRect.fromLTRBR(0.0, 0.0, 100.0, 100.0, const Radius.circular(12.0)),
-          ),
-      );
+    const UnderlineInputBorder border2 = UnderlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(60.0)),
+    );
+    expect(
+      (Canvas canvas) => border2.paint(canvas, canvasRect),
+      paints
+        ..drrect(
+          outer: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 100.0,
+                bottomRight: const Radius.circular(50.0),
+                bottomLeft: const Radius.circular(50.0)),
+          inner: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 99.0,
+                bottomRight: const Radius.elliptical(50.0, 49.0),
+                bottomLeft: const Radius.elliptical(50.0, 49.0)),
+        ),
+      reason: 'clamp is expected',
+    );
   });
 }
