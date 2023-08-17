@@ -26,7 +26,7 @@ Future<void> main() async {
     // the Dart SDK update.
     dartSdkStamp.deleteSync();
     Future<String> runFuture = runDartBatch();
-    final Timer timer = Timer(Duration(minutes: 6), () {
+    final Timer timer = Timer(Duration(minutes: 5), () {
       print(
         'The Dart batch entrypoint did not complete after 5 minutes. '
         'Historically this is a sign that 7z zip extraction is waiting for'
