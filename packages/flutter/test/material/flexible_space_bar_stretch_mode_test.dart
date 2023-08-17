@@ -9,13 +9,14 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 final Key blockKey = UniqueKey();
 const double expandedAppbarHeight = 250.0;
 final Key finderKey = UniqueKey();
 
 void main() {
-  testWidgets('FlexibleSpaceBar stretch mode default zoomBackground', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('FlexibleSpaceBar stretch mode default zoomBackground', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -50,7 +51,7 @@ void main() {
     expect(sizeBeforeScroll.height, lessThan(sizeAfterScroll.height));
   });
 
-  testWidgets('FlexibleSpaceBar stretch mode blurBackground', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('FlexibleSpaceBar stretch mode blurBackground', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),

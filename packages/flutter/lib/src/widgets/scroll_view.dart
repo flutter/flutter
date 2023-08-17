@@ -61,6 +61,16 @@ enum ScrollViewKeyboardDismissBehavior {
 /// To control the initial scroll offset of the scroll view, provide a
 /// [controller] with its [ScrollController.initialScrollOffset] property set.
 ///
+/// {@template flutter.widgets.ScrollView.PageStorage}
+/// ## Persisting the scroll position during a session
+///
+/// Scroll views attempt to persist their scroll position using [PageStorage].
+/// This can be disabled by setting [ScrollController.keepScrollOffset] to false
+/// on the [controller]. If it is enabled, using a [PageStorageKey] for the
+/// [key] of this widget is recommended to help disambiguate different scroll
+/// views from each other.
+/// {@endtemplate}
+///
 /// See also:
 ///
 ///  * [ListView], which is a commonly used [ScrollView] that displays a
@@ -619,6 +629,8 @@ abstract class ScrollView extends StatelessWidget {
 /// parameter `semanticChildCount`. This should always be the same as the
 /// number of widgets wrapped in [IndexedSemantics].
 ///
+/// {@macro flutter.widgets.ScrollView.PageStorage}
+///
 /// See also:
 ///
 ///  * [SliverList], which is a sliver that displays linear list of children.
@@ -1165,6 +1177,8 @@ abstract class BoxScrollView extends ScrollView {
 ///
 /// {@macro flutter.widgets.BoxScroll.scrollBehaviour}
 ///
+/// {@macro flutter.widgets.ScrollView.PageStorage}
+///
 /// See also:
 ///
 ///  * [SingleChildScrollView], which is a scrollable widget that has a single
@@ -1667,6 +1681,10 @@ class ListView extends BoxScrollView {
 /// [SliverList] or [SliverAppBar], can be put in the [CustomScrollView.slivers]
 /// list.
 ///
+/// {@macro flutter.widgets.ScrollView.PageStorage}
+///
+/// ## Examples
+///
 /// {@tool snippet}
 /// This example demonstrates how to create a [GridView] with two columns. The
 /// children are spaced apart using the `crossAxisSpacing` and `mainAxisSpacing`
@@ -1772,6 +1790,25 @@ class ListView extends BoxScrollView {
 /// ```
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example shows a custom implementation of selection in list and grid views.
+/// Use the button in the top right (possibly hidden under the DEBUG banner) to toggle between
+/// [ListView] and [GridView].
+/// Long press any [ListTile] or [GridTile] to enable selection mode.
+///
+/// ** See code in examples/api/lib/widgets/scroll_view/list_view.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows a custom [SliverGridDelegate].
+///
+/// ** See code in examples/api/lib/widgets/scroll_view/grid_view.0.dart **
+/// {@end-tool}
+///
+/// ## Troubleshooting
+///
+/// ### Padding
+///
 /// By default, [GridView] will automatically pad the limits of the
 /// grid's scrollable to avoid partial obstructions indicated by
 /// [MediaQuery]'s padding. To avoid this behavior, override with a
@@ -1801,13 +1838,6 @@ class ListView extends BoxScrollView {
 ///   );
 /// }
 /// ```
-/// {@end-tool}
-///
-/// {@tool dartpad}
-/// This example shows a custom implementation of [ListTile] selection in a [GridView] or [ListView].
-/// Long press any ListTile to enable selection mode.
-///
-/// ** See code in examples/api/lib/widgets/scroll_view/list_view.0.dart **
 /// {@end-tool}
 ///
 /// See also:

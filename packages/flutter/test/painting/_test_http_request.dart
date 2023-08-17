@@ -4,16 +4,16 @@
 
 import 'dart:js_interop';
 
-import 'package:flutter/src/services/dom.dart';
+import 'package:web/web.dart' as web;
 
 /// Defines a new property on an Object.
 @JS('Object.defineProperty')
-external JSVoid objectDefineProperty(JSAny o, JSString symbol, JSAny desc);
+external void objectDefineProperty(JSAny o, String symbol, JSAny desc);
 
 void createGetter(JSAny mock, String key, JSAny? Function() get) {
   objectDefineProperty(
     mock,
-    key.toJS,
+    key,
     <String, JSFunction>{
       'get': (() => get()).toJS,
     }.jsify()!,
@@ -35,6 +35,8 @@ class DomXMLHttpRequestMock {
   });
 }
 
+typedef _DartDomEventListener = JSVoid Function(web.Event event);
+
 class TestHttpRequest {
   TestHttpRequest() {
     _mock = DomXMLHttpRequestMock(
@@ -43,8 +45,6 @@ class TestHttpRequest {
         setRequestHeader: setRequestHeader.toJS,
         addEventListener: addEventListener.toJS,
     );
-    // TODO(srujzs): This is needed for when we reify JS types. Right now, JSAny
-    // is a typedef for Object?, but when we reify, it'll be its own type.
     final JSAny mock = _mock as JSAny;
     createGetter(mock, 'headers', () => headers.jsify());
     createGetter(mock,
@@ -60,26 +60,26 @@ class TestHttpRequest {
   Object? response;
 
   Map<String, String> get responseHeaders => headers;
-  JSVoid open(JSString method, JSString url, JSBoolean async) {}
+  JSVoid open(String method, String url, bool async) {}
   JSVoid send() {}
-  JSVoid setRequestHeader(JSString name, JSString value) {
-    headers[name.toDart] = value.toDart;
+  JSVoid setRequestHeader(String name, String value) {
+    headers[name] = value;
   }
 
-  JSVoid addEventListener(JSString type, DomEventListener listener) {
-    if (type.toDart == mockEvent?.type) {
-      final DartDomEventListener dartListener =
-        (listener as JSExportedDartFunction).toDart as DartDomEventListener;
+  JSVoid addEventListener(String type, web.EventListener listener) {
+    if (type == mockEvent?.type) {
+      final _DartDomEventListener dartListener =
+          (listener as JSExportedDartFunction).toDart as _DartDomEventListener;
       dartListener(mockEvent!.event);
     }
   }
 
-  DomXMLHttpRequest getMock() => _mock as DomXMLHttpRequest;
+  web.XMLHttpRequest getMock() => _mock as web.XMLHttpRequest;
 }
 
 class MockEvent {
   MockEvent(this.type, this.event);
 
   final String type;
-  final DomEvent event;
+  final web.Event event;
 }

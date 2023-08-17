@@ -15,13 +15,14 @@ const List<Widget> children = <Widget>[
 
 void expectRects(WidgetTester tester, List<Rect> expected) {
   final Finder finder = find.byType(SizedBox);
-  finder.precache();
   final List<Rect> actual = <Rect>[];
-  for (int i = 0; i < expected.length; ++i) {
-    final Finder current = finder.at(i);
-    expect(current, findsOneWidget);
-    actual.add(tester.getRect(finder.at(i)));
-  }
+  finder.runCached(() {
+    for (int i = 0; i < expected.length; ++i) {
+      final Finder current = finder.at(i);
+      expect(current, findsOneWidget);
+      actual.add(tester.getRect(finder.at(i)));
+    }
+  });
   expect(() => finder.at(expected.length), throwsRangeError);
   expect(actual, equals(expected));
 }

@@ -12,7 +12,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../widgets/clipboard_utils.dart';
 import 'editable_text_utils.dart';
 import 'live_text_utils.dart';
@@ -64,11 +63,10 @@ TextEditingValue collapsedAtEnd(String text) {
 }
 
 void main() {
-  final MockClipboard mockClipboard = MockClipboard();
-  TestWidgetsFlutterBinding.ensureInitialized()
-    .defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
-
   setUp(() async {
+    final MockClipboard mockClipboard = MockClipboard();
+    TestWidgetsFlutterBinding.ensureInitialized()
+      .defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
     debugResetSemanticsIdCounter();
     controller = TextEditingController();
     // Fill the clipboard so that the Paste option is available in the text
@@ -77,6 +75,8 @@ void main() {
   });
 
   tearDown(() {
+    TestWidgetsFlutterBinding.ensureInitialized()
+      .defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
     controller.dispose();
   });
 
@@ -154,6 +154,8 @@ void main() {
                     onCut: null,
                     onPaste: null,
                     onSelectAll: null,
+                    onLookUp: null,
+                    onSearchWeb: null,
                     onLiveTextInput: () {
                       invokedLiveTextInputSuccessfully = true;
                     },
@@ -2144,7 +2146,7 @@ void main() {
     );
 
     final EditableTextState state =
-    tester.state<EditableTextState>(find.byType(EditableText));
+        tester.state<EditableTextState>(find.byType(EditableText));
 
     // Show the toolbar.
     state.renderEditable.selectWordsInRange(
@@ -2155,9 +2157,11 @@ void main() {
 
     final TextSelection copySelectionRange = localController.selection;
 
+    expect(find.byType(TextSelectionToolbar), findsNothing);
     state.showToolbar();
     await tester.pumpAndSettle();
 
+    expect(find.byType(TextSelectionToolbar), findsOneWidget);
     expect(find.text('Copy'), findsOneWidget);
 
     await tester.tap(find.text('Copy'));
@@ -16602,6 +16606,56 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
   },
     skip: kIsWeb, // [intended]
   );
+
+  group('hasStrings', () {
+    late int calls;
+    setUp(() {
+      calls = 0;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) {
+          if (methodCall.method == 'Clipboard.hasStrings') {
+            calls += 1;
+          }
+          return Future<void>.value();
+        });
+    });
+    tearDown(() {
+      TestWidgetsFlutterBinding.ensureInitialized()
+        .defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
+    });
+
+    testWidgets('web avoids the paste permissions prompt by not calling hasStrings', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: TextEditingController(),
+            focusNode: focusNode,
+            obscureText: true,
+            toolbarOptions: const ToolbarOptions(
+              copy: true,
+              cut: true,
+              paste: true,
+              selectAll: true,
+            ),
+            style: textStyle,
+            cursorColor: cursorColor,
+            selectionControls: materialTextSelectionControls,
+          ),
+        ),
+      );
+
+      expect(calls, equals(kIsWeb ? 0 : 1));
+
+      // Long-press to bring up the context menu.
+      final Finder textFinder = find.byType(EditableText);
+      await tester.longPress(textFinder);
+      tester.state<EditableTextState>(textFinder).showToolbar();
+      await tester.pumpAndSettle();
+
+      expect(calls, equals(kIsWeb ? 0 : 2));
+    });
+  });
 }
 
 class UnsettableController extends TextEditingController {

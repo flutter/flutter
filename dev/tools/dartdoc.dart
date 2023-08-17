@@ -116,7 +116,7 @@ Future<void> main(List<String> arguments) async {
   final List<String> dartdocBaseArgs = <String>[
     'global',
     'run',
-    if (args['checked'] as bool) '-c',
+    if (args['checked'] as bool) '--enable-asserts',
     'dartdoc',
   ];
 
@@ -229,8 +229,7 @@ Future<void> main(List<String> arguments) async {
   ));
   printStream(process.stdout, prefix: args['json'] as bool ? '' : 'dartdoc:stdout: ',
     filter: args['verbose'] as bool ? const <Pattern>[] : <Pattern>[
-      RegExp(r'^generating docs for library '), // unnecessary verbosity
-      RegExp(r'^pars'), // unnecessary verbosity
+      RegExp(r'^Generating docs for library '), // unnecessary verbosity
     ],
   );
   printStream(process.stderr, prefix: args['json'] as bool ? '' : 'dartdoc:stderr: ',
@@ -259,7 +258,7 @@ ArgParser _createArgsParser() {
           'filter out some known false positives (off). Shut this off '
           'locally if you want to address Flutter-specific issues.');
   parser.addFlag('checked', abbr: 'c',
-      help: 'Run dartdoc in checked mode.');
+      help: 'Run dartdoc with asserts enabled.');
   parser.addFlag('json',
       help: 'Display json-formatted output from dartdoc and skip stdout/stderr prefixing.');
   parser.addFlag('validate-links',

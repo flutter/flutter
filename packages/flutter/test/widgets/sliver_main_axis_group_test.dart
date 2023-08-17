@@ -6,6 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/sliver_utils.dart';
+
+
 const double VIEWPORT_HEIGHT = 600;
 const double VIEWPORT_WIDTH = 300;
 
@@ -603,6 +606,63 @@ void main() {
     await tester.pumpAndSettle();
     expect(renderHeader.geometry!.paintExtent, equals(60.0));
     expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-50.0));
+  });
+
+  testWidgets('SliverMainAxisGroup skips painting invisible children', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+
+    int counter = 0;
+    void incrementCounter() {
+      counter += 1;
+    }
+
+    await tester.pumpWidget(
+      _buildSliverMainAxisGroup(
+        controller: controller,
+        slivers: <Widget>[
+          MockSliverToBoxAdapter(
+            incrementCounter: incrementCounter,
+            child: Container(
+              height: 1000,
+              decoration: const BoxDecoration(color: Colors.amber),
+            ),
+          ),
+          MockSliverToBoxAdapter(
+            incrementCounter: incrementCounter,
+            child: Container(
+              height: 400,
+              decoration: const BoxDecoration(color: Colors.amber)
+            ),
+          ),
+          MockSliverToBoxAdapter(
+            incrementCounter: incrementCounter,
+            child: Container(
+              height: 500,
+              decoration: const BoxDecoration(color: Colors.amber)
+            ),
+          ),
+          MockSliverToBoxAdapter(
+            incrementCounter: incrementCounter,
+            child: Container(
+              height: 300,
+              decoration: const BoxDecoration(color: Colors.amber)
+            ),
+          ),
+        ],
+      ),
+    );
+
+    // Can only see top sliver.
+    expect(counter, equals(1));
+
+    // Reset paint counter.
+    counter = 0;
+    controller.jumpTo(1000);
+    await tester.pumpAndSettle();
+
+    // Can only see second and third slivers.
+    expect(controller.offset, 1000);
+    expect(counter, equals(2));
   });
 }
 
