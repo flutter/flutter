@@ -66,14 +66,6 @@ typedef ErrorCallback = bool Function(Object exception, StackTrace stackTrace);
 // A gesture setting value that indicates it has not been set by the engine.
 const double _kUnsetGestureSetting = -1.0;
 
-// The view ID of PlatformDispatcher.implicitView. This is an
-// implementation detail that may change at any time. Apps
-// should always use PlatformDispatcher.implicitView to determine
-// the current implicit view, if any.
-//
-// Keep this in sync with kImplicitViewId in window/platform_configuration.cc.
-const int _kImplicitViewId = 0;
-
 // A message channel to receive KeyData from the platform.
 //
 // See embedder.cc::kFlutterKeyDataChannel for more information.
@@ -218,10 +210,29 @@ class PlatformDispatcher {
   /// * [View.of], for accessing the current view.
   /// * [PlatformDispatcher.views] for a list of all [FlutterView]s provided
   ///   by the platform.
-  FlutterView? get implicitView => _implicitViewEnabled() ? _views[_kImplicitViewId] : null;
-
-  @Native<Handle Function()>(symbol: 'PlatformConfigurationNativeApi::ImplicitViewEnabled')
-  external static bool _implicitViewEnabled();
+  FlutterView? get implicitView {
+    final FlutterView? result = _views[_implicitViewId];
+    // Make sure [implicitView] agrees with `_implicitViewId`.
+    assert((result != null) == (_implicitViewId != null),
+      (_implicitViewId != null) ?
+        'The implicit view ID is $_implicitViewId, but the implicit view does not exist.' :
+        'The implicit view ID is null, but the implicit view exists.');
+    // Make sure [implicitView] never chages.
+    assert(() {
+      if (_debugRecordedLastImplicitView) {
+        assert(identical(_debugLastImplicitView, result),
+          'The implicitView has changed:\n'
+          'Last: $_debugLastImplicitView\nCurrent: $result');
+      } else {
+        _debugLastImplicitView = result;
+        _debugRecordedLastImplicitView = true;
+      }
+      return true;
+    }());
+    return result;
+  }
+  FlutterView? _debugLastImplicitView;
+  bool _debugRecordedLastImplicitView = false;
 
   /// A callback that is invoked whenever the [ViewConfiguration] of any of the
   /// [views] changes.
@@ -249,6 +260,34 @@ class PlatformDispatcher {
     _onMetricsChangedZone = Zone.current;
   }
 
+  // Called from the engine, via hooks.dart
+  //
+  // Adds a new view with the specific view configuration.
+  //
+  // The implicit view must be added before [implicitView] is first called,
+  // which is typically the main function.
+  void _addView(int id, _ViewConfiguration viewConfiguration) {
+    assert(!_views.containsKey(id), 'View ID $id already exists.');
+    _views[id] = FlutterView._(id, this, viewConfiguration);
+    _invoke(onMetricsChanged, _onMetricsChangedZone);
+  }
+
+  // Called from the engine, via hooks.dart
+  //
+  // Removes the specific view.
+  //
+  // The target view must must exist. The implicit view must not be removed,
+  // or an assertion will be triggered.
+  void _removeView(int id) {
+    assert(id != _implicitViewId, 'The implicit view #$id can not be removed.');
+    if (id == _implicitViewId) {
+      return;
+    }
+    assert(_views.containsKey(id), 'View ID $id does not exist.');
+    _views.remove(id);
+    _invoke(onMetricsChanged, _onMetricsChangedZone);
+  }
+
   // Called from the engine, via hooks.dart.
   //
   // Updates the available displays.
@@ -264,15 +303,8 @@ class PlatformDispatcher {
   //
   // Updates the metrics of the window with the given id.
   void _updateWindowMetrics(int viewId, _ViewConfiguration viewConfiguration) {
-    final FlutterView? view = _views[viewId];
-    if (viewId == _kImplicitViewId && view == null) {
-      // TODO(goderbauer): Remove the implicit creation of the implicit view
-      //   when we have an addView API and the implicit view is added via that.
-      _views[viewId] = FlutterView._(viewId, this, viewConfiguration);
-    } else {
-      assert(view != null);
-      view!._viewConfiguration = viewConfiguration;
-    }
+    assert(_views.containsKey(viewId), 'View $viewId does not exist.');
+    _views[viewId]!._viewConfiguration = viewConfiguration;
     _invoke(onMetricsChanged, _onMetricsChangedZone);
   }
 

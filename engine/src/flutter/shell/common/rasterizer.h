@@ -205,6 +205,19 @@ class Rasterizer final : public SnapshotDelegate,
   fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> GetSnapshotDelegate() const;
 
   //----------------------------------------------------------------------------
+  /// @brief      Deallocate the resources for displaying a view.
+  ///
+  ///             This method should be called when a view is removed.
+  ///
+  ///             The rasterizer don't need views to be registered. Last-frame
+  ///             states for views are recorded when layer trees are rasterized
+  ///             to the view and used during `Rasterizer::DrawLastLayerTree`.
+  ///
+  /// @param[in]  view_id  The ID of the view.
+  ///
+  void CollectView(int64_t view_id);
+
+  //----------------------------------------------------------------------------
   /// @brief      Sometimes, it may be necessary to render the same frame again
   ///             without having to wait for the framework to build a whole new
   ///             layer tree describing the same contents. One such case is when
@@ -240,7 +253,8 @@ class Rasterizer final : public SnapshotDelegate,
 
   std::shared_ptr<flutter::TextureRegistry> GetTextureRegistry() override;
 
-  using LayerTreeDiscardCallback = std::function<bool(flutter::LayerTree&)>;
+  using LayerTreeDiscardCallback =
+      std::function<bool(int64_t, flutter::LayerTree&)>;
 
   //----------------------------------------------------------------------------
   /// @brief      Takes the next item from the layer tree pipeline and executes
@@ -569,7 +583,9 @@ class Rasterizer final : public SnapshotDelegate,
 
   void FireNextFrameCallbackIfPresent();
 
-  static bool NoDiscard(const flutter::LayerTree& layer_tree) { return false; }
+  static bool NoDiscard(int64_t view_id, const flutter::LayerTree& layer_tree) {
+    return false;
+  }
   static bool ShouldResubmitFrame(const RasterStatus& raster_status);
 
   Delegate& delegate_;

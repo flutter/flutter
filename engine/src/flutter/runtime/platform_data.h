@@ -32,7 +32,9 @@ struct PlatformData {
 
   ~PlatformData();
 
-  ViewportMetrics viewport_metrics;
+  // A map from view IDs of existing views to their viewport metrics.
+  std::unordered_map<int64_t, ViewportMetrics> viewport_metrics_for_views;
+
   std::string language_code;
   std::string country_code;
   std::string script_code;

@@ -10,7 +10,6 @@
 #include "flutter/lib/ui/painting/picture.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/lib/ui/window/platform_configuration.h"
-#include "flutter/lib/ui/window/window.h"
 #if IMPELLER_SUPPORTS_RENDERING
 #include "flutter/lib/ui/painting/display_list_deferred_image_gpu_impeller.h"
 #endif  // IMPELLER_SUPPORTS_RENDERING

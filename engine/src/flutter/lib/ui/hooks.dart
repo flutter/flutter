@@ -5,6 +5,60 @@
 part of dart.ui;
 
 @pragma('vm:entry-point')
+void _addView(
+  int viewId,
+  double devicePixelRatio,
+  double width,
+  double height,
+  double viewPaddingTop,
+  double viewPaddingRight,
+  double viewPaddingBottom,
+  double viewPaddingLeft,
+  double viewInsetTop,
+  double viewInsetRight,
+  double viewInsetBottom,
+  double viewInsetLeft,
+  double systemGestureInsetTop,
+  double systemGestureInsetRight,
+  double systemGestureInsetBottom,
+  double systemGestureInsetLeft,
+  double physicalTouchSlop,
+  List<double> displayFeaturesBounds,
+  List<int> displayFeaturesType,
+  List<int> displayFeaturesState,
+  int displayId,
+) {
+  final _ViewConfiguration viewConfiguration = _buildViewConfiguration(
+    devicePixelRatio,
+    width,
+    height,
+    viewPaddingTop,
+    viewPaddingRight,
+    viewPaddingBottom,
+    viewPaddingLeft,
+    viewInsetTop,
+    viewInsetRight,
+    viewInsetBottom,
+    viewInsetLeft,
+    systemGestureInsetTop,
+    systemGestureInsetRight,
+    systemGestureInsetBottom,
+    systemGestureInsetLeft,
+    physicalTouchSlop,
+    displayFeaturesBounds,
+    displayFeaturesType,
+    displayFeaturesState,
+    displayId,
+  );
+  PlatformDispatcher.instance._addView(viewId, viewConfiguration);
+}
+
+@pragma('vm:entry-point')
+void _removeView(int viewId) {
+  PlatformDispatcher.instance._removeView(viewId);
+}
+
+@pragma('vm:entry-point')
 void _updateDisplays(
   List<int> ids,
   List<double> widths,

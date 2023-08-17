@@ -406,7 +406,11 @@ class SingletonFlutterWindow extends FlutterView {
     'This feature was deprecated after v3.7.0-32.0.pre.'
   )
   SingletonFlutterWindow._() : super._(
-    _kImplicitViewId,
+    // TODO(dkwingsmt): This crashes if the implicit view is disabled. We need
+    // to resolve this by the time embedders are allowed to disable the implicit
+    // view.
+    // https://github.com/flutter/flutter/issues/131651
+    _implicitViewId!,
     PlatformDispatcher.instance,
     const _ViewConfiguration(),
   );
