@@ -63,12 +63,12 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
   BenchMouseRegionGridHover.benchmarkName: () => BenchMouseRegionGridHover(),
   BenchMouseRegionMixedGridHover.benchmarkName: () => BenchMouseRegionMixedGridHover(),
   BenchWrapBoxScroll.benchmarkName: () => BenchWrapBoxScroll(),
-  if (!isSkwasm) ...<String, RecorderFactory>{
-    // Platform views are not yet supported with Skwasm.
-    // https://github.com/flutter/flutter/issues/126346
+  // if (!isSkwasm) ...<String, RecorderFactory>{
+  //   // Platform views are not yet supported with Skwasm.
+  //   // https://github.com/flutter/flutter/issues/126346
     BenchPlatformViewInfiniteScroll.benchmarkName: () => BenchPlatformViewInfiniteScroll.forward(),
     BenchPlatformViewInfiniteScroll.benchmarkNameBackward: () => BenchPlatformViewInfiniteScroll.backward(),
-  },
+  // },
   BenchMaterial3Components.benchmarkName: () => BenchMaterial3Components(),
   BenchMaterial3Semantics.benchmarkName: () => BenchMaterial3Semantics(),
   BenchMaterial3ScrollSemantics.benchmarkName: () => BenchMaterial3ScrollSemantics(),
