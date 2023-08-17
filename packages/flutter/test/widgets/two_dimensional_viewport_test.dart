@@ -111,6 +111,80 @@ void main() {
         );
       }, variant: TargetPlatformVariant.all());
 
+      test('maxXIndex and maxYIndex assertions', () {
+        final TwoDimensionalChildBuilderDelegate delegate = TwoDimensionalChildBuilderDelegate(
+          maxXIndex: 0,
+          maxYIndex: 0,
+          builder: (BuildContext context, ChildVicinity vicinity) {
+            return const SizedBox.shrink();
+          }
+        );
+        // Update
+        delegate.maxXIndex = -1; // No exception.
+        expect(
+          () {
+            delegate.maxXIndex = -2;
+          },
+          throwsA(
+            isA<AssertionError>().having(
+              (AssertionError error) => error.toString(),
+              'description',
+              contains('value == null || value >= -1'),
+            ),
+          ),
+        );
+        delegate.maxYIndex = -1; // No exception
+        expect(
+          () {
+            delegate.maxYIndex = -2;
+          },
+          throwsA(
+            isA<AssertionError>().having(
+              (AssertionError error) => error.toString(),
+              'description',
+              contains('value == null || value >= -1'),
+            ),
+          ),
+        );
+        // Constructor
+        expect(
+          () {
+            TwoDimensionalChildBuilderDelegate(
+              maxXIndex: -2,
+              maxYIndex: 0,
+              builder: (BuildContext context, ChildVicinity vicinity) {
+                return const SizedBox.shrink();
+              }
+            );
+          },
+          throwsA(
+            isA<AssertionError>().having(
+              (AssertionError error) => error.toString(),
+              'description',
+              contains('maxXIndex == null || maxXIndex >= -1'),
+            ),
+          ),
+        );
+        expect(
+          () {
+            TwoDimensionalChildBuilderDelegate(
+              maxXIndex: 0,
+              maxYIndex: -2,
+              builder: (BuildContext context, ChildVicinity vicinity) {
+                return const SizedBox.shrink();
+              }
+            );
+          },
+          throwsA(
+            isA<AssertionError>().having(
+              (AssertionError error) => error.toString(),
+              'description',
+              contains('maxYIndex == null || maxYIndex >= -1'),
+            ),
+          ),
+        );
+      });
+
       testWidgets('throws an error when builder throws', (WidgetTester tester) async {
         final List<Object> exceptions = <Object>[];
         final FlutterExceptionHandler? oldHandler = FlutterError.onError;
