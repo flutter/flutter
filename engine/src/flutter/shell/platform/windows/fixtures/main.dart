@@ -128,6 +128,38 @@ void exitTestCancel() async {
 }
 
 @pragma('vm:entry-point')
+void enableLifecycleTest() async {
+  final Completer<ByteData?> finished = Completer<ByteData?>();
+  ui.channelBuffers.setListener('flutter/lifecycle', (ByteData? data, ui.PlatformMessageResponseCallback callback) async {
+    if (data != null) {
+      ui.PlatformDispatcher.instance.sendPlatformMessage(
+        'flutter/unittest',
+        data,
+        (ByteData? reply) {
+          finished.complete();
+        });
+    }
+  });
+  await finished.future;
+}
+
+@pragma('vm:entry-point')
+void enableLifecycleToFrom() async {
+  ui.channelBuffers.setListener('flutter/lifecycle', (ByteData? data, ui.PlatformMessageResponseCallback callback) async {
+    if (data != null) {
+      ui.PlatformDispatcher.instance.sendPlatformMessage(
+        'flutter/unittest',
+        data,
+        (ByteData? reply) {});
+    }
+  });
+  final Completer<ByteData?> enabledLifecycle = Completer<ByteData?>();
+  ui.PlatformDispatcher.instance.sendPlatformMessage('flutter/platform', ByteData.sublistView(utf8.encode('{"method":"System.initializationComplete"}')), (ByteData? data) {
+    enabledLifecycle.complete(data);
+  });
+}
+
+@pragma('vm:entry-point')
 void customEntrypoint() {}
 
 @pragma('vm:entry-point')
