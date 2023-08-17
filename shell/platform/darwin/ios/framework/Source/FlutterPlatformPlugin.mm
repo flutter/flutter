@@ -123,9 +123,21 @@ using namespace flutter;
   } else if ([method isEqualToString:@"LookUp.invoke"]) {
     [self showLookUpViewController:args];
     result(nil);
+  } else if ([method isEqualToString:@"Share.invoke"]) {
+    [self showShareViewController:args];
+    result(nil);
   } else {
     result(FlutterMethodNotImplemented);
   }
+}
+
+- (void)showShareViewController:(NSString*)content {
+  UIViewController* engineViewController = [_engine.get() viewController];
+  NSArray* itemsToShare = @[ content ];
+  UIActivityViewController* activityViewController =
+      [[[UIActivityViewController alloc] initWithActivityItems:itemsToShare
+                                         applicationActivities:nil] autorelease];
+  [engineViewController presentViewController:activityViewController animated:YES completion:nil];
 }
 
 - (void)searchWeb:(NSString*)searchTerm {
@@ -338,7 +350,6 @@ using namespace flutter;
 
 - (void)showLookUpViewController:(NSString*)term {
   UIViewController* engineViewController = [_engine.get() viewController];
-  FML_DCHECK(![engineViewController presentingViewController]);
   UIReferenceLibraryViewController* referenceLibraryViewController =
       [[[UIReferenceLibraryViewController alloc] initWithTerm:term] autorelease];
   [engineViewController presentViewController:referenceLibraryViewController
