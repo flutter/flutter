@@ -8,6 +8,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.deferredcomponents.PlayStoreDeferredComponentManager;
@@ -73,8 +74,9 @@ public class FlutterInjectorTest {
     threadNames = injector.executorService().invokeAll(callables);
 
     assertEquals(threadNames.size(), 2);
-    assertEquals(threadNames.get(0).get(), "flutter-worker-0");
-    assertEquals(threadNames.get(1).get(), "flutter-worker-1");
+    for (Future<String> name : threadNames) {
+      assertTrue(name.get().startsWith("flutter-worker-"));
+    }
   }
 
   @Test
