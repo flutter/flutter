@@ -314,7 +314,7 @@ class WidgetsApp extends StatefulWidget {
     this.onGenerateRoute,
     this.onGenerateInitialRoutes,
     this.onUnknownRoute,
-    this.onNavigationNotification = defaultOnNavigationNotification,
+    this.onNavigationNotification,
     List<NavigatorObserver> this.navigatorObservers = const <NavigatorObserver>[],
     this.initialRoute,
     this.pageRouteBuilder,
@@ -422,7 +422,7 @@ class WidgetsApp extends StatefulWidget {
     this.builder,
     this.title = '',
     this.onGenerateTitle,
-    this.onNavigationNotification = defaultOnNavigationNotification,
+    this.onNavigationNotification,
     this.textStyle,
     required this.color,
     this.locale,
@@ -707,11 +707,7 @@ class WidgetsApp extends StatefulWidget {
   /// {@template flutter.widgets.widgetsApp.onNavigationNotification}
   /// The callback to use when receiving a [NavigationNotification].
   ///
-  /// By default set to [WidgetsApp.defaultOnNavigationNotification], which
-  /// updates the engine with the navigation status.
-  ///
-  /// If null, [NavigationNotification] is not listened for at all, and so will
-  /// continue to propagate.
+  /// By default this updates the engine with the navigation status.
   /// {@endtemplate}
   final NotificationListenerCallback<NavigationNotification>? onNavigationNotification;
 
@@ -1328,15 +1324,6 @@ class WidgetsApp extends StatefulWidget {
     VoidCallbackIntent: VoidCallbackAction(),
   };
 
-  /// The default value for [onNavigationNotification].
-  ///
-  /// Updates the platform with [NavigationNotification.canHandlePop] and stops
-  /// bubbling.
-  static bool defaultOnNavigationNotification(NavigationNotification notification) {
-    SystemNavigator.setFrameworkHandlesBack(notification.canHandlePop);
-    return true;
-  }
-
   @override
   State<WidgetsApp> createState() => _WidgetsAppState();
 }
@@ -1352,6 +1339,20 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     : widget.initialRoute ?? WidgetsBinding.instance.platformDispatcher.defaultRouteName;
 
   AppLifecycleState? _appLifecycleState;
+
+  /// The default value for [onNavigationNotification].
+  ///
+  /// Does nothing and stops bubbling if the app is detached. Otherwise, updates
+  /// the platform with [NavigationNotification.canHandlePop] and stops
+  /// bubbling.
+  bool _defaultOnNavigationNotification(NavigationNotification notification) {
+    // Don't do anything with navigation notifications if there is no engine
+    // attached.
+    if (_appLifecycleState != AppLifecycleState.detached) {
+      SystemNavigator.setFrameworkHandlesBack(notification.canHandlePop);
+    }
+    return true;
+  }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -1779,52 +1780,38 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
     assert(_debugCheckLocalizations(appLocale));
 
-    Widget child = Shortcuts(
-      debugLabel: '<Default WidgetsApp Shortcuts>',
-      shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
-      // DefaultTextEditingShortcuts is nested inside Shortcuts so that it can
-      // fall through to the defaultShortcuts.
-      child: DefaultTextEditingShortcuts(
-        child: Actions(
-          actions: widget.actions ?? <Type, Action<Intent>>{
-            ...WidgetsApp.defaultActions,
-            ScrollIntent: Action<ScrollIntent>.overridable(context: context, defaultAction: ScrollAction()),
-          },
-          child: FocusTraversalGroup(
-            policy: ReadingOrderTraversalPolicy(),
-            child: TapRegionSurface(
-              child: ShortcutRegistrar(
-                child: Localizations(
-                  locale: appLocale,
-                  delegates: _localizationsDelegates.toList(),
-                  child: title,
+    return RootRestorationScope(
+      restorationId: widget.restorationScopeId,
+      child: SharedAppData(
+        child: NotificationListener<NavigationNotification>(
+          onNotification: widget.onNavigationNotification ?? _defaultOnNavigationNotification,
+          child: Shortcuts(
+            debugLabel: '<Default WidgetsApp Shortcuts>',
+            shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
+            // DefaultTextEditingShortcuts is nested inside Shortcuts so that it can
+            // fall through to the defaultShortcuts.
+            child: DefaultTextEditingShortcuts(
+              child: Actions(
+                actions: widget.actions ?? <Type, Action<Intent>>{
+                  ...WidgetsApp.defaultActions,
+                  ScrollIntent: Action<ScrollIntent>.overridable(context: context, defaultAction: ScrollAction()),
+                },
+                child: FocusTraversalGroup(
+                  policy: ReadingOrderTraversalPolicy(),
+                  child: TapRegionSurface(
+                    child: ShortcutRegistrar(
+                      child: Localizations(
+                        locale: appLocale,
+                        delegates: _localizationsDelegates.toList(),
+                        child: title,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
         ),
-      ),
-    );
-
-    if (widget.onNavigationNotification != null) {
-      child = NotificationListener<NavigationNotification>(
-        onNotification: widget.onNavigationNotification == null ? null : (NavigationNotification notification) {
-          // By default, don't do anything with navigation notifications if
-          // there is no engine attached.
-          if (widget.onNavigationNotification == WidgetsApp.defaultOnNavigationNotification
-              && _appLifecycleState == AppLifecycleState.detached) {
-            return true;
-          }
-          return widget.onNavigationNotification!(notification);
-        },
-        child: child,
-      );
-    }
-
-    return RootRestorationScope(
-      restorationId: widget.restorationScopeId,
-      child: SharedAppData(
-        child: child,
       ),
     );
   }
