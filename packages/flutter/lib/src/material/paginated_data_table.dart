@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart' show DragStartBehavior;
-import 'package:flutter/src/material/material_state.dart';
 import 'package:flutter/widgets.dart';
 
 import 'card.dart';
@@ -18,6 +17,7 @@ import 'icon_button.dart';
 import 'icons.dart';
 import 'ink_decoration.dart';
 import 'material_localizations.dart';
+import 'material_state.dart';
 import 'progress_indicator.dart';
 import 'theme.dart';
 
