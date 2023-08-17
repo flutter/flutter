@@ -34,8 +34,10 @@ void usePathUrlStrategy() {
 /// ```dart
 /// import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 ///
-/// // Somewhere before calling `runApp()` do:
-/// setUrlStrategy(PathUrlStrategy());
+/// void main() {
+///   // Somewhere before calling `runApp()` do:
+///   setUrlStrategy(PathUrlStrategy());
+/// }
 /// ```
 class PathUrlStrategy extends ui_web.HashUrlStrategy {
   /// Creates an instance of [PathUrlStrategy].
