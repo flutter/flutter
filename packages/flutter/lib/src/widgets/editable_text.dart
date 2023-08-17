@@ -206,7 +206,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
         value == null || !value.composing.isValid || value.isComposingRangeValid,
         'New TextEditingValue $value has an invalid non-empty composing range '
         '${value.composing}. It is recommended to use a valid composing range, '
-        'even for readonly text fields',
+        'even for readonly text fields.',
       ),
       super(value ?? TextEditingValue.empty);
 
@@ -235,7 +235,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
       !newValue.composing.isValid || newValue.isComposingRangeValid,
       'New TextEditingValue $newValue has an invalid non-empty composing range '
       '${newValue.composing}. It is recommended to use a valid composing range, '
-      'even for readonly text fields',
+      'even for readonly text fields.',
     );
     super.value = newValue;
   }
@@ -547,8 +547,11 @@ class _DiscreteKeyFrameSimulation extends Simulation {
 ///
 /// This widget interacts with the [TextInput] service to let the user edit the
 /// text it contains. It also provides scrolling, selection, and cursor
-/// movement. This widget does not provide any focus management (e.g.,
-/// tap-to-focus).
+/// movement.
+///
+/// The [EditableText] widget is a low-level widget that is intended as a
+/// building block for custom widget sets. For a complete user experience,
+/// consider using a [TextField] or [CupertinoTextField].
 ///
 /// ## Handling User Input
 ///
@@ -662,13 +665,14 @@ class _DiscreteKeyFrameSimulation extends Simulation {
 ///
 /// ## Gesture Events Handling
 ///
-/// This widget provides rudimentary, platform-agnostic gesture handling for
-/// user actions such as tapping, long-pressing and scrolling when
-/// [rendererIgnoresPointer] is false (false by default). To tightly conform
-/// to the platform behavior with respect to input gestures in text fields, use
-/// [TextField] or [CupertinoTextField]. For custom selection behavior, call
-/// methods such as [RenderEditable.selectPosition],
-/// [RenderEditable.selectWord], etc. programmatically.
+/// When [rendererIgnoresPointer] is false (the default), this widget provides
+/// rudimentary, platform-agnostic gesture handling for user actions such as
+/// tapping, long-pressing, and scrolling.
+///
+/// To provide more complete gesture handling, including double-click to select
+/// a word, drag selection, and platform-specific handling of gestures such as
+/// long presses, consider setting [rendererIgnoresPointer] to true and using
+/// [TextSelectionGestureDetectorBuilder].
 ///
 /// {@template flutter.widgets.editableText.showCaretOnScreen}
 /// ## Keep the caret visible when focused
@@ -696,7 +700,7 @@ class _DiscreteKeyFrameSimulation extends Simulation {
 /// a currency value text field. The following example demonstrates how to
 /// suppress the default accessibility announcements by always announcing
 /// the content of the text field as a US currency value (the `\$` inserts
-/// a dollar sign, the `$newText interpolates the `newText` variable):
+/// a dollar sign, the `$newText` interpolates the `newText` variable):
 ///
 /// ```dart
 /// onChanged: (String newText) {
@@ -726,14 +730,6 @@ class EditableText extends StatefulWidget {
   ///
   /// The text cursor is not shown if [showCursor] is false or if [showCursor]
   /// is null (the default) and [readOnly] is true.
-  ///
-  /// The [controller], [focusNode], [obscureText], [autocorrect], [autofocus],
-  /// [showSelectionHandles], [enableInteractiveSelection], [forceLine],
-  /// [style], [cursorColor], [cursorOpacityAnimates], [backgroundCursorColor],
-  /// [enableSuggestions], [paintCursorAboveText], [selectionHeightStyle],
-  /// [selectionWidthStyle], [textAlign], [dragStartBehavior], [scrollPadding],
-  /// [dragStartBehavior], [toolbarOptions], [rendererIgnoresPointer],
-  /// [readOnly], and [enableIMEPersonalizedLearning] arguments must not be null.
   EditableText({
     super.key,
     required this.controller,
@@ -1101,8 +1097,7 @@ class EditableText extends StatefulWidget {
   /// The color to use when painting the background cursor aligned with the text
   /// while rendering the floating cursor.
   ///
-  /// Cannot be null. By default it is the disabled grey color from
-  /// CupertinoColors.
+  /// Typically this would be set to [CupertinoColors.inactiveGray].
   final Color backgroundCursorColor;
 
   /// {@template flutter.widgets.editableText.maxLines}
@@ -1255,11 +1250,14 @@ class EditableText extends StatefulWidget {
   final Color? selectionColor;
 
   /// {@template flutter.widgets.editableText.selectionControls}
-  /// Optional delegate for building the text selection handles and toolbar.
+  /// Optional delegate for building the text selection handles.
   ///
-  /// The [EditableText] widget used on its own will not trigger the display
-  /// of the selection toolbar by itself. The toolbar is shown by calling
-  /// [EditableTextState.showToolbar] in response to an appropriate user event.
+  /// Historically, this field also controlled the toolbar. This is now handled
+  /// by [contextMenuBuilder] instead. However, for backwards compatibility, when
+  /// [selectionControls] is set to an object that does not mix in
+  /// [TextSelectionHandleControls], [contextMenuBuilder] is ignored and the
+  /// [TextSelectionControls.buildToolbar] method is used instead.
+  /// {@endtemplate}
   ///
   /// See also:
   ///
@@ -1269,7 +1267,6 @@ class EditableText extends StatefulWidget {
   ///  * [TextField], a Material Design themed wrapper of [EditableText], which
   ///    shows the selection toolbar upon appropriate user events based on the
   ///    user's platform set in [ThemeData.platform].
-  /// {@endtemplate}
   final TextSelectionControls? selectionControls;
 
   /// {@template flutter.widgets.editableText.keyboardType}
@@ -1471,10 +1468,28 @@ class EditableText extends StatefulWidget {
   /// the editing position.
   final MouseCursor? mouseCursor;
 
-  /// If true, the [RenderEditable] created by this widget will not handle
-  /// pointer events, see [RenderEditable] and [RenderEditable.ignorePointer].
+  /// Whether the caller will provide gesture handling (true), or if the
+  /// [EditableText] is expected to handle basic gestures (false).
+  ///
+  /// When this is false, the [EditableText] (or more specifically, the
+  /// [RenderEditable]) enables some rudimentary gestures (tap to position the
+  /// cursor, long-press to select all, and some scrolling behavior).
+  ///
+  /// These behaviors are sufficient for debugging purposes but are inadequate
+  /// for user-facing applications. To enable platform-specific behaviors, use a
+  /// [TextSelectionGestureDetectorBuilder] to wrap the [EditableText], and set
+  /// [rendererIgnoresPointer] to true.
+  ///
+  /// When [rendererIgnoresPointer] is true true, the [RenderEditable] created
+  /// by this widget will not handle pointer events.
   ///
   /// This property is false by default.
+  ///
+  /// See also:
+  ///
+  ///  * [RenderEditable.ignorePointer], which implements this feature.
+  ///  * [TextSelectionGestureDetectorBuilder], which implements platform-specific
+  ///    gestures and behaviors.
   final bool rendererIgnoresPointer;
 
   /// {@template flutter.widgets.editableText.cursorWidth}
@@ -1777,6 +1792,11 @@ class EditableText extends StatefulWidget {
   ///
   /// `buttonItems` represents the buttons that would be built by default for
   /// this widget.
+  ///
+  /// For backwards compatibility, when [selectionControls] is set to an object
+  /// that does not mix in [TextSelectionHandleControls], [contextMenuBuilder]
+  /// is ignored and the [TextSelectionControls.buildToolbar] method is used
+  /// instead.
   ///
   /// {@tool dartpad}
   /// This example shows how to customize the menu, in this case by keeping the

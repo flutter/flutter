@@ -631,6 +631,7 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
     final double leadingScrollOffset = firstChildGridGeometry.scrollOffset;
     double trailingScrollOffset = firstChildGridGeometry.trailingScrollOffset;
     RenderBox? trailingChildWithLayout;
+    bool reachedEnd = false;
 
     for (int index = indexOf(firstChild!) - 1; index >= firstIndex; --index) {
       final SliverGridGeometry gridGeometry = layout.getGeometryForChildIndex(index);
@@ -660,6 +661,7 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
       if (child == null || indexOf(child) != index) {
         child = insertAndLayoutChild(childConstraints, after: trailingChildWithLayout);
         if (child == null) {
+          reachedEnd = true;
           // We have run out of children.
           break;
         }
@@ -680,13 +682,15 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
     assert(indexOf(firstChild!) == firstIndex);
     assert(targetLastIndex == null || lastIndex <= targetLastIndex);
 
-    final double estimatedTotalExtent = childManager.estimateMaxScrollOffset(
-      constraints,
-      firstIndex: firstIndex,
-      lastIndex: lastIndex,
-      leadingScrollOffset: leadingScrollOffset,
-      trailingScrollOffset: trailingScrollOffset,
-    );
+    final double estimatedTotalExtent = reachedEnd
+      ? trailingScrollOffset
+      : childManager.estimateMaxScrollOffset(
+          constraints,
+          firstIndex: firstIndex,
+          lastIndex: lastIndex,
+          leadingScrollOffset: leadingScrollOffset,
+          trailingScrollOffset: trailingScrollOffset,
+        );
     final double paintExtent = calculatePaintOffset(
       constraints,
       from: math.min(constraints.scrollOffset, leadingScrollOffset),
