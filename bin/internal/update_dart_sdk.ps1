@@ -18,7 +18,6 @@ $flutterRoot = (Get-Item $progName).parent.parent.FullName
 
 $cachePath = "$flutterRoot\bin\cache"
 $dartSdkPath = "$cachePath\dart-sdk"
-$dartSdkLicense = "$cachePath\LICENSE.dart_sdk_archive.md"
 $engineStamp = "$cachePath\engine-dart-sdk.stamp"
 $engineVersion = (Get-Content "$flutterRoot\bin\internal\engine.version")
 $engineRealm = (Get-Content "$flutterRoot\bin\internal\engine.realm")
@@ -50,18 +49,11 @@ if ($engineRealm) {
 $dartZipName = "dart-sdk-windows-x64.zip"
 $dartSdkUrl = "$dartSdkBaseUrl/flutter_infra_release/flutter/$engineVersion/$dartZipName"
 
-if ((Test-Path $dartSdkPath) -or (Test-Path $dartSdkLicense)) {
+if (Test-Path $dartSdkPath) {
     # Move old SDK to a new location instead of deleting it in case it is still in use (e.g. by IntelliJ).
     $oldDartSdkSuffix = 1
     while (Test-Path "$cachePath\$oldDartSdkPrefix$oldDartSdkSuffix") { $oldDartSdkSuffix++ }
-
-    if (Test-Path $dartSdkPath) {
-        Rename-Item $dartSdkPath "$oldDartSdkPrefix$oldDartSdkSuffix"
-    }
-
-    if (Test-Path $dartSdkLicense) {
-        Rename-Item $dartSdkLicense "$oldDartSdkPrefix$oldDartSdkSuffix.LICENSE.md"
-    }
+    Rename-Item $dartSdkPath "$oldDartSdkPrefix$oldDartSdkSuffix"
 }
 New-Item $dartSdkPath -force -type directory | Out-Null
 $dartSdkZip = "$cachePath\$dartZipName"
@@ -106,5 +98,5 @@ If (Get-Command 7z -errorAction SilentlyContinue) {
 Remove-Item $dartSdkZip
 $engineVersion | Out-File $engineStamp -Encoding ASCII
 
-# Try to delete all old SDKs and license files.
+# Try to delete all old SDKs.
 Get-ChildItem -Path $cachePath | Where {$_.BaseName.StartsWith($oldDartSdkPrefix)} | Remove-Item -Recurse -ErrorAction SilentlyContinue
