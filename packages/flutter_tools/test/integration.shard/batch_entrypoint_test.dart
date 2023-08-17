@@ -27,8 +27,9 @@ Future<void> main() async {
     dartSdkStamp.deleteSync();
     final Future<String> runFuture = runDartBatch();
     final Timer timer = Timer(const Duration(minutes: 5), () {
-      // This print is useful for people debugging this test. Normally we would avoid printing in
-      // a test but this is an exception because it's useful ambient information.
+      // This print is useful for people debugging this test. Normally we would
+      // avoid printing in a test but this is an exception because it's useful
+      // ambient information.
       // ignore: avoid_print
       print(
         'The Dart batch entrypoint did not complete after 5 minutes. '
