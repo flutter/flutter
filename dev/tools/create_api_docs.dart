@@ -237,6 +237,7 @@ class Configurator {
       // Have to canonicalize because otherwise things like /foo/bar/baz and
       // /foo/../foo/bar/baz won't compare as identical.
       if (path.canonicalize(source.absolute.path) != path.canonicalize(destination.absolute.path)) {
+        print('Copying ${path.canonicalize(source.absolute.path)} to ${path.canonicalize(destination.absolute.path)}');
         source.copySync(destination.path);
       }
     }
@@ -250,7 +251,7 @@ class Configurator {
       assetsDir.deleteSync(recursive: true);
     }
     copyDirectorySync(docsRoot.childDirectory('assets'), assetsDir,
-        (File src, File dest) => print('Copied ${src.path} to ${dest.path}'));
+        (File src, File dest) => print('Copied ${path.canonicalize(src.absolute.path)} to ${path.canonicalize(dest.absolute.path)}'));
   }
 
   /// Generates an OpenSearch XML description that can be used to add a custom
