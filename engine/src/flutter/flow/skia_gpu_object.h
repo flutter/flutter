@@ -128,6 +128,8 @@ class UnrefQueue : public fml::RefCountedThreadSafe<UnrefQueue<T>> {
       if (!skia_objects.empty()) {
         context->performDeferredCleanup(std::chrono::milliseconds(0));
       }
+
+      context->flushAndSubmit(true);
     }
   }
 
