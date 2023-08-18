@@ -548,7 +548,7 @@ void main() {
   }, variant: TargetPlatformVariant.all());
 
   group('SelectionArea integration', () {
-    testWidgetsWithLeakTracking('mouse can select single text', (WidgetTester tester) async {
+    testWidgets('mouse can select single text on desktop platforms', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
 
@@ -584,8 +584,12 @@ void main() {
 
       // Start a new drag.
       await gesture.up();
+      await tester.pumpAndSettle();
+
       await gesture.down(textOffsetToPosition(paragraph, 5));
       await tester.pumpAndSettle();
+      expect(paragraph.selections.isEmpty, isFalse);
+      expect(paragraph.selections[0], const TextSelection.collapsed(offset: 5));
 
       // Selecting across line should select to the end.
       await gesture.moveTo(textOffsetToPosition(paragraph, 5) + const Offset(0.0, 200.0));
@@ -593,7 +597,57 @@ void main() {
       expect(paragraph.selections[0], const TextSelection(baseOffset: 5, extentOffset: 11));
 
       await gesture.up();
-    });
+    }, variant: TargetPlatformVariant.desktop());
+
+    testWidgets('mouse can select single text on mobile platforms', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: FocusNode(),
+            selectionControls: materialTextSelectionControls,
+            child: const Center(
+              child: Text('How are you'),
+            ),
+          ),
+        ),
+      );
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you'), matching: find.byType(RichText)));
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2), kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+
+      await gesture.moveTo(textOffsetToPosition(paragraph, 4));
+      await tester.pump();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 2, extentOffset: 4));
+
+      await gesture.moveTo(textOffsetToPosition(paragraph, 6));
+      await tester.pump();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 2, extentOffset: 6));
+
+      // Check backward selection.
+      await gesture.moveTo(textOffsetToPosition(paragraph, 1));
+      await tester.pump();
+      expect(paragraph.selections.isEmpty, isFalse);
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 2, extentOffset: 1));
+
+      // Start a new drag.
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      await gesture.down(textOffsetToPosition(paragraph, 5));
+      await tester.pumpAndSettle();
+      await gesture.moveTo(textOffsetToPosition(paragraph, 6));
+      await tester.pump();
+      expect(paragraph.selections.isEmpty, isFalse);
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 5, extentOffset: 6));
+
+      // Selecting across line should select to the end.
+      await gesture.moveTo(textOffsetToPosition(paragraph, 5) + const Offset(0.0, 200.0));
+      await tester.pump();
+      expect(paragraph.selections[0], const TextSelection(baseOffset: 5, extentOffset: 11));
+
+      await gesture.up();
+    }, variant: TargetPlatformVariant.mobile());
 
     testWidgetsWithLeakTracking('mouse can select word-by-word on double click drag', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
