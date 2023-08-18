@@ -95,4 +95,12 @@ void main() {
     expect(flutterView.viewId, 0);
     expect(flutterView.toString(), 'FlutterView(id: 0)');
   });
+
+  test('scaleFontSize is the identity function by default when textScaleFactor = 1', () {
+    expect(PlatformDispatcher.instance.scaleFontSize(0), 0.0);
+    expect(PlatformDispatcher.instance.scaleFontSize(1), 1.0);
+    expect(PlatformDispatcher.instance.scaleFontSize(2), 2.0);
+    expect(PlatformDispatcher.instance.scaleFontSize(3), 3.0);
+    expect(PlatformDispatcher.instance.scaleFontSize(3.4), 3.4);
+  });
 }
