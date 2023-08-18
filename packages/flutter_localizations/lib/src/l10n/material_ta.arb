@@ -145,5 +145,6 @@
   "collapsedHint": "விரிவாக்கப்பட்டது",
   "menuDismissLabel": "மெனுவை மூடும்",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }
