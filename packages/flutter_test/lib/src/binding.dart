@@ -1748,6 +1748,14 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     super.scheduleForcedFrame();
   }
 
+  bool _expectingWarmUpFrame = false;
+
+  @override
+  void scheduleWarmUpFrame() {
+    _expectingWarmUpFrame = true;
+    super.scheduleWarmUpFrame();
+  }
+
   @override
   Future<void> reassembleApplication() {
     _expectingFrameToReassemble = true;
@@ -1761,6 +1769,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(_doDrawThisFrame == null);
     if (_expectingFrame ||
         _expectingFrameToReassemble ||
+        _expectingWarmUpFrame ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.fullyLive) ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive) ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark) ||
@@ -1781,7 +1790,10 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     _doDrawThisFrame = null;
     _viewNeedsPaint = false;
     _expectingFrameToReassemble = false;
-    if (_expectingFrame) { // set during pump
+    // _expectingFrame is set during pump, but a warmup frame should not complete
+    // the pump future (_pendingFrame) as the frame may not have been rendered
+    // by the engine.
+    if (_expectingFrame && !_expectingWarmUpFrame) {
       assert(_pendingFrame != null);
       _pendingFrame!.complete(); // unlocks the test API
       _pendingFrame = null;
@@ -1789,6 +1801,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     } else if (framePolicy != LiveTestWidgetsFlutterBindingFramePolicy.benchmark) {
       platformDispatcher.scheduleFrame();
     }
+    _expectingWarmUpFrame = false;
   }
 
   void _markViewsNeedPaint([int? viewId]) {
