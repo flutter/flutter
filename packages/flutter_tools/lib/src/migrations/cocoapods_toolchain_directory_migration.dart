@@ -50,7 +50,8 @@ class CocoaPodsToolchainDirectoryMigration extends ProjectMigrator {
 
   @override
   String? migrateLine(String line) {
-    if (line.startsWith('LD_RUNPATH_SEARCH_PATHS') || line.startsWith('LIBRARY_SEARCH_PATHS')) {
+    final String trimmedString = line.trim();
+    if (trimmedString.startsWith('LD_RUNPATH_SEARCH_PATHS') || trimmedString.startsWith('LIBRARY_SEARCH_PATHS')) {
       const String originalReadLinkLine = r'{DT_TOOLCHAIN_DIR}';
       const String replacementReadLinkLine = r'{TOOLCHAIN_DIR}';
 
