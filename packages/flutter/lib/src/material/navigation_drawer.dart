@@ -230,7 +230,7 @@ class NavigationDrawerDestination extends StatelessWidget {
   /// text style would use [TextTheme.labelLarge] with [ColorScheme.onSurfaceVariant].
   final Widget label;
 
-  /// Indicates that this destination is accessible.
+  /// Indicates that this destination is selectable.
   final bool enabled;
 
   @override
