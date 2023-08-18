@@ -157,6 +157,15 @@ public class MethodChannel {
     BasicMessageChannel.resizeChannelBuffer(messenger, name, newSize);
   }
 
+  /**
+   * Toggles whether the channel should show warning messages when discarding messages due to
+   * overflow. When 'allowed' is true the channel is expected to overflow and warning messages will
+   * not be shown.
+   */
+  public void allowChannelBufferOverflow(boolean allowed) {
+    BasicMessageChannel.allowChannelBufferOverflow(messenger, name, allowed);
+  }
+
   /** A handler of incoming method calls. */
   public interface MethodCallHandler {
     /**

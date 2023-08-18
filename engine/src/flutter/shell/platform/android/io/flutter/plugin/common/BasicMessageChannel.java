@@ -12,8 +12,7 @@ import io.flutter.Log;
 import io.flutter.plugin.common.BinaryMessenger.BinaryMessageHandler;
 import io.flutter.plugin.common.BinaryMessenger.BinaryReply;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.util.Locale;
+import java.util.Arrays;
 
 /**
  * A named channel for communicating with the Flutter application using basic, asynchronous message
@@ -143,13 +142,56 @@ public final class BasicMessageChannel<T> {
     resizeChannelBuffer(messenger, name, newSize);
   }
 
-  static void resizeChannelBuffer(
-      @NonNull BinaryMessenger messenger, @NonNull String channel, int newSize) {
-    Charset charset = Charset.forName("UTF-8");
-    String messageString = String.format(Locale.US, "resize\r%s\r%d", channel, newSize);
-    final byte[] bytes = messageString.getBytes(charset);
+  /**
+   * Toggles whether the channel should show warning messages when discarding messages due to
+   * overflow. When 'allowed' is true the channel is expected to overflow and warning messages will
+   * not be shown.
+   */
+  public void allowChannelBufferOverflow(boolean allowed) {
+    allowChannelBufferOverflow(messenger, name, allowed);
+  }
+
+  private static ByteBuffer packetFromEncodedMessage(ByteBuffer message) {
+    // Create a bytes array using the buffer content (messages.array() can not be used here).
+    message.flip();
+    final byte[] bytes = new byte[message.remaining()];
+    message.get(bytes);
+
+    // The current Android Java/JNI platform message implementation assumes
+    // that all buffers passed to native are direct buffers.
     ByteBuffer packet = ByteBuffer.allocateDirect(bytes.length);
     packet.put(bytes);
+
+    return packet;
+  }
+
+  /**
+   * Adjusts the number of messages that will get buffered when sending messages to channels that
+   * aren't fully set up yet. For example, the engine isn't running yet or the channel's message
+   * handler isn't set up on the Dart side yet.
+   */
+  public static void resizeChannelBuffer(
+      @NonNull BinaryMessenger messenger, @NonNull String channel, int newSize) {
+    final StandardMethodCodec codec = StandardMethodCodec.INSTANCE;
+    Object[] arguments = {channel, newSize};
+    MethodCall methodCall = new MethodCall("resize", Arrays.asList(arguments));
+    ByteBuffer message = codec.encodeMethodCall(methodCall);
+    ByteBuffer packet = packetFromEncodedMessage(message);
+    messenger.send(BasicMessageChannel.CHANNEL_BUFFERS_CHANNEL, packet);
+  }
+
+  /**
+   * Toggles whether the channel should show warning messages when discarding messages due to
+   * overflow. When 'allowed' is true the channel is expected to overflow and warning messages will
+   * not be shown.
+   */
+  public static void allowChannelBufferOverflow(
+      @NonNull BinaryMessenger messenger, @NonNull String channel, boolean allowed) {
+    final StandardMethodCodec codec = StandardMethodCodec.INSTANCE;
+    Object[] arguments = {channel, allowed};
+    MethodCall methodCall = new MethodCall("overflow", Arrays.asList(arguments));
+    ByteBuffer message = codec.encodeMethodCall(methodCall);
+    ByteBuffer packet = packetFromEncodedMessage(message);
     messenger.send(BasicMessageChannel.CHANNEL_BUFFERS_CHANNEL, packet);
   }
 
