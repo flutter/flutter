@@ -959,6 +959,80 @@ void main() {
     );
 
     testWidgets(
+      'right-click mouse can select word at position on Apple platforms',
+      (WidgetTester tester) async {
+        Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
+        final UniqueKey toolbarKey = UniqueKey();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: SelectableRegion(
+              focusNode: FocusNode(),
+              selectionControls: materialTextSelectionHandleControls,
+              contextMenuBuilder: (
+                BuildContext context,
+                SelectableRegionState selectableRegionState,
+              ) {
+                buttonTypes = selectableRegionState.contextMenuButtonItems
+                  .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
+                  .toSet();
+                return SizedBox.shrink(key: toolbarKey);
+              },
+              child: const Center(
+                child: Text('How are you'),
+              ),
+            ),
+          ),
+        );
+
+        expect(buttonTypes.isEmpty, true);
+        expect(find.byKey(toolbarKey), findsNothing);
+
+        final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you'), matching: find.byType(RichText)));
+        final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2), kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
+        addTearDown(gesture.removePointer);
+        await tester.pump();
+        expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 3));
+
+        await gesture.up();
+        await tester.pump();
+
+        expect(buttonTypes, contains(ContextMenuButtonType.copy));
+        expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
+        expect(find.byKey(toolbarKey), findsOneWidget);
+
+        await gesture.down(textOffsetToPosition(paragraph, 6));
+        await tester.pump();
+        expect(paragraph.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+
+        await gesture.up();
+        await tester.pump();
+
+        expect(buttonTypes, contains(ContextMenuButtonType.copy));
+        expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
+        expect(find.byKey(toolbarKey), findsOneWidget);
+
+        await gesture.down(textOffsetToPosition(paragraph, 9));
+        await tester.pump();
+        expect(paragraph.selections[0], const TextSelection(baseOffset: 8, extentOffset: 11));
+
+        await gesture.up();
+        await tester.pump();
+
+        expect(buttonTypes, contains(ContextMenuButtonType.copy));
+        expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
+        expect(find.byKey(toolbarKey), findsOneWidget);
+
+        // Clear selection.
+        await tester.tapAt(textOffsetToPosition(paragraph, 1));
+        await tester.pump();
+        expect(paragraph.selections.isEmpty, true);
+        expect(find.byKey(toolbarKey), findsNothing);
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }),
+      skip: kIsWeb, // [intended] Web uses its native context menu.
+    );
+
+    testWidgets(
       'right-click mouse at the same position as previous right-click toggles the context menu on macOS',
       (WidgetTester tester) async {
         Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
