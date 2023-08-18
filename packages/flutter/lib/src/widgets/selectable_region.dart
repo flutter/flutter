@@ -341,7 +341,20 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     _gestureRecognizers[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
           () => TapGestureRecognizer(debugOwner: this),
           (TapGestureRecognizer instance) {
-        instance.onTap = _clearSelection;
+        instance.onTapUp = (TapUpDetails details) {
+          if (defaultTargetPlatform == TargetPlatform.iOS && _positionIsOnActiveSelection(globalPosition: details.globalPosition)) {
+            // On iOS when the tap occurs on the previous selection, instead of
+            // moving the selection, the context menu will be toggled.
+            final bool toolbarIsVisible = _selectionOverlay?.toolbarIsVisible ?? false;
+            if (toolbarIsVisible) {
+              hideToolbar(false);
+            } else {
+              _showToolbar(location: details.globalPosition);
+            }
+          } else {
+            _clearSelection();
+          }
+        };
         instance.onSecondaryTapDown = _handleRightClickDown;
       },
     );
