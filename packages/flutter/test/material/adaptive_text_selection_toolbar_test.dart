@@ -194,6 +194,7 @@ void main() {
               onLiveTextInput: () {},
               onLookUp: () {},
               onSearchWeb: () {},
+              onShare: () {},
             ),
           ),
         ),
@@ -211,7 +212,7 @@ void main() {
         expect(find.byType(TextSelectionToolbarTextButton), findsNWidgets(6));
       case TargetPlatform.fuchsia:
         expect(find.text('Select all'), findsOneWidget);
-        expect(find.byType(TextSelectionToolbarTextButton), findsNWidgets(7));
+        expect(find.byType(TextSelectionToolbarTextButton), findsNWidgets(8));
       case TargetPlatform.iOS:
         expect(find.text('Select All'), findsOneWidget);
         expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(6));
@@ -221,10 +222,10 @@ void main() {
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         expect(find.text('Select all'), findsOneWidget);
-        expect(find.byType(DesktopTextSelectionToolbarButton), findsNWidgets(7));
+        expect(find.byType(DesktopTextSelectionToolbarButton), findsNWidgets(8));
       case TargetPlatform.macOS:
         expect(find.text('Select All'), findsOneWidget);
-        expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(7));
+        expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(8));
     }
   },
     skip: kIsWeb, // [intended] on web the browser handles the context menu.

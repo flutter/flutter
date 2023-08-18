@@ -151,5 +151,6 @@
   "collapsedHint": "Развернуто",
   "menuDismissLabel": "Закрыть меню",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }
