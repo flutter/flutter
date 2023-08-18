@@ -3,6 +3,8 @@
 Here are some noteworthy benchmarks related to Impeller performance:
 
 - **New Gallery** - Runs through the Flutter Gallery with a driver test.
+  - Pixel 7 Pro
+    - Skia vs Vulkan Impeller - frame raster time stats: [dashboard](https://flutter-flutter-perf.skia.org/e/?queries=device_type%3DPixel_7_Pro%26sub_result%3D90th_percentile_frame_rasterizer_time_millis%26sub_result%3D99th_percentile_frame_rasterizer_time_millis%26sub_result%3Daverage_frame_rasterizer_time_millis%26sub_result%3Dworst_frame_rasterizer_time_millis%26test%3Dnew_gallery__transition_perf%26test%3Dnew_gallery_impeller__transition_perf)
   - Samsung S10
     - Vulkan: [dashboard](https://flutter-flutter-perf.skia.org/e/?keys=X8f96868d3a9eeb120bec1f458c577c30)
     - OpenGLES: [dashboard](https://flutter-flutter-perf.skia.org/e/?keys=Xeb13bfef4ef2947f899646422bbad8c6)
