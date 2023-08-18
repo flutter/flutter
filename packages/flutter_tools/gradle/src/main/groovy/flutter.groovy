@@ -161,6 +161,7 @@ class FlutterPlugin implements Plugin<Project> {
     private File flutterRoot
     private File flutterExecutable
     private String localEngine
+    private String localEngineHost
     private String localEngineSrcPath
     private Properties localProperties
     private String engineVersion
@@ -321,6 +322,13 @@ class FlutterPlugin implements Plugin<Project> {
             }
             localEngine = engineOut.name
             localEngineSrcPath = engineOut.parentFile.parent
+
+            String engineHostOutPath = project.property('local-engine-host-out')
+            File engineHostOut = project.file(engineHostOutPath)
+            if (!engineHostOut.isDirectory()) {
+                throw new GradleException('local-engine-host-out must point to a local engine host build')
+            }
+            localEngineHost = engineHostOut.name
         }
         project.android.buildTypes.all this.&addFlutterDependencies
     }
@@ -1033,6 +1041,7 @@ class FlutterPlugin implements Plugin<Project> {
                 flutterExecutable this.flutterExecutable
                 buildMode variantBuildMode
                 localEngine this.localEngine
+                localEngineHost this.localEngineHost
                 localEngineSrcPath this.localEngineSrcPath
                 targetPath getFlutterTarget()
                 verbose this.isVerbose()
@@ -1259,6 +1268,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     @Optional @Input
     String localEngine
     @Optional @Input
+    String localEngineHost
+    @Optional @Input
     String localEngineSrcPath
     @Optional @Input
     Boolean fastStart
@@ -1336,6 +1347,9 @@ abstract class BaseFlutterTask extends DefaultTask {
             if (localEngine != null) {
                 args "--local-engine", localEngine
                 args "--local-engine-src-path", localEngineSrcPath
+            }
+            if (localEngineHost != null) {
+                args "--local-engine-host", localEngineHost
             }
             if (verbose) {
                 args "--verbose"

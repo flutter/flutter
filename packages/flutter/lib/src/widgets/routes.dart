@@ -717,12 +717,24 @@ mixin LocalHistoryRoute<T> on Route<T> {
     }
   }
 
+  @Deprecated(
+    'Use popDisposition instead. '
+    'This feature was deprecated after v3.12.0-1.0.pre.',
+  )
   @override
   Future<RoutePopDisposition> willPop() async {
     if (willHandlePopInternally) {
       return RoutePopDisposition.pop;
     }
     return super.willPop();
+  }
+
+  @override
+  RoutePopDisposition get popDisposition {
+    if (willHandlePopInternally) {
+      return RoutePopDisposition.pop;
+    }
+    return super.popDisposition;
   }
 
   @override
@@ -1490,6 +1502,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   final List<WillPopCallback> _willPopCallbacks = <WillPopCallback>[];
 
+  final Set<PopEntry> _popEntries = <PopEntry>{};
+
   /// Returns [RoutePopDisposition.doNotPop] if any of callbacks added with
   /// [addScopedWillPopCallback] returns either false or null. If they all
   /// return true, the base [Route.willPop]'s result will be returned. The
@@ -1508,6 +1522,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///    method checks.
   ///  * [removeScopedWillPopCallback], which removes a callback from the list
   ///    this method checks.
+  @Deprecated(
+    'Use popDisposition instead. '
+    'This feature was deprecated after v3.12.0-1.0.pre.',
+  )
   @override
   Future<RoutePopDisposition> willPop() async {
     final _ModalScopeState<T>? scope = _scopeKey.currentState;
@@ -1520,25 +1538,43 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     return super.willPop();
   }
 
+  /// Returns [RoutePopDisposition.doNotPop] if any of the [PopEntry] instances
+  /// registered with [registerPopEntry] have [PopEntry.canPopNotifier] set to
+  /// false.
+  ///
+  /// Typically this method is not overridden because applications usually
+  /// don't create modal routes directly, they use higher level primitives
+  /// like [showDialog]. The scoped [PopEntry] list makes it possible for
+  /// ModalRoute descendants to collectively define the value of
+  /// [popDisposition].
+  ///
+  /// See also:
+  ///
+  ///  * [Form], which provides an `onPopInvoked` callback that is similar.
+  ///  * [registerPopEntry], which adds a [PopEntry] to the list this method
+  ///    checks.
+  ///  * [unregisterPopEntry], which removes a [PopEntry] from the list this
+  ///    method checks.
+  @override
+  RoutePopDisposition get popDisposition {
+    final bool canPop = _popEntries.every((PopEntry popEntry) {
+      return popEntry.canPopNotifier.value;
+    });
+
+    if (!canPop) {
+      return RoutePopDisposition.doNotPop;
+    }
+    return super.popDisposition;
+  }
+
+  @override
+  void onPopInvoked(bool didPop) {
+    for (final PopEntry popEntry in _popEntries) {
+      popEntry.onPopInvoked?.call(didPop);
+    }
+  }
+
   /// Enables this route to veto attempts by the user to dismiss it.
-  ///
-  /// {@tool snippet}
-  /// This callback is typically added using a [WillPopScope] widget. That
-  /// widget finds the enclosing [ModalRoute] and uses this function to register
-  /// this callback:
-  ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   return WillPopScope(
-  ///     onWillPop: () async {
-  ///       // ask the user if they are sure
-  ///       return true;
-  ///     },
-  ///     child: Container(),
-  ///   );
-  /// }
-  /// ```
-  /// {@end-tool}
   ///
   /// This callback runs asynchronously and it's possible that it will be called
   /// after its route has been disposed. The callback should check [State.mounted]
@@ -1548,49 +1584,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// unsaved [Form] data if the user attempts to back out of the form. In that
   /// case, use the [Form.onWillPop] property to register the callback.
   ///
-  /// {@tool snippet}
-  /// To register a callback manually, look up the enclosing [ModalRoute] in a
-  /// [State.didChangeDependencies] callback:
-  ///
-  /// ```dart
-  /// abstract class _MyWidgetState extends State<MyWidget> {
-  ///   ModalRoute<dynamic>? _route;
-  ///
-  ///   // ...
-  ///
-  ///   @override
-  ///   void didChangeDependencies() {
-  ///    super.didChangeDependencies();
-  ///    _route?.removeScopedWillPopCallback(askTheUserIfTheyAreSure);
-  ///    _route = ModalRoute.of(context);
-  ///    _route?.addScopedWillPopCallback(askTheUserIfTheyAreSure);
-  ///   }
-  /// }
-  /// ```
-  /// {@end-tool}
-  ///
-  /// {@tool snippet}
-  /// If you register a callback manually, be sure to remove the callback with
-  /// [removeScopedWillPopCallback] by the time the widget has been disposed. A
-  /// stateful widget can do this in its dispose method (continuing the previous
-  /// example):
-  ///
-  /// ```dart
-  /// abstract class _MyWidgetState2 extends State<MyWidget> {
-  ///   ModalRoute<dynamic>? _route;
-  ///
-  ///   // ...
-  ///
-  ///   @override
-  ///   void dispose() {
-  ///     _route?.removeScopedWillPopCallback(askTheUserIfTheyAreSure);
-  ///     _route = null;
-  ///     super.dispose();
-  ///   }
-  /// }
-  /// ```
-  /// {@end-tool}
-  ///
   /// See also:
   ///
   ///  * [WillPopScope], which manages the registration and unregistration
@@ -1599,6 +1592,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [willPop], which runs the callbacks added with this method.
   ///  * [removeScopedWillPopCallback], which removes a callback from the list
   ///    that [willPop] checks.
+  @Deprecated(
+    'Use registerPopEntry or PopScope instead. '
+    'This feature was deprecated after v3.12.0-1.0.pre.',
+  )
   void addScopedWillPopCallback(WillPopCallback callback) {
     assert(_scopeKey.currentState != null, 'Tried to add a willPop callback to a route that is not currently in the tree.');
     _willPopCallbacks.add(callback);
@@ -1611,9 +1608,67 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [Form], which provides an `onWillPop` callback that uses this mechanism.
   ///  * [addScopedWillPopCallback], which adds callback to the list
   ///    checked by [willPop].
+  @Deprecated(
+    'Use unregisterPopEntry or PopScope instead. '
+    'This feature was deprecated after v3.12.0-1.0.pre.',
+  )
   void removeScopedWillPopCallback(WillPopCallback callback) {
     assert(_scopeKey.currentState != null, 'Tried to remove a willPop callback from a route that is not currently in the tree.');
     _willPopCallbacks.remove(callback);
+  }
+
+  /// Registers the existence of a [PopEntry] in the route.
+  ///
+  /// [PopEntry] instances registered in this way will have their
+  /// [PopEntry.onPopInvoked] callbacks called when a route is popped or a pop
+  /// is attempted. They will also be able to block pop operations with
+  /// [PopEntry.canPopNotifier] through this route's [popDisposition] method.
+  ///
+  /// See also:
+  ///
+  ///  * [unregisterPopEntry], which performs the opposite operation.
+  void registerPopEntry(PopEntry popEntry) {
+    _popEntries.add(popEntry);
+    popEntry.canPopNotifier.addListener(_handlePopEntryChange);
+    _handlePopEntryChange();
+  }
+
+  /// Unregisters a [PopEntry] in the route's widget subtree.
+  ///
+  /// See also:
+  ///
+  ///  * [registerPopEntry], which performs the opposite operation.
+  void unregisterPopEntry(PopEntry popEntry) {
+    _popEntries.remove(popEntry);
+    popEntry.canPopNotifier.removeListener(_handlePopEntryChange);
+    _handlePopEntryChange();
+  }
+
+  void _handlePopEntryChange() {
+    if (!isCurrent) {
+      return;
+    }
+    final NavigationNotification notification = NavigationNotification(
+      // canPop indicates that the originator of the Notification can handle a
+      // pop. In the case of PopScope, it handles pops when canPop is
+      // false. Hence the seemingly backward logic here.
+      canHandlePop: popDisposition == RoutePopDisposition.doNotPop,
+    );
+    // Avoid dispatching a notification in the middle of a build.
+    switch (SchedulerBinding.instance.schedulerPhase) {
+      case SchedulerPhase.postFrameCallbacks:
+        notification.dispatch(subtreeContext);
+      case SchedulerPhase.idle:
+      case SchedulerPhase.midFrameMicrotasks:
+      case SchedulerPhase.persistentCallbacks:
+      case SchedulerPhase.transientCallbacks:
+        SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+          if (!(subtreeContext?.mounted ?? false)) {
+            return;
+          }
+          notification.dispatch(subtreeContext);
+        });
+    }
   }
 
   /// True if one or more [WillPopCallback] callbacks exist.
@@ -1633,6 +1688,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [removeScopedWillPopCallback], which removes a callback.
   ///  * [willHandlePopInternally], which reports on another reason why
   ///    a pop might be vetoed.
+  @Deprecated(
+    'Use popDisposition instead. '
+    'This feature was deprecated after v3.12.0-1.0.pre.',
+  )
   @protected
   bool get hasScopedWillPopCallback {
     return _willPopCallbacks.isNotEmpty;
@@ -1770,6 +1829,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       _modalBarrier = OverlayEntry(builder: _buildModalBarrier),
       _modalScope = OverlayEntry(builder: _buildModalScope, maintainState: maintainState),
     ];
+  }
+
+  @override
+  bool get willHandlePopInternally {
+    final bool popEntriesCanPop = _popEntries.every((PopEntry popEntry) {
+      return popEntry.canPopNotifier.value;
+    });
+    return !popEntriesCanPop || super.willHandlePopInternally;
   }
 
   @override
@@ -2212,3 +2279,33 @@ typedef RoutePageBuilder = Widget Function(BuildContext context, Animation<doubl
 ///
 /// See [ModalRoute.buildTransitions] for complete definition of the parameters.
 typedef RouteTransitionsBuilder = Widget Function(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child);
+
+/// A callback type for informing that a navigation pop has been invoked,
+/// whether or not it was handled successfully.
+///
+/// Accepts a didPop boolean indicating whether or not back navigation
+/// succeeded.
+typedef PopInvokedCallback = void Function(bool didPop);
+
+/// Allows listening to and preventing pops.
+///
+/// Can be registered in [ModalRoute] to listen to pops with [onPopInvoked] or
+/// to enable/disable them with [canPopNotifier].
+///
+/// See also:
+///
+///  * [PopScope], which provides similar functionality in a widget.
+///  * [ModalRoute.registerPopEntry], which unregisters instances of this.
+///  * [ModalRoute.unregisterPopEntry], which unregisters instances of this.
+abstract class PopEntry {
+  /// {@macro flutter.widgets.PopScope.onPopInvoked}
+  PopInvokedCallback? get onPopInvoked;
+
+  /// {@macro flutter.widgets.PopScope.canPop}
+  ValueListenable<bool> get canPopNotifier;
+
+  @override
+  String toString() {
+    return 'PopEntry canPop: ${canPopNotifier.value}, onPopInvoked: $onPopInvoked';
+  }
+}

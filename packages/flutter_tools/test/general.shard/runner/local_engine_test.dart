@@ -119,7 +119,7 @@ void main() {
     expect(logger.traceText, contains('Local engine source at /arbitrary/engine/src'));
   });
 
-  testWithoutContext('works but produces a warning if --local-engine is specified but not --local-host-engine', () async {
+  testWithoutContext('works but produces a warning if --local-engine is specified but not --local-engine-host', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Directory localEngine = fileSystem
         .directory('$kArbitraryEngineRoot/src/out/android_debug_unopt_arm64/')
@@ -142,7 +142,30 @@ void main() {
         targetEngine: '/arbitrary/engine/src/out/android_debug_unopt_arm64',
       ),
     );
-    expect(logger.statusText, contains('Warning! You are using a locally built engine (--local-engine) but have not specified --local-host-engine'));
+    expect(logger.statusText, contains('Warning! You are using a locally built engine (--local-engine) but have not specified --local-engine-host'));
+  });
+
+  testWithoutContext('fails if --local-engine-host is emitted and treatMissingLocalEngineHostAsFatal is set', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Directory localEngine = fileSystem
+        .directory('$kArbitraryEngineRoot/src/out/android_debug_unopt_arm64/')
+        ..createSync(recursive: true);
+    fileSystem.directory('$kArbitraryEngineRoot/src/out/host_debug_unopt/').createSync(recursive: true);
+
+    final BufferLogger logger = BufferLogger.test();
+    final LocalEngineLocator localEngineLocator = LocalEngineLocator(
+      fileSystem: fileSystem,
+      flutterRoot: 'flutter/flutter',
+      logger: logger,
+      userMessages: UserMessages(),
+      platform: FakePlatform(environment: <String, String>{}),
+      treatMissingLocalEngineHostAsFatal: true,
+    );
+
+    await expectLater(
+      localEngineLocator.findEnginePath(localEngine: localEngine.path),
+      throwsToolExit(message: 'You are using a locally built engine (--local-engine) but have not specified --local-engine-host'),
+    );
   });
 
   testWithoutContext('works if --local-engine is specified and --local-engine-src-path '
