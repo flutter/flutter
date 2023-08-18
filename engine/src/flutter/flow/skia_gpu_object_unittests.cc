@@ -43,6 +43,7 @@ class TestResourceContext : public TestSkObject {
   ~TestResourceContext() = default;
   void performDeferredCleanup(std::chrono::milliseconds msNotUsed) {}
   void deleteBackendTexture(const GrBackendTexture& texture) {}
+  void flushAndSubmit(bool syncCpu) {}
 };
 
 class SkiaGpuObjectTest : public ThreadTest {
