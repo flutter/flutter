@@ -3384,6 +3384,32 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(),
     Logger: () => logger,
   });
+
+  testUsingContext('Does not double quote description in index.html on web', () async {
+    await _createProject(
+      projectDir,
+      <String>['--no-pub', '--platforms=web'],
+      <String>['pubspec.yaml', 'web/index.html'],
+    );
+
+    final String rawIndexHtml = await projectDir.childDirectory('web').childFile('index.html').readAsString();
+    const String expectedDescription = '<meta name="description" content="A new Flutter project.">';
+
+    expect(rawIndexHtml.contains(expectedDescription), isTrue);
+  });
+
+  testUsingContext('Does not double quote description in manifest.json on web', () async {
+    await _createProject(
+      projectDir,
+      <String>['--no-pub', '--platforms=web'],
+      <String>['pubspec.yaml', 'web/manifest.json'],
+    );
+
+    final String rawManifestJson = await projectDir.childDirectory('web').childFile('manifest.json').readAsString();
+    const String expectedDescription = '"description": "A new Flutter project."';
+
+    expect(rawManifestJson.contains(expectedDescription), isTrue);
+  });
 }
 
 Future<void> _createProject(
