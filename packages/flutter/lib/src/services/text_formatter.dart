@@ -253,6 +253,7 @@ class _TextEditingValueAccumulator {
 /// patterns are usually meant for matching the whole string.
 ///
 /// ### Quote characters on iOS
+///
 /// When filtering single (`'`) or double (`"`) quote characters, be aware that
 /// the default iOS keyboard actually inserts special directional versions of
 /// these characters (`‘` and `’` for single quote, and `“` and `”` for double
