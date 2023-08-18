@@ -101,6 +101,18 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   }
 
   @override
+  String datePickerStandaloneMonth(int monthIndex) {
+    // It doesn't actually have anything to do with _fullYearFormat. It's just
+    // taking advantage of the fact that _fullYearFormat loaded the needed
+    // locale's symbols.
+    //
+    // Because this will be used without specifying any day of month,
+    // in most cases it should be capitalized (according to rules in specific language).
+    return intl.toBeginningOfSentenceCase(_fullYearFormat.dateSymbols.STANDALONEMONTHS[monthIndex - 1]) ??
+        _fullYearFormat.dateSymbols.STANDALONEMONTHS[monthIndex - 1];
+  }
+
+  @override
   String datePickerDayOfMonth(int dayIndex, [int? weekDay]) {
      if (weekDay != null) {
       return ' ${DefaultCupertinoLocalizations.shortWeekdays[weekDay - DateTime.monday]} $dayIndex ';
