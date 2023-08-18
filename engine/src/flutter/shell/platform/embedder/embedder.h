@@ -25,9 +25,9 @@
 // - Function signatures (names, argument counts, argument order, and argument
 //   type) cannot change.
 // - The core behavior of existing functions cannot change.
-// - Instead of nesting structures by value within another structure, prefer
-//   nesting by pointer. This ensures that adding members to the nested struct
-//   does not break the ABI of the parent struct.
+// - Instead of nesting structures by value within another structure/union,
+//   prefer nesting by pointer. This ensures that adding members to the nested
+//   struct does not break the ABI of the parent struct/union.
 // - Instead of array of structures, prefer array of pointers to structures.
 //   This ensures that array indexing does not break if members are added
 //   to the structure.
@@ -1064,6 +1064,57 @@ typedef int64_t FlutterPlatformViewIdentifier;
 FLUTTER_EXPORT
 extern const int32_t kFlutterSemanticsNodeIdBatchEnd;
 
+// The enumeration of possible string attributes that affect how assistive
+// technologies announce a string.
+//
+// See dart:ui's implementers of the StringAttribute abstract class.
+typedef enum {
+  // Indicates the string should be announced character by character.
+  kSpellOut,
+  // Indicates the string should be announced using the specified locale.
+  kLocale,
+} FlutterStringAttributeType;
+
+// Indicates the assistive technology should announce out the string character
+// by character.
+//
+// See dart:ui's SpellOutStringAttribute.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterSpellOutStringAttribute).
+  size_t struct_size;
+} FlutterSpellOutStringAttribute;
+
+// Indicates the assistive technology should announce the string using the
+// specified locale.
+//
+// See dart:ui's LocaleStringAttribute.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterLocaleStringAttribute).
+  size_t struct_size;
+  // The locale of this attribute.
+  const char* locale;
+} FlutterLocaleStringAttribute;
+
+// Indicates how the assistive technology should treat the string.
+//
+// See dart:ui's StringAttribute.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterStringAttribute).
+  size_t struct_size;
+  // The position this attribute starts.
+  size_t start;
+  // The next position after the attribute ends.
+  size_t end;
+  /// The type of the attribute described by the subsequent union.
+  FlutterStringAttributeType type;
+  union {
+    // Indicates the string should be announced character by character.
+    const FlutterSpellOutStringAttribute* spell_out;
+    // Indicates the string should be announced using the specified locale.
+    const FlutterLocaleStringAttribute* locale;
+  };
+} FlutterStringAttribute;
+
 /// A node that represents some semantic data.
 ///
 /// The semantics tree is maintained during the semantics phase of the pipeline
@@ -1215,6 +1266,31 @@ typedef struct {
   FlutterPlatformViewIdentifier platform_view_id;
   /// A textual tooltip attached to the node.
   const char* tooltip;
+  // The number of string attributes associated with the `label`.
+  size_t label_attribute_count;
+  // Array of string attributes associated with the `label`.
+  // Has length `label_attribute_count`.
+  const FlutterStringAttribute** label_attributes;
+  // The number of string attributes associated with the `hint`.
+  size_t hint_attribute_count;
+  // Array of string attributes associated with the `hint`.
+  // Has length `hint_attribute_count`.
+  const FlutterStringAttribute** hint_attributes;
+  // The number of string attributes associated with the `value`.
+  size_t value_attribute_count;
+  // Array of string attributes associated with the `value`.
+  // Has length `value_attribute_count`.
+  const FlutterStringAttribute** value_attributes;
+  // The number of string attributes associated with the `increased_value`.
+  size_t increased_value_attribute_count;
+  // Array of string attributes associated with the `increased_value`.
+  // Has length `increased_value_attribute_count`.
+  const FlutterStringAttribute** increased_value_attributes;
+  // The number of string attributes associated with the `decreased_value`.
+  size_t decreased_value_attribute_count;
+  // Array of string attributes associated with the `decreased_value`.
+  // Has length `decreased_value_attribute_count`.
+  const FlutterStringAttribute** decreased_value_attributes;
 } FlutterSemanticsNode2;
 
 /// `FlutterSemanticsCustomAction` ID used as a sentinel to signal the end of a
