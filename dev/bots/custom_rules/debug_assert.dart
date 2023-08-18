@@ -4,7 +4,6 @@
 
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';
-import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
@@ -40,6 +39,9 @@ class _DebugOnlySymbolAccessError {
     final String symbolName = switch (symbol) {
       ConstructorElement(:final InterfaceElement enclosingElement, name: '') => '${enclosingElement.name}.new',
       ExecutableElement(:final InterfaceElement enclosingElement, :final String name) => '${enclosingElement.name}.$name',
+      // When the enclosingElement is an Extension.
+      ExecutableElement(:final String name) => name,
+      // When `symbol` is field.
       Element(:final String? name) => name ?? '',
     };
     return '$relativePath:$lineNumber: $bold$symbolName$reset accessed outside of an assert.';
@@ -277,10 +279,10 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
 
     for (final FormalParameter parameter in node.parameters.parameters) {
       switch (parameter) {
-        case FieldFormalParameter(name: Token(:final String lexeme))
+        case FieldFormalParameter(name: (:final String lexeme))
           // Default values are Expressions so they should be covered by the
           // simple identifier visitor.
-          || DefaultFormalParameter(parameter: FieldFormalParameter(name: Token(:final String lexeme))):
+          || DefaultFormalParameter(parameter: FieldFormalParameter(name: (:final String lexeme))):
             final FieldElement? field = element.enclosingElement.getField(lexeme);
             assert(field != null);
             if (field != null && _isDebugOnlyExecutableElement(field)) {
@@ -374,7 +376,7 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
     final Element? element = node.declaredElement;
     // Special case toString.
     final bool shouldSkip = (node.name.lexeme == 'toString' && !node.isStatic)
-                    || (element != null && _isDebugOnlyExecutableElement(element));
+                         || (element != null && _isDebugOnlyExecutableElement(element));
     if (shouldSkip) {
       return;
     }
