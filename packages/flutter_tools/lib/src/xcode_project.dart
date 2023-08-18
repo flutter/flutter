@@ -104,11 +104,14 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform  {
   File get podManifestLock => hostAppRoot.childDirectory('Pods').childFile('Manifest.lock');
 
   /// The CocoaPods generated 'Pods-Runner-frameworks.sh'.
-  File get podRunnerFrameworksScript => hostAppRoot
+  File get podRunnerFrameworksScript => podRunnerTargetSupportFiles
+      .childFile('Pods-Runner-frameworks.sh');
+
+  /// The CocoaPods generated directory 'Pods-Runner'.
+  Directory get podRunnerTargetSupportFiles => hostAppRoot
       .childDirectory('Pods')
       .childDirectory('Target Support Files')
-      .childDirectory('Pods-Runner')
-      .childFile('Pods-Runner-frameworks.sh');
+      .childDirectory('Pods-Runner');
 }
 
 /// Represents the iOS sub-project of a Flutter project.
