@@ -349,7 +349,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
             if (toolbarIsVisible) {
               hideToolbar(false);
             } else {
-              _showToolbar(location: lastSecondaryTapDownPosition);
+              _showToolbar(location: details.globalPosition);
             }
           } else {
             _clearSelection();
