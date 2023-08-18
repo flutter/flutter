@@ -277,7 +277,7 @@ void main() {
 
 double _getScale(WidgetTester tester) {
   final ScaleTransition scale = tester.widget(find.byType(ScaleTransition));
-  return scale.scale.value;
+  return scale.animation.value;
 }
 
 double _getOpacity(WidgetTester tester) {

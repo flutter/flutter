@@ -131,7 +131,7 @@ void main() {
           final Iterable<RotationTransition> rotationTransitions = tester.widgetList(
             find.byType(RotationTransition),
           );
-          final Iterable<double> currentRotations = rotationTransitions.map((RotationTransition t) => t.turns.value);
+          final Iterable<double> currentRotations = rotationTransitions.map((RotationTransition t) => t.animation.value);
 
           if (previousRotations != null && previousRotations!.isNotEmpty && currentRotations.isNotEmpty
               && previousRect != null && currentRect != null) {

@@ -288,17 +288,17 @@ void main() {
     await tester.tap(switchFinder);
     expect(state.builds, equals(1));
     await tester.pump();
-    expect(scaleWidget.scale.value, equals(1.0));
+    expect(scaleWidget.animation.value, equals(1.0));
     expect(state.builds, equals(2));
 
     await tester.pump(const Duration(milliseconds: 500));
-    expect(scaleWidget.scale.value, equals(1.5));
+    expect(scaleWidget.animation.value, equals(1.5));
     expect(state.builds, equals(2));
     await tester.pump(const Duration(milliseconds: 250));
-    expect(scaleWidget.scale.value, equals(1.75));
+    expect(scaleWidget.animation.value, equals(1.75));
     expect(state.builds, equals(2));
     await tester.pump(const Duration(milliseconds: 250));
-    expect(scaleWidget.scale.value, equals(2.0));
+    expect(scaleWidget.animation.value, equals(2.0));
     expect(state.builds, equals(2));
   });
 
@@ -348,17 +348,17 @@ void main() {
     await tester.tap(switchFinder);
     expect(state.builds, equals(1));
     await tester.pump();
-    expect(rotationWidget.turns.value, equals(0.0));
+    expect(rotationWidget.animation.value, equals(0.0));
     expect(state.builds, equals(2));
 
     await tester.pump(const Duration(milliseconds: 500));
-    expect(rotationWidget.turns.value, equals(0.75));
+    expect(rotationWidget.animation.value, equals(0.75));
     expect(state.builds, equals(2));
     await tester.pump(const Duration(milliseconds: 250));
-    expect(rotationWidget.turns.value, equals(1.125));
+    expect(rotationWidget.animation.value, equals(1.125));
     expect(state.builds, equals(2));
     await tester.pump(const Duration(milliseconds: 250));
-    expect(rotationWidget.turns.value, equals(1.5));
+    expect(rotationWidget.animation.value, equals(1.5));
     expect(state.builds, equals(2));
   });
 

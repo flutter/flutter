@@ -201,7 +201,7 @@ void main() {
       );
 
       double itemScale(int index) =>
-          tester.widget<ScaleTransition>(find.byKey(ValueKey<int>(index), skipOffstage: false)).scale.value;
+          tester.widget<ScaleTransition>(find.byKey(ValueKey<int>(index), skipOffstage: false)).animation.value;
       double itemLeft(int index) => tester.getTopLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dx;
       double itemRight(int index) => tester.getTopRight(find.byKey(ValueKey<int>(index), skipOffstage: false)).dx;
 
@@ -281,7 +281,7 @@ void main() {
       );
 
       double itemScale(int index) =>
-          tester.widget<ScaleTransition>(find.byKey(ValueKey<int>(index), skipOffstage: false)).scale.value;
+          tester.widget<ScaleTransition>(find.byKey(ValueKey<int>(index), skipOffstage: false)).animation.value;
       double itemLeft(int index) => tester.getTopLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dx;
       double itemRight(int index) => tester.getTopRight(find.byKey(ValueKey<int>(index), skipOffstage: false)).dx;
 
@@ -345,7 +345,7 @@ void main() {
       );
 
       double itemScale(int index) =>
-          tester.widget<ScaleTransition>(find.byKey(ValueKey<int>(index), skipOffstage: false)).scale.value;
+          tester.widget<ScaleTransition>(find.byKey(ValueKey<int>(index), skipOffstage: false)).animation.value;
       double itemLeft(int index) => tester.getTopLeft(find.byKey(ValueKey<int>(index), skipOffstage: false)).dx;
       double itemRight(int index) => tester.getTopRight(find.byKey(ValueKey<int>(index), skipOffstage: false)).dx;
 
@@ -496,7 +496,7 @@ void main() {
 
       await tester.pump(const Duration(milliseconds: 500));
       expect(
-        tester.widget<ScaleTransition>(find.byKey(const ObjectKey('removing'), skipOffstage: false)).scale.value,
+        tester.widget<ScaleTransition>(find.byKey(const ObjectKey('removing'), skipOffstage: false)).animation.value,
         0.5,
       );
       expect(tester.getTopLeft(find.text('item 0')).dx, 100);

@@ -1551,7 +1551,7 @@ void main() {
 
       final double transitioningRotation = tester.widget<RotationTransition>(
         find.byType(RotationTransition),
-      ).turns.value;
+      ).animation.value;
 
       await tester.pump(const Duration(seconds: 3));
       geometry = listenerState.cache.value;
@@ -1560,7 +1560,7 @@ void main() {
 
       final double completedRotation = tester.widget<RotationTransition>(
         find.byType(RotationTransition),
-      ).turns.value;
+      ).animation.value;
 
       expect(transitioningRotation, lessThan(1.0));
 

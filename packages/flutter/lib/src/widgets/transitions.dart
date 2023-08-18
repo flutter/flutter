@@ -347,9 +347,6 @@ class ScaleTransition extends MatrixTransition {
     super.child,
   }) : super(animation: scale, onTransform: _handleScaleMatrix);
 
-  /// The animation that controls the scale of the child.
-  Animation<double> get scale => animation;
-
   /// The callback that controls the scale of the child.
   ///
   /// If the current value of the animation is v, the child will be
@@ -385,9 +382,6 @@ class RotationTransition extends MatrixTransition {
     super.filterQuality,
     super.child,
   }) : super(animation: turns, onTransform: _handleTurnsMatrix);
-
-  /// The animation that controls the rotation of the child.
-  Animation<double> get turns => animation;
 
   /// The callback that controls the rotation of the child.
   ///

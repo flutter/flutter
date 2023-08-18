@@ -132,7 +132,7 @@ void main() {
       ),
     ));
     final RotationTransition rotation = tester.firstWidget(find.byType(RotationTransition));
-    expect(rotation.turns.value, 0.5);
+    expect(rotation.animation.value, 0.5);
   });
 
   testWidgetsWithLeakTracking('ExpandIcon default size is 24', (WidgetTester tester) async {
