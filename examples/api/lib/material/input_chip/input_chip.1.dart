@@ -240,7 +240,7 @@ class ChipsInputState<T> extends State<ChipsInput<T>> {
 
   static int countReplacements(String text) {
     return text.codeUnits
-      .where((int u) => u == ChipsInputEditingController.kObjectReplacementChar) 
+      .where((int u) => u == ChipsInputEditingController.kObjectReplacementChar)
       .length;
   }
 
@@ -301,7 +301,7 @@ class ChipsInputEditingController<T> extends TextEditingController {
   @override
   TextSpan buildTextSpan(
       {required BuildContext context, TextStyle? style, required bool withComposing}) {
-    
+
     final Iterable<WidgetSpan> chipWidgets =
         values.map((T v) => WidgetSpan(child: chipBuilder(context, v)));
 
