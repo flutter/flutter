@@ -239,6 +239,9 @@ class NavigationDrawerDestination extends StatelessWidget {
       MaterialState.selected
     };
     const Set<MaterialState> unselectedState = <MaterialState>{};
+    const Set<MaterialState> disabledState = <MaterialState>{
+      MaterialState.disabled
+    };
 
     final NavigationDrawerThemeData navigationDrawerTheme =
         NavigationDrawerTheme.of(context);
@@ -251,13 +254,13 @@ class NavigationDrawerDestination extends StatelessWidget {
     return _NavigationDestinationBuilder(
       buildIcon: (BuildContext context) {
         final Widget selectedIconWidget = IconTheme.merge(
-          data: navigationDrawerTheme.iconTheme?.resolve(selectedState) ??
-              defaults.iconTheme!.resolve(selectedState)!,
+          data: navigationDrawerTheme.iconTheme?.resolve(enabled ? selectedState : disabledState) ??
+              defaults.iconTheme!.resolve(enabled ? selectedState : disabledState)!,
           child: selectedIcon ?? icon,
         );
         final Widget unselectedIconWidget = IconTheme.merge(
-          data: navigationDrawerTheme.iconTheme?.resolve(unselectedState) ??
-              defaults.iconTheme!.resolve(unselectedState)!,
+          data: navigationDrawerTheme.iconTheme?.resolve(enabled ? unselectedState : disabledState) ??
+              defaults.iconTheme!.resolve(enabled ? unselectedState : disabledState)!,
           child: icon,
         );
 
@@ -267,11 +270,12 @@ class NavigationDrawerDestination extends StatelessWidget {
       },
       buildLabel: (BuildContext context) {
         final TextStyle? effectiveSelectedLabelTextStyle =
-            navigationDrawerTheme.labelTextStyle?.resolve(selectedState) ??
-            defaults.labelTextStyle!.resolve(selectedState);
+            navigationDrawerTheme.labelTextStyle?.resolve(enabled ? selectedState : disabledState) ??
+            defaults.labelTextStyle!.resolve(enabled ? selectedState : disabledState);
         final TextStyle? effectiveUnselectedLabelTextStyle =
-            navigationDrawerTheme.labelTextStyle?.resolve(unselectedState) ??
-            defaults.labelTextStyle!.resolve(unselectedState);
+            navigationDrawerTheme.labelTextStyle?.resolve(enabled ? unselectedState : disabledState) ??
+            defaults.labelTextStyle!.resolve(enabled ? unselectedState : disabledState);
+
         return DefaultTextStyle(
           style: _isForwardOrCompleted(animation)
             ? effectiveSelectedLabelTextStyle!
@@ -364,14 +368,7 @@ class _NavigationDestinationBuilder extends StatelessWidget {
                   width: (navigationDrawerTheme.indicatorSize ?? defaults.indicatorSize!).width,
                   height: (navigationDrawerTheme.indicatorSize ?? defaults.indicatorSize!).height,
                 ),
-
-                if (enabled)
-                  destinationBody
-                else
-                  Opacity(
-                    opacity: 0.38,
-                    child: destinationBody,
-                  ),
+                destinationBody
               ],
             ),
           ),
@@ -719,7 +716,9 @@ class _NavigationDrawerDefaultsM3 extends NavigationDrawerThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       return IconThemeData(
         size: 24.0,
-        color: states.contains(MaterialState.selected)
+        color: states.contains(MaterialState.disabled)
+          ? _colors.onSurfaceVariant.withOpacity(0.38)
+          : states.contains(MaterialState.selected)
             ? _colors.onSecondaryContainer
             : _colors.onSurfaceVariant,
       );
@@ -731,7 +730,9 @@ class _NavigationDrawerDefaultsM3 extends NavigationDrawerThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       final TextStyle style = _textTheme.labelLarge!;
       return style.apply(
-        color: states.contains(MaterialState.selected)
+        color: states.contains(MaterialState.disabled)
+          ? _colors.onSurfaceVariant.withOpacity(0.38)
+          : states.contains(MaterialState.selected)
             ? _colors.onSecondaryContainer
             : _colors.onSurfaceVariant,
       );
