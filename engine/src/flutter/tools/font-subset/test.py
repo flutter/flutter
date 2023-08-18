@@ -60,6 +60,13 @@ COMPARE_TESTS = (
     (False, '1.ttf', MATERIAL_TTF, [r'57348'
                                    ]),  # False because different codepoint
     (True, '2.ttf', MATERIAL_TTF, [r'0xE003', r'0xE004']),
+    (True, '2.ttf', MATERIAL_TTF, [r'0xE003', r'optional:0xE004'
+                                  ]),  # Optional codepoint that is found
+    (True, '2.ttf', MATERIAL_TTF, [
+        r'0xE003',
+        r'0xE004',
+        r'optional:0x12',
+    ]),  # Optional codepoint that is not found
     (True, '2.ttf', MATERIAL_TTF, [
         r'0xE003',
         r'0xE004',
