@@ -4,6 +4,7 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:test/test.dart';
@@ -178,6 +179,17 @@ void main() {
       expect(info['frameworkVersion'], equals(Version.parse('2.5.0')));
       expect(info['dartSdkVersion'], isNotNull);
       expect(info['dartSdkVersion'], equals(Version.parse('2.14.0-360.0.dev')));
+    });
+    test('the engine realm is read from the engine.realm file', () async {
+      const String flutterRoot = '/home/user/flutter';
+      final File realmFile = memoryFileSystem.file(
+        path.join(flutterRoot, 'bin', 'internal', 'engine.realm',
+      ));
+      realmFile.writeAsStringSync('realm');
+      setUpWithEnvironment(<String, String>{'FLUTTER_ROOT': flutterRoot});
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+      final Map<String, dynamic> info = flutterInformation.getFlutterInformation();
+      expect(info['engineRealm'], equals('realm'));
     });
   });
 }

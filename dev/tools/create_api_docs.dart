@@ -775,16 +775,19 @@ class PlatformDocGenerator {
   final FileSystem filesystem;
   final Directory outputDir;
   final String engineRevision = FlutterInformation.instance.getEngineRevision();
+  final String engineRealm = FlutterInformation.instance.getEngineRealm();
 
   /// This downloads an archive of platform docs for the engine from the artifact
   /// store and extracts them to the location used for Dartdoc.
   void generatePlatformDocs() {
+    final String realm = engineRealm.isNotEmpty ? '$engineRealm/' : '';
+
     final String javadocUrl =
-        'https://storage.googleapis.com/flutter_infra_release/flutter/$engineRevision/android-javadoc.zip';
+        'https://storage.googleapis.com/${realm}flutter_infra_release/flutter/$engineRevision/android-javadoc.zip';
     _extractDocs(javadocUrl, 'javadoc', 'io/flutter/view/FlutterView.html', outputDir);
 
     final String objcdocUrl =
-        'https://storage.googleapis.com/flutter_infra_release/flutter/$engineRevision/ios-objcdoc.zip';
+        'https://storage.googleapis.com/${realm}flutter_infra_release/flutter/$engineRevision/ios-objcdoc.zip';
     _extractDocs(objcdocUrl, 'objcdoc', 'Classes/FlutterViewController.html', outputDir);
   }
 
@@ -1034,6 +1037,10 @@ class FlutterInformation {
   /// Gets the git hash of the engine used by the Flutter framework in the repo.
   String getEngineRevision() => getFlutterInformation()['engineRevision']! as String;
 
+  /// Gets the value stored in bin/internal/engine.realm used by the Flutter
+  /// framework repo.
+  String getEngineRealm() => getFlutterInformation()['engineRealm']! as String;
+
   /// Gets the git hash of the Flutter framework in the repo.
   String getFlutterRevision() => getFlutterInformation()['flutterGitRevision']! as String;
 
@@ -1090,6 +1097,9 @@ class FlutterInformation {
     info['flutterRoot'] = flutterRoot;
     info['frameworkVersion'] = Version.parse(flutterVersion['frameworkVersion'] as String);
     info['engineRevision'] = flutterVersion['engineRevision'] as String;
+    info['engineRealm'] = filesystem.file(
+      path.join(flutterRoot.path, 'bin', 'internal', 'engine.realm',
+    )).readAsStringSync().trim();
 
     final RegExpMatch? dartVersionRegex = RegExp(r'(?<base>[\d.]+)(?:\s+\(build (?<detail>[-.\w]+)\))?')
         .firstMatch(flutterVersion['dartSdkVersion'] as String);
