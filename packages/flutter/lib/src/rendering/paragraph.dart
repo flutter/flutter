@@ -1733,6 +1733,32 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     return SelectionResult.none;
   }
 
+  SelectionResult _handleSelectTextBoundary(_TextBoundaryRecord textBoundary, Offset globalPosition) {
+    if (textBoundary.boundaryStart.offset < range.start && textBoundary.boundaryEnd.offset < range.start) {
+      return SelectionResult.previous;
+    } else if (textBoundary.boundaryStart.offset > range.end && textBoundary.boundaryEnd.offset > range.end) {
+      return SelectionResult.next;
+    }
+    // Fragments are separated by placeholder span, the paragraph boundary shouldn't
+    // expand across fragments.
+    assert(textBoundary.boundaryStart.offset >= range.start && textBoundary.boundaryEnd.offset <= range.end);
+    _textSelectionStart = textBoundary.boundaryStart;
+    _textSelectionEnd = textBoundary.boundaryEnd;
+    return SelectionResult.end;
+  }
+
+  _TextBoundaryRecord _adjustTextBoundaryAtPosition(TextRange textBoundary, TextPosition position) {
+    late final TextPosition start;
+    late final TextPosition end;
+    if (position.offset > textBoundary.end) {
+      start = end = TextPosition(offset: position.offset);
+    } else {
+      start = TextPosition(offset: textBoundary.start);
+      end = TextPosition(offset: textBoundary.end, affinity: TextAffinity.upstream);
+    }
+    return (boundaryStart: start, boundaryEnd: end);
+  }
+
   SelectionResult _handleSelectWord(Offset globalPosition) {
     _selectableContainsOriginTextBoundary = true;
 
@@ -1741,52 +1767,20 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
       return SelectionResult.end;
     }
     final _TextBoundaryRecord wordBoundary = _getWordBoundaryAtPosition(position);
-    if (wordBoundary.boundaryStart.offset < range.start && wordBoundary.boundaryEnd.offset < range.start) {
-      return SelectionResult.previous;
-    } else if (wordBoundary.boundaryStart.offset > range.end && wordBoundary.boundaryEnd.offset > range.end) {
-      return SelectionResult.next;
-    }
-    // Fragments are separated by placeholder span, the word boundary shouldn't
-    // expand across fragments.
-    assert(wordBoundary.boundaryStart.offset >= range.start && wordBoundary.boundaryEnd.offset <= range.end);
-    _textSelectionStart = wordBoundary.boundaryStart;
-    _textSelectionEnd = wordBoundary.boundaryEnd;
-    return SelectionResult.end;
+    return _handleSelectTextBoundary(wordBoundary, globalPosition);
   }
 
   _TextBoundaryRecord _getWordBoundaryAtPosition(TextPosition position) {
     final TextRange word = paragraph.getWordBoundary(position);
     assert(word.isNormalized);
-    late TextPosition start;
-    late TextPosition end;
-    if (position.offset > word.end) {
-      start = end = TextPosition(offset: position.offset);
-    } else {
-      start = TextPosition(offset: word.start);
-      end = TextPosition(offset: word.end, affinity: TextAffinity.upstream);
-    }
-    return (boundaryStart: start, boundaryEnd: end);
+    return _adjustTextBoundaryAtPosition(word, position);
   }
 
   SelectionResult _handleSelectParagraph(Offset globalPosition) {
     _selectableContainsOriginTextBoundary = true;
-
     final TextPosition position = paragraph.getPositionForOffset(paragraph.globalToLocal(globalPosition));
-    // if (_positionIsWithinCurrentSelection(position)) {
-    //   return SelectionResult.end;
-    // }
     final _TextBoundaryRecord paragraphBoundary = _getParagraphBoundaryAtPosition(position);
-    if (paragraphBoundary.boundaryStart.offset < range.start && paragraphBoundary.boundaryEnd.offset < range.start) {
-      return SelectionResult.previous;
-    } else if (paragraphBoundary.boundaryStart.offset > range.end && paragraphBoundary.boundaryEnd.offset > range.end) {
-      return SelectionResult.next;
-    }
-    // Fragments are separated by placeholder span, the paragraph boundary shouldn't
-    // expand across fragments.
-    assert(paragraphBoundary.boundaryStart.offset >= range.start && paragraphBoundary.boundaryEnd.offset <= range.end);
-    _textSelectionStart = paragraphBoundary.boundaryStart;
-    _textSelectionEnd = paragraphBoundary.boundaryEnd;
-    return SelectionResult.end;
+    return _handleSelectTextBoundary(paragraphBoundary, globalPosition);
   }
 
   _TextBoundaryRecord _getParagraphBoundaryAtPosition(TextPosition position) {
@@ -1794,11 +1788,11 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     final ParagraphBoundary paragraphBoundary = ParagraphBoundary(text);
     // Use position.offset - 1 when `position` is at the end of the selectable to retrieve
     // the previous text boundary's location.
-    final int start = paragraphBoundary.getLeadingTextBoundaryAt(position.offset == range.end ? position.offset - 1 : position.offset) ?? 0;
-    final int end = paragraphBoundary.getTrailingTextBoundaryAt(position.offset) ?? text.length;
-    final TextRange paragraphRange = TextRange(start: start, end: end);
+    final int paragraphStart = paragraphBoundary.getLeadingTextBoundaryAt(position.offset == range.end || position.affinity == TextAffinity.upstream ? position.offset - 1 : position.offset) ?? 0;
+    final int paragraphEnd = paragraphBoundary.getTrailingTextBoundaryAt(position.offset) ?? text.length;
+    final TextRange paragraphRange = TextRange(start: paragraphStart, end: paragraphEnd);
     assert(paragraphRange.isNormalized);
-    return (boundaryStart: TextPosition(offset: paragraphRange.start), boundaryEnd: TextPosition(offset: paragraphRange.end));
+    return _adjustTextBoundaryAtPosition(paragraphRange, position);
   }
 
   SelectionResult _handleDirectionallyExtendSelection(double horizontalBaseline, bool isExtent, SelectionExtendDirection movement) {
