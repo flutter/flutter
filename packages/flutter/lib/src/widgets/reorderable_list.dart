@@ -832,6 +832,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
       _recognizer?.dispose();
       _recognizer = null;
       _overlayEntry?.remove();
+      _overlayEntry?.dispose();
       _overlayEntry = null;
       _finalDropPosition = null;
     }
