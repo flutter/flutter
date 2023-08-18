@@ -1006,9 +1006,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     }
   }
 
-  /// Selects a position at the `offset` location.
-  ///
-  /// The selection will be collapsed at the `offset` location.
+  /// Collapses the selection at the given `offset` location.
   ///
   /// See also:
   ///  * [_selectStartTo], which sets or updates selection start edge.
