@@ -1389,9 +1389,10 @@ class PipelineOwner with DiagnosticableTreeMixin {
     assert(!_children.contains(child));
     assert(_debugAllowChildListModifications, 'Cannot modify child list after layout.');
     _children.add(child);
-    if (!kReleaseMode) {
+    assert(() {
       _debugSetParent(child, this);
-    }
+      return true;
+    }());
     if (_manifold != null) {
       child.attach(_manifold!);
     }
@@ -1409,9 +1410,10 @@ class PipelineOwner with DiagnosticableTreeMixin {
     assert(_children.contains(child));
     assert(_debugAllowChildListModifications, 'Cannot modify child list after layout.');
     _children.remove(child);
-    if (!kReleaseMode) {
+    assert(() {
       _debugSetParent(child, null);
-    }
+      return true;
+    }());
     if (_manifold != null) {
       child.detach();
     }

@@ -280,8 +280,8 @@ void main() {
      .join();
 
     final String otherBadAccesses = <String>[
-      '║ packages/flutter/lib/debug_only_access.dart:15: globalVaraibleFromDebugLib accessed outside of an assert.\n',
-      '║ packages/flutter/lib/debug_only_access.dart:15: globalVaraibleFromDebugLib= accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:15: globalVariableFromDebugLib accessed outside of an assert.\n',
+      '║ packages/flutter/lib/debug_only_access.dart:15: globalVariableFromDebugLib= accessed outside of an assert.\n',
       '║ packages/flutter/lib/debug_only_access.dart:16: globalFunctionFromDebugLib accessed outside of an assert.\n',
       '║ packages/flutter/lib/debug_only_access.dart:17: globalFunctionFromDebugLib accessed outside of an assert.\n',
       '║ packages/flutter/lib/debug_only_access.dart:18: globalFunctionFromDebugLib accessed outside of an assert.\n',

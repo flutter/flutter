@@ -13,12 +13,8 @@ export 'dart:ui' show Brightness;
 export 'print.dart' show DebugPrintCallback;
 
 /// An annotation that prevents annotated getters, setters, constructors,
-/// functions, methods and fields to be called/accessed directly or indirectly
-/// outside of an assert.
-///
-/// The annotation can also be added to classes, mixins, extensions, or
-/// libraries, in which case all non-synthetic memebers defined within that
-/// scope will be considered to have this annotation.
+/// functions, methods, operators and fields to be called/accessed directly or
+/// indirectly outside of an assert.
 ///
 /// BAD:
 /// ```dart
@@ -52,6 +48,20 @@ export 'print.dart' show DebugPrintCallback;
 ///
 /// This annotation should only be used in the framework code and has no effect
 /// when used outside of the "flutter/lib/src" directory.
+///
+/// For convenience, the annotation can also be added to classes, mixins,
+/// extensions, or libraries, in which case all members explicitly defined within
+/// that scope will be considered to be annotated with `@debugAssert`. However,
+/// if an annotated class does not define any constructors, the (implicit)
+/// default constructor is not considered debug-only.
+///
+/// When a class member is inherited by subtypes, whether the class member is
+/// debug-only is decided by whether that member has the annotation when it's
+/// first introduced. For example, if 2 unrelated classes from Flutter framework
+/// `A` and `B` have the same method `m`, and another class `C` implements both
+/// `A` and `B`, then either none of `A.m`, `B.m` and `C.m` should be annotated
+/// with `@debugAssert`, or both `A.m`, `B.m` should be annotated with
+/// `@debugAssert`, in which case `C.m` inherits the debug-only status.
 const Null debugAssert = null;
 
 /// Returns true if none of the foundation library debug variables have been

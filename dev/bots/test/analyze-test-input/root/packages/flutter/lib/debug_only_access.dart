@@ -12,7 +12,7 @@ ProductionClassWithDebugOnlyMixin y = ProductionClassWithDebugOnlyMixin();
 void takeAnything(Object? input) { }
 
 void badDebugAssertAccess() {
-  globalVaraibleFromDebugLib += 'test';
+  globalVariableFromDebugLib += 'test';
   globalFunctionFromDebugLib();
   void Function() f = globalFunctionFromDebugLib; // ignore: unused_local_variable
   f = globalFunctionFromDebugLib.call;
@@ -46,7 +46,7 @@ void badDebugAssertAccess() {
   xx?[x.debugGetSet]; // ignore: unnecessary_statements
 }
 
-/// Yours truly [globalVaraibleFromDebugLib] from the comment section with love.
+/// Yours truly [globalVariableFromDebugLib] from the comment section with love.
 void goodDebugAssertAccess() {
   assert(() {
     final _DebugOnlyClass debugObject = _DebugOnlyClass();

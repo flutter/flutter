@@ -7,7 +7,7 @@ library;
 
 const String debugAssert = '';
 
-String globalVaraibleFromDebugLib = '';
+String globalVariableFromDebugLib = '';
 
 void globalFunctionFromDebugLib() { }
 

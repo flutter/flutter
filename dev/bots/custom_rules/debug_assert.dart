@@ -18,8 +18,8 @@ import 'analyze.dart';
 /// methods annotated with @debugAssert are only directly or indirectly called
 /// inside asserts.
 ///
-/// The annotation can also be applied to [InterfaceElement]s (classes, mixins
-/// and extensions) or libraries, in which case all non-synthetic elements
+/// The annotation can also be applied to [InterfaceElement]s (classes, mixins),
+/// extensions or libraries, in which case all non-synthetic elements
 /// defined within that scope will be considered to have the @debugAssert
 /// annotation.
 final AnalyzeRule debugAssert = _DebugAssert();
@@ -160,10 +160,11 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
     assert(!constructorElement.isFactory);
     assert(constructorElement.isDefaultConstructor);
 
-    // Subclasses may "inherit" default constructors from the superclass. Since
-    // constructors can't be invoked by the class members (unlike methods that
-    // can have "bad annotations"). Defer to the first non-synthetic default
-    // constructor in the class hierarchy.
+    // Subclasses without explicitly defined constructors get a default
+    // constructors that calls `super()`, in which case we need to check whether
+    // the `super()` invocation is allowed. Since constructors can't be invoked
+    // by the class members (unlike methods, which can have "bad annotations"),
+    // defer to the first non-synthetic default constructor in the class hierarchy.
     final ConstructorElement? superConstructor = constructorElement.enclosingElement.thisType
       .superclass?.element.constructors
       .firstWhereOrNull((ConstructorElement constructor) => constructor.isDefaultConstructor);
@@ -190,7 +191,7 @@ class _DebugAssertVisitor extends GeneralizingAstVisitor<void> {
         || ConstructorElement(:final Element enclosingElement)
         || ClassMemberElement(enclosingElement: ExtensionElement() && final Element enclosingElement):
         return lib.metadata.any(_isDebugAssertAnnotationElement) || element.metadata.any(_isDebugAssertAnnotationElement) || enclosingElement.metadata.any(_isDebugAssertAnnotationElement);
-      // Non-static, overridable class memebers. Call to these members can be
+      // Non-static, overridable class memebers. Calls to these members can be
       // polymorphic so we want to detect and warn against "bad annotations":
       // class A {
       //   int get a;
