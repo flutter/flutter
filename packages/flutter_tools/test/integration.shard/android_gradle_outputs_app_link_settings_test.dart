@@ -5,7 +5,6 @@
 import 'dart:convert';
 import 'dart:io' as io;
 
-import 'package:collection/collection.dart';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart'
     show getGradlewFileName;
@@ -136,8 +135,15 @@ void main() {
     tryToDelete(tempDir);
   });
 
+  void testDeeplink(dynamic deeplink, String scheme, String host, String path) {
+    deeplink as Map<String, dynamic>;
+    expect(deeplink['scheme'], scheme);
+    expect(deeplink['host'], host);
+    expect(deeplink['path'], path);
+  }
+
   testWithoutContext(
-      'gradle task exists named print<mode>AppLinkDomains that prints app link domains', () async {
+      'gradle task outputs<mode>AppLinkSettings works when a project has app links', () async {
     // Create a new flutter project.
     final String flutterBin =
     fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
@@ -173,17 +179,61 @@ void main() {
       '.${platform.pathSeparator}${getGradlewFileName(platform)}',
       ...getLocalEngineArguments(),
       '-q', // quiet output.
-      'printDebugAppLinkDomains',
+      'outputDebugAppLinkSettings',
     ], workingDirectory: androidApp.path);
 
     expect(result, const ProcessResultMatcher());
 
-    const List<String> expectedLines = <String>[
-      // Should only pick up the pure and hybrid intent filters
-      'Domain: pure-http.com',
-      'Domain: hybrid.com',
-    ];
-    final List<String> actualLines = LineSplitter.split(result.stdout.toString()).toList();
-    expect(const ListEquality<String>().equals(actualLines, expectedLines), isTrue);
+    final io.File fileDump = tempDir.childDirectory('build').childDirectory('app').childFile('app-link-settings-debug.json');
+    expect(fileDump.existsSync(), true);
+    final Map<String, dynamic> json = jsonDecode(fileDump.readAsStringSync()) as Map<String, dynamic>;
+    expect(json['applicationId'], 'com.example.testapp');
+    final List<dynamic> deeplinks = json['deeplinks']! as List<dynamic>;
+    expect(deeplinks.length, 5);
+    testDeeplink(deeplinks[0], 'http', 'pure-http.com', '.*');
+    testDeeplink(deeplinks[1], 'custom', 'custom.com', '.*');
+    testDeeplink(deeplinks[2], 'custom', 'hybrid.com', '.*');
+    testDeeplink(deeplinks[3], 'http', 'hybrid.com', '.*');
+    testDeeplink(deeplinks[4], 'http', 'non-auto-verify.com', '.*');
+  });
+
+  testWithoutContext(
+      'gradle task outputs<mode>AppLinkSettings works when a project does not have app link', () async {
+    // Create a new flutter project.
+    final String flutterBin =
+    fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
+    ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      'create',
+      tempDir.path,
+      '--project-name=testapp',
+    ], workingDirectory: tempDir.path);
+    expect(result, const ProcessResultMatcher());
+
+    // Ensure that gradle files exists from templates.
+    result = await processManager.run(<String>[
+      flutterBin,
+      'build',
+      'apk',
+      '--config-only',
+    ], workingDirectory: tempDir.path);
+    expect(result, const ProcessResultMatcher());
+
+    final Directory androidApp = tempDir.childDirectory('android');
+    result = await processManager.run(<String>[
+      '.${platform.pathSeparator}${getGradlewFileName(platform)}',
+      ...getLocalEngineArguments(),
+      '-q', // quiet output.
+      'outputDebugAppLinkSettings',
+    ], workingDirectory: androidApp.path);
+
+    expect(result, const ProcessResultMatcher());
+
+    final io.File fileDump = tempDir.childDirectory('build').childDirectory('app').childFile('app-link-settings-debug.json');
+    expect(fileDump.existsSync(), true);
+    final Map<String, dynamic> json = jsonDecode(fileDump.readAsStringSync()) as Map<String, dynamic>;
+    expect(json['applicationId'], 'com.example.testapp');
+    final List<dynamic> deeplinks = json['deeplinks']! as List<dynamic>;
+    expect(deeplinks.length, 0);
   });
 }
