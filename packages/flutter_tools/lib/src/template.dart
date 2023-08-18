@@ -361,7 +361,13 @@ class Template {
           context['androidIdentifier'] = _escapeKotlinKeywords(androidIdentifier);
         }
 
-        final String renderedContents = _templateRenderer.renderString(templateContents, context);
+        // Use a copy of the context,
+        // since the original is used in rendering other templates.
+        final Map<String, Object?> localContext = finalDestinationFile.path.endsWith('.yaml')
+          ? _createEscapedContextCopy(context)
+          : context;
+
+        final String renderedContents = _templateRenderer.renderString(templateContents, localContext);
 
         finalDestinationFile.writeAsStringSync(renderedContents);
 
@@ -375,6 +381,21 @@ class Template {
 
     return fileCount;
   }
+}
+
+/// Create a copy of the given [context], escaping its values when necessary.
+///
+/// Returns the copied context.
+Map<String, Object?> _createEscapedContextCopy(Map<String, Object?> context) {
+  final Map<String, Object?> localContext = Map<String, Object?>.of(context);
+
+  final String? description = localContext['description'] as String?;
+
+  if (description != null && description.isNotEmpty) {
+    localContext['description'] = escapeYamlString(description);
+  }
+
+  return localContext;
 }
 
 String _escapeKotlinKeywords(String androidIdentifier) {
