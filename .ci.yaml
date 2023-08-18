@@ -50,6 +50,18 @@ platform_properties:
         ]
       os: Linux
       device_type: "msm8952"
+
+  linux_pixel_7pro:
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:33v6"},
+          {"dependency": "open_jdk", "version": "version:11"},
+          {"dependency": "curl", "version": "version:7.64.0"}
+        ]
+      os: Linux
+      device_type: "Pixel 7 Pro"
+
   linux_samsung_s10:
     properties:
       dependencies: >-
@@ -363,6 +375,7 @@ targets:
         ]
       tags: >
         ["framework", "hostonly", "linux"]
+      backfill: "false"
       validation: docs
       validation_name: Docs
       firebase_project: master-docs-flutter-dev
@@ -2271,15 +2284,6 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: old_gallery__transition_perf
 
-  - name: Linux_android new_gallery__transition_perf
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux"]
-      task_name: new_gallery__transition_perf
-
   - name: Linux_build_test flutter_gallery__transition_perf
     recipe: devicelab/devicelab_drone_build_test
     presubmit: false
@@ -2325,6 +2329,17 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery__transition_perf_with_semantics
 
+  # MotoG4, Skia
+  - name: Linux_android new_gallery__transition_perf
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux"]
+      task_name: new_gallery__transition_perf
+
+  # Samsung S10, Skia
   - name: Linux_samsung_s10 new_gallery__transition_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -2334,6 +2349,29 @@ targets:
         ["devicelab", "android", "linux", "samsung", "s10"]
       task_name: new_gallery__transition_perf
 
+  # Pixel 7 Pro, Skia
+  - name: Linux_pixel_7pro new_gallery__transition_perf
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: new_gallery__transition_perf
+
+  # Samsung A02, Skia
+  - name: Linux_samsung_a02 new_gallery__transition_perf
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "samsung", "a02"]
+      task_name: new_gallery__transition_perf
+
+  # Moto G4, Impeller (OpenGL)
   - name: Linux_android new_gallery_impeller__transition_perf
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -2345,6 +2383,30 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: new_gallery_impeller__transition_perf
 
+  # Pixel 7 Pro, Impeller (Vulkan)
+  - name: Linux_pixel_7pro new_gallery_impeller__transition_perf
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: new_gallery_impeller__transition_perf
+
+  # Samsung A02, Impeller (OpenGL)
+  - name: Linux_samsung_a02 new_gallery_impeller__transition_perf
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      ignore_flakiness: "true"
+      tags: >
+        ["devicelab", "android", "linux", "samsung", "a02"]
+      task_name: new_gallery_impeller__transition_perf
+
+  # Samsung S10, Impeller (Vulkan)
   - name: Linux_samsung_s10 new_gallery_impeller__transition_perf
     bringup: true # Flaky https://github.com/flutter/flutter/issues/124693
     recipe: devicelab/devicelab_drone
@@ -2356,6 +2418,7 @@ targets:
         ["devicelab", "android", "linux", "samsung", "s10"]
       task_name: new_gallery_impeller__transition_perf
 
+  # Samsung S10, Impeller (OpenGL)
   - name: Linux_samsung_s10 new_gallery_opengles_impeller__transition_perf
     bringup: true
     recipe: devicelab/devicelab_drone

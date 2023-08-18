@@ -150,5 +150,6 @@
   "collapsedHint": "Rozbalené",
   "menuDismissLabel": "Zavrieť ponuku",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }
