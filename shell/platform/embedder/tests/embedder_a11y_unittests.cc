@@ -272,6 +272,126 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV3Callbacks) {
 #endif  // OS_FUCHSIA
 }
 
+TEST_F(EmbedderA11yTest, A11yStringAttributes) {
+#if defined(OS_FUCHSIA)
+  GTEST_SKIP() << "This test crashes on Fuchsia. https://fxbug.dev/87493 ";
+#else
+
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
+
+  fml::AutoResetWaitableEvent signal_native_latch;
+
+  // Called by the Dart text fixture on the UI thread to signal that the C++
+  // unittest should resume.
+  context.AddNativeCallback(
+      "SignalNativeTest",
+      CREATE_NATIVE_ENTRY(([&signal_native_latch](Dart_NativeArguments) {
+        signal_native_latch.Signal();
+      })));
+
+  fml::AutoResetWaitableEvent semantics_update_latch;
+  context.SetSemanticsUpdateCallback2(
+      [&](const FlutterSemanticsUpdate2* update) {
+        ASSERT_EQ(update->node_count, size_t(1));
+        ASSERT_EQ(update->custom_action_count, size_t(0));
+
+        auto node = update->nodes[0];
+
+        // Verify label
+        {
+          ASSERT_EQ(std::string(node->label), "What is the meaning of life?");
+          ASSERT_EQ(node->label_attribute_count, size_t(2));
+
+          ASSERT_EQ(node->label_attributes[0]->start, size_t(0));
+          ASSERT_EQ(node->label_attributes[0]->end, size_t(28));
+          ASSERT_EQ(node->label_attributes[0]->type,
+                    FlutterStringAttributeType::kLocale);
+          ASSERT_EQ(std::string(node->label_attributes[0]->locale->locale),
+                    "en");
+
+          ASSERT_EQ(node->label_attributes[1]->start, size_t(0));
+          ASSERT_EQ(node->label_attributes[1]->end, size_t(1));
+          ASSERT_EQ(node->label_attributes[1]->type,
+                    FlutterStringAttributeType::kSpellOut);
+        }
+
+        // Verify hint
+        {
+          ASSERT_EQ(std::string(node->hint), "It's a number");
+          ASSERT_EQ(node->hint_attribute_count, size_t(2));
+
+          ASSERT_EQ(node->hint_attributes[0]->start, size_t(0));
+          ASSERT_EQ(node->hint_attributes[0]->end, size_t(1));
+          ASSERT_EQ(node->hint_attributes[0]->type,
+                    FlutterStringAttributeType::kLocale);
+          ASSERT_EQ(std::string(node->hint_attributes[0]->locale->locale),
+                    "en");
+
+          ASSERT_EQ(node->hint_attributes[1]->start, size_t(2));
+          ASSERT_EQ(node->hint_attributes[1]->end, size_t(3));
+          ASSERT_EQ(node->hint_attributes[1]->type,
+                    FlutterStringAttributeType::kLocale);
+          ASSERT_EQ(std::string(node->hint_attributes[1]->locale->locale),
+                    "fr");
+        }
+
+        // Verify value
+        {
+          ASSERT_EQ(std::string(node->value), "42");
+          ASSERT_EQ(node->value_attribute_count, size_t(1));
+
+          ASSERT_EQ(node->value_attributes[0]->start, size_t(0));
+          ASSERT_EQ(node->value_attributes[0]->end, size_t(2));
+          ASSERT_EQ(node->value_attributes[0]->type,
+                    FlutterStringAttributeType::kLocale);
+          ASSERT_EQ(std::string(node->value_attributes[0]->locale->locale),
+                    "en-US");
+        }
+
+        // Verify increased value
+        {
+          ASSERT_EQ(std::string(node->increased_value), "43");
+          ASSERT_EQ(node->increased_value_attribute_count, size_t(2));
+
+          ASSERT_EQ(node->increased_value_attributes[0]->start, size_t(0));
+          ASSERT_EQ(node->increased_value_attributes[0]->end, size_t(1));
+          ASSERT_EQ(node->increased_value_attributes[0]->type,
+                    FlutterStringAttributeType::kSpellOut);
+
+          ASSERT_EQ(node->increased_value_attributes[1]->start, size_t(1));
+          ASSERT_EQ(node->increased_value_attributes[1]->end, size_t(2));
+          ASSERT_EQ(node->increased_value_attributes[1]->type,
+                    FlutterStringAttributeType::kSpellOut);
+        }
+
+        // Verify decreased value
+        {
+          ASSERT_EQ(std::string(node->decreased_value), "41");
+          ASSERT_EQ(node->decreased_value_attribute_count, size_t(0));
+          ASSERT_EQ(node->decreased_value_attributes, nullptr);
+        }
+
+        semantics_update_latch.Signal();
+      });
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSoftwareRendererConfig();
+  builder.SetDartEntrypoint("a11y_string_attributes");
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // 1: Enable semantics.
+  auto result = FlutterEngineUpdateSemanticsEnabled(engine.get(), true);
+  ASSERT_EQ(result, FlutterEngineResult::kSuccess);
+
+  // 2: Wait for semantics update callback on platform (current) thread.
+  signal_native_latch.Wait();
+  fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+  semantics_update_latch.Wait();
+#endif  // OS_FUCHSIA
+}
+
 TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV2Callbacks) {
 #if defined(OS_FUCHSIA)
   GTEST_SKIP() << "This test crashes on Fuchsia. https://fxbug.dev/87493 ";

@@ -291,6 +291,82 @@ void a11y_main() async {
 }
 
 @pragma('vm:entry-point')
+void a11y_string_attributes() async {
+  // 1: Wait until semantics are enabled.
+  if (!PlatformDispatcher.instance.semanticsEnabled) {
+    await semanticsChanged;
+  }
+
+  // 2: Update semantics with string attributes.
+  final SemanticsUpdateBuilder builder = SemanticsUpdateBuilder()
+    ..updateNode(
+      id: 42,
+      label: 'What is the meaning of life?',
+      labelAttributes: <StringAttribute>[
+        LocaleStringAttribute(
+          range: TextRange(start: 0, end: 'What is the meaning of life?'.length),
+          locale: Locale('en'),
+        ),
+        SpellOutStringAttribute(
+          range: TextRange(start: 0, end: 1),
+        ),
+      ],
+      rect: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+      transform: kTestTransform,
+      childrenInTraversalOrder: Int32List.fromList(<int>[84, 96]),
+      childrenInHitTestOrder: Int32List.fromList(<int>[96, 84]),
+      actions: 0,
+      flags: 0,
+      maxValueLength: 0,
+      currentValueLength: 0,
+      textSelectionBase: 0,
+      textSelectionExtent: 0,
+      platformViewId: 0,
+      scrollChildren: 0,
+      scrollIndex: 0,
+      scrollPosition: 0.0,
+      scrollExtentMax: 0.0,
+      scrollExtentMin: 0.0,
+      elevation: 0.0,
+      thickness: 0.0,
+      hint: "It's a number",
+      hintAttributes: <StringAttribute>[
+        LocaleStringAttribute(
+          range: TextRange(start: 0, end: 1),
+          locale: Locale('en'),
+        ),
+        LocaleStringAttribute(
+          range: TextRange(start: 2, end: 3),
+          locale: Locale('fr'),
+        ),
+      ],
+      value: '42',
+      valueAttributes: <StringAttribute>[
+        LocaleStringAttribute(
+          range: TextRange(start: 0, end: '42'.length),
+          locale: Locale('en', 'US'),
+        ),
+      ],
+      increasedValue: '43',
+      increasedValueAttributes: <StringAttribute>[
+        SpellOutStringAttribute(
+          range: TextRange(start: 0, end: 1),
+        ),
+        SpellOutStringAttribute(
+          range: TextRange(start: 1, end: 2),
+        ),
+      ],
+      decreasedValue: '41',
+      decreasedValueAttributes: <StringAttribute>[],
+      tooltip: 'tooltip',
+      additionalActions: Int32List(0),
+    );
+
+  PlatformDispatcher.instance.views.first.updateSemantics(builder.build());
+  signalNativeTest();
+}
+
+@pragma('vm:entry-point')
 void platform_messages_response() {
   PlatformDispatcher.instance.onPlatformMessage =
       (String name, ByteData? data, PlatformMessageResponseCallback? callback) {
