@@ -103,6 +103,7 @@ class TextFormField extends FormField<String> {
     this.controller,
     String? initialValue,
     FocusNode? focusNode,
+    super.forceErrorText,
     InputDecoration? decoration = const InputDecoration(),
     TextInputType? keyboardType,
     TextCapitalization textCapitalization = TextCapitalization.none,
