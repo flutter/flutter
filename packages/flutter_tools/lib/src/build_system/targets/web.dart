@@ -507,10 +507,10 @@ class WebServiceWorker extends Target {
       <String>[
         'main.dart.js',
         'index.html',
-        if (urlToHash.containsKey('assets/AssetManifest.json'))
-          'assets/AssetManifest.json',
-        if (urlToHash.containsKey('assets/FontManifest.json'))
-          'assets/FontManifest.json',
+        if (urlToHash.containsKey('assets/AssetManifest.bin'))
+          'assets/AssetManifest.bin',
+        if (urlToHash.containsKey('aassets/AssetManifest.bin'))
+          'assets/AssetManifest.bin',
       ],
       serviceWorkerStrategy: serviceWorkerStrategy,
     );
