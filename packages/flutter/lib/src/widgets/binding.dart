@@ -350,7 +350,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     _buildOwner = BuildOwner();
     buildOwner!.onBuildScheduled = _handleBuildScheduled;
     platformDispatcher.onLocaleChanged = handleLocaleChanged;
-    SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
+    SystemChannels.navigation.setMethodCallHandler(handleNavigationInvocation);
     assert(() {
       FlutterErrorDetails.propertiesTransformers.add(debugTransformDebugCreator);
       return true;
@@ -775,7 +775,11 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     }
   }
 
-  Future<dynamic> _handleNavigationInvocation(MethodCall methodCall) {
+  /// Called when the host tells the app to navigate to a new route.
+  /// This method is called by instances of [WidgetsFlutterBinding]
+  /// It can also always be set by calling
+  /// SystemChannels.navigation.setMethodCallHandler.
+  Future<dynamic> handleNavigationInvocation(MethodCall methodCall) {
     switch (methodCall.method) {
       case 'popRoute':
         return handlePopRoute();
