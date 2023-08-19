@@ -621,6 +621,27 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   }
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.forceErrorText != null) {
+      // ignore: always_specify_types
+      Future.microtask(() {
+        setState(() {
+          _errorText.value = widget.forceErrorText;
+        });
+      });
+    }
+  }
+
+  @override
+  void didUpdateWidget(FormField<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.forceErrorText != oldWidget.forceErrorText) {
+      _errorText.value = widget.forceErrorText;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (widget.enabled) {
       switch (widget.autovalidateMode) {
