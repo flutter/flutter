@@ -3060,6 +3060,26 @@ TEST_P(AiksTest, DrawPictureWithText) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, DrawPictureClipped) {
+  Canvas subcanvas;
+  subcanvas.ClipRRect(Rect::MakeLTRB(100, 100, 400, 400), 15);
+  subcanvas.DrawPaint({.color = Color::Red()});
+  auto picture = subcanvas.EndRecordingAsPicture();
+
+  Canvas canvas;
+  canvas.DrawPaint({.color = Color::CornflowerBlue()});
+
+  // Draw a red RRect via DrawPicture.
+  canvas.DrawPicture(picture);
+
+  // Draw over the picture with a larger green rectangle, completely covering it
+  // up.
+  canvas.ClipRRect(Rect::MakeLTRB(100, 100, 400, 400).Expand(20), 15);
+  canvas.DrawPaint({.color = Color::Green()});
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 TEST_P(AiksTest, MatrixSaveLayerFilter) {
   Canvas canvas;
   canvas.DrawPaint({.color = Color::Black()});
