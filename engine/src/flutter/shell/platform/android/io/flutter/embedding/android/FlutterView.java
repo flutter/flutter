@@ -1493,7 +1493,6 @@ public class FlutterView extends FrameLayout
         .getSettingsChannel()
         .startMessage()
         .setTextScaleFactor(getResources().getConfiguration().fontScale)
-        .setDisplayMetrics(getResources().getDisplayMetrics())
         .setNativeSpellCheckServiceDefined(isNativeSpellCheckServiceDefined)
         .setBrieflyShowPassword(
             Settings.System.getInt(

@@ -1050,19 +1050,17 @@ class PlatformDispatcher {
     if (brieflyShowPassword != null) {
       _brieflyShowPassword = brieflyShowPassword;
     }
-    final Brightness platformBrightness = switch (data['platformBrightness']) {
-      'dark'              => Brightness.dark,
-      'light'             => Brightness.light,
-      final Object? value => throw StateError('$value is not a valid platformBrightness.'),
-    };
+    final Brightness platformBrightness =
+    data['platformBrightness']! as String == 'dark' ? Brightness.dark : Brightness.light;
     final String? systemFontFamily = data['systemFontFamily'] as String?;
-    final int? configurationId = data['configurationId'] as int?;
     final _PlatformConfiguration previousConfiguration = _configuration;
     final bool platformBrightnessChanged = previousConfiguration.platformBrightness != platformBrightness;
     final bool textScaleFactorChanged = previousConfiguration.textScaleFactor != textScaleFactor;
-    final bool alwaysUse24HourFormatChanged = previousConfiguration.alwaysUse24HourFormat != alwaysUse24HourFormat;
-    final bool systemFontFamilyChanged = previousConfiguration.systemFontFamily != systemFontFamily;
-    if (!platformBrightnessChanged && !textScaleFactorChanged && !alwaysUse24HourFormatChanged && !systemFontFamilyChanged && configurationId == null) {
+    final bool alwaysUse24HourFormatChanged =
+        previousConfiguration.alwaysUse24HourFormat != alwaysUse24HourFormat;
+    final bool systemFontFamilyChanged =
+        previousConfiguration.systemFontFamily != systemFontFamily;
+    if (!platformBrightnessChanged && !textScaleFactorChanged && !alwaysUse24HourFormatChanged && !systemFontFamilyChanged) {
       return;
     }
     _configuration = previousConfiguration.copyWith(
@@ -1070,11 +1068,9 @@ class PlatformDispatcher {
       alwaysUse24HourFormat: alwaysUse24HourFormat,
       platformBrightness: platformBrightness,
       systemFontFamily: systemFontFamily,
-      configurationId: configurationId,
     );
     _invoke(onPlatformConfigurationChanged, _onPlatformConfigurationChangedZone);
     if (textScaleFactorChanged) {
-      _cachedFontSizes = null;
       _invoke(onTextScaleFactorChanged, _onTextScaleFactorChangedZone);
     }
     if (platformBrightnessChanged) {
@@ -1247,99 +1243,6 @@ class PlatformDispatcher {
 
   @Native<Handle Function()>(symbol: 'PlatformConfigurationNativeApi::DefaultRouteName')
   external static String _defaultRouteName();
-
-  /// Computes the scaled font size from the given `unscaledFontSize`, according
-  /// to the user's platform preferences.
-  ///
-  /// Many platforms allow users to scale text globally for better readability.
-  /// Given the font size the app developer specified in logical pixels, this
-  /// method converts it to the preferred font size (also in logical pixels) that
-  /// accounts for platform-wide text scaling. The return value is always
-  /// non-negative.
-  ///
-  /// The scaled value of the same font size input may change if the user changes
-  /// the text scaling preference (in system settings for example). The
-  /// [onTextScaleFactorChanged] callback can be used to monitor such changes.
-  ///
-  /// Instead of directly calling this method, applications should typically use
-  /// [MediaQuery.textScalerOf] to retrive the scaled font size in a widget tree,
-  /// so text in the app resizes properly when the text scaling preference
-  /// changes.
-  double scaleFontSize(double unscaledFontSize) {
-    assert(unscaledFontSize >= 0);
-    assert(unscaledFontSize.isFinite);
-
-    if (textScaleFactor == 1.0) {
-      return unscaledFontSize;
-    }
-
-    final int unscaledFloor = unscaledFontSize.floor();
-    final int unscaledCeil = unscaledFontSize.ceil();
-    if (unscaledFloor == unscaledCeil) {
-      // No need to interpolate if the input value is an integer.
-      return _scaleAndMemoize(unscaledFloor) ?? unscaledFontSize * textScaleFactor;
-    }
-    assert(unscaledCeil - unscaledFloor == 1, 'Unexpected interpolation range: $unscaledFloor - $unscaledCeil.');
-
-    return switch ((_scaleAndMemoize(unscaledFloor), _scaleAndMemoize(unscaledCeil))) {
-      (null, _) || (_, null)                   => unscaledFontSize * textScaleFactor,
-      (final double lower, final double upper) => lower + (upper - lower) * (unscaledFontSize - unscaledFloor),
-    };
-  }
-
-  // The cache is cleared when the text scale factor changes.
-  Map<int, double>? _cachedFontSizes;
-  // This method returns null if an error is encountered.
-  double? _scaleAndMemoize(int unscaledFontSize) {
-    final int? configurationId = _configuration.configurationId;
-    if (configurationId == null) {
-      // The platform uses linear scaling, or the platform hasn't sent us a
-      // configuration yet.
-      return null;
-    }
-    final double? cachedValue = _cachedFontSizes?[unscaledFontSize];
-    if (cachedValue != null) {
-      assert(cachedValue >= 0);
-      return cachedValue;
-    }
-
-    final double unscaledFontSizeDouble = unscaledFontSize.toDouble();
-    final double fontSize = PlatformDispatcher._getScaledFontSize(unscaledFontSizeDouble, configurationId);
-    if (fontSize >= 0) {
-      return (_cachedFontSizes ??= <int, double>{})[unscaledFontSize] = fontSize;
-    }
-    switch (fontSize) {
-      case -1:
-        // Invalid configuration id. This error can be unrecoverable as the
-        // _getScaledFontSize function can be destructive.
-        assert(false, 'Flutter Error: incorrect configuration id: $configurationId.');
-      case final double errorCode:
-        assert(false, 'Unknown error: GetScaledFontSize failed with $errorCode.');
-    }
-    return null;
-  }
-
-  // Calls the platform's text scaling implementation to scale the given
-  // `unscaledFontSize`.
-  //
-  // The `configurationId` parameter tells the embedder which platform
-  // configuration to use for computing the scaled font size. When the user
-  // changes the platform configuration, the configuration data will first be
-  // made available on the platform thread before being dispatched asynchronously
-  // to the Flutter UI thread. Since this call is synchronous, without this
-  // identifier, it could call into the embber who's using a newer configuration
-  // that Flutter has not received yet. The `configurationId` parameter must be
-  // the lastest configuration id received from the platform
-  // (`_configuration.configurationId`). Using an incorrect id could result in
-  // an unrecoverable error.
-  //
-  // Currently this is only implemented on newer versions of Android (SDK level
-  // 34, using the `TypedValue#applyDimension` API). Platforms that do not have
-  // the capability will never send a `configurationId` to [PlatformDispatcher],
-  // and should not call this method. This method returns -1 when the specified
-  // configurationId does not match any configuration.
-  @Native<Double Function(Double, Int)>(symbol: 'PlatformConfigurationNativeApi::GetScaledFontSize')
-  external static double _getScaledFontSize(double unscaledFontSize, int configurationId);
 }
 
 /// Configuration of the platform.
@@ -1355,7 +1258,6 @@ class _PlatformConfiguration {
     this.locales = const <Locale>[],
     this.defaultRouteName,
     this.systemFontFamily,
-    this.configurationId,
   });
 
   _PlatformConfiguration copyWith({
@@ -1367,7 +1269,6 @@ class _PlatformConfiguration {
     List<Locale>? locales,
     String? defaultRouteName,
     String? systemFontFamily,
-    int? configurationId,
   }) {
     return _PlatformConfiguration(
       accessibilityFeatures: accessibilityFeatures ?? this.accessibilityFeatures,
@@ -1378,7 +1279,6 @@ class _PlatformConfiguration {
       locales: locales ?? this.locales,
       defaultRouteName: defaultRouteName ?? this.defaultRouteName,
       systemFontFamily: systemFontFamily ?? this.systemFontFamily,
-      configurationId: configurationId ?? this.configurationId,
     );
   }
 
@@ -1410,22 +1310,6 @@ class _PlatformConfiguration {
 
   /// The system-reported default font family.
   final String? systemFontFamily;
-
-  /// A unique identifier for this [_PlatformConfiguration].
-  ///
-  /// This unique identifier is optionally assigned by the platform embedder.
-  /// Dart code that runs on the Flutter UI thread and synchronously invokes
-  /// platform APIs can use this identifier to tell the embedder to use the
-  /// configuration that matches the current [_PlatformConfiguration] in
-  /// dart:ui. See the [_getScaledFontSize] function for an example.
-  ///
-  /// This field's nullability also indicates whether the platform supports
-  /// nonlinear text scaling (as it's the only feature that requires synchronous
-  /// invocation of platform APIs). This field is always null if the platform
-  /// does not use nonlinear text scaling, or when dart:ui has not received any
-  /// configuration updates from the embedder yet. The _getScaledFontSize
-  /// function should not be called in either case.
-  final int? configurationId;
 }
 
 /// An immutable view configuration.
