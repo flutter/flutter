@@ -881,6 +881,22 @@ bool EntityPass::OnRender(
   return true;
 }
 
+void EntityPass::IterateAllElements(
+    const std::function<bool(Element&)>& iterator) {
+  if (!iterator) {
+    return;
+  }
+
+  for (auto& element : elements_) {
+    if (!iterator(element)) {
+      return;
+    }
+    if (auto subpass = std::get_if<std::unique_ptr<EntityPass>>(&element)) {
+      subpass->get()->IterateAllElements(iterator);
+    }
+  }
+}
+
 void EntityPass::IterateAllEntities(
     const std::function<bool(Entity&)>& iterator) {
   if (!iterator) {
@@ -973,6 +989,10 @@ void EntityPass::SetTransformation(Matrix xformation) {
 
 void EntityPass::SetStencilDepth(size_t stencil_depth) {
   stencil_depth_ = stencil_depth;
+}
+
+size_t EntityPass::GetStencilDepth() {
+  return stencil_depth_;
 }
 
 void EntityPass::SetBlendMode(BlendMode blend_mode) {

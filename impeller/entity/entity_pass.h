@@ -88,6 +88,12 @@ class EntityPass {
   bool Render(ContentContext& renderer,
               const RenderTarget& render_target) const;
 
+  /// @brief  Iterate all elements (entities and subpasses) in this pass,
+  ///         recursively including elements of child passes. The iteration
+  ///         order is depth-first. Whenever a subpass elements is encountered,
+  ///         it's included in the stream before its children.
+  void IterateAllElements(const std::function<bool(Element&)>& iterator);
+
   /// @brief  Iterate all entities in this pass, recursively including entities
   ///         of child passes. The iteration order is depth-first.
   void IterateAllEntities(const std::function<bool(Entity&)>& iterator);
@@ -110,6 +116,8 @@ class EntityPass {
   void SetTransformation(Matrix xformation);
 
   void SetStencilDepth(size_t stencil_depth);
+
+  size_t GetStencilDepth();
 
   void SetBlendMode(BlendMode blend_mode);
 
