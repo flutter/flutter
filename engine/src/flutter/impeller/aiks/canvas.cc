@@ -427,20 +427,29 @@ void Canvas::DrawPicture(const Picture& picture) {
     return;
   }
 
-  auto save_count = GetSaveCount();
-  Save();
-
   // Clone the base pass and account for the CTM updates.
   auto pass = picture.pass->Clone();
-  pass->IterateAllEntities([&](auto& entity) -> bool {
-    entity.IncrementStencilDepth(GetStencilDepth());
-    entity.SetTransformation(GetCurrentTransformation() *
-                             entity.GetTransformation());
-    return true;
+
+  pass->IterateAllElements([&](auto& element) -> bool {
+    if (auto entity = std::get_if<Entity>(&element)) {
+      entity->IncrementStencilDepth(GetStencilDepth());
+      entity->SetTransformation(GetCurrentTransformation() *
+                                entity->GetTransformation());
+      return true;
+    }
+
+    if (auto subpass = std::get_if<std::unique_ptr<EntityPass>>(&element)) {
+      subpass->get()->SetStencilDepth(subpass->get()->GetStencilDepth() +
+                                      GetStencilDepth());
+      return true;
+    }
+
+    FML_UNREACHABLE();
   });
+
   GetCurrentPass().AddSubpassInline(std::move(pass));
 
-  RestoreToCount(save_count);
+  RestoreClip();
 }
 
 void Canvas::DrawImage(const std::shared_ptr<Image>& image,
