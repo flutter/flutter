@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:html' as html;
+import 'dart:math' as math;
 import 'dart:io' show Platform;
 import 'dart:ui' show
   FontWeight,
@@ -1702,6 +1704,7 @@ class TextInput {
   /// should call [TextInputConnection.close] on the returned
   /// [TextInputConnection].
   static TextInputConnection attach(TextInputClient client, TextInputConfiguration configuration) {
+    print('attaching in text input');
     final TextInputConnection connection = TextInputConnection._(client);
     _instance._attach(connection, configuration);
     return connection;
@@ -1712,6 +1715,7 @@ class TextInput {
   // `TextInputClient.requestExistingInputState` method.
   void _attach(TextInputConnection connection, TextInputConfiguration configuration) {
     assert(_debugEnsureInputActionWorksOnPlatform(configuration.inputAction));
+    print('calling _attach in TextInput');
     _currentConnection = connection;
     _currentConfiguration = configuration;
     _setClient(connection._client, configuration);
@@ -2013,6 +2017,7 @@ class TextInput {
   }
 
   void _updateEditingValue(TextEditingValue value, {TextInputControl? exclude}) {
+    print('_updateEditingValue for instance in Text Input $_currentConnection');
     if (_currentConnection == null) {
       return;
     }
@@ -2030,7 +2035,19 @@ class TextInput {
   /// This method should be called by the text input control implementation to
   /// send editing value updates to the attached input client.
   static void updateEditingValue(TextEditingValue value) {
+    print('updateEditingValue in TextInput');
     _instance._updateEditingValue(value, exclude: _instance._currentControl);
+  }
+
+  /// get the current client.
+  static TextInputClient? get client => TextInput._instance._currentConnection?._client;
+
+  /// platform view input element.
+  html.HtmlElement? _inputEl;
+
+  /// set input element.
+  static void setInputElement(html.HtmlElement inputEl) {
+    _instance._inputEl = inputEl;
   }
 
   /// Finishes the current autofill context, and potentially saves the user
@@ -2223,6 +2240,8 @@ class _PlatformTextInputControl with TextInputControl {
 
   MethodChannel get _channel => TextInput._instance._channel;
 
+  html.HtmlElement? get _inputEl => TextInput._instance._inputEl;
+
   Map<String, dynamic> _configurationToJson(TextInputConfiguration configuration) {
     final Map<String, dynamic> json = configuration.toJson();
     if (TextInput._instance._currentControl != _PlatformTextInputControl.instance) {
@@ -2233,6 +2252,12 @@ class _PlatformTextInputControl with TextInputControl {
 
   @override
   void attach(TextInputClient client, TextInputConfiguration configuration) {
+    print('attaching in text input control ${StackTrace.current}');
+
+    if(kIsWeb) {
+      return;
+    }
+
     _channel.invokeMethod<void>(
       'TextInput.setClient',
       <Object>[
@@ -2244,11 +2269,19 @@ class _PlatformTextInputControl with TextInputControl {
 
   @override
   void detach(TextInputClient client) {
+    if(kIsWeb) {
+      return;
+    }
+
     _channel.invokeMethod<void>('TextInput.clearClient');
   }
 
   @override
   void updateConfig(TextInputConfiguration configuration) {
+    if(kIsWeb) {
+      return;
+    }
+
     _channel.invokeMethod<void>(
       'TextInput.updateConfig',
       _configurationToJson(configuration),
@@ -2257,6 +2290,17 @@ class _PlatformTextInputControl with TextInputControl {
 
   @override
   void setEditingState(TextEditingValue value) {
+    if(kIsWeb) {
+      print('setEditingState in TextEditingController $value');
+      final html.InputElement element = _inputEl! as html.InputElement;
+      final int minOffset = math.min(value.selection.baseOffset, value.selection.extentOffset);
+      final int maxOffset = math.max(value.selection.baseOffset, value.selection.extentOffset);
+      element.value = value.text;
+      element.setSelectionRange(minOffset, maxOffset);
+
+      return;
+    }
+
     _channel.invokeMethod<void>(
       'TextInput.setEditingState',
       value.toJSON(),
@@ -2265,16 +2309,26 @@ class _PlatformTextInputControl with TextInputControl {
 
   @override
   void show() {
+    if(kIsWeb) {
+      _inputEl!.focus();
+      return;
+    }
     _channel.invokeMethod<void>('TextInput.show');
   }
 
   @override
   void hide() {
+    if(kIsWeb) {
+      _inputEl!.blur();
+    }
     _channel.invokeMethod<void>('TextInput.hide');
   }
 
   @override
   void setEditableSizeAndTransform(Size editableBoxSize, Matrix4 transform) {
+    if(kIsWeb) {
+      return;
+    }
     _channel.invokeMethod<void>(
       'TextInput.setEditableSizeAndTransform',
       <String, dynamic>{
@@ -2287,6 +2341,9 @@ class _PlatformTextInputControl with TextInputControl {
 
   @override
   void setComposingRect(Rect rect) {
+    if(kIsWeb) {
+      return;
+    }
     _channel.invokeMethod<void>(
       'TextInput.setMarkedTextRect',
       <String, dynamic>{
@@ -2300,6 +2357,9 @@ class _PlatformTextInputControl with TextInputControl {
 
   @override
   void setCaretRect(Rect rect) {
+    if(kIsWeb) {
+      return;
+    }
     _channel.invokeMethod<void>(
       'TextInput.setCaretRect',
       <String, dynamic>{
@@ -2313,6 +2373,9 @@ class _PlatformTextInputControl with TextInputControl {
 
   @override
   void setSelectionRects(List<SelectionRect> selectionRects) {
+    if(kIsWeb) {
+      return;
+    }
     _channel.invokeMethod<void>(
       'TextInput.setSelectionRects',
       selectionRects.map((SelectionRect rect) {
@@ -2337,6 +2400,9 @@ class _PlatformTextInputControl with TextInputControl {
     required TextDirection textDirection,
     required TextAlign textAlign,
   }) {
+    if(kIsWeb) {
+      return;
+    }
     _channel.invokeMethod<void>(
       'TextInput.setStyle',
       <String, dynamic>{
@@ -2351,11 +2417,17 @@ class _PlatformTextInputControl with TextInputControl {
 
   @override
   void requestAutofill() {
+    if(kIsWeb) {
+      return;
+    }
     _channel.invokeMethod<void>('TextInput.requestAutofill');
   }
 
   @override
   void finishAutofillContext({bool shouldSave = true}) {
+    if(kIsWeb) {
+      return;
+    }
     _channel.invokeMethod<void>(
       'TextInput.finishAutofillContext',
       shouldSave,
