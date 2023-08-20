@@ -175,9 +175,6 @@ class PlatformViewAndroid final : public PlatformView {
 
   void FireFirstFrameCallback();
 
-  double GetScaledFontSize(double unscaled_font_size,
-                           int configuration_id) const override;
-
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewAndroid);
 };
 }  // namespace flutter

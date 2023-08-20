@@ -680,10 +680,6 @@ class Shell final : public PlatformView::Delegate,
   // |Engine::Delegate|
   fml::TimePoint GetCurrentTimePoint() override;
 
-  // |Engine::Delegate|
-  double GetScaledFontSize(double unscaled_font_size,
-                           int configuration_id) const override;
-
   // |Rasterizer::Delegate|
   void OnFrameRasterized(const FrameTiming&) override;
 
