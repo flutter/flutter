@@ -2184,6 +2184,73 @@ void main() {
       expect(find.text(TestMenu.subMenu00.label), findsNothing);
     });
 
+    testWidgets('SubmenuButton shows default arrow icon when submenuIcon is null', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuBar(
+              controller: controller,
+              children: <Widget>[
+                SubmenuButton(
+                  menuChildren: <Widget>[
+                    SubmenuButton(
+                      menuChildren: <Widget>[
+                        MenuItemButton(
+                          child: Text(TestMenu.subSubMenu110.label),
+                        ),
+                      ],
+                      child: Text(TestMenu.subMenu00.label),
+                    ),
+                  ],
+                  child: Text(TestMenu.mainMenu0.label),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text(TestMenu.mainMenu0.label));
+      await tester.pump();
+
+      // Direction of the arrow is automatically switched
+      expect(find.byIcon(Icons.arrow_right), findsOneWidget);
+    });
+
+    testWidgets('SubmenuButton can show custom submenu widget instead of the default arrow icon', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: MenuBar(
+              controller: controller,
+              children: <Widget>[
+                SubmenuButton(
+                  menuChildren: <Widget>[
+                    SubmenuButton(
+                      submenuIcon: const Text('customSubmenuIcon'),
+                      menuChildren: <Widget>[
+                        MenuItemButton(
+                          child: Text(TestMenu.subSubMenu110.label),
+                        ),
+                      ],
+                      child: Text(TestMenu.subMenu00.label),
+                    ),
+                  ],
+                  child: Text(TestMenu.mainMenu0.label),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text(TestMenu.mainMenu0.label));
+      await tester.pump();
+
+      expect(find.text('customSubmenuIcon'), findsOneWidget);
+      expect(find.byIcon(Icons.arrow_right), findsNothing);
+    });
+
     testWidgets('diagnostics', (WidgetTester tester) async {
       final ButtonStyle style = ButtonStyle(
         shape: MaterialStateProperty.all<OutlinedBorder?>(const StadiumBorder()),

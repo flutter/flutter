@@ -1567,6 +1567,7 @@ class SubmenuButton extends StatefulWidget {
     this.statesController,
     this.leadingIcon,
     this.trailingIcon,
+    this.submenuIcon,
     required this.menuChildren,
     required this.child,
   });
@@ -1633,6 +1634,9 @@ class SubmenuButton extends StatefulWidget {
 
   /// An optional icon to display after the [child].
   final Widget? trailingIcon;
+
+  /// An optional icon to display instead of the default arrow icon.
+  final Widget? submenuIcon;
 
   /// The list of widgets that appear in the menu when it is opened.
   ///
@@ -1764,6 +1768,7 @@ class SubmenuButton extends StatefulWidget {
     properties.add(DiagnosticsProperty<Widget>('leadingIcon', leadingIcon, defaultValue: null));
     properties.add(DiagnosticsProperty<String>('child', child.toString()));
     properties.add(DiagnosticsProperty<Widget>('trailingIcon', trailingIcon, defaultValue: null));
+    properties.add(DiagnosticsProperty<Widget>('submenuIcon', submenuIcon, defaultValue: null));
     properties.add(DiagnosticsProperty<FocusNode?>('focusNode', focusNode));
     properties.add(DiagnosticsProperty<MenuStyle>('menuStyle', menuStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<Offset>('alignmentOffset', alignmentOffset));
@@ -1918,6 +1923,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
               child: _MenuItemLabel(
                 leadingIcon: widget.leadingIcon,
                 trailingIcon: widget.trailingIcon,
+                submenuIcon: widget.submenuIcon,
                 hasSubmenu: true,
                 showDecoration: (controller._anchor!._parent?._orientation ?? Axis.horizontal) == Axis.vertical,
                 child: child ?? const SizedBox(),
@@ -2985,6 +2991,7 @@ class _MenuItemLabel extends StatelessWidget {
     this.showDecoration = true,
     this.leadingIcon,
     this.trailingIcon,
+    this.submenuIcon,
     this.shortcut,
     required this.child,
   });
@@ -3004,6 +3011,9 @@ class _MenuItemLabel extends StatelessWidget {
 
   /// The optional icon that comes after the [child].
   final Widget? trailingIcon;
+
+  /// The optional icon that will be displayed instead of the default arrow icon.
+  final Widget? submenuIcon;
 
   /// The shortcut for this label, so that it can generate a string describing
   /// the shortcut.
@@ -3050,7 +3060,7 @@ class _MenuItemLabel extends StatelessWidget {
         if (showDecoration && hasSubmenu)
           Padding(
             padding: EdgeInsetsDirectional.only(start: horizontalPadding),
-            child: const Icon(
+            child: submenuIcon ?? const Icon(
               Icons.arrow_right, // Automatically switches with text direction.
               size: _kDefaultSubmenuIconSize,
             ),
