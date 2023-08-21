@@ -7,8 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'dart:math' as math;
 
-class Editable extends StatefulWidget {
-  Editable({
+class EditableWeb extends StatefulWidget {
+  const EditableWeb({
     super.key,
     required this.inlineSpan,
     required this.value,
@@ -53,7 +53,7 @@ class Editable extends StatefulWidget {
     this.textCapitalization = TextCapitalization.none, // _Editable doesn't have
     this.autocorrect = true, // _Editable doesn't have
     this.textInputAction, // _Editable doesn't have
-    required this.requestKeyboard,
+    required this.requestKeyboard, // _Editable doesn't have
   });
 
   final InlineSpan inlineSpan;
@@ -102,10 +102,10 @@ class Editable extends StatefulWidget {
   final void Function() requestKeyboard;
 
   @override
-  State<Editable> createState() => _EditableState();
+  State<EditableWeb> createState() => _EditableWebState();
 }
 
-class _EditableState extends State<Editable> {
+class _EditableWebState extends State<EditableWeb> {
   late html.HtmlElement _inputEl;
   html.InputElement? _inputElement;
   html.TextAreaElement? _textAreaElement;
@@ -349,21 +349,6 @@ class _EditableState extends State<Editable> {
         return null;
     }
   }
-  // TODO
-  // void _handleSelectionChanged(
-  //     TextSelection selection, SelectionChangedCause? cause) {
-  //   try {
-  //     widget.onSelectionChanged?.call(selection, cause);
-  //   } catch (exception, stack) {
-  //     FlutterError.reportError(FlutterErrorDetails(
-  //       exception: exception,
-  //       stack: stack,
-  //       library: 'widgets',
-  //       context:
-  //           ErrorDescription('while calling onSelectionChanged for $cause'),
-  //     ));
-  //   }
-  // }
 
   String _getAutocompleteAttribute(String autofillHint) {
     switch (autofillHint) {
@@ -495,9 +480,10 @@ class _EditableState extends State<Editable> {
               : 'transparent')
       ..outline = 'none'
       ..border = 'none'
+      ..background = 'transparent'
       ..padding = '0'
       ..textAlign = textAlignToCssValue(widget.textAlign, widget.textDirection)
-      ..pointerEvents = widget.rendererIgnoresPointer ? 'none' : 'auto'
+      // ..pointerEvents = widget.rendererIgnoresPointer ? 'none' : 'auto' // Can't use this, material3 text field sets this to none
       ..direction = widget.textDirection.name
       ..lineHeight = '1.5'; // can this be modified by a property?
 
@@ -749,7 +735,6 @@ class _EditableState extends State<Editable> {
     //     control.setEditingState(value);
     //   }
     // }
-    print('updateEditingState in platform view');
     TextInput.updateEditingValue(value);
   }
 
@@ -772,7 +757,6 @@ class _EditableState extends State<Editable> {
 
   @override
   Widget build(BuildContext context) {
-    // print('build ${widget.value}');
     return SizedBox(
       height: sizedBoxHeight,
       child: HtmlElementView.fromTagName(

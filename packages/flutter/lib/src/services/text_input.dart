@@ -2017,7 +2017,6 @@ class TextInput {
   }
 
   void _updateEditingValue(TextEditingValue value, {TextInputControl? exclude}) {
-    print('_updateEditingValue for instance in Text Input $_currentConnection');
     if (_currentConnection == null) {
       return;
     }
@@ -2027,6 +2026,9 @@ class TextInput {
         control.setEditingState(value);
       }
     }
+
+    print('--updateEditingValue-- ${value}');
+
     _instance._currentConnection!._client.updateEditingValue(value);
   }
 
@@ -2035,7 +2037,6 @@ class TextInput {
   /// This method should be called by the text input control implementation to
   /// send editing value updates to the attached input client.
   static void updateEditingValue(TextEditingValue value) {
-    print('updateEditingValue in TextInput');
     _instance._updateEditingValue(value, exclude: _instance._currentControl);
   }
 
@@ -2252,8 +2253,6 @@ class _PlatformTextInputControl with TextInputControl {
 
   @override
   void attach(TextInputClient client, TextInputConfiguration configuration) {
-    print('attaching in text input control ${StackTrace.current}');
-
     if(kIsWeb) {
       return;
     }
@@ -2291,7 +2290,7 @@ class _PlatformTextInputControl with TextInputControl {
   @override
   void setEditingState(TextEditingValue value) {
     if(kIsWeb) {
-      print('setEditingState in TextEditingController $value');
+      print('--setEditingState-- $value');
       final html.InputElement element = _inputEl! as html.InputElement;
       final int minOffset = math.min(value.selection.baseOffset, value.selection.extentOffset);
       final int maxOffset = math.max(value.selection.baseOffset, value.selection.extentOffset);

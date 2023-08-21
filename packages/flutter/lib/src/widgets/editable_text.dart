@@ -23,6 +23,7 @@ import 'context_menu_button_item.dart';
 import 'debug.dart';
 import 'default_selection_style.dart';
 import 'default_text_editing_shortcuts.dart';
+import 'editable_web.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'focus_traversal.dart';
@@ -4772,7 +4773,101 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                             _openInputConnection();
                             _updateSelectionRects(force: true);
                           },
-                          child: _Editable(
+                          child: kIsWeb ? (
+                            Stack(
+                              children: [
+                                _Editable(
+                              key: _editableKey,
+                              startHandleLayerLink: _startHandleLayerLink,
+                              endHandleLayerLink: _endHandleLayerLink,
+                              inlineSpan: buildTextSpan(),
+                              value: _value,
+                              cursorColor: _cursorColor,
+                              backgroundCursorColor: widget.backgroundCursorColor,
+                              showCursor: EditableText.debugDeterministicCursor
+                                  ? ValueNotifier<bool>(widget.showCursor)
+                                  : _cursorVisibilityNotifier,
+                              forceLine: widget.forceLine,
+                              readOnly: widget.readOnly,
+                              hasFocus: _hasFocus,
+                              maxLines: widget.maxLines,
+                              minLines: widget.minLines,
+                              expands: widget.expands,
+                              strutStyle: widget.strutStyle,
+                              selectionColor: _selectionOverlay?.spellCheckToolbarIsVisible ?? false
+                                  ? _spellCheckConfiguration.misspelledSelectionColor ?? widget.selectionColor
+                                  : widget.selectionColor,
+                              textScaler: effectiveTextScaler,
+                              textAlign: widget.textAlign,
+                              textDirection: _textDirection,
+                              locale: widget.locale,
+                              textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
+                              textWidthBasis: widget.textWidthBasis,
+                              obscuringCharacter: widget.obscuringCharacter,
+                              obscureText: widget.obscureText,
+                              offset: offset,
+                              rendererIgnoresPointer: widget.rendererIgnoresPointer,
+                              cursorWidth: widget.cursorWidth,
+                              cursorHeight: widget.cursorHeight,
+                              cursorRadius: widget.cursorRadius,
+                              cursorOffset: widget.cursorOffset ?? Offset.zero,
+                              selectionHeightStyle: widget.selectionHeightStyle,
+                              selectionWidthStyle: widget.selectionWidthStyle,
+                              paintCursorAboveText: widget.paintCursorAboveText,
+                              enableInteractiveSelection: widget._userSelectionEnabled,
+                              textSelectionDelegate: this,
+                              devicePixelRatio: _devicePixelRatio,
+                              promptRectRange: _currentPromptRectRange,
+                              promptRectColor: widget.autocorrectionTextRectColor,
+                              clipBehavior: widget.clipBehavior,
+                              ),
+                              EditableWeb(
+                                startHandleLayerLink: _startHandleLayerLink,
+                                endHandleLayerLink: _endHandleLayerLink,
+                                inlineSpan: buildTextSpan(),
+                                value: _value,
+                                cursorColor: _cursorColor,
+                                backgroundCursorColor: widget.backgroundCursorColor,
+                                showCursor: EditableText.debugDeterministicCursor
+                                    ? ValueNotifier<bool>(widget.showCursor)
+                                    : _cursorVisibilityNotifier,
+                                forceLine: widget.forceLine,
+                                readOnly: widget.readOnly,
+                                hasFocus: _hasFocus,
+                                maxLines: widget.maxLines,
+                                minLines: widget.minLines,
+                                expands: widget.expands,
+                                strutStyle: widget.strutStyle,
+                                selectionColor: _selectionOverlay?.spellCheckToolbarIsVisible ?? false
+                                    ? _spellCheckConfiguration.misspelledSelectionColor ?? widget.selectionColor
+                                    : widget.selectionColor,
+                                textScaler: effectiveTextScaler,
+                                textAlign: widget.textAlign,
+                                textDirection: _textDirection,
+                                locale: widget.locale,
+                                textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
+                                textWidthBasis: widget.textWidthBasis,
+                                obscuringCharacter: widget.obscuringCharacter,
+                                obscureText: widget.obscureText,
+                                offset: offset,
+                                rendererIgnoresPointer: widget.rendererIgnoresPointer,
+                                cursorWidth: widget.cursorWidth,
+                                cursorHeight: widget.cursorHeight,
+                                cursorRadius: widget.cursorRadius,
+                                cursorOffset: widget.cursorOffset ?? Offset.zero,
+                                selectionHeightStyle: widget.selectionHeightStyle,
+                                selectionWidthStyle: widget.selectionWidthStyle,
+                                paintCursorAboveText: widget.paintCursorAboveText,
+                                enableInteractiveSelection: widget._userSelectionEnabled,
+                                textSelectionDelegate: this,
+                                devicePixelRatio: _devicePixelRatio,
+                                promptRectRange: _currentPromptRectRange,
+                                promptRectColor: widget.autocorrectionTextRectColor,
+                                clipBehavior: widget.clipBehavior,
+                                requestKeyboard: requestKeyboard,
+                              ),
+                            ],
+                          )) : _Editable(
                             key: _editableKey,
                             startHandleLayerLink: _startHandleLayerLink,
                             endHandleLayerLink: _endHandleLayerLink,
