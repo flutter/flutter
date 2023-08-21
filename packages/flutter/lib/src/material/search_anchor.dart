@@ -127,6 +127,7 @@ class SearchAnchor extends StatefulWidget {
     this.dividerColor,
     this.viewConstraints,
     this.textCapitalization,
+    this.viewSearchOnChanged,
     required this.builder,
     required this.suggestionsBuilder,
   });
@@ -172,6 +173,7 @@ class SearchAnchor extends StatefulWidget {
     bool? isFullScreen,
     SearchController searchController,
     TextCapitalization textCapitalization,
+    ValueSetter<String>? viewSearchOnChanged,
     required SuggestionsBuilder suggestionsBuilder
   }) = _SearchAnchorWithSearchBar;
 
@@ -305,6 +307,9 @@ class SearchAnchor extends StatefulWidget {
   /// To get a different layout, use [viewBuilder] to override.
   final SuggestionsBuilder suggestionsBuilder;
 
+  /// Called when the user enters text into the search field while the search view is open
+  final ValueSetter<String>? viewSearchOnChanged;
+
   @override
   State<SearchAnchor> createState() => _SearchAnchorState();
 }
@@ -366,6 +371,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
       anchorKey: _anchorKey,
       searchController: _searchController,
       suggestionsBuilder: widget.suggestionsBuilder,
+      onChanged: widget.viewSearchOnChanged,
       textCapitalization: widget.textCapitalization,
     ));
   }
@@ -433,6 +439,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     this.dividerColor,
     this.viewConstraints,
     this.textCapitalization,
+    this.onChanged,
     required this.showFullScreenView,
     required this.anchorKey,
     required this.searchController,
@@ -455,6 +462,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   final Color? dividerColor;
   final BoxConstraints? viewConstraints;
   final TextCapitalization? textCapitalization;
+  final ValueSetter<String>? onChanged;
   final bool showFullScreenView;
   final GlobalKey anchorKey;
   final SearchController searchController;
@@ -489,8 +497,8 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   @override
   TickerFuture didPush() {
     assert(anchorKey.currentContext != null);
-    updateViewConfig(anchorKey.currentContext!);
-    updateTweens(anchorKey.currentContext!);
+    updateViewConfig(anchorKey.currentContext);
+    updateTweens(anchorKey.currentContext);
     toggleVisibility?.call();
     return super.didPush();
   }
@@ -498,7 +506,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   @override
   bool didPop(_SearchViewRoute? result) {
     assert(anchorKey.currentContext != null);
-    updateTweens(anchorKey.currentContext!);
+    updateTweens(anchorKey.currentContext);
     toggleVisibility?.call();
     return super.didPop(result);
   }
@@ -569,7 +577,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
             reverseCurve: Curves.easeInOutCubicEmphasized.flipped,
           );
 
-          final Rect viewRect = _rectTween.evaluate(curvedAnimation)!;
+          final Rect viewRect = _rectTween.evaluate(curvedAnimation);
           final double topPadding = showFullScreenView
             ? lerpDouble(0.0, MediaQuery.paddingOf(context).top, curvedAnimation.value)!
             : 0.0;
@@ -602,6 +610,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
               dividerTheme: dividerTheme,
               viewBuilder: viewBuilder,
               searchController: searchController,
+              onChanged: onChanged,
               suggestionsBuilder: suggestionsBuilder,
               textCapitalization: textCapitalization,
             ),
@@ -630,6 +639,7 @@ class _ViewContent extends StatefulWidget {
     this.viewHeaderHintStyle,
     this.dividerColor,
     this.textCapitalization,
+    this.onChanged,
     required this.showFullScreenView,
     required this.topPadding,
     required this.animation,
@@ -655,6 +665,7 @@ class _ViewContent extends StatefulWidget {
   final TextStyle? viewHeaderHintStyle;
   final Color? dividerColor;
   final TextCapitalization? textCapitalization;
+  final ValueSetter<String>? onChanged;
   final bool showFullScreenView;
   final double topPadding;
   final Animation<double> animation;
@@ -833,6 +844,7 @@ class _ViewContentState extends State<_ViewContent> {
                             hintStyle: MaterialStatePropertyAll<TextStyle?>(effectiveHintStyle),
                             controller: _controller,
                             onChanged: (_) {
+                              widget.onChanged?.call(value);
                               updateSuggestions();
                             },
                             textCapitalization: widget.textCapitalization,
@@ -897,6 +909,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     super.isFullScreen,
     super.searchController,
     super.textCapitalization,
+    super.viewSearchOnChanged,
     required super.suggestionsBuilder
   }) : super(
     viewHintText: viewHintText ?? barHintText,
@@ -910,8 +923,9 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
           controller.openView();
           onTap?.call();
         },
-        onChanged: (_) {
+        onChanged: (String value) {
           controller.openView();
+          viewSearchOnChanged?.call(value);
         },
         hintText: barHintText,
         hintStyle: barHintStyle,
