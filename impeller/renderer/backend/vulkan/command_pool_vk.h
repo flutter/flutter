@@ -44,6 +44,7 @@ class CommandPoolVK {
   Mutex buffers_to_collect_mutex_;
   std::vector<vk::UniqueCommandBuffer> buffers_to_collect_
       IPLR_GUARDED_BY(buffers_to_collect_mutex_);
+  std::vector<vk::UniqueCommandBuffer> recycled_buffers_;
   bool is_valid_ = false;
 
   explicit CommandPoolVK(const ContextVK* context);
