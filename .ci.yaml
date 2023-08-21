@@ -210,6 +210,7 @@ targets:
 
   - name: Linux linux_clang_tidy
     recipe: engine_v2/engine_v2
+    presubmit: false
     timeout: 120
     properties:
       config_name: linux_clang_tidy
@@ -227,7 +228,6 @@ targets:
       - "**.vert"
 
   - name: Linux linux_clang_tidy_presubmit
-    bringup: true
     recipe: engine_v2/engine_v2
     timeout: 120
     properties:
@@ -361,6 +361,7 @@ targets:
 
   - name: Mac mac_clang_tidy
     recipe: engine_v2/engine_v2
+    presubmit: false
     timeout: 120
     properties:
       config_name: mac_clang_tidy
@@ -380,7 +381,6 @@ targets:
       - "**.mm"
 
   - name: Mac mac_clang_tidy_presubmit
-    bringup: true
     recipe: engine_v2/engine_v2
     timeout: 120
     properties:

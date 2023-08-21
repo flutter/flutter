@@ -101,7 +101,6 @@
                     "parameters": [
                         "--variant",
                         "ios_debug_sim",
-                        "--lint-all",
                         "--shard-id=1",
                         "--shard-variants=host_debug"
                     ],
