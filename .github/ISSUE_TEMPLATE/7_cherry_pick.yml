@@ -1,4 +1,4 @@
-name: Request a cherry-pick.
+name: Request a cherry-pick
 description: As a contributor, you would like to request that a feature be cherry-picked into a release.
 title: '[CP] <title>'
 labels: ['cp: review']

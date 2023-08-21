@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:meta/meta.dart' show visibleForTesting;
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-import 'android/android_app_link_settings.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/io.dart' as io;
@@ -43,9 +42,7 @@ const String kCompileExpressionServiceName = 'compileExpression';
 const String kFlutterMemoryInfoServiceName = 'flutterMemoryInfo';
 const String kFlutterGetSkSLServiceName = 'flutterGetSkSL';
 const String kFlutterGetIOSBuildOptionsServiceName = 'flutterGetIOSBuildOptions';
-const String kFlutterGetAndroidBuildVariantsServiceName = 'flutterGetAndroidBuildVariants';
 const String kFlutterGetIOSUniversalLinkSettingsServiceName = 'flutterGetIOSUniversalLinkSettings';
-const String kFlutterGetAndroidAppLinkSettingsName = 'flutterGetAndroidAppLinkSettings';
 
 /// The error response code from an unrecoverable compilation failure.
 const int kIsolateReloadBarred = 1005;
@@ -341,19 +338,6 @@ Future<vm_service.VmService> setUpVmService({
       vmService.registerService(kFlutterGetIOSBuildOptionsServiceName, kFlutterToolAlias),
     );
 
-    vmService.registerServiceCallback(kFlutterGetAndroidBuildVariantsServiceName, (Map<String, Object?> params) async {
-      final List<String> options = await flutterProject.android.getBuildVariants();
-      return <String, Object>{
-        'result': <String, Object>{
-          kResultType: kResultTypeSuccess,
-          'variants': options,
-        },
-      };
-    });
-    registrationRequests.add(
-      vmService.registerService(kFlutterGetAndroidBuildVariantsServiceName, kFlutterToolAlias),
-    );
-
     vmService.registerServiceCallback(kFlutterGetIOSUniversalLinkSettingsServiceName, (Map<String, Object?> params) async {
       final XcodeUniversalLinkSettings settings = await flutterProject.ios.universalLinkSettings(
         configuration: params['configuration']! as String,
@@ -371,21 +355,6 @@ Future<vm_service.VmService> setUpVmService({
     });
     registrationRequests.add(
       vmService.registerService(kFlutterGetIOSUniversalLinkSettingsServiceName, kFlutterToolAlias),
-    );
-
-    vmService.registerServiceCallback(kFlutterGetAndroidAppLinkSettingsName, (Map<String, Object?> params) async {
-      final String variant = params['variant']! as String;
-      final AndroidAppLinkSettings settings = await flutterProject.android.getAppLinksSettings(variant: variant);
-      return <String, Object>{
-        'result': <String, Object>{
-          kResultType: kResultTypeSuccess,
-          'applicationId': settings.applicationId,
-          'domains': settings.domains,
-        },
-      };
-    });
-    registrationRequests.add(
-      vmService.registerService(kFlutterGetAndroidAppLinkSettingsName, kFlutterToolAlias),
     );
   }
 
@@ -809,19 +778,6 @@ class FlutterVmService {
     );
   }
 
-  Future<Map<String, Object?>?> flutterFastReassemble({
-   required String isolateId,
-   required String className,
-  }) {
-    return invokeFlutterExtensionRpcRaw(
-      'ext.flutter.fastReassemble',
-      isolateId: isolateId,
-      args: <String, Object>{
-        'className': className,
-      },
-    );
-  }
-
   Future<bool> flutterAlreadyPaintedFirstUsefulFrame({
     required String isolateId,
   }) async {
@@ -1107,6 +1063,22 @@ class FlutterVmService {
             return null;
           }
           return Future<vm_service.Isolate?>.error(error, stackTrace);
+        });
+  }
+
+  /// Attempt to retrieve the isolate pause event with id [isolateId], or `null` if it has
+  /// been collected.
+  Future<vm_service.Event?> getIsolatePauseEventOrNull(String isolateId) async {
+    return service.getIsolatePauseEvent(isolateId)
+      .then<vm_service.Event?>(
+        (vm_service.Event event) => event,
+        onError: (Object? error, StackTrace stackTrace) {
+          if (error is vm_service.SentinelException ||
+            error == null ||
+            (error is vm_service.RPCError && error.code == RPCErrorCodes.kServiceDisappeared)) {
+            return null;
+          }
+          return Future<vm_service.Event?>.error(error, stackTrace);
         });
   }
 

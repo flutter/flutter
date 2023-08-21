@@ -16,7 +16,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import 'editable_text_utils.dart';
 
 final TextEditingController controller = TextEditingController();
@@ -927,6 +926,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Padding(
           padding: const EdgeInsets.only(top: 0.25),
           child: Material(

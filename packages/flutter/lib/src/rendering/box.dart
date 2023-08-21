@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:developer' show Timeline;
 import 'dart:math' as math;
 import 'dart:ui' as ui show lerpDouble;
 
@@ -912,6 +911,15 @@ class BoxHitTestEntry extends HitTestEntry<RenderBox> {
 }
 
 /// Parent data used by [RenderBox] and its subclasses.
+///
+/// {@tool dartpad}
+/// Parent data is used to communicate to a render object about its
+/// children. In this example, there are two render objects that perform
+/// text layout. They use parent data to identify the kind of child they
+/// are laying out, and space the children accordingly.
+///
+/// ** See code in examples/api/lib/rendering/box/parent_data.0.dart **
+/// {@end-tool}
 class BoxParentData extends ParentData {
   /// The offset at which to paint the child in the parent's coordinate system.
   Offset offset = Offset.zero;
@@ -1396,7 +1404,7 @@ abstract class RenderBox extends RenderObject {
       }());
       if (!kReleaseMode) {
         if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
-          Timeline.startSync(
+          FlutterTimeline.startSync(
             '$runtimeType intrinsics',
             arguments: debugTimelineArguments,
           );
@@ -1411,7 +1419,7 @@ abstract class RenderBox extends RenderObject {
       if (!kReleaseMode) {
         _debugIntrinsicsDepth -= 1;
         if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
-          Timeline.finishSync();
+          FlutterTimeline.finishSync();
         }
       }
       return result;
@@ -1832,7 +1840,7 @@ abstract class RenderBox extends RenderObject {
       }());
       if (!kReleaseMode) {
         if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
-          Timeline.startSync(
+          FlutterTimeline.startSync(
             '$runtimeType.getDryLayout',
             arguments: debugTimelineArguments,
           );
@@ -1844,7 +1852,7 @@ abstract class RenderBox extends RenderObject {
       if (!kReleaseMode) {
         _debugIntrinsicsDepth -= 1;
         if (debugProfileLayoutsEnabled || _debugIntrinsicsDepth == 0) {
-          Timeline.finishSync();
+          FlutterTimeline.finishSync();
         }
       }
       return result;

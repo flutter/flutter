@@ -5,9 +5,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('MaterialBanner properties are respected', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialBanner properties are respected', (WidgetTester tester) async {
     const String contentText = 'Content';
     const Color backgroundColor = Colors.pink;
     const Color surfaceTintColor = Colors.green;
@@ -47,7 +48,7 @@ void main() {
     expect(divider.color, dividerColor);
   });
 
-  testWidgets('MaterialBanner properties are respected when presented by ScaffoldMessenger', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialBanner properties are respected when presented by ScaffoldMessenger', (WidgetTester tester) async {
     const String contentText = 'Content';
     const Key tapTarget = Key('tap-target');
     const Color backgroundColor = Colors.pink;
@@ -104,7 +105,7 @@ void main() {
     expect(divider.color, dividerColor);
   });
 
-  testWidgets('Actions laid out below content if more than one action', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Actions laid out below content if more than one action', (WidgetTester tester) async {
     const String contentText = 'Content';
 
     await tester.pumpWidget(
@@ -131,7 +132,7 @@ void main() {
     expect(contentBottomLeft.dx, lessThan(actionsTopLeft.dx));
   });
 
-  testWidgets('Actions laid out below content if more than one action when presented by ScaffoldMessenger', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Actions laid out below content if more than one action when presented by ScaffoldMessenger', (WidgetTester tester) async {
     const String contentText = 'Content';
     const Key tapTarget = Key('tap-target');
     await tester.pumpWidget(MaterialApp(
@@ -174,7 +175,7 @@ void main() {
     expect(contentBottomLeft.dx, lessThan(actionsTopLeft.dx));
   });
 
-  testWidgets('Actions laid out beside content if only one action', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Actions laid out beside content if only one action', (WidgetTester tester) async {
     const String contentText = 'Content';
 
     await tester.pumpWidget(
@@ -197,7 +198,7 @@ void main() {
     expect(contentBottomLeft.dx, lessThan(actionsTopRight.dx));
   });
 
-  testWidgets('Actions laid out beside content if only one action when presented by ScaffoldMessenger', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Actions laid out beside content if only one action when presented by ScaffoldMessenger', (WidgetTester tester) async {
     const String contentText = 'Content';
     const Key tapTarget = Key('tap-target');
     await tester.pumpWidget(MaterialApp(
@@ -269,7 +270,7 @@ void main() {
       );
     }
 
-    testWidgets('Elevation defaults to 0', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Elevation defaults to 0', (WidgetTester tester) async {
       const Key tapTarget = Key('tap-target');
 
       await tester.pumpWidget(buildBanner(tapTarget));
@@ -294,7 +295,7 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets('Uses elevation of MaterialBannerTheme by default', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Uses elevation of MaterialBannerTheme by default', (WidgetTester tester) async {
       const Key tapTarget = Key('tap-target');
 
       await tester.pumpWidget(buildBanner(tapTarget, themeElevation: 6.0));
@@ -312,7 +313,7 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets('Scaffold body is pushed down if elevation is 0', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Scaffold body is pushed down if elevation is 0', (WidgetTester tester) async {
       const Key tapTarget = Key('tap-target');
 
       await tester.pumpWidget(buildBanner(tapTarget, elevation: 0.0));
@@ -327,7 +328,7 @@ void main() {
     });
   });
 
-  testWidgets('MaterialBanner control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialBanner control test', (WidgetTester tester) async {
     const String helloMaterialBanner = 'Hello MaterialBanner';
     const Key tapTarget = Key('tap-target');
     const Key dismissTarget = Key('dismiss-target');
@@ -379,7 +380,7 @@ void main() {
     expect(find.text(helloMaterialBanner), findsNothing);
   });
 
-  testWidgets('MaterialBanner twice test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialBanner twice test', (WidgetTester tester) async {
     int materialBannerCount = 0;
     const Key tapTarget = Key('tap-target');
     const Key dismissTarget = Key('dismiss-target');
@@ -461,7 +462,7 @@ void main() {
     expect(find.text('banner2'), findsNothing);
   });
 
-  testWidgets('ScaffoldMessenger does not duplicate a MaterialBanner when presenting a SnackBar.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ScaffoldMessenger does not duplicate a MaterialBanner when presenting a SnackBar.', (WidgetTester tester) async {
     const Key materialBannerTapTarget = Key('materialbanner-tap-target');
     const Key snackBarTapTarget = Key('snackbar-tap-target');
     const String snackBarText = 'SnackBar';
@@ -519,7 +520,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/39574
-  testWidgets('Single action laid out beside content but aligned to the trailing edge', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Single action laid out beside content but aligned to the trailing edge', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: MaterialBanner(
@@ -540,7 +541,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/39574
-  testWidgets('Single action laid out beside content but aligned to the trailing edge when presented by ScaffoldMessenger', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Single action laid out beside content but aligned to the trailing edge when presented by ScaffoldMessenger', (WidgetTester tester) async {
     const Key tapTarget = Key('tap-target');
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -578,7 +579,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/39574
-  testWidgets('Single action laid out beside content but aligned to the trailing edge - RTL', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Single action laid out beside content but aligned to the trailing edge - RTL', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Directionality(
@@ -598,10 +599,10 @@ void main() {
 
     final Offset actionsTopLeft = tester.getTopLeft(find.byType(OverflowBar));
     final Offset bannerTopLeft = tester.getTopLeft(find.byType(MaterialBanner));
-    expect(actionsTopLeft.dx - 8, bannerTopLeft.dx); // actions OverflowBar is padded by 8
+    expect(actionsTopLeft.dx - 8, moreOrLessEquals(bannerTopLeft.dx)); // actions OverflowBar is padded by 8
   });
 
-  testWidgets('Single action laid out beside content but aligned to the trailing edge when presented by ScaffoldMessenger - RTL', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Single action laid out beside content but aligned to the trailing edge when presented by ScaffoldMessenger - RTL', (WidgetTester tester) async {
     const Key tapTarget = Key('tap-target');
     await tester.pumpWidget(MaterialApp(
       home: Directionality(
@@ -638,10 +639,10 @@ void main() {
 
     final Offset actionsTopLeft = tester.getTopLeft(find.byType(OverflowBar));
     final Offset bannerTopLeft = tester.getTopLeft(find.byType(MaterialBanner));
-    expect(actionsTopLeft.dx - 8, bannerTopLeft.dx); // actions OverflowBar is padded by 8
+    expect(actionsTopLeft.dx - 8, moreOrLessEquals(bannerTopLeft.dx)); // actions OverflowBar is padded by 8
   });
 
-  testWidgets('Actions laid out below content if forced override', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Actions laid out below content if forced override', (WidgetTester tester) async {
     const String contentText = 'Content';
 
     await tester.pumpWidget(
@@ -665,7 +666,7 @@ void main() {
     expect(contentBottomLeft.dx, lessThan(actionsTopLeft.dx));
   });
 
-  testWidgets('Actions laid out below content if forced override when presented by ScaffoldMessenger', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Actions laid out below content if forced override when presented by ScaffoldMessenger', (WidgetTester tester) async {
     const String contentText = 'Content';
     const Key tapTarget = Key('tap-target');
     await tester.pumpWidget(MaterialApp(
@@ -705,7 +706,7 @@ void main() {
     expect(contentBottomLeft.dx, lessThan(actionsTopLeft.dx));
   });
 
-  testWidgets('Action widgets layout', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Action widgets layout', (WidgetTester tester) async {
     // This regression test ensures that the action widgets layout matches what
     // it was, before ButtonBar was replaced by OverflowBar.
     Widget buildFrame(int actionCount, TextDirection textDirection) {
@@ -749,7 +750,7 @@ void main() {
     expect(tester.getTopLeft(action2), const Offset(8, 130));
   });
 
-  testWidgets('Action widgets layout when presented by ScaffoldMessenger', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Action widgets layout when presented by ScaffoldMessenger', (WidgetTester tester) async {
     // This regression test ensures that the action widgets layout matches what
     // it was, before ButtonBar was replaced by OverflowBar.
 
@@ -836,7 +837,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Action widgets layout with overflow', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Action widgets layout with overflow', (WidgetTester tester) async {
     // This regression test ensures that the action widgets layout matches what
     // it was, before ButtonBar was replaced by OverflowBar.
     const int actionCount = 4;
@@ -871,7 +872,7 @@ void main() {
     }
   });
 
-  testWidgets('Action widgets layout with overflow when presented by ScaffoldMessenger', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Action widgets layout with overflow when presented by ScaffoldMessenger', (WidgetTester tester) async {
     // This regression test ensures that the action widgets layout matches what
     // it was, before ButtonBar was replaced by OverflowBar.
 
@@ -942,7 +943,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('[overflowAlignment] test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('[overflowAlignment] test', (WidgetTester tester) async {
     const int actionCount = 4;
     Widget buildFrame(TextDirection textDirection, OverflowBarAlignment overflowAlignment) {
       return MaterialApp(
@@ -979,7 +980,7 @@ void main() {
     }
   });
 
-  testWidgets('[overflowAlignment] test when presented by ScaffoldMessenger', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('[overflowAlignment] test when presented by ScaffoldMessenger', (WidgetTester tester) async {
     const int actionCount = 4;
     Widget buildFrame(TextDirection textDirection, OverflowBarAlignment overflowAlignment) {
       return MaterialApp(
@@ -1054,7 +1055,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('ScaffoldMessenger will alert for MaterialBanners that cannot be presented', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ScaffoldMessenger will alert for MaterialBanners that cannot be presented', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/103004
     await tester.pumpWidget(const MaterialApp(
       home: Center(),
@@ -1083,7 +1084,7 @@ void main() {
     );
   });
 
-   testWidgets('Custom Margin respected', (WidgetTester tester) async {
+   testWidgetsWithLeakTracking('Custom Margin respected', (WidgetTester tester) async {
     const EdgeInsets margin = EdgeInsets.all(30);
     await tester.pumpWidget(
       MaterialApp(

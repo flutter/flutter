@@ -81,13 +81,12 @@ Future<void> runSmokeTests({
 // A class to hold information related to an example, used to generate names
 // from for the tests.
 class ExampleInfo {
-  ExampleInfo(this.file, Directory examplesLibDir)
+  ExampleInfo(File file, Directory examplesLibDir)
       : importPath = _getImportPath(file, examplesLibDir),
         importName = '' {
     importName = importPath.replaceAll(RegExp(r'\.dart$'), '').replaceAll(RegExp(r'\W'), '_');
   }
 
-  final File file;
   final String importPath;
   String importName;
 

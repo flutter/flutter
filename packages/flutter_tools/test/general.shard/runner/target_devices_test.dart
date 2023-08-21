@@ -1459,7 +1459,7 @@ No devices found yet. Checking for wireless devices...
               logger: logger,
             );
             targetDevices.waitForWirelessBeforeInput = true;
-            targetDevices.deviceSelection.input = '1';
+            targetDevices.deviceSelection.input = <String>['1'];
             logger.originalStatusText = '''
 Connected devices:
 target-device-9 (mobile) • xxx • ios • iOS 16
@@ -1483,6 +1483,49 @@ Please choose one (or "q" to quit): '''));
             expect(deviceManager.iosDiscoverer.devicesCalled, 2);
             expect(deviceManager.iosDiscoverer.discoverDevicesCalled, 1);
             expect(deviceManager.iosDiscoverer.numberOfTimesPolled, 2);
+          }, overrides: <Type, Generator>{
+            AnsiTerminal: () => terminal,
+          });
+
+
+          testUsingContext('handle invalid options for device', () async {
+            deviceManager.iosDiscoverer.deviceList = <Device>[nonEphemeralDevice];
+
+            final TestTargetDevicesWithExtendedWirelessDeviceDiscovery targetDevices = TestTargetDevicesWithExtendedWirelessDeviceDiscovery(
+              deviceManager: deviceManager,
+              logger: logger,
+            );
+            targetDevices.waitForWirelessBeforeInput = true;
+
+            // Having the '0' first is an invalid choice for a device, the second
+            // item in the list is a '2' which is out of range since we only have
+            // one item in the deviceList. The final item in the list, is '1'
+            // which is a valid option though which will return a valid device
+            //
+            // Important: if none of the values in the list are valid, the test will
+            // hang indefinitely since the [userSelectDevice()] method uses a while
+            // loop to listen for valid devices
+            targetDevices.deviceSelection.input = <String>['0', '2', '1'];
+            logger.originalStatusText = '''
+Connected devices:
+target-device-9 (mobile) • xxx • ios • iOS 16
+
+Checking for wireless devices...
+
+[1]: target-device-9 (xxx)
+''';
+
+            final List<Device>? devices = await targetDevices.findAllTargetDevices();
+
+            expect(logger.statusText, equals('''
+Connected devices:
+target-device-9 (mobile) • xxx • ios • iOS 16
+
+No wireless devices were found.
+
+[1]: target-device-9 (xxx)
+Please choose one (or "q" to quit): '''));
+            expect(devices, <Device>[nonEphemeralDevice]);
           }, overrides: <Type, Generator>{
             AnsiTerminal: () => terminal,
           });
@@ -1753,7 +1796,7 @@ Checking for wireless devices...
             ];
 
             targetDevices.waitForWirelessBeforeInput = true;
-            targetDevices.deviceSelection.input = '3';
+            targetDevices.deviceSelection.input = <String>['3'];
             logger.originalStatusText = '''
 Connected devices:
 target-device-1 (mobile) • xxx • ios • iOS 16
@@ -1791,7 +1834,7 @@ Please choose one (or "q" to quit): '''));
             deviceManager.iosDiscoverer.deviceList = <Device>[attachedIOSDevice1, attachedIOSDevice2];
 
             targetDevices.waitForWirelessBeforeInput = true;
-            targetDevices.deviceSelection.input = '2';
+            targetDevices.deviceSelection.input = <String>['2'];
             logger.originalStatusText = '''
 Connected devices:
 target-device-1 (mobile) • xxx • ios • iOS 16
@@ -1828,7 +1871,7 @@ Please choose one (or "q" to quit): '''));
             deviceManager.iosDiscoverer.refreshDeviceList = <Device>[connectedWirelessIOSDevice1, connectedWirelessIOSDevice2];
 
             targetDevices.waitForWirelessBeforeInput = true;
-            targetDevices.deviceSelection.input = '2';
+            targetDevices.deviceSelection.input = <String>['2'];
             terminal.setPrompt(<String>['1', '2', 'q', 'Q'], '1');
 
             final List<Device>? devices = await targetDevices.findAllTargetDevices();
@@ -1906,7 +1949,7 @@ target-device-5 (mobile) • xxx • ios • iOS 16
               deviceManager.iosDiscoverer.deviceList = <Device>[attachedIOSDevice1, attachedIOSDevice2];
 
               targetDevices.waitForWirelessBeforeInput = true;
-              targetDevices.deviceSelection.input = '2';
+              targetDevices.deviceSelection.input = <String>['2'];
               logger.originalStatusText = '''
 Connected devices:
 target-device-1 (mobile) • xxx • ios • iOS 16
@@ -1951,7 +1994,7 @@ Please choose one (or "q" to quit): '''));
               deviceManager.iosDiscoverer.refreshDeviceList = <Device>[attachedIOSDevice1, attachedIOSDevice2, connectedWirelessIOSDevice1];
 
               targetDevices.waitForWirelessBeforeInput = true;
-              targetDevices.deviceSelection.input = '2';
+              targetDevices.deviceSelection.input = <String>['2'];
               logger.originalStatusText = '''
 Connected devices:
 target-device-1 (mobile) • xxx • ios • iOS 16
@@ -2133,7 +2176,7 @@ target-device-6 (mobile) • xxx • ios • iOS 16
             ];
 
             targetDevices.waitForWirelessBeforeInput = true;
-            targetDevices.deviceSelection.input = '3';
+            targetDevices.deviceSelection.input = <String>['3'];
             logger.originalStatusText = '''
 Found multiple devices with name or id matching target-device:
 target-device-1 (mobile) • xxx • ios • iOS 16
@@ -2173,7 +2216,7 @@ Please choose one (or "q" to quit): '''));
             deviceManager.iosDiscoverer.deviceList = <Device>[attachedIOSDevice1, attachedIOSDevice2];
 
             targetDevices.waitForWirelessBeforeInput = true;
-            targetDevices.deviceSelection.input = '2';
+            targetDevices.deviceSelection.input = <String>['2'];
             logger.originalStatusText = '''
 Found multiple devices with name or id matching target-device:
 target-device-1 (mobile) • xxx • ios • iOS 16
@@ -2443,11 +2486,21 @@ class TestTargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices
 class TestTargetDeviceSelection extends TargetDeviceSelection {
   TestTargetDeviceSelection(super.logger);
 
-  String input = '';
+  List<String> input = <String>[];
 
   @override
   Future<String> readUserInput() async {
-    return input;
+    // If only one value is provided for the input, continue
+    // to return that one input value without popping
+    //
+    // If more than one input values are provided, we are simulating
+    // the user selecting more than one option for a device, so we will pop
+    // them out from the front
+    if (input.length > 1) {
+      return input.removeAt(0);
+    }
+
+    return input[0];
   }
 }
 

@@ -13,7 +13,6 @@ import 'package:matcher/expect.dart' as matcher_expect;
 import 'package:meta/meta.dart';
 import 'package:test_api/scaffolding.dart' as test_package;
 
-import 'all_elements.dart';
 import 'binding.dart';
 import 'controller.dart';
 import 'finders.dart';
@@ -23,6 +22,7 @@ import 'test_async_utils.dart';
 import 'test_compat.dart';
 import 'test_pointer.dart';
 import 'test_text_input.dart';
+import 'tree_traversal.dart';
 
 // Keep users from needing multiple imports to test semantics.
 export 'package:flutter/rendering.dart' show SemanticsHandle;
@@ -81,6 +81,9 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
   return null;
 }
 
+// Examples can assume:
+// typedef MyWidget = Placeholder;
+
 /// Runs the [callback] inside the Flutter test environment.
 ///
 /// Use this function for testing custom [StatelessWidget]s and
@@ -93,9 +96,7 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 /// `test` package. If set, it should be relatively large (minutes). It defaults
 /// to ten minutes for tests run by `flutter test`, and is unlimited for tests
 /// run by `flutter run`; specifically, it defaults to
-/// [TestWidgetsFlutterBinding.defaultTestTimeout]. (The `initialTimeout`
-/// parameter has no effect. It was previously used with
-/// [TestWidgetsFlutterBinding.addTime] but that feature was removed.)
+/// [TestWidgetsFlutterBinding.defaultTestTimeout].
 ///
 /// If the `semanticsEnabled` parameter is set to `true`,
 /// [WidgetTester.ensureSemantics] will have been called before the tester is
@@ -115,16 +116,11 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 /// If the [tags] are passed, they declare user-defined tags that are implemented by
 /// the `test` package.
 ///
-/// See also:
-///
-///  * [AutomatedTestWidgetsFlutterBinding.addTime] to learn more about
-///    timeout and how to manually increase timeouts.
-///
 /// ## Sample code
 ///
 /// ```dart
 /// testWidgets('MyWidget', (WidgetTester tester) async {
-///   await tester.pumpWidget(MyWidget());
+///   await tester.pumpWidget(const MyWidget());
 ///   await tester.tap(find.text('Save'));
 ///   expect(find.text('Success'), findsOneWidget);
 /// });
@@ -135,11 +131,6 @@ void testWidgets(
   WidgetTesterCallback callback, {
   bool? skip,
   test_package.Timeout? timeout,
-  @Deprecated(
-    'This parameter has no effect. Use `timeout` instead. '
-    'This feature was deprecated after v2.6.0-1.0.pre.'
-  )
-  Duration? initialTimeout,
   bool semanticsEnabled = true,
   TestVariant<Object?> variant = const DefaultTestVariant(),
   dynamic tags,
@@ -182,7 +173,6 @@ void testWidgets(
           },
           tester._endOfTestVerifications,
           description: combinedDescription,
-          timeout: initialTimeout,
         );
       },
       skip: skip,
@@ -332,12 +322,13 @@ class TargetPlatformVariant extends TestVariant<TargetPlatform> {
 /// }
 ///
 /// final ValueVariant<TestScenario> variants = ValueVariant<TestScenario>(
-///   <TestScenario>{value1, value2},
+///   <TestScenario>{TestScenario.value1, TestScenario.value2},
 /// );
-///
-/// testWidgets('Test handling of TestScenario', (WidgetTester tester) {
-///   expect(variants.currentValue, equals(value1));
-/// }, variant: variants);
+/// void main() {
+///   testWidgets('Test handling of TestScenario', (WidgetTester tester) async {
+///     expect(variants.currentValue, equals(TestScenario.value1));
+///   }, variant: variants);
+/// }
 /// ```
 /// {@end-tool}
 class ValueVariant<T> extends TestVariant<T> {
@@ -520,7 +511,7 @@ Future<void> expectLater(
 ///
 /// ```dart
 /// testWidgets('MyWidget', (WidgetTester tester) async {
-///   await tester.pumpWidget(MyWidget());
+///   await tester.pumpWidget(const MyWidget());
 ///   await tester.tap(find.text('Save'));
 ///   await tester.pump(); // allow the application to handle
 ///   await tester.pump(const Duration(seconds: 1)); // skip past the animation
@@ -568,7 +559,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// {@tool snippet}
   /// ```dart
   /// testWidgets('MyWidget asserts invalid bounds', (WidgetTester tester) async {
-  ///   await tester.pumpWidget(MyWidget(-1));
+  ///   await tester.pumpWidget(const MyWidget());
   ///   expect(tester.takeException(), isAssertionError); // or isNull, as appropriate.
   /// });
   /// ```
@@ -582,22 +573,10 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     EnginePhase phase = EnginePhase.sendSemanticsUpdate,
   ]) {
     return TestAsyncUtils.guard<void>(() {
-      return _pumpWidget(
-        binding.wrapWithDefaultView(widget),
-        duration,
-        phase,
-      );
+      binding.attachRootWidget(binding.wrapWithDefaultView(widget));
+      binding.scheduleFrame();
+      return binding.pump(duration, phase);
     });
-  }
-
-  Future<void> _pumpWidget(
-    Widget widget, [
-    Duration? duration,
-    EnginePhase phase = EnginePhase.sendSemanticsUpdate,
-  ]) {
-    binding.attachRootWidget(widget);
-    binding.scheduleFrame();
-    return binding.pump(duration, phase);
   }
 
   @override
@@ -758,12 +737,14 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       'your widget tree in a RootRestorationScope?',
     );
     return TestAsyncUtils.guard<void>(() async {
-      final Widget widget = ((binding.rootElement! as RenderObjectToWidgetElement<RenderObject>).widget as RenderObjectToWidgetAdapter<RenderObject>).child!;
+      final RootWidget widget = binding.rootElement!.widget as RootWidget;
       final TestRestorationData restorationData = binding.restorationManager.restorationData;
       runApp(Container(key: UniqueKey()));
       await pump();
       binding.restorationManager.restoreFrom(restorationData);
-      return _pumpWidget(widget);
+      binding.attachToBuildOwner(widget);
+      binding.scheduleFrame();
+      return binding.pump();
     });
   }
 
@@ -826,8 +807,12 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///   your widget tree, then await that future inside [callback].
   Future<T?> runAsync<T>(
     Future<T> Function() callback, {
+    @Deprecated(
+      'This is no longer supported and has no effect. '
+      'This feature was deprecated after v3.12.0-1.1.pre.'
+    )
     Duration additionalTime = const Duration(milliseconds: 1000),
-  }) => binding.runAsync<T?>(callback, additionalTime: additionalTime);
+  }) => binding.runAsync<T?>(callback);
 
   /// Whether there are any transient callbacks scheduled.
   ///
@@ -846,9 +831,11 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   bool get hasRunningAnimations => binding.transientCallbackCount > 0;
 
   @override
-  HitTestResult hitTestOnBinding(Offset location) {
-    location = binding.localToGlobal(location, binding.renderView);
-    return super.hitTestOnBinding(location);
+  HitTestResult hitTestOnBinding(Offset location, {int? viewId}) {
+    viewId ??= view.viewId;
+    final RenderView renderView = binding.renderViews.firstWhere((RenderView r) => r.flutterView.viewId == viewId);
+    location = binding.localToGlobal(location, renderView);
+    return super.hitTestOnBinding(location, viewId: viewId);
   }
 
   @override
@@ -870,10 +857,12 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
         .map((HitTestEntry candidate) => candidate.target)
         .whereType<RenderObject>()
         .first;
-      final Element? innerTargetElement = _lastWhereOrNull(
-        collectAllElementsFrom(binding.rootElement!, skipOffstage: true),
-        (Element element) => element.renderObject == innerTarget,
-      );
+      final Element? innerTargetElement = binding.renderViews.contains(innerTarget)
+          ? null
+          : _lastWhereOrNull(
+              collectAllElementsFrom(binding.rootElement!, skipOffstage: true),
+              (Element element) => element.renderObject == innerTarget,
+            );
       if (innerTargetElement == null) {
         printToConsole('No widgets found at ${event.position}.');
         return;
@@ -1069,6 +1058,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   int? _lastRecordedSemanticsHandles;
 
+  // TODO(goderbauer): Only use binding.debugOutstandingSemanticsHandles when deprecated binding.pipelineOwner is removed.
+  // ignore: deprecated_member_use
   int get _currentSemanticsHandles => binding.debugOutstandingSemanticsHandles + binding.pipelineOwner.debugOutstandingSemanticsHandles;
 
   void _recordNumberOfSemanticsHandles() {
@@ -1098,12 +1089,16 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///
   /// Tests that just need to add text to widgets like [TextField]
   /// or [TextFormField] only need to call [enterText].
-  Future<void> showKeyboard(Finder finder) async {
+  Future<void> showKeyboard(FinderBase<Element> finder) async {
+    bool skipOffstage = true;
+    if (finder is Finder) {
+      skipOffstage = finder.skipOffstage;
+    }
     return TestAsyncUtils.guard<void>(() async {
       final EditableTextState editable = state<EditableTextState>(
         find.descendant(
           of: finder,
-          matching: find.byType(EditableText, skipOffstage: finder.skipOffstage),
+          matching: find.byType(EditableText, skipOffstage: skipOffstage),
           matchRoot: true,
         ),
       );
@@ -1133,7 +1128,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// that widget has an open connection (e.g. by using [tap] to focus it),
   /// then call `testTextInput.enterText` directly (see
   /// [TestTextInput.enterText]).
-  Future<void> enterText(Finder finder, String text) async {
+  Future<void> enterText(FinderBase<Element> finder, String text) async {
     return TestAsyncUtils.guard<void>(() async {
       await showKeyboard(finder);
       testTextInput.enterText(text);

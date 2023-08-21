@@ -12,9 +12,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../widgets/clipboard_utils.dart';
 import 'editable_text_utils.dart';
+import 'live_text_utils.dart';
 import 'semantics_tester.dart';
 
 Matcher matchesMethodCall(String method, { dynamic args }) => _MatchesMethodCall(method, arguments: args == null ? null : wrapMatcher(args));
@@ -63,11 +63,10 @@ TextEditingValue collapsedAtEnd(String text) {
 }
 
 void main() {
-  final MockClipboard mockClipboard = MockClipboard();
-  TestWidgetsFlutterBinding.ensureInitialized()
-    .defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
-
   setUp(() async {
+    final MockClipboard mockClipboard = MockClipboard();
+    TestWidgetsFlutterBinding.ensureInitialized()
+      .defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
     debugResetSemanticsIdCounter();
     controller = TextEditingController();
     // Fill the clipboard so that the Paste option is available in the text
@@ -76,6 +75,8 @@ void main() {
   });
 
   tearDown(() {
+    TestWidgetsFlutterBinding.ensureInitialized()
+      .defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
     controller.dispose();
   });
 
@@ -117,6 +118,75 @@ void main() {
     expect(tester.testTextInput.editingState!['text'], equals('test'));
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals(serializedActionName));
   }
+
+  testWidgets(
+    'Tapping the Live Text button calls onLiveTextInput',
+    (WidgetTester tester) async {
+      bool invokedLiveTextInputSuccessfully = false;
+      final GlobalKey key = GlobalKey();
+      final TextEditingController controller = TextEditingController(text: '');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 400,
+              child: EditableText(
+                maxLines: 10,
+                controller: controller,
+                showSelectionHandles: true,
+                autofocus: true,
+                focusNode: FocusNode(),
+                style: Typography.material2018().black.subtitle1!,
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+                keyboardType: TextInputType.text,
+                textAlign: TextAlign.right,
+                selectionControls: materialTextSelectionHandleControls,
+                contextMenuBuilder: (
+                  BuildContext context,
+                  EditableTextState editableTextState,
+                ) {
+                  return CupertinoAdaptiveTextSelectionToolbar.editable(
+                    key: key,
+                    clipboardStatus: ClipboardStatus.pasteable,
+                    onCopy: null,
+                    onCut: null,
+                    onPaste: null,
+                    onSelectAll: null,
+                    onLookUp: null,
+                    onSearchWeb: null,
+                    onShare: null,
+                    onLiveTextInput: () {
+                      invokedLiveTextInputSuccessfully = true;
+                    },
+                    anchors: const TextSelectionToolbarAnchors(primaryAnchor: Offset.zero),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump(); // Wait for autofocus to take effect.
+
+      expect(find.byKey(key), findsNothing);
+
+      // Long-press to bring up the context menu.
+      final Finder textFinder = find.byType(EditableText);
+      await tester.longPress(textFinder);
+      tester.state<EditableTextState>(textFinder).showToolbar();
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(key), findsOneWidget);
+      expect(findLiveTextButton(), findsOneWidget);
+      await tester.tap(findLiveTextButton());
+      await tester.pump();
+      expect(invokedLiveTextInputSuccessfully, isTrue);
+    },
+    skip: kIsWeb, // [intended]
+  );
 
   // Regression test for https://github.com/flutter/flutter/issues/126312.
   testWidgets('when open input connection in didUpdateWidget, should not throw', (WidgetTester tester) async {
@@ -2077,7 +2147,7 @@ void main() {
     );
 
     final EditableTextState state =
-    tester.state<EditableTextState>(find.byType(EditableText));
+        tester.state<EditableTextState>(find.byType(EditableText));
 
     // Show the toolbar.
     state.renderEditable.selectWordsInRange(
@@ -2088,9 +2158,11 @@ void main() {
 
     final TextSelection copySelectionRange = localController.selection;
 
+    expect(find.byType(TextSelectionToolbar), findsNothing);
     state.showToolbar();
     await tester.pumpAndSettle();
 
+    expect(find.byType(TextSelectionToolbar), findsOneWidget);
     expect(find.text('Copy'), findsOneWidget);
 
     await tester.tap(find.text('Copy'));
@@ -9652,7 +9724,7 @@ void main() {
       expect(tester.takeException(), isNull);
 
       await tester.pumpWidget(Container());
-      expect(tester.takeException(), isNotNull);
+      expect(tester.takeException(), isAssertionError);
     });
   });
 
@@ -16535,6 +16607,56 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
   },
     skip: kIsWeb, // [intended]
   );
+
+  group('hasStrings', () {
+    late int calls;
+    setUp(() {
+      calls = 0;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) {
+          if (methodCall.method == 'Clipboard.hasStrings') {
+            calls += 1;
+          }
+          return Future<void>.value();
+        });
+    });
+    tearDown(() {
+      TestWidgetsFlutterBinding.ensureInitialized()
+        .defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
+    });
+
+    testWidgets('web avoids the paste permissions prompt by not calling hasStrings', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: TextEditingController(),
+            focusNode: focusNode,
+            obscureText: true,
+            toolbarOptions: const ToolbarOptions(
+              copy: true,
+              cut: true,
+              paste: true,
+              selectAll: true,
+            ),
+            style: textStyle,
+            cursorColor: cursorColor,
+            selectionControls: materialTextSelectionControls,
+          ),
+        ),
+      );
+
+      expect(calls, equals(kIsWeb ? 0 : 1));
+
+      // Long-press to bring up the context menu.
+      final Finder textFinder = find.byType(EditableText);
+      await tester.longPress(textFinder);
+      tester.state<EditableTextState>(textFinder).showToolbar();
+      await tester.pumpAndSettle();
+
+      expect(calls, equals(kIsWeb ? 0 : 2));
+    });
+  });
 }
 
 class UnsettableController extends TextEditingController {

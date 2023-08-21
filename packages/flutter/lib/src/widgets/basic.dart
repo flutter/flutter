@@ -290,6 +290,22 @@ class Directionality extends _UbiquitousInheritedWidget {
 /// Drawing content into the offscreen buffer may also trigger render target
 /// switches and such switching is particularly slow in older GPUs.
 ///
+/// ## Hit testing
+///
+/// Setting the [opacity] to zero does not prevent hit testing from being applied
+/// to the descendants of the [Opacity] widget. This can be confusing for the
+/// user, who may not see anything, and may believe the area of the interface
+/// where the [Opacity] is hiding a widget to be non-interactive.
+///
+/// With certain widgets, such as [Flow], that compute their positions only when
+/// they are painted, this can actually lead to bugs (from unexpected geometry
+/// to exceptions), because those widgets are not painted by the [Opacity]
+/// widget at all when the [opacity] is zero.
+///
+/// To avoid such problems, it is generally a good idea to use an
+/// [IgnorePointer] widget when setting the [opacity] to zero. This prevents
+/// interactions with any children in the subtree.
+///
 /// See also:
 ///
 ///  * [Visibility], which can hide a child more efficiently (albeit less
@@ -600,11 +616,13 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 /// `setState` or `markNeedsLayout` during the callback (the layout for this
 /// frame has already happened).
 ///
-/// Custom painters normally size themselves to their child. If they do not have
-/// a child, they attempt to size themselves to the [size], which defaults to
-/// [Size.zero]. [size] must not be null.
+/// Custom painters normally size themselves to their [child]. If they do not
+/// have a child, they attempt to size themselves to the specified [size], which
+/// defaults to [Size.zero]. The parent [may enforce constraints on this
+/// size](https://docs.flutter.dev/ui/layout/constraints).
 ///
-/// [isComplex] and [willChange] are hints to the compositor's raster cache.
+/// The [isComplex] and [willChange] properties are hints to the compositor's
+/// raster cache.
 ///
 /// {@tool snippet}
 ///
@@ -1247,6 +1265,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
     properties.add(ColorProperty('shadowColor', shadowColor));
   }
 }
+
 
 // POSITIONING AND SIZING NODES
 
@@ -3036,6 +3055,12 @@ class LimitedBox extends SingleChildRenderObjectWidget {
 /// A widget that imposes different constraints on its child than it gets
 /// from its parent, possibly allowing the child to overflow the parent.
 ///
+/// {@tool dartpad}
+/// This example shows how an [OverflowBox] is used, and what its effect is.
+///
+/// ** See code in examples/api/lib/widgets/basic/overflowbox.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [RenderConstrainedOverflowBox] for details about how [OverflowBox] is
@@ -3534,8 +3559,6 @@ class IntrinsicHeight extends SingleChildRenderObjectWidget {
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Baseline extends SingleChildRenderObjectWidget {
   /// Creates a widget that positions its child according to the child's baseline.
-  ///
-  /// The [baseline] and [baselineType] arguments must not be null.
   const Baseline({
     super.key,
     required this.baseline,
@@ -3560,6 +3583,25 @@ class Baseline extends SingleChildRenderObjectWidget {
     renderObject
       ..baseline = baseline
       ..baselineType = baselineType;
+  }
+}
+
+/// A widget that causes the parent to ignore the [child] for the purposes
+/// of baseline alignment.
+///
+/// See also:
+///
+///  * [Baseline], a widget that positions a child relative to a baseline.
+class IgnoreBaseline extends SingleChildRenderObjectWidget {
+  /// Creates a widget that ignores the child for baseline alignment purposes.
+  const IgnoreBaseline({
+    super.key,
+    super.child,
+  });
+
+  @override
+  RenderIgnoreBaseline createRenderObject(BuildContext context) {
+    return RenderIgnoreBaseline();
   }
 }
 
@@ -3915,6 +3957,17 @@ class Stack extends MultiChildRenderObjectWidget {
   final StackFit fit;
 
   /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// Stacks only clip children whose _geometry_ overflows the stack. A child
+  /// that paints outside its bounds (e.g. a box with a shadow) will not be
+  /// clipped, regardless of the value of this property. Similarly, a child that
+  /// itself has a descendant that overflows the stack will not be clipped, as
+  /// only the geometry of the stack's direct children are considered.
+  /// [Transform] is an example of a widget that can cause its children to paint
+  /// outside its geometry.
+  ///
+  /// To clip children whose geometry does not overflow the stack, consider
+  /// using a [ClipRect] widget.
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
@@ -5565,19 +5618,6 @@ class Wrap extends MultiChildRenderObjectWidget {
 /// this animation and repaint whenever the animation ticks, avoiding both the
 /// build and layout phases of the pipeline.
 ///
-/// See also:
-///
-///  * [Wrap], which provides the layout model that some other frameworks call
-///    "flow", and is otherwise unrelated to [Flow].
-///  * [FlowDelegate], which controls the visual presentation of the children.
-///  * [Stack], which arranges children relative to the edges of the container.
-///  * [CustomSingleChildLayout], which uses a delegate to control the layout of
-///    a single child.
-///  * [CustomMultiChildLayout], which uses a delegate to position multiple
-///    children.
-///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
-///
-///
 /// {@tool dartpad}
 /// This example uses the [Flow] widget to create a menu that opens and closes
 /// as it is interacted with, shown above. The color of the button in the menu
@@ -5586,6 +5626,38 @@ class Wrap extends MultiChildRenderObjectWidget {
 /// ** See code in examples/api/lib/widgets/basic/flow.0.dart **
 /// {@end-tool}
 ///
+/// ## Hit testing and hidden [Flow] widgets
+///
+/// The [Flow] widget recomputers its children's positions (as used by hit
+/// testing) during the _paint_ phase rather than during the _layout_ phase.
+///
+/// Widgets like [Opacity] avoid painting their children when those children
+/// would be invisible due to their opacity being zero.
+///
+/// Unfortunately, this means that hiding a [Flow] widget using an [Opacity]
+/// widget will cause bugs when the user attempts to interact with the hidden
+/// region, for example, by tapping it or clicking it.
+///
+/// Such bugs will manifest either as out-of-date geometry (taps going to
+/// different widgets than might be expected by the currently-specified
+/// [FlowDelegate]s), or exceptions (e.g. if the last time the [Flow] was
+/// painted, a different set of children was specified).
+///
+/// To avoid this, when hiding a [Flow] widget with an [Opacity] widget (or
+/// [AnimatedOpacity] or similar), it is wise to also disable hit testing on the
+/// widget by using [IgnorePointer]. This is generally good advice anyway as
+/// hit-testing invisible widgets is often confusing for the user.
+///
+/// See also:
+///
+///  * [Wrap], which provides the layout model that some other frameworks call
+///    "flow", and is otherwise unrelated to [Flow].
+///  * [Stack], which arranges children relative to the edges of the container.
+///  * [CustomSingleChildLayout], which uses a delegate to control the layout of
+///    a single child.
+///  * [CustomMultiChildLayout], which uses a delegate to position multiple
+///    children.
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Flow extends MultiChildRenderObjectWidget {
   /// Creates a flow layout.
   ///
@@ -5717,7 +5789,7 @@ class Flow extends MultiChildRenderObjectWidget {
 class RichText extends MultiChildRenderObjectWidget {
   /// Creates a paragraph of rich text.
   ///
-  /// The [text], [textAlign], [softWrap], [overflow], and [textScaleFactor]
+  /// The [text], [textAlign], [softWrap], [overflow], and [textScaler]
   /// arguments must not be null.
   ///
   /// The [maxLines] property may be null (and indeed defaults to null), but if
@@ -5732,7 +5804,13 @@ class RichText extends MultiChildRenderObjectWidget {
     this.textDirection,
     this.softWrap = true,
     this.overflow = TextOverflow.clip,
-    this.textScaleFactor = 1.0,
+    @Deprecated(
+      'Use textScaler instead. '
+      'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+      'This feature was deprecated after v3.12.0-2.0.pre.',
+    )
+    double textScaleFactor = 1.0,
+    TextScaler textScaler = TextScaler.noScaling,
     this.maxLines,
     this.locale,
     this.strutStyle,
@@ -5742,7 +5820,17 @@ class RichText extends MultiChildRenderObjectWidget {
     this.selectionColor,
   }) : assert(maxLines == null || maxLines > 0),
        assert(selectionRegistrar == null || selectionColor != null),
-       super(children: WidgetSpan.extractFromInlineSpan(text, textScaleFactor));
+       assert(textScaleFactor == 1.0 || identical(textScaler, TextScaler.noScaling), 'Use textScaler instead.'),
+       textScaler = _effectiveTextScalerFrom(textScaler, textScaleFactor),
+       super(children: WidgetSpan.extractFromInlineSpan(text, _effectiveTextScalerFrom(textScaler, textScaleFactor)));
+
+  static TextScaler _effectiveTextScalerFrom(TextScaler textScaler, double textScaleFactor) {
+    return switch ((textScaler, textScaleFactor)) {
+      (final TextScaler scaler, 1.0) => scaler,
+      (TextScaler.noScaling, final double textScaleFactor) => TextScaler.linear(textScaleFactor),
+      (final TextScaler scaler, _) => scaler,
+    };
+  }
 
   /// The text to display in this widget.
   final InlineSpan text;
@@ -5774,11 +5862,22 @@ class RichText extends MultiChildRenderObjectWidget {
   /// How visual overflow should be handled.
   final TextOverflow overflow;
 
+  /// Deprecated. Will be removed in a future version of Flutter. Use
+  /// [textScaler] instead.
+  ///
   /// The number of font pixels for each logical pixel.
   ///
   /// For example, if the text scale factor is 1.5, text will be 50% larger than
   /// the specified font size.
-  final double textScaleFactor;
+  @Deprecated(
+    'Use textScaler instead. '
+    'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+    'This feature was deprecated after v3.12.0-2.0.pre.',
+  )
+  double get textScaleFactor => textScaler.textScaleFactor;
+
+  /// {@macro flutter.painting.textPainter.textScaler}
+  final TextScaler textScaler;
 
   /// An optional maximum number of lines for the text to span, wrapping if necessary.
   /// If the text exceeds the given number of lines, it will be truncated according
@@ -5828,7 +5927,7 @@ class RichText extends MultiChildRenderObjectWidget {
       textDirection: textDirection ?? Directionality.of(context),
       softWrap: softWrap,
       overflow: overflow,
-      textScaleFactor: textScaleFactor,
+      textScaler: textScaler,
       maxLines: maxLines,
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis,
@@ -5848,7 +5947,7 @@ class RichText extends MultiChildRenderObjectWidget {
       ..textDirection = textDirection ?? Directionality.of(context)
       ..softWrap = softWrap
       ..overflow = overflow
-      ..textScaleFactor = textScaleFactor
+      ..textScaler = textScaler
       ..maxLines = maxLines
       ..strutStyle = strutStyle
       ..textWidthBasis = textWidthBasis
@@ -5865,7 +5964,7 @@ class RichText extends MultiChildRenderObjectWidget {
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: TextOverflow.clip));
-    properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: 1.0));
+    properties.add(DiagnosticsProperty<TextScaler>('textScaler', textScaler, defaultValue: TextScaler.noScaling));
     properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
     properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: TextWidthBasis.parent));
     properties.add(StringProperty('text', text.toPlainText()));
@@ -6140,7 +6239,7 @@ class RawImage extends LeafRenderObjectWidget {
 ///   @override
 ///   Future<ByteData> load(String key) async {
 ///     if (key == 'resources/test') {
-///       return ByteData.view(Uint8List.fromList(utf8.encode('Hello World!')).buffer);
+///       return ByteData.sublistView(utf8.encode('Hello World!'));
 ///     }
 ///     return ByteData(0);
 ///   }
@@ -6750,20 +6849,33 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 ///
 /// ## Semantics
 ///
-/// Using this widget may also affect how the semantics subtree underneath this
-/// widget is collected.
+/// Using this class may also affect how the semantics subtree underneath is
+/// collected.
 ///
-/// {@template flutter.widgets.IgnorePointer.Semantics}
+/// {@template flutter.widgets.IgnorePointer.semantics}
+/// If [ignoring] is true, pointer-related [SemanticsAction]s are removed from
+/// the semantics subtree. Otherwise, the subtree remains untouched.
+/// {@endtemplate}
+///
+/// {@template flutter.widgets.IgnorePointer.ignoringSemantics}
+/// The usages of [ignoringSemantics] are deprecated and not recommended. This
+/// property was introduced to workaround the semantics behavior of the
+/// [IgnorePointer] and its friends before v3.8.0-12.0.pre.
+///
+/// Before that version, entire semantics subtree is dropped if [ignoring] is
+/// true. Developers can only use [ignoringSemantics] to preserver the semantics
+/// subtrees.
+///
+/// After that version, with [ignoring] set to true, it only prevents semantics
+/// user actions in the semantics subtree but leaves the other
+/// [SemanticsProperties] intact. Therefore, the [ignoringSemantics] is no
+/// longer needed.
+///
 /// If [ignoringSemantics] is true, the semantics subtree is dropped. Therefore,
 /// the subtree will be invisible to assistive technologies.
 ///
 /// If [ignoringSemantics] is false, the semantics subtree is collected as
 /// usual.
-///
-/// If [ignoringSemantics] is not set, then [ignoring] decides how the
-/// semantics subtree is collected. If [ignoring] is true, pointer-related
-/// [SemanticsAction]s are removed from the semantics subtree. Otherwise, the
-/// subtree remains untouched.
 /// {@endtemplate}
 ///
 /// See also:
@@ -6791,7 +6903,7 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
   /// Regardless of whether this widget is ignored during hit testing, it will
   /// still consume space during layout and be visible during painting.
   ///
-  /// {@macro flutter.widgets.IgnorePointer.Semantics}
+  /// {@macro flutter.widgets.IgnorePointer.semantics}
   ///
   /// Defaults to true.
   final bool ignoring;
@@ -6799,7 +6911,7 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
   /// Whether the semantics of this widget is ignored when compiling the
   /// semantics subtree.
   ///
-  /// {@macro flutter.widgets.IgnorePointer.Semantics}
+  /// {@macro flutter.widgets.IgnorePointer.ignoringSemantics}
   ///
   /// See [SemanticsNode] for additional information about the semantics tree.
   @Deprecated(
@@ -6854,19 +6966,33 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 ///
 /// ## Semantics
 ///
-/// Using this widget may also affect how the semantics subtree underneath this
-/// widget is collected.
+/// Using this class may also affect how the semantics subtree underneath is
+/// collected.
 ///
-/// {@template flutter.widgets.AbsorbPointer.Semantics}
-/// If [ignoringSemantics] is true, the semantics subtree is dropped.
+/// {@template flutter.widgets.AbsorbPointer.semantics}
+/// If [absorbing] is true, pointer-related [SemanticsAction]s are removed from
+/// the semantics subtree. Otherwise, the subtree remains untouched.
+/// {@endtemplate}
+///
+/// {@template flutter.widgets.AbsorbPointer.ignoringSemantics}
+/// The usages of [ignoringSemantics] are deprecated and not recommended. This
+/// property was introduced to workaround the semantics behavior of the
+/// [IgnorePointer] and its friends before v3.8.0-12.0.pre.
+///
+/// Before that version, entire semantics subtree is dropped if [absorbing] is
+/// true. Developers can only use [ignoringSemantics] to preserver the semantics
+/// subtrees.
+///
+/// After that version, with [absorbing] set to true, it only prevents semantics
+/// user actions in the semantics subtree but leaves the other
+/// [SemanticsProperties] intact. Therefore, the [ignoringSemantics] is no
+/// longer needed.
+///
+/// If [ignoringSemantics] is true, the semantics subtree is dropped. Therefore,
+/// the subtree will be invisible to assistive technologies.
 ///
 /// If [ignoringSemantics] is false, the semantics subtree is collected as
 /// usual.
-///
-/// If [ignoringSemantics] is not set, then [absorbing] decides how the
-/// semantics subtree is collected. If [absorbing] is true, pointer-related
-/// [SemanticsAction]s are removed from the semantics subtree. Otherwise, the
-/// subtree remains untouched.
 /// {@endtemplate}
 ///
 /// See also:
@@ -6894,7 +7020,7 @@ class AbsorbPointer extends SingleChildRenderObjectWidget {
   /// testing, it will still consume space during layout and be visible during
   /// painting.
   ///
-  /// {@macro flutter.widgets.AbsorbPointer.Semantics}
+  /// {@macro flutter.widgets.AbsorbPointer.semantics}
   ///
   /// Defaults to true.
   final bool absorbing;
@@ -6902,7 +7028,7 @@ class AbsorbPointer extends SingleChildRenderObjectWidget {
   /// Whether the semantics of this render object is ignored when compiling the
   /// semantics tree.
   ///
-  /// {@macro flutter.widgets.AbsorbPointer.Semantics}
+  /// {@macro flutter.widgets.AbsorbPointer.ignoringSemantics}
   ///
   /// See [SemanticsNode] for additional information about the semantics tree.
   @Deprecated(
@@ -7049,6 +7175,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool? hidden,
     bool? image,
     bool? liveRegion,
+    bool? expanded,
     int? maxValueLength,
     int? currentValueLength,
     String? label,
@@ -7097,6 +7224,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       enabled: enabled,
       checked: checked,
       mixed: mixed,
+      expanded: expanded,
       toggled: toggled,
       selected: selected,
       button: button,

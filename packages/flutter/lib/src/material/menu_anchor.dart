@@ -303,6 +303,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
     _anchorChildren.clear();
     _menuController._detach(this);
     _internalMenuController = null;
+    _menuScopeNode.dispose();
     super.dispose();
   }
 
@@ -551,6 +552,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
     }
     _closeChildren(inDispose: inDispose);
     _overlayEntry?.remove();
+    _overlayEntry?.dispose();
     _overlayEntry = null;
     if (!inDispose) {
       // Notify that _childIsOpen changed state, but only if not
@@ -1072,14 +1074,14 @@ class _MenuItemButtonState extends State<MenuItemButton> {
       ),
     );
 
-    if (_platformSupportsAccelerators() && widget.enabled) {
+    if (_platformSupportsAccelerators && widget.enabled) {
       child = MenuAcceleratorCallbackBinding(
         onInvoke: _handleSelect,
         child: child,
       );
     }
 
-    return child;
+    return MergeSemantics(child: child);
   }
 
   void _handleFocusChange() {
@@ -1099,10 +1101,16 @@ class _MenuItemButtonState extends State<MenuItemButton> {
 
   void _handleSelect() {
     assert(_debugMenuInfo('Selected ${widget.child} menu'));
-    widget.onPressed?.call();
     if (widget.closeOnActivate) {
       _MenuAnchorState._maybeOf(context)?._root._close();
     }
+    // Delay the call to onPressed until post-frame so that the focus is
+    // restored to what it was before the menu was opened before the action is
+    // executed.
+    SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+      FocusManager.instance.applyFocusChangesIfNeeded();
+      widget.onPressed?.call();
+    });
   }
 
   void _createInternalFocusNodeIfNeeded() {
@@ -1898,23 +1906,27 @@ class _SubmenuButtonState extends State<SubmenuButton> {
             controller._anchor!._focusButton();
           }
         }
-
-        child = TextButton(
-          style: mergedStyle,
-          focusNode: _buttonFocusNode,
-          onHover: _enabled ? (bool hovering) => handleHover(hovering, context) : null,
-          onPressed: _enabled ? () => toggleShowMenu(context) : null,
-          isSemanticButton: null,
-          child: _MenuItemLabel(
-            leadingIcon: widget.leadingIcon,
-            trailingIcon: widget.trailingIcon,
-            hasSubmenu: true,
-            showDecoration: (controller._anchor!._parent?._orientation ?? Axis.horizontal) == Axis.vertical,
-            child: child ?? const SizedBox(),
+        child = MergeSemantics(
+          child: Semantics(
+            expanded: controller.isOpen,
+            child: TextButton(
+              style: mergedStyle,
+              focusNode: _buttonFocusNode,
+              onHover: _enabled ? (bool hovering) => handleHover(hovering, context) : null,
+              onPressed: _enabled ? () => toggleShowMenu(context) : null,
+              isSemanticButton: null,
+              child: _MenuItemLabel(
+                leadingIcon: widget.leadingIcon,
+                trailingIcon: widget.trailingIcon,
+                hasSubmenu: true,
+                showDecoration: (controller._anchor!._parent?._orientation ?? Axis.horizontal) == Axis.vertical,
+                child: child ?? const SizedBox(),
+              ),
+            ),
           ),
         );
 
-        if (_enabled && _platformSupportsAccelerators()) {
+        if (_enabled && _platformSupportsAccelerators) {
           return MenuAcceleratorCallbackBinding(
             onInvoke: () => toggleShowMenu(context),
             hasSubmenu: true,
@@ -2043,33 +2055,44 @@ class _LocalizedShortcutLabeler {
   String getShortcutLabel(MenuSerializableShortcut shortcut, MaterialLocalizations localizations) {
     final ShortcutSerialization serialized = shortcut.serializeForMenu();
     final String keySeparator;
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
+    if (_usesSymbolicModifiers) {
         // Use "⌃ ⇧ A" style on macOS and iOS.
         keySeparator = ' ';
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
+    } else {
         // Use "Ctrl+Shift+A" style.
         keySeparator = '+';
     }
     if (serialized.trigger != null) {
       final List<String> modifiers = <String>[];
       final LogicalKeyboardKey trigger = serialized.trigger!;
-      // These should be in this order, to match the LogicalKeySet version.
-      if (serialized.alt!) {
-        modifiers.add(_getModifierLabel(LogicalKeyboardKey.alt, localizations));
-      }
-      if (serialized.control!) {
-        modifiers.add(_getModifierLabel(LogicalKeyboardKey.control, localizations));
-      }
-      if (serialized.meta!) {
-        modifiers.add(_getModifierLabel(LogicalKeyboardKey.meta, localizations));
-      }
-      if (serialized.shift!) {
-        modifiers.add(_getModifierLabel(LogicalKeyboardKey.shift, localizations));
+      if (_usesSymbolicModifiers) {
+        // macOS/iOS platform convention uses this ordering, with ⌘ always last.
+        if (serialized.control!) {
+          modifiers.add(_getModifierLabel(LogicalKeyboardKey.control, localizations));
+        }
+        if (serialized.alt!) {
+          modifiers.add(_getModifierLabel(LogicalKeyboardKey.alt, localizations));
+        }
+        if (serialized.shift!) {
+          modifiers.add(_getModifierLabel(LogicalKeyboardKey.shift, localizations));
+        }
+        if (serialized.meta!) {
+          modifiers.add(_getModifierLabel(LogicalKeyboardKey.meta, localizations));
+        }
+      } else {
+        // These should be in this order, to match the LogicalKeySet version.
+        if (serialized.alt!) {
+          modifiers.add(_getModifierLabel(LogicalKeyboardKey.alt, localizations));
+        }
+        if (serialized.control!) {
+          modifiers.add(_getModifierLabel(LogicalKeyboardKey.control, localizations));
+        }
+        if (serialized.meta!) {
+          modifiers.add(_getModifierLabel(LogicalKeyboardKey.meta, localizations));
+        }
+        if (serialized.shift!) {
+          modifiers.add(_getModifierLabel(LogicalKeyboardKey.shift, localizations));
+        }
       }
       String? shortcutTrigger;
       final int logicalKeyId = trigger.keyId;
@@ -2842,7 +2865,7 @@ class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
   @override
   void initState() {
     super.initState();
-    if (_platformSupportsAccelerators()) {
+    if (_platformSupportsAccelerators) {
       _showAccelerators = _altIsPressed();
       HardwareKeyboard.instance.addHandler(_handleKeyEvent);
     }
@@ -2851,9 +2874,9 @@ class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
 
   @override
   void dispose() {
-    assert(_platformSupportsAccelerators() || _shortcutRegistryEntry == null);
+    assert(_platformSupportsAccelerators || _shortcutRegistryEntry == null);
     _displayLabel = '';
-    if (_platformSupportsAccelerators()) {
+    if (_platformSupportsAccelerators) {
       _shortcutRegistryEntry?.dispose();
       _shortcutRegistryEntry = null;
       _shortcutRegistry = null;
@@ -2866,7 +2889,7 @@ class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!_platformSupportsAccelerators()) {
+    if (!_platformSupportsAccelerators) {
       return;
     }
     _binding = MenuAcceleratorCallbackBinding.maybeOf(context);
@@ -2894,7 +2917,7 @@ class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
   }
 
   bool _handleKeyEvent(KeyEvent event) {
-    assert(_platformSupportsAccelerators());
+    assert(_platformSupportsAccelerators);
     final bool altIsPressed = _altIsPressed();
     if (altIsPressed != _showAccelerators) {
       setState(() {
@@ -2907,7 +2930,7 @@ class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
   }
 
   void _updateAcceleratorShortcut() {
-    assert(_platformSupportsAccelerators());
+    assert(_platformSupportsAccelerators);
     _shortcutRegistryEntry?.dispose();
     _shortcutRegistryEntry = null;
     // Before registering an accelerator as a shortcut it should meet these
@@ -3560,21 +3583,36 @@ bool _debugMenuInfo(String message, [Iterable<String>? details]) {
   return true;
 }
 
-bool _platformSupportsAccelerators() {
+/// Whether [defaultTargetPlatform] is an Apple platform (Mac or iOS).
+bool get _isApple {
   switch (defaultTargetPlatform) {
+    case TargetPlatform.iOS:
+    case TargetPlatform.macOS:
+      return true;
     case TargetPlatform.android:
     case TargetPlatform.fuchsia:
     case TargetPlatform.linux:
     case TargetPlatform.windows:
-      return true;
-    case TargetPlatform.iOS:
-    case TargetPlatform.macOS:
-      // On iOS and macOS, pressing the Option key (a.k.a. the Alt key) causes a
-      // different set of characters to be generated, and the native menus don't
-      // support accelerators anyhow, so we just disable accelerators on these
-      // platforms.
       return false;
   }
+}
+
+/// Whether [defaultTargetPlatform] is one that uses symbolic shortcuts.
+///
+/// Mac and iOS use special symbols for modifier keys instead of their names,
+/// render them in a particular order defined by Apple's human interface
+/// guidelines, and format them so that the modifier keys always align.
+bool get _usesSymbolicModifiers {
+  return _isApple;
+}
+
+
+bool get _platformSupportsAccelerators {
+  // On iOS and macOS, pressing the Option key (a.k.a. the Alt key) causes a
+  // different set of characters to be generated, and the native menus don't
+  // support accelerators anyhow, so we just disable accelerators on these
+  // platforms.
+  return !_isApple;
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - Menu

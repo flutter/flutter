@@ -4,13 +4,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import '../rendering/mock_canvas.dart';
-
-RenderBox getMaterialBox(WidgetTester tester) {
+RenderBox getMaterialBox(WidgetTester tester, Finder type) {
   return tester.firstRenderObject<RenderBox>(
     find.descendant(
-      of: find.byType(RawChip),
+      of: type,
       matching: find.byType(CustomPaint),
     ),
   );
@@ -19,7 +18,7 @@ RenderBox getMaterialBox(WidgetTester tester) {
 Material getMaterial(WidgetTester tester) {
   return tester.widget<Material>(
     find.descendant(
-      of: find.byType(RawChip),
+      of: find.byType(ChoiceChip),
       matching: find.byType(Material),
     ),
   );
@@ -40,9 +39,10 @@ Widget wrapForChip({
   TextDirection textDirection = TextDirection.ltr,
   double textScaleFactor = 1.0,
   Brightness brightness = Brightness.light,
+  bool? useMaterial3,
 }) {
   return MaterialApp(
-    theme: ThemeData(brightness: brightness),
+    theme: ThemeData(brightness: brightness, useMaterial3: useMaterial3),
     home: Directionality(
       textDirection: textDirection,
       child: MediaQuery(
@@ -63,7 +63,7 @@ void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
 }
 
 void main() {
-  testWidgets('ChoiceChip defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ChoiceChip defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     const String label = 'choice chip';
 
@@ -84,7 +84,10 @@ void main() {
     );
 
     // Test default chip size.
-    expect(tester.getSize(find.byType(ChoiceChip)), const Size(190.0, 48.0));
+    expect(
+      tester.getSize(find.byType(ChoiceChip)),
+      within(distance: 0.01, from: const Size(189.1, 48.0)),
+    );
     // Test default label style.
     expect(
       getLabelStyle(tester, label).style.color!.value,
@@ -195,7 +198,7 @@ void main() {
     expect(decoration.color, theme.colorScheme.onSurface.withOpacity(0.12));
   });
 
-  testWidgets('ChoiceChip.elevated defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ChoiceChip.elevated defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     const String label = 'choice chip';
 
@@ -216,7 +219,10 @@ void main() {
     );
 
     // Test default chip size.
-    expect(tester.getSize(find.byType(ChoiceChip)), const Size(190.0, 48.0));
+    expect(
+      tester.getSize(find.byType(ChoiceChip)),
+      within(distance: 0.01, from: const Size(189.1, 48.0)),
+    );
     // Test default label style.
     expect(
       getLabelStyle(tester, label).style.color!.value,
@@ -327,7 +333,181 @@ void main() {
     expect(decoration.color, theme.colorScheme.onSurface.withOpacity(0.12));
   });
 
-  testWidgets('ChoiceChip can be tapped', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ChoiceChip.color resolves material states', (WidgetTester tester) async {
+    const Color disabledSelectedColor = Color(0xffffff00);
+    const Color disabledColor = Color(0xff00ff00);
+    const Color backgroundColor = Color(0xff0000ff);
+    const Color selectedColor = Color(0xffff0000);
+    final MaterialStateProperty<Color?> color = MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled) && states.contains(MaterialState.selected)) {
+        return disabledSelectedColor;
+      }
+      if (states.contains(MaterialState.disabled)) {
+        return disabledColor;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return selectedColor;
+      }
+      return backgroundColor;
+    });
+    Widget buildApp({ required bool enabled, required bool selected }) {
+      return wrapForChip(
+        useMaterial3: true,
+        child: Column(
+          children: <Widget>[
+            ChoiceChip(
+              onSelected: enabled ? (bool value) { } : null,
+              selected: selected,
+              color: color,
+              label: const Text('ChoiceChip'),
+            ),
+            ChoiceChip.elevated(
+              onSelected: enabled ? (bool value) { } : null,
+              selected: selected,
+              color: color,
+              label: const Text('ChoiceChip.elevated'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Test enabled state.
+    await tester.pumpWidget(buildApp(enabled: true, selected: false));
+
+    // Enabled ChoiceChip should have the provided backgroundColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).first),
+      paints..rrect(color: backgroundColor),
+    );
+    // Enabled elevated ChoiceChip should have the provided backgroundColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).last),
+      paints..rrect(color: backgroundColor),
+    );
+
+    // Test disabled state.
+    await tester.pumpWidget(buildApp(enabled: false, selected: false));
+    await tester.pumpAndSettle();
+
+    // Disabled ChoiceChip should have the provided disabledColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).first),
+      paints..rrect(color: disabledColor),
+    );
+    // Disabled elevated ChoiceChip should have the provided disabledColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).last),
+      paints..rrect(color: disabledColor),
+    );
+
+    // Test enabled & selected state.
+    await tester.pumpWidget(buildApp(enabled: true, selected: true));
+    await tester.pumpAndSettle();
+
+    // Enabled & selected ChoiceChip should have the provided selectedColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).first),
+      paints..rrect(color: selectedColor),
+    );
+    // Enabled & selected elevated ChoiceChip should have the provided selectedColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).last),
+      paints..rrect(color: selectedColor),
+    );
+
+    // Test disabled & selected state.
+    await tester.pumpWidget(buildApp(enabled: false, selected: true));
+    await tester.pumpAndSettle();
+
+    // Disabled & selected ChoiceChip should have the provided disabledSelectedColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).first),
+      paints..rrect(color: disabledSelectedColor),
+    );
+    // Disabled & selected elevated ChoiceChip should have the provided disabledSelectedColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).last),
+      paints..rrect(color: disabledSelectedColor),
+    );
+  });
+
+  testWidgetsWithLeakTracking('ChoiceChip uses provided state color properties', (WidgetTester tester) async {
+    const Color disabledColor = Color(0xff00ff00);
+    const Color backgroundColor = Color(0xff0000ff);
+    const Color selectedColor = Color(0xffff0000);
+    Widget buildApp({ required bool enabled, required bool selected }) {
+      return wrapForChip(
+        useMaterial3: true,
+        child: Column(
+          children: <Widget>[
+            ChoiceChip(
+              onSelected: enabled ? (bool value) { } : null,
+              selected: selected,
+              disabledColor: disabledColor,
+              backgroundColor: backgroundColor,
+              selectedColor: selectedColor,
+              label: const Text('ChoiceChip'),
+            ),
+            ChoiceChip.elevated(
+              onSelected: enabled ? (bool value) { } : null,
+              selected: selected,
+              disabledColor: disabledColor,
+              backgroundColor: backgroundColor,
+              selectedColor: selectedColor,
+              label: const Text('ChoiceChip.elevated'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Test enabled chips.
+    await tester.pumpWidget(buildApp(enabled: true, selected: false));
+
+    // Enabled ChoiceChip should have the provided backgroundColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).first),
+      paints..rrect(color: backgroundColor),
+    );
+    // Enabled elevated ChoiceChip should have the provided backgroundColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).last),
+      paints..rrect(color: backgroundColor),
+    );
+
+    // Test disabled chips.
+    await tester.pumpWidget(buildApp(enabled: false, selected: false));
+    await tester.pumpAndSettle();
+
+    // Disabled ChoiceChip should have the provided disabledColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).first),
+      paints..rrect(color: disabledColor),
+    );
+    // Disabled elevated ChoiceChip should have the provided disabledColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).last),
+      paints..rrect(color: disabledColor),
+    );
+
+    // Test enabled & selected chips.
+    await tester.pumpWidget(buildApp(enabled: true, selected: true));
+    await tester.pumpAndSettle();
+
+    // Enabled & selected ChoiceChip should have the provided selectedColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).first),
+      paints..rrect(color: selectedColor),
+    );
+    // Enabled & selected elevated ChoiceChip should have the provided selectedColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).last),
+      paints..rrect(color: selectedColor),
+    );
+  });
+
+  testWidgetsWithLeakTracking('ChoiceChip can be tapped', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -343,7 +523,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('ChoiceChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ChoiceChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
     const Text label = Text('label');
     await tester.pumpWidget(wrapForChip(child: const ChoiceChip(label: label, selected: false)));
     checkChipMaterialClipBehavior(tester, Clip.none);
@@ -352,7 +532,7 @@ void main() {
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
 
-  testWidgets('ChoiceChip passes iconTheme property to RawChip', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ChoiceChip passes iconTheme property to RawChip', (WidgetTester tester) async {
     const IconThemeData iconTheme = IconThemeData(color: Colors.red);
     await tester.pumpWidget(wrapForChip(
       child: const ChoiceChip(
@@ -364,7 +544,7 @@ void main() {
     expect(rawChip.iconTheme, iconTheme);
   });
 
-  testWidgets('ChoiceChip passes showCheckmark from ChipTheme to RawChip', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ChoiceChip passes showCheckmark from ChipTheme to RawChip', (WidgetTester tester) async {
     const bool showCheckmark = false;
     await tester.pumpWidget(wrapForChip(
         child: const ChipTheme(
@@ -380,7 +560,7 @@ void main() {
     expect(rawChip.showCheckmark, showCheckmark);
   });
 
-  testWidgets('ChoiceChip passes checkmark properties to RawChip', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ChoiceChip passes checkmark properties to RawChip', (WidgetTester tester) async {
     const bool showCheckmark = false;
     const Color checkmarkColor = Color(0xff0000ff);
     await tester.pumpWidget(wrapForChip(
@@ -400,7 +580,7 @@ void main() {
     // support is deprecated and the APIs are removed, these tests
     // can be deleted.
 
-    testWidgets('ChoiceChip defaults', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ChoiceChip defaults', (WidgetTester tester) async {
       Widget buildFrame(Brightness brightness) {
         return MaterialApp(
           theme: ThemeData(useMaterial3: false, brightness: brightness),
@@ -416,7 +596,7 @@ void main() {
       }
 
       await tester.pumpWidget(buildFrame(Brightness.light));
-      expect(getMaterialBox(tester), paints..rrect(color: const Color(0x3d000000)));
+      expect(getMaterialBox(tester, find.byType(RawChip)), paints..rrect(color: const Color(0x3d000000)));
       expect(tester.getSize(find.byType(ChoiceChip)), const Size(108.0, 48.0));
       expect(getMaterial(tester).color, null);
       expect(getMaterial(tester).elevation, 0);
@@ -425,7 +605,7 @@ void main() {
 
       await tester.pumpWidget(buildFrame(Brightness.dark));
       await tester.pumpAndSettle(); // Theme transition animation
-      expect(getMaterialBox(tester), paints..rrect(color: const Color(0x3dffffff)));
+      expect(getMaterialBox(tester, find.byType(RawChip)), paints..rrect(color: const Color(0x3dffffff)));
       expect(tester.getSize(find.byType(ChoiceChip)), const Size(108.0, 48.0));
       expect(getMaterial(tester).color, null);
       expect(getMaterial(tester).elevation, 0);

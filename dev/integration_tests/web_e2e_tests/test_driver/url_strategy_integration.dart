@@ -46,11 +46,6 @@ void main() {
 /// It keeps a list of history entries and event listeners in memory and
 /// manipulates them in order to achieve the desired functionality.
 class TestUrlStrategy extends UrlStrategy {
-  /// Creates a instance of [TestUrlStrategy] with an empty string as the
-  /// path.
-  factory TestUrlStrategy() =>
-      TestUrlStrategy.fromEntry(const TestHistoryEntry(null, null, ''));
-
   /// Creates an instance of [TestUrlStrategy] and populates it with a list
   /// that has [initialEntry] as the only item.
   TestUrlStrategy.fromEntry(TestHistoryEntry initialEntry)
@@ -64,8 +59,6 @@ class TestUrlStrategy extends UrlStrategy {
   dynamic getState() => currentEntry.state;
 
   int _currentEntryIndex;
-  int get currentEntryIndex => _currentEntryIndex;
-
   final List<TestHistoryEntry> history;
 
   TestHistoryEntry get currentEntry {
@@ -103,16 +96,6 @@ class TestUrlStrategy extends UrlStrategy {
       url = currentEntry.url;
     }
     currentEntry = TestHistoryEntry(state, title, url);
-  }
-
-  /// This simulates the case where a user types in a url manually. It causes
-  /// a new state to be pushed, and all event listeners will be invoked.
-  Future<void> simulateUserTypingUrl(String url) {
-    assert(withinAppHistory);
-    return _nextEventLoop(() {
-      pushState(null, '', url);
-      _firePopStateEvent();
-    });
   }
 
   @override

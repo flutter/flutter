@@ -63,11 +63,6 @@ class Context {
     }
   }
 
-  bool existsDir(String path) {
-    final Directory dir = Directory(path);
-    return dir.existsSync();
-  }
-
   bool existsFile(String path) {
     final File file = File(path);
     return file.existsSync();
@@ -348,6 +343,10 @@ class Context {
 
     if (environment['LOCAL_ENGINE'] != null && environment['LOCAL_ENGINE']!.isNotEmpty) {
       flutterArgs.add('--local-engine=${environment['LOCAL_ENGINE']}');
+    }
+
+    if (environment['LOCAL_ENGINE_HOST'] != null && environment['LOCAL_ENGINE_HOST']!.isNotEmpty) {
+      flutterArgs.add('--local-engine-host=${environment['LOCAL_ENGINE_HOST']}');
     }
 
     flutterArgs.addAll(<String>[

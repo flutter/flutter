@@ -4,8 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 /// Adds the basic requirements for a Chip.
 Widget wrapForChip({
@@ -13,15 +12,25 @@ Widget wrapForChip({
   TextDirection textDirection = TextDirection.ltr,
   double textScaleFactor = 1.0,
   Brightness brightness = Brightness.light,
+  bool? useMaterial3,
 }) {
   return MaterialApp(
-    theme: ThemeData(brightness: brightness),
+    theme: ThemeData(brightness: brightness, useMaterial3: useMaterial3),
     home: Directionality(
       textDirection: textDirection,
       child: MediaQuery(
         data: MediaQueryData(textScaleFactor: textScaleFactor),
         child: Material(child: child),
       ),
+    ),
+  );
+}
+
+RenderBox getMaterialBox(WidgetTester tester, Finder type) {
+  return tester.firstRenderObject<RenderBox>(
+    find.descendant(
+      of: type,
+      matching: find.byType(CustomPaint),
     ),
   );
 }
@@ -54,7 +63,7 @@ void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
 }
 
 void main() {
-  testWidgets('ActionChip defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ActionChip defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     const String label = 'action chip';
 
@@ -74,7 +83,10 @@ void main() {
     );
 
     // Test default chip size.
-    expect(tester.getSize(find.byType(ActionChip)), const Size(190.0, 48.0));
+    expect(
+      tester.getSize(find.byType(ActionChip)),
+      within<Size>(distance: 0.01, from: const Size(189.1, 48.0)),
+    );
     // Test default label style.
     expect(
       getLabelStyle(tester, label).style.color!.value,
@@ -125,7 +137,7 @@ void main() {
     expect(decoration.color, null);
   });
 
-  testWidgets('ActionChip.elevated defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ActionChip.elevated defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     const String label = 'action chip';
 
@@ -145,7 +157,10 @@ void main() {
     );
 
     // Test default chip size.
-    expect(tester.getSize(find.byType(ActionChip)), const Size(190.0, 48.0));
+    expect(
+      tester.getSize(find.byType(ActionChip)),
+      within<Size>(distance: 0.01, from: const Size(189.1, 48.0)),
+    );
     // Test default label style.
     expect(
       getLabelStyle(tester, label).style.color!.value,
@@ -194,6 +209,120 @@ void main() {
 
     decoration = tester.widget<Ink>(find.byType(Ink)).decoration! as ShapeDecoration;
     expect(decoration.color, theme.colorScheme.onSurface.withOpacity(0.12));
+  });
+
+  testWidgetsWithLeakTracking('ActionChip.color resolves material states', (WidgetTester tester) async {
+    const Color disabledColor = Color(0xff00ff00);
+    const Color backgroundColor = Color(0xff0000ff);
+    final MaterialStateProperty<Color?> color = MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return disabledColor;
+      }
+      return backgroundColor;
+    });
+    Widget buildApp({ required bool enabled, required bool selected }) {
+      return wrapForChip(
+        useMaterial3: true,
+        child: Column(
+          children: <Widget>[
+            ActionChip(
+              onPressed: enabled ? () { } : null,
+              color: color,
+              label: const Text('ActionChip'),
+            ),
+            ActionChip.elevated(
+              onPressed: enabled ? () { } : null,
+              color: color,
+              label: const Text('ActionChip.elevated'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Test enabled state.
+    await tester.pumpWidget(buildApp(enabled: true, selected: false));
+
+    // Enabled ActionChip should have the provided backgroundColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).first),
+      paints..rrect(color: backgroundColor),
+    );
+    // Enabled elevated ActionChip should have the provided backgroundColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).last),
+      paints..rrect(color: backgroundColor),
+    );
+
+    // Test disabled state.
+    await tester.pumpWidget(buildApp(enabled: false, selected: false));
+    await tester.pumpAndSettle();
+
+    // Disabled ActionChip should have the provided disabledColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).first),
+      paints..rrect(color: disabledColor),
+    );
+    // Disabled elevated ActionChip should have the provided disabledColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).last),
+      paints..rrect(color: disabledColor),
+    );
+  });
+
+  testWidgetsWithLeakTracking('ActionChip uses provided state color properties', (WidgetTester tester) async {
+    const Color disabledColor = Color(0xff00ff00);
+    const Color backgroundColor = Color(0xff0000ff);
+    Widget buildApp({ required bool enabled, required bool selected }) {
+      return wrapForChip(
+        useMaterial3: true,
+        child: Column(
+          children: <Widget>[
+            ActionChip(
+              onPressed: enabled ? () { } : null,
+              disabledColor: disabledColor,
+              backgroundColor: backgroundColor,
+              label: const Text('ActionChip'),
+            ),
+            ActionChip.elevated(
+              onPressed: enabled ? () { } : null,
+              disabledColor: disabledColor,
+              backgroundColor: backgroundColor,
+              label: const Text('ActionChip.elevated'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Test enabled state.
+    await tester.pumpWidget(buildApp(enabled: true, selected: false));
+
+    // Enabled ActionChip should have the provided backgroundColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).first),
+      paints..rrect(color: backgroundColor),
+    );
+    // Enabled elevated ActionChip should have the provided backgroundColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).last),
+      paints..rrect(color: backgroundColor),
+    );
+
+    // Test disabled state.
+    await tester.pumpWidget(buildApp(enabled: false, selected: false));
+    await tester.pumpAndSettle();
+
+    // Disabled ActionChip should have the provided disabledColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).first),
+      paints..rrect(color: disabledColor),
+    );
+    // Disabled elevated ActionChip should have the provided disabledColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).last),
+      paints..rrect(color: disabledColor),
+    );
   });
 
   testWidgetsWithLeakTracking('ActionChip can be tapped', (WidgetTester tester) async {

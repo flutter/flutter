@@ -37,6 +37,13 @@ class DispatchedEventKey {
 }
 
 class TestWidgetInspectorService extends Object with WidgetInspectorService {
+    TestWidgetInspectorService() {
+    selection.addListener(() {
+      if (selectionChangedCallback != null) {
+        selectionChangedCallback!();
+      }
+    });
+  }
   final Map<String, ServiceExtensionCallback> extensions = <String, ServiceExtensionCallback>{};
 
   final Map<DispatchedEventKey, List<Map<Object, Object?>>> eventsDispatched =
@@ -47,6 +54,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
   void registerServiceExtension({
     required String name,
     required ServiceExtensionCallback callback,
+    required RegisterServiceExtensionCallback registerExtension,
   }) {
     assert(!extensions.containsKey(name));
     extensions[name] = callback;
@@ -107,7 +115,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
     final WidgetsBinding binding = WidgetsBinding.instance;
 
     if (binding.rootElement != null) {
-      binding.buildOwner!.reassemble(binding.rootElement!, null);
+      binding.buildOwner!.reassemble(binding.rootElement!);
     }
   }
 

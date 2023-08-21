@@ -99,14 +99,14 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   static final HttpClient _sharedHttpClient = HttpClient()..autoUncompress = false;
 
   static HttpClient get _httpClient {
-    HttpClient client = _sharedHttpClient;
+    HttpClient? client;
     assert(() {
       if (debugNetworkImageHttpClientProvider != null) {
         client = debugNetworkImageHttpClientProvider!();
       }
       return true;
     }());
-    return client;
+    return client ?? _sharedHttpClient;
   }
 
   Future<ui.Codec> _loadAsync(
@@ -185,5 +185,5 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   int get hashCode => Object.hash(url, scale);
 
   @override
-  String toString() => '${objectRuntimeType(this, 'NetworkImage')}("$url", scale: $scale)';
+  String toString() => '${objectRuntimeType(this, 'NetworkImage')}("$url", scale: ${scale.toStringAsFixed(1)})';
 }

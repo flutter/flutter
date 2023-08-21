@@ -4,8 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../rendering/mock_canvas.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 /// Adds the basic requirements for a Chip.
 Widget wrapForChip({
@@ -78,6 +77,15 @@ void expectCheckmarkColor(Finder finder, Color color) {
   );
 }
 
+RenderBox getMaterialBox(WidgetTester tester, Finder type) {
+  return tester.firstRenderObject<RenderBox>(
+    find.descendant(
+      of: type,
+      matching: find.byType(CustomPaint),
+    ),
+  );
+}
+
 void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
   final Iterable<Material> materials = tester.widgetList<Material>(find.byType(Material));
   // There should be two Material widgets, first Material is from the "_wrapForChip" and
@@ -106,7 +114,7 @@ DefaultTextStyle getLabelStyle(WidgetTester tester, String labelText) {
 }
 
 void main() {
-  testWidgets('FilterChip defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('FilterChip defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     const String label = 'filter chip';
 
@@ -126,7 +134,10 @@ void main() {
     );
 
     // Test default chip size.
-    expect(tester.getSize(find.byType(FilterChip)), const Size(190.0, 48.0));
+    expect(
+      tester.getSize(find.byType(FilterChip)),
+      within(distance: 0.001, from: const Size(189.1, 48.0)),
+    );
     // Test default label style.
     expect(
       getLabelStyle(tester, label).style.color!.value,
@@ -238,7 +249,7 @@ void main() {
     expect(decoration.color, theme.colorScheme.onSurface.withOpacity(0.12));
   });
 
-  testWidgets('FilterChip.elevated defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('FilterChip.elevated defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     const String label = 'filter chip';
 
@@ -258,7 +269,10 @@ void main() {
     );
 
     // Test default chip size.
-    expect(tester.getSize(find.byType(FilterChip)), const Size(190.0, 48.0));
+    expect(
+      tester.getSize(find.byType(FilterChip)),
+      within(distance: 0.001, from: const Size(189.1, 48.0)),
+    );
     // Test default label style.
     expect(
       getLabelStyle(tester, 'filter chip').style.color!.value,
@@ -370,7 +384,182 @@ void main() {
     expect(decoration.color, theme.colorScheme.onSurface.withOpacity(0.12));
   });
 
-  testWidgets('FilterChip can be tapped', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('FilterChip.color resolves material states', (WidgetTester tester) async {
+    const Color disabledSelectedColor = Color(0xffffff00);
+    const Color disabledColor = Color(0xff00ff00);
+    const Color backgroundColor = Color(0xff0000ff);
+    const Color selectedColor = Color(0xffff0000);
+    final MaterialStateProperty<Color?> color = MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled) && states.contains(MaterialState.selected)) {
+        return disabledSelectedColor;
+      }
+      if (states.contains(MaterialState.disabled)) {
+        return disabledColor;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return selectedColor;
+      }
+      return backgroundColor;
+    });
+    Widget buildApp({ required bool enabled, required bool selected }) {
+      return wrapForChip(
+        useMaterial3: true,
+        child: Column(
+          children: <Widget>[
+            FilterChip(
+              onSelected: enabled ? (bool value) { } : null,
+              selected: selected,
+              color: color,
+              label: const Text('FilterChip'),
+            ),
+            FilterChip.elevated(
+              onSelected: enabled ? (bool value) { } : null,
+              selected: selected,
+              color: color,
+              label: const Text('FilterChip.elevated'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Test enabled state.
+    await tester.pumpWidget(buildApp(enabled: true, selected: false));
+
+    // Enabled FilterChip should have the provided backgroundColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).first),
+      paints..rrect(color: backgroundColor),
+    );
+    // Enabled elevated FilterChip should have the provided backgroundColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).last),
+      paints..rrect(color: backgroundColor),
+    );
+
+    // Test disabled state.
+    await tester.pumpWidget(buildApp(enabled: false, selected: false));
+    await tester.pumpAndSettle();
+
+    // Disabled FilterChip should have the provided disabledColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).first),
+      paints..rrect(color: disabledColor),
+    );
+    // Disabled elevated FilterChip should have the provided disabledColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).last),
+      paints..rrect(color: disabledColor),
+    );
+
+    // Test enabled & selected state.
+    await tester.pumpWidget(buildApp(enabled: true, selected: true));
+    await tester.pumpAndSettle();
+
+    // Enabled & selected FilterChip should have the provided selectedColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).first),
+      paints..rrect(color: selectedColor),
+    );
+    // Enabled & selected elevated FilterChip should have the provided selectedColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).last),
+      paints..rrect(color: selectedColor),
+    );
+
+    // Test disabled & selected state.
+    await tester.pumpWidget(buildApp(enabled: false, selected: true));
+    await tester.pumpAndSettle();
+
+    // Disabled & selected FilterChip should have the provided disabledSelectedColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).first),
+      paints..rrect(color: disabledSelectedColor),
+    );
+    // Disabled & selected elevated FilterChip should have the
+    // provided disabledSelectedColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).last),
+      paints..rrect(color: disabledSelectedColor),
+    );
+  });
+
+  testWidgetsWithLeakTracking('FilterChip uses provided state color properties', (WidgetTester tester) async {
+    const Color disabledColor = Color(0xff00ff00);
+    const Color backgroundColor = Color(0xff0000ff);
+    const Color selectedColor = Color(0xffff0000);
+    Widget buildApp({ required bool enabled, required bool selected }) {
+      return wrapForChip(
+        useMaterial3: true,
+        child: Column(
+          children: <Widget>[
+            FilterChip(
+              onSelected: enabled ? (bool value) { } : null,
+              selected: selected,
+              disabledColor: disabledColor,
+              backgroundColor: backgroundColor,
+              selectedColor: selectedColor,
+              label: const Text('FilterChip'),
+            ),
+            FilterChip.elevated(
+              onSelected: enabled ? (bool value) { } : null,
+              selected: selected,
+              disabledColor: disabledColor,
+              backgroundColor: backgroundColor,
+              selectedColor: selectedColor,
+              label: const Text('FilterChip.elevated'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Test enabled state.
+    await tester.pumpWidget(buildApp(enabled: true, selected: false));
+
+    // Enabled FilterChip should have the provided backgroundColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).first),
+      paints..rrect(color: backgroundColor),
+    );
+    // Enabled elevated FilterChip should have the provided backgroundColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).last),
+      paints..rrect(color: backgroundColor),
+    );
+
+    // Test disabled state.
+    await tester.pumpWidget(buildApp(enabled: false, selected: false));
+    await tester.pumpAndSettle();
+
+    // Disabled FilterChip should have the provided disabledColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).first),
+      paints..rrect(color: disabledColor),
+    );
+    // Disabled elevated FilterChip should have the provided disabledColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).last),
+      paints..rrect(color: disabledColor),
+    );
+
+    // Test enabled & selected state.
+    await tester.pumpWidget(buildApp(enabled: true, selected: true));
+    await tester.pumpAndSettle();
+
+    // Enabled & selected FilterChip should have the provided selectedColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).first),
+      paints..rrect(color: selectedColor),
+    );
+    // Enabled & selected elevated FilterChip should have the provided selectedColor.
+    expect(
+      getMaterialBox(tester, find.byType(RawChip).last),
+      paints..rrect(color: selectedColor),
+    );
+  });
+
+  testWidgetsWithLeakTracking('FilterChip can be tapped', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -386,7 +575,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('Filter chip check mark color is determined by platform brightness when light', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Filter chip check mark color is determined by platform brightness when light', (WidgetTester tester) async {
     await pumpCheckmarkChip(
       theme: ThemeData(useMaterial3: false),
       tester,
@@ -399,7 +588,7 @@ void main() {
     );
   });
 
-  testWidgets('Filter chip check mark color is determined by platform brightness when dark', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Filter chip check mark color is determined by platform brightness when dark', (WidgetTester tester) async {
     await pumpCheckmarkChip(
       tester,
       chip: selectedFilterChip(),
@@ -413,7 +602,7 @@ void main() {
     );
   });
 
-  testWidgets('Filter chip check mark color can be set by the chip theme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Filter chip check mark color can be set by the chip theme', (WidgetTester tester) async {
     await pumpCheckmarkChip(
       tester,
       chip: selectedFilterChip(),
@@ -426,7 +615,7 @@ void main() {
     );
   });
 
-  testWidgets('Filter chip check mark color can be set by the chip constructor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Filter chip check mark color can be set by the chip constructor', (WidgetTester tester) async {
     await pumpCheckmarkChip(
       tester,
       chip: selectedFilterChip(checkmarkColor: const Color(0xff00ff00)),
@@ -438,7 +627,7 @@ void main() {
     );
   });
 
-  testWidgets('Filter chip check mark color is set by chip constructor even when a theme color is specified', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Filter chip check mark color is set by chip constructor even when a theme color is specified', (WidgetTester tester) async {
     await pumpCheckmarkChip(
       tester,
       chip: selectedFilterChip(checkmarkColor: const Color(0xffff0000)),
@@ -451,7 +640,7 @@ void main() {
     );
   });
 
-  testWidgets('FilterChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('FilterChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
     const Text label = Text('label');
     await tester.pumpWidget(wrapForChip(child: FilterChip(label: label, onSelected: (bool b) { })));
     checkChipMaterialClipBehavior(tester, Clip.none);
@@ -460,7 +649,7 @@ void main() {
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
 
-  testWidgets('M3 width should not change with selection', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('M3 width should not change with selection', (WidgetTester tester) async {
     // Regression tests for: https://github.com/flutter/flutter/issues/110645
 
     // For the text "FilterChip" the chip should default to 175 regardless of selection.
