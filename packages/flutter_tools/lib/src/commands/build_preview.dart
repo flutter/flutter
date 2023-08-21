@@ -13,11 +13,13 @@ import 'build.dart';
 class BuildPreviewCommand extends BuildSubCommand {
   BuildPreviewCommand({
     required super.logger,
-    required super.verboseHelp,
+    required bool verboseHelp,
     required this.fs,
     required this.flutterRoot,
     required this.processUtils,
-  }) : super();
+  }) : super(verboseHelp: verboseHelp) {
+    addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
+  }
 
   @override
   final String name = '_preview';
