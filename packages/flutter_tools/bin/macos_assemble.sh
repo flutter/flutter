@@ -66,9 +66,23 @@ BuildApp() {
       EchoError "This engine is not compatible with FLUTTER_BUILD_MODE: '${build_mode}'."
       EchoError "You can fix this by updating the LOCAL_ENGINE environment variable, or"
       EchoError "by running:"
-      EchoError "  flutter build macos --local-engine=host_${build_mode}"
+      EchoError "  flutter build macos --local-engine=host_${build_mode} --local-engine-host=host_${build_mode}"
       EchoError "or"
-      EchoError "  flutter build macos --local-engine=host_${build_mode}_unopt"
+      EchoError "  flutter build macos --local-engine=host_${build_mode}_unopt --local-engine-host=host_${build_mode}_unopt"
+      EchoError "========================================================================"
+      exit -1
+    fi
+  fi
+  if [[ -n "$LOCAL_ENGINE_HOST" ]]; then
+    if [[ $(echo "$LOCAL_ENGINE_HOST" | tr "[:upper:]" "[:lower:]") != *"$build_mode"* ]]; then
+      EchoError "========================================================================"
+      EchoError "ERROR: Requested build with Flutter local engine at '${LOCAL_ENGINE_HOST}'"
+      EchoError "This engine is not compatible with FLUTTER_BUILD_MODE: '${build_mode}'."
+      EchoError "You can fix this by updating the LOCAL_ENGINE_HOST environment variable, or"
+      EchoError "by running:"
+      EchoError "  flutter build macos --local-engine=host_${build_mode} --local-engine-host=host_${build_mode}"
+      EchoError "or"
+      EchoError "  flutter build macos --local-engine=host_${build_mode}_unopt --local-engine-host=host_${build_mode}_unopt"
       EchoError "========================================================================"
       exit -1
     fi
@@ -93,6 +107,9 @@ BuildApp() {
   fi
   if [[ -n "$LOCAL_ENGINE" ]]; then
     flutter_args+=("--local-engine=${LOCAL_ENGINE}")
+  fi
+  if [[ -n "$LOCAL_ENGINE_HOST" ]]; then
+    flutter_args+=("--local-engine-host=${LOCAL_ENGINE_HOST}")
   fi
   flutter_args+=(
     "assemble"

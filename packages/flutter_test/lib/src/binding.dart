@@ -143,6 +143,10 @@ class CapturedAccessibilityAnnouncement {
   final Assertiveness assertiveness;
 }
 
+// Examples can assume:
+// late TestWidgetsFlutterBinding binding;
+// late Size someSize;
+
 /// Base class for bindings used by widgets library tests.
 ///
 /// The [ensureInitialized] method creates (if necessary) and returns an
@@ -1253,7 +1257,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       if (hasScheduledFrame) {
         _currentFakeAsync!.flushMicrotasks();
         handleBeginFrame(Duration(
-          milliseconds: _clock!.now().millisecondsSinceEpoch,
+          microseconds: _clock!.now().microsecondsSinceEpoch,
         ));
         _currentFakeAsync!.flushMicrotasks();
         handleDrawFrame();
@@ -1548,7 +1552,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 /// ```dart
 /// TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
 /// if (binding is LiveTestWidgetsFlutterBinding) {
-///   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.[thePolicy];
+///   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.onlyPumps;
 /// }
 /// ```
 /// {@endtemplate}

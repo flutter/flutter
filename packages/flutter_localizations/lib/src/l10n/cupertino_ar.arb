@@ -45,5 +45,6 @@
   "noSpellCheckReplacementsLabel": "لم يتم العثور على بدائل",
   "menuDismissLabel": "إغلاق القائمة",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

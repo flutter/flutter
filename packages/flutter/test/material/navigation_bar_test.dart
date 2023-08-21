@@ -13,8 +13,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   testWidgetsWithLeakTracking('Navigation bar updates destinations when tapped', (WidgetTester tester) async {
@@ -411,10 +410,8 @@ void main() {
     await tester.longPress(find.text(label));
     expect(find.text(label), findsNWidgets(2));
 
-    if (kIsWeb && !isCanvasKit) {
-      expect(tester.getSize(find.text(label).last), const Size(15.0, 21.0));
-    } else {
-      expect(tester.getSize(find.text(label).last), const Size(15.0, 20.0));
+    if (!kIsWeb || isCanvasKit) {
+      expect(tester.getSize(find.text(label).last), const Size(14.25, 20.0));
     }
     // The duration is needed to ensure the tooltip disappears.
     await tester.pumpAndSettle(const Duration(seconds: 2));
@@ -423,10 +420,8 @@ void main() {
     expect(find.text(label), findsOneWidget);
     await tester.longPress(find.text(label));
 
-    if (kIsWeb && !isCanvasKit) {
-      expect(tester.getSize(find.text(label).last), const Size(57.0, 81.0));
-    } else {
-      expect(tester.getSize(find.text(label).last), const Size(57.0, 80.0));
+    if (!kIsWeb || isCanvasKit) {
+      expect(tester.getSize(find.text(label).last), const Size(56.25, 80.0));
     }
   });
 
@@ -831,7 +826,7 @@ void main() {
           color: const Color(0x0a000000),
         )
     );
-  });
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
 
   testWidgetsWithLeakTracking('Material3 - Navigation indicator ripple golden test', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/117420.

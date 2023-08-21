@@ -395,8 +395,8 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// {@template flutter.widgets.SliverChildBuilderDelegate.addAutomaticKeepAlives}
   /// Whether to wrap each child in an [AutomaticKeepAlive].
   ///
-  /// Typically, children in lazy list are wrapped in [AutomaticKeepAlive]
-  /// widgets so that children can use [KeepAliveNotification]s to preserve
+  /// Typically, lazily laid out children are wrapped in [AutomaticKeepAlive]
+  /// widgets so that the children can use [KeepAliveNotification]s to preserve
   /// their state when they would otherwise be garbage collected off-screen.
   ///
   /// This feature (and [addRepaintBoundaries]) must be disabled if the children
@@ -863,7 +863,6 @@ Widget _createErrorWidget(Object exception, StackTrace stackTrace) {
   return ErrorWidget.builder(details);
 }
 
-// TODO(Piinks): Come back and add keep alive support, https://github.com/flutter/flutter/issues/126297
 /// A delegate that supplies children for scrolling in two dimensions.
 ///
 /// A [TwoDimensionalScrollView] lazily constructs its box children to avoid
@@ -929,12 +928,13 @@ class TwoDimensionalChildBuilderDelegate extends TwoDimensionalChildDelegate {
   /// Creates a delegate that supplies children for a [TwoDimensionalScrollView]
   /// using the given builder callback.
   TwoDimensionalChildBuilderDelegate({
-    this.addRepaintBoundaries = true,
     required this.builder,
     int? maxXIndex,
     int? maxYIndex,
-  }) : assert(maxYIndex == null || maxYIndex >= 0),
-       assert(maxXIndex == null || maxXIndex >= 0),
+    this.addRepaintBoundaries = true,
+    this.addAutomaticKeepAlives = true,
+  }) : assert(maxYIndex == null || maxYIndex >= -1),
+       assert(maxXIndex == null || maxXIndex >= -1),
        _maxYIndex = maxYIndex,
        _maxXIndex = maxXIndex;
 
@@ -976,7 +976,9 @@ class TwoDimensionalChildBuilderDelegate extends TwoDimensionalChildDelegate {
   /// [TwoDimensionalViewport] subclass to learn how this value is applied in
   /// the specific use case.
   ///
-  /// If not null, the value must be non-negative.
+  /// If not null, the value must be greater than or equal to -1, where -1
+  /// indicates there will be no children at all provided to the
+  /// [TwoDimensionalViewport].
   ///
   /// If the value changes, the delegate will call [notifyListeners]. This
   /// informs the [RenderTwoDimensionalViewport] that any cached information
@@ -997,7 +999,7 @@ class TwoDimensionalChildBuilderDelegate extends TwoDimensionalChildDelegate {
     if (value == maxXIndex) {
       return;
     }
-    assert(value == null || value >= 0);
+    assert(value == null || value >= -1);
     _maxXIndex = value;
     notifyListeners();
   }
@@ -1020,13 +1022,16 @@ class TwoDimensionalChildBuilderDelegate extends TwoDimensionalChildDelegate {
     if (maxYIndex == value) {
       return;
     }
-    assert(value == null || value >= 0);
+    assert(value == null || value >= -1);
     _maxYIndex = value;
     notifyListeners();
   }
 
   /// {@macro flutter.widgets.SliverChildBuilderDelegate.addRepaintBoundaries}
   final bool addRepaintBoundaries;
+
+  /// {@macro flutter.widgets.SliverChildBuilderDelegate.addAutomaticKeepAlives}
+  final bool addAutomaticKeepAlives;
 
   @override
   Widget? build(BuildContext context, ChildVicinity vicinity) {
@@ -1049,6 +1054,9 @@ class TwoDimensionalChildBuilderDelegate extends TwoDimensionalChildDelegate {
     }
     if (addRepaintBoundaries) {
       child = RepaintBoundary(child: child);
+    }
+    if (addAutomaticKeepAlives) {
+      child = AutomaticKeepAlive(child: _SelectionKeepAlive(child: child));
     }
     return child;
   }
@@ -1095,6 +1103,7 @@ class TwoDimensionalChildListDelegate extends TwoDimensionalChildDelegate {
   /// null.
   TwoDimensionalChildListDelegate({
     this.addRepaintBoundaries = true,
+    this.addAutomaticKeepAlives = true,
     required this.children,
   });
 
@@ -1114,6 +1123,9 @@ class TwoDimensionalChildListDelegate extends TwoDimensionalChildDelegate {
   /// {@macro flutter.widgets.SliverChildBuilderDelegate.addRepaintBoundaries}
   final bool addRepaintBoundaries;
 
+  /// {@macro flutter.widgets.SliverChildBuilderDelegate.addAutomaticKeepAlives}
+  final bool addAutomaticKeepAlives;
+
   @override
   Widget? build(BuildContext context, ChildVicinity vicinity) {
     // If we have exceeded explicit upper bounds, return null.
@@ -1128,7 +1140,9 @@ class TwoDimensionalChildListDelegate extends TwoDimensionalChildDelegate {
     if (addRepaintBoundaries) {
       child = RepaintBoundary(child: child);
     }
-
+    if (addAutomaticKeepAlives) {
+      child = AutomaticKeepAlive(child: _SelectionKeepAlive(child: child));
+    }
     return child;
   }
 
