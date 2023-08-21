@@ -91,15 +91,22 @@ bool CommandPoolVK::IsValid() const {
 }
 
 void CommandPoolVK::Reset() {
-  Lock lock(buffers_to_collect_mutex_);
-  graphics_pool_.reset();
+  {
+    Lock lock(buffers_to_collect_mutex_);
+    graphics_pool_.reset();
 
-  // When the command pool is destroyed, all of its command buffers are freed.
-  // Handles allocated from that pool are now invalid and must be discarded.
-  for (vk::UniqueCommandBuffer& buffer : buffers_to_collect_) {
+    // When the command pool is destroyed, all of its command buffers are freed.
+    // Handles allocated from that pool are now invalid and must be discarded.
+    for (vk::UniqueCommandBuffer& buffer : buffers_to_collect_) {
+      buffer.release();
+    }
+    buffers_to_collect_.clear();
+  }
+
+  for (vk::UniqueCommandBuffer& buffer : recycled_buffers_) {
     buffer.release();
   }
-  buffers_to_collect_.clear();
+  recycled_buffers_.clear();
 
   is_valid_ = false;
 }
@@ -113,13 +120,18 @@ vk::UniqueCommandBuffer CommandPoolVK::CreateGraphicsCommandBuffer() {
   if (!strong_device) {
     return {};
   }
-  if (std::this_thread::get_id() != owner_id_) {
-    return {};
-  }
+  FML_DCHECK(std::this_thread::get_id() == owner_id_);
   {
     Lock lock(buffers_to_collect_mutex_);
     GarbageCollectBuffersIfAble();
   }
+
+  if (!recycled_buffers_.empty()) {
+    vk::UniqueCommandBuffer result = std::move(recycled_buffers_.back());
+    recycled_buffers_.pop_back();
+    return result;
+  }
+
   vk::CommandBufferAllocateInfo alloc_info;
   alloc_info.commandPool = graphics_pool_.get();
   alloc_info.commandBufferCount = 1u;
@@ -148,6 +160,12 @@ void CommandPoolVK::GarbageCollectBuffersIfAble() {
   if (std::this_thread::get_id() != owner_id_) {
     return;
   }
+
+  for (auto& buffer : buffers_to_collect_) {
+    buffer->reset();
+    recycled_buffers_.emplace_back(std::move(buffer));
+  }
+
   buffers_to_collect_.clear();
 }
 
