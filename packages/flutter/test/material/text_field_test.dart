@@ -433,14 +433,14 @@ void main() {
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();
-    expect(controller.selection, const TextSelection.collapsed(offset: 11, affinity: TextAffinity.upstream));
-    expect(find.text('Cut'), findsNothing);
-    expect(find.text('Copy'), findsNothing);
+    expect(controller.selection, const TextSelection(baseOffset: 6, extentOffset: 11));
+    expect(find.text('Cut'), findsOneWidget);
+    expect(find.text('Copy'), findsOneWidget);
     expect(find.text('Paste'), findsOneWidget);
     await tester.tap(find.text('Paste'));
     await tester.pumpAndSettle();
-    expect(controller.text, 'blah1 blah2blah1');
-    expect(controller.selection, const TextSelection.collapsed(offset: 16));
+    expect(controller.text, 'blah1 blah1');
+    expect(controller.selection, const TextSelection.collapsed(offset: 11));
 
     // Cut the first word.
     await gesture.down(midBlah1);
@@ -453,7 +453,7 @@ void main() {
     expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 5));
     await tester.tap(find.text('Cut'));
     await tester.pumpAndSettle();
-    expect(controller.text, ' blah2blah1');
+    expect(controller.text, ' blah1');
     expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 0));
     expect(find.byType(CupertinoButton), findsNothing);
   },
