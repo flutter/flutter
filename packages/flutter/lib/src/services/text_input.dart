@@ -723,6 +723,13 @@ TextAffinity? _toTextAffinity(String? affinity) {
 
 /// A floating cursor state the user has induced by force pressing an iOS
 /// keyboard.
+///
+/// ## Floating cursor
+///
+/// The floating cursor is an iOS feature in which long pressing and dragging on
+/// the spacebar of the soft keyboard causes the cursor in the text field to
+/// move along with the drag gesture. It's used to precisely position the cursor
+/// in some editable text.
 enum FloatingCursorDragState {
   /// A user has just activated a floating cursor.
   Start,
@@ -736,6 +743,13 @@ enum FloatingCursorDragState {
 }
 
 /// The current state and position of the floating cursor.
+///
+/// {@template flutter.services.TextInput.floatingCursor}
+/// See also:
+///
+///  * [FloatingCursorDragState], which explains the floating cursor feature in
+///    detail.
+/// {@endtemplate}
 class RawFloatingCursorPoint {
   /// Creates information for setting the position and state of a floating
   /// cursor.
@@ -1148,6 +1162,8 @@ mixin TextInputClient {
   void performPrivateCommand(String action, Map<String, dynamic> data);
 
   /// Updates the floating cursor position and state.
+  ///
+  /// @{macro flutter.services.TextInput.RawFloatingCursorPoint}
   void updateFloatingCursor(RawFloatingCursorPoint point);
 
   /// Requests that this client display a prompt rectangle for the given text range,
