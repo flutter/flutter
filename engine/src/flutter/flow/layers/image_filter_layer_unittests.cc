@@ -525,9 +525,11 @@ TEST_F(ImageFilterLayerTest, CacheImageFilterLayerSelf) {
   }
 
   // frame 2.
+  reset_display_list();
   layer->Preroll(preroll_context());
   layer->Paint(display_list_paint_context());
   // frame 3.
+  reset_display_list();
   layer->Preroll(preroll_context());
   layer->Paint(display_list_paint_context());
 

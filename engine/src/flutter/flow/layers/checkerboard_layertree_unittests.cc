@@ -68,7 +68,6 @@ TEST_F(CheckerBoardLayerTest, ClipRectSaveLayerCheckBoard) {
         DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
   }
 
-  reset_display_list();
   layer->Paint(checkerboard_context());
   {
     DisplayListBuilder expected_builder;
@@ -89,8 +88,8 @@ TEST_F(CheckerBoardLayerTest, ClipRectSaveLayerCheckBoard) {
       }
       expected_builder.Restore();
     }
-    EXPECT_TRUE(
-        DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
+    EXPECT_TRUE(DisplayListsEQ_Verbose(checkerboard_display_list(),
+                                       expected_builder.Build()));
   }
 }
 
@@ -145,7 +144,6 @@ TEST_F(CheckerBoardLayerTest, ClipPathSaveLayerCheckBoard) {
         DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
   }
 
-  reset_display_list();
   layer->Paint(checkerboard_context());
   {
     DisplayListBuilder expected_builder;
@@ -166,8 +164,8 @@ TEST_F(CheckerBoardLayerTest, ClipPathSaveLayerCheckBoard) {
       }
       expected_builder.Restore();
     }
-    EXPECT_TRUE(
-        DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
+    EXPECT_TRUE(DisplayListsEQ_Verbose(checkerboard_display_list(),
+                                       expected_builder.Build()));
   }
 }
 
@@ -221,7 +219,6 @@ TEST_F(CheckerBoardLayerTest, ClipRRectSaveLayerCheckBoard) {
         DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
   }
 
-  reset_display_list();
   layer->Paint(checkerboard_context());
   {
     DisplayListBuilder expected_builder;
@@ -242,8 +239,8 @@ TEST_F(CheckerBoardLayerTest, ClipRRectSaveLayerCheckBoard) {
       }
       expected_builder.Restore();
     }
-    EXPECT_TRUE(
-        DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
+    EXPECT_TRUE(DisplayListsEQ_Verbose(checkerboard_display_list(),
+                                       expected_builder.Build()));
   }
 }
 

@@ -146,7 +146,7 @@ class ComplexityCalculatorHelper
   }
 
   void drawImageRect(
-      const sk_sp<DlImage> image,
+      const sk_sp<DlImage>& image,
       const SkRect& src,
       const SkRect& dst,
       DlImageSampling sampling,
@@ -159,7 +159,7 @@ class ComplexityCalculatorHelper
               render_with_attributes, constraint == SrcRectConstraint::kStrict);
   }
 
-  void drawAtlas(const sk_sp<DlImage> atlas,
+  void drawAtlas(const sk_sp<DlImage>& atlas,
                  const SkRSXform xform[],
                  const SkRect tex[],
                  const DlColor colors[],

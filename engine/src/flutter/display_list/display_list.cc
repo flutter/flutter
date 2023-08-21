@@ -15,7 +15,7 @@ const SaveLayerOptions SaveLayerOptions::kWithAttributes =
     kNoAttributes.with_renders_with_attributes();
 
 DisplayList::DisplayList()
-    : byte_count_(0),
+    : storage_(),
       op_count_(0),
       nested_byte_count_(0),
       nested_op_count_(0),
@@ -25,8 +25,7 @@ DisplayList::DisplayList()
       is_ui_thread_safe_(true),
       modifies_transparent_black_(false) {}
 
-DisplayList::DisplayList(DisplayListStorage&& storage,
-                         size_t byte_count,
+DisplayList::DisplayList(DlStorage&& storage,
                          unsigned int op_count,
                          size_t nested_byte_count,
                          unsigned int nested_op_count,
@@ -36,7 +35,6 @@ DisplayList::DisplayList(DisplayListStorage&& storage,
                          bool modifies_transparent_black,
                          sk_sp<const DlRTree> rtree)
     : storage_(std::move(storage)),
-      byte_count_(byte_count),
       op_count_(op_count),
       nested_byte_count_(nested_byte_count),
       nested_op_count_(nested_op_count),
@@ -47,9 +45,65 @@ DisplayList::DisplayList(DisplayListStorage&& storage,
       modifies_transparent_black_(modifies_transparent_black),
       rtree_(std::move(rtree)) {}
 
-DisplayList::~DisplayList() {
-  uint8_t* ptr = storage_.get();
-  DisposeOps(ptr, ptr + byte_count_);
+DisplayList::DlStorage::DlStorage(DisplayList::DlStorage&& source)
+    : ptr_(std::move(source.ptr_)),
+      used_(source.used_),
+      allocated_(source.allocated_) {
+  FML_DCHECK(source.ptr_.get() == nullptr);
+  FML_DCHECK(!source.disabled_);
+  source.ptr_ = nullptr;
+  source.used_ = 0u;
+  source.allocated_ = 0u;
+  source.disabled_ = true;
+}
+
+DisplayList::DlStorage::~DlStorage() {
+  uint8_t* ptr = get();
+  if (ptr != nullptr) {
+    FML_DCHECK(used_ <= allocated_);
+    DisposeOps(ptr, ptr + used_);
+  } else {
+    FML_DCHECK(used_ == 0u);
+    FML_DCHECK(allocated_ == 0u);
+  }
+}
+
+static constexpr inline bool is_power_of_two(int value) {
+  return (value & (value - 1)) == 0;
+}
+
+uint8_t* DisplayList::DlStorage::alloc(size_t bytes) {
+  if (disabled_) {
+    FML_DCHECK(is_valid());
+    return nullptr;
+  }
+  FML_DCHECK(bytes < (1 << 24));
+  if (used_ + bytes > allocated_) {
+    static_assert(is_power_of_two(kPageSize),
+                  "This math needs updating for non-pow2.");
+    // Next greater multiple of DL_BUILDER_PAGE.
+    allocated_ = (used_ + bytes + kPageSize) & ~(kPageSize - 1);
+    realloc(allocated_);
+    FML_DCHECK(get());
+    memset(get() + used_, 0, allocated_ - used_);
+  }
+  FML_DCHECK(used_ + bytes <= allocated_);
+  uint8_t* ret = get() + used_;
+  used_ += bytes;
+  return ret;
+}
+
+void DisplayList::DlStorage::realloc(size_t count) {
+  FML_DCHECK(is_valid());
+  FML_DCHECK(count >= used_);
+  ptr_.reset(static_cast<uint8_t*>(std::realloc(ptr_.release(), count)));
+  allocated_ = count;
+  FML_CHECK(ptr_);
+}
+
+DisplayList::DlStorage DisplayList::DlStorage::take() {
+  realloc(used_);
+  return std::move(*this);
 }
 
 uint32_t DisplayList::next_unique_id() {
@@ -112,10 +166,10 @@ class VectorCuller final : public Culler {
     }
   }
   void update(DispatchContext& context) override {
-    if (++context.cur_index > context.next_render_index) {
+    if (context.cur_render_index > context.next_render_index) {
       while (cur_ < end_) {
         context.next_render_index = rtree_->id(*cur_++);
-        if (context.next_render_index >= context.cur_index) {
+        if (context.next_render_index >= context.cur_render_index) {
           // It should be rare that we have duplicate indices
           // but if we do, then having a while loop is a cheap
           // insurance for those cases.
@@ -139,8 +193,7 @@ class VectorCuller final : public Culler {
 };
 
 void DisplayList::Dispatch(DlOpReceiver& receiver) const {
-  uint8_t* ptr = storage_.get();
-  Dispatch(receiver, ptr, ptr + byte_count_, NopCuller::instance);
+  Dispatch(receiver, storage_.get(), storage_.end(), NopCuller::instance);
 }
 
 void DisplayList::Dispatch(DlOpReceiver& receiver,
@@ -164,11 +217,10 @@ void DisplayList::Dispatch(DlOpReceiver& receiver,
     Dispatch(receiver);
     return;
   }
-  uint8_t* ptr = storage_.get();
   std::vector<int> rect_indices;
   rtree->search(cull_rect, &rect_indices);
   VectorCuller culler(rtree, rect_indices);
-  Dispatch(receiver, ptr, ptr + byte_count_, culler);
+  Dispatch(receiver, storage_.get(), storage_.end(), culler);
 }
 
 void DisplayList::Dispatch(DlOpReceiver& receiver,
@@ -177,7 +229,7 @@ void DisplayList::Dispatch(DlOpReceiver& receiver,
                            Culler& culler) const {
   DispatchContext context = {
       .receiver = receiver,
-      .cur_index = 0,
+      .cur_render_index = 0,
       // next_render_index will be initialized by culler.init()
       .next_restore_index = std::numeric_limits<int>::max(),
   };
@@ -209,7 +261,7 @@ void DisplayList::Dispatch(DlOpReceiver& receiver,
   }
 }
 
-void DisplayList::DisposeOps(uint8_t* ptr, uint8_t* end) {
+void DisplayList::DlStorage::DisposeOps(uint8_t* ptr, uint8_t* end) {
   while (ptr < end) {
     auto op = reinterpret_cast<const DLOp*>(ptr);
     ptr += op->size;
@@ -309,7 +361,8 @@ bool DisplayList::Equals(const DisplayList* other) const {
   if (this == other) {
     return true;
   }
-  if (byte_count_ != other->byte_count_ || op_count_ != other->op_count_) {
+  if (storage_.used() != other->storage_.used() ||
+      op_count_ != other->op_count_) {
     return false;
   }
   uint8_t* ptr = storage_.get();
@@ -317,7 +370,7 @@ bool DisplayList::Equals(const DisplayList* other) const {
   if (ptr == o_ptr) {
     return true;
   }
-  return CompareOps(ptr, ptr + byte_count_, o_ptr, o_ptr + other->byte_count_);
+  return CompareOps(ptr, storage_.end(), o_ptr, other->storage_.end());
 }
 
 }  // namespace flutter

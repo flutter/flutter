@@ -182,14 +182,14 @@ void DlSkCanvasDispatcher::drawVertices(const DlVertices* vertices,
                                         DlBlendMode mode) {
   canvas_->drawVertices(ToSk(vertices), ToSk(mode), paint());
 }
-void DlSkCanvasDispatcher::drawImage(const sk_sp<DlImage> image,
+void DlSkCanvasDispatcher::drawImage(const sk_sp<DlImage>& image,
                                      const SkPoint point,
                                      DlImageSampling sampling,
                                      bool render_with_attributes) {
   canvas_->drawImage(image ? image->skia_image() : nullptr, point.fX, point.fY,
                      ToSk(sampling), safe_paint(render_with_attributes));
 }
-void DlSkCanvasDispatcher::drawImageRect(const sk_sp<DlImage> image,
+void DlSkCanvasDispatcher::drawImageRect(const sk_sp<DlImage>& image,
                                          const SkRect& src,
                                          const SkRect& dst,
                                          DlImageSampling sampling,
@@ -199,7 +199,7 @@ void DlSkCanvasDispatcher::drawImageRect(const sk_sp<DlImage> image,
                          ToSk(sampling), safe_paint(render_with_attributes),
                          ToSk(constraint));
 }
-void DlSkCanvasDispatcher::drawImageNine(const sk_sp<DlImage> image,
+void DlSkCanvasDispatcher::drawImageNine(const sk_sp<DlImage>& image,
                                          const SkIRect& center,
                                          const SkRect& dst,
                                          DlFilterMode filter,
@@ -214,7 +214,7 @@ void DlSkCanvasDispatcher::drawImageNine(const sk_sp<DlImage> image,
   canvas_->drawImageNine(skia_image.get(), center, dst, ToSk(filter),
                          safe_paint(render_with_attributes));
 }
-void DlSkCanvasDispatcher::drawAtlas(const sk_sp<DlImage> atlas,
+void DlSkCanvasDispatcher::drawAtlas(const sk_sp<DlImage>& atlas,
                                      const SkRSXform xform[],
                                      const SkRect tex[],
                                      const DlColor colors[],
@@ -236,7 +236,7 @@ void DlSkCanvasDispatcher::drawAtlas(const sk_sp<DlImage> atlas,
                      safe_paint(render_with_attributes));
 }
 void DlSkCanvasDispatcher::drawDisplayList(
-    const sk_sp<DisplayList> display_list,
+    const sk_sp<DisplayList>& display_list,
     SkScalar opacity) {
   const int restore_count = canvas_->getSaveCount();
 
@@ -264,7 +264,7 @@ void DlSkCanvasDispatcher::drawDisplayList(
   // Restore canvas state to what it was before dispatching.
   canvas_->restoreToCount(restore_count);
 }
-void DlSkCanvasDispatcher::drawTextBlob(const sk_sp<SkTextBlob> blob,
+void DlSkCanvasDispatcher::drawTextBlob(const sk_sp<SkTextBlob>& blob,
                                         SkScalar x,
                                         SkScalar y) {
   canvas_->drawTextBlob(blob, x, y, paint());
