@@ -12,7 +12,6 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/src/widgets/render_editable.dart';
 
 import 'actions.dart';
 import 'autofill.dart';
@@ -2288,7 +2287,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   TextEditingValue get _textEditingValueforTextLayoutMetrics {
     final Widget? editableWidget =_editableKey.currentContext?.widget;
-    if (editableWidget is! Editable) {
+    if (editableWidget is! _Editable) {
       throw StateError('_Editable must be mounted.');
     }
     return editableWidget.value;
@@ -2609,30 +2608,30 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // widget.renderObject.getRectForComposingRange might fail. In cases where
     // the current frame is different from the previous we fall back to
     // renderObject.preferredLineHeight.
-    final InlineSpan span = renderEditable!.text!;
+    final InlineSpan span = renderEditable.text!;
     final String prevText = span.toPlainText();
     final String currText = textEditingValue.text;
     if (prevText != currText || !selection.isValid || selection.isCollapsed) {
       return _GlyphHeights(
-        start: renderEditable!.preferredLineHeight,
-        end: renderEditable!.preferredLineHeight,
+        start: renderEditable.preferredLineHeight,
+        end: renderEditable.preferredLineHeight,
       );
     }
 
     final String selectedGraphemes = selection.textInside(currText);
     final int firstSelectedGraphemeExtent = selectedGraphemes.characters.first.length;
-    final Rect? startCharacterRect = renderEditable!.getRectForComposingRange(TextRange(
+    final Rect? startCharacterRect = renderEditable.getRectForComposingRange(TextRange(
       start: selection.start,
       end: selection.start + firstSelectedGraphemeExtent,
     ));
     final int lastSelectedGraphemeExtent = selectedGraphemes.characters.last.length;
-    final Rect? endCharacterRect = renderEditable!.getRectForComposingRange(TextRange(
+    final Rect? endCharacterRect = renderEditable.getRectForComposingRange(TextRange(
       start: selection.end - lastSelectedGraphemeExtent,
       end: selection.end,
     ));
     return _GlyphHeights(
-      start: startCharacterRect?.height ?? renderEditable!.preferredLineHeight,
-      end: endCharacterRect?.height ?? renderEditable!.preferredLineHeight,
+      start: startCharacterRect?.height ?? renderEditable.preferredLineHeight,
+      end: endCharacterRect?.height ?? renderEditable.preferredLineHeight,
     );
   }
 
@@ -2645,18 +2644,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ///  * [contextMenuButtonItems], which provides the [ContextMenuButtonItem]s
   ///    for the default context menu buttons.
   TextSelectionToolbarAnchors get contextMenuAnchors {
-    if (renderEditable!.lastSecondaryTapDownPosition != null) {
+    if (renderEditable.lastSecondaryTapDownPosition != null) {
       return TextSelectionToolbarAnchors(
-        primaryAnchor: renderEditable!.lastSecondaryTapDownPosition!,
+        primaryAnchor: renderEditable.lastSecondaryTapDownPosition!,
       );
     }
 
     final _GlyphHeights glyphHeights = _getGlyphHeights();
     final TextSelection selection = textEditingValue.selection;
     final List<TextSelectionPoint> points =
-        renderEditable!.getEndpointsForSelection(selection);
+        renderEditable.getEndpointsForSelection(selection);
     return TextSelectionToolbarAnchors.fromSelection(
-      renderBox: renderEditable!,
+      renderBox: renderEditable,
       startGlyphHeight: glyphHeights.start,
       endGlyphHeight: glyphHeights.end,
       selectionEndpoints: points,
@@ -2742,7 +2741,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (!_didAutoFocus && widget.autofocus) {
       _didAutoFocus = true;
       SchedulerBinding.instance.addPostFrameCallback((_) {
-        if (mounted && (renderEditable!.hasSize || kIsWeb)) {
+        if (mounted && renderEditable.hasSize) {
           _flagInternalFocus();
           FocusScope.of(context).autofocus(widget.focusNode);
         }
@@ -2816,7 +2815,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // _openInputConnection must be called after layout information is available.
       // See https://github.com/flutter/flutter/issues/126312
       SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-        print('schedulerBinding');
         _openInputConnection();
       });
     }
@@ -2912,7 +2910,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     // Since we still have to support keyboard select, this is the best place
     // to disable text updating.
-    print('updateEditingValue in editable_text.dart $value');
     if (!_shouldCreateInputConnection) {
       return;
     }
@@ -3043,14 +3040,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // Because the center of the cursor is preferredLineHeight / 2 below the touch
   // origin, but the touch origin is used to determine which line the cursor is
   // on, we need this offset to correctly render and move the cursor.
-  Offset get _floatingCursorOffset => Offset(0, renderEditable!.preferredLineHeight / 2);
+  Offset get _floatingCursorOffset => Offset(0, renderEditable.preferredLineHeight / 2);
 
   @override
   void updateFloatingCursor(RawFloatingCursorPoint point) {
-    if(kIsWeb) {
-      return;
-    }
-
     _floatingCursorResetController ??= AnimationController(
       vsync: this,
     )..addListener(_onFloatingCursorResetTick);
@@ -3067,19 +3060,19 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         // we cache the position.
         _pointOffsetOrigin = point.offset;
 
-        final TextPosition currentTextPosition = TextPosition(offset: renderEditable!.selection!.baseOffset, affinity: renderEditable!.selection!.affinity);
-        _startCaretRect = renderEditable!.getLocalRectForCaret(currentTextPosition);
+        final TextPosition currentTextPosition = TextPosition(offset: renderEditable.selection!.baseOffset, affinity: renderEditable.selection!.affinity);
+        _startCaretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
 
         _lastBoundedOffset = _startCaretRect!.center - _floatingCursorOffset;
         _lastTextPosition = currentTextPosition;
-        renderEditable!.setFloatingCursor(point.state, _lastBoundedOffset!, _lastTextPosition!);
+        renderEditable.setFloatingCursor(point.state, _lastBoundedOffset!, _lastTextPosition!);
       case FloatingCursorDragState.Update:
         final Offset centeredPoint = point.offset! - _pointOffsetOrigin!;
         final Offset rawCursorOffset = _startCaretRect!.center + centeredPoint - _floatingCursorOffset;
 
-        _lastBoundedOffset = renderEditable!.calculateBoundedFloatingCursorOffset(rawCursorOffset);
-        _lastTextPosition = renderEditable!.getPositionForPoint(renderEditable!.localToGlobal(_lastBoundedOffset! + _floatingCursorOffset));
-        renderEditable!.setFloatingCursor(point.state, _lastBoundedOffset!, _lastTextPosition!);
+        _lastBoundedOffset = renderEditable.calculateBoundedFloatingCursorOffset(rawCursorOffset);
+        _lastTextPosition = renderEditable.getPositionForPoint(renderEditable.localToGlobal(_lastBoundedOffset! + _floatingCursorOffset));
+        renderEditable.setFloatingCursor(point.state, _lastBoundedOffset!, _lastTextPosition!);
       case FloatingCursorDragState.End:
         // Resume cursor blinking.
         _startCursorBlink();
@@ -3092,12 +3085,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _onFloatingCursorResetTick() {
-    if(kIsWeb) {
-      return;
-    }
-    final Offset finalPosition = renderEditable!.getLocalRectForCaret(_lastTextPosition!).centerLeft - _floatingCursorOffset;
+    final Offset finalPosition = renderEditable.getLocalRectForCaret(_lastTextPosition!).centerLeft - _floatingCursorOffset;
     if (_floatingCursorResetController!.isCompleted) {
-      renderEditable!.setFloatingCursor(FloatingCursorDragState.End, finalPosition, _lastTextPosition!);
+      renderEditable.setFloatingCursor(FloatingCursorDragState.End, finalPosition, _lastTextPosition!);
       // During a floating cursor's move gesture (1 finger), a cursor is
       // animated only visually, without actually updating the selection.
       // Only after move gesture is complete, this function will be called
@@ -3114,7 +3104,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // move gesture (1 finger) vs selection gesture (2 fingers), as
       // the engine does not provide information other than notifying a
       // new selection during with selection gesture (2 fingers).
-      if (renderEditable!.selection!.isCollapsed) {
+      if (renderEditable.selection!.isCollapsed) {
         // The cause is technically the force cursor, but the cause is listed as tap as the desired functionality is the same.
         _handleSelectionChanged(TextSelection.fromPosition(_lastTextPosition!), SelectionChangedCause.forcePress);
       }
@@ -3127,7 +3117,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final double lerpX = ui.lerpDouble(_lastBoundedOffset!.dx, finalPosition.dx, lerpValue)!;
       final double lerpY = ui.lerpDouble(_lastBoundedOffset!.dy, finalPosition.dy, lerpValue)!;
 
-      renderEditable!.setFloatingCursor(FloatingCursorDragState.Update, Offset(lerpX, lerpY), _lastTextPosition!, resetLerpValue: lerpValue);
+      renderEditable.setFloatingCursor(FloatingCursorDragState.Update, Offset(lerpX, lerpY), _lastTextPosition!, resetLerpValue: lerpValue);
     }
   }
 
@@ -3264,7 +3254,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return RevealedOffset(offset: _scrollController.offset, rect: rect);
     }
 
-    final Size editableSize = renderEditable!.size;
+    final Size editableSize = renderEditable.size;
     final double additionalOffset;
     final Offset unitOffset;
 
@@ -3283,7 +3273,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final Rect expandedRect = Rect.fromCenter(
         center: rect.center,
         width: rect.width,
-        height: math.max(rect.height, renderEditable!.preferredLineHeight),
+        height: math.max(rect.height, renderEditable.preferredLineHeight),
       );
 
       additionalOffset = expandedRect.height >= editableSize.height
@@ -3325,21 +3315,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // _needsAutofill changes to false from true, the platform needs to be
       // notified to exclude this field from the autofill context. So we need to
       // provide the autofillId.
-      print('_needsAutofill $_needsAutofill');
-      print('currentAutofillScope $currentAutofillScope');
-
-      // if(kIsWeb) {
-        
-      // } else {
-      // _textInputConnection = _needsAutofill && currentAutofillScope != null
-      //   ? currentAutofillScope!.attach(this, _effectiveAutofillClient.textInputConfiguration)
-      //   : TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
-      // }
-      
       _textInputConnection = _needsAutofill && currentAutofillScope != null
         ? currentAutofillScope!.attach(this, _effectiveAutofillClient.textInputConfiguration)
         : TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
-
       _updateSizeAndTransform();
       _schedulePeriodicPostFrameCallbacks();
       _textInputConnection!
@@ -3375,7 +3353,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   void _openOrCloseInputConnectionIfNeeded() {
     if (_hasFocus && widget.focusNode.consumeKeyboardToken()) {
-      print('_openOrCloseInputConnectionIfNeeded');
       _openInputConnection();
     } else if (!_hasFocus) {
       _closeInputConnectionIfNeeded();
@@ -3471,7 +3448,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// focus, the control will then attach to the keyboard and request that the
   /// keyboard become visible.
   void requestKeyboard() {
-    print('request keyboard');
     if (_hasFocus) {
       _openInputConnection();
     } else {
@@ -3506,7 +3482,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       toolbarLayerLink: _toolbarLayerLink,
       startHandleLayerLink: _startHandleLayerLink,
       endHandleLayerLink: _endHandleLayerLink,
-      renderObject: renderEditable!,
+      renderObject: renderEditable,
       selectionControls: widget.selectionControls,
       selectionDelegate: this,
       dragStartBehavior: widget.dragStartBehavior,
@@ -3599,12 +3575,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_showCaretOnScreenScheduled) {
       return;
     }
-
-    if(kIsWeb){
-      return;
-    }
-
-
     _showCaretOnScreenScheduled = true;
     SchedulerBinding.instance.addPostFrameCallback((Duration _) {
       _showCaretOnScreenScheduled = false;
@@ -3707,9 +3677,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   Future<void> _performSpellCheck(final String text) async {
-    if(kIsWeb) {
-      return;
-    }
     try {
       final Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
 
@@ -3729,7 +3696,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
 
       spellCheckResults = SpellCheckResults(text, suggestions);
-      renderEditable!.text = buildTextSpan();
+      renderEditable.text = buildTextSpan();
     } catch (exception, stack) {
       FlutterError.reportError(FlutterErrorDetails(
         exception: exception,
@@ -3831,10 +3798,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _onCursorColorTick() {
-    if(kIsWeb) {
-      return;
-    }
-    renderEditable!.cursorColor = widget.cursorColor.withOpacity(_cursorBlinkOpacityController.value);
+    renderEditable.cursorColor = widget.cursorColor.withOpacity(_cursorBlinkOpacityController.value);
     _cursorVisibilityNotifier.value = widget.showCursor && _cursorBlinkOpacityController.value > 0;
   }
 
@@ -3978,13 +3942,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _compositeCallback(Layer layer) {
-    if(kIsWeb) {
-      return;
-    }
     // The callback can be invoked when the layer is detached.
     // The input connection can be closed by the platform in which case this
     // widget doesn't rebuild.
-    if (!renderEditable!.attached || !_hasInputConnection) {
+    if (!renderEditable.attached || !_hasInputConnection) {
       return;
     }
     assert(mounted);
@@ -3995,11 +3956,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // Must be called after layout.
   // See https://github.com/flutter/flutter/issues/126312
   void _updateSizeAndTransform() {
-    if(kIsWeb) {
-      return;
-    }
-    final Size size = renderEditable!.size;
-    final Matrix4 transform = renderEditable!.getTransformTo(null);
+    final Size size = renderEditable.size;
+    final Matrix4 transform = renderEditable.getTransformTo(null);
     _textInputConnection!.setEditableSizeAndTransform(size, transform);
   }
 
@@ -4015,9 +3973,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   _ScribbleCacheKey? _scribbleCacheKey;
 
   void _updateSelectionRects({bool force = false}) {
-    if(kIsWeb) {
-      return;
-    }
     if (!widget.scribbleEnabled || defaultTargetPlatform != TargetPlatform.iOS) {
       return;
     }
@@ -4027,7 +3982,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return;
     }
 
-    final InlineSpan inlineSpan = renderEditable!.text!;
+    final InlineSpan inlineSpan = renderEditable.text!;
     final TextScaler effectiveTextScaler = switch ((widget.textScaler, widget.textScaleFactor)) {
       (final TextScaler textScaler, _)     => textScaler,
       (null, final double textScaleFactor) => TextScaler.linear(textScaleFactor),
@@ -4043,7 +3998,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       locale: widget.locale,
       structStyle: widget.strutStyle,
       placeholder: _placeholderLocation,
-      size: renderEditable!.size,
+      size: renderEditable.size,
     );
 
     final RenderComparison comparison = force
@@ -4062,13 +4017,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final CharacterRange characterRange = CharacterRange(plainText);
     while (characterRange.moveNext()) {
       final int graphemeEnd = graphemeStart + characterRange.current.length;
-      final List<TextBox> boxes = renderEditable!.getBoxesForSelection(
+      final List<TextBox> boxes = renderEditable.getBoxesForSelection(
         TextSelection(baseOffset: graphemeStart, extentOffset: graphemeEnd),
       );
 
       final TextBox? box = boxes.isEmpty ? null : boxes.first;
       if (box != null) {
-        final Rect paintBounds = renderEditable!.paintBounds;
+        final Rect paintBounds = renderEditable.paintBounds;
         // Stop early when characters are already below the bottom edge of the
         // RenderEditable, regardless of its clipBehavior.
         if (paintBounds.bottom <= box.top) {
@@ -4093,31 +4048,25 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // plugin needs to estimate the composing rect based on the latest caret rect,
   // when the composing rect info didn't arrive in time.
   void _updateComposingRectIfNeeded() {
-    if(kIsWeb) {
-      return;
-    }
     final TextRange composingRange = _value.composing;
     assert(mounted);
-    Rect? composingRect = renderEditable!.getRectForComposingRange(composingRange);
+    Rect? composingRect = renderEditable.getRectForComposingRange(composingRange);
     // Send the caret location instead if there's no marked text yet.
     if (composingRect == null) {
       assert(!composingRange.isValid || composingRange.isCollapsed);
       final int offset = composingRange.isValid ? composingRange.start : 0;
-      composingRect = renderEditable!.getLocalRectForCaret(TextPosition(offset: offset));
+      composingRect = renderEditable.getLocalRectForCaret(TextPosition(offset: offset));
     }
     _textInputConnection!.setComposingRect(composingRect);
   }
 
   void _updateCaretRectIfNeeded() {
-    if(kIsWeb) {
-      return;
-    }
-    final TextSelection? selection = renderEditable!.selection;
+    final TextSelection? selection = renderEditable.selection;
     if (selection == null || !selection.isValid || !selection.isCollapsed) {
       return;
     }
     final TextPosition currentTextPosition = TextPosition(offset: selection.baseOffset);
-    final Rect caretRect = renderEditable!.getLocalRectForCaret(currentTextPosition);
+    final Rect caretRect = renderEditable.getLocalRectForCaret(currentTextPosition);
     _textInputConnection!.setCaretRect(caretRect);
   }
 
@@ -4127,7 +4076,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ///
   /// This property is typically used to notify the renderer of input gestures
   /// when [RenderEditable.ignorePointer] is true.
-  late final RenderEditable? renderEditable = _editableKey.currentContext?.findRenderObject() as RenderEditable?;
+  late final RenderEditable renderEditable = _editableKey.currentContext!.findRenderObject()! as RenderEditable;
 
   @override
   TextEditingValue get textEditingValue => _value;
@@ -4162,11 +4111,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void bringIntoView(TextPosition position) {
-    final Rect localRect = renderEditable!.getLocalRectForCaret(position);
+    final Rect localRect = renderEditable.getLocalRectForCaret(position);
     final RevealedOffset targetOffset = _getOffsetToRevealCaret(localRect);
 
     _scrollController.jumpTo(targetOffset.offset);
-    renderEditable!.showOnScreen(rect: targetOffset.rect);
+    renderEditable.showOnScreen(rect: targetOffset.rect);
   }
 
   /// Shows the selection toolbar at the location of the current cursor.
@@ -4474,8 +4423,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // --------------------------- Text Editing Actions ---------------------------
 
   TextBoundary _characterBoundary() => widget.obscureText ? _CodePointBoundary(_value.text) : CharacterBoundary(_value.text);
-  TextBoundary _nextWordBoundary() => widget.obscureText ? _documentBoundary() : renderEditable!.wordBoundaries.moveByWordBoundary;
-  TextBoundary _linebreak() => widget.obscureText ? _documentBoundary() : LineBoundary(renderEditable!);
+  TextBoundary _nextWordBoundary() => widget.obscureText ? _documentBoundary() : renderEditable.wordBoundaries.moveByWordBoundary;
+  TextBoundary _linebreak() => widget.obscureText ? _documentBoundary() : LineBoundary(renderEditable);
   TextBoundary _paragraphBoundary() => ParagraphBoundary(_value.text);
   TextBoundary _documentBoundary() => DocumentBoundary(_value.text);
 
@@ -4586,16 +4535,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// Extend the selection down by page if the `forward` parameter is true, or
   /// up by page otherwise.
   void _extendSelectionByPage(ExtendSelectionByPageIntent intent) {
-    if(kIsWeb) {
-      return;
-    }
-
     if (widget.maxLines == 1) {
       return;
     }
 
     final TextSelection nextSelection;
-    final Rect extentRect = renderEditable!.getLocalRectForCaret(
+    final Rect extentRect = renderEditable.getLocalRectForCaret(
       _value.selection.extent,
     );
     final ScrollableState? state = _scrollableKey.currentState as ScrollableState?;
@@ -4613,11 +4558,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
       final Offset nextExtentOffset =
           Offset(extentRect.left, extentRect.top + increment);
-      final double height = position.maxScrollExtent + renderEditable!.size.height;
+      final double height = position.maxScrollExtent + renderEditable.size.height;
       final TextPosition nextExtent = nextExtentOffset.dy + position.pixels >= height
           ? TextPosition(offset: _value.text.length)
-          : renderEditable!.getPositionForPoint(
-              renderEditable!.localToGlobal(nextExtentOffset),
+          : renderEditable.getPositionForPoint(
+              renderEditable.localToGlobal(nextExtentOffset),
             );
       nextSelection = _value.selection.copyWith(
         extentOffset: nextExtent.offset,
@@ -4630,8 +4575,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           Offset(extentRect.left, extentRect.top + increment);
       final TextPosition nextExtent = nextExtentOffset.dy + position.pixels <= 0
           ? const TextPosition(offset: 0)
-          : renderEditable!.getPositionForPoint(
-              renderEditable!.localToGlobal(nextExtentOffset),
+          : renderEditable.getPositionForPoint(
+              renderEditable.localToGlobal(nextExtentOffset),
             );
       nextSelection = _value.selection.copyWith(
         extentOffset: nextExtent.offset,
@@ -4824,11 +4769,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                           editableKey: _editableKey,
                           enabled: widget.scribbleEnabled,
                           updateSelectionRects: () {
-                            print('updateSelectionRects');
                             _openInputConnection();
                             _updateSelectionRects(force: true);
                           },
-                          child: Editable(
+                          child: _Editable(
                             key: _editableKey,
                             startHandleLayerLink: _startHandleLayerLink,
                             endHandleLayerLink: _endHandleLayerLink,
@@ -4872,7 +4816,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                             promptRectRange: _currentPromptRectRange,
                             promptRectColor: widget.autocorrectionTextRectColor,
                             clipBehavior: widget.clipBehavior,
-                            requestKeyboard: requestKeyboard,
                           ),
                         ),
                       ),
@@ -4918,7 +4861,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (_isMultiline) {
         // The zero size placeholder here allows the line to break and keep the caret on the first line.
         placeholders.add(const _ScribblePlaceholder(child: SizedBox.shrink(), size: Size.zero));
-        placeholders.add(_ScribblePlaceholder(child: const SizedBox.shrink(), size: Size(renderEditable!.size.width, 0.0)));
+        placeholders.add(_ScribblePlaceholder(child: const SizedBox.shrink(), size: Size(renderEditable.size.width, 0.0)));
       } else {
         placeholders.add(const _ScribblePlaceholder(child: SizedBox.shrink(), size: Size(100.0, 0.0)));
       }
@@ -4953,6 +4896,176 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       style: _style,
       withComposing: withComposing,
     );
+  }
+}
+
+class _Editable extends MultiChildRenderObjectWidget {
+  _Editable({
+    super.key,
+    required this.inlineSpan,
+    required this.value,
+    required this.startHandleLayerLink,
+    required this.endHandleLayerLink,
+    this.cursorColor,
+    this.backgroundCursorColor,
+    required this.showCursor,
+    required this.forceLine,
+    required this.readOnly,
+    this.textHeightBehavior,
+    required this.textWidthBasis,
+    required this.hasFocus,
+    required this.maxLines,
+    this.minLines,
+    required this.expands,
+    this.strutStyle,
+    this.selectionColor,
+    required this.textScaler,
+    required this.textAlign,
+    required this.textDirection,
+    this.locale,
+    required this.obscuringCharacter,
+    required this.obscureText,
+    required this.offset,
+    this.rendererIgnoresPointer = false,
+    required this.cursorWidth,
+    this.cursorHeight,
+    this.cursorRadius,
+    required this.cursorOffset,
+    required this.paintCursorAboveText,
+    this.selectionHeightStyle = ui.BoxHeightStyle.tight,
+    this.selectionWidthStyle = ui.BoxWidthStyle.tight,
+    this.enableInteractiveSelection = true,
+    required this.textSelectionDelegate,
+    required this.devicePixelRatio,
+    this.promptRectRange,
+    this.promptRectColor,
+    required this.clipBehavior,
+  }) : super(children: WidgetSpan.extractFromInlineSpan(inlineSpan, textScaler));
+
+  final InlineSpan inlineSpan;
+  final TextEditingValue value;
+  final Color? cursorColor;
+  final LayerLink startHandleLayerLink;
+  final LayerLink endHandleLayerLink;
+  final Color? backgroundCursorColor;
+  final ValueNotifier<bool> showCursor;
+  final bool forceLine;
+  final bool readOnly;
+  final bool hasFocus;
+  final int? maxLines;
+  final int? minLines;
+  final bool expands;
+  final StrutStyle? strutStyle;
+  final Color? selectionColor;
+  final TextScaler textScaler;
+  final TextAlign textAlign;
+  final TextDirection textDirection;
+  final Locale? locale;
+  final String obscuringCharacter;
+  final bool obscureText;
+  final TextHeightBehavior? textHeightBehavior;
+  final TextWidthBasis textWidthBasis;
+  final ViewportOffset offset;
+  final bool rendererIgnoresPointer;
+  final double cursorWidth;
+  final double? cursorHeight;
+  final Radius? cursorRadius;
+  final Offset cursorOffset;
+  final bool paintCursorAboveText;
+  final ui.BoxHeightStyle selectionHeightStyle;
+  final ui.BoxWidthStyle selectionWidthStyle;
+  final bool enableInteractiveSelection;
+  final TextSelectionDelegate textSelectionDelegate;
+  final double devicePixelRatio;
+  final TextRange? promptRectRange;
+  final Color? promptRectColor;
+  final Clip clipBehavior;
+
+  @override
+  RenderEditable createRenderObject(BuildContext context) {
+    return RenderEditable(
+      text: inlineSpan,
+      cursorColor: cursorColor,
+      startHandleLayerLink: startHandleLayerLink,
+      endHandleLayerLink: endHandleLayerLink,
+      backgroundCursorColor: backgroundCursorColor,
+      showCursor: showCursor,
+      forceLine: forceLine,
+      readOnly: readOnly,
+      hasFocus: hasFocus,
+      maxLines: maxLines,
+      minLines: minLines,
+      expands: expands,
+      strutStyle: strutStyle,
+      selectionColor: selectionColor,
+      textScaler: textScaler,
+      textAlign: textAlign,
+      textDirection: textDirection,
+      locale: locale ?? Localizations.maybeLocaleOf(context),
+      selection: value.selection,
+      offset: offset,
+      ignorePointer: rendererIgnoresPointer,
+      obscuringCharacter: obscuringCharacter,
+      obscureText: obscureText,
+      textHeightBehavior: textHeightBehavior,
+      textWidthBasis: textWidthBasis,
+      cursorWidth: cursorWidth,
+      cursorHeight: cursorHeight,
+      cursorRadius: cursorRadius,
+      cursorOffset: cursorOffset,
+      paintCursorAboveText: paintCursorAboveText,
+      selectionHeightStyle: selectionHeightStyle,
+      selectionWidthStyle: selectionWidthStyle,
+      enableInteractiveSelection: enableInteractiveSelection,
+      textSelectionDelegate: textSelectionDelegate,
+      devicePixelRatio: devicePixelRatio,
+      promptRectRange: promptRectRange,
+      promptRectColor: promptRectColor,
+      clipBehavior: clipBehavior,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderEditable renderObject) {
+    renderObject
+      ..text = inlineSpan
+      ..cursorColor = cursorColor
+      ..startHandleLayerLink = startHandleLayerLink
+      ..endHandleLayerLink = endHandleLayerLink
+      ..backgroundCursorColor = backgroundCursorColor
+      ..showCursor = showCursor
+      ..forceLine = forceLine
+      ..readOnly = readOnly
+      ..hasFocus = hasFocus
+      ..maxLines = maxLines
+      ..minLines = minLines
+      ..expands = expands
+      ..strutStyle = strutStyle
+      ..selectionColor = selectionColor
+      ..textScaler = textScaler
+      ..textAlign = textAlign
+      ..textDirection = textDirection
+      ..locale = locale ?? Localizations.maybeLocaleOf(context)
+      ..selection = value.selection
+      ..offset = offset
+      ..ignorePointer = rendererIgnoresPointer
+      ..textHeightBehavior = textHeightBehavior
+      ..textWidthBasis = textWidthBasis
+      ..obscuringCharacter = obscuringCharacter
+      ..obscureText = obscureText
+      ..cursorWidth = cursorWidth
+      ..cursorHeight = cursorHeight
+      ..cursorRadius = cursorRadius
+      ..cursorOffset = cursorOffset
+      ..selectionHeightStyle = selectionHeightStyle
+      ..selectionWidthStyle = selectionWidthStyle
+      ..enableInteractiveSelection = enableInteractiveSelection
+      ..textSelectionDelegate = textSelectionDelegate
+      ..devicePixelRatio = devicePixelRatio
+      ..paintCursorAboveText = paintCursorAboveText
+      ..promptRectColor = promptRectColor
+      ..clipBehavior = clipBehavior
+      ..setPromptRectRange(promptRectRange);
   }
 }
 
@@ -5265,7 +5378,7 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
   // upstream position.
   bool _isAtWordwrapUpstream(TextPosition position) {
     final TextPosition end = TextPosition(
-      offset: state.renderEditable!.getLineAtOffset(position).end,
+      offset: state.renderEditable.getLineAtOffset(position).end,
       affinity: TextAffinity.upstream,
     );
     return end == position && end.offset != state.textEditingValue.text.length
@@ -5276,7 +5389,7 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent> exten
   // downstream position.
   bool _isAtWordwrapDownstream(TextPosition position) {
     final TextPosition start = TextPosition(
-      offset: state.renderEditable!.getLineAtOffset(position).start,
+      offset: state.renderEditable.getLineAtOffset(position).start,
     );
     return start == position && start.offset != 0
         && state.textEditingValue.text.codeUnitAt(position.offset - 1) != NEWLINE_CODE_UNIT;
@@ -5356,9 +5469,6 @@ class _UpdateTextSelectionVerticallyAction<T extends DirectionalCaretMovementInt
   @override
   void invoke(T intent, [BuildContext? context]) {
     assert(state._value.selection.isValid);
-    if(kIsWeb) {
-      return;
-    }
 
     final bool collapseSelection = intent.collapseSelection || !state.widget.selectionEnabled;
     final TextEditingValue value = state._textEditingValueforTextLayoutMetrics;
@@ -5372,10 +5482,10 @@ class _UpdateTextSelectionVerticallyAction<T extends DirectionalCaretMovementInt
     }
 
     final VerticalCaretMovementRun currentRun = _verticalMovementRun
-      ?? state.renderEditable!.startVerticalCaretMovement(state.renderEditable!.selection!.extent);
+      ?? state.renderEditable.startVerticalCaretMovement(state.renderEditable.selection!.extent);
 
     final bool shouldMove = intent is ExtendSelectionVerticallyToAdjacentPageIntent
-      ? currentRun.moveByOffset((intent.forward ? 1.0 : -1.0) * state.renderEditable!.size.height)
+      ? currentRun.moveByOffset((intent.forward ? 1.0 : -1.0) * state.renderEditable.size.height)
       : intent.forward ? currentRun.moveNext() : currentRun.movePrevious();
     final TextPosition newExtent = shouldMove
       ? currentRun.current
