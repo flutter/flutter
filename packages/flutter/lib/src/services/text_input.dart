@@ -2294,8 +2294,18 @@ class _PlatformTextInputControl with TextInputControl {
       final html.InputElement element = _inputEl! as html.InputElement;
       final int minOffset = math.min(value.selection.baseOffset, value.selection.extentOffset);
       final int maxOffset = math.max(value.selection.baseOffset, value.selection.extentOffset);
+      final TextAffinity affinity = value.selection.affinity;
+      String direction;
+
+      switch(affinity) {
+        case TextAffinity.upstream:
+          direction = 'backward';
+        case TextAffinity.downstream:
+          direction = 'forward';
+      }
+
       element.value = value.text;
-      element.setSelectionRange(minOffset, maxOffset);
+      element.setSelectionRange(minOffset, maxOffset, direction);
 
       return;
     }
