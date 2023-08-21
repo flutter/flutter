@@ -127,6 +127,7 @@ class SearchAnchor extends StatefulWidget {
     this.dividerColor,
     this.viewConstraints,
     this.textCapitalization,
+    this.viewSearchOnChanged,
     required this.builder,
     required this.suggestionsBuilder,
   });
@@ -170,6 +171,7 @@ class SearchAnchor extends StatefulWidget {
     BoxConstraints? constraints,
     BoxConstraints? viewConstraints,
     bool? isFullScreen,
+    ValueSetter<String>? viewSearchOnChanged,
     SearchController searchController,
     TextCapitalization textCapitalization,
     required SuggestionsBuilder suggestionsBuilder
@@ -305,6 +307,9 @@ class SearchAnchor extends StatefulWidget {
   /// To get a different layout, use [viewBuilder] to override.
   final SuggestionsBuilder suggestionsBuilder;
 
+  /// Called when the user enters text into the search field while the search view is open
+  final ValueSetter<String>? viewSearchOnChanged;
+
   @override
   State<SearchAnchor> createState() => _SearchAnchorState();
 }
@@ -364,6 +369,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
       textDirection: Directionality.of(context),
       viewBuilder: widget.viewBuilder,
       anchorKey: _anchorKey,
+      onChanged: widget.viewSearchOnChanged,
       searchController: _searchController,
       suggestionsBuilder: widget.suggestionsBuilder,
       textCapitalization: widget.textCapitalization,
@@ -433,6 +439,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     this.dividerColor,
     this.viewConstraints,
     this.textCapitalization,
+    this.onChanged,
     required this.showFullScreenView,
     required this.anchorKey,
     required this.searchController,
@@ -455,6 +462,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   final Color? dividerColor;
   final BoxConstraints? viewConstraints;
   final TextCapitalization? textCapitalization;
+  final ValueSetter<String>? onChanged;
   final bool showFullScreenView;
   final GlobalKey anchorKey;
   final SearchController searchController;
@@ -602,6 +610,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
               dividerTheme: dividerTheme,
               viewBuilder: viewBuilder,
               searchController: searchController,
+              onChanged: onChanged,
               suggestionsBuilder: suggestionsBuilder,
               textCapitalization: textCapitalization,
             ),
@@ -832,7 +841,8 @@ class _ViewContentState extends State<_ViewContent> {
                             textStyle: MaterialStatePropertyAll<TextStyle?>(effectiveTextStyle),
                             hintStyle: MaterialStatePropertyAll<TextStyle?>(effectiveHintStyle),
                             controller: _controller,
-                            onChanged: (_) {
+                            onChanged: (String value) {
+                              widget.onChanged?.call(value);
                               updateSuggestions();
                             },
                             textCapitalization: widget.textCapitalization,
@@ -895,6 +905,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     BoxConstraints? constraints,
     super.viewConstraints,
     super.isFullScreen,
+    super.viewSearchOnChanged,
     super.searchController,
     super.textCapitalization,
     required super.suggestionsBuilder
@@ -910,8 +921,9 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
           controller.openView();
           onTap?.call();
         },
-        onChanged: (_) {
+        onChanged: (String value) {
           controller.openView();
+          viewSearchOnChanged?.call(value);
         },
         hintText: barHintText,
         hintStyle: barHintStyle,
