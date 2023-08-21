@@ -146,6 +146,8 @@ abstract class PlatformDispatcher {
 
   VoidCallback? get onFrameDataChanged => null;
   set onFrameDataChanged(VoidCallback? callback) {}
+
+  double scaleFontSize(double unscaledFontSize);
 }
 
 enum FramePhase {

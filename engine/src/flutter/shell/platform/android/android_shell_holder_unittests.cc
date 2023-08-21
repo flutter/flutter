@@ -60,6 +60,8 @@ class MockPlatformViewAndroidJNI : public PlatformViewAndroidJNI {
   MOCK_METHOD0(GetDisplayHeight, double());
   MOCK_METHOD0(GetDisplayDensity, double());
   MOCK_METHOD1(RequestDartDeferredLibrary, bool(int loading_unit_id));
+  MOCK_CONST_METHOD2(FlutterViewGetScaledFontSize,
+                     double(double font_size, int configuration_id));
 };
 
 class MockPlatformMessageResponse : public PlatformMessageResponse {
