@@ -30,6 +30,8 @@ void main() {
     ]) {
       testWidgets('converts the valid url $text to a link by default', (WidgetTester tester) async {
         final InlineLinkedText inlineLinkedText = InlineLinkedText(
+          onTap: (String text) {},
+          style: const TextStyle(),
           text: text,
         );
 
@@ -49,6 +51,8 @@ void main() {
     ]) {
       testWidgets('does nothing to the invalid url $text', (WidgetTester tester) async {
         final InlineLinkedText inlineLinkedText = InlineLinkedText(
+          onTap: (String text) {},
+          style: const TextStyle(),
           text: text,
         );
 
@@ -69,6 +73,8 @@ void main() {
     ]) {
       testWidgets('can parse url $text with leading and trailing characters', (WidgetTester tester) async {
         final InlineLinkedText inlineLinkedText = InlineLinkedText(
+          onTap: (String text) {},
+          style: const TextStyle(),
           text: text,
         );
 

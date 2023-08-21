@@ -196,7 +196,9 @@ class _LinkedTextState extends State<LinkedText> {
 
   @override
   void dispose() {
-    _disposeRecognizers(_textKey.currentWidget! as Text);
+    if (_textKey.currentWidget != null) {
+      _disposeRecognizers(_textKey.currentWidget! as Text);
+    }
     super.dispose();
   }
 
