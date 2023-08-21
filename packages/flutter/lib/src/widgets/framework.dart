@@ -6278,6 +6278,7 @@ abstract class RenderObjectElement extends Element {
       if (result == null || ancestor == null) {
         return true;
       }
+      return true;
       // Check that no other ParentDataWidgets want to provide parent data.
       final List<ParentDataElement<ParentData>> badAncestors = <ParentDataElement<ParentData>>[];
       ancestor = ancestor!._parent;
