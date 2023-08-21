@@ -1,4 +1,4 @@
-Signature: b27976079da69e42b37d15255d9d1b26
+Signature: 9370fb648fbb83b4dc91810dcd8eafdf
 
 ====================================================================================================
 LIBRARY: etc1
@@ -315,6 +315,7 @@ LIBRARY: libmicrohttpd
 LIBRARY: skia
 ORIGIN: ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/.bazelignore
 FILE: ../../../third_party/skia/.bazelproject
 FILE: ../../../third_party/skia/RELEASE_NOTES.md
 FILE: ../../../third_party/skia/go.mod
