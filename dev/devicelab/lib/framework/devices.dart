@@ -402,7 +402,7 @@ class MacosDeviceDiscovery implements DeviceDiscovery {
 
   static MacosDeviceDiscovery? _instance;
 
-  static const MacosDevice _device = MacosDevice();
+  static final MacosDevice _device = MacosDevice();
 
   @override
   Future<Map<String, HealthCheckResult>> checkDevices() async {
@@ -1136,7 +1136,7 @@ class LinuxDevice extends Device {
 }
 
 class MacosDevice extends Device {
-  const MacosDevice();
+  MacosDevice();
 
   @override
   String get deviceId => 'macos';
@@ -1185,6 +1185,45 @@ class MacosDevice extends Device {
 
   @override
   Future<void> wakeUp() async { }
+
+  @override
+  bool get canStreamLogs => true;
+
+  bool _abortedLogging = false;
+  Process? _loggingProcess;
+
+  @override
+  Future<void> startLoggingToSink(IOSink sink, {bool clear = true}) async {
+    // Clear is not supported.
+    _loggingProcess = await startProcess(
+      'xcrun',
+      <String>['log', 'stream'],
+    );
+    _loggingProcess!.stdout
+      .transform<String>(const Utf8Decoder(allowMalformed: true))
+      .listen((String line) {
+        sink.write(line);
+      });
+    _loggingProcess!.stderr
+      .transform<String>(const Utf8Decoder(allowMalformed: true))
+      .listen((String line) {
+        sink.write(line);
+      });
+    unawaited(_loggingProcess!.exitCode.then<void>((int exitCode) {
+      if (!_abortedLogging) {
+        sink.writeln('log failed with exit code $exitCode.\n');
+      }
+    }));
+  }
+
+  @override
+  Future<void> stopLoggingToSink() async {
+    if (_loggingProcess != null) {
+      _abortedLogging = true;
+      _loggingProcess!.kill();
+      await _loggingProcess!.exitCode;
+    }
+  }
 }
 
 class WindowsDevice extends Device {
