@@ -639,6 +639,7 @@ class _ViewContent extends StatefulWidget {
     this.viewHeaderHintStyle,
     this.dividerColor,
     this.textCapitalization,
+    this.onChanged,
     required this.showFullScreenView,
     required this.topPadding,
     required this.animation,
@@ -664,6 +665,7 @@ class _ViewContent extends StatefulWidget {
   final TextStyle? viewHeaderHintStyle;
   final Color? dividerColor;
   final TextCapitalization? textCapitalization;
+  final ValueSetter<String>? onChanged;
   final bool showFullScreenView;
   final double topPadding;
   final Animation<double> animation;
