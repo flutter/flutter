@@ -791,7 +791,7 @@ void DisplayListStreamDispatcher::drawVertices(const DlVertices* vertices,
                    out_array("indices", vertices->index_count(), vertices->indices())
                    << "), " << mode << ");" << std::endl;
 }
-void DisplayListStreamDispatcher::drawImage(const sk_sp<DlImage> image,
+void DisplayListStreamDispatcher::drawImage(const sk_sp<DlImage>& image,
                                             const SkPoint point,
                                             DlImageSampling sampling,
                                             bool render_with_attributes) {
@@ -801,7 +801,7 @@ void DisplayListStreamDispatcher::drawImage(const sk_sp<DlImage> image,
                            << "with attributes: " << render_with_attributes
            << ");" << std::endl;
 }
-void DisplayListStreamDispatcher::drawImageRect(const sk_sp<DlImage> image,
+void DisplayListStreamDispatcher::drawImageRect(const sk_sp<DlImage>& image,
                                                 const SkRect& src,
                                                 const SkRect& dst,
                                                 DlImageSampling sampling,
@@ -815,7 +815,7 @@ void DisplayListStreamDispatcher::drawImageRect(const sk_sp<DlImage> image,
                                << constraint
            << ");" << std::endl;
 }
-void DisplayListStreamDispatcher::drawImageNine(const sk_sp<DlImage> image,
+void DisplayListStreamDispatcher::drawImageNine(const sk_sp<DlImage>& image,
                                                 const SkIRect& center,
                                                 const SkRect& dst,
                                                 DlFilterMode filter,
@@ -827,7 +827,7 @@ void DisplayListStreamDispatcher::drawImageNine(const sk_sp<DlImage> image,
                                << "with attributes: " << render_with_attributes
            << ");" << std::endl;
 }
-void DisplayListStreamDispatcher::drawAtlas(const sk_sp<DlImage> atlas,
+void DisplayListStreamDispatcher::drawAtlas(const sk_sp<DlImage>& atlas,
                                             const SkRSXform xform[],
                                             const SkRect tex[],
                                             const DlColor colors[],
@@ -845,14 +845,14 @@ void DisplayListStreamDispatcher::drawAtlas(const sk_sp<DlImage> atlas,
            << ");" << std::endl;
 }
 void DisplayListStreamDispatcher::drawDisplayList(
-    const sk_sp<DisplayList> display_list, SkScalar opacity) {
+    const sk_sp<DisplayList>& display_list, SkScalar opacity) {
   startl() << "drawDisplayList("
            << "ID: " << display_list->unique_id() << ", "
            << "bounds: " << display_list->bounds() << ", "
            << "opacity: " << opacity
            << ");" << std::endl;
 }
-void DisplayListStreamDispatcher::drawTextBlob(const sk_sp<SkTextBlob> blob,
+void DisplayListStreamDispatcher::drawTextBlob(const sk_sp<SkTextBlob>& blob,
                                                SkScalar x,
                                                SkScalar y) {
   startl() << "drawTextBlob("
