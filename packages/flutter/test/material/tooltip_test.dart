@@ -24,6 +24,58 @@ Finder _findTooltipContainer(String tooltipText) {
 }
 
 void main() {
+  testWidgets('Does tooltip end up in the right place - no preference; room above and below', (WidgetTester tester) async {
+    final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            OverlayEntry(
+              builder: (BuildContext context) {
+                return Stack(
+                  children: <Widget>[
+                    Positioned(
+                      left: 400.0,
+                      top: 300.0,
+                      child: Tooltip(
+                        key: tooltipKey,
+                        message: tooltipText,
+                        height: 100.0,
+                        padding: EdgeInsets.zero,
+                        verticalOffset: 100.0,
+                        child: const SizedBox.shrink(),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+    tooltipKey.currentState?.ensureTooltipVisible();
+    await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+    /********************* 800x600 screen
+     *        ___        * }- 10.0 margin
+     *       |___|       * }-100.0 height
+     *         |         * }-100.0 vertical offset
+     *         o         * y=300.0
+     *                   *
+     *                   *
+     *                   *
+     *********************/
+
+    final RenderBox tip = tester.renderObject(
+      _findTooltipContainer(tooltipText),
+    );
+    expect(tip.size.height, equals(100.0));
+    expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(100.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(200.0));
+  });
+
   testWidgets('Does tooltip end up in the right place - center', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(

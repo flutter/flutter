@@ -231,9 +231,12 @@ class Tooltip extends StatefulWidget {
 
   /// Whether the tooltip defaults to being displayed below the widget.
   ///
-  /// Defaults to true. If there is insufficient space to display the tooltip in
+  /// If there is insufficient space to display the tooltip in
   /// the preferred direction, the tooltip will be displayed in the opposite
   /// direction.
+  ///
+  /// If this property is null, then [TooltipThemeData.preferBelow] is used.
+  /// If that is also null, the default value is false.
   final bool? preferBelow;
 
   /// Whether the tooltip's [message] or [richMessage] should be excluded from
@@ -377,7 +380,7 @@ class Tooltip extends StatefulWidget {
 /// [ensureTooltipVisible] method.
 class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   static const double _defaultVerticalOffset = 24.0;
-  static const bool _defaultPreferBelow = true;
+  static const bool _defaultPreferBelow = false; // to avoid finger/cursor when possible
   static const EdgeInsetsGeometry _defaultMargin = EdgeInsets.zero;
   static const Duration _fadeInDuration = Duration(milliseconds: 150);
   static const Duration _fadeOutDuration = Duration(milliseconds: 75);
