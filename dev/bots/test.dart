@@ -1011,7 +1011,7 @@ Future<void> _runFrameworkTests() async {
     // To generate the wrapper, build a flavor that doesn't exist.
     Process.runSync(
       flutter,
-      <String>['build', 'apk', '--debug', '--flavor=does-not-exist'],
+      <String>['build', 'apk', '--config-only'],
       workingDirectory: path.join(flutterRoot, 'packages', 'integration_test', 'example', 'android'),
     );
     await runCommand(
