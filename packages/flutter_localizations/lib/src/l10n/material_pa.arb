@@ -143,5 +143,6 @@
   "collapsedHint": "ਵਿਸਤਾਰ ਕੀਤਾ ਗਿਆ",
   "menuDismissLabel": "ਮੀਨੂ ਖਾਰਜ ਕਰੋ",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }
