@@ -485,5 +485,5 @@ class _DefaultSnapshotPainter implements SnapshotPainter {
 
   @override
   @protected
-  void mayBeDispatchObjectCreation() { }
+  void maybeDispatchObjectCreation() { }
 }

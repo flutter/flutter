@@ -1198,7 +1198,7 @@ class ShortcutRegistryEntry {
 class ShortcutRegistry with ChangeNotifier {
   /// Creates an instance of [ShortcutRegistry].
   ShortcutRegistry() {
-    mayBeDispatchObjectCreation();
+    maybeDispatchObjectCreation();
   }
 
   bool _notificationScheduled = false;

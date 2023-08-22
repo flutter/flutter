@@ -212,11 +212,19 @@ mixin class ChangeNotifier implements Listenable {
   /// If the event was already dispatched or [kFlutterMemoryAllocationsEnabled]
   /// is false, the method is noop.
   ///
-  /// This method is invoked on first [addListener] call,
-  /// but it may be helpful to dispatch it earlier, in constructor,
-  /// to make the event closer to actual object creation.
+  /// Tools like leak_tracker use the event of object creation to help
+  /// developers identify the owner of the object, for troubleshooting purposes,
+  /// taking stack trace at the moment of the event.
+  ///
+  /// But, as [ChangeNotifier] is mixin, it does not have its own constructor. So, it
+  /// communicates object creation in first `addListener`, that results
+  /// in the stack trace pointing to `addListener`, not to constructor.
+  ///
+  /// To make debugging easier, invoke [ChangeNotifier.maybeDispatchObjectCreation]
+  /// in constructor of the class. It will help
+  /// to identify the owner.
   @protected
-  void mayBeDispatchObjectCreation() {
+  void maybeDispatchObjectCreation() {
     if (kFlutterMemoryAllocationsEnabled && !_creationDispatched) {
       MemoryAllocations.instance.dispatchObjectCreated(
         library: _flutterFoundationLibrary,
@@ -257,7 +265,7 @@ mixin class ChangeNotifier implements Listenable {
   void addListener(VoidCallback listener) {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
 
-    mayBeDispatchObjectCreation();
+    maybeDispatchObjectCreation();
 
     if (_count == _listeners.length) {
       if (_count == 0) {
@@ -519,7 +527,7 @@ class _MergingListenable extends Listenable {
 class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
   /// Creates a [ChangeNotifier] that wraps this value.
   ValueNotifier(this._value) {
-    mayBeDispatchObjectCreation();
+    maybeDispatchObjectCreation();
   }
 
   /// The current value stored in this notifier.
