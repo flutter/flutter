@@ -56,14 +56,27 @@ void SurfaceTextureExternalTexture::Paint(PaintContext& context,
   FML_CHECK(state_ == AttachmentState::kAttached);
 
   if (dl_image_) {
-    context.canvas->DrawImageRect(
-        dl_image_,                                     // image
-        SkRect::Make(dl_image_->bounds()),             // source rect
-        bounds,                                        // destination rect
-        sampling,                                      // sampling
-        context.paint,                                 // paint
-        flutter::DlCanvas::SrcRectConstraint::kStrict  // enforce edges
-    );
+    DlAutoCanvasRestore autoRestore(context.canvas, true);
+
+    // The incoming texture is vertically flipped, so we flip it
+    // back. OpenGL's coordinate system has Positive Y equivalent to up, while
+    // Skia's coordinate system has Negative Y equvalent to up.
+    context.canvas->Translate(bounds.x(), bounds.y() + bounds.height());
+    context.canvas->Scale(bounds.width(), -bounds.height());
+
+    if (!transform_.isIdentity()) {
+      DlImageColorSource source(dl_image_, DlTileMode::kRepeat,
+                                DlTileMode::kRepeat, sampling, &transform_);
+
+      DlPaint paintWithShader;
+      if (context.paint) {
+        paintWithShader = *context.paint;
+      }
+      paintWithShader.setColorSource(&source);
+      context.canvas->DrawRect(SkRect::MakeWH(1, 1), paintWithShader);
+    } else {
+      context.canvas->DrawImage(dl_image_, {0, 0}, sampling, context.paint);
+    }
   } else {
     FML_LOG(WARNING)
         << "No DlImage available for SurfaceTextureExternalTexture to paint.";
