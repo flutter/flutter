@@ -97,7 +97,7 @@ TextFrame TextFrameFromTextBlob(const sk_sp<SkTextBlob>& blob) {
         FML_DLOG(ERROR) << "Unimplemented.";
         continue;
     }
-    frame.AddTextRun(text_run);
+    frame.AddTextRun(std::move(text_run));
   }
 
   return frame;

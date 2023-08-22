@@ -26,7 +26,7 @@ class TextContents final : public Contents {
 
   ~TextContents();
 
-  void SetTextFrame(const TextFrame& frame);
+  void SetTextFrame(TextFrame&& frame);
 
   void SetColor(Color color);
 
