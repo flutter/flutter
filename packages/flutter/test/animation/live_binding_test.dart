@@ -139,8 +139,8 @@ void main() {
     );
     image.dispose();
   },
-  skip: isBrowser,
+  skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
   // TODO(polina-c): remove after fixing https://github.com/flutter/flutter/issues/133071
   leakTrackingTestConfig: const LeakTrackingTestConfig(allowAllNotDisposed: true),
-  ); // https://github.com/flutter/flutter/issues/56001
+  );
 }

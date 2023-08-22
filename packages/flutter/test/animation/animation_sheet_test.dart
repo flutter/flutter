@@ -32,7 +32,7 @@ void main() {
       const Duration(milliseconds: 100),
     );
   },
-  skip: isBrowser,
+  skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
   // TODO(polina-c): remove after fixing https://github.com/flutter/flutter/issues/133071
   leakTrackingTestConfig: const LeakTrackingTestConfig(allowAllNotDisposed: true),
   );
@@ -109,10 +109,10 @@ void main() {
     );
     image.dispose();
   },
-  skip: isBrowser,
+  skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
   // TODO(polina-c): remove after fixing https://github.com/flutter/flutter/issues/133071
   leakTrackingTestConfig: const LeakTrackingTestConfig(allowAllNotDisposed: true),
-  ); // https://github.com/flutter/flutter/issues/56001
+  );
 }
 
 // An animation of a yellow pixel moving from left to right, in a container of
