@@ -656,7 +656,7 @@ allprojects {
 
   group('validates java/AGP versions', () {
     final List<JavaAgpTestData> testData = <JavaAgpTestData>[
-      // Strictly too old cases for known AGP versions -- Java
+      // Strictly too old java versions for known AGP versions. 
       JavaAgpTestData(false, javaVersion: '1.6', agpVersion: maxKnownAgpVersion),
       JavaAgpTestData(false, javaVersion: '1.6', agpVersion: maxKnownAndSupportedAgpVersion),
       JavaAgpTestData(false, javaVersion: '1.6', agpVersion: '4.2'),
