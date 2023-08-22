@@ -299,6 +299,17 @@ def to_gn_args(args):
   gn_args['full_dart_sdk'] = args.full_dart_sdk
 
   if args.enable_unittests:
+    # Ensure that Android and iOS are *not* used with --enable-unittests.
+    # https://github.com/flutter/flutter/issues/132611
+    if args.target_os == 'android' or args.target_os == 'ios':
+      raise Exception(
+          'Cannot use --enable-unittests with --target-os=android or ios. If ' +
+          'you are trying to create an output directory to use for clangd ' +
+          '(i.e. for VSCode integration), use a host build instead.\n\n' +
+          'See https://github.com/flutter/flutter/wiki/' +
+          'Setting-up-the-Engine-development-environment' +
+          '#vscode-with-cc-intellisense-cc'
+      )
     gn_args['enable_unittests'] = True
   if args.no_enable_unittests:
     gn_args['enable_unittests'] = False
