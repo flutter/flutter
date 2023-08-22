@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/display_list/testing/dl_test_snippets.h"
-#include "flutter/display_list/display_list_builder.h"
+#include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_op_receiver.h"
 
 namespace flutter {
@@ -46,17 +46,17 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
       {"SetAntiAlias",
        {
            {0, 8, 0, 0, [](DlOpReceiver& r) { r.setAntiAlias(true); }},
-           {0, 8, 0, 0, [](DlOpReceiver& r) { r.setAntiAlias(false); }},
+           {0, 0, 0, 0, [](DlOpReceiver& r) { r.setAntiAlias(false); }},
        }},
       {"SetDither",
        {
            {0, 8, 0, 0, [](DlOpReceiver& r) { r.setDither(true); }},
-           {0, 8, 0, 0, [](DlOpReceiver& r) { r.setDither(false); }},
+           {0, 0, 0, 0, [](DlOpReceiver& r) { r.setDither(false); }},
        }},
       {"SetInvertColors",
        {
            {0, 8, 0, 0, [](DlOpReceiver& r) { r.setInvertColors(true); }},
-           {0, 8, 0, 0, [](DlOpReceiver& r) { r.setInvertColors(false); }},
+           {0, 0, 0, 0, [](DlOpReceiver& r) { r.setInvertColors(false); }},
        }},
       {"SetStrokeCap",
        {
@@ -64,7 +64,7 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
             [](DlOpReceiver& r) { r.setStrokeCap(DlStrokeCap::kRound); }},
            {0, 8, 0, 0,
             [](DlOpReceiver& r) { r.setStrokeCap(DlStrokeCap::kSquare); }},
-           {0, 8, 0, 0,
+           {0, 0, 0, 0,
             [](DlOpReceiver& r) { r.setStrokeCap(DlStrokeCap::kButt); }},
        }},
       {"SetStrokeJoin",
@@ -73,7 +73,7 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
             [](DlOpReceiver& r) { r.setStrokeJoin(DlStrokeJoin::kBevel); }},
            {0, 8, 0, 0,
             [](DlOpReceiver& r) { r.setStrokeJoin(DlStrokeJoin::kRound); }},
-           {0, 8, 0, 0,
+           {0, 0, 0, 0,
             [](DlOpReceiver& r) { r.setStrokeJoin(DlStrokeJoin::kMiter); }},
        }},
       {"SetStyle",
@@ -84,26 +84,26 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
             [](DlOpReceiver& r) {
               r.setDrawStyle(DlDrawStyle::kStrokeAndFill);
             }},
-           {0, 8, 0, 0,
+           {0, 0, 0, 0,
             [](DlOpReceiver& r) { r.setDrawStyle(DlDrawStyle::kFill); }},
        }},
       {"SetStrokeWidth",
        {
            {0, 8, 0, 0, [](DlOpReceiver& r) { r.setStrokeWidth(1.0); }},
            {0, 8, 0, 0, [](DlOpReceiver& r) { r.setStrokeWidth(5.0); }},
-           {0, 8, 0, 0, [](DlOpReceiver& r) { r.setStrokeWidth(0.0); }},
+           {0, 0, 0, 0, [](DlOpReceiver& r) { r.setStrokeWidth(0.0); }},
        }},
       {"SetStrokeMiter",
        {
            {0, 8, 0, 0, [](DlOpReceiver& r) { r.setStrokeMiter(0.0); }},
            {0, 8, 0, 0, [](DlOpReceiver& r) { r.setStrokeMiter(5.0); }},
-           {0, 8, 0, 0, [](DlOpReceiver& r) { r.setStrokeMiter(4.0); }},
+           {0, 0, 0, 0, [](DlOpReceiver& r) { r.setStrokeMiter(4.0); }},
        }},
       {"SetColor",
        {
            {0, 8, 0, 0, [](DlOpReceiver& r) { r.setColor(SK_ColorGREEN); }},
            {0, 8, 0, 0, [](DlOpReceiver& r) { r.setColor(SK_ColorBLUE); }},
-           {0, 8, 0, 0, [](DlOpReceiver& r) { r.setColor(SK_ColorBLACK); }},
+           {0, 0, 0, 0, [](DlOpReceiver& r) { r.setColor(SK_ColorBLACK); }},
        }},
       {"SetBlendMode",
        {
@@ -111,7 +111,7 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
             [](DlOpReceiver& r) { r.setBlendMode(DlBlendMode::kSrcIn); }},
            {0, 8, 0, 0,
             [](DlOpReceiver& r) { r.setBlendMode(DlBlendMode::kDstIn); }},
-           {0, 8, 0, 0,
+           {0, 0, 0, 0,
             [](DlOpReceiver& r) { r.setBlendMode(DlBlendMode::kSrcOver); }},
        }},
       {"SetColorSource",
@@ -127,7 +127,7 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
             [](DlOpReceiver& r) { r.setColorSource(kTestSource4.get()); }},
            {0, 80 + 6 * 4, 0, 0,
             [](DlOpReceiver& r) { r.setColorSource(kTestSource5.get()); }},
-           {0, 8, 0, 0, [](DlOpReceiver& r) { r.setColorSource(nullptr); }},
+           {0, 0, 0, 0, [](DlOpReceiver& r) { r.setColorSource(nullptr); }},
        }},
       {"SetImageFilter",
        {
@@ -185,7 +185,7 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
             [](DlOpReceiver& r) { r.setImageFilter(&kTestCFImageFilter1); }},
            {0, 24, 0, 0,
             [](DlOpReceiver& r) { r.setImageFilter(&kTestCFImageFilter2); }},
-           {0, 8, 0, 0, [](DlOpReceiver& r) { r.setImageFilter(nullptr); }},
+           {0, 0, 0, 0, [](DlOpReceiver& r) { r.setImageFilter(nullptr); }},
            {0, 24, 0, 0,
             [](DlOpReceiver& r) {
               r.setImageFilter(
@@ -218,7 +218,7 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
             [](DlOpReceiver& r) {
               r.setColorFilter(DlLinearToSrgbGammaColorFilter::instance.get());
             }},
-           {0, 8, 0, 0, [](DlOpReceiver& r) { r.setColorFilter(nullptr); }},
+           {0, 0, 0, 0, [](DlOpReceiver& r) { r.setColorFilter(nullptr); }},
        }},
       {"SetPathEffect",
        {
@@ -227,7 +227,7 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
             [](DlOpReceiver& r) { r.setPathEffect(kTestPathEffect1.get()); }},
            {0, 32, 0, 0,
             [](DlOpReceiver& r) { r.setPathEffect(kTestPathEffect2.get()); }},
-           {0, 8, 0, 0, [](DlOpReceiver& r) { r.setPathEffect(nullptr); }},
+           {0, 0, 0, 0, [](DlOpReceiver& r) { r.setPathEffect(nullptr); }},
        }},
       {"SetMaskFilter",
        {
@@ -241,7 +241,7 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
             [](DlOpReceiver& r) { r.setMaskFilter(&kTestMaskFilter4); }},
            {0, 32, 0, 0,
             [](DlOpReceiver& r) { r.setMaskFilter(&kTestMaskFilter5); }},
-           {0, 8, 0, 0, [](DlOpReceiver& r) { r.setMaskFilter(nullptr); }},
+           {0, 0, 0, 0, [](DlOpReceiver& r) { r.setMaskFilter(nullptr); }},
        }},
   };
 }
@@ -354,7 +354,7 @@ std::vector<DisplayListInvocationGroup> CreateAllTransformOps() {
            {1, 16, 1, 16, [](DlOpReceiver& r) { r.translate(10, 10); }},
            {1, 16, 1, 16, [](DlOpReceiver& r) { r.translate(10, 15); }},
            {1, 16, 1, 16, [](DlOpReceiver& r) { r.translate(15, 10); }},
-           {1, 16, 1, 16, [](DlOpReceiver& r) { r.translate(0, 0); }},
+           {0, 0, 0, 0, [](DlOpReceiver& r) { r.translate(0, 0); }},
        }},
       {"Scale",
        {
@@ -362,15 +362,15 @@ std::vector<DisplayListInvocationGroup> CreateAllTransformOps() {
            {1, 16, 1, 16, [](DlOpReceiver& r) { r.scale(2, 2); }},
            {1, 16, 1, 16, [](DlOpReceiver& r) { r.scale(2, 3); }},
            {1, 16, 1, 16, [](DlOpReceiver& r) { r.scale(3, 2); }},
-           {1, 16, 1, 16, [](DlOpReceiver& r) { r.scale(1, 1); }},
+           {0, 0, 0, 0, [](DlOpReceiver& r) { r.scale(1, 1); }},
        }},
       {"Rotate",
        {
            // cv.rotate(0) is ignored, otherwise expressed as concat(rotmatrix)
            {1, 8, 1, 32, [](DlOpReceiver& r) { r.rotate(30); }},
            {1, 8, 1, 32, [](DlOpReceiver& r) { r.rotate(45); }},
-           {1, 8, 1, 32, [](DlOpReceiver& r) { r.rotate(0); }},
-           {1, 8, 1, 32, [](DlOpReceiver& r) { r.rotate(360); }},
+           {0, 0, 0, 0, [](DlOpReceiver& r) { r.rotate(0); }},
+           {0, 0, 0, 0, [](DlOpReceiver& r) { r.rotate(360); }},
        }},
       {"Skew",
        {
@@ -379,14 +379,14 @@ std::vector<DisplayListInvocationGroup> CreateAllTransformOps() {
            {1, 16, 1, 32, [](DlOpReceiver& r) { r.skew(0.1, 0.1); }},
            {1, 16, 1, 32, [](DlOpReceiver& r) { r.skew(0.1, 0.2); }},
            {1, 16, 1, 32, [](DlOpReceiver& r) { r.skew(0.2, 0.1); }},
-           {1, 16, 1, 32, [](DlOpReceiver& r) { r.skew(0, 0); }},
+           {0, 0, 0, 0, [](DlOpReceiver& r) { r.skew(0, 0); }},
        }},
       {"Transform2DAffine",
        {
            {1, 32, 1, 32,
             [](DlOpReceiver& r) { r.transform2DAffine(0, 1, 12, 1, 0, 33); }},
            // r.transform(identity) is ignored
-           {1, 32, 1, 32,
+           {0, 0, 0, 0,
             [](DlOpReceiver& r) { r.transform2DAffine(1, 0, 0, 0, 1, 0); }},
        }},
       {"TransformFullPerspective",
@@ -397,13 +397,13 @@ std::vector<DisplayListInvocationGroup> CreateAllTransformOps() {
                                          0, 0, 0, 12);
             }},
            // r.transform(2D affine) is reduced to 2x3
-           {1, 72, 1, 72,
+           {1, 32, 1, 32,
             [](DlOpReceiver& r) {
               r.transformFullPerspective(2, 1, 0, 4, 1, 3, 0, 5, 0, 0, 1, 0, 0,
                                          0, 0, 1);
             }},
            // r.transform(identity) is ignored
-           {1, 72, 1, 72,
+           {0, 0, 0, 0,
             [](DlOpReceiver& r) {
               r.transformFullPerspective(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0,
                                          0, 0, 1);
@@ -488,11 +488,13 @@ std::vector<DisplayListInvocationGroup> CreateAllClipOps() {
             [](DlOpReceiver& r) {
               r.clipPath(kTestPath1, DlCanvas::ClipOp::kDifference, false);
             }},
+           // clipPath(rect) becomes clipRect
            {1, 24, 1, 24,
             [](DlOpReceiver& r) {
               r.clipPath(kTestPathRect, DlCanvas::ClipOp::kIntersect, true);
             }},
-           {1, 24, 1, 24,
+           // clipPath(oval) becomes clipRRect
+           {1, 64, 1, 64,
             [](DlOpReceiver& r) {
               r.clipPath(kTestPathOval, DlCanvas::ClipOp::kIntersect, true);
             }},

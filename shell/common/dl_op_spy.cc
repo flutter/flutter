@@ -81,13 +81,13 @@ void DlOpSpy::drawVertices(const DlVertices* vertices, DlBlendMode mode) {
 // transparent needs examine all the pixels in the image object, which is slow.
 // Drawing a completely transparent image is not a valid use case, thus, such
 // case is ignored.
-void DlOpSpy::drawImage(const sk_sp<DlImage>& image,
+void DlOpSpy::drawImage(const sk_sp<DlImage> image,
                         const SkPoint point,
                         DlImageSampling sampling,
                         bool render_with_attributes) {
   did_draw_ = true;
 }
-void DlOpSpy::drawImageRect(const sk_sp<DlImage>& image,
+void DlOpSpy::drawImageRect(const sk_sp<DlImage> image,
                             const SkRect& src,
                             const SkRect& dst,
                             DlImageSampling sampling,
@@ -95,14 +95,14 @@ void DlOpSpy::drawImageRect(const sk_sp<DlImage>& image,
                             SrcRectConstraint constraint) {
   did_draw_ = true;
 }
-void DlOpSpy::drawImageNine(const sk_sp<DlImage>& image,
+void DlOpSpy::drawImageNine(const sk_sp<DlImage> image,
                             const SkIRect& center,
                             const SkRect& dst,
                             DlFilterMode filter,
                             bool render_with_attributes) {
   did_draw_ = true;
 }
-void DlOpSpy::drawAtlas(const sk_sp<DlImage>& atlas,
+void DlOpSpy::drawAtlas(const sk_sp<DlImage> atlas,
                         const SkRSXform xform[],
                         const SkRect tex[],
                         const DlColor colors[],
@@ -113,7 +113,7 @@ void DlOpSpy::drawAtlas(const sk_sp<DlImage>& atlas,
                         bool render_with_attributes) {
   did_draw_ = true;
 }
-void DlOpSpy::drawDisplayList(const sk_sp<DisplayList>& display_list,
+void DlOpSpy::drawDisplayList(const sk_sp<DisplayList> display_list,
                               SkScalar opacity) {
   if (did_draw_ || opacity == 0) {
     return;
@@ -122,7 +122,7 @@ void DlOpSpy::drawDisplayList(const sk_sp<DisplayList>& display_list,
   display_list->Dispatch(receiver);
   did_draw_ |= receiver.did_draw();
 }
-void DlOpSpy::drawTextBlob(const sk_sp<SkTextBlob>& blob,
+void DlOpSpy::drawTextBlob(const sk_sp<SkTextBlob> blob,
                            SkScalar x,
                            SkScalar y) {
   did_draw_ |= will_draw_;

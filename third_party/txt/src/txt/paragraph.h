@@ -18,7 +18,7 @@
 #ifndef LIB_TXT_SRC_PARAGRAPH_H_
 #define LIB_TXT_SRC_PARAGRAPH_H_
 
-#include "flutter/display_list/display_list_builder.h"
+#include "flutter/display_list/dl_builder.h"
 #include "line_metrics.h"
 #include "paragraph_style.h"
 #include "third_party/skia/include/core/SkRect.h"

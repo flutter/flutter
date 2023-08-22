@@ -418,7 +418,7 @@ class DlLinearGradientColorSource final : public DlGradientColorSourceBase {
   SkPoint end_point_;
 
   friend class DlColorSource;
-  friend class DlOpRecorder;
+  friend class DisplayListBuilder;
 
   FML_DISALLOW_COPY_ASSIGN_AND_MOVE(DlLinearGradientColorSource);
 };
@@ -481,7 +481,7 @@ class DlRadialGradientColorSource final : public DlGradientColorSourceBase {
   SkScalar radius_;
 
   friend class DlColorSource;
-  friend class DlOpRecorder;
+  friend class DisplayListBuilder;
 
   FML_DISALLOW_COPY_ASSIGN_AND_MOVE(DlRadialGradientColorSource);
 };
@@ -557,7 +557,7 @@ class DlConicalGradientColorSource final : public DlGradientColorSourceBase {
   SkScalar end_radius_;
 
   friend class DlColorSource;
-  friend class DlOpRecorder;
+  friend class DisplayListBuilder;
 
   FML_DISALLOW_COPY_ASSIGN_AND_MOVE(DlConicalGradientColorSource);
 };
@@ -625,7 +625,7 @@ class DlSweepGradientColorSource final : public DlGradientColorSourceBase {
   SkScalar end_;
 
   friend class DlColorSource;
-  friend class DlOpRecorder;
+  friend class DisplayListBuilder;
 
   FML_DISALLOW_COPY_ASSIGN_AND_MOVE(DlSweepGradientColorSource);
 };

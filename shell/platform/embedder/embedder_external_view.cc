@@ -4,7 +4,7 @@
 
 #include "flutter/shell/platform/embedder/embedder_external_view.h"
 
-#include "flutter/display_list/display_list_builder.h"
+#include "flutter/display_list/dl_builder.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/common/dl_op_spy.h"
 

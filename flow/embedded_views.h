@@ -8,7 +8,7 @@
 #include <memory>
 #include <vector>
 
-#include "flutter/display_list/display_list_builder.h"
+#include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/skia/dl_sk_canvas.h"
 #include "flutter/flow/surface_frame.h"
 #include "flutter/fml/memory/ref_counted.h"
