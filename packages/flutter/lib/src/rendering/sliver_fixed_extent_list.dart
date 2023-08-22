@@ -20,7 +20,7 @@ import 'sliver_multi_box_adaptor.dart';
 ///
 /// Subclasses should override [itemExtent] or [itemExtentBuilder] to control
 /// the size of the children in the main axis. For a concrete subclass with a
-/// configurable [itemExtent], see [RenderSliverFixedExtentList] or [RenderVariedExplicitExtentList].
+/// configurable [itemExtent], see [RenderSliverFixedExtentList] or [RenderSliverVariedExtentList].
 ///
 /// [RenderSliverFixedExtentBoxAdaptor] is more efficient than
 /// [RenderSliverList] because [RenderSliverFixedExtentBoxAdaptor] does not need
