@@ -668,7 +668,7 @@ allprojects {
       JavaAgpTestData(true, javaVersion: '18', agpVersion: '8.1'),
       JavaAgpTestData(true, javaVersion: '18', agpVersion: '7.4'),
       JavaAgpTestData(true, javaVersion: '18', agpVersion: '4.2'),
-      // Strictly too new cases -- AGP
+      // Strictly too new AGP versions.
       // *these need to be updated* when max supported AGP versions are updated:
       JavaAgpTestData(false, javaVersion: '24', agpVersion: '8.3'),
       JavaAgpTestData(false, javaVersion: '20', agpVersion: '8.3'),
