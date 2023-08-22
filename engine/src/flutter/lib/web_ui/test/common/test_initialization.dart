@@ -32,7 +32,7 @@ void setUpUnitTests({
       // this stuff in.
       const double devicePixelRatio = 3.0;
       engine.window.debugOverrideDevicePixelRatio(devicePixelRatio);
-      engine.window.webOnlyDebugPhysicalSizeOverride =
+      engine.window.debugPhysicalSizeOverride =
           const ui.Size(800 * devicePixelRatio, 600 * devicePixelRatio);
       engine.scheduleFrameCallback = () {};
     }

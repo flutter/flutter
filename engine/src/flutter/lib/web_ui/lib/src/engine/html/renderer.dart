@@ -8,6 +8,7 @@ import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 class HtmlRenderer implements Renderer {
   static HtmlRenderer get instance => _instance;
@@ -176,11 +177,9 @@ class HtmlRenderer implements Renderer {
   @override
   Future<ui.Codec> instantiateImageCodecFromUrl(
     Uri uri, {
-    WebOnlyImageCodecChunkCallback? chunkCallback}) {
-      return futurize<ui.Codec>((Callback<ui.Codec> callback) {
-        callback(HtmlCodec(uri.toString(), chunkCallback: chunkCallback));
-        return null;
-      });
+    ui_web.ImageCodecChunkCallback? chunkCallback,
+  }) async {
+    return HtmlCodec(uri.toString(), chunkCallback: chunkCallback);
   }
 
   @override

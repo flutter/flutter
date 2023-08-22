@@ -10,6 +10,7 @@ library ui_web;
 
 export 'ui_web/asset_manager.dart';
 export 'ui_web/benchmarks.dart';
+export 'ui_web/images.dart';
 export 'ui_web/initialization.dart';
 export 'ui_web/navigation/platform_location.dart';
 export 'ui_web/navigation/url_strategy.dart';

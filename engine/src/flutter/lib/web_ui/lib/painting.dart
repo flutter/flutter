@@ -533,9 +533,22 @@ class TargetImageSize {
   final int? height;
 }
 
-Future<Codec> webOnlyInstantiateImageCodecFromUrl(Uri uri,
-  {engine.WebOnlyImageCodecChunkCallback? chunkCallback}) =>
-  engine.renderer.instantiateImageCodecFromUrl(uri, chunkCallback: chunkCallback);
+// TODO(mdebbar): Deprecate this and remove it.
+// https://github.com/flutter/flutter/issues/127395
+Future<Codec> webOnlyInstantiateImageCodecFromUrl(
+  Uri uri, {
+  ui_web.ImageCodecChunkCallback? chunkCallback,
+}) {
+  assert(() {
+    engine.printWarning(
+      'The webOnlyInstantiateImageCodecFromUrl API is deprecated and will be '
+      'removed in a future release. Please use `createImageCodecFromUrl` from '
+      '`dart:ui_web` instead.',
+    );
+    return true;
+  }());
+  return ui_web.createImageCodecFromUrl(uri, chunkCallback: chunkCallback);
+}
 
 void decodeImageFromList(Uint8List list, ImageDecoderCallback callback) {
   _decodeImageFromListAsync(list, callback);

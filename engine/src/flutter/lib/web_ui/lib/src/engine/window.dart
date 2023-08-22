@@ -255,8 +255,8 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
     bool override = false;
 
     assert(() {
-      if (webOnlyDebugPhysicalSizeOverride != null) {
-        _physicalSize = webOnlyDebugPhysicalSizeOverride;
+      if (debugPhysicalSizeOverride != null) {
+        _physicalSize = debugPhysicalSizeOverride;
         override = true;
       }
       return true;
@@ -319,8 +319,37 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow {
   /// Lazily populated and cleared at the end of the frame.
   ui.Size? _physicalSize;
 
-  /// Overrides the value of [physicalSize] in tests.
-  ui.Size? webOnlyDebugPhysicalSizeOverride;
+  // TODO(mdebbar): Deprecate this and remove it.
+  // https://github.com/flutter/flutter/issues/127395
+  ui.Size? get webOnlyDebugPhysicalSizeOverride {
+    assert(() {
+      printWarning(
+        'The webOnlyDebugPhysicalSizeOverride API is deprecated and will be '
+        'removed in a future release. Please use '
+        '`SingletonFlutterWindow.debugPhysicalSizeOverride` from `dart:ui_web` '
+        'instead.',
+      );
+      return true;
+    }());
+    return debugPhysicalSizeOverride;
+  }
+
+  // TODO(mdebbar): Deprecate this and remove it.
+  // https://github.com/flutter/flutter/issues/127395
+  set webOnlyDebugPhysicalSizeOverride(ui.Size? value) {
+    assert(() {
+      printWarning(
+        'The webOnlyDebugPhysicalSizeOverride API is deprecated and will be '
+        'removed in a future release. Please use '
+        '`SingletonFlutterWindow.debugPhysicalSizeOverride` from `dart:ui_web` '
+        'instead.',
+      );
+      return true;
+    }());
+    debugPhysicalSizeOverride = value;
+  }
+
+  ui.Size? debugPhysicalSizeOverride;
 }
 
 /// The Web implementation of [ui.SingletonFlutterWindow].
@@ -336,7 +365,7 @@ class EngineSingletonFlutterWindow extends EngineFlutterWindow {
   /// Overrides the default device pixel ratio.
   ///
   /// This is useful in tests to emulate screens of different dimensions.
-  void debugOverrideDevicePixelRatio(double value) {
+  void debugOverrideDevicePixelRatio(double? value) {
     _debugDevicePixelRatio = value;
   }
 

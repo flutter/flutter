@@ -644,7 +644,7 @@ void testMain() {
       sb.addPicture(ui.Offset.zero, picture);
       sb.addPlatformView(0, width: 10, height: 10);
 
-      window.webOnlyDebugPhysicalSizeOverride = const ui.Size(100, 100);
+      window.debugPhysicalSizeOverride = const ui.Size(100, 100);
       window.debugForceResize();
       CanvasKitRenderer.instance.rasterizer.draw(sb.build().layerTree);
       _expectSceneMatches(<_EmbeddedViewMarker>[
@@ -653,7 +653,7 @@ void testMain() {
         _overlay,
       ]);
 
-      window.webOnlyDebugPhysicalSizeOverride = const ui.Size(200, 200);
+      window.debugPhysicalSizeOverride = const ui.Size(200, 200);
       window.debugForceResize();
       CanvasKitRenderer.instance.rasterizer.draw(sb.build().layerTree);
       _expectSceneMatches(<_EmbeddedViewMarker>[
@@ -662,7 +662,7 @@ void testMain() {
         _overlay,
       ]);
 
-      window.webOnlyDebugPhysicalSizeOverride = null;
+      window.debugPhysicalSizeOverride = null;
       window.debugForceResize();
     // ImageDecoder is not supported in Safari or Firefox.
     }, skip: isSafari || isFirefox);

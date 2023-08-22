@@ -209,7 +209,7 @@ class CanvasKitRenderer implements Renderer {
   @override
   Future<ui.Codec> instantiateImageCodecFromUrl(
     Uri uri, {
-    WebOnlyImageCodecChunkCallback? chunkCallback
+    ui_web.ImageCodecChunkCallback? chunkCallback
   }) => skiaInstantiateWebImageCodec(uri.toString(), chunkCallback);
 
   @override

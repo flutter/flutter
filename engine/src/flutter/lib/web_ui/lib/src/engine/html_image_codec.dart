@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import 'browser_detection.dart';
 import 'dom.dart';
@@ -20,14 +21,15 @@ Object? get _jsImageDecodeFunction => getJsProperty<Object?>(
 );
 final bool _supportsDecode = _jsImageDecodeFunction != null;
 
-typedef WebOnlyImageCodecChunkCallback = void Function(
-    int cumulativeBytesLoaded, int expectedTotalBytes);
+// TODO(mdebbar): Deprecate this and remove it.
+// https://github.com/flutter/flutter/issues/127395
+typedef WebOnlyImageCodecChunkCallback = ui_web.ImageCodecChunkCallback;
 
 class HtmlCodec implements ui.Codec {
   HtmlCodec(this.src, {this.chunkCallback});
 
   final String src;
-  final WebOnlyImageCodecChunkCallback? chunkCallback;
+  final ui_web.ImageCodecChunkCallback? chunkCallback;
 
   @override
   int get frameCount => 1;
