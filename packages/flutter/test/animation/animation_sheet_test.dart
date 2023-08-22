@@ -32,9 +32,9 @@ void main() {
       const Duration(milliseconds: 100),
     );
   },
-  skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
-  // TODO(polina-c): remove after fixing https://github.com/flutter/flutter/issues/133071
-  leakTrackingTestConfig: const LeakTrackingTestConfig(allowAllNotDisposed: true),
+    skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
+    // TODO(polina-c): remove after fixing https://github.com/flutter/flutter/issues/133071
+    leakTrackingTestConfig: const LeakTrackingTestConfig(allowAllNotDisposed: true),
   );
 
   testWidgetsWithLeakTracking('correctly records frames using collate',
@@ -74,9 +74,10 @@ void main() {
     );
 
     image.dispose();
-  }, skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
-  // TODO(polina-c): remove after fixing https://github.com/flutter/flutter/issues/133071
-  leakTrackingTestConfig: const LeakTrackingTestConfig(allowAllNotDisposed: true),
+  },
+    skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
+    // TODO(polina-c): remove after fixing https://github.com/flutter/flutter/issues/133071
+    leakTrackingTestConfig: const LeakTrackingTestConfig(allowAllNotDisposed: true),
   ); // https://github.com/flutter/flutter/issues/56001
 
   testWidgetsWithLeakTracking('use allLayers to record out-of-subtree contents', (WidgetTester tester) async {
@@ -112,9 +113,9 @@ void main() {
     );
     image.dispose();
   },
-  skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
-  // TODO(polina-c): remove after fixing https://github.com/flutter/flutter/issues/133071
-  leakTrackingTestConfig: const LeakTrackingTestConfig(allowAllNotDisposed: true),
+    skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
+    // TODO(polina-c): remove after fixing https://github.com/flutter/flutter/issues/133071
+    leakTrackingTestConfig: const LeakTrackingTestConfig(allowAllNotDisposed: true),
   );
 }
 
