@@ -6,6 +6,12 @@ import 'package:flutter/widgets.dart';
 
 import 'check_box_list_tile.dart';
 import 'check_box_list_tile_disabled.dart';
+import 'date_picker.dart';
+import 'dialog.dart';
+import 'slider.dart';
+import 'text_field.dart';
+import 'text_field_disabled.dart';
+import 'text_field_password.dart';
 
 abstract class UseCase {
   String get name;
@@ -16,4 +22,10 @@ abstract class UseCase {
 final List<UseCase> useCases = <UseCase>[
   CheckBoxListTile(),
   CheckBoxListTileDisabled(),
+  DialogUseCase(),
+  SliderUseCase(),
+  TextFieldUseCase(),
+  TextFieldDisabledUseCase(),
+  TextFieldPasswordUseCase(),
+  DatePickerUseCase(),
 ];

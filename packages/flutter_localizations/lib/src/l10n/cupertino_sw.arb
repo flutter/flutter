@@ -25,5 +25,6 @@
   "noSpellCheckReplacementsLabel": "Hakuna Neno Mbadala Lilopatikana",
   "menuDismissLabel": "Ondoa menyu",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

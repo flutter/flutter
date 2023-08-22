@@ -25,5 +25,6 @@
   "noSpellCheckReplacementsLabel": "Không tìm thấy phương án thay thế",
   "menuDismissLabel": "Đóng trình đơn",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }
