@@ -15,8 +15,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 void main() {
   testWidgets('Switch can toggle on tap', (WidgetTester tester) async {
     final Key switchKey = UniqueKey();
@@ -751,6 +749,187 @@ void main() {
       find.byKey(switchKey),
       matchesGoldenFile('switch.tap.on.png'),
     );
+  });
+
+  PaintPattern onLabelPaintPattern({
+    required int alpha,
+    bool isRtl = false,
+  }) =>
+      paints
+        ..rect(
+          rect: Rect.fromLTWH(isRtl ? 43.5 : 14.5, 14.5, 1.0, 10.0),
+          color: const Color(0xffffffff).withAlpha(alpha),
+          style: PaintingStyle.fill,
+        );
+
+  PaintPattern offLabelPaintPattern({
+    required int alpha,
+    bool highContrast = false,
+    bool isRtl = false,
+  }) =>
+      paints
+        ..circle(
+          x: isRtl ? 16.0 : 43.0,
+          y: 19.5,
+          radius: 5.0,
+          color:
+              (highContrast ? const Color(0xffffffff) : const Color(0xffb3b3b3))
+                  .withAlpha(alpha),
+          strokeWidth: 1.0,
+          style: PaintingStyle.stroke,
+        );
+
+  testWidgets('Switch renders switch labels correctly before, during, and after being tapped', (WidgetTester tester) async {
+    final Key switchKey = UniqueKey();
+    bool value = false;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(onOffSwitchLabels: true),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Center(
+                child: RepaintBoundary(
+                  child: CupertinoSwitch(
+                    key: switchKey,
+                    value: value,
+                    dragStartBehavior: DragStartBehavior.down,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    final RenderObject switchRenderObject =
+        tester.element(find.byType(CupertinoSwitch)).renderObject!;
+
+    expect(switchRenderObject, offLabelPaintPattern(alpha: 255));
+    expect(switchRenderObject, onLabelPaintPattern(alpha: 0));
+
+    await tester.tap(find.byKey(switchKey));
+    expect(value, isTrue);
+
+    // Kick off animation, then advance to intermediate frame.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+    expect(switchRenderObject, onLabelPaintPattern(alpha: 131));
+    expect(switchRenderObject, offLabelPaintPattern(alpha: 124));
+
+    await tester.pumpAndSettle();
+    expect(switchRenderObject, onLabelPaintPattern(alpha: 255));
+    expect(switchRenderObject, offLabelPaintPattern(alpha: 0));
+  });
+
+  testWidgets('Switch renders switch labels correctly before, during, and after being tapped in high contrast', (WidgetTester tester) async {
+    final Key switchKey = UniqueKey();
+    bool value = false;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          onOffSwitchLabels: true,
+          highContrast: true,
+        ),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Center(
+                child: RepaintBoundary(
+                  child: CupertinoSwitch(
+                    key: switchKey,
+                    value: value,
+                    dragStartBehavior: DragStartBehavior.down,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    final RenderObject switchRenderObject =
+        tester.element(find.byType(CupertinoSwitch)).renderObject!;
+
+    expect(switchRenderObject, offLabelPaintPattern(highContrast: true, alpha: 255));
+    expect(switchRenderObject, onLabelPaintPattern(alpha: 0));
+
+    await tester.tap(find.byKey(switchKey));
+    expect(value, isTrue);
+
+    // Kick off animation, then advance to intermediate frame.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+    expect(switchRenderObject, onLabelPaintPattern(alpha: 131));
+    expect(switchRenderObject, offLabelPaintPattern(highContrast: true, alpha: 124));
+
+    await tester.pumpAndSettle();
+    expect(switchRenderObject, onLabelPaintPattern(alpha: 255));
+    expect(switchRenderObject, offLabelPaintPattern(highContrast: true, alpha: 0));
+  });
+
+  testWidgets('Switch renders switch labels correctly before, during, and after being tapped with direction rtl', (WidgetTester tester) async {
+    final Key switchKey = UniqueKey();
+    bool value = false;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(onOffSwitchLabels: true),
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Center(
+                child: RepaintBoundary(
+                  child: CupertinoSwitch(
+                    key: switchKey,
+                    value: value,
+                    dragStartBehavior: DragStartBehavior.down,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    final RenderObject switchRenderObject =
+        tester.element(find.byType(CupertinoSwitch)).renderObject!;
+
+    expect(switchRenderObject, offLabelPaintPattern(isRtl: true, alpha: 255));
+    expect(switchRenderObject, onLabelPaintPattern(isRtl: true, alpha: 0));
+
+    await tester.tap(find.byKey(switchKey));
+    expect(value, isTrue);
+
+    // Kick off animation, then advance to intermediate frame.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+    expect(switchRenderObject, onLabelPaintPattern(isRtl: true, alpha: 131));
+    expect(switchRenderObject, offLabelPaintPattern(isRtl: true, alpha: 124));
+
+    await tester.pumpAndSettle();
+    expect(switchRenderObject, onLabelPaintPattern(isRtl: true, alpha: 255));
+    expect(switchRenderObject, offLabelPaintPattern(isRtl: true, alpha: 0));
   });
 
   testWidgets('Switch renders correctly in dark mode', (WidgetTester tester) async {

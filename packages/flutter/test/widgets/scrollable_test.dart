@@ -1356,6 +1356,113 @@ void main() {
       'AlwaysScrollableScrollPhysics ClampingScrollPhysics RangeMaintainingScrollPhysics',
     );
   });
+
+  testWidgets('dragDevices change updates widget', (WidgetTester tester) async {
+    bool enable = false;
+
+    await tester.pumpWidget(
+      Builder(
+        builder: (BuildContext context) {
+          return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return MaterialApp(
+                home: Scaffold(
+                  body: Scrollable(
+                    scrollBehavior: const MaterialScrollBehavior().copyWith(dragDevices: <ui.PointerDeviceKind>{
+                      if (enable) ui.PointerDeviceKind.mouse,
+                    }),
+                    viewportBuilder: (BuildContext context, ViewportOffset position) => Viewport(
+                      offset: position,
+                      slivers: const <Widget>[
+                        SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
+                      ],
+                    ),
+                  ),
+                  floatingActionButton: FloatingActionButton(onPressed: () {
+                    setState(() {
+                      enable = !enable;
+                    });
+                  }),
+                ),
+              );
+            },
+          );
+        },
+      )
+    );
+
+    // Gesture should not work.
+    TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true), kind: ui.PointerDeviceKind.mouse);
+    expect(getScrollOffset(tester), 0.0);
+    await gesture.moveBy(const Offset(0.0, -200));
+    await tester.pumpAndSettle();
+    expect(getScrollOffset(tester), 0.0);
+
+    // Change state to include mouse pointer device.
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pump();
+
+    // Gesture should work after state change.
+    gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true), kind: ui.PointerDeviceKind.mouse);
+    expect(getScrollOffset(tester), 0.0);
+    await gesture.moveBy(const Offset(0.0, -200));
+    await tester.pumpAndSettle();
+    expect(getScrollOffset(tester), 200);
+  });
+
+  testWidgets('dragDevices change updates widget when oldWidget scrollBehavior is null', (WidgetTester tester) async {
+    ScrollBehavior? scrollBehavior;
+
+    await tester.pumpWidget(
+      Builder(
+        builder: (BuildContext context) {
+          return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return MaterialApp(
+                home: Scaffold(
+                  body: Scrollable(
+                    physics: const ScrollPhysics(),
+                    scrollBehavior: scrollBehavior,
+                    viewportBuilder: (BuildContext context, ViewportOffset position) => Viewport(
+                      offset: position,
+                      slivers: const <Widget>[
+                        SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
+                      ],
+                    ),
+                  ),
+                  floatingActionButton: FloatingActionButton(onPressed: () {
+                    setState(() {
+                      scrollBehavior = const MaterialScrollBehavior().copyWith(dragDevices: <ui.PointerDeviceKind>{
+                        ui.PointerDeviceKind.mouse
+                      });
+                    });
+                  }),
+                ),
+              );
+            },
+          );
+        },
+      )
+    );
+
+    // Gesture should not work.
+    TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true), kind: ui.PointerDeviceKind.mouse);
+    expect(getScrollOffset(tester), 0.0);
+    await gesture.moveBy(const Offset(0.0, -200));
+    await tester.pumpAndSettle();
+    expect(getScrollOffset(tester), 0.0);
+
+    // Change state to include mouse pointer device.
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pump();
+
+    // Gesture should work after state change.
+    gesture = await tester.startGesture(tester.getCenter(find.byType(Scrollable), warnIfMissed: true), kind: ui.PointerDeviceKind.mouse);
+    expect(getScrollOffset(tester), 0.0);
+    await gesture.moveBy(const Offset(0.0, -200));
+    await tester.pumpAndSettle();
+    expect(getScrollOffset(tester), 200);
+  });
 }
 
 // ignore: must_be_immutable

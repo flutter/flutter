@@ -6,6 +6,8 @@ import 'package:flutter/animation.dart';
 
 // The easing curves of the Material Library
 
+// TODO(guidezpl): deprecate the three curves below once customers (packages/plugins) are migrated
+
 /// The standard easing curve in the Material specification.
 ///
 /// Elements that begin and end at rest use standard easing.

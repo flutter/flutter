@@ -22,5 +22,9 @@
   "tabSemanticsLabel": "Ներդիր $tabIndex՝ $tabCount-ից",
   "modalBarrierDismissLabel": "Փակել",
   "searchTextFieldPlaceholderLabel": "Որոնում",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "Փոխարինումներ չեն գտնվել",
+  "menuDismissLabel": "Փակել ընտրացանկը",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

@@ -135,10 +135,14 @@
   "bottomSheetLabel": "Ishidi Eliphansi",
   "scrimOnTapHint": "Vala i-$modalRouteContentName",
   "keyboardKeyShift": "U-Shift",
-  "expansionTileExpandedHint": "double tap to collapse'",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "thepha kabili ukuze ugoqe",
+  "expansionTileCollapsedHint": "Thepha kabili ukuze unwebe",
+  "expansionTileExpandedTapHint": "Goqa",
+  "expansionTileCollapsedTapHint": "Nweba ukuze uthole imininingwane eyengeziwe",
+  "expandedHint": "Kugoqiwe",
+  "collapsedHint": "Kunwetshiwe",
+  "menuDismissLabel": "Chitha imenyu",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

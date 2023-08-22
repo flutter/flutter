@@ -37,7 +37,7 @@ void main() {
       final Completer<void> responseCompleter = Completer<void>();
       final MockRequest request = MockRequest();
       final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
-        cwd: '/project',
+        cwd: '.',
         program: 'foo.dart',
         toolArgs: <String>['tool_arg'],
         noDebug: true,
@@ -59,7 +59,7 @@ void main() {
       final Completer<void> responseCompleter = Completer<void>();
       final MockRequest request = MockRequest();
       final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
-        cwd: '/project',
+        cwd: '.',
         program: 'foo.dart',
         env: <String, String>{
           'MY_TEST_ENV': 'MY_TEST_VALUE',
@@ -82,7 +82,7 @@ void main() {
         final Completer<void> responseCompleter = Completer<void>();
         final MockRequest request = MockRequest();
         final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
-          cwd: '/project',
+          cwd: '.',
           program: 'foo.dart',
           customTool: '/custom/flutter',
           noDebug: true,
@@ -105,7 +105,7 @@ void main() {
         final Completer<void> responseCompleter = Completer<void>();
         final MockRequest request = MockRequest();
         final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
-          cwd: '/project',
+          cwd: '.',
           program: 'foo.dart',
           customTool: '/custom/flutter',
           customToolReplacesArgs: 9999, // replaces all built-in args

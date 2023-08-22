@@ -135,10 +135,14 @@
   "bottomSheetLabel": "Aşağıdakı Vərəq",
   "scrimOnTapHint": "Bağlayın: $modalRouteContentName",
   "keyboardKeyShift": "Shift",
-  "expansionTileExpandedHint": "double tap to collapse'",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "yığcamlaşdırmaq üçün iki dəfə toxunun",
+  "expansionTileCollapsedHint": "genişləndirmək üçün iki dəfə toxunun",
+  "expansionTileExpandedTapHint": "Yığcamlaşdırın",
+  "expansionTileCollapsedTapHint": "Daha çox detallar üçün genişləndirin",
+  "expandedHint": "Yığcamlaşdırıldı",
+  "collapsedHint": "Genişləndirildi",
+  "menuDismissLabel": "Menyunu qapadın",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

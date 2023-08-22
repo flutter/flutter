@@ -12,7 +12,7 @@ void main() {
     expect(const NavigationRailThemeData().hashCode, const NavigationRailThemeData().copyWith().hashCode);
   });
 
-  testWidgets('Default values are used when no NavigationRail or NavigationRailThemeData properties are specified', (WidgetTester tester) async {
+  testWidgets('Material3 - Default values are used when no NavigationRail or NavigationRailThemeData properties are specified', (WidgetTester tester) async {
     final ThemeData theme = ThemeData.light(useMaterial3: true);
     // Material 3 defaults
     await tester.pumpWidget(
@@ -47,7 +47,7 @@ void main() {
     expect(inkResponse.customBorder, const StadiumBorder());
   });
 
-  testWidgets('Default values are used when no NavigationRail or NavigationRailThemeData properties are specified (Material 2)', (WidgetTester tester) async {
+  testWidgets('Material2 - Default values are used when no NavigationRail or NavigationRailThemeData properties are specified', (WidgetTester tester) async {
     // This test can be removed when `useMaterial3` is deprecated.
     await tester.pumpWidget(
       MaterialApp(

@@ -621,14 +621,17 @@ class _MyHomePageState extends State<MyHomePage> {
               data: Theme.of(context).copyWith(visualDensity: _model.density),
               child: Directionality(
                 textDirection: _model.rtl ? TextDirection.rtl : TextDirection.ltr,
-                child: MediaQuery(
-                  data: MediaQuery.of(context).copyWith(textScaleFactor: _model.size),
-                  child: SizedBox.expand(
-                    child: ListView(
-                      children: tiles,
+                child: Builder(builder: (BuildContext context) {
+                  final MediaQueryData mediaQueryData = MediaQuery.of(context);
+                  return MediaQuery(
+                    data: mediaQueryData.copyWith(textScaler: TextScaler.linear(_model.size)),
+                    child: SizedBox.expand(
+                      child: ListView(
+                        children: tiles,
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                }),
               ),
             ),
           ),

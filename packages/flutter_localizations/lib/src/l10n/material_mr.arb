@@ -137,10 +137,14 @@
   "bottomSheetLabel": "तळाशी असलेली शीट",
   "scrimOnTapHint": "$modalRouteContentName बंद करा",
   "keyboardKeyShift": "शिफ्ट",
-  "expansionTileExpandedHint": "double tap to collapse'",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "कोलॅप्स करण्यासाठी दोनदा टॅप करा",
+  "expansionTileCollapsedHint": "विस्तार करण्‍यासाठी दोनदा टॅप करा",
+  "expansionTileExpandedTapHint": "कोलॅप्स करा",
+  "expansionTileCollapsedTapHint": "आणखी तपशिलांसाठी विस्तार करा",
+  "expandedHint": "कोलॅप्स केले",
+  "collapsedHint": "विस्तार केले",
+  "menuDismissLabel": "मेनू डिसमिस करा",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

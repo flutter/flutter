@@ -136,10 +136,14 @@
   "bottomSheetLabel": "Bottom Sheet",
   "scrimOnTapHint": "Isara ang $modalRouteContentName",
   "keyboardKeyShift": "Shift",
-  "expansionTileExpandedHint": "double tap to collapse'",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "i-double tap para i-collapse",
+  "expansionTileCollapsedHint": "i-double tap para i-expand",
+  "expansionTileExpandedTapHint": "I-collapse",
+  "expansionTileCollapsedTapHint": "I-expand para sa higit pang detalye",
+  "expandedHint": "Naka-collapse",
+  "collapsedHint": "Naka-expand",
+  "menuDismissLabel": "I-dismiss ang menu",
+  "lookUpButtonLabel": "Tumingin sa Itaas",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }
