@@ -3855,6 +3855,20 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery_ios__start_up
 
+  - name: Mac_ios flutter_gallery_ios__start_up_xcode_debug
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: flutter_gallery_ios__start_up_xcode_debug
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "14c18"
+        }
+    bringup: true
+
   - name: Mac_ios flutter_view_ios__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -3921,6 +3935,20 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: integration_ui_ios_driver
+
+  - name: Mac_ios integration_ui_ios_driver_xcode_debug
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: integration_ui_ios_driver_xcode_debug
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "14c18"
+        }
+    bringup: true
 
   - name: Mac_ios integration_ui_ios_frame_number
     recipe: devicelab/devicelab_drone
