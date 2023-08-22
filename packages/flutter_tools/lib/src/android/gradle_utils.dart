@@ -47,7 +47,7 @@ const String ndkVersion = '23.1.7779620';
 // Update these when new major versions of Java are supported by Gradle.
 // Supported means Java <-> Gradle support.
 // Source of truth: https://docs.gradle.org/current/userguide/compatibility.html
-const String oneMajorVersionHigherJavaVersion = '21';
+const String oneMajorVersionHigherJavaVersion = '20';
 
 // Update this when new versions of Gradle come out including minor versions
 // and should correspond to the maximum Gradle version we test in CI.
@@ -600,6 +600,8 @@ bool validateJavaAgp(Logger logger,
 }
 
 // Returns valid Java range for specified Gradle and AGP verisons.
+//
+// Assumes that gradleV and agpV are compatible versions.
 VersionRange getJavaVersionFor({required String gradleV, required String agpV}) {
   // Find minimum Java version based on AGP compatibility.
   String? minJavaVersion;
@@ -612,12 +614,13 @@ VersionRange getJavaVersionFor({required String gradleV, required String agpV}) 
   // Find maximum Java version based on Gradle compatibility.
   String? maxJavaVersion;
   for (final JavaGradleCompat data in _javaGradleCompatList.reversed) {
+    // TODO(camsim99): Check inclusiveMax
     if (isWithinVersionRange(gradleV, min: data.gradleMin, max: maxKnownAndSupportedGradleVersion)) {
       maxJavaVersion = data.javaMax;
     }
   }
 
-  return VersionRange(versionMin: minJavaVersion, versionMax: maxJavaVersion);
+  return VersionRange(minJavaVersion, maxJavaVersion);
 }
 
 /// Returns the Gradle version that is required by the given Android Gradle plugin version
@@ -807,12 +810,21 @@ class GradleForAgp {
 
 // Data class that represents a range of versions.
 class VersionRange{
-  VersionRange({
-    required this.versionMin,
-    required this.versionMax,
-  });
+  VersionRange(
+    this.versionMin,
+    this.versionMax,
+  );
   final String? versionMin;
   final String? versionMax;
+
+  @override
+  bool operator ==(Object other) =>
+      other is VersionRange &&
+      other.versionMin == versionMin &&
+      other.versionMax == versionMax;
+
+  @override
+  int get hashCode => Object.hash(versionMin, versionMax);
 }
 
 // Returns gradlew file name based on the platform.

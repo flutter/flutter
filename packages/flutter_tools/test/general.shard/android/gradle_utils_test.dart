@@ -582,7 +582,7 @@ allprojects {
         // Newer tools version does not even meet current gradle version requiremnts.
         JavaGradleTestData(false, javaVersion: '20', gradleVersion: '7.5'),
         // Newer tools version requires newer gradle version.
-        JavaGradleTestData(true, javaVersion: '20', gradleVersion: maxKnownAndSupportedGradleVersion),
+        JavaGradleTestData(true, javaVersion: '20', gradleVersion: '8.1'),
         // Max known unsupported Java version.
         JavaGradleTestData(true, javaVersion: '24', gradleVersion: maxKnownAndSupportedGradleVersion),
         // Minimums as defined in
@@ -668,12 +668,12 @@ allprojects {
       JavaAgpTestData(true, javaVersion: '18', agpVersion: '7.4'),
       JavaAgpTestData(true, javaVersion: '18', agpVersion: '4.2'),
       // Strictly too new AGP versions.
-      // *these need to be updated* when max supported AGP versions are updated:
+      // *The tests that follow need to be updated* when max supported AGP versions are updated:
       JavaAgpTestData(false, javaVersion: '24', agpVersion: '8.3'),
       JavaAgpTestData(false, javaVersion: '20', agpVersion: '8.3'),
       JavaAgpTestData(false, javaVersion: '17', agpVersion: '8.3'),
       // Java 17 & patch versions compatibility cases
-      // *these need to be updated* when maxKnownAndSupportedAgpVersion is
+      // *The tests that follow need to be updated* when maxKnownAndSupportedAgpVersion is
       // updated:
       JavaAgpTestData(false, javaVersion: '17', agpVersion: '8.2'),
       JavaAgpTestData(true, javaVersion: '17', agpVersion: maxKnownAndSupportedAgpVersion),
@@ -724,7 +724,7 @@ allprojects {
       }
   });
 
-  group('detecting valid Gradle/AGP versions for given Java version', () {
+  group('detecting valid Gradle/AGP versions for given Java version and vice versa', () {
     testWithoutContext('getValidGradleVersionRangeForJavaVersion returns valid Gradle version range for Java version', () {
       final Logger testLogger = BufferLogger.test();
       // Java version unspecified.
@@ -939,6 +939,30 @@ allprojects {
         allOf(
           equals(getMinimumAgpVersionForJavaVersion(testLogger, javaV: '1.7.2')),
           isNull));
+    });
+
+    testWithoutContext('getJavaVersionFor returns expected Java version range', () {
+      final Logger testLogger = BufferLogger.test();
+      // Strictly too old Gradle and AGP versions.
+      expect(getJavaVersionFor(gradleV: '1.9', agpV: '4.1'), equals(VersionRange(null, null)));
+      // Strictly too old Gradle or AGP version.
+      expect(getJavaVersionFor(gradleV: '1.9', agpV: '4.2'), equals(VersionRange('1.8', null)));
+      expect(getJavaVersionFor(gradleV: '2.0', agpV: '4.1'), equals(VersionRange(null, '1.9')));
+      // Strictly too new Gradle and AGP versions.
+      expect(getJavaVersionFor(gradleV: '8.1', agpV: '8.2'), equals(VersionRange(null, null)));
+      // Strictly too new Gradle version and maximum version of AGP.
+      //*This test case will need its expected Java range updated when a new version of AGP is supported.*
+      expect(getJavaVersionFor(gradleV: '8.1', agpV: maxKnownAndSupportedAgpVersion), equals(VersionRange('17', null)));
+      // Strictly too new AGP version and maximum version of Gradle.
+      //*This test case will need its expected Java range updated when a new version of Gradle is supported.*
+      expect(getJavaVersionFor(gradleV: maxKnownAndSupportedGradleVersion, agpV: '8.2'), equals(VersionRange(null, '20')));
+      // Tests with a known compatible Gradle/AGP version pair.
+      expect(getJavaVersionFor(gradleV: '7.0', agpV: '7.2'), equals(VersionRange('1.11', '17')));
+      expect(getJavaVersionFor(gradleV: '7.1', agpV: '7.2'), equals(VersionRange('1.11', '17')));
+      expect(getJavaVersionFor(gradleV: '7.2.2', agpV: '7.2'), equals(VersionRange('1.11', '17')));
+      expect(getJavaVersionFor(gradleV: '7.1', agpV: '7.0'), equals(VersionRange('1.11', '17')));
+      expect(getJavaVersionFor(gradleV: '7.1', agpV: '7.2'), equals(VersionRange('1.11', '17')));
+      expect(getJavaVersionFor(gradleV: '7.1', agpV: '7.4'), equals(VersionRange('1.11', '17')));
     });
   });
 }
