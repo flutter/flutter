@@ -193,3 +193,5 @@ To your `AndroidManifest.xml` file, add under the `<application>` tag:
 * [How color blending works in Impeller](docs/blending.md)
 * [Enabling Vulkan Validation Layers on Android](docs/android_validation_layers.md)
 * [Important Benchmarks](docs/benchmarks.md)
+* [Threading in the Vulkan Backend](docs/vulkan_threading.md)
+* [Android Rendering Backend Selection](docs/android.md)
