@@ -1,9 +1,13 @@
 package io.flutter.embedding.android;
 
+import android.annotation.TargetApi;
+import android.content.Context;
 import android.graphics.Matrix;
 import android.os.Build;
+import android.util.TypedValue;
 import android.view.InputDevice;
 import android.view.MotionEvent;
+import android.view.ViewConfiguration;
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
@@ -80,6 +84,10 @@ public class AndroidTouchProcessor {
   private static final int POINTER_DATA_FIELD_COUNT = 35;
   @VisibleForTesting static final int BYTES_PER_FIELD = 8;
 
+  // Default if context is null, chosen to ensure reasonable speed scrolling.
+  @VisibleForTesting static final int DEFAULT_VERTICAL_SCROLL_FACTOR = 48;
+  @VisibleForTesting static final int DEFAULT_HORIZONTAL_SCROLL_FACTOR = 48;
+
   // This value must match the value in framework's platform_view.dart.
   // This flag indicates whether the original Android pointer events were batched together.
   private static final int POINTER_DATA_FLAG_BATCHED = 1;
@@ -92,6 +100,9 @@ public class AndroidTouchProcessor {
   private final boolean trackMotionEvents;
 
   private final Map<Integer, float[]> ongoingPans = new HashMap<>();
+
+  // Only used on api 25 and below to avoid requerying display metrics.
+  private int cachedVerticalScrollFactor;
 
   /**
    * Constructs an {@code AndroidTouchProcessor} that will send touch event data to the Flutter
@@ -181,9 +192,10 @@ public class AndroidTouchProcessor {
    * wheel movements, etc.
    *
    * @param event The generic motion event being processed.
+   * @param context For use by ViewConfiguration.get(context) to scale input.
    * @return True if the event was handled.
    */
-  public boolean onGenericMotionEvent(@NonNull MotionEvent event) {
+  public boolean onGenericMotionEvent(@NonNull MotionEvent event, @NonNull Context context) {
     // Method isFromSource is only available in API 18+ (Jelly Bean MR2)
     // Mouse hover support is not implemented for API < 18.
     boolean isPointerEvent =
@@ -192,7 +204,9 @@ public class AndroidTouchProcessor {
     boolean isMovementEvent =
         (event.getActionMasked() == MotionEvent.ACTION_HOVER_MOVE
             || event.getActionMasked() == MotionEvent.ACTION_SCROLL);
-    if (!isPointerEvent || !isMovementEvent) {
+    if (isPointerEvent && isMovementEvent) {
+      // Continue.
+    } else {
       return false;
     }
 
@@ -203,7 +217,8 @@ public class AndroidTouchProcessor {
     packet.order(ByteOrder.LITTLE_ENDIAN);
 
     // ACTION_HOVER_MOVE always applies to a single pointer only.
-    addPointerForIndex(event, event.getActionIndex(), pointerChange, 0, IDENTITY_TRANSFORM, packet);
+    addPointerForIndex(
+        event, event.getActionIndex(), pointerChange, 0, IDENTITY_TRANSFORM, packet, context);
     if (packet.position() % (POINTER_DATA_FIELD_COUNT * BYTES_PER_FIELD) != 0) {
       throw new AssertionError("Packet position is not on field boundary.");
     }
@@ -211,8 +226,9 @@ public class AndroidTouchProcessor {
     return true;
   }
 
-  // TODO(mattcarroll): consider creating a PointerPacket class instead of using a procedure that
-  // mutates inputs.
+  /// Calls addPointerForIndex with null for context.
+  ///
+  /// Without context the scroll wheel will not mimick android's scroll speed.
   private void addPointerForIndex(
       MotionEvent event,
       int pointerIndex,
@@ -220,9 +236,24 @@ public class AndroidTouchProcessor {
       int pointerData,
       Matrix transformMatrix,
       ByteBuffer packet) {
+    addPointerForIndex(
+        event, pointerIndex, pointerChange, pointerData, transformMatrix, packet, null);
+  }
+
+  // TODO: consider creating a PointerPacket class instead of using a procedure that
+  // mutates inputs. https://github.com/flutter/flutter/issues/132853
+  private void addPointerForIndex(
+      MotionEvent event,
+      int pointerIndex,
+      int pointerChange,
+      int pointerData,
+      Matrix transformMatrix,
+      ByteBuffer packet,
+      Context context) {
     if (pointerChange == -1) {
       return;
     }
+    final int pointerId = event.getPointerId(pointerIndex);
 
     int pointerKind = getPointerDeviceTypeForToolType(event.getToolType(pointerIndex));
     // We use this in lieu of using event.getRawX and event.getRawY as we wish to support
@@ -238,16 +269,21 @@ public class AndroidTouchProcessor {
         // Some implementations translate trackpad scrolling into a mouse down-move-up event
         // sequence with buttons: 0, such as ARC on a Chromebook. See #11420, a legacy
         // implementation that uses the same condition but converts differently.
-        ongoingPans.put(event.getPointerId(pointerIndex), viewToScreenCoords);
+        ongoingPans.put(pointerId, viewToScreenCoords);
       }
     } else if (pointerKind == PointerDeviceKind.STYLUS) {
+      // Returns converted android button state into flutter framework normalized state
+      // and updates ongoingPans for chromebook trackpad scrolling.
+      // See
+      // https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/gestures/events.dart
+      // for target button constants.
       buttons = (event.getButtonState() >> 4) & 0xF;
     } else {
       buttons = 0;
     }
 
     int panZoomType = -1;
-    boolean isTrackpadPan = ongoingPans.containsKey(event.getPointerId(pointerIndex));
+    boolean isTrackpadPan = ongoingPans.containsKey(pointerId);
     if (isTrackpadPan) {
       panZoomType = getPointerChangeForPanZoom(pointerChange);
       if (panZoomType == -1) {
@@ -278,13 +314,13 @@ public class AndroidTouchProcessor {
       packet.putLong(pointerKind); // kind
     }
     packet.putLong(signalKind); // signal_kind
-    packet.putLong(event.getPointerId(pointerIndex)); // device
+    packet.putLong(pointerId); // device
     packet.putLong(0); // pointer_identifier, will be generated in pointer_data_packet_converter.cc.
 
     if (isTrackpadPan) {
-      float[] panStart = ongoingPans.get(event.getPointerId(pointerIndex));
-      packet.putDouble(panStart[0]);
-      packet.putDouble(panStart[1]);
+      float[] panStart = ongoingPans.get(pointerId);
+      packet.putDouble(panStart[0]); // physical_x
+      packet.putDouble(panStart[1]); // physical_y
     } else {
       packet.putDouble(viewToScreenCoords[0]); // physical_x
       packet.putDouble(viewToScreenCoords[1]); // physical_y
@@ -341,16 +377,30 @@ public class AndroidTouchProcessor {
 
     packet.putLong(pointerData); // platformData
 
+    // See android scrollview for inspiration.
+    // https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/core/java/android/widget/ScrollView.java?q=function:onGenericMotionEvent%20filepath:widget%2FScrollView.java&ss=android%2Fplatform%2Fsuperproject%2Fmain
     if (signalKind == PointerSignalKind.SCROLL) {
-      packet.putDouble(-event.getAxisValue(MotionEvent.AXIS_HSCROLL)); // scroll_delta_x
-      packet.putDouble(-event.getAxisValue(MotionEvent.AXIS_VSCROLL)); // scroll_delta_y
+      double horizontalScaleFactor = DEFAULT_HORIZONTAL_SCROLL_FACTOR;
+      double verticalScaleFactor = DEFAULT_VERTICAL_SCROLL_FACTOR;
+      if (context != null) {
+        horizontalScaleFactor = getHorizontalScrollFactor(context);
+        verticalScaleFactor = getVerticalScrollFactor(context);
+      }
+      // We flip the sign of the scroll value below because it aligns the pixel value with the
+      // scroll direction in native android.
+      final double horizontalScrollPixels =
+          horizontalScaleFactor * -event.getAxisValue(MotionEvent.AXIS_HSCROLL, pointerIndex);
+      final double verticalScrollPixels =
+          verticalScaleFactor * -event.getAxisValue(MotionEvent.AXIS_VSCROLL, pointerIndex);
+      packet.putDouble(horizontalScrollPixels); // scroll_delta_x
+      packet.putDouble(verticalScrollPixels); // scroll_delta_y
     } else {
       packet.putDouble(0.0); // scroll_delta_x
-      packet.putDouble(0.0); // scroll_delta_x
+      packet.putDouble(0.0); // scroll_delta_y
     }
 
     if (isTrackpadPan) {
-      float[] panStart = ongoingPans.get(event.getPointerId(pointerIndex));
+      float[] panStart = ongoingPans.get(pointerId);
       packet.putDouble(viewToScreenCoords[0] - panStart[0]);
       packet.putDouble(viewToScreenCoords[1] - panStart[1]);
     } else {
@@ -363,8 +413,46 @@ public class AndroidTouchProcessor {
     packet.putDouble(0.0); // rotation
 
     if (isTrackpadPan && (panZoomType == PointerChange.PAN_ZOOM_END)) {
-      ongoingPans.remove(event.getPointerId(pointerIndex));
+      ongoingPans.remove(pointerId);
     }
+  }
+
+  private float getHorizontalScrollFactor(@NonNull Context context) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      return ViewConfiguration.get(context).getScaledHorizontalScrollFactor();
+    } else {
+      // Vertical scroll factor is not a typo. This is what View.java does in android.
+      return getVerticalScrollFactorPre26(context);
+    }
+  }
+
+  private float getVerticalScrollFactor(@NonNull Context context) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      return getVerticalScrollFactorAbove26(context);
+    } else {
+      return getVerticalScrollFactorPre26(context);
+    }
+  }
+
+  @TargetApi(26)
+  private float getVerticalScrollFactorAbove26(@NonNull Context context) {
+    return ViewConfiguration.get(context).getScaledVerticalScrollFactor();
+  }
+
+  // See
+  // https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/core/java/android/view/View.java?q=function:getVerticalScrollFactor%20filepath:android%2Fview%2FView.java&ss=android%2Fplatform%2Fsuperproject%2Fmain
+  private int getVerticalScrollFactorPre26(@NonNull Context context) {
+    if (cachedVerticalScrollFactor == 0) {
+      TypedValue outValue = new TypedValue();
+      if (!context
+          .getTheme()
+          .resolveAttribute(android.R.attr.listPreferredItemHeight, outValue, true)) {
+        return DEFAULT_VERTICAL_SCROLL_FACTOR;
+      }
+      cachedVerticalScrollFactor =
+          (int) outValue.getDimension(context.getResources().getDisplayMetrics());
+    }
+    return cachedVerticalScrollFactor;
   }
 
   @PointerChange
