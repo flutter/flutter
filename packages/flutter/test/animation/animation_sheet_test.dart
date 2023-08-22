@@ -34,7 +34,6 @@ void main() {
   },
   skip: isBrowser,
   // TODO(polina-c): remove after fixing https://github.com/flutter/flutter/issues/133071
-  // And replace other `testWidgets` with `testWidgetsWithLeakTracking` in this file.
   leakTrackingTestConfig: const LeakTrackingTestConfig(allowAllNotDisposed: true),
   );
 
@@ -77,7 +76,7 @@ void main() {
     image.dispose();
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
-  testWidgets('use allLayers to record out-of-subtree contents', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('use allLayers to record out-of-subtree contents', (WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(
       frameSize: const Size(8, 2),
       allLayers: true,
@@ -109,7 +108,11 @@ void main() {
       matchesGoldenFile('test.animation_sheet_builder.out_of_tree.png'),
     );
     image.dispose();
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
+  },
+  skip: isBrowser,
+  // TODO(polina-c): remove after fixing https://github.com/flutter/flutter/issues/133071
+  leakTrackingTestConfig: const LeakTrackingTestConfig(allowAllNotDisposed: true),
+  ); // https://github.com/flutter/flutter/issues/56001
 }
 
 // An animation of a yellow pixel moving from left to right, in a container of
