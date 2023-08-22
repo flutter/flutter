@@ -18,12 +18,12 @@ import 'viewport_offset.dart';
 
 /// Called to get the item extent by the index of item.
 ///
-/// Used by [ListView.itemExtentBuilder] and [SliverExplicitExtentList.itemExtentBuilder].
+/// Used by [ListView.itemExtentBuilder] and [SliverVariedExtentList.itemExtentBuilder].
 typedef ItemExtentBuilder = double Function(int index, SliverLayoutDimensions dimensions);
 
 /// Relates the dimensions of the [RenderSliver] during layout.
 ///
-/// Used by [ListView.itemExtentBuilder] and [SliverExplicitExtentList.itemExtentBuilder].
+/// Used by [ListView.itemExtentBuilder] and [SliverVariedExtentList.itemExtentBuilder].
 @immutable
 class SliverLayoutDimensions {
   /// Constructs a [SliverLayoutDimensions] with the specified parameters.

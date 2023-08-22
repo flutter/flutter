@@ -1050,7 +1050,7 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
         itemExtent: widget.itemExtent!,
       );
     } else if (widget.itemExtentBuilder != null) {
-      return SliverExplicitExtentList(
+      return SliverVariedExtentList(
         delegate: childrenDelegate,
         itemExtentBuilder: widget.itemExtentBuilder!,
       );
