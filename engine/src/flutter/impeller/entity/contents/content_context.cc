@@ -16,6 +16,7 @@
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/render_target.h"
 #include "impeller/tessellator/tessellator.h"
+#include "impeller/typographer/text_render_context.h"
 
 namespace impeller {
 
@@ -159,9 +160,12 @@ static std::unique_ptr<PipelineT> CreateDefaultPipeline(
   return std::make_unique<PipelineT>(context, desc);
 }
 
-ContentContext::ContentContext(std::shared_ptr<Context> context)
+ContentContext::ContentContext(
+    std::shared_ptr<Context> context,
+    std::shared_ptr<TextRenderContext> text_render_context)
     : context_(std::move(context)),
-      lazy_glyph_atlas_(std::make_shared<LazyGlyphAtlas>()),
+      lazy_glyph_atlas_(
+          std::make_shared<LazyGlyphAtlas>(std::move(text_render_context))),
       tessellator_(std::make_shared<Tessellator>()),
       scene_context_(std::make_shared<scene::SceneContext>(context_)),
       render_target_cache_(std::make_shared<RenderTargetCache>(

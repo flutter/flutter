@@ -5,9 +5,10 @@
 #include "flutter/shell/gpu/gpu_surface_gl_impeller.h"
 
 #include "flutter/fml/make_copyable.h"
-#include "flutter/impeller/display_list/dl_dispatcher.h"
-#include "flutter/impeller/renderer/backend/gles/surface_gles.h"
-#include "flutter/impeller/renderer/renderer.h"
+#include "impeller/display_list/dl_dispatcher.h"
+#include "impeller/renderer/backend/gles/surface_gles.h"
+#include "impeller/renderer/renderer.h"
+#include "impeller/typographer/backends/skia/text_render_context_skia.h"
 
 namespace flutter {
 
@@ -28,7 +29,8 @@ GPUSurfaceGLImpeller::GPUSurfaceGLImpeller(
     return;
   }
 
-  auto aiks_context = std::make_shared<impeller::AiksContext>(context);
+  auto aiks_context = std::make_shared<impeller::AiksContext>(
+      context, impeller::TextRenderContextSkia::Make());
 
   if (!aiks_context->IsValid()) {
     return;

@@ -4,12 +4,13 @@
 
 #pragma once
 
+#include "impeller/playground/playground_test.h"
+
 #include "flutter/fml/macros.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_pass.h"
-
-#include "impeller/playground/playground_test.h"
+#include "impeller/typographer/text_render_context.h"
 
 namespace impeller {
 
@@ -22,6 +23,9 @@ class EntityPlayground : public PlaygroundTest {
 
   ~EntityPlayground();
 
+  void SetTextRenderContext(
+      std::shared_ptr<TextRenderContext> text_render_context);
+
   bool OpenPlaygroundHere(Entity entity);
 
   bool OpenPlaygroundHere(EntityPass& entity_pass);
@@ -29,6 +33,8 @@ class EntityPlayground : public PlaygroundTest {
   bool OpenPlaygroundHere(EntityPlaygroundCallback callback);
 
  private:
+  std::shared_ptr<TextRenderContext> text_render_context_;
+
   FML_DISALLOW_COPY_AND_ASSIGN(EntityPlayground);
 };
 

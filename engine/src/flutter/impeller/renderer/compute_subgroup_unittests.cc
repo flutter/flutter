@@ -125,7 +125,7 @@ TEST_P(ComputeSubgroupTest, PathPlayground) {
     }
     ImGui::End();
 
-    ContentContext renderer(context);
+    ContentContext renderer(context, nullptr);
     if (!renderer.IsValid()) {
       return false;
     }
@@ -329,7 +329,7 @@ TEST_P(ComputeSubgroupTest, LargePath) {
                                  ->count;
             });
 
-    ContentContext renderer(context);
+    ContentContext renderer(context, nullptr);
     if (!renderer.IsValid()) {
       return false;
     }
@@ -413,7 +413,7 @@ TEST_P(ComputeSubgroupTest, QuadAndCubicInOnePath) {
   ASSERT_EQ(status, ComputeTessellator::Status::kOk);
 
   auto callback = [&](RenderPass& pass) -> bool {
-    ContentContext renderer(context);
+    ContentContext renderer(context, nullptr);
     if (!renderer.IsValid()) {
       return false;
     }
