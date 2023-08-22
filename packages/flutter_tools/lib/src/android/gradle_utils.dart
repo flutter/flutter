@@ -50,10 +50,11 @@ const String ndkVersion = '23.1.7779620';
 const String oneMajorVersionHigherJavaVersion = '21';
 
 // Update this when new versions of Gradle come out including minor versions
+// and should correspond to the maximum Gradle version we test in CI.
 //
 // Supported here means supported by the tooling for
 // flutter analyze --suggestions and does not imply broader flutter support.
-const String maxKnownAndSupportedGradleVersion = '8.2.1';
+const String maxKnownAndSupportedGradleVersion = '8.0.2';
 
 // Update this when new versions of AGP come out.
 //
@@ -598,6 +599,26 @@ bool validateJavaAgp(Logger logger,
   return null;
 }
 
+// Returns valid Java range for specified Gradle and AGP verisons.
+VersionRange getJavaVersionFor({required String gradleV, required String agpV}) {
+  // Find minimum Java version based on AGP compatibility.
+  String? minJavaVersion;
+  for (final JavaAgpCompat data in _javaAgpCompatList) {
+    if (isWithinVersionRange(agpV, min: data.agpMin, max: data.agpMax)) {
+      minJavaVersion = data.javaMin;
+    }
+  }
+
+  // Find maximum Java version based on Gradle compatibility.
+  String? maxJavaVersion;
+  for (final JavaGradleCompat data in _javaGradleCompatList.reversed) {
+    if (isWithinVersionRange(gradleV, min: data.gradleMin, max: maxKnownAndSupportedGradleVersion)) {
+      maxJavaVersion = data.javaMax;
+    }
+  }
+
+  return VersionRange(versionMin: minJavaVersion, versionMax: maxJavaVersion);
+}
 
 /// Returns the Gradle version that is required by the given Android Gradle plugin version
 /// by picking the largest compatible version from
@@ -784,6 +805,16 @@ class GradleForAgp {
   final String minRequiredGradle;
 }
 
+// Data class that represents a range of versions.
+class VersionRange{
+  VersionRange({
+    required this.versionMin,
+    required this.versionMax,
+  });
+  final String? versionMin;
+  final String? versionMax;
+}
+
 // Returns gradlew file name based on the platform.
 String getGradlewFileName(Platform platform) {
   if (platform.isWindows) {
@@ -793,7 +824,12 @@ String getGradlewFileName(Platform platform) {
   }
 }
 
-// List of compatible Java/Gradle versions.
+// List of compatible Java/Gradle versions, where javaMax versions are
+// exclusive.
+//
+// Should be updated when a new version of Java is supported by a new version
+// of Gradle, as https://docs.gradle.org/current/userguide/compatibility.html
+// detials.
 List<JavaGradleCompat> _javaGradleCompatList = const <JavaGradleCompat>[
     JavaGradleCompat(
       javaMin: '19',
@@ -870,7 +906,10 @@ List<JavaGradleCompat> _javaGradleCompatList = const <JavaGradleCompat>[
     ),
   ];
 
-  // List of compatible Java/AGP versions.
+  // List of compatible Java/AGP versions, where agpMax versions are inclusive.
+  //
+  // Should be updated whenever a new version of AGP is released as
+  // https://developer.android.com/build/releases/gradle-plugin details.
   List<JavaAgpCompat> _javaAgpCompatList = const <JavaAgpCompat>[
     JavaAgpCompat(
       javaMin: '17',

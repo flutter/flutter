@@ -582,10 +582,9 @@ allprojects {
         // Newer tools version does not even meet current gradle version requiremnts.
         JavaGradleTestData(false, javaVersion: '20', gradleVersion: '7.5'),
         // Newer tools version requires newer gradle version.
-        JavaGradleTestData(true, javaVersion: '20', gradleVersion: '8.2.1'),
-        // Max known unsupported java version.
-        JavaGradleTestData(true, javaVersion: '24', gradleVersion: '8.2.1'),
-
+        JavaGradleTestData(true, javaVersion: '20', gradleVersion: maxKnownAndSupportedGradleVersion),
+        // Max known unsupported Java version.
+        JavaGradleTestData(true, javaVersion: '24', gradleVersion: maxKnownAndSupportedGradleVersion),
         // Minimums as defined in
         // https://docs.gradle.org/current/userguide/compatibility.html#java
         JavaGradleTestData(true, javaVersion: '19', gradleVersion: '7.6'),
@@ -600,7 +599,7 @@ allprojects {
         JavaGradleTestData(true, javaVersion: '1.10', gradleVersion: '4.7'),
         JavaGradleTestData(true, javaVersion: '1.9', gradleVersion: '4.3'),
         JavaGradleTestData(true, javaVersion: '1.8', gradleVersion: '2.0'),
-        // Gradle too old for java version.
+        // Gradle too old for Java version.
         JavaGradleTestData(false, javaVersion: '19', gradleVersion: '6.7'),
         JavaGradleTestData(false, javaVersion: '11', gradleVersion: '4.10.1'),
         JavaGradleTestData(false, javaVersion: '1.9', gradleVersion: '4.1'),
@@ -656,15 +655,15 @@ allprojects {
 
   group('validates java/AGP versions', () {
     final List<JavaAgpTestData> testData = <JavaAgpTestData>[
-      // Strictly too old java versions for known AGP versions. 
+      // Strictly too old Java versions for known AGP versions.
       JavaAgpTestData(false, javaVersion: '1.6', agpVersion: maxKnownAgpVersion),
       JavaAgpTestData(false, javaVersion: '1.6', agpVersion: maxKnownAndSupportedAgpVersion),
       JavaAgpTestData(false, javaVersion: '1.6', agpVersion: '4.2'),
-      // Strictly too old AGP versions. 
+      // Strictly too old AGP versions.
       JavaAgpTestData(false, javaVersion: '1.8', agpVersion: '1.0'),
       JavaAgpTestData(false, javaVersion: '1.8', agpVersion: '4.1'),
       JavaAgpTestData(false, javaVersion: '1.8', agpVersion: '2.3'),
-      // Strictly too new java versions for defined AGP versions.
+      // Strictly too new Java versions for defined AGP versions.
       JavaAgpTestData(true, javaVersion: '18', agpVersion: '8.1'),
       JavaAgpTestData(true, javaVersion: '18', agpVersion: '7.4'),
       JavaAgpTestData(true, javaVersion: '18', agpVersion: '4.2'),
@@ -733,7 +732,7 @@ allprojects {
       // Java version too high.
       expect(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: oneMajorVersionHigherJavaVersion), isNull);
       // Maximum known Java version.
-      // *This needs to be updated* when higher versions of Java are supported:
+      // *The test case that follows needs to be updated* when higher versions of Java are supported:
       expect(
         getValidGradleVersionRangeForJavaVersion(testLogger, javaV: '20'),
         allOf(
@@ -874,7 +873,7 @@ allprojects {
       // Java version unspecified.
       expect(getMinimumAgpVersionForJavaVersion(testLogger, javaV: null), isNull);
       // Maximum known Java version.
-      // *This needs to be updated* as higher versions of AGP are supported:
+      // *The test case that follows needs to be updated* as higher versions of AGP are supported:
       expect(
         getMinimumAgpVersionForJavaVersion(testLogger, javaV: oneMajorVersionHigherJavaVersion),
         equals(

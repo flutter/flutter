@@ -46,26 +46,6 @@ const String frameworkChannel = 'omega';
 const String _kDisabledPlatformRequestedMessage = 'currently not supported on your local environment.';
 const String _kIncompatibleJavaVersionMessage = 'The configured version of Java detected may conflict with the';
 
-// Returns incompatible Java/template Gradle/template AGP message header based
-// on incompatibility and project type.
-String getIncompatibleJavaGradleAgpMessageHeader(
-  bool javaGradleVersionsCompatible,
-  String templateGradleVersion,
-  String templateAgpVersion,
-  String projectType) {
-  final String incompatibleDependency = javaGradleVersionsCompatible ? 'Android Gradle Plugin (AGP)' :'Gradle' ;
-  final String incompatibleDependencyVersion = javaGradleVersionsCompatible ? 'AGP version $templateAgpVersion' : 'Gradle version $templateGradleVersion';
-
-  return '''
-$_kIncompatibleJavaVersionMessage $incompatibleDependency version in your new Flutter $projectType.
-
-[RECOMMENDED] If so, to keep the default $incompatibleDependencyVersion, make
-sure to download a compatible Java version. You may configure this compatible
-Java version by running: `flutter config --jdk-dir=<JDK_DIRECTORY>`. Note that
-this is a global configuration.
-''';
-}
-
 // This needs to be created from the local platform due to re-entrant flutter calls made in this test.
 FakePlatform _kNoColorTerminalPlatform() => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
 FakePlatform _kNoColorTerminalMacOSPlatform() => FakePlatform.fromPlatform(const LocalPlatform())
@@ -3525,7 +3505,7 @@ void main() {
       expect(logger.warningText, isNot(contains(unexpectedMessage)));
       expect(logger.warningText, contains('https://developer.android.com/build/releases/gradle-plugin'));
 
-        // Check expected file(s) for updating AGP version is/are present.
+      // Check expected file(s) for updating AGP version is/are present.
       if (projectType == FlutterProjectType.app || projectType == FlutterProjectType.skeleton || projectType == FlutterProjectType.pluginFfi) {
         expect(logger.warningText, contains(globals.fs.path.join(projectDir.path, 'android/build.gradle')));
       }
