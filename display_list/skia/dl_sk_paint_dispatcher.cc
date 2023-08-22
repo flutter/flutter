@@ -41,7 +41,7 @@ void DlSkPaintDispatchHelper::setAntiAlias(bool aa) {
   paint_.setAntiAlias(aa);
 }
 void DlSkPaintDispatchHelper::setDither(bool dither) {
-  paint_.setDither(dither);
+  dither_ = dither;
 }
 void DlSkPaintDispatchHelper::setInvertColors(bool invert) {
   invert_colors_ = invert;
@@ -73,6 +73,7 @@ void DlSkPaintDispatchHelper::setBlendMode(DlBlendMode mode) {
   paint_.setBlendMode(ToSk(mode));
 }
 void DlSkPaintDispatchHelper::setColorSource(const DlColorSource* source) {
+  color_source_gradient_ = source && source->isGradient();
   paint_.setShader(ToSk(source));
 }
 void DlSkPaintDispatchHelper::setImageFilter(const DlImageFilter* filter) {
