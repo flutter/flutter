@@ -1869,12 +1869,10 @@ ORIGIN: ../../../flutter/lib/ui/text/asset_manager_font_provider.cc + ../../../f
 ORIGIN: ../../../flutter/lib/ui/text/asset_manager_font_provider.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/ui/text/font_collection.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/ui/text/font_collection.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/lib/ui/text/line_metrics.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/ui/text/paragraph.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/ui/text/paragraph.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/ui/text/paragraph_builder.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/ui/text/paragraph_builder.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/lib/ui/text/text_box.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/ui/ui.dart + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/ui/ui_benchmarks.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/ui/ui_dart_state.cc + ../../../flutter/LICENSE
@@ -4598,12 +4596,10 @@ FILE: ../../../flutter/lib/ui/text/asset_manager_font_provider.cc
 FILE: ../../../flutter/lib/ui/text/asset_manager_font_provider.h
 FILE: ../../../flutter/lib/ui/text/font_collection.cc
 FILE: ../../../flutter/lib/ui/text/font_collection.h
-FILE: ../../../flutter/lib/ui/text/line_metrics.h
 FILE: ../../../flutter/lib/ui/text/paragraph.cc
 FILE: ../../../flutter/lib/ui/text/paragraph.h
 FILE: ../../../flutter/lib/ui/text/paragraph_builder.cc
 FILE: ../../../flutter/lib/ui/text/paragraph_builder.h
-FILE: ../../../flutter/lib/ui/text/text_box.h
 FILE: ../../../flutter/lib/ui/ui.dart
 FILE: ../../../flutter/lib/ui/ui_benchmarks.cc
 FILE: ../../../flutter/lib/ui/ui_dart_state.cc
