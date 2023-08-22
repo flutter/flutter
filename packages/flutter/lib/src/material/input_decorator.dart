@@ -260,7 +260,7 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
   }
 }
 
-// Used to "shake" the floating label to the left to the left and right
+// Used to "shake" the floating label to the left and right
 // when the errorText first appears.
 class _Shaker extends AnimatedWidget {
   const _Shaker({
@@ -1956,6 +1956,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   void dispose() {
     _floatingLabelController.dispose();
     _shakingLabelController.dispose();
+    _borderGap.dispose();
     super.dispose();
   }
 

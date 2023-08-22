@@ -54,9 +54,8 @@ export 'dart:ui' show AppLifecycleState, Locale;
 /// ** See code in examples/api/lib/widgets/binding/widget_binding_observer.0.dart **
 /// {@end-tool}
 abstract mixin class WidgetsBindingObserver {
-  /// Called when the system tells the app to pop the current route.
-  /// For example, on Android, this is called when the user presses
-  /// the back button.
+  /// Called when the system tells the app to pop the current route, such as
+  /// after a system back button press or back gesture.
   ///
   /// Observers are notified in registration order until one returns
   /// true. If none return true, the application quits.
@@ -69,6 +68,8 @@ abstract mixin class WidgetsBindingObserver {
   ///
   /// This method exposes the `popRoute` notification from
   /// [SystemChannels.navigation].
+  ///
+  /// {@macro flutter.widgets.AndroidPredictiveBack}
   Future<bool> didPopRoute() => Future<bool>.value(false);
 
   /// Called when the host tells the application to push a new route onto the
@@ -505,23 +506,6 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         },
       );
 
-      registerServiceExtension(
-        name: WidgetsServiceExtensions.fastReassemble.name,
-        callback: (Map<String, Object> params) async {
-          // This mirrors the implementation of the 'reassemble' callback registration
-          // in lib/src/foundation/binding.dart, but with the extra binding config used
-          // to skip some reassemble work.
-          final String? className = params['className'] as String?;
-          BindingBase.debugReassembleConfig = DebugReassembleConfig(widgetName: className);
-          try {
-            await reassembleApplication();
-          } finally {
-            BindingBase.debugReassembleConfig = null;
-          }
-          return <String, String>{'type': 'Success'};
-        },
-      );
-
       // Expose the ability to send Widget rebuilds as [Timeline] events.
       registerBoolServiceExtension(
         name: WidgetsServiceExtensions.profileWidgetBuilds.name,
@@ -560,7 +544,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
   Future<void> _forceRebuild() {
     if (rootElement != null) {
-      buildOwner!.reassemble(rootElement!, null);
+      buildOwner!.reassemble(rootElement!);
       return endOfFrame;
     }
     return Future<void>.value();
@@ -720,6 +704,27 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   /// This method exposes the `popRoute` notification from
   /// [SystemChannels.navigation].
+  ///
+  /// {@template flutter.widgets.AndroidPredictiveBack}
+  /// ## Handling backs ahead of time
+  ///
+  /// Not all system backs will result in a call to this method. Some are
+  /// handled entirely by the system without informing the Flutter framework.
+  ///
+  /// Android API 33+ introduced a feature called predictive back, which allows
+  /// the user to peek behind the current app or route during a back gesture and
+  /// then decide to cancel or commit the back. Flutter enables or disables this
+  /// feature ahead of time, before a back gesture occurs, and back gestures
+  /// that trigger predictive back are handled entirely by the system and do not
+  /// trigger this method here in the framework.
+  ///
+  /// By default, the framework communicates when it would like to handle system
+  /// back gestures using [SystemNavigator.setFrameworkHandlesBack] in
+  /// [WidgetsApp]. This is done automatically based on the status of the
+  /// [Navigator] stack and the state of any [PopScope] widgets present.
+  /// Developers can manually set this by calling the method directly or by
+  /// using [NavigationNotification].
+  /// {@endtemplate}
   @protected
   @visibleForTesting
   Future<void> handlePopRoute() async {
@@ -1090,7 +1095,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     }());
 
     if (rootElement != null) {
-      buildOwner!.reassemble(rootElement!, BindingBase.debugReassembleConfig);
+      buildOwner!.reassemble(rootElement!);
     }
     return super.performReassemble();
   }
