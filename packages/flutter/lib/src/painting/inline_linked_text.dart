@@ -65,21 +65,23 @@ class InlineLinkedText extends TextSpan {
   ///  * [InlineLinkedText.textLinkers], which uses [TextLinker]s to allow
   ///    specifying an arbitrary number of [ranges] and [linkBuilders].
   factory InlineLinkedText({
-    required LinkTapCallback onTap,
+    // TODO(justinmc): Why is style required?
     required TextStyle style,
     LinkBuilder? linkBuilder,
+    LinkTapCallback? onTap,
     Iterable<TextRange>? ranges,
     List<InlineSpan>? spans,
     String? text,
   }) {
     assert(text != null || spans != null, 'Must specify something to link: either text or spans.');
     assert(text == null || spans == null, 'Pass one of spans or text, not both.');
+    assert(linkBuilder != null || onTap != null);
     final RangesFinder rangesFinder = ranges != null
       ? (String text) => ranges
       : defaultRangesFinder;
     final TextLinker textLinker = TextLinker(
       rangesFinder: rangesFinder,
-      linkBuilder: linkBuilder ?? getDefaultLinkBuilder(onTap),
+      linkBuilder: linkBuilder ?? getDefaultLinkBuilder(onTap!),
     );
     final (Iterable<InlineSpan> linkedSpans, Iterable<TapGestureRecognizer> recognizers) =
         text == null
@@ -102,19 +104,20 @@ class InlineLinkedText extends TextSpan {
   ///  * [InlineLinkedText.textLinkers], which uses [TextLinker]s to allow
   ///    specifying an arbitrary number of [ranges] and [linkBuilders].
   factory InlineLinkedText.regExp({
-    required LinkTapCallback onTap,
     required RegExp regExp,
     required TextStyle style,
+    LinkTapCallback? onTap,
+    LinkBuilder? linkBuilder,
     String? text,
     List<InlineSpan>? spans,
-    LinkBuilder? linkBuilder,
   }) {
     assert(text != null || spans != null, 'Must specify something to link: either text or spans.');
     assert(text == null || spans == null, 'Pass one of spans or text, not both.');
+    assert(linkBuilder != null || onTap != null);
 
     final TextLinker textLinker = TextLinker(
       rangesFinder: TextLinker.rangesFinderFromRegExp(regExp),
-      linkBuilder: linkBuilder ?? getDefaultLinkBuilder(onTap),
+      linkBuilder: linkBuilder ?? getDefaultLinkBuilder(onTap!),
     );
     final (Iterable<InlineSpan> linkedSpans, Iterable<TapGestureRecognizer> recognizers) =
         text == null

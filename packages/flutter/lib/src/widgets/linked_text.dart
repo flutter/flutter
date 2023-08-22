@@ -65,21 +65,21 @@ class LinkedText extends StatefulWidget {
   ///  * [InlineLinkedText.new], which is like this, but for inline text.
   LinkedText({
     super.key,
-    required LinkTapCallback onTap,
+    LinkTapCallback? onTap,
     String? text,
     List<InlineSpan>? spans,
     this.style,
     Iterable<TextRange>? ranges,
-    // TODO(justinmc): Maybe shouldn't take something that takes a recognizer here, should be callback?
     LinkBuilder? linkBuilder,
   }) : assert(text != null || spans != null, 'Must specify something to link: either text or spans.'),
        assert(text == null || spans == null, 'Pass one of spans or text, not both.'),
+       assert(linkBuilder != null || onTap != null),
        textLinkers = <TextLinker>[
          TextLinker(
            rangesFinder: ranges == null
                ? InlineLinkedText.defaultRangesFinder
                : (String text) => ranges,
-           linkBuilder: linkBuilder ?? InlineLinkedText.getDefaultLinkBuilder(onTap),
+           linkBuilder: linkBuilder ?? InlineLinkedText.getDefaultLinkBuilder(onTap!),
          ),
        ],
        spans = spans ?? <InlineSpan>[
@@ -106,7 +106,7 @@ class LinkedText extends StatefulWidget {
   ///  * [InlineLinkedText.regExp], which is like this, but for inline text.
   LinkedText.regExp({
     super.key,
-    required LinkTapCallback onTap,
+    LinkTapCallback? onTap,
     String? text,
     List<InlineSpan>? spans,
     required RegExp regExp,
@@ -114,10 +114,11 @@ class LinkedText extends StatefulWidget {
     LinkBuilder? linkBuilder,
   }) : assert(text != null || spans != null, 'Must specify something to link: either text or spans.'),
        assert(text == null || spans == null, 'Pass one of spans or text, not both.'),
+       assert(linkBuilder != null || onTap != null),
        textLinkers = <TextLinker>[
          TextLinker(
            rangesFinder: TextLinker.rangesFinderFromRegExp(regExp),
-           linkBuilder: linkBuilder ?? InlineLinkedText.getDefaultLinkBuilder(onTap),
+           linkBuilder: linkBuilder ?? InlineLinkedText.getDefaultLinkBuilder(onTap!),
          ),
        ],
        spans = spans ?? <InlineSpan>[
