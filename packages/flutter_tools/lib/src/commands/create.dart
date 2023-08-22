@@ -816,7 +816,7 @@ void _printIncompatibleJavaAgpGradleVersionsWarning({
   required String templateAgpVersion,
   required FlutterProjectType projectType,
   required String projectDirPath}) {
-  // Determine if the Java version specified conflicts with the tempalte Gradle or AGP version.
+  // Determine if the Java version specified conflicts with the template Gradle or AGP version.
   final bool javaGradleVersionsCompatible = gradle.validateJavaGradle(globals.logger, javaV: javaVersion, gradleV: templateGradleVersion);
   final bool javaAgpVersionsCompatible = gradle.validateJavaAgp(globals.logger, javaV: javaVersion, agpV: templateAgpVersion);
 
