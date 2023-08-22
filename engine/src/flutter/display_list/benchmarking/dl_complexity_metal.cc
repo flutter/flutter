@@ -455,7 +455,7 @@ void DisplayListMetalComplexityCalculator::MetalHelper::drawVertices(
 }
 
 void DisplayListMetalComplexityCalculator::MetalHelper::drawImage(
-    const sk_sp<DlImage>& image,
+    const sk_sp<DlImage> image,
     const SkPoint point,
     DlImageSampling sampling,
     bool render_with_attributes) {
@@ -532,7 +532,7 @@ void DisplayListMetalComplexityCalculator::MetalHelper::ImageRect(
 }
 
 void DisplayListMetalComplexityCalculator::MetalHelper::drawImageNine(
-    const sk_sp<DlImage>& image,
+    const sk_sp<DlImage> image,
     const SkIRect& center,
     const SkRect& dst,
     DlFilterMode filter,
@@ -552,7 +552,7 @@ void DisplayListMetalComplexityCalculator::MetalHelper::drawImageNine(
 }
 
 void DisplayListMetalComplexityCalculator::MetalHelper::drawDisplayList(
-    const sk_sp<DisplayList>& display_list,
+    const sk_sp<DisplayList> display_list,
     SkScalar opacity) {
   if (IsComplex()) {
     return;
@@ -566,7 +566,7 @@ void DisplayListMetalComplexityCalculator::MetalHelper::drawDisplayList(
 }
 
 void DisplayListMetalComplexityCalculator::MetalHelper::drawTextBlob(
-    const sk_sp<SkTextBlob>& blob,
+    const sk_sp<SkTextBlob> blob,
     SkScalar x,
     SkScalar y) {
   if (IsComplex()) {

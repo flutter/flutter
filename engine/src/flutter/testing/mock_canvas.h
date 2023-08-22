@@ -27,7 +27,7 @@
 namespace flutter {
 namespace testing {
 
-[[maybe_unused]] static constexpr SkRect kEmptyRect = SkRect::MakeEmpty();
+static constexpr SkRect kEmptyRect = SkRect::MakeEmpty();
 
 // Mock |SkCanvas|, useful for writing tests that use Skia but do not interact
 // with the GPU.

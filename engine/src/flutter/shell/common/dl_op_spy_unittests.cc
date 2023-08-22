@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/display_list/display_list.h"
-#include "flutter/display_list/display_list_builder.h"
+#include "flutter/display_list/dl_builder.h"
 #include "flutter/shell/common/dl_op_spy.h"
 #include "flutter/testing/testing.h"
 #include "third_party/skia/include/core/SkBitmap.h"
