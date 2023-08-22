@@ -145,7 +145,7 @@ class SkwasmRenderer implements Renderer {
   }
 
   @override
-  Future<ui.Codec> instantiateImageCodecFromUrl(Uri uri, {WebOnlyImageCodecChunkCallback? chunkCallback}) {
+  Future<ui.Codec> instantiateImageCodecFromUrl(Uri uri, {ui_web.ImageCodecChunkCallback? chunkCallback}) {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
 

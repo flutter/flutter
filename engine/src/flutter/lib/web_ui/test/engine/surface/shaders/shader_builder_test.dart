@@ -5,7 +5,7 @@
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
-import 'package:ui/ui.dart' hide window;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -24,7 +24,7 @@ void testMain() {
       ')';
 
   setUpAll(() async {
-    await webOnlyInitializePlatform();
+    await ui_web.bootstrapEngine();
   });
 
   group('Shader Declarations', () {

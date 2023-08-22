@@ -31,6 +31,13 @@ part of ui;
 // TODO(mdebbar): Deprecate this and remove it.
 // https://github.com/flutter/flutter/issues/127395
 Future<void> webOnlyInitializePlatform() async {
+  assert(() {
+    engine.printWarning(
+      'The webOnlyInitializePlatform API is deprecated and will be removed in a '
+      'future release. Please use `bootstrapEngine` from `dart:ui_web` instead.',
+    );
+    return true;
+  }());
   await engine.initializeEngine();
 }
 

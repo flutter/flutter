@@ -8,6 +8,7 @@ import 'dart:typed_data';
 
 import 'package:ui/src/engine/skwasm/skwasm_stub.dart' if (dart.library.ffi) 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import 'browser_detection.dart';
 import 'canvaskit/renderer.dart';
@@ -15,7 +16,6 @@ import 'configuration.dart';
 import 'embedder.dart';
 import 'fonts.dart';
 import 'html/renderer.dart';
-import 'html_image_codec.dart';
 
 final Renderer _renderer = Renderer._internal();
 Renderer get renderer => _renderer;
@@ -131,7 +131,7 @@ abstract class Renderer {
 
   Future<ui.Codec> instantiateImageCodecFromUrl(
     Uri uri, {
-    WebOnlyImageCodecChunkCallback? chunkCallback,
+    ui_web.ImageCodecChunkCallback? chunkCallback,
   });
 
   void decodeImageFromPixels(
