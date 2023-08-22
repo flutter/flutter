@@ -48,7 +48,7 @@ class TextFrame {
   ///
   /// @return     If the text run could be added to this frame.
   ///
-  bool AddTextRun(const TextRun& run);
+  bool AddTextRun(TextRun&& run);
 
   //----------------------------------------------------------------------------
   /// @brief      Returns a reference to all the text runs in this frame.
@@ -70,6 +70,10 @@ class TextFrame {
   //----------------------------------------------------------------------------
   /// @brief      The type of atlas this run should be emplaced in.
   GlyphAtlas::Type GetAtlasType() const;
+
+  TextFrame& operator=(TextFrame&& other) = default;
+
+  TextFrame(const TextFrame& other) = default;
 
  private:
   std::vector<TextRun> runs_;

@@ -542,7 +542,7 @@ void Canvas::DrawTextFrame(const TextFrame& text_frame,
   entity.SetBlendMode(paint.blend_mode);
 
   auto text_contents = std::make_shared<TextContents>();
-  text_contents->SetTextFrame(text_frame);
+  text_contents->SetTextFrame(TextFrame(text_frame));
 
   if (paint.color_source.GetType() != ColorSource::Type::kColor) {
     auto color_text_contents = std::make_shared<ColorSourceTextContents>();
