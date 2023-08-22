@@ -660,7 +660,7 @@ allprojects {
       JavaAgpTestData(false, javaVersion: '1.6', agpVersion: maxKnownAgpVersion),
       JavaAgpTestData(false, javaVersion: '1.6', agpVersion: maxKnownAndSupportedAgpVersion),
       JavaAgpTestData(false, javaVersion: '1.6', agpVersion: '4.2'),
-      // Strictly too old cases -- AGP
+      // Strictly too old AGP versions. 
       JavaAgpTestData(false, javaVersion: '1.8', agpVersion: '1.0'),
       JavaAgpTestData(false, javaVersion: '1.8', agpVersion: '4.1'),
       JavaAgpTestData(false, javaVersion: '1.8', agpVersion: '2.3'),
