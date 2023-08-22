@@ -11,8 +11,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 
 const double _defaultBorderWidth = 1.0;
@@ -817,6 +816,8 @@ void main() {
     expect(inkFeatures, paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.12)));
 
     await hoverGesture.removePointer();
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Default InkWell colors - selected', (WidgetTester tester) async {
@@ -882,6 +883,8 @@ void main() {
     expect(inkFeatures, paints..rect(color: theme.colorScheme.primary.withOpacity(0.12)));
 
     await hoverGesture.removePointer();
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Custom InkWell colors', (WidgetTester tester) async {
@@ -951,6 +954,8 @@ void main() {
     expect(inkFeatures, paints..rect(color: focusColor));
 
     await hoverGesture.removePointer();
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking(
@@ -1863,6 +1868,10 @@ void main() {
     expect(toggleButtonElevation('two'), 0);
 
     await hoverGesture.removePointer();
+
+    for (final FocusNode n in focusNodes) {
+      n.dispose();
+    }
   });
 
   testWidgetsWithLeakTracking('Toggle buttons height matches MaterialTapTargetSize.padded height', (WidgetTester tester) async {

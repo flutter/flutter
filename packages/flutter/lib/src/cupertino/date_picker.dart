@@ -438,8 +438,9 @@ class CupertinoDatePicker extends StatefulWidget {
     _PickerColumnType columnType,
     CupertinoLocalizations localizations,
     BuildContext context,
-    bool showDayOfWeek
-  ) {
+    bool showDayOfWeek, {
+    bool standaloneMonth = false,
+  }) {
     String longestText = '';
 
     switch (columnType) {
@@ -491,8 +492,10 @@ class CupertinoDatePicker extends StatefulWidget {
           }
         }
       case _PickerColumnType.month:
-        for (int i = 1; i <=12; i++) {
-          final String month = localizations.datePickerMonth(i);
+        for (int i = 1; i <= 12; i++) {
+          final String month = standaloneMonth
+              ? localizations.datePickerStandaloneMonth(i)
+              : localizations.datePickerMonth(i);
           if (longestText.length < month.length) {
             longestText = month;
           }
@@ -1280,11 +1283,12 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
           final int month = index + 1;
           final bool isInvalidMonth = (widget.minimumDate?.year == selectedYear && widget.minimumDate!.month > month)
                                    || (widget.maximumDate?.year == selectedYear && widget.maximumDate!.month < month);
+          final String monthName = (widget.mode == CupertinoDatePickerMode.monthYear) ? localizations.datePickerStandaloneMonth(month) : localizations.datePickerMonth(month);
 
           return itemPositioningBuilder(
             context,
             Text(
-              localizations.datePickerMonth(month),
+              monthName,
               style: _themeTextStyle(context, isValid: !isInvalidMonth),
             ),
           );
@@ -1577,7 +1581,8 @@ class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
   }
 
   void _refreshEstimatedColumnWidths() {
-    estimatedColumnWidths[_PickerColumnType.month.index] = CupertinoDatePicker._getColumnWidth(_PickerColumnType.month, localizations, context, false);
+    estimatedColumnWidths[_PickerColumnType.month.index] =
+        CupertinoDatePicker._getColumnWidth(_PickerColumnType.month, localizations, context, false, standaloneMonth: widget.mode == CupertinoDatePickerMode.monthYear);
     estimatedColumnWidths[_PickerColumnType.year.index] = CupertinoDatePicker._getColumnWidth(_PickerColumnType.year, localizations, context, false);
   }
 
@@ -1613,11 +1618,12 @@ class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
           final int month = index + 1;
           final bool isInvalidMonth = (widget.minimumDate?.year == selectedYear && widget.minimumDate!.month > month)
                                    || (widget.maximumDate?.year == selectedYear && widget.maximumDate!.month < month);
+          final String monthName = (widget.mode == CupertinoDatePickerMode.monthYear) ? localizations.datePickerStandaloneMonth(month) : localizations.datePickerMonth(month);
 
           return itemPositioningBuilder(
             context,
             Text(
-              localizations.datePickerMonth(month),
+              monthName,
               style: _themeTextStyle(context, isValid: !isInvalidMonth),
             ),
           );

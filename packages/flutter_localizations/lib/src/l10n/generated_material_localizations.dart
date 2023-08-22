@@ -465,6 +465,9 @@ class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'Wys rekeninge';
 
   @override
@@ -950,6 +953,9 @@ class MaterialLocalizationAm extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'መለያዎችን አሳይ';
@@ -1439,6 +1445,9 @@ class MaterialLocalizationAr extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'لم يتم اختيار أي عنصر';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'إظهار الحسابات';
 
   @override
@@ -1924,6 +1933,9 @@ class MaterialLocalizationAs extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'একাউণ্টসমূহ দেখুৱাওক';
@@ -2413,6 +2425,9 @@ class MaterialLocalizationAz extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'Hesabları göstərin';
 
   @override
@@ -2898,6 +2913,9 @@ class MaterialLocalizationBe extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'Паказаць уліковыя запісы';
@@ -3387,6 +3405,9 @@ class MaterialLocalizationBg extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'Показване на профилите';
 
   @override
@@ -3872,6 +3893,9 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'অ্যাকাউন্টগুলি দেখান';
@@ -4361,6 +4385,9 @@ class MaterialLocalizationBs extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'Prikaži račune';
 
   @override
@@ -4846,6 +4873,9 @@ class MaterialLocalizationCa extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'Mostra els comptes';
@@ -5335,6 +5365,9 @@ class MaterialLocalizationCs extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'Zobrazit účty';
 
   @override
@@ -5820,6 +5853,9 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => "Nid oes unrhyw eitemau wedi'u dewis";
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'Dangos cyfrifon';
@@ -6309,6 +6345,9 @@ class MaterialLocalizationDa extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'Vis konti';
 
   @override
@@ -6794,6 +6833,9 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => 'Keine Objekte ausgewählt';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'Konten anzeigen';
@@ -7347,6 +7389,9 @@ class MaterialLocalizationEl extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'Εμφάνιση λογαριασμών';
 
   @override
@@ -7832,6 +7877,9 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => 'No items selected';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'Show accounts';
@@ -9116,6 +9164,9 @@ class MaterialLocalizationEs extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => 'No se han seleccionado elementos';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'Mostrar cuentas';
@@ -13408,6 +13459,9 @@ class MaterialLocalizationEt extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'Kuva kontod';
 
   @override
@@ -13893,6 +13947,9 @@ class MaterialLocalizationEu extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'Erakutsi kontuak';
@@ -14382,6 +14439,9 @@ class MaterialLocalizationFa extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'نشان دادن حساب‌ها';
 
   @override
@@ -14867,6 +14927,9 @@ class MaterialLocalizationFi extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'Näytä tilit';
@@ -15356,6 +15419,9 @@ class MaterialLocalizationFil extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'Ipakita ang mga account';
 
   @override
@@ -15841,6 +15907,9 @@ class MaterialLocalizationFr extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => 'Aucun élément sélectionné';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'Afficher les comptes';
@@ -16487,6 +16556,9 @@ class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'Non se seleccionaron elementos';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'Mostrar contas';
 
   @override
@@ -16972,6 +17044,9 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'Konten anzeigen';
@@ -17461,6 +17536,9 @@ class MaterialLocalizationGu extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'એકાઉન્ટ બતાવો';
 
   @override
@@ -17946,6 +18024,9 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'הצגת החשבונות';
@@ -18435,6 +18516,9 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'खाते दिखाएं';
 
   @override
@@ -18920,6 +19004,9 @@ class MaterialLocalizationHr extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'Prikažite račune';
@@ -19409,6 +19496,9 @@ class MaterialLocalizationHu extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'Fiókok megjelenítése';
 
   @override
@@ -19894,6 +19984,9 @@ class MaterialLocalizationHy extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => 'Տողերը ընտրված չեն';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'Ցույց տալ հաշիվները';
@@ -20383,6 +20476,9 @@ class MaterialLocalizationId extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'Tampilkan akun';
 
   @override
@@ -20868,6 +20964,9 @@ class MaterialLocalizationIs extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'Sýna reikninga';
@@ -21357,6 +21456,9 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'Mostra account';
 
   @override
@@ -21842,6 +21944,9 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'アカウントを表示';
@@ -22331,6 +22436,9 @@ class MaterialLocalizationKa extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'ანგარიშების ჩვენება';
 
   @override
@@ -22816,6 +22924,9 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => 'Тармақ таңдалмаған';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'Аккаунттарды көрсету';
@@ -23305,6 +23416,9 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'បង្ហាញគណនី';
 
   @override
@@ -23790,6 +23904,9 @@ class MaterialLocalizationKn extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => '\u{c96}\u{cbe}\u{ca4}\u{cc6}\u{c97}\u{cb3}\u{ca8}\u{ccd}\u{ca8}\u{cc1}\u{20}\u{ca4}\u{ccb}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
@@ -24279,6 +24396,9 @@ class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => '계정 표시';
 
   @override
@@ -24764,6 +24884,9 @@ class MaterialLocalizationKy extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'Аккаунттарды көрсөтүү';
@@ -25253,6 +25376,9 @@ class MaterialLocalizationLo extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'ສະແດງບັນຊີ';
 
   @override
@@ -25738,6 +25864,9 @@ class MaterialLocalizationLt extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'Rodyti paskyras';
@@ -26227,6 +26356,9 @@ class MaterialLocalizationLv extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'Nav atlasītu vienumu';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'Rādīt kontus';
 
   @override
@@ -26712,6 +26844,9 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'Прикажи сметки';
@@ -27201,6 +27336,9 @@ class MaterialLocalizationMl extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'അക്കൗണ്ടുകൾ കാണിക്കുക';
 
   @override
@@ -27686,6 +27824,9 @@ class MaterialLocalizationMn extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => 'Бичлэг сонгоогүй байна';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'Бүртгэлүүдийг харуулах';
@@ -28175,6 +28316,9 @@ class MaterialLocalizationMr extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'कोणतेही आयटम निवडलेले नाहीत';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'खाती दर्शवा';
 
   @override
@@ -28660,6 +28804,9 @@ class MaterialLocalizationMs extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => 'Tiada item dipilih';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'Tunjukkan akaun';
@@ -29149,6 +29296,9 @@ class MaterialLocalizationMy extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'အကောင့်များကို ပြရန်';
 
   @override
@@ -29634,6 +29784,9 @@ class MaterialLocalizationNb extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'Vis kontoer';
@@ -30123,6 +30276,9 @@ class MaterialLocalizationNe extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'खाताहरू देखाउनुहोस्';
 
   @override
@@ -30608,6 +30764,9 @@ class MaterialLocalizationNl extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'Accounts tonen';
@@ -31097,6 +31256,9 @@ class MaterialLocalizationNo extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'Vis kontoer';
 
   @override
@@ -31582,6 +31744,9 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'ଆକାଉଣ୍ଟ ଦେଖାନ୍ତୁ';
@@ -32071,6 +32236,9 @@ class MaterialLocalizationPa extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'ਖਾਤੇ ਦਿਖਾਓ';
 
   @override
@@ -32556,6 +32724,9 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'Pokaż konta';
@@ -33045,6 +33216,9 @@ class MaterialLocalizationPs extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'حسابونه ښکاره کړئ';
 
   @override
@@ -33530,6 +33704,9 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'Mostrar contas';
@@ -34194,6 +34371,9 @@ class MaterialLocalizationRo extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'Nu există elemente selectate';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'Afișați conturile';
 
   @override
@@ -34679,6 +34859,9 @@ class MaterialLocalizationRu extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => 'Строки не выбраны';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'Показать аккаунты';
@@ -35168,6 +35351,9 @@ class MaterialLocalizationSi extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'ගිණුම් පෙන්වන්න';
 
   @override
@@ -35653,6 +35839,9 @@ class MaterialLocalizationSk extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'Zobraziť účty';
@@ -36142,6 +36331,9 @@ class MaterialLocalizationSl extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'Prikaz računov';
 
   @override
@@ -36629,6 +36821,9 @@ class MaterialLocalizationSq extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'Shfaq llogaritë';
 
   @override
@@ -37114,6 +37309,9 @@ class MaterialLocalizationSr extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'Прикажи налоге';
@@ -37941,6 +38139,9 @@ class MaterialLocalizationSv extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'Visa konton';
 
   @override
@@ -38426,6 +38627,9 @@ class MaterialLocalizationSw extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => 'Hamna kilicho chaguliwa';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'Onyesha akaunti';
@@ -38915,6 +39119,9 @@ class MaterialLocalizationTa extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => 'எந்த வரிசையும் தேர்ந்தெடுக்கவில்லை';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'கணக்குகளைக் காட்டும்';
 
   @override
@@ -39400,6 +39607,9 @@ class MaterialLocalizationTe extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'ఖాతాలను చూపు';
@@ -39889,6 +40099,9 @@ class MaterialLocalizationTh extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'แสดงบัญชี';
 
   @override
@@ -40374,6 +40587,9 @@ class MaterialLocalizationTl extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'Ipakita ang mga account';
@@ -40863,6 +41079,9 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'Hesapları göster';
 
   @override
@@ -41348,6 +41567,9 @@ class MaterialLocalizationUk extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'Показати облікові записи';
@@ -41837,6 +42059,9 @@ class MaterialLocalizationUr extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'اکاؤنٹس دکھائیں';
 
   @override
@@ -42322,6 +42547,9 @@ class MaterialLocalizationUz extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'Hisoblarni koʻrsatish';
@@ -42811,6 +43039,9 @@ class MaterialLocalizationVi extends GlobalMaterialLocalizations {
   String? get selectedRowCountTitleZero => null;
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get showAccountsLabel => 'Hiển thị tài khoản';
 
   @override
@@ -43296,6 +43527,9 @@ class MaterialLocalizationZh extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => '显示帐号';
@@ -44318,6 +44552,9 @@ class MaterialLocalizationZu extends GlobalMaterialLocalizations {
 
   @override
   String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get showAccountsLabel => 'Bonisa ama-akhawunti';
