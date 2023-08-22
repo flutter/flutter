@@ -11,6 +11,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 
 void main() {
@@ -19,7 +20,26 @@ void main() {
    * because [matchesGoldenFile] does not use Skia Gold in its native package.
    */
 
-  testWidgets('correctly records frames using collate', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('recording disposes images',
+  (WidgetTester tester) async {
+    final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
+
+    await tester.pumpFrames(
+      builder.record(
+        const _DecuplePixels(Duration(seconds: 1)),
+      ),
+      const Duration(milliseconds: 200),
+      const Duration(milliseconds: 100),
+    );
+  },
+  skip: isBrowser,
+  // TODO(polina-c): remove after fixing https://github.com/flutter/flutter/issues/133071
+  // And replace other `testWidgets` with `testWidgetsWithLeakTracking` in this file.
+  leakTrackingTestConfig: const LeakTrackingTestConfig(allowAllNotDisposed: true),
+  );
+
+  testWidgetsWithLeakTracking('correctly records frames using collate',
+  (WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
 
     await tester.pumpFrames(
@@ -53,6 +73,7 @@ void main() {
       image,
       matchesGoldenFile('test.animation_sheet_builder.collate.png'),
     );
+
     image.dispose();
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
