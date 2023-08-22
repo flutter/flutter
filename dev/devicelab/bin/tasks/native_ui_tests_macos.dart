@@ -23,6 +23,7 @@ Future<void> main() async {
       device = await devices.workingDevice;
     } on DeviceException {
       device = null;
+      print('Could not find device');
     }
 
     try {
@@ -50,7 +51,7 @@ Future<void> main() async {
         platformDirectory: path.join(projectDirectory, 'macos'),
         destination: 'platform=macOS',
         testName: 'native_ui_tests_macos',
-        skipCodesign: true,
+        // skipCodesign: true,
       )) {
         return TaskResult.failure('Platform unit tests failed');
       }
