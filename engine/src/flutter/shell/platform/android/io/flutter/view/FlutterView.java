@@ -482,7 +482,8 @@ public class FlutterView extends SurfaceView
    */
   @Override
   public boolean onGenericMotionEvent(MotionEvent event) {
-    boolean handled = isAttached() && androidTouchProcessor.onGenericMotionEvent(event);
+    boolean handled =
+        isAttached() && androidTouchProcessor.onGenericMotionEvent(event, getContext());
     return handled ? true : super.onGenericMotionEvent(event);
   }
 

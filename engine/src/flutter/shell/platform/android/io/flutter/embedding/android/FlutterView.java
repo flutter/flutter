@@ -952,7 +952,8 @@ public class FlutterView extends FrameLayout
   @Override
   public boolean onGenericMotionEvent(@NonNull MotionEvent event) {
     boolean handled =
-        isAttachedToFlutterEngine() && androidTouchProcessor.onGenericMotionEvent(event);
+        isAttachedToFlutterEngine()
+            && androidTouchProcessor.onGenericMotionEvent(event, getContext());
     return handled ? true : super.onGenericMotionEvent(event);
   }
 
