@@ -214,7 +214,7 @@ mixin class ChangeNotifier implements Listenable {
   ///
   /// Tools like leak_tracker use the event of object creation to help
   /// developers identify the owner of the object, for troubleshooting purposes,
-  /// taking stack trace at the moment of the event.
+  /// by taking stack trace at the moment of the event.
   ///
   /// But, as [ChangeNotifier] is mixin, it does not have its own constructor. So, it
   /// communicates object creation in first `addListener`, that results
