@@ -1196,6 +1196,11 @@ class ShortcutRegistryEntry {
 /// widgets that are not descendants of the registry can listen to it (e.g. in
 /// overlays).
 class ShortcutRegistry with ChangeNotifier {
+  /// Creates an instance of [ShortcutRegistry].
+  ShortcutRegistry() {
+    mayBeDispatchObjectCreation();
+  }
+
   bool _notificationScheduled = false;
   bool _disposed = false;
 
