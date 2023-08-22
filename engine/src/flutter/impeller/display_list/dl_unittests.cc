@@ -7,8 +7,8 @@
 #include <memory>
 #include <vector>
 
-#include "flutter/display_list/display_list_builder.h"
 #include "flutter/display_list/dl_blend_mode.h"
+#include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_color.h"
 #include "flutter/display_list/dl_paint.h"
 #include "flutter/display_list/dl_tile_mode.h"
