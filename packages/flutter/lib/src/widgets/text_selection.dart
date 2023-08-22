@@ -1871,12 +1871,13 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay> with S
 
 /// Delegate interface for the [TextSelectionGestureDetectorBuilder].
 ///
-/// The interface is usually implemented by text field implementations wrapping
-/// [EditableText], that use a [TextSelectionGestureDetectorBuilder] to build a
-/// [TextSelectionGestureDetector] for their [EditableText]. The delegate provides
-/// the builder with information about the current state of the text field.
-/// Based on these information, the builder adds the correct gesture handlers
-/// to the gesture detector.
+/// The interface is usually implemented by the [State] of text field
+/// implementations wrapping [EditableText], so that they can use a
+/// [TextSelectionGestureDetectorBuilder] to build a
+/// [TextSelectionGestureDetector] for their [EditableText]. The delegate
+/// provides the builder with information about the current state of the text
+/// field. Based on that information, the builder adds the correct gesture
+/// handlers to the gesture detector.
 ///
 /// See also:
 ///
@@ -1907,6 +1908,12 @@ abstract class TextSelectionGestureDetectorBuilderDelegate {
 /// The resulting [TextSelectionGestureDetector] to wrap an [EditableText] is
 /// obtained by calling [buildGestureDetector].
 ///
+/// A [TextSelectionGestureDetectorBuilder] must be provided a
+/// [TextSelectionGestureDetectorBuilderDelegate], from which information about
+/// the [EditableText] may be obtained. Typically, the [State] of the widget
+/// that builds the [EditableText] implements this interface, and then passes
+/// itself as the [delegate].
+///
 /// See also:
 ///
 ///  * [TextField], which uses a subclass to implement the Material-specific
@@ -1915,8 +1922,6 @@ abstract class TextSelectionGestureDetectorBuilderDelegate {
 ///    Cupertino-specific gesture logic of an [EditableText].
 class TextSelectionGestureDetectorBuilder {
   /// Creates a [TextSelectionGestureDetectorBuilder].
-  ///
-  /// The [delegate] must not be null.
   TextSelectionGestureDetectorBuilder({
     required this.delegate,
   });
@@ -1926,6 +1931,9 @@ class TextSelectionGestureDetectorBuilder {
   /// The delegate provides the builder with information about what actions can
   /// currently be performed on the text field. Based on this, the builder adds
   /// the correct gesture handlers to the gesture detector.
+  ///
+  /// Typically implemented by a [State] of a widget that builds an
+  /// [EditableText].
   @protected
   final TextSelectionGestureDetectorBuilderDelegate delegate;
 
@@ -2567,14 +2575,13 @@ class TextSelectionGestureDetectorBuilder {
     _selectTextBoundariesInRange(boundary: lineBoundary, from: from, to: to, cause: cause);
   }
 
-  // Returns the closest boundary location to `extent` but not including `extent`
-  // itself.
-  TextRange _moveBeyondTextBoundary(TextPosition extent, TextBoundary textBoundary) {
+  // Returns the location of a text boundary at `extent`. When `extent` is at
+  // the end of the text, returns the previous text boundary's location.
+  TextRange _moveToTextBoundary(TextPosition extent, TextBoundary textBoundary) {
     assert(extent.offset >= 0);
-    // if x is a boundary defined by `textBoundary`, most textBoundaries (except
-    // LineBreaker) guarantees `x == textBoundary.getLeadingTextBoundaryAt(x)`.
-    // Use x - 1 here to make sure we don't get stuck at the fixed point x.
-    final int start = textBoundary.getLeadingTextBoundaryAt(extent.offset - 1) ?? 0;
+    // Use extent.offset - 1 when `extent` is at the end of the text to retrieve
+    // the previous text boundary's location.
+    final int start = textBoundary.getLeadingTextBoundaryAt(extent.offset == editableText.textEditingValue.text.length ? extent.offset - 1 : extent.offset) ?? 0;
     final int end = textBoundary.getTrailingTextBoundaryAt(extent.offset) ?? editableText.textEditingValue.text.length;
     return TextRange(start: start, end: end);
   }
@@ -2589,13 +2596,13 @@ class TextSelectionGestureDetectorBuilder {
   // beginning and end of a text boundary respectively.
   void _selectTextBoundariesInRange({required TextBoundary boundary, required Offset from, Offset? to, SelectionChangedCause? cause}) {
     final TextPosition fromPosition = renderEditable.getPositionForPoint(from);
-    final TextRange fromRange = _moveBeyondTextBoundary(fromPosition, boundary);
+    final TextRange fromRange = _moveToTextBoundary(fromPosition, boundary);
     final TextPosition toPosition = to == null
         ? fromPosition
         : renderEditable.getPositionForPoint(to);
     final TextRange toRange = toPosition == fromPosition
         ? fromRange
-        : _moveBeyondTextBoundary(toPosition, boundary);
+        : _moveToTextBoundary(toPosition, boundary);
     final bool isFromBoundaryBeforeToBoundary = fromRange.start < toRange.end;
 
     final TextSelection newSelection = isFromBoundaryBeforeToBoundary
@@ -2972,7 +2979,9 @@ class TextSelectionGestureDetectorBuilder {
   /// Returns a [TextSelectionGestureDetector] configured with the handlers
   /// provided by this builder.
   ///
-  /// The [child] or its subtree should contain [EditableText].
+  /// The [child] or its subtree should contain an [EditableText] whose key is
+  /// the [GlobalKey] provided by the [delegate]'s
+  /// [TextSelectionGestureDetectorBuilderDelegate.editableTextKey].
   Widget buildGestureDetector({
     Key? key,
     HitTestBehavior? behavior,
