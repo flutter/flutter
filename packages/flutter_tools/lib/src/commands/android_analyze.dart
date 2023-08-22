@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:path/path.dart' as path;
-
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -48,7 +46,7 @@ class AndroidAnalyze {
           throwToolExit('"--build-variant" must be provided');
         }
         await project.android.outputsAppLinkSettings(variant: buildVariant!);
-        final String filePath = path.join(project.directory.path, 'build', 'app', 'app-link-settings-$buildVariant.json`');
+        final String filePath = fileSystem.path.join(project.directory.path, 'build', 'app', 'app-link-settings-$buildVariant.json`');
         logger.printStatus('result saved in $filePath');
     }
   }

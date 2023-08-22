@@ -103,7 +103,7 @@ class AnalyzeCommand extends FlutterCommand {
 
     argParser.addFlag('android',
       negatable: false,
-      help: 'Analyze Android sub-project. Used by internal tools only',
+      help: 'Analyze Android sub-project. Used by internal tools only.',
       hide: !verboseHelp,
     );
 
