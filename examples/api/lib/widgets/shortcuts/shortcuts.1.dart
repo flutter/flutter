@@ -26,6 +26,10 @@ class ShortcutsExampleApp extends StatelessWidget {
 }
 
 class Model with ChangeNotifier {
+  Model() {
+    mayBeDispatchObjectCreation();
+  }
+
   int count = 0;
   void incrementBy(int amount) {
     count += amount;

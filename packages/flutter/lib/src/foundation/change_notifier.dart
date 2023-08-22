@@ -207,6 +207,26 @@ mixin class ChangeNotifier implements Listenable {
   @protected
   bool get hasListeners => _count > 0;
 
+  /// Dispatches event of object creation to [MemoryAllocations.instance].
+  ///
+  /// If the event was already dispatched or [kFlutterMemoryAllocationsEnabled]
+  /// is false, the method is noop.
+  ///
+  /// This method is invoked on first [addListener] call,
+  /// but it may be helpful to dispatch it earlier,
+  /// to make it the event closer to actual object creation.
+  @protected
+  void mayBeDispatchObjectCreation() {
+    if (kFlutterMemoryAllocationsEnabled && !_creationDispatched) {
+      MemoryAllocations.instance.dispatchObjectCreated(
+        library: _flutterFoundationLibrary,
+        className: '$ChangeNotifier',
+        object: this,
+      );
+      _creationDispatched = true;
+    }
+  }
+
   /// Register a closure to be called when the object changes.
   ///
   /// If the given closure is already registered, an additional instance is
@@ -236,14 +256,9 @@ mixin class ChangeNotifier implements Listenable {
   @override
   void addListener(VoidCallback listener) {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
-    if (kFlutterMemoryAllocationsEnabled && !_creationDispatched) {
-      MemoryAllocations.instance.dispatchObjectCreated(
-        library: _flutterFoundationLibrary,
-        className: '$ChangeNotifier',
-        object: this,
-      );
-      _creationDispatched = true;
-    }
+
+    mayBeDispatchObjectCreation();
+
     if (_count == _listeners.length) {
       if (_count == 0) {
         _listeners = List<VoidCallback?>.filled(1, null);
@@ -504,14 +519,7 @@ class _MergingListenable extends Listenable {
 class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
   /// Creates a [ChangeNotifier] that wraps this value.
   ValueNotifier(this._value) {
-    if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectCreated(
-        library: _flutterFoundationLibrary,
-        className: '$ValueNotifier',
-        object: this,
-      );
-    }
-    _creationDispatched = true;
+    mayBeDispatchObjectCreation();
   }
 
   /// The current value stored in this notifier.
