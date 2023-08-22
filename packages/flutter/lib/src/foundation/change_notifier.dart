@@ -213,8 +213,8 @@ mixin class ChangeNotifier implements Listenable {
   /// is false, the method is noop.
   ///
   /// This method is invoked on first [addListener] call,
-  /// but it may be helpful to dispatch it earlier,
-  /// to make it the event closer to actual object creation.
+  /// but it may be helpful to dispatch it earlier, in constructor,
+  /// to make the event closer to actual object creation.
   @protected
   void mayBeDispatchObjectCreation() {
     if (kFlutterMemoryAllocationsEnabled && !_creationDispatched) {
