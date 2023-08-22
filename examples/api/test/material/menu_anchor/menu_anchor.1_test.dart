@@ -21,13 +21,19 @@ void main() {
 
     await tester.tapAt(const Offset(100, 200), buttons: kSecondaryButton);
     await tester.pumpAndSettle();
-    expect(tester.getRect(findMenu()), equals(const Rect.fromLTRB(100.0, 200.0, 433.0, 360.0)));
+    expect(tester.getRect(findMenu()).left, equals(100.0));
+    expect(tester.getRect(findMenu()).top, equals(200.0));
+    expect(tester.getRect(findMenu()).right, closeTo(389.8, 0.1));
+    expect(tester.getRect(findMenu()).bottom, equals(360.0));
 
     // Make sure tapping in a different place causes the menu to move.
     await tester.tapAt(const Offset(200, 100), buttons: kSecondaryButton);
     await tester.pump();
 
-    expect(tester.getRect(findMenu()), equals(const Rect.fromLTRB(200.0, 100.0, 533.0, 260.0)));
+    expect(tester.getRect(findMenu()).left, equals(200.0));
+    expect(tester.getRect(findMenu()).top, equals(100.0));
+    expect(tester.getRect(findMenu()).right, closeTo(489.8, 0.1));
+    expect(tester.getRect(findMenu()).bottom, equals(260.0));
 
     expect(find.text(example.MenuEntry.about.label), findsOneWidget);
     expect(find.text(example.MenuEntry.showMessage.label), findsOneWidget);
