@@ -786,7 +786,22 @@ class SliverReorderableListState extends State<SliverReorderableList> with Ticke
 
   void _dragEnd(_DragInfo item) {
     // No changes required if last child is being inserted into the last position.
-    if (_insertIndex! + 1 == _items.length) {
+    if ((_insertIndex! + 1 == _items.length) && _reverse) {
+      final RenderBox lastItemRenderBox =  _items[_items.length - 1]!.context.findRenderObject()! as RenderBox;
+      final Offset lastItemOffset =  lastItemRenderBox.localToGlobal(Offset.zero);
+
+      // When drag starts, the corresponding element is removed from
+      // the list, and moves inside of [ReorderableListState.CustomScrollView],
+      // which gives [CustomScrollView] a variable height.
+      //
+      // So when the element is moved, delta would change accordingly,
+      // and since it's the last element,
+      // we animate it back to it's position and add it back to the list.
+      final double delta = item.itemSize.height;
+
+      setState(() {
+        _finalDropPosition = Offset(lastItemOffset.dx, lastItemOffset.dy  - delta);
+      });
       return;
     }
     setState(() {
