@@ -483,8 +483,10 @@ class FlutterPlugin implements Plugin<Project> {
     /** Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project. */
     private void detectLowCompileSdkVersionOrNdkVersion() {
         project.afterEvaluate {
-            int projectCompileSdkVersion = Integer.MAX_VALUE // Default to int max if using a preview version to skip the sdk check.
-            if (project.android.compileSdkVersion.substring(8).isInteger()) { // Stable versions use ints, legacy preview uses string.
+            // Default to int max if using a preview version to skip the sdk check.
+            int projectCompileSdkVersion = Integer.MAX_VALUE
+            // Stable versions use ints, legacy preview uses string.
+            if (project.android.compileSdkVersion.substring(8).isInteger()) {
                 projectCompileSdkVersion = project.android.compileSdkVersion.substring(8) as int
             }
             int maxPluginCompileSdkVersion = projectCompileSdkVersion
@@ -496,8 +498,10 @@ class FlutterPlugin implements Plugin<Project> {
             getPluginList().each { plugin ->
                 Project pluginProject = project.rootProject.findProject(plugin.key)
                 pluginProject.afterEvaluate {
-                    int pluginCompileSdkVersion = Integer.MIN_VALUE; // Default to int min if using a preview version to skip the sdk check.
-                    if (pluginProject.android.compileSdkVersion.substring(8).isInteger()) { // Stable versions use ints, legacy preview uses string.
+                    // Default to int min if using a preview version to skip the sdk check.
+                    int pluginCompileSdkVersion = Integer.MIN_VALUE;
+                    // Stable versions use ints, legacy preview uses string.
+                    if (pluginProject.android.compileSdkVersion.substring(8).isInteger()) {
                         pluginCompileSdkVersion = pluginProject.android.compileSdkVersion.substring(8) as int;
                     }
                     maxPluginCompileSdkVersion = Math.max(pluginCompileSdkVersion, maxPluginCompileSdkVersion)
