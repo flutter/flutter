@@ -8,9 +8,13 @@
 #include <pthread.h>
 #include <cstring>
 
+#include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/linux/fl_binary_messenger_private.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_binary_messenger.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_method_channel.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_method_codec.h"
 #include "flutter/shell/platform/linux/testing/fl_test.h"
 #include "flutter/shell/platform/linux/testing/mock_binary_messenger_response_handle.h"
 #include "flutter/shell/platform/linux/testing/mock_renderer.h"
@@ -126,12 +130,26 @@ static GBytes* send_on_channel_finish(FlBinaryMessenger* messenger,
   return g_bytes_new(text, strlen(text));
 }
 
+static void resize_channel(FlBinaryMessenger* messenger,
+                           const gchar* channel,
+                           int64_t new_size) {
+  // Fake implementation. Do nothing.
+}
+
+static void set_allow_channel_overflow(FlBinaryMessenger* messenger,
+                                       const gchar* channel,
+                                       bool allowed) {
+  // Fake implementation. Do nothing.
+}
+
 static void fl_fake_binary_messenger_iface_init(
     FlBinaryMessengerInterface* iface) {
   iface->set_message_handler_on_channel = set_message_handler_on_channel;
   iface->send_response = send_response;
   iface->send_on_channel = send_on_channel;
   iface->send_on_channel_finish = send_on_channel_finish;
+  iface->resize_channel = resize_channel;
+  iface->set_allow_channel_overflow = set_allow_channel_overflow;
 }
 
 static void fl_fake_binary_messenger_init(FlFakeBinaryMessenger* self) {}
@@ -385,6 +403,105 @@ TEST(FlBinaryMessengerTest, ReceiveMessage) {
   // Blocks here until response_cb is called.
   g_main_loop_run(loop);
 }
+
+// MOCK_ENGINE_PROC is leaky by design.
+// NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
+
+// Checks if the 'resize' command is sent and is well-formed.
+TEST(FlBinaryMessengerTest, ResizeChannel) {
+  g_autoptr(FlEngine) engine = make_mock_engine();
+  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
+
+  bool called = false;
+
+  FlutterEngineSendPlatformMessageFnPtr old_handler =
+      embedder_api->SendPlatformMessage;
+  embedder_api->SendPlatformMessage = MOCK_ENGINE_PROC(
+      SendPlatformMessage,
+      ([&called, old_handler](auto engine,
+                              const FlutterPlatformMessage* message) {
+        // Expect to receive a message on the "control" channel.
+        if (strcmp(message->channel, "dev.flutter/channel-buffers") != 0) {
+          return old_handler(engine, message);
+        }
+
+        called = true;
+
+        // The expected content was created from the following Dart code:
+        //   MethodCall call = MethodCall('resize', ['flutter/test',3]);
+        //   StandardMethodCodec().encodeMethodCall(call).buffer.asUint8List();
+        const int expected_message_size = 29;
+        EXPECT_EQ(message->message_size,
+                  static_cast<size_t>(expected_message_size));
+        int expected[expected_message_size] = {
+            7,   6,   114, 101, 115, 105, 122, 101, 12,  2,
+            7,   12,  102, 108, 117, 116, 116, 101, 114, 47,
+            116, 101, 115, 116, 3,   3,   0,   0,   0};
+        for (size_t i = 0; i < expected_message_size; i++) {
+          EXPECT_EQ(message->message[i], expected[i]);
+        }
+
+        return kSuccess;
+      }));
+
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+  EXPECT_EQ(error, nullptr);
+
+  FlBinaryMessenger* messenger = fl_binary_messenger_new(engine);
+  fl_binary_messenger_resize_channel(messenger, "flutter/test", 3);
+
+  EXPECT_TRUE(called);
+}
+
+// Checks if the 'overflow' command is sent and is well-formed.
+TEST(FlBinaryMessengerTest, AllowOverflowChannel) {
+  g_autoptr(FlEngine) engine = make_mock_engine();
+  FlutterEngineProcTable* embedder_api = fl_engine_get_embedder_api(engine);
+
+  bool called = false;
+
+  FlutterEngineSendPlatformMessageFnPtr old_handler =
+      embedder_api->SendPlatformMessage;
+  embedder_api->SendPlatformMessage = MOCK_ENGINE_PROC(
+      SendPlatformMessage,
+      ([&called, old_handler](auto engine,
+                              const FlutterPlatformMessage* message) {
+        // Expect to receive a message on the "control" channel.
+        if (strcmp(message->channel, "dev.flutter/channel-buffers") != 0) {
+          return old_handler(engine, message);
+        }
+
+        called = true;
+
+        // The expected content was created from the following Dart code:
+        //   MethodCall call = MethodCall('overflow',['flutter/test', true]);
+        //   StandardMethodCodec().encodeMethodCall(call).buffer.asUint8List();
+        const int expected_message_size = 27;
+        EXPECT_EQ(message->message_size,
+                  static_cast<size_t>(expected_message_size));
+        int expected[expected_message_size] = {
+            7,   8,   111, 118, 101, 114, 102, 108, 111, 119, 12,  2,   7, 12,
+            102, 108, 117, 116, 116, 101, 114, 47,  116, 101, 115, 116, 1};
+        for (size_t i = 0; i < expected_message_size; i++) {
+          EXPECT_EQ(message->message[i], expected[i]);
+        }
+
+        return kSuccess;
+      }));
+
+  g_autoptr(GError) error = nullptr;
+  EXPECT_TRUE(fl_engine_start(engine, &error));
+  EXPECT_EQ(error, nullptr);
+
+  FlBinaryMessenger* messenger = fl_binary_messenger_new(engine);
+  fl_binary_messenger_set_allow_channel_overflow(messenger, "flutter/test",
+                                                 true);
+
+  EXPECT_TRUE(called);
+}
+
+// NOLINTEND(clang-analyzer-core.StackAddressEscape)
 
 struct RespondsOnBackgroundThreadInfo {
   FlBinaryMessenger* messenger;
