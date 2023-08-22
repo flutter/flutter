@@ -17,7 +17,7 @@ Future<void> main() async {
     final String projectDirectory = '${flutterDirectory.path}/dev/integration_tests/flutter_gallery';
 
     IOSink? sink;
-    deviceOperatingSystem = DeviceOperatingSystem.ios;
+    deviceOperatingSystem = DeviceOperatingSystem.macos;
     Device? device;
     try {
       device = await devices.workingDevice;
