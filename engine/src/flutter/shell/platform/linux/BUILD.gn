@@ -158,6 +158,7 @@ source_set("flutter_linux_sources") {
   ]
 
   deps = [
+    "//flutter/fml",
     "//flutter/shell/platform/common:common_cpp_enums",
     "//flutter/shell/platform/common:common_cpp_input",
     "//flutter/shell/platform/common:common_cpp_switches",

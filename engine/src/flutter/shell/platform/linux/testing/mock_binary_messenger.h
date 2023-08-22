@@ -48,6 +48,16 @@ class MockBinaryMessenger {
                        GAsyncResult* result,
                        GError** error));
 
+  MOCK_METHOD3(fl_binary_messenger_resize_channel,
+               void(FlBinaryMessenger* messenger,
+                    const gchar* channel,
+                    int64_t new_size));
+
+  MOCK_METHOD3(fl_binary_messenger_set_allow_channel_overflow,
+               void(FlBinaryMessenger* messenger,
+                    const gchar* channel,
+                    bool allowed));
+
   bool HasMessageHandler(const gchar* channel) const;
 
   void SetMessageHandler(const gchar* channel,

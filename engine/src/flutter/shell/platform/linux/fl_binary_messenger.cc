@@ -5,10 +5,19 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_binary_messenger.h"
 #include "flutter/shell/platform/linux/fl_binary_messenger_private.h"
 
+#include "flutter/fml/logging.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
+#include "flutter/shell/platform/linux/fl_method_codec_private.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_method_channel.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_method_codec.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_method_codec.h"
 
 #include <gmodule.h>
+
+static constexpr char kControlChannelName[] = "dev.flutter/channel-buffers";
+static constexpr char kResizeMethod[] = "resize";
+static constexpr char kOverflowMethod[] = "overflow";
 
 G_DEFINE_QUARK(fl_binary_messenger_codec_error_quark,
                fl_binary_messenger_codec_error)
@@ -311,6 +320,67 @@ static GBytes* send_on_channel_finish(FlBinaryMessenger* messenger,
   return fl_engine_send_platform_message_finish(engine, r, error);
 }
 
+// Completes method call and returns TRUE if the call was successful.
+static gboolean finish_method(GObject* object,
+                              GAsyncResult* result,
+                              GError** error) {
+  g_autoptr(FlMethodResponse) response = fl_method_channel_invoke_method_finish(
+      FL_METHOD_CHANNEL(object), result, error);
+  if (response == nullptr) {
+    return FALSE;
+  }
+  return fl_method_response_get_result(response, error) != nullptr;
+}
+
+// Called when a response is received for the resize channel message.
+static void resize_channel_response_cb(GObject* object,
+                                       GAsyncResult* result,
+                                       gpointer user_data) {
+  g_autoptr(GError) error = nullptr;
+  if (!finish_method(object, result, &error)) {
+    g_warning("Failed to resize channel: %s", error->message);
+  }
+}
+
+static void resize_channel(FlBinaryMessenger* messenger,
+                           const gchar* channel,
+                           int64_t new_size) {
+  FML_DCHECK(new_size >= 0);
+  g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
+  g_autoptr(FlValue) args = fl_value_new_list();
+  fl_value_append_take(args, fl_value_new_string(channel));
+  fl_value_append_take(args, fl_value_new_int(new_size));
+  g_autoptr(GBytes) message = fl_method_codec_encode_method_call(
+      FL_METHOD_CODEC(codec), kResizeMethod, args, nullptr);
+  fl_binary_messenger_send_on_channel(messenger, kControlChannelName, message,
+                                      nullptr, resize_channel_response_cb,
+                                      nullptr);
+}
+
+// Called when a response is received for the allow channel overflow message.
+static void set_allow_channel_overflowl_response_cb(GObject* object,
+                                                    GAsyncResult* result,
+                                                    gpointer user_data) {
+  g_autoptr(GError) error = nullptr;
+  if (!finish_method(object, result, &error)) {
+    g_warning("Failed to set allow channel overflow: %s", error->message);
+  }
+}
+
+static void set_allow_channel_overflow(FlBinaryMessenger* messenger,
+                                       const gchar* channel,
+                                       bool allowed) {
+  g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
+  g_autoptr(FlValue) args = fl_value_new_list();
+  fl_value_append_take(args, fl_value_new_string(channel));
+  fl_value_append_take(args, fl_value_new_bool(allowed));
+  g_autoptr(GBytes) message = fl_method_codec_encode_method_call(
+      FL_METHOD_CODEC(codec), kOverflowMethod, args, nullptr);
+  fl_binary_messenger_send_on_channel(
+      messenger, kControlChannelName, message, nullptr,
+      set_allow_channel_overflowl_response_cb, nullptr);
+}
+
 static void fl_binary_messenger_impl_class_init(
     FlBinaryMessengerImplClass* klass) {
   G_OBJECT_CLASS(klass)->dispose = fl_binary_messenger_impl_dispose;
@@ -322,6 +392,8 @@ static void fl_binary_messenger_impl_iface_init(
   iface->send_response = send_response;
   iface->send_on_channel = send_on_channel;
   iface->send_on_channel_finish = send_on_channel_finish;
+  iface->resize_channel = resize_channel;
+  iface->set_allow_channel_overflow = set_allow_channel_overflow;
 }
 
 static void fl_binary_messenger_impl_init(FlBinaryMessengerImpl* self) {
@@ -396,4 +468,23 @@ G_MODULE_EXPORT GBytes* fl_binary_messenger_send_on_channel_finish(
 
   return FL_BINARY_MESSENGER_GET_IFACE(self)->send_on_channel_finish(
       self, result, error);
+}
+
+G_MODULE_EXPORT void fl_binary_messenger_resize_channel(FlBinaryMessenger* self,
+                                                        const gchar* channel,
+                                                        int64_t new_size) {
+  g_return_if_fail(FL_IS_BINARY_MESSENGER(self));
+
+  return FL_BINARY_MESSENGER_GET_IFACE(self)->resize_channel(self, channel,
+                                                             new_size);
+}
+
+G_MODULE_EXPORT void fl_binary_messenger_set_allow_channel_overflow(
+    FlBinaryMessenger* self,
+    const gchar* channel,
+    bool allowed) {
+  g_return_if_fail(FL_IS_BINARY_MESSENGER(self));
+
+  return FL_BINARY_MESSENGER_GET_IFACE(self)->set_allow_channel_overflow(
+      self, channel, allowed);
 }
