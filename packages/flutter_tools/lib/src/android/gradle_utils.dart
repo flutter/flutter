@@ -47,7 +47,7 @@ const String ndkVersion = '23.1.7779620';
 // Update these when new major versions of Java are supported by Gradle.
 // Supported means Java <-> Gradle support.
 // Source of truth: https://docs.gradle.org/current/userguide/compatibility.html
-const String oneMajorVersionHigherJavaVersion = '20';
+const String oneMajorVersionHigherJavaVersion = '21';
 
 // Update this when new versions of Gradle come out including minor versions
 //
