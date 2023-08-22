@@ -225,6 +225,8 @@ mixin class ChangeNotifier implements Listenable {
   /// to identify the owner.
   @protected
   void maybeDispatchObjectCreation() {
+    // Tree shaker does not include this method and the class MemoryAllocations
+    // if kFlutterMemoryAllocationsEnabled is false.
     if (kFlutterMemoryAllocationsEnabled && !_creationDispatched) {
       MemoryAllocations.instance.dispatchObjectCreated(
         library: _flutterFoundationLibrary,
