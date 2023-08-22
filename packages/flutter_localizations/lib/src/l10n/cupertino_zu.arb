@@ -22,7 +22,9 @@
   "tabSemanticsLabel": "Ithebhu $tabIndex kwangu-$tabCount",
   "modalBarrierDismissLabel": "Cashisa",
   "searchTextFieldPlaceholderLabel": "Sesha",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "menuDismissLabel": "Dismiss menu",
-  "lookUpButtonLabel": "Look Up"
+  "noSpellCheckReplacementsLabel": "Akukho Okuzofakwa Esikhundleni Okutholakele",
+  "menuDismissLabel": "Chitha imenyu",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

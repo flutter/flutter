@@ -22,7 +22,9 @@
   "tabSemanticsLabel": "$tabCount ичинен $tabIndex-өтмөк",
   "modalBarrierDismissLabel": "Жабуу",
   "searchTextFieldPlaceholderLabel": "Издөө",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "menuDismissLabel": "Dismiss menu",
-  "lookUpButtonLabel": "Look Up"
+  "noSpellCheckReplacementsLabel": "Алмаштыруу үчүн сөз табылган жок",
+  "menuDismissLabel": "Менюну жабуу",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

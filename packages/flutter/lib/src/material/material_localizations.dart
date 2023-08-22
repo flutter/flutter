@@ -118,6 +118,12 @@ abstract class MaterialLocalizations {
   /// Label for "look up" edit buttons and menu items.
   String get lookUpButtonLabel;
 
+  /// Label for "search web" edit buttons and menu items.
+  String get searchWebButtonLabel;
+
+  /// Label for "share" edit buttons and menu items.
+  String get shareButtonLabel;
+
   /// Label for the [AboutDialog] button that shows the [LicensePage].
   String get viewLicensesButtonLabel;
 
@@ -1183,6 +1189,12 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get lookUpButtonLabel => 'Look Up';
+
+  @override
+  String get searchWebButtonLabel => 'Search Web';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get viewLicensesButtonLabel => 'View licenses';

@@ -344,6 +344,16 @@ typedef ImageDecoderCallback = Future<ui.Codec> Function(
 /// }
 /// ```
 /// {@end-tool}
+///
+/// ## Creating an [ImageProvider]
+///
+/// {@tool dartpad}
+/// In this example, a variant of [NetworkImage] is created that passes all the
+/// [ImageConfiguration] information (locale, platform, size, etc) to the server
+/// using query arguments in the image URL.
+///
+/// ** See code in examples/api/lib/painting/image_provider/image_provider.0.dart **
+/// {@end-tool}
 @optionalTypeArgs
 abstract class ImageProvider<T extends Object> {
   /// Abstract const constructor. This constructor enables subclasses to provide
@@ -596,7 +606,7 @@ abstract class ImageProvider<T extends Object> {
     return cache.evict(key);
   }
 
-  /// Converts an ImageProvider's settings plus an ImageConfiguration to a key
+  /// Converts an [ImageProvider]'s settings plus an [ImageConfiguration] to a key
   /// that describes the precise image to load.
   ///
   /// The type of the key is determined by the subclass. It is a value that
@@ -605,6 +615,10 @@ abstract class ImageProvider<T extends Object> {
   /// arguments and [ImageConfiguration] objects should return keys that are
   /// '==' to each other (possibly by using a class for the key that itself
   /// implements [==]).
+  ///
+  /// If the result can be determined synchronously, this function should return
+  /// a [SynchronousFuture]. This allows image resolution to progress
+  /// synchronously during a frame rather than delaying image loading.
   Future<T> obtainKey(ImageConfiguration configuration);
 
   /// Converts a key into an [ImageStreamCompleter], and begins fetching the
@@ -632,10 +646,7 @@ abstract class ImageProvider<T extends Object> {
   /// Converts a key into an [ImageStreamCompleter], and begins fetching the
   /// image.
   ///
-  /// For backwards-compatibility the default implementation of this method returns
-  /// an object that will cause [resolveStreamForKey] to consult [load]. However,
-  /// implementors of this interface should only override this method and not
-  /// [load], which is deprecated.
+  /// This method is deprecated. Implement [loadImage] instead.
   ///
   /// The [decode] callback provides the logic to obtain the codec for the
   /// image.
@@ -1344,6 +1355,7 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
     if (!kReleaseMode) {
       completer.debugLabel = '${completer.debugLabel} - Resized(${key._width}×${key._height})';
     }
+    _configureErrorListener(completer, key);
     return completer;
   }
 
@@ -1366,6 +1378,7 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
     if (!kReleaseMode) {
       completer.debugLabel = '${completer.debugLabel} - Resized(${key._width}×${key._height})';
     }
+    _configureErrorListener(completer, key);
     return completer;
   }
 
@@ -1435,7 +1448,20 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
     if (!kReleaseMode) {
       completer.debugLabel = '${completer.debugLabel} - Resized(${key._width}×${key._height})';
     }
+    _configureErrorListener(completer, key);
     return completer;
+  }
+
+  void _configureErrorListener(ImageStreamCompleter completer, ResizeImageKey key) {
+    completer.addEphemeralErrorListener((Object exception, StackTrace? stackTrace) {
+      // The microtask is scheduled because of the same reason as NetworkImage:
+      // Depending on where the exception was thrown, the image cache may not
+      // have had a chance to track the key in the cache at all.
+      // Schedule a microtask to give the cache a chance to add the key.
+      scheduleMicrotask(() {
+        PaintingBinding.instance.imageCache.evict(key);
+      });
+    });
   }
 
   @override
@@ -1477,6 +1503,8 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
 /// See also:
 ///
 ///  * [Image.network] for a shorthand of an [Image] widget backed by [NetworkImage].
+///  * The example at [ImageProvider], which shows a custom variant of this class
+///    that applies different logic for fetching the image.
 // TODO(ianh): Find some way to honor cache headers to the extent that when the
 // last reference to an image is released, we proactively evict the image from
 // our cache if the headers describe the image as having expired at that point.
@@ -1494,7 +1522,7 @@ abstract class NetworkImage extends ImageProvider<NetworkImage> {
 
   /// The HTTP headers that will be used with [HttpClient.get] to fetch image from network.
   ///
-  /// When running flutter on the web, headers are not used.
+  /// When running Flutter on the web, headers are not used.
   Map<String, String>? get headers;
 
   @override

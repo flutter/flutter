@@ -22,7 +22,9 @@
   "tabSemanticsLabel": "$tabCount-н $tabIndex-р таб",
   "modalBarrierDismissLabel": "Үл хэрэгсэх",
   "searchTextFieldPlaceholderLabel": "Хайх",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "menuDismissLabel": "Dismiss menu",
-  "lookUpButtonLabel": "Look Up"
+  "noSpellCheckReplacementsLabel": "Ямар ч орлуулалт олдсонгүй",
+  "menuDismissLabel": "Цэсийг хаах",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

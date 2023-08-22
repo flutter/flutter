@@ -393,18 +393,18 @@ class RenderSimpleListTableViewport extends RenderTwoDimensionalViewport {
     final TwoDimensionalChildListDelegate listDelegate = delegate as TwoDimensionalChildListDelegate;
     final int rowCount;
     final int columnCount;
-    rowCount = listDelegate.children.length - 1;
-    columnCount = listDelegate.children[0].length - 1;
+    rowCount = listDelegate.children.length;
+    columnCount = listDelegate.children[0].length;
 
     final int leadingColumn = math.max((horizontalPixels / 200).floor(), 0);
     final int leadingRow = math.max((verticalPixels / 200).floor(), 0);
     final int trailingColumn = math.min(
       ((horizontalPixels + viewportDimension.width) / 200).ceil(),
-      columnCount,
+      columnCount - 1,
     );
     final int trailingRow = math.min(
       ((verticalPixels + viewportDimension.height) / 200).ceil(),
-      rowCount,
+      rowCount - 1,
     );
 
     double xLayoutOffset = (leadingColumn * 200) - horizontalOffset.pixels;
@@ -420,7 +420,51 @@ class RenderSimpleListTableViewport extends RenderTwoDimensionalViewport {
       }
       xLayoutOffset += 200;
     }
-    verticalOffset.applyContentDimensions(0, 200 * 100 - viewportDimension.height);
-    horizontalOffset.applyContentDimensions(0, 200 * 100 - viewportDimension.width);
+
+    verticalOffset.applyContentDimensions(
+      0.0,
+      math.max(200 * rowCount - viewportDimension.height, 0.0),
+    );
+    horizontalOffset.applyContentDimensions(
+      0,
+      math.max(200 * columnCount - viewportDimension.width, 0.0),
+    );
+  }
+}
+
+class KeepAliveCheckBox extends StatefulWidget {
+  const KeepAliveCheckBox({ super.key });
+
+  @override
+  KeepAliveCheckBoxState createState() => KeepAliveCheckBoxState();
+}
+
+class KeepAliveCheckBoxState extends State<KeepAliveCheckBox> with AutomaticKeepAliveClientMixin {
+  bool checkValue = false;
+
+  @override
+  bool get wantKeepAlive => _wantKeepAlive;
+  bool _wantKeepAlive = false;
+  set wantKeepAlive(bool value) {
+    if (_wantKeepAlive != value) {
+      _wantKeepAlive = value;
+      updateKeepAlive();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return Checkbox(
+      value: checkValue,
+      onChanged: (bool? value) {
+        if (checkValue != value) {
+          setState(() {
+            checkValue = value!;
+            wantKeepAlive = value;
+          });
+        }
+      },
+    );
   }
 }

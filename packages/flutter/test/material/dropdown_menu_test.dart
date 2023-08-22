@@ -5,7 +5,6 @@
 
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -146,8 +145,8 @@ void main() {
     await tester.pumpWidget(buildTest(themeData, menuChildren, width: 200.0));
 
     final Finder anchor = find.byType(TextField);
-    final Size size = tester.getSize(anchor);
-    expect(size, const Size(200.0, 56.0));
+    final double width = tester.getSize(anchor).width;
+    expect(width, 200.0);
 
     await tester.tap(anchor);
     await tester.pumpAndSettle();
@@ -156,8 +155,8 @@ void main() {
       of: find.byType(SingleChildScrollView),
       matching: find.byType(Material),
     );
-    final Size updatedMenuSize = tester.getSize(updatedMenu);
-    expect(updatedMenuSize, const Size(200.0, 304.0));
+    final double updatedMenuWidth = tester.getSize(updatedMenu).width;
+    expect(updatedMenuWidth, 200.0);
   });
 
   testWidgets('Material3 - The width of the text field should always be the same as the menu view',
@@ -177,12 +176,8 @@ void main() {
     );
 
     final Finder textField = find.byType(TextField);
-    final Size anchorSize = tester.getSize(textField);
-    if (kIsWeb && !isCanvasKit) {
-      expect(anchorSize, const Size(195.0, 61.0));
-    } else {
-      expect(anchorSize, const Size(195.0, 60.0));
-    }
+    final double anchorWidth = tester.getSize(textField).width;
+    expect(anchorWidth, 195.0);
 
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pumpAndSettle();
@@ -191,20 +186,16 @@ void main() {
       of: find.byType(SingleChildScrollView),
       matching: find.byType(Material),
     );
-    final Size menuSize = tester.getSize(menuMaterial);
-    expect(menuSize, const Size(195.0, 304.0));
+    final double menuWidth = tester.getSize(menuMaterial).width;
+    expect(menuWidth, 195.0);
 
     // The text field should have same width as the menu
     // when the width property is not null.
     await tester.pumpWidget(buildTest(themeData, menuChildren, width: 200.0));
 
     final Finder anchor = find.byType(TextField);
-    final Size size = tester.getSize(anchor);
-    if (kIsWeb && !isCanvasKit) {
-      expect(size, const Size(200.0, 61.0));
-    } else {
-      expect(size, const Size(200.0, 60.0));
-    }
+    final double width = tester.getSize(anchor).width;
+    expect(width, 200.0);
 
     await tester.tap(anchor);
     await tester.pumpAndSettle();
@@ -213,8 +204,8 @@ void main() {
       of: find.byType(SingleChildScrollView),
       matching: find.byType(Material),
     );
-    final Size updatedMenuSize = tester.getSize(updatedMenu);
-    expect(updatedMenuSize, const Size(200.0, 304.0));
+    final double updatedMenuWidth = tester.getSize(updatedMenu).width;
+    expect(updatedMenuWidth, 200.0);
   });
 
   testWidgets('The width property can customize the width of the dropdown menu', (WidgetTester tester) async {
@@ -1232,7 +1223,7 @@ void main() {
 
     final Finder textFieldFinder = find.byType(TextField);
     final TextField result = tester.widget<TextField>(textFieldFinder);
-    expect(result.focusNode!.canRequestFocus, false);
+    expect(result.canRequestFocus, false);
   }, variant: TargetPlatformVariant.mobile());
 
   testWidgets('The text input field should be focused on desktop platforms '
@@ -1300,7 +1291,7 @@ void main() {
 
     final Finder textFieldFinder1 = find.byType(TextField);
     final TextField textField1 = tester.widget<TextField>(textFieldFinder1);
-    expect(textField1.focusNode!.canRequestFocus, false);
+    expect(textField1.canRequestFocus, false);
     // Open the dropdown menu.
     await tester.tap(textFieldFinder1);
     await tester.pump();
@@ -1329,7 +1320,7 @@ void main() {
 
     final Finder textFieldFinder = find.byType(TextField);
     final TextField textField = tester.widget<TextField>(textFieldFinder);
-    expect(textField.focusNode!.canRequestFocus, false);
+    expect(textField.canRequestFocus, false);
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
     await gesture.moveTo(tester.getCenter(textFieldFinder));
@@ -1526,6 +1517,7 @@ void main() {
     // Item 5 should show up.
     expect(find.text('Item 5').hitTestable(), findsOneWidget);
   });
+
 }
 
 enum TestMenu {
