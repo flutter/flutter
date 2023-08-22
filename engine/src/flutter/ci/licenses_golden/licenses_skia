@@ -1,4 +1,4 @@
-Signature: 71cc76e4ce67de40cc7c3ef6c21fa7b5
+Signature: 5dad8cab4c7769274c06df254b1bf3cf
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8900,8 +8900,10 @@ ORIGIN: ../../../third_party/skia/include/private/chromium/SkImageChromium.h + .
 ORIGIN: ../../../third_party/skia/include/private/gpu/ganesh/GrTextureGenerator.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/bentleyottmann/include/EventQueue.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/bentleyottmann/include/Point.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/modules/bentleyottmann/include/Segment.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/bentleyottmann/src/EventQueue.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/bentleyottmann/src/Point.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/modules/bentleyottmann/src/Segment.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkBezierCurves.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkCubics.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkCubics.h + ../../../third_party/skia/LICENSE
@@ -9138,8 +9140,10 @@ FILE: ../../../third_party/skia/include/private/chromium/SkImageChromium.h
 FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrTextureGenerator.h
 FILE: ../../../third_party/skia/modules/bentleyottmann/include/EventQueue.h
 FILE: ../../../third_party/skia/modules/bentleyottmann/include/Point.h
+FILE: ../../../third_party/skia/modules/bentleyottmann/include/Segment.h
 FILE: ../../../third_party/skia/modules/bentleyottmann/src/EventQueue.cpp
 FILE: ../../../third_party/skia/modules/bentleyottmann/src/Point.cpp
+FILE: ../../../third_party/skia/modules/bentleyottmann/src/Segment.cpp
 FILE: ../../../third_party/skia/src/base/SkBezierCurves.h
 FILE: ../../../third_party/skia/src/base/SkCubics.cpp
 FILE: ../../../third_party/skia/src/base/SkCubics.h
