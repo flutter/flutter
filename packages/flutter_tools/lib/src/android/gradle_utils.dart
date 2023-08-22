@@ -525,8 +525,10 @@ bool validateJavaGradle(Logger logger,
 
 // Returns compatibility information for the valid range of Gradle versions for
 // the specified Java version.
-JavaGradleCompat? getValidGradleVersionRangeForJavaVersion(Logger logger,
-    {required String? javaV}) {
+JavaGradleCompat? getValidGradleVersionRangeForJavaVersion(
+  Logger logger, {
+  required String? javaV,
+}) {
   if (javaV == null) {
     logger.printTrace('Java version unknown ($javaV).');
     return null;
