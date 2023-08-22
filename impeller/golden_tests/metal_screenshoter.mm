@@ -17,15 +17,15 @@ MetalScreenshoter::MetalScreenshoter() {
   FML_CHECK(::glfwInit() == GLFW_TRUE);
   playground_ =
       PlaygroundImpl::Create(PlaygroundBackend::kMetal, PlaygroundSwitches{});
-  aiks_context_.reset(new AiksContext(playground_->GetContext()));
 }
 
 std::unique_ptr<MetalScreenshot> MetalScreenshoter::MakeScreenshot(
+    AiksContext& aiks_context,
     const Picture& picture,
     const ISize& size) {
   Vector2 content_scale = playground_->GetContentScale();
   std::shared_ptr<Image> image = picture.ToImage(
-      *aiks_context_,
+      aiks_context,
       ISize(size.width * content_scale.x, size.height * content_scale.y));
   std::shared_ptr<Texture> texture = image->GetTexture();
   id<MTLTexture> metal_texture =

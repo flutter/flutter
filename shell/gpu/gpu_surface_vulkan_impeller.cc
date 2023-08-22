@@ -5,10 +5,11 @@
 #include "flutter/shell/gpu/gpu_surface_vulkan_impeller.h"
 
 #include "flutter/fml/make_copyable.h"
-#include "flutter/impeller/display_list/dl_dispatcher.h"
-#include "flutter/impeller/renderer/renderer.h"
+#include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/renderer/backend/vulkan/surface_context_vk.h"
+#include "impeller/renderer/renderer.h"
 #include "impeller/renderer/surface.h"
+#include "impeller/typographer/backends/skia/text_render_context_skia.h"
 
 namespace flutter {
 
@@ -23,7 +24,8 @@ GPUSurfaceVulkanImpeller::GPUSurfaceVulkanImpeller(
     return;
   }
 
-  auto aiks_context = std::make_shared<impeller::AiksContext>(context);
+  auto aiks_context = std::make_shared<impeller::AiksContext>(
+      context, impeller::TextRenderContextSkia::Make());
   if (!aiks_context->IsValid()) {
     return;
   }

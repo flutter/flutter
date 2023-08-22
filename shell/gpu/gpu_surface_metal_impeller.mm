@@ -11,8 +11,9 @@
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/trace_event.h"
-#include "flutter/impeller/display_list/dl_dispatcher.h"
-#include "flutter/impeller/renderer/backend/metal/surface_mtl.h"
+#include "impeller/display_list/dl_dispatcher.h"
+#include "impeller/renderer/backend/metal/surface_mtl.h"
+#include "impeller/typographer/backends/skia/text_render_context_skia.h"
 
 static_assert(!__has_feature(objc_arc), "ARC must be disabled.");
 
@@ -35,7 +36,8 @@ GPUSurfaceMetalImpeller::GPUSurfaceMetalImpeller(GPUSurfaceMetalDelegate* delega
       render_target_type_(delegate->GetRenderTargetType()),
       impeller_renderer_(CreateImpellerRenderer(context)),
       aiks_context_(
-          std::make_shared<impeller::AiksContext>(impeller_renderer_ ? context : nullptr)),
+          std::make_shared<impeller::AiksContext>(impeller_renderer_ ? context : nullptr,
+                                                  impeller::TextRenderContextSkia::Make())),
       render_to_surface_(render_to_surface) {
   // If this preference is explicitly set, we allow for disabling partial repaint.
   NSNumber* disablePartialRepaint =

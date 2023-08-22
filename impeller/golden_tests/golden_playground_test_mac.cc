@@ -4,12 +4,15 @@
 
 #include <dlfcn.h>
 #include <filesystem>
+#include <memory>
 
 #include "flutter/impeller/golden_tests/golden_playground_test.h"
 
 #include "flutter/impeller/aiks/picture.h"
 #include "flutter/impeller/golden_tests/golden_digest.h"
 #include "flutter/impeller/golden_tests/metal_screenshoter.h"
+#include "impeller/typographer/backends/skia/text_render_context_skia.h"
+#include "impeller/typographer/text_render_context.h"
 
 namespace impeller {
 
@@ -85,7 +88,15 @@ struct GoldenPlaygroundTest::GoldenPlaygroundTestImpl {
 };
 
 GoldenPlaygroundTest::GoldenPlaygroundTest()
-    : pimpl_(new GoldenPlaygroundTest::GoldenPlaygroundTestImpl()) {}
+    : text_render_context_(TextRenderContextSkia::Make()),
+      pimpl_(new GoldenPlaygroundTest::GoldenPlaygroundTestImpl()) {}
+
+GoldenPlaygroundTest::~GoldenPlaygroundTest() = default;
+
+void GoldenPlaygroundTest::SetTextRenderContext(
+    std::shared_ptr<TextRenderContext> text_render_context) {
+  text_render_context_ = std::move(text_render_context);
+};
 
 void GoldenPlaygroundTest::TearDown() {
   ASSERT_FALSE(dlopen("/usr/local/lib/libMoltenVK.dylib", RTLD_NOLOAD));
@@ -124,8 +135,10 @@ PlaygroundBackend GoldenPlaygroundTest::GetBackend() const {
 }
 
 bool GoldenPlaygroundTest::OpenPlaygroundHere(const Picture& picture) {
-  auto screenshot =
-      pimpl_->screenshoter->MakeScreenshot(picture, pimpl_->window_size);
+  AiksContext renderer(GetContext(), text_render_context_);
+
+  auto screenshot = pimpl_->screenshoter->MakeScreenshot(renderer, picture,
+                                                         pimpl_->window_size);
   return SaveScreenshot(std::move(screenshot));
 }
 
@@ -161,7 +174,7 @@ std::shared_ptr<RuntimeStage> GoldenPlaygroundTest::OpenAssetAsRuntimeStage(
 }
 
 std::shared_ptr<Context> GoldenPlaygroundTest::GetContext() const {
-  return pimpl_->screenshoter->GetContext().GetContext();
+  return pimpl_->screenshoter->GetPlayground().GetContext();
 }
 
 Point GoldenPlaygroundTest::GetContentScale() const {
