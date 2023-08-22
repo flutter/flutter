@@ -6,7 +6,14 @@
 
 namespace impeller {
 
-GoldenPlaygroundTest::GoldenPlaygroundTest() {}
+GoldenPlaygroundTest::GoldenPlaygroundTest() = default;
+
+GoldenPlaygroundTest::~GoldenPlaygroundTest() = default;
+
+void GoldenPlaygroundTest::SetTextRenderContext(
+    std::shared_ptr<TextRenderContext> text_render_context) {
+  text_render_context_ = std::move(text_render_context);
+};
 
 void GoldenPlaygroundTest::TearDown() {}
 

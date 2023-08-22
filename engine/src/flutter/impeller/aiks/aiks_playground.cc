@@ -4,15 +4,24 @@
 
 #include "impeller/aiks/aiks_playground.h"
 
-#include "impeller/aiks/aiks_context.h"
+#include <memory>
 
+#include "impeller/aiks/aiks_context.h"
+#include "impeller/typographer/backends/skia/text_render_context_skia.h"
+#include "impeller/typographer/text_render_context.h"
 #include "third_party/imgui/imgui.h"
 
 namespace impeller {
 
-AiksPlayground::AiksPlayground() = default;
+AiksPlayground::AiksPlayground()
+    : text_render_context_(TextRenderContextSkia::Make()) {}
 
 AiksPlayground::~AiksPlayground() = default;
+
+void AiksPlayground::SetTextRenderContext(
+    std::shared_ptr<TextRenderContext> text_render_context) {
+  text_render_context_ = std::move(text_render_context);
+}
 
 bool AiksPlayground::OpenPlaygroundHere(const Picture& picture) {
   return OpenPlaygroundHere(
@@ -26,7 +35,7 @@ bool AiksPlayground::OpenPlaygroundHere(AiksPlaygroundCallback callback) {
     return true;
   }
 
-  AiksContext renderer(GetContext());
+  AiksContext renderer(GetContext(), text_render_context_);
 
   if (!renderer.IsValid()) {
     return false;

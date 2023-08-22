@@ -25,9 +25,10 @@
 #include "flutter/fml/time/time_point.h"
 #if IMPELLER_SUPPORTS_RENDERING
 // GN is having trouble understanding how this works in the Fuchsia builds.
-#include "flutter/impeller/aiks/aiks_context.h"  // nogncheck
-#include "flutter/impeller/renderer/context.h"   // nogncheck
-#endif                                           // IMPELLER_SUPPORTS_RENDERING
+#include "impeller/aiks/aiks_context.h"  // nogncheck
+#include "impeller/renderer/context.h"   // nogncheck
+#include "impeller/typographer/backends/skia/text_render_context_skia.h"  // nogncheck
+#endif  // IMPELLER_SUPPORTS_RENDERING
 #include "flutter/lib/ui/snapshot_delegate.h"
 #include "flutter/shell/common/pipeline.h"
 #include "flutter/shell/common/snapshot_controller.h"
@@ -544,7 +545,8 @@ class Rasterizer final : public SnapshotDelegate,
       return surface_->GetAiksContext();
     }
     if (auto context = impeller_context_.lock()) {
-      return std::make_shared<impeller::AiksContext>(context);
+      return std::make_shared<impeller::AiksContext>(
+          context, impeller::TextRenderContextSkia::Make());
     }
 #endif
     return nullptr;

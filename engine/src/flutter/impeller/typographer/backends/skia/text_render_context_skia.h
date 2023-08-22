@@ -11,12 +11,15 @@ namespace impeller {
 
 class TextRenderContextSkia : public TextRenderContext {
  public:
-  TextRenderContextSkia(std::shared_ptr<Context> context);
+  static std::shared_ptr<TextRenderContext> Make();
+
+  TextRenderContextSkia();
 
   ~TextRenderContextSkia() override;
 
   // |TextRenderContext|
   std::shared_ptr<GlyphAtlas> CreateGlyphAtlas(
+      Context& context,
       GlyphAtlas::Type type,
       std::shared_ptr<GlyphAtlasContext> atlas_context,
       const FontGlyphPair::Set& font_glyph_pairs) const override;

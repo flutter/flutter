@@ -10,6 +10,7 @@
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/render_target.h"
+#include "impeller/typographer/text_render_context.h"
 
 namespace impeller {
 
@@ -18,7 +19,17 @@ class RenderPass;
 
 class AiksContext {
  public:
-  AiksContext(std::shared_ptr<Context> context);
+  /// Construct a new AiksContext.
+  ///
+  /// @param context              The Impeller context that Aiks should use for
+  ///                             allocating resources and executing device
+  ///                             commands. Required.
+  /// @param text_render_context  The text backend to use for rendering text. If
+  ///                             `nullptr` is supplied, then attempting to draw
+  ///                             text with Aiks will result in validation
+  ///                             errors.
+  AiksContext(std::shared_ptr<Context> context,
+              std::shared_ptr<TextRenderContext> text_render_context);
 
   ~AiksContext();
 

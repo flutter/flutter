@@ -8,6 +8,7 @@
 #include "impeller/aiks/aiks_context.h"
 #include "impeller/aiks/picture.h"
 #include "impeller/playground/playground_test.h"
+#include "impeller/typographer/text_render_context.h"
 
 namespace impeller {
 
@@ -20,11 +21,16 @@ class AiksPlayground : public PlaygroundTest {
 
   ~AiksPlayground();
 
+  void SetTextRenderContext(
+      std::shared_ptr<TextRenderContext> text_render_context);
+
   bool OpenPlaygroundHere(const Picture& picture);
 
   bool OpenPlaygroundHere(AiksPlaygroundCallback callback);
 
  private:
+  std::shared_ptr<TextRenderContext> text_render_context_;
+
   FML_DISALLOW_COPY_AND_ASSIGN(AiksPlayground);
 };
 

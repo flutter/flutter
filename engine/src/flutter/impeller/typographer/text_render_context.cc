@@ -8,11 +8,7 @@
 
 namespace impeller {
 
-TextRenderContext::TextRenderContext(std::shared_ptr<Context> context)
-    : context_(std::move(context)) {
-  if (!context_ || !context_->IsValid()) {
-    return;
-  }
+TextRenderContext::TextRenderContext() {
   is_valid_ = true;
 }
 
@@ -20,10 +16,6 @@ TextRenderContext::~TextRenderContext() = default;
 
 bool TextRenderContext::IsValid() const {
   return is_valid_;
-}
-
-const std::shared_ptr<Context>& TextRenderContext::GetContext() const {
-  return context_;
 }
 
 }  // namespace impeller
