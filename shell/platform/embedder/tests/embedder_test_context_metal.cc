@@ -95,7 +95,7 @@ FlutterMetalTexture EmbedderTestContextMetal::GetNextDrawable(
   }
 
   auto texture_info = metal_surface_->GetTextureInfo();
-  FlutterMetalTexture texture;
+  FlutterMetalTexture texture = {};
   texture.struct_size = sizeof(FlutterMetalTexture);
   texture.texture_id = texture_info.texture_id;
   texture.texture =
