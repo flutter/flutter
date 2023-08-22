@@ -329,7 +329,7 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
   /// overlay or not.
   ///
   /// We use this to avoid spamming the console with redundant warning messages.
-  static bool _webOnlyDidWarnAboutPerformanceOverlay = false;
+  static bool _didWarnAboutPerformanceOverlay = false;
 
   void _addPerformanceOverlay(
     int enabledOptions,
@@ -338,8 +338,8 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
     double top,
     double bottom,
   ) {
-    if (!_webOnlyDidWarnAboutPerformanceOverlay) {
-      _webOnlyDidWarnAboutPerformanceOverlay = true;
+    if (!_didWarnAboutPerformanceOverlay) {
+      _didWarnAboutPerformanceOverlay = true;
       printWarning("The performance overlay isn't supported on the web");
     }
   }

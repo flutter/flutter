@@ -389,7 +389,7 @@ class SkwasmRenderer implements Renderer {
   @override
   Future<ui.Codec> instantiateImageCodecFromUrl(
     Uri uri, {
-    WebOnlyImageCodecChunkCallback? chunkCallback
+    ui_web.ImageCodecChunkCallback? chunkCallback
   }) async {
     final DomResponse response = await rawHttpGet(uri.toString());
     final String? contentType = response.headers.get('Content-Type');
