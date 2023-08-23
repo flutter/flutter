@@ -48,6 +48,8 @@ public class ApplicationInfoLoaderTest {
     assertNull(info.nativeLibraryDir);
   }
 
+  @SuppressWarnings("deprecation")
+  // getApplicationInfo
   private Context generateMockContext(Bundle metadata, String networkPolicyXml) throws Exception {
     Context context = mock(Context.class);
     PackageManager packageManager = mock(PackageManager.class);

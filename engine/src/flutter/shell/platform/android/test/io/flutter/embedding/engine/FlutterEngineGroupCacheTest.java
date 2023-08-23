@@ -7,13 +7,13 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import androidx.test.core.app.ApplicationProvider;
 import io.flutter.FlutterInjector;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @Config(manifest = Config.NONE)
@@ -75,8 +75,10 @@ public class FlutterEngineGroupCacheTest {
   @Test
   public void itRemovesAllFlutterEngineGroups() {
     // --- Test Setup ---
-    FlutterEngineGroup flutterEngineGroup1 = new FlutterEngineGroup(RuntimeEnvironment.application);
-    FlutterEngineGroup flutterEngineGroup2 = new FlutterEngineGroup(RuntimeEnvironment.application);
+    FlutterEngineGroup flutterEngineGroup1 =
+        new FlutterEngineGroup(ApplicationProvider.getApplicationContext());
+    FlutterEngineGroup flutterEngineGroup2 =
+        new FlutterEngineGroup(ApplicationProvider.getApplicationContext());
     FlutterEngineGroupCache cache = new FlutterEngineGroupCache();
 
     // --- Execute Test ---

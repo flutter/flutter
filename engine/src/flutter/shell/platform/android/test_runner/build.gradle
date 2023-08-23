@@ -18,11 +18,10 @@ apply plugin: "com.android.library"
 rootProject.buildDir = project.property("build_dir")
 
 // Shows warnings for usage of deprecated API usages.
-// TODO(camsim99): Make deprecation warnings fatal and remove limit when all
-// 434 (at the time of this comment) deprecations are fixed.
+// TODO(reidbaker): Expand linter coverage https://github.com/flutter/flutter/issues/133154
 gradle.projectsEvaluated {
   tasks.withType(JavaCompile) {
-      options.compilerArgs << "-Xlint:deprecation" << "-Xmaxwarns" << "434"
+      options.compilerArgs << "-Xlint:deprecation" << "-Werror"
   }
 }
 

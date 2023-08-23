@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import junit.framework.Assert;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -489,25 +488,25 @@ public class KeyboardManagerTest {
   @Test
   public void basicCombingCharactersTest() {
     final KeyboardManager.CharacterCombiner combiner = new KeyboardManager.CharacterCombiner();
-    Assert.assertEquals(0, (int) combiner.applyCombiningCharacterToBaseCharacter(0));
-    Assert.assertEquals('A', (int) combiner.applyCombiningCharacterToBaseCharacter('A'));
-    Assert.assertEquals('B', (int) combiner.applyCombiningCharacterToBaseCharacter('B'));
-    Assert.assertEquals('B', (int) combiner.applyCombiningCharacterToBaseCharacter('B'));
-    Assert.assertEquals(0, (int) combiner.applyCombiningCharacterToBaseCharacter(0));
-    Assert.assertEquals(0, (int) combiner.applyCombiningCharacterToBaseCharacter(0));
+    assertEquals(0, (int) combiner.applyCombiningCharacterToBaseCharacter(0));
+    assertEquals('B', (int) combiner.applyCombiningCharacterToBaseCharacter('B'));
+    assertEquals('B', (int) combiner.applyCombiningCharacterToBaseCharacter('B'));
+    assertEquals('A', (int) combiner.applyCombiningCharacterToBaseCharacter('A'));
+    assertEquals(0, (int) combiner.applyCombiningCharacterToBaseCharacter(0));
+    assertEquals(0, (int) combiner.applyCombiningCharacterToBaseCharacter(0));
 
-    Assert.assertEquals('`', (int) combiner.applyCombiningCharacterToBaseCharacter(DEAD_KEY));
-    Assert.assertEquals('`', (int) combiner.applyCombiningCharacterToBaseCharacter(DEAD_KEY));
-    Assert.assertEquals('À', (int) combiner.applyCombiningCharacterToBaseCharacter('A'));
+    assertEquals('`', (int) combiner.applyCombiningCharacterToBaseCharacter(DEAD_KEY));
+    assertEquals('`', (int) combiner.applyCombiningCharacterToBaseCharacter(DEAD_KEY));
+    assertEquals('À', (int) combiner.applyCombiningCharacterToBaseCharacter('A'));
 
-    Assert.assertEquals('`', (int) combiner.applyCombiningCharacterToBaseCharacter(DEAD_KEY));
-    Assert.assertEquals(0, (int) combiner.applyCombiningCharacterToBaseCharacter(0));
+    assertEquals('`', (int) combiner.applyCombiningCharacterToBaseCharacter(DEAD_KEY));
+    assertEquals(0, (int) combiner.applyCombiningCharacterToBaseCharacter(0));
     // The 0 input should remove the combining state.
-    Assert.assertEquals('A', (int) combiner.applyCombiningCharacterToBaseCharacter('A'));
+    assertEquals('A', (int) combiner.applyCombiningCharacterToBaseCharacter('A'));
 
-    Assert.assertEquals(0, (int) combiner.applyCombiningCharacterToBaseCharacter(0));
-    Assert.assertEquals('`', (int) combiner.applyCombiningCharacterToBaseCharacter(DEAD_KEY));
-    Assert.assertEquals('À', (int) combiner.applyCombiningCharacterToBaseCharacter('A'));
+    assertEquals(0, (int) combiner.applyCombiningCharacterToBaseCharacter(0));
+    assertEquals('`', (int) combiner.applyCombiningCharacterToBaseCharacter(DEAD_KEY));
+    assertEquals('À', (int) combiner.applyCombiningCharacterToBaseCharacter('A'));
   }
 
   @Test

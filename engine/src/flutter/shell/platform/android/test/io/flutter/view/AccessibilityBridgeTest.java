@@ -81,7 +81,8 @@ public class AccessibilityBridgeTest {
     assertEquals(nodeInfo.getText(), null);
   }
 
-  @TargetApi(26)
+  @Config(sdk = 28)
+  @TargetApi(28)
   @Test
   public void itDescribesTextFieldsWithTextAndHint() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
@@ -322,6 +323,7 @@ public class AccessibilityBridgeTest {
     verify(mockNodeInfo2, times(1)).setTraversalAfter(eq(mockRootView), eq(1));
   }
 
+  @Config(sdk = 24)
   @TargetApi(24)
   @Test
   public void itSetsRootViewNotImportantForAccessibility() {
@@ -350,6 +352,7 @@ public class AccessibilityBridgeTest {
     verify(mockNodeInfo, times(1)).setImportantForAccessibility(eq(false));
   }
 
+  @Config(sdk = 24)
   @TargetApi(24)
   @Test
   public void itSetsNodeImportantForAccessibilityIfItHasContent() {
@@ -380,6 +383,7 @@ public class AccessibilityBridgeTest {
     verify(mockNodeInfo, times(1)).setImportantForAccessibility(eq(true));
   }
 
+  @Config(sdk = 24)
   @TargetApi(24)
   @Test
   public void itSetsNodeImportantForAccessibilityIfItHasActions() {
@@ -410,6 +414,7 @@ public class AccessibilityBridgeTest {
     verify(mockNodeInfo, times(1)).setImportantForAccessibility(eq(true));
   }
 
+  @Config(sdk = 24)
   @TargetApi(24)
   @Test
   public void itSetsNodeUnImportantForAccessibilityIfItIsEmpty() {
@@ -449,6 +454,9 @@ public class AccessibilityBridgeTest {
     verify(mockNodeInfo1, times(1)).setImportantForAccessibility(eq(false));
   }
 
+  @SuppressWarnings("deprecation")
+  // getSystemWindowInset* methods deprecated.
+  @Config(sdk = 28)
   @TargetApi(28)
   @Test
   public void itSetCutoutInsetBasedonLayoutModeNever() {
@@ -498,6 +506,9 @@ public class AccessibilityBridgeTest {
             new Rect(left + expectedInsetLeft, top, right + expectedInsetLeft, bottom));
   }
 
+  @SuppressWarnings("deprecation")
+  // getSystemWindowInset* methods deprecated.
+  @Config(sdk = 28)
   @TargetApi(28)
   @Test
   public void itSetCutoutInsetBasedonLayoutModeDefault() {
@@ -547,6 +558,9 @@ public class AccessibilityBridgeTest {
             new Rect(left + expectedInsetLeft, top, right + expectedInsetLeft, bottom));
   }
 
+  @SuppressWarnings("deprecation")
+  // getSystemWindowInset* methods deprecated.
+  @Config(sdk = 28)
   @TargetApi(28)
   @Test
   public void itSetCutoutInsetBasedonLayoutModeShortEdges() {
@@ -595,6 +609,10 @@ public class AccessibilityBridgeTest {
     verify(mockNodeInfo, times(1)).setBoundsInScreen(new Rect(left, top, right, bottom));
   }
 
+  @SuppressWarnings("deprecation")
+  // getSystemWindowInset* methods deprecated.
+  // fluter#133074 tracks post deprecation work.
+  @Config(sdk = 30)
   @TargetApi(30)
   @Test
   public void itSetCutoutInsetBasedonLayoutModeAlways() {
@@ -840,6 +858,7 @@ public class AccessibilityBridgeTest {
     verify(mockRootView, times(1)).setAccessibilityPaneTitle(eq("new_node2"));
   }
 
+  @Config(sdk = 21)
   @TargetApi(21)
   @Test
   public void itCanPerformSetText() {
@@ -879,6 +898,7 @@ public class AccessibilityBridgeTest {
         .dispatchSemanticsAction(1, AccessibilityBridge.Action.SET_TEXT, expectedText);
   }
 
+  @Config(sdk = 21)
   @TargetApi(21)
   @Test
   public void itCanPredictSetText() {
@@ -918,6 +938,7 @@ public class AccessibilityBridgeTest {
     assertEquals(nodeInfo.getText().toString(), expectedText);
   }
 
+  @Config(sdk = 21)
   @TargetApi(21)
   @Test
   public void itBuildsAttributedString() {
@@ -984,6 +1005,7 @@ public class AccessibilityBridgeTest {
     assertEquals(actual.getSpanEnd(spellOutSpan), 9);
   }
 
+  @Config(sdk = 21)
   @TargetApi(21)
   @Test
   public void itSetsTextCorrectly() {
@@ -1043,6 +1065,7 @@ public class AccessibilityBridgeTest {
     assertEquals(objectSpans.length, 0);
   }
 
+  @Config(sdk = 28)
   @TargetApi(28)
   @Test
   public void itSetsTooltipCorrectly() {
@@ -1080,6 +1103,7 @@ public class AccessibilityBridgeTest {
     assertEquals(actual.toString(), root.tooltip);
   }
 
+  @Config(sdk = 21)
   @TargetApi(21)
   @Test
   public void itCanCreateAccessibilityNodeInfoWithSetText() {
@@ -1255,6 +1279,7 @@ public class AccessibilityBridgeTest {
     assertTrue(node2Info.isFocusable());
   }
 
+  @Config(sdk = 31)
   @TargetApi(31)
   @Test
   public void itSetsBoldTextFlagCorrectly() {

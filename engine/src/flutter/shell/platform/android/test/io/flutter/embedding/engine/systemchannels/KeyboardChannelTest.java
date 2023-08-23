@@ -32,6 +32,8 @@ public class KeyboardChannelTest {
     return reply;
   }
 
+  @SuppressWarnings("deprecation")
+  // setMessageHandler is deprecated.
   @Test
   public void respondsToGetKeyboardStateChannelMessage() {
     ArgumentCaptor<BinaryMessenger.BinaryMessageHandler> binaryMessageHandlerCaptor =
