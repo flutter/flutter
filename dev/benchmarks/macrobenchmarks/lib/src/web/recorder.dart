@@ -4,10 +4,6 @@
 
 import 'dart:async';
 import 'dart:js_interop';
-// The analyzer currently thinks `js_interop_unsafe` is unused, but it is used
-// for `JSObject.[]=`.
-// ignore: unused_import
-import 'dart:js_interop_unsafe';
 import 'dart:math' as math;
 import 'dart:ui';
 import 'dart:ui_web' as ui_web;
