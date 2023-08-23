@@ -181,7 +181,14 @@ class FontVariation {
   const FontVariation(
     this.axis,
     this.value,
-  ) : assert(axis.length == 4, 'Axis tag must be exactly four characters long.');
+  ) : assert(axis.length == 4, 'Axis tag must be exactly four characters long.'),
+      assert(value >= -32768.0 && value < 32768.0, 'Value must be representable as a signed 16.16 fixed-point number, i.e. it must be in this range: -32768.0 ≤ value < 32768.0');
+
+  const FontVariation.italic(this.value) : assert(value >= 0.0), assert(value <= 1.0), axis = 'ital';
+  const FontVariation.opticalSize(this.value) : assert(value > 0.0), axis = 'opsz';
+  const FontVariation.slant(this.value) : assert(value > -90.0), assert(value < 90.0), axis = 'slnt';
+  const FontVariation.width(this.value) : assert(value >= 0.0), axis = 'wdth';
+  const FontVariation.weight(this.value) : assert(value >= 1), assert(value <= 1000), axis = 'wght';
 
   final String axis;
   final double value;
@@ -198,6 +205,16 @@ class FontVariation {
 
   @override
   int get hashCode => Object.hash(axis, value);
+
+  static FontVariation? lerp(FontVariation? a, FontVariation? b, double t) {
+    if (a?.axis != b?.axis || (a == null && b == null)) {
+      return t < 0.5 ? a : b;
+    }
+    return FontVariation(
+      a!.axis,
+      clampDouble(lerpDouble(a.value, b!.value, t)!, -32768.0, 32768.0 - 1.0/65536.0),
+    );
+  }
 
   @override
   String toString() => "FontVariation('$axis', $value)";
