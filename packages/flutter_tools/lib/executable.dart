@@ -124,6 +124,14 @@ Future<void> main(List<String> args) async {
           windows: globals.platform.isWindows,
         );
       },
+      Terminal: () {
+        return AnsiTerminal(
+          stdio: globals.stdio,
+          platform: globals.platform,
+          now: DateTime.now(),
+          isCliAnimationEnabled: featureFlags.isCliAnimationEnabled,
+        );
+      },
       PreRunValidator: () => PreRunValidator(fileSystem: globals.fs),
     },
     shutdownHooks: globals.shutdownHooks,

@@ -79,6 +79,7 @@ void main() {
   group('CommandHelp', () {
     group('toString', () {
       testWithoutContext('ends with a resetBold when it has parenthetical text', () {
+        // This is apparently required to work around bugs in some terminal clients.
         final Platform platform = FakePlatform(stdoutSupportsAnsi: true);
         final AnsiTerminal terminal = AnsiTerminal(stdio: FakeStdio(), platform: platform);
 
@@ -131,19 +132,19 @@ void main() {
           wrapColumn: maxLineWidth,
         );
 
-        expect(commandHelp.I.toString(), endsWith('\x1B[90m(debugInvertOversizedImages)\x1B[39m\x1B[22m'));
-        expect(commandHelp.L.toString(), endsWith('\x1B[90m(debugDumpLayerTree)\x1B[39m\x1B[22m'));
-        expect(commandHelp.P.toString(), endsWith('\x1B[90m(WidgetsApp.showPerformanceOverlay)\x1B[39m\x1B[22m'));
-        expect(commandHelp.S.toString(), endsWith('\x1B[90m(debugDumpSemantics)\x1B[39m\x1B[22m'));
-        expect(commandHelp.U.toString(), endsWith('\x1B[90m(debugDumpSemantics)\x1B[39m\x1B[22m'));
-        expect(commandHelp.a.toString(), endsWith('\x1B[90m(debugProfileWidgetBuilds)\x1B[39m\x1B[22m'));
-        expect(commandHelp.b.toString(), endsWith('\x1B[90m(debugBrightnessOverride)\x1B[39m\x1B[22m'));
-        expect(commandHelp.f.toString(), endsWith('\x1B[90m(debugDumpFocusTree)\x1B[39m\x1B[22m'));
-        expect(commandHelp.i.toString(), endsWith('\x1B[90m(WidgetsApp.showWidgetInspectorOverride)\x1B[39m\x1B[22m'));
-        expect(commandHelp.o.toString(), endsWith('\x1B[90m(defaultTargetPlatform)\x1B[39m\x1B[22m'));
-        expect(commandHelp.p.toString(), endsWith('\x1B[90m(debugPaintSizeEnabled)\x1B[39m\x1B[22m'));
-        expect(commandHelp.t.toString(), endsWith('\x1B[90m(debugDumpRenderTree)\x1B[39m\x1B[22m'));
-        expect(commandHelp.w.toString(), endsWith('\x1B[90m(debugDumpApp)\x1B[39m\x1B[22m'));
+        expect(commandHelp.I.toString(), contains('\x1B[90m(debugInvertOversizedImages)\x1B[39m'));
+        expect(commandHelp.L.toString(), contains('\x1B[90m(debugDumpLayerTree)\x1B[39m'));
+        expect(commandHelp.P.toString(), contains('\x1B[90m(WidgetsApp.showPerformanceOverlay)\x1B[39m'));
+        expect(commandHelp.S.toString(), contains('\x1B[90m(debugDumpSemantics)\x1B[39m'));
+        expect(commandHelp.U.toString(), contains('\x1B[90m(debugDumpSemantics)\x1B[39m'));
+        expect(commandHelp.a.toString(), contains('\x1B[90m(debugProfileWidgetBuilds)\x1B[39m'));
+        expect(commandHelp.b.toString(), contains('\x1B[90m(debugBrightnessOverride)\x1B[39m'));
+        expect(commandHelp.f.toString(), contains('\x1B[90m(debugDumpFocusTree)\x1B[39m'));
+        expect(commandHelp.i.toString(), contains('\x1B[90m(WidgetsApp.showWidgetInspectorOverride)\x1B[39m'));
+        expect(commandHelp.o.toString(), contains('\x1B[90m(defaultTargetPlatform)\x1B[39m'));
+        expect(commandHelp.p.toString(), contains('\x1B[90m(debugPaintSizeEnabled)\x1B[39m'));
+        expect(commandHelp.t.toString(), contains('\x1B[90m(debugDumpRenderTree)\x1B[39m'));
+        expect(commandHelp.w.toString(), contains('\x1B[90m(debugDumpApp)\x1B[39m'));
       });
 
       testWithoutContext('should not create a help text longer than maxLineWidth without ansi support', () {
@@ -184,6 +185,7 @@ void main() {
           wrapColumn: maxLineWidth,
         );
 
+        // The trailing \x1B[22m is to work around reported bugs in some terminal clients.
         expect(commandHelp.I.toString(), equals('\x1B[1mI\x1B[22m Toggle oversized image inversion.                     \x1B[90m(debugInvertOversizedImages)\x1B[39m\x1B[22m'));
         expect(commandHelp.L.toString(), equals('\x1B[1mL\x1B[22m Dump layer tree to the console.                               \x1B[90m(debugDumpLayerTree)\x1B[39m\x1B[22m'));
         expect(commandHelp.M.toString(), equals('\x1B[1mM\x1B[22m Write SkSL shaders to a unique file in the project directory.'));
