@@ -68,22 +68,12 @@ struct ComputeCommand : public ResourceBinder {
   bool BindResource(ShaderStage stage,
                     const SampledImageSlot& slot,
                     const ShaderMetadata& metadata,
-                    const std::shared_ptr<const Texture>& texture) override;
-
-  // |ResourceBinder|
-  bool BindResource(ShaderStage stage,
-                    const SampledImageSlot& slot,
-                    const ShaderMetadata& metadata,
-                    const std::shared_ptr<const Sampler>& sampler) override;
-
-  // |ResourceBinder|
-  bool BindResource(ShaderStage stage,
-                    const SampledImageSlot& slot,
-                    const ShaderMetadata& metadata,
                     const std::shared_ptr<const Texture>& texture,
                     const std::shared_ptr<const Sampler>& sampler) override;
 
-  constexpr operator bool() const { return pipeline && pipeline->IsValid(); }
+  constexpr explicit operator bool() const {
+    return pipeline && pipeline->IsValid();
+  }
 };
 
 }  // namespace impeller

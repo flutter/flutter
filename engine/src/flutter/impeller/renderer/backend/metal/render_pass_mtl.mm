@@ -379,8 +379,9 @@ static bool Bind(PassBindingsCache& pass,
 static bool Bind(PassBindingsCache& pass,
                  ShaderStage stage,
                  size_t bind_index,
+                 const Sampler& sampler,
                  const Texture& texture) {
-  if (!texture.IsValid()) {
+  if (!sampler.IsValid() || !texture.IsValid()) {
     return false;
   }
 
@@ -395,18 +396,8 @@ static bool Bind(PassBindingsCache& pass,
   }
 
   return pass.SetTexture(stage, bind_index,
-                         TextureMTL::Cast(texture).GetMTLTexture());
-}
-
-static bool Bind(PassBindingsCache& pass,
-                 ShaderStage stage,
-                 size_t bind_index,
-                 const Sampler& sampler) {
-  if (!sampler.IsValid()) {
-    return false;
-  }
-
-  return pass.SetSampler(stage, bind_index,
+                         TextureMTL::Cast(texture).GetMTLTexture()) &&
+         pass.SetSampler(stage, bind_index,
                          SamplerMTL::Cast(sampler).GetMTLSamplerState());
 }
 
@@ -422,15 +413,9 @@ bool RenderPassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
         return false;
       }
     }
-    for (const auto& texture : bindings.textures) {
-      if (!Bind(pass_bindings, stage, texture.first,
-                *texture.second.resource)) {
-        return false;
-      }
-    }
-    for (const auto& sampler : bindings.samplers) {
-      if (!Bind(pass_bindings, stage, sampler.first,
-                *sampler.second.resource)) {
+    for (const auto& data : bindings.sampled_images) {
+      if (!Bind(pass_bindings, stage, data.first, *data.second.sampler.resource,
+                *data.second.texture.resource)) {
         return false;
       }
     }
