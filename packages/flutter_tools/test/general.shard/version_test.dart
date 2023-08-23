@@ -554,7 +554,7 @@ void main() {
     Cache: () => cache,
   });
 
-  testUsingContext('_FlutterVersionFromFile ensures legacy version file exists', () async {
+  testUsingContext('_FlutterVersionFromFile.ensureVersionFile ensures legacy version file exists', () async {
     final MemoryFileSystem fs = MemoryFileSystem.test();
     final Directory flutterRoot = fs.directory('/path/to/flutter');
     final Directory cacheDir = flutterRoot
@@ -583,18 +583,12 @@ void main() {
       fs: fs,
       flutterRoot: flutterRoot.path,
     );
+    flutterVersion.ensureVersionFile();
     expect(legacyVersionFile.existsSync(), isTrue);
-    expect(flutterVersion.channel, 'stable');
-    expect(flutterVersion.getVersionString(), 'stable/1.2.3');
-    expect(flutterVersion.getBranchName(), 'stable');
-    expect(flutterVersion.dartSdkVersion, 'deadbeef2');
-    expect(flutterVersion.devToolsVersion, devToolsVersion);
-    expect(flutterVersion.engineRevision, 'deadbeef');
-
-    expect(processManager, hasNoRemainingExpectations);
-  //}, overrides: <Type, Generator>{
-  //  ProcessManager: () => processManager,
-  //  Cache: () => cache,
+    expect(legacyVersionFile.readAsStringSync(), '1.2.3');
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => processManager,
+    Cache: () => cache,
   });
 
   testUsingContext('FlutterVersion() falls back to git if .version.json is malformed', () async {
