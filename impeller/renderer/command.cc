@@ -18,8 +18,8 @@ bool Command::BindVertices(const VertexBuffer& buffer) {
     return false;
   }
 
-  vertex_bindings.buffers[VertexDescriptor::kReservedVertexBufferIndex] = {
-      nullptr, buffer.vertex_buffer};
+  vertex_bindings.buffers[VertexDescriptor::kReservedVertexBufferIndex] =
+      BufferAndUniformSlot{.slot = {}, .view = {nullptr, buffer.vertex_buffer}};
   index_buffer = buffer.index_buffer;
   vertex_count = buffer.vertex_count;
   index_type = buffer.index_type;
@@ -30,7 +30,7 @@ BufferView Command::GetVertexBuffer() const {
   auto found = vertex_bindings.buffers.find(
       VertexDescriptor::kReservedVertexBufferIndex);
   if (found != vertex_bindings.buffers.end()) {
-    return found->second.resource;
+    return found->second.view.resource;
   }
   return {};
 }
@@ -61,13 +61,12 @@ bool Command::DoBindResource(ShaderStage stage,
 
   switch (stage) {
     case ShaderStage::kVertex:
-      vertex_bindings.uniforms[slot.ext_res_0] = slot;
-      vertex_bindings.buffers[slot.ext_res_0] = BufferResource(metadata, view);
+      vertex_bindings.buffers[slot.ext_res_0] = {
+          .slot = slot, .view = BufferResource(metadata, view)};
       return true;
     case ShaderStage::kFragment:
-      fragment_bindings.uniforms[slot.ext_res_0] = slot;
-      fragment_bindings.buffers[slot.ext_res_0] =
-          BufferResource(metadata, view);
+      fragment_bindings.buffers[slot.ext_res_0] = {
+          .slot = slot, .view = BufferResource(metadata, view)};
       return true;
     case ShaderStage::kCompute:
       VALIDATION_LOG << "Use ComputeCommands for compute shader stages.";

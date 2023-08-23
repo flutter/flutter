@@ -225,7 +225,7 @@ bool ComputePassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
 
     for (const auto& buffer : command.bindings.buffers) {
       if (!Bind(pass_bindings, *allocator, buffer.first,
-                buffer.second.resource)) {
+                buffer.second.view.resource)) {
         return false;
       }
     }
