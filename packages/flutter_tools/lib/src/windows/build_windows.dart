@@ -190,7 +190,16 @@ Future<void> _runBuild(
 
   // MSBuild sends all output to stdout, including build errors. This surfaces
   // known error patterns.
-  final RegExp errorMatcher = RegExp(r':\s*(?:warning|(?:fatal )?error).*?:');
+  final RegExp errorMatcher = RegExp(
+    <String>[
+      // Known error messages
+      r'(:\s*(?:warning|(?:fatal )?error).*?:)',
+      r'Error detected in pubspec\.yaml:',
+
+      // Known secondary error lines for pubspec.yaml
+      r'No file or variants found for asset:',
+    ].join('|'),
+  );
 
   int result;
   try {
@@ -238,9 +247,11 @@ void _writeGeneratedFlutterConfig(
   };
   final LocalEngineInfo? localEngineInfo = globals.artifacts?.localEngineInfo;
   if (localEngineInfo != null) {
-    final String engineOutPath = localEngineInfo.engineOutPath;
-    environment['FLUTTER_ENGINE'] = globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath));
-    environment['LOCAL_ENGINE'] = localEngineInfo.localEngineName;
+    final String targetOutPath = localEngineInfo.targetOutPath;
+    // Get the engine source root $ENGINE/src/out/foo_bar_baz -> $ENGINE/src
+    environment['FLUTTER_ENGINE'] = globals.fs.path.dirname(globals.fs.path.dirname(targetOutPath));
+    environment['LOCAL_ENGINE'] = localEngineInfo.localTargetName;
+    environment['LOCAL_ENGINE_HOST'] = localEngineInfo.localHostName;
   }
   writeGeneratedCmakeConfig(Cache.flutterRoot!, windowsProject, buildInfo, environment, globals.logger);
 }

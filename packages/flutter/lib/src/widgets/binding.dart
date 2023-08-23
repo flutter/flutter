@@ -54,9 +54,8 @@ export 'dart:ui' show AppLifecycleState, Locale;
 /// ** See code in examples/api/lib/widgets/binding/widget_binding_observer.0.dart **
 /// {@end-tool}
 abstract mixin class WidgetsBindingObserver {
-  /// Called when the system tells the app to pop the current route.
-  /// For example, on Android, this is called when the user presses
-  /// the back button.
+  /// Called when the system tells the app to pop the current route, such as
+  /// after a system back button press or back gesture.
   ///
   /// Observers are notified in registration order until one returns
   /// true. If none return true, the application quits.
@@ -69,6 +68,8 @@ abstract mixin class WidgetsBindingObserver {
   ///
   /// This method exposes the `popRoute` notification from
   /// [SystemChannels.navigation].
+  ///
+  /// {@macro flutter.widgets.AndroidPredictiveBack}
   Future<bool> didPopRoute() => Future<bool>.value(false);
 
   /// Called when the host tells the application to push a new route onto the
@@ -253,6 +254,11 @@ abstract mixin class WidgetsBindingObserver {
   /// documentation for the [WidgetsBindingObserver] class.
   ///
   /// This method exposes notifications from [SystemChannels.lifecycle].
+  ///
+  /// See also:
+  ///
+  ///  * [AppLifecycleListener], an alternative API for responding to
+  ///    application lifecycle changes.
   void didChangeAppLifecycleState(AppLifecycleState state) { }
 
   /// Called when a request is received from the system to exit the application.
@@ -505,23 +511,6 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         },
       );
 
-      registerServiceExtension(
-        name: WidgetsServiceExtensions.fastReassemble.name,
-        callback: (Map<String, Object> params) async {
-          // This mirrors the implementation of the 'reassemble' callback registration
-          // in lib/src/foundation/binding.dart, but with the extra binding config used
-          // to skip some reassemble work.
-          final String? className = params['className'] as String?;
-          BindingBase.debugReassembleConfig = DebugReassembleConfig(widgetName: className);
-          try {
-            await reassembleApplication();
-          } finally {
-            BindingBase.debugReassembleConfig = null;
-          }
-          return <String, String>{'type': 'Success'};
-        },
-      );
-
       // Expose the ability to send Widget rebuilds as [Timeline] events.
       registerBoolServiceExtension(
         name: WidgetsServiceExtensions.profileWidgetBuilds.name,
@@ -560,7 +549,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
   Future<void> _forceRebuild() {
     if (rootElement != null) {
-      buildOwner!.reassemble(rootElement!, null);
+      buildOwner!.reassemble(rootElement!);
       return endOfFrame;
     }
     return Future<void>.value();
@@ -623,7 +612,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @override
   Future<AppExitResponse> handleRequestAppExit() async {
     bool didCancel = false;
-    for (final WidgetsBindingObserver observer in _observers) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if ((await observer.didRequestAppExit()) == AppExitResponse.cancel) {
         didCancel = true;
         // Don't early return. For the case where someone is just using the
@@ -637,7 +626,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @override
   void handleMetricsChanged() {
     super.handleMetricsChanged();
-    for (final WidgetsBindingObserver observer in _observers) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didChangeMetrics();
     }
   }
@@ -645,7 +634,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @override
   void handleTextScaleFactorChanged() {
     super.handleTextScaleFactorChanged();
-    for (final WidgetsBindingObserver observer in _observers) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didChangeTextScaleFactor();
     }
   }
@@ -653,7 +642,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @override
   void handlePlatformBrightnessChanged() {
     super.handlePlatformBrightnessChanged();
-    for (final WidgetsBindingObserver observer in _observers) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didChangePlatformBrightness();
     }
   }
@@ -661,7 +650,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @override
   void handleAccessibilityFeaturesChanged() {
     super.handleAccessibilityFeaturesChanged();
-    for (final WidgetsBindingObserver observer in _observers) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didChangeAccessibilityFeatures();
     }
   }
@@ -673,6 +662,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// See [dart:ui.PlatformDispatcher.onLocaleChanged].
   @protected
   @mustCallSuper
+  @visibleForTesting
   void handleLocaleChanged() {
     dispatchLocalesChanged(platformDispatcher.locales);
   }
@@ -686,7 +676,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @protected
   @mustCallSuper
   void dispatchLocalesChanged(List<Locale>? locales) {
-    for (final WidgetsBindingObserver observer in _observers) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didChangeLocales(locales);
     }
   }
@@ -700,7 +690,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @protected
   @mustCallSuper
   void dispatchAccessibilityFeaturesChanged() {
-    for (final WidgetsBindingObserver observer in _observers) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didChangeAccessibilityFeatures();
     }
   }
@@ -719,7 +709,29 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   /// This method exposes the `popRoute` notification from
   /// [SystemChannels.navigation].
+  ///
+  /// {@template flutter.widgets.AndroidPredictiveBack}
+  /// ## Handling backs ahead of time
+  ///
+  /// Not all system backs will result in a call to this method. Some are
+  /// handled entirely by the system without informing the Flutter framework.
+  ///
+  /// Android API 33+ introduced a feature called predictive back, which allows
+  /// the user to peek behind the current app or route during a back gesture and
+  /// then decide to cancel or commit the back. Flutter enables or disables this
+  /// feature ahead of time, before a back gesture occurs, and back gestures
+  /// that trigger predictive back are handled entirely by the system and do not
+  /// trigger this method here in the framework.
+  ///
+  /// By default, the framework communicates when it would like to handle system
+  /// back gestures using [SystemNavigator.setFrameworkHandlesBack] in
+  /// [WidgetsApp]. This is done automatically based on the status of the
+  /// [Navigator] stack and the state of any [PopScope] widgets present.
+  /// Developers can manually set this by calling the method directly or by
+  /// using [NavigationNotification].
+  /// {@endtemplate}
   @protected
+  @visibleForTesting
   Future<void> handlePopRoute() async {
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (await observer.didPopRoute()) {
@@ -741,6 +753,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// [SystemChannels.navigation].
   @protected
   @mustCallSuper
+  @visibleForTesting
   Future<void> handlePushRoute(String route) async {
     final RouteInformation routeInformation = RouteInformation(uri: Uri.parse(route));
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
@@ -777,7 +790,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @override
   void handleAppLifecycleStateChanged(AppLifecycleState state) {
     super.handleAppLifecycleStateChanged(state);
-    for (final WidgetsBindingObserver observer in _observers) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didChangeAppLifecycleState(state);
     }
   }
@@ -785,7 +798,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @override
   void handleMemoryPressure() {
     super.handleMemoryPressure();
-    for (final WidgetsBindingObserver observer in _observers) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didHaveMemoryPressure();
     }
   }
@@ -1087,7 +1100,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     }());
 
     if (rootElement != null) {
-      buildOwner!.reassemble(rootElement!, BindingBase.debugReassembleConfig);
+      buildOwner!.reassemble(rootElement!);
     }
     return super.performReassemble();
   }
@@ -1148,6 +1161,23 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 /// rebuilds after calling [State.setState].
 ///
 /// Initializes the binding using [WidgetsFlutterBinding] if necessary.
+///
+/// ## Application shutdown
+///
+/// This widget tree is not torn down when the application shuts down, because
+/// there is no way to predict when that will happen. For example, a user could
+/// physically remove power from their device, or the application could crash
+/// unexpectedly, or the malware on the device could forcibly terminate the
+/// process.
+///
+/// Applications are responsible for ensuring that they are well-behaved
+/// even in the face of a rapid unscheduled termination.
+///
+/// To artificially cause the entire widget tree to be disposed, consider
+/// calling [runApp] with a widget such as [SizedBox.shrink].
+///
+/// To listen for platform shutdown messages (and other lifecycle changes),
+/// consider the [AppLifecycleListener] API.
 ///
 /// See also:
 ///

@@ -9,7 +9,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -238,7 +237,7 @@ void main() {
     );
   });
 
-  testWidgets('menu defaults colors', (WidgetTester tester) async {
+  testWidgets('Menu defaults', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
@@ -279,6 +278,8 @@ void main() {
     expect(material.elevation, 0.0);
     expect(material.shape, const RoundedRectangleBorder());
     expect(material.textStyle?.color, themeData.colorScheme.onSurface);
+    expect(material.textStyle?.fontSize, 14.0);
+    expect(material.textStyle?.height, 1.43);
 
     // vertical menu
     await tester.tap(find.text(TestMenu.mainMenu1.label));
@@ -306,6 +307,8 @@ void main() {
     expect(material.elevation, 0.0);
     expect(material.shape, const RoundedRectangleBorder());
     expect(material.textStyle?.color, themeData.colorScheme.onSurface);
+    expect(material.textStyle?.fontSize, 14.0);
+    expect(material.textStyle?.height, 1.43);
 
     await tester.tap(find.text(TestMenu.mainMenu0.label));
     await tester.pump();
@@ -316,7 +319,7 @@ void main() {
     expect(iconRichText.text.style?.color, themeData.colorScheme.onSurfaceVariant);
   });
 
-  testWidgets('menu defaults - disabled', (WidgetTester tester) async {
+  testWidgets('Menu defaults - disabled', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
@@ -3181,7 +3184,8 @@ void main() {
             children: <TestSemantics>[
               TestSemantics(
                 rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
-                flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState],
+                flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState,
+                  SemanticsFlag.hasExpandedState],
                 label: 'ABC',
                 textDirection: TextDirection.ltr,
               ),
@@ -3194,6 +3198,188 @@ void main() {
 
       semantics.dispose();
     });
+
+    testWidgets('SubmenuButton expanded/collapsed state', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Center(
+            child: SubmenuButton(
+              onHover: (bool value) {},
+              style: SubmenuButton.styleFrom(fixedSize: const Size(88.0, 36.0)),
+              menuChildren: <Widget>[
+                MenuItemButton(
+                  style: SubmenuButton.styleFrom(fixedSize: const Size(120.0, 36.0)),
+                  child: const Text('Item 0'),
+                  onPressed: () {},
+                ),
+              ],
+              child: const Text('ABC'),
+            ),
+          ),
+        ),
+      );
+
+      // Test expanded state.
+      await tester.tap(find.text('ABC'));
+      await tester.pumpAndSettle();
+      expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 1,
+                rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+                children: <TestSemantics> [
+                  TestSemantics(
+                    id: 2,
+                    rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+                    children: <TestSemantics> [
+                      TestSemantics(
+                        id: 3,
+                        rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+                        flags: <SemanticsFlag> [SemanticsFlag.scopesRoute],
+                        children: <TestSemantics> [
+                          TestSemantics(
+                            id: 4,
+                            flags: <SemanticsFlag>[SemanticsFlag.hasExpandedState, SemanticsFlag.isExpanded, SemanticsFlag.isFocused, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled,
+                              SemanticsFlag.isFocusable],
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: 'ABC',
+                            rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+                          )
+                        ]
+                      )
+                    ]
+                  ),
+                  TestSemantics(
+                      id: 6,
+                      rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 64.0),
+                      children: <TestSemantics> [
+                        TestSemantics(
+                            id: 7,
+                            rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 48.0),
+                            flags: <SemanticsFlag> [SemanticsFlag.hasImplicitScrolling],
+                            children: <TestSemantics> [
+                              TestSemantics(
+                                  id: 8,
+                                  label: 'Item 0',
+                                  rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 48.0),
+                                  flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled, SemanticsFlag.isFocusable],
+                                  actions: <SemanticsAction>[SemanticsAction.tap],
+                              ),
+                            ],
+                        ),
+                      ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          ignoreTransform: true,
+        ),
+      );
+
+      // Test collapsed state.
+      await tester.tap(find.text('ABC'));
+      await tester.pumpAndSettle();
+      expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics(
+                id: 1,
+                rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+                children: <TestSemantics> [
+                  TestSemantics(
+                      id: 2,
+                      rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+                      children: <TestSemantics> [
+                        TestSemantics(
+                            id: 3,
+                            rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+                            flags: <SemanticsFlag> [SemanticsFlag.scopesRoute],
+                            children: <TestSemantics> [
+                              TestSemantics(
+                                id: 4,
+                                flags: <SemanticsFlag>[SemanticsFlag.hasExpandedState, SemanticsFlag.isFocused, SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled,
+                                  SemanticsFlag.isFocusable],
+                                actions: <SemanticsAction>[SemanticsAction.tap],
+                                label: 'ABC',
+                                rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+                              )
+                            ]
+                        )
+                      ]
+                  ),
+                ],
+              ),
+            ],
+          ),
+          ignoreTransform: true,
+        ),
+      );
+
+      semantics.dispose();
+    });
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/131676.
+  testWidgets('Material3 - Menu uses correct text styles', (WidgetTester tester) async {
+    const TextStyle menuTextStyle = TextStyle(
+      fontSize: 18.5,
+      fontStyle: FontStyle.italic,
+      wordSpacing: 1.2,
+      decoration: TextDecoration.lineThrough,
+    );
+    final ThemeData themeData = ThemeData(
+      textTheme: const TextTheme(
+        labelLarge: menuTextStyle,
+      )
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: themeData,
+        home: Material(
+          child: MenuBar(
+            controller: controller,
+            children: createTestMenus(
+              onPressed: onPressed,
+              onOpen: onOpen,
+              onClose: onClose,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Test menu button text style uses the TextTheme.labelLarge.
+    Finder buttonMaterial = find.descendant(
+      of: find.byType(TextButton),
+      matching: find.byType(Material),
+    ).first;
+    Material material = tester.widget<Material>(buttonMaterial);
+    expect(material.textStyle?.fontSize, menuTextStyle.fontSize);
+    expect(material.textStyle?.fontStyle, menuTextStyle.fontStyle);
+    expect(material.textStyle?.wordSpacing, menuTextStyle.wordSpacing);
+    expect(material.textStyle?.decoration, menuTextStyle.decoration);
+
+    // Open the menu.
+    await tester.tap(find.text(TestMenu.mainMenu1.label));
+    await tester.pump();
+
+    // Test menu item text style uses the TextTheme.labelLarge.
+    buttonMaterial = find.descendant(
+      of: find.widgetWithText(TextButton, TestMenu.subMenu10.label),
+      matching: find.byType(Material),
+    ).first;
+    material = tester.widget<Material>(buttonMaterial);
+    expect(material.textStyle?.fontSize, menuTextStyle.fontSize);
+    expect(material.textStyle?.fontStyle, menuTextStyle.fontStyle);
+    expect(material.textStyle?.wordSpacing, menuTextStyle.wordSpacing);
+    expect(material.textStyle?.decoration, menuTextStyle.decoration);
   });
 }
 
