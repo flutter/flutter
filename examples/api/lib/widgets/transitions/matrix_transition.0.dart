@@ -63,9 +63,11 @@ class _MatrixTransitionExampleState extends State<MatrixTransitionExample> with 
             padding: EdgeInsets.all(8.0),
             child: FlutterLogo(size: 150.0),
           ),
-          onTransform: (double value) => Matrix4.identity()
-            ..setEntry(3, 2, 0.004)
-            ..rotateY(pi * 2.0 * value),
+          onTransform: (double value) {
+            return Matrix4.identity()
+              ..setEntry(3, 2, 0.004)
+              ..rotateY(pi * 2.0 * value);
+          },
         ),
       ),
     );
