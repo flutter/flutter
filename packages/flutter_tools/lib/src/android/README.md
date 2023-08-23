@@ -4,7 +4,7 @@ This section of the Flutter repository contains the command line developer tools
 for building Flutter applications on Android. What follows are some notes about
 updating this part of the tool.
 
-## Updating supported Android dependencies
+## Updating Android dependencies
 The Android dependencies that may need updating in Flutter project templates
 include the Android NDK and SDK versions, Gradle, the Kotlin Gradle Plugin,
 and the Android Gradle Plugin. The current template versions of these
@@ -16,9 +16,12 @@ is up-to-date. **Please make sure to check for new available versions of
 the dependency whose version you are upgrading!**
 
 ### Android NDK & SDK versions
-Note that all of the Android SDK/NDK versions noted in `gradle_utils.dart`
-should match the values in the Flutter Gradle Plugin, so updating any of
+All of the Android SDK/NDK versions noted in `gradle_utils.dart`
+(`compileSdkVersion`, `minSdkVersion`, `targetSdkVersion`, `ndkVersion`) versions should match the values in Flutter Gradle Plugin (FlutterExtension), so updating any of
 these versions also requires an update in [flutter.groovy](../../../gradle/src/main/groovy/flutter.groovy).
+
+The Flutter Gradle plugin is only applied to app projects, and modules that are built from source
+using (`include_flutter.groovy`). The remaining projects are: plugins, and modules compiled as AARs. In modules, the ephemeral directory `.android` is always regenerated after `flutter pub get`, so new versions are picked up after a Flutter upgrade.
 
 When updating the Android `compileSdkVersion`, `minSdkVersion`, or
 `targetSdkVersion`, make sure that:
@@ -53,10 +56,14 @@ be marked inline).
 - Update the test cases in [create_test.dart](../../../test/commands.shard/permeable/create_test.dart) that test for a warning for Java/Gradle incompatibilities as needed
 (relevant tests should fail if you do not fix them preemptively).
 
+For more information about the latest version, check https://gradle.org/releases/.
+
 ### Kotlin Gradle Plugin
 When updating the Kotlin Gradle Plugin (KGP) version used in project templates
 (`templateKotlinGradlePluginVersion`), make sure that the framework integration
 & benchmark tests are running with at least this KGP version.
+
+For information aboout the latest version, check https://kotlinlang.org/docs/releases.html#release-details.
 
 ### Android Gradle Plugin
 When updating the Android Gradle Plugin (AGP) version used in project templates
@@ -79,3 +86,5 @@ infomration known to the tool.
 be marked inline).
 - Update the test cases in [create_test.dart](../../../test/commands.shard/permeable/create_test.dart) that test for a warning for Java/AGP incompatibilities as needed
 (relevant tests should fail if you do not fix them preemptively).
+
+For information about the latest version, check https://developer.android.com/studio/releases/gradle-plugin#updating-gradle.

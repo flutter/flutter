@@ -24,20 +24,13 @@ import 'android_sdk.dart';
 // In general, Flutter aims to default to the latest version.
 // However, this currently requires to migrate existing integration tests to the latest supported values.
 //
-// For more information about the latest version, check:
-// https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
-// https://kotlinlang.org/docs/releases.html#release-details
+// Please see the README before changing any of these values.
 const String templateDefaultGradleVersion = '7.5';
 const String templateAndroidGradlePluginVersion = '7.3.0';
 const String templateDefaultGradleVersionForModule = '7.3.0';
 const String templateKotlinGradlePluginVersion = '1.7.10';
 
-// These versions should match the values in Flutter Gradle Plugin (FlutterExtension).
-// The Flutter Gradle plugin is only applied to app projects, and modules that are built from source
-// using (include_flutter.groovy).
-// The remaining projects are: plugins, and modules compiled as AARs. In modules, the ephemeral directory
-// `.android` is always regenerated after flutter pub get, so new versions are picked up after a
-// Flutter upgrade.
+// Please see the README before changing any of these values.
 const String compileSdkVersion = '33';
 const String minSdkVersion = '19';
 const String targetSdkVersion = '33';
