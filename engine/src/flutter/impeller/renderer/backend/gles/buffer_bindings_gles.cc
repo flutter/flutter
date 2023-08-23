@@ -145,12 +145,12 @@ bool BufferBindingsGLES::BindUniformData(
     const Bindings& vertex_bindings,
     const Bindings& fragment_bindings) const {
   for (const auto& buffer : vertex_bindings.buffers) {
-    if (!BindUniformBuffer(gl, transients_allocator, buffer.second)) {
+    if (!BindUniformBuffer(gl, transients_allocator, buffer.second.view)) {
       return false;
     }
   }
   for (const auto& buffer : fragment_bindings.buffers) {
-    if (!BindUniformBuffer(gl, transients_allocator, buffer.second)) {
+    if (!BindUniformBuffer(gl, transients_allocator, buffer.second.view)) {
       return false;
     }
   }

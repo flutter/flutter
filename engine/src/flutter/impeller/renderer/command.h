@@ -68,10 +68,15 @@ struct TextureAndSampler {
   SamplerResource sampler;
 };
 
+/// @brief combines the buffer resource and its uniform slot information.
+struct BufferAndUniformSlot {
+  ShaderUniformSlot slot;
+  BufferResource view;
+};
+
 struct Bindings {
-  std::map<size_t, ShaderUniformSlot> uniforms;
   std::map<size_t, TextureAndSampler> sampled_images;
-  std::map<size_t, BufferResource> buffers;
+  std::map<size_t, BufferAndUniformSlot> buffers;
 };
 
 //------------------------------------------------------------------------------
