@@ -305,15 +305,15 @@ bool BufferBindingsGLES::BindTextures(const ProcTableGLES& gl,
                                       const Bindings& bindings,
                                       ShaderStage stage) const {
   size_t active_index = 0;
-  for (const auto& texture : bindings.textures) {
-    const auto& texture_gles = TextureGLES::Cast(*texture.second.resource);
-    if (texture.second.GetMetadata() == nullptr) {
+  for (const auto& data : bindings.sampled_images) {
+    const auto& texture_gles = TextureGLES::Cast(*data.second.texture.resource);
+    if (data.second.texture.GetMetadata() == nullptr) {
       VALIDATION_LOG << "No metadata found for texture binding.";
       return false;
     }
 
     const auto uniform_key =
-        CreateUniformMemberKey(texture.second.GetMetadata()->name);
+        CreateUniformMemberKey(data.second.texture.GetMetadata()->name);
     auto uniform = uniform_locations_.find(uniform_key);
     if (uniform == uniform_locations_.end()) {
       VALIDATION_LOG << "Could not find uniform for key: " << uniform_key;
@@ -341,12 +341,9 @@ bool BufferBindingsGLES::BindTextures(const ProcTableGLES& gl,
     /// If there is a sampler for the texture at the same index, configure the
     /// bound texture using that sampler.
     ///
-    auto sampler = bindings.samplers.find(texture.first);
-    if (sampler != bindings.samplers.end()) {
-      const auto& sampler_gles = SamplerGLES::Cast(*sampler->second.resource);
-      if (!sampler_gles.ConfigureBoundTexture(texture_gles, gl)) {
-        return false;
-      }
+    const auto& sampler_gles = SamplerGLES::Cast(*data.second.sampler.resource);
+    if (!sampler_gles.ConfigureBoundTexture(texture_gles, gl)) {
+      return false;
     }
 
     //--------------------------------------------------------------------------

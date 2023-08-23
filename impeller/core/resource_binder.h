@@ -35,16 +35,6 @@ struct ResourceBinder {
   virtual bool BindResource(ShaderStage stage,
                             const SampledImageSlot& slot,
                             const ShaderMetadata& metadata,
-                            const std::shared_ptr<const Texture>& texture) = 0;
-
-  virtual bool BindResource(ShaderStage stage,
-                            const SampledImageSlot& slot,
-                            const ShaderMetadata& metadata,
-                            const std::shared_ptr<const Sampler>& sampler) = 0;
-
-  virtual bool BindResource(ShaderStage stage,
-                            const SampledImageSlot& slot,
-                            const ShaderMetadata& metadata,
                             const std::shared_ptr<const Texture>& texture,
                             const std::shared_ptr<const Sampler>& sampler) = 0;
 };
