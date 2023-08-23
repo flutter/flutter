@@ -62,16 +62,6 @@ platform_properties:
       os: Linux
       device_type: "Pixel 7 Pro"
 
-  linux_samsung_s10:
-    properties:
-      dependencies: >-
-        [
-          {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "open_jdk", "version": "version:11"},
-          {"dependency": "curl", "version": "version:7.64.0"}
-        ]
-      os: Linux
-      device_type: "SM-G973U1"
   linux_samsung_a02:
     properties:
       dependencies: >-
@@ -82,6 +72,7 @@ platform_properties:
         ]
       os: Linux
       device_type: "SM-A025V"
+
   mac:
     properties:
       dependencies: >-
@@ -1668,17 +1659,18 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: backdrop_filter_perf__e2e_summary
 
-  - name: Linux_samsung_s10 backdrop_filter_perf__timeline_summary
+  - name: Linux_pixel_7pro backdrop_filter_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux", "samsung", "s10"]
+        ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: backdrop_filter_perf__timeline_summary
 
 
-  - name: Linux_samsung_s10 draw_atlas_perf_opengles__timeline_summary
+  - name: Linux_pixel_7pro draw_atlas_perf_opengles__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     bringup: true
@@ -1686,10 +1678,10 @@ targets:
     properties:
       ignore_flakiness: "true"
       tags: >
-        ["devicelab", "android", "linux", "samsung", "s10"]
+        ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: draw_atlas_perf_opengles__timeline_summary
 
-  - name: Linux_samsung_s10 draw_atlas_perf__timeline_summary
+  - name: Linux_pixel_7pro draw_atlas_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     bringup: true
@@ -1697,10 +1689,10 @@ targets:
     properties:
       ignore_flakiness: "true"
       tags: >
-        ["devicelab", "android", "linux", "samsung", "s10"]
+        ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: draw_atlas_perf__timeline_summary
 
-  - name: Linux_samsung_s10 dynamic_path_tessellation_perf__timeline_summary
+  - name: Linux_pixel_7pro dynamic_path_tessellation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     bringup: true
@@ -1708,10 +1700,10 @@ targets:
     properties:
       ignore_flakiness: "true"
       tags: >
-        ["devicelab", "android", "linux", "samsung", "s10"]
+        ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: dynamic_path_tessellation_perf__timeline_summary
 
-  - name: Linux_samsung_s10 static_path_tessellation_perf__timeline_summary
+  - name: Linux_pixel_7pro static_path_tessellation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     bringup: true
@@ -1719,7 +1711,7 @@ targets:
     properties:
       ignore_flakiness: "true"
       tags: >
-        ["devicelab", "android", "linux", "samsung", "s10"]
+        ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: static_path_tessellation_perf__timeline_summary
 
   - name: Linux_android basic_material_app_android__compile
@@ -1846,13 +1838,14 @@ targets:
           {"dependency": "open_jdk", "version": "version:11"}
         ]
 
-  - name: Linux_samsung_s10 complex_layout_scroll_perf__timeline_summary
+  - name: Linux_pixel_7pro complex_layout_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux", "samsung", "s10"]
+        ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: complex_layout_scroll_perf__timeline_summary
       dependencies: >-
         [
@@ -1894,13 +1887,14 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: cubic_bezier_perf__e2e_summary
 
-  - name: Linux_samsung_s10 cubic_bezier_perf__timeline_summary
+  - name: Linux_pixel_7pro cubic_bezier_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux", "samsung", "s10"]
+        ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: cubic_bezier_perf__timeline_summary
 
   - name: Linux_android cull_opacity_perf__e2e_summary
@@ -1912,13 +1906,14 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: cull_opacity_perf__e2e_summary
 
-  - name: Linux_samsung_s10 cull_opacity_perf__timeline_summary
+  - name: Linux_pixel_7pro cull_opacity_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux", "samsung", "s10"]
+        ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: cull_opacity_perf__timeline_summary
 
   - name: Linux_android devtools_profile_start_test
@@ -2174,13 +2169,14 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: imagefiltered_transform_animation_perf__timeline_summary
 
-  - name: Linux_samsung_s10 imagefiltered_transform_animation_perf__timeline_summary
+  - name: Linux_pixel_7pro imagefiltered_transform_animation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux", "samsung", "s10"]
+        ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: imagefiltered_transform_animation_perf__timeline_summary
 
   - name: Linux_android image_list_reported_duration
@@ -2339,16 +2335,6 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: new_gallery__transition_perf
 
-  # Samsung S10, Skia
-  - name: Linux_samsung_s10 new_gallery__transition_perf
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux", "samsung", "s10"]
-      task_name: new_gallery__transition_perf
-
   # Pixel 7 Pro, Skia
   - name: Linux_pixel_7pro new_gallery__transition_perf
     recipe: devicelab/devicelab_drone
@@ -2406,20 +2392,8 @@ targets:
         ["devicelab", "android", "linux", "samsung", "a02"]
       task_name: new_gallery_impeller__transition_perf
 
-  # Samsung S10, Impeller (Vulkan)
-  - name: Linux_samsung_s10 new_gallery_impeller__transition_perf
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/124693
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      ignore_flakiness: "true"
-      tags: >
-        ["devicelab", "android", "linux", "samsung", "s10"]
-      task_name: new_gallery_impeller__transition_perf
-
-  # Samsung S10, Impeller (OpenGL)
-  - name: Linux_samsung_s10 new_gallery_opengles_impeller__transition_perf
+  # Pixel 7 Pro, Impeller (OpenGL)
+  - name: Linux_pixel_7pro new_gallery_opengles_impeller__transition_perf
     bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -2427,7 +2401,7 @@ targets:
     properties:
       ignore_flakiness: "true"
       tags: >
-        ["devicelab", "android", "linux", "samsung", "s10"]
+        ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: new_gallery_opengles_impeller__transition_perf
 
   - name: Linux_android picture_cache_perf__e2e_summary
@@ -2439,13 +2413,14 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: picture_cache_perf__e2e_summary
 
-  - name: Linux_samsung_s10 picture_cache_perf__timeline_summary
+  - name: Linux_pixel_7pro picture_cache_perf__timeline_summary
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux", "samsung", "s10"]
+        ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: picture_cache_perf__timeline_summary
 
   - name: Linux_android android_picture_cache_complexity_scoring_perf__timeline_summary
@@ -2502,13 +2477,14 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: platform_views_scroll_perf__timeline_summary
 
-  - name: Linux_samsung_s10 platform_views_scroll_perf__timeline_summary
+  - name: Linux_pixel_7pro platform_views_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux", "samsung", "s10"]
+        ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: platform_views_scroll_perf__timeline_summary
 
   - name: Linux_android platform_views_scroll_perf_impeller__timeline_summary
@@ -2522,7 +2498,7 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: platform_views_scroll_perf_impeller__timeline_summary
 
-  - name: Linux_samsung_s10 platform_views_scroll_perf_impeller__timeline_summary
+  - name: Linux_pixel_7pro platform_views_scroll_perf_impeller__timeline_summary
     bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -2530,7 +2506,7 @@ targets:
     properties:
       ignore_flakiness: "true"
       tags: >
-        ["devicelab", "android", "linux", "samsung", "s10"]
+        ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: platform_views_scroll_perf_impeller__timeline_summary
 
   - name: Linux_android platform_view__start_up
@@ -2569,13 +2545,14 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: textfield_perf__e2e_summary
 
-  - name: Linux_samsung_s10 textfield_perf__timeline_summary
+  - name: Linux_pixel_7pro textfield_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "android", "linux", "samsung", "s10"]
+        ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: textfield_perf__timeline_summary
 
   - name: Linux_android tiles_scroll_perf__timeline_summary
@@ -2710,7 +2687,7 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: animated_blur_backdrop_filter_perf__timeline_summary
 
-  - name: Linux_samsung_s10 animated_blur_backdrop_filter_perf__timeline_summary
+  - name: Linux_pixel_7pro animated_blur_backdrop_filter_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     bringup: true
@@ -2718,10 +2695,10 @@ targets:
     properties:
       ignore_flakiness: "true"
       tags: >
-        ["devicelab", "android", "linux", "samsung", "s10"]
+        ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: animated_blur_backdrop_filter_perf__timeline_summary
 
-  - name: Linux_samsung_s10 animated_advanced_blend_perf_opengles__timeline_summary
+  - name: Linux_pixel_7pro animated_advanced_blend_perf_opengles__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     bringup: true
@@ -2729,10 +2706,10 @@ targets:
     properties:
       ignore_flakiness: "true"
       tags: >
-        ["devicelab", "android", "linux", "samsung", "s10"]
+        ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: animated_advanced_blend_perf_opengles__timeline_summary
 
-  - name: Linux_samsung_s10 animated_advanced_blend_perf__timeline_summary
+  - name: Linux_pixel_7pro animated_advanced_blend_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     bringup: true
@@ -2740,7 +2717,7 @@ targets:
     properties:
       ignore_flakiness: "true"
       tags: >
-        ["devicelab", "android", "linux", "samsung", "s10"]
+        ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: animated_advanced_blend_perf__timeline_summary
 
   - name: Mac_ios animated_advanced_blend_perf_ios__timeline_summary
@@ -2753,7 +2730,7 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: animated_advanced_blend_perf_ios__timeline_summary
 
-  - name: Linux_samsung_s10 animated_blur_backdrop_filter_perf_opengles__timeline_summary
+  - name: Linux_pixel_7pro animated_blur_backdrop_filter_perf_opengles__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     bringup: true
@@ -2761,10 +2738,10 @@ targets:
     properties:
       ignore_flakiness: "true"
       tags: >
-        ["devicelab", "android", "linux", "samsung", "s10"]
+        ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: animated_blur_backdrop_filter_perf_opengles__timeline_summary
 
-  - name: Linux_samsung_s10 draw_vertices_perf_opengles__timeline_summary
+  - name: Linux_pixel_7pro draw_vertices_perf_opengles__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     bringup: true
@@ -2772,10 +2749,10 @@ targets:
     properties:
       ignore_flakiness: "true"
       tags: >
-        ["devicelab", "android", "linux", "samsung", "s10"]
+        ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: draw_vertices_perf_opengles__timeline_summary
 
-  - name: Linux_samsung_s10 draw_vertices_perf__timeline_summary
+  - name: Linux_pixel_7pro draw_vertices_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
     bringup: true
@@ -2783,7 +2760,7 @@ targets:
     properties:
       ignore_flakiness: "true"
       tags: >
-        ["devicelab", "android", "linux", "samsung", "s10"]
+        ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: draw_vertices_perf__timeline_summary
 
   - name: Mac_ios draw_vertices_perf_ios__timeline_summary
@@ -3855,6 +3832,20 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery_ios__start_up
 
+  - name: Mac_ios flutter_gallery_ios__start_up_xcode_debug
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: flutter_gallery_ios__start_up_xcode_debug
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "14c18"
+        }
+    bringup: true
+
   - name: Mac_ios flutter_view_ios__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -3921,6 +3912,20 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: integration_ui_ios_driver
+
+  - name: Mac_ios integration_ui_ios_driver_xcode_debug
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: integration_ui_ios_driver_xcode_debug
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "14c18"
+        }
+    bringup: true
 
   - name: Mac_ios integration_ui_ios_frame_number
     recipe: devicelab/devicelab_drone
