@@ -61,12 +61,17 @@ using BufferResource = Resource<BufferView>;
 using TextureResource = Resource<std::shared_ptr<const Texture>>;
 using SamplerResource = Resource<std::shared_ptr<const Sampler>>;
 
+/// @brief combines the texture, sampler and sampler slot information.
+struct TextureAndSampler {
+  SampledImageSlot slot;
+  TextureResource texture;
+  SamplerResource sampler;
+};
+
 struct Bindings {
   std::map<size_t, ShaderUniformSlot> uniforms;
-  std::map<size_t, SampledImageSlot> sampled_images;
+  std::map<size_t, TextureAndSampler> sampled_images;
   std::map<size_t, BufferResource> buffers;
-  std::map<size_t, TextureResource> textures;
-  std::map<size_t, SamplerResource> samplers;
 };
 
 //------------------------------------------------------------------------------
@@ -188,24 +193,14 @@ struct Command : public ResourceBinder {
   bool BindResource(ShaderStage stage,
                     const SampledImageSlot& slot,
                     const ShaderMetadata& metadata,
-                    const std::shared_ptr<const Texture>& texture) override;
-
-  // |ResourceBinder|
-  bool BindResource(ShaderStage stage,
-                    const SampledImageSlot& slot,
-                    const ShaderMetadata& metadata,
-                    const std::shared_ptr<const Sampler>& sampler) override;
-
-  // |ResourceBinder|
-  bool BindResource(ShaderStage stage,
-                    const SampledImageSlot& slot,
-                    const ShaderMetadata& metadata,
                     const std::shared_ptr<const Texture>& texture,
                     const std::shared_ptr<const Sampler>& sampler) override;
 
   BufferView GetVertexBuffer() const;
 
-  constexpr operator bool() const { return pipeline && pipeline->IsValid(); }
+  constexpr explicit operator bool() const {
+    return pipeline && pipeline->IsValid();
+  }
 
  private:
   template <class T>
