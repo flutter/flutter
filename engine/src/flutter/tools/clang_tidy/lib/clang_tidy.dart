@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert' show LineSplitter, jsonDecode;
-import 'dart:io' as io show Directory, File, stderr, stdout;
+import 'dart:io' as io show File, stderr, stdout;
 
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
@@ -11,7 +11,6 @@ import 'package:process_runner/process_runner.dart';
 
 import 'src/command.dart';
 import 'src/git_repo.dart';
-import 'src/hooks_exclude.dart';
 import 'src/options.dart';
 
 const String _linterOutputHeader = '''
@@ -48,8 +47,6 @@ class ClangTidy {
   /// an instance of [ClangTidy].
   ///
   /// `buildCommandsPath` is the path to the build_commands.json file.
-  /// `configPath` is a path to a `.clang-tidy` config file.
-  /// `excludeSlowChecks` when true indicates that slow checks should be skipped.
   /// `repoPath` is the path to the Engine repo.
   /// `checksArg` are specific checks for clang-tidy to do.
   /// `lintAll` when true indicates that all files should be linted.
@@ -59,8 +56,6 @@ class ClangTidy {
   /// will otherwise go to stderr.
   ClangTidy({
     required io.File buildCommandsPath,
-    io.File? configPath,
-    bool excludeSlowChecks = false,
     String checksArg = '',
     bool lintAll = false,
     bool lintHead = false,
@@ -70,8 +65,6 @@ class ClangTidy {
   }) :
     options = Options(
       buildCommandsPath: buildCommandsPath,
-      configPath: configPath,
-      excludeSlowChecks: excludeSlowChecks,
       checksArg: checksArg,
       lintAll: lintAll,
       lintHead: lintHead,
@@ -161,20 +154,10 @@ class ClangTidy {
       );
     }
 
-    io.File? configPath = options.configPath;
-    io.Directory? rewriteDir;
-    if (configPath != null && options.excludeSlowChecks) {
-      configPath = _createClangTidyConfigExcludingSlowLints(configPath);
-      rewriteDir = io.Directory(path.dirname(configPath.path));
-    }
     final _ComputeJobsResult computeJobsResult = await _computeJobs(
       changedFileBuildCommands,
       options,
-      configPath,
     );
-    if (rewriteDir != null) {
-      rewriteDir.deleteSync(recursive: true);
-    }
     final int computeResult = computeJobsResult.sawMalformed ? 1 : 0;
     final List<WorkerJob> jobs = computeJobsResult.jobs;
 
@@ -308,7 +291,6 @@ class ClangTidy {
   Future<_ComputeJobsResult> _computeJobs(
     List<Command> commands,
     Options options,
-    io.File? configPath,
   ) async {
     bool sawMalformed = false;
     final List<WorkerJob> jobs = <WorkerJob>[];
@@ -329,7 +311,7 @@ class ClangTidy {
           sawMalformed = true;
         case LintAction.lint:
           _outSink.writeln('🔶 linting $relativePath');
-          jobs.add(command.createLintJob(options, withPath: configPath));
+          jobs.add(command.createLintJob(options));
         case LintAction.skipThirdParty:
           _outSink.writeln('🔷 ignoring $relativePath (third_party)');
         case LintAction.skipMissing:
@@ -337,10 +319,6 @@ class ClangTidy {
       }
     }
     return _ComputeJobsResult(jobs, sawMalformed);
-  }
-
-  static io.File _createClangTidyConfigExcludingSlowLints(io.File configPath) {
-    return rewriteClangTidyConfig(configPath);
   }
 
   static Iterable<String> _trimGenerator(String output) sync* {

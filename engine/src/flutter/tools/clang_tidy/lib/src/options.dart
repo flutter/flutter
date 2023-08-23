@@ -28,8 +28,6 @@ class Options {
     required this.buildCommandsPath,
     this.help = false,
     this.verbose = false,
-    this.configPath,
-    this.excludeSlowChecks = false,
     this.checksArg = '',
     this.lintAll = false,
     this.lintHead = false,
@@ -76,8 +74,6 @@ class Options {
       help: options['help'] as bool,
       verbose: options['verbose'] as bool,
       buildCommandsPath: buildCommandsPath,
-      configPath: options.wasParsed('config-file') ? io.File(options['config-file'] as String) : null,
-      excludeSlowChecks: options['exclude-slow-checks'] as bool,
       checksArg: options.wasParsed('checks') ? options['checks'] as String : '',
       lintAll: io.Platform.environment['FLUTTER_LINT_ALL'] != null ||
                options['lint-all'] as bool,
@@ -201,16 +197,6 @@ class Options {
             'string, indicating all checks should be performed.',
       defaultsTo: '',
     )
-    ..addOption(
-      'config-file',
-      help: 'Path to a .clang-tidy configuration file.',
-      valueHelp: 'path/to/.clang-tidy',
-    )
-    ..addFlag(
-      'exclude-slow-checks',
-      help: 'Exclude checks that are too slow for git hooks.',
-      negatable: false,
-    )
     ..addFlag(
       'enable-check-profile',
       help: 'Enable per-check timing profiles and print a report to stderr.',
@@ -225,12 +211,6 @@ class Options {
 
   /// The location of the compile_commands.json file.
   final io.File buildCommandsPath;
-
-  /// A location of a `.clang-tidy` configuration file.
-  final io.File? configPath;
-
-  /// Whether to exclude lints that are too slow for git hooks.
-  final bool excludeSlowChecks;
 
   /// The location of shard compile_commands.json files.
   final List<io.File> shardCommandsPaths;
@@ -289,13 +269,6 @@ class Options {
     final bool compileCommandsParsed = argResults.wasParsed('compile-commands');
     if (compileCommandsParsed && argResults.wasParsed('target-variant')) {
       return 'ERROR: --compile-commands option cannot be used with --target-variant.';
-    }
-
-    if (argResults.wasParsed('config-file')) {
-      final io.File configPath = io.File(argResults['config-file'] as String);
-      if (!configPath.existsSync()) {
-        return 'ERROR: Config file ${configPath.path} does not exist.';
-      }
     }
 
     if (compileCommandsParsed && argResults.wasParsed('src-dir')) {
