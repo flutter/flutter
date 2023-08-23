@@ -25,5 +25,6 @@
   "noSpellCheckReplacementsLabel": "सही वर्तनी वाला कोई शब्द नहीं मिला",
   "menuDismissLabel": "मेन्यू खारिज करें",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

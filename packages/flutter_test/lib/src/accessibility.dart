@@ -57,6 +57,9 @@ class Evaluation {
   }
 }
 
+// Examples can assume:
+// typedef HomePage = Placeholder;
+
 /// An accessibility guideline describes a recommendation an application should
 /// meet to be considered accessible.
 ///

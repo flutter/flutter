@@ -30,5 +30,6 @@
   "noSpellCheckReplacementsLabel": "Nije pronađena nijedna zamjena",
   "menuDismissLabel": "Odbacivanje menija",
   "lookUpButtonLabel": "Pogled prema gore",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

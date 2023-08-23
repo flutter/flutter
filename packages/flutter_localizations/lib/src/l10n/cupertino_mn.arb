@@ -25,5 +25,6 @@
   "noSpellCheckReplacementsLabel": "Ямар ч орлуулалт олдсонгүй",
   "menuDismissLabel": "Цэсийг хаах",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

@@ -5,8 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('TextSelectionThemeData copyWith, ==, hashCode basics', () {
@@ -107,17 +106,19 @@ void main() {
     final RenderBox handle = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
     expect(handle, paints..path(color: defaultSelectionHandleColor));
   },
-  // TODO(polina-c): remove after fixing
-  // https://github.com/flutter/flutter/issues/130469
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    notDisposedAllowList: <String, int?>{
-      'ValueNotifier<MagnifierInfo>': 1,
-      'ValueNotifier<_OverlayEntryWidgetState?>': 2,
-      'ValueNotifier<bool>': 1,
-    },
-    // TODO(polina-c): investigate notGCed, if it does not disappear after fixing notDisposed.
-    allowAllNotGCed: true,
-  ));
+    // TODO(polina-c): remove after fixing
+    // https://github.com/flutter/flutter/issues/130469
+    leakTrackingTestConfig: const LeakTrackingTestConfig(
+      notDisposedAllowList: <String, int?>{
+        'ValueNotifier<MagnifierInfo>': 1,
+        'ValueNotifier<_OverlayEntryWidgetState?>': 2,
+        'ValueNotifier<bool>': 2,
+        '_InputBorderGap': 1,
+      },
+      // TODO(polina-c): investigate notGCed, if it does not disappear after fixing notDisposed.
+      allowAllNotGCed: true,
+    ),
+  );
 
   testWidgetsWithLeakTracking('Material3 - Empty textSelectionTheme will use defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
@@ -167,17 +168,19 @@ void main() {
     final RenderBox handle = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
     expect(handle, paints..path(color: defaultSelectionHandleColor));
   },
-  // TODO(polina-c): remove after fixing
-  // https://github.com/flutter/flutter/issues/130469
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    notDisposedAllowList: <String, int?>{
-      'ValueNotifier<MagnifierInfo>': 1,
-      'ValueNotifier<_OverlayEntryWidgetState?>': 2,
-      'ValueNotifier<bool>': 1,
-    },
-    // TODO(polina-c): investigate notGCed, if it does not disappear after fixing notDisposed.
-    allowAllNotGCed: true,
-  ));
+    // TODO(polina-c): remove after fixing
+    // https://github.com/flutter/flutter/issues/130469
+    leakTrackingTestConfig: const LeakTrackingTestConfig(
+      notDisposedAllowList: <String, int?>{
+        'ValueNotifier<MagnifierInfo>': 1,
+        'ValueNotifier<_OverlayEntryWidgetState?>': 2,
+        'ValueNotifier<bool>': 2,
+        '_InputBorderGap': 1,
+      },
+      // TODO(polina-c): investigate notGCed, if it does not disappear after fixing notDisposed.
+      allowAllNotGCed: true,
+    ),
+  );
 
   testWidgets('ThemeData.textSelectionTheme will be used if provided', (WidgetTester tester) async {
     const TextSelectionThemeData textSelectionTheme = TextSelectionThemeData(

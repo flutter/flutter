@@ -34,6 +34,11 @@ void main() {
       expect(localizations.datePickerMonth(11), isNotNull);
       expect(localizations.datePickerMonth(12), isNotNull);
 
+      expect(localizations.datePickerStandaloneMonth(1), isNotNull);
+      expect(localizations.datePickerStandaloneMonth(2), isNotNull);
+      expect(localizations.datePickerStandaloneMonth(11), isNotNull);
+      expect(localizations.datePickerStandaloneMonth(12), isNotNull);
+
       expect(localizations.datePickerDayOfMonth(0), isNotNull);
       expect(localizations.datePickerDayOfMonth(1), isNotNull);
       expect(localizations.datePickerDayOfMonth(2), isNotNull);
