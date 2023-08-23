@@ -6,11 +6,13 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/config.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:path/path.dart' as p;
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -867,6 +869,27 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
+
+    testUsingContext('discovers explicitly configured Android Studio', () {
+      const String androidStudioDir = r'C:\Users\Dash\Desktop\android-studio';
+      config.setValue('android-studio-dir', androidStudioDir);
+      fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio2022.1\.home')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(androidStudioDir);
+      fileSystem.directory(androidStudioDir)
+        .createSync(recursive: true);
+
+      final AndroidStudio studio = AndroidStudio.allInstalled().single;
+
+      expect(studio.version, equals(Version(2022, 1, null)));
+      expect(studio.configuredPath, androidStudioDir);
+      expect(studio.javaPath, fileSystem.path.join(androidStudioDir, 'jbr'));
+    }, overrides: <Type, Generator>{
+      Config: () => config,
+      Platform: () => platform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
   });
 
   group('installation detection on Linux', () {
@@ -1287,6 +1310,20 @@ void main() {
       Platform: () => platform,
       ProcessManager: () => FakeProcessManager.any(),
     });
+
+    testUsingContext('handles file system exception when checking for explicitly configured Android Studio install', () {
+      const String androidStudioDir = '/Users/Dash/Desktop/android-studio';
+      config.setValue('android-studio-dir', androidStudioDir);
+
+      expect(() => AndroidStudio.latestValid(),
+        throwsToolExit(message: RegExp(r'[.\s\S]*Could not find[.\s\S]*FileSystemException[.\s\S]*')));
+    }, overrides: <Type, Generator>{
+      Config: () => config,
+      Platform: () => platform,
+      FileSystem: () => _FakeFileSystem(),
+      FileSystemUtils: () => _FakeFsUtils(),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
   });
 }
 
@@ -1297,4 +1334,34 @@ class FakePlistUtils extends Fake implements PlistParser {
   Map<String, Object> parseFile(String plistFilePath) {
     return fileContents[plistFilePath]!;
   }
+}
+
+class _FakeFileSystem extends Fake implements ErrorHandlingFileSystem {
+  @override
+  Directory directory(dynamic path) {
+    return _NonExistentDirectory();
+  }
+
+  @override
+  p.Context get path {
+    return p.Context();
+  }
+}
+
+class _NonExistentDirectory extends Fake implements ErrorHandlingDirectory {
+  @override
+  bool existsSync() {
+    throw const FileSystemException('OS Error: Filename, directory name, or volume label syntax is incorrect.');
+  }
+
+  @override
+  String get path => '';
+
+  @override
+  Directory get parent => _NonExistentDirectory();
+}
+
+class _FakeFsUtils extends Fake implements FileSystemUtils {
+  @override
+  String get homeDirPath => '/home/';
 }
