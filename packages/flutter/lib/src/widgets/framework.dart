@@ -1317,6 +1317,9 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// To artificially cause the entire widget tree to be disposed, consider
   /// calling [runApp] with a widget such as [SizedBox.shrink].
   ///
+  /// To listen for platform shutdown messages (and other lifecycle changes),
+  /// consider the [AppLifecycleListener] API.
+  ///
   /// See also:
   ///
   ///  * [deactivate], which is called prior to [dispose].

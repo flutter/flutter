@@ -254,6 +254,11 @@ abstract mixin class WidgetsBindingObserver {
   /// documentation for the [WidgetsBindingObserver] class.
   ///
   /// This method exposes notifications from [SystemChannels.lifecycle].
+  ///
+  /// See also:
+  ///
+  ///  * [AppLifecycleListener], an alternative API for responding to
+  ///    application lifecycle changes.
   void didChangeAppLifecycleState(AppLifecycleState state) { }
 
   /// Called when a request is received from the system to exit the application.
@@ -1170,6 +1175,9 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 ///
 /// To artificially cause the entire widget tree to be disposed, consider
 /// calling [runApp] with a widget such as [SizedBox.shrink].
+///
+/// To listen for platform shutdown messages (and other lifecycle changes),
+/// consider the [AppLifecycleListener] API.
 ///
 /// See also:
 ///
