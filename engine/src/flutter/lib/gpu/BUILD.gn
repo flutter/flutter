@@ -36,6 +36,8 @@ source_set("gpu") {
       "context.h",
       "export.cc",
       "export.h",
+      "host_buffer.cc",
+      "host_buffer.h",
       "smoketest.cc",
       "smoketest.h",
     ]
