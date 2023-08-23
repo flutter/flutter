@@ -53,7 +53,7 @@ TextFrame MakeTextFrameSTB(const std::shared_ptr<TypefaceSTB>& typeface_stb,
   }
 
   TextFrame frame;
-  frame.AddTextRun(run);
+  frame.AddTextRun(std::move(run));
 
   return frame;
 }
