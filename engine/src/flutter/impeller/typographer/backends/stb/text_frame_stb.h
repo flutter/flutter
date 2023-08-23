@@ -5,11 +5,13 @@
 #pragma once
 
 #include "flutter/fml/macros.h"
+#include "impeller/typographer/backends/stb/typeface_stb.h"
 #include "impeller/typographer/text_frame.h"
-#include "third_party/skia/include/core/SkTextBlob.h"
 
 namespace impeller {
 
-TextFrame MakeTextFrameFromTextBlobSkia(const sk_sp<SkTextBlob>& blob);
+TextFrame MakeTextFrameSTB(const std::shared_ptr<TypefaceSTB>& typeface_stb,
+                           Font::Metrics metrics,
+                           const std::string& text);
 
 }  // namespace impeller

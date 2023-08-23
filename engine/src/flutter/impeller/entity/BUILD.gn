@@ -283,6 +283,7 @@ impeller_component("entity_unittests") {
     ":entity",
     "../geometry:geometry_asserts",
     "../playground:playground_test",
+    "//flutter/impeller/typographer/backends/skia:typographer_skia_backend",
   ]
 }
 

@@ -1701,12 +1701,22 @@ ORIGIN: ../../../flutter/impeller/toolkit/egl/surface.cc + ../../../flutter/LICE
 ORIGIN: ../../../flutter/impeller/toolkit/egl/surface.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/toolkit/gles/gles.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/toolkit/gles/texture.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/typographer/backends/skia/glyph_atlas_context_skia.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/typographer/backends/skia/glyph_atlas_context_skia.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/typographer/backends/skia/text_frame_skia.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/typographer/backends/skia/text_frame_skia.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/typographer/backends/skia/text_render_context_skia.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/typographer/backends/skia/text_render_context_skia.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/typographer/backends/skia/typeface_skia.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/typographer/backends/skia/typeface_skia.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/typographer/backends/skia/typographer_context_skia.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/typographer/backends/skia/typographer_context_skia.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/typographer/backends/stb/glyph_atlas_context_stb.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/typographer/backends/stb/glyph_atlas_context_stb.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/typographer/backends/stb/text_frame_stb.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/typographer/backends/stb/text_frame_stb.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/typographer/backends/stb/typeface_stb.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/typographer/backends/stb/typeface_stb.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/typographer/backends/stb/typographer_context_stb.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/typographer/backends/stb/typographer_context_stb.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/typographer/font.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/typographer/font.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/typographer/font_glyph_pair.cc + ../../../flutter/LICENSE
@@ -1721,12 +1731,12 @@ ORIGIN: ../../../flutter/impeller/typographer/rectangle_packer.cc + ../../../flu
 ORIGIN: ../../../flutter/impeller/typographer/rectangle_packer.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/typographer/text_frame.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/typographer/text_frame.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/typographer/text_render_context.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/typographer/text_render_context.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/typographer/text_run.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/typographer/text_run.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/typographer/typeface.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/typographer/typeface.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/typographer/typographer_context.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/typographer/typographer_context.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/gpu/context.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/gpu/context.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/lib/gpu/export.cc + ../../../flutter/LICENSE
@@ -4432,12 +4442,22 @@ FILE: ../../../flutter/impeller/toolkit/gles/gles.h
 FILE: ../../../flutter/impeller/toolkit/gles/texture.cc
 FILE: ../../../flutter/impeller/toolkit/gles/texture.h
 FILE: ../../../flutter/impeller/tools/malioc.json
+FILE: ../../../flutter/impeller/typographer/backends/skia/glyph_atlas_context_skia.cc
+FILE: ../../../flutter/impeller/typographer/backends/skia/glyph_atlas_context_skia.h
 FILE: ../../../flutter/impeller/typographer/backends/skia/text_frame_skia.cc
 FILE: ../../../flutter/impeller/typographer/backends/skia/text_frame_skia.h
-FILE: ../../../flutter/impeller/typographer/backends/skia/text_render_context_skia.cc
-FILE: ../../../flutter/impeller/typographer/backends/skia/text_render_context_skia.h
 FILE: ../../../flutter/impeller/typographer/backends/skia/typeface_skia.cc
 FILE: ../../../flutter/impeller/typographer/backends/skia/typeface_skia.h
+FILE: ../../../flutter/impeller/typographer/backends/skia/typographer_context_skia.cc
+FILE: ../../../flutter/impeller/typographer/backends/skia/typographer_context_skia.h
+FILE: ../../../flutter/impeller/typographer/backends/stb/glyph_atlas_context_stb.cc
+FILE: ../../../flutter/impeller/typographer/backends/stb/glyph_atlas_context_stb.h
+FILE: ../../../flutter/impeller/typographer/backends/stb/text_frame_stb.cc
+FILE: ../../../flutter/impeller/typographer/backends/stb/text_frame_stb.h
+FILE: ../../../flutter/impeller/typographer/backends/stb/typeface_stb.cc
+FILE: ../../../flutter/impeller/typographer/backends/stb/typeface_stb.h
+FILE: ../../../flutter/impeller/typographer/backends/stb/typographer_context_stb.cc
+FILE: ../../../flutter/impeller/typographer/backends/stb/typographer_context_stb.h
 FILE: ../../../flutter/impeller/typographer/font.cc
 FILE: ../../../flutter/impeller/typographer/font.h
 FILE: ../../../flutter/impeller/typographer/font_glyph_pair.cc
@@ -4452,12 +4472,12 @@ FILE: ../../../flutter/impeller/typographer/rectangle_packer.cc
 FILE: ../../../flutter/impeller/typographer/rectangle_packer.h
 FILE: ../../../flutter/impeller/typographer/text_frame.cc
 FILE: ../../../flutter/impeller/typographer/text_frame.h
-FILE: ../../../flutter/impeller/typographer/text_render_context.cc
-FILE: ../../../flutter/impeller/typographer/text_render_context.h
 FILE: ../../../flutter/impeller/typographer/text_run.cc
 FILE: ../../../flutter/impeller/typographer/text_run.h
 FILE: ../../../flutter/impeller/typographer/typeface.cc
 FILE: ../../../flutter/impeller/typographer/typeface.h
+FILE: ../../../flutter/impeller/typographer/typographer_context.cc
+FILE: ../../../flutter/impeller/typographer/typographer_context.h
 FILE: ../../../flutter/lib/gpu/context.cc
 FILE: ../../../flutter/lib/gpu/context.h
 FILE: ../../../flutter/lib/gpu/export.cc

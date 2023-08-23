@@ -5,19 +5,22 @@
 #pragma once
 
 #include "flutter/fml/macros.h"
-#include "impeller/typographer/text_render_context.h"
+#include "impeller/typographer/typographer_context.h"
 
 namespace impeller {
 
-class TextRenderContextSkia : public TextRenderContext {
+class TypographerContextSkia : public TypographerContext {
  public:
-  static std::shared_ptr<TextRenderContext> Make();
+  static std::shared_ptr<TypographerContext> Make();
 
-  TextRenderContextSkia();
+  TypographerContextSkia();
 
-  ~TextRenderContextSkia() override;
+  ~TypographerContextSkia() override;
 
-  // |TextRenderContext|
+  // |TypographerContext|
+  std::shared_ptr<GlyphAtlasContext> CreateGlyphAtlasContext() const override;
+
+  // |TypographerContext|
   std::shared_ptr<GlyphAtlas> CreateGlyphAtlas(
       Context& context,
       GlyphAtlas::Type type,
@@ -25,7 +28,7 @@ class TextRenderContextSkia : public TextRenderContext {
       const FontGlyphPair::Set& font_glyph_pairs) const override;
 
  private:
-  FML_DISALLOW_COPY_AND_ASSIGN(TextRenderContextSkia);
+  FML_DISALLOW_COPY_AND_ASSIGN(TypographerContextSkia);
 };
 
 }  // namespace impeller

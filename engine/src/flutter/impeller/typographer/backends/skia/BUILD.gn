@@ -1,0 +1,23 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//flutter/impeller/tools/impeller.gni")
+
+impeller_component("typographer_skia_backend") {
+  sources = [
+    "glyph_atlas_context_skia.cc",
+    "glyph_atlas_context_skia.h",
+    "text_frame_skia.cc",
+    "text_frame_skia.h",
+    "typeface_skia.cc",
+    "typeface_skia.h",
+    "typographer_context_skia.cc",
+    "typographer_context_skia.h",
+  ]
+
+  public_deps = [
+    "//flutter/impeller/typographer",
+    "//third_party/skia",
+  ]
+}
