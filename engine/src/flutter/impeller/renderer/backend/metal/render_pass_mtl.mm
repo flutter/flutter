@@ -409,7 +409,7 @@ bool RenderPassMTL::EncodeCommands(const std::shared_ptr<Allocator>& allocator,
                                   ShaderStage stage) -> bool {
     for (const auto& buffer : bindings.buffers) {
       if (!Bind(pass_bindings, *allocator, stage, buffer.first,
-                buffer.second.resource)) {
+                buffer.second.view.resource)) {
         return false;
       }
     }
