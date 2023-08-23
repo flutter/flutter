@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 // This example demonstrates highlighting both URLs and Twitter handles with
@@ -63,6 +64,7 @@ class MyHomePage extends StatelessWidget {
   }
 
   final RegExp _twitterHandleRegExp = RegExp(r'@[a-zA-Z0-9]{4,15}');
+  final RegExp _urlRegExp = RegExp(r'(?<!@[a-zA-Z0-9-]*)(?<![\/\.a-zA-Z0-9-])((https?:\/\/)?(([a-zA-Z0-9-]*\.)*[a-zA-Z0-9-]+(\.[a-zA-Z]+)+))(?::\d{1,5})?(?:\/[^\s]*)?(?:\?[^\s#]*)?(?:#[^\s]*)?(?![a-zA-Z0-9-]*@)');
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +83,7 @@ class MyHomePage extends StatelessWidget {
                     text: _text,
                     textLinkers: <TextLinker>[
                       TextLinker(
-                        textRangesFinder: TextLinker.urlRangesFinder,
+                        textRangesFinder: TextLinker.textRangesFinderFromRegExp(_urlRegExp),
                         linkBuilder: InlineLinkedText.getDefaultLinkBuilder((String urlString) {
                           return _handleTapUrl(context, urlString);
                         }),
@@ -89,12 +91,17 @@ class MyHomePage extends StatelessWidget {
                       TextLinker(
                         textRangesFinder: TextLinker.textRangesFinderFromRegExp(_twitterHandleRegExp),
                         linkBuilder: (String displayText, String linkText) {
-                          return InlineLink(
-                            text: displayText,
-                            style: const TextStyle(
-                              color: Color(0xff00aaaa),
+                          final TapGestureRecognizer recognizer = TapGestureRecognizer()
+                              ..onTap = () => _handleTapTwitterHandle(context, linkText);
+                          return (
+                            InlineLink(
+                              text: displayText,
+                              style: const TextStyle(
+                                color: Color(0xff00aaaa),
+                              ),
+                              recognizer: recognizer,
                             ),
-                            onTap: () => _handleTapTwitterHandle(context, linkText),
+                            recognizer,
                           );
                         },
                       ),
