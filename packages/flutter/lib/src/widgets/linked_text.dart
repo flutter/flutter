@@ -20,7 +20,7 @@ import 'text.dart';
 /// This example shows how to create a [LinkedText] that turns URLs into
 /// working links.
 ///
-/// ** See code in examples/api/lib/painting/linked_text/linked_text.0.dart **
+/// ** See code in examples/api/lib/widgets/linked_text/linked_text.0.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -46,14 +46,14 @@ class LinkedText extends StatefulWidget {
   /// This example shows how to create a [LinkedText] that turns URLs into
   /// working links.
   ///
-  /// ** See code in examples/api/lib/painting/linked_text/linked_text.0.dart **
+  /// ** See code in examples/api/lib/widgets/linked_text/linked_text.0.dart **
   /// {@end-tool}
   ///
   /// {@tool dartpad}
   /// This example shows how to use [LinkedText] to link URLs in a TextSpan tree
   /// instead of in a flat string.
   ///
-  /// ** See code in examples/api/lib/painting/linked_text/linked_text.3.dart **
+  /// ** See code in examples/api/lib/widgets/linked_text/linked_text.3.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -94,7 +94,7 @@ class LinkedText extends StatefulWidget {
   /// {@tool dartpad}
   /// This example shows how to use [LinkedText.regExp] to link Twitter handles.
   ///
-  /// ** See code in examples/api/lib/painting/linked_text/linked_text.1.dart **
+  /// ** See code in examples/api/lib/widgets/linked_text/linked_text.1.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -140,7 +140,7 @@ class LinkedText extends StatefulWidget {
   /// This example shows how to use [LinkedText.textLinkers] to link both URLs
   /// and Twitter handles independently.
   ///
-  /// ** See code in examples/api/lib/painting/linked_text/linked_text.2.dart **
+  /// ** See code in examples/api/lib/widgets/linked_text/linked_text.2.dart **
   /// {@end-tool}
   ///
   /// See also:
