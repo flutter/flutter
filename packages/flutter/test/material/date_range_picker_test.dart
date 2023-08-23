@@ -8,8 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'feedback_tester.dart';
 
 void main() {
@@ -256,11 +255,13 @@ void main() {
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
     },
-    // TODO(polina-c): remove after resolving
-    // https://github.com/flutter/flutter/issues/130354
-    leakTrackingTestConfig: const LeakTrackingTestConfig(
-      allowAllNotGCed: true,
-    ));
+      // TODO(polina-c): remove after resolving
+      // https://github.com/flutter/flutter/issues/130354
+      leakTrackingTestConfig: const LeakTrackingTestConfig(
+        allowAllNotGCed: true,
+        allowAllNotDisposed: true,
+      ),
+    );
   });
 
   testWidgets('Save and help text is used', (WidgetTester tester) async {
