@@ -13,6 +13,7 @@ source_set("common") {
   cflags_objcc = flutter_cflags_objcc
 
   sources = [
+    "availability_version_check.cc",
     "buffer_conversions.h",
     "buffer_conversions.mm",
     "command_line.h",
