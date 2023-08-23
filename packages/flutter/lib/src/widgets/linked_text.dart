@@ -13,8 +13,8 @@ import 'text.dart';
 /// By default, any URLs in the text are made interactive, and clicking one
 /// calls [onTap].
 ///
-/// Works with either a flat [String] ([text]) or a list of [InlineSpans]
-/// ([spans]).
+/// Works with either a flat [String] (`text`) or a list of [InlineSpan]s
+/// (`spans`).
 ///
 /// {@tool dartpad}
 /// This example shows how to create a [LinkedText] that turns URLs into
@@ -61,7 +61,7 @@ class LinkedText extends StatefulWidget {
   ///  * [LinkedText.regExp], which automatically finds ranges that match
   ///    the given [RegExp].
   ///  * [LinkedText.textLinkers], which uses [TextLinker]s to allow
-  ///    specifying an arbitrary number of [textRanges] and [linkBuilders].
+  ///    specifying an arbitrary number of [textRanges] and [linkBuilder]s.
   ///  * [InlineLinkedText.new], which is like this, but for inline text.
   LinkedText({
     super.key,

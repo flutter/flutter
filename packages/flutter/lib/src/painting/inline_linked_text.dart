@@ -62,7 +62,7 @@ class InlineLinkedText extends TextSpan {
   ///  * [InlineLinkedText.regExp], which automatically finds ranges that match
   ///    the given [RegExp].
   ///  * [InlineLinkedText.textLinkers], which uses [TextLinker]s to allow
-  ///    specifying an arbitrary number of [textRanges] and [linkBuilders].
+  ///    specifying an arbitrary number of [textRanges] and [linkBuilder]s.
   factory InlineLinkedText({
     TextStyle? style,
     LinkBuilder? linkBuilder,
@@ -170,8 +170,8 @@ class InlineLinkedText extends TextSpan {
   /// the links and whose lifecycle must be maintained by the
   /// [InlineLinkedText]'s owner.
   ///
-  /// Call [dispose] on these recognizers before throwing away this
-  /// [InlineLinkedText].
+  /// Call [TapGestureRecognizer.dispose] on these recognizers before throwing
+  /// away this [InlineLinkedText].
   ///
   /// See also:
   ///  * [TextSpan.recognizer], which explains the need to manage the lifecycle
