@@ -90,6 +90,13 @@ class _TestRouteInformationParser extends RouteInformationParser<String> {
 }
 
 class _TestRouterDelegate extends RouterDelegate<String> with ChangeNotifier {
+  /// Creates an instance of [MultiSelectableSelectionContainerDelegate].
+  MultiSelectableSelectionContainerDelegate() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+  }
+
   final List<String> newRoutePaths = <String>[];
   final List<String> restoredRoutePaths = <String>[];
 
@@ -128,6 +135,12 @@ class _TestRouterDelegate extends RouterDelegate<String> with ChangeNotifier {
 }
 
 class _TestRouteInformationProvider extends RouteInformationProvider with ChangeNotifier {
+  _TestRouteInformationProvider() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+  }
+
   @override
   RouteInformation get value => _value;
   RouteInformation _value = RouteInformation(uri: Uri.parse('/home'));

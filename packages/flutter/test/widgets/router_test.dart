@@ -1629,6 +1629,13 @@ class CustomRouteInformationParser extends RouteInformationParser<RouteInformati
 }
 
 class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeNotifier {
+  /// Creates an instance of [MultiSelectableSelectionContainerDelegate].
+  MultiSelectableSelectionContainerDelegate() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+  }
+
   SimpleRouterDelegate({
     this.builder,
     this.onPopRoute,
@@ -1715,6 +1722,13 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
 }
 
 class SimpleRouteInformationProvider extends RouteInformationProvider with ChangeNotifier {
+  /// Creates an instance of [MultiSelectableSelectionContainerDelegate].
+  MultiSelectableSelectionContainerDelegate() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+  }
+
   SimpleRouteInformationProvider({
     this.onRouterReport,
   });
@@ -1773,7 +1787,11 @@ class CompleterRouteInformationParser extends RouteInformationParser<RouteInform
 class SimpleAsyncRouterDelegate extends RouterDelegate<RouteInformation> with ChangeNotifier {
   SimpleAsyncRouterDelegate({
     required this.builder,
-  });
+  }) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+  }
 
   RouteInformation? get routeInformation => _routeInformation;
   RouteInformation? _routeInformation;
