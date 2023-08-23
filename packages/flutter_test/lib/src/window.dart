@@ -442,21 +442,6 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     _platformDispatcher.sendPlatformMessage(name, data, callback);
   }
 
-  @Deprecated(
-    'Instead of calling this callback, use ServicesBinding.instance.channelBuffers.push. '
-    'This feature was deprecated after v2.1.0-10.0.pre.'
-  )
-  @override
-  PlatformMessageCallback? get onPlatformMessage => _platformDispatcher.onPlatformMessage;
-  @Deprecated(
-    'Instead of setting this callback, use ServicesBinding.instance.defaultBinaryMessenger.setMessageHandler. '
-    'This feature was deprecated after v2.1.0-10.0.pre.'
-  )
-  @override
-  set onPlatformMessage(PlatformMessageCallback? callback) {
-    _platformDispatcher.onPlatformMessage = callback;
-  }
-
   /// Delete any test value properties that have been set on this [TestPlatformDispatcher]
   /// and return to reporting the real [PlatformDispatcher] values for all
   /// [PlatformDispatcher] properties.
@@ -1836,21 +1821,6 @@ class TestWindow implements SingletonFlutterWindow {
     PlatformMessageResponseCallback? callback,
   ) {
     platformDispatcher.sendPlatformMessage(name, data, callback);
-  }
-
-  @Deprecated(
-    'Instead of calling this callback, use ServicesBinding.instance.channelBuffers.push. '
-    'This feature was deprecated after v2.1.0-10.0.pre.'
-  )
-  @override
-  PlatformMessageCallback? get onPlatformMessage => platformDispatcher.onPlatformMessage;
-  @Deprecated(
-    'Instead of setting this callback, use ServicesBinding.instance.defaultBinaryMessenger.setMessageHandler. '
-    'This feature was deprecated after v2.1.0-10.0.pre.'
-  )
-  @override
-  set onPlatformMessage(PlatformMessageCallback? callback) {
-    platformDispatcher.onPlatformMessage = callback;
   }
 
   /// Delete any test value properties that have been set on this [TestWindow]
