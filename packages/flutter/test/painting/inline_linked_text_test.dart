@@ -35,7 +35,6 @@ void main() {
       test('converts the valid url $text to a link by default', () {
         final InlineLinkedText inlineLinkedText = InlineLinkedText(
           onTap: (String text) {},
-          style: const TextStyle(),
           text: text,
         );
 
@@ -62,7 +61,6 @@ void main() {
       test('does nothing to the invalid url $text', () {
         final InlineLinkedText inlineLinkedText = InlineLinkedText(
           onTap: (String text) {},
-          style: const TextStyle(),
           text: text,
         );
 
@@ -87,7 +85,6 @@ void main() {
       test('can parse url $text with leading and trailing characters', () {
         final InlineLinkedText inlineLinkedText = InlineLinkedText(
           onTap: (String text) {},
-          style: const TextStyle(),
           text: text,
         );
 
@@ -122,7 +119,6 @@ void main() {
   test('can pass ranges directly', () {
     final InlineLinkedText inlineLinkedText = InlineLinkedText(
       onTap: (String text) {},
-      style: const TextStyle(),
       ranges: const <TextRange>[
         TextRange(start: 1, end: 3),
         TextRange(start: 4, end: 6),
@@ -171,7 +167,6 @@ void main() {
   test('can use a custom regexp', () {
     final InlineLinkedText inlineLinkedText = InlineLinkedText.regExp(
       onTap: (String text) {},
-      style: const TextStyle(),
       regExp: hashTagRegExp,
       text: 'Flutter is great #crossplatform #declarative',
     );
@@ -218,7 +213,6 @@ void main() {
       linkBuilder: InlineLinkedText.getDefaultLinkBuilder((String text) {}),
     );
     final InlineLinkedText inlineLinkedText = InlineLinkedText.textLinkers(
-      style: const TextStyle(),
       textLinkers: <TextLinker>[urlTextLinker, hashTagTextLinker],
       text: 'Flutter is great #crossplatform #declarative check out flutter.dev.',
     );
@@ -276,11 +270,9 @@ void main() {
   test('can pass TextSpans instead of a string', () {
     final InlineLinkedText inlineLinkedText = InlineLinkedText(
       onTap: (String text) {},
-      style: const TextStyle(),
       spans: const <InlineSpan>[
         TextSpan(
           text: 'Check out https://www.',
-          style: TextStyle(),
           children: <InlineSpan>[
             TextSpan(
               style: TextStyle(
@@ -292,7 +284,6 @@ void main() {
         ),
         TextSpan(
           text: '.dev!',
-          style: TextStyle(),
         ),
       ],
     );
@@ -301,7 +292,7 @@ void main() {
     expect(inlineLinkedText.children!.first, isA<TextSpan>());
     final TextSpan span1 = inlineLinkedText.children!.first as TextSpan;
     expect(span1.text, isNull);
-    expect(span1.style, const TextStyle());
+    expect(span1.style, isNull);
     expect(span1.children, hasLength(3));
 
     // First span's children ('Check out https://www.flutter').
@@ -334,7 +325,7 @@ void main() {
     final TextSpan span2 = inlineLinkedText.children![1] as TextSpan;
     expect(span2.text, isNull);
     expect(span2.children, hasLength(2));
-    expect(span2.style, const TextStyle());
+    expect(span2.style, isNull);
 
     expect(span2.children![0], isA<TextSpan>());
     final TextSpan span2Child1 = span2.children![0] as TextSpan;

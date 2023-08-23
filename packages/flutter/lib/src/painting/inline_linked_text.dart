@@ -65,8 +65,7 @@ class InlineLinkedText extends TextSpan {
   ///  * [InlineLinkedText.textLinkers], which uses [TextLinker]s to allow
   ///    specifying an arbitrary number of [ranges] and [linkBuilders].
   factory InlineLinkedText({
-    // TODO(justinmc): Why is style required?
-    required TextStyle style,
+    TextStyle? style,
     LinkBuilder? linkBuilder,
     LinkTapCallback? onTap,
     Iterable<TextRange>? ranges,
@@ -105,7 +104,7 @@ class InlineLinkedText extends TextSpan {
   ///    specifying an arbitrary number of [ranges] and [linkBuilders].
   factory InlineLinkedText.regExp({
     required RegExp regExp,
-    required TextStyle style,
+    TextStyle? style,
     LinkTapCallback? onTap,
     LinkBuilder? linkBuilder,
     String? text,
@@ -143,7 +142,7 @@ class InlineLinkedText extends TextSpan {
   ///  * [InlineLinkedText.regExp], which automatically finds ranges that match
   ///    the given [RegExp].
   factory InlineLinkedText.textLinkers({
-    required TextStyle style,
+    TextStyle? style,
     required Iterable<TextLinker> textLinkers,
     String? text,
     List<InlineSpan>? spans,
