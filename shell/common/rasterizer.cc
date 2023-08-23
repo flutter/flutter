@@ -195,8 +195,7 @@ void Rasterizer::DrawLastLayerTree(
 }
 
 RasterStatus Rasterizer::Draw(
-    const std::shared_ptr<LayerTreePipeline>& pipeline,
-    LayerTreeDiscardCallback discard_callback) {
+    const std::shared_ptr<LayerTreePipeline>& pipeline) {
   TRACE_EVENT0("flutter", "GPURasterizer::Draw");
   if (raster_thread_merger_ &&
       !raster_thread_merger_->IsOnRasterizingThread()) {
@@ -209,7 +208,8 @@ RasterStatus Rasterizer::Draw(
 
   RasterStatus raster_status = RasterStatus::kFailed;
   LayerTreePipeline::Consumer consumer =
-      [&](std::unique_ptr<LayerTreeItem> item) {
+      [&raster_status, this,
+       &delegate = delegate_](std::unique_ptr<LayerTreeItem> item) {
         // TODO(dkwingsmt): Use a proper view ID when Rasterizer supports
         // multi-view.
         int64_t view_id = kFlutterImplicitViewId;
@@ -217,7 +217,7 @@ RasterStatus Rasterizer::Draw(
         std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder =
             std::move(item->frame_timings_recorder);
         float device_pixel_ratio = item->device_pixel_ratio;
-        if (discard_callback(view_id, *layer_tree.get())) {
+        if (delegate.ShouldDiscardLayerTree(view_id, *layer_tree.get())) {
           raster_status = RasterStatus::kDiscarded;
         } else {
           raster_status = DoDraw(std::move(frame_timings_recorder),
@@ -259,13 +259,11 @@ RasterStatus Rasterizer::Draw(
   switch (consume_result) {
     case PipelineConsumeResult::MoreAvailable: {
       delegate_.GetTaskRunners().GetRasterTaskRunner()->PostTask(
-          fml::MakeCopyable(
-              [weak_this = weak_factory_.GetWeakPtr(), pipeline,
-               discard_callback = std::move(discard_callback)]() mutable {
-                if (weak_this) {
-                  weak_this->Draw(pipeline, std::move(discard_callback));
-                }
-              }));
+          [weak_this = weak_factory_.GetWeakPtr(), pipeline]() {
+            if (weak_this) {
+              weak_this->Draw(pipeline);
+            }
+          });
       break;
     }
     default:
