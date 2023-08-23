@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 // This example demonstrates highlighting and linking Twitter handles.
 
 void main() {
-  runApp(const MyApp());
+  runApp(const LinkedTextApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({
+class LinkedTextApp extends StatelessWidget {
+  const LinkedTextApp({
     super.key,
   });
 
@@ -30,7 +30,7 @@ class MyHomePage extends StatelessWidget {
   });
 
   final String title;
-  static const String _text = 'Check out @FlutterDev on Twitter for the latest.';
+  static const String _text = 'Please check out @FlutterDev on Twitter for the latest.';
 
   void _handleTapTwitterHandle(BuildContext context, String linkText) {
     final String handleWithoutAt = linkText.substring(1);

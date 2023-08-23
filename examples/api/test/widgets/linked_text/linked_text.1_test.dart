@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/linked_text/linked_text.0.dart' as example;
+import 'package:flutter_api_samples/widgets/linked_text/linked_text.1.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('tapping a link shows a dialog with the tapped uri', (WidgetTester tester) async {
+  testWidgets('tapping a Twitter handle shows a dialog with the uri of the user', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.LinkedTextApp(),
     );
@@ -22,6 +22,6 @@ void main() {
     await tester.tapAt(tester.getCenter(textFinder));
     await tester.pumpAndSettle();
     expect(find.byType(AlertDialog), findsOneWidget);
-    expect(find.text('You tapped: www.flutter.dev'), findsOneWidget);
+    expect(find.text('You tapped: https://www.twitter.com/FlutterDev'), findsOneWidget);
   });
 }

@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 // different actions and different styles.
 
 void main() {
-  runApp(const MyApp());
+  runApp(const LinkedTextApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({
+class LinkedTextApp extends StatelessWidget {
+  const LinkedTextApp({
     super.key,
   });
 
@@ -32,7 +32,8 @@ class MyHomePage extends StatelessWidget {
   });
 
   final String title;
-  static const String _text = 'Check out @FlutterDev on Twitter for the latest, or go to flutter.dev.';
+  //static const String _text = '@FlutterDev is our account on Twitter, or go to flutter.dev';
+  static const String _text = '@FlutterDev is our Twitter account, or find us at www.flutter.dev';
 
   void _handleTapTwitterHandle(BuildContext context, String linkText) {
     final String handleWithoutAt = linkText.substring(1);
@@ -44,10 +45,10 @@ class MyHomePage extends StatelessWidget {
     _showDialog(context, uri);
   }
 
-  void _handleTapUrl(BuildContext context, String urlString) {
-    final Uri? uri = Uri.tryParse(urlString);
+  void _handleTapUrl(BuildContext context, String urlText) {
+    final Uri? uri = Uri.tryParse(urlText);
     if (uri == null) {
-      throw Exception('Failed to parse $urlString.');
+      throw Exception('Failed to parse $urlText.');
     }
     _showDialog(context, uri);
   }

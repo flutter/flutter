@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/widgets/linked_text/linked_text.0.dart' as example;
+import 'package:flutter_api_samples/widgets/linked_text/linked_text.2.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('tapping a link shows a dialog with the tapped uri', (WidgetTester tester) async {
+  testWidgets('can tap different link types with different results', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.LinkedTextApp(),
     );
@@ -17,6 +17,15 @@ void main() {
       matching: find.byType(RichText),
     );
     expect(textFinder, findsOneWidget);
+    expect(find.byType(AlertDialog), findsNothing);
+
+    await tester.tapAt(tester.getTopLeft(textFinder));
+    await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsOneWidget);
+    expect(find.text('You tapped: https://www.twitter.com/FlutterDev'), findsOneWidget);
+
+    await tester.tapAt(tester.getTopLeft(find.byType(Scaffold)));
+    await tester.pumpAndSettle();
     expect(find.byType(AlertDialog), findsNothing);
 
     await tester.tapAt(tester.getCenter(textFinder));

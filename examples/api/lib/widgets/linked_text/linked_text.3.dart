@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 // flat String.
 
 void main() {
-  runApp(const MyApp());
+  runApp(const LinkedTextApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({
+class LinkedTextApp extends StatelessWidget {
+  const LinkedTextApp({
     super.key,
   });
 
