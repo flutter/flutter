@@ -949,6 +949,9 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
+          # This is UpsideDownCake, a preview version of android that is hosted on CIPD. It is used
+          # to ensure integration testing doesn't flake when the sdkmanager removes this version.
+          # https://chrome-infra-packages.appspot.com/p/flutter/android/sdk/all/mac-arm64/+/version:UDCv1
           {"dependency": "android_sdk", "version": "version:UDCv1"},
           {"dependency": "chrome_and_driver", "version": "version:115.0"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
