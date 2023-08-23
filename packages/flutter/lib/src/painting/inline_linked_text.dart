@@ -13,8 +13,6 @@ import 'inline_span.dart';
 import 'text_span.dart';
 import 'text_style.dart';
 
-// TODO(justinmc): On some platforms, may want to underline link?
-
 /// A callback that passes a [String] representing a link that has been tapped.
 typedef LinkTapCallback = void Function(String linkString);
 
@@ -465,18 +463,14 @@ class _TextLinkerMatch {
   }
 
   @override
-  String toString() {
-    return '_TextLinkerMatch $textRange, $linkBuilder, $linkString';
-  }
+  String toString() => '${objectRuntimeType(this, '_TextLinkerMatch')}($textRange, $linkBuilder, $linkString)';
 }
 
-// TODO(justinmc): This shouldn't just be a record should it?
-// TODO(justinmc): Would it simplify things if the public class TextLinker
-// actually handled multiple rangesFinders and linkBuilders? Then there was a
-// private single _TextLinker or something? Seems like it didn't work out when
-// I tried this, actually.
-// TODO(justinmc): Think about which links need to go here vs. on InlineTextLinker.
-/// Specifies a way to find and style parts of a String.
+/// Specifies a way to find and style parts of a [String].
+///
+/// By calling [getSpans] with a [String], produces a [List] of [InlineSpan]s
+/// where the parts of the [String] matched by [textRangesFinder] have been
+/// turned into links using [linkBuilder].
 class TextLinker {
   /// Creates an instance of [TextLinker].
   const TextLinker({
@@ -487,23 +481,8 @@ class TextLinker {
   /// Builds an [InlineSpan] to display the text that it's passed.
   final LinkBuilder linkBuilder;
 
-  // TODO(justinmc): Is it possible to enforce this order by TextRange.start, or should I just assume it's unordered?
   /// Returns [TextRange]s that should be built with [linkBuilder].
   final TextRangesFinder textRangesFinder;
-
-  // Turns all matches from the regExp into a list of TextRanges.
-  static Iterable<TextRange> _textRangesFromText({
-    required String text,
-    required RegExp regExp,
-  }) {
-    final Iterable<RegExpMatch> matches = regExp.allMatches(text);
-    return matches.map((RegExpMatch match) {
-      return TextRange(
-        start: match.start,
-        end: match.end,
-      );
-    });
-  }
 
   /// Returns a flat list of [InlineSpan]s for multiple [TextLinker]s.
   ///
@@ -535,6 +514,20 @@ class TextLinker {
         regExp: regExp,
       );
     };
+  }
+
+  // Turns all matches from the regExp into a list of TextRanges.
+  static Iterable<TextRange> _textRangesFromText({
+    required String text,
+    required RegExp regExp,
+  }) {
+    final Iterable<RegExpMatch> matches = regExp.allMatches(text);
+    return matches.map((RegExpMatch match) {
+      return TextRange(
+        start: match.start,
+        end: match.end,
+      );
+    });
   }
 
   /// Apply this [TextLinker] to a [String].

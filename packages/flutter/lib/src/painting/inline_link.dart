@@ -45,7 +45,6 @@ class InlineLink extends TextSpan {
   /// The style used for the link by default if none is given.
   @visibleForTesting
   static TextStyle defaultLinkStyle = TextStyle(
-    // And decide underline or not per-platform.
     color: _linkColor,
     decoration: TextDecoration.underline,
   );
