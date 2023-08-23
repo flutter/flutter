@@ -119,7 +119,7 @@ void main() {
   test('can pass ranges directly', () {
     final InlineLinkedText inlineLinkedText = InlineLinkedText(
       onTap: (String text) {},
-      ranges: const <TextRange>[
+      textRanges: const <TextRange>[
         TextRange(start: 1, end: 3),
         TextRange(start: 4, end: 6),
       ],
@@ -205,11 +205,11 @@ void main() {
 
   test('can use custom TextLinkers', () {
     final TextLinker urlTextLinker = TextLinker(
-      rangesFinder: TextLinker.rangesFinderFromRegExp(urlRegExp),
+      textRangesFinder: TextLinker.textRangesFinderFromRegExp(urlRegExp),
       linkBuilder: InlineLinkedText.getDefaultLinkBuilder((String text) {}),
     );
     final TextLinker hashTagTextLinker = TextLinker(
-      rangesFinder: TextLinker.rangesFinderFromRegExp(hashTagRegExp),
+      textRangesFinder: TextLinker.textRangesFinderFromRegExp(hashTagRegExp),
       linkBuilder: InlineLinkedText.getDefaultLinkBuilder((String text) {}),
     );
     final InlineLinkedText inlineLinkedText = InlineLinkedText.textLinkers(

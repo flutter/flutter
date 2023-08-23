@@ -35,11 +35,11 @@ class LinkedText extends StatefulWidget {
   /// By default, highlights URLs in the [text] or [spans] and makes them
   /// tappable with [onTap].
   ///
-  /// If [ranges] is given, then makes those ranges in the text interactive
+  /// If [textRanges] is given, then makes those ranges in the text interactive
   /// instead of URLs.
   ///
   /// [linkBuilder] can be used to specify a custom [InlineSpan] for each
-  /// [TextRange] in [ranges].
+  /// [TextRange] in [textRanges].
   /// {@endtemplate}
   ///
   /// {@tool dartpad}
@@ -61,7 +61,7 @@ class LinkedText extends StatefulWidget {
   ///  * [LinkedText.regExp], which automatically finds ranges that match
   ///    the given [RegExp].
   ///  * [LinkedText.textLinkers], which uses [TextLinker]s to allow
-  ///    specifying an arbitrary number of [ranges] and [linkBuilders].
+  ///    specifying an arbitrary number of [textRanges] and [linkBuilders].
   ///  * [InlineLinkedText.new], which is like this, but for inline text.
   LinkedText({
     super.key,
@@ -69,16 +69,16 @@ class LinkedText extends StatefulWidget {
     String? text,
     List<InlineSpan>? spans,
     this.style,
-    Iterable<TextRange>? ranges,
+    Iterable<TextRange>? textRanges,
     LinkBuilder? linkBuilder,
   }) : assert(text != null || spans != null, 'Must specify something to link: either text or spans.'),
        assert(text == null || spans == null, 'Pass one of spans or text, not both.'),
        assert(linkBuilder != null || onTap != null),
        textLinkers = <TextLinker>[
          TextLinker(
-           rangesFinder: ranges == null
-               ? InlineLinkedText.defaultRangesFinder
-               : (String text) => ranges,
+           textRangesFinder: textRanges == null
+               ? InlineLinkedText.defaultTextRangesFinder
+               : (String text) => textRanges,
            linkBuilder: linkBuilder ?? InlineLinkedText.getDefaultLinkBuilder(onTap!),
          ),
        ],
@@ -102,7 +102,7 @@ class LinkedText extends StatefulWidget {
   ///  * [LinkedText.new], which can be passed [TextRange]s directly or
   ///    otherwise matches URLs by default.
   ///  * [LinkedText.textLinkers], which uses [TextLinker]s to allow
-  ///    specifying an arbitrary number of [ranges] and [linkBuilders].
+  ///    specifying an arbitrary number of [TextRange]s and [linkBuilder]s.
   ///  * [InlineLinkedText.regExp], which is like this, but for inline text.
   LinkedText.regExp({
     super.key,
@@ -117,7 +117,7 @@ class LinkedText extends StatefulWidget {
        assert(linkBuilder != null || onTap != null),
        textLinkers = <TextLinker>[
          TextLinker(
-           rangesFinder: TextLinker.rangesFinderFromRegExp(regExp),
+           textRangesFinder: TextLinker.textRangesFinderFromRegExp(regExp),
            linkBuilder: linkBuilder ?? InlineLinkedText.getDefaultLinkBuilder(onTap!),
          ),
        ],

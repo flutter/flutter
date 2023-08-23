@@ -81,13 +81,13 @@ class MyHomePage extends StatelessWidget {
                     text: _text,
                     textLinkers: <TextLinker>[
                       TextLinker(
-                        rangesFinder: TextLinker.urlRangesFinder,
+                        textRangesFinder: TextLinker.urlRangesFinder,
                         linkBuilder: InlineLinkedText.getDefaultLinkBuilder((String urlString) {
                           return _handleTapUrl(context, urlString);
                         }),
                       ),
                       TextLinker(
-                        rangesFinder: TextLinker.rangesFinderFromRegExp(_twitterHandleRegExp),
+                        textRangesFinder: TextLinker.textRangesFinderFromRegExp(_twitterHandleRegExp),
                         linkBuilder: (String displayText, String linkText) {
                           return InlineLink(
                             text: displayText,

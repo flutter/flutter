@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
@@ -33,7 +34,7 @@ typedef LinkBuilder = (InlineSpan, TapGestureRecognizer) Function(
 );
 
 /// Finds [TextRange]s in the given [String].
-typedef RangesFinder = Iterable<TextRange> Function(String text);
+typedef TextRangesFinder = Iterable<TextRange> Function(String text);
 
 /// A [TextSpan] that makes parts of the [text] interactive.
 ///
@@ -63,23 +64,23 @@ class InlineLinkedText extends TextSpan {
   ///  * [InlineLinkedText.regExp], which automatically finds ranges that match
   ///    the given [RegExp].
   ///  * [InlineLinkedText.textLinkers], which uses [TextLinker]s to allow
-  ///    specifying an arbitrary number of [ranges] and [linkBuilders].
+  ///    specifying an arbitrary number of [textRanges] and [linkBuilders].
   factory InlineLinkedText({
     TextStyle? style,
     LinkBuilder? linkBuilder,
     LinkTapCallback? onTap,
-    Iterable<TextRange>? ranges,
+    Iterable<TextRange>? textRanges,
     List<InlineSpan>? spans,
     String? text,
   }) {
     assert(text != null || spans != null, 'Must specify something to link: either text or spans.');
     assert(text == null || spans == null, 'Pass one of spans or text, not both.');
     assert(linkBuilder != null || onTap != null);
-    final RangesFinder rangesFinder = ranges != null
-      ? (String text) => ranges
-      : defaultRangesFinder;
+    final TextRangesFinder textRangesFinder = textRanges != null
+      ? (String text) => textRanges
+      : defaultTextRangesFinder;
     final TextLinker textLinker = TextLinker(
-      rangesFinder: rangesFinder,
+      textRangesFinder: textRangesFinder,
       linkBuilder: linkBuilder ?? getDefaultLinkBuilder(onTap!),
     );
     final (Iterable<InlineSpan> linkedSpans, Iterable<TapGestureRecognizer> recognizers) =
@@ -101,7 +102,7 @@ class InlineLinkedText extends TextSpan {
   ///  * [InlineLinkedText.new], which can be passed [TextRange]s directly or
   ///    otherwise matches URLs by default.
   ///  * [InlineLinkedText.textLinkers], which uses [TextLinker]s to allow
-  ///    specifying an arbitrary number of [ranges] and [linkBuilders].
+  ///    specifying an arbitrary number of [TextRange]s and [linkBuilder]s.
   factory InlineLinkedText.regExp({
     required RegExp regExp,
     TextStyle? style,
@@ -115,7 +116,7 @@ class InlineLinkedText extends TextSpan {
     assert(linkBuilder != null || onTap != null);
 
     final TextLinker textLinker = TextLinker(
-      rangesFinder: TextLinker.rangesFinderFromRegExp(regExp),
+      textRangesFinder: TextLinker.textRangesFinderFromRegExp(regExp),
       linkBuilder: linkBuilder ?? getDefaultLinkBuilder(onTap!),
     );
     final (Iterable<InlineSpan> linkedSpans, Iterable<TapGestureRecognizer> recognizers) =
@@ -183,7 +184,7 @@ class InlineLinkedText extends TextSpan {
 
   static final RegExp _urlRegExp = RegExp(r'(?<!@[a-zA-Z0-9-]*)(?<![\/\.a-zA-Z0-9-])((https?:\/\/)?(([a-zA-Z0-9-]*\.)*[a-zA-Z0-9-]+(\.[a-zA-Z]+)+))(?::\d{1,5})?(?:\/[^\s]*)?(?:\?[^\s#]*)?(?:#[^\s]*)?(?![a-zA-Z0-9-]*@)');
 
-  /// A [RangesFinder] that returns [TextRange]s for URLs.
+  /// A [TextRangesFinder] that returns [TextRange]s for URLs.
   ///
   /// Matches full (https://www.example.com/?q=1) and shortened (example.com)
   /// URLs.
@@ -192,13 +193,13 @@ class InlineLinkedText extends TextSpan {
   ///
   ///   * URLs with any protocol other than http or https.
   ///   * Email addresses.
-  static final RangesFinder defaultRangesFinder = TextLinker.rangesFinderFromRegExp(_urlRegExp);
+  static final TextRangesFinder defaultTextRangesFinder = TextLinker.textRangesFinderFromRegExp(_urlRegExp);
 
   /// Finds urls in text and replaces them with a plain, platform-specific link.
   static Iterable<TextLinker> defaultTextLinkers(LinkTapCallback onTap) {
     return <TextLinker>[
       TextLinker(
-        rangesFinder: defaultRangesFinder,
+        textRangesFinder: defaultTextRangesFinder,
         linkBuilder: getDefaultLinkBuilder(onTap),
       ),
     ];
@@ -391,7 +392,7 @@ class InlineLinkedText extends TextSpan {
 
 /// A matched replacement on some String.
 ///
-/// Produced by applying a [TextLinker]'s [RangesFinder] to a string.
+/// Produced by applying a [TextLinker]'s [TextRangesFinder] to a string.
 class _TextLinkerMatch {
   _TextLinkerMatch({
     required this.textRange,
@@ -479,8 +480,7 @@ class _TextLinkerMatch {
 class TextLinker {
   /// Creates an instance of [TextLinker].
   const TextLinker({
-    // TODO(justinmc): Change "range" naming to always be "textRange"?
-    required this.rangesFinder,
+    required this.textRangesFinder,
     required this.linkBuilder,
   });
 
@@ -489,10 +489,10 @@ class TextLinker {
 
   // TODO(justinmc): Is it possible to enforce this order by TextRange.start, or should I just assume it's unordered?
   /// Returns [TextRange]s that should be built with [linkBuilder].
-  final RangesFinder rangesFinder;
+  final TextRangesFinder textRangesFinder;
 
   // Turns all matches from the regExp into a list of TextRanges.
-  static Iterable<TextRange> _rangesFromText({
+  static Iterable<TextRange> _textRangesFromText({
     required String text,
     required RegExp regExp,
   }) {
@@ -509,28 +509,28 @@ class TextLinker {
   ///
   /// Similar to [getSpans], but for multiple [TextLinker]s instead of just one.
   static (List<InlineSpan>, List<TapGestureRecognizer>) getSpansForMany(Iterable<TextLinker> textLinkers, String text) {
-    final List<_TextLinkerMatch> combinedRanges = textLinkers
+    final List<_TextLinkerMatch> combinedTextRanges = textLinkers
         .fold<List<_TextLinkerMatch>>(
           <_TextLinkerMatch>[],
           (List<_TextLinkerMatch> previousValue, TextLinker value) {
-            final Iterable<TextRange> ranges = value.rangesFinder(text);
-            for (final TextRange range in ranges) {
+            final Iterable<TextRange> textRanges = value.textRangesFinder(text);
+            for (final TextRange textRange in textRanges) {
               previousValue.add(_TextLinkerMatch(
-                textRange: range,
+                textRange: textRange,
                 linkBuilder: value.linkBuilder,
-                linkString: text.substring(range.start, range.end),
+                linkString: text.substring(textRange.start, textRange.end),
               ));
             }
             return previousValue;
         });
 
-    return _TextLinkerMatch.getSpansForMany(combinedRanges, text);
+    return _TextLinkerMatch.getSpansForMany(combinedTextRanges, text);
   }
 
-  /// Creates a [RangesFinder] that finds all the matches of the given [RegExp].
-  static RangesFinder rangesFinderFromRegExp(RegExp regExp) {
+  /// Creates a [TextRangesFinder] that finds all the matches of the given [RegExp].
+  static TextRangesFinder textRangesFinderFromRegExp(RegExp regExp) {
     return (String text) {
-      return _rangesFromText(
+      return _textRangesFromText(
         text: text,
         regExp: regExp,
       );
@@ -539,7 +539,7 @@ class TextLinker {
 
   /// Apply this [TextLinker] to a [String].
   Iterable<_TextLinkerMatch> _link(String text) {
-    final Iterable<TextRange> textRanges = rangesFinder(text);
+    final Iterable<TextRange> textRanges = textRangesFinder(text);
     return textRanges.map((TextRange textRange) {
       return _TextLinkerMatch(
         textRange: textRange,
@@ -551,7 +551,7 @@ class TextLinker {
 
   /// Builds the [InlineSpan]s for the given text.
   ///
-  /// Builds [linkBuilder] for any ranges found by [rangesFinder]. All other
+  /// Builds [linkBuilder] for any ranges found by [textRangesFinder]. All other
   /// text is presented in a plain [TextSpan].
   (List<InlineSpan>, List<TapGestureRecognizer>) getSpans(String text) {
     final Iterable<_TextLinkerMatch> textLinkerMatches = _link(text);
@@ -559,7 +559,5 @@ class TextLinker {
   }
 
   @override
-  String toString() {
-    return 'TextLinker $rangesFinder, $linkBuilder';
-  }
+  String toString() => '${objectRuntimeType(this, 'TextLinker')}($linkBuilder, $textRangesFinder)';
 }

@@ -93,7 +93,7 @@ void main() {
                 onTap: (String text) {
                   lastTappedLink = text;
                 },
-                ranges: const <TextRange>[
+                textRanges: const <TextRange>[
                   TextRange(start: 0, end: 5), // 'Check'
                   TextRange(start: 10, end: 17), // 'flutter'
                 ],
@@ -145,13 +145,13 @@ void main() {
   testWidgets('can link multiple different types', (WidgetTester tester) async {
     String? lastTappedLink;
     final TextLinker urlTextLinker = TextLinker(
-      rangesFinder: TextLinker.rangesFinderFromRegExp(urlRegExp),
+      textRangesFinder: TextLinker.textRangesFinderFromRegExp(urlRegExp),
       linkBuilder: InlineLinkedText.getDefaultLinkBuilder((String text) {
         lastTappedLink = text;
       }),
     );
     final TextLinker hashTagTextLinker = TextLinker(
-      rangesFinder: TextLinker.rangesFinderFromRegExp(hashTagRegExp),
+      textRangesFinder: TextLinker.textRangesFinderFromRegExp(hashTagRegExp),
       linkBuilder: InlineLinkedText.getDefaultLinkBuilder((String text) {
         lastTappedLink = text;
       }),
