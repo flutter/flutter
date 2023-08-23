@@ -2670,6 +2670,7 @@
 ../../../third_party/skia/include/gpu/ganesh/BUILD.bazel
 ../../../third_party/skia/include/gpu/ganesh/gl/BUILD.bazel
 ../../../third_party/skia/include/gpu/ganesh/mtl/BUILD.bazel
+../../../third_party/skia/include/gpu/ganesh/vk/BUILD.bazel
 ../../../third_party/skia/include/gpu/gl/BUILD.bazel
 ../../../third_party/skia/include/gpu/gl/egl/BUILD.bazel
 ../../../third_party/skia/include/gpu/gl/glx/BUILD.bazel
