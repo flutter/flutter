@@ -32,6 +32,7 @@ void main() {
     late AnalyzeCommand command;
     late CommandRunner<void> runner;
     late Directory tempDir;
+    late FakeAndroidBuilder builder;
 
     setUpAll(() {
       Cache.disableLocking();
@@ -63,14 +64,16 @@ void main() {
       for (final String dir in <String>['dev', 'examples', 'packages']) {
         fileSystem.directory(homePath).childDirectory(dir).createSync(recursive: true);
       }
+      builder = FakeAndroidBuilder();
+
     });
 
     testUsingContext('can list build variants', () async {
-      FakeAndroidBuilder.variants = <String>['debug', 'release'];
+      builder.variants = <String>['debug', 'release'];
       await runner.run(<String>['analyze', '--android', '--list-build-variants', tempDir.path]);
-      expect(logger.statusText, contains('output = ["debug","release"]'));
+      expect(logger.statusText, contains('["debug","release"]'));
     }, overrides: <Type, Generator>{
-      AndroidBuilder: () => FakeAndroidBuilder(),
+      AndroidBuilder: () => builder,
     });
 
     testUsingContext('throw if provide multiple path', () async {
@@ -90,9 +93,9 @@ void main() {
     testUsingContext('can output app link settings', () async {
       const String buildVariant = 'release';
       await runner.run(<String>['analyze', '--android', '--output-app-link-settings', '--build-variant=$buildVariant', tempDir.path]);
-      expect(FakeAndroidBuilder.outputVariant, buildVariant);
+      expect(builder.outputVariant, buildVariant);
     }, overrides: <Type, Generator>{
-      AndroidBuilder: () => FakeAndroidBuilder(),
+      AndroidBuilder: () => builder,
     });
 
     testUsingContext('output app link settings throws if no build variant', () async {
@@ -111,8 +114,8 @@ void main() {
 }
 
 class FakeAndroidBuilder extends Fake implements AndroidBuilder {
-  static List<String> variants = const <String>[];
-  static String? outputVariant;
+  List<String> variants = const <String>[];
+  String? outputVariant;
 
   @override
   Future<List<String>> getBuildVariants({required FlutterProject project}) async {

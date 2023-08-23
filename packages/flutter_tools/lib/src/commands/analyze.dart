@@ -186,12 +186,21 @@ class AnalyzeCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     if (boolArg('android')) {
       final AndroidAnalyzeOption option;
+      final String? buildVariant;
+      if (argResults!['list-build-variants'] as bool && argResults!['output-app-link-settings'] as bool) {
+        throwToolExit('Only one of "--list-build-variants" or "--output-app-link-settings" can be provided');
+      }
       if (argResults!['list-build-variants'] as bool) {
         option = AndroidAnalyzeOption.listBuildVariant;
+        buildVariant = null;
       } else if (argResults!['output-app-link-settings'] as bool) {
         option = AndroidAnalyzeOption.outputAppLinkSettings;
+        buildVariant = argResults!['build-variant'] as String?;
+        if (buildVariant == null) {
+          throwToolExit('"--build-variant" must be provided');
+        }
       } else {
-        throwToolExit('No argument provided to analyze');
+        throwToolExit('No argument is provided to analyze. Use -h to see available commands.');
       }
       final Set<String> items = findDirectories(argResults!, _fileSystem);
       final String directoryPath;
@@ -206,7 +215,7 @@ class AnalyzeCommand extends FlutterCommand {
         fileSystem: _fileSystem,
         option: option,
         userPath: directoryPath,
-        buildVariant: argResults!['build-variant'] as String?,
+        buildVariant: buildVariant,
         logger: _logger,
       ).analyze();
     } else if (boolArg('suggestions')) {
