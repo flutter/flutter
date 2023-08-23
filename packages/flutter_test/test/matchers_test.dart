@@ -10,6 +10,7 @@ import 'dart:typed_data';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:vector_math/vector_math_64.dart' show Matrix3;
 
 /// Class that makes it easy to mock common toStringDeep behavior.
 class _MockToStringDeep {
@@ -251,6 +252,35 @@ void main() {
     );
   });
 
+  test('matrix3MoreOrLessEquals', () {
+    expect(
+      Matrix3.rotationZ(math.pi),
+      matrix3MoreOrLessEquals(Matrix3.fromList(<double>[
+       -1,  0, 0,
+        0, -1, 0,
+        0,  0, 1,
+      ]))
+    );
+
+    expect(
+      Matrix3.rotationZ(math.pi),
+      matrix3MoreOrLessEquals(Matrix3.fromList(<double>[
+       -2,  0, 0,
+        0, -2, 0,
+        0,  0, 1,
+      ]), epsilon: 2)
+    );
+
+    expect(
+      Matrix3.rotationZ(math.pi),
+      isNot(matrix3MoreOrLessEquals(Matrix3.fromList(<double>[
+       -2,  0, 0,
+        0, -2, 0,
+        0,  0, 1,
+      ])))
+    );
+  });
+
   test('rectMoreOrLessEquals', () {
     expect(
       const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
@@ -436,6 +466,14 @@ void main() {
 
       testWidgets('future list of integers', (WidgetTester tester) async {
         await expectLater(Future<List<int>>.value(<int>[1, 2]), matchesGoldenFile('foo.png'));
+        expect(comparator.invocation, _ComparatorInvocation.compare);
+        expect(comparator.imageBytes, equals(<int>[1, 2]));
+        expect(comparator.golden, Uri.parse('foo.png'));
+      });
+
+      testWidgets('future nullable list of integers',
+          (WidgetTester tester) async {
+        await expectLater(Future<List<int>?>.value(<int>[1, 2]), matchesGoldenFile('foo.png'));
         expect(comparator.invocation, _ComparatorInvocation.compare);
         expect(comparator.imageBytes, equals(<int>[1, 2]));
         expect(comparator.golden, Uri.parse('foo.png'));
@@ -683,6 +721,8 @@ void main() {
          hasToggledState: true,
          isToggled: true,
          hasImplicitScrolling: true,
+         hasExpandedState: true,
+         isExpanded: true,
          /* Actions */
          hasTapAction: true,
          hasLongPressAction: true,
@@ -966,6 +1006,8 @@ void main() {
           hasToggledState: true,
           isToggled: true,
           hasImplicitScrolling: true,
+          hasExpandedState: true,
+          isExpanded: true,
           /* Actions */
           hasTapAction: true,
           hasLongPressAction: true,
@@ -1055,6 +1097,8 @@ void main() {
           hasToggledState: false,
           isToggled: false,
           hasImplicitScrolling: false,
+          hasExpandedState: false,
+          isExpanded: false,
           /* Actions */
           hasTapAction: false,
           hasLongPressAction: false,
@@ -1322,6 +1366,72 @@ void main() {
       )));
 
       expect(find.byType(Text), isNot(findsAtLeastNWidgets(3)));
+    });
+  });
+
+  group('findsOneWidget', () {
+    testWidgets('finds exactly one widget', (WidgetTester tester) async {
+      await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
+      expect(find.text('foo'), findsOneWidget);
+    });
+
+    testWidgets('fails with a descriptive message', (WidgetTester tester) async {
+      late TestFailure failure;
+      try {
+        expect(find.text('foo', skipOffstage: false), findsOneWidget);
+      } on TestFailure catch (e) {
+        failure = e;
+      }
+
+      expect(failure, isNotNull);
+      final String? message = failure.message;
+      expect(message, contains('Expected: exactly one matching candidate\n'));
+      expect(message, contains('Actual: _TextWidgetFinder:<Found 0 widgets with text "foo"'));
+      expect(message, contains('Which: means none were found but one was expected\n'));
+    });
+  });
+
+  group('findsNothing', () {
+    testWidgets('finds no widgets', (WidgetTester tester) async {
+      expect(find.text('foo'), findsNothing);
+    });
+
+    testWidgets('fails with a descriptive message', (WidgetTester tester) async {
+      await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
+
+      late TestFailure failure;
+      try {
+        expect(find.text('foo', skipOffstage: false), findsNothing);
+      } on TestFailure catch (e) {
+        failure = e;
+      }
+
+      expect(failure, isNotNull);
+      final String? message = failure.message;
+
+      expect(message, contains('Expected: no matching candidates\n'));
+      expect(message, contains('Actual: _TextWidgetFinder:<Found 1 widget with text "foo"'));
+      expect(message, contains('Text("foo", textDirection: ltr, dependencies: [MediaQuery])'));
+      expect(message, contains('Which: means one was found but none were expected\n'));
+    });
+
+    testWidgets('fails with a descriptive message when skipping', (WidgetTester tester) async {
+      await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
+
+      late TestFailure failure;
+      try {
+        expect(find.text('foo'), findsNothing);
+      } on TestFailure catch (e) {
+        failure = e;
+      }
+
+      expect(failure, isNotNull);
+      final String? message = failure.message;
+
+      expect(message, contains('Expected: no matching candidates\n'));
+      expect(message, contains('Actual: _TextWidgetFinder:<Found 1 widget with text "foo"'));
+      expect(message, contains('Text("foo", textDirection: ltr, dependencies: [MediaQuery])'));
+      expect(message, contains('Which: means one was found but none were expected\n'));
     });
   });
 }

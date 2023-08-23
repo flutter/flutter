@@ -11,8 +11,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   /*
@@ -139,5 +138,9 @@ void main() {
       matchesGoldenFile('LiveBinding.press.animation.2.png'),
     );
     image.dispose();
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
+  },
+    skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
+    // TODO(polina-c): remove after fixing https://github.com/flutter/flutter/issues/133071
+    leakTrackingTestConfig: const LeakTrackingTestConfig(allowAllNotDisposed: true),
+  );
 }

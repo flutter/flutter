@@ -138,15 +138,15 @@ class IconTreeShaker {
       if (codePoints == null) {
         throw IconTreeShakerException._('Expected to font code points for ${entry.key}, but none were found.');
       }
-      if (_targetPlatform == TargetPlatform.web_javascript) {
-        if (!codePoints.contains(kSpacePoint)) {
-          codePoints.add(kSpacePoint);
-        }
-      }
+
+      // Add space as an optional code point, as web uses it to measure the font height.
+      final List<int> optionalCodePoints = _targetPlatform == TargetPlatform.web_javascript
+        ? <int>[kSpacePoint] : <int>[];
       result[entry.value] = _IconTreeShakerData(
         family: entry.key,
         relativePath: entry.value,
         codePoints: codePoints,
+        optionalCodePoints: optionalCodePoints,
       );
     }
     _iconData = result;
@@ -197,12 +197,17 @@ class IconTreeShaker {
       outputPath,
       input.path,
     ];
-    final String codePoints = iconTreeShakerData.codePoints.join(' ');
+    final Iterable<String> requiredCodePointStrings = iconTreeShakerData.codePoints
+      .map((int codePoint) => codePoint.toString());
+    final Iterable<String> optionalCodePointStrings = iconTreeShakerData.optionalCodePoints
+      .map((int codePoint) => 'optional:$codePoint');
+    final String codePointsString = requiredCodePointStrings
+      .followedBy(optionalCodePointStrings).join(' ');
     _logger.printTrace('Running font-subset: ${cmd.join(' ')}, '
-                       'using codepoints $codePoints');
+                       'using codepoints $codePointsString');
     final Process fontSubsetProcess = await _processManager.start(cmd);
     try {
-      fontSubsetProcess.stdin.writeln(codePoints);
+      fontSubsetProcess.stdin.writeln(codePointsString);
       await fontSubsetProcess.stdin.flush();
       await fontSubsetProcess.stdin.close();
     } on Exception {
@@ -369,6 +374,7 @@ class _IconTreeShakerData {
     required this.family,
     required this.relativePath,
     required this.codePoints,
+    required this.optionalCodePoints,
   });
 
   /// The font family name, e.g. "MaterialIcons".
@@ -379,6 +385,10 @@ class _IconTreeShakerData {
 
   /// The list of code points for the font.
   final List<int> codePoints;
+
+  /// The list of code points to be optionally added, if they exist in the
+  /// input font. Otherwise, the tool will silently omit them.
+  final List<int> optionalCodePoints;
 
   @override
   String toString() => 'FontSubsetData($family, $relativePath, $codePoints)';

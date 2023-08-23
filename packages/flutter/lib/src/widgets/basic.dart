@@ -6839,20 +6839,33 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 ///
 /// ## Semantics
 ///
-/// Using this widget may also affect how the semantics subtree underneath this
-/// widget is collected.
+/// Using this class may also affect how the semantics subtree underneath is
+/// collected.
 ///
-/// {@template flutter.widgets.IgnorePointer.Semantics}
+/// {@template flutter.widgets.IgnorePointer.semantics}
+/// If [ignoring] is true, pointer-related [SemanticsAction]s are removed from
+/// the semantics subtree. Otherwise, the subtree remains untouched.
+/// {@endtemplate}
+///
+/// {@template flutter.widgets.IgnorePointer.ignoringSemantics}
+/// The usages of [ignoringSemantics] are deprecated and not recommended. This
+/// property was introduced to workaround the semantics behavior of the
+/// [IgnorePointer] and its friends before v3.8.0-12.0.pre.
+///
+/// Before that version, entire semantics subtree is dropped if [ignoring] is
+/// true. Developers can only use [ignoringSemantics] to preserver the semantics
+/// subtrees.
+///
+/// After that version, with [ignoring] set to true, it only prevents semantics
+/// user actions in the semantics subtree but leaves the other
+/// [SemanticsProperties] intact. Therefore, the [ignoringSemantics] is no
+/// longer needed.
+///
 /// If [ignoringSemantics] is true, the semantics subtree is dropped. Therefore,
 /// the subtree will be invisible to assistive technologies.
 ///
 /// If [ignoringSemantics] is false, the semantics subtree is collected as
 /// usual.
-///
-/// If [ignoringSemantics] is not set, then [ignoring] decides how the
-/// semantics subtree is collected. If [ignoring] is true, pointer-related
-/// [SemanticsAction]s are removed from the semantics subtree. Otherwise, the
-/// subtree remains untouched.
 /// {@endtemplate}
 ///
 /// See also:
@@ -6880,7 +6893,7 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
   /// Regardless of whether this widget is ignored during hit testing, it will
   /// still consume space during layout and be visible during painting.
   ///
-  /// {@macro flutter.widgets.IgnorePointer.Semantics}
+  /// {@macro flutter.widgets.IgnorePointer.semantics}
   ///
   /// Defaults to true.
   final bool ignoring;
@@ -6888,7 +6901,7 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
   /// Whether the semantics of this widget is ignored when compiling the
   /// semantics subtree.
   ///
-  /// {@macro flutter.widgets.IgnorePointer.Semantics}
+  /// {@macro flutter.widgets.IgnorePointer.ignoringSemantics}
   ///
   /// See [SemanticsNode] for additional information about the semantics tree.
   @Deprecated(
@@ -6943,19 +6956,33 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 ///
 /// ## Semantics
 ///
-/// Using this widget may also affect how the semantics subtree underneath this
-/// widget is collected.
+/// Using this class may also affect how the semantics subtree underneath is
+/// collected.
 ///
-/// {@template flutter.widgets.AbsorbPointer.Semantics}
-/// If [ignoringSemantics] is true, the semantics subtree is dropped.
+/// {@template flutter.widgets.AbsorbPointer.semantics}
+/// If [absorbing] is true, pointer-related [SemanticsAction]s are removed from
+/// the semantics subtree. Otherwise, the subtree remains untouched.
+/// {@endtemplate}
+///
+/// {@template flutter.widgets.AbsorbPointer.ignoringSemantics}
+/// The usages of [ignoringSemantics] are deprecated and not recommended. This
+/// property was introduced to workaround the semantics behavior of the
+/// [IgnorePointer] and its friends before v3.8.0-12.0.pre.
+///
+/// Before that version, entire semantics subtree is dropped if [absorbing] is
+/// true. Developers can only use [ignoringSemantics] to preserver the semantics
+/// subtrees.
+///
+/// After that version, with [absorbing] set to true, it only prevents semantics
+/// user actions in the semantics subtree but leaves the other
+/// [SemanticsProperties] intact. Therefore, the [ignoringSemantics] is no
+/// longer needed.
+///
+/// If [ignoringSemantics] is true, the semantics subtree is dropped. Therefore,
+/// the subtree will be invisible to assistive technologies.
 ///
 /// If [ignoringSemantics] is false, the semantics subtree is collected as
 /// usual.
-///
-/// If [ignoringSemantics] is not set, then [absorbing] decides how the
-/// semantics subtree is collected. If [absorbing] is true, pointer-related
-/// [SemanticsAction]s are removed from the semantics subtree. Otherwise, the
-/// subtree remains untouched.
 /// {@endtemplate}
 ///
 /// See also:
@@ -6983,7 +7010,7 @@ class AbsorbPointer extends SingleChildRenderObjectWidget {
   /// testing, it will still consume space during layout and be visible during
   /// painting.
   ///
-  /// {@macro flutter.widgets.AbsorbPointer.Semantics}
+  /// {@macro flutter.widgets.AbsorbPointer.semantics}
   ///
   /// Defaults to true.
   final bool absorbing;
@@ -6991,7 +7018,7 @@ class AbsorbPointer extends SingleChildRenderObjectWidget {
   /// Whether the semantics of this render object is ignored when compiling the
   /// semantics tree.
   ///
-  /// {@macro flutter.widgets.AbsorbPointer.Semantics}
+  /// {@macro flutter.widgets.AbsorbPointer.ignoringSemantics}
   ///
   /// See [SemanticsNode] for additional information about the semantics tree.
   @Deprecated(
@@ -7138,6 +7165,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool? hidden,
     bool? image,
     bool? liveRegion,
+    bool? expanded,
     int? maxValueLength,
     int? currentValueLength,
     String? label,
@@ -7186,6 +7214,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       enabled: enabled,
       checked: checked,
       mixed: mixed,
+      expanded: expanded,
       toggled: toggled,
       selected: selected,
       button: button,

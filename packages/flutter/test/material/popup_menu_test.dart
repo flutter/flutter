@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
@@ -200,7 +199,7 @@ void main() {
     expect(cancels, equals(2));
   });
 
-  testWidgets('disabled PopupMenuButton will not call itemBuilder, onOpened, onSelected or onCanceled', (WidgetTester tester) async {
+  testWidgets('Disabled PopupMenuButton will not call itemBuilder, onOpened, onSelected or onCanceled', (WidgetTester tester) async {
     final GlobalKey popupButtonKey = GlobalKey();
     bool itemBuilderCalled = false;
     bool onOpenedCalled = false;
@@ -327,7 +326,7 @@ void main() {
     expect(onSelectedCalled, isFalse);
   });
 
-  testWidgets('disabled PopupMenuButton is focusable with directional navigation', (WidgetTester tester) async {
+  testWidgets('Disabled PopupMenuButton is focusable with directional navigation', (WidgetTester tester) async {
     final Key popupButtonKey = UniqueKey();
     final GlobalKey childKey = GlobalKey();
 
@@ -1085,7 +1084,7 @@ void main() {
     expect(tester.getTopLeft(find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PopupMenu<int?>')), const Offset(50.0, 50.0));
   });
 
-  testWidgets('open PopupMenu has correct semantics', (WidgetTester tester) async {
+  testWidgets('Opened PopupMenu has correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       MaterialApp(
@@ -1297,7 +1296,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('disabled PopupMenuItem has correct semantics', (WidgetTester tester) async {
+  testWidgets('Disabled PopupMenuItem has correct semantics', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/45044.
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
@@ -1552,6 +1551,82 @@ void main() {
       tester.getRect(find.widgetWithText(menuItemType, 'Item 2')).center.dy,
       tester.getRect(find.text('Item 2')).center.dy,
     );
+  });
+
+  testWidgets('Material3 - PopupMenuItem default padding', (WidgetTester tester) async {
+    final Key popupMenuButtonKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              key: popupMenuButtonKey,
+              child: const Text('button'),
+              onSelected: (String result) { },
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuEntry<String>>[
+                   const PopupMenuItem<String>(
+                    value: '0',
+                    enabled: false,
+                    child: Text('Item 0'),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: '1',
+                    child: Text('Item 1'),
+                  ),
+                ];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Show the menu.
+    await tester.tap(find.byKey(popupMenuButtonKey));
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 0')).padding, const EdgeInsets.symmetric(horizontal: 12.0));
+    expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 1')).padding, const EdgeInsets.symmetric(horizontal: 12.0));
+  });
+
+  testWidgets('Material2 - PopupMenuItem default padding', (WidgetTester tester) async {
+    final Key popupMenuButtonKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              key: popupMenuButtonKey,
+              child: const Text('button'),
+              onSelected: (String result) { },
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuEntry<String>>[
+                   const PopupMenuItem<String>(
+                    value: '0',
+                    enabled: false,
+                    child: Text('Item 0'),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: '1',
+                    child: Text('Item 1'),
+                  ),
+                ];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Show the menu.
+    await tester.tap(find.byKey(popupMenuButtonKey));
+    await tester.pumpAndSettle();
+
+    expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 0')).padding, const EdgeInsets.symmetric(horizontal: 16.0));
+    expect(tester.widget<Container>(find.widgetWithText(Container, 'Item 1')).padding, const EdgeInsets.symmetric(horizontal: 16.0));
   });
 
   testWidgets('PopupMenuItem custom padding', (WidgetTester tester) async {
@@ -2577,32 +2652,30 @@ void main() {
     });
   });
 
-  testWidgets('iconSize parameter tests', (WidgetTester tester) async {
-    Future<void> buildFrame({double? iconSize}) {
-      return tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: PopupMenuButton<String>(
-                iconSize: iconSize,
-                itemBuilder: (_) => <PopupMenuEntry<String>>[
-                  const PopupMenuItem<String>(
-                    value: 'value',
-                    child: Text('child'),
-                  ),
-                ],
-              ),
+  testWidgets('Can customize PopupMenuButton icon', (WidgetTester tester) async {
+    const Color iconColor = Color(0xffffff00);
+    const double iconSize = 29.5;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              iconColor: iconColor,
+              iconSize: iconSize,
+              itemBuilder: (_) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  value: 'value',
+                  child: Text('child'),
+                ),
+              ],
             ),
           ),
         ),
-      );
-    }
+      ),
+    );
 
-    await buildFrame();
-    expect(tester.getSize(find.byIcon(Icons.adaptive.more)), const Size(24, 24));
-
-    await buildFrame(iconSize: 50);
-    expect(tester.getSize(find.byIcon(Icons.adaptive.more)), const Size(50, 50));
+    expect(_iconStyle(tester, Icons.adaptive.more)?.color, iconColor);
+    expect(tester.getSize(find.byIcon(Icons.adaptive.more)), const Size(iconSize, iconSize));
   });
 
   testWidgets('does not crash in small overlay', (WidgetTester tester) async {
@@ -3266,7 +3339,7 @@ void main() {
     expect(childBottomLeft, menuTopLeft);
   });
 
-  testWidgets('PopupmenuItem onTap should be calling after Navigator.pop', (WidgetTester tester) async {
+  testWidgets('PopupMenuItem onTap should be calling after Navigator.pop', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -3306,6 +3379,207 @@ void main() {
     // Verify that the ModalBottomSheet is displayed
     final Finder modalBottomSheet = find.text('ModalBottomSheet');
     expect(modalBottomSheet, findsOneWidget);
+  });
+
+  testWidgets('Material3 - CheckedPopupMenuItem.labelTextStyle uses correct text style', (WidgetTester tester) async {
+    final Key popupMenuButtonKey = UniqueKey();
+    ThemeData theme = ThemeData(useMaterial3: true);
+
+    Widget buildMenu() {
+      return  MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          appBar: AppBar(
+            actions: <Widget>[
+              PopupMenuButton<void>(
+                key: popupMenuButtonKey,
+                itemBuilder: (BuildContext context) => <PopupMenuItem<void>>[
+                  const CheckedPopupMenuItem<void>(
+                    child: Text('Item 1'),
+                  ),
+                  const CheckedPopupMenuItem<int>(
+                    checked: true,
+                    child: Text('Item 2'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildMenu());
+
+    // Show the menu
+    await tester.tap(find.byKey(popupMenuButtonKey));
+    await tester.pumpAndSettle();
+
+    // Test default text style.
+    expect(_labelStyle(tester, 'Item 1')!.fontSize, 14.0);
+    expect(_labelStyle(tester, 'Item 1')!.color, theme.colorScheme.onSurface);
+
+    // Close the menu.
+    await tester.tapAt(const Offset(20.0, 20.0));
+    await tester.pumpAndSettle();
+
+    // Test custom text theme text style.
+    theme = theme.copyWith(
+      textTheme: theme.textTheme.copyWith(
+        labelLarge: const TextStyle(
+          fontSize: 20.0,
+          fontWeight: FontWeight.bold,
+        )
+      ),
+    );
+    await tester.pumpWidget(buildMenu());
+
+    // Show the menu.
+    await tester.tap(find.byKey(popupMenuButtonKey));
+    await tester.pumpAndSettle();
+
+    expect(_labelStyle(tester, 'Item 1')!.fontSize, 20.0);
+    expect(_labelStyle(tester, 'Item 1')!.fontWeight, FontWeight.bold);
+  });
+
+  testWidgets('CheckedPopupMenuItem.labelTextStyle resolve material states', (WidgetTester tester) async {
+    final Key popupMenuButtonKey = UniqueKey();
+    final MaterialStateProperty<TextStyle?> labelTextStyle = MaterialStateProperty.resolveWith(
+     (Set<MaterialState> states) {
+       if (states.contains(MaterialState.selected)) {
+        return const TextStyle(color: Colors.red, fontSize: 24.0);
+       }
+
+      return const TextStyle(color: Colors.amber, fontSize: 20.0);
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            actions: <Widget>[
+              PopupMenuButton<void>(
+                key: popupMenuButtonKey,
+                itemBuilder: (BuildContext context) => <PopupMenuItem<void>>[
+                  CheckedPopupMenuItem<void>(
+                    labelTextStyle: labelTextStyle,
+                    child: const Text('Item 1'),
+                  ),
+                  CheckedPopupMenuItem<int>(
+                    checked: true,
+                    labelTextStyle: labelTextStyle,
+                    child: const Text('Item 2'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Show the menu.
+    await tester.tap(find.byKey(popupMenuButtonKey));
+    await tester.pumpAndSettle();
+
+    expect(
+      _labelStyle(tester, 'Item 1'),
+      labelTextStyle.resolve(<MaterialState>{})
+    );
+    expect(
+      _labelStyle(tester, 'Item 2'),
+      labelTextStyle.resolve(<MaterialState>{MaterialState.selected})
+    );
+  });
+
+  testWidgets('CheckedPopupMenuItem overrides redundant ListTile content padding', (WidgetTester tester) async {
+    final Key popupMenuButtonKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              key: popupMenuButtonKey,
+              child: const Text('button'),
+              onSelected: (String result) { },
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuEntry<String>>[
+                   const CheckedPopupMenuItem<String>(
+                    value: '0',
+                    child: Text('Item 0'),
+                  ),
+                  const CheckedPopupMenuItem<String>(
+                    value: '1',
+                    checked: true,
+                    child: Text('Item 1'),
+                  ),
+                ];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Show the menu.
+    await tester.tap(find.byKey(popupMenuButtonKey));
+    await tester.pumpAndSettle();
+
+    SafeArea getItemSafeArea(String label) {
+      return tester.widget<SafeArea>(find.ancestor(
+        of: find.text(label),
+        matching: find.byType(SafeArea),
+      ));
+    }
+
+    expect(getItemSafeArea('Item 0').minimum, EdgeInsets.zero);
+    expect(getItemSafeArea('Item 1').minimum, EdgeInsets.zero);
+  });
+
+  testWidgets('PopupMenuItem overrides redundant ListTile content padding', (WidgetTester tester) async {
+    final Key popupMenuButtonKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              key: popupMenuButtonKey,
+              child: const Text('button'),
+              onSelected: (String result) { },
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuEntry<String>>[
+                   const PopupMenuItem<String>(
+                    value: '0',
+                    enabled: false,
+                    child: ListTile(title: Text('Item 0')),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: '1',
+                    child: ListTile(title: Text('Item 1')),
+                  ),
+                ];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Show the menu.
+    await tester.tap(find.byKey(popupMenuButtonKey));
+    await tester.pumpAndSettle();
+
+    SafeArea getItemSafeArea(String label) {
+      return tester.widget<SafeArea>(find.ancestor(
+        of: find.text(label),
+        matching: find.byType(SafeArea),
+      ));
+    }
+
+    expect(getItemSafeArea('Item 0').minimum, EdgeInsets.zero);
+    expect(getItemSafeArea('Item 1').minimum, EdgeInsets.zero);
   });
 }
 
@@ -3376,4 +3650,18 @@ class _ClosureNavigatorObserver extends NavigatorObserver {
 
   @override
   void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) => onDidChange(newRoute!);
+}
+
+TextStyle? _labelStyle(WidgetTester tester, String label) {
+  return tester.widget<RichText>(find.descendant(
+    of: find.text(label),
+    matching: find.byType(RichText),
+  )).text.style;
+}
+
+TextStyle? _iconStyle(WidgetTester tester, IconData icon) {
+  return tester.widget<RichText>(find.descendant(
+    of: find.byIcon(icon),
+    matching: find.byType(RichText),
+  )).text.style;
 }

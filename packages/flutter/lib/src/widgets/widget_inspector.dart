@@ -716,7 +716,15 @@ class InspectorReferenceData {
 }
 
 // Production implementation of [WidgetInspectorService].
-class _WidgetInspectorService = Object with WidgetInspectorService;
+class _WidgetInspectorService with WidgetInspectorService {
+  _WidgetInspectorService() {
+    selection.addListener(() {
+      if (selectionChangedCallback != null) {
+        selectionChangedCallback!();
+      }
+    });
+  }
+}
 
 /// Service used by GUI tools to interact with the [WidgetInspector].
 ///
@@ -747,6 +755,15 @@ mixin WidgetInspectorService {
   /// The current [WidgetInspectorService].
   static WidgetInspectorService get instance => _instance;
   static WidgetInspectorService _instance = _WidgetInspectorService();
+
+  /// Whether the inspector is in select mode.
+  ///
+  /// In select mode, pointer interactions trigger widget selection instead of
+  /// normal interactions. Otherwise the previously selected widget is
+  /// highlighted but the application can be interacted with normally.
+  @visibleForTesting
+  final ValueNotifier<bool> isSelectMode = ValueNotifier<bool>(true);
+
   @protected
   static set instance(WidgetInspectorService instance) {
     _instance = instance;
@@ -953,7 +970,7 @@ mixin WidgetInspectorService {
   Future<void> forceRebuild() {
     final WidgetsBinding binding = WidgetsBinding.instance;
     if (binding.rootElement != null) {
-      binding.buildOwner!.reassemble(binding.rootElement!, null);
+      binding.buildOwner!.reassemble(binding.rootElement!);
       return binding.endOfFrame;
     }
     return Future<void>.value();
@@ -1562,18 +1579,7 @@ mixin WidgetInspectorService {
         selection.current = object! as RenderObject;
         _sendInspectEvent(selection.current);
       }
-      if (selectionChangedCallback != null) {
-        if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle) {
-          selectionChangedCallback!();
-        } else {
-          // It isn't safe to trigger the selection change callback if we are in
-          // the middle of rendering the frame.
-          SchedulerBinding.instance.scheduleTask(
-            selectionChangedCallback!,
-            Priority.touch,
-          );
-        }
-      }
+
       return true;
     }
     return false;
@@ -2103,24 +2109,35 @@ mixin WidgetInspectorService {
         summaryTree: true,
         subtreeDepth: subtreeDepth,
         service: this,
-        addAdditionalPropertiesCallback: (DiagnosticsNode node, InspectorSerializationDelegate delegate) {
+        addAdditionalPropertiesCallback:
+            (DiagnosticsNode node, InspectorSerializationDelegate delegate) {
           final Object? value = node.value;
-          final RenderObject? renderObject = value is Element ? value.renderObject : null;
+          final RenderObject? renderObject =
+              value is Element ? value.renderObject : null;
           if (renderObject == null) {
             return const <String, Object>{};
           }
 
-          final DiagnosticsSerializationDelegate renderObjectSerializationDelegate = delegate.copyWith(
+          final DiagnosticsSerializationDelegate
+              renderObjectSerializationDelegate = delegate.copyWith(
             subtreeDepth: 0,
             includeProperties: true,
             expandPropertyValues: false,
           );
           final Map<String, Object> additionalJson = <String, Object>{
-            'renderObject': renderObject.toDiagnosticsNode().toJsonMap(renderObjectSerializationDelegate),
+            // Only include renderObject properties separately if this value is not already the renderObject.
+            // Only include if we are expanding property values to mitigate the risk of infinite loops if
+            // RenderObjects have properties that are Element objects.
+            if (value is! RenderObject && delegate.expandPropertyValues)
+              'renderObject': renderObject
+                  .toDiagnosticsNode()
+                  .toJsonMap(renderObjectSerializationDelegate),
           };
 
           final RenderObject? renderParent = renderObject.parent;
-          if (renderParent is RenderObject && subtreeDepth > 0) {
+          if (renderParent != null &&
+              delegate.subtreeDepth > 0 &&
+              delegate.expandPropertyValues) {
             final Object? parentCreator = renderParent.debugCreator;
             if (parentCreator is DebugCreator) {
               additionalJson['parentRenderElement'] =
@@ -2141,7 +2158,7 @@ mixin WidgetInspectorService {
             if (!renderObject.debugNeedsLayout) {
               // ignore: invalid_use_of_protected_member
               final Constraints constraints = renderObject.constraints;
-              final Map<String, Object>constraintsProperty = <String, Object>{
+              final Map<String, Object> constraintsProperty = <String, Object>{
                 'type': constraints.runtimeType.toString(),
                 'description': constraints.toString(),
               };
@@ -2675,18 +2692,13 @@ class WidgetInspector extends StatefulWidget {
 class _WidgetInspectorState extends State<WidgetInspector>
     with WidgetsBindingObserver {
 
-  _WidgetInspectorState() : selection = WidgetInspectorService.instance.selection;
+  _WidgetInspectorState();
 
   Offset? _lastPointerLocation;
 
-  final InspectorSelection selection;
+  late InspectorSelection selection;
 
-  /// Whether the inspector is in select mode.
-  ///
-  /// In select mode, pointer interactions trigger widget selection instead of
-  /// normal interactions. Otherwise the previously selected widget is
-  /// highlighted but the application can be interacted with normally.
-  bool isSelectMode = true;
+  late bool isSelectMode;
 
   final GlobalKey _ignorePointerKey = GlobalKey();
 
@@ -2694,27 +2706,31 @@ class _WidgetInspectorState extends State<WidgetInspector>
   /// as selecting the edge of the bounding box.
   static const double _edgeHitMargin = 2.0;
 
-  InspectorSelectionChangedCallback? _selectionChangedCallback;
   @override
   void initState() {
     super.initState();
 
-    _selectionChangedCallback = () {
-      setState(() {
-        // The [selection] property which the build method depends on has
-        // changed.
-      });
-    };
-    WidgetInspectorService.instance.selectionChangedCallback = _selectionChangedCallback;
+    WidgetInspectorService.instance.selection
+        .addListener(_selectionInformationChanged);
+    WidgetInspectorService.instance.isSelectMode
+        .addListener(_selectionInformationChanged);
+    selection = WidgetInspectorService.instance.selection;
+    isSelectMode = WidgetInspectorService.instance.isSelectMode.value;
   }
 
   @override
   void dispose() {
-    if (WidgetInspectorService.instance.selectionChangedCallback == _selectionChangedCallback) {
-      WidgetInspectorService.instance.selectionChangedCallback = null;
-    }
+    WidgetInspectorService.instance.selection
+        .removeListener(_selectionInformationChanged);
+    WidgetInspectorService.instance.isSelectMode
+        .removeListener(_selectionInformationChanged);
     super.dispose();
   }
+
+  void _selectionInformationChanged() => setState((){
+    selection = WidgetInspectorService.instance.selection;
+    isSelectMode = WidgetInspectorService.instance.isSelectMode.value;
+  });
 
   bool _hitTestHelper(
     List<RenderObject> hits,
@@ -2802,9 +2818,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
     final RenderObject userRender = ignorePointer.child!;
     final List<RenderObject> selected = hitTest(position, userRender);
 
-    setState(() {
-      selection.candidates = selected;
-    });
+    selection.candidates = selected;
   }
 
   void _handlePanDown(DragDownDetails event) {
@@ -2826,9 +2840,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
     final ui.FlutterView view = View.of(context);
     final Rect bounds = (Offset.zero & (view.physicalSize / view.devicePixelRatio)).deflate(_kOffScreenMargin);
     if (!bounds.contains(_lastPointerLocation!)) {
-      setState(() {
-        selection.clear();
-      });
+      selection.clear();
     }
   }
 
@@ -2840,18 +2852,15 @@ class _WidgetInspectorState extends State<WidgetInspector>
       _inspectAt(_lastPointerLocation!);
       WidgetInspectorService.instance._sendInspectEvent(selection.current);
     }
-    setState(() {
-      // Only exit select mode if there is a button to return to select mode.
-      if (widget.selectButtonBuilder != null) {
-        isSelectMode = false;
-      }
-    });
+
+    // Only exit select mode if there is a button to return to select mode.
+    if (widget.selectButtonBuilder != null) {
+      WidgetInspectorService.instance.isSelectMode.value = false;
+    }
   }
 
   void _handleEnableSelect() {
-    setState(() {
-      isSelectMode = true;
-    });
+      WidgetInspectorService.instance.isSelectMode.value = true;
   }
 
   @override
@@ -2885,7 +2894,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
 }
 
 /// Mutable selection state of the inspector.
-class InspectorSelection {
+class InspectorSelection with ChangeNotifier {
   /// Render objects that are candidates to be selected.
   ///
   /// Tools may wish to iterate through the list of candidates.
@@ -2924,6 +2933,7 @@ class InspectorSelection {
     if (_current != value) {
       _current = value;
       _currentElement = (value?.debugCreator as DebugCreator?)?.element;
+      notifyListeners();
     }
   }
 
@@ -2941,11 +2951,13 @@ class InspectorSelection {
     if (element?.debugIsDefunct ?? false) {
       _currentElement = null;
       _current = null;
+      notifyListeners();
       return;
     }
     if (currentElement != element) {
       _currentElement = element;
       _current = element!.findRenderObject();
+      notifyListeners();
     }
   }
 
@@ -2953,9 +2965,11 @@ class InspectorSelection {
     if (_index < candidates.length) {
       _current = candidates[index];
       _currentElement = (_current?.debugCreator as DebugCreator?)?.element;
+      notifyListeners();
     } else {
       _current = null;
       _currentElement = null;
+      notifyListeners();
     }
   }
 
@@ -3234,7 +3248,10 @@ class _InspectorOverlayLayer extends Layer {
     Rect targetRect,
   ) {
     canvas.save();
-    final double maxWidth = size.width - 2 * (_kScreenEdgeMargin + _kTooltipPadding);
+    final double maxWidth = math.max(
+      size.width - 2 * (_kScreenEdgeMargin + _kTooltipPadding),
+      0,
+    );
     final TextSpan? textSpan = _textPainter?.text as TextSpan?;
     if (_textPainter == null || textSpan!.text != message || _textPainterMaxWidth != maxWidth) {
       _textPainterMaxWidth = maxWidth;
