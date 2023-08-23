@@ -284,8 +284,11 @@ public class FlutterFragmentTest {
   }
 
   @SuppressWarnings("deprecation")
-  // Robolectric.setupActivity
-  // TODO(reidbaker): https://github.com/flutter/flutter/issues/133151
+  private FragmentActivity getMockFragmentActivity() {
+    // TODO(reidbaker): https://github.com/flutter/flutter/issues/133151
+    return Robolectric.setupActivity(FragmentActivity.class);
+  }
+
   @Test
   public void itDelegatesOnBackPressedAutomaticallyWhenEnabled() {
     // We need to mock FlutterJNI to avoid triggering native code.
@@ -300,7 +303,7 @@ public class FlutterFragmentTest {
         FlutterFragment.withCachedEngine("my_cached_engine")
             .shouldAutomaticallyHandleOnBackPressed(true)
             .build();
-    FragmentActivity activity = Robolectric.setupActivity(FragmentActivity.class);
+    FragmentActivity activity = getMockFragmentActivity();
     activity
         .getSupportFragmentManager()
         .beginTransaction()
@@ -337,7 +340,7 @@ public class FlutterFragmentTest {
         FlutterFragment.withCachedEngine("my_cached_engine")
             .shouldAutomaticallyHandleOnBackPressed(true)
             .build();
-    FragmentActivity activity = Robolectric.setupActivity(FragmentActivity.class);
+    FragmentActivity activity = getMockFragmentActivity();
     activity
         .getSupportFragmentManager()
         .beginTransaction()
