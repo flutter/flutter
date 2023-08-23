@@ -86,32 +86,34 @@ class _LabeledRadioExampleState extends State<LabeledRadioExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          LinkedLabelRadio(
-            label: 'First tappable label text',
-            padding: const EdgeInsets.symmetric(horizontal: 5.0),
-            value: true,
-            groupValue: _isRadioSelected,
-            onChanged: (bool newValue) {
-              setState(() {
-                _isRadioSelected = newValue;
-              });
-            },
-          ),
-          LinkedLabelRadio(
-            label: 'Second tappable label text',
-            padding: const EdgeInsets.symmetric(horizontal: 5.0),
-            value: false,
-            groupValue: _isRadioSelected,
-            onChanged: (bool newValue) {
-              setState(() {
-                _isRadioSelected = newValue;
-              });
-            },
-          ),
-        ],
+      body: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            LinkedLabelRadio(
+              label: 'First tappable label text',
+              padding: const EdgeInsets.symmetric(horizontal: 5.0),
+              value: true,
+              groupValue: _isRadioSelected,
+              onChanged: (bool newValue) {
+                setState(() {
+                  _isRadioSelected = newValue;
+                });
+              },
+            ),
+            LinkedLabelRadio(
+              label: 'Second tappable label text',
+              padding: const EdgeInsets.symmetric(horizontal: 5.0),
+              value: false,
+              groupValue: _isRadioSelected,
+              onChanged: (bool newValue) {
+                setState(() {
+                  _isRadioSelected = newValue;
+                });
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
