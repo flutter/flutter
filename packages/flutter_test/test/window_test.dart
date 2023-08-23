@@ -118,7 +118,7 @@ void main() {
 
     // Set fake values for window properties.
     testWindow.devicePixelRatioTestValue = 2.5;
-    testWindow.textScaleFactorTestValue = 3.0;
+    tester.platformDispatcher.textScaleFactorTestValue = 3.0;
 
     // Erase fake window property values.
     testWindow.clearAllTestValues();
