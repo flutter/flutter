@@ -641,10 +641,6 @@ class ButtonThemeData with Diagnosticable {
       return button.padding!;
     }
 
-    if (button is MaterialButtonWithIconMixin) {
-      return const EdgeInsetsDirectional.only(start: 12.0, end: 16.0);
-    }
-
     if (_padding != null) {
       return _padding!;
     }

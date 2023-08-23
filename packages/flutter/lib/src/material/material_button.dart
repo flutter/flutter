@@ -440,17 +440,3 @@ class MaterialButton extends StatelessWidget {
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
   }
 }
-
-/// The distinguished type of [MaterialButton].
-///
-/// This class is deprecated and will be removed in a future release.
-///
-/// This mixin only exists to give the "label and icon" button widgets a distinct
-/// type for the sake of [ButtonTheme].
-@Deprecated(
-  'This was used to differentiate types of FlatButton, RaisedButton, and OutlineButton in ButtonTheme. '
-  'These buttons have been replaced with TextButton, ElevatedButton, and OutlinedButton, each of which have their own respective themes now. '
-  'Use one of these button classes instead. '
-  'This feature was deprecated after v2.11.0-0.0.pre.',
-)
-mixin MaterialButtonWithIconMixin { }
