@@ -229,7 +229,7 @@ class DropdownMenu<T> extends StatefulWidget {
 
   /// The text style for the [TextField] of the [DropdownMenu];
   ///
-  /// Defaults to the overall theme's [TextTheme.labelLarge]
+  /// Defaults to the overall theme's [TextTheme.bodyLarge]
   /// if the dropdown menu theme's value is null.
   final TextStyle? textStyle;
 
@@ -916,7 +916,7 @@ class _DropdownMenuDefaultsM3 extends DropdownMenuThemeData {
   late final ThemeData _theme = Theme.of(context);
 
   @override
-  TextStyle? get textStyle => _theme.textTheme.labelLarge;
+  TextStyle? get textStyle => _theme.textTheme.bodyLarge;
 
   @override
   MenuStyle get menuStyle {
