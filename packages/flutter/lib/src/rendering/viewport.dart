@@ -1830,7 +1830,7 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
 
     double correction;
     double effectiveExtent;
-    do {
+    while (true) {
       correction = _attemptLayout(mainAxisExtent, crossAxisExtent, offset.pixels);
       if (correction != 0.0) {
         offset.correctBy(correction);
@@ -1847,7 +1847,7 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
           break;
         }
       }
-    } while (true);
+    }
     switch (axis) {
       case Axis.vertical:
         size = constraints.constrainDimensions(crossAxisExtent, effectiveExtent);
