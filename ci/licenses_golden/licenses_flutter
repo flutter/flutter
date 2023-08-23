@@ -2582,6 +2582,7 @@ ORIGIN: ../../../flutter/shell/platform/common/text_editing_delta.h + ../../../f
 ORIGIN: ../../../flutter/shell/platform/common/text_input_model.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/common/text_input_model.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/common/text_range.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/shell/platform/darwin/common/availability_version_check.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/common/buffer_conversions.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/common/buffer_conversions.mm + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/darwin/common/command_line.h + ../../../flutter/LICENSE
@@ -5336,6 +5337,7 @@ FILE: ../../../flutter/shell/platform/common/text_editing_delta.h
 FILE: ../../../flutter/shell/platform/common/text_input_model.cc
 FILE: ../../../flutter/shell/platform/common/text_input_model.h
 FILE: ../../../flutter/shell/platform/common/text_range.h
+FILE: ../../../flutter/shell/platform/darwin/common/availability_version_check.cc
 FILE: ../../../flutter/shell/platform/darwin/common/buffer_conversions.h
 FILE: ../../../flutter/shell/platform/darwin/common/buffer_conversions.mm
 FILE: ../../../flutter/shell/platform/darwin/common/command_line.h
