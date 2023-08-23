@@ -6,7 +6,6 @@ import 'dart:io' as io show Directory, File, Platform, stderr;
 
 import 'package:clang_tidy/clang_tidy.dart';
 import 'package:clang_tidy/src/command.dart';
-import 'package:clang_tidy/src/hooks_exclude.dart';
 import 'package:clang_tidy/src/options.dart';
 import 'package:litetest/litetest.dart';
 import 'package:path/path.dart' as path;
@@ -146,44 +145,6 @@ Future<int> main(List<String> args) async {
 
     expect(result, equals(0));
     expect(clangTidy.options.enableCheckProfile, isTrue);
-    print(outBuffer);
-  });
-
-  test('Accepts --config-file', () async {
-    // If buildCommands is in "$ENGINE/src/out/host_debug", then the config
-    // file should be in "$ENGINE/src/flutter/.clang-tidy-for-githooks".
-    late final String flutterRoot;
-
-    // Find the 'src' directory and append 'flutter/.clang-tidy-for-githooks'.
-    {
-      final List<String> buildCommandParts = path.split(path.absolute(buildCommands));
-      for (int i = 0; i < buildCommandParts.length; ++i) {
-        if (buildCommandParts[i] == 'src') {
-          flutterRoot = path.joinAll(<String>[
-            ...buildCommandParts.sublist(0, i + 1),
-            'flutter',
-          ]);
-          break;
-        }
-      }
-    }
-
-    final StringBuffer outBuffer = StringBuffer();
-    final StringBuffer errBuffer = StringBuffer();
-    final ClangTidy clangTidy = ClangTidy.fromCommandLine(
-      <String>[
-        '--compile-commands',
-        buildCommands,
-        '--config-file=${path.join(flutterRoot, '.clang-tidy')}',
-      ],
-      outSink: outBuffer,
-      errSink: errBuffer,
-    );
-
-    final int result = await clangTidy.run();
-
-    expect(result, equals(0));
-    expect(clangTidy.options.configPath?.path, endsWith('.clang-tidy'));
     print(outBuffer);
   });
 
@@ -515,39 +476,6 @@ Future<int> main(List<String> args) async {
     );
 
     expect(lintAction, equals(LintAction.lint));
-  });
-
-  test('rewriteClangTidyConfig should remove "performance-unnecessary-value-param"', () {
-    final io.Directory tmpDir = io.Directory.systemTemp.createTempSync('clang_tidy_test');
-
-    final io.File input = io.File(path.join(tmpDir.path, '.clang-tidy'));
-    input.writeAsStringSync('''
-Checks: >-
-  bugprone-use-after-move,
-  bugprone-unchecked-optional-access,
-  clang-analyzer-*,
-  clang-diagnostic-*,
-  darwin-*,
-  google-*,
-  modernize-use-default-member-init,
-  objc-*,
-  -objc-nsinvocation-argument-lifetime,
-  readability-identifier-naming,
-  -google-build-using-namespace,
-  -google-default-arguments,
-  -google-objc-global-variable-declaration,
-  -google-objc-avoid-throwing-exception,
-  -google-readability-casting,
-  -clang-analyzer-nullability.NullPassedToNonnull,
-  -clang-analyzer-nullability.NullablePassedToNonnull,
-  -clang-analyzer-nullability.NullReturnedFromNonnull,
-  -clang-analyzer-nullability.NullableReturnedFromNonnull,
-  performance-move-const-arg,
-  performance-unnecessary-value-param
-    ''');
-
-    final io.File output = rewriteClangTidyConfig(input);
-    expect(output.readAsStringSync().contains('performance-unnecessary-value-param'), isFalse);
   });
 
   return 0;
