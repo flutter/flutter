@@ -7,7 +7,7 @@
 #include "flutter/testing/testing.h"
 #include "impeller/aiks/aiks_context.h"
 #include "impeller/display_list/dl_dispatcher.h"
-#include "impeller/typographer/backends/skia/text_render_context_skia.h"
+#include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "third_party/imgui/imgui.h"
 #include "third_party/skia/include/core/SkData.h"
 
@@ -30,7 +30,7 @@ bool DlPlayground::OpenPlaygroundHere(DisplayListPlaygroundCallback callback) {
     return true;
   }
 
-  AiksContext context(GetContext(), TextRenderContextSkia::Make());
+  AiksContext context(GetContext(), TypographerContextSkia::Make());
   if (!context.IsValid()) {
     return false;
   }

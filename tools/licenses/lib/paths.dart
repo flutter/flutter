@@ -184,6 +184,7 @@ final Set<String> skippedPaths = <String>{
   r'third_party/skia/third_party/lua', // not linked in
   r'third_party/skia/third_party/vello', // not linked in
   r'third_party/skia/tools', // contains nothing that ends up in the binary executable
+  r'third_party/stb',
   r'third_party/swiftshader', // only used on hosts for tests
   r'third_party/tinygltf',
   r'third_party/vulkan-deps/glslang/LICENSE', // excluded to make sure we don't accidentally apply it as a default license

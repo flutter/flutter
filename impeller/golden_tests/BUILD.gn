@@ -15,6 +15,7 @@ impeller_component("golden_playground_test") {
     "//flutter/fml",
     "//flutter/impeller/aiks",
     "//flutter/impeller/playground",
+    "//flutter/impeller/typographer/backends/skia:typographer_skia_backend",
     "//flutter/testing:testing_lib",
   ]
 

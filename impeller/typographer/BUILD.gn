@@ -6,12 +6,6 @@ import("//flutter/impeller/tools/impeller.gni")
 
 impeller_component("typographer") {
   sources = [
-    "backends/skia/text_frame_skia.cc",
-    "backends/skia/text_frame_skia.h",
-    "backends/skia/text_render_context_skia.cc",
-    "backends/skia/text_render_context_skia.h",
-    "backends/skia/typeface_skia.cc",
-    "backends/skia/typeface_skia.h",
     "font.cc",
     "font.h",
     "font_glyph_pair.cc",
@@ -26,19 +20,18 @@ impeller_component("typographer") {
     "rectangle_packer.h",
     "text_frame.cc",
     "text_frame.h",
-    "text_render_context.cc",
-    "text_render_context.h",
     "text_run.cc",
     "text_run.h",
     "typeface.cc",
     "typeface.h",
+    "typographer_context.cc",
+    "typographer_context.h",
   ]
 
   public_deps = [
     "../base",
     "../geometry",
     "../renderer",
-    "//third_party/skia",
   ]
 
   deps = [ "//flutter/fml" ]
@@ -50,7 +43,8 @@ impeller_component("typographer_unittests") {
   sources = [ "typographer_unittests.cc" ]
 
   deps = [
-    ":typographer",
     "../playground:playground_test",
+    "backends/skia:typographer_skia_backend",
+    "backends/stb:typographer_stb_backend",
   ]
 }

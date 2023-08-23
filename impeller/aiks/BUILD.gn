@@ -37,6 +37,7 @@ impeller_component("aiks") {
 
 impeller_component("aiks_playground") {
   testonly = true
+
   sources = [
     "aiks_playground.cc",
     "aiks_playground.h",
@@ -45,10 +46,14 @@ impeller_component("aiks_playground") {
     ":aiks",
     "../playground:playground_test",
   ]
+  public_deps = [
+    "//flutter/impeller/typographer/backends/skia:typographer_skia_backend",
+  ]
 }
 
 impeller_component("aiks_unittests") {
   testonly = true
+
   sources = [
     "aiks_unittests.cc",
     "canvas_unittests.cc",
@@ -62,6 +67,7 @@ impeller_component("aiks_unittests") {
     "//flutter/impeller/geometry:geometry_asserts",
     "//flutter/impeller/golden_tests:golden_playground_test",
     "//flutter/impeller/playground:playground_test",
+    "//flutter/impeller/typographer/backends/stb:typographer_stb_backend",
     "//flutter/testing:testing_lib",
   ]
 }
@@ -86,6 +92,7 @@ impeller_component("aiks_unittests_golden") {
     "//flutter/impeller/geometry:geometry_asserts",
     "//flutter/impeller/golden_tests:golden_playground_test",
     "//flutter/impeller/playground:playground_test",
+    "//flutter/impeller/typographer/backends/stb:typographer_stb_backend",
     "//flutter/testing:testing_lib",
   ]
 }

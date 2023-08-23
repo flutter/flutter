@@ -8,7 +8,7 @@
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/renderer/backend/gles/surface_gles.h"
 #include "impeller/renderer/renderer.h"
-#include "impeller/typographer/backends/skia/text_render_context_skia.h"
+#include "impeller/typographer/backends/skia/typographer_context_skia.h"
 
 namespace flutter {
 
@@ -30,7 +30,7 @@ GPUSurfaceGLImpeller::GPUSurfaceGLImpeller(
   }
 
   auto aiks_context = std::make_shared<impeller::AiksContext>(
-      context, impeller::TextRenderContextSkia::Make());
+      context, impeller::TypographerContextSkia::Make());
 
   if (!aiks_context->IsValid()) {
     return;

@@ -39,7 +39,7 @@ static Rect ToRect(const SkRect& rect) {
 
 static constexpr Scalar kScaleSize = 100000.0f;
 
-TextFrame TextFrameFromTextBlob(const sk_sp<SkTextBlob>& blob) {
+TextFrame MakeTextFrameFromTextBlobSkia(const sk_sp<SkTextBlob>& blob) {
   if (!blob) {
     return {};
   }

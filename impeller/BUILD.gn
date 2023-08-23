@@ -62,7 +62,7 @@ group("impeller") {
       "image:image_skia_backend",
       "renderer",
       "renderer/backend",
-      "typographer",
+      "typographer/backends/skia:typographer_skia_backend",
     ]
   }
 }
