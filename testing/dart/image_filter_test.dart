@@ -176,7 +176,7 @@ void main() {
   test('ImageFilter - blur', () async {
     final Paint paint = Paint()
       ..color = green
-      ..imageFilter = makeBlur(1.0, 1.0);
+      ..imageFilter = makeBlur(1.0, 1.0, TileMode.decal);
 
     final Uint32List bytes = await getBytesForPaint(paint);
     checkBytes(bytes, greenCenterBlurred, greenSideBlurred, greenCornerBlurred);
