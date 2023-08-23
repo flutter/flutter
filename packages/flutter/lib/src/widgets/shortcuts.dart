@@ -1198,7 +1198,9 @@ class ShortcutRegistryEntry {
 class ShortcutRegistry with ChangeNotifier {
   /// Creates an instance of [ShortcutRegistry].
   ShortcutRegistry() {
-    maybeDispatchObjectCreation();
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
   }
 
   bool _notificationScheduled = false;

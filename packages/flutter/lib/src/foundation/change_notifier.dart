@@ -267,7 +267,9 @@ mixin class ChangeNotifier implements Listenable {
   void addListener(VoidCallback listener) {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
 
-    maybeDispatchObjectCreation();
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
 
     if (_count == _listeners.length) {
       if (_count == 0) {
@@ -529,7 +531,9 @@ class _MergingListenable extends Listenable {
 class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
   /// Creates a [ChangeNotifier] that wraps this value.
   ValueNotifier(this._value) {
-    maybeDispatchObjectCreation();
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
   }
 
   /// The current value stored in this notifier.
