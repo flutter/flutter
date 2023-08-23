@@ -28,8 +28,6 @@ Future<void> testMain() async {
       // Run the unit test without emulating Flutter tester environment.
       ui_web.debugEmulateFlutterTesterEnvironment = false;
 
-      // TODO(yjbanov): https://github.com/flutter/flutter/issues/39159
-      domDocument.title = '';
       expect(domDocument.title, '');
       expect(getCssThemeColor(), isNull);
 
