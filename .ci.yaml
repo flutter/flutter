@@ -947,11 +947,12 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
+      # This makes use of UpsideDownCake, a preview version of android. Preview versions eventually
+      # get removed from the sdk manager, so it is hosted on CIPD to ensure integration testing
+      # doesn't flake when that happens.
+      # https://chrome-infra-packages.appspot.com/p/flutter/android/sdk/all/mac-arm64/+/version:UDCv1
       dependencies: >-
         [
-          # This is UpsideDownCake, a preview version of android that is hosted on CIPD. It is used
-          # to ensure integration testing doesn't flake when the sdkmanager removes this version.
-          # https://chrome-infra-packages.appspot.com/p/flutter/android/sdk/all/mac-arm64/+/version:UDCv1
           {"dependency": "android_sdk", "version": "version:UDCv1"},
           {"dependency": "chrome_and_driver", "version": "version:115.0"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
