@@ -13,44 +13,52 @@ enum FontStyle {
 }
 
 /// The thickness of the glyphs used to draw the text
-enum FontWeight {
-  /// Thin, the least thick
-  w100._(100),
+class FontWeight {
+  const FontWeight._(this.index, this.value);
 
-  /// Extra-light
-  w200._(200),
-
-  /// Light
-  w300._(300),
-
-  /// Normal / regular / plain
-  w400._(400),
-
-  /// Medium
-  w500._(500),
-
-  /// Semi-bold
-  w600._(600),
-
-  /// Bold
-  w700._(700),
-
-  /// Extra-bold
-  w800._(800),
-
-  /// Black, the most thick
-  w900._(900);
-
-  const FontWeight._(this.value);
+  /// The encoded integer value of this font weight.
+  final int index;
 
   /// The thickness value of this font weight.
   final int value;
+
+  /// Thin, the least thick
+  static const FontWeight w100 = FontWeight._(0, 100);
+
+  /// Extra-light
+  static const FontWeight w200 = FontWeight._(1, 200);
+
+  /// Light
+  static const FontWeight w300 = FontWeight._(2, 300);
+
+  /// Normal / regular / plain
+  static const FontWeight w400 = FontWeight._(3, 400);
+
+  /// Medium
+  static const FontWeight w500 = FontWeight._(4, 500);
+
+  /// Semi-bold
+  static const FontWeight w600 = FontWeight._(5, 600);
+
+  /// Bold
+  static const FontWeight w700 = FontWeight._(6, 700);
+
+  /// Extra-bold
+  static const FontWeight w800 = FontWeight._(7, 800);
+
+  /// Black, the most thick
+  static const FontWeight w900 = FontWeight._(8, 900);
 
   /// The default font weight.
   static const FontWeight normal = w400;
 
   /// A commonly used font weight that is heavier than normal.
   static const FontWeight bold = w700;
+
+  /// A list of all the font weights.
+  static const List<FontWeight> values = <FontWeight>[
+    w100, w200, w300, w400, w500, w600, w700, w800, w900
+  ];
 
   /// Linearly interpolates between two font weights.
   ///
@@ -78,6 +86,21 @@ enum FontWeight {
       return null;
     }
     return values[_lerpInt((a ?? normal).index, (b ?? normal).index, t).round().clamp(0, 8)];
+  }
+
+  @override
+  String toString() {
+    return const <int, String>{
+      0: 'FontWeight.w100',
+      1: 'FontWeight.w200',
+      2: 'FontWeight.w300',
+      3: 'FontWeight.w400',
+      4: 'FontWeight.w500',
+      5: 'FontWeight.w600',
+      6: 'FontWeight.w700',
+      7: 'FontWeight.w800',
+      8: 'FontWeight.w900',
+    }[index]!;
   }
 }
 
