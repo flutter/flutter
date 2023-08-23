@@ -116,7 +116,7 @@ linter:
     - library_prefixes
     - library_private_types_in_public_api
     # - lines_longer_than_80_chars # not required by flutter style
-    # - literal_only_boolean_expressions # too many false positives: https://github.com/dart-lang/linter/issues/453
+    - literal_only_boolean_expressions
     # - matching_super_parameters # blocked on https://github.com/dart-lang/language/issues/2509
     - missing_whitespace_between_adjacent_strings
     - no_adjacent_strings_in_list
