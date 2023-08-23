@@ -3607,6 +3607,9 @@ class InputDecoration {
   ///
   /// Only null valued properties from this [InputDecoration] are replaced
   /// by the corresponding values from [theme].
+  ///
+  /// [isCollapsed] defaults to false in [InputDecoration] and [InputDecorationTheme],
+  /// and will be set to true if any one parameter is provided.
   InputDecoration applyDefaults(InputDecorationTheme theme) {
     return copyWith(
       labelStyle: labelStyle ?? theme.labelStyle,
@@ -3620,7 +3623,7 @@ class InputDecoration {
       floatingLabelAlignment: floatingLabelAlignment ?? theme.floatingLabelAlignment,
       isDense: isDense ?? theme.isDense,
       contentPadding: contentPadding ?? theme.contentPadding,
-      isCollapsed: isCollapsed,
+      isCollapsed: theme.isCollapsed || isCollapsed,
       iconColor: iconColor ?? theme.iconColor,
       prefixStyle: prefixStyle ?? theme.prefixStyle,
       prefixIconColor: prefixIconColor ?? theme.prefixIconColor,
