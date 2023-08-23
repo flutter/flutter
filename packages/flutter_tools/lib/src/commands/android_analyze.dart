@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../convert.dart';
@@ -44,11 +43,9 @@ class AndroidAnalyze {
 
   Future<void> analyze() async {
     final FlutterProject project = FlutterProject.fromDirectory(fileSystem.directory(userPath));
-    final String result;
     switch (option) {
       case AndroidAnalyzeOption.listBuildVariant:
-        result = jsonEncode(await project.android.getBuildVariants());
-        logger.printStatus('$result');
+        logger.printStatus(jsonEncode(await project.android.getBuildVariants()));
       case AndroidAnalyzeOption.outputAppLinkSettings:
         assert(buildVariant != null);
         await project.android.outputsAppLinkSettings(variant: buildVariant!);
