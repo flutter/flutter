@@ -1,16 +1,18 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 // This example demonstrates using InlineLinkedText to make URLs open on tap.
 
-// TODO(justinmc): Test all examples.
-
 void main() {
-  runApp(const MyApp());
+  runApp(const InlineLinkedTextApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({
+class InlineLinkedTextApp extends StatelessWidget {
+  const InlineLinkedTextApp({
     super.key,
   });
 
@@ -21,13 +23,13 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Link Demo'),
+      home: const MyHomePage(title: 'Flutter Link Demo'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget{
-  MyHomePage({
+  const MyHomePage({
     super.key,
     required this.title,
   });
