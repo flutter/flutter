@@ -285,6 +285,26 @@ void testFontVariation() {
 
     expect(wideWidth, greaterThan(baseWidth));
   });
+
+  test('FontVariation constructors', () async {
+    expect(const FontVariation.weight(123.0).axis, 'wght');
+    expect(const FontVariation.weight(123.0).value, 123.0);
+    expect(const FontVariation.width(123.0).axis, 'wdth');
+    expect(const FontVariation.width(123.0).value, 123.0);
+    expect(const FontVariation.slant(45.0).axis, 'slnt');
+    expect(const FontVariation.slant(45.0).value, 45.0);
+    expect(const FontVariation.opticalSize(67.0).axis, 'opsz');
+    expect(const FontVariation.opticalSize(67.0).value, 67.0);
+    expect(const FontVariation.italic(0.8).axis, 'ital');
+    expect(const FontVariation.italic(0.8).value, 0.8);
+  });
+
+  test('FontVariation.lerp', () async {
+    expect(FontVariation.lerp(const FontVariation.weight(100.0), const FontVariation.weight(300.0), 0.5), const FontVariation.weight(200.0));
+    expect(FontVariation.lerp(const FontVariation.slant(0.0), const FontVariation.slant(-80.0), 0.25), const FontVariation.slant(-20.0));
+    expect(FontVariation.lerp(const FontVariation.width(90.0), const FontVariation.italic(0.2), 0.1), const FontVariation.width(90.0));
+    expect(FontVariation.lerp(const FontVariation.width(90.0), const FontVariation.italic(0.2), 0.9), const FontVariation.italic(0.2));
+  });
 }
 
 void testGetWordBoundary() {
