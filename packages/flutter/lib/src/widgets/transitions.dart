@@ -237,7 +237,7 @@ typedef TransformCallback = Matrix4 Function(double animationValue);
 /// is called every time the [animation] changes its value.
 ///
 /// {@tool dartpad}
-/// The following code implements a [MatrixTransition] with a rotation around
+/// The following example implements a [MatrixTransition] with a rotation around
 /// the Y axis, with a 3D perspective skew.
 ///
 /// ** See code in examples/api/lib/widgets/transitions/matrix_transition.0.dart **
