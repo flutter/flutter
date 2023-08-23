@@ -17,6 +17,8 @@ the following locations:
 * [Installation](https://flutter.dev/docs/get-started/install)
 * [Codelabs](https://flutter.dev/docs/codelabs)
 * [Contributing to Flutter](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md)
+* [Platform documentation for iOS and macOS](https://api.flutter.dev/objcdoc/index.html)
+* [Platform documentation for Android](https://api.flutter.dev/javadoc/index.html)
 
 ## Offline Documentation
 
