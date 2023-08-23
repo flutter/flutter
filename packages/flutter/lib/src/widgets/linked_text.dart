@@ -127,8 +127,8 @@ class LinkedText extends StatefulWidget {
          ),
        ];
 
-  /// Create an instance of [LinkedText] where text matched by the given
-  /// [RegExp] is made interactive.
+  /// Create an instance of [LinkedText] where the given [textLinkers] are
+  /// applied.
   ///
   /// {@template flutter.widgets.LinkedText.textLinkers}
   /// Useful for independently matching different types of strings with
@@ -176,9 +176,6 @@ class LinkedText extends StatefulWidget {
   late final List<TextLinker> textLinkers;
 
   /// The [TextStyle] to apply to the output [InlineSpan].
-  ///
-  /// If not provided, the [DefaultTextStyle] at this point in the tree will be
-  /// used.
   final TextStyle? style;
 
   @override
