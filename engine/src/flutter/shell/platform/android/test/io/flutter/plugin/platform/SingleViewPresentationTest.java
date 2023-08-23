@@ -3,7 +3,7 @@ package io.flutter.plugin.platform;
 import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 import static android.os.Build.VERSION_CODES.P;
 import static android.os.Build.VERSION_CODES.R;
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -13,10 +13,10 @@ import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.view.Display;
 import android.view.inputmethod.InputMethodManager;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @Config(manifest = Config.NONE)
@@ -38,7 +38,7 @@ public class SingleViewPresentationTest {
     // system service instead of the spy's and fails.
 
     // Create an SVP under test with a Context that returns a local IMM mock.
-    Context context = spy(RuntimeEnvironment.application);
+    Context context = spy(ApplicationProvider.getApplicationContext());
     InputMethodManager expected = mock(InputMethodManager.class);
     when(context.getSystemService(Context.INPUT_METHOD_SERVICE)).thenReturn(expected);
     DisplayManager dm = (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
@@ -60,7 +60,7 @@ public class SingleViewPresentationTest {
     // The IMM should also persist across display contexts created from the base context.
 
     // Create an SVP under test with a Context that returns a local IMM mock.
-    Context context = spy(RuntimeEnvironment.application);
+    Context context = spy(ApplicationProvider.getApplicationContext());
     InputMethodManager expected = mock(InputMethodManager.class);
     when(context.getSystemService(Context.INPUT_METHOD_SERVICE)).thenReturn(expected);
     Display display =

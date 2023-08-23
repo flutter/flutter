@@ -23,6 +23,8 @@ public class SettingsChannelTest {
   @Test
   @TargetApi(33)
   @Config(sdk = 33)
+  @SuppressWarnings("deprecation")
+  // DartExecutor.send is deprecated.
   public void setDisplayMetricsDoesNothingOnAPILevel33() {
     final DartExecutor executor = mock(DartExecutor.class);
     executor.onAttachedToJNI();

@@ -15,7 +15,6 @@ import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding;
 import io.flutter.embedding.engine.plugins.PluginRegistry;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
-import io.flutter.plugin.common.PluginRegistry.Registrar;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,11 +42,15 @@ public class ShimPluginRegistryTest {
     when(mockActivityPluginBinding.getActivity()).thenReturn(mockActivity);
   }
 
+  @SuppressWarnings("deprecation")
+  // Test is intentionally verifying deprecated behavior.
   @Test
   public void itSuppliesOldAPIsViaTheNewFlutterPluginBinding() {
     ShimPluginRegistry registryUnderTest = new ShimPluginRegistry(mockFlutterEngine);
+    // Fully qualifed name because imports can not have deprecation supression.
     // This is the consumption side of the old plugins.
-    Registrar registrarUnderTest = registryUnderTest.registrarFor("test");
+    io.flutter.plugin.common.PluginRegistry.Registrar registrarUnderTest =
+        registryUnderTest.registrarFor("test");
 
     ArgumentCaptor<FlutterPlugin> shimAggregateCaptor =
         ArgumentCaptor.forClass(FlutterPlugin.class);
@@ -65,11 +68,16 @@ public class ShimPluginRegistryTest {
     verify(mockFlutterPluginBinding).getApplicationContext();
   }
 
+  @SuppressWarnings("deprecation")
+  // Test is intentionally verifying deprecated behavior.
   @Test
   public void itSuppliesMultipleOldPlugins() {
     ShimPluginRegistry registryUnderTest = new ShimPluginRegistry(mockFlutterEngine);
-    Registrar registrarUnderTest1 = registryUnderTest.registrarFor("test1");
-    Registrar registrarUnderTest2 = registryUnderTest.registrarFor("test2");
+    // Fully qualifed name because imports can not have deprecation supression.
+    io.flutter.plugin.common.PluginRegistry.Registrar registrarUnderTest1 =
+        registryUnderTest.registrarFor("test1");
+    io.flutter.plugin.common.PluginRegistry.Registrar registrarUnderTest2 =
+        registryUnderTest.registrarFor("test2");
 
     ArgumentCaptor<FlutterPlugin> shimAggregateCaptor =
         ArgumentCaptor.forClass(FlutterPlugin.class);
@@ -86,10 +94,13 @@ public class ShimPluginRegistryTest {
     verify(mockFlutterPluginBinding, times(2)).getApplicationContext();
   }
 
+  @SuppressWarnings("deprecation")
+  // Test is intentionally verifying deprecated behavior.
   @Test
   public void itCanOnlySupplyActivityBindingWhenUpstreamActivityIsAttached() {
     ShimPluginRegistry registryUnderTest = new ShimPluginRegistry(mockFlutterEngine);
-    Registrar registrarUnderTest = registryUnderTest.registrarFor("test");
+    io.flutter.plugin.common.PluginRegistry.Registrar registrarUnderTest =
+        registryUnderTest.registrarFor("test");
 
     ArgumentCaptor<FlutterPlugin> shimAggregateCaptor =
         ArgumentCaptor.forClass(FlutterPlugin.class);
