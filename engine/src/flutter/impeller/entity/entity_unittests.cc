@@ -50,7 +50,7 @@
 #include "impeller/runtime_stage/runtime_stage.h"
 #include "impeller/tessellator/tessellator.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
-#include "impeller/typographer/backends/skia/text_render_context_skia.h"
+#include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "include/core/SkBlendMode.h"
 #include "third_party/imgui/imgui.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
@@ -2174,9 +2174,9 @@ TEST_P(EntityTest, InheritOpacityTest) {
   SkFont font;
   font.setSize(30);
   auto blob = SkTextBlob::MakeFromString("A", font);
-  auto frame = TextFrameFromTextBlob(blob);
+  auto frame = MakeTextFrameFromTextBlobSkia(blob);
   auto lazy_glyph_atlas =
-      std::make_shared<LazyGlyphAtlas>(TextRenderContextSkia::Make());
+      std::make_shared<LazyGlyphAtlas>(TypographerContextSkia::Make());
   lazy_glyph_atlas->AddTextFrame(frame, 1.0f);
 
   auto text_contents = std::make_shared<TextContents>();

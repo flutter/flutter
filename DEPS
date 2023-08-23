@@ -214,6 +214,7 @@ vars = {
   "upstream_sqlite": "https://github.com/sqlite/sqlite.git",
   "upstream_sse": "https://github.com/dart-lang/sse.git",
   "upstream_stack_trace": "https://github.com/dart-lang/stack_trace.git",
+  "upstream_stb": "https://github.com/nothings/stb.git",
   "upstream_stream_channel": "https://github.com/dart-lang/stream_channel.git",
   "upstream_string_scanner": "https://github.com/dart-lang/string_scanner.git",
   "upstream_SwiftShader": "https://swiftshader.googlesource.com/SwiftShader.git",
@@ -257,7 +258,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'a067408d923ccf80742571bb7a71705499f5779e',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'f91786b0f7ed84f4d55fef7707b68bea180281f5',
 
    # Fuchsia compatibility
    #
@@ -680,6 +681,9 @@ deps = {
 
   'src/third_party/json':
   Var('github_git') + '/nlohmann/json.git' + '@' + '17d9eacd248f58b73f4d1be518ef649fe2295642',
+
+  'src/third_party/stb':
+  Var('github_git') + '/nothings/stb.git' + '@' + '5736b15f7ea0ffb08dd38af21067c314d6a3aae9',
 
   'src/third_party/gradle': {
     'packages': [

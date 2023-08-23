@@ -11,7 +11,7 @@
 #include "flutter/impeller/playground/playground.h"
 #include "flutter/impeller/renderer/render_target.h"
 #include "flutter/testing/testing.h"
-#include "impeller/typographer/text_render_context.h"
+#include "impeller/typographer/typographer_context.h"
 
 #if FML_OS_MACOSX
 #include "flutter/fml/platform/darwin/scoped_nsautorelease_pool.h"
@@ -35,8 +35,8 @@ class GoldenPlaygroundTest
 
   PlaygroundBackend GetBackend() const;
 
-  void SetTextRenderContext(
-      std::shared_ptr<TextRenderContext> text_render_context);
+  void SetTypographerContext(
+      std::shared_ptr<TypographerContext> typographer_context);
 
   bool OpenPlaygroundHere(const Picture& picture);
 
@@ -64,7 +64,7 @@ class GoldenPlaygroundTest
   fml::ScopedNSAutoreleasePool autorelease_pool_;
 #endif
 
-  std::shared_ptr<TextRenderContext> text_render_context_;
+  std::shared_ptr<TypographerContext> typographer_context_;
 
   struct GoldenPlaygroundTestImpl;
   // This is only a shared_ptr so it can work with a forward declared type.

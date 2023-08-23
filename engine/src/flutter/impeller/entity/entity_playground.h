@@ -10,7 +10,7 @@
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_pass.h"
-#include "impeller/typographer/text_render_context.h"
+#include "impeller/typographer/typographer_context.h"
 
 namespace impeller {
 
@@ -23,8 +23,8 @@ class EntityPlayground : public PlaygroundTest {
 
   ~EntityPlayground();
 
-  void SetTextRenderContext(
-      std::shared_ptr<TextRenderContext> text_render_context);
+  void SetTypographerContext(
+      std::shared_ptr<TypographerContext> typographer_context);
 
   bool OpenPlaygroundHere(Entity entity);
 
@@ -33,7 +33,7 @@ class EntityPlayground : public PlaygroundTest {
   bool OpenPlaygroundHere(EntityPlaygroundCallback callback);
 
  private:
-  std::shared_ptr<TextRenderContext> text_render_context_;
+  std::shared_ptr<TypographerContext> typographer_context_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EntityPlayground);
 };

@@ -16,8 +16,6 @@
 #include "impeller/typographer/font_glyph_pair.h"
 #include "impeller/typographer/rectangle_packer.h"
 
-class SkBitmap;
-
 namespace impeller {
 
 //------------------------------------------------------------------------------
@@ -130,9 +128,7 @@ class GlyphAtlas {
 ///
 class GlyphAtlasContext {
  public:
-  GlyphAtlasContext();
-
-  ~GlyphAtlasContext();
+  virtual ~GlyphAtlasContext();
 
   //----------------------------------------------------------------------------
   /// @brief      Retrieve the current glyph atlas.
@@ -143,10 +139,6 @@ class GlyphAtlasContext {
   const ISize& GetAtlasSize() const;
 
   //----------------------------------------------------------------------------
-  /// @brief      Retrieve the previous (if any) SkBitmap instance.
-  std::shared_ptr<SkBitmap> GetBitmap() const;
-
-  //----------------------------------------------------------------------------
   /// @brief      Retrieve the previous (if any) rect packer.
   std::shared_ptr<RectanglePacker> GetRectPacker() const;
 
@@ -154,14 +146,14 @@ class GlyphAtlasContext {
   /// @brief      Update the context with a newly constructed glyph atlas.
   void UpdateGlyphAtlas(std::shared_ptr<GlyphAtlas> atlas, ISize size);
 
-  void UpdateBitmap(std::shared_ptr<SkBitmap> bitmap);
-
   void UpdateRectPacker(std::shared_ptr<RectanglePacker> rect_packer);
+
+ protected:
+  GlyphAtlasContext();
 
  private:
   std::shared_ptr<GlyphAtlas> atlas_;
   ISize atlas_size_;
-  std::shared_ptr<SkBitmap> bitmap_;
   std::shared_ptr<RectanglePacker> rect_packer_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(GlyphAtlasContext);

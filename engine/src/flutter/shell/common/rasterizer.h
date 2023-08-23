@@ -27,7 +27,7 @@
 // GN is having trouble understanding how this works in the Fuchsia builds.
 #include "impeller/aiks/aiks_context.h"  // nogncheck
 #include "impeller/renderer/context.h"   // nogncheck
-#include "impeller/typographer/backends/skia/text_render_context_skia.h"  // nogncheck
+#include "impeller/typographer/backends/skia/typographer_context_skia.h"  // nogncheck
 #endif  // IMPELLER_SUPPORTS_RENDERING
 #include "flutter/lib/ui/snapshot_delegate.h"
 #include "flutter/shell/common/pipeline.h"
@@ -543,7 +543,7 @@ class Rasterizer final : public SnapshotDelegate,
     }
     if (auto context = impeller_context_.lock()) {
       return std::make_shared<impeller::AiksContext>(
-          context, impeller::TextRenderContextSkia::Make());
+          context, impeller::TypographerContextSkia::Make());
     }
 #endif
     return nullptr;

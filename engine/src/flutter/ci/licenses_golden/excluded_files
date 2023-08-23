@@ -2891,6 +2891,7 @@
 ../../../third_party/sqlite/Makefile
 ../../../third_party/sqlite/README.md
 ../../../third_party/sqlite/VERSION
+../../../third_party/stb
 ../../../third_party/swiftshader
 ../../../third_party/tinygltf
 ../../../third_party/vulkan-deps/.git

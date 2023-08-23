@@ -5,19 +5,19 @@
 #include "impeller/entity/entity_playground.h"
 
 #include "impeller/entity/contents/content_context.h"
-#include "impeller/typographer/backends/skia/text_render_context_skia.h"
+#include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "third_party/imgui/imgui.h"
 
 namespace impeller {
 
 EntityPlayground::EntityPlayground()
-    : text_render_context_(TextRenderContextSkia::Make()) {}
+    : typographer_context_(TypographerContextSkia::Make()) {}
 
 EntityPlayground::~EntityPlayground() = default;
 
-void EntityPlayground::SetTextRenderContext(
-    std::shared_ptr<TextRenderContext> text_render_context) {
-  text_render_context_ = std::move(text_render_context);
+void EntityPlayground::SetTypographerContext(
+    std::shared_ptr<TypographerContext> typographer_context) {
+  typographer_context_ = std::move(typographer_context);
 }
 
 bool EntityPlayground::OpenPlaygroundHere(EntityPass& entity_pass) {
@@ -25,7 +25,7 @@ bool EntityPlayground::OpenPlaygroundHere(EntityPass& entity_pass) {
     return true;
   }
 
-  ContentContext content_context(GetContext(), text_render_context_);
+  ContentContext content_context(GetContext(), typographer_context_);
   if (!content_context.IsValid()) {
     return false;
   }
@@ -41,7 +41,7 @@ bool EntityPlayground::OpenPlaygroundHere(Entity entity) {
     return true;
   }
 
-  ContentContext content_context(GetContext(), text_render_context_);
+  ContentContext content_context(GetContext(), typographer_context_);
   if (!content_context.IsValid()) {
     return false;
   }
@@ -56,7 +56,7 @@ bool EntityPlayground::OpenPlaygroundHere(EntityPlaygroundCallback callback) {
     return true;
   }
 
-  ContentContext content_context(GetContext(), text_render_context_);
+  ContentContext content_context(GetContext(), typographer_context_);
   if (!content_context.IsValid()) {
     return false;
   }

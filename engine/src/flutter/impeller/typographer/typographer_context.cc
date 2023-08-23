@@ -2,19 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/typographer/text_render_context.h"
+#include "impeller/typographer/typographer_context.h"
 
 #include <utility>
 
 namespace impeller {
 
-TextRenderContext::TextRenderContext() {
+TypographerContext::TypographerContext() {
   is_valid_ = true;
 }
 
-TextRenderContext::~TextRenderContext() = default;
+TypographerContext::~TypographerContext() = default;
 
-bool TextRenderContext::IsValid() const {
+bool TypographerContext::IsValid() const {
   return is_valid_;
 }
 
