@@ -71,7 +71,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void dispose() {
-    _disposeRecognizers(_textKey.currentWidget! as Text);
+    final Text? text = _textKey.currentWidget as Text?;
+    if (text != null) {
+      _disposeRecognizers(text);
+    }
     super.dispose();
   }
 
