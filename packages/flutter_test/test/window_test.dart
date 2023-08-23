@@ -92,7 +92,7 @@ void main() {
         return WidgetsBinding.instance.window.textScaleFactor;
       },
       propertyFaker: (TestWidgetsFlutterBinding binding, double fakeValue) {
-        binding.window.textScaleFactorTestValue = fakeValue;
+        binding.platformDispatcher.textScaleFactorTestValue = fakeValue;
       },
     );
   });
