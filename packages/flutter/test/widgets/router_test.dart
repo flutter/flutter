@@ -1629,18 +1629,15 @@ class CustomRouteInformationParser extends RouteInformationParser<RouteInformati
 }
 
 class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeNotifier {
-  /// Creates an instance of [MultiSelectableSelectionContainerDelegate].
-  MultiSelectableSelectionContainerDelegate() {
-    if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
-    }
-  }
-
   SimpleRouterDelegate({
     this.builder,
     this.onPopRoute,
     this.reportConfiguration = false,
-  });
+  }) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+  }
 
   RouteInformation? get routeInformation => _routeInformation;
   RouteInformation? _routeInformation;
@@ -1722,16 +1719,13 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
 }
 
 class SimpleRouteInformationProvider extends RouteInformationProvider with ChangeNotifier {
-  /// Creates an instance of [MultiSelectableSelectionContainerDelegate].
-  MultiSelectableSelectionContainerDelegate() {
+  SimpleRouteInformationProvider({
+    this.onRouterReport,
+  }) {
     if (kFlutterMemoryAllocationsEnabled) {
       maybeDispatchObjectCreation();
     }
   }
-
-  SimpleRouteInformationProvider({
-    this.onRouterReport,
-  });
 
   RouterReportRouterInformation? onRouterReport;
 

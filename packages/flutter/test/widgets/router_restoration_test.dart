@@ -90,8 +90,7 @@ class _TestRouteInformationParser extends RouteInformationParser<String> {
 }
 
 class _TestRouterDelegate extends RouterDelegate<String> with ChangeNotifier {
-  /// Creates an instance of [MultiSelectableSelectionContainerDelegate].
-  MultiSelectableSelectionContainerDelegate() {
+  _TestRouterDelegate() {
     if (kFlutterMemoryAllocationsEnabled) {
       maybeDispatchObjectCreation();
     }
