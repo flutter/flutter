@@ -11,6 +11,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 
 void main() {
@@ -19,7 +20,25 @@ void main() {
    * because [matchesGoldenFile] does not use Skia Gold in its native package.
    */
 
-  testWidgets('correctly records frames using collate', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('recording disposes images',
+  (WidgetTester tester) async {
+    final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
+
+    await tester.pumpFrames(
+      builder.record(
+        const _DecuplePixels(Duration(seconds: 1)),
+      ),
+      const Duration(milliseconds: 200),
+      const Duration(milliseconds: 100),
+    );
+  },
+    skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
+    // TODO(polina-c): remove after fixing https://github.com/flutter/flutter/issues/133071
+    leakTrackingTestConfig: const LeakTrackingTestConfig(allowAllNotDisposed: true),
+  );
+
+  testWidgetsWithLeakTracking('correctly records frames using collate',
+  (WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
 
     await tester.pumpFrames(
@@ -53,10 +72,15 @@ void main() {
       image,
       matchesGoldenFile('test.animation_sheet_builder.collate.png'),
     );
-    image.dispose();
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
-  testWidgets('use allLayers to record out-of-subtree contents', (WidgetTester tester) async {
+    image.dispose();
+  },
+    skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
+    // TODO(polina-c): remove after fixing https://github.com/flutter/flutter/issues/133071
+    leakTrackingTestConfig: const LeakTrackingTestConfig(allowAllNotDisposed: true),
+  ); // https://github.com/flutter/flutter/issues/56001
+
+  testWidgetsWithLeakTracking('use allLayers to record out-of-subtree contents', (WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(
       frameSize: const Size(8, 2),
       allLayers: true,
@@ -88,7 +112,11 @@ void main() {
       matchesGoldenFile('test.animation_sheet_builder.out_of_tree.png'),
     );
     image.dispose();
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
+  },
+    skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
+    // TODO(polina-c): remove after fixing https://github.com/flutter/flutter/issues/133071
+    leakTrackingTestConfig: const LeakTrackingTestConfig(allowAllNotDisposed: true),
+  );
 }
 
 // An animation of a yellow pixel moving from left to right, in a container of
