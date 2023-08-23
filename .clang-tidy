@@ -1,30 +1,27 @@
-# These checks are run by the CI presubmit script, but are not run by the
-# githooks presubmit script. The githooks presubmit script runs a subset of
-# these checks.
-#
-# See "./tools/clang_tidy/lib/src/hooks_exclude.dart".
-Checks: >-
-  bugprone-use-after-move,
-  bugprone-unchecked-optional-access,
-  clang-analyzer-*,
-  clang-diagnostic-*,
-  darwin-*,
-  google-*,
-  modernize-use-default-member-init,
-  objc-*,
-  -objc-nsinvocation-argument-lifetime,
-  readability-identifier-naming,
-  -google-build-using-namespace,
-  -google-default-arguments,
-  -google-objc-global-variable-declaration,
-  -google-objc-avoid-throwing-exception,
-  -google-readability-casting,
-  -clang-analyzer-nullability.NullPassedToNonnull,
-  -clang-analyzer-nullability.NullablePassedToNonnull,
-  -clang-analyzer-nullability.NullReturnedFromNonnull,
-  -clang-analyzer-nullability.NullableReturnedFromNonnull,
-  performance-move-const-arg,
-  performance-unnecessary-value-param
+# Prefix check with "-" to ignore.
+# Note: Some of the checks here are used as errors selectively, see
+# //ci/lint.sh
+Checks: "bugprone-use-after-move,\
+bugprone-unchecked-optional-access,\
+clang-analyzer-*,\
+clang-diagnostic-*,\
+darwin-*,\
+google-*,\
+modernize-use-default-member-init,\
+objc-*,\
+-objc-nsinvocation-argument-lifetime,\
+readability-identifier-naming,\
+-google-build-using-namespace,\
+-google-default-arguments,\
+-google-objc-global-variable-declaration,\
+-google-objc-avoid-throwing-exception,\
+-google-readability-casting,\
+-clang-analyzer-nullability.NullPassedToNonnull,\
+-clang-analyzer-nullability.NullablePassedToNonnull,\
+-clang-analyzer-nullability.NullReturnedFromNonnull,\
+-clang-analyzer-nullability.NullableReturnedFromNonnull,\
+performance-move-const-arg,\
+performance-unnecessary-value-param"
 
 CheckOptions:
   - key:    modernize-use-default-member-init.UseAssignment

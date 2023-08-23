@@ -23,7 +23,7 @@ def Main(argv):
     FLUTTER_DIR,
   ]
 
-  if ENABLE_CLANG_TIDY is not False:
+  if ENABLE_CLANG_TIDY is not None:
     githook_args += [
       '--enable-clang-tidy',
     ]
