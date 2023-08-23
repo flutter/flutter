@@ -6,6 +6,7 @@ import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
 import 'package:clang_tidy/clang_tidy.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 /// The command that implements the pre-push githook
@@ -24,8 +25,9 @@ class PrePushCommand extends Command<bool> {
     final String flutterRoot = globalResults!['flutter']! as String;
 
     if (!enableClangTidy) {
-      print('The clang-tidy check is disabled. To enable set the environment '
-            'variable PRE_PUSH_CLANG_TIDY to any value.');
+      print(
+        'The clang-tidy check was explicitly disabled. To enable clear '
+        'the environment variable PRE_PUSH_CLANG_TIDY or set it to true.');
     }
 
     final List<bool> checkResults = <bool>[
@@ -38,36 +40,40 @@ class PrePushCommand extends Command<bool> {
     return !checkResults.contains(false);
   }
 
+  /// Different `host_xxx` targets are built depending on the host platform.
+  @visibleForTesting
+  static const List<String> supportedHostTargets = <String>[
+    'host_debug_unopt_arm64',
+    'host_debug_arm64',
+    'host_debug_unopt',
+    'host_debug',
+  ];
+
   Future<bool> _runClangTidy(String flutterRoot, bool verbose) async {
     io.stdout.writeln('Starting clang-tidy checks.');
     final Stopwatch sw = Stopwatch()..start();
-    // First ensure that out/host_debug/compile_commands.json exists by running
-    // //flutter/tools/gn.
-    io.File compileCommands = io.File(path.join(
-      flutterRoot,
-      '..',
-      'out',
-      'host_debug',
-      'compile_commands.json',
-    ));
-    if (!compileCommands.existsSync()) {
-      compileCommands = io.File(path.join(
-        flutterRoot,
-        '..',
-        'out',
-        'host_debug_unopt',
-        'compile_commands.json',
-      ));
-      if (!compileCommands.existsSync()) {
-        io.stderr.writeln('clang-tidy requires a fully built host_debug or '
-                          'host_debug_unopt build directory');
-        return false;
-      }
+
+    // First ensure that out/host_{{flags}}/compile_commands.json exists by running
+    // //flutter/tools/gn. See _checkForHostTargets above for supported targets.
+    final io.File? compileCommands = findMostRelevantCompileCommands(flutterRoot, verbose: verbose);
+    if (compileCommands == null) {
+      io.stderr.writeln(
+        'clang-tidy requires a fully built host directory, such as: '
+        '${supportedHostTargets.join(', ')}.'
+      );
+      return false;
     }
+
+    // Because we are using a heuristic to pick a host build directory, we
+    // should print some debug information explaining which directory we picked.
+    io.stdout.writeln('Using compile_commands.json from ${compileCommands.parent.path}');
+
     final StringBuffer outBuffer = StringBuffer();
     final StringBuffer errBuffer = StringBuffer();
     final ClangTidy clangTidy = ClangTidy(
       buildCommandsPath: compileCommands,
+      configPath: io.File(path.join(flutterRoot, '.clang-tidy-for-githooks')),
+      excludeSlowChecks: true,
       outSink: outBuffer,
       errSink: errBuffer,
     );
@@ -79,6 +85,46 @@ class PrePushCommand extends Command<bool> {
       return false;
     }
     return true;
+  }
+
+  /// Returns the most recent `compile_commands.json` for the given root.
+  ///
+  /// For example, if the following builds exist with the following timestamps:
+  ///
+  /// ```txt
+  /// <filename>                                       <last modified>
+  /// out/host_debug_unopt_arm64/compile_commands.json 1/1/2023
+  /// out/host_debug_arm64/compile_commands.json       1/2/2023
+  /// out/host_debug_unopt/compile_commands.json       1/3/2023
+  /// out/host_debug/compile_commands.json             1/4/2023
+  /// ```
+  ///
+  /// ... then the returned file will be `out/host_debug/compile_commands.json`.
+  @visibleForTesting
+  static io.File? findMostRelevantCompileCommands(String flutterRoot, {required bool verbose}) {
+    final String engineRoot = path.normalize(path.join(flutterRoot, '../'));
+
+    // Create a list of all the compile_commands.json files that exist,
+    // including their last modified time.
+    final List<(io.File, DateTime)> compileCommandsFiles = supportedHostTargets
+      .map((String target) => io.File(path.join(engineRoot, 'out', target, 'compile_commands.json')))
+      .where((io.File file) => file.existsSync())
+      .map((io.File file) => (file, file.lastModifiedSync()))
+      .toList();
+
+    // Sort the list by last modified time, most recent first.
+    compileCommandsFiles.sort(((io.File, DateTime) a, (io.File, DateTime) b) => b.$2.compareTo(a.$2));
+
+    // If there are more than one entry, and we're in verbose mode, explain.
+    if (verbose && compileCommandsFiles.length > 1) {
+      io.stdout.writeln('Found multiple compile_commands.json files. Using the most recent one.');
+      for (final (io.File file, DateTime lastModified) in compileCommandsFiles) {
+        io.stdout.writeln('  ${file.path} (last modified: $lastModified)');
+      }
+    }
+
+    // Return the first file in the list, or null if the list is empty.
+    return compileCommandsFiles.firstOrNull?.$1;
   }
 
   Future<bool> _runFormatter(String flutterRoot, bool verbose) async {
