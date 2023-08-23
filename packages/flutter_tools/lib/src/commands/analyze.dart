@@ -16,6 +16,7 @@ import '../runner/flutter_command.dart';
 import 'analyze_base.dart';
 import 'analyze_continuously.dart';
 import 'analyze_once.dart';
+import 'android_analyze.dart';
 import 'validate_project.dart';
 
 class AnalyzeCommand extends FlutterCommand {
@@ -99,6 +100,37 @@ class AnalyzeCommand extends FlutterCommand {
     argParser.addFlag('fatal-warnings',
         help: 'Treat warning level issues as fatal.',
         defaultsTo: true);
+
+    argParser.addFlag('android',
+      negatable: false,
+      help: 'Analyze Android sub-project. Used by internal tools only.',
+      hide: !verboseHelp,
+    );
+
+    if (verboseHelp) {
+      argParser.addSeparator('Usage: flutter analyze --android [arguments]');
+    }
+
+    argParser.addFlag('list-build-variants',
+      negatable: false,
+      help: 'Print out a list of available build variants for the '
+          'Android sub-project.',
+      hide: !verboseHelp,
+    );
+
+    argParser.addFlag('output-app-link-settings',
+      negatable: false,
+      help: 'Output a JSON with Android app link settings into a file. '
+          'The "--build-variant" must also be set.',
+      hide: !verboseHelp,
+    );
+
+    argParser.addOption('build-variant',
+      help: 'Sets the Android build variant to be analyzed.',
+      valueHelp: 'use "flutter analyze --android --list-build-variants" to get '
+          'all available build variants',
+      hide: !verboseHelp,
+    );
   }
 
   /// The working directory for testing analysis using dartanalyzer.
@@ -142,12 +174,51 @@ class AnalyzeCommand extends FlutterCommand {
       return false;
     }
 
+    // Don't run pub if asking for android analysis.
+    if (boolArg('android')) {
+      return false;
+    }
+
     return super.shouldRunPub;
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (boolArg('suggestions')) {
+    if (boolArg('android')) {
+      final AndroidAnalyzeOption option;
+      final String? buildVariant;
+      if (argResults!['list-build-variants'] as bool && argResults!['output-app-link-settings'] as bool) {
+        throwToolExit('Only one of "--list-build-variants" or "--output-app-link-settings" can be provided');
+      }
+      if (argResults!['list-build-variants'] as bool) {
+        option = AndroidAnalyzeOption.listBuildVariant;
+        buildVariant = null;
+      } else if (argResults!['output-app-link-settings'] as bool) {
+        option = AndroidAnalyzeOption.outputAppLinkSettings;
+        buildVariant = argResults!['build-variant'] as String?;
+        if (buildVariant == null) {
+          throwToolExit('"--build-variant" must be provided');
+        }
+      } else {
+        throwToolExit('No argument is provided to analyze. Use -h to see available commands.');
+      }
+      final Set<String> items = findDirectories(argResults!, _fileSystem);
+      final String directoryPath;
+      if (items.isEmpty) { // user did not specify any path
+        directoryPath = _fileSystem.currentDirectory.path;
+      } else if (items.length > 1) { // if the user sends more than one path
+        throwToolExit('The Android analyze can process only one directory path');
+      } else {
+        directoryPath = items.first;
+      }
+      await AndroidAnalyze(
+        fileSystem: _fileSystem,
+        option: option,
+        userPath: directoryPath,
+        buildVariant: buildVariant,
+        logger: _logger,
+      ).analyze();
+    } else if (boolArg('suggestions')) {
       final String directoryPath;
       if (boolArg('watch')) {
         throwToolExit('flag --watch is not compatible with --suggestions');
