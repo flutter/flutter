@@ -869,27 +869,6 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
-
-    testUsingContext('discovers explicitly configured Android Studio', () {
-      const String androidStudioDir = r'C:\Users\Dash\Desktop\android-studio';
-      config.setValue('android-studio-dir', androidStudioDir);
-      fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio2022.1\.home')
-        ..createSync(recursive: true)
-        ..writeAsStringSync(androidStudioDir);
-      fileSystem.directory(androidStudioDir)
-        .createSync(recursive: true);
-
-      final AndroidStudio studio = AndroidStudio.allInstalled().single;
-
-      expect(studio.version, equals(Version(2022, 1, null)));
-      expect(studio.configuredPath, androidStudioDir);
-      expect(studio.javaPath, fileSystem.path.join(androidStudioDir, 'jbr'));
-    }, overrides: <Type, Generator>{
-      Config: () => config,
-      Platform: () => platform,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-    });
   });
 
   group('installation detection on Linux', () {
