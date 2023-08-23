@@ -18,18 +18,19 @@ class Context : public RefCountedDartWrappable<Context> {
  public:
   static void SetOverrideContext(std::shared_ptr<impeller::Context> context);
 
-  static std::shared_ptr<impeller::Context> GetOverrideContext();
+  static std::shared_ptr<impeller::Context> GetDefaultContext();
 
   explicit Context(std::shared_ptr<impeller::Context> context);
   ~Context() override;
 
- protected:
+  std::shared_ptr<impeller::Context> GetContext();
+
+ private:
   /// An Impeller context that takes precedent over the IO state context when
   /// set. This is used to inject the context when running with the Impeller
   /// playground, which doesn't instantiate an Engine instance.
-  static std::shared_ptr<impeller::Context> override_context_;
+  static std::shared_ptr<impeller::Context> default_context_;
 
- private:
   std::shared_ptr<impeller::Context> context_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Context);

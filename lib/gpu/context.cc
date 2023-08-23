@@ -15,20 +15,24 @@ namespace flutter {
 
 IMPLEMENT_WRAPPERTYPEINFO(gpu, Context);
 
-std::shared_ptr<impeller::Context> Context::override_context_;
+std::shared_ptr<impeller::Context> Context::default_context_;
 
 void Context::SetOverrideContext(std::shared_ptr<impeller::Context> context) {
-  override_context_ = std::move(context);
+  default_context_ = std::move(context);
 }
 
-std::shared_ptr<impeller::Context> Context::GetOverrideContext() {
-  return override_context_;
+std::shared_ptr<impeller::Context> Context::GetDefaultContext() {
+  return default_context_;
 }
 
 Context::Context(std::shared_ptr<impeller::Context> context)
     : context_(std::move(context)) {}
 
 Context::~Context() = default;
+
+std::shared_ptr<impeller::Context> Context::GetContext() {
+  return context_;
+}
 
 }  // namespace flutter
 
@@ -40,7 +44,7 @@ Dart_Handle InternalFlutterGpu_Context_InitializeDefault(Dart_Handle wrapper) {
   auto dart_state = flutter::UIDartState::Current();
 
   std::shared_ptr<impeller::Context> impeller_context =
-      flutter::Context::GetOverrideContext();
+      flutter::Context::GetDefaultContext();
 
   if (!impeller_context) {
     if (!dart_state->IsImpellerEnabled()) {
