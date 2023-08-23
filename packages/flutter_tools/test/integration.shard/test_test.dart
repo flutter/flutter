@@ -423,6 +423,31 @@ Future<ProcessResult> _runFlutterTest(
     }
   }
 
+  final List<String> debugArgs = <String>[
+    'test',
+    '--no-color',
+    '--no-version-check',
+    '--no-pub',
+    '--reporter',
+    'compact',
+    '-v',
+    ...extraArguments,
+    if (query != null) Uri.file(testPath).replace(query: query).toString()
+    else testPath,
+  ];
+
+  final ProcessResult debugResults = await Process.run(
+    flutterBin, // Uses the precompiled flutter tool for faster tests,
+    debugArgs,
+    workingDirectory: workingDirectory,
+    stdoutEncoding: utf8,
+    stderrEncoding: utf8,
+  );
+
+  print('[STDOUT]: ${debugResults.stdout}');
+  print('[STDERR]: ${debugResults.stderr}');
+
+
   final List<String> args = <String>[
     'test',
     '--no-color',
