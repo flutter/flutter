@@ -1,4 +1,4 @@
-Signature: 3cf26c3d05d2dea9064638f28127e856
+Signature: 6362b36794c633ff06bcbc2b66bcb7d1
 
 ====================================================================================================
 LIBRARY: etc1
@@ -395,7 +395,6 @@ FILE: ../../../third_party/skia/src/sksl/generated/sksl_frag.minified.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_frag.unoptimized.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_gpu.minified.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_gpu.unoptimized.sksl
-FILE: ../../../third_party/skia/src/sksl/generated/sksl_graphite_frag.dehydrated.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_graphite_frag.minified.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_graphite_frag.unoptimized.sksl
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_graphite_vert.minified.sksl
