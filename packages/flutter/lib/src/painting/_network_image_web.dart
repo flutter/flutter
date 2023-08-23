@@ -191,16 +191,13 @@ class NetworkImage
         return decodeDeprecated!(bytes);
       }
     } else {
-      // This API only exists in the web engine implementation and is not
-      // contained in the analyzer summary for Flutter.
-      // ignore: undefined_function, avoid_dynamic_calls
       return ui_web.createImageCodecFromUrl(
         resolved,
         chunkCallback: (int bytes, int total) {
           chunkEvents.add(ImageChunkEvent(
               cumulativeBytesLoaded: bytes, expectedTotalBytes: total));
         },
-      ) as Future<ui.Codec>;
+      );
     }
   }
 
