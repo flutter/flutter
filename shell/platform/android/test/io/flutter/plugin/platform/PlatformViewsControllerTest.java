@@ -2,8 +2,6 @@ package io.flutter.plugin.platform;
 
 import static android.os.Looper.getMainLooper;
 import static io.flutter.embedding.engine.systemchannels.PlatformViewsChannel.PlatformViewTouch;
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -27,9 +25,9 @@ import android.widget.FrameLayout.LayoutParams;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.android.FlutterImageView;
+import io.flutter.embedding.android.FlutterSurfaceView;
 import io.flutter.embedding.android.FlutterView;
 import io.flutter.embedding.android.MotionEventTracker;
-import io.flutter.embedding.android.RenderMode;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.FlutterOverlaySurface;
@@ -1523,7 +1521,7 @@ public class PlatformViewsControllerTest {
       FlutterJNI jni, PlatformViewsController platformViewsController) {
     final Context context = ApplicationProvider.getApplicationContext();
     final FlutterView flutterView =
-        new FlutterView(context, RenderMode.surface) {
+        new FlutterView(context, new FlutterSurfaceView(context)) {
           @Override
           public FlutterImageView createImageView() {
             final FlutterImageView view = mock(FlutterImageView.class);
