@@ -223,6 +223,9 @@ mixin class ChangeNotifier implements Listenable {
   /// To make debugging easier, invoke [ChangeNotifier.maybeDispatchObjectCreation]
   /// in constructor of the class. It will help
   /// to identify the owner.
+  ///
+  /// Make sure to invoke it with condition `if (kFlutterMemoryAllocationsEnabled) ...`
+  /// so that the method is tree-shaken away when the flag is false.
   @protected
   void maybeDispatchObjectCreation() {
     // Tree shaker does not include this method and the class MemoryAllocations
