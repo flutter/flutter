@@ -754,6 +754,7 @@ class JavaGradleCompat {
     required this.gradleMin,
     required this.gradleMax,
   });
+
   final String javaMin;
   final String javaMax;
   final String gradleMin;
@@ -780,6 +781,7 @@ class JavaAgpCompat {
     required this.agpMin,
     required this.agpMax,
   });
+
   final String javaMin;
   final String javaDefault;
   final String agpMin;
@@ -803,17 +805,20 @@ class GradleForAgp {
     required this.agpMax,
     required this.minRequiredGradle,
   });
+
   final String agpMin;
   final String agpMax;
   final String minRequiredGradle;
 }
 
 // Data class that represents a range of versions.
+@immutable
 class VersionRange{
-  VersionRange(
+  const VersionRange(
     this.versionMin,
     this.versionMax,
   );
+
   final String? versionMin;
   final String? versionMax;
 

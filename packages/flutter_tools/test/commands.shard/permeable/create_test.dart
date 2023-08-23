@@ -3427,7 +3427,7 @@ void main() {
     expect(logger.statusText, isNot(contains(getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, 'plugin'))));
     expect(logger.statusText, isNot(contains(getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, 'pluginFfi'))));
   }, overrides: <Type, Generator>{
-    Java : () => FakeJava(version: const software.Version.withText(1000, 0, 0, '1000.0.0')), // Too high a version for template Gradle versions.
+    Java: () => FakeJava(version: const software.Version.withText(1000, 0, 0, '1000.0.0')), // Too high a version for template Gradle versions.
     Logger: () => logger,
   });
 
@@ -3446,7 +3446,7 @@ void main() {
     expect(logger.statusText, isNot(contains(getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, 'app'))));
     expect(logger.statusText, isNot(contains(getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, 'package'))));
   }, overrides: <Type, Generator>{
-    Java : () => FakeJava(version: const software.Version.withText(0, 0, 0, '0.0.0')), // Too low a version for template AGP versions.
+    Java: () => FakeJava(version: const software.Version.withText(0, 0, 0, '0.0.0')), // Too low a version for template AGP versions.
     Logger: () => logger,
   });
 
@@ -3483,7 +3483,7 @@ void main() {
       logger.clear();
     }
   }, overrides: <Type, Generator>{
-    Java : () => FakeJava(version: const software.Version.withText(500, 0, 0, '500.0.0')), // Too high a version for template Gradle versions.
+    Java: () => FakeJava(version: const software.Version.withText(500, 0, 0, '500.0.0')), // Too high a version for template Gradle versions.
     Logger: () => logger,
   });
 
@@ -3524,7 +3524,7 @@ void main() {
       logger.clear();
     }
   }, overrides: <Type, Generator>{
-    Java : () => FakeJava(version: const software.Version.withText(1, 8, 0, '1.8.0')), // Too low a version for template AGP versions.
+    Java: () => FakeJava(version: const software.Version.withText(1, 8, 0, '1.8.0')), // Too low a version for template AGP versions.
     Logger: () => logger,
   });
 
@@ -3552,7 +3552,7 @@ void main() {
       logger.clear();
     }
   }, overrides: <Type, Generator>{
-    Java : () => FakeJava(version: const software.Version.withText(14, 0, 0, '14.0.0')), // Middle compatible Java version with current template AGP/Gradle versions.
+    Java: () => FakeJava(version: const software.Version.withText(14, 0, 0, '14.0.0')), // Middle compatible Java version with current template AGP/Gradle versions.
     Logger: () => logger,
   });
 
@@ -3578,7 +3578,7 @@ void main() {
       logger.clear();
     }
   }, overrides: <Type, Generator>{
-    Java : () => FakeJava(version: const software.Version.withText(17, 0, 0, '18.0.0')), // Maximum compatible Java version with current template AGP/Gradle versions.
+    Java: () => FakeJava(version: const software.Version.withText(17, 0, 0, '18.0.0')), // Maximum compatible Java version with current template AGP/Gradle versions.
     Logger: () => logger,
   });
 
@@ -3604,7 +3604,7 @@ void main() {
       logger.clear();
     }
   }, overrides: <Type, Generator>{
-    Java : () => FakeJava(version: const software.Version.withText(11, 0, 0, '11.0.0')), // Minimum compatible Java version with current template AGP/Gradle versions.
+    Java: () => FakeJava(version: const software.Version.withText(11, 0, 0, '11.0.0')), // Minimum compatible Java version with current template AGP/Gradle versions.
     Logger: () => logger,
   });
 

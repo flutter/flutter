@@ -942,27 +942,26 @@ allprojects {
     });
 
     testWithoutContext('getJavaVersionFor returns expected Java version range', () {
-      final Logger testLogger = BufferLogger.test();
       // Strictly too old Gradle and AGP versions.
-      expect(getJavaVersionFor(gradleV: '1.9', agpV: '4.1'), equals(VersionRange(null, null)));
+      expect(getJavaVersionFor(gradleV: '1.9', agpV: '4.1'), equals(const VersionRange(null, null)));
       // Strictly too old Gradle or AGP version.
-      expect(getJavaVersionFor(gradleV: '1.9', agpV: '4.2'), equals(VersionRange('1.8', null)));
-      expect(getJavaVersionFor(gradleV: '2.0', agpV: '4.1'), equals(VersionRange(null, '1.9')));
+      expect(getJavaVersionFor(gradleV: '1.9', agpV: '4.2'), equals(const VersionRange('1.8', null)));
+      expect(getJavaVersionFor(gradleV: '2.0', agpV: '4.1'), equals(const VersionRange(null, '1.9')));
       // Strictly too new Gradle and AGP versions.
-      expect(getJavaVersionFor(gradleV: '8.1', agpV: '8.2'), equals(VersionRange(null, null)));
+      expect(getJavaVersionFor(gradleV: '8.1', agpV: '8.2'), equals(const VersionRange(null, null)));
       // Strictly too new Gradle version and maximum version of AGP.
       //*This test case will need its expected Java range updated when a new version of AGP is supported.*
-      expect(getJavaVersionFor(gradleV: '8.1', agpV: maxKnownAndSupportedAgpVersion), equals(VersionRange('17', null)));
+      expect(getJavaVersionFor(gradleV: '8.1', agpV: maxKnownAndSupportedAgpVersion), equals(const VersionRange('17', null)));
       // Strictly too new AGP version and maximum version of Gradle.
       //*This test case will need its expected Java range updated when a new version of Gradle is supported.*
-      expect(getJavaVersionFor(gradleV: maxKnownAndSupportedGradleVersion, agpV: '8.2'), equals(VersionRange(null, '20')));
+      expect(getJavaVersionFor(gradleV: maxKnownAndSupportedGradleVersion, agpV: '8.2'), equals(const VersionRange(null, '20')));
       // Tests with a known compatible Gradle/AGP version pair.
-      expect(getJavaVersionFor(gradleV: '7.0', agpV: '7.2'), equals(VersionRange('1.11', '17')));
-      expect(getJavaVersionFor(gradleV: '7.1', agpV: '7.2'), equals(VersionRange('1.11', '17')));
-      expect(getJavaVersionFor(gradleV: '7.2.2', agpV: '7.2'), equals(VersionRange('1.11', '17')));
-      expect(getJavaVersionFor(gradleV: '7.1', agpV: '7.0'), equals(VersionRange('1.11', '17')));
-      expect(getJavaVersionFor(gradleV: '7.1', agpV: '7.2'), equals(VersionRange('1.11', '17')));
-      expect(getJavaVersionFor(gradleV: '7.1', agpV: '7.4'), equals(VersionRange('1.11', '17')));
+      expect(getJavaVersionFor(gradleV: '7.0', agpV: '7.2'), equals(const VersionRange('1.11', '17')));
+      expect(getJavaVersionFor(gradleV: '7.1', agpV: '7.2'), equals(const VersionRange('1.11', '17')));
+      expect(getJavaVersionFor(gradleV: '7.2.2', agpV: '7.2'), equals(const VersionRange('1.11', '17')));
+      expect(getJavaVersionFor(gradleV: '7.1', agpV: '7.0'), equals(const VersionRange('1.11', '17')));
+      expect(getJavaVersionFor(gradleV: '7.1', agpV: '7.2'), equals(const VersionRange('1.11', '17')));
+      expect(getJavaVersionFor(gradleV: '7.1', agpV: '7.4'), equals(const VersionRange('1.11', '17')));
     });
   });
 }
