@@ -111,5 +111,19 @@ TEST_P(RendererDartTest, CanInstantiateFlutterGPUContext) {
   ASSERT_TRUE(result);
 }
 
+TEST_P(RendererDartTest, CanEmplaceHostBuffer) {
+  auto isolate = GetIsolate();
+  bool result = isolate->RunInIsolateScope([]() -> bool {
+    if (tonic::CheckAndHandleError(
+            ::Dart_Invoke(Dart_RootLibrary(),
+                          tonic::ToDart("canEmplaceHostBuffer"), 0, nullptr))) {
+      return false;
+    }
+    return true;
+  });
+
+  ASSERT_TRUE(result);
+}
+
 }  // namespace testing
 }  // namespace impeller

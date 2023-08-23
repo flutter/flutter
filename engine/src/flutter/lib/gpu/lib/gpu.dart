@@ -11,5 +11,7 @@
 ///  * [Flutter GPU Wiki page](https://github.com/flutter/flutter/wiki/Flutter-GPU).
 library flutter_gpu;
 
-export 'src/context.dart';
 export 'src/smoketest.dart';
+
+export 'src/context.dart';
+export 'src/buffer.dart';
