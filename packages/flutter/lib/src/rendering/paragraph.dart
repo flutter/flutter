@@ -1417,6 +1417,9 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
         result = _handleClearSelection();
       case SelectionEventType.selectAll:
         result = _handleSelectAll();
+      case SelectionEventType.collapseSelection:
+        final CollapseSelectionSelectionEvent colllapseSelection = event as CollapseSelectionSelectionEvent;
+        result = _handleCollapseSelection(colllapseSelection.globalPosition);
       case SelectionEventType.selectWord:
         final SelectWordSelectionEvent selectWord = event as SelectWordSelectionEvent;
         result = _handleSelectWord(selectWord.globalPosition);
@@ -1713,6 +1716,25 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     _textSelectionStart = TextPosition(offset: range.start);
     _textSelectionEnd = TextPosition(offset: range.end, affinity: TextAffinity.upstream);
     return SelectionResult.none;
+  }
+
+  SelectionResult _handleCollapseSelection(Offset globalPosition) {
+    _selectableContainsOriginWord = true;
+
+    final TextPosition position = paragraph.getPositionForOffset(paragraph.globalToLocal(globalPosition));
+    if (_positionIsWithinCurrentSelection(position) && _textSelectionStart != _textSelectionEnd) {
+      return SelectionResult.end;
+    }
+    if (position.offset < range.start) {
+      return SelectionResult.previous;
+    } else if (position.offset > range.end) {
+      return SelectionResult.next;
+    }
+    // Fragments are separated by placeholder span, the target position shouldn't
+    // expand across fragments.
+    assert(position.offset >= range.start && position.offset <= range.end);
+    _textSelectionStart = _textSelectionEnd = position;
+    return SelectionResult.end;
   }
 
   SelectionResult _handleSelectWord(Offset globalPosition) {

@@ -1016,8 +1016,23 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///  * [_selectWordAt], which selects a whole word at the location.
   ///  * [selectAll], which selects the entire content.
   void _collapseSelectionAtPosition({required Offset offset}) {
-    _selectStartTo(offset: offset);
-    _selectEndTo(offset: offset);
+    // Placing this before updating the start/end edge does not
+    // work to clear all unrelated selections because dispatching a selection edge
+    // update event will send the edge update to every selectable until arriving
+    // at the correct selectable, so the selection is set again after it is cleared.
+    // _clearSelection();
+
+    // _selectStartTo(offset: offset);
+    // _selectEndTo(offset: offset);
+
+    // This works to clear all unrelated selections but relies on a new selection event.
+    _selectable?.dispatchSelectionEvent(CollapseSelectionSelectionEvent(globalPosition: offset));
+
+    // This works to clear all unrelated selections but does not abide by the delegate
+    // contract i.e. dispatching SelectionEvents and reacting to them. Making a new
+    // selection event, ClearAllOtherSelectionEvent is also an an option, but i'm not
+    // sure it makes much sense to add a selection event for this.
+    // _selectionDelegate.handleClearAllOtherSelections();
   }
 
   /// Selects a whole word at the `offset` location.
@@ -1562,6 +1577,7 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
         _hasReceivedStartEvent.remove(selectable);
         _hasReceivedEndEvent.remove(selectable);
       case SelectionEventType.selectAll:
+      case SelectionEventType.collapseSelection:
       case SelectionEventType.selectWord:
         break;
       case SelectionEventType.granularlyExtendSelection:
@@ -2100,16 +2116,21 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     return SelectionResult.none;
   }
 
-  /// Selects a word in a selectable at the location
-  /// [SelectWordSelectionEvent.globalPosition].
-  @protected
-  SelectionResult handleSelectWord(SelectWordSelectionEvent event) {
+  SelectionResult _handleSelectBoundary(SelectionEvent event) {
+    final Offset effectiveGlobalPosition;
+    if (event.type == SelectionEventType.selectWord) {
+      effectiveGlobalPosition = (event as SelectWordSelectionEvent).globalPosition;
+    } else if (event.type == SelectionEventType.collapseSelection) {
+      effectiveGlobalPosition = (event as CollapseSelectionSelectionEvent).globalPosition;
+    } else {
+      throw UnimplementedError();
+    }
     SelectionResult? lastSelectionResult;
     for (int index = 0; index < selectables.length; index += 1) {
       final Rect localRect = Rect.fromLTWH(0, 0, selectables[index].size.width, selectables[index].size.height);
       final Matrix4 transform = selectables[index].getTransformTo(null);
       final Rect globalRect = MatrixUtils.transformRect(transform, localRect);
-      if (globalRect.contains(event.globalPosition)) {
+      if (globalRect.contains(effectiveGlobalPosition)) {
         final SelectionGeometry existingGeometry = selectables[index].value;
         lastSelectionResult = dispatchSelectionEventToChild(selectables[index], event);
         if (index == selectables.length - 1 && lastSelectionResult == SelectionResult.next) {
@@ -2122,7 +2143,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
           return SelectionResult.previous;
         }
         if (selectables[index].value != existingGeometry) {
-          // Geometry has changed as a result of select word, need to clear the
+          // Geometry has changed as a result of select boundary, need to clear the
           // selection of other selectables to keep selection in sync.
           selectables
             .where((Selectable target) => target != selectables[index])
@@ -2139,6 +2160,31 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     }
     assert(lastSelectionResult == null);
     return SelectionResult.end;
+  }
+
+  /// Collapses the selection in a selectable at the location
+  /// [CollapseSelectionSelectionEvent.globalPosition].
+  @protected
+  SelectionResult handleCollapseSelection(CollapseSelectionSelectionEvent event) {
+    return _handleSelectBoundary(event);
+  }
+
+  /// Selects a word in a selectable at the location
+  /// [SelectWordSelectionEvent.globalPosition].
+  @protected
+  SelectionResult handleSelectWord(SelectWordSelectionEvent event) {
+    return _handleSelectBoundary(event);
+  }
+
+  void handleClearAllOtherSelections() {
+    final int skipStart = min(currentSelectionStartIndex, currentSelectionEndIndex);
+    final int skipEnd = max(currentSelectionStartIndex, currentSelectionEndIndex);
+    for (int index = 0; index < selectables.length; index += 1) {
+      if (index >= skipStart && index <= skipEnd) {
+        continue;
+      }
+      dispatchSelectionEventToChild(selectables[index], const ClearSelectionEvent());
+    }
   }
 
   /// Removes the selection of all selectables this delegate manages.
@@ -2271,6 +2317,9 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       case SelectionEventType.selectAll:
         _extendSelectionInProgress = false;
         result = handleSelectAll(event as SelectAllSelectionEvent);
+      case SelectionEventType.collapseSelection:
+        _extendSelectionInProgress = false;
+        result = handleCollapseSelection(event as CollapseSelectionSelectionEvent);
       case SelectionEventType.selectWord:
         _extendSelectionInProgress = false;
         result = handleSelectWord(event as SelectWordSelectionEvent);
