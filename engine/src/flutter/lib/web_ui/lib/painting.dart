@@ -5,18 +5,6 @@
 // For documentation see https://github.com/flutter/engine/blob/main/lib/ui/painting.dart
 part of ui;
 
-// ignore: unused_element, Used in Shader assert.
-bool _offsetIsValid(Offset offset) {
-  assert(!offset.dx.isNaN && !offset.dy.isNaN, 'Offset argument contained a NaN value.');
-  return true;
-}
-
-// ignore: unused_element, Used in Shader assert.
-bool _matrix4IsValid(Float32List matrix4) {
-  assert(matrix4.length == 16, 'Matrix4 must have 16 entries.');
-  return true;
-}
-
 void _validateColorStops(List<Color> colors, List<double>? colorStops) {
   if (colorStops == null) {
     if (colors.length != 2) {
