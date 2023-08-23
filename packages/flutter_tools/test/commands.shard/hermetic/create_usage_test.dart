@@ -19,9 +19,7 @@ import '../../src/test_flutter_command_runner.dart';
 import '../../src/testbed.dart';
 
 class FakePub extends Fake implements Pub {
-  FakePub(this.fs);
 
-  final FileSystem fs;
   int calledGetOffline = 0;
   int calledOnline = 0;
 
@@ -29,7 +27,6 @@ class FakePub extends Fake implements Pub {
   Future<void> get({
     PubContext? context,
     required FlutterProject project,
-    bool skipIfAbsent = false,
     bool upgrade = false,
     bool offline = false,
     bool generateSyntheticPackage = false,
@@ -37,10 +34,10 @@ class FakePub extends Fake implements Pub {
     String? flutterRootOverride,
     bool checkUpToDate = false,
     bool shouldSkipThirdPartyGenerator = true,
-    bool printProgress = true,
+    PubOutputMode outputMode = PubOutputMode.all,
   }) async {
     project.directory.childFile('.packages').createSync();
-    if (offline == true) {
+    if (offline) {
       calledGetOffline += 1;
     } else {
       calledOnline += 1;
@@ -60,7 +57,7 @@ void main() {
 
     setUp(() {
       testbed = Testbed(setup: () {
-        fakePub = FakePub(globals.fs);
+        fakePub = FakePub();
         Cache.flutterRoot = 'flutter';
         final List<String> filePaths = <String>[
           globals.fs.path.join('flutter', 'packages', 'flutter', 'pubspec.yaml'),
@@ -75,6 +72,7 @@ void main() {
         }
         final List<String> templatePaths = <String>[
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'app'),
+          globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'app_integration_test'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'app_shared'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'app_test_widget'),
           globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'cocoapods'),

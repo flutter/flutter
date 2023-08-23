@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
@@ -22,7 +24,7 @@ Widget wrap({Widget? child}) {
 }
 
 void main() {
-  testWidgets('RadioListTile should initialize according to groupValue', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RadioListTile should initialize according to groupValue', (WidgetTester tester) async {
     final List<int> values = <int>[0, 1, 2];
     int? selectedValue;
     // Constructor parameters are required for [RadioListTile], but they are
@@ -82,7 +84,7 @@ void main() {
     expect(generatedRadioListTiles[2].checked, equals(false));
   });
 
-  testWidgets('RadioListTile simple control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RadioListTile simple control test', (WidgetTester tester) async {
     final Key key = UniqueKey();
     final Key titleKey = UniqueKey();
     final List<int?> log = <int?>[];
@@ -154,7 +156,7 @@ void main() {
     expect(log, equals(<int>[1]));
   });
 
-  testWidgets('RadioListTile control tests', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RadioListTile control tests', (WidgetTester tester) async {
     final List<int> values = <int>[0, 1, 2];
     int? selectedValue;
     // Constructor parameters are required for [Radio], but they are irrelevant
@@ -221,7 +223,7 @@ void main() {
     expect(log, equals(<dynamic>[1, '-', 2]));
   });
 
-  testWidgets('Selected RadioListTile should not trigger onChanged', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Selected RadioListTile should not trigger onChanged', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/30311
     final List<int> values = <int>[0, 1, 2];
     int? selectedValue;
@@ -273,7 +275,7 @@ void main() {
     expect(log, equals(<int>[0]));
   });
 
-  testWidgets('Selected RadioListTile should trigger onChanged when toggleable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Selected RadioListTile should trigger onChanged when toggleable', (WidgetTester tester) async {
     final List<int> values = <int>[0, 1, 2];
     int? selectedValue;
     // Constructor parameters are required for [Radio], but they are irrelevant
@@ -327,7 +329,7 @@ void main() {
     expect(log, equals(<int?>[0, null, 0]));
   });
 
-  testWidgets('RadioListTile can be toggled when toggleable is set', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RadioListTile can be toggled when toggleable is set', (WidgetTester tester) async {
     final Key key = UniqueKey();
     final List<int?> log = <int?>[];
 
@@ -382,7 +384,7 @@ void main() {
     expect(log, equals(<int>[1]));
   });
 
-  testWidgets('RadioListTile semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RadioListTile semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -531,7 +533,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('RadioListTile has semantic events', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RadioListTile has semantic events', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final Key key = UniqueKey();
     dynamic semanticEvent;
@@ -570,7 +572,7 @@ void main() {
     tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
   });
 
-  testWidgets('RadioListTile can autofocus unless disabled.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RadioListTile can autofocus unless disabled.', (WidgetTester tester) async {
     final GlobalKey childKey = GlobalKey();
 
     await tester.pumpWidget(
@@ -604,7 +606,7 @@ void main() {
     expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isFalse);
   });
 
-  testWidgets('RadioListTile contentPadding test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RadioListTile contentPadding test', (WidgetTester tester) async {
     final Type radioType = const Radio<bool>(
       groupValue: true,
       value: true,
@@ -644,7 +646,7 @@ void main() {
     expect(paddingRect.right, titleRect.right + 15); //right padding
   });
 
-  testWidgets('RadioListTile respects shape', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RadioListTile respects shape', (WidgetTester tester) async {
     const ShapeBorder shapeBorder = RoundedRectangleBorder(
       borderRadius: BorderRadius.horizontal(right: Radius.circular(100)),
     );
@@ -664,7 +666,7 @@ void main() {
     expect(tester.widget<InkWell>(find.byType(InkWell)).customBorder, shapeBorder);
   });
 
-  testWidgets('RadioListTile respects tileColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RadioListTile respects tileColor', (WidgetTester tester) async {
     final Color tileColor = Colors.red.shade500;
 
     await tester.pumpWidget(
@@ -684,7 +686,7 @@ void main() {
     expect(find.byType(Material), paints..rect(color: tileColor));
   });
 
-  testWidgets('RadioListTile respects selectedTileColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RadioListTile respects selectedTileColor', (WidgetTester tester) async {
     final Color selectedTileColor = Colors.green.shade500;
 
     await tester.pumpWidget(
@@ -705,7 +707,7 @@ void main() {
     expect(find.byType(Material), paints..rect(color: selectedTileColor));
   });
 
-  testWidgets('RadioListTile selected item text Color', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RadioListTile selected item text Color', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/76906
 
     const Color activeColor = Color(0xff00ff00);
@@ -745,7 +747,7 @@ void main() {
     expect(textColor('title'), activeColor);
   });
 
-  testWidgets('RadioListTile respects visualDensity', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RadioListTile respects visualDensity', (WidgetTester tester) async {
     const Key key = Key('test');
     Future<void> buildTest(VisualDensity visualDensity) async {
       return tester.pumpWidget(
@@ -770,7 +772,7 @@ void main() {
     expect(box.size, equals(const Size(800, 56)));
   });
 
-  testWidgets('RadioListTile respects focusNode', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RadioListTile respects focusNode', (WidgetTester tester) async {
     final GlobalKey childKey = GlobalKey();
     await tester.pumpWidget(
       wrap(
@@ -823,6 +825,471 @@ void main() {
     expect(node.hasFocus, isFalse);
   });
 
+  testWidgetsWithLeakTracking('Radio changes mouse cursor when hovered', (WidgetTester tester) async {
+    // Test Radio() constructor
+    await tester.pumpWidget(
+      wrap(child: MouseRegion(
+        cursor: SystemMouseCursors.forbidden,
+        child: RadioListTile<int>(
+          mouseCursor: SystemMouseCursors.text,
+          value: 1,
+          onChanged: (int? v) {},
+          groupValue: 2,
+        ),
+      )),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(Radio<int>)));
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
+
+
+    // Test default cursor
+    await tester.pumpWidget(
+      wrap(child: MouseRegion(
+        cursor: SystemMouseCursors.forbidden,
+        child: RadioListTile<int>(
+          value: 1,
+          onChanged: (int? v) {},
+          groupValue: 2,
+        ),
+      )),
+    );
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+
+    // Test default cursor when disabled
+    await tester.pumpWidget(wrap(
+      child: const MouseRegion(
+        cursor: SystemMouseCursors.forbidden,
+        child: RadioListTile<int>(
+          value: 1,
+          onChanged: null,
+          groupValue: 2,
+        ),
+      ),
+    ),);
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+  });
+
+  testWidgetsWithLeakTracking('RadioListTile respects fillColor in enabled/disabled states', (WidgetTester tester) async {
+    const Color activeEnabledFillColor = Color(0xFF000001);
+    const Color activeDisabledFillColor = Color(0xFF000002);
+    const Color inactiveEnabledFillColor = Color(0xFF000003);
+    const Color inactiveDisabledFillColor = Color(0xFF000004);
+
+    Color getFillColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        if (states.contains(MaterialState.selected)) {
+          return activeDisabledFillColor;
+        }
+        return inactiveDisabledFillColor;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return activeEnabledFillColor;
+      }
+      return inactiveEnabledFillColor;
+    }
+
+    final MaterialStateProperty<Color> fillColor =
+    MaterialStateColor.resolveWith(getFillColor);
+
+    int? groupValue = 0;
+    Widget buildApp({required bool enabled}) {
+      return wrap(
+        child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+          return RadioListTile<int>(
+            value: 0,
+            fillColor: fillColor,
+            onChanged: enabled ? (int? newValue) {
+              setState(() {
+                groupValue = newValue;
+              });
+            } : null,
+            groupValue: groupValue,
+          );
+        })
+      );
+    }
+
+    await tester.pumpWidget(buildApp(enabled: true));
+
+    // Selected and enabled.
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Radio<int>))),
+      paints
+        ..rect()
+        ..circle(color: activeEnabledFillColor)
+        ..circle(color: activeEnabledFillColor),
+    );
+
+    // Check when the radio isn't selected.
+    groupValue = 1;
+    await tester.pumpWidget(buildApp(enabled: true));
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Radio<int>))),
+      paints
+        ..rect()
+        ..circle(color: inactiveEnabledFillColor, style: PaintingStyle.stroke, strokeWidth: 2.0),
+    );
+
+    // Check when the radio is selected, but disabled.
+    groupValue = 0;
+    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Radio<int>))),
+      paints
+        ..rect()
+        ..circle(color: activeDisabledFillColor)
+        ..circle(color: activeDisabledFillColor),
+    );
+
+    // Check when the radio is unselected and disabled.
+    groupValue = 1;
+    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Radio<int>))),
+      paints
+        ..rect()
+        ..circle(color: inactiveDisabledFillColor, style: PaintingStyle.stroke, strokeWidth: 2.0),
+    );
+  });
+
+  testWidgetsWithLeakTracking('RadioListTile respects fillColor in hovered state', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    const Color hoveredFillColor = Color(0xFF000001);
+
+    Color getFillColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.hovered)) {
+        return hoveredFillColor;
+      }
+      return Colors.transparent;
+    }
+
+    final MaterialStateProperty<Color> fillColor =
+    MaterialStateColor.resolveWith(getFillColor);
+
+    int? groupValue = 0;
+    Widget buildApp() {
+      return wrap(
+        child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+          return RadioListTile<int>(
+            value: 0,
+            fillColor: fillColor,
+            onChanged: (int? newValue) {
+              setState(() {
+                groupValue = newValue;
+              });
+            },
+            groupValue: groupValue,
+          );
+        }),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    // Start hovering
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(Radio<int>)));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Radio<int>))),
+      paints
+        ..rect()..circle()
+        ..circle(color: hoveredFillColor),
+    );
+  });
+
+  testWidgetsWithLeakTracking('Material3 - RadioListTile respects hoverColor', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    int? groupValue = 0;
+    final Color? hoverColor = Colors.orange[500];
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    Widget buildApp({bool enabled = true}) {
+      return wrap(
+        child: MaterialApp(
+          theme: theme,
+          home: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            return RadioListTile<int>(
+              value: 0,
+              onChanged: enabled ? (int? newValue) {
+                setState(() {
+                  groupValue = newValue;
+                });
+              } : null,
+              hoverColor: hoverColor,
+              groupValue: groupValue,
+            );
+          }),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildApp());
+
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Radio<int>))),
+      paints
+        ..rect()
+        ..circle(color: theme.colorScheme.primary)
+        ..circle(color: theme.colorScheme.primary),
+    );
+
+    // Start hovering
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.moveTo(tester.getCenter(find.byType(Radio<int>)));
+
+    // Check when the radio isn't selected.
+    groupValue = 1;
+    await tester.pumpWidget(buildApp());
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Radio<int>))),
+      paints
+        ..rect()
+        ..circle(color: hoverColor)
+    );
+
+    // Check when the radio is selected, but disabled.
+    groupValue = 0;
+    await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(
+      Material.of(tester.element(find.byType(Radio<int>))),
+      paints
+        ..rect()
+        ..circle(color: theme.colorScheme.onSurface.withOpacity(0.38))
+        ..circle(color: theme.colorScheme.onSurface.withOpacity(0.38)),
+    );
+  });
+
+  testWidgetsWithLeakTracking('Material3 - RadioListTile respects overlayColor in active/pressed/hovered states', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+
+    const Color fillColor = Color(0xFF000000);
+    const Color activePressedOverlayColor = Color(0xFF000001);
+    const Color inactivePressedOverlayColor = Color(0xFF000002);
+    const Color hoverOverlayColor = Color(0xFF000003);
+    const Color hoverColor = Color(0xFF000005);
+
+    Color? getOverlayColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        if (states.contains(MaterialState.selected)) {
+          return activePressedOverlayColor;
+        }
+        return inactivePressedOverlayColor;
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return hoverOverlayColor;
+      }
+      return null;
+    }
+
+    Widget buildRadio({bool active = false, bool useOverlay = true}) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Material(
+          child: RadioListTile<bool>(
+            value: active,
+            groupValue: true,
+            onChanged: (_) { },
+            fillColor: const MaterialStatePropertyAll<Color>(fillColor),
+            overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
+            hoverColor: hoverColor,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildRadio(useOverlay: false));
+    await tester.press(find.byType(Radio<bool>));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Radio<bool>))),
+      paints
+        ..rect(color: const Color(0x00000000))
+        ..rect(color: const Color(0x66bcbcbc))
+        ..circle(
+          color: fillColor.withAlpha(kRadialReactionAlpha),
+          radius: 20.0,
+        ),
+      reason: 'Default inactive pressed Radio should have overlay color from fillColor',
+    );
+
+    await tester.pumpWidget(buildRadio(active: true, useOverlay: false));
+    await tester.press(find.byType(Radio<bool>));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Radio<bool>))),
+      paints
+        ..rect(color: const Color(0x00000000))
+        ..rect(color: const Color(0x66bcbcbc))
+        ..circle(
+          color: fillColor.withAlpha(kRadialReactionAlpha),
+          radius: 20.0,
+        ),
+      reason: 'Default active pressed Radio should have overlay color from fillColor',
+    );
+
+    await tester.pumpWidget(buildRadio());
+    await tester.press(find.byType(Radio<bool>));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Radio<bool>))),
+      paints
+        ..rect(color: const Color(0x00000000))
+        ..rect(color: const Color(0x66bcbcbc))
+        ..circle(
+          color: inactivePressedOverlayColor,
+          radius: 20.0,
+        ),
+      reason: 'Inactive pressed Radio should have overlay color: $inactivePressedOverlayColor',
+    );
+
+    await tester.pumpWidget(buildRadio(active: true));
+    await tester.press(find.byType(Radio<bool>));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Radio<bool>))),
+      paints
+        ..rect(color: const Color(0x00000000))
+        ..rect(color: const Color(0x66bcbcbc))
+        ..circle(
+          color: activePressedOverlayColor,
+          radius: 20.0,
+        ),
+      reason: 'Active pressed Radio should have overlay color: $activePressedOverlayColor',
+    );
+
+    // Start hovering.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(Radio<bool>)));
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(Container());
+    await tester.pumpWidget(buildRadio());
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(find.byType(Radio<bool>))),
+      paints
+        ..rect(color: const Color(0x00000000))
+        ..rect(color: const Color(0x0a000000))
+        ..circle(
+          color: hoverOverlayColor,
+          radius: 20.0,
+        ),
+      reason: 'Hovered Radio should use overlay color $hoverOverlayColor over $hoverColor',
+    );
+  });
+
+  testWidgetsWithLeakTracking('RadioListTile respects splashRadius', (WidgetTester tester) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    const double splashRadius = 30;
+    Widget buildApp() {
+      return wrap(
+        child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+          return RadioListTile<int>(
+            value: 0,
+            onChanged: (_) {},
+            hoverColor: Colors.orange[500],
+            groupValue: 0,
+            splashRadius: splashRadius,
+          );
+        }),
+      );
+    }
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(Radio<int>)));
+    await tester.pumpAndSettle();
+
+    expect(
+      Material.of(tester.element(
+        find.byWidgetPredicate((Widget widget) => widget is Radio<int>),
+      )),
+      paints..circle(color: Colors.orange[500], radius: splashRadius),
+    );
+  });
+
+  testWidgetsWithLeakTracking('Radio respects materialTapTargetSize', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrap(child: RadioListTile<bool>(
+        groupValue: true,
+        value: true,
+        onChanged: (bool? newValue) { },
+      )),
+    );
+
+    // default test
+    expect(tester.getSize(find.byType(Radio<bool>)), const Size(40.0, 40.0));
+
+    await tester.pumpWidget(
+      wrap(child: RadioListTile<bool>(
+        materialTapTargetSize: MaterialTapTargetSize.padded,
+        groupValue: true,
+        value: true,
+        onChanged: (bool? newValue) { },
+      )),
+    );
+
+    expect(tester.getSize(find.byType(Radio<bool>)), const Size(48.0, 48.0));
+  });
+
+  testWidgetsWithLeakTracking('RadioListTile.adaptive shows the correct radio platform widget', (WidgetTester tester) async {
+    Widget buildApp(TargetPlatform platform) {
+      return MaterialApp(
+        theme: ThemeData(platform: platform),
+        home: Material(
+          child: Center(
+            child: RadioListTile<int>.adaptive(
+              value: 1,
+              groupValue: 2,
+              onChanged: (_) {},
+            ),
+          ),
+        ),
+      );
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+      await tester.pumpWidget(buildApp(platform));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(CupertinoRadio<int>), findsOneWidget);
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows ]) {
+      await tester.pumpWidget(buildApp(platform));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(CupertinoRadio<int>), findsNothing);
+    }
+  });
+
   group('feedback', () {
     late FeedbackTester feedback;
 
@@ -834,7 +1301,7 @@ void main() {
       feedback.dispose();
     });
 
-    testWidgets('RadioListTile respects enableFeedback', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('RadioListTile respects enableFeedback', (WidgetTester tester) async {
       const Key key = Key('test');
       Future<void> buildTest(bool enableFeedback) async {
         return tester.pumpWidget(
@@ -864,6 +1331,181 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
       expect(feedback.clickSoundCount, 1);
       expect(feedback.hapticCount, 0);
+    });
+  });
+
+  group('Material 2', () {
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
+
+    testWidgetsWithLeakTracking('Material2 - RadioListTile respects overlayColor in active/pressed/hovered states', (WidgetTester tester) async {
+      tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+
+      const Color fillColor = Color(0xFF000000);
+      const Color activePressedOverlayColor = Color(0xFF000001);
+      const Color inactivePressedOverlayColor = Color(0xFF000002);
+      const Color hoverOverlayColor = Color(0xFF000003);
+      const Color hoverColor = Color(0xFF000005);
+
+      Color? getOverlayColor(Set<MaterialState> states) {
+        if (states.contains(MaterialState.pressed)) {
+          if (states.contains(MaterialState.selected)) {
+            return activePressedOverlayColor;
+          }
+          return inactivePressedOverlayColor;
+        }
+        if (states.contains(MaterialState.hovered)) {
+          return hoverOverlayColor;
+        }
+        return null;
+      }
+
+      Widget buildRadio({bool active = false, bool useOverlay = true}) {
+        return MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Material(
+            child: RadioListTile<bool>(
+              value: active,
+              groupValue: true,
+              onChanged: (_) { },
+              fillColor: const MaterialStatePropertyAll<Color>(fillColor),
+              overlayColor: useOverlay ? MaterialStateProperty.resolveWith(getOverlayColor) : null,
+              hoverColor: hoverColor,
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildRadio(useOverlay: false));
+      await tester.press(find.byType(Radio<bool>));
+      await tester.pumpAndSettle();
+
+      expect(
+        Material.of(tester.element(find.byType(Radio<bool>))),
+        paints
+          ..circle()
+          ..circle(
+            color: fillColor.withAlpha(kRadialReactionAlpha),
+            radius: 20,
+          ),
+        reason: 'Default inactive pressed Radio should have overlay color from fillColor',
+      );
+
+      await tester.pumpWidget(buildRadio(active: true, useOverlay: false));
+      await tester.press(find.byType(Radio<bool>));
+      await tester.pumpAndSettle();
+
+      expect(
+        Material.of(tester.element(find.byType(Radio<bool>))),
+        paints
+          ..circle()
+          ..circle(
+            color: fillColor.withAlpha(kRadialReactionAlpha),
+            radius: 20,
+          ),
+        reason: 'Default active pressed Radio should have overlay color from fillColor',
+      );
+
+      await tester.pumpWidget(buildRadio());
+      await tester.press(find.byType(Radio<bool>));
+      await tester.pumpAndSettle();
+
+      expect(
+        Material.of(tester.element(find.byType(Radio<bool>))),
+        paints
+          ..circle()
+          ..circle(
+            color: inactivePressedOverlayColor,
+            radius: 20,
+          ),
+        reason: 'Inactive pressed Radio should have overlay color: $inactivePressedOverlayColor',
+      );
+
+      // Start hovering.
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer();
+      await gesture.moveTo(tester.getCenter(find.byType(Radio<bool>)));
+      await tester.pumpAndSettle();
+
+      await tester.pumpWidget(Container());
+      await tester.pumpWidget(buildRadio());
+      await tester.pumpAndSettle();
+
+      expect(
+        Material.of(tester.element(find.byType(Radio<bool>))),
+        paints
+          ..circle(
+            color: hoverOverlayColor,
+            radius: 20,
+          ),
+        reason: 'Hovered Radio should use overlay color $hoverOverlayColor over $hoverColor',
+      );
+    });
+
+    testWidgetsWithLeakTracking('Material2 - RadioListTile respects hoverColor', (WidgetTester tester) async {
+      tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+      int? groupValue = 0;
+      final Color? hoverColor = Colors.orange[500];
+      Widget buildApp({bool enabled = true}) {
+        return wrap(
+          child: MaterialApp(
+            theme: ThemeData(useMaterial3: false),
+            home: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              return RadioListTile<int>(
+                value: 0,
+                onChanged: enabled ? (int? newValue) {
+                  setState(() {
+                    groupValue = newValue;
+                  });
+                } : null,
+                hoverColor: hoverColor,
+                groupValue: groupValue,
+              );
+            }),
+          ),
+        );
+      }
+      await tester.pumpWidget(buildApp());
+
+      await tester.pump();
+      await tester.pumpAndSettle();
+      expect(
+        Material.of(tester.element(find.byType(Radio<int>))),
+        paints
+          ..rect()
+          ..circle(color:const Color(0xff2196f3))
+          ..circle(color:const Color(0xff2196f3)),
+      );
+
+      // Start hovering
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.moveTo(tester.getCenter(find.byType(Radio<int>)));
+
+      // Check when the radio isn't selected.
+      groupValue = 1;
+      await tester.pumpWidget(buildApp());
+      await tester.pump();
+      await tester.pumpAndSettle();
+      expect(
+        Material.of(tester.element(find.byType(Radio<int>))),
+        paints
+          ..rect()
+          ..circle(color: hoverColor)
+      );
+
+      // Check when the radio is selected, but disabled.
+      groupValue = 0;
+      await tester.pumpWidget(buildApp(enabled: false));
+      await tester.pump();
+      await tester.pumpAndSettle();
+      expect(
+        Material.of(tester.element(find.byType(Radio<int>))),
+        paints
+          ..rect()
+          ..circle(color:const Color(0x61000000))
+          ..circle(color:const Color(0x61000000)),
+      );
     });
   });
 }

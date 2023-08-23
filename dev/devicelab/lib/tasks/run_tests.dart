@@ -12,11 +12,27 @@ import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
 TaskFunction createAndroidRunDebugTest() {
-  return AndroidRunOutputTest(release: false);
+  return AndroidRunOutputTest(release: false).call;
 }
 
 TaskFunction createAndroidRunReleaseTest() {
-  return AndroidRunOutputTest(release: true);
+  return AndroidRunOutputTest(release: true).call;
+}
+
+TaskFunction createLinuxRunDebugTest() {
+  return DesktopRunOutputTest(
+    '${flutterDirectory.path}/dev/integration_tests/ui',
+    'lib/empty.dart',
+    release: false,
+  ).call;
+}
+
+TaskFunction createLinuxRunReleaseTest() {
+  return DesktopRunOutputTest(
+    '${flutterDirectory.path}/dev/integration_tests/ui',
+    'lib/empty.dart',
+    release: true,
+  ).call;
 }
 
 TaskFunction createMacOSRunDebugTest() {
@@ -27,7 +43,7 @@ TaskFunction createMacOSRunDebugTest() {
     'lib/main.dart',
     release: false,
     allowStderr: true,
-  );
+  ).call;
 }
 
 TaskFunction createMacOSRunReleaseTest() {
@@ -38,23 +54,23 @@ TaskFunction createMacOSRunReleaseTest() {
     'lib/main.dart',
     release: true,
     allowStderr: true,
-  );
+  ).call;
 }
 
 TaskFunction createWindowsRunDebugTest() {
-  return DesktopRunOutputTest(
+  return WindowsRunOutputTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/empty.dart',
     release: false,
-  );
+  ).call;
 }
 
 TaskFunction createWindowsRunReleaseTest() {
-  return DesktopRunOutputTest(
+  return WindowsRunOutputTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/empty.dart',
     release: true,
-  );
+  ).call;
 }
 
 class AndroidRunOutputTest extends RunOutputTask {
@@ -148,6 +164,52 @@ class AndroidRunOutputTest extends RunOutputTask {
   }
 }
 
+class WindowsRunOutputTest extends DesktopRunOutputTest {
+  WindowsRunOutputTest(
+    super.testDirectory,
+    super.testTarget, {
+      required super.release,
+      super.allowStderr = false,
+    }
+  );
+
+  static final RegExp _buildOutput = RegExp(
+    r'Building Windows application\.\.\.\s*\d+(\.\d+)?(ms|s)',
+    multiLine: true,
+  );
+  static final RegExp _builtOutput = RegExp(
+    r'Built build\\windows\\runner\\(Debug|Release)\\\w+\.exe( \(\d+(\.\d+)?MB\))?\.',
+  );
+
+  @override
+  void verifyBuildOutput(List<String> stdout) {
+    _findNextMatcherInList(
+      stdout,
+      _buildOutput.hasMatch,
+      'Building Windows application...',
+    );
+
+    final String buildMode = release ? 'Release' : 'Debug';
+    _findNextMatcherInList(
+      stdout,
+      (String line) {
+        if (!_builtOutput.hasMatch(line) || !line.contains(buildMode)) {
+          return false;
+        }
+
+        // Size information is only included in release builds.
+        final bool hasSize = line.contains('MB).');
+        if (release != hasSize) {
+          return false;
+        }
+
+        return true;
+      },
+      'Built build\\windows\\runner\\$buildMode\\app.exe',
+    );
+  }
+}
+
 class DesktopRunOutputTest extends RunOutputTask {
   DesktopRunOutputTest(
     super.testDirectory,
@@ -172,6 +234,8 @@ class DesktopRunOutputTest extends RunOutputTask {
       'Launching $testTarget on',
     );
 
+    verifyBuildOutput(stdout);
+
     _findNextMatcherInList(
       stdout,
       (String line) => line.contains('Quit (terminate the application on the device).'),
@@ -186,6 +250,9 @@ class DesktopRunOutputTest extends RunOutputTask {
 
     return TaskResult.success(null);
   }
+
+  /// Verify the output from `flutter run`'s build step.
+  void verifyBuildOutput(List<String> stdout) {}
 }
 
 /// Test that the output of `flutter run` is expected.
@@ -244,14 +311,14 @@ abstract class RunOutputTask {
             ready.complete();
           }
         });
-      run.stderr
+      final Stream<String> runStderr = run.stderr
         .transform<String>(utf8.decoder)
         .transform<String>(const LineSplitter())
+        .asBroadcastStream();
+      runStderr.listen((String line) => print('run:stderr: $line'));
+      runStderr
         .skipWhile(isExpectedStderr)
-        .listen((String line) {
-          print('run:stderr: $line');
-          stderr.add(line);
-        });
+        .listen((String line) => stderr.add(line));
       unawaited(run.exitCode.then<void>((int exitCode) { runExitCode = exitCode; }));
       await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
       if (runExitCode != null) {

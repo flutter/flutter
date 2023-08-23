@@ -2,20 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show AccessibilityFeatures, Brightness, Locale, PlatformDispatcher;
+import 'dart:ui' show AccessibilityFeatures, Brightness, Display, FlutterView, Locale, PlatformDispatcher, VoidCallback;
 
 import 'package:flutter/widgets.dart' show WidgetsBinding, WidgetsBindingObserver;
 import 'package:flutter_test/flutter_test.dart';
 
+import 'utils/fake_and_mock_utils.dart';
+
 void main() {
-  test('TestWindow can handle new methods without breaking', () {
+  test('TestPlatformDispatcher can handle new methods without breaking', () {
     final dynamic testPlatformDispatcher = TestPlatformDispatcher(platformDispatcher: PlatformDispatcher.instance);
     // ignore: avoid_dynamic_calls
     expect(testPlatformDispatcher.someNewProperty, null);
   });
 
-  testWidgets('TestWindow can fake locale', (WidgetTester tester) async {
-    verifyThatTestPlatformDispatcherCanFakeProperty<Locale>(
+  testWidgets('TestPlatformDispatcher can fake locale', (WidgetTester tester) async {
+    verifyPropertyFaked<Locale>(
       tester: tester,
       realValue: PlatformDispatcher.instance.locale,
       fakeValue: const Locale('fake_language_code'),
@@ -28,8 +30,8 @@ void main() {
     );
   });
 
-  testWidgets('TestWindow can fake locales', (WidgetTester tester) async {
-    verifyThatTestPlatformDispatcherCanFakeProperty<List<Locale>>(
+  testWidgets('TestPlatformDispatcher can fake locales', (WidgetTester tester) async {
+    verifyPropertyFaked<List<Locale>>(
       tester: tester,
       realValue: PlatformDispatcher.instance.locales,
       fakeValue: <Locale>[const Locale('fake_language_code')],
@@ -42,8 +44,8 @@ void main() {
     );
   });
 
-  testWidgets('TestWindow can fake text scale factor', (WidgetTester tester) async {
-    verifyThatTestPlatformDispatcherCanFakeProperty<double>(
+  testWidgets('TestPlatformDispatcher can fake text scale factor', (WidgetTester tester) async {
+    verifyPropertyFaked<double>(
       tester: tester,
       realValue: PlatformDispatcher.instance.textScaleFactor,
       fakeValue: 2.5,
@@ -56,8 +58,8 @@ void main() {
     );
   });
 
-  testWidgets('TestWindow can fake clock format', (WidgetTester tester) async {
-    verifyThatTestPlatformDispatcherCanFakeProperty<bool>(
+  testWidgets('TestPlatformDispatcher can fake clock format', (WidgetTester tester) async {
+    verifyPropertyFaked<bool>(
       tester: tester,
       realValue: PlatformDispatcher.instance.alwaysUse24HourFormat,
       fakeValue: !PlatformDispatcher.instance.alwaysUse24HourFormat,
@@ -70,8 +72,8 @@ void main() {
     );
   });
 
-  testWidgets('TestWindow can fake brieflyShowPassword', (WidgetTester tester) async {
-    verifyThatTestPlatformDispatcherCanFakeProperty<bool>(
+  testWidgets('TestPlatformDispatcher can fake brieflyShowPassword', (WidgetTester tester) async {
+    verifyPropertyFaked<bool>(
       tester: tester,
       realValue: PlatformDispatcher.instance.brieflyShowPassword,
       fakeValue: !PlatformDispatcher.instance.brieflyShowPassword,
@@ -82,8 +84,8 @@ void main() {
     );
   });
 
-  testWidgets('TestWindow can fake default route name', (WidgetTester tester) async {
-    verifyThatTestPlatformDispatcherCanFakeProperty<String>(
+  testWidgets('TestPlatformDispatcher can fake default route name', (WidgetTester tester) async {
+    verifyPropertyFaked<String>(
       tester: tester,
       realValue: PlatformDispatcher.instance.defaultRouteName,
       fakeValue: 'fake_route',
@@ -96,8 +98,8 @@ void main() {
     );
   });
 
-  testWidgets('TestWindow can fake accessibility features', (WidgetTester tester) async {
-    verifyThatTestPlatformDispatcherCanFakeProperty<AccessibilityFeatures>(
+  testWidgets('TestPlatformDispatcher can fake accessibility features', (WidgetTester tester) async {
+    verifyPropertyFaked<AccessibilityFeatures>(
       tester: tester,
       realValue: PlatformDispatcher.instance.accessibilityFeatures,
       fakeValue: const FakeAccessibilityFeatures(),
@@ -110,8 +112,8 @@ void main() {
     );
   });
 
-  testWidgets('TestWindow can fake platform brightness', (WidgetTester tester) async {
-    verifyThatTestPlatformDispatcherCanFakeProperty<Brightness>(
+  testWidgets('TestPlatformDispatcher can fake platform brightness', (WidgetTester tester) async {
+    verifyPropertyFaked<Brightness>(
       tester: tester,
       realValue: Brightness.light,
       fakeValue: Brightness.dark,
@@ -124,7 +126,7 @@ void main() {
     );
   });
 
-  testWidgets('TestWindow can clear out fake properties all at once', (WidgetTester tester) async {
+  testWidgets('TestPlatformDispatcher can clear out fake properties all at once', (WidgetTester tester) async {
     final Locale originalLocale = PlatformDispatcher.instance.locale;
     final double originalTextScaleFactor = PlatformDispatcher.instance.textScaleFactor;
     final TestPlatformDispatcher testPlatformDispatcher = retrieveTestBinding(tester).platformDispatcher;
@@ -141,7 +143,7 @@ void main() {
     expect(WidgetsBinding.instance.platformDispatcher.textScaleFactor, originalTextScaleFactor);
   });
 
-  testWidgets('TestWindow sends fake locales when WidgetsBindingObserver notifiers are called', (WidgetTester tester) async {
+  testWidgets('TestPlatformDispatcher sends fake locales when WidgetsBindingObserver notifiers are called', (WidgetTester tester) async {
     final List<Locale> defaultLocales = WidgetsBinding.instance.platformDispatcher.locales;
     final TestObserver observer = TestObserver();
     retrieveTestBinding(tester).addObserver(observer);
@@ -150,41 +152,155 @@ void main() {
     expect(observer.locales, equals(expectedValue));
     retrieveTestBinding(tester).platformDispatcher.localesTestValue = defaultLocales;
   });
-}
 
-void verifyThatTestPlatformDispatcherCanFakeProperty<PlatformDispatcherPropertyType>({
-  required WidgetTester tester,
-  required PlatformDispatcherPropertyType? realValue,
-  required PlatformDispatcherPropertyType fakeValue,
-  required PlatformDispatcherPropertyType? Function() propertyRetriever,
-  required Function(TestWidgetsFlutterBinding, PlatformDispatcherPropertyType fakeValue) propertyFaker,
-}) {
-  PlatformDispatcherPropertyType? propertyBeforeFaking;
-  PlatformDispatcherPropertyType? propertyAfterFaking;
+  testWidgets('TestPlatformDispatcher.view getter returns the implicit view', (WidgetTester tester) async {
+    expect(WidgetsBinding.instance.platformDispatcher.view(id: tester.view.viewId), same(tester.view));
+  });
 
-  propertyBeforeFaking = propertyRetriever();
+  // TODO(pdblasi-google): Removed this group of tests when the Display API is stable and supported on all platforms.
+  group('TestPlatformDispatcher with unsupported Display API', () {
+    testWidgets('can initialize with empty displays', (WidgetTester tester) async {
+      expect(() {
+        TestPlatformDispatcher(
+          platformDispatcher: _FakePlatformDispatcher(
+            displays: <Display>[],
+            views: <FlutterView>[
+              _FakeFlutterView(),
+            ],
+          )
+        );
+      }, isNot(throwsA(anything)));
+    });
 
-  propertyFaker(retrieveTestBinding(tester), fakeValue);
+    testWidgets('can initialize with mismatched displays', (WidgetTester tester) async {
+      expect(() {
+        TestPlatformDispatcher(
+          platformDispatcher: _FakePlatformDispatcher(
+            displays: <Display>[
+              _FakeDisplay(id: 2),
+            ],
+            views: <FlutterView>[
+              _FakeFlutterView(display: _FakeDisplay(id: 1)),
+            ],
+          )
+        );
+      }, isNot(throwsA(anything)));
+    });
 
-  propertyAfterFaking = propertyRetriever();
+    testWidgets('creates test views for all views', (WidgetTester tester) async {
+      final PlatformDispatcher backingDispatcher = _FakePlatformDispatcher(
+        displays: <Display>[],
+        views: <FlutterView>[
+          _FakeFlutterView(),
+        ],
+      );
+      final TestPlatformDispatcher testDispatcher = TestPlatformDispatcher(
+        platformDispatcher: backingDispatcher,
+      );
 
-  expect(propertyBeforeFaking, realValue);
-  expect(propertyAfterFaking, fakeValue);
-}
+      expect(testDispatcher.views.length, backingDispatcher.views.length);
+    });
 
-TestWidgetsFlutterBinding retrieveTestBinding(WidgetTester tester) {
-  final WidgetsBinding binding = tester.binding;
-  assert(binding is TestWidgetsFlutterBinding);
-  final TestWidgetsFlutterBinding testBinding = binding as TestWidgetsFlutterBinding;
-  return testBinding;
+    group('creates TestFlutterViews', () {
+      testWidgets('that defaults to the correct devicePixelRatio', (WidgetTester tester) async {
+        const double expectedDpr = 2.5;
+        final TestPlatformDispatcher testDispatcher =  TestPlatformDispatcher(
+          platformDispatcher: _FakePlatformDispatcher(
+            displays: <Display>[],
+            views: <FlutterView>[
+              _FakeFlutterView(devicePixelRatio: expectedDpr),
+            ],
+          )
+        );
+
+        expect(testDispatcher.views.single.devicePixelRatio, expectedDpr);
+      });
+
+      testWidgets('with working devicePixelRatio setter', (WidgetTester tester) async {
+        const double expectedDpr = 2.5;
+        const double defaultDpr = 4;
+        final TestPlatformDispatcher testDispatcher =  TestPlatformDispatcher(
+          platformDispatcher: _FakePlatformDispatcher(
+            displays: <Display>[],
+            views: <FlutterView>[
+              _FakeFlutterView(devicePixelRatio: defaultDpr),
+            ],
+          )
+        );
+
+        testDispatcher.views.single.devicePixelRatio = expectedDpr;
+
+        expect(testDispatcher.views.single.devicePixelRatio, expectedDpr);
+      });
+
+      testWidgets('with working resetDevicePixelRatio', (WidgetTester tester) async {
+        const double changedDpr = 2.5;
+        const double defaultDpr = 4;
+        final TestPlatformDispatcher testDispatcher =  TestPlatformDispatcher(
+          platformDispatcher: _FakePlatformDispatcher(
+            displays: <Display>[],
+            views: <FlutterView>[
+              _FakeFlutterView(devicePixelRatio: defaultDpr),
+            ],
+          )
+        );
+
+        testDispatcher.views.single.devicePixelRatio = changedDpr;
+        testDispatcher.views.single.resetDevicePixelRatio();
+
+        expect(testDispatcher.views.single.devicePixelRatio, defaultDpr);
+      });
+    });
+  });
 }
 
 class TestObserver with WidgetsBindingObserver {
   List<Locale>? locales;
-  Locale? locale;
 
   @override
   void didChangeLocales(List<Locale>? locales) {
     this.locales = locales;
   }
+}
+
+class _FakeDisplay extends Fake implements Display {
+  _FakeDisplay({this.id = 0});
+
+  @override
+  final int id;
+}
+
+class _FakeFlutterView extends Fake implements FlutterView {
+  _FakeFlutterView({
+    this.devicePixelRatio = 1,
+    Display? display,
+  }) : _display = display;
+
+  @override
+  final double devicePixelRatio;
+
+  // This emulates the PlatformDispatcher not having a display on the engine
+  // side. We don't have access to the `_displayId` used in the engine to try
+  // to find it and can't directly extend `FlutterView` to emulate it closer.
+  @override
+  Display get display {
+    assert(_display != null);
+    return _display!;
+  }
+  final Display? _display;
+
+  @override
+  final int viewId = 1;
+}
+
+class _FakePlatformDispatcher extends Fake implements PlatformDispatcher {
+  _FakePlatformDispatcher({required this.displays, required this.views});
+  @override
+  final Iterable<Display> displays;
+
+  @override
+  final Iterable<FlutterView> views;
+
+  @override
+  VoidCallback? onMetricsChanged;
 }

@@ -2,12 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(gspencergoog): Remove this tag once this test's state leaks/test
-// dependencies have been fixed.
-// https://github.com/flutter/flutter/issues/85160
-// Fails with "flutter test --test-randomize-ordering-seed=1000"
-@Tags(<String>['no-shuffle'])
-
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -174,6 +168,137 @@ void main() {
 
     expect(log, <String>['rows-per-page-changed: 8']);
     log.clear();
+  });
+
+  testWidgets('PaginatedDataTable footer page number', (WidgetTester tester) async {
+    final TestDataSource source = TestDataSource();
+    int rowsPerPage = 2;
+
+    Widget buildTable(TestDataSource source, int rowsPerPage) {
+      return PaginatedDataTable(
+        header: const Text('Test table'),
+        source: source,
+        rowsPerPage: rowsPerPage,
+        showFirstLastButtons: true,
+        availableRowsPerPage: const <int>[
+          2, 3, 4, 5, 7, 8,
+        ],
+        onRowsPerPageChanged: (int? rowsPerPage) {
+        },
+        onPageChanged: (int rowIndex) {
+        },
+        columns: const <DataColumn>[
+          DataColumn(label: Text('Name')),
+          DataColumn(label: Text('Calories'), numeric: true),
+          DataColumn(label: Text('Generation')),
+        ],
+      );
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: buildTable(source, rowsPerPage)
+    ));
+
+    expect(find.text('1–2 of 500'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Next page'));
+    await tester.pump();
+
+    expect(find.text('3–4 of 500'), findsOneWidget);
+
+    final Finder lastPageButton = find.ancestor(
+      of: find.byTooltip('Last page'),
+      matching: find.byWidgetPredicate((Widget widget) => widget is IconButton),
+    );
+
+    expect(tester.widget<IconButton>(lastPageButton).onPressed, isNotNull);
+
+    await tester.tap(lastPageButton);
+    await tester.pump();
+
+    expect(find.text('499–500 of 500'), findsOneWidget);
+
+    final PaginatedDataTableState state =  tester.state(find.byType(PaginatedDataTable));
+
+    state.pageTo(1);
+    rowsPerPage = 3;
+
+    await tester.pumpWidget(MaterialApp(
+      home: buildTable(source, rowsPerPage)
+    ));
+
+    expect(find.textContaining('1–3 of 500'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Next page'));
+    await tester.pump();
+
+    expect(find.text('4–6 of 500'), findsOneWidget);
+    expect(tester.widget<IconButton>(lastPageButton).onPressed, isNotNull);
+
+    await tester.tap(lastPageButton);
+    await tester.pump();
+
+    expect(find.text('499–500 of 500'), findsOneWidget);
+
+    state.pageTo(1);
+    rowsPerPage = 4;
+
+    await tester.pumpWidget(MaterialApp(
+      home: buildTable(source, rowsPerPage)
+    ));
+
+    expect(find.textContaining('1–4 of 500'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Next page'));
+    await tester.pump();
+
+    expect(find.text('5–8 of 500'), findsOneWidget);
+    expect(tester.widget<IconButton>(lastPageButton).onPressed, isNotNull);
+
+    await tester.tap(lastPageButton);
+    await tester.pump();
+
+    expect(find.text('497–500 of 500'), findsOneWidget);
+
+    state.pageTo(1);
+    rowsPerPage = 5;
+
+    await tester.pumpWidget(MaterialApp(
+      home: buildTable(source, rowsPerPage)
+    ));
+
+    expect(find.textContaining('1–5 of 500'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Next page'));
+    await tester.pump();
+
+    expect(find.text('6–10 of 500'), findsOneWidget);
+    expect(tester.widget<IconButton>(lastPageButton).onPressed, isNotNull);
+
+    await tester.tap(lastPageButton);
+    await tester.pump();
+
+    expect(find.text('496–500 of 500'), findsOneWidget);
+
+    state.pageTo(1);
+    rowsPerPage = 8;
+
+    await tester.pumpWidget(MaterialApp(
+      home: buildTable(source, rowsPerPage)
+    ));
+
+    expect(find.textContaining('1–8 of 500'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Next page'));
+    await tester.pump();
+
+    expect(find.text('9–16 of 500'), findsOneWidget);
+    expect(tester.widget<IconButton>(lastPageButton).onPressed, isNotNull);
+
+    await tester.tap(lastPageButton);
+    await tester.pump();
+
+    expect(find.text('497–500 of 500'), findsOneWidget);
   });
 
   testWidgets('PaginatedDataTable control test', (WidgetTester tester) async {
@@ -404,7 +529,9 @@ void main() {
     final TestDataSource source = TestDataSource();
 
     Widget buildCustomHeightPaginatedTable({
-      double dataRowHeight = 48.0,
+      double? dataRowHeight,
+      double? dataRowMinHeight,
+      double? dataRowMaxHeight,
       double headingRowHeight = 56.0,
     }) {
       return PaginatedDataTable(
@@ -422,6 +549,8 @@ void main() {
           DataColumn(label: Text('Generation')),
         ],
         dataRowHeight: dataRowHeight,
+        dataRowMinHeight: dataRowMinHeight,
+        dataRowMaxHeight: dataRowMaxHeight,
         headingRowHeight: headingRowHeight,
       );
     }
@@ -479,6 +608,13 @@ void main() {
     expect(tester.renderObject<RenderBox>(
       find.widgetWithText(Container, 'Frozen yogurt (0)').first,
     ).size.height, 56.0);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildCustomHeightPaginatedTable(dataRowMinHeight: 51.0, dataRowMaxHeight: 51.0)),
+    ));
+    expect(tester.renderObject<RenderBox>(
+      find.widgetWithText(Container, 'Frozen yogurt (0)').first,
+    ).size.height, 51.0);
   });
 
   testWidgets('PaginatedDataTable custom horizontal padding - checkbox', (WidgetTester tester) async {
@@ -770,7 +906,7 @@ void main() {
   testWidgets('PaginatedDataTable table fills Card width', (WidgetTester tester) async {
     final TestDataSource source = TestDataSource();
 
-    // Note: 800 is wide enough to ensure that all of the columns fit in the
+    // 800 is wide enough to ensure that all of the columns fit in the
     // Card. The test makes sure that the DataTable is exactly as wide
     // as the Card, minus the Card's margin.
     const double originalWidth = 800;
@@ -833,6 +969,7 @@ void main() {
 
   testWidgets('PaginatedDataTable with optional column checkbox', (WidgetTester tester) async {
     await binding.setSurfaceSize(const Size(800, 800));
+    addTearDown(() => binding.setSurfaceSize(null));
 
     Widget buildTable(bool checkbox) => MaterialApp(
       home: PaginatedDataTable(
@@ -992,6 +1129,7 @@ void main() {
 
   testWidgets('PaginatedDataTable arrowHeadColor set properly', (WidgetTester tester) async {
     await binding.setSurfaceSize(const Size(800, 800));
+    addTearDown(() => binding.setSurfaceSize(null));
     const Color arrowHeadColor = Color(0xFFE53935);
 
     await tester.pumpWidget(

@@ -21,5 +21,10 @@
   "selectAllButtonLabel": "ሁሉንም ምረጥ",
   "tabSemanticsLabel": "ትር $tabIndex ከ$tabCount",
   "modalBarrierDismissLabel": "አሰናብት",
-  "searchTextFieldPlaceholderLabel": "ፍለጋ"
+  "searchTextFieldPlaceholderLabel": "ፍለጋ",
+  "noSpellCheckReplacementsLabel": "ምንም ተተኪዎች አልተገኙም",
+  "menuDismissLabel": "ምናሌን አሰናብት",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

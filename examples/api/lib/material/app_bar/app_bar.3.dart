@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [AppBar].
-
 import 'package:flutter/material.dart';
+
+/// Flutter code sample for [AppBar].
 
 List<String> titles = <String>[
   'Cloud',
@@ -80,7 +80,7 @@ class AppBarExample extends StatelessWidget {
             ListView.builder(
               itemCount: 25,
               itemBuilder: (BuildContext context, int index) {
-                return  ListTile(
+                return ListTile(
                   tileColor: index.isOdd ? oddItemColor : evenItemColor,
                   title: Text('${titles[0]} $index'),
                 );
@@ -89,7 +89,7 @@ class AppBarExample extends StatelessWidget {
             ListView.builder(
               itemCount: 25,
               itemBuilder: (BuildContext context, int index) {
-                return  ListTile(
+                return ListTile(
                   tileColor: index.isOdd ? oddItemColor : evenItemColor,
                   title: Text('${titles[1]} $index'),
                 );
@@ -98,7 +98,7 @@ class AppBarExample extends StatelessWidget {
             ListView.builder(
               itemCount: 25,
               itemBuilder: (BuildContext context, int index) {
-                return  ListTile(
+                return ListTile(
                   tileColor: index.isOdd ? oddItemColor : evenItemColor,
                   title: Text('${titles[2]} $index'),
                 );

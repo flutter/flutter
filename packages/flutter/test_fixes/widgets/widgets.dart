@@ -10,6 +10,16 @@ void main() {
   RenderObjectWidget renderObjectWidget;
   RenderObject renderObject;
   Object object;
+  TickerProvider vsync;
+
+  // Changes made in https://github.com/flutter/flutter/pull/123352
+  WidgetsBinding.instance.renderViewElement;
+
+  // Changes made in https://github.com/flutter/flutter/pull/119647
+  MediaQueryData.fromWindow(View.of(context));
+
+  // Changes made in https://github.com/flutter/flutter/pull/119186 and https://github.com/flutter/flutter/pull/81067
+  AnimatedSize(vsync: vsync, duration: Duration.zero);
 
   // Changes made in https://github.com/flutter/flutter/pull/45941 and https://github.com/flutter/flutter/pull/83843
   final WidgetsBinding binding = WidgetsBinding.instance;
@@ -153,4 +163,11 @@ void main() {
 
   // Changes made in https://github.com/flutter/flutter/pull/114459
   MediaQuery.boldTextOverride(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/122555
+  final ScrollableDetails details = ScrollableDetails(
+    direction: AxisDirection.down,
+    clipBehavior: Clip.none,
+  );
+  final Clip clip = details.clipBehavior;
 }

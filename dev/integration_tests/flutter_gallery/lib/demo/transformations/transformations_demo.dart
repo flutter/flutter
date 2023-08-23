@@ -93,10 +93,10 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
   Widget get instructionDialog {
     return AlertDialog(
       title: const Text('2D Transformations'),
-      content: Column(
+      content: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
-        children: const <Widget>[
+        children: <Widget>[
           Text('Tap to edit hex tiles, and use gestures to move around the scene:\n'),
           Text('- Drag to pan.'),
           Text('- Pinch to zoom.'),

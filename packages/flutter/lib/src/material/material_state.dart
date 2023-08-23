@@ -602,6 +602,8 @@ class _MaterialStateUnderlineInputBorder extends MaterialStateUnderlineInputBord
 /// on a widget's interactive "state", which is defined as a set
 /// of [MaterialState]s.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=CylXr3AF3uU}
+///
 /// Material state properties represent values that depend on a widget's material
 /// "state". The state is encoded as a set of [MaterialState] values, like
 /// [MaterialState.focused], [MaterialState.hovered], [MaterialState.pressed]. For
@@ -630,7 +632,6 @@ class _MaterialStateUnderlineInputBorder extends MaterialStateUnderlineInputBord
 ///
 /// {@macro flutter.material.MaterialStateProperty.implementations}
 abstract class MaterialStateProperty<T> {
-
   /// Returns a value of type `T` that depends on [states].
   ///
   /// Widgets like [TextButton] and [ElevatedButton] apply this method to their

@@ -45,13 +45,12 @@ abstract class BinaryMessenger {
   /// To register a handler for a given message channel, see [setMessageHandler].
   ///
   /// To send a message _to_ a plugin on the platform thread, see [send].
-  // TODO(ianh): deprecate this method once cocoon and other customer_tests are migrated:
-  // @NotYetDeprecated(
-  //   'Instead of calling this method, use ServicesBinding.instance.channelBuffers.push. '
-  //   'In tests, consider using tester.binding.defaultBinaryMessenger.handlePlatformMessage '
-  //   'or TestDefaultBinaryMessenger.instance.defaultBinaryMessenger.handlePlatformMessage. '
-  //   'This feature was deprecated after v2.1.0-10.0.pre.'
-  // )
+  @Deprecated(
+    'Instead of calling this method, use ServicesBinding.instance.channelBuffers.push. '
+    'In tests, consider using tester.binding.defaultBinaryMessenger.handlePlatformMessage '
+    'or TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage. '
+    'This feature was deprecated after v3.9.0-19.0.pre.'
+  )
   Future<void> handlePlatformMessage(String channel, ByteData? data, ui.PlatformMessageResponseCallback? callback);
 
   /// Send a binary message to the platform plugins on the given channel.

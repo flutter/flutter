@@ -446,6 +446,7 @@ void main() {
         key: outerContainerKey,
         child: LookupBoundary(
           child: Container(
+            padding: const EdgeInsets.all(10),
             color: Colors.blue,
             child: Container(
               key: innerContainerKey,
@@ -963,6 +964,7 @@ void main() {
     testWidgets('is hiding', (WidgetTester tester) async {
       bool? isHidden;
       await tester.pumpWidget(Container(
+        padding: const EdgeInsets.all(10),
         color: Colors.blue,
         child: LookupBoundary(
           child: Builder(
@@ -979,9 +981,11 @@ void main() {
     testWidgets('is not hiding entity within boundary', (WidgetTester tester) async {
       bool? isHidden;
       await tester.pumpWidget(Container(
+        padding: const EdgeInsets.all(10),
         color: Colors.blue,
         child: LookupBoundary(
           child: Container(
+            padding: const EdgeInsets.all(10),
             color: Colors.red,
             child: Builder(
               builder: (BuildContext context) {
@@ -998,6 +1002,7 @@ void main() {
     testWidgets('is not hiding if no boundary exists', (WidgetTester tester) async {
       bool? isHidden;
       await tester.pumpWidget(Container(
+        padding: const EdgeInsets.all(10),
         color: Colors.blue,
         child: Builder(
           builder: (BuildContext context) {

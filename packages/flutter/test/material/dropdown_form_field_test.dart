@@ -4,10 +4,9 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../rendering/mock_canvas.dart';
 
 const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
 void onChanged<T>(T _) { }
@@ -90,7 +89,7 @@ class _TestAppState extends State<TestApp> {
         DefaultMaterialLocalizations.delegate,
       ],
       child: MediaQuery(
-        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window).copyWith(size: widget.mediaSize),
+        data: const MediaQueryData().copyWith(size: widget.mediaSize),
         child: Directionality(
           textDirection: widget.textDirection,
           child: Navigator(
@@ -1133,5 +1132,101 @@ void main() {
       buttonBox.localToGlobal(Offset(buttonBox.size.width / 2.0, buttonBox.size.height / 2.0)),
       selectedItemBox.localToGlobal(Offset(selectedItemBox.size.width / 2.0, selectedItemBox.size.height / 2.0)),
     );
+  });
+
+  testWidgets('InputDecoration borders are used for clipping', (WidgetTester tester) async {
+    const BorderRadius errorBorderRadius = BorderRadius.all(Radius.circular(5.0));
+    const BorderRadius focusedErrorBorderRadius = BorderRadius.all(Radius.circular(6.0));
+    const BorderRadius focusedBorder = BorderRadius.all(Radius.circular(7.0));
+    const BorderRadius enabledBorder = BorderRadius.all(Radius.circular(9.0));
+
+    final FocusNode focusNode = FocusNode();
+
+    const String errorText = 'This is an error';
+    bool showError = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          inputDecorationTheme: const InputDecorationTheme(
+            errorBorder: OutlineInputBorder(
+              borderRadius: errorBorderRadius,
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: focusedErrorBorderRadius,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: focusedBorder,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: enabledBorder,
+            ),
+          ),
+        ),
+        home: Material(
+          child: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return DropdownButtonFormField<String>(
+                  value: 'two',
+                  onChanged:(String? value) {
+                    setState(() {
+                      if (value == 'three') {
+                        showError = true;
+                      } else {
+                        showError = false;
+                      }
+                    });
+                  },
+                  decoration: InputDecoration(
+                    errorText: showError ? errorText : null,
+                  ),
+                  focusNode: focusNode,
+                  items: menuItems.map<DropdownMenuItem<String>>((String item) {
+                    return DropdownMenuItem<String>(
+                      key: ValueKey<String>(item),
+                      value: item,
+                      child: Text(item, key: ValueKey<String>('${item}Text')),
+                    );
+                  }).toList(),
+                );
+              }
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Test enabled border.
+    InkWell inkWell = tester.widget<InkWell>(find.byType(InkWell));
+    expect(inkWell.borderRadius, enabledBorder);
+
+    // Test focused border.
+    focusNode.requestFocus();
+    await tester.pump();
+
+    inkWell = tester.widget<InkWell>(find.byType(InkWell));
+    expect(inkWell.borderRadius, focusedBorder);
+
+    // Test focused error border.
+    await tester.tap(find.text('two'), warnIfMissed: false);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('three').last);
+    await tester.pumpAndSettle();
+
+    inkWell = tester.widget<InkWell>(find.byType(InkWell));
+    expect(inkWell.borderRadius, focusedErrorBorderRadius);
+
+    // Test error border with no focus.
+    focusNode.unfocus();
+    await tester.pump();
+
+    // Hovering over the widget should show the error border.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.moveTo(tester.getCenter(find.text('three').last));
+    await tester.pumpAndSettle();
+
+    inkWell = tester.widget<InkWell>(find.byType(InkWell));
+    expect(inkWell.borderRadius, errorBorderRadius);
   });
 }

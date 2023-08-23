@@ -58,7 +58,7 @@ abstract class IOSApp extends ApplicationPackage {
       globals.printError('Invalid prebuilt iOS app. Does not contain Info.plist.');
       return null;
     }
-    final String? id = globals.plistParser.getStringValueFromFile(
+    final String? id = globals.plistParser.getValueFromFile<String>(
       plistPath,
       PlistParser.kCFBundleIdentifierKey,
     );
@@ -191,7 +191,7 @@ class BuildableIOSApp extends IOSApp {
 
   // Template asset's images are in flutter_template_images package.
   Future<String> _templateImageAssetDirNameForImages(String asset) async {
-    final Directory imageTemplate = await templateImageDirectory(null, globals.fs, globals.logger);
+    final Directory imageTemplate = await templatePathProvider.imageDirectory(null, globals.fs, globals.logger);
     return globals.fs.path.join(imageTemplate.path, _templateImageAssetDirNameSuffix(asset));
   }
 

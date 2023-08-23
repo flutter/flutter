@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
 
@@ -23,7 +24,13 @@ void main() {
     expect(copy, custom);
   });
 
-  testWidgets('Default SegmentedButtonThemeData debugFillProperties', (WidgetTester tester) async {
+  test('SegmentedButtonThemeData lerp special cases', () {
+    expect(SegmentedButtonThemeData.lerp(null, null, 0), const SegmentedButtonThemeData());
+    const SegmentedButtonThemeData theme = SegmentedButtonThemeData();
+    expect(identical(SegmentedButtonThemeData.lerp(theme, theme, 0.5), theme), true);
+  });
+
+  testWidgetsWithLeakTracking('Default SegmentedButtonThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SegmentedButtonThemeData().debugFillProperties(builder);
 
@@ -64,7 +71,7 @@ void main() {
       final Material material = tester.widget<Material>(parent);
       expect(material.color, Colors.transparent);
       expect(material.shape, const RoundedRectangleBorder());
-      expect(material.textStyle!.color, theme.colorScheme.primary);
+      expect(material.textStyle!.color, theme.colorScheme.onSurface);
       expect(material.textStyle!.fontFamily, 'Roboto');
       expect(material.textStyle!.fontSize, 14);
       expect(material.textStyle!.fontWeight, FontWeight.w500);

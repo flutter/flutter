@@ -21,8 +21,6 @@ import 'convert.dart';
 
 /// Opt-in changes to the dart compilers.
 const List<String> kDartCompilerExperiments = <String>[
-  // improve AOT code size.
-  '--compact-async',
 ];
 
 /// The target model describes the set of core libraries that are available within
@@ -116,7 +114,7 @@ class StdoutHandler {
         }
       }
       if (message.length <= messageBoundaryKey.length) {
-        compilerOutput?.complete(null);
+        compilerOutput?.complete();
         return;
       }
       final int spaceDelimiter = message.lastIndexOf(' ');
@@ -146,10 +144,8 @@ class StdoutHandler {
       switch (message[0]) {
         case '+':
           sources.add(Uri.parse(message.substring(1)));
-          break;
         case '-':
           sources.remove(Uri.parse(message.substring(1)));
-          break;
         default:
           _logger.printTrace('Unexpected prefix for $message uri - ignoring');
       }
@@ -169,37 +165,33 @@ class StdoutHandler {
 }
 
 /// List the preconfigured build options for a given build mode.
-List<String> buildModeOptions(BuildMode mode, List<String> dartDefines) {
-  switch (mode) {
-    case BuildMode.debug:
-      return <String>[
-        // These checks allow the CLI to override the value of this define for unit
-        // testing the framework.
-        if (!dartDefines.any((String define) => define.startsWith('dart.vm.profile')))
+List<String> buildModeOptions(BuildMode mode, List<String> dartDefines) =>
+    switch (mode) {
+      BuildMode.debug => <String>[
+          // These checks allow the CLI to override the value of this define for unit
+          // testing the framework.
+          if (!dartDefines.any((String define) => define.startsWith('dart.vm.profile')))
+            '-Ddart.vm.profile=false',
+          if (!dartDefines.any((String define) => define.startsWith('dart.vm.product')))
+            '-Ddart.vm.product=false',
+          '--enable-asserts',
+        ],
+      BuildMode.profile => <String>[
+          // These checks allow the CLI to override the value of this define for
+          // benchmarks with most timeline traces disabled.
+          if (!dartDefines.any((String define) => define.startsWith('dart.vm.profile')))
+            '-Ddart.vm.profile=true',
+          if (!dartDefines.any((String define) => define.startsWith('dart.vm.product')))
+            '-Ddart.vm.product=false',
+          ...kDartCompilerExperiments,
+        ],
+      BuildMode.release => <String>[
           '-Ddart.vm.profile=false',
-        if (!dartDefines.any((String define) => define.startsWith('dart.vm.product')))
-          '-Ddart.vm.product=false',
-        '--enable-asserts',
-      ];
-    case BuildMode.profile:
-      return <String>[
-        // These checks allow the CLI to override the value of this define for
-        // benchmarks with most timeline traces disabled.
-        if (!dartDefines.any((String define) => define.startsWith('dart.vm.profile')))
-          '-Ddart.vm.profile=true',
-        if (!dartDefines.any((String define) => define.startsWith('dart.vm.product')))
-          '-Ddart.vm.product=false',
-        ...kDartCompilerExperiments,
-      ];
-    case BuildMode.release:
-      return <String>[
-        '-Ddart.vm.profile=false',
-        '-Ddart.vm.product=true',
-        ...kDartCompilerExperiments,
-      ];
-  }
-  throw Exception('Unknown BuildMode: $mode');
-}
+          '-Ddart.vm.product=true',
+          ...kDartCompilerExperiments,
+        ],
+      _ => throw Exception('Unknown BuildMode: $mode')
+    };
 
 /// A compiler interface for producing single (non-incremental) kernel files.
 class KernelCompiler {
@@ -241,6 +233,7 @@ class KernelCompiler {
     String? initializeFromDill,
     String? platformDill,
     Directory? buildDir,
+    String? targetOS,
     bool checkDartPluginRegistry = false,
     required String? packagesPath,
     required BuildMode buildMode,
@@ -301,6 +294,11 @@ class KernelCompiler {
       if (aot) ...<String>[
         '--aot',
         '--tfa',
+        // The --target-os flag only makes sense for whole program compilation.
+        if (targetOS != null) ...<String>[
+          '--target-os',
+          targetOS,
+        ],
       ],
       if (packagesPath != null) ...<String>[
         '--packages',
@@ -404,17 +402,25 @@ class _CompileExpressionRequest extends _CompilationRequest {
     super.completer,
     this.expression,
     this.definitions,
+    this.definitionTypes,
     this.typeDefinitions,
+    this.typeBounds,
+    this.typeDefaults,
     this.libraryUri,
     this.klass,
+    this.method,
     this.isStatic,
   );
 
   String expression;
   List<String>? definitions;
+  List<String>? definitionTypes;
   List<String>? typeDefinitions;
+  List<String>? typeBounds;
+  List<String>? typeDefaults;
   String? libraryUri;
   String? klass;
+  String? method;
   bool isStatic;
 
   @override
@@ -514,9 +520,13 @@ abstract class ResidentCompiler {
   Future<CompilerOutput?> compileExpression(
     String expression,
     List<String>? definitions,
+    List<String>? definitionTypes,
     List<String>? typeDefinitions,
+    List<String>? typeBounds,
+    List<String>? typeDefaults,
     String? libraryUri,
     String? klass,
+    String? method,
     bool isStatic,
   );
 
@@ -575,7 +585,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     required this.buildMode,
     required Logger logger,
     required ProcessManager processManager,
-    required Artifacts artifacts,
+    required this.artifacts,
     required Platform platform,
     required FileSystem fileSystem,
     this.testCompilation = false,
@@ -592,10 +602,8 @@ class DefaultResidentCompiler implements ResidentCompiler {
     List<String>? dartDefines,
     this.librariesSpec,
     @visibleForTesting StdoutHandler? stdoutHandler,
-  }) : assert(sdkRoot != null),
-       _logger = logger,
+  }) : _logger = logger,
        _processManager = processManager,
-       _artifacts = artifacts,
        _stdoutHandler = stdoutHandler ?? StdoutHandler(logger: logger, fileSystem: fileSystem),
        _platform = platform,
        dartDefines = dartDefines ?? const <String>[],
@@ -606,7 +614,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
 
   final Logger _logger;
   final ProcessManager _processManager;
-  final Artifacts _artifacts;
+  final Artifacts artifacts;
   final Platform _platform;
 
   final bool testCompilation;
@@ -656,7 +664,6 @@ class DefaultResidentCompiler implements ResidentCompiler {
     String? projectRootPath,
     FileSystem? fs,
   }) async {
-    assert(outputPath != null);
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
     }
@@ -743,12 +750,12 @@ class DefaultResidentCompiler implements ResidentCompiler {
     {String? additionalSourceUri}
   ) async {
     final TargetPlatform? platform = (targetModel == TargetModel.dartdevc) ? TargetPlatform.web_javascript : null;
-    final String frontendServer = _artifacts.getArtifactPath(
+    final String frontendServer = artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk,
       platform: platform,
     );
     final List<String> command = <String>[
-      _artifacts.getArtifactPath(Artifact.engineDartBinary, platform: platform),
+      artifacts.getArtifactPath(Artifact.engineDartBinary, platform: platform),
       '--disable-dart-dev',
       frontendServer,
       '--sdk-root',
@@ -779,11 +786,10 @@ class DefaultResidentCompiler implements ResidentCompiler {
       ],
       ...buildModeOptions(buildMode, dartDefines),
       if (trackWidgetCreation) '--track-widget-creation',
-      if (fileSystemRoots != null)
-        for (final String root in fileSystemRoots) ...<String>[
-          '--filesystem-root',
-          root,
-        ],
+      for (final String root in fileSystemRoots) ...<String>[
+        '--filesystem-root',
+        root,
+      ],
       if (fileSystemScheme != null) ...<String>[
         '--filesystem-scheme',
         fileSystemScheme!,
@@ -804,7 +810,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
         '--platform',
         platformDill!,
       ],
-      if (unsafePackageSerialization == true) '--unsafe-package-serialization',
+      if (unsafePackageSerialization) '--unsafe-package-serialization',
       // See: https://github.com/flutter/flutter/issues/103994
       '--verbosity=error',
       ...?extraFrontEndOptions,
@@ -820,7 +826,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
           // when outputFilename future is not completed, but stdout is closed
           // process has died unexpectedly.
           if (_stdoutHandler.compilerOutput?.isCompleted == false) {
-            _stdoutHandler.compilerOutput?.complete(null);
+            _stdoutHandler.compilerOutput?.complete();
             throwToolExit('the Dart compiler exited unexpectedly.');
           }
         });
@@ -846,9 +852,13 @@ class DefaultResidentCompiler implements ResidentCompiler {
   Future<CompilerOutput?> compileExpression(
     String expression,
     List<String>? definitions,
+    List<String>? definitionTypes,
     List<String>? typeDefinitions,
+    List<String>? typeBounds,
+    List<String>? typeDefaults,
     String? libraryUri,
     String? klass,
+    String? method,
     bool isStatic,
   ) async {
     if (!_controller.hasListener) {
@@ -857,7 +867,8 @@ class DefaultResidentCompiler implements ResidentCompiler {
 
     final Completer<CompilerOutput?> completer = Completer<CompilerOutput?>();
     final _CompileExpressionRequest request =  _CompileExpressionRequest(
-        completer, expression, definitions, typeDefinitions, libraryUri, klass, isStatic);
+        completer, expression, definitions, definitionTypes, typeDefinitions,
+        typeBounds, typeDefaults, libraryUri, klass, method, isStatic);
     _controller.add(request);
     return completer.future;
   }
@@ -878,11 +889,18 @@ class DefaultResidentCompiler implements ResidentCompiler {
       ..writeln(request.expression);
     request.definitions?.forEach(server.stdin.writeln);
     server.stdin.writeln(inputKey);
+    request.definitionTypes?.forEach(server.stdin.writeln);
+    server.stdin.writeln(inputKey);
     request.typeDefinitions?.forEach(server.stdin.writeln);
+    server.stdin.writeln(inputKey);
+    request.typeBounds?.forEach(server.stdin.writeln);
+    server.stdin.writeln(inputKey);
+    request.typeDefaults?.forEach(server.stdin.writeln);
     server.stdin
       ..writeln(inputKey)
       ..writeln(request.libraryUri ?? '')
       ..writeln(request.klass ?? '')
+      ..writeln(request.method ?? '')
       ..writeln(request.isStatic);
 
     return _stdoutHandler.compilerOutput?.future;

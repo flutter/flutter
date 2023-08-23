@@ -100,7 +100,7 @@ class ScaffoldMessenger extends StatefulWidget {
   const ScaffoldMessenger({
     super.key,
     required this.child,
-  }) : assert(child != null);
+  });
 
   /// The widget below this widget in the tree.
   ///
@@ -144,7 +144,6 @@ class ScaffoldMessenger extends StatefulWidget {
   ///  * [debugCheckHasScaffoldMessenger], which asserts that the given context
   ///    has a [ScaffoldMessenger] ancestor.
   static ScaffoldMessengerState of(BuildContext context) {
-    assert(context != null);
     assert(debugCheckHasScaffoldMessenger(context));
 
     final _ScaffoldMessengerScope scope = context.dependOnInheritedWidgetOfExactType<_ScaffoldMessengerScope>()!;
@@ -161,7 +160,6 @@ class ScaffoldMessenger extends StatefulWidget {
   ///  * [of], which is a similar function, except that it will throw an
   ///    exception if a [ScaffoldMessenger] is not found in the given context.
   static ScaffoldMessengerState? maybeOf(BuildContext context) {
-    assert(context != null);
 
     final _ScaffoldMessengerScope? scope = context.dependOnInheritedWidgetOfExactType<_ScaffoldMessengerScope>();
     return scope?._scaffoldMessengerState;
@@ -281,6 +279,12 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// the SnackBar to be visible.
   ///
   /// {@tool dartpad}
+  /// Here is an example showing how to display a [SnackBar] with [showSnackBar]
+  ///
+  /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger_state.show_snack_bar.0.dart **
+  /// {@end-tool}
+  ///
+  /// {@tool dartpad}
   /// Here is an example showing that a floating [SnackBar] appears above [Scaffold.floatingActionButton].
   ///
   /// ** See code in examples/api/lib/material/scaffold/scaffold_messenger_state.show_snack_bar.1.dart **
@@ -362,14 +366,12 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
         if (_snackBars.isNotEmpty) {
           _snackBarController!.forward();
         }
-        break;
       case AnimationStatus.completed:
         setState(() {
           assert(_snackBarTimer == null);
           // build will create a new timer if necessary to dismiss the snackBar.
         });
         _updateScaffolds();
-        break;
       case AnimationStatus.forward:
         break;
       case AnimationStatus.reverse:
@@ -383,7 +385,6 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// The removed snack bar does not run its normal exit animation. If there are
   /// any queued snack bars, they begin their entrance animation immediately.
   void removeCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.remove }) {
-    assert(reason != null);
     if (_snackBars.isEmpty) {
       return;
     }
@@ -401,7 +402,6 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   ///
   /// The closed completer is called after the animation is complete.
   void hideCurrentSnackBar({ SnackBarClosedReason reason = SnackBarClosedReason.hide }) {
-    assert(reason != null);
     if (_snackBars.isEmpty || _snackBarController!.status == AnimationStatus.dismissed) {
       return;
     }
@@ -501,10 +501,8 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
         if (_materialBanners.isNotEmpty) {
           _materialBannerController!.forward();
         }
-        break;
       case AnimationStatus.completed:
         _updateScaffolds();
-        break;
       case AnimationStatus.forward:
         break;
       case AnimationStatus.reverse:
@@ -518,7 +516,6 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   /// The removed material banner does not run its normal exit animation. If there are
   /// any queued material banners, they begin their entrance animation immediately.
   void removeCurrentMaterialBanner({ MaterialBannerClosedReason reason = MaterialBannerClosedReason.remove }) {
-    assert(reason != null);
     if (_materialBanners.isEmpty) {
       return;
     }
@@ -535,7 +532,6 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
   ///
   /// The closed completer is called after the animation is complete.
   void hideCurrentMaterialBanner({ MaterialBannerClosedReason reason = MaterialBannerClosedReason.hide }) {
-    assert(reason != null);
     if (_materialBanners.isEmpty || _materialBannerController!.status == AnimationStatus.dismissed) {
       return;
     }
@@ -827,8 +823,7 @@ class ScaffoldGeometry {
 }
 
 class _ScaffoldGeometryNotifier extends ChangeNotifier implements ValueListenable<ScaffoldGeometry> {
-  _ScaffoldGeometryNotifier(this.geometry, this.context)
-    : assert (context != null);
+  _ScaffoldGeometryNotifier(this.geometry, this.context);
 
   final BuildContext context;
   double? floatingActionButtonScale;
@@ -880,11 +875,8 @@ class _BodyBoxConstraints extends BoxConstraints {
     required this.bottomWidgetsHeight,
     required this.appBarHeight,
     required this.materialBannerHeight,
-  }) : assert(bottomWidgetsHeight != null),
-       assert(bottomWidgetsHeight >= 0),
-       assert(appBarHeight != null),
+  }) : assert(bottomWidgetsHeight >= 0),
        assert(appBarHeight >= 0),
-       assert(materialBannerHeight != null),
        assert(materialBannerHeight >= 0);
 
   final double bottomWidgetsHeight;
@@ -921,9 +913,7 @@ class _BodyBuilder extends StatelessWidget {
     required this.extendBody,
     required this.extendBodyBehindAppBar,
     required this.body,
-  }) : assert(extendBody != null),
-       assert(extendBodyBehindAppBar != null),
-       assert(body != null);
+  });
 
   final Widget body;
   final bool extendBody;
@@ -979,13 +969,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     required this.extendBody,
     required this.extendBodyBehindAppBar,
     required this.extendBodyBehindMaterialBanner,
-  }) : assert(minInsets != null),
-       assert(textDirection != null),
-       assert(geometryNotifier != null),
-       assert(previousFloatingActionButtonLocation != null),
-       assert(currentFloatingActionButtonLocation != null),
-       assert(extendBody != null),
-       assert(extendBodyBehindAppBar != null);
+  });
 
   final bool extendBody;
   final bool extendBodyBehindAppBar;
@@ -1158,7 +1142,29 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       }
 
       final double snackBarYOffsetBase;
-      if (floatingActionButtonRect.size != Size.zero && isSnackBarFloating) {
+      final bool showAboveFab = switch (currentFloatingActionButtonLocation) {
+        FloatingActionButtonLocation.startTop
+        || FloatingActionButtonLocation.centerTop
+        || FloatingActionButtonLocation.endTop
+        || FloatingActionButtonLocation.miniStartTop
+        || FloatingActionButtonLocation.miniCenterTop
+        || FloatingActionButtonLocation.miniEndTop => false,
+        FloatingActionButtonLocation.startDocked
+        || FloatingActionButtonLocation.startFloat
+        || FloatingActionButtonLocation.centerDocked
+        || FloatingActionButtonLocation.centerFloat
+        || FloatingActionButtonLocation.endContained
+        || FloatingActionButtonLocation.endDocked
+        || FloatingActionButtonLocation.endFloat
+        || FloatingActionButtonLocation.miniStartDocked
+        || FloatingActionButtonLocation.miniStartFloat
+        || FloatingActionButtonLocation.miniCenterDocked
+        || FloatingActionButtonLocation.miniCenterFloat
+        || FloatingActionButtonLocation.miniEndDocked
+        || FloatingActionButtonLocation.miniEndFloat => true,
+        FloatingActionButtonLocation() => true,
+      };
+      if (floatingActionButtonRect.size != Size.zero && isSnackBarFloating && showAboveFab) {
         snackBarYOffsetBase = floatingActionButtonRect.top;
       } else {
         // SnackBarBehavior.fixed applies a SafeArea automatically.
@@ -1176,9 +1182,9 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       positionChild(_ScaffoldSlot.snackBar, Offset(xOffset, snackBarYOffsetBase - snackBarSize.height));
 
       assert((){
-        // Whether a floating SnackBar has been offsetted too high.
+        // Whether a floating SnackBar has been offset too high.
         //
-        // To improve the developper experience, this assert is done after the call to positionChild.
+        // To improve the developer experience, this assert is done after the call to positionChild.
         // if we assert sooner the SnackBar is visible because its defaults position is (0,0) and
         // it can cause confusion to the user as the error message states that the SnackBar is off screen.
         if (isSnackBarFloating) {
@@ -1251,9 +1257,7 @@ class _FloatingActionButtonTransition extends StatefulWidget {
     required this.fabMotionAnimator,
     required this.geometryNotifier,
     required this.currentController,
-  }) : assert(fabMoveAnimation != null),
-       assert(fabMotionAnimator != null),
-       assert(currentController != null);
+  });
 
   final Widget? child;
   final Animation<double> fabMoveAnimation;
@@ -1382,11 +1386,9 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 
   void _handlePreviousAnimationStatusChanged(AnimationStatus status) {
     setState(() {
-      if (status == AnimationStatus.dismissed) {
+      if (widget.child != null && status == AnimationStatus.dismissed) {
         assert(widget.currentController.status == AnimationStatus.dismissed);
-        if (widget.child != null) {
-          widget.currentController.forward();
-        }
+        widget.currentController.forward();
       }
     });
   }
@@ -1460,8 +1462,6 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// within the [Scaffold]. The [FloatingActionButton] is connected to a
 /// callback that increments a counter.
 ///
-/// ![The Scaffold has a white background with a blue AppBar at the top. A blue FloatingActionButton is positioned at the bottom right corner of the Scaffold.](https://flutter.github.io/assets-for-api-docs/assets/material/scaffold.png)
-///
 /// ** See code in examples/api/lib/material/scaffold/scaffold.0.dart **
 /// {@end-tool}
 ///
@@ -1508,6 +1508,19 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// cause the body to avoid the padding. The [SafeArea]
 /// widget can be used within the scaffold's body to avoid areas
 /// like display notches.
+///
+/// ## Floating action button with a draggable scrollable bottom sheet
+///
+/// If [Scaffold.bottomSheet] is a [DraggableScrollableSheet],
+/// [Scaffold.floatingActionButton] is set, and the bottom sheet is dragged to
+/// cover greater than 70% of the Scaffold's height, two things happen in parallel:
+///
+///   * Scaffold starts to show scrim (see [ScaffoldState.showBodyScrim]), and
+///   * [Scaffold.floatingActionButton] is scaled down through an animation with a [Curves.easeIn], and
+///     disappears when the bottom sheet covers the entire Scaffold.
+///
+/// And as soon as the bottom sheet is dragged down to cover less than 70% of the [Scaffold], the scrim
+/// disappears and [Scaffold.floatingActionButton] animates back to its normal size.
 ///
 /// ## Troubleshooting
 ///
@@ -1600,10 +1613,7 @@ class Scaffold extends StatefulWidget {
     this.drawerEnableOpenDragGesture = true,
     this.endDrawerEnableOpenDragGesture = true,
     this.restorationId,
-  }) : assert(primary != null),
-       assert(extendBody != null),
-       assert(extendBodyBehindAppBar != null),
-       assert(drawerDragStartBehavior != null);
+  });
 
   /// If true, and [bottomNavigationBar] or [persistentFooterButtons]
   /// is specified, then the [body] extends to the bottom of the Scaffold,
@@ -1898,7 +1908,6 @@ class Scaffold extends StatefulWidget {
   /// If there is no [Scaffold] in scope, then this will throw an exception.
   /// To return null if there is no [Scaffold], use [maybeOf] instead.
   static ScaffoldState of(BuildContext context) {
-    assert(context != null);
     final ScaffoldState? result = context.findAncestorStateOfType<ScaffoldState>();
     if (result != null) {
       return result;
@@ -1945,7 +1954,6 @@ class Scaffold extends StatefulWidget {
   ///    encloses the given context. Also includes some sample code in its
   ///    documentation.
   static ScaffoldState? maybeOf(BuildContext context) {
-    assert(context != null);
     return context.findAncestorStateOfType<ScaffoldState>();
   }
 
@@ -2014,8 +2022,6 @@ class Scaffold extends StatefulWidget {
   ///  * [Scaffold.of], which provides access to the [ScaffoldState] object as a
   ///    whole, from which you can show bottom sheets, and so forth.
   static bool hasDrawer(BuildContext context, { bool registerForUpdates = true }) {
-    assert(registerForUpdates != null);
-    assert(context != null);
     if (registerForUpdates) {
       final _ScaffoldScope? scaffold = context.dependOnInheritedWidgetOfExactType<_ScaffoldScope>();
       return scaffold?.hasDrawer ?? false;
@@ -2230,7 +2236,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
             child: DraggableScrollableActuator(
               child: StatefulBuilder(
                 key: _currentBottomSheetKey,
-                builder: (BuildContext context, StateSetter setState) => widget.bottomSheet!,
+                builder: (BuildContext context, StateSetter setState) {
+                  return widget.bottomSheet ?? const SizedBox.shrink();
+                },
               ),
             ),
           );
@@ -2330,6 +2338,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
 
       bottomSheetKey.currentState!.close();
       setState(() {
+        _showBodyScrim = false;
+        _bodyScrimColor = Colors.black.withOpacity(0.0);
         _currentBottomSheet = null;
       });
 
@@ -2450,7 +2460,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   ///  * [showModalBottomSheet], which can be used to display a modal bottom
   ///    sheet.
   ///  * [Scaffold.of], for information about how to obtain the [ScaffoldState].
-  ///  * <https://material.io/design/components/sheets-bottom.html#standard-bottom-sheet>
+  ///  * The Material 2 spec at <https://m2.material.io/components/sheets-bottom>.
+  ///  * The Material 3 spec at <https://m3.material.io/components/bottom-sheets/overview>.
   PersistentBottomSheetController<T> showBottomSheet<T>(
     WidgetBuilder builder, {
     Color? backgroundColor,
@@ -2507,7 +2518,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   /// Sets the current value of the visibility animation for the
   /// [Scaffold.floatingActionButton]. This value must not be null.
   set _floatingActionButtonVisibilityValue(double newValue) {
-    assert(newValue != null);
     _floatingActionButtonVisibilityController.value = clampDouble(newValue,
       _floatingActionButtonVisibilityController.lowerBound,
       _floatingActionButtonVisibilityController.upperBound,
@@ -2745,7 +2755,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   ///
   /// The `value` parameter must not be null.
   void showBodyScrim(bool value, double opacity) {
-    assert(value != null);
     if (_showBodyScrim == value && _bodyScrimColor.opacity == opacity) {
       return;
     }
@@ -2953,7 +2962,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
           removeRightPadding: false,
           removeBottomPadding: true,
         );
-        break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -3079,8 +3087,7 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
   const _BottomSheetSuspendedCurve(
       this.startingPoint, {
         this.curve = Curves.easeOutCubic,
-      }) : assert(startingPoint != null),
-        assert(curve != null);
+      });
 
   /// The progress value at which [curve] should begin.
   ///
@@ -3154,7 +3161,6 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
   @override
   void initState() {
     super.initState();
-    assert(widget.animationController != null);
     assert(
       widget.animationController.status == AnimationStatus.forward
         || widget.animationController.status == AnimationStatus.completed,
@@ -3175,7 +3181,6 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
   }
 
   void close() {
-    assert(widget.animationController != null);
     widget.animationController.reverse();
     widget.onClosing?.call();
   }
@@ -3213,7 +3218,9 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
       scaffold.showBodyScrim(false, 0.0);
     }
     // If the Scaffold.bottomSheet != null, we're a persistent bottom sheet.
-    if (notification.extent == notification.minExtent && scaffold.widget.bottomSheet == null) {
+    if (notification.extent == notification.minExtent &&
+        scaffold.widget.bottomSheet == null &&
+        notification.shouldCloseOnMinExtent) {
       close();
     }
     return false;
@@ -3279,7 +3286,7 @@ class _ScaffoldScope extends InheritedWidget {
     required this.hasDrawer,
     required this.geometryNotifier,
     required super.child,
-  }) : assert(hasDrawer != null);
+  });
 
   final bool hasDrawer;
   final _ScaffoldGeometryNotifier geometryNotifier;

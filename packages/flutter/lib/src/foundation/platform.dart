@@ -26,6 +26,12 @@ import '_platform_io.dart'
 ///
 /// Tests can also create specific platform tests by and adding a `variant:`
 /// argument to the test and using a [TargetPlatformVariant].
+///
+/// See also:
+///
+/// * [kIsWeb], a boolean which is true if the application is running on the
+///   web, where [defaultTargetPlatform] returns which platform the browser is
+///   running on.
 //
 // When adding support for a new platform (e.g. Windows Phone, Raspberry Pi),
 // first create a new value on the [TargetPlatform] enum, then add a rule for

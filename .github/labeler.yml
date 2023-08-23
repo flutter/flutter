@@ -1,0 +1,98 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# See https://github.com/actions/labeler/blob/main/README.md for docs.
+'a: accessibility':
+  - '**/accessibility/*'
+  - '**/*accessibility*'
+  - '**/semantics/*'
+  - '**/*semantics*'
+
+'a: animation':
+  - '**/animation/*'
+  - '**/*animation*'
+
+'a: desktop':
+  - '**/linux/**/*'
+  - '**/macos/**/*'
+  - '**/windows/**/*'
+
+'a: internationalization':
+  - packages/flutter_localizations/**/*
+
+'a: tests':
+  - packages/flutter_driver/**/*
+  - packages/flutter_goldens/**/*
+  - packages/flutter_goldens_client/**/*
+  - packages/flutter_test/**/*
+
+'a: text input':
+  - '**/text/*'
+  - '**/*text*'
+
+'d: api docs':
+  - examples/api/**/*
+
+'d: examples':
+  - examples/**/*
+
+engine:
+  - bin/internal/engine.version
+
+'f: cupertino':
+  - '**/cupertino/*'
+  - '**/*cupertino*'
+
+'f: focus':
+  - '**/focus/*'
+  - '**/*focus*'
+
+'f: gestures':
+  - '**/gestures/*'
+  - '**/*gestures*'
+
+'f: material design':
+  - '**/material/*'
+  - '**/*material*'
+
+'f: routes':
+  - '**/navigator/*'
+  - '**/*navigator*'
+  - '**/route/*'
+  - '**/*route*'
+
+'f: scrolling':
+  - '**/*scroll*'
+  - '**/scroll/*'
+  - '**/*sliver*'
+  - '**/sliver/*'
+  - '**/*viewport*'
+  - '**/viewport/*'
+
+framework:
+  - packages/flutter/**/*
+  - packages/flutter_driver/**/*
+  - packages/flutter_goldens/**/*
+  - packages/flutter_goldens_client/**/*
+  - packages/flutter_test/**/*
+  - packages/integration_test/**/*
+  - examples/api/**/*
+
+'f: integration_test':
+  - packages/integration_test/**/*
+
+platform-ios:
+  - packages/flutter_tools/lib/src/ios/**/*
+
+'customer: gallery':
+  - examples/flutter_gallery/**/*
+
+'c: tech-debt':
+  - '**/fix_data.yaml'
+  - '**/*.expect'
+  - '**/*test_fixes*'
+
+tool:
+  - packages/flutter_tools/**/*
+  - packages/fuchsia_remote_debug_protocol/**/*

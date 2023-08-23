@@ -5,9 +5,14 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
+
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+
 
 void main() {
   /*
@@ -15,7 +20,25 @@ void main() {
    * because [matchesGoldenFile] does not use Skia Gold in its native package.
    */
 
-  testWidgets('correctly records frames using display', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('recording disposes images',
+  (WidgetTester tester) async {
+    final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
+
+    await tester.pumpFrames(
+      builder.record(
+        const _DecuplePixels(Duration(seconds: 1)),
+      ),
+      const Duration(milliseconds: 200),
+      const Duration(milliseconds: 100),
+    );
+  },
+    skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
+    // TODO(polina-c): remove after fixing https://github.com/flutter/flutter/issues/133071
+    leakTrackingTestConfig: const LeakTrackingTestConfig(allowAllNotDisposed: true),
+  );
+
+  testWidgetsWithLeakTracking('correctly records frames using collate',
+  (WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
 
     await tester.pumpFrames(
@@ -43,67 +66,21 @@ void main() {
       const Duration(milliseconds: 100),
     );
 
-    // This test verifies deprecated methods.
-    final Widget display = await builder.display(); // ignore: deprecated_member_use
-    await tester.binding.setSurfaceSize(builder.sheetSize()); // ignore: deprecated_member_use
-    await tester.pumpWidget(display);
-
-    await expectLater(find.byWidget(display), matchesGoldenFile('test.animation_sheet_builder.records.png'));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
-
-  testWidgets('correctly wraps a row', (WidgetTester tester) async {
-    final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
-
-    const Duration duration = Duration(seconds: 2);
-    await tester.pumpFrames(
-      builder.record(const _DecuplePixels(duration)),
-      duration,
-      const Duration(milliseconds: 200),
-    );
-
-    // This test verifies deprecated methods.
-    final Widget display = await builder.display(); // ignore: deprecated_member_use
-    await tester.binding.setSurfaceSize(builder.sheetSize(maxWidth: 80)); // ignore: deprecated_member_use
-    await tester.pumpWidget(display);
-
-    await expectLater(find.byWidget(display), matchesGoldenFile('test.animation_sheet_builder.wraps.png'));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
-
-  testWidgets('correctly records frames using collate', (WidgetTester tester) async {
-    final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
-
-    await tester.pumpFrames(
-      builder.record(
-        const _DecuplePixels(Duration(seconds: 1)),
-      ),
-      const Duration(milliseconds: 200),
-      const Duration(milliseconds: 100),
-    );
-
-    await tester.pumpFrames(
-      builder.record(
-        const _DecuplePixels(Duration(seconds: 1)),
-        recording: false,
-      ),
-      const Duration(milliseconds: 200),
-      const Duration(milliseconds: 100),
-    );
-
-    await tester.pumpFrames(
-      builder.record(
-        const _DecuplePixels(Duration(seconds: 1)),
-      ),
-      const Duration(milliseconds: 400),
-      const Duration(milliseconds: 100),
-    );
+    final ui.Image image = await builder.collate(5);
 
     await expectLater(
-      builder.collate(5),
+      image,
       matchesGoldenFile('test.animation_sheet_builder.collate.png'),
     );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
-  testWidgets('use allLayers to record out-of-subtree contents', (WidgetTester tester) async {
+    image.dispose();
+  },
+    skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
+    // TODO(polina-c): remove after fixing https://github.com/flutter/flutter/issues/133071
+    leakTrackingTestConfig: const LeakTrackingTestConfig(allowAllNotDisposed: true),
+  ); // https://github.com/flutter/flutter/issues/56001
+
+  testWidgetsWithLeakTracking('use allLayers to record out-of-subtree contents', (WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(
       frameSize: const Size(8, 2),
       allLayers: true,
@@ -128,12 +105,18 @@ void main() {
       const Duration(milliseconds: 100),
     );
 
+    final ui.Image image = await builder.collate(5);
+
     await expectLater(
-      builder.collate(5),
+      image,
       matchesGoldenFile('test.animation_sheet_builder.out_of_tree.png'),
     );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
-
+    image.dispose();
+  },
+    skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
+    // TODO(polina-c): remove after fixing https://github.com/flutter/flutter/issues/133071
+    leakTrackingTestConfig: const LeakTrackingTestConfig(allowAllNotDisposed: true),
+  );
 }
 
 // An animation of a yellow pixel moving from left to right, in a container of

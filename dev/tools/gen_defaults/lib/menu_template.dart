@@ -18,6 +18,7 @@ class _MenuBarDefaultsM3 extends MenuStyle {
       shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
       alignment: AlignmentDirectional.bottomStart,
     );
+
   static const RoundedRectangleBorder _defaultMenuBorder =
     ${shape('md.comp.menu.container', '')};
 
@@ -42,15 +43,15 @@ class _MenuBarDefaultsM3 extends MenuStyle {
 
   @override
   MaterialStateProperty<EdgeInsetsGeometry?>? get padding {
-    return MaterialStatePropertyAll<EdgeInsetsGeometry>(
+    return const MaterialStatePropertyAll<EdgeInsetsGeometry>(
       EdgeInsetsDirectional.symmetric(
-        horizontal: math.max(
-          _kTopLevelMenuHorizontalMinPadding,
-          2 + Theme.of(context).visualDensity.baseSizeAdjustment.dx,
-        ),
+        horizontal: _kTopLevelMenuHorizontalMinPadding
       ),
     );
   }
+
+  @override
+  VisualDensity get visualDensity => Theme.of(context).visualDensity;
 }
 
 class _MenuButtonDefaultsM3 extends ButtonStyle {
@@ -60,9 +61,11 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
       enableFeedback: true,
       alignment: AlignmentDirectional.centerStart,
     );
+
   final BuildContext context;
 
   late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
   MaterialStateProperty<Color?>? get backgroundColor {
@@ -82,18 +85,18 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   MaterialStateProperty<Color?>? get foregroundColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
-        return ${componentColor('md.comp.menu.list-item.disabled.label-text')};
+        return ${componentColor('md.comp.list.list-item.disabled.label-text')};
       }
       if (states.contains(MaterialState.pressed)) {
-        return ${componentColor('md.comp.menu.list-item.pressed.label-text')};
+        return ${componentColor('md.comp.list.list-item.pressed.label-text')};
       }
       if (states.contains(MaterialState.hovered)) {
-        return ${componentColor('md.comp.menu.list-item.hover.label-text')};
+        return ${componentColor('md.comp.list.list-item.hover.label-text')};
       }
       if (states.contains(MaterialState.focused)) {
-        return ${componentColor('md.comp.menu.list-item.focus.label-text')};
+        return ${componentColor('md.comp.list.list-item.focus.label-text')};
       }
-      return ${componentColor('md.comp.menu.list-item.label-text')};
+      return ${componentColor('md.comp.list.list-item.label-text')};
     });
   }
 
@@ -101,18 +104,18 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   MaterialStateProperty<Color?>? get iconColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
-        return ${componentColor('md.comp.menu.list-item.with-leading-icon.disabled.leading-icon')};
+        return ${componentColor('md.comp.list.list-item.disabled.leading-icon')};
       }
       if (states.contains(MaterialState.pressed)) {
-        return ${componentColor('md.comp.menu.list-item.with-leading-icon.pressed.icon')};
+        return ${componentColor('md.comp.list.list-item.pressed.leading-icon.icon')};
       }
       if (states.contains(MaterialState.hovered)) {
-        return ${componentColor('md.comp.menu.list-item.with-leading-icon.hover.icon')};
+        return ${componentColor('md.comp.list.list-item.hover.leading-icon.icon')};
       }
       if (states.contains(MaterialState.focused)) {
-        return ${componentColor('md.comp.menu.list-item.with-leading-icon.focus.icon')};
+        return ${componentColor('md.comp.list.list-item.focus.leading-icon.icon')};
       }
-      return ${componentColor('md.comp.menu.list-item.with-leading-icon.leading-icon')};
+      return ${componentColor('md.comp.list.list-item.leading-icon')};
     });
   }
 
@@ -125,7 +128,7 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<Size>? get minimumSize {
-    return ButtonStyleButton.allOrNull<Size>(const Size(64.0, ${tokens['md.comp.menu.list-item.container.height']}));
+    return ButtonStyleButton.allOrNull<Size>(const Size(64.0, 48.0));
   }
 
   @override
@@ -145,13 +148,13 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
     return MaterialStateProperty.resolveWith(
       (Set<MaterialState> states) {
         if (states.contains(MaterialState.pressed)) {
-          return ${componentColor('md.comp.menu.list-item.pressed.state-layer')};
+          return ${componentColor('md.comp.list.list-item.pressed.state-layer')};
         }
         if (states.contains(MaterialState.hovered)) {
-          return ${componentColor('md.comp.menu.list-item.hover.state-layer')};
+          return ${componentColor('md.comp.list.list-item.hover.state-layer')};
         }
         if (states.contains(MaterialState.focused)) {
-          return ${componentColor('md.comp.menu.list-item.focus.state-layer')};
+          return ${componentColor('md.comp.list.list-item.focus.state-layer')};
         }
         return Colors.transparent;
       },
@@ -178,7 +181,9 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<TextStyle?> get textStyle {
-    return MaterialStatePropertyAll<TextStyle?>(${textStyle('md.comp.menu.list-item.label-text')});
+    // TODO(tahatesser): This is taken from https://m3.material.io/components/menus/specs
+    // Update this when the token is available.
+    return MaterialStatePropertyAll<TextStyle?>(_textTheme.labelLarge);
   }
 
   @override
@@ -186,11 +191,26 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
 
   // The horizontal padding number comes from the spec.
   EdgeInsetsGeometry _scaledPadding(BuildContext context) {
+    VisualDensity visualDensity = Theme.of(context).visualDensity;
+    // When horizontal VisualDensity is greater than zero, set it to zero
+    // because the [ButtonStyleButton] has already handle the padding based on the density.
+    // However, the [ButtonStyleButton] doesn't allow the [VisualDensity] adjustment
+    // to reduce the width of the left/right padding, so we need to handle it here if
+    // the density is less than zero, such as on desktop platforms.
+    if (visualDensity.horizontal > 0) {
+      visualDensity = VisualDensity(vertical: visualDensity.vertical);
+    }
     return ButtonStyleButton.scaledPadding(
-      const EdgeInsets.symmetric(horizontal: 12),
-      const EdgeInsets.symmetric(horizontal: 8),
-      const EdgeInsets.symmetric(horizontal: 4),
-      MediaQuery.maybeOf(context)?.textScaleFactor ?? 1,
+      EdgeInsets.symmetric(horizontal: math.max(
+        _kMenuViewPadding,
+        _kLabelItemDefaultSpacing + visualDensity.baseSizeAdjustment.dx,
+      )),
+      EdgeInsets.symmetric(horizontal: math.max(
+        _kMenuViewPadding,
+        8 + visualDensity.baseSizeAdjustment.dx,
+      )),
+      const EdgeInsets.symmetric(horizontal: _kMenuViewPadding),
+      MediaQuery.maybeTextScaleFactorOf(context) ?? 1,
     );
   }
 }
@@ -202,6 +222,7 @@ class _MenuDefaultsM3 extends MenuStyle {
       shape: const MaterialStatePropertyAll<OutlinedBorder>(_defaultMenuBorder),
       alignment: AlignmentDirectional.topEnd,
     );
+
   static const RoundedRectangleBorder _defaultMenuBorder =
     ${shape('md.comp.menu.container', '')};
 
@@ -226,15 +247,13 @@ class _MenuDefaultsM3 extends MenuStyle {
 
   @override
   MaterialStateProperty<EdgeInsetsGeometry?>? get padding {
-    return MaterialStatePropertyAll<EdgeInsetsGeometry>(
-      EdgeInsetsDirectional.symmetric(
-        vertical: math.max(
-          _kMenuVerticalMinPadding,
-          2 + Theme.of(context).visualDensity.baseSizeAdjustment.dy,
-        ),
-      ),
+    return const MaterialStatePropertyAll<EdgeInsetsGeometry>(
+      EdgeInsetsDirectional.symmetric(vertical: _kMenuVerticalMinPadding),
     );
   }
+
+  @override
+  VisualDensity get visualDensity => Theme.of(context).visualDensity;
 }
 ''';
 }

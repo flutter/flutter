@@ -310,4 +310,17 @@ void main() {
 
   // Changes made in https://github.com/flutter/flutter/pull/114459
   MediaQuery.boldTextOverride(context);
+
+  // Changes made in https://github.com/flutter/flutter/pull/122555
+  final ScrollableDetails details = ScrollableDetails(
+    direction: AxisDirection.down,
+    clipBehavior: Clip.none,
+  );
+  final Clip clip = details.clipBehavior;
+
+  // Changes made in https://github.com/flutter/flutter/pull/129942
+  // TODO(guidezpl): enable fix after https://github.com/dart-lang/sdk/issues/52902
+  // const Curve curve = standardEasing; expect Easing.legacy
+  // const Curve curve = accelerateEasing; expect Easing.legacyAccelerate
+  // const Curve curve = decelerateEasing; expect Easing.legacyDecelerate
 }

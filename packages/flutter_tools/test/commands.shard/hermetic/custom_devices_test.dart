@@ -239,6 +239,9 @@ class FakeTerminal implements Terminal {
   bool get supportsColor => terminal.supportsColor;
 
   @override
+  bool get isCliAnimationEnabled => terminal.isCliAnimationEnabled;
+
+  @override
   bool get supportsEmoji => terminal.supportsEmoji;
 
   @override
@@ -257,10 +260,7 @@ class FakeCommandRunner extends FlutterCommandRunner {
   }) : _platform = platform,
        _fileSystem = fileSystem,
        _logger = logger,
-       _userMessages = userMessages ?? UserMessages(),
-       assert(platform != null),
-       assert(fileSystem != null),
-       assert(logger != null);
+       _userMessages = userMessages ?? UserMessages();
 
   final Platform _platform;
   final FileSystem _fileSystem;
@@ -1123,7 +1123,7 @@ void main() {
         expect(
           logger.statusText,
           contains(
-            'Successfully resetted the custom devices config file and created a '
+            'Successfully reset the custom devices config file and created a '
             'backup at "/.flutter_custom_devices.json.bak".'
           )
         );
@@ -1155,7 +1155,7 @@ void main() {
         expect(
           logger.statusText,
           contains(
-            'Successfully resetted the custom devices config file.'
+            'Successfully reset the custom devices config file.'
           )
         );
 

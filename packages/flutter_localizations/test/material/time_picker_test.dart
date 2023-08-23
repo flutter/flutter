@@ -9,8 +9,9 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('can localize the header in all known formats - portrait', (WidgetTester tester) async {
     // Ensure picker is displayed in portrait mode.
-    tester.binding.window.physicalSizeTestValue = const Size(400, 800);
-    tester.binding.window.devicePixelRatioTestValue = 1;
+    tester.view.physicalSize = const Size(400, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
 
     final Finder stringFragmentTextFinder = find.descendant(
       of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_StringFragment'),
@@ -74,15 +75,13 @@ void main() {
       await tester.tapAt(Offset(center.dx, center.dy - 50.0));
       await finishPicker(tester);
     }
-
-    tester.binding.window.clearPhysicalSizeTestValue();
-    tester.binding.window.clearDevicePixelRatioTestValue();
   });
 
   testWidgets('can localize the header in all known formats - landscape', (WidgetTester tester) async {
     // Ensure picker is displayed in landscape mode.
-    tester.binding.window.physicalSizeTestValue = const Size(800, 400);
-    tester.binding.window.devicePixelRatioTestValue = 1;
+    tester.view.physicalSize = const Size(800, 400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
 
     final Finder stringFragmentTextFinder = find.descendant(
       of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_StringFragment'),
@@ -151,9 +150,6 @@ void main() {
       await tester.tapAt(Offset(center.dx, center.dy - 50.0));
       await finishPicker(tester);
     }
-
-    tester.binding.window.clearPhysicalSizeTestValue();
-    tester.binding.window.clearDevicePixelRatioTestValue();
   });
 
   testWidgets('can localize input mode in all known formats', (WidgetTester tester) async {
@@ -224,7 +220,7 @@ void main() {
     }
   });
 
-  testWidgets('uses single-ring 24-hour dial for all formats', (WidgetTester tester) async {
+  testWidgets('Material2 uses single-ring 24-hour dial for all locales', (WidgetTester tester) async {
     const List<Locale> locales = <Locale>[
       Locale('en', 'US'), // h
       Locale('en', 'GB'), // HH
@@ -232,11 +228,11 @@ void main() {
     ];
     for (final Locale locale in locales) {
       // Tap along the segment stretching from the center to the edge at
-      // 12:00 AM position. Because there's only one ring, no matter where you
-      // tap the time will be the same.
+      // 12:00 AM position. Because there's only one ring, in the M2
+      // DatePicker no matter where you tap the time will be the same.
       for (int i = 1; i < 10; i++) {
         TimeOfDay? result;
-        final Offset center = await startPicker(tester, (TimeOfDay? time) { result = time; }, locale: locale);
+        final Offset center = await startPicker(tester, (TimeOfDay? time) { result = time; }, locale: locale, useMaterial3: false);
         final Size size = tester.getSize(find.byKey(const Key('time-picker-dial')));
         final double dy = (size.height / 2.0 / 10) * i;
         await tester.tapAt(Offset(center.dx, center.dy - dy));
@@ -246,34 +242,57 @@ void main() {
     }
   });
 
-  const List<String> labels12To11 = <String>['12', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
-  const List<String> labels00To22TwoDigit = <String>['00', '02', '04', '06', '08', '10', '12', '14', '16', '18', '20', '22'];
+  testWidgets('Material3 uses a  double-ring 24-hour dial for 24 hour locales', (WidgetTester tester) async {
+    Future<void> testLocale(Locale locale, int startFactor, int endFactor, TimeOfDay expectedTime) async {
+      // For locales that display 24 hour time, factors 1-5 put the tap on the
+      // inner ring's "12" (the inner ring goes from 12-23). Otherwise the offset
+      // should land on the outer ring's "00".
+      for (int factor = startFactor; factor < endFactor; factor += 1) {
+        TimeOfDay? result;
+        final Offset center = await startPicker(tester, (TimeOfDay? time) { result = time; }, locale: locale, useMaterial3: true);
+        final Size size = tester.getSize(find.byKey(const Key('time-picker-dial')));
+        final double dy = (size.height / 2.0 / 10) * factor;
+        await tester.tapAt(Offset(center.dx, center.dy - dy));
+        await finishPicker(tester);
+        expect(result, equals(expectedTime), reason: 'Failed for locale=$locale with factor=$factor');
+      }
+    }
 
-  Future<void> mediaQueryBoilerplate(WidgetTester tester, bool alwaysUse24HourFormat) async {
+    await testLocale(const Locale('en', 'US'), 1, 10, const TimeOfDay(hour: 0, minute: 0)); // 12 hour
+    await testLocale(const Locale('en', 'ES'), 1, 10, const TimeOfDay(hour: 0, minute: 0)); // 12 hour
+    await testLocale(const Locale('en', 'GB'), 1, 5, const TimeOfDay(hour: 12, minute: 0)); // 24 hour, inner ring
+    await testLocale(const Locale('en', 'GB'), 6, 10, const TimeOfDay(hour: 0, minute: 0)); // 24 hour, outer ring
+  });
+
+  const List<String> labels12To11 = <String>['12', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
+  const List<String> labels00To22TwoDigit = <String>['00', '02', '04', '06', '08', '10', '12', '14', '16', '18', '20', '22']; // Material 2
+  const List<String> labels00To23TwoDigit = <String>[ // Material 3
+    '00', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'];
+
+  Future<void> mediaQueryBoilerplate(WidgetTester tester, {required bool alwaysUse24HourFormat, bool? useMaterial3}) async {
     await tester.pumpWidget(
-      Localizations(
-        locale: const Locale('en', 'US'),
-        delegates: const <LocalizationsDelegate<dynamic>>[
-          GlobalMaterialLocalizations.delegate,
-          DefaultWidgetsLocalizations.delegate,
-        ],
-        child: MediaQuery(
-          data: MediaQueryData(alwaysUse24HourFormat: alwaysUse24HourFormat),
-          child: Material(
-            child: Directionality(
-              textDirection: TextDirection.ltr,
-              child: Navigator(
-                onGenerateRoute: (RouteSettings settings) {
-                  return MaterialPageRoute<void>(builder: (BuildContext context) {
-                    return TextButton(
-                      onPressed: () {
-                        showTimePicker(context: context, initialTime: const TimeOfDay(hour: 7, minute: 0));
-                      },
-                      child: const Text('X'),
-                    );
-                  });
-                },
-              ),
+      MaterialApp(
+        theme: ThemeData(useMaterial3: useMaterial3),
+        builder: (BuildContext context, Widget? child) {
+          return MediaQuery(
+            data: MediaQueryData(alwaysUse24HourFormat: alwaysUse24HourFormat),
+            child: child!,
+          );
+        },
+        home: Material(
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Navigator(
+              onGenerateRoute: (RouteSettings settings) {
+                return MaterialPageRoute<void>(builder: (BuildContext context) {
+                  return TextButton(
+                    onPressed: () {
+                      showTimePicker(context: context, initialTime: const TimeOfDay(hour: 7, minute: 0));
+                    },
+                    child: const Text('X'),
+                  );
+                });
+              },
             ),
           ),
         ),
@@ -285,7 +304,7 @@ void main() {
   }
 
   testWidgets('respects MediaQueryData.alwaysUse24HourFormat == false', (WidgetTester tester) async {
-    await mediaQueryBoilerplate(tester, false);
+    await mediaQueryBoilerplate(tester, alwaysUse24HourFormat: false);
 
     final CustomPaint dialPaint = tester.widget(find.byKey(const ValueKey<String>('time-picker-dial')));
     final dynamic dialPainter = dialPaint.painter;
@@ -306,8 +325,30 @@ void main() {
     );
   });
 
-  testWidgets('respects MediaQueryData.alwaysUse24HourFormat == true', (WidgetTester tester) async {
-    await mediaQueryBoilerplate(tester, true);
+  testWidgets('Material3 respects MediaQueryData.alwaysUse24HourFormat == true', (WidgetTester tester) async {
+    await mediaQueryBoilerplate(tester, alwaysUse24HourFormat: true, useMaterial3: true);
+
+    final CustomPaint dialPaint = tester.widget(find.byKey(const ValueKey<String>('time-picker-dial')));
+    final dynamic dialPainter = dialPaint.painter;
+    // ignore: avoid_dynamic_calls
+    final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
+    expect(
+      // ignore: avoid_dynamic_calls
+      primaryLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!),
+      labels00To23TwoDigit,
+    );
+
+    // ignore: avoid_dynamic_calls
+    final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
+    expect(
+      // ignore: avoid_dynamic_calls
+      selectedLabels.map<String>((dynamic tp) => ((tp.painter as TextPainter).text! as TextSpan).text!),
+      labels00To23TwoDigit,
+    );
+  });
+
+  testWidgets('Material2 respects MediaQueryData.alwaysUse24HourFormat == true', (WidgetTester tester) async {
+    await mediaQueryBoilerplate(tester, alwaysUse24HourFormat: true, useMaterial3: false);
 
     final CustomPaint dialPaint = tester.widget(find.byKey(const ValueKey<String>('time-picker-dial')));
     final dynamic dialPainter = dialPaint.painter;
@@ -334,15 +375,18 @@ class _TimePickerLauncher extends StatelessWidget {
     this.onChanged,
     required this.locale,
     this.entryMode = TimePickerEntryMode.dial,
+    this.useMaterial3,
   });
 
   final ValueChanged<TimeOfDay?>? onChanged;
   final Locale locale;
   final TimePickerEntryMode entryMode;
+  final bool? useMaterial3;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(useMaterial3: useMaterial3),
       locale: locale,
       supportedLocales: <Locale>[locale],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
@@ -372,11 +416,13 @@ Future<Offset> startPicker(
   WidgetTester tester,
   ValueChanged<TimeOfDay?> onChanged, {
     Locale locale = const Locale('en', 'US'),
+    bool? useMaterial3,
 }) async {
   await tester.pumpWidget(
     _TimePickerLauncher(
       onChanged: onChanged,
       locale: locale,
+      useMaterial3: useMaterial3,
     ),
   );
   await tester.tap(find.text('X'));

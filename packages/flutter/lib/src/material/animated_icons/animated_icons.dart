@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of material_animated_icons;
+// TODO(goderbauer): Clean up the part-of hack currently used for testing the private implementation.
+part of material_animated_icons; // ignore: use_string_in_part_of_directives
 
 // The code for drawing animated icons is kept in a private API, as we are not
 // yet ready for exposing a public API for (partial) vector graphics support.
@@ -38,8 +39,7 @@ class AnimatedIcon extends StatelessWidget {
     this.size,
     this.semanticLabel,
     this.textDirection,
-  }) : assert(progress != null),
-       assert(icon != null);
+  });
 
   /// The animation progress for the animated icon.
   ///
@@ -196,7 +196,7 @@ class _PathFrames {
   final List<double> opacities;
 
   void paint(ui.Canvas canvas, Color color, _UiPathFactory uiPathFactory, double progress) {
-    final double opacity = _interpolate<double?>(opacities, progress, lerpDouble)!;
+    final double opacity = _interpolate<double?>(opacities, progress, ui.lerpDouble)!;
     final ui.Paint paint = ui.Paint()
       ..style = PaintingStyle.fill
       ..color = color.withOpacity(color.opacity * opacity);
@@ -293,7 +293,7 @@ T _interpolate<T>(List<T> values, double progress, _Interpolator<T> interpolator
   if (values.length == 1) {
     return values[0];
   }
-  final double targetIdx = lerpDouble(0, values.length -1, progress)!;
+  final double targetIdx = ui.lerpDouble(0, values.length -1, progress)!;
   final int lowIdx = targetIdx.floor();
   final int highIdx = targetIdx.ceil();
   final double t = targetIdx - lowIdx;

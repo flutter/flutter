@@ -7,8 +7,6 @@ import 'dart:math' as math;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 final Matcher doesNotOverscroll = isNot(paints..circle());
 
 Future<void> slowDrag(WidgetTester tester, Offset start, Offset offset) async {
@@ -228,6 +226,35 @@ void main() {
     expect(painter, isNot(paints..circle()..circle()));
     await slowDrag(tester, const Offset(200.0, 200.0), const Offset(0.0, -5.0));
     expect(painter, paints..circle()..circle());
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(painter, doesNotOverscroll);
+  });
+
+  testWidgets('Overscroll ignored from alternate axis', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: ScrollConfiguration(
+          behavior: TestScrollBehaviorNoGlow(),
+          child: GlowingOverscrollIndicator(
+            axisDirection: AxisDirection.right,
+            color: Color(0xFF0000FF),
+            child: CustomScrollView(
+              physics: AlwaysScrollableScrollPhysics(),
+              slivers: <Widget>[
+                SliverToBoxAdapter(child: SizedBox(height: 20.0)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
+    await slowDrag(tester, const Offset(200.0, 200.0), const Offset(0.0, 5.0));
+    expect(painter, doesNotOverscroll);
+    await slowDrag(tester, const Offset(200.0, 200.0), const Offset(0.0, -5.0));
+    expect(painter, doesNotOverscroll);
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(painter, doesNotOverscroll);
@@ -568,5 +595,14 @@ class TestScrollBehavior2 extends ScrollBehavior {
       color: const Color(0xFF0000FF),
       child: child,
     );
+  }
+}
+
+class TestScrollBehaviorNoGlow extends ScrollBehavior {
+  const TestScrollBehaviorNoGlow();
+
+  @override
+  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
+    return child;
   }
 }

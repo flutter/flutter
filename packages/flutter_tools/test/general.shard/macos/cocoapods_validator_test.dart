@@ -15,7 +15,7 @@ void main() {
     testWithoutContext('Emits installed status when CocoaPods is installed', () async {
       final CocoaPodsValidator workflow = CocoaPodsValidator(FakeCocoaPods(CocoaPodsStatus.recommended, '1000.0.0'), UserMessages());
       final ValidationResult result = await workflow.validate();
-      expect(result.type, ValidationType.installed);
+      expect(result.type, ValidationType.success);
     });
 
     testWithoutContext('Emits missing status when CocoaPods is not installed', () async {

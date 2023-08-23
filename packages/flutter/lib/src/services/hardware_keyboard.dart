@@ -7,7 +7,9 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 
 import 'binding.dart';
+import 'debug.dart';
 import 'raw_keyboard.dart';
+import 'system_channels.dart';
 
 export 'dart:ui' show KeyData;
 
@@ -15,6 +17,41 @@ export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
 
 export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
 export 'raw_keyboard.dart' show RawKeyEvent, RawKeyboard;
+
+// When using _keyboardDebug, always call it like so:
+//
+// assert(_keyboardDebug(() => 'Blah $foo'));
+//
+// It needs to be inside the assert in order to be removed in release mode, and
+// it needs to use a closure to generate the string in order to avoid string
+// interpolation when debugPrintKeyboardEvents is false.
+//
+// It will throw a StateError if you try to call it when the app is in release
+// mode.
+bool _keyboardDebug(
+  String Function() messageFunc, [
+  Iterable<Object> Function()? detailsFunc,
+]) {
+  if (kReleaseMode) {
+    throw StateError(
+      '_keyboardDebug was called in Release mode, which means they are called '
+      'without being wrapped in an assert. Always call _keyboardDebug like so:\n'
+      r"  assert(_keyboardDebug(() => 'Blah $foo'));"
+    );
+  }
+  if (!debugPrintKeyboardEvents) {
+    return true;
+  }
+  debugPrint('KEYBOARD: ${messageFunc()}');
+  final Iterable<Object> details = detailsFunc?.call() ?? const <Object>[];
+  if (details.isNotEmpty) {
+    for (final Object detail in details) {
+      debugPrint('    $detail');
+    }
+  }
+  // Return true so that it can be used inside of an assert.
+  return true;
+}
 
 /// Represents a lock mode of a keyboard, such as [KeyboardLockMode.capsLock].
 ///
@@ -26,34 +63,33 @@ export 'raw_keyboard.dart' show RawKeyEvent, RawKeyboard;
 /// Only a limited number of modes are supported, which are enumerated as
 /// static members of this class. Manual constructing of this class is
 /// prohibited.
-@immutable
-class KeyboardLockMode {
-  // KeyboardLockMode has a fixed pool of supported keys, enumerated as static
-  // members of this class, therefore constructing is prohibited.
-  const KeyboardLockMode._(this.logicalKey);
-
-  /// The logical key that triggers this lock mode.
-  final LogicalKeyboardKey logicalKey;
-
+enum KeyboardLockMode {
   /// Represents the number lock mode on the keyboard.
   ///
   /// On supporting systems, enabling number lock mode usually allows key
   /// presses of the number pad to input numbers, instead of acting as up, down,
   /// left, right, page up, end, etc.
-  static const KeyboardLockMode numLock = KeyboardLockMode._(LogicalKeyboardKey.numLock);
+  numLock._(LogicalKeyboardKey.numLock),
 
   /// Represents the scrolling lock mode on the keyboard.
   ///
   /// On supporting systems and applications (such as a spreadsheet), enabling
   /// scrolling lock mode usually allows key presses of the cursor keys to
   /// scroll the document instead of the cursor.
-  static const KeyboardLockMode scrollLock = KeyboardLockMode._(LogicalKeyboardKey.scrollLock);
+  scrollLock._(LogicalKeyboardKey.scrollLock),
 
   /// Represents the capital letters lock mode on the keyboard.
   ///
   /// On supporting systems, enabling capital lock mode allows key presses of
   /// the letter keys to input uppercase letters instead of lowercase.
-  static const KeyboardLockMode capsLock = KeyboardLockMode._(LogicalKeyboardKey.capsLock);
+  capsLock._(LogicalKeyboardKey.capsLock);
+
+  // KeyboardLockMode has a fixed pool of supported keys, enumerated as static
+  // members of this class, therefore constructing is prohibited.
+  const KeyboardLockMode._(this.logicalKey);
+
+  /// The logical key that triggers this lock mode.
+  final LogicalKeyboardKey logicalKey;
 
   static final Map<int, KeyboardLockMode> _knownLockModes = <int, KeyboardLockMode>{
     numLock.logicalKey.keyId: numLock,
@@ -101,7 +137,7 @@ abstract class KeyEvent with Diagnosticable {
   /// is a mnemonic ("keyA" is easier to remember than 0x70004), derived from the
   /// key's effect on a QWERTY keyboard. The name does not represent the key's
   /// effect whatsoever (a physical "keyA" can be the Q key on an AZERTY
-  /// keyboard.)
+  /// keyboard).
   ///
   /// For instance, if you wanted to make a game where the key to the right of
   /// the CAPS LOCK key made the player move left, you would be comparing a
@@ -242,6 +278,9 @@ class KeyUpEvent extends KeyEvent {
 /// An event indicating that the user has been holding a key on the keyboard
 /// and causing repeated events.
 ///
+/// Repeat events are not guaranteed and are provided only if supported by the
+/// underlying platform.
+///
 /// See also:
 ///
 ///  * [KeyDownEvent], a key event representing the user
@@ -259,7 +298,7 @@ class KeyRepeatEvent extends KeyEvent {
   });
 }
 
-/// The signature for [HardwareKeyboard.addHandler], a callback to to decide whether
+/// The signature for [HardwareKeyboard.addHandler], a callback to decide whether
 /// the entire framework handles a key event.
 typedef KeyEventCallback = bool Function(KeyEvent event);
 
@@ -492,6 +531,20 @@ class HardwareKeyboard {
     }
   }
 
+  /// Query the engine and update _pressedKeys accordingly to the engine answer.
+  Future<void> syncKeyboardState() async {
+    final Map<int, int>? keyboardState = await SystemChannels.keyboard.invokeMapMethod<int, int>(
+      'getKeyboardState',
+    );
+    if (keyboardState != null) {
+      for (final int key in keyboardState.keys) {
+        final PhysicalKeyboardKey physicalKey = PhysicalKeyboardKey(key);
+        final LogicalKeyboardKey logicalKey = LogicalKeyboardKey(keyboardState[key]!);
+        _pressedKeys[physicalKey] = logicalKey;
+      }
+    }
+  }
+
   bool _dispatchKeyEvent(KeyEvent event) {
     // This dispatching could have used the same algorithm as [ChangeNotifier],
     // but since 1) it shouldn't be necessary to support reentrantly
@@ -529,9 +582,22 @@ class HardwareKeyboard {
     return handled;
   }
 
+  List<String> _debugPressedKeysDetails() {
+    if (_pressedKeys.isEmpty) {
+      return <String>['Empty'];
+    }
+    final List<String> details = <String>[];
+    for (final PhysicalKeyboardKey physicalKey in _pressedKeys.keys) {
+      details.add('$physicalKey: ${_pressedKeys[physicalKey]}');
+    }
+    return details;
+  }
+
   /// Process a new [KeyEvent] by recording the state changes and dispatching
   /// to handlers.
   bool handleKeyEvent(KeyEvent event) {
+    assert(_keyboardDebug(() => 'Key event received: $event'));
+    assert(_keyboardDebug(() => 'Pressed state before processing the event:', _debugPressedKeysDetails));
     _assertEventIsRegular(event);
     final PhysicalKeyboardKey physicalKey = event.physicalKey;
     final LogicalKeyboardKey logicalKey = event.logicalKey;
@@ -551,6 +617,7 @@ class HardwareKeyboard {
       // Empty
     }
 
+    assert(_keyboardDebug(() => 'Pressed state after processing the event:', _debugPressedKeysDetails));
     return _dispatchKeyEvent(event);
   }
 
@@ -721,14 +788,42 @@ typedef KeyMessageHandler = bool Function(KeyMessage message);
 /// and [RawKeyboard] for recording keeping, and then dispatches the [KeyMessage]
 /// to [keyMessageHandler], the global message handler.
 ///
-/// [KeyEventManager] also resolves cross-platform compatibility of keyboard
-/// implementations. Legacy platforms might have not implemented the new key
-/// data API and only send raw key data on each key message. [KeyEventManager]
-/// recognize platform types as [KeyDataTransitMode] and dispatches events in
-/// different ways accordingly.
-///
 /// [KeyEventManager] is typically created, owned, and invoked by
 /// [ServicesBinding].
+///
+/// ## On embedder implementation
+///
+/// Currently, Flutter has two sets of key event APIs running in parallel.
+///
+/// * The legacy "raw key event" route receives messages from the
+///   "flutter/keyevent" message channel ([SystemChannels.keyEvent]) and
+///   dispatches [RawKeyEvent] to [RawKeyboard] and [Focus.onKey] as well as
+///   similar methods.
+/// * The newer "hardware key event" route receives messages from the
+///   "flutter/keydata" message channel (embedder API
+///   `FlutterEngineSendKeyEvent`) and dispatches [KeyEvent] to
+///   [HardwareKeyboard] and some methods such as [Focus.onKeyEvent].
+///
+/// [KeyEventManager] resolves cross-platform compatibility of keyboard
+/// implementations, since legacy platforms might have not implemented the new
+/// key data API and only send raw key data on each key message.
+/// [KeyEventManager] recognizes the platform support by detecting whether a
+/// message comes from platform channel "flutter/keyevent" before one from
+/// "flutter/keydata", or vice versa, at the beginning of the app.
+///
+/// * If a "flutter/keyevent" message is received first, then this platform is
+///   considered a legacy platform. The raw key event is transformed into a
+///   hardware key event at best effort. No messages from "flutter/keydata" are
+///   expected.
+/// * If a "flutter/keydata" message is received first, then this platform is
+///   considered a newer platform. The hardware key events are stored, and
+///   dispatched only when a raw key message is received.
+///
+/// Therefore, to correctly implement a platform that supports
+/// `FlutterEngineSendKeyEvent`, the platform must ensure that
+/// `FlutterEngineSendKeyEvent` is called before sending a message to
+/// "flutter/keyevent" at the beginning of the app, and every physical key event
+/// is ended with a "flutter/keyevent" message.
 class KeyEventManager {
   /// Create an instance.
   ///
@@ -738,7 +833,7 @@ class KeyEventManager {
   /// The global entrance which handles all key events sent to Flutter.
   ///
   /// Typical applications use [WidgetsBinding], where this field is
-  /// set by the focus system (see `FocusManger`) on startup to a function that
+  /// set by the focus system (see `FocusManager`) on startup to a function that
   /// dispatches incoming events to the focus system, including
   /// `FocusNode.onKey`, `FocusNode.onKeyEvent`, and `Shortcuts`. In this case,
   /// the application does not need to read, assign, or invoke this value.
@@ -862,7 +957,7 @@ class KeyEventManager {
         return false;
       case KeyDataTransitMode.keyDataThenRawKeyData:
         // Having 0 as the physical and logical ID indicates an empty key data
-        // (the only occassion either field can be 0,) transmitted to ensure
+        // (the only occasion either field can be 0,) transmitted to ensure
         // that the transit mode is correctly inferred. These events should be
         // ignored.
         if (data.physical == 0 && data.logical == 0) {

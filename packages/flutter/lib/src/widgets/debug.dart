@@ -33,8 +33,8 @@ import 'table.dart';
 /// Combined with [debugPrintScheduleBuildForStacks], this lets you watch a
 /// widget's dirty/clean lifecycle.
 ///
-/// To get similar information but showing it on the timeline available from the
-/// Observatory rather than getting it in the console (where it can be
+/// To get similar information but showing it on the timeline available from
+/// Flutter DevTools rather than getting it in the console (where it can be
 /// overwhelming), consider [debugProfileBuildsEnabled].
 ///
 /// See also:
@@ -170,7 +170,6 @@ bool debugHighlightDeprecatedWidgets = false;
 Key? _firstNonUniqueKey(Iterable<Widget> widgets) {
   final Set<Key> keySet = HashSet<Key>();
   for (final Widget widget in widgets) {
-    assert(widget != null);
     if (widget.key == null) {
       continue;
     }
@@ -302,10 +301,9 @@ bool debugCheckHasMediaQuery(BuildContext context) {
         context.describeOwnershipChain('The ownership chain for the affected widget is'),
         ErrorHint(
           'No MediaQuery ancestor could be found starting from the context '
-          'that was passed to MediaQuery.of(). This can happen because you '
-          'have not added a WidgetsApp, CupertinoApp, or MaterialApp widget '
-          '(those widgets introduce a MediaQuery), or it can happen if the '
-          'context you use comes from a widget above those widgets.',
+          'that was passed to MediaQuery.of(). This can happen because the '
+          'context used is not a descendant of a View widget, which introduces '
+          'a MediaQuery.'
         ),
       ]);
     }

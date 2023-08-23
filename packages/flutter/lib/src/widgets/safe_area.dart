@@ -47,10 +47,7 @@ class SafeArea extends StatelessWidget {
     this.minimum = EdgeInsets.zero,
     this.maintainBottomViewPadding = false,
     required this.child,
-  }) : assert(left != null),
-       assert(top != null),
-       assert(right != null),
-       assert(bottom != null);
+  });
 
   /// Whether to avoid system intrusions on the left.
   final bool left;
@@ -142,7 +139,7 @@ class SafeArea extends StatelessWidget {
 ///
 /// See also:
 ///
-///  * [SafeArea], for insetting widgets to avoid operating system intrusions.
+///  * [SafeArea], for insetting box widgets to avoid operating system intrusions.
 ///  * [SliverPadding], for insetting slivers in general.
 ///  * [MediaQuery], from which the window padding is obtained.
 ///  * [dart:ui.FlutterView.padding], which reports the padding from the operating
@@ -159,10 +156,7 @@ class SliverSafeArea extends StatelessWidget {
     this.bottom = true,
     this.minimum = EdgeInsets.zero,
     required this.sliver,
-  }) : assert(left != null),
-       assert(top != null),
-       assert(right != null),
-       assert(bottom != null);
+  });
 
   /// Whether to avoid system intrusions on the left.
   final bool left;

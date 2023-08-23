@@ -21,5 +21,10 @@
   "selectAllButtonLabel": "બધા પસંદ કરો",
   "tabSemanticsLabel": "$tabCountમાંથી $tabIndex ટૅબ",
   "modalBarrierDismissLabel": "છોડી દો",
-  "searchTextFieldPlaceholderLabel": "શોધો"
+  "searchTextFieldPlaceholderLabel": "શોધો",
+  "noSpellCheckReplacementsLabel": "બદલવા માટે કોઈ શબ્દ મળ્યો નથી",
+  "menuDismissLabel": "મેનૂ છોડી દો",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

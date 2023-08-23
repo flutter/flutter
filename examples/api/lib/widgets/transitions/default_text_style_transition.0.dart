@@ -2,36 +2,33 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter code sample for [DefaultTextStyleTransition].
-
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [DefaultTextStyleTransition].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const DefaultTextStyleTransitionExampleApp());
 
-  static const String _title = 'Flutter Code Sample';
+class DefaultTextStyleTransitionExampleApp extends StatelessWidget {
+  const DefaultTextStyleTransitionExampleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: _title,
-      home: MyStatefulWidget(),
+      home: DefaultTextStyleTransitionExample(),
     );
   }
 }
 
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({super.key});
+class DefaultTextStyleTransitionExample extends StatefulWidget {
+  const DefaultTextStyleTransitionExample({super.key});
 
   @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
+  State<DefaultTextStyleTransitionExample> createState() => _DefaultTextStyleTransitionExampleState();
 }
 
 /// [AnimationController]s can be created with `vsync: this` because of
 /// [TickerProviderStateMixin].
-class _MyStatefulWidgetState extends State<MyStatefulWidget>
+class _DefaultTextStyleTransitionExampleState extends State<DefaultTextStyleTransitionExample>
     with TickerProviderStateMixin {
   late AnimationController _controller;
   late TextStyleTween _styleTween;
@@ -45,10 +42,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
       vsync: this,
     )..repeat(reverse: true);
     _styleTween = TextStyleTween(
-      begin: const TextStyle(
-          fontSize: 50, color: Colors.blue, fontWeight: FontWeight.w900),
-      end: const TextStyle(
-          fontSize: 50, color: Colors.red, fontWeight: FontWeight.w100),
+      begin: const TextStyle(fontSize: 50, color: Colors.blue, fontWeight: FontWeight.w900),
+      end: const TextStyle(fontSize: 50, color: Colors.red, fontWeight: FontWeight.w100),
     );
     _curvedAnimation = CurvedAnimation(
       parent: _controller,

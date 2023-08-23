@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'dart:math';
 import 'dart:ui';
@@ -94,7 +95,7 @@ void main() {
           imageFilter: matrix,
           child: MaterialApp(
             title: 'Flutter Demo',
-            theme: ThemeData(primarySwatch: Colors.blue),
+            theme: ThemeData(useMaterial3: false, primarySwatch: Colors.blue),
             home: Scaffold(
               appBar: AppBar(
                 title: const Text('Matrix ImageFilter Test'),
@@ -131,7 +132,7 @@ void main() {
             imageFilter: matrixFilter,
             child: MaterialApp(
               title: 'Flutter Demo',
-              theme: ThemeData(primarySwatch: Colors.blue),
+              theme: ThemeData(useMaterial3: false, primarySwatch: Colors.blue),
               home: Scaffold(
                 appBar: AppBar(
                   title: const Text('Matrix ImageFilter Test'),
@@ -178,7 +179,7 @@ void main() {
   });
 
   testWidgets('Image filter - enabled and disabled', (WidgetTester tester) async {
-    Future<void> pumpWithEnabledStaet(bool enabled) async {
+    Future<void> pumpWithEnabledState(bool enabled) async {
       await tester.pumpWidget(
         RepaintBoundary(
           child: ImageFiltered(
@@ -190,11 +191,11 @@ void main() {
       );
     }
 
-    await pumpWithEnabledStaet(false);
+    await pumpWithEnabledState(false);
     expect(tester.layers, isNot(contains(isA<ImageFilterLayer>())));
 
 
-    await pumpWithEnabledStaet(true);
+    await pumpWithEnabledState(true);
     expect(tester.layers, contains(isA<ImageFilterLayer>()));
   });
 }

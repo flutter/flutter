@@ -21,7 +21,7 @@ function pub_upgrade_with_retry {
   local total_tries="10"
   local remaining_tries=$((total_tries - 1))
   while [[ "$remaining_tries" -gt 0 ]]; do
-    (cd "$FLUTTER_TOOLS_DIR" && "$DART" __deprecated_pub upgrade "$VERBOSITY" --no-precompile) && break
+    (cd "$FLUTTER_TOOLS_DIR" && "$DART" pub upgrade --suppress-analytics) && break
     >&2 echo "Error: Unable to 'pub upgrade' flutter tool. Retrying in five seconds... ($remaining_tries tries left)"
     remaining_tries=$((remaining_tries - 1))
     sleep 5
@@ -123,7 +123,10 @@ function upgrade_flutter () (
   #  * STAMP_PATH is an empty file, or
   #  * Contents of STAMP_PATH is not what we are going to compile, or
   #  * pubspec.yaml last modified after pubspec.lock
-  if [[ ! -f "$SNAPSHOT_PATH" || ! -s "$STAMP_PATH" || "$(cat "$STAMP_PATH")" != "$compilekey" || "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]]; then
+  if [[ ! -f "$SNAPSHOT_PATH" || \
+        ! -s "$STAMP_PATH" || \
+        "$(cat "$STAMP_PATH")" != "$compilekey" || \
+        "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]]; then
     # Waits for the update lock to be acquired. Placing this check inside the
     # conditional allows the majority of flutter/dart installations to bypass
     # the lock entirely, but as a result this required a second verification that
@@ -137,21 +140,19 @@ function upgrade_flutter () (
 
     # Fetch Dart...
     rm -f "$FLUTTER_ROOT/version"
+    rm -f "$FLUTTER_ROOT/bin/cache/flutter.version.json"
     touch "$FLUTTER_ROOT/bin/cache/.dartignore"
     "$FLUTTER_ROOT/bin/internal/update_dart_sdk.sh"
 
     >&2 echo Building flutter tool...
 
     # Prepare packages...
-    VERBOSITY="--verbosity=error"
     if [[ "$CI" == "true" || "$BOT" == "true" || "$CONTINUOUS_INTEGRATION" == "true" || "$CHROME_HEADLESS" == "1" ]]; then
       PUB_ENVIRONMENT="$PUB_ENVIRONMENT:flutter_bot"
-      VERBOSITY="--verbosity=normal"
+    else
+      export PUB_SUMMARY_ONLY=1
     fi
     export PUB_ENVIRONMENT="$PUB_ENVIRONMENT:flutter_install"
-    if [[ -d "$FLUTTER_ROOT/.pub-cache" ]]; then
-      export PUB_CACHE="${PUB_CACHE:-"$FLUTTER_ROOT/.pub-cache"}"
-    fi
     pub_upgrade_with_retry
 
     # Move the old snapshot - we can't just overwrite it as the VM might currently have it
@@ -200,7 +201,7 @@ function shared::execute() {
   # If running over git-bash, overrides the default UNIX executables with win32
   # executables
   case "$(uname -s)" in
-    MINGW*)
+    MINGW* | MSYS* )
       DART="$DART.exe"
       ;;
   esac

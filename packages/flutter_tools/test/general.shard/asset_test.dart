@@ -122,7 +122,7 @@ name: my_package
     ProcessManager: () => FakeProcessManager.empty(),
   });
 
-  testUsingContext('Does not bundles material shaders on web platforms', () async {
+  testUsingContext('Does bundle material shaders on web platforms', () async {
     final String shaderPath = globals.fs.path.join(
       Cache.flutterRoot!,
       'packages', 'flutter', 'lib', 'src', 'material', 'shaders', 'ink_sparkle.frag'
@@ -136,7 +136,7 @@ name: my_package
 
     await asset.build(packagesPath: '.packages', targetPlatform: TargetPlatform.web_javascript);
 
-    expect(asset.entries.keys, isNot(contains('shaders/ink_sparkle.frag')));
+    expect(asset.entries.keys, contains('shaders/ink_sparkle.frag'));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.empty(),

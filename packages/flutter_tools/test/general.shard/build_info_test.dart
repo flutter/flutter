@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/memory.dart';
+
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 
@@ -74,24 +77,24 @@ void main() {
       expect(BuildMode.jitRelease.isPrecompiled, false);
       expect(BuildMode.jitRelease.isJit, true);
 
-      expect(BuildMode.fromName('debug'), BuildMode.debug);
-      expect(BuildMode.fromName('profile'), BuildMode.profile);
-      expect(BuildMode.fromName('jit_release'), BuildMode.jitRelease);
-      expect(BuildMode.fromName('release'), BuildMode.release);
-      expect(() => BuildMode.fromName('foo'), throwsArgumentError);
+      expect(BuildMode.fromCliName('debug'), BuildMode.debug);
+      expect(BuildMode.fromCliName('profile'), BuildMode.profile);
+      expect(BuildMode.fromCliName('jit_release'), BuildMode.jitRelease);
+      expect(BuildMode.fromCliName('release'), BuildMode.release);
+      expect(() => BuildMode.fromCliName('foo'), throwsArgumentError);
     });
   });
 
   testWithoutContext('getDartNameForDarwinArch returns name used in Dart SDK', () {
-    expect(getDartNameForDarwinArch(DarwinArch.armv7),  'armv7');
-    expect(getDartNameForDarwinArch(DarwinArch.arm64),  'arm64');
-    expect(getDartNameForDarwinArch(DarwinArch.x86_64), 'x64');
+    expect(DarwinArch.armv7.dartName,  'armv7');
+    expect(DarwinArch.arm64.dartName,  'arm64');
+    expect(DarwinArch.x86_64.dartName, 'x64');
   });
 
   testWithoutContext('getNameForDarwinArch returns Apple names', () {
-    expect(getNameForDarwinArch(DarwinArch.armv7),  'armv7');
-    expect(getNameForDarwinArch(DarwinArch.arm64),  'arm64');
-    expect(getNameForDarwinArch(DarwinArch.x86_64), 'x86_64');
+    expect(DarwinArch.armv7.name,  'armv7');
+    expect(DarwinArch.arm64.name,  'arm64');
+    expect(DarwinArch.x86_64.name, 'x86_64');
   });
 
   testWithoutContext('getNameForTargetPlatform on Darwin arches', () {
@@ -101,20 +104,20 @@ void main() {
     expect(getNameForTargetPlatform(TargetPlatform.android), isNot(contains('ios')));
   });
 
-  testWithoutContext('defaultIOSArchsForEnvironment', () {
+  testUsingContext('defaultIOSArchsForEnvironment', () {
     expect(defaultIOSArchsForEnvironment(
       EnvironmentType.physical,
-      Artifacts.test(localEngine: 'ios_debug_unopt'),
+      Artifacts.testLocalEngine(localEngineHost: 'host_debug_unopt', localEngine: 'ios_debug_unopt'),
     ).single, DarwinArch.arm64);
 
     expect(defaultIOSArchsForEnvironment(
       EnvironmentType.simulator,
-      Artifacts.test(localEngine: 'ios_debug_sim_unopt'),
+      Artifacts.testLocalEngine(localEngineHost: 'host_debug_unopt', localEngine: 'ios_debug_sim_unopt'),
     ).single, DarwinArch.x86_64);
 
     expect(defaultIOSArchsForEnvironment(
       EnvironmentType.simulator,
-      Artifacts.test(localEngine: 'ios_debug_sim_unopt_arm64'),
+      Artifacts.testLocalEngine(localEngineHost: 'host_debug_unopt', localEngine: 'ios_debug_sim_unopt_arm64'),
     ).single, DarwinArch.arm64);
 
     expect(defaultIOSArchsForEnvironment(
@@ -124,21 +127,27 @@ void main() {
     expect(defaultIOSArchsForEnvironment(
       EnvironmentType.simulator, Artifacts.test(),
     ), <DarwinArch>[ DarwinArch.x86_64, DarwinArch.arm64 ]);
-  });
+  }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
 
-  testWithoutContext('defaultMacOSArchsForEnvironment', () {
+  testUsingContext('defaultMacOSArchsForEnvironment', () {
     expect(defaultMacOSArchsForEnvironment(
-      Artifacts.test(localEngine: 'host_debug_unopt'),
+      Artifacts.testLocalEngine(localEngineHost: 'host_debug_unopt', localEngine: 'host_debug_unopt'),
     ).single, DarwinArch.x86_64);
 
     expect(defaultMacOSArchsForEnvironment(
-      Artifacts.test(localEngine: 'host_debug_unopt_arm64'),
+      Artifacts.testLocalEngine(localEngineHost: 'host_debug_unopt', localEngine: 'host_debug_unopt_arm64'),
     ).single, DarwinArch.arm64);
 
     expect(defaultMacOSArchsForEnvironment(
       Artifacts.test(),
     ), <DarwinArch>[ DarwinArch.x86_64, DarwinArch.arm64 ]);
-  });
+  }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
 
   testWithoutContext('getIOSArchForName on Darwin arches', () {
     expect(getIOSArchForName('armv7'), DarwinArch.armv7);

@@ -34,7 +34,7 @@ class _Linear${blockName}DefaultsM3 extends ProgressIndicatorThemeData {
   Color get linearTrackColor => ${componentColor('md.comp.linear-progress-indicator.track')};
 
   @override
-  double get linearMinHeight => ${tokens['md.comp.linear-progress-indicator.track.height']};
+  double get linearMinHeight => ${getToken('md.comp.linear-progress-indicator.track.height')};
 }
 ''';
 }

@@ -43,8 +43,8 @@ void main() {
         sync_io.LogType.browser: 'INFO',
         sync_io.LogType.performance: 'ALL',
       },
-      'chromeOptions': <String, dynamic>{
-        'w3c': false,
+      'goog:chromeOptions': <String, dynamic>{
+        'w3c': true,
         'args': <String>[
           ...kChromeArgs,
           '--headless',
@@ -70,9 +70,9 @@ void main() {
         sync_io.LogType.browser: 'INFO',
         sync_io.LogType.performance: 'ALL',
       },
-      'chromeOptions': <String, dynamic>{
+      'goog:chromeOptions': <String, dynamic>{
         'binary': chromeBinary,
-        'w3c': false,
+        'w3c': true,
         'args': kChromeArgs,
         'perfLoggingPrefs': <String, String>{
           'traceCategories':
@@ -100,8 +100,8 @@ void main() {
         sync_io.LogType.browser: 'INFO',
         sync_io.LogType.performance: 'ALL',
       },
-      'chromeOptions': <String, dynamic>{
-        'w3c': false,
+      'goog:chromeOptions': <String, dynamic>{
+        'w3c': true,
         'args': <String>[
           ...kChromeArgs,
           '--autoplay-policy=no-user-gesture-required',
@@ -254,6 +254,29 @@ void main() {
       'exitApp',
       'cleanupAtFinish',
     ]);
+  }, overrides: <Type, Generator>{
+    WebRunnerFactory: () => FakeWebRunnerFactory(),
+  });
+
+  testUsingContext('WebDriverService can start an app with a launch url provided', () async {
+    final WebDriverService service = setUpDriverService();
+    final FakeDevice device = FakeDevice();
+    const String testUrl = 'http://localhost:1234/test';
+    await service.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile, webLaunchUrl: testUrl), true);
+    await service.stop();
+    expect(service.webUri, Uri.parse(testUrl));
+  }, overrides: <Type, Generator>{
+    WebRunnerFactory: () => FakeWebRunnerFactory(),
+  });
+
+  testUsingContext('WebDriverService will throw when an invalid launch url is provided', () async {
+    final WebDriverService service = setUpDriverService();
+    final FakeDevice device = FakeDevice();
+    const String invalidTestUrl = '::INVALID_URL::';
+    await expectLater(
+      service.start(BuildInfo.profile, device, DebuggingOptions.enabled(BuildInfo.profile, webLaunchUrl: invalidTestUrl), true),
+      throwsA(isA<FormatException>()),
+    );
   }, overrides: <Type, Generator>{
     WebRunnerFactory: () => FakeWebRunnerFactory(),
   });

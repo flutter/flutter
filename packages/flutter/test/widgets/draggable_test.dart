@@ -7,6 +7,7 @@
 // https://github.com/flutter/flutter/issues/85160
 // Fails with "flutter test --test-randomize-ordering-seed=123"
 @Tags(<String>['no-shuffle'])
+library;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -1751,9 +1752,9 @@ void main() {
     await gesture.moveTo(secondLocation);
     await tester.pump();
 
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(const MaterialApp(
         home: Column(
-            children: const <Widget>[
+            children: <Widget>[
               Draggable<int>(
                   data: 1,
                   feedback: Text('Dragging'),
@@ -2283,9 +2284,9 @@ void main() {
     await gesture.moveTo(secondLocation);
     await tester.pump();
 
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(const MaterialApp(
       home: Column(
-        children: const <Widget>[
+        children: <Widget>[
           Draggable<int>(
             data: 1,
             feedback: Text('Dragging'),
@@ -3060,9 +3061,9 @@ void main() {
     const HitTestBehavior hitTestBehavior = HitTestBehavior.deferToChild;
 
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Column(
-          children: const <Widget>[
+          children: <Widget>[
             Draggable<int>(
               feedback: SizedBox(height: 50.0, child: Text('Draggable')),
               child: SizedBox(height: 50.0, child: Text('Target')),
@@ -3078,9 +3079,9 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/92083
   testWidgets('feedback respect the MouseRegion cursor configure', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Column(
-          children: const <Widget>[
+          children: <Widget>[
             Draggable<int>(
               ignoringFeedbackPointer: false,
               feedback: MouseRegion(
@@ -3193,6 +3194,48 @@ void main() {
     expect(const LongPressDraggable<int>(feedback: widget2, child: widget1).child, widget1);
     expect(const LongPressDraggable<int>(feedback: widget2, child: widget1).feedback, widget2);
     expect(LongPressDraggable<int>(feedback: widget2, dragAnchorStrategy: dummyStrategy, child: widget1).dragAnchorStrategy, dummyStrategy);
+  });
+
+  testWidgets('Test allowedButtonsFilter', (WidgetTester tester) async {
+    Widget build(bool Function(int buttons)? allowedButtonsFilter) {
+      return MaterialApp(
+        home: Draggable<int>(
+          key: UniqueKey(),
+          allowedButtonsFilter: allowedButtonsFilter,
+          feedback: const Text('Dragging'),
+          child: const Text('Source'),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build(null));
+    final Offset firstLocation = tester.getCenter(find.text('Source'));
+    expect(find.text('Dragging'), findsNothing);
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
+    expect(find.text('Dragging'), findsOneWidget);
+    await gesture.up();
+
+    await tester.pumpWidget(build((int buttons) => buttons == kSecondaryButton));
+    expect(find.text('Dragging'), findsNothing);
+    final TestGesture gesture1 = await tester.startGesture(firstLocation, pointer: 8);
+    await tester.pump();
+    expect(find.text('Dragging'), findsNothing);
+    await gesture1.up();
+
+    await tester.pumpWidget(build((int buttons) => buttons & kTertiaryButton != 0 || buttons & kPrimaryButton != 0));
+    expect(find.text('Dragging'), findsNothing);
+    final TestGesture gesture2 = await tester.startGesture(firstLocation, pointer: 8);
+    await tester.pump();
+    expect(find.text('Dragging'), findsOneWidget);
+    await gesture2.up();
+
+    await tester.pumpWidget(build((int buttons) => false));
+    expect(find.text('Dragging'), findsNothing);
+    final TestGesture gesture3 = await tester.startGesture(firstLocation, pointer: 8);
+    await tester.pump();
+    expect(find.text('Dragging'), findsNothing);
+    await gesture3.up();
   });
 }
 

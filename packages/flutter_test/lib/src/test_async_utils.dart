@@ -12,6 +12,9 @@ class _AsyncScope {
   final Zone zone;
 }
 
+// Examples can assume:
+// late WidgetTester tester;
+
 /// Utility class for all the async APIs in the `flutter_test` library.
 ///
 /// This class provides checking for asynchronous APIs, allowing the library to
@@ -44,10 +47,7 @@ class _AsyncScope {
 ///   // ...
 /// });
 /// ```
-class TestAsyncUtils {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  TestAsyncUtils._();
+abstract final class TestAsyncUtils {
   static const String _className = 'TestAsyncUtils';
 
   static final List<_AsyncScope> _scopeStack = <_AsyncScope>[];
@@ -187,10 +187,7 @@ class TestAsyncUtils {
         return;
       }
       candidateScope = _scopeStack[_scopeStack.length - skipCount - 1];
-      assert(candidateScope != null);
-      assert(candidateScope.zone != null);
     } while (candidateScope.zone != zone);
-    assert(scope != null);
     final List<DiagnosticsNode> information = <DiagnosticsNode>[
       ErrorSummary('Guarded function conflict.'),
       ErrorHint('You must use "await" with all Future-returning test APIs.'),

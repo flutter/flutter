@@ -3,86 +3,97 @@
 // found in the LICENSE file.
 
 import 'template.dart';
+import 'token_logger.dart';
 
 class ColorSchemeTemplate extends TokenTemplate {
-  ColorSchemeTemplate(super.blockName, super.fileName, super.tokens);
+  ColorSchemeTemplate(this._colorTokensLight, this._colorTokensDark, super.blockName, super.fileName, super.tokens);
 
   // Map of light color scheme token data from tokens.
-  late Map<String, dynamic> colorTokensLight = tokens['colorsLight'] as Map<String, dynamic>;
+  final Map<String, dynamic> _colorTokensLight;
 
   // Map of dark color scheme token data from tokens.
-  late Map<String, dynamic> colorTokensDark = tokens['colorsDark'] as Map<String, dynamic>;
+  final Map<String, dynamic> _colorTokensDark;
+
+  dynamic light(String tokenName) {
+    tokenLogger.log(tokenName);
+    return getToken(_colorTokensLight[tokenName] as String);
+  }
+
+  dynamic dark(String tokenName) {
+    tokenLogger.log(tokenName);
+    return getToken(_colorTokensDark[tokenName] as String);
+  }
 
   @override
   String generate() => '''
 const ColorScheme _colorSchemeLightM3 = ColorScheme(
   brightness: Brightness.light,
-  primary: Color(${tokens[colorTokensLight['md.sys.color.primary']]}),
-  onPrimary: Color(${tokens[colorTokensLight['md.sys.color.on-primary']]}),
-  primaryContainer: Color(${tokens[colorTokensLight['md.sys.color.primary-container']]}),
-  onPrimaryContainer: Color(${tokens[colorTokensLight['md.sys.color.on-primary-container']]}),
-  secondary: Color(${tokens[colorTokensLight['md.sys.color.secondary']]}),
-  onSecondary: Color(${tokens[colorTokensLight['md.sys.color.on-secondary']]}),
-  secondaryContainer: Color(${tokens[colorTokensLight['md.sys.color.secondary-container']]}),
-  onSecondaryContainer: Color(${tokens[colorTokensLight['md.sys.color.on-secondary-container']]}),
-  tertiary: Color(${tokens[colorTokensLight['md.sys.color.tertiary']]}),
-  onTertiary: Color(${tokens[colorTokensLight['md.sys.color.on-tertiary']]}),
-  tertiaryContainer: Color(${tokens[colorTokensLight['md.sys.color.tertiary-container']]}),
-  onTertiaryContainer: Color(${tokens[colorTokensLight['md.sys.color.on-tertiary-container']]}),
-  error: Color(${tokens[colorTokensLight['md.sys.color.error']]}),
-  onError: Color(${tokens[colorTokensLight['md.sys.color.on-error']]}),
-  errorContainer: Color(${tokens[colorTokensLight['md.sys.color.error-container']]}),
-  onErrorContainer: Color(${tokens[colorTokensLight['md.sys.color.on-error-container']]}),
-  background: Color(${tokens[colorTokensLight['md.sys.color.background']]}),
-  onBackground: Color(${tokens[colorTokensLight['md.sys.color.on-background']]}),
-  surface: Color(${tokens[colorTokensLight['md.sys.color.surface']]}),
-  onSurface: Color(${tokens[colorTokensLight['md.sys.color.on-surface']]}),
-  surfaceVariant: Color(${tokens[colorTokensLight['md.sys.color.surface-variant']]}),
-  onSurfaceVariant: Color(${tokens[colorTokensLight['md.sys.color.on-surface-variant']]}),
-  outline: Color(${tokens[colorTokensLight['md.sys.color.outline']]}),
-  outlineVariant: Color(${tokens[colorTokensLight['md.sys.color.outline-variant']]}),
-  shadow: Color(${tokens[colorTokensLight['md.sys.color.shadow']]}),
-  scrim: Color(${tokens[colorTokensLight['md.sys.color.scrim']]}),
-  inverseSurface: Color(${tokens[colorTokensLight['md.sys.color.inverse-surface']]}),
-  onInverseSurface: Color(${tokens[colorTokensLight['md.sys.color.inverse-on-surface']]}),
-  inversePrimary: Color(${tokens[colorTokensLight['md.sys.color.inverse-primary']]}),
+  primary: Color(${light('md.sys.color.primary')}),
+  onPrimary: Color(${light('md.sys.color.on-primary')}),
+  primaryContainer: Color(${light('md.sys.color.primary-container')}),
+  onPrimaryContainer: Color(${light('md.sys.color.on-primary-container')}),
+  secondary: Color(${light('md.sys.color.secondary')}),
+  onSecondary: Color(${light('md.sys.color.on-secondary')}),
+  secondaryContainer: Color(${light('md.sys.color.secondary-container')}),
+  onSecondaryContainer: Color(${light('md.sys.color.on-secondary-container')}),
+  tertiary: Color(${light('md.sys.color.tertiary')}),
+  onTertiary: Color(${light('md.sys.color.on-tertiary')}),
+  tertiaryContainer: Color(${light('md.sys.color.tertiary-container')}),
+  onTertiaryContainer: Color(${light('md.sys.color.on-tertiary-container')}),
+  error: Color(${light('md.sys.color.error')}),
+  onError: Color(${light('md.sys.color.on-error')}),
+  errorContainer: Color(${light('md.sys.color.error-container')}),
+  onErrorContainer: Color(${light('md.sys.color.on-error-container')}),
+  background: Color(${light('md.sys.color.background')}),
+  onBackground: Color(${light('md.sys.color.on-background')}),
+  surface: Color(${light('md.sys.color.surface')}),
+  onSurface: Color(${light('md.sys.color.on-surface')}),
+  surfaceVariant: Color(${light('md.sys.color.surface-variant')}),
+  onSurfaceVariant: Color(${light('md.sys.color.on-surface-variant')}),
+  outline: Color(${light('md.sys.color.outline')}),
+  outlineVariant: Color(${light('md.sys.color.outline-variant')}),
+  shadow: Color(${light('md.sys.color.shadow')}),
+  scrim: Color(${light('md.sys.color.scrim')}),
+  inverseSurface: Color(${light('md.sys.color.inverse-surface')}),
+  onInverseSurface: Color(${light('md.sys.color.inverse-on-surface')}),
+  inversePrimary: Color(${light('md.sys.color.inverse-primary')}),
   // The surfaceTint color is set to the same color as the primary.
-  surfaceTint: Color(${tokens[colorTokensLight['md.sys.color.primary']]}),
+  surfaceTint: Color(${light('md.sys.color.primary')}),
 );
 
 const ColorScheme _colorSchemeDarkM3 = ColorScheme(
   brightness: Brightness.dark,
-  primary: Color(${tokens[colorTokensDark['md.sys.color.primary']]}),
-  onPrimary: Color(${tokens[colorTokensDark['md.sys.color.on-primary']]}),
-  primaryContainer: Color(${tokens[colorTokensDark['md.sys.color.primary-container']]}),
-  onPrimaryContainer: Color(${tokens[colorTokensDark['md.sys.color.on-primary-container']]}),
-  secondary: Color(${tokens[colorTokensDark['md.sys.color.secondary']]}),
-  onSecondary: Color(${tokens[colorTokensDark['md.sys.color.on-secondary']]}),
-  secondaryContainer: Color(${tokens[colorTokensDark['md.sys.color.secondary-container']]}),
-  onSecondaryContainer: Color(${tokens[colorTokensDark['md.sys.color.on-secondary-container']]}),
-  tertiary: Color(${tokens[colorTokensDark['md.sys.color.tertiary']]}),
-  onTertiary: Color(${tokens[colorTokensDark['md.sys.color.on-tertiary']]}),
-  tertiaryContainer: Color(${tokens[colorTokensDark['md.sys.color.tertiary-container']]}),
-  onTertiaryContainer: Color(${tokens[colorTokensDark['md.sys.color.on-tertiary-container']]}),
-  error: Color(${tokens[colorTokensDark['md.sys.color.error']]}),
-  onError: Color(${tokens[colorTokensDark['md.sys.color.on-error']]}),
-  errorContainer: Color(${tokens[colorTokensDark['md.sys.color.error-container']]}),
-  onErrorContainer: Color(${tokens[colorTokensDark['md.sys.color.on-error-container']]}),
-  background: Color(${tokens[colorTokensDark['md.sys.color.background']]}),
-  onBackground: Color(${tokens[colorTokensDark['md.sys.color.on-background']]}),
-  surface: Color(${tokens[colorTokensDark['md.sys.color.surface']]}),
-  onSurface: Color(${tokens[colorTokensDark['md.sys.color.on-surface']]}),
-  surfaceVariant: Color(${tokens[colorTokensDark['md.sys.color.surface-variant']]}),
-  onSurfaceVariant: Color(${tokens[colorTokensDark['md.sys.color.on-surface-variant']]}),
-  outline: Color(${tokens[colorTokensDark['md.sys.color.outline']]}),
-  outlineVariant: Color(${tokens[colorTokensDark['md.sys.color.outline-variant']]}),
-  shadow: Color(${tokens[colorTokensDark['md.sys.color.shadow']]}),
-  scrim: Color(${tokens[colorTokensDark['md.sys.color.scrim']]}),
-  inverseSurface: Color(${tokens[colorTokensDark['md.sys.color.inverse-surface']]}),
-  onInverseSurface: Color(${tokens[colorTokensDark['md.sys.color.inverse-on-surface']]}),
-  inversePrimary: Color(${tokens[colorTokensDark['md.sys.color.inverse-primary']]}),
+  primary: Color(${dark('md.sys.color.primary')}),
+  onPrimary: Color(${dark('md.sys.color.on-primary')}),
+  primaryContainer: Color(${dark('md.sys.color.primary-container')}),
+  onPrimaryContainer: Color(${dark('md.sys.color.on-primary-container')}),
+  secondary: Color(${dark('md.sys.color.secondary')}),
+  onSecondary: Color(${dark('md.sys.color.on-secondary')}),
+  secondaryContainer: Color(${dark('md.sys.color.secondary-container')}),
+  onSecondaryContainer: Color(${dark('md.sys.color.on-secondary-container')}),
+  tertiary: Color(${dark('md.sys.color.tertiary')}),
+  onTertiary: Color(${dark('md.sys.color.on-tertiary')}),
+  tertiaryContainer: Color(${dark('md.sys.color.tertiary-container')}),
+  onTertiaryContainer: Color(${dark('md.sys.color.on-tertiary-container')}),
+  error: Color(${dark('md.sys.color.error')}),
+  onError: Color(${dark('md.sys.color.on-error')}),
+  errorContainer: Color(${dark('md.sys.color.error-container')}),
+  onErrorContainer: Color(${dark('md.sys.color.on-error-container')}),
+  background: Color(${dark('md.sys.color.background')}),
+  onBackground: Color(${dark('md.sys.color.on-background')}),
+  surface: Color(${dark('md.sys.color.surface')}),
+  onSurface: Color(${dark('md.sys.color.on-surface')}),
+  surfaceVariant: Color(${dark('md.sys.color.surface-variant')}),
+  onSurfaceVariant: Color(${dark('md.sys.color.on-surface-variant')}),
+  outline: Color(${dark('md.sys.color.outline')}),
+  outlineVariant: Color(${dark('md.sys.color.outline-variant')}),
+  shadow: Color(${dark('md.sys.color.shadow')}),
+  scrim: Color(${dark('md.sys.color.scrim')}),
+  inverseSurface: Color(${dark('md.sys.color.inverse-surface')}),
+  onInverseSurface: Color(${dark('md.sys.color.inverse-on-surface')}),
+  inversePrimary: Color(${dark('md.sys.color.inverse-primary')}),
   // The surfaceTint color is set to the same color as the primary.
-  surfaceTint: Color(${tokens[colorTokensDark['md.sys.color.primary']]}),
+  surfaceTint: Color(${dark('md.sys.color.primary')}),
 );
 ''';
 }

@@ -12,6 +12,7 @@
 #include <flutter/standard_method_codec.h>
 
 #include "flutter/generated_plugin_registrant.h"
+#include "utils.h"
 
 /// Window attribute that enables dark mode window decorations.
 ///
@@ -62,6 +63,11 @@ bool FlutterWindow::OnCreate() {
     visible = true;
   });
 
+  // Flutter can complete the first frame before the "show window" callback is
+  // registered. The following call ensures a frame is pending to ensure the
+  // window is shown. It is a no-op if the first frame hasn't completed yet.
+  flutter_controller_->ForceRedraw();
+
   // Create a method channel to check the window's visibility.
   flutter::MethodChannel<> channel(
       flutter_controller_->engine()->messenger(), "tests.flutter.dev/windows_startup_test",
@@ -106,6 +112,16 @@ bool FlutterWindow::OnCreate() {
         } else {
           result->Error("error", "Received status " + status);
         }
+      } else if (method == "convertString") {
+        const flutter::EncodableValue* argument = call.arguments();
+        const std::vector<int32_t> code_points = std::get<std::vector<int32_t>>(*argument);
+        std::vector<wchar_t> wide_str;
+        for (int32_t code_point : code_points) {
+          wide_str.push_back((wchar_t)(code_point));
+        }
+        wide_str.push_back((wchar_t)0);
+        const std::string string = Utf8FromUtf16(wide_str.data());
+        result->Success(string);
       } else {
         result->NotImplemented();
       }

@@ -88,6 +88,9 @@ enum MaxLengthEnforcement {
 ///  * [FilteringTextInputFormatter], a provided formatter for filtering
 ///    characters.
 abstract class TextInputFormatter {
+  /// This constructor enables subclasses to provide const constructors so that they can be used in const expressions.
+  const TextInputFormatter();
+
   /// Called when text is being typed or cut/copy/pasted in the [EditableText].
   ///
   /// You can override the resulting text based on the previous text value and
@@ -118,8 +121,7 @@ typedef TextInputFormatFunction = TextEditingValue Function(
 
 /// Wiring for [TextInputFormatter.withFunction].
 class _SimpleTextInputFormatter extends TextInputFormatter {
-  _SimpleTextInputFormatter(this.formatFunction)
-    : assert(formatFunction != null);
+  _SimpleTextInputFormatter(this.formatFunction);
 
   final TextInputFormatFunction formatFunction;
 
@@ -249,6 +251,14 @@ class _TextEditingValueAccumulator {
 /// As an example, [FilteringTextInputFormatter] typically shouldn't be used
 /// with [RegExp]s that contain positional matchers (`^` or `$`) since these
 /// patterns are usually meant for matching the whole string.
+///
+/// ### Quote characters on iOS
+///
+/// When filtering single (`'`) or double (`"`) quote characters, be aware that
+/// the default iOS keyboard actually inserts special directional versions of
+/// these characters (`‘` and `’` for single quote, and `“` and `”` for double
+/// quote). Consider including all three variants in your regular expressions to
+/// support iOS.
 class FilteringTextInputFormatter extends TextInputFormatter {
   /// Creates a formatter that replaces banned patterns with the given
   /// [replacementString].
@@ -268,9 +278,7 @@ class FilteringTextInputFormatter extends TextInputFormatter {
     this.filterPattern, {
     required this.allow,
     this.replacementString = '',
-  }) : assert(filterPattern != null),
-       assert(allow != null),
-       assert(replacementString != null);
+  });
 
   /// Creates a formatter that only allows characters matching a pattern.
   ///

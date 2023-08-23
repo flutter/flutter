@@ -119,8 +119,7 @@ class ValueListenableBuilder<T> extends StatefulWidget {
     required this.valueListenable,
     required this.builder,
     this.child,
-  }) : assert(valueListenable != null),
-       assert(builder != null);
+  });
 
   /// The [ValueListenable] whose value you depend on in order to build.
   ///

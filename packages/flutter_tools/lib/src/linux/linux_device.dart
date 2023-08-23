@@ -25,6 +25,7 @@ class LinuxDevice extends DesktopDevice {
     required FileSystem fileSystem,
     required OperatingSystemUtils operatingSystemUtils,
   })  : _operatingSystemUtils = operatingSystemUtils,
+        _logger = logger,
         super(
           'linux',
           platformType: PlatformType.linux,
@@ -36,6 +37,7 @@ class LinuxDevice extends DesktopDevice {
         );
 
   final OperatingSystemUtils _operatingSystemUtils;
+  final Logger _logger;
 
   @override
   bool isSupported() => true;
@@ -57,8 +59,7 @@ class LinuxDevice extends DesktopDevice {
   }
 
   @override
-  Future<void> buildForDevice(
-    covariant LinuxApp package, {
+  Future<void> buildForDevice({
     String? mainPath,
     required BuildInfo buildInfo,
   }) async {
@@ -67,12 +68,13 @@ class LinuxDevice extends DesktopDevice {
       buildInfo,
       target: mainPath,
       targetPlatform: await targetPlatform,
+      logger: _logger,
     );
   }
 
   @override
-  String executablePathForDevice(covariant LinuxApp package, BuildMode buildMode) {
-    return package.executable(buildMode);
+  String executablePathForDevice(covariant LinuxApp package, BuildInfo buildInfo) {
+    return package.executable(buildInfo.mode);
   }
 }
 

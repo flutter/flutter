@@ -5,9 +5,12 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+
 
 void main() {
   testWidgets('Slider value indicator', (WidgetTester tester) async {
@@ -95,7 +98,7 @@ void main() {
     );
   });
 
-  testWidgets('Slider value indicator large text scale', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Slider value indicator large text scale', (WidgetTester tester) async {
     await _buildValueIndicatorStaticSlider(
       tester,
       value: 0,
@@ -139,7 +142,7 @@ void main() {
     );
   });
 
-  testWidgets('Slider value indicator large text scale and wide text',
+  testWidgetsWithLeakTracking('Slider value indicator large text scale and wide text',
       (WidgetTester tester) async {
     await _buildValueIndicatorStaticSlider(
       tester,
@@ -188,8 +191,9 @@ void main() {
   });
 
   group('Material 2', () {
-    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
-    // is turned on by default, these tests can be removed.
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
 
     testWidgets('Slider value indicator', (WidgetTester tester) async {
       await _buildValueIndicatorStaticSlider(
@@ -270,7 +274,7 @@ void main() {
       );
     });
 
-    testWidgets('Slider value indicator large text scale', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Slider value indicator large text scale', (WidgetTester tester) async {
       await _buildValueIndicatorStaticSlider(
         tester,
         value: 0,
@@ -311,7 +315,7 @@ void main() {
       );
     });
 
-    testWidgets('Slider value indicator large text scale and wide text',
+    testWidgetsWithLeakTracking('Slider value indicator large text scale and wide text',
         (WidgetTester tester) async {
       await _buildValueIndicatorStaticSlider(
         tester,

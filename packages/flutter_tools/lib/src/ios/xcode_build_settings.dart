@@ -35,6 +35,7 @@ Future<void> updateGeneratedXcodeProperties({
   String? targetOverride,
   bool useMacOSConfig = false,
   String? buildDirOverride,
+  bool usingCoreDevice = false,
 }) async {
   final List<String> xcodeBuildSettings = await _xcodeBuildSettingsLines(
     project: project,
@@ -42,6 +43,7 @@ Future<void> updateGeneratedXcodeProperties({
     targetOverride: targetOverride,
     useMacOSConfig: useMacOSConfig,
     buildDirOverride: buildDirOverride,
+    usingCoreDevice: usingCoreDevice,
   );
 
   _updateGeneratedXcodePropertiesFile(
@@ -143,6 +145,7 @@ Future<List<String>> _xcodeBuildSettingsLines({
   String? targetOverride,
   bool useMacOSConfig = false,
   String? buildDirOverride,
+  bool usingCoreDevice = false,
 }) async {
   final List<String> xcodeBuildSettings = <String>[];
 
@@ -170,18 +173,27 @@ Future<List<String>> _xcodeBuildSettingsLines({
   final String buildNumber = parsedBuildNumber(manifest: project.manifest, buildInfo: buildInfo) ?? '1';
   xcodeBuildSettings.add('FLUTTER_BUILD_NUMBER=$buildNumber');
 
+  // CoreDevices in debug and profile mode are launched, but not built, via Xcode.
+  // Set the BUILD_DIR so Xcode knows where to find the app bundle to launch.
+  if (usingCoreDevice && !buildInfo.isRelease) {
+    xcodeBuildSettings.add('BUILD_DIR=${globals.fs.path.absolute(getIosBuildDirectory())}');
+  }
+
   final LocalEngineInfo? localEngineInfo = globals.artifacts?.localEngineInfo;
   if (localEngineInfo != null) {
-    final String engineOutPath = localEngineInfo.engineOutPath;
+    final String engineOutPath = localEngineInfo.targetOutPath;
     xcodeBuildSettings.add('FLUTTER_ENGINE=${globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath))}');
 
-    final String localEngineName = localEngineInfo.localEngineName;
+    final String localEngineName = localEngineInfo.localTargetName;
     xcodeBuildSettings.add('LOCAL_ENGINE=$localEngineName');
+
+    final String localEngineHostName = localEngineInfo.localHostName;
+    xcodeBuildSettings.add('LOCAL_ENGINE_HOST=$localEngineHostName');
 
     // Tell Xcode not to build universal binaries for local engines, which are
     // single-architecture.
     //
-    // NOTE: this assumes that local engine binary paths are consistent with
+    // This assumes that local engine binary paths are consistent with
     // the conventions uses in the engine: 32-bit iOS engines are built to
     // paths ending in _arm, 64-bit builds are not.
 

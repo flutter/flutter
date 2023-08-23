@@ -98,8 +98,7 @@ class ProcessExit implements Exception {
 
 class RunResult {
   RunResult(this.processResult, this._command)
-    : assert(_command != null),
-      assert(_command.isNotEmpty);
+    : assert(_command.isNotEmpty);
 
   final ProcessResult processResult;
 
@@ -256,7 +255,7 @@ class _DefaultProcessUtils implements ProcessUtils {
     Duration? timeout,
     int timeoutRetries = 0,
   }) async {
-    if (cmd == null || cmd.isEmpty) {
+    if (cmd.isEmpty) {
       throw ArgumentError('cmd must be a non-empty list');
     }
     if (timeoutRetries < 0) {

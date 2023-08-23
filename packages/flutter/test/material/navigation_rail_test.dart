@@ -7,12 +7,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../rendering/mock_canvas.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgets('Custom selected and unselected textStyles are honored', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Custom selected and unselected textStyles are honored', (WidgetTester tester) async {
     const TextStyle selectedTextStyle = TextStyle(fontWeight: FontWeight.w300, fontSize: 17.0);
     const TextStyle unselectedTextStyle = TextStyle(fontWeight: FontWeight.w800, fontSize: 11.0);
 
@@ -35,7 +34,7 @@ void main() {
     expect(actualUnselectedTextStyle.fontWeight, equals(actualUnselectedTextStyle.fontWeight));
   });
 
-  testWidgets('Custom selected and unselected iconThemes are honored', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Custom selected and unselected iconThemes are honored', (WidgetTester tester) async {
     const IconThemeData selectedIconTheme = IconThemeData(size: 36, color: Color(0x00000001));
     const IconThemeData unselectedIconTheme = IconThemeData(size: 18, color: Color(0x00000002));
 
@@ -58,7 +57,7 @@ void main() {
     expect(actualUnselectedIconTheme.fontSize, equals(unselectedIconTheme.size));
   });
 
-  testWidgets('No selected destination when selectedIndex is null', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('No selected destination when selectedIndex is null', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
@@ -71,7 +70,7 @@ void main() {
     expect(semantics.where((Semantics s) => s.properties.selected ?? false), isEmpty);
   });
 
-  testWidgets('backgroundColor can be changed', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('backgroundColor can be changed', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
@@ -96,7 +95,7 @@ void main() {
     expect(_railMaterial(tester).color, equals(Colors.green));
   });
 
-  testWidgets('elevation can be changed', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('elevation can be changed', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
@@ -121,7 +120,7 @@ void main() {
     expect(_railMaterial(tester).elevation, equals(7));
   });
 
-  testWidgets('Renders at the correct default width - [labelType]=none (default)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Renders at the correct default width - [labelType]=none (default)', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
@@ -134,7 +133,7 @@ void main() {
     expect(renderBox.size.width, 80.0);
   });
 
-  testWidgets('Renders at the correct default width - [labelType]=selected', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Renders at the correct default width - [labelType]=selected', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
@@ -148,7 +147,7 @@ void main() {
     expect(renderBox.size.width, 80.0);
   });
 
-  testWidgets('Renders at the correct default width - [labelType]=all', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Renders at the correct default width - [labelType]=all', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
@@ -162,7 +161,7 @@ void main() {
     expect(renderBox.size.width, 80.0);
   });
 
-  testWidgets('Renders wider for a destination with a long label - [labelType]=all', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Renders wider for a destination with a long label - [labelType]=all', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
@@ -188,7 +187,7 @@ void main() {
     expect(renderBox.size.width, _labelRenderBox(tester, 'Longer Label').size.width + 16.0);
   });
 
-  testWidgets('Renders only icons - [labelType]=none (default)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Renders only icons - [labelType]=none (default)', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
@@ -209,7 +208,7 @@ void main() {
     expect(_labelOpacity(tester, 'Jkl'), 0);
   });
 
-  testWidgets('Renders icons and labels - [labelType]=all', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Renders icons and labels - [labelType]=all', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
@@ -236,7 +235,7 @@ void main() {
     expect(_opacityAboveLabel('Jkl'), findsNothing);
   });
 
-  testWidgets('Renders icons and selected label - [labelType]=selected', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Renders icons and selected label - [labelType]=selected', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
@@ -258,7 +257,7 @@ void main() {
     expect(_labelOpacity(tester, 'Jkl'), 0);
   });
 
-  testWidgets('Destination spacing is correct - [labelType]=none (default), [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Destination spacing is correct - [labelType]=none (default), [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
     // Padding at the top of the rail.
     const double topPadding = 8.0;
     // Width of a destination.
@@ -332,7 +331,7 @@ void main() {
     );
   });
 
-  testWidgets('Destination spacing is correct - [labelType]=none (default), [textScaleFactor]=3.0', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Destination spacing is correct - [labelType]=none (default), [textScaleFactor]=3.0', (WidgetTester tester) async {
     // Since the rail is icon only, its destinations should not be affected by
     // textScaleFactor.
 
@@ -410,7 +409,7 @@ void main() {
     );
   });
 
-  testWidgets('Destination spacing is correct - [labelType]=none (default), [textScaleFactor]=0.75', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Destination spacing is correct - [labelType]=none (default), [textScaleFactor]=0.75', (WidgetTester tester) async {
     // Since the rail is icon only, its destinations should not be affected by
     // textScaleFactor.
 
@@ -488,7 +487,7 @@ void main() {
     );
   });
 
-  testWidgets('Destination spacing is correct - [labelType]=selected, [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Destination spacing is correct - [labelType]=selected, [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
     // Padding at the top of the rail.
     const double topPadding = 8.0;
     // Width of a destination.
@@ -542,50 +541,54 @@ void main() {
     // The second destination is below the first with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-    expect(
-      secondIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - secondIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - secondIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        secondIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - secondIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - secondIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
+    }
 
     // The third destination is below the second with some spacing.
     nextDestinationY += destinationHeight + destinationSpacing;
     final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
-    expect(
-      thirdIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - thirdIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - thirdIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        thirdIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - thirdIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - thirdIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
+    }
 
     // The fourth destination is below the third with some spacing.
     nextDestinationY += destinationHeight + destinationSpacing;
     final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
-    expect(
-      fourthIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - fourthIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - fourthIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        fourthIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - fourthIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - fourthIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
-  },
-  skip: isBrowser, // https://github.com/flutter/flutter/issues/99786
-  );
+      );
+    }
+  });
 
-  testWidgets('Destination spacing is correct - [labelType]=selected, [textScaleFactor]=3.0', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Destination spacing is correct - [labelType]=selected, [textScaleFactor]=3.0', (WidgetTester tester) async {
     // Padding at the top of the rail.
     const double topPadding = 8.0;
     // Width of a destination.
-    const double destinationWidth = 126.0;
+    const double destinationWidth = 125.5;
     // Height of a destination indicator with icon.
     const double destinationHeight = 32.0;
     // Space between the indicator and label.
@@ -636,46 +639,50 @@ void main() {
     // The second destination is below the first with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-    expect(
-      secondIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - secondIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - secondIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        secondIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - secondIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - secondIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
+    }
 
     // The third destination is below the second with some spacing.
     nextDestinationY += destinationHeight + destinationSpacing;
     final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
-    expect(
-      thirdIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - thirdIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - thirdIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        thirdIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - thirdIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - thirdIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
+    }
 
     // The fourth destination is below the third with some spacing.
     nextDestinationY += destinationHeight + destinationSpacing;
     final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
-    expect(
-      fourthIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - fourthIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - fourthIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        fourthIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - fourthIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - fourthIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
-  },
-  skip: isBrowser, // https://github.com/flutter/flutter/issues/99786
-  );
+      );
+    }
+  });
 
-  testWidgets('Destination spacing is correct - [labelType]=selected, [textScaleFactor]=0.75', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Destination spacing is correct - [labelType]=selected, [textScaleFactor]=0.75', (WidgetTester tester) async {
     // Padding at the top of the rail.
     const double topPadding = 8.0;
     // Width of a destination.
@@ -730,46 +737,50 @@ void main() {
     // The second destination is below the first with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-    expect(
-      secondIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - secondIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - secondIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        secondIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - secondIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - secondIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
+    }
 
     // The third destination is below the second with some spacing.
     nextDestinationY += destinationHeight + destinationSpacing;
     final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
-    expect(
-      thirdIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - thirdIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - thirdIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        thirdIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - thirdIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - thirdIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
+    }
 
     // The fourth destination is below the third with some spacing.
     nextDestinationY += destinationHeight + destinationSpacing;
     final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
-    expect(
-      fourthIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - fourthIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - fourthIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        fourthIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - fourthIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - fourthIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
-  },
-  skip: isBrowser, // https://github.com/flutter/flutter/issues/99786
-  );
+      );
+    }
+  });
 
-  testWidgets('Destination spacing is correct - [labelType]=all, [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Destination spacing is correct - [labelType]=all, [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
     // Padding at the top of the rail.
     const double topPadding = 8.0;
     // Width of a destination.
@@ -823,50 +834,54 @@ void main() {
     // The second destination is below the first with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-    expect(
-      secondIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - secondIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - secondIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        secondIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - secondIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - secondIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
+    }
 
     // The third destination is below the second with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
-    expect(
-      thirdIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - thirdIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - thirdIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        thirdIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - thirdIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - thirdIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
+    }
 
     // The fourth destination is below the third with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
-    expect(
-      fourthIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - fourthIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - fourthIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        fourthIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - fourthIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - fourthIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
-  },
-  skip: isBrowser, // https://github.com/flutter/flutter/issues/99786
-  );
+      );
+    }
+  });
 
-  testWidgets('Destination spacing is correct - [labelType]=all, [textScaleFactor]=3.0', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Destination spacing is correct - [labelType]=all, [textScaleFactor]=3.0', (WidgetTester tester) async {
     // Padding at the top of the rail.
     const double topPadding = 8.0;
     // Width of a destination.
-    const double destinationWidth = 126.0;
+    const double destinationWidth = 125.5;
     // Height of a destination indicator with icon.
     const double destinationHeight = 32.0;
     // Space between the indicator and label.
@@ -917,46 +932,50 @@ void main() {
     // The second destination is below the first with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-    expect(
-      secondIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - secondIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - secondIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        secondIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - secondIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - secondIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
+    }
 
     // The third destination is below the second with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
-    expect(
-      thirdIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - thirdIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - thirdIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        thirdIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - thirdIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - thirdIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
+    }
 
     // The fourth destination is below the third with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
-    expect(
-      fourthIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - fourthIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - fourthIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        fourthIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - fourthIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - fourthIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
-  },
-  skip: isBrowser, // https://github.com/flutter/flutter/issues/99786
-  );
+      );
+    }
+  });
 
-  testWidgets('Destination spacing is correct - [labelType]=all, [textScaleFactor]=0.75', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Destination spacing is correct - [labelType]=all, [textScaleFactor]=0.75', (WidgetTester tester) async {
     // Padding at the top of the rail.
     const double topPadding = 8.0;
     // Width of a destination.
@@ -1011,46 +1030,50 @@ void main() {
     // The second destination is below the first with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-    expect(
-      secondIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - secondIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - secondIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        secondIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - secondIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - secondIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
+    }
 
     // The third destination is below the second with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
-    expect(
-      thirdIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - thirdIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - thirdIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        thirdIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - thirdIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - thirdIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
+      );
+    }
 
     // The fourth destination is below the third with some spacing.
     nextDestinationY += destinationHeightWithLabel + destinationSpacing;
     final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
-    expect(
-      fourthIconRenderBox.localToGlobal(Offset.zero),
-      equals(
-        Offset(
-          (destinationWidth - fourthIconRenderBox.size.width) / 2.0,
-          nextDestinationY + (destinationHeight - fourthIconRenderBox.size.height) / 2.0,
+    if (!kIsWeb || isCanvasKit) { // https://github.com/flutter/flutter/issues/99933
+      expect(
+        fourthIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (destinationWidth - fourthIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (destinationHeight - fourthIconRenderBox.size.height) / 2.0,
+          ),
         ),
-      ),
-    );
-  },
-  skip: isBrowser, // https://github.com/flutter/flutter/issues/99786
-  );
+      );
+    }
+  });
 
-  testWidgets('Destination spacing is correct for a compact rail - [preferredWidth]=56, [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Destination spacing is correct for a compact rail - [preferredWidth]=56, [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
     // Padding at the top of the rail.
     const double topPadding = 8.0;
     // Width of a destination.
@@ -1125,7 +1148,7 @@ void main() {
     );
   });
 
-  testWidgets('Destination spacing is correct for a compact rail - [preferredWidth]=56, [textScaleFactor]=3.0', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Destination spacing is correct for a compact rail - [preferredWidth]=56, [textScaleFactor]=3.0', (WidgetTester tester) async {
     // Padding at the top of the rail.
     const double topPadding = 8.0;
     // Width of a destination.
@@ -1203,7 +1226,7 @@ void main() {
     );
   });
 
-  testWidgets('Destination spacing is correct for a compact rail - [preferredWidth]=56, [textScaleFactor]=0.75', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Destination spacing is correct for a compact rail - [preferredWidth]=56, [textScaleFactor]=0.75', (WidgetTester tester) async {
     // Padding at the top of the rail.
     const double topPadding = 8.0;
     // Width of a destination.
@@ -1281,7 +1304,7 @@ void main() {
     );
   });
 
-  testWidgets('Group alignment works - [groupAlignment]=-1.0 (default)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Group alignment works - [groupAlignment]=-1.0 (default)', (WidgetTester tester) async {
     // Padding at the top of the rail.
     const double topPadding = 8.0;
     // Width of a destination.
@@ -1355,7 +1378,7 @@ void main() {
     );
   });
 
-  testWidgets('Group alignment works - [groupAlignment]=0.0', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Group alignment works - [groupAlignment]=0.0', (WidgetTester tester) async {
     // Padding at the top of the rail.
     const double topPadding = 8.0;
     // Width of a destination.
@@ -1430,7 +1453,7 @@ void main() {
     );
   });
 
-  testWidgets('Group alignment works - [groupAlignment]=1.0', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Group alignment works - [groupAlignment]=1.0', (WidgetTester tester) async {
     // Padding at the top of the rail.
     const double topPadding = 8.0;
     // Width of a destination.
@@ -1505,7 +1528,7 @@ void main() {
     );
   });
 
-  testWidgets('Leading and trailing appear in the correct places', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Leading and trailing appear in the correct places', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
@@ -1522,7 +1545,7 @@ void main() {
     expect(trailing.localToGlobal(Offset.zero), Offset((80 - trailing.size.width) / 2, 248.0));
   });
 
-  testWidgets('Extended rail animates the width and labels appear - [textDirection]=LTR', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Extended rail animates the width and labels appear - [textDirection]=LTR', (WidgetTester tester) async {
     // Padding at the top of the rail.
     const double topPadding = 8.0;
     // Width of a destination.
@@ -1668,7 +1691,7 @@ void main() {
     );
   });
 
-  testWidgets('Extended rail animates the width and labels appear - [textDirection]=RTL', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Extended rail animates the width and labels appear - [textDirection]=RTL', (WidgetTester tester) async {
     // Padding at the top of the rail.
     const double topPadding = 8.0;
     // Width of a destination.
@@ -1821,7 +1844,7 @@ void main() {
     );
   });
 
-  testWidgets('Extended rail gets wider with longer labels are larger text scale', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Extended rail gets wider with longer labels are larger text scale', (WidgetTester tester) async {
     bool extended = false;
     late StateSetter stateSetter;
 
@@ -1880,7 +1903,7 @@ void main() {
     expect(rail.size.width, equals(526.0));
   });
 
-  testWidgets('Extended rail final width can be changed', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Extended rail final width can be changed', (WidgetTester tester) async {
     bool extended = false;
     late StateSetter stateSetter;
 
@@ -1923,7 +1946,7 @@ void main() {
   });
 
   /// Regression test for https://github.com/flutter/flutter/issues/65657
-  testWidgets('Extended rail transition does not jump from the beginning', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Extended rail transition does not jump from the beginning', (WidgetTester tester) async {
     bool extended = false;
     late StateSetter stateSetter;
 
@@ -1982,7 +2005,7 @@ void main() {
     expect(tester.getSize(rail).width, closeTo(80.0, 1.0));
   });
 
-  testWidgets('Extended rail animation can be consumed', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Extended rail animation can be consumed', (WidgetTester tester) async {
     bool extended = false;
     late Animation<double> animation;
     late StateSetter stateSetter;
@@ -2027,7 +2050,7 @@ void main() {
     expect(animation.isCompleted, isTrue);
   });
 
-  testWidgets('onDestinationSelected is called', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('onDestinationSelected is called', (WidgetTester tester) async {
     late int selectedIndex;
 
     await _pumpNavigationRail(
@@ -2052,7 +2075,7 @@ void main() {
     tester.pumpAndSettle();
   });
 
-  testWidgets('onDestinationSelected is not called if null', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('onDestinationSelected is not called if null', (WidgetTester tester) async {
     const int selectedIndex = 0;
     await _pumpNavigationRail(
       tester,
@@ -2070,7 +2093,7 @@ void main() {
     tester.pumpAndSettle();
   });
 
-  testWidgets('Changing destinations animate when [labelType]=selected', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Changing destinations animate when [labelType]=selected', (WidgetTester tester) async {
     int selectedIndex = 0;
 
     await tester.pumpWidget(
@@ -2135,7 +2158,7 @@ void main() {
     expect(_labelOpacity(tester, 'Ghi'), equals(1.0));
   });
 
-  testWidgets('Changing destinations animate for selectedIndex=null', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Changing destinations animate for selectedIndex=null', (WidgetTester tester) async {
     int? selectedIndex = 0;
     late StateSetter stateSetter;
 
@@ -2190,7 +2213,7 @@ void main() {
     expect(_labelOpacity(tester, 'Abc'), equals(1.0));
   });
 
-  testWidgets('Changing destinations animate when selectedIndex=null during transition', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Changing destinations animate when selectedIndex=null during transition', (WidgetTester tester) async {
     int? selectedIndex = 0;
     late StateSetter stateSetter;
 
@@ -2245,7 +2268,7 @@ void main() {
     expect(_labelOpacity(tester, 'Def'), equals(0.0));
   });
 
-  testWidgets('Semantics - labelType=[none]', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics - labelType=[none]', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await _pumpLocalizedTestRail(tester, labelType: NavigationRailLabelType.none);
@@ -2255,7 +2278,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics - labelType=[selected]', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics - labelType=[selected]', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await _pumpLocalizedTestRail(tester, labelType: NavigationRailLabelType.selected);
@@ -2265,7 +2288,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics - labelType=[all]', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics - labelType=[all]', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await _pumpLocalizedTestRail(tester, labelType: NavigationRailLabelType.all);
@@ -2275,7 +2298,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics - extended', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Semantics - extended', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await _pumpLocalizedTestRail(tester, extended: true);
@@ -2285,7 +2308,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('NavigationRailDestination padding properly applied - NavigationRailLabelType.all', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NavigationRailDestination padding properly applied - NavigationRailLabelType.all', (WidgetTester tester) async {
     const EdgeInsets defaultPadding = EdgeInsets.symmetric(horizontal: 8.0);
     const EdgeInsets secondItemPadding = EdgeInsets.symmetric(vertical: 30.0);
     const EdgeInsets thirdItemPadding = EdgeInsets.symmetric(horizontal: 10.0);
@@ -2342,7 +2365,7 @@ void main() {
     expect(thirdItem.padding, thirdItemPadding);
   });
 
-  testWidgets('NavigationRailDestination padding properly applied - NavigationRailLabelType.selected', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NavigationRailDestination padding properly applied - NavigationRailLabelType.selected', (WidgetTester tester) async {
     const EdgeInsets defaultPadding = EdgeInsets.symmetric(horizontal: 8.0);
     const EdgeInsets secondItemPadding = EdgeInsets.symmetric(vertical: 30.0);
     const EdgeInsets thirdItemPadding = EdgeInsets.symmetric(horizontal: 10.0);
@@ -2399,7 +2422,7 @@ void main() {
     expect(thirdItem.padding, thirdItemPadding);
   });
 
-  testWidgets('NavigationRailDestination padding properly applied - NavigationRailLabelType.none', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NavigationRailDestination padding properly applied - NavigationRailLabelType.none', (WidgetTester tester) async {
     const EdgeInsets defaultPadding = EdgeInsets.zero;
     const EdgeInsets secondItemPadding = EdgeInsets.symmetric(vertical: 30.0);
     const EdgeInsets thirdItemPadding = EdgeInsets.symmetric(horizontal: 10.0);
@@ -2456,7 +2479,7 @@ void main() {
     expect(thirdItem.padding, thirdItemPadding);
   });
 
-  testWidgets('NavigationRailDestination adds indicator by default when ThemeData.useMaterial3 is true', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NavigationRailDestination adds indicator by default when ThemeData.useMaterial3 is true', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
@@ -2485,7 +2508,7 @@ void main() {
     expect(find.byType(NavigationIndicator), findsWidgets);
   });
 
-  testWidgets('NavigationRailDestination adds indicator when useIndicator is true', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NavigationRailDestination adds indicator when useIndicator is true', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
@@ -2515,7 +2538,7 @@ void main() {
     expect(find.byType(NavigationIndicator), findsWidgets);
   });
 
-  testWidgets('NavigationRailDestination does not add indicator when useIndicator is false', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NavigationRailDestination does not add indicator when useIndicator is false', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
@@ -2545,7 +2568,7 @@ void main() {
     expect(find.byType(NavigationIndicator), findsNothing);
   });
 
-  testWidgets('NavigationRailDestination adds an oval indicator when no labels are present', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NavigationRailDestination adds an oval indicator when no labels are present', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
@@ -2578,7 +2601,7 @@ void main() {
     expect(indicator.height, 32);
   });
 
-  testWidgets('NavigationRailDestination adds an oval indicator when selected labels are present', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NavigationRailDestination adds an oval indicator when selected labels are present', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
@@ -2611,7 +2634,7 @@ void main() {
     expect(indicator.height, 32);
   });
 
-  testWidgets('NavigationRailDestination adds an oval indicator when all labels are present', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NavigationRailDestination adds an oval indicator when all labels are present', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
@@ -2644,7 +2667,7 @@ void main() {
     expect(indicator.height, 32);
   });
 
-  testWidgets('NavigationRailDestination has center aligned indicator - [labelType]=none', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NavigationRailDestination has center aligned indicator - [labelType]=none', (WidgetTester tester) async {
     // This is a regression test for
     // https://github.com/flutter/flutter/issues/97753
     await _pumpNavigationRail(
@@ -2652,10 +2675,10 @@ void main() {
       navigationRail: NavigationRail(
         labelType: NavigationRailLabelType.none,
         selectedIndex: 0,
-        destinations:  <NavigationRailDestination>[
+        destinations:  const <NavigationRailDestination>[
           NavigationRailDestination(
             icon: Stack(
-              children: const <Widget>[
+              children: <Widget>[
                 Icon(Icons.umbrella),
                 Positioned(
                   top: 0,
@@ -2667,13 +2690,13 @@ void main() {
                 ),
               ],
             ),
-            label: const Text('Abc'),
+            label: Text('Abc'),
           ),
-          const NavigationRailDestination(
+          NavigationRailDestination(
             icon: Icon(Icons.umbrella),
             label: Text('Def'),
           ),
-          const NavigationRailDestination(
+          NavigationRailDestination(
             icon: Icon(Icons.bookmark_border),
             label: Text('Ghi'),
           ),
@@ -2688,7 +2711,7 @@ void main() {
     expect(lastIndicator.localToGlobal(Offset.zero).dx, 28.0);
   });
 
-  testWidgets('NavigationRail respects the notch/system navigation bar in landscape mode', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NavigationRail respects the notch/system navigation bar in landscape mode', (WidgetTester tester) async {
     const double safeAreaPadding = 40.0;
     NavigationRail navigationRail() {
       return NavigationRail(
@@ -2741,7 +2764,7 @@ void main() {
     expect(updatedWidthRTL, defaultWidth + safeAreaPadding);
   });
 
-  testWidgets('NavigationRail indicator renders ripple', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NavigationRail indicator renders ripple', (WidgetTester tester) async {
     await _pumpNavigationRail(
       tester,
       navigationRail: NavigationRail(
@@ -2800,9 +2823,342 @@ void main() {
           color: const Color(0xffe8def8),
         ),
     );
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+
+  testWidgetsWithLeakTracking('NavigationRail indicator renders ripple - extended', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/117126
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        selectedIndex: 1,
+        extended: true,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('Def'),
+          ),
+        ],
+        labelType: NavigationRailLabelType.none,
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byIcon(Icons.favorite_border)));
+    await tester.pumpAndSettle();
+
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    const Rect indicatorRect = Rect.fromLTRB(12.0, 6.0, 68.0, 38.0);
+    const Rect includedRect = indicatorRect;
+    final Rect excludedRect = includedRect.inflate(10);
+
+    expect(
+      inkFeatures,
+      paints
+        ..clipPath(
+          pathMatcher: isPathThat(
+            includes: <Offset>[
+              includedRect.centerLeft,
+              includedRect.topCenter,
+              includedRect.centerRight,
+              includedRect.bottomCenter,
+            ],
+            excludes: <Offset>[
+              excludedRect.centerLeft,
+              excludedRect.topCenter,
+              excludedRect.centerRight,
+              excludedRect.bottomCenter,
+            ],
+          ),
+        )
+        ..rect(
+          rect: indicatorRect,
+          color: const Color(0x0a6750a4),
+        )
+        ..rrect(
+          rrect: RRect.fromLTRBR(12.0, 58.0, 68.0, 90.0, const Radius.circular(16)),
+          color: const Color(0xffe8def8),
+        ),
+    );
   });
 
-  testWidgets('NavigationRail indicator scale transform', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NavigationRail indicator renders properly when padding is applied', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/117126
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        selectedIndex: 1,
+        extended: true,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            padding: EdgeInsets.all(10),
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            padding: EdgeInsets.all(18),
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('Def'),
+          ),
+        ],
+        labelType: NavigationRailLabelType.none,
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byIcon(Icons.favorite_border)));
+    await tester.pumpAndSettle();
+
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    const Rect indicatorRect = Rect.fromLTRB(22.0, 16.0, 78.0, 48.0);
+    const Rect includedRect = indicatorRect;
+    final Rect excludedRect = includedRect.inflate(10);
+
+    expect(
+      inkFeatures,
+      paints
+        ..clipPath(
+          pathMatcher: isPathThat(
+            includes: <Offset>[
+              includedRect.centerLeft,
+              includedRect.topCenter,
+              includedRect.centerRight,
+              includedRect.bottomCenter,
+            ],
+            excludes: <Offset>[
+              excludedRect.centerLeft,
+              excludedRect.topCenter,
+              excludedRect.centerRight,
+              excludedRect.bottomCenter,
+            ],
+          ),
+        )
+        ..rect(
+          rect: indicatorRect,
+          color: const Color(0x0a6750a4),
+        )
+        ..rrect(
+          rrect: RRect.fromLTRBR(30.0, 96.0, 86.0, 128.0, const Radius.circular(16)),
+          color: const Color(0xffe8def8),
+        ),
+    );
+  });
+
+  testWidgetsWithLeakTracking('Indicator renders properly when NavigationRai.minWidth < default minWidth', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/117126
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        minWidth: 50,
+        selectedIndex: 1,
+        extended: true,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('Def'),
+          ),
+        ],
+        labelType: NavigationRailLabelType.none,
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byIcon(Icons.favorite_border)));
+    await tester.pumpAndSettle();
+
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    const Rect indicatorRect = Rect.fromLTRB(-3.0, 6.0, 53.0, 38.0);
+    const Rect includedRect = indicatorRect;
+    final Rect excludedRect = includedRect.inflate(10);
+
+    expect(
+      inkFeatures,
+      paints
+        ..clipPath(
+          pathMatcher: isPathThat(
+            includes: <Offset>[
+              includedRect.centerLeft,
+              includedRect.topCenter,
+              includedRect.centerRight,
+              includedRect.bottomCenter,
+            ],
+            excludes: <Offset>[
+              excludedRect.centerLeft,
+              excludedRect.topCenter,
+              excludedRect.centerRight,
+              excludedRect.bottomCenter,
+            ],
+          ),
+        )
+        ..rect(
+          rect: indicatorRect,
+          color: const Color(0x0a6750a4),
+        )
+        ..rrect(
+          rrect: RRect.fromLTRBR(0.0, 58.0, 50.0, 90.0, const Radius.circular(16)),
+          color: const Color(0xffe8def8),
+        ),
+    );
+  });
+
+  testWidgetsWithLeakTracking('NavigationRail indicator renders properly with custom padding and minWidth', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/117126
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        minWidth: 300,
+        selectedIndex: 1,
+        extended: true,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            padding: EdgeInsets.all(10),
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            padding: EdgeInsets.all(18),
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('Def'),
+          ),
+        ],
+        labelType: NavigationRailLabelType.none,
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byIcon(Icons.favorite_border)));
+    await tester.pumpAndSettle();
+
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    const Rect indicatorRect = Rect.fromLTRB(132.0, 16.0, 188.0, 48.0);
+    const Rect includedRect = indicatorRect;
+    final Rect excludedRect = includedRect.inflate(10);
+
+    expect(
+      inkFeatures,
+      paints
+        ..clipPath(
+          pathMatcher: isPathThat(
+            includes: <Offset>[
+              includedRect.centerLeft,
+              includedRect.topCenter,
+              includedRect.centerRight,
+              includedRect.bottomCenter,
+            ],
+            excludes: <Offset>[
+              excludedRect.centerLeft,
+              excludedRect.topCenter,
+              excludedRect.centerRight,
+              excludedRect.bottomCenter,
+            ],
+          ),
+        )
+        ..rect(
+          rect: indicatorRect,
+          color: const Color(0x0a6750a4),
+        )
+        ..rrect(
+          rrect: RRect.fromLTRBR(140.0, 96.0, 196.0, 128.0, const Radius.circular(16)),
+          color: const Color(0xffe8def8),
+        ),
+    );
+  });
+
+  testWidgetsWithLeakTracking('NavigationRail indicator renders properly with long labels', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/128005.
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        selectedIndex: 1,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('ABCDEFGHIJKLMNOPQRSTUVWXYZ'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('ABC'),
+          ),
+        ],
+        labelType: NavigationRailLabelType.all,
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byIcon(Icons.favorite_border)));
+    await tester.pumpAndSettle();
+
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+
+    // Default values from M3 specification.
+    const double indicatorHeight = 32.0;
+    const double destinationWidth = 72.0;
+    const double destinationHorizontalPadding = 8.0;
+    const double indicatorWidth = destinationWidth - 2 * destinationHorizontalPadding; // 56.0
+
+    // The navigation rail width is larger than default because of the first destination long label.
+    final double railWidth = tester.getSize(find.byType(NavigationRail)).width;
+
+    // Expected indicator position.
+    final double indicatorLeft = (railWidth - indicatorWidth) / 2;
+    final double indicatorRight = (railWidth + indicatorWidth) / 2;
+    final Rect indicatorRect = Rect.fromLTRB(indicatorLeft, 0.0, indicatorRight, indicatorHeight);
+    final Rect includedRect = indicatorRect;
+    final Rect excludedRect = includedRect.inflate(10);
+
+    expect(
+      inkFeatures,
+      paints
+        ..clipPath(
+          pathMatcher: isPathThat(
+            includes: <Offset>[
+              includedRect.centerLeft,
+              includedRect.topCenter,
+              includedRect.centerRight,
+              includedRect.bottomCenter,
+            ],
+            excludes: <Offset>[
+              excludedRect.centerLeft,
+              excludedRect.topCenter,
+              excludedRect.centerRight,
+              excludedRect.bottomCenter,
+            ],
+          ),
+        )
+        ..rect(
+          rect: indicatorRect,
+          color: const Color(0x0a6750a4),
+        )
+        ..rrect(
+          rrect: RRect.fromLTRBR(indicatorLeft, 72.0, indicatorRight, 104.0, const Radius.circular(16)),
+          color: const Color(0xffe8def8),
+        ),
+    );
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+
+  testWidgetsWithLeakTracking('NavigationRail indicator scale transform', (WidgetTester tester) async {
     int selectedIndex = 0;
     Future<void> buildWidget() async {
       await _pumpNavigationRail(
@@ -2846,9 +3202,100 @@ void main() {
     expect(transform.getColumn(0)[0], 1.0);
   });
 
+  testWidgetsWithLeakTracking('Navigation destination updates indicator color and shape', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    const Color color = Color(0xff0000ff);
+    const ShapeBorder shape = RoundedRectangleBorder();
+
+    Widget buildNavigationRail({Color? indicatorColor, ShapeBorder? indicatorShape}) {
+      return MaterialApp(
+        theme: theme,
+        home: Builder(
+          builder: (BuildContext context) {
+            return Scaffold(
+              body: Row(
+                children: <Widget>[
+                  NavigationRail(
+                    useIndicator: true,
+                    indicatorColor: indicatorColor,
+                    indicatorShape: indicatorShape,
+                    selectedIndex: 0,
+                    destinations: _destinations(),
+                  ),
+                  const Expanded(
+                    child: Text('body'),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildNavigationRail());
+
+    // Test default indicator color and shape.
+    expect(_getIndicatorDecoration(tester)?.color, theme.colorScheme.secondaryContainer);
+    expect(_getIndicatorDecoration(tester)?.shape, const StadiumBorder());
+
+    await tester.pumpWidget(buildNavigationRail(indicatorColor: color, indicatorShape: shape));
+
+    // Test custom indicator color and shape.
+    expect(_getIndicatorDecoration(tester)?.color, color);
+    expect(_getIndicatorDecoration(tester)?.shape, shape);
+  });
+
+  testWidgetsWithLeakTracking("Destination's respect their disabled state", (WidgetTester tester) async {
+    late int selectedIndex;
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        selectedIndex: 0,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.star_border),
+            selectedIcon: Icon(Icons.star),
+            label: Text('Bcd'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('Cde'),
+            disabled: true,
+          ),
+        ],
+        onDestinationSelected: (int index) {
+          selectedIndex = index;
+        },
+        labelType: NavigationRailLabelType.all,
+      ),
+    );
+
+    await tester.tap(find.text('Abc'));
+    expect(selectedIndex, 0);
+
+    await tester.tap(find.text('Bcd'));
+    expect(selectedIndex, 1);
+
+    await tester.tap(find.text('Cde'));
+    expect(selectedIndex, 1);
+
+    // Wait for any pending shader compilation.
+    tester.pumpAndSettle();
+  });
+
   group('Material 2', () {
-    // Original Material 2 tests. Remove this group after `useMaterial3` has been deprecated.
-    testWidgets('Renders at the correct default width - [labelType]=none (default)', (WidgetTester tester) async {
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
+
+    testWidgetsWithLeakTracking('Renders at the correct default width - [labelType]=none (default)', (WidgetTester tester) async {
       await _pumpNavigationRail(
         tester,
         useMaterial3: false,
@@ -2862,7 +3309,7 @@ void main() {
       expect(renderBox.size.width, 72.0);
     });
 
-    testWidgets('Renders at the correct default width - [labelType]=selected', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Renders at the correct default width - [labelType]=selected', (WidgetTester tester) async {
       await _pumpNavigationRail(
         tester,
         useMaterial3: false,
@@ -2877,7 +3324,7 @@ void main() {
       expect(renderBox.size.width, 72.0);
     });
 
-    testWidgets('Renders at the correct default width - [labelType]=all', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Renders at the correct default width - [labelType]=all', (WidgetTester tester) async {
       await _pumpNavigationRail(
         tester,
         useMaterial3: false,
@@ -2892,7 +3339,7 @@ void main() {
       expect(renderBox.size.width, 72.0);
     });
 
-    testWidgets('Destination spacing is correct - [labelType]=none (default), [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Destination spacing is correct - [labelType]=none (default), [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
       await _pumpNavigationRail(
         tester,
         useMaterial3: false,
@@ -2957,9 +3404,9 @@ void main() {
           ),
         ),
       );
-    });
+    }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
 
-    testWidgets('Destination spacing is correct - [labelType]=none (default), [textScaleFactor]=3.0', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Destination spacing is correct - [labelType]=none (default), [textScaleFactor]=3.0', (WidgetTester tester) async {
       // Since the rail is icon only, its destinations should not be affected by
       // textScaleFactor.
       await _pumpNavigationRail(
@@ -3027,9 +3474,9 @@ void main() {
           ),
         ),
       );
-    });
+    }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
 
-    testWidgets('Destination spacing is correct - [labelType]=none (default), [textScaleFactor]=0.75', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Destination spacing is correct - [labelType]=none (default), [textScaleFactor]=0.75', (WidgetTester tester) async {
       // Since the rail is icon only, its destinations should not be affected by
       // textScaleFactor.
       await _pumpNavigationRail(
@@ -3097,9 +3544,9 @@ void main() {
           ),
         ),
       );
-    });
+    }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
 
-    testWidgets('Destination spacing is correct - [labelType]=selected, [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Destination spacing is correct - [labelType]=selected, [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
       await _pumpNavigationRail(
         tester,
         useMaterial3: false,
@@ -3177,7 +3624,7 @@ void main() {
       );
     });
 
-    testWidgets('Destination spacing is correct - [labelType]=selected, [textScaleFactor]=3.0', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Destination spacing is correct - [labelType]=selected, [textScaleFactor]=3.0', (WidgetTester tester) async {
       await _pumpNavigationRail(
         tester,
         useMaterial3: false,
@@ -3256,7 +3703,7 @@ void main() {
       );
     });
 
-    testWidgets('Destination spacing is correct - [labelType]=selected, [textScaleFactor]=0.75', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Destination spacing is correct - [labelType]=selected, [textScaleFactor]=0.75', (WidgetTester tester) async {
       await _pumpNavigationRail(
         tester,
         useMaterial3: false,
@@ -3335,7 +3782,7 @@ void main() {
       );
     });
 
-    testWidgets('Destination spacing is correct - [labelType]=all, [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Destination spacing is correct - [labelType]=all, [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
       await _pumpNavigationRail(
         tester,
         useMaterial3: false,
@@ -3443,7 +3890,7 @@ void main() {
       );
     });
 
-    testWidgets('Destination spacing is correct - [labelType]=all, [textScaleFactor]=3.0', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Destination spacing is correct - [labelType]=all, [textScaleFactor]=3.0', (WidgetTester tester) async {
       await _pumpNavigationRail(
         tester,
         useMaterial3: false,
@@ -3550,7 +3997,7 @@ void main() {
       );
     });
 
-    testWidgets('Destination spacing is correct - [labelType]=all, [textScaleFactor]=0.75', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Destination spacing is correct - [labelType]=all, [textScaleFactor]=0.75', (WidgetTester tester) async {
       await _pumpNavigationRail(
         tester,
         useMaterial3: false,
@@ -3660,7 +4107,7 @@ void main() {
       );
     });
 
-    testWidgets('Destination spacing is correct for a compact rail - [preferredWidth]=56, [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Destination spacing is correct for a compact rail - [preferredWidth]=56, [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
       await _pumpNavigationRail(
         tester,
         useMaterial3: false,
@@ -3728,78 +4175,7 @@ void main() {
       );
     });
 
-    testWidgets('Destination spacing is correct for a compact rail - [preferredWidth]=56, [textScaleFactor]=3.0', (WidgetTester tester) async {
-      await _pumpNavigationRail(
-        tester,
-        useMaterial3: false,
-        textScaleFactor: 3.0,
-        navigationRail: NavigationRail(
-          selectedIndex: 0,
-          minWidth: 56.0,
-          destinations: _destinations(),
-        ),
-      );
-
-      // Since the rail is icon only, its preferred width should not be affected
-      // by textScaleFactor.
-      final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
-      expect(renderBox.size.width, 56.0);
-
-      // The first destination is 8 from the top because of the default vertical
-      // padding at the to of the rail.
-      double nextDestinationY = 8.0;
-      final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite);
-      expect(
-        firstIconRenderBox.localToGlobal(Offset.zero),
-        equals(
-          Offset(
-            (56.0 - firstIconRenderBox.size.width) / 2.0,
-            nextDestinationY + (56.0 - firstIconRenderBox.size.height) / 2.0,
-          ),
-        ),
-      );
-
-      // The second destination is 56 below the first destination.
-      nextDestinationY += 56.0;
-      final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
-      expect(
-        secondIconRenderBox.localToGlobal(Offset.zero),
-        equals(
-          Offset(
-            (56.0 - secondIconRenderBox.size.width) / 2.0,
-            nextDestinationY + (56.0 - secondIconRenderBox.size.height) / 2.0,
-          ),
-        ),
-      );
-
-      // The third destination is 56 below the second destination.
-      nextDestinationY += 56.0;
-      final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
-      expect(
-        thirdIconRenderBox.localToGlobal(Offset.zero),
-        equals(
-          Offset(
-            (56.0 - thirdIconRenderBox.size.width) / 2.0,
-            nextDestinationY + (56.0 - thirdIconRenderBox.size.height) / 2.0,
-          ),
-        ),
-      );
-
-      // The fourth destination is 56 below the third destination.
-      nextDestinationY += 56.0;
-      final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
-      expect(
-        fourthIconRenderBox.localToGlobal(Offset.zero),
-        equals(
-          Offset(
-            (56.0 - fourthIconRenderBox.size.width) / 2.0,
-            nextDestinationY + (56.0 - fourthIconRenderBox.size.height) / 2.0,
-          ),
-        ),
-      );
-    });
-
-    testWidgets('Destination spacing is correct for a compact rail - [preferredWidth]=56, [textScaleFactor]=0.75', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Destination spacing is correct for a compact rail - [preferredWidth]=56, [textScaleFactor]=3.0', (WidgetTester tester) async {
       await _pumpNavigationRail(
         tester,
         useMaterial3: false,
@@ -3870,7 +4246,78 @@ void main() {
       );
     });
 
-    testWidgets('Group alignment works - [groupAlignment]=-1.0 (default)', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Destination spacing is correct for a compact rail - [preferredWidth]=56, [textScaleFactor]=0.75', (WidgetTester tester) async {
+      await _pumpNavigationRail(
+        tester,
+        useMaterial3: false,
+        textScaleFactor: 3.0,
+        navigationRail: NavigationRail(
+          selectedIndex: 0,
+          minWidth: 56.0,
+          destinations: _destinations(),
+        ),
+      );
+
+      // Since the rail is icon only, its preferred width should not be affected
+      // by textScaleFactor.
+      final RenderBox renderBox = tester.renderObject(find.byType(NavigationRail));
+      expect(renderBox.size.width, 56.0);
+
+      // The first destination is 8 from the top because of the default vertical
+      // padding at the to of the rail.
+      double nextDestinationY = 8.0;
+      final RenderBox firstIconRenderBox = _iconRenderBox(tester, Icons.favorite);
+      expect(
+        firstIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (56.0 - firstIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (56.0 - firstIconRenderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+
+      // The second destination is 56 below the first destination.
+      nextDestinationY += 56.0;
+      final RenderBox secondIconRenderBox = _iconRenderBox(tester, Icons.bookmark_border);
+      expect(
+        secondIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (56.0 - secondIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (56.0 - secondIconRenderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+
+      // The third destination is 56 below the second destination.
+      nextDestinationY += 56.0;
+      final RenderBox thirdIconRenderBox = _iconRenderBox(tester, Icons.star_border);
+      expect(
+        thirdIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (56.0 - thirdIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (56.0 - thirdIconRenderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+
+      // The fourth destination is 56 below the third destination.
+      nextDestinationY += 56.0;
+      final RenderBox fourthIconRenderBox = _iconRenderBox(tester, Icons.hotel);
+      expect(
+        fourthIconRenderBox.localToGlobal(Offset.zero),
+        equals(
+          Offset(
+            (56.0 - fourthIconRenderBox.size.width) / 2.0,
+            nextDestinationY + (56.0 - fourthIconRenderBox.size.height) / 2.0,
+          ),
+        ),
+      );
+    });
+
+    testWidgetsWithLeakTracking('Group alignment works - [groupAlignment]=-1.0 (default)', (WidgetTester tester) async {
       await _pumpNavigationRail(
         tester,
         useMaterial3: false,
@@ -3934,7 +4381,7 @@ void main() {
       );
     });
 
-    testWidgets('Group alignment works - [groupAlignment]=0.0', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Group alignment works - [groupAlignment]=0.0', (WidgetTester tester) async {
       await _pumpNavigationRail(
         tester,
         useMaterial3: false,
@@ -3997,7 +4444,7 @@ void main() {
       );
     });
 
-    testWidgets('Group alignment works - [groupAlignment]=1.0', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Group alignment works - [groupAlignment]=1.0', (WidgetTester tester) async {
       await _pumpNavigationRail(
         tester,
         useMaterial3: false,
@@ -4060,7 +4507,7 @@ void main() {
       );
     });
 
-    testWidgets('Leading and trailing appear in the correct places', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Leading and trailing appear in the correct places', (WidgetTester tester) async {
       await _pumpNavigationRail(
         tester,
         useMaterial3: false,
@@ -4078,7 +4525,7 @@ void main() {
       expect(trailing.localToGlobal(Offset.zero), Offset((72 - trailing.size.width) / 2.0, 360.0));
     });
 
-    testWidgets('Extended rail animates the width and labels appear - [textDirection]=LTR', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Extended rail animates the width and labels appear - [textDirection]=LTR', (WidgetTester tester) async {
       bool extended = false;
       late StateSetter stateSetter;
 
@@ -4216,7 +4663,7 @@ void main() {
       );
     });
 
-    testWidgets('Extended rail animates the width and labels appear - [textDirection]=RTL', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Extended rail animates the width and labels appear - [textDirection]=RTL', (WidgetTester tester) async {
       bool extended = false;
       late StateSetter stateSetter;
 
@@ -4361,7 +4808,7 @@ void main() {
       );
     });
 
-    testWidgets('Extended rail gets wider with longer labels are larger text scale', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Extended rail gets wider with longer labels are larger text scale', (WidgetTester tester) async {
       bool extended = false;
       late StateSetter stateSetter;
 
@@ -4420,7 +4867,7 @@ void main() {
       expect(rail.size.width, equals(584.0));
     });
 
-    testWidgets('Extended rail final width can be changed', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Extended rail final width can be changed', (WidgetTester tester) async {
       bool extended = false;
       late StateSetter stateSetter;
 
@@ -4463,7 +4910,7 @@ void main() {
     });
 
     /// Regression test for https://github.com/flutter/flutter/issues/65657
-    testWidgets('Extended rail transition does not jump from the beginning', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Extended rail transition does not jump from the beginning', (WidgetTester tester) async {
       bool extended = false;
       late StateSetter stateSetter;
 
@@ -4522,7 +4969,7 @@ void main() {
       expect(tester.getSize(rail).width, closeTo(72.0, 1.0));
     });
 
-    testWidgets('NavigationRailDestination adds circular indicator when no labels are present', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('NavigationRailDestination adds circular indicator when no labels are present', (WidgetTester tester) async {
       await _pumpNavigationRail(
         tester,
         useMaterial3: false,
@@ -4556,7 +5003,7 @@ void main() {
       expect(indicator.height, 56);
     });
 
-    testWidgets('NavigationRailDestination has center aligned indicator - [labelType]=none', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('NavigationRailDestination has center aligned indicator - [labelType]=none', (WidgetTester tester) async {
       // This is a regression test for
       // https://github.com/flutter/flutter/issues/97753
       await _pumpNavigationRail(
@@ -4565,10 +5012,10 @@ void main() {
         navigationRail: NavigationRail(
           labelType: NavigationRailLabelType.none,
           selectedIndex: 0,
-          destinations:  <NavigationRailDestination>[
+          destinations:  const <NavigationRailDestination>[
             NavigationRailDestination(
               icon: Stack(
-                children: const <Widget>[
+                children: <Widget>[
                   Icon(Icons.umbrella),
                   Positioned(
                     top: 0,
@@ -4580,13 +5027,13 @@ void main() {
                   ),
                 ],
               ),
-              label: const Text('Abc'),
+              label: Text('Abc'),
             ),
-            const NavigationRailDestination(
+            NavigationRailDestination(
               icon: Icon(Icons.umbrella),
               label: Text('Def'),
             ),
-            const NavigationRailDestination(
+            NavigationRailDestination(
               icon: Icon(Icons.bookmark_border),
               label: Text('Ghi'),
             ),
@@ -4601,7 +5048,7 @@ void main() {
       expect(lastIndicator.localToGlobal(Offset.zero).dx, 24.0);
     });
 
-    testWidgets('NavigationRail respects the notch/system navigation bar in landscape mode', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('NavigationRail respects the notch/system navigation bar in landscape mode', (WidgetTester tester) async {
       const double safeAreaPadding = 40.0;
       NavigationRail navigationRail() {
         return NavigationRail(
@@ -4655,7 +5102,6 @@ void main() {
       final double updatedWidthRTL = tester.getSize(find.byType(NavigationRail)).width;
       expect(updatedWidthRTL, defaultWidth + safeAreaPadding);
     });
-
   }); // End Material 2 group
 }
 
@@ -4877,4 +5323,13 @@ Widget _buildWidget(Widget child, {bool useMaterial3 = true, bool isRTL = false}
       ),
     ),
   );
+}
+
+ShapeDecoration? _getIndicatorDecoration(WidgetTester tester) {
+  return tester.firstWidget<Container>(
+    find.descendant(
+      of: find.byType(FadeTransition),
+      matching: find.byType(Container),
+    ),
+  ).decoration as ShapeDecoration?;
 }

@@ -86,13 +86,11 @@ void main(List<String> arguments) {
 
     // Verify that the Gradlew wrapper exists.
     final File gradleWrapper = androidDirectory.childFile('gradlew');
-    // Generate Gradle wrapper if it doesn't exists.
-    // This logic is embedded within the Flutter tool.
-    // To generate the wrapper, build a flavor that doesn't exist.
+    // Generate Gradle wrapper if it doesn't exist.
     if (!gradleWrapper.existsSync()) {
       Process.runSync(
         'flutter',
-        <String>['build', 'apk', '--debug', '--flavor=does-not-exist'],
+        <String>['build', 'apk', '--config-only'],
         workingDirectory: appDirectory,
       );
     }
@@ -149,7 +147,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.2.0'
+        classpath 'com.android.tools.build:gradle:7.3.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 
@@ -181,7 +179,7 @@ subprojects {
     }
 }
 
-task clean(type: Delete) {
+tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
 ''';
@@ -196,8 +194,6 @@ const String settingGradleFile = r'''
 // See dev/tools/bin/generate_gradle_lockfiles.dart.
 
 include ':app'
-
-enableFeaturePreview('ONE_LOCKFILE_PER_PROJECT')
 
 def localPropertiesFile = new File(rootProject.projectDir, "local.properties")
 def properties = new Properties()

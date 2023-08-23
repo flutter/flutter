@@ -8,7 +8,7 @@
 PRODUCT_NAME = channels
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.channels
+PRODUCT_BUNDLE_IDENTIFIER = com.example.channels
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2022 com.yourcompany. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2023 com.example. All rights reserved.

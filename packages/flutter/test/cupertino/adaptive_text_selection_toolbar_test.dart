@@ -8,12 +8,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/clipboard_utils.dart';
+import '../widgets/live_text_utils.dart';
 
 void main() {
   final MockClipboard mockClipboard = MockClipboard();
 
   setUp(() async {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
       mockClipboard.handleMethodCall,
     );
@@ -23,11 +24,18 @@ void main() {
   });
 
   tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
       null,
     );
   });
+
+  Finder findOverflowNextButton() {
+    return find.byWidgetPredicate((Widget widget) =>
+      widget is CustomPaint &&
+          '${widget.painter?.runtimeType}' == '_RightCupertinoChevronPainter',
+      );
+  }
 
   testWidgets('Builds the right toolbar on each platform, including web, and shows buttonItems', (WidgetTester tester) async {
     const String buttonText = 'Click me';
@@ -59,13 +67,11 @@ void main() {
       case TargetPlatform.iOS:
         expect(find.byType(CupertinoTextSelectionToolbar), findsOneWidget);
         expect(find.byType(CupertinoDesktopTextSelectionToolbar), findsNothing);
-        break;
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         expect(find.byType(CupertinoTextSelectionToolbar), findsNothing);
         expect(find.byType(CupertinoDesktopTextSelectionToolbar), findsOneWidget);
-        break;
     }
   },
     variant: TargetPlatformVariant.all(),
@@ -144,12 +150,10 @@ void main() {
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
         expect(find.byType(CupertinoTextSelectionToolbarButton), findsOneWidget);
-        break;
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsOneWidget);
-        break;
     }
   },
     skip: kIsWeb, // [intended] on web the browser handles the context menu.
@@ -170,6 +174,10 @@ void main() {
           onCut: () {},
           onPaste: () {},
           onSelectAll: () {},
+          onLiveTextInput: () {},
+          onLookUp: () {},
+          onSearchWeb: () {},
+          onShare: () {},
         ),
       ),
     ));
@@ -179,18 +187,23 @@ void main() {
     expect(find.text('Cut'), findsOneWidget);
     expect(find.text('Select All'), findsOneWidget);
     expect(find.text('Paste'), findsOneWidget);
+    expect(find.text('Look Up'), findsOneWidget);
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
+        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(6));
       case TargetPlatform.fuchsia:
+        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(6));
       case TargetPlatform.iOS:
-        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(4));
-        break;
+        expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(6));
+        expect(findOverflowNextButton(), findsOneWidget);
+        await tester.tapAt(tester.getCenter(findOverflowNextButton()));
+        await tester.pumpAndSettle();
+        expect(findLiveTextButton(), findsOneWidget);
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(4));
-        break;
+        expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(8));
     }
   },
     skip: kIsWeb, // [intended] on web the browser handles the context menu.
@@ -231,13 +244,11 @@ void main() {
       case TargetPlatform.iOS:
         expect(find.byType(CupertinoTextSelectionToolbarButton), findsOneWidget);
         expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNothing);
-        break;
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         expect(find.byType(CupertinoTextSelectionToolbarButton), findsNothing);
         expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsOneWidget);
-        break;
     }
   },
     variant: TargetPlatformVariant.all(),

@@ -38,7 +38,7 @@ void main() {
     final FakePlatform platform = FakePlatform(
       operatingSystem: platformName,
       environment: <String, String>{
-        'DEPOT_TOOLS': path.join('D:', 'depot_tools'),
+        'DEPOT_TOOLS': platformName == Platform.windows ? path.join('D:', 'depot_tools'): '/depot_tools',
       },
     );
     group('ProcessRunner for $platform', () {
@@ -143,6 +143,7 @@ void main() {
           '$flutter create --template=app ${createBase}app': null,
           '$flutter create --template=package ${createBase}package': null,
           '$flutter create --template=plugin ${createBase}plugin': null,
+          '$flutter pub cache list': <ProcessResult>[ProcessResult(0,0,'{"packages":{}}','')],
           'git clean -f -x -- **/.packages': null,
           'git clean -f -x -- **/.dart_tool/': null,
           if (platform.isMacOS) 'codesign -vvvv --check-notarization ${path.join(tempDir.path, 'flutter', 'bin', 'cache', 'dart-sdk', 'bin', 'dart')}': null,
@@ -180,6 +181,7 @@ void main() {
           '$flutter create --template=app ${createBase}app': null,
           '$flutter create --template=package ${createBase}package': null,
           '$flutter create --template=plugin ${createBase}plugin': null,
+          '$flutter pub cache list': <ProcessResult>[ProcessResult(0,0,'{"packages":{}}','')],
           'git clean -f -x -- **/.packages': null,
           'git clean -f -x -- **/.dart_tool/': null,
           if (platform.isMacOS) 'codesign -vvvv --check-notarization ${path.join(tempDir.path, 'flutter', 'bin', 'cache', 'dart-sdk', 'bin', 'dart')}': null,
@@ -228,6 +230,7 @@ void main() {
           '$flutter create --template=app ${createBase}app': null,
           '$flutter create --template=package ${createBase}package': null,
           '$flutter create --template=plugin ${createBase}plugin': null,
+          '$flutter pub cache list': <ProcessResult>[ProcessResult(0,0,'{"packages":{}}','')],
           'git clean -f -x -- **/.packages': null,
           'git clean -f -x -- **/.dart_tool/': null,
           if (platform.isMacOS) 'codesign -vvvv --check-notarization ${path.join(tempDir.path, 'flutter', 'bin', 'cache', 'dart-sdk', 'bin', 'dart')}': null,
@@ -286,6 +289,7 @@ void main() {
           '$flutter create --template=app ${createBase}app': null,
           '$flutter create --template=package ${createBase}package': null,
           '$flutter create --template=plugin ${createBase}plugin': null,
+          '$flutter pub cache list': <ProcessResult>[ProcessResult(0,0,'{"packages":{}}','')],
           'git clean -f -x -- **/.packages': null,
           'git clean -f -x -- **/.dart_tool/': null,
           if (platform.isWindows) 'attrib -h .git': null,
@@ -336,6 +340,7 @@ void main() {
           '$flutter create --template=app ${createBase}app': null,
           '$flutter create --template=package ${createBase}package': null,
           '$flutter create --template=plugin ${createBase}plugin': null,
+          '$flutter pub cache list': <ProcessResult>[ProcessResult(0,0,'{"packages":{}}','')],
           'git clean -f -x -- **/.packages': null,
           'git clean -f -x -- **/.dart_tool/': null,
           if (platform.isMacOS) 'codesign -vvvv --check-notarization $binPath': <ProcessResult>[codesignFailure],
@@ -373,7 +378,7 @@ void main() {
       late Directory tempDir;
       final String gsutilCall = platform.isWindows
           ? 'python3 ${path.join("D:", "depot_tools", "gsutil.py")}'
-          : 'gsutil.py';
+          : 'python3 ${path.join("/", "depot_tools", "gsutil.py")}';
       final String releasesName = 'releases_$platformName.json';
       final String archiveName = platform.isLinux ? 'archive.tar.xz' : 'archive.zip';
       final String archiveMime = platform.isLinux ? 'application/x-gtar' : 'application/zip';

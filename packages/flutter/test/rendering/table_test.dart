@@ -5,7 +5,6 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'mock_canvas.dart';
 import 'rendering_tester.dart';
 
 RenderBox sizedBox(double width, double height) {
@@ -277,4 +276,37 @@ void main() {
     );
   });
 
+  test('MaxColumnWidth.flex returns the correct result', () {
+    MaxColumnWidth columnWidth = const MaxColumnWidth(
+      FixedColumnWidth(100), // returns null from .flex
+      FlexColumnWidth(), // returns 1 from .flex
+    );
+    final double? flexValue = columnWidth.flex(<RenderBox>[]);
+    expect(flexValue, 1.0);
+
+    // Swap a and b, check for same result.
+    columnWidth = const MaxColumnWidth(
+      FlexColumnWidth(), // returns 1 from .flex
+      FixedColumnWidth(100), // returns null from .flex
+    );
+    // Same result.
+    expect(columnWidth.flex(<RenderBox>[]), flexValue);
+  });
+
+  test('MinColumnWidth.flex returns the correct result', () {
+    MinColumnWidth columnWidth = const MinColumnWidth(
+      FixedColumnWidth(100), // returns null from .flex
+      FlexColumnWidth(), // returns 1 from .flex
+    );
+    final double? flexValue = columnWidth.flex(<RenderBox>[]);
+    expect(flexValue, 1.0);
+
+    // Swap a and b, check for same result.
+    columnWidth = const MinColumnWidth(
+      FlexColumnWidth(), // returns 1 from .flex
+      FixedColumnWidth(100), // returns null from .flex
+    );
+    // Same result.
+    expect(columnWidth.flex(<RenderBox>[]), flexValue);
+  });
 }

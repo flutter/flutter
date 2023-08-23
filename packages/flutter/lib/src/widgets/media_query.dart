@@ -30,8 +30,8 @@ enum Orientation {
 ///
 /// [MediaQuery] contains a large number of related properties. Widgets frequently
 /// depend on only a few of these attributes. For example, a widget that needs to
-/// rebuild when the [MediaQueryData.textScaleFactor] changes does not need to
-/// be notified when the [MediaQueryData.size] changes. Specifying an aspect avoids
+/// rebuild when the [MediaQueryData.textScaler] changes does not need to be
+/// notified when the [MediaQueryData.size] changes. Specifying an aspect avoids
 /// unnecessary rebuilds.
 enum _MediaQueryAspect {
   /// Specifies the aspect corresponding to [MediaQueryData.size].
@@ -42,6 +42,8 @@ enum _MediaQueryAspect {
   devicePixelRatio,
   /// Specifies the aspect corresponding to [MediaQueryData.textScaleFactor].
   textScaleFactor,
+  /// Specifies the aspect corresponding to [MediaQueryData.textScaler].
+  textScaler,
   /// Specifies the aspect corresponding to [MediaQueryData.platformBrightness].
   platformBrightness,
   /// Specifies the aspect corresponding to [MediaQueryData.padding].
@@ -60,6 +62,8 @@ enum _MediaQueryAspect {
   invertColors,
   /// Specifies the aspect corresponding to [MediaQueryData.highContrast].
   highContrast,
+  /// Specifies the aspect corresponding to [MediaQueryData.onOffSwitchLabels].
+  onOffSwitchLabels,
   /// Specifies the aspect corresponding to [MediaQueryData.disableAnimations].
   disableAnimations,
   /// Specifies the aspect corresponding to [MediaQueryData.boldText].
@@ -138,12 +142,20 @@ enum _MediaQueryAspect {
 class MediaQueryData {
   /// Creates data for a media query with explicit values.
   ///
-  /// Consider using [MediaQueryData.fromWindow] to create data based on a
-  /// [dart:ui.PlatformDispatcher].
+  /// In a typical application, calling this constructor directly is rarely
+  /// needed. Consider using [MediaQueryData.fromView] to create data based on a
+  /// [dart:ui.FlutterView], or [MediaQueryData.copyWith] to create a new copy
+  /// of [MediaQueryData] with updated properties from a base [MediaQueryData].
   const MediaQueryData({
     this.size = Size.zero,
     this.devicePixelRatio = 1.0,
-    this.textScaleFactor = 1.0,
+    @Deprecated(
+      'Use textScaler instead. '
+      'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+      'This feature was deprecated after v3.12.0-2.0.pre.',
+    )
+    double textScaleFactor = 1.0,
+    TextScaler textScaler = _kUnspecifiedTextScaler,
     this.platformBrightness = Brightness.light,
     this.padding = EdgeInsets.zero,
     this.viewInsets = EdgeInsets.zero,
@@ -153,54 +165,94 @@ class MediaQueryData {
     this.accessibleNavigation = false,
     this.invertColors = false,
     this.highContrast = false,
+    this.onOffSwitchLabels = false,
     this.disableAnimations = false,
     this.boldText = false,
     this.navigationMode = NavigationMode.traditional,
     this.gestureSettings = const DeviceGestureSettings(touchSlop: kTouchSlop),
     this.displayFeatures = const <ui.DisplayFeature>[],
-  }) : assert(size != null),
-       assert(devicePixelRatio != null),
-       assert(textScaleFactor != null),
-       assert(platformBrightness != null),
-       assert(padding != null),
-       assert(viewInsets != null),
-       assert(systemGestureInsets != null),
-       assert(viewPadding != null),
-       assert(alwaysUse24HourFormat != null),
-       assert(accessibleNavigation != null),
-       assert(invertColors != null),
-       assert(highContrast != null),
-       assert(disableAnimations != null),
-       assert(boldText != null),
-       assert(navigationMode != null),
-       assert(gestureSettings != null),
-       assert(displayFeatures != null);
+  }) : _textScaleFactor = textScaleFactor,
+       _textScaler = textScaler,
+       assert(
+         identical(textScaler, _kUnspecifiedTextScaler) || textScaleFactor == 1.0,
+         'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
+       );
 
-  /// Creates data for a media query based on the given window.
+  /// Deprecated. Use [MediaQueryData.fromView] instead.
   ///
-  /// If you use this, you should ensure that you also register for
-  /// notifications so that you can update your [MediaQueryData] when the
-  /// window's metrics change. For example, see
-  /// [WidgetsBindingObserver.didChangeMetrics] or
-  /// [dart:ui.PlatformDispatcher.onMetricsChanged].
-  MediaQueryData.fromWindow(ui.FlutterView window)
-    : size = window.physicalSize / window.devicePixelRatio,
-      devicePixelRatio = window.devicePixelRatio,
-      textScaleFactor = window.platformDispatcher.textScaleFactor,
-      platformBrightness = window.platformDispatcher.platformBrightness,
-      padding = EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio),
-      viewPadding = EdgeInsets.fromWindowPadding(window.viewPadding, window.devicePixelRatio),
-      viewInsets = EdgeInsets.fromWindowPadding(window.viewInsets, window.devicePixelRatio),
-      systemGestureInsets = EdgeInsets.fromWindowPadding(window.systemGestureInsets, window.devicePixelRatio),
-      accessibleNavigation = window.platformDispatcher.accessibilityFeatures.accessibleNavigation,
-      invertColors = window.platformDispatcher.accessibilityFeatures.invertColors,
-      disableAnimations = window.platformDispatcher.accessibilityFeatures.disableAnimations,
-      boldText = window.platformDispatcher.accessibilityFeatures.boldText,
-      highContrast = window.platformDispatcher.accessibilityFeatures.highContrast,
-      alwaysUse24HourFormat = window.platformDispatcher.alwaysUse24HourFormat,
-      navigationMode = NavigationMode.traditional,
-      gestureSettings = DeviceGestureSettings.fromWindow(window),
-      displayFeatures = window.displayFeatures;
+  /// This constructor was operating on a single window assumption. In
+  /// preparation for Flutter's upcoming multi-window support, it has been
+  /// deprecated.
+  @Deprecated(
+    'Use MediaQueryData.fromView instead. '
+    'This constructor was deprecated in preparation for the upcoming multi-window support. '
+    'This feature was deprecated after v3.7.0-32.0.pre.'
+  )
+  factory MediaQueryData.fromWindow(ui.FlutterView window) => MediaQueryData.fromView(window);
+
+  /// Creates data for a [MediaQuery] based on the given `view`.
+  ///
+  /// If provided, the `platformData` is used to fill in the platform-specific
+  /// aspects of the newly created [MediaQueryData]. If `platformData` is null,
+  /// the `view`'s [PlatformDispatcher] is consulted to construct the
+  /// platform-specific data.
+  ///
+  /// Data which is exposed directly on the [FlutterView] is considered
+  /// view-specific. Data which is only exposed via the
+  /// [FlutterView.platformDispatcher] property is considered platform-specific.
+  ///
+  /// Callers of this method should ensure that they also register for
+  /// notifications so that the [MediaQueryData] can be updated when any data
+  /// used to construct it changes. Notifications to consider are:
+  ///
+  ///  * [WidgetsBindingObserver.didChangeMetrics] or
+  ///    [dart:ui.PlatformDispatcher.onMetricsChanged],
+  ///  * [WidgetsBindingObserver.didChangeAccessibilityFeatures] or
+  ///    [dart:ui.PlatformDispatcher.onAccessibilityFeaturesChanged],
+  ///  * [WidgetsBindingObserver.didChangeTextScaleFactor] or
+  ///    [dart:ui.PlatformDispatcher.onTextScaleFactorChanged],
+  ///  * [WidgetsBindingObserver.didChangePlatformBrightness] or
+  ///    [dart:ui.PlatformDispatcher.onPlatformBrightnessChanged].
+  ///
+  /// The last three notifications are only relevant if no `platformData` is
+  /// provided. If `platformData` is provided, callers should ensure to call
+  /// this method again when it changes to keep the constructed [MediaQueryData]
+  /// updated.
+  ///
+  /// In general, [MediaQuery.of] is the appropriate way to obtain
+  /// [MediaQueryData] from a widget. This `fromView` constructor is primarily
+  /// for use in the implementation of the framework itself.
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQuery.fromView], which constructs [MediaQueryData] from a provided
+  ///    [FlutterView], makes it available to descendant widgets, and sets up
+  ///    the appropriate notification listeners to keep the data updated.
+  MediaQueryData.fromView(ui.FlutterView view, {MediaQueryData? platformData})
+    : size = view.physicalSize / view.devicePixelRatio,
+      devicePixelRatio = view.devicePixelRatio,
+      _textScaleFactor = 1.0, // _textScaler is the source of truth.
+      _textScaler = _textScalerFromView(view, platformData),
+      platformBrightness = platformData?.platformBrightness ?? view.platformDispatcher.platformBrightness,
+      padding = EdgeInsets.fromViewPadding(view.padding, view.devicePixelRatio),
+      viewPadding = EdgeInsets.fromViewPadding(view.viewPadding, view.devicePixelRatio),
+      viewInsets = EdgeInsets.fromViewPadding(view.viewInsets, view.devicePixelRatio),
+      systemGestureInsets = EdgeInsets.fromViewPadding(view.systemGestureInsets, view.devicePixelRatio),
+      accessibleNavigation = platformData?.accessibleNavigation ?? view.platformDispatcher.accessibilityFeatures.accessibleNavigation,
+      invertColors = platformData?.invertColors ?? view.platformDispatcher.accessibilityFeatures.invertColors,
+      disableAnimations = platformData?.disableAnimations ?? view.platformDispatcher.accessibilityFeatures.disableAnimations,
+      boldText = platformData?.boldText ?? view.platformDispatcher.accessibilityFeatures.boldText,
+      highContrast = platformData?.highContrast ?? view.platformDispatcher.accessibilityFeatures.highContrast,
+      onOffSwitchLabels = platformData?.onOffSwitchLabels ?? view.platformDispatcher.accessibilityFeatures.onOffSwitchLabels,
+      alwaysUse24HourFormat = platformData?.alwaysUse24HourFormat ?? view.platformDispatcher.alwaysUse24HourFormat,
+      navigationMode = platformData?.navigationMode ?? NavigationMode.traditional,
+      gestureSettings = DeviceGestureSettings.fromView(view),
+      displayFeatures = view.displayFeatures;
+
+  static TextScaler _textScalerFromView(ui.FlutterView view, MediaQueryData? platformData) {
+    final double scaleFactor = platformData?.textScaleFactor ?? view.platformDispatcher.textScaleFactor;
+    return scaleFactor == 1.0 ? TextScaler.noScaling : TextScaler.linear(scaleFactor);
+  }
 
   /// The size of the media in logical pixels (e.g, the size of the screen).
   ///
@@ -214,9 +266,12 @@ class MediaQueryData {
   /// It is considered bad practice to cache and later use the size returned
   /// by `MediaQuery.of(context).size`. It will make the application non responsive
   /// and might lead to unexpected behaviors.
-  /// For instance, during startup, especially in release mode, the first returned
-  /// size might be (0,0). The size will be updated when the native platform
-  /// reports the actual resolution.
+  ///
+  /// For instance, during startup, especially in release mode, the first
+  /// returned size might be (0,0). The size will be updated when the native
+  /// platform reports the actual resolution. Using [MediaQuery.of] will ensure
+  /// that when the size changes, any widgets depending on the size are
+  /// automatically rebuilt.
   ///
   /// See the article on [Creating responsive and adaptive
   /// apps](https://docs.flutter.dev/development/ui/layout/adaptive-responsive)
@@ -234,6 +289,9 @@ class MediaQueryData {
   /// the Nexus 6 has a device pixel ratio of 3.5.
   final double devicePixelRatio;
 
+  /// Deprecated. Will be removed in a future version of Flutter. Use
+  /// [textScaler] instead.
+  ///
   /// The number of font pixels for each logical pixel.
   ///
   /// For example, if the text scale factor is 1.5, text will be 50% larger than
@@ -243,7 +301,44 @@ class MediaQueryData {
   ///
   ///  * [MediaQuery.textScaleFactorOf], a method to find and depend on the
   ///    textScaleFactor defined for a [BuildContext].
-  final double textScaleFactor;
+  @Deprecated(
+    'Use textScaler instead. '
+    'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+    'This feature was deprecated after v3.12.0-2.0.pre.',
+  )
+  double get textScaleFactor => textScaler.textScaleFactor;
+  // TODO(LongCatIsLooong): remove this after textScaleFactor is removed. To
+  // maintain backward compatibility and also keep the const constructor this
+  // has to be kept as a private field.
+  // https://github.com/flutter/flutter/issues/128825
+  final double _textScaleFactor;
+
+  /// The font scaling strategy to use for laying out textual contents.
+  ///
+  /// If this [MediaQueryData] is created by the [MediaQueryData.fromView]
+  /// constructor, this property reflects the platform's preferred text scaling
+  /// strategy, and may change as the user changes the scaling factor in the
+  /// operating system's accessibility settings.
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQuery.textScalerOf], a method to find and depend on the
+  ///    [textScaler] defined for a [BuildContext].
+  ///  * [TextPainter], a class that lays out and paints text.
+  TextScaler get textScaler {
+    // The constructor was called with an explicitly specified textScaler value,
+    // we assume the caller is migrated and ignore _textScaleFactor.
+    if (!identical(_kUnspecifiedTextScaler, _textScaler)) {
+      return _textScaler;
+    }
+    return _textScaleFactor == 1.0
+      // textScaleFactor and textScaler from the constructor are consistent.
+      ? TextScaler.noScaling
+      // The constructor was called with an explicitly specified textScaleFactor,
+      // we assume the caller is unmigrated and ignore _textScaler.
+      : TextScaler.linear(_textScaleFactor);
+  }
+  final TextScaler _textScaler;
 
   /// The current brightness mode of the host platform.
   ///
@@ -271,9 +366,11 @@ class MediaQueryData {
   /// level MediaQuery created by [WidgetsApp] are the same as the window
   /// (often the mobile device screen) that contains the app.
   ///
+  /// {@youtube 560 315 https://www.youtube.com/watch?v=ceCo8U0XHqw}
+  ///
   /// See also:
   ///
-  ///  * [ui.window], which provides some additional detail about this property
+  ///  * [FlutterView], which provides some additional detail about this property
   ///    and how it relates to [padding] and [viewPadding].
   final EdgeInsets viewInsets;
 
@@ -288,9 +385,11 @@ class MediaQueryData {
   ///
   /// Padding is derived from the values of [viewInsets] and [viewPadding].
   ///
+  /// {@youtube 560 315 https://www.youtube.com/watch?v=ceCo8U0XHqw}
+  ///
   /// See also:
   ///
-  ///  * [ui.window], which provides some additional detail about this
+  ///  * [FlutterView], which provides some additional detail about this
   ///    property and how it relates to [viewInsets] and [viewPadding].
   ///  * [SafeArea], a widget that consumes this padding with a [Padding] widget
   ///    and automatically removes it from the [MediaQuery] for its child.
@@ -310,9 +409,11 @@ class MediaQueryData {
   /// same as the window that contains the app. On mobile devices, this will
   /// typically be the full screen.
   ///
+  /// {@youtube 560 315 https://www.youtube.com/watch?v=ceCo8U0XHqw}
+  ///
   /// See also:
   ///
-  ///  * [ui.window], which provides some additional detail about this
+  ///  * [FlutterView], which provides some additional detail about this
   ///    property and how it relates to [padding] and [viewInsets].
   final EdgeInsets viewPadding;
 
@@ -387,6 +488,15 @@ class MediaQueryData {
   /// or above.
   final bool highContrast;
 
+  /// Whether the user requested to show on/off labels inside switches on iOS,
+  /// via Settings -> Accessibility -> Display & Text Size -> On/Off Labels.
+  ///
+  /// See also:
+  ///
+  ///  * [dart:ui.PlatformDispatcher.accessibilityFeatures], where the setting
+  ///    originates.
+  final bool onOffSwitchLabels;
+
   /// Whether the platform is requesting that animations be disabled or reduced
   /// as much as possible.
   ///
@@ -448,10 +558,19 @@ class MediaQueryData {
 
   /// Creates a copy of this media query data but with the given fields replaced
   /// with the new values.
+  ///
+  /// The `textScaler` parameter and `textScaleFactor` parameter must not be
+  /// both specified.
   MediaQueryData copyWith({
     Size? size,
     double? devicePixelRatio,
+    @Deprecated(
+      'Use textScaler instead. '
+      'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+      'This feature was deprecated after v3.12.0-2.0.pre.',
+    )
     double? textScaleFactor,
+    TextScaler? textScaler,
     Brightness? platformBrightness,
     EdgeInsets? padding,
     EdgeInsets? viewPadding,
@@ -459,6 +578,7 @@ class MediaQueryData {
     EdgeInsets? systemGestureInsets,
     bool? alwaysUse24HourFormat,
     bool? highContrast,
+    bool? onOffSwitchLabels,
     bool? disableAnimations,
     bool? invertColors,
     bool? accessibleNavigation,
@@ -467,10 +587,14 @@ class MediaQueryData {
     DeviceGestureSettings? gestureSettings,
     List<ui.DisplayFeature>? displayFeatures,
   }) {
+    assert(textScaleFactor == null || textScaler == null);
+    if (textScaleFactor != null) {
+      textScaler ??= TextScaler.linear(textScaleFactor);
+    }
     return MediaQueryData(
       size: size ?? this.size,
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
-      textScaleFactor: textScaleFactor ?? this.textScaleFactor,
+      textScaler: textScaler ?? this.textScaler,
       platformBrightness: platformBrightness ?? this.platformBrightness,
       padding: padding ?? this.padding,
       viewPadding: viewPadding ?? this.viewPadding,
@@ -479,6 +603,7 @@ class MediaQueryData {
       alwaysUse24HourFormat: alwaysUse24HourFormat ?? this.alwaysUse24HourFormat,
       invertColors: invertColors ?? this.invertColors,
       highContrast: highContrast ?? this.highContrast,
+      onOffSwitchLabels: onOffSwitchLabels ?? this.onOffSwitchLabels,
       disableAnimations: disableAnimations ?? this.disableAnimations,
       accessibleNavigation: accessibleNavigation ?? this.accessibleNavigation,
       boldText: boldText ?? this.boldText,
@@ -670,6 +795,7 @@ class MediaQueryData {
         && other.systemGestureInsets == systemGestureInsets
         && other.alwaysUse24HourFormat == alwaysUse24HourFormat
         && other.highContrast == highContrast
+        && other.onOffSwitchLabels == onOffSwitchLabels
         && other.disableAnimations == disableAnimations
         && other.invertColors == invertColors
         && other.accessibleNavigation == accessibleNavigation
@@ -690,6 +816,7 @@ class MediaQueryData {
     viewInsets,
     alwaysUse24HourFormat,
     highContrast,
+    onOffSwitchLabels,
     disableAnimations,
     invertColors,
     accessibleNavigation,
@@ -704,7 +831,7 @@ class MediaQueryData {
     final List<String> properties = <String>[
       'size: $size',
       'devicePixelRatio: ${devicePixelRatio.toStringAsFixed(1)}',
-      'textScaleFactor: ${textScaleFactor.toStringAsFixed(1)}',
+      'textScaler: $textScaler',
       'platformBrightness: $platformBrightness',
       'padding: $padding',
       'viewPadding: $viewPadding',
@@ -713,6 +840,7 @@ class MediaQueryData {
       'alwaysUse24HourFormat: $alwaysUse24HourFormat',
       'accessibleNavigation: $accessibleNavigation',
       'highContrast: $highContrast',
+      'onOffSwitchLabels: $onOffSwitchLabels',
       'disableAnimations: $disableAnimations',
       'invertColors: $invertColors',
       'boldText: $boldText',
@@ -727,16 +855,24 @@ class MediaQueryData {
 /// Establishes a subtree in which media queries resolve to the given data.
 ///
 /// For example, to learn the size of the current media (e.g., the window
-/// containing your app), you can read the [MediaQueryData.size] property from
-/// the [MediaQueryData] returned by [MediaQuery.of]:
-/// `MediaQuery.of(context).size`.
+/// containing your app), you can use [MediaQuery.sizeOf]:
+/// `MediaQuery.sizeOf(context)`.
 ///
-/// Querying the current media using [MediaQuery.of] will cause your widget to
-/// rebuild automatically whenever the [MediaQueryData] changes (e.g., if the
-/// user rotates their device).
+/// Querying the current media using specific methods (for example,
+/// [MediaQuery.sizeOf] and [MediaQuery.paddingOf]) will cause your widget to
+/// rebuild automatically whenever the property you query changes.
 ///
-/// If no [MediaQuery] is in scope then the [MediaQuery.of] method will throw an
-/// exception. Alternatively, [MediaQuery.maybeOf] may be used, which returns
+/// On the other hand, querying using [MediaQuery.of] will cause your widget to
+/// rebuild automatically whenever any field of the [MediaQueryData] changes
+/// (e.g., if the user rotates their device). Therefore, if you are only
+/// concerned with one or a few fields of [MediaQueryData], prefer using
+/// the specific methods (for example: [MediaQuery.sizeOf] and
+/// [MediaQuery.paddingOf]).
+///
+/// If no [MediaQuery] is in scope then the series of methods like
+/// [MediaQuery.of] and [MediaQuery.sizeOf] will throw an exception.
+/// Alternatively, the "maybe-" variant methods (such as [MediaQuery.maybeOf]
+/// and [MediaQuery.maybeSizeOf]) can be used, which returns
 /// null instead of throwing if no [MediaQuery] is in scope.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=A3WrA4zAaPw}
@@ -754,8 +890,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(child != null),
-       assert(data != null);
+  });
 
   /// Creates a new [MediaQuery] that inherits from the ambient [MediaQuery]
   /// from the given context, but removes the specified padding.
@@ -893,26 +1028,117 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
     );
   }
 
-  /// Provides a [MediaQuery] which is built and updated using the latest
-  /// [WidgetsBinding.window] values.
+  /// Deprecated. Use [MediaQuery.fromView] instead.
   ///
-  /// The [MediaQuery] is wrapped in a separate widget to ensure that only it
-  /// and its dependents are updated when `window` changes, instead of
-  /// rebuilding the whole widget tree.
+  /// This constructor was operating on a single window assumption. In
+  /// preparation for Flutter's upcoming multi-window support, it has been
+  /// deprecated.
   ///
-  /// This should be inserted into the widget tree when the [MediaQuery] view
-  /// padding is consumed by a widget in such a way that the view padding is no
-  /// longer exposed to the widget's descendants or siblings.
-  ///
-  /// The [child] argument is required and must not be null.
+  /// Replaced by [MediaQuery.fromView], which requires specifying the
+  /// [FlutterView] the [MediaQuery] is constructed for. The [FlutterView] can,
+  /// for example, be obtained from the context via [View.of] or from
+  /// [PlatformDispatcher.views].
+  @Deprecated(
+    'Use MediaQuery.fromView instead. '
+    'This constructor was deprecated in preparation for the upcoming multi-window support. '
+    'This feature was deprecated after v3.7.0-32.0.pre.'
+  )
   static Widget fromWindow({
     Key? key,
     required Widget child,
   }) {
-    return _MediaQueryFromWindow(
+    return _MediaQueryFromView(
       key: key,
+      view: WidgetsBinding.instance.window,
+      ignoreParentData: true,
       child: child,
     );
+  }
+
+  /// Wraps the [child] in a [MediaQuery] which is built using data from the
+  /// provided [view].
+  ///
+  /// The [MediaQuery] is constructed using the platform-specific data of the
+  /// surrounding [MediaQuery] and the view-specific data of the provided
+  /// [view]. If no surrounding [MediaQuery] exists, the platform-specific data
+  /// is generated from the [PlatformDispatcher] associated with the provided
+  /// [view]. Any information that's exposed via the [PlatformDispatcher] is
+  /// considered platform-specific. Data exposed directly on the [FlutterView]
+  /// (excluding its [FlutterView.platformDispatcher] property) is considered
+  /// view-specific.
+  ///
+  /// The injected [MediaQuery] automatically updates when any of the data used
+  /// to construct it changes.
+  ///
+  /// The [view] and [child] arguments are required and must not be null.
+  static Widget fromView({
+    Key? key,
+    required FlutterView view,
+    required Widget child,
+  }) {
+    return _MediaQueryFromView(
+      key: key,
+      view: view,
+      child: child,
+    );
+  }
+
+  /// Wraps the `child` in a [MediaQuery] with its [MediaQueryData.textScaler]
+  /// set to [TextScaler.noScaling].
+  ///
+  /// The returned widget must be inserted in a widget tree below an existing
+  /// [MediaQuery] widget.
+  ///
+  /// This can be used to prevent, for example, icon fonts from scaling as the
+  /// user adjusts the platform's text scaling value.
+  static Widget withNoTextScaling({
+    Key? key,
+    required Widget child,
+  }) {
+    return Builder(
+      key: key,
+      builder: (BuildContext context) {
+        assert(debugCheckHasMediaQuery(context));
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling),
+          child: child,
+        );
+      },
+    );
+  }
+
+  /// Wraps the `child` in a [MediaQuery] and applies [TextScaler.clamp] on the
+  /// current [MediaQueryData.textScaler].
+  ///
+  /// The returned widget must be inserted in a widget tree below an existing
+  /// [MediaQuery] widget.
+  ///
+  /// This is a convenience function to restrict the range of the scaled text
+  /// size to `[minScaleFactor * fontSize, maxScaleFactor * fontSize]` (to
+  /// prevent excessive text scaling that would break the UI, for example). When
+  /// `minScaleFactor` equals `maxScaleFactor`, the scaler becomes
+  /// `TextScaler.linear(minScaleFactor)`.
+  static Widget withClampedTextScaling({
+    Key? key,
+    double minScaleFactor = 0.0,
+    double maxScaleFactor = double.infinity,
+    required Widget child,
+  }) {
+    assert(maxScaleFactor >= minScaleFactor);
+    assert(!maxScaleFactor.isNaN);
+    assert(minScaleFactor.isFinite);
+    assert(minScaleFactor >= 0);
+
+    return Builder(builder: (BuildContext context) {
+      assert(debugCheckHasMediaQuery(context));
+      final MediaQueryData data = MediaQuery.of(context);
+      return MediaQuery(
+        data: data.copyWith(
+          textScaler: data.textScaler.clamp(minScaleFactor: minScaleFactor, maxScaleFactor: maxScaleFactor),
+        ),
+        child: child,
+      );
+    });
   }
 
   /// Contains information about the current media.
@@ -949,7 +1175,6 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   ///  * [maybeOf], which doesn't throw or assert if it doesn't find a
   ///    [MediaQuery] ancestor, it returns null instead.
   static MediaQueryData of(BuildContext context) {
-    assert(context != null);
     return _of(context);
   }
 
@@ -991,7 +1216,6 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   ///  * [of], which will throw if it doesn't find a [MediaQuery] ancestor,
   ///    instead of returning null.
   static MediaQueryData? maybeOf(BuildContext context) {
-    assert(context != null);
     return _maybeOf(context);
   }
 
@@ -1041,19 +1265,52 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// the [MediaQueryData.devicePixelRatio] property of the ancestor [MediaQuery] changes.
   static double? maybeDevicePixelRatioOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.devicePixelRatio)?.devicePixelRatio;
 
+  /// Deprecated. Will be removed in a future version of Flutter. Use
+  /// [maybeTextScalerOf] instead.
+  ///
   /// Returns textScaleFactor for the nearest MediaQuery ancestor or
   /// 1.0, if no such ancestor exists.
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
   /// the [MediaQueryData.textScaleFactor] property of the ancestor [MediaQuery] changes.
+  @Deprecated(
+    'Use textScalerOf instead. '
+    'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+    'This feature was deprecated after v3.12.0-2.0.pre.',
+  )
   static double textScaleFactorOf(BuildContext context) => maybeTextScaleFactorOf(context) ?? 1.0;
 
+  /// Deprecated. Will be removed in a future version of Flutter. Use
+  /// [maybeTextScalerOf] instead.
+  ///
   /// Returns textScaleFactor for the nearest MediaQuery ancestor or
   /// null, if no such ancestor exists.
   ///
   /// Use of this method will cause the given [context] to rebuild any time that
-  /// the [MediaQueryData.textScaleFactor] property of the ancestor [MediaQuery] changes.
+  /// the [MediaQueryData.textScaleFactor] property of the ancestor [MediaQuery]
+  /// changes.
+  @Deprecated(
+    'Use maybeTextScalerOf instead. '
+    'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+    'This feature was deprecated after v3.12.0-2.0.pre.',
+  )
   static double? maybeTextScaleFactorOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.textScaleFactor)?.textScaleFactor;
+
+  /// Returns the [TextScaler] for the nearest [MediaQuery] ancestor or null if
+  /// no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.textScaler] property of the ancestor [MediaQuery]
+  /// changes.
+  static TextScaler textScalerOf(BuildContext context) => maybeTextScalerOf(context) ?? TextScaler.noScaling;
+
+  /// Returns the [TextScaler] for the nearest [MediaQuery] ancestor or
+  /// [TextScaler.noScaling] if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.textScaler] property of the ancestor [MediaQuery]
+  /// changes.
+  static TextScaler? maybeTextScalerOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.textScaler)?.textScaler;
 
   /// Returns platformBrightness for the nearest MediaQuery ancestor or
   /// [Brightness.light], if no such ancestor exists.
@@ -1188,6 +1445,25 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// the [MediaQueryData.highContrast] property of the ancestor [MediaQuery] changes.
   static bool? maybeHighContrastOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.highContrast)?.highContrast;
 
+  /// Returns onOffSwitchLabels for the nearest MediaQuery ancestor or false, if no
+  /// such ancestor exists.
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQueryData.onOffSwitchLabels], which indicates the platform's
+  ///    desire to show on/off labels inside switches.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.onOffSwitchLabels] property of the ancestor [MediaQuery] changes.
+  static bool onOffSwitchLabelsOf(BuildContext context) => maybeOnOffSwitchLabelsOf(context) ?? false;
+
+  /// Returns onOffSwitchLabels for the nearest MediaQuery ancestor or
+  /// null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.onOffSwitchLabels] property of the ancestor [MediaQuery] changes.
+  static bool? maybeOnOffSwitchLabelsOf(BuildContext context) => _maybeOf(context, _MediaQueryAspect.onOffSwitchLabels)?.onOffSwitchLabels;
+
   /// Returns disableAnimations for the nearest MediaQuery ancestor or
   /// [Brightness.light], if no such ancestor exists.
   ///
@@ -1291,92 +1567,82 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
             if (data.size != oldWidget.data.size) {
               return true;
             }
-            break;
           case _MediaQueryAspect.orientation:
             if (data.orientation != oldWidget.data.orientation) {
               return true;
             }
-            break;
           case _MediaQueryAspect.devicePixelRatio:
             if (data.devicePixelRatio != oldWidget.data.devicePixelRatio) {
               return true;
             }
-            break;
           case _MediaQueryAspect.textScaleFactor:
             if (data.textScaleFactor != oldWidget.data.textScaleFactor) {
               return true;
             }
-            break;
+          case _MediaQueryAspect.textScaler:
+            if (data.textScaler != oldWidget.data.textScaler) {
+              return true;
+            }
           case _MediaQueryAspect.platformBrightness:
             if (data.platformBrightness != oldWidget.data.platformBrightness) {
               return true;
             }
-            break;
           case _MediaQueryAspect.padding:
             if (data.padding != oldWidget.data.padding) {
               return true;
             }
-            break;
           case _MediaQueryAspect.viewInsets:
             if (data.viewInsets != oldWidget.data.viewInsets) {
               return true;
             }
-            break;
           case _MediaQueryAspect.systemGestureInsets:
             if (data.systemGestureInsets != oldWidget.data.systemGestureInsets) {
               return true;
             }
-            break;
           case _MediaQueryAspect.viewPadding:
             if (data.viewPadding != oldWidget.data.viewPadding) {
               return true;
             }
-            break;
           case _MediaQueryAspect.alwaysUse24HourFormat:
             if (data.alwaysUse24HourFormat != oldWidget.data.alwaysUse24HourFormat) {
               return true;
             }
-            break;
           case _MediaQueryAspect.accessibleNavigation:
             if (data.accessibleNavigation != oldWidget.data.accessibleNavigation) {
               return true;
             }
-            break;
           case _MediaQueryAspect.invertColors:
             if (data.invertColors != oldWidget.data.invertColors) {
               return true;
             }
-            break;
           case _MediaQueryAspect.highContrast:
             if (data.highContrast != oldWidget.data.highContrast) {
               return true;
             }
-            break;
+          case _MediaQueryAspect.onOffSwitchLabels:
+            if (data.onOffSwitchLabels != oldWidget.data.onOffSwitchLabels) {
+              return true;
+            }
           case _MediaQueryAspect.disableAnimations:
             if (data.disableAnimations != oldWidget.data.disableAnimations) {
               return true;
             }
-            break;
           case _MediaQueryAspect.boldText:
             if (data.boldText != oldWidget.data.boldText) {
               return true;
             }
-            break;
           case _MediaQueryAspect.navigationMode:
             if (data.navigationMode != oldWidget.data.navigationMode) {
               return true;
             }
-            break;
           case _MediaQueryAspect.gestureSettings:
             if (data.gestureSettings != oldWidget.data.gestureSettings) {
               return true;
             }
-            break;
           case _MediaQueryAspect.displayFeatures:
             if (data.displayFeatures != oldWidget.data.displayFeatures) {
               return true;
             }
-            break;
         }
       }
     }
@@ -1412,94 +1678,102 @@ enum NavigationMode {
   directional,
 }
 
-/// Provides a [MediaQuery] which is built and updated using the latest
-/// [WidgetsBinding.window] values.
-///
-/// Receives `window` updates by listening to [WidgetsBinding].
-///
-/// The standalone widget ensures that it rebuilds **only** [MediaQuery] and
-/// its dependents when `window` changes, instead of rebuilding the entire
-/// widget tree.
-///
-/// It is used by [WidgetsApp] if no other [MediaQuery] is available above it.
-///
-/// See also:
-///
-///  * [MediaQuery], which establishes a subtree in which media queries resolve
-///    to a [MediaQueryData].
-class _MediaQueryFromWindow extends StatefulWidget {
-  /// Creates a [_MediaQueryFromWindow] that provides a [MediaQuery] to its
-  /// descendants using the `window` to keep [MediaQueryData] up to date.
-  ///
-  /// The [child] must not be null.
-  const _MediaQueryFromWindow({
+class _MediaQueryFromView extends StatefulWidget {
+  const _MediaQueryFromView({
     super.key,
+    required this.view,
+    this.ignoreParentData = false,
     required this.child,
   });
 
-  /// {@macro flutter.widgets.ProxyWidget.child}
+  final FlutterView view;
+  final bool ignoreParentData;
   final Widget child;
 
   @override
-  State<_MediaQueryFromWindow> createState() => _MediaQueryFromWindowState();
+  State<_MediaQueryFromView> createState() => _MediaQueryFromViewState();
 }
 
-class _MediaQueryFromWindowState extends State<_MediaQueryFromWindow> with WidgetsBindingObserver {
+class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBindingObserver {
+  MediaQueryData? _parentData;
+  MediaQueryData? _data;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
   }
 
-  // ACCESSIBILITY
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _updateParentData();
+    _updateData();
+    assert(_data != null);
+  }
+
+  @override
+  void didUpdateWidget(_MediaQueryFromView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.ignoreParentData != oldWidget.ignoreParentData) {
+      _updateParentData();
+    }
+    if (_data == null || oldWidget.view != widget.view) {
+      _updateData();
+    }
+    assert(_data != null);
+  }
+
+  void _updateParentData() {
+    _parentData = widget.ignoreParentData ? null : MediaQuery.maybeOf(context);
+    _data = null; // _updateData must be called again after changing parent data.
+  }
+
+  void _updateData() {
+    final MediaQueryData newData = MediaQueryData.fromView(widget.view, platformData: _parentData);
+    if (newData != _data) {
+      setState(() {
+        _data = newData;
+      });
+    }
+  }
 
   @override
   void didChangeAccessibilityFeatures() {
-    setState(() {
-      // The properties of window have changed. We use them in our build
-      // function, so we need setState(), but we don't cache anything locally.
-    });
+    // If we have a parent, it dictates our accessibility features. If we don't
+    // have a parent, we get our accessibility features straight from the
+    // PlatformDispatcher and need to update our data in response to the
+    // PlatformDispatcher changing its accessibility features setting.
+    if (_parentData == null) {
+      _updateData();
+    }
   }
-
-  // METRICS
 
   @override
   void didChangeMetrics() {
-    setState(() {
-      // The properties of window have changed. We use them in our build
-      // function, so we need setState(), but we don't cache anything locally.
-    });
+    _updateData();
   }
 
   @override
   void didChangeTextScaleFactor() {
-    setState(() {
-      // The textScaleFactor property of window has changed. We reference
-      // window in our build function, so we need to call setState(), but
-      // we don't need to cache anything locally.
-    });
+    // If we have a parent, it dictates our text scale factor. If we don't have
+    // a parent, we get our text scale factor from the PlatformDispatcher and
+    // need to update our data in response to the PlatformDispatcher changing
+    // its text scale factor setting.
+    if (_parentData == null) {
+      _updateData();
+    }
   }
 
-  // RENDERING
   @override
   void didChangePlatformBrightness() {
-    setState(() {
-      // The platformBrightness property of window has changed. We reference
-      // window in our build function, so we need to call setState(), but
-      // we don't need to cache anything locally.
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    MediaQueryData data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
-    if (!kReleaseMode) {
-      data = data.copyWith(platformBrightness: debugBrightnessOverride);
+    // If we have a parent, it dictates our platform brightness. If we don't
+    // have a parent, we get our platform brightness from the PlatformDispatcher
+    // and need to update our data in response to the PlatformDispatcher
+    // changing its platform brightness setting.
+    if (_parentData == null) {
+      _updateData();
     }
-    return MediaQuery(
-      data: data,
-      child: widget.child,
-    );
   }
 
   @override
@@ -1507,4 +1781,34 @@ class _MediaQueryFromWindowState extends State<_MediaQueryFromWindow> with Widge
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
+
+  @override
+  Widget build(BuildContext context) {
+    MediaQueryData effectiveData = _data!;
+    // If we get our platformBrightness from the PlatformDispatcher (i.e. we have no parentData) replace it
+    // with the debugBrightnessOverride in non-release mode.
+    if (!kReleaseMode && _parentData == null && effectiveData.platformBrightness != debugBrightnessOverride) {
+      effectiveData = effectiveData.copyWith(platformBrightness: debugBrightnessOverride);
+    }
+    return MediaQuery(
+      data: effectiveData,
+      child: widget.child,
+    );
+  }
+}
+
+const TextScaler _kUnspecifiedTextScaler = _UnspecifiedTextScaler();
+// TODO(LongCatIsLooong): Remove once `MediaQueryData.textScaleFactor` is
+// removed: https://github.com/flutter/flutter/issues/128825.
+class _UnspecifiedTextScaler implements TextScaler {
+  const _UnspecifiedTextScaler();
+
+  @override
+  TextScaler clamp({double minScaleFactor = 0, double maxScaleFactor = double.infinity}) => throw UnimplementedError();
+
+  @override
+  double scale(double fontSize) => throw UnimplementedError();
+
+  @override
+  double get textScaleFactor => throw UnimplementedError();
 }

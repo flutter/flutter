@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-/// Reades through the print commands from [process] waiting for the magic phase
+/// Reads through the print commands from [process] waiting for the magic phase
 /// that contains microbenchmarks results as defined in
 /// `dev/benchmarks/microbenchmarks/lib/common.dart`.
 Future<Map<String, double>> readJsonResults(Process process) {

@@ -226,6 +226,22 @@ void main() {
     expect(tokens[5].type, equals(ST.identifier));
   });
 
+  testWithoutContext('lexer identifier names can contain underscores', () {
+    final List<Node> tokens = Parser('keywords', 'app_en.arb', '{ test_placeholder } { test_select, select, singular{test} other{hmm} }').lexIntoTokens();
+    expect(tokens[1].value, equals('test_placeholder'));
+    expect(tokens[1].type, equals(ST.identifier));
+    expect(tokens[5].value, equals('test_select'));
+    expect(tokens[5].type, equals(ST.identifier));
+  });
+
+   testWithoutContext('lexer identifier names can contain the strings select or plural', () {
+    final List<Node> tokens = Parser('keywords', 'app_en.arb', '{ selectTest } { pluralTest, select, singular{test} other{hmm} }').lexIntoTokens();
+    expect(tokens[1].value, equals('selectTest'));
+    expect(tokens[1].type, equals(ST.identifier));
+    expect(tokens[5].value, equals('pluralTest'));
+    expect(tokens[5].type, equals(ST.identifier));
+  });
+
   testWithoutContext('lexer: lexically correct but syntactically incorrect', () {
     final List<Node> tokens = Parser(
       'syntax',
@@ -277,6 +293,54 @@ void main() {
     )));
   });
 
+  testWithoutContext('relaxed lexer', () {
+    final List<Node> tokens1 = Parser(
+      'string',
+      'app_en.arb',
+      '{ }',
+      placeholders: <String>[],
+    ).lexIntoTokens();
+    expect(tokens1, equals(<Node>[
+      Node(ST.string, 0, value: '{'),
+      Node(ST.string, 1, value: ' '),
+      Node(ST.string, 2, value: '}')
+    ]));
+
+    final List<Node> tokens2 = Parser(
+      'string',
+      'app_en.arb',
+      '{ notAPlaceholder }',
+      placeholders: <String>['isAPlaceholder'],
+    ).lexIntoTokens();
+    expect(tokens2, equals(<Node>[
+      Node(ST.string, 0, value: '{'),
+      Node(ST.string, 1, value: ' notAPlaceholder '),
+      Node(ST.string, 18, value: '}')
+    ]));
+
+    final List<Node> tokens3 = Parser(
+      'string',
+      'app_en.arb',
+      '{ isAPlaceholder }',
+      placeholders: <String>['isAPlaceholder'],
+    ).lexIntoTokens();
+    expect(tokens3, equals(<Node>[
+      Node(ST.openBrace, 0, value: '{'),
+      Node(ST.identifier, 2, value: 'isAPlaceholder'),
+      Node(ST.closeBrace, 17, value: '}')
+    ]));
+  });
+
+  testWithoutContext('relaxed lexer complex', () {
+    const String message = '{ notPlaceholder } {count,plural, =0{Hello} =1{Hello World} =2{Hello two worlds} few{Hello {count} worlds} many{Hello all {count} worlds} other{Hello other {count} worlds}}';
+    final List<Node> tokens = Parser(
+      'string',
+      'app_en.arb',
+      message,
+      placeholders: <String>['count'],
+    ).lexIntoTokens();
+    expect(tokens[0].type, equals(ST.string));
+  });
 
   testWithoutContext('parser basic', () {
     expect(Parser('helloWorld', 'app_en.arb', 'Hello {name}').parse(), equals(
@@ -288,6 +352,25 @@ void main() {
             Node(ST.closeBrace, 11, value: '}')
           ])
         ])
+    ));
+
+    expect(Parser('argumentTest', 'app_en.arb', 'Today is {date, date, ::yMMd}').parse(), equals(
+      Node(ST.message, 0, children: <Node>[
+        Node(ST.string, 0, value: 'Today is '),
+        Node(ST.argumentExpr, 9, children: <Node>[
+          Node(ST.openBrace, 9, value: '{'),
+          Node(ST.identifier, 10, value: 'date'),
+          Node(ST.comma, 14, value: ','),
+          Node(ST.argType, 16, children: <Node>[
+            Node(ST.date, 16, value: 'date'),
+          ]),
+          Node(ST.comma, 20, value: ','),
+          Node(ST.colon, 22, value: ':'),
+          Node(ST.colon, 23, value: ':'),
+          Node(ST.identifier, 24, value: 'yMMd'),
+          Node(ST.closeBrace, 28, value: '}'),
+        ]),
+      ])
     ));
 
     expect(Parser(
@@ -502,5 +585,16 @@ void main() {
         'message',
         contains(expectedError3),
     )));
+  });
+
+  testWithoutContext('parser allows select cases with numbers', () {
+    final Node node = Parser('numberSelect', 'app_en.arb', '{ count, select, 0{none} 100{perfect} other{required!} }').parse();
+    final Node selectExpr = node.children[0];
+    final Node selectParts = selectExpr.children[5];
+    final Node selectPart = selectParts.children[0];
+    expect(selectPart.children[0].value, equals('0'));
+    expect(selectPart.children[1].value, equals('{'));
+    expect(selectPart.children[2].type, equals(ST.message));
+    expect(selectPart.children[3].value, equals('}'));
   });
 }

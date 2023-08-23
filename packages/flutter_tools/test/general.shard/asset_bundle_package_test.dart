@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -11,6 +12,7 @@ import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:standard_message_codec/standard_message_codec.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -24,6 +26,7 @@ void main() {
     // rolls into Flutter.
     return path.replaceAll('/', globals.fs.path.separator);
   }
+
   void writePubspecFile(String path, String name, { List<String>? assets }) {
     String assetsSection;
     if (assets == null) {
@@ -60,35 +63,51 @@ $assetsSection
       ..writeAsStringSync(packages);
   }
 
+  Map<Object, Object> assetManifestBinToJson(Map<Object, Object> manifest) {
+    List<Object> convertList(List<Object> variants) => variants
+      .map((Object variant) => (variant as Map<Object?, Object?>)['asset']!)
+      .toList();
+
+    return manifest.map((Object key, Object value) => MapEntry<Object, Object>(key, convertList(value as List<Object>)));
+  }
+
   Future<void> buildAndVerifyAssets(
     List<String> assets,
     List<String> packages,
-    String? expectedAssetManifest, {
-    bool expectExists = true,
-  }) async {
+    Map<Object,Object> expectedAssetManifest
+  ) async {
+
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
     await bundle.build(packagesPath: '.packages');
 
     for (final String packageName in packages) {
       for (final String asset in assets) {
         final String entryKey = Uri.encodeFull('packages/$packageName/$asset');
-        expect(bundle.entries.containsKey(entryKey), expectExists,
+        expect(bundle.entries, contains(entryKey),
           reason: 'Cannot find key on bundle: $entryKey');
-        if (expectExists) {
-          expect(
-            utf8.decode(await bundle.entries[entryKey]!.contentsAsBytes()),
-            asset,
-          );
-        }
+        expect(
+          utf8.decode(await bundle.entries[entryKey]!.contentsAsBytes()),
+          asset,
+        );
       }
     }
 
-    if (expectExists) {
-      expect(
-        utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
-        expectedAssetManifest,
-      );
-    }
+    final Map<Object?, Object?> assetManifest = const StandardMessageCodec().decodeMessage(
+      ByteData.sublistView(
+        Uint8List.fromList(
+          await bundle.entries['AssetManifest.bin']!.contentsAsBytes()
+        )
+      )
+    ) as Map<Object?, Object?>;
+
+    expect(
+      json.decode(utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes())),
+      assetManifestBinToJson(expectedAssetManifest),
+    );
+    expect(
+      assetManifest,
+      expectedAssetManifest
+    );
   }
 
   void writeAssets(String path, List<String> assets) {
@@ -120,7 +139,8 @@ $assetsSection
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(packagesPath: '.packages');
-      expect(bundle.entries.length, 3); // LICENSE, AssetManifest, FontManifest
+      expect(bundle.entries.keys, unorderedEquals(
+        <String>['NOTICES.Z', 'AssetManifest.json', 'AssetManifest.bin', 'FontManifest.json']));
       const String expectedAssetManifest = '{}';
       expect(
         utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
@@ -145,7 +165,8 @@ $assetsSection
 
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(packagesPath: '.packages');
-      expect(bundle.entries.length, 3); // LICENSE, AssetManifest, FontManifest
+      expect(bundle.entries.keys, unorderedEquals(
+        <String>['NOTICES.Z', 'AssetManifest.json', 'AssetManifest.bin', 'FontManifest.json']));
       const String expectedAssetManifest = '{}';
       expect(
         utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes()),
@@ -174,8 +195,14 @@ $assetsSection
 
       writeAssets('p/p/', assets);
 
-      const String expectedAssetManifest = '{"packages/test_package/a/foo":'
-          '["packages/test_package/a/foo"]}';
+      final Map<Object, Object> expectedAssetManifest = <Object, Object>{
+        'packages/test_package/a/foo': <Map<Object, Object>>[
+          <Object, Object>{
+            'asset': 'packages/test_package/a/foo',
+          }
+        ]
+      };
+
       await buildAndVerifyAssets(
         assets,
         <String>['test_package'],
@@ -200,12 +227,16 @@ $assetsSection
       final List<String> assets = <String>['a/foo'];
       writeAssets('p/p/lib/', assets);
 
-      const String expectedAssetManifest = '{"packages/test_package/a/foo":'
-          '["packages/test_package/a/foo"]}';
+
+      const Map<Object, Object> expectedAssetManifest = <Object, Object>{
+        'packages/test_package/a/foo': <Map<String, Object>>[
+          <String, Object>{'asset': 'packages/test_package/a/foo'}
+        ]
+      };
       await buildAndVerifyAssets(
         assets,
         <String>['test_package'],
-        expectedAssetManifest,
+        expectedAssetManifest
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
@@ -225,12 +256,15 @@ $assetsSection
       final List<String> assets = <String>['a/foo', 'a/2x/foo', 'a/bar'];
       writeAssets('p/p/', assets);
 
-      const String expectedManifest = '{'
-          '"packages/test_package/a/bar":'
-          '["packages/test_package/a/bar"],'
-          '"packages/test_package/a/foo":'
-          '["packages/test_package/a/foo","packages/test_package/a/2x/foo"]'
-          '}';
+      const Map<Object, Object> expectedManifest = <Object, Object>{
+        'packages/test_package/a/bar': <Map<String, Object>>[
+          <String, Object>{'asset': 'packages/test_package/a/bar'}
+        ],
+        'packages/test_package/a/foo': <Map<String, Object>>[
+          <String, Object>{'asset': 'packages/test_package/a/foo'},
+          <String, Object>{'asset': 'packages/test_package/a/2x/foo', 'dpr': 2.0}
+        ]
+      };
 
       await buildAndVerifyAssets(
         assets,
@@ -258,8 +292,12 @@ $assetsSection
       final List<String> assets = <String>['a/foo', 'a/2x/foo'];
       writeAssets('p/p/lib/', assets);
 
-      const String expectedManifest = '{"packages/test_package/a/foo":'
-          '["packages/test_package/a/foo","packages/test_package/a/2x/foo"]}';
+      const Map<Object, Object> expectedManifest = <Object, Object>{
+        'packages/test_package/a/foo': <Map<String, Object>>[
+          <String, Object>{'asset': 'packages/test_package/a/foo'},
+          <String, Object>{'asset': 'packages/test_package/a/2x/foo', 'dpr': 2.0}
+        ]
+      };
 
       await buildAndVerifyAssets(
         assets,
@@ -284,9 +322,14 @@ $assetsSection
       );
 
       writeAssets('p/p/', assets);
-      const String expectedAssetManifest =
-          '{"packages/test_package/a/bar":["packages/test_package/a/bar"],'
-          '"packages/test_package/a/foo":["packages/test_package/a/foo"]}';
+      const Map<Object, Object> expectedAssetManifest = <Object, Object>{
+        'packages/test_package/a/bar': <Map<String, Object>>[
+          <String, Object>{'asset': 'packages/test_package/a/bar'}
+        ],
+        'packages/test_package/a/foo': <Map<String, Object>>[
+          <String, Object>{'asset': 'packages/test_package/a/foo'}
+        ]
+      };
 
       await buildAndVerifyAssets(
         assets,
@@ -317,9 +360,14 @@ $assetsSection
       );
 
       writeAssets('p/p/lib/', assets);
-      const String expectedAssetManifest =
-          '{"packages/test_package/a/bar":["packages/test_package/a/bar"],'
-          '"packages/test_package/a/foo":["packages/test_package/a/foo"]}';
+      const Map<Object, Object> expectedAssetManifest = <Object, Object>{
+        'packages/test_package/a/bar': <Map<String, Object>>[
+          <String, Object>{'asset': 'packages/test_package/a/bar'}
+        ],
+        'packages/test_package/a/foo': <Map<String, Object>>[
+          <String, Object>{'asset': 'packages/test_package/a/foo'}
+        ]
+      };
 
       await buildAndVerifyAssets(
         assets,
@@ -352,11 +400,16 @@ $assetsSection
       writeAssets('p/p/', assets);
       writeAssets('p2/p/', assets);
 
-      const String expectedAssetManifest =
-          '{"packages/test_package/a/foo":'
-          '["packages/test_package/a/foo","packages/test_package/a/2x/foo"],'
-          '"packages/test_package2/a/foo":'
-          '["packages/test_package2/a/foo","packages/test_package2/a/2x/foo"]}';
+      const Map<Object, Object> expectedAssetManifest = <Object, Object>{
+        'packages/test_package/a/foo': <Map<String, Object>>[
+          <String, Object>{'asset': 'packages/test_package/a/foo'},
+          <String, Object>{'asset': 'packages/test_package/a/2x/foo', 'dpr': 2.0}
+        ],
+        'packages/test_package2/a/foo': <Map<String, Object>>[
+          <String, Object>{'asset': 'packages/test_package2/a/foo'},
+          <String, Object>{'asset': 'packages/test_package2/a/2x/foo', 'dpr': 2.0}
+        ]
+      };
 
       await buildAndVerifyAssets(
         assets,
@@ -392,11 +445,16 @@ $assetsSection
       writeAssets('p/p/lib/', assets);
       writeAssets('p2/p/lib/', assets);
 
-      const String expectedAssetManifest =
-          '{"packages/test_package/a/foo":'
-          '["packages/test_package/a/foo","packages/test_package/a/2x/foo"],'
-          '"packages/test_package2/a/foo":'
-          '["packages/test_package2/a/foo","packages/test_package2/a/2x/foo"]}';
+      const Map<Object, Object> expectedAssetManifest = <Object, Object>{
+        'packages/test_package/a/foo': <Map<String, Object>>[
+          <String, Object>{'asset': 'packages/test_package/a/foo'},
+          <String, Object>{'asset': 'packages/test_package/a/2x/foo', 'dpr': 2.0}
+        ],
+        'packages/test_package2/a/foo': <Map<String, Object>>[
+          <String, Object>{'asset': 'packages/test_package2/a/foo'},
+          <String, Object>{'asset': 'packages/test_package2/a/2x/foo', 'dpr': 2.0}
+        ]
+      };
 
       await buildAndVerifyAssets(
         assets,
@@ -428,9 +486,12 @@ $assetsSection
       final List<String> assets = <String>['a/foo', 'a/2x/foo'];
       writeAssets('p2/p/lib/', assets);
 
-      const String expectedAssetManifest =
-          '{"packages/test_package2/a/foo":'
-          '["packages/test_package2/a/foo","packages/test_package2/a/2x/foo"]}';
+      const Map<Object, Object> expectedAssetManifest = <Object, Object>{
+        'packages/test_package2/a/foo': <Map<String, Object>>[
+          <String, Object>{'asset': 'packages/test_package2/a/foo'},
+          <String, Object>{'asset': 'packages/test_package2/a/2x/foo', 'dpr': 2.0}
+        ]
+      };
 
       await buildAndVerifyAssets(
         assets,
@@ -455,9 +516,14 @@ $assetsSection
     );
 
     writeAssets('p/p/', assets);
-    const String expectedAssetManifest =
-        '{"packages/test_package/a/foo":["packages/test_package/a/foo"],'
-        '"packages/test_package/a/foo [x]":["packages/test_package/a/foo [x]"]}';
+    const Map<Object, Object> expectedAssetManifest = <Object, Object>{
+      'packages/test_package/a/foo': <Map<String, Object>>[
+        <String, Object>{'asset': 'packages/test_package/a/foo'}
+      ],
+      'packages/test_package/a/foo [x]': <Map<String, Object>>[
+        <String, Object>{'asset': 'packages/test_package/a/foo [x]'}
+      ]
+    };
 
     await buildAndVerifyAssets(
       assets,
@@ -484,9 +550,14 @@ $assetsSection
       );
 
       writeAssets('p/p/', assetsOnDisk);
-      const String expectedAssetManifest =
-          '{"packages/test_package/a/bar":["packages/test_package/a/bar"],'
-          '"packages/test_package/a/foo":["packages/test_package/a/foo"]}';
+      const Map<Object, Object> expectedAssetManifest = <Object, Object>{
+        'packages/test_package/a/bar': <Map<String, Object>>[
+          <String, Object>{'asset': 'packages/test_package/a/bar'}
+        ],
+        'packages/test_package/a/foo': <Map<String, Object>>[
+          <String, Object>{'asset': 'packages/test_package/a/foo'}
+        ]
+      };
 
       await buildAndVerifyAssets(
         assetsOnDisk,
@@ -512,9 +583,14 @@ $assetsSection
       );
 
       writeAssets('p/p/', assetsOnDisk);
-      const String expectedAssetManifest =
-          '{"packages/test_package/a/foo":["packages/test_package/a/foo"],'
-          '"packages/test_package/abc/bar":["packages/test_package/abc/bar"]}';
+      const Map<Object, Object> expectedAssetManifest = <Object, Object>{
+        'packages/test_package/a/foo': <Map<String, Object>>[
+          <String, Object>{'asset': 'packages/test_package/a/foo'}
+        ],
+        'packages/test_package/abc/bar': <Map<String, Object>>[
+          <String, Object>{'asset': 'packages/test_package/abc/bar'}
+        ]
+      };
 
       await buildAndVerifyAssets(
         assetsOnDisk,
@@ -567,9 +643,12 @@ $assetsSection
       );
 
       writeAssets('p/p/', assetsOnDisk);
-      const String expectedAssetManifest =
-          '{"packages/test_package/a/foo":["packages/test_package/a/foo","packages/test_package/a/2x/foo"]}';
-
+      const Map<Object, Object> expectedAssetManifest = <Object, Object>{
+        'packages/test_package/a/foo': <Map<String, Object>>[
+          <String, Object>{'asset': 'packages/test_package/a/foo'},
+          <String, Object>{'asset': 'packages/test_package/a/2x/foo', 'dpr': 2.0}
+        ]
+      };
       await buildAndVerifyAssets(
         assetsOnDisk,
         <String>['test_package'],
@@ -594,7 +673,7 @@ $assetsSection
       );
 
       writeAssets('p/p/', assetsOnDisk);
-      const String expectedAssetManifest = '{}';
+      const Map<Object, Object> expectedAssetManifest = <Object, Object>{};
 
       await buildAndVerifyAssets(
         assetOnManifest,
@@ -618,12 +697,8 @@ $assetsSection
         assets: assetOnManifest,
       );
 
-      await buildAndVerifyAssets(
-        assetOnManifest,
-        <String>['test_package'],
-        null,
-        expectExists: false,
-      );
+    final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+    await bundle.build(packagesPath: '.packages');
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
       ProcessManager: () => FakeProcessManager.any(),

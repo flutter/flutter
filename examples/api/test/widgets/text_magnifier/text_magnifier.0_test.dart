@@ -43,7 +43,7 @@ Offset _textOffsetToPosition<T extends State<StatefulWidget>>(WidgetTester teste
 }
 
 void main() {
-  const Duration durationBetweenActons = Duration(milliseconds: 20);
+  const Duration durationBetweenActions = Duration(milliseconds: 20);
   const String defaultText = 'I am a magnifier, fear me!';
 
   Future<void> showMagnifier(WidgetTester tester, String characterToTapOn) async {
@@ -51,11 +51,11 @@ void main() {
 
     // Double tap 'Magnifier' word to show the selection handles.
     final TestGesture testGesture = await tester.startGesture(tapOffset);
-    await tester.pump(durationBetweenActons);
+    await tester.pump(durationBetweenActions);
     await testGesture.up();
-    await tester.pump(durationBetweenActons);
+    await tester.pump(durationBetweenActions);
     await testGesture.down(tapOffset);
-    await tester.pump(durationBetweenActons);
+    await tester.pump(durationBetweenActions);
     await testGesture.up();
     await tester.pumpAndSettle();
 
@@ -84,13 +84,13 @@ void main() {
   }
 
   testWidgets('should show custom magnifier on drag', (WidgetTester tester) async {
-    await tester.pumpWidget(const example.MyApp(text: defaultText));
+    await tester.pumpWidget(const example.TextMagnifierExampleApp(text: defaultText));
 
     await showMagnifier(tester, 'e');
     expect(find.byType(example.CustomMagnifier), findsOneWidget);
 
     await expectLater(
-      find.byType(example.MyApp),
+      find.byType(example.TextMagnifierExampleApp),
       matchesGoldenFile('text_magnifier.0_test.png'),
     );
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
@@ -101,7 +101,7 @@ void main() {
       final String text = textDirection == TextDirection.rtl ? 'أثارت زر' : defaultText;
       final String textToTapOn = textDirection == TextDirection.rtl ? 'ت' : 'e';
 
-      await tester.pumpWidget(example.MyApp(textDirection: textDirection, text: text));
+      await tester.pumpWidget(example.TextMagnifierExampleApp(textDirection: textDirection, text: text));
 
       await showMagnifier(tester, textToTapOn);
 

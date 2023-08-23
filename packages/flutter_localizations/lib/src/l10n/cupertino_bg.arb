@@ -21,5 +21,10 @@
   "selectAllButtonLabel": "Избиране на всички",
   "tabSemanticsLabel": "Раздел $tabIndex от $tabCount",
   "modalBarrierDismissLabel": "Отхвърляне",
-  "searchTextFieldPlaceholderLabel": "Търсене"
+  "searchTextFieldPlaceholderLabel": "Търсене",
+  "noSpellCheckReplacementsLabel": "Не бяха намерени замествания",
+  "menuDismissLabel": "Отхвърляне на менюто",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

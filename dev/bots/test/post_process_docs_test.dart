@@ -118,7 +118,7 @@ void main() async {
           ),
         ],
       );
-      await runProcessWithValidations(command, '', processManager: processManager);
+      await runProcessWithValidations(command, '', processManager: processManager, verbose: false);
       expect(processManager, hasNoRemainingExpectations);
     });
 
@@ -133,7 +133,7 @@ void main() async {
         ],
       );
       try {
-        await runProcessWithValidations(command, '', processManager: processManager);
+        await runProcessWithValidations(command, '', processManager: processManager, verbose: false);
         throw Exception('Exception was not thrown');
       } on CommandException catch (e) {
         expect(e, isA<Exception>());

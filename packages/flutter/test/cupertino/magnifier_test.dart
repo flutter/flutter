@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -52,7 +53,7 @@ void main() {
         final Key outerKey = UniqueKey();
 
         await tester.pumpWidget(
-          Container(
+          ColoredBox(
             key: outerKey,
             color: const Color.fromARGB(255, 0, 255, 179),
             child: MaterialApp(
@@ -188,7 +189,7 @@ void main() {
           ),
         );
 
-        // Show the magnifier initally, so that we get it in a not hidden state.
+        // Show the magnifier initially, so that we get it in a not hidden state.
         await showCupertinoMagnifier(context, tester, magnifierinfo);
 
         // Move the gesture to one that should hide it.
@@ -227,7 +228,7 @@ void main() {
           ),
         );
 
-        // Show the magnifier initally, so that we get it in a not hidden state.
+        // Show the magnifier initially, so that we get it in a not hidden state.
         await showCupertinoMagnifier(context, tester, magnifierInfo);
 
         // Move the gesture to one that should hide it.

@@ -71,9 +71,6 @@ class DeferredComponent {
   void assignLoadingUnits(List<LoadingUnit> allLoadingUnits) {
     _assigned = true;
     _loadingUnits = <LoadingUnit>{};
-    if (allLoadingUnits == null) {
-      return;
-    }
     for (final String lib in libraries) {
       for (final LoadingUnit loadingUnit in allLoadingUnits) {
         if (loadingUnit.libraries.contains(lib)) {

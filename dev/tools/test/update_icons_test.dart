@@ -17,6 +17,9 @@ Map<String, String> codepointsC = <String, String>{
   'airplane': '111',
   'train': '444',
 };
+Map<String, String> codepointsUnderscore = <String, String>{
+  'airplane__123': '111',
+};
 
 void main() {
   group('safety checks', () {
@@ -38,7 +41,7 @@ void main() {
   });
 
   test('no double underscores', () {
-    expect(Icon.generateFlutterId('abc__123'), 'abc_123');
+    expect(Icon(codepointsUnderscore.entries.first), 'abc_123');
   });
 
   test('usage string is correct', () {
@@ -56,6 +59,63 @@ void main() {
     expect(
       Icon(const MapEntry<String, String>('123_rounded', '')).usage,
       'Icon(Icons.onetwothree_rounded),',
+    );
+  });
+
+  test('certain icons should be mirrored in RTL', () {
+    // Exact match
+    expect(
+      Icon(const MapEntry<String, String>('help', '')).isMirroredInRTL,
+      true,
+    );
+    // Variant
+    expect(
+      Icon(const MapEntry<String, String>('help_rounded', '')).isMirroredInRTL,
+      true,
+    );
+    // Common suffixes
+    expect(
+      Icon(const MapEntry<String, String>('help_alt', '')).isMirroredInRTL,
+      true,
+    );
+    expect(
+      Icon(const MapEntry<String, String>('help_new', '')).isMirroredInRTL,
+      true,
+    );
+    expect(
+      Icon(const MapEntry<String, String>('help_off', '')).isMirroredInRTL,
+      true,
+    );
+    expect(
+      Icon(const MapEntry<String, String>('help_on', '')).isMirroredInRTL,
+      true,
+    );
+    // Common suffixes + variant
+    expect(
+      Icon(const MapEntry<String, String>('help_alt_rounded', '')).isMirroredInRTL,
+      true,
+    );
+    expect(
+      Icon(const MapEntry<String, String>('help_new_rounded', '')).isMirroredInRTL,
+      true,
+    );
+    expect(
+      Icon(const MapEntry<String, String>('help_off_rounded', '')).isMirroredInRTL,
+      true,
+    );
+    expect(
+      Icon(const MapEntry<String, String>('help_on_rounded', '')).isMirroredInRTL,
+      true,
+    );
+    // No match
+    expect(
+      Icon(const MapEntry<String, String>('help_center_rounded', '')).isMirroredInRTL,
+      false,
+    );
+    // No match
+    expect(
+      Icon(const MapEntry<String, String>('arrow', '')).isMirroredInRTL,
+      false,
     );
   });
 }

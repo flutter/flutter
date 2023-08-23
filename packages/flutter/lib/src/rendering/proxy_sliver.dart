@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
 import 'dart:ui' as ui show Color;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
-import 'package:vector_math/vector_math_64.dart';
+import 'package:flutter/semantics.dart';
 
 import 'layer.dart';
 import 'object.dart';
@@ -74,14 +75,12 @@ abstract class RenderProxySliver extends RenderSliver with RenderObjectWithChild
 
   @override
   double childMainAxisPosition(RenderSliver child) {
-    assert(child != null);
     assert(child == this.child);
     return 0.0;
   }
 
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
-    assert(child != null);
     final SliverPhysicalParentData childParentData = child.parentData! as SliverPhysicalParentData;
     childParentData.applyPaintTransform(transform);
   }
@@ -105,8 +104,7 @@ class RenderSliverOpacity extends RenderProxySliver {
     double opacity = 1.0,
     bool alwaysIncludeSemantics = false,
     RenderSliver? sliver,
-  }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
-       assert(alwaysIncludeSemantics != null),
+  }) : assert(opacity >= 0.0 && opacity <= 1.0),
        _opacity = opacity,
        _alwaysIncludeSemantics = alwaysIncludeSemantics,
        _alpha = ui.Color.getAlphaFromOpacity(opacity) {
@@ -131,7 +129,6 @@ class RenderSliverOpacity extends RenderProxySliver {
   double get opacity => _opacity;
   double _opacity;
   set opacity(double value) {
-    assert(value != null);
     assert(value >= 0.0 && value <= 1.0);
     if (_opacity == value) {
       return;
@@ -208,20 +205,27 @@ class RenderSliverOpacity extends RenderProxySliver {
 /// child as usual. It just cannot be the target of located events, because its
 /// render object returns false from [hitTest].
 ///
-/// When [ignoringSemantics] is true, the subtree will be invisible to the
-/// semantics layer (and thus e.g. accessibility tools). If [ignoringSemantics]
-/// is null, it uses the value of [ignoring].
+/// ## Semantics
+///
+/// Using this class may also affect how the semantics subtree underneath is
+/// collected.
+///
+/// {@macro flutter.widgets.IgnorePointer.semantics}
+///
+/// {@macro flutter.widgets.IgnorePointer.ignoringSemantics}
 class RenderSliverIgnorePointer extends RenderProxySliver {
   /// Creates a render object that is invisible to hit testing.
   ///
-  /// The [ignoring] argument must not be null. If [ignoringSemantics] is null,
-  /// this render object will be ignored for semantics if [ignoring] is true.
+  /// The [ignoring] argument must not be null.
   RenderSliverIgnorePointer({
     RenderSliver? sliver,
     bool ignoring = true,
+    @Deprecated(
+      'Create a custom sliver ignore pointer widget instead. '
+      'This feature was deprecated after v3.8.0-12.0.pre.'
+    )
     bool? ignoringSemantics,
-  }) : assert(ignoring != null),
-       _ignoring = ignoring,
+  }) : _ignoring = ignoring,
        _ignoringSemantics = ignoringSemantics {
     child = sliver;
   }
@@ -230,15 +234,16 @@ class RenderSliverIgnorePointer extends RenderProxySliver {
   ///
   /// Regardless of whether this render object is ignored during hit testing, it
   /// will still consume space during layout and be visible during painting.
+  ///
+  /// {@macro flutter.widgets.IgnorePointer.semantics}
   bool get ignoring => _ignoring;
   bool _ignoring;
   set ignoring(bool value) {
-    assert(value != null);
     if (value == _ignoring) {
       return;
     }
     _ignoring = value;
-    if (_ignoringSemantics == null || !_ignoringSemantics!) {
+    if (ignoringSemantics == null) {
       markNeedsSemanticsUpdate();
     }
   }
@@ -246,23 +251,20 @@ class RenderSliverIgnorePointer extends RenderProxySliver {
   /// Whether the semantics of this render object is ignored when compiling the
   /// semantics tree.
   ///
-  /// If null, defaults to value of [ignoring].
-  ///
-  /// See [SemanticsNode] for additional information about the semantics tree.
+  /// {@macro flutter.widgets.IgnorePointer.ignoringSemantics}
+  @Deprecated(
+    'Create a custom sliver ignore pointer widget instead. '
+    'This feature was deprecated after v3.8.0-12.0.pre.'
+  )
   bool? get ignoringSemantics => _ignoringSemantics;
   bool? _ignoringSemantics;
   set ignoringSemantics(bool? value) {
     if (value == _ignoringSemantics) {
       return;
     }
-    final bool oldEffectiveValue = _effectiveIgnoringSemantics;
     _ignoringSemantics = value;
-    if (oldEffectiveValue != _effectiveIgnoringSemantics) {
-      markNeedsSemanticsUpdate();
-    }
+    markNeedsSemanticsUpdate();
   }
-
-  bool get _effectiveIgnoringSemantics => ignoringSemantics ?? ignoring;
 
   @override
   bool hitTest(SliverHitTestResult result, {required double mainAxisPosition, required double crossAxisPosition}) {
@@ -276,16 +278,31 @@ class RenderSliverIgnorePointer extends RenderProxySliver {
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    if (child != null && !_effectiveIgnoringSemantics) {
-      visitor(child!);
+    if (_ignoringSemantics ?? false) {
+      return;
     }
+    super.visitChildrenForSemantics(visitor);
+  }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    // Do not block user interactions if _ignoringSemantics is false; otherwise,
+    // delegate to absorbing
+    config.isBlockingUserActions = ignoring && (_ignoringSemantics ?? true);
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('ignoring', ignoring));
-    properties.add(DiagnosticsProperty<bool>('ignoringSemantics', _effectiveIgnoringSemantics, description: ignoringSemantics == null ? 'implicitly $_effectiveIgnoringSemantics' : null));
+    properties.add(
+      DiagnosticsProperty<bool>(
+        'ignoringSemantics',
+        ignoringSemantics,
+        description: ignoringSemantics == null ? null : 'implicitly $ignoringSemantics',
+      ),
+    );
   }
 }
 
@@ -297,8 +314,7 @@ class RenderSliverOffstage extends RenderProxySliver {
   RenderSliverOffstage({
     bool offstage = true,
     RenderSliver? sliver,
-  }) : assert(offstage != null),
-       _offstage = offstage {
+  }) : _offstage = offstage {
     child = sliver;
   }
 
@@ -313,7 +329,6 @@ class RenderSliverOffstage extends RenderProxySliver {
   bool _offstage;
 
   set offstage(bool value) {
-    assert(value != null);
     if (value == _offstage) {
       return;
     }
@@ -401,10 +416,49 @@ class RenderSliverAnimatedOpacity extends RenderProxySliver with RenderAnimatedO
     required Animation<double> opacity,
     bool alwaysIncludeSemantics = false,
     RenderSliver? sliver,
-  }) : assert(opacity != null),
-       assert(alwaysIncludeSemantics != null) {
+  }) {
     this.opacity = opacity;
     this.alwaysIncludeSemantics = alwaysIncludeSemantics;
     child = sliver;
+  }
+}
+
+/// Applies a cross-axis constraint to its sliver child.
+///
+/// This render object takes a [maxExtent] parameter and uses the smaller of
+/// [maxExtent] and the parent's [SliverConstraints.crossAxisExtent] as the
+/// cross axis extent of the [SliverConstraints] passed to the sliver child.
+class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
+  /// Creates a render object that constrains the cross axis extent of its sliver child.
+  ///
+  /// The [maxExtent] parameter must not be null and must be nonnegative.
+  RenderSliverConstrainedCrossAxis({
+    required double maxExtent
+  }) : _maxExtent = maxExtent,
+       assert(maxExtent >= 0.0);
+
+  /// The cross axis extent to apply to the sliver child.
+  ///
+  /// This value must be nonnegative.
+  double get maxExtent => _maxExtent;
+  double _maxExtent;
+  set maxExtent(double value) {
+    if (_maxExtent == value) {
+      return;
+    }
+    _maxExtent = value;
+    markNeedsLayout();
+  }
+
+  @override
+  void performLayout() {
+    assert(child != null);
+    assert(maxExtent >= 0.0);
+    child!.layout(
+      constraints.copyWith(crossAxisExtent: min(_maxExtent, constraints.crossAxisExtent)),
+      parentUsesSize: true,
+    );
+    final SliverGeometry childLayoutGeometry = child!.geometry!;
+    geometry = childLayoutGeometry.copyWith(crossAxisExtent: min(_maxExtent, constraints.crossAxisExtent));
   }
 }

@@ -6,13 +6,18 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../rendering/mock_canvas.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('CheckboxThemeData copyWith, ==, hashCode basics', () {
     expect(const CheckboxThemeData(), const CheckboxThemeData().copyWith());
     expect(const CheckboxThemeData().hashCode, const CheckboxThemeData().copyWith().hashCode);
+  });
+
+  test('CheckboxThemeData lerp special cases', () {
+    expect(CheckboxThemeData.lerp(null, null, 0), const CheckboxThemeData());
+    const CheckboxThemeData data = CheckboxThemeData();
+    expect(identical(CheckboxThemeData.lerp(data, data, 0.5), data), true);
   });
 
   test('CheckboxThemeData defaults', () {
@@ -35,7 +40,7 @@ void main() {
     expect(theme.data.visualDensity, null);
   });
 
-  testWidgets('Default CheckboxThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default CheckboxThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const CheckboxThemeData().debugFillProperties(builder);
 
@@ -47,7 +52,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('CheckboxThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CheckboxThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const CheckboxThemeData(
       mouseCursor: MaterialStatePropertyAll<MouseCursor?>(SystemMouseCursors.click),
@@ -78,7 +83,7 @@ void main() {
     );
   });
 
-  testWidgets('Checkbox is themeable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Checkbox is themeable', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const MouseCursor mouseCursor = SystemMouseCursors.text;
@@ -136,7 +141,7 @@ void main() {
     // Checkbox.
     await tester.pumpWidget(buildCheckbox());
     await tester.pumpAndSettle();
-    expect(_getCheckboxMaterial(tester), paints..drrect(color: defaultFillColor));
+    expect(_getCheckboxMaterial(tester), paints..path(color: defaultFillColor));
     // Size from MaterialTapTargetSize.shrinkWrap with added VisualDensity.
     expect(tester.getSize(find.byType(Checkbox)), const Size(40.0, 40.0) + visualDensity.baseSizeAdjustment);
 
@@ -160,7 +165,7 @@ void main() {
     expect(_getCheckboxMaterial(tester), paints..path(color: selectedFillColor)..path(color: focusedCheckColor));
   });
 
-  testWidgets('Checkbox properties are taken over the theme values', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Checkbox properties are taken over the theme values', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const MouseCursor themeMouseCursor = SystemMouseCursors.click;
@@ -235,7 +240,7 @@ void main() {
     // Checkbox.
     await tester.pumpWidget(buildCheckbox());
     await tester.pumpAndSettle();
-    expect(_getCheckboxMaterial(tester), paints..drrect(color: defaultFillColor));
+    expect(_getCheckboxMaterial(tester), paints..path(color: defaultFillColor));
     // Size from MaterialTapTargetSize.shrinkWrap with added VisualDensity.
     expect(tester.getSize(find.byType(Checkbox)), const Size(40.0, 40.0) + visualDensity.baseSizeAdjustment);
 
@@ -258,7 +263,7 @@ void main() {
     expect(_getCheckboxMaterial(tester), paints..circle(color: focusColor, radius: splashRadius));
   });
 
-  testWidgets('Checkbox activeColor property is taken over the theme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Checkbox activeColor property is taken over the theme', (WidgetTester tester) async {
     const Color themeSelectedFillColor = Color(0xfffffff1);
     const Color themeDefaultFillColor = Color(0xfffffff0);
     const Color selectedFillColor = Color(0xfffffff6);
@@ -288,7 +293,7 @@ void main() {
     // Unselected checkbox.
     await tester.pumpWidget(buildCheckbox());
     await tester.pumpAndSettle();
-    expect(_getCheckboxMaterial(tester), paints..drrect(color: themeDefaultFillColor));
+    expect(_getCheckboxMaterial(tester), paints..path(color: themeDefaultFillColor));
 
     // Selected checkbox.
     await tester.pumpWidget(buildCheckbox(selected: true));
@@ -357,7 +362,7 @@ void main() {
     );
   });
 
-  testWidgets('Local CheckboxTheme can override global CheckboxTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Local CheckboxTheme can override global CheckboxTheme', (WidgetTester tester) async {
     const Color globalThemeFillColor = Color(0xfffffff1);
     const Color globalThemeCheckColor = Color(0xff000000);
     const Color localThemeFillColor = Color(0xffff0000);
@@ -390,6 +395,77 @@ void main() {
     await tester.pumpAndSettle();
     expect(_getCheckboxMaterial(tester), paints..path(color: localThemeFillColor));
     expect(_getCheckboxMaterial(tester), paints..path(color: localThemeFillColor)..path(color: localThemeCheckColor));
+  });
+
+  test('CheckboxThemeData lerp with null parameters', () {
+    final CheckboxThemeData lerped = CheckboxThemeData.lerp(null, null, 0.25);
+
+    expect(lerped.mouseCursor, null);
+    expect(lerped.fillColor, null);
+    expect(lerped.checkColor, null);
+    expect(lerped.overlayColor, null);
+    expect(lerped.splashRadius, null);
+    expect(lerped.materialTapTargetSize, null);
+    expect(lerped.visualDensity, null);
+    expect(lerped.shape, null);
+    expect(lerped.side, null);
+  });
+
+  test('CheckboxThemeData lerp from populated to null parameters', () {
+    final CheckboxThemeData theme = CheckboxThemeData(
+      fillColor: MaterialStateProperty.all(const Color(0xfffffff0)),
+      checkColor: MaterialStateProperty.all(const Color(0xfffffff1)),
+      overlayColor: MaterialStateProperty.all(const Color(0xfffffff2)),
+      splashRadius: 3.0,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      visualDensity: const VisualDensity(vertical: 1.0, horizontal: 1.0),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
+      side: const BorderSide(width: 4.0),
+    );
+    final CheckboxThemeData lerped = CheckboxThemeData.lerp(theme, null, 0.5);
+
+    expect(lerped.fillColor!.resolve(<MaterialState>{}), const Color(0x80fffff0));
+    expect(lerped.checkColor!.resolve(<MaterialState>{}), const Color(0x80fffff1));
+    expect(lerped.overlayColor!.resolve(<MaterialState>{}), const Color(0x80fffff2));
+    expect(lerped.splashRadius, 1.5);
+    expect(lerped.materialTapTargetSize, null);
+    expect(lerped.visualDensity, null);
+    expect(lerped.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.0))));
+    // Returns null if either lerp value is null.
+    expect(lerped.side, null);
+  });
+
+  test('CheckboxThemeData lerp from populated parameters', () {
+    final CheckboxThemeData themeA = CheckboxThemeData(
+      fillColor: MaterialStateProperty.all(const Color(0xfffffff0)),
+      checkColor: MaterialStateProperty.all(const Color(0xfffffff1)),
+      overlayColor: MaterialStateProperty.all(const Color(0xfffffff2)),
+      splashRadius: 3.0,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      visualDensity: const VisualDensity(vertical: 1.0, horizontal: 1.0),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
+      side: const BorderSide(width: 4.0),
+    );
+    final CheckboxThemeData themeB = CheckboxThemeData(
+      fillColor: MaterialStateProperty.all(const Color(0xfffffff3)),
+      checkColor: MaterialStateProperty.all(const Color(0xfffffff4)),
+      overlayColor: MaterialStateProperty.all(const Color(0xfffffff5)),
+      splashRadius: 9.0,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      visualDensity: const VisualDensity(vertical: 2.0, horizontal: 2.0),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(1.0))),
+      side: const BorderSide(width: 3.0),
+    );
+    final CheckboxThemeData lerped = CheckboxThemeData.lerp(themeA, themeB, 0.5);
+
+    expect(lerped.fillColor!.resolve(<MaterialState>{}), const Color(0xfffffff1));
+    expect(lerped.checkColor!.resolve(<MaterialState>{}), const Color(0xfffffff2));
+    expect(lerped.overlayColor!.resolve(<MaterialState>{}), const Color(0xfffffff3));
+    expect(lerped.splashRadius, 6);
+    expect(lerped.materialTapTargetSize, MaterialTapTargetSize.shrinkWrap);
+    expect(lerped.visualDensity,  const VisualDensity(vertical: 2.0, horizontal: 2.0));
+    expect(lerped.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(2.5))));
+    expect(lerped.side, const BorderSide(width: 3.5));
   });
 }
 

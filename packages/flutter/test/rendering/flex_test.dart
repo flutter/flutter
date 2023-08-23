@@ -70,10 +70,8 @@ void main() {
         case Clip.antiAlias:
         case Clip.antiAliasWithSaveLayer:
           flex = RenderFlex(direction: Axis.vertical, children: <RenderBox>[box200x200], clipBehavior: clip!);
-          break;
         case null:
           flex = RenderFlex(direction: Axis.vertical, children: <RenderBox>[box200x200]);
-          break;
       }
       layout(flex, constraints: viewport, phase: EnginePhase.composite, onErrors: () {
         absorbOverflowedErrors();
