@@ -33,12 +33,11 @@ preemptively).
 
 ### Gradle
 When updating the Gradle version used in project templates
-(`templateDefaultGradleVersion`, `templateDefaultGradleVersionForModule`), make
-sure that:
+(`templateDefaultGradleVersion`), make sure that:
 - Framework integration & benchmark tests are running with at least this Gradle
 version.
 - Flutter tools tests that perform String checks with the current template
-Gradle verisons are updated (you should see these fail if you do not fix them
+Gradle verison is updated (you should see these fail if you do not fix them
 preemptively).
 
 When new versions of Gradle become available, make sure to:
@@ -66,8 +65,9 @@ When updating the Kotlin Gradle Plugin (KGP) version used in project templates
 For information aboout the latest version, check https://kotlinlang.org/docs/releases.html#release-details.
 
 ### Android Gradle Plugin
-When updating the Android Gradle Plugin (AGP) version used in project templates
-(`templateAndroidGradlePluginVersion`), make sure that:
+When updating the Android Gradle Plugin (AGP) versions used in project templates
+(`templateAndroidGradlePluginVersion`, `templateDefaultGradleVersionForModule`),
+make sure that:
 - Framework integration & benchmark tests are running with at least this AGP
 version.
 - Flutter tools tests that perform String checks with the current template
