@@ -36,14 +36,7 @@ const List<String> _kDart2WasmLinuxArgs = <String> [
   'Artifact.dart2wasmSnapshot.TargetPlatform.web_javascript',
   '--packages=.dart_tool/package_config.json',
   '--dart-sdk=Artifact.engineDartSdkPath.TargetPlatform.web_javascript',
-  '--multi-root-scheme',
-  'org-dartlang-sdk',
-  '--multi-root',
-  'HostArtifact.flutterWebSdk',
-  '--multi-root',
-  _kDartSdkRoot,
-  '--libraries-spec',
-  'HostArtifact.flutterWebLibrariesJson',
+  '--platform=HostArtifact.webPlatformKernelFolder/dart2wasm_platform.dill',
 ];
 
 const List<String> _kWasmOptLinuxArgrs = <String> [
