@@ -993,10 +993,13 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
   OutlinedBorder _getShape(ThemeData theme, ChipThemeData chipTheme, ChipThemeData chipDefaults) {
     final BorderSide? resolvedSide = MaterialStateProperty.resolveAs<BorderSide?>(widget.side, materialStates)
       ?? MaterialStateProperty.resolveAs<BorderSide?>(chipTheme.side, materialStates)
+      ?? MaterialStateProperty.resolveAs<BorderSide?>(widget.shape?.side, materialStates)
+      ?? MaterialStateProperty.resolveAs<BorderSide?>(chipTheme.shape?.side, materialStates)
       ?? MaterialStateProperty.resolveAs<BorderSide?>(chipDefaults.side, materialStates);
     final OutlinedBorder resolvedShape = MaterialStateProperty.resolveAs<OutlinedBorder?>(widget.shape, materialStates)
       ?? MaterialStateProperty.resolveAs<OutlinedBorder?>(chipTheme.shape, materialStates)
       ?? MaterialStateProperty.resolveAs<OutlinedBorder?>(chipDefaults.shape, materialStates)
+      // TODO(tahatesser): Remove this fallback when Material 2 is deprecated.
       ?? const StadiumBorder();
     return resolvedShape.copyWith(side: resolvedSide);
   }
