@@ -27,7 +27,7 @@ import 'android_sdk.dart';
 // Please see the README before changing any of these values.
 const String templateDefaultGradleVersion = '7.5';
 const String templateAndroidGradlePluginVersion = '7.3.0';
-const String templateDefaultGradleVersionForModule = '7.3.0';
+const String templateAndroidGradlePluginVersionForModule = '7.3.0';
 const String templateKotlinGradlePluginVersion = '1.7.10';
 
 // Please see the README before changing any of these values.

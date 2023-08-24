@@ -66,7 +66,7 @@ For information aboout the latest version, check https://kotlinlang.org/docs/rel
 
 ### Android Gradle Plugin
 When updating the Android Gradle Plugin (AGP) versions used in project templates
-(`templateAndroidGradlePluginVersion`, `templateDefaultGradleVersionForModule`),
+(`templateAndroidGradlePluginVersion`, `templateAndroidGradlePluginVersionForModule`),
 make sure that:
 - Framework integration & benchmark tests are running with at least this AGP
 version.
