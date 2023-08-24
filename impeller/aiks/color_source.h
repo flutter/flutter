@@ -15,7 +15,10 @@
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/point.h"
 #include "impeller/runtime_stage/runtime_stage.h"
-#include "impeller/scene/node.h"
+
+#if IMPELLER_ENABLE_3D
+#include "impeller/scene/node.h"  // nogncheck
+#endif                            // IMPELLER_ENABLE_3D
 
 namespace impeller {
 
@@ -85,8 +88,10 @@ class ColorSource {
       std::shared_ptr<std::vector<uint8_t>> uniform_data,
       std::vector<RuntimeEffectContents::TextureInput> texture_inputs);
 
+#if IMPELLER_ENABLE_3D
   static ColorSource MakeScene(std::shared_ptr<scene::Node> scene_node,
                                Matrix camera_transform);
+#endif  // IMPELLER_ENABLE_3D
 
   Type GetType() const;
 

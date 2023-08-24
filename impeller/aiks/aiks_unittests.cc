@@ -2056,6 +2056,7 @@ TEST_P(AiksTest, SaveLayerFiltersScaleWithTransform) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+#if IMPELLER_ENABLE_3D
 TEST_P(AiksTest, SceneColorSource) {
   // Load up the scene.
   auto mapping =
@@ -2096,6 +2097,7 @@ TEST_P(AiksTest, SceneColorSource) {
 
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
+#endif  // IMPELLER_ENABLE_3D
 
 TEST_P(AiksTest, PaintWithFilters) {
   // validate that a paint with a color filter "HasFilters", no other filters

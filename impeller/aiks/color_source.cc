@@ -13,7 +13,6 @@
 #include "impeller/entity/contents/linear_gradient_contents.h"
 #include "impeller/entity/contents/radial_gradient_contents.h"
 #include "impeller/entity/contents/runtime_effect_contents.h"
-#include "impeller/entity/contents/scene_contents.h"
 #include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/contents/sweep_gradient_contents.h"
 #include "impeller/entity/contents/tiled_texture_contents.h"
@@ -21,7 +20,11 @@
 #include "impeller/geometry/matrix.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/runtime_stage/runtime_stage.h"
-#include "impeller/scene/node.h"
+
+#if IMPELLER_ENABLE_3D
+#include "impeller/entity/contents/scene_contents.h"  // nogncheck
+#include "impeller/scene/node.h"                      // nogncheck
+#endif                                                // IMPELLER_ENABLE_3D
 
 namespace impeller {
 
@@ -210,6 +213,7 @@ ColorSource ColorSource::MakeRuntimeEffect(
   return result;
 }
 
+#if IMPELLER_ENABLE_3D
 ColorSource ColorSource::MakeScene(std::shared_ptr<scene::Node> scene_node,
                                    Matrix camera_transform) {
   ColorSource result;
@@ -224,6 +228,7 @@ ColorSource ColorSource::MakeScene(std::shared_ptr<scene::Node> scene_node,
   };
   return result;
 }
+#endif  // IMPELLER_ENABLE_3D
 
 ColorSource::Type ColorSource::GetType() const {
   return type_;
