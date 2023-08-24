@@ -6,7 +6,8 @@ print_usage () {
   echo "Usage:"
   echo "  ./create_cipd_packages.sh <VERSION_TAG> [PATH_TO_SDK_DIR]"
   echo "    Downloads, packages, and uploads Android SDK packages where:"
-  echo "      - VERSION_TAG is the tag of the cipd packages, e.g. 28r6 or 31v1"
+  echo "      - VERSION_TAG is the tag of the cipd packages, e.g. 28r6 or 31v1. Must contain"
+  echo "                    only lowercase letters and numbers."
   echo "      - PATH_TO_SDK_DIR is the path to the sdk folder. If omitted, this defaults to"
   echo "                      your ANDROID_SDK_ROOT environment variable."
   echo "  ./create_cipd_packages.sh list"
@@ -27,6 +28,13 @@ print_usage () {
 
 # Validate version is provided
 if [[ $1 == "" ]]; then
+  print_usage
+  exit 1
+fi
+
+#Validate version contains only lower case letters and numbers
+if ! [[ $1 =~ ^[[:lower:][:digit:]]+$ ]]; then
+  echo "Version tag can only consist of lower case letters and digits.";
   print_usage
   exit 1
 fi
