@@ -41,8 +41,6 @@ impeller_component("aiks_playground") {
   sources = [
     "aiks_playground.cc",
     "aiks_playground.h",
-    "aiks_playground_inspector.cc",
-    "aiks_playground_inspector.h",
   ]
   deps = [
     ":aiks",
