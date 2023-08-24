@@ -731,6 +731,7 @@ def to_gn_wasm_args(args, gn_args):
   gn_args['skia_canvaskit_enable_paragraph'] = True
   gn_args['skia_canvaskit_enable_webgl'] = True
   gn_args['skia_canvaskit_enable_webgpu'] = False
+  gn_args['skia_enable_optimize_size'] = True
   gn_args['skia_canvaskit_profile_build'] = args.runtime_mode == 'profile'
   gn_args['flutter_prebuilt_dart_sdk'] = True
 
