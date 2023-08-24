@@ -134,7 +134,7 @@ PlaygroundBackend GoldenPlaygroundTest::GetBackend() const {
   return GetParam();
 }
 
-bool GoldenPlaygroundTest::OpenPlaygroundHere(Picture picture) {
+bool GoldenPlaygroundTest::OpenPlaygroundHere(const Picture& picture) {
   AiksContext renderer(GetContext(), typographer_context_);
 
   auto screenshot = pimpl_->screenshoter->MakeScreenshot(renderer, picture,
@@ -143,8 +143,7 @@ bool GoldenPlaygroundTest::OpenPlaygroundHere(Picture picture) {
 }
 
 bool GoldenPlaygroundTest::OpenPlaygroundHere(
-    AiksPlaygroundCallback
-        callback) {  // NOLINT(performance-unnecessary-value-param)
+    const AiksPlaygroundCallback& callback) {
   return false;
 }
 

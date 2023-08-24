@@ -17,7 +17,6 @@
 #include "impeller/aiks/image.h"
 #include "impeller/aiks/paint_pass_delegate.h"
 #include "impeller/aiks/testing/context_spy.h"
-#include "impeller/core/capture.h"
 #include "impeller/entity/contents/color_source_contents.h"
 #include "impeller/entity/contents/conical_gradient_contents.h"
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
@@ -642,7 +641,7 @@ TEST_P(AiksTest, CanRenderLinearGradientWayManyColorsClamp) {
 }
 
 TEST_P(AiksTest, CanRenderLinearGradientManyColorsUnevenStops) {
-  auto callback = [&](AiksContext& renderer) -> std::optional<Picture> {
+  auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
     const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
     const Entity::TileMode tile_modes[] = {
         Entity::TileMode::kClamp, Entity::TileMode::kRepeat,
@@ -687,7 +686,7 @@ TEST_P(AiksTest, CanRenderLinearGradientManyColorsUnevenStops) {
         {0, 0}, {200, 200}, std::move(colors), std::move(stops), tile_mode, {});
 
     canvas.DrawRect({0, 0, 600, 600}, paint);
-    return canvas.EndRecordingAsPicture();
+    return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
   };
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
@@ -718,7 +717,7 @@ TEST_P(AiksTest, CanRenderLinearGradientMaskBlur) {
 }
 
 TEST_P(AiksTest, CanRenderRadialGradient) {
-  auto callback = [&](AiksContext& renderer) -> std::optional<Picture> {
+  auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
     const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
     const Entity::TileMode tile_modes[] = {
         Entity::TileMode::kClamp, Entity::TileMode::kRepeat,
@@ -755,13 +754,13 @@ TEST_P(AiksTest, CanRenderRadialGradient) {
         {100, 100}, 100, std::move(colors), std::move(stops), tile_mode, {});
 
     canvas.DrawRect({0, 0, 600, 600}, paint);
-    return canvas.EndRecordingAsPicture();
+    return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
   };
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 TEST_P(AiksTest, CanRenderRadialGradientManyColors) {
-  auto callback = [&](AiksContext& renderer) -> std::optional<Picture> {
+  auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
     const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
     const Entity::TileMode tile_modes[] = {
         Entity::TileMode::kClamp, Entity::TileMode::kRepeat,
@@ -812,7 +811,7 @@ TEST_P(AiksTest, CanRenderRadialGradientManyColors) {
         {100, 100}, 100, std::move(colors), std::move(stops), tile_mode, {});
 
     canvas.DrawRect({0, 0, 600, 600}, paint);
-    return canvas.EndRecordingAsPicture();
+    return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
   };
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
@@ -1342,7 +1341,8 @@ TEST_P(AiksTest, TextFrameSubpixelAlignment) {
     offset = (static_cast<float>(rand) / static_cast<float>(RAND_MAX)) * k2Pi;
   }
 
-  auto callback = [&](AiksContext& renderer) -> std::optional<Picture> {
+  auto callback = [&](AiksContext& renderer,
+                      RenderTarget& render_target) -> bool {
     static float font_size = 20;
     static float phase_variation = 0.2;
     static float speed = 0.5;
@@ -1369,10 +1369,10 @@ TEST_P(AiksTest, TextFrameSubpixelAlignment) {
               "the lazy dog!.?",
               "Roboto-Regular.ttf",
               {.font_size = font_size, .position = position})) {
-        return std::nullopt;
+        return false;
       }
     }
-    return canvas.EndRecordingAsPicture();
+    return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
   };
 
   ASSERT_TRUE(OpenPlaygroundHere(callback));
@@ -1543,7 +1543,7 @@ static BlendModeSelection GetBlendModeSelection() {
 TEST_P(AiksTest, CanDrawPaintMultipleTimesInteractive) {
   auto modes = GetBlendModeSelection();
 
-  auto callback = [&](AiksContext& renderer) -> std::optional<Picture> {
+  auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
     static Color background = Color::MediumTurquoise();
     static Color foreground = Color::Color::OrangeRed().WithAlpha(0.5);
     static int current_blend_index = 3;
@@ -1564,7 +1564,7 @@ TEST_P(AiksTest, CanDrawPaintMultipleTimesInteractive) {
     canvas.DrawPaint(
         {.color = foreground,
          .blend_mode = static_cast<BlendMode>(current_blend_index)});
-    return canvas.EndRecordingAsPicture();
+    return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
   };
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
@@ -1633,7 +1633,7 @@ TEST_P(AiksTest, ColorWheel) {
   std::shared_ptr<Image> color_wheel_image;
   Matrix color_wheel_transform;
 
-  auto callback = [&](AiksContext& renderer) -> std::optional<Picture> {
+  auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
     // UI state.
     static bool cache_the_wheel = true;
     static int current_blend_index = 3;
@@ -1675,7 +1675,7 @@ TEST_P(AiksTest, ColorWheel) {
       auto color_wheel_picture = canvas.EndRecordingAsPicture();
       auto snapshot = color_wheel_picture.Snapshot(renderer);
       if (!snapshot.has_value() || !snapshot->texture) {
-        return std::nullopt;
+        return false;
       }
       color_wheel_image = std::make_shared<Image>(snapshot->texture);
       color_wheel_transform = snapshot->transform;
@@ -1718,7 +1718,7 @@ TEST_P(AiksTest, ColorWheel) {
     }
     canvas.Restore();
 
-    return canvas.EndRecordingAsPicture();
+    return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
   };
 
   ASSERT_TRUE(OpenPlaygroundHere(callback));
@@ -1765,7 +1765,7 @@ TEST_P(AiksTest, TransformMultipliesCorrectly) {
 
 TEST_P(AiksTest, SolidStrokesRenderCorrectly) {
   // Compare with https://fiddle.skia.org/c/027392122bec8ac2b5d5de00a4b9bbe2
-  auto callback = [&](AiksContext& renderer) -> std::optional<Picture> {
+  auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
     static Color color = Color::Black().WithAlpha(0.5);
     static float scale = 3;
     static bool add_circle_clip = true;
@@ -1820,7 +1820,7 @@ TEST_P(AiksTest, SolidStrokesRenderCorrectly) {
       canvas.Translate({-240, 60});
     }
 
-    return canvas.EndRecordingAsPicture();
+    return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
   };
 
   ASSERT_TRUE(OpenPlaygroundHere(callback));
@@ -1828,7 +1828,7 @@ TEST_P(AiksTest, SolidStrokesRenderCorrectly) {
 
 TEST_P(AiksTest, GradientStrokesRenderCorrectly) {
   // Compare with https://fiddle.skia.org/c/027392122bec8ac2b5d5de00a4b9bbe2
-  auto callback = [&](AiksContext& renderer) -> std::optional<Picture> {
+  auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
     static float scale = 3;
     static bool add_circle_clip = true;
     const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
@@ -1897,14 +1897,14 @@ TEST_P(AiksTest, GradientStrokesRenderCorrectly) {
       canvas.Translate({-240, 60});
     }
 
-    return canvas.EndRecordingAsPicture();
+    return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
   };
 
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 TEST_P(AiksTest, CoverageOriginShouldBeAccountedForInSubpasses) {
-  auto callback = [&](AiksContext& renderer) -> std::optional<Picture> {
+  auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
     Canvas canvas;
     canvas.Scale(GetContentScale());
 
@@ -1931,7 +1931,7 @@ TEST_P(AiksTest, CoverageOriginShouldBeAccountedForInSubpasses) {
 
     canvas.Restore();
 
-    return canvas.EndRecordingAsPicture();
+    return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
   };
 
   ASSERT_TRUE(OpenPlaygroundHere(callback));
@@ -2066,7 +2066,7 @@ TEST_P(AiksTest, SceneColorSource) {
       *mapping, *GetContext()->GetResourceAllocator());
   ASSERT_NE(gltf_scene, nullptr);
 
-  auto callback = [&](AiksContext& renderer) -> std::optional<Picture> {
+  auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
     Paint paint;
 
     ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
@@ -2091,7 +2091,7 @@ TEST_P(AiksTest, SceneColorSource) {
     canvas.DrawPaint(Paint{.color = Color::MakeRGBA8(0xf9, 0xf9, 0xf9, 0xff)});
     canvas.Scale(GetContentScale());
     canvas.DrawPaint(paint);
-    return canvas.EndRecordingAsPicture();
+    return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
   };
 
   ASSERT_TRUE(OpenPlaygroundHere(callback));
@@ -2746,7 +2746,7 @@ TEST_P(AiksTest, CanRenderMaskBlurHugeSigma) {
 }
 
 TEST_P(AiksTest, CanRenderBackdropBlurInteractive) {
-  auto callback = [&](AiksContext& renderer) -> std::optional<Picture> {
+  auto callback = [&](AiksContext& renderer, RenderTarget& render_target) {
     auto [a, b] = IMPELLER_PLAYGROUND_LINE(Point(50, 50), Point(300, 200), 30,
                                            Color::White(), Color::White());
 
@@ -2766,7 +2766,7 @@ TEST_P(AiksTest, CanRenderBackdropBlurInteractive) {
                      });
     canvas.Restore();
 
-    return canvas.EndRecordingAsPicture();
+    return renderer.Render(canvas.EndRecordingAsPicture(), render_target);
   };
 
   ASSERT_TRUE(OpenPlaygroundHere(callback));
@@ -3269,31 +3269,6 @@ TEST_P(AiksTest, PipelineBlendSingleParameter) {
   }
 
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
-}
-
-TEST_P(AiksTest, CaptureContext) {
-  auto capture_context = CaptureContext::MakeAllowlist({"TestDocument"});
-
-  auto callback = [&](AiksContext& renderer) -> std::optional<Picture> {
-    Canvas canvas;
-
-    capture_context.Rewind();
-    auto document = capture_context.GetDocument("TestDocument");
-
-    auto color = document.AddColor("Background color", Color::CornflowerBlue());
-    canvas.DrawPaint({.color = color});
-
-    ImGui::Begin("TestDocument", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    document.GetElement()->properties.Iterate([](CaptureProperty& property) {
-      property.Invoke({.color = [](CaptureColorProperty& p) {
-        ImGui::ColorEdit4(p.label.c_str(), reinterpret_cast<float*>(&p.value));
-      }});
-    });
-    ImGui::End();
-
-    return canvas.EndRecordingAsPicture();
-  };
-  OpenPlaygroundHere(callback);
 }
 
 }  // namespace testing
