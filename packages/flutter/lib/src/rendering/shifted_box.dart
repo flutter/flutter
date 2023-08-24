@@ -515,6 +515,23 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
   }
 }
 
+/// How much space should be occupied by the [OverflowBox].
+///
+/// See also:
+///
+///  * [OverflowBox], the widget using this enum.
+enum OverflowBoxFit {
+  /// The widget will size itself to be as large as the parent allows.
+  max,
+
+  /// The widget will follow the child's size.
+  ///
+  /// More specifically, the render object will size itself to match the size of
+  /// its child within the constraints of its parent or be as small as the
+  /// parent allows if no child is set.
+  passthrough,
+}
+
 /// A render object that imposes different constraints on its child than it gets
 /// from its parent, possibly allowing the child to overflow the parent.
 ///
@@ -553,14 +570,14 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
     double? maxWidth,
     double? minHeight,
     double? maxHeight,
-    bool shrinkWrap = false,
+    OverflowBoxFit fit = OverflowBoxFit.max,
     super.alignment,
     super.textDirection,
   }) : _minWidth = minWidth,
        _maxWidth = maxWidth,
        _minHeight = minHeight,
        _maxHeight = maxHeight,
-       _shrinkWrap = shrinkWrap;
+       _size = fit;
 
   /// The minimum width constraint to give the child. Set this to null (the
   /// default) to use the constraint from the parent instead.
@@ -617,13 +634,13 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   /// its child within the constraints of its parent or be as small as the
   /// parent allows if no child is set. If set to false (the default), the
   /// render object will size itself to be as large as the parent allows.
-  bool get shrinkWrap => _shrinkWrap;
-  bool _shrinkWrap;
-  set shrinkWrap(bool value) {
-    if (_shrinkWrap == value) {
+  OverflowBoxFit get fit => _size;
+  OverflowBoxFit _size;
+  set fit(OverflowBoxFit value) {
+    if (_size == value) {
       return;
     }
-    _shrinkWrap = value;
+    _size = value;
     markNeedsLayoutForSizedByParentChange();
   }
 
@@ -636,10 +653,10 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
     );
   }
 
-  // If shrinkWrap, the size will be as small as its child when non-overflowing,
+  // If passthrough, the size will be as small as its child when non-overflowing,
   // thus is cannot be sizedByParent.
   @override
-  bool get sizedByParent => !shrinkWrap;
+  bool get sizedByParent => fit != OverflowBoxFit.passthrough;
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
@@ -652,7 +669,7 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
       child?.layout(_getInnerConstraints(constraints), parentUsesSize: true);
     }
 
-    if (shrinkWrap) {
+    if (fit == OverflowBoxFit.passthrough) {
       size = child != null ? constraints.constrain(child!.size) : constraints.smallest;
     }
 

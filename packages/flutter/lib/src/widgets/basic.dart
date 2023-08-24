@@ -3082,7 +3082,7 @@ class OverflowBox extends SingleChildRenderObjectWidget {
     this.maxWidth,
     this.minHeight,
     this.maxHeight,
-    this.shrinkWrap = false,
+    this.fit = OverflowBoxFit.max,
     super.child,
   });
 
@@ -3125,11 +3125,12 @@ class OverflowBox extends SingleChildRenderObjectWidget {
   /// The way to size the render object.
   ///
   /// This only affects scenario when the child does not indeed overflow.
-  /// If set to true, the render object will size itself to match the size of
-  /// its child within the constraints of its parent or be as small as the
-  /// parent allows if no child is set. If set to false (the default), the
-  /// render object will size itself to be as large as the parent allows.
-  final bool shrinkWrap;
+  /// If set to [OverflowBoxFit.passthrough], the render object will size itself to
+  /// match the size of its child within the constraints of its parent or be
+  /// as small as the parent allows if no child is set. If set to
+  /// [OverflowBoxFit.max] (the default), the render object will size itself
+  /// to be as large as the parent allows.
+  final OverflowBoxFit fit;
 
   @override
   RenderConstrainedOverflowBox createRenderObject(BuildContext context) {
@@ -3139,7 +3140,7 @@ class OverflowBox extends SingleChildRenderObjectWidget {
       maxWidth: maxWidth,
       minHeight: minHeight,
       maxHeight: maxHeight,
-      shrinkWrap: shrinkWrap,
+      fit: fit,
       textDirection: Directionality.maybeOf(context),
     );
   }
@@ -3152,7 +3153,7 @@ class OverflowBox extends SingleChildRenderObjectWidget {
       ..maxWidth = maxWidth
       ..minHeight = minHeight
       ..maxHeight = maxHeight
-      ..shrinkWrap = shrinkWrap
+      ..fit = fit
       ..textDirection = Directionality.maybeOf(context);
   }
 
@@ -3164,7 +3165,7 @@ class OverflowBox extends SingleChildRenderObjectWidget {
     properties.add(DoubleProperty('maxWidth', maxWidth, defaultValue: null));
     properties.add(DoubleProperty('minHeight', minHeight, defaultValue: null));
     properties.add(DoubleProperty('maxHeight', maxHeight, defaultValue: null));
-    properties.add(FlagProperty('shrinkWrap', value: shrinkWrap, defaultValue: false, ifTrue: 'shrink wraps'));
+    properties.add(EnumProperty<OverflowBoxFit>('fit', fit));
   }
 }
 
