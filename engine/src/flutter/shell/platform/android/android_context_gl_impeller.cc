@@ -10,8 +10,10 @@
 #include "flutter/impeller/toolkit/egl/context.h"
 #include "flutter/impeller/toolkit/egl/surface.h"
 #include "impeller/entity/gles/entity_shaders_gles.h"
-#include "impeller/scene/shaders/gles/scene_shaders_gles.h"
 
+#if IMPELLER_ENABLE_3D
+#include "impeller/scene/shaders/gles/scene_shaders_gles.h"  // nogcncheck
+#endif  // IMPELLER_ENABLE_3D
 namespace flutter {
 
 class AndroidContextGLImpeller::ReactorWorker final
@@ -56,11 +58,12 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
   }
 
   std::vector<std::shared_ptr<fml::Mapping>> shader_mappings = {
-      std::make_shared<fml::NonOwnedMapping>(
-          impeller_entity_shaders_gles_data,
-          impeller_entity_shaders_gles_length),
-      std::make_shared<fml::NonOwnedMapping>(
-          impeller_scene_shaders_gles_data, impeller_scene_shaders_gles_length),
+    std::make_shared<fml::NonOwnedMapping>(impeller_entity_shaders_gles_data,
+                                           impeller_entity_shaders_gles_length),
+#if IMPELLER_ENABLE_3D
+    std::make_shared<fml::NonOwnedMapping>(impeller_scene_shaders_gles_data,
+                                           impeller_scene_shaders_gles_length),
+#endif  // IMPELLER_ENABLE_3D
   };
 
   auto context =

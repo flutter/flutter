@@ -167,7 +167,9 @@ ContentContext::ContentContext(
       lazy_glyph_atlas_(
           std::make_shared<LazyGlyphAtlas>(std::move(typographer_context))),
       tessellator_(std::make_shared<Tessellator>()),
+#if IMPELLER_ENABLE_3D
       scene_context_(std::make_shared<scene::SceneContext>(context_)),
+#endif  // IMPELLER_ENABLE_3D
       render_target_cache_(std::make_shared<RenderTargetCache>(
           context_->GetResourceAllocator())) {
   if (!context_ || !context_->IsValid()) {
@@ -413,9 +415,11 @@ std::shared_ptr<Texture> ContentContext::MakeSubpass(
   return subpass_texture;
 }
 
+#if IMPELLER_ENABLE_3D
 std::shared_ptr<scene::SceneContext> ContentContext::GetSceneContext() const {
   return scene_context_;
 }
+#endif  // IMPELLER_ENABLE_3D
 
 std::shared_ptr<Tessellator> ContentContext::GetTessellator() const {
   return tessellator_;
