@@ -38,7 +38,7 @@ void main() {
 
         final Column child = Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
+          children: <Widget>[
             SizedBox(width: 100, height: contentSuperLong ? 10000 : 100),
           ],
         );
