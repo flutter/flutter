@@ -67,18 +67,18 @@ void main() {
       color: Color(0xFF000000),
       darkColor: Color(0xFF000001),
     );
-    await tester.pumpWidget(const CupertinoApp(
+    await tester.pumpWidget(CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.light),
       color: dynamicColor,
-      home: Placeholder(),
+      home: const Placeholder(),
     ));
 
     expect(tester.widget<Title>(find.byType(Title)).color.value, 0xFF000000);
 
-    await tester.pumpWidget(const CupertinoApp(
+    await tester.pumpWidget(CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.dark),
       color: dynamicColor,
-      home: Placeholder(),
+      home: const Placeholder(),
     ));
 
     expect(tester.widget<Title>(find.byType(Title)).color.value, 0xFF000001);
@@ -354,7 +354,7 @@ void main() {
     late BuildContext capturedContext;
     await tester.pumpWidget(
       CupertinoApp(
-        theme: const CupertinoThemeData(
+        theme: CupertinoThemeData(
           brightness: Brightness.dark,
         ),
         home: Builder(
@@ -402,7 +402,7 @@ void main() {
 
     await tester.pumpWidget(
       CupertinoApp(
-        theme: const CupertinoThemeData(
+        theme: CupertinoThemeData(
           primaryColor: CupertinoColors.activeOrange,
         ),
         home: CupertinoPageScaffold(

@@ -239,9 +239,9 @@ void main() {
 
       // CupertinoTheme should take precedence over MediaQuery.
       await tester.pumpWidget(
-        const CupertinoTheme(
+         CupertinoTheme(
           data: CupertinoThemeData(brightness: Brightness.light),
-          child: MediaQuery(
+          child: const MediaQuery(
             data: MediaQueryData(platformBrightness: Brightness.dark),
             child: DependentWidget(color: vibrancyDependentColor1),
           ),
@@ -417,7 +417,7 @@ void main() {
     late CupertinoDynamicColor color;
     await tester.pumpWidget(
       CupertinoApp(
-        theme: const CupertinoThemeData(
+        theme: CupertinoThemeData(
           brightness: Brightness.dark,
           primaryColor: dynamicColor,
         ),
@@ -435,7 +435,7 @@ void main() {
     // Changing dependencies works.
     await tester.pumpWidget(
       CupertinoApp(
-        theme: const CupertinoThemeData(
+        theme: CupertinoThemeData(
           brightness: Brightness.light,
           primaryColor: dynamicColor,
         ),
@@ -453,7 +453,7 @@ void main() {
     // Having a dependency below the CupertinoTheme widget works.
     await tester.pumpWidget(
       CupertinoApp(
-        theme: const CupertinoThemeData(primaryColor: dynamicColor),
+        theme: CupertinoThemeData(primaryColor: dynamicColor),
         home: MediaQuery(
           data: const MediaQueryData(),
           child: CupertinoUserInterfaceLevel(
@@ -475,7 +475,7 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(
         // No brightness is explicitly specified here so it should defer to MediaQuery.
-        theme: const CupertinoThemeData(primaryColor: dynamicColor),
+        theme: CupertinoThemeData(primaryColor: dynamicColor),
         home: MediaQuery(
           data: const MediaQueryData(platformBrightness: Brightness.dark, highContrast: true),
           child: CupertinoUserInterfaceLevel(
@@ -504,7 +504,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
-            cupertinoOverrideTheme: const CupertinoThemeData(
+            cupertinoOverrideTheme: CupertinoThemeData(
               brightness: Brightness.dark,
               primaryColor: dynamicColor,
             ),
@@ -532,7 +532,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
-            cupertinoOverrideTheme: const CupertinoThemeData(
+            cupertinoOverrideTheme: CupertinoThemeData(
               brightness: Brightness.dark,
               primaryColor: dynamicColor,
             ),

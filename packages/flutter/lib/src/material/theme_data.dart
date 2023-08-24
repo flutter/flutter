@@ -2251,7 +2251,7 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
     required ThemeData materialTheme,
   }) : this._(
     materialTheme,
-    (materialTheme.cupertinoOverrideTheme ?? const CupertinoThemeData()).noDefault(),
+    (materialTheme.cupertinoOverrideTheme ?? CupertinoThemeData()).noDefault(),
   );
 
   MaterialBasedCupertinoThemeData._(
@@ -2262,6 +2262,7 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
       // CupertinoThemeData.
       super.raw(
         _cupertinoOverrideTheme.brightness,
+        _cupertinoOverrideTheme.extensions,
         _cupertinoOverrideTheme.primaryColor,
         _cupertinoOverrideTheme.primaryContrastingColor,
         _cupertinoOverrideTheme.textTheme,
@@ -2285,6 +2286,9 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
   @override
   Color get scaffoldBackgroundColor => _cupertinoOverrideTheme.scaffoldBackgroundColor ?? _materialTheme.scaffoldBackgroundColor;
 
+  @override
+  T? extension<T>() => _cupertinoOverrideTheme.extension<T>() ?? _materialTheme.extension<T>();
+
   /// Copies the [ThemeData]'s `cupertinoOverrideTheme`.
   ///
   /// Only the specified override attributes of the [ThemeData]'s
@@ -2298,6 +2302,7 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
   @override
   MaterialBasedCupertinoThemeData copyWith({
     Brightness? brightness,
+    Iterable<CupertinoThemeExtension<dynamic>>? extensions,
     Color? primaryColor,
     Color? primaryContrastingColor,
     CupertinoTextThemeData? textTheme,
@@ -2309,6 +2314,7 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
       _materialTheme,
       _cupertinoOverrideTheme.copyWith(
         brightness: brightness,
+        extensions: extensions,
         primaryColor: primaryColor,
         primaryContrastingColor: primaryContrastingColor,
         textTheme: textTheme,

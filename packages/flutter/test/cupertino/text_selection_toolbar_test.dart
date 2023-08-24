@@ -433,7 +433,7 @@ void main() {
 
     await tester.pumpWidget(
       CupertinoApp(
-        theme: const CupertinoThemeData(
+        theme: CupertinoThemeData(
           brightness: Brightness.light,
         ),
         home: Center(

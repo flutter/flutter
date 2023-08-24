@@ -146,8 +146,8 @@ void main() {
     testWidgets('draws transparent handle correctly', (WidgetTester tester) async {
       await tester.pumpWidget(RepaintBoundary(
         child: CupertinoTheme(
-          data: const CupertinoThemeData(
-            primaryColor: Color(0x550000AA),
+          data: CupertinoThemeData(
+            primaryColor: const Color(0x550000AA),
           ),
           child: Builder(
             builder: (BuildContext context) {

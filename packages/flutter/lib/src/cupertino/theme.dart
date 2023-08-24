@@ -11,6 +11,34 @@ import 'text_theme.dart';
 
 export 'package:flutter/foundation.dart' show Brightness;
 
+/// An interface that defines custom additions to a [CupertinoThemeData] object.
+///
+/// Typically used for custom colors. To use, subclass [CupertinoThemeExtension],
+/// define a number of fields (e.g. [Color]s), and implement the [copyWith] and
+/// [lerp] methods. The latter will ensure smooth transitions of properties when
+/// switching themes.
+///
+/// {@tool dartpad}
+/// This sample shows how to create and use a subclass of [CupertinoThemeExtension] that
+/// defines two colors.
+///
+/// ** See code in examples/api/lib/cupertino/theme/cupertino_theme_extension.1.dart **
+/// {@end-tool}
+abstract class CupertinoThemeExtension<T extends CupertinoThemeExtension<T>> {
+  /// Enable const constructor for subclasses.
+  const CupertinoThemeExtension();
+
+  /// The extension's type.
+  Object get type => T;
+
+  /// Creates a copy of this theme extension with the given fields
+  /// replaced by the non-null parameter values.
+  CupertinoThemeExtension<T> copyWith();
+
+  /// Resolves this [CupertinoThemeExtension] using the provided [BuildContext].
+  CupertinoThemeExtension<T> resolveFrom(BuildContext context);
+}
+
 // Values derived from https://developer.apple.com/design/resources/.
 const _CupertinoThemeDefaults _kDefaultTheme = _CupertinoThemeDefaults(
   null,
@@ -66,7 +94,7 @@ class CupertinoTheme extends StatelessWidget {
   /// given [BuildContext] on a best-effort basis.
   static CupertinoThemeData of(BuildContext context) {
     final _InheritedCupertinoTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<_InheritedCupertinoTheme>();
-    return (inheritedTheme?.theme.data ?? const CupertinoThemeData()).resolveFrom(context);
+    return (inheritedTheme?.theme.data ?? CupertinoThemeData()).resolveFrom(context);
   }
 
   /// Retrieves the [Brightness] to use for descendant Cupertino widgets, based
@@ -144,6 +172,27 @@ class _InheritedCupertinoTheme extends InheritedWidget {
   bool updateShouldNotify(_InheritedCupertinoTheme old) => theme.data != old.theme.data;
 }
 
+/// Convert the [extensionsIterable] passed to [CupertinoThemeData.new] or [copyWith]
+/// to the stored [extensions] map, where each entry's key consists of the extension's type.
+Map<Object, CupertinoThemeExtension<dynamic>> _themeExtensionIterableToMap(Iterable<CupertinoThemeExtension<dynamic>> extensionsIterable) {
+  return Map<Object, CupertinoThemeExtension<dynamic>>.unmodifiable(<Object, CupertinoThemeExtension<dynamic>>{
+    // Strangely, the cast is necessary for tests to run.
+    for (final CupertinoThemeExtension<dynamic> extension in extensionsIterable) extension.type: extension as CupertinoThemeExtension<CupertinoThemeExtension<dynamic>>,
+  });
+}
+
+/// Linearly interpolate between two [extensions].
+///
+/// Includes all theme extensions in [a] and [b].
+///
+/// {@macro dart.ui.shadow.lerp}
+Map<Object, CupertinoThemeExtension<dynamic>>? _resolveThemeExtensions(Map<Object, CupertinoThemeExtension<dynamic>>? extensions, BuildContext context) {
+  final Map<Object, CupertinoThemeExtension<dynamic>>? newExtensions = extensions?.map((Object id, CupertinoThemeExtension<dynamic> extension) {
+    return MapEntry<Object, CupertinoThemeExtension<dynamic>>(id, extension.resolveFrom(context));
+  });
+  return newExtensions;
+}
+
 /// Styling specifications for a [CupertinoTheme].
 ///
 /// All constructor parameters can be null, in which case a
@@ -165,23 +214,25 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
   /// Creates a [CupertinoTheme] styling specification.
   ///
   /// Unspecified parameters default to a reasonable iOS default style.
-  const CupertinoThemeData({
+  factory CupertinoThemeData({
     Brightness? brightness,
+    Iterable<CupertinoThemeExtension<dynamic>>? extensions,
     Color? primaryColor,
     Color? primaryContrastingColor,
     CupertinoTextThemeData? textTheme,
     Color? barBackgroundColor,
     Color? scaffoldBackgroundColor,
     bool? applyThemeToAll,
-  }) : this.raw(
-        brightness,
-        primaryColor,
-        primaryContrastingColor,
-        textTheme,
-        barBackgroundColor,
-        scaffoldBackgroundColor,
-        applyThemeToAll,
-      );
+  }) => CupertinoThemeData.raw(
+      brightness,
+      (extensions != null) ? _themeExtensionIterableToMap(extensions) : null,
+      primaryColor,
+      primaryContrastingColor,
+      textTheme,
+      barBackgroundColor,
+      scaffoldBackgroundColor,
+      applyThemeToAll,
+    );
 
   /// Same as the default constructor but with positional arguments to avoid
   /// forgetting any and to specify all arguments.
@@ -190,25 +241,28 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
   @protected
   const CupertinoThemeData.raw(
     Brightness? brightness,
+    Map<Object, CupertinoThemeExtension<dynamic>>? extensions,
     Color? primaryColor,
     Color? primaryContrastingColor,
     CupertinoTextThemeData? textTheme,
     Color? barBackgroundColor,
     Color? scaffoldBackgroundColor,
     bool? applyThemeToAll,
-  ) : this._rawWithDefaults(
-    brightness,
-    primaryColor,
-    primaryContrastingColor,
-    textTheme,
-    barBackgroundColor,
-    scaffoldBackgroundColor,
-    applyThemeToAll,
-    _kDefaultTheme,
-  );
+  ) : _defaults = _kDefaultTheme,
+      super.raw(
+        brightness: brightness,
+        extensions: extensions,
+        primaryColor: primaryColor,
+        primaryContrastingColor: primaryContrastingColor,
+        textTheme: textTheme,
+        barBackgroundColor: barBackgroundColor,
+        scaffoldBackgroundColor: scaffoldBackgroundColor,
+        applyThemeToAll: applyThemeToAll,
+      );
 
   const CupertinoThemeData._rawWithDefaults(
     Brightness? brightness,
+    Map<Object, CupertinoThemeExtension<dynamic>>? extensions,
     Color? primaryColor,
     Color? primaryContrastingColor,
     CupertinoTextThemeData? textTheme,
@@ -216,8 +270,9 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
     Color? scaffoldBackgroundColor,
     bool? applyThemeToAll,
     this._defaults,
-  ) : super(
+  ) : super.raw(
     brightness: brightness,
+    extensions: extensions,
     primaryColor: primaryColor,
     primaryContrastingColor: primaryContrastingColor,
     textTheme: textTheme,
@@ -250,8 +305,9 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
 
   @override
   NoDefaultCupertinoThemeData noDefault() {
-    return NoDefaultCupertinoThemeData(
+    return NoDefaultCupertinoThemeData.raw(
       brightness: super.brightness,
+      extensions: super.extensions,
       primaryColor: super.primaryColor,
       primaryContrastingColor: super.primaryContrastingColor,
       textTheme: super.textTheme,
@@ -267,6 +323,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
 
     return CupertinoThemeData._rawWithDefaults(
       brightness,
+      _resolveThemeExtensions(extensions, context),
       convertColor(super.primaryColor),
       convertColor(super.primaryContrastingColor),
       super.textTheme?.resolveFrom(context),
@@ -280,6 +337,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
   @override
   CupertinoThemeData copyWith({
     Brightness? brightness,
+    Iterable<CupertinoThemeExtension<dynamic>>? extensions,
     Color? primaryColor,
     Color? primaryContrastingColor,
     CupertinoTextThemeData? textTheme,
@@ -289,6 +347,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
   }) {
     return CupertinoThemeData._rawWithDefaults(
       brightness ?? super.brightness,
+      (extensions != null) ? _themeExtensionIterableToMap(extensions) : super.extensions,
       primaryColor ?? super.primaryColor,
       primaryContrastingColor ?? super.primaryContrastingColor,
       textTheme ?? super.textTheme,
@@ -302,8 +361,9 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    const CupertinoThemeData defaultData = CupertinoThemeData();
+    final CupertinoThemeData defaultData = CupertinoThemeData();
     properties.add(EnumProperty<Brightness>('brightness', brightness, defaultValue: null));
+    properties.add(IterableProperty<CupertinoThemeExtension<dynamic>>('extensions', extensions?.values, defaultValue: null, level: DiagnosticLevel.debug));
     properties.add(createCupertinoColorProperty('primaryColor', primaryColor, defaultValue: defaultData.primaryColor));
     properties.add(createCupertinoColorProperty('primaryContrastingColor', primaryContrastingColor, defaultValue: defaultData.primaryContrastingColor));
     properties.add(createCupertinoColorProperty('barBackgroundColor', barBackgroundColor, defaultValue: defaultData.barBackgroundColor));
@@ -313,7 +373,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
   }
 
   @override
-  bool operator == (Object other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -322,6 +382,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
     }
     return other is CupertinoThemeData
       && other.brightness == brightness
+      && mapEquals(other.extensions, extensions)
       && other.primaryColor == primaryColor
       && other.primaryContrastingColor == primaryContrastingColor
       && other.textTheme == textTheme
@@ -331,15 +392,17 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll(<Object?>[
     brightness,
+    ...?extensions?.keys,
+    ...?extensions?.values,
     primaryColor,
     primaryContrastingColor,
     textTheme,
     barBackgroundColor,
     scaffoldBackgroundColor,
     applyThemeToAll,
-  );
+  ]);
 }
 
 /// Styling specifications for a cupertino theme without default values for
@@ -358,8 +421,33 @@ class NoDefaultCupertinoThemeData {
   /// Creates a [NoDefaultCupertinoThemeData] styling specification.
   ///
   /// Unspecified properties default to null.
-  const NoDefaultCupertinoThemeData({
+  factory NoDefaultCupertinoThemeData({
+    Brightness? brightness,
+    Iterable<CupertinoThemeExtension<dynamic>>? extensions,
+    Color? primaryColor,
+    Color? primaryContrastingColor,
+    CupertinoTextThemeData? textTheme,
+    Color? barBackgroundColor,
+    Color? scaffoldBackgroundColor,
+    bool? applyThemeToAll,
+  }) => CupertinoThemeData.raw(
+      brightness,
+      (extensions != null) ? _themeExtensionIterableToMap(extensions) : null,
+      primaryColor,
+      primaryContrastingColor,
+      textTheme,
+      barBackgroundColor,
+      scaffoldBackgroundColor,
+      applyThemeToAll,
+    );
+
+  /// Same as the default constructor but with positional arguments to avoid
+  /// forgetting any and to specify all arguments.
+  ///
+  /// Used by subclasses to get the superclass's defaulting behaviors.
+  const NoDefaultCupertinoThemeData.raw({
     this.brightness,
+    this.extensions,
     this.primaryColor,
     this.primaryContrastingColor,
     this.textTheme,
@@ -385,6 +473,32 @@ class NoDefaultCupertinoThemeData {
   ///  * [CupertinoTheme.brightnessOf], a method used to retrieve the overall
   ///    [Brightness] from a [BuildContext], for Cupertino widgets.
   final Brightness? brightness;
+
+  /// Arbitrary additions to this theme.
+  ///
+  /// To define extensions, pass an [Iterable] containing one or more [CupertinoThemeExtension]
+  /// subclasses to [CupertinoThemeData.new] or [copyWith].
+  ///
+  /// To obtain an extension, use [extension].
+  ///
+  /// {@tool dartpad}
+  /// This sample shows how to create and use a subclass of [CupertinoThemeExtension] that
+  /// defines two colors.
+  ///
+  /// ** See code in examples/api/lib/cupertino/theme/cupertino_theme_extension.1.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  /// * [extension], a convenience function for obtaining a specific extension.
+  final Map<Object, CupertinoThemeExtension<dynamic>>? extensions;
+
+  /// Used to obtain a particular [CupertinoThemeExtension] from [extensions].
+  ///
+  /// Obtain with `CupertinoTheme.of(context).extension<MyThemeExtension>()`.
+  ///
+  /// See [extensions] for an interactive example.
+  T? extension<T>() => extensions?[T] as T?;
 
   /// A color used on interactive elements of the theme.
   ///
@@ -465,8 +579,9 @@ class NoDefaultCupertinoThemeData {
   NoDefaultCupertinoThemeData resolveFrom(BuildContext context) {
     Color? convertColor(Color? color) => CupertinoDynamicColor.maybeResolve(color, context);
 
-    return NoDefaultCupertinoThemeData(
+    return NoDefaultCupertinoThemeData.raw(
       brightness: brightness,
+      extensions: _resolveThemeExtensions(extensions, context),
       primaryColor: convertColor(primaryColor),
       primaryContrastingColor: convertColor(primaryContrastingColor),
       textTheme: textTheme?.resolveFrom(context),
@@ -484,15 +599,17 @@ class NoDefaultCupertinoThemeData {
   /// different [primaryColor] will also change the copy's implied [textTheme].
   NoDefaultCupertinoThemeData copyWith({
     Brightness? brightness,
+    Iterable<CupertinoThemeExtension<dynamic>>? extensions,
     Color? primaryColor,
     Color? primaryContrastingColor,
     CupertinoTextThemeData? textTheme,
-    Color? barBackgroundColor ,
+    Color? barBackgroundColor,
     Color? scaffoldBackgroundColor,
     bool? applyThemeToAll,
   }) {
-    return NoDefaultCupertinoThemeData(
+    return NoDefaultCupertinoThemeData.raw(
       brightness: brightness ?? this.brightness,
+      extensions: (extensions != null) ? _themeExtensionIterableToMap(extensions) : this.extensions,
       primaryColor: primaryColor ?? this.primaryColor,
       primaryContrastingColor: primaryContrastingColor ?? this.primaryContrastingColor,
       textTheme: textTheme ?? this.textTheme,

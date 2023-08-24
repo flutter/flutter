@@ -265,7 +265,7 @@ void main() {
 
       await tester.pumpWidget(
         CupertinoApp(
-          theme: const CupertinoThemeData(brightness: Brightness.dark),
+          theme: CupertinoThemeData(brightness: Brightness.dark),
           home: boilerplate(
             builder: (BuildContext context) {
               return CupertinoSlidingSegmentedControl<int>(

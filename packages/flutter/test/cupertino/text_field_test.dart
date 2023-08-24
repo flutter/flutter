@@ -835,9 +835,9 @@ void main() {
 
       // Dark mode.
       await tester.pumpWidget(
-        const CupertinoApp(
+         CupertinoApp(
           theme: CupertinoThemeData(brightness: Brightness.dark),
-          home: Center(
+          home: const Center(
             child: CupertinoTextField(),
           ),
         ),
@@ -1038,9 +1038,9 @@ void main() {
 
   testWidgets('placeholder dark mode', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const CupertinoApp(
+       CupertinoApp(
         theme: CupertinoThemeData(brightness: Brightness.dark),
-        home: Center(
+        home: const Center(
           child: CupertinoTextField(
             placeholder: 'placeholder',
             textAlign: TextAlign.right,
@@ -1745,7 +1745,7 @@ void main() {
     // Change the theme.
     await tester.pumpWidget(
       CupertinoApp(
-        theme: const CupertinoThemeData(
+        theme: CupertinoThemeData(
           brightness: Brightness.dark,
           textTheme: CupertinoTextThemeData(
             textStyle: TextStyle(fontSize: 100, fontWeight: FontWeight.w800),
@@ -6309,11 +6309,11 @@ void main() {
     'text field respects theme',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        const CupertinoApp(
+         CupertinoApp(
           theme: CupertinoThemeData(
             brightness: Brightness.dark,
           ),
-          home: Center(
+          home: const Center(
             child: CupertinoTextField(),
           ),
         ),
@@ -6422,11 +6422,11 @@ void main() {
     });
 
     await tester.pumpWidget(
-      const CupertinoApp(
+       CupertinoApp(
         theme: CupertinoThemeData(
           brightness: Brightness.dark,
         ),
-        home: Center(
+        home: const Center(
           child: CupertinoTextField(),
         ),
       ),
@@ -6446,11 +6446,11 @@ void main() {
     });
 
     await tester.pumpWidget(
-      const CupertinoApp(
+       CupertinoApp(
         theme: CupertinoThemeData(
           brightness: Brightness.dark,
         ),
-        home: Center(
+        home: const Center(
           child: CupertinoTextField(
             keyboardAppearance: Brightness.light,
           ),
@@ -6482,8 +6482,8 @@ void main() {
     expect(renderEditable.cursorColor, CupertinoColors.activeBlue.color);
 
     await tester.pumpWidget(
-      const CupertinoApp(
-        home: CupertinoTextField(),
+       CupertinoApp(
+        home: const CupertinoTextField(),
         theme: CupertinoThemeData(
           brightness: Brightness.dark,
         ),
@@ -6494,8 +6494,8 @@ void main() {
     expect(renderEditable.cursorColor, CupertinoColors.activeBlue.darkColor);
 
     await tester.pumpWidget(
-      const CupertinoApp(
-        home: CupertinoTextField(),
+       CupertinoApp(
+        home: const CupertinoTextField(),
         theme: CupertinoThemeData(
           primaryColor: Color(0xFFF44336),
         ),
@@ -6513,9 +6513,9 @@ void main() {
     );
 
     await tester.pumpWidget(
-      const CupertinoApp(
+       CupertinoApp(
         theme: CupertinoThemeData(),
-        home: Center(
+        home: const Center(
           child: CupertinoTextField(
             cursorColor: cursorColor,
           ),
@@ -6527,9 +6527,9 @@ void main() {
     expect(editableText.cursorColor.value, 0x12345678);
 
     await tester.pumpWidget(
-      const CupertinoApp(
+       CupertinoApp(
         theme: CupertinoThemeData(brightness: Brightness.dark),
-        home: Center(
+        home: const Center(
           child: CupertinoTextField(
             cursorColor: cursorColor,
           ),
@@ -6547,7 +6547,7 @@ void main() {
 
     await tester.pumpWidget(
       CupertinoApp(
-        theme: const CupertinoThemeData(),
+        theme: CupertinoThemeData(),
         home: Center(
           child: CupertinoTextField(
             controller: controller,
@@ -6578,7 +6578,7 @@ void main() {
     final TextEditingController controller = TextEditingController();
 
     await tester.pumpWidget(CupertinoApp(
-      theme: const CupertinoThemeData(),
+      theme: CupertinoThemeData(),
       home: Center(
         child: ListView(
           controller: scrollController,
@@ -8119,11 +8119,11 @@ void main() {
     );
 
     await tester.pumpWidget(
-      const CupertinoApp(
+       CupertinoApp(
         theme: CupertinoThemeData(
           brightness: Brightness.dark,
         ),
-        home: Center(
+        home: const Center(
           child: CupertinoTextField(
             enabled: false,
           ),

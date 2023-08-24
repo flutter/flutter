@@ -1555,8 +1555,8 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(
         // Also check if the picker respects the theme.
-        theme: const CupertinoThemeData(
-          textTheme: CupertinoTextThemeData(
+        theme: CupertinoThemeData(
+          textTheme: const CupertinoTextThemeData(
             pickerTextStyle: TextStyle(
               color: Color(0xFF663311),
               fontSize: 21,
@@ -1721,8 +1721,8 @@ void main() {
 
     await tester.pumpWidget(
       CupertinoApp(
-        theme: const CupertinoThemeData(
-          textTheme: CupertinoTextThemeData(
+        theme: CupertinoThemeData(
+          textTheme: const CupertinoTextThemeData(
             dateTimePickerTextStyle: TextStyle(
               color: CupertinoDynamicColor.withBrightness(
                 color: Color(0xFFFFFFFF),

@@ -255,7 +255,7 @@ void main() {
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
-      theme: const CupertinoThemeData(brightness: Brightness.dark),
+      theme: CupertinoThemeData(brightness: Brightness.dark),
     );
 
     // Be mid-transition.

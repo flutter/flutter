@@ -13,10 +13,10 @@ class CupertinoDialogApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const CupertinoApp(
+    return CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.light),
       restorationScopeId: 'app',
-      home: CupertinoDialogExample(),
+      home: const CupertinoDialogExample(),
     );
   }
 }

@@ -13,9 +13,9 @@ class CupertinoTabBarApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const CupertinoApp(
+    return CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.light),
-      home: CupertinoTabBarExample(),
+      home: const CupertinoTabBarExample(),
     );
   }
 }

@@ -224,7 +224,7 @@ Future<void> main() async {
 
     await tester.pumpWidget(
       CupertinoApp(
-        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        theme: CupertinoThemeData(brightness: Brightness.dark),
         home: CupertinoTabBar(
           items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(

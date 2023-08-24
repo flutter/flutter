@@ -982,7 +982,7 @@ void main() {
     bool value = false;
     await tester.pumpWidget(
       CupertinoTheme(
-        data: const CupertinoThemeData(primaryColor: Colors.amber, applyThemeToAll: true),
+        data: CupertinoThemeData(primaryColor: Colors.amber, applyThemeToAll: true),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(

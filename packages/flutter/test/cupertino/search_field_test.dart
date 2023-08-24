@@ -157,9 +157,9 @@ void main() {
 
   testWidgets('placeholder color', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const CupertinoApp(
+       CupertinoApp(
         theme: CupertinoThemeData(brightness: Brightness.dark),
-        home: Center(
+        home: const Center(
           child: CupertinoSearchTextField(),
         ),
       ),
@@ -171,9 +171,9 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.pumpWidget(
-      const CupertinoApp(
+       CupertinoApp(
         theme: CupertinoThemeData(brightness: Brightness.light),
-        home: Center(
+        home: const Center(
           child: CupertinoSearchTextField(),
         ),
       ),

@@ -428,7 +428,7 @@ void main() {
 
     await tester.pumpWidget(
       CupertinoApp(
-        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        theme: CupertinoThemeData(brightness: Brightness.dark),
         home: Center(
           child: CupertinoSlider(
             onChanged: (double value) { },
@@ -447,7 +447,7 @@ void main() {
   testWidgets('Themes can be overridden', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
-        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        theme: CupertinoThemeData(brightness: Brightness.dark),
         home: Center(
           child: CupertinoSlider(
             activeColor: CupertinoColors.activeGreen,
@@ -522,7 +522,7 @@ void main() {
   testWidgets('track color is dynamic', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
-        theme: const CupertinoThemeData(brightness: Brightness.light),
+        theme: CupertinoThemeData(brightness: Brightness.light),
         home: Center(
           child: CupertinoSlider(
             activeColor: CupertinoColors.activeGreen,
@@ -545,7 +545,7 @@ void main() {
 
     await tester.pumpWidget(
       CupertinoApp(
-        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        theme: CupertinoThemeData(brightness: Brightness.dark),
         home: Center(
           child: CupertinoSlider(
             activeColor: CupertinoColors.activeGreen,

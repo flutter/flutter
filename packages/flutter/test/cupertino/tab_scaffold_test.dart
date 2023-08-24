@@ -351,7 +351,7 @@ void main() {
     // Pump again but with dark theme.
     await tester.pumpWidget(
       CupertinoApp(
-        theme: const CupertinoThemeData(
+        theme: CupertinoThemeData(
           brightness: Brightness.dark,
           primaryColor: CupertinoColors.destructiveRed,
         ),

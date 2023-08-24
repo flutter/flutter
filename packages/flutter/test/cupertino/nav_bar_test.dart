@@ -65,9 +65,9 @@ void main() {
     );
 
     await tester.pumpWidget(
-      const CupertinoApp(
+       CupertinoApp(
         theme: CupertinoThemeData(brightness: Brightness.light),
-        home: CupertinoNavigationBar(
+        home: const CupertinoNavigationBar(
           middle: Text('Title'),
           backgroundColor: background,
         ),
@@ -77,9 +77,9 @@ void main() {
     expect(find.byType(CupertinoNavigationBar), paints..rect(color: background.color));
 
     await tester.pumpWidget(
-      const CupertinoApp(
+       CupertinoApp(
         theme: CupertinoThemeData(brightness: Brightness.dark),
-        home: CupertinoNavigationBar(
+        home: const CupertinoNavigationBar(
           middle: Text('Title'),
           backgroundColor: background,
         ),
@@ -304,7 +304,7 @@ void main() {
     count = 0x000000;
     await tester.pumpWidget(
       CupertinoApp(
-        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        theme: CupertinoThemeData(brightness: Brightness.dark),
         home: CupertinoNavigationBar(
           leading: CupertinoButton(
             onPressed: () { },
@@ -325,7 +325,7 @@ void main() {
     count = 0x000000;
     await tester.pumpWidget(
       CupertinoApp(
-        theme: const CupertinoThemeData(primaryColor: Color(0xFF001122)),
+        theme: CupertinoThemeData(primaryColor: Color(0xFF001122)),
         home: CupertinoNavigationBar(
           leading: CupertinoButton(
             onPressed: () { },

@@ -128,7 +128,7 @@ void main() {
   testWidgets('Dialog default action style', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoTheme(
-      data: const CupertinoThemeData(
+      data: CupertinoThemeData(
         primaryColor: CupertinoColors.systemGreen,
       ),
       child: boilerplate(const CupertinoDialogAction(

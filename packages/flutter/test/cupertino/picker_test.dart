@@ -130,7 +130,7 @@ void main() {
   testWidgets('picker dark mode', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
-        theme: const CupertinoThemeData(brightness: Brightness.light),
+        theme: CupertinoThemeData(brightness: Brightness.light),
         home: Align(
           alignment: Alignment.topLeft,
           child: SizedBox(
@@ -155,7 +155,7 @@ void main() {
 
     await tester.pumpWidget(
       CupertinoApp(
-        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        theme: CupertinoThemeData(brightness: Brightness.dark),
         home: Align(
           alignment: Alignment.topLeft,
           child: SizedBox(
@@ -182,7 +182,7 @@ void main() {
   testWidgets('picker selectionOverlay', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
-        theme: const CupertinoThemeData(brightness: Brightness.light),
+        theme: CupertinoThemeData(brightness: Brightness.light),
         home: Align(
           alignment: Alignment.topLeft,
           child: SizedBox(
@@ -205,7 +205,7 @@ void main() {
   testWidgets('CupertinoPicker.selectionOverlay is nullable', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
-        theme: const CupertinoThemeData(brightness: Brightness.light),
+        theme: CupertinoThemeData(brightness: Brightness.light),
         home: Align(
           alignment: Alignment.topLeft,
           child: SizedBox(
@@ -477,7 +477,7 @@ void main() {
     testWidgets('should be using directional decoration', (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
-          theme: const CupertinoThemeData(brightness: Brightness.light),
+          theme: CupertinoThemeData(brightness: Brightness.light),
           home: CupertinoPicker(
             itemExtent: 15.0,
             onSelectedItemChanged: (int i) {},

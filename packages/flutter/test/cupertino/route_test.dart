@@ -1161,7 +1161,7 @@ void main() {
 
     await tester.pumpWidget(
       CupertinoApp(
-        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        theme: CupertinoThemeData(brightness: Brightness.dark),
         home: CupertinoPageScaffold(
           child: Builder(builder: (BuildContext context) {
             return GestureDetector(

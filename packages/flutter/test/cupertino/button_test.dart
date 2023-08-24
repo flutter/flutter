@@ -74,7 +74,7 @@ void main() {
       // to pass the color contrast guideline.
       //await tester.pumpWidget(
       //  CupertinoTheme(
-      //    data: const CupertinoThemeData(),
+      //    data: CupertinoThemeData(),
       //    child: Directionality(
       //      textDirection: TextDirection.ltr,
       //      child: CupertinoButton.filled(
@@ -88,7 +88,7 @@ void main() {
 
       await tester.pumpWidget(
         CupertinoApp(
-          theme: const CupertinoThemeData(brightness: Brightness.dark),
+          theme: CupertinoThemeData(brightness: Brightness.dark),
           home: CupertinoPageScaffold(
             child: CupertinoButton.filled(
               child: const Text('Button'),
@@ -419,7 +419,7 @@ void main() {
 
     await tester.pumpWidget(
       CupertinoApp(
-        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        theme: CupertinoThemeData(brightness: Brightness.dark),
         home: CupertinoButton(
           onPressed: () { },
           child: Builder(builder: (BuildContext context) {
@@ -433,7 +433,7 @@ void main() {
 
     await tester.pumpWidget(
       CupertinoApp(
-        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        theme: CupertinoThemeData(brightness: Brightness.dark),
         home: CupertinoButton.filled(
           onPressed: () { },
           child: Builder(builder: (BuildContext context) {

@@ -143,7 +143,7 @@ void main() {
     // Pump again but with dark theme.
     await tester.pumpWidget(
       CupertinoApp(
-        theme: const CupertinoThemeData(
+        theme: CupertinoThemeData(
           brightness: Brightness.dark,
           primaryColor: CupertinoColors.destructiveRed,
         ),
@@ -183,7 +183,7 @@ void main() {
     );
     await tester.pumpWidget(
       CupertinoApp(
-        theme: const CupertinoThemeData(brightness: Brightness.light),
+        theme: CupertinoThemeData(brightness: Brightness.light),
         home: CupertinoTabScaffold(
           backgroundColor: backgroundColor,
           tabBar: _buildTabBar(),
@@ -208,7 +208,7 @@ void main() {
     // Dark mode
     await tester.pumpWidget(
       CupertinoApp(
-        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        theme: CupertinoThemeData(brightness: Brightness.dark),
         home: CupertinoTabScaffold(
           backgroundColor: backgroundColor,
           tabBar: _buildTabBar(),

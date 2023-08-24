@@ -18,7 +18,7 @@ class SwitchApp extends StatelessWidget {
       theme: ThemeData.light(useMaterial3: true).copyWith(
         // Use the ambient CupertinoThemeData to style all widgets which would
         // otherwise use iOS defaults.
-        cupertinoOverrideTheme: const CupertinoThemeData(applyThemeToAll: true),
+        cupertinoOverrideTheme: CupertinoThemeData(applyThemeToAll: true),
       ),
       home: Scaffold(
         appBar: AppBar(title: const Text('Switch Sample')),
