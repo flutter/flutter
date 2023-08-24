@@ -464,10 +464,10 @@ void main() {
           method: 'ext.flutter.platformOverride',
           args: <String, Object>{
             'isolateId': '1',
-            'value': 'fuchsia',
+            'value': 'windows',
           },
           jsonResponse: <String, Object>{
-            'value': 'fuchsia',
+            'value': 'windows',
           },
         ),
         // Request 2.
@@ -496,7 +496,7 @@ void main() {
       await terminalHandler.processTerminalInput('o');
       await terminalHandler.processTerminalInput('O');
 
-      expect(terminalHandler.logger.statusText, contains('Switched operating system to fuchsia'));
+      expect(terminalHandler.logger.statusText, contains('Switched operating system to windows'));
       expect(terminalHandler.logger.statusText, contains('Switched operating system to iOS'));
     });
 
@@ -518,10 +518,10 @@ void main() {
           method: 'ext.flutter.platformOverride',
           args: <String, Object>{
             'isolateId': '1',
-            'value': 'fuchsia',
+            'value': 'windows',
           },
           jsonResponse: <String, Object>{
-            'value': 'fuchsia',
+            'value': 'windows',
           },
         ),
         // Request 2.
@@ -550,7 +550,7 @@ void main() {
       await terminalHandler.processTerminalInput('o');
       await terminalHandler.processTerminalInput('O');
 
-      expect(terminalHandler.logger.statusText, contains('Switched operating system to fuchsia'));
+      expect(terminalHandler.logger.statusText, contains('Switched operating system to windows'));
       expect(terminalHandler.logger.statusText, contains('Switched operating system to iOS'));
     });
 
