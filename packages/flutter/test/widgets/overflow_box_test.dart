@@ -30,6 +30,40 @@ void main() {
     expect(box.size, equals(const Size(100.0, 50.0)));
   });
 
+  group('OverflowBox behavior with long and short content', () {
+    for (final bool contentSuperLong in [false, true]) {
+      for (final bool enableOverflowBox in [false, true]) {
+        testWidgets('contentSuperLong=$contentSuperLong enableOverflowBox=$enableOverflowBox', (WidgetTester tester) async {
+          final GlobalKey<State<StatefulWidget>> key = GlobalKey();
+
+          final Column child = Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(width: 100, height: contentSuperLong ? 10000 : 100),
+            ],
+          );
+
+          await tester.pumpWidget(Stack(
+            children: <Widget>[
+              Container(
+                key: key,
+                child: enableOverflowBox
+                    ? OverflowBox(
+                        maxHeight: 1000000,
+                        fit: OverflowBoxFit.passthrough,
+                        child: child,
+                      )
+                    : child,
+              ),
+            ],
+          ));
+
+          expect(tester.getBottomLeft(find.byKey(key)).dy, contentSuperLong ? 600 : 100);
+        });
+      }
+    }
+  });
+
   testWidgets('OverflowBox implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const OverflowBox(
