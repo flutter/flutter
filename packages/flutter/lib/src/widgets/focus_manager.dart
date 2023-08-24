@@ -435,6 +435,9 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
         _canRequestFocus = canRequestFocus,
         _descendantsAreFocusable = descendantsAreFocusable,
         _descendantsAreTraversable = descendantsAreTraversable {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
     // Set it via the setter so that it does nothing on release builds.
     this.debugLabel = debugLabel;
   }
@@ -1463,6 +1466,9 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// handlers, callers must call [registerGlobalHandlers]. See the
   /// documentation in that method for caveats to watch out for.
   FocusManager() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
     rootScope._manager = this;
   }
 

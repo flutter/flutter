@@ -57,7 +57,10 @@ void main() {
     expect(find.text('View licenses'), findsOneWidget);
   });
 
-  testWidgets('Material2 - AboutListTile control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - AboutListTile control test',
+
+  leakTrackingTestConfig: LeakTrackingTestConfig.debugnotDisposed(),
+  (WidgetTester tester) async {
     const FlutterLogo logo = FlutterLogo();
 
     await tester.pumpWidget(

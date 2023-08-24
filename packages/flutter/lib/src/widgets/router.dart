@@ -1465,7 +1465,11 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
   /// provider.
   PlatformRouteInformationProvider({
     required RouteInformation initialRouteInformation,
-  }) : _value = initialRouteInformation;
+  }) : _value = initialRouteInformation {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+  }
 
   static bool _equals(Uri a, Uri b) {
     return a.path == b.path
