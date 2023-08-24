@@ -236,16 +236,7 @@ class AndroidStudio {
   /// Android Studio found at that location is always returned, even if it is
   /// invalid.
   static AndroidStudio? latestValid() {
-    final String? configuredStudioPath = globals.config.getValue('android-studio-dir') as String?;
-    if (configuredStudioPath != null && !globals.fs.directory(configuredStudioPath).existsSync()) {
-      throwToolExit('''
-Could not find the Android Studio installation at the manually configured path "$configuredStudioPath".
-Please verify that the path is correct and update it by running this command: flutter config --android-studio-dir '<path>'
-
-To have flutter search for Android Studio installations automatically, remove
-the configured path by running this command: flutter config --android-studio-dir ''
-''');
-    }
+    final Directory? configuredStudioDir = _configuredDir();
 
     // Find all available Studio installations.
     final List<AndroidStudio> studios = allInstalled();
@@ -255,8 +246,8 @@ the configured path by running this command: flutter config --android-studio-dir
 
     final AndroidStudio? manuallyConfigured = studios
       .where((AndroidStudio studio) => studio.configuredPath != null &&
-        configuredStudioPath != null &&
-        _pathsAreEqual(studio.configuredPath!, configuredStudioPath))
+        configuredStudioDir != null &&
+        _pathsAreEqual(studio.configuredPath!, configuredStudioDir.path))
       .firstOrNull;
 
     if (manuallyConfigured != null) {
@@ -323,16 +314,14 @@ the configured path by running this command: flutter config --android-studio-dir
       ));
     }
 
-    final String? configuredStudioDir = globals.config.getValue('android-studio-dir') as String?;
-    FileSystemEntity? configuredStudioDirAsEntity;
+    Directory? configuredStudioDir = _configuredDir();
     if (configuredStudioDir != null) {
-      configuredStudioDirAsEntity = globals.fs.directory(configuredStudioDir);
-      if (configuredStudioDirAsEntity.basename == 'Contents') {
-        configuredStudioDirAsEntity = configuredStudioDirAsEntity.parent;
+      if (configuredStudioDir.basename == 'Contents') {
+        configuredStudioDir = configuredStudioDir.parent;
       }
       if (!candidatePaths
-          .any((FileSystemEntity e) => _pathsAreEqual(e.path, configuredStudioDirAsEntity!.path))) {
-        candidatePaths.add(configuredStudioDirAsEntity);
+          .any((FileSystemEntity e) => _pathsAreEqual(e.path, configuredStudioDir!.path))) {
+        candidatePaths.add(configuredStudioDir);
       }
     }
 
@@ -357,13 +346,13 @@ the configured path by running this command: flutter config --android-studio-dir
 
     return candidatePaths
       .map<AndroidStudio?>((FileSystemEntity e) {
-        if (configuredStudioDirAsEntity == null) {
+        if (configuredStudioDir == null) {
           return AndroidStudio.fromMacOSBundle(e.path);
         }
 
         return AndroidStudio.fromMacOSBundle(
           e.path,
-          configuredPath: _pathsAreEqual(configuredStudioDirAsEntity.path, e.path) ? configuredStudioDir : null,
+          configuredPath: _pathsAreEqual(configuredStudioDir.path, e.path) ? configuredStudioDir.path : null,
         );
       })
       .whereType<AndroidStudio>()
@@ -491,6 +480,38 @@ the configured path by running this command: flutter config --android-studio-dir
       checkWellKnownPath('${globals.fsUtils.homeDirPath}/android-studio');
     }
     return studios;
+  }
+
+  /// Gets the Android Studio install directory set by the user, if it is configured.
+  ///
+  /// The returned [Directory], if not null, is guaranteed to have existed during
+  /// this function's execution.
+  static Directory? _configuredDir() {
+    final String? configuredPath = globals.config.getValue('android-studio-dir') as String?;
+    if (configuredPath == null) {
+      return null;
+    }
+    final Directory result = globals.fs.directory(configuredPath);
+
+    bool? configuredStudioPathExists;
+    String? exceptionMessage;
+    try {
+      configuredStudioPathExists = result.existsSync();
+    } on FileSystemException catch (e) {
+      exceptionMessage = e.toString();
+    }
+
+    if (configuredStudioPathExists == false || exceptionMessage != null) {
+      throwToolExit('''
+Could not find the Android Studio installation at the manually configured path "$configuredPath".
+${exceptionMessage == null ? '' : 'Encountered exception: $exceptionMessage\n\n'}
+Please verify that the path is correct and update it by running this command: flutter config --android-studio-dir '<path>'
+To have flutter search for Android Studio installations automatically, remove
+the configured path by running this command: flutter config --android-studio-dir
+''');
+    }
+
+    return result;
   }
 
   static String? extractStudioPlistValueWithMatcher(String plistValue, RegExp keyMatcher) {
