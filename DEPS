@@ -182,7 +182,6 @@ vars = {
   "upstream_libwebp": "https://chromium.googlesource.com/webm/libwebp.git",
   "upstream_libxml": "https://gitlab.gnome.org/GNOME/libxml2.git",
   "upstream_leak_tracker": "https://github.com/dart-lang/leak_tracker.git",
-  "upstream_linter": "https://github.com/dart-lang/linter.git",
   "upstream_logging": "https://github.com/dart-lang/logging.git",
   "upstream_markdown": "https://github.com/dart-lang/markdown.git",
   "upstream_matcher": "https://github.com/dart-lang/matcher.git",
@@ -406,9 +405,6 @@ deps = {
 
   'src/third_party/dart/third_party/pkg/leak_tracker':
    Var('dart_git') + '/leak_tracker.git@098bafcf99a5220e3c352d895d991e163568ee03',
-
-  'src/third_party/dart/third_party/pkg/linter':
-   Var('dart_git') + '/linter.git@7f40f112f54124e8dbfdc1e5da048643ae019b9e',
 
   'src/third_party/dart/third_party/pkg/logging':
    Var('dart_git') + '/logging.git@521498757ed3eeae151c2d4796404e8947baa04c',
