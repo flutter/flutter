@@ -15,7 +15,7 @@ export 'package:flutter/foundation.dart' show Brightness;
 ///
 /// Typically used for custom colors. To use, subclass [CupertinoThemeExtension],
 /// define a number of fields (e.g. [Color]s), and implement the [copyWith] and
-/// [lerp] methods. The latter will ensure smooth transitions of properties when
+/// [resolveFrom] methods. The latter will ensure smooth transitions of properties when
 /// switching themes.
 ///
 /// {@tool dartpad}
@@ -181,11 +181,8 @@ Map<Object, CupertinoThemeExtension<dynamic>> _themeExtensionIterableToMap(Itera
   });
 }
 
-/// Linearly interpolate between two [extensions].
-///
-/// Includes all theme extensions in [a] and [b].
-///
-/// {@macro dart.ui.shadow.lerp}
+/// Returns a copy of the current [extensions] with all the fields resolved 
+/// against the given [BuildContext].
 Map<Object, CupertinoThemeExtension<dynamic>>? _resolveThemeExtensions(Map<Object, CupertinoThemeExtension<dynamic>>? extensions, BuildContext context) {
   final Map<Object, CupertinoThemeExtension<dynamic>>? newExtensions = extensions?.map((Object id, CupertinoThemeExtension<dynamic> extension) {
     return MapEntry<Object, CupertinoThemeExtension<dynamic>>(id, extension.resolveFrom(context));
