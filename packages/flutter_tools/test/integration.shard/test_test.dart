@@ -335,7 +335,10 @@ Future<void> _testFile(
     reason: '"$testName" returned code ${exec.exitCode}\n\nstdout:\n'
             '${exec.stdout}\nstderr:\n${exec.stderr}',
   );
-  final List<String> output = (exec.stdout as String).split('\n');
+  List<String> output = (exec.stdout as String).split('\n');
+
+  output = _removeMacFontServerWarning(output);
+
   if (output.first.startsWith('Waiting for another flutter command to release the startup lock...')) {
     output.removeAt(0);
   }
@@ -396,6 +399,22 @@ Future<void> _testFile(
   if (!haveSeenStdErrMarker) {
     expect(exec.stderr, '');
   }
+}
+
+// https://github.com/flutter/flutter/issues/132990
+List<String> _removeMacFontServerWarning(List<String> output) {
+  return output.where((String line) {
+    if (RegExp(r'flutter_tester.*Font server protocol version mismatch').hasMatch(line)) {
+      return false;
+    }
+    if (RegExp(r'flutter_tester.*XType: unable to make a connection to the font daemon!').hasMatch(line)) {
+      return false;
+    }
+    if (RegExp(r'flutter_tester.*XType: XTFontStaticRegistry is enabled as fontd is not available').hasMatch(line)) {
+      return false;
+    }
+    return true;
+  }).toList();
 }
 
 Future<ProcessResult> _runFlutterTest(
