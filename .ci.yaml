@@ -91,9 +91,11 @@ platform_properties:
         [
           {"dependency": "apple_signing", "version": "version:2022_to_2023"}
         ]
-      os: Mac-12
-      device_type: none
-      cpu: arm64
+      id: flutter-devicelab-mac-45
+      pool: luci.flutter.staging
+      # os: Mac-12
+      # device_type: none
+      # cpu: arm64
       $flutter/osx_sdk : >-
         {
           "sdk_version": "15a5219j"
@@ -168,8 +170,10 @@ platform_properties:
           {"dependency": "gems", "version": "v3.3.14"},
           {"dependency": "apple_signing", "version": "version:2022_to_2023"}
         ]
-      os: Mac-12
-      cpu: x86
+      id: flutter-devicelab-mac-45
+      pool: luci.flutter.staging
+      # os: Mac-12
+      # cpu: x86
       device_os: iOS-16
       $flutter/osx_sdk : >-
         {
