@@ -157,6 +157,8 @@ constexpr vk::Format ToVKImageFormat(PixelFormat format) {
       return vk::Format::eR16G16B16A16Sfloat;
     case PixelFormat::kS8UInt:
       return vk::Format::eS8Uint;
+    case PixelFormat::kD24UnormS8Uint:
+      return vk::Format::eD24UnormS8Uint;
     case PixelFormat::kD32FloatS8UInt:
       return vk::Format::eD32SfloatS8Uint;
     case PixelFormat::kR8UNormInt:
@@ -186,6 +188,8 @@ constexpr PixelFormat ToPixelFormat(vk::Format format) {
       return PixelFormat::kR16G16B16A16Float;
     case vk::Format::eS8Uint:
       return PixelFormat::kS8UInt;
+    case vk::Format::eD24UnormS8Uint:
+      return PixelFormat::kD24UnormS8Uint;
     case vk::Format::eD32SfloatS8Uint:
       return PixelFormat::kD32FloatS8UInt;
     case vk::Format::eR8Unorm:
@@ -385,6 +389,7 @@ constexpr bool PixelFormatIsDepthStencil(PixelFormat format) {
     case PixelFormat::kB10G10R10A10XR:
       return false;
     case PixelFormat::kS8UInt:
+    case PixelFormat::kD24UnormS8Uint:
     case PixelFormat::kD32FloatS8UInt:
       return true;
   }
@@ -416,6 +421,7 @@ constexpr AttachmentKind AttachmentKindFromFormat(PixelFormat format) {
       return AttachmentKind::kColor;
     case PixelFormat::kS8UInt:
       return AttachmentKind::kStencil;
+    case PixelFormat::kD24UnormS8Uint:
     case PixelFormat::kD32FloatS8UInt:
       return AttachmentKind::kDepthStencil;
   }
@@ -574,6 +580,7 @@ constexpr vk::ImageAspectFlags ToVKImageAspectFlags(PixelFormat format) {
       return vk::ImageAspectFlagBits::eColor;
     case PixelFormat::kS8UInt:
       return vk::ImageAspectFlagBits::eStencil;
+    case PixelFormat::kD24UnormS8Uint:
     case PixelFormat::kD32FloatS8UInt:
       return vk::ImageAspectFlagBits::eDepth |
              vk::ImageAspectFlagBits::eStencil;
@@ -647,6 +654,7 @@ constexpr vk::ImageAspectFlags ToImageAspectFlags(PixelFormat format) {
       return vk::ImageAspectFlagBits::eColor;
     case PixelFormat::kS8UInt:
       return vk::ImageAspectFlagBits::eStencil;
+    case PixelFormat::kD24UnormS8Uint:
     case PixelFormat::kD32FloatS8UInt:
       return vk::ImageAspectFlagBits::eDepth |
              vk::ImageAspectFlagBits::eStencil;
