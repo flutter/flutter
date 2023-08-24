@@ -1,4 +1,4 @@
-Signature: fd8b29fb708184925b2df0a093b33439
+Signature: 0eac497351bbf573fcec87e47be68f94
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8904,6 +8904,8 @@ ORIGIN: ../../../third_party/skia/src/encode/SkPngEncoder_none.cpp + ../../../th
 ORIGIN: ../../../third_party/skia/src/encode/SkWebpEncoder_none.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/BlendFormula.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/BlendFormula.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/BlurUtils.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/BlurUtils.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/DitherUtils.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/DitherUtils.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/GpuTypesPriv.h + ../../../third_party/skia/LICENSE
@@ -9145,6 +9147,8 @@ FILE: ../../../third_party/skia/src/encode/SkPngEncoder_none.cpp
 FILE: ../../../third_party/skia/src/encode/SkWebpEncoder_none.cpp
 FILE: ../../../third_party/skia/src/gpu/BlendFormula.cpp
 FILE: ../../../third_party/skia/src/gpu/BlendFormula.h
+FILE: ../../../third_party/skia/src/gpu/BlurUtils.cpp
+FILE: ../../../third_party/skia/src/gpu/BlurUtils.h
 FILE: ../../../third_party/skia/src/gpu/DitherUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/DitherUtils.h
 FILE: ../../../third_party/skia/src/gpu/GpuTypesPriv.h
