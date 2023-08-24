@@ -1633,7 +1633,11 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
     this.builder,
     this.onPopRoute,
     this.reportConfiguration = false,
-  });
+  }) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+  }
 
   RouteInformation? get routeInformation => _routeInformation;
   RouteInformation? _routeInformation;
@@ -1717,7 +1721,11 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
 class SimpleRouteInformationProvider extends RouteInformationProvider with ChangeNotifier {
   SimpleRouteInformationProvider({
     this.onRouterReport,
-  });
+  }) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+  }
 
   RouterReportRouterInformation? onRouterReport;
 
@@ -1773,7 +1781,11 @@ class CompleterRouteInformationParser extends RouteInformationParser<RouteInform
 class SimpleAsyncRouterDelegate extends RouterDelegate<RouteInformation> with ChangeNotifier {
   SimpleAsyncRouterDelegate({
     required this.builder,
-  });
+  }) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+  }
 
   RouteInformation? get routeInformation => _routeInformation;
   RouteInformation? _routeInformation;

@@ -338,7 +338,11 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
     required this.builder,
     this.onPopRoute,
     this.reportConfiguration = false,
-  });
+  }) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+  }
 
   RouteInformation get routeInformation => _routeInformation;
   late RouteInformation _routeInformation;
