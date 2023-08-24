@@ -577,7 +577,7 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
        _maxWidth = maxWidth,
        _minHeight = minHeight,
        _maxHeight = maxHeight,
-       _size = fit;
+       _fit = fit;
 
   /// The minimum width constraint to give the child. Set this to null (the
   /// default) to use the constraint from the parent instead.
@@ -634,13 +634,13 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   /// its child within the constraints of its parent or be as small as the
   /// parent allows if no child is set. If set to false (the default), the
   /// render object will size itself to be as large as the parent allows.
-  OverflowBoxFit get fit => _size;
-  OverflowBoxFit _size;
+  OverflowBoxFit get fit => _fit;
+  OverflowBoxFit _fit;
   set fit(OverflowBoxFit value) {
-    if (_size == value) {
+    if (_fit == value) {
       return;
     }
-    _size = value;
+    _fit = value;
     markNeedsLayoutForSizedByParentChange();
   }
 
