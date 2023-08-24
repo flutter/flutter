@@ -30,6 +30,7 @@ void main() {
     expect(box.size, equals(const Size(100.0, 50.0)));
   });
 
+  // Adapted from https://github.com/flutter/flutter/issues/129094
   group('OverflowBox behavior with long and short content', () {
     for (final bool contentSuperLong in [false, true]) {
       for (final bool enableOverflowBox in [false, true]) {
@@ -43,19 +44,22 @@ void main() {
             ],
           );
 
-          await tester.pumpWidget(Stack(
-            children: <Widget>[
-              Container(
-                key: key,
-                child: enableOverflowBox
-                    ? OverflowBox(
-                        maxHeight: 1000000,
-                        fit: OverflowBoxFit.passthrough,
-                        child: child,
-                      )
-                    : child,
-              ),
-            ],
+          await tester.pumpWidget(Directionality(
+            textDirection: TextDirection.ltr,
+            child: Stack(
+              children: <Widget>[
+                Container(
+                  key: key,
+                  child: enableOverflowBox
+                      ? OverflowBox(
+                          maxHeight: 1000000,
+                          fit: OverflowBoxFit.passthrough,
+                          child: child,
+                        )
+                      : child,
+                ),
+              ],
+            ),
           ));
 
           expect(tester.getBottomLeft(find.byKey(key)).dy, contentSuperLong ? 600 : 100);
@@ -81,6 +85,7 @@ void main() {
       'maxWidth: 2.0',
       'minHeight: 3.0',
       'maxHeight: 4.0',
+      'fit: max',
     ]);
   });
 
