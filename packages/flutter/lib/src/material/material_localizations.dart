@@ -179,10 +179,11 @@ abstract class MaterialLocalizations {
   /// Label indicating that a given date is the current date.
   String get currentDateLabel;
 
-  /// Label for the scrim rendered underneath the content of a modal route.
+  /// Label for the scrim rendered underneath a [BottomSheet].
   String get scrimLabel;
 
-  /// Label for a BottomSheet.
+  /// Label for a [BottomSheet], used as the `modalRouteContentName` of the
+  /// [scrimOnTapHint].
   String get bottomSheetLabel;
 
   /// Hint text announced when tapping on the scrim underneath the content of
