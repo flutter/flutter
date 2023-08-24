@@ -401,16 +401,20 @@ Future<void> _testFile(
   }
 }
 
+final RegExp _fontServerProtocolPattern = RegExp(r'flutter_tester.*Font server protocol version mismatch');
+final RegExp _unableToConnectToFontDaemonPattern = RegExp(r'flutter_tester.*XType: unable to make a connection to the font daemon!');
+final RegExp _xtFontStaticRegistryPattern = RegExp(r'flutter_tester.*XType: XTFontStaticRegistry is enabled as fontd is not available');
+
 // https://github.com/flutter/flutter/issues/132990
 List<String> _removeMacFontServerWarning(List<String> output) {
   return output.where((String line) {
-    if (RegExp(r'flutter_tester.*Font server protocol version mismatch').hasMatch(line)) {
+    if (_fontServerProtocolPattern.hasMatch(line)) {
       return false;
     }
-    if (RegExp(r'flutter_tester.*XType: unable to make a connection to the font daemon!').hasMatch(line)) {
+    if (_unableToConnectToFontDaemonPattern.hasMatch(line)) {
       return false;
     }
-    if (RegExp(r'flutter_tester.*XType: XTFontStaticRegistry is enabled as fontd is not available').hasMatch(line)) {
+    if (_xtFontStaticRegistryPattern.hasMatch(line)) {
       return false;
     }
     return true;
