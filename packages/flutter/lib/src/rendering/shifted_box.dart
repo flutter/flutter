@@ -660,7 +660,12 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    return constraints.biggest;
+    if (fit == OverflowBoxFit.passthrough) {
+      // We cannot compute dry layout, since it depends on the child
+      return super.computeDryLayout(constraints);
+    } else {
+      return constraints.biggest;
+    }
   }
 
   @override
