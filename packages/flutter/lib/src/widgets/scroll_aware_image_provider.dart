@@ -63,7 +63,7 @@ class ScrollAwareImageProvider<T extends Object> extends ImageProvider<T> {
   /// been resolved.
   final DisposableBuildContext context;
 
-  /// The wrapped image provider to delegate [obtainKey] and [load] to.
+  /// The wrapped image provider to delegate [obtainKey] and [loadImage] to.
   final ImageProvider<T> imageProvider;
 
   @override
@@ -104,9 +104,6 @@ class ScrollAwareImageProvider<T extends Object> extends ImageProvider<T> {
     // have our image, and no one has otherwise completed the stream. Go.
     imageProvider.resolveStreamForKey(configuration, stream, key, handleError);
   }
-
-  @override
-  ImageStreamCompleter load(T key, DecoderCallback decode) => imageProvider.load(key, decode);
 
   @override
   ImageStreamCompleter loadBuffer(T key, DecoderBufferCallback decode) => imageProvider.loadBuffer(key, decode);
