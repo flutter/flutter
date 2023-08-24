@@ -685,6 +685,7 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
     properties.add(DoubleProperty('maxWidth', maxWidth, ifNull: 'use parent maxWidth constraint'));
     properties.add(DoubleProperty('minHeight', minHeight, ifNull: 'use parent minHeight constraint'));
     properties.add(DoubleProperty('maxHeight', maxHeight, ifNull: 'use parent maxHeight constraint'));
+    properties.add(EnumProperty<OverflowBoxFit>('fit', fit));
   }
 }
 
