@@ -22,5 +22,9 @@
   "tabSemanticsLabel": "Kichupo cha $tabIndex kati ya $tabCount",
   "modalBarrierDismissLabel": "Ondoa",
   "searchTextFieldPlaceholderLabel": "Tafuta",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "Hakuna Neno Mbadala Lilopatikana",
+  "menuDismissLabel": "Ondoa menyu",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

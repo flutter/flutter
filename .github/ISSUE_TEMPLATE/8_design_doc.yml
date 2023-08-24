@@ -1,6 +1,5 @@
-name: Share a Flutter design document.
+name: Share a Flutter design document
 description: As a contributor, I would like to share a design document.
-title: '[Design Document] <title>'
 labels: ['design doc']
 body:
   - type: markdown
@@ -18,7 +17,8 @@ body:
     attributes:
       label: Document Link
       description: |
-        Insert the 'flutter.dev/go' for your document here, as referenced in
+        Insert the "https://flutter.dev/go" link for your document here.
+        For details on creating a link, see the instructions in
         https://flutter.dev/go/template
     validations:
       required: true

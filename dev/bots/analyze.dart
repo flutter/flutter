@@ -187,6 +187,13 @@ Future<void> run(List<String> arguments) async {
     workingDirectory: flutterRoot,
   );
 
+  // Make sure that all of the existing samples are linked from at least one API doc comment.
+  printProgress('Code sample link validation...');
+  await runCommand(dart,
+    <String>['--enable-asserts', path.join(flutterRoot, 'dev', 'bots', 'check_code_samples.dart')],
+    workingDirectory: flutterRoot,
+  );
+
   // Try analysis against a big version of the gallery; generate into a temporary directory.
   printProgress('Dart analysis (mega gallery)...');
   final Directory outDir = Directory.systemTemp.createTempSync('flutter_mega_gallery.');

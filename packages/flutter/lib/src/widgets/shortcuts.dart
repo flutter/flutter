@@ -1051,6 +1051,8 @@ class _ShortcutsState extends State<Shortcuts> {
 
 /// A widget that binds key combinations to specific callbacks.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=VcQQ1ns_qNY}
+///
 /// This is similar to but simpler than the [Shortcuts] widget as it doesn't
 /// require [Intent]s and [Actions] widgets. Instead, it accepts a map
 /// of [ShortcutActivator]s to [VoidCallback]s.
@@ -1194,6 +1196,13 @@ class ShortcutRegistryEntry {
 /// widgets that are not descendants of the registry can listen to it (e.g. in
 /// overlays).
 class ShortcutRegistry with ChangeNotifier {
+  /// Creates an instance of [ShortcutRegistry].
+  ShortcutRegistry() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+  }
+
   bool _notificationScheduled = false;
   bool _disposed = false;
 

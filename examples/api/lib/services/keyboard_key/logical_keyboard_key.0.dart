@@ -74,8 +74,8 @@ class _MyKeyExampleState extends State<MyKeyExample> {
         child: Focus(
           focusNode: _focusNode,
           onKey: _handleKeyEvent,
-          child: AnimatedBuilder(
-            animation: _focusNode,
+          child: ListenableBuilder(
+            listenable: _focusNode,
             builder: (BuildContext context, Widget? child) {
               if (!_focusNode.hasFocus) {
                 return GestureDetector(

@@ -15,6 +15,7 @@ import 'constants.dart';
 import 'debug.dart';
 import 'icons.dart';
 import 'ink_well.dart';
+import 'input_border.dart';
 import 'input_decorator.dart';
 import 'material.dart';
 import 'material_localizations.dart';
@@ -1221,7 +1222,6 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   Orientation? _lastOrientation;
   FocusNode? _internalNode;
   FocusNode? get focusNode => widget.focusNode ?? _internalNode;
-  bool _hasPrimaryFocus = false;
   late Map<Type, Action<Intent>> _actionMap;
 
   // Only used if needed to create _internalNode.
@@ -1244,14 +1244,12 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         onInvoke: (ButtonActivateIntent intent) => _handleTap(),
       ),
     };
-    focusNode!.addListener(_handleFocusChanged);
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _removeDropdownRoute();
-    focusNode!.removeListener(_handleFocusChanged);
     _internalNode?.dispose();
     super.dispose();
   }
@@ -1262,25 +1260,11 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     _lastOrientation = null;
   }
 
-  void _handleFocusChanged() {
-    if (_hasPrimaryFocus != focusNode!.hasPrimaryFocus) {
-      setState(() {
-        _hasPrimaryFocus = focusNode!.hasPrimaryFocus;
-      });
-    }
-  }
-
-
   @override
   void didUpdateWidget(DropdownButton<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.focusNode != oldWidget.focusNode) {
-      oldWidget.focusNode?.removeListener(_handleFocusChanged);
-      if (widget.focusNode == null) {
-        _internalNode ??= _createFocusNode();
-      }
-      _hasPrimaryFocus = focusNode!.hasPrimaryFocus;
-      focusNode!.addListener(_handleFocusChanged);
+    if (widget.focusNode == null) {
+      _internalNode ??= _createFocusNode();
     }
     _updateSelectedIndex();
   }
@@ -1372,9 +1356,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   // Similarly, we don't reduce the height of the button so much that its icon
   // would be clipped.
   double get _denseButtonHeight {
-    final double textScaleFactor = MediaQuery.textScaleFactorOf(context);
     final double fontSize = _textStyle!.fontSize ?? Theme.of(context).textTheme.titleMedium!.fontSize!;
-    final double scaledFontSize = textScaleFactor * fontSize;
+    final double scaledFontSize = MediaQuery.textScalerOf(context).scale(fontSize);
     return math.max(scaledFontSize, math.max(widget.iconSize, _kDenseButtonHeight));
   }
 
@@ -1651,6 +1634,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
              }
            }
            final bool isEmpty = !showSelectedItem && !isHintOrDisabledHintAvailable();
+           final bool hasError = effectiveDecoration.errorText != null;
 
            // An unfocusable Focus widget so that this widget can detect if its
            // descendants have focus or not.
@@ -1658,6 +1642,33 @@ class DropdownButtonFormField<T> extends FormField<T> {
              canRequestFocus: false,
              skipTraversal: true,
              child: Builder(builder: (BuildContext context) {
+                final bool isFocused = Focus.of(context).hasFocus;
+                InputBorder? resolveInputBorder() {
+                  if (hasError) {
+                    if (isFocused) {
+                      return effectiveDecoration.focusedErrorBorder;
+                    }
+                    return effectiveDecoration.errorBorder;
+                  }
+                  if (isFocused) {
+                    return effectiveDecoration.focusedBorder;
+                  }
+                  if (effectiveDecoration.enabled) {
+                    return effectiveDecoration.enabledBorder;
+                  }
+                  return effectiveDecoration.border;
+                }
+                BorderRadius? effectiveBorderRadius() {
+                  final InputBorder? inputBorder = resolveInputBorder();
+                  if (inputBorder is OutlineInputBorder) {
+                    return inputBorder.borderRadius;
+                  }
+                  if (inputBorder is UnderlineInputBorder) {
+                    return inputBorder.borderRadius;
+                  }
+                  return null;
+                }
+
                return DropdownButtonHideUnderline(
                  child: DropdownButton<T>._formField(
                    items: items,
@@ -1683,10 +1694,10 @@ class DropdownButtonFormField<T> extends FormField<T> {
                    menuMaxHeight: menuMaxHeight,
                    enableFeedback: enableFeedback,
                    alignment: alignment,
-                   borderRadius: borderRadius,
+                   borderRadius: borderRadius ?? effectiveBorderRadius(),
                    inputDecoration: effectiveDecoration.copyWith(errorText: field.errorText),
                    isEmpty: isEmpty,
-                   isFocused: Focus.of(context).hasFocus,
+                   isFocused: isFocused,
                    padding: padding,
                  ),
                );

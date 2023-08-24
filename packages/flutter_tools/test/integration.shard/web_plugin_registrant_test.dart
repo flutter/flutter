@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import '../src/common.dart';
 import '../src/context.dart';
 import '../src/test_flutter_command_runner.dart';
+import 'test_utils.dart';
 
 void main() {
   late Directory tempDir;
@@ -275,7 +276,7 @@ Future<void> _ensureFlutterToolsSnapshot() async {
   printOnFailure('Output of dart ${snapshotArgs.join(" ")}:');
   printOnFailure(snapshotResult.stdout.toString());
   printOnFailure(snapshotResult.stderr.toString());
-  expect(snapshotResult.exitCode, 0);
+  expect(snapshotResult, const ProcessResultMatcher());
 }
 
 Future<void> _restoreFlutterToolsSnapshot() async {
@@ -415,10 +416,7 @@ Future<void> _analyzeEntity(FileSystemEntity target) async {
     args,
     workingDirectory: target is Directory ? target.path : target.dirname,
   );
-  printOnFailure('Output of flutter analyze:');
-  printOnFailure(exec.stdout.toString());
-  printOnFailure(exec.stderr.toString());
-  expect(exec.exitCode, 0);
+  expect(exec, const ProcessResultMatcher());
 }
 
 Future<void> _buildWebProject(Directory workingDir) async {
@@ -445,17 +443,14 @@ Future<void> _runFlutterSnapshot(List<String> flutterCommandArgs, Directory work
   );
 
   final List<String> args = <String>[
+    globals.artifacts!.getArtifactPath(Artifact.engineDartBinary, platform: TargetPlatform.web_javascript),
     flutterToolsSnapshotPath,
     ...flutterCommandArgs
   ];
 
-  final ProcessResult exec = await Process.run(
-    globals.artifacts!.getArtifactPath(Artifact.engineDartBinary, platform: TargetPlatform.web_javascript),
+  final ProcessResult exec = await globals.processManager.run(
     args,
     workingDirectory: workingDir.path,
   );
-  printOnFailure('Output of flutter ${flutterCommandArgs.join(" ")}:');
-  printOnFailure(exec.stdout.toString());
-  printOnFailure(exec.stderr.toString());
-  expect(exec.exitCode, 0);
+  expect(exec, const ProcessResultMatcher());
 }

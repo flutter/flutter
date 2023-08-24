@@ -20,8 +20,9 @@ import 'object.dart';
 import 'platform.dart';
 import 'print.dart';
 import 'service_extensions.dart';
+import 'timeline.dart';
 
-export 'dart:ui' show PlatformDispatcher, SingletonFlutterWindow; // ignore: deprecated_member_use
+export 'dart:ui' show PlatformDispatcher, SingletonFlutterWindow, clampDouble; // ignore: deprecated_member_use
 
 export 'basic_types.dart' show AsyncCallback, AsyncValueGetter, AsyncValueSetter;
 
@@ -141,7 +142,9 @@ abstract class BindingBase {
   /// [initServiceExtensions] to have bindings initialize their
   /// VM service extensions, if any.
   BindingBase() {
-    developer.Timeline.startSync('Framework initialization');
+    if (!kReleaseMode) {
+      FlutterTimeline.startSync('Framework initialization');
+    }
     assert(() {
       _debugConstructed = true;
       return true;
@@ -155,21 +158,15 @@ abstract class BindingBase {
     initServiceExtensions();
     assert(_debugServiceExtensionsRegistered);
 
-    developer.postEvent('Flutter.FrameworkInitialization', <String, String>{});
-
-    developer.Timeline.finishSync();
+    if (!kReleaseMode) {
+      developer.postEvent('Flutter.FrameworkInitialization', <String, String>{});
+      FlutterTimeline.finishSync();
+    }
   }
 
   bool _debugConstructed = false;
   static Type? _debugInitializedType;
   static bool _debugServiceExtensionsRegistered = false;
-
-  /// Additional configuration used by the framework during hot reload.
-  ///
-  /// See also:
-  ///
-  ///  * [DebugReassembleConfig], which describes the configuration.
-  static DebugReassembleConfig? debugReassembleConfig;
 
   /// Deprecated. Will be removed in a future version of Flutter.
   ///
@@ -652,14 +649,19 @@ abstract class BindingBase {
   /// [locked].
   @protected
   Future<void> lockEvents(Future<void> Function() callback) {
-    final developer.TimelineTask timelineTask = developer.TimelineTask()..start('Lock events');
+    developer.TimelineTask? debugTimelineTask;
+    if (!kReleaseMode) {
+      debugTimelineTask = developer.TimelineTask()..start('Lock events');
+    }
 
     _lockCount += 1;
     final Future<void> future = callback();
     future.whenComplete(() {
       _lockCount -= 1;
       if (!locked) {
-        timelineTask.finish();
+        if (!kReleaseMode) {
+          debugTimelineTask!.finish();
+        }
         try {
           unlocked();
         } catch (error, stack) {
@@ -979,24 +981,4 @@ abstract class BindingBase {
 /// Terminate the Flutter application.
 Future<void> _exitApplication() async {
   exit(0);
-}
-
-/// Additional configuration used for hot reload reassemble optimizations.
-///
-/// Do not extend, implement, or mixin this class. This may only be instantiated
-/// in debug mode.
-class DebugReassembleConfig {
-  /// Create a new [DebugReassembleConfig].
-  ///
-  /// Throws a [FlutterError] if this is called in profile or release mode.
-  DebugReassembleConfig({
-    this.widgetName,
-  }) {
-    if (!kDebugMode) {
-      throw FlutterError('Cannot instantiate DebugReassembleConfig in profile or release mode.');
-    }
-  }
-
-  /// The name of the widget that was modified, or `null` if the change was elsewhere.
-  final String? widgetName;
 }

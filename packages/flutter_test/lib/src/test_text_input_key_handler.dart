@@ -50,6 +50,8 @@ class MacOSTestTextInputKeyHandler extends TestTextInputKeyHandler {
           alt: true, shift: pressShift): <String>['deleteWordBackward:'],
       SingleActivator(LogicalKeyboardKey.backspace,
           meta: true, shift: pressShift): <String>['deleteToBeginningOfLine:'],
+      SingleActivator(LogicalKeyboardKey.backspace, control: true, shift: pressShift):
+          <String>['deleteBackwardByDecomposingPreviousCharacter:'],
       SingleActivator(LogicalKeyboardKey.delete, shift: pressShift): <String>[
         'deleteForward:'
       ],
