@@ -554,6 +554,43 @@ void main() {
     Cache: () => cache,
   });
 
+  testUsingContext('_FlutterVersionFromFile.ensureVersionFile ensures legacy version file exists', () async {
+    final MemoryFileSystem fs = MemoryFileSystem.test();
+    final Directory flutterRoot = fs.directory('/path/to/flutter');
+    final Directory cacheDir = flutterRoot
+        .childDirectory('bin')
+        .childDirectory('cache')
+        ..createSync(recursive: true);
+    const String devToolsVersion = '0000000';
+    final File legacyVersionFile = flutterRoot.childFile('version');
+    const Map<String, Object> versionJson = <String, Object>{
+      'channel': 'stable',
+      'frameworkVersion': '1.2.3',
+      'repositoryUrl': 'https://github.com/flutter/flutter.git',
+      'frameworkRevision': '1234abcd',
+      'frameworkCommitDate': '2023-04-28 12:34:56 -0400',
+      'engineRevision': 'deadbeef',
+      'dartSdkVersion': 'deadbeef2',
+      'devToolsVersion': devToolsVersion,
+      'flutterVersion': 'foo',
+    };
+    cacheDir.childFile('flutter.version.json').writeAsStringSync(
+      jsonEncode(versionJson),
+    );
+    expect(legacyVersionFile.existsSync(), isFalse);
+    final FlutterVersion flutterVersion = FlutterVersion(
+      clock: _testClock,
+      fs: fs,
+      flutterRoot: flutterRoot.path,
+    );
+    flutterVersion.ensureVersionFile();
+    expect(legacyVersionFile.existsSync(), isTrue);
+    expect(legacyVersionFile.readAsStringSync(), '1.2.3');
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => processManager,
+    Cache: () => cache,
+  });
+
   testUsingContext('FlutterVersion() falls back to git if .version.json is malformed', () async {
     final MemoryFileSystem fs = MemoryFileSystem.test();
     final Directory flutterRoot = fs.directory(fs.path.join('path', 'to', 'flutter'));
