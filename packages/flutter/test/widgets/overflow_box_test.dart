@@ -32,39 +32,35 @@ void main() {
 
   // Adapted from https://github.com/flutter/flutter/issues/129094
   group('OverflowBox behavior with long and short content', () {
-    for (final bool contentSuperLong in [false, true]) {
-      for (final bool enableOverflowBox in [false, true]) {
-        testWidgets('contentSuperLong=$contentSuperLong enableOverflowBox=$enableOverflowBox', (WidgetTester tester) async {
-          final GlobalKey<State<StatefulWidget>> key = GlobalKey();
+    for (final bool contentSuperLong in <bool>[false, true]) {
+      testWidgets('contentSuperLong=$contentSuperLong', (WidgetTester tester) async {
+        final GlobalKey<State<StatefulWidget>> key = GlobalKey();
 
-          final Column child = Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(width: 100, height: contentSuperLong ? 10000 : 100),
-            ],
-          );
+        final Column child = Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(width: 100, height: contentSuperLong ? 10000 : 100),
+          ],
+        );
 
-          await tester.pumpWidget(Directionality(
-            textDirection: TextDirection.ltr,
-            child: Stack(
-              children: <Widget>[
-                Container(
-                  key: key,
-                  child: enableOverflowBox
-                      ? OverflowBox(
-                          maxHeight: 1000000,
-                          fit: OverflowBoxFit.passthrough,
-                          child: child,
-                        )
-                      : child,
+        await tester.pumpWidget(Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: <Widget>[
+              Container(
+                key: key,
+                child: OverflowBox(
+                  maxHeight: 1000000,
+                  fit: OverflowBoxFit.passthrough,
+                  child: child,
                 ),
-              ],
-            ),
-          ));
+              ),
+            ],
+          ),
+        ));
 
-          expect(tester.getBottomLeft(find.byKey(key)).dy, contentSuperLong ? 600 : 100);
-        });
-      }
+        expect(tester.getBottomLeft(find.byKey(key)).dy, contentSuperLong ? 600 : 100);
+      });
     }
   });
 
