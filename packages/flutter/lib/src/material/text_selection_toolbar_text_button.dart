@@ -134,6 +134,8 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
   // Android API level 34.
   static const Color _defaultForegroundColorLight = Color(0xff000000);
   static const Color _defaultForegroundColorDark = Color(0xffffffff);
+  static const Color _defaultBackgroundColorLight = Color(0xffffffff);
+  static const Color _defaultBackgroundColorDark = Color(0xff424242);
 
   static Color _getForegroundColor(ColorScheme colorScheme) {
     final bool isDefaultOnSurface = switch (colorScheme.brightness) {
@@ -149,11 +151,26 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
     };
   }
 
+  static Color _getBackgroundColor(ColorScheme colorScheme) {
+    final bool isDefaultSurface = switch (colorScheme.brightness) {
+      Brightness.light => identical(ThemeData().colorScheme.surface, colorScheme.surface),
+      Brightness.dark => identical(ThemeData.dark().colorScheme.surface, colorScheme.surface),
+    };
+    if (!isDefaultSurface) {
+      return colorScheme.surface;
+    }
+    return switch (colorScheme.brightness) {
+      Brightness.light => _defaultBackgroundColorLight,
+      Brightness.dark => _defaultBackgroundColorDark,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return TextButton(
       style: TextButton.styleFrom(
+        backgroundColor: _getBackgroundColor(colorScheme),
         foregroundColor: _getForegroundColor(colorScheme),
         shape: const RoundedRectangleBorder(),
         minimumSize: const Size(kMinInteractiveDimension, kMinInteractiveDimension),
