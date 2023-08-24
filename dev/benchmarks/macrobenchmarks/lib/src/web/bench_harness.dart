@@ -18,7 +18,7 @@ class BenchWidgetRecorder extends WidgetRecorder {
     // This is intentionally using a simple widget. The benchmark is meant to
     // measure the overhead of the harness, so this method should induce as
     // little work as possible.
-    return Container();
+    return const SizedBox.expand();
   }
 }
 
@@ -32,7 +32,7 @@ class BenchWidgetBuildRecorder extends WidgetBuildRecorder {
     // This is intentionally using a simple widget. The benchmark is meant to
     // measure the overhead of the harness, so this method should induce as
     // little work as possible.
-    return Container();
+    return const SizedBox.expand();
   }
 }
 
