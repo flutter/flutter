@@ -6,13 +6,12 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/config.dart';
-import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
-import 'package:path/path.dart' as p;
+import 'package:path/path.dart' as p; // flutter_ignore: package_path_import
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -1315,7 +1314,7 @@ class FakePlistUtils extends Fake implements PlistParser {
   }
 }
 
-class _FakeFileSystem extends Fake implements ErrorHandlingFileSystem {
+class _FakeFileSystem extends Fake implements FileSystem {
   @override
   Directory directory(dynamic path) {
     return _NonExistentDirectory();
@@ -1327,7 +1326,7 @@ class _FakeFileSystem extends Fake implements ErrorHandlingFileSystem {
   }
 }
 
-class _NonExistentDirectory extends Fake implements ErrorHandlingDirectory {
+class _NonExistentDirectory extends Fake implements Directory {
   @override
   bool existsSync() {
     throw const FileSystemException('OS Error: Filename, directory name, or volume label syntax is incorrect.');
