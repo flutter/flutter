@@ -9,7 +9,10 @@
 #include "impeller/entity/gles/entity_shaders_gles.h"
 #include "impeller/renderer/backend/gles/context_gles.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
-#include "impeller/scene/shaders/gles/scene_shaders_gles.h"
+
+#if IMPELLER_ENABLE_3D
+#include "impeller/scene/shaders/gles/scene_shaders_gles.h"  // nogncheck
+#endif  // IMPELLER_ENABLE_3D
 
 namespace flutter {
 
@@ -62,11 +65,12 @@ EmbedderSurfaceGLImpeller::EmbedderSurfaceGLImpeller(
   gl_dispatch_table_.gl_make_current_callback();
 
   std::vector<std::shared_ptr<fml::Mapping>> shader_mappings = {
-      std::make_shared<fml::NonOwnedMapping>(
-          impeller_entity_shaders_gles_data,
-          impeller_entity_shaders_gles_length),
-      std::make_shared<fml::NonOwnedMapping>(
-          impeller_scene_shaders_gles_data, impeller_scene_shaders_gles_length),
+    std::make_shared<fml::NonOwnedMapping>(impeller_entity_shaders_gles_data,
+                                           impeller_entity_shaders_gles_length),
+#if IMPELLER_ENABLE_3D
+    std::make_shared<fml::NonOwnedMapping>(impeller_scene_shaders_gles_data,
+                                           impeller_scene_shaders_gles_length),
+#endif  // IMPELLER_ENABLE_3D
   };
   auto gl = std::make_unique<impeller::ProcTableGLES>(
       gl_dispatch_table_.gl_proc_resolver);
