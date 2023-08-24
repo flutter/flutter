@@ -5,6 +5,7 @@
 #pragma once
 
 #include <variant>
+#include "impeller/core/capture.h"
 #include "impeller/entity/contents/contents.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/matrix.h"
@@ -96,11 +97,16 @@ class Entity {
 
   Scalar DeriveTextScale() const;
 
+  Capture& GetCapture() const;
+
+  void SetCapture(Capture capture) const;
+
  private:
   Matrix transformation_;
   std::shared_ptr<Contents> contents_;
   BlendMode blend_mode_ = BlendMode::kSourceOver;
   uint32_t stencil_depth_ = 0u;
+  mutable Capture capture_;
 };
 
 }  // namespace impeller

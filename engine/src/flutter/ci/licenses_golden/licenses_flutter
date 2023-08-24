@@ -1015,6 +1015,8 @@ ORIGIN: ../../../flutter/impeller/aiks/aiks_context.cc + ../../../flutter/LICENS
 ORIGIN: ../../../flutter/impeller/aiks/aiks_context.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/aiks/aiks_playground.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/aiks/aiks_playground.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/aiks/aiks_playground_inspector.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/aiks/aiks_playground_inspector.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/aiks/canvas.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/aiks/canvas.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/aiks/color_filter.cc + ../../../flutter/LICENSE
@@ -1127,6 +1129,8 @@ ORIGIN: ../../../flutter/impeller/core/buffer.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/core/buffer.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/core/buffer_view.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/core/buffer_view.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/core/capture.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/core/capture.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/core/device_buffer.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/core/device_buffer.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/core/device_buffer_descriptor.cc + ../../../flutter/LICENSE
@@ -3753,6 +3757,8 @@ FILE: ../../../flutter/impeller/aiks/aiks_context.cc
 FILE: ../../../flutter/impeller/aiks/aiks_context.h
 FILE: ../../../flutter/impeller/aiks/aiks_playground.cc
 FILE: ../../../flutter/impeller/aiks/aiks_playground.h
+FILE: ../../../flutter/impeller/aiks/aiks_playground_inspector.cc
+FILE: ../../../flutter/impeller/aiks/aiks_playground_inspector.h
 FILE: ../../../flutter/impeller/aiks/canvas.cc
 FILE: ../../../flutter/impeller/aiks/canvas.h
 FILE: ../../../flutter/impeller/aiks/color_filter.cc
@@ -3865,6 +3871,8 @@ FILE: ../../../flutter/impeller/core/buffer.cc
 FILE: ../../../flutter/impeller/core/buffer.h
 FILE: ../../../flutter/impeller/core/buffer_view.cc
 FILE: ../../../flutter/impeller/core/buffer_view.h
+FILE: ../../../flutter/impeller/core/capture.cc
+FILE: ../../../flutter/impeller/core/capture.h
 FILE: ../../../flutter/impeller/core/device_buffer.cc
 FILE: ../../../flutter/impeller/core/device_buffer.h
 FILE: ../../../flutter/impeller/core/device_buffer_descriptor.cc
