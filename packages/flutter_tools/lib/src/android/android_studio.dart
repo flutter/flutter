@@ -497,7 +497,7 @@ class AndroidStudio {
     String? exceptionMessage;
     try {
       configuredStudioPathExists = result.existsSync();
-    } on Exception catch (e) {
+    } on FileSystemException catch (e) {
       exceptionMessage = e.toString();
     }
 
