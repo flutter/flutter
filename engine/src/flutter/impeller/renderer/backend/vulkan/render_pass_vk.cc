@@ -89,7 +89,6 @@ static vk::AttachmentDescription CreateAttachmentDescription(
 SharedHandleVK<vk::RenderPass> RenderPassVK::CreateVKRenderPass(
     const ContextVK& context,
     const std::shared_ptr<CommandBufferVK>& command_buffer) const {
-  TRACE_EVENT0("impeller", "RenderPassVK::CreateVKRenderPass");
   std::vector<vk::AttachmentDescription> attachments;
 
   std::vector<vk::AttachmentReference> color_refs;
@@ -223,7 +222,6 @@ static std::vector<vk::ClearValue> GetVKClearValues(
 SharedHandleVK<vk::Framebuffer> RenderPassVK::CreateVKFramebuffer(
     const ContextVK& context,
     const vk::RenderPass& pass) const {
-  TRACE_EVENT0("impeller", "RenderPassVK::CreateVKFramebuffer");
   vk::FramebufferCreateInfo fb_info;
 
   fb_info.renderPass = pass;
