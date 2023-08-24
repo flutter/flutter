@@ -3122,10 +3122,13 @@ class OverflowBox extends SingleChildRenderObjectWidget {
   /// default) to use the constraint from the parent instead.
   final double? maxHeight;
 
+  /// The way to size the render object.
+  ///
   /// This only affects scenario when the child does not indeed overflow.
-  /// If enabled, the self size will be as small as its child when the child
-  /// does not overflow. If disabled (the default case), the self size will
-  /// always be the biggest possible size that the parent constraints allows.
+  /// If set to true, the render object will size itself to match the size of
+  /// its child within the constraints of its parent or be as small as the
+  /// parent allows if no child is set. If set to false (the default), the
+  /// render object will size itself to be as large as the parent allows.
   final bool shrinkWrap;
 
   @override
