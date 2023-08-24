@@ -12,6 +12,8 @@ impeller_component("core") {
     "buffer.h",
     "buffer_view.cc",
     "buffer_view.h",
+    "capture.cc",
+    "capture.h",
     "device_buffer.cc",
     "device_buffer.h",
     "device_buffer_descriptor.cc",

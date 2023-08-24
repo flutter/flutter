@@ -108,6 +108,8 @@ std::optional<Snapshot> TextureContents::RenderToSnapshot(
 bool TextureContents::Render(const ContentContext& renderer,
                              const Entity& entity,
                              RenderPass& pass) const {
+  auto capture = entity.GetCapture().CreateChild("TextureContents");
+
   using VS = TextureFillVertexShader;
   using FS = TextureFillFragmentShader;
   using FSExternal = TextureFillExternalFragmentShader;
@@ -123,24 +125,27 @@ bool TextureContents::Render(const ContentContext& renderer,
   // Expand the source rect by half a texel, which aligns sampled texels to the
   // pixel grid if the source rect is the same size as the destination rect.
   auto texture_coords =
-      Rect::MakeSize(texture_->GetSize()).Project(source_rect_.Expand(0.5));
+      Rect::MakeSize(texture_->GetSize())
+          .Project(capture.AddRect("Source rect", source_rect_).Expand(0.5));
 
   VertexBufferBuilder<VS::PerVertexData> vertex_builder;
 
+  auto destination_rect =
+      capture.AddRect("Destination rect", destination_rect_);
   vertex_builder.AddVertices({
-      {destination_rect_.GetLeftTop(), texture_coords.GetLeftTop()},
-      {destination_rect_.GetRightTop(), texture_coords.GetRightTop()},
-      {destination_rect_.GetLeftBottom(), texture_coords.GetLeftBottom()},
-      {destination_rect_.GetRightBottom(), texture_coords.GetRightBottom()},
+      {destination_rect.GetLeftTop(), texture_coords.GetLeftTop()},
+      {destination_rect.GetRightTop(), texture_coords.GetRightTop()},
+      {destination_rect.GetLeftBottom(), texture_coords.GetLeftBottom()},
+      {destination_rect.GetRightBottom(), texture_coords.GetRightBottom()},
   });
 
   auto& host_buffer = pass.GetTransientsBuffer();
 
   VS::FrameInfo frame_info;
   frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
-                   entity.GetTransformation();
+                   capture.AddMatrix("Transform", entity.GetTransformation());
   frame_info.texture_sampler_y_coord_scale = texture_->GetYCoordScale();
-  frame_info.alpha = GetOpacity();
+  frame_info.alpha = capture.AddScalar("Alpha", GetOpacity());
 
   Command cmd;
   if (label_.empty()) {
