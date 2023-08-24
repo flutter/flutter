@@ -23,10 +23,11 @@ void AiksPlayground::SetTypographerContext(
   typographer_context_ = std::move(typographer_context);
 }
 
-bool AiksPlayground::OpenPlaygroundHere(Picture picture) {
-  return OpenPlaygroundHere([&picture](AiksContext& renderer) -> Picture {
-    return std::move(picture);
-  });
+bool AiksPlayground::OpenPlaygroundHere(const Picture& picture) {
+  return OpenPlaygroundHere(
+      [&picture](AiksContext& renderer, RenderTarget& render_target) -> bool {
+        return renderer.Render(picture, render_target);
+      });
 }
 
 bool AiksPlayground::OpenPlaygroundHere(AiksPlaygroundCallback callback) {
@@ -41,14 +42,13 @@ bool AiksPlayground::OpenPlaygroundHere(AiksPlaygroundCallback callback) {
   }
 
   return Playground::OpenPlaygroundHere(
-      [this, &renderer, &callback](RenderTarget& render_target) -> bool {
-        const std::optional<Picture>& picture = inspector_.RenderInspector(
-            renderer, [&]() { return callback(renderer); });
-
-        if (!picture.has_value()) {
-          return false;
+      [&renderer, &callback](RenderTarget& render_target) -> bool {
+        static bool wireframe = false;
+        if (ImGui::IsKeyPressed(ImGuiKey_Z)) {
+          wireframe = !wireframe;
+          renderer.GetContentContext().SetWireframe(wireframe);
         }
-        return renderer.Render(*picture, render_target);
+        return callback(renderer, render_target);
       });
 }
 
