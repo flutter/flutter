@@ -1853,7 +1853,7 @@ void main() {
       token.dispose();
     });
 
-    testWidgets('dispatches object creation in constructor', (WidgetTester tester) async {
+    test('dispatches object creation in constructor', () async {
       final MemoryAllocations ma = MemoryAllocations.instance;
       assert(!ma.hasListeners);
       int eventCount = 0;
