@@ -2666,7 +2666,6 @@
 ../../../third_party/skia/include/encode/BUILD.bazel
 ../../../third_party/skia/include/gpu/BUILD.bazel
 ../../../third_party/skia/include/gpu/d3d/BUILD.bazel
-../../../third_party/skia/include/gpu/dawn/BUILD.bazel
 ../../../third_party/skia/include/gpu/ganesh/BUILD.bazel
 ../../../third_party/skia/include/gpu/ganesh/gl/BUILD.bazel
 ../../../third_party/skia/include/gpu/ganesh/mtl/BUILD.bazel
@@ -2807,7 +2806,6 @@
 ../../../third_party/skia/src/gpu/dawn/BUILD.bazel
 ../../../third_party/skia/src/gpu/ganesh/BUILD.bazel
 ../../../third_party/skia/src/gpu/ganesh/d3d/BUILD.bazel
-../../../third_party/skia/src/gpu/ganesh/dawn/BUILD.bazel
 ../../../third_party/skia/src/gpu/ganesh/effects/BUILD.bazel
 ../../../third_party/skia/src/gpu/ganesh/geometry/BUILD.bazel
 ../../../third_party/skia/src/gpu/ganesh/gl/BUILD.bazel
