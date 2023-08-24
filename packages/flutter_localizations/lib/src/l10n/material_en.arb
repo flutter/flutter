@@ -73,7 +73,7 @@
 
   "scrimLabel": "Scrim",
   "@scrimLabel": {
-    "description": "The label for the scrim rendered underneath the content of a modal route."
+    "description": "The label for the scrim rendered underneath the content of a bottom sheet (used as the 'modalRouteContentName' of the 'scrimOnTapHint' message)."
   },
 
   "bottomSheetLabel": "Bottom Sheet",
@@ -83,7 +83,7 @@
 
   "scrimOnTapHint": "Close $modalRouteContentName",
   "@scrimOnTapHint": {
-    "description": "The onTapHint for the scrim rendered underneath the content of a modal route which users can tap to dismiss the content",
+    "description": "The onTapHint for the scrim rendered underneath the content of a modal route (especially a bottom sheet) which users can tap to dismiss the content.",
     "parameters": "modalRouteContentName"
   },
 
@@ -200,6 +200,16 @@
   "lookUpButtonLabel": "Look Up",
   "@lookUpButtonLabel": {
     "description": "The label for the Look Up button and menu items on iOS."
+  },
+
+  "searchWebButtonLabel": "Search Web",
+  "@searchWebButtonLabel": {
+    "description": "The label for the Search Web button and menu items on iOS."
+  },
+
+  "shareButtonLabel": "Share...",
+  "@shareButtonLabel": {
+    "description": "The label for the Share button and menu items on iOS."
   },
 
   "okButtonLabel": "OK",

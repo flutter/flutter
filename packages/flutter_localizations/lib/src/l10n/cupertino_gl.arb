@@ -22,7 +22,9 @@
   "tabSemanticsLabel": "Pestana $tabIndex de $tabCount",
   "modalBarrierDismissLabel": "Ignorar",
   "searchTextFieldPlaceholderLabel": "Fai unha busca",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "menuDismissLabel": "Dismiss menu",
-  "lookUpButtonLabel": "Look Up"
+  "noSpellCheckReplacementsLabel": "Non se encontrou ningunha substitución",
+  "menuDismissLabel": "Pechar menú",
+  "lookUpButtonLabel": "Mirar cara arriba",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

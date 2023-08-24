@@ -2959,7 +2959,7 @@ void main() {
       );
 
       // Selected text shows 1 toolbar buttons on MacOS, 2 on iOS.
-      expect(find.byType(CupertinoButton), isTargetPlatformIOS ? findsNWidgets(2) : findsNWidgets(1));
+      expect(find.byType(CupertinoButton), isTargetPlatformIOS ? findsNWidgets(4) : findsNWidgets(1));
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
@@ -3090,7 +3090,7 @@ void main() {
       );
 
       // Selected text shows 2 toolbar buttons for iOS, 1 for macOS.
-      expect(find.byType(CupertinoButton), isTargetPlatformIOS ? findsNWidgets(2) : findsNWidgets(1));
+      expect(find.byType(CupertinoButton), isTargetPlatformIOS ? findsNWidgets(4) : findsNWidgets(1));
 
       await gesture.up();
       await tester.pump();
@@ -3101,7 +3101,7 @@ void main() {
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
       // The toolbar is still showing.
-      expect(find.byType(CupertinoButton), isTargetPlatformIOS ? findsNWidgets(2) : findsNWidgets(1));
+      expect(find.byType(CupertinoButton), isTargetPlatformIOS ? findsNWidgets(4) : findsNWidgets(1));
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
@@ -3218,7 +3218,7 @@ void main() {
       );
 
       // Toolbar shows one button.
-      expect(find.byType(CupertinoButton), isTargetPlatformIOS ? findsNWidgets(2) : findsNWidgets(1));
+      expect(find.byType(CupertinoButton), isTargetPlatformIOS ? findsNWidgets(4) : findsNWidgets(1));
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
@@ -3554,7 +3554,7 @@ void main() {
         ),
       );
       // The toolbar now shows up.
-      expect(find.byType(CupertinoButton), isTargetPlatformIOS ? findsNWidgets(2) : findsNWidgets(1));
+      expect(find.byType(CupertinoButton), isTargetPlatformIOS ? findsNWidgets(4) : findsNWidgets(1));
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
@@ -3782,7 +3782,7 @@ void main() {
       );
 
       // Long press toolbar.
-      expect(find.byType(CupertinoButton), findsNWidgets(2));
+      expect(find.byType(CupertinoButton), findsNWidgets(4));
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
@@ -3876,7 +3876,7 @@ void main() {
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
 
-      expect(find.byType(CupertinoButton), isTargetPlatformIOS ? findsNWidgets(2) : findsNWidgets(1));
+      expect(find.byType(CupertinoButton), isTargetPlatformIOS ? findsNWidgets(4) : findsNWidgets(1));
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
 
@@ -3911,7 +3911,7 @@ void main() {
         controller.selection,
         const TextSelection(baseOffset: 0, extentOffset: 7),
       );
-      expect(find.byType(CupertinoButton), isTargetPlatformIOS ? findsNWidgets(2) : findsNWidgets(1));
+      expect(find.byType(CupertinoButton), isTargetPlatformIOS ? findsNWidgets(4) : findsNWidgets(1));
 
       // Double tap selecting the same word somewhere else is fine.
       await tester.pumpAndSettle(kDoubleTapTimeout);
@@ -3928,7 +3928,7 @@ void main() {
         controller.selection,
         const TextSelection(baseOffset: 0, extentOffset: 7),
       );
-      expect(find.byType(CupertinoButton), isTargetPlatformIOS ? findsNWidgets(2) : findsNWidgets(1));
+      expect(find.byType(CupertinoButton), isTargetPlatformIOS ? findsNWidgets(4) : findsNWidgets(1));
 
       // Hide the toolbar so it doesn't interfere with taps on the text.
       final EditableTextState editableTextState =
@@ -3950,7 +3950,7 @@ void main() {
         controller.selection,
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
-      expect(find.byType(CupertinoButton), isTargetPlatformIOS ? findsNWidgets(2) : findsNWidgets(1));
+      expect(find.byType(CupertinoButton), isTargetPlatformIOS ? findsNWidgets(4) : findsNWidgets(1));
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
@@ -4029,7 +4029,7 @@ void main() {
 
     await gesture.up();
     await tester.pump();
-    expect(find.byType(CupertinoButton), findsNWidgets(2));
+    expect(find.byType(CupertinoButton), findsNWidgets(4));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('tap on non-force-press-supported devices work', (WidgetTester tester) async {
