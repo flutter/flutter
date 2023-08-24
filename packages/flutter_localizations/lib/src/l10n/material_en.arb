@@ -73,7 +73,7 @@
 
   "scrimLabel": "Scrim",
   "@scrimLabel": {
-    "description": "The label for the scrim rendered underneath the content of a modal route."
+    "description": "The label for the scrim rendered underneath the content of a bottom sheet (used as the 'modalRouteContentName' of the 'scrimOnTapHint' message)."
   },
 
   "bottomSheetLabel": "Bottom Sheet",
@@ -83,7 +83,7 @@
 
   "scrimOnTapHint": "Close $modalRouteContentName",
   "@scrimOnTapHint": {
-    "description": "The onTapHint for the scrim rendered underneath the content of a modal route which users can tap to dismiss the content",
+    "description": "The onTapHint for the scrim rendered underneath the content of a modal route (especially a bottom sheet) which users can tap to dismiss the content.",
     "parameters": "modalRouteContentName"
   },
 
