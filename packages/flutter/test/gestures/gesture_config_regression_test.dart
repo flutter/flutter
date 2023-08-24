@@ -93,9 +93,7 @@ class NestedDraggableCase extends StatelessWidget {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('Scroll Views get the same ScrollConfiguration as GestureDetectors',
-  leakTrackingTestConfig: LeakTrackingTestConfig.debugnotDisposed(),
-  (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scroll Views get the same ScrollConfiguration as GestureDetectors', (WidgetTester tester) async {
     tester.view.gestureSettings = const ui.GestureSettings(physicalTouchSlop: 4);
     addTearDown(tester.view.reset);
 
