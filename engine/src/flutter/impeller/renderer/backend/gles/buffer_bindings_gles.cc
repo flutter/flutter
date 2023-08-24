@@ -177,12 +177,6 @@ bool BufferBindingsGLES::BindUniformBuffer(const ProcTableGLES& gl,
                                            Allocator& transients_allocator,
                                            const BufferResource& buffer) const {
   const auto* metadata = buffer.GetMetadata();
-  if (metadata == nullptr) {
-    // Vertex buffer bindings don't have metadata as those definitions are
-    // already handled by vertex attrib pointers. Keep going.
-    return true;
-  }
-
   auto device_buffer =
       buffer.resource.buffer->GetDeviceBuffer(transients_allocator);
   if (!device_buffer) {

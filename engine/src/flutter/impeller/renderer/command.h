@@ -77,6 +77,8 @@ struct BufferAndUniformSlot {
 struct Bindings {
   std::map<size_t, TextureAndSampler> sampled_images;
   std::map<size_t, BufferAndUniformSlot> buffers;
+  // This is only valid for vertex bindings.
+  BufferAndUniformSlot vertex_buffer;
 };
 
 //------------------------------------------------------------------------------

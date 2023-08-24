@@ -18,7 +18,7 @@ bool Command::BindVertices(const VertexBuffer& buffer) {
     return false;
   }
 
-  vertex_bindings.buffers[VertexDescriptor::kReservedVertexBufferIndex] =
+  vertex_bindings.vertex_buffer =
       BufferAndUniformSlot{.slot = {}, .view = {nullptr, buffer.vertex_buffer}};
   index_buffer = buffer.index_buffer;
   vertex_count = buffer.vertex_count;
@@ -27,12 +27,7 @@ bool Command::BindVertices(const VertexBuffer& buffer) {
 }
 
 BufferView Command::GetVertexBuffer() const {
-  auto found = vertex_bindings.buffers.find(
-      VertexDescriptor::kReservedVertexBufferIndex);
-  if (found != vertex_bindings.buffers.end()) {
-    return found->second.view.resource;
-  }
-  return {};
+  return vertex_bindings.vertex_buffer.view.resource;
 }
 
 bool Command::BindResource(ShaderStage stage,
@@ -55,6 +50,7 @@ bool Command::DoBindResource(ShaderStage stage,
                              const ShaderUniformSlot& slot,
                              const T metadata,
                              const BufferView& view) {
+  FML_DCHECK(slot.ext_res_0 != VertexDescriptor::kReservedVertexBufferIndex);
   if (!view) {
     return false;
   }

@@ -15,7 +15,7 @@ struct BufferView {
   uint8_t* contents;
   Range range;
 
-  constexpr operator bool() const { return static_cast<bool>(buffer); }
+  constexpr explicit operator bool() const { return static_cast<bool>(buffer); }
 };
 
 }  // namespace impeller
