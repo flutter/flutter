@@ -36,6 +36,10 @@ constexpr PixelFormat FromMTLPixelFormat(MTLPixelFormat format) {
       return PixelFormat::kR16G16B16A16Float;
     case MTLPixelFormatStencil8:
       return PixelFormat::kS8UInt;
+#if !FML_OS_IOS
+    case MTLPixelFormatDepth24Unorm_Stencil8:
+      return PixelFormat::kD24UnormS8Uint;
+#endif  // FML_OS_IOS
     case MTLPixelFormatDepth32Float_Stencil8:
       return PixelFormat::kD32FloatS8UInt;
     case MTLPixelFormatBGR10_XR_sRGB:
@@ -49,6 +53,11 @@ constexpr PixelFormat FromMTLPixelFormat(MTLPixelFormat format) {
   }
   return PixelFormat::kUnknown;
 }
+
+/// Safe accessor for MTLPixelFormatDepth24Unorm_Stencil8.
+/// Returns PixelFormat::kUnknown if MTLPixelFormatDepth24Unorm_Stencil8 isn't
+/// supported.
+MTLPixelFormat SafeMTLPixelFormatDepth24Unorm_Stencil8();
 
 /// Safe accessor for MTLPixelFormatBGR10_XR_sRGB.
 /// Returns PixelFormat::kUnknown if MTLPixelFormatBGR10_XR_sRGB isn't
@@ -87,6 +96,8 @@ constexpr MTLPixelFormat ToMTLPixelFormat(PixelFormat format) {
       return MTLPixelFormatRGBA16Float;
     case PixelFormat::kS8UInt:
       return MTLPixelFormatStencil8;
+    case PixelFormat::kD24UnormS8Uint:
+      return SafeMTLPixelFormatDepth24Unorm_Stencil8();
     case PixelFormat::kD32FloatS8UInt:
       return MTLPixelFormatDepth32Float_Stencil8;
     case PixelFormat::kB10G10R10XRSRGB:

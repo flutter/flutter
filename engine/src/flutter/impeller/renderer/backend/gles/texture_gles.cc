@@ -119,6 +119,7 @@ struct TexImage2DData {
         break;
       case PixelFormat::kUnknown:
       case PixelFormat::kS8UInt:
+      case PixelFormat::kD24UnormS8Uint:
       case PixelFormat::kD32FloatS8UInt:
       case PixelFormat::kR8UNormInt:
       case PixelFormat::kR8G8UNormInt:
@@ -167,6 +168,7 @@ struct TexImage2DData {
       case PixelFormat::kB8G8R8A8UNormInt:
       case PixelFormat::kB8G8R8A8UNormIntSRGB:
       case PixelFormat::kS8UInt:
+      case PixelFormat::kD24UnormS8Uint:
       case PixelFormat::kD32FloatS8UInt:
       case PixelFormat::kR8UNormInt:
       case PixelFormat::kR8G8UNormInt:
@@ -314,6 +316,8 @@ static std::optional<GLenum> ToRenderBufferFormat(PixelFormat format) {
       return GL_RGBA16F;
     case PixelFormat::kS8UInt:
       return GL_STENCIL_INDEX8;
+    case PixelFormat::kD24UnormS8Uint:
+      return GL_DEPTH24_STENCIL8;
     case PixelFormat::kD32FloatS8UInt:
       return GL_DEPTH32F_STENCIL8;
     case PixelFormat::kUnknown:

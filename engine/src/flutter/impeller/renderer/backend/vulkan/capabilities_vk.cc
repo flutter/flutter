@@ -7,6 +7,7 @@
 #include <algorithm>
 
 #include "impeller/base/validation.h"
+#include "impeller/core/formats.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 
 namespace impeller {
@@ -250,6 +251,7 @@ static bool PhysicalDeviceSupportsRequiredFormats(
       HasSuitableColorFormat(device, vk::Format::eB8G8R8A8Unorm);
   const auto has_depth_stencil_format =
       HasSuitableDepthStencilFormat(device, vk::Format::eS8Uint) ||
+      HasSuitableDepthStencilFormat(device, vk::Format::eD32SfloatS8Uint) ||
       HasSuitableDepthStencilFormat(device, vk::Format::eD24UnormS8Uint);
   return has_color_format && has_depth_stencil_format;
 }
@@ -337,8 +339,11 @@ bool CapabilitiesVK::SetPhysicalDevice(const vk::PhysicalDevice& device) {
   if (HasSuitableDepthStencilFormat(device, vk::Format::eS8Uint)) {
     depth_stencil_format_ = PixelFormat::kS8UInt;
   } else if (HasSuitableDepthStencilFormat(device,
-                                           vk::Format::eD24UnormS8Uint)) {
+                                           vk::Format::eD32SfloatS8Uint)) {
     depth_stencil_format_ = PixelFormat::kD32FloatS8UInt;
+  } else if (HasSuitableDepthStencilFormat(device,
+                                           vk::Format::eD24UnormS8Uint)) {
+    depth_stencil_format_ = PixelFormat::kD24UnormS8Uint;
   } else {
     return false;
   }

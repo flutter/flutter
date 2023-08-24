@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "impeller/renderer/backend/metal/formats_mtl.h"
+#include <Metal/Metal.h>
 
 #include <memory>
 
@@ -107,6 +108,15 @@ MTLTextureDescriptor* ToMTLTextureDescriptor(const TextureDescriptor& desc) {
     mtl_desc.usage |= MTLTextureUsageRenderTarget;
   }
   return mtl_desc;
+}
+
+MTLPixelFormat SafeMTLPixelFormatDepth24Unorm_Stencil8() {
+#if !FML_OS_IOS
+  if (@available(macOS 10.11, *)) {
+    return MTLPixelFormatDepth24Unorm_Stencil8;
+  }
+#endif  // FML_OS_IOS
+  return MTLPixelFormatInvalid;
 }
 
 MTLPixelFormat SafeMTLPixelFormatBGR10_XR_sRGB() {
