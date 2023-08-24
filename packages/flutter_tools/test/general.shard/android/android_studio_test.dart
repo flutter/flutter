@@ -11,7 +11,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
-import 'package:path/path.dart' as p; // flutter_ignore: package_path_import
+import 'package:path/path.dart' show Context; // flutter_ignore: package_path_import -- We only use Context as an interface.
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -1321,8 +1321,8 @@ class _FakeFileSystem extends Fake implements FileSystem {
   }
 
   @override
-  p.Context get path {
-    return p.Context();
+  Context get path {
+    return MemoryFileSystem.test().path;
   }
 }
 
