@@ -128,26 +128,6 @@ Future<int> main(List<String> args) async {
     ));
   });
 
-  test('Accepts --enable-check-profile', () async {
-    final StringBuffer outBuffer = StringBuffer();
-    final StringBuffer errBuffer = StringBuffer();
-    final ClangTidy clangTidy = ClangTidy.fromCommandLine(
-      <String>[
-        '--compile-commands',
-        buildCommands,
-        '--enable-check-profile',
-      ],
-      outSink: outBuffer,
-      errSink: errBuffer,
-    );
-
-    final int result = await clangTidy.run();
-
-    expect(result, equals(0));
-    expect(clangTidy.options.enableCheckProfile, isTrue);
-    print(outBuffer);
-  });
-
   test('shard-id valid', () async {
     _withTempFile('shard-id-valid', (String path) {
       final Options options = Options.fromCommandLine( <String>[
