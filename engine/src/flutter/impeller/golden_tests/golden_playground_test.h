@@ -23,7 +23,7 @@ class GoldenPlaygroundTest
     : public ::testing::TestWithParam<PlaygroundBackend> {
  public:
   using AiksPlaygroundCallback =
-      std::function<bool(AiksContext& renderer, RenderTarget& render_target)>;
+      std::function<std::optional<Picture>(AiksContext& renderer)>;
 
   GoldenPlaygroundTest();
 
@@ -38,9 +38,9 @@ class GoldenPlaygroundTest
   void SetTypographerContext(
       std::shared_ptr<TypographerContext> typographer_context);
 
-  bool OpenPlaygroundHere(const Picture& picture);
+  bool OpenPlaygroundHere(Picture picture);
 
-  bool OpenPlaygroundHere(const AiksPlaygroundCallback& callback);
+  bool OpenPlaygroundHere(AiksPlaygroundCallback callback);
 
   std::shared_ptr<Texture> CreateTextureForFixture(
       const char* fixture_name,

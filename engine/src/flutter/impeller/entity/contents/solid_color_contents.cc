@@ -44,6 +44,8 @@ std::optional<Rect> SolidColorContents::GetCoverage(
 bool SolidColorContents::Render(const ContentContext& renderer,
                                 const Entity& entity,
                                 RenderPass& pass) const {
+  auto capture = entity.GetCapture().CreateChild("SolidColorContents");
+
   using VS = SolidFillPipeline::VertexShader;
 
   Command cmd;
@@ -64,8 +66,8 @@ bool SolidColorContents::Render(const ContentContext& renderer,
   cmd.BindVertices(geometry_result.vertex_buffer);
 
   VS::FrameInfo frame_info;
-  frame_info.mvp = geometry_result.transform;
-  frame_info.color = GetColor().Premultiply();
+  frame_info.mvp = capture.AddMatrix("Transform", geometry_result.transform);
+  frame_info.color = capture.AddColor("Color", GetColor()).Premultiply();
   VS::BindFrameInfo(cmd, pass.GetTransientsBuffer().EmplaceUniform(frame_info));
 
   if (!pass.AddCommand(std::move(cmd))) {
