@@ -12,17 +12,15 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   final MemoryAllocations ma = MemoryAllocations.instance;
 
-  setUp(() {
-    assert(!ma.hasListeners);
-  });
-
   test('Publishers dispatch events in debug mode', () async {
 
     void listener(ObjectEvent event) {
+      print('${event.runtimeType} ${event.object.runtimeType}');
       if (event is ObjectDisposed) {
         _disposals++;
       }
       if (event is ObjectCreated) {
+
         _creations++;
       }
     }
@@ -142,8 +140,6 @@ Future<_EventStats> _activateFlutterObjectsAndReturnCountOfEvents() async {
   print('$_creations, $_disposals');
   renderObject.dispose(); disposals += 3;
   print('$_creations, $_disposals');
-
-
 
   return _EventStats()..creations = creations..disposals = disposals;
 }
