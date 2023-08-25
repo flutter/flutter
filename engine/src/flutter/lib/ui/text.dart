@@ -3,16 +3,51 @@
 // found in the LICENSE file.
 part of dart.ui;
 
-/// Whether to slant the glyphs in the font
+/// Whether to use the italic type variation of glyphs in the font.
+///
+/// Some modern fonts allow this to be selected in a more fine-grained manner.
+/// See [FontVariation.italic] for details.
+///
+/// Italic type is distinct from slanted glyphs. To control the slant of a
+/// glyph, consider the [FontVariation.slant] font feature.
 enum FontStyle {
-  /// Use the upright glyphs
+  /// Use the upright ("Roman") glyphs.
   normal,
 
-  /// Use glyphs designed for slanting
+  /// Use glyphs that have a more pronounced angle and typically a cursive style
+  /// ("italic type").
   italic,
 }
 
-/// The thickness of the glyphs used to draw the text
+/// The thickness of the glyphs used to draw the text.
+///
+/// Fonts are typically weighted on a 9-point scale, which, for historical
+/// reasons, uses the names 100 to 900. In Flutter, these are named `w100` to
+/// `w900` and have the following conventional meanings:
+///
+///  * [w100]: Thin, the thinnest font weight.
+///
+///  * [w200]: Extra light.
+///
+///  * [w300]: Light.
+///
+///  * [w400]: Normal. The constant [FontWeight.normal] is an alias for this value.
+///
+///  * [w500]: Medium.
+///
+///  * [w600]: Semi-bold.
+///
+///  * [w700]: Bold. The constant [FontWeight.bold] is an alias for this value.
+///
+///  * [w800]: Extra-bold.
+///
+///  * [w900]: Black, the thickest font weight.
+///
+/// For example, the font named "Roboto Medium" is typically exposed as a font
+/// with the name "Roboto" and the weight [FontWeight.w500].
+///
+/// Some modern fonts allow the weight to be adjusted in arbitrary increments.
+/// See [FontVariation.weight] for details.
 class FontWeight {
   const FontWeight._(this.index, this.value);
 
@@ -22,31 +57,31 @@ class FontWeight {
   /// The thickness value of this font weight.
   final int value;
 
-  /// Thin, the least thick
+  /// Thin, the least thick.
   static const FontWeight w100 = FontWeight._(0, 100);
 
-  /// Extra-light
+  /// Extra-light.
   static const FontWeight w200 = FontWeight._(1, 200);
 
-  /// Light
+  /// Light.
   static const FontWeight w300 = FontWeight._(2, 300);
 
-  /// Normal / regular / plain
+  /// Normal / regular / plain.
   static const FontWeight w400 = FontWeight._(3, 400);
 
-  /// Medium
+  /// Medium.
   static const FontWeight w500 = FontWeight._(4, 500);
 
-  /// Semi-bold
+  /// Semi-bold.
   static const FontWeight w600 = FontWeight._(5, 600);
 
-  /// Bold
+  /// Bold.
   static const FontWeight w700 = FontWeight._(6, 700);
 
-  /// Extra-bold
+  /// Extra-bold.
   static const FontWeight w800 = FontWeight._(7, 800);
 
-  /// Black, the most thick
+  /// Black, the most thick.
   static const FontWeight w900 = FontWeight._(8, 900);
 
   /// The default font weight.
@@ -64,6 +99,9 @@ class FontWeight {
   ///
   /// Rather than using fractional weights, the interpolation rounds to the
   /// nearest weight.
+  ///
+  /// For a smoother animation of font weight, consider using
+  /// [FontVariation.weight] if the font in question supports it.
   ///
   /// If both `a` and `b` are null, then this method will return null. Otherwise,
   /// any null values for `a` or `b` are interpreted as equivalent to [normal]
@@ -117,6 +155,9 @@ class FontWeight {
 ///
 /// ** See code in examples/api/lib/ui/text/font_feature.0.dart **
 /// {@end-tool}
+///
+/// Some fonts also support continuous font variations; see the [FontVariation]
+/// class.
 ///
 /// See also:
 ///
@@ -938,32 +979,158 @@ class FontFeature {
 /// Some fonts are variable fonts that can generate a range of different
 /// font faces by altering the values of the font's design axes.
 ///
-/// See https://docs.microsoft.com/en-us/typography/opentype/spec/otvaroverview
+/// For example:
 ///
-/// Example:
-/// `TextStyle(fontVariations: <FontVariation>[FontVariation('wght', 800.0)])`
+/// ```dart
+/// const TextStyle(fontVariations: <ui.FontVariation>[ui.FontVariation('wght', 800.0)])
+/// ```
+///
+/// Font variations are distinct from font features, as exposed by the
+/// [FontFeature] class. Where features can be enabled or disabled in a discrete
+/// manner, font variations provide a continuous axis of control.
+///
+/// See also:
+///
+///  * <https://learn.microsoft.com/en-us/typography/opentype/spec/dvaraxisreg#registered-axis-tags>,
+///    which lists registered axis tags.
+///
+///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/otvaroverview>,
+///    an overview of the font variations technology.
 class FontVariation {
   /// Creates a [FontVariation] object, which can be added to a [TextStyle] to
   /// change the variable attributes of a font.
   ///
   /// `axis` is the four-character tag that identifies the design axis.
-  /// These tags are specified by font formats such as OpenType.
-  /// See https://docs.microsoft.com/en-us/typography/opentype/spec/dvaraxisreg
+  /// OpenType lists the [currently registered axis
+  /// tags](https://docs.microsoft.com/en-us/typography/opentype/spec/dvaraxisreg).
   ///
   /// `value` is the value that the axis will be set to. The behavior
   /// depends on how the font implements the axis.
   const FontVariation(
     this.axis,
     this.value,
-  ) : assert(axis.length == 4, 'Axis tag must be exactly four characters long.');
+  ) : assert(axis.length == 4, 'Axis tag must be exactly four characters long.'),
+      assert(value >= -32768.0 && value < 32768.0, 'Value must be representable as a signed 16.16 fixed-point number, i.e. it must be in this range: -32768.0 ≤ value < 32768.0');
 
-  /// The tag that identifies the design axis.  Must consist of 4 ASCII
-  /// characters.
+  // Constructors below should be alphabetic by axis tag. This makes it easier
+  // to determine when an axis is missing so that we avoid adding duplicates.
+
+  // Start of axis tag list.
+  // ------------------------------------------------------------------------
+
+  /// Variable font style. (`ital`)
+  ///
+  /// Varies the style of glyphs in the font between normal and italic.
+  ///
+  /// Values must in the range 0.0 (meaning normal, or Roman, as in
+  /// [FontStyle.normal]) to 1.0 (meaning fully italic, as in
+  /// [FontStyle.italic]).
+  ///
+  /// This is distinct from [FontVariation.slant], which leans the characters
+  /// without changing the font style.
+  ///
+  /// See also:
+  ///
+  ///  * <https://learn.microsoft.com/en-us/typography/opentype/spec/dvaraxistag_ital>
+  const FontVariation.italic(this.value) : assert(value >= 0.0), assert(value <= 1.0), axis = 'ital';
+
+  /// Optical size optimization. (`opzs`)
+  ///
+  /// Changes the rendering of the font to be optimized for the given text size.
+  /// Normally, the optical size of the font will be derived from the font size.
+  ///
+  /// This feature could be used when the text represents a particular physical
+  /// font size, for example text in the representation of a hardcopy magazine,
+  /// which does not correspond to the actual font size being used to render the
+  /// text. By setting the optical size explicitly, font variations that might
+  /// be applied as the text is zoomed will be fixed at the size being
+  /// represented by the text.
+  ///
+  /// This feature could also be used to smooth animations. If a font varies its
+  /// rendering as the font size is adjusted, it may appear to "quiver" (or, one
+  /// might even say, "flutter") if the font size is animated. By setting a
+  /// fixed optical size, the rendering can be fixed to one particular style as
+  /// the text size animates.
+  ///
+  /// Values must be greater than zero, and are interpreted as points. A point
+  /// is 1/72 of an inch, or 1.333 logical pixels (96/72).
+  ///
+  /// See also:
+  ///
+  ///  * <https://learn.microsoft.com/en-us/typography/opentype/spec/dvaraxistag_opsz>
+  const FontVariation.opticalSize(this.value) : assert(value > 0.0), axis = 'opsz';
+
+  /// Variable font width. (`slnt`)
+  ///
+  /// Varies the slant of glyphs in the font.
+  ///
+  /// Values must be greater than -90.0 and less than +90.0, and represents the
+  /// angle in _counter-clockwise_ degrees relative to "normal", at 0.0.
+  ///
+  /// For example, to lean the glyphs forward by 45 degrees, one would use
+  /// `FontVariation.slant(-45.0)`.
+  ///
+  /// This is distinct from [FontVariation.italic], in that slant leans the
+  /// characters without changing the font style.
+  ///
+  /// See also:
+  ///
+  ///  * <https://learn.microsoft.com/en-us/typography/opentype/spec/dvaraxistag_slnt>
+  const FontVariation.slant(this.value) : assert(value > -90.0), assert(value < 90.0), axis = 'slnt';
+
+  /// Variable font width. (`wdth`)
+  ///
+  /// Varies the width of glyphs in the font.
+  ///
+  /// Values must be greater than zero, with no upper limit. 100.0 represents
+  /// the "normal" width. Smaller values are "condensed", greater values are
+  /// "extended".
+  ///
+  /// See also:
+  ///
+  ///  * <https://learn.microsoft.com/en-us/typography/opentype/spec/dvaraxistag_wdth>
+  const FontVariation.width(this.value) : assert(value >= 0.0), axis = 'wdth';
+
+  /// Variable font weight. (`wght`)
+  ///
+  /// Varies the stroke thickness of the font, similar to [FontWeight] but on a
+  /// continuous axis.
+  ///
+  /// Values must be in the range 1..1000, and are to be interpreted in a manner
+  /// consistent with the values of [FontWeight]. For instance, `400` is the
+  /// "normal" weight, and `700` is "bold".
+  ///
+  /// See also:
+  ///
+  ///  * <https://learn.microsoft.com/en-us/typography/opentype/spec/dvaraxistag_wght>
+  const FontVariation.weight(this.value) : assert(value >= 1), assert(value <= 1000), axis = 'wght';
+
+  // ------------------------------------------------------------------------
+  // End of axis tags list.
+
+  /// The tag that identifies the design axis.
+  ///
+  /// An axis tag must consist of 4 ASCII characters.
   final String axis;
 
   /// The value assigned to this design axis.
   ///
   /// The range of usable values depends on the specification of the axis.
+  ///
+  /// While this property is represented as a [double] in this API
+  /// ([binary64](https://en.wikipedia.org/wiki/Double-precision_floating-point_format)),
+  /// fonts use the fixed-point 16.16 format to represent the value of font
+  /// variations. This means that the actual range is -32768.0 to approximately
+  /// 32767.999985 and in principle the smallest increment between two values is
+  /// approximately 0.000015 (1/65536).
+  ///
+  /// Unfortunately for technical reasons the value is first converted to the
+  /// [binary32 floating point
+  /// format](https://en.wikipedia.org/wiki/Single-precision_floating-point_format),
+  /// which only has 24 bits of precision. This means that for values outside
+  /// the range -256.0 to 256.0, the smallest increment is larger than what is
+  /// technically supported by OpenType. At the extreme edge of the range, the
+  /// smallest increment is only approximately ±0.002.
   final double value;
 
   static const int _kEncodedSize = 8;
@@ -988,6 +1155,37 @@ class FontVariation {
 
   @override
   int get hashCode => Object.hash(axis, value);
+
+  /// Linearly interpolates between two font variations.
+  ///
+  /// If the two variations have different axis tags, the interpolation switches
+  /// abruptly from one to the other at t=0.5. Otherwise, the value is
+  /// interpolated (see [lerpDouble].
+  ///
+  /// The value is not clamped to the valid values of the axis tag, but it is
+  /// clamped to the valid range of font variations values in general (the range
+  /// of signed 16.16 fixed point numbers).
+  ///
+  /// The `t` argument represents position on the timeline, with 0.0 meaning
+  /// that the interpolation has not started, returning `a` (or something
+  /// equivalent to `a`), 1.0 meaning that the interpolation has finished,
+  /// returning `b` (or something equivalent to `b`), and values in between
+  /// meaning that the interpolation is at the relevant point on the timeline
+  /// between `a` and `b`. The interpolation can be extrapolated beyond 0.0 and
+  /// 1.0, so negative values and values greater than 1.0 are valid (and can
+  /// easily be generated by curves such as [Curves.elasticInOut]).
+  ///
+  /// Values for `t` are usually obtained from an [Animation<double>], such as
+  /// an [AnimationController].
+  static FontVariation? lerp(FontVariation? a, FontVariation? b, double t) {
+    if (a?.axis != b?.axis || (a == null && b == null)) {
+      return t < 0.5 ? a : b;
+    }
+    return FontVariation(
+      a!.axis,
+      clampDouble(lerpDouble(a.value, b!.value, t)!, -32768.0, 32768.0 - 1.0/65536.0),
+    );
+  }
 
   @override
   String toString() => "FontVariation('$axis', $value)";
