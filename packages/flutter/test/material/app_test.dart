@@ -1299,9 +1299,8 @@ void main() {
     expect(find.byType(GlowingOverscrollIndicator), findsNothing);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-  testWidgetsWithLeakTracking('ScrollBehavior stretch android overscroll indicator', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialScrollBehavior default stretch android overscroll indicator', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-      scrollBehavior: const MaterialScrollBehavior(androidOverscrollIndicator: AndroidOverscrollIndicator.stretch),
       home: ListView(
         children: const <Widget>[
           SizedBox(
@@ -1319,8 +1318,8 @@ void main() {
 
   testWidgetsWithLeakTracking('Overscroll indicator can be set by theme', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-      // The current default is glowing, setting via the theme should override.
-      theme: ThemeData().copyWith(androidOverscrollIndicator: AndroidOverscrollIndicator.stretch),
+      // The current default is M3 and stretch overscroll, setting via the theme should override.
+      theme: ThemeData().copyWith(useMaterial3: false),
       home: ListView(
         children: const <Widget>[
           SizedBox(
@@ -1332,28 +1331,8 @@ void main() {
       ),
     ));
 
-    expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
-    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
-
-  testWidgetsWithLeakTracking('Overscroll indicator in MaterialScrollBehavior takes precedence over theme', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      // MaterialScrollBehavior.androidOverscrollIndicator takes precedence over theme.
-      scrollBehavior: const MaterialScrollBehavior(androidOverscrollIndicator: AndroidOverscrollIndicator.stretch),
-      theme: ThemeData().copyWith(androidOverscrollIndicator: AndroidOverscrollIndicator.glow),
-      home: ListView(
-        children: const <Widget>[
-          SizedBox(
-            height: 1000.0,
-            width: 1000.0,
-            child: Text('Test'),
-          ),
-        ],
-      ),
-    ));
-
-    expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
-    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+    expect(find.byType(GlowingOverscrollIndicator), findsOneWidget);
+    expect(find.byType(StretchingOverscrollIndicator), findsNothing);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
   testWidgetsWithLeakTracking('Material3 - ListView clip behavior updates overscroll indicator clip behavior', (WidgetTester tester) async {
