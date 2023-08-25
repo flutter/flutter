@@ -109,6 +109,12 @@ class _TestStatefulWidgetState extends State<_TestStatefulWidget> {
   }
 }
 
+
+class _EventStats {
+  int creations = 0;
+  int disposals = 0;
+}
+
 /// Create and dispose Flutter objects to fire memory allocation events.
 Future<int> _activateFlutterObjectsAndReturnCountOfEvents() async {
   int count = 0;
