@@ -268,6 +268,7 @@ class SampleChecker {
 // TODO(gspencergoog): implement the missing tests.
 // See https://github.com/flutter/flutter/issues/130459
 final Set<String> _knownMissingTests = <String>{
+  'examples/api/test/cupertino/theme/cupertino_theme_extension.1_test.dart',
   'examples/api/test/cupertino/text_field/cupertino_text_field.0_test.dart',
   'examples/api/test/material/bottom_app_bar/bottom_app_bar.2_test.dart',
   'examples/api/test/material/bottom_app_bar/bottom_app_bar.1_test.dart',

@@ -325,7 +325,7 @@ void main() {
     count = 0x000000;
     await tester.pumpWidget(
       CupertinoApp(
-        theme: CupertinoThemeData(primaryColor: Color(0xFF001122)),
+        theme: CupertinoThemeData(primaryColor: const Color(0xFF001122)),
         home: CupertinoNavigationBar(
           leading: CupertinoButton(
             onPressed: () { },

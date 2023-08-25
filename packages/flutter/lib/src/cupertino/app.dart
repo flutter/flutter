@@ -111,12 +111,12 @@ import 'theme.dart';
 /// ![The CupertinoApp displays a CupertinoPageScaffold with orange-colored icons](https://flutter.github.io/assets-for-api-docs/assets/cupertino/theme_cupertino_app.png)
 ///
 /// ```dart
-/// const CupertinoApp(
+/// CupertinoApp(
 ///   theme: CupertinoThemeData(
 ///     brightness: Brightness.dark,
 ///     primaryColor: CupertinoColors.systemOrange,
 ///   ),
-///   home: CupertinoPageScaffold(
+///   home: const CupertinoPageScaffold(
 ///     navigationBar: CupertinoNavigationBar(
 ///       middle: Text('CupertinoApp Theme'),
 ///     ),

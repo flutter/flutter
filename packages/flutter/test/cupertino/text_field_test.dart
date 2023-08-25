@@ -1747,7 +1747,7 @@ void main() {
       CupertinoApp(
         theme: CupertinoThemeData(
           brightness: Brightness.dark,
-          textTheme: CupertinoTextThemeData(
+          textTheme: const CupertinoTextThemeData(
             textStyle: TextStyle(fontSize: 100, fontWeight: FontWeight.w800),
           ),
         ),
@@ -6497,7 +6497,7 @@ void main() {
        CupertinoApp(
         home: const CupertinoTextField(),
         theme: CupertinoThemeData(
-          primaryColor: Color(0xFFF44336),
+          primaryColor: const Color(0xFFF44336),
         ),
       ),
     );
