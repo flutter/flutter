@@ -6,7 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-    int eventCount = 0;
+    int _creations = 0;
+    int _disposals = 0;
 
 void main() {
   final MemoryAllocations ma = MemoryAllocations.instance;
@@ -17,11 +18,11 @@ void main() {
 
   test('Publishers dispatch events in debug mode', () async {
 
-    void listener(ObjectEvent event) => eventCount++;
+    void listener(ObjectEvent event) => _creations++;
     ma.addListener(listener);
 
     final int expectedEventCount = await _activateFlutterObjectsAndReturnCountOfEvents();
-    expect(eventCount, expectedEventCount);
+    expect(_creations + _disposals, expectedEventCount);
 
     ma.removeListener(listener);
     expect(ma.hasListeners, isFalse);
@@ -122,16 +123,16 @@ Future<int> _activateFlutterObjectsAndReturnCountOfEvents() async {
   int count = 0;
 
   final _TestElement element = _TestElement(); count++;
-  print(eventCount);
+  print(_creations);
   final RenderObject renderObject = _TestRenderObject(); count++;
-  print(eventCount);
+  print(_creations);
 
   element.makeInactive();
-  print(eventCount);
+  print(_creations);
   element.unmount(); count += 3;
-  print(eventCount);
+  print(_creations);
   renderObject.dispose(); count++;
-  print(eventCount);
+  print(_creations);
 
   count++;
   count++;
