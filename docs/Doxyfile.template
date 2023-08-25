@@ -48,7 +48,7 @@ DOXYFILE_ENCODING      = UTF-8
 # title of most generated pages and in a few other places.
 # The default value is: My Project.
 
-PROJECT_NAME           = @@PROJECT_NAME@@
+PROJECT_NAME           = "@@PROJECT_NAME@@"
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number. This
 # could be handy for archiving the generated documentation or if some version
@@ -74,7 +74,7 @@ PROJECT_LOGO           = ./docs/flutter_logo.png
 # entered, it will be relative to the location where doxygen was started. If
 # left blank the current directory will be used.
 
-OUTPUT_DIRECTORY       = @@OUTPUT_DIRECTORY@@
+OUTPUT_DIRECTORY       = "@@OUTPUT_DIRECTORY@@"
 
 # If the CREATE_SUBDIRS tag is set to YES then doxygen will create up to 4096
 # sub-directories (in 2 levels) under the output directory of each output format
@@ -938,7 +938,7 @@ WARN_LINE_FORMAT       = "at line $line of file $file"
 # specified the warning and error messages are written to standard output
 # (stdout).
 
-WARN_LOGFILE           = @@LOG_FILE@@
+WARN_LOGFILE           = "@@LOG_FILE@@"
 
 #---------------------------------------------------------------------------
 # Configuration options related to the input files
@@ -1437,7 +1437,7 @@ GENERATE_DOCSET        = YES
 # The default value is: Doxygen generated docs.
 # This tag requires that the tag GENERATE_DOCSET is set to YES.
 
-DOCSET_FEEDNAME        = @@DOCSET_FEEDNAME@@
+DOCSET_FEEDNAME        = "@@DOCSET_FEEDNAME@@"
 
 # This tag determines the URL of the docset feed. A documentation feed provides
 # an umbrella under which multiple documentation sets from a single provider
