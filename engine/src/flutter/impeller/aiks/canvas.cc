@@ -492,7 +492,7 @@ void Canvas::DrawImageRect(const std::shared_ptr<Image>& image,
   Entity entity;
   entity.SetBlendMode(paint.blend_mode);
   entity.SetStencilDepth(GetStencilDepth());
-  entity.SetContents(paint.WithFilters(contents, false));
+  entity.SetContents(paint.WithFilters(contents));
   entity.SetTransformation(GetCurrentTransformation());
 
   GetCurrentPass().AddEntity(entity);
@@ -561,8 +561,14 @@ void Canvas::DrawTextFrame(const TextFrame& text_frame,
     color_text_contents->SetColorSourceContents(
         paint.color_source.GetContents(paint));
 
-    entity.SetContents(
-        paint.WithFilters(std::move(color_text_contents), false));
+    // TODO(bdero): This mask blur application is a hack. It will always wind up
+    //              doing a gaussian blur that affects the color source itself
+    //              instead of just the mask. The color filter text support
+    //              needs to be reworked in order to interact correctly with
+    //              mask filters.
+    //              https://github.com/flutter/flutter/issues/133297
+    entity.SetContents(paint.WithFilters(
+        paint.WithMaskBlur(std::move(color_text_contents), true)));
 
     GetCurrentPass().AddEntity(entity);
     return;
@@ -573,7 +579,14 @@ void Canvas::DrawTextFrame(const TextFrame& text_frame,
   entity.SetTransformation(GetCurrentTransformation() *
                            Matrix::MakeTranslation(position));
 
-  entity.SetContents(paint.WithFilters(std::move(text_contents), true));
+  // TODO(bdero): This mask blur application is a hack. It will always wind up
+  //              doing a gaussian blur that affects the color source itself
+  //              instead of just the mask. The color filter text support
+  //              needs to be reworked in order to interact correctly with
+  //              mask filters.
+  //              https://github.com/flutter/flutter/issues/133297
+  entity.SetContents(
+      paint.WithFilters(paint.WithMaskBlur(std::move(text_contents), true)));
 
   GetCurrentPass().AddEntity(entity);
 }
@@ -682,7 +695,7 @@ void Canvas::DrawAtlas(const std::shared_ptr<Image>& atlas,
   entity.SetTransformation(GetCurrentTransformation());
   entity.SetStencilDepth(GetStencilDepth());
   entity.SetBlendMode(paint.blend_mode);
-  entity.SetContents(paint.WithFilters(contents, false));
+  entity.SetContents(paint.WithFilters(contents));
 
   GetCurrentPass().AddEntity(entity);
 }

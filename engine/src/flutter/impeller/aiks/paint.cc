@@ -34,21 +34,32 @@ std::shared_ptr<Contents> Paint::CreateContentsForEntity(const Path& path,
 std::shared_ptr<Contents> Paint::CreateContentsForGeometry(
     std::shared_ptr<Geometry> geometry) const {
   auto contents = color_source.GetContents(*this);
+
+  // Attempt to apply the color filter on the CPU first.
+  // Note: This is not just an optimization; some color sources rely on
+  //       CPU-applied color filters to behave properly.
+  bool needs_color_filter = !!color_filter;
+  if (color_filter &&
+      contents->ApplyColorFilter(color_filter->GetCPUColorFilterProc())) {
+    needs_color_filter = false;
+  }
+
   contents->SetGeometry(std::move(geometry));
   if (mask_blur_descriptor.has_value()) {
-    return mask_blur_descriptor->CreateMaskBlur(contents);
+    // If there's a mask blur and we need to apply the color filter on the GPU,
+    // we need to be careful to only apply the color filter to the source
+    // colors. CreateMaskBlur is able to handle this case.
+    return mask_blur_descriptor->CreateMaskBlur(
+        contents, needs_color_filter ? color_filter : nullptr);
   }
+
   return contents;
 }
 
 std::shared_ptr<Contents> Paint::WithFilters(
-    std::shared_ptr<Contents> input,
-    std::optional<bool> is_solid_color) const {
-  bool is_solid_color_val = is_solid_color.value_or(color_source.GetType() ==
-                                                    ColorSource::Type::kColor);
+    std::shared_ptr<Contents> input) const {
   input = WithColorFilter(input, /*absorb_opacity=*/true);
   input = WithInvertFilter(input);
-  input = WithMaskBlur(input, is_solid_color_val);
   input = WithImageFilter(input, Matrix(), /*is_subpass=*/false);
   return input;
 }
@@ -128,7 +139,16 @@ std::shared_ptr<Contents> Paint::WithInvertFilter(
 }
 
 std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
-    std::shared_ptr<ColorSourceContents> color_source_contents) const {
+    std::shared_ptr<ColorSourceContents> color_source_contents,
+    const std::shared_ptr<ColorFilter>& color_filter) const {
+  // If it's a solid color and there is no color filter, then we can just get
+  // away with doing one Gaussian blur.
+  if (color_source_contents->IsSolidColor() && !color_filter) {
+    return FilterContents::MakeGaussianBlur(
+        FilterInput::Make(color_source_contents), sigma, sigma, style,
+        Entity::TileMode::kDecal, Matrix());
+  }
+
   /// 1. Create an opaque white mask of the original geometry.
 
   auto mask = std::make_shared<SolidColorContents>();
@@ -152,11 +172,20 @@ std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
   color_source_contents->SetGeometry(
       Geometry::MakeRect(*expanded_local_bounds));
 
-  /// 4. Composite the color source and mask together.
+  std::shared_ptr<Contents> color_contents = color_source_contents;
+
+  /// 4. Apply the user set color filter on the GPU, if applicable.
+
+  if (color_filter) {
+    color_contents = color_filter->WrapWithGPUColorFilter(
+        FilterInput::Make(color_source_contents), true);
+  }
+
+  /// 5. Composite the color source with the blurred mask.
 
   return ColorFilterContents::MakeBlend(
-      BlendMode::kSourceIn, {FilterInput::Make(blurred_mask),
-                             FilterInput::Make(color_source_contents)});
+      BlendMode::kSourceIn,
+      {FilterInput::Make(blurred_mask), FilterInput::Make(color_contents)});
 }
 
 std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(

@@ -90,6 +90,8 @@ class ColorSourceContents : public Contents {
   ///
   Scalar GetOpacityFactor() const;
 
+  virtual bool IsSolidColor() const;
+
   // |Contents|
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
