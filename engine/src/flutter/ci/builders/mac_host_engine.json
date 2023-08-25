@@ -15,7 +15,9 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-12"
+                "os=Mac-12",
+                "cpu=x86",
+                "mac_model=Macmini8,1"
             ],
             "gclient_variables": {
                 "download_android_deps": false
@@ -47,7 +49,21 @@
                 "$flutter/osx_sdk": {
                     "sdk_version": "14e300c"
                 }
-            }
+            },
+            "tests": [
+                {
+                    "language": "python3",
+                    "name": "Host Tests for host_debug",
+                    "parameters": [
+                        "--variant",
+                        "host_debug",
+                        "--type",
+                        "dart,engine",
+                        "--engine-capture-core-dump"
+                    ],
+                    "script": "flutter/testing/run_tests.py"
+                }
+            ]
         },
         {
             "archives": [
@@ -63,7 +79,9 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-12"
+                "os=Mac-12",
+                "cpu=x86",
+                "mac_model=Macmini8,1"
             ],
             "gclient_variables": {
                 "download_android_deps": false
@@ -90,7 +108,21 @@
                 "$flutter/osx_sdk": {
                     "sdk_version": "14e300c"
                 }
-            }
+            },
+            "tests": [
+                {
+                    "language": "python3",
+                    "name": "Host Tests for host_profile",
+                    "parameters": [
+                        "--variant",
+                        "host_profile",
+                        "--type",
+                        "dart,engine",
+                        "--engine-capture-core-dump"
+                    ],
+                    "script": "flutter/testing/run_tests.py"
+                }
+            ]
         },
         {
             "archives": [
@@ -107,7 +139,9 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-12"
+                "os=Mac-12",
+                "cpu=x86",
+                "mac_model=Macmini8,1"
             ],
             "dependencies": [
                 {
@@ -144,7 +178,20 @@
                 "$flutter/osx_sdk": {
                     "sdk_version": "14e300c"
                 }
-            }
+            },
+            "tests": [
+                {
+                    "language": "python3",
+                    "name": "Impeller-golden, dart and engine tests for host_release",
+                    "parameters": [
+                        "--variant",
+                        "host_release",
+                        "--type",
+                        "dart,engine,impeller-golden"
+                    ],
+                    "script": "flutter/testing/run_tests.py"
+                }
+            ]
         },
         {
             "archives": [
@@ -161,7 +208,8 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-12"
+                "os=Mac-12",
+                "cpu=x86"
             ],
             "gclient_variables": {
                 "download_android_deps": false
@@ -207,7 +255,8 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-12"
+                "os=Mac-12",
+                "cpu=x86"
             ],
             "gclient_variables": {
                 "download_android_deps": false
@@ -250,7 +299,8 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-12"
+                "os=Mac-12",
+                "cpu=x86"
             ],
             "gclient_variables": {
                 "download_android_deps": false
@@ -425,100 +475,6 @@
             "source": "out/release/snapshot/gen_snapshot.zip",
             "destination": "darwin-x64-release/gen_snapshot.zip",
             "realm": "production"
-        }
-    ],
-    "tests": [
-        {
-            "name": "Mac Host Tests for host_debug",
-            "recipe": "engine_v2/tester_engine",
-            "drone_dimensions": [
-                "device_type=none",
-                "os=Mac-12",
-                "cpu=x86"
-            ],
-            "gclient_variables": {
-                "download_android_deps": false
-            },
-            "dependencies": [
-                "host_debug"
-            ],
-            "tasks": [
-                {
-                    "language": "python3",
-                    "name": "Host Tests for host_debug",
-                    "parameters": [
-                        "--variant",
-                        "host_debug",
-                        "--type",
-                        "dart,engine",
-                        "--engine-capture-core-dump"
-                    ],
-                    "script": "flutter/testing/run_tests.py"
-                }
-            ]
-        },
-        {
-            "name": "Mac Impeller-golden, dart and engine tests for host_release",
-            "recipe": "engine_v2/tester_engine",
-            "drone_dimensions": [
-                "device_type=none",
-                "os=Mac-12",
-                "cpu=x86"
-            ],
-            "gclient_variables": {
-                "download_android_deps": false
-            },
-            "dependencies": [
-                "host_release"
-            ],
-            "test_dependencies": [
-                {
-                    "dependency": "goldctl",
-                    "version": "git_revision:3a77d0b12c697a840ca0c7705208e8622dc94603"
-                }
-            ],
-            "tasks": [
-                {
-                    "language": "python3",
-                    "name": "Impeller-golden, dart and engine tests for host_release",
-                    "parameters": [
-                        "--variant",
-                        "host_release",
-                        "--type",
-                        "dart,engine,impeller-golden"
-                    ],
-                    "script": "flutter/testing/run_tests.py"
-                }
-            ]
-        },
-        {
-            "name": "Mac Host Tests for host_profile",
-            "recipe": "engine_v2/tester_engine",
-            "drone_dimensions": [
-                "device_type=none",
-                "os=Mac-12",
-                "cpu=x86"
-            ],
-            "gclient_variables": {
-                "download_android_deps": false
-            },
-            "dependencies": [
-                "host_profile"
-            ],
-            "tasks": [
-                {
-                    "language": "python3",
-                    "name": "Host Tests for host_profile",
-                    "parameters": [
-                        "--variant",
-                        "host_profile",
-                        "--type",
-                        "dart,engine",
-                        "--engine-capture-core-dump"
-                    ],
-                    "script": "flutter/testing/run_tests.py"
-                }
-            ]
         }
     ]
 }
