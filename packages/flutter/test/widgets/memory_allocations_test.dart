@@ -119,5 +119,8 @@ Future<int> _activateFlutterObjectsAndReturnCountOfEvents() async {
   element.makeInactive(); element.unmount(); count += 3;
   renderObject.dispose(); count++;
 
+  count++;
+  count++;
+
   return count;
 }
