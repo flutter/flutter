@@ -683,6 +683,91 @@ void main() {
     expect(copySpy.invoked, isTrue);
     expect(pasteSpy.invoked, isTrue);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+
+  group('Android Predictive Back', () {
+    final List<bool> frameworkHandlesBacks = <bool>[];
+    setUp(() {
+      // Initialize to false. Because this uses a static boolean internally, it
+      // is not reset between tests or calls to pumpWidget. Explicitly setting
+      // it to false before each test makes them behave deterministically.
+      SystemNavigator.setFrameworkHandlesBack(false);
+      frameworkHandlesBacks.clear();
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+          if (methodCall.method == 'SystemNavigator.setFrameworkHandlesBack') {
+            expect(methodCall.arguments, isA<bool>());
+            frameworkHandlesBacks.add(methodCall.arguments as bool);
+          }
+          return;
+        });
+    });
+
+    tearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.platform, null);
+      SystemNavigator.setFrameworkHandlesBack(true);
+    });
+
+    Future<void> setAppLifeCycleState(AppLifecycleState state) async {
+      final ByteData? message = const StringCodec().encodeMessage(state.toString());
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .handlePlatformMessage('flutter/lifecycle', message, (_) {});
+    }
+
+    testWidgets('WidgetsApp calls setFrameworkHandlesBack only when app is ready', (WidgetTester tester) async {
+      // Start in the `resumed` state, where setFrameworkHandlesBack should be
+      // called like normal.
+      await setAppLifeCycleState(AppLifecycleState.resumed);
+
+      late BuildContext currentContext;
+      await tester.pumpWidget(
+        WidgetsApp(
+          color: const Color(0xFF123456),
+          builder: (BuildContext context, Widget? child) {
+            currentContext = context;
+            return const Placeholder();
+          },
+        ),
+      );
+
+      expect(frameworkHandlesBacks, isEmpty);
+
+      const NavigationNotification(canHandlePop: true).dispatch(currentContext);
+      await tester.pumpAndSettle();
+      expect(frameworkHandlesBacks, isNotEmpty);
+      expect(frameworkHandlesBacks.last, isTrue);
+
+      const NavigationNotification(canHandlePop: false).dispatch(currentContext);
+      await tester.pumpAndSettle();
+      expect(frameworkHandlesBacks.last, isFalse);
+
+      // Set the app state to inactive, where setFrameworkHandlesBack shouldn't
+      // be called.
+      await setAppLifeCycleState(AppLifecycleState.inactive);
+
+      final int finalCallsLength = frameworkHandlesBacks.length;
+      const NavigationNotification(canHandlePop: true).dispatch(currentContext);
+      await tester.pumpAndSettle();
+      expect(frameworkHandlesBacks, hasLength(finalCallsLength));
+
+      const NavigationNotification(canHandlePop: false).dispatch(currentContext);
+      await tester.pumpAndSettle();
+      expect(frameworkHandlesBacks, hasLength(finalCallsLength));
+
+      // Set the app state to detached, which also shouldn't call
+      // setFrameworkHandlesBack. Must go to paused, then detached.
+      await setAppLifeCycleState(AppLifecycleState.paused);
+      await setAppLifeCycleState(AppLifecycleState.detached);
+
+      const NavigationNotification(canHandlePop: true).dispatch(currentContext);
+      await tester.pumpAndSettle();
+      expect(frameworkHandlesBacks, hasLength(finalCallsLength));
+
+      const NavigationNotification(canHandlePop: false).dispatch(currentContext);
+      await tester.pumpAndSettle();
+      expect(frameworkHandlesBacks, hasLength(finalCallsLength));
+    });
+  });
 }
 
 typedef SimpleRouterDelegateBuilder = Widget Function(BuildContext, RouteInformation);
