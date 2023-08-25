@@ -1338,7 +1338,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     ? WidgetsBinding.instance.platformDispatcher.defaultRouteName
     : widget.initialRoute ?? WidgetsBinding.instance.platformDispatcher.defaultRouteName;
 
-  AppLifecycleState? _appLifecycleState;
+  late AppLifecycleState _appLifecycleState;
 
   /// The default value for [onNavigationNotification].
   ///
@@ -1347,7 +1347,6 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   /// bubbling.
   bool _defaultOnNavigationNotification(NavigationNotification notification) {
     switch(_appLifecycleState) {
-      case null:
       case AppLifecycleState.detached:
       case AppLifecycleState.inactive:
         // Avoid updating the engine when the app isn't ready.
@@ -1373,7 +1372,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     _locale = _resolveLocales(WidgetsBinding.instance.platformDispatcher.locales, widget.supportedLocales);
     WidgetsBinding.instance.addObserver(this);
     if (WidgetsBinding.instance.lifecycleState != null) {
-      _appLifecycleState = WidgetsBinding.instance.lifecycleState;
+      _appLifecycleState = WidgetsBinding.instance.lifecycleState!;
     }
   }
 
