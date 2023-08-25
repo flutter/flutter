@@ -2900,6 +2900,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// remote value is outdated and needs updating.
   TextEditingValue? _lastKnownRemoteTextEditingValue;
 
+  static int _lastClientId = 0;
+  final int _clientId = ++_lastClientId;
+
+  @override
+  int get clientId => _clientId;
+
   @override
   TextEditingValue get currentTextEditingValue => _value;
 
@@ -4775,8 +4781,56 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                           },
                           child: kIsWeb ? (
                             Stack(
-                              children: [
-                                _Editable(
+                              children: <Widget>[
+                              Positioned.fill(
+                                child: EditableWeb(
+                                  startHandleLayerLink: _startHandleLayerLink,
+                                  endHandleLayerLink: _endHandleLayerLink,
+                                  inlineSpan: buildTextSpan(),
+                                  value: _value,
+                                  cursorColor: _cursorColor,
+                                  backgroundCursorColor: widget.backgroundCursorColor,
+                                  showCursor: EditableText.debugDeterministicCursor
+                                      ? ValueNotifier<bool>(widget.showCursor)
+                                      : _cursorVisibilityNotifier,
+                                  forceLine: widget.forceLine,
+                                  readOnly: widget.readOnly,
+                                  hasFocus: _hasFocus,
+                                  maxLines: widget.maxLines,
+                                  minLines: widget.minLines,
+                                  expands: widget.expands,
+                                  strutStyle: widget.strutStyle,
+                                  selectionColor: _selectionOverlay?.spellCheckToolbarIsVisible ?? false
+                                      ? _spellCheckConfiguration.misspelledSelectionColor ?? widget.selectionColor
+                                      : widget.selectionColor,
+                                  textScaler: effectiveTextScaler,
+                                  textAlign: widget.textAlign,
+                                  textDirection: _textDirection,
+                                  locale: widget.locale,
+                                  textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
+                                  textWidthBasis: widget.textWidthBasis,
+                                  obscuringCharacter: widget.obscuringCharacter,
+                                  obscureText: widget.obscureText,
+                                  offset: offset,
+                                  rendererIgnoresPointer: widget.rendererIgnoresPointer,
+                                  cursorWidth: widget.cursorWidth,
+                                  cursorHeight: widget.cursorHeight,
+                                  cursorRadius: widget.cursorRadius,
+                                  cursorOffset: widget.cursorOffset ?? Offset.zero,
+                                  selectionHeightStyle: widget.selectionHeightStyle,
+                                  selectionWidthStyle: widget.selectionWidthStyle,
+                                  paintCursorAboveText: widget.paintCursorAboveText,
+                                  enableInteractiveSelection: widget._userSelectionEnabled,
+                                  textSelectionDelegate: this,
+                                  devicePixelRatio: _devicePixelRatio,
+                                  promptRectRange: _currentPromptRectRange,
+                                  promptRectColor: widget.autocorrectionTextRectColor,
+                                  clipBehavior: widget.clipBehavior,
+                                  requestKeyboard: requestKeyboard,
+                                  clientId: clientId,
+                                ),
+                              ),
+                              _Editable(
                               key: _editableKey,
                               startHandleLayerLink: _startHandleLayerLink,
                               endHandleLayerLink: _endHandleLayerLink,
@@ -4820,51 +4874,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                               promptRectRange: _currentPromptRectRange,
                               promptRectColor: widget.autocorrectionTextRectColor,
                               clipBehavior: widget.clipBehavior,
-                              ),
-                              EditableWeb(
-                                startHandleLayerLink: _startHandleLayerLink,
-                                endHandleLayerLink: _endHandleLayerLink,
-                                inlineSpan: buildTextSpan(),
-                                value: _value,
-                                cursorColor: _cursorColor,
-                                backgroundCursorColor: widget.backgroundCursorColor,
-                                showCursor: EditableText.debugDeterministicCursor
-                                    ? ValueNotifier<bool>(widget.showCursor)
-                                    : _cursorVisibilityNotifier,
-                                forceLine: widget.forceLine,
-                                readOnly: widget.readOnly,
-                                hasFocus: _hasFocus,
-                                maxLines: widget.maxLines,
-                                minLines: widget.minLines,
-                                expands: widget.expands,
-                                strutStyle: widget.strutStyle,
-                                selectionColor: _selectionOverlay?.spellCheckToolbarIsVisible ?? false
-                                    ? _spellCheckConfiguration.misspelledSelectionColor ?? widget.selectionColor
-                                    : widget.selectionColor,
-                                textScaler: effectiveTextScaler,
-                                textAlign: widget.textAlign,
-                                textDirection: _textDirection,
-                                locale: widget.locale,
-                                textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
-                                textWidthBasis: widget.textWidthBasis,
-                                obscuringCharacter: widget.obscuringCharacter,
-                                obscureText: widget.obscureText,
-                                offset: offset,
-                                rendererIgnoresPointer: widget.rendererIgnoresPointer,
-                                cursorWidth: widget.cursorWidth,
-                                cursorHeight: widget.cursorHeight,
-                                cursorRadius: widget.cursorRadius,
-                                cursorOffset: widget.cursorOffset ?? Offset.zero,
-                                selectionHeightStyle: widget.selectionHeightStyle,
-                                selectionWidthStyle: widget.selectionWidthStyle,
-                                paintCursorAboveText: widget.paintCursorAboveText,
-                                enableInteractiveSelection: widget._userSelectionEnabled,
-                                textSelectionDelegate: this,
-                                devicePixelRatio: _devicePixelRatio,
-                                promptRectRange: _currentPromptRectRange,
-                                promptRectColor: widget.autocorrectionTextRectColor,
-                                clipBehavior: widget.clipBehavior,
-                                requestKeyboard: requestKeyboard,
                               ),
                             ],
                           )) : _Editable(
