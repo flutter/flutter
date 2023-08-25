@@ -684,7 +684,9 @@ deps = {
   'src/third_party/gradle': {
     'packages': [
       {
-        'version': 'version:7.0.2',
+        # See tools/gradle/README.md for update instructions.
+        # Version here means the CIPD tag.
+        'version': 'version:7.5.1',
         'package': 'flutter/gradle'
       }
     ],
