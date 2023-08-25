@@ -928,6 +928,64 @@ void main() {
       )),
     );
   });
+
+  testWidgets("Material3 - RawChip.shape's side is used when provided", (WidgetTester tester) async {
+    Widget buildChip({ OutlinedBorder? shape, BorderSide? side }) {
+      return MaterialApp(
+        theme: ThemeData(
+          useMaterial3: true,
+          chipTheme: ChipThemeData(
+            shape: shape,
+            side: side,
+          ),
+        ),
+        home: const Material(
+          child: Center(
+            child: RawChip(
+              label: Text('RawChip'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test [RawChip.shape] with a side.
+    await tester.pumpWidget(buildChip(
+      shape: const RoundedRectangleBorder(
+        side: BorderSide(color: Color(0xffff00ff)),
+        borderRadius: BorderRadius.all(Radius.circular(7.0)),
+      )),
+    );
+
+    // Chip should have the provided shape and the side from [RawChip.shape].
+    expect(
+      getMaterial(tester).shape,
+      const RoundedRectangleBorder(
+        side: BorderSide(color: Color(0xffff00ff)),
+        borderRadius: BorderRadius.all(Radius.circular(7.0)),
+      ),
+    );
+
+    // Test [RawChip.shape] with a side and [RawChip.side].
+    await tester.pumpWidget(buildChip(
+      shape: const RoundedRectangleBorder(
+        side: BorderSide(color: Color(0xffff00ff)),
+        borderRadius: BorderRadius.all(Radius.circular(7.0)),
+      ),
+      side: const BorderSide(color: Color(0xfffff000))),
+    );
+    await tester.pumpAndSettle();
+
+    // Chip use shape from [RawChip.shape] and the side from [RawChip.side].
+    // [RawChip.shape]'s side should be ignored.
+    expect(
+      getMaterial(tester).shape,
+      const RoundedRectangleBorder(
+        side: BorderSide(color: Color(0xfffff000)),
+        borderRadius: BorderRadius.all(Radius.circular(7.0)),
+      ),
+    );
+  });
 }
 
 class _MaterialStateOutlinedBorder extends StadiumBorder implements MaterialStateOutlinedBorder {
