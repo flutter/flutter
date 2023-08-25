@@ -123,16 +123,16 @@ Future<int> _activateFlutterObjectsAndReturnCountOfEvents() async {
   int count = 0;
 
   final _TestElement element = _TestElement(); count++;
-  print(_creations);
+  print('$_creations, $_disposals');
   final RenderObject renderObject = _TestRenderObject(); count++;
-  print(_creations);
+  print('$_creations, $_disposals');
 
   element.makeInactive();
-  print(_creations);
+  print('$_creations, $_disposals');
   element.unmount(); count += 3;
-  print(_creations);
+  print('$_creations, $_disposals');
   renderObject.dispose(); count++;
-  print(_creations);
+  print('$_creations, $_disposals');
 
   count++;
   count++;
