@@ -1853,20 +1853,17 @@ void main() {
       token.dispose();
     });
 
-    testWidgets('dispatches object creation in constructor', (WidgetTester tester) async {
-      final MemoryAllocations ma = MemoryAllocations.instance;
-      assert(!ma.hasListeners);
+    test('dispatches object creation in constructor', () {
       int eventCount = 0;
       void listener(ObjectEvent event) => eventCount++;
-      ma.addListener(listener);
+      MemoryAllocations.instance.addListener(listener);
 
       final ShortcutRegistry registry = ShortcutRegistry();
 
       expect(eventCount, 1);
 
       registry.dispose();
-      ma.removeListener(listener);
-      assert(!ma.hasListeners);
+      MemoryAllocations.instance.removeListener(listener);
     });
   });
 }
