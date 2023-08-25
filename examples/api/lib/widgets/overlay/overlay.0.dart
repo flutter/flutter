@@ -138,6 +138,7 @@ class _OverlayExampleState extends State<OverlayExample> {
   // Remove the OverlayEntry.
   void removeHighlightOverlay() {
     overlayEntry?.remove();
+    overlayEntry?.dispose();
     overlayEntry = null;
   }
 
