@@ -1265,7 +1265,7 @@ void main() {
     expect(footerScrollView.controller, null);
   });
 
-    testWidgets('PaginatedDataTable custom heading row color', (WidgetTester tester) async {
+  testWidgets('PaginatedDataTable custom heading row color', (WidgetTester tester) async {
     const MaterialStateProperty<Color> headingRowColor = MaterialStatePropertyAll<Color>(Color(0xffFF0000));
     final TestDataSource source = TestDataSource();
 
