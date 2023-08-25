@@ -1852,6 +1852,22 @@ void main() {
       }, throwsAssertionError);
       token.dispose();
     });
+
+    testWidgets('dispatches object creation in constructor', (WidgetTester tester) async {
+      final MemoryAllocations ma = MemoryAllocations.instance;
+      assert(!ma.hasListeners);
+      int eventCount = 0;
+      void listener(ObjectEvent event) => eventCount++;
+      ma.addListener(listener);
+
+      final ShortcutRegistry registry = ShortcutRegistry();
+
+      expect(eventCount, 1);
+
+      registry.dispose();
+      ma.removeListener(listener);
+      assert(!ma.hasListeners);
+    });
   });
 }
 

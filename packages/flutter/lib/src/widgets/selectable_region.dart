@@ -1567,6 +1567,13 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
 /// This class optimize the selection update by keeping track of the
 /// [Selectable]s that currently contain the selection edges.
 abstract class MultiSelectableSelectionContainerDelegate extends SelectionContainerDelegate with ChangeNotifier {
+  /// Creates an instance of [MultiSelectableSelectionContainerDelegate].
+  MultiSelectableSelectionContainerDelegate() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+  }
+
   /// Gets the list of selectables this delegate is managing.
   List<Selectable> selectables = <Selectable>[];
 
