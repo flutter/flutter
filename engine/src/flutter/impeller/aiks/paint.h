@@ -42,7 +42,8 @@ struct Paint {
     Sigma sigma;
 
     std::shared_ptr<FilterContents> CreateMaskBlur(
-        std::shared_ptr<ColorSourceContents> color_source_contents) const;
+        std::shared_ptr<ColorSourceContents> color_source_contents,
+        const std::shared_ptr<ColorFilter>& color_filter) const;
 
     std::shared_ptr<FilterContents> CreateMaskBlur(
         const FilterInput::Ref& input,
@@ -67,18 +68,10 @@ struct Paint {
 
   /// @brief      Wrap this paint's configured filters to the given contents.
   /// @param[in]  input           The contents to wrap with paint's filters.
-  /// @param[in]  is_solid_color  Affects mask blurring behavior. If false, use
-  ///                             the image border for mask blurring. If true,
-  ///                             do a Gaussian blur to achieve the mask
-  ///                             blurring effect for arbitrary paths. If unset,
-  ///                             use the current paint configuration to infer
-  ///                             the result.
   /// @return     The filter-wrapped contents. If there are no filters that need
   ///             to be wrapped for the current paint configuration, the
   ///             original contents is returned.
-  std::shared_ptr<Contents> WithFilters(
-      std::shared_ptr<Contents> input,
-      std::optional<bool> is_solid_color = std::nullopt) const;
+  std::shared_ptr<Contents> WithFilters(std::shared_ptr<Contents> input) const;
 
   /// @brief      Wrap this paint's configured filters to the given contents of
   ///             subpass target.
@@ -101,10 +94,10 @@ struct Paint {
   /// @brief   Whether this paint has a color filter that can apply opacity
   bool HasColorFilter() const;
 
- private:
   std::shared_ptr<Contents> WithMaskBlur(std::shared_ptr<Contents> input,
                                          bool is_solid_color) const;
 
+ private:
   std::shared_ptr<Contents> WithImageFilter(std::shared_ptr<Contents> input,
                                             const Matrix& effect_transform,
                                             bool is_subpass) const;

@@ -30,6 +30,9 @@ static const std::vector<std::string> kSkipTests = {
     "impeller_Play_AiksTest_CanRenderRadialGradientManyColors_Vulkan",
     "impeller_Play_AiksTest_CanRenderBackdropBlurInteractive_Metal",
     "impeller_Play_AiksTest_CanRenderBackdropBlurInteractive_Vulkan",
+    "impeller_Play_AiksTest_ClippedBlurFilterRendersCorrectlyInteractive_Metal",
+    "impeller_Play_AiksTest_ClippedBlurFilterRendersCorrectlyInteractive_"
+    "Vulkan",
     "impeller_Play_AiksTest_TextFrameSubpixelAlignment_Metal",
     "impeller_Play_AiksTest_TextFrameSubpixelAlignment_Vulkan",
     "impeller_Play_AiksTest_ColorWheel_Metal",
