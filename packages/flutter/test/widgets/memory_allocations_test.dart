@@ -18,7 +18,14 @@ void main() {
 
   test('Publishers dispatch events in debug mode', () async {
 
-    void listener(ObjectEvent event) => _creations++;
+    void listener(ObjectEvent event) {
+      if (event is ObjectDisposed) {
+        _disposals++;
+      }
+      if (event is ObjectCreated) {
+        _creations++;
+      }
+    }
     ma.addListener(listener);
 
     final int expectedEventCount = await _activateFlutterObjectsAndReturnCountOfEvents();
