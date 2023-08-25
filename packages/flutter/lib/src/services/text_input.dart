@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:html' as html;
-import 'dart:math' as math;
 import 'dart:io' show Platform;
 import 'dart:ui' show
   FontWeight,
@@ -15,6 +14,7 @@ import 'dart:ui' show
   TextDirection;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/src/widgets/editable_web.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'autofill.dart';
@@ -1104,6 +1104,9 @@ mixin TextSelectionDelegate {
 ///  * [DeltaTextInputClient], a [TextInputClient] extension that receives
 ///    granular information from the platform's text input.
 mixin TextInputClient {
+  /// Unique identifier for the client.
+  int get clientId;
+
   /// The current state of the [TextEditingValue] held by this client.
   TextEditingValue? get currentTextEditingValue;
 
@@ -1605,13 +1608,13 @@ class TextInput {
   static final TextInput _instance = TextInput._();
 
   static void _addInputControl(TextInputControl control) {
-    if (control != _PlatformTextInputControl.instance) {
+    if (control != (kIsWeb ? WebTextInputControl.instance : _PlatformTextInputControl.instance)) {
       _instance._inputControls.add(control);
     }
   }
 
   static void _removeInputControl(TextInputControl control) {
-    if (control != _PlatformTextInputControl.instance) {
+    if (control != (kIsWeb ? WebTextInputControl.instance : _PlatformTextInputControl.instance)) {
       _instance._inputControls.remove(control);
     }
   }
@@ -1653,12 +1656,12 @@ class TextInput {
   /// * [TextInput.setInputControl], a method to set a custom input
   ///   control, or to remove the visual input control.
   static void restorePlatformInputControl() {
-    setInputControl(_PlatformTextInputControl.instance);
+    setInputControl(kIsWeb ? WebTextInputControl.instance : _PlatformTextInputControl.instance);
   }
 
-  TextInputControl? _currentControl = _PlatformTextInputControl.instance;
+  TextInputControl? _currentControl = kIsWeb ? WebTextInputControl.instance : _PlatformTextInputControl.instance;
   final Set<TextInputControl> _inputControls = <TextInputControl>{
-    _PlatformTextInputControl.instance,
+    if (kIsWeb) WebTextInputControl.instance else _PlatformTextInputControl.instance,
   };
 
   static const List<TextInputAction> _androidSupportedInputActions = <TextInputAction>[
@@ -1859,6 +1862,7 @@ class TextInput {
     switch (method) {
       case 'TextInputClient.updateEditingState':
         final TextEditingValue value = TextEditingValue.fromJSON(args[1] as Map<String, dynamic>);
+        print('ds;lafjads;lkjasdf;lkjsdfa');
         TextInput._instance._updateEditingValue(value, exclude: _PlatformTextInputControl.instance);
       case 'TextInputClient.updateEditingStateWithDeltas':
         assert(_currentConnection!._client is DeltaTextInputClient, 'You must be using a DeltaTextInputClient if TextInputConfiguration.enableDeltaModel is set to true');
@@ -2038,17 +2042,6 @@ class TextInput {
   /// send editing value updates to the attached input client.
   static void updateEditingValue(TextEditingValue value) {
     _instance._updateEditingValue(value, exclude: _instance._currentControl);
-  }
-
-  /// get the current client.
-  static TextInputClient? get client => TextInput._instance._currentConnection?._client;
-
-  /// platform view input element.
-  html.HtmlElement? _inputEl;
-
-  /// set input element.
-  static void setInputElement(html.HtmlElement inputEl) {
-    _instance._inputEl = inputEl;
   }
 
   /// Finishes the current autofill context, and potentially saves the user
@@ -2241,8 +2234,6 @@ class _PlatformTextInputControl with TextInputControl {
 
   MethodChannel get _channel => TextInput._instance._channel;
 
-  html.HtmlElement? get _inputEl => TextInput._instance._inputEl;
-
   Map<String, dynamic> _configurationToJson(TextInputConfiguration configuration) {
     final Map<String, dynamic> json = configuration.toJson();
     if (TextInput._instance._currentControl != _PlatformTextInputControl.instance) {
@@ -2253,10 +2244,7 @@ class _PlatformTextInputControl with TextInputControl {
 
   @override
   void attach(TextInputClient client, TextInputConfiguration configuration) {
-    if(kIsWeb) {
-      return;
-    }
-
+    print('in legacy attach');
     _channel.invokeMethod<void>(
       'TextInput.setClient',
       <Object>[
@@ -2268,19 +2256,11 @@ class _PlatformTextInputControl with TextInputControl {
 
   @override
   void detach(TextInputClient client) {
-    if(kIsWeb) {
-      return;
-    }
-
     _channel.invokeMethod<void>('TextInput.clearClient');
   }
 
   @override
   void updateConfig(TextInputConfiguration configuration) {
-    if(kIsWeb) {
-      return;
-    }
-
     _channel.invokeMethod<void>(
       'TextInput.updateConfig',
       _configurationToJson(configuration),
@@ -2289,27 +2269,6 @@ class _PlatformTextInputControl with TextInputControl {
 
   @override
   void setEditingState(TextEditingValue value) {
-    if(kIsWeb) {
-      print('--setEditingState-- $value');
-      final html.InputElement element = _inputEl! as html.InputElement;
-      final int minOffset = math.min(value.selection.baseOffset, value.selection.extentOffset);
-      final int maxOffset = math.max(value.selection.baseOffset, value.selection.extentOffset);
-      final TextAffinity affinity = value.selection.affinity;
-      String direction;
-
-      switch(affinity) {
-        case TextAffinity.upstream:
-          direction = 'backward';
-        case TextAffinity.downstream:
-          direction = 'forward';
-      }
-
-      element.value = value.text;
-      element.setSelectionRange(minOffset, maxOffset, direction);
-
-      return;
-    }
-
     _channel.invokeMethod<void>(
       'TextInput.setEditingState',
       value.toJSON(),
@@ -2318,26 +2277,16 @@ class _PlatformTextInputControl with TextInputControl {
 
   @override
   void show() {
-    if(kIsWeb) {
-      _inputEl!.focus();
-      return;
-    }
     _channel.invokeMethod<void>('TextInput.show');
   }
 
   @override
   void hide() {
-    if(kIsWeb) {
-      _inputEl!.blur();
-    }
     _channel.invokeMethod<void>('TextInput.hide');
   }
 
   @override
   void setEditableSizeAndTransform(Size editableBoxSize, Matrix4 transform) {
-    if(kIsWeb) {
-      return;
-    }
     _channel.invokeMethod<void>(
       'TextInput.setEditableSizeAndTransform',
       <String, dynamic>{
@@ -2350,9 +2299,6 @@ class _PlatformTextInputControl with TextInputControl {
 
   @override
   void setComposingRect(Rect rect) {
-    if(kIsWeb) {
-      return;
-    }
     _channel.invokeMethod<void>(
       'TextInput.setMarkedTextRect',
       <String, dynamic>{
@@ -2366,9 +2312,6 @@ class _PlatformTextInputControl with TextInputControl {
 
   @override
   void setCaretRect(Rect rect) {
-    if(kIsWeb) {
-      return;
-    }
     _channel.invokeMethod<void>(
       'TextInput.setCaretRect',
       <String, dynamic>{
@@ -2382,9 +2325,6 @@ class _PlatformTextInputControl with TextInputControl {
 
   @override
   void setSelectionRects(List<SelectionRect> selectionRects) {
-    if(kIsWeb) {
-      return;
-    }
     _channel.invokeMethod<void>(
       'TextInput.setSelectionRects',
       selectionRects.map((SelectionRect rect) {
@@ -2409,9 +2349,6 @@ class _PlatformTextInputControl with TextInputControl {
     required TextDirection textDirection,
     required TextAlign textAlign,
   }) {
-    if(kIsWeb) {
-      return;
-    }
     _channel.invokeMethod<void>(
       'TextInput.setStyle',
       <String, dynamic>{
@@ -2426,17 +2363,11 @@ class _PlatformTextInputControl with TextInputControl {
 
   @override
   void requestAutofill() {
-    if(kIsWeb) {
-      return;
-    }
     _channel.invokeMethod<void>('TextInput.requestAutofill');
   }
 
   @override
   void finishAutofillContext({bool shouldSave = true}) {
-    if(kIsWeb) {
-      return;
-    }
     _channel.invokeMethod<void>(
       'TextInput.finishAutofillContext',
       shouldSave,

@@ -54,6 +54,7 @@ class EditableWeb extends StatefulWidget {
     this.autocorrect = true, // _Editable doesn't have
     this.textInputAction, // _Editable doesn't have
     required this.requestKeyboard, // _Editable doesn't have
+    required this.clientId,
   });
 
   final InlineSpan inlineSpan;
@@ -100,6 +101,7 @@ class EditableWeb extends StatefulWidget {
   final bool autocorrect;
   final TextInputAction? textInputAction;
   final void Function() requestKeyboard;
+  final int clientId;
 
   @override
   State<EditableWeb> createState() => _EditableWebState();
@@ -111,6 +113,7 @@ class _EditableWebState extends State<EditableWeb> {
   html.TextAreaElement? _textAreaElement;
   double sizedBoxHeight = 24;
   late final int _maxLines;
+  TextEditingValue? _lastEditingState;
 
   @override
   void initState() {
@@ -136,6 +139,7 @@ class _EditableWebState extends State<EditableWeb> {
     print('disposed');
     // widget.controller.removeListener(_controllerListener);
     // widget.focusNode.removeListener(_focusListener);
+    WebTextInputControl.instance.deregisterInputElement(widget.clientId);
 
     super.dispose();
   }
@@ -149,7 +153,8 @@ class _EditableWebState extends State<EditableWeb> {
   }
 
   String colorToCss(Color color) {
-    return 'rgba(${color.red}, ${color.green}, ${color.blue}, ${color.opacity})';
+    // hard coding opacity to 1 for now because EditableText passes cursorColor with 0 opacity. 
+    return 'rgba(${color.red}, ${color.green}, ${color.blue}, ${color.opacity == 0 ? 1 : color.opacity})';
   }
 
   String textStyleToCss(TextStyle style) {
@@ -524,38 +529,30 @@ class _EditableWebState extends State<EditableWeb> {
     // }
   }
 
-  // void _handleChange(DomEvent event) {
-
-  //   TextEditingValue newEditingState = TextEditingValue(text: _inputEl)
-  //       EditingState.fromDomElement(activeDomElement);
-  //   newEditingState = determineCompositionState(newEditingState);
-
-  //   TextEditingDeltaState? newTextEditingDeltaState;
-  //   if (inputConfiguration.enableDeltaModel) {
-  //     editingDeltaState.composingOffset = newEditingState.composingBaseOffset;
-  //     editingDeltaState.composingExtent = newEditingState.composingExtentOffset;
-  //     newTextEditingDeltaState = TextEditingDeltaState.inferDeltaState(
-  //         newEditingState, lastEditingState, editingDeltaState);
-  //   }
-
-  //   if (newEditingState != lastEditingState) {
-  //     lastEditingState = newEditingState;
-  //     _editingDeltaState = newTextEditingDeltaState;
-  //     onChange!(lastEditingState, _editingDeltaState);
-  //     // Flush delta after it has been sent to framework.
-  //     _editingDeltaState = null;
-  //   }
-  // }
+  // TODO: Handle composition and delta model?
+  void handleChange() {
+    final html.InputElement element = _inputEl as html.InputElement;
+    final String text = element.value!;
+      final TextSelection selection = TextSelection(
+          baseOffset: element.selectionStart ?? 0,
+          extentOffset: element.selectionEnd ?? 0);
+          
+    final TextEditingValue newEditingState = TextEditingValue(text: text, selection: selection);
+    print('newEditingState: ${newEditingState} == _lastEditingState: ${_lastEditingState}');
+    if(_lastEditingState == null) {
+      // TODO need to find a way to set lastEditingState on setEditingState message from framework. Map of EditableWeb objects could work. 
+      _lastEditingState = newEditingState;
+    }
+    if(newEditingState != _lastEditingState) {
+      _lastEditingState = newEditingState;
+      updateEditingState(newEditingState);
+    }
+  }
 
   void setElementListeners(html.HtmlElement inputEl) {
     // listen for events
     inputEl.onInput.listen((e) {
-      // e.preventDefault();
-      final html.InputElement element = _inputEl as html.InputElement;
-      final String text = element.value!;
-      final TextSelection selection = TextSelection(baseOffset: element.selectionStart ?? 0, extentOffset: element.selectionEnd ?? 0);
-      final TextEditingValue value = TextEditingValue(text: text, selection: selection);
-      updateEditingState(value);
+      handleChange();
     });
 
     inputEl.onFocus.listen((e) {
@@ -567,6 +564,7 @@ class _EditableWebState extends State<EditableWeb> {
         // values. In that case, the variable is always set to whatever the last rendered input's selection
         // background value was set to.  To fix this, we update that CSS variable to the currently focused
         // element's selection color value.
+        inputEl.classes.add('customInputSelection');
         html.document.querySelector('flt-glass-pane')!.style.setProperty(
             '--selection-background', colorToCss(widget.selectionColor!));
       }
@@ -584,37 +582,43 @@ class _EditableWebState extends State<EditableWeb> {
     //   }
     // });
 
-    // we can only do 'select' events which fire after selection, but not
-    // when carets change positions.  This is slightly different than the
-    // selectionChange behavior on Flutter, which also fires when the caret
-    // changes.
-    inputEl.onSelect.listen((event) {
-      // final int baseOffset = (inputEl as html.InputElement).selectionStart ?? 0;
-      // final int extentOffset = (inputEl as html.InputElement).selectionEnd ?? 0;
-      // _handleSelectionChanged(
-      //     TextSelection(baseOffset: baseOffset, extentOffset: extentOffset),
-      //     null);
-
-      // hacky implementation, but don't know of a non-JS solution to disable
-      // selection while keeping the input enabled for mouse + key events.
-      // We adjust the selection if readOnly is set because the readOnly attribute
-      // will take care of the disabled behavior
-      if (!widget.enableInteractiveSelection && !widget.readOnly) {
-        (inputEl as html.InputElement).selectionStart =
-            inputEl.selectionEnd;
-      }
+    html.document.onSelectionChange.listen((e) {
+      handleChange();
     });
 
-    // add listeners for controller and focus
-    // widget.controller.addListener(_controllerListener);
-    // widget.focusNode.addListener(_focusListener);
+    // inputEl.onSelect.listen((event) {
+    //   // hacky implementation, but don't know of a non-JS solution to disable
+    //   // selection while keeping the input enabled for mouse + key events.
+    //   // We adjust the selection if readOnly is set because the readOnly attribute
+    //   // will take care of the disabled behavior
+    //   if (!widget.enableInteractiveSelection && !widget.readOnly) {
+    //     (inputEl as html.InputElement).selectionStart = inputEl.selectionEnd;
+    //   }
 
-    // handle autofocus, need to wait for platform view to be added to DOM
-    // if (widget.autofocus) {
-    //   WidgetsBinding.instance!.addPostFrameCallback((_) {
-    //     inputEl.focus();
-    //   });
-    // }
+    //   // final html.InputElement element = _inputEl as html.InputElement;
+    //   // final String text = element.value!;
+    //   // final TextSelection selection = TextSelection(
+    //   //     baseOffset: element.selectionStart ?? 0,
+    //   //     extentOffset: element.selectionEnd ?? 0);
+    //   // final TextEditingValue value =
+    //   //     TextEditingValue(text: text, selection: selection);
+
+    //   // updateEditingState(value);
+    // });
+
+    // prevent default for mouse events to prevent selection interference/flickering
+    // point and drag selection is completely handled by framework
+    inputEl.onMouseDown.listen((event) {
+      event.preventDefault();
+    });
+
+    inputEl.onMouseUp.listen((event) {
+      event.preventDefault();
+    });
+
+    inputEl.onMouseMove.listen((event) {
+      event.preventDefault();
+    });
   }
 
   void setGeneralAttributes(html.HtmlElement inputEl) {
@@ -676,7 +680,9 @@ class _EditableWebState extends State<EditableWeb> {
     setGeneralAttributes(inputEl);
 
     _inputEl = inputEl;
-    TextInput.setInputElement(inputEl);
+    // TextInput.setInputElement(inputEl); // TODO change this to the WebInputControl
+    // register platform view via clientId.
+    WebTextInputControl.instance.registerInputElement(widget.clientId, inputEl);
   }
 
   // --------------
@@ -698,7 +704,7 @@ class _EditableWebState extends State<EditableWeb> {
   // }
 
   // void show() {
-  //   _inputEl.focus(); 
+  //   _inputEl.focus();
   // }
 
   // void hide() {
@@ -725,26 +731,16 @@ class _EditableWebState extends State<EditableWeb> {
     - TextInputClient.requestExistingInputState
     - TextInputClient.onConnectionClosed
   */
-  void updateEditingState(TextEditingValue value, {TextInputControl? exclude}) {
-    // if (_currentConnection == null) {
-    //   return;
-    // }
-
-    // for (final TextInputControl control in _instance._inputControls) {
-    //   if (control != exclude) {
-    //     control.setEditingState(value);
-    //   }
-    // }
+  void updateEditingState(TextEditingValue value) {
     TextInput.updateEditingValue(value);
   }
 
   void updateEditingStateWithTag() {
     // ?
-    
   }
 
   void performAction(TextInputAction action) {
-    TextInput.client?.performAction(action);
+    // TextInput.client?.performAction(action); // TODO just pass this from above. 
   }
 
   void requestExistingInputState() {
@@ -753,6 +749,23 @@ class _EditableWebState extends State<EditableWeb> {
 
   void onConnectionClosed() {
     // no-op
+  }
+
+  @override
+  void didUpdateWidget(EditableWeb oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // we do this because widget can sometimes selectionColor can be passed 
+    // as conditionally null depending on some state that's determined in a layer
+    // above (e.g. `hasFocus`), so we need to keep track of the selectionColor 
+    // and set it when appropriate.  
+    if (widget.selectionColor != oldWidget.selectionColor) {
+      if (widget.selectionColor != null) {
+        html.document.querySelector('flt-glass-pane')!.style.setProperty(
+            '--selection-background', colorToCss(widget.selectionColor!));
+        _inputEl.classes.add('customInputSelection');
+      }
+    }
   }
 
   @override
@@ -766,5 +779,140 @@ class _EditableWebState extends State<EditableWeb> {
         },
       ),
     );
+  }
+}
+
+/*
+  Put inputEl 
+*/
+
+/*
+  There's only a single instance ever of WebTextInputControl.
+
+  We need a map of unique ids that are associated with an inputElement. 
+  Ids should be set on the client and incremented everytime there's an editabletext created
+  We register an input element when the platfrom view is created. To do this, we need to pass the unique
+  id created in EditableText to our platform view.  We can then set a "currentInputElement" in attach by 
+  referencing that TextInputClient id. 
+*/
+class WebTextInputControl with TextInputControl {
+  WebTextInputControl._();
+
+  /// The shared instance of [WebTextInputControl].
+  static final WebTextInputControl instance = WebTextInputControl._();
+
+  Map<int, html.HtmlElement> elementMap = <int, html.HtmlElement>{};
+  html.HtmlElement? _currentInputElement;
+  // html.HtmlElement? get _inputEl => TextInput._instance._inputEl;
+
+  /// Register an input element. We use an EditableText id because we need 
+  /// an id that can be referenced from a TextInputClient (due to attach's function
+  /// signature).
+  void registerInputElement(int clientId, html.HtmlElement inputEl) {
+    print('register');
+    elementMap[clientId] = inputEl;
+  }
+
+  /// De-register an input element.
+  void deregisterInputElement(int clientId) {
+    print('deregister');
+    elementMap.remove(clientId);
+  }
+
+  @override
+  void attach(TextInputClient client, TextInputConfiguration configuration) {
+    // set currentInputElement by grabbing it from the map. This is why we have to register
+    // the id of the TextInputClient (editabletext) above, because we need that id in attach. 
+    print('in web control attach');
+    print(elementMap[client.clientId]!.text);
+    _currentInputElement = elementMap[client.clientId];
+  }
+
+  @override
+  void detach(TextInputClient client) {
+    // set currentInputElement to null? can't do this because detach get's before hide, which 
+    print('detach');
+    (_currentInputElement! as html.InputElement).blur();
+    _currentInputElement = null;
+  }
+
+  @override
+  void updateConfig(TextInputConfiguration configuration) {
+    
+  }
+
+  @override
+  void setEditingState(TextEditingValue value) {
+
+      print('calling setEditingState');
+      final html.InputElement element = _currentInputElement! as html.InputElement;
+      final int minOffset = math.min(value.selection.baseOffset, value.selection.extentOffset);
+      final int maxOffset = math.max(value.selection.baseOffset, value.selection.extentOffset);
+      final TextAffinity affinity = value.selection.affinity;
+      String direction;
+
+      // do we need this?
+      switch(affinity) {
+        case TextAffinity.upstream:
+          direction = 'backward';
+        case TextAffinity.downstream:
+          direction = 'forward';
+      }
+      element.value = value.text;
+      element.setSelectionRange(minOffset, maxOffset);
+  }
+
+  @override
+  void show() {
+    print('show');
+    (_currentInputElement! as html.InputElement).focus();
+  }
+
+  @override
+  void hide() {
+    // no op? it goes detach -> hide.  So if we want to clear the currentInputElement,
+    // blur needs to be called on detach. 
+  }
+
+  @override
+  void setEditableSizeAndTransform(Size editableBoxSize, Matrix4 transform) {
+    
+  }
+
+  @override
+  void setComposingRect(Rect rect) {
+    
+  }
+
+  @override
+  void setCaretRect(Rect rect) {
+    
+  }
+
+  @override
+  void setSelectionRects(List<SelectionRect> selectionRects) {
+    
+  }
+
+
+  @override
+  void setStyle({
+    required String? fontFamily,
+    required double? fontSize,
+    required FontWeight? fontWeight,
+    required TextDirection textDirection,
+    required TextAlign textAlign,
+  }) {
+    
+  }
+
+  @override
+  void requestAutofill() {
+    
+  }
+
+  @override
+  void finishAutofillContext({bool shouldSave = true}) {
+    
   }
 }
