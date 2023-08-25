@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+    int eventCount = 0;
+
 void main() {
   final MemoryAllocations ma = MemoryAllocations.instance;
 
@@ -14,7 +16,7 @@ void main() {
   });
 
   test('Publishers dispatch events in debug mode', () async {
-    int eventCount = 0;
+
     void listener(ObjectEvent event) => eventCount++;
     ma.addListener(listener);
 
