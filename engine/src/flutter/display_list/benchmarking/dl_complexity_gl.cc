@@ -503,7 +503,7 @@ void DisplayListGLComplexityCalculator::GLHelper::drawVertices(
 }
 
 void DisplayListGLComplexityCalculator::GLHelper::drawImage(
-    const sk_sp<DlImage> image,
+    const sk_sp<DlImage>& image,
     const SkPoint point,
     DlImageSampling sampling,
     bool render_with_attributes) {
@@ -583,7 +583,7 @@ void DisplayListGLComplexityCalculator::GLHelper::ImageRect(
 }
 
 void DisplayListGLComplexityCalculator::GLHelper::drawImageNine(
-    const sk_sp<DlImage> image,
+    const sk_sp<DlImage>& image,
     const SkIRect& center,
     const SkRect& dst,
     DlFilterMode filter,
@@ -608,7 +608,7 @@ void DisplayListGLComplexityCalculator::GLHelper::drawImageNine(
 }
 
 void DisplayListGLComplexityCalculator::GLHelper::drawDisplayList(
-    const sk_sp<DisplayList> display_list,
+    const sk_sp<DisplayList>& display_list,
     SkScalar opacity) {
   if (IsComplex()) {
     return;
@@ -622,7 +622,7 @@ void DisplayListGLComplexityCalculator::GLHelper::drawDisplayList(
 }
 
 void DisplayListGLComplexityCalculator::GLHelper::drawTextBlob(
-    const sk_sp<SkTextBlob> blob,
+    const sk_sp<SkTextBlob>& blob,
     SkScalar x,
     SkScalar y) {
   if (IsComplex()) {

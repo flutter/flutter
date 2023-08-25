@@ -2,67 +2,71 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef TESTING_DISPLAY_LIST_TESTING_H_
-#define TESTING_DISPLAY_LIST_TESTING_H_
+#ifndef FLUTTER_DISPLAY_LIST_DL_OP_RECORDER_H_
+#define FLUTTER_DISPLAY_LIST_DL_OP_RECORDER_H_
 
-#include <ostream>
-
-#include "flutter/display_list/display_list.h"
+#include "flutter/display_list/dl_canvas_to_receiver.h"
 #include "flutter/display_list/dl_op_receiver.h"
+#include "flutter/display_list/utils/dl_bounds_accumulator.h"
+#include "flutter/display_list/utils/dl_matrix_clip_tracker.h"
 
 namespace flutter {
-namespace testing {
 
-bool DisplayListsEQ_Verbose(const DisplayList* a, const DisplayList* b);
-bool inline DisplayListsEQ_Verbose(const DisplayList& a, const DisplayList& b) {
-  return DisplayListsEQ_Verbose(&a, &b);
-}
-bool inline DisplayListsEQ_Verbose(sk_sp<const DisplayList> a,
-                                   sk_sp<const DisplayList> b) {
-  return DisplayListsEQ_Verbose(a.get(), b.get());
-}
-bool DisplayListsNE_Verbose(const DisplayList* a, const DisplayList* b);
-bool inline DisplayListsNE_Verbose(const DisplayList& a, const DisplayList& b) {
-  return DisplayListsNE_Verbose(&a, &b);
-}
-bool inline DisplayListsNE_Verbose(sk_sp<const DisplayList> a,
-                                   sk_sp<const DisplayList> b) {
-  return DisplayListsNE_Verbose(a.get(), b.get());
-}
+class DisplayList;
 
-extern std::ostream& operator<<(std::ostream& os,
-                                const DisplayList& display_list);
-extern std::ostream& operator<<(std::ostream& os, const DlPaint& paint);
-extern std::ostream& operator<<(std::ostream& os, const DlBlendMode& mode);
-extern std::ostream& operator<<(std::ostream& os, const DlCanvas::ClipOp& op);
-extern std::ostream& operator<<(std::ostream& os,
-                                const DlCanvas::PointMode& op);
-extern std::ostream& operator<<(std::ostream& os,
-                                const DlCanvas::SrcRectConstraint& op);
-extern std::ostream& operator<<(std::ostream& os, const DlStrokeCap& cap);
-extern std::ostream& operator<<(std::ostream& os, const DlStrokeJoin& join);
-extern std::ostream& operator<<(std::ostream& os, const DlDrawStyle& style);
-extern std::ostream& operator<<(std::ostream& os, const DlBlurStyle& style);
-extern std::ostream& operator<<(std::ostream& os, const DlFilterMode& mode);
-extern std::ostream& operator<<(std::ostream& os, const DlColor& color);
-extern std::ostream& operator<<(std::ostream& os, DlImageSampling sampling);
-extern std::ostream& operator<<(std::ostream& os, const DlVertexMode& mode);
-extern std::ostream& operator<<(std::ostream& os, const DlTileMode& mode);
-extern std::ostream& operator<<(std::ostream& os, const DlImage* image);
+//------------------------------------------------------------------------------
+/// @brief      An implementation of DlOpReceiver that records the calls into
+///             a buffer, typically driven from a DisplayListBuilder.
+///
+class DlOpRecorder : public DlCanvasReceiver {
+ private:
+  using ClipOp = DlCanvas::ClipOp;
 
-class DisplayListStreamDispatcher final : public DlOpReceiver {
  public:
-  DisplayListStreamDispatcher(std::ostream& os,
-                              int cur_indent = 2,
-                              int indent = 2)
-      : os_(os), cur_indent_(cur_indent), indent_(indent) {}
+  static constexpr SkRect kMaxCullRect =
+      SkRect::MakeLTRB(-1E9F, -1E9F, 1E9F, 1E9F);
 
+  DlOpRecorder(const SkRect& cull_rect = kMaxCullRect, bool keep_rtree = false);
+
+  ~DlOpRecorder() = default;
+
+  // | DlCanvasReceiver|
+  SkRect base_device_cull_rect() const override {
+    return tracker_->base_device_cull_rect();
+  }
+  SkRect device_cull_rect() const override {
+    return tracker_->device_cull_rect();
+  }
+  SkRect local_cull_rect() const override {
+    return tracker_->local_cull_rect();
+  }
+  bool is_cull_rect_empty() const override {
+    return tracker_->is_cull_rect_empty();
+  }
+  bool content_culled(const SkRect& content_bounds) const override {
+    return tracker_->content_culled(content_bounds);
+  }
+
+  // | DlCanvasReceiver|
+  SkM44 matrix_4x4() const override { return tracker_->matrix_4x4(); }
+  SkMatrix matrix_3x3() const override { return tracker_->matrix_3x3(); }
+
+  // | DlCanvasReceiver|
+  void resetCullRect(const SkRect* cull_rect = nullptr) override;
+  void intersectCullRect(const SkRect& cull_rect) override;
+
+  // | DlCanvasReceiver|
+  bool wants_granular_bounds() const override {
+    return accumulator_->type() == BoundsAccumulator::Type::kRTree;
+  }
+
+  // |DlOpReceiver| all set methods
   void setAntiAlias(bool aa) override;
   void setDither(bool dither) override;
   void setDrawStyle(DlDrawStyle style) override;
   void setColor(DlColor color) override;
-  void setStrokeWidth(SkScalar width) override;
-  void setStrokeMiter(SkScalar limit) override;
+  void setStrokeWidth(float width) override;
+  void setStrokeMiter(float limit) override;
   void setStrokeCap(DlStrokeCap cap) override;
   void setStrokeJoin(DlStrokeJoin join) override;
   void setColorSource(const DlColorSource* source) override;
@@ -73,31 +77,47 @@ class DisplayListStreamDispatcher final : public DlOpReceiver {
   void setMaskFilter(const DlMaskFilter* filter) override;
   void setImageFilter(const DlImageFilter* filter) override;
 
+  // |DlOpReceiver|
   void save() override;
+  // |DlOpReceiver|
   void saveLayer(const SkRect* bounds,
                  const SaveLayerOptions options,
-                 const DlImageFilter* backdrop) override;
-  void restore() override;
+                 const DlImageFilter* backdrop = nullptr) override;
 
+  // |DlOpReceiver|
+  void restore() override;
+  // |DlCanvasReceiver|
+  void restoreLayer(const DlImageFilter*,
+                    bool layer_content_was_unbounded,
+                    bool layer_could_distribute_opacity) override;
+
+  // |DlOpReceiver| all transform methods
   void translate(SkScalar tx, SkScalar ty) override;
   void scale(SkScalar sx, SkScalar sy) override;
   void rotate(SkScalar degrees) override;
   void skew(SkScalar sx, SkScalar sy) override;
+
   // clang-format off
+  // |DlOpReceiver|
   void transform2DAffine(SkScalar mxx, SkScalar mxy, SkScalar mxt,
-                                 SkScalar myx, SkScalar myy, SkScalar myt) override;
+                         SkScalar myx, SkScalar myy, SkScalar myt) override;
+  // |DlOpReceiver|
   void transformFullPerspective(
       SkScalar mxx, SkScalar mxy, SkScalar mxz, SkScalar mxt,
       SkScalar myx, SkScalar myy, SkScalar myz, SkScalar myt,
       SkScalar mzx, SkScalar mzy, SkScalar mzz, SkScalar mzt,
       SkScalar mwx, SkScalar mwy, SkScalar mwz, SkScalar mwt) override;
   // clang-format on
+
+  // |DlOpReceiver|
   void transformReset() override;
 
+  // |DlOpReceiver| all clip methods
   void clipRect(const SkRect& rect, ClipOp clip_op, bool is_aa) override;
   void clipRRect(const SkRRect& rrect, ClipOp clip_op, bool is_aa) override;
   void clipPath(const SkPath& path, ClipOp clip_op, bool is_aa) override;
 
+  // |DlOpReceiver| all render methods
   void drawColor(DlColor color, DlBlendMode mode) override;
   void drawPaint() override;
   void drawLine(const SkPoint& p0, const SkPoint& p1) override;
@@ -119,12 +139,13 @@ class DisplayListStreamDispatcher final : public DlOpReceiver {
                  const SkPoint point,
                  DlImageSampling sampling,
                  bool render_with_attributes) override;
-  void drawImageRect(const sk_sp<DlImage>& image,
-                     const SkRect& src,
-                     const SkRect& dst,
-                     DlImageSampling sampling,
-                     bool render_with_attributes,
-                     SrcRectConstraint constraint) override;
+  void drawImageRect(
+      const sk_sp<DlImage>& image,
+      const SkRect& src,
+      const SkRect& dst,
+      DlImageSampling sampling,
+      bool render_with_attributes,
+      SrcRectConstraint constraint = SrcRectConstraint::kFast) override;
   void drawImageNine(const sk_sp<DlImage>& image,
                      const SkIRect& center,
                      const SkRect& dst,
@@ -140,7 +161,7 @@ class DisplayListStreamDispatcher final : public DlOpReceiver {
                  const SkRect* cull_rect,
                  bool render_with_attributes) override;
   void drawDisplayList(const sk_sp<DisplayList>& display_list,
-                       SkScalar opacity) override;
+                       SkScalar opacity = SK_Scalar1) override;
   void drawTextBlob(const sk_sp<SkTextBlob>& blob,
                     SkScalar x,
                     SkScalar y) override;
@@ -150,28 +171,40 @@ class DisplayListStreamDispatcher final : public DlOpReceiver {
                   bool transparent_occluder,
                   SkScalar dpr) override;
 
+  bool accumulateLocalBoundsForNextOp(const SkRect& r) override;
+  bool accumulateUnboundedForNextOp() override;
+
+  bool is_nop() override { return tracker_->is_cull_rect_empty(); }
+
+  sk_sp<DisplayList> Build(bool can_distribute_opacity = false,
+                           bool affects_transparent_layer = true);
+
  private:
-  std::ostream& os_;
-  int cur_indent_;
-  int indent_;
+  std::shared_ptr<DisplayListMatrixClipTracker> tracker_;
+  std::shared_ptr<BoundsAccumulator> accumulator_;
+  DisplayList::DlStorage storage_;
 
-  void indent() { indent(indent_); }
-  void outdent() { outdent(indent_); }
-  void indent(int spaces) { cur_indent_ += spaces; }
-  void outdent(int spaces) { cur_indent_ -= spaces; }
+  struct SaveInfo {
+    size_t offset;
+    bool deferred;
+    bool is_layer;
+  };
+  std::vector<SaveInfo> save_infos_;
+  void ResolveDeferredSave();
 
-  template <class T>
-  std::ostream& out_array(std::string name, int count, const T array[]);
+  int render_op_count_ = 0;
+  int op_index_ = 0;
 
-  std::ostream& startl();
+  // bytes and ops from |drawPicture| and |drawDisplayList|
+  size_t nested_bytes_ = 0;
+  int nested_op_count_ = 0;
 
-  void out(const DlColorFilter& filter);
-  void out(const DlColorFilter* filter);
-  void out(const DlImageFilter& filter);
-  void out(const DlImageFilter* filter);
+  bool is_ui_thread_safe_ = true;
+
+  template <typename T, typename... Args>
+  void* Push(size_t extra, int op_inc, Args&&... args);
 };
 
-}  // namespace testing
 }  // namespace flutter
 
-#endif  // TESTING_DISPLAY_LIST_TESTING_H_
+#endif  // FLUTTER_DISPLAY_LIST_DL_OP_RECORDER_H_

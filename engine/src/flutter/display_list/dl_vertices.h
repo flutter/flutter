@@ -279,7 +279,7 @@ class DlVertices {
     return static_cast<const char*>(base) + offset;
   }
 
-  friend class DisplayListBuilder;
+  friend class DlOpRecorder;
 };
 
 }  // namespace flutter
