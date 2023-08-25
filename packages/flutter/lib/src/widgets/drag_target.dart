@@ -20,6 +20,12 @@ import 'view.dart';
 /// Used by [DragTarget.onWillAccept].
 typedef DragTargetWillAccept<T> = bool Function(T? data);
 
+/// Signature for determining whether the given data will be accepted by a [DragTarget],
+/// based on provided information.
+///
+/// Used by [DragTarget.onWillAcceptWithDetails].
+typedef DragTargetWillAcceptWithDetails<T> = bool Function(DragTargetDetails<T> details);
+
 /// Signature for causing a [DragTarget] to accept the given data.
 ///
 /// Used by [DragTarget.onAccept].
@@ -612,12 +618,13 @@ class DragTarget<T extends Object> extends StatefulWidget {
     super.key,
     required this.builder,
     this.onWillAccept,
+    this.onWillAcceptWithDetails,
     this.onAccept,
     this.onAcceptWithDetails,
     this.onLeave,
     this.onMove,
     this.hitTestBehavior = HitTestBehavior.translucent,
-  });
+  }) : assert(onWillAccept == null || onWillAcceptWithDetails == null, "Don't pass both onWillAccept and onWillAcceptWithDetails.");
 
   /// Called to build the contents of this widget.
   ///
@@ -631,7 +638,24 @@ class DragTarget<T extends Object> extends StatefulWidget {
   /// Called when a piece of data enters the target. This will be followed by
   /// either [onAccept] and [onAcceptWithDetails], if the data is dropped, or
   /// [onLeave], if the drag leaves the target.
+  ///
+  /// Equivalent to [onWillAcceptWithDetails], but only includes the data.
+  ///
+  /// Must not be provided if [onWillAcceptWithDetails] is provided.
   final DragTargetWillAccept<T>? onWillAccept;
+
+  /// Called to determine whether this widget is interested in receiving a given
+  /// piece of data being dragged over this drag target.
+  ///
+  /// Called when a piece of data enters the target. This will be followed by
+  /// either [onAccept] and [onAcceptWithDetails], if the data is dropped, or
+  /// [onLeave], if the drag leaves the target.
+  ///
+  /// Equivalent to [onWillAccept], but with information, including the data,
+  /// in a [DragTargetDetails].
+  ///
+  /// Must not be provided if [onWillAccept] is provided.
+  final DragTargetWillAcceptWithDetails<T>? onWillAcceptWithDetails;
 
   /// Called when an acceptable piece of data was dropped over this drag target.
   ///
@@ -684,7 +708,13 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
   bool didEnter(_DragAvatar<Object> avatar) {
     assert(!_candidateAvatars.contains(avatar));
     assert(!_rejectedAvatars.contains(avatar));
-    if (widget.onWillAccept == null || widget.onWillAccept!(avatar.data as T?)) {
+    final bool resolvedWillAccept = (widget.onWillAccept == null &&
+                                    widget.onWillAcceptWithDetails == null) ||
+                                    (widget.onWillAccept != null &&
+                                    widget.onWillAccept!(avatar.data as T?)) ||
+                                    (widget.onWillAcceptWithDetails != null &&
+                                    widget.onWillAcceptWithDetails!(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!)));
+    if (resolvedWillAccept) {
       setState(() {
         _candidateAvatars.add(avatar);
       });
