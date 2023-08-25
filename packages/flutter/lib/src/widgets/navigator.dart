@@ -3355,6 +3355,13 @@ typedef _IndexWhereCallback = bool Function(_RouteEntry element);
 /// Acts as a ChangeNotifier and notifies after its List of _RouteEntries is
 /// mutated.
 class _History extends Iterable<_RouteEntry> with ChangeNotifier {
+  /// Creates an instance of [_History].
+  _History() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+  }
+
   final List<_RouteEntry> _value = <_RouteEntry>[];
 
   int indexWhere(_IndexWhereCallback test, [int start = 0]) {

@@ -341,7 +341,20 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     _gestureRecognizers[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
           () => TapGestureRecognizer(debugOwner: this),
           (TapGestureRecognizer instance) {
-        instance.onTap = _clearSelection;
+        instance.onTapUp = (TapUpDetails details) {
+          if (defaultTargetPlatform == TargetPlatform.iOS && _positionIsOnActiveSelection(globalPosition: details.globalPosition)) {
+            // On iOS when the tap occurs on the previous selection, instead of
+            // moving the selection, the context menu will be toggled.
+            final bool toolbarIsVisible = _selectionOverlay?.toolbarIsVisible ?? false;
+            if (toolbarIsVisible) {
+              hideToolbar(false);
+            } else {
+              _showToolbar(location: details.globalPosition);
+            }
+          } else {
+            _clearSelection();
+          }
+        };
         instance.onSecondaryTapDown = _handleRightClickDown;
       },
     );
@@ -1554,6 +1567,13 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
 /// This class optimize the selection update by keeping track of the
 /// [Selectable]s that currently contain the selection edges.
 abstract class MultiSelectableSelectionContainerDelegate extends SelectionContainerDelegate with ChangeNotifier {
+  /// Creates an instance of [MultiSelectableSelectionContainerDelegate].
+  MultiSelectableSelectionContainerDelegate() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+  }
+
   /// Gets the list of selectables this delegate is managing.
   List<Selectable> selectables = <Selectable>[];
 
