@@ -5,6 +5,7 @@
 #pragma once
 
 #include "flutter/fml/macros.h"
+#include "flutter/fml/status.h"
 #include "impeller/base/thread.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/renderer/backend/vulkan/barrier_vk.h"
@@ -13,6 +14,10 @@
 
 namespace impeller {
 
+/// Abstract base class that represents a vkImage and an vkImageView.
+///
+/// This is intended to be used with an impeller::TextureVK. Example
+/// implementations represent swapchain images or uploaded textures.
 class TextureSourceVK {
  public:
   virtual ~TextureSourceVK();
@@ -23,10 +28,26 @@ class TextureSourceVK {
 
   virtual vk::ImageView GetImageView() const = 0;
 
-  bool SetLayout(const BarrierVK& barrier) const;
+  /// Encodes the layout transition `barrier` to `barrier.cmd_buffer` for the
+  /// image.
+  ///
+  /// The transition is from the layout stored via `SetLayoutWithoutEncoding` to
+  /// `barrier.new_layout`.
+  fml::Status SetLayout(const BarrierVK& barrier) const;
 
+  /// Store the layout of the image.
+  ///
+  /// This just is bookkeeping on the CPU, to actually set the layout use
+  /// `SetLayout`.
+  ///
+  /// @param layout The new layout.
+  /// @return The old layout.
   vk::ImageLayout SetLayoutWithoutEncoding(vk::ImageLayout layout) const;
 
+  /// Get the last layout assigned to the TextureSourceVK.
+  ///
+  /// This value is synchronized with the GPU via SetLayout so it may not
+  /// reflect the actual layout.
   vk::ImageLayout GetLayout() const;
 
  protected:

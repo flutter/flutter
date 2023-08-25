@@ -27,10 +27,10 @@ vk::ImageLayout TextureSourceVK::SetLayoutWithoutEncoding(
   return old_layout;
 }
 
-bool TextureSourceVK::SetLayout(const BarrierVK& barrier) const {
+fml::Status TextureSourceVK::SetLayout(const BarrierVK& barrier) const {
   const auto old_layout = SetLayoutWithoutEncoding(barrier.new_layout);
   if (barrier.new_layout == old_layout) {
-    return true;
+    return {};
   }
 
   vk::ImageMemoryBarrier image_barrier;
@@ -55,7 +55,7 @@ bool TextureSourceVK::SetLayout(const BarrierVK& barrier) const {
                                      image_barrier       // image barriers
   );
 
-  return true;
+  return {};
 }
 
 }  // namespace impeller

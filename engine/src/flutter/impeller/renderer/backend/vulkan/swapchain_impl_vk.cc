@@ -435,7 +435,7 @@ bool SwapchainImplVK::Present(const std::shared_ptr<SwapchainImageVK>& image,
     barrier.dst_access = {};
     barrier.dst_stage = vk::PipelineStageFlagBits::eBottomOfPipe;
 
-    if (!image->SetLayout(barrier)) {
+    if (!image->SetLayout(barrier).ok()) {
       return false;
     }
 
