@@ -624,7 +624,7 @@ class DragTarget<T extends Object> extends StatefulWidget {
     this.onLeave,
     this.onMove,
     this.hitTestBehavior = HitTestBehavior.translucent,
-  }) : assert(onWillAccept == null || onWillAcceptWithDetails == null, 'Don't pass both onWillAccept and onWillAcceptWithDetails.');
+  }) : assert(onWillAccept == null || onWillAcceptWithDetails == null, "Don't pass both onWillAccept and onWillAcceptWithDetails.");
 
   /// Called to build the contents of this widget.
   ///
