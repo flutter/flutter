@@ -993,8 +993,6 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
   OutlinedBorder _getShape(ThemeData theme, ChipThemeData chipTheme, ChipThemeData chipDefaults) {
     final BorderSide? resolvedSide = MaterialStateProperty.resolveAs<BorderSide?>(widget.side, materialStates)
       ?? MaterialStateProperty.resolveAs<BorderSide?>(chipTheme.side, materialStates)
-      ?? MaterialStateProperty.resolveAs<BorderSide?>(widget.shape?.side, materialStates)
-      ?? MaterialStateProperty.resolveAs<BorderSide?>(chipTheme.shape?.side, materialStates)
       ?? MaterialStateProperty.resolveAs<BorderSide?>(chipDefaults.side, materialStates);
     final OutlinedBorder resolvedShape = MaterialStateProperty.resolveAs<OutlinedBorder?>(widget.shape, materialStates)
       ?? MaterialStateProperty.resolveAs<OutlinedBorder?>(chipTheme.shape, materialStates)
@@ -2237,7 +2235,6 @@ class _ChipDefaultsM3 extends ChipThemeData {
   _ChipDefaultsM3(this.context, this.isEnabled)
     : super(
         elevation: 0.0,
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
         showCheckmark: true,
       );
 
@@ -2265,9 +2262,13 @@ class _ChipDefaultsM3 extends ChipThemeData {
   Color? get deleteIconColor => null;
 
   @override
-  BorderSide? get side => isEnabled
-    ? BorderSide(color: _colors.outline)
-    : BorderSide(color: _colors.onSurface.withOpacity(0.12));
+  OutlinedBorder? get shape {
+    return const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))).copyWith(
+      side: isEnabled
+        ? BorderSide(color: _colors.outline)
+        : BorderSide(color: _colors.onSurface.withOpacity(0.12)),
+    );
+  }
 
   @override
   IconThemeData? get iconTheme => IconThemeData(
