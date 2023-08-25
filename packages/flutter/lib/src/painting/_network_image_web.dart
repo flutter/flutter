@@ -7,17 +7,17 @@ import 'dart:js_interop';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:web/web.dart' as web;
 
-import '../services/dom.dart';
 import 'image_provider.dart' as image_provider;
 import 'image_stream.dart';
 
 /// Creates a type for an overridable factory function for testing purposes.
-typedef HttpRequestFactory = DomXMLHttpRequest Function();
+typedef HttpRequestFactory = web.XMLHttpRequest Function();
 
 /// Default HTTP client.
-DomXMLHttpRequest _httpClient() {
-  return DomXMLHttpRequest();
+web.XMLHttpRequest _httpClient() {
+  return web.XMLHttpRequest();
 }
 
 /// Creates an overridable factory function.
@@ -135,9 +135,9 @@ class NetworkImage
     // We use a different method when headers are set because the
     // `ui.webOnlyInstantiateImageCodecFromUrl` method is not capable of handling headers.
     if (isCanvasKit || containsNetworkImageHeaders) {
-      final Completer<DomXMLHttpRequest> completer =
-          Completer<DomXMLHttpRequest>();
-      final DomXMLHttpRequest request = httpRequestFactory();
+      final Completer<web.XMLHttpRequest> completer =
+          Completer<web.XMLHttpRequest>();
+      final web.XMLHttpRequest request = httpRequestFactory();
 
       request.open('GET', key.url, true);
       request.responseType = 'arraybuffer';
@@ -147,9 +147,9 @@ class NetworkImage
         });
       }
 
-      request.addEventListener('load', createDomEventListener((DomEvent e) {
-        final int? status = request.status;
-        final bool accepted = status! >= 200 && status < 300;
+      request.addEventListener('load', (web.Event e) {
+        final int status = request.status;
+        final bool accepted = status >= 200 && status < 300;
         final bool fileUri = status == 0; // file:// URIs have status of 0.
         final bool notModified = status == 304;
         final bool unknownRedirect = status > 307 && status < 400;
@@ -161,12 +161,12 @@ class NetworkImage
         } else {
           completer.completeError(e);
           throw image_provider.NetworkImageLoadException(
-              statusCode: request.status ?? 400, uri: resolved);
+              statusCode: status, uri: resolved);
         }
-      }));
+      }.toJS);
 
       request.addEventListener('error',
-          createDomEventListener(completer.completeError));
+          ((JSObject e) => completer.completeError(e)).toJS);
 
       request.send();
 
@@ -176,7 +176,7 @@ class NetworkImage
 
       if (bytes.lengthInBytes == 0) {
         throw image_provider.NetworkImageLoadException(
-            statusCode: request.status!, uri: resolved);
+            statusCode: request.status, uri: resolved);
       }
 
       if (decode != null) {

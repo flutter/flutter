@@ -25,7 +25,6 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
@@ -424,7 +423,6 @@ void main() {
         hotEventSdkName: 'Android',
         hotEventEmulator: false,
         hotEventFullRestart: false,
-        fastReassemble: false,
       )),
     ));
     expect(fakeVmServiceHost?.hasRemainingExpectations, false);
@@ -480,7 +478,6 @@ void main() {
         hotEventSdkName: 'Android',
         hotEventEmulator: false,
         hotEventFullRestart: false,
-        fastReassemble: false,
       )),
     ));
     expect(fakeVmServiceHost?.hasRemainingExpectations, false);
@@ -527,7 +524,6 @@ void main() {
         hotEventSdkName: 'Android',
         hotEventEmulator: false,
         hotEventFullRestart: false,
-        fastReassemble: false,
       )),
     ));
     expect(fakeVmServiceHost?.hasRemainingExpectations, false);
@@ -766,96 +762,6 @@ void main() {
     Usage: () => TestUsage(),
   }));
 
-  testUsingContext('ResidentRunner can perform fast reassemble', () => testbed.run(() async {
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-      listViews,
-      FakeVmServiceRequest(
-        method: 'getVM',
-        jsonResponse: fakeVM.toJson(),
-      ),
-      listViews,
-      listViews,
-      FakeVmServiceRequest(
-        method: 'getVM',
-        jsonResponse: fakeVM.toJson(),
-      ),
-      const FakeVmServiceRequest(
-        method: kReloadSourcesServiceName,
-        args: <String, Object>{
-          'isolateId': '1',
-          'pause': false,
-          'rootLibUri': 'main.dart.incremental.dill',
-        },
-        jsonResponse: <String, Object>{
-          'type': 'ReloadReport',
-          'success': true,
-          'details': <String, Object>{
-            'loadedLibraryCount': 1,
-          },
-        },
-      ),
-      FakeVmServiceRequest(
-        method: 'getIsolatePauseEvent',
-        args: <String, Object>{
-          'isolateId': '1',
-        },
-        jsonResponse: fakeUnpausedEvent.toJson(),
-      ),
-      FakeVmServiceRequest(
-        method: 'ext.flutter.fastReassemble',
-        args: <String, Object?>{
-          'isolateId': fakeUnpausedIsolate.id,
-          'className': 'FOO',
-        },
-      ),
-    ]);
-    final FakeDelegateFlutterDevice flutterDevice = FakeDelegateFlutterDevice(
-      device,
-      BuildInfo.debug,
-      FakeResidentCompiler(),
-      devFS,
-    )..vmService = fakeVmServiceHost!.vmService;
-    residentRunner = HotRunner(
-      <FlutterDevice>[
-        flutterDevice,
-      ],
-      stayResident: false,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      target: 'main.dart',
-      devtoolsHandler: createNoOpHandler,
-    );
-    devFS.nextUpdateReport = UpdateFSReport(
-      success: true,
-      fastReassembleClassName: 'FOO',
-      invalidatedSourcesCount: 1,
-    );
-
-    final Completer<DebugConnectionInfo> futureConnectionInfo = Completer<DebugConnectionInfo>.sync();
-    final Completer<void> futureAppStart = Completer<void>.sync();
-    unawaited(residentRunner.attach(
-      appStartedCompleter: futureAppStart,
-      connectionInfoCompleter: futureConnectionInfo,
-      enableDevTools: true,
-    ));
-
-    await futureAppStart.future;
-    final OperationResult result = await residentRunner.restart();
-
-    expect(result.fatal, false);
-    expect(result.code, 0);
-
-    final TestUsageEvent event = (globals.flutterUsage as TestUsage).events.first;
-    expect(event.category, 'hot');
-    expect(event.parameter, 'reload');
-    expect(event.parameters?.fastReassemble, true);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem.test(),
-    Platform: () => FakePlatform(),
-    ProjectFileInvalidator: () => FakeProjectFileInvalidator(),
-    Usage: () => TestUsage(),
-    FeatureFlags: () => TestFeatureFlags(isSingleWidgetReloadEnabled: true),
-  }));
-
   testUsingContext('ResidentRunner reports hot reload time details', () => testbed.run(() async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
       listViews,
@@ -893,10 +799,9 @@ void main() {
         jsonResponse: fakeUnpausedEvent.toJson(),
       ),
       FakeVmServiceRequest(
-        method: 'ext.flutter.fastReassemble',
+        method: 'ext.flutter.reassemble',
         args: <String, Object?>{
           'isolateId': fakeUnpausedIsolate.id,
-          'className': 'FOO',
         },
       ),
     ]);
@@ -917,7 +822,6 @@ void main() {
     );
     devFS.nextUpdateReport = UpdateFSReport(
       success: true,
-      fastReassembleClassName: 'FOO',
       invalidatedSourcesCount: 1,
     );
 
@@ -942,7 +846,6 @@ void main() {
     Platform: () => FakePlatform(),
     ProjectFileInvalidator: () => FakeProjectFileInvalidator(),
     Usage: () => TestUsage(),
-    FeatureFlags: () => TestFeatureFlags(isSingleWidgetReloadEnabled: true),
   }));
 
   testUsingContext('ResidentRunner can send target platform to analytics from full restart', () => testbed.run(() async {
@@ -1225,7 +1128,6 @@ void main() {
         hotEventSdkName: 'Android',
         hotEventEmulator: false,
         hotEventFullRestart: true,
-        fastReassemble: false,
       )),
     ));
     expect(fakeVmServiceHost?.hasRemainingExpectations, false);
@@ -1984,31 +1886,7 @@ flutter:
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-  testUsingContext('FlutterDevice passes flutter-widget-cache flag when feature is enabled', () async {
-    fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-    final FakeDevice device = FakeDevice();
-
-    final DefaultResidentCompiler? residentCompiler = (await FlutterDevice.create(
-      device,
-      buildInfo: const BuildInfo(
-        BuildMode.debug,
-        '',
-        treeShakeIcons: false,
-        extraFrontEndOptions: <String>[],
-      ),
-      target: null, platform: FakePlatform(),
-    )).generator as DefaultResidentCompiler?;
-
-    expect(residentCompiler!.extraFrontEndOptions,
-      contains('--flutter-widget-cache'));
-  }, overrides: <Type, Generator>{
-    Artifacts: () => Artifacts.test(),
-    FileSystem: () => MemoryFileSystem.test(),
-    ProcessManager: () => FakeProcessManager.any(),
-    FeatureFlags: () => TestFeatureFlags(isSingleWidgetReloadEnabled: true),
-  });
-
-   testUsingContext('FlutterDevice passes alternative-invalidation-strategy flag', () async {
+  testUsingContext('FlutterDevice passes alternative-invalidation-strategy flag', () async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final FakeDevice device = FakeDevice();
 
@@ -2032,7 +1910,7 @@ flutter:
     ProcessManager: () => FakeProcessManager.any(),
   });
 
-   testUsingContext('FlutterDevice passes initializeFromDill parameter if specified', () async {
+  testUsingContext('FlutterDevice passes initializeFromDill parameter if specified', () async {
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final FakeDevice device = FakeDevice();
 

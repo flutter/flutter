@@ -45,11 +45,18 @@ void configureProject(Project project, String outputDir) {
     }
 
     String storageUrl = System.getenv('FLUTTER_STORAGE_BASE_URL') ?: "https://storage.googleapis.com"
+
+    String engineRealm = Paths.get(getFlutterRoot(project), "bin", "internal", "engine.realm")
+        .toFile().text.trim()
+    if (engineRealm) {
+        engineRealm = engineRealm + "/"
+    }
+
     // This is a Flutter plugin project. Plugin projects don't apply the Flutter Gradle plugin,
     // as a result, add the dependency on the embedding.
     project.repositories {
         maven {
-            url "$storageUrl/download.flutter.io"
+            url "$storageUrl/${engineRealm}download.flutter.io"
         }
     }
     String engineVersion = Paths.get(getFlutterRoot(project), "bin", "internal", "engine.version")

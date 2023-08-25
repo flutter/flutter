@@ -49,13 +49,18 @@ class FlutterExtension {
     /** Sets the minSdkVersion used by default in Flutter app projects. */
     static int minSdkVersion = 19
 
-    /** Sets the targetSdkVersion used by default in Flutter app projects. */
+    /**
+     * Sets the targetSdkVersion used by default in Flutter app projects.
+     * targetSdkVersion should always be the latest available stable version.
+     *
+     * See https://developer.android.com/guide/topics/manifest/uses-sdk-element.
+     */
     static int targetSdkVersion = 33
 
     /**
      * Sets the ndkVersion used by default in Flutter app projects.
      * Chosen as default version of the AGP version below as found in
-     * https://developer.android.com/studio/projects/install-ndk#default-ndk-per-agp
+     * https://developer.android.com/studio/projects/install-ndk#default-ndk-per-agp.
      */
     static String ndkVersion = "23.1.7779620"
 
@@ -159,9 +164,11 @@ class FlutterPlugin implements Plugin<Project> {
     private File flutterRoot
     private File flutterExecutable
     private String localEngine
+    private String localEngineHost
     private String localEngineSrcPath
     private Properties localProperties
     private String engineVersion
+    private String engineRealm
 
     /**
      * Flutter Docs Website URLs for help messages.
@@ -187,11 +194,29 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
+        String flutterRootPath = resolveProperty("flutter.sdk", System.env.FLUTTER_ROOT)
+        if (flutterRootPath == null) {
+            throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file or with a FLUTTER_ROOT environment variable.")
+        }
+        flutterRoot = project.file(flutterRootPath)
+        if (!flutterRoot.isDirectory()) {
+            throw new GradleException("flutter.sdk must point to the Flutter SDK directory")
+        }
+
+        engineVersion = useLocalEngine()
+            ? "+" // Match any version since there's only one.
+            : "1.0.0-" + Paths.get(flutterRoot.absolutePath, "bin", "internal", "engine.version").toFile().text.trim()
+
+        engineRealm = Paths.get(flutterRoot.absolutePath, "bin", "internal", "engine.realm").toFile().text.trim()
+        if (engineRealm) {
+            engineRealm = engineRealm + "/"
+        }
+
         // Configure the Maven repository.
         String hostedRepository = System.env.FLUTTER_STORAGE_BASE_URL ?: DEFAULT_MAVEN_HOST
         String repository = useLocalEngine()
             ? project.property('local-engine-repo')
-            : "$hostedRepository/download.flutter.io"
+            : "$hostedRepository/${engineRealm}download.flutter.io"
         rootProject.allprojects {
             repositories {
                 maven {
@@ -240,19 +265,6 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
         }
-
-        String flutterRootPath = resolveProperty("flutter.sdk", System.env.FLUTTER_ROOT)
-        if (flutterRootPath == null) {
-            throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file or with a FLUTTER_ROOT environment variable.")
-        }
-        flutterRoot = project.file(flutterRootPath)
-        if (!flutterRoot.isDirectory()) {
-            throw new GradleException("flutter.sdk must point to the Flutter SDK directory")
-        }
-
-        engineVersion = useLocalEngine()
-            ? "+" // Match any version since there's only one.
-            : "1.0.0-" + Paths.get(flutterRoot.absolutePath, "bin", "internal", "engine.version").toFile().text.trim()
 
         String flutterExecutableName = Os.isFamily(Os.FAMILY_WINDOWS) ? "flutter.bat" : "flutter"
         flutterExecutable = Paths.get(flutterRoot.absolutePath, "bin", flutterExecutableName).toFile();
@@ -313,6 +325,13 @@ class FlutterPlugin implements Plugin<Project> {
             }
             localEngine = engineOut.name
             localEngineSrcPath = engineOut.parentFile.parent
+
+            String engineHostOutPath = project.property('local-engine-host-out')
+            File engineHostOut = project.file(engineHostOutPath)
+            if (!engineHostOut.isDirectory()) {
+                throw new GradleException('local-engine-host-out must point to a local engine host build')
+            }
+            localEngineHost = engineHostOut.name
         }
         project.android.buildTypes.all this.&addFlutterDependencies
     }
@@ -1016,6 +1035,7 @@ class FlutterPlugin implements Plugin<Project> {
                 flutterExecutable this.flutterExecutable
                 buildMode variantBuildMode
                 localEngine this.localEngine
+                localEngineHost this.localEngineHost
                 localEngineSrcPath this.localEngineSrcPath
                 targetPath getFlutterTarget()
                 verbose this.isVerbose()
@@ -1224,6 +1244,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     @Optional @Input
     String localEngine
     @Optional @Input
+    String localEngineHost
+    @Optional @Input
     String localEngineSrcPath
     @Optional @Input
     Boolean fastStart
@@ -1301,6 +1323,9 @@ abstract class BaseFlutterTask extends DefaultTask {
             if (localEngine != null) {
                 args "--local-engine", localEngine
                 args "--local-engine-src-path", localEngineSrcPath
+            }
+            if (localEngineHost != null) {
+                args "--local-engine-host", localEngineHost
             }
             if (verbose) {
                 args "--verbose"

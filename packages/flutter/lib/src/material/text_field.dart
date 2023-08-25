@@ -1248,7 +1248,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
     final ThemeData theme = Theme.of(context);
     final DefaultSelectionStyle selectionStyle = DefaultSelectionStyle.of(context);
-    final TextStyle style = _getInputStyleForState(theme.useMaterial3 ? _m3InputStyle(context) : theme.textTheme.titleMedium!).merge(widget.style);
+    final TextStyle? providedStyle = MaterialStateProperty.resolveAs(widget.style, _materialState);
+    final TextStyle style = _getInputStyleForState(theme.useMaterial3 ? _m3InputStyle(context) : theme.textTheme.titleMedium!).merge(providedStyle);
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? theme.brightness;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;

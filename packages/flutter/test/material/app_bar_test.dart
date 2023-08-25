@@ -8,7 +8,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 Widget buildSliverAppBarApp({
@@ -1281,7 +1280,9 @@ void main() {
     // Test the expanded title is positioned correctly.
     final Offset titleOffset = tester.getBottomLeft(expandedTitle);
     expect(titleOffset.dx, 16.0);
-    expect(titleOffset.dy, 96.0);
+    if (!kIsWeb || isCanvasKit) {
+      expect(titleOffset.dy, 96.0);
+    }
 
     _verifyTextNotClipped(expandedTitle, tester);
 
@@ -5192,7 +5193,7 @@ void main() {
     await tester.pumpWidget(buildAppBar(textScaleFactor: 3.0));
     expect(tester.getRect(expandedTitle).height, 43.0);
     _verifyTextNotClipped(expandedTitle, tester);
-  });
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('SliverAppBar.large expanded title has upper limit on text scaling', (WidgetTester tester) async {
     const String title = 'Large AppBar';
@@ -5222,22 +5223,15 @@ void main() {
 
     await tester.pumpWidget(buildAppBar());
 
-    // TODO(tahatesser): https://github.com/flutter/flutter/issues/99933
-    // A bug in the HTML renderer and/or Chrome 96+ causes a
-    // discrepancy in the paragraph height.
-    const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
     final Finder expandedTitle = find.text(title).first;
-    expect(
-      tester.getRect(expandedTitle).height,
-      closeTo( hasIssue99933 ? 37.0 : 36.0, 0.1),
-    );
+    expect(tester.getRect(expandedTitle).height, 36.0);
 
     await tester.pumpWidget(buildAppBar(textScaleFactor: 2.0));
     expect(tester.getRect(expandedTitle).height, closeTo(48.0, 0.1));
 
     await tester.pumpWidget(buildAppBar(textScaleFactor: 3.0));
     expect(tester.getRect(expandedTitle).height, closeTo(48.0, 0.1));
-  });
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('SliverAppBar.medium expanded title position is adjusted with textScaleFactor', (WidgetTester tester) async {
     const String title = 'Medium AppBar';
@@ -5278,7 +5272,7 @@ void main() {
     await tester.pumpWidget(buildAppBar(textScaleFactor: 3.0));
     expect(tester.getBottomLeft(expandedTitle).dy, 107.0);
     _verifyTextNotClipped(expandedTitle, tester);
-  });
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
 
   testWidgets('SliverAppBar.large expanded title position is adjusted with textScaleFactor', (WidgetTester tester) async {
     const String title = 'Large AppBar';

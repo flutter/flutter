@@ -38,6 +38,15 @@ class TestCommand extends Command<void> {
           'is required when running an A/B test (see the --ab option).',
     );
     argParser.addOption(
+      'local-engine-host',
+      help: 'Name of a build output within the engine out directory, if you\n'
+          'are building Flutter locally. Use this to select a specific\n'
+          'version of the engine to use as the host platform if you have built '
+          'multiple engine targets.\n'
+          'This path is relative to --local-engine-src-path/out. This option\n'
+          'is required when running an A/B test (see the --ab option).',
+    );
+    argParser.addOption(
       'local-engine-src-path',
       help: 'Path to your engine src directory, if you are building Flutter\n'
           'locally. Defaults to \$FLUTTER_ENGINE if set, or tries to guess at\n'
@@ -74,6 +83,7 @@ class TestCommand extends Command<void> {
       deviceId: argResults!['device-id'] as String?,
       gitBranch: argResults!['git-branch'] as String?,
       localEngine: argResults!['local-engine'] as String?,
+      localEngineHost: argResults!['local-engine-host'] as String?,
       localEngineSrcPath: argResults!['local-engine-src-path'] as String?,
       luciBuilder: argResults!['luci-builder'] as String?,
       resultsPath: argResults!['results-file'] as String?,

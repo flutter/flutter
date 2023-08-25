@@ -22,6 +22,9 @@
   "tabSemanticsLabel": "Καρτέλα $tabIndex από $tabCount",
   "modalBarrierDismissLabel": "Παράβλεψη",
   "searchTextFieldPlaceholderLabel": "Αναζήτηση",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "menuDismissLabel": "Dismiss menu"
+  "noSpellCheckReplacementsLabel": "Δεν βρέθηκαν αντικαταστάσεις",
+  "menuDismissLabel": "Παράβλεψη μενού",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

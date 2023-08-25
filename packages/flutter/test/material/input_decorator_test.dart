@@ -15,8 +15,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 Widget buildInputDecorator({
   InputDecoration decoration = const InputDecoration(),
   ThemeData? theme,
@@ -5932,10 +5930,7 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
         }
         final Rect clipRect = arguments[0] as Rect;
         // _kFinalLabelScale = 0.75
-        final double width = ParagraphBuilder.shouldDisableRoundingHack
-          ? 100 / 0.75
-          : 133.0;
-        expect(clipRect, rectMoreOrLessEquals(Rect.fromLTWH(0, 0, width, 16.0), epsilon: 1e-5));
+        expect(clipRect, rectMoreOrLessEquals(const Rect.fromLTWH(0, 0, 100 / 0.75, 16.0), epsilon: 1e-5));
         return true;
       }),
     );

@@ -309,6 +309,16 @@ typedef ImageErrorWidgetBuilder = Widget Function(
 /// using the HTML renderer, the web engine delegates image decoding of network
 /// images to the Web, which does not support custom decode sizes.
 ///
+/// ## Custom image providers
+///
+/// {@tool dartpad}
+/// In this example, a variant of [NetworkImage] is created that passes all the
+/// [ImageConfiguration] information (locale, platform, size, etc) to the server
+/// using query arguments in the image URL.
+///
+/// ** See code in examples/api/lib/painting/image_provider/image_provider.0.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Icon], which shows an image from a font.
@@ -819,7 +829,7 @@ class Image extends StatefulWidget {
   /// {@end-tool}
   final ImageErrorWidgetBuilder? errorBuilder;
 
-  /// If non-null, require the image to have this width.
+  /// If non-null, require the image to have this width (in logical pixels).
   ///
   /// If null, the image will pick a size that best preserves its intrinsic
   /// aspect ratio.
@@ -831,7 +841,7 @@ class Image extends StatefulWidget {
   /// and height if the exact image dimensions are not known in advance.
   final double? width;
 
-  /// If non-null, require the image to have this height.
+  /// If non-null, require the image to have this height (in logical pixels).
   ///
   /// If null, the image will pick a size that best preserves its intrinsic
   /// aspect ratio.

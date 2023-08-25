@@ -9,8 +9,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 final Key blockKey = UniqueKey();
 const double expandedAppbarHeight = 250.0;
@@ -92,7 +91,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('FlexibleSpaceBar stretch mode fadeTitle', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar stretch mode fadeTitle', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -136,7 +135,7 @@ void main() {
     expect(opacityWidget.opacity, equals(0.0));
   });
 
-  testWidgetsWithLeakTracking('FlexibleSpaceBar stretch mode ignored for non-overscroll physics', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar stretch mode ignored for non-overscroll physics', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(

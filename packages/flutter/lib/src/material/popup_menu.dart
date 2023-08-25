@@ -14,6 +14,7 @@ import 'icon_button.dart';
 import 'icons.dart';
 import 'ink_well.dart';
 import 'list_tile.dart';
+import 'list_tile_theme.dart';
 import 'material.dart';
 import 'material_localizations.dart';
 import 'material_state.dart';
@@ -32,7 +33,6 @@ import 'tooltip.dart';
 
 const Duration _kMenuDuration = Duration(milliseconds: 300);
 const double _kMenuCloseIntervalEnd = 2.0 / 3.0;
-const double _kMenuHorizontalPadding = 16.0;
 const double _kMenuDividerHeight = 16.0;
 const double _kMenuMaxWidth = 5.0 * _kMenuWidthStep;
 const double _kMenuMinWidth = 2.0 * _kMenuWidthStep;
@@ -255,7 +255,11 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// If a [height] greater than the height of the sum of the padding and [child]
   /// is provided, then the padding's effect will not be visible.
   ///
-  /// When null, the horizontal padding defaults to 16.0 on both sides.
+  /// If this is null and [ThemeData.useMaterial3] is true, the horizontal padding
+  /// defaults to 12.0 on both sides.
+  ///
+  /// If this is null and [ThemeData.useMaterial3] is false, the horizontal padding
+  /// defaults to 16.0 on both sides.
   final EdgeInsets? padding;
 
   /// The text style of the popup menu item.
@@ -372,7 +376,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
       child: Container(
         alignment: AlignmentDirectional.centerStart,
         constraints: BoxConstraints(minHeight: widget.height),
-        padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: _kMenuHorizontalPadding),
+        padding: widget.padding ?? (theme.useMaterial3 ? _PopupMenuDefaultsM3.menuHorizontalPadding : _PopupMenuDefaultsM2.menuHorizontalPadding),
         child: buildChild(),
       ),
     );
@@ -393,7 +397,10 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
           onTap: widget.enabled ? handleTap : null,
           canRequestFocus: widget.enabled,
           mouseCursor: _EffectiveMouseCursor(widget.mouseCursor, popupMenuTheme.mouseCursor),
-          child: item,
+          child: ListTileTheme.merge(
+            contentPadding: EdgeInsets.zero,
+            child: item,
+          ),
         ),
       ),
     );
@@ -540,14 +547,17 @@ class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMe
       ?? popupMenuTheme.labelTextStyle
       ?? defaults.labelTextStyle;
     return IgnorePointer(
-      child: ListTile(
-        enabled: widget.enabled,
-        titleTextStyle: effectiveLabelTextStyle?.resolve(states),
-        leading: FadeTransition(
-          opacity: _opacity,
-          child: Icon(_controller.isDismissed ? null : Icons.done),
+      child: ListTileTheme.merge(
+        contentPadding: EdgeInsets.zero,
+        child: ListTile(
+          enabled: widget.enabled,
+          titleTextStyle: effectiveLabelTextStyle?.resolve(states),
+          leading: FadeTransition(
+            opacity: _opacity,
+            child: Icon(_controller.isDismissed ? null : Icons.done),
+          ),
+          title: widget.child,
         ),
-        title: widget.child,
       ),
     );
   }
@@ -1111,6 +1121,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.enabled = true,
     this.shape,
     this.color,
+    this.iconColor,
     this.enableFeedback,
     this.constraints,
     this.position,
@@ -1220,6 +1231,13 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// If [PopupMenuThemeData.color] is also null, then
   /// Theme.of(context).cardColor is used.
   final Color? color;
+
+  /// If provided, this color is used for the button icon.
+  ///
+  /// If this property is null, then [PopupMenuThemeData.iconColor] is used.
+  /// If [PopupMenuThemeData.iconColor] is also null then defaults to
+  /// [IconThemeData.color].
+  final Color? iconColor;
 
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
   ///
@@ -1355,6 +1373,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   @override
   Widget build(BuildContext context) {
     final IconThemeData iconTheme = IconTheme.of(context);
+    final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     final bool enableFeedback = widget.enableFeedback
       ?? PopupMenuTheme.of(context).enableFeedback
       ?? true;
@@ -1378,8 +1397,8 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       icon: widget.icon ?? Icon(Icons.adaptive.more),
       padding: widget.padding,
       splashRadius: widget.splashRadius,
-      iconSize: widget.iconSize ?? iconTheme.size,
-      color: widget.color ?? iconTheme.color,
+      iconSize: widget.iconSize ?? popupMenuTheme.iconSize ?? iconTheme.size,
+      color: widget.iconColor ?? popupMenuTheme.iconColor ?? iconTheme.color,
       tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
       onPressed: widget.enabled ? showButtonMenu : null,
       enableFeedback: enableFeedback,
@@ -1417,6 +1436,8 @@ class _PopupMenuDefaultsM2 extends PopupMenuThemeData {
 
   @override
   TextStyle? get textStyle => _textTheme.subtitle1;
+
+  static EdgeInsets menuHorizontalPadding = const EdgeInsets.symmetric(horizontal: 16.0);
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - PopupMenu
@@ -1456,5 +1477,9 @@ class _PopupMenuDefaultsM3 extends PopupMenuThemeData {
 
   @override
   ShapeBorder? get shape => const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
+
+  // TODO(tahatesser): This is taken from https://m3.material.io/components/menus/specs
+  // Update this when the token is available.
+  static EdgeInsets menuHorizontalPadding  = const EdgeInsets.symmetric(horizontal: 12.0);
 }
 // END GENERATED TOKEN PROPERTIES - PopupMenu

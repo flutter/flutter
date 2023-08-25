@@ -6,8 +6,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 void main() {
   testWidgets('Passes textAlign to underlying CupertinoTextField', (WidgetTester tester) async {
     const TextAlign alignment = TextAlign.center;

@@ -303,6 +303,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
     _anchorChildren.clear();
     _menuController._detach(this);
     _internalMenuController = null;
+    _menuScopeNode.dispose();
     super.dispose();
   }
 
@@ -551,6 +552,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
     }
     _closeChildren(inDispose: inDispose);
     _overlayEntry?.remove();
+    _overlayEntry?.dispose();
     _overlayEntry = null;
     if (!inDispose) {
       // Notify that _childIsOpen changed state, but only if not

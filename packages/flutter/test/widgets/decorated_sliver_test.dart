@@ -10,8 +10,6 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 void main() {
   testWidgets('DecoratedSliver creates, paints, and disposes BoxPainter', (WidgetTester tester) async {
     final TestDecoration decoration = TestDecoration();

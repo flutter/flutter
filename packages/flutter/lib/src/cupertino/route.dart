@@ -196,7 +196,8 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
     }
     // If attempts to dismiss this route might be vetoed such as in a page
     // with forms, then do not allow the user to dismiss the route with a swipe.
-    if (route.hasScopedWillPopCallback) {
+    if (route.hasScopedWillPopCallback
+        || route.popDisposition == RoutePopDisposition.doNotPop) {
       return false;
     }
     // Fullscreen dialogs aren't dismissible by back swipe.
@@ -724,8 +725,6 @@ class _CupertinoBackGestureController<T> {
   /// [fractionalVelocity] as a fraction of screen width per second.
   void dragEnd(double velocity) {
     // Fling in the appropriate direction.
-    // AnimationController.fling is guaranteed to
-    // take at least one frame.
     //
     // This curve has been determined through rigorously eyeballing native iOS
     // animations.

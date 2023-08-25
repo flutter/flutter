@@ -850,7 +850,7 @@ class ThemeData with Diagnosticable {
     );
   }
 
-  /// A default light blue theme.
+  /// A default light theme.
   ///
   /// This theme does not contain text geometry. Instead, it is expected that
   /// this theme is localized using text geometry using [ThemeData.localize].
@@ -859,7 +859,7 @@ class ThemeData with Diagnosticable {
     useMaterial3: useMaterial3,
   );
 
-  /// A default dark theme with a teal secondary [ColorScheme] color.
+  /// A default dark theme.
   ///
   /// This theme does not contain text geometry. Instead, it is expected that
   /// this theme is localized using text geometry using [ThemeData.localize].

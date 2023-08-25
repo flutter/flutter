@@ -7,13 +7,10 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-import 'dart:ui' as ui show ParagraphBuilder;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -473,9 +470,7 @@ void main() {
       ),
     );
 
-    final double textWidth = ui.ParagraphBuilder.shouldDisableRoundingHack
-      ? width
-      : (width / 1.5).floorToDouble() * 1.5;
+    final double textWidth = width;
     // The title is scaled and transformed to be 1.5 times bigger, when the
     // FlexibleSpaceBar is fully expanded, thus we expect the width to be
     // 1.5 times smaller than the full width. The height of the text is the same
@@ -544,9 +539,7 @@ void main() {
     // bottom edge.
     const double bottomMargin = titleFontSize * (expandedTitleScale - 1);
 
-    final double textWidth = ui.ParagraphBuilder.shouldDisableRoundingHack
-      ? collapsedWidth
-      : (collapsedWidth / 3).floorToDouble() * 3;
+    final double textWidth = collapsedWidth;
     // The title is scaled and transformed to be 3 times bigger, when the
     // FlexibleSpaceBar is fully expanded, thus we expect the width to be
     // 3 times smaller than the full width. The height of the text is the same
@@ -910,21 +903,17 @@ class _SubCategoryScreenViewState extends State<SubCategoryScreenView>
             ),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 12)),
-          SliverToBoxAdapter(
-            child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-              ),
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: 300,
-              itemBuilder: (BuildContext context, int index) {
-                return Card(
-                  color: Colors.amber,
-                  child: Center(child: Text('$index')),
-                );
-              },
+          SliverGrid.builder(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
             ),
+            itemCount: 300,
+            itemBuilder: (BuildContext context, int index) {
+              return Card(
+                color: Colors.amber,
+                child: Center(child: Text('$index')),
+              );
+            },
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 12)),
         ],

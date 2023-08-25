@@ -385,7 +385,7 @@ class _RenderScaledInlineWidget extends RenderBox with RenderObjectWithChildMixi
   Size computeDryLayout(BoxConstraints constraints) {
     assert(!constraints.hasBoundedHeight);
     final Size unscaledSize = child?.computeDryLayout(BoxConstraints(maxWidth: constraints.maxWidth / scale)) ?? Size.zero;
-    return unscaledSize * scale;
+    return constraints.constrain(unscaledSize * scale);
   }
 
   @override

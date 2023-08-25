@@ -178,8 +178,6 @@ enum ScrollPositionAlignmentPolicy {
 abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// Creates an object that determines which portion of the content is visible
   /// in a scroll view.
-  ///
-  /// The [physics], [context], and [keepScrollOffset] parameters must not be null.
   ScrollPosition({
     required this.physics,
     required this.context,

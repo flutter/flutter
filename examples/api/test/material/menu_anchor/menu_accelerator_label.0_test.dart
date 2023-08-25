@@ -29,7 +29,7 @@ void main() {
     expect(find.text('About', findRichText: true), findsOneWidget);
     expect(
       tester.getRect(findMenu('About')),
-      equals(const Rect.fromLTRB(4.0, 48.0, 111.0, 208.0)),
+      equals(const Rect.fromLTRB(4.0, 48.0, 110.5, 208.0)),
     );
     expect(find.text('Save', findRichText: true), findsOneWidget);
     expect(find.text('Quit', findRichText: true), findsOneWidget);
@@ -50,5 +50,19 @@ void main() {
     await tester.tap(find.text('Close'));
     await tester.pumpAndSettle();
     expect(find.text('Close'), findsNothing);
+  });
+
+  testWidgets('MenuBar is wrapped in a SafeArea', (WidgetTester tester) async {
+    const double safeAreaPadding = 100.0;
+    await tester.pumpWidget(
+      const MediaQuery(
+        data: MediaQueryData(
+          padding: EdgeInsets.symmetric(vertical: safeAreaPadding),
+        ),
+        child: example.MenuAcceleratorApp(),
+      ),
+    );
+
+    expect(tester.getTopLeft(find.byType(MenuBar)), const Offset(0.0, safeAreaPadding));
   });
 }

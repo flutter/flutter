@@ -9,8 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 
 MaterialApp _buildAppWithDialog(
@@ -2338,7 +2337,7 @@ void main() {
   });
 
   group('AlertDialog.scrollable: ', () {
-    testWidgetsWithLeakTracking('Title is scrollable', (WidgetTester tester) async {
+    testWidgets('Title is scrollable', (WidgetTester tester) async {
       final Key titleKey = UniqueKey();
       final AlertDialog dialog = AlertDialog(
         title: Container(
@@ -2378,7 +2377,7 @@ void main() {
       expect(box.localToGlobal(Offset.zero), equals(originalOffset.translate(0.0, -200.0)));
     });
 
-    testWidgetsWithLeakTracking('Title and content are scrollable', (WidgetTester tester) async {
+    testWidgets('Title and content are scrollable', (WidgetTester tester) async {
       final Key titleKey = UniqueKey();
       final Key contentKey = UniqueKey();
       final AlertDialog dialog = AlertDialog(
@@ -2511,7 +2510,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('DialogRoute is state restorable', (WidgetTester tester) async {
+  testWidgets('DialogRoute is state restorable', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         restorationScopeId: 'app',
@@ -2660,6 +2659,9 @@ void main() {
     expect(await previousFocus(), true);
     expect(okNode.hasFocus, true);
     expect(cancelNode.hasFocus, false);
+
+    cancelNode.dispose();
+    okNode.dispose();
   });
 
   testWidgets('Adaptive AlertDialog shows correct widget on each platform', (WidgetTester tester) async {
@@ -2764,7 +2766,7 @@ void main() {
     expect(find.text('Dialog2'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Uses open focus traversal when overridden', (WidgetTester tester) async {
+  testWidgets('Uses open focus traversal when overridden', (WidgetTester tester) async {
     final FocusNode okNode = FocusNode();
     final FocusNode cancelNode = FocusNode();
 
