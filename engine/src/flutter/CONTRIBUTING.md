@@ -1,8 +1,6 @@
 Contributing to the Flutter engine
 ==================================
 
-[![Build Status](https://api.cirrus-ci.com/github/flutter/engine.svg)][build_status]
-
 _See also: [Flutter's code of conduct][code_of_conduct]_
 
 Welcome
