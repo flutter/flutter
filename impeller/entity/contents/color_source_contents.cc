@@ -38,6 +38,10 @@ const Matrix& ColorSourceContents::GetInverseEffectTransform() const {
   return inverse_matrix_;
 }
 
+bool ColorSourceContents::IsSolidColor() const {
+  return false;
+}
+
 std::optional<Rect> ColorSourceContents::GetCoverage(
     const Entity& entity) const {
   return geometry_->GetCoverage(entity.GetTransformation());

@@ -34,6 +34,9 @@ class SolidColorContents final : public ColorSourceContents {
 
   Color GetColor() const;
 
+  // |ColorSourceContents|
+  bool IsSolidColor() const override;
+
   // |Contents|
   bool IsOpaque() const override;
 
