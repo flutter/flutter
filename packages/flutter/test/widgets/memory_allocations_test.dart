@@ -28,8 +28,9 @@ void main() {
     }
     ma.addListener(listener);
 
-    final int expectedEventCount = await _activateFlutterObjectsAndReturnCountOfEvents();
-    expect(_creations + _disposals, expectedEventCount);
+    final _EventStats actual = await _activateFlutterObjectsAndReturnCountOfEvents();
+    expect(actual.creations, _creations);
+    expect(actual.disposals, _disposals);
 
     ma.removeListener(listener);
     expect(ma.hasListeners, isFalse);
@@ -126,7 +127,7 @@ class _EventStats {
 }
 
 /// Create and dispose Flutter objects to fire memory allocation events.
-Future<int> _activateFlutterObjectsAndReturnCountOfEvents() async {
+Future<_EventStats> _activateFlutterObjectsAndReturnCountOfEvents() async {
   int creations = 0;
   int disposals = 0;
 
@@ -142,8 +143,7 @@ Future<int> _activateFlutterObjectsAndReturnCountOfEvents() async {
   renderObject.dispose(); disposals += 3;
   print('$_creations, $_disposals');
 
-  creations++;
-  creations++;
 
-  return creations;
+
+  return _EventStats()..creations = creations..disposals = disposals;
 }
