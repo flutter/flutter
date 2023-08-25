@@ -25,5 +25,6 @@
   "noSpellCheckReplacementsLabel": "Ауыстыратын ешнәрсе табылмады.",
   "menuDismissLabel": "Мәзірді жабу",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

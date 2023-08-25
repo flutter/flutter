@@ -96,7 +96,7 @@ Future<Map<Type, dynamic>> _loadAll(Locale locale, Iterable<LocalizationsDelegat
 /// the object created by an individual delegate's [load] method.
 ///
 /// An example of a class used as the value of `T` here would be
-/// MaterialLocalizations.
+/// [MaterialLocalizations].
 abstract class LocalizationsDelegate<T> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.

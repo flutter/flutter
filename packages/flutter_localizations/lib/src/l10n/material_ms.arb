@@ -145,5 +145,6 @@
   "collapsedHint": "Dikembangkan",
   "menuDismissLabel": "Ketepikan menu",
   "lookUpButtonLabel": "Lihat ke Atas",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

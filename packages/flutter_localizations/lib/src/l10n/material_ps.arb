@@ -145,5 +145,6 @@
   "collapsedHint": "Expanded",
   "menuDismissLabel": "Dismiss menu",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

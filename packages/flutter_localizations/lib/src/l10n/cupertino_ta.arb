@@ -25,5 +25,6 @@
   "noSpellCheckReplacementsLabel": "மாற்று வார்த்தைகள் கிடைக்கவில்லை",
   "menuDismissLabel": "மெனுவை மூடும்",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

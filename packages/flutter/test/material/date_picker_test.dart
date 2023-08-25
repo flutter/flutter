@@ -14,7 +14,7 @@ void main() {
 
   late DateTime firstDate;
   late DateTime lastDate;
-  late DateTime initialDate;
+  late DateTime? initialDate;
   late DateTime today;
   late SelectableDayPredicate? selectableDayPredicate;
   late DatePickerEntryMode initialEntryMode;
@@ -1044,6 +1044,37 @@ void main() {
       });
     });
 
+    testWidgets('Can select a day with no initial date', (WidgetTester tester) async {
+      initialDate = null;
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {
+        await tester.tap(find.text('12'));
+        await tester.tap(find.text('OK'));
+        expect(await date, equals(DateTime(2016, DateTime.january, 12)));
+      });
+    });
+
+    testWidgets('Can select a month with no initial date', (WidgetTester tester) async {
+      initialDate = null;
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {
+        await tester.tap(previousMonthIcon);
+        await tester.pumpAndSettle(const Duration(seconds: 1));
+        await tester.tap(find.text('25'));
+        await tester.tap(find.text('OK'));
+        expect(await date, DateTime(2015, DateTime.december, 25));
+      });
+    });
+
+    testWidgets('Can select a year with no initial date', (WidgetTester tester) async {
+      initialDate = null;
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {
+        await tester.tap(find.text('January 2016')); // Switch to year mode.
+        await tester.pump();
+        await tester.tap(find.text('2018'));
+        await tester.pump();
+        expect(find.text('January 2018'), findsOneWidget);
+      });
+    });
+
     testWidgets('Selecting date does not change displayed month', (WidgetTester tester) async {
       initialDate = DateTime(2020, DateTime.march, 15);
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
@@ -1105,8 +1136,8 @@ void main() {
 
     testWidgets('Cannot select a day outside bounds', (WidgetTester tester) async {
       initialDate = DateTime(2017, DateTime.january, 15);
-      firstDate = initialDate;
-      lastDate = initialDate;
+      firstDate = initialDate!;
+      lastDate = initialDate!;
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
         // Earlier than firstDate. Should be ignored.
         await tester.tap(find.text('10'));
@@ -1120,7 +1151,7 @@ void main() {
 
     testWidgets('Cannot select a month past last date', (WidgetTester tester) async {
       initialDate = DateTime(2017, DateTime.january, 15);
-      firstDate = initialDate;
+      firstDate = initialDate!;
       lastDate = DateTime(2017, DateTime.february, 20);
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
         await tester.tap(nextMonthIcon);
@@ -1133,7 +1164,7 @@ void main() {
     testWidgets('Cannot select a month before first date', (WidgetTester tester) async {
       initialDate = DateTime(2017, DateTime.january, 15);
       firstDate = DateTime(2016, DateTime.december, 10);
-      lastDate = initialDate;
+      lastDate = initialDate!;
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
         await tester.tap(previousMonthIcon);
         await tester.pumpAndSettle(const Duration(seconds: 1));

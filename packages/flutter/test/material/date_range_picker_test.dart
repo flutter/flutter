@@ -255,12 +255,13 @@ void main() {
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
     },
-    // TODO(polina-c): remove after resolving
-    // https://github.com/flutter/flutter/issues/130354
-    leakTrackingTestConfig: const LeakTrackingTestConfig(
-      allowAllNotGCed: true,
-      allowAllNotDisposed: true,
-    ));
+      // TODO(polina-c): remove after resolving
+      // https://github.com/flutter/flutter/issues/130354
+      leakTrackingTestConfig: const LeakTrackingTestConfig(
+        allowAllNotGCed: true,
+        allowAllNotDisposed: true,
+      ),
+    );
   });
 
   testWidgets('Save and help text is used', (WidgetTester tester) async {
