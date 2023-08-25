@@ -23,8 +23,7 @@ static const CGFloat kCompareAccuracy = 0.001;
 //             +---+
 - (void)testNoOverlay {
   XCUIApplication* app = [[XCUIApplication alloc] init];
-  app.launchArguments =
-      @[ @"--platform-view-no-overlay-intersection", @"--enable-software-rendering" ];
+  app.launchArguments = @[ @"--platform-view-no-overlay-intersection" ];
   [app launch];
 
   XCUIElement* platform_view = app.otherElements[@"platform_view[0]"];
