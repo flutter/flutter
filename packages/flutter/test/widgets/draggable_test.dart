@@ -1293,6 +1293,83 @@ void main() {
     expect(onDraggableCanceledOffset, equals(Offset(secondLocation.dx, secondLocation.dy)));
   });
 
+  testWidgets('Drag and drop - onDraggableCanceled called if dropped on non-accepting target with details', (WidgetTester tester) async {
+    final List<int> accepted = <int>[];
+    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
+    bool onDraggableCanceledCalled = false;
+    late Velocity onDraggableCanceledVelocity;
+    late Offset onDraggableCanceledOffset;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Column(
+        children: <Widget>[
+          Draggable<int>(
+            data: 1,
+            feedback: const Text('Dragging'),
+            onDraggableCanceled: (Velocity velocity, Offset offset) {
+              onDraggableCanceledCalled = true;
+              onDraggableCanceledVelocity = velocity;
+              onDraggableCanceledOffset = offset;
+            },
+            child: const Text('Source'),
+          ),
+          DragTarget<int>(
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
+              return const SizedBox(
+                height: 100.0,
+                child: Text('Target'),
+              );
+            },
+            onWillAcceptWithDetails: (DragTargetDetails<int> details) => false,
+            onAccept: accepted.add,
+            onAcceptWithDetails: acceptedDetails.add,
+          ),
+        ],
+      ),
+    ));
+
+    expect(accepted, isEmpty);
+    expect(acceptedDetails, isEmpty);
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(find.text('Target'), findsOneWidget);
+    expect(onDraggableCanceledCalled, isFalse);
+
+    final Offset firstLocation = tester.getTopLeft(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
+
+    expect(accepted, isEmpty);
+    expect(acceptedDetails, isEmpty);
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsOneWidget);
+    expect(find.text('Target'), findsOneWidget);
+    expect(onDraggableCanceledCalled, isFalse);
+
+    final Offset secondLocation = tester.getCenter(find.text('Target'));
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+
+    expect(accepted, isEmpty);
+    expect(acceptedDetails, isEmpty);
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsOneWidget);
+    expect(find.text('Target'), findsOneWidget);
+    expect(onDraggableCanceledCalled, isFalse);
+
+    await gesture.up();
+    await tester.pump();
+
+    expect(accepted, isEmpty);
+    expect(acceptedDetails, isEmpty);
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(find.text('Target'), findsOneWidget);
+    expect(onDraggableCanceledCalled, isTrue);
+    expect(onDraggableCanceledVelocity, equals(Velocity.zero));
+    expect(onDraggableCanceledOffset, equals(Offset(secondLocation.dx, secondLocation.dy)));
+  });
+
   testWidgets('Drag and drop - onDraggableCanceled called if dropped on non-accepting target with correct velocity', (WidgetTester tester) async {
     final List<int> accepted = <int>[];
     final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
@@ -1367,6 +1444,82 @@ void main() {
               return const SizedBox(height: 100.0, child: Text('Target'));
             },
             onWillAccept: (int? data) => false,
+            onAccept: accepted.add,
+            onAcceptWithDetails: acceptedDetails.add,
+          ),
+        ],
+      ),
+    ));
+
+    expect(accepted, isEmpty);
+    expect(acceptedDetails, isEmpty);
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(find.text('Target'), findsOneWidget);
+    expect(onDragEndCalled, isFalse);
+
+    final Offset firstLocation = tester.getTopLeft(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
+
+    expect(accepted, isEmpty);
+    expect(acceptedDetails, isEmpty);
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsOneWidget);
+    expect(find.text('Target'), findsOneWidget);
+    expect(onDragEndCalled, isFalse);
+
+    final Offset secondLocation = tester.getCenter(find.text('Target'));
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+
+    expect(accepted, isEmpty);
+    expect(acceptedDetails, isEmpty);
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsOneWidget);
+    expect(find.text('Target'), findsOneWidget);
+    expect(onDragEndCalled, isFalse);
+
+    await gesture.up();
+    await tester.pump();
+
+    expect(accepted, isEmpty);
+    expect(acceptedDetails, isEmpty);
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(find.text('Target'), findsOneWidget);
+    expect(onDragEndCalled, isTrue);
+    expect(onDragEndDraggableDetails, isNotNull);
+    expect(onDragEndDraggableDetails.wasAccepted, isFalse);
+    expect(onDragEndDraggableDetails.velocity, equals(Velocity.zero));
+    expect(
+      onDragEndDraggableDetails.offset,
+      equals(Offset(secondLocation.dx, secondLocation.dy - firstLocation.dy)),
+    );
+  });
+
+  testWidgets('Drag and drop - onDragEnd not called if dropped on non-accepting target with details', (WidgetTester tester) async {
+    final List<int> accepted = <int>[];
+    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
+    bool onDragEndCalled = false;
+    late DraggableDetails onDragEndDraggableDetails;
+    await tester.pumpWidget(MaterialApp(
+      home: Column(
+        children: <Widget>[
+          Draggable<int>(
+            data: 1,
+            feedback: const Text('Dragging'),
+            onDragEnd: (DraggableDetails details) {
+              onDragEndCalled = true;
+              onDragEndDraggableDetails = details;
+            },
+            child: const Text('Source'),
+          ),
+          DragTarget<int>(
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
+              return const SizedBox(height: 100.0, child: Text('Target'));
+            },
+            onWillAcceptWithDetails: (DragTargetDetails<int> data) => false,
             onAccept: accepted.add,
             onAcceptWithDetails: acceptedDetails.add,
           ),
@@ -1581,6 +1734,77 @@ void main() {
               );
             },
             onWillAccept: (int? data) => false,
+            onAccept: accepted.add,
+            onAcceptWithDetails: acceptedDetails.add,
+          ),
+        ],
+      ),
+    ));
+
+    expect(accepted, isEmpty);
+    expect(acceptedDetails, isEmpty);
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(find.text('Target'), findsOneWidget);
+    expect(onDragCompletedCalled, isFalse);
+
+    final Offset firstLocation = tester.getTopLeft(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
+
+    expect(accepted, isEmpty);
+    expect(acceptedDetails, isEmpty);
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsOneWidget);
+    expect(find.text('Target'), findsOneWidget);
+    expect(onDragCompletedCalled, isFalse);
+
+    final Offset secondLocation = tester.getCenter(find.text('Target'));
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+
+    expect(accepted, isEmpty);
+    expect(acceptedDetails, isEmpty);
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsOneWidget);
+    expect(find.text('Target'), findsOneWidget);
+    expect(onDragCompletedCalled, isFalse);
+
+    await gesture.up();
+    await tester.pump();
+
+    expect(accepted, isEmpty);
+    expect(acceptedDetails, isEmpty);
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(find.text('Target'), findsOneWidget);
+    expect(onDragCompletedCalled, isFalse);
+  });
+
+  testWidgets('Drag and drop - onDragCompleted not called if dropped on non-accepting target with details', (WidgetTester tester) async {
+    final List<int> accepted = <int>[];
+    final List<DragTargetDetails<int>> acceptedDetails = <DragTargetDetails<int>>[];
+    bool onDragCompletedCalled = false;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Column(
+        children: <Widget>[
+          Draggable<int>(
+            data: 1,
+            feedback: const Text('Dragging'),
+            onDragCompleted: () {
+              onDragCompletedCalled = true;
+            },
+            child: const Text('Source'),
+          ),
+          DragTarget<int>(
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
+              return const SizedBox(
+                height: 100.0,
+                child: Text('Target'),
+              );
+            },
+            onWillAcceptWithDetails: (DragTargetDetails<int> data) => false,
             onAccept: accepted.add,
             onAcceptWithDetails: acceptedDetails.add,
           ),
@@ -3237,6 +3461,16 @@ void main() {
     expect(find.text('Dragging'), findsNothing);
     await gesture3.up();
   });
+
+ testWidgets('throws error when both onWillAccept and onWillAcceptWithDetails are provided', (WidgetTester tester) async {
+    expect(() => DragTarget<int>(
+      builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
+        return const SizedBox(height: 100.0, child: Text('Target'));
+      },
+      onWillAccept: (int? data) => true,
+      onWillAcceptWithDetails: (DragTargetDetails<int> details) => false,
+    ), throwsAssertionError);
+ });
 }
 
 Future<void> _testLongPressDraggableHapticFeedback({ required WidgetTester tester, required bool hapticFeedbackOnStart, required int expectedHapticFeedbackCount }) async {
