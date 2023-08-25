@@ -1467,6 +1467,10 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// handlers, callers must call [registerGlobalHandlers]. See the
   /// documentation in that method for caveats to watch out for.
   FocusManager() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+
     rootScope._manager = this;
   }
 
