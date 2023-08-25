@@ -73,6 +73,20 @@ FLUTTER_ASSERT_ARC
   XCTAssertNotNil(found);
 }
 
+- (void)testFLTGetApplicationBundleWhenCurrentTargetIsNotExtension {
+  NSBundle* bundle = FLTGetApplicationBundle();
+  XCTAssertEqual(bundle, [NSBundle mainBundle]);
+}
+
+- (void)testFLTGetApplicationBundleWhenCurrentTargetIsExtension {
+  id mockMainBundle = OCMPartialMock([NSBundle mainBundle]);
+  NSURL* url = [[NSBundle mainBundle].bundleURL URLByAppendingPathComponent:@"foo/ext.appex"];
+  OCMStub([mockMainBundle bundleURL]).andReturn(url);
+  NSBundle* bundle = FLTGetApplicationBundle();
+  [mockMainBundle stopMocking];
+  XCTAssertEqualObjects(bundle.bundleURL, [NSBundle mainBundle].bundleURL);
+}
+
 - (void)testDisableImpellerSettingIsCorrectlyParsed {
   id mockMainBundle = OCMPartialMock([NSBundle mainBundle]);
   OCMStub([mockMainBundle objectForInfoDictionaryKey:@"FLTEnableImpeller"]).andReturn(@"NO");

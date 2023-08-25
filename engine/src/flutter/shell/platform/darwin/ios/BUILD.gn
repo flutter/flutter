@@ -348,6 +348,10 @@ shared_library("create_flutter_framework_dylib") {
 
   ldflags = [ "-Wl,-install_name,@rpath/Flutter.framework/Flutter" ]
 
+  if (darwin_extension_safe) {
+    ldflags += [ "-fapplication-extension" ]
+  }
+
   public = _flutter_framework_headers
 
   deps = [
@@ -438,7 +442,10 @@ copy("copy_license") {
 shared_library("copy_and_verify_framework_module") {
   framework_search_path = rebase_path("$root_out_dir")
   visibility = [ ":*" ]
-  cflags_objc = [ "-F$framework_search_path" ]
+  cflags_objc = [
+    "-F$framework_search_path",
+    "-fapplication-extension",
+  ]
 
   sources = [ "framework/Source/FlutterUmbrellaImport.m" ]
   deps = [
@@ -446,6 +453,17 @@ shared_library("copy_and_verify_framework_module") {
     ":copy_framework_info_plist",
     ":copy_framework_module_map",
   ]
+
+  if (darwin_extension_safe) {
+    ldflags = [
+      "-F$framework_search_path",
+      "-fapplication-extension",
+      "-Xlinker",
+      "-fatal_warnings",
+    ]
+    deps += [ ":copy_dylib" ]
+    frameworks = [ "Flutter.framework" ]
+  }
 }
 
 group("universal_flutter_framework") {
