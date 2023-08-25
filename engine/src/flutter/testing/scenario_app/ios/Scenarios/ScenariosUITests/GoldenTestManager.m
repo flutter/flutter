@@ -55,7 +55,18 @@ NSDictionary* launchArgsMap;
       };
     });
     _identifier = launchArgsMap[launchArg];
-    NSString* prefix = [NSString stringWithFormat:@"golden_%@_", _identifier];
+
+    NSString* impeller = @"";
+    NSNumber* enableImpeller = [[NSBundle bundleWithIdentifier:@"dev.flutter.ScenariosUITests"]
+        objectForInfoDictionaryKey:@"FLTEnableImpeller"];
+    if (enableImpeller != nil) {
+      impeller = enableImpeller.boolValue ? @"impeller_" : @"";
+    } else {
+      NSLog(@"FLTEnableImpeller was nil");
+    }
+    NSLog(@"impeller = '%@'", impeller);
+
+    NSString* prefix = [NSString stringWithFormat:@"golden_%@_%@", _identifier, impeller];
     _goldenImage = [[GoldenImage alloc] initWithGoldenNamePrefix:prefix];
     _launchArg = launchArg;
   }
@@ -65,8 +76,8 @@ NSDictionary* launchArgsMap;
 - (void)checkGoldenForTest:(XCTestCase*)test {
   XCUIScreenshot* screenshot = [[XCUIScreen mainScreen] screenshot];
   if (!_goldenImage.image) {
-    XCTAttachment* attachment = [XCTAttachment attachmentWithScreenshot:screenshot];
-    attachment.name = [_goldenImage.goldenName stringByAppendingString:@"_new"];
+    XCTAttachment* attachment = [XCTAttachment attachmentWithScreenshot:screenshot.image];
+    attachment.name = [_goldenImage.goldenName stringByAppendingString:@"_new.png"];
     attachment.lifetime = XCTAttachmentLifetimeKeepAlways;
     [test addAttachment:attachment];
     // Instead of XCTFail because that definition changed between Xcode 11 and 12 whereas this impl
@@ -79,7 +90,7 @@ NSDictionary* launchArgsMap;
 
   if (![_goldenImage compareGoldenToImage:screenshot.image]) {
     XCTAttachment* screenshotAttachment = [XCTAttachment attachmentWithImage:screenshot.image];
-    screenshotAttachment.name = [_goldenImage.goldenName stringByAppendingString:@"_actual"];
+    screenshotAttachment.name = [_goldenImage.goldenName stringByAppendingString:@"_actual.png"];
     screenshotAttachment.lifetime = XCTAttachmentLifetimeKeepAlways;
     [test addAttachment:screenshotAttachment];
 

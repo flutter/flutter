@@ -13,7 +13,7 @@
   self.continueAfterFailure = NO;
 
   XCUIApplication* application = [[XCUIApplication alloc] init];
-  application.launchArguments = @[ @"--spawn-engine-works", @"--enable-software-rendering" ];
+  application.launchArguments = @[ @"--spawn-engine-works" ];
   [application launch];
 
   XCUIElement* addTextField = application.textFields[@"ready"];
