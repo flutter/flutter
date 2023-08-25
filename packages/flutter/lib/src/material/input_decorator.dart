@@ -3611,9 +3611,6 @@ class InputDecoration {
   ///
   /// Only null valued properties from this [InputDecoration] are replaced
   /// by the corresponding values from [theme].
-  ///
-  /// [isCollapsed] defaults to false in [InputDecoration] and [InputDecorationTheme],
-  /// and will be set to true if any one parameter is provided.
   InputDecoration applyDefaults(InputDecorationTheme theme) {
     return copyWith(
       labelStyle: labelStyle ?? theme.labelStyle,
