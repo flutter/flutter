@@ -1346,7 +1346,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   /// the platform with [NavigationNotification.canHandlePop] and stops
   /// bubbling.
   bool _defaultOnNavigationNotification(NavigationNotification notification) {
-    switch(_appLifecycleState) {
+    switch (_appLifecycleState) {
       case AppLifecycleState.detached:
       case AppLifecycleState.inactive:
         // Avoid updating the engine when the app isn't ready.
