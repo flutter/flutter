@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 /// Flutter code sample for [CupertinoThemeExtension].
+
+const Duration kThemeChangeDuration = Duration(milliseconds: 180);
 
 @immutable
 class MyColors extends CupertinoThemeExtension<MyColors> {
