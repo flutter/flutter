@@ -1470,7 +1470,6 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     if (kFlutterMemoryAllocationsEnabled) {
       maybeDispatchObjectCreation();
     }
-
     rootScope._manager = this;
   }
 
