@@ -687,10 +687,6 @@ void main() {
   group('Android Predictive Back', () {
     final List<bool> frameworkHandlesBacks = <bool>[];
     setUp(() {
-      // Initialize to false. Because this uses a static boolean internally, it
-      // is not reset between tests or calls to pumpWidget. Explicitly setting
-      // it to false before each test makes them behave deterministically.
-      SystemNavigator.setFrameworkHandlesBack(false);
       frameworkHandlesBacks.clear();
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
@@ -705,7 +701,6 @@ void main() {
     tearDown(() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(SystemChannels.platform, null);
-      SystemNavigator.setFrameworkHandlesBack(true);
     });
 
     Future<void> setAppLifeCycleState(AppLifecycleState state) async {
