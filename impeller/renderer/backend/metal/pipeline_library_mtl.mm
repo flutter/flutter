@@ -112,7 +112,8 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryMTL::GetPipeline(
       ^(id<MTLRenderPipelineState> _Nullable render_pipeline_state,
         NSError* _Nullable error) {
         if (error != nil) {
-          VALIDATION_LOG << "Could not create render pipeline: "
+          VALIDATION_LOG << "Could not create render pipeline for "
+                         << descriptor.GetLabel() << " :"
                          << error.localizedDescription.UTF8String;
           promise->set_value(nullptr);
           return;
