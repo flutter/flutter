@@ -1366,6 +1366,9 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     _updateRouting();
     _locale = _resolveLocales(WidgetsBinding.instance.platformDispatcher.locales, widget.supportedLocales);
     WidgetsBinding.instance.addObserver(this);
+    if (WidgetsBinding.instance.lifecycleState != null) {
+      _appLifecycleState = WidgetsBinding.instance.lifecycleState;
+    }
   }
 
   @override
