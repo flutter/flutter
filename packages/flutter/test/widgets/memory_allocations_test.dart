@@ -13,14 +13,11 @@ void main() {
   final MemoryAllocations ma = MemoryAllocations.instance;
 
   test('Publishers dispatch events in debug mode', () async {
-
     void listener(ObjectEvent event) {
-      print('${event.runtimeType} ${event.object.runtimeType}');
       if (event is ObjectDisposed) {
         _disposals++;
       }
       if (event is ObjectCreated) {
-
         _creations++;
       }
     }
@@ -37,6 +34,8 @@ void main() {
   testWidgets('State dispatches events in debug mode', (WidgetTester tester) async {
     bool stateCreated = false;
     bool stateDisposed = false;
+
+    expect(ma.hasListeners, false);
 
     void listener(ObjectEvent event) {
       if (event is ObjectCreated && event.object is State) {
@@ -56,7 +55,7 @@ void main() {
     expect(stateCreated, isTrue);
     expect(stateDisposed, isTrue);
     ma.removeListener(listener);
-    expect(ma.hasListeners, isFalse);
+    expect(ma.hasListeners, false);
   });
 }
 
@@ -71,7 +70,8 @@ class _TestElement extends RenderObjectElement with RootElementMixin {
   _TestElement(): super(_TestLeafRenderObjectWidget());
 
   void makeInactive() {
-    assignOwner(BuildOwner(focusManager: FocusManager()));
+    final FocusManager newFocusManager = FocusManager();
+    assignOwner(BuildOwner(focusManager: newFocusManager));
     mount(null, null);
     deactivate();
   }
@@ -130,16 +130,11 @@ Future<_EventStats> _activateFlutterObjectsAndReturnCountOfEvents() async {
   int disposals = 0;
 
   final _TestElement element = _TestElement(); creations++;
-  print('$_creations, $_disposals');
   final RenderObject renderObject = _TestRenderObject(); creations++;
-  print('$_creations, $_disposals');
 
-  element.makeInactive(); creations += 3;
-  print('$_creations, $_disposals');
+  element.makeInactive(); creations += 3; // 1 for the new BuildOwner, 1 for the new FocusManager, 1 for the new FocusScopeNode
   element.unmount(); disposals += 2;
-  print('$_creations, $_disposals');
-  renderObject.dispose(); disposals += 3;
-  print('$_creations, $_disposals');
+  renderObject.dispose(); disposals += 1;
 
   return _EventStats()..creations = creations..disposals = disposals;
 }
