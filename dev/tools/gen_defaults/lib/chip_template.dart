@@ -19,7 +19,6 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   _${blockName}DefaultsM3(this.context, this.isEnabled)
     : super(
         elevation: ${elevation("$tokenGroup$variant.container")},
-        shape: ${shape("$tokenGroup.container")},
         showCheckmark: true,
       );
 
@@ -47,9 +46,13 @@ class _${blockName}DefaultsM3 extends ChipThemeData {
   Color? get deleteIconColor => ${color("$tokenGroup.with-icon.selected.icon.color")};
 
   @override
-  BorderSide? get side => isEnabled
-    ? ${border('$tokenGroup$variant.outline')}
-    : ${border('$tokenGroup$variant.disabled.outline')};
+  OutlinedBorder? get shape {
+    return ${shape("$tokenGroup.container")}.copyWith(
+      side: isEnabled
+        ? ${border('$tokenGroup$variant.outline')}
+        : ${border('$tokenGroup$variant.disabled.outline')},
+    );
+  }
 
   @override
   IconThemeData? get iconTheme => IconThemeData(
