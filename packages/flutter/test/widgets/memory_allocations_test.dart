@@ -127,22 +127,23 @@ class _EventStats {
 
 /// Create and dispose Flutter objects to fire memory allocation events.
 Future<int> _activateFlutterObjectsAndReturnCountOfEvents() async {
-  int count = 0;
+  int creations = 0;
+  int disposals = 0;
 
-  final _TestElement element = _TestElement(); count++;
+  final _TestElement element = _TestElement(); creations++;
   print('$_creations, $_disposals');
-  final RenderObject renderObject = _TestRenderObject(); count++;
-  print('$_creations, $_disposals');
-
-  element.makeInactive();
-  print('$_creations, $_disposals');
-  element.unmount(); count += 3;
-  print('$_creations, $_disposals');
-  renderObject.dispose(); count++;
+  final RenderObject renderObject = _TestRenderObject(); creations++;
   print('$_creations, $_disposals');
 
-  count++;
-  count++;
+  element.makeInactive(); creations += 3;
+  print('$_creations, $_disposals');
+  element.unmount(); disposals += 2;
+  print('$_creations, $_disposals');
+  renderObject.dispose(); disposals += 3;
+  print('$_creations, $_disposals');
 
-  return count;
+  creations++;
+  creations++;
+
+  return creations;
 }
