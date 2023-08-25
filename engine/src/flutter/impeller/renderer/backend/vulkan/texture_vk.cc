@@ -137,7 +137,7 @@ std::shared_ptr<const TextureSourceVK> TextureVK::GetTextureSource() const {
 }
 
 bool TextureVK::SetLayout(const BarrierVK& barrier) const {
-  return source_ ? source_->SetLayout(barrier) : false;
+  return source_ ? source_->SetLayout(barrier).ok() : false;
 }
 
 vk::ImageLayout TextureVK::SetLayoutWithoutEncoding(
