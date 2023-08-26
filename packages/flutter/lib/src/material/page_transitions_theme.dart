@@ -244,7 +244,7 @@ class _ZoomPageTransition extends StatelessWidget {
       ) {
         return _ZoomExitTransition(
           animation: animation,
-          allowSnapshotting:  allowSnapshotting,
+          allowSnapshotting: allowSnapshotting,
           reverse: true,
           child: child,
         );
