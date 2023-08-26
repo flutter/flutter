@@ -85,8 +85,6 @@ source_set("common") {
     "context_options.h",
     "display_manager.cc",
     "display_manager.h",
-    "dl_op_spy.cc",
-    "dl_op_spy.h",
     "engine.cc",
     "engine.h",
     "pipeline.cc",
@@ -294,7 +292,6 @@ if (enable_unittests) {
     sources = [
       "animator_unittests.cc",
       "context_options_unittests.cc",
-      "dl_op_spy_unittests.cc",
       "engine_unittests.cc",
       "input_events_unittests.cc",
       "persistent_cache_unittests.cc",

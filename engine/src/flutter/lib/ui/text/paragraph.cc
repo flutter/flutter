@@ -64,9 +64,9 @@ void Paragraph::paint(Canvas* canvas, double x, double y) {
     return;
   }
 
-  DisplayListBuilder* builder = canvas->builder();
-  if (builder) {
-    m_paragraph->Paint(builder, x, y);
+  DlCanvas* dl_canvas = canvas->dl_canvas();
+  if (dl_canvas) {
+    m_paragraph->Paint(dl_canvas, x, y);
   }
 }
 
