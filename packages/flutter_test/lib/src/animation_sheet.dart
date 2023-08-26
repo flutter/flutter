@@ -340,6 +340,7 @@ class _RenderPostFrameCallbacker extends RenderProxyBox {
 Future<ui.Image> _collateFrames(List<_AsyncImage> futureFrames, Size frameSize, int cellsPerRow) async {
   final List<ui.Image> frames = await _AsyncImage.resolveList(futureFrames);
   final int rowNum = (frames.length / cellsPerRow).ceil();
+
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   final Canvas canvas = Canvas(
     recorder,
@@ -353,7 +354,7 @@ Future<ui.Image> _collateFrames(List<_AsyncImage> futureFrames, Size frameSize, 
     );
   }
   final ui.Picture picture = recorder.endRecording();
-  final Future<ui.Image> image = picture.toImage(
+  final ui.Image image = await picture.toImage(
     (frameSize.width * cellsPerRow).toInt(),
     (frameSize.height * rowNum).toInt(),
   );
