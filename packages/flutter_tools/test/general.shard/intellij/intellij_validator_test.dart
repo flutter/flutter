@@ -381,7 +381,7 @@ void main() {
 
     final FakeProcessManager processManager = FakeProcessManager.empty();
 
-    IntelliJValidatorOnMac.installed(
+    final Iterable<DoctorValidator> validators = IntelliJValidatorOnMac.installed(
       fileSystem: fileSystem,
       fileSystemUtils: FileSystemUtils(fileSystem: fileSystem, platform: macPlatform),
       userMessages: UserMessages(),
@@ -391,6 +391,11 @@ void main() {
       }),
       processManager: processManager,
     );
+
+    expect(validators.length, 1);
+    final DoctorValidator validator = validators.first;
+    expect(validator, isA<ValidatorWithResult>());
+    expect(validator.title, 'Cannot determine if IntelliJ is installed');
   });
 
   testWithoutContext('Remove JetBrains Toolbox', () async {
