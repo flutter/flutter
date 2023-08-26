@@ -1219,7 +1219,7 @@ void main() {
 
   group('Android Predictive Back', () {
     bool? lastFrameworkHandlesBack;
-    setUp(() {
+    setUp(() async {
       lastFrameworkHandlesBack = null;
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
@@ -1229,6 +1229,12 @@ void main() {
           }
           return;
         });
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .handlePlatformMessage(
+            'flutter/lifecycle',
+            const StringCodec().encodeMessage(AppLifecycleState.resumed.toString()),
+            (ByteData? data) {},
+          );
     });
 
     tearDown(() {
