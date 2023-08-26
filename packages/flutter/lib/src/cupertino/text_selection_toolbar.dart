@@ -197,7 +197,6 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
         delegate: TextSelectionToolbarLayoutDelegate(
           anchorAbove: anchorAboveAdjusted,
           anchorBelow: anchorBelowAdjusted,
-          fitsAbove: null,
         ),
         child: _CupertinoTextSelectionToolbarContent(
           anchorAbove: anchorAboveAdjusted,
