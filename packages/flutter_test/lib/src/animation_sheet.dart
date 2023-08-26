@@ -11,8 +11,8 @@ import 'package:flutter/widgets.dart';
 
 // A Future<ui.Image> that stores the resolved result.
 class _AsyncImage {
-  _AsyncImage(this._task) {
-    _task.then((ui.Image image) {
+  _AsyncImage(Future<ui.Image> task) {
+    _task = task.then((ui.Image image) {
       _result = image;
     });
   }
@@ -27,7 +27,7 @@ class _AsyncImage {
     return _result!;
   }
 
-  final Future<ui.Image> _task;
+  late final Future<void> _task;
   ui.Image? _result;
 
   // Wait for a list of `_AsyncImage` and returns the list of its resolved
