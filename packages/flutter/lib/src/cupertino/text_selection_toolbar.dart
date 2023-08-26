@@ -14,19 +14,22 @@ import 'text_selection_toolbar_button.dart';
 import 'theme.dart';
 
 // Values extracted from https://developer.apple.com/design/resources/.
-// The height of the toolbar, including the arrow.
-const double _kToolbarHeight = 45.0;
+
 // Vertical distance between the tip of the arrow and the line of text the arrow
 // is pointing to. The value used here is eyeballed.
 const double _kToolbarContentDistance = 8.0;
+
+// The size of the arrow button to navigate between pages.
 const Size _kToolbarArrowSize = Size(14.0, 7.0);
 
 // Minimal padding from tip of the selection toolbar arrow to horizontal edges of the
 // screen. Eyeballed value.
 const double _kArrowScreenPadding = 26.0;
 
-// Values extracted from https://developer.apple.com/design/resources/.
-const Radius _kToolbarBorderRadius = Radius.circular(8);
+const Radius _kToolbarBorderRadius = Radius.circular(8.0);
+
+const double _kToolbarChevronSize = 10.0;
+const double _kToolbarChevronThickness = 2.0;
 
 // Color was measured from a screenshot of iOS 16.0.2
 // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/41507.
@@ -34,9 +37,6 @@ const CupertinoDynamicColor _kToolbarBackgroundColor = CupertinoDynamicColor.wit
   color: Color(0xFFF6F6F6),
   darkColor: Color(0xFF222222),
 );
-
-const double _kToolbarChevronSize = 10;
-const double _kToolbarChevronThickness = 2;
 
 // Color was measured from a screenshot of iOS 16.0.2.
 const CupertinoDynamicColor _kToolbarDividerColor = CupertinoDynamicColor.withBrightness(
@@ -63,8 +63,8 @@ const Duration _kToolbarTransitionDuration = Duration(milliseconds: 125);
 ///     Material-style toolbar.
 typedef CupertinoToolbarBuilder = Widget Function(
   BuildContext context,
-  Offset anchor,
-  bool isAbove,
+  Offset anchorAbove,
+  Offset anchorBelow,
   Widget child,
 );
 
@@ -126,10 +126,15 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
 
   // Builds a toolbar just like the default iOS toolbar, with the right color
   // background and a rounded cutout with an arrow.
-  static Widget _defaultToolbarBuilder(BuildContext context, Offset anchor, bool isAbove, Widget child) {
+  static Widget _defaultToolbarBuilder(
+    BuildContext context,
+    Offset anchorAbove,
+    Offset anchorBelow,
+    Widget child,
+  ) {
     final Widget outputChild = _CupertinoTextSelectionToolbarShape(
-      anchor: anchor,
-      isAbove: isAbove,
+      anchorAbove: anchorAbove,
+      anchorBelow: anchorBelow,
       child: ColoredBox(
         color: _kToolbarBackgroundColor.resolveFrom(context),
         child: child,
@@ -150,7 +155,8 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
             blurRadius: 15.0,
             offset: Offset(
               0.0,
-              isAbove ? 0.0 : _kToolbarArrowSize.height,
+              0.0,
+              // XXX isAbove ? 0.0 : _kToolbarArrowSize.height,
             ),
           ),
         ],
@@ -165,10 +171,6 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
     final EdgeInsets mediaQueryPadding = MediaQuery.paddingOf(context);
 
     final double paddingAbove = mediaQueryPadding.top + kToolbarScreenPadding;
-    final double toolbarHeightNeeded = paddingAbove
-        + _kToolbarContentDistance
-        + _kToolbarHeight;
-    final bool fitsAbove = anchorAbove.dy >= toolbarHeightNeeded;
 
     // The arrow, which points to the anchor, has some margin so it can't get
     // too close to the horizontal edges of the screen.
@@ -195,11 +197,11 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
         delegate: TextSelectionToolbarLayoutDelegate(
           anchorAbove: anchorAboveAdjusted,
           anchorBelow: anchorBelowAdjusted,
-          fitsAbove: fitsAbove,
+          fitsAbove: null,
         ),
         child: _CupertinoTextSelectionToolbarContent(
-          anchor: fitsAbove ? anchorAboveAdjusted : anchorBelowAdjusted,
-          isAbove: fitsAbove,
+          anchorAbove: anchorAboveAdjusted,
+          anchorBelow: anchorBelowAdjusted,
           toolbarBuilder: toolbarBuilder,
           children: children,
         ),
@@ -214,30 +216,27 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
 // The anchor should be in global coordinates.
 class _CupertinoTextSelectionToolbarShape extends SingleChildRenderObjectWidget {
   const _CupertinoTextSelectionToolbarShape({
-    required Offset anchor,
-    required bool isAbove,
+    required Offset anchorAbove,
+    required Offset anchorBelow,
     super.child,
-  }) : _anchor = anchor,
-       _isAbove = isAbove;
+  }) : _anchorAbove = anchorAbove,
+       _anchorBelow = anchorBelow;
 
-  final Offset _anchor;
-
-  // Whether the arrow should point down and be attached to the bottom
-  // of the toolbar, or point up and be attached to the top of the toolbar.
-  final bool _isAbove;
+  final Offset _anchorAbove;
+  final Offset _anchorBelow;
 
   @override
   _RenderCupertinoTextSelectionToolbarShape createRenderObject(BuildContext context) => _RenderCupertinoTextSelectionToolbarShape(
-    _anchor,
-    _isAbove,
+    _anchorAbove,
+    _anchorBelow,
     null,
   );
 
   @override
   void updateRenderObject(BuildContext context, _RenderCupertinoTextSelectionToolbarShape renderObject) {
     renderObject
-      ..anchor = _anchor
-      ..isAbove = _isAbove;
+      ..anchorAbove = _anchorAbove
+      ..anchorBelow = _anchorBelow;
   }
 }
 
@@ -251,43 +250,35 @@ class _CupertinoTextSelectionToolbarShape extends SingleChildRenderObjectWidget 
 // on the necessary side.
 class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
   _RenderCupertinoTextSelectionToolbarShape(
-    this._anchor,
-    this._isAbove,
+    this._anchorAbove,
+    this._anchorBelow,
     super.child,
   );
 
   @override
   bool get isRepaintBoundary => true;
 
-  Offset get anchor => _anchor;
-  Offset _anchor;
-  set anchor(Offset value) {
-    if (value == _anchor) {
+  Offset get anchorAbove => _anchorAbove;
+  Offset _anchorAbove;
+  set anchorAbove(Offset value) {
+    if (value == _anchorAbove) {
       return;
     }
-    _anchor = value;
+    _anchorAbove = value;
     markNeedsLayout();
   }
 
-  bool get isAbove => _isAbove;
-  bool _isAbove;
-  set isAbove(bool value) {
-    if (_isAbove == value) {
+  Offset get anchorBelow => _anchorBelow;
+  Offset _anchorBelow;
+  set anchorBelow(Offset value) {
+    if (value == _anchorBelow) {
       return;
     }
-    _isAbove = value;
+    _anchorBelow = value;
     markNeedsLayout();
   }
 
-  // The child is tall enough to have the arrow clipped out of it on both sides
-  // top and bottom. Since _kToolbarHeight includes the height of one arrow, the
-  // total height that the child is given is that plus one more arrow height.
-  // The extra height on the opposite side of the arrow will be clipped out. By
-  // using this approach, the buttons don't need any special padding that
-  // depends on isAbove.
-  final BoxConstraints _heightConstraint = BoxConstraints.tightFor(
-    height: _kToolbarHeight + _kToolbarArrowSize.height,
-  );
+  bool get isAbove => anchorAbove.dy >= (child?.size.height ?? 0.0);
 
   @override
   void performLayout() {
@@ -297,18 +288,21 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
 
     final BoxConstraints enforcedConstraint = constraints.loosen();
 
-    child!.layout(_heightConstraint.enforce(enforcedConstraint), parentUsesSize: true);
+    child!.layout(enforcedConstraint, parentUsesSize: true);
+
+    final Size childSize = child!.size;
+    final bool isAbove = anchorAbove.dy >= childSize.height;
 
     // The height of one arrow will be clipped off of the child, so adjust the
     // size and position to remove that piece from the layout.
     final BoxParentData childParentData = child!.parentData! as BoxParentData;
     childParentData.offset = Offset(
       0.0,
-      _isAbove ? -_kToolbarArrowSize.height : 0.0,
+      isAbove ? -_kToolbarArrowSize.height : 0.0,
     );
     size = Size(
-      child!.size.width,
-      child!.size.height - _kToolbarArrowSize.height,
+      childSize.width,
+      childSize.height - _kToolbarArrowSize.height,
     );
   }
 
@@ -327,16 +321,16 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
         ),
       );
 
-    final Offset localAnchor = globalToLocal(_anchor);
+    final Offset localAnchor = globalToLocal(isAbove ? _anchorAbove : _anchorBelow);
     final double centerX = childParentData.offset.dx + child!.size.width / 2;
     final double arrowXOffsetFromCenter = localAnchor.dx - centerX;
     final double arrowTipX = child!.size.width / 2 + arrowXOffsetFromCenter;
 
-    final double arrowBaseY = _isAbove
+    final double arrowBaseY = isAbove
       ? child!.size.height - _kToolbarArrowSize.height
       : _kToolbarArrowSize.height;
 
-    final double arrowTipY = _isAbove ? child!.size.height : 0;
+    final double arrowTipY = isAbove ? child!.size.height : 0;
 
     final Path arrow = Path()
       ..moveTo(arrowTipX, arrowTipY)
@@ -423,15 +417,15 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
 // The anchor should be in global coordinates.
 class _CupertinoTextSelectionToolbarContent extends StatefulWidget {
   const _CupertinoTextSelectionToolbarContent({
-    required this.anchor,
-    required this.isAbove,
+    required this.anchorAbove,
+    required this.anchorBelow,
     required this.toolbarBuilder,
     required this.children,
   }) : assert(children.length > 0);
 
-  final Offset anchor;
+  final Offset anchorAbove;
+  final Offset anchorBelow;
   final List<Widget> children;
-  final bool isAbove;
   final CupertinoToolbarBuilder toolbarBuilder;
 
   @override
@@ -526,22 +520,18 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
     final Color color = _kToolbarTextColor.resolveFrom(context);
 
     return IgnorePointer(
-      child: Center(
-        // If widthFactor is not set to 0, the button is given unbounded width.
-        widthFactor: 0,
-        child: CustomPaint(
-          painter: isLeft
-            ? _LeftCupertinoChevronPainter(color: color)
-            : _RightCupertinoChevronPainter(color: color),
-          size: const Size.square(_kToolbarChevronSize),
-        ),
+      child: CustomPaint(
+        painter: isLeft
+          ? _LeftCupertinoChevronPainter(color: color)
+          : _RightCupertinoChevronPainter(color: color),
+        size: const Size.square(_kToolbarChevronSize),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return widget.toolbarBuilder(context, widget.anchor, widget.isAbove, FadeTransition(
+    return widget.toolbarBuilder(context, widget.anchorAbove, widget.anchorBelow, FadeTransition(
       opacity: _controller,
       child: AnimatedSize(
         duration: _kToolbarTransitionDuration,
