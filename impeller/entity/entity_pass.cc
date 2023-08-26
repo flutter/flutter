@@ -127,9 +127,6 @@ std::optional<Rect> EntityPass::GetElementsCoverage(
     if (!coverage.has_value()) {
       continue;
     }
-    if (coverage->IsMaximum()) {
-      return coverage;
-    }
     result = result->Union(coverage.value());
   }
   return result;

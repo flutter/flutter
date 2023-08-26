@@ -30,7 +30,6 @@ impeller_component("aiks") {
     "../base",
     "../entity",
     "../geometry",
-    "//flutter/display_list",
   ]
 
   deps = [ "//flutter/fml" ]

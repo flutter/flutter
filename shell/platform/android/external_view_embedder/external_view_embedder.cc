@@ -12,15 +12,13 @@ AndroidExternalViewEmbedder::AndroidExternalViewEmbedder(
     const AndroidContext& android_context,
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
     std::shared_ptr<AndroidSurfaceFactory> surface_factory,
-    const TaskRunners& task_runners,
-    bool enable_impeller)
+    const TaskRunners& task_runners)
     : ExternalViewEmbedder(),
       android_context_(android_context),
       jni_facade_(std::move(jni_facade)),
       surface_factory_(std::move(surface_factory)),
       surface_pool_(std::make_unique<SurfacePool>()),
-      task_runners_(task_runners),
-      enable_impeller_(enable_impeller) {}
+      task_runners_(task_runners) {}
 
 // |ExternalViewEmbedder|
 void AndroidExternalViewEmbedder::PrerollCompositeEmbeddedView(
@@ -31,11 +29,7 @@ void AndroidExternalViewEmbedder::PrerollCompositeEmbeddedView(
 
   SkRect view_bounds = SkRect::Make(frame_size_);
   std::unique_ptr<EmbedderViewSlice> view;
-  if (enable_impeller_) {
-    view = std::make_unique<ImpellerEmbedderViewSlice>(view_bounds);
-  } else {
-    view = std::make_unique<DisplayListEmbedderViewSlice>(view_bounds);
-  }
+  view = std::make_unique<DisplayListEmbedderViewSlice>(view_bounds);
   slices_.insert_or_assign(view_id, std::move(view));
 
   composition_order_.push_back(view_id);

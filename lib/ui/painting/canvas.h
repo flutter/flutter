@@ -186,12 +186,12 @@ class Canvas : public RefCountedDartWrappable<Canvas>, DisplayListOpFlags {
 
   void Invalidate();
 
-  DlCanvas* dl_canvas() { return dl_canvas_; }
+  DisplayListBuilder* builder() { return display_list_builder_.get(); }
 
  private:
-  explicit Canvas(DlCanvas* canvas);
+  explicit Canvas(sk_sp<DisplayListBuilder> builder);
 
-  DlCanvas* dl_canvas_;
+  sk_sp<DisplayListBuilder> display_list_builder_;
 };
 
 }  // namespace flutter
