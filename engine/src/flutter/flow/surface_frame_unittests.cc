@@ -22,6 +22,7 @@ TEST(FlowTest, SurfaceFrameDoesNotSubmitInDtor) {
   surface_frame.reset();
 }
 
+#if IMPELLER_SUPPORTS_RENDERING
 TEST(FlowTest, SurfaceFrameDoesNotHaveEmptyCanvas) {
   SurfaceFrame::FramebufferInfo framebuffer_info;
   SurfaceFrame frame(
@@ -33,5 +34,6 @@ TEST(FlowTest, SurfaceFrameDoesNotHaveEmptyCanvas) {
   EXPECT_FALSE(frame.Canvas()->GetLocalClipBounds().isEmpty());
   EXPECT_FALSE(frame.Canvas()->QuickReject(SkRect::MakeLTRB(10, 10, 50, 50)));
 }
+#endif  // IMPELLER_SUPPORTS_RENDERING
 
 }  // namespace flutter

@@ -18,6 +18,10 @@
 #include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
 
+namespace impeller {
+struct Picture;
+}  // namespace impeller
+
 namespace flutter {
 
 // The primary class used to express rendering operations in the
@@ -59,7 +63,12 @@ class DlCanvas {
                          const DlImageFilter* backdrop = nullptr) = 0;
   virtual void Restore() = 0;
   virtual int GetSaveCount() const = 0;
-  virtual void RestoreToCount(int restore_count) = 0;
+  virtual void RestoreToCount(int restore_count) {
+    FML_DCHECK(restore_count <= GetSaveCount());
+    while (restore_count < GetSaveCount() && GetSaveCount() > 1) {
+      Restore();
+    }
+  }
 
   virtual void Translate(SkScalar tx, SkScalar ty) = 0;
   virtual void Scale(SkScalar sx, SkScalar sy) = 0;
@@ -199,6 +208,9 @@ class DlCanvas {
                          const DlPaint* paint = nullptr) = 0;
   virtual void DrawDisplayList(const sk_sp<DisplayList> display_list,
                                SkScalar opacity = SK_Scalar1) = 0;
+  virtual void DrawImpellerPicture(
+      const std::shared_ptr<const impeller::Picture>& picture,
+      SkScalar opacity = SK_Scalar1) = 0;
   virtual void DrawTextBlob(const sk_sp<SkTextBlob>& blob,
                             SkScalar x,
                             SkScalar y,

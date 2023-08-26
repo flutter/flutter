@@ -811,6 +811,12 @@ void DlCanvasToReceiver::DrawDisplayList(const sk_sp<DisplayList> display_list,
           : OpResult::kPreservesTransparency,
       display_list->can_apply_group_opacity());
 }
+void DlCanvasToReceiver::DrawImpellerPicture(
+    const std::shared_ptr<const impeller::Picture>& picture,
+    SkScalar opacity) {
+  FML_LOG(ERROR) << "Cannot draw Impeller Picture in to a a display list.";
+  FML_DCHECK(false);
+}
 void DlCanvasToReceiver::DrawTextBlob(const sk_sp<SkTextBlob>& blob,
                                       SkScalar x,
                                       SkScalar y,
