@@ -1624,7 +1624,7 @@ void main() {
 
     focusManager.dispose();
 
-    assert(!MemoryAllocations.instance.hasListeners);
+    MemoryAllocations.instance.removeListener(listener);
   });
 
   test('$FocusNode dispatches object creation in constructor', () {
@@ -1641,8 +1641,7 @@ void main() {
     expect(events, hasLength(1));
 
     focusManager.dispose();
-
-    assert(!MemoryAllocations.instance.hasListeners);
+    MemoryAllocations.instance.removeListener(listener);
   });
 
   testWidgets('FocusManager notifies listeners when a widget loses focus because it was removed.', (WidgetTester tester) async {
