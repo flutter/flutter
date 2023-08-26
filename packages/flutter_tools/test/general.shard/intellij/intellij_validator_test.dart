@@ -375,20 +375,11 @@ void main() {
     expect(validator.pluginsPath, '/path/to/JetBrainsToolboxApp.plugins');
   });
 
-  testWithoutContext('foo bar', () async {
+  testWithoutContext('IntelliJValidatorOnMac.installed() handles FileSystemExceptions)', () async {
     const FileSystemException exception = FileSystemException('cannot list');
     final FileSystem fileSystem = _ThrowingFileSystem(exception);
 
-    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      const FakeCommand(command: <String>[
-        'mdfind',
-        'kMDItemCFBundleIdentifier="com.jetbrains.intellij.ce"',
-      ], stdout: 'skip'),
-      const FakeCommand(command: <String>[
-        'mdfind',
-        'kMDItemCFBundleIdentifier="com.jetbrains.intellij*"',
-      ], stdout: 'skip')
-    ]);
+    final FakeProcessManager processManager = FakeProcessManager.empty();
 
     IntelliJValidatorOnMac.installed(
       fileSystem: fileSystem,
@@ -400,8 +391,6 @@ void main() {
       }),
       processManager: processManager,
     );
-
-    expect(processManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('Remove JetBrains Toolbox', () async {
