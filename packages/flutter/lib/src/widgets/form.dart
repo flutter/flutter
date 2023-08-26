@@ -574,6 +574,13 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   }
 
   @override
+  void dispose() {
+    _errorText.dispose();
+    _hasInteractedByUser.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (widget.enabled) {
       switch (widget.autovalidateMode) {
