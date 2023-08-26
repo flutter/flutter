@@ -762,7 +762,10 @@ void main() {
       const NavigationNotification(canHandlePop: false).dispatch(currentContext);
       await tester.pumpAndSettle();
       expect(frameworkHandlesBacks, hasLength(finalCallsLength));
-    });
+    },
+      skip: kIsWeb, // [intended] predictive back is only native Android.
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android })
+    );
   });
 }
 
