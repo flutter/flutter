@@ -25,7 +25,7 @@ namespace flutter {
 /// - Query for a set of non-overlapping rectangles that are joined
 ///   from the original rectangles that intersect a query rect
 ///   @see |searchAndConsolidateRects|
-class DlRTree {
+class DlRTree : public SkRefCnt {
  private:
   static constexpr int kMaxChildren = 11;
 
