@@ -376,7 +376,7 @@ void main() {
   });
 
   testWithoutContext('foo bar', () async {
-    final FileSystemException exception = FileSystemException('cannot list');
+    const FileSystemException exception = FileSystemException('cannot list');
     final FileSystem fileSystem = _ThrowingFileSystem(exception);
 
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
