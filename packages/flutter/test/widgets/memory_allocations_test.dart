@@ -126,15 +126,14 @@ class _EventStats {
 
 /// Create and dispose Flutter objects to fire memory allocation events.
 Future<_EventStats> _activateFlutterObjectsAndReturnCountOfEvents() async {
-  int creations = 0;
-  int disposals = 0;
+  final _EventStats result = _EventStats();
 
-  final _TestElement element = _TestElement(); creations++;
-  final RenderObject renderObject = _TestRenderObject(); creations++;
+  final _TestElement element = _TestElement(); result.creations++;
+  final RenderObject renderObject = _TestRenderObject(); result.creations++;
 
-  element.makeInactive(); creations += 3; // 1 for the new BuildOwner, 1 for the new FocusManager, 1 for the new FocusScopeNode
-  element.unmount(); disposals += 2;
-  renderObject.dispose(); disposals += 1;
+  element.makeInactive(); result.creations += 3; // 1 for the new BuildOwner, 1 for the new FocusManager, 1 for the new FocusScopeNode
+  element.unmount(); result.disposals += 2; // 1 for the old BuildOwner, 1 for the element
+  renderObject.dispose(); result.disposals += 1;
 
-  return _EventStats()..creations = creations..disposals = disposals;
+  return result;
 }
