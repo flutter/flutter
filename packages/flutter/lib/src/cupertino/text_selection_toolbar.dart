@@ -153,11 +153,11 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
           BoxShadow(
             color: CupertinoColors.black.withOpacity(0.2),
             blurRadius: 15.0,
-            offset: const Offset(
-              0.0,
-              0.0,
-              // XXX isAbove ? 0.0 : _kToolbarArrowSize.height,
-            ),
+            // XXX
+            // offset: const Offset(
+              // 0.0,
+              // isAbove ? 0.0 : _kToolbarArrowSize.height,
+            // ),
           ),
         ],
       ),
