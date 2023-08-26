@@ -145,10 +145,10 @@ const DlPaint* Paint::paint(DlPaint& paint,
     paint.setBlendMode(static_cast<DlBlendMode>(blend_mode));
   }
 
-  if (flags.applies_style()) {
-    uint32_t style = uint_data[kStyleIndex];
-    paint.setDrawStyle(static_cast<DlDrawStyle>(style));
-  }
+  // if (flags.applies_style()) {
+  uint32_t style = uint_data[kStyleIndex];
+  paint.setDrawStyle(static_cast<DlDrawStyle>(style));
+  // }
 
   if (flags.is_stroked(paint.getDrawStyle())) {
     float stroke_width = float_data[kStrokeWidthIndex];
