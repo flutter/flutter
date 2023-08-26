@@ -5,9 +5,10 @@
 #include "flutter/shell/gpu/gpu_surface_gl_impeller.h"
 
 #include "flutter/fml/make_copyable.h"
-#include "flutter/impeller/renderer/backend/gles/surface_gles.h"
-#include "flutter/impeller/renderer/renderer.h"
-#include "flutter/impeller/typographer/backends/skia/typographer_context_skia.h"
+#include "impeller/display_list/dl_dispatcher.h"
+#include "impeller/renderer/backend/gles/surface_gles.h"
+#include "impeller/renderer/renderer.h"
+#include "impeller/typographer/backends/skia/typographer_context_skia.h"
 
 namespace flutter {
 
@@ -101,14 +102,27 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLImpeller::AcquireFrame(
           return false;
         }
 
-        auto picture = surface_frame.GetImpellerPicture();
+        auto display_list = surface_frame.BuildDisplayList();
+        if (!display_list) {
+          FML_LOG(ERROR) << "Could not build display list for surface frame.";
+          return false;
+        }
+
+        auto cull_rect =
+            surface->GetTargetRenderPassDescriptor().GetRenderTargetSize();
+        impeller::Rect dl_cull_rect = impeller::Rect::MakeSize(cull_rect);
+        impeller::DlDispatcher impeller_dispatcher(dl_cull_rect);
+        display_list->Dispatch(
+            impeller_dispatcher,
+            SkIRect::MakeWH(cull_rect.width, cull_rect.height));
+        auto picture = impeller_dispatcher.EndRecordingAsPicture();
 
         return renderer->Render(
             std::move(surface),
             fml::MakeCopyable(
                 [aiks_context, picture = std::move(picture)](
                     impeller::RenderTarget& render_target) -> bool {
-                  return aiks_context->Render(*picture, render_target);
+                  return aiks_context->Render(picture, render_target);
                 }));
       });
 

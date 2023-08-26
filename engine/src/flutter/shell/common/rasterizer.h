@@ -535,11 +535,6 @@ class Rasterizer final : public SnapshotDelegate,
                                     SkISize picture_size) override;
 
   // |SnapshotDelegate|
-  sk_sp<DlImage> MakeRasterSnapshot(
-      const std::shared_ptr<const impeller::Picture>& picture,
-      SkISize picture_size) override;
-
-  // |SnapshotDelegate|
   sk_sp<SkImage> ConvertToRasterImage(sk_sp<SkImage> image) override;
 
   // |Stopwatch::Delegate|

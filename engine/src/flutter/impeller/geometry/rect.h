@@ -72,11 +72,6 @@ struct TRect {
     return TRect::MakeLTRB(left, top, right, bottom);
   }
 
-  constexpr static TRect Giant() {
-    // See flutter::kGiantRect.
-    return TRect::MakeLTRB(-1E9, -1E9, 1E9, 1E9);
-  }
-
   constexpr static TRect MakeMaximum() {
     return TRect::MakeLTRB(-std::numeric_limits<Type>::infinity(),
                            -std::numeric_limits<Type>::infinity(),
