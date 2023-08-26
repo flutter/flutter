@@ -685,8 +685,14 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   group('Android Predictive Back', () {
+    Future<void> setAppLifeCycleState(AppLifecycleState state) async {
+      final ByteData? message = const StringCodec().encodeMessage(state.toString());
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .handlePlatformMessage('flutter/lifecycle', message, (ByteData? data) {});
+    }
+
     final List<bool> frameworkHandlesBacks = <bool>[];
-    setUp(() {
+    setUp(() async {
       frameworkHandlesBacks.clear();
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
@@ -698,16 +704,11 @@ void main() {
         });
     });
 
-    tearDown(() {
+    tearDown(() async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(SystemChannels.platform, null);
+      await setAppLifeCycleState(AppLifecycleState.resumed);
     });
-
-    Future<void> setAppLifeCycleState(AppLifecycleState state) async {
-      final ByteData? message = const StringCodec().encodeMessage(state.toString());
-      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .handlePlatformMessage('flutter/lifecycle', message, (_) {});
-    }
 
     testWidgets('WidgetsApp calls setFrameworkHandlesBack only when app is ready', (WidgetTester tester) async {
       // Start in the `resumed` state, where setFrameworkHandlesBack should be
