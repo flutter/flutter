@@ -221,7 +221,7 @@ class AnimationSheetBuilder {
   Future<ui.Image> collate(int cellsPerRow) async {
     assert(_recordedFrames.isNotEmpty,
       'No frames are collected. Have you forgot to set `recording` to true?');
-    final _AsyncImage result = _collateFrames(_recordedFrames, frameSize, cellsPerRow);
+    final _AsyncImage result = _AsyncImage(_collateFrames(_recordedFrames, frameSize, cellsPerRow));
     _results.add(result);
     return result.result();
   }
@@ -337,30 +337,28 @@ class _RenderPostFrameCallbacker extends RenderProxyBox {
   }
 }
 
-_AsyncImage _collateFrames(List<_AsyncImage> futureFrames, Size frameSize, int cellsPerRow) {
-  return _AsyncImage(() async {
-    final List<ui.Image> frames = await _AsyncImage.resolveList(futureFrames);
-    final int rowNum = (frames.length / cellsPerRow).ceil();
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final Canvas canvas = Canvas(
-      recorder,
-      Rect.fromLTWH(0, 0, frameSize.width * cellsPerRow, frameSize.height * rowNum),
+Future<ui.Image> _collateFrames(List<_AsyncImage> futureFrames, Size frameSize, int cellsPerRow) async {
+  final List<ui.Image> frames = await _AsyncImage.resolveList(futureFrames);
+  final int rowNum = (frames.length / cellsPerRow).ceil();
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final Canvas canvas = Canvas(
+    recorder,
+    Rect.fromLTWH(0, 0, frameSize.width * cellsPerRow, frameSize.height * rowNum),
+  );
+  for (int i = 0; i < frames.length; i += 1) {
+    canvas.drawImage(
+      frames[i],
+      Offset(frameSize.width * (i % cellsPerRow), frameSize.height * (i / cellsPerRow).floor()),
+      Paint(),
     );
-    for (int i = 0; i < frames.length; i += 1) {
-      canvas.drawImage(
-        frames[i],
-        Offset(frameSize.width * (i % cellsPerRow), frameSize.height * (i / cellsPerRow).floor()),
-        Paint(),
-      );
-    }
-    final ui.Picture picture = recorder.endRecording();
-    final Future<ui.Image> image = picture.toImage(
-      (frameSize.width * cellsPerRow).toInt(),
-      (frameSize.height * rowNum).toInt(),
-    );
-    picture.dispose();
-    return image;
-  }());
+  }
+  final ui.Picture picture = recorder.endRecording();
+  final Future<ui.Image> image = picture.toImage(
+    (frameSize.width * cellsPerRow).toInt(),
+    (frameSize.height * rowNum).toInt(),
+  );
+  picture.dispose();
+  return image;
 }
 
 class _RenderRootableRepaintBoundary extends RenderRepaintBoundary {
