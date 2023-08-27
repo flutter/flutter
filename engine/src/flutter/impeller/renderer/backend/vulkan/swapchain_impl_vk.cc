@@ -379,7 +379,8 @@ SwapchainImplVK::AcquireResult SwapchainImplVK::AcquireNextDrawable() {
     return AcquireResult{true /* out of date */};
   }
 
-  if (acq_result != vk::Result::eSuccess) {
+  if (acq_result != vk::Result::eSuccess &&
+      acq_result != vk::Result::eSuboptimalKHR) {
     VALIDATION_LOG << "Could not acquire next swapchain image: "
                    << vk::to_string(acq_result);
     return {};
