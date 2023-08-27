@@ -143,6 +143,7 @@ if (enable_unittests) {
 
     sources = [
       "tests/font_collection_tests.cc",
+      "tests/paragraph_unittests.cc",
       "tests/txt_run_all_unittests.cc",
     ]
 
@@ -154,7 +155,10 @@ if (enable_unittests) {
       ":txt",
       ":txt_fixtures",
       "//flutter/fml",
+      "//flutter/runtime:test_font",
+      "//flutter/testing:skia",
       "//flutter/testing:testing_lib",
+      "//third_party/skia/modules/skparagraph:skparagraph",
     ]
 
     # This is needed for //third_party/googletest for linking zircon symbols.
