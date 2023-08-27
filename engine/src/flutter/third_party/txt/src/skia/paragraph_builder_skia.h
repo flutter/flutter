@@ -24,11 +24,16 @@
 
 namespace txt {
 
-// Implementation of ParagraphBuilder based on Skia's text layout module.
+//------------------------------------------------------------------------------
+/// @brief      ParagraphBuilder implementation using Skia's text layout module.
+///
+/// @note       Despite the suffix "Skia", this class is not specific to Skia
+///             and is also used with the Impeller backend.
 class ParagraphBuilderSkia : public ParagraphBuilder {
  public:
   ParagraphBuilderSkia(const ParagraphStyle& style,
-                       std::shared_ptr<FontCollection> font_collection);
+                       std::shared_ptr<FontCollection> font_collection,
+                       const bool impeller_enabled);
 
   virtual ~ParagraphBuilderSkia();
 
@@ -47,6 +52,14 @@ class ParagraphBuilderSkia : public ParagraphBuilder {
 
   std::shared_ptr<skia::textlayout::ParagraphBuilder> builder_;
   TextStyle base_style_;
+
+  /// @brief      Whether Impeller is enabled in the runtime.
+  ///
+  /// @note       As of the time of this writing, this is used to draw text
+  ///             decorations (i.e. dashed and dotted lines) directly using the
+  ///             `drawLine` API, because Impeller's path rendering does not
+  ///             support dashed and dotted lines (but Skia's does).
+  const bool impeller_enabled_;
   std::stack<TextStyle> txt_style_stack_;
   std::vector<flutter::DlPaint> dl_paints_;
 };

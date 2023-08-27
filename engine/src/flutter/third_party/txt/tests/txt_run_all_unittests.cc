@@ -15,13 +15,10 @@
  */
 
 #include "flutter/fml/backtrace.h"
-#include "flutter/fml/command_line.h"
-#include "flutter/fml/logging.h"
 #include "flutter/testing/testing.h"
 
 int main(int argc, char** argv) {
   fml::InstallCrashHandler();
-  fml::CommandLine cmd = fml::CommandLineFromPlatformOrArgcArgv(argc, argv);
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

@@ -300,8 +300,9 @@ ParagraphBuilder::ParagraphBuilder(
                                         ->client()
                                         ->GetFontCollection();
 
+  auto impeller_enabled = UIDartState::Current()->IsImpellerEnabled();
   m_paragraphBuilder = txt::ParagraphBuilder::CreateSkiaBuilder(
-      style, font_collection.GetFontCollection());
+      style, font_collection.GetFontCollection(), impeller_enabled);
 }
 
 ParagraphBuilder::~ParagraphBuilder() = default;
