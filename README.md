@@ -48,13 +48,13 @@ upgrade` command).
 
 We think Flutter will help you create beautiful, fast apps, with a productive,
 extensible and open development model, whether you're targeting iOS or Android,
-web, Windows, macOS, Linux or embedding it as the UI toolkit for a platform of
+web, Windows, macOS, Linux, or embedding it as the UI toolkit for a platform of
 your choice.
 
 ### Beautiful user experiences
 
 We want to enable designers to deliver their full creative vision without being
-forced to water it down due to limitations of the underlying framework.
+forced to water it down due to the limitations of the underlying framework.
 Flutter's [layered architecture] gives you control over every pixel on the
 screen and its powerful compositing capabilities let you overlay and animate
 graphics, video, text, and controls without limitation. Flutter includes a full
@@ -70,7 +70,7 @@ Flutter is fast. It's powered by the same hardware-accelerated 2D graphics
 library that underpins Chrome and Android: [Skia]. We architected Flutter to
 support glitch-free, jank-free graphics at the native speed of your device.
 Flutter code is powered by the world-class [Dart platform], which enables
-compilation to 32-bit and 64-bit ARM machine code for iOS and Android, as well
+the compilation of 32-bit and 64-bit ARM machine code for iOS and Android, as well
 as JavaScript for the web and Intel x64 for desktop devices.
 
 <p align="center"><img src="https://github.com/flutter/website/blob/main/src/assets/images/docs/homepage/dart-diagram-small.png?raw=true" alt="Dart diagram"></p>
@@ -84,7 +84,7 @@ and see the results instantly without restarting your app or losing its state.
 
 ### Extensible and open model
 
-Flutter works with any development tool (or none at all), and also includes
+Flutter works with any development tool (or none at all) and also includes
 editor plug-ins for both [Visual Studio Code] and [IntelliJ / Android Studio].
 Flutter provides [tens of thousands of packages][Flutter packages] to speed your
 development, regardless of your target platform. And accessing other native code
