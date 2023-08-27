@@ -33,7 +33,8 @@ class ParagraphBuilder {
  public:
   static std::unique_ptr<ParagraphBuilder> CreateSkiaBuilder(
       const ParagraphStyle& style,
-      std::shared_ptr<FontCollection> font_collection);
+      std::shared_ptr<FontCollection> font_collection,
+      const bool impeller_enabled);
 
   virtual ~ParagraphBuilder() = default;
 
