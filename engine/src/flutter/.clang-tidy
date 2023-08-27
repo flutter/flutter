@@ -1,40 +1,43 @@
+# A YAML format of https://clang.llvm.org/extra/clang-tidy/.
+
 # Prefix check with "-" to ignore.
 # Note: Some of the checks here are used as errors selectively, see
 # //ci/lint.sh
-Checks: "bugprone-use-after-move,\
-bugprone-unchecked-optional-access,\
-clang-analyzer-*,\
-clang-diagnostic-*,\
-darwin-*,\
-google-*,\
-modernize-use-default-member-init,\
-objc-*,\
--objc-nsinvocation-argument-lifetime,\
-readability-identifier-naming,\
--google-build-using-namespace,\
--google-default-arguments,\
--google-objc-global-variable-declaration,\
--google-objc-avoid-throwing-exception,\
--google-readability-casting,\
--clang-analyzer-nullability.NullPassedToNonnull,\
--clang-analyzer-nullability.NullablePassedToNonnull,\
--clang-analyzer-nullability.NullReturnedFromNonnull,\
--clang-analyzer-nullability.NullableReturnedFromNonnull,\
-performance-move-const-arg,\
-performance-unnecessary-value-param"
+Checks: >-
+  bugprone-use-after-move,
+  bugprone-unchecked-optional-access,
+  clang-analyzer-*,
+  clang-diagnostic-*,
+  darwin-*,
+  google-*,
+  modernize-use-default-member-init,
+  objc-*,
+  -objc-nsinvocation-argument-lifetime,
+  readability-identifier-naming,
+  -google-build-using-namespace,
+  -google-default-arguments,
+  -google-objc-global-variable-declaration,
+  -google-objc-avoid-throwing-exception,
+  -google-readability-casting,
+  -clang-analyzer-nullability.NullPassedToNonnull,
+  -clang-analyzer-nullability.NullablePassedToNonnull,
+  -clang-analyzer-nullability.NullReturnedFromNonnull,
+  -clang-analyzer-nullability.NullableReturnedFromNonnull,
+  performance-move-const-arg,
+  performance-unnecessary-value-param
 
 CheckOptions:
-  - key:    modernize-use-default-member-init.UseAssignment
-    value:  true
-  - key:    readability-identifier-naming.EnumConstantCase
-    value:  'CamelCase'
-  - key:    readability-identifier-naming.EnumConstantPrefix
-    value:  'k'
-  - key:    readability-identifier-naming.GlobalConstantCase
-    value:  'CamelCase'
-  - key:    readability-identifier-naming.GlobalConstantPrefix
-    value:  'k'
-  - key:    readability-identifier-naming.PrivateMemberCase
-    value:  'lower_case'
-  - key:    readability-identifier-naming.PrivateMemberSuffix
-    value:  '_'
+  - key: modernize-use-default-member-init.UseAssignment
+    value: true
+  - key: readability-identifier-naming.EnumConstantCase
+    value: "CamelCase"
+  - key: readability-identifier-naming.EnumConstantPrefix
+    value: "k"
+  - key: readability-identifier-naming.GlobalConstantCase
+    value: "CamelCase"
+  - key: readability-identifier-naming.GlobalConstantPrefix
+    value: "k"
+  - key: readability-identifier-naming.PrivateMemberCase
+    value: "lower_case"
+  - key: readability-identifier-naming.PrivateMemberSuffix
+    value: "_"
