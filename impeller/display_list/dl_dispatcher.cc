@@ -1111,20 +1111,17 @@ void DlDispatcher::drawDisplayList(
 void DlDispatcher::drawTextBlob(const sk_sp<SkTextBlob>& blob,
                                 SkScalar x,
                                 SkScalar y) {
-  const auto text_frame = MakeTextFrameFromTextBlobSkia(blob);
   if (paint_.style == Paint::Style::kStroke) {
     auto path = skia_conversions::PathDataFromTextBlob(blob);
-    auto bounds = text_frame.GetBounds();
-    if (!bounds.has_value()) {
-      return;
-    }
+    auto bounds = blob->bounds();
     canvas_.Save();
-    canvas_.Translate({x + bounds->origin.x, y + bounds->origin.y, 0.0});
+    canvas_.Translate({x + bounds.left(), y + bounds.top(), 0.0});
     canvas_.DrawPath(path, paint_);
     canvas_.Restore();
     return;
   }
 
+  const auto text_frame = MakeTextFrameFromTextBlobSkia(blob);
   canvas_.DrawTextFrame(text_frame,             //
                         impeller::Point{x, y},  //
                         paint_                  //
