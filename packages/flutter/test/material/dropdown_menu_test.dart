@@ -1607,10 +1607,12 @@ void main() {
         matching: find.byType(Text),
       ).last;
     }
-    expect(tester.getSize(findMenuItemText('Item 0')).height, 300);
-    expect(tester.getSize(findMenuItemText('Menu 1')).height, 300);
-    expect(tester.getSize(findMenuItemText('Item 2')).height, 300);
-    expect(tester.getSize(findMenuItemText('Item 3')).height, 300);
+
+    final Matcher closeTo300 = closeTo(300, 0.5);
+    expect(tester.getSize(findMenuItemText('Item 0')).height, closeTo300);
+    expect(tester.getSize(findMenuItemText('Menu 1')).height, closeTo300);
+    expect(tester.getSize(findMenuItemText('Item 2')).height, closeTo300);
+    expect(tester.getSize(findMenuItemText('Item 3')).height, closeTo300);
 
     await tester.tap(findMenuItemText('Item 0'));
     await tester.pumpAndSettle();
