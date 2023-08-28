@@ -77,7 +77,7 @@ Future<void> main(List<String> arguments) async {
   configurator.generateConfiguration();
 
   final PlatformDocGenerator platformGenerator = PlatformDocGenerator(outputDir: publishRoot, filesystem: filesystem);
-  platformGenerator.generatePlatformDocs();
+  await platformGenerator.generatePlatformDocs();
 
   final DartdocGenerator dartdocGenerator = DartdocGenerator(
     publishRoot: publishRoot,
@@ -465,7 +465,7 @@ class DartdocGenerator {
 
     // Verify which version of snippets and dartdoc we're using.
     final ProcessResult snippetsResult = Process.runSync(
-      FlutterInformation.instance.getDartBinaryPath().path,
+      FlutterInformation.instance.getFlutterBinaryPath().path,
       <String>[
         'pub',
         'global',
@@ -779,16 +779,16 @@ class PlatformDocGenerator {
 
   /// This downloads an archive of platform docs for the engine from the artifact
   /// store and extracts them to the location used for Dartdoc.
-  void generatePlatformDocs() {
+  Future<void> generatePlatformDocs() async {
     final String realm = engineRealm.isNotEmpty ? '$engineRealm/' : '';
 
     final String javadocUrl =
         'https://storage.googleapis.com/${realm}flutter_infra_release/flutter/$engineRevision/android-javadoc.zip';
-    _extractDocs(javadocUrl, 'javadoc', 'io/flutter/view/FlutterView.html', outputDir);
+    await _extractDocs(javadocUrl, 'javadoc', 'io/flutter/view/FlutterView.html', outputDir);
 
     final String objcdocUrl =
         'https://storage.googleapis.com/${realm}flutter_infra_release/flutter/$engineRevision/ios-objcdoc.zip';
-    _extractDocs(objcdocUrl, 'objcdoc', 'Classes/FlutterViewController.html', outputDir);
+    await _extractDocs(objcdocUrl, 'objcdoc', 'Classes/FlutterViewController.html', outputDir);
   }
 
   /// Fetches the zip archive at the specified url.
@@ -935,7 +935,7 @@ Future<Process> runPubProcess({
   @visibleForTesting FileSystem filesystem = const LocalFileSystem(),
 }) {
   return processManager.start(
-    <Object>[FlutterInformation.instance.getDartBinaryPath().path, 'pub', ...arguments],
+    <Object>[FlutterInformation.instance.getFlutterBinaryPath().path, 'pub', ...arguments],
     workingDirectory: (workingDirectory ?? filesystem.currentDirectory).path,
     environment: environment,
   );
@@ -968,21 +968,13 @@ List<Directory> findPackages(FileSystem filesystem) {
 }
 
 /// An exception class used to indicate problems when collecting information.
-class DartdocException implements Exception {
-  DartdocException(this.message, {this.file, this.line});
+class FlutterInformationException implements Exception {
+  FlutterInformationException(this.message);
   final String message;
-  final String? file;
-  final int? line;
 
   @override
   String toString() {
-    if (file != null || line != null) {
-      final String fileStr = file == null ? '' : '$file:';
-      final String lineStr = line == null ? '' : '$line:';
-      return '$runtimeType: $fileStr$lineStr: $message';
-    } else {
-      return '$runtimeType: $message';
-    }
+    return '$runtimeType: $message';
   }
 }
 
@@ -1015,6 +1007,13 @@ class FlutterInformation {
   /// This is probably a shell script.
   File getDartBinaryPath() {
     return getFlutterRoot().childDirectory('bin').childFile('dart');
+  }
+
+  /// The path to the Dart binary in the Flutter repo.
+  ///
+  /// This is probably a shell script.
+  File getFlutterBinaryPath() {
+    return getFlutterRoot().childDirectory('bin').childFile('flutter');
   }
 
   /// The path to the Flutter repo root directory.
@@ -1074,11 +1073,12 @@ class FlutterInformation {
       try {
         result = processManager.runSync(<String>[flutterCommand, '--version', '--machine'], stdoutEncoding: utf8);
       } on ProcessException catch (e) {
-        throw DartdocException(
+        throw FlutterInformationException(
             'Unable to determine Flutter information. Either set FLUTTER_ROOT, or place flutter command in your path.\n$e');
       }
       if (result.exitCode != 0) {
-        throw DartdocException('Unable to determine Flutter information, because of abnormal exit to flutter command.');
+        throw FlutterInformationException(
+            'Unable to determine Flutter information, because of abnormal exit to flutter command.');
       }
       flutterVersionJson = (result.stdout as String)
           .replaceAll('Waiting for another flutter command to release the startup lock...', '');
@@ -1088,7 +1088,7 @@ class FlutterInformation {
     if (flutterVersion['flutterRoot'] == null ||
         flutterVersion['frameworkVersion'] == null ||
         flutterVersion['dartSdkVersion'] == null) {
-      throw DartdocException(
+      throw FlutterInformationException(
           'Flutter command output has unexpected format, unable to determine flutter root location.');
     }
 
@@ -1097,14 +1097,13 @@ class FlutterInformation {
     info['flutterRoot'] = flutterRoot;
     info['frameworkVersion'] = Version.parse(flutterVersion['frameworkVersion'] as String);
     info['engineRevision'] = flutterVersion['engineRevision'] as String;
-    info['engineRealm'] = filesystem.file(
-      path.join(flutterRoot.path, 'bin', 'internal', 'engine.realm',
-    )).readAsStringSync().trim();
+    final File engineRealm = flutterRoot.childDirectory('bin').childDirectory('internal').childFile('engine.realm');
+    info['engineRealm'] = engineRealm.existsSync() ? engineRealm.readAsStringSync().trim() : '';
 
     final RegExpMatch? dartVersionRegex = RegExp(r'(?<base>[\d.]+)(?:\s+\(build (?<detail>[-.\w]+)\))?')
         .firstMatch(flutterVersion['dartSdkVersion'] as String);
     if (dartVersionRegex == null) {
-      throw DartdocException(
+      throw FlutterInformationException(
           'Flutter command output has unexpected format, unable to parse dart SDK version ${flutterVersion['dartSdkVersion']}.');
     }
     info['dartSdkVersion'] =
