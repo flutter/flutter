@@ -747,11 +747,7 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
   ShortcutManager({
     Map<ShortcutActivator, Intent> shortcuts = const <ShortcutActivator, Intent>{},
     this.modal = false,
-  })  : _shortcuts = shortcuts {
-    if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
-    }
-  }
+  })  : _shortcuts = shortcuts;
 
   /// True if the [ShortcutManager] should not pass on keys that it doesn't
   /// handle to any key-handling widgets that are ancestors to this one.
@@ -1444,7 +1440,6 @@ class _ShortcutRegistrarState extends State<ShortcutRegistrar> {
   void dispose() {
     registry.removeListener(_shortcutsChanged);
     registry.dispose();
-    manager.dispose();
     super.dispose();
   }
 
