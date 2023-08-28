@@ -52,10 +52,16 @@ TextFrame MakeTextFrameSTB(const std::shared_ptr<TypefaceSTB>& typeface_stb,
     }
   }
 
-  TextFrame frame;
-  frame.AddTextRun(std::move(run));
+  std::optional<Rect> result;
+  for (const auto& glyph_position : run.GetGlyphPositions()) {
+    Rect glyph_rect =
+        Rect(glyph_position.position + glyph_position.glyph.bounds.origin,
+             glyph_position.glyph.bounds.size);
+    result = result.has_value() ? result->Union(glyph_rect) : glyph_rect;
+  }
 
-  return frame;
+  std::vector<TextRun> runs = {run};
+  return TextFrame(runs, result.value_or(Rect::MakeLTRB(0, 0, 0, 0)), false);
 }
 
 }  // namespace impeller

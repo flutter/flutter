@@ -13,11 +13,18 @@ TextRun::TextRun(const Font& font) : font_(font) {
   is_valid_ = true;
 }
 
+TextRun::TextRun(const Font& font, std::vector<GlyphPosition>& glyphs)
+    : font_(font), glyphs_(std::move(glyphs)) {
+  if (!font_.IsValid()) {
+    return;
+  }
+  is_valid_ = true;
+}
+
 TextRun::~TextRun() = default;
 
 bool TextRun::AddGlyph(Glyph glyph, Point position) {
   glyphs_.emplace_back(GlyphPosition{glyph, position});
-  has_color_ |= glyph.type == Glyph::Type::kBitmap;
   return true;
 }
 
@@ -35,10 +42,6 @@ size_t TextRun::GetGlyphCount() const {
 
 const Font& TextRun::GetFont() const {
   return font_;
-}
-
-bool TextRun::HasColor() const {
-  return has_color_;
 }
 
 }  // namespace impeller

@@ -1111,7 +1111,11 @@ void DlDispatcher::drawDisplayList(
 void DlDispatcher::drawTextBlob(const sk_sp<SkTextBlob>& blob,
                                 SkScalar x,
                                 SkScalar y) {
-  const auto text_frame = MakeTextFrameFromTextBlobSkia(blob);
+  const auto maybe_text_frame = MakeTextFrameFromTextBlobSkia(blob);
+  if (!maybe_text_frame.has_value()) {
+    return;
+  }
+  const auto text_frame = maybe_text_frame.value();
   if (paint_.style == Paint::Style::kStroke ||
       paint_.color_source.GetType() != ColorSource::Type::kColor) {
     auto path = skia_conversions::PathDataFromTextBlob(blob);

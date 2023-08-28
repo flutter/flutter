@@ -20,6 +20,8 @@ class TextFrame {
  public:
   TextFrame();
 
+  TextFrame(std::vector<TextRun>& runs, Rect bounds, bool has_color);
+
   ~TextFrame();
 
   void CollectUniqueFontGlyphPairs(FontGlyphPair::Set& set, Scalar scale) const;
@@ -30,9 +32,9 @@ class TextFrame {
   /// @brief      The conservative bounding box for this text frame.
   ///
   /// @return     The bounds rectangle. If there are no glyphs in this text
-  ///             frame, std::nullopt is returned.
+  ///             frame and empty Rectangle is returned instead.
   ///
-  std::optional<Rect> GetBounds() const;
+  Rect GetBounds() const;
 
   //----------------------------------------------------------------------------
   /// @brief      The number of runs in this text frame.
@@ -40,15 +42,6 @@ class TextFrame {
   /// @return     The run count.
   ///
   size_t GetRunCount() const;
-
-  //----------------------------------------------------------------------------
-  /// @brief      Adds a new text run to the text frame.
-  ///
-  /// @param[in]  run   The run
-  ///
-  /// @return     If the text run could be added to this frame.
-  ///
-  bool AddTextRun(TextRun&& run);
 
   //----------------------------------------------------------------------------
   /// @brief      Returns a reference to all the text runs in this frame.
@@ -77,6 +70,7 @@ class TextFrame {
 
  private:
   std::vector<TextRun> runs_;
+  Rect bounds_;
   bool has_color_ = false;
 };
 

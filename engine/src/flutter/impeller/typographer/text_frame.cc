@@ -8,30 +8,13 @@ namespace impeller {
 
 TextFrame::TextFrame() = default;
 
+TextFrame::TextFrame(std::vector<TextRun>& runs, Rect bounds, bool has_color)
+    : runs_(std::move(runs)), bounds_(bounds), has_color_(has_color) {}
+
 TextFrame::~TextFrame() = default;
 
-std::optional<Rect> TextFrame::GetBounds() const {
-  std::optional<Rect> result;
-
-  for (const auto& run : runs_) {
-    for (const auto& glyph_position : run.GetGlyphPositions()) {
-      Rect glyph_rect =
-          Rect(glyph_position.position + glyph_position.glyph.bounds.origin,
-               glyph_position.glyph.bounds.size);
-      result = result.has_value() ? result->Union(glyph_rect) : glyph_rect;
-    }
-  }
-
-  return result;
-}
-
-bool TextFrame::AddTextRun(TextRun&& run) {
-  if (!run.IsValid()) {
-    return false;
-  }
-  has_color_ |= run.HasColor();
-  runs_.emplace_back(std::move(run));
-  return true;
+Rect TextFrame::GetBounds() const {
+  return bounds_;
 }
 
 size_t TextFrame::GetRunCount() const {
