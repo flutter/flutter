@@ -215,32 +215,59 @@ class LinkedText extends StatefulWidget {
   /// The [TextStyle] to apply to the output [InlineSpan].
   final TextStyle? style;
 
+  /// Returns a [Map] containing the given [InlineSpan] and all of its children
+  /// mapped to their indices in the overall flat string.
+  ///
+  /// Useful for caching to avoid recomputing a span's text and its lengths.
+  static (String, Map<InlineSpan, _SpanText>) _computeTextCache(InlineSpan span, [int index = 0]) {
+    if (span is! TextSpan) {
+      return ('', <InlineSpan, _SpanText>{span: _SpanText.empty});
+    }
+
+    String text = span.text ?? '';
+    final Map<InlineSpan, _SpanText> textCache = <InlineSpan, _SpanText>{};
+    int currentIndex = index + text.length;
+    for (final InlineSpan child in span.children ?? <InlineSpan>[]) {
+      final (String childText, Map<InlineSpan, _SpanText> childTextCache)
+          = _computeTextCache(child, currentIndex);
+      text += childText;
+      textCache.addAll(childTextCache);
+      currentIndex = textCache[child]!.end;
+    }
+
+    textCache[span] = _SpanText(start: index, end: currentIndex);
+    return (text, textCache);
+  }
+
   /// Apply the given [TextLinker]s to the given [InlineSpan]s and return the
   /// new resulting spans and any created [TapGestureRecognizer]s.
   ///
   /// {@macro flutter.painting.LinkBuilder.recognizer}
   static (Iterable<InlineSpan>, Iterable<TapGestureRecognizer>) linkSpans(Iterable<InlineSpan> spans, Iterable<TextLinker> textLinkers) {
-    // Flatten the spans and find all ranges in the flat String. This must be done
-    // cumulatively, and not during a traversal, because matches may occur across
-    // span boundaries.
-    final List<({InlineSpan span, int length})> spansWithLength =
-        <({InlineSpan span, int length})>[];
+    // Flatten the spans and find all ranges in the flat string. This must be
+    // done cumulatively, and not during a traversal, because matches may occur
+    // across span boundaries. Cache ranges to avoid recomputing.
     String spansText = '';
+    final Map<InlineSpan, _SpanText> textCache = <InlineSpan, _SpanText>{};
     for (final InlineSpan span in spans) {
-      final String string = span.toPlainText();
-      spansText += string;
-      spansWithLength.add((
-        span: span,
-        length: string.length,
-      ));
+      final (String spanText, Map<InlineSpan, _SpanText> spanTextCache) =
+          _computeTextCache(span);
+      spansText += spanText;
+      textCache.addAll(spanTextCache);
     }
+
     final Iterable<_TextLinkerMatch> textLinkerMatches =
         _cleanTextLinkerMatches(
           _TextLinkerMatch.fromTextLinkers(textLinkers, spansText),
         );
 
     final (Iterable<InlineSpan> output, Iterable<_TextLinkerMatch> _, Iterable<TapGestureRecognizer> recognizers) =
-        _linkSpansRecurse(spansWithLength, textLinkerMatches, 0);
+        _linkSpansRecurse(
+          spans,
+          Map<InlineSpan, _SpanText>.unmodifiable(textCache),
+          textLinkerMatches,
+          0,
+        );
     return (output, recognizers);
   }
 
@@ -270,21 +297,22 @@ class LinkedText extends StatefulWidget {
     return nextTextLinkerMatches;
   }
 
-  static (Iterable<InlineSpan>, Iterable<_TextLinkerMatch>, Iterable<TapGestureRecognizer>) _linkSpansRecurse(Iterable<({InlineSpan span, int length})> spansWithLength, Iterable<_TextLinkerMatch> textLinkerMatches, int index) {
+  static (Iterable<InlineSpan>, Iterable<_TextLinkerMatch>, Iterable<TapGestureRecognizer>) _linkSpansRecurse(Iterable<InlineSpan> spans, Map<InlineSpan, _SpanText> textCache, Iterable<_TextLinkerMatch> textLinkerMatches, int index) {
     final List<InlineSpan> output = <InlineSpan>[];
     Iterable<_TextLinkerMatch> nextTextLinkerMatches = textLinkerMatches;
     final List<TapGestureRecognizer> recognizers = <TapGestureRecognizer>[];
     int nextIndex = index;
-    for (final (span: InlineSpan span, length: int length) in spansWithLength) {
+    for (final InlineSpan span in spans) {
       final (InlineSpan childSpan, Iterable<_TextLinkerMatch> childTextLinkerMatches, Iterable<TapGestureRecognizer> childRecognizers) = _linkSpanRecurse(
         span,
+        textCache,
         nextTextLinkerMatches,
         nextIndex,
       );
       output.add(childSpan);
       nextTextLinkerMatches = childTextLinkerMatches;
       recognizers.addAll(childRecognizers);
-      nextIndex += length;
+      nextIndex += textCache[span]!.length;
     }
 
     return (output, nextTextLinkerMatches, recognizers);
@@ -294,7 +322,7 @@ class LinkedText extends StatefulWidget {
   // string.
   //
   // The TapGestureRecognizers must be disposed by an owning widget.
-  static (InlineSpan, Iterable<_TextLinkerMatch>, Iterable<TapGestureRecognizer>) _linkSpanRecurse(InlineSpan span, Iterable<_TextLinkerMatch> textLinkerMatches, int index) {
+  static (InlineSpan, Iterable<_TextLinkerMatch>, Iterable<TapGestureRecognizer>) _linkSpanRecurse(InlineSpan span, Map<InlineSpan, _SpanText> textCache, Iterable<_TextLinkerMatch> textLinkerMatches, int index) {
     if (span is! TextSpan) {
       return (span, textLinkerMatches, <TapGestureRecognizer>[]);
     }
@@ -361,10 +389,8 @@ class LinkedText extends StatefulWidget {
         Iterable<_TextLinkerMatch> childrenTextLinkerMatches,
         Iterable<TapGestureRecognizer> childrenRecognizers,
       ) = _linkSpansRecurse(
-        span.children!.map((InlineSpan childSpan) => (
-          span: childSpan,
-          length: childSpan.toPlainText().length,
-        )),
+        span.children!,
+        textCache,
         nextTextLinkerMatches,
         index + (span.text?.length ?? 0),
       );
@@ -611,4 +637,23 @@ class _TextLinkerMatch {
 
   @override
   String toString() => '${objectRuntimeType(this, '_TextLinkerMatch')}($textRange, $linkBuilder, $linkString)';
+}
+
+/// Used to cache information about a span's recursive text.
+///
+/// Avoids repeatedly calling [TextSpan.toPlainText].
+class _SpanText {
+  const _SpanText({
+    required this.start,
+    required this.end,
+  }) : assert(start <= end);
+
+  static const _SpanText empty = _SpanText(start: 0, end: 0);
+
+  final int start;
+  final int end;
+
+  int get length => end - start;
+
+  String getText(String overallText) => overallText.substring(start, end);
 }
