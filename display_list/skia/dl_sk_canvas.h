@@ -10,8 +10,10 @@
 
 namespace flutter {
 
-// An adapter to receive DlCanvas calls and dispatch them into
-// an SkCanvas.
+// -----------------------------------------------------------------------------
+/// @brief      Backend implementation of |DlCanvas| for |SkCanvas|.
+///
+/// @see        DlCanvas
 class DlSkCanvasAdapter final : public virtual DlCanvas {
  public:
   DlSkCanvasAdapter() : delegate_(nullptr) {}
