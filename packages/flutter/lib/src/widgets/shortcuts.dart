@@ -1444,7 +1444,6 @@ class _ShortcutRegistrarState extends State<ShortcutRegistrar> {
   void dispose() {
     registry.removeListener(_shortcutsChanged);
     registry.dispose();
-    manager.dispose();
     super.dispose();
   }
 
