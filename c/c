@@ -1,0 +1,16 @@
+#include<stdio.h>
+void main(){
+       itn a,b,c,d;
+        printf("enter a value");
+         scanf("%d%d%d%d",&a,&b,&c,&d)
+          
+
+
+        if(a>b){
+            printf("A is max");
+             if(a>c){
+                
+             }
+        }
+
+}
