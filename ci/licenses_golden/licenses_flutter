@@ -1185,8 +1185,6 @@ ORIGIN: ../../../flutter/impeller/entity/contents/clip_contents.cc + ../../../fl
 ORIGIN: ../../../flutter/impeller/entity/contents/clip_contents.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/contents/color_source_contents.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/contents/color_source_contents.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/entity/contents/color_source_text_contents.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/entity/contents/color_source_text_contents.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/contents/conical_gradient_contents.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/contents/conical_gradient_contents.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/contents/content_context.cc + ../../../flutter/LICENSE
@@ -3932,8 +3930,6 @@ FILE: ../../../flutter/impeller/entity/contents/clip_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/clip_contents.h
 FILE: ../../../flutter/impeller/entity/contents/color_source_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/color_source_contents.h
-FILE: ../../../flutter/impeller/entity/contents/color_source_text_contents.cc
-FILE: ../../../flutter/impeller/entity/contents/color_source_text_contents.h
 FILE: ../../../flutter/impeller/entity/contents/conical_gradient_contents.cc
 FILE: ../../../flutter/impeller/entity/contents/conical_gradient_contents.h
 FILE: ../../../flutter/impeller/entity/contents/content_context.cc
