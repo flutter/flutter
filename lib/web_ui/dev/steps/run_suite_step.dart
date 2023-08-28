@@ -179,8 +179,12 @@ class RunSuiteStep implements PipelineStep {
   Future<SkiaGoldClient?> _createSkiaClient() async {
     final Renderer renderer = suite.testBundle.compileConfig.renderer;
     final CanvasKitVariant? variant = suite.runConfig.variant;
+    final io.Directory workDirectory = getSkiaGoldDirectoryForSuite(suite);
+    if (workDirectory.existsSync()) {
+      workDirectory.deleteSync(recursive: true);
+    }
     final SkiaGoldClient skiaClient = SkiaGoldClient(
-      getSkiaGoldDirectoryForSuite(suite),
+      workDirectory,
       dimensions: <String, String> {
         'Browser': suite.runConfig.browser.name,
         if (isWasm) 'Wasm': 'true',

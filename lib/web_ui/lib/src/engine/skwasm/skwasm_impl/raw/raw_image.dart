@@ -6,7 +6,9 @@
 library skwasm_impl;
 
 import 'dart:ffi';
+import 'dart:js_interop';
 
+import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 
 final class RawImage extends Opaque {}
@@ -38,17 +40,45 @@ external ImageHandle imageCreateFromPixels(
   int rowByteCount,
 );
 
-@Native<ImageHandle Function(
-  Uint32,
-  Int,
-  Int,
-  SurfaceHandle,
-)>(symbol: 'image_createFromVideoFrame', isLeaf: true)
-external ImageHandle imageCreateFromVideoFrame(
-  int videoFrameId,
+// We actually want this function to look something like this:
+//
+// @Native<ImageHandle Function(
+//   WasmExternRef,
+//   Int,
+//   Int,
+//   SurfaceHandle,
+// )>(symbol: 'image_createFromVideoFrame', isLeaf: true)
+// external ImageHandle imageCreateFromVideoFrame(
+//   JSAny videoFrame,
+//   int width,
+//   int height,
+//   SurfaceHandle handle,
+// );
+//
+// However, this doesn't work because we cannot use extern refs as part of @Native
+// annotations currently. For now, we can use JS interop to expose this function
+// instead.
+extension SkwasmImageExtension on SkwasmInstance {
+  @JS('wasmExports.image_createFromVideoFrame')
+  external JSNumber imageCreateFromVideoFrame(
+    VideoFrame frame,
+    JSNumber width,
+    JSNumber height,
+    JSNumber surfaceHandle,
+  );
+}
+ImageHandle imageCreateFromVideoFrame(
+  VideoFrame frame,
   int width,
   int height,
-  SurfaceHandle handle,
+  SurfaceHandle handle
+) => ImageHandle.fromAddress(
+  skwasmInstance.imageCreateFromVideoFrame(
+    frame,
+    width.toJS,
+    height.toJS,
+    handle.address.toJS,
+  ).toDartInt
 );
 
 @Native<Void Function(ImageHandle)>(symbol:'image_ref', isLeaf: true)

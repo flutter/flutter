@@ -4,32 +4,73 @@
 
 import 'dart:typed_data';
 
-import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-class SkwasmScene implements ui.Scene {
-  SkwasmScene(this.picture);
+// This file implements a SceneBuilder and Scene that works with any renderer
+// implementation that provides:
+//   * A `ui.Canvas` that conforms to `SceneCanvas`
+//   * A `ui.Picture` that conforms to `ScenePicture`
+//   * A `ui.ImageFilter` that conforms to `SceneImageFilter`
+//
+// These contain a few augmentations to the normal `dart:ui` API that provide
+// additional sizing information that the scene builder uses to determine how
+// these object might occlude one another.
 
-  final ui.Picture picture;
 
-  @override
-  void dispose() {
-    picture.dispose();
+class EngineScene implements ui.Scene {
+  EngineScene(this.rootLayer);
+
+  final EngineRootLayer rootLayer;
+
+  // We keep a refcount here because this can be asynchronously rendered, so we
+  // don't necessarily want to dispose immediately when the user calls dispose.
+  // Instead, we need to stay alive until we're done rendering.
+  int _refCount = 1;
+
+  void beginRender() {
+    assert(_refCount > 0);
+    _refCount++;
+  }
+
+  void endRender() {
+    _refCount--;
+    _disposeIfNeeded();
   }
 
   @override
-  Future<ui.Image> toImage(int width, int height) {
-    return picture.toImage(width, height);
+  void dispose() {
+    _refCount--;
+    _disposeIfNeeded();
+  }
+
+  void _disposeIfNeeded() {
+    assert(_refCount >= 0);
+    if (_refCount == 0) {
+      rootLayer.dispose();
+    }
+  }
+
+  @override
+  Future<ui.Image> toImage(int width, int height) async {
+    return toImageSync(width, height);
   }
 
   @override
   ui.Image toImageSync(int width, int height) {
-    return picture.toImageSync(width, height);
-  }
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final ui.Rect canvasRect = ui.Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble());
+    final ui.Canvas canvas = ui.Canvas(recorder, canvasRect);
 
+    // Only rasterizes the picture slices.
+    for (final PictureSlice slice in rootLayer.slices.whereType<PictureSlice>()) {
+      canvas.drawPicture(slice.picture);
+    }
+    return recorder.endRecording().toImageSync(width, height);
+  }
 }
 
-class SkwasmSceneBuilder implements ui.SceneBuilder {
+class EngineSceneBuilder implements ui.SceneBuilder {
   LayerBuilder currentBuilder = LayerBuilder.rootLayer();
 
   @override
@@ -61,16 +102,17 @@ class SkwasmSceneBuilder implements ui.SceneBuilder {
     double width = 0.0,
     double height = 0.0
   }) {
-    throw UnimplementedError('Platform view not yet implemented with skwasm renderer.');
+    currentBuilder.addPlatformView(
+      viewId,
+      offset: offset,
+      width: width,
+      height: height
+    );
   }
 
   @override
   void addRetained(ui.EngineLayer retainedLayer) {
-    final ui.Picture? picture = (retainedLayer as PictureLayer).picture;
-    if (picture == null) {
-      throw StateError('Adding incomplete retained layer.');
-    }
-    currentBuilder.addPicture(ui.Offset.zero, picture);
+    currentBuilder.mergeLayer(retainedLayer as PictureEngineLayer);
   }
 
   @override
@@ -82,7 +124,7 @@ class SkwasmSceneBuilder implements ui.SceneBuilder {
     bool freeze = false,
     ui.FilterQuality filterQuality = ui.FilterQuality.low
   }) {
-    // TODO(jacksongardner): implement addTexture
+    // addTexture is not implemented on web.
   }
 
   @override
@@ -187,10 +229,12 @@ class SkwasmSceneBuilder implements ui.SceneBuilder {
 
   @override
   void setCheckerboardOffscreenLayers(bool checkerboard) {
+    // Not implemented on web
   }
 
   @override
   void setCheckerboardRasterCacheImages(bool checkerboard) {
+    // Not implemented on web
   }
 
   @override
@@ -203,10 +247,12 @@ class SkwasmSceneBuilder implements ui.SceneBuilder {
     double insetLeft,
     bool focusable
   ) {
+    // Not implemented on web
   }
 
   @override
   void setRasterizerTracingThreshold(int frameInterval) {
+    // Not implemented on web
   }
 
   @override
@@ -214,22 +260,22 @@ class SkwasmSceneBuilder implements ui.SceneBuilder {
     while (currentBuilder.parent != null) {
       pop();
     }
-    final ui.Picture finalPicture = currentBuilder.build();
-    return SkwasmScene(finalPicture);
+    final PictureEngineLayer rootLayer = currentBuilder.build();
+    return EngineScene(rootLayer as EngineRootLayer);
   }
 
   @override
   void pop() {
-    final ui.Picture picture = currentBuilder.build();
+    final PictureEngineLayer layer = currentBuilder.build();
     final LayerBuilder? parentBuilder = currentBuilder.parent;
     if (parentBuilder == null) {
       throw StateError('Popped too many times.');
     }
     currentBuilder = parentBuilder;
-    currentBuilder.addPicture(ui.Offset.zero, picture);
+    currentBuilder.mergeLayer(layer);
   }
 
-  T pushLayer<T extends PictureLayer>(T layer, LayerOperation operation) {
+  T pushLayer<T extends PictureEngineLayer>(T layer, LayerOperation operation) {
     currentBuilder = LayerBuilder.childLayer(
       parent: currentBuilder,
       layer: layer,
