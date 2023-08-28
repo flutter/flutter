@@ -81,6 +81,10 @@ wasm_toolchain("skwasm") {
     skia_use_libpng_decode = false
     skia_use_libwebp_decode = false
 
+    # We use OffscreenCanvas to produce PNG data instead of skia
+    skia_use_no_png_encode = true
+    skia_use_libpng_encode = false
+
     # skwasm is multithreaded
     wasm_use_pthreads = true
     wasm_prioritize_size = true
