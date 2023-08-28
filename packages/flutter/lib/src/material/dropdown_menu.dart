@@ -66,7 +66,7 @@ class DropdownMenuEntry<T> {
   /// widget with one that forces the menu entry to appear on one line
   /// by specifying [Text.maxLines] and [Text.overflow].
   ///
-  /// ** See code in examples/api/lib/material/dropdown_menu/dropdown_menu.0.dart **
+  /// ** See code in examples/api/lib/material/dropdown_menu/dropdown_menu_entry_label_widget.0.dart **
   /// {@end-tool}
   final Widget? labelWidget;
 
