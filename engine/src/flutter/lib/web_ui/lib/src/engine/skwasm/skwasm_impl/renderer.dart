@@ -13,9 +13,8 @@ import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 class SkwasmRenderer implements Renderer {
-  late DomCanvasElement sceneElement;
   late SkwasmSurface surface;
-  ui.Size? surfaceSize;
+  late EngineSceneView sceneView;
 
   @override
   final SkwasmFontCollection fontCollection = SkwasmFontCollection();
@@ -194,7 +193,7 @@ class SkwasmRenderer implements Renderer {
   );
 
   @override
-  ui.SceneBuilder createSceneBuilder() => SkwasmSceneBuilder();
+  ui.SceneBuilder createSceneBuilder() => EngineSceneBuilder();
 
   @override
   ui.StrutStyle createStrutStyle({
@@ -348,14 +347,8 @@ class SkwasmRenderer implements Renderer {
 
   @override
   FutureOr<void> initialize() {
-    // TODO(jacksongardner): This is very basic and doesn't work for element
-    // embedding or with platform views. We need to update this at some point
-    // to deal with those cases.
-    sceneElement = createDomCanvasElement();
-    sceneElement.id = 'flt-scene';
-    domDocument.body!.appendChild(sceneElement);
-    surface = SkwasmSurface('#flt-scene');
-    domDocument.body!.removeChild(sceneElement);
+    surface = SkwasmSurface();
+    sceneView = EngineSceneView(SkwasmPictureRenderer(surface));
   }
 
   @override
@@ -406,28 +399,14 @@ class SkwasmRenderer implements Renderer {
   }
 
   @override
-  Future<void> renderScene(ui.Scene scene) async {
-    final ui.Size frameSize = ui.window.physicalSize;
-    if (frameSize != surfaceSize) {
-      final double logicalWidth = frameSize.width.ceil() / window.devicePixelRatio;
-      final double logicalHeight = frameSize.height.ceil() / window.devicePixelRatio;
-      final DomCSSStyleDeclaration style = sceneElement.style;
-      style.width = '${logicalWidth}px';
-      style.height = '${logicalHeight}px';
-
-      surface.setSize(frameSize.width.ceil(), frameSize.height.ceil());
-      surfaceSize = frameSize;
-    }
-    final SkwasmPicture picture = (scene as SkwasmScene).picture as SkwasmPicture;
-    await surface.renderPicture(picture);
-  }
+  Future<void> renderScene(ui.Scene scene) => sceneView.renderScene(scene as EngineScene);
 
   @override
   String get rendererTag => 'skwasm';
 
   @override
   void reset(FlutterViewEmbedder embedder) {
-    embedder.addSceneToSceneHost(sceneElement);
+    embedder.addSceneToSceneHost(sceneView.sceneElement);
   }
 
   static final Map<String, Future<ui.FragmentProgram>> _programs = <String, Future<ui.FragmentProgram>>{};
@@ -469,4 +448,14 @@ class SkwasmRenderer implements Renderer {
     baseline: baseline,
     lineNumber: lineNumber
   );
+}
+
+class SkwasmPictureRenderer implements PictureRenderer {
+  SkwasmPictureRenderer(this.surface);
+
+  SkwasmSurface surface;
+
+  @override
+  FutureOr<DomImageBitmap> renderPicture(ScenePicture picture) =>
+    surface.renderPicture(picture as SkwasmPicture);
 }

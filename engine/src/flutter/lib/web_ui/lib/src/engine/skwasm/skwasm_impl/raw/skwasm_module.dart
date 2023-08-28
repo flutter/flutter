@@ -17,23 +17,37 @@ extension WebAssemblyMemoryExtension on WebAssemblyMemory {
 class SkwasmInstance {}
 
 extension SkwasmInstanceExtension on SkwasmInstance {
-  external JSNumber addFunction(JSFunction function, JSString signature);
+  external JSNumber getEmptyTableSlot();
+
+  // The function here *must* be a directly exported wasm function, not a
+  // JavaScript function. If you actually need to add a JavaScript function,
+  // use `addFunction` instead.
+  external void setWasmTableEntry(JSNumber index, JSAny function);
+
+  external JSNumber addFunction(WebAssemblyFunction function);
   external void removeFunction(JSNumber functionPointer);
-
-  @JS('skwasm_registerObject')
-  external void skwasmRegisterObject(JSNumber objectId, JSAny object);
-
-  @JS('skwasm_unregisterObject')
-  external void skwasmUnregisterObject(JSNumber objectId);
-
-  @JS('skwasm_getObject')
-  external JSAny skwasmGetObject(JSNumber objectId);
-
-  @JS('skwasm_transferObjectToThread')
-  external void skwasmTransferObjectToThread(JSNumber objectId, JSNumber threadId);
 
   external WebAssemblyMemory get wasmMemory;
 }
 
 @JS('window._flutter_skwasmInstance')
 external SkwasmInstance get skwasmInstance;
+
+@JS()
+@staticInterop
+@anonymous
+class WebAssemblyFunctionType {
+  external factory WebAssemblyFunctionType({
+    required JSArray parameters,
+    required JSArray results,
+  });
+}
+
+@JS('WebAssembly.Function')
+@staticInterop
+class WebAssemblyFunction {
+  external factory WebAssemblyFunction(
+    WebAssemblyFunctionType functionType,
+    JSFunction function
+  );
+}

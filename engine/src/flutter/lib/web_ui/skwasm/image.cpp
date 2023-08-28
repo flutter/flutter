@@ -82,22 +82,17 @@ class ExternalWebGLTexture : public GrExternalTexture {
 class VideoFrameImageGenerator : public GrExternalTextureGenerator {
  public:
   VideoFrameImageGenerator(SkImageInfo ii,
-                           SkwasmObjectId videoFrameId,
+                           SkwasmObject videoFrame,
                            Skwasm::Surface* surface)
       : GrExternalTextureGenerator(ii),
-        _videoFrameId(videoFrameId),
-        _surface(surface) {}
-
-  ~VideoFrameImageGenerator() override {
-    _surface->disposeVideoFrame(_videoFrameId);
-  }
+        _videoFrameWrapper(surface->createVideoFrameWrapper(videoFrame)) {}
 
   std::unique_ptr<GrExternalTexture> generateExternalTexture(
       GrRecordingContext* context,
       GrMipMapped mipmapped) override {
     GrGLTextureInfo glInfo;
     glInfo.fID = skwasm_createGlTextureFromVideoFrame(
-        _videoFrameId, fInfo.width(), fInfo.height());
+        _videoFrameWrapper->getVideoFrame(), fInfo.width(), fInfo.height());
     glInfo.fFormat = GL_RGBA8_OES;
     glInfo.fTarget = GL_TEXTURE_2D;
 
@@ -108,8 +103,7 @@ class VideoFrameImageGenerator : public GrExternalTextureGenerator {
   }
 
  private:
-  SkwasmObjectId _videoFrameId;
-  Skwasm::Surface* _surface;
+  std::unique_ptr<Skwasm::VideoFrameWrapper> _videoFrameWrapper;
 };
 
 SKWASM_EXPORT SkImage* image_createFromPicture(SkPicture* picture,
@@ -135,16 +129,17 @@ SKWASM_EXPORT SkImage* image_createFromPixels(SkData* data,
       .release();
 }
 
-SKWASM_EXPORT SkImage* image_createFromVideoFrame(SkwasmObjectId videoFrameId,
+SKWASM_EXPORT SkImage* image_createFromVideoFrame(SkwasmObject videoFrame,
                                                   int width,
                                                   int height,
                                                   Skwasm::Surface* surface) {
   return SkImages::DeferredFromTextureGenerator(
-             std::make_unique<VideoFrameImageGenerator>(
-                 SkImageInfo::Make(width, height,
-                                   SkColorType::kRGBA_8888_SkColorType,
-                                   SkAlphaType::kPremul_SkAlphaType),
-                 videoFrameId, surface))
+             std::unique_ptr<VideoFrameImageGenerator>(
+                 new VideoFrameImageGenerator(
+                     SkImageInfo::Make(width, height,
+                                       SkColorType::kRGBA_8888_SkColorType,
+                                       SkAlphaType::kPremul_SkAlphaType),
+                     videoFrame, surface)))
       .release();
 }
 

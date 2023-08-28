@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "surface.h"
+#include <algorithm>
 
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
@@ -10,13 +11,12 @@
 
 using namespace Skwasm;
 
-Surface::Surface(const char* canvasID) : _canvasID(canvasID) {
+Surface::Surface() {
   assert(emscripten_is_main_browser_thread());
 
   pthread_attr_t attr;
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-  emscripten_pthread_attr_settransferredcanvases(&attr, _canvasID.c_str());
 
   pthread_create(
       &_thread, &attr,
@@ -25,6 +25,8 @@ Surface::Surface(const char* canvasID) : _canvasID(canvasID) {
         return nullptr;
       },
       this);
+  // Listen to messages from the worker
+  skwasm_registerMessageListener(_thread);
 }
 
 // Main thread only
@@ -36,29 +38,13 @@ void Surface::dispose() {
 }
 
 // Main thread only
-void Surface::setCanvasSize(int width, int height) {
-  assert(emscripten_is_main_browser_thread());
-  emscripten_dispatch_to_thread(_thread, EM_FUNC_SIG_VIII,
-                                reinterpret_cast<void*>(fSetCanvasSize),
-                                nullptr, this, width, height);
-}
-
-// Main thread only
 uint32_t Surface::renderPicture(SkPicture* picture) {
   assert(emscripten_is_main_browser_thread());
   uint32_t callbackId = ++_currentCallbackId;
   picture->ref();
-  emscripten_dispatch_to_thread(_thread, EM_FUNC_SIG_VII,
+  emscripten_dispatch_to_thread(_thread, EM_FUNC_SIG_VIII,
                                 reinterpret_cast<void*>(fRenderPicture),
-                                nullptr, this, picture);
-
-  // After drawing to the surface, the browser implicitly flushes the drawing
-  // commands at the end of the event loop. As a result, in order to make
-  // sure we call back after the rendering has actually occurred, we issue
-  // the callback in a subsequent event, after the flushing has happened.
-  emscripten_dispatch_to_thread(_thread, EM_FUNC_SIG_VII,
-                                reinterpret_cast<void*>(fNotifyRenderComplete),
-                                nullptr, this, callbackId);
+                                nullptr, this, picture, callbackId);
   return callbackId;
 }
 
@@ -74,10 +60,10 @@ uint32_t Surface::rasterizeImage(SkImage* image, ImageByteFormat format) {
   return callbackId;
 }
 
-void Surface::disposeVideoFrame(SkwasmObjectId videoFrameId) {
-  emscripten_dispatch_to_thread(_thread, EM_FUNC_SIG_VII,
-                                reinterpret_cast<void*>(fDisposeVideoFrame),
-                                nullptr, this, videoFrameId);
+std::unique_ptr<VideoFrameWrapper> Surface::createVideoFrameWrapper(
+    SkwasmObject videoFrame) {
+  return std::unique_ptr<VideoFrameWrapper>(
+      new VideoFrameWrapper(_thread, videoFrame));
 }
 
 // Main thread only
@@ -89,34 +75,21 @@ void Surface::setCallbackHandler(CallbackHandler* callbackHandler) {
 // Worker thread only
 void Surface::_runWorker() {
   _init();
-  emscripten_unwind_to_js_event_loop();
+  emscripten_exit_with_live_runtime();
 }
 
 // Worker thread only
 void Surface::_init() {
-  EmscriptenWebGLContextAttributes attributes;
-  emscripten_webgl_init_context_attributes(&attributes);
-
-  attributes.alpha = true;
-  attributes.depth = true;
-  attributes.stencil = true;
-  attributes.antialias = false;
-  attributes.premultipliedAlpha = true;
-  attributes.preserveDrawingBuffer = 0;
-  attributes.powerPreference = EM_WEBGL_POWER_PREFERENCE_DEFAULT;
-  attributes.failIfMajorPerformanceCaveat = false;
-  attributes.enableExtensionsByDefault = true;
-  attributes.explicitSwapControl = false;
-  attributes.renderViaOffscreenBackBuffer = true;
-  attributes.majorVersion = 2;
-
-  _glContext = emscripten_webgl_create_context(_canvasID.c_str(), &attributes);
+  // Listen to messages from the main thread
+  skwasm_registerMessageListener(0);
+  _glContext = skwasm_createOffscreenCanvas(256, 256);
   if (!_glContext) {
     printf("Failed to create context!\n");
     return;
   }
 
   makeCurrent(_glContext);
+  emscripten_webgl_enable_extension(_glContext, "WEBGL_debug_renderer_info");
 
   _grContext = GrDirectContext::MakeGL(GrGLMakeNativeInterface());
 
@@ -144,11 +117,10 @@ void Surface::_dispose() {
 }
 
 // Worker thread only
-void Surface::_setCanvasSize(int width, int height) {
-  if (_canvasWidth != width || _canvasHeight != height) {
-    emscripten_set_canvas_element_size(_canvasID.c_str(), width, height);
-    _canvasWidth = width;
-    _canvasHeight = height;
+void Surface::_resizeCanvasToFit(int width, int height) {
+  if (!_surface || width > _canvasWidth || height > _canvasHeight) {
+    _canvasWidth = std::max(width, _canvasWidth);
+    _canvasHeight = std::max(height, _canvasHeight);
     _recreateSurface();
   }
 }
@@ -156,6 +128,7 @@ void Surface::_setCanvasSize(int width, int height) {
 // Worker thread only
 void Surface::_recreateSurface() {
   makeCurrent(_glContext);
+  skwasm_resizeCanvas(_glContext, _canvasWidth, _canvasHeight);
   auto target = GrBackendRenderTargets::MakeGL(_canvasWidth, _canvasHeight,
                                                _sampleCount, _stencil, _fbInfo);
   _surface = SkSurfaces::WrapBackendRenderTarget(
@@ -164,16 +137,20 @@ void Surface::_recreateSurface() {
 }
 
 // Worker thread only
-void Surface::_renderPicture(const SkPicture* picture) {
-  if (!_surface) {
-    printf("Can't render picture with no surface.\n");
-    return;
-  }
-
+void Surface::_renderPicture(const SkPicture* picture, uint32_t callbackId) {
+  SkRect pictureRect = picture->cullRect();
+  SkIRect roundedOutRect;
+  pictureRect.roundOut(&roundedOutRect);
+  _resizeCanvasToFit(roundedOutRect.width(), roundedOutRect.height());
+  SkMatrix matrix =
+      SkMatrix::Translate(-roundedOutRect.fLeft, -roundedOutRect.fTop);
   makeCurrent(_glContext);
   auto canvas = _surface->getCanvas();
-  canvas->drawPicture(picture);
+  canvas->drawColor(SK_ColorTRANSPARENT, SkBlendMode::kSrc);
+  canvas->drawPicture(sk_ref_sp<SkPicture>(picture), &matrix, nullptr);
   _grContext->flush(_surface);
+  skwasm_captureImageBitmap(this, _glContext, callbackId,
+                            roundedOutRect.width(), roundedOutRect.height());
 }
 
 void Surface::_rasterizeImage(SkImage* image,
@@ -200,49 +177,29 @@ void Surface::_rasterizeImage(SkImage* image,
       data = nullptr;
     }
   }
-  emscripten_sync_run_in_main_runtime_thread(
+  emscripten_async_run_in_main_runtime_thread(
       EM_FUNC_SIG_VIII, fOnRasterizeComplete, this, data.release(), callbackId);
 }
 
-void Surface::_disposeVideoFrame(SkwasmObjectId objectId) {
-  skwasm_disposeVideoFrame(objectId);
-}
-
 void Surface::_onRasterizeComplete(SkData* data, uint32_t callbackId) {
-  _callbackHandler(callbackId, data);
-}
-
-// Worker thread only
-void Surface::_notifyRenderComplete(uint32_t callbackId) {
-  emscripten_sync_run_in_main_runtime_thread(EM_FUNC_SIG_VII, fOnRenderComplete,
-                                             this, callbackId);
+  _callbackHandler(callbackId, data, __builtin_wasm_ref_null_extern());
 }
 
 // Main thread only
-void Surface::_onRenderComplete(uint32_t callbackId) {
+void Surface::onRenderComplete(uint32_t callbackId, SkwasmObject imageBitmap) {
   assert(emscripten_is_main_browser_thread());
-  _callbackHandler(callbackId, nullptr);
+  _callbackHandler(callbackId, nullptr, imageBitmap);
 }
 
 void Surface::fDispose(Surface* surface) {
   surface->_dispose();
 }
 
-void Surface::fSetCanvasSize(Surface* surface, int width, int height) {
-  surface->_setCanvasSize(width, height);
-}
-
-void Surface::fRenderPicture(Surface* surface, SkPicture* picture) {
-  surface->_renderPicture(picture);
+void Surface::fRenderPicture(Surface* surface,
+                             SkPicture* picture,
+                             uint32_t callbackId) {
+  surface->_renderPicture(picture, callbackId);
   picture->unref();
-}
-
-void Surface::fNotifyRenderComplete(Surface* surface, uint32_t callbackId) {
-  surface->_notifyRenderComplete(callbackId);
-}
-
-void Surface::fOnRenderComplete(Surface* surface, uint32_t callbackId) {
-  surface->_onRenderComplete(callbackId);
 }
 
 void Surface::fOnRasterizeComplete(Surface* surface,
@@ -259,13 +216,8 @@ void Surface::fRasterizeImage(Surface* surface,
   image->unref();
 }
 
-void Surface::fDisposeVideoFrame(Surface* surface,
-                                 SkwasmObjectId videoFrameId) {
-  surface->_disposeVideoFrame(videoFrameId);
-}
-
-SKWASM_EXPORT Surface* surface_createFromCanvas(const char* canvasID) {
-  return new Surface(canvasID);
+SKWASM_EXPORT Surface* surface_create() {
+  return new Surface();
 }
 
 SKWASM_EXPORT unsigned long surface_getThreadId(Surface* surface) {
@@ -282,12 +234,6 @@ SKWASM_EXPORT void surface_destroy(Surface* surface) {
   surface->dispose();
 }
 
-SKWASM_EXPORT void surface_setCanvasSize(Surface* surface,
-                                         int width,
-                                         int height) {
-  surface->setCanvasSize(width, height);
-}
-
 SKWASM_EXPORT uint32_t surface_renderPicture(Surface* surface,
                                              SkPicture* picture) {
   return surface->renderPicture(picture);
@@ -297,4 +243,12 @@ SKWASM_EXPORT uint32_t surface_rasterizeImage(Surface* surface,
                                               SkImage* image,
                                               ImageByteFormat format) {
   return surface->rasterizeImage(image, format);
+}
+
+// This is used by the skwasm JS support code to call back into C++ when the
+// we finish creating the image bitmap, which is an asynchronous operation.
+SKWASM_EXPORT void surface_onRenderComplete(Surface* surface,
+                                            uint32_t callbackId,
+                                            SkwasmObject imageBitmap) {
+  return surface->onRenderComplete(callbackId, imageBitmap);
 }

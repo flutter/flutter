@@ -64,7 +64,7 @@ window.onload = async function () {
         const skwasmInstance = await skwasm();
         window._flutter_skwasmInstance = skwasmInstance;
         resolve({
-          "skwasm": skwasmInstance.asm,
+          "skwasm": skwasmInstance.asm ?? skwasmInstance.wasmExports,
           "ffi": {
             "memory": skwasmInstance.wasmMemory,
           }

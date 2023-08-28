@@ -14,12 +14,10 @@ typedef SurfaceHandle = Pointer<RawSurface>;
 final class RawRenderCallback extends Opaque {}
 typedef OnRenderCallbackHandle = Pointer<RawRenderCallback>;
 
-@Native<SurfaceHandle Function(Pointer<Int8>)>(
-  symbol: 'surface_createFromCanvas',
-  isLeaf: true)
-external SurfaceHandle surfaceCreateFromCanvas(
-  Pointer<Int8> querySelector
-);
+typedef CallbackId = int;
+
+@Native<SurfaceHandle Function()>(symbol: 'surface_create', isLeaf: true)
+external SurfaceHandle surfaceCreate();
 
 @Native<UnsignedLong Function(SurfaceHandle)>(symbol: 'surface_getThreadId', isLeaf: true)
 external int surfaceGetThreadId(SurfaceHandle handle);
@@ -37,26 +35,17 @@ external void surfaceSetCallbackHandler(
   isLeaf: true)
 external void surfaceDestroy(SurfaceHandle surface);
 
-@Native<Void Function(SurfaceHandle, Int, Int)>(
-  symbol: 'surface_setCanvasSize',
-  isLeaf: true)
-external void surfaceSetCanvasSize(
-  SurfaceHandle surface,
-  int width,
-  int height
-);
-
 @Native<Int32 Function(SurfaceHandle, PictureHandle)>(
   symbol: 'surface_renderPicture',
   isLeaf: true)
-external int surfaceRenderPicture(SurfaceHandle surface, PictureHandle picture);
+external CallbackId surfaceRenderPicture(SurfaceHandle surface, PictureHandle picture);
 
 @Native<Int32 Function(
   SurfaceHandle,
   ImageHandle,
   Int
 )>(symbol: 'surface_rasterizeImage', isLeaf: true)
-external int surfaceRasterizeImage(
+external CallbackId surfaceRasterizeImage(
   SurfaceHandle handle,
   ImageHandle image,
   int format,

@@ -8,44 +8,81 @@
 mergeInto(LibraryManager.library, {
   $skwasm_support_setup__postset: 'skwasm_support_setup();',
   $skwasm_support_setup: function() {
-    const objectMap = new Map();
-    skwasm_registerObject = function(id, object) {
-      objectMap.set(id, object);
-    };
-    skwasm_unregisterObject = function(id) {
-      objectMap.delete(id);
-    }
-    skwasm_getObject = function(id) {
-      return objectMap.get(id);
-    }
-
-    addEventListener('message', function (event) {
-      const transfers = event.data.skwasmObjectTransfers;
-      if (!transfers) {
-        return;
-      }
-      transfers.forEach(function(object, objectId) {
-        objectMap.set(objectId, object);
-      });
-    });  
-    skwasm_transferObjectToMain = function(objectId) {
-      postMessage({
-        skwasmObjectTransfers: new Map([
-          [objectId, objectMap[objectId]]
-        ])
-      });
-      objectMap.delete(objectId);
-    }
-    skwasm_transferObjectToThread = function(objectId, threadId) {
+    const handleToCanvasMap = new Map();
+    const associatedObjectsMap = new Map();
+    _skwasm_setAssociatedObjectOnThread = function(threadId, pointer, object) {
       PThread.pthreads[threadId].postMessage({
-        skwasmObjectTransfers: new Map([
-          [objectId, objectMap.get(objectId)]
-        ])
+        skwasmMessage: 'setAssociatedObject',
+        pointer,
+        object,
       });
-      objectMap.delete(objectId);
-    }
-    _skwasm_createGlTextureFromVideoFrame = function(videoFrameId, width, height) {
-      const videoFrame = skwasm_getObject(videoFrameId);
+    };
+    _skwasm_getAssociatedObject = function(pointer) {
+      return associatedObjectsMap.get(pointer);
+    };
+    _skwasm_registerMessageListener = function(threadId) {
+      const eventListener = function({data}) {
+        const skwasmMessage = data.skwasmMessage;
+        if (!skwasmMessage) {
+          return;
+        }
+        switch (skwasmMessage) {
+          case 'onRenderComplete':
+            _surface_onRenderComplete(data.surface, data.callbackId, data.imageBitmap);
+            return;
+          case 'setAssociatedObject':
+            associatedObjectsMap.set(data.pointer, data.object);
+            return;
+          case 'disposeAssociatedObject':
+            const object = { data };
+            if (object.close) {
+              object.close();
+            }
+            associatedObjectsMap.delete(data.pointer);
+          default:
+            console.warn('unrecognized skwasm message');
+        }
+      };
+      if (!threadId) {
+        addEventListener("message", eventListener);
+      } else {
+        PThread.pthreads[threadId].addEventListener("message", eventListener);
+      }
+    };
+    _skwasm_createOffscreenCanvas = function(width, height) {
+      const canvas = new OffscreenCanvas(width, height);
+      var contextAttributes = {
+        majorVersion: 2,
+        alpha: true,
+        depth: true,
+        stencil: true,
+        antialias: false,
+        premultipliedAlpha: true,
+        preserveDrawingBuffer: false,
+        powerPreference: 'default',
+        failIfMajorPerformanceCaveat: false,
+        enableExtensionsByDefault: true,
+      };
+      const contextHandle = GL.createContext(canvas, contextAttributes);
+      handleToCanvasMap.set(contextHandle, canvas);
+      return contextHandle;
+    };
+    _skwasm_resizeCanvas = function(contextHandle, width, height) {
+      const canvas = handleToCanvasMap.get(contextHandle);
+      canvas.width = width;
+      canvas.height = height;
+    };
+    _skwasm_captureImageBitmap = async function(surfaceHandle, contextHandle, callbackId, width, height) {
+      const canvas = handleToCanvasMap.get(contextHandle);
+      const imageBitmap = await createImageBitmap(canvas, 0, 0, width, height);
+      postMessage({
+        skwasmMessage: 'onRenderComplete',
+        surface: surfaceHandle,
+        callbackId,
+        imageBitmap,
+      });
+    };
+    _skwasm_createGlTextureFromVideoFrame = function(videoFrame, width, height) {
       const glCtx = GL.currentContext.GLctx;
       const newTexture = glCtx.createTexture();
       glCtx.bindTexture(glCtx.TEXTURE_2D, newTexture);
@@ -59,26 +96,29 @@ mergeInto(LibraryManager.library, {
       const textureId = GL.getNewId(GL.textures);
       GL.textures[textureId] = newTexture;
       return textureId;
-    },
-    _skwasm_disposeVideoFrame = function(videoFrameId) {
-      const videoFrame = skwasm_getObject(videoFrameId);
-      videoFrame.close();
-      skwasm_unregisterObject(videoFrameId);
-    }
+    };
+    _skwasm_disposeAssociatedObjectOnThread = function(threadId, object) {
+      PThread.pthreads[threadId].postMessage({
+        skwasmMessage: 'disposeAssociatedObject',
+        object,
+      });
+    };
   },
-  $skwasm_registerObject: function() {},
-  $skwasm_registerObject__deps: ['$skwasm_support_setup'],
-  $skwasm_unregisterObject: function() {},
-  $skwasm_unregisterObject__deps: ['$skwasm_support_setup'],
-  $skwasm_getObject: function() {},
-  $skwasm_getObject__deps: ['$skwasm_support_setup'],
-  $skwasm_transferObjectToMain: function() {},
-  $skwasm_transferObjectToMain__deps: ['$skwasm_support_setup'],
-  $skwasm_transferObjectToThread: function() {},
-  $skwasm_transferObjectToThread__deps: ['$skwasm_support_setup'],
+  skwasm_setAssociatedObjectOnThread: function () {},
+  skwasm_setAssociatedObjectOnThread__deps: ['$skwasm_support_setup'],
+  skwasm_getAssociatedObject: function () {},
+  skwasm_getAssociatedObject__deps: ['$skwasm_support_setup'],
+  skwasm_disposeAssociatedObjectOnThread: function () {},
+  skwasm_disposeAssociatedObjectOnThread__deps: ['$skwasm_support_setup'],
+  skwasm_registerMessageListener: function() {},
+  skwasm_registerMessageListener__deps: ['$skwasm_support_setup'],
+  skwasm_createOffscreenCanvas: function () {},
+  skwasm_createOffscreenCanvas__deps: ['$skwasm_support_setup'],
+  skwasm_resizeCanvas: function () {},
+  skwasm_resizeCanvas__deps: ['$skwasm_support_setup'],
+  skwasm_captureImageBitmap: function () {},
+  skwasm_captureImageBitmap__deps: ['$skwasm_support_setup'],
   skwasm_createGlTextureFromVideoFrame: function () {},
-  skwasm_createGlTextureFromVideoFrame__deps: ['$skwasm_support_setup', '$skwasm_getObject'],
-  skwasm_disposeVideoFrame: function () {},
-  skwasm_disposeVideoFrame__deps: ['$skwasm_support_setup', '$skwasm_getObject', '$skwasm_unregisterObject'],
+  skwasm_createGlTextureFromVideoFrame__deps: ['$skwasm_support_setup'],
 });
   
