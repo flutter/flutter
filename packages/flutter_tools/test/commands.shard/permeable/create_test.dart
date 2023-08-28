@@ -8,7 +8,7 @@ import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
 import 'package:file_testing/file_testing.dart';
-import 'package:flutter_tools/src/android/gradle_utils.dart' show templateAndroidGradlePluginVersion, templateDefaultGradleVersion;
+import 'package:flutter_tools/src/android/gradle_utils.dart' show templateAndroidGradlePluginVersion, templateAndroidGradlePluginVersionForModule, templateDefaultGradleVersion;
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -45,6 +45,7 @@ const String frameworkRevision = '12345678';
 const String frameworkChannel = 'omega';
 const String _kDisabledPlatformRequestedMessage = 'currently not supported on your local environment.';
 const String _kIncompatibleJavaVersionMessage = 'The configured version of Java detected may conflict with the';
+final String _kIncompatibleAgpVersionForModule = Version.parse(templateAndroidGradlePluginVersion) < Version.parse(templateAndroidGradlePluginVersionForModule) ? templateAndroidGradlePluginVersionForModule : templateAndroidGradlePluginVersion;
 
 // This needs to be created from the local platform due to re-entrant flutter calls made in this test.
 FakePlatform _kNoColorTerminalPlatform() => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
@@ -3458,8 +3459,9 @@ void main() {
     final List<FlutterProjectType> relevantProjectTypes = <FlutterProjectType>[FlutterProjectType.app, FlutterProjectType.skeleton, FlutterProjectType.module];
 
     for (final FlutterProjectType projectType in relevantProjectTypes) {
-      final String expectedMessage = getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, projectType.cliName);
-      final String unexpectedMessage = getIncompatibleJavaGradleAgpMessageHeader(true, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, projectType.cliName);
+      final String relevantAgpVersion = projectType == FlutterProjectType.module ? _kIncompatibleAgpVersionForModule : templateAndroidGradlePluginVersion;
+      final String expectedMessage = getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, relevantAgpVersion, projectType.cliName);
+      final String unexpectedMessage = getIncompatibleJavaGradleAgpMessageHeader(true, templateDefaultGradleVersion, relevantAgpVersion, projectType.cliName);
 
       await runner.run(<String>['create', '--no-pub', '--template=${projectType.cliName}', if (projectType != FlutterProjectType.module) '--platforms=android', projectDir.path]);
 
@@ -3495,8 +3497,9 @@ void main() {
     final List<FlutterProjectType> relevantProjectTypes = <FlutterProjectType>[FlutterProjectType.app, FlutterProjectType.skeleton, FlutterProjectType.pluginFfi, FlutterProjectType.module, FlutterProjectType.plugin];
 
     for (final FlutterProjectType projectType in relevantProjectTypes) {
-      final String expectedMessage = getIncompatibleJavaGradleAgpMessageHeader(true, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, projectType.cliName);
-      final String unexpectedMessage = getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, projectType.cliName);
+      final String relevantAgpVersion = projectType == FlutterProjectType.module ? _kIncompatibleAgpVersionForModule : templateAndroidGradlePluginVersion;
+      final String expectedMessage = getIncompatibleJavaGradleAgpMessageHeader(true, templateDefaultGradleVersion, relevantAgpVersion, projectType.cliName);
+      final String unexpectedMessage = getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, relevantAgpVersion, projectType.cliName);
 
       await runner.run(<String>['create', '--no-pub', '--template=${projectType.cliName}', if (projectType != FlutterProjectType.module) '--platforms=android', projectDir.path]);
 
@@ -3538,8 +3541,9 @@ void main() {
     final List<FlutterProjectType> relevantProjectTypes = <FlutterProjectType>[FlutterProjectType.app, FlutterProjectType.skeleton, FlutterProjectType.pluginFfi, FlutterProjectType.module, FlutterProjectType.plugin];
 
     for (final FlutterProjectType projectType in relevantProjectTypes) {
-      final String unexpectedIncompatibleAgpMessage = getIncompatibleJavaGradleAgpMessageHeader(true, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, projectType.cliName);
-      final String unexpectedIncompatibleGradleMessage = getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, projectType.cliName);
+      final String relevantAgpVersion = projectType == FlutterProjectType.module ? _kIncompatibleAgpVersionForModule : templateAndroidGradlePluginVersion;
+      final String unexpectedIncompatibleAgpMessage = getIncompatibleJavaGradleAgpMessageHeader(true, templateDefaultGradleVersion, relevantAgpVersion, projectType.cliName);
+      final String unexpectedIncompatibleGradleMessage = getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, relevantAgpVersion, projectType.cliName);
 
       await runner.run(<String>['create', '--no-pub', '--template=${projectType.cliName}', if (projectType != FlutterProjectType.module) '--platforms=android', projectDir.path]);
 
@@ -3564,8 +3568,9 @@ void main() {
     final List<FlutterProjectType> relevantProjectTypes = <FlutterProjectType>[FlutterProjectType.app, FlutterProjectType.skeleton, FlutterProjectType.pluginFfi, FlutterProjectType.module, FlutterProjectType.plugin];
 
     for (final FlutterProjectType projectType in relevantProjectTypes) {
-      final String unexpectedIncompatibleAgpMessage = getIncompatibleJavaGradleAgpMessageHeader(true, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, projectType.cliName);
-      final String unexpectedIncompatibleGradleMessage = getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, projectType.cliName);
+      final String relevantAgpVersion = projectType == FlutterProjectType.module ? _kIncompatibleAgpVersionForModule : templateAndroidGradlePluginVersion;
+      final String unexpectedIncompatibleAgpMessage = getIncompatibleJavaGradleAgpMessageHeader(true, templateDefaultGradleVersion, relevantAgpVersion, projectType.cliName);
+      final String unexpectedIncompatibleGradleMessage = getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, relevantAgpVersion, projectType.cliName);
 
       await runner.run(<String>['create', '--no-pub', '--template=${projectType.cliName}', if (projectType != FlutterProjectType.module) '--platforms=android', projectDir.path]);
 
@@ -3590,8 +3595,9 @@ void main() {
     final List<FlutterProjectType> relevantProjectTypes = <FlutterProjectType>[FlutterProjectType.app, FlutterProjectType.skeleton, FlutterProjectType.pluginFfi, FlutterProjectType.module, FlutterProjectType.plugin];
 
     for (final FlutterProjectType projectType in relevantProjectTypes) {
-      final String unexpectedIncompatibleAgpMessage = getIncompatibleJavaGradleAgpMessageHeader(true, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, projectType.cliName);
-      final String unexpectedIncompatibleGradleMessage = getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, projectType.cliName);
+      final String relevantAgpVersion = projectType == FlutterProjectType.module ? _kIncompatibleAgpVersionForModule : templateAndroidGradlePluginVersion;
+      final String unexpectedIncompatibleAgpMessage = getIncompatibleJavaGradleAgpMessageHeader(true, templateDefaultGradleVersion, relevantAgpVersion, projectType.cliName);
+      final String unexpectedIncompatibleGradleMessage = getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, relevantAgpVersion, projectType.cliName);
 
       await runner.run(<String>['create', '--no-pub', '--template=${projectType.cliName}', if (projectType != FlutterProjectType.module) '--platforms=android', projectDir.path]);
 

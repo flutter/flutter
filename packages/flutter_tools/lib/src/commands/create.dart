@@ -11,6 +11,7 @@ import '../base/file_system.dart';
 import '../base/net.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
+import '../base/version.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
 import '../features.dart';
@@ -490,6 +491,7 @@ Your $application code is in $relativeAppMain.
         javaVersion: versionToParsableString(globals.java?.version)!,
         templateGradleVersion: templateContext['gradleVersion']! as String,
         templateAgpVersion: templateContext['agpVersion']! as String,
+        templateAgpVersionForModule: templateContext['agpVersionForModule']! as String,
         projectType: template,
         projectDirPath: projectDirPath,
       );
@@ -816,18 +818,26 @@ void _printIncompatibleJavaAgpGradleVersionsWarning({
   required String javaVersion,
   required String templateGradleVersion,
   required String templateAgpVersion,
+  required String templateAgpVersionForModule,
   required FlutterProjectType projectType,
   required String projectDirPath}) {
   // Determine if the Java version specified conflicts with the template Gradle or AGP version.
   final bool javaGradleVersionsCompatible = gradle.validateJavaGradle(globals.logger, javaV: javaVersion, gradleV: templateGradleVersion);
-  final bool javaAgpVersionsCompatible = gradle.validateJavaAgp(globals.logger, javaV: javaVersion, agpV: templateAgpVersion);
+  bool javaAgpVersionsCompatible = gradle.validateJavaAgp(globals.logger, javaV: javaVersion, agpV: templateAgpVersion);
+  String relevantTemplateAgpVersion = templateAgpVersion;
+
+  if (projectType == FlutterProjectType.module && Version.parse(templateAgpVersion)! < Version.parse(templateAgpVersionForModule)!) {
+    // If a module is being created, make sure to check for Java/AGP compatibility between the highest used version of AGP in the module template.
+    javaAgpVersionsCompatible = gradle.validateJavaAgp(globals.logger, javaV: javaVersion, agpV: templateAgpVersionForModule);
+    relevantTemplateAgpVersion = templateAgpVersionForModule;
+  }
 
   if (javaGradleVersionsCompatible && javaAgpVersionsCompatible) {
     return;
   }
 
   // Determine header of warning with recommended fix of re-configuring Java version.
-  final String incompatibleVersionsAndRecommendedOptionMessage = getIncompatibleJavaGradleAgpMessageHeader(javaGradleVersionsCompatible, templateGradleVersion, templateAgpVersion, projectType.cliName);
+  final String incompatibleVersionsAndRecommendedOptionMessage = getIncompatibleJavaGradleAgpMessageHeader(javaGradleVersionsCompatible, templateGradleVersion, relevantTemplateAgpVersion, projectType.cliName);
 
   if (!javaGradleVersionsCompatible) {
     // Gradle template version incompatible with Java version.
@@ -866,7 +876,7 @@ $incompatibleVersionsAndRecommendedOptionMessage
 
 Alternatively, to continue using your configured Java version, update the AGP
 version specified in the following files to a compatible AGP
-version$compatibleAgpVersionMessage:
+version$compatibleAgpVersionMessage as necessary:
 $gradleBuildFilePaths
 
 See

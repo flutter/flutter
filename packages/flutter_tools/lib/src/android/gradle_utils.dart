@@ -607,8 +607,7 @@ VersionRange getJavaVersionFor({required String gradleV, required String agpV}) 
   // Find maximum Java version based on Gradle compatibility.
   String? maxJavaVersion;
   for (final JavaGradleCompat data in _javaGradleCompatList.reversed) {
-    // TODO(camsim99): Check inclusiveMax
-    if (isWithinVersionRange(gradleV, min: data.gradleMin, max: maxKnownAndSupportedGradleVersion)) {
+    if (isWithinVersionRange(gradleV, min: data.gradleMin, max: maxKnownAndSupportedGradleVersion, inclusiveMax: false)) {
       maxJavaVersion = data.javaMax;
     }
   }
