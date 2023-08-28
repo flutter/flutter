@@ -1582,6 +1582,21 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
       expect(info2.location, '/abc?def=ghi&def=jkl#mno');
     });
   });
+
+  test('$PlatformRouteInformationProvider dispatches object creation in constructor', () {
+    int eventCount = 0;
+    void listener(ObjectEvent event) => eventCount++;
+    MemoryAllocations.instance.addListener(listener);
+
+    final PlatformRouteInformationProvider registry = PlatformRouteInformationProvider(
+      initialRouteInformation: RouteInformation(uri: Uri.parse('http://google.com')),
+    );
+
+    expect(eventCount, 1);
+
+    registry.dispose();
+    MemoryAllocations.instance.removeListener(listener);
+  });
 }
 
 Widget buildBoilerPlate(Widget child) {
