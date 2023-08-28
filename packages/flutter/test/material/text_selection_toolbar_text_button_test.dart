@@ -145,14 +145,13 @@ void main() {
       expect(find.byType(TextButton), findsOneWidget);
 
       final TextButton textButton = tester.widget(find.byType(TextButton));
-      // The background color is hardcoded to grey or white by default, not the
-      // default value from ColorScheme.surface.
+      // The background color is hardcoded to transparent by default so the buttons
+      // are the color of the container behind them. For example TextSelectionToolbar
+      // hardcodes the color value, and TextSelectionToolbarTextButton that are its
+      // children should be that color.
       expect(
         textButton.style!.backgroundColor!.resolve(<MaterialState>{}),
-        switch (colorScheme.brightness) {
-          Brightness.light => const Color(0xffffffff),
-          Brightness.dark => const Color(0xff424242),
-        },
+        Colors.transparent,
       );
     });
 
@@ -182,45 +181,13 @@ void main() {
       expect(find.byType(TextButton), findsOneWidget);
 
       final TextButton textButton = tester.widget(find.byType(TextButton));
-      // The background color is hardcoded to grey or white by default, not the
-      // default value from ColorScheme.surface.
+      // The background color is hardcoded to transparent by default so the buttons
+      // are the color of the container behind them. For example TextSelectionToolbar
+      // hardcodes the color value, and TextSelectionToolbarTextButton that are its
+      // children should be that color.
       expect(
         textButton.style!.backgroundColor!.resolve(<MaterialState>{}),
-        switch (colorScheme.brightness) {
-          Brightness.light => const Color(0xffffffff),
-          Brightness.dark => const Color(0xff424242),
-        },
-      );
-    });
-
-    testWidgetsWithLeakTracking('custom background color', (WidgetTester tester) async {
-      // Regression test for https://github.com/flutter/flutter/issues/133027
-      const Color customBackgroundColor = Colors.red;
-
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(
-            colorScheme: colorScheme.copyWith(
-              surface: customBackgroundColor,
-            ),
-          ),
-          home: Scaffold(
-            body: Center(
-              child: TextSelectionToolbarTextButton(
-                padding: TextSelectionToolbarTextButton.getPadding(0, 1),
-                child: const Text('button'),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      expect(find.byType(TextButton), findsOneWidget);
-
-      final TextButton textButton = tester.widget(find.byType(TextButton));
-      expect(
-        textButton.style!.backgroundColor!.resolve(<MaterialState>{}),
-        customBackgroundColor,
+        Colors.transparent,
       );
     });
   }
