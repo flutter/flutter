@@ -425,7 +425,7 @@ class TableCell extends ParentDataWidget<TableCellParentData> {
   }
 
   @override
-  Type get debugTypicalAncestorWidgetClass => Table;
+  String get debugTypicalAncestorWidgetClass => 'Table';
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

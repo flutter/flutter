@@ -1368,7 +1368,7 @@ class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
   bool debugCanApplyOutOfTurn() => keepAlive;
 
   @override
-  Type get debugTypicalAncestorWidgetClass => RenderAbstractViewport;
+  String get debugTypicalAncestorWidgetClass => 'RenderAbstractViewport widget';
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1456,7 +1456,7 @@ class _SliverZeroFlexParentDataWidget extends ParentDataWidget<SliverPhysicalPar
   }
 
   @override
-  Type get debugTypicalAncestorWidgetClass => SliverCrossAxisGroup;
+  String get debugTypicalAncestorWidgetClass => 'SliverCrossAxisGroup';
 }
 
 class _SliverConstrainedCrossAxis extends SingleChildRenderObjectWidget {
@@ -1527,7 +1527,7 @@ class SliverCrossAxisExpanded extends ParentDataWidget<SliverPhysicalContainerPa
   }
 
   @override
-  Type get debugTypicalAncestorWidgetClass => SliverCrossAxisGroup;
+  String get debugTypicalAncestorWidgetClass => 'SliverCrossAxisGroup';
 }
 
 

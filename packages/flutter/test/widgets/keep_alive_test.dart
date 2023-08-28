@@ -52,7 +52,7 @@ void main() {
     final KeepAlive keepAlive = KeepAlive(keepAlive: false, child: Container());
     expect(
       keepAlive.debugTypicalAncestorWidgetClass,
-      RenderAbstractViewport,
+      'RenderAbstractViewport widget',
     );
   });
 

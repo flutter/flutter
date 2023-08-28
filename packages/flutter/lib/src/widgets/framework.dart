@@ -1592,25 +1592,25 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
     return renderObject.parentData is T;
   }
 
-  /// The [RenderObjectWidget] that is typically used to set up the [ParentData]
-  /// that [applyParentData] will write to.
+  /// Describes the [RenderObjectWidget] that is typically used to set up the
+  /// [ParentData] that [applyParentData] will write to.
   ///
   /// This is only used in error messages to tell users what widget typically
   /// wraps this [ParentDataWidget].
   ///
   /// ## Implementations
   ///
-  /// The returned type should be a subclass of `RenderObjectWidget`.
+  /// The returned String should describe a subclass of `RenderObjectWidget`.
   ///
   /// ```dart
   ///   @override
-  ///   Type get debugTypicalAncestorWidgetClass => FrogJar;
+  ///   String get debugTypicalAncestorWidgetClass => 'FrogJar';
   /// ```
   ///
   /// If the "typical" parent is generic (`Foo<T>`), consider specifying either
   /// a typical type argument (e.g. `Foo<int>` if `int` is typically how the
   /// type is specialized), or specifying the upper bound (e.g. `Foo<Object?>`).
-  Type get debugTypicalAncestorWidgetClass;
+  String get debugTypicalAncestorWidgetClass;
 
   Iterable<DiagnosticsNode> _debugDescribeIncorrectParentDataType({
     required ParentData? parentData,
