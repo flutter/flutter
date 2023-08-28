@@ -59,16 +59,8 @@ void TextContents::SetOffset(Vector2 offset) {
   offset_ = offset;
 }
 
-std::optional<Rect> TextContents::GetTextFrameBounds() const {
-  return frame_.GetBounds();
-}
-
 std::optional<Rect> TextContents::GetCoverage(const Entity& entity) const {
-  auto bounds = frame_.GetBounds();
-  if (!bounds.has_value()) {
-    return std::nullopt;
-  }
-  return bounds->TransformBounds(entity.GetTransformation());
+  return frame_.GetBounds().TransformBounds(entity.GetTransformation());
 }
 
 void TextContents::PopulateGlyphAtlas(
