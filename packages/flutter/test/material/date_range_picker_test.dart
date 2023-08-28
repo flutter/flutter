@@ -53,6 +53,9 @@ void main() {
     saveText = null;
   });
 
+  const Size wideWindowSize = Size(1920.0, 1080.0);
+  const Size narrowWindowSize = Size(1070.0, 1770.0);
+
   Future<void> preparePicker(
     WidgetTester tester,
     Future<void> Function(Future<DateTimeRange?> date) callback, {
@@ -1064,6 +1067,22 @@ void main() {
 
       // Test the end date text field
       testInputDecorator(tester.widget(borderContainers.last), border, Colors.transparent);
+    });
+
+    // This is a regression test for https://github.com/flutter/flutter/issues/131989.
+    testWidgets('Dialog contents do not overflow when resized from landscape to portrait',
+      (WidgetTester tester) async {
+        addTearDown(tester.view.reset);
+        // Initial window size is wide for landscape mode.
+        tester.view.physicalSize = wideWindowSize;
+        tester.view.devicePixelRatio = 1.0;
+
+        await preparePicker(tester, (Future<DateTimeRange?> range) async {
+          // Change window size to narrow for portrait mode.
+          tester.view.physicalSize = narrowWindowSize;
+          await tester.pump();
+          expect(tester.takeException(), null);
+      });
     });
   });
 
