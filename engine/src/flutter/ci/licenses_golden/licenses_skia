@@ -1,4 +1,4 @@
-Signature: c73a1f101b26d40bafa5f85beabf205d
+Signature: 10e584a14af062f5f734d852b0cae024
 
 ====================================================================================================
 LIBRARY: etc1
@@ -1898,8 +1898,6 @@ ORIGIN: ../../../third_party/skia/src/gpu/ganesh/GrShaderCaps.cpp + ../../../thi
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/GrShaderCaps.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/GrSurface.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/GrSurface.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/gpu/ganesh/effects/GrGaussianConvolutionFragmentProcessor.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/gpu/ganesh/effects/GrGaussianConvolutionFragmentProcessor.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/gl/GrGLCaps.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/gl/GrGLCaps.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/gl/GrGLProgramDataManager.cpp + ../../../third_party/skia/LICENSE
@@ -2058,8 +2056,6 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/GrShaderCaps.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrShaderCaps.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrSurface.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/GrSurface.h
-FILE: ../../../third_party/skia/src/gpu/ganesh/effects/GrGaussianConvolutionFragmentProcessor.cpp
-FILE: ../../../third_party/skia/src/gpu/ganesh/effects/GrGaussianConvolutionFragmentProcessor.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/gl/GrGLCaps.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/gl/GrGLCaps.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/gl/GrGLProgramDataManager.cpp
