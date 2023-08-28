@@ -11,10 +11,11 @@ config("impeller_public_config") {
   defines = []
 
   if (impeller_debug) {
-    defines += [
-      "IMPELLER_DEBUG=1",
-      "IMPELLER_ENABLE_CAPTURE=1",
-    ]
+    defines += [ "IMPELLER_DEBUG=1" ]
+  }
+
+  if (impeller_capture) {
+    defines += [ "IMPELLER_ENABLE_CAPTURE=1" ]
   }
 
   if (impeller_supports_rendering) {
