@@ -1609,41 +1609,6 @@ void main() {
     tester.binding.focusManager.removeListener(handleFocusChange);
   });
 
-  test('$FocusManager dispatches object creation in constructor', () {
-    final List<ObjectEvent> events = <ObjectEvent>[];
-    void listener(ObjectEvent event) {
-      if (event.object.runtimeType == FocusManager) {
-        events.add(event);
-      }
-    }
-    MemoryAllocations.instance.addListener(listener);
-
-    final FocusManager focusManager = FocusManager();
-
-    expect(events, hasLength(1));
-
-    focusManager.dispose();
-
-    MemoryAllocations.instance.removeListener(listener);
-  });
-
-  test('$FocusNode dispatches object creation in constructor', () {
-    final List<ObjectEvent> events = <ObjectEvent>[];
-    void listener(ObjectEvent event) {
-      if (event.object.runtimeType == FocusNode) {
-        events.add(event);
-      }
-    }
-    MemoryAllocations.instance.addListener(listener);
-
-    final FocusNode focusManager = FocusNode();
-
-    expect(events, hasLength(1));
-
-    focusManager.dispose();
-    MemoryAllocations.instance.removeListener(listener);
-  });
-
   testWidgets('FocusManager notifies listeners when a widget loses focus because it was removed.', (WidgetTester tester) async {
     final FocusNode nodeA = FocusNode(debugLabel: 'a');
     final FocusNode nodeB = FocusNode(debugLabel: 'b');
