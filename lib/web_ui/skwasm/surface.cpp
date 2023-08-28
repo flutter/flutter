@@ -156,26 +156,25 @@ void Surface::_renderPicture(const SkPicture* picture, uint32_t callbackId) {
 void Surface::_rasterizeImage(SkImage* image,
                               ImageByteFormat format,
                               uint32_t callbackId) {
+  // We handle PNG encoding with browser APIs so that we can omit libpng from
+  // skia to save binary size.
+  assert(format != ImageByteFormat::png);
   sk_sp<SkData> data;
-  if (format == ImageByteFormat::png) {
-    data = SkPngEncoder::Encode(_grContext.get(), image, {});
-  } else {
-    SkAlphaType alphaType = format == ImageByteFormat::rawStraightRgba
-                                ? SkAlphaType::kUnpremul_SkAlphaType
-                                : SkAlphaType::kPremul_SkAlphaType;
-    SkImageInfo info = SkImageInfo::Make(image->width(), image->height(),
-                                         SkColorType::kRGBA_8888_SkColorType,
-                                         alphaType, SkColorSpace::MakeSRGB());
-    size_t bytesPerRow = 4 * image->width();
-    size_t byteSize = info.computeByteSize(bytesPerRow);
-    data = SkData::MakeUninitialized(byteSize);
-    uint8_t* pixels = reinterpret_cast<uint8_t*>(data->writable_data());
-    bool success = image->readPixels(_grContext.get(), image->imageInfo(),
-                                     pixels, bytesPerRow, 0, 0);
-    if (!success) {
-      printf("Failed to read pixels from image!\n");
-      data = nullptr;
-    }
+  SkAlphaType alphaType = format == ImageByteFormat::rawStraightRgba
+                              ? SkAlphaType::kUnpremul_SkAlphaType
+                              : SkAlphaType::kPremul_SkAlphaType;
+  SkImageInfo info = SkImageInfo::Make(image->width(), image->height(),
+                                       SkColorType::kRGBA_8888_SkColorType,
+                                       alphaType, SkColorSpace::MakeSRGB());
+  size_t bytesPerRow = 4 * image->width();
+  size_t byteSize = info.computeByteSize(bytesPerRow);
+  data = SkData::MakeUninitialized(byteSize);
+  uint8_t* pixels = reinterpret_cast<uint8_t*>(data->writable_data());
+  bool success = image->readPixels(_grContext.get(), image->imageInfo(), pixels,
+                                   bytesPerRow, 0, 0);
+  if (!success) {
+    printf("Failed to read pixels from image!\n");
+    data = nullptr;
   }
   emscripten_async_run_in_main_runtime_thread(
       EM_FUNC_SIG_VIII, fOnRasterizeComplete, this, data.release(), callbackId);

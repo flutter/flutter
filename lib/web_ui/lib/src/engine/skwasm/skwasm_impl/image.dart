@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ffi';
+import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
@@ -55,8 +56,31 @@ class SkwasmImage extends SkwasmObjectWrapper<RawImage> implements ui.Image {
 
   @override
   Future<ByteData?> toByteData(
-      {ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba}) {
-    return (renderer as SkwasmRenderer).surface.rasterizeImage(this, format);
+      {ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba}) async {
+    if (format == ui.ImageByteFormat.png) {
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final ui.Canvas canvas = ui.Canvas(recorder);
+      canvas.drawImage(this, ui.Offset.zero, ui.Paint());
+      final DomImageBitmap bitmap =
+        await (renderer as SkwasmRenderer).surface.renderPicture(
+          recorder.endRecording() as SkwasmPicture,
+        );
+      final DomOffscreenCanvas offscreenCanvas =
+        createDomOffscreenCanvas(bitmap.width.toDartInt, bitmap.height.toDartInt);
+      final DomCanvasRenderingContextBitmapRenderer context =
+        offscreenCanvas.getContext('bitmaprenderer')! as DomCanvasRenderingContextBitmapRenderer;
+      context.transferFromImageBitmap(bitmap);
+      final DomBlob blob = await offscreenCanvas.convertToBlob();
+      final JSArrayBuffer arrayBuffer = (await blob.arrayBuffer().toDart)! as JSArrayBuffer;
+
+      // Zero out the contents of the canvas so that resources can be reclaimed
+      // by the browser.
+      offscreenCanvas.width = 0;
+      offscreenCanvas.height = 0;
+      return ByteData.view(arrayBuffer.toDart);
+    } else {
+      return (renderer as SkwasmRenderer).surface.rasterizeImage(this, format);
+    }
   }
 
   @override
