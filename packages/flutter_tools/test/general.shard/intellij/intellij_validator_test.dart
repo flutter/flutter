@@ -1,5 +1,3 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:archive/archive.dart';
@@ -11,7 +9,6 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/intellij/intellij_validator.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
-import 'package:path/path.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
