@@ -721,17 +721,26 @@ TextAffinity? _toTextAffinity(String? affinity) {
   return null;
 }
 
-/// A floating cursor state the user has induced by force pressing an iOS
-/// keyboard.
-///
-/// ## Floating cursor
+/// The state of a floating cursor drag on an iOS soft keyboard.
 ///
 /// The floating cursor is an iOS feature in which long pressing and dragging on
 /// the spacebar of the soft keyboard causes the cursor in the text field to
 /// move along with the drag gesture. It's used to precisely position the cursor
 /// in some editable text.
+///
+/// This feature works out-of-the-box with Flutter. Support is built into
+/// [EditableText].
+///
+/// ![Animation of the native iOS floating cursor feature](https://flutter.github.io/assets-for-api-docs/assets/services/floating_cursor.gif)
+///
+/// See also:
+///
+///  * [EditableText.backgroundCursorColor], which configures the color of the
+///    placeholder cursor that appear in the original cursor location while the
+///    floating cursor is being dragged.
 enum FloatingCursorDragState {
-  /// A user has just activated a floating cursor.
+  /// A user has just activated a floating cursor by long pressing on the
+  /// spacebar.
   Start,
 
   /// A user is dragging a floating cursor.
