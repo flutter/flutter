@@ -31,6 +31,11 @@ wasm_lib("skwasm") {
     "wrappers.h",
   ]
 
+  cflags = [
+    "-mreference-types",
+    "-pthread",
+  ]
+
   ldflags = [
     "-std=c++20",
     "-lGL",
@@ -40,10 +45,9 @@ wasm_lib("skwasm") {
     "-sPTHREAD_POOL_SIZE=1",
     "-sALLOW_MEMORY_GROWTH",
     "-sALLOW_TABLE_GROWTH",
-    "-sUSE_PTHREADS=1",
     "-lexports.js",
     "-sEXPORTED_FUNCTIONS=[stackAlloc]",
-    "-sEXPORTED_RUNTIME_METHODS=[addFunction,removeFunction,skwasm_registerObject,skwasm_unregisterObject,skwasm_getObject,skwasm_transferObjectToThread]",
+    "-sEXPORTED_RUNTIME_METHODS=[addFunction,wasmExports]",
     "-Wno-pthreads-mem-growth",
     "--js-library",
     rebase_path("library_skwasm_support.js"),
@@ -57,6 +61,8 @@ wasm_lib("skwasm") {
       "-sASSERTIONS=1",
       "-sGL_ASSERTIONS=1",
     ]
+  } else {
+    ldflags += [ "--closure=1" ]
   }
 
   deps = [

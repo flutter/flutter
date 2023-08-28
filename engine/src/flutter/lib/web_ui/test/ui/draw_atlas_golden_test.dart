@@ -116,6 +116,16 @@ Future<void> testMain() async {
   );
 
   const ui.Rect region = ui.Rect.fromLTWH(0, 0, 300, 300);
+
+  test('render atlas', () async {
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final ui.Canvas canvas = ui.Canvas(recorder, region);
+    final ui.Image atlas = generateAtlas();
+    canvas.drawImage(atlas, ui.Offset.zero, ui.Paint());
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('ui_atlas.png', region: region);
+  }, skip: isHtml); // HTML renderer doesn't support drawAtlas
+
   test('drawAtlas', () async {
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     final ui.Canvas canvas = ui.Canvas(recorder, region);

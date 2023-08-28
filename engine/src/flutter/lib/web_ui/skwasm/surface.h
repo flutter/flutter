@@ -33,40 +33,54 @@ enum class ImageByteFormat {
   png,
 };
 
+class VideoFrameWrapper {
+ public:
+  VideoFrameWrapper(unsigned long threadId, SkwasmObject videoFrame)
+      : _rasterThreadId(threadId) {
+    skwasm_setAssociatedObjectOnThread(_rasterThreadId, this, videoFrame);
+  }
+
+  ~VideoFrameWrapper() {
+    skwasm_disposeAssociatedObjectOnThread(_rasterThreadId, this);
+  }
+
+  SkwasmObject getVideoFrame() { return skwasm_getAssociatedObject(this); }
+
+ private:
+  unsigned long _rasterThreadId;
+};
+
 class Surface {
  public:
- public:
-  using CallbackHandler = void(uint32_t, void*);
+  using CallbackHandler = void(uint32_t, void*, SkwasmObject);
 
   // Main thread only
-  Surface(const char* canvasID);
+  Surface();
 
   unsigned long getThreadId() { return _thread; }
 
   // Main thread only
   void dispose();
-  void setCanvasSize(int width, int height);
   uint32_t renderPicture(SkPicture* picture);
   uint32_t rasterizeImage(SkImage* image, ImageByteFormat format);
   void setCallbackHandler(CallbackHandler* callbackHandler);
+  void onRenderComplete(uint32_t callbackId, SkwasmObject imageBitmap);
 
   // Any thread
-  void disposeVideoFrame(SkwasmObjectId videoFrameId);
+  std::unique_ptr<VideoFrameWrapper> createVideoFrameWrapper(
+      SkwasmObject videoFrame);
 
  private:
   void _runWorker();
   void _init();
   void _dispose();
-  void _setCanvasSize(int width, int height);
+  void _resizeCanvasToFit(int width, int height);
   void _recreateSurface();
-  void _renderPicture(const SkPicture* picture);
+  void _renderPicture(const SkPicture* picture, uint32_t callbackId);
   void _rasterizeImage(SkImage* image,
                        ImageByteFormat format,
                        uint32_t callbackId);
-  void _disposeVideoFrame(SkwasmObjectId objectId);
   void _onRasterizeComplete(SkData* data, uint32_t callbackId);
-  void _notifyRenderComplete(uint32_t callbackId);
-  void _onRenderComplete(uint32_t callbackId);
 
   std::string _canvasID;
   CallbackHandler* _callbackHandler = nullptr;
@@ -85,10 +99,12 @@ class Surface {
   pthread_t _thread;
 
   static void fDispose(Surface* surface);
-  static void fSetCanvasSize(Surface* surface, int width, int height);
-  static void fRenderPicture(Surface* surface, SkPicture* picture);
-  static void fNotifyRenderComplete(Surface* surface, uint32_t callbackId);
-  static void fOnRenderComplete(Surface* surface, uint32_t callbackId);
+  static void fRenderPicture(Surface* surface,
+                             SkPicture* picture,
+                             uint32_t callbackId);
+  static void fOnRenderComplete(Surface* surface,
+                                uint32_t callbackId,
+                                SkwasmObject imageBitmap);
   static void fRasterizeImage(Surface* surface,
                               SkImage* image,
                               ImageByteFormat format,
@@ -96,6 +112,5 @@ class Surface {
   static void fOnRasterizeComplete(Surface* surface,
                                    SkData* imageData,
                                    uint32_t callbackId);
-  static void fDisposeVideoFrame(Surface* surface, SkwasmObjectId videoFrameId);
 };
 }  // namespace Skwasm
