@@ -1479,7 +1479,9 @@ class ListView extends BoxScrollView {
   ///             findChildIndexCallback: (Key key) {
   ///               final ValueKey<String> valueKey = key as ValueKey<String>;
   ///               final String data = valueKey.value;
-  ///               return items.indexOf(data);
+  ///               final int index = items.indexOf(data);
+  ///               if (index >= 0) return index;
+  ///               return null;
   ///             }
   ///           ),
   ///         ),
