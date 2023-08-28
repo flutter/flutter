@@ -1097,9 +1097,8 @@ class FlutterInformation {
     info['flutterRoot'] = flutterRoot;
     info['frameworkVersion'] = Version.parse(flutterVersion['frameworkVersion'] as String);
     info['engineRevision'] = flutterVersion['engineRevision'] as String;
-    info['engineRealm'] = filesystem.file(
-      path.join(flutterRoot.path, 'bin', 'internal', 'engine.realm',
-    )).readAsStringSync().trim();
+    final File engineRealm = flutterRoot.childDirectory('bin').childDirectory('internal').childFile('engine.realm');
+    info['engineRealm'] = engineRealm.existsSync() ? engineRealm.readAsStringSync().trim() : '';
 
     final RegExpMatch? dartVersionRegex = RegExp(r'(?<base>[\d.]+)(?:\s+\(build (?<detail>[-.\w]+)\))?')
         .firstMatch(flutterVersion['dartSdkVersion'] as String);

@@ -31,15 +31,6 @@ void main() {
     setUp(() {
       fakeProcessManager = FakeProcessManager.empty();
       memoryFileSystem = MemoryFileSystem();
-      final Directory flutterHome = memoryFileSystem
-          .directory('/home')
-          .childDirectory('user')
-          .childDirectory('flutter')
-          .childDirectory('bin')
-          .childDirectory('internal');
-      flutterHome.childFile('engine.realm')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('realm');
       setUpWithEnvironment(<String, String>{});
     });
 
@@ -181,6 +172,15 @@ void main() {
       expect(info['dartSdkVersion'], equals(Version.parse('2.14.0-360.0.dev')));
     });
     test('the engine realm is read from the engine.realm file', () async {
+      final Directory flutterHome = memoryFileSystem
+          .directory('/home')
+          .childDirectory('user')
+          .childDirectory('flutter')
+          .childDirectory('bin')
+          .childDirectory('internal');
+      flutterHome.childFile('engine.realm')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('realm');
       setUpWithEnvironment(<String, String>{'FLUTTER_ROOT': '/home/user/flutter'});
       fakeProcessManager.addCommand(const FakeCommand(
         command: <Pattern>['/home/user/flutter/bin/flutter', '--version', '--machine'],
