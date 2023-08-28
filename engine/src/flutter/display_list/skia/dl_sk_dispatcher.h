@@ -14,11 +14,9 @@
 namespace flutter {
 
 //------------------------------------------------------------------------------
-/// Can be fed to the dispatch() method of a DisplayList to feed the resulting
-/// rendering operations to an SkCanvas instance.
+/// @brief      Backend implementation of |DlOpReceiver| for |SkCanvas|.
 ///
-/// Receives all methods on Dispatcher and sends them to an SkCanvas
-///
+/// @see       DlOpReceiver
 class DlSkCanvasDispatcher : public virtual DlOpReceiver,
                              public DlSkPaintDispatchHelper {
  public:

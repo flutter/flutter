@@ -20,16 +20,18 @@
 
 namespace flutter {
 
-// The primary class used to express rendering operations in the
-// DisplayList ecosystem. This class is an API-only virtual class and
-// can be used to talk to a DisplayListBuilder to record a series of
-// rendering operations, or it could be the public facing API of an
-// adapter that forwards the calls to another rendering module, like
-// Skia.
-//
-// Developers familiar with Skia's SkCanvas API will be immediately
-// familiar with the methods below as they follow that API closely
-// but with DisplayList objects and values used as data instead.
+//------------------------------------------------------------------------------
+/// @brief    Developer-facing API for rendering anything *within* the engine.
+///
+/// |DlCanvas| should be used to render anything in the framework classes (i.e.
+/// `lib/ui`), flow and flow layers, embedders, shell, and elsewhere.
+///
+/// The only state carried by implementations of this interface are the clip
+/// and transform which are saved and restored by the |save|, |saveLayer|, and
+/// |restore| calls.
+///
+/// @note      The interface resembles closely the familiar |SkCanvas| interface
+///            used throughout the engine.
 class DlCanvas {
  public:
   enum class ClipOp {
