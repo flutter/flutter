@@ -48,7 +48,7 @@ List<Widget> generateList(Widget child) {
 }
 
 void main() {
-  test('KeepAlive debugTypicalAncestor ', () {
+  test('KeepAlive debugTypicalAncestorWidgetClass', () {
     final KeepAlive keepAlive = KeepAlive(keepAlive: false, child: Container());
     expect(
       keepAlive.debugTypicalAncestorWidgetClass,
