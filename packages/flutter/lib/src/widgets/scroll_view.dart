@@ -1480,7 +1480,7 @@ class ListView extends BoxScrollView {
   ///               final ValueKey<String> valueKey = key as ValueKey<String>;
   ///               final String data = valueKey.value;
   ///               final int index = items.indexOf(data);
-  ///               if (index >= 0) { 
+  ///               if (index >= 0) {
   ///                 return index;
   ///               }
   ///               return null;
