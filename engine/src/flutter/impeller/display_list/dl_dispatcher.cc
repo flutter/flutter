@@ -1111,7 +1111,9 @@ void DlDispatcher::drawDisplayList(
 void DlDispatcher::drawTextBlob(const sk_sp<SkTextBlob>& blob,
                                 SkScalar x,
                                 SkScalar y) {
-  if (paint_.style == Paint::Style::kStroke) {
+  const auto text_frame = MakeTextFrameFromTextBlobSkia(blob);
+  if (paint_.style == Paint::Style::kStroke ||
+      paint_.color_source.GetType() != ColorSource::Type::kColor) {
     auto path = skia_conversions::PathDataFromTextBlob(blob);
     auto bounds = blob->bounds();
     canvas_.Save();
@@ -1121,7 +1123,6 @@ void DlDispatcher::drawTextBlob(const sk_sp<SkTextBlob>& blob,
     return;
   }
 
-  const auto text_frame = MakeTextFrameFromTextBlobSkia(blob);
   canvas_.DrawTextFrame(text_frame,             //
                         impeller::Point{x, y},  //
                         paint_                  //
