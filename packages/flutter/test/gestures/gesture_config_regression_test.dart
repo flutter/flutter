@@ -114,7 +114,12 @@ void main() {
 
    expect(result.dragStarted, true);
    expect(result.dragUpdate, true);
-  });
+  },
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    // TODO(polina-c): remove after fixing
+    // https://github.com/flutter/flutter/issues/133515
+    notDisposedAllowList: <String, int?> {'ShortcutManager' : 1}
+  ));
 
   testWidgetsWithLeakTracking('Scroll Views get the same ScrollConfiguration as Draggables', (WidgetTester tester) async {
     tester.view.gestureSettings = const ui.GestureSettings(physicalTouchSlop: 4);
@@ -138,5 +143,10 @@ void main() {
    expect(result.dragStarted, true);
    expect(result.dragUpdate, true);
    expect(result.dragEnd, true);
-  });
+  },
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    // TODO(polina-c): remove after fixing
+    // https://github.com/flutter/flutter/issues/133515
+    notDisposedAllowList: <String, int?> {'ShortcutManager' : 1}
+  ));
 }
