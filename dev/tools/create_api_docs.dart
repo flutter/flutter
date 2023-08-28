@@ -465,7 +465,7 @@ class DartdocGenerator {
 
     // Verify which version of snippets and dartdoc we're using.
     final ProcessResult snippetsResult = Process.runSync(
-      FlutterInformation.instance.getDartBinaryPath().path,
+      FlutterInformation.instance.getFlutterBinaryPath().path,
       <String>[
         'pub',
         'global',
@@ -935,7 +935,7 @@ Future<Process> runPubProcess({
   @visibleForTesting FileSystem filesystem = const LocalFileSystem(),
 }) {
   return processManager.start(
-    <Object>[FlutterInformation.instance.getDartBinaryPath().path, 'pub', ...arguments],
+    <Object>[FlutterInformation.instance.getFlutterBinaryPath().path, 'pub', ...arguments],
     workingDirectory: (workingDirectory ?? filesystem.currentDirectory).path,
     environment: environment,
   );
@@ -1015,6 +1015,13 @@ class FlutterInformation {
   /// This is probably a shell script.
   File getDartBinaryPath() {
     return getFlutterRoot().childDirectory('bin').childFile('dart');
+  }
+
+  /// The path to the Dart binary in the Flutter repo.
+  ///
+  /// This is probably a shell script.
+  File getFlutterBinaryPath() {
+    return getFlutterRoot().childDirectory('bin').childFile('flutter');
   }
 
   /// The path to the Flutter repo root directory.
