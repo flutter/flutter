@@ -1219,11 +1219,7 @@ void main() {
 
   group('Android Predictive Back', () {
     bool? lastFrameworkHandlesBack;
-    setUp(() {
-      // Initialize to false. Because this uses a static boolean internally, it
-      // is not reset between tests or calls to pumpWidget. Explicitly setting
-      // it to false before each test makes them behave deterministically.
-      SystemNavigator.setFrameworkHandlesBack(false);
+    setUp(() async {
       lastFrameworkHandlesBack = null;
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
@@ -1233,12 +1229,17 @@ void main() {
           }
           return;
         });
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .handlePlatformMessage(
+            'flutter/lifecycle',
+            const StringCodec().encodeMessage(AppLifecycleState.resumed.toString()),
+            (ByteData? data) {},
+          );
     });
 
     tearDown(() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(SystemChannels.platform, null);
-      SystemNavigator.setFrameworkHandlesBack(true);
     });
 
     testWidgets('System back navigation inside of tabs', (WidgetTester tester) async {
