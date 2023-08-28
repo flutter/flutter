@@ -1608,7 +1608,8 @@ void main() {
       ).last;
     }
 
-    final Matcher closeTo300 = closeTo(300, 0.5);
+    // Actual size varies a little on web platforms.
+    final Matcher closeTo300 = closeTo(300, 0.25);
     expect(tester.getSize(findMenuItemText('Item 0')).height, closeTo300);
     expect(tester.getSize(findMenuItemText('Menu 1')).height, closeTo300);
     expect(tester.getSize(findMenuItemText('Item 2')).height, closeTo300);
@@ -1654,10 +1655,13 @@ void main() {
 
     await tester.pumpWidget(buildFrame(maxLines: 1));
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
-    expect(tester.getSize(findMenuItemText('Item 0')).height, 20);
-    expect(tester.getSize(findMenuItemText('Menu 1')).height, 20);
-    expect(tester.getSize(findMenuItemText('Item 2')).height, 20);
-    expect(tester.getSize(findMenuItemText('Item 3')).height, 20);
+
+    // Actual size varies a little on web platforms.
+    final Matcher closeTo20 = closeTo(20, 0.05);
+    expect(tester.getSize(findMenuItemText('Item 0')).height, closeTo20);
+    expect(tester.getSize(findMenuItemText('Menu 1')).height, closeTo20);
+    expect(tester.getSize(findMenuItemText('Item 2')).height, closeTo20);
+    expect(tester.getSize(findMenuItemText('Item 3')).height, closeTo20);
 
     // Close the menu
     await tester.tap(find.byType(TextField));
@@ -1666,10 +1670,13 @@ void main() {
 
     await tester.pumpWidget(buildFrame(maxLines: 2));
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
-    expect(tester.getSize(findMenuItemText('Item 0')).height, 40);
-    expect(tester.getSize(findMenuItemText('Menu 1')).height, 40);
-    expect(tester.getSize(findMenuItemText('Item 2')).height, 40);
-    expect(tester.getSize(findMenuItemText('Item 3')).height, 40);
+
+    // Actual size varies a little on web platforms.
+    final Matcher closeTo40 = closeTo(40, 0.05);
+    expect(tester.getSize(findMenuItemText('Item 0')).height, closeTo40);
+    expect(tester.getSize(findMenuItemText('Menu 1')).height, closeTo40);
+    expect(tester.getSize(findMenuItemText('Item 2')).height, closeTo40);
+    expect(tester.getSize(findMenuItemText('Item 3')).height, closeTo40);
 
     // Close the menu
     await tester.tap(find.byType(TextField));
