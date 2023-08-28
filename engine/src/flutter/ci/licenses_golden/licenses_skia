@@ -1,4 +1,4 @@
-Signature: 069d649183708887af8de63431ed8387
+Signature: ef6547b4de3d82e879ad827582b8b2bb
 
 ====================================================================================================
 LIBRARY: etc1
@@ -388,6 +388,7 @@ FILE: ../../../third_party/skia/package-lock.json
 FILE: ../../../third_party/skia/relnotes/sksl_always_on.md
 FILE: ../../../third_party/skia/relnotes/sksl_comma_array.md
 FILE: ../../../third_party/skia/relnotes/sksl_ganesh_dawn_removed.md
+FILE: ../../../third_party/skia/relnotes/vk_backend_surface.md
 FILE: ../../../third_party/skia/src/core/SkOrderedReadBuffer.h
 FILE: ../../../third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
@@ -8939,6 +8940,8 @@ ORIGIN: ../../../third_party/skia/src/gpu/ganesh/image/SkImage_RasterPinnable.h 
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/image/SkSpecialImage_Ganesh.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/surface/SkSurface_AndroidFactories.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/ganesh/vk/AHardwareBufferVk.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkBackendSurface.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkBackendSurfacePriv.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/AtlasProvider.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/AtlasProvider.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/BackendSemaphore.cpp + ../../../third_party/skia/LICENSE
@@ -9182,6 +9185,8 @@ FILE: ../../../third_party/skia/src/gpu/ganesh/image/SkImage_RasterPinnable.h
 FILE: ../../../third_party/skia/src/gpu/ganesh/image/SkSpecialImage_Ganesh.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/surface/SkSurface_AndroidFactories.cpp
 FILE: ../../../third_party/skia/src/gpu/ganesh/vk/AHardwareBufferVk.cpp
+FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkBackendSurface.cpp
+FILE: ../../../third_party/skia/src/gpu/ganesh/vk/GrVkBackendSurfacePriv.h
 FILE: ../../../third_party/skia/src/gpu/graphite/AtlasProvider.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/AtlasProvider.h
 FILE: ../../../third_party/skia/src/gpu/graphite/BackendSemaphore.cpp
