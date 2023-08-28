@@ -1099,7 +1099,10 @@ class EditableText extends StatefulWidget {
   ///
   /// Typically this would be set to [CupertinoColors.inactiveGray].
   ///
-  /// @{macro flutter.services.TextInput.floatingCursor}
+  /// See also:
+  ///
+  ///  * [FloatingCursorDragState], which explains the floating cursor feature
+  ///    in detail.
   final Color backgroundCursorColor;
 
   /// {@template flutter.widgets.editableText.maxLines}

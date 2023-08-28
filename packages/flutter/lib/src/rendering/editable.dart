@@ -882,7 +882,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///
   /// If this is null, the background cursor is not painted.
   ///
-  /// @{macro flutter.services.TextInput.floatingCursor}
+  /// See also:
+  ///
+  ///  * [FloatingCursorDragState], which explains the floating cursor feature
+  ///    in detail.
   Color? get backgroundCursorColor => _caretPainter.backgroundCursorColor;
   set backgroundCursorColor(Color? value) {
     _caretPainter.backgroundCursorColor = value;
@@ -1173,7 +1176,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///
   /// Defaults to a padding with left, top and right set to 4, bottom to 5.
   ///
-  /// @{macro flutter.services.TextInput.floatingCursor}
+  /// See also:
+  ///
+  ///  * [FloatingCursorDragState], which explains the floating cursor feature
+  ///    in detail.
   EdgeInsets floatingCursorAddedMargin;
 
   bool _floatingCursorOn = false;
@@ -2341,7 +2347,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   /// Returns the position within the text field closest to the raw cursor offset.
   ///
-  /// @{macro flutter.services.TextInput.floatingCursor}
+  /// See also:
+  ///
+  ///  * [FloatingCursorDragState], which explains the floating cursor feature
+  ///    in detail.
   Offset calculateBoundedFloatingCursorOffset(Offset rawCursorOffset) {
     Offset deltaPosition = Offset.zero;
     final double topBound = -floatingCursorAddedMargin.top;
@@ -2395,7 +2404,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// Sets the screen position of the floating cursor and the text position
   /// closest to the cursor.
   ///
-  /// @{macro flutter.services.TextInput.floatingCursor}
+  /// See also:
+  ///
+  ///  * [FloatingCursorDragState], which explains the floating cursor feature
+  ///    in detail.
   void setFloatingCursor(FloatingCursorDragState state, Offset boundedOffset, TextPosition lastTextPosition, { double? resetLerpValue }) {
     if (state == FloatingCursorDragState.Start) {
       _relativeOrigin = Offset.zero;

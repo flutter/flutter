@@ -744,12 +744,10 @@ enum FloatingCursorDragState {
 
 /// The current state and position of the floating cursor.
 ///
-/// {@template flutter.services.TextInput.floatingCursor}
 /// See also:
 ///
 ///  * [FloatingCursorDragState], which explains the floating cursor feature in
 ///    detail.
-/// {@endtemplate}
 class RawFloatingCursorPoint {
   /// Creates information for setting the position and state of a floating
   /// cursor.
@@ -1163,7 +1161,10 @@ mixin TextInputClient {
 
   /// Updates the floating cursor position and state.
   ///
-  /// @{macro flutter.services.TextInput.RawFloatingCursorPoint}
+  /// See also:
+  ///
+  ///  * [FloatingCursorDragState], which explains the floating cursor feature
+  ///    in detail.
   void updateFloatingCursor(RawFloatingCursorPoint point);
 
   /// Requests that this client display a prompt rectangle for the given text range,
