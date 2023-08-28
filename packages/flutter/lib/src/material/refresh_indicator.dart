@@ -59,7 +59,7 @@ enum RefreshIndicatorTriggerMode {
   onEdge,
 }
 
-enum _IndicatorType { material, adaptive }
+enum _IndicatorType { material, adaptive , noSpinner}
 
 /// A widget that supports the Material "swipe to refresh" idiom.
 ///
@@ -140,7 +140,7 @@ class RefreshIndicator extends StatefulWidget {
     this.semanticsValue,
     this.strokeWidth = RefreshProgressIndicator.defaultStrokeWidth,
     this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
-  }) : _indicatorType = _IndicatorType.material;
+  }) : _indicatorType = _IndicatorType.material, onModeChange = null;
 
   /// Creates an adaptive [RefreshIndicator] based on whether the target
   /// platform is iOS or macOS, following Material design's
@@ -171,7 +171,28 @@ class RefreshIndicator extends StatefulWidget {
     this.semanticsValue,
     this.strokeWidth = RefreshProgressIndicator.defaultStrokeWidth,
     this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
-  }) : _indicatorType = _IndicatorType.adaptive;
+  }) : _indicatorType = _IndicatorType.adaptive, onModeChange = null;
+
+  /// Creates [RefreshIndicator] with no spinner and calls `onRefresh` when
+  /// successfully armed by drag event.
+  const RefreshIndicator.noSpinner({
+    super.key,
+    required this.child,
+    required this.onRefresh,
+    this.onModeChange,
+    this.notificationPredicate = defaultScrollNotificationPredicate,
+    this.semanticsLabel,
+    this.semanticsValue,
+    this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
+  })
+      : _indicatorType = _IndicatorType.noSpinner,
+        // these parameters aren't used for [_IndicatorType.noSpinner],
+        // setting default values
+        displacement = 0.0,
+        edgeOffset = 0.0,
+        color = null,
+        backgroundColor = null,
+        strokeWidth = 0.0;
 
   /// The widget below this widget in the tree.
   ///
@@ -210,6 +231,18 @@ class RefreshIndicator extends StatefulWidget {
   /// far enough to demonstrate that they want the app to refresh. The returned
   /// [Future] must complete when the refresh operation is finished.
   final RefreshCallback onRefresh;
+
+  /// A function used to get current status of [RefreshIndicator] to update UI
+  /// as required while using [RefreshIndicator.noSpinner].
+  /// ```
+  ///   drag,     while pointer is down.
+  ///   armed,    when dragged far enough that an up event will run the onRefresh callback.
+  ///   snap,     while animating to the indicator's final "displacement".
+  ///   refresh,  while running the refresh callback.
+  ///   done,     while animating the indicator's fade-out after refreshing.
+  ///   canceled, while animating the indicator's fade-out after not arming.
+  ///```
+  final Function(String? mode)? onModeChange;
 
   /// The progress indicator's foreground color. The current theme's
   /// [ColorScheme.primary] by default.
@@ -347,6 +380,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     if (_shouldStart(notification)) {
       setState(() {
         _mode = _RefreshIndicatorMode.drag;
+        widget.onModeChange?.call(_mode?.name);
       });
       return false;
     }
@@ -450,6 +484,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     _positionController.value = clampDouble(newValue, 0.0, 1.0); // this triggers various rebuilds
     if (_mode == _RefreshIndicatorMode.drag && _valueColor.value!.alpha == 0xFF) {
       _mode = _RefreshIndicatorMode.armed;
+      widget.onModeChange?.call(_mode?.name);
     }
   }
 
@@ -462,6 +497,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     assert(newMode == _RefreshIndicatorMode.canceled || newMode == _RefreshIndicatorMode.done);
     setState(() {
       _mode = newMode;
+      widget.onModeChange?.call(_mode?.name);
     });
     switch (_mode!) {
       case _RefreshIndicatorMode.done:
@@ -489,6 +525,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     final Completer<void> completer = Completer<void>();
     _pendingRefreshFuture = completer.future;
     _mode = _RefreshIndicatorMode.snap;
+    widget.onModeChange?.call(_mode?.name);
     _positionController
       .animateTo(1.0 / _kDragSizeFactorLimit, duration: _kIndicatorSnapDuration)
       .then<void>((void value) {
@@ -612,6 +649,9 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
                           case TargetPlatform.macOS:
                             return cupertinoIndicator;
                         }
+                      }
+                      case _IndicatorType.noSpinner: {
+                        return Container();
                       }
                     }
                   },

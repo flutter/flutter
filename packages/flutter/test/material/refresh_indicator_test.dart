@@ -1056,4 +1056,60 @@ void main() {
     expect(refreshCalled, true);
     expect(stretchAccepted, false);
   });
+
+  group('RefreshIndicator.noSpinner', () {
+    testWidgetsWithLeakTracking('onModeChange and onRefresh Trigger',
+            (WidgetTester tester) async {
+          refreshCalled = false;
+          bool modeSnap = false;
+          bool modeDrag = false;
+          bool modeArmed = false;
+          bool modeDone = false;
+
+          await tester.pumpWidget(MaterialApp(
+            home: RefreshIndicator.noSpinner(
+              onModeChange: (String? mode) {
+                if (mode == 'armed') {
+                  modeArmed = true;
+                }
+                if (mode == 'drag') {
+                  modeDrag = true;
+                }
+                if (mode == 'snap') {
+                  modeSnap = true;
+                }
+                if (mode == 'done') {
+                  modeDone = true;
+                }
+              },
+              onRefresh: refresh,
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children:
+                <String>['A', 'B', 'C', 'D', 'E', 'F'].map<Widget>((String item) {
+                  return SizedBox(
+                    height: 200.0,
+                    child: Text(item),
+                  );
+                }).toList(),
+              ),
+            ),
+          ));
+
+          await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0);
+          await tester.pump();
+
+          await tester
+              .pump(const Duration(seconds: 1)); // finish the scroll animation
+          await tester.pump(
+              const Duration(seconds: 1)); // finish the indicator settle animation
+          await tester.pump(
+              const Duration(seconds: 1)); // finish the indicator hide animation
+          expect(refreshCalled, true);
+          expect(modeSnap, true);
+          expect(modeDrag, true);
+          expect(modeArmed, true);
+          expect(modeDone, true);
+        });
+  });
 }
