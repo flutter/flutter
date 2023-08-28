@@ -437,10 +437,6 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
         _descendantsAreTraversable = descendantsAreTraversable {
     // Set it via the setter so that it does nothing on release builds.
     this.debugLabel = debugLabel;
-
-    if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
-    }
   }
 
   /// If true, tells the focus traversal policy to skip over this node for
@@ -1467,9 +1463,6 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// handlers, callers must call [registerGlobalHandlers]. See the
   /// documentation in that method for caveats to watch out for.
   FocusManager() {
-    if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
-    }
     rootScope._manager = this;
   }
 
