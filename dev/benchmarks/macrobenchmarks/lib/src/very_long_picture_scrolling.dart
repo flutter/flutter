@@ -179,7 +179,6 @@ class PaintSomeTest extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    print('painting ${to - from} lines');
     final double height = size.height;
     double x = 0;
     const double strokeSize = .5;
