@@ -29,6 +29,11 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   }
 
   @override
+  ImageStreamCompleter load(TestImageProvider key, DecoderCallback decode) {
+    throw UnsupportedError('Use ImageProvider.loadImage instead.');
+  }
+
+  @override
   ImageStreamCompleter loadBuffer(TestImageProvider key, DecoderBufferCallback decode) {
     throw UnsupportedError('Use ImageProvider.loadImage instead.');
   }

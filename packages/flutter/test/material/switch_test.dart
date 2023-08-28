@@ -3556,7 +3556,7 @@ class DelayedImageProvider extends ImageProvider<DelayedImageProvider> {
   }
 
   @override
-  ImageStreamCompleter loadImage(DelayedImageProvider key, ImageDecoderCallback decode) {
+  ImageStreamCompleter load(DelayedImageProvider key, DecoderCallback decode) {
     return OneFrameImageStreamCompleter(_completer.future);
   }
 
@@ -3592,7 +3592,7 @@ class _TestImageProvider extends ImageProvider<Object> {
   }
 
   @override
-  ImageStreamCompleter loadImage(Object key, ImageDecoderCallback decode) {
+  ImageStreamCompleter load(Object key, DecoderCallback decode) {
     _loadCallCount += 1;
     return _streamCompleter;
   }

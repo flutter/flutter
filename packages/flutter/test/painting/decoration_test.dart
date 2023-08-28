@@ -34,7 +34,7 @@ class SynchronousTestImageProvider extends ImageProvider<int> {
   }
 
   @override
-  ImageStreamCompleter loadImage(int key, ImageDecoderCallback decode) {
+  ImageStreamCompleter load(int key, DecoderCallback decode) {
     return OneFrameImageStreamCompleter(
       SynchronousFuture<ImageInfo>(TestImageInfo(key, image: image)),
     );
@@ -52,7 +52,7 @@ class SynchronousErrorTestImageProvider extends ImageProvider<int> {
   }
 
   @override
-  ImageStreamCompleter loadImage(int key, ImageDecoderCallback decode) {
+  ImageStreamCompleter load(int key, DecoderCallback decode) {
     throw throwable;
   }
 }
@@ -68,7 +68,7 @@ class AsyncTestImageProvider extends ImageProvider<int> {
   }
 
   @override
-  ImageStreamCompleter loadImage(int key, ImageDecoderCallback decode) {
+  ImageStreamCompleter load(int key, DecoderCallback decode) {
     return OneFrameImageStreamCompleter(
       Future<ImageInfo>.value(TestImageInfo(key, image: image)),
     );
@@ -88,7 +88,7 @@ class DelayedImageProvider extends ImageProvider<DelayedImageProvider> {
   }
 
   @override
-  ImageStreamCompleter loadImage(DelayedImageProvider key, ImageDecoderCallback decode) {
+  ImageStreamCompleter load(DelayedImageProvider key, DecoderCallback decode) {
     return OneFrameImageStreamCompleter(_completer.future);
   }
 
@@ -111,7 +111,7 @@ class MultiFrameImageProvider extends ImageProvider<MultiFrameImageProvider> {
   }
 
   @override
-  ImageStreamCompleter loadImage(MultiFrameImageProvider key, ImageDecoderCallback decode) {
+  ImageStreamCompleter load(MultiFrameImageProvider key, DecoderCallback decode) {
     return completer;
   }
 
