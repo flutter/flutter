@@ -11,7 +11,7 @@ void main() {
   final RegExp hashTagRegExp = RegExp(r'#[a-zA-Z0-9]*');
   final RegExp urlRegExp = RegExp(r'(?<!@[a-zA-Z0-9-]*)(?<![\/\.a-zA-Z0-9-])((https?:\/\/)?(([a-zA-Z0-9-]*\.)*[a-zA-Z0-9-]+(\.[a-zA-Z]+)+))(?::\d{1,5})?(?:\/[^\s]*)?(?:\?[^\s#]*)?(?:#[^\s]*)?(?![a-zA-Z0-9-]*@)');
 
-  group('InlineLinkedText', () {
+  group('LinkedText.linkSpans', () {
     group('url matching', () {
       for (final String text in <String>[
         'https://www.example.com',
@@ -35,27 +35,36 @@ void main() {
         'https://subsub.www.example.com'
       ]) {
         test('converts the valid url $text to a link by default', () {
-          final InlineLinkedText inlineLinkedText = InlineLinkedText(
-            textLinkers: <TextLinker>[
-              TextLinker(
-                textRangesFinder: LinkedText.defaultTextRangesFinder,
-                linkBuilder: LinkedText.getDefaultLinkBuilder((String text) {}),
-              ),
-            ],
-            text: text,
-          );
+          final (Iterable<InlineSpan> linkedSpans, Iterable<TapGestureRecognizer> recognizers) =
+              LinkedText.linkSpans(
+                 <InlineSpan>[
+                   TextSpan(
+                     text: text,
+                   ),
+                 ],
+                <TextLinker>[
+                  TextLinker(
+                    textRangesFinder: LinkedText.defaultTextRangesFinder,
+                    linkBuilder: LinkedText.getDefaultLinkBuilder((String text) {}),
+                  ),
+                ],
+              );
 
-          expect(inlineLinkedText.children, hasLength(1));
-          expect(inlineLinkedText.children!.first, isA<TextSpan>());
+          expect(linkedSpans, hasLength(1));
+          expect(linkedSpans.first, isA<TextSpan>());
 
-          final TextSpan span = inlineLinkedText.children!.first as TextSpan;
+          final TextSpan wrapperSpan = linkedSpans.first as TextSpan;
+          expect(wrapperSpan.text, isNull);
+          expect(wrapperSpan.children, hasLength(1));
+
+          final TextSpan span = wrapperSpan.children!.first as TextSpan;
 
           expect(span.text, text);
           expect(span.style, InlineLink.defaultLinkStyle);
           expect(span.children, isNull);
 
-          expect(inlineLinkedText.recognizers, hasLength(1));
-          for (final GestureRecognizer recognizer in inlineLinkedText.recognizers) {
+          expect(recognizers, hasLength(1));
+          for (final GestureRecognizer recognizer in recognizers) {
             recognizer.dispose();
           }
         });
@@ -66,26 +75,35 @@ void main() {
         'ftp://subdomain.example.net',
       ]) {
         test('does nothing to the invalid url $text', () {
-          final InlineLinkedText inlineLinkedText = InlineLinkedText(
-            textLinkers: <TextLinker>[
-              TextLinker(
-                textRangesFinder: LinkedText.defaultTextRangesFinder,
-                linkBuilder: LinkedText.getDefaultLinkBuilder((String text) {}),
-              ),
-            ],
-            text: text,
-          );
+          final (Iterable<InlineSpan> linkedSpans, Iterable<TapGestureRecognizer> recognizers) =
+              LinkedText.linkSpans(
+                 <InlineSpan>[
+                   TextSpan(
+                     text: text,
+                   ),
+                 ],
+                <TextLinker>[
+                  TextLinker(
+                    textRangesFinder: LinkedText.defaultTextRangesFinder,
+                    linkBuilder: LinkedText.getDefaultLinkBuilder((String text) {}),
+                  ),
+                ],
+              );
 
-          expect(inlineLinkedText.children, hasLength(1));
-          expect(inlineLinkedText.children!.first, isA<TextSpan>());
+          expect(linkedSpans, hasLength(1));
+          expect(linkedSpans.first, isA<TextSpan>());
 
-          final TextSpan span = inlineLinkedText.children!.first as TextSpan;
+          final TextSpan wrapperSpan = linkedSpans.first as TextSpan;
+          expect(wrapperSpan.text, isNull);
+          expect(wrapperSpan.children, hasLength(1));
+
+          final TextSpan span = wrapperSpan.children!.first as TextSpan;
 
           expect(span.text, text);
           expect(span.style, isNull);
           expect(span.children, isNull);
 
-          expect(inlineLinkedText.recognizers, hasLength(0));
+          expect(recognizers, hasLength(0));
         });
       }
 
@@ -95,45 +113,55 @@ void main() {
         '(example.com)',
       ]) {
         test('can parse url $text with leading and trailing characters', () {
-          final InlineLinkedText inlineLinkedText = InlineLinkedText(
-            textLinkers: <TextLinker>[
-              TextLinker(
-                textRangesFinder: LinkedText.defaultTextRangesFinder,
-                linkBuilder: LinkedText.getDefaultLinkBuilder((String text) {}),
-              ),
-            ],
-            text: text,
-          );
+          final (Iterable<InlineSpan> linkedSpans, Iterable<TapGestureRecognizer> recognizers) =
+              LinkedText.linkSpans(
+                 <InlineSpan>[
+                   TextSpan(
+                     text: text,
+                   ),
+                 ],
+                <TextLinker>[
+                  TextLinker(
+                    textRangesFinder: LinkedText.defaultTextRangesFinder,
+                    linkBuilder: LinkedText.getDefaultLinkBuilder((String text) {}),
+                  ),
+                ],
+              );
 
-          expect(inlineLinkedText.children, hasLength(3));
+          expect(linkedSpans, hasLength(1));
+          expect(linkedSpans.first, isA<TextSpan>());
 
-          expect(inlineLinkedText.children!.first, isA<TextSpan>());
-          final TextSpan leadingSpan = inlineLinkedText.children!.first as TextSpan;
+          final TextSpan wrapperSpan = linkedSpans.first as TextSpan;
+          expect(wrapperSpan.text, isNull);
+          expect(wrapperSpan.children, hasLength(3));
+
+          expect(wrapperSpan.children!.first, isA<TextSpan>());
+          final TextSpan leadingSpan = wrapperSpan.children!.first as TextSpan;
           expect(leadingSpan.text, hasLength(1));
           expect(leadingSpan.style, isNull);
           expect(leadingSpan.children, isNull);
 
-          expect(inlineLinkedText.children![1], isA<TextSpan>());
-          final TextSpan bodySpan = inlineLinkedText.children![1] as TextSpan;
+          expect(wrapperSpan.children![1], isA<TextSpan>());
+          final TextSpan bodySpan = wrapperSpan.children![1] as TextSpan;
           expect(bodySpan.text, 'example.com');
           expect(bodySpan.style, InlineLink.defaultLinkStyle);
           expect(bodySpan.children, isNull);
 
-          expect(inlineLinkedText.children!.last, isA<TextSpan>());
-          final TextSpan trailingSpan = inlineLinkedText.children!.last as TextSpan;
+          expect(wrapperSpan.children!.last, isA<TextSpan>());
+          final TextSpan trailingSpan = wrapperSpan.children!.last as TextSpan;
           expect(trailingSpan.text, hasLength(1));
           expect(trailingSpan.style, isNull);
           expect(trailingSpan.children, isNull);
 
-          expect(inlineLinkedText.recognizers, hasLength(1));
-          for (final GestureRecognizer recognizer in inlineLinkedText.recognizers) {
+          expect(recognizers, hasLength(1));
+          for (final GestureRecognizer recognizer in recognizers) {
             recognizer.dispose();
           }
         });
       }
     });
 
-    test('can use custom TextLinkers', () {
+    test('multiple TextLinkers', () {
       final TextLinker urlTextLinker = TextLinker(
         textRangesFinder: TextLinker.textRangesFinderFromRegExp(urlRegExp),
         linkBuilder: LinkedText.getDefaultLinkBuilder((String text) {}),
@@ -142,90 +170,102 @@ void main() {
         textRangesFinder: TextLinker.textRangesFinderFromRegExp(hashTagRegExp),
         linkBuilder: LinkedText.getDefaultLinkBuilder((String text) {}),
       );
-      final InlineLinkedText inlineLinkedText = InlineLinkedText(
-        textLinkers: <TextLinker>[urlTextLinker, hashTagTextLinker],
-        text: 'Flutter is great #crossplatform #declarative check out flutter.dev.',
-      );
+      final (Iterable<InlineSpan> linkedSpans, Iterable<TapGestureRecognizer> recognizers) =
+          LinkedText.linkSpans(
+             <InlineSpan>[
+               const TextSpan(
+                 text: 'Flutter is great #crossplatform #declarative check out flutter.dev.',
+               ),
+             ],
+             <TextLinker>[urlTextLinker, hashTagTextLinker],
+          );
 
-      expect(inlineLinkedText.children, hasLength(7));
+      expect(linkedSpans, hasLength(1));
+      expect(linkedSpans.first, isA<TextSpan>());
 
-      expect(inlineLinkedText.children!.first, isA<TextSpan>());
-      final TextSpan textSpan1 = inlineLinkedText.children!.first as TextSpan;
+      final TextSpan wrapperSpan = linkedSpans.first as TextSpan;
+      expect(wrapperSpan.text, isNull);
+      expect(wrapperSpan.children, hasLength(7));
+
+      expect(wrapperSpan.children!.first, isA<TextSpan>());
+      final TextSpan textSpan1 = wrapperSpan.children!.first as TextSpan;
       expect(textSpan1.text, 'Flutter is great ');
       expect(textSpan1.style, isNull);
       expect(textSpan1.children, isNull);
 
-      expect(inlineLinkedText.children![1], isA<TextSpan>());
-      final TextSpan hashTagSpan1 = inlineLinkedText.children![1] as TextSpan;
+      expect(wrapperSpan.children![1], isA<TextSpan>());
+      final TextSpan hashTagSpan1 = wrapperSpan.children![1] as TextSpan;
       expect(hashTagSpan1.text, '#crossplatform');
       expect(hashTagSpan1.style, InlineLink.defaultLinkStyle);
       expect(hashTagSpan1.children, isNull);
 
-      expect(inlineLinkedText.children![2], isA<TextSpan>());
-      final TextSpan textSpan2 = inlineLinkedText.children![2] as TextSpan;
+      expect(wrapperSpan.children![2], isA<TextSpan>());
+      final TextSpan textSpan2 = wrapperSpan.children![2] as TextSpan;
       expect(textSpan2.text, ' ');
       expect(textSpan2.style, isNull);
       expect(textSpan2.children, isNull);
 
-      expect(inlineLinkedText.children![3], isA<TextSpan>());
-      final TextSpan hashTagSpan2 = inlineLinkedText.children![3] as TextSpan;
+      expect(wrapperSpan.children![3], isA<TextSpan>());
+      final TextSpan hashTagSpan2 = wrapperSpan.children![3] as TextSpan;
       expect(hashTagSpan2.text, '#declarative');
       expect(hashTagSpan2.style, InlineLink.defaultLinkStyle);
       expect(hashTagSpan2.children, isNull);
 
-      expect(inlineLinkedText.children![4], isA<TextSpan>());
-      final TextSpan textSpan3 = inlineLinkedText.children![4] as TextSpan;
+      expect(wrapperSpan.children![4], isA<TextSpan>());
+      final TextSpan textSpan3 = wrapperSpan.children![4] as TextSpan;
       expect(textSpan3.text, ' check out ');
       expect(textSpan3.style, isNull);
       expect(textSpan3.children, isNull);
 
-      expect(inlineLinkedText.children![5], isA<TextSpan>());
-      final TextSpan urlSpan = inlineLinkedText.children![5] as TextSpan;
+      expect(wrapperSpan.children![5], isA<TextSpan>());
+      final TextSpan urlSpan = wrapperSpan.children![5] as TextSpan;
       expect(urlSpan.text, 'flutter.dev');
       expect(urlSpan.style, InlineLink.defaultLinkStyle);
       expect(urlSpan.children, isNull);
 
-      expect(inlineLinkedText.children![6], isA<TextSpan>());
-      final TextSpan textSpan4 = inlineLinkedText.children![6] as TextSpan;
+      expect(wrapperSpan.children![6], isA<TextSpan>());
+      final TextSpan textSpan4 = wrapperSpan.children![6] as TextSpan;
       expect(textSpan4.text, '.');
       expect(textSpan4.style, isNull);
       expect(textSpan4.children, isNull);
 
-      expect(inlineLinkedText.recognizers, hasLength(3)); // Two hash tags, one url.
-      for (final GestureRecognizer recognizer in inlineLinkedText.recognizers) {
+      expect(recognizers, hasLength(3)); // Two hash tags, one url.
+      for (final GestureRecognizer recognizer in recognizers) {
         recognizer.dispose();
       }
     });
 
-    test('can pass TextSpans instead of a string', () {
-      final InlineLinkedText inlineLinkedText = InlineLinkedText(
-        textLinkers: <TextLinker>[
-          TextLinker(
-            textRangesFinder: LinkedText.defaultTextRangesFinder,
-            linkBuilder: LinkedText.getDefaultLinkBuilder((String text) {}),
-          ),
-        ],
-        spans: const <InlineSpan>[
-          TextSpan(
-            text: 'Check out https://www.',
-            children: <InlineSpan>[
+    test('complex span tree', () {
+      final (Iterable<InlineSpan> linkedSpans, Iterable<TapGestureRecognizer> recognizers) =
+          LinkedText.linkSpans(
+            const <InlineSpan>[
               TextSpan(
-                style: TextStyle(
-                  fontWeight: FontWeight.w800,
-                ),
-                text: 'flutter',
+                text: 'Check out https://www.',
+                children: <InlineSpan>[
+                  TextSpan(
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                    ),
+                    text: 'flutter',
+                  ),
+                ],
+              ),
+              TextSpan(
+                text: '.dev!',
               ),
             ],
-          ),
-          TextSpan(
-            text: '.dev!',
-          ),
-        ],
-      );
+            <TextLinker>[
+              TextLinker(
+                textRangesFinder: LinkedText.defaultTextRangesFinder,
+                linkBuilder: LinkedText.getDefaultLinkBuilder((String text) {}),
+              ),
+            ],
+          );
 
-      expect(inlineLinkedText.children, hasLength(2));
-      expect(inlineLinkedText.children!.first, isA<TextSpan>());
-      final TextSpan span1 = inlineLinkedText.children!.first as TextSpan;
+      expect(linkedSpans, hasLength(2));
+
+      expect(linkedSpans.first, isA<TextSpan>());
+      final TextSpan span1 = linkedSpans.first as TextSpan;
       expect(span1.text, isNull);
       expect(span1.style, isNull);
       expect(span1.children, hasLength(3));
@@ -256,8 +296,8 @@ void main() {
       expect(span1Child3Child1.children, isNull);
 
       // Second span's children ('.dev!').
-      expect(inlineLinkedText.children![1], isA<TextSpan>());
-      final TextSpan span2 = inlineLinkedText.children![1] as TextSpan;
+      expect(linkedSpans.elementAt(1), isA<TextSpan>());
+      final TextSpan span2 = linkedSpans.elementAt(1) as TextSpan;
       expect(span2.text, isNull);
       expect(span2.children, hasLength(2));
       expect(span2.style, isNull);
@@ -273,8 +313,8 @@ void main() {
       expect(span2Child2.text, '!');
       expect(span2Child2.children, isNull);
 
-      expect(inlineLinkedText.recognizers, hasLength(3)); // 'https://www.', 'flutter', '.dev'
-      for (final GestureRecognizer recognizer in inlineLinkedText.recognizers) {
+      expect(recognizers, hasLength(3)); // 'https://www.', 'flutter', '.dev'
+      for (final GestureRecognizer recognizer in recognizers) {
         recognizer.dispose();
       }
     });

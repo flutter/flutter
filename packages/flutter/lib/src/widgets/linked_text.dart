@@ -29,6 +29,9 @@ typedef LinkBuilder = (InlineSpan, TapGestureRecognizer) Function(
   String linkString,
 );
 
+/// Finds [TextRange]s in the given [String].
+typedef TextRangesFinder = Iterable<TextRange> Function(String text);
+
 /// A widget that displays text with parts of it made interactive.
 ///
 /// By default, any URLs in the text are made interactive, and clicking one
@@ -212,44 +215,232 @@ class LinkedText extends StatefulWidget {
   /// The [TextStyle] to apply to the output [InlineSpan].
   final TextStyle? style;
 
+  /// Apply the given [TextLinker]s to the given [InlineSpan]s and return the
+  /// new resulting spans and any created [TapGestureRecognizer]s.
+  ///
+  /// {@macro flutter.painting.LinkBuilder.recognizer}
+  static (Iterable<InlineSpan>, Iterable<TapGestureRecognizer>) linkSpans(Iterable<InlineSpan> spans, Iterable<TextLinker> textLinkers) {
+    // Flatten the spans and find all ranges in the flat String. This must be done
+    // cumulatively, and not during a traversal, because matches may occur across
+    // span boundaries.
+    final List<({InlineSpan span, int length})> spansWithLength =
+        <({InlineSpan span, int length})>[];
+    String spansText = '';
+    for (final InlineSpan span in spans) {
+      final String string = span.toPlainText();
+      spansText += string;
+      spansWithLength.add((
+        span: span,
+        length: string.length,
+      ));
+    }
+    final Iterable<_TextLinkerMatch> textLinkerMatches =
+        _cleanTextLinkerMatches(
+          _TextLinkerMatch.fromTextLinkers(textLinkers, spansText),
+        );
+
+    final (Iterable<InlineSpan> output, Iterable<_TextLinkerMatch> _, Iterable<TapGestureRecognizer> recognizers) =
+        _linkSpansRecurse(spansWithLength, textLinkerMatches, 0);
+    return (output, recognizers);
+  }
+
+  static List<_TextLinkerMatch> _cleanTextLinkerMatches(Iterable<_TextLinkerMatch> textLinkerMatches) {
+    final List<_TextLinkerMatch> nextTextLinkerMatches = textLinkerMatches.toList();
+
+    // Sort by start.
+    nextTextLinkerMatches.sort((_TextLinkerMatch a, _TextLinkerMatch b) {
+      return a.textRange.start.compareTo(b.textRange.start);
+    });
+
+    int lastEnd = 0;
+    nextTextLinkerMatches.removeWhere((_TextLinkerMatch textLinkerMatch) {
+      // Return empty ranges.
+      if (textLinkerMatch.textRange.start == textLinkerMatch.textRange.end) {
+        return true;
+      }
+
+      // Remove overlapping ranges.
+      final bool overlaps = textLinkerMatch.textRange.start < lastEnd;
+      if (!overlaps) {
+        lastEnd = textLinkerMatch.textRange.end;
+      }
+      return overlaps;
+    });
+
+    return nextTextLinkerMatches;
+  }
+
+  static (Iterable<InlineSpan>, Iterable<_TextLinkerMatch>, Iterable<TapGestureRecognizer>) _linkSpansRecurse(Iterable<({InlineSpan span, int length})> spansWithLength, Iterable<_TextLinkerMatch> textLinkerMatches, int index) {
+    final List<InlineSpan> output = <InlineSpan>[];
+    Iterable<_TextLinkerMatch> nextTextLinkerMatches = textLinkerMatches;
+    final List<TapGestureRecognizer> recognizers = <TapGestureRecognizer>[];
+    int nextIndex = index;
+    for (final (span: InlineSpan span, length: int length) in spansWithLength) {
+      final (InlineSpan childSpan, Iterable<_TextLinkerMatch> childTextLinkerMatches, Iterable<TapGestureRecognizer> childRecognizers) = _linkSpanRecurse(
+        span,
+        nextTextLinkerMatches,
+        nextIndex,
+      );
+      output.add(childSpan);
+      nextTextLinkerMatches = childTextLinkerMatches;
+      recognizers.addAll(childRecognizers);
+      nextIndex += length;
+    }
+
+    return (output, nextTextLinkerMatches, recognizers);
+  }
+
+  // index is the index of the start of `span` in the overall flattened tree
+  // string.
+  //
+  // The TapGestureRecognizers must be disposed by an owning widget.
+  static (InlineSpan, Iterable<_TextLinkerMatch>, Iterable<TapGestureRecognizer>) _linkSpanRecurse(InlineSpan span, Iterable<_TextLinkerMatch> textLinkerMatches, int index) {
+    if (span is! TextSpan) {
+      return (span, textLinkerMatches, <TapGestureRecognizer>[]);
+    }
+
+    final List<InlineSpan> nextChildren = <InlineSpan>[];
+    final List<TapGestureRecognizer> recognizers = <TapGestureRecognizer>[];
+    List<_TextLinkerMatch> nextTextLinkerMatches = <_TextLinkerMatch>[...textLinkerMatches];
+    int lastLinkEnd = index;
+    if (span.text?.isNotEmpty ?? false) {
+      final int textEnd = index + span.text!.length;
+      for (final _TextLinkerMatch textLinkerMatch in textLinkerMatches) {
+        if (textLinkerMatch.textRange.start >= textEnd) {
+          // Because ranges is ordered, there are no more relevant ranges for this
+          // text.
+          break;
+        }
+        if (textLinkerMatch.textRange.end <= index) {
+          // This range ends before this span and is therefore irrelevant to it.
+          // It should have been removed from ranges.
+          assert(false, 'Invalid ranges.');
+          nextTextLinkerMatches.removeAt(0);
+          continue;
+        }
+        if (textLinkerMatch.textRange.start > index) {
+          // Add the unlinked text before the range.
+          nextChildren.add(TextSpan(
+            text: span.text!.substring(
+              lastLinkEnd - index,
+              textLinkerMatch.textRange.start - index,
+            ),
+          ));
+        }
+        // Add the link itself.
+        final int linkStart = math.max(textLinkerMatch.textRange.start, index);
+        lastLinkEnd = math.min(textLinkerMatch.textRange.end, textEnd);
+        final (InlineSpan nextChild, TapGestureRecognizer recognizer) = textLinkerMatch.linkBuilder(
+          span.text!.substring(linkStart - index, lastLinkEnd - index),
+          textLinkerMatch.linkString,
+        );
+        nextChildren.add(nextChild);
+        recognizers.add(recognizer);
+        if (textLinkerMatch.textRange.end > textEnd) {
+          // If we only partially used this range, keep it in nextRanges. Since
+          // overlapping ranges have been removed, this must be the last relevant
+          // range for this span.
+          break;
+        }
+        nextTextLinkerMatches.removeAt(0);
+      }
+
+      // Add any extra text after any ranges.
+      final String remainingText = span.text!.substring(lastLinkEnd - index);
+      if (remainingText.isNotEmpty) {
+        nextChildren.add(TextSpan(
+          text: remainingText,
+        ));
+      }
+    }
+
+    // Recurse on the children.
+    if (span.children?.isNotEmpty ?? false) {
+      final (
+        Iterable<InlineSpan> childrenSpans,
+        Iterable<_TextLinkerMatch> childrenTextLinkerMatches,
+        Iterable<TapGestureRecognizer> childrenRecognizers,
+      ) = _linkSpansRecurse(
+        span.children!.map((InlineSpan childSpan) => (
+          span: childSpan,
+          length: childSpan.toPlainText().length,
+        )),
+        nextTextLinkerMatches,
+        index + (span.text?.length ?? 0),
+      );
+      nextTextLinkerMatches = childrenTextLinkerMatches.toList();
+      nextChildren.addAll(childrenSpans);
+      recognizers.addAll(childrenRecognizers);
+    }
+
+    return (
+      TextSpan(
+        style: span.style,
+        children: nextChildren,
+      ),
+      nextTextLinkerMatches,
+      recognizers,
+    );
+  }
+
   @override
   State<LinkedText> createState() => _LinkedTextState();
 }
 
 class _LinkedTextState extends State<LinkedText> {
   final GlobalKey _textKey = GlobalKey();
+  Iterable<TapGestureRecognizer>? _recognizers;
+  late Iterable<InlineSpan> _linkedSpans;
 
-  static void _disposeRecognizers(Text text) {
-    final InlineLinkedText inlineLinkedText = text.textSpan! as InlineLinkedText;
-    for (final GestureRecognizer recognizer in inlineLinkedText.recognizers) {
+  void _disposeRecognizers() {
+    if (_recognizers == null) {
+      return;
+    }
+    for (final TapGestureRecognizer recognizer in _recognizers!) {
       recognizer.dispose();
+    }
+  }
+
+  void _linkSpans() {
+    final (Iterable<InlineSpan> linkedSpans, Iterable<TapGestureRecognizer> recognizers) =
+        LinkedText.linkSpans(widget.spans, widget.textLinkers);
+    _linkedSpans = linkedSpans;
+    _disposeRecognizers();
+    _recognizers = recognizers;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _linkSpans();
+  }
+
+  @override
+  void didUpdateWidget(LinkedText oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.spans != oldWidget.spans || widget.textLinkers != oldWidget.textLinkers) {
+      _linkSpans();
     }
   }
 
   @override
   void dispose() {
-    if (_textKey.currentWidget != null) {
-      _disposeRecognizers(_textKey.currentWidget! as Text);
-    }
+    _disposeRecognizers();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final Text? text = _textKey.currentWidget as Text?;
-    if (text != null) {
-      _disposeRecognizers(text);
-    }
-
     if (widget.spans.isEmpty) {
       return const SizedBox.shrink();
     }
+
     return Text.rich(
       key: _textKey,
-      InlineLinkedText(
+      TextSpan(
         style: widget.style ?? DefaultTextStyle.of(context).style,
-        textLinkers: widget.textLinkers,
-        spans: widget.spans,
+        children: _linkedSpans.toList(),
       ),
     );
   }
@@ -420,247 +611,4 @@ class _TextLinkerMatch {
 
   @override
   String toString() => '${objectRuntimeType(this, '_TextLinkerMatch')}($textRange, $linkBuilder, $linkString)';
-}
-
-/// Finds [TextRange]s in the given [String].
-typedef TextRangesFinder = Iterable<TextRange> Function(String text);
-
-/// A [TextSpan] that makes parts of the [text] interactive.
-///
-/// This class generates [TapGestureRecognizer]s to handle taps on any links,
-/// and the owning widget is responsible for managing the lifecycle of these
-/// recognizers. Access the recognizers at [InlineLinkedText.recognizers] and
-/// call [TapGestureRecognizer.dispose] whenever the owning widget is rebuilt or
-/// disposed.
-///
-/// {@tool dartpad}
-/// This example shows how to create an [InlineLinkedText] and manage its
-/// [InlineLinkedText.recognizers].
-///
-/// ** See code in examples/api/lib/painting/inline_linked_text/inline_linked_text.0.dart **
-/// {@end-tool}
-///
-/// See also:
-///
-///  * [LinkedText], which is a widget that performs the same functionality.
-@visibleForTesting
-class InlineLinkedText extends TextSpan {
-  /// Create an instance of [InlineLinkedText] with the given [textLinkers]
-  /// applied.
-  ///
-  /// {@macro flutter.widgets.LinkedText.textLinkers}
-  ///
-  /// See also:
-  ///
-  ///  * [InlineLinkedText.new], which can be passed [TextRange]s directly or
-  ///    otherwise matches URLs by default.
-  ///  * [InlineLinkedText.regExp], which automatically finds ranges that match
-  ///    the given [RegExp].
-  factory InlineLinkedText({
-    TextStyle? style,
-    required Iterable<TextLinker> textLinkers,
-    String? text,
-    List<InlineSpan>? spans,
-  }) {
-    assert(text != null || spans != null, 'Must specify something to link: either text or spans.');
-    assert(text == null || spans == null, 'Pass one of spans or text, not both.');
-    final (Iterable<InlineSpan> linkedSpans, Iterable<TapGestureRecognizer> recognizers) =
-        text == null
-            ? linkSpans(spans!, textLinkers)
-            : TextLinker.getSpansForMany(textLinkers, text);
-
-    return InlineLinkedText._(
-      recognizers: recognizers,
-      style: style,
-      children: linkedSpans.toList(),
-    );
-  }
-
-  const InlineLinkedText._({
-    super.style,
-    super.children,
-    required this.recognizers,
-  });
-
-  /// Any [TapGestureRecognizer]s that have been generated for handling taps on
-  /// the links and whose lifecycle must be maintained by the
-  /// [InlineLinkedText]'s owner.
-  ///
-  /// Call [TapGestureRecognizer.dispose] on these recognizers before throwing
-  /// away this [InlineLinkedText].
-  ///
-  /// See also:
-  ///  * [TextSpan.recognizer], which explains the need to manage the lifecycle
-  ///    of [GestureRecognizer]s created in [InlineSpan]s.
-  ///  * [InlineLinkedText], which has a full example of managing these
-  ///    recognizers.
-  final Iterable<TapGestureRecognizer> recognizers;
-
-  static List<_TextLinkerMatch> _cleanTextLinkerMatches(Iterable<_TextLinkerMatch> textLinkerMatches) {
-    final List<_TextLinkerMatch> nextTextLinkerMatches = textLinkerMatches.toList();
-
-    // Sort by start.
-    nextTextLinkerMatches.sort((_TextLinkerMatch a, _TextLinkerMatch b) {
-      return a.textRange.start.compareTo(b.textRange.start);
-    });
-
-    int lastEnd = 0;
-    nextTextLinkerMatches.removeWhere((_TextLinkerMatch textLinkerMatch) {
-      // Return empty ranges.
-      if (textLinkerMatch.textRange.start == textLinkerMatch.textRange.end) {
-        return true;
-      }
-
-      // Remove overlapping ranges.
-      final bool overlaps = textLinkerMatch.textRange.start < lastEnd;
-      if (!overlaps) {
-        lastEnd = textLinkerMatch.textRange.end;
-      }
-      return overlaps;
-    });
-
-    return nextTextLinkerMatches;
-  }
-
-  /// Apply the given [TextLinker]s to the given [InlineSpan]s and return the
-  /// new resulting spans and any created [TapGestureRecognizer]s.
-  ///
-  /// {@macro flutter.painting.LinkBuilder.recognizer}
-  static (Iterable<InlineSpan>, Iterable<TapGestureRecognizer>) linkSpans(Iterable<InlineSpan> spans, Iterable<TextLinker> textLinkers) {
-    // Flatten the spans and find all ranges in the flat String. This must be done
-    // cumulatively, and not during a traversal, because matches may occur across
-    // span boundaries.
-    final List<({InlineSpan span, int length})> spansWithLength =
-        <({InlineSpan span, int length})>[];
-    String spansText = '';
-    for (final InlineSpan span in spans) {
-      final String string = span.toPlainText();
-      spansText += string;
-      spansWithLength.add((
-        span: span,
-        length: string.length,
-      ));
-    }
-    final Iterable<_TextLinkerMatch> textLinkerMatches =
-        _cleanTextLinkerMatches(
-          _TextLinkerMatch.fromTextLinkers(textLinkers, spansText),
-        );
-
-    final (Iterable<InlineSpan> output, Iterable<_TextLinkerMatch> _, Iterable<TapGestureRecognizer> recognizers) =
-        _linkSpansRecurse(spansWithLength, textLinkerMatches, 0);
-    return (output, recognizers);
-  }
-
-  static (Iterable<InlineSpan>, Iterable<_TextLinkerMatch>, Iterable<TapGestureRecognizer>) _linkSpansRecurse(Iterable<({InlineSpan span, int length})> spansWithLength, Iterable<_TextLinkerMatch> textLinkerMatches, int index) {
-    final List<InlineSpan> output = <InlineSpan>[];
-    Iterable<_TextLinkerMatch> nextTextLinkerMatches = textLinkerMatches;
-    final List<TapGestureRecognizer> recognizers = <TapGestureRecognizer>[];
-    int nextIndex = index;
-    for (final (span: InlineSpan span, length: int length) in spansWithLength) {
-      final (InlineSpan childSpan, Iterable<_TextLinkerMatch> childTextLinkerMatches, Iterable<TapGestureRecognizer> childRecognizers) = _linkSpanRecurse(
-        span,
-        nextTextLinkerMatches,
-        nextIndex,
-      );
-      output.add(childSpan);
-      nextTextLinkerMatches = childTextLinkerMatches;
-      recognizers.addAll(childRecognizers);
-      nextIndex += length;
-    }
-
-    return (output, nextTextLinkerMatches, recognizers);
-  }
-
-  // index is the index of the start of `span` in the overall flattened tree
-  // string.
-  //
-  // The TapGestureRecognizers must be disposed by an owning widget.
-  static (InlineSpan, Iterable<_TextLinkerMatch>, Iterable<TapGestureRecognizer>) _linkSpanRecurse(InlineSpan span, Iterable<_TextLinkerMatch> textLinkerMatches, int index) {
-    if (span is! TextSpan) {
-      return (span, textLinkerMatches, <TapGestureRecognizer>[]);
-    }
-
-    final List<InlineSpan> nextChildren = <InlineSpan>[];
-    final List<TapGestureRecognizer> recognizers = <TapGestureRecognizer>[];
-    List<_TextLinkerMatch> nextTextLinkerMatches = <_TextLinkerMatch>[...textLinkerMatches];
-    int lastLinkEnd = index;
-    if (span.text?.isNotEmpty ?? false) {
-      final int textEnd = index + span.text!.length;
-      for (final _TextLinkerMatch textLinkerMatch in textLinkerMatches) {
-        if (textLinkerMatch.textRange.start >= textEnd) {
-          // Because ranges is ordered, there are no more relevant ranges for this
-          // text.
-          break;
-        }
-        if (textLinkerMatch.textRange.end <= index) {
-          // This range ends before this span and is therefore irrelevant to it.
-          // It should have been removed from ranges.
-          assert(false, 'Invalid ranges.');
-          nextTextLinkerMatches.removeAt(0);
-          continue;
-        }
-        if (textLinkerMatch.textRange.start > index) {
-          // Add the unlinked text before the range.
-          nextChildren.add(TextSpan(
-            text: span.text!.substring(
-              lastLinkEnd - index,
-              textLinkerMatch.textRange.start - index,
-            ),
-          ));
-        }
-        // Add the link itself.
-        final int linkStart = math.max(textLinkerMatch.textRange.start, index);
-        lastLinkEnd = math.min(textLinkerMatch.textRange.end, textEnd);
-        final (InlineSpan nextChild, TapGestureRecognizer recognizer) = textLinkerMatch.linkBuilder(
-          span.text!.substring(linkStart - index, lastLinkEnd - index),
-          textLinkerMatch.linkString,
-        );
-        nextChildren.add(nextChild);
-        recognizers.add(recognizer);
-        if (textLinkerMatch.textRange.end > textEnd) {
-          // If we only partially used this range, keep it in nextRanges. Since
-          // overlapping ranges have been removed, this must be the last relevant
-          // range for this span.
-          break;
-        }
-        nextTextLinkerMatches.removeAt(0);
-      }
-
-      // Add any extra text after any ranges.
-      final String remainingText = span.text!.substring(lastLinkEnd - index);
-      if (remainingText.isNotEmpty) {
-        nextChildren.add(TextSpan(
-          text: remainingText,
-        ));
-      }
-    }
-
-    // Recurse on the children.
-    if (span.children?.isNotEmpty ?? false) {
-      final (
-        Iterable<InlineSpan> childrenSpans,
-        Iterable<_TextLinkerMatch> childrenTextLinkerMatches,
-        Iterable<TapGestureRecognizer> childrenRecognizers,
-      ) = _linkSpansRecurse(
-        span.children!.map((InlineSpan childSpan) => (
-          span: childSpan,
-          length: childSpan.toPlainText().length,
-        )),
-        nextTextLinkerMatches,
-        index + (span.text?.length ?? 0),
-      );
-      nextTextLinkerMatches = childrenTextLinkerMatches.toList();
-      nextChildren.addAll(childrenSpans);
-      recognizers.addAll(childrenRecognizers);
-    }
-
-    return (
-      TextSpan(
-        style: span.style,
-        children: nextChildren,
-      ),
-      nextTextLinkerMatches,
-      recognizers,
-    );
-  }
 }

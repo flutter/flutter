@@ -89,7 +89,7 @@ class MyHomePage extends StatelessWidget {
                     textLinkers: <TextLinker>[
                       TextLinker(
                         textRangesFinder: TextLinker.textRangesFinderFromRegExp(_urlRegExp),
-                        linkBuilder: InlineLinkedText.getDefaultLinkBuilder((String urlString) {
+                        linkBuilder: LinkedText.getDefaultLinkBuilder((String urlString) {
                           return _handleTapUrl(context, urlString);
                         }),
                       ),
