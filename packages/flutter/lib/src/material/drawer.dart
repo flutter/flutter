@@ -471,6 +471,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   void dispose() {
     _historyEntry?.remove();
     _controller.dispose();
+    _focusScopeNode.dispose();
     super.dispose();
   }
 
