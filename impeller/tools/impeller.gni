@@ -11,6 +11,9 @@ declare_args() {
   impeller_debug =
       flutter_runtime_mode == "debug" || flutter_runtime_mode == "profile"
 
+  # Whether the runtime capture/playback system is enabled.
+  impeller_capture = flutter_runtime_mode == "debug"
+
   # Whether the Metal backend is enabled.
   impeller_enable_metal = (is_mac || is_ios) && target_os != "fuchsia"
 
