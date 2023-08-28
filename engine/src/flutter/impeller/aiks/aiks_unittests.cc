@@ -3031,6 +3031,9 @@ TEST_P(AiksTest, CanDrawPointsWithTextureMap) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+// This currently renders solid blue, as the support for text color sources was
+// moved into DLDispatching. Path data requires the SkTextBlobs which are not
+// used in impeller::TextFrames.
 TEST_P(AiksTest, TextForegroundShaderWithTransform) {
   auto mapping = OpenFixtureAsSkData("Roboto-Regular.ttf");
   ASSERT_NE(mapping, nullptr);
