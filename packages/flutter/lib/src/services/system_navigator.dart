@@ -2,10 +2,44 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
 import 'system_channels.dart';
 
 /// Controls specific aspects of the system navigation stack.
 abstract final class SystemNavigator {
+  /// Informs the platform of whether or not the Flutter framework will handle
+  /// back events.
+  ///
+  /// Currently, this is used only on Android to inform its use of the
+  /// predictive back gesture when exiting the app. When true, predictive back
+  /// is disabled.
+  ///
+  /// See also:
+  ///
+  ///  * The
+  ///    [migration guide](https://developer.android.com/guide/navigation/predictive-back-gesture)
+  ///    for predictive back in native Android apps.
+  static Future<void> setFrameworkHandlesBack(bool frameworkHandlesBack) async {
+    // Currently, this method call is only relevant on Android.
+    if (kIsWeb) {
+      return;
+    }
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return;
+      case TargetPlatform.android:
+        return SystemChannels.platform.invokeMethod<void>(
+          'SystemNavigator.setFrameworkHandlesBack',
+          frameworkHandlesBack,
+        );
+    }
+  }
+
   /// Removes the topmost Flutter instance, presenting what was before
   /// it.
   ///

@@ -7,7 +7,6 @@ import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
 
 import '../src/convert.dart';
-import 'android/android_app_link_settings.dart';
 import 'android/android_builder.dart';
 import 'android/gradle_utils.dart' as gradle;
 import 'base/common.dart';
@@ -486,20 +485,15 @@ class AndroidProject extends FlutterProjectPlatform {
     return androidBuilder!.getBuildVariants(project: parent);
   }
 
-  /// Returns app link related project settings for a given build variant.
+  /// Outputs app link related settings into a json file.
   ///
-  /// Use [getBuildVariants] to get all of the available build variants.
-  Future<AndroidAppLinkSettings> getAppLinksSettings({required String variant}) async {
+  /// The file is stored in
+  /// `<project>/build/app/app-link-settings-<variant>.json`.
+  Future<void> outputsAppLinkSettings({required String variant}) async {
     if (!existsSync() || androidBuilder == null) {
-      return const AndroidAppLinkSettings(
-        applicationId: '',
-        domains: <String>[],
-      );
+      return;
     }
-    return AndroidAppLinkSettings(
-      applicationId: await androidBuilder!.getApplicationIdForVariant(variant, project: parent),
-      domains: await androidBuilder!.getAppLinkDomainsForVariant(variant, project: parent),
-    );
+    await androidBuilder!.outputsAppLinkSettings(variant, project: parent);
   }
 
   bool _computeSupportedVersion() {

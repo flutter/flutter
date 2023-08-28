@@ -25,5 +25,6 @@
   "noSpellCheckReplacementsLabel": "কোনও বিকল্প বানান দেখানো হয়নি",
   "menuDismissLabel": "বাতিল করার মেনু",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

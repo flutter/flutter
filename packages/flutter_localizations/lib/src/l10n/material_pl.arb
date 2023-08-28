@@ -150,5 +150,6 @@
   "collapsedHint": "Rozwinięto",
   "menuDismissLabel": "Zamknij menu",
   "lookUpButtonLabel": "Sprawdź",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

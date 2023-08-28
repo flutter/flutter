@@ -143,5 +143,6 @@
   "collapsedHint": "విస్తరించబడింది",
   "menuDismissLabel": "మెనూను తీసివేయండి",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

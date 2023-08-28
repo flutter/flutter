@@ -1480,6 +1480,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   @override
   void dispose() {
     _highlightManager.dispose();
+    rootScope.dispose();
     super.dispose();
   }
 

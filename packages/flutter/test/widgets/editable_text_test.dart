@@ -156,6 +156,7 @@ void main() {
                     onSelectAll: null,
                     onLookUp: null,
                     onSearchWeb: null,
+                    onShare: null,
                     onLiveTextInput: () {
                       invokedLiveTextInputSuccessfully = true;
                     },

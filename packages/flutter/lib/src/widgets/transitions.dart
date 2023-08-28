@@ -225,51 +225,58 @@ class SlideTransition extends AnimatedWidget {
   }
 }
 
-/// Animates the scale of a transformed widget.
+/// Signature for the callback to [MatrixTransition.onTransform].
 ///
-/// Here's an illustration of the [ScaleTransition] widget, with it's [alignment]
-/// animated by a [CurvedAnimation] set to [Curves.fastOutSlowIn]:
-/// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/scale_transition.mp4}
+/// Computes a [Matrix4] to be used in the [MatrixTransition] transformed widget
+/// from the [MatrixTransition.animation] value.
+typedef TransformCallback = Matrix4 Function(double animationValue);
+
+/// Animates the [Matrix4] of a transformed widget.
+///
+/// The [onTransform] callback computes a [Matrix4] from the animated value, it
+/// is called every time the [animation] changes its value.
 ///
 /// {@tool dartpad}
-/// The following code implements the [ScaleTransition] as seen in the video
-/// above:
+/// The following example implements a [MatrixTransition] with a rotation around
+/// the Y axis, with a 3D perspective skew.
 ///
-/// ** See code in examples/api/lib/widgets/transitions/scale_transition.0.dart **
+/// ** See code in examples/api/lib/widgets/transitions/matrix_transition.0.dart **
 /// {@end-tool}
 ///
 /// See also:
 ///
-///  * [PositionedTransition], a widget that animates its child from a start
-///    position to an end position over the lifetime of the animation.
-///  * [RelativePositionedTransition], a widget that transitions its child's
-///    position based on the value of a rectangle relative to a bounding box.
-///  * [SizeTransition], a widget that animates its own size and clips and
-///    aligns its child.
-class ScaleTransition extends AnimatedWidget {
-  /// Creates a scale transition.
+///  * [ScaleTransition], which animates the scale of a widget, by providing a
+///    matrix which scales along the X and Y axis.
+///  * [RotationTransition], which animates the rotation of a widget, by
+///    providing a matrix which rotates along the Z axis.
+class MatrixTransition extends AnimatedWidget {
+  /// Creates a matrix transition.
   ///
-  /// The [scale] argument must not be null. The [alignment] argument defaults
-  /// to [Alignment.center].
-  const ScaleTransition({
+  /// The [alignment] argument defaults to [Alignment.center].
+  const MatrixTransition({
     super.key,
-    required Animation<double> scale,
+    required Animation<double> animation,
+    required this.onTransform,
     this.alignment = Alignment.center,
     this.filterQuality,
     this.child,
-  }) : super(listenable: scale);
+  }) : super(listenable: animation);
 
-  /// The animation that controls the scale of the child.
-  ///
-  /// If the current value of the scale animation is v, the child will be
-  /// painted v times its normal size.
-  Animation<double> get scale => listenable as Animation<double>;
+  /// The callback to compute a [Matrix4] from the [animation]. It's called
+  /// every time [animation] changes its value.
+  final TransformCallback onTransform;
 
-  /// The alignment of the origin of the coordinate system in which the scale
-  /// takes place, relative to the size of the box.
+  /// The animation that controls the matrix of the child.
   ///
-  /// For example, to set the origin of the scale to bottom middle, you can use
-  /// an alignment of (0.0, 1.0).
+  /// The matrix will be computed from the animation with the [onTransform]
+  /// callback.
+  Animation<double> get animation => listenable as Animation<double>;
+
+  /// The alignment of the origin of the coordinate system in which the
+  /// transform takes place, relative to the size of the box.
+  ///
+  /// For example, to set the origin of the transform to bottom middle, you can
+  /// use an alignment of (0.0, 1.0).
   final Alignment alignment;
 
   /// The filter quality with which to apply the transform as a bitmap operation.
@@ -292,7 +299,7 @@ class ScaleTransition extends AnimatedWidget {
     // but leaving it in the layer tree before the animation has started or after
     // it has finished significantly hurts performance.
     final bool useFilterQuality;
-    switch (scale.status) {
+    switch (animation.status) {
       case AnimationStatus.dismissed:
       case AnimationStatus.completed:
         useFilterQuality = false;
@@ -300,13 +307,56 @@ class ScaleTransition extends AnimatedWidget {
       case AnimationStatus.reverse:
         useFilterQuality = true;
     }
-    return Transform.scale(
-      scale: scale.value,
+    return Transform(
+      transform: onTransform(animation.value),
       alignment: alignment,
       filterQuality: useFilterQuality ? filterQuality : null,
       child: child,
     );
   }
+}
+
+/// Animates the scale of a transformed widget.
+///
+/// Here's an illustration of the [ScaleTransition] widget, with it's [scale]
+/// animated by a [CurvedAnimation] set to [Curves.fastOutSlowIn]:
+/// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/scale_transition.mp4}
+///
+/// {@tool dartpad}
+/// The following code implements the [ScaleTransition] as seen in the video
+/// above:
+///
+/// ** See code in examples/api/lib/widgets/transitions/scale_transition.0.dart **
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [PositionedTransition], a widget that animates its child from a start
+///    position to an end position over the lifetime of the animation.
+///  * [RelativePositionedTransition], a widget that transitions its child's
+///    position based on the value of a rectangle relative to a bounding box.
+///  * [SizeTransition], a widget that animates its own size and clips and
+///    aligns its child.
+class ScaleTransition extends MatrixTransition {
+  /// Creates a scale transition.
+  ///
+  /// The [alignment] argument defaults to [Alignment.center].
+  const ScaleTransition({
+    super.key,
+    required Animation<double> scale,
+    super.alignment = Alignment.center,
+    super.filterQuality,
+    super.child,
+  }) : super(animation: scale, onTransform: _handleScaleMatrix);
+
+  /// The animation that controls the scale of the child.
+  Animation<double> get scale => animation;
+
+  /// The callback that controls the scale of the child.
+  ///
+  /// If the current value of the animation is v, the child will be
+  /// painted v times its normal size.
+  static Matrix4 _handleScaleMatrix(double value) => Matrix4.diagonal3Values(value, value, 1.0);
 }
 
 /// Animates the rotation of a widget.
@@ -328,66 +378,26 @@ class ScaleTransition extends AnimatedWidget {
 ///    widget.
 ///  * [SizeTransition], a widget that animates its own size and clips and
 ///    aligns its child.
-class RotationTransition extends AnimatedWidget {
+class RotationTransition extends MatrixTransition {
   /// Creates a rotation transition.
   ///
   /// The [turns] argument must not be null.
   const RotationTransition({
     super.key,
     required Animation<double> turns,
-    this.alignment = Alignment.center,
-    this.filterQuality,
-    this.child,
-  }) : super(listenable: turns);
+    super.alignment = Alignment.center,
+    super.filterQuality,
+    super.child,
+  }) : super(animation: turns, onTransform: _handleTurnsMatrix);
 
   /// The animation that controls the rotation of the child.
-  ///
-  /// If the current value of the turns animation is v, the child will be
-  /// rotated v * 2 * pi radians before being painted.
-  Animation<double> get turns => listenable as Animation<double>;
+  Animation<double> get turns => animation;
 
-  /// The alignment of the origin of the coordinate system around which the
-  /// rotation occurs, relative to the size of the box.
+  /// The callback that controls the rotation of the child.
   ///
-  /// For example, to set the origin of the rotation to top right corner, use
-  /// an alignment of (1.0, -1.0) or use [Alignment.topRight]
-  final Alignment alignment;
-
-  /// The filter quality with which to apply the transform as a bitmap operation.
-  ///
-  /// When the animation is stopped (either in [AnimationStatus.dismissed] or
-  /// [AnimationStatus.completed]), the filter quality argument will be ignored.
-  ///
-  /// {@macro flutter.widgets.Transform.optional.FilterQuality}
-  final FilterQuality? filterQuality;
-
-  /// The widget below this widget in the tree.
-  ///
-  /// {@macro flutter.widgets.ProxyWidget.child}
-  final Widget? child;
-
-  @override
-  Widget build(BuildContext context) {
-    // The ImageFilter layer created by setting filterQuality will introduce
-    // a saveLayer call. This is usually worthwhile when animating the layer,
-    // but leaving it in the layer tree before the animation has started or after
-    // it has finished significantly hurts performance.
-    final bool useFilterQuality;
-    switch (turns.status) {
-      case AnimationStatus.dismissed:
-      case AnimationStatus.completed:
-        useFilterQuality = false;
-      case AnimationStatus.forward:
-      case AnimationStatus.reverse:
-        useFilterQuality = true;
-    }
-    return Transform.rotate(
-      angle: turns.value * math.pi * 2.0,
-      alignment: alignment,
-      filterQuality: useFilterQuality ? filterQuality : null,
-      child: child,
-    );
-  }
+  /// If the current value of the animation is v, the child will be rotated
+  /// v * 2 * pi radians before being painted.
+  static Matrix4 _handleTurnsMatrix(double value) => Matrix4.rotationZ(value * math.pi * 2.0);
 }
 
 /// Animates its own size and clips and aligns its child.

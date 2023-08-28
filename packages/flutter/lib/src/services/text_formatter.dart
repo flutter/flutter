@@ -251,6 +251,14 @@ class _TextEditingValueAccumulator {
 /// As an example, [FilteringTextInputFormatter] typically shouldn't be used
 /// with [RegExp]s that contain positional matchers (`^` or `$`) since these
 /// patterns are usually meant for matching the whole string.
+///
+/// ### Quote characters on iOS
+///
+/// When filtering single (`'`) or double (`"`) quote characters, be aware that
+/// the default iOS keyboard actually inserts special directional versions of
+/// these characters (`‘` and `’` for single quote, and `“` and `”` for double
+/// quote). Consider including all three variants in your regular expressions to
+/// support iOS.
 class FilteringTextInputFormatter extends TextInputFormatter {
   /// Creates a formatter that replaces banned patterns with the given
   /// [replacementString].
