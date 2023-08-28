@@ -1430,6 +1430,7 @@ class DomImageBitmap {}
 extension DomImageBitmapExtension on DomImageBitmap {
   external JSNumber get width;
   external JSNumber get height;
+  external void close();
 }
 
 @JS()
@@ -2263,6 +2264,10 @@ extension DomURLExtension on DomURL {
 @staticInterop
 class DomBlob {
   external factory DomBlob(JSArray parts);
+}
+
+extension DomBlobExtension on DomBlob {
+  external JSPromise arrayBuffer();
 }
 
 DomBlob createDomBlob(List<Object?> parts) =>
