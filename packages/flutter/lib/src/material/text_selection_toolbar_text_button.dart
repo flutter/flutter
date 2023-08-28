@@ -134,6 +134,11 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
   // Android API level 34.
   static const Color _defaultForegroundColorLight = Color(0xff000000);
   static const Color _defaultForegroundColorDark = Color(0xffffffff);
+
+  // The background color is hardcoded to transparent by default so the buttons
+  // are the color of the container behind them. For example TextSelectionToolbar
+  // hardcodes the color value, and TextSelectionToolbarTextButtons that are its
+  // children become that color.
   static const Color _defaultBackgroundColorTransparent = Color(0x00000000);
 
   static Color _getForegroundColor(ColorScheme colorScheme) {
