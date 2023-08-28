@@ -731,7 +731,8 @@ TextAffinity? _toTextAffinity(String? affinity) {
 /// This feature works out-of-the-box with Flutter. Support is built into
 /// [EditableText].
 ///
-/// ![Animation of the native iOS floating cursor feature](https://flutter.github.io/assets-for-api-docs/assets/services/floating_cursor.gif)
+/// ![Animation of the native iOS floating cursor feature on an iPhone 14 simulator running iOS 17.0](
+/// https://flutter.github.io/assets-for-api-docs/assets/services/floating_cursor.gif)
 ///
 /// See also:
 ///
