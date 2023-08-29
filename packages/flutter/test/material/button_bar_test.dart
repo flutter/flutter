@@ -4,8 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   testWidgetsWithLeakTracking('ButtonBar default control smoketest', (WidgetTester tester) async {
@@ -341,7 +340,7 @@ void main() {
 
   group('layoutBehavior', () {
 
-    testWidgetsWithLeakTracking('ButtonBar has a min height of 52 when using ButtonBarLayoutBehavior.constrained', (WidgetTester tester) async {
+    testWidgets('ButtonBar has a min height of 52 when using ButtonBarLayoutBehavior.constrained', (WidgetTester tester) async {
       await tester.pumpWidget(
         const SingleChildScrollView(
           child: ListBody(
@@ -364,7 +363,7 @@ void main() {
       expect(tester.getBottomRight(buttonBar).dy - tester.getTopRight(buttonBar).dy, 52.0);
     });
 
-    testWidgetsWithLeakTracking('ButtonBar has padding applied when using ButtonBarLayoutBehavior.padded', (WidgetTester tester) async {
+    testWidgets('ButtonBar has padding applied when using ButtonBarLayoutBehavior.padded', (WidgetTester tester) async {
       await tester.pumpWidget(
         const SingleChildScrollView(
           child: ListBody(

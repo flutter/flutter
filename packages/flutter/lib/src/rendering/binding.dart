@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show SemanticsUpdate;
+import 'dart:ui' as ui show ParagraphBuilder, SemanticsUpdate;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -49,6 +49,11 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       addPostFrameCallback(_handleWebFirstFrame);
     }
     rootPipelineOwner.attach(_manifold);
+    // TODO(LongCatIsLooong): clean up after
+    // https://github.com/flutter/flutter/issues/31707 is fully migrated.
+    if (!const bool.fromEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK', defaultValue: true)) {
+      ui.ParagraphBuilder.setDisableRoundingHack(false);
+    }
   }
 
   /// The current [RendererBinding], if one has been created.

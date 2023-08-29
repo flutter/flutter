@@ -2892,6 +2892,13 @@ class _WidgetInspectorState extends State<WidgetInspector>
 
 /// Mutable selection state of the inspector.
 class InspectorSelection with ChangeNotifier {
+  /// Creates an instance of [InspectorSelection].
+  InspectorSelection() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+  }
+
   /// Render objects that are candidates to be selected.
   ///
   /// Tools may wish to iterate through the list of candidates.

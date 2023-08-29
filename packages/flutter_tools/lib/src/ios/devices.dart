@@ -690,7 +690,7 @@ class IOSDevice extends Device {
           mDNSLookupTimer.cancel();
         }
       } else {
-        if (isCoreDevice && vmServiceDiscovery != null) {
+        if ((isCoreDevice || forceXcodeDebugWorkflow) && vmServiceDiscovery != null) {
           // When searching for the Dart VM url, search for it via ProtocolDiscovery
           // (device logs) and mDNS simultaneously, since both can be flaky at times.
           final Future<Uri?> vmUrlFromMDns = MDnsVmServiceDiscovery.instance!.getVMServiceUriForLaunch(
@@ -1071,7 +1071,8 @@ class IOSDeviceLogReader extends DeviceLogReader {
   // Sometimes (race condition?) we try to send a log after the controller has
   // been closed. See https://github.com/flutter/flutter/issues/99021 for more
   // context.
-  void _addToLinesController(String message, IOSDeviceLogSource source) {
+  @visibleForTesting
+  void addToLinesController(String message, IOSDeviceLogSource source) {
     if (!linesController.isClosed) {
       if (_excludeLog(message, source)) {
         return;
@@ -1080,32 +1081,53 @@ class IOSDeviceLogReader extends DeviceLogReader {
     }
   }
 
-  /// Used to track messages prefixed with "flutter:" when [useBothLogDeviceReaders]
-  /// is true.
-  final List<String> _streamFlutterMessages = <String>[];
+  /// Used to track messages prefixed with "flutter:" from the fallback log source.
+  final List<String> _fallbackStreamFlutterMessages = <String>[];
+
+  /// Used to track if a message prefixed with "flutter:" has been received from the primary log.
+  bool primarySourceFlutterLogReceived = false;
 
   /// There are three potential logging sources: `idevicesyslog`, `ios-deploy`,
   /// and Unified Logging (Dart VM). When using more than one of these logging
-  /// sources at a time, exclude logs with a `flutter:` prefix if they have
-  /// already been added to the stream. This is to prevent duplicates from
-  /// being printed.
+  /// sources at a time, prefer to use the primary source. However, if the
+  /// primary source is not working, use the fallback.
   bool _excludeLog(String message, IOSDeviceLogSource source) {
-    if (!usingMultipleLoggingSources) {
+    // If no fallback, don't exclude any logs.
+    if (logSources.fallbackSource == null) {
       return false;
     }
-    if (message.startsWith('flutter:')) {
-      if (_streamFlutterMessages.contains(message)) {
+
+    // If log is from primary source, don't exclude it unless the fallback was
+    // quicker and added the message first.
+    if (source == logSources.primarySource) {
+      if (!primarySourceFlutterLogReceived && message.startsWith('flutter:')) {
+        primarySourceFlutterLogReceived = true;
+      }
+
+      // If the message was already added by the fallback, exclude it to
+      // prevent duplicates.
+      final bool foundAndRemoved = _fallbackStreamFlutterMessages.remove(message);
+      if (foundAndRemoved) {
         return true;
       }
-      _streamFlutterMessages.add(message);
-    } else if (useIOSDeployLogging && source == IOSDeviceLogSource.idevicesyslog) {
-      // If using both `ios-deploy` and `idevicesyslog` simultaneously, exclude
-      // the message if its source is `idevicesyslog`. This is done because
-      //`ios-deploy` and `idevicesyslog` often have different prefixes, which
-      // makes duplicate matching difficult. Instead, exclude any non-flutter-prefixed
-      // `idevicesyslog` messages, which are not critical for CI tests.
+      return false;
+    }
+
+    // If a flutter log was received from the primary source, that means it's
+    // working so don't use any messages from the fallback.
+    if (primarySourceFlutterLogReceived) {
       return true;
     }
+
+    // When using logs from fallbacks, skip any logs not prefixed with "flutter:".
+    // This is done because different sources often have different prefixes for
+    // non-flutter messages, which makes duplicate matching difficult. Also,
+    // non-flutter messages are not critical for CI tests.
+    if (!message.startsWith('flutter:')) {
+      return true;
+    }
+
+    _fallbackStreamFlutterMessages.add(message);
     return false;
   }
 
@@ -1128,114 +1150,91 @@ class IOSDeviceLogReader extends DeviceLogReader {
 
   static const int minimumUniversalLoggingSdkVersion = 13;
 
-  /// Use `idevicesyslog` to stream logs from the device when one of the
-  /// following criteria is met:
+  /// Determine the primary and fallback source for device logs.
   ///
-  /// 1) The device is a physically attached CoreDevice.
-  /// 2) The device has iOS 16 or greater and it's being debugged from CI.
-  /// 3) The device has iOS 12 or lower.
-  ///
-  /// Syslog stopped working on iOS 13 (https://github.com/flutter/flutter/issues/41133).
-  /// However, from at least iOS 16, it has began working again. It's unclear
-  /// why it started working again.
+  /// There are three potential logging sources: `idevicesyslog`, `ios-deploy`,
+  /// and Unified Logging (Dart VM).
   @visibleForTesting
-  bool get useSyslogLogging {
-    // When forcing XcodeDebug workflow, use `idevicesyslog`.
-    if (_forceXcodeDebug) {
-      return true;
-    }
-
+  _IOSDeviceLogSources get logSources {
     // `ios-deploy` stopped working with iOS 17 / Xcode 15, so use `idevicesyslog` instead.
-    // However, `idevicesyslog` does not work with iOS 17 wireless devices.
-    if (_isCoreDevice && !_isWirelesslyConnected) {
-      return true;
+    // However, `idevicesyslog` is sometimes unreliable so use Dart VM as a fallback.
+    // Also, `idevicesyslog` does not work with iOS 17 wireless devices, so use the
+    // Dart VM for wireless devices.
+    if (_isCoreDevice || _forceXcodeDebug) {
+      if (_isWirelesslyConnected) {
+        return _IOSDeviceLogSources(
+          primarySource: IOSDeviceLogSource.unifiedLogging,
+        );
+      }
+      return _IOSDeviceLogSources(
+        primarySource: IOSDeviceLogSource.idevicesyslog,
+        fallbackSource: IOSDeviceLogSource.unifiedLogging,
+      );
     }
 
-    // Use both logs from `idevicesyslog` and `ios-deploy` when debugging from CI system
-    // since sometimes `ios-deploy` does not return the device logs:
+    // Use `idevicesyslog` for iOS 12 or less.
+    // Syslog stopped working on iOS 13 (https://github.com/flutter/flutter/issues/41133).
+    // However, from at least iOS 16, it has began working again. It's unclear
+    // why it started working again.
+    if (_majorSdkVersion < minimumUniversalLoggingSdkVersion) {
+      return _IOSDeviceLogSources(
+        primarySource: IOSDeviceLogSource.idevicesyslog,
+      );
+    }
+
+    // Use `idevicesyslog` as a fallback to `ios-deploy` when debugging from
+    // CI system since sometimes `ios-deploy` does not return the device logs:
     // https://github.com/flutter/flutter/issues/121231
     if (_usingCISystem && _majorSdkVersion >= 16) {
-      return true;
+      return _IOSDeviceLogSources(
+        primarySource: IOSDeviceLogSource.iosDeploy,
+        fallbackSource: IOSDeviceLogSource.idevicesyslog,
+      );
     }
-    if (_majorSdkVersion < minimumUniversalLoggingSdkVersion) {
-      return true;
+
+    // Use `ios-deploy` to stream logs from the device when the device is not a
+    // CoreDevice and has iOS 13 or greater.
+    // When using `ios-deploy` and the Dart VM, prefer the more complete logs
+    // from the attached debugger, if available.
+    if (connectedVMService != null && (_iosDeployDebugger == null || !_iosDeployDebugger!.debuggerAttached)) {
+      return _IOSDeviceLogSources(
+        primarySource: IOSDeviceLogSource.unifiedLogging,
+        fallbackSource: IOSDeviceLogSource.iosDeploy,
+      );
     }
-    return false;
+    return _IOSDeviceLogSources(
+      primarySource: IOSDeviceLogSource.iosDeploy,
+      fallbackSource: IOSDeviceLogSource.unifiedLogging,
+    );
   }
 
-  /// Use the Dart VM to stream logs from the device when one of the following
-  /// criteria is met:
+  /// Whether `idevicesyslog` is used as either the primary or fallback source for device logs.
+  @visibleForTesting
+  bool get useSyslogLogging {
+    return logSources.primarySource == IOSDeviceLogSource.idevicesyslog ||
+        logSources.fallbackSource == IOSDeviceLogSource.idevicesyslog;
+  }
+
+  /// Whether the Dart VM is used as either the primary or fallback source for device logs.
   ///
-  /// 1) The device is a CoreDevice and wirelessly connected.
-  /// 2) The device has iOS 13 or greater and [_iosDeployDebugger] is null or
-  /// the [_iosDeployDebugger] debugger is not attached.
-  ///
-  /// This value may change if [_iosDeployDebugger] changes.
+  /// Unified Logging only works after the Dart VM has been connected to.
   @visibleForTesting
   bool get useUnifiedLogging {
-    // Can't use Unified Logging if it's not going to listen to the Dart VM.
-    if (!_shouldListenForUnifiedLoggingEvents) {
-      return false;
-    }
-
-    // `idevicesyslog` doesn't work on wireless devices, so use logs from Dart VM instead.
-    if (_isCoreDevice) {
-      return true;
-    }
-
-    // Prefer the more complete logs from the attached debugger, if they are available.
-    if (_majorSdkVersion >= minimumUniversalLoggingSdkVersion && (_iosDeployDebugger == null || !_iosDeployDebugger!.debuggerAttached)) {
-      return true;
-    }
-
-    return false;
-  }
-
-  /// Determine whether to listen to the Dart VM for logging events. Returns
-  /// true when one of the following criteria is met:
-  ///
-  /// 1) The device is a CoreDevice and wirelessly connected.
-  /// 2) The device has iOS 13 or greater.
-  bool get _shouldListenForUnifiedLoggingEvents {
-    // `idevicesyslog` doesn't work on wireless devices, so use logs from Dart VM instead.
-    if (_isCoreDevice) {
-      return true;
-    }
-
-    if (_majorSdkVersion >= minimumUniversalLoggingSdkVersion) {
-      return true;
-    }
-
-    return false;
+    return logSources.primarySource == IOSDeviceLogSource.unifiedLogging ||
+        logSources.fallbackSource == IOSDeviceLogSource.unifiedLogging;
   }
 
 
-  /// Use `ios-deploy` to stream logs from the device when the device is not a
-  /// CoreDevice and has iOS 13 or greater.
+  /// Whether `ios-deploy` is used as either the primary or fallback source for device logs.
   @visibleForTesting
   bool get useIOSDeployLogging {
-    if (_majorSdkVersion < minimumUniversalLoggingSdkVersion || _isCoreDevice) {
-      return false;
-    }
-    return true;
-  }
-
-  @visibleForTesting
-  /// Returns true when using multiple sources for streaming the device logs.
-  bool get usingMultipleLoggingSources {
-    final int numberOfSources = (useIOSDeployLogging ? 1 : 0) + (useSyslogLogging ? 1 : 0) + (useUnifiedLogging ? 1 : 0);
-    if (numberOfSources > 1) {
-      return true;
-    }
-    return false;
+    return logSources.primarySource == IOSDeviceLogSource.iosDeploy ||
+        logSources.fallbackSource == IOSDeviceLogSource.iosDeploy;
   }
 
   /// Listen to Dart VM for logs on iOS 13 or greater.
-  ///
-  /// Only send logs to stream if [_iosDeployDebugger] is null or
-  /// the [_iosDeployDebugger] debugger is not attached.
   Future<void> _listenToUnifiedLoggingEvents(FlutterVmService connectedVmService) async {
-    if (!_shouldListenForUnifiedLoggingEvents) {
+    if (!useUnifiedLogging) {
       return;
     }
     try {
@@ -1252,13 +1251,9 @@ class IOSDeviceLogReader extends DeviceLogReader {
     }
 
     void logMessage(vm_service.Event event) {
-      if (!useUnifiedLogging) {
-        // Prefer the more complete logs from the attached debugger.
-        return;
-      }
       final String message = processVmServiceMessage(event);
       if (message.isNotEmpty) {
-        _addToLinesController(message, IOSDeviceLogSource.unifiedLogging);
+        addToLinesController(message, IOSDeviceLogSource.unifiedLogging);
       }
     }
 
@@ -1283,7 +1278,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
     }
     // Add the debugger logs to the controller created on initialization.
     _loggingSubscriptions.add(debugger.logLines.listen(
-      (String line) => _addToLinesController(
+      (String line) => addToLinesController(
         _debuggerLineHandler(line),
         IOSDeviceLogSource.iosDeploy,
       ),
@@ -1338,7 +1333,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
     return (String line) {
       if (printing) {
         if (!_anyLineRegex.hasMatch(line)) {
-          _addToLinesController(decodeSyslog(line), IOSDeviceLogSource.idevicesyslog);
+          addToLinesController(decodeSyslog(line), IOSDeviceLogSource.idevicesyslog);
           return;
         }
 
@@ -1350,7 +1345,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
       if (match != null) {
         final String logLine = line.substring(match.end);
         // Only display the log line after the initial device and executable information.
-        _addToLinesController(decodeSyslog(logLine), IOSDeviceLogSource.idevicesyslog);
+        addToLinesController(decodeSyslog(logLine), IOSDeviceLogSource.idevicesyslog);
         printing = true;
       }
     };
@@ -1373,6 +1368,16 @@ enum IOSDeviceLogSource {
   idevicesyslog,
   /// Gets logs from the Dart VM Service.
   unifiedLogging,
+}
+
+class _IOSDeviceLogSources {
+  _IOSDeviceLogSources({
+    required this.primarySource,
+    this.fallbackSource,
+  });
+
+  final IOSDeviceLogSource primarySource;
+  final IOSDeviceLogSource? fallbackSource;
 }
 
 /// A [DevicePortForwarder] specialized for iOS usage with iproxy.

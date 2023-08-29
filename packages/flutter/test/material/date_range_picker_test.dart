@@ -8,8 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'feedback_tester.dart';
 
 void main() {
@@ -53,6 +52,9 @@ void main() {
     helpText = null;
     saveText = null;
   });
+
+  const Size wideWindowSize = Size(1920.0, 1080.0);
+  const Size narrowWindowSize = Size(1070.0, 1770.0);
 
   Future<void> preparePicker(
     WidgetTester tester,
@@ -256,11 +258,13 @@ void main() {
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
     },
-    // TODO(polina-c): remove after resolving
-    // https://github.com/flutter/flutter/issues/130354
-    leakTrackingTestConfig: const LeakTrackingTestConfig(
-      allowAllNotGCed: true,
-    ));
+      // TODO(polina-c): remove after resolving
+      // https://github.com/flutter/flutter/issues/130354
+      leakTrackingTestConfig: const LeakTrackingTestConfig(
+        allowAllNotGCed: true,
+        allowAllNotDisposed: true,
+      ),
+    );
   });
 
   testWidgets('Save and help text is used', (WidgetTester tester) async {
@@ -1063,6 +1067,22 @@ void main() {
 
       // Test the end date text field
       testInputDecorator(tester.widget(borderContainers.last), border, Colors.transparent);
+    });
+
+    // This is a regression test for https://github.com/flutter/flutter/issues/131989.
+    testWidgets('Dialog contents do not overflow when resized from landscape to portrait',
+      (WidgetTester tester) async {
+        addTearDown(tester.view.reset);
+        // Initial window size is wide for landscape mode.
+        tester.view.physicalSize = wideWindowSize;
+        tester.view.devicePixelRatio = 1.0;
+
+        await preparePicker(tester, (Future<DateTimeRange?> range) async {
+          // Change window size to narrow for portrait mode.
+          tester.view.physicalSize = narrowWindowSize;
+          await tester.pump();
+          expect(tester.takeException(), null);
+      });
     });
   });
 

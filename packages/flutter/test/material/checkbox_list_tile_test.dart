@@ -8,8 +8,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'feedback_tester.dart';
 
 Widget wrap({ required Widget child }) {
@@ -496,6 +495,8 @@ void main() {
     await tester.pump();
     expect(gotFocus, isFalse);
     expect(node.hasFocus, isFalse);
+
+    node.dispose();
   });
 
     testWidgetsWithLeakTracking('CheckboxListTile can be disabled', (WidgetTester tester) async {

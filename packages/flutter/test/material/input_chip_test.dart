@@ -4,8 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 /// Adds the basic requirements for a Chip.
 Widget wrapForChip({
@@ -241,6 +240,8 @@ void main() {
     );
     await tester.pump();
     expect(focusNode.hasPrimaryFocus, isFalse);
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('cannot be traversed to when disabled', (WidgetTester tester) async {
@@ -276,6 +277,9 @@ void main() {
     await tester.pump();
     expect(focusNode1.hasPrimaryFocus, isTrue);
     expect(focusNode2.hasPrimaryFocus, isFalse);
+
+    focusNode1.dispose();
+    focusNode2.dispose();
   });
 
   testWidgetsWithLeakTracking('Input chip check mark color is determined by platform brightness when light', (WidgetTester tester) async {

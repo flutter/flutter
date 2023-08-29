@@ -119,12 +119,17 @@ void main() {
 
       await tester.pumpFrames(target, const Duration(milliseconds: 55));
 
-      expect(logPaints, <int>[0, 17000, 34000, 50000]);
+      // `pumpframes` defaults to 16 milliseconds and 683 microseconds per pump,
+      // so we expect 4 pumps of 16683 microseconds each in the 55ms duration.
+      expect(logPaints, <int>[0, 16683, 33366, 50049]);
       logPaints.clear();
 
       await tester.pumpFrames(target, const Duration(milliseconds: 30), const Duration(milliseconds: 10));
 
-      expect(logPaints, <int>[60000, 70000, 80000]);
+      // Since `pumpFrames` was given a 10ms interval per pump, we expect the
+      // results to continue from 50049 with 10000 microseconds per pump over
+      // the 30ms duration.
+      expect(logPaints, <int>[60049, 70049, 80049]);
     });
   });
   group('pageBack', () {

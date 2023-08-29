@@ -165,7 +165,8 @@ class NetworkImage
         }
       }.toJS);
 
-      request.addEventListener('error', completer.completeError.toJS);
+      request.addEventListener('error',
+          ((JSObject e) => completer.completeError(e)).toJS);
 
       request.send();
 

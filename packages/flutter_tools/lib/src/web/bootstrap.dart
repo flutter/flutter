@@ -247,25 +247,16 @@ String generateTestEntrypoint({
   StreamChannel serializeSuite(Function getMain(), {bool hidePrints = true}) => RemoteListener.start(getMain, hidePrints: hidePrints);
 
   StreamChannel postMessageChannel() {
-    var controller = StreamChannelController(sync: true);
-    window.onMessage.firstWhere((message) {
-      return message.origin == window.location.origin && message.data == "port";
-    }).then((message) {
-      var port = message.ports.first;
-      var portSubscription = port.onMessage.listen((message) {
-        controller.local.sink.add(message.data);
-      });
-      controller.local.stream.listen((data) {
-        port.postMessage({"data": data});
-      }, onDone: () {
-        port.postMessage({"event": "done"});
-        portSubscription.cancel();
-      });
+    var controller = StreamChannelController<Object?>(sync: true);
+    var channel = MessageChannel();
+    window.parent!.postMessage('port', window.location.origin, [channel.port2]);
+
+    var portSubscription = channel.port1.onMessage.listen((message) {
+      controller.local.sink.add(message.data);
     });
-    context['parent'].callMethod('postMessage', [
-      JsObject.jsify({"href": window.location.href, "ready": true}),
-      window.location.origin,
-    ]);
+    controller.local.stream
+        .listen(channel.port1.postMessage, onDone: portSubscription.cancel);
+
     return controller.foreign;
   }
   ''';

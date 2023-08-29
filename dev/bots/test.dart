@@ -213,13 +213,16 @@ String get shuffleSeed {
 ///
 /// Examples:
 /// SHARD=tool_tests bin/cache/dart-sdk/bin/dart dev/bots/test.dart
-/// bin/cache/dart-sdk/bin/dart dev/bots/test.dart --local-engine=host_debug_unopt
+/// bin/cache/dart-sdk/bin/dart dev/bots/test.dart --local-engine=host_debug_unopt --local-engine-host=host_debug_unopt
 Future<void> main(List<String> args) async {
   try {
     printProgress('STARTING ANALYSIS');
     for (final String arg in args) {
       if (arg.startsWith('--local-engine=')) {
         localEngineEnv['FLUTTER_LOCAL_ENGINE'] = arg.substring('--local-engine='.length);
+        flutterTestArgs.add(arg);
+      } else if (arg.startsWith('--local-engine-host=')) {
+        localEngineEnv['FLUTTER_LOCAL_ENGINE_HOST'] = arg.substring('--local-engine-host='.length);
         flutterTestArgs.add(arg);
       } else if (arg.startsWith('--local-engine-src-path=')) {
         localEngineEnv['FLUTTER_LOCAL_ENGINE_SRC_PATH'] = arg.substring('--local-engine-src-path='.length);

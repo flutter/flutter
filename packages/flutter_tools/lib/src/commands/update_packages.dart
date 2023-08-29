@@ -38,10 +38,6 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'url_launcher_android': '6.0.17',
   // https://github.com/flutter/flutter/issues/115660
   'archive': '3.3.2',
-  // https://github.com/flutter/flutter/issues/132222
-  'leak_tracker': '8.0.3',
-  // https://github.com/flutter/flutter/issues/132222
-  'leak_tracker_testing': '1.0.2',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {

@@ -150,5 +150,6 @@
   "collapsedHint": "Išskleista",
   "menuDismissLabel": "Atsisakyti meniu",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

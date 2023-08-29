@@ -7,8 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
@@ -701,7 +700,7 @@ void main() {
     expect(calledDelete, isFalse);
   });
 
-  testWidgetsWithLeakTracking('Chip elements are ordered horizontally for locale', (WidgetTester tester) async {
+  testWidgets('Chip elements are ordered horizontally for locale', (WidgetTester tester) async {
     final UniqueKey iconKey = UniqueKey();
     final Widget test = Overlay(
       initialEntries: <OverlayEntry>[
@@ -877,7 +876,7 @@ void main() {
     expect(tester.getSize(find.byKey(keyA)), equals(const Size(20.0, 20.0)));
   });
 
-  testWidgetsWithLeakTracking('Chip padding - LTR', (WidgetTester tester) async {
+  testWidgets('Chip padding - LTR', (WidgetTester tester) async {
     final GlobalKey keyA = GlobalKey();
     final GlobalKey keyB = GlobalKey();
     await tester.pumpWidget(
@@ -913,7 +912,7 @@ void main() {
     expect(tester.getBottomRight(find.byType(Icon)), const Offset(457.0, 309.0));
   });
 
-  testWidgetsWithLeakTracking('Chip padding - RTL', (WidgetTester tester) async {
+  testWidgets('Chip padding - RTL', (WidgetTester tester) async {
     final GlobalKey keyA = GlobalKey();
     final GlobalKey keyB = GlobalKey();
     await tester.pumpWidget(
@@ -2633,7 +2632,7 @@ void main() {
     expect(find.byType(InkWell), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Chip uses stateful color for text color in different states', (WidgetTester tester) async {
+  testWidgets('Chip uses stateful color for text color in different states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     const Color pressedColor = Color(0x00000001);
@@ -2721,7 +2720,7 @@ void main() {
     expect(textColor(), disabledColor);
   });
 
-  testWidgetsWithLeakTracking('Chip uses stateful border side color in different states', (WidgetTester tester) async {
+  testWidgets('Chip uses stateful border side color in different states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     const Color pressedColor = Color(0x00000001);
@@ -2801,7 +2800,7 @@ void main() {
     expect(find.byType(RawChip), paints..rrect()..rrect(color: disabledColor));
   });
 
-  testWidgetsWithLeakTracking('Chip uses stateful border side color from resolveWith', (WidgetTester tester) async {
+  testWidgets('Chip uses stateful border side color from resolveWith', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     const Color pressedColor = Color(0x00000001);
@@ -2882,7 +2881,7 @@ void main() {
 
   });
 
-  testWidgetsWithLeakTracking('Chip uses stateful nullable border side color from resolveWith', (WidgetTester tester) async {
+  testWidgets('Chip uses stateful nullable border side color from resolveWith', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     const Color pressedColor = Color(0x00000001);
@@ -2971,7 +2970,7 @@ void main() {
     expect(find.byType(RawChip), paints..rrect()..rrect(color: disabledColor));
   });
 
-  testWidgetsWithLeakTracking('Chip uses stateful shape in different states', (WidgetTester tester) async {
+  testWidgets('Chip uses stateful shape in different states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     OutlinedBorder? getShape(Set<MaterialState> states) {
 
@@ -3339,7 +3338,7 @@ void main() {
     expect(decoration.shape, shape);
   });
 
-  testWidgetsWithLeakTracking('Chip highlight color is drawn on top of the backgroundColor', (WidgetTester tester) async {
+  testWidgets('Chip highlight color is drawn on top of the backgroundColor', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'RawChip');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Color backgroundColor = Color(0xff00ff00);
@@ -3502,6 +3501,60 @@ void main() {
     await tester.tapAt(Offset(labelCenter.dx + (labelSize.width / 2) + 0.01, labelCenter.dy));
     await tester.pump();
     expect(calledDelete, isTrue);
+  });
+
+  testWidgets("Material3 - RawChip.shape's side is used when provided", (WidgetTester tester) async {
+    Widget buildChip({ OutlinedBorder? shape, BorderSide? side }) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Material(
+          child: Center(
+            child: RawChip(
+              shape: shape,
+              side: side,
+              label: const Text('RawChip'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test [RawChip.shape] with a side.
+    await tester.pumpWidget(buildChip(
+      shape: const RoundedRectangleBorder(
+        side: BorderSide(color: Color(0xffff00ff)),
+        borderRadius: BorderRadius.all(Radius.circular(7.0)),
+      )),
+    );
+
+    // Chip should have the provided shape and the side from [RawChip.shape].
+    expect(
+      getMaterial(tester).shape,
+      const RoundedRectangleBorder(
+        side: BorderSide(color: Color(0xffff00ff)),
+        borderRadius: BorderRadius.all(Radius.circular(7.0)),
+      ),
+    );
+
+    // Test [RawChip.shape] with a side and [RawChip.side].
+    await tester.pumpWidget(buildChip(
+      shape: const RoundedRectangleBorder(
+        side: BorderSide(color: Color(0xffff00ff)),
+        borderRadius: BorderRadius.all(Radius.circular(7.0)),
+      ),
+      side: const BorderSide(color: Color(0xfffff000))),
+    );
+    await tester.pumpAndSettle();
+
+    // Chip use shape from [RawChip.shape] and the side from [RawChip.side].
+    // [RawChip.shape]'s side should be ignored.
+    expect(
+      getMaterial(tester).shape,
+      const RoundedRectangleBorder(
+        side: BorderSide(color: Color(0xfffff000)),
+        borderRadius: BorderRadius.all(Radius.circular(7.0)),
+      ),
+    );
   });
 
   group('Material 2', () {

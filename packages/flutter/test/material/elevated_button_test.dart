@@ -7,8 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -196,6 +195,7 @@ void main() {
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
     await expectLater(tester, meetsGuideline(textContrastGuideline));
+    focusNode.dispose();
   },
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
@@ -259,6 +259,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(elevation(), 1.0);
     expect(overlayColor(), paints..rect(color: theme.colorScheme.primary.withOpacity(0.12)));
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('ElevatedButton uses stateful color for text color in different states', (WidgetTester tester) async {
@@ -334,6 +336,8 @@ void main() {
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     expect(textColor(), pressedColor);
+
+    focusNode.dispose();
   });
 
 
@@ -410,6 +414,8 @@ void main() {
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     expect(iconColor(), pressedColor);
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('ElevatedButton onPressed and onLongPress callbacks are correctly called when non-null', (WidgetTester tester) async {
@@ -534,6 +540,8 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(focusNode.hasPrimaryFocus, isFalse);
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('disabled and hovered ElevatedButton responds to mouse-exit', (WidgetTester tester) async {
@@ -625,6 +633,8 @@ void main() {
 
     expect(gotFocus, isFalse);
     expect(node.hasFocus, isFalse);
+
+    node.dispose();
   });
 
   testWidgetsWithLeakTracking('When ElevatedButton disable, Can not set ElevatedButton focus.', (WidgetTester tester) async {
@@ -648,6 +658,9 @@ void main() {
 
     expect(gotFocus, isFalse);
     expect(node.hasFocus, isFalse);
+
+
+    node.dispose();
   });
 
   testWidgetsWithLeakTracking('Does ElevatedButton work with hover', (WidgetTester tester) async {
@@ -703,6 +716,8 @@ void main() {
 
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(color: focusColor));
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Does ElevatedButton work with autofocus', (WidgetTester tester) async {
@@ -733,6 +748,8 @@ void main() {
 
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(color: focusColor));
+
+    focusNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Does ElevatedButton contribute semantics', (WidgetTester tester) async {
@@ -1667,7 +1684,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
-  testWidgetsWithLeakTracking('ElevatedButton in SelectionArea changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgets('ElevatedButton in SelectionArea changes mouse cursor when hovered', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/104595.
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
@@ -1865,15 +1882,15 @@ void main() {
     await gesture.removePointer();
   }
 
-  testWidgetsWithLeakTracking('ElevatedButton statesController', (WidgetTester tester) async {
+  testWidgets('ElevatedButton statesController', (WidgetTester tester) async {
     testStatesController(null, tester);
   });
 
-  testWidgetsWithLeakTracking('ElevatedButton.icon statesController', (WidgetTester tester) async {
+  testWidgets('ElevatedButton.icon statesController', (WidgetTester tester) async {
     testStatesController(const Icon(Icons.add), tester);
   });
 
-  testWidgetsWithLeakTracking('Disabled ElevatedButton statesController', (WidgetTester tester) async {
+  testWidgets('Disabled ElevatedButton statesController', (WidgetTester tester) async {
     int count = 0;
     void valueChanged() {
       count += 1;
