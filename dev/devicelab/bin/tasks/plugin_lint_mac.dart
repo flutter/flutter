@@ -44,6 +44,7 @@ Future<void> main() async {
             '--allow-warnings',
           ],
         );
+
         final String macosintegrationTestPodspec = path.join(integrationTestPackage, 'integration_test_macos', 'macos', 'integration_test_macos.podspec');
         await _tryMacOSLint(
           'pod',
