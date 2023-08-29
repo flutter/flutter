@@ -674,7 +674,12 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
           // Constrain the textScaleFactor to the largest supported value to prevent
           // layout issues.
           maxScaleFactor: _kMaxTextScaleFactor,
-          child: Builder(builder: (BuildContext context) {
+          child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+            final Size portraitDialogSize = useMaterial3 ? _inputPortraitDialogSizeM3 : _inputPortraitDialogSizeM2;
+            // Make sure the portrait dialog can fit the contents comfortably when
+            // resized from the landscape dialog.
+            final bool isFullyPortrait = constraints.maxHeight >= portraitDialogSize.height;
+
             switch (orientation) {
               case Orientation.portrait:
                 return Column(
@@ -683,8 +688,10 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
                   children: <Widget>[
                     header,
                     if (useMaterial3) Divider(height: 0, color: datePickerTheme.dividerColor),
-                    Expanded(child: picker),
-                    actions,
+                    if (isFullyPortrait) ...<Widget>[
+                      Expanded(child: picker),
+                      actions,
+                    ],
                   ],
                 );
               case Orientation.landscape:
@@ -2093,14 +2100,11 @@ class _DayHeaders extends StatelessWidget {
   ///
   List<Widget> _getDayHeaders(TextStyle headerStyle, MaterialLocalizations localizations) {
     final List<Widget> result = <Widget>[];
-    for (int i = localizations.firstDayOfWeekIndex; true; i = (i + 1) % 7) {
+    for (int i = localizations.firstDayOfWeekIndex; result.length < DateTime.daysPerWeek; i = (i + 1) % DateTime.daysPerWeek) {
       final String weekday = localizations.narrowWeekdays[i];
       result.add(ExcludeSemantics(
         child: Center(child: Text(weekday, style: headerStyle)),
       ));
-      if (i == (localizations.firstDayOfWeekIndex - 1) % 7) {
-        break;
-      }
     }
     return result;
   }
@@ -2512,13 +2516,9 @@ class _MonthItemState extends State<_MonthItem> {
     final double gridHeight = weeks * _monthItemRowHeight + (weeks - 1) * _monthItemSpaceBetweenRows;
     final List<Widget> dayItems = <Widget>[];
 
-    for (int i = 0; true; i += 1) {
-      // 1-based day of month, e.g. 1-31 for January, and 1-29 for February on
-      // a leap year.
-      final int day = i - dayOffset + 1;
-      if (day > daysInMonth) {
-        break;
-      }
+    // 1-based day of month, e.g. 1-31 for January, and 1-29 for February on
+    // a leap year.
+    for (int day = 0 - dayOffset + 1; day <= daysInMonth; day += 1) {
       if (day < 1) {
         dayItems.add(Container());
       } else {
@@ -2782,14 +2782,25 @@ class _InputDateRangePickerDialog extends StatelessWidget {
 
     switch (orientation) {
       case Orientation.portrait:
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            header,
-            Expanded(child: picker),
-            actions,
-          ],
+        return LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            final Size portraitDialogSize = useMaterial3 ? _inputPortraitDialogSizeM3 : _inputPortraitDialogSizeM2;
+            // Make sure the portrait dialog can fit the contents comfortably when
+            // resized from the landscape dialog.
+            final bool isFullyPortrait = constraints.maxHeight >= portraitDialogSize.height;
+
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                header,
+                if (isFullyPortrait) ...<Widget>[
+                  Expanded(child: picker),
+                  actions,
+                ],
+              ],
+            );
+          }
         );
 
       case Orientation.landscape:
