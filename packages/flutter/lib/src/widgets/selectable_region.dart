@@ -353,7 +353,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
             }
           } else {
             hideToolbar();
-            _collapseSelectionAtPosition(offset: details.globalPosition);
+            _collapseSelectionAt(offset: details.globalPosition);
           }
         };
         instance.onSecondaryTapDown = _handleRightClickDown;
@@ -509,7 +509,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           case TargetPlatform.macOS:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
-            _collapseSelectionAtPosition(offset: details.globalPosition);
+            _collapseSelectionAt(offset: details.globalPosition);
         }
       case 2:
         _selectWordAt(offset: details.globalPosition);
@@ -547,7 +547,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
           case TargetPlatform.iOS:
-            _collapseSelectionAtPosition(offset: details.globalPosition);
+            _collapseSelectionAt(offset: details.globalPosition);
           case TargetPlatform.macOS:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
@@ -616,7 +616,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         // keep the current selection, if not then collapse it.
         final bool lastSecondaryTapDownPositionWasOnActiveSelection = _positionIsOnActiveSelection(globalPosition: details.globalPosition);
         if (!lastSecondaryTapDownPositionWasOnActiveSelection) {
-          _collapseSelectionAtPosition(offset: lastSecondaryTapDownPosition!);
+          _collapseSelectionAt(offset: lastSecondaryTapDownPosition!);
         }
         _showHandles();
         _showToolbar(location: lastSecondaryTapDownPosition);
@@ -641,7 +641,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         // keep the current selection, if not then collapse it.
         final bool lastSecondaryTapDownPositionWasOnActiveSelection = _positionIsOnActiveSelection(globalPosition: details.globalPosition);
         if (!lastSecondaryTapDownPositionWasOnActiveSelection) {
-          _collapseSelectionAtPosition(offset: lastSecondaryTapDownPosition!);
+          _collapseSelectionAt(offset: lastSecondaryTapDownPosition!);
         }
         _showHandles();
         _showToolbar(location: lastSecondaryTapDownPosition);
@@ -953,8 +953,9 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// See also:
   ///  * [_selectStartTo], which sets or updates selection start edge.
   ///  * [_finalizeSelection], which stops the `continuous` updates.
-  ///  * [_clearSelection], which clear the ongoing selection.
+  ///  * [_clearSelection], which clears the ongoing selection.
   ///  * [_selectWordAt], which selects a whole word at the location.
+  ///  * [_collapseSelectionAt], which collapses the selection at the location.
   ///  * [selectAll], which selects the entire content.
   void _selectEndTo({required Offset offset, bool continuous = false, TextGranularity? textGranularity}) {
     if (!continuous) {
@@ -992,8 +993,9 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// See also:
   ///  * [_selectEndTo], which sets or updates selection end edge.
   ///  * [_finalizeSelection], which stops the `continuous` updates.
-  ///  * [_clearSelection], which clear the ongoing selection.
+  ///  * [_clearSelection], which clears the ongoing selection.
   ///  * [_selectWordAt], which selects a whole word at the location.
+  ///  * [_collapseSelectionAt], which collapses the selection at the location.
   ///  * [selectAll], which selects the entire content.
   void _selectStartTo({required Offset offset, bool continuous = false, TextGranularity? textGranularity}) {
     if (!continuous) {
@@ -1012,10 +1014,10 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///  * [_selectStartTo], which sets or updates selection start edge.
   ///  * [_selectEndTo], which sets or updates selection end edge.
   ///  * [_finalizeSelection], which stops the `continuous` updates.
-  ///  * [_clearSelection], which clear the ongoing selection.
+  ///  * [_clearSelection], which clears the ongoing selection.
   ///  * [_selectWordAt], which selects a whole word at the location.
   ///  * [selectAll], which selects the entire content.
-  void _collapseSelectionAtPosition({required Offset offset}) {
+  void _collapseSelectionAt({required Offset offset}) {
     _selectStartTo(offset: offset);
     _selectEndTo(offset: offset);
     _selectionDelegate._flushInactiveSelections();
@@ -1034,7 +1036,8 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///  * [_selectStartTo], which sets or updates selection start edge.
   ///  * [_selectEndTo], which sets or updates selection end edge.
   ///  * [_finalizeSelection], which stops the `continuous` updates.
-  ///  * [_clearSelection], which clear the ongoing selection.
+  ///  * [_clearSelection], which clears the ongoing selection.
+  ///  * [_collapseSelectionAt], which collapses the selection at the location.
   ///  * [selectAll], which selects the entire content.
   void _selectWordAt({required Offset offset}) {
     // There may be other selection ongoing.
