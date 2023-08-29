@@ -8,11 +8,11 @@ body:
   - type: markdown
     attributes:
       value: |
-        "Thank you for using Flutter!
+        Thank you for using Flutter!
 
         It looks like you found an issue with our Infrastructure services.
         Please complete the form below so that we can help to resolve your
-        issue as quickly as possible."
+        issue as quickly as possible.
   - type: checkboxes
     attributes:
       label: Is there an existing issue for this?
@@ -24,13 +24,13 @@ body:
     attributes:
       label: Type of Request
       description: |
-        "Is this a bug, feature request or Infra Task?
+        Is this a bug, feature request or Infra Task?
 
         If you have a bug and you believe the issue is a blocker please add the P0 label and
         set the project to 'Infra Ticket Queue.'
 
         If this is a devicelab feature such as a package update or a device is down please
-        add the 'device-lab' label to the created issue and set the project to 'Infra Ticket Queue.'"
+        add the 'device-lab' label to the created issue and set the project to 'Infra Ticket Queue.'
       options:
         - bug
         - feature request
@@ -46,6 +46,8 @@ body:
         Which part of the infrastructure is this issue occurring? Or, if this is a feature
         request, where should the feature be implemented?
       value: LUCI, Github, Cocoon scheduler, Autosubmit, etc...
+    validations:
+      required: true
   - type: textarea
     id: affects
     attributes:
