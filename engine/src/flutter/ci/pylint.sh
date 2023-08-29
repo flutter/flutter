@@ -39,6 +39,7 @@ pylint-2.7 --rcfile=.pylintrc \
   "impeller/" \
   "sky/" \
   "tools/gn" \
+  "tools/pub_get_offline.py" \
   "testing/"
 
 echo "$(date +%T) Linting complete"

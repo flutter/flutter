@@ -64,6 +64,8 @@ class SmoothingApproximation {
 /// Finally, use the [dispose] method to clean up native resources. After
 /// [dispose] has been called, this class must not be used again.
 class VerticesBuilder {
+  /// Constructs a [VerticesBuilder] instance to which path commands can be
+  /// added.
   VerticesBuilder() : _builder = _createPathFn();
 
   ffi.Pointer<_PathBuilder>? _builder;
@@ -98,7 +100,7 @@ class VerticesBuilder {
   /// Adds a close command to the start of the current contour.
   void close() {
     assert(_builder != null);
-    closeFn(_builder!, true);
+    _closeFn(_builder!, true);
   }
 
   /// Tessellates the path created by the previous method calls into a list of
@@ -209,7 +211,7 @@ final _CubicToType _cubicToFn =
 typedef _CloseType = void Function(ffi.Pointer<_PathBuilder>, bool);
 typedef _close_type = ffi.Void Function(ffi.Pointer<_PathBuilder>, ffi.Bool);
 
-final _CloseType closeFn =
+final _CloseType _closeFn =
     _dylib.lookupFunction<_close_type, _CloseType>('Close');
 
 typedef _TessellateType = ffi.Pointer<_Vertices> Function(
