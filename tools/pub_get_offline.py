@@ -20,78 +20,123 @@ SRC_ROOT = os.path.dirname(
 ENGINE_DIR = os.path.join(SRC_ROOT, 'flutter')
 
 ALL_PACKAGES = [
-    os.path.join(ENGINE_DIR, "ci"),
-    os.path.join(ENGINE_DIR, "impeller", "golden_tests_harvester"),
-    os.path.join(ENGINE_DIR, "flutter_frontend_server"),
-    os.path.join(ENGINE_DIR, "shell", "vmservice"),
-    os.path.join(ENGINE_DIR, "testing", "benchmark"),
-    os.path.join(ENGINE_DIR, "testing", "dart"),
-    os.path.join(ENGINE_DIR, "testing", "litetest"),
-    os.path.join(ENGINE_DIR, "testing", "android_background_image"),
-    os.path.join(ENGINE_DIR, "testing", "scenario_app"),
-    os.path.join(ENGINE_DIR, "testing", "smoke_test_failure"),
-    os.path.join(ENGINE_DIR, "testing", "symbols"),
-    os.path.join(ENGINE_DIR, "tools", "api_check"),
-    os.path.join(ENGINE_DIR, "tools", "android_lint"),
-    os.path.join(ENGINE_DIR, "tools", "clang_tidy"),
-    os.path.join(ENGINE_DIR, "tools", "const_finder"),
-    os.path.join(ENGINE_DIR, "tools", "pkg", "engine_repo_tools"),
-    os.path.join(ENGINE_DIR, "tools", "githooks"),
-    os.path.join(ENGINE_DIR, "tools", "licenses"),
-    os.path.join(ENGINE_DIR, "tools", "path_ops", "dart")
+    os.path.join(ENGINE_DIR, 'ci'),
+    os.path.join(ENGINE_DIR, 'flutter_frontend_server'),
+    os.path.join(ENGINE_DIR, 'impeller', 'golden_tests_harvester'),
+    os.path.join(ENGINE_DIR, 'impeller', 'tessellator', 'dart'),
+    os.path.join(ENGINE_DIR, 'shell', 'vmservice'),
+    os.path.join(ENGINE_DIR, 'testing', 'android_background_image'),
+    os.path.join(ENGINE_DIR, 'testing', 'benchmark'),
+    os.path.join(ENGINE_DIR, 'testing', 'dart'),
+    os.path.join(ENGINE_DIR, 'testing', 'litetest'),
+    os.path.join(ENGINE_DIR, 'testing', 'scenario_app'),
+    os.path.join(ENGINE_DIR, 'testing', 'skia_gold_client'),
+    os.path.join(ENGINE_DIR, 'testing', 'smoke_test_failure'),
+    os.path.join(ENGINE_DIR, 'testing', 'symbols'),
+    os.path.join(ENGINE_DIR, 'tools', 'android_lint'),
+    os.path.join(ENGINE_DIR, 'tools', 'api_check'),
+    os.path.join(ENGINE_DIR, 'tools', 'clang_tidy'),
+    os.path.join(ENGINE_DIR, 'tools', 'const_finder'),
+    os.path.join(ENGINE_DIR, 'tools', 'gen_web_locale_keymap'),
+    os.path.join(ENGINE_DIR, 'tools', 'githooks'),
+    os.path.join(ENGINE_DIR, 'tools', 'licenses'),
+    os.path.join(ENGINE_DIR, 'tools', 'path_ops', 'dart'),
+    os.path.join(ENGINE_DIR, 'tools', 'pkg', 'engine_repo_tools'),
 ]
 
 
-def FetchPackage(pub, package):
+def fetch_package(pub, package):
   try:
     subprocess.check_output(pub, cwd=package, stderr=subprocess.STDOUT)
   except subprocess.CalledProcessError as err:
     print(
-        "'%s' failed in '%s' with status %d:\n%s" %
+        '"%s" failed in "%s" with status %d:\n%s' %
         (' '.join(pub), package, err.returncode, err.output)
     )
     return 1
   return 0
 
 
-def CheckPackage(package):
-  package_config = os.path.join(package, ".dart_tool", "package_config.json")
+def check_package(package):
+  package_config = os.path.join(package, '.dart_tool', 'package_config.json')
   pub_count = 0
-  with open(package_config) as f:
-    data_dict = json.load(f)
-    packages_data = data_dict["packages"]
+  with open(package_config) as config_file:
+    data_dict = json.load(config_file)
+    packages_data = data_dict['packages']
     for package_data in packages_data:
-      package_uri = package_data["rootUri"]
-      package_name = package_data["name"]
-      if ".pub-cache" in package_uri and "pub.dartlang.org" in package_uri:
-        print("Error: package '%s' was fetched from pub" % package_name)
+      package_uri = package_data['rootUri']
+      package_name = package_data['name']
+      if '.pub-cache' in package_uri and 'pub.dartlang.org' in package_uri:
+        print('Error: package "%s" was fetched from pub' % package_name)
         pub_count = pub_count + 1
   if pub_count > 0:
     print(
-        "Error: %d packages were fetched from pub for %s" %
+        'Error: %d packages were fetched from pub for %s' %
         (pub_count, package)
     )
     print(
-        "Please fix the pubspec.yaml for %s "
-        "so that all dependencies are path dependencies" % package
+        'Please fix the pubspec.yaml for %s '
+        'so that all dependencies are path dependencies' % package
     )
   return pub_count
 
 
-def Main():
+EXCLUDED_DIRS = [
+    os.path.join(ENGINE_DIR, 'lib'),
+    os.path.join(ENGINE_DIR, 'prebuilts'),
+    os.path.join(ENGINE_DIR, 'shell', 'platform', 'fuchsia'),
+    os.path.join(ENGINE_DIR, 'shell', 'vmservice'),
+    os.path.join(ENGINE_DIR, 'sky', 'packages'),
+    os.path.join(ENGINE_DIR, 'third_party'),
+    os.path.join(ENGINE_DIR, 'web_sdk'),
+]
+
+
+# Returns a list of paths to directories containing pubspec.yaml files that
+# are not listed in ALL_PACKAGES. Directory trees under the paths in
+# EXCLUDED_DIRS are skipped.
+def find_unlisted_packages():
+  unlisted = []
+  for root, dirs, files in os.walk(ENGINE_DIR):
+    excluded = []
+    for dirname in dirs:
+      full_dirname = os.path.join(root, dirname)
+      if full_dirname in EXCLUDED_DIRS:
+        excluded.append(dirname)
+    for exclude in excluded:
+      dirs.remove(exclude)
+    for filename in files:
+      if filename == 'pubspec.yaml':
+        if root not in ALL_PACKAGES:
+          unlisted.append(root)
+  return unlisted
+
+
+def main():
   dart_sdk_bin = os.path.join(
-      SRC_ROOT, "third_party", "dart", "tools", "sdks", "dart-sdk", "bin"
+      SRC_ROOT, 'third_party', 'dart', 'tools', 'sdks', 'dart-sdk', 'bin'
   )
-  dart = "dart"
-  if os.name == "nt":
-    dart = "dart.exe"
-  pubcmd = [os.path.join(dart_sdk_bin, dart), "pub", "get", "--offline"]
+
+  # Ensure all relevant packages are listed in ALL_PACKAGES.
+  unlisted = find_unlisted_packages()
+  if len(unlisted) > 0:
+    for pkg in unlisted:
+      print(
+          'The Dart package "%s" must be checked in flutter/tools/pub_get_offline.py'
+          % pkg
+      )
+    return 1
+
+  dart = 'dart'
+  if os.name == 'nt':
+    dart = 'dart.exe'
+  pubcmd = [os.path.join(dart_sdk_bin, dart), 'pub', 'get', '--offline']
 
   pub_count = 0
   for package in ALL_PACKAGES:
-    if FetchPackage(pubcmd, package) != 0:
+    if fetch_package(pubcmd, package) != 0:
       return 1
-    pub_count = pub_count + CheckPackage(package)
+    pub_count = pub_count + check_package(package)
 
   if pub_count > 0:
     return 1
@@ -100,4 +145,4 @@ def Main():
 
 
 if __name__ == '__main__':
-  sys.exit(Main())
+  sys.exit(main())
