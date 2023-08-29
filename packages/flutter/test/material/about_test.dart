@@ -57,7 +57,7 @@ void main() {
     expect(find.text('View licenses'), findsOneWidget);
   });
 
-  testWidgets('Material2 - AboutListTile control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - AboutListTile control test', (WidgetTester tester) async {
     const FlutterLogo logo = FlutterLogo();
 
     await tester.pumpWidget(
@@ -140,7 +140,7 @@ void main() {
     expect(find.text('Pirate license'), findsOneWidget);
   });
 
-  testWidgets('Material3 - AboutListTile control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - AboutListTile control test', (WidgetTester tester) async {
     const FlutterLogo logo = FlutterLogo();
 
     await tester.pumpWidget(
@@ -732,7 +732,7 @@ void main() {
       rootObserver = AboutDialogObserver();
     });
 
-    testWidgets('Barrier is dismissible with default parameter', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Barrier is dismissible with default parameter', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           navigatorObservers: <NavigatorObserver>[rootObserver],
@@ -764,7 +764,7 @@ void main() {
       expect(rootObserver.dialogCount, 0);
     });
 
-    testWidgets('Barrier is not dismissible with barrierDismissible is false', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Barrier is not dismissible with barrierDismissible is false', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           navigatorObservers: <NavigatorObserver>[rootObserver],
@@ -798,7 +798,7 @@ void main() {
     });
   });
 
-  testWidgets('Barrier color', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Barrier color', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -852,7 +852,7 @@ void main() {
     expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, Colors.pink);
   });
 
-  testWidgets('Barrier Label', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Barrier Label', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
