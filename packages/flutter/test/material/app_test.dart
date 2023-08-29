@@ -1161,6 +1161,7 @@ void main() {
       routerDelegate: delegate,
     ));
     expect(tester.takeException(), isAssertionError);
+    provider.dispose();
   });
 
   testWidgetsWithLeakTracking('MaterialApp.router throw if route configuration is provided along with other delegate', (WidgetTester tester) async {

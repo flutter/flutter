@@ -1295,6 +1295,7 @@ void main() {
           isCliAnimationEnabled: false,
         ),
         stdio: fakeStdio,
+        stopwatchFactory: FakeStopwatchFactory(stopwatch: FakeStopwatch()),
         outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40),
       );
       logger.startProgress('po').stop();

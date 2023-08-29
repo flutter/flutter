@@ -58,7 +58,7 @@ class LoadTestImageProvider extends ImageProvider<Object> {
   }
 
   @override
-  ImageStreamCompleter loadImage(Object key, ImageDecoderCallback decode) {
+  ImageStreamCompleter load(Object key, DecoderCallback decode) {
     throw UnimplementedError();
   }
 }

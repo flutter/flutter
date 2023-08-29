@@ -67,6 +67,13 @@ enum _FloatingActionButtonType {
 /// ** See code in examples/api/lib/material/floating_action_button/floating_action_button.1.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This sample shows [FloatingActionButton] with additional color mappings as
+/// described in: https://m3.material.io/components/floating-action-button/overview.
+///
+/// ** See code in examples/api/lib/material/floating_action_button/floating_action_button.2.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Scaffold], in which floating action buttons typically live.
