@@ -347,4 +347,8 @@ void AndroidShellHolder::UpdateDisplayMetrics() {
   shell_->OnDisplayUpdates(std::move(displays));
 }
 
+void AndroidShellHolder::SetIsRenderingToImageView(bool value) {
+  platform_view_->SetIsRenderingToImageView(value);
+}
+
 }  // namespace flutter

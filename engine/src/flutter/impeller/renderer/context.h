@@ -162,6 +162,15 @@ class Context {
   virtual void Shutdown() = 0;
 
   //----------------------------------------------------------------------------
+  /// @brief      Force the Vulkan presentation (submitKHR) to be performed on
+  ///             the raster task runner.
+  ///
+  ///             This is required for correct rendering on Android when using
+  ///             the hybrid composition mode. This has no effect on other
+  ///             backends.
+  virtual void SetSyncPresentation(bool value) {}
+
+  //----------------------------------------------------------------------------
   /// @brief Accessor for a pool of HostBuffers.
   Pool<HostBuffer>& GetHostBufferPool() const { return host_buffer_pool_; }
 

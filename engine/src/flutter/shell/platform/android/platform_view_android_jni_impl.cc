@@ -550,6 +550,13 @@ static void NotifyLowMemoryWarning(JNIEnv* env,
   ANDROID_SHELL_HOLDER->NotifyLowMemoryWarning();
 }
 
+static void SetIsRenderingToImageView(JNIEnv* env,
+                                      jobject jcaller,
+                                      jlong shell_holder,
+                                      bool value) {
+  ANDROID_SHELL_HOLDER->SetIsRenderingToImageView(value);
+}
+
 static jboolean FlutterTextUtilsIsEmoji(JNIEnv* env,
                                         jobject obj,
                                         jint codePoint) {
@@ -708,6 +715,11 @@ bool RegisterApi(JNIEnv* env) {
           .name = "nativeNotifyLowMemoryWarning",
           .signature = "(J)V",
           .fnPtr = reinterpret_cast<void*>(&NotifyLowMemoryWarning),
+      },
+      {
+          .name = "nativeSetIsRenderingToImageView",
+          .signature = "(JZ)V",
+          .fnPtr = reinterpret_cast<void*>(&SetIsRenderingToImageView),
       },
 
       // Start of methods from FlutterView

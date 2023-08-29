@@ -81,6 +81,10 @@ std::unique_ptr<Surface> SurfaceContextVK::AcquireNextSurface() {
   return surface;
 }
 
+void SurfaceContextVK::SetSyncPresentation(bool value) {
+  parent_->SetSyncPresentation(value);
+}
+
 #ifdef FML_OS_ANDROID
 
 vk::UniqueSurfaceKHR SurfaceContextVK::CreateAndroidSurface(

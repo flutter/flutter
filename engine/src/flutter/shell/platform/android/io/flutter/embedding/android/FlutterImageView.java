@@ -143,6 +143,7 @@ public class FlutterImageView extends View implements RenderSurface {
     switch (kind) {
       case background:
         flutterRenderer.swapSurface(imageReader.getSurface());
+        flutterRenderer.SetRenderingToImageView(true);
         break;
       case overlay:
         // Do nothing since the attachment is done by the handler of
@@ -173,6 +174,12 @@ public class FlutterImageView extends View implements RenderSurface {
     closeCurrentImage();
     invalidate();
     isAttachedToFlutterRenderer = false;
+    if (kind == SurfaceKind.background) {
+      // The overlay FlutterImageViews seem to be constructed per frame and not
+      // always used; An overlay FlutterImageView always seems to imply
+      // a background FlutterImageView.
+      flutterRenderer.SetRenderingToImageView(false);
+    }
   }
 
   public void pause() {
