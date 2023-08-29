@@ -13,18 +13,19 @@ namespace impeller {
 namespace scene {
 
 void SceneContextOptions::ApplyToPipelineDescriptor(
+    const Capabilities& capabilities,
     PipelineDescriptor& desc) const {
   DepthAttachmentDescriptor depth;
   depth.depth_compare = CompareFunction::kLess;
   depth.depth_write_enabled = true;
   desc.SetDepthStencilAttachmentDescriptor(depth);
-  desc.SetDepthPixelFormat(PixelFormat::kD32FloatS8UInt);
+  desc.SetDepthPixelFormat(capabilities.GetDefaultDepthStencilFormat());
 
   StencilAttachmentDescriptor stencil;
   stencil.stencil_compare = CompareFunction::kAlways;
   stencil.depth_stencil_pass = StencilOperation::kKeep;
   desc.SetStencilAttachmentDescriptors(stencil);
-  desc.SetStencilPixelFormat(PixelFormat::kD32FloatS8UInt);
+  desc.SetStencilPixelFormat(capabilities.GetDefaultDepthStencilFormat());
 
   desc.SetSampleCount(sample_count);
   desc.SetPrimitiveType(primitive_type);
@@ -79,7 +80,7 @@ std::shared_ptr<Pipeline<PipelineDescriptor>> SceneContext::GetPipeline(
     return nullptr;
   }
   if (auto found = pipelines_.find(key); found != pipelines_.end()) {
-    return found->second->GetPipeline(opts);
+    return found->second->GetPipeline(*context_, opts);
   }
   return nullptr;
 }

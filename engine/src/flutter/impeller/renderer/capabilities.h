@@ -41,6 +41,8 @@ class Capabilities {
 
   virtual PixelFormat GetDefaultStencilFormat() const = 0;
 
+  virtual PixelFormat GetDefaultDepthStencilFormat() const = 0;
+
  protected:
   Capabilities();
 
@@ -75,6 +77,8 @@ class CapabilitiesBuilder {
 
   CapabilitiesBuilder& SetDefaultStencilFormat(PixelFormat value);
 
+  CapabilitiesBuilder& SetDefaultDepthStencilFormat(PixelFormat value);
+
   CapabilitiesBuilder& SetSupportsDecalTileMode(bool value);
 
   CapabilitiesBuilder& SetSupportsMemorylessTextures(bool value);
@@ -95,6 +99,7 @@ class CapabilitiesBuilder {
   bool supports_memoryless_textures_ = false;
   std::optional<PixelFormat> default_color_format_ = std::nullopt;
   std::optional<PixelFormat> default_stencil_format_ = std::nullopt;
+  std::optional<PixelFormat> default_depth_stencil_format_ = std::nullopt;
 
   FML_DISALLOW_COPY_AND_ASSIGN(CapabilitiesBuilder);
 };

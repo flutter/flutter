@@ -70,6 +70,7 @@ ContextGLES::ContextGLES(std::unique_ptr<ProcTableGLES> gl,
             .SetSupportsFramebufferFetch(false)
             .SetDefaultColorFormat(PixelFormat::kR8G8B8A8UNormInt)
             .SetDefaultStencilFormat(PixelFormat::kS8UInt)
+            .SetDefaultDepthStencilFormat(PixelFormat::kD24UnormS8Uint)
             .SetSupportsCompute(false)
             .SetSupportsComputeSubgroups(false)
             .SetSupportsReadFromResolve(false)

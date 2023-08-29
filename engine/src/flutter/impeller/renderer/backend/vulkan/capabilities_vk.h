@@ -96,12 +96,16 @@ class CapabilitiesVK final : public Capabilities,
   // |Capabilities|
   PixelFormat GetDefaultStencilFormat() const override;
 
+  // |Capabilities|
+  PixelFormat GetDefaultDepthStencilFormat() const override;
+
  private:
   const bool enable_validations_;
   std::map<std::string, std::set<std::string>> exts_;
   std::set<OptionalDeviceExtensionVK> optional_device_extensions_;
-  mutable PixelFormat color_format_ = PixelFormat::kUnknown;
-  PixelFormat depth_stencil_format_ = PixelFormat::kUnknown;
+  mutable PixelFormat default_color_format_ = PixelFormat::kUnknown;
+  PixelFormat default_stencil_format_ = PixelFormat::kUnknown;
+  PixelFormat default_depth_stencil_format_ = PixelFormat::kUnknown;
   vk::PhysicalDeviceProperties device_properties_;
   bool supports_compute_subgroups_ = false;
   bool supports_memoryless_textures_ = false;
