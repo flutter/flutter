@@ -953,6 +953,25 @@ def gather_clang_tidy_tests(build_dir):
     )
 
 
+def gather_engine_repo_tools_tests(build_dir):
+  test_dir = os.path.join(
+      BUILDROOT_DIR, 'flutter', 'tools', 'pkg', 'engine_repo_tools'
+  )
+  dart_tests = glob.glob('%s/*_test.dart' % test_dir)
+  for dart_test_file in dart_tests:
+    opts = [
+        '--disable-dart-dev',
+        dart_test_file,
+    ]
+    yield EngineExecutableTask(
+        build_dir,
+        os.path.join('dart-sdk', 'bin', 'dart'),
+        None,
+        flags=opts,
+        cwd=test_dir
+    )
+
+
 def gather_api_consistency_tests(build_dir):
   test_dir = os.path.join(BUILDROOT_DIR, 'flutter', 'tools', 'api_check')
   dart_tests = glob.glob('%s/test/*_test.dart' % test_dir)
@@ -1230,6 +1249,7 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
     tasks += list(gather_litetest_tests(build_dir))
     tasks += list(gather_githooks_tests(build_dir))
     tasks += list(gather_clang_tidy_tests(build_dir))
+    tasks += list(gather_engine_repo_tools_tests(build_dir))
     tasks += list(gather_api_consistency_tests(build_dir))
     tasks += list(gather_path_ops_tests(build_dir))
     tasks += list(gather_const_finder_tests(build_dir))
