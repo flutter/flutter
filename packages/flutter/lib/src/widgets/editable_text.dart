@@ -4794,7 +4794,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                                       ? ValueNotifier<bool>(widget.showCursor)
                                       : _cursorVisibilityNotifier,
                                   forceLine: widget.forceLine,
-                                  readOnly: widget.readOnly,
                                   hasFocus: _hasFocus,
                                   maxLines: widget.maxLines,
                                   minLines: widget.minLines,
@@ -4810,7 +4809,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                                   textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
                                   textWidthBasis: widget.textWidthBasis,
                                   obscuringCharacter: widget.obscuringCharacter,
-                                  obscureText: widget.obscureText,
                                   offset: offset,
                                   rendererIgnoresPointer: widget.rendererIgnoresPointer,
                                   cursorWidth: widget.cursorWidth,
@@ -4820,14 +4818,18 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                                   selectionHeightStyle: widget.selectionHeightStyle,
                                   selectionWidthStyle: widget.selectionWidthStyle,
                                   paintCursorAboveText: widget.paintCursorAboveText,
-                                  enableInteractiveSelection: widget._userSelectionEnabled,
                                   textSelectionDelegate: this,
                                   devicePixelRatio: _devicePixelRatio,
                                   promptRectRange: _currentPromptRectRange,
                                   promptRectColor: widget.autocorrectionTextRectColor,
                                   clipBehavior: widget.clipBehavior,
                                   requestKeyboard: requestKeyboard,
-                                  clientId: clientId,
+                                  clientId: clientId, // to register 
+                                  performAction: performAction,
+                                  // Have to use _effectiveAutofillClient.textInputConfiguration as it is the most accurate.
+                                  // autofillHints always end up empty [] because of the way props are being passed from EditableText wrappers like TextField()
+                                  // Instead, it exists in the autofillClient  
+                                  textInputConfiguration: _effectiveAutofillClient.textInputConfiguration 
                                 ),
                               ),
                               _Editable(

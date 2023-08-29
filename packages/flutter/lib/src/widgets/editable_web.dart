@@ -18,7 +18,6 @@ class EditableWeb extends StatefulWidget {
     this.backgroundCursorColor,
     required this.showCursor,
     required this.forceLine,
-    required this.readOnly,
     this.textHeightBehavior,
     required this.textWidthBasis,
     required this.hasFocus,
@@ -32,7 +31,6 @@ class EditableWeb extends StatefulWidget {
     required this.textDirection,
     this.locale,
     required this.obscuringCharacter,
-    required this.obscureText,
     required this.offset,
     this.rendererIgnoresPointer = false,
     required this.cursorWidth,
@@ -42,19 +40,15 @@ class EditableWeb extends StatefulWidget {
     required this.paintCursorAboveText,
     this.selectionHeightStyle = ui.BoxHeightStyle.tight,
     this.selectionWidthStyle = ui.BoxWidthStyle.tight,
-    this.enableInteractiveSelection = true,
     required this.textSelectionDelegate,
     required this.devicePixelRatio,
     this.promptRectRange,
     this.promptRectColor,
     required this.clipBehavior,
-    this.keyboardType = TextInputType.text, // _Editable doesn't have
-    this.autofillHints = const <String>[], // _Editable doesn't have
-    this.textCapitalization = TextCapitalization.none, // _Editable doesn't have
-    this.autocorrect = true, // _Editable doesn't have
-    this.textInputAction, // _Editable doesn't have
-    required this.requestKeyboard, // _Editable doesn't have
+    required this.requestKeyboard,
     required this.clientId,
+    required this.performAction,
+    required this.textInputConfiguration, // contains a bunch of things like obscureText, readOnly, autofillHints, etc.
   });
 
   final InlineSpan inlineSpan;
@@ -65,7 +59,6 @@ class EditableWeb extends StatefulWidget {
   final Color? backgroundCursorColor;
   final ValueNotifier<bool> showCursor;
   final bool forceLine;
-  final bool readOnly;
   final bool hasFocus;
   final int? maxLines;
   final int? minLines;
@@ -77,7 +70,6 @@ class EditableWeb extends StatefulWidget {
   final TextDirection textDirection;
   final Locale? locale;
   final String obscuringCharacter;
-  final bool obscureText;
   final TextHeightBehavior? textHeightBehavior;
   final TextWidthBasis textWidthBasis;
   final ViewportOffset offset;
@@ -89,19 +81,15 @@ class EditableWeb extends StatefulWidget {
   final bool paintCursorAboveText;
   final ui.BoxHeightStyle selectionHeightStyle;
   final ui.BoxWidthStyle selectionWidthStyle;
-  final bool enableInteractiveSelection;
   final TextSelectionDelegate textSelectionDelegate;
   final double devicePixelRatio;
   final TextRange? promptRectRange;
   final Color? promptRectColor;
   final Clip clipBehavior;
-  final TextInputType keyboardType;
-  final Iterable<String> autofillHints;
-  final TextCapitalization textCapitalization;
-  final bool autocorrect;
-  final TextInputAction? textInputAction;
   final void Function() requestKeyboard;
   final int clientId;
+  final void Function(TextInputAction) performAction;
+  final TextInputConfiguration textInputConfiguration;
 
   @override
   State<EditableWeb> createState() => _EditableWebState();
@@ -120,19 +108,6 @@ class _EditableWebState extends State<EditableWeb> {
     super.initState();
     _maxLines = widget.maxLines ?? 1;
   }
-
-  // void _controllerListener() {
-  //   final String text = widget.controller.text;
-  //   setElementValue(text);
-  // }
-
-  // void _focusListener() {
-  //   if (widget.focusNode.hasFocus) {
-  //     inputEl.focus();
-  //   } else {
-  //     inputEl.blur();
-  //   }
-  // }
 
   @override
   void dispose() {
@@ -227,7 +202,7 @@ class _EditableWebState extends State<EditableWeb> {
   /// https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/autocapitalize
   void setAutocapitalizeAttribute(html.HtmlElement inputEl) {
     String autocapitalize = '';
-    switch (widget.textCapitalization) {
+    switch (widget.textInputConfiguration.textCapitalization) {
       case TextCapitalization.words:
         // TODO(mdebbar): There is a bug for `words` level capitalization in IOS now.
         // For now go back to default. Remove the check after bug is resolved.
@@ -303,13 +278,13 @@ class _EditableWebState extends State<EditableWeb> {
   // }
 
   Map<String, String> getKeyboardTypeAttributes(TextInputType inputType) {
-    final bool? isDecimal = inputType.decimal;
+    final bool isDecimal = inputType.decimal ?? false; // appropriate default?
 
     switch (inputType) {
       case TextInputType.number:
         return {
           'type': 'number',
-          'inputmode': isDecimal == true ? 'decimal' : 'numeric'
+          'inputmode': isDecimal ? 'decimal' : 'numeric'
         };
       case TextInputType.phone:
         return {'type': 'tel', 'inputmode': 'tel'};
@@ -491,7 +466,7 @@ class _EditableWebState extends State<EditableWeb> {
       ..lineHeight = '1.5'; // can this be modified by a property?
 
     // debug
-    if (widget.obscureText) {
+    if (widget.textInputConfiguration.obscureText) {
       inputEl.style.border = '1px solid red'; // debug
     }
 
@@ -519,12 +494,6 @@ class _EditableWebState extends State<EditableWeb> {
       // instead of adding a blanket rule for all inputs.
       inputEl.classes.add('customInputSelection');
     }
-
-    // if (widget.textScaleFactor != null) {
-    //   inputEl.style.fontSize =
-    //       scaleFontSize(inputEl.style.fontSize, widget.textScaleFactor!);
-    //   sizedBoxHeight *= widget.textScaleFactor!;
-    // }
   }
 
   // TODO: Handle composition and delta model?
@@ -565,51 +534,21 @@ class _EditableWebState extends State<EditableWeb> {
       }
     });
 
-    // inputEl.onBlur.listen((e) {
-    //   widget.focusNode.unfocus();
-    // });
+    inputEl.onKeyDown.listen((html.KeyboardEvent event) {
+      maybeSendAction(event);
+    });
 
-    // inputEl.onKeyDown.listen((event) {
-    //   if (event.keyCode == html.KeyCode.ENTER) {
-    //     final TextInputAction defaultTextInputAction =
-    //         _maxLines > 1 ? TextInputAction.newline : TextInputAction.done;
-    //     performAction(widget.textInputAction ?? defaultTextInputAction);
-    //   }
-    // });
-
-    // html.document.onSelectionChange.listen(handleChange as void Function(html.Event event)?);
-
-    // inputEl.onSelect.listen((event) {
-    //   // hacky implementation, but don't know of a non-JS solution to disable
-    //   // selection while keeping the input enabled for mouse + key events.
-    //   // We adjust the selection if readOnly is set because the readOnly attribute
-    //   // will take care of the disabled behavior
-    //   if (!widget.enableInteractiveSelection && !widget.readOnly) {
-    //     (inputEl as html.InputElement).selectionStart = inputEl.selectionEnd;
-    //   }
-
-    //   // final html.InputElement element = _inputEl as html.InputElement;
-    //   // final String text = element.value!;
-    //   // final TextSelection selection = TextSelection(
-    //   //     baseOffset: element.selectionStart ?? 0,
-    //   //     extentOffset: element.selectionEnd ?? 0);
-    //   // final TextEditingValue value =
-    //   //     TextEditingValue(text: text, selection: selection);
-
-    //   // updateEditingState(value);
-    // });
-
-    // prevent default for mouse events to prevent selection interference/flickering
-    // point and drag selection is completely handled by framework
-    inputEl.onMouseDown.listen((event) {
+    // Prevent default for mouse events to prevent selection interference/flickering.
+    // We want to let the framework handle these pointerevents.
+    inputEl.onMouseDown.listen((html.MouseEvent event) {
       event.preventDefault();
     });
 
-    inputEl.onMouseUp.listen((event) {
+    inputEl.onMouseUp.listen((html.MouseEvent event) {
       event.preventDefault();
     });
 
-    inputEl.onMouseMove.listen((event) {
+    inputEl.onMouseMove.listen((html.MouseEvent event) {
       event.preventDefault();
     });
   }
@@ -622,34 +561,33 @@ class _EditableWebState extends State<EditableWeb> {
     setAutocapitalizeAttribute(inputEl);
 
     inputEl.setAttribute(
-        'autocorrect', widget.autocorrect == true ? 'on' : 'off');
+        'autocorrect', widget.textInputConfiguration.autocorrect ? 'on' : 'off');
+    
 
-    if (widget.textInputAction != null) {
-      final String? enterKeyHint = getEnterKeyHint(widget.textInputAction!);
+    final String? enterKeyHint = getEnterKeyHint(widget.textInputConfiguration.inputAction);
 
-      if (enterKeyHint != null) {
-        inputEl.setAttribute('enterkeyhint', enterKeyHint);
-      }
+    if (enterKeyHint != null) {
+      inputEl.setAttribute('enterkeyhint', enterKeyHint);
     }
   }
 
   void setInputElementAttributes(html.InputElement inputEl) {
     // set attributes
-    inputEl.readOnly = widget.readOnly;
+    inputEl.readOnly = widget.textInputConfiguration.readOnly;
 
-    if (widget.obscureText) {
+    if (widget.textInputConfiguration.obscureText) {
       inputEl.type = 'password';
     } else {
       final Map<String, String> attributes =
-          getKeyboardTypeAttributes(widget.keyboardType);
+          getKeyboardTypeAttributes(widget.textInputConfiguration.inputType);
       inputEl.type = attributes['type'];
       inputEl.inputMode = attributes['inputmode'];
     }
 
-    if (widget.autofillHints.isNotEmpty) {
+    if (widget.textInputConfiguration.autofillConfiguration.autofillHints.isNotEmpty) {
       // browsers can only use one autocomplete attribute
       final String autocomplete =
-          _getAutocompleteAttribute(widget.autofillHints.first);
+          _getAutocompleteAttribute(widget.textInputConfiguration.autofillConfiguration.autofillHints.first);
       inputEl.id = autocomplete;
       inputEl.name = autocomplete;
       inputEl.autocomplete = autocomplete;
@@ -660,7 +598,7 @@ class _EditableWebState extends State<EditableWeb> {
 
   void setTextAreaElementAttributes(html.TextAreaElement textAreaEl) {
     textAreaEl.rows = _maxLines;
-    textAreaEl.readOnly = widget.readOnly;
+    textAreaEl.readOnly = widget.textInputConfiguration.readOnly;
     _textAreaElement = textAreaEl;
   }
 
@@ -679,40 +617,6 @@ class _EditableWebState extends State<EditableWeb> {
   }
 
   // --------------
-  /* Outgoing methods (to engine)
-  - TextInputControl should call these...how? 
-  - invoked using OptionalMethodChannel.invokeMethod
-  - TextInput.setClient -> no-op
-  - TextInput.show -> focus() to show keyboard
-  - TextInput.setEditingState -> inputEl.value = newValue
-  - TextInput.clearClient -> no-op
-  - TextInput.hide -> blur() to hide keyboard
-  */
-  // void setClient() {
-  //   // no-op
-  // }
-
-  // void clearClient() {
-  //   // no-op
-  // }
-
-  // void show() {
-  //   _inputEl.focus();
-  // }
-
-  // void hide() {
-  //   _inputEl.blur();
-  // }
-
-  // void setEditingState(TextEditingValue editingState) {
-  //   final html.InputElement element = _inputEl as html.InputElement;
-  //   final int minOffset = math.min(editingState.selection.baseOffset, editingState.selection.extentOffset);
-  //   final int maxOffset = math.max(editingState.selection.baseOffset, editingState.selection.extentOffset);
-  //   element.value = editingState.text;
-  //   element.setSelectionRange(minOffset, maxOffset);
-  // }
-
-  // --------------
   // Incoming methods
   /* Incoming methods (back to framework)
     - registered using MethodChannel.setMethodCallHandler
@@ -729,11 +633,11 @@ class _EditableWebState extends State<EditableWeb> {
   }
 
   void updateEditingStateWithTag() {
-    // ?
+    // autofill stuff?
   }
 
   void performAction(TextInputAction action) {
-    // TextInput.client?.performAction(action); // TODO just pass this from above.
+    widget.performAction(action);
   }
 
   void requestExistingInputState() {
@@ -741,7 +645,19 @@ class _EditableWebState extends State<EditableWeb> {
   }
 
   void onConnectionClosed() {
-    // no-op
+    // no-op?
+  }
+
+  void maybeSendAction(html.KeyboardEvent event) {
+    if (event.keyCode == html.KeyCode.ENTER) {
+      performAction(widget.textInputConfiguration.inputAction);
+
+      // Prevent the browser from inserting a new line when it's not a multiline input.
+      // note: taken from engine. Do we still need?
+      if (widget.textInputConfiguration.inputType != TextInputType.multiline) {
+        event.preventDefault();
+      }
+    }
   }
 
   @override
@@ -763,6 +679,7 @@ class _EditableWebState extends State<EditableWeb> {
 
   @override
   Widget build(BuildContext context) {
+    print('textInputConfiguration.autofillConfiguration.autofillHints: ${widget.textInputConfiguration.autofillConfiguration.autofillHints}');
     return SizedBox(
       height: sizedBoxHeight,
       child: HtmlElementView.fromTagName(
@@ -775,19 +692,6 @@ class _EditableWebState extends State<EditableWeb> {
   }
 }
 
-/*
-  Put inputEl 
-*/
-
-/*
-  There's only a single instance ever of WebTextInputControl.
-
-  We need a map of unique ids that are associated with an inputElement. 
-  Ids should be set on the client and incremented everytime there's an editabletext created
-  We register an input element when the platfrom view is created. To do this, we need to pass the unique
-  id created in EditableText to our platform view.  We can then set a "currentInputElement" in attach by 
-  referencing that TextInputClient id. 
-*/
 class WebTextInputControl with TextInputControl {
   WebTextInputControl._();
 
@@ -802,7 +706,6 @@ class WebTextInputControl with TextInputControl {
   // We should add the listener on `attach()` and remove it on `detach()` to make
   // sure that the listener is only ever added for the currently "active" input element.
   late void Function(html.Event) handleChangeRef;
-
 
   // html.HtmlElement? get _inputEl => TextInput._instance._inputEl;
 
@@ -820,6 +723,7 @@ class WebTextInputControl with TextInputControl {
     editableWebMap.remove(clientId);
   }
 
+  // TODO: We should set the configuration here.
   @override
   void attach(TextInputClient client, TextInputConfiguration configuration) {
     // set currentInputElement by grabbing it from the map. This is why we have to register
@@ -831,7 +735,7 @@ class WebTextInputControl with TextInputControl {
     // Add selectionchange listener. attach() seems like the best place to put this
     // as this is the agreed upon place with the framework where an input gets activated.
     // Other options: Listen to focus and blur changes in the EditableWeb widget and keep it there.
-    // Or we can keep logic within a method of our EditableWeb instance and just call it here. 
+    // Or we can keep logic within a method of our EditableWeb instance and just call it here.
     handleChangeRef = _currentEditableWebInstance!.handleChange;
     html.document.addEventListener('selectionchange', handleChangeRef);
   }
@@ -850,6 +754,8 @@ class WebTextInputControl with TextInputControl {
     _currentInputElement = null;
   }
 
+  // Currently, we directly set the visual appearance of our textfield by props
+  // directly passed into EditableWeb. Should we use this instead?
   @override
   void updateConfig(TextInputConfiguration configuration) {}
 
@@ -872,10 +778,8 @@ class WebTextInputControl with TextInputControl {
       case TextAffinity.downstream:
         direction = 'forward';
     }
-    element.value = value.text;
-    element.setSelectionRange(minOffset, maxOffset);
 
-    final TextEditingValue _lastEditingState = TextEditingValue(
+    final TextEditingValue lastEditingState = TextEditingValue(
       text: value.text,
       selection: TextSelection(
         baseOffset: value.selection.baseOffset,
@@ -883,7 +787,10 @@ class WebTextInputControl with TextInputControl {
       ),
     );
 
-    _currentEditableWebInstance!.lastEditingState = _lastEditingState;
+    element.value = value.text;
+    element.setSelectionRange(minOffset, maxOffset);
+
+    _currentEditableWebInstance!.lastEditingState = lastEditingState;
   }
 
   @override
@@ -893,8 +800,13 @@ class WebTextInputControl with TextInputControl {
 
   @override
   void hide() {
-    // no op? it goes detach -> hide.  So if we want to clear the currentInputElement,
-    // blur needs to be called on detach.
+    // We need to check if this is null because detach is called before hide.
+    // In detach, we blur and reset the _currentInputElement.
+    // This blur call is for instances where we blur to hide keyboard without
+    // detaching the connection (if such a circumstance exists).
+    if (_currentInputElement != null) {
+      (_currentInputElement! as html.InputElement).blur();
+    }
   }
 
   @override
@@ -909,6 +821,8 @@ class WebTextInputControl with TextInputControl {
   @override
   void setSelectionRects(List<SelectionRect> selectionRects) {}
 
+  // Currently, we directly set the style of our textfield by props
+  // directly passed into EditableWeb. Should we use this instead?
   @override
   void setStyle({
     required String? fontFamily,
@@ -918,6 +832,7 @@ class WebTextInputControl with TextInputControl {
     required TextAlign textAlign,
   }) {}
 
+  // no-op
   @override
   void requestAutofill() {}
 
