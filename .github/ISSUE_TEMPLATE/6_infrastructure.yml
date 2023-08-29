@@ -17,7 +17,7 @@ body:
     attributes:
       label: Is there an existing issue for this?
       options:
-        - label: I have searched the [existing infra issues](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3Ateam-infra)
+      - label: I have searched the [existing infra issues](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3Ateam-infra)
         required: true
   - type: dropdown
     attributes:
