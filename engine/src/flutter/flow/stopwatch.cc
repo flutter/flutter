@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/flow/instrumentation.h"
+#include "flutter/flow/stopwatch.h"
 
-#include <algorithm>
-
-#include "flutter/display_list/skia/dl_sk_canvas.h"
+#include "include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
