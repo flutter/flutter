@@ -101,7 +101,7 @@ class LinkedText extends StatefulWidget {
          ),
        ];
 
-  /// Create an instance of [LinkedText] where text matched by the given
+  /// Creates an instance of [LinkedText] where text matched by the given
   /// [RegExp] is made interactive.
   ///
   /// {@tool dartpad}
@@ -137,7 +137,7 @@ class LinkedText extends StatefulWidget {
          ),
        ];
 
-  /// Create an instance of [LinkedText] where the given [textLinkers] are
+  /// Creates an instance of [LinkedText] where the given [textLinkers] are
   /// applied.
   ///
   /// {@template flutter.widgets.LinkedText.textLinkers}
@@ -206,7 +206,7 @@ class LinkedText extends StatefulWidget {
       final TapGestureRecognizer recognizer = TapGestureRecognizer()
           ..onTap = () => onTap(linkString);
       return (
-        InlineLink(
+        InlineLinkSpan(
           recognizer: recognizer,
           text: displayString,
         ),

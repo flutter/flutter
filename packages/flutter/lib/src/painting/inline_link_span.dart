@@ -11,9 +11,9 @@ import 'text_span.dart';
 import 'text_style.dart';
 
 /// An inline, interactive text link.
-class InlineLink extends TextSpan {
-  /// Create an instance of [InlineLink].
-  InlineLink({
+class InlineLinkSpan extends TextSpan {
+  /// Create an instance of [InlineLinkSpan].
+  InlineLinkSpan({
     required String text,
     TextStyle? style,
     super.locale,

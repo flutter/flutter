@@ -36,7 +36,6 @@ class MyHomePage extends StatelessWidget {
   });
 
   final String title;
-  //static const String _text = '@FlutterDev is our account on Twitter, or go to flutter.dev';
   static const String _text = '@FlutterDev is our Twitter account, or find us at www.flutter.dev';
 
   void _handleTapTwitterHandle(BuildContext context, String linkText) {
@@ -99,7 +98,7 @@ class MyHomePage extends StatelessWidget {
                           final TapGestureRecognizer recognizer = TapGestureRecognizer()
                               ..onTap = () => _handleTapTwitterHandle(context, linkText);
                           return (
-                            InlineLink(
+                            InlineLinkSpan(
                               text: displayText,
                               style: const TextStyle(
                                 color: Color(0xff00aaaa),

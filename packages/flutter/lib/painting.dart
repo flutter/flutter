@@ -46,7 +46,7 @@ export 'src/painting/image_decoder.dart';
 export 'src/painting/image_provider.dart';
 export 'src/painting/image_resolution.dart';
 export 'src/painting/image_stream.dart';
-export 'src/painting/inline_link.dart';
+export 'src/painting/inline_link_span.dart';
 export 'src/painting/inline_span.dart';
 export 'src/painting/linear_border.dart';
 export 'src/painting/matrix_utils.dart';
