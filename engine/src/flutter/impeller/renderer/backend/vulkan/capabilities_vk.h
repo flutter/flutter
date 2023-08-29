@@ -58,9 +58,6 @@ class CapabilitiesVK final : public Capabilities,
   void SetOffscreenFormat(PixelFormat pixel_format) const;
 
   // |Capabilities|
-  bool HasThreadingRestrictions() const override;
-
-  // |Capabilities|
   bool SupportsOffscreenMSAA() const override;
 
   // |Capabilities|

@@ -15,8 +15,6 @@ class Capabilities {
  public:
   virtual ~Capabilities();
 
-  virtual bool HasThreadingRestrictions() const = 0;
-
   virtual bool SupportsOffscreenMSAA() const = 0;
 
   virtual bool SupportsSSBO() const = 0;
@@ -55,8 +53,6 @@ class CapabilitiesBuilder {
 
   ~CapabilitiesBuilder();
 
-  CapabilitiesBuilder& SetHasThreadingRestrictions(bool value);
-
   CapabilitiesBuilder& SetSupportsOffscreenMSAA(bool value);
 
   CapabilitiesBuilder& SetSupportsSSBO(bool value);
@@ -86,7 +82,6 @@ class CapabilitiesBuilder {
   std::unique_ptr<Capabilities> Build();
 
  private:
-  bool has_threading_restrictions_ = false;
   bool supports_offscreen_msaa_ = false;
   bool supports_ssbo_ = false;
   bool supports_buffer_to_texture_blits_ = false;
