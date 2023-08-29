@@ -1020,7 +1020,6 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   void _collapseSelectionAt({required Offset offset}) {
     _selectStartTo(offset: offset);
     _selectEndTo(offset: offset);
-    _selectionDelegate._flushInactiveSelections();
   }
 
   /// Selects a whole word at the `offset` location.
@@ -2397,6 +2396,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     } else {
       currentSelectionStartIndex = newIndex;
     }
+    _flushInactiveSelections();
     // The result can only be null if the loop went through the entire list
     // without any of the selection returned end or previous. In this case, the
     // caller of this method needs to find the next selectable in their list.
@@ -2465,6 +2465,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     } else {
       currentSelectionStartIndex = newIndex;
     }
+    _flushInactiveSelections();
     return finalResult!;
   }
 }

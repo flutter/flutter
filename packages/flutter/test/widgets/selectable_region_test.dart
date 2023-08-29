@@ -821,13 +821,13 @@ void main() {
       // Should clear the selection on paragraph 3.
       expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 12));
       expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 6));
-      expect(paragraph3.selections[0], const TextSelection.collapsed(offset: 0));
+      expect(paragraph3.selections.isEmpty, isTrue);
 
       await gesture.moveTo(textOffsetToPosition(paragraph1, 4));
       // Should clear the selection on paragraph 2.
       expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 7));
-      expect(paragraph2.selections[0], const TextSelection.collapsed(offset: 0));
-      expect(paragraph3.selections[0], const TextSelection.collapsed(offset: 0));
+      expect(paragraph2.selections.isEmpty, isTrue);
+      expect(paragraph3.selections.isEmpty, isTrue);
 
       await gesture.up();
     }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
