@@ -52,7 +52,6 @@ static std::unique_ptr<Capabilities> InferMetalCapabilities(
     id<MTLDevice> device,
     PixelFormat color_format) {
   return CapabilitiesBuilder()
-      .SetHasThreadingRestrictions(false)
       .SetSupportsOffscreenMSAA(true)
       .SetSupportsSSBO(true)
       .SetSupportsBufferToTextureBlits(true)

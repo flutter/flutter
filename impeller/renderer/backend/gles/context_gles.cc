@@ -62,7 +62,6 @@ ContextGLES::ContextGLES(std::unique_ptr<ProcTableGLES> gl,
   {
     device_capabilities_ =
         CapabilitiesBuilder()
-            .SetHasThreadingRestrictions(true)
             .SetSupportsOffscreenMSAA(false)
             .SetSupportsSSBO(false)
             .SetSupportsBufferToTextureBlits(false)
