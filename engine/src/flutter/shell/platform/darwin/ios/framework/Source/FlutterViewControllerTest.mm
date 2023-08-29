@@ -1858,8 +1858,15 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 #endif
   XCTAssertFalse(flutterViewController.isKeyboardInOrTransitioningFromBackground);
   OCMVerify([mockVC surfaceUpdated:YES]);
-  OCMVerify([mockVC goToApplicationLifecycle:@"AppLifecycleState.resumed"]);
-  [flutterViewController deregisterNotifications];
+  XCTestExpectation* timeoutApplicationLifeCycle =
+      [self expectationWithDescription:@"timeoutApplicationLifeCycle"];
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)),
+                 dispatch_get_main_queue(), ^{
+                   [timeoutApplicationLifeCycle fulfill];
+                   OCMVerify([mockVC goToApplicationLifecycle:@"AppLifecycleState.resumed"]);
+                   [flutterViewController deregisterNotifications];
+                 });
+  [self waitForExpectationsWithTimeout:5.0 handler:nil];
 }
 
 - (void)testLifeCycleNotificationWillResignActive {
@@ -1973,6 +1980,38 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 #endif
   OCMVerify([mockVC goToApplicationLifecycle:@"AppLifecycleState.inactive"]);
   [flutterViewController deregisterNotifications];
+}
+
+- (void)testLifeCycleNotificationCancelledInvalidResumed {
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* flutterViewController =
+      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  NSNotification* applicationDidBecomeActiveNotification =
+      [NSNotification notificationWithName:UIApplicationDidBecomeActiveNotification
+                                    object:nil
+                                  userInfo:nil];
+  NSNotification* applicationWillResignActiveNotification =
+      [NSNotification notificationWithName:UIApplicationWillResignActiveNotification
+                                    object:nil
+                                  userInfo:nil];
+  id mockVC = OCMPartialMock(flutterViewController);
+  [[NSNotificationCenter defaultCenter] postNotification:applicationDidBecomeActiveNotification];
+  [[NSNotificationCenter defaultCenter] postNotification:applicationWillResignActiveNotification];
+#if APPLICATION_EXTENSION_API_ONLY
+#else
+  OCMVerify([mockVC goToApplicationLifecycle:@"AppLifecycleState.inactive"]);
+#endif
+
+  XCTestExpectation* timeoutApplicationLifeCycle =
+      [self expectationWithDescription:@"timeoutApplicationLifeCycle"];
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)),
+                 dispatch_get_main_queue(), ^{
+                   OCMReject([mockVC goToApplicationLifecycle:@"AppLifecycleState.resumed"]);
+                   [timeoutApplicationLifeCycle fulfill];
+                   [flutterViewController deregisterNotifications];
+                 });
+  [self waitForExpectationsWithTimeout:5.0 handler:nil];
 }
 
 @end
