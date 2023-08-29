@@ -46,17 +46,14 @@ echo "Using dart from $DART_BIN"
 "$DART" --version
 echo ""
 
-"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/lib/ui"
-
 "$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/ci"
-
 "$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/flutter_frontend_server"
-
-(cd "$FLUTTER_DIR/tools/gen_web_locale_keymap"; "$DART" pub get)
-"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/tools"
-
-(cd "$FLUTTER_DIR/testing/skia_gold_client"; "$DART" pub get)
+"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/impeller/golden_tests_harvester"
+"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/impeller/tessellator/dart"
+"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/lib/gpu"
+"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/lib/ui"
 "$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/testing"
+"$DART" analyze --fatal-infos --fatal-warnings "$FLUTTER_DIR/tools"
 
 echo ""
 

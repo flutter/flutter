@@ -6,15 +6,30 @@ environment:
 
 dependencies:
   args: any
-  http: ^0.13.4
-  path: ^1.8.1
+  http: any
+  path: any
   meta: any
-
-dev_dependencies:
-  test: ^1.21.1
 
 dependency_overrides:
   args:
     path: ../../../third_party/dart/third_party/pkg/args
+  async:
+    path: ../../../third_party/dart/third_party/pkg/async
+  collection:
+    path: ../../../third_party/dart/third_party/pkg/collection
+  http:
+    path: ../../../third_party/dart/third_party/pkg/http/pkgs/http
+  http_parser:
+    path: ../../../third_party/dart/third_party/pkg/http_parser
   meta:
     path: ../../../third_party/dart/pkg/meta
+  path:
+    path: ../../../third_party/dart/third_party/pkg/path
+  source_span:
+    path: ../../../third_party/dart/third_party/pkg/source_span
+  string_scanner:
+    path: ../../../third_party/dart/third_party/pkg/string_scanner
+  term_glyph:
+    path: ../../../third_party/dart/third_party/pkg/term_glyph
+  typed_data:
+    path: ../../../third_party/dart/third_party/pkg/typed_data
