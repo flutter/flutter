@@ -923,6 +923,49 @@ void main() {
       await gesture.up();
     });
 
+    testWidgets('collapsing selection should clear selection of all other selectables', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: FocusNode(),
+            selectionControls: materialTextSelectionControls,
+            child: const Column(
+              children: <Widget>[
+                Text('How are you?'),
+                Text('Good, and you?'),
+                Text('Fine, thank you.'),
+              ],
+            ),
+          ),
+        ),
+      );
+      final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 2), kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(paragraph1.selections[0], const TextSelection.collapsed(offset: 2));
+
+      final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Good, and you?'), matching: find.byType(RichText)));
+      await gesture.down(textOffsetToPosition(paragraph2, 5));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(paragraph1.selections.isEmpty, isTrue);
+      expect(paragraph2.selections[0], const TextSelection.collapsed(offset: 5));
+
+      final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Fine, thank you.'), matching: find.byType(RichText)));
+      await gesture.down(textOffsetToPosition(paragraph3, 13));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(paragraph1.selections.isEmpty, isTrue);
+      expect(paragraph2.selections.isEmpty, isTrue);
+      expect(paragraph3.selections[0], const TextSelection.collapsed(offset: 13));
+    });
+
     testWidgetsWithLeakTracking('mouse can work with disabled container', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
       addTearDown(focusNode.dispose);
@@ -1168,10 +1211,11 @@ void main() {
         expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
         expect(find.byKey(toolbarKey), findsOneWidget);
 
-        // Clear selection.
+        // Collapse selection.
         await tester.tapAt(textOffsetToPosition(paragraph, 9));
         await tester.pump();
-        expect(paragraph.selections.isEmpty, true);
+        expect(paragraph.selections.isEmpty, isFalse);
+        expect(paragraph.selections[0], const TextSelection.collapsed(offset: 9));
         expect(find.byKey(toolbarKey), findsNothing);
       },
       variant: TargetPlatformVariant.only(TargetPlatform.iOS),

@@ -1018,6 +1018,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   void _collapseSelectionAtPosition({required Offset offset}) {
     _selectStartTo(offset: offset);
     _selectEndTo(offset: offset);
+    _selectionDelegate._flushInactiveSelections();
   }
 
   /// Selects a whole word at the `offset` location.
@@ -2087,6 +2088,34 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     return SelectedContent(
       plainText: buffer.toString(),
     );
+  }
+
+  // Clears the selection on all selectables not in the range of
+  // currentSelectionStartIndex..currentSelectionEndIndex.
+  //
+  // If one of the edges does not exist, then this method will clear the selection
+  // in all selectables except the existing edge.
+  //
+  // If neither of the edges exist this method immediately returns.
+  void _flushInactiveSelections() {
+    if (currentSelectionStartIndex == -1 && currentSelectionEndIndex == -1) {
+      return;
+    }
+    if (currentSelectionStartIndex == -1 || currentSelectionEndIndex == -1) {
+      final int skipIndex = currentSelectionStartIndex == -1 ? currentSelectionEndIndex : currentSelectionStartIndex;
+      selectables
+        .where((Selectable target) => target != selectables[skipIndex])
+        .forEach((Selectable target) => dispatchSelectionEventToChild(target, const ClearSelectionEvent()));
+      return;
+    }
+    final int skipStart = min(currentSelectionStartIndex, currentSelectionEndIndex);
+    final int skipEnd = max(currentSelectionStartIndex, currentSelectionEndIndex);
+    for (int index = 0; index < selectables.length; index += 1) {
+      if (index >= skipStart && index <= skipEnd) {
+        continue;
+      }
+      dispatchSelectionEventToChild(selectables[index], const ClearSelectionEvent());
+    }
   }
 
   /// Selects all contents of all selectables.
