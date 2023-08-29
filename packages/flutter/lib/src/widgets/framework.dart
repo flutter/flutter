@@ -1554,7 +1554,7 @@ abstract class ProxyWidget extends Widget {
 ///   }
 ///
 ///   @override
-///   Type get debugTypicalAncestorWidgetClass => FrogJar;
+///   String get debugTypicalAncestorWidgetClass => 'FrogJar';
 /// }
 /// ```
 /// {@end-tool}
