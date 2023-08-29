@@ -2211,7 +2211,7 @@ typedef struct {
 
   /// The callback invoked by the engine in response to a channel listener
   /// being registered on the framework side. The callback is invoked from
-  /// a task posted to the UI task runner.
+  /// a task posted to the platform thread.
   FlutterChannelUpdateCallback channel_update_callback;
 } FlutterProjectArgs;
 

@@ -1330,7 +1330,6 @@ void Shell::OnEngineHandlePlatformMessage(
 
 void Shell::OnEngineChannelUpdate(std::string name, bool listening) {
   FML_DCHECK(is_set_up_);
-  FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
 
   task_runners_.GetPlatformTaskRunner()->PostTask(
       [view = platform_view_->GetWeakPtr(), name = std::move(name), listening] {
