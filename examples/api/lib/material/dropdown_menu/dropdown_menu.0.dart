@@ -2,13 +2,41 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// which is the default configuration, and the second one has a filled input decoration.
-
 import 'package:flutter/material.dart';
 
-/// Flutter code sample for [DropdownMenu]s. The first dropdown menu has an outlined border.
+// Flutter code sample for [DropdownMenu]s. The first dropdown menu
+// has the default outlined border and demos using the
+// [DropdownMenuEntry] style parameter to customize its appearance.
+// The second dropdown menu customizes the appearance of the dropdown
+// menu's text field with the [InputDecorationTheme] parameter.
 
-void main() => runApp(const DropdownMenuExample());
+// DropdownMenuEntry labels and values for the first dropdown menu.
+enum ColorLabel {
+  blue('Blue', Colors.blue),
+  pink('Pink', Colors.pink),
+  green('Green', Colors.green),
+  yellow('Orange', Colors.orange),
+  grey('Grey', Colors.grey);
+
+  const ColorLabel(this.label, this.color);
+  final String label;
+  final Color color;
+}
+
+// DropdownMenuEntry labels and values for the second dropdown menu.
+enum IconLabel {
+  smile('Smile', Icons.sentiment_satisfied_outlined),
+  cloud(
+    'Cloud',
+    Icons.cloud_outlined,
+  ),
+  brush('Brush', Icons.brush_outlined),
+  heart('Heart', Icons.favorite);
+
+  const IconLabel(this.label, this.icon);
+  final String label;
+  final IconData icon;
+}
 
 class DropdownMenuExample extends StatefulWidget {
   const DropdownMenuExample({super.key});
@@ -113,28 +141,6 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
   }
 }
 
-enum ColorLabel {
-  blue('Blue', Colors.blue),
-  pink('Pink', Colors.pink),
-  green('Green', Colors.green),
-  yellow('Orange', Colors.orange),
-  grey('Grey', Colors.grey);
-
-  const ColorLabel(this.label, this.color);
-  final String label;
-  final Color color;
-}
-
-enum IconLabel {
-  smile('Smile', Icons.sentiment_satisfied_outlined),
-  cloud(
-    'Cloud',
-    Icons.cloud_outlined,
-  ),
-  brush('Brush', Icons.brush_outlined),
-  heart('Heart', Icons.favorite);
-
-  const IconLabel(this.label, this.icon);
-  final String label;
-  final IconData icon;
+void main() {
+  runApp(const DropdownMenuExample());
 }
