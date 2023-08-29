@@ -1289,3 +1289,12 @@ void pointer_data_packet() {
 
   signalNativeTest();
 }
+
+@pragma('vm:entry-point')
+void channel_listener_response() async {
+  channelBuffers.setListener('test/listen',
+      (ByteData? data, PlatformMessageResponseCallback callback) {
+    callback(null);
+  });
+  signalNativeTest();
+}

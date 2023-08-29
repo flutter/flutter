@@ -114,6 +114,8 @@ void PlatformView::UpdateSemantics(
     // NOLINTNEXTLINE(performance-unnecessary-value-param)
     CustomAccessibilityActionUpdates actions) {}
 
+void PlatformView::SendChannelUpdate(const std::string& name, bool listening) {}
+
 void PlatformView::HandlePlatformMessage(
     std::unique_ptr<PlatformMessage> message) {
   if (auto response = message->response()) {

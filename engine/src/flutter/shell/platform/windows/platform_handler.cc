@@ -498,7 +498,7 @@ void PlatformHandler::HandleMethodCall(
 
     SystemSoundPlay(sound_type.GetString(), std::move(result));
   } else if (method.compare(kInitializationCompleteMethod) == 0) {
-    engine_->OnApplicationLifecycleEnabled();
+    // Deprecated but should not cause an error.
     result->Success();
   } else {
     result->NotImplemented();
