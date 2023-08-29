@@ -198,7 +198,6 @@ class RenderSimpleBuilderTableViewport extends RenderTwoDimensionalViewport {
 
   @override
   void setupParentData(RenderBox child) {
-    print('SETUPPARENTDATA, child: $child');
     if (child.parentData is! TestExtendedParentData) {
       child.parentData = TestExtendedParentData();
     }
@@ -501,7 +500,6 @@ class TestParentDataWidget extends ParentDataWidget<TestExtendedParentData> {
 
   @override
   void applyParentData(RenderObject renderObject) {
-    print('APPLY PARENT DATA');
     assert(renderObject.parentData is TestExtendedParentData);
     final TestExtendedParentData parentData = renderObject.parentData! as TestExtendedParentData;
     parentData.testValue = testValue;

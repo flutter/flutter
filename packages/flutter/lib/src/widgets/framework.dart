@@ -1587,7 +1587,6 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
   /// This is called just before [applyParentData] is invoked with the same
   /// [RenderObject] provided to that method.
   bool debugIsValidRenderObject(RenderObject renderObject) {
-    print('debugIsValidRenderObject, renderObject: $renderObject, parentData: ${renderObject.parentData}, T: $T');
     assert(T != dynamic);
     assert(T != ParentData);
     return renderObject.parentData is T;
@@ -5819,7 +5818,6 @@ class ParentDataElement<T extends ParentData> extends ProxyElement {
       if (child is RenderObjectElement) {
         child._updateParentData(widget);
       } else {
-        assert(child is! ParentDataElement<ParentData>);
         child.visitChildren(applyParentDataToChild);
       }
     }
@@ -6435,7 +6433,6 @@ abstract class RenderObjectElement extends Element {
   }
 
   void _updateParentData(ParentDataWidget<ParentData> parentDataWidget) {
-    print('_updateParentData, parentDataWidget: $parentDataWidget, renderObject: $renderObject');
     bool applyParentData = true;
     assert(() {
       try {
@@ -6500,7 +6497,6 @@ abstract class RenderObjectElement extends Element {
     }());
     _ancestorRenderObjectElement?.insertRenderObjectChild(renderObject, newSlot);
     final List<ParentDataElement<ParentData>> parentDataElements = _findAncestorParentDataElements();
-    print('PARENTDATAELEMENTS: $parentDataElements');
     for (final ParentDataElement<ParentData> parentDataElement in parentDataElements) {
       _updateParentData(parentDataElement.widget as ParentDataWidget<ParentData>);
     }

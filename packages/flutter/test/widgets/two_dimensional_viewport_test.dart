@@ -308,6 +308,7 @@ void main() {
         final TwoDimensionalChildBuilderDelegate builderDelegate = TwoDimensionalChildBuilderDelegate(
           maxXIndex: 5,
           maxYIndex: 5,
+          addRepaintBoundaries: false,
           builder: (BuildContext context, ChildVicinity vicinity) {
             // The delegate will add a KeepAlive ParentDataWidget, this add an
             // additional ParentDataWidget.
