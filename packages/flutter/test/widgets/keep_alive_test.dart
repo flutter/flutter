@@ -5,7 +5,6 @@
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
@@ -52,7 +51,7 @@ void main() {
     final KeepAlive keepAlive = KeepAlive(keepAlive: false, child: Container());
     expect(
       keepAlive.debugTypicalAncestorWidgetClass,
-      'RenderAbstractViewport widget',
+      'SliverWithKeepAliveWidget or TwoDimensionalViewport',
     );
   });
 

@@ -1368,7 +1368,7 @@ class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
   bool debugCanApplyOutOfTurn() => keepAlive;
 
   @override
-  String get debugTypicalAncestorWidgetClass => 'RenderAbstractViewport widget';
+  String get debugTypicalAncestorWidgetClass => 'SliverWithKeepAliveWidget or TwoDimensionalViewport';
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
