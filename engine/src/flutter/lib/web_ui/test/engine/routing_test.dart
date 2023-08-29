@@ -27,14 +27,14 @@ void main() {
 }
 
 void testMain() {
-  late EngineSingletonFlutterWindow window;
+  late EngineFlutterWindow window;
 
   setUpAll(() async {
     await initializeEngine();
   });
 
   setUp(() {
-    window = EngineSingletonFlutterWindow(0, EnginePlatformDispatcher.instance);
+    window = EngineFlutterWindow(0, EnginePlatformDispatcher.instance);
   });
 
   tearDown(() async {
