@@ -397,11 +397,6 @@ bool CapabilitiesVK::SetPhysicalDevice(const vk::PhysicalDevice& device) {
 }
 
 // |Capabilities|
-bool CapabilitiesVK::HasThreadingRestrictions() const {
-  return false;
-}
-
-// |Capabilities|
 bool CapabilitiesVK::SupportsOffscreenMSAA() const {
   return true;
 }

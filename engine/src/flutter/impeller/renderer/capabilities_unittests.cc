@@ -18,7 +18,6 @@ namespace testing {
     ASSERT_EQ(opposite->name(), !default_value);                             \
   }
 
-CAPABILITY_TEST(HasThreadingRestrictions, false);
 CAPABILITY_TEST(SupportsOffscreenMSAA, false);
 CAPABILITY_TEST(SupportsSSBO, false);
 CAPABILITY_TEST(SupportsBufferToTextureBlits, false);

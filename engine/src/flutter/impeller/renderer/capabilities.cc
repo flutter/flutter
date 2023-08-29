@@ -16,11 +16,6 @@ class StandardCapabilities final : public Capabilities {
   ~StandardCapabilities() override = default;
 
   // |Capabilities|
-  bool HasThreadingRestrictions() const override {
-    return has_threading_restrictions_;
-  }
-
-  // |Capabilities|
   bool SupportsOffscreenMSAA() const override {
     return supports_offscreen_msaa_;
   }
@@ -81,8 +76,7 @@ class StandardCapabilities final : public Capabilities {
   }
 
  private:
-  StandardCapabilities(bool has_threading_restrictions,
-                       bool supports_offscreen_msaa,
+  StandardCapabilities(bool supports_offscreen_msaa,
                        bool supports_ssbo,
                        bool supports_buffer_to_texture_blits,
                        bool supports_texture_to_texture_blits,
@@ -95,8 +89,7 @@ class StandardCapabilities final : public Capabilities {
                        bool supports_memoryless_textures,
                        PixelFormat default_color_format,
                        PixelFormat default_stencil_format)
-      : has_threading_restrictions_(has_threading_restrictions),
-        supports_offscreen_msaa_(supports_offscreen_msaa),
+      : supports_offscreen_msaa_(supports_offscreen_msaa),
         supports_ssbo_(supports_ssbo),
         supports_buffer_to_texture_blits_(supports_buffer_to_texture_blits),
         supports_texture_to_texture_blits_(supports_texture_to_texture_blits),
@@ -113,7 +106,6 @@ class StandardCapabilities final : public Capabilities {
 
   friend class CapabilitiesBuilder;
 
-  bool has_threading_restrictions_ = false;
   bool supports_offscreen_msaa_ = false;
   bool supports_ssbo_ = false;
   bool supports_buffer_to_texture_blits_ = false;
@@ -134,12 +126,6 @@ class StandardCapabilities final : public Capabilities {
 CapabilitiesBuilder::CapabilitiesBuilder() = default;
 
 CapabilitiesBuilder::~CapabilitiesBuilder() = default;
-
-CapabilitiesBuilder& CapabilitiesBuilder::SetHasThreadingRestrictions(
-    bool value) {
-  has_threading_restrictions_ = value;
-  return *this;
-}
 
 CapabilitiesBuilder& CapabilitiesBuilder::SetSupportsOffscreenMSAA(bool value) {
   supports_offscreen_msaa_ = value;
@@ -217,7 +203,6 @@ CapabilitiesBuilder& CapabilitiesBuilder::SetSupportsMemorylessTextures(
 
 std::unique_ptr<Capabilities> CapabilitiesBuilder::Build() {
   return std::unique_ptr<StandardCapabilities>(new StandardCapabilities(  //
-      has_threading_restrictions_,                                        //
       supports_offscreen_msaa_,                                           //
       supports_ssbo_,                                                     //
       supports_buffer_to_texture_blits_,                                  //
