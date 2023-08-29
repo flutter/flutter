@@ -1,95 +1,62 @@
 // ignore_for_file: public_member_api_docs
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:html' as html;
+import 'dart:math' as math;
 import 'dart:ui' as ui; // change to ui_web when you update
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'dart:math' as math;
 
 class EditableWeb extends StatefulWidget {
   const EditableWeb({
     super.key,
-    required this.inlineSpan,
-    required this.value,
-    required this.startHandleLayerLink,
-    required this.endHandleLayerLink,
+    this.textStyle,
     required this.cursorColor,
-    this.backgroundCursorColor,
     required this.showCursor,
     required this.forceLine,
-    this.textHeightBehavior,
-    required this.textWidthBasis,
     required this.hasFocus,
     required this.maxLines,
     this.minLines,
     required this.expands,
-    this.strutStyle,
     this.selectionColor,
     required this.textScaler,
     required this.textAlign,
     required this.textDirection,
     this.locale,
-    required this.obscuringCharacter,
     required this.offset,
     this.rendererIgnoresPointer = false,
-    required this.cursorWidth,
-    this.cursorHeight,
-    this.cursorRadius,
-    required this.cursorOffset,
-    required this.paintCursorAboveText,
-    this.selectionHeightStyle = ui.BoxHeightStyle.tight,
-    this.selectionWidthStyle = ui.BoxWidthStyle.tight,
-    required this.textSelectionDelegate,
     required this.devicePixelRatio,
-    this.promptRectRange,
-    this.promptRectColor,
     required this.clipBehavior,
     required this.requestKeyboard,
     required this.clientId,
     required this.performAction,
     required this.textInputConfiguration, // contains a bunch of things like obscureText, readOnly, autofillHints, etc.
+    this.currentAutofillScope, // contains a bunch of things like obscureText, readOnly, autofillHints, etc.
   });
 
-  final InlineSpan inlineSpan;
-  final TextEditingValue value;
+  final TextStyle? textStyle;
   final Color cursorColor;
-  final LayerLink startHandleLayerLink;
-  final LayerLink endHandleLayerLink;
-  final Color? backgroundCursorColor;
   final ValueNotifier<bool> showCursor;
   final bool forceLine;
   final bool hasFocus;
   final int? maxLines;
   final int? minLines;
   final bool expands;
-  final StrutStyle? strutStyle;
   final Color? selectionColor;
   final TextScaler textScaler;
   final TextAlign textAlign;
   final TextDirection textDirection;
   final Locale? locale;
-  final String obscuringCharacter;
-  final TextHeightBehavior? textHeightBehavior;
-  final TextWidthBasis textWidthBasis;
   final ViewportOffset offset;
   final bool rendererIgnoresPointer;
-  final double cursorWidth;
-  final double? cursorHeight;
-  final Radius? cursorRadius;
-  final Offset cursorOffset;
-  final bool paintCursorAboveText;
-  final ui.BoxHeightStyle selectionHeightStyle;
-  final ui.BoxWidthStyle selectionWidthStyle;
-  final TextSelectionDelegate textSelectionDelegate;
   final double devicePixelRatio;
-  final TextRange? promptRectRange;
-  final Color? promptRectColor;
   final Clip clipBehavior;
   final void Function() requestKeyboard;
   final int clientId;
   final void Function(TextInputAction) performAction;
   final TextInputConfiguration textInputConfiguration;
+  final AutofillScope? currentAutofillScope;
 
   @override
   State<EditableWeb> createState() => _EditableWebState();
@@ -117,21 +84,13 @@ class _EditableWebState extends State<EditableWeb> {
     super.dispose();
   }
 
-  String getElementValue(html.HtmlElement inputEl) {
-    return (inputEl as html.InputElement).value!;
-  }
-
-  void setElementValue(String value) {
-    (_inputEl as html.InputElement).value = value;
-  }
-
   String colorToCss(Color color) {
     // hard coding opacity to 1 for now because EditableText passes cursorColor with 0 opacity.
     return 'rgba(${color.red}, ${color.green}, ${color.blue}, ${color.opacity == 0 ? 1 : color.opacity})';
   }
 
   String textStyleToCss(TextStyle style) {
-    List<String> cssProperties = [];
+    final List<String> cssProperties = <String>[];
 
     if (style.color != null) {
       cssProperties.add('color: ${colorToCss(style.color!)}');
@@ -163,8 +122,8 @@ class _EditableWebState extends State<EditableWeb> {
     }
 
     if (style.decoration != null) {
-      List<String> textDecorations = [];
-      TextDecoration decoration = style.decoration!;
+      final List<String> textDecorations = <String>[];
+      final TextDecoration decoration = style.decoration!;
 
       if (decoration == TextDecoration.none) {
         textDecorations.add('none');
@@ -282,22 +241,22 @@ class _EditableWebState extends State<EditableWeb> {
 
     switch (inputType) {
       case TextInputType.number:
-        return {
+        return <String, String>{
           'type': 'number',
           'inputmode': isDecimal ? 'decimal' : 'numeric'
         };
       case TextInputType.phone:
-        return {'type': 'tel', 'inputmode': 'tel'};
+        return <String, String>{'type': 'tel', 'inputmode': 'tel'};
       case TextInputType.emailAddress:
-        return {'type': 'email', 'inputmode': 'email'};
+        return <String, String>{'type': 'email', 'inputmode': 'email'};
       case TextInputType.url:
-        return {'type': 'url', 'inputmode': 'url'};
+        return <String, String>{'type': 'url', 'inputmode': 'url'};
       case TextInputType.none:
-        return {'type': 'text', 'inputmode': 'none'};
+        return <String, String>{'type': 'text', 'inputmode': 'none'};
       case TextInputType.text:
-        return {'type': 'text', 'inputmode': 'text'};
+        return <String, String>{'type': 'text', 'inputmode': 'text'};
       default:
-        return {'type': 'text', 'inputmode': 'text'};
+        return <String, String>{'type': 'text', 'inputmode': 'text'};
     }
   }
 
@@ -443,8 +402,8 @@ class _EditableWebState extends State<EditableWeb> {
 
   void setElementStyles(html.HtmlElement inputEl) {
     // style based on TextStyle
-    if (widget.inlineSpan.style != null) {
-      inputEl.style.cssText = textStyleToCss(widget.inlineSpan.style!);
+    if (widget.textStyle != null) {
+      inputEl.style.cssText = textStyleToCss(widget.textStyle!);
     }
 
     // reset input styles
@@ -515,11 +474,11 @@ class _EditableWebState extends State<EditableWeb> {
 
   void setElementListeners(html.HtmlElement inputEl) {
     // listen for events
-    inputEl.onInput.listen((e) {
+    inputEl.onInput.listen((html.Event e) {
       handleChange(e);
     });
 
-    inputEl.onFocus.listen((e) {
+    inputEl.onFocus.listen((html.Event e) {
       widget.requestKeyboard();
 
       if (widget.selectionColor != null) {
@@ -535,6 +494,7 @@ class _EditableWebState extends State<EditableWeb> {
     });
 
     inputEl.onKeyDown.listen((html.KeyboardEvent event) {
+      print('KEYDOWN');
       maybeSendAction(event);
     });
 
@@ -560,11 +520,11 @@ class _EditableWebState extends State<EditableWeb> {
 
     setAutocapitalizeAttribute(inputEl);
 
-    inputEl.setAttribute(
-        'autocorrect', widget.textInputConfiguration.autocorrect ? 'on' : 'off');
-    
+    inputEl.setAttribute('autocorrect',
+        widget.textInputConfiguration.autocorrect ? 'on' : 'off');
 
-    final String? enterKeyHint = getEnterKeyHint(widget.textInputConfiguration.inputAction);
+    final String? enterKeyHint =
+        getEnterKeyHint(widget.textInputConfiguration.inputAction);
 
     if (enterKeyHint != null) {
       inputEl.setAttribute('enterkeyhint', enterKeyHint);
@@ -584,10 +544,11 @@ class _EditableWebState extends State<EditableWeb> {
       inputEl.inputMode = attributes['inputmode'];
     }
 
-    if (widget.textInputConfiguration.autofillConfiguration.autofillHints.isNotEmpty) {
+    if (widget.textInputConfiguration.autofillConfiguration.autofillHints
+        .isNotEmpty) {
       // browsers can only use one autocomplete attribute
-      final String autocomplete =
-          _getAutocompleteAttribute(widget.textInputConfiguration.autofillConfiguration.autofillHints.first);
+      final String autocomplete = _getAutocompleteAttribute(widget
+          .textInputConfiguration.autofillConfiguration.autofillHints.first);
       inputEl.id = autocomplete;
       inputEl.name = autocomplete;
       inputEl.autocomplete = autocomplete;
@@ -602,6 +563,54 @@ class _EditableWebState extends State<EditableWeb> {
     _textAreaElement = textAreaEl;
   }
 
+  void setupAutofill(html.HtmlElement inputEl) {
+    // No autofill group, nothing to setup
+    if (widget.currentAutofillScope == null) {
+      return;
+    }
+
+    // Create a unique id for the form id and form attribute
+    // Taken from engine.
+    final Iterable<AutofillClient> autofillClients =
+        widget.currentAutofillScope!.autofillClients;
+    final List<String> ids = List<String>.empty(growable: true);
+
+    for (final AutofillClient autofillClient in autofillClients) {
+      ids.add(autofillClient.autofillId);
+    }
+
+    ids.sort();
+    final StringBuffer idBuffer = StringBuffer();
+
+    // Add a separator between element identifiers.
+    for (final String id in ids) {
+      if (idBuffer.length > 0) {
+        idBuffer.write('*');
+      }
+      idBuffer.write(id);
+    }
+
+    final String formId = idBuffer.toString();
+
+    // Only create form if it doesn't already exist.
+    if (html.document.getElementById(formId) == null) {
+      final html.FormElement formElement = html.FormElement();
+      formElement.id = formId;
+
+      // Append the form to the glasspane
+      html.document.querySelector('flt-glass-pane')!.append(formElement);
+    }
+
+    final String autofillId =
+        widget.textInputConfiguration.autofillConfiguration.uniqueIdentifier;
+
+    // verify the current element is inside the autofill group.
+    if (widget.currentAutofillScope?.getAutofillClient(autofillId) != null) {
+      // associate with created form using form attribute and formId.
+      inputEl.setAttribute('form', formId);
+    }
+  }
+
   void initializePlatformView(html.HtmlElement inputEl) {
     _maxLines > 1
         ? setTextAreaElementAttributes(inputEl as html.TextAreaElement)
@@ -609,6 +618,7 @@ class _EditableWebState extends State<EditableWeb> {
     setElementStyles(inputEl);
     setElementListeners(inputEl);
     setGeneralAttributes(inputEl);
+    setupAutofill(inputEl);
 
     _inputEl = inputEl;
 
@@ -616,10 +626,7 @@ class _EditableWebState extends State<EditableWeb> {
     WebTextInputControl.instance.registerInstance(widget.clientId, this);
   }
 
-  // --------------
-  // Incoming methods
   /* Incoming methods (back to framework)
-    - registered using MethodChannel.setMethodCallHandler
     - TextInputClient.updateEditingState -> send new editing state
     -- right now, this calls _updateEditingValue (on TextInput instance), which calls
     -- updateEditingValue (on the TextInputClient, which is EditableText). 
@@ -649,6 +656,7 @@ class _EditableWebState extends State<EditableWeb> {
   }
 
   void maybeSendAction(html.KeyboardEvent event) {
+    print('event ${event}');
     if (event.keyCode == html.KeyCode.ENTER) {
       performAction(widget.textInputConfiguration.inputAction);
 
@@ -663,6 +671,10 @@ class _EditableWebState extends State<EditableWeb> {
   @override
   void didUpdateWidget(EditableWeb oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    /*
+      should we listen to the hasFocus attribute? Focus seems fine for now. 
+    */
 
     // we do this because widget can sometimes selectionColor can be passed
     // as conditionally null depending on some state that's determined in a layer
@@ -679,7 +691,6 @@ class _EditableWebState extends State<EditableWeb> {
 
   @override
   Widget build(BuildContext context) {
-    print('textInputConfiguration.autofillConfiguration.autofillHints: ${widget.textInputConfiguration.autofillConfiguration.autofillHints}');
     return SizedBox(
       height: sizedBoxHeight,
       child: HtmlElementView.fromTagName(
@@ -761,7 +772,7 @@ class WebTextInputControl with TextInputControl {
 
   @override
   void setEditingState(TextEditingValue value) {
-    print('WebTextInputControl.setEditingState()');
+    print('WebTextInputControl.setEditingState() ${value}');
     final html.InputElement element =
         _currentInputElement! as html.InputElement;
     final int minOffset =

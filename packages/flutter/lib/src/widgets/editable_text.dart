@@ -4699,6 +4699,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       (null, final double textScaleFactor) => TextScaler.linear(textScaleFactor),
       (null, null)                         => MediaQuery.textScalerOf(context),
     };
+    final InlineSpan inlineSpan = buildTextSpan();
 
     return _CompositionCallback(
       compositeCallback: _compositeCallback,
@@ -4784,12 +4785,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                               children: <Widget>[
                               Positioned.fill(
                                 child: EditableWeb(
-                                  startHandleLayerLink: _startHandleLayerLink,
-                                  endHandleLayerLink: _endHandleLayerLink,
-                                  inlineSpan: buildTextSpan(),
-                                  value: _value,
+                                  textStyle: inlineSpan.style,
                                   cursorColor: _cursorColor,
-                                  backgroundCursorColor: widget.backgroundCursorColor,
                                   showCursor: EditableText.debugDeterministicCursor
                                       ? ValueNotifier<bool>(widget.showCursor)
                                       : _cursorVisibilityNotifier,
@@ -4798,7 +4795,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                                   maxLines: widget.maxLines,
                                   minLines: widget.minLines,
                                   expands: widget.expands,
-                                  strutStyle: widget.strutStyle,
                                   selectionColor: _selectionOverlay?.spellCheckToolbarIsVisible ?? false
                                       ? _spellCheckConfiguration.misspelledSelectionColor ?? widget.selectionColor
                                       : widget.selectionColor,
@@ -4806,22 +4802,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                                   textAlign: widget.textAlign,
                                   textDirection: _textDirection,
                                   locale: widget.locale,
-                                  textHeightBehavior: widget.textHeightBehavior ?? DefaultTextHeightBehavior.maybeOf(context),
-                                  textWidthBasis: widget.textWidthBasis,
-                                  obscuringCharacter: widget.obscuringCharacter,
                                   offset: offset,
                                   rendererIgnoresPointer: widget.rendererIgnoresPointer,
-                                  cursorWidth: widget.cursorWidth,
-                                  cursorHeight: widget.cursorHeight,
-                                  cursorRadius: widget.cursorRadius,
-                                  cursorOffset: widget.cursorOffset ?? Offset.zero,
-                                  selectionHeightStyle: widget.selectionHeightStyle,
-                                  selectionWidthStyle: widget.selectionWidthStyle,
-                                  paintCursorAboveText: widget.paintCursorAboveText,
-                                  textSelectionDelegate: this,
                                   devicePixelRatio: _devicePixelRatio,
-                                  promptRectRange: _currentPromptRectRange,
-                                  promptRectColor: widget.autocorrectionTextRectColor,
                                   clipBehavior: widget.clipBehavior,
                                   requestKeyboard: requestKeyboard,
                                   clientId: clientId, // to register 
@@ -4829,14 +4812,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                                   // Have to use _effectiveAutofillClient.textInputConfiguration as it is the most accurate.
                                   // autofillHints always end up empty [] because of the way props are being passed from EditableText wrappers like TextField()
                                   // Instead, it exists in the autofillClient  
-                                  textInputConfiguration: _effectiveAutofillClient.textInputConfiguration 
+                                  textInputConfiguration: _effectiveAutofillClient.textInputConfiguration,
+                                  currentAutofillScope: currentAutofillScope
                                 ),
                               ),
                               _Editable(
                               key: _editableKey,
                               startHandleLayerLink: _startHandleLayerLink,
                               endHandleLayerLink: _endHandleLayerLink,
-                              inlineSpan: buildTextSpan(),
+                              inlineSpan: inlineSpan,
                               value: _value,
                               cursorColor: _cursorColor,
                               backgroundCursorColor: widget.backgroundCursorColor,
@@ -4882,7 +4866,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                             key: _editableKey,
                             startHandleLayerLink: _startHandleLayerLink,
                             endHandleLayerLink: _endHandleLayerLink,
-                            inlineSpan: buildTextSpan(),
+                            inlineSpan: inlineSpan,
                             value: _value,
                             cursorColor: _cursorColor,
                             backgroundCursorColor: widget.backgroundCursorColor,
