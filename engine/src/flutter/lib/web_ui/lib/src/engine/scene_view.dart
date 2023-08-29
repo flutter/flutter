@@ -163,11 +163,13 @@ final class PictureSliceContainer extends SliceContainer {
       final DomCSSStyleDeclaration style = canvas.style;
       final double logicalWidth = roundedOutBounds.width / window.devicePixelRatio;
       final double logicalHeight = roundedOutBounds.height / window.devicePixelRatio;
+      final double logicalLeft = roundedOutBounds.left / window.devicePixelRatio;
+      final double logicalTop = roundedOutBounds.top / window.devicePixelRatio;
       style.width = '${logicalWidth}px';
       style.height = '${logicalHeight}px';
       style.position = 'absolute';
-      style.left = '${roundedOutBounds.left}px';
-      style.top = '${roundedOutBounds.top}px';
+      style.left = '${logicalLeft}px';
+      style.top = '${logicalTop}px';
       canvas.width = roundedOutBounds.width.ceilToDouble();
       canvas.height = roundedOutBounds.height.ceilToDouble();
     }
@@ -221,8 +223,10 @@ final class PlatformViewContainer extends SliceContainer {
       style.position = 'absolute';
 
       final ui.Offset? offset = _styling!.position.offset;
-      style.left = '${offset?.dx ?? 0}px';
-      style.top = '${offset?.dy ?? 0}px';
+      final double logicalLeft = (offset?.dx ?? 0) / window.devicePixelRatio;
+      final double logicalTop = (offset?.dy ?? 0) / window.devicePixelRatio;
+      style.left = '${logicalLeft}px';
+      style.top = '${logicalTop}px';
 
       final Matrix4? transform = _styling!.position.transform;
       style.transform = transform != null ? float64ListToCssTransform3d(transform.storage) : '';
