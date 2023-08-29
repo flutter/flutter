@@ -666,6 +666,19 @@ void main() {
       expect(pressedKeys, isEmpty);
     });
 
+    test('$ShortcutManager dispatches object creation in constructor', () {
+      int eventCount = 0;
+      void listener(ObjectEvent event) => eventCount++;
+      MemoryAllocations.instance.addListener(listener);
+
+      final ShortcutManager registry = ShortcutManager();
+
+      expect(eventCount, 1);
+
+      registry.dispose();
+      MemoryAllocations.instance.removeListener(listener);
+    });
+
     testWidgets("Shortcuts passes to the next Shortcuts widget if it doesn't map the key", (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       final List<LogicalKeyboardKey> pressedKeys = <LogicalKeyboardKey>[];
@@ -1853,20 +1866,17 @@ void main() {
       token.dispose();
     });
 
-    testWidgets('dispatches object creation in constructor', (WidgetTester tester) async {
-      final MemoryAllocations ma = MemoryAllocations.instance;
-      assert(!ma.hasListeners);
+    test('dispatches object creation in constructor', () {
       int eventCount = 0;
       void listener(ObjectEvent event) => eventCount++;
-      ma.addListener(listener);
+      MemoryAllocations.instance.addListener(listener);
 
       final ShortcutRegistry registry = ShortcutRegistry();
 
       expect(eventCount, 1);
 
       registry.dispose();
-      ma.removeListener(listener);
-      assert(!ma.hasListeners);
+      MemoryAllocations.instance.removeListener(listener);
     });
   });
 }

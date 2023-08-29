@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:js_interop';
 import 'dart:ui' as ui;
+import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/foundation.dart';
 import 'package:web/web.dart' as web;
@@ -14,9 +15,6 @@ import 'image_stream.dart';
 
 /// Creates a type for an overridable factory function for testing purposes.
 typedef HttpRequestFactory = web.XMLHttpRequest Function();
-
-// Method signature for _loadAsync decode callbacks.
-typedef _SimpleDecoderCallback = Future<ui.Codec> Function(ui.ImmutableBuffer buffer);
 
 /// Default HTTP client.
 web.XMLHttpRequest _httpClient() {
@@ -58,6 +56,23 @@ class NetworkImage
   }
 
   @override
+  ImageStreamCompleter load(image_provider.NetworkImage key, image_provider.DecoderCallback decode) {
+    // Ownership of this controller is handed off to [_loadAsync]; it is that
+    // method's responsibility to close the controller's stream when the image
+    // has been loaded or an error is thrown.
+    final StreamController<ImageChunkEvent> chunkEvents =
+        StreamController<ImageChunkEvent>();
+
+    return MultiFrameImageStreamCompleter(
+      chunkEvents: chunkEvents.stream,
+      codec: _loadAsync(key as NetworkImage, null, null, decode, chunkEvents),
+      scale: key.scale,
+      debugLabel: key.url,
+      informationCollector: _imageStreamInformationCollector(key),
+    );
+  }
+
+  @override
   ImageStreamCompleter loadBuffer(image_provider.NetworkImage key, image_provider.DecoderBufferCallback decode) {
     // Ownership of this controller is handed off to [_loadAsync]; it is that
     // method's responsibility to close the controller's stream when the image
@@ -67,7 +82,7 @@ class NetworkImage
 
     return MultiFrameImageStreamCompleter(
       chunkEvents: chunkEvents.stream,
-      codec: _loadAsync(key as NetworkImage, decode, chunkEvents),
+      codec: _loadAsync(key as NetworkImage, null, decode, null, chunkEvents),
       scale: key.scale,
       debugLabel: key.url,
       informationCollector: _imageStreamInformationCollector(key),
@@ -83,7 +98,7 @@ class NetworkImage
 
     return MultiFrameImageStreamCompleter(
       chunkEvents: chunkEvents.stream,
-      codec: _loadAsync(key as NetworkImage, decode, chunkEvents),
+      codec: _loadAsync(key as NetworkImage, decode, null, null, chunkEvents),
       scale: key.scale,
       debugLabel: key.url,
       informationCollector: _imageStreamInformationCollector(key),
@@ -103,11 +118,13 @@ class NetworkImage
   }
 
   // Html renderer does not support decoding network images to a specified size. The decode parameter
-  // here is ignored and the web-only `ui.webOnlyInstantiateImageCodecFromUrl` will be used
-  // directly in place of the typical `instantiateImageCodec` method.
+  // here is ignored and `ui_web.createImageCodecFromUrl` will be used directly
+  // in place of the typical `instantiateImageCodec` method.
   Future<ui.Codec> _loadAsync(
     NetworkImage key,
-    _SimpleDecoderCallback decode,
+    image_provider.ImageDecoderCallback? decode,
+    image_provider.DecoderBufferCallback? decodeBufferDeprecated,
+    image_provider.DecoderCallback? decodeDeprecated,
     StreamController<ImageChunkEvent> chunkEvents,
   ) async {
     assert(key == this);
@@ -117,7 +134,7 @@ class NetworkImage
     final bool containsNetworkImageHeaders = key.headers?.isNotEmpty ?? false;
 
     // We use a different method when headers are set because the
-    // `ui.webOnlyInstantiateImageCodecFromUrl` method is not capable of handling headers.
+    // `ui_web.createImageCodecFromUrl` method is not capable of handling headers.
     if (isCanvasKit || containsNetworkImageHeaders) {
       final Completer<web.XMLHttpRequest> completer =
           Completer<web.XMLHttpRequest>();
@@ -162,18 +179,25 @@ class NetworkImage
         throw image_provider.NetworkImageLoadException(
             statusCode: request.status, uri: resolved);
       }
-      return decode(await ui.ImmutableBuffer.fromUint8List(bytes));
+
+      if (decode != null) {
+        final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+        return decode(buffer);
+      } else if (decodeBufferDeprecated != null) {
+        final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+        return decodeBufferDeprecated(buffer);
+      } else {
+        assert(decodeDeprecated != null);
+        return decodeDeprecated!(bytes);
+      }
     } else {
-      // This API only exists in the web engine implementation and is not
-      // contained in the analyzer summary for Flutter.
-      // ignore: undefined_function, avoid_dynamic_calls
-      return ui.webOnlyInstantiateImageCodecFromUrl(
+      return ui_web.createImageCodecFromUrl(
         resolved,
         chunkCallback: (int bytes, int total) {
           chunkEvents.add(ImageChunkEvent(
               cumulativeBytesLoaded: bytes, expectedTotalBytes: total));
         },
-      ) as Future<ui.Codec>;
+      );
     }
   }
 
