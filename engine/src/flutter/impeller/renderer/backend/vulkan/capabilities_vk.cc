@@ -378,7 +378,7 @@ bool CapabilitiesVK::SetPhysicalDevice(const vk::PhysicalDevice& device) {
     for (auto i = 0u; i < memory_properties.memoryTypeCount; i++) {
       if (memory_properties.memoryTypes[i].propertyFlags &
           vk::MemoryPropertyFlagBits::eLazilyAllocated) {
-        supports_memoryless_textures_ = true;
+        supports_device_transient_textures_ = true;
       }
     }
   }
@@ -448,13 +448,13 @@ bool CapabilitiesVK::SupportsReadFromOnscreenTexture() const {
   return false;
 }
 
-bool CapabilitiesVK::SupportsDecalTileMode() const {
+bool CapabilitiesVK::SupportsDecalSamplerAddressMode() const {
   return true;
 }
 
 // |Capabilities|
-bool CapabilitiesVK::SupportsMemorylessTextures() const {
-  return supports_memoryless_textures_;
+bool CapabilitiesVK::SupportsDeviceTransientTextures() const {
+  return supports_device_transient_textures_;
 }
 
 // |Capabilities|

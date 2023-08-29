@@ -176,7 +176,7 @@ static std::optional<Entity> AdvancedBlend(
     typename VS::FrameInfo frame_info;
 
     auto dst_sampler_descriptor = dst_snapshot->sampler_descriptor;
-    if (renderer.GetDeviceCapabilities().SupportsDecalTileMode()) {
+    if (renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode()) {
       dst_sampler_descriptor.width_address_mode = SamplerAddressMode::kDecal;
       dst_sampler_descriptor.height_address_mode = SamplerAddressMode::kDecal;
     }
@@ -195,7 +195,7 @@ static std::optional<Entity> AdvancedBlend(
       FS::BindTextureSamplerSrc(cmd, dst_snapshot->texture, dst_sampler);
     } else {
       auto src_sampler_descriptor = src_snapshot->sampler_descriptor;
-      if (renderer.GetDeviceCapabilities().SupportsDecalTileMode()) {
+      if (renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode()) {
         src_sampler_descriptor.width_address_mode = SamplerAddressMode::kDecal;
         src_sampler_descriptor.height_address_mode = SamplerAddressMode::kDecal;
       }
@@ -344,7 +344,7 @@ std::optional<Entity> BlendFilterContents::CreateForegroundAdvancedBlend(
     VS::FrameInfo frame_info;
 
     auto dst_sampler_descriptor = dst_snapshot->sampler_descriptor;
-    if (renderer.GetDeviceCapabilities().SupportsDecalTileMode()) {
+    if (renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode()) {
       dst_sampler_descriptor.width_address_mode = SamplerAddressMode::kDecal;
       dst_sampler_descriptor.height_address_mode = SamplerAddressMode::kDecal;
     }
@@ -466,7 +466,7 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
     VS::FrameInfo frame_info;
 
     auto dst_sampler_descriptor = dst_snapshot->sampler_descriptor;
-    if (renderer.GetDeviceCapabilities().SupportsDecalTileMode()) {
+    if (renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode()) {
       dst_sampler_descriptor.width_address_mode = SamplerAddressMode::kDecal;
       dst_sampler_descriptor.height_address_mode = SamplerAddressMode::kDecal;
     }

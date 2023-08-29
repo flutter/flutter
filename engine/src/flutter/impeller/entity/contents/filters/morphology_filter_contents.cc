@@ -123,7 +123,7 @@ std::optional<Entity> DirectionalMorphologyFilterContents::RenderFilter(
     cmd.BindVertices(vtx_buffer);
 
     auto sampler_descriptor = input_snapshot->sampler_descriptor;
-    if (renderer.GetDeviceCapabilities().SupportsDecalTileMode()) {
+    if (renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode()) {
       sampler_descriptor.width_address_mode = SamplerAddressMode::kDecal;
       sampler_descriptor.height_address_mode = SamplerAddressMode::kDecal;
     }

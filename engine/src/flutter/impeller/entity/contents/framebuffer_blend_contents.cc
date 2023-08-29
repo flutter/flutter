@@ -136,7 +136,7 @@ bool FramebufferBlendContents::Render(const ContentContext& renderer,
   FS::FragInfo frag_info;
 
   auto src_sampler_descriptor = src_snapshot->sampler_descriptor;
-  if (!renderer.GetDeviceCapabilities().SupportsDecalTileMode()) {
+  if (!renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode()) {
     // No known devices that support framebuffer fetch but not decal tile mode.
     return false;
   }

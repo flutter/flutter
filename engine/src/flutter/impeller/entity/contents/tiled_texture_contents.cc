@@ -30,7 +30,7 @@ static std::optional<SamplerAddressMode> TileModeToAddressMode(
       return SamplerAddressMode::kRepeat;
       break;
     case Entity::TileMode::kDecal:
-      if (capabilities.SupportsDecalTileMode()) {
+      if (capabilities.SupportsDecalSamplerAddressMode()) {
         return SamplerAddressMode::kDecal;
       }
       return std::nullopt;

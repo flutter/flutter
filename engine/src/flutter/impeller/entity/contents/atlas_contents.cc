@@ -258,7 +258,7 @@ bool AtlasContents::Render(const ContentContext& renderer,
     VS::FrameInfo frame_info;
 
     auto dst_sampler_descriptor = sampler_descriptor_;
-    if (renderer.GetDeviceCapabilities().SupportsDecalTileMode()) {
+    if (renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode()) {
       dst_sampler_descriptor.width_address_mode = SamplerAddressMode::kDecal;
       dst_sampler_descriptor.height_address_mode = SamplerAddressMode::kDecal;
     }
