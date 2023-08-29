@@ -1066,9 +1066,6 @@ mixin WidgetInspectorService {
       name: WidgetInspectorServiceExtensions.show.name,
       getter: () async => WidgetsApp.debugShowWidgetInspectorOverrideNotifier.value,
       setter: (bool value) {
-        if (WidgetsApp.debugShowWidgetInspectorOverrideNotifier.value == value) {
-          return Future<void>.value();
-        }
         WidgetsApp.debugShowWidgetInspectorOverrideNotifier.value = value;
         return Future<void>.value();
       },

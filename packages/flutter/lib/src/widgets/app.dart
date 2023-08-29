@@ -1192,7 +1192,15 @@ class WidgetsApp extends StatefulWidget {
     'Use debugShowWidgetInspectorOverrideNotifier.value instead. '
     'This feature was deprecated after v3.13.0-19.0.pre.'
   )
-  static bool debugShowWidgetInspectorOverride = false;
+  bool get debugShowWidgetInspectorOverride =>
+      debugShowWidgetInspectorOverrideNotifier.value;
+  @Deprecated(
+    'Use debugShowWidgetInspectorOverrideNotifier.value instead. '
+    'This feature was deprecated after v3.13.0-19.0.pre.'
+  )
+  set debugShowWidgetInspectorOverride(bool value) {
+    debugShowWidgetInspectorOverrideNotifier.value = value;
+  }
 
   /// If true, the WidgetInspector is added to the tree and made visible.
   ///
