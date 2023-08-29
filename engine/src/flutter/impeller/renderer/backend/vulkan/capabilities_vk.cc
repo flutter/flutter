@@ -249,11 +249,11 @@ static bool PhysicalDeviceSupportsRequiredFormats(
     const vk::PhysicalDevice& device) {
   const auto has_color_format =
       HasSuitableColorFormat(device, vk::Format::eB8G8R8A8Unorm);
-  const auto has_depth_stencil_format =
+  const auto has_stencil_format =
       HasSuitableDepthStencilFormat(device, vk::Format::eS8Uint) ||
       HasSuitableDepthStencilFormat(device, vk::Format::eD32SfloatS8Uint) ||
       HasSuitableDepthStencilFormat(device, vk::Format::eD24UnormS8Uint);
-  return has_color_format && has_depth_stencil_format;
+  return has_color_format && has_stencil_format;
 }
 
 static bool HasRequiredProperties(const vk::PhysicalDevice& physical_device) {
@@ -332,18 +332,23 @@ bool CapabilitiesVK::HasExtension(const std::string& ext) const {
 }
 
 void CapabilitiesVK::SetOffscreenFormat(PixelFormat pixel_format) const {
-  color_format_ = pixel_format;
+  default_color_format_ = pixel_format;
 }
 
 bool CapabilitiesVK::SetPhysicalDevice(const vk::PhysicalDevice& device) {
-  if (HasSuitableDepthStencilFormat(device, vk::Format::eS8Uint)) {
-    depth_stencil_format_ = PixelFormat::kS8UInt;
-  } else if (HasSuitableDepthStencilFormat(device,
-                                           vk::Format::eD32SfloatS8Uint)) {
-    depth_stencil_format_ = PixelFormat::kD32FloatS8UInt;
+  if (HasSuitableDepthStencilFormat(device, vk::Format::eD32SfloatS8Uint)) {
+    default_depth_stencil_format_ = PixelFormat::kD32FloatS8UInt;
   } else if (HasSuitableDepthStencilFormat(device,
                                            vk::Format::eD24UnormS8Uint)) {
-    depth_stencil_format_ = PixelFormat::kD24UnormS8Uint;
+    default_depth_stencil_format_ = PixelFormat::kD24UnormS8Uint;
+  } else {
+    default_depth_stencil_format_ = PixelFormat::kUnknown;
+  }
+
+  if (HasSuitableDepthStencilFormat(device, vk::Format::eS8Uint)) {
+    default_stencil_format_ = PixelFormat::kS8UInt;
+  } else if (default_stencil_format_ != PixelFormat::kUnknown) {
+    default_stencil_format_ = default_depth_stencil_format_;
   } else {
     return false;
   }
@@ -454,12 +459,17 @@ bool CapabilitiesVK::SupportsMemorylessTextures() const {
 
 // |Capabilities|
 PixelFormat CapabilitiesVK::GetDefaultColorFormat() const {
-  return color_format_;
+  return default_color_format_;
 }
 
 // |Capabilities|
 PixelFormat CapabilitiesVK::GetDefaultStencilFormat() const {
-  return depth_stencil_format_;
+  return default_stencil_format_;
+}
+
+// |Capabilities|
+PixelFormat CapabilitiesVK::GetDefaultDepthStencilFormat() const {
+  return default_depth_stencil_format_;
 }
 
 const vk::PhysicalDeviceProperties&

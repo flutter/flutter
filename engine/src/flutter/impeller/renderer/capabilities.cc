@@ -71,6 +71,11 @@ class StandardCapabilities final : public Capabilities {
     return default_stencil_format_;
   }
 
+  // |Capabilities|
+  PixelFormat GetDefaultDepthStencilFormat() const override {
+    return default_depth_stencil_format_;
+  }
+
   bool SupportsMemorylessTextures() const override {
     return supports_memoryless_textures_;
   }
@@ -88,7 +93,8 @@ class StandardCapabilities final : public Capabilities {
                        bool supports_decal_tile_mode,
                        bool supports_memoryless_textures,
                        PixelFormat default_color_format,
-                       PixelFormat default_stencil_format)
+                       PixelFormat default_stencil_format,
+                       PixelFormat default_depth_stencil_format)
       : supports_offscreen_msaa_(supports_offscreen_msaa),
         supports_ssbo_(supports_ssbo),
         supports_buffer_to_texture_blits_(supports_buffer_to_texture_blits),
@@ -102,7 +108,8 @@ class StandardCapabilities final : public Capabilities {
         supports_decal_tile_mode_(supports_decal_tile_mode),
         supports_memoryless_textures_(supports_memoryless_textures),
         default_color_format_(default_color_format),
-        default_stencil_format_(default_stencil_format) {}
+        default_stencil_format_(default_stencil_format),
+        default_depth_stencil_format_(default_depth_stencil_format) {}
 
   friend class CapabilitiesBuilder;
 
@@ -119,6 +126,7 @@ class StandardCapabilities final : public Capabilities {
   bool supports_memoryless_textures_ = false;
   PixelFormat default_color_format_ = PixelFormat::kUnknown;
   PixelFormat default_stencil_format_ = PixelFormat::kUnknown;
+  PixelFormat default_depth_stencil_format_ = PixelFormat::kUnknown;
 
   FML_DISALLOW_COPY_AND_ASSIGN(StandardCapabilities);
 };
@@ -190,6 +198,12 @@ CapabilitiesBuilder& CapabilitiesBuilder::SetDefaultStencilFormat(
   return *this;
 }
 
+CapabilitiesBuilder& CapabilitiesBuilder::SetDefaultDepthStencilFormat(
+    PixelFormat value) {
+  default_depth_stencil_format_ = value;
+  return *this;
+}
+
 CapabilitiesBuilder& CapabilitiesBuilder::SetSupportsDecalTileMode(bool value) {
   supports_decal_tile_mode_ = value;
   return *this;
@@ -215,7 +229,8 @@ std::unique_ptr<Capabilities> CapabilitiesBuilder::Build() {
       supports_decal_tile_mode_,                                          //
       supports_memoryless_textures_,                                      //
       default_color_format_.value_or(PixelFormat::kUnknown),              //
-      default_stencil_format_.value_or(PixelFormat::kUnknown)             //
+      default_stencil_format_.value_or(PixelFormat::kUnknown),            //
+      default_depth_stencil_format_.value_or(PixelFormat::kUnknown)       //
       ));
 }
 

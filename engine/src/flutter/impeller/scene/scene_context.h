@@ -32,7 +32,8 @@ struct SceneContextOptions {
     }
   };
 
-  void ApplyToPipelineDescriptor(PipelineDescriptor& desc) const;
+  void ApplyToPipelineDescriptor(const Capabilities& capabilities,
+                                 PipelineDescriptor& desc) const;
 };
 
 class SceneContext {
@@ -57,6 +58,7 @@ class SceneContext {
     virtual ~PipelineVariants() = default;
 
     virtual std::shared_ptr<Pipeline<PipelineDescriptor>> GetPipeline(
+        Context& context,
         SceneContextOptions opts) = 0;
   };
 
@@ -66,12 +68,14 @@ class SceneContext {
     explicit PipelineVariantsT(Context& context) {
       auto desc = PipelineT::Builder::MakeDefaultPipelineDescriptor(context);
       // Apply default ContentContextOptions to the descriptor.
-      SceneContextOptions{}.ApplyToPipelineDescriptor(*desc);
+      SceneContextOptions{}.ApplyToPipelineDescriptor(
+          *context.GetCapabilities(), *desc);
       variants_[{}] = std::make_unique<PipelineT>(context, desc);
     };
 
-    // |PipelineCollection|
+    // |PipelineVariants|
     std::shared_ptr<Pipeline<PipelineDescriptor>> GetPipeline(
+        Context& context,
         SceneContextOptions opts) {
       if (auto found = variants_.find(opts); found != variants_.end()) {
         return found->second->WaitAndGet();
@@ -83,8 +87,9 @@ class SceneContext {
       FML_CHECK(prototype != variants_.end());
 
       auto variant_future = prototype->second->WaitAndGet()->CreateVariant(
-          [&opts, variants_count = variants_.size()](PipelineDescriptor& desc) {
-            opts.ApplyToPipelineDescriptor(desc);
+          [&context, &opts,
+           variants_count = variants_.size()](PipelineDescriptor& desc) {
+            opts.ApplyToPipelineDescriptor(*context.GetCapabilities(), desc);
             desc.SetLabel(
                 SPrintF("%s V#%zu", desc.GetLabel().c_str(), variants_count));
           });
