@@ -103,6 +103,8 @@ To do this, in the `Options` tab on the `Edit Scheme…` pop-up, in the `Argumen
 Passed on Launch` section, add the right `--gtest_filter=` to launch, and
 instrument just the one test you want.
 
+You also need to set the `--enable_playground` flag in order to do frame capturing.
+
 ![alt_text](assets/xcode_frame_capture/image12.png "image_tooltip")
 
 This is also the spot where you will add other command line arguments that will
