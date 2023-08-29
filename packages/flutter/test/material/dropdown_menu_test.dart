@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  const String longText = 'one two three four five six seven eight nine ten eleven twelve';
   final List<DropdownMenuEntry<TestMenu>> menuChildren = <DropdownMenuEntry<TestMenu>>[];
 
   for (final TestMenu value in TestMenu.values) {
@@ -1574,8 +1575,6 @@ void main() {
 
   testWidgets('DropdownMenuEntries do not overflow when width is specified', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/126882
-
-    const String longText = 'one two three four five six seven eight nine ten eleven twelve';
     final TextEditingController controller = TextEditingController();
 
     await tester.pumpWidget(
@@ -1622,8 +1621,6 @@ void main() {
 
   testWidgets('DropdownMenuEntry.labelWidget is Text that specifies maxLines 1 or 2', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/126882
-
-    const String longText = 'one two three four five six seven eight nine ten eleven twelve';
     final TextEditingController controller = TextEditingController();
 
     Widget buildFrame({ required int maxLines }) {
