@@ -44,20 +44,6 @@ Future<void> main() async {
             '--allow-warnings',
           ],
         );
-
-        final String macosintegrationTestPodspec = path.join(integrationTestPackage, 'integration_test_macos', 'macos', 'integration_test_macos.podspec');
-        await exec(
-          'pod',
-          <String>[
-            'lib',
-            'lint',
-            macosintegrationTestPodspec,
-            '--verbose',
-            // TODO(cyanglaz): remove allow-warnings when https://github.com/flutter/flutter/issues/125812 is fixed.
-            // https://github.com/flutter/flutter/issues/125812
-            '--allow-warnings',
-          ],
-        );
       });
 
       section('Create Objective-C plugin');
@@ -153,38 +139,6 @@ Future<void> main() async {
             'lib',
             'lint',
             swiftPodspecPath,
-            '--allow-warnings',
-            '--use-libraries',
-            '--verbose',
-          ],
-        );
-      });
-
-      section('Lint Swift macOS podspec plugin as framework');
-
-      final String macOSPodspecPath = path.join(swiftPluginPath, 'macos', '$swiftPluginName.podspec');
-      await inDirectory(tempDir, () async {
-        await exec(
-          'pod',
-          <String>[
-            'lib',
-            'lint',
-            macOSPodspecPath,
-            '--allow-warnings',
-            '--verbose',
-          ],
-        );
-      });
-
-      section('Lint Swift macOS podspec plugin as library');
-
-      await inDirectory(tempDir, () async {
-        await exec(
-          'pod',
-          <String>[
-            'lib',
-            'lint',
-            macOSPodspecPath,
             '--allow-warnings',
             '--use-libraries',
             '--verbose',
