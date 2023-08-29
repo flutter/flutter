@@ -740,6 +740,14 @@ public class FlutterJNI {
       int[] displayFeaturesBounds,
       int[] displayFeaturesType,
       int[] displayFeaturesState);
+
+  @UiThread
+  public void SetIsRenderingToImageView(boolean value) {
+    nativeSetIsRenderingToImageView(nativeShellHolderId, value);
+  }
+
+  private native void nativeSetIsRenderingToImageView(long nativeShellHolderId, boolean value);
+
   // ----- End Render Surface Support -----
 
   // ------ Start Touch Interaction Support ---
