@@ -9,11 +9,11 @@ import 'package:ui/ui.dart' as ui;
 
 import '../browser_detection.dart';
 import '../canvas_pool.dart';
+import '../display.dart';
 import '../dom.dart';
 import '../engine_canvas.dart';
 import '../frame_reference.dart';
 import '../html_image_codec.dart';
-import '../platform_dispatcher.dart';
 import '../text/canvas_paragraph.dart';
 import '../util.dart';
 import '../vector_math.dart';
@@ -126,7 +126,7 @@ class BitmapCanvas extends EngineCanvas {
   /// Keeps track of what device pixel ratio was used when this [BitmapCanvas]
   /// was created.
   final double _devicePixelRatio =
-      EnginePlatformDispatcher.browserDevicePixelRatio;
+      EngineFlutterDisplay.instance.browserDevicePixelRatio;
 
   // Compensation for [_initializeViewport] snapping canvas position to 1 pixel.
   int? _canvasPositionX, _canvasPositionY;
@@ -201,14 +201,14 @@ class BitmapCanvas extends EngineCanvas {
 
   static int widthToPhysical(double width) {
     final double boundsWidth = width + 1;
-    return (boundsWidth * EnginePlatformDispatcher.browserDevicePixelRatio)
+    return (boundsWidth * EngineFlutterDisplay.instance.browserDevicePixelRatio)
             .ceil() +
         2 * kPaddingPixels;
   }
 
   static int heightToPhysical(double height) {
     final double boundsHeight = height + 1;
-    return (boundsHeight * EnginePlatformDispatcher.browserDevicePixelRatio)
+    return (boundsHeight * EngineFlutterDisplay.instance.browserDevicePixelRatio)
             .ceil() +
         2 * kPaddingPixels;
   }
@@ -253,8 +253,7 @@ class BitmapCanvas extends EngineCanvas {
   /// * [PersistedPicture._recycleCanvas] which also uses this method
   ///   for the same reason.
   bool isReusable() {
-    return _devicePixelRatio ==
-        EnginePlatformDispatcher.browserDevicePixelRatio;
+    return _devicePixelRatio == EngineFlutterDisplay.instance.browserDevicePixelRatio;
   }
 
   /// Returns a "data://" URI containing a representation of the image in this
