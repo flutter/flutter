@@ -177,8 +177,6 @@ void main() {
         'ValueNotifier<bool>': 2,
         '_InputBorderGap': 1,
       },
-      // TODO(polina-c): investigate notGCed, if it does not disappear after fixing notDisposed.
-      allowAllNotGCed: true,
     ),
   );
 
