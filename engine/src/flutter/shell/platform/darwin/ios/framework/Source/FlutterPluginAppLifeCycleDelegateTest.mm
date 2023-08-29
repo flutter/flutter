@@ -20,7 +20,6 @@ FLUTTER_ASSERT_ARC
   XCTAssertNotNil(delegate);
 }
 
-#if not APPLICATION_EXTENSION_API_ONLY
 - (void)testDidEnterBackground {
   XCTNSNotificationExpectation* expectation = [[XCTNSNotificationExpectation alloc]
       initWithName:UIApplicationDidEnterBackgroundNotification];
@@ -89,6 +88,5 @@ FLUTTER_ASSERT_ARC
   [self waitForExpectations:@[ expectation ] timeout:5.0];
   OCMVerify([plugin applicationWillTerminate:[UIApplication sharedApplication]]);
 }
-#endif
 
 @end

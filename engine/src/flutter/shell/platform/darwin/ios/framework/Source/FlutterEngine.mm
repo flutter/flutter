@@ -1515,8 +1515,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   }];
 }
 
-- (void)addApplicationDelegate:(NSObject<FlutterPlugin>*)delegate
-    NS_EXTENSION_UNAVAILABLE_IOS("Disallowed in plugins used in app extensions") {
+- (void)addApplicationDelegate:(NSObject<FlutterPlugin>*)delegate {
   id<UIApplicationDelegate> appDelegate = [[UIApplication sharedApplication] delegate];
   if ([appDelegate conformsToProtocol:@protocol(FlutterAppLifeCycleProvider)]) {
     id<FlutterAppLifeCycleProvider> lifeCycleProvider =

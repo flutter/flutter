@@ -41,12 +41,15 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
   // 3. Settings from the NSBundle with the default bundle ID.
   // 4. Settings from the main NSBundle and default values.
 
-  NSBundle* mainBundle = FLTGetApplicationBundle();
+  NSBundle* mainBundle = [NSBundle mainBundle];
   NSBundle* engineBundle = [NSBundle bundleForClass:[FlutterViewController class]];
 
   bool hasExplicitBundle = bundle != nil;
   if (bundle == nil) {
     bundle = FLTFrameworkBundleWithIdentifier([FlutterDartProject defaultBundleIdentifier]);
+  }
+  if (bundle == nil) {
+    bundle = mainBundle;
   }
 
   auto settings = flutter::SettingsFromCommandLine(command_line);
@@ -119,24 +122,29 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
 
   // Checks to see if the flutter assets directory is already present.
   if (settings.assets_path.empty()) {
-    NSURL* assetsURL = FLTAssetsURLFromBundle(bundle);
+    NSString* assetsName = [FlutterDartProject flutterAssetsName:bundle];
+    NSString* assetsPath = [bundle pathForResource:assetsName ofType:@""];
 
-    if (!assetsURL) {
-      NSLog(@"Failed to find assets path for 1\"%@\"", bundle);
+    if (assetsPath.length == 0) {
+      assetsPath = [mainBundle pathForResource:assetsName ofType:@""];
+    }
+
+    if (assetsPath.length == 0) {
+      NSLog(@"Failed to find assets path for \"%@\"", assetsName);
     } else {
-      settings.assets_path = assetsURL.path.UTF8String;
+      settings.assets_path = assetsPath.UTF8String;
 
       // Check if there is an application kernel snapshot in the assets directory we could
       // potentially use.  Looking for the snapshot makes sense only if we have a VM that can use
       // it.
       if (!flutter::DartVM::IsRunningPrecompiledCode()) {
         NSURL* applicationKernelSnapshotURL =
-            [assetsURL URLByAppendingPathComponent:@(kApplicationKernelSnapshotFileName)];
-        NSError* error;
-        if ([applicationKernelSnapshotURL checkResourceIsReachableAndReturnError:&error]) {
+            [NSURL URLWithString:@(kApplicationKernelSnapshotFileName)
+                   relativeToURL:[NSURL fileURLWithPath:assetsPath]];
+        if ([[NSFileManager defaultManager] fileExistsAtPath:applicationKernelSnapshotURL.path]) {
           settings.application_kernel_asset = applicationKernelSnapshotURL.path.UTF8String;
         } else {
-          NSLog(@"Failed to find snapshot at %@: %@", applicationKernelSnapshotURL.path, error);
+          NSLog(@"Failed to find snapshot: %@", applicationKernelSnapshotURL.path);
         }
       }
     }
@@ -331,7 +339,9 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
   if (bundle == nil) {
     bundle = FLTFrameworkBundleWithIdentifier([FlutterDartProject defaultBundleIdentifier]);
   }
-
+  if (bundle == nil) {
+    bundle = [NSBundle mainBundle];
+  }
   NSString* flutterAssetsName = [bundle objectForInfoDictionaryKey:@"FLTAssetsPath"];
   if (flutterAssetsName == nil) {
     flutterAssetsName = @"Frameworks/App.framework/flutter_assets";
