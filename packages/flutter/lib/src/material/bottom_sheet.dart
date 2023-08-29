@@ -1005,6 +1005,12 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   final ValueNotifier<EdgeInsets> _clipDetailsNotifier = ValueNotifier<EdgeInsets>(EdgeInsets.zero);
 
+  @override
+  void didAdd() {
+    _clipDetailsNotifier.dispose();
+    super.didAdd();
+  }
+
   /// Updates the details regarding how the [SemanticsNode.rect] (focus) of
   /// the barrier for this [ModalBottomSheetRoute] should be clipped.
   ///
