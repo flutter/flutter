@@ -1,4 +1,4 @@
-Signature: 4924db2fdfd4392c0cf92a1038351c0d
+Signature: 85871fab6026e6f458d402fb71f1647f
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8005,6 +8005,8 @@ ORIGIN: ../../../third_party/skia/include/gpu/mtl/MtlMemoryAllocator.h + ../../.
 ORIGIN: ../../../third_party/skia/modules/skottie/src/BlendModes.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skottie/src/text/Font.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skottie/src/text/Font.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/modules/skottie/utils/TextEditor.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/modules/skottie/utils/TextEditor.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skunicode/src/SkUnicode_client.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skunicode/src/SkUnicode_client.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skunicode/src/SkUnicode_libgrapheme.cpp + ../../../third_party/skia/LICENSE
@@ -8033,6 +8035,8 @@ FILE: ../../../third_party/skia/include/gpu/mtl/MtlMemoryAllocator.h
 FILE: ../../../third_party/skia/modules/skottie/src/BlendModes.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/text/Font.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/text/Font.h
+FILE: ../../../third_party/skia/modules/skottie/utils/TextEditor.cpp
+FILE: ../../../third_party/skia/modules/skottie/utils/TextEditor.h
 FILE: ../../../third_party/skia/modules/skunicode/src/SkUnicode_client.cpp
 FILE: ../../../third_party/skia/modules/skunicode/src/SkUnicode_client.h
 FILE: ../../../third_party/skia/modules/skunicode/src/SkUnicode_libgrapheme.cpp
