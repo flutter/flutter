@@ -44,6 +44,19 @@ Future<void> main() async {
             '--allow-warnings',
           ],
         );
+        final String macosintegrationTestPodspec = path.join(integrationTestPackage, 'integration_test_macos', 'macos', 'integration_test_macos.podspec');
+        await _tryMacOSLint(
+          'pod',
+          <String>[
+            'lib',
+            'lint',
+            macosintegrationTestPodspec,
+            '--verbose',
+            // TODO(cyanglaz): remove allow-warnings when https://github.com/flutter/flutter/issues/125812 is fixed.
+            // https://github.com/flutter/flutter/issues/125812
+            '--allow-warnings',
+          ],
+        );
       });
 
       section('Create Objective-C plugin');
@@ -139,6 +152,38 @@ Future<void> main() async {
             'lib',
             'lint',
             swiftPodspecPath,
+            '--allow-warnings',
+            '--use-libraries',
+            '--verbose',
+          ],
+        );
+      });
+
+      section('Lint Swift macOS podspec plugin as framework');
+
+      final String macOSPodspecPath = path.join(swiftPluginPath, 'macos', '$swiftPluginName.podspec');
+      await inDirectory(tempDir, () async {
+        await _tryMacOSLint(
+          'pod',
+          <String>[
+            'lib',
+            'lint',
+            macOSPodspecPath,
+            '--allow-warnings',
+            '--verbose',
+          ],
+        );
+      });
+
+      section('Lint Swift macOS podspec plugin as library');
+
+      await inDirectory(tempDir, () async {
+        await _tryMacOSLint(
+          'pod',
+          <String>[
+            'lib',
+            'lint',
+            macOSPodspecPath,
             '--allow-warnings',
             '--use-libraries',
             '--verbose',
@@ -486,4 +531,23 @@ void _validateMacOSPodfile(String appPath) {
     'test_plugin_swift',
     'macos',
   ));
+}
+
+Future<void> _tryMacOSLint(String executable, List<String> arguments) async {
+  final StringBuffer lintStdout = StringBuffer();
+  try {
+    await eval(
+      executable,
+      arguments,
+      stdout: lintStdout,
+    );
+  } on BuildFailedError {
+    // Temporarily ignore errors due to DT_TOOLCHAIN_DIR. This error was
+    // introduced with Xcode 15. Fix was made in Cocoapods, but is not in an
+    // official release yet.
+    // TODO(vashworth): Stop ignoring when https://github.com/flutter/flutter/issues/133584 is complete.
+    if (!lintStdout.toString().contains('error: DT_TOOLCHAIN_DIR cannot be used to evaluate')) {
+      rethrow;
+    }
+  }
 }
