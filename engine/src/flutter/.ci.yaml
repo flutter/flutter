@@ -167,6 +167,14 @@ targets:
       # ensure files from pre-production Fuchsia SDK tests are purged from cache
       clobber: "true"
     timeout: 90
+    runIfNot:
+      - lib/web_ui/**
+      - shell/platform/android/**
+      - shell/platform/darwin/**
+      - shell/platform/glfw/**
+      - shell/platform/linux/**
+      - shell/platform/windows/**
+      - web_sdk/**
 
   - name: Linux Fuchsia FEMU
     recipe: engine/femu_test
@@ -179,6 +187,14 @@ targets:
       emulator_arch: "x64"
       enable_cso: "true"
     timeout: 60
+    runIfNot:
+      - lib/web_ui/**
+      - shell/platform/android/**
+      - shell/platform/darwin/**
+      - shell/platform/glfw/**
+      - shell/platform/linux/**
+      - shell/platform/windows/**
+      - web_sdk/**
 
   - name: Linux Fuchsia arm64 FEMU
     recipe: engine/femu_test
@@ -191,12 +207,14 @@ targets:
       enable_cso: "true"
     timeout: 60
     bringup: true
-
-  - name: Linux Framework Smoke Tests
-    recipe: engine/framework_smoke
-    enabled_branches:
-      - main
-    timeout: 60
+    runIfNot:
+      - lib/web_ui/**
+      - shell/platform/android/**
+      - shell/platform/darwin/**
+      - shell/platform/glfw/**
+      - shell/platform/linux/**
+      - shell/platform/windows/**
+      - web_sdk/**
 
   - name: Linux linux_fuchsia
     bringup: true
@@ -207,6 +225,20 @@ targets:
       config_name: linux_fuchsia
     drone_dimensions:
       - os=Linux
+    runIfNot:
+      - lib/web_ui/**
+      - shell/platform/android/**
+      - shell/platform/darwin/**
+      - shell/platform/glfw/**
+      - shell/platform/linux/**
+      - shell/platform/windows/**
+      - web_sdk/**
+
+  - name: Linux Framework Smoke Tests
+    recipe: engine/framework_smoke
+    enabled_branches:
+      - main
+    timeout: 60
 
   - name: Linux linux_clang_tidy
     recipe: engine_v2/engine_v2
