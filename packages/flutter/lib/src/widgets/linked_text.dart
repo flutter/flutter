@@ -215,58 +215,26 @@ class LinkedText extends StatefulWidget {
   /// The [TextStyle] to apply to the output [InlineSpan].
   final TextStyle? style;
 
-  /// Returns a [Map] containing the given [InlineSpan] and all of its children
-  /// mapped to their indices in the overall flat string.
-  ///
-  /// Useful for caching to avoid recomputing a span's text and its lengths.
-  static (String, Map<InlineSpan, _SpanText>) _computeTextCache(InlineSpan span, [int index = 0]) {
-    if (span is! TextSpan) {
-      return ('', <InlineSpan, _SpanText>{span: _SpanText.empty});
-    }
-
-    String text = span.text ?? '';
-    final Map<InlineSpan, _SpanText> textCache = <InlineSpan, _SpanText>{};
-    int currentIndex = index + text.length;
-    for (final InlineSpan child in span.children ?? <InlineSpan>[]) {
-      final (String childText, Map<InlineSpan, _SpanText> childTextCache)
-          = _computeTextCache(child, currentIndex);
-      text += childText;
-      textCache.addAll(childTextCache);
-      currentIndex = textCache[child]!.end;
-    }
-
-    textCache[span] = _SpanText(start: index, end: currentIndex);
-    return (text, textCache);
-  }
-
   /// Apply the given [TextLinker]s to the given [InlineSpan]s and return the
   /// new resulting spans and any created [TapGestureRecognizer]s.
   ///
   /// {@macro flutter.painting.LinkBuilder.recognizer}
   static (Iterable<InlineSpan>, Iterable<TapGestureRecognizer>) linkSpans(Iterable<InlineSpan> spans, Iterable<TextLinker> textLinkers) {
-    // Flatten the spans and find all ranges in the flat string. This must be
-    // done cumulatively, and not during a traversal, because matches may occur
-    // across span boundaries. Cache ranges to avoid recomputing.
-    String spansText = '';
-    final Map<InlineSpan, _SpanText> textCache = <InlineSpan, _SpanText>{};
-    for (final InlineSpan span in spans) {
-      final (String spanText, Map<InlineSpan, _SpanText> spanTextCache) =
-          _computeTextCache(span);
-      spansText += spanText;
-      textCache.addAll(spanTextCache);
-    }
+    // Flatten the spans and store all string lengths, so that matches across
+    // span boundaries can be matched in the flat string. This is calculated
+    // once in the beginning to avoid recomputing.
+    final _TextCache textCache = _TextCache.fromMany(spans: spans);
 
     final Iterable<_TextLinkerMatch> textLinkerMatches =
         _cleanTextLinkerMatches(
-          _TextLinkerMatch.fromTextLinkers(textLinkers, spansText),
+          _TextLinkerMatch.fromTextLinkers(textLinkers, textCache.text),
         );
 
     final (Iterable<InlineSpan> output, Iterable<_TextLinkerMatch> _, Iterable<TapGestureRecognizer> recognizers) =
         _linkSpansRecurse(
           spans,
-          Map<InlineSpan, _SpanText>.unmodifiable(textCache),
+          textCache,
           textLinkerMatches,
-          0,
         );
     return (output, recognizers);
   }
@@ -297,7 +265,7 @@ class LinkedText extends StatefulWidget {
     return nextTextLinkerMatches;
   }
 
-  static (Iterable<InlineSpan>, Iterable<_TextLinkerMatch>, Iterable<TapGestureRecognizer>) _linkSpansRecurse(Iterable<InlineSpan> spans, Map<InlineSpan, _SpanText> textCache, Iterable<_TextLinkerMatch> textLinkerMatches, int index) {
+  static (Iterable<InlineSpan>, Iterable<_TextLinkerMatch>, Iterable<TapGestureRecognizer>) _linkSpansRecurse(Iterable<InlineSpan> spans, _TextCache textCache, Iterable<_TextLinkerMatch> textLinkerMatches, [int index = 0]) {
     final List<InlineSpan> output = <InlineSpan>[];
     Iterable<_TextLinkerMatch> nextTextLinkerMatches = textLinkerMatches;
     final List<TapGestureRecognizer> recognizers = <TapGestureRecognizer>[];
@@ -312,7 +280,7 @@ class LinkedText extends StatefulWidget {
       output.add(childSpan);
       nextTextLinkerMatches = childTextLinkerMatches;
       recognizers.addAll(childRecognizers);
-      nextIndex += textCache[span]!.length;
+      nextIndex += textCache.getLength(span)!;
     }
 
     return (output, nextTextLinkerMatches, recognizers);
@@ -322,7 +290,7 @@ class LinkedText extends StatefulWidget {
   // string.
   //
   // The TapGestureRecognizers must be disposed by an owning widget.
-  static (InlineSpan, Iterable<_TextLinkerMatch>, Iterable<TapGestureRecognizer>) _linkSpanRecurse(InlineSpan span, Map<InlineSpan, _SpanText> textCache, Iterable<_TextLinkerMatch> textLinkerMatches, int index) {
+  static (InlineSpan, Iterable<_TextLinkerMatch>, Iterable<TapGestureRecognizer>) _linkSpanRecurse(InlineSpan span, _TextCache textCache, Iterable<_TextLinkerMatch> textLinkerMatches, [int index = 0]) {
     if (span is! TextSpan) {
       return (span, textLinkerMatches, <TapGestureRecognizer>[]);
     }
@@ -642,18 +610,80 @@ class _TextLinkerMatch {
 /// Used to cache information about a span's recursive text.
 ///
 /// Avoids repeatedly calling [TextSpan.toPlainText].
-class _SpanText {
-  const _SpanText({
-    required this.start,
-    required this.end,
-  }) : assert(start <= end);
+class _TextCache {
+  factory _TextCache({
+    required InlineSpan span,
+  }) {
+    if (span is! TextSpan) {
+      return _TextCache._(
+        text: '',
+        lengths: <InlineSpan, int>{span: 0},
+      );
+    }
 
-  static const _SpanText empty = _SpanText(start: 0, end: 0);
+    _TextCache childrenTextCache = _TextCache._empty();
+    for (final InlineSpan child in span.children ?? <InlineSpan>[]) {
+      final _TextCache childTextCache = _TextCache(
+        span: child,
+      );
+      childrenTextCache = childrenTextCache._merge(childTextCache);
+    }
 
-  final int start;
-  final int end;
+    final String text = (span.text ?? '') + childrenTextCache.text;
+    return _TextCache._(
+      text: text,
+      lengths: <InlineSpan, int>{
+        span: text.length,
+        ...childrenTextCache._lengths,
+      },
+    );
+  }
 
-  int get length => end - start;
+  factory _TextCache.fromMany({
+    required Iterable<InlineSpan> spans,
+  }) {
+    _TextCache textCache = _TextCache._empty();
+    for (final InlineSpan span in spans) {
+      final _TextCache spanTextCache = _TextCache(
+        span: span,
+      );
+      textCache = textCache._merge(spanTextCache);
+    }
+    return textCache;
+  }
 
-  String getText(String overallText) => overallText.substring(start, end);
+  _TextCache._empty(
+  ) : text = '',
+      _lengths = <InlineSpan, int>{};
+
+  const _TextCache._({
+    required this.text,
+    required Map<InlineSpan, int> lengths,
+  }) : _lengths = lengths;
+
+  /// The flattened text of all spans in the span tree.
+  final String text;
+
+  /// A [Map] containing the lengths of all spans in the span tree.
+  ///
+  /// The length is defined as the length of the flattened text at the point in
+  /// the tree where the node resides.
+  ///
+  /// The length of [text] is the length of the root node in [_lengths].
+  final Map<InlineSpan, int> _lengths;
+
+  /// Merges the given _TextCache with this one by appending it to the end.
+  ///
+  /// Returns a new _TextCache and makes no modifications to either passed in.
+  _TextCache _merge(_TextCache other) {
+    return _TextCache._(
+      text: text + other.text,
+      lengths: Map<InlineSpan, int>.from(_lengths)..addAll(other._lengths),
+    );
+  }
+
+  int? getLength(InlineSpan span) => _lengths[span];
+
+  @override
+  String toString() => '${objectRuntimeType(this, '_TextCache')}($text, $_lengths)';
 }
