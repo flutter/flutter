@@ -25,18 +25,6 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
 
   @override
   Widget build(BuildContext context) {
-    final List<DropdownMenuEntry<ColorLabel>> colorEntries = <DropdownMenuEntry<ColorLabel>>[];
-    for (final ColorLabel color in ColorLabel.values) {
-      colorEntries.add(
-        DropdownMenuEntry<ColorLabel>(value: color, label: color.label, enabled: color.label != 'Grey'),
-      );
-    }
-
-    final List<DropdownMenuEntry<IconLabel>> iconEntries = <DropdownMenuEntry<IconLabel>>[];
-    for (final IconLabel icon in IconLabel.values) {
-      iconEntries.add(DropdownMenuEntry<IconLabel>(value: icon, label: icon.label));
-    }
-
     return MaterialApp(
       theme: ThemeData(
         useMaterial3: true,
@@ -55,20 +43,30 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
                       initialSelection: ColorLabel.green,
                       controller: colorController,
                       label: const Text('Color'),
-                      dropdownMenuEntries: colorEntries,
                       onSelected: (ColorLabel? color) {
                         setState(() {
                           selectedColor = color;
                         });
                       },
+                      dropdownMenuEntries: ColorLabel.values.map<DropdownMenuEntry<ColorLabel>>(
+                        (ColorLabel color) {
+                          return DropdownMenuEntry<ColorLabel>(
+                            value: color,
+                            label: color.label,
+                            enabled: color.label != 'Grey',
+                            style: MenuItemButton.styleFrom(
+                              foregroundColor: color.color,
+                            ),
+                          );
+                        }
+                      ).toList(),
                     ),
-                    const SizedBox(width: 20),
+                    const SizedBox(width: 24),
                     DropdownMenu<IconLabel>(
                       controller: iconController,
                       enableFilter: true,
                       leadingIcon: const Icon(Icons.search),
                       label: const Text('Icon'),
-                      dropdownMenuEntries: iconEntries,
                       inputDecorationTheme: const InputDecorationTheme(
                         filled: true,
                         contentPadding: EdgeInsets.symmetric(vertical: 5.0),
@@ -78,7 +76,16 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
                           selectedIcon = icon;
                         });
                       },
-                    )
+                      dropdownMenuEntries: IconLabel.values.map<DropdownMenuEntry<IconLabel>>(
+                        (IconLabel icon) {
+                          return DropdownMenuEntry<IconLabel>(
+                            value: icon,
+                            label: icon.label,
+                            leadingIcon: Icon(icon.icon),
+                          );
+                        },
+                      ).toList(),
+                    ),
                   ],
                 ),
               ),
@@ -110,7 +117,7 @@ enum ColorLabel {
   blue('Blue', Colors.blue),
   pink('Pink', Colors.pink),
   green('Green', Colors.green),
-  yellow('Yellow', Colors.yellow),
+  yellow('Orange', Colors.orange),
   grey('Grey', Colors.grey);
 
   const ColorLabel(this.label, this.color);
