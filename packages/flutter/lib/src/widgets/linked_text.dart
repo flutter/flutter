@@ -38,7 +38,8 @@ typedef TextRangesFinder = Iterable<TextRange> Function(String text);
 /// calls [onTap].
 ///
 /// Works with either a flat [String] (`text`) or a list of [InlineSpan]s
-/// (`spans`).
+/// (`spans`), though when using `spans`, only [TextSpan]s will be converted to
+/// links.
 ///
 /// {@tool dartpad}
 /// This example shows how to create a [LinkedText] that turns URLs into
@@ -191,6 +192,8 @@ class LinkedText extends StatefulWidget {
   late final List<TextLinker> textLinkers;
 
   /// The [TextStyle] to apply to the output [InlineSpan].
+  ///
+  /// Defaults to [DefaultTextStyle].
   final TextStyle? style;
 
   /// Returns a [LinkBuilder] that highlights the given text and sets the given
