@@ -42,5 +42,20 @@ TEST(Instrumentation, GetFrameBudgetFromUpdaterTest) {
   EXPECT_EQ(frame_budget_90fps, actual_frame_budget);
 }
 
+TEST(Instrumentation, GetLapByIndexTest) {
+  fml::Milliseconds frame_budget_90fps = fml::RefreshRateToFrameBudget(90);
+  FixedRefreshRateStopwatch stopwatch(frame_budget_90fps);
+  stopwatch.SetLapTime(fml::TimeDelta::FromMilliseconds(10));
+  EXPECT_EQ(stopwatch.GetLap(1), fml::TimeDelta::FromMilliseconds(10));
+}
+
+TEST(Instrumentation, GetCurrentSampleTest) {
+  fml::Milliseconds frame_budget_90fps = fml::RefreshRateToFrameBudget(90);
+  FixedRefreshRateStopwatch stopwatch(frame_budget_90fps);
+  stopwatch.Start();
+  stopwatch.Stop();
+  EXPECT_EQ(stopwatch.GetCurrentSample(), size_t(1));
+}
+
 }  // namespace testing
 }  // namespace flutter
