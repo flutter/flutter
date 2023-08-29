@@ -787,8 +787,6 @@ ORIGIN: ../../../flutter/flow/flow_test_utils.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/flow/flow_test_utils.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/flow/frame_timings.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/flow/frame_timings.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/flow/instrumentation.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/flow/instrumentation.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/flow/layer_snapshot_store.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/flow/layer_snapshot_store.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/flow/layers/backdrop_filter_layer.cc + ../../../flutter/LICENSE
@@ -846,6 +844,8 @@ ORIGIN: ../../../flutter/flow/raster_cache_key.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/flow/raster_cache_util.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/flow/raster_cache_util.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/flow/skia_gpu_object.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/flow/stopwatch.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/flow/stopwatch.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/flow/surface.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/flow/surface.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/flow/surface_frame.cc + ../../../flutter/LICENSE
@@ -3532,8 +3532,6 @@ FILE: ../../../flutter/flow/flow_test_utils.cc
 FILE: ../../../flutter/flow/flow_test_utils.h
 FILE: ../../../flutter/flow/frame_timings.cc
 FILE: ../../../flutter/flow/frame_timings.h
-FILE: ../../../flutter/flow/instrumentation.cc
-FILE: ../../../flutter/flow/instrumentation.h
 FILE: ../../../flutter/flow/layer_snapshot_store.cc
 FILE: ../../../flutter/flow/layer_snapshot_store.h
 FILE: ../../../flutter/flow/layers/backdrop_filter_layer.cc
@@ -3591,6 +3589,8 @@ FILE: ../../../flutter/flow/raster_cache_key.h
 FILE: ../../../flutter/flow/raster_cache_util.cc
 FILE: ../../../flutter/flow/raster_cache_util.h
 FILE: ../../../flutter/flow/skia_gpu_object.h
+FILE: ../../../flutter/flow/stopwatch.cc
+FILE: ../../../flutter/flow/stopwatch.h
 FILE: ../../../flutter/flow/surface.cc
 FILE: ../../../flutter/flow/surface.h
 FILE: ../../../flutter/flow/surface_frame.cc

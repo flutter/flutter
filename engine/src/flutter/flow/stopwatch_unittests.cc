@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/flow/instrumentation.h"
-#include "gmock/gmock.h"
+#include "flutter/flow/stopwatch.h"
+#include "gmock/gmock.h"  // IWYU pragma: keep
 #include "gtest/gtest.h"
 
 using testing::Return;
