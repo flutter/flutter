@@ -681,6 +681,9 @@ class Shell final : public PlatformView::Delegate,
   fml::TimePoint GetCurrentTimePoint() override;
 
   // |Engine::Delegate|
+  void OnEngineChannelUpdate(std::string name, bool listening) override;
+
+  // |Engine::Delegate|
   double GetScaledFontSize(double unscaled_font_size,
                            int configuration_id) const override;
 

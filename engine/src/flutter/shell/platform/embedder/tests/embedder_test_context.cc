@@ -147,6 +147,11 @@ void EmbedderTestContext::SetPlatformMessageCallback(
   platform_message_callback_ = callback;
 }
 
+void EmbedderTestContext::SetChannelUpdateCallback(
+    const ChannelUpdateCallback& callback) {
+  channel_update_callback_ = callback;
+}
+
 void EmbedderTestContext::PlatformMessageCallback(
     const FlutterPlatformMessage* message) {
   if (platform_message_callback_) {
@@ -229,6 +234,20 @@ EmbedderTestContext::GetComputePlatformResolvedLocaleCallbackHook() {
   return [](const FlutterLocale** supported_locales,
             size_t length) -> const FlutterLocale* {
     return supported_locales[0];
+  };
+}
+
+FlutterChannelUpdateCallback
+EmbedderTestContext::GetChannelUpdateCallbackHook() {
+  if (channel_update_callback_ == nullptr) {
+    return nullptr;
+  }
+
+  return [](const FlutterChannelUpdate* update, void* user_data) {
+    auto context = reinterpret_cast<EmbedderTestContext*>(user_data);
+    if (context->channel_update_callback_) {
+      context->channel_update_callback_(update);
+    }
   };
 }
 

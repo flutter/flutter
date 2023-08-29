@@ -49,7 +49,7 @@ bool WindowsLifecycleManager::WindowProc(HWND hwnd,
     // is, we re-dispatch a new WM_CLOSE message. In order to allow the new
     // message to reach other delegates, we ignore it here.
     case WM_CLOSE: {
-      if (!process_lifecycle_) {
+      if (!process_exit_) {
         return false;
       }
       auto key = std::make_tuple(hwnd, wpar, lpar);
@@ -181,6 +181,10 @@ bool WindowsLifecycleManager::IsLastWindowOfProcess() {
 
 void WindowsLifecycleManager::BeginProcessingLifecycle() {
   process_lifecycle_ = true;
+}
+
+void WindowsLifecycleManager::BeginProcessingExit() {
+  process_exit_ = true;
 }
 
 // TODO(schectman): Wait until the platform channel is registered to send

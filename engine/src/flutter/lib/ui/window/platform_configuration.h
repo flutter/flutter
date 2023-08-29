@@ -208,6 +208,17 @@ class PlatformConfigurationClient {
   virtual void RequestDartDeferredLibrary(intptr_t loading_unit_id) = 0;
 
   //--------------------------------------------------------------------------
+  /// @brief      Invoked when a listener is registered on a platform channel.
+  ///
+  /// @param[in]  name             The name of the platform channel to which a
+  ///                              listener has been registered or cleared.
+  ///
+  /// @param[in]  listening        Whether the listener has been set (true) or
+  ///                              cleared (false).
+  ///
+  virtual void SendChannelUpdate(std::string name, bool listening) = 0;
+
+  //--------------------------------------------------------------------------
   /// @brief      Synchronously invokes platform-specific APIs to apply the
   ///             system text scaling on the given unscaled font size.
   ///
@@ -570,6 +581,8 @@ class PlatformConfigurationNativeApi {
 
   static void RespondToPlatformMessage(int response_id,
                                        const tonic::DartByteData& data);
+
+  static void SendChannelUpdate(const std::string& name, bool listening);
 
   //--------------------------------------------------------------------------
   /// @brief      Requests the Dart VM to adjusts the GC heuristics based on

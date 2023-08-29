@@ -258,10 +258,6 @@ class FlutterWindowsEngine {
   // Called when a WM_DWMCOMPOSITIONCHANGED message is received.
   void OnDwmCompositionChanged();
 
-  // Called in response to the framework registering a ServiceBindings.
-  // Registers the top level handler for the WM_CLOSE window message.
-  void OnApplicationLifecycleEnabled();
-
   // Called when a Window receives an event that may alter the application
   // lifecycle state.
   void OnWindowStateEvent(HWND hwnd, WindowStateEvent event);
@@ -300,6 +296,10 @@ class FlutterWindowsEngine {
   // This should reset necessary states to as if the engine has just been
   // created. This is typically caused by a hot restart (Shift-R in CLI.)
   void OnPreEngineRestart();
+
+  // Invoked by the engine when a listener is set or cleared on a platform
+  // channel.
+  virtual void OnChannelUpdate(std::string name, bool listening);
 
  private:
   // Allows swapping out embedder_api_ calls in tests.

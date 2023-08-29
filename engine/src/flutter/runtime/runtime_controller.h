@@ -684,6 +684,9 @@ class RuntimeController : public PlatformConfigurationClient {
       const std::vector<std::string>& supported_locale_data) override;
 
   // |PlatformConfigurationClient|
+  void SendChannelUpdate(std::string name, bool listening) override;
+
+  // |PlatformConfigurationClient|
   double GetScaledFontSize(double unscaled_font_size,
                            int configuration_id) const override;
 

@@ -295,6 +295,17 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
     GetPlatformMessageHandler() const = 0;
 
     //--------------------------------------------------------------------------
+    /// @brief      Invoked when a listener is registered on a platform channel.
+    ///
+    /// @param[in]  name             The name of the platform channel to which a
+    ///                              listener has been registered or cleared.
+    ///
+    /// @param[in]  listening        Whether the listener has been set (true) or
+    ///                              cleared (false).
+    ///
+    virtual void OnEngineChannelUpdate(std::string name, bool listening) = 0;
+
+    //--------------------------------------------------------------------------
     /// @brief      Synchronously invokes platform-specific APIs to apply the
     ///             system text scaling on the given unscaled font size.
     ///
@@ -976,6 +987,9 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   // |RuntimeDelegate|
   std::weak_ptr<PlatformMessageHandler> GetPlatformMessageHandler()
       const override;
+
+  // |RuntimeDelegate|
+  void SendChannelUpdate(std::string name, bool listening) override;
 
   // |RuntimeDelegate|
   double GetScaledFontSize(double unscaled_font_size,

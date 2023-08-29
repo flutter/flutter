@@ -15,6 +15,7 @@
 #include "flutter/shell/platform/common/client_wrapper/binary_messenger_impl.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/standard_message_codec.h"
 #include "flutter/shell/platform/common/path_utils.h"
+#include "flutter/shell/platform/embedder/embedder_struct_macros.h"
 #include "flutter/shell/platform/windows/accessibility_bridge_windows.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/shell/platform/windows/keyboard_key_channel_handler.h"
@@ -371,6 +372,15 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
     auto host = static_cast<FlutterWindowsEngine*>(user_data);
     if (host->root_isolate_create_callback_) {
       host->root_isolate_create_callback_();
+    }
+  };
+  args.channel_update_callback = [](const FlutterChannelUpdate* update,
+                                    void* user_data) {
+    auto host = static_cast<FlutterWindowsEngine*>(user_data);
+    if (SAFE_ACCESS(update, channel, nullptr) != nullptr) {
+      std::string channel_name(update->channel);
+      host->OnChannelUpdate(std::move(channel_name),
+                            SAFE_ACCESS(update, listening, false));
     }
   };
 
@@ -792,16 +802,6 @@ void FlutterWindowsEngine::OnDwmCompositionChanged() {
   view_->OnDwmCompositionChanged();
 }
 
-// TODO(yaakovschectman): This enables the flutter/lifecycle channel
-// once the System.initializationComplete message is received on
-// the flutter/system channel. This is a short-term workaround to
-// ensure the framework is initialized and ready to accept lifecycle
-// messages. This cross-channel dependency should be removed.
-// See: https://github.com/flutter/flutter/issues/132514
-void FlutterWindowsEngine::OnApplicationLifecycleEnabled() {
-  lifecycle_manager_->BeginProcessingLifecycle();
-}
-
 void FlutterWindowsEngine::OnWindowStateEvent(HWND hwnd,
                                               WindowStateEvent event) {
   lifecycle_manager_->OnWindowStateEvent(hwnd, event);
@@ -817,6 +817,14 @@ std::optional<LRESULT> FlutterWindowsEngine::ProcessExternalWindowMessage(
                                                      lparam);
   }
   return std::nullopt;
+}
+
+void FlutterWindowsEngine::OnChannelUpdate(std::string name, bool listening) {
+  if (name == "flutter/platform" && listening) {
+    lifecycle_manager_->BeginProcessingExit();
+  } else if (name == "flutter/lifecycle" && listening) {
+    lifecycle_manager_->BeginProcessingLifecycle();
+  }
 }
 
 }  // namespace flutter

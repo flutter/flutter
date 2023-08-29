@@ -80,6 +80,8 @@ class EmbedderConfigBuilder {
   // Used to set a custom log message handler.
   void SetLogMessageCallbackHook();
 
+  void SetChannelUpdateCallbackHook();
+
   // Used to set a custom log tag.
   void SetLogTag(std::string tag);
 

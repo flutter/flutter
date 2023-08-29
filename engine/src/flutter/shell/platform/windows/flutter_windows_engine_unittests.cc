@@ -703,7 +703,8 @@ TEST_F(FlutterWindowsEngineTest, TestExit) {
   ON_CALL(*handler, IsLastWindowOfProcess).WillByDefault([]() { return true; });
   EXPECT_CALL(*handler, Quit).Times(1);
   modifier.SetLifecycleManager(std::move(handler));
-  engine->OnApplicationLifecycleEnabled();
+
+  engine->lifecycle_manager()->BeginProcessingExit();
 
   engine->Run();
 
@@ -740,7 +741,7 @@ TEST_F(FlutterWindowsEngineTest, TestExitCancel) {
   ON_CALL(*handler, IsLastWindowOfProcess).WillByDefault([]() { return true; });
   EXPECT_CALL(*handler, Quit).Times(0);
   modifier.SetLifecycleManager(std::move(handler));
-  engine->OnApplicationLifecycleEnabled();
+  engine->lifecycle_manager()->BeginProcessingExit();
 
   auto binary_messenger =
       std::make_unique<BinaryMessengerImpl>(engine->messenger());
@@ -801,7 +802,7 @@ TEST_F(FlutterWindowsEngineTest, TestExitSecondCloseMessage) {
                 hwnd, msg, wparam, lparam);
           });
   modifier.SetLifecycleManager(std::move(handler));
-  engine->OnApplicationLifecycleEnabled();
+  engine->lifecycle_manager()->BeginProcessingExit();
 
   engine->Run();
 
@@ -852,7 +853,7 @@ TEST_F(FlutterWindowsEngineTest, TestExitCloseMultiWindow) {
   // Quit should not be called when there is more than one window.
   EXPECT_CALL(*handler, Quit).Times(0);
   modifier.SetLifecycleManager(std::move(handler));
-  engine->OnApplicationLifecycleEnabled();
+  engine->lifecycle_manager()->BeginProcessingExit();
 
   engine->Run();
 
@@ -900,7 +901,7 @@ TEST_F(FlutterWindowsEngineTest, EnableApplicationLifecycle) {
   });
   EXPECT_CALL(*handler, IsLastWindowOfProcess).Times(1);
   modifier.SetLifecycleManager(std::move(handler));
-  engine->OnApplicationLifecycleEnabled();
+  engine->lifecycle_manager()->BeginProcessingExit();
 
   engine->window_proc_delegate_manager()->OnTopLevelWindowProc(0, WM_CLOSE, 0,
                                                                0);
@@ -1054,7 +1055,8 @@ TEST_F(FlutterWindowsEngineTest, EnableLifecycleState) {
   EXPECT_FALSE(finished);
 
   // Test that we can set the state afterwards.
-  engine->OnApplicationLifecycleEnabled();
+
+  engine->lifecycle_manager()->BeginProcessingLifecycle();
   view.OnWindowStateEvent(hwnd, WindowStateEvent::kShow);
 
   while (!finished) {
@@ -1107,6 +1109,30 @@ TEST_F(FlutterWindowsEngineTest, LifecycleStateToFrom) {
   view.OnWindowStateEvent(hwnd, WindowStateEvent::kHide);
 
   while (!dart_responded) {
+    engine->task_runner()->ProcessTasks();
+  }
+}
+
+TEST_F(FlutterWindowsEngineTest, ChannelListenedTo) {
+  FlutterWindowsEngineBuilder builder{GetContext()};
+  builder.SetDartEntrypoint("enableLifecycleToFrom");
+
+  auto window_binding_handler =
+      std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>();
+  MockFlutterWindowsView view(std::move(window_binding_handler));
+  view.SetEngine(builder.Build());
+  FlutterWindowsEngine* engine = view.GetEngine();
+  EngineModifier modifier(engine);
+  modifier.embedder_api().RunsAOTCompiledDartCode = []() { return false; };
+
+  bool lifecycle_began = false;
+  auto handler = std::make_unique<MockWindowsLifecycleManager>(engine);
+  handler->begin_processing_callback = [&]() { lifecycle_began = true; };
+  modifier.SetLifecycleManager(std::move(handler));
+
+  engine->Run();
+
+  while (!lifecycle_began) {
     engine->task_runner()->ProcessTasks();
   }
 }

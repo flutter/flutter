@@ -2562,6 +2562,37 @@ TEST_F(EmbedderTest, CanSendPointer) {
   message_latch.Wait();
 }
 
+TEST_F(EmbedderTest, RegisterChannelListener) {
+  auto& context = GetEmbedderContext(EmbedderTestContextType::kSoftwareContext);
+
+  fml::AutoResetWaitableEvent latch;
+  fml::AutoResetWaitableEvent latch2;
+  bool listening = false;
+  context.AddNativeCallback(
+      "SignalNativeTest",
+      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments) { latch.Signal(); }));
+  context.SetChannelUpdateCallback([&](const FlutterChannelUpdate* update) {
+    EXPECT_STREQ(update->channel, "test/listen");
+    EXPECT_TRUE(update->listening);
+    listening = true;
+    latch2.Signal();
+  });
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSoftwareRendererConfig();
+  builder.SetDartEntrypoint("channel_listener_response");
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  latch.Wait();
+  // Drain tasks posted to platform thread task runner.
+  fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+  latch2.Wait();
+
+  ASSERT_TRUE(listening);
+}
+
 }  // namespace testing
 }  // namespace flutter
 
