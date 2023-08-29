@@ -14,6 +14,14 @@ This site hosts Flutter's API documentation. Other documentation can be found at
 the following locations:
 
 * [flutter.dev](https://flutter.dev) (main site)
+* [api.flutter.dev](https://api.flutter.dev) (API docs reference site)
+* Engine Embedder API documentation:
+  * [Android Embedder](https://api.flutter.dev/javadoc/index.html)
+  * [iOS Embedder](https://api.flutter.dev/ios-embedder/index.html)
+  * [macOS Embedder](https://api.flutter.dev/macos-embedder/index.html)
+  * [Linux Embedder](https://api.flutter.dev/linux-embedder/index.html)
+  * [Windows Embedder](https://api.flutter.dev/windows-embedder/index.html)
+  * [Web Embedder](https://api.flutter.dev/flutter/dart-ui_web/dart-ui_web-library.html)
 * [Installation](https://flutter.dev/docs/get-started/install)
 * [Codelabs](https://flutter.dev/docs/codelabs)
 * [Contributing to Flutter](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md)
