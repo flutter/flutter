@@ -85,10 +85,10 @@ class CapabilitiesVK final : public Capabilities,
   bool SupportsReadFromOnscreenTexture() const override;
 
   // |Capabilities|
-  bool SupportsDecalTileMode() const override;
+  bool SupportsDecalSamplerAddressMode() const override;
 
   // |Capabilities|
-  bool SupportsMemorylessTextures() const override;
+  bool SupportsDeviceTransientTextures() const override;
 
   // |Capabilities|
   PixelFormat GetDefaultColorFormat() const override;
@@ -108,7 +108,7 @@ class CapabilitiesVK final : public Capabilities,
   PixelFormat default_depth_stencil_format_ = PixelFormat::kUnknown;
   vk::PhysicalDeviceProperties device_properties_;
   bool supports_compute_subgroups_ = false;
-  bool supports_memoryless_textures_ = false;
+  bool supports_device_transient_textures_ = false;
   bool is_valid_ = false;
 
   bool HasExtension(const std::string& ext) const;
