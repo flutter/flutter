@@ -301,6 +301,119 @@ void main() {
         );
       });
 
+      testWidgets('Keep alive works with additional parent data widgets', (WidgetTester tester) async {
+        const ChildVicinity firstCell = ChildVicinity(xIndex: 0, yIndex: 0);
+        final ScrollController verticalController = ScrollController();
+        final UniqueKey checkBoxKey = UniqueKey();
+        final TwoDimensionalChildBuilderDelegate builderDelegate = TwoDimensionalChildBuilderDelegate(
+          maxXIndex: 5,
+          maxYIndex: 5,
+          builder: (BuildContext context, ChildVicinity vicinity) {
+            // The delegate will add a KeepAlive ParentDataWidget, this add an
+            // additional ParentDataWidget.
+            return TestParentDataWidget(
+              testValue: 20,
+              child: SizedBox.square(
+                dimension: 200,
+                child: Center(child: vicinity == firstCell
+                  ? KeepAliveCheckBox(key: checkBoxKey)
+                  : Text('R${vicinity.xIndex}:C${vicinity.yIndex}')
+                ),
+              ),
+            );
+          }
+        );
+
+        await tester.pumpWidget(simpleBuilderTest(
+          delegate: builderDelegate,
+          verticalDetails: ScrollableDetails.vertical(controller: verticalController),
+        ));
+        await tester.pumpAndSettle();
+
+        expect(verticalController.hasClients, isTrue);
+        expect(verticalController.position.pixels, 0.0);
+        expect(find.byKey(checkBoxKey), findsOneWidget);
+        expect(
+          tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).checkValue,
+          isFalse,
+        );
+        expect(
+          tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).wantKeepAlive,
+          isFalse,
+        );
+        RenderSimpleBuilderTableViewport viewport = getViewport(tester, checkBoxKey) as RenderSimpleBuilderTableViewport;
+        TestExtendedParentData parentData = viewport.parentDataOf(viewport.testGetChildFor(firstCell)!);
+        // Check parent data from both ParentDataWidgets
+        expect(parentData.testValue, 20);
+        expect(parentData.keepAlive, isFalse);
+
+        // Scroll away, disposing of the checkbox.
+        verticalController.jumpTo(verticalController.position.maxScrollExtent);
+        await tester.pump();
+        expect(verticalController.position.pixels, 600.0);
+        expect(find.byKey(checkBoxKey), findsNothing);
+
+        // Bring back into view, still unchecked, not kept alive.
+        verticalController.jumpTo(0.0);
+        await tester.pump();
+        expect(verticalController.position.pixels, 0.0);
+        expect(find.byKey(checkBoxKey), findsOneWidget);
+        // Check the box to set keep alive to true.
+        await tester.tap(find.byKey(checkBoxKey));
+        await tester.pumpAndSettle();
+        expect(
+          tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).checkValue,
+          isTrue,
+        );
+        expect(
+          tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).wantKeepAlive,
+          isTrue,
+        );
+        viewport = getViewport(tester, checkBoxKey) as RenderSimpleBuilderTableViewport;
+        parentData = viewport.parentDataOf(viewport.testGetChildFor(firstCell)!);
+        // Check parent data from both ParentDataWidgets
+        expect(parentData.testValue, 20);
+        expect(parentData.keepAlive, isTrue);
+
+        // Scroll away again, checkbox should be kept alive now.
+        verticalController.jumpTo(verticalController.position.maxScrollExtent);
+        await tester.pump();
+        expect(verticalController.position.pixels, 600.0);
+        expect(find.byKey(checkBoxKey), findsOneWidget);
+        expect(
+          tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).checkValue,
+          isTrue,
+        );
+        expect(
+          tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).wantKeepAlive,
+          isTrue,
+        );
+        viewport = getViewport(tester, checkBoxKey) as RenderSimpleBuilderTableViewport;
+        parentData = viewport.parentDataOf(viewport.testGetChildFor(firstCell)!);
+        // Check parent data from both ParentDataWidgets
+        expect(parentData.testValue, 20);
+        expect(parentData.keepAlive, isTrue);
+
+        // Bring back into view, still checked, after being kept alive.
+        verticalController.jumpTo(0.0);
+        await tester.pump();
+        expect(verticalController.position.pixels, 0.0);
+        expect(find.byKey(checkBoxKey), findsOneWidget);
+        expect(
+          tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).checkValue,
+          isTrue,
+        );
+        expect(
+          tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).wantKeepAlive,
+          isTrue,
+        );
+        viewport = getViewport(tester, checkBoxKey) as RenderSimpleBuilderTableViewport;
+        parentData = viewport.parentDataOf(viewport.testGetChildFor(firstCell)!);
+        // Check parent data from both ParentDataWidgets
+        expect(parentData.testValue, 20);
+        expect(parentData.keepAlive, isTrue);
+      });
+
       testWidgets('builder delegate will not add automatic keep alives', (WidgetTester tester) async {
         const ChildVicinity firstCell = ChildVicinity(xIndex: 0, yIndex: 0);
         final ScrollController verticalController = ScrollController();

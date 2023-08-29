@@ -276,12 +276,13 @@ void main() {
       exception.toString(),
       startsWith(
         'Incorrect use of ParentDataWidget.\n'
-        'The following ParentDataWidgets are providing parent data to the same RenderObject:\n'
+        'Competing ParentDataWidgets are providing parent data to the same RenderObject:\n'
         '- Positioned(left: 7.0, top: 6.0) (typically placed directly inside a Stack widget)\n'
         '- Positioned(top: 5.0, bottom: 8.0) (typically placed directly inside a Stack widget)\n'
-        'However, a RenderObject can only receive parent data from at most one ParentDataWidget.\n'
-        'Usually, this indicates that at least one of the offending ParentDataWidgets listed '
-        'above is not placed directly inside a compatible ancestor widget.\n'
+        'A RenderObject can receive parent data from more than one type of ParentDataWidget, '
+        'but not of the same conflicting type.\n'
+        'Alternatively, this can indicate that at least one of the offending ParentDataWidgets '
+        'listed above is not placed directly inside a compatible ancestor widget.\n'
         'The ownership chain for the RenderObject that received the parent data was:\n'
         '  DecoratedBox ← Positioned ← Positioned ← Stack ← Directionality ← ', // End of chain omitted, not relevant for test.
       ),
