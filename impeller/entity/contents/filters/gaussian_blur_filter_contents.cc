@@ -230,7 +230,8 @@ std::optional<Entity> DirectionalGaussianBlurFilterContents::RenderFilter(
     auto source_descriptor = source_snapshot->sampler_descriptor;
     switch (tile_mode_) {
       case Entity::TileMode::kDecal:
-        if (renderer.GetDeviceCapabilities().SupportsDecalTileMode()) {
+        if (renderer.GetDeviceCapabilities()
+                .SupportsDecalSamplerAddressMode()) {
           input_descriptor.width_address_mode = SamplerAddressMode::kDecal;
           input_descriptor.height_address_mode = SamplerAddressMode::kDecal;
           source_descriptor.width_address_mode = SamplerAddressMode::kDecal;
@@ -263,7 +264,7 @@ std::optional<Entity> DirectionalGaussianBlurFilterContents::RenderFilter(
     bool has_alpha_mask = blur_style_ != BlurStyle::kNormal;
     bool has_decal_specialization =
         tile_mode_ == Entity::TileMode::kDecal &&
-        !renderer.GetDeviceCapabilities().SupportsDecalTileMode();
+        !renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode();
 
     if (has_alpha_mask && has_decal_specialization) {
       cmd.pipeline = renderer.GetGaussianBlurAlphaDecalPipeline(options);

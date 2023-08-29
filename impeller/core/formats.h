@@ -383,7 +383,7 @@ enum class SamplerAddressMode {
   // supported) defaults.
 
   /// @brief decal sampling mode is only supported on devices that pass
-  ///        the Capabilities.SupportsDecalTileMode check.
+  ///        the `Capabilities.SupportsDecalSamplerAddressMode` check.
   kDecal,
 };
 

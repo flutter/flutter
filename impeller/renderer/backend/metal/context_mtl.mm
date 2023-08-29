@@ -56,7 +56,7 @@ static std::unique_ptr<Capabilities> InferMetalCapabilities(
       .SetSupportsSSBO(true)
       .SetSupportsBufferToTextureBlits(true)
       .SetSupportsTextureToTextureBlits(true)
-      .SetSupportsDecalTileMode(true)
+      .SetSupportsDecalSamplerAddressMode(true)
       .SetSupportsFramebufferFetch(DeviceSupportsFramebufferFetch(device))
       .SetDefaultColorFormat(color_format)
       .SetDefaultStencilFormat(PixelFormat::kS8UInt)
@@ -65,7 +65,7 @@ static std::unique_ptr<Capabilities> InferMetalCapabilities(
       .SetSupportsComputeSubgroups(DeviceSupportsComputeSubgroups(device))
       .SetSupportsReadFromResolve(true)
       .SetSupportsReadFromOnscreenTexture(true)
-      .SetSupportsMemorylessTextures(true)
+      .SetSupportsDeviceTransientTextures(true)
       .Build();
 }
 

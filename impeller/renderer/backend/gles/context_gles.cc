@@ -75,8 +75,8 @@ ContextGLES::ContextGLES(std::unique_ptr<ProcTableGLES> gl,
             .SetSupportsComputeSubgroups(false)
             .SetSupportsReadFromResolve(false)
             .SetSupportsReadFromOnscreenTexture(false)
-            .SetSupportsDecalTileMode(false)
-            .SetSupportsMemorylessTextures(false)
+            .SetSupportsDecalSamplerAddressMode(false)
+            .SetSupportsDeviceTransientTextures(false)
             .Build();
   }
 
