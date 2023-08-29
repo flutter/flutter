@@ -9,12 +9,12 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-// Finds a bundle with the named `flutterFrameworkBundleID` within `searchURL`.
+// Finds a bundle with the named `bundleID` within `searchURL`.
 //
 // Returns `nil` if the bundle cannot be found or if errors are encountered.
-NSBundle* FLTFrameworkBundleInternal(NSString* flutterFrameworkBundleID, NSURL* searchURL);
+NSBundle* FLTFrameworkBundleInternal(NSString* bundleID, NSURL* searchURL);
 
-// Finds a bundle with the named `flutterFrameworkBundleID`.
+// Finds a bundle with the named `bundleID`.
 //
 // `+[NSBundle bundleWithIdentifier:]` is slow, and can take in the order of
 // tens of milliseconds in a minimal flutter app, and closer to 100 milliseconds
@@ -28,20 +28,7 @@ NSBundle* FLTFrameworkBundleInternal(NSString* flutterFrameworkBundleID, NSURL* 
 // frameworks used by this file are placed. If the desired bundle cannot be
 // found here, the implementation falls back to
 // `+[NSBundle bundleWithIdentifier:]`.
-NSBundle* FLTFrameworkBundleWithIdentifier(NSString* flutterFrameworkBundleID);
-
-// Finds the bundle of the application.
-//
-// Returns [NSBundle mainBundle] if the current running process is the application.
-NSBundle* FLTGetApplicationBundle();
-
-// Finds the Flutter asset directory from `bundle`.
-//
-// The raw path can be set by the application via info.plist's `FLTAssetsPath` key.
-// If the key is not set, `flutter_assets` is used as the raw path value.
-//
-// If no valid asset is found under the raw path, returns nil.
-NSURL* FLTAssetsURLFromBundle(NSBundle* bundle);
+NSBundle* FLTFrameworkBundleWithIdentifier(NSString* bundleID);
 
 NS_ASSUME_NONNULL_END
 
