@@ -12,8 +12,6 @@
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
 
-#include "third_party/skia/include/core/SkSurface.h"
-
 namespace flutter {
 
 class Stopwatch {
@@ -32,15 +30,15 @@ class Stopwatch {
 
   ~Stopwatch();
 
+  const fml::TimeDelta& GetLap(size_t index) const;
+
+  size_t GetCurrentSample() const;
+
   const fml::TimeDelta& LastLap() const;
 
   fml::TimeDelta MaxDelta() const;
 
   fml::TimeDelta AverageDelta() const;
-
-  void InitVisualizeSurface(SkISize size) const;
-
-  void Visualize(DlCanvas* canvas, const SkRect& rect) const;
 
   void Start();
 
@@ -52,19 +50,10 @@ class Stopwatch {
   fml::Milliseconds GetFrameBudget() const;
 
  private:
-  inline double UnitFrameInterval(double time_ms) const;
-  inline double UnitHeight(double time_ms, double max_height) const;
-
   const RefreshRateUpdater& refresh_rate_updater_;
   fml::TimePoint start_;
   std::vector<fml::TimeDelta> laps_;
   size_t current_sample_;
-
-  // Mutable data cache for performance optimization of the graphs. Prevents
-  // expensive redrawing of old data.
-  mutable bool cache_dirty_;
-  mutable sk_sp<SkSurface> visualize_cache_surface_;
-  mutable size_t prev_drawn_sample_index_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Stopwatch);
 };
@@ -89,6 +78,38 @@ class FixedRefreshRateStopwatch : public Stopwatch {
 
  private:
   FixedRefreshRateUpdater fixed_delegate_;
+};
+
+//------------------------------------------------------------------------------
+/// @brief        Abstract class for visualizing (i.e. drawing) a stopwatch.
+///
+/// @note         This was originally folded into the |Stopwatch| class, but
+///               was separated out to make it easier to change the underlying
+///               implementation (which relied directly on Skia, not showing on
+///               Impeller: https://github.com/flutter/flutter/issues/126009).
+class StopwatchVisualizer {
+ public:
+  explicit StopwatchVisualizer(const Stopwatch& stopwatch)
+      : stopwatch_(stopwatch) {}
+
+  virtual ~StopwatchVisualizer() = default;
+
+  /// @brief      Renders the stopwatch as a graph.
+  ///
+  /// @param      canvas  The canvas to draw on.
+  /// @param[in]  rect    The rectangle to draw in.
+  virtual void Visualize(DlCanvas* canvas, const SkRect& rect) const = 0;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(StopwatchVisualizer);
+
+ protected:
+  /// @brief      Converts a raster time to a unit interval.
+  double UnitFrameInterval(double time_ms) const;
+
+  /// @brief      Converts a raster time to a unit height.
+  double UnitHeight(double time_ms, double max_height) const;
+
+  const Stopwatch& stopwatch_;
 };
 
 }  // namespace flutter

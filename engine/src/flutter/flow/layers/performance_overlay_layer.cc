@@ -8,6 +8,7 @@
 #include <iostream>
 #include <string>
 
+#include "flow/stopwatch_sk.h"
 #include "third_party/skia/include/core/SkFont.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
 
@@ -29,7 +30,11 @@ void VisualizeStopWatch(DlCanvas* canvas,
 
   if (show_graph) {
     SkRect visualization_rect = SkRect::MakeXYWH(x, y, width, height);
-    stopwatch.Visualize(canvas, visualization_rect);
+
+    // TODO(matanlurey): Select a visualizer based on the current backend.
+    // https://github.com/flutter/flutter/issues/126009
+    SkStopwatchVisualizer visualizer = SkStopwatchVisualizer(stopwatch);
+    visualizer.Visualize(canvas, visualization_rect);
   }
 
   if (show_labels) {

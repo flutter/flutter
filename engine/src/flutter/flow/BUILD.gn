@@ -77,6 +77,8 @@ source_set("flow") {
     "skia_gpu_object.h",
     "stopwatch.cc",
     "stopwatch.h",
+    "stopwatch_sk.cc",
+    "stopwatch_sk.h",
     "surface.cc",
     "surface.h",
     "surface_frame.cc",
