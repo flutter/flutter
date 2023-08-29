@@ -13,8 +13,10 @@ extension SingletonFlutterWindowExtension on ui.SingletonFlutterWindow {
 }
 
 /// Overrides the value of [ui.FlutterView.devicePixelRatio] in tests.
+///
+/// Passing `null` resets the device pixel ratio to the browser's default.
 void debugOverrideDevicePixelRatio(double? value) {
-  (ui.window as EngineSingletonFlutterWindow).debugOverrideDevicePixelRatio(value);
+  EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(value);
 }
 
 /// Whether the Flutter engine is running in `flutter test` emulation mode.

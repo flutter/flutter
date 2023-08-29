@@ -60,24 +60,6 @@ class HighContrastSupport {
   }
 }
 
-class EngineFlutterDisplay extends ui.Display {
-  EngineFlutterDisplay({
-    required this.id,
-    required this.devicePixelRatio,
-    required this.size,
-    required this.refreshRate,
-  });
-
-  @override
-  final int id;
-  @override
-  final double devicePixelRatio;
-  @override
-  final ui.Size size;
-  @override
-  final double refreshRate;
-}
-
 /// Platform event dispatcher.
 ///
 /// This is the central entry point for platform messages and configuration
@@ -141,13 +123,8 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   }
 
   @override
-  Iterable<ui.Display> get displays => <ui.Display>[
-    EngineFlutterDisplay(
-      id: 0,
-      size: ui.Size(domWindow.screen?.width ?? 0, domWindow.screen?.height ?? 0),
-      devicePixelRatio: domWindow.devicePixelRatio,
-      refreshRate: 60,
-    )
+  Iterable<EngineFlutterDisplay> displays = <EngineFlutterDisplay>[
+    EngineFlutterDisplay.instance,
   ];
 
   /// The current list of windows.
@@ -229,13 +206,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     if (_onMetricsChanged != null) {
       invoke(_onMetricsChanged, _onMetricsChangedZone);
     }
-  }
-
-  /// Returns device pixel ratio returned by browser.
-  static double get browserDevicePixelRatio {
-    final double ratio = domWindow.devicePixelRatio;
-    // Guard against WebOS returning 0.
-    return (ratio == 0.0) ? 1.0 : ratio;
   }
 
   /// A callback invoked when any window begins a frame.
@@ -1297,7 +1267,7 @@ bool _handleWebTestEnd2EndMessage(MethodCodec codec, ByteData? data) {
   final double ratio = double.parse(decoded.arguments as String);
   switch (decoded.method) {
     case 'setDevicePixelRatio':
-      window.debugOverrideDevicePixelRatio(ratio);
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(ratio);
       EnginePlatformDispatcher.instance.onMetricsChanged!();
       return true;
   }

@@ -4,8 +4,8 @@
 
 import 'dart:async';
 
+import '../display.dart';
 import '../dom.dart';
-import '../platform_dispatcher.dart';
 import 'bitmap_canvas.dart';
 import 'dom_canvas.dart';
 import 'picture.dart';
@@ -131,9 +131,9 @@ void debugRepaintSurfaceStatsOverlay(PersistedScene scene) {
     ..fill();
 
   final double physicalScreenWidth =
-      domWindow.innerWidth! * EnginePlatformDispatcher.browserDevicePixelRatio;
+      domWindow.innerWidth! * EngineFlutterDisplay.instance.browserDevicePixelRatio;
   final double physicalScreenHeight =
-      domWindow.innerHeight! * EnginePlatformDispatcher.browserDevicePixelRatio;
+      domWindow.innerHeight! * EngineFlutterDisplay.instance.browserDevicePixelRatio;
   final double physicsScreenPixelCount =
       physicalScreenWidth * physicalScreenHeight;
 
@@ -300,9 +300,9 @@ void debugPrintSurfaceStats(PersistedScene scene, int frameNumber) {
       return pixels;
     }).fold(0, (int total, int pixels) => total + pixels);
     final double physicalScreenWidth =
-        domWindow.innerWidth! * EnginePlatformDispatcher.browserDevicePixelRatio;
+        domWindow.innerWidth! * EngineFlutterDisplay.instance.browserDevicePixelRatio;
     final double physicalScreenHeight =
-        domWindow.innerHeight! * EnginePlatformDispatcher.browserDevicePixelRatio;
+        domWindow.innerHeight! * EngineFlutterDisplay.instance.browserDevicePixelRatio;
     final double physicsScreenPixelCount =
         physicalScreenWidth * physicalScreenHeight;
     final double screenPixelRatio = pixelCount / physicsScreenPixelCount;

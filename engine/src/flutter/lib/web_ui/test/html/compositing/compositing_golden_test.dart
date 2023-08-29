@@ -487,8 +487,8 @@ void _testCullRectComputation() {
     final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
 
     builder.pushTransform(Matrix4.diagonal3Values(
-            EnginePlatformDispatcher.browserDevicePixelRatio,
-            EnginePlatformDispatcher.browserDevicePixelRatio,
+            EngineFlutterDisplay.instance.browserDevicePixelRatio,
+            EngineFlutterDisplay.instance.browserDevicePixelRatio,
             1.0)
         .toFloat64());
 

@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
 import 'browser_detection.dart';
+import 'display.dart';
 import 'dom.dart';
 import 'engine_canvas.dart';
 import 'html/bitmap_canvas.dart';
@@ -20,7 +21,6 @@ import 'html/path/path_utils.dart';
 import 'html/picture.dart';
 import 'html/shaders/image_shader.dart';
 import 'html/shaders/shader.dart';
-import 'platform_dispatcher.dart';
 import 'rrect_renderer.dart';
 import 'safe_browser_api.dart';
 import 'shadow.dart';
@@ -156,9 +156,9 @@ class CanvasPool extends _SaveStackTracking {
       // * To make sure that when we scale the canvas by devicePixelRatio (see
       //   _initializeViewport below) the pixels line up.
       final double cssWidth =
-          _widthInBitmapPixels / EnginePlatformDispatcher.browserDevicePixelRatio;
+          _widthInBitmapPixels / EngineFlutterDisplay.instance.browserDevicePixelRatio;
       final double cssHeight =
-          _heightInBitmapPixels / EnginePlatformDispatcher.browserDevicePixelRatio;
+          _heightInBitmapPixels / EngineFlutterDisplay.instance.browserDevicePixelRatio;
       canvas = _allocCanvas(_widthInBitmapPixels, _heightInBitmapPixels);
       _canvas = canvas;
 
@@ -385,8 +385,7 @@ class CanvasPool extends _SaveStackTracking {
   }
 
   /// Returns effective dpi (browser DPI and pixel density due to transform).
-  double get dpi =>
-      EnginePlatformDispatcher.browserDevicePixelRatio * _density;
+  double get dpi => EngineFlutterDisplay.instance.browserDevicePixelRatio * _density;
 
   void _resetTransform() {
     final DomCanvasElement? canvas = _canvas;
