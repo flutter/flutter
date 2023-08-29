@@ -1035,10 +1035,15 @@ static void SendFakeTouchEvent(UIScreen* screen,
   if (_viewportMetrics.physical_width) {
     [self surfaceUpdated:YES];
   }
-  [self goToApplicationLifecycle:@"AppLifecycleState.resumed"];
+  [self performSelector:@selector(goToApplicationLifecycle:)
+             withObject:@"AppLifecycleState.resumed"
+             afterDelay:0.0f];
 }
 
 - (void)appOrSceneWillResignActive {
+  [NSObject cancelPreviousPerformRequestsWithTarget:self
+                                           selector:@selector(goToApplicationLifecycle:)
+                                             object:@"AppLifecycleState.resumed"];
   [self goToApplicationLifecycle:@"AppLifecycleState.inactive"];
 }
 
