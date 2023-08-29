@@ -2083,7 +2083,7 @@ class _TestImageProvider extends ImageProvider<Object> {
   }
 
   @override
-  ImageStreamCompleter loadImage(Object key, ImageDecoderCallback decode) {
+  ImageStreamCompleter load(Object key, DecoderCallback decode) {
     _loadCallCount += 1;
     return _streamCompleter;
   }
@@ -2198,7 +2198,7 @@ class _FailingImageProvider extends ImageProvider<int> {
   }
 
   @override
-  ImageStreamCompleter loadImage(int key, ImageDecoderCallback decode) {
+  ImageStreamCompleter load(int key, DecoderCallback decode) {
     if (failOnLoad) {
       throw throws;
     }
