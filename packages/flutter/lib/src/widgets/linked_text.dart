@@ -229,7 +229,6 @@ class LinkedText extends StatefulWidget {
 }
 
 class _LinkedTextState extends State<LinkedText> {
-  final GlobalKey _textKey = GlobalKey();
   Iterable<TapGestureRecognizer>? _recognizers;
   late Iterable<InlineSpan> _linkedSpans;
 
@@ -278,7 +277,6 @@ class _LinkedTextState extends State<LinkedText> {
     }
 
     return Text.rich(
-      key: _textKey,
       TextSpan(
         style: widget.style ?? DefaultTextStyle.of(context).style,
         children: _linkedSpans.toList(),
