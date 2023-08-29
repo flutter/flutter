@@ -347,39 +347,6 @@ void main() {
     expect(lastTappedLink, 'flutter.dev');
   });
 
-  testWidgets('can pass ranges directly', (WidgetTester tester) async {
-    String? lastTappedLink;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Builder(
-            builder: (BuildContext context) {
-              return LinkedText(
-                onTap: (String text) {
-                  lastTappedLink = text;
-                },
-                textRanges: const <TextRange>[
-                  TextRange(start: 0, end: 5), // 'Check'
-                  TextRange(start: 10, end: 17), // 'flutter'
-                ],
-                text: 'Check out flutter.dev.',
-              );
-            },
-          ),
-        ),
-      ),
-    );
-
-    expect(find.byType(RichText), findsOneWidget);
-    expect(lastTappedLink, isNull);
-
-    await tester.tapAt(tester.getTopLeft(find.byType(RichText)));
-    expect(lastTappedLink, 'Check');
-
-    await tester.tapAt(tester.getCenter(find.byType(RichText)));
-    expect(lastTappedLink, 'flutter');
-  });
-
   testWidgets('can pass custom regexp', (WidgetTester tester) async {
     String? lastTappedLink;
     await tester.pumpWidget(

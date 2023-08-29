@@ -84,14 +84,10 @@ class LinkedText extends StatefulWidget {
     required LinkTapCallback onTap,
     List<InlineSpan>? spans,
     String? text,
-    Iterable<TextRange>? textRanges,
-  }) : assert(text != null || spans != null, 'Must specify something to link: either text or spans.'),
-       assert(text == null || spans == null, 'Pass one of spans or text, not both.'),
+  }) : assert((text == null) != (spans == null), 'Must specify exactly one to link: either text or spans.'),
        textLinkers = <TextLinker>[
          TextLinker(
-           textRangesFinder: textRanges == null
-               ? defaultTextRangesFinder
-               : (String text) => textRanges,
+           textRangesFinder: defaultTextRangesFinder,
            linkBuilder: getDefaultLinkBuilder(onTap),
          ),
        ],
@@ -123,8 +119,7 @@ class LinkedText extends StatefulWidget {
     required RegExp regExp,
     List<InlineSpan>? spans,
     String? text,
-  }) : assert(text != null || spans != null, 'Must specify something to link: either text or spans.'),
-       assert(text == null || spans == null, 'Pass one of spans or text, not both.'),
+  }) : assert((text == null) != (spans == null), 'Must specify exactly one to link: either text or spans.'),
        textLinkers = <TextLinker>[
          TextLinker(
            textRangesFinder: TextLinker.textRangesFinderFromRegExp(regExp),
@@ -165,8 +160,7 @@ class LinkedText extends StatefulWidget {
     List<InlineSpan>? spans,
     required this.textLinkers,
     this.style,
-  }) : assert(text != null || spans != null, 'Must specify something to link: either text or spans.'),
-       assert(text == null || spans == null, 'Pass one of spans or text, not both.'),
+  }) : assert((text == null) != (spans == null), 'Must specify exactly one to link: either text or spans.'),
        assert(textLinkers.isNotEmpty),
        spans = spans ?? <InlineSpan>[
          TextSpan(
@@ -578,30 +572,6 @@ class _LinkedSpans {
 
   final Iterable<InlineSpan> linkedSpans;
   final Iterable<TapGestureRecognizer> recognizers;
-
-  /// Apply the given [TextLinker]s to the given [InlineSpan]s and return the
-  /// new resulting spans and any created [TapGestureRecognizer]s.
-  ///
-  /// {@macro flutter.painting.LinkBuilder.recognizer}
-  static (Iterable<InlineSpan>, Iterable<TapGestureRecognizer>) linkSpans(Iterable<InlineSpan> spans, Iterable<TextLinker> textLinkers) {
-    // Flatten the spans and store all string lengths, so that matches across
-    // span boundaries can be matched in the flat string. This is calculated
-    // once in the beginning to avoid recomputing.
-    final _TextCache textCache = _TextCache.fromMany(spans: spans);
-
-    final Iterable<_TextLinkerMatch> textLinkerMatches =
-        _cleanTextLinkerMatches(
-          _TextLinkerMatch.fromTextLinkers(textLinkers, textCache.text),
-        );
-
-    final (Iterable<InlineSpan> output, Iterable<_TextLinkerMatch> _, Iterable<TapGestureRecognizer> recognizers) =
-        _linkSpansRecurse(
-          spans,
-          textCache,
-          textLinkerMatches,
-        );
-    return (output, recognizers);
-  }
 
   static List<_TextLinkerMatch> _cleanTextLinkerMatches(Iterable<_TextLinkerMatch> textLinkerMatches) {
     final List<_TextLinkerMatch> nextTextLinkerMatches = textLinkerMatches.toList();
