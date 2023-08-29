@@ -257,6 +257,8 @@ class ChannelBuffers {
       return true;
     }());
   }
+
+  void sendChannelUpdate(String name, {required bool listening}) {}
 }
 
 final ChannelBuffers channelBuffers = ChannelBuffers();

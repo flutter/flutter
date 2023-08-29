@@ -199,6 +199,14 @@ void PlatformViewEmbedder::OnPreEngineRestart() const {
   }
 }
 
+// |PlatformView|
+void PlatformViewEmbedder::SendChannelUpdate(const std::string& name,
+                                             bool listening) {
+  if (platform_dispatch_table_.on_channel_update != nullptr) {
+    platform_dispatch_table_.on_channel_update(name, listening);
+  }
+}
+
 std::shared_ptr<PlatformMessageHandler>
 PlatformViewEmbedder::GetPlatformMessageHandler() const {
   return platform_message_handler_;

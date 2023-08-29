@@ -114,6 +114,7 @@ EmbedderConfigBuilder::EmbedderConfigBuilder(
     SetSemanticsCallbackHooks();
     SetLogMessageCallbackHook();
     SetLocalizationCallbackHooks();
+    SetChannelUpdateCallbackHook();
     AddCommandLineArgument("--disable-vm-service");
 
     if (preference == InitializationPreference::kSnapshotsInitialize ||
@@ -261,6 +262,11 @@ void EmbedderConfigBuilder::SetSemanticsCallbackHooks() {
 void EmbedderConfigBuilder::SetLogMessageCallbackHook() {
   project_args_.log_message_callback =
       EmbedderTestContext::GetLogMessageCallbackHook();
+}
+
+void EmbedderConfigBuilder::SetChannelUpdateCallbackHook() {
+  project_args_.channel_update_callback =
+      context_.GetChannelUpdateCallbackHook();
 }
 
 void EmbedderConfigBuilder::SetLogTag(std::string tag) {
