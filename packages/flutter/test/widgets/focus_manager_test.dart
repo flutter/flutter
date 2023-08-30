@@ -1227,8 +1227,9 @@ void main() {
           'FocusManager#00000\n'
           ' │ primaryFocus: FocusNode#00000(Child 4 [PRIMARY FOCUS])\n'
           ' │ primaryFocusCreator: Container-[GlobalKey#00000] ← MediaQuery ←\n'
-          ' │   _MediaQueryFromView ← _ViewScope ← View-[GlobalObjectKey\n'
-          ' │   TestFlutterView#00000] ← [root]\n'
+          ' │   _MediaQueryFromView ← _PipelineOwnerScope ← _ViewScope ←\n'
+          ' │   _RawView-[_DeprecatedRawViewKey TestFlutterView#00000] ← View ←\n'
+          ' │   [root]\n'
           ' │\n'
           ' └─rootScope: FocusScopeNode#00000(Root Focus Scope [IN FOCUS PATH])\n'
           '   │ IN FOCUS PATH\n'
@@ -1606,6 +1607,41 @@ void main() {
     notifyCount = 0;
 
     tester.binding.focusManager.removeListener(handleFocusChange);
+  });
+
+  test('$FocusManager dispatches object creation in constructor', () {
+    final List<ObjectEvent> events = <ObjectEvent>[];
+    void listener(ObjectEvent event) {
+      if (event.object.runtimeType == FocusManager) {
+        events.add(event);
+      }
+    }
+    MemoryAllocations.instance.addListener(listener);
+
+    final FocusManager focusManager = FocusManager();
+
+    expect(events, hasLength(1));
+
+    focusManager.dispose();
+
+    MemoryAllocations.instance.removeListener(listener);
+  });
+
+  test('$FocusNode dispatches object creation in constructor', () {
+    final List<ObjectEvent> events = <ObjectEvent>[];
+    void listener(ObjectEvent event) {
+      if (event.object.runtimeType == FocusNode) {
+        events.add(event);
+      }
+    }
+    MemoryAllocations.instance.addListener(listener);
+
+    final FocusNode focusManager = FocusNode();
+
+    expect(events, hasLength(1));
+
+    focusManager.dispose();
+    MemoryAllocations.instance.removeListener(listener);
   });
 
   testWidgets('FocusManager notifies listeners when a widget loses focus because it was removed.', (WidgetTester tester) async {

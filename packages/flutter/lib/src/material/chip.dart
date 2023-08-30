@@ -748,7 +748,7 @@ class RawChip extends StatefulWidget
     this.surfaceTintColor,
     this.iconTheme,
     this.selectedShadowColor,
-    this.showCheckmark = true,
+    this.showCheckmark,
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
     @Deprecated(
@@ -1169,7 +1169,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     final EdgeInsetsGeometry defaultLabelPadding = EdgeInsets.lerp(
       const EdgeInsets.symmetric(horizontal: 8.0),
       const EdgeInsets.symmetric(horizontal: 4.0),
-      clampDouble(MediaQuery.textScaleFactorOf(context) - 1.0, 0.0, 1.0),
+      clampDouble(MediaQuery.textScalerOf(context).textScaleFactor - 1.0, 0.0, 1.0),
     )!;
 
     final ThemeData theme = Theme.of(context);
@@ -1763,6 +1763,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     }
     final bool hitIsOnDeleteIcon = deleteIcon != null && _hitIsOnDeleteIcon(
       padding: theme.padding,
+      labelPadding: theme.labelPadding,
       tapPosition: position,
       chipSize: size,
       deleteButtonSize: deleteIcon!.size,
@@ -2186,6 +2187,7 @@ class _UnconstrainedInkSplashFactory extends InteractiveInkFeatureFactory {
 
 bool _hitIsOnDeleteIcon({
   required EdgeInsetsGeometry padding,
+  required EdgeInsetsGeometry labelPadding,
   required Offset tapPosition,
   required Size chipSize,
   required Size deleteButtonSize,
@@ -2197,10 +2199,10 @@ bool _hitIsOnDeleteIcon({
   final Size deflatedSize = resolvedPadding.deflateSize(chipSize);
   final Offset adjustedPosition = tapPosition - Offset(resolvedPadding.left, resolvedPadding.top);
   // The delete button hit area should be at least the width of the delete
-  // button, but, if there's room, up to 24 pixels from the center of the delete
-  // icon (corresponding to part of a 48x48 square that Material would prefer
-  // for touch targets), but no more than approximately half of the overall size
-  // of the chip when the chip is small.
+  // button and right label padding, but, if there's room, up to 24 pixels
+  // from the center of the delete icon (corresponding to part of a 48x48 square
+  // that Material would prefer for touch targets), but no more than approximately
+  // half of the overall size of the chip when the chip is small.
   //
   // This isn't affected by materialTapTargetSize because it only applies to the
   // width of the tappable region within the chip, not outside of the chip,
@@ -2211,7 +2213,7 @@ bool _hitIsOnDeleteIcon({
   // chip will still hit the chip, not the delete button.
   final double accessibleDeleteButtonWidth = math.min(
     deflatedSize.width * 0.499,
-    math.max(deleteButtonSize.width, 24.0 + deleteButtonSize.width / 2.0),
+    math.min(labelPadding.resolve(textDirection).right + deleteButtonSize.width, 24.0 + deleteButtonSize.width / 2.0),
   );
   switch (textDirection) {
     case TextDirection.ltr:
@@ -2283,7 +2285,7 @@ class _ChipDefaultsM3 extends ChipThemeData {
   EdgeInsetsGeometry? get labelPadding => EdgeInsets.lerp(
     const EdgeInsets.symmetric(horizontal: 8.0),
     const EdgeInsets.symmetric(horizontal: 4.0),
-    clampDouble(MediaQuery.textScaleFactorOf(context) - 1.0, 0.0, 1.0),
+    clampDouble(MediaQuery.textScalerOf(context).textScaleFactor - 1.0, 0.0, 1.0),
   )!;
 }
 

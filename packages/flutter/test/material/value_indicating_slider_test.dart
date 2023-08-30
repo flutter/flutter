@@ -9,6 +9,8 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+
 
 void main() {
   testWidgets('Slider value indicator', (WidgetTester tester) async {
@@ -96,7 +98,7 @@ void main() {
     );
   });
 
-  testWidgets('Slider value indicator large text scale', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Slider value indicator large text scale', (WidgetTester tester) async {
     await _buildValueIndicatorStaticSlider(
       tester,
       value: 0,
@@ -140,7 +142,7 @@ void main() {
     );
   });
 
-  testWidgets('Slider value indicator large text scale and wide text',
+  testWidgetsWithLeakTracking('Slider value indicator large text scale and wide text',
       (WidgetTester tester) async {
     await _buildValueIndicatorStaticSlider(
       tester,
@@ -272,7 +274,7 @@ void main() {
       );
     });
 
-    testWidgets('Slider value indicator large text scale', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Slider value indicator large text scale', (WidgetTester tester) async {
       await _buildValueIndicatorStaticSlider(
         tester,
         value: 0,
@@ -313,7 +315,7 @@ void main() {
       );
     });
 
-    testWidgets('Slider value indicator large text scale and wide text',
+    testWidgetsWithLeakTracking('Slider value indicator large text scale and wide text',
         (WidgetTester tester) async {
       await _buildValueIndicatorStaticSlider(
         tester,

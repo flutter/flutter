@@ -7,6 +7,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -1672,7 +1673,8 @@ void main() {
   });
 
   group('Modal BottomSheet avoids overlapping display features', () {
-    testWidgets('positioning using anchorPoint', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('positioning using anchorPoint',
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           builder: (BuildContext context, Widget? child) {
@@ -1708,7 +1710,12 @@ void main() {
       // Should take the right side of the screen
       expect(tester.getTopLeft(find.byType(Placeholder)).dx, 410);
       expect(tester.getBottomRight(find.byType(Placeholder)).dx, 800);
-    });
+    },
+    leakTrackingTestConfig: const LeakTrackingTestConfig(
+      // TODO(polina-c): remove after fix
+      // https://github.com/flutter/flutter/issues/133594
+      notDisposedAllowList: <String, int?> {'ValueNotifier<EdgeInsets>': 1}
+    ));
 
     testWidgets('positioning using Directionality', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1789,7 +1796,7 @@ void main() {
   });
 
   group('constraints', () {
-      testWidgets('default constraints are max width 640 in material 3', (WidgetTester tester) async {
+    testWidgets('default constraints are max width 640 in material 3', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData.light(useMaterial3: true),
@@ -2045,6 +2052,58 @@ void main() {
       );
     });
 
+    group('scrollControlDisabledMaxHeightRatio', () {
+      Future<void> test(
+        WidgetTester tester,
+        bool isScrollControlled,
+        double scrollControlDisabledMaxHeightRatio,
+      ) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Builder(builder: (BuildContext context) {
+                return Center(
+                  child: ElevatedButton(
+                    child: const Text('Press me'),
+                    onPressed: () {
+                      showModalBottomSheet<void>(
+                        context: context,
+                        isScrollControlled: isScrollControlled,
+                        scrollControlDisabledMaxHeightRatio: scrollControlDisabledMaxHeightRatio,
+                        builder: (BuildContext context) => const SizedBox.expand(
+                          child: Text('BottomSheet'),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              }),
+            ),
+          ),
+        );
+        await tester.tap(find.text('Press me'));
+        await tester.pumpAndSettle();
+        expect(
+          tester.getRect(find.text('BottomSheet')),
+          Rect.fromLTRB(
+            80,
+            600 * (isScrollControlled ? 0 : (1 - scrollControlDisabledMaxHeightRatio)),
+            720,
+            600,
+          ),
+        );
+      }
+
+      testWidgets('works at 9 / 16', (WidgetTester tester) {
+        return test(tester, false, 9.0 / 16.0);
+      });
+      testWidgets('works at 8 / 16', (WidgetTester tester) {
+        return test(tester, false, 8.0 / 16.0);
+      });
+      testWidgets('works at isScrollControlled', (WidgetTester tester) {
+        return test(tester, true, 8.0 / 16.0);
+      });
+    });
   });
 
   group('showModalBottomSheet modalBarrierDismissLabel', () {

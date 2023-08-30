@@ -155,14 +155,15 @@ void main() {
           'FLUTTER_ENGINE_SWITCH_10': 'dump-skp-on-shader-compilation=true',
           'FLUTTER_ENGINE_SWITCH_11': 'cache-sksl=true',
           'FLUTTER_ENGINE_SWITCH_12': 'purge-persistent-cache=true',
-          'FLUTTER_ENGINE_SWITCH_13': 'enable-checked-mode=true',
-          'FLUTTER_ENGINE_SWITCH_14': 'verify-entry-points=true',
-          'FLUTTER_ENGINE_SWITCH_15': 'start-paused=true',
-          'FLUTTER_ENGINE_SWITCH_16': 'disable-service-auth-codes=true',
-          'FLUTTER_ENGINE_SWITCH_17': 'dart-flags=--null_assertions',
-          'FLUTTER_ENGINE_SWITCH_18': 'use-test-fonts=true',
-          'FLUTTER_ENGINE_SWITCH_19': 'verbose-logging=true',
-          'FLUTTER_ENGINE_SWITCHES': '19',
+          'FLUTTER_ENGINE_SWITCH_13': 'enable-impeller=false',
+          'FLUTTER_ENGINE_SWITCH_14': 'enable-checked-mode=true',
+          'FLUTTER_ENGINE_SWITCH_15': 'verify-entry-points=true',
+          'FLUTTER_ENGINE_SWITCH_16': 'start-paused=true',
+          'FLUTTER_ENGINE_SWITCH_17': 'disable-service-auth-codes=true',
+          'FLUTTER_ENGINE_SWITCH_18': 'dart-flags=--null_assertions',
+          'FLUTTER_ENGINE_SWITCH_19': 'use-test-fonts=true',
+          'FLUTTER_ENGINE_SWITCH_20': 'verbose-logging=true',
+          'FLUTTER_ENGINE_SWITCHES': '20',
         }
       ),
     ]);
@@ -209,7 +210,8 @@ void main() {
           'FLUTTER_ENGINE_SWITCH_2': 'trace-startup=true',
           'FLUTTER_ENGINE_SWITCH_3': 'trace-allowlist=foo,bar',
           'FLUTTER_ENGINE_SWITCH_4': 'cache-sksl=true',
-          'FLUTTER_ENGINE_SWITCHES': '4',
+          'FLUTTER_ENGINE_SWITCH_5': 'enable-impeller=false',
+          'FLUTTER_ENGINE_SWITCHES': '5',
         }
       ),
     ]);
@@ -301,7 +303,7 @@ void main() {
     );
   });
 
-  testWithoutContext('Desktop devices that support impeller pass through the enable-impeller flag', () async {
+  testWithoutContext('Desktop devices pass through the enable-impeller flag', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>['debug'],
@@ -317,7 +319,6 @@ void main() {
     ]);
     final FakeDesktopDevice device = setUpDesktopDevice(
       processManager: processManager,
-      supportsImpeller: true,
     );
 
     final FakeApplicationPackage package = FakeApplicationPackage();
@@ -332,16 +333,17 @@ void main() {
     );
   });
 
-  testWithoutContext('Desktop devices that do not support impeller ignore the enable-impeller flag', () async {
+  testWithoutContext('Desktop devices pass through the --no-enable-impeller flag', () async {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>['debug'],
         exitCode: -1,
         environment: <String, String>{
           'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
-          'FLUTTER_ENGINE_SWITCH_2': 'enable-checked-mode=true',
-          'FLUTTER_ENGINE_SWITCH_3': 'verify-entry-points=true',
-          'FLUTTER_ENGINE_SWITCHES': '3'
+          'FLUTTER_ENGINE_SWITCH_2': 'enable-impeller=false',
+          'FLUTTER_ENGINE_SWITCH_3': 'enable-checked-mode=true',
+          'FLUTTER_ENGINE_SWITCH_4': 'verify-entry-points=true',
+          'FLUTTER_ENGINE_SWITCHES': '4'
         }
       ),
     ]);
@@ -355,7 +357,7 @@ void main() {
       prebuiltApplication: true,
       debuggingOptions: DebuggingOptions.enabled(
         BuildInfo.debug,
-        enableImpeller: ImpellerStatus.enabled,
+        enableImpeller: ImpellerStatus.disabled,
         dartEntrypointArgs: <String>[],
       ),
     );
@@ -368,7 +370,6 @@ FakeDesktopDevice setUpDesktopDevice({
   ProcessManager? processManager,
   OperatingSystemUtils? operatingSystemUtils,
   bool nullExecutablePathForDevice = false,
-  bool supportsImpeller = false,
 }) {
   return FakeDesktopDevice(
     fileSystem: fileSystem ?? MemoryFileSystem.test(),
@@ -376,7 +377,6 @@ FakeDesktopDevice setUpDesktopDevice({
     processManager: processManager ?? FakeProcessManager.any(),
     operatingSystemUtils: operatingSystemUtils ?? FakeOperatingSystemUtils(),
     nullExecutablePathForDevice: nullExecutablePathForDevice,
-    supportsImpeller: supportsImpeller,
   );
 }
 
@@ -388,7 +388,6 @@ class FakeDesktopDevice extends DesktopDevice {
     required FileSystem fileSystem,
     required OperatingSystemUtils operatingSystemUtils,
     this.nullExecutablePathForDevice = false,
-    this.supportsImpeller = false,
   }) : super(
       'dummy',
       platformType: PlatformType.linux,
@@ -406,9 +405,6 @@ class FakeDesktopDevice extends DesktopDevice {
   BuildInfo? lastBuildInfo;
 
   final bool nullExecutablePathForDevice;
-
-  @override
-  final bool supportsImpeller;
 
   @override
   String get name => 'dummy';

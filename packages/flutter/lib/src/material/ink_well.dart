@@ -332,6 +332,7 @@ class InkResponse extends StatelessWidget {
     this.onFocusChange,
     this.autofocus = false,
     this.statesController,
+    this.hoverDuration,
   });
 
   /// The widget below this widget in the tree.
@@ -623,6 +624,11 @@ class InkResponse extends StatelessWidget {
   /// {@endtemplate}
   final MaterialStatesController? statesController;
 
+  /// The duration of the animation that animates the hover effect.
+  ///
+  /// The default is 50ms.
+  final Duration? hoverDuration;
+
   @override
   Widget build(BuildContext context) {
     final _ParentInkResponseState? parentState = _ParentInkResponseProvider.maybeOf(context);
@@ -661,6 +667,7 @@ class InkResponse extends StatelessWidget {
       getRectCallback: getRectCallback,
       debugCheckContext: debugCheckContext,
       statesController: statesController,
+      hoverDuration: hoverDuration,
       child: child,
     );
   }
@@ -717,6 +724,7 @@ class _InkResponseStateWidget extends StatefulWidget {
     this.getRectCallback,
     required this.debugCheckContext,
     this.statesController,
+    this.hoverDuration,
   });
 
   final Widget? child;
@@ -754,6 +762,7 @@ class _InkResponseStateWidget extends StatefulWidget {
   final _GetRectCallback? getRectCallback;
   final _CheckContext debugCheckContext;
   final MaterialStatesController? statesController;
+  final Duration? hoverDuration;
 
   @override
   _InkResponseState createState() => _InkResponseState();
@@ -922,7 +931,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         return const Duration(milliseconds: 200);
       case _HighlightType.hover:
       case _HighlightType.focus:
-        return const Duration(milliseconds: 50);
+        return widget.hoverDuration ?? const Duration(milliseconds: 50);
     }
   }
 
@@ -1458,6 +1467,7 @@ class InkWell extends InkResponse {
     super.onFocusChange,
     super.autofocus,
     super.statesController,
+    super.hoverDuration,
   }) : super(
     containedInkWell: true,
     highlightShape: BoxShape.rectangle,

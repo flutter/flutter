@@ -605,6 +605,9 @@ void main() {
     const Widget flexibleSpace = Text('FlexibleSpace');
 
     TestSemantics buildExpected({ required String routeName }) {
+      final bool isDesktop = debugDefaultTargetPlatformOverride == TargetPlatform.macOS ||
+          debugDefaultTargetPlatformOverride == TargetPlatform.windows ||
+          debugDefaultTargetPlatformOverride == TargetPlatform.linux;
       return TestSemantics.root(
         children: <TestSemantics>[
           TestSemantics(
@@ -651,9 +654,10 @@ void main() {
                                     debugDefaultTargetPlatformOverride != TargetPlatform.macOS) SemanticsFlag.namesRoute,
                                 ],
                                 actions: <SemanticsAction>[
-                                  if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS ||
-                                    debugDefaultTargetPlatformOverride == TargetPlatform.windows)
+                                  if (isDesktop)
                                     SemanticsAction.didGainAccessibilityFocus,
+                                  if (isDesktop)
+                                    SemanticsAction.didLoseAccessibilityFocus,
                                   SemanticsAction.tap,
                                   SemanticsAction.setSelection,
                                   SemanticsAction.setText,
@@ -748,6 +752,9 @@ void main() {
 
   group('contributes semantics', () {
     TestSemantics buildExpected({ required String routeName }) {
+      final bool isDesktop = debugDefaultTargetPlatformOverride == TargetPlatform.macOS ||
+                             debugDefaultTargetPlatformOverride == TargetPlatform.windows ||
+                             debugDefaultTargetPlatformOverride == TargetPlatform.linux;
       return TestSemantics.root(
         children: <TestSemantics>[
           TestSemantics(
@@ -791,9 +798,10 @@ void main() {
                                 debugDefaultTargetPlatformOverride != TargetPlatform.macOS) SemanticsFlag.namesRoute,
                             ],
                             actions: <SemanticsAction>[
-                              if (debugDefaultTargetPlatformOverride == TargetPlatform.macOS ||
-                                debugDefaultTargetPlatformOverride == TargetPlatform.windows)
+                              if (isDesktop)
                                 SemanticsAction.didGainAccessibilityFocus,
+                              if (isDesktop)
+                                SemanticsAction.didLoseAccessibilityFocus,
                               SemanticsAction.tap,
                               SemanticsAction.setSelection,
                               SemanticsAction.setText,

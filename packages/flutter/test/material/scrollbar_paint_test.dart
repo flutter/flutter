@@ -4,8 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../rendering/mock_canvas.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 const Color _kAndroidThumbIdleColor = Color(0xffbcbcbc);
 
@@ -26,7 +25,7 @@ Widget _buildSingleChildScrollViewWithScrollbar({
 }
 
 void main() {
-  testWidgets('Viewport basic test (LTR)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Viewport basic test (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(_buildSingleChildScrollViewWithScrollbar(
       child: const SizedBox(width: 4000.0, height: 4000.0),
     ));
@@ -52,7 +51,7 @@ void main() {
     );
   });
 
-  testWidgets('Viewport basic test (RTL)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Viewport basic test (RTL)', (WidgetTester tester) async {
     await tester.pumpWidget(_buildSingleChildScrollViewWithScrollbar(
       textDirection: TextDirection.rtl,
       child: const SizedBox(width: 4000.0, height: 4000.0),

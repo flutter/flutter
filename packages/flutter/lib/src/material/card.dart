@@ -78,6 +78,12 @@ class Card extends StatelessWidget {
   ///
   /// Defines the card's [Material.color].
   ///
+  /// In Material 3, [surfaceTintColor] is drawn on top of this color
+  /// when the card is elevated. This might make the appearance of
+  /// the card slightly different than in Material 2. To disable this
+  /// feature, set [surfaceTintColor] to [Colors.transparent].
+  /// See [Material.surfaceTintColor] for more details.
+  ///
   /// If this property is null then the ambient [CardTheme.color] is used. If that is null,
   /// and [ThemeData.useMaterial3] is true, then [ColorScheme.surface] of
   /// [ThemeData.colorScheme] is used. Otherwise, [ThemeData.cardColor] is used.

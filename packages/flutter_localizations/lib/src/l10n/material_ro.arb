@@ -140,10 +140,14 @@
   "bottomSheetLabel": "Foaie din partea de jos",
   "scrimOnTapHint": "Închideți $modalRouteContentName",
   "keyboardKeyShift": "Shift",
-  "expansionTileExpandedHint": "double tap to collapse'",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "atingeți de două ori pentru a restrânge",
+  "expansionTileCollapsedHint": "atingeți de două ori pentru a extinde",
+  "expansionTileExpandedTapHint": "Restrângeți",
+  "expansionTileCollapsedTapHint": "Extindeți pentru mai multe detalii",
+  "expandedHint": "Restrâns",
+  "collapsedHint": "Extins",
+  "menuDismissLabel": "Respingeți meniul",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

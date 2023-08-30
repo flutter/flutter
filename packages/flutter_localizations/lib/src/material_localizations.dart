@@ -11,6 +11,10 @@ import 'l10n/generated_material_localizations.dart';
 import 'utils/date_localizations.dart' as util;
 import 'widgets_localizations.dart';
 
+// Examples can assume:
+// import 'package:flutter_localizations/flutter_localizations.dart';
+// import 'package:flutter/material.dart';
+
 /// Implementation of localized strings for the material widgets using the
 /// `intl` package for date and time formatting.
 ///
@@ -30,11 +34,11 @@ import 'widgets_localizations.dart';
 /// app supports with [MaterialApp.supportedLocales]:
 ///
 /// ```dart
-/// MaterialApp(
+/// const MaterialApp(
 ///   localizationsDelegates: GlobalMaterialLocalizations.delegates,
-///   supportedLocales: [
-///     const Locale('en', 'US'), // American English
-///     const Locale('he', 'IL'), // Israeli Hebrew
+///   supportedLocales: <Locale>[
+///     Locale('en', 'US'), // American English
+///     Locale('he', 'IL'), // Israeli Hebrew
 ///     // ...
 ///   ],
 ///   // ...
@@ -681,11 +685,11 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   /// app supports with [MaterialApp.supportedLocales]:
   ///
   /// ```dart
-  /// MaterialApp(
+  /// const MaterialApp(
   ///   localizationsDelegates: GlobalMaterialLocalizations.delegates,
-  ///   supportedLocales: [
-  ///     const Locale('en', 'US'), // English
-  ///     const Locale('he', 'IL'), // Hebrew
+  ///   supportedLocales: <Locale>[
+  ///     Locale('en', 'US'), // English
+  ///     Locale('he', 'IL'), // Hebrew
   ///   ],
   ///   // ...
   /// )

@@ -7,9 +7,11 @@
 
 import 'package:flutter/rendering.dart';
 
+import 'src/binding.dart';
+
 void main() {
-  // We use RenderingFlutterBinding to attach the render tree to the window.
-  RenderingFlutterBinding(
+  // We use ViewRenderingFlutterBinding to attach the render tree to the window.
+  ViewRenderingFlutterBinding(
     // The root of our render tree is a RenderPositionedBox, which centers its
     // child both vertically and horizontally.
     root: RenderPositionedBox(

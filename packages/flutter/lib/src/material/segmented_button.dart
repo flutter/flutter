@@ -21,7 +21,7 @@ import 'tooltip.dart';
 
 /// Data describing a segment of a [SegmentedButton].
 class ButtonSegment<T> {
-  /// Construct a SegmentData
+  /// Construct a [ButtonSegment].
   ///
   /// One of [icon] or [label] must be non-null.
   const ButtonSegment({

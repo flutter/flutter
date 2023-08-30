@@ -8,8 +8,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-import '../rendering/recording_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
@@ -328,7 +326,10 @@ void main() {
       MaterialApp(theme: theme, home: const Center(child: Material(child: Tab(text: 'x')))),
     );
     expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style!.fontFamily, 'FlutterTest');
-    expect(tester.getSize(find.byType(Tab)), material3 ? const Size(15.0, 46.0) : const Size(14.0, 46.0));
+    expect(
+      tester.getSize(find.byType(Tab)),
+      material3 ? const Size(14.25, 46.0) : const Size(14.0, 46.0),
+    );
   });
 
   testWidgets('Tab sizing - icon and text', (WidgetTester tester) async {
@@ -338,7 +339,9 @@ void main() {
       MaterialApp(theme: theme, home: const Center(child: Material(child: Tab(icon: SizedBox(width: 10.0, height: 10.0), text: 'x')))),
     );
     expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style!.fontFamily, 'FlutterTest');
-    expect(tester.getSize(find.byType(Tab)), material3 ? const Size(15.0, 72.0) : const Size(14.0, 72.0));
+    expect(
+      tester.getSize(find.byType(Tab)),
+      material3 ? const Size(14.25, 72.0) : const Size(14.0, 72.0));
   });
 
   testWidgets('Tab sizing - icon, iconMargin and text', (WidgetTester tester) async {
@@ -372,7 +375,9 @@ void main() {
       MaterialApp(theme: theme, home: const Center(child: Material(child: Tab(icon: SizedBox(width: 10.0, height: 10.0), child: Text('x'))))),
     );
     expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style!.fontFamily, 'FlutterTest');
-    expect(tester.getSize(find.byType(Tab)), material3 ? const Size(15.0, 72.0) : const Size(14.0, 72.0));
+    expect(
+      tester.getSize(find.byType(Tab)),
+      material3 ? const Size(14.25, 72.0) : const Size(14.0, 72.0));
   });
 
   testWidgets('Tab color - normal', (WidgetTester tester) async {
@@ -488,24 +493,14 @@ void main() {
 
     const double indicatorWeight = 3.0;
 
-
-    final RRect rrect = const bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')
-      ? RRect.fromLTRBAndCorners(
-          64.75,
-          tabBarBox.size.height - indicatorWeight,
-          135.25,
-          tabBarBox.size.height,
-          topLeft: const Radius.circular(3.0),
-          topRight: const Radius.circular(3.0),
-        )
-      : RRect.fromLTRBAndCorners(
-          64.5,
-          tabBarBox.size.height - indicatorWeight,
-          135.5,
-          tabBarBox.size.height,
-          topLeft: const Radius.circular(3.0),
-          topRight: const Radius.circular(3.0),
-        );
+    final RRect rrect = RRect.fromLTRBAndCorners(
+      64.75,
+      tabBarBox.size.height - indicatorWeight,
+      135.25,
+      tabBarBox.size.height,
+      topLeft: const Radius.circular(3.0),
+      topRight: const Radius.circular(3.0),
+    );
 
     expect(
       tabBarBox,
@@ -699,10 +694,16 @@ void main() {
     expect(controller.index, 0);
   });
 
-  testWidgets('Scrollable TabBar tap centers selected tab', (WidgetTester tester) async {
+  testWidgets('Material2 - Scrollable TabBar tap centers selected tab', (WidgetTester tester) async {
     final List<String> tabs = <String>['AAAAAA', 'BBBBBB', 'CCCCCC', 'DDDDDD', 'EEEEEE', 'FFFFFF', 'GGGGGG', 'HHHHHH', 'IIIIII', 'JJJJJJ', 'KKKKKK', 'LLLLLL'];
     const Key tabBarKey = Key('TabBar');
-    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'AAAAAA', isScrollable: true, tabBarKey: tabBarKey));
+    await tester.pumpWidget(buildFrame(
+      tabs: tabs,
+      value: 'AAAAAA',
+      isScrollable: true,
+      tabBarKey: tabBarKey,
+      useMaterial3: false,
+    ));
     final TabController controller = DefaultTabController.of(tester.element(find.text('AAAAAA')));
     expect(controller, isNotNull);
     expect(controller.index, 0);
@@ -718,12 +719,44 @@ void main() {
     expect(tester.getCenter(find.text('FFFFFF')).dx, moreOrLessEquals(400.0, epsilon: 1.0));
   });
 
-  testWidgets('Scrollable TabBar, with padding, tap centers selected tab', (WidgetTester tester) async {
+  testWidgets('Material3 - Scrollable TabBar tap centers selected tab', (WidgetTester tester) async {
+    final List<String> tabs = <String>['AAAAAA', 'BBBBBB', 'CCCCCC', 'DDDDDD', 'EEEEEE', 'FFFFFF', 'GGGGGG', 'HHHHHH', 'IIIIII', 'JJJJJJ', 'KKKKKK', 'LLLLLL'];
+    const Key tabBarKey = Key('TabBar');
+    await tester.pumpWidget(buildFrame(
+      tabs: tabs,
+      value: 'AAAAAA',
+      isScrollable: true,
+      tabBarKey: tabBarKey,
+      useMaterial3: true,
+    ));
+    final TabController controller = DefaultTabController.of(tester.element(find.text('AAAAAA')));
+    expect(controller, isNotNull);
+    expect(controller.index, 0);
+
+    expect(tester.getSize(find.byKey(tabBarKey)).width, equals(800.0));
+    // The center of the FFFFFF item is to the right of the TabBar's center
+    expect(tester.getCenter(find.text('FFFFFF')).dx, greaterThan(401.0));
+
+    await tester.tap(find.text('FFFFFF'));
+    await tester.pumpAndSettle();
+    expect(controller.index, 5);
+    // The center of the FFFFFF item is now at the TabBar's center
+    expect(tester.getCenter(find.text('FFFFFF')).dx, moreOrLessEquals(452.0, epsilon: 1.0));
+  });
+
+  testWidgets('Material2 - Scrollable TabBar, with padding, tap centers selected tab', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/112776
     final List<String> tabs = <String>['AAAAAA', 'BBBBBB', 'CCCCCC', 'DDDDDD', 'EEEEEE', 'FFFFFF', 'GGGGGG', 'HHHHHH', 'IIIIII', 'JJJJJJ', 'KKKKKK', 'LLLLLL'];
     const Key tabBarKey = Key('TabBar');
     const EdgeInsetsGeometry padding = EdgeInsets.only(right: 30, left: 60);
-    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'AAAAAA', isScrollable: true, tabBarKey: tabBarKey, padding: padding));
+    await tester.pumpWidget(buildFrame(
+      tabs: tabs,
+      value: 'AAAAAA',
+      isScrollable: true,
+      tabBarKey: tabBarKey,
+      padding: padding,
+      useMaterial3: false,
+    ));
     final TabController controller = DefaultTabController.of(tester.element(find.text('AAAAAA')));
     expect(controller, isNotNull);
     expect(controller.index, 0);
@@ -739,7 +772,35 @@ void main() {
     expect(tester.getCenter(find.text('FFFFFF')).dx, moreOrLessEquals(400.0, epsilon: 1.0));
   });
 
-  testWidgets('Scrollable TabBar, with padding and TextDirection.rtl, tap centers selected tab', (WidgetTester tester) async {
+  testWidgets('Material3 - Scrollable TabBar, with padding, tap centers selected tab', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/112776
+    final List<String> tabs = <String>['AAAAAA', 'BBBBBB', 'CCCCCC', 'DDDDDD', 'EEEEEE', 'FFFFFF', 'GGGGGG', 'HHHHHH', 'IIIIII', 'JJJJJJ', 'KKKKKK', 'LLLLLL'];
+    const Key tabBarKey = Key('TabBar');
+    const EdgeInsetsGeometry padding = EdgeInsets.only(right: 30, left: 60);
+    await tester.pumpWidget(buildFrame(
+      tabs: tabs,
+      value: 'AAAAAA',
+      isScrollable: true,
+      tabBarKey: tabBarKey,
+      padding: padding,
+      useMaterial3: true,
+    ));
+    final TabController controller = DefaultTabController.of(tester.element(find.text('AAAAAA')));
+    expect(controller, isNotNull);
+    expect(controller.index, 0);
+
+    expect(tester.getSize(find.byKey(tabBarKey)).width, equals(800.0));
+    // The center of the FFFFFF item is to the right of the TabBar's center
+    expect(tester.getCenter(find.text('FFFFFF')).dx, greaterThan(401.0));
+
+    await tester.tap(find.text('FFFFFF'));
+    await tester.pumpAndSettle();
+    expect(controller.index, 5);
+    // The center of the FFFFFF item is now at the TabBar's center
+    expect(tester.getCenter(find.text('FFFFFF')).dx, moreOrLessEquals(452.0, epsilon: 1.0));
+  });
+
+  testWidgets('Material2 - Scrollable TabBar, with padding and TextDirection.rtl, tap centers selected tab', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/112776
     final List<String> tabs = <String>['AAAAAA', 'BBBBBB', 'CCCCCC', 'DDDDDD', 'EEEEEE', 'FFFFFF', 'GGGGGG', 'HHHHHH', 'IIIIII', 'JJJJJJ', 'KKKKKK', 'LLLLLL'];
     const Key tabBarKey = Key('TabBar');
@@ -751,6 +812,7 @@ void main() {
       tabBarKey: tabBarKey,
       padding: padding,
       textDirection: TextDirection.rtl,
+      useMaterial3: false,
     ));
     final TabController controller = DefaultTabController.of(tester.element(find.text('AAAAAA')));
     expect(controller, isNotNull);
@@ -767,16 +829,76 @@ void main() {
     expect(tester.getCenter(find.text('FFFFFF')).dx, moreOrLessEquals(400.0, epsilon: 1.0));
   });
 
-  testWidgets('TabBar can be scrolled independent of the selection', (WidgetTester tester) async {
+  testWidgets('Material3 - Scrollable TabBar, with padding and TextDirection.rtl, tap centers selected tab', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/112776
+    final List<String> tabs = <String>['AAAAAA', 'BBBBBB', 'CCCCCC', 'DDDDDD', 'EEEEEE', 'FFFFFF', 'GGGGGG', 'HHHHHH', 'IIIIII', 'JJJJJJ', 'KKKKKK', 'LLLLLL'];
+    const Key tabBarKey = Key('TabBar');
+    const EdgeInsetsGeometry padding = EdgeInsets.only(right: 30, left: 60);
+    await tester.pumpWidget(buildFrame(
+      tabs: tabs,
+      value: 'AAAAAA',
+      isScrollable: true,
+      tabBarKey: tabBarKey,
+      padding: padding,
+      textDirection: TextDirection.rtl,
+      useMaterial3: true,
+    ));
+    final TabController controller = DefaultTabController.of(tester.element(find.text('AAAAAA')));
+    expect(controller, isNotNull);
+    expect(controller.index, 0);
+
+    expect(tester.getSize(find.byKey(tabBarKey)).width, equals(800.0));
+    // The center of the FFFFFF item is to the left of the TabBar's center
+    expect(tester.getCenter(find.text('FFFFFF')).dx, lessThan(401.0));
+
+    await tester.tap(find.text('FFFFFF'));
+    await tester.pumpAndSettle();
+    expect(controller.index, 5);
+    // The center of the FFFFFF item is now at the TabBar's center
+    expect(tester.getCenter(find.text('FFFFFF')).dx, moreOrLessEquals(348.0, epsilon: 1.0));
+  });
+
+  testWidgets('Material2 - TabBar can be scrolled independent of the selection', (WidgetTester tester) async {
     final List<String> tabs = <String>['AAAA', 'BBBB', 'CCCC', 'DDDD', 'EEEE', 'FFFF', 'GGGG', 'HHHH', 'IIII', 'JJJJ', 'KKKK', 'LLLL'];
     const Key tabBarKey = Key('TabBar');
-    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'AAAA', isScrollable: true, tabBarKey: tabBarKey));
+    await tester.pumpWidget(buildFrame(
+      tabs: tabs,
+      value: 'AAAA',
+      isScrollable: true,
+      tabBarKey: tabBarKey,
+      useMaterial3: false,
+    ));
     final TabController controller = DefaultTabController.of(tester.element(find.text('AAAA')));
     expect(controller, isNotNull);
     expect(controller.index, 0);
 
     // Fling-scroll the TabBar to the left
     expect(tester.getCenter(find.text('HHHH')).dx, lessThan(700.0));
+    await tester.fling(find.byKey(tabBarKey), const Offset(-200.0, 0.0), 10000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    expect(tester.getCenter(find.text('HHHH')).dx, lessThan(500.0));
+
+    // Scrolling the TabBar doesn't change the selection
+    expect(controller.index, 0);
+  });
+
+  testWidgets('Material3 - TabBar can be scrolled independent of the selection', (WidgetTester tester) async {
+    final List<String> tabs = <String>['AAAA', 'BBBB', 'CCCC', 'DDDD', 'EEEE', 'FFFF', 'GGGG', 'HHHH', 'IIII', 'JJJJ', 'KKKK', 'LLLL'];
+    const Key tabBarKey = Key('TabBar');
+    await tester.pumpWidget(buildFrame(
+      tabs: tabs,
+      value: 'AAAA',
+      isScrollable: true,
+      tabBarKey: tabBarKey,
+      useMaterial3: true,
+    ));
+    final TabController controller = DefaultTabController.of(tester.element(find.text('AAAA')));
+    expect(controller, isNotNull);
+    expect(controller.index, 0);
+
+    // Fling-scroll the TabBar to the left
+    expect(tester.getCenter(find.text('HHHH')).dx, lessThan(720.0));
     await tester.fling(find.byKey(tabBarKey), const Offset(-200.0, 0.0), 10000.0);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
@@ -2290,7 +2412,7 @@ void main() {
     // that. Tabs are padded horizontally with kTabLabelPadding.
     final double tabRight = 800.0 - kTabLabelPadding.right;
 
-    expect(tester.getTopRight(find.widgetWithText(Tab, 'TAB #19')).dx, tabRight);
+    expect(tester.getTopRight(find.widgetWithText(Tab, 'TAB #19')).dx, moreOrLessEquals(tabRight));
   });
 
   testWidgets('TabBar with indicatorWeight, indicatorPadding (LTR)', (WidgetTester tester) async {
@@ -2979,9 +3101,10 @@ void main() {
     expect(tabBarBox.size.width, tabRight);
   });
 
-  testWidgets('TabBar with padding isScrollable: true', (WidgetTester tester) async {
+  testWidgets('Material3 - TabBar with padding isScrollable: true', (WidgetTester tester) async {
     const double indicatorWeight = 2.0; // default indicator weight
     const EdgeInsets padding = EdgeInsets.only(left: 3.0, top: 7.0, right: 5.0, bottom: 3.0);
+    const double tabStartOffset = 52.0;
 
     final List<Widget> tabs = <Widget>[
       SizedBox(key: UniqueKey(), width: 130.0, height: 30.0),
@@ -3006,6 +3129,7 @@ void main() {
             tabs: tabs,
           ),
         ),
+        useMaterial3: true,
       ),
     );
 
@@ -3014,7 +3138,7 @@ void main() {
     expect(tabBarBox.size.height, tabBarHeight);
 
     // Tab0 width = 130, height = 30
-    double tabLeft = padding.left;
+    double tabLeft = padding.left + tabStartOffset;
     double tabRight = tabLeft + 130.0;
     double tabTop = (tabBarHeight - indicatorWeight + (padding.top - padding.bottom) - 30.0) / 2.0;
     double tabBottom = tabTop + 30.0;
@@ -3038,7 +3162,7 @@ void main() {
     expect(tester.getRect(find.byKey(tabs[2].key!)), tabRect);
 
     tabRight += padding.right;
-    expect(tabBarBox.size.width, tabRight);
+    expect(tabBarBox.size.width, tabRight + 320.0); // Right tab + remaining space of the stretched tab bar.
   });
 
   testWidgets('TabBar with labelPadding', (WidgetTester tester) async {
@@ -5948,15 +6072,12 @@ void main() {
     );
   });
 
-  testWidgets('Default TabAlignment', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+  testWidgets('Material3 - Default TabAlignment', (WidgetTester tester) async {
     final List<String> tabs = <String>['A', 'B'];
+    const double tabStartOffset = 52.0;
 
     // Test default TabAlignment when isScrollable is false.
-    await tester.pumpWidget(MaterialApp(
-      theme: theme,
-      home: buildFrame(tabs: tabs,  value: 'B'),
-    ));
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'B', useMaterial3: true));
 
     final Rect tabBar = tester.getRect(find.byType(TabBar));
     Rect tabOneRect = tester.getRect(find.byType(Tab).first);
@@ -5964,24 +6085,26 @@ void main() {
 
     // Tabs should fill the width of the TabBar.
     double tabOneLeft = ((tabBar.width / 2) - tabOneRect.width) / 2;
-    expect(tabOneRect.left, equals(tabOneLeft));
+    expect(tabOneRect.left, moreOrLessEquals(tabOneLeft));
     double tabTwoRight = tabBar.width - ((tabBar.width / 2) - tabTwoRect.width) / 2;
-    expect(tabTwoRect.right, equals(tabTwoRight));
+    expect(tabTwoRect.right, moreOrLessEquals(tabTwoRight));
 
     // Test default TabAlignment when isScrollable is true.
-    await tester.pumpWidget(MaterialApp(
-      theme: theme,
-      home: buildFrame(tabs: tabs,  value: 'B', isScrollable: true),
+    await tester.pumpWidget(buildFrame(
+      tabs: tabs,
+      value: 'B',
+      isScrollable: true,
+      useMaterial3: true,
     ));
 
     tabOneRect = tester.getRect(find.byType(Tab).first);
     tabTwoRect = tester.getRect(find.byType(Tab).last);
 
     // Tabs should be aligned to the start of the TabBar.
-    tabOneLeft = kTabLabelPadding.left;
-    expect(tabOneRect.left, equals(tabOneLeft));
-    tabTwoRight = kTabLabelPadding.horizontal + tabOneRect.width + kTabLabelPadding.left + tabTwoRect.width;
-    expect(tabTwoRect.right, equals(tabTwoRight));
+    tabOneLeft = kTabLabelPadding.left + tabStartOffset;
+    expect(tabOneRect.left, moreOrLessEquals(tabOneLeft));
+    tabTwoRight = kTabLabelPadding.horizontal + tabStartOffset + tabOneRect.width + kTabLabelPadding.left + tabTwoRect.width;
+    expect(tabTwoRect.right, moreOrLessEquals(tabTwoRight));
   });
 
   testWidgets('TabAlignment.fill only supports non-scrollable tab bar', (WidgetTester tester) async {
@@ -6040,6 +6163,262 @@ void main() {
     ));
 
     expect(tester.takeException(), isAssertionError);
+  });
+
+  testWidgets('Material3 - TabAlignment updates tabs alignment (non-scrollable TabBar)', (WidgetTester tester) async {
+    final List<String> tabs = <String>['A', 'B'];
+
+    // Test TabAlignment.fill (default) when isScrollable is false.
+    await tester.pumpWidget(buildFrame(tabs: tabs,  value: 'B', useMaterial3: true));
+
+    const double availableWidth = 800.0;
+    Rect tabOneRect = tester.getRect(find.byType(Tab).first);
+    Rect tabTwoRect = tester.getRect(find.byType(Tab).last);
+
+    // By defaults tabs should fill the width of the TabBar.
+    double tabOneLeft = ((availableWidth / 2) - tabOneRect.width) / 2;
+    expect(tabOneRect.left, moreOrLessEquals(tabOneLeft));
+    double tabTwoRight = availableWidth - ((availableWidth / 2) - tabTwoRect.width) / 2;
+    expect(tabTwoRect.right, moreOrLessEquals(tabTwoRight));
+
+    // Test TabAlignment.center when isScrollable is false.
+    await tester.pumpWidget(buildFrame(
+      tabs: tabs,
+      value: 'B',
+      tabAlignment: TabAlignment.center,
+      useMaterial3: true,
+    ));
+    await tester.pumpAndSettle();
+
+    tabOneRect = tester.getRect(find.byType(Tab).first);
+    tabTwoRect = tester.getRect(find.byType(Tab).last);
+
+    // Tabs should not fill the width of the TabBar.
+    tabOneLeft = kTabLabelPadding.left;
+    expect(tabOneRect.left, moreOrLessEquals(tabOneLeft));
+    tabTwoRight = kTabLabelPadding.horizontal + tabOneRect.width + kTabLabelPadding.left + tabTwoRect.width;
+    expect(tabTwoRect.right, moreOrLessEquals(tabTwoRight));
+  });
+
+  testWidgets('Material3 - TabAlignment updates tabs alignment (scrollable TabBar)', (WidgetTester tester) async {
+    final List<String> tabs = <String>['A', 'B'];
+    const double tabStartOffset = 52.0;
+
+    // Test TabAlignment.startOffset (default) when isScrollable is true.
+    await tester.pumpWidget(buildFrame(
+      tabs: tabs,
+      value: 'B',
+      isScrollable: true,
+      useMaterial3: true,
+    ));
+
+    final Rect tabBar = tester.getRect(find.byType(TabBar));
+    Rect tabOneRect = tester.getRect(find.byType(Tab).first);
+    Rect tabTwoRect = tester.getRect(find.byType(Tab).last);
+
+    // By default tabs should be aligned to the start of the TabBar with
+    // an horizontal offset of 52.0 pixels.
+    double tabOneLeft = kTabLabelPadding.left + tabStartOffset;
+    expect(tabOneRect.left, equals(tabOneLeft));
+    double tabTwoRight = tabStartOffset + kTabLabelPadding.horizontal + tabOneRect.width
+      + kTabLabelPadding.left + tabTwoRect.width;
+    expect(tabTwoRect.right, equals(tabTwoRight));
+
+    // Test TabAlignment.start when isScrollable is true.
+    await tester.pumpWidget(buildFrame(
+      tabs: tabs,
+      value: 'B',
+      isScrollable: true,
+      tabAlignment: TabAlignment.start,
+      useMaterial3: true,
+    ));
+    await tester.pumpAndSettle();
+
+    tabOneRect = tester.getRect(find.byType(Tab).first);
+    tabTwoRect = tester.getRect(find.byType(Tab).last);
+
+    // Tabs should be aligned to the start of the TabBar.
+    tabOneLeft = kTabLabelPadding.left;
+    expect(tabOneRect.left, equals(tabOneLeft));
+    tabTwoRight = kTabLabelPadding.horizontal + tabOneRect.width + kTabLabelPadding.left + tabTwoRect.width;
+    expect(tabTwoRect.right, equals(tabTwoRight));
+
+    // Test TabAlignment.center when isScrollable is true.
+    await tester.pumpWidget(buildFrame(
+      tabs: tabs,
+      value: 'B',
+      isScrollable: true,
+      tabAlignment: TabAlignment.center,
+      useMaterial3: true,
+    ));
+    await tester.pumpAndSettle();
+
+    tabOneRect = tester.getRect(find.byType(Tab).first);
+    tabTwoRect = tester.getRect(find.byType(Tab).last);
+
+    // Tabs should be centered in the TabBar.
+    tabOneLeft = (tabBar.width / 2) - tabOneRect.width - kTabLabelPadding.right;
+    expect(tabOneRect.left, equals(tabOneLeft));
+    tabTwoRight = (tabBar.width / 2) + tabTwoRect.width + kTabLabelPadding.left;
+    expect(tabTwoRect.right, equals(tabTwoRight));
+
+    // Test TabAlignment.startOffset when isScrollable is true.
+    await tester.pumpWidget(buildFrame(
+      tabs: tabs,
+      value: 'B',
+      isScrollable: true,
+      tabAlignment: TabAlignment.startOffset,
+      useMaterial3: true,
+    ));
+    await tester.pumpAndSettle();
+
+    tabOneRect = tester.getRect(find.byType(Tab).first);
+    tabTwoRect = tester.getRect(find.byType(Tab).last);
+
+    // Tabs should be aligned to the start of the TabBar with an
+    // horizontal offset of 52.0 pixels.
+    tabOneLeft = kTabLabelPadding.left + tabStartOffset;
+    expect(tabOneRect.left, equals(tabOneLeft));
+    tabTwoRight = tabStartOffset + kTabLabelPadding.horizontal + tabOneRect.width
+      + kTabLabelPadding.left + tabTwoRect.width;
+    expect(tabTwoRect.right, equals(tabTwoRight));
+  });
+
+  testWidgets('Material3 - TabAlignment.start & TabAlignment.startOffset respects TextDirection.rtl', (WidgetTester tester) async {
+    final List<String> tabs = <String>['A', 'B'];
+    const double tabStartOffset = 52.0;
+
+    // Test TabAlignment.startOffset (default) when isScrollable is true.
+    await tester.pumpWidget(buildFrame(
+      tabs: tabs,
+      value: 'B',
+      isScrollable: true,
+      textDirection: TextDirection.rtl,
+      useMaterial3: true,
+    ));
+
+    final Rect tabBar = tester.getRect(find.byType(TabBar));
+    Rect tabOneRect = tester.getRect(find.byType(Tab).first);
+    Rect tabTwoRect = tester.getRect(find.byType(Tab).last);
+
+    // Tabs should be aligned to the start of the TabBar with an
+    // horizontal offset of 52.0 pixels.
+    double tabOneRight = tabBar.width - kTabLabelPadding.right - tabStartOffset;
+    expect(tabOneRect.right, equals(tabOneRight));
+    double tabTwoLeft = tabBar.width - tabStartOffset - kTabLabelPadding.horizontal - tabOneRect.width
+      - kTabLabelPadding.right - tabTwoRect.width;
+    expect(tabTwoRect.left, equals(tabTwoLeft));
+
+    // Test TabAlignment.start when isScrollable is true.
+    await tester.pumpWidget(buildFrame(
+      tabs: tabs,
+      value: 'B',
+      isScrollable: true,
+      tabAlignment: TabAlignment.start,
+      textDirection: TextDirection.rtl,
+      useMaterial3: true,
+    ));
+    await tester.pumpAndSettle();
+
+    tabOneRect = tester.getRect(find.byType(Tab).first);
+    tabTwoRect = tester.getRect(find.byType(Tab).last);
+
+    // Tabs should be aligned to the start of the TabBar.
+    tabOneRight = tabBar.width - kTabLabelPadding.right;
+    expect(tabOneRect.right, equals(tabOneRight));
+    tabTwoLeft = tabBar.width - kTabLabelPadding.horizontal - tabOneRect.width
+      - kTabLabelPadding.left - tabTwoRect.width;
+    expect(tabTwoRect.left, equals(tabTwoLeft));
+
+    // Test TabAlignment.startOffset when isScrollable is true.
+    await tester.pumpWidget(buildFrame(
+      tabs: tabs,
+      value: 'B',
+      isScrollable: true,
+      tabAlignment: TabAlignment.startOffset,
+      textDirection: TextDirection.rtl,
+      useMaterial3: true,
+    ));
+    await tester.pumpAndSettle();
+
+    tabOneRect = tester.getRect(find.byType(Tab).first);
+    tabTwoRect = tester.getRect(find.byType(Tab).last);
+
+    // Tabs should be aligned to the start of the TabBar with an
+    // horizontal offset of 52.0 pixels.
+    tabOneRight = tabBar.width - kTabLabelPadding.right - tabStartOffset;
+    expect(tabOneRect.right, equals(tabOneRight));
+    tabTwoLeft = tabBar.width - tabStartOffset - kTabLabelPadding.horizontal - tabOneRect.width
+      - kTabLabelPadding.right - tabTwoRect.width;
+    expect(tabTwoRect.left, equals(tabTwoLeft));
+  });
+
+  testWidgets('Material3 - TabBar inherits the dividerColor of TabBarTheme', (WidgetTester tester) async {
+    const Color dividerColor = Colors.yellow;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          useMaterial3: true,
+          tabBarTheme: const TabBarTheme(dividerColor: dividerColor),
+        ),
+        home: Scaffold(
+          appBar: AppBar(
+            bottom: TabBar(
+              controller: TabController(length: 3, vsync: const TestVSync()),
+              tabs: const <Widget>[
+                Tab(text: 'Tab 1'),
+                Tab(text: 'Tab 2'),
+                Tab(text: 'Tab 3'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Test painter's divider color.
+    final CustomPaint paint = tester.widget<CustomPaint>(find.byType(CustomPaint).last);
+    // ignore: avoid_dynamic_calls
+    expect((paint.painter as dynamic).dividerColor, dividerColor);
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/pull/125974#discussion_r1239089151.
+  testWidgets('Divider can be constrained', (WidgetTester tester) async {
+    const Color dividerColor = Colors.yellow;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          useMaterial3: true,
+          tabBarTheme: const TabBarTheme(dividerColor: dividerColor),
+        ),
+        home: Scaffold(
+          body: DefaultTabController(
+            length: 2,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 360),
+                child: ColoredBox(
+                  color: Colors.grey[200]!,
+                  child: const TabBar.secondary(
+                    tabAlignment: TabAlignment.start,
+                    isScrollable: true,
+                    tabs: <Widget>[
+                      Tab(text: 'Test 1'),
+                      Tab(text: 'Test 2'),
+                    ],
+                  ),
+                )
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Test tab bar width.
+    expect(tester.getSize(find.byType(TabBar)).width, 360);
+    // Test divider width.
+    expect(tester.getSize(find.byType(CustomPaint).at(1)).width, 360);
   });
 
   group('Material 2', () {
@@ -6102,45 +6481,11 @@ void main() {
       );
     });
 
-    testWidgets('Material3 - TabBar inherits the dividerColor of TabBarTheme', (WidgetTester tester) async {
-      const Color dividerColor = Colors.yellow;
-
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(
-            useMaterial3: true,
-            tabBarTheme: const TabBarTheme(dividerColor: dividerColor),
-          ),
-          home: Scaffold(
-            appBar: AppBar(
-              bottom: TabBar(
-                controller: TabController(length: 3, vsync: const TestVSync()),
-                tabs: const <Widget>[
-                  Tab(text: 'Tab 1'),
-                  Tab(text: 'Tab 2'),
-                  Tab(text: 'Tab 3'),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-
-      // Test painter's divider color.
-      final CustomPaint paint = tester.widget<CustomPaint>(find.byType(CustomPaint).last);
-      // ignore: avoid_dynamic_calls
-      expect((paint.painter as dynamic).dividerColor, dividerColor);
-    });
-
-    testWidgets('Default TabAlignment', (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(useMaterial3: false);
+    testWidgets('Material2 - Default TabAlignment', (WidgetTester tester) async {
       final List<String> tabs = <String>['A', 'B'];
 
       // Test default TabAlignment when isScrollable is false.
-      await tester.pumpWidget(MaterialApp(
-        theme: theme,
-        home: buildFrame(tabs: tabs,  value: 'B'),
-      ));
+      await tester.pumpWidget(buildFrame(tabs: tabs,  value: 'B', useMaterial3: false));
 
       final Rect tabBar = tester.getRect(find.byType(TabBar));
       Rect tabOneRect = tester.getRect(find.byType(Tab).first);
@@ -6153,9 +6498,11 @@ void main() {
       expect(tabTwoRect.right, equals(tabTwoRight));
 
       // Test default TabAlignment when isScrollable is true.
-      await tester.pumpWidget(MaterialApp(
-        theme: theme,
-        home: buildFrame(tabs: tabs,  value: 'B', isScrollable: true),
+      await tester.pumpWidget(buildFrame(
+        tabs: tabs,
+        value: 'B',
+        isScrollable: true,
+        useMaterial3: false,
       ));
 
       tabOneRect = tester.getRect(find.byType(Tab).first);
@@ -6258,6 +6605,106 @@ void main() {
               p2: const Offset(indicatorRight, indicatorY),
             ),
       );
+    });
+
+    testWidgets('Material2 - TabBar with padding isScrollable: true', (WidgetTester tester) async {
+      const double indicatorWeight = 2.0; // default indicator weight
+      const EdgeInsets padding = EdgeInsets.only(left: 3.0, top: 7.0, right: 5.0, bottom: 3.0);
+
+      final List<Widget> tabs = <Widget>[
+        SizedBox(key: UniqueKey(), width: 130.0, height: 30.0),
+        SizedBox(key: UniqueKey(), width: 140.0, height: 40.0),
+        SizedBox(key: UniqueKey(), width: 150.0, height: 50.0),
+      ];
+
+      final TabController controller = TabController(
+        vsync: const TestVSync(),
+        length: tabs.length,
+      );
+
+      await tester.pumpWidget(
+        boilerplate(
+          child: Container(
+            alignment: Alignment.topLeft,
+            child: TabBar(
+              padding: padding,
+              labelPadding: EdgeInsets.zero,
+              isScrollable: true,
+              controller: controller,
+              tabs: tabs,
+            ),
+          ),
+          useMaterial3: false,
+        ),
+      );
+
+      final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+      final double tabBarHeight = 50.0 + indicatorWeight + padding.top + padding.bottom;  // 50 = max tab height
+      expect(tabBarBox.size.height, tabBarHeight);
+
+      // Tab0 width = 130, height = 30
+      double tabLeft = padding.left;
+      double tabRight = tabLeft + 130.0;
+      double tabTop = (tabBarHeight - indicatorWeight + (padding.top - padding.bottom) - 30.0) / 2.0;
+      double tabBottom = tabTop + 30.0;
+      Rect tabRect = Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
+      expect(tester.getRect(find.byKey(tabs[0].key!)), tabRect);
+
+      // Tab1 width = 140, height = 40
+      tabLeft = tabRight;
+      tabRight = tabLeft + 140.0;
+      tabTop = (tabBarHeight - indicatorWeight + (padding.top - padding.bottom) - 40.0) / 2.0;
+      tabBottom = tabTop + 40.0;
+      tabRect = Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
+      expect(tester.getRect(find.byKey(tabs[1].key!)), tabRect);
+
+      // Tab2 width = 150, height = 50
+      tabLeft = tabRight;
+      tabRight = tabLeft + 150.0;
+      tabTop = (tabBarHeight - indicatorWeight + (padding.top - padding.bottom) - 50.0) / 2.0;
+      tabBottom = tabTop + 50.0;
+      tabRect = Rect.fromLTRB(tabLeft, tabTop, tabRight, tabBottom);
+      expect(tester.getRect(find.byKey(tabs[2].key!)), tabRect);
+
+      tabRight += padding.right;
+      expect(tabBarBox.size.width, tabRight);
+    });
+
+    testWidgets('Material2 - TabAlignment updates tabs alignment (non-scrollable TabBar)', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData(useMaterial3: false);
+      final List<String> tabs = <String>['A', 'B'];
+
+      // Test TabAlignment.fill (default) when isScrollable is false.
+      await tester.pumpWidget(MaterialApp(
+        theme: theme,
+        home: buildFrame(tabs: tabs,  value: 'B'),
+      ));
+
+      final Rect tabBar = tester.getRect(find.byType(TabBar));
+      Rect tabOneRect = tester.getRect(find.byType(Tab).first);
+      Rect tabTwoRect = tester.getRect(find.byType(Tab).last);
+
+      // By default tabs should fill the width of the TabBar.
+      double tabOneLeft = ((tabBar.width / 2) - tabOneRect.width) / 2;
+      expect(tabOneRect.left, moreOrLessEquals(tabOneLeft));
+      double tabTwoRight = tabBar.width - ((tabBar.width / 2) - tabTwoRect.width) / 2;
+      expect(tabTwoRect.right, moreOrLessEquals(tabTwoRight));
+
+      // Test TabAlignment.center when isScrollable is false.
+      await tester.pumpWidget(MaterialApp(
+        theme: theme,
+        home: buildFrame(tabs: tabs, value: 'B', tabAlignment: TabAlignment.center),
+      ));
+      await tester.pumpAndSettle();
+
+      tabOneRect = tester.getRect(find.byType(Tab).first);
+      tabTwoRect = tester.getRect(find.byType(Tab).last);
+
+      // Tabs should not fill the width of the TabBar.
+      tabOneLeft = kTabLabelPadding.left;
+      expect(tabOneRect.left, moreOrLessEquals(tabOneLeft));
+      tabTwoRight = kTabLabelPadding.horizontal + tabOneRect.width + kTabLabelPadding.left + tabTwoRect.width;
+      expect(tabTwoRect.right, moreOrLessEquals(tabTwoRight));
     });
   });
 }

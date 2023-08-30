@@ -867,6 +867,76 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
     ]);
   });
 
+  testWidgets('PlatformRouteInformationProvider does not push new entry if query parameters are semantically the same', (WidgetTester tester) async {
+    final List<MethodCall> log = <MethodCall>[];
+    TestDefaultBinaryMessengerBinding
+        .instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+        SystemChannels.navigation,
+            (MethodCall methodCall) async {
+          log.add(methodCall);
+          return null;
+        }
+    );
+    final RouteInformation initial = RouteInformation(
+      uri: Uri.parse('initial?a=ws/abcd'),
+    );
+    final RouteInformationProvider provider = PlatformRouteInformationProvider(
+      initialRouteInformation: initial
+    );
+    // Make sure engine is updated with initial route
+    provider.routerReportsNewRouteInformation(initial);
+    log.clear();
+
+    provider.routerReportsNewRouteInformation(
+      RouteInformation(
+        uri: Uri(
+          path: 'initial',
+          queryParameters: <String, String>{'a': 'ws/abcd'}, // This will be escaped.
+        ),
+      ),
+    );
+    expect(provider.value.uri.toString(), 'initial?a=ws%2Fabcd');
+    // should use `replace: true`
+    expect(log, <Object>[
+      isMethodCall('selectMultiEntryHistory', arguments: null),
+      isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{ 'uri': 'initial?a=ws%2Fabcd', 'state': null, 'replace': true }),
+    ]);
+    log.clear();
+
+    provider.routerReportsNewRouteInformation(
+      RouteInformation(uri: Uri.parse('initial?a=1&b=2')),
+    );
+    log.clear();
+
+    // Change query parameters order
+    provider.routerReportsNewRouteInformation(
+      RouteInformation(uri: Uri.parse('initial?b=2&a=1')),
+    );
+    // should use `replace: true`
+    expect(log, <Object>[
+      isMethodCall('selectMultiEntryHistory', arguments: null),
+      isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{ 'uri': 'initial?b=2&a=1', 'state': null, 'replace': true }),
+    ]);
+    log.clear();
+
+    provider.routerReportsNewRouteInformation(
+      RouteInformation(uri: Uri.parse('initial?a=1&a=2')),
+    );
+    log.clear();
+
+    // Change query parameters order for same key
+    provider.routerReportsNewRouteInformation(
+      RouteInformation(uri: Uri.parse('initial?a=2&a=1')),
+    );
+    // should use `replace: true`
+    expect(log, <Object>[
+      isMethodCall('selectMultiEntryHistory', arguments: null),
+      isMethodCall('routeInformationUpdated', arguments: <String, dynamic>{ 'uri': 'initial?a=2&a=1', 'state': null, 'replace': true }),
+    ]);
+    log.clear();
+  });
+
   testWidgets('RootBackButtonDispatcher works', (WidgetTester tester) async {
     final BackButtonDispatcher outerDispatcher = RootBackButtonDispatcher();
     final RouteInformationProvider provider = PlatformRouteInformationProvider(
@@ -1512,6 +1582,21 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
       expect(info2.location, '/abc?def=ghi&def=jkl#mno');
     });
   });
+
+  test('$PlatformRouteInformationProvider dispatches object creation in constructor', () {
+    int eventCount = 0;
+    void listener(ObjectEvent event) => eventCount++;
+    MemoryAllocations.instance.addListener(listener);
+
+    final PlatformRouteInformationProvider registry = PlatformRouteInformationProvider(
+      initialRouteInformation: RouteInformation(uri: Uri.parse('http://google.com')),
+    );
+
+    expect(eventCount, 1);
+
+    registry.dispose();
+    MemoryAllocations.instance.removeListener(listener);
+  });
 }
 
 Widget buildBoilerPlate(Widget child) {
@@ -1563,7 +1648,11 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
     this.builder,
     this.onPopRoute,
     this.reportConfiguration = false,
-  });
+  }) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+  }
 
   RouteInformation? get routeInformation => _routeInformation;
   RouteInformation? _routeInformation;
@@ -1647,7 +1736,11 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
 class SimpleRouteInformationProvider extends RouteInformationProvider with ChangeNotifier {
   SimpleRouteInformationProvider({
     this.onRouterReport,
-  });
+  }) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+  }
 
   RouterReportRouterInformation? onRouterReport;
 
@@ -1703,7 +1796,11 @@ class CompleterRouteInformationParser extends RouteInformationParser<RouteInform
 class SimpleAsyncRouterDelegate extends RouterDelegate<RouteInformation> with ChangeNotifier {
   SimpleAsyncRouterDelegate({
     required this.builder,
-  });
+  }) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+  }
 
   RouteInformation? get routeInformation => _routeInformation;
   RouteInformation? _routeInformation;

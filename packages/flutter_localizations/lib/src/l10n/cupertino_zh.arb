@@ -22,5 +22,9 @@
   "tabSemanticsLabel": "第 $tabIndex 个标签，共 $tabCount 个",
   "modalBarrierDismissLabel": "关闭",
   "searchTextFieldPlaceholderLabel": "搜索",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "找不到替换文字",
+  "menuDismissLabel": "关闭菜单",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }
