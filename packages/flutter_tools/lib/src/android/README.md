@@ -37,7 +37,7 @@ When updating the Gradle version used in project templates
 - Framework integration & benchmark tests are running with at least this Gradle
 version.
 - Flutter tools tests that perform String checks with the current template
-Gradle verison are updated (you should see these fail if you do not fix them
+Gradle version are updated (you should see these fail if you do not fix them
 preemptively).
 
 When new versions of Gradle become available, make sure to:
