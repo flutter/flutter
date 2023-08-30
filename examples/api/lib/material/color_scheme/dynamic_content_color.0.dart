@@ -87,6 +87,7 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
     }
 
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       theme: ThemeData(useMaterial3: true, colorScheme: colorScheme),
       debugShowCheckedModeBanner: false,
       home: Builder(

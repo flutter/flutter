@@ -14,6 +14,7 @@ class ActionsExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       home: Scaffold(
         appBar: AppBar(title: const Text('Actions Sample')),
         body: const Center(

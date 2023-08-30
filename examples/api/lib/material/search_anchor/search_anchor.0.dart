@@ -72,6 +72,7 @@ class _SearchBarAppState extends State<SearchBarApp> {
     final ColorScheme colors = themeData.colorScheme;
 
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       theme: themeData,
       home: Scaffold(
         appBar: AppBar(title: const Text('Search Bar Sample')),

@@ -52,6 +52,7 @@ class _ContextMenuControllerExampleAppState extends State<ContextMenuControllerE
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Context menu outside of text'),

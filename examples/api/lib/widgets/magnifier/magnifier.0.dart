@@ -19,6 +19,7 @@ class _MagnifierExampleAppState extends State<MagnifierExampleApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       home: Scaffold(
         body: Center(
           child: Column(

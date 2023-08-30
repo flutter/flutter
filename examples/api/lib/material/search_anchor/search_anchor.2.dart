@@ -23,6 +23,7 @@ class _SearchBarAppState extends State<SearchBarApp> {
     final ThemeData themeData = ThemeData(useMaterial3: true);
 
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       theme: themeData,
       home: Scaffold(
         appBar: AppBar(title: const Text('Search Anchor Sample')),

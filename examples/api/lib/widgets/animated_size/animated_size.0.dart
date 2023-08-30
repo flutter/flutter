@@ -14,6 +14,7 @@ class AnimatedSizeExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       home: Scaffold(
         appBar: AppBar(title: const Text('AnimatedSize Sample')),
         body: const Center(

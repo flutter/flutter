@@ -15,6 +15,7 @@ class AdaptiveAlertDialogApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       // Try this: set the platform to TargetPlatform.android and see the difference
       theme: ThemeData(platform: TargetPlatform.iOS, useMaterial3: true),
       home: Scaffold(

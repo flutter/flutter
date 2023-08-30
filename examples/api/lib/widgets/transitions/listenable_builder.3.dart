@@ -35,6 +35,7 @@ class _ListenableBuilderExampleState extends State<ListenableBuilderExample> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       home: Scaffold(
         appBar: AppBar(title: const Text('ListenableBuilder Example')),
         body: ListBody(listNotifier: _listNotifier),

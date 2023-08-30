@@ -62,6 +62,7 @@ class _SampleAppState extends State<SampleApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Custom Render Boxes'),

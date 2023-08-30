@@ -14,6 +14,7 @@ class NavigatorExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       // MaterialApp contains our top-level Navigator
       initialRoute: '/',
       routes: <String, WidgetBuilder>{

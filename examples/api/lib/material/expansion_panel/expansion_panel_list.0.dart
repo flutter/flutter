@@ -14,6 +14,7 @@ class ExpansionPanelListExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       home: Scaffold(
         appBar: AppBar(title: const Text('ExpansionPanelList Sample')),
         body: const ExpansionPanelListExample(),

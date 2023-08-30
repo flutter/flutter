@@ -18,7 +18,8 @@ class ApplicationExitExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       home: Scaffold(body: Body()),
     );
   }

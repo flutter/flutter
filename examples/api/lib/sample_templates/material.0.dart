@@ -41,7 +41,8 @@ class SampleApp extends StatelessWidget {
   const SampleApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       home: Scaffold(
         body: PlaceholderExample(),
       ),

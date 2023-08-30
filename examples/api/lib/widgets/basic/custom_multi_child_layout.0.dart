@@ -13,7 +13,8 @@ class CustomMultiChildLayoutApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       home: Directionality(
         // TRY THIS: Try changing the direction here and hot-reloading to
         // see the layout change.

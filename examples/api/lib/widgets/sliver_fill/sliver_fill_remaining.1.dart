@@ -14,6 +14,7 @@ class SliverFillRemainingExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       home: Scaffold(
         appBar: AppBar(title: const Text('SliverFillRemaining Sample')),
         body: const SliverFillRemainingExample(),

@@ -52,7 +52,8 @@ class InheritedThemeExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       home: Scaffold(
         // Override the DefaultTextStyle defined by the Scaffold.
         // Descendant widgets will inherit this big blue text style.

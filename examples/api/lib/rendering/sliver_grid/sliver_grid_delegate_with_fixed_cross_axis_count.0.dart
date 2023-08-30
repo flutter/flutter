@@ -14,6 +14,7 @@ class SliverGridDelegateWithFixedCrossAxisCountExampleApp extends StatelessWidge
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       home: Scaffold(
         appBar: AppBar(title: const Text('SliverGridDelegateWithFixedCrossAxisCount Sample')),
         body: const SliverGridDelegateWithFixedCrossAxisCountExample(),

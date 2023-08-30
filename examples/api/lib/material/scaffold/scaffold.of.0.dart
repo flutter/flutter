@@ -15,6 +15,7 @@ class OfExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),

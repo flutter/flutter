@@ -15,6 +15,7 @@ class SwitchApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       theme: ThemeData.light(useMaterial3: true).copyWith(
         // Use the ambient CupertinoThemeData to style all widgets which would
         // otherwise use iOS defaults.

@@ -15,6 +15,7 @@ class GridViewExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       home: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Card(

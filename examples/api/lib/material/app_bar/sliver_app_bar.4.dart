@@ -23,6 +23,7 @@ class _StretchableSliverAppBarState extends State<StretchableSliverAppBar> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
         home: Scaffold(
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),

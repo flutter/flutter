@@ -14,6 +14,7 @@ class RangeSliderExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       home: Scaffold(
         appBar: AppBar(title: const Text('RangeSlider Sample')),
         body: const RangeSliderExample(),

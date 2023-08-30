@@ -38,6 +38,7 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
     }
 
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.green,

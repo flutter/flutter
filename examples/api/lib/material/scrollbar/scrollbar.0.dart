@@ -14,6 +14,7 @@ class ScrollbarExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       home: Scaffold(
         appBar: AppBar(title: const Text('Scrollbar Sample')),
         body: const ScrollbarExample(),

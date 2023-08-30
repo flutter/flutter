@@ -16,6 +16,7 @@ class AnimatedIconApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       theme: ThemeData(
         colorSchemeSeed: const Color(0xff6750a4),
         useMaterial3: true,

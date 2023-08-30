@@ -14,6 +14,7 @@ class OverflowBoxApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       home: Scaffold(
         appBar: AppBar(title: const Text('OverflowBox Sample')),
         body: const Center(

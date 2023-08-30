@@ -82,6 +82,7 @@ class _AnimatedListSampleState extends State<AnimatedListSample> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       home: Scaffold(
         appBar: AppBar(
           title: const Text('AnimatedList'),
