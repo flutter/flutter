@@ -472,9 +472,9 @@ void main() {
     // testing it, IMO.
     if (kIsWeb) {
       // The web implementation never includes "dither: ..." as a property.
-      expect(ts2.toString(), contains('background: Paint(Color(0xff00ff00));'));
+      expect(ts2.toString(), contains('background: Paint(Color(0xff00ff00))'));
     } else {
-      expect(ts2.toString(), contains('background: Paint(Color(0xff00ff00); dither: true))'));
+      expect(ts2.toString(), contains('background: Paint(Color(0xff00ff00); dither: true)'));
     }
   });
 
