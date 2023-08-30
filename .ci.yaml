@@ -3884,6 +3884,7 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: hot_mode_dev_cycle_macos_target__benchmark
+    bringup: true
     runIf:
       - dev/**
       - .ci.yaml
