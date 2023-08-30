@@ -72,7 +72,7 @@ class TimePickerThemeData with Diagnosticable {
   /// The style of the cancel button of a [TimePickerDialog].
   final ButtonStyle? cancelButtonStyle;
 
-  /// The style of the conform (OK) button of a [TimePickerDialog].
+  /// The style of the confirm (OK) button of a [TimePickerDialog].
   final ButtonStyle? confirmButtonStyle;
 
   /// The color and weight of the day period's outline.
