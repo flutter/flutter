@@ -520,12 +520,8 @@ bool validateJavaGradle(Logger logger,
 // the specified Java version.
 JavaGradleCompat? getValidGradleVersionRangeForJavaVersion(
   Logger logger, {
-  required String? javaV,
+  required String javaV,
 }) {
-  if (javaV == null) {
-    logger.printTrace('Java version unknown ($javaV).');
-    return null;
-  }
   for (final JavaGradleCompat data in _javaGradleCompatList) {
     if (isWithinVersionRange(javaV, min: data.javaMin, max: data.javaMax, inclusiveMax: false)) {
       return data;
@@ -576,11 +572,7 @@ bool validateJavaAgp(Logger logger,
   // Returns compatibility information for concerning the compatible minimum AGP
   // version for the specified Java version.
   JavaAgpCompat? getMinimumAgpVersionForJavaVersion(Logger logger,
-    {required String? javaV}) {
-  if (javaV == null) {
-    logger.printTrace('Java version unknown ($javaV).');
-    return null;
-  }
+    {required String javaV}) {
   for (final JavaAgpCompat data in _javaAgpCompatList) {
     if (isWithinVersionRange(javaV, min: data.javaMin, max: '100.100')) {
       return data;
