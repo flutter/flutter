@@ -51,7 +51,7 @@ void main() {
 
   testUsingContext('dry run with no package config',
       overrides: <Type, Generator>{
-        ProcessManager: () => FakeProcessManager.any(),
+        ProcessManager: () => FakeProcessManager.empty(),
       }, () async {
     expect(
       await dryRunNativeAssetsMacOS(
@@ -70,7 +70,7 @@ void main() {
   });
 
   testUsingContext('build with no package config', overrides: <Type, Generator>{
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => FakeProcessManager.empty(),
   }, () async {
     await buildNativeAssetsMacOS(
       darwinArchs: <DarwinArch>[DarwinArch.arm64],
@@ -89,7 +89,7 @@ void main() {
 
   testUsingContext('dry run for multiple OSes with no package config',
       overrides: <Type, Generator>{
-        ProcessManager: () => FakeProcessManager.any(),
+        ProcessManager: () => FakeProcessManager.empty(),
       }, () async {
     await dryRunNativeAssetsMultipeOSes(
       projectUri: projectUri,
@@ -110,7 +110,7 @@ void main() {
 
   testUsingContext('dry run with assets but not enabled',
       overrides: <Type, Generator>{
-        ProcessManager: () => FakeProcessManager.any(),
+        ProcessManager: () => FakeProcessManager.empty(),
       }, () async {
     final File packageConfig =
         environment.projectDir.childFile('.dart_tool/package_config.json');
@@ -136,7 +136,7 @@ void main() {
 
   testUsingContext('dry run with assets', overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => FakeProcessManager.empty(),
   }, () async {
     final File packageConfig =
         environment.projectDir.childFile('.dart_tool/package_config.json');
@@ -179,7 +179,7 @@ void main() {
 
   testUsingContext('build with assets but not enabled',
       overrides: <Type, Generator>{
-        ProcessManager: () => FakeProcessManager.any(),
+        ProcessManager: () => FakeProcessManager.empty(),
       }, () async {
     final File packageConfig =
         environment.projectDir.childFile('.dart_tool/package_config.json');
@@ -207,7 +207,7 @@ void main() {
 
   testUsingContext('build no assets', overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => FakeProcessManager.empty(),
   }, () async {
     final File packageConfig =
         environment.projectDir.childFile('.dart_tool/package_config.json');
