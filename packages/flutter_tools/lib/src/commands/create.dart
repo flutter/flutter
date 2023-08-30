@@ -415,14 +415,16 @@ class CreateCommand extends CreateBase {
         offline: boolArg('offline'),
         outputMode: PubOutputMode.summaryOnly,
       );
-      await project.ensureReadyForPlatformSpecificTooling(
-        androidPlatform: includeAndroid,
-        iosPlatform: includeIos,
-        linuxPlatform: includeLinux,
-        macOSPlatform: includeMacos,
-        windowsPlatform: includeWindows,
-        webPlatform: includeWeb,
-      );
+      if (!generateFfiPackage) {
+        await project.ensureReadyForPlatformSpecificTooling(
+          androidPlatform: includeAndroid,
+          iosPlatform: includeIos,
+          linuxPlatform: includeLinux,
+          macOSPlatform: includeMacos,
+          windowsPlatform: includeWindows,
+          webPlatform: includeWeb,
+        );
+      }
     }
     if (sampleCode != null) {
       _applySample(relativeDir, sampleCode);
