@@ -59,7 +59,7 @@ const String exampleAppName = '${packageName}_example';
 const String dylibName = 'lib$packageName.dylib';
 
 void main() {
-  if (platform.isWindows || platform.isLinux) {
+  if (!platform.isMacOS) {
     // TODO(dacoharkes): Implement other OSes. https://github.com/flutter/flutter/issues/129757
     return;
   }
