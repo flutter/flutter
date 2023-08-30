@@ -2373,6 +2373,42 @@ TEST(GeometryTest, HalfConversions) {
 #endif  // FML_OS_WIN
 }
 
+TEST(GeometryTest, PathShifting) {
+  PathBuilder builder{};
+  auto path =
+      builder.AddLine(Point(0, 0), Point(10, 10))
+          .AddQuadraticCurve(Point(10, 10), Point(15, 15), Point(20, 20))
+          .AddCubicCurve(Point(20, 20), Point(25, 25), Point(-5, -5),
+                         Point(30, 30))
+          .Close()
+          .TakePath();
+  path.Shift(Point(1, 1));
+
+  ContourComponent contour;
+  LinearPathComponent linear;
+  QuadraticPathComponent quad;
+  CubicPathComponent cubic;
+
+  ASSERT_TRUE(path.GetContourComponentAtIndex(0, contour));
+  ASSERT_TRUE(path.GetLinearComponentAtIndex(1, linear));
+  ASSERT_TRUE(path.GetQuadraticComponentAtIndex(3, quad));
+  ASSERT_TRUE(path.GetCubicComponentAtIndex(5, cubic));
+
+  ASSERT_EQ(contour.destination, Point(1, 1));
+
+  ASSERT_EQ(linear.p1, Point(1, 1));
+  ASSERT_EQ(linear.p2, Point(11, 11));
+
+  ASSERT_EQ(quad.cp, Point(16, 16));
+  ASSERT_EQ(quad.p1, Point(11, 11));
+  ASSERT_EQ(quad.p2, Point(21, 21));
+
+  ASSERT_EQ(cubic.cp1, Point(26, 26));
+  ASSERT_EQ(cubic.cp2, Point(-4, -4));
+  ASSERT_EQ(cubic.p1, Point(21, 21));
+  ASSERT_EQ(cubic.p2, Point(31, 31));
+}
+
 }  // namespace testing
 }  // namespace impeller
 

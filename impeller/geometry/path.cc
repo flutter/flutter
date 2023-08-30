@@ -61,6 +61,33 @@ void Path::SetConvexity(Convexity value) {
   convexity_ = value;
 }
 
+void Path::Shift(Point shift) {
+  size_t currentIndex = 0;
+  for (const auto& component : components_) {
+    switch (component.type) {
+      case ComponentType::kLinear:
+        linears_[component.index].p1 += shift;
+        linears_[component.index].p2 += shift;
+        break;
+      case ComponentType::kQuadratic:
+        quads_[component.index].cp += shift;
+        quads_[component.index].p1 += shift;
+        quads_[component.index].p2 += shift;
+        break;
+      case ComponentType::kCubic:
+        cubics_[component.index].cp1 += shift;
+        cubics_[component.index].cp2 += shift;
+        cubics_[component.index].p1 += shift;
+        cubics_[component.index].p2 += shift;
+        break;
+      case ComponentType::kContour:
+        contours_[component.index].destination += shift;
+        break;
+    }
+    currentIndex++;
+  }
+}
+
 Path& Path::AddLinearComponent(Point p1, Point p2) {
   linears_.emplace_back(p1, p2);
   components_.emplace_back(ComponentType::kLinear, linears_.size() - 1);
