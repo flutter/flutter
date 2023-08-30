@@ -32,6 +32,9 @@ class Stopwatch {
 
   const fml::TimeDelta& GetLap(size_t index) const;
 
+  /// Return a reference to all the laps.
+  size_t GetLapsCount() const;
+
   size_t GetCurrentSample() const;
 
   const fml::TimeDelta& LastLap() const;
