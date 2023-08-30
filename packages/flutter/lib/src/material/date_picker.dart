@@ -543,6 +543,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
         spacing: 8,
         children: <Widget>[
           TextButton(
+            style: datePickerTheme.cancelButtonStyle ?? defaults.cancelButtonStyle,
             onPressed: _handleCancel,
             child: Text(widget.cancelText ?? (
               useMaterial3
@@ -551,6 +552,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
             )),
           ),
           TextButton(
+            style: datePickerTheme.confirmButtonStyle ?? defaults.confirmButtonStyle,
             onPressed: _handleOk,
             child: Text(widget.confirmText ?? localizations.okButtonLabel),
           ),

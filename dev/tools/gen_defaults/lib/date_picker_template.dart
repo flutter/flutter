@@ -57,6 +57,16 @@ class _${blockName}DefaultsM3 extends DatePickerThemeData {
   Color? get backgroundColor => ${componentColor("md.comp.date-picker.modal.container")};
 
   @override
+  ButtonStyle get cancelButtonStyle {
+    return TextButton.styleFrom();
+  }
+
+  @override
+  ButtonStyle get confirmButtonStyle {
+    return TextButton.styleFrom();
+  }
+
+  @override
   Color? get shadowColor => ${colorOrTransparent("md.comp.date-picker.modal.container.shadow-color")};
 
   @override
@@ -231,8 +241,6 @@ class _${blockName}DefaultsM3 extends DatePickerThemeData {
 
   @override
   TextStyle? get rangePickerHeaderHelpStyle => ${textStyle("md.comp.date-picker.modal.range-selection.month.subhead")};
-
-
 }
 ''';
 }
