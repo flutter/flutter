@@ -161,12 +161,10 @@ Future<void> main() async {
       await _createFakeDartPlugin(dartPluginName, tempDir);
 
       // Make a package with native assets.
-      await inDirectory(projectDir, () async {
-        await flutter(
-          'config',
-          options: <String>['--enable-native-assets'],
-        );
-      });
+      await flutter(
+        'config',
+        options: <String>['--enable-native-assets'],
+      );
 
       section('Create package with native assets');
 
