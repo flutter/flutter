@@ -2384,6 +2384,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
                 overflowAlignment: OverflowBarAlignment.end,
                 children: <Widget>[
                   TextButton(
+                    style: pickerTheme.cancelButtonStyle ?? defaultTheme.cancelButtonStyle,
                     onPressed: _handleCancel,
                     child: Text(widget.cancelText ??
                         (theme.useMaterial3
@@ -2391,6 +2392,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
                             : localizations.cancelButtonLabel.toUpperCase())),
                   ),
                   TextButton(
+                    style: pickerTheme.confirmButtonStyle ?? defaultTheme.confirmButtonStyle,
                     onPressed: _handleOk,
                     child: Text(widget.confirmText ?? localizations.okButtonLabel),
                   ),
