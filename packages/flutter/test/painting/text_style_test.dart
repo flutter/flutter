@@ -466,7 +466,7 @@ void main() {
     expect(s2.toString(), 'TextStyle(inherit: true, backgroundColor: Color(0xff00ff00))');
 
     final ui.TextStyle ts2 = s2.getTextStyle();
-    expect(ts2.toString(), contains('background: Paint(Color(0xff00ff00)); dither: true))'));
+    expect(ts2.toString(), contains('background: Paint(Color(0xff00ff00); dither: true)))'));
   });
 
   test('TextStyle background and backgroundColor combos', () {
