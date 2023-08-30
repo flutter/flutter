@@ -544,6 +544,30 @@ class _TextCache {
   String toString() => '${objectRuntimeType(this, '_TextCache')}($text, $_lengths)';
 }
 
+/// The output of linking an InlineSpan to some _TextLinkerMatches.
+typedef _LinkSpanRecursion = (
+  /// The output of linking the input InlineSpan.
+  InlineSpan linkedSpan,
+  /// The provided _TextLinkerMatches, but with those completely used during
+  /// linking removed.
+  Iterable<_TextLinkerMatch> unusedTextLinkerMatches,
+  /// The TapGestureRecognizers produced when each link is created. These need
+  /// to be disposed by a widget when no longer needed.
+  Iterable<TapGestureRecognizer> generatedRecognizers,
+);
+
+/// The output of linking a List of InlineSpans to some _TextLinkerMatches.
+typedef _LinkSpansRecursion = (
+  /// The output of linking the input InlineSpans.
+  Iterable<InlineSpan> linkedSpans,
+  /// The provided _TextLinkerMatches, but with those completely used during
+  /// linking removed.
+  Iterable<_TextLinkerMatch> unusedTextLinkerMatches,
+  /// The TapGestureRecognizers produced when each link is created. These need
+  /// to be disposed by a widget when no longer needed.
+  Iterable<TapGestureRecognizer> generatedRecognizers,
+);
+
 /// Applies some [TextLinker]s to some [InlineSpan]s and produces a new list of
 /// [linkedSpans] as well as the [recognizers] created for each generated link.
 class _LinkedSpans {
@@ -612,7 +636,7 @@ class _LinkedSpans {
   //
   // The TapGestureRecognizers are returned so that they can be disposed by an
   // owning widget.
-  static (Iterable<InlineSpan>, Iterable<_TextLinkerMatch>, Iterable<TapGestureRecognizer>) _linkSpansRecurse(Iterable<InlineSpan> spans, _TextCache textCache, Iterable<_TextLinkerMatch> textLinkerMatches, [int index = 0]) {
+  static _LinkSpansRecursion _linkSpansRecurse(Iterable<InlineSpan> spans, _TextCache textCache, Iterable<_TextLinkerMatch> textLinkerMatches, [int index = 0]) {
     final List<InlineSpan> output = <InlineSpan>[];
     Iterable<_TextLinkerMatch> nextTextLinkerMatches = textLinkerMatches;
     final List<TapGestureRecognizer> recognizers = <TapGestureRecognizer>[];
@@ -638,7 +662,7 @@ class _LinkedSpans {
   //
   // The TapGestureRecognizers are returned so that they can be disposed by an
   // owning widget.
-  static (InlineSpan, Iterable<_TextLinkerMatch>, Iterable<TapGestureRecognizer>) _linkSpanRecurse(InlineSpan span, _TextCache textCache, Iterable<_TextLinkerMatch> textLinkerMatches, [int index = 0]) {
+  static _LinkSpanRecursion _linkSpanRecurse(InlineSpan span, _TextCache textCache, Iterable<_TextLinkerMatch> textLinkerMatches, [int index = 0]) {
     if (span is! TextSpan) {
       return (span, textLinkerMatches, <TapGestureRecognizer>[]);
     }
