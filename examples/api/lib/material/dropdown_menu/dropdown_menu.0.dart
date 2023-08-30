@@ -10,6 +10,10 @@ import 'package:flutter/material.dart';
 // The second dropdown menu customizes the appearance of the dropdown
 // menu's text field with its [InputDecorationTheme] parameter.
 
+void main() {
+  runApp(const DropdownMenuExample());
+}
+
 // DropdownMenuEntry labels and values for the first dropdown menu.
 enum ColorLabel {
   blue('Blue', Colors.blue),
