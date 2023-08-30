@@ -213,6 +213,18 @@ class CanvasKitRenderer implements Renderer {
   }) => skiaInstantiateWebImageCodec(uri.toString(), chunkCallback);
 
   @override
+  ui.Image createImageFromImageBitmap(DomImageBitmap imageBitmap) {
+    final SkImage? skImage = canvasKit.MakeLazyImageFromImageBitmap(
+      imageBitmap,
+      true
+    );
+    if (skImage == null) {
+      throw Exception('Failed to convert image bitmap to an SkImage.');
+    }
+    return CkImage(skImage);
+  }
+
+  @override
   void decodeImageFromPixels(
     Uint8List pixels,
     int width,

@@ -26,8 +26,8 @@ extern void skwasm_captureImageBitmap(Skwasm::Surface* surfaceHandle,
                                       uint32_t bitmapId,
                                       int width,
                                       int height);
-extern unsigned int skwasm_createGlTextureFromVideoFrame(
-    SkwasmObject videoFrame,
+extern unsigned int skwasm_createGlTextureFromTextureSource(
+    SkwasmObject textureSource,
     int width,
     int height);
 }
