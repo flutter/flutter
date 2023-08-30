@@ -57,7 +57,7 @@ void main() {
     expect(focusNode.hasFocus, isTrue);
   });
 
-  testWidgets('Can place app inside FocusScope', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can place app inside FocusScope', (WidgetTester tester) async {
     final FocusScopeNode focusScopeNode = FocusScopeNode();
 
     await tester.pumpWidget(FocusScope(
@@ -69,6 +69,7 @@ void main() {
     ));
 
     expect(find.text('Home'), findsOneWidget);
+    focusScopeNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Can show grid without losing sync', (WidgetTester tester) async {
@@ -310,7 +311,7 @@ void main() {
     expect(find.text('route "/b"', skipOffstage: false), findsNothing);
   });
 
-  testWidgets('Initial route with missing step', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Initial route with missing step', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => const Text('route "/"'),
       '/a': (BuildContext context) => const Text('route "/a"'),
@@ -333,7 +334,12 @@ void main() {
       expect(find.text('route "/a/b"'), findsNothing);
       expect(find.text('route "/b"'), findsNothing);
     }
-  });
+  },
+  // TODO(polina-c): remove after fixing
+  // https://github.com/flutter/flutter/issues/133695
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    notDisposedAllowList: <String, int?> {'ValueNotifier<String?>': 3},
+  ));
 
   testWidgetsWithLeakTracking('Make sure initialRoute is only used the first time', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
