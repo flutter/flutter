@@ -838,7 +838,7 @@ String getGradlewFileName(Platform platform) {
 //
 // Should be updated when a new version of Java is supported by a new version
 // of Gradle, as https://docs.gradle.org/current/userguide/compatibility.html
-// detials.
+// details.
 List<JavaGradleCompat> _javaGradleCompatList = const <JavaGradleCompat>[
     JavaGradleCompat(
       javaMin: '19',
