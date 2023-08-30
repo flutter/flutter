@@ -54,9 +54,6 @@ class LinkedText extends StatefulWidget {
   /// {@template flutter.widgets.LinkedText.new}
   /// By default, highlights URLs in the [text] or [spans] and makes them
   /// tappable with [onTap].
-  ///
-  /// If [textRanges] is given, then makes those ranges in the text interactive
-  /// instead of URLs.
   /// {@endtemplate}
   ///
   /// {@tool dartpad}
