@@ -171,19 +171,26 @@ class Context {
     exitApp(-1);
   }
 
+  /// Copies all files from [source] to [destination].
+  /// 
+  /// Does not copy `.DS_Store`.
+  /// 
+  /// If [delete], delete extraneous files from [destination].
   void runRsync(
     String source,
     String destination, {
     List<String> extraArgs = const <String>[],
+    bool delete = false,
   }) {
     runSync(
       'rsync',
       <String>[
         '-8', // Avoid mangling filenames with encodings that do not match the current locale.
         '-av',
-        '--delete',
+        if (delete) '--delete',
         '--filter',
         '- .DS_Store',
+        ...extraArgs,
         source,
         destination,
       ],
@@ -205,6 +212,7 @@ class Context {
       ]
     );
     runRsync(
+      delete: true,
       '${environment['BUILT_PRODUCTS_DIR']}/App.framework',
       xcodeFrameworksDir,
     );
@@ -213,7 +221,7 @@ class Context {
     // which could be a local build or an arch/type specific build.
     runRsync(
       '${environment['BUILT_PRODUCTS_DIR']}/Flutter.framework',
-      xcodeFrameworksDir,
+      '$xcodeFrameworksDir/',
     );
 
     // Copy the native assets.
