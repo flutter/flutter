@@ -12,6 +12,7 @@ class SliverDecorationExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       home: Scaffold(
         appBar: AppBar(title: const Text('SliverDecoration Sample')),
         body: const SliverDecorationExample(),

@@ -96,6 +96,7 @@ class _ScrollNotificationDemoState extends State<ScrollNotificationDemo> {
     }
 
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       theme: ThemeData.from(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),

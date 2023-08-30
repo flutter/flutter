@@ -17,6 +17,7 @@ class SystemOverlayStyleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.light,

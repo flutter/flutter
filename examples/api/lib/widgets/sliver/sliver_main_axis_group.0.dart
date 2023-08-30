@@ -12,6 +12,7 @@ class SliverMainAxisGroupExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       home: Scaffold(
         appBar: AppBar(title: const Text('SliverMainAxisGroup Sample')),
         body: const SliverMainAxisGroupExample(),

@@ -14,6 +14,7 @@ class ClipRRectApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       home: Scaffold(
         appBar: AppBar(title: const Text('ClipRRect Sample')),
         body: const ClipRRectExample(),

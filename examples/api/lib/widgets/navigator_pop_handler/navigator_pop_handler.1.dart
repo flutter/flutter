@@ -29,6 +29,7 @@ class NavigatorPopHandlerApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       initialRoute: '/home',
       routes: <String, WidgetBuilder>{
         '/home': (BuildContext context) => const _BottomNavPage(

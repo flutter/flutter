@@ -14,6 +14,7 @@ class DatePickerApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       theme: ThemeData(useMaterial3: true),
       restorationScopeId: 'app',
       home: const DatePickerExample(restorationId: 'main'),

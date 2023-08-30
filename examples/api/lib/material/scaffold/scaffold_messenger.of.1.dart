@@ -33,6 +33,7 @@ class _OfExampleAppState extends State<OfExampleApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       scaffoldMessengerKey: _scaffoldMessengerKey,
       home: Scaffold(
         appBar: AppBar(title: const Text('ScaffoldMessenger Demo')),

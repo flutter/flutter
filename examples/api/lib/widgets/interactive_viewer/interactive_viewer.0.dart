@@ -14,6 +14,7 @@ class InteractiveViewerExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       home: Scaffold(
         appBar: AppBar(title: const Text('InteractiveViewer Sample')),
         body: const InteractiveViewerExample(),

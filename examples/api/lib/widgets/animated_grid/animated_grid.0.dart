@@ -87,6 +87,7 @@ class _AnimatedGridSampleState extends State<AnimatedGridSample> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(

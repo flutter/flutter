@@ -15,6 +15,7 @@ class SelectableRegionExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       home: SelectionArea(
         child: Scaffold(
           appBar: AppBar(title: const Text('SelectableRegion Sample')),

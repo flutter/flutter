@@ -64,6 +64,7 @@ class _ThemeExtensionExampleAppState extends State<ThemeExtensionExampleApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       theme: ThemeData.light().copyWith(
         extensions: <ThemeExtension<dynamic>>[
           const MyColors(

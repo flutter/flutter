@@ -56,6 +56,7 @@ class _ScrollControllerDemoState extends State<ScrollControllerDemo> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       home: Scaffold(
         appBar: AppBar(
           title: Text(isScrolling ? 'Scrolling' : 'Not Scrolling'),

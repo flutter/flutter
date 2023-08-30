@@ -53,6 +53,7 @@ class _ErrorWidgetExampleAppState extends State<ErrorWidgetExampleApp> {
       );
     } else {
       return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
         home: Scaffold(
           appBar: AppBar(title: const Text('ErrorWidget Sample')),
           body: Center(

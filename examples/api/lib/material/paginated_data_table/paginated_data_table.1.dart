@@ -60,7 +60,8 @@ class DataTableExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       home: SingleChildScrollView(
         padding: EdgeInsets.all(12.0),
         child: DataTableExample(),

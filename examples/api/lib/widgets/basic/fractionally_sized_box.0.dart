@@ -14,6 +14,7 @@ class FractionallySizedBoxApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       home: Scaffold(
         appBar: AppBar(title: const Text('FractionallySizedBox Sample')),
         body: const FractionallySizedBoxExample(),

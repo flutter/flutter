@@ -43,6 +43,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       home: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,

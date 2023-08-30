@@ -44,6 +44,7 @@ class ThemeDataExampleApp extends StatelessWidget {
       seedColor: Colors.indigo,
     );
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       title: 'ThemeData Demo',
       theme: ThemeData(
         colorScheme: colorScheme,

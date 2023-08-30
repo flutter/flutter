@@ -36,6 +36,7 @@ class _ShowTimePickerAppState extends State<ShowTimePickerApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       theme: ThemeData.light(useMaterial3: useMaterial3),
       darkTheme: ThemeData.dark(useMaterial3: useMaterial3),
       themeMode: themeMode,

@@ -90,6 +90,7 @@ class ExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       home: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           return Image(

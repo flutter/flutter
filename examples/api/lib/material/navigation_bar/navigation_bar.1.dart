@@ -13,7 +13,8 @@ class NavigationBarApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: NavigationExample());
+    return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,home: NavigationExample());
   }
 }
 

@@ -102,6 +102,7 @@ class MenuApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       theme: ThemeData(useMaterial3: true),
       home: const Scaffold(body: SafeArea(child: MyCheckboxMenu(message: kMessage))),
     );

@@ -88,6 +88,7 @@ class _SliverAnimatedListSampleState extends State<SliverAnimatedListSample> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       scaffoldMessengerKey: _scaffoldMessengerKey,
       home: Scaffold(
         key: _scaffoldKey,

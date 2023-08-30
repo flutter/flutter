@@ -42,6 +42,7 @@ class ActionIconThemeExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,

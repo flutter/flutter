@@ -14,6 +14,7 @@ class ScrollNotificationObserverApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: kAllDraggableScrollBehavior,
       theme: ThemeData(useMaterial3: true),
       // The Scaffold widget contains a [ScrollNotificationObserver].
       // This is used by [AppBar] for its scrolled under behavior.
