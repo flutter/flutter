@@ -2172,7 +2172,6 @@ targets:
   - name: Linux_pixel_7pro imagefiltered_transform_animation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
