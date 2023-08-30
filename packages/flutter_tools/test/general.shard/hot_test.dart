@@ -561,7 +561,7 @@ void main() {
         successfulHotRestartSetup: true,
       );
     });
-    testUsingContext('native assets', () async {
+    testUsingContext('native assets restart', () async {
       final FakeDevice device = FakeDevice();
       final FakeFlutterDevice fakeFlutterDevice = FakeFlutterDevice(device);
       final List<FlutterDevice> devices = <FlutterDevice>[
@@ -617,7 +617,69 @@ void main() {
       Artifacts: () => Artifacts.test(),
       FileSystem: () => fileSystem,
       Platform: () => FakePlatform(),
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager.empty(),
+      FeatureFlags: () =>
+          TestFeatureFlags(isNativeAssetsEnabled: true, isMacOSEnabled: true),
+    });
+
+    testUsingContext('native assets run unsupported', () async {
+      final FakeDevice device = FakeDevice(targetPlatform: TargetPlatform.android_arm64);
+      final FakeFlutterDevice fakeFlutterDevice = FakeFlutterDevice(device);
+      final List<FlutterDevice> devices = <FlutterDevice>[
+        fakeFlutterDevice,
+      ];
+
+      fakeFlutterDevice.updateDevFSReportCallback = () async => UpdateFSReport(
+            success: true,
+            invalidatedSourcesCount: 6,
+            syncedBytes: 8,
+            scannedSourcesCount: 16,
+            compileDuration: const Duration(seconds: 16),
+            transferDuration: const Duration(seconds: 32),
+          );
+
+      (fakeFlutterDevice.devFS! as FakeDevFs).baseUri =
+          Uri.parse('file:///base_uri');
+
+      final FakeNativeAssetsBuildRunner buildRunner =
+          FakeNativeAssetsBuildRunner(
+        packagesWithNativeAssetsResult: <Package>[
+          Package('bar', fileSystem.currentDirectory.uri),
+        ],
+        dryRunResult: FakeNativeAssetsBuilderResult(
+          assets: <Asset>[
+            Asset(
+              id: 'package:bar/bar.dart',
+              linkMode: LinkMode.dynamic,
+              target: native_assets_cli.Target.macOSArm64,
+              path: AssetAbsolutePath(Uri.file('bar.dylib')),
+            ),
+          ],
+        ),
+      );
+
+      final HotRunner hotRunner = HotRunner(
+        devices,
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+        target: 'main.dart',
+        devtoolsHandler: createNoOpHandler,
+        buildRunner: buildRunner,
+      );
+      expect(
+        () => hotRunner.run(),
+        throwsToolExit( message:
+          'Package(s) bar require the native assets feature. '
+          'This feature has not yet been implemented for `TargetPlatform.android_arm64`. '
+          'For more info see https://github.com/flutter/flutter/issues/129757.'
+        )
+      );
+
+    }, overrides: <Type, Generator>{
+      HotRunnerConfig: () => testingConfig,
+      Artifacts: () => Artifacts.test(),
+      FileSystem: () => fileSystem,
+      Platform: () => FakePlatform(),
+      ProcessManager: () => FakeProcessManager.empty(),
       FeatureFlags: () =>
           TestFeatureFlags(isNativeAssetsEnabled: true, isMacOSEnabled: true),
     });
@@ -654,6 +716,12 @@ class FakeDevFs extends Fake implements DevFS {
 // Until we fix that, we have to also ignore related lints here.
 // ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
+  FakeDevice({
+    TargetPlatform targetPlatform = TargetPlatform.tester,
+  }) : _targetPlatform = targetPlatform;
+
+  final TargetPlatform _targetPlatform;
+
   bool disposed = false;
 
   @override
@@ -669,7 +737,7 @@ class FakeDevice extends Fake implements Device {
   bool supportsFlutterExit = true;
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
+  Future<TargetPlatform> get targetPlatform async => _targetPlatform;
 
   @override
   Future<String> get sdkNameAndVersion async => 'Tester';
@@ -732,6 +800,9 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
     required List<Uri> invalidatedFiles,
     required PackageConfig packageConfig,
   }) => updateDevFSReportCallback();
+
+  @override
+  TargetPlatform? get targetPlatform => device._targetPlatform;
 }
 
 class TestFlutterDevice extends FlutterDevice {
