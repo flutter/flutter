@@ -1582,6 +1582,21 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
       expect(info2.location, '/abc?def=ghi&def=jkl#mno');
     });
   });
+
+  test('$PlatformRouteInformationProvider dispatches object creation in constructor', () {
+    int eventCount = 0;
+    void listener(ObjectEvent event) => eventCount++;
+    MemoryAllocations.instance.addListener(listener);
+
+    final PlatformRouteInformationProvider registry = PlatformRouteInformationProvider(
+      initialRouteInformation: RouteInformation(uri: Uri.parse('http://google.com')),
+    );
+
+    expect(eventCount, 1);
+
+    registry.dispose();
+    MemoryAllocations.instance.removeListener(listener);
+  });
 }
 
 Widget buildBoilerPlate(Widget child) {
@@ -1633,7 +1648,11 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
     this.builder,
     this.onPopRoute,
     this.reportConfiguration = false,
-  });
+  }) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+  }
 
   RouteInformation? get routeInformation => _routeInformation;
   RouteInformation? _routeInformation;
@@ -1717,7 +1736,11 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
 class SimpleRouteInformationProvider extends RouteInformationProvider with ChangeNotifier {
   SimpleRouteInformationProvider({
     this.onRouterReport,
-  });
+  }) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+  }
 
   RouterReportRouterInformation? onRouterReport;
 
@@ -1773,7 +1796,11 @@ class CompleterRouteInformationParser extends RouteInformationParser<RouteInform
 class SimpleAsyncRouterDelegate extends RouterDelegate<RouteInformation> with ChangeNotifier {
   SimpleAsyncRouterDelegate({
     required this.builder,
-  });
+  }) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+  }
 
   RouteInformation? get routeInformation => _routeInformation;
   RouteInformation? _routeInformation;

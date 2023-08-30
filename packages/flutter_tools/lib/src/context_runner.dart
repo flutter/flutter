@@ -276,11 +276,6 @@ Future<T> runInContext<T>(
         platform: globals.platform,
         fileSystem: globals.fs,
         flutterRoot: Cache.flutterRoot!,
-        // TODO(matanlurey): https://github.com/flutter/flutter/issues/132245.
-        // Even though we *think* this feature is stable, we'd like to verify
-        // that automated tests are all providing `--local-engine-host` before
-        // enforcing it for all users.
-        treatMissingLocalEngineHostAsFatal: runningOnBot,
       ),
       Logger: () => globals.platform.isWindows
         ? WindowsStdoutLogger(

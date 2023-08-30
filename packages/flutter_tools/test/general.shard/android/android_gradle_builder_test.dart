@@ -885,113 +885,13 @@ Gradle Crashed
         command: <String>[
           'gradlew',
           '-q',
-          'printFreeDebugApplicationId',
+          'outputFreeDebugAppLinkSettings',
         ],
-        stdout: '''
-ApplicationId: com.example.id
-        ''',
       ));
-      final String actual = await builder.getApplicationIdForVariant(
+      await builder.outputsAppLinkSettings(
         'freeDebug',
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       );
-      expect(actual, 'com.example.id');
-    }, overrides: <Type, Generator>{
-      AndroidStudio: () => FakeAndroidStudio(),
-    });
-
-    testUsingContext('can call custom gradle task getApplicationIdForVariant with unknown crash', () async {
-      final AndroidGradleBuilder builder = AndroidGradleBuilder(
-        java: FakeJava(),
-        logger: logger,
-        processManager: processManager,
-        fileSystem: fileSystem,
-        artifacts: Artifacts.test(),
-        usage: testUsage,
-        gradleUtils: FakeGradleUtils(),
-        platform: FakePlatform(),
-        androidStudio: FakeAndroidStudio(),
-      );
-      processManager.addCommand(const FakeCommand(
-        command: <String>[
-          'gradlew',
-          '-q',
-          'printFreeDebugApplicationId',
-        ],
-        stdout: '''
-unknown crash
-        ''',
-      ));
-      final String actual = await builder.getApplicationIdForVariant(
-        'freeDebug',
-        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-      );
-      expect(actual, '');
-    }, overrides: <Type, Generator>{
-      AndroidStudio: () => FakeAndroidStudio(),
-    });
-
-    testUsingContext('can call custom gradle task getAppLinkDomainsForVariant and parse the result', () async {
-      final AndroidGradleBuilder builder = AndroidGradleBuilder(
-        java: FakeJava(),
-        logger: logger,
-        processManager: processManager,
-        fileSystem: fileSystem,
-        artifacts: Artifacts.test(),
-        usage: testUsage,
-        gradleUtils: FakeGradleUtils(),
-        platform: FakePlatform(),
-        androidStudio: FakeAndroidStudio(),
-      );
-
-      processManager.addCommand(const FakeCommand(
-        command: <String>[
-          'gradlew',
-          '-q',
-          'printFreeDebugAppLinkDomains',
-        ],
-        stdout: '''
-Domain: example.com
-Domain: example2.com
-        ''',
-      ));
-      final List<String> actual = await builder.getAppLinkDomainsForVariant(
-        'freeDebug',
-        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-      );
-      expect(actual, <String>['example.com', 'example2.com']);
-    }, overrides: <Type, Generator>{
-      AndroidStudio: () => FakeAndroidStudio(),
-    });
-
-    testUsingContext('can call custom gradle task getAppLinkDomainsForVariant with unknown crash', () async {
-      final AndroidGradleBuilder builder = AndroidGradleBuilder(
-        java: FakeJava(),
-        logger: logger,
-        processManager: processManager,
-        fileSystem: fileSystem,
-        artifacts: Artifacts.test(),
-        usage: testUsage,
-        gradleUtils: FakeGradleUtils(),
-        platform: FakePlatform(),
-        androidStudio: FakeAndroidStudio(),
-      );
-
-      processManager.addCommand(const FakeCommand(
-        command: <String>[
-          'gradlew',
-          '-q',
-          'printFreeDebugAppLinkDomains',
-        ],
-        stdout: '''
-unknown crash
-        ''',
-      ));
-      final List<String> actual = await builder.getAppLinkDomainsForVariant(
-        'freeDebug',
-        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-      );
-      expect(actual.isEmpty, isTrue);
     }, overrides: <Type, Generator>{
       AndroidStudio: () => FakeAndroidStudio(),
     });

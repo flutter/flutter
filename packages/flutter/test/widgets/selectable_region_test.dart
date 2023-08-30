@@ -887,6 +887,78 @@ void main() {
     });
 
     testWidgets(
+      'single tap on the previous selection toggles the toolbar on iOS',
+      (WidgetTester tester) async {
+        Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
+        final UniqueKey toolbarKey = UniqueKey();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: SelectableRegion(
+              focusNode: FocusNode(),
+              selectionControls: materialTextSelectionHandleControls,
+              contextMenuBuilder: (
+                BuildContext context,
+                SelectableRegionState selectableRegionState,
+              ) {
+                buttonTypes = selectableRegionState.contextMenuButtonItems
+                  .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
+                  .toSet();
+                return SizedBox.shrink(key: toolbarKey);
+              },
+              child: const Column(
+                children: <Widget>[
+                  Text('How are you?'),
+                  Text('Good, and you?'),
+                  Text('Fine, thank you.'),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        expect(buttonTypes.isEmpty, true);
+        expect(find.byKey(toolbarKey), findsNothing);
+
+        final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+        final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2));
+        addTearDown(gesture.removePointer);
+        await tester.pump(const Duration(milliseconds: 500));
+        await gesture.up();
+        await tester.pumpAndSettle();
+        expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 3));
+        expect(buttonTypes, contains(ContextMenuButtonType.copy));
+        expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
+        expect(find.byKey(toolbarKey), findsOneWidget);
+
+        await gesture.down(textOffsetToPosition(paragraph, 2));
+        await tester.pump();
+        await gesture.up();
+        await tester.pumpAndSettle();
+        expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 3));
+        expect(buttonTypes, contains(ContextMenuButtonType.copy));
+        expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
+        expect(find.byKey(toolbarKey), findsNothing);
+
+        await gesture.down(textOffsetToPosition(paragraph, 2));
+        await tester.pump();
+        await gesture.up();
+        await tester.pumpAndSettle();
+        expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 3));
+        expect(buttonTypes, contains(ContextMenuButtonType.copy));
+        expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
+        expect(find.byKey(toolbarKey), findsOneWidget);
+
+        // Clear selection.
+        await tester.tapAt(textOffsetToPosition(paragraph, 9));
+        await tester.pump();
+        expect(paragraph.selections.isEmpty, true);
+        expect(find.byKey(toolbarKey), findsNothing);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+      skip: kIsWeb, // [intended] Web uses its native context menu.
+    );
+
+    testWidgets(
       'right-click mouse can select word at position on Apple platforms',
       (WidgetTester tester) async {
         Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
@@ -1498,7 +1570,6 @@ void main() {
       final UniqueKey outerText = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: false),
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
@@ -1523,8 +1594,13 @@ void main() {
         ),
       );
       final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.byKey(outerText), matching: find.byType(RichText)).first);
+
+      // Adjust `textOffsetToPosition` result because it returns the wrong vertical position (wrong line).
+      // TODO(bleroux): Remove when https://github.com/flutter/flutter/issues/133637 is fixed.
+      final Offset gestureOffset = textOffsetToPosition(paragraph, 125).translate(0, 10);
+
       // Right click to select word at position.
-      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 125), kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
+      final TestGesture gesture = await tester.startGesture(gestureOffset, kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
       addTearDown(gesture.removePointer);
       await tester.pump();
       await gesture.up();
