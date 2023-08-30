@@ -20,7 +20,7 @@ All of the Android SDK/NDK versions noted in `gradle_utils.dart`
 (`compileSdkVersion`, `minSdkVersion`, `targetSdkVersion`, `ndkVersion`) versions should match the values in Flutter Gradle Plugin (FlutterExtension), so updating any of
 these versions also requires an update in [flutter.groovy](../../../gradle/src/main/groovy/flutter.groovy).
 
-The Flutter Gradle plugin is only applied to app projects, and modules that are built from source
+The Flutter Gradle Plugin is only applied to app projects, and modules that are built from source
 using (`include_flutter.groovy`). The remaining projects are: plugins, and modules compiled as AARs. In modules, the ephemeral directory `.android` is always regenerated after `flutter pub get`, so new versions are picked up after a Flutter upgrade.
 
 When updating the Android `compileSdkVersion`, `minSdkVersion`, or
