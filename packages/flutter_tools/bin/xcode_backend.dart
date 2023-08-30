@@ -171,6 +171,25 @@ class Context {
     exitApp(-1);
   }
 
+  void runRsync(
+    String source,
+    String destination, {
+    List<String> extraArgs = const <String>[],
+  }) {
+    runSync(
+      'rsync',
+      <String>[
+        '-8', // Avoid mangling filenames with encodings that do not match the current locale.
+        '-av',
+        '--delete',
+        '--filter',
+        '- .DS_Store',
+        source,
+        destination,
+      ],
+    );
+  }
+
   // Adds the App.framework as an embedded binary and the flutter_assets as
   // resources.
   void embedFlutterFrameworks() {
@@ -185,31 +204,16 @@ class Context {
         xcodeFrameworksDir,
       ]
     );
-    runSync(
-      'rsync',
-      <String>[
-        '-8', // Avoid mangling filenames with encodings that do not match the current locale.
-        '-av',
-        '--delete',
-        '--filter',
-        '- .DS_Store',
-        '${environment['BUILT_PRODUCTS_DIR']}/App.framework',
-        xcodeFrameworksDir,
-      ],
+    runRsync(
+      '${environment['BUILT_PRODUCTS_DIR']}/App.framework',
+      xcodeFrameworksDir,
     );
 
     // Embed the actual Flutter.framework that the Flutter app expects to run against,
     // which could be a local build or an arch/type specific build.
-    runSync(
-      'rsync',
-      <String>[
-        '-av',
-        '--delete',
-        '--filter',
-        '- .DS_Store',
-        '${environment['BUILT_PRODUCTS_DIR']}/Flutter.framework',
-        '$xcodeFrameworksDir/',
-      ],
+    runRsync(
+      '${environment['BUILT_PRODUCTS_DIR']}/Flutter.framework',
+      xcodeFrameworksDir,
     );
 
     // Copy the native assets.
@@ -221,24 +225,19 @@ class Context {
     final String flutterBuildDir = environment['FLUTTER_BUILD_DIR']!;
     final String nativeAssetsPath =
         '$projectPath/$flutterBuildDir/native_assets/ios/';
-    final bool verbose = environment['VERBOSE_SCRIPT_LOGGING'] != null &&
-        environment['VERBOSE_SCRIPT_LOGGING'] != '';
+    final bool verbose =
+        (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
     if (Directory(nativeAssetsPath).existsSync()) {
       if (verbose) {
         print('♦ Copying native assets from $nativeAssetsPath.');
       }
-      runSync(
-        'rsync',
-        <String>[
-          '-8', // Avoid mangling filenames with encodings that do not match the current locale.
-          '-av',
-          '--filter',
-          '- .DS_Store',
+      runRsync(
+        extraArgs: [
           '--filter',
           '- native_assets.yaml',
-          nativeAssetsPath,
-          xcodeFrameworksDir,
         ],
+        nativeAssetsPath,
+        xcodeFrameworksDir,
       );
     } else if (verbose) {
       print("♦ No native assets to bundle. $nativeAssetsPath doesn't exist.");

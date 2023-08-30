@@ -471,7 +471,7 @@ class HotRunner extends ResidentRunner {
     final FlutterDevice flutterDevice = flutterDevices.single;
     final TargetPlatform targetPlatform = flutterDevice.targetPlatform!;
 
-    late Uri? nativeAssetsYaml;
+    final Uri? nativeAssetsYaml;
     switch (targetPlatform) {
       case TargetPlatform.darwin:
         nativeAssetsYaml = await dryRunNativeAssetsMacOS(

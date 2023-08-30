@@ -58,7 +58,7 @@ enum FlutterProjectType implements CliEnum {
         FlutterProjectType.packageFfi =>
           'Generate a shareable Dart/Flutter project containing an API '
           'in Dart code with a platform-specific implementation through dart:ffi for Android, iOS, '
-          'Linux, macOS, Windows, or any combination of these.',
+          'Linux, macOS, and Windows.',
         FlutterProjectType.module =>
           'Generate a project to add a Flutter module to an existing Android or iOS application.',
       };

@@ -20,11 +20,10 @@ import 'common.dart';
 
 /// Builds the right native assets for a Flutter app.
 ///
-/// Because the build mode and target architecture can be changed from the
-/// native build project (Xcode etc.), we can only build the native assets
-/// inside `flutter assemble` when we have all the information.
-///
-/// All the other invocations for native assets should be dry runs.
+/// The build mode and target architecture can be changed from the
+/// native build project (Xcode etc.), so only `flutter assemble` has the
+/// information about build-mode and target architecture.
+/// Invocations of flutter_tools other than `flutter assemble` are dry runs.
 ///
 /// This step needs to be consistent with the dry run invocations in `flutter
 /// run`s so that the kernel mapping of asset id to dylib lines up after hot
@@ -58,7 +57,7 @@ class NativeAssets extends Target {
     final NativeAssetsBuildRunner buildRunner = _buildRunner ??
         NativeAssetsBuildRunnerImpl(projectUri, fileSystem, environment.logger);
 
-    List<Uri> dependencies = <Uri>[];
+    final List<Uri> dependencies;
     switch (targetPlatform) {
       case TargetPlatform.ios:
         final String? iosArchsEnvironment = environment.defines[kIosArchs];
@@ -131,6 +130,7 @@ class NativeAssets extends Target {
           // Write the file we claim to have in the [outputs].
           await writeNativeAssetsYaml(
               <Asset>[], environment.buildDir.uri, fileSystem);
+          dependencies = <Uri>[];
         }
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
@@ -147,6 +147,7 @@ class NativeAssets extends Target {
         // Write the file we claim to have in the [outputs].
         await writeNativeAssetsYaml(
             <Asset>[], environment.buildDir.uri, fileSystem);
+        dependencies = <Uri>[];
     }
 
 
