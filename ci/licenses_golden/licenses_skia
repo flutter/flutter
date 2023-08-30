@@ -1,4 +1,4 @@
-Signature: a482454a8599b3c244185a234bf6442c
+Signature: cf3ecdd77481e703d6eb1647d1fffd43
 
 ====================================================================================================
 LIBRARY: etc1
@@ -385,6 +385,7 @@ FILE: ../../../third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../third_party/skia/modules/skparagraph/test.html
 FILE: ../../../third_party/skia/package-lock.json
+FILE: ../../../third_party/skia/relnotes/makewithfilter.md
 FILE: ../../../third_party/skia/relnotes/sksl_always_on.md
 FILE: ../../../third_party/skia/relnotes/sksl_comma_array.md
 FILE: ../../../third_party/skia/relnotes/sksl_ganesh_dawn_removed.md
