@@ -46,9 +46,7 @@ void main() {
     User(name: 'Charlie', email: 'charlie123@gmail.com'),
   ];
 
-  testWidgetsWithLeakTracking('can filter and select a list of string options',
-  leakTrackingTestConfig: LeakTrackingTestConfig.debugNotDisposed(),
-    (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can filter and select a list of string options', (WidgetTester tester) async {
 
     late String lastSelection;
     await tester.pumpWidget(
