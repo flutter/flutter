@@ -1022,6 +1022,39 @@ void main() {
     await binding.setSurfaceSize(originalSize);
   });
 
+  testWidgets('dataRowMinHeight & dataRowMaxHeight if not set will use DataTableTheme', (WidgetTester tester) async {
+    final Size originalSize = binding.renderView.size;
+    await binding.setSurfaceSize(const Size(800, 800));
+
+    const double minMaxDataRowHeight = 30.0;
+
+    Widget buildTable() {
+      return MaterialApp(
+        theme: ThemeData.light().copyWith(
+          dataTableTheme: const DataTableThemeData(
+            dataRowMinHeight: minMaxDataRowHeight,
+            dataRowMaxHeight: minMaxDataRowHeight,
+          ),
+        ),
+        home: PaginatedDataTable(
+          header: const Text('Test table'),
+          source: TestDataSource(allowSelection: true),
+          columns: const <DataColumn>[
+            DataColumn(label: Text('Name')),
+            DataColumn(label: Text('Calories'), numeric: true),
+            DataColumn(label: Text('Generation')),
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTable());
+    expect(tester.getSize(find.widgetWithText(Container, 'Frozen yogurt (0)').first).height, minMaxDataRowHeight);
+
+    // Reset the surface size.
+    await binding.setSurfaceSize(originalSize);
+  });
+
   testWidgets('PaginatedDataTable custom checkboxHorizontalMargin properly applied', (WidgetTester tester) async {
     const double customCheckboxHorizontalMargin = 15.0;
     const double customHorizontalMargin = 10.0;
