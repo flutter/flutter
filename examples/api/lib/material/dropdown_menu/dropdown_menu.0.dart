@@ -144,7 +144,3 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
     );
   }
 }
-
-void main() {
-  runApp(const DropdownMenuExample());
-}
