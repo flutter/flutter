@@ -29,17 +29,21 @@ Future<String> evalTestAppInChrome({
   Chrome? chrome;
   try {
     final Completer<String> resultCompleter = Completer<String>();
+    // Start an HTTP server to serve the app and capture test results.
     server = await io.HttpServer.bind('localhost', serverPort);
     final Cascade cascade = Cascade()
       .add((Request request) async {
+        // Handle the test result POST request.
         if (request.requestedUri.path.endsWith('/test-result')) {
           resultCompleter.complete(await request.readAsString());
           return Response.ok('Test results received');
         }
         return Response.notFound('');
       })
-      .add(createStaticHandler(appDirectory));
+      .add(createStaticHandler(appDirectory)); // Serve the app's static files.
     shelf_io.serveRequests(server, cascade.handler);
+    
+    // Launch Chrome browser with specified options.
     final io.Directory userDataDirectory = io.Directory.systemTemp.createTempSync('flutter_chrome_user_data.');
     chrome = await Chrome.launch(ChromeOptions(
       headless: true,
@@ -49,8 +53,10 @@ Future<String> evalTestAppInChrome({
       windowHeight: 500,
       windowWidth: 500,
     ), onError: resultCompleter.completeError);
-    return await resultCompleter.future;
+    
+    return await resultCompleter.future; // Return test results.
   } finally {
+    // Clean up: stop Chrome and close the server.
     chrome?.stop();
     await server?.close();
   }
@@ -72,6 +78,7 @@ class AppServer {
   }) async {
     io.HttpServer server;
     Chrome chrome;
+    // Start an HTTP server to serve the app with additional request handlers.
     server = await io.HttpServer.bind('localhost', serverPort);
     final Handler staticHandler = createStaticHandler(appDirectory, defaultDocument: 'index.html');
     Cascade cascade = Cascade();
@@ -87,6 +94,8 @@ class AppServer {
       });
     });
     shelf_io.serveRequests(server, cascade.handler);
+    
+    // Launch Chrome browser with specified options.
     final io.Directory userDataDirectory = io.Directory.systemTemp.createTempSync('flutter_chrome_user_data.');
     final Completer<String> chromeErrorCompleter = Completer<String>();
     chrome = await Chrome.launch(ChromeOptions(
@@ -95,6 +104,7 @@ class AppServer {
       url: appUrl,
       userDataDirectory: userDataDirectory.path,
     ), onError: chromeErrorCompleter.complete);
+    
     return AppServer._(server, chrome, chromeErrorCompleter.future);
   }
 
@@ -103,6 +113,7 @@ class AppServer {
   final Chrome chrome;
 
   Future<void> stop() async {
+    // Clean up: stop Chrome and close the server.
     chrome.stop();
     await _server.close();
   }
