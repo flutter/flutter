@@ -35,11 +35,10 @@ typedef TextRangesFinder = Iterable<TextRange> Function(String text);
 /// A widget that displays text with parts of it made interactive.
 ///
 /// By default, any URLs in the text are made interactive, and clicking one
-/// calls [onTap].
+/// calls the provided callback.
 ///
 /// Works with either a flat [String] (`text`) or a list of [InlineSpan]s
-/// (`spans`), though when using `spans`, only [TextSpan]s will be converted to
-/// links.
+/// (`spans`). When using `spans`, only [TextSpan]s will be converted to links.
 ///
 /// {@tool dartpad}
 /// This example shows how to create a [LinkedText] that turns URLs into
@@ -98,6 +97,8 @@ class LinkedText extends StatefulWidget {
   /// Creates an instance of [LinkedText] where text matched by the given
   /// [RegExp] is made interactive.
   ///
+  /// The [RegExp] must not produce overlapping matches.
+  ///
   /// {@tool dartpad}
   /// This example shows how to use [LinkedText.regExp] to link Twitter handles.
   ///
@@ -138,6 +139,9 @@ class LinkedText extends StatefulWidget {
   /// different behaviors. For example, highlighting both URLs and Twitter
   /// handles with different style and/or behavior.
   /// {@endtemplate}
+  ///
+  /// The [TextLinker.textRangesFinder] must not produce overlapping
+  /// [TextRange]s.
   ///
   /// {@tool dartpad}
   /// This example shows how to use [LinkedText.textLinkers] to link both URLs
@@ -185,7 +189,7 @@ class LinkedText extends StatefulWidget {
   /// Defines what parts of the text to match and how to link them.
   ///
   /// [TextLinker]s are applied in the order given. Overlapping matches are not
-  /// supported.
+  /// supported and will produce an error.
   late final List<TextLinker> textLinkers;
 
   /// The [TextStyle] to apply to the output [InlineSpan].
@@ -209,8 +213,11 @@ class LinkedText extends StatefulWidget {
     };
   }
 
-  /// Apply the given [TextLinker]s to the given [InlineSpan]s and return the
+  /// Applies the given [TextLinker]s to the given [InlineSpan]s and returns the
   /// new resulting spans and any created [TapGestureRecognizer]s.
+  ///
+  /// The [TextLinker.textRangesFinder]s must not produce any overlapping
+  /// [TextRange]s.
   ///
   /// {@macro flutter.painting.LinkBuilder.recognizer}
   static (Iterable<InlineSpan>, Iterable<TapGestureRecognizer>) linkSpans(Iterable<InlineSpan> spans, Iterable<TextLinker> textLinkers) {
@@ -290,6 +297,8 @@ class _LinkedTextState extends State<LinkedText> {
 /// By calling [getSpans] with a [String], produces a [List] of [InlineSpan]s
 /// where the parts of the [String] matched by [textRangesFinder] have been
 /// turned into links using [linkBuilder].
+///
+/// [textRangesFinder] must not produce overlapping [TextRange]s.
 class TextLinker {
   /// Creates an instance of [TextLinker].
   const TextLinker({
@@ -301,6 +310,8 @@ class TextLinker {
   final LinkBuilder linkBuilder;
 
   /// Returns [TextRange]s that should be built with [linkBuilder].
+  ///
+  /// Throws if overlapping [TextRange]s are produced.
   final TextRangesFinder textRangesFinder;
 
   /// Returns a flat list of [InlineSpan]s for multiple [TextLinker]s.
@@ -374,7 +385,7 @@ class TextLinker {
   String toString() => '${objectRuntimeType(this, 'TextLinker')}($linkBuilder, $textRangesFinder)';
 }
 
-/// A matched replacement on some [String].
+/// A matched replacement on some string.
 ///
 /// Produced by applying a [TextLinker]'s [TextRangesFinder] to a string.
 class _TextLinkerMatch {
@@ -387,7 +398,7 @@ class _TextLinkerMatch {
   final LinkBuilder linkBuilder;
   final TextRange textRange;
 
-  /// The [String] that [textRange] matches.
+  /// The string that [textRange] matches.
   final String linkString;
 
   /// Get all [_TextLinkerMatch]s obtained from applying the given
@@ -579,19 +590,18 @@ class _LinkedSpans {
       return a.textRange.start.compareTo(b.textRange.start);
     });
 
+    // Validate that there are no overlapping matches.
     int lastEnd = 0;
-    nextTextLinkerMatches.removeWhere((_TextLinkerMatch textLinkerMatch) {
-      // Return empty ranges.
-      if (textLinkerMatch.textRange.start == textLinkerMatch.textRange.end) {
-        return true;
+    for (final _TextLinkerMatch textLinkerMatch in nextTextLinkerMatches) {
+      if (textLinkerMatch.textRange.start < lastEnd) {
+        throw ArgumentError('Matches must not overlap. Overlapping text was "${textLinkerMatch.linkString}" located at ${textLinkerMatch.textRange.start}-${textLinkerMatch.textRange.end}.');
       }
+      lastEnd = textLinkerMatch.textRange.end;
+    }
 
-      // Remove overlapping ranges.
-      final bool overlaps = textLinkerMatch.textRange.start < lastEnd;
-      if (!overlaps) {
-        lastEnd = textLinkerMatch.textRange.end;
-      }
-      return overlaps;
+    // Remove empty ranges.
+    nextTextLinkerMatches.removeWhere((_TextLinkerMatch textLinkerMatch) {
+      return textLinkerMatch.textRange.start == textLinkerMatch.textRange.end;
     });
 
     return nextTextLinkerMatches;
