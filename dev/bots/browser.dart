@@ -58,9 +58,12 @@ Future<String> evalTestAppInChrome({
 
 typedef ServerRequestListener = void Function(Request);
 
+// A class representing an application server.
 class AppServer {
+  // Private constructor to initialize the server and related components.
   AppServer._(this._server, this.chrome, this.onChromeError);
 
+  // Start the application server with specified configurations.
   static Future<AppServer> start({
     required String appUrl,
     required String appDirectory,
@@ -72,38 +75,65 @@ class AppServer {
   }) async {
     io.HttpServer server;
     Chrome chrome;
+
+    // Bind the HTTP server to a specific port on localhost.
     server = await io.HttpServer.bind('localhost', serverPort);
+
+    // Create a static request handler for serving files from the app directory.
     final Handler staticHandler = createStaticHandler(appDirectory, defaultDocument: 'index.html');
+
+    // Create a Cascade for handling requests in a chain of handlers.
     Cascade cascade = Cascade();
+
+    // Add additional request handlers if provided.
     if (additionalRequestHandlers != null) {
       for (final Handler handler in additionalRequestHandlers) {
         cascade = cascade.add(handler);
       }
     }
+
+    // Add a final handler that applies cache control and serves static files.
     cascade = cascade.add((Request request) async {
       final Response response = await staticHandler(request);
       return response.change(headers: <String, Object>{
         'cache-control': cacheControl,
       });
     });
+
+    // Serve requests using the cascade handler.
     shelf_io.serveRequests(server, cascade.handler);
+
+    // Create a temporary user data directory for the Chrome instance.
     final io.Directory userDataDirectory = io.Directory.systemTemp.createTempSync('flutter_chrome_user_data.');
+
+    // Create a completer to capture Chrome error.
     final Completer<String> chromeErrorCompleter = Completer<String>();
+
+    // Launch Chrome browser with specified options.
     chrome = await Chrome.launch(ChromeOptions(
       headless: headless,
       debugPort: browserDebugPort,
       url: appUrl,
       userDataDirectory: userDataDirectory.path,
     ), onError: chromeErrorCompleter.complete);
+
+    // Return an instance of AppServer with initialized components.
     return AppServer._(server, chrome, chromeErrorCompleter.future);
   }
 
+  // Future that completes with an error message if Chrome encounters an error.
   final Future<String> onChromeError;
+
+  // HTTP server instance.
   final io.HttpServer _server;
+
+  // Chrome browser instance.
   final Chrome chrome;
 
+  // Stop the server and associated components.
   Future<void> stop() async {
-    chrome.stop();
-    await _server.close();
+    chrome.stop();  // Stop the Chrome instance.
+    await _server.close();  // Close the HTTP server.
   }
 }
+
