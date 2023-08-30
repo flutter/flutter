@@ -483,3 +483,24 @@ final logging.Logger loggingLogger = logging.Logger('')
       globals.logger.printTrace(message);
     }
   });
+
+/// Flutter expects `xcrun` to be on the path on macOS hosts.
+///
+/// Use the `clang`, `ar`, and `ld` that would be used if run with `xcrun`.
+Future<CCompilerConfig> cCompilerConfigMacOS() async {
+  final ProcessResult xcrunResult =
+      await globals.processManager.run(<String>['xcrun', 'clang', '--version']);
+  if (xcrunResult.exitCode != 0) {
+    throwToolExit('Failed to find clang with xcrun:\n${xcrunResult.stderr}');
+  }
+  final String installPath = (xcrunResult.stdout as String)
+      .split('\n')
+      .firstWhere((String s) => s.startsWith('InstalledDir: '))
+      .split(' ')
+      .last;
+  return CCompilerConfig(
+    cc: Uri.file('$installPath/clang'),
+    ar: Uri.file('$installPath/ar'),
+    ld: Uri.file('$installPath/ld'),
+  );
+}

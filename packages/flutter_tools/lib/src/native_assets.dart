@@ -10,12 +10,15 @@ import 'package:package_config/package_config_types.dart';
 
 import 'base/common.dart';
 import 'base/file_system.dart';
-import 'base/io.dart';
 import 'base/logger.dart';
 import 'cache.dart';
 import 'globals.dart' as globals;
+import 'macos/native_assets.dart';
 
 /// Programmatic API to be used by Dart launchers to invoke native builds.
+///
+/// It enables mocking `package:native_assets_builder` package.
+/// It also enables mocking native toolchain discovery via [cCompilerConfig].
 abstract class NativeAssetsBuildRunner {
   /// Whether the project has a `.dart_tools/package_config.json`.
   ///
@@ -136,25 +139,13 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
     );
   }
 
-  /// Flutter expects `xcrun` to be on the path.
-  ///
-  /// Use the `clang`, `ar`, and `ld` that would be used if run with `xcrun`.
   @override
-  late final Future<CCompilerConfig> cCompilerConfig = () async {
-    final ProcessResult xcrunResult = await globals.processManager
-        .run(<String>['xcrun', 'clang', '--version']);
-    if (xcrunResult.exitCode != 0) {
-      throwToolExit('Failed to find clang with xcrun:\n${xcrunResult.stderr}');
-    }
-    final String installPath = (xcrunResult.stdout as String)
-        .split('\n')
-        .firstWhere((String s) => s.startsWith('InstalledDir: '))
-        .split(' ')
-        .last;
-    return CCompilerConfig(
-      cc: Uri.file('$installPath/clang'),
-      ar: Uri.file('$installPath/ar'),
-      ld: Uri.file('$installPath/ld'),
+  late final Future<CCompilerConfig> cCompilerConfig = () {
+    if (globals.platform.isMacOS || globals.platform.isIOS) {
+      return cCompilerConfigMacOS();
+    } 
+    throwToolExit(
+      'Native assets feature not yet implemented for Linux, Windows and Android.',
     );
   }();
 }
