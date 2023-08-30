@@ -158,10 +158,10 @@ const-rgx=(([A-Z_][A-Z0-9_]*)|(__.*__))$
 class-rgx=[A-Z_][a-zA-Z0-9]+$
 
 # Regular expression which should only match correct function names
-function-rgx=[a-z_][a-z0-9_]{2,30}$
+function-rgx=[a-z_][a-z0-9_]{2,60}$
 
 # Regular expression which should only match correct method names
-method-rgx=[a-z_][a-z0-9_]{2,30}$
+method-rgx=[a-z_][a-z0-9_]{2,60}$
 
 # Regular expression which should only match correct instance attribute names
 attr-rgx=[a-z_][a-z0-9_]{2,30}$
