@@ -574,7 +574,7 @@ bool validateJavaAgp(Logger logger,
   return false;
   }
 
-  // Returns compatibility information for concerning the compatible minimum AGP
+  // Returns compatibility information concerning the minimum AGP
   // version for the specified Java version.
   JavaAgpCompat? getMinimumAgpVersionForJavaVersion(Logger logger,
     {required String? javaV}) {
