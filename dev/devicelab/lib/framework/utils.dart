@@ -430,7 +430,7 @@ Future<String> eval(
   Map<String, String>? environment,
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
   String? workingDirectory,
-  StringBuffer? stdout,
+  StringBuffer? stdout, // if not null, the stdout will be written here
   StringBuffer? stderr, // if not null, the stderr will be written here
   bool printStdout = true,
   bool printStderr = true,

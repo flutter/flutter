@@ -47,11 +47,8 @@ Future<void> main() async {
 
         final String macosintegrationTestPodspec = path.join(integrationTestPackage, 'integration_test_macos', 'macos', 'integration_test_macos.podspec');
         await _tryMacOSLint(
-          'pod',
+          macosintegrationTestPodspec,
           <String>[
-            'lib',
-            'lint',
-            macosintegrationTestPodspec,
             '--verbose',
             // TODO(cyanglaz): remove allow-warnings when https://github.com/flutter/flutter/issues/125812 is fixed.
             // https://github.com/flutter/flutter/issues/125812
@@ -165,11 +162,8 @@ Future<void> main() async {
       final String macOSPodspecPath = path.join(swiftPluginPath, 'macos', '$swiftPluginName.podspec');
       await inDirectory(tempDir, () async {
         await _tryMacOSLint(
-          'pod',
+          macOSPodspecPath,
           <String>[
-            'lib',
-            'lint',
-            macOSPodspecPath,
             '--allow-warnings',
             '--verbose',
           ],
@@ -180,11 +174,8 @@ Future<void> main() async {
 
       await inDirectory(tempDir, () async {
         await _tryMacOSLint(
-          'pod',
+          macOSPodspecPath,
           <String>[
-            'lib',
-            'lint',
-            macOSPodspecPath,
             '--allow-warnings',
             '--use-libraries',
             '--verbose',
@@ -534,12 +525,20 @@ void _validateMacOSPodfile(String appPath) {
   ));
 }
 
-Future<void> _tryMacOSLint(String executable, List<String> arguments) async {
+Future<void> _tryMacOSLint(
+  String podspecPath,
+  List<String> extraArguments,
+) async {
   final StringBuffer lintStdout = StringBuffer();
   try {
     await eval(
-      executable,
-      arguments,
+      'pod',
+      <String>[
+        'lib',
+        'lint',
+        podspecPath,
+        ...extraArguments,
+      ],
       stdout: lintStdout,
     );
   } on BuildFailedError {
