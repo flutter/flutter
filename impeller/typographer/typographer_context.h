@@ -36,7 +36,7 @@ class TypographerContext {
       Context& context,
       GlyphAtlas::Type type,
       std::shared_ptr<GlyphAtlasContext> atlas_context,
-      const FontGlyphPair::Set& font_glyph_pairs) const = 0;
+      const FontGlyphMap& font_glyph_map) const = 0;
 
  protected:
   //----------------------------------------------------------------------------

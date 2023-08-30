@@ -16,43 +16,40 @@
 namespace impeller {
 
 //------------------------------------------------------------------------------
+/// @brief      A font and a scale.  Used as a key that represents a typeface
+///             within a glyph atlas.
+///
+struct ScaledFont {
+  Font font;
+  Scalar scale;
+};
+
+using FontGlyphMap = std::unordered_map<ScaledFont, std::unordered_set<Glyph>>;
+
+//------------------------------------------------------------------------------
 /// @brief      A font along with a glyph in that font rendered at a particular
-///             scale. Used in glyph atlases as keys.
+///             scale.
 ///
 struct FontGlyphPair {
-  struct Hash;
-  struct Equal;
-
-  using Set = std::unordered_set<FontGlyphPair, Hash, Equal>;
-
-  Font font;
-  Glyph glyph;
-  Scalar scale;
-
-  struct Hash {
-    std::size_t operator()(const FontGlyphPair& p) const {
-      static_assert(sizeof(p.glyph.index) == 2);
-      static_assert(sizeof(p.glyph.type) == 1);
-      size_t index = p.glyph.index;
-      size_t type = static_cast<size_t>(p.glyph.type);
-      // By packaging multiple values in a single size_t the hash function is
-      // more efficient without losing entropy.
-      if (sizeof(size_t) == 8 && sizeof(Scalar) == 4) {
-        const float* fScale = &p.scale;
-        size_t nScale = *reinterpret_cast<const uint32_t*>(fScale);
-        size_t index_type_scale = nScale << 32 | index << 16 | type;
-        return fml::HashCombine(p.font.GetHash(), index_type_scale);
-      }
-      size_t index_type = index << 16 | type;
-      return fml::HashCombine(p.font.GetHash(), index_type, p.scale);
-    }
-  };
-  struct Equal {
-    bool operator()(const FontGlyphPair& lhs, const FontGlyphPair& rhs) const {
-      return lhs.font.IsEqual(rhs.font) && lhs.glyph.index == rhs.glyph.index &&
-             lhs.glyph.type == rhs.glyph.type && lhs.scale == rhs.scale;
-    }
-  };
+  FontGlyphPair(const ScaledFont& sf, const Glyph& g)
+      : scaled_font(sf), glyph(g) {}
+  const ScaledFont& scaled_font;
+  const Glyph& glyph;
 };
 
 }  // namespace impeller
+
+template <>
+struct std::hash<impeller::ScaledFont> {
+  constexpr std::size_t operator()(const impeller::ScaledFont& sf) const {
+    return fml::HashCombine(sf.font.GetHash(), sf.scale);
+  }
+};
+
+template <>
+struct std::equal_to<impeller::ScaledFont> {
+  constexpr bool operator()(const impeller::ScaledFont& lhs,
+                            const impeller::ScaledFont& rhs) const {
+    return lhs.font.IsEqual(rhs.font) && lhs.scale == rhs.scale;
+  }
+};
