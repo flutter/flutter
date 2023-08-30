@@ -14,7 +14,8 @@ Future<void> main() async {
     await createFlavorsTest().call();
     await createIntegrationTestFlavorsTest().call();
 
-    await inDirectory('${flutterDirectory.path}/dev/integration_tests/flavors', () async {
+    final TaskResult installTestsResult = await inDirectory(
+        '${flutterDirectory.path}/dev/integration_tests/flavors', () async {
       final StringBuffer stderr = StringBuffer();
 
       await evalFlutter(
@@ -32,8 +33,10 @@ Future<void> main() async {
         print(stderrString);
         return TaskResult.failure('Installing a macOS app on macOS should no-op');
       }
+
+      return TaskResult.success(null);
     });
 
-    return TaskResult.success(null);
+    return installTestsResult;
   });
 }

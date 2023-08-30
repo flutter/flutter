@@ -14,7 +14,8 @@ Future<void> main() async {
     await createFlavorsTest().call();
     await createIntegrationTestFlavorsTest().call();
     // test install and uninstall of flavors app
-    await inDirectory('${flutterDirectory.path}/dev/integration_tests/flavors', () async {
+    final TaskResult installTestsResult = await inDirectory(
+        '${flutterDirectory.path}/dev/integration_tests/flavors', () async {
       await flutter(
         'install',
         options: <String>['--flavor', 'paid'],
@@ -36,8 +37,10 @@ Future<void> main() async {
         print(stderrString);
         return TaskResult.failure('Should not succeed with bogus flavor');
       }
+
+      return TaskResult.success(null);
     });
 
-    return TaskResult.success(null);
+    return installTestsResult;
   });
 }
