@@ -321,7 +321,6 @@ final Set<String> _knownMissingTests = <String>{
   'examples/api/test/material/scrollbar/scrollbar.1_test.dart',
   'examples/api/test/material/scrollbar/scrollbar.0_test.dart',
   'examples/api/test/material/dropdown_menu/dropdown_menu.1_test.dart',
-  'examples/api/test/material/dropdown_menu/dropdown_menu.0_test.dart',
   'examples/api/test/material/radio/radio.toggleable.0_test.dart',
   'examples/api/test/material/radio/radio.0_test.dart',
   'examples/api/test/material/search_anchor/search_anchor.0_test.dart',
