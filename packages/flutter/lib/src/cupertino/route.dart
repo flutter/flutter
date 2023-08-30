@@ -311,6 +311,9 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
 /// the route is popped from the stack via [Navigator.pop] when an optional
 /// `result` can be provided.
 ///
+/// If `barrierDismissible` is true, then pressing the escape key on the keyboard
+/// will cause the current route to be popped with null as the value.
+///
 /// See also:
 ///
 ///  * [CupertinoRouteTransitionMixin], for a mixin that provides iOS transition
@@ -334,6 +337,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
     this.maintainState = true,
     super.fullscreenDialog,
     super.allowSnapshotting = true,
+    super.barrierDismissible = false,
   }) {
     assert(opaque);
   }
