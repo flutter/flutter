@@ -466,7 +466,16 @@ void main() {
     expect(s2.toString(), 'TextStyle(inherit: true, backgroundColor: Color(0xff00ff00))');
 
     final ui.TextStyle ts2 = s2.getTextStyle();
-    expect(ts2.toString(), contains('background: Paint(Color(0xff00ff00); dither: true)'));
+
+    // TODO(matanlurey): Remove when https://github.com/flutter/flutter/issues/133698 is resolved.
+    // There are 5+ implementations of Paint, so we should either align the toString() or stop
+    // testing it, IMO.
+    if (kIsWeb) {
+      // The web implementation never includes "dither: ..." as a property.
+      expect(ts2.toString(), contains('background: Paint(Color(0xff00ff00));'));
+    } else {
+      expect(ts2.toString(), contains('background: Paint(Color(0xff00ff00); dither: true))'));
+    }
   });
 
   test('TextStyle background and backgroundColor combos', () {
