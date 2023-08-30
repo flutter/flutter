@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class User {
   const User({
@@ -45,7 +46,8 @@ void main() {
     User(name: 'Charlie', email: 'charlie123@gmail.com'),
   ];
 
-  testWidgets('can filter and select a list of string options', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can filter and select a list of string options', (WidgetTester tester) async {
+
     late String lastSelection;
     await tester.pumpWidget(
       MaterialApp(
