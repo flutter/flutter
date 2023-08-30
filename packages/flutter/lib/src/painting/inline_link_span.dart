@@ -46,6 +46,7 @@ class InlineLinkSpan extends TextSpan {
   @visibleForTesting
   static TextStyle defaultLinkStyle = TextStyle(
     color: _linkColor,
+    decorationColor: _linkColor,
     decoration: TextDecoration.underline,
   );
 }
