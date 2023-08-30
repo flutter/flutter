@@ -239,6 +239,8 @@ class PlatformViewsService {
     return UiKitViewController._(id, layoutDirection);
   }
 
+  /// Factory method to create an `AppKitView`.
+  ///
   /// `id` is an unused unique identifier generated with [platformViewsRegistry].
   ///
   /// `viewType` is the identifier of the iOS view type to be created, a
