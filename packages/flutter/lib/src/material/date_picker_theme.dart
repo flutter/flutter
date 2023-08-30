@@ -298,7 +298,7 @@ class DatePickerThemeData with Diagnosticable {
   /// If this is null, [ThemeData.inputDecorationTheme] is used instead.
   final InputDecorationTheme? inputDecorationTheme;
 
-  /// The style of the cancel button of a [DatePickerDialog].
+  /// Overrides the default style of the cancel button of a [DatePickerDialog].
   final ButtonStyle? cancelButtonStyle;
 
   /// Overrrides the default style of the confirm (OK) button of a [DatePickerDialog].
