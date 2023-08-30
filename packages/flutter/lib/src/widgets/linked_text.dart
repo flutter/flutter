@@ -232,14 +232,40 @@ class LinkedText extends StatefulWidget {
       final TapGestureRecognizer recognizer = TapGestureRecognizer()
           ..onTap = () => onTap(linkString);
       return (
-        InlineLinkSpan(
+        _InlineLinkSpan(
           recognizer: recognizer,
+          style: defaultLinkStyle,
           text: displayString,
         ),
         recognizer,
       );
     };
   }
+
+  static Color get _linkColor {
+    return switch (defaultTargetPlatform) {
+      // This value was taken from Safari on an iPhone 14 Pro iOS 16.4
+      // simulator.
+      TargetPlatform.iOS => const Color(0xff1717f0),
+      // This value was taken from Chrome on macOS 13.4.1.
+      TargetPlatform.macOS => const Color(0xff0000ee),
+      // This value was taken from Chrome on Android 14.
+      TargetPlatform.android || TargetPlatform.fuchsia => const Color(0xff0e0eef),
+      // This value was taken from the Chrome browser running on GNOME 43.3 on
+      // Debian.
+      TargetPlatform.linux => const Color(0xff0026e8),
+      // This value was taken from the Edge browser running on Windows 10.
+      TargetPlatform.windows => const Color(0xff1e2b8b),
+    };
+  }
+
+  /// The style used for the link by default if none is given.
+  @visibleForTesting
+  static TextStyle defaultLinkStyle = TextStyle(
+    color: _linkColor,
+    decorationColor: _linkColor,
+    decoration: TextDecoration.underline,
+  );
 
   /// Applies the given [TextLinker]s to the given [InlineSpan]s and returns the
   /// new resulting spans and any created [TapGestureRecognizer]s.
@@ -309,6 +335,47 @@ class _LinkedTextState extends State<LinkedText> {
   Widget build(BuildContext context) {
     return widget.builder(context, _linkedSpans);
   }
+}
+
+/// An inline, interactive text link.
+class _InlineLinkSpan extends TextSpan {
+  /// Create an instance of [_InlineLinkSpan].
+  _InlineLinkSpan({
+    required String text,
+    TextStyle? style,
+    super.locale,
+    super.recognizer,
+    super.semanticsLabel,
+  }) : super(
+    style: style ?? defaultLinkStyle,
+    mouseCursor: SystemMouseCursors.click,
+    text: text,
+  );
+
+  static Color get _linkColor {
+    return switch (defaultTargetPlatform) {
+      // This value was taken from Safari on an iPhone 14 Pro iOS 16.4
+      // simulator.
+      TargetPlatform.iOS => const Color(0xff1717f0),
+      // This value was taken from Chrome on macOS 13.4.1.
+      TargetPlatform.macOS => const Color(0xff0000ee),
+      // This value was taken from Chrome on Android 14.
+      TargetPlatform.android || TargetPlatform.fuchsia => const Color(0xff0e0eef),
+      // This value was taken from the Chrome browser running on GNOME 43.3 on
+      // Debian.
+      TargetPlatform.linux => const Color(0xff0026e8),
+      // This value was taken from the Edge browser running on Windows 10.
+      TargetPlatform.windows => const Color(0xff1e2b8b),
+    };
+  }
+
+  /// The style used for the link by default if none is given.
+  @visibleForTesting
+  static TextStyle defaultLinkStyle = TextStyle(
+    color: _linkColor,
+    decorationColor: _linkColor,
+    decoration: TextDecoration.underline,
+  );
 }
 
 /// Specifies a way to find and style parts of a [String].

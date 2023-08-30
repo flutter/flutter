@@ -60,7 +60,7 @@ void main() {
           final TextSpan span = wrapperSpan.children!.first as TextSpan;
 
           expect(span.text, text);
-          expect(span.style, InlineLinkSpan.defaultLinkStyle);
+          expect(span.style, LinkedText.defaultLinkStyle);
           expect(span.children, isNull);
 
           expect(recognizers, hasLength(1));
@@ -144,7 +144,7 @@ void main() {
           expect(wrapperSpan.children![1], isA<TextSpan>());
           final TextSpan bodySpan = wrapperSpan.children![1] as TextSpan;
           expect(bodySpan.text, 'example.com');
-          expect(bodySpan.style, InlineLinkSpan.defaultLinkStyle);
+          expect(bodySpan.style, LinkedText.defaultLinkStyle);
           expect(bodySpan.children, isNull);
 
           expect(wrapperSpan.children!.last, isA<TextSpan>());
@@ -196,7 +196,7 @@ void main() {
       expect(wrapperSpan.children![1], isA<TextSpan>());
       final TextSpan hashTagSpan1 = wrapperSpan.children![1] as TextSpan;
       expect(hashTagSpan1.text, '#crossplatform');
-      expect(hashTagSpan1.style, InlineLinkSpan.defaultLinkStyle);
+      expect(hashTagSpan1.style, LinkedText.defaultLinkStyle);
       expect(hashTagSpan1.children, isNull);
 
       expect(wrapperSpan.children![2], isA<TextSpan>());
@@ -208,7 +208,7 @@ void main() {
       expect(wrapperSpan.children![3], isA<TextSpan>());
       final TextSpan hashTagSpan2 = wrapperSpan.children![3] as TextSpan;
       expect(hashTagSpan2.text, '#declarative');
-      expect(hashTagSpan2.style, InlineLinkSpan.defaultLinkStyle);
+      expect(hashTagSpan2.style, LinkedText.defaultLinkStyle);
       expect(hashTagSpan2.children, isNull);
 
       expect(wrapperSpan.children![4], isA<TextSpan>());
@@ -220,7 +220,7 @@ void main() {
       expect(wrapperSpan.children![5], isA<TextSpan>());
       final TextSpan urlSpan = wrapperSpan.children![5] as TextSpan;
       expect(urlSpan.text, 'flutter.dev');
-      expect(urlSpan.style, InlineLinkSpan.defaultLinkStyle);
+      expect(urlSpan.style, LinkedText.defaultLinkStyle);
       expect(urlSpan.children, isNull);
 
       expect(wrapperSpan.children![6], isA<TextSpan>());
@@ -280,7 +280,7 @@ void main() {
       expect(span1.children![1], isA<TextSpan>());
       final TextSpan span1Child2 = span1.children![1] as TextSpan;
       expect(span1Child2.text, 'https://www.');
-      expect(span1Child2.style, InlineLinkSpan.defaultLinkStyle);
+      expect(span1Child2.style, LinkedText.defaultLinkStyle);
       expect(span1Child2.children, isNull);
 
       expect(span1.children![2], isA<TextSpan>());
@@ -292,7 +292,7 @@ void main() {
       expect(span1Child3.children![0], isA<TextSpan>());
       final TextSpan span1Child3Child1 = span1Child3.children![0] as TextSpan;
       expect(span1Child3Child1.text, 'flutter');
-      expect(span1Child3Child1.style, InlineLinkSpan.defaultLinkStyle);
+      expect(span1Child3Child1.style, LinkedText.defaultLinkStyle);
       expect(span1Child3Child1.children, isNull);
 
       // Second span's children ('.dev!').
@@ -305,7 +305,7 @@ void main() {
       expect(span2.children![0], isA<TextSpan>());
       final TextSpan span2Child1 = span2.children![0] as TextSpan;
       expect(span2Child1.text, '.dev');
-      expect(span2Child1.style, InlineLinkSpan.defaultLinkStyle);
+      expect(span2Child1.style, LinkedText.defaultLinkStyle);
       expect(span2Child1.children, isNull);
 
       expect(span2.children![1], isA<TextSpan>());
