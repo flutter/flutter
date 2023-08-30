@@ -224,7 +224,8 @@ class Context {
       '$xcodeFrameworksDir/',
     );
 
-    // Copy the native assets.
+    // Copy the native assets. These do not have to be codesigned here because,
+    // they are already codesigned in buildNativeAssetsMacOS.
     final String sourceRoot = environment['SOURCE_ROOT'] ?? '';
     String projectPath = '$sourceRoot/..';
     if (environment['FLUTTER_APPLICATION_PATH'] != null) {
@@ -240,7 +241,7 @@ class Context {
         print('♦ Copying native assets from $nativeAssetsPath.');
       }
       runRsync(
-        extraArgs: [
+        extraArgs: <String>[
           '--filter',
           '- native_assets.yaml',
         ],

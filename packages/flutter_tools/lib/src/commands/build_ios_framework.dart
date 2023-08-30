@@ -271,7 +271,8 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       final Status status = globals.logger.startProgress(
         ' └─Moving to ${globals.fs.path.relative(modeDirectory.path)}');
 
-      // Copy the native assets.
+      // Copy the native assets. The native assets have already been signed in
+      // buildNativeAssetsMacOS.
       final Directory nativeAssetsDirectory = globals.fs
           .directory(getBuildDirectory())
           .childDirectory('native_assets/ios/');

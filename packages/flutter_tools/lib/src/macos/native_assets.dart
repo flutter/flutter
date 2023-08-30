@@ -253,7 +253,7 @@ Uri flutterDartUri(FileSystem fileSystem) =>
     fileSystem.directory(Cache.flutterRoot).uri.resolve('bin/dart');
 
 /// This should be the same for different archs, debug/release, etc.
-/// It should work for all MacOS.
+/// It should work for all macOS.
 Uri buildUri(Uri projectUri, OS os) {
   final String buildDir = getBuildDirectory();
   return projectUri.resolve('$buildDir/native_assets/$os/');
@@ -266,7 +266,7 @@ Uri buildUriMultiple(Uri projectUri) {
   return projectUri.resolve('$buildDir/native_assets/multiple/');
 }
 
-/// The target location for native assets on MacOS.
+/// The target location for native assets on macOS.
 ///
 /// Because we need to have a multi-architecture solution for
 /// `flutter run --release`, we use `lipo` to combine all target architectures
@@ -332,7 +332,7 @@ Future<void> lipoDylibs(String targetFullPath, List<Uri> sources) async {
 
 /// Sets the install name in a dylib with a Mach-O format.
 ///
-/// On MacOS and iOS, opening a dylib at runtime fails if the path inside the
+/// On macOS and iOS, opening a dylib at runtime fails if the path inside the
 /// dylib itself does not correspond to the path that the file is at. Therefore,
 /// native assets copied into their final location also need their install name
 /// updated with the `install_name_tool`.
