@@ -11,6 +11,7 @@ import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -1228,6 +1229,45 @@ void main() {
 
     expect(find.text('p1'), findsOneWidget);
     expect(find.text('count: 1'), findsOneWidget);
+  });
+
+  testWidgets('MaterialPageRoute can be dismissed with escape keyboard shortcut', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/132138.
+    final GlobalKey scaffoldKey = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          body: Center(
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.push<void>(scaffoldKey.currentContext!, MaterialPageRoute<void>(
+                  builder: (BuildContext context) {
+                    return const Scaffold(
+                      body: Center(child: Text('route')),
+                    );
+                  },
+                  barrierDismissible: true,
+                ));
+              },
+              child: const Text('push'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('push'));
+    await tester.pumpAndSettle();
+    expect(find.text('route'), findsOneWidget);
+    expect(find.text('push'), findsNothing);
+
+    // Try to dismiss the route with the escape key.
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+
+    expect(find.text('route'), findsNothing);
   });
 }
 
