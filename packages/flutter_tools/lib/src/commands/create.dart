@@ -213,8 +213,7 @@ class CreateCommand extends CreateBase {
 
     final List<String> platforms = stringsArg('platforms');
     // `--platforms` does not support module or package.
-    if (argResults!.wasParsed('platforms') &&
-        (generateModule || generatePackage || generateFfiPackage)) {
+    if (argResults!.wasParsed('platforms') && (generateModule || generatePackage || generateFfiPackage)) {
       final String template = generateModule ? 'module' : 'package';
       throwToolExit(
         'The "--platforms" argument is not supported in $template template.',
@@ -223,9 +222,7 @@ class CreateCommand extends CreateBase {
     } else if (platforms.isEmpty) {
       throwToolExit('Must specify at least one platform using --platforms',
         exitCode: 2);
-    } else if (generateFfiPlugin &&
-        argResults!.wasParsed('platforms') &&
-        platforms.contains('web')) {
+    } else if (generateFfiPlugin && argResults!.wasParsed('platforms') && platforms.contains('web')) {
       throwToolExit(
         'The web platform is not supported in plugin_ffi template.',
         exitCode: 2,
@@ -418,16 +415,14 @@ class CreateCommand extends CreateBase {
         offline: boolArg('offline'),
         outputMode: PubOutputMode.summaryOnly,
       );
-      if (!generateFfiPackage) {
-        await project.ensureReadyForPlatformSpecificTooling(
-          androidPlatform: includeAndroid,
-          iosPlatform: includeIos,
-          linuxPlatform: includeLinux,
-          macOSPlatform: includeMacos,
-          windowsPlatform: includeWindows,
-          webPlatform: includeWeb,
-        );
-      }
+      await project.ensureReadyForPlatformSpecificTooling(
+        androidPlatform: includeAndroid,
+        iosPlatform: includeIos,
+        linuxPlatform: includeLinux,
+        macOSPlatform: includeMacos,
+        windowsPlatform: includeWindows,
+        webPlatform: includeWeb,
+      );
     }
     if (sampleCode != null) {
       _applySample(relativeDir, sampleCode);
