@@ -149,7 +149,7 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
   late final Future<CCompilerConfig> cCompilerConfig = () {
     if (globals.platform.isMacOS || globals.platform.isIOS) {
       return cCompilerConfigMacOS();
-    } 
+    }
     throwToolExit(
       'Native assets feature not yet implemented for Linux, Windows and Android.',
     );

@@ -172,9 +172,9 @@ class Context {
   }
 
   /// Copies all files from [source] to [destination].
-  /// 
+  ///
   /// Does not copy `.DS_Store`.
-  /// 
+  ///
   /// If [delete], delete extraneous files from [destination].
   void runRsync(
     String source,
