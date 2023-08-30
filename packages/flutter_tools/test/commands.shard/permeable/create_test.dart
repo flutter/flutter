@@ -2610,6 +2610,16 @@ void main() {
       , throwsToolExit(message: 'The "--platforms" argument is not supported', exitCode: 2));
   });
 
+  testUsingContext('create an ffi package with --platforms throws error.', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await expectLater(
+      runner.run(<String>['create', '--no-pub', '--template=package_ffi', '--platform=ios', projectDir.path])
+      , throwsToolExit(message: 'The "--platforms" argument is not supported', exitCode: 2));
+  });
+
   testUsingContext('create a plugin with android, delete then re-create folders', () async {
     Cache.flutterRoot = '../..';
 
@@ -3325,7 +3335,7 @@ void main() {
         '--template=$template',
         '-a',
         'kotlin',
-        '--platforms=android',
+        if (template == 'plugin_ffi') '--platforms=android',
         projectDir.path,
       ];
 
@@ -3344,7 +3354,7 @@ void main() {
         '--template=$template',
         '--ios-language',
         'swift',
-        '--platforms=ios',
+        if (template == 'plugin_ffi') '--platforms=ios',
         projectDir.path,
       ];
 
@@ -3353,24 +3363,24 @@ void main() {
         throwsToolExit(message: 'The "ios-language" option is not supported with the $template template: the language will always be C or C++.'),
       );
     });
-
-    testUsingContext('$template error web platform', () async {
-      final CreateCommand command = CreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
-      final List<String> args = <String>[
-        'create',
-        '--no-pub',
-        '--template=$template',
-        '--platforms=web',
-        projectDir.path,
-      ];
-
-      await expectLater(
-        runner.run(args),
-        throwsToolExit(message: 'The web platform is not supported in $template template.'),
-      );
-    });
   }
+
+  testUsingContext('FFI plugins error web platform', () async {
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    final List<String> args = <String>[
+      'create',
+      '--no-pub',
+      '--template=plugin_ffi',
+      '--platforms=web',
+      projectDir.path,
+    ];
+
+    await expectLater(
+      runner.run(args),
+      throwsToolExit(message: 'The web platform is not supported in plugin_ffi template.'),
+    );
+  });
 
   testUsingContext('should show warning when disabled platforms are selected while creating an FFI plugin', () async {
     Cache.flutterRoot = '../..';

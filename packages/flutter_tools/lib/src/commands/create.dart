@@ -213,7 +213,8 @@ class CreateCommand extends CreateBase {
 
     final List<String> platforms = stringsArg('platforms');
     // `--platforms` does not support module or package.
-    if (argResults!.wasParsed('platforms') && (generateModule || generatePackage)) {
+    if (argResults!.wasParsed('platforms') &&
+        (generateModule || generatePackage || generateFfiPackage)) {
       final String template = generateModule ? 'module' : 'package';
       throwToolExit(
         'The "--platforms" argument is not supported in $template template.',
@@ -222,9 +223,11 @@ class CreateCommand extends CreateBase {
     } else if (platforms.isEmpty) {
       throwToolExit('Must specify at least one platform using --platforms',
         exitCode: 2);
-    } else if (generateFfi && argResults!.wasParsed('platforms') && platforms.contains('web')) {
+    } else if (generateFfiPlugin &&
+        argResults!.wasParsed('platforms') &&
+        platforms.contains('web')) {
       throwToolExit(
-        'The web platform is not supported in ${template.cliName} template.',
+        'The web platform is not supported in plugin_ffi template.',
         exitCode: 2,
       );
     } else if (generateFfi && argResults!.wasParsed('ios-language')) {
@@ -388,7 +391,7 @@ class CreateCommand extends CreateBase {
         );
         pubContext = PubContext.createPlugin;
       case FlutterProjectType.pluginFfi:
-        generatedFileCount += await _generateFfiPluginOrPackage(
+        generatedFileCount += await _generateFfiPlugin(
           relativeDir,
           templateContext,
           overwrite: overwrite,
@@ -397,7 +400,7 @@ class CreateCommand extends CreateBase {
         );
         pubContext = PubContext.createPlugin;
       case FlutterProjectType.packageFfi:
-        generatedFileCount += await _generateFfiPluginOrPackage(
+        generatedFileCount += await _generateFfiPackage(
           relativeDir,
           templateContext,
           overwrite: overwrite,
@@ -608,7 +611,7 @@ Your $application code is in $relativeAppMain.
     return generatedCount;
   }
 
-  Future<int> _generateFfiPluginOrPackage(
+  Future<int> _generateFfiPlugin(
     Directory directory,
     Map<String, Object?> templateContext, {
     bool overwrite = false,
@@ -636,18 +639,10 @@ Your $application code is in $relativeAppMain.
     int generatedCount = 0;
     final String? description = argResults!.wasParsed('description')
         ? stringArg('description')
-        : projectType == FlutterProjectType.packageFfi
-            ? 'A new Dart FFI package project.'
-            : 'A new Flutter FFI plugin project.';
+        : 'A new Flutter FFI plugin project.';
     templateContext['description'] = description;
     generatedCount += await renderMerged(
-      <String>[
-        if (projectType == FlutterProjectType.packageFfi) 'package_ffi',
-        if (projectType == FlutterProjectType.pluginFfi) ...<String>[
-          'plugin_ffi',
-          'plugin_shared',
-        ],
-      ],
+      <String>['plugin_ffi', 'plugin_shared'],
       directory,
       templateContext,
       overwrite: overwrite,
@@ -656,7 +651,7 @@ Your $application code is in $relativeAppMain.
 
     final FlutterProject project = FlutterProject.fromDirectory(directory);
     final bool generateAndroid = templateContext['android'] == true;
-    if (generateAndroid && projectType == FlutterProjectType.pluginFfi) {
+    if (generateAndroid) {
       gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
     }
 
@@ -672,6 +667,49 @@ Your $application code is in $relativeAppMain.
     templateContext['description'] = 'Demonstrates how to use the $projectName plugin.';
     templateContext['pluginProjectName'] = projectName;
     templateContext['androidPluginIdentifier'] = androidPluginIdentifier;
+
+    generatedCount += await generateApp(
+      <String>['app'],
+      project.example.directory,
+      templateContext,
+      overwrite: overwrite,
+      pluginExampleApp: true,
+      printStatusWhenWriting: printStatusWhenWriting,
+      projectType: projectType,
+    );
+    return generatedCount;
+  }
+
+  Future<int> _generateFfiPackage(
+    Directory directory,
+    Map<String, Object?> templateContext, {
+    bool overwrite = false,
+    bool printStatusWhenWriting = true,
+    required FlutterProjectType projectType,
+  }) async {
+    int generatedCount = 0;
+    final String? description = argResults!.wasParsed('description')
+        ? stringArg('description')
+        : 'A new Dart FFI package project.';
+    templateContext['description'] = description;
+    generatedCount += await renderMerged(
+      <String>[
+        'package_ffi',
+      ],
+      directory,
+      templateContext,
+      overwrite: overwrite,
+      printStatusWhenWriting: printStatusWhenWriting,
+    );
+
+    final FlutterProject project = FlutterProject.fromDirectory(directory);
+
+    final String? projectName = templateContext['projectName'] as String?;
+    final String exampleProjectName = '${projectName}_example';
+    templateContext['projectName'] = exampleProjectName;
+    templateContext['description'] =
+        'Demonstrates how to use the $projectName package.';
+    templateContext['pluginProjectName'] = projectName;
 
     generatedCount += await generateApp(
       <String>['app'],
