@@ -343,7 +343,7 @@ class UiKitView extends _DarwinView {
 /// NSView is ready this widget paints nothing while maintaining the same
 /// layout constraints.
 class AppKitView extends _DarwinView {
-  /// Creates a widget that embeds a macOS view.
+  /// Creates a widget that embeds a macOS AppKit NSView.
   const AppKitView({
     super.key,
     required super.viewType,
