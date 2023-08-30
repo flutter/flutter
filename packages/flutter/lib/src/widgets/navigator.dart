@@ -3418,6 +3418,14 @@ class _History extends Iterable<_RouteEntry> with ChangeNotifier {
   String toString() {
     return _value.toString();
   }
+
+  @override
+  void dispose() {
+    for (final _RouteEntry element in _value) {
+      element.dispose();
+    }
+    super.dispose();
+  }
 }
 
 /// The state for a [Navigator] widget.
