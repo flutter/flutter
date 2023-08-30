@@ -21,6 +21,7 @@ import 'package:package_config/package_config_types.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
+import '../fake_native_assets_build_runner.dart';
 
 void main() {
   late FakeProcessManager processManager;

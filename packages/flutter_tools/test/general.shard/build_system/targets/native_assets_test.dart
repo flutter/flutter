@@ -18,6 +18,7 @@ import 'package:native_assets_cli/native_assets_cli.dart' as native_assets_cli;
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fakes.dart';
+import '../../fake_native_assets_build_runner.dart';
 
 void main() {
   late FakeProcessManager processManager;
