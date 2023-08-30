@@ -756,6 +756,38 @@ mixin SchedulerBinding on BindingBase {
     _postFrameCallbacks.add(callback);
   }
 
+  final List<VoidCallback> _preRenderCallbacks = <VoidCallback>[];
+
+  /// Schedule a callback to be executed just before rendering a frame.
+  ///
+  /// The provided callback run immediately after compositing
+  /// a scene [ContainerLayer.buildScene] and before rendering
+  /// it [FlutterView.render].
+  ///
+  /// The callbacks are executed in the order in which they have been
+  /// added.
+  ///
+  /// Pre-rendering callbacks cannot be unregistered. They are called exactly once.
+  ///
+  /// See also:
+  ///
+  /// * [addPostFrameCallback], which schedule a callback for the end of
+  ///   this frame.
+  void addPreRenderCallback(VoidCallback callback) {
+    _preRenderCallbacks.add(callback);
+  }
+
+  /// Called by the framework after compositing [ContainerLayer.buildScene]
+  /// and before rendering [FlutterView.render].
+  ///
+  /// This function calls all the pre-rendering callbacks registered by
+  /// [addPreRenderCallback].
+  void handlePreRenderScene() {
+    final List<VoidCallback> localPreRenderCallbacks = List<VoidCallback>.of(_preRenderCallbacks);
+    _preRenderCallbacks.clear();
+    localPreRenderCallbacks.forEach(_invokePreRenderCallback);
+  }
+
   Completer<void>? _nextFrameCompleter;
 
   /// Returns a Future that completes after the frame completes.
@@ -1345,6 +1377,20 @@ mixin SchedulerBinding on BindingBase {
       _FrameCallbackEntry.debugCurrentCallbackStack = null;
       return true;
     }());
+  }
+
+  // Calls the given [callback] with try/catch and prints the error if any.
+  void _invokePreRenderCallback(VoidCallback callback) {
+    try {
+      callback();
+    } catch (exception, exceptionStack) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: exception,
+        stack: exceptionStack,
+        library: 'scheduler library',
+        context: ErrorDescription('during a pre-rendering callback'),
+      ));
+    }
   }
 }
 

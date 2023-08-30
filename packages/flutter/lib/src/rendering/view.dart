@@ -5,6 +5,7 @@
 import 'dart:io' show Platform;
 import 'dart:ui' as ui show FlutterView, Scene, SceneBuilder, SemanticsUpdate;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -253,6 +254,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       if (automaticSystemUiAdjustment) {
         _updateSystemChrome();
       }
+      WidgetsBinding.instance.handlePreRenderScene();
       _view.render(scene);
       scene.dispose();
       assert(() {
