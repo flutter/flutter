@@ -26,15 +26,15 @@ LazyGlyphAtlas::~LazyGlyphAtlas() = default;
 void LazyGlyphAtlas::AddTextFrame(const TextFrame& frame, Scalar scale) {
   FML_DCHECK(atlas_map_.empty());
   if (frame.GetAtlasType() == GlyphAtlas::Type::kAlphaBitmap) {
-    frame.CollectUniqueFontGlyphPairs(alpha_set_, scale);
+    frame.CollectUniqueFontGlyphPairs(alpha_glyph_map_, scale);
   } else {
-    frame.CollectUniqueFontGlyphPairs(color_set_, scale);
+    frame.CollectUniqueFontGlyphPairs(color_glyph_map_, scale);
   }
 }
 
 void LazyGlyphAtlas::ResetTextFrames() {
-  alpha_set_.clear();
-  color_set_.clear();
+  alpha_glyph_map_.clear();
+  color_glyph_map_.clear();
   atlas_map_.clear();
 }
 
@@ -59,11 +59,12 @@ std::shared_ptr<GlyphAtlas> LazyGlyphAtlas::CreateOrGetGlyphAtlas(
     return nullptr;
   }
 
-  auto& set = type == GlyphAtlas::Type::kAlphaBitmap ? alpha_set_ : color_set_;
+  auto& glyph_map = type == GlyphAtlas::Type::kAlphaBitmap ? alpha_glyph_map_
+                                                           : color_glyph_map_;
   auto atlas_context =
       type == GlyphAtlas::Type::kAlphaBitmap ? alpha_context_ : color_context_;
-  auto atlas =
-      typographer_context_->CreateGlyphAtlas(context, type, atlas_context, set);
+  auto atlas = typographer_context_->CreateGlyphAtlas(context, type,
+                                                      atlas_context, glyph_map);
   if (!atlas || !atlas->IsValid()) {
     VALIDATION_LOG << "Could not create valid atlas.";
     return nullptr;

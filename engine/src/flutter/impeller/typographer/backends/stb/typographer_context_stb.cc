@@ -4,6 +4,7 @@
 
 #include "impeller/typographer/backends/stb/typographer_context_stb.h"
 
+#include <numeric>
 #include <utility>
 
 #include "flutter/fml/logging.h"
@@ -23,9 +24,6 @@ constexpr auto kColorFontBitsPerPixel = 4;
 
 namespace impeller {
 
-using FontGlyphPairRefVector =
-    std::vector<std::reference_wrapper<const FontGlyphPair>>;
-
 constexpr size_t kPadding = 1;
 
 std::unique_ptr<TypographerContext> TypographerContextSTB::Make() {
@@ -44,7 +42,7 @@ TypographerContextSTB::CreateGlyphAtlasContext() const {
 // Function returns the count of "remaining pairs" not packed into rect of given
 // size.
 static size_t PairsFitInAtlasOfSize(
-    const FontGlyphPair::Set& pairs,
+    const std::vector<FontGlyphPair>& pairs,
     const ISize& atlas_size,
     std::vector<Rect>& glyph_positions,
     const std::shared_ptr<RectanglePacker>& rect_packer) {
@@ -58,15 +56,16 @@ static size_t PairsFitInAtlasOfSize(
   size_t i = 0;
   for (auto it = pairs.begin(); it != pairs.end(); ++i, ++it) {
     const auto& pair = *it;
+    const Font& font = pair.scaled_font.font;
 
     // We downcast to the correct typeface type to access `stb` specific
     // methods.
     std::shared_ptr<TypefaceSTB> typeface_stb =
-        std::reinterpret_pointer_cast<TypefaceSTB>(pair.font.GetTypeface());
+        std::reinterpret_pointer_cast<TypefaceSTB>(font.GetTypeface());
     // Conversion factor to scale font size in Points to pixels.
     // Note this assumes typical DPI.
     float text_size_pixels =
-        pair.font.GetMetrics().point_size * TypefaceSTB::kPointsToPixels;
+        font.GetMetrics().point_size * TypefaceSTB::kPointsToPixels;
 
     ISize glyph_size;
     {
@@ -100,7 +99,7 @@ static size_t PairsFitInAtlasOfSize(
 
 static bool CanAppendToExistingAtlas(
     const std::shared_ptr<GlyphAtlas>& atlas,
-    const FontGlyphPairRefVector& extra_pairs,
+    const std::vector<FontGlyphPair>& extra_pairs,
     std::vector<Rect>& glyph_positions,
     ISize atlas_size,
     const std::shared_ptr<RectanglePacker>& rect_packer) {
@@ -116,14 +115,15 @@ static bool CanAppendToExistingAtlas(
   glyph_positions.reserve(extra_pairs.size());
   for (size_t i = 0; i < extra_pairs.size(); i++) {
     const FontGlyphPair& pair = extra_pairs[i];
+    const Font& font = pair.scaled_font.font;
 
     // We downcast to the correct typeface type to access `stb` specific methods
     std::shared_ptr<TypefaceSTB> typeface_stb =
-        std::reinterpret_pointer_cast<TypefaceSTB>(pair.font.GetTypeface());
+        std::reinterpret_pointer_cast<TypefaceSTB>(font.GetTypeface());
     // Conversion factor to scale font size in Points to pixels.
     // Note this assumes typical DPI.
     float text_size_pixels =
-        pair.font.GetMetrics().point_size * TypefaceSTB::kPointsToPixels;
+        font.GetMetrics().point_size * TypefaceSTB::kPointsToPixels;
 
     ISize glyph_size;
     {
@@ -157,7 +157,7 @@ static bool CanAppendToExistingAtlas(
 }
 
 static ISize OptimumAtlasSizeForFontGlyphPairs(
-    const FontGlyphPair::Set& pairs,
+    const std::vector<FontGlyphPair>& pairs,
     std::vector<Rect>& glyph_positions,
     const std::shared_ptr<GlyphAtlasContext>& atlas_context,
     GlyphAtlas::Type type) {
@@ -196,13 +196,13 @@ static ISize OptimumAtlasSizeForFontGlyphPairs(
 }
 
 static void DrawGlyph(BitmapSTB* bitmap,
-                      const FontGlyphPair& font_glyph,
+                      const ScaledFont& scaled_font,
+                      const Glyph& glyph,
                       const Rect& location,
                       bool has_color) {
-  const auto& metrics = font_glyph.font.GetMetrics();
+  const auto& metrics = scaled_font.font.GetMetrics();
 
-  const impeller::Font& font = font_glyph.font;
-  const impeller::Glyph& glyph = font_glyph.glyph;
+  const impeller::Font& font = scaled_font.font;
   auto typeface = font.GetTypeface();
   // We downcast to the correct typeface type to access `stb` specific methods
   std::shared_ptr<TypefaceSTB> typeface_stb =
@@ -272,7 +272,7 @@ static void DrawGlyph(BitmapSTB* bitmap,
 
 static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
                               const std::shared_ptr<BitmapSTB>& bitmap,
-                              const FontGlyphPairRefVector& new_pairs) {
+                              const std::vector<FontGlyphPair>& new_pairs) {
   TRACE_EVENT0("impeller", __FUNCTION__);
   FML_DCHECK(bitmap != nullptr);
 
@@ -283,7 +283,8 @@ static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
     if (!pos.has_value()) {
       continue;
     }
-    DrawGlyph(bitmap.get(), pair, pos.value(), has_color);
+    DrawGlyph(bitmap.get(), pair.scaled_font, pair.glyph, pos.value(),
+              has_color);
   }
   return true;
 }
@@ -302,9 +303,10 @@ static std::shared_ptr<BitmapSTB> CreateAtlasBitmap(const GlyphAtlas& atlas,
 
   bool has_color = atlas.GetType() == GlyphAtlas::Type::kColorBitmap;
 
-  atlas.IterateGlyphs([&bitmap, has_color](const FontGlyphPair& font_glyph,
+  atlas.IterateGlyphs([&bitmap, has_color](const ScaledFont& scaled_font,
+                                           const Glyph& glyph,
                                            const Rect& location) -> bool {
-    DrawGlyph(bitmap.get(), font_glyph, location, has_color);
+    DrawGlyph(bitmap.get(), scaled_font, glyph, location, has_color);
     return true;
   });
 
@@ -375,7 +377,7 @@ std::shared_ptr<GlyphAtlas> TypographerContextSTB::CreateGlyphAtlas(
     Context& context,
     GlyphAtlas::Type type,
     std::shared_ptr<GlyphAtlasContext> atlas_context,
-    const FontGlyphPair::Set& font_glyph_pairs) const {
+    const FontGlyphMap& font_glyph_map) const {
   TRACE_EVENT0("impeller", __FUNCTION__);
   if (!IsValid()) {
     return nullptr;
@@ -383,7 +385,7 @@ std::shared_ptr<GlyphAtlas> TypographerContextSTB::CreateGlyphAtlas(
   auto& atlas_context_stb = GlyphAtlasContextSTB::Cast(*atlas_context);
   std::shared_ptr<GlyphAtlas> last_atlas = atlas_context->GetGlyphAtlas();
 
-  if (font_glyph_pairs.empty()) {
+  if (font_glyph_map.empty()) {
     return last_atlas;
   }
 
@@ -391,10 +393,21 @@ std::shared_ptr<GlyphAtlas> TypographerContextSTB::CreateGlyphAtlas(
   // Step 1: Determine if the atlas type and font glyph pairs are compatible
   //         with the current atlas and reuse if possible.
   // ---------------------------------------------------------------------------
-  FontGlyphPairRefVector new_glyphs;
-  for (const FontGlyphPair& pair : font_glyph_pairs) {
-    if (!last_atlas->FindFontGlyphBounds(pair).has_value()) {
-      new_glyphs.push_back(pair);
+  std::vector<FontGlyphPair> new_glyphs;
+  for (const auto& font_value : font_glyph_map) {
+    const ScaledFont& scaled_font = font_value.first;
+    const FontGlyphAtlas* font_glyph_atlas =
+        last_atlas->GetFontGlyphAtlas(scaled_font.font, scaled_font.scale);
+    if (font_glyph_atlas) {
+      for (const Glyph& glyph : font_value.second) {
+        if (!font_glyph_atlas->FindGlyphBounds(glyph)) {
+          new_glyphs.emplace_back(scaled_font, glyph);
+        }
+      }
+    } else {
+      for (const Glyph& glyph : font_value.second) {
+        new_glyphs.emplace_back(scaled_font, glyph);
+      }
     }
   }
   if (last_atlas->GetType() == type && new_glyphs.size() == 0) {
@@ -444,6 +457,16 @@ std::shared_ptr<GlyphAtlas> TypographerContextSTB::CreateGlyphAtlas(
   // ---------------------------------------------------------------------------
   // Step 3b: Get the optimum size of the texture atlas.
   // ---------------------------------------------------------------------------
+  std::vector<FontGlyphPair> font_glyph_pairs;
+  font_glyph_pairs.reserve(std::accumulate(
+      font_glyph_map.begin(), font_glyph_map.end(), 0,
+      [](const int a, const auto& b) { return a + b.second.size(); }));
+  for (const auto& font_value : font_glyph_map) {
+    const ScaledFont& scaled_font = font_value.first;
+    for (const Glyph& glyph : font_value.second) {
+      font_glyph_pairs.push_back({scaled_font, glyph});
+    }
+  }
   auto glyph_atlas = std::make_shared<GlyphAtlas>(type);
   auto atlas_size = OptimumAtlasSizeForFontGlyphPairs(
       font_glyph_pairs, glyph_positions, atlas_context, type);

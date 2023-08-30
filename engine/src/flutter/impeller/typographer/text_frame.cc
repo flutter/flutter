@@ -67,12 +67,13 @@ Scalar TextFrame::RoundScaledFontSize(Scalar scale, Scalar point_size) {
   return std::round(scale * 100) / 100;
 }
 
-void TextFrame::CollectUniqueFontGlyphPairs(FontGlyphPair::Set& set,
+void TextFrame::CollectUniqueFontGlyphPairs(FontGlyphMap& glyph_map,
                                             Scalar scale) const {
   for (const TextRun& run : GetRuns()) {
     const Font& font = run.GetFont();
     auto rounded_scale =
         RoundScaledFontSize(scale, font.GetMetrics().point_size);
+    auto& set = glyph_map[{font, rounded_scale}];
     for (const TextRun::GlyphPosition& glyph_position :
          run.GetGlyphPositions()) {
 #if false
@@ -82,7 +83,7 @@ if (rounded_scale != scale) {
   FML_LOG(ERROR) << glyph_position.glyph.bounds.size * delta;
 }
 #endif
-      set.insert({font, glyph_position.glyph, rounded_scale});
+      set.insert(glyph_position.glyph);
     }
   }
 }

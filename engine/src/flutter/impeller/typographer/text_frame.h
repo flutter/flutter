@@ -24,7 +24,7 @@ class TextFrame {
 
   ~TextFrame();
 
-  void CollectUniqueFontGlyphPairs(FontGlyphPair::Set& set, Scalar scale) const;
+  void CollectUniqueFontGlyphPairs(FontGlyphMap& glyph_map, Scalar scale) const;
 
   static Scalar RoundScaledFontSize(Scalar scale, Scalar point_size);
 
