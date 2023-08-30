@@ -732,7 +732,6 @@ Future<void> _createffiPackage(String name, Directory parent) async {
         '--org',
         'io.flutter.devicelab',
         '--template=package_ffi',
-        '--platforms=ios',
         name,
       ],
     );

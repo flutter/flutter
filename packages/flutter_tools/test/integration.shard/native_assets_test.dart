@@ -365,7 +365,6 @@ Future<Directory> createTestProject(
       flutterBin,
       'create',
       '--template=package_ffi',
-      '--platform=macos,ios,linux,windows,android',
       packageName,
     ],
     workingDirectory: tempDirectory.path,

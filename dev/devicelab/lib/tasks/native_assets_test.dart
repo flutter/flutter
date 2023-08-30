@@ -181,7 +181,6 @@ Future<Directory> createTestProject(
     <String>[
       'create',
       '--template=package_ffi',
-      '--platform=macos,ios,linux,windows,android',
       packageName,
     ],
     workingDirectory: tempDirectory.path,
