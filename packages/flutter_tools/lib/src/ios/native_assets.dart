@@ -11,27 +11,25 @@ import '../base/file_system.dart';
 import '../build_info.dart';
 import '../globals.dart' as globals;
 
-import '../macos/native_assets.dart';
-import '../native_assets.dart'; // Reuse some logic.
+import '../macos/native_assets_host.dart';
+import '../native_assets.dart';
 
 /// Dry run the native builds.
 ///
 /// This does not build native assets, it only simulates what the final paths
 /// of all assets will be so that this can be embedded in the kernel file and
-/// the xcode project.
+/// the Xcode project.
 Future<Uri?> dryRunNativeAssetsiOS({
   required NativeAssetsBuildRunner buildRunner,
   required Uri projectUri,
   required FileSystem fileSystem,
 }) async {
-  if (await hasNoPackageConfig(buildRunner)) {
-    return null;
-  }
-  if (await isDisabledAndNoNativeAssets(buildRunner)) {
+  if (await hasNoPackageConfig(buildRunner) ||
+      await isDisabledAndNoNativeAssets(buildRunner)) {
     return null;
   }
 
-  final Uri buildUri_ = buildUri(projectUri, OS.iOS);
+  final Uri buildUri_ = nativeAssetsBuildUri(projectUri, OS.iOS);
   final Iterable<Asset> assetTargetLocations =
       await dryRunNativeAssetsIosInternal(fileSystem, projectUri, buildRunner);
   final Uri nativeAssetsUri =
@@ -68,8 +66,8 @@ Future<List<Uri>> buildNativeAssetsiOS({
   required Uri projectUri,
   required BuildMode buildMode,
   String? codesignIdentity,
-  required FileSystem fileSystem,
   required Uri yamlParentDirectory,
+  required FileSystem fileSystem,
 }) async {
   if (await hasNoPackageConfig(buildRunner) ||
       await isDisabledAndNoNativeAssets(buildRunner)) {
@@ -78,15 +76,15 @@ Future<List<Uri>> buildNativeAssetsiOS({
   }
 
   final List<Target> targets = darwinArchs.map(_getNativeTarget).toList();
-  final native_assets_cli.BuildMode buildModeCli = getBuildMode(buildMode);
+  final native_assets_cli.BuildMode buildModeCli =
+      nativeAssetsBuildMode(buildMode);
 
   const OS targetOs = OS.iOS;
-  final Uri buildUri_ = buildUri(projectUri, targetOs);
+  final Uri buildUri_ = nativeAssetsBuildUri(projectUri, targetOs);
   final IOSSdk iosSdk = _getIosSdk(environmentType);
 
   globals.logger
       .printTrace('Building native assets for $targets $buildModeCli.');
-
   final List<Asset> nativeAssets = <Asset>[];
   final Set<Uri> dependencies = <Uri>{};
   for (final Target target in targets) {
@@ -106,7 +104,8 @@ Future<List<Uri>> buildNativeAssetsiOS({
   globals.logger.printTrace('Building native assets for $targets done.');
   final Map<AssetPath, List<Asset>> fatAssetTargetLocations =
       _fatAssetTargetLocations(nativeAssets);
-  await copyNativeAssets(buildUri_, fatAssetTargetLocations, codesignIdentity,
+  await copyNativeAssetsMacOSHost(buildUri_, fatAssetTargetLocations,
+      codesignIdentity,
       buildMode, fileSystem);
 
   final Map<Asset, Asset> assetTargetLocations =
@@ -125,6 +124,7 @@ IOSSdk _getIosSdk(EnvironmentType environmentType) {
   }
 }
 
+/// Extract the [Target] from a [DarwinArch].
 Target _getNativeTarget(DarwinArch darwinArch) {
   switch (darwinArch) {
     case DarwinArch.armv7:
