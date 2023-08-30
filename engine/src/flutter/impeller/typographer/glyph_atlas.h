@@ -18,6 +18,8 @@
 
 namespace impeller {
 
+class FontGlyphAtlas;
+
 //------------------------------------------------------------------------------
 /// @brief      A texture containing the bitmap representation of glyphs in
 ///             different fonts along with the ability to query the location of
@@ -97,8 +99,9 @@ class GlyphAtlas {
   /// @return     The number of glyphs iterated over.
   ///
   size_t IterateGlyphs(
-      const std::function<bool(const FontGlyphPair& pair, const Rect& rect)>&
-          iterator) const;
+      const std::function<bool(const ScaledFont& scaled_font,
+                               const Glyph& glyph,
+                               const Rect& rect)>& iterator) const;
 
   //----------------------------------------------------------------------------
   /// @brief      Find the location of a specific font-glyph pair in the atlas.
@@ -106,19 +109,29 @@ class GlyphAtlas {
   /// @param[in]  pair  The font-glyph pair
   ///
   /// @return     The location of the font-glyph pair in the atlas.
-  ///             `std::nullopt` of the pair in not in the atlas.
+  ///             `std::nullopt` if the pair is not in the atlas.
   ///
   std::optional<Rect> FindFontGlyphBounds(const FontGlyphPair& pair) const;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Obtain an interface for querying the location of glyphs in the
+  ///             atlas for the given font and scale.  This provides a more
+  ///             efficient way to look up a run of glyphs in the same font.
+  ///
+  /// @param[in]  font  The font
+  /// @param[in]  scale The scale
+  ///
+  /// @return     A pointer to a FontGlyphAtlas, or nullptr if the font and
+  ///             scale are not available in the atlas.  The pointer is only
+  ///             valid for the lifetime of the GlyphAtlas.
+  ///
+  const FontGlyphAtlas* GetFontGlyphAtlas(const Font& font, Scalar scale) const;
 
  private:
   const Type type_;
   std::shared_ptr<Texture> texture_;
 
-  std::unordered_map<FontGlyphPair,
-                     Rect,
-                     FontGlyphPair::Hash,
-                     FontGlyphPair::Equal>
-      positions_;
+  std::unordered_map<ScaledFont, FontGlyphAtlas> font_atlas_map_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(GlyphAtlas);
 };
@@ -157,6 +170,31 @@ class GlyphAtlasContext {
   std::shared_ptr<RectanglePacker> rect_packer_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(GlyphAtlasContext);
+};
+
+//------------------------------------------------------------------------------
+/// @brief      An object that can look up glyph locations within the GlyphAtlas
+///             for a particular typeface.
+///
+class FontGlyphAtlas {
+ public:
+  FontGlyphAtlas() = default;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Find the location of a glyph in the atlas.
+  ///
+  /// @param[in]  glyph The glyph
+  ///
+  /// @return     The location of the glyph in the atlas.
+  ///             `std::nullopt` if the glyph is not in the atlas.
+  ///
+  std::optional<Rect> FindGlyphBounds(const Glyph& glyph) const;
+
+ private:
+  friend class GlyphAtlas;
+  std::unordered_map<Glyph, Rect> positions_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(FontGlyphAtlas);
 };
 
 }  // namespace impeller

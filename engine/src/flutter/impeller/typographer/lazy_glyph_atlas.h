@@ -32,8 +32,8 @@ class LazyGlyphAtlas {
  private:
   std::shared_ptr<TypographerContext> typographer_context_;
 
-  FontGlyphPair::Set alpha_set_;
-  FontGlyphPair::Set color_set_;
+  FontGlyphMap alpha_glyph_map_;
+  FontGlyphMap color_glyph_map_;
   std::shared_ptr<GlyphAtlasContext> alpha_context_;
   std::shared_ptr<GlyphAtlasContext> color_context_;
   mutable std::unordered_map<GlyphAtlas::Type, std::shared_ptr<GlyphAtlas>>
