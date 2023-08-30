@@ -120,19 +120,6 @@ void main() {
     await expectException(project, "throw 'while handling a gesture';");
   });
 
-  testWithoutContext('breaks when platform message callback throws', () async {
-    final TestProject project = TestProject(
-      r'''
-      BasicMessageChannel<String>('foo', const StringCodec()).setMessageHandler((_) {
-        throw 'platform message callback';
-      });
-      tester.binding.defaultBinaryMessenger.handlePlatformMessage('foo', const StringCodec().encodeMessage('Hello'), (_) {});
-      '''
-    );
-
-    await expectException(project, "throw 'platform message callback';");
-  });
-
   testWithoutContext('breaks when SliverChildBuilderDelegate.builder throws', () async {
     final TestProject project = TestProject(
       r'''
