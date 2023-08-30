@@ -76,7 +76,7 @@ void main() {
       projectUri: projectUri,
       buildMode: BuildMode.debug,
       fileSystem: fileSystem,
-      writeYamlFileTo: environment.buildDir.uri,
+      yamlParentDirectory: environment.buildDir.uri,
       buildRunner: FakeNativeAssetsBuildRunner(
         hasPackageConfigResult: false,
       ),
@@ -169,7 +169,7 @@ void main() {
         projectUri: projectUri,
         buildMode: BuildMode.debug,
         fileSystem: fileSystem,
-        writeYamlFileTo: environment.buildDir.uri,
+        yamlParentDirectory: environment.buildDir.uri,
         buildRunner: FakeNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <Package>[
             Package('bar', projectUri),
@@ -198,7 +198,7 @@ void main() {
       projectUri: projectUri,
       buildMode: BuildMode.debug,
       fileSystem: fileSystem,
-      writeYamlFileTo: environment.buildDir.uri,
+      yamlParentDirectory: environment.buildDir.uri,
       buildRunner: FakeNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', projectUri),
@@ -221,7 +221,7 @@ void main() {
       projectUri: projectUri,
       buildMode: BuildMode.debug,
       fileSystem: fileSystem,
-      writeYamlFileTo: environment.buildDir.uri,
+      yamlParentDirectory: environment.buildDir.uri,
       buildRunner: FakeNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', projectUri),

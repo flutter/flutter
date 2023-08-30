@@ -88,7 +88,7 @@ class NativeAssets extends Target {
           codesignIdentity: environment.defines[kCodesignIdentity],
           fileSystem: fileSystem,
           buildRunner: buildRunner,
-          writeYamlFileTo: environment.buildDir.uri,
+          yamlParentDirectory: environment.buildDir.uri,
         );
       case TargetPlatform.darwin:
         final String? darwinArchsEnvironment =
@@ -110,7 +110,7 @@ class NativeAssets extends Target {
           buildMode: buildMode,
           projectUri: projectUri,
           codesignIdentity: environment.defines[kCodesignIdentity],
-          writeYamlFileTo: environment.buildDir.uri,
+          yamlParentDirectory: environment.buildDir.uri,
           fileSystem: fileSystem,
           buildRunner: buildRunner,
         );
@@ -120,7 +120,7 @@ class NativeAssets extends Target {
             buildMode: BuildMode.debug,
             projectUri: projectUri,
             codesignIdentity: environment.defines[kCodesignIdentity],
-            writeYamlFileTo: environment.buildDir.uri,
+            yamlParentDirectory: environment.buildDir.uri,
             fileSystem: fileSystem,
             buildRunner: buildRunner,
             flutterTester: true,

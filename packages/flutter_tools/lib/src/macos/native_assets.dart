@@ -115,7 +115,7 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsMacOS({
   required BuildMode buildMode,
   bool flutterTester = false,
   String? codesignIdentity,
-  Uri? writeYamlFileTo,
+  Uri? yamlParentDirectory,
   required FileSystem fileSystem,
 }) async {
   const OS targetOs = OS.macOS;
@@ -123,7 +123,7 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsMacOS({
   if (await hasNoPackageConfig(buildRunner) ||
       await isDisabledAndNoNativeAssets(buildRunner)) {
     final Uri nativeAssetsYaml = await writeNativeAssetsYaml(
-        <Asset>[], writeYamlFileTo ?? buildUri_, fileSystem);
+        <Asset>[], yamlParentDirectory ?? buildUri_, fileSystem);
     return (nativeAssetsYaml, <Uri>[]);
   }
 
@@ -158,7 +158,9 @@ Future<(Uri? nativeAssetsYaml, List<Uri> dependencies)> buildNativeAssetsMacOS({
   await copyNativeAssets(buildUri_, fatAssetTargetLocations, codesignIdentity,
       buildMode, fileSystem);
   final Uri nativeAssetsUri = await writeNativeAssetsYaml(
-        assetTargetLocations.values, writeYamlFileTo ?? buildUri_, fileSystem);
+      assetTargetLocations.values,
+      yamlParentDirectory ?? buildUri_,
+      fileSystem);
   return (nativeAssetsUri, dependencies.toList());
 }
 
@@ -383,13 +385,13 @@ Future<void> codesignDylib(
 
 Future<Uri> writeNativeAssetsYaml(
   Iterable<Asset> assets,
-  Uri buildUri,
+  Uri yamlParentDirectory,
   FileSystem fileSystem,
 ) async {
   globals.logger.printTrace('Writing native_assets.yaml.');
   final String nativeAssetsDartContents =
       assets.toNativeAssetsFile();
-  final Directory parentDirectory = fileSystem.directory(buildUri);
+  final Directory parentDirectory = fileSystem.directory(yamlParentDirectory);
   if (!await parentDirectory.exists()) {
     await parentDirectory.create(recursive: true);
   }

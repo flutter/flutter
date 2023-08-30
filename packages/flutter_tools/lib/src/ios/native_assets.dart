@@ -69,11 +69,11 @@ Future<List<Uri>> buildNativeAssetsiOS({
   required BuildMode buildMode,
   String? codesignIdentity,
   required FileSystem fileSystem,
-  required Uri writeYamlFileTo,
+  required Uri yamlParentDirectory,
 }) async {
   if (await hasNoPackageConfig(buildRunner) ||
       await isDisabledAndNoNativeAssets(buildRunner)) {
-    await writeNativeAssetsYaml(<Asset>[], writeYamlFileTo, fileSystem);
+    await writeNativeAssetsYaml(<Asset>[], yamlParentDirectory, fileSystem);
     return <Uri>[];
   }
 
@@ -112,7 +112,7 @@ Future<List<Uri>> buildNativeAssetsiOS({
   final Map<Asset, Asset> assetTargetLocations =
       _assetTargetLocations(nativeAssets);
   await writeNativeAssetsYaml(
-      assetTargetLocations.values, writeYamlFileTo, fileSystem);
+      assetTargetLocations.values, yamlParentDirectory, fileSystem);
   return dependencies.toList();
 }
 
