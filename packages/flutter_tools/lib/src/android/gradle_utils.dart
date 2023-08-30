@@ -569,7 +569,7 @@ bool validateJavaAgp(Logger logger,
   return false;
   }
 
-  // Returns compatibility information for concerning the compatible minimum AGP
+  // Returns compatibility information concerning the minimum AGP
   // version for the specified Java version.
   JavaAgpCompat? getMinimumAgpVersionForJavaVersion(Logger logger,
     {required String javaV}) {
@@ -829,7 +829,7 @@ String getGradlewFileName(Platform platform) {
 //
 // Should be updated when a new version of Java is supported by a new version
 // of Gradle, as https://docs.gradle.org/current/userguide/compatibility.html
-// detials.
+// details.
 List<JavaGradleCompat> _javaGradleCompatList = const <JavaGradleCompat>[
     JavaGradleCompat(
       javaMin: '19',

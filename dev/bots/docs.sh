@@ -134,6 +134,11 @@ function main() {
   if ! [[ "$DESTINATION" =~ ^/ ]]; then
     DESTINATION="$PWD/$DESTINATION"
   fi
+
+  # Make sure the destination has .zip as an extension, because zip will add it
+  # anyhow, and we want to print the correct output location.
+  DESTINATION=${DESTINATION%.zip}.zip
+
   # Zip up doc directory and write the output to the destination.
   (cd "$STAGING_DIR"; zip -r -9 -q "$DESTINATION" ./doc)
   if [[ $KEEP_STAGING -eq 1 ]]; then

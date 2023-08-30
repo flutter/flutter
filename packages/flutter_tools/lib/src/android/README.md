@@ -20,7 +20,7 @@ All of the Android SDK/NDK versions noted in `gradle_utils.dart`
 (`compileSdkVersion`, `minSdkVersion`, `targetSdkVersion`, `ndkVersion`) versions should match the values in Flutter Gradle Plugin (FlutterExtension), so updating any of
 these versions also requires an update in [flutter.groovy](../../../gradle/src/main/groovy/flutter.groovy).
 
-The Flutter Gradle plugin is only applied to app projects, and modules that are built from source
+The Flutter Gradle Plugin is only applied to app projects, and modules that are built from source
 using (`include_flutter.groovy`). The remaining projects are: plugins, and modules compiled as AARs. In modules, the ephemeral directory `.android` is always regenerated after `flutter pub get`, so new versions are picked up after a Flutter upgrade.
 
 When updating the Android `compileSdkVersion`, `minSdkVersion`, or
@@ -37,7 +37,7 @@ When updating the Gradle version used in project templates
 - Framework integration & benchmark tests are running with at least this Gradle
 version.
 - Flutter tools tests that perform String checks with the current template
-Gradle verison is updated (you should see these fail if you do not fix them
+Gradle version are updated (you should see these fail if you do not fix them
 preemptively).
 
 When new versions of Gradle become available, make sure to:
@@ -80,7 +80,7 @@ When new versions of the Android Gradle Plugin become available, make sure to:
 (`maxKnownAndSupportedAgpVersion`) can be updated, and if so, take the necessary
 steps to ensure that we are testing this version in CI.
 - Update the `javaAgpCompatList` that contains the Java/AGP compatibility
-infomration known to the tool.
+information known to the tool.
 - Update the test cases in [gradle_utils_test.dart](../../..test/general.shard/android/gradle_utils_test.dart) that test compatibility between Java and AGP versions
 (relevant tests should fail if you do not fix them preemptively, but should also
 be marked inline).
