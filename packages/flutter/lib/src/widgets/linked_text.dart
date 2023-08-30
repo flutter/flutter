@@ -29,6 +29,15 @@ typedef LinkBuilder = (InlineSpan, TapGestureRecognizer) Function(
   String linkString,
 );
 
+/// Builds the [Widget] output by [LinkedText].
+///
+/// Typically a [Text.rich] containing a [TextSpan] whose children are the
+/// [linkedSpans].
+typedef LinkedTextBuilder = Widget Function (
+  BuildContext context,
+  Iterable<InlineSpan> linkedSpans,
+);
+
 /// Finds [TextRange]s in the given [String].
 typedef TextRangesFinder = Iterable<TextRange> Function(String text);
 
@@ -77,7 +86,7 @@ class LinkedText extends StatefulWidget {
   ///    control over matching and building different types of links.
   LinkedText({
     super.key,
-    this.style,
+    this.builder = defaultBuilder,
     required LinkTapCallback onTap,
     List<InlineSpan>? spans,
     String? text,
@@ -113,7 +122,7 @@ class LinkedText extends StatefulWidget {
   ///    control over matching and building different types of links.
   LinkedText.regExp({
     super.key,
-    this.style,
+    this.builder = defaultBuilder,
     required LinkTapCallback onTap,
     required RegExp regExp,
     List<InlineSpan>? spans,
@@ -158,10 +167,10 @@ class LinkedText extends StatefulWidget {
   ///    the given [RegExp].
   LinkedText.textLinkers({
     super.key,
+    this.builder = defaultBuilder,
     String? text,
     List<InlineSpan>? spans,
     required this.textLinkers,
-    this.style,
   }) : assert((text == null) != (spans == null), 'Must specify exactly one to link: either text or spans.'),
        assert(textLinkers.isNotEmpty),
        spans = spans ?? <InlineSpan>[
@@ -192,10 +201,29 @@ class LinkedText extends StatefulWidget {
   /// supported and will produce an error.
   late final List<TextLinker> textLinkers;
 
-  /// The [TextStyle] to apply to the output [InlineSpan].
+  /// Builds the [Widget] that is output by [LinkedText].
   ///
-  /// Defaults to [DefaultTextStyle].
-  final TextStyle? style;
+  /// By default, builds a [Text.rich] with a single [TextSpan] whose children
+  /// are the linked [TextSpan]s, and whose style is [DefaultTextStyle].
+  final LinkedTextBuilder builder;
+
+  /// The default value of [builder].
+  ///
+  /// Builds a [Text.rich] with a single [TextSpan] whose children are the
+  /// linked [TextSpan]s, and whose style is [DefaultTextStyle]. If there are no
+  /// linked [TextSpan]s to display, builds a [SizedBox.shrink].
+  static Widget defaultBuilder(BuildContext context, Iterable<InlineSpan> linkedSpans) {
+    if (linkedSpans.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Text.rich(
+      TextSpan(
+        style: DefaultTextStyle.of(context).style,
+        children: linkedSpans.toList(),
+      ),
+    );
+  }
 
   /// Returns a [LinkBuilder] that highlights the given text and sets the given
   /// [onTap] handler.
@@ -279,16 +307,7 @@ class _LinkedTextState extends State<LinkedText> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.spans.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Text.rich(
-      TextSpan(
-        style: widget.style ?? DefaultTextStyle.of(context).style,
-        children: _linkedSpans.toList(),
-      ),
-    );
+    return widget.builder(context, _linkedSpans);
   }
 }
 

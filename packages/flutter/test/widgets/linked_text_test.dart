@@ -512,4 +512,33 @@ void main() {
 
     expect(lastTappedLink, 'flutter.dev');
   });
+
+  testWidgets('builds the widget specified by builder', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return LinkedText(
+                onTap: (String text) {},
+                text: 'Check out flutter.dev.',
+                builder: (BuildContext context, Iterable<InlineSpan> linkedSpans) {
+                  return RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      children: linkedSpans.toList(),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(RichText), findsOneWidget);
+    final RichText richText = tester.widget(find.byType(RichText));
+    expect(richText.textAlign, TextAlign.center);
+  });
 }
