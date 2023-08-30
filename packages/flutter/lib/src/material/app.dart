@@ -770,6 +770,11 @@ class MaterialApp extends StatefulWidget {
   }
 }
 
+/// Scroll behaviour that scrolls by all pointer devices.
+final ScrollBehavior kAllDraggableScrollBehavior =
+    const MaterialScrollBehavior()
+        .copyWith(dragDevices: ui.PointerDeviceKind.values.toSet());
+
 /// Describes how [Scrollable] widgets behave for [MaterialApp]s.
 ///
 /// {@macro flutter.widgets.scrollBehavior}
