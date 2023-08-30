@@ -48,6 +48,10 @@ const fml::TimeDelta& Stopwatch::GetLap(size_t index) const {
   return laps_[index];
 }
 
+size_t Stopwatch::GetLapsCount() const {
+  return laps_.size();
+}
+
 size_t Stopwatch::GetCurrentSample() const {
   return current_sample_;
 }

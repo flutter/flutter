@@ -74,6 +74,7 @@
 ../../../flutter/flow/mutators_stack_unittests.cc
 ../../../flutter/flow/raster_cache_unittests.cc
 ../../../flutter/flow/skia_gpu_object_unittests.cc
+../../../flutter/flow/stopwatch_dl_unittests.cc
 ../../../flutter/flow/stopwatch_unittests.cc
 ../../../flutter/flow/surface_frame_unittests.cc
 ../../../flutter/flow/testing

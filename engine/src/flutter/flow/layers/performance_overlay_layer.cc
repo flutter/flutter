@@ -6,8 +6,11 @@
 
 #include <iomanip>
 #include <iostream>
+#include <memory>
 #include <string>
 
+#include "flow/stopwatch.h"
+#include "flow/stopwatch_dl.h"
 #include "flow/stopwatch_sk.h"
 #include "third_party/skia/include/core/SkFont.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
@@ -16,6 +19,7 @@ namespace flutter {
 namespace {
 
 void VisualizeStopWatch(DlCanvas* canvas,
+                        const bool impeller_enabled,
                         const Stopwatch& stopwatch,
                         SkScalar x,
                         SkScalar y,
@@ -30,11 +34,15 @@ void VisualizeStopWatch(DlCanvas* canvas,
 
   if (show_graph) {
     SkRect visualization_rect = SkRect::MakeXYWH(x, y, width, height);
+    std::unique_ptr<StopwatchVisualizer> visualizer;
 
-    // TODO(matanlurey): Select a visualizer based on the current backend.
-    // https://github.com/flutter/flutter/issues/126009
-    SkStopwatchVisualizer visualizer = SkStopwatchVisualizer(stopwatch);
-    visualizer.Visualize(canvas, visualization_rect);
+    if (impeller_enabled) {
+      visualizer = std::make_unique<DlStopwatchVisualizer>(stopwatch);
+    } else {
+      visualizer = std::make_unique<SkStopwatchVisualizer>(stopwatch);
+    }
+
+    visualizer->Visualize(canvas, visualization_rect);
   }
 
   if (show_labels) {
@@ -105,12 +113,13 @@ void PerformanceOverlayLayer::Paint(PaintContext& context) const {
   auto mutator = context.state_stack.save();
 
   VisualizeStopWatch(
-      context.canvas, context.raster_time, x, y, width, height - padding,
-      options_ & kVisualizeRasterizerStatistics,
+      context.canvas, context.impeller_enabled, context.raster_time, x, y,
+      width, height - padding, options_ & kVisualizeRasterizerStatistics,
       options_ & kDisplayRasterizerStatistics, "Raster", font_path_);
 
-  VisualizeStopWatch(context.canvas, context.ui_time, x, y + height, width,
-                     height - padding, options_ & kVisualizeEngineStatistics,
+  VisualizeStopWatch(context.canvas, context.impeller_enabled, context.ui_time,
+                     x, y + height, width, height - padding,
+                     options_ & kVisualizeEngineStatistics,
                      options_ & kDisplayEngineStatistics, "UI", font_path_);
 }
 
