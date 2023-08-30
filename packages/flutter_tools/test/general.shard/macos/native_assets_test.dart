@@ -87,7 +87,7 @@ void main() {
     );
   });
 
-  testUsingContext('dry run with no package config',
+  testUsingContext('dry run for multiple OSes with no package config',
       overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
       }, () async {
@@ -311,7 +311,7 @@ InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault
       // TODO(dacoharkes): Implement other OSes. https://github.com/flutter/flutter/issues/129757
       return;
     }
-    
+
     final NativeAssetsBuildRunner runner =
         NativeAssetsBuildRunnerImpl(projectUri, fileSystem, logger);
     final CCompilerConfig result = await runner.cCompilerConfig;
