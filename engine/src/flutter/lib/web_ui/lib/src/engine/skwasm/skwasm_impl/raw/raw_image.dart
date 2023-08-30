@@ -8,7 +8,6 @@ library skwasm_impl;
 import 'dart:ffi';
 import 'dart:js_interop';
 
-import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 
 final class RawImage extends Opaque {}
@@ -47,9 +46,9 @@ external ImageHandle imageCreateFromPixels(
 //   Int,
 //   Int,
 //   SurfaceHandle,
-// )>(symbol: 'image_createFromVideoFrame', isLeaf: true)
-// external ImageHandle imageCreateFromVideoFrame(
-//   JSAny videoFrame,
+// )>(symbol: 'image_createFromTextureSource', isLeaf: true)
+// external ImageHandle imageCreateFromTextureSource(
+//   JSAny textureSource,
 //   int width,
 //   int height,
 //   SurfaceHandle handle,
@@ -59,21 +58,21 @@ external ImageHandle imageCreateFromPixels(
 // annotations currently. For now, we can use JS interop to expose this function
 // instead.
 extension SkwasmImageExtension on SkwasmInstance {
-  @JS('wasmExports.image_createFromVideoFrame')
-  external JSNumber imageCreateFromVideoFrame(
-    VideoFrame frame,
+  @JS('wasmExports.image_createFromTextureSource')
+  external JSNumber imageCreateFromTextureSource(
+    JSAny textureSource,
     JSNumber width,
     JSNumber height,
     JSNumber surfaceHandle,
   );
 }
-ImageHandle imageCreateFromVideoFrame(
-  VideoFrame frame,
+ImageHandle imageCreateFromTextureSource(
+  JSAny frame,
   int width,
   int height,
   SurfaceHandle handle
 ) => ImageHandle.fromAddress(
-  skwasmInstance.imageCreateFromVideoFrame(
+  skwasmInstance.imageCreateFromTextureSource(
     frame,
     width.toJS,
     height.toJS,

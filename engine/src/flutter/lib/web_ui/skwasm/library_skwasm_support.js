@@ -82,13 +82,13 @@ mergeInto(LibraryManager.library, {
         imageBitmap,
       });
     };
-    _skwasm_createGlTextureFromVideoFrame = function(videoFrame, width, height) {
+    _skwasm_createGlTextureFromTextureSource = function(textureSource, width, height) {
       const glCtx = GL.currentContext.GLctx;
       const newTexture = glCtx.createTexture();
       glCtx.bindTexture(glCtx.TEXTURE_2D, newTexture);
       glCtx.pixelStorei(glCtx.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
       
-      glCtx.texImage2D(glCtx.TEXTURE_2D, 0, glCtx.RGBA, width, height, 0, glCtx.RGBA, glCtx.UNSIGNED_BYTE, videoFrame);
+      glCtx.texImage2D(glCtx.TEXTURE_2D, 0, glCtx.RGBA, width, height, 0, glCtx.RGBA, glCtx.UNSIGNED_BYTE, textureSource);
 
       glCtx.pixelStorei(glCtx.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
       glCtx.bindTexture(glCtx.TEXTURE_2D, null);
@@ -118,7 +118,7 @@ mergeInto(LibraryManager.library, {
   skwasm_resizeCanvas__deps: ['$skwasm_support_setup'],
   skwasm_captureImageBitmap: function () {},
   skwasm_captureImageBitmap__deps: ['$skwasm_support_setup'],
-  skwasm_createGlTextureFromVideoFrame: function () {},
-  skwasm_createGlTextureFromVideoFrame__deps: ['$skwasm_support_setup'],
+  skwasm_createGlTextureFromTextureSource: function () {},
+  skwasm_createGlTextureFromTextureSource__deps: ['$skwasm_support_setup'],
 });
   

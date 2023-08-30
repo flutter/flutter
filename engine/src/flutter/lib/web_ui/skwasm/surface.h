@@ -33,18 +33,18 @@ enum class ImageByteFormat {
   png,
 };
 
-class VideoFrameWrapper {
+class TextureSourceWrapper {
  public:
-  VideoFrameWrapper(unsigned long threadId, SkwasmObject videoFrame)
+  TextureSourceWrapper(unsigned long threadId, SkwasmObject textureSource)
       : _rasterThreadId(threadId) {
-    skwasm_setAssociatedObjectOnThread(_rasterThreadId, this, videoFrame);
+    skwasm_setAssociatedObjectOnThread(_rasterThreadId, this, textureSource);
   }
 
-  ~VideoFrameWrapper() {
+  ~TextureSourceWrapper() {
     skwasm_disposeAssociatedObjectOnThread(_rasterThreadId, this);
   }
 
-  SkwasmObject getVideoFrame() { return skwasm_getAssociatedObject(this); }
+  SkwasmObject getTextureSource() { return skwasm_getAssociatedObject(this); }
 
  private:
   unsigned long _rasterThreadId;
@@ -67,8 +67,8 @@ class Surface {
   void onRenderComplete(uint32_t callbackId, SkwasmObject imageBitmap);
 
   // Any thread
-  std::unique_ptr<VideoFrameWrapper> createVideoFrameWrapper(
-      SkwasmObject videoFrame);
+  std::unique_ptr<TextureSourceWrapper> createTextureSourceWrapper(
+      SkwasmObject textureSource);
 
  private:
   void _runWorker();

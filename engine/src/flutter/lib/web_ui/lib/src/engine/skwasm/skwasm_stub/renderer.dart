@@ -189,4 +189,9 @@ class SkwasmRenderer implements Renderer {
     required double baseline,
     required int lineNumber
   }) => throw UnimplementedError('Skwasm not implemented on this platform.');
+
+  @override
+  ui.Image createImageFromImageBitmap(DomImageBitmap imageSource) {
+    throw UnimplementedError('Skwasm not implemented on this platform.');
+  }
 }

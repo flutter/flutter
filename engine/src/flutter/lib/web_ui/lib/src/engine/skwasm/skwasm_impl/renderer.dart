@@ -448,6 +448,16 @@ class SkwasmRenderer implements Renderer {
     baseline: baseline,
     lineNumber: lineNumber
   );
+
+  @override
+  ui.Image createImageFromImageBitmap(DomImageBitmap imageSource) {
+    return SkwasmImage(imageCreateFromTextureSource(
+      imageSource as JSAny,
+      imageSource.width.toDartInt,
+      imageSource.height.toDartInt,
+      surface.handle,
+    ));
+  }
 }
 
 class SkwasmPictureRenderer implements PictureRenderer {
