@@ -80,7 +80,7 @@ When new versions of the Android Gradle Plugin become available, make sure to:
 (`maxKnownAndSupportedAgpVersion`) can be updated, and if so, take the necessary
 steps to ensure that we are testing this version in CI.
 - Update the `javaAgpCompatList` that contains the Java/AGP compatibility
-infomration known to the tool.
+information known to the tool.
 - Update the test cases in [gradle_utils_test.dart](../../..test/general.shard/android/gradle_utils_test.dart) that test compatibility between Java and AGP versions
 (relevant tests should fail if you do not fix them preemptively, but should also
 be marked inline).
