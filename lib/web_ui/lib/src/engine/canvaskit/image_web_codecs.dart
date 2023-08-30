@@ -60,7 +60,7 @@ class CkBrowserImageDecoder extends BrowserImageDecoder {
 
   @override
   ui.Image generateImageFromVideoFrame(VideoFrame frame) {
-    final SkImage? skImage = canvasKit.MakeLazyImageFromTextureSource(
+    final SkImage? skImage = canvasKit.MakeLazyImageFromTextureSourceWithInfo(
       frame,
       SkPartialImageInfo(
         alphaType: canvasKit.AlphaType.Premul,

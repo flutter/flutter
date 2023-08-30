@@ -1003,6 +1003,12 @@ class OffScreenCanvas {
         : canvasElement!.getContext('2d');
   }
 
+  DomCanvasRenderingContextBitmapRenderer? getBitmapRendererContext() {
+    return (offScreenCanvas != null
+        ? offScreenCanvas!.getContext('bitmaprenderer')
+        : canvasElement!.getContext('bitmaprenderer')) as DomCanvasRenderingContextBitmapRenderer?;
+  }
+
   /// Feature detection for transferToImageBitmap on OffscreenCanvas.
   bool get transferToImageBitmapSupported =>
       js_util.hasProperty(offScreenCanvas!, 'transferToImageBitmap');

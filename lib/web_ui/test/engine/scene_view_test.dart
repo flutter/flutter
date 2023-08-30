@@ -14,15 +14,6 @@ import 'package:ui/ui_web/src/ui_web.dart';
 
 import 'scene_builder_utils.dart';
 
-@JS('createImageBitmap')
-external JSPromise createImageBitmap(
-  JSAny source,
-  JSNumber x,
-  JSNumber y,
-  JSNumber width,
-  JSNumber height
-);
-
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
@@ -37,10 +28,7 @@ class StubPictureRenderer implements PictureRenderer {
     final ui.Rect cullRect = picture.cullRect;
     final DomImageBitmap bitmap = (await createImageBitmap(
       scratchCanvasElement as JSAny,
-      0.toJS,
-      0.toJS,
-      cullRect.width.toJS,
-      cullRect.height.toJS
+      (x: 0, y: 0, width: cullRect.width.toInt(), height: cullRect.height.toInt())
     ).toDart)! as DomImageBitmap;
     return bitmap;
   }
