@@ -392,7 +392,6 @@ void main() {
           expect(find.byType(DesktopTextSelectionToolbarButton), findsOneWidget);
           expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNothing);
       }
-
     },
       variant: TargetPlatformVariant.all(),
     );
