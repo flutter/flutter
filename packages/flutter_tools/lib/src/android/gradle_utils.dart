@@ -38,7 +38,6 @@ const String ndkVersion = '23.1.7779620';
 
 
 // Update these when new major versions of Java are supported by Gradle.
-// Supported means Java <-> Gradle support.
 // Source of truth: https://docs.gradle.org/current/userguide/compatibility.html
 const String oneMajorVersionHigherJavaVersion = '20';
 
@@ -533,7 +532,7 @@ JavaGradleCompat? getValidGradleVersionRangeForJavaVersion(
     }
   }
 
-  logger.printTrace('Unable to determine valid Gradle version range for specified Java version.');
+  logger.printTrace('Unable to determine valid Gradle version range for Java version $javaV.');
   return null;
 }
 
