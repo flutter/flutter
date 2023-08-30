@@ -448,6 +448,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isFuchsiaEnabled = false,
     this.areCustomDevicesEnabled = false,
     this.isFlutterWebWasmEnabled = false,
+    this.isCliAnimationEnabled = true,
     this.isNativeAssetsEnabled = false,
   });
 
@@ -479,6 +480,9 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isFlutterWebWasmEnabled;
 
   @override
+  final bool isCliAnimationEnabled;
+
+  @override
   final bool isNativeAssetsEnabled;
 
   @override
@@ -500,6 +504,8 @@ class TestFeatureFlags implements FeatureFlags {
         return isFuchsiaEnabled;
       case flutterCustomDevicesFeature:
         return areCustomDevicesEnabled;
+      case cliAnimation:
+        return isCliAnimationEnabled;
       case nativeAssets:
         return isNativeAssetsEnabled;
     }

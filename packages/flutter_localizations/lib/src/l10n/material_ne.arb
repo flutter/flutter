@@ -143,5 +143,6 @@
   "collapsedHint": "एक्स्पान्ड गरियो",
   "menuDismissLabel": "मेनु खारेज गर्नुहोस्",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }
