@@ -4,6 +4,7 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -49,7 +50,7 @@ void main() {
 
   testUsingContext('dry run with no package config',
       overrides: <Type, Generator>{
-        ProcessManager: () => FakeProcessManager.any(),
+        ProcessManager: () => FakeProcessManager.empty(),
       }, () async {
     expect(
       await dryRunNativeAssetsiOS(
@@ -68,7 +69,7 @@ void main() {
   });
 
   testUsingContext('build with no package config', overrides: <Type, Generator>{
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => FakeProcessManager.empty(),
   }, () async {
     await buildNativeAssetsiOS(
       darwinArchs: <DarwinArch>[DarwinArch.arm64],
@@ -90,7 +91,7 @@ void main() {
 
   testUsingContext('dry run with assets but not enabled',
       overrides: <Type, Generator>{
-        ProcessManager: () => FakeProcessManager.any(),
+        ProcessManager: () => FakeProcessManager.empty(),
       }, () async {
     final File packageConfig =
         environment.projectDir.childFile('.dart_tool/package_config.json');
@@ -116,7 +117,7 @@ void main() {
 
   testUsingContext('dry run with assets', overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => FakeProcessManager.empty(),
   }, () async {
     final File packageConfig =
         environment.projectDir.childFile('.dart_tool/package_config.json');
@@ -186,7 +187,7 @@ void main() {
 
   testUsingContext('build no assets', overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => FakeProcessManager.empty(),
   }, () async {
     final File packageConfig =
         environment.projectDir.childFile('.dart_tool/package_config.json');
@@ -205,11 +206,45 @@ void main() {
         ],
       ),
     );
+    expect(
+      environment.buildDir.childFile('native_assets.yaml'),
+      exists,
+    );
   });
 
   testUsingContext('build with assets', overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-    ProcessManager: () => FakeProcessManager.any(),
+    ProcessManager: () => FakeProcessManager.list(
+          <FakeCommand>[
+            const FakeCommand(
+              command: <Pattern>[
+                'lipo',
+                '-create',
+                '-output',
+                '/build/native_assets/ios/bar.dylib',
+                'bar.dylib',
+              ],
+            ),
+            const FakeCommand(
+              command: <Pattern>[
+                'install_name_tool',
+                '-id',
+                '@executable_path/Frameworks/bar.dylib',
+                '/build/native_assets/ios/bar.dylib',
+              ],
+            ),
+            const FakeCommand(
+              command: <Pattern>[
+                'codesign',
+                '--force',
+                '--sign',
+                '-',
+                '--timestamp=none',
+                '/build/native_assets/ios/bar.dylib',
+              ],
+            ),
+          ],
+        ),
   }, () async {
     final File packageConfig =
         environment.projectDir.childFile('.dart_tool/package_config.json');
@@ -237,6 +272,10 @@ void main() {
           ],
         ),
       ),
+    );
+    expect(
+      environment.buildDir.childFile('native_assets.yaml'),
+      exists,
     );
   });
 }
