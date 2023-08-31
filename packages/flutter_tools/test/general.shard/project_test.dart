@@ -845,6 +845,7 @@ apply plugin: 'kotlin-android'
           final Map<String, Object?> json = jsonDecode(outputFile.readAsStringSync()) as Map<String, Object?>;
           expect(json['teamIdentifier'], 'ABC');
           expect(json['bundleIdentifier'], 'io.flutter.someProject');
+          expect(json['associatedDomains'], unorderedEquals(<String>[]));
         });
       });
 
