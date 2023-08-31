@@ -639,10 +639,12 @@ void main() {
           )
         )
       );
-      const TestPage page = TestPage(name: 'page');
-      final Route<dynamic> route = page.createRoute(nav.currentContext!);
-      // ignore: invalid_use_of_protected_member
-      route.dispose();
+
+      nav.currentState!.push(MaterialPageRoute<void>(builder: (_) => const Placeholder())); // This should create a route
+      await tester.pumpAndSettle();
+
+      nav.currentState!.pop();
+      await tester.pumpAndSettle(); // this should dispose the route.
     }
 
     final List<ObjectEvent> events = <ObjectEvent>[];
