@@ -37,9 +37,9 @@ class _ListenableBuilderExampleState extends State<ListenableBuilderExample> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('ListenableBuilder Example')),
-        body: ListContent(listNotifier: _listNotifier),
+        body: ListBody(listNotifier: _listNotifier),
         floatingActionButton: FloatingActionButton(
-          onPressed: () => _listNotifier.add(_random.nextInt(1 << 31)), // 1 << 31 is the maximum supported value
+          onPressed: () => _listNotifier.add(_random.nextInt(1 << 32)), // 1 << 32 is the maximum supported value
           child: const Icon(Icons.add),
         ),
       ),
@@ -47,8 +47,8 @@ class _ListenableBuilderExampleState extends State<ListenableBuilderExample> {
   }
 }
 
-class ListContent extends StatelessWidget {
-  const ListContent({super.key, required this.listNotifier});
+class ListBody extends StatelessWidget {
+  const ListBody({super.key, required this.listNotifier});
 
   final ListModel listNotifier;
 
