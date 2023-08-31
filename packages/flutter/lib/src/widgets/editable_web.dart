@@ -689,8 +689,34 @@ class _EditableWebState extends State<EditableWeb> {
     }
   }
 
+  /*
+    Nice-to-have:
+      million inputs results in 1 form platform view created. 
+      will this have problems with laying out the inputs?
+  */
+
+  static Map<String, _EditableWebState>? formOwners = {};
+
+  // single EditableWeb that is a form owner for both cases.  
   @override
   Widget build(BuildContext context) {
+    // final String autofillScopeId = widget.currentAutofillScope?.id ?? _defaultId;
+
+    // if(formOwners[autofillScopeId] == null) {
+    //   // create form platform view
+    //   formOwners[autofillScopeId] = this;
+    // } else if(formOwners[autofillScopeId] == this) {
+    //   return HtmlElementView.fromTagName(
+    //     tagName: 'form',
+    //     onElementCreated: (Object element) {
+    //       // initalizeForm(element);
+    //       // initializePlatformView(element as html.HtmlElement);
+    //     },
+    //   );
+    // } else {
+    //   return Container();
+    // }
+
     return SizedBox(
       height: sizedBoxHeight,
       child: HtmlElementView.fromTagName(
@@ -755,6 +781,7 @@ class WebTextInputControl with TextInputControl {
   void detach(TextInputClient client) {
     print('WebTextInputControl.detach()');
     // Blur here since order goes detach -> hide.
+    print('blurring in detach');
     (_currentInputElement! as html.InputElement).blur();
 
     // Remove selectionchange listener.
@@ -806,6 +833,8 @@ class WebTextInputControl with TextInputControl {
 
   @override
   void show() {
+    print('--inside show--');
+    print('is current element == document.activeElement ${_currentInputElement == html.document.activeElement}');
     (_currentInputElement! as html.InputElement).focus();
   }
 
@@ -816,6 +845,7 @@ class WebTextInputControl with TextInputControl {
     // This blur call is for instances where we blur to hide keyboard without
     // detaching the connection (if such a circumstance exists).
     if (_currentInputElement != null) {
+      print('blurring');
       (_currentInputElement! as html.InputElement).blur();
     }
   }

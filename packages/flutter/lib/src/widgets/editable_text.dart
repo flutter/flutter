@@ -3327,6 +3327,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         : TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
       _updateSizeAndTransform();
       _schedulePeriodicPostFrameCallbacks();
+      print('calling show in _openInputConnection when _hasInputConnection is false');
       _textInputConnection!
         ..setStyle(
           fontFamily: _style.fontFamily,
@@ -3344,6 +3345,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
       _lastKnownRemoteTextEditingValue = localValue;
     } else {
+      print('calling show in _openInputConnection when _hasInputConnection is true');
       _textInputConnection!.show();
     }
   }

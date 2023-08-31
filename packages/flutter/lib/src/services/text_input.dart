@@ -1707,7 +1707,7 @@ class TextInput {
   /// should call [TextInputConnection.close] on the returned
   /// [TextInputConnection].
   static TextInputConnection attach(TextInputClient client, TextInputConfiguration configuration) {
-    print('attaching in text input');
+    print('TextInput.attach()');
     final TextInputConnection connection = TextInputConnection._(client);
     _instance._attach(connection, configuration);
     return connection;
@@ -1718,7 +1718,7 @@ class TextInput {
   // `TextInputClient.requestExistingInputState` method.
   void _attach(TextInputConnection connection, TextInputConfiguration configuration) {
     assert(_debugEnsureInputActionWorksOnPlatform(configuration.inputAction));
-    print('calling _attach in TextInput');
+    print('TextInput._attach()');
     _currentConnection = connection;
     _currentConfiguration = configuration;
     _setClient(connection._client, configuration);
@@ -1862,7 +1862,6 @@ class TextInput {
     switch (method) {
       case 'TextInputClient.updateEditingState':
         final TextEditingValue value = TextEditingValue.fromJSON(args[1] as Map<String, dynamic>);
-        print('ds;lafjads;lkjasdf;lkjsdfa');
         TextInput._instance._updateEditingValue(value, exclude: _PlatformTextInputControl.instance);
       case 'TextInputClient.updateEditingStateWithDeltas':
         assert(_currentConnection!._client is DeltaTextInputClient, 'You must be using a DeltaTextInputClient if TextInputConfiguration.enableDeltaModel is set to true');
@@ -2031,7 +2030,7 @@ class TextInput {
       }
     }
 
-    print('--updateEditingValue-- ${value}');
+    print('TextInput.updateEditingValue() ${value}');
 
     _instance._currentConnection!._client.updateEditingValue(value);
   }
@@ -2244,7 +2243,6 @@ class _PlatformTextInputControl with TextInputControl {
 
   @override
   void attach(TextInputClient client, TextInputConfiguration configuration) {
-    print('in legacy attach');
     _channel.invokeMethod<void>(
       'TextInput.setClient',
       <Object>[
