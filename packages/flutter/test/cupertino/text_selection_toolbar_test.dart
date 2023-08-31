@@ -424,4 +424,54 @@ void main() {
       }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
     }
   }
+
+  testWidgets('draws a shadow below the toolbar in light mode', (WidgetTester tester) async {
+    const double height = 50.0;
+    const double anchorAbove = 100.0;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(
+          brightness: Brightness.light,
+        ),
+        home: Center(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setter) {
+              final MediaQueryData data = MediaQuery.of(context);
+              // Add some custom vertical padding to make this test more strict.
+              // By default in the testing environment, _kToolbarContentDistance
+              // and the built-in padding from CupertinoApp can end up canceling
+              // each other out.
+              return MediaQuery(
+                data: data.copyWith(
+                  padding: data.viewPadding.copyWith(
+                    top: 12.0,
+                  ),
+                ),
+                child: CupertinoTextSelectionToolbar(
+                  anchorAbove: const Offset(50.0, anchorAbove),
+                  anchorBelow: const Offset(50.0, 500.0),
+                  children: <Widget>[
+                    Container(color: const Color(0xffff0000), width: 50.0, height: height),
+                    Container(color: const Color(0xff00ff00), width: 50.0, height: height),
+                    Container(color: const Color(0xff0000ff), width: 50.0, height: height),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.byType(CupertinoTextSelectionToolbar),
+      paints..shadow(
+        includes: const <Offset>[Offset(50.0, anchorAbove - _kToolbarContentDistance - height / 2)],
+        color: const Color(0x33000000),
+        elevation: 12.0,
+        transparentOccluder: false,
+      ),
+    );
+  }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 }
