@@ -10,11 +10,13 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 import '../../src/testbed.dart';
 
@@ -110,6 +112,7 @@ void main() {
         flutterManifest.writeAsStringSync('{"files":[]}');
       }, overrides: <Type, Generator>{
         DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
+        FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
       });
     });
 

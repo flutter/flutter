@@ -36,10 +36,11 @@ class CreateCommand extends CreateBase {
     argParser.addOption(
       'template',
       abbr: 't',
-      allowed: FlutterProjectType.values.map<String>((FlutterProjectType e) => e.cliName),
+      allowed: FlutterProjectType.enabledValues
+          .map<String>((FlutterProjectType e) => e.cliName),
       help: 'Specify the type of project to create.',
       valueHelp: 'type',
-      allowedHelp: CliEnum.allowedHelp(FlutterProjectType.values),
+      allowedHelp: CliEnum.allowedHelp(FlutterProjectType.enabledValues),
     );
     argParser.addOption(
       'sample',

@@ -7,6 +7,7 @@ import 'package:yaml/yaml.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
+import 'features.dart';
 import 'project.dart';
 import 'template.dart';
 import 'version.dart';
@@ -71,6 +72,14 @@ enum FlutterProjectType implements CliEnum {
     }
     return null;
   }
+
+  static List<FlutterProjectType> enabledValues = <FlutterProjectType>[
+    for (final FlutterProjectType value in values)
+      if (value == FlutterProjectType.packageFfi) ...<FlutterProjectType>[
+        if (featureFlags.isNativeAssetsEnabled) value
+      ] else
+        value,
+  ];
 }
 
   /// Verifies the expected yaml keys are present in the file.
