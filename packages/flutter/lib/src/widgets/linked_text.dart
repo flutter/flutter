@@ -18,6 +18,8 @@ typedef LinkTapCallback = void Function(String linkString);
 /// Signature for a function that builds an [InlineSpan] link.
 ///
 /// The link displays [displayString] and links to [linkString] when tapped.
+/// These are distinct because sometimes a link may be split across multiple
+/// [TextSpan]s.
 ///
 /// Creates a [TapGestureRecognizer] and returns it so that its lifecycle can be
 /// maintained by the caller.
@@ -25,6 +27,8 @@ typedef LinkTapCallback = void Function(String linkString);
 /// {@template flutter.painting.LinkBuilder.recognizer}
 /// It's necessary to call [TapGestureRecognizer.dispose] on the returned
 /// recognizer when the owning widget is disposed. See [TextSpan.recognizer].
+/// When using [LinkedText], this is done automatically for any recognizers
+/// returned from a [LinkBuilder].
 /// {@endtemplate}
 typedef LinkBuilder = (InlineSpan, TapGestureRecognizer) Function(
   String displayString,
