@@ -98,7 +98,7 @@ class MyHomePage extends StatelessWidget {
                           final TapGestureRecognizer recognizer = TapGestureRecognizer()
                               ..onTap = () => _handleTapTwitterHandle(context, linkText);
                           return (
-                            InlineLinkSpan(
+                            TextSpan(
                               text: displayText,
                               style: const TextStyle(
                                 color: Color(0xff00aaaa),

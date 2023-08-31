@@ -349,9 +349,7 @@ class _InlineLinkSpan extends TextSpan {
   _InlineLinkSpan({
     required String text,
     TextStyle? style,
-    super.locale,
     super.recognizer,
-    super.semanticsLabel,
   }) : super(
     style: style ?? defaultLinkStyle,
     mouseCursor: SystemMouseCursors.click,
