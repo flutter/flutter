@@ -116,35 +116,6 @@ class _DropdownMenuItemButton<T> extends StatefulWidget {
 }
 
 class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> {
-  late final CurvedAnimation _fadeOpacity;
-
-  @override
-  void initState() {
-    super.initState();
-
-    final double unit = 0.5 / (widget.route.items.length + 1.5);
-
-    if (widget.itemIndex == widget.route.selectedIndex) {
-      _fadeOpacity = CurvedAnimation(
-        parent: widget.route.animation!,
-        curve: const Threshold(0.0),
-      );
-    } else {
-      final double start = clampDouble(0.5 + (widget.itemIndex + 1) * unit, 0.0, 1.0);
-      final double end = clampDouble(start + 1.5 * unit, 0.0, 1.0);
-      _fadeOpacity = CurvedAnimation(
-        parent: widget.route.animation!,
-        curve: Interval(start, end),
-      );
-    }
-  }
-
-  @override
-  void dispose() {
-    _fadeOpacity.dispose();
-    super.dispose();
-  }
-
   void _handleFocusChange(bool focused) {
     final bool inTraditionalMode;
     switch (FocusManager.instance.highlightMode) {
@@ -189,13 +160,20 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
   @override
   Widget build(BuildContext context) {
     final DropdownMenuItem<T> dropdownMenuItem = widget.route.items[widget.itemIndex].item!;
-
+    final CurvedAnimation opacity;
+    final double unit = 0.5 / (widget.route.items.length + 1.5);
+    if (widget.itemIndex == widget.route.selectedIndex) {
+      opacity = CurvedAnimation(parent: widget.route.animation!, curve: const Threshold(0.0));
+    } else {
+      final double start = clampDouble(0.5 + (widget.itemIndex + 1) * unit, 0.0, 1.0);
+      final double end = clampDouble(start + 1.5 * unit, 0.0, 1.0);
+      opacity = CurvedAnimation(parent: widget.route.animation!, curve: Interval(start, end));
+    }
     Widget child = Container(
       padding: widget.padding,
       height: widget.route.itemHeight,
       child: widget.route.items[widget.itemIndex],
     );
-
     // An [InkWell] is added to the item only if it is enabled
     if (dropdownMenuItem.enabled) {
       child = InkWell(
@@ -206,19 +184,13 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
         child: child,
       );
     }
-
-    child = FadeTransition(
-      opacity: _fadeOpacity,
-      child: child,
-    );
-
+    child = FadeTransition(opacity: opacity, child: child);
     if (kIsWeb && dropdownMenuItem.enabled) {
       child = Shortcuts(
         shortcuts: _webShortcuts,
         child: child,
       );
     }
-
     return child;
   }
 }
