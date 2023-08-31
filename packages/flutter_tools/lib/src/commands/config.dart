@@ -14,6 +14,7 @@ import '../runner/flutter_command.dart';
 
 class ConfigCommand extends FlutterCommand {
   ConfigCommand({ bool verboseHelp = false }) {
+    addSubcommand(ConfigListCommand());
     argParser.addFlag('analytics',
       help: 'Enable or disable reporting anonymously tool usage statistics and crash reports.');
     argParser.addFlag('clear-ios-signing-cert',
@@ -69,37 +70,7 @@ class ConfigCommand extends FlutterCommand {
   bool get shouldUpdateCache => false;
 
   @override
-  String get usageFooter {
-    // List all config settings. for feature flags, include whether they
-    // are available.
-    final Map<String, Feature> featuresByName = <String, Feature>{};
-    final String channel = globals.flutterVersion.channel;
-    for (final Feature feature in allFeatures) {
-      final String? configSetting = feature.configSetting;
-      if (configSetting != null) {
-        featuresByName[configSetting] = feature;
-      }
-    }
-    String values = globals.config.keys
-        .map<String>((String key) {
-          String configFooter = '';
-          if (featuresByName.containsKey(key)) {
-            final FeatureChannelSetting setting = featuresByName[key]!.getSettingForChannel(channel);
-            if (!setting.available) {
-              configFooter = '(Unavailable)';
-            }
-          }
-          return '  $key: ${globals.config.getValue(key)} $configFooter';
-        }).join('\n');
-    if (values.isEmpty) {
-      values = '  No settings have been configured.';
-    }
-    final bool analyticsEnabled = globals.flutterUsage.enabled &&
-                                  !globals.flutterUsage.suppressAnalytics;
-    return
-      '\nSettings:\n$values\n\n'
-      'Analytics reporting is currently ${analyticsEnabled ? 'enabled' : 'disabled'}.';
-  }
+  String get usageFooter => '\n$analyticsUsage';
 
   /// Return null to disable analytics recording of the `config` command.
   @override
@@ -229,5 +200,81 @@ class ConfigCommand extends FlutterCommand {
       globals.config.setValue(keyName, keyValue);
       globals.printStatus('Setting "$keyName" value to "$keyValue".');
     }
+  }
+
+  /// List the status of the analytics reporting.
+  String get analyticsUsage {
+    final bool analyticsEnabled =
+        globals.flutterUsage.enabled && !globals.flutterUsage.suppressAnalytics;
+    return 'Analytics reporting is currently ${analyticsEnabled ? 'enabled' : 'disabled'}.';
+  }
+}
+
+class ConfigListCommand extends FlutterCommand {
+  ConfigListCommand() {
+    argParser.addFlag('all', help: 'List all settings including non-configured.');
+  }
+
+  @override
+  String get name => 'list';
+
+  @override
+  String get description {
+    return 'List all settings and their current values.';
+  }
+
+  @override
+  final String category = FlutterCommandCategory.sdk;
+
+  @override
+  bool get shouldUpdateCache => false;
+
+  /// List all config settings. for feature flags, include whether they are available.
+  String get settingsText {
+    final Map<String, Feature> featuresByName = <String, Feature>{};
+    final String channel = globals.flutterVersion.channel;
+    for (final Feature feature in allFeatures) {
+      final String? configSetting = feature.configSetting;
+      if (configSetting != null) {
+        featuresByName[configSetting] = feature;
+      }
+    }
+    final bool listAll = boolArg('all');
+    final Set<String> keys = <String>{
+      if (listAll) ...allFeatures.map((Feature e) => e.configSetting).whereType<String>(),
+      ...globals.config.keys,
+    };
+    final Iterable<String> settings = keys.map<String>((String key) {
+      Object? value = globals.config.getValue(key);
+      value ??= '(Not set)';
+      final StringBuffer buffer = StringBuffer('  $key: $value');
+      if (featuresByName.containsKey(key)) {
+        final FeatureChannelSetting setting = featuresByName[key]!.getSettingForChannel(channel);
+        if (!setting.available) {
+          buffer.write(' (Unavailable)');
+        }
+      }
+      return buffer.toString();
+    });
+    final StringBuffer buffer = StringBuffer();
+    if (listAll) {
+      buffer.write('All ');
+    }
+    buffer.writeln('Settings:');
+    if (settings.isEmpty) {
+      buffer.writeln('  No configs have been configured.');
+    } else {
+      buffer.writeln(settings.join('\n'));
+    }
+    if (!listAll) {
+      buffer.write('\nUse --all to list all settings and their values.');
+    }
+    return buffer.toString();
+  }
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    globals.printStatus(settingsText);
+    return FlutterCommandResult.success();
   }
 }
