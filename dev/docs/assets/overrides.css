@@ -30,6 +30,15 @@ section.summary h2 {
   border-bottom: none;
 }
 
+section.summary .name {
+  font-size: 1.5em;
+  margin-right: 0.2em;
+}
+
+section.summary .returntype {
+  font-style:italic;
+}
+
 pre {
   margin: 0 0 15px 0;
   padding: 8px 12px;
