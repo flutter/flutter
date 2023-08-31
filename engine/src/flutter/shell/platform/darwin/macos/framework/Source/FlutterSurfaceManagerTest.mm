@@ -25,6 +25,7 @@
   self = [super initWithFrame:NSZeroRect];
   if (self) {
     [self setWantsLayer:YES];
+    self.layer.contentsScale = 2.0;
   }
   return self;
 }
@@ -48,13 +49,16 @@ static FlutterSurfaceManager* CreateSurfaceManager(TestView* testView) {
                                               delegate:testView];
 }
 
-static FlutterSurfacePresentInfo* CreatePresentInfo(FlutterSurface* surface,
-                                                    CGPoint offset = CGPointZero,
-                                                    size_t index = 0) {
+static FlutterSurfacePresentInfo* CreatePresentInfo(
+    FlutterSurface* surface,
+    CGPoint offset = CGPointZero,
+    size_t index = 0,
+    const std::vector<FlutterRect>& paintRegion = {}) {
   FlutterSurfacePresentInfo* res = [[FlutterSurfacePresentInfo alloc] init];
   res.surface = surface;
   res.offset = offset;
   res.zIndex = index;
+  res.paintRegion = paintRegion;
   return res;
 }
 
@@ -160,6 +164,10 @@ TEST(FlutterSurfaceManager, SurfacesAreRecycled) {
   EXPECT_EQ(surface3, surface1);
 }
 
+inline bool operator==(const CGRect& lhs, const CGRect& rhs) {
+  return CGRectEqualToRect(lhs, rhs);
+}
+
 TEST(FlutterSurfaceManager, LayerManagement) {
   TestView* testView = [[TestView alloc] init];
   FlutterSurfaceManager* surfaceManager = CreateSurfaceManager(testView);
@@ -176,14 +184,67 @@ TEST(FlutterSurfaceManager, LayerManagement) {
   auto surface2_2 = [surfaceManager surfaceForSize:CGSizeMake(20, 20)];
   [surfaceManager present:@[
     CreatePresentInfo(surface2_1, CGPointMake(20, 10), 1),
-    CreatePresentInfo(surface2_2, CGPointMake(40, 50), 2)
+    CreatePresentInfo(surface2_2, CGPointMake(40, 50), 2,
+                      {
+                          FlutterRect{0, 0, 20, 20},
+                          FlutterRect{40, 0, 60, 20},
+                      })
   ]
                    notify:nil];
 
   EXPECT_EQ(testView.layer.sublayers.count, 2ul);
-  EXPECT_EQ([testView.layer.sublayers objectAtIndex:0].zPosition, 1.0);
-  EXPECT_EQ([testView.layer.sublayers objectAtIndex:1].zPosition, 2.0);
+  EXPECT_EQ(testView.layer.sublayers[0].zPosition, 1.0);
+  EXPECT_EQ(testView.layer.sublayers[1].zPosition, 2.0);
+  CALayer* firstOverlaySublayer;
+  {
+    NSArray<CALayer*>* sublayers = testView.layer.sublayers[1].sublayers;
+    EXPECT_EQ(sublayers.count, 2ul);
+    EXPECT_TRUE(CGRectEqualToRect(sublayers[0].frame, CGRectMake(0, 0, 10, 10)));
+    EXPECT_TRUE(CGRectEqualToRect(sublayers[1].frame, CGRectMake(20, 0, 10, 10)));
+    EXPECT_TRUE(CGRectEqualToRect(sublayers[0].contentsRect, CGRectMake(0, 0, 1, 1)));
+    EXPECT_TRUE(CGRectEqualToRect(sublayers[1].contentsRect, CGRectMake(2, 0, 1, 1)));
+    EXPECT_EQ(sublayers[0].contents, sublayers[1].contents);
+    firstOverlaySublayer = sublayers[0];
+  }
   EXPECT_TRUE(CGSizeEqualToSize(testView.presentedFrameSize, CGSizeMake(70, 70)));
+
+  // Check second overlay sublayer is removed while first is reused and updated
+  [surfaceManager present:@[
+    CreatePresentInfo(surface2_1, CGPointMake(20, 10), 1),
+    CreatePresentInfo(surface2_2, CGPointMake(40, 50), 2,
+                      {
+                          FlutterRect{0, 10, 20, 20},
+                      })
+  ]
+                   notify:nil];
+  EXPECT_EQ(testView.layer.sublayers.count, 2ul);
+  {
+    NSArray<CALayer*>* sublayers = testView.layer.sublayers[1].sublayers;
+    EXPECT_EQ(sublayers.count, 1ul);
+    EXPECT_EQ(sublayers[0], firstOverlaySublayer);
+    EXPECT_TRUE(CGRectEqualToRect(sublayers[0].frame, CGRectMake(0, 5, 10, 5)));
+  }
+
+  // Check that second overlay sublayer is added back while first is reused and updated
+  [surfaceManager present:@[
+    CreatePresentInfo(surface2_1, CGPointMake(20, 10), 1),
+    CreatePresentInfo(surface2_2, CGPointMake(40, 50), 2,
+                      {
+                          FlutterRect{0, 0, 20, 20},
+                          FlutterRect{40, 0, 60, 20},
+                      })
+  ]
+                   notify:nil];
+
+  EXPECT_EQ(testView.layer.sublayers.count, 2ul);
+  {
+    NSArray<CALayer*>* sublayers = testView.layer.sublayers[1].sublayers;
+    EXPECT_EQ(sublayers.count, 2ul);
+    EXPECT_EQ(sublayers[0], firstOverlaySublayer);
+    EXPECT_TRUE(CGRectEqualToRect(sublayers[0].frame, CGRectMake(0, 0, 10, 10)));
+    EXPECT_TRUE(CGRectEqualToRect(sublayers[1].frame, CGRectMake(20, 0, 10, 10)));
+    EXPECT_EQ(sublayers[0].contents, sublayers[1].contents);
+  }
 
   auto surface3_1 = [surfaceManager surfaceForSize:CGSizeMake(50, 30)];
   [surfaceManager present:@[ CreatePresentInfo(surface3_1, CGPointMake(20, 10)) ] notify:nil];
