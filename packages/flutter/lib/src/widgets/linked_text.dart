@@ -11,11 +11,13 @@ import 'basic.dart';
 import 'framework.dart';
 import 'text.dart';
 
-/// A callback that passes a [String] representing a link that has been tapped.
+/// Signature for a callback that passes a [String] representing a link that has
+/// been tapped.
 typedef LinkTapCallback = void Function(String linkString);
 
-/// Builds an [InlineSpan] for displaying a link on [displayString] linking to
-/// [linkString].
+/// Signature for a function that builds an [InlineSpan] link.
+///
+/// The link displays [displayString] and links to [linkString] when tapped.
 ///
 /// Creates a [TapGestureRecognizer] and returns it so that its lifecycle can be
 /// maintained by the caller.
@@ -29,16 +31,16 @@ typedef LinkBuilder = (InlineSpan, TapGestureRecognizer) Function(
   String linkString,
 );
 
-/// Builds the [Widget] output by [LinkedText].
+/// Singature for a function that builds the [Widget] output by [LinkedText].
 ///
 /// Typically a [Text.rich] containing a [TextSpan] whose children are the
 /// [linkedSpans].
-typedef LinkedTextBuilder = Widget Function (
+typedef LinkedTextWidgetBuilder = Widget Function (
   BuildContext context,
   Iterable<InlineSpan> linkedSpans,
 );
 
-/// Finds [TextRange]s in the given [String].
+/// Singature for a function that finds [TextRange]s in the given [String].
 typedef TextRangesFinder = Iterable<TextRange> Function(String text);
 
 /// A widget that displays text with parts of it made interactive.
@@ -86,7 +88,7 @@ class LinkedText extends StatefulWidget {
   ///    control over matching and building different types of links.
   LinkedText({
     super.key,
-    this.builder = defaultBuilder,
+    this.builder = _defaultBuilder,
     required LinkTapCallback onTap,
     List<InlineSpan>? spans,
     String? text,
@@ -122,7 +124,7 @@ class LinkedText extends StatefulWidget {
   ///    control over matching and building different types of links.
   LinkedText.regExp({
     super.key,
-    this.builder = defaultBuilder,
+    this.builder = _defaultBuilder,
     required LinkTapCallback onTap,
     required RegExp regExp,
     List<InlineSpan>? spans,
@@ -167,7 +169,7 @@ class LinkedText extends StatefulWidget {
   ///    the given [RegExp].
   LinkedText.textLinkers({
     super.key,
-    this.builder = defaultBuilder,
+    this.builder = _defaultBuilder,
     String? text,
     List<InlineSpan>? spans,
     required this.textLinkers,
@@ -199,20 +201,20 @@ class LinkedText extends StatefulWidget {
   ///
   /// [TextLinker]s are applied in the order given. Overlapping matches are not
   /// supported and will produce an error.
-  late final List<TextLinker> textLinkers;
+  final List<TextLinker> textLinkers;
 
   /// Builds the [Widget] that is output by [LinkedText].
   ///
   /// By default, builds a [Text.rich] with a single [TextSpan] whose children
   /// are the linked [TextSpan]s, and whose style is [DefaultTextStyle].
-  final LinkedTextBuilder builder;
+  final LinkedTextWidgetBuilder builder;
 
   /// The default value of [builder].
   ///
   /// Builds a [Text.rich] with a single [TextSpan] whose children are the
   /// linked [TextSpan]s, and whose style is [DefaultTextStyle]. If there are no
   /// linked [TextSpan]s to display, builds a [SizedBox.shrink].
-  static Widget defaultBuilder(BuildContext context, Iterable<InlineSpan> linkedSpans) {
+  static Widget _defaultBuilder(BuildContext context, Iterable<InlineSpan> linkedSpans) {
     if (linkedSpans.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -338,6 +340,10 @@ class _LinkedTextState extends State<LinkedText> {
 }
 
 /// An inline, interactive text link.
+///
+/// See also:
+///
+///  * [LinkedText], which creates links with this class by default.
 class _InlineLinkSpan extends TextSpan {
   /// Create an instance of [_InlineLinkSpan].
   _InlineLinkSpan({
@@ -380,9 +386,9 @@ class _InlineLinkSpan extends TextSpan {
 
 /// Specifies a way to find and style parts of a [String].
 ///
-/// By calling [getSpans] with a [String], produces a [List] of [InlineSpan]s
-/// where the parts of the [String] matched by [textRangesFinder] have been
-/// turned into links using [linkBuilder].
+/// Calling [getSpans] with a [String] produces a [List] of [InlineSpan]s where
+/// the parts of the [String] matched by [textRangesFinder] have been turned
+/// into links using [linkBuilder].
 ///
 /// [textRangesFinder] must not produce overlapping [TextRange]s.
 class TextLinker {
@@ -488,7 +494,7 @@ class _TextLinkerMatch {
   final String linkString;
 
   /// Get all [_TextLinkerMatch]s obtained from applying the given
-  // `textLinker`s with the given `text`.
+  /// `textLinker`s with the given `text`.
   static List<_TextLinkerMatch> fromTextLinkers(Iterable<TextLinker> textLinkers, String text) {
     return textLinkers
         .fold<List<_TextLinkerMatch>>(
@@ -630,7 +636,8 @@ class _TextCache {
   String toString() => '${objectRuntimeType(this, '_TextCache')}($text, $_lengths)';
 }
 
-/// The output of linking an InlineSpan to some _TextLinkerMatches.
+/// Signature for the output of linking an InlineSpan to some
+/// _TextLinkerMatches.
 typedef _LinkSpanRecursion = (
   /// The output of linking the input InlineSpan.
   InlineSpan linkedSpan,
@@ -642,7 +649,8 @@ typedef _LinkSpanRecursion = (
   Iterable<TapGestureRecognizer> generatedRecognizers,
 );
 
-/// The output of linking a List of InlineSpans to some _TextLinkerMatches.
+/// Signature for the output of linking a List of InlineSpans to some
+/// _TextLinkerMatches.
 typedef _LinkSpansRecursion = (
   /// The output of linking the input InlineSpans.
   Iterable<InlineSpan> linkedSpans,
