@@ -2052,7 +2052,7 @@ class _VerticalOuterDimensionState extends ScrollableState {
 
   Axis? lockedAxis;
   Offset? lastDragOffset;
-  final dragForwarding = _TwoDimensionalDragForwarding();
+  final _TwoDimensionalDragForwarding dragForwarding = _TwoDimensionalDragForwarding();
 
   void _evaluateLockedAxis(Offset offset) {
     assert(lastDragOffset != null);
@@ -2296,7 +2296,7 @@ class _HorizontalInnerDimensionState extends ScrollableState {
 
   @override
   void didChangeDependencies() {
-    final verticalScrollable = Scrollable.of(context) as _VerticalOuterDimensionState;
+    final _VerticalOuterDimensionState verticalScrollable = Scrollable.of(context) as _VerticalOuterDimensionState;
     verticalScrollable.dragForwarding.onDragDown = _handleDragDown;
     verticalScrollable.dragForwarding.onDragStart = _handleDragStart;
     verticalScrollable.dragForwarding.onDragUpdate = _handleDragUpdate;
