@@ -11,7 +11,6 @@ import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
 // These constants are copied from cupertino/text_selection_toolbar.dart.
 const double _kArrowScreenPadding = 26.0;
 const double _kToolbarContentDistance = 8.0;
-const double _kToolbarHeight = 45.0;
 
 // A custom text selection menu that just displays a single custom button.
 class _CustomCupertinoTextSelectionControls extends CupertinoTextSelectionControls {
@@ -270,7 +269,7 @@ void main() {
 
   testWidgets('positions itself at anchorAbove if it fits', (WidgetTester tester) async {
     late StateSetter setState;
-    const double height = _kToolbarHeight;
+    const double height = 50.0;
     const double anchorBelowY = 500.0;
     double anchorAboveY = 0.0;
     const double paddingAbove = 12.0;
@@ -428,7 +427,7 @@ void main() {
 
   testWidgets('draws a shadow below the toolbar in light mode', (WidgetTester tester) async {
     late StateSetter setState;
-    const double height = _kToolbarHeight;
+    const double height = 50.0;
     double anchorAboveY = 0.0;
 
     await tester.pumpWidget(

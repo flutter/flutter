@@ -301,7 +301,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
     );
     size = Size(
       childSize.width,
-      childSize.height - _kToolbarArrowSize.height,
+      childSize.height,
     );
   }
 
