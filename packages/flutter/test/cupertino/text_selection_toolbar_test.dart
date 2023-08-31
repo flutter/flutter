@@ -468,8 +468,8 @@ void main() {
       find.byType(CupertinoTextSelectionToolbar),
       paints..shadow(
         includes: const <Offset>[Offset(50.0, anchorAbove - _kToolbarContentDistance - height / 2)],
-        color: const Color(0x33000000),
-        elevation: 12.0,
+        color: const Color(0xbf000000),
+        elevation: 10.0,
         transparentOccluder: false,
       ),
     );
