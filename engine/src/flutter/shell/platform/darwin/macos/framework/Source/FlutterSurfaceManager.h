@@ -5,6 +5,8 @@
 #import <Cocoa/Cocoa.h>
 #import <QuartzCore/QuartzCore.h>
 
+#include <vector>
+
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterSurface.h"
 
 /**
@@ -15,6 +17,7 @@
 @property(readwrite, strong, nonatomic, nonnull) FlutterSurface* surface;
 @property(readwrite, nonatomic) CGPoint offset;
 @property(readwrite, nonatomic) size_t zIndex;
+@property(readwrite, nonatomic) std::vector<FlutterRect> paintRegion;
 
 @end
 

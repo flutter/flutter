@@ -17,7 +17,9 @@ EmbedderLayers::EmbedderLayers(SkISize frame_size,
 
 EmbedderLayers::~EmbedderLayers() = default;
 
-void EmbedderLayers::PushBackingStoreLayer(const FlutterBackingStore* store) {
+void EmbedderLayers::PushBackingStoreLayer(
+    const FlutterBackingStore* store,
+    const std::vector<SkIRect>& paint_region_vec) {
   FlutterLayer layer = {};
 
   layer.struct_size = sizeof(FlutterLayer);
@@ -35,6 +37,33 @@ void EmbedderLayers::PushBackingStoreLayer(const FlutterBackingStore* store) {
   layer.size.width = transformed_layer_bounds.width();
   layer.size.height = transformed_layer_bounds.height();
 
+  auto paint_region_rects = std::make_unique<std::vector<FlutterRect>>();
+  paint_region_rects->reserve(paint_region_vec.size());
+
+  for (const auto& rect : paint_region_vec) {
+    auto transformed_rect =
+        root_surface_transformation_.mapRect(SkRect::Make(rect));
+    paint_region_rects->push_back(FlutterRect{
+        transformed_rect.x(),
+        transformed_rect.y(),
+        transformed_rect.right(),
+        transformed_rect.bottom(),
+    });
+  }
+
+  auto paint_region = std::make_unique<FlutterRegion>();
+  paint_region->struct_size = sizeof(FlutterRegion);
+  paint_region->rects = paint_region_rects->data();
+  paint_region->rects_count = paint_region_rects->size();
+  rects_referenced_.push_back(std::move(paint_region_rects));
+
+  auto present_info = std::make_unique<FlutterBackingStorePresentInfo>();
+  present_info->struct_size = sizeof(FlutterBackingStorePresentInfo);
+  present_info->paint_region = paint_region.get();
+  regions_referenced_.push_back(std::move(paint_region));
+  layer.backing_store_present_info = present_info.get();
+
+  present_info_referenced_.push_back(std::move(present_info));
   presented_layers_.push_back(layer);
 }
 

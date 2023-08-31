@@ -29,6 +29,11 @@
 
   // Currently visible layers.
   NSMutableArray<CALayer*>* _layers;
+
+  // Whether to highlight borders of overlay surfaces. Determined by
+  // FLTEnableSurfaceDebugInfo value in main bundle Info.plist.
+  NSNumber* _enableSurfaceDebugInfo;
+  CATextLayer* _infoLayer;
 }
 
 /**
@@ -37,6 +42,60 @@
 - (void)commit:(NSArray<FlutterSurfacePresentInfo*>*)surfaces;
 
 @end
+
+static NSColor* GetBorderColorForLayer(int layer) {
+  NSArray* colors = @[
+    [NSColor yellowColor],
+    [NSColor cyanColor],
+    [NSColor magentaColor],
+    [NSColor greenColor],
+    [NSColor purpleColor],
+    [NSColor orangeColor],
+    [NSColor blueColor],
+  ];
+  return colors[layer % colors.count];
+}
+
+/// Creates sublayers for given layer, each one displaying a portion of the
+/// of the surface determined by a rectangle in the provided paint region.
+static void UpdateContentSubLayers(CALayer* layer,
+                                   IOSurfaceRef surface,
+                                   CGFloat scale,
+                                   CGSize surfaceSize,
+                                   NSColor* borderColor,
+                                   const std::vector<FlutterRect>& paintRegion) {
+  // Adjust sublayer count to paintRegion count.
+  while (layer.sublayers.count > paintRegion.size()) {
+    [layer.sublayers.lastObject removeFromSuperlayer];
+  }
+
+  while (layer.sublayers.count < paintRegion.size()) {
+    CALayer* newLayer = [CALayer layer];
+    [layer addSublayer:newLayer];
+  }
+
+  for (size_t i = 0; i < paintRegion.size(); i++) {
+    CALayer* subLayer = [layer.sublayers objectAtIndex:i];
+    const auto& rect = paintRegion[i];
+    subLayer.frame = CGRectMake(rect.left / scale, rect.top / scale,
+                                (rect.right - rect.left) / scale, (rect.bottom - rect.top) / scale);
+
+    double width = surfaceSize.width;
+    double height = surfaceSize.height;
+
+    subLayer.contentsRect =
+        CGRectMake(rect.left / width, rect.top / height, (rect.right - rect.left) / width,
+                   (rect.bottom - rect.top) / height);
+
+    if (borderColor != nil) {
+      // Visualize sublayer
+      subLayer.borderColor = borderColor.CGColor;
+      subLayer.borderWidth = 1.0;
+    }
+
+    subLayer.contents = (__bridge id)surface;
+  }
+}
 
 @implementation FlutterSurfaceManager
 
@@ -77,6 +136,17 @@
   return surface;
 }
 
+- (BOOL)enableSurfaceDebugInfo {
+  if (_enableSurfaceDebugInfo == nil) {
+    _enableSurfaceDebugInfo =
+        [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTEnableSurfaceDebugInfo"];
+    if (_enableSurfaceDebugInfo == nil) {
+      _enableSurfaceDebugInfo = @NO;
+    }
+  }
+  return [_enableSurfaceDebugInfo boolValue];
+}
+
 - (void)commit:(NSArray<FlutterSurfacePresentInfo*>*)surfaces {
   FML_DCHECK([NSThread isMainThread]);
 
@@ -100,15 +170,37 @@
     [_layers addObject:layer];
   }
 
+  bool enableSurfaceDebugInfo = self.enableSurfaceDebugInfo;
+
   // Update contents of surfaces.
   for (size_t i = 0; i < surfaces.count; ++i) {
     FlutterSurfacePresentInfo* info = surfaces[i];
     CALayer* layer = _layers[i];
     CGFloat scale = _containingLayer.contentsScale;
-    layer.frame = CGRectMake(info.offset.x / scale, info.offset.y / scale,
-                             info.surface.size.width / scale, info.surface.size.height / scale);
-    layer.contents = (__bridge id)info.surface.ioSurface;
+    if (i == 0) {
+      layer.frame = CGRectMake(info.offset.x / scale, info.offset.y / scale,
+                               info.surface.size.width / scale, info.surface.size.height / scale);
+      layer.contents = (__bridge id)info.surface.ioSurface;
+    } else {
+      layer.frame = CGRectZero;
+      NSColor* borderColor = enableSurfaceDebugInfo ? GetBorderColorForLayer(i - 1) : nil;
+      UpdateContentSubLayers(layer, info.surface.ioSurface, scale, info.surface.size, borderColor,
+                             info.paintRegion);
+    }
     layer.zPosition = info.zIndex;
+  }
+
+  if (enableSurfaceDebugInfo) {
+    if (_infoLayer == nil) {
+      _infoLayer = [[CATextLayer alloc] init];
+      [_containingLayer addSublayer:_infoLayer];
+      _infoLayer.fontSize = 15;
+      _infoLayer.foregroundColor = [NSColor yellowColor].CGColor;
+      _infoLayer.frame = CGRectMake(15, 15, 300, 100);
+      _infoLayer.contentsScale = _containingLayer.contentsScale;
+      _infoLayer.zPosition = 100000;
+    }
+    _infoLayer.string = [NSString stringWithFormat:@"Surface count: %li", _layers.count];
   }
 }
 

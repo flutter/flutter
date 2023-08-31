@@ -1663,6 +1663,27 @@ typedef enum {
   kFlutterLayerContentTypePlatformView,
 } FlutterLayerContentType;
 
+/// A region represented by a collection of non-overlapping rectangles.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterRegion).
+  size_t struct_size;
+  /// Number of rectangles in the region.
+  size_t rects_count;
+  /// The rectangles that make up the region.
+  FlutterRect* rects;
+} FlutterRegion;
+
+/// Contains additional information about the backing store provided
+/// during presentation to the embedder.
+typedef struct {
+  size_t struct_size;
+
+  /// The area of the backing store that contains Flutter contents. Pixels
+  /// outside of this area are transparent and the embedder may choose not
+  /// to render them. Coordinates are in physical pixels.
+  FlutterRegion* paint_region;
+} FlutterBackingStorePresentInfo;
+
 typedef struct {
   /// This size of this struct. Must be sizeof(FlutterLayer).
   size_t struct_size;
@@ -1682,6 +1703,10 @@ typedef struct {
   FlutterPoint offset;
   /// The size of the layer (in physical pixels).
   FlutterSize size;
+
+  /// Extra information for the backing store that the embedder may
+  /// use during presentation.
+  FlutterBackingStorePresentInfo* backing_store_present_info;
 } FlutterLayer;
 
 typedef bool (*FlutterBackingStoreCreateCallback)(
