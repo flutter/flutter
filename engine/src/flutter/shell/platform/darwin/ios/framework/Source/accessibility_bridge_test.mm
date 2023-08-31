@@ -274,7 +274,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                  /*io=*/thread_task_runner);
 
     auto flutterPlatformViewsController =
-        std::make_shared<flutter::FlutterPlatformViewsController>(false);
+        std::make_shared<flutter::FlutterPlatformViewsController>();
     auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
         /*delegate=*/mock_delegate,
         /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -333,7 +333,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                  /*io=*/thread_task_runner);
 
     auto flutterPlatformViewsController =
-        std::make_shared<flutter::FlutterPlatformViewsController>(false);
+        std::make_shared<flutter::FlutterPlatformViewsController>();
     auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
         /*delegate=*/mock_delegate,
         /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -378,8 +378,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
 
-  auto flutterPlatformViewsController =
-      std::make_shared<flutter::FlutterPlatformViewsController>(false);
+  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -473,8 +472,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
 
-  auto flutterPlatformViewsController =
-      std::make_shared<flutter::FlutterPlatformViewsController>(false);
+  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -546,8 +544,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
 
-  auto flutterPlatformViewsController =
-      std::make_shared<flutter::FlutterPlatformViewsController>(false);
+  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -2067,7 +2064,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
 
     id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
     auto flutterPlatformViewsController =
-        std::make_shared<flutter::FlutterPlatformViewsController>(false);
+        std::make_shared<flutter::FlutterPlatformViewsController>();
     OCMStub([mockFlutterViewController platformViewsController])
         .andReturn(flutterPlatformViewsController.get());
     auto weakFactory =

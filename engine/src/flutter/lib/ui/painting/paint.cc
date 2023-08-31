@@ -4,6 +4,7 @@
 
 #include "flutter/lib/ui/painting/paint.h"
 
+#include "flutter/display_list/dl_builder.h"
 #include "flutter/fml/logging.h"
 #include "flutter/lib/ui/floating_point.h"
 #include "flutter/lib/ui/painting/color_filter.h"
@@ -145,10 +146,10 @@ const DlPaint* Paint::paint(DlPaint& paint,
     paint.setBlendMode(static_cast<DlBlendMode>(blend_mode));
   }
 
-  // if (flags.applies_style()) {
-  uint32_t style = uint_data[kStyleIndex];
-  paint.setDrawStyle(static_cast<DlDrawStyle>(style));
-  // }
+  if (flags.applies_style()) {
+    uint32_t style = uint_data[kStyleIndex];
+    paint.setDrawStyle(static_cast<DlDrawStyle>(style));
+  }
 
   if (flags.is_stroked(paint.getDrawStyle())) {
     float stroke_width = float_data[kStrokeWidthIndex];

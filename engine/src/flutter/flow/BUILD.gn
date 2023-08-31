@@ -20,8 +20,6 @@ source_set("flow") {
     "frame_timings.h",
     "layer_snapshot_store.cc",
     "layer_snapshot_store.h",
-    "layers/aiks_layer.cc",
-    "layers/aiks_layer.h",
     "layers/backdrop_filter_layer.cc",
     "layers/backdrop_filter_layer.h",
     "layers/cacheable_layer.cc",
@@ -193,11 +191,6 @@ if (enable_unittests) {
       "//third_party/googletest:gtest",
       "//third_party/skia",
     ]
-
-    if (impeller_supports_rendering) {
-      sources += [ "layers/aiks_layer_unittests.cc" ]
-      deps += [ "//flutter/impeller" ]
-    }
 
     if (!defined(defines)) {
       defines = []

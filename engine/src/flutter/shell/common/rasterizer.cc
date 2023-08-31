@@ -379,12 +379,6 @@ sk_sp<DlImage> Rasterizer::MakeRasterSnapshot(sk_sp<DisplayList> display_list,
   return snapshot_controller_->MakeRasterSnapshot(display_list, picture_size);
 }
 
-sk_sp<DlImage> Rasterizer::MakeRasterSnapshot(
-    const std::shared_ptr<const impeller::Picture>& picture,
-    SkISize picture_size) {
-  return snapshot_controller_->MakeRasterSnapshot(picture, picture_size);
-}
-
 sk_sp<SkImage> Rasterizer::ConvertToRasterImage(sk_sp<SkImage> image) {
   TRACE_EVENT0("flutter", __FUNCTION__);
   return snapshot_controller_->ConvertToRasterImage(image);

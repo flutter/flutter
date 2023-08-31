@@ -115,22 +115,22 @@ class DisplayListStreamDispatcher final : public DlOpReceiver {
                   uint32_t count,
                   const SkPoint points[]) override;
   void drawVertices(const DlVertices* vertices, DlBlendMode mode) override;
-  void drawImage(const sk_sp<DlImage>& image,
+  void drawImage(const sk_sp<DlImage> image,
                  const SkPoint point,
                  DlImageSampling sampling,
                  bool render_with_attributes) override;
-  void drawImageRect(const sk_sp<DlImage>& image,
+  void drawImageRect(const sk_sp<DlImage> image,
                      const SkRect& src,
                      const SkRect& dst,
                      DlImageSampling sampling,
                      bool render_with_attributes,
                      SrcRectConstraint constraint) override;
-  void drawImageNine(const sk_sp<DlImage>& image,
+  void drawImageNine(const sk_sp<DlImage> image,
                      const SkIRect& center,
                      const SkRect& dst,
                      DlFilterMode filter,
                      bool render_with_attributes) override;
-  void drawAtlas(const sk_sp<DlImage>& atlas,
+  void drawAtlas(const sk_sp<DlImage> atlas,
                  const SkRSXform xform[],
                  const SkRect tex[],
                  const DlColor colors[],
@@ -139,9 +139,9 @@ class DisplayListStreamDispatcher final : public DlOpReceiver {
                  DlImageSampling sampling,
                  const SkRect* cull_rect,
                  bool render_with_attributes) override;
-  void drawDisplayList(const sk_sp<DisplayList>& display_list,
+  void drawDisplayList(const sk_sp<DisplayList> display_list,
                        SkScalar opacity) override;
-  void drawTextBlob(const sk_sp<SkTextBlob>& blob,
+  void drawTextBlob(const sk_sp<SkTextBlob> blob,
                     SkScalar x,
                     SkScalar y) override;
   void drawShadow(const SkPath& path,

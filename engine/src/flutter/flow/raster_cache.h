@@ -29,7 +29,7 @@ class RasterCacheResult {
   RasterCacheResult(sk_sp<DlImage> image,
                     const SkRect& logical_rect,
                     const char* type,
-                    std::shared_ptr<const DlRTree> rtree = nullptr);
+                    sk_sp<const DlRTree> rtree = nullptr);
 
   virtual ~RasterCacheResult() = default;
 
@@ -49,7 +49,7 @@ class RasterCacheResult {
   sk_sp<DlImage> image_;
   SkRect logical_rect_;
   fml::tracing::TraceFlow flow_;
-  std::shared_ptr<const DlRTree> rtree_;
+  sk_sp<const DlRTree> rtree_;
 };
 
 class Layer;
@@ -129,7 +129,7 @@ class RasterCache {
 
   std::unique_ptr<RasterCacheResult> Rasterize(
       const RasterCache::Context& context,
-      std::shared_ptr<const DlRTree> rtree,
+      sk_sp<const DlRTree> rtree,
       const std::function<void(DlCanvas*)>& draw_function,
       const std::function<void(DlCanvas*, const SkRect& rect)>&
           draw_checkerboard) const;
@@ -244,7 +244,7 @@ class RasterCache {
   bool UpdateCacheEntry(const RasterCacheKeyID& id,
                         const Context& raster_cache_context,
                         const std::function<void(DlCanvas*)>& render_function,
-                        std::shared_ptr<const DlRTree> rtree = nullptr) const;
+                        sk_sp<const DlRTree> rtree = nullptr) const;
 
  private:
   struct Entry {

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #include <memory>
-#include "display_list/display_list_builder.h"
 #include "display_list/utils/dl_receiver_utils.h"
 #include "gtest/gtest.h"
 #include "runtime/test_font_data.h"

@@ -4,7 +4,7 @@
 
 #include "flutter/display_list/utils/dl_matrix_clip_tracker.h"
 
-#include "flutter/display_list/display_list_builder.h"
+#include "flutter/display_list/dl_builder.h"
 #include "flutter/fml/logging.h"
 
 namespace flutter {

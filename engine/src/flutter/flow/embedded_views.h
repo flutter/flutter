@@ -8,7 +8,7 @@
 #include <memory>
 #include <vector>
 
-#include "flutter/display_list/display_list_builder.h"
+#include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/skia/dl_sk_canvas.h"
 #include "flutter/flow/surface_frame.h"
 #include "flutter/fml/memory/ref_counted.h"
@@ -340,33 +340,11 @@ class EmbedderViewSlice {
   virtual std::list<SkRect> searchNonOverlappingDrawnRects(
       const SkRect& query) const = 0;
   virtual void render_into(DlCanvas* canvas) = 0;
-  virtual bool recording_ended() = 0;
-  virtual bool renders_anything() = 0;
 };
-
-#if IMPELLER_SUPPORTS_RENDERING
-class ImpellerEmbedderViewSlice : public EmbedderViewSlice {
- public:
-  explicit ImpellerEmbedderViewSlice(SkRect view_bounds);
-  ~ImpellerEmbedderViewSlice() override = default;
-
-  DlCanvas* canvas() override;
-  void end_recording() override;
-  std::list<SkRect> searchNonOverlappingDrawnRects(
-      const SkRect& query) const override;
-  void render_into(DlCanvas* canvas) override;
-  bool recording_ended() override;
-  bool renders_anything() override;
-
- private:
-  std::unique_ptr<impeller::DlAiksCanvas> canvas_;
-  std::shared_ptr<const impeller::Picture> picture_;
-};
-#endif
 
 class DisplayListEmbedderViewSlice : public EmbedderViewSlice {
  public:
-  explicit DisplayListEmbedderViewSlice(SkRect view_bounds);
+  DisplayListEmbedderViewSlice(SkRect view_bounds);
   ~DisplayListEmbedderViewSlice() override = default;
 
   DlCanvas* canvas() override;
@@ -374,9 +352,9 @@ class DisplayListEmbedderViewSlice : public EmbedderViewSlice {
   std::list<SkRect> searchNonOverlappingDrawnRects(
       const SkRect& query) const override;
   void render_into(DlCanvas* canvas) override;
+  void dispatch(DlOpReceiver& receiver);
   bool is_empty();
-  bool recording_ended() override;
-  bool renders_anything() override;
+  bool recording_ended();
 
  private:
   std::unique_ptr<DisplayListBuilder> builder_;

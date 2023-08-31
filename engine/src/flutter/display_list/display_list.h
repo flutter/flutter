@@ -150,6 +150,7 @@ enum class DisplayListOpType {
 #undef DL_OP_TO_ENUM_VALUE
 
 class DlOpReceiver;
+class DisplayListBuilder;
 
 class SaveLayerOptions {
  public:
@@ -201,6 +202,26 @@ class SaveLayerOptions {
   };
 };
 
+// Manages a buffer allocated with malloc.
+class DisplayListStorage {
+ public:
+  DisplayListStorage() = default;
+  DisplayListStorage(DisplayListStorage&&) = default;
+
+  uint8_t* get() const { return ptr_.get(); }
+
+  void realloc(size_t count) {
+    ptr_.reset(static_cast<uint8_t*>(std::realloc(ptr_.release(), count)));
+    FML_CHECK(ptr_);
+  }
+
+ private:
+  struct FreeDeleter {
+    void operator()(uint8_t* p) { std::free(p); }
+  };
+  std::unique_ptr<uint8_t, FreeDeleter> ptr_;
+};
+
 class Culler;
 
 // The base class that contains a sequence of rendering operations
@@ -210,7 +231,7 @@ class DisplayList : public SkRefCnt {
  public:
   DisplayList();
 
-  ~DisplayList() = default;
+  ~DisplayList();
 
   void Dispatch(DlOpReceiver& ctx) const;
   void Dispatch(DlOpReceiver& ctx, const SkRect& cull_rect) const;
@@ -220,8 +241,7 @@ class DisplayList : public SkRefCnt {
   // but nested ops are only included if requested. The defaults used
   // here for these accessors follow that pattern.
   size_t bytes(bool nested = true) const {
-    FML_DCHECK(storage_.used() == storage_.allocated());
-    return sizeof(DisplayList) + storage_.allocated() +
+    return sizeof(DisplayList) + byte_count_ +
            (nested ? nested_byte_count_ : 0);
   }
 
@@ -234,7 +254,7 @@ class DisplayList : public SkRefCnt {
   const SkRect& bounds() const { return bounds_; }
 
   bool has_rtree() const { return rtree_ != nullptr; }
-  std::shared_ptr<const DlRTree> rtree() const { return rtree_; }
+  sk_sp<const DlRTree> rtree() const { return rtree_; }
 
   bool Equals(const DisplayList* other) const;
   bool Equals(const DisplayList& other) const { return Equals(&other); }
@@ -259,40 +279,8 @@ class DisplayList : public SkRefCnt {
   }
 
  private:
-  // Manages a buffer allocated with malloc.
-  class DlStorage {
-   public:
-    DlStorage() = default;
-    DlStorage(DlStorage&& source);
-
-    ~DlStorage();
-
-    uint8_t* get() const { return ptr_.get(); }
-    uint8_t* end() const { return ptr_.get() + used_; }
-    size_t used() const { return used_; }
-    size_t allocated() const { return allocated_; }
-    bool is_valid() const { return !disabled_; }
-
-    uint8_t* alloc(size_t bytes);
-    void realloc(size_t count);
-    DlStorage take();
-
-   private:
-    static constexpr size_t kPageSize = 4096u;
-
-    static void DisposeOps(uint8_t* ptr, uint8_t* end);
-
-    struct FreeDeleter {
-      void operator()(uint8_t* p) { std::free(p); }
-    };
-    std::unique_ptr<uint8_t, FreeDeleter> ptr_;
-
-    bool disabled_ = false;
-    size_t used_ = 0u;
-    size_t allocated_ = 0u;
-  };
-
-  DisplayList(DlStorage&& ptr,
+  DisplayList(DisplayListStorage&& ptr,
+              size_t byte_count,
               unsigned int op_count,
               size_t nested_byte_count,
               unsigned int nested_op_count,
@@ -300,11 +288,14 @@ class DisplayList : public SkRefCnt {
               bool can_apply_group_opacity,
               bool is_ui_thread_safe,
               bool modifies_transparent_black,
-              std::shared_ptr<const DlRTree> rtree);
+              sk_sp<const DlRTree> rtree);
 
   static uint32_t next_unique_id();
 
-  const DlStorage storage_;
+  static void DisposeOps(uint8_t* ptr, uint8_t* end);
+
+  const DisplayListStorage storage_;
+  const size_t byte_count_;
   const unsigned int op_count_;
 
   const size_t nested_byte_count_;
@@ -317,14 +308,13 @@ class DisplayList : public SkRefCnt {
   const bool is_ui_thread_safe_;
   const bool modifies_transparent_black_;
 
-  const std::shared_ptr<const DlRTree> rtree_;
+  const sk_sp<const DlRTree> rtree_;
 
   void Dispatch(DlOpReceiver& ctx,
                 uint8_t* ptr,
                 uint8_t* end,
                 Culler& culler) const;
 
-  friend class DlOpRecorder;
   friend class DisplayListBuilder;
 };
 

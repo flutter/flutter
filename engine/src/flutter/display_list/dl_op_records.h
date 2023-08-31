@@ -19,7 +19,7 @@ namespace flutter {
 // Structure holding the information necessary to dispatch and
 // potentially cull the DLOps during playback.
 //
-// Generally drawing ops will execute as long as |cur_render_index|
+// Generally drawing ops will execute as long as |cur_index|
 // is at or after |next_render_index|, so setting the latter
 // to 0 will render all primitives and setting it to MAX_INT
 // will skip all remaining rendering primitives.
@@ -40,7 +40,7 @@ namespace flutter {
 struct DispatchContext {
   DlOpReceiver& receiver;
 
-  int cur_render_index;
+  int cur_index;
   int next_render_index;
 
   int next_restore_index;
@@ -328,7 +328,6 @@ struct SaveOpBase : DLOp {
     bool needed = ctx.next_render_index <= restore_index;
     ctx.save_infos.emplace_back(ctx.next_restore_index, needed);
     ctx.next_restore_index = restore_index;
-    ctx.cur_render_index++;
     return needed;
   }
 };
@@ -418,44 +417,25 @@ struct SaveLayerBackdropBoundsOp final : SaveOpBase {
                : DisplayListCompare::kNotEqual;
   }
 };
-// The base object for the restore() op
 // 4 byte header + no payload uses minimum 8 bytes (4 bytes unused)
-struct RestoreOpBase : DLOp {
-  RestoreOpBase() {}
-
-  inline bool restore_needed(DispatchContext& ctx) const {
-    bool restore_needed;
-    {
-      // ensure all use of save_infos.back happens before the pop
-      DispatchContext::SaveInfo& info = ctx.save_infos.back();
-      restore_needed = info.save_was_needed;
-      ctx.next_restore_index = info.previous_restore_index;
-    }
-    ctx.cur_render_index++;
-    ctx.save_infos.pop_back();
-    return restore_needed;
-  }
-};
-// 4 byte header + no payload uses minimum 8 bytes (4 bytes unused)
-struct RestoreOp final : RestoreOpBase {
+struct RestoreOp final : DLOp {
   static const auto kType = DisplayListOpType::kRestore;
 
   RestoreOp() {}
 
   void dispatch(DispatchContext& ctx) const {
-    if (restore_needed(ctx)) {
+    DispatchContext::SaveInfo& info = ctx.save_infos.back();
+    if (info.save_was_needed) {
       ctx.receiver.restore();
     }
+    ctx.next_restore_index = info.previous_restore_index;
+    ctx.save_infos.pop_back();
   }
 };
 
 struct TransformClipOpBase : DLOp {
-  inline bool tx_clip_needed(DispatchContext& ctx) const {
-    // We only dispatch a transform or clip if we are going to render
-    // something before it gets erased by the next restore.
-    bool tx_clip_needed = (ctx.next_render_index <= ctx.next_restore_index);
-    ctx.cur_render_index++;
-    return tx_clip_needed;
+  inline bool op_needed(const DispatchContext& context) const {
+    return context.next_render_index <= context.next_restore_index;
   }
 };
 // 4 byte header + 8 byte payload uses 12 bytes but is rounded up to 16 bytes
@@ -469,7 +449,7 @@ struct TranslateOp final : TransformClipOpBase {
   const SkScalar ty;
 
   void dispatch(DispatchContext& ctx) const {
-    if (tx_clip_needed(ctx)) {
+    if (op_needed(ctx)) {
       ctx.receiver.translate(tx, ty);
     }
   }
@@ -485,7 +465,7 @@ struct ScaleOp final : TransformClipOpBase {
   const SkScalar sy;
 
   void dispatch(DispatchContext& ctx) const {
-    if (tx_clip_needed(ctx)) {
+    if (op_needed(ctx)) {
       ctx.receiver.scale(sx, sy);
     }
   }
@@ -499,7 +479,7 @@ struct RotateOp final : TransformClipOpBase {
   const SkScalar degrees;
 
   void dispatch(DispatchContext& ctx) const {
-    if (tx_clip_needed(ctx)) {
+    if (op_needed(ctx)) {
       ctx.receiver.rotate(degrees);
     }
   }
@@ -515,7 +495,7 @@ struct SkewOp final : TransformClipOpBase {
   const SkScalar sy;
 
   void dispatch(DispatchContext& ctx) const {
-    if (tx_clip_needed(ctx)) {
+    if (op_needed(ctx)) {
       ctx.receiver.skew(sx, sy);
     }
   }
@@ -535,7 +515,7 @@ struct Transform2DAffineOp final : TransformClipOpBase {
   const SkScalar myx, myy, myt;
 
   void dispatch(DispatchContext& ctx) const {
-    if (tx_clip_needed(ctx)) {
+    if (op_needed(ctx)) {
       ctx.receiver.transform2DAffine(mxx, mxy, mxt,  //
                                      myx, myy, myt);
     }
@@ -564,7 +544,7 @@ struct TransformFullPerspectiveOp final : TransformClipOpBase {
   const SkScalar mwx, mwy, mwz, mwt;
 
   void dispatch(DispatchContext& ctx) const {
-    if (tx_clip_needed(ctx)) {
+    if (op_needed(ctx)) {
       ctx.receiver.transformFullPerspective(mxx, mxy, mxz, mxt,  //
                                             myx, myy, myz, myt,  //
                                             mzx, mzy, mzz, mzt,  //
@@ -580,7 +560,7 @@ struct TransformResetOp final : TransformClipOpBase {
   TransformResetOp() = default;
 
   void dispatch(DispatchContext& ctx) const {
-    if (tx_clip_needed(ctx)) {
+    if (op_needed(ctx)) {
       ctx.receiver.transformReset();
     }
   }
@@ -607,7 +587,7 @@ struct TransformResetOp final : TransformClipOpBase {
     const Sk##shapetype shape;                                             \
                                                                            \
     void dispatch(DispatchContext& ctx) const {                            \
-      if (tx_clip_needed(ctx)) {                                           \
+      if (op_needed(ctx)) {                                                \
         ctx.receiver.clip##shapetype(shape, DlCanvas::ClipOp::k##clipop,   \
                                      is_aa);                               \
       }                                                                    \
@@ -630,7 +610,7 @@ DEFINE_CLIP_SHAPE_OP(RRect, Difference)
     const SkPath path;                                                   \
                                                                          \
     void dispatch(DispatchContext& ctx) const {                          \
-      if (tx_clip_needed(ctx)) {                                         \
+      if (op_needed(ctx)) {                                              \
         ctx.receiver.clipPath(path, DlCanvas::ClipOp::k##clipop, is_aa); \
       }                                                                  \
     }                                                                    \
@@ -646,8 +626,8 @@ DEFINE_CLIP_PATH_OP(Difference)
 #undef DEFINE_CLIP_PATH_OP
 
 struct DrawOpBase : DLOp {
-  inline bool draw_needed(DispatchContext& ctx) const {
-    return ctx.cur_render_index++ >= ctx.next_render_index;
+  inline bool op_needed(const DispatchContext& ctx) const {
+    return ctx.cur_index >= ctx.next_render_index;
   }
 };
 
@@ -658,7 +638,7 @@ struct DrawPaintOp final : DrawOpBase {
   DrawPaintOp() {}
 
   void dispatch(DispatchContext& ctx) const {
-    if (draw_needed(ctx)) {
+    if (op_needed(ctx)) {
       ctx.receiver.drawPaint();
     }
   }
@@ -674,7 +654,7 @@ struct DrawColorOp final : DrawOpBase {
   const DlBlendMode mode;
 
   void dispatch(DispatchContext& ctx) const {
-    if (draw_needed(ctx)) {
+    if (op_needed(ctx)) {
       ctx.receiver.drawColor(color, mode);
     }
   }
@@ -694,7 +674,7 @@ struct DrawColorOp final : DrawOpBase {
     const arg_type arg_name;                                              \
                                                                           \
     void dispatch(DispatchContext& ctx) const {                           \
-      if (draw_needed(ctx)) {                                             \
+      if (op_needed(ctx)) {                                               \
         ctx.receiver.draw##op_name(arg_name);                             \
       }                                                                   \
     }                                                                     \
@@ -714,7 +694,7 @@ struct DrawPathOp final : DrawOpBase {
   const SkPath path;
 
   void dispatch(DispatchContext& ctx) const {
-    if (draw_needed(ctx)) {
+    if (op_needed(ctx)) {
       ctx.receiver.drawPath(path);
     }
   }
@@ -742,7 +722,7 @@ struct DrawPathOp final : DrawOpBase {
     const type2 name2;                                           \
                                                                  \
     void dispatch(DispatchContext& ctx) const {                  \
-      if (draw_needed(ctx)) {                                    \
+      if (op_needed(ctx)) {                                      \
         ctx.receiver.draw##op_name(name1, name2);                \
       }                                                          \
     }                                                            \
@@ -765,7 +745,7 @@ struct DrawArcOp final : DrawOpBase {
   const bool center;
 
   void dispatch(DispatchContext& ctx) const {
-    if (draw_needed(ctx)) {
+    if (op_needed(ctx)) {
       ctx.receiver.drawArc(bounds, start, sweep, center);
     }
   }
@@ -786,7 +766,7 @@ struct DrawArcOp final : DrawOpBase {
     const uint32_t count;                                                \
                                                                          \
     void dispatch(DispatchContext& ctx) const {                          \
-      if (draw_needed(ctx)) {                                            \
+      if (op_needed(ctx)) {                                              \
         const SkPoint* pts = reinterpret_cast<const SkPoint*>(this + 1); \
         ctx.receiver.drawPoints(DlCanvas::PointMode::mode, count, pts);  \
       }                                                                  \
@@ -812,7 +792,7 @@ struct DrawVerticesOp final : DrawOpBase {
   const DlBlendMode mode;
 
   void dispatch(DispatchContext& ctx) const {
-    if (draw_needed(ctx)) {
+    if (op_needed(ctx)) {
       const DlVertices* vertices =
           reinterpret_cast<const DlVertices*>(this + 1);
       ctx.receiver.drawVertices(vertices, mode);
@@ -836,7 +816,7 @@ struct DrawVerticesOp final : DrawOpBase {
     const sk_sp<DlImage> image;                                          \
                                                                          \
     void dispatch(DispatchContext& ctx) const {                          \
-      if (draw_needed(ctx)) {                                            \
+      if (op_needed(ctx)) {                                              \
         ctx.receiver.drawImage(image, point, sampling, with_attributes); \
       }                                                                  \
     }                                                                    \
@@ -878,7 +858,7 @@ struct DrawImageRectOp final : DrawOpBase {
   const sk_sp<DlImage> image;
 
   void dispatch(DispatchContext& ctx) const {
-    if (draw_needed(ctx)) {
+    if (op_needed(ctx)) {
       ctx.receiver.drawImageRect(image, src, dst, sampling,
                                  render_with_attributes, constraint);
     }
@@ -911,7 +891,7 @@ struct DrawImageRectOp final : DrawOpBase {
     const sk_sp<DlImage> image;                                            \
                                                                            \
     void dispatch(DispatchContext& ctx) const {                            \
-      if (draw_needed(ctx)) {                                              \
+      if (op_needed(ctx)) {                                                \
         ctx.receiver.drawImageNine(image, center, dst, mode,               \
                                    render_with_attributes);                \
       }                                                                    \
@@ -993,7 +973,7 @@ struct DrawAtlasOp final : DrawAtlasBaseOp {
                         render_with_attributes) {}
 
   void dispatch(DispatchContext& ctx) const {
-    if (draw_needed(ctx)) {
+    if (op_needed(ctx)) {
       const SkRSXform* xform = reinterpret_cast<const SkRSXform*>(this + 1);
       const SkRect* tex = reinterpret_cast<const SkRect*>(xform + count);
       const DlColor* colors =
@@ -1038,7 +1018,7 @@ struct DrawAtlasCulledOp final : DrawAtlasBaseOp {
   const SkRect cull_rect;
 
   void dispatch(DispatchContext& ctx) const {
-    if (draw_needed(ctx)) {
+    if (op_needed(ctx)) {
       const SkRSXform* xform = reinterpret_cast<const SkRSXform*>(this + 1);
       const SkRect* tex = reinterpret_cast<const SkRect*>(xform + count);
       const DlColor* colors =
@@ -1072,7 +1052,7 @@ struct DrawDisplayListOp final : DrawOpBase {
   const sk_sp<DisplayList> display_list;
 
   void dispatch(DispatchContext& ctx) const {
-    if (draw_needed(ctx)) {
+    if (op_needed(ctx)) {
       ctx.receiver.drawDisplayList(display_list, opacity);
     }
   }
@@ -1098,7 +1078,7 @@ struct DrawTextBlobOp final : DrawOpBase {
   const sk_sp<SkTextBlob> blob;
 
   void dispatch(DispatchContext& ctx) const {
-    if (draw_needed(ctx)) {
+    if (op_needed(ctx)) {
       ctx.receiver.drawTextBlob(blob, x, y);
     }
   }
@@ -1121,7 +1101,7 @@ struct DrawTextBlobOp final : DrawOpBase {
     const SkPath path;                                                        \
                                                                               \
     void dispatch(DispatchContext& ctx) const {                               \
-      if (draw_needed(ctx)) {                                                 \
+      if (op_needed(ctx)) {                                                   \
         ctx.receiver.drawShadow(path, color, elevation, transparent_occluder, \
                                 dpr);                                         \
       }                                                                       \

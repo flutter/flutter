@@ -72,11 +72,11 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
             .raster_cache                  = nullptr,
             // clang-format on
         },
+        display_list_builder_(kDlBounds),
         display_list_paint_context_{
             // clang-format off
             .state_stack                   = display_list_state_stack_,
-            // canvas is set below by resetting the display_list
-            .canvas                        = nullptr,
+            .canvas                        = &display_list_builder_,
             .gr_context                    = nullptr,
             .view_embedder                 = nullptr,
             .raster_time                   = raster_time_,
@@ -88,8 +88,7 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
         checkerboard_context_{
             // clang-format off
             .state_stack                   = checkerboard_state_stack_,
-            // canvas is set below by resetting the display_list
-            .canvas                        = nullptr,
+            .canvas                        = &display_list_builder_,
             .gr_context                    = nullptr,
             .view_embedder                 = nullptr,
             .raster_time                   = raster_time_,
@@ -101,8 +100,8 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
     use_null_raster_cache();
     preroll_state_stack_.set_preroll_delegate(kGiantRect, SkMatrix::I());
     paint_state_stack_.set_delegate(&TestT::mock_canvas());
-    reset_display_list();
-    reset_checkerboard_display_list();
+    display_list_state_stack_.set_delegate(&display_list_builder_);
+    checkerboard_state_stack_.set_delegate(&display_list_builder_);
     checkerboard_state_stack_.set_checkerboard_func(draw_checkerboard);
     checkerboard_paint_.setColor(checkerboard_color_);
   }
@@ -171,44 +170,19 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
   PaintContext& checkerboard_context() { return checkerboard_context_; }
   LayerSnapshotStore& layer_snapshot_store() { return snapshot_store_; }
 
-  sk_sp<DisplayList> checkerboard_display_list() {
-    if (checkerboard_display_list_ == nullptr) {
-      if (checkerboard_builder_.get()) {
-        checkerboard_state_stack_.clear_delegate();
-        checkerboard_display_list_ = checkerboard_builder_->Build();
-        checkerboard_builder_.reset();
-        checkerboard_context_.canvas = nullptr;
-      }
-    }
-    return checkerboard_display_list_;
-  }
-
   sk_sp<DisplayList> display_list() {
     if (display_list_ == nullptr) {
-      if (display_list_builder_.get()) {
-        display_list_state_stack_.clear_delegate();
-        display_list_ = display_list_builder_->Build();
-        display_list_builder_.reset();
-        display_list_paint_context_.canvas = nullptr;
-      }
+      display_list_ = display_list_builder_.Build();
     }
     return display_list_;
   }
 
-  void reset_checkerboard_display_list() {
-    checkerboard_display_list_ = nullptr;
-    checkerboard_state_stack_.clear_delegate();
-    checkerboard_builder_.reset(new DisplayListBuilder(kDlBounds));
-    checkerboard_state_stack_.set_delegate(checkerboard_builder_.get());
-    checkerboard_context_.canvas = checkerboard_builder_.get();
-  }
-
   void reset_display_list() {
     display_list_ = nullptr;
-    display_list_state_stack_.clear_delegate();
-    display_list_builder_.reset(new DisplayListBuilder(kDlBounds));
-    display_list_state_stack_.set_delegate(display_list_builder_.get());
-    display_list_paint_context_.canvas = display_list_builder_.get();
+    // Build() will leave the builder in a state to start recording a new DL
+    display_list_builder_.Build();
+    // Make sure we are starting from a fresh state stack
+    FML_DCHECK(display_list_state_stack_.is_empty());
   }
 
   void enable_leaf_layer_tracing() {
@@ -246,7 +220,6 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
   }
 
   LayerStateStack preroll_state_stack_;
-  LayerStateStack display_list_state_stack_;
   LayerStateStack paint_state_stack_;
   LayerStateStack checkerboard_state_stack_;
   FixedRefreshRateStopwatch raster_time_;
@@ -256,11 +229,10 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
   std::unique_ptr<RasterCache> raster_cache_;
   PrerollContext preroll_context_;
   PaintContext paint_context_;
-  std::unique_ptr<DisplayListBuilder> display_list_builder_;
+  DisplayListBuilder display_list_builder_;
+  LayerStateStack display_list_state_stack_;
   sk_sp<DisplayList> display_list_;
   PaintContext display_list_paint_context_;
-  std::unique_ptr<DisplayListBuilder> checkerboard_builder_;
-  sk_sp<DisplayList> checkerboard_display_list_;
   DlPaint checkerboard_paint_;
   PaintContext checkerboard_context_;
   LayerSnapshotStore snapshot_store_;
