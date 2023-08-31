@@ -3616,7 +3616,7 @@ void main() {
       RenderParagraph title = _getTextRenderObject(tester, 'title');
       expect(title.text.style!.color, theme.textTheme.titleMedium!.color);
       RenderParagraph subtitle = _getTextRenderObject(tester, 'subtitle');
-      expect(subtitle.text.style!.color, theme.textTheme.bodyMedium!.color);
+      expect(subtitle.text.style!.color, theme.textTheme.bodySmall!.color);
       RenderParagraph trailing = _getTextRenderObject(tester, 'trailing');
       expect(trailing.text.style!.color, theme.textTheme.bodyMedium!.color);
 
@@ -3628,7 +3628,7 @@ void main() {
       title = _getTextRenderObject(tester, 'title');
       expect(title.text.style!.color, theme.textTheme.titleMedium!.color);
       subtitle = _getTextRenderObject(tester, 'subtitle');
-      expect(subtitle.text.style!.color, theme.textTheme.bodyMedium!.color);
+      expect(subtitle.text.style!.color, theme.textTheme.bodySmall!.color);
       trailing = _getTextRenderObject(tester, 'trailing');
       expect(trailing.text.style!.color, theme.textTheme.bodyMedium!.color);
     });
