@@ -78,6 +78,7 @@ class UpgradeCommand extends FlutterCommand {
       continueFlow: boolArg('continue'),
       testFlow: stringArg('working-directory') != null,
       gitTagVersion: GitTagVersion.determine(globals.processUtils, globals.platform, workingDirectory: _commandRunner.workingDirectory),
+      //gitTagVersion: GitTagVersion.determine(globals.processUtils, globals.platform),
       flutterVersion: stringArg('working-directory') == null
         ? globals.flutterVersion
         : FlutterVersion(flutterRoot: _commandRunner.workingDirectory!, fs: globals.fs),
