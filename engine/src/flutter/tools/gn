@@ -214,8 +214,69 @@ def buildtools_dir():
   return '%s-%s' % (host_os, host_cpu)
 
 
+def setup_rbe(args):
+  rbe_gn_args = {}
+  # RBE is default-off. If it is not asked for, then silently keep all default
+  # flag values.
+  if not args.rbe:
+    return rbe_gn_args
+
+  if get_host_os() not in ['linux']:
+    print(
+        'The --rbe flag has no effect. RBE is currently only supported on Linux.'
+    )
+    return rbe_gn_args
+
+  rbe_gn_args['use_rbe'] = True
+
+  # When running in CI, the recipes use their own rbe install, and take
+  # care of starting and stopping the compiler proxy.
+  running_on_luci = os.environ.get('LUCI_CONTEXT') is not None
+
+  # Bootstrap reproxy if not running in CI.
+  if not running_on_luci:
+    cipd_reclient_dir = os.path.join(
+        SRC_ROOT,
+        'buildtools',
+        buildtools_dir(),
+        'reclient',
+    )
+    bootstrap_path = os.path.join(cipd_reclient_dir, 'bootstrap')
+    reproxy_path = os.path.join(cipd_reclient_dir, 'reproxy')
+    rbe_cfg_path = os.path.join(SRC_ROOT, 'build', 'rbe.cfg')
+    bootstrap_cmd = [
+        bootstrap_path,
+        '--re_proxy=' + reproxy_path,
+        '--automatic_auth=true',
+        '--cfg=' + rbe_cfg_path,
+    ]
+    try:
+      subprocess.call(bootstrap_cmd, cwd=SRC_ROOT)
+    except subprocess.CalledProcessError as exc:
+      print('Failed to boostrap reproxy: ', exc.returncode, exc.output)
+      return {}
+
+  if args.rbe_server_address:
+    rbe_gn_args['rbe_server_address'] = args.rbe_server_address
+  if args.rbe_exec_strategy:
+    rbe_gn_args['rbe_exec_strategy'] = args.rbe_exec_strategy
+  if args.rbe_dial_timeout:
+    rbe_gn_args['rbe_dial_timeout'] = args.rbe_dial_timeout
+  if args.rbe_platform:
+    rbe_gn_args['rbe_platform'] = args.rbe_platform
+  if args.rbe_dir:
+    rbe_gn_args['rbe_dir'] = args.rbe_dir
+
+  return rbe_gn_args
+
+
 def setup_goma(args):
   goma_gn_args = {}
+  # If RBE is requested, don't try to use goma.
+  if args.rbe:
+    goma_gn_args['use_goma'] = False
+    goma_gn_args['goma_dir'] = None
+    return goma_gn_args
 
   # args.goma has three states, True (--goma), False (--no-goma), and
   # None (default). In True mode, we force GOMA to be used (and fail
@@ -289,6 +350,8 @@ def to_gn_args(args):
   gn_args['is_debug'] = args.unoptimized
 
   gn_args.update(setup_goma(args))
+
+  gn_args.update(setup_rbe(args))
 
   # If building for WASM, set the GN args using 'to_gn_wasm_args' as most
   # of the Flutter SDK specific arguments are unused.
@@ -911,6 +974,41 @@ def parse_args(args):
       dest='build_engine_artifacts',
       action='store_false',
       help='Do not build the host-side development artifacts.'
+  )
+
+  parser.add_argument('--rbe', default=None, action='store_true')
+  parser.add_argument('--no-rbe', dest='rbe', action='store_false')
+  parser.add_argument(
+      '--rbe-server-address',
+      default=None,
+      type=str,
+      help='The reproxy serveraddress'
+  )
+  parser.add_argument(
+      '--rbe-exec-strategy',
+      default=None,
+      type=str,
+      help='The RBE execution strategy.',
+      choices=['local', 'remote', 'remote_local_fallback', 'racing']
+  )
+  parser.add_argument(
+      '--rbe-dial-timeout',
+      default=None,
+      type=str,
+      help='The timeout for connecting to the local reproxy server.',
+  )
+  parser.add_argument(
+      '--rbe-platform',
+      default=None,
+      type=str,
+      help='The RBE "platform" string. This is used to identify remote platform '
+      'settings like the docker image to use to run the command.'
+  )
+  parser.add_argument(
+      '--rbe-dir',
+      default=None,
+      type=str,
+      help='The location of the reclient binaries.'
   )
 
   parser.add_argument('--goma', default=None, action='store_true')
