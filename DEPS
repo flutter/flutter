@@ -47,6 +47,10 @@ vars = {
   # https://chrome-infra-packages.appspot.com/p/fuchsia/third_party/goma/client
   'goma_version': ' git_revision:41b3bcb64014144a844153fd5588c36411fffb56',
 
+  'reclient_version': 'git_revision:81e819b39d4743462857cc55430d898b9fcca1af',
+
+  'gcloud_version': 'version:2@444.0.0.chromium.3',
+
   # When updating the Dart revision, ensure that all entries that are
   # dependencies of Dart are also updated to match the entries in the
   # Dart SDK's DEPS file for that revision of Dart. The DEPS file for
@@ -877,6 +881,30 @@ deps = {
       }
     ],
     'condition': 'use_cipd_goma and download_windows_deps',
+    'dep_type': 'cipd',
+  },
+
+  # reclient.
+  'src/buildtools/linux-x64/reclient': {
+    'packages': [
+      {
+        'package': 'infra/rbe/client/${{platform}}',
+        'version': Var('reclient_version'),
+      }
+    ],
+    'condition': 'host_os == "linux" and host_cpu == "x64"',
+    'dep_type': 'cipd',
+  },
+
+  # gcloud
+  'src/buildtools/linux-x64/gcloud': {
+    'packages': [
+      {
+        'package': 'infra/3pp/tools/gcloud/${{platform}}',
+        'version': Var('gcloud_version'),
+      }
+    ],
+    'condition': 'host_os == "linux" and host_cpu == "x64"',
     'dep_type': 'cipd',
   },
 
