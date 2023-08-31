@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'navigator_utils.dart';
 import 'observer_tester.dart';
@@ -625,6 +626,17 @@ void main() {
     expect(observations[2].operation, 'push');
     expect(observations[2].current, '/A/B');
     expect(observations[2].previous, '/A');
+  });
+
+  testWidgets('$Route  dispatches memory events', (WidgetTester tester) async {
+    void createAndDisposeRoute() {
+      final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+      const MaterialPage<void> page = MaterialPage<void>(child: Text('page'));
+      final Route<void> route = page.createRoute(nav.currentContext!);
+      // ignore: invalid_use_of_protected_member
+      route.dispose();
+    }
+    expect(createAndDisposeRoute, dispatchesMemoryEvents(Route<dynamic>));
   });
 
   testWidgets('Route didAdd and dispose in same frame work', (WidgetTester tester) async {
