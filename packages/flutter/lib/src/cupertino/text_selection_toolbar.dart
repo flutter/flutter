@@ -144,8 +144,8 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
       return outputChild;
     }
     return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: const BorderRadius.all(_kToolbarBorderRadius),
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.all(_kToolbarBorderRadius),
       ),
       child: outputChild,
     );
