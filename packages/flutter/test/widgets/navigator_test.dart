@@ -632,13 +632,13 @@ void main() {
     Future<void> createAndDisposeRoute() async {
       final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
       await tester.pumpWidget(
-      MaterialApp(
-        navigatorKey: nav,
-        home: const Scaffold(
-          body: Text('home'),
+        MaterialApp(
+          navigatorKey: nav,
+          home: const Scaffold(
+            body: Text('home'),
+          )
         )
-      )
-    );
+      );
       const TestPage page = TestPage(name: 'page');
       final Route<dynamic> route = page.createRoute(nav.currentContext!);
       // ignore: invalid_use_of_protected_member
