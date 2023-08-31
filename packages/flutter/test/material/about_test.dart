@@ -1525,7 +1525,7 @@ void main() {
     expect(tester.getCenter(find.byType(ListView)), const Offset(160, 356));
   });
 
-  testWidgets('Material3 - LicensePage master view layout position - ltr', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - LicensePage master view layout position - ltr', (WidgetTester tester) async {
     const TextDirection textDirection = TextDirection.ltr;
     const Size defaultSize = Size(800.0, 600.0);
     const Size wideSize = Size(1200.0, 600.0);
@@ -1590,7 +1590,12 @@ void main() {
     expect(titleOffset, const Offset(292.0, 136.0));
     expect(titleOffset.dx, lessThan(wideSize.width - 320)); // Default master view width is 320.0.
     expect(tester.getCenter(find.byType(ListView)), const Offset(160, 356));
-  });
+  },
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    // TODO(polina-c): remove after fixing
+    // https://github.com/flutter/flutter/issues/133705
+    notDisposedAllowList: <String, int?> {'ValueNotifier<double>':5},
+  ));
 
   testWidgets('Material2 - LicensePage master view layout position - rtl', (WidgetTester tester) async {
     const TextDirection textDirection = TextDirection.rtl;
