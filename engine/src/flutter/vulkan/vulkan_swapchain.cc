@@ -11,6 +11,7 @@
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
+#include "third_party/skia/include/gpu/ganesh/vk/GrVkBackendSurface.h"
 #include "third_party/skia/include/gpu/vk/GrVkTypes.h"
 
 #include "vulkan_backbuffer.h"
@@ -242,8 +243,8 @@ sk_sp<SkSurface> VulkanSwapchain::CreateSkiaSurface(
   image_info.fLevelCount = 1;
 
   // TODO(chinmaygarde): Setup the stencil buffer and the sampleCnt.
-  GrBackendRenderTarget backend_render_target(size.fWidth, size.fHeight,
-                                              image_info);
+  auto backend_render_target =
+      GrBackendRenderTargets::MakeVk(size.fWidth, size.fHeight, image_info);
   SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
 
   return SkSurfaces::WrapBackendRenderTarget(
@@ -483,7 +484,8 @@ VulkanSwapchain::AcquireResult VulkanSwapchain::AcquireSurface() {
     FML_DLOG(INFO) << "Could not get backend render target.";
     return error;
   }
-  backendRT.setVkImageLayout(destination_image_layout);
+  GrBackendRenderTargets::SetVkImageLayout(&backendRT,
+                                           destination_image_layout);
 
   current_image_index_ = next_image_index;
 

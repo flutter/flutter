@@ -13,6 +13,7 @@
 #include "third_party/skia/include/core/SkSurfaceProps.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
+#include "third_party/skia/include/gpu/ganesh/vk/GrVkBackendSurface.h"
 #include "third_party/skia/include/gpu/vk/GrVkTypes.h"
 
 namespace flutter {
@@ -43,10 +44,8 @@ std::unique_ptr<TestVulkanSurface> TestVulkanSurface::Create(
       .fSampleCount = 1,
       .fLevelCount = 1,
   };
-  GrBackendTexture backend_texture(surface_size.width(),   //
-                                   surface_size.height(),  //
-                                   image_info              //
-  );
+  auto backend_texture = GrBackendTextures::MakeVk(
+      surface_size.width(), surface_size.height(), image_info);
 
   SkSurfaceProps surface_properties(0, kUnknown_SkPixelGeometry);
 
