@@ -2,107 +2,47 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'text/unicode_range.dart';
-
 class NotoFont {
-  NotoFont(this.name, this.url, this._packedRanges);
+  NotoFont(this.name, this.url, {this.enabled = true});
 
   final String name;
   final String url;
-  final String _packedRanges;
-  // A sorted list of Unicode ranges.
-  late final List<CodePointRange> _ranges = _unpackFontRange(_packedRanges);
 
-  List<CodePointRange> computeUnicodeRanges() => _ranges;
+  /// `true` if this font is to be considered as a fallback font. Almost all
+  /// fonts are enabled, but [enabled] may be `false` to exclude a font. This is
+  /// used to choose between color and monochrome emoji fonts - only one of them
+  /// is enabled.
+  final bool enabled;
 
-  // Returns `true` if this font has a glyph for the given [codeunit].
-  bool contains(int codeUnit) {
-    // Binary search through the unicode ranges to see if there
-    // is a range that contains the codeunit.
-    int min = 0;
-    int max = _ranges.length - 1;
-    while (min <= max) {
-      final int mid = (min + max) ~/ 2;
-      final CodePointRange range = _ranges[mid];
-      if (range.start > codeUnit) {
-        max = mid - 1;
-      } else {
-        // range.start <= codeUnit
-        if (range.end >= codeUnit) {
-          return true;
-        }
-        min = mid + 1;
-      }
-    }
-    return false;
-  }
+  final int index = _index++;
+  static int _index = 0;
+
+  /// During fallback font selection this is the number of missing code points
+  /// that are covered by (i.e. in) this font.
+  int coverCount = 0;
+
+  /// During fallback font selection this is a list of [FallbackFontComponent]s
+  /// from this font that are required to cover some of the missing code
+  /// points. The cover count for the font is the sum of the cover counts for
+  /// the components that make up the font.
+  final List<FallbackFontComponent> coverComponents = <FallbackFontComponent>[];
 }
 
-class CodePointRange {
-  const CodePointRange(this.start, this.end);
+/// A component is a set of code points common to some fonts. Each code point is
+/// in a single component. Each font can be represented as a disjoint union of
+/// components. We store the inverse of this relationship, the fonts that use
+/// this component. The font fallback selection algorithm does not need the code
+/// points in a component or a font, so this is not stored, but can be recovered
+/// via the map from code-point to component.
+class FallbackFontComponent {
+  FallbackFontComponent(this._allFonts);
+  final List<NotoFont> _allFonts;
+  late final List<NotoFont> _activeFonts = List<NotoFont>.unmodifiable(
+      _allFonts.where((NotoFont font) => font.enabled));
 
-  final int start;
-  final int end;
+  List<NotoFont> get fonts => _activeFonts;
 
-  bool contains(int codeUnit) {
-    return start <= codeUnit && codeUnit <= end;
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (other is! CodePointRange) {
-      return false;
-    }
-    final CodePointRange range = other;
-    return range.start == start && range.end == end;
-  }
-
-  @override
-  int get hashCode => Object.hash(start, end);
-
-  @override
-  String toString() => '[$start, $end]';
-}
-
-final int _kCharPipe = '|'.codeUnitAt(0);
-final int _kCharSemicolon = ';'.codeUnitAt(0);
-
-class MutableInt {
-  MutableInt(this.value);
-
-  int value;
-}
-
-List<CodePointRange> _unpackFontRange(String packedRange) {
-    final MutableInt i = MutableInt(0);
-    final List<CodePointRange> ranges = <CodePointRange>[];
-
-    while (i.value < packedRange.length) {
-      final int rangeStart = _consumeInt36(packedRange, i, until: _kCharPipe);
-      final int rangeLength = _consumeInt36(packedRange, i, until: _kCharSemicolon);
-      final int rangeEnd = rangeStart + rangeLength;
-      ranges.add(CodePointRange(rangeStart, rangeEnd));
-    }
-    return ranges;
-}
-
-int _consumeInt36(String packedData, MutableInt index, {required int until}) {
-  // The implementation is similar to:
-  //
-  // ```dart
-  // return int.tryParse(packedData.substring(index, indexOfUntil), radix: 36);
-  // ```
-  //
-  // But using substring is slow when called too many times. This custom
-  // implementation parses the integer without extra memory.
-
-  int result = 0;
-  while (true) {
-    final int charCode = packedData.codeUnitAt(index.value);
-    index.value++;
-    if (charCode == until) {
-      return result;
-    }
-    result = result * 36 + getIntFromCharCode(charCode);
-  }
+  /// During fallback font selection this is the number of missing code points
+  /// that are covered by this component.
+  int coverCount = 0;
 }

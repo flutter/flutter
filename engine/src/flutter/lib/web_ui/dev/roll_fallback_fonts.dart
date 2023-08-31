@@ -12,6 +12,9 @@ import 'package:crypto/crypto.dart' as crypto;
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 
+// ignore: avoid_relative_lib_imports
+import '../lib/src/engine/noto_font_encoding.dart';
+
 import 'cipd.dart';
 import 'environment.dart';
 import 'exceptions.dart';
@@ -103,7 +106,8 @@ class RollFallbackFontsCommand extends Command<bool>
 
       final Uint8List bodyBytes = fontResponse.bodyBytes;
       if (!_checkForLicenseAttribution(bodyBytes)) {
-        throw ToolExit('Expected license attribution not found in file: $urlString');
+        throw ToolExit(
+            'Expected license attribution not found in file: $urlString');
       }
       hasher.add(utf8.encode(urlSuffix));
       hasher.add(bodyBytes);
@@ -122,6 +126,29 @@ class RollFallbackFontsCommand extends Command<bool>
 
     final StringBuffer sb = StringBuffer();
 
+    final List<_Font> fonts = <_Font>[];
+
+    for (final String family in fallbackFonts) {
+      final List<int> starts = <int>[];
+      final List<int> ends = <int>[];
+      final String charset = charsetForFamily[family]!;
+      for (final String range in charset.split(' ')) {
+        // Range is one hexadecimal number or two, separated by `-`.
+        final List<String> parts = range.split('-');
+        if (parts.length != 1 && parts.length != 2) {
+          throw ToolExit('Malformed charset range "$range"');
+        }
+        final int first = int.parse(parts.first, radix: 16);
+        final int last = int.parse(parts.last, radix: 16);
+        starts.add(first);
+        ends.add(last);
+      }
+
+      fonts.add(_Font(family, fonts.length, starts, ends));
+    }
+
+    final String fontSetsCode = _computeEncodedFontSets(fonts);
+
     sb.writeln('// Copyright 2013 The Flutter Authors. All rights reserved.');
     sb.writeln('// Use of this source code is governed by a BSD-style license '
         'that can be');
@@ -131,51 +158,28 @@ class RollFallbackFontsCommand extends Command<bool>
     sb.writeln('// dev/roll_fallback_fonts.dart');
     sb.writeln("import 'noto_font.dart';");
     sb.writeln();
-    sb.writeln('List<NotoFont> getFallbackFontData(bool useColorEmoji) => <NotoFont>[');
+    sb.writeln('List<NotoFont> getFallbackFontList(bool useColorEmoji) => <NotoFont>[');
 
-    for (final String family in fallbackFonts) {
+    for (final _Font font in fonts) {
+      final String family = font.family;
+      String enabledArgument = '';
       if (family == 'Noto Emoji') {
-        sb.write(' if (!useColorEmoji)');
+        enabledArgument = 'enabled: !useColorEmoji, ';
       }
       if (family == 'Noto Color Emoji') {
-        sb.write(' if (useColorEmoji)');
+        enabledArgument = 'enabled: useColorEmoji, ';
       }
       final String urlString = urlForFamily[family]!.toString();
       if (!urlString.startsWith(expectedUrlPrefix)) {
-        throw ToolExit('Unexpected url format received from Google Fonts API: $urlString.');
+        throw ToolExit(
+            'Unexpected url format received from Google Fonts API: $urlString.');
       }
       final String urlSuffix = urlString.substring(expectedUrlPrefix.length);
-      sb.writeln(" NotoFont('$family', '$urlSuffix',");
-      final List<String> starts = <String>[];
-      final List<String> ends = <String>[];
-      for (final String range in charsetForFamily[family]!.split(' ')) {
-        final List<String> parts = range.split('-');
-        if (parts.length == 1) {
-          starts.add(parts[0]);
-          ends.add(parts[0]);
-        } else {
-          starts.add(parts[0]);
-          ends.add(parts[1]);
-        }
-      }
-
-      // Print the unicode ranges in a readable format for easier review. This
-      // shouldn't affect code size because comments are removed in release mode.
-      sb.write('   // <int>[');
-      for (final String start in starts) {
-        sb.write('0x$start,');
-      }
-      sb.writeln('],');
-      sb.write('   // <int>[');
-      for (final String end in ends) {
-        sb.write('0x$end,');
-      }
-      sb.writeln(']');
-
-      sb.writeln("   '${_packFontRanges(starts, ends)}',");
-      sb.writeln(' ),');
+      sb.writeln(" NotoFont('$family', $enabledArgument'$urlSuffix'),");
     }
     sb.writeln('];');
+    sb.writeln();
+    sb.write(fontSetsCode);
 
     final io.File fontDataFile = io.File(path.join(
       environment.webUiRootDir.path,
@@ -471,30 +475,11 @@ const List<String> fallbackFonts = <String>[
   'Noto Sans Zanabazar Square',
 ];
 
-String _packFontRanges(List<String> starts, List<String> ends) {
-  assert(starts.length == ends.length);
-
-  final StringBuffer sb = StringBuffer();
-
-  for (int i = 0; i < starts.length; i++) {
-    final int start = int.parse(starts[i], radix: 16);
-    final int end = int.parse(ends[i], radix: 16);
-
-    sb.write(start.toRadixString(36));
-    sb.write('|');
-    if (start != end) {
-      sb.write((end - start).toRadixString(36));
-    }
-    sb.write(';');
-  }
-
-  return sb.toString();
-}
-
 bool _checkForLicenseAttribution(Uint8List fontBytes) {
   final ByteData fontData = fontBytes.buffer.asByteData();
   final int codePointCount = fontData.lengthInBytes ~/ 2;
-  const String attributionString = 'This Font Software is licensed under the SIL Open Font License, Version 1.1.';
+  const String attributionString =
+      'This Font Software is licensed under the SIL Open Font License, Version 1.1.';
   for (int i = 0; i < codePointCount - attributionString.length; i++) {
     bool match = true;
     for (int j = 0; j < attributionString.length; j++) {
@@ -508,4 +493,371 @@ bool _checkForLicenseAttribution(Uint8List fontBytes) {
     }
   }
   return false;
+}
+
+class _Font {
+  _Font(this.family, this.index, this.starts, this.ends);
+
+  final String family;
+  final int index;
+  final List<int> starts;
+  final List<int> ends; // inclusive ends
+
+  static int compare(_Font a, _Font b) => a.index.compareTo(b.index);
+
+  String get shortName =>
+      _shortName +
+      String.fromCharCodes(
+          '$index'.codeUnits.map((int ch) => ch - 48 + 0x2080));
+
+  String get _shortName => family.startsWith('Noto Sans ')
+      ? family.substring('Noto Sans '.length)
+      : family;
+}
+
+/// The boundary of a range of a font.
+class _Boundary {
+  _Boundary(this.value, this.isStart, this.font);
+  final int value; // inclusive start or exclusive end.
+  final bool isStart;
+  final _Font font;
+
+  static int compare(_Boundary a, _Boundary b) => a.value.compareTo(b.value);
+}
+
+class _Range {
+  _Range(this.start, this.end, this.fontSet);
+  final int start;
+  final int end;
+  final _FontSet fontSet;
+
+  @override
+  String toString() {
+    return '[${start.toRadixString(16)}, ${end.toRadixString(16)}]'
+        ' (${end - start + 1})'
+        ' ${fontSet.description()}';
+  }
+}
+
+/// A canonical representative for a set of _Fonts. The fonts are stored in
+/// order of increasing `_Font.index`.
+class _FontSet {
+  _FontSet(this.fonts);
+
+  /// The number of [_Font]s in this set.
+  int get length => fonts.length;
+
+  /// The members of this set.
+  final List<_Font> fonts;
+
+  /// Number of unicode ranges that are supported by this set of fonts.
+  int rangeCount = 0;
+
+  /// The serialization order of this set. This index is assigned after building
+  /// all the sets.
+  late final int index;
+
+  static int orderByDecreasingRangeCount(_FontSet a, _FontSet b) {
+    final int r = b.rangeCount.compareTo(a.rangeCount);
+    if (r != 0) {
+      return r;
+    }
+    return orderByLexicographicFontIndexes(a, b);
+  }
+
+  static int orderByLexicographicFontIndexes(_FontSet a, _FontSet b) {
+    for (int i = 0; i < a.length && i < b.length; i++) {
+      final int r = _Font.compare(a.fonts[i], b.fonts[i]);
+      if (r != 0) {
+        return r;
+      }
+    }
+    assert(a.length != b.length); // _FontSets are canonical.
+    return a.length - b.length;
+  }
+
+  @override
+  String toString() {
+    return description();
+  }
+
+  String description() {
+    return fonts.map((_Font font) => font.shortName).join(', ');
+  }
+}
+
+/// A trie node [1] used to find the canonical _FontSet.
+///
+/// [1]: https://en.wikipedia.org/wiki/Trie
+class _TrieNode {
+  final Map<_Font, _TrieNode> _children = <_Font, _TrieNode>{};
+  _FontSet? fontSet;
+
+  /// Inserts a string of fonts into the trie and returns the trie node
+  /// representing the string. [this] must be the root node of the trie.
+  ///
+  /// Inserting the same sequence again will traverse the same path through the
+  /// trie and return the same node, canonicalizing the sequence to its
+  /// representative node.
+  _TrieNode insertSequenceAtRoot(Iterable<_Font> fonts) {
+    _TrieNode node = this;
+    for (final _Font font in fonts) {
+      node = node._children[font] ??= _TrieNode();
+    }
+    return node;
+  }
+}
+
+/// Computes the Dart source code for the encoded data structures used by the
+/// fallback font selection algorithm.
+///
+/// The data structures allow the fallback font selection algorithm to quickly
+/// determine which fonts support a given code point. The structures are
+/// essentially a map from a code point to a set of fonts that support that code
+/// point.
+///
+/// The universe of code points is partitioned into a set of subsets, or
+/// components, where each component contains all the code points that are in
+/// exactly the same set of fonts. A font can be considered to be a union of
+/// some subset of the components and may share components with other fonts.  A
+/// `_FontSet` is used to represent a component and the set of fonts that use
+/// the component. One way to visualize this is as a Venn diagram. The fonts are
+/// the overlapping circles and the components are the spaces between the lines.
+///
+/// The emitted data structures are
+///
+///  (1) A list of sets of fonts.
+///  (2) A list of code point ranges mapping to an index of list (1).
+///
+/// Each set of fonts is represented as a list of font indexes. The indexes are
+/// always increasing so the delta is stored. The stored value is biased by -1
+/// (i.e.  `delta - 1`) since a delta is never less than 1. The deltas are STMR
+/// encoded.
+///
+/// A code point with no fonts is mapped to an empty set of fonts. This allows
+/// the list of code point ranges to be complete, covering every code
+/// point. There are no gaps between ranges; instead there are some ranges that
+/// map to the empty set. Each range is encoded as the size (number of code
+/// points) in the range followed by the value which is the index of the
+/// corresponding set in the list of sets.
+///
+///
+/// STMR (Self terminating multiple radix) encoding
+/// ---
+///
+/// This encoding is a minor adaptation of [VLQ encoding][1], using different
+/// ranges of characters to represent continuing or terminating digits instead
+/// of using a 'continuation' bit.
+///
+/// The separators between the numbers can be a significant proportion of the
+/// number of characters needed to encode a sequence of numbers as a string.
+/// Instead values are encoded with two kinds of digits: prefix digits and
+/// terminating digits. Each kind of digit uses a different set of characters,
+/// and the radix (number of digit characters) can differ between the different
+/// kinds of digit.  Lets say we use decimal digits `0`..`9` for prefix digits
+/// and `A`..`Z` as terminating digits.
+///
+///     M = ('M' - 'A') = 12
+///     38M = (3 * 10 + 8) * 26 + 12 = 38 * 26 + 12 = 1000
+///
+/// Choosing a large terminating radix is especially effective when most of the
+/// encoded values are small, as is the case with delta-encoding.
+///
+/// There can be multiple terminating digit kinds to represent different sorts
+/// of values. For the range table, the size uses a different terminating digit,
+/// 'a'..'z'. This allows the very common size of 1 (accounting over a third of
+/// the range sizes) to be omitted. A range is encoded as either
+/// `<size><value>`, or `<value>` with an implicit size of 1.  Since the size 1
+/// can be implicit, it is always implicit, and the stored sizes are biased by
+/// -2.
+///
+/// | encoding | value | size |
+/// | :---     | ---:  | ---: |
+/// | A        | 0     | 1    |
+/// | B        | 1     | 1    |
+/// | 38M      | 1000  | 1    |
+/// | aA       | 0     | 2    |
+/// | bB       | 1     | 3    |
+/// | zZ       | 25    | 27   |
+/// | 1a1A     | 26    | 28   |
+/// | 38a38M   | 1000  | 1002 |
+///
+/// STMR-encoded strings are decoded efficiently by a simple loop that updates
+/// the current value and performs some additional operation for a terminating
+/// digit, e.g. recording the optional size, or creating a range.
+///
+/// [1]: https://en.wikipedia.org/wiki/Variable-length_quantity
+
+String _computeEncodedFontSets(List<_Font> fonts) {
+  final List<_Range> ranges = <_Range>[];
+  final List<_FontSet> allSets = <_FontSet>[];
+
+  {
+    // The fonts have their supported code points provided as list of inclusive
+    // [start, end] ranges. We want to intersect all of these ranges and find
+    // the fonts that overlap each intersected range.
+    //
+    // It is easier to work with the boundaries of the ranges rather than the
+    // ranges themselves. The boundaries of the intersected ranges is the union
+    // of the boundaries of the individual font ranges.  We scan the boundaries
+    // in increasing order, keeping track of the current set of fonts that are
+    // in the current intersected range.  Each time the boundary value changes,
+    // the current set of fonts is canonicalized and recorded.
+    //
+    // There has to be a wiki article for this algorithm but I didn't find one.
+    final List<_Boundary> boundaries = <_Boundary>[];
+    for (final _Font font in fonts) {
+      for (final int start in font.starts) {
+        boundaries.add(_Boundary(start, true, font));
+      }
+      for (final int end in font.ends) {
+        boundaries.add(_Boundary(end + 1, false, font));
+      }
+    }
+    boundaries.sort(_Boundary.compare);
+
+    // The trie root represents the empty set of fonts.
+    final _TrieNode trieRoot = _TrieNode();
+    final Set<_Font> currentElements = <_Font>{};
+
+    void newRange(int start, int end) {
+      // Ensure we are using the canonical font order.
+      final List<_Font> fonts = List<_Font>.of(currentElements)
+        ..sort(_Font.compare);
+      final _TrieNode node = trieRoot.insertSequenceAtRoot(fonts);
+      final _FontSet fontSet = node.fontSet ??= _FontSet(fonts);
+      if (fontSet.rangeCount == 0) {
+        allSets.add(fontSet);
+      }
+      fontSet.rangeCount++;
+      final _Range range = _Range(start, end, fontSet);
+      ranges.add(range);
+    }
+
+    int start = 0;
+    for (final _Boundary boundary in boundaries) {
+      final int value = boundary.value;
+      if (value > start) {
+        // Boundary has changed, record the pending range `[start, value - 1]`,
+        // and start a new range at `value`. `value` must be > 0 to get here.
+        newRange(start, value - 1);
+        start = value;
+      }
+      if (boundary.isStart) {
+        currentElements.add(boundary.font);
+      } else {
+        currentElements.remove(boundary.font);
+      }
+    }
+    assert(currentElements.isEmpty);
+    // Ensure the ranges cover the whole unicode code point space.
+    if (start <= kMaxCodePoint) {
+      newRange(start, kMaxCodePoint);
+    }
+  }
+
+  print('${allSets.length} sets covering ${ranges.length} ranges');
+
+  // Sort _FontSets by the number of ranges that map to that _FontSet, so that
+  // _FontSets that are referenced from many ranges have smaller indexes.  This
+  // makes the range table encoding smaller, by about half.
+  allSets.sort(_FontSet.orderByDecreasingRangeCount);
+
+  for (int i = 0; i < allSets.length; i++) {
+    allSets[i].index = i;
+  }
+
+  final StringBuffer code = StringBuffer();
+
+  final StringBuffer sb = StringBuffer();
+  int totalEncodedLength = 0;
+
+  void encode(int value, int radix, int firstDigitCode) {
+    final int prefix = value ~/ radix;
+    assert(kPrefixDigit0 == '0'.codeUnitAt(0) && kPrefixRadix == 10);
+    if (prefix != 0) {
+      sb.write(prefix);
+    }
+    sb.writeCharCode(firstDigitCode + value.remainder(radix));
+  }
+
+  for (final _FontSet fontSet in allSets) {
+    int previousFontIndex = -1;
+    for (final _Font font in fontSet.fonts) {
+      final int fontIndexDelta = font.index - previousFontIndex;
+      previousFontIndex = font.index;
+      encode(fontIndexDelta - 1, kFontIndexRadix, kFontIndexDigit0);
+    }
+    if (fontSet != allSets.last) {
+      sb.write(',');
+    }
+    final String fragment = sb.toString();
+    sb.clear();
+    totalEncodedLength += fragment.length;
+
+    final int length = fontSet.fonts.length;
+    code.write('    // #${fontSet.index}: $length font');
+    if (length != 1) {
+      code.write('s');
+    }
+    if (length > 0) {
+      code.write(': ${fontSet.description()}');
+    }
+    code.writeln('.');
+
+    code.writeln("    '$fragment'");
+  }
+
+  final StringBuffer declarations = StringBuffer();
+
+  final int references =
+      allSets.fold(0, (int sum, _FontSet set) => sum + set.length);
+  declarations
+    ..writeln('// ${allSets.length} unique sets of fonts'
+        ' containing $references font references'
+        ' encoded in $totalEncodedLength characters')
+    ..writeln('const String encodedFontSets =')
+    ..write(code)
+    ..writeln('    ;');
+
+  // Encode ranges.
+  code.clear();
+  totalEncodedLength = 0;
+
+  for (final _Range range in ranges) {
+    final int start = range.start;
+    final int end = range.end;
+    final int index = range.fontSet.index;
+    final int size = end - start + 1;
+
+    // Encode <size><index> or <index> for unit ranges.
+    if (size >= 2) {
+      encode(size - 2, kRangeSizeRadix, kRangeSizeDigit0);
+    }
+    encode(index, kRangeValueRadix, kRangeValueDigit0);
+
+    final String encoding = sb.toString();
+    sb.clear();
+    totalEncodedLength += encoding.length;
+
+    String description = start.toRadixString(16);
+    if (end != start) {
+      description = '$description-${end.toRadixString(16)}';
+    }
+    if (range.fontSet.fonts.isNotEmpty) {
+      description = '${description.padRight(12)} #$index';
+    }
+    final String encodingText = "'$encoding'".padRight(10);
+    code.writeln('    $encodingText // $description');
+  }
+
+  declarations
+    ..writeln()
+    ..writeln(
+        '// ${ranges.length} ranges encoded in $totalEncodedLength characters')
+    ..writeln('const String encodedFontSetRanges =')
+    ..write(code)
+    ..writeln('    ;');
+
+  return declarations.toString();
 }
