@@ -239,7 +239,8 @@ class UserMessages {
       'supported by Flutter yet.';
   String get visualStudioNotLaunchable =>
       'The current Visual Studio installation is not launchable. Please reinstall Visual Studio.';
-  String get visualStudioIsIncomplete => 'The current Visual Studio installation is incomplete. Please reinstall Visual Studio.';
+  String get visualStudioIsIncomplete => 'The current Visual Studio installation is incomplete.\n'
+      'Please use Visual Studio Installer to complete the installation or reinstall Visual Studio.';
   String get visualStudioRebootRequired => 'Visual Studio requires a reboot of your system to complete installation.';
 
   // Messages used in LinuxDoctorValidator
