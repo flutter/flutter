@@ -4861,7 +4861,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                             cursorColor: _cursorColor,
                             backgroundCursorColor: widget.backgroundCursorColor,
                             showCursor: EditableText.debugDeterministicCursor
-                                ? ValueNotifier<bool>(widget.showCursor)
+                                ? _debugCursorNotifier
                                 : _cursorVisibilityNotifier,
                             forceLine: widget.forceLine,
                             readOnly: widget.readOnly,
