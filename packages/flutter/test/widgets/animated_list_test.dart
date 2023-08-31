@@ -649,6 +649,8 @@ void main() {
     );
 
     expect(tester.widget<CustomScrollView>(find.byType(CustomScrollView)).shrinkWrap, true);
+
+    controller.dispose();
   });
 
   testWidgetsWithLeakTracking('AnimatedList applies MediaQuery padding', (WidgetTester tester) async {
