@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -825,7 +826,7 @@ void main() {
     expect(focusNode1.nextFocus(), isFalse);
     await tester.pump();
 
-    expect(focusNode1.hasPrimaryFocus, isTrue);
+    expect(focusNode1.hasPrimaryFocus, !kIsWeb);
     expect(focusNode2.hasPrimaryFocus, isFalse);
   });
 
