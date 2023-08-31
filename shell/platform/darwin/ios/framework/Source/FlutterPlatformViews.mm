@@ -387,7 +387,11 @@ void FlutterPlatformViewsController::PrerollCompositeEmbeddedView(
 
   SkRect view_bounds = SkRect::Make(frame_size_);
   std::unique_ptr<EmbedderViewSlice> view;
-  view = std::make_unique<DisplayListEmbedderViewSlice>(view_bounds);
+  if (enable_impeller_) {
+    view = std::make_unique<ImpellerEmbedderViewSlice>(view_bounds);
+  } else {
+    view = std::make_unique<DisplayListEmbedderViewSlice>(view_bounds);
+  }
   slices_.insert_or_assign(view_id, std::move(view));
 
   composition_order_.push_back(view_id);

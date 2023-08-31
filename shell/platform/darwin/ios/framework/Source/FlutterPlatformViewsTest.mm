@@ -145,7 +145,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController =
+      std::make_shared<flutter::FlutterPlatformViewsController>(false);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -201,7 +202,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController =
+      std::make_shared<flutter::FlutterPlatformViewsController>(false);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -255,7 +257,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController =
+      std::make_shared<flutter::FlutterPlatformViewsController>(false);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -327,7 +330,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController =
+      std::make_shared<flutter::FlutterPlatformViewsController>(false);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -399,7 +403,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController =
+      std::make_shared<flutter::FlutterPlatformViewsController>(false);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -472,7 +477,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController =
+      std::make_shared<flutter::FlutterPlatformViewsController>(false);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -585,7 +591,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController =
+      std::make_shared<flutter::FlutterPlatformViewsController>(false);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -722,7 +729,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController =
+      std::make_shared<flutter::FlutterPlatformViewsController>(false);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -999,7 +1007,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController =
+      std::make_shared<flutter::FlutterPlatformViewsController>(false);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -1299,7 +1308,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController =
+      std::make_shared<flutter::FlutterPlatformViewsController>(false);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -1355,7 +1365,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController =
+      std::make_shared<flutter::FlutterPlatformViewsController>(false);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -1449,7 +1460,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController =
+      std::make_shared<flutter::FlutterPlatformViewsController>(false);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -1520,7 +1532,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController =
+      std::make_shared<flutter::FlutterPlatformViewsController>(false);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -1587,7 +1600,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController =
+      std::make_shared<flutter::FlutterPlatformViewsController>(false);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -1653,7 +1667,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController =
+      std::make_shared<flutter::FlutterPlatformViewsController>(false);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -1726,7 +1741,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController =
+      std::make_shared<flutter::FlutterPlatformViewsController>(false);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -1799,7 +1815,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController =
+      std::make_shared<flutter::FlutterPlatformViewsController>(false);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -1873,7 +1890,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController =
+      std::make_shared<flutter::FlutterPlatformViewsController>(false);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -1937,7 +1955,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController =
+      std::make_shared<flutter::FlutterPlatformViewsController>(false);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -2058,7 +2077,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController =
+      std::make_shared<flutter::FlutterPlatformViewsController>(false);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -2169,7 +2189,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController =
+      std::make_shared<flutter::FlutterPlatformViewsController>(false);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -2231,7 +2252,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController =
+      std::make_shared<flutter::FlutterPlatformViewsController>(false);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -2293,7 +2315,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController =
+      std::make_shared<flutter::FlutterPlatformViewsController>(false);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -2343,7 +2366,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController =
+      std::make_shared<flutter::FlutterPlatformViewsController>(false);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -2399,7 +2423,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController =
+      std::make_shared<flutter::FlutterPlatformViewsController>(false);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -2497,7 +2522,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController =
+      std::make_shared<flutter::FlutterPlatformViewsController>(false);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -2595,7 +2621,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner_other,
                                /*ui=*/thread_task_runner_other,
                                /*io=*/thread_task_runner_other);
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController =
+      std::make_shared<flutter::FlutterPlatformViewsController>(false);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -2748,7 +2775,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController =
+      std::make_shared<flutter::FlutterPlatformViewsController>(false);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -2830,7 +2858,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController =
+      std::make_shared<flutter::FlutterPlatformViewsController>(false);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -2930,7 +2959,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController =
+      std::make_shared<flutter::FlutterPlatformViewsController>(false);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,
@@ -3038,7 +3068,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
                                /*raster=*/thread_task_runner,
                                /*ui=*/thread_task_runner,
                                /*io=*/thread_task_runner);
-  auto flutterPlatformViewsController = std::make_shared<flutter::FlutterPlatformViewsController>();
+  auto flutterPlatformViewsController =
+      std::make_shared<flutter::FlutterPlatformViewsController>(false);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
       /*rendering_api=*/flutter::IOSRenderingAPI::kSoftware,

@@ -267,7 +267,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 
 - (void)recreatePlatformViewController {
   _renderingApi = flutter::GetRenderingAPIForProcess(FlutterView.forceSoftwareRendering);
-  _platformViewsController.reset(new flutter::FlutterPlatformViewsController());
+  _platformViewsController.reset(new flutter::FlutterPlatformViewsController(self.isUsingImpeller));
 }
 
 - (flutter::IOSRenderingAPI)platformViewsRenderingAPI {
