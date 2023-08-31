@@ -1056,6 +1056,11 @@ class DraggableScrollableActuator extends StatelessWidget {
 /// A [ChangeNotifier] to use with [InheritedResetNotifier] to notify
 /// descendants that they should reset to initial state.
 class _ResetNotifier extends ChangeNotifier {
+  _ResetNotifier() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+  }
   /// Whether someone called [sendReset] or not.
   ///
   /// This flag should be reset after checking it.
