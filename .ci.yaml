@@ -2114,6 +2114,16 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: fullscreen_textfield_perf__e2e_summary
 
+  - name: Linux_android very_long_picture_scrolling_perf__e2e_summary
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 120
+    properties:
+      tags: >
+        ["devicelab", "android", "linux"]
+      task_name: very_long_picture_scrolling_perf__e2e_summary
+
   - name: Linux_android hello_world__memory
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -4195,6 +4205,16 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: fullscreen_textfield_perf_ios__e2e_summary
+
+  - name: Mac_ios very_long_picture_scrolling_perf_ios__e2e_summary
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 120
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: very_long_picture_scrolling_perf_ios__e2e_summary
 
   - name: Mac_ios tiles_scroll_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
