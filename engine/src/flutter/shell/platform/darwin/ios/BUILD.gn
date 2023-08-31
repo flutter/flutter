@@ -270,7 +270,7 @@ source_set("ios_test_flutter_mrc") {
 
 shared_library("ios_test_flutter") {
   testonly = true
-  visibility = [ ":*" ]
+  visibility = [ "*" ]
   cflags = [
     "-fvisibility=default",
     "-F$platform_frameworks_path",
