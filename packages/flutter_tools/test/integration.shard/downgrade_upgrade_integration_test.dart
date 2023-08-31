@@ -100,6 +100,8 @@ ${logger.errorText}''',
       'upgrade',
       '--verbose',
       '--working-directory=${testDirectory.path}',
+      // we intentionally run this in a directory outside the test repo to
+      // verify the tool overrides the working directory when invoking git
     ], workingDirectory: parentDirectory.path, trace: true);
     checkExitCode(exitCode);
 
@@ -121,7 +123,7 @@ ${logger.errorText}''',
       'downgrade',
       '--no-prompt',
       '--working-directory=${testDirectory.path}',
-    ], workingDirectory: testDirectory.path, trace: true);
+    ], workingDirectory: parentDirectory.path, trace: true);
     checkExitCode(exitCode);
 
     printOnFailure('Step 7 - verify downgraded version matches original version');
