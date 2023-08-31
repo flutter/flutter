@@ -337,8 +337,8 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
     final Path clipPath = _clipPath();
     context.canvas.drawShadow(
       clipPath.shift(offset + childParentData.offset),
-      CupertinoColors.black.withOpacity(0.2),
-      12.0,
+      CupertinoColors.black.withOpacity(0.75),
+      10.0,
       false,
     );
 
