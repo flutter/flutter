@@ -100,6 +100,7 @@ class ConfigCommand extends FlutterCommand {
           globals.config.removeValue(configSetting);
         }
       }
+      globals.printStatus('You may need to restart any open editors for them to read new settings.');
       return FlutterCommandResult.success();
     }
 
