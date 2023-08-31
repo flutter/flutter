@@ -48,9 +48,7 @@ class ClipShapeLayer : public CacheableContainerLayer {
     // We can use the raster_cache for children only when the use_save_layer is
     // true so if use_save_layer is false we pass the layer_raster_item is
     // nullptr which mean we don't do raster cache logic.
-    AutoCache cache =
-        AutoCache(uses_save_layer ? layer_raster_cache_item_.get() : nullptr,
-                  context, context->state_stack.transform_3x3());
+    AutoCache cache(*this, context, uses_save_layer);
 
     Layer::AutoPrerollSaveLayerState save =
         Layer::AutoPrerollSaveLayerState::Create(

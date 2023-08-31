@@ -367,27 +367,26 @@ TEST_F(ImageFilterLayerTest, CacheChild) {
   DlPaint paint;
 
   use_mock_raster_cache();
-  const auto* cacheable_image_filter_item = layer->raster_cache_item();
+  EXPECT_EQ(layer->raster_cache_item(), nullptr);
 
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
-  // ImageFilterLayer default cache itself.
-  EXPECT_EQ(cacheable_image_filter_item->cache_state(),
-            RasterCacheItem::CacheState::kNone);
-  EXPECT_FALSE(cacheable_image_filter_item->Draw(paint_context(), &paint));
+  EXPECT_EQ(cacheable_items().size(), 0u);
 
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);
   layer->Preroll(preroll_context());
+  EXPECT_NE(layer->raster_cache_item(), nullptr);
+  EXPECT_EQ(cacheable_items().size(), 1u);
   LayerTree::TryToRasterCache(cacheable_items(), &paint_context());
 
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)1);
   // The layer_cache_item's strategy is Children, mean we will must cache
   // his children
-  EXPECT_EQ(cacheable_image_filter_item->cache_state(),
+  EXPECT_EQ(layer->raster_cache_item()->cache_state(),
             RasterCacheItem::CacheState::kChildren);
-  EXPECT_TRUE(raster_cache()->Draw(cacheable_image_filter_item->GetId().value(),
+  EXPECT_TRUE(raster_cache()->Draw(layer->raster_cache_item()->GetId().value(),
                                    cache_canvas, &paint));
-  EXPECT_FALSE(raster_cache()->Draw(
-      cacheable_image_filter_item->GetId().value(), other_canvas, &paint));
+  EXPECT_FALSE(raster_cache()->Draw(layer->raster_cache_item()->GetId().value(),
+                                    other_canvas, &paint));
 }
 
 TEST_F(ImageFilterLayerTest, CacheChildren) {
@@ -413,30 +412,27 @@ TEST_F(ImageFilterLayerTest, CacheChildren) {
 
   use_mock_raster_cache();
 
-  const auto* cacheable_image_filter_item = layer->raster_cache_item();
+  EXPECT_EQ(layer->raster_cache_item(), nullptr);
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
-
-  // ImageFilterLayer default cache itself.
-  EXPECT_EQ(cacheable_image_filter_item->cache_state(),
-            RasterCacheItem::CacheState::kNone);
-  EXPECT_FALSE(cacheable_image_filter_item->Draw(paint_context(), &paint));
 
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);
   layer->Preroll(preroll_context());
+  EXPECT_NE(layer->raster_cache_item(), nullptr);
   LayerTree::TryToRasterCache(cacheable_items(), &paint_context());
 
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)1);
 
   // The layer_cache_item's strategy is Children, mean we will must cache his
   // children
-  EXPECT_EQ(cacheable_image_filter_item->cache_state(),
+  EXPECT_EQ(layer->raster_cache_item()->cache_state(),
             RasterCacheItem::CacheState::kChildren);
-  EXPECT_TRUE(raster_cache()->Draw(cacheable_image_filter_item->GetId().value(),
+  EXPECT_TRUE(raster_cache()->Draw(layer->raster_cache_item()->GetId().value(),
                                    cache_canvas, &paint));
-  EXPECT_FALSE(raster_cache()->Draw(
-      cacheable_image_filter_item->GetId().value(), other_canvas, &paint));
+  EXPECT_FALSE(raster_cache()->Draw(layer->raster_cache_item()->GetId().value(),
+                                    other_canvas, &paint));
 
   layer->Preroll(preroll_context());
+  EXPECT_NE(layer->raster_cache_item(), nullptr);
 
   SkRect children_bounds = child_path1.getBounds();
   children_bounds.join(child_path2.getBounds());
@@ -459,13 +455,52 @@ TEST_F(ImageFilterLayerTest, CacheChildren) {
       expected_builder.Transform(snapped_matrix);
       DlPaint dl_paint;
       dl_paint.setImageFilter(transformed_filter.get());
-      raster_cache()->Draw(cacheable_image_filter_item->GetId().value(),
+      raster_cache()->Draw(layer->raster_cache_item()->GetId().value(),
                            expected_builder, &dl_paint);
     }
     expected_builder.Restore();
   }
   expected_builder.Restore();
   EXPECT_TRUE(DisplayListsEQ_Verbose(display_list(), expected_builder.Build()));
+}
+
+TEST_F(ImageFilterLayerTest, NullRasterCacheResetsRasterCacheItem) {
+  auto dl_image_filter = std::make_shared<DlMatrixImageFilter>(
+      SkMatrix(), DlImageSampling::kMipmapLinear);
+  const SkPath child_path = SkPath().addRect(SkRect::MakeWH(5.0f, 5.0f));
+  auto mock_layer = std::make_shared<MockLayer>(child_path);
+  auto layer = std::make_shared<ImageFilterLayer>(dl_image_filter);
+  layer->Add(mock_layer);
+
+  ASSERT_EQ(layer->raster_cache_item(), nullptr);
+
+  layer->Preroll(preroll_context());
+  ASSERT_EQ(layer->raster_cache_item(), nullptr);
+
+  use_mock_raster_cache();
+
+  int limit = RasterCacheUtil::kMinimumRendersBeforeCachingFilterLayer;
+  for (int i = 1; i < limit; i++) {
+    layer->Preroll(preroll_context());
+    ASSERT_NE(layer->raster_cache_item(), nullptr);
+    ASSERT_EQ(layer->raster_cache_item()->cache_state(),
+              RasterCacheItem::kChildren);
+    ASSERT_TRUE(
+        layer->raster_cache_item()->TryToPrepareRasterCache(paint_context()));
+  }
+
+  layer->Preroll(preroll_context());
+  ASSERT_NE(layer->raster_cache_item(), nullptr);
+  ASSERT_EQ(layer->raster_cache_item()->cache_state(),
+            RasterCacheItem::kCurrent);
+  ASSERT_TRUE(
+      layer->raster_cache_item()->TryToPrepareRasterCache(paint_context()));
+
+  use_null_raster_cache();
+
+  layer->Preroll(preroll_context());
+  ASSERT_NE(layer->raster_cache_item(), nullptr);
+  ASSERT_EQ(layer->raster_cache_item()->cache_state(), RasterCacheItem::kNone);
 }
 
 TEST_F(ImageFilterLayerTest, CacheImageFilterLayerSelf) {
@@ -495,9 +530,10 @@ TEST_F(ImageFilterLayerTest, CacheImageFilterLayerSelf) {
 
   use_mock_raster_cache();
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);
-  const auto* cacheable_image_filter_item = layer->raster_cache_item();
+  EXPECT_EQ(layer->raster_cache_item(), nullptr);
   // frame 1.
   layer->Preroll(preroll_context());
+  EXPECT_NE(layer->raster_cache_item(), nullptr);
 
   layer->Paint(display_list_paint_context());
   {
@@ -537,14 +573,14 @@ TEST_F(ImageFilterLayerTest, CacheImageFilterLayerSelf) {
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)2);
 
   // ImageFilterLayer default cache itself.
-  EXPECT_EQ(cacheable_image_filter_item->cache_state(),
+  EXPECT_EQ(layer->raster_cache_item()->cache_state(),
             RasterCacheItem::CacheState::kCurrent);
-  EXPECT_EQ(cacheable_image_filter_item->GetId(),
+  EXPECT_EQ(layer->raster_cache_item()->GetId(),
             RasterCacheKeyID(layer->unique_id(), RasterCacheKeyType::kLayer));
-  EXPECT_TRUE(raster_cache()->Draw(cacheable_image_filter_item->GetId().value(),
+  EXPECT_TRUE(raster_cache()->Draw(layer->raster_cache_item()->GetId().value(),
                                    cache_canvas, &paint));
-  EXPECT_FALSE(raster_cache()->Draw(
-      cacheable_image_filter_item->GetId().value(), other_canvas, &paint));
+  EXPECT_FALSE(raster_cache()->Draw(layer->raster_cache_item()->GetId().value(),
+                                    other_canvas, &paint));
 
   layer->Preroll(preroll_context());
 
@@ -556,7 +592,7 @@ TEST_F(ImageFilterLayerTest, CacheImageFilterLayerSelf) {
       expected_builder.Save();
       {
         EXPECT_TRUE(
-            raster_cache()->Draw(cacheable_image_filter_item->GetId().value(),
+            raster_cache()->Draw(layer->raster_cache_item()->GetId().value(),
                                  expected_builder, nullptr));
       }
       expected_builder.Restore();
