@@ -144,22 +144,8 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
       return outputChild;
     }
     return DecoratedBox(
-      // These shadow values were eyeballed from a screenshot of iOS 16.3.1, as
-      // light mode didn't appear in the Apple design resources assets linked at
-      // the top of this file.
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.all(_kToolbarBorderRadius),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: CupertinoColors.black.withOpacity(0.2),
-            blurRadius: 15.0,
-            // XXX
-            // offset: const Offset(
-              // 0.0,
-              // isAbove ? 0.0 : _kToolbarArrowSize.height,
-            // ),
-          ),
-        ],
       ),
       child: outputChild,
     );
@@ -347,11 +333,20 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
     }
 
     final BoxParentData childParentData = child!.parentData! as BoxParentData;
+
+    final Path clipPath = _clipPath();
+    context.canvas.drawShadow(
+      clipPath.shift(offset + childParentData.offset),
+      CupertinoColors.black.withOpacity(0.2),
+      12.0,
+      false,
+    );
+
     _clipPathLayer.layer = context.pushClipPath(
       needsCompositing,
       offset + childParentData.offset,
       Offset.zero & child!.size,
-      _clipPath(),
+      clipPath,
       (PaintingContext innerContext, Offset innerOffset) => innerContext.paintChild(child!, innerOffset),
       oldLayer: _clipPathLayer.layer,
     );
