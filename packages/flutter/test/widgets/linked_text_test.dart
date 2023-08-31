@@ -354,11 +354,15 @@ void main() {
         home: Scaffold(
           body: Builder(
             builder: (BuildContext context) {
-              return LinkedText.regExp(
-                onTap: (String text) {
-                  lastTappedLink = text;
-                },
-                regExp: hashTagRegExp,
+              return LinkedText.textLinkers(
+                textLinkers: <TextLinker>[
+                  TextLinker.regExp(
+                    regExp: hashTagRegExp,
+                    linkBuilder: LinkedText.getDefaultLinkBuilder((String urlString) {
+                      lastTappedLink = urlString;
+                    }),
+                  ),
+                ],
                 text: 'Flutter is great #crossplatform #declarative',
               );
             },

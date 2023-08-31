@@ -69,10 +69,16 @@ class MyHomePage extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  LinkedText.regExp(
+                  LinkedText.textLinkers(
                     text: _text,
-                    regExp: _twitterHandleRegExp,
-                    onTap: (String urlString) => _handleTapTwitterHandle(context, urlString),
+                    textLinkers: <TextLinker>[
+                      TextLinker.regExp(
+                        regExp: _twitterHandleRegExp,
+                        linkBuilder: LinkedText.getDefaultLinkBuilder((String urlString) {
+                          _handleTapTwitterHandle(context, urlString);
+                        }),
+                      ),
+                    ],
                   ),
                 ],
               ),

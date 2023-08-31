@@ -82,8 +82,6 @@ class LinkedText extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [LinkedText.regExp], which automatically finds ranges that match
-  ///    the given [RegExp].
   ///  * [LinkedText.textLinkers], which uses [TextLinker]s to allow full
   ///    control over matching and building different types of links.
   LinkedText({
@@ -96,43 +94,6 @@ class LinkedText extends StatefulWidget {
        textLinkers = <TextLinker>[
          TextLinker(
            textRangesFinder: defaultTextRangesFinder,
-           linkBuilder: getDefaultLinkBuilder(onTap),
-         ),
-       ],
-       spans = spans ?? <InlineSpan>[
-         TextSpan(
-           text: text,
-         ),
-       ];
-
-  /// Creates an instance of [LinkedText] where text matched by the given
-  /// [RegExp] is made interactive.
-  ///
-  /// The [RegExp] must not produce overlapping matches.
-  ///
-  /// {@tool dartpad}
-  /// This example shows how to use [LinkedText.regExp] to link Twitter handles.
-  ///
-  /// ** See code in examples/api/lib/widgets/linked_text/linked_text.1.dart **
-  /// {@end-tool}
-  ///
-  /// See also:
-  ///
-  ///  * [LinkedText.new], which can be passed [TextRange]s directly or
-  ///    otherwise matches URLs by default.
-  ///  * [LinkedText.textLinkers], which uses [TextLinker]s to allow full
-  ///    control over matching and building different types of links.
-  LinkedText.regExp({
-    super.key,
-    this.builder = _defaultBuilder,
-    required LinkTapCallback onTap,
-    required RegExp regExp,
-    List<InlineSpan>? spans,
-    String? text,
-  }) : assert((text == null) != (spans == null), 'Must specify exactly one to link: either text or spans.'),
-       textLinkers = <TextLinker>[
-         TextLinker(
-           textRangesFinder: TextLinker.textRangesFinderFromRegExp(regExp),
            linkBuilder: getDefaultLinkBuilder(onTap),
          ),
        ],
@@ -163,10 +124,10 @@ class LinkedText extends StatefulWidget {
   ///
   /// See also:
   ///
+  ///  * [TextLinker.regExp], which can be used to easily create a [TextLinker]
+  ///    from a given [RegExp].
   ///  * [LinkedText.new], which can be passed [TextRange]s directly or
   ///    otherwise matches URLs by default.
-  ///  * [LinkedText.regExp], which automatically finds ranges that match
-  ///    the given [RegExp].
   LinkedText.textLinkers({
     super.key,
     this.builder = _defaultBuilder,
@@ -389,12 +350,37 @@ class _InlineLinkSpan extends TextSpan {
 /// into links using [linkBuilder].
 ///
 /// [textRangesFinder] must not produce overlapping [TextRange]s.
+///
+/// See also:
+///
+///  * [LinkedText.textLinkers], which uses [TextLinker]s to allow full control
+///    over matching and building different types of links.
 class TextLinker {
   /// Creates an instance of [TextLinker].
   const TextLinker({
     required this.textRangesFinder,
     required this.linkBuilder,
   });
+
+  /// Creates an instance of [TextLinker] where the [textRangesFinder] is
+  /// defined by a given [RegExp].
+  ///
+  /// The [RegExp] must not produce overlapping matches.
+  ///
+  /// {@tool dartpad}
+  /// This example shows how to use [TextLinker.regExp] to link Twitter handles.
+  ///
+  /// ** See code in examples/api/lib/widgets/linked_text/linked_text.1.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [LinkedText.textLinkers], which uses [TextLinker]s to allow full
+  ///    control over matching and building different types of links.
+  TextLinker.regExp({
+    required RegExp regExp,
+    required this.linkBuilder,
+  }) : textRangesFinder = TextLinker.textRangesFinderFromRegExp(regExp);
 
   /// Builds an [InlineSpan] to display the text that it's passed.
   final LinkBuilder linkBuilder;
