@@ -198,7 +198,7 @@ class FlutterPlatformViewLayerPool {
 
 class FlutterPlatformViewsController {
  public:
-  FlutterPlatformViewsController();
+  explicit FlutterPlatformViewsController(bool enable_impeller);
 
   ~FlutterPlatformViewsController();
 
@@ -329,6 +329,8 @@ class FlutterPlatformViewsController {
 
   // Resets the state of the frame.
   void ResetFrameState();
+
+  bool enable_impeller_ = true;
 
   // The pool of reusable view layers. The pool allows to recycle layer in each frame.
   std::unique_ptr<FlutterPlatformViewLayerPool> layer_pool_;
