@@ -1124,4 +1124,29 @@ void main() {
 
     await gesture.up();
   });
+
+  testWidgets('Stretch overscroll only uses image filter during stretch effect', (WidgetTester tester) async {
+    final GlobalKey box1Key = GlobalKey();
+    final GlobalKey box2Key = GlobalKey();
+    final GlobalKey box3Key = GlobalKey();
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(
+      buildTest(
+        box1Key,
+        box2Key,
+        box3Key,
+        controller,
+        axis: Axis.horizontal,
+      )
+    );
+
+    expect(tester.layers, isNot(contains(isA<ImageFilterLayer>())));
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(CustomScrollView)));
+    // Overscroll
+    await gesture.moveBy(const Offset(200.0, 0.0));
+    await tester.pumpAndSettle();
+
+    expect(tester.layers, contains(isA<ImageFilterLayer>()));
+  });
 }
