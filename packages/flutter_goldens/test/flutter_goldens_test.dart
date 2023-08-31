@@ -1167,22 +1167,25 @@ class FakeHttpClient extends Fake implements HttpClient {
   }
 }
 
+// This code defines two classes, FakeHttpClientRequest and FakeHttpImageResponse,
+// that are used for mocking HTTP requests and responses in unit tests.
+
 class FakeHttpClientRequest extends Fake implements HttpClientRequest {
-  late FakeHttpImageResponse response;
+  late FakeHttpImageResponse response; // A property to store the mock response.
 
   @override
   Future<HttpClientResponse> close() async {
-    return response;
+    return response; // Returns the mock response when the request is closed.
   }
 }
 
 class FakeHttpImageResponse extends Fake implements HttpClientResponse {
-  FakeHttpImageResponse(this.response);
+  FakeHttpImageResponse(this.response); // Constructor to set the mock response data.
 
-  final List<List<int>> response;
+  final List<List<int>> response; // The mock response data as a list of byte arrays.
 
   @override
   Future<void> forEach(void Function(List<int> element) action) async {
-    response.forEach(action);
+    response.forEach(action); // Calls the provided action on each byte array in the response.
   }
 }
