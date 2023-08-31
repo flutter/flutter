@@ -517,6 +517,62 @@ void main() {
     expect(lastTappedLink, 'flutter.dev');
   });
 
+  testWidgets('can handle WidgetSpans', (WidgetTester tester) async {
+    String? lastTappedLink;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return LinkedText(
+                onTap: (String text) {
+                  lastTappedLink = text;
+                },
+                spans: <InlineSpan>[
+                  TextSpan(
+                    text: 'Check out fl',
+                    style: DefaultTextStyle.of(context).style,
+                    children: const <InlineSpan>[
+                      TextSpan(
+                        text: 'u',
+                        children: <InlineSpan>[
+                          TextSpan(
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                            ),
+                            text: 'tt',
+                          ),
+                          WidgetSpan(
+                            child: FlutterLogo(),
+                          ),
+                          TextSpan(
+                            text: 'er',
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const TextSpan(
+                    text: '.dev.',
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(RichText), findsOneWidget);
+    expect(lastTappedLink, isNull);
+
+    await tester.tapAt(tester.getCenter(find.byType(RichText)));
+
+    // The WidgetSpan is ignored, so a link is still produced even though it has
+    // a FlutterLogo in the middle of it.
+    expect(lastTappedLink, 'flutter.dev');
+  });
+
   testWidgets('builds the widget specified by builder', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
