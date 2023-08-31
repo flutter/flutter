@@ -872,8 +872,9 @@ String getLinuxBuildDirectory([TargetPlatform? targetPlatform]) {
 }
 
 /// Returns the Windows build output directory.
-String getWindowsBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'windows');
+String getWindowsBuildDirectory(TargetPlatform targetPlatform) {
+  final String arch = targetPlatform.simpleName;
+  return globals.fs.path.join(getBuildDirectory(), 'windows', arch);
 }
 
 /// Returns the Fuchsia build output directory.
