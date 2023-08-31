@@ -111,8 +111,10 @@ void main() {
     expect(find.byKey(key), findsOneWidget);
   });
 
-  testWidgets('Can build from EditableTextState', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can build from EditableTextState', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
+    final TextEditingController controller = TextEditingController();
+    final FocusNode focusNode = FocusNode();
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -120,9 +122,9 @@ void main() {
             child: SizedBox(
               width: 400,
               child: EditableText(
-                controller: TextEditingController(),
+                controller: controller,
                 backgroundCursorColor: const Color(0xff00ffff),
-                focusNode: FocusNode(),
+                focusNode: focusNode,
                 style: const TextStyle(),
                 cursorColor: const Color(0xff00ffff),
                 selectionControls: materialTextSelectionHandleControls,
@@ -170,6 +172,8 @@ void main() {
       case TargetPlatform.macOS:
         expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsOneWidget);
     }
+    controller.dispose();
+    focusNode.dispose();
   },
     skip: kIsWeb, // [intended] on web the browser handles the context menu.
     variant: TargetPlatformVariant.all(),
@@ -233,13 +237,14 @@ void main() {
   );
 
   group('buttonItems', () {
-    testWidgets('getEditableTextButtonItems builds the correct button items per-platform', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('getEditableTextButtonItems builds the correct button items per-platform', (WidgetTester tester) async {
       // Fill the clipboard so that the Paste option is available in the text
       // selection menu.
       await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
 
       Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
       final TextEditingController controller = TextEditingController();
+      final FocusNode focusNode = FocusNode();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -248,7 +253,7 @@ void main() {
               child: EditableText(
                 controller: controller,
                 backgroundCursorColor: Colors.grey,
-                focusNode: FocusNode(),
+                focusNode: focusNode,
                 style: const TextStyle(),
                 cursorColor: Colors.red,
                 selectionControls: materialTextSelectionHandleControls,
@@ -323,12 +328,15 @@ void main() {
         case TargetPlatform.macOS:
           expect(buttonTypes, isNot(contains(ContextMenuButtonType.selectAll)));
       }
+
+      focusNode.dispose();
+      controller.dispose();
     },
       variant: TargetPlatformVariant.all(),
       skip: kIsWeb, // [intended]
     );
 
-    testWidgets('getAdaptiveButtons builds the correct button widgets per-platform', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('getAdaptiveButtons builds the correct button widgets per-platform', (WidgetTester tester) async {
       const String buttonText = 'Click me';
 
       await tester.pumpWidget(
