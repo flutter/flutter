@@ -121,12 +121,7 @@ void main() {
 
     // 3rd, check that the underlying Scrollable has the same clipBehavior
     // Regression test for https://github.com/flutter/flutter/issues/133330
-    Finder scrollable = find.byWidgetPredicate((Widget widget) {
-      if (widget is Scrollable) {
-        return widget.axisDirection == AxisDirection.down;
-      }
-      return false;
-    });
+    Finder scrollable = find.byWidgetPredicate((Widget widget) => widget is Scrollable);
     expect(
       (tester.widget(scrollable) as Scrollable).clipBehavior,
       Clip.hardEdge,
@@ -142,12 +137,7 @@ void main() {
 
     // 6th, check that the underlying Scrollable has the same clipBehavior
     // Regression test for https://github.com/flutter/flutter/issues/133330
-    scrollable = find.byWidgetPredicate((Widget widget) {
-      if (widget is Scrollable) {
-        return widget.axisDirection == AxisDirection.down;
-      }
-      return false;
-    });
+    scrollable = find.byWidgetPredicate((Widget widget) => widget is Scrollable);
     expect(
       (tester.widget(scrollable) as Scrollable).clipBehavior,
       Clip.antiAlias,
