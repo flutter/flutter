@@ -73,6 +73,11 @@ bool EmbedderExternalView::HasPlatformView() const {
   return view_identifier_.platform_view_id.has_value();
 }
 
+std::list<SkRect> EmbedderExternalView::GetEngineRenderedContentsRegion(
+    const SkRect& query) const {
+  return slice_->searchNonOverlappingDrawnRects(query);
+}
+
 bool EmbedderExternalView::HasEngineRenderedContents() {
   if (has_engine_rendered_contents_.has_value()) {
     return has_engine_rendered_contents_.value();

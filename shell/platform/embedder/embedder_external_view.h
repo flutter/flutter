@@ -111,6 +111,8 @@ class EmbedderExternalView {
 
   bool Render(const EmbedderRenderTarget& render_target);
 
+  std::list<SkRect> GetEngineRenderedContentsRegion(const SkRect& query) const;
+
  private:
   // End the recording of the slice.
   // Noop if the slice's recording has already ended.

@@ -241,8 +241,17 @@ void EmbedderExternalViewEmbedder::SubmitFrame(
       // platform view.
       if (external_view->HasEngineRenderedContents()) {
         const auto& exteral_render_target = matched_render_targets.at(view_id);
+        const auto& external_view = pending_views_.at(view_id);
+        auto rect_list =
+            external_view->GetEngineRenderedContentsRegion(SkRect::MakeIWH(
+                pending_frame_size_.width(), pending_frame_size_.height()));
+        std::vector<SkIRect> rects;
+        rects.reserve(rect_list.size());
+        for (const auto& rect : rect_list) {
+          rects.push_back(rect.roundOut());
+        }
         presented_layers.PushBackingStoreLayer(
-            exteral_render_target->GetBackingStore());
+            exteral_render_target->GetBackingStore(), rects);
       }
     }
 
