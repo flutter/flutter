@@ -11,7 +11,7 @@ void main() {
   final RegExp hashTagRegExp = RegExp(r'#[a-zA-Z0-9]*');
   final RegExp urlRegExp = RegExp(r'(?<!@[a-zA-Z0-9-]*)(?<![\/\.a-zA-Z0-9-])((https?:\/\/)?(([a-zA-Z0-9-]*\.)*[a-zA-Z0-9-]+(\.[a-zA-Z]+)+))(?::\d{1,5})?(?:\/[^\s]*)?(?:\?[^\s#]*)?(?:#[^\s]*)?(?![a-zA-Z0-9-]*@)');
 
-  group('LinkedText.linkSpans', () {
+  group('TextLinker.linkSpans', () {
     group('url matching', () {
       for (final String text in <String>[
         'https://www.example.com',
@@ -36,7 +36,7 @@ void main() {
       ]) {
         test('converts the valid url $text to a link by default', () {
           final (Iterable<InlineSpan> linkedSpans, Iterable<TapGestureRecognizer> recognizers) =
-              LinkedText.linkSpans(
+              TextLinker.linkSpans(
                  <InlineSpan>[
                    TextSpan(
                      text: text,
@@ -76,7 +76,7 @@ void main() {
       ]) {
         test('does nothing to the invalid url $text', () {
           final (Iterable<InlineSpan> linkedSpans, Iterable<TapGestureRecognizer> recognizers) =
-              LinkedText.linkSpans(
+              TextLinker.linkSpans(
                  <InlineSpan>[
                    TextSpan(
                      text: text,
@@ -114,7 +114,7 @@ void main() {
       ]) {
         test('can parse url $text with leading and trailing characters', () {
           final (Iterable<InlineSpan> linkedSpans, Iterable<TapGestureRecognizer> recognizers) =
-              LinkedText.linkSpans(
+              TextLinker.linkSpans(
                  <InlineSpan>[
                    TextSpan(
                      text: text,
@@ -171,7 +171,7 @@ void main() {
         linkBuilder: LinkedText.getDefaultLinkBuilder((String text) {}),
       );
       final (Iterable<InlineSpan> linkedSpans, Iterable<TapGestureRecognizer> recognizers) =
-          LinkedText.linkSpans(
+          TextLinker.linkSpans(
              <InlineSpan>[
                const TextSpan(
                  text: 'Flutter is great #crossplatform #declarative check out flutter.dev.',
@@ -237,7 +237,7 @@ void main() {
 
     test('complex span tree', () {
       final (Iterable<InlineSpan> linkedSpans, Iterable<TapGestureRecognizer> recognizers) =
-          LinkedText.linkSpans(
+          TextLinker.linkSpans(
             const <InlineSpan>[
               TextSpan(
                 text: 'Check out https://www.',

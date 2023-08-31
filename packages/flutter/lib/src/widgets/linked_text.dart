@@ -234,24 +234,6 @@ class LinkedText extends StatefulWidget {
     decoration: TextDecoration.underline,
   );
 
-  /// Applies the given [TextLinker]s to the given [InlineSpan]s and returns the
-  /// new resulting spans and any created [TapGestureRecognizer]s.
-  ///
-  /// The [TextLinker.textRangesFinder]s must not produce any overlapping
-  /// [TextRange]s.
-  ///
-  /// {@macro flutter.painting.LinkBuilder.recognizer}
-  static (Iterable<InlineSpan>, Iterable<TapGestureRecognizer>) linkSpans(Iterable<InlineSpan> spans, Iterable<TextLinker> textLinkers) {
-    final _LinkedSpans linkedSpans = _LinkedSpans(
-      spans: spans,
-      textLinkers: textLinkers,
-    );
-    return (
-      linkedSpans.linkedSpans,
-      linkedSpans.recognizers,
-    );
-  }
-
   @override
   State<LinkedText> createState() => _LinkedTextState();
 }
@@ -271,7 +253,7 @@ class _LinkedTextState extends State<LinkedText> {
 
   void _linkSpans() {
     final (Iterable<InlineSpan> linkedSpans, Iterable<TapGestureRecognizer> recognizers) =
-        LinkedText.linkSpans(widget.spans, widget.textLinkers);
+        TextLinker.linkSpans(widget.spans, widget.textLinkers);
     _linkedSpans = linkedSpans;
     _disposeRecognizers();
     _recognizers = recognizers;
@@ -347,11 +329,9 @@ class _InlineLinkSpan extends TextSpan {
   );
 }
 
-/// Specifies a way to find and style parts of a [String].
+/// Specifies a way to find and style parts of some text.
 ///
-/// Calling [getSpans] with a [String] produces a [List] of [InlineSpan]s where
-/// the parts of the [String] matched by [textRangesFinder] have been turned
-/// into links using [linkBuilder].
+/// [TextLinker]s can be applied to some text using the [linkSpans] method.
 ///
 /// [textRangesFinder] must not produce overlapping [TextRange]s.
 ///
@@ -394,28 +374,6 @@ class TextLinker {
   /// Throws if overlapping [TextRange]s are produced.
   final TextRangesFinder textRangesFinder;
 
-  /// Returns a flat list of [InlineSpan]s for multiple [TextLinker]s.
-  ///
-  /// Similar to [getSpans], but for multiple [TextLinker]s instead of just one.
-  static (List<InlineSpan>, List<TapGestureRecognizer>) getSpansForMany(Iterable<TextLinker> textLinkers, String text) {
-    final List<_TextLinkerMatch> combinedTextRanges = textLinkers
-        .fold<List<_TextLinkerMatch>>(
-          <_TextLinkerMatch>[],
-          (List<_TextLinkerMatch> previousValue, TextLinker value) {
-            final Iterable<TextRange> textRanges = value.textRangesFinder(text);
-            for (final TextRange textRange in textRanges) {
-              previousValue.add(_TextLinkerMatch(
-                textRange: textRange,
-                linkBuilder: value.linkBuilder,
-                linkString: text.substring(textRange.start, textRange.end),
-              ));
-            }
-            return previousValue;
-        });
-
-    return _TextLinkerMatch.getSpansForMany(combinedTextRanges, text);
-  }
-
   /// Creates a [TextRangesFinder] that finds all the matches of the given [RegExp].
   static TextRangesFinder textRangesFinderFromRegExp(RegExp regExp) {
     return (String text) {
@@ -424,6 +382,24 @@ class TextLinker {
         regExp: regExp,
       );
     };
+  }
+
+  /// Applies the given [TextLinker]s to the given [InlineSpan]s and returns the
+  /// new resulting spans and any created [TapGestureRecognizer]s.
+  ///
+  /// The [TextLinker.textRangesFinder]s must not produce any overlapping
+  /// [TextRange]s.
+  ///
+  /// {@macro flutter.painting.LinkBuilder.recognizer}
+  static (Iterable<InlineSpan>, Iterable<TapGestureRecognizer>) linkSpans(Iterable<InlineSpan> spans, Iterable<TextLinker> textLinkers) {
+    final _LinkedSpans linkedSpans = _LinkedSpans(
+      spans: spans,
+      textLinkers: textLinkers,
+    );
+    return (
+      linkedSpans.linkedSpans,
+      linkedSpans.recognizers,
+    );
   }
 
   // Turns all matches from the regExp into a list of TextRanges.
@@ -438,15 +414,6 @@ class TextLinker {
         end: match.end,
       );
     });
-  }
-
-  /// Builds the [InlineSpan]s for the given text.
-  ///
-  /// Builds [linkBuilder] for any ranges found by [textRangesFinder]. All other
-  /// text is presented in a plain [TextSpan].
-  (List<InlineSpan>, List<TapGestureRecognizer>) getSpans(String text) {
-    final Iterable<_TextLinkerMatch> textLinkerMatches = _link(text);
-    return _TextLinkerMatch.getSpansForMany(textLinkerMatches, text);
   }
 
   /// Apply this [TextLinker] to a [String].
@@ -490,53 +457,6 @@ class _TextLinkerMatch {
           (List<_TextLinkerMatch> previousValue, TextLinker value) {
             return previousValue..addAll(value._link(text));
         });
-  }
-
-  /// Returns a list of [InlineSpan]s representing all of the [text].
-  ///
-  /// Ranges matched by [textLinkerMatches] are built with their respective
-  /// [LinkBuilder], and other text is represented with a simple [TextSpan].
-  static (List<InlineSpan>, List<TapGestureRecognizer>) getSpansForMany(Iterable<_TextLinkerMatch> textLinkerMatches, String text) {
-    // Sort so that overlapping ranges can be detected and ignored.
-    final List<_TextLinkerMatch> textLinkerMatchesList = textLinkerMatches
-        .toList()
-        ..sort((_TextLinkerMatch a, _TextLinkerMatch b) {
-          return a.textRange.start.compareTo(b.textRange.start);
-        });
-
-    final List<InlineSpan> spans = <InlineSpan>[];
-    final List<TapGestureRecognizer> recognizers = <TapGestureRecognizer>[];
-    int index = 0;
-    for (final _TextLinkerMatch textLinkerMatch in textLinkerMatchesList) {
-      // Ignore overlapping ranges.
-      if (index > textLinkerMatch.textRange.start) {
-        continue;
-      }
-      if (index < textLinkerMatch.textRange.start) {
-        spans.add(TextSpan(
-          text: text.substring(index, textLinkerMatch.textRange.start),
-        ));
-      }
-      final (InlineSpan nextChild, TapGestureRecognizer recognizer) =
-          textLinkerMatch.linkBuilder(
-            text.substring(
-              textLinkerMatch.textRange.start,
-              textLinkerMatch.textRange.end,
-            ),
-            textLinkerMatch.linkString,
-          );
-      spans.add(nextChild);
-      recognizers.add(recognizer);
-
-      index = textLinkerMatch.textRange.end;
-    }
-    if (index < text.length) {
-      spans.add(TextSpan(
-        text: text.substring(index),
-      ));
-    }
-
-    return (spans, recognizers);
   }
 
   @override
