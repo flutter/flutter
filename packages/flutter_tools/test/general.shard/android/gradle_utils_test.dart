@@ -727,8 +727,6 @@ allprojects {
   group('detecting valid Gradle/AGP versions for given Java version and vice versa', () {
     testWithoutContext('getValidGradleVersionRangeForJavaVersion returns valid Gradle version range for Java version', () {
       final Logger testLogger = BufferLogger.test();
-      // Java version unspecified.
-      expect(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: null), isNull);
       // Java version too high.
       expect(getValidGradleVersionRangeForJavaVersion(testLogger, javaV: oneMajorVersionHigherJavaVersion), isNull);
       // Maximum known Java version.
@@ -870,8 +868,6 @@ allprojects {
 
     testWithoutContext('getMinimumAgpVersionForJavaVersion returns minimum AGP version for Java version', () {
       final Logger testLogger = BufferLogger.test();
-      // Java version unspecified.
-      expect(getMinimumAgpVersionForJavaVersion(testLogger, javaV: null), isNull);
       // Maximum known Java version.
       // *The test case that follows needs to be updated* as higher versions of AGP are supported:
       expect(

@@ -50,10 +50,10 @@ const String maxKnownAndSupportedGradleVersion = '8.0.2';
 
 // Update this when new versions of AGP come out.
 //
-// Supported here means supported by the tooling for
-// flutter analyze --suggestions and does not imply broader flutter support.
+// Supported here means tooling is aware of this version's Java <-> AGP
+// compatibility.
 @visibleForTesting
-const String maxKnownAndSupportedAgpVersion = '8.0';
+const String maxKnownAndSupportedAgpVersion = '8.1';
 
 // Update this when new versions of AGP come out.
 const String maxKnownAgpVersion = '8.2';
@@ -553,7 +553,7 @@ bool validateJavaAgp(Logger logger,
   }
 
   if (isWithinVersionRange(agpV,
-        min: maxKnownAgpVersion, max: '100.100')) {
+        min: maxKnownAndSupportedAgpVersion, max: '100.100', inclusiveMin: false)) {
     logger.printTrace('AGP Version: $agpV is too new to determine Java compatibility.');
     return false;
   }
@@ -915,7 +915,7 @@ List<JavaGradleCompat> _javaGradleCompatList = const <JavaGradleCompat>[
       javaMin: '17',
       javaDefault: '17',
       agpMin: '8.0',
-      agpMax: '8.1',
+      agpMax: maxKnownAndSupportedAgpVersion,
     ),
     JavaAgpCompat(
       javaMin: '1.11',
