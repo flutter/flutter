@@ -628,7 +628,7 @@ void main() {
     expect(observations[2].previous, '/A');
   });
 
-  testWidgets('$Route  dispatches memory events', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('$Route  dispatches memory events', (WidgetTester tester) async {
     Future<void> createAndDisposeRoute() async {
       final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
       await tester.pumpWidget(
