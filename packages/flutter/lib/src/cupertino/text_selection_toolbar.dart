@@ -137,7 +137,10 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
       anchorBelow: anchorBelow,
       child: ColoredBox(
         color: _kToolbarBackgroundColor.resolveFrom(context),
-        child: child,
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: _kToolbarArrowSize.height),
+          child: child,
+        ),
       ),
     );
     if (CupertinoTheme.brightnessOf(context) == Brightness.dark) {
@@ -263,7 +266,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  bool get isAbove => anchorAbove.dy >= (child?.size.height ?? 0.0);
+  bool get isAbove => anchorAbove.dy >= (child?.size.height ?? 0.0) - _kToolbarArrowSize.height * 2;
 
   @override
   void performLayout() {
@@ -272,11 +275,12 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
     }
 
     final BoxConstraints enforcedConstraint = constraints.loosen();
-
     child!.layout(enforcedConstraint, parentUsesSize: true);
 
-    final Size childSize = child!.size;
-    final bool isAbove = anchorAbove.dy >= childSize.height;
+    // The content child is padded with arrow height on both top and bottom
+    // and so it can have the arrow clipped out of it on either side. By
+    // using this approach, the buttons don't need any special padding that
+    // depends on isAbove.
 
     // The height of one arrow will be clipped off of the child, so adjust the
     // size and position to remove that piece from the layout.
@@ -286,8 +290,8 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
       isAbove ? -_kToolbarArrowSize.height : 0.0,
     );
     size = Size(
-      childSize.width,
-      childSize.height,
+      child!.size.width,
+      child!.size.height - _kToolbarArrowSize.height,
     );
   }
 
