@@ -8,21 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'gesture_tester.dart';
 
-class TestGestureArenaMember extends GestureArenaMember {
-  @override
-  void acceptGesture(int key) {
-    accepted = true;
-  }
-
-  @override
-  void rejectGesture(int key) {
-    rejected = true;
-  }
-
-  bool accepted = false;
-  bool rejected = false;
-}
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -794,4 +779,19 @@ void main() {
     tap.dispose();
     doubleTap.dispose();
   });
+}
+
+class TestGestureArenaMember extends GestureArenaMember {
+  @override
+  void acceptGesture(int key) {
+    accepted = true;
+  }
+
+  @override
+  void rejectGesture(int key) {
+    rejected = true;
+  }
+
+  bool accepted = false;
+  bool rejected = false;
 }

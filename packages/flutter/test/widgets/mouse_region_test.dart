@@ -9,72 +9,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class HoverClient extends StatefulWidget {
-  const HoverClient({
-    super.key,
-    this.onHover,
-    this.child,
-    this.onEnter,
-    this.onExit,
-  });
-
-  final ValueChanged<bool>? onHover;
-  final Widget? child;
-  final VoidCallback? onEnter;
-  final VoidCallback? onExit;
-
-  @override
-  HoverClientState createState() => HoverClientState();
-}
-
-class HoverClientState extends State<HoverClient> {
-  void _onExit(PointerExitEvent details) {
-    widget.onExit?.call();
-    widget.onHover?.call(false);
-  }
-
-  void _onEnter(PointerEnterEvent details) {
-    widget.onEnter?.call();
-    widget.onHover?.call(true);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: _onEnter,
-      onExit: _onExit,
-      child: widget.child,
-    );
-  }
-}
-
-class HoverFeedback extends StatefulWidget {
-  const HoverFeedback({super.key, this.onEnter, this.onExit});
-
-  final VoidCallback? onEnter;
-  final VoidCallback? onExit;
-
-  @override
-  State<HoverFeedback> createState() => _HoverFeedbackState();
-}
-
-class _HoverFeedbackState extends State<HoverFeedback> {
-  bool _hovering = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.ltr,
-      child: HoverClient(
-        onHover: (bool hovering) => setState(() => _hovering = hovering),
-        onEnter: widget.onEnter,
-        onExit: widget.onExit,
-        child: Text(_hovering ? 'HOVERING' : 'not hovering'),
-      ),
-    );
-  }
-}
-
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/73330
   testWidgets('hitTestBehavior test - HitTestBehavior.deferToChild/opaque', (WidgetTester tester) async {
@@ -1941,6 +1875,72 @@ class _ColumnContainer extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: children,
+      ),
+    );
+  }
+}
+
+class HoverClient extends StatefulWidget {
+  const HoverClient({
+    super.key,
+    this.onHover,
+    this.child,
+    this.onEnter,
+    this.onExit,
+  });
+
+  final ValueChanged<bool>? onHover;
+  final Widget? child;
+  final VoidCallback? onEnter;
+  final VoidCallback? onExit;
+
+  @override
+  HoverClientState createState() => HoverClientState();
+}
+
+class HoverClientState extends State<HoverClient> {
+  void _onExit(PointerExitEvent details) {
+    widget.onExit?.call();
+    widget.onHover?.call(false);
+  }
+
+  void _onEnter(PointerEnterEvent details) {
+    widget.onEnter?.call();
+    widget.onHover?.call(true);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: _onEnter,
+      onExit: _onExit,
+      child: widget.child,
+    );
+  }
+}
+
+class HoverFeedback extends StatefulWidget {
+  const HoverFeedback({super.key, this.onEnter, this.onExit});
+
+  final VoidCallback? onEnter;
+  final VoidCallback? onExit;
+
+  @override
+  State<HoverFeedback> createState() => _HoverFeedbackState();
+}
+
+class _HoverFeedbackState extends State<HoverFeedback> {
+  bool _hovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: HoverClient(
+        onHover: (bool hovering) => setState(() => _hovering = hovering),
+        onEnter: widget.onEnter,
+        onExit: widget.onExit,
+        child: Text(_hovering ? 'HOVERING' : 'not hovering'),
       ),
     );
   }

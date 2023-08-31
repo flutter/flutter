@@ -6,8 +6,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_api_samples/cupertino/nav_bar/cupertino_sliver_nav_bar.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
-const Offset dragUp = Offset(0.0, -150.0);
-
 void main() {
   testWidgets('Collapse and expand CupertinoSliverNavigationBar changes title position', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -66,3 +64,5 @@ void main() {
     expect(nextButton, findsOneWidget);
   });
 }
+
+const Offset dragUp = Offset(0.0, -150.0);

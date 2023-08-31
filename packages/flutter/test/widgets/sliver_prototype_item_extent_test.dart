@@ -5,40 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestItem extends StatelessWidget {
-  const TestItem({ super.key, required this.item, this.width, this.height });
-  final int item;
-  final double? width;
-  final double? height;
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: width,
-      height: height,
-      alignment: Alignment.center,
-      child: Text('Item $item', textDirection: TextDirection.ltr),
-    );
-  }
-}
-
-Widget buildFrame({ int? count, double? width, double? height, Axis? scrollDirection, Key? prototypeKey }) {
-  return Directionality(
-    textDirection: TextDirection.ltr,
-    child: CustomScrollView(
-      scrollDirection: scrollDirection ?? Axis.vertical,
-      slivers: <Widget>[
-        SliverPrototypeExtentList(
-          prototypeItem: TestItem(item: -1, width: width, height: height, key: prototypeKey),
-          delegate: SliverChildBuilderDelegate(
-            (BuildContext context, int index) => TestItem(item: index),
-            childCount: count,
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
 void main() {
   testWidgets('SliverPrototypeExtentList.builder test', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -216,4 +182,38 @@ void main() {
 
     expect(prototype.getTransformTo(scrollView), Matrix4.zero());
   });
+}
+
+class TestItem extends StatelessWidget {
+  const TestItem({ super.key, required this.item, this.width, this.height });
+  final int item;
+  final double? width;
+  final double? height;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: height,
+      alignment: Alignment.center,
+      child: Text('Item $item', textDirection: TextDirection.ltr),
+    );
+  }
+}
+
+Widget buildFrame({ int? count, double? width, double? height, Axis? scrollDirection, Key? prototypeKey }) {
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: CustomScrollView(
+      scrollDirection: scrollDirection ?? Axis.vertical,
+      slivers: <Widget>[
+        SliverPrototypeExtentList(
+          prototypeItem: TestItem(item: -1, width: width, height: height, key: prototypeKey),
+          delegate: SliverChildBuilderDelegate(
+            (BuildContext context, int index) => TestItem(item: index),
+            childCount: count,
+          ),
+        ),
+      ],
+    ),
+  );
 }

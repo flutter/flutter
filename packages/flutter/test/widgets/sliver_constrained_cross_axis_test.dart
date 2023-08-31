@@ -6,9 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const double VIEWPORT_HEIGHT = 500;
-const double VIEWPORT_WIDTH = 300;
-
 void main() {
   testWidgets('SliverConstrainedCrossAxis basic test', (WidgetTester tester) async {
     await tester.pumpWidget(_buildSliverConstrainedCrossAxis(maxExtent: 50));
@@ -90,3 +87,6 @@ Widget _buildSliverConstrainedCrossAxis({
     ),
   );
 }
+
+const double VIEWPORT_HEIGHT = 500;
+const double VIEWPORT_WIDTH = 300;

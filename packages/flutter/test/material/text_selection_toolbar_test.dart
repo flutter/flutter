@@ -8,55 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
 
-const double _kToolbarContentDistance = 8.0;
-
-// A custom text selection menu that just displays a single custom button.
-class _CustomMaterialTextSelectionControls extends MaterialTextSelectionControls {
-  @override
-  Widget buildToolbar(
-    BuildContext context,
-    Rect globalEditableRegion,
-    double textLineHeight,
-    Offset selectionMidpoint,
-    List<TextSelectionPoint> endpoints,
-    TextSelectionDelegate delegate,
-    ValueListenable<ClipboardStatus>? clipboardStatus,
-    Offset? lastSecondaryTapDownPosition,
-  ) {
-    final TextSelectionPoint startTextSelectionPoint = endpoints[0];
-    final TextSelectionPoint endTextSelectionPoint = endpoints.length > 1
-      ? endpoints[1]
-      : endpoints[0];
-    final Offset anchorAbove = Offset(
-      globalEditableRegion.left + selectionMidpoint.dx,
-      globalEditableRegion.top + startTextSelectionPoint.point.dy - textLineHeight - _kToolbarContentDistance,
-    );
-    final Offset anchorBelow = Offset(
-      globalEditableRegion.left + selectionMidpoint.dx,
-      globalEditableRegion.top + endTextSelectionPoint.point.dy + TextSelectionToolbar.kToolbarContentDistanceBelow,
-    );
-
-    return TextSelectionToolbar(
-      anchorAbove: anchorAbove,
-      anchorBelow: anchorBelow,
-      children: <Widget>[
-        TextSelectionToolbarTextButton(
-          padding: TextSelectionToolbarTextButton.getPadding(0, 1),
-          onPressed: () {},
-          child: const Text('Custom button'),
-        ),
-      ],
-    );
-  }
-}
-
-class TestBox extends SizedBox {
-  const TestBox({super.key}) : super(width: itemWidth, height: itemHeight);
-
-  static const double itemHeight = 44.0;
-  static const double itemWidth = 100.0;
-}
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -292,4 +243,53 @@ void main() {
       );
     });
   }
+}
+
+const double _kToolbarContentDistance = 8.0;
+
+// A custom text selection menu that just displays a single custom button.
+class _CustomMaterialTextSelectionControls extends MaterialTextSelectionControls {
+  @override
+  Widget buildToolbar(
+    BuildContext context,
+    Rect globalEditableRegion,
+    double textLineHeight,
+    Offset selectionMidpoint,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
+    Offset? lastSecondaryTapDownPosition,
+  ) {
+    final TextSelectionPoint startTextSelectionPoint = endpoints[0];
+    final TextSelectionPoint endTextSelectionPoint = endpoints.length > 1
+      ? endpoints[1]
+      : endpoints[0];
+    final Offset anchorAbove = Offset(
+      globalEditableRegion.left + selectionMidpoint.dx,
+      globalEditableRegion.top + startTextSelectionPoint.point.dy - textLineHeight - _kToolbarContentDistance,
+    );
+    final Offset anchorBelow = Offset(
+      globalEditableRegion.left + selectionMidpoint.dx,
+      globalEditableRegion.top + endTextSelectionPoint.point.dy + TextSelectionToolbar.kToolbarContentDistanceBelow,
+    );
+
+    return TextSelectionToolbar(
+      anchorAbove: anchorAbove,
+      anchorBelow: anchorBelow,
+      children: <Widget>[
+        TextSelectionToolbarTextButton(
+          padding: TextSelectionToolbarTextButton.getPadding(0, 1),
+          onPressed: () {},
+          child: const Text('Custom button'),
+        ),
+      ],
+    );
+  }
+}
+
+class TestBox extends SizedBox {
+  const TestBox({super.key}) : super(width: itemWidth, height: itemHeight);
+
+  static const double itemHeight = 44.0;
+  static const double itemWidth = 100.0;
 }

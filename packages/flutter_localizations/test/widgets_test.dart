@@ -7,182 +7,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestLocalizations {
-  TestLocalizations(this.locale, this.prefix);
-
-  final Locale locale;
-  final String? prefix;
-
-  static Future<TestLocalizations> loadSync(Locale locale, String? prefix) {
-    return SynchronousFuture<TestLocalizations>(TestLocalizations(locale, prefix));
-  }
-
-  static Future<TestLocalizations> loadAsync(Locale locale, String? prefix) {
-    return Future<TestLocalizations>.delayed(
-      const Duration(milliseconds: 100),
-      () => TestLocalizations(locale, prefix)
-    );
-  }
-
-  static TestLocalizations of(BuildContext context) {
-    return Localizations.of<TestLocalizations>(context, TestLocalizations)!;
-  }
-
-  String get message => '${prefix ?? ""}$locale';
-}
-
-class SyncTestLocalizationsDelegate extends LocalizationsDelegate<TestLocalizations> {
-  SyncTestLocalizationsDelegate([this.prefix]);
-
-  final String? prefix; // Changing this value triggers a rebuild
-  final List<bool> shouldReloadValues = <bool>[];
-
-  @override
-  bool isSupported(Locale locale) => true;
-
-  @override
-  Future<TestLocalizations> load(Locale locale) => TestLocalizations.loadSync(locale, prefix);
-
-  @override
-  bool shouldReload(SyncTestLocalizationsDelegate old) {
-    shouldReloadValues.add(prefix != old.prefix);
-    return prefix != old.prefix;
-  }
-
-  @override
-  String toString() => '${objectRuntimeType(this, 'SyncTestLocalizationsDelegate')}($prefix)';
-}
-
-class AsyncTestLocalizationsDelegate extends LocalizationsDelegate<TestLocalizations> {
-  AsyncTestLocalizationsDelegate([this.prefix]);
-
-  final String? prefix; // Changing this value triggers a rebuild
-  final List<bool> shouldReloadValues = <bool>[];
-
-  @override
-  bool isSupported(Locale locale) => true;
-
-  @override
-  Future<TestLocalizations> load(Locale locale) => TestLocalizations.loadAsync(locale, prefix);
-
-  @override
-  bool shouldReload(AsyncTestLocalizationsDelegate old) {
-    shouldReloadValues.add(prefix != old.prefix);
-    return prefix != old.prefix;
-  }
-
-  @override
-  String toString() => '${objectRuntimeType(this, 'AsyncTestLocalizationsDelegate')}($prefix)';
-}
-
-class MoreLocalizations {
-  MoreLocalizations(this.locale);
-
-  final Locale locale;
-
-  static Future<MoreLocalizations> loadSync(Locale locale) {
-    return SynchronousFuture<MoreLocalizations>(MoreLocalizations(locale));
-  }
-
-  static Future<MoreLocalizations> loadAsync(Locale locale) {
-    return Future<MoreLocalizations>.delayed(
-      const Duration(milliseconds: 100),
-      () => MoreLocalizations(locale)
-    );
-  }
-
-  static MoreLocalizations of(BuildContext context) {
-    return Localizations.of<MoreLocalizations>(context, MoreLocalizations)!;
-  }
-
-  String get message => '$locale';
-}
-
-class SyncMoreLocalizationsDelegate extends LocalizationsDelegate<MoreLocalizations> {
-  @override
-  Future<MoreLocalizations> load(Locale locale) => MoreLocalizations.loadSync(locale);
-
-  @override
-  bool isSupported(Locale locale) => true;
-
-  @override
-  bool shouldReload(SyncMoreLocalizationsDelegate old) => false;
-}
-
-class AsyncMoreLocalizationsDelegate extends LocalizationsDelegate<MoreLocalizations> {
-  @override
-  Future<MoreLocalizations> load(Locale locale) => MoreLocalizations.loadAsync(locale);
-
-  @override
-  bool isSupported(Locale locale) => true;
-
-  @override
-  bool shouldReload(AsyncMoreLocalizationsDelegate old) => false;
-}
-
-class OnlyRTLDefaultWidgetsLocalizations extends DefaultWidgetsLocalizations {
-  @override
-  TextDirection get textDirection => TextDirection.rtl;
-}
-
-class OnlyRTLDefaultWidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
-  const OnlyRTLDefaultWidgetsLocalizationsDelegate();
-
-  @override
-  bool isSupported(Locale locale) => true;
-
-  @override
-  Future<WidgetsLocalizations> load(Locale locale) {
-    return SynchronousFuture<WidgetsLocalizations>(OnlyRTLDefaultWidgetsLocalizations());
-  }
-
-  @override
-  bool shouldReload(OnlyRTLDefaultWidgetsLocalizationsDelegate old) => false;
-}
-
-Widget buildFrame({
-  Locale? locale,
-  Iterable<LocalizationsDelegate<dynamic>>? delegates,
-  required WidgetBuilder buildContent,
-  LocaleResolutionCallback? localeResolutionCallback,
-  List<Locale> supportedLocales = const <Locale>[
-    Locale('en', 'US'),
-    Locale('en', 'GB'),
-  ],
-}) {
-  return WidgetsApp(
-    color: const Color(0xFFFFFFFF),
-    locale: locale,
-    localizationsDelegates: delegates,
-    localeResolutionCallback: localeResolutionCallback,
-    supportedLocales: supportedLocales,
-    onGenerateRoute: (RouteSettings settings) {
-      return PageRouteBuilder<void>(
-        pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
-          return buildContent(context);
-        }
-      );
-    },
-  );
-}
-
-class SyncLoadTest extends StatefulWidget {
-  const SyncLoadTest({super.key});
-
-  @override
-  SyncLoadTestState createState() => SyncLoadTestState();
-}
-
-class SyncLoadTestState extends State<SyncLoadTest> {
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      TestLocalizations.of(context).message,
-      textDirection: TextDirection.rtl,
-    );
-  }
-}
-
 void main() {
   testWidgets('Localizations.localeFor in a WidgetsApp with system locale', (WidgetTester tester) async {
     late BuildContext pageContext;
@@ -1450,4 +1274,180 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('und_US'), findsOneWidget);
   });
+}
+
+class TestLocalizations {
+  TestLocalizations(this.locale, this.prefix);
+
+  final Locale locale;
+  final String? prefix;
+
+  static Future<TestLocalizations> loadSync(Locale locale, String? prefix) {
+    return SynchronousFuture<TestLocalizations>(TestLocalizations(locale, prefix));
+  }
+
+  static Future<TestLocalizations> loadAsync(Locale locale, String? prefix) {
+    return Future<TestLocalizations>.delayed(
+      const Duration(milliseconds: 100),
+      () => TestLocalizations(locale, prefix)
+    );
+  }
+
+  static TestLocalizations of(BuildContext context) {
+    return Localizations.of<TestLocalizations>(context, TestLocalizations)!;
+  }
+
+  String get message => '${prefix ?? ""}$locale';
+}
+
+class SyncTestLocalizationsDelegate extends LocalizationsDelegate<TestLocalizations> {
+  SyncTestLocalizationsDelegate([this.prefix]);
+
+  final String? prefix; // Changing this value triggers a rebuild
+  final List<bool> shouldReloadValues = <bool>[];
+
+  @override
+  bool isSupported(Locale locale) => true;
+
+  @override
+  Future<TestLocalizations> load(Locale locale) => TestLocalizations.loadSync(locale, prefix);
+
+  @override
+  bool shouldReload(SyncTestLocalizationsDelegate old) {
+    shouldReloadValues.add(prefix != old.prefix);
+    return prefix != old.prefix;
+  }
+
+  @override
+  String toString() => '${objectRuntimeType(this, 'SyncTestLocalizationsDelegate')}($prefix)';
+}
+
+class AsyncTestLocalizationsDelegate extends LocalizationsDelegate<TestLocalizations> {
+  AsyncTestLocalizationsDelegate([this.prefix]);
+
+  final String? prefix; // Changing this value triggers a rebuild
+  final List<bool> shouldReloadValues = <bool>[];
+
+  @override
+  bool isSupported(Locale locale) => true;
+
+  @override
+  Future<TestLocalizations> load(Locale locale) => TestLocalizations.loadAsync(locale, prefix);
+
+  @override
+  bool shouldReload(AsyncTestLocalizationsDelegate old) {
+    shouldReloadValues.add(prefix != old.prefix);
+    return prefix != old.prefix;
+  }
+
+  @override
+  String toString() => '${objectRuntimeType(this, 'AsyncTestLocalizationsDelegate')}($prefix)';
+}
+
+class MoreLocalizations {
+  MoreLocalizations(this.locale);
+
+  final Locale locale;
+
+  static Future<MoreLocalizations> loadSync(Locale locale) {
+    return SynchronousFuture<MoreLocalizations>(MoreLocalizations(locale));
+  }
+
+  static Future<MoreLocalizations> loadAsync(Locale locale) {
+    return Future<MoreLocalizations>.delayed(
+      const Duration(milliseconds: 100),
+      () => MoreLocalizations(locale)
+    );
+  }
+
+  static MoreLocalizations of(BuildContext context) {
+    return Localizations.of<MoreLocalizations>(context, MoreLocalizations)!;
+  }
+
+  String get message => '$locale';
+}
+
+class SyncMoreLocalizationsDelegate extends LocalizationsDelegate<MoreLocalizations> {
+  @override
+  Future<MoreLocalizations> load(Locale locale) => MoreLocalizations.loadSync(locale);
+
+  @override
+  bool isSupported(Locale locale) => true;
+
+  @override
+  bool shouldReload(SyncMoreLocalizationsDelegate old) => false;
+}
+
+class AsyncMoreLocalizationsDelegate extends LocalizationsDelegate<MoreLocalizations> {
+  @override
+  Future<MoreLocalizations> load(Locale locale) => MoreLocalizations.loadAsync(locale);
+
+  @override
+  bool isSupported(Locale locale) => true;
+
+  @override
+  bool shouldReload(AsyncMoreLocalizationsDelegate old) => false;
+}
+
+class OnlyRTLDefaultWidgetsLocalizations extends DefaultWidgetsLocalizations {
+  @override
+  TextDirection get textDirection => TextDirection.rtl;
+}
+
+class OnlyRTLDefaultWidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
+  const OnlyRTLDefaultWidgetsLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) => true;
+
+  @override
+  Future<WidgetsLocalizations> load(Locale locale) {
+    return SynchronousFuture<WidgetsLocalizations>(OnlyRTLDefaultWidgetsLocalizations());
+  }
+
+  @override
+  bool shouldReload(OnlyRTLDefaultWidgetsLocalizationsDelegate old) => false;
+}
+
+Widget buildFrame({
+  Locale? locale,
+  Iterable<LocalizationsDelegate<dynamic>>? delegates,
+  required WidgetBuilder buildContent,
+  LocaleResolutionCallback? localeResolutionCallback,
+  List<Locale> supportedLocales = const <Locale>[
+    Locale('en', 'US'),
+    Locale('en', 'GB'),
+  ],
+}) {
+  return WidgetsApp(
+    color: const Color(0xFFFFFFFF),
+    locale: locale,
+    localizationsDelegates: delegates,
+    localeResolutionCallback: localeResolutionCallback,
+    supportedLocales: supportedLocales,
+    onGenerateRoute: (RouteSettings settings) {
+      return PageRouteBuilder<void>(
+        pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
+          return buildContent(context);
+        }
+      );
+    },
+  );
+}
+
+class SyncLoadTest extends StatefulWidget {
+  const SyncLoadTest({super.key});
+
+  @override
+  SyncLoadTestState createState() => SyncLoadTestState();
+}
+
+class SyncLoadTestState extends State<SyncLoadTest> {
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      TestLocalizations.of(context).message,
+      textDirection: TextDirection.rtl,
+    );
+  }
 }

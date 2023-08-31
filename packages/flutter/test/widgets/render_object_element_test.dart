@@ -6,6 +6,52 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+void main() {
+  testWidgets('RenderObjectElement *RenderObjectChild methods get called with correct arguments', (WidgetTester tester) async {
+    const Key redKey = ValueKey<String>('red');
+    const Key blueKey = ValueKey<String>('blue');
+    Widget widget() {
+      return SwapperWithProperOverrides(
+        stable: ColoredBox(
+          key: redKey,
+          color: Color(nonconst(0xffff0000)),
+        ),
+        swapper: ColoredBox(
+          key: blueKey,
+          color: Color(nonconst(0xff0000ff)),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(widget());
+    final SwapperElement swapper = tester.element<SwapperElement>(find.byType(SwapperWithProperOverrides));
+    final RenderBox redBox = tester.renderObject<RenderBox>(find.byKey(redKey));
+    final RenderBox blueBox = tester.renderObject<RenderBox>(find.byKey(blueKey));
+    expect(swapper.insertSlots.length, 2);
+    expect(swapper.insertSlots, contains('stable'));
+    expect(swapper.insertSlots, contains(true));
+    expect(swapper.moveSlots, isEmpty);
+    expect(swapper.removeSlots, isEmpty);
+    expect(parentDataFor(redBox).offset, const Offset(0, 300));
+    expect(parentDataFor(blueBox).offset, Offset.zero);
+    await tester.pumpWidget(widget());
+    expect(swapper.insertSlots.length, 2);
+    expect(swapper.moveSlots.length, 1);
+    expect(swapper.moveSlots, contains(const Pair<bool>(true, false)));
+    expect(swapper.removeSlots, isEmpty);
+    expect(parentDataFor(redBox).offset, Offset.zero);
+    expect(parentDataFor(blueBox).offset, const Offset(0, 300));
+    await tester.pumpWidget(const SwapperWithProperOverrides());
+    expect(redBox.attached, false);
+    expect(blueBox.attached, false);
+    expect(swapper.insertSlots.length, 2);
+    expect(swapper.moveSlots.length, 1);
+    expect(swapper.removeSlots.length, 2);
+    expect(swapper.removeSlots, contains('stable'));
+    expect(swapper.removeSlots, contains(false));
+  });
+}
+
 @immutable
 class Pair<T> {
   const Pair(this.first, this.second);
@@ -237,49 +283,3 @@ class RenderSwapper extends RenderBox {
 }
 
 BoxParentData parentDataFor(RenderObject renderObject) => renderObject.parentData! as BoxParentData;
-
-void main() {
-  testWidgets('RenderObjectElement *RenderObjectChild methods get called with correct arguments', (WidgetTester tester) async {
-    const Key redKey = ValueKey<String>('red');
-    const Key blueKey = ValueKey<String>('blue');
-    Widget widget() {
-      return SwapperWithProperOverrides(
-        stable: ColoredBox(
-          key: redKey,
-          color: Color(nonconst(0xffff0000)),
-        ),
-        swapper: ColoredBox(
-          key: blueKey,
-          color: Color(nonconst(0xff0000ff)),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(widget());
-    final SwapperElement swapper = tester.element<SwapperElement>(find.byType(SwapperWithProperOverrides));
-    final RenderBox redBox = tester.renderObject<RenderBox>(find.byKey(redKey));
-    final RenderBox blueBox = tester.renderObject<RenderBox>(find.byKey(blueKey));
-    expect(swapper.insertSlots.length, 2);
-    expect(swapper.insertSlots, contains('stable'));
-    expect(swapper.insertSlots, contains(true));
-    expect(swapper.moveSlots, isEmpty);
-    expect(swapper.removeSlots, isEmpty);
-    expect(parentDataFor(redBox).offset, const Offset(0, 300));
-    expect(parentDataFor(blueBox).offset, Offset.zero);
-    await tester.pumpWidget(widget());
-    expect(swapper.insertSlots.length, 2);
-    expect(swapper.moveSlots.length, 1);
-    expect(swapper.moveSlots, contains(const Pair<bool>(true, false)));
-    expect(swapper.removeSlots, isEmpty);
-    expect(parentDataFor(redBox).offset, Offset.zero);
-    expect(parentDataFor(blueBox).offset, const Offset(0, 300));
-    await tester.pumpWidget(const SwapperWithProperOverrides());
-    expect(redBox.attached, false);
-    expect(blueBox.attached, false);
-    expect(swapper.insertSlots.length, 2);
-    expect(swapper.moveSlots.length, 1);
-    expect(swapper.removeSlots.length, 2);
-    expect(swapper.removeSlots, contains('stable'));
-    expect(swapper.removeSlots, contains(false));
-  });
-}

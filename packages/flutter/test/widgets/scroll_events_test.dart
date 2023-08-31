@@ -7,24 +7,6 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Widget _buildScroller({ required List<String> log }) {
-  return NotificationListener<ScrollNotification>(
-    onNotification: (ScrollNotification notification) {
-      if (notification is ScrollStartNotification) {
-        log.add('scroll-start');
-      } else if (notification is ScrollUpdateNotification) {
-        log.add('scroll-update');
-      } else if (notification is ScrollEndNotification) {
-        log.add('scroll-end');
-      }
-      return false;
-    },
-    child: const SingleChildScrollView(
-      child: SizedBox(width: 1000.0, height: 1000.0),
-    ),
-  );
-}
-
 void main() {
   Completer<void> animateTo(WidgetTester tester, double newScrollOffset, { required Duration duration }) {
     final Completer<void> completer = Completer<void>();
@@ -191,4 +173,22 @@ void main() {
     expect(log.length, equals(2));
     expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, equals(0.0));
   });
+}
+
+Widget _buildScroller({ required List<String> log }) {
+  return NotificationListener<ScrollNotification>(
+    onNotification: (ScrollNotification notification) {
+      if (notification is ScrollStartNotification) {
+        log.add('scroll-start');
+      } else if (notification is ScrollUpdateNotification) {
+        log.add('scroll-update');
+      } else if (notification is ScrollEndNotification) {
+        log.add('scroll-end');
+      }
+      return false;
+    },
+    child: const SingleChildScrollView(
+      child: SizedBox(width: 1000.0, height: 1000.0),
+    ),
+  );
 }

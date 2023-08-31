@@ -9,13 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-
-Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
-  const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
-  final Offset localOffset = paragraph.getOffsetForCaret(TextPosition(offset: offset), caret);
-  return paragraph.localToGlobal(localOffset);
-}
-
 void main() {
   testWidgets('SelectionArea uses correct selection controls', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
@@ -215,4 +208,10 @@ void main() {
     variant: TargetPlatformVariant.all(),
     skip: kIsWeb, // [intended]
   );
+}
+
+Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
+  const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
+  final Offset localOffset = paragraph.getOffsetForCaret(TextPosition(offset: offset), caret);
+  return paragraph.localToGlobal(localOffset);
 }

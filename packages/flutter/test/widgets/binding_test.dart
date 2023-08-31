@@ -9,132 +9,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class MemoryPressureObserver with WidgetsBindingObserver {
-  bool sawMemoryPressure = false;
-
-  @override
-  void didHaveMemoryPressure() {
-    sawMemoryPressure = true;
-  }
-}
-
-class AppLifecycleStateObserver with WidgetsBindingObserver {
-  List<AppLifecycleState> accumulatedStates = <AppLifecycleState>[];
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    accumulatedStates.add(state);
-  }
-}
-
-class PushRouteObserver with WidgetsBindingObserver {
-  late String pushedRoute;
-
-  @override
-  Future<bool> didPushRoute(String route) async {
-    pushedRoute = route;
-    return true;
-  }
-}
-
-class PushRouteInformationObserver with WidgetsBindingObserver {
-  late RouteInformation pushedRouteInformation;
-
-  @override
-  Future<bool> didPushRouteInformation(RouteInformation routeInformation) async {
-    pushedRouteInformation = routeInformation;
-    return true;
-  }
-}
-
-// Implements to make sure all methods get coverage.
-class RentrantObserver implements WidgetsBindingObserver {
-  RentrantObserver() {
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  bool active = true;
-
-  int removeSelf() {
-    active = false;
-    int count = 0;
-    while (WidgetsBinding.instance.removeObserver(this)) {
-      count += 1;
-    }
-    return count;
-  }
-
-  @override
-  void didChangeAccessibilityFeatures() {
-    assert(active);
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    assert(active);
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void didChangeLocales(List<Locale>? locales) {
-    assert(active);
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void didChangeMetrics() {
-    assert(active);
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void didChangePlatformBrightness() {
-    assert(active);
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void didChangeTextScaleFactor() {
-    assert(active);
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void didHaveMemoryPressure() {
-    assert(active);
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  Future<bool> didPopRoute() {
-    assert(active);
-    WidgetsBinding.instance.addObserver(this);
-    return Future<bool>.value(true);
-  }
-
-  @override
-  Future<bool> didPushRoute(String route) {
-    assert(active);
-    WidgetsBinding.instance.addObserver(this);
-    return Future<bool>.value(true);
-  }
-
-  @override
-  Future<bool> didPushRouteInformation(RouteInformation routeInformation) {
-    assert(active);
-    WidgetsBinding.instance.addObserver(this);
-    return Future<bool>.value(true);
-  }
-
-  @override
-  Future<AppExitResponse> didRequestAppExit() {
-    assert(active);
-    WidgetsBinding.instance.addObserver(this);
-    return Future<AppExitResponse>.value(AppExitResponse.exit);
-  }
-}
-
 void main() {
   Future<void> setAppLifeCycleState(AppLifecycleState state) async {
     final ByteData? message =
@@ -473,5 +347,131 @@ class TestStatefulWidgetState extends State<TestStatefulWidget> {
   @override
   Widget build(BuildContext context) {
     return widget.child;
+  }
+}
+
+class MemoryPressureObserver with WidgetsBindingObserver {
+  bool sawMemoryPressure = false;
+
+  @override
+  void didHaveMemoryPressure() {
+    sawMemoryPressure = true;
+  }
+}
+
+class AppLifecycleStateObserver with WidgetsBindingObserver {
+  List<AppLifecycleState> accumulatedStates = <AppLifecycleState>[];
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    accumulatedStates.add(state);
+  }
+}
+
+class PushRouteObserver with WidgetsBindingObserver {
+  late String pushedRoute;
+
+  @override
+  Future<bool> didPushRoute(String route) async {
+    pushedRoute = route;
+    return true;
+  }
+}
+
+class PushRouteInformationObserver with WidgetsBindingObserver {
+  late RouteInformation pushedRouteInformation;
+
+  @override
+  Future<bool> didPushRouteInformation(RouteInformation routeInformation) async {
+    pushedRouteInformation = routeInformation;
+    return true;
+  }
+}
+
+// Implements to make sure all methods get coverage.
+class RentrantObserver implements WidgetsBindingObserver {
+  RentrantObserver() {
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  bool active = true;
+
+  int removeSelf() {
+    active = false;
+    int count = 0;
+    while (WidgetsBinding.instance.removeObserver(this)) {
+      count += 1;
+    }
+    return count;
+  }
+
+  @override
+  void didChangeAccessibilityFeatures() {
+    assert(active);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    assert(active);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeLocales(List<Locale>? locales) {
+    assert(active);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeMetrics() {
+    assert(active);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangePlatformBrightness() {
+    assert(active);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeTextScaleFactor() {
+    assert(active);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didHaveMemoryPressure() {
+    assert(active);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  Future<bool> didPopRoute() {
+    assert(active);
+    WidgetsBinding.instance.addObserver(this);
+    return Future<bool>.value(true);
+  }
+
+  @override
+  Future<bool> didPushRoute(String route) {
+    assert(active);
+    WidgetsBinding.instance.addObserver(this);
+    return Future<bool>.value(true);
+  }
+
+  @override
+  Future<bool> didPushRouteInformation(RouteInformation routeInformation) {
+    assert(active);
+    WidgetsBinding.instance.addObserver(this);
+    return Future<bool>.value(true);
+  }
+
+  @override
+  Future<AppExitResponse> didRequestAppExit() {
+    assert(active);
+    WidgetsBinding.instance.addObserver(this);
+    return Future<AppExitResponse>.value(AppExitResponse.exit);
   }
 }

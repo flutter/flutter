@@ -5,54 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestTransition extends AnimatedWidget {
-  const TestTransition({
-    super.key,
-    required this.childFirstHalf,
-    required this.childSecondHalf,
-    required Animation<double> animation,
-  }) : super(listenable: animation);
-
-  final Widget childFirstHalf;
-  final Widget childSecondHalf;
-
-  @override
-  Widget build(BuildContext context) {
-    final Animation<double> animation = listenable as Animation<double>;
-    if (animation.value >= 0.5) {
-      return childSecondHalf;
-    }
-    return childFirstHalf;
-  }
-}
-
-class TestRoute<T> extends PageRoute<T> {
-  TestRoute({
-    required this.child,
-    required RouteSettings settings,
-    this.barrierColor,
-  }) : super(settings: settings);
-
-  final Widget child;
-
-  @override
-  Duration get transitionDuration => const Duration(milliseconds: 150);
-
-  @override
-  final Color? barrierColor;
-
-  @override
-  String? get barrierLabel => null;
-
-  @override
-  bool get maintainState => false;
-
-  @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    return child;
-  }
-}
-
 void main() {
   const Duration kTwoTenthsOfTheTransitionDuration = Duration(milliseconds: 30);
   const Duration kFourTenthsOfTheTransitionDuration = Duration(milliseconds: 60);
@@ -223,4 +175,52 @@ void main() {
     expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier)).color, const Color(0xFFFFFF00));
 
   });
+}
+
+class TestTransition extends AnimatedWidget {
+  const TestTransition({
+    super.key,
+    required this.childFirstHalf,
+    required this.childSecondHalf,
+    required Animation<double> animation,
+  }) : super(listenable: animation);
+
+  final Widget childFirstHalf;
+  final Widget childSecondHalf;
+
+  @override
+  Widget build(BuildContext context) {
+    final Animation<double> animation = listenable as Animation<double>;
+    if (animation.value >= 0.5) {
+      return childSecondHalf;
+    }
+    return childFirstHalf;
+  }
+}
+
+class TestRoute<T> extends PageRoute<T> {
+  TestRoute({
+    required this.child,
+    required RouteSettings settings,
+    this.barrierColor,
+  }) : super(settings: settings);
+
+  final Widget child;
+
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 150);
+
+  @override
+  final Color? barrierColor;
+
+  @override
+  String? get barrierLabel => null;
+
+  @override
+  bool get maintainState => false;
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    return child;
+  }
 }

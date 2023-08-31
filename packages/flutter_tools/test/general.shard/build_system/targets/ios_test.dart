@@ -18,26 +18,6 @@ import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
 
-final Platform macPlatform = FakePlatform(operatingSystem: 'macos', environment: <String, String>{});
-
-const List<String> _kSharedConfig = <String>[
-  '-dynamiclib',
-  '-miphoneos-version-min=11.0',
-  '-Xlinker',
-  '-rpath',
-  '-Xlinker',
-  '@executable_path/Frameworks',
-  '-Xlinker',
-  '-rpath',
-  '-Xlinker',
-  '@loader_path/Frameworks',
-  '-fapplication-extension',
-  '-install_name',
-  '@rpath/App.framework/App',
-  '-isysroot',
-  'path/to/iPhoneOS.sdk',
-];
-
 void main() {
   late Environment environment;
   late FileSystem fileSystem;
@@ -957,3 +937,23 @@ void main() {
     });
   });
 }
+
+final Platform macPlatform = FakePlatform(operatingSystem: 'macos', environment: <String, String>{});
+
+const List<String> _kSharedConfig = <String>[
+  '-dynamiclib',
+  '-miphoneos-version-min=11.0',
+  '-Xlinker',
+  '-rpath',
+  '-Xlinker',
+  '@executable_path/Frameworks',
+  '-Xlinker',
+  '-rpath',
+  '-Xlinker',
+  '@loader_path/Frameworks',
+  '-fapplication-extension',
+  '-install_name',
+  '@rpath/App.framework/App',
+  '-isysroot',
+  'path/to/iPhoneOS.sdk',
+];

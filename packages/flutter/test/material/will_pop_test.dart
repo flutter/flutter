@@ -5,96 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-bool willPopValue = false;
-
-class SamplePage extends StatefulWidget {
-  const SamplePage({ super.key });
-  @override
-  SamplePageState createState() => SamplePageState();
-}
-
-class SamplePageState extends State<SamplePage> {
-  ModalRoute<void>? _route;
-
-  Future<bool> _callback() async => willPopValue;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _route?.removeScopedWillPopCallback(_callback);
-    _route = ModalRoute.of(context);
-    _route?.addScopedWillPopCallback(_callback);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _route?.removeScopedWillPopCallback(_callback);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Sample Page')),
-    );
-  }
-}
-
-int willPopCount = 0;
-
-class SampleForm extends StatelessWidget {
-  const SampleForm({ super.key, required this.callback });
-
-  final WillPopCallback callback;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Sample Form')),
-      body: SizedBox.expand(
-        child: Form(
-          onWillPop: () {
-            willPopCount += 1;
-            return callback();
-          },
-          child: const TextField(),
-        ),
-      ),
-    );
-  }
-}
-
-// Expose the protected hasScopedWillPopCallback getter
-class _TestPageRoute<T> extends MaterialPageRoute<T> {
-  _TestPageRoute({
-    super.settings,
-    required super.builder,
-  }) : super(maintainState: true);
-
-  bool get hasCallback => super.hasScopedWillPopCallback;
-}
-
-class _TestPage extends Page<dynamic> {
-  _TestPage({
-    required this.builder,
-    required LocalKey key,
-  })  : _key = GlobalKey(),
-        super(key: key);
-
-  final WidgetBuilder builder;
-  final GlobalKey<dynamic> _key;
-
-  @override
-  Route<dynamic> createRoute(BuildContext context) {
-    return _TestPageRoute<dynamic>(
-        settings: this,
-        builder: (BuildContext context) {
-          // keep state during move to another location in tree
-          return KeyedSubtree(key: _key, child: builder.call(context));
-        });
-  }
-}
-
 void main() {
   testWidgets('ModalRoute scopedWillPopupCallback can inhibit back button', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -452,4 +362,94 @@ void main() {
     expect(route1.hasCallback, isFalse);
     expect(route2.hasCallback, isTrue);
   });
+}
+
+bool willPopValue = false;
+
+class SamplePage extends StatefulWidget {
+  const SamplePage({ super.key });
+  @override
+  SamplePageState createState() => SamplePageState();
+}
+
+class SamplePageState extends State<SamplePage> {
+  ModalRoute<void>? _route;
+
+  Future<bool> _callback() async => willPopValue;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _route?.removeScopedWillPopCallback(_callback);
+    _route = ModalRoute.of(context);
+    _route?.addScopedWillPopCallback(_callback);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _route?.removeScopedWillPopCallback(_callback);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Sample Page')),
+    );
+  }
+}
+
+int willPopCount = 0;
+
+class SampleForm extends StatelessWidget {
+  const SampleForm({ super.key, required this.callback });
+
+  final WillPopCallback callback;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Sample Form')),
+      body: SizedBox.expand(
+        child: Form(
+          onWillPop: () {
+            willPopCount += 1;
+            return callback();
+          },
+          child: const TextField(),
+        ),
+      ),
+    );
+  }
+}
+
+// Expose the protected hasScopedWillPopCallback getter
+class _TestPageRoute<T> extends MaterialPageRoute<T> {
+  _TestPageRoute({
+    super.settings,
+    required super.builder,
+  }) : super(maintainState: true);
+
+  bool get hasCallback => super.hasScopedWillPopCallback;
+}
+
+class _TestPage extends Page<dynamic> {
+  _TestPage({
+    required this.builder,
+    required LocalKey key,
+  })  : _key = GlobalKey(),
+        super(key: key);
+
+  final WidgetBuilder builder;
+  final GlobalKey<dynamic> _key;
+
+  @override
+  Route<dynamic> createRoute(BuildContext context) {
+    return _TestPageRoute<dynamic>(
+        settings: this,
+        builder: (BuildContext context) {
+          // keep state during move to another location in tree
+          return KeyedSubtree(key: _key, child: builder.call(context));
+        });
+  }
 }

@@ -11,56 +11,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-typedef HandleEventCallback = void Function(PointerEvent event);
-
-class TestResampleEventFlutterBinding extends BindingBase with GestureBinding, SchedulerBinding {
-  HandleEventCallback? callback;
-  FrameCallback? postFrameCallback;
-  Duration? frameTime;
-
-  @override
-  void handleEvent(PointerEvent event, HitTestEntry entry) {
-    super.handleEvent(event, entry);
-    if (callback != null) {
-      callback?.call(event);
-    }
-  }
-
-  @override
-  Duration get currentSystemFrameTimeStamp {
-    assert(frameTime != null);
-    return frameTime!;
-  }
-
-  @override
-  int addPostFrameCallback(FrameCallback callback) {
-    postFrameCallback = callback;
-    return 0;
-  }
-
-  @override
-  SamplingClock? get debugSamplingClock => TestSamplingClock();
-}
-
-class TestSamplingClock implements SamplingClock {
-  @override
-  DateTime now() => clock.now();
-
-  @override
-  Stopwatch stopwatch() => clock.stopwatch();
-}
-
-typedef ResampleEventTest = void Function(FakeAsync async);
-
-void testResampleEvent(String description, ResampleEventTest callback) {
-  test(description, () {
-    fakeAsync((FakeAsync async) {
-      callback(async);
-    }, initialTime: DateTime.utc(2015));
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87067
-                       // Fake clock is not working with the web platform.
-}
-
 void main() {
   final TestResampleEventFlutterBinding binding = TestResampleEventFlutterBinding();
   testResampleEvent('Pointer event resampling', (FakeAsync async) {
@@ -185,3 +135,53 @@ void main() {
 }
 
 double get _devicePixelRatio => GestureBinding.instance.platformDispatcher.implicitView!.devicePixelRatio;
+
+typedef HandleEventCallback = void Function(PointerEvent event);
+
+class TestResampleEventFlutterBinding extends BindingBase with GestureBinding, SchedulerBinding {
+  HandleEventCallback? callback;
+  FrameCallback? postFrameCallback;
+  Duration? frameTime;
+
+  @override
+  void handleEvent(PointerEvent event, HitTestEntry entry) {
+    super.handleEvent(event, entry);
+    if (callback != null) {
+      callback?.call(event);
+    }
+  }
+
+  @override
+  Duration get currentSystemFrameTimeStamp {
+    assert(frameTime != null);
+    return frameTime!;
+  }
+
+  @override
+  int addPostFrameCallback(FrameCallback callback) {
+    postFrameCallback = callback;
+    return 0;
+  }
+
+  @override
+  SamplingClock? get debugSamplingClock => TestSamplingClock();
+}
+
+class TestSamplingClock implements SamplingClock {
+  @override
+  DateTime now() => clock.now();
+
+  @override
+  Stopwatch stopwatch() => clock.stopwatch();
+}
+
+typedef ResampleEventTest = void Function(FakeAsync async);
+
+void testResampleEvent(String description, ResampleEventTest callback) {
+  test(description, () {
+    fakeAsync((FakeAsync async) {
+      callback(async);
+    }, initialTime: DateTime.utc(2015));
+  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87067
+                       // Fake clock is not working with the web platform.
+}

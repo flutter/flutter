@@ -20,11 +20,6 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 
-enum _StdioStream {
-  stdout,
-  stderr,
-}
-
 void main() {
   late FileSystem fileSystem;
   late FakeProcessManager fakeProcessManager;
@@ -891,4 +886,9 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   }) async => buildSettings;
 
   final Map<String, String> buildSettings;
+}
+
+enum _StdioStream {
+  stdout,
+  stderr,
 }

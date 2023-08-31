@@ -17,12 +17,6 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 
-final Uri goldenKey = Uri.parse('file://golden_key');
-final Uri goldenKey2 = Uri.parse('file://second_golden_key');
-final Uri testUri = Uri.parse('file://test_uri');
-final Uri testUri2  = Uri.parse('file://second_test_uri');
-final Uint8List imageBytes = Uint8List.fromList(<int>[1, 2, 3, 4, 5]);
-
 void main() {
 
   group('Test that TestGoldenComparator', () {
@@ -221,3 +215,9 @@ class FakeTestCompiler extends Fake implements TestCompiler {
   @override
   Future<void> dispose() async { }
 }
+
+final Uri goldenKey = Uri.parse('file://golden_key');
+final Uri goldenKey2 = Uri.parse('file://second_golden_key');
+final Uri testUri = Uri.parse('file://test_uri');
+final Uri testUri2  = Uri.parse('file://second_test_uri');
+final Uint8List imageBytes = Uint8List.fromList(<int>[1, 2, 3, 4, 5]);

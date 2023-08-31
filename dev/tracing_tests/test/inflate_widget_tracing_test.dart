@@ -8,13 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'common.dart';
 
-final Set<String> interestingLabels = <String>{
-  '$Row',
-  '$TestRoot',
-  '$TestChildWidget',
-  '$Container',
-};
-
 void main() {
   ZoneIgnoringTestBinding.ensureInitialized();
   initTimelineTests();
@@ -83,3 +76,10 @@ class TestChildWidget extends StatelessWidget {
     return Container();
   }
 }
+
+final Set<String> interestingLabels = <String>{
+  '$Row',
+  '$TestRoot',
+  '$TestChildWidget',
+  '$Container',
+};

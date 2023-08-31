@@ -6,21 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class User {
-  const User({
-    required this.email,
-    required this.name,
-  });
-
-  final String email;
-  final String name;
-
-  @override
-  String toString() {
-    return '$name, $email';
-  }
-}
-
 void main() {
   const List<String> kOptions = <String>[
     'aardvark',
@@ -564,4 +549,19 @@ void main() {
       expect(actual, equals(OptionsViewOpenDirection.up));
     });
   });
+}
+
+class User {
+  const User({
+    required this.email,
+    required this.name,
+  });
+
+  final String email;
+  final String name;
+
+  @override
+  String toString() {
+    return '$name, $email';
+  }
 }

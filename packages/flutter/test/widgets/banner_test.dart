@@ -7,15 +7,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestCanvas implements Canvas {
-  final List<Invocation> invocations = <Invocation>[];
-
-  @override
-  void noSuchMethod(Invocation invocation) {
-    invocations.add(invocation);
-  }
-}
-
 void main() {
   // the textDirection values below are intentionally sometimes different and
   // sometimes the same as the layoutDirection, to make sure that they don't
@@ -279,4 +270,13 @@ void main() {
     );
     debugDisableShadows = true;
   });
+}
+
+class TestCanvas implements Canvas {
+  final List<Invocation> invocations = <Invocation>[];
+
+  @override
+  void noSuchMethod(Invocation invocation) {
+    invocations.add(invocation);
+  }
 }

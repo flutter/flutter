@@ -5,6 +5,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+void main() {
+  TestTestBinding();
+  testWidgets('TestAsyncUtils - handling unguarded async helper functions', (WidgetTester tester) async {
+    helperFunction(tester);
+    helperFunction(tester);
+    // this should fail
+  });
+}
+
 class TestTestBinding extends AutomatedTestWidgetsFlutterBinding {
   @override
   DebugPrintCallback get debugPrintOverride => testPrint;
@@ -13,13 +22,4 @@ class TestTestBinding extends AutomatedTestWidgetsFlutterBinding {
 
 Future<void> helperFunction(WidgetTester tester) async {
   await tester.pump();
-}
-
-void main() {
-  TestTestBinding();
-  testWidgets('TestAsyncUtils - handling unguarded async helper functions', (WidgetTester tester) async {
-    helperFunction(tester);
-    helperFunction(tester);
-    // this should fail
-  });
 }

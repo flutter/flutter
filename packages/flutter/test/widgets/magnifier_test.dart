@@ -10,25 +10,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class _MockAnimationController extends AnimationController {
-  _MockAnimationController()
-      : super(duration: const Duration(minutes: 1), vsync: const TestVSync());
-  int forwardCalls = 0;
-  int reverseCalls = 0;
-
-  @override
-  TickerFuture forward({double? from}) {
-    forwardCalls++;
-    return super.forward(from: from);
-  }
-
-  @override
-  TickerFuture reverse({double? from}) {
-    reverseCalls++;
-    return super.reverse(from: from);
-  }
-}
-
 void main() {
   Future<T> runFakeAsync<T>(Future<T> Function(FakeAsync time) f) async {
     return FakeAsync().run((FakeAsync time) async {
@@ -323,4 +304,23 @@ void main() {
       }
     });
   });
+}
+
+class _MockAnimationController extends AnimationController {
+  _MockAnimationController()
+      : super(duration: const Duration(minutes: 1), vsync: const TestVSync());
+  int forwardCalls = 0;
+  int reverseCalls = 0;
+
+  @override
+  TickerFuture forward({double? from}) {
+    forwardCalls++;
+    return super.forward(from: from);
+  }
+
+  @override
+  TickerFuture reverse({double? from}) {
+    reverseCalls++;
+    return super.reverse(from: from);
+  }
 }

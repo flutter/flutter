@@ -9,49 +9,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-typedef HandleEventCallback = void Function(PointerEvent event);
-
-class TestGestureFlutterBinding extends BindingBase with GestureBinding, SchedulerBinding {
-  @override
-  void initInstances() {
-    super.initInstances();
-    _instance = this;
-  }
-
-  /// The singleton instance of this object.
-  ///
-  /// Provides access to the features exposed by this class. The binding must
-  /// be initialized before using this getter; this is typically done by calling
-  /// [TestGestureFlutterBinding.ensureInitialized].
-  static TestGestureFlutterBinding get instance => BindingBase.checkInstance(_instance);
-  static TestGestureFlutterBinding? _instance;
-
-  /// Returns an instance of the [TestGestureFlutterBinding], creating and
-  /// initializing it if necessary.
-  static TestGestureFlutterBinding ensureInitialized() {
-    if (_instance == null) {
-      TestGestureFlutterBinding();
-    }
-    return _instance!;
-  }
-
-  HandleEventCallback? onHandlePointerEvent;
-
-  @override
-  void handlePointerEvent(PointerEvent event) {
-    onHandlePointerEvent?.call(event);
-    super.handlePointerEvent(event);
-  }
-
-  HandleEventCallback? onHandleEvent;
-
-  @override
-  void handleEvent(PointerEvent event, HitTestEntry entry) {
-    super.handleEvent(event, entry);
-    onHandleEvent?.call(event);
-  }
-}
-
 void main() {
   final TestGestureFlutterBinding binding = TestGestureFlutterBinding.ensureInitialized();
 
@@ -458,4 +415,47 @@ void main() {
     expect(events, hasLength(10));
     expect(events.map((PointerEvent event) => event.viewId), expectedViewIds);
   });
+}
+
+typedef HandleEventCallback = void Function(PointerEvent event);
+
+class TestGestureFlutterBinding extends BindingBase with GestureBinding, SchedulerBinding {
+  @override
+  void initInstances() {
+    super.initInstances();
+    _instance = this;
+  }
+
+  /// The singleton instance of this object.
+  ///
+  /// Provides access to the features exposed by this class. The binding must
+  /// be initialized before using this getter; this is typically done by calling
+  /// [TestGestureFlutterBinding.ensureInitialized].
+  static TestGestureFlutterBinding get instance => BindingBase.checkInstance(_instance);
+  static TestGestureFlutterBinding? _instance;
+
+  /// Returns an instance of the [TestGestureFlutterBinding], creating and
+  /// initializing it if necessary.
+  static TestGestureFlutterBinding ensureInitialized() {
+    if (_instance == null) {
+      TestGestureFlutterBinding();
+    }
+    return _instance!;
+  }
+
+  HandleEventCallback? onHandlePointerEvent;
+
+  @override
+  void handlePointerEvent(PointerEvent event) {
+    onHandlePointerEvent?.call(event);
+    super.handlePointerEvent(event);
+  }
+
+  HandleEventCallback? onHandleEvent;
+
+  @override
+  void handleEvent(PointerEvent event, HitTestEntry entry) {
+    super.handleEvent(event, entry);
+    onHandleEvent?.call(event);
+  }
 }

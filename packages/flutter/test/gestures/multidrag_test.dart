@@ -7,8 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'gesture_tester.dart';
 
-class TestDrag extends Drag { }
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -112,3 +110,5 @@ void main() {
     expect(recognizer2.isPointerAllowed(rejectedPointer), false);
   });
 }
+
+class TestDrag extends Drag { }

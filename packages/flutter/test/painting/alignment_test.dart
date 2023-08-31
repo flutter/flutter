@@ -7,11 +7,6 @@ import 'dart:math' as math;
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-void approxExpect(Alignment a, Alignment b) {
-  expect(a.x, moreOrLessEquals(b.x));
-  expect(a.y, moreOrLessEquals(b.y));
-}
-
 void main() {
   test('Alignment control test', () {
     const Alignment alignment = Alignment(0.5, 0.25);
@@ -244,4 +239,9 @@ void main() {
     expect(AlignmentDirectional.center.toString(), 'AlignmentDirectional.center');
     expect(Alignment.bottomRight.add(AlignmentDirectional.bottomEnd).toString(), 'Alignment(1.0, 2.0) + AlignmentDirectional.centerEnd');
   });
+}
+
+void approxExpect(Alignment a, Alignment b) {
+  expect(a.x, moreOrLessEquals(b.x));
+  expect(a.y, moreOrLessEquals(b.y));
 }

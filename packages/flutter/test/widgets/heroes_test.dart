@@ -12,177 +12,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../painting/image_test_utils.dart' show TestImageProvider;
 
-Future<ui.Image> createTestImage() {
-  final ui.Paint paint = ui.Paint()
-    ..style = ui.PaintingStyle.stroke
-    ..strokeWidth = 1.0;
-  final ui.PictureRecorder recorder = ui.PictureRecorder();
-  final ui.Canvas pictureCanvas = ui.Canvas(recorder);
-  pictureCanvas.drawCircle(Offset.zero, 20.0, paint);
-  final ui.Picture picture = recorder.endRecording();
-  return picture.toImage(300, 300);
-}
-
-Key firstKey = const Key('first');
-Key secondKey = const Key('second');
-Key thirdKey = const Key('third');
-Key simpleKey = const Key('simple');
-
-Key homeRouteKey = const Key('homeRoute');
-Key routeTwoKey = const Key('routeTwo');
-Key routeThreeKey = const Key('routeThree');
-
-bool transitionFromUserGestures = false;
-
-final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-  '/': (BuildContext context) => Material(
-    child: ListView(
-      key: homeRouteKey,
-      children: <Widget>[
-        const SizedBox(height: 100.0, width: 100.0),
-        Card(child: Hero(
-          tag: 'a',
-          transitionOnUserGestures: transitionFromUserGestures,
-          child: SizedBox(height: 100.0, width: 100.0, key: firstKey),
-        )),
-        const SizedBox(height: 100.0, width: 100.0),
-        TextButton(
-          child: const Text('two'),
-          onPressed: () { Navigator.pushNamed(context, '/two'); },
-        ),
-        TextButton(
-          child: const Text('twoInset'),
-          onPressed: () { Navigator.pushNamed(context, '/twoInset'); },
-        ),
-        TextButton(
-          child: const Text('simple'),
-          onPressed: () { Navigator.pushNamed(context, '/simple'); },
-        ),
-      ],
-    ),
-  ),
-  '/two': (BuildContext context) => Material(
-    child: ListView(
-      key: routeTwoKey,
-      children: <Widget>[
-        TextButton(
-          child: const Text('pop'),
-          onPressed: () { Navigator.pop(context); },
-        ),
-        const SizedBox(height: 150.0, width: 150.0),
-        Card(child: Hero(
-          tag: 'a',
-          transitionOnUserGestures: transitionFromUserGestures,
-          child: SizedBox(height: 150.0, width: 150.0, key: secondKey),
-        )),
-        const SizedBox(height: 150.0, width: 150.0),
-        TextButton(
-          child: const Text('three'),
-          onPressed: () { Navigator.push(context, ThreeRoute()); },
-        ),
-      ],
-    ),
-  ),
-  // This route is the same as /two except that Hero 'a' is shifted to the right by
-  // 50 pixels. When the hero's in-flight bounds between / and /twoInset are animated
-  // using MaterialRectArcTween (the default) they'll follow a different path
-  // then when the flight starts at /twoInset and returns to /.
-  '/twoInset': (BuildContext context) => Material(
-    child: ListView(
-      key: routeTwoKey,
-      children: <Widget>[
-        TextButton(
-          child: const Text('pop'),
-          onPressed: () { Navigator.pop(context); },
-        ),
-        const SizedBox(height: 150.0, width: 150.0),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.only(left: 50.0),
-            child: Hero(
-              tag: 'a',
-              transitionOnUserGestures: transitionFromUserGestures,
-              child: SizedBox(height: 150.0, width: 150.0, key: secondKey),
-            ),
-          ),
-        ),
-        const SizedBox(height: 150.0, width: 150.0),
-        TextButton(
-          child: const Text('three'),
-          onPressed: () { Navigator.push(context, ThreeRoute()); },
-        ),
-      ],
-    ),
-  ),
-  // This route is the same as /two except that Hero 'a' is shifted to the right by
-  // 50 pixels. When the hero's in-flight bounds between / and /twoInset are animated
-  // using MaterialRectArcTween (the default) they'll follow a different path
-  // then when the flight starts at /twoInset and returns to /.
-  '/simple': (BuildContext context) => CupertinoPageScaffold(
-    child: Center(
-      child: Hero(
-        tag: 'a',
-        transitionOnUserGestures: transitionFromUserGestures,
-        child: SizedBox(height: 150.0, width: 150.0, key: simpleKey),
-      ),
-    ),
-  ),
-};
-
-class ThreeRoute extends MaterialPageRoute<void> {
-  ThreeRoute()
-    : super(builder: (BuildContext context) {
-        return Material(
-          key: routeThreeKey,
-          child: ListView(
-            children: <Widget>[
-              const SizedBox(height: 200.0, width: 200.0),
-              Card(child: Hero(tag: 'a', child: SizedBox(height: 200.0, width: 200.0, key: thirdKey))),
-              const SizedBox(height: 200.0, width: 200.0),
-            ],
-          ),
-        );
-      });
-}
-
-class MutatingRoute extends MaterialPageRoute<void> {
-  MutatingRoute()
-    : super(builder: (BuildContext context) {
-        return Hero(tag: 'a', key: UniqueKey(), child: const Text('MutatingRoute'));
-      });
-
-  void markNeedsBuild() {
-    setState(() {
-      // Trigger a rebuild
-    });
-  }
-}
-
-class _SimpleStatefulWidget extends StatefulWidget {
-  const _SimpleStatefulWidget({ super.key });
-  @override
-  _SimpleState createState() => _SimpleState();
-}
-
-class _SimpleState extends State<_SimpleStatefulWidget> {
-  int state = 0;
-
-  @override
-  Widget build(BuildContext context) => Text(state.toString());
-}
-
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({ super.key, this.value = '123' });
-  final String value;
-  @override
-  MyStatefulWidgetState createState() => MyStatefulWidgetState();
-}
-
-class MyStatefulWidgetState extends State<MyStatefulWidget> {
-  @override
-  Widget build(BuildContext context) => Text(widget.value);
-}
-
 Future<void> main() async {
   final ui.Image testImage = await createTestImage();
 
@@ -3150,4 +2979,175 @@ class TestDependencies extends StatelessWidget {
       ),
     );
   }
+}
+
+Future<ui.Image> createTestImage() {
+  final ui.Paint paint = ui.Paint()
+    ..style = ui.PaintingStyle.stroke
+    ..strokeWidth = 1.0;
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final ui.Canvas pictureCanvas = ui.Canvas(recorder);
+  pictureCanvas.drawCircle(Offset.zero, 20.0, paint);
+  final ui.Picture picture = recorder.endRecording();
+  return picture.toImage(300, 300);
+}
+
+Key firstKey = const Key('first');
+Key secondKey = const Key('second');
+Key thirdKey = const Key('third');
+Key simpleKey = const Key('simple');
+
+Key homeRouteKey = const Key('homeRoute');
+Key routeTwoKey = const Key('routeTwo');
+Key routeThreeKey = const Key('routeThree');
+
+bool transitionFromUserGestures = false;
+
+final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+  '/': (BuildContext context) => Material(
+    child: ListView(
+      key: homeRouteKey,
+      children: <Widget>[
+        const SizedBox(height: 100.0, width: 100.0),
+        Card(child: Hero(
+          tag: 'a',
+          transitionOnUserGestures: transitionFromUserGestures,
+          child: SizedBox(height: 100.0, width: 100.0, key: firstKey),
+        )),
+        const SizedBox(height: 100.0, width: 100.0),
+        TextButton(
+          child: const Text('two'),
+          onPressed: () { Navigator.pushNamed(context, '/two'); },
+        ),
+        TextButton(
+          child: const Text('twoInset'),
+          onPressed: () { Navigator.pushNamed(context, '/twoInset'); },
+        ),
+        TextButton(
+          child: const Text('simple'),
+          onPressed: () { Navigator.pushNamed(context, '/simple'); },
+        ),
+      ],
+    ),
+  ),
+  '/two': (BuildContext context) => Material(
+    child: ListView(
+      key: routeTwoKey,
+      children: <Widget>[
+        TextButton(
+          child: const Text('pop'),
+          onPressed: () { Navigator.pop(context); },
+        ),
+        const SizedBox(height: 150.0, width: 150.0),
+        Card(child: Hero(
+          tag: 'a',
+          transitionOnUserGestures: transitionFromUserGestures,
+          child: SizedBox(height: 150.0, width: 150.0, key: secondKey),
+        )),
+        const SizedBox(height: 150.0, width: 150.0),
+        TextButton(
+          child: const Text('three'),
+          onPressed: () { Navigator.push(context, ThreeRoute()); },
+        ),
+      ],
+    ),
+  ),
+  // This route is the same as /two except that Hero 'a' is shifted to the right by
+  // 50 pixels. When the hero's in-flight bounds between / and /twoInset are animated
+  // using MaterialRectArcTween (the default) they'll follow a different path
+  // then when the flight starts at /twoInset and returns to /.
+  '/twoInset': (BuildContext context) => Material(
+    child: ListView(
+      key: routeTwoKey,
+      children: <Widget>[
+        TextButton(
+          child: const Text('pop'),
+          onPressed: () { Navigator.pop(context); },
+        ),
+        const SizedBox(height: 150.0, width: 150.0),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.only(left: 50.0),
+            child: Hero(
+              tag: 'a',
+              transitionOnUserGestures: transitionFromUserGestures,
+              child: SizedBox(height: 150.0, width: 150.0, key: secondKey),
+            ),
+          ),
+        ),
+        const SizedBox(height: 150.0, width: 150.0),
+        TextButton(
+          child: const Text('three'),
+          onPressed: () { Navigator.push(context, ThreeRoute()); },
+        ),
+      ],
+    ),
+  ),
+  // This route is the same as /two except that Hero 'a' is shifted to the right by
+  // 50 pixels. When the hero's in-flight bounds between / and /twoInset are animated
+  // using MaterialRectArcTween (the default) they'll follow a different path
+  // then when the flight starts at /twoInset and returns to /.
+  '/simple': (BuildContext context) => CupertinoPageScaffold(
+    child: Center(
+      child: Hero(
+        tag: 'a',
+        transitionOnUserGestures: transitionFromUserGestures,
+        child: SizedBox(height: 150.0, width: 150.0, key: simpleKey),
+      ),
+    ),
+  ),
+};
+
+class ThreeRoute extends MaterialPageRoute<void> {
+  ThreeRoute()
+    : super(builder: (BuildContext context) {
+        return Material(
+          key: routeThreeKey,
+          child: ListView(
+            children: <Widget>[
+              const SizedBox(height: 200.0, width: 200.0),
+              Card(child: Hero(tag: 'a', child: SizedBox(height: 200.0, width: 200.0, key: thirdKey))),
+              const SizedBox(height: 200.0, width: 200.0),
+            ],
+          ),
+        );
+      });
+}
+
+class MutatingRoute extends MaterialPageRoute<void> {
+  MutatingRoute()
+    : super(builder: (BuildContext context) {
+        return Hero(tag: 'a', key: UniqueKey(), child: const Text('MutatingRoute'));
+      });
+
+  void markNeedsBuild() {
+    setState(() {
+      // Trigger a rebuild
+    });
+  }
+}
+
+class _SimpleStatefulWidget extends StatefulWidget {
+  const _SimpleStatefulWidget({ super.key });
+  @override
+  _SimpleState createState() => _SimpleState();
+}
+
+class _SimpleState extends State<_SimpleStatefulWidget> {
+  int state = 0;
+
+  @override
+  Widget build(BuildContext context) => Text(state.toString());
+}
+
+class MyStatefulWidget extends StatefulWidget {
+  const MyStatefulWidget({ super.key, this.value = '123' });
+  final String value;
+  @override
+  MyStatefulWidgetState createState() => MyStatefulWidgetState();
+}
+
+class MyStatefulWidgetState extends State<MyStatefulWidget> {
+  @override
+  Widget build(BuildContext context) => Text(widget.value);
 }

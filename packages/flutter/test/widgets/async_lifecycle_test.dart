@@ -5,6 +5,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+void main() {
+  testWidgets('async onInit throws FlutterError', (WidgetTester tester) async {
+    await tester.pumpWidget(const InvalidOnInitLifecycleWidget());
+
+    expect(tester.takeException(), isFlutterError);
+  });
+
+  testWidgets('async didUpdateWidget throws FlutterError', (WidgetTester tester) async {
+    await tester.pumpWidget(const InvalidDidUpdateWidgetLifecycleWidget(color: Colors.green));
+    await tester.pumpWidget(const InvalidDidUpdateWidgetLifecycleWidget(color: Colors.red));
+
+    expect(tester.takeException(), isFlutterError);
+  });
+}
+
 class InvalidOnInitLifecycleWidget extends StatefulWidget {
   const InvalidOnInitLifecycleWidget({super.key});
 
@@ -43,19 +58,4 @@ class InvalidDidUpdateWidgetLifecycleWidgetState extends State<InvalidDidUpdateW
   Widget build(BuildContext context) {
     return ColoredBox(color: widget.color);
   }
-}
-
-void main() {
-  testWidgets('async onInit throws FlutterError', (WidgetTester tester) async {
-    await tester.pumpWidget(const InvalidOnInitLifecycleWidget());
-
-    expect(tester.takeException(), isFlutterError);
-  });
-
-  testWidgets('async didUpdateWidget throws FlutterError', (WidgetTester tester) async {
-    await tester.pumpWidget(const InvalidDidUpdateWidgetLifecycleWidget(color: Colors.green));
-    await tester.pumpWidget(const InvalidDidUpdateWidgetLifecycleWidget(color: Colors.red));
-
-    expect(tester.takeException(), isFlutterError);
-  });
 }

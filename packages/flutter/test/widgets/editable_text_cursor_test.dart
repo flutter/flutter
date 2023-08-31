@@ -18,12 +18,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'editable_text_utils.dart';
 
-final TextEditingController controller = TextEditingController();
-final FocusNode focusNode = FocusNode();
-final FocusScopeNode focusScopeNode = FocusScopeNode();
-const TextStyle textStyle = TextStyle();
-const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
-
 void main() {
   setUp(() async {
     // Fill the clipboard so that the Paste option is available in the text
@@ -1289,3 +1283,9 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 }
+
+final TextEditingController controller = TextEditingController();
+final FocusNode focusNode = FocusNode();
+final FocusScopeNode focusScopeNode = FocusScopeNode();
+const TextStyle textStyle = TextStyle();
+const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);

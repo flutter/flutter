@@ -6,36 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestStatefulWidget extends StatefulWidget {
-  const TestStatefulWidget({ super.key });
-
-  @override
-  TestStatefulWidgetState createState() => TestStatefulWidgetState();
-}
-
-class TestStatefulWidgetState extends State<TestStatefulWidget> {
-  @override
-  Widget build(BuildContext context) => Container();
-}
-
-class TestChildWidget extends StatefulWidget {
-  const TestChildWidget({ super.key });
-
-  @override
-  TestChildState createState() => TestChildState();
-}
-
-class TestChildState extends State<TestChildWidget> {
-  bool toggle = true;
-
-  void toggleMe() {
-    setState(() { toggle = !toggle; });
-  }
-
-  @override
-  Widget build(BuildContext context) => toggle ? const SizedBox() : const Text('CRASHHH');
-}
-
 void main() {
   testWidgets('Table widget - empty', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1080,4 +1050,34 @@ void main() {
   });
 
   // TODO(ianh): Test handling of TableCell object
+}
+
+class TestStatefulWidget extends StatefulWidget {
+  const TestStatefulWidget({ super.key });
+
+  @override
+  TestStatefulWidgetState createState() => TestStatefulWidgetState();
+}
+
+class TestStatefulWidgetState extends State<TestStatefulWidget> {
+  @override
+  Widget build(BuildContext context) => Container();
+}
+
+class TestChildWidget extends StatefulWidget {
+  const TestChildWidget({ super.key });
+
+  @override
+  TestChildState createState() => TestChildState();
+}
+
+class TestChildState extends State<TestChildWidget> {
+  bool toggle = true;
+
+  void toggleMe() {
+    setState(() { toggle = !toggle; });
+  }
+
+  @override
+  Widget build(BuildContext context) => toggle ? const SizedBox() : const Text('CRASHHH');
 }

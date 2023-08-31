@@ -11,266 +11,6 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
-Widget boilerplate({ Widget? child, TextDirection textDirection = TextDirection.ltr, bool? useMaterial3, TabBarTheme? tabBarTheme }) {
-  return Theme(
-    data: ThemeData(useMaterial3: useMaterial3, tabBarTheme: tabBarTheme),
-    child: Localizations(
-      locale: const Locale('en', 'US'),
-      delegates: const <LocalizationsDelegate<dynamic>>[
-        DefaultMaterialLocalizations.delegate,
-        DefaultWidgetsLocalizations.delegate,
-      ],
-      child: Directionality(
-        textDirection: textDirection,
-        child: Material(
-          child: child,
-        ),
-      ),
-    ),
-  );
-}
-
-class StateMarker extends StatefulWidget {
-  const StateMarker({ super.key, this.child });
-
-  final Widget? child;
-
-  @override
-  StateMarkerState createState() => StateMarkerState();
-}
-
-class StateMarkerState extends State<StateMarker> {
-  String? marker;
-
-  @override
-  Widget build(BuildContext context) {
-    if (widget.child != null) {
-      return widget.child!;
-    }
-    return Container();
-  }
-}
-
-class AlwaysKeepAliveWidget extends StatefulWidget {
-  const AlwaysKeepAliveWidget({ super.key});
-  static String text = 'AlwaysKeepAlive';
-  @override
-  AlwaysKeepAliveState createState() => AlwaysKeepAliveState();
-}
-
-class AlwaysKeepAliveState extends State<AlwaysKeepAliveWidget>
-    with AutomaticKeepAliveClientMixin {
-  @override
-  bool get wantKeepAlive => true;
-
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    return Text(AlwaysKeepAliveWidget.text);
-  }
-}
-
-class _NestedTabBarContainer extends StatelessWidget {
-  const _NestedTabBarContainer({
-    this.tabController,
-  });
-
-  final TabController? tabController;
-
-  @override
-  Widget build(BuildContext context) {
-    return ColoredBox(
-      color: Colors.blue,
-      child: Column(
-        children: <Widget>[
-          TabBar(
-            controller: tabController,
-            tabs: const <Tab>[
-              Tab(text: 'Yellow'),
-              Tab(text: 'Grey'),
-            ],
-          ),
-          Expanded(
-            child: TabBarView(
-              controller: tabController,
-              children: <Widget>[
-                Container(color: Colors.yellow),
-                Container(color: Colors.grey),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-Widget buildFrame({
-  Key? tabBarKey,
-  bool secondaryTabBar = false,
-  required List<String> tabs,
-  required String value,
-  bool isScrollable = false,
-  Color? indicatorColor,
-  Duration? animationDuration,
-  EdgeInsetsGeometry? padding,
-  TextDirection textDirection = TextDirection.ltr,
-  TabAlignment? tabAlignment,
-  TabBarTheme? tabBarTheme,
-  bool? useMaterial3,
-}) {
-  if (secondaryTabBar) {
-    return boilerplate(
-      useMaterial3: useMaterial3,
-      tabBarTheme: tabBarTheme,
-      textDirection: textDirection,
-      child: DefaultTabController(
-        animationDuration: animationDuration,
-        initialIndex: tabs.indexOf(value),
-        length: tabs.length,
-        child: TabBar.secondary(
-          key: tabBarKey,
-          tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
-          isScrollable: isScrollable,
-          indicatorColor: indicatorColor,
-          padding: padding,
-          tabAlignment: tabAlignment,
-        ),
-      ),
-    );
-  }
-
-  return boilerplate(
-    useMaterial3: useMaterial3,
-    tabBarTheme: tabBarTheme,
-    textDirection: textDirection,
-    child: DefaultTabController(
-      animationDuration: animationDuration,
-      initialIndex: tabs.indexOf(value),
-      length: tabs.length,
-      child: TabBar(
-        key: tabBarKey,
-        tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
-        isScrollable: isScrollable,
-        indicatorColor: indicatorColor,
-        padding: padding,
-        tabAlignment: tabAlignment,
-      ),
-    ),
-  );
-}
-
-typedef TabControllerFrameBuilder = Widget Function(BuildContext context, TabController controller);
-
-class TabControllerFrame extends StatefulWidget {
-  const TabControllerFrame({
-    super.key,
-    required this.length,
-    this.initialIndex = 0,
-    required this.builder,
-  });
-
-  final int length;
-  final int initialIndex;
-  final TabControllerFrameBuilder builder;
-
-  @override
-  TabControllerFrameState createState() => TabControllerFrameState();
-}
-
-class TabControllerFrameState extends State<TabControllerFrame> with SingleTickerProviderStateMixin {
-  late TabController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TabController(
-      vsync: this,
-      length: widget.length,
-      initialIndex: widget.initialIndex,
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return widget.builder(context, _controller);
-  }
-}
-
-Widget buildLeftRightApp({required List<String> tabs, required String value, bool automaticIndicatorColorAdjustment = true, ThemeData? themeData}) {
-  return MaterialApp(
-    theme: themeData ?? ThemeData(platform: TargetPlatform.android),
-    home: DefaultTabController(
-      initialIndex: tabs.indexOf(value),
-      length: tabs.length,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('tabs'),
-          bottom: TabBar(
-            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
-            automaticIndicatorColorAdjustment: automaticIndicatorColorAdjustment,
-          ),
-        ),
-        body: const TabBarView(
-          children: <Widget>[
-            Center(child: Text('LEFT CHILD')),
-            Center(child: Text('RIGHT CHILD')),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
-class TabIndicatorRecordingCanvas extends TestRecordingCanvas {
-  TabIndicatorRecordingCanvas(this.indicatorColor);
-
-  final Color indicatorColor;
-  late Rect indicatorRect;
-
-  @override
-  void drawLine(Offset p1, Offset p2, Paint paint) {
-    // Assuming that the indicatorWeight is 2.0, the default.
-    const double indicatorWeight = 2.0;
-    if (paint.color == indicatorColor) {
-      indicatorRect = Rect.fromPoints(p1, p2).inflate(indicatorWeight / 2.0);
-    }
-  }
-}
-
-class TestScrollPhysics extends ScrollPhysics {
-  const TestScrollPhysics({ super.parent });
-
-  @override
-  TestScrollPhysics applyTo(ScrollPhysics? ancestor) {
-    return TestScrollPhysics(parent: buildParent(ancestor));
-  }
-
-  @override
-  double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
-    return offset == 10 ? 20 : offset;
-  }
-
-  static final SpringDescription _kDefaultSpring = SpringDescription.withDampingRatio(
-    mass: 0.5,
-    stiffness: 500.0,
-    ratio: 1.1,
-  );
-
-  @override
-  SpringDescription get spring => _kDefaultSpring;
-}
-
-RenderParagraph _getText(WidgetTester tester, String text) {
-  return  tester.renderObject<RenderParagraph>(find.text(text));
-}
-
 void main() {
   setUp(() {
     debugResetSemanticsIdCounter();
@@ -6804,4 +6544,264 @@ class TabBodyState extends State<TabBody> {
         : Text('${widget.index}-${widget.marker}'),
     );
   }
+}
+
+Widget boilerplate({ Widget? child, TextDirection textDirection = TextDirection.ltr, bool? useMaterial3, TabBarTheme? tabBarTheme }) {
+  return Theme(
+    data: ThemeData(useMaterial3: useMaterial3, tabBarTheme: tabBarTheme),
+    child: Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: const <LocalizationsDelegate<dynamic>>[
+        DefaultMaterialLocalizations.delegate,
+        DefaultWidgetsLocalizations.delegate,
+      ],
+      child: Directionality(
+        textDirection: textDirection,
+        child: Material(
+          child: child,
+        ),
+      ),
+    ),
+  );
+}
+
+class StateMarker extends StatefulWidget {
+  const StateMarker({ super.key, this.child });
+
+  final Widget? child;
+
+  @override
+  StateMarkerState createState() => StateMarkerState();
+}
+
+class StateMarkerState extends State<StateMarker> {
+  String? marker;
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.child != null) {
+      return widget.child!;
+    }
+    return Container();
+  }
+}
+
+class AlwaysKeepAliveWidget extends StatefulWidget {
+  const AlwaysKeepAliveWidget({ super.key});
+  static String text = 'AlwaysKeepAlive';
+  @override
+  AlwaysKeepAliveState createState() => AlwaysKeepAliveState();
+}
+
+class AlwaysKeepAliveState extends State<AlwaysKeepAliveWidget>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return Text(AlwaysKeepAliveWidget.text);
+  }
+}
+
+class _NestedTabBarContainer extends StatelessWidget {
+  const _NestedTabBarContainer({
+    this.tabController,
+  });
+
+  final TabController? tabController;
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: Colors.blue,
+      child: Column(
+        children: <Widget>[
+          TabBar(
+            controller: tabController,
+            tabs: const <Tab>[
+              Tab(text: 'Yellow'),
+              Tab(text: 'Grey'),
+            ],
+          ),
+          Expanded(
+            child: TabBarView(
+              controller: tabController,
+              children: <Widget>[
+                Container(color: Colors.yellow),
+                Container(color: Colors.grey),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+Widget buildFrame({
+  Key? tabBarKey,
+  bool secondaryTabBar = false,
+  required List<String> tabs,
+  required String value,
+  bool isScrollable = false,
+  Color? indicatorColor,
+  Duration? animationDuration,
+  EdgeInsetsGeometry? padding,
+  TextDirection textDirection = TextDirection.ltr,
+  TabAlignment? tabAlignment,
+  TabBarTheme? tabBarTheme,
+  bool? useMaterial3,
+}) {
+  if (secondaryTabBar) {
+    return boilerplate(
+      useMaterial3: useMaterial3,
+      tabBarTheme: tabBarTheme,
+      textDirection: textDirection,
+      child: DefaultTabController(
+        animationDuration: animationDuration,
+        initialIndex: tabs.indexOf(value),
+        length: tabs.length,
+        child: TabBar.secondary(
+          key: tabBarKey,
+          tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+          isScrollable: isScrollable,
+          indicatorColor: indicatorColor,
+          padding: padding,
+          tabAlignment: tabAlignment,
+        ),
+      ),
+    );
+  }
+
+  return boilerplate(
+    useMaterial3: useMaterial3,
+    tabBarTheme: tabBarTheme,
+    textDirection: textDirection,
+    child: DefaultTabController(
+      animationDuration: animationDuration,
+      initialIndex: tabs.indexOf(value),
+      length: tabs.length,
+      child: TabBar(
+        key: tabBarKey,
+        tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+        isScrollable: isScrollable,
+        indicatorColor: indicatorColor,
+        padding: padding,
+        tabAlignment: tabAlignment,
+      ),
+    ),
+  );
+}
+
+typedef TabControllerFrameBuilder = Widget Function(BuildContext context, TabController controller);
+
+class TabControllerFrame extends StatefulWidget {
+  const TabControllerFrame({
+    super.key,
+    required this.length,
+    this.initialIndex = 0,
+    required this.builder,
+  });
+
+  final int length;
+  final int initialIndex;
+  final TabControllerFrameBuilder builder;
+
+  @override
+  TabControllerFrameState createState() => TabControllerFrameState();
+}
+
+class TabControllerFrameState extends State<TabControllerFrame> with SingleTickerProviderStateMixin {
+  late TabController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TabController(
+      vsync: this,
+      length: widget.length,
+      initialIndex: widget.initialIndex,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.builder(context, _controller);
+  }
+}
+
+Widget buildLeftRightApp({required List<String> tabs, required String value, bool automaticIndicatorColorAdjustment = true, ThemeData? themeData}) {
+  return MaterialApp(
+    theme: themeData ?? ThemeData(platform: TargetPlatform.android),
+    home: DefaultTabController(
+      initialIndex: tabs.indexOf(value),
+      length: tabs.length,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('tabs'),
+          bottom: TabBar(
+            tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+            automaticIndicatorColorAdjustment: automaticIndicatorColorAdjustment,
+          ),
+        ),
+        body: const TabBarView(
+          children: <Widget>[
+            Center(child: Text('LEFT CHILD')),
+            Center(child: Text('RIGHT CHILD')),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+class TabIndicatorRecordingCanvas extends TestRecordingCanvas {
+  TabIndicatorRecordingCanvas(this.indicatorColor);
+
+  final Color indicatorColor;
+  late Rect indicatorRect;
+
+  @override
+  void drawLine(Offset p1, Offset p2, Paint paint) {
+    // Assuming that the indicatorWeight is 2.0, the default.
+    const double indicatorWeight = 2.0;
+    if (paint.color == indicatorColor) {
+      indicatorRect = Rect.fromPoints(p1, p2).inflate(indicatorWeight / 2.0);
+    }
+  }
+}
+
+class TestScrollPhysics extends ScrollPhysics {
+  const TestScrollPhysics({ super.parent });
+
+  @override
+  TestScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return TestScrollPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
+    return offset == 10 ? 20 : offset;
+  }
+
+  static final SpringDescription _kDefaultSpring = SpringDescription.withDampingRatio(
+    mass: 0.5,
+    stiffness: 500.0,
+    ratio: 1.1,
+  );
+
+  @override
+  SpringDescription get spring => _kDefaultSpring;
+}
+
+RenderParagraph _getText(WidgetTester tester, String text) {
+  return  tester.renderObject<RenderParagraph>(find.text(text));
 }

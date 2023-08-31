@@ -23,226 +23,6 @@ import 'package:leak_tracker/leak_tracker.dart';
 
 import 'widget_inspector_test_utils.dart';
 
-// Start of block of code where widget creation location line numbers and
-// columns will impact whether tests pass.
-
-class ClockDemo extends StatelessWidget {
-  const ClockDemo({ super.key });
-
-  @override
-  Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.ltr,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          const Text('World Clock'),
-          makeClock('Local', DateTime.now().timeZoneOffset.inHours),
-          makeClock('UTC', 0),
-          makeClock('New York, NY', -4),
-          makeClock('Chicago, IL', -5),
-          makeClock('Denver, CO', -6),
-          makeClock('Los Angeles, CA', -7),
-        ],
-      ),
-    );
-  }
-
-  Widget makeClock(String label, int utcOffset) {
-    return Stack(
-      children: <Widget>[
-        const Icon(Icons.watch),
-        Text(label),
-        ClockText(utcOffset: utcOffset),
-      ],
-    );
-  }
-}
-
-class ClockText extends StatefulWidget {
-  const ClockText({
-    super.key,
-    this.utcOffset = 0,
-  });
-
-  final int utcOffset;
-
-  @override
-  State<ClockText> createState() => _ClockTextState();
-}
-
-class _ClockTextState extends State<ClockText> {
-  DateTime? currentTime = DateTime.now();
-
-  void updateTime() {
-    setState(() {
-      currentTime = DateTime.now();
-    });
-  }
-
-  void stopClock() {
-    setState(() {
-      currentTime = null;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (currentTime == null) {
-      return const Text('stopped');
-    }
-    return Text(
-      currentTime!
-          .toUtc()
-          .add(Duration(hours: widget.utcOffset))
-          .toIso8601String(),
-    );
-  }
-}
-
-// End of block of code where widget creation location line numbers and
-// columns will impact whether tests pass.
-
-// Class to enable building trees of nodes with cycles between properties of
-// nodes and the properties of those properties.
-// This exposed a bug in code serializing DiagnosticsNode objects that did not
-// handle these sorts of cycles robustly.
-class CyclicDiagnostic extends DiagnosticableTree {
-  CyclicDiagnostic(this.name);
-
-  // Field used to create cyclic relationships.
-  CyclicDiagnostic? related;
-  final List<DiagnosticsNode> children = <DiagnosticsNode>[];
-
-  final String name;
-
-  @override
-  String toStringShort() => '${objectRuntimeType(this, 'CyclicDiagnostic')}-$name';
-
-  // We have to override toString to avoid the toString call itself triggering a
-  // stack overflow.
-  @override
-  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
-    return toStringShort();
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<CyclicDiagnostic>('related', related));
-  }
-
-  @override
-  List<DiagnosticsNode> debugDescribeChildren() => children;
-}
-
-class _CreationLocation {
-  _CreationLocation({
-    required this.id,
-    required this.file,
-    required this.line,
-    required this.column,
-    required this.name,
-  });
-
-  final int id;
-  final String file;
-  final int line;
-  final int column;
-  String? name;
-}
-
-class RenderRepaintBoundaryWithDebugPaint extends RenderRepaintBoundary {
-  @override
-  void debugPaintSize(PaintingContext context, Offset offset) {
-    super.debugPaintSize(context, offset);
-    assert(() {
-      // Draw some debug paint UI interleaving creating layers and drawing
-      // directly to the context's canvas.
-      final Paint paint = Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.0
-        ..color = Colors.red;
-      {
-        final PictureLayer pictureLayer = PictureLayer(Offset.zero & size);
-        final ui.PictureRecorder recorder = ui.PictureRecorder();
-        final Canvas pictureCanvas = Canvas(recorder);
-        pictureCanvas.drawCircle(Offset.zero, 20.0, paint);
-        pictureLayer.picture = recorder.endRecording();
-        context.addLayer(
-          OffsetLayer()
-            ..offset = offset
-            ..append(pictureLayer),
-        );
-      }
-      context.canvas.drawLine(
-        offset,
-        offset.translate(size.width, size.height),
-        paint,
-      );
-      {
-        final PictureLayer pictureLayer = PictureLayer(Offset.zero & size);
-        final ui.PictureRecorder recorder = ui.PictureRecorder();
-        final Canvas pictureCanvas = Canvas(recorder);
-        pictureCanvas.drawCircle(const Offset(20.0, 20.0), 20.0, paint);
-        pictureLayer.picture = recorder.endRecording();
-        context.addLayer(
-          OffsetLayer()
-            ..offset = offset
-            ..append(pictureLayer),
-        );
-      }
-      paint.color = Colors.blue;
-      context.canvas.drawLine(
-        offset,
-        offset.translate(size.width * 0.5, size.height * 0.5),
-        paint,
-      );
-      return true;
-    }());
-  }
-}
-
-class RepaintBoundaryWithDebugPaint extends RepaintBoundary {
-  /// Creates a widget that isolates repaints.
-  const RepaintBoundaryWithDebugPaint({
-    super.key,
-    super.child,
-  });
-
-  @override
-  RenderRepaintBoundary createRenderObject(BuildContext context) {
-    return RenderRepaintBoundaryWithDebugPaint();
-  }
-}
-
-Widget _applyConstructor(Widget Function() constructor) => constructor();
-
-class _TrivialWidget extends StatelessWidget {
-  const _TrivialWidget() : super(key: const Key('singleton'));
-  @override
-  Widget build(BuildContext context) => const Text('Hello, world!');
-}
-
-int getChildLayerCount(OffsetLayer layer) {
-  Layer? child = layer.firstChild;
-  int count = 0;
-  while (child != null) {
-    count++;
-    child = child.nextSibling;
-  }
-  return count;
-}
-
-extension TextFromString on String {
-  @widgetFactory
-  Widget text() {
-    return Text(this);
-  }
-}
-
-final List<Object> _weakValueTests = <Object>[1, 1.0, 'hello', true, false, Object(), <int>[3, 4], DateTime(2023)];
-
 void main() {
   group('$InspectorReferenceData', (){
     for (final Object item in _weakValueTests) {
@@ -5391,3 +5171,223 @@ extension WidgetInspectorServiceExtension on WidgetInspectorService {
       ))['result'] as List<Object?>).cast<String>();
   }
 }
+
+// Start of block of code where widget creation location line numbers and
+// columns will impact whether tests pass.
+
+class ClockDemo extends StatelessWidget {
+  const ClockDemo({ super.key });
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          const Text('World Clock'),
+          makeClock('Local', DateTime.now().timeZoneOffset.inHours),
+          makeClock('UTC', 0),
+          makeClock('New York, NY', -4),
+          makeClock('Chicago, IL', -5),
+          makeClock('Denver, CO', -6),
+          makeClock('Los Angeles, CA', -7),
+        ],
+      ),
+    );
+  }
+
+  Widget makeClock(String label, int utcOffset) {
+    return Stack(
+      children: <Widget>[
+        const Icon(Icons.watch),
+        Text(label),
+        ClockText(utcOffset: utcOffset),
+      ],
+    );
+  }
+}
+
+class ClockText extends StatefulWidget {
+  const ClockText({
+    super.key,
+    this.utcOffset = 0,
+  });
+
+  final int utcOffset;
+
+  @override
+  State<ClockText> createState() => _ClockTextState();
+}
+
+class _ClockTextState extends State<ClockText> {
+  DateTime? currentTime = DateTime.now();
+
+  void updateTime() {
+    setState(() {
+      currentTime = DateTime.now();
+    });
+  }
+
+  void stopClock() {
+    setState(() {
+      currentTime = null;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (currentTime == null) {
+      return const Text('stopped');
+    }
+    return Text(
+      currentTime!
+          .toUtc()
+          .add(Duration(hours: widget.utcOffset))
+          .toIso8601String(),
+    );
+  }
+}
+
+// End of block of code where widget creation location line numbers and
+// columns will impact whether tests pass.
+
+// Class to enable building trees of nodes with cycles between properties of
+// nodes and the properties of those properties.
+// This exposed a bug in code serializing DiagnosticsNode objects that did not
+// handle these sorts of cycles robustly.
+class CyclicDiagnostic extends DiagnosticableTree {
+  CyclicDiagnostic(this.name);
+
+  // Field used to create cyclic relationships.
+  CyclicDiagnostic? related;
+  final List<DiagnosticsNode> children = <DiagnosticsNode>[];
+
+  final String name;
+
+  @override
+  String toStringShort() => '${objectRuntimeType(this, 'CyclicDiagnostic')}-$name';
+
+  // We have to override toString to avoid the toString call itself triggering a
+  // stack overflow.
+  @override
+  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
+    return toStringShort();
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<CyclicDiagnostic>('related', related));
+  }
+
+  @override
+  List<DiagnosticsNode> debugDescribeChildren() => children;
+}
+
+class _CreationLocation {
+  _CreationLocation({
+    required this.id,
+    required this.file,
+    required this.line,
+    required this.column,
+    required this.name,
+  });
+
+  final int id;
+  final String file;
+  final int line;
+  final int column;
+  String? name;
+}
+
+class RenderRepaintBoundaryWithDebugPaint extends RenderRepaintBoundary {
+  @override
+  void debugPaintSize(PaintingContext context, Offset offset) {
+    super.debugPaintSize(context, offset);
+    assert(() {
+      // Draw some debug paint UI interleaving creating layers and drawing
+      // directly to the context's canvas.
+      final Paint paint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.0
+        ..color = Colors.red;
+      {
+        final PictureLayer pictureLayer = PictureLayer(Offset.zero & size);
+        final ui.PictureRecorder recorder = ui.PictureRecorder();
+        final Canvas pictureCanvas = Canvas(recorder);
+        pictureCanvas.drawCircle(Offset.zero, 20.0, paint);
+        pictureLayer.picture = recorder.endRecording();
+        context.addLayer(
+          OffsetLayer()
+            ..offset = offset
+            ..append(pictureLayer),
+        );
+      }
+      context.canvas.drawLine(
+        offset,
+        offset.translate(size.width, size.height),
+        paint,
+      );
+      {
+        final PictureLayer pictureLayer = PictureLayer(Offset.zero & size);
+        final ui.PictureRecorder recorder = ui.PictureRecorder();
+        final Canvas pictureCanvas = Canvas(recorder);
+        pictureCanvas.drawCircle(const Offset(20.0, 20.0), 20.0, paint);
+        pictureLayer.picture = recorder.endRecording();
+        context.addLayer(
+          OffsetLayer()
+            ..offset = offset
+            ..append(pictureLayer),
+        );
+      }
+      paint.color = Colors.blue;
+      context.canvas.drawLine(
+        offset,
+        offset.translate(size.width * 0.5, size.height * 0.5),
+        paint,
+      );
+      return true;
+    }());
+  }
+}
+
+class RepaintBoundaryWithDebugPaint extends RepaintBoundary {
+  /// Creates a widget that isolates repaints.
+  const RepaintBoundaryWithDebugPaint({
+    super.key,
+    super.child,
+  });
+
+  @override
+  RenderRepaintBoundary createRenderObject(BuildContext context) {
+    return RenderRepaintBoundaryWithDebugPaint();
+  }
+}
+
+Widget _applyConstructor(Widget Function() constructor) => constructor();
+
+class _TrivialWidget extends StatelessWidget {
+  const _TrivialWidget() : super(key: const Key('singleton'));
+  @override
+  Widget build(BuildContext context) => const Text('Hello, world!');
+}
+
+int getChildLayerCount(OffsetLayer layer) {
+  Layer? child = layer.firstChild;
+  int count = 0;
+  while (child != null) {
+    count++;
+    child = child.nextSibling;
+  }
+  return count;
+}
+
+extension TextFromString on String {
+  @widgetFactory
+  Widget text() {
+    return Text(this);
+  }
+}
+
+final List<Object> _weakValueTests = <Object>[1, 1.0, 'hello', true, false, Object(), <int>[3, 4], DateTime(2023)];

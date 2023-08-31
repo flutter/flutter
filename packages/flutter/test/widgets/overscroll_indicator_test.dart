@@ -7,17 +7,6 @@ import 'dart:math' as math;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-final Matcher doesNotOverscroll = isNot(paints..circle());
-
-Future<void> slowDrag(WidgetTester tester, Offset start, Offset offset) async {
-  final TestGesture gesture = await tester.startGesture(start);
-  for (int index = 0; index < 10; index += 1) {
-    await gesture.moveBy(offset);
-    await tester.pump(const Duration(milliseconds: 20));
-  }
-  await gesture.up();
-}
-
 void main() {
   testWidgets('Overscroll indicator color', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -605,4 +594,15 @@ class TestScrollBehaviorNoGlow extends ScrollBehavior {
   Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
     return child;
   }
+}
+
+final Matcher doesNotOverscroll = isNot(paints..circle());
+
+Future<void> slowDrag(WidgetTester tester, Offset start, Offset offset) async {
+  final TestGesture gesture = await tester.startGesture(start);
+  for (int index = 0; index < 10; index += 1) {
+    await gesture.moveBy(offset);
+    await tester.pump(const Duration(milliseconds: 20));
+  }
+  await gesture.up();
 }

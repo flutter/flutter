@@ -15,16 +15,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-// TODO(yjbanov): on the web text rendered with perspective produces flaky goldens: https://github.com/flutter/flutter/issues/110785
-const bool skipPerspectiveTextGoldens = isBrowser;
-
-// A number of the hit tests below say "warnIfMissed: false". This is because
-// the way the CupertinoPicker works, the hits don't actually reach the labels,
-// the scroll view intercepts them.
-
-// scrolling by this offset will move the picker to the next item
-const Offset _kRowOffset = Offset(0.0, -50.0);
-
 void main() {
   group('Countdown timer picker', () {
     testWidgets('initialTimerDuration falls within limit', (WidgetTester tester) async {
@@ -1976,3 +1966,13 @@ Widget _buildPicker({
     ),
   );
 }
+
+// TODO(yjbanov): on the web text rendered with perspective produces flaky goldens: https://github.com/flutter/flutter/issues/110785
+const bool skipPerspectiveTextGoldens = isBrowser;
+
+// A number of the hit tests below say "warnIfMissed: false". This is because
+// the way the CupertinoPicker works, the hits don't actually reach the labels,
+// the scroll view intercepts them.
+
+// scrolling by this offset will move the picker to the next item
+const Offset _kRowOffset = Offset(0.0, -50.0);

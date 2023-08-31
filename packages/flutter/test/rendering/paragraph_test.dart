@@ -12,86 +12,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
-const String _kText = "I polished up that handle so carefullee\nThat now I am the Ruler of the Queen's Navee!";
-
-void _applyParentData(List<RenderBox> inlineRenderBoxes, InlineSpan span) {
-  int index = 0;
-  RenderBox? previousBox;
-  span.visitChildren((InlineSpan span) {
-    if (span is! WidgetSpan) {
-      return true;
-    }
-
-    final RenderBox box = inlineRenderBoxes[index];
-    box.parentData = TextParentData()
-                      ..span = span
-                      ..previousSibling = previousBox;
-    (previousBox?.parentData as TextParentData?)?.nextSibling = box;
-    index += 1;
-    previousBox = box;
-    return true;
-  });
-}
-
-// A subclass of RenderParagraph that returns an empty list in getBoxesForSelection
-// for a given TextSelection.
-// This is intended to simulate SkParagraph's implementation of Paragraph.getBoxesForRange,
-// which may return an empty list in some situations where Libtxt would return a list
-// containing an empty box.
-class RenderParagraphWithEmptySelectionBoxList extends RenderParagraph {
-  RenderParagraphWithEmptySelectionBoxList(
-    super.text, {
-    required super.textDirection,
-    required this.emptyListSelection,
-  });
-
-  TextSelection emptyListSelection;
-
-  @override
-  List<ui.TextBox> getBoxesForSelection(
-    TextSelection selection, {
-    ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
-    ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
-  }) {
-    if (selection == emptyListSelection) {
-      return <ui.TextBox>[];
-    }
-    return super.getBoxesForSelection(
-      selection,
-      boxHeightStyle: boxHeightStyle,
-      boxWidthStyle: boxWidthStyle,
-    );
-  }
-}
-
-// A subclass of RenderParagraph that returns an empty list in getBoxesForSelection
-// for a selection representing a WidgetSpan.
-// This is intended to simulate how SkParagraph's implementation of Paragraph.getBoxesForRange
-// can return an empty list for a WidgetSpan with empty dimensions.
-class RenderParagraphWithEmptyBoxListForWidgetSpan extends RenderParagraph {
-  RenderParagraphWithEmptyBoxListForWidgetSpan(
-    super.text, {
-    required List<RenderBox> super.children,
-    required super.textDirection,
-  });
-
-  @override
-  List<ui.TextBox> getBoxesForSelection(
-    TextSelection selection, {
-    ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
-    ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
-  }) {
-    if (text.getSpanForPosition(selection.base) is WidgetSpan) {
-      return <ui.TextBox>[];
-    }
-    return super.getBoxesForSelection(
-      selection,
-      boxHeightStyle: boxHeightStyle,
-      boxWidthStyle: boxWidthStyle,
-    );
-  }
-}
-
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
@@ -1361,4 +1281,84 @@ class TestSelectionRegistrar extends SelectionRegistrar {
     expect(selectables.remove(selectable), isTrue);
   }
 
+}
+
+const String _kText = "I polished up that handle so carefullee\nThat now I am the Ruler of the Queen's Navee!";
+
+void _applyParentData(List<RenderBox> inlineRenderBoxes, InlineSpan span) {
+  int index = 0;
+  RenderBox? previousBox;
+  span.visitChildren((InlineSpan span) {
+    if (span is! WidgetSpan) {
+      return true;
+    }
+
+    final RenderBox box = inlineRenderBoxes[index];
+    box.parentData = TextParentData()
+                      ..span = span
+                      ..previousSibling = previousBox;
+    (previousBox?.parentData as TextParentData?)?.nextSibling = box;
+    index += 1;
+    previousBox = box;
+    return true;
+  });
+}
+
+// A subclass of RenderParagraph that returns an empty list in getBoxesForSelection
+// for a given TextSelection.
+// This is intended to simulate SkParagraph's implementation of Paragraph.getBoxesForRange,
+// which may return an empty list in some situations where Libtxt would return a list
+// containing an empty box.
+class RenderParagraphWithEmptySelectionBoxList extends RenderParagraph {
+  RenderParagraphWithEmptySelectionBoxList(
+    super.text, {
+    required super.textDirection,
+    required this.emptyListSelection,
+  });
+
+  TextSelection emptyListSelection;
+
+  @override
+  List<ui.TextBox> getBoxesForSelection(
+    TextSelection selection, {
+    ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
+    ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
+  }) {
+    if (selection == emptyListSelection) {
+      return <ui.TextBox>[];
+    }
+    return super.getBoxesForSelection(
+      selection,
+      boxHeightStyle: boxHeightStyle,
+      boxWidthStyle: boxWidthStyle,
+    );
+  }
+}
+
+// A subclass of RenderParagraph that returns an empty list in getBoxesForSelection
+// for a selection representing a WidgetSpan.
+// This is intended to simulate how SkParagraph's implementation of Paragraph.getBoxesForRange
+// can return an empty list for a WidgetSpan with empty dimensions.
+class RenderParagraphWithEmptyBoxListForWidgetSpan extends RenderParagraph {
+  RenderParagraphWithEmptyBoxListForWidgetSpan(
+    super.text, {
+    required List<RenderBox> super.children,
+    required super.textDirection,
+  });
+
+  @override
+  List<ui.TextBox> getBoxesForSelection(
+    TextSelection selection, {
+    ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
+    ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
+  }) {
+    if (text.getSpanForPosition(selection.base) is WidgetSpan) {
+      return <ui.TextBox>[];
+    }
+    return super.getBoxesForSelection(
+      selection,
+      boxHeightStyle: boxHeightStyle,
+      boxWidthStyle: boxWidthStyle,
+    );
+  }
 }

@@ -14,15 +14,6 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
-const String tooltipText = 'TIP';
-
-Finder _findTooltipContainer(String tooltipText) {
-  return find.ancestor(
-    of: find.text(tooltipText),
-    matching: find.byType(Container),
-  );
-}
-
 void main() {
   testWidgets('Does tooltip end up in the right place - center', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
@@ -2406,4 +2397,13 @@ SemanticsNode _findDebugSemantics(RenderObject object) {
     return object.debugSemantics!;
   }
   return _findDebugSemantics(object.parent!);
+}
+
+const String tooltipText = 'TIP';
+
+Finder _findTooltipContainer(String tooltipText) {
+  return find.ancestor(
+    of: find.text(tooltipText),
+    matching: find.byType(Container),
+  );
 }

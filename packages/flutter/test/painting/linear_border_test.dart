@@ -5,20 +5,6 @@
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const Rect canvasRect = Rect.fromLTWH(0, 0, 100, 100);
-const BorderSide borderSide = BorderSide(width: 4, color: Color(0x0f00ff00));
-
-// Test points for rectangular filled paths based on a BorderSide with width 4 and
-// a 100x100 bounding rectangle (canvasRect).
-List<Offset> rectIncludes(Rect r) {
-  return <Offset>[r.topLeft, r.topRight, r.bottomLeft, r.bottomRight, r.center];
-}
-final List<Offset> leftRectIncludes = rectIncludes(const Rect.fromLTWH(0, 0, 4, 100));
-final List<Offset> rightRectIncludes = rectIncludes(const Rect.fromLTWH(96, 0, 4, 100));
-final List<Offset> topRectIncludes = rectIncludes(const Rect.fromLTWH(0, 0, 100, 4));
-final List<Offset> bottomRectIncludes = rectIncludes(const Rect.fromLTWH(0, 96, 100, 4));
-
-
 void main() {
   test('LinearBorderEdge defaults', () {
     expect(const LinearBorderEdge().size, 1);
@@ -175,3 +161,16 @@ void main() {
     );
   });
 }
+
+const Rect canvasRect = Rect.fromLTWH(0, 0, 100, 100);
+const BorderSide borderSide = BorderSide(width: 4, color: Color(0x0f00ff00));
+
+// Test points for rectangular filled paths based on a BorderSide with width 4 and
+// a 100x100 bounding rectangle (canvasRect).
+List<Offset> rectIncludes(Rect r) {
+  return <Offset>[r.topLeft, r.topRight, r.bottomLeft, r.bottomRight, r.center];
+}
+final List<Offset> leftRectIncludes = rectIncludes(const Rect.fromLTWH(0, 0, 4, 100));
+final List<Offset> rightRectIncludes = rectIncludes(const Rect.fromLTWH(96, 0, 4, 100));
+final List<Offset> topRectIncludes = rectIncludes(const Rect.fromLTWH(0, 0, 100, 4));
+final List<Offset> bottomRectIncludes = rectIncludes(const Rect.fromLTWH(0, 96, 100, 4));

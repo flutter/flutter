@@ -8,76 +8,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart' as intl;
 
-class FooMaterialLocalizations extends MaterialLocalizationEn {
-  FooMaterialLocalizations(
-    Locale localeName,
-    this.backButtonTooltip,
-  ) : super(
-    localeName: localeName.toString(),
-    fullYearFormat: intl.DateFormat.y(),
-    compactDateFormat: intl.DateFormat.yMd(),
-    shortDateFormat: intl.DateFormat.yMMMd(),
-    mediumDateFormat: intl.DateFormat('E, MMM\u00a0d'),
-    longDateFormat: intl.DateFormat.yMMMMEEEEd(),
-    yearMonthFormat: intl.DateFormat.yMMMM(),
-    shortMonthDayFormat: intl.DateFormat.MMMd(),
-    decimalFormat: intl.NumberFormat.decimalPattern(),
-    twoDigitZeroPaddedFormat: intl.NumberFormat('00'),
-  );
-
-  @override
-  final String backButtonTooltip;
-}
-
-class FooMaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
-  const FooMaterialLocalizationsDelegate({
-    this.supportedLanguage = 'en',
-    this.backButtonTooltip = 'foo',
-  });
-
-  final String supportedLanguage;
-  final String backButtonTooltip;
-
-  @override
-  bool isSupported(Locale locale) {
-    return supportedLanguage == 'allLanguages' || locale.languageCode == supportedLanguage;
-  }
-
-  @override
-  Future<FooMaterialLocalizations> load(Locale locale) {
-    return SynchronousFuture<FooMaterialLocalizations>(FooMaterialLocalizations(locale, backButtonTooltip));
-  }
-
-  @override
-  bool shouldReload(FooMaterialLocalizationsDelegate old) => false;
-}
-
-Widget buildFrame({
-  Locale? locale,
-  Iterable<LocalizationsDelegate<dynamic>> delegates = GlobalMaterialLocalizations.delegates,
-  required WidgetBuilder buildContent,
-  LocaleResolutionCallback? localeResolutionCallback,
-  Iterable<Locale> supportedLocales = const <Locale>[
-    Locale('en', 'US'),
-    Locale('es', 'ES'),
-  ],
-}) {
-  return MaterialApp(
-    color: const Color(0xFFFFFFFF),
-    locale: locale,
-    supportedLocales: supportedLocales,
-    localizationsDelegates: delegates,
-    localeResolutionCallback: localeResolutionCallback,
-    onGenerateRoute: (RouteSettings settings) {
-      return MaterialPageRoute<void>(
-        builder: (BuildContext context) {
-          return buildContent(context);
-        }
-      );
-    },
-  );
-}
-
 void main() {
   testWidgets('Locale fallbacks', (WidgetTester tester) async {
     final Key textKey = UniqueKey();
@@ -308,4 +238,74 @@ void main() {
     await tester.pump();
     expect(tester.widget<Text>(find.byKey(textKey)).data, 'id_JV');
   });
+}
+
+class FooMaterialLocalizations extends MaterialLocalizationEn {
+  FooMaterialLocalizations(
+    Locale localeName,
+    this.backButtonTooltip,
+  ) : super(
+    localeName: localeName.toString(),
+    fullYearFormat: intl.DateFormat.y(),
+    compactDateFormat: intl.DateFormat.yMd(),
+    shortDateFormat: intl.DateFormat.yMMMd(),
+    mediumDateFormat: intl.DateFormat('E, MMM\u00a0d'),
+    longDateFormat: intl.DateFormat.yMMMMEEEEd(),
+    yearMonthFormat: intl.DateFormat.yMMMM(),
+    shortMonthDayFormat: intl.DateFormat.MMMd(),
+    decimalFormat: intl.NumberFormat.decimalPattern(),
+    twoDigitZeroPaddedFormat: intl.NumberFormat('00'),
+  );
+
+  @override
+  final String backButtonTooltip;
+}
+
+class FooMaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
+  const FooMaterialLocalizationsDelegate({
+    this.supportedLanguage = 'en',
+    this.backButtonTooltip = 'foo',
+  });
+
+  final String supportedLanguage;
+  final String backButtonTooltip;
+
+  @override
+  bool isSupported(Locale locale) {
+    return supportedLanguage == 'allLanguages' || locale.languageCode == supportedLanguage;
+  }
+
+  @override
+  Future<FooMaterialLocalizations> load(Locale locale) {
+    return SynchronousFuture<FooMaterialLocalizations>(FooMaterialLocalizations(locale, backButtonTooltip));
+  }
+
+  @override
+  bool shouldReload(FooMaterialLocalizationsDelegate old) => false;
+}
+
+Widget buildFrame({
+  Locale? locale,
+  Iterable<LocalizationsDelegate<dynamic>> delegates = GlobalMaterialLocalizations.delegates,
+  required WidgetBuilder buildContent,
+  LocaleResolutionCallback? localeResolutionCallback,
+  Iterable<Locale> supportedLocales = const <Locale>[
+    Locale('en', 'US'),
+    Locale('es', 'ES'),
+  ],
+}) {
+  return MaterialApp(
+    color: const Color(0xFFFFFFFF),
+    locale: locale,
+    supportedLocales: supportedLocales,
+    localizationsDelegates: delegates,
+    localeResolutionCallback: localeResolutionCallback,
+    onGenerateRoute: (RouteSettings settings) {
+      return MaterialPageRoute<void>(
+        builder: (BuildContext context) {
+          return buildContent(context);
+        }
+      );
+    },
+  );
 }

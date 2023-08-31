@@ -5,59 +5,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Size pageSize = const Size(600.0, 300.0);
-const List<int> defaultPages = <int>[0, 1, 2, 3, 4, 5];
-final List<GlobalKey> globalKeys = defaultPages.map<GlobalKey>((_) => GlobalKey()).toList();
-int? currentPage;
-
-Widget buildPage(int page) {
-  return SizedBox(
-    key: globalKeys[page],
-    width: pageSize.width,
-    height: pageSize.height,
-    child: Text(page.toString()),
-  );
-}
-
-Widget buildFrame({
-  bool reverse = false,
-  List<int> pages = defaultPages,
-  required TextDirection textDirection,
-}) {
-  final PageView child = PageView(
-    reverse: reverse,
-    onPageChanged: (int page) { currentPage = page; },
-    children: pages.map<Widget>(buildPage).toList(),
-  );
-
-  // The test framework forces the frame to be 800x600, so we need to create
-  // an outer container where we can change the size.
-  return Directionality(
-    textDirection: textDirection,
-    child: Center(
-      child: SizedBox(
-        width: pageSize.width, height: pageSize.height, child: child,
-      ),
-    ),
-  );
-}
-
-Future<void> page(WidgetTester tester, Offset offset) {
-  return TestAsyncUtils.guard(() async {
-    final String itemText = currentPage != null ? currentPage.toString() : '0';
-    await tester.drag(find.text(itemText), offset);
-    await tester.pumpAndSettle();
-  });
-}
-
-Future<void> pageLeft(WidgetTester tester) {
-  return page(tester, Offset(-pageSize.width, 0.0));
-}
-
-Future<void> pageRight(WidgetTester tester) {
-  return page(tester, Offset(pageSize.width, 0.0));
-}
-
 void main() {
   testWidgets('PageView default control', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -193,4 +140,57 @@ void main() {
     await pageRight(tester);
     expect(currentPage, equals(0));
   });
+}
+
+Size pageSize = const Size(600.0, 300.0);
+const List<int> defaultPages = <int>[0, 1, 2, 3, 4, 5];
+final List<GlobalKey> globalKeys = defaultPages.map<GlobalKey>((_) => GlobalKey()).toList();
+int? currentPage;
+
+Widget buildPage(int page) {
+  return SizedBox(
+    key: globalKeys[page],
+    width: pageSize.width,
+    height: pageSize.height,
+    child: Text(page.toString()),
+  );
+}
+
+Widget buildFrame({
+  bool reverse = false,
+  List<int> pages = defaultPages,
+  required TextDirection textDirection,
+}) {
+  final PageView child = PageView(
+    reverse: reverse,
+    onPageChanged: (int page) { currentPage = page; },
+    children: pages.map<Widget>(buildPage).toList(),
+  );
+
+  // The test framework forces the frame to be 800x600, so we need to create
+  // an outer container where we can change the size.
+  return Directionality(
+    textDirection: textDirection,
+    child: Center(
+      child: SizedBox(
+        width: pageSize.width, height: pageSize.height, child: child,
+      ),
+    ),
+  );
+}
+
+Future<void> page(WidgetTester tester, Offset offset) {
+  return TestAsyncUtils.guard(() async {
+    final String itemText = currentPage != null ? currentPage.toString() : '0';
+    await tester.drag(find.text(itemText), offset);
+    await tester.pumpAndSettle();
+  });
+}
+
+Future<void> pageLeft(WidgetTester tester) {
+  return page(tester, Offset(-pageSize.width, 0.0));
+}
+
+Future<void> pageRight(WidgetTester tester) {
+  return page(tester, Offset(pageSize.width, 0.0));
 }

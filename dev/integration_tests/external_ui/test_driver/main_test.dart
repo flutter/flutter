@@ -7,10 +7,6 @@ import 'dart:async';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
-final RegExp calibrationRegExp = RegExp('Flutter frame rate is (.*)fps');
-final RegExp statsRegExp = RegExp('Produced: (.*)fps\nConsumed: (.*)fps\nWidget builds: (.*)');
-const Duration samplingTime = Duration(seconds: 8);
-
 Future<void> main() async {
   group('texture suite', () {
     late FlutterDriver driver;
@@ -66,3 +62,7 @@ Future<void> main() async {
     });
   });
 }
+
+final RegExp calibrationRegExp = RegExp('Flutter frame rate is (.*)fps');
+final RegExp statsRegExp = RegExp('Produced: (.*)fps\nConsumed: (.*)fps\nWidget builds: (.*)');
+const Duration samplingTime = Duration(seconds: 8);

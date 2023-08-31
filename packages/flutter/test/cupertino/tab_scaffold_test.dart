@@ -11,33 +11,6 @@ import '../image_data.dart';
 import '../rendering/rendering_tester.dart' show TestCallbackPainter;
 import '../widgets/navigator_utils.dart';
 
-late List<int> selectedTabs;
-
-class MockCupertinoTabController extends CupertinoTabController {
-  MockCupertinoTabController({ required super.initialIndex });
-
-  bool isDisposed = false;
-  int numOfListeners = 0;
-
-  @override
-  void addListener(VoidCallback listener) {
-    numOfListeners++;
-    super.addListener(listener);
-  }
-
-  @override
-  void removeListener(VoidCallback listener) {
-    numOfListeners--;
-    super.removeListener(listener);
-  }
-
-  @override
-  void dispose() {
-    isDisposed = true;
-    super.dispose();
-  }
-}
-
 void main() {
   setUp(() {
     selectedTabs = <int>[];
@@ -1360,4 +1333,31 @@ CupertinoTabBar _buildTabBar({ int selectedTab = 0 }) {
     currentIndex: selectedTab,
     onTap: (int newTab) => selectedTabs.add(newTab),
   );
+}
+
+late List<int> selectedTabs;
+
+class MockCupertinoTabController extends CupertinoTabController {
+  MockCupertinoTabController({ required super.initialIndex });
+
+  bool isDisposed = false;
+  int numOfListeners = 0;
+
+  @override
+  void addListener(VoidCallback listener) {
+    numOfListeners++;
+    super.addListener(listener);
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    numOfListeners--;
+    super.removeListener(listener);
+  }
+
+  @override
+  void dispose() {
+    isDisposed = true;
+    super.dispose();
+  }
 }

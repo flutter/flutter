@@ -12,18 +12,6 @@ import 'package:flutter/src/widgets/scroll_view.dart';
 import 'package:flutter/src/widgets/sliver_layout_builder.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class Wrapper extends StatelessWidget {
-  const Wrapper({
-    super.key,
-    required this.child,
-  });
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => child;
-}
-
 void main() {
   testWidgets('Moving a global key from another LayoutBuilder at layout time', (WidgetTester tester) async {
     final GlobalKey victimKey = GlobalKey();
@@ -207,4 +195,16 @@ class _RenderLayoutCount extends RenderProxyBox {
   void performLayout() {
     layoutCount += 1;
   }
+}
+
+class Wrapper extends StatelessWidget {
+  const Wrapper({
+    super.key,
+    required this.child,
+  });
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => child;
 }

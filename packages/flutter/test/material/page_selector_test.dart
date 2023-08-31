@@ -6,64 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-const Color kSelectedColor = Color(0xFF00FF00);
-const Color kUnselectedColor = Colors.transparent;
-
-Widget buildFrame(TabController tabController, { Color? color, Color? selectedColor, double indicatorSize = 12.0, BorderStyle? borderStyle }) {
-  return Localizations(
-    locale: const Locale('en', 'US'),
-    delegates: const <LocalizationsDelegate<dynamic>>[
-      DefaultMaterialLocalizations.delegate,
-      DefaultWidgetsLocalizations.delegate,
-    ],
-    child: Directionality(
-      textDirection: TextDirection.ltr,
-      child: Theme(
-        data: ThemeData(colorScheme: const ColorScheme.light().copyWith(secondary: kSelectedColor)),
-        child: SizedBox.expand(
-          child: Center(
-            child: SizedBox(
-              width: 400.0,
-              height: 400.0,
-              child: Column(
-                children: <Widget>[
-                  TabPageSelector(
-                    controller: tabController,
-                    color: color,
-                    selectedColor: selectedColor,
-                    indicatorSize: indicatorSize,
-                    borderStyle: borderStyle,
-                  ),
-                  Flexible(
-                    child: TabBarView(
-                      controller: tabController,
-                      children: const <Widget>[
-                        Center(child: Text('0')),
-                        Center(child: Text('1')),
-                        Center(child: Text('2')),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
-List<Color> indicatorColors(WidgetTester tester) {
-  final Iterable<TabPageSelectorIndicator> indicators = tester.widgetList(
-    find.descendant(
-      of: find.byType(TabPageSelector),
-      matching: find.byType(TabPageSelectorIndicator),
-    ),
-  );
-  return indicators.map<Color>((TabPageSelectorIndicator indicator) => indicator.backgroundColor).toList();
-}
-
 void main() {
   testWidgetsWithLeakTracking('PageSelector responds correctly to setting the TabController index', (WidgetTester tester) async {
     final TabController tabController = TabController(
@@ -273,4 +215,62 @@ void main() {
       expect(indicator.borderStyle, BorderStyle.solid);
     }
   });
+}
+
+const Color kSelectedColor = Color(0xFF00FF00);
+const Color kUnselectedColor = Colors.transparent;
+
+Widget buildFrame(TabController tabController, { Color? color, Color? selectedColor, double indicatorSize = 12.0, BorderStyle? borderStyle }) {
+  return Localizations(
+    locale: const Locale('en', 'US'),
+    delegates: const <LocalizationsDelegate<dynamic>>[
+      DefaultMaterialLocalizations.delegate,
+      DefaultWidgetsLocalizations.delegate,
+    ],
+    child: Directionality(
+      textDirection: TextDirection.ltr,
+      child: Theme(
+        data: ThemeData(colorScheme: const ColorScheme.light().copyWith(secondary: kSelectedColor)),
+        child: SizedBox.expand(
+          child: Center(
+            child: SizedBox(
+              width: 400.0,
+              height: 400.0,
+              child: Column(
+                children: <Widget>[
+                  TabPageSelector(
+                    controller: tabController,
+                    color: color,
+                    selectedColor: selectedColor,
+                    indicatorSize: indicatorSize,
+                    borderStyle: borderStyle,
+                  ),
+                  Flexible(
+                    child: TabBarView(
+                      controller: tabController,
+                      children: const <Widget>[
+                        Center(child: Text('0')),
+                        Center(child: Text('1')),
+                        Center(child: Text('2')),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+List<Color> indicatorColors(WidgetTester tester) {
+  final Iterable<TabPageSelectorIndicator> indicators = tester.widgetList(
+    find.descendant(
+      of: find.byType(TabPageSelector),
+      matching: find.byType(TabPageSelectorIndicator),
+    ),
+  );
+  return indicators.map<Color>((TabPageSelectorIndicator indicator) => indicator.backgroundColor).toList();
 }

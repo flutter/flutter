@@ -7,35 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const List<String> platforms = <String>['linux', 'macos', 'android', 'fuchsia'];
-
-void _verifyKeyEvent<T extends KeyEvent>(KeyEvent event, PhysicalKeyboardKey physical, LogicalKeyboardKey logical, String? character) {
-  expect(event, isA<T>());
-  expect(event.physicalKey, physical);
-  expect(event.logicalKey, logical);
-  expect(event.character, character);
-  expect(event.synthesized, false);
-}
-
-void _verifyRawKeyEvent<T extends RawKeyEvent>(RawKeyEvent event, PhysicalKeyboardKey physical, LogicalKeyboardKey logical, String? character) {
-  expect(event, isA<T>());
-  expect(event.physicalKey, physical);
-  expect(event.logicalKey, logical);
-  expect(event.character, character);
-}
-
-Future<void> _shouldThrow<T extends Error>(AsyncValueGetter<void> func) async {
-  bool hasError = false;
-  try {
-    await func();
-  } catch (e) {
-    expect(e, isA<T>());
-    hasError = true;
-  } finally {
-    expect(hasError, true);
-  }
-}
-
 void main() {
   testWidgets('simulates keyboard events (RawEvent)', (WidgetTester tester) async {
     debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.rawKeyData;
@@ -347,4 +318,33 @@ void main() {
 
     debugKeyEventSimulatorTransitModeOverride = null;
   });
+}
+
+const List<String> platforms = <String>['linux', 'macos', 'android', 'fuchsia'];
+
+void _verifyKeyEvent<T extends KeyEvent>(KeyEvent event, PhysicalKeyboardKey physical, LogicalKeyboardKey logical, String? character) {
+  expect(event, isA<T>());
+  expect(event.physicalKey, physical);
+  expect(event.logicalKey, logical);
+  expect(event.character, character);
+  expect(event.synthesized, false);
+}
+
+void _verifyRawKeyEvent<T extends RawKeyEvent>(RawKeyEvent event, PhysicalKeyboardKey physical, LogicalKeyboardKey logical, String? character) {
+  expect(event, isA<T>());
+  expect(event.physicalKey, physical);
+  expect(event.logicalKey, logical);
+  expect(event.character, character);
+}
+
+Future<void> _shouldThrow<T extends Error>(AsyncValueGetter<void> func) async {
+  bool hasError = false;
+  try {
+    await func();
+  } catch (e) {
+    expect(e, isA<T>());
+    hasError = true;
+  } finally {
+    expect(hasError, true);
+  }
 }

@@ -10,44 +10,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
-class MissingPerformLayoutRenderBox extends RenderBox {
-  void triggerExceptionSettingSizeOutsideOfLayout() {
-    size = const Size(200, 200);
-  }
-
-  // performLayout is left unimplemented to test the error reported if it is
-  // missing.
-}
-
-class FakeMissingSizeRenderBox extends RenderBox {
-  @override
-  void performLayout() {
-    size = constraints.biggest;
-  }
-
-  @override
-  bool get hasSize => !fakeMissingSize && super.hasSize;
-
-  bool fakeMissingSize = false;
-}
-
-class MissingSetSizeRenderBox extends RenderBox {
-  @override
-  void performLayout() { }
-}
-
-class BadBaselineRenderBox extends RenderBox {
-  @override
-  void performLayout() {
-    size = constraints.biggest;
-  }
-
-  @override
-  double? computeDistanceToActualBaseline(TextBaseline baseline) {
-    throw Exception();
-  }
-}
-
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
@@ -1238,4 +1200,42 @@ class _DummyHitTestTarget implements HitTestTarget {
 
 class MyHitTestResult extends HitTestResult {
   void publicPushTransform(Matrix4 transform) => pushTransform(transform);
+}
+
+class MissingPerformLayoutRenderBox extends RenderBox {
+  void triggerExceptionSettingSizeOutsideOfLayout() {
+    size = const Size(200, 200);
+  }
+
+  // performLayout is left unimplemented to test the error reported if it is
+  // missing.
+}
+
+class FakeMissingSizeRenderBox extends RenderBox {
+  @override
+  void performLayout() {
+    size = constraints.biggest;
+  }
+
+  @override
+  bool get hasSize => !fakeMissingSize && super.hasSize;
+
+  bool fakeMissingSize = false;
+}
+
+class MissingSetSizeRenderBox extends RenderBox {
+  @override
+  void performLayout() { }
+}
+
+class BadBaselineRenderBox extends RenderBox {
+  @override
+  void performLayout() {
+    size = constraints.biggest;
+  }
+
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    throw Exception();
+  }
 }

@@ -9,12 +9,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class _ModifierCheck {
-  const _ModifierCheck(this.key, this.side);
-  final ModifierKey key;
-  final KeyboardSide side;
-}
-
 void main() {
   group('RawKeyboard', () {
     testWidgets('The correct character is produced', (WidgetTester tester) async {
@@ -2970,4 +2964,10 @@ Map<String, DiagnosticsNode> _groupDiagnosticsByName(Iterable<DiagnosticsNode> i
     infos,
     key: (Object? node) => (node! as DiagnosticsNode).name ?? '',
   );
+}
+
+class _ModifierCheck {
+  const _ModifierCheck(this.key, this.side);
+  final ModifierKey key;
+  final KeyboardSide side;
 }

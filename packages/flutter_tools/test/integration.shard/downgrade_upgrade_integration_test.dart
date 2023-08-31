@@ -11,20 +11,6 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import '../src/common.dart';
 import 'test_utils.dart';
 
-const String _kInitialVersion = '3.0.0';
-const String _kBranch = 'beta';
-
-final Stdio stdio = Stdio();
-final ProcessUtils processUtils = ProcessUtils(processManager: processManager, logger: StdoutLogger(
-  terminal: AnsiTerminal(
-    platform: platform,
-    stdio: stdio,
-  ),
-  stdio: stdio,
-  outputPreferences: OutputPreferences.test(wrapText: true),
-));
-final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
-
 /// A test for flutter upgrade & downgrade that checks out a parallel flutter repo.
 void main() {
   late Directory parentDirectory;
@@ -121,3 +107,17 @@ void main() {
     printOnFailure('current version is ${oldVersionResult.stdout.trim()}\ninitial was $_kInitialVersion');
   });
 }
+
+const String _kInitialVersion = '3.0.0';
+const String _kBranch = 'beta';
+
+final Stdio stdio = Stdio();
+final ProcessUtils processUtils = ProcessUtils(processManager: processManager, logger: StdoutLogger(
+  terminal: AnsiTerminal(
+    platform: platform,
+    stdio: stdio,
+  ),
+  stdio: stdio,
+  outputPreferences: OutputPreferences.test(wrapText: true),
+));
+final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');

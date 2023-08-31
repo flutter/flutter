@@ -26,318 +26,6 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
-const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
-void onChanged<T>(T _) { }
-
-final Type dropdownButtonType = DropdownButton<String>(
-  onChanged: (_) { },
-  items: const <DropdownMenuItem<String>>[],
-).runtimeType;
-
-Finder _iconRichText(Key iconKey) {
-  return find.descendant(
-    of: find.byKey(iconKey),
-    matching: find.byType(RichText),
-  );
-}
-
-Widget buildDropdown({
-    required bool isFormField,
-    Key? buttonKey,
-    String? value = 'two',
-    ValueChanged<String?>? onChanged,
-    VoidCallback? onTap,
-    Widget? icon,
-    Color? iconDisabledColor,
-    Color? iconEnabledColor,
-    double iconSize = 24.0,
-    bool isDense = false,
-    bool isExpanded = false,
-    Widget? hint,
-    Widget? disabledHint,
-    Widget? underline,
-    List<String>? items = menuItems,
-    List<Widget> Function(BuildContext)? selectedItemBuilder,
-    double? itemHeight = kMinInteractiveDimension,
-    AlignmentDirectional alignment = AlignmentDirectional.centerStart,
-    TextDirection textDirection = TextDirection.ltr,
-    Size? mediaSize,
-    FocusNode? focusNode,
-    bool autofocus = false,
-    Color? focusColor,
-    Color? dropdownColor,
-    double? menuMaxHeight,
-    EdgeInsetsGeometry? padding,
-  }) {
-  final List<DropdownMenuItem<String>>? listItems = items?.map<DropdownMenuItem<String>>((String item) {
-    return DropdownMenuItem<String>(
-      key: ValueKey<String>(item),
-      value: item,
-      child: Text(item, key: ValueKey<String>('${item}Text')),
-    );
-  }).toList();
-
-  if (isFormField) {
-    return Form(
-      child: DropdownButtonFormField<String>(
-        key: buttonKey,
-        value: value,
-        hint: hint,
-        disabledHint: disabledHint,
-        onChanged: onChanged,
-        onTap: onTap,
-        icon: icon,
-        iconSize: iconSize,
-        iconDisabledColor: iconDisabledColor,
-        iconEnabledColor: iconEnabledColor,
-        isDense: isDense,
-        isExpanded: isExpanded,
-        // No underline attribute
-        focusNode: focusNode,
-        autofocus: autofocus,
-        focusColor: focusColor,
-        dropdownColor: dropdownColor,
-        items: listItems,
-        selectedItemBuilder: selectedItemBuilder,
-        itemHeight: itemHeight,
-        alignment: alignment,
-        menuMaxHeight: menuMaxHeight,
-        padding: padding,
-      ),
-    );
-  }
-  return DropdownButton<String>(
-    key: buttonKey,
-    value: value,
-    hint: hint,
-    disabledHint: disabledHint,
-    onChanged: onChanged,
-    onTap: onTap,
-    icon: icon,
-    iconSize: iconSize,
-    iconDisabledColor: iconDisabledColor,
-    iconEnabledColor: iconEnabledColor,
-    isDense: isDense,
-    isExpanded: isExpanded,
-    underline: underline,
-    focusNode: focusNode,
-    autofocus: autofocus,
-    focusColor: focusColor,
-    dropdownColor: dropdownColor,
-    items: listItems,
-    selectedItemBuilder: selectedItemBuilder,
-    itemHeight: itemHeight,
-    alignment: alignment,
-    menuMaxHeight: menuMaxHeight,
-    padding: padding,
-  );
-}
-
-Widget buildFrame({
-  Key? buttonKey,
-  String? value = 'two',
-  ValueChanged<String?>? onChanged,
-  VoidCallback? onTap,
-  Widget? icon,
-  Color? iconDisabledColor,
-  Color? iconEnabledColor,
-  double iconSize = 24.0,
-  bool isDense = false,
-  bool isExpanded = false,
-  Widget? hint,
-  Widget? disabledHint,
-  Widget? underline,
-  List<String>? items = menuItems,
-  List<Widget> Function(BuildContext)? selectedItemBuilder,
-  double? itemHeight = kMinInteractiveDimension,
-  AlignmentDirectional alignment = AlignmentDirectional.centerStart,
-  TextDirection textDirection = TextDirection.ltr,
-  Size? mediaSize,
-  FocusNode? focusNode,
-  bool autofocus = false,
-  Color? focusColor,
-  Color? dropdownColor,
-  bool isFormField = false,
-  double? menuMaxHeight,
-  EdgeInsetsGeometry? padding,
-  Alignment dropdownAlignment = Alignment.center,
-  bool? useMaterial3,
-}) {
-  return Theme(
-    data: ThemeData(useMaterial3: useMaterial3),
-    child: TestApp(
-      textDirection: textDirection,
-      mediaSize: mediaSize,
-      child: Material(
-        child: Align(
-          alignment: dropdownAlignment,
-          child: RepaintBoundary(
-            child: buildDropdown(
-              isFormField: isFormField,
-              buttonKey: buttonKey,
-              value: value,
-              hint: hint,
-              disabledHint: disabledHint,
-              onChanged: onChanged,
-              onTap: onTap,
-              icon: icon,
-              iconSize: iconSize,
-              iconDisabledColor: iconDisabledColor,
-              iconEnabledColor: iconEnabledColor,
-              isDense: isDense,
-              isExpanded: isExpanded,
-              underline: underline,
-              focusNode: focusNode,
-              autofocus: autofocus,
-              focusColor: focusColor,
-              dropdownColor: dropdownColor,
-              items: items,
-              selectedItemBuilder: selectedItemBuilder,
-              itemHeight: itemHeight,
-              alignment: alignment,
-              menuMaxHeight: menuMaxHeight,
-              padding: padding,
-            ),
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
-Widget buildDropdownWithHint({
-  required AlignmentDirectional alignment,
-  required bool isExpanded,
-  bool enableSelectedItemBuilder = false,
-}){
-  return buildFrame(
-    useMaterial3: false,
-    mediaSize: const Size(800, 600),
-    itemHeight: 100.0,
-    alignment: alignment,
-    isExpanded: isExpanded,
-    selectedItemBuilder: enableSelectedItemBuilder
-      ? (BuildContext context) {
-          return menuItems.map<Widget>((String item) {
-            return ColoredBox(
-              color: const Color(0xff00ff00),
-              child: Text(item),
-            );
-          }).toList();
-        }
-      : null,
-    hint: const Text('hint'),
-  );
-}
-
-class TestApp extends StatefulWidget {
-  const TestApp({
-    super.key,
-    required this.textDirection,
-    required this.child,
-    this.mediaSize,
-  });
-
-  final TextDirection textDirection;
-  final Widget child;
-  final Size? mediaSize;
-
-  @override
-  State<TestApp> createState() => _TestAppState();
-}
-
-class _TestAppState extends State<TestApp> {
-  @override
-  Widget build(BuildContext context) {
-    return Localizations(
-      locale: const Locale('en', 'US'),
-      delegates: const <LocalizationsDelegate<dynamic>>[
-        DefaultWidgetsLocalizations.delegate,
-        DefaultMaterialLocalizations.delegate,
-      ],
-      child: MediaQuery(
-        data: MediaQueryData.fromView(View.of(context)).copyWith(size: widget.mediaSize),
-        child: Directionality(
-          textDirection: widget.textDirection,
-          child: Navigator(
-            onGenerateRoute: (RouteSettings settings) {
-              assert(settings.name == '/');
-              return MaterialPageRoute<void>(
-                settings: settings,
-                builder: (BuildContext context) => widget.child,
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// When the dropdown's menu is popped up, a RenderParagraph for the selected
-// menu's text item will appear both in the dropdown button and in the menu.
-// The RenderParagraphs should be aligned, i.e. they should have the same
-// size and location.
-void checkSelectedItemTextGeometry(WidgetTester tester, String value) {
-  final List<RenderBox> boxes = tester.renderObjectList<RenderBox>(find.byKey(ValueKey<String>('${value}Text'))).toList();
-  expect(boxes.length, equals(2));
-  final RenderBox box0 = boxes[0];
-  final RenderBox box1 = boxes[1];
-  expect(box0.localToGlobal(Offset.zero), equals(box1.localToGlobal(Offset.zero)));
-  expect(box0.size, equals(box1.size));
-}
-
-Future<void> checkDropdownColor(WidgetTester tester, {Color? color, bool isFormField = false }) async {
-  const String text = 'foo';
-  await tester.pumpWidget(
-    MaterialApp(
-      theme: ThemeData(useMaterial3: false),
-      home: Material(
-        child: isFormField
-            ? Form(
-                child: DropdownButtonFormField<String>(
-                  dropdownColor: color,
-                  value: text,
-                  items: const <DropdownMenuItem<String>>[
-                    DropdownMenuItem<String>(
-                      value: text,
-                      child: Text(text),
-                    ),
-                  ],
-                  onChanged: (_) {},
-                ),
-              )
-            : DropdownButton<String>(
-                dropdownColor: color,
-                value: text,
-                items: const <DropdownMenuItem<String>>[
-                  DropdownMenuItem<String>(
-                    value: text,
-                    child: Text(text),
-                  ),
-                ],
-                onChanged: (_) {},
-              ),
-      ),
-    ),
-  );
-  await tester.tap(find.text(text));
-  await tester.pump();
-
-  expect(
-    find.ancestor(
-      of: find.text(text).last,
-      matching: find.byType(CustomPaint),
-    ).at(2),
-    paints
-      ..save()
-      ..rrect()
-      ..rrect()
-      ..rrect()
-      ..rrect(color: color ?? Colors.grey[50], hasMaskFilter: false),
-  );
-}
-
 void main() {
   testWidgets('Default dropdown golden', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
@@ -3966,4 +3654,316 @@ void main() {
     expect(noPaddingSize.height, equals(paddedSize.height - padVertical * 2));
     expect(noPaddingSize.width, equals(paddedSize.width - padHorizontal * 2));
   });
+}
+
+const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
+void onChanged<T>(T _) { }
+
+final Type dropdownButtonType = DropdownButton<String>(
+  onChanged: (_) { },
+  items: const <DropdownMenuItem<String>>[],
+).runtimeType;
+
+Finder _iconRichText(Key iconKey) {
+  return find.descendant(
+    of: find.byKey(iconKey),
+    matching: find.byType(RichText),
+  );
+}
+
+Widget buildDropdown({
+    required bool isFormField,
+    Key? buttonKey,
+    String? value = 'two',
+    ValueChanged<String?>? onChanged,
+    VoidCallback? onTap,
+    Widget? icon,
+    Color? iconDisabledColor,
+    Color? iconEnabledColor,
+    double iconSize = 24.0,
+    bool isDense = false,
+    bool isExpanded = false,
+    Widget? hint,
+    Widget? disabledHint,
+    Widget? underline,
+    List<String>? items = menuItems,
+    List<Widget> Function(BuildContext)? selectedItemBuilder,
+    double? itemHeight = kMinInteractiveDimension,
+    AlignmentDirectional alignment = AlignmentDirectional.centerStart,
+    TextDirection textDirection = TextDirection.ltr,
+    Size? mediaSize,
+    FocusNode? focusNode,
+    bool autofocus = false,
+    Color? focusColor,
+    Color? dropdownColor,
+    double? menuMaxHeight,
+    EdgeInsetsGeometry? padding,
+  }) {
+  final List<DropdownMenuItem<String>>? listItems = items?.map<DropdownMenuItem<String>>((String item) {
+    return DropdownMenuItem<String>(
+      key: ValueKey<String>(item),
+      value: item,
+      child: Text(item, key: ValueKey<String>('${item}Text')),
+    );
+  }).toList();
+
+  if (isFormField) {
+    return Form(
+      child: DropdownButtonFormField<String>(
+        key: buttonKey,
+        value: value,
+        hint: hint,
+        disabledHint: disabledHint,
+        onChanged: onChanged,
+        onTap: onTap,
+        icon: icon,
+        iconSize: iconSize,
+        iconDisabledColor: iconDisabledColor,
+        iconEnabledColor: iconEnabledColor,
+        isDense: isDense,
+        isExpanded: isExpanded,
+        // No underline attribute
+        focusNode: focusNode,
+        autofocus: autofocus,
+        focusColor: focusColor,
+        dropdownColor: dropdownColor,
+        items: listItems,
+        selectedItemBuilder: selectedItemBuilder,
+        itemHeight: itemHeight,
+        alignment: alignment,
+        menuMaxHeight: menuMaxHeight,
+        padding: padding,
+      ),
+    );
+  }
+  return DropdownButton<String>(
+    key: buttonKey,
+    value: value,
+    hint: hint,
+    disabledHint: disabledHint,
+    onChanged: onChanged,
+    onTap: onTap,
+    icon: icon,
+    iconSize: iconSize,
+    iconDisabledColor: iconDisabledColor,
+    iconEnabledColor: iconEnabledColor,
+    isDense: isDense,
+    isExpanded: isExpanded,
+    underline: underline,
+    focusNode: focusNode,
+    autofocus: autofocus,
+    focusColor: focusColor,
+    dropdownColor: dropdownColor,
+    items: listItems,
+    selectedItemBuilder: selectedItemBuilder,
+    itemHeight: itemHeight,
+    alignment: alignment,
+    menuMaxHeight: menuMaxHeight,
+    padding: padding,
+  );
+}
+
+Widget buildFrame({
+  Key? buttonKey,
+  String? value = 'two',
+  ValueChanged<String?>? onChanged,
+  VoidCallback? onTap,
+  Widget? icon,
+  Color? iconDisabledColor,
+  Color? iconEnabledColor,
+  double iconSize = 24.0,
+  bool isDense = false,
+  bool isExpanded = false,
+  Widget? hint,
+  Widget? disabledHint,
+  Widget? underline,
+  List<String>? items = menuItems,
+  List<Widget> Function(BuildContext)? selectedItemBuilder,
+  double? itemHeight = kMinInteractiveDimension,
+  AlignmentDirectional alignment = AlignmentDirectional.centerStart,
+  TextDirection textDirection = TextDirection.ltr,
+  Size? mediaSize,
+  FocusNode? focusNode,
+  bool autofocus = false,
+  Color? focusColor,
+  Color? dropdownColor,
+  bool isFormField = false,
+  double? menuMaxHeight,
+  EdgeInsetsGeometry? padding,
+  Alignment dropdownAlignment = Alignment.center,
+  bool? useMaterial3,
+}) {
+  return Theme(
+    data: ThemeData(useMaterial3: useMaterial3),
+    child: TestApp(
+      textDirection: textDirection,
+      mediaSize: mediaSize,
+      child: Material(
+        child: Align(
+          alignment: dropdownAlignment,
+          child: RepaintBoundary(
+            child: buildDropdown(
+              isFormField: isFormField,
+              buttonKey: buttonKey,
+              value: value,
+              hint: hint,
+              disabledHint: disabledHint,
+              onChanged: onChanged,
+              onTap: onTap,
+              icon: icon,
+              iconSize: iconSize,
+              iconDisabledColor: iconDisabledColor,
+              iconEnabledColor: iconEnabledColor,
+              isDense: isDense,
+              isExpanded: isExpanded,
+              underline: underline,
+              focusNode: focusNode,
+              autofocus: autofocus,
+              focusColor: focusColor,
+              dropdownColor: dropdownColor,
+              items: items,
+              selectedItemBuilder: selectedItemBuilder,
+              itemHeight: itemHeight,
+              alignment: alignment,
+              menuMaxHeight: menuMaxHeight,
+              padding: padding,
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+Widget buildDropdownWithHint({
+  required AlignmentDirectional alignment,
+  required bool isExpanded,
+  bool enableSelectedItemBuilder = false,
+}){
+  return buildFrame(
+    useMaterial3: false,
+    mediaSize: const Size(800, 600),
+    itemHeight: 100.0,
+    alignment: alignment,
+    isExpanded: isExpanded,
+    selectedItemBuilder: enableSelectedItemBuilder
+      ? (BuildContext context) {
+          return menuItems.map<Widget>((String item) {
+            return ColoredBox(
+              color: const Color(0xff00ff00),
+              child: Text(item),
+            );
+          }).toList();
+        }
+      : null,
+    hint: const Text('hint'),
+  );
+}
+
+class TestApp extends StatefulWidget {
+  const TestApp({
+    super.key,
+    required this.textDirection,
+    required this.child,
+    this.mediaSize,
+  });
+
+  final TextDirection textDirection;
+  final Widget child;
+  final Size? mediaSize;
+
+  @override
+  State<TestApp> createState() => _TestAppState();
+}
+
+class _TestAppState extends State<TestApp> {
+  @override
+  Widget build(BuildContext context) {
+    return Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: const <LocalizationsDelegate<dynamic>>[
+        DefaultWidgetsLocalizations.delegate,
+        DefaultMaterialLocalizations.delegate,
+      ],
+      child: MediaQuery(
+        data: MediaQueryData.fromView(View.of(context)).copyWith(size: widget.mediaSize),
+        child: Directionality(
+          textDirection: widget.textDirection,
+          child: Navigator(
+            onGenerateRoute: (RouteSettings settings) {
+              assert(settings.name == '/');
+              return MaterialPageRoute<void>(
+                settings: settings,
+                builder: (BuildContext context) => widget.child,
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// When the dropdown's menu is popped up, a RenderParagraph for the selected
+// menu's text item will appear both in the dropdown button and in the menu.
+// The RenderParagraphs should be aligned, i.e. they should have the same
+// size and location.
+void checkSelectedItemTextGeometry(WidgetTester tester, String value) {
+  final List<RenderBox> boxes = tester.renderObjectList<RenderBox>(find.byKey(ValueKey<String>('${value}Text'))).toList();
+  expect(boxes.length, equals(2));
+  final RenderBox box0 = boxes[0];
+  final RenderBox box1 = boxes[1];
+  expect(box0.localToGlobal(Offset.zero), equals(box1.localToGlobal(Offset.zero)));
+  expect(box0.size, equals(box1.size));
+}
+
+Future<void> checkDropdownColor(WidgetTester tester, {Color? color, bool isFormField = false }) async {
+  const String text = 'foo';
+  await tester.pumpWidget(
+    MaterialApp(
+      theme: ThemeData(useMaterial3: false),
+      home: Material(
+        child: isFormField
+            ? Form(
+                child: DropdownButtonFormField<String>(
+                  dropdownColor: color,
+                  value: text,
+                  items: const <DropdownMenuItem<String>>[
+                    DropdownMenuItem<String>(
+                      value: text,
+                      child: Text(text),
+                    ),
+                  ],
+                  onChanged: (_) {},
+                ),
+              )
+            : DropdownButton<String>(
+                dropdownColor: color,
+                value: text,
+                items: const <DropdownMenuItem<String>>[
+                  DropdownMenuItem<String>(
+                    value: text,
+                    child: Text(text),
+                  ),
+                ],
+                onChanged: (_) {},
+              ),
+      ),
+    ),
+  );
+  await tester.tap(find.text(text));
+  await tester.pump();
+
+  expect(
+    find.ancestor(
+      of: find.text(text).last,
+      matching: find.byType(CustomPaint),
+    ).at(2),
+    paints
+      ..save()
+      ..rrect()
+      ..rrect()
+      ..rrect()
+      ..rrect(color: color ?? Colors.grey[50], hasMaskFilter: false),
+  );
 }

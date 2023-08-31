@@ -9,8 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-const String tooltipText = 'TIP';
-
 void main() {
   testWidgetsWithLeakTracking('Tooltip does not build MouseRegion when mouse is detected and in TooltipVisibility with visibility = false', (WidgetTester tester) async {
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -203,3 +201,5 @@ Future<void> testGestureTap(WidgetTester tester, Finder tooltip) async {
   await tester.tap(tooltip);
   await tester.pump(const Duration(milliseconds: 10));
 }
+
+const String tooltipText = 'TIP';

@@ -27,40 +27,6 @@ import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
-class FakeXcodeProjectInterpreterWithProfile extends FakeXcodeProjectInterpreter {
-  @override
-  Future<XcodeProjectInfo> getInfo(String projectPath, { String? projectFilename }) async {
-    return XcodeProjectInfo(
-      <String>['Runner'],
-      <String>['Debug', 'Profile', 'Release'],
-      <String>['Runner'],
-      BufferLogger.test(),
-    );
-  }
-}
-
-final Platform macosPlatform = FakePlatform(
-  operatingSystem: 'macos',
-  environment: <String, String>{
-    'FLUTTER_ROOT': '/',
-    'HOME': '/',
-  }
-);
-
-final FakePlatform macosPlatformCustomEnv = FakePlatform(
-    operatingSystem: 'macos',
-    environment: <String, String>{
-      'FLUTTER_ROOT': '/',
-      'HOME': '/',
-    }
-);
-
-final Platform notMacosPlatform = FakePlatform(
-  environment: <String, String>{
-    'FLUTTER_ROOT': '/',
-  }
-);
-
 void main() {
   late FileSystem fileSystem;
   late TestUsage usage;
@@ -573,3 +539,37 @@ STDERR STUFF
     Usage: () => usage,
   });
 }
+
+class FakeXcodeProjectInterpreterWithProfile extends FakeXcodeProjectInterpreter {
+  @override
+  Future<XcodeProjectInfo> getInfo(String projectPath, { String? projectFilename }) async {
+    return XcodeProjectInfo(
+      <String>['Runner'],
+      <String>['Debug', 'Profile', 'Release'],
+      <String>['Runner'],
+      BufferLogger.test(),
+    );
+  }
+}
+
+final Platform macosPlatform = FakePlatform(
+  operatingSystem: 'macos',
+  environment: <String, String>{
+    'FLUTTER_ROOT': '/',
+    'HOME': '/',
+  }
+);
+
+final FakePlatform macosPlatformCustomEnv = FakePlatform(
+    operatingSystem: 'macos',
+    environment: <String, String>{
+      'FLUTTER_ROOT': '/',
+      'HOME': '/',
+    }
+);
+
+final Platform notMacosPlatform = FakePlatform(
+  environment: <String, String>{
+    'FLUTTER_ROOT': '/',
+  }
+);

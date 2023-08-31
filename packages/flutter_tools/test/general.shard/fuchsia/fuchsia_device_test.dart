@@ -35,24 +35,6 @@ import '../../src/context.dart';
 import '../../src/fake_vm_services.dart';
 import '../../src/fakes.dart';
 
-final vm_service.Isolate fakeIsolate = vm_service.Isolate(
-  id: '1',
-  pauseEvent: vm_service.Event(
-    kind: vm_service.EventKind.kResume,
-    timestamp: 0,
-  ),
-  breakpoints: <vm_service.Breakpoint>[],
-  libraries: <vm_service.LibraryRef>[],
-  livePorts: 0,
-  name: 'wrong name',
-  number: '1',
-  pauseOnExit: false,
-  runnable: true,
-  startTime: 0,
-  isSystemIsolate: false,
-  isolateFlags: <vm_service.IsolateFlag>[],
-);
-
 void main() {
   group('fuchsia device', () {
     late MemoryFileSystem memoryFileSystem;
@@ -1075,3 +1057,21 @@ class FakeFuchsiaWorkflow implements FuchsiaWorkflow {
   @override
   bool canListEmulators;
 }
+
+final vm_service.Isolate fakeIsolate = vm_service.Isolate(
+  id: '1',
+  pauseEvent: vm_service.Event(
+    kind: vm_service.EventKind.kResume,
+    timestamp: 0,
+  ),
+  breakpoints: <vm_service.Breakpoint>[],
+  libraries: <vm_service.LibraryRef>[],
+  livePorts: 0,
+  name: 'wrong name',
+  number: '1',
+  pauseOnExit: false,
+  runnable: true,
+  startTime: 0,
+  isSystemIsolate: false,
+  isolateFlags: <vm_service.IsolateFlag>[],
+);

@@ -7,161 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestMultiChildLayoutDelegate extends MultiChildLayoutDelegate {
-  late BoxConstraints getSizeConstraints;
-
-  @override
-  Size getSize(BoxConstraints constraints) {
-    if (!RenderObject.debugCheckingIntrinsics) {
-      getSizeConstraints = constraints;
-    }
-    return const Size(200.0, 300.0);
-  }
-
-  Size? performLayoutSize;
-  late Size performLayoutSize0;
-  late Size performLayoutSize1;
-  late bool performLayoutIsChild;
-
-  @override
-  void performLayout(Size size) {
-    assert(!RenderObject.debugCheckingIntrinsics);
-    expect(() {
-      performLayoutSize = size;
-      final BoxConstraints constraints = BoxConstraints.loose(size);
-      performLayoutSize0 = layoutChild(0, constraints);
-      performLayoutSize1 = layoutChild(1, constraints);
-      performLayoutIsChild = hasChild('fred');
-    }, returnsNormally);
-  }
-
-  bool shouldRelayoutCalled = false;
-  bool shouldRelayoutValue = false;
-
-  @override
-  bool shouldRelayout(_) {
-    assert(!RenderObject.debugCheckingIntrinsics);
-    shouldRelayoutCalled = true;
-    return shouldRelayoutValue;
-  }
-}
-
-Widget buildFrame(MultiChildLayoutDelegate delegate) {
-  return Center(
-    child: CustomMultiChildLayout(
-      delegate: delegate,
-      children: <Widget>[
-        LayoutId(id: 0, child: const SizedBox(width: 150.0, height: 100.0)),
-        LayoutId(id: 1, child: const SizedBox(width: 100.0, height: 200.0)),
-      ],
-    ),
-  );
-}
-
-class PreferredSizeDelegate extends MultiChildLayoutDelegate {
-  PreferredSizeDelegate({ required this.preferredSize });
-
-  final Size preferredSize;
-
-  @override
-  Size getSize(BoxConstraints constraints) => preferredSize;
-
-  @override
-  void performLayout(Size size) { }
-
-  @override
-  bool shouldRelayout(PreferredSizeDelegate oldDelegate) {
-    return preferredSize != oldDelegate.preferredSize;
-  }
-}
-
-class NotifierLayoutDelegate extends MultiChildLayoutDelegate {
-  NotifierLayoutDelegate(this.size) : super(relayout: size);
-
-  final ValueNotifier<Size> size;
-
-  @override
-  Size getSize(BoxConstraints constraints) => size.value;
-
-  @override
-  void performLayout(Size size) { }
-
-  @override
-  bool shouldRelayout(NotifierLayoutDelegate oldDelegate) {
-    return size != oldDelegate.size;
-  }
-}
-
-// LayoutDelegate that lays out child with id 0 and 1
-// Used in the 'performLayout error control test' test case to trigger:
-//  - error when laying out a non existent child and a child that has not been laid out
-class ZeroAndOneIdLayoutDelegate extends MultiChildLayoutDelegate {
-  @override
-  void performLayout(Size size) {
-    final BoxConstraints constraints = BoxConstraints.loose(size);
-    layoutChild(0, constraints);
-    layoutChild(1, constraints);
-  }
-
-  @override
-  bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) => true;
-}
-
-// Used in the 'performLayout error control test' test case
-//  to trigger an error when laying out child more than once
-class DuplicateLayoutDelegate extends MultiChildLayoutDelegate {
-  @override
-  void performLayout(Size size) {
-    final BoxConstraints constraints = BoxConstraints.loose(size);
-    layoutChild(0, constraints);
-    layoutChild(0, constraints);
-  }
-
-  @override
-  bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) => true;
-}
-// Used in the 'performLayout error control test' test case
-//  to trigger an error when positioning non existent child
-class NonExistentPositionDelegate extends MultiChildLayoutDelegate {
-  @override
-  void performLayout(Size size) {
-    positionChild(0, Offset.zero);
-    positionChild(1, Offset.zero);
-  }
-
-  @override
-  bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) => true;
-}
-
-// Used in the 'performLayout error control test' test case for triggering
-//  to layout child more than once
-class InvalidConstraintsChildLayoutDelegate extends MultiChildLayoutDelegate {
-  @override
-  void performLayout(Size size) {
-    final BoxConstraints constraints = BoxConstraints.loose(
-      // Invalid because width and height must be greater than or equal to 0
-      const Size(-1, -1),
-    );
-    layoutChild(0, constraints);
-  }
-
-  @override
-  bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) => true;
-}
-
-class LayoutWithMissingId extends ParentDataWidget<MultiChildLayoutParentData> {
-  const LayoutWithMissingId({
-    super.key,
-    required super.child,
-  });
-
-  @override
-  void applyParentData(RenderObject renderObject) {}
-
-  @override
-  Type get debugTypicalAncestorWidgetClass => CustomMultiChildLayout;
-}
-
 void main() {
   testWidgets('Control test for CustomMultiChildLayout', (WidgetTester tester) async {
     final TestMultiChildLayoutDelegate delegate = TestMultiChildLayoutDelegate();
@@ -429,4 +274,159 @@ void main() {
       );
     });
   });
+}
+
+class TestMultiChildLayoutDelegate extends MultiChildLayoutDelegate {
+  late BoxConstraints getSizeConstraints;
+
+  @override
+  Size getSize(BoxConstraints constraints) {
+    if (!RenderObject.debugCheckingIntrinsics) {
+      getSizeConstraints = constraints;
+    }
+    return const Size(200.0, 300.0);
+  }
+
+  Size? performLayoutSize;
+  late Size performLayoutSize0;
+  late Size performLayoutSize1;
+  late bool performLayoutIsChild;
+
+  @override
+  void performLayout(Size size) {
+    assert(!RenderObject.debugCheckingIntrinsics);
+    expect(() {
+      performLayoutSize = size;
+      final BoxConstraints constraints = BoxConstraints.loose(size);
+      performLayoutSize0 = layoutChild(0, constraints);
+      performLayoutSize1 = layoutChild(1, constraints);
+      performLayoutIsChild = hasChild('fred');
+    }, returnsNormally);
+  }
+
+  bool shouldRelayoutCalled = false;
+  bool shouldRelayoutValue = false;
+
+  @override
+  bool shouldRelayout(_) {
+    assert(!RenderObject.debugCheckingIntrinsics);
+    shouldRelayoutCalled = true;
+    return shouldRelayoutValue;
+  }
+}
+
+Widget buildFrame(MultiChildLayoutDelegate delegate) {
+  return Center(
+    child: CustomMultiChildLayout(
+      delegate: delegate,
+      children: <Widget>[
+        LayoutId(id: 0, child: const SizedBox(width: 150.0, height: 100.0)),
+        LayoutId(id: 1, child: const SizedBox(width: 100.0, height: 200.0)),
+      ],
+    ),
+  );
+}
+
+class PreferredSizeDelegate extends MultiChildLayoutDelegate {
+  PreferredSizeDelegate({ required this.preferredSize });
+
+  final Size preferredSize;
+
+  @override
+  Size getSize(BoxConstraints constraints) => preferredSize;
+
+  @override
+  void performLayout(Size size) { }
+
+  @override
+  bool shouldRelayout(PreferredSizeDelegate oldDelegate) {
+    return preferredSize != oldDelegate.preferredSize;
+  }
+}
+
+class NotifierLayoutDelegate extends MultiChildLayoutDelegate {
+  NotifierLayoutDelegate(this.size) : super(relayout: size);
+
+  final ValueNotifier<Size> size;
+
+  @override
+  Size getSize(BoxConstraints constraints) => size.value;
+
+  @override
+  void performLayout(Size size) { }
+
+  @override
+  bool shouldRelayout(NotifierLayoutDelegate oldDelegate) {
+    return size != oldDelegate.size;
+  }
+}
+
+// LayoutDelegate that lays out child with id 0 and 1
+// Used in the 'performLayout error control test' test case to trigger:
+//  - error when laying out a non existent child and a child that has not been laid out
+class ZeroAndOneIdLayoutDelegate extends MultiChildLayoutDelegate {
+  @override
+  void performLayout(Size size) {
+    final BoxConstraints constraints = BoxConstraints.loose(size);
+    layoutChild(0, constraints);
+    layoutChild(1, constraints);
+  }
+
+  @override
+  bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) => true;
+}
+
+// Used in the 'performLayout error control test' test case
+//  to trigger an error when laying out child more than once
+class DuplicateLayoutDelegate extends MultiChildLayoutDelegate {
+  @override
+  void performLayout(Size size) {
+    final BoxConstraints constraints = BoxConstraints.loose(size);
+    layoutChild(0, constraints);
+    layoutChild(0, constraints);
+  }
+
+  @override
+  bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) => true;
+}
+// Used in the 'performLayout error control test' test case
+//  to trigger an error when positioning non existent child
+class NonExistentPositionDelegate extends MultiChildLayoutDelegate {
+  @override
+  void performLayout(Size size) {
+    positionChild(0, Offset.zero);
+    positionChild(1, Offset.zero);
+  }
+
+  @override
+  bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) => true;
+}
+
+// Used in the 'performLayout error control test' test case for triggering
+//  to layout child more than once
+class InvalidConstraintsChildLayoutDelegate extends MultiChildLayoutDelegate {
+  @override
+  void performLayout(Size size) {
+    final BoxConstraints constraints = BoxConstraints.loose(
+      // Invalid because width and height must be greater than or equal to 0
+      const Size(-1, -1),
+    );
+    layoutChild(0, constraints);
+  }
+
+  @override
+  bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) => true;
+}
+
+class LayoutWithMissingId extends ParentDataWidget<MultiChildLayoutParentData> {
+  const LayoutWithMissingId({
+    super.key,
+    required super.child,
+  });
+
+  @override
+  void applyParentData(RenderObject renderObject) {}
+
+  @override
+  Type get debugTypicalAncestorWidgetClass => CustomMultiChildLayout;
 }

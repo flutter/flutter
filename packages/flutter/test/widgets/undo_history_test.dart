@@ -9,8 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'editable_text_utils.dart';
 
-final FocusNode focusNode = FocusNode(debugLabel: 'UndoHistory Node');
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -516,3 +514,5 @@ void main() {
     });
   });
 }
+
+final FocusNode focusNode = FocusNode(debugLabel: 'UndoHistory Node');

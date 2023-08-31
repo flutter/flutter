@@ -17,18 +17,6 @@ import '../src/common.dart';
 import '../src/fake_process_manager.dart';
 import '../src/fakes.dart';
 
-/// Matches a doctor validation result.
-Matcher _matchDoctorValidation({
-  required ValidationType validationType,
-  required String statusInfo,
-  required Object messages
-}) {
-  return const TypeMatcher<ValidationResult>()
-      .having((ValidationResult result) => result.type, 'type', validationType)
-      .having((ValidationResult result) => result.statusInfo, 'statusInfo', statusInfo)
-      .having((ValidationResult result) => result.messages, 'messages', messages);
-}
-
 void main() {
   testWithoutContext('FlutterValidator shows an error message if gen_snapshot is '
     'downloaded and exits with code 1', () async {
@@ -644,4 +632,16 @@ class FakeThrowingFlutterVersion extends FakeFlutterVersion {
   String get frameworkCommitDate {
     throw VersionCheckError('version error');
   }
+}
+
+/// Matches a doctor validation result.
+Matcher _matchDoctorValidation({
+  required ValidationType validationType,
+  required String statusInfo,
+  required Object messages
+}) {
+  return const TypeMatcher<ValidationResult>()
+      .having((ValidationResult result) => result.type, 'type', validationType)
+      .having((ValidationResult result) => result.statusInfo, 'statusInfo', statusInfo)
+      .having((ValidationResult result) => result.messages, 'messages', messages);
 }

@@ -15,36 +15,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
-  _TestSliverPersistentHeaderDelegate({
-    this.key,
-    required this.minExtent,
-    required this.maxExtent,
-    this.vsync = const TestVSync(),
-    this.showOnScreenConfiguration = const PersistentHeaderShowOnScreenConfiguration(),
-  });
-
-  final Key? key;
-
-  @override
-  final double maxExtent;
-
-  @override
-  final double minExtent;
-
-  @override
-  final TickerProvider? vsync;
-
-  @override
-  final PersistentHeaderShowOnScreenConfiguration showOnScreenConfiguration;
-
-  @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) => SizedBox.expand(key: key);
-
-  @override
-  bool shouldRebuild(_TestSliverPersistentHeaderDelegate oldDelegate) => true;
-}
-
 void main() {
   testWidgets('Scrollable widget scrollDirection update test', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -2260,4 +2230,34 @@ void main() {
     );
     errors.clear();
   });
+}
+
+class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
+  _TestSliverPersistentHeaderDelegate({
+    this.key,
+    required this.minExtent,
+    required this.maxExtent,
+    this.vsync = const TestVSync(),
+    this.showOnScreenConfiguration = const PersistentHeaderShowOnScreenConfiguration(),
+  });
+
+  final Key? key;
+
+  @override
+  final double maxExtent;
+
+  @override
+  final double minExtent;
+
+  @override
+  final TickerProvider? vsync;
+
+  @override
+  final PersistentHeaderShowOnScreenConfiguration showOnScreenConfiguration;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) => SizedBox.expand(key: key);
+
+  @override
+  bool shouldRebuild(_TestSliverPersistentHeaderDelegate oldDelegate) => true;
 }

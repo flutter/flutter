@@ -6,80 +6,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class _ManyRelayoutBoundaries extends StatelessWidget {
-  const _ManyRelayoutBoundaries({
-    required this.levels,
-    required this.child,
-  });
-
-  final Widget child;
-
-  final int levels;
-
-  @override
-  Widget build(BuildContext context) {
-    final Widget result = levels <= 1
-      ? child
-      : _ManyRelayoutBoundaries(levels: levels - 1, child: child);
-    return SizedBox.square(dimension: 50, child: result);
-  }
-}
-
-void rebuildLayoutBuilderSubtree(RenderBox descendant) {
-  assert(descendant is! RenderConstrainedLayoutBuilder<BoxConstraints, RenderBox>);
-
-  RenderObject? node = descendant.parent;
-  while (node != null) {
-    if (node is! RenderConstrainedLayoutBuilder<BoxConstraints, RenderBox>) {
-      node = node.parent;
-    } else {
-      node.markNeedsBuild();
-      return;
-    }
-  }
-  assert(false);
-}
-
-void verifyTreeIsClean() {
-   final RenderObject renderObject = RendererBinding.instance.renderView;
-   bool hasDirtyNode = renderObject.debugNeedsLayout;
-
-   void visitor(RenderObject renderObject) {
-     expect(renderObject.debugNeedsLayout, false, reason: '$renderObject is dirty');
-     hasDirtyNode = hasDirtyNode || renderObject.debugNeedsLayout;
-     if (!hasDirtyNode) {
-       renderObject.visitChildren(visitor);
-     }
-   }
-   visitor(renderObject);
-}
-
-void verifyOverlayChildReadyForLayout(GlobalKey overlayWidgetKey) {
-  final RenderBox layoutSurrogate = overlayWidgetKey.currentContext!.findRenderObject()! as RenderBox;
-  assert(
-    layoutSurrogate.runtimeType.toString() == '_RenderLayoutSurrogateProxyBox',
-    layoutSurrogate.runtimeType,
-  );
-  if (layoutSurrogate.debugNeedsLayout) {
-    assert(layoutSurrogate.debugDoingThisLayout);
-  }
-  expect(!layoutSurrogate.debugNeedsLayout || layoutSurrogate.debugDoingThisLayout, true);
-}
-
-List<RenderObject> _ancestorRenderTheaters(RenderObject child) {
-  final List<RenderObject> results = <RenderObject>[];
-  RenderObject? node = child;
-  while (node != null) {
-    if (node.runtimeType.toString() == '_RenderTheater') {
-      results.add(node);
-    }
-    final RenderObject? parent = node.parent;
-    node = parent is RenderObject? parent : null;
-  }
-  return results;
-}
-
-
 void main() {
   final OverlayPortalController controller1 = OverlayPortalController(debugLabel: 'controller1');
   final OverlayPortalController controller2 = OverlayPortalController(debugLabel: 'controller2');
@@ -1789,4 +1715,77 @@ class _RenderPaintRecorder extends RenderProxyBox {
     onPaint?.call();
     super.paint(context, offset);
   }
+}
+
+class _ManyRelayoutBoundaries extends StatelessWidget {
+  const _ManyRelayoutBoundaries({
+    required this.levels,
+    required this.child,
+  });
+
+  final Widget child;
+
+  final int levels;
+
+  @override
+  Widget build(BuildContext context) {
+    final Widget result = levels <= 1
+      ? child
+      : _ManyRelayoutBoundaries(levels: levels - 1, child: child);
+    return SizedBox.square(dimension: 50, child: result);
+  }
+}
+
+void rebuildLayoutBuilderSubtree(RenderBox descendant) {
+  assert(descendant is! RenderConstrainedLayoutBuilder<BoxConstraints, RenderBox>);
+
+  RenderObject? node = descendant.parent;
+  while (node != null) {
+    if (node is! RenderConstrainedLayoutBuilder<BoxConstraints, RenderBox>) {
+      node = node.parent;
+    } else {
+      node.markNeedsBuild();
+      return;
+    }
+  }
+  assert(false);
+}
+
+void verifyTreeIsClean() {
+   final RenderObject renderObject = RendererBinding.instance.renderView;
+   bool hasDirtyNode = renderObject.debugNeedsLayout;
+
+   void visitor(RenderObject renderObject) {
+     expect(renderObject.debugNeedsLayout, false, reason: '$renderObject is dirty');
+     hasDirtyNode = hasDirtyNode || renderObject.debugNeedsLayout;
+     if (!hasDirtyNode) {
+       renderObject.visitChildren(visitor);
+     }
+   }
+   visitor(renderObject);
+}
+
+void verifyOverlayChildReadyForLayout(GlobalKey overlayWidgetKey) {
+  final RenderBox layoutSurrogate = overlayWidgetKey.currentContext!.findRenderObject()! as RenderBox;
+  assert(
+    layoutSurrogate.runtimeType.toString() == '_RenderLayoutSurrogateProxyBox',
+    layoutSurrogate.runtimeType,
+  );
+  if (layoutSurrogate.debugNeedsLayout) {
+    assert(layoutSurrogate.debugDoingThisLayout);
+  }
+  expect(!layoutSurrogate.debugNeedsLayout || layoutSurrogate.debugDoingThisLayout, true);
+}
+
+List<RenderObject> _ancestorRenderTheaters(RenderObject child) {
+  final List<RenderObject> results = <RenderObject>[];
+  RenderObject? node = child;
+  while (node != null) {
+    if (node.runtimeType.toString() == '_RenderTheater') {
+      results.add(node);
+    }
+    final RenderObject? parent = node.parent;
+    node = parent is RenderObject? parent : null;
+  }
+  return results;
 }

@@ -8,68 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-const Key key = Key('testContainer');
-const Color trueColor = Colors.red;
-const Color falseColor = Colors.green;
-
-/// Mock widget which plays the role of a button -- it can emit notifications
-/// that [MaterialState] values are now in or out of play.
-class _InnerWidget extends StatefulWidget {
-  const _InnerWidget({required this.onValueChanged, required this.controller});
-  final ValueChanged<bool> onValueChanged;
-  final StreamController<bool> controller;
-
-  @override
-  _InnerWidgetState createState() => _InnerWidgetState();
-}
-
-class _InnerWidgetState extends State<_InnerWidget> {
-  @override
-  void initState() {
-    super.initState();
-    widget.controller.stream.listen((bool val) => widget.onValueChanged(val));
-  }
-  @override
-  Widget build(BuildContext context) => Container();
-}
-
-class _MyWidget extends StatefulWidget {
-  const _MyWidget({
-    required this.controller,
-    required this.evaluator,
-    required this.materialState,
-  });
-
-  /// Wrapper around `MaterialStateMixin.isPressed/isHovered/isFocused/etc`.
-  final bool Function(_MyWidgetState state) evaluator;
-
-  /// Stream passed down to the child [_InnerWidget] to begin the process.
-  /// This plays the role of an actual user interaction in the wild, but allows
-  /// us to engage the system without mocking pointers/hovers etc.
-  final StreamController<bool> controller;
-
-  /// The value we're watching in the given test.
-  final MaterialState materialState;
-
-  @override
-  State createState() => _MyWidgetState();
-}
-
-class _MyWidgetState extends State<_MyWidget> with MaterialStateMixin {
-
-  @override
-  Widget build(BuildContext context) {
-    return ColoredBox(
-      key: key,
-      color: widget.evaluator(this) ? trueColor : falseColor,
-      child: _InnerWidget(
-        onValueChanged: updateMaterialState(widget.materialState),
-        controller: widget.controller,
-      ),
-    );
-  }
-}
-
 void main() {
   Future<void> verify(WidgetTester tester, Widget widget, StreamController<bool> controller,) async {
     await tester.pumpWidget(MaterialApp(home: Scaffold(body: widget)));
@@ -163,4 +101,66 @@ void main() {
     );
     await verify(tester, widget, controller);
   });
+}
+
+const Key key = Key('testContainer');
+const Color trueColor = Colors.red;
+const Color falseColor = Colors.green;
+
+/// Mock widget which plays the role of a button -- it can emit notifications
+/// that [MaterialState] values are now in or out of play.
+class _InnerWidget extends StatefulWidget {
+  const _InnerWidget({required this.onValueChanged, required this.controller});
+  final ValueChanged<bool> onValueChanged;
+  final StreamController<bool> controller;
+
+  @override
+  _InnerWidgetState createState() => _InnerWidgetState();
+}
+
+class _InnerWidgetState extends State<_InnerWidget> {
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.stream.listen((bool val) => widget.onValueChanged(val));
+  }
+  @override
+  Widget build(BuildContext context) => Container();
+}
+
+class _MyWidget extends StatefulWidget {
+  const _MyWidget({
+    required this.controller,
+    required this.evaluator,
+    required this.materialState,
+  });
+
+  /// Wrapper around `MaterialStateMixin.isPressed/isHovered/isFocused/etc`.
+  final bool Function(_MyWidgetState state) evaluator;
+
+  /// Stream passed down to the child [_InnerWidget] to begin the process.
+  /// This plays the role of an actual user interaction in the wild, but allows
+  /// us to engage the system without mocking pointers/hovers etc.
+  final StreamController<bool> controller;
+
+  /// The value we're watching in the given test.
+  final MaterialState materialState;
+
+  @override
+  State createState() => _MyWidgetState();
+}
+
+class _MyWidgetState extends State<_MyWidget> with MaterialStateMixin {
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      key: key,
+      color: widget.evaluator(this) ? trueColor : falseColor,
+      child: _InnerWidget(
+        onValueChanged: updateMaterialState(widget.materialState),
+        controller: widget.controller,
+      ),
+    );
+  }
 }

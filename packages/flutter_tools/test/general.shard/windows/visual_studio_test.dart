@@ -13,362 +13,6 @@ import 'package:flutter_tools/src/windows/visual_studio.dart';
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
-const String programFilesPath = r'C:\Program Files (x86)';
-const String visualStudioPath = programFilesPath + r'\Microsoft Visual Studio\2017\Community';
-const String cmakePath = visualStudioPath + r'\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe';
-const String vswherePath = programFilesPath + r'\Microsoft Visual Studio\Installer\vswhere.exe';
-
-final Platform windowsPlatform = FakePlatform(
-  operatingSystem: 'windows',
-  environment: <String, String>{
-    'PROGRAMFILES(X86)': r'C:\Program Files (x86)\',
-  },
-);
-
-// A minimum version of a response where a VS installation was found.
-const Map<String, dynamic> _defaultResponse = <String, dynamic>{
-  'installationPath': visualStudioPath,
-  'displayName': 'Visual Studio Community 2019',
-  'installationVersion': '16.2.29306.81',
-  'isRebootRequired': false,
-  'isComplete': true,
-  'isLaunchable': true,
-  'isPrerelease': false,
-  'catalog': <String, dynamic>{
-    'productDisplayVersion': '16.2.5',
-  },
-};
-
-// A minimum version of a response where a VS 2022 installation was found.
-const Map<String, dynamic> _vs2022Response = <String, dynamic>{
-  'installationPath': visualStudioPath,
-  'displayName': 'Visual Studio Community 2022',
-  'installationVersion': '17.0.31903.59',
-  'isRebootRequired': false,
-  'isComplete': true,
-  'isLaunchable': true,
-  'isPrerelease': false,
-  'catalog': <String, dynamic>{
-    'productDisplayVersion': '17.0.0',
-  },
-};
-
-// A minimum version of a response where a Build Tools installation was found.
-const Map<String, dynamic> _defaultBuildToolsResponse = <String, dynamic>{
-  'installationPath': visualStudioPath,
-  'displayName': 'Visual Studio Build Tools 2019',
-  'installationVersion': '16.7.30413.136',
-  'isRebootRequired': false,
-  'isComplete': true,
-  'isLaunchable': true,
-  'isPrerelease': false,
-  'catalog': <String, dynamic>{
-    'productDisplayVersion': '16.7.2',
-  },
-};
-
-// A response for a VS installation that's too old.
-const Map<String, dynamic> _tooOldResponse = <String, dynamic>{
-  'installationPath': visualStudioPath,
-  'displayName': 'Visual Studio Community 2017',
-  'installationVersion': '15.9.28307.665',
-  'isRebootRequired': false,
-  'isComplete': true,
-  'isLaunchable': true,
-  'isPrerelease': false,
-  'catalog': <String, dynamic>{
-    'productDisplayVersion': '15.9.12',
-  },
-};
-
-// A version of a response that doesn't include certain installation status
-// information that might be missing in older vswhere.
-const Map<String, dynamic> _missingStatusResponse = <String, dynamic>{
-  'installationPath': visualStudioPath,
-  'displayName': 'Visual Studio Community 2017',
-  'installationVersion': '16.4.29609.76',
-  'catalog': <String, dynamic>{
-    'productDisplayVersion': '16.4.1',
-  },
-};
-
-const String _malformedDescriptionResponse = r'''
-[
-  {
-    "installationPath": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community",
-    "displayName": "Visual Studio Community 2019",
-    "description": "This description has too many "quotes",
-    "installationVersion": "16.2.29306.81",
-    "isRebootRequired": false,
-    "isComplete": true,
-    "isPrerelease": false,
-    "catalog": {
-      "productDisplayVersion": "16.2.5"
-    }
-  }
-]
-''';
-
-// Arguments for a vswhere query to search for an installation with the
-// requirements.
-const List<String> _requirements = <String>[
-  'Microsoft.VisualStudio.Workload.NativeDesktop',
-  'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
-  'Microsoft.VisualStudio.Component.VC.CMake.Project',
-];
-
-// Arguments for a vswhere query to search for a Build Tools installation with the
-// requirements.
-const List<String> _requirementsBuildTools = <String>[
-  'Microsoft.VisualStudio.Workload.VCTools',
-  'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
-  'Microsoft.VisualStudio.Component.VC.CMake.Project',
-];
-
-// Sets up the mock environment so that searching for Visual Studio with
-// exactly the given required components will provide a result. By default it
-// return a preset installation, but the response can be overridden.
-void setMockVswhereResponse(
-  FileSystem fileSystem,
-  FakeProcessManager processManager, [
-  List<String>? requiredComponents,
-  List<String>? additionalArguments,
-  Map<String, dynamic>? response,
-  String? responseOverride,
-  int? exitCode,
-  Exception? exception,
-]) {
-  fileSystem.file(vswherePath).createSync(recursive: true);
-  fileSystem.file(cmakePath).createSync(recursive: true);
-  final String finalResponse = responseOverride
-    ?? (response != null ? json.encode(<Map<String, dynamic>>[response]) : '[]');
-  final List<String> requirementArguments = requiredComponents == null
-    ? <String>[]
-    : <String>['-requires', ...requiredComponents];
-
-  processManager.addCommand(FakeCommand(
-    command: <String>[
-      vswherePath,
-      '-format',
-      'json',
-      '-products',
-      '*',
-      '-utf8',
-      '-latest',
-      ...?additionalArguments,
-      ...requirementArguments,
-    ],
-    stdout: finalResponse,
-    exception: exception,
-    exitCode: exitCode ?? 0,
-  ));
-}
-
-// Sets whether or not a vswhere query with the required components will
-// return an installation.
-void setMockCompatibleVisualStudioInstallation(
-  Map<String, dynamic>? response,
-  FileSystem fileSystem,
-  FakeProcessManager processManager, [
-  int? exitCode,
-  Exception? exception,
-]) {
-  setMockVswhereResponse(
-    fileSystem,
-    processManager,
-    _requirements,
-    <String>['-version', '16'],
-    response,
-    null,
-    exitCode,
-    exception,
-  );
-}
-
-// Sets whether or not a vswhere query with the required components will
-// return a pre-release installation.
-void setMockPrereleaseVisualStudioInstallation(
-  Map<String, dynamic>? response,
-  FileSystem fileSystem,
-  FakeProcessManager processManager, [
-  int? exitCode,
-  Exception? exception,
-]) {
-  setMockVswhereResponse(
-    fileSystem,
-    processManager,
-    _requirements,
-    <String>['-version', '16', '-prerelease'],
-    response,
-    null,
-    exitCode,
-    exception,
-  );
-}
-
-// Sets whether or not a vswhere query with the required components will
-// return an Build Tools installation.
-void setMockCompatibleVisualStudioBuildToolsInstallation(
-  Map<String, dynamic>? response,
-  FileSystem fileSystem,
-  FakeProcessManager processManager, [
-  int? exitCode,
-  Exception? exception,
-]) {
-  setMockVswhereResponse(
-    fileSystem,
-    processManager,
-    _requirementsBuildTools,
-    <String>['-version', '16'],
-    response,
-    null,
-    exitCode,
-    exception,
-  );
-}
-
-// Sets whether or not a vswhere query with the required components will
-// return a pre-release Build Tools installation.
-void setMockPrereleaseVisualStudioBuildToolsInstallation(
-  Map<String, dynamic>? response,
-  FileSystem fileSystem,
-  FakeProcessManager processManager, [
-  int? exitCode,
-  Exception? exception,
-]) {
-  setMockVswhereResponse(
-    fileSystem,
-    processManager,
-    _requirementsBuildTools,
-    <String>['-version', '16', '-prerelease'],
-    response,
-    null,
-    exitCode,
-    exception,
-  );
-}
-
-// Sets whether or not a vswhere query searching for 'all' and 'prerelease'
-// versions will return an installation.
-void setMockAnyVisualStudioInstallation(
-  Map<String, dynamic>? response,
-  FileSystem fileSystem,
-  FakeProcessManager processManager, [
-  int? exitCode,
-  Exception? exception,
-]) {
-  setMockVswhereResponse(
-    fileSystem,
-    processManager,
-    null,
-    <String>['-prerelease', '-all'],
-    response,
-    null,
-    exitCode,
-    exception,
-  );
-}
-
-// Set a pre-encoded query result.
-void setMockEncodedAnyVisualStudioInstallation(
-  String response,
-  FileSystem fileSystem,
-  FakeProcessManager processManager,
-) {
-  setMockVswhereResponse(
-    fileSystem,
-    processManager,
-    null,
-    <String>['-prerelease', '-all'],
-    null,
-    response,
-  );
-}
-
-// Sets up the mock environment for a Windows 10 SDK query.
-//
-// registryPresent controls whether or not the registry key is found.
-// filesPresent controls where or not there are any SDK folders at the location
-// returned by the registry query.
-void setMockSdkRegResponse(
-  FileSystem fileSystem,
-  FakeProcessManager processManager, {
-  bool registryPresent = true,
-  bool filesPresent = true,
-}) {
-  const String registryPath = r'HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v10.0';
-  const String registryKey = r'InstallationFolder';
-  const String installationPath = r'C:\Program Files (x86)\Windows Kits\10\';
-  final String stdout = registryPresent
-    ? '''
-$registryPath
-    $registryKey    REG_SZ    $installationPath
-'''
-    : '''
-
-ERROR: The system was unable to find the specified registry key or value.
-''';
-
-  if (filesPresent) {
-    final Directory includeDirectory =  fileSystem.directory(installationPath).childDirectory('Include');
-    includeDirectory.childDirectory('10.0.17763.0').createSync(recursive: true);
-    includeDirectory.childDirectory('10.0.18362.0').createSync(recursive: true);
-    // Not an actual version; added to ensure that version comparison is number, not string-based.
-    includeDirectory.childDirectory('10.0.184.0').createSync(recursive: true);
-  }
-
-  processManager.addCommand(FakeCommand(
-    command: const <String>[
-      'reg',
-      'query',
-      registryPath,
-      '/v',
-      registryKey,
-    ],
-    stdout: stdout,
-  ));
-}
-
-// Create a visual studio instance with a FakeProcessManager.
-VisualStudioFixture setUpVisualStudio() {
-  final FakeProcessManager processManager = FakeProcessManager.empty();
-  final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
-  final BufferLogger logger = BufferLogger.test();
-  final VisualStudio visualStudio = VisualStudio(
-    fileSystem: fileSystem,
-    platform: windowsPlatform,
-    logger: logger,
-    processManager: processManager,
-  );
-  return VisualStudioFixture(visualStudio, fileSystem, processManager, logger);
-}
-
-// Set all vswhere query with the required components return null.
-void setNoViableToolchainInstallation(
-  VisualStudioFixture fixture,
-) {
-  setMockCompatibleVisualStudioInstallation(
-    null,
-    fixture.fileSystem,
-    fixture.processManager,
-  );
-  setMockCompatibleVisualStudioBuildToolsInstallation(
-    null,
-    fixture.fileSystem,
-    fixture.processManager,
-  );
-  setMockPrereleaseVisualStudioInstallation(
-    null,
-    fixture.fileSystem,
-    fixture.processManager,
-  );
-  setMockPrereleaseVisualStudioBuildToolsInstallation(
-    null,
-    fixture.fileSystem,
-    fixture.processManager,
-  );
-}
-
 void main() {
   group('Visual Studio', () {
     testWithoutContext('isInstalled throws when PROGRAMFILES(X86) env not set', () {
@@ -1092,4 +736,360 @@ class VisualStudioFixture {
   final FileSystem fileSystem;
   final FakeProcessManager processManager;
   final BufferLogger logger;
+}
+
+const String programFilesPath = r'C:\Program Files (x86)';
+const String visualStudioPath = programFilesPath + r'\Microsoft Visual Studio\2017\Community';
+const String cmakePath = visualStudioPath + r'\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe';
+const String vswherePath = programFilesPath + r'\Microsoft Visual Studio\Installer\vswhere.exe';
+
+final Platform windowsPlatform = FakePlatform(
+  operatingSystem: 'windows',
+  environment: <String, String>{
+    'PROGRAMFILES(X86)': r'C:\Program Files (x86)\',
+  },
+);
+
+// A minimum version of a response where a VS installation was found.
+const Map<String, dynamic> _defaultResponse = <String, dynamic>{
+  'installationPath': visualStudioPath,
+  'displayName': 'Visual Studio Community 2019',
+  'installationVersion': '16.2.29306.81',
+  'isRebootRequired': false,
+  'isComplete': true,
+  'isLaunchable': true,
+  'isPrerelease': false,
+  'catalog': <String, dynamic>{
+    'productDisplayVersion': '16.2.5',
+  },
+};
+
+// A minimum version of a response where a VS 2022 installation was found.
+const Map<String, dynamic> _vs2022Response = <String, dynamic>{
+  'installationPath': visualStudioPath,
+  'displayName': 'Visual Studio Community 2022',
+  'installationVersion': '17.0.31903.59',
+  'isRebootRequired': false,
+  'isComplete': true,
+  'isLaunchable': true,
+  'isPrerelease': false,
+  'catalog': <String, dynamic>{
+    'productDisplayVersion': '17.0.0',
+  },
+};
+
+// A minimum version of a response where a Build Tools installation was found.
+const Map<String, dynamic> _defaultBuildToolsResponse = <String, dynamic>{
+  'installationPath': visualStudioPath,
+  'displayName': 'Visual Studio Build Tools 2019',
+  'installationVersion': '16.7.30413.136',
+  'isRebootRequired': false,
+  'isComplete': true,
+  'isLaunchable': true,
+  'isPrerelease': false,
+  'catalog': <String, dynamic>{
+    'productDisplayVersion': '16.7.2',
+  },
+};
+
+// A response for a VS installation that's too old.
+const Map<String, dynamic> _tooOldResponse = <String, dynamic>{
+  'installationPath': visualStudioPath,
+  'displayName': 'Visual Studio Community 2017',
+  'installationVersion': '15.9.28307.665',
+  'isRebootRequired': false,
+  'isComplete': true,
+  'isLaunchable': true,
+  'isPrerelease': false,
+  'catalog': <String, dynamic>{
+    'productDisplayVersion': '15.9.12',
+  },
+};
+
+// A version of a response that doesn't include certain installation status
+// information that might be missing in older vswhere.
+const Map<String, dynamic> _missingStatusResponse = <String, dynamic>{
+  'installationPath': visualStudioPath,
+  'displayName': 'Visual Studio Community 2017',
+  'installationVersion': '16.4.29609.76',
+  'catalog': <String, dynamic>{
+    'productDisplayVersion': '16.4.1',
+  },
+};
+
+const String _malformedDescriptionResponse = r'''
+[
+  {
+    "installationPath": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community",
+    "displayName": "Visual Studio Community 2019",
+    "description": "This description has too many "quotes",
+    "installationVersion": "16.2.29306.81",
+    "isRebootRequired": false,
+    "isComplete": true,
+    "isPrerelease": false,
+    "catalog": {
+      "productDisplayVersion": "16.2.5"
+    }
+  }
+]
+''';
+
+// Arguments for a vswhere query to search for an installation with the
+// requirements.
+const List<String> _requirements = <String>[
+  'Microsoft.VisualStudio.Workload.NativeDesktop',
+  'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
+  'Microsoft.VisualStudio.Component.VC.CMake.Project',
+];
+
+// Arguments for a vswhere query to search for a Build Tools installation with the
+// requirements.
+const List<String> _requirementsBuildTools = <String>[
+  'Microsoft.VisualStudio.Workload.VCTools',
+  'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
+  'Microsoft.VisualStudio.Component.VC.CMake.Project',
+];
+
+// Sets up the mock environment so that searching for Visual Studio with
+// exactly the given required components will provide a result. By default it
+// return a preset installation, but the response can be overridden.
+void setMockVswhereResponse(
+  FileSystem fileSystem,
+  FakeProcessManager processManager, [
+  List<String>? requiredComponents,
+  List<String>? additionalArguments,
+  Map<String, dynamic>? response,
+  String? responseOverride,
+  int? exitCode,
+  Exception? exception,
+]) {
+  fileSystem.file(vswherePath).createSync(recursive: true);
+  fileSystem.file(cmakePath).createSync(recursive: true);
+  final String finalResponse = responseOverride
+    ?? (response != null ? json.encode(<Map<String, dynamic>>[response]) : '[]');
+  final List<String> requirementArguments = requiredComponents == null
+    ? <String>[]
+    : <String>['-requires', ...requiredComponents];
+
+  processManager.addCommand(FakeCommand(
+    command: <String>[
+      vswherePath,
+      '-format',
+      'json',
+      '-products',
+      '*',
+      '-utf8',
+      '-latest',
+      ...?additionalArguments,
+      ...requirementArguments,
+    ],
+    stdout: finalResponse,
+    exception: exception,
+    exitCode: exitCode ?? 0,
+  ));
+}
+
+// Sets whether or not a vswhere query with the required components will
+// return an installation.
+void setMockCompatibleVisualStudioInstallation(
+  Map<String, dynamic>? response,
+  FileSystem fileSystem,
+  FakeProcessManager processManager, [
+  int? exitCode,
+  Exception? exception,
+]) {
+  setMockVswhereResponse(
+    fileSystem,
+    processManager,
+    _requirements,
+    <String>['-version', '16'],
+    response,
+    null,
+    exitCode,
+    exception,
+  );
+}
+
+// Sets whether or not a vswhere query with the required components will
+// return a pre-release installation.
+void setMockPrereleaseVisualStudioInstallation(
+  Map<String, dynamic>? response,
+  FileSystem fileSystem,
+  FakeProcessManager processManager, [
+  int? exitCode,
+  Exception? exception,
+]) {
+  setMockVswhereResponse(
+    fileSystem,
+    processManager,
+    _requirements,
+    <String>['-version', '16', '-prerelease'],
+    response,
+    null,
+    exitCode,
+    exception,
+  );
+}
+
+// Sets whether or not a vswhere query with the required components will
+// return an Build Tools installation.
+void setMockCompatibleVisualStudioBuildToolsInstallation(
+  Map<String, dynamic>? response,
+  FileSystem fileSystem,
+  FakeProcessManager processManager, [
+  int? exitCode,
+  Exception? exception,
+]) {
+  setMockVswhereResponse(
+    fileSystem,
+    processManager,
+    _requirementsBuildTools,
+    <String>['-version', '16'],
+    response,
+    null,
+    exitCode,
+    exception,
+  );
+}
+
+// Sets whether or not a vswhere query with the required components will
+// return a pre-release Build Tools installation.
+void setMockPrereleaseVisualStudioBuildToolsInstallation(
+  Map<String, dynamic>? response,
+  FileSystem fileSystem,
+  FakeProcessManager processManager, [
+  int? exitCode,
+  Exception? exception,
+]) {
+  setMockVswhereResponse(
+    fileSystem,
+    processManager,
+    _requirementsBuildTools,
+    <String>['-version', '16', '-prerelease'],
+    response,
+    null,
+    exitCode,
+    exception,
+  );
+}
+
+// Sets whether or not a vswhere query searching for 'all' and 'prerelease'
+// versions will return an installation.
+void setMockAnyVisualStudioInstallation(
+  Map<String, dynamic>? response,
+  FileSystem fileSystem,
+  FakeProcessManager processManager, [
+  int? exitCode,
+  Exception? exception,
+]) {
+  setMockVswhereResponse(
+    fileSystem,
+    processManager,
+    null,
+    <String>['-prerelease', '-all'],
+    response,
+    null,
+    exitCode,
+    exception,
+  );
+}
+
+// Set a pre-encoded query result.
+void setMockEncodedAnyVisualStudioInstallation(
+  String response,
+  FileSystem fileSystem,
+  FakeProcessManager processManager,
+) {
+  setMockVswhereResponse(
+    fileSystem,
+    processManager,
+    null,
+    <String>['-prerelease', '-all'],
+    null,
+    response,
+  );
+}
+
+// Sets up the mock environment for a Windows 10 SDK query.
+//
+// registryPresent controls whether or not the registry key is found.
+// filesPresent controls where or not there are any SDK folders at the location
+// returned by the registry query.
+void setMockSdkRegResponse(
+  FileSystem fileSystem,
+  FakeProcessManager processManager, {
+  bool registryPresent = true,
+  bool filesPresent = true,
+}) {
+  const String registryPath = r'HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v10.0';
+  const String registryKey = r'InstallationFolder';
+  const String installationPath = r'C:\Program Files (x86)\Windows Kits\10\';
+  final String stdout = registryPresent
+    ? '''
+$registryPath
+    $registryKey    REG_SZ    $installationPath
+'''
+    : '''
+
+ERROR: The system was unable to find the specified registry key or value.
+''';
+
+  if (filesPresent) {
+    final Directory includeDirectory =  fileSystem.directory(installationPath).childDirectory('Include');
+    includeDirectory.childDirectory('10.0.17763.0').createSync(recursive: true);
+    includeDirectory.childDirectory('10.0.18362.0').createSync(recursive: true);
+    // Not an actual version; added to ensure that version comparison is number, not string-based.
+    includeDirectory.childDirectory('10.0.184.0').createSync(recursive: true);
+  }
+
+  processManager.addCommand(FakeCommand(
+    command: const <String>[
+      'reg',
+      'query',
+      registryPath,
+      '/v',
+      registryKey,
+    ],
+    stdout: stdout,
+  ));
+}
+
+// Create a visual studio instance with a FakeProcessManager.
+VisualStudioFixture setUpVisualStudio() {
+  final FakeProcessManager processManager = FakeProcessManager.empty();
+  final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+  final BufferLogger logger = BufferLogger.test();
+  final VisualStudio visualStudio = VisualStudio(
+    fileSystem: fileSystem,
+    platform: windowsPlatform,
+    logger: logger,
+    processManager: processManager,
+  );
+  return VisualStudioFixture(visualStudio, fileSystem, processManager, logger);
+}
+
+// Set all vswhere query with the required components return null.
+void setNoViableToolchainInstallation(
+  VisualStudioFixture fixture,
+) {
+  setMockCompatibleVisualStudioInstallation(
+    null,
+    fixture.fileSystem,
+    fixture.processManager,
+  );
+  setMockCompatibleVisualStudioBuildToolsInstallation(
+    null,
+    fixture.fileSystem,
+    fixture.processManager,
+  );
+  setMockPrereleaseVisualStudioInstallation(
+    null,
+    fixture.fileSystem,
+    fixture.processManager,
+  );
+  setMockPrereleaseVisualStudioBuildToolsInstallation(
+    null,
+    fixture.fileSystem,
+    fixture.processManager,
+  );
 }

@@ -8,9 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../gestures/gesture_tester.dart';
 
-// Anything longer than [kDoubleTapTimeout] will reset the consecutive tap count.
-final Duration kConsecutiveTapDelay = kDoubleTapTimeout ~/ 2;
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -894,3 +891,6 @@ void main() {
     expect(events, <String>['down#1']);
   });
 }
+
+// Anything longer than [kDoubleTapTimeout] will reset the consecutive tap count.
+final Duration kConsecutiveTapDelay = kDoubleTapTimeout ~/ 2;

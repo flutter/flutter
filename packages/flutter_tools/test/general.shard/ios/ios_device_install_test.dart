@@ -24,10 +24,6 @@ import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
-const Map<String, String> kDyLdLibEntry = <String, String>{
-  'DYLD_LIBRARY_PATH': '/path/to/libraries',
-};
-
 void main() {
   late Artifacts artifacts;
   late String iosDeployPath;
@@ -468,3 +464,7 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
     return true;
   }
 }
+
+const Map<String, String> kDyLdLibEntry = <String, String>{
+  'DYLD_LIBRARY_PATH': '/path/to/libraries',
+};

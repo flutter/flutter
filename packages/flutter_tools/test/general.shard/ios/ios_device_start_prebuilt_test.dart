@@ -33,78 +33,6 @@ import '../../src/fake_devices.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
-// The command used to actually launch the app with args in release/profile.
-const FakeCommand kLaunchReleaseCommand = FakeCommand(
-  command: <String>[
-    'HostArtifact.iosDeploy',
-    '--id',
-    '123',
-    '--bundle',
-    '/',
-    '--no-wifi',
-    '--justlaunch',
-    // These args are the default on DebuggingOptions.
-    '--args',
-    '--enable-dart-profiling',
-  ],
-  environment: <String, String>{
-    'PATH': '/usr/bin:null',
-    'DYLD_LIBRARY_PATH': '/path/to/libraries',
-  }
-);
-
-// The command used to just launch the app with args in debug.
-const FakeCommand kLaunchDebugCommand = FakeCommand(command: <String>[
-  'HostArtifact.iosDeploy',
-  '--id',
-  '123',
-  '--bundle',
-  '/',
-  '--no-wifi',
-  '--justlaunch',
-  '--args',
-  '--enable-dart-profiling --enable-checked-mode --verify-entry-points',
-], environment: <String, String>{
-  'PATH': '/usr/bin:null',
-  'DYLD_LIBRARY_PATH': '/path/to/libraries',
-});
-
-// The command used to actually launch the app and attach the debugger with args in debug.
-FakeCommand attachDebuggerCommand({
-  IOSink? stdin,
-  String stdout = '(lldb)     run\nsuccess',
-  Completer<void>? completer,
-  bool isWirelessDevice = false,
-}) {
-  return FakeCommand(
-    command: <String>[
-      'script',
-      '-t',
-      '0',
-      '/dev/null',
-      'HostArtifact.iosDeploy',
-      '--id',
-      '123',
-      '--bundle',
-      '/',
-      '--debug',
-      if (!isWirelessDevice) '--no-wifi',
-      '--args',
-      if (isWirelessDevice)
-        '--enable-dart-profiling --enable-checked-mode --verify-entry-points --vm-service-host=0.0.0.0'
-      else
-        '--enable-dart-profiling --enable-checked-mode --verify-entry-points',
-    ],
-    completer: completer,
-    environment: const <String, String>{
-      'PATH': '/usr/bin:null',
-      'DYLD_LIBRARY_PATH': '/path/to/libraries',
-    },
-    stdout: stdout,
-    stdin: stdin,
-  );
-}
-
 void main() {
   testWithoutContext('disposing device disposes the portForwarder and logReader', () async {
     final IOSDevice device = setUpIOSDevice();
@@ -970,4 +898,76 @@ class FakeShutDownHooks extends Fake implements ShutdownHooks {
   void addShutdownHook(ShutdownHook shutdownHook) {
     hooks.add(shutdownHook);
   }
+}
+
+// The command used to actually launch the app with args in release/profile.
+const FakeCommand kLaunchReleaseCommand = FakeCommand(
+  command: <String>[
+    'HostArtifact.iosDeploy',
+    '--id',
+    '123',
+    '--bundle',
+    '/',
+    '--no-wifi',
+    '--justlaunch',
+    // These args are the default on DebuggingOptions.
+    '--args',
+    '--enable-dart-profiling',
+  ],
+  environment: <String, String>{
+    'PATH': '/usr/bin:null',
+    'DYLD_LIBRARY_PATH': '/path/to/libraries',
+  }
+);
+
+// The command used to just launch the app with args in debug.
+const FakeCommand kLaunchDebugCommand = FakeCommand(command: <String>[
+  'HostArtifact.iosDeploy',
+  '--id',
+  '123',
+  '--bundle',
+  '/',
+  '--no-wifi',
+  '--justlaunch',
+  '--args',
+  '--enable-dart-profiling --enable-checked-mode --verify-entry-points',
+], environment: <String, String>{
+  'PATH': '/usr/bin:null',
+  'DYLD_LIBRARY_PATH': '/path/to/libraries',
+});
+
+// The command used to actually launch the app and attach the debugger with args in debug.
+FakeCommand attachDebuggerCommand({
+  IOSink? stdin,
+  String stdout = '(lldb)     run\nsuccess',
+  Completer<void>? completer,
+  bool isWirelessDevice = false,
+}) {
+  return FakeCommand(
+    command: <String>[
+      'script',
+      '-t',
+      '0',
+      '/dev/null',
+      'HostArtifact.iosDeploy',
+      '--id',
+      '123',
+      '--bundle',
+      '/',
+      '--debug',
+      if (!isWirelessDevice) '--no-wifi',
+      '--args',
+      if (isWirelessDevice)
+        '--enable-dart-profiling --enable-checked-mode --verify-entry-points --vm-service-host=0.0.0.0'
+      else
+        '--enable-dart-profiling --enable-checked-mode --verify-entry-points',
+    ],
+    completer: completer,
+    environment: const <String, String>{
+      'PATH': '/usr/bin:null',
+      'DYLD_LIBRARY_PATH': '/path/to/libraries',
+    },
+    stdout: stdout,
+    stdin: stdin,
+  );
 }

@@ -6,9 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-    int _creations = 0;
-    int _disposals = 0;
-
 void main() {
   final MemoryAllocations ma = MemoryAllocations.instance;
 
@@ -137,3 +134,6 @@ Future<_EventStats> _activateFlutterObjectsAndReturnCountOfEvents() async {
 
   return result;
 }
+
+    int _creations = 0;
+    int _disposals = 0;

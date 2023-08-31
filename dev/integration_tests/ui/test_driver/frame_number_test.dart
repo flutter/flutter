@@ -5,10 +5,6 @@
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
-bool _isNumeric(String s) {
-  return double.tryParse(s) != null;
-}
-
 // Connect and disconnect from the empty app.
 void main() {
   group('FrameNumber', () {
@@ -35,4 +31,8 @@ void main() {
       expect(_isNumeric(minFrameNumber), true);
     }, timeout: Timeout.none);
   });
+}
+
+bool _isNumeric(String s) {
+  return double.tryParse(s) != null;
 }

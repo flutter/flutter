@@ -7,42 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-class TestIcon extends StatefulWidget {
-  const TestIcon({super.key});
-
-  @override
-  TestIconState createState() => TestIconState();
-}
-
-class TestIconState extends State<TestIcon> {
-  late IconThemeData iconTheme;
-
-  @override
-  Widget build(BuildContext context) {
-    iconTheme = IconTheme.of(context);
-    return const Icon(Icons.expand_more);
-  }
-}
-
-class TestText extends StatefulWidget {
-  const TestText(this.text, {super.key});
-
-  final String text;
-
-  @override
-  TestTextState createState() => TestTextState();
-}
-
-class TestTextState extends State<TestText> {
-  late TextStyle textStyle;
-
-  @override
-  Widget build(BuildContext context) {
-    textStyle = DefaultTextStyle.of(context).style;
-    return Text(widget.text);
-  }
-}
-
 void main() {
   const Color dividerColor = Color(0x1f333333);
   const Color foregroundColor = Colors.blueAccent;
@@ -1042,4 +1006,40 @@ void main() {
     final ExpansionTileController? controller2 = ExpansionTileController.maybeOf(nonDescendantKey.currentContext!);
     expect(controller2, isNull);
   });
+}
+
+class TestIcon extends StatefulWidget {
+  const TestIcon({super.key});
+
+  @override
+  TestIconState createState() => TestIconState();
+}
+
+class TestIconState extends State<TestIcon> {
+  late IconThemeData iconTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    iconTheme = IconTheme.of(context);
+    return const Icon(Icons.expand_more);
+  }
+}
+
+class TestText extends StatefulWidget {
+  const TestText(this.text, {super.key});
+
+  final String text;
+
+  @override
+  TestTextState createState() => TestTextState();
+}
+
+class TestTextState extends State<TestText> {
+  late TextStyle textStyle;
+
+  @override
+  Widget build(BuildContext context) {
+    textStyle = DefaultTextStyle.of(context).style;
+    return Text(widget.text);
+  }
 }

@@ -44,120 +44,6 @@ import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
 import '../src/testbed.dart';
 
-final vm_service.Event fakeUnpausedEvent = vm_service.Event(
-  kind: vm_service.EventKind.kResume,
-  timestamp: 0
-);
-
-final vm_service.Event fakePausedEvent = vm_service.Event(
-  kind: vm_service.EventKind.kPauseException,
-  timestamp: 0
-);
-
-final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
-  id: '1',
-  pauseEvent: fakeUnpausedEvent,
-  breakpoints: <vm_service.Breakpoint>[],
-  extensionRPCs: <String>[],
-  libraries: <vm_service.LibraryRef>[
-    vm_service.LibraryRef(
-      id: '1',
-      uri: 'file:///hello_world/main.dart',
-      name: '',
-    ),
-  ],
-  livePorts: 0,
-  name: 'test',
-  number: '1',
-  pauseOnExit: false,
-  runnable: true,
-  startTime: 0,
-  isSystemIsolate: false,
-  isolateFlags: <vm_service.IsolateFlag>[],
-);
-
-final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
-  id: '1',
-  pauseEvent: fakePausedEvent,
-  breakpoints: <vm_service.Breakpoint>[
-    vm_service.Breakpoint(
-      breakpointNumber: 123,
-      id: 'test-breakpoint',
-      location: vm_service.SourceLocation(
-        tokenPos: 0,
-        script: vm_service.ScriptRef(id: 'test-script', uri: 'foo.dart'),
-      ),
-      enabled: true,
-      resolved: true,
-    ),
-  ],
-  libraries: <vm_service.LibraryRef>[],
-  livePorts: 0,
-  name: 'test',
-  number: '1',
-  pauseOnExit: false,
-  runnable: true,
-  startTime: 0,
-  isSystemIsolate: false,
-  isolateFlags: <vm_service.IsolateFlag>[],
-);
-
-final vm_service.VM fakeVM = vm_service.VM(
-  isolates: <vm_service.IsolateRef>[fakeUnpausedIsolate],
-  pid: 1,
-  hostCPU: '',
-  isolateGroups: <vm_service.IsolateGroupRef>[],
-  targetCPU: '',
-  startTime: 0,
-  name: 'dart',
-  architectureBits: 64,
-  operatingSystem: '',
-  version: '',
-  systemIsolateGroups: <vm_service.IsolateGroupRef>[],
-  systemIsolates: <vm_service.IsolateRef>[],
-);
-
-final FlutterView fakeFlutterView = FlutterView(
-  id: 'a',
-  uiIsolate: fakeUnpausedIsolate,
-);
-
-final FakeVmServiceRequest listViews = FakeVmServiceRequest(
-  method: kListViewsMethod,
-  jsonResponse: <String, Object>{
-    'views': <Object>[
-      fakeFlutterView.toJson(),
-    ],
-  },
-);
-
-const FakeVmServiceRequest setAssetBundlePath = FakeVmServiceRequest(
-  method: '_flutter.setAssetBundlePath',
-  args: <String, Object>{
-    'viewId': 'a',
-    'assetDirectory': 'build/flutter_assets',
-    'isolateId': '1',
-  }
-);
-
-const FakeVmServiceRequest evict = FakeVmServiceRequest(
-  method: 'ext.flutter.evict',
-  args: <String, Object>{
-    'value': 'asset',
-    'isolateId': '1',
-  }
-);
-
-const FakeVmServiceRequest evictShader = FakeVmServiceRequest(
-  method: 'ext.ui.window.reinitializeShader',
-  args: <String, Object>{
-    'assetKey': 'foo.frag',
-    'isolateId': '1',
-  }
-);
-
-final Uri testUri = Uri.parse('foo://bar');
-
 void main() {
   late Testbed testbed;
   late FakeFlutterDevice flutterDevice;
@@ -2711,3 +2597,117 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
     throw UnimplementedError();
   }
 }
+
+final vm_service.Event fakeUnpausedEvent = vm_service.Event(
+  kind: vm_service.EventKind.kResume,
+  timestamp: 0
+);
+
+final vm_service.Event fakePausedEvent = vm_service.Event(
+  kind: vm_service.EventKind.kPauseException,
+  timestamp: 0
+);
+
+final vm_service.Isolate fakeUnpausedIsolate = vm_service.Isolate(
+  id: '1',
+  pauseEvent: fakeUnpausedEvent,
+  breakpoints: <vm_service.Breakpoint>[],
+  extensionRPCs: <String>[],
+  libraries: <vm_service.LibraryRef>[
+    vm_service.LibraryRef(
+      id: '1',
+      uri: 'file:///hello_world/main.dart',
+      name: '',
+    ),
+  ],
+  livePorts: 0,
+  name: 'test',
+  number: '1',
+  pauseOnExit: false,
+  runnable: true,
+  startTime: 0,
+  isSystemIsolate: false,
+  isolateFlags: <vm_service.IsolateFlag>[],
+);
+
+final vm_service.Isolate fakePausedIsolate = vm_service.Isolate(
+  id: '1',
+  pauseEvent: fakePausedEvent,
+  breakpoints: <vm_service.Breakpoint>[
+    vm_service.Breakpoint(
+      breakpointNumber: 123,
+      id: 'test-breakpoint',
+      location: vm_service.SourceLocation(
+        tokenPos: 0,
+        script: vm_service.ScriptRef(id: 'test-script', uri: 'foo.dart'),
+      ),
+      enabled: true,
+      resolved: true,
+    ),
+  ],
+  libraries: <vm_service.LibraryRef>[],
+  livePorts: 0,
+  name: 'test',
+  number: '1',
+  pauseOnExit: false,
+  runnable: true,
+  startTime: 0,
+  isSystemIsolate: false,
+  isolateFlags: <vm_service.IsolateFlag>[],
+);
+
+final vm_service.VM fakeVM = vm_service.VM(
+  isolates: <vm_service.IsolateRef>[fakeUnpausedIsolate],
+  pid: 1,
+  hostCPU: '',
+  isolateGroups: <vm_service.IsolateGroupRef>[],
+  targetCPU: '',
+  startTime: 0,
+  name: 'dart',
+  architectureBits: 64,
+  operatingSystem: '',
+  version: '',
+  systemIsolateGroups: <vm_service.IsolateGroupRef>[],
+  systemIsolates: <vm_service.IsolateRef>[],
+);
+
+final FlutterView fakeFlutterView = FlutterView(
+  id: 'a',
+  uiIsolate: fakeUnpausedIsolate,
+);
+
+final FakeVmServiceRequest listViews = FakeVmServiceRequest(
+  method: kListViewsMethod,
+  jsonResponse: <String, Object>{
+    'views': <Object>[
+      fakeFlutterView.toJson(),
+    ],
+  },
+);
+
+const FakeVmServiceRequest setAssetBundlePath = FakeVmServiceRequest(
+  method: '_flutter.setAssetBundlePath',
+  args: <String, Object>{
+    'viewId': 'a',
+    'assetDirectory': 'build/flutter_assets',
+    'isolateId': '1',
+  }
+);
+
+const FakeVmServiceRequest evict = FakeVmServiceRequest(
+  method: 'ext.flutter.evict',
+  args: <String, Object>{
+    'value': 'asset',
+    'isolateId': '1',
+  }
+);
+
+const FakeVmServiceRequest evictShader = FakeVmServiceRequest(
+  method: 'ext.ui.window.reinitializeShader',
+  args: <String, Object>{
+    'assetKey': 'foo.frag',
+    'isolateId': '1',
+  }
+);
+
+final Uri testUri = Uri.parse('foo://bar');

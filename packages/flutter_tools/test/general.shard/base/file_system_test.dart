@@ -17,13 +17,6 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 
-class LocalFileSystemFake extends LocalFileSystem {
-  LocalFileSystemFake.test({required super.signals}) : super.test();
-
-  @override
-  Directory get superSystemTempDirectory => directory('/does_not_exist');
-}
-
 void main() {
   group('fsUtils', () {
     late MemoryFileSystem fs;
@@ -223,4 +216,11 @@ class FakeProcessSignal extends Fake implements io.ProcessSignal {
 
   @override
   Stream<io.ProcessSignal> watch() => controller.stream;
+}
+
+class LocalFileSystemFake extends LocalFileSystem {
+  LocalFileSystemFake.test({required super.signals}) : super.test();
+
+  @override
+  Directory get superSystemTempDirectory => directory('/does_not_exist');
 }

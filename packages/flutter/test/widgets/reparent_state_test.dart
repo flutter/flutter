@@ -5,50 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class StateMarker extends StatefulWidget {
-  const StateMarker({ super.key, this.child });
-
-  final Widget? child;
-
-  @override
-  StateMarkerState createState() => StateMarkerState();
-}
-
-class StateMarkerState extends State<StateMarker> {
-  String? marker;
-
-  @override
-  Widget build(BuildContext context) {
-    if (widget.child != null) {
-      return widget.child!;
-    }
-    return Container();
-  }
-}
-
-class DeactivateLogger extends StatefulWidget {
-  const DeactivateLogger({ required Key key, required this.log }) : super(key: key);
-
-  final List<String> log;
-
-  @override
-  DeactivateLoggerState createState() => DeactivateLoggerState();
-}
-
-class DeactivateLoggerState extends State<DeactivateLogger> {
-  @override
-  void deactivate() {
-    widget.log.add('deactivate');
-    super.deactivate();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    widget.log.add('build');
-    return Container();
-  }
-}
-
 void main() {
   testWidgets('can reparent state', (WidgetTester tester) async {
     final GlobalKey left = GlobalKey();
@@ -394,4 +350,48 @@ void main() {
       ),
     );
   });
+}
+
+class StateMarker extends StatefulWidget {
+  const StateMarker({ super.key, this.child });
+
+  final Widget? child;
+
+  @override
+  StateMarkerState createState() => StateMarkerState();
+}
+
+class StateMarkerState extends State<StateMarker> {
+  String? marker;
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.child != null) {
+      return widget.child!;
+    }
+    return Container();
+  }
+}
+
+class DeactivateLogger extends StatefulWidget {
+  const DeactivateLogger({ required Key key, required this.log }) : super(key: key);
+
+  final List<String> log;
+
+  @override
+  DeactivateLoggerState createState() => DeactivateLoggerState();
+}
+
+class DeactivateLoggerState extends State<DeactivateLogger> {
+  @override
+  void deactivate() {
+    widget.log.add('deactivate');
+    super.deactivate();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    widget.log.add('build');
+    return Container();
+  }
 }

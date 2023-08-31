@@ -6,6 +6,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+void main() {
+  TestTestBinding();
+  testWidgets('TestAsyncUtils - custom guarded sections', (WidgetTester tester) async {
+    await tester.pumpWidget(Container());
+    expect(find.byElementType(Container), isNotNull);
+    guardedHelper(tester);
+    expect(find.byElementType(Container), isNull);
+    // this should fail
+  });
+}
+
 class TestTestBinding extends AutomatedTestWidgetsFlutterBinding {
   @override
   DebugPrintCallback get debugPrintOverride => testPrint;
@@ -15,16 +26,5 @@ class TestTestBinding extends AutomatedTestWidgetsFlutterBinding {
 Future<void> guardedHelper(WidgetTester tester) {
   return TestAsyncUtils.guard(() async {
     await tester.pumpWidget(const Text('Hello', textDirection: TextDirection.ltr));
-  });
-}
-
-void main() {
-  TestTestBinding();
-  testWidgets('TestAsyncUtils - custom guarded sections', (WidgetTester tester) async {
-    await tester.pumpWidget(Container());
-    expect(find.byElementType(Container), isNotNull);
-    guardedHelper(tester);
-    expect(find.byElementType(Container), isNull);
-    // this should fail
   });
 }

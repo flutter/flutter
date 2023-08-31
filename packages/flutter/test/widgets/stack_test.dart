@@ -8,15 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart' show TestCallbackPainter;
 
-class TestPaintingContext implements PaintingContext {
-  final List<Invocation> invocations = <Invocation>[];
-
-  @override
-  void noSuchMethod(Invocation invocation) {
-    invocations.add(invocation);
-  }
-}
-
 void main() {
   testWidgets('Can construct an empty Stack', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -956,5 +947,14 @@ class _ShowVisibility extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text('index $index is visible ? ${Visibility.of(context)}');
+  }
+}
+
+class TestPaintingContext implements PaintingContext {
+  final List<Invocation> invocations = <Invocation>[];
+
+  @override
+  void noSuchMethod(Invocation invocation) {
+    invocations.add(invocation);
   }
 }

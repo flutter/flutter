@@ -11,18 +11,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:web/web.dart' as web;
 
-extension on web.HTMLCollection {
-  Iterable<web.Element> get iterable => _genIterable(this);
-}
-extension on web.CSSRuleList {
-  Iterable<web.CSSRule> get iterable => _genIterable(this);
-}
-
-Iterable<T> _genIterable<T>(dynamic jsCollection) {
-  // ignore: avoid_dynamic_calls
-  return Iterable<T>.generate(jsCollection.length as int, (int index) => jsCollection.item(index) as T,);
-}
-
 void main() {
   web.HTMLElement? element;
   PlatformSelectableRegionContextMenu.debugOverrideRegisterViewFactory = (String viewType, Object Function(int viewId) fn, {bool isVisible = true}) {
@@ -175,4 +163,16 @@ class RenderSelectionSpy extends RenderProxyBox
 
   @override
   void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) { }
+}
+
+extension on web.HTMLCollection {
+  Iterable<web.Element> get iterable => _genIterable(this);
+}
+extension on web.CSSRuleList {
+  Iterable<web.CSSRule> get iterable => _genIterable(this);
+}
+
+Iterable<T> _genIterable<T>(dynamic jsCollection) {
+  // ignore: avoid_dynamic_calls
+  return Iterable<T>.generate(jsCollection.length as int, (int index) => jsCollection.item(index) as T,);
 }

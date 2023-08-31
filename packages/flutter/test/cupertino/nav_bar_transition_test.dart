@@ -12,124 +12,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Future<void> startTransitionBetween(
-  WidgetTester tester, {
-  Widget? from,
-  Widget? to,
-  String? fromTitle,
-  String? toTitle,
-  TextDirection textDirection = TextDirection.ltr,
-  CupertinoThemeData? theme,
-  double textScale = 1.0,
-}) async {
-  await tester.pumpWidget(
-    CupertinoApp(
-      theme: theme,
-      builder: (BuildContext context, Widget? navigator) {
-        return MediaQuery(
-          data: MediaQuery.of(context).copyWith(textScaleFactor: textScale),
-          child: Directionality(
-            textDirection: textDirection,
-            child: navigator!,
-          )
-        );
-      },
-      home: const Placeholder(),
-    ),
-  );
-
-  tester
-      .state<NavigatorState>(find.byType(Navigator))
-      .push(CupertinoPageRoute<void>(
-        title: fromTitle,
-        builder: (BuildContext context) => scaffoldForNavBar(from)!,
-      ));
-
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: 600));
-
-  tester
-      .state<NavigatorState>(find.byType(Navigator))
-      .push(CupertinoPageRoute<void>(
-        title: toTitle,
-        builder: (BuildContext context) => scaffoldForNavBar(to)!,
-      ));
-
-  await tester.pump();
-}
-
-CupertinoPageScaffold? scaffoldForNavBar(Widget? navBar) {
-  if (navBar is CupertinoNavigationBar || navBar == null) {
-    return CupertinoPageScaffold(
-      navigationBar: navBar as CupertinoNavigationBar? ?? const CupertinoNavigationBar(),
-      child: const Placeholder(),
-    );
-  } else if (navBar is CupertinoSliverNavigationBar) {
-    return CupertinoPageScaffold(
-      child: CustomScrollView(
-        slivers: <Widget>[
-          navBar,
-          // Add filler so it's scrollable.
-          const SliverToBoxAdapter(
-            child: Placeholder(fallbackHeight: 1000.0),
-          ),
-        ],
-      ),
-    );
-  }
-  assert(false, 'Unexpected nav bar type ${navBar.runtimeType}');
-  return null;
-}
-
-Finder flying(WidgetTester tester, Finder finder) {
-  final ContainerRenderObjectMixin<RenderBox, StackParentData> theater = tester.renderObject(find.byType(Overlay));
-  final Finder lastOverlayFinder = find.byElementPredicate((Element element) {
-    return element is RenderObjectElement && element.renderObject == theater.lastChild;
-  });
-
-  assert(
-    find.descendant(
-      of: lastOverlayFinder,
-      matching: find.byWidgetPredicate(
-        (Widget widget) =>
-            widget.runtimeType.toString() == '_NavigationBarTransition',
-      ),
-    ).evaluate().length == 1,
-    'The last overlay in the navigator was not a flying hero',
-  );
-
-  return find.descendant(
-    of: lastOverlayFinder,
-    matching: finder,
-  );
-}
-
-void checkBackgroundBoxHeight(WidgetTester tester, double height) {
-  final Widget transitionBackgroundBox =
-      tester.widget<Stack>(flying(tester, find.byType(Stack))).children[0];
-  expect(
-    tester.widget<SizedBox>(
-      find.descendant(
-        of: find.byWidget(transitionBackgroundBox),
-        matching: find.byType(SizedBox),
-      ),
-    ).height,
-    height,
-  );
-}
-
-void checkOpacity(WidgetTester tester, Finder finder, double opacity) {
-  expect(
-    tester.firstRenderObject<RenderAnimatedOpacity>(
-      find.ancestor(
-        of: finder,
-        matching: find.byType(FadeTransition),
-      ),
-    ).opacity.value,
-    moreOrLessEquals(opacity),
-  );
-}
-
 void main() {
   testWidgets('Bottom middle moves between middle and back label', (WidgetTester tester) async {
     await startTransitionBetween(tester, fromTitle: 'Page 1');
@@ -1456,4 +1338,122 @@ void main() {
     // Back to page 2.
     expect(find.text('Page 2'), findsOneWidget);
   });
+}
+
+Future<void> startTransitionBetween(
+  WidgetTester tester, {
+  Widget? from,
+  Widget? to,
+  String? fromTitle,
+  String? toTitle,
+  TextDirection textDirection = TextDirection.ltr,
+  CupertinoThemeData? theme,
+  double textScale = 1.0,
+}) async {
+  await tester.pumpWidget(
+    CupertinoApp(
+      theme: theme,
+      builder: (BuildContext context, Widget? navigator) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaleFactor: textScale),
+          child: Directionality(
+            textDirection: textDirection,
+            child: navigator!,
+          )
+        );
+      },
+      home: const Placeholder(),
+    ),
+  );
+
+  tester
+      .state<NavigatorState>(find.byType(Navigator))
+      .push(CupertinoPageRoute<void>(
+        title: fromTitle,
+        builder: (BuildContext context) => scaffoldForNavBar(from)!,
+      ));
+
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 600));
+
+  tester
+      .state<NavigatorState>(find.byType(Navigator))
+      .push(CupertinoPageRoute<void>(
+        title: toTitle,
+        builder: (BuildContext context) => scaffoldForNavBar(to)!,
+      ));
+
+  await tester.pump();
+}
+
+CupertinoPageScaffold? scaffoldForNavBar(Widget? navBar) {
+  if (navBar is CupertinoNavigationBar || navBar == null) {
+    return CupertinoPageScaffold(
+      navigationBar: navBar as CupertinoNavigationBar? ?? const CupertinoNavigationBar(),
+      child: const Placeholder(),
+    );
+  } else if (navBar is CupertinoSliverNavigationBar) {
+    return CupertinoPageScaffold(
+      child: CustomScrollView(
+        slivers: <Widget>[
+          navBar,
+          // Add filler so it's scrollable.
+          const SliverToBoxAdapter(
+            child: Placeholder(fallbackHeight: 1000.0),
+          ),
+        ],
+      ),
+    );
+  }
+  assert(false, 'Unexpected nav bar type ${navBar.runtimeType}');
+  return null;
+}
+
+Finder flying(WidgetTester tester, Finder finder) {
+  final ContainerRenderObjectMixin<RenderBox, StackParentData> theater = tester.renderObject(find.byType(Overlay));
+  final Finder lastOverlayFinder = find.byElementPredicate((Element element) {
+    return element is RenderObjectElement && element.renderObject == theater.lastChild;
+  });
+
+  assert(
+    find.descendant(
+      of: lastOverlayFinder,
+      matching: find.byWidgetPredicate(
+        (Widget widget) =>
+            widget.runtimeType.toString() == '_NavigationBarTransition',
+      ),
+    ).evaluate().length == 1,
+    'The last overlay in the navigator was not a flying hero',
+  );
+
+  return find.descendant(
+    of: lastOverlayFinder,
+    matching: finder,
+  );
+}
+
+void checkBackgroundBoxHeight(WidgetTester tester, double height) {
+  final Widget transitionBackgroundBox =
+      tester.widget<Stack>(flying(tester, find.byType(Stack))).children[0];
+  expect(
+    tester.widget<SizedBox>(
+      find.descendant(
+        of: find.byWidget(transitionBackgroundBox),
+        matching: find.byType(SizedBox),
+      ),
+    ).height,
+    height,
+  );
+}
+
+void checkOpacity(WidgetTester tester, Finder finder, double opacity) {
+  expect(
+    tester.firstRenderObject<RenderAnimatedOpacity>(
+      find.ancestor(
+        of: finder,
+        matching: find.byType(FadeTransition),
+      ),
+    ).opacity.value,
+    moreOrLessEquals(opacity),
+  );
 }

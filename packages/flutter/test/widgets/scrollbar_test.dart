@@ -9,60 +9,6 @@ import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const Color _kScrollbarColor = Color(0xFF123456);
-const double _kThickness = 2.5;
-const double _kMinThumbExtent = 18.0;
-const Duration _kScrollbarFadeDuration = Duration(milliseconds: 300);
-const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
-
-ScrollbarPainter _buildPainter({
-  TextDirection textDirection = TextDirection.ltr,
-  EdgeInsets padding = EdgeInsets.zero,
-  Color color = _kScrollbarColor,
-  double thickness = _kThickness,
-  double mainAxisMargin = 0.0,
-  double crossAxisMargin = 0.0,
-  Radius? radius,
-  Radius? trackRadius,
-  double minLength = _kMinThumbExtent,
-  double? minOverscrollLength,
-  ScrollbarOrientation? scrollbarOrientation,
-  required ScrollMetrics scrollMetrics,
-}) {
-  return ScrollbarPainter(
-    color: color,
-    textDirection: textDirection,
-    thickness: thickness,
-    padding: padding,
-    mainAxisMargin: mainAxisMargin,
-    crossAxisMargin: crossAxisMargin,
-    radius: radius,
-    trackRadius: trackRadius,
-    minLength: minLength,
-    minOverscrollLength: minOverscrollLength ?? minLength,
-    fadeoutOpacityAnimation: kAlwaysCompleteAnimation,
-    scrollbarOrientation: scrollbarOrientation,
-  )..update(scrollMetrics, scrollMetrics.axisDirection);
-}
-
-class _DrawRectOnceCanvas extends Fake implements Canvas {
-  List<Rect> rects = <Rect>[];
-  List<RRect> rrects = <RRect>[];
-
-  @override
-  void drawRect(Rect rect, Paint paint) {
-    rects.add(rect);
-  }
-
-  @override
-  void drawRRect(ui.RRect rrect, ui.Paint paint) {
-    rrects.add(rrect);
-  }
-
-  @override
-  void drawLine(Offset p1, Offset p2, Paint paint) {}
-}
-
 void main() {
   final _DrawRectOnceCanvas testCanvas = _DrawRectOnceCanvas();
   ScrollbarPainter painter;
@@ -2896,4 +2842,58 @@ void main() {
 
     expect(scrollController.offset, 100.0);
   }, variant: TargetPlatformVariant.all());
+}
+
+const Color _kScrollbarColor = Color(0xFF123456);
+const double _kThickness = 2.5;
+const double _kMinThumbExtent = 18.0;
+const Duration _kScrollbarFadeDuration = Duration(milliseconds: 300);
+const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
+
+ScrollbarPainter _buildPainter({
+  TextDirection textDirection = TextDirection.ltr,
+  EdgeInsets padding = EdgeInsets.zero,
+  Color color = _kScrollbarColor,
+  double thickness = _kThickness,
+  double mainAxisMargin = 0.0,
+  double crossAxisMargin = 0.0,
+  Radius? radius,
+  Radius? trackRadius,
+  double minLength = _kMinThumbExtent,
+  double? minOverscrollLength,
+  ScrollbarOrientation? scrollbarOrientation,
+  required ScrollMetrics scrollMetrics,
+}) {
+  return ScrollbarPainter(
+    color: color,
+    textDirection: textDirection,
+    thickness: thickness,
+    padding: padding,
+    mainAxisMargin: mainAxisMargin,
+    crossAxisMargin: crossAxisMargin,
+    radius: radius,
+    trackRadius: trackRadius,
+    minLength: minLength,
+    minOverscrollLength: minOverscrollLength ?? minLength,
+    fadeoutOpacityAnimation: kAlwaysCompleteAnimation,
+    scrollbarOrientation: scrollbarOrientation,
+  )..update(scrollMetrics, scrollMetrics.axisDirection);
+}
+
+class _DrawRectOnceCanvas extends Fake implements Canvas {
+  List<Rect> rects = <Rect>[];
+  List<RRect> rrects = <RRect>[];
+
+  @override
+  void drawRect(Rect rect, Paint paint) {
+    rects.add(rect);
+  }
+
+  @override
+  void drawRRect(ui.RRect rrect, ui.Paint paint) {
+    rrects.add(rrect);
+  }
+
+  @override
+  void drawLine(Offset p1, Offset p2, Paint paint) {}
 }

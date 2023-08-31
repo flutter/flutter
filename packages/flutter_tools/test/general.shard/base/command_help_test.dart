@@ -10,71 +10,6 @@ import 'package:flutter_tools/src/base/terminal.dart' show AnsiTerminal, OutputP
 import '../../src/common.dart';
 import '../../src/fakes.dart';
 
-CommandHelp _createCommandHelp({
-  required bool ansi,
-  required int wrapColumn,
-}) {
-  final Platform platform = FakePlatform(
-    stdoutSupportsAnsi: ansi,
-  );
-  return CommandHelp(
-    logger: BufferLogger.test(),
-    terminal: AnsiTerminal(
-      stdio:  FakeStdio(),
-      platform: platform,
-    ),
-    platform: platform,
-    outputPreferences: OutputPreferences.test(
-      showColor: ansi,
-      wrapColumn: wrapColumn,
-    ),
-  );
-}
-
-// Used to use the message length in different scenarios in a DRY way
-void _testMessageLength({
-  required bool stdoutSupportsAnsi,
-  required int maxTestLineLength,
-  required int wrapColumn,
-}) {
-  final CommandHelp commandHelp = _createCommandHelp(
-    ansi: stdoutSupportsAnsi,
-    wrapColumn: wrapColumn,
-  );
-
-  int expectedWidth = maxTestLineLength;
-
-  if (stdoutSupportsAnsi) {
-    const int ansiMetaCharactersLength = 33;
-    expectedWidth += ansiMetaCharactersLength;
-  }
-
-  expect(commandHelp.I.toString().length, lessThanOrEqualTo(expectedWidth));
-  expect(commandHelp.L.toString().length, lessThanOrEqualTo(expectedWidth));
-  expect(commandHelp.M.toString().length, lessThanOrEqualTo(expectedWidth));
-  expect(commandHelp.P.toString().length, lessThanOrEqualTo(expectedWidth));
-  expect(commandHelp.R.toString().length, lessThanOrEqualTo(expectedWidth));
-  expect(commandHelp.S.toString().length, lessThanOrEqualTo(expectedWidth));
-  expect(commandHelp.U.toString().length, lessThanOrEqualTo(expectedWidth));
-  expect(commandHelp.a.toString().length, lessThanOrEqualTo(expectedWidth));
-  expect(commandHelp.b.toString().length, lessThanOrEqualTo(expectedWidth));
-  expect(commandHelp.c.toString().length, lessThanOrEqualTo(expectedWidth));
-  expect(commandHelp.d.toString().length, lessThanOrEqualTo(expectedWidth));
-  expect(commandHelp.f.toString().length, lessThanOrEqualTo(expectedWidth));
-  expect(commandHelp.g.toString().length, lessThanOrEqualTo(expectedWidth));
-  expect(commandHelp.hWithDetails.toString().length, lessThanOrEqualTo(expectedWidth));
-  expect(commandHelp.hWithoutDetails.toString().length, lessThanOrEqualTo(expectedWidth));
-  expect(commandHelp.i.toString().length, lessThanOrEqualTo(expectedWidth));
-  expect(commandHelp.k.toString().length, lessThanOrEqualTo(expectedWidth));
-  expect(commandHelp.o.toString().length, lessThanOrEqualTo(expectedWidth));
-  expect(commandHelp.p.toString().length, lessThanOrEqualTo(expectedWidth));
-  expect(commandHelp.q.toString().length, lessThanOrEqualTo(expectedWidth));
-  expect(commandHelp.r.toString().length, lessThanOrEqualTo(expectedWidth));
-  expect(commandHelp.s.toString().length, lessThanOrEqualTo(expectedWidth));
-  expect(commandHelp.t.toString().length, lessThanOrEqualTo(expectedWidth));
-  expect(commandHelp.w.toString().length, lessThanOrEqualTo(expectedWidth));
-}
-
 void main() {
   group('CommandHelp', () {
     group('toString', () {
@@ -244,4 +179,69 @@ void main() {
       });
     });
   });
+}
+
+CommandHelp _createCommandHelp({
+  required bool ansi,
+  required int wrapColumn,
+}) {
+  final Platform platform = FakePlatform(
+    stdoutSupportsAnsi: ansi,
+  );
+  return CommandHelp(
+    logger: BufferLogger.test(),
+    terminal: AnsiTerminal(
+      stdio:  FakeStdio(),
+      platform: platform,
+    ),
+    platform: platform,
+    outputPreferences: OutputPreferences.test(
+      showColor: ansi,
+      wrapColumn: wrapColumn,
+    ),
+  );
+}
+
+// Used to use the message length in different scenarios in a DRY way
+void _testMessageLength({
+  required bool stdoutSupportsAnsi,
+  required int maxTestLineLength,
+  required int wrapColumn,
+}) {
+  final CommandHelp commandHelp = _createCommandHelp(
+    ansi: stdoutSupportsAnsi,
+    wrapColumn: wrapColumn,
+  );
+
+  int expectedWidth = maxTestLineLength;
+
+  if (stdoutSupportsAnsi) {
+    const int ansiMetaCharactersLength = 33;
+    expectedWidth += ansiMetaCharactersLength;
+  }
+
+  expect(commandHelp.I.toString().length, lessThanOrEqualTo(expectedWidth));
+  expect(commandHelp.L.toString().length, lessThanOrEqualTo(expectedWidth));
+  expect(commandHelp.M.toString().length, lessThanOrEqualTo(expectedWidth));
+  expect(commandHelp.P.toString().length, lessThanOrEqualTo(expectedWidth));
+  expect(commandHelp.R.toString().length, lessThanOrEqualTo(expectedWidth));
+  expect(commandHelp.S.toString().length, lessThanOrEqualTo(expectedWidth));
+  expect(commandHelp.U.toString().length, lessThanOrEqualTo(expectedWidth));
+  expect(commandHelp.a.toString().length, lessThanOrEqualTo(expectedWidth));
+  expect(commandHelp.b.toString().length, lessThanOrEqualTo(expectedWidth));
+  expect(commandHelp.c.toString().length, lessThanOrEqualTo(expectedWidth));
+  expect(commandHelp.d.toString().length, lessThanOrEqualTo(expectedWidth));
+  expect(commandHelp.f.toString().length, lessThanOrEqualTo(expectedWidth));
+  expect(commandHelp.g.toString().length, lessThanOrEqualTo(expectedWidth));
+  expect(commandHelp.hWithDetails.toString().length, lessThanOrEqualTo(expectedWidth));
+  expect(commandHelp.hWithoutDetails.toString().length, lessThanOrEqualTo(expectedWidth));
+  expect(commandHelp.i.toString().length, lessThanOrEqualTo(expectedWidth));
+  expect(commandHelp.k.toString().length, lessThanOrEqualTo(expectedWidth));
+  expect(commandHelp.o.toString().length, lessThanOrEqualTo(expectedWidth));
+  expect(commandHelp.p.toString().length, lessThanOrEqualTo(expectedWidth));
+  expect(commandHelp.q.toString().length, lessThanOrEqualTo(expectedWidth));
+  expect(commandHelp.r.toString().length, lessThanOrEqualTo(expectedWidth));
+  expect(commandHelp.s.toString().length, lessThanOrEqualTo(expectedWidth));
+  expect(commandHelp.t.toString().length, lessThanOrEqualTo(expectedWidth));
+  expect(commandHelp.w.toString().length, lessThanOrEqualTo(expectedWidth));
 }

@@ -9,8 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'scheduler_tester.dart';
 
-class TestSchedulerBinding extends BindingBase with SchedulerBinding, ServicesBinding { }
-
 void main() {
   final SchedulerBinding scheduler = TestSchedulerBinding();
 
@@ -56,3 +54,5 @@ void main() {
     expect(secondCallbackRan, isFalse);
   });
 }
+
+class TestSchedulerBinding extends BindingBase with SchedulerBinding, ServicesBinding { }

@@ -8,9 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'gesture_tester.dart';
 
-// Anything longer than [kDoubleTapTimeout] will reset the serial tap count.
-final Duration kSerialTapDelay = kDoubleTapTimeout ~/ 2;
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -455,3 +452,6 @@ class ReleaseGestureRecognizer extends PrimaryPointerGestureRecognizer {
     }
   }
 }
+
+// Anything longer than [kDoubleTapTimeout] will reset the serial tap count.
+final Duration kSerialTapDelay = kDoubleTapTimeout ~/ 2;

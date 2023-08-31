@@ -7,10 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-final Key blockKey = UniqueKey();
-const double expandedAppbarHeight = 250.0;
-final Key appbarContainerKey = UniqueKey();
-
 void main() {
   testWidgetsWithLeakTracking('FlexibleSpaceBar collapse mode none', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -134,3 +130,7 @@ Future<void> slowDrag(WidgetTester tester, Key widget, Offset offset) async {
   await tester.pump(const Duration(milliseconds: 10));
   await gesture.up();
 }
+
+final Key blockKey = UniqueKey();
+const double expandedAppbarHeight = 250.0;
+final Key appbarContainerKey = UniqueKey();

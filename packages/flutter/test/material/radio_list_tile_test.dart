@@ -13,16 +13,6 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
-Widget wrap({Widget? child}) {
-  return MediaQuery(
-    data: const MediaQueryData(),
-    child: Directionality(
-      textDirection: TextDirection.ltr,
-      child: Material(child: child),
-    ),
-  );
-}
-
 void main() {
   testWidgetsWithLeakTracking('RadioListTile should initialize according to groupValue', (WidgetTester tester) async {
     final List<int> values = <int>[0, 1, 2];
@@ -1508,4 +1498,14 @@ void main() {
       );
     });
   });
+}
+
+Widget wrap({Widget? child}) {
+  return MediaQuery(
+    data: const MediaQueryData(),
+    child: Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(child: child),
+    ),
+  );
 }

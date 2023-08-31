@@ -5,32 +5,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-// Assuming that the test container is 800x600. The height of the
-// viewport's contents is 650.0, the top and bottom text children
-// are 100 pixels high and top/left edge of both widgets are visible.
-// The top of the bottom widget is at 550 (the top of the top widget
-// is at 0). The top of the bottom widget is 500 when it has been
-// scrolled completely into view.
-Widget buildFrame(ScrollPhysics physics, { ScrollController? scrollController }) {
-  return SingleChildScrollView(
-    key: UniqueKey(),
-    physics: physics,
-    controller: scrollController,
-    child: SizedBox(
-      height: 650.0,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        textDirection: TextDirection.ltr,
-        children: <Widget>[
-          const SizedBox(height: 100.0, child: Text('top', textDirection: TextDirection.ltr)),
-          Expanded(child: Container()),
-          const SizedBox(height: 100.0, child: Text('bottom', textDirection: TextDirection.ltr)),
-        ],
-      ),
-    ),
-  );
-}
-
 void main() {
   testWidgets('ClampingScrollPhysics', (WidgetTester tester) async {
 
@@ -105,4 +79,30 @@ void main() {
     await testOutOfBounds(const ClampingScrollPhysics(), -400.0, 0.0);
     await testOutOfBounds(const ClampingScrollPhysics(), 800.0, 50.0);
   });
+}
+
+// Assuming that the test container is 800x600. The height of the
+// viewport's contents is 650.0, the top and bottom text children
+// are 100 pixels high and top/left edge of both widgets are visible.
+// The top of the bottom widget is at 550 (the top of the top widget
+// is at 0). The top of the bottom widget is 500 when it has been
+// scrolled completely into view.
+Widget buildFrame(ScrollPhysics physics, { ScrollController? scrollController }) {
+  return SingleChildScrollView(
+    key: UniqueKey(),
+    physics: physics,
+    controller: scrollController,
+    child: SizedBox(
+      height: 650.0,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        textDirection: TextDirection.ltr,
+        children: <Widget>[
+          const SizedBox(height: 100.0, child: Text('top', textDirection: TextDirection.ltr)),
+          Expanded(child: Container()),
+          const SizedBox(height: 100.0, child: Text('bottom', textDirection: TextDirection.ltr)),
+        ],
+      ),
+    ),
+  );
 }

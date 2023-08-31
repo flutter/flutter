@@ -7,8 +7,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestBinding extends BindingBase { }
-
 void main() {
   test('BindingBase.debugCheckZone', () async {
     final BindingBase binding = TestBinding();
@@ -61,3 +59,5 @@ void main() {
     });
   });
 }
+
+class TestBinding extends BindingBase { }

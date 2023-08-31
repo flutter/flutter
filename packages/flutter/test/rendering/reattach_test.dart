@@ -7,82 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
-class TestTree {
-  TestTree() {
-    // incoming constraints are tight 800x600
-    root = RenderPositionedBox(
-      child: RenderConstrainedBox(
-        additionalConstraints: const BoxConstraints.tightFor(width: 800.0),
-        // Place the child to be evaluated within both a repaint boundary and a
-        // layout-root element (in this case a tightly constrained box). Otherwise
-        // the act of transplanting the root into a new container will cause the
-        // relayout/repaint of the new parent node to satisfy the test.
-        child: RenderRepaintBoundary(
-          child: RenderConstrainedBox(
-            additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0),
-            child: RenderRepaintBoundary(
-              child: RenderCustomPaint(
-                painter: TestCallbackPainter(
-                  onPaint: () { painted = true; },
-                ),
-                child: RenderPositionedBox(
-                  child: child = RenderConstrainedBox(
-                    additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0),
-                    child: RenderSemanticsAnnotations(
-                      textDirection: TextDirection.ltr,
-                      properties: const SemanticsProperties(label: 'Hello there foo'),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-  late RenderBox root;
-  late RenderConstrainedBox child;
-  bool painted = false;
-}
-
-class MutableCompositor extends RenderProxyBox {
-  MutableCompositor({ required RenderBox child }) : super(child);
-  bool _alwaysComposite = false;
-  @override
-  bool get alwaysNeedsCompositing => _alwaysComposite;
-}
-
-class TestCompositingBitsTree {
-  TestCompositingBitsTree() {
-    // incoming constraints are tight 800x600
-    root = RenderPositionedBox(
-      child: RenderConstrainedBox(
-        additionalConstraints: const BoxConstraints.tightFor(width: 800.0),
-        // Place the child to be evaluated within a repaint boundary. Otherwise
-        // the act of transplanting the root into a new container will cause the
-        // repaint of the new parent node to satisfy the test.
-        child: RenderRepaintBoundary(
-          child: compositor = MutableCompositor(
-            child: RenderCustomPaint(
-              painter: TestCallbackPainter(
-                onPaint: () { painted = true; },
-              ),
-              child: child = RenderConstrainedBox(
-                additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-  late RenderBox root;
-  late MutableCompositor compositor;
-  late RenderConstrainedBox child;
-  bool painted = false;
-}
-
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
@@ -179,4 +103,80 @@ void main() {
     expect(semanticsUpdateCount, 1); // semantics have changed.
     semanticsHandle.dispose();
   });
+}
+
+class TestTree {
+  TestTree() {
+    // incoming constraints are tight 800x600
+    root = RenderPositionedBox(
+      child: RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints.tightFor(width: 800.0),
+        // Place the child to be evaluated within both a repaint boundary and a
+        // layout-root element (in this case a tightly constrained box). Otherwise
+        // the act of transplanting the root into a new container will cause the
+        // relayout/repaint of the new parent node to satisfy the test.
+        child: RenderRepaintBoundary(
+          child: RenderConstrainedBox(
+            additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0),
+            child: RenderRepaintBoundary(
+              child: RenderCustomPaint(
+                painter: TestCallbackPainter(
+                  onPaint: () { painted = true; },
+                ),
+                child: RenderPositionedBox(
+                  child: child = RenderConstrainedBox(
+                    additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0),
+                    child: RenderSemanticsAnnotations(
+                      textDirection: TextDirection.ltr,
+                      properties: const SemanticsProperties(label: 'Hello there foo'),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+  late RenderBox root;
+  late RenderConstrainedBox child;
+  bool painted = false;
+}
+
+class MutableCompositor extends RenderProxyBox {
+  MutableCompositor({ required RenderBox child }) : super(child);
+  bool _alwaysComposite = false;
+  @override
+  bool get alwaysNeedsCompositing => _alwaysComposite;
+}
+
+class TestCompositingBitsTree {
+  TestCompositingBitsTree() {
+    // incoming constraints are tight 800x600
+    root = RenderPositionedBox(
+      child: RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints.tightFor(width: 800.0),
+        // Place the child to be evaluated within a repaint boundary. Otherwise
+        // the act of transplanting the root into a new container will cause the
+        // repaint of the new parent node to satisfy the test.
+        child: RenderRepaintBoundary(
+          child: compositor = MutableCompositor(
+            child: RenderCustomPaint(
+              painter: TestCallbackPainter(
+                onPaint: () { painted = true; },
+              ),
+              child: child = RenderConstrainedBox(
+                additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+  late RenderBox root;
+  late MutableCompositor compositor;
+  late RenderConstrainedBox child;
+  bool painted = false;
 }

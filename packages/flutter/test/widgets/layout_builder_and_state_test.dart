@@ -7,6 +7,45 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'test_widgets.dart';
 
+void main() {
+  testWidgets('Calling setState on a widget that moves into a LayoutBuilder in the same frame', (WidgetTester tester) async {
+    StatefulWrapperState statefulWrapper;
+    final Widget inner = Wrapper(
+      child: StatefulWrapper(
+        key: GlobalKey(),
+        child: Container(),
+      ),
+    );
+    await tester.pumpWidget(FlipWidget(
+      left: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+        return inner;
+      }),
+      right: inner,
+    ));
+    statefulWrapper = tester.state(find.byType(StatefulWrapper));
+    expect(statefulWrapper.built, true);
+    statefulWrapper.built = false;
+
+    statefulWrapper.trigger();
+    flipStatefulWidget(tester);
+    await tester.pump();
+    expect(statefulWrapper.built, true);
+    statefulWrapper.built = false;
+
+    statefulWrapper.trigger();
+    flipStatefulWidget(tester);
+    await tester.pump();
+    expect(statefulWrapper.built, true);
+    statefulWrapper.built = false;
+
+    statefulWrapper.trigger();
+    flipStatefulWidget(tester);
+    await tester.pump();
+    expect(statefulWrapper.built, true);
+    statefulWrapper.built = false;
+  });
+}
+
 class StatefulWrapper extends StatefulWidget {
   const StatefulWrapper({
     super.key,
@@ -46,43 +85,4 @@ class Wrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return child;
   }
-}
-
-void main() {
-  testWidgets('Calling setState on a widget that moves into a LayoutBuilder in the same frame', (WidgetTester tester) async {
-    StatefulWrapperState statefulWrapper;
-    final Widget inner = Wrapper(
-      child: StatefulWrapper(
-        key: GlobalKey(),
-        child: Container(),
-      ),
-    );
-    await tester.pumpWidget(FlipWidget(
-      left: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-        return inner;
-      }),
-      right: inner,
-    ));
-    statefulWrapper = tester.state(find.byType(StatefulWrapper));
-    expect(statefulWrapper.built, true);
-    statefulWrapper.built = false;
-
-    statefulWrapper.trigger();
-    flipStatefulWidget(tester);
-    await tester.pump();
-    expect(statefulWrapper.built, true);
-    statefulWrapper.built = false;
-
-    statefulWrapper.trigger();
-    flipStatefulWidget(tester);
-    await tester.pump();
-    expect(statefulWrapper.built, true);
-    statefulWrapper.built = false;
-
-    statefulWrapper.trigger();
-    flipStatefulWidget(tester);
-    await tester.pump();
-    expect(statefulWrapper.built, true);
-    statefulWrapper.built = false;
-  });
 }

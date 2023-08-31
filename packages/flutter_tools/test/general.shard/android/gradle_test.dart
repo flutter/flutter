@@ -19,14 +19,6 @@ import 'package:flutter_tools/src/project.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 
-const String kModulePubspec = '''
-name: test
-flutter:
-  module:
-    androidPackage: com.example
-    androidX: true
-''';
-
 void main() {
   Cache.flutterRoot = getFlutterRoot();
 
@@ -717,3 +709,11 @@ flutter:
     // TODO(zanderso): This is an integration test and should be moved to the integration shard.
   }, skip: true); // https://github.com/flutter/flutter/issues/87922
 }
+
+const String kModulePubspec = '''
+name: test
+flutter:
+  module:
+    androidPackage: com.example
+    androidX: true
+''';

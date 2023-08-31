@@ -8,11 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const List<Widget> fooBarTexts = <Text>[
-  Text('foo', textDirection: TextDirection.ltr),
-  Text('bar', textDirection: TextDirection.ltr),
-];
-
 void main() {
   group('image', () {
     testWidgets('finds Image widgets', (WidgetTester tester) async {
@@ -1247,3 +1242,8 @@ class _FakeFinder extends FinderBase<String> {
     return findInCandidatesCallback?.call(candidates) ?? candidates;
   }
 }
+
+const List<Widget> fooBarTexts = <Text>[
+  Text('foo', textDirection: TextDirection.ltr),
+  Text('bar', textDirection: TextDirection.ltr),
+];

@@ -10,8 +10,6 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 
-final UserMessages userMessages = UserMessages();
-
 void main() {
   group('Visual Studio validation', () {
     late FakeVisualStudio fakeVisualStudio;
@@ -236,3 +234,5 @@ class FakeVisualStudio extends Fake implements VisualStudio {
   @override
   String get workloadDescription => 'Desktop development';
 }
+
+final UserMessages userMessages = UserMessages();

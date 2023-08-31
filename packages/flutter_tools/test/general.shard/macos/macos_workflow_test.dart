@@ -8,12 +8,6 @@ import 'package:flutter_tools/src/macos/macos_workflow.dart';
 import '../../src/common.dart';
 import '../../src/fakes.dart';
 
-final FakePlatform macOS = FakePlatform(
-  operatingSystem: 'macos',
-);
-
-final FakePlatform linux = FakePlatform();
-
 void main() {
   testWithoutContext('Applies to macOS platform', () {
     final MacOSWorkflow macOSWorkflow = MacOSWorkflow(
@@ -51,3 +45,9 @@ void main() {
     expect(macOSWorkflow.canListEmulators, false);
   });
 }
+
+final FakePlatform macOS = FakePlatform(
+  operatingSystem: 'macos',
+);
+
+final FakePlatform linux = FakePlatform();

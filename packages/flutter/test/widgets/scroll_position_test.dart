@@ -5,6 +5,131 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+void main() {
+  testWidgets("ScrollPosition jumpTo() doesn't call notifyListeners twice", (WidgetTester tester) async {
+    int count = 0;
+    await tester.pumpWidget(MaterialApp(
+      home: ListView.builder(
+        itemBuilder: (BuildContext context, int index) {
+          return Text('$index', textDirection: TextDirection.ltr);
+        },
+      ),
+    ));
+
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    position.addListener(() {
+      count++;
+    });
+    position.jumpTo(100);
+
+    expect(count, 1);
+  });
+
+  testWidgets('whether we remember our scroll position', (WidgetTester tester) async {
+    await performTest(tester, true);
+    await performTest(tester, false);
+  });
+
+  testWidgets('scroll alignment is honored by ensureVisible', (WidgetTester tester) async {
+    final List<int> items = List<int>.generate(11, (int index) => index).toList();
+    final List<FocusNode> nodes = List<FocusNode>.generate(11, (int index) => FocusNode(debugLabel: 'Item ${index + 1}')).toList();
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ListView(
+          controller: controller,
+          children: items.map<Widget>((int item) {
+            return Focus(
+              key: ValueKey<int>(item),
+              focusNode: nodes[item],
+              child: Container(height: 110),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+
+    controller.position.ensureVisible(
+      tester.renderObject(find.byKey(const ValueKey<int>(0))),
+      alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+    );
+    expect(controller.position.pixels, equals(0.0));
+
+    controller.position.ensureVisible(
+      tester.renderObject(find.byKey(const ValueKey<int>(1))),
+      alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+    );
+    expect(controller.position.pixels, equals(0.0));
+
+    controller.position.ensureVisible(
+      tester.renderObject(find.byKey(const ValueKey<int>(1))),
+      alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+    );
+    expect(controller.position.pixels, equals(0.0));
+
+    controller.position.ensureVisible(
+      tester.renderObject(find.byKey(const ValueKey<int>(4))),
+      alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+    );
+    expect(controller.position.pixels, equals(0.0));
+
+    controller.position.ensureVisible(
+      tester.renderObject(find.byKey(const ValueKey<int>(5))),
+      alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+    );
+    expect(controller.position.pixels, equals(0.0));
+
+    controller.position.ensureVisible(
+      tester.renderObject(find.byKey(const ValueKey<int>(5))),
+      alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+    );
+    expect(controller.position.pixels, equals(60.0));
+
+    controller.position.ensureVisible(
+      tester.renderObject(find.byKey(const ValueKey<int>(0))),
+      alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
+    );
+    expect(controller.position.pixels, equals(0.0));
+  });
+
+  testWidgets('jumpTo recommends deferred loading', (WidgetTester tester) async {
+    int loadedWithDeferral = 0;
+    int buildCount = 0;
+    const double height = 500;
+    await tester.pumpWidget(MaterialApp(
+      home: ListView.builder(
+        itemBuilder: (BuildContext context, int index) {
+          buildCount += 1;
+          if (Scrollable.recommendDeferredLoadingForContext(context)) {
+            loadedWithDeferral += 1;
+          }
+          return const SizedBox(height: height);
+        },
+      ),
+    ));
+
+    // The two visible on screen should have loaded without deferral.
+    expect(buildCount, 2);
+    expect(loadedWithDeferral, 0);
+
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    position.jumpTo(height * 100);
+    await tester.pump();
+
+    // All but the first two that were loaded normally should have gotten a
+    // recommendation to defer.
+    expect(buildCount, 102);
+    expect(loadedWithDeferral, 100);
+
+    position.jumpTo(height * 102);
+    await tester.pump();
+
+    // The smaller jump should not have recommended deferral.
+    expect(buildCount, 104);
+    expect(loadedWithDeferral, 100);
+  });
+}
+
 ScrollController _controller = ScrollController(
   initialScrollOffset: 110.0,
 );
@@ -137,129 +262,4 @@ Future<void> performTest(WidgetTester tester, bool maintainState) async {
   expect(find.text('15'), findsOneWidget, reason: 'with maintainState: $maintainState');
   expect(find.text('16'), findsNothing, reason: 'with maintainState: $maintainState');
   expect(find.text('100'), findsNothing, reason: 'with maintainState: $maintainState');
-}
-
-void main() {
-  testWidgets("ScrollPosition jumpTo() doesn't call notifyListeners twice", (WidgetTester tester) async {
-    int count = 0;
-    await tester.pumpWidget(MaterialApp(
-      home: ListView.builder(
-        itemBuilder: (BuildContext context, int index) {
-          return Text('$index', textDirection: TextDirection.ltr);
-        },
-      ),
-    ));
-
-    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
-    position.addListener(() {
-      count++;
-    });
-    position.jumpTo(100);
-
-    expect(count, 1);
-  });
-
-  testWidgets('whether we remember our scroll position', (WidgetTester tester) async {
-    await performTest(tester, true);
-    await performTest(tester, false);
-  });
-
-  testWidgets('scroll alignment is honored by ensureVisible', (WidgetTester tester) async {
-    final List<int> items = List<int>.generate(11, (int index) => index).toList();
-    final List<FocusNode> nodes = List<FocusNode>.generate(11, (int index) => FocusNode(debugLabel: 'Item ${index + 1}')).toList();
-    final ScrollController controller = ScrollController();
-    await tester.pumpWidget(
-      MaterialApp(
-        home: ListView(
-          controller: controller,
-          children: items.map<Widget>((int item) {
-            return Focus(
-              key: ValueKey<int>(item),
-              focusNode: nodes[item],
-              child: Container(height: 110),
-            );
-          }).toList(),
-        ),
-      ),
-    );
-
-    controller.position.ensureVisible(
-      tester.renderObject(find.byKey(const ValueKey<int>(0))),
-      alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
-    );
-    expect(controller.position.pixels, equals(0.0));
-
-    controller.position.ensureVisible(
-      tester.renderObject(find.byKey(const ValueKey<int>(1))),
-      alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
-    );
-    expect(controller.position.pixels, equals(0.0));
-
-    controller.position.ensureVisible(
-      tester.renderObject(find.byKey(const ValueKey<int>(1))),
-      alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
-    );
-    expect(controller.position.pixels, equals(0.0));
-
-    controller.position.ensureVisible(
-      tester.renderObject(find.byKey(const ValueKey<int>(4))),
-      alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
-    );
-    expect(controller.position.pixels, equals(0.0));
-
-    controller.position.ensureVisible(
-      tester.renderObject(find.byKey(const ValueKey<int>(5))),
-      alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
-    );
-    expect(controller.position.pixels, equals(0.0));
-
-    controller.position.ensureVisible(
-      tester.renderObject(find.byKey(const ValueKey<int>(5))),
-      alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
-    );
-    expect(controller.position.pixels, equals(60.0));
-
-    controller.position.ensureVisible(
-      tester.renderObject(find.byKey(const ValueKey<int>(0))),
-      alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
-    );
-    expect(controller.position.pixels, equals(0.0));
-  });
-
-  testWidgets('jumpTo recommends deferred loading', (WidgetTester tester) async {
-    int loadedWithDeferral = 0;
-    int buildCount = 0;
-    const double height = 500;
-    await tester.pumpWidget(MaterialApp(
-      home: ListView.builder(
-        itemBuilder: (BuildContext context, int index) {
-          buildCount += 1;
-          if (Scrollable.recommendDeferredLoadingForContext(context)) {
-            loadedWithDeferral += 1;
-          }
-          return const SizedBox(height: height);
-        },
-      ),
-    ));
-
-    // The two visible on screen should have loaded without deferral.
-    expect(buildCount, 2);
-    expect(loadedWithDeferral, 0);
-
-    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
-    position.jumpTo(height * 100);
-    await tester.pump();
-
-    // All but the first two that were loaded normally should have gotten a
-    // recommendation to defer.
-    expect(buildCount, 102);
-    expect(loadedWithDeferral, 100);
-
-    position.jumpTo(height * 102);
-    await tester.pump();
-
-    // The smaller jump should not have recommended deferral.
-    expect(buildCount, 104);
-    expect(loadedWithDeferral, 100);
-  });
 }

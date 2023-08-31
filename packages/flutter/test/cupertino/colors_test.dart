@@ -6,96 +6,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class DependentWidget extends StatelessWidget {
-  const DependentWidget({
-    super.key,
-    required this.color,
-  });
-
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    final Color resolved = CupertinoDynamicColor.resolve(color, context);
-    return DecoratedBox(
-      decoration: BoxDecoration(color: resolved),
-      child: const SizedBox.expand(),
-    );
-  }
-}
-
-const Color color0 = Color(0xFF000000);
-const Color color1 = Color(0xFF000001);
-const Color color2 = Color(0xFF000002);
-const Color color3 = Color(0xFF000003);
-const Color color4 = Color(0xFF000004);
-const Color color5 = Color(0xFF000005);
-const Color color6 = Color(0xFF000006);
-const Color color7 = Color(0xFF000007);
-
-// A color that depends on color vibrancy, accessibility contrast, as well as user
-// interface elevation.
-const CupertinoDynamicColor dynamicColor = CupertinoDynamicColor(
-  color: color0,
-  darkColor: color1,
-  elevatedColor: color2,
-  highContrastColor: color3,
-  darkElevatedColor: color4,
-  darkHighContrastColor: color5,
-  highContrastElevatedColor: color6,
-  darkHighContrastElevatedColor: color7,
-);
-
-// A color that uses [color0] in every circumstance.
-const Color notSoDynamicColor1 = CupertinoDynamicColor(
-  color: color0,
-  darkColor: color0,
-  darkHighContrastColor: color0,
-  darkElevatedColor: color0,
-  darkHighContrastElevatedColor: color0,
-  highContrastColor: color0,
-  highContrastElevatedColor: color0,
-  elevatedColor: color0,
-);
-
-// A color that uses [color1] for light mode, and [color0] for dark mode.
-const Color vibrancyDependentColor1 = CupertinoDynamicColor(
-  color: color1,
-  elevatedColor: color1,
-  highContrastColor: color1,
-  highContrastElevatedColor: color1,
-  darkColor: color0,
-  darkHighContrastColor: color0,
-  darkElevatedColor: color0,
-  darkHighContrastElevatedColor: color0,
-);
-
-// A color that uses [color1] for normal contrast mode, and [color0] for high
-// contrast mode.
-const Color contrastDependentColor1 = CupertinoDynamicColor(
-  color: color1,
-  darkColor: color1,
-  elevatedColor: color1,
-  darkElevatedColor: color1,
-  highContrastColor: color0,
-  darkHighContrastColor: color0,
-  highContrastElevatedColor: color0,
-  darkHighContrastElevatedColor: color0,
-);
-
-// A color that uses [color1] for base interface elevation, and [color0] for elevated
-// interface elevation.
-const Color elevationDependentColor1 = CupertinoDynamicColor(
-  color: color1,
-  darkColor: color1,
-  highContrastColor: color1,
-  darkHighContrastColor: color1,
-  elevatedColor: color0,
-  darkElevatedColor: color0,
-  highContrastElevatedColor: color0,
-  darkHighContrastElevatedColor: color0,
-);
-
 void main() {
   test('== works as expected', () {
     expect(dynamicColor, const CupertinoDynamicColor(
@@ -597,3 +507,93 @@ class _NullWidget extends Widget {
   @override
   Element createElement() => throw UnimplementedError();
 }
+
+class DependentWidget extends StatelessWidget {
+  const DependentWidget({
+    super.key,
+    required this.color,
+  });
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color resolved = CupertinoDynamicColor.resolve(color, context);
+    return DecoratedBox(
+      decoration: BoxDecoration(color: resolved),
+      child: const SizedBox.expand(),
+    );
+  }
+}
+
+const Color color0 = Color(0xFF000000);
+const Color color1 = Color(0xFF000001);
+const Color color2 = Color(0xFF000002);
+const Color color3 = Color(0xFF000003);
+const Color color4 = Color(0xFF000004);
+const Color color5 = Color(0xFF000005);
+const Color color6 = Color(0xFF000006);
+const Color color7 = Color(0xFF000007);
+
+// A color that depends on color vibrancy, accessibility contrast, as well as user
+// interface elevation.
+const CupertinoDynamicColor dynamicColor = CupertinoDynamicColor(
+  color: color0,
+  darkColor: color1,
+  elevatedColor: color2,
+  highContrastColor: color3,
+  darkElevatedColor: color4,
+  darkHighContrastColor: color5,
+  highContrastElevatedColor: color6,
+  darkHighContrastElevatedColor: color7,
+);
+
+// A color that uses [color0] in every circumstance.
+const Color notSoDynamicColor1 = CupertinoDynamicColor(
+  color: color0,
+  darkColor: color0,
+  darkHighContrastColor: color0,
+  darkElevatedColor: color0,
+  darkHighContrastElevatedColor: color0,
+  highContrastColor: color0,
+  highContrastElevatedColor: color0,
+  elevatedColor: color0,
+);
+
+// A color that uses [color1] for light mode, and [color0] for dark mode.
+const Color vibrancyDependentColor1 = CupertinoDynamicColor(
+  color: color1,
+  elevatedColor: color1,
+  highContrastColor: color1,
+  highContrastElevatedColor: color1,
+  darkColor: color0,
+  darkHighContrastColor: color0,
+  darkElevatedColor: color0,
+  darkHighContrastElevatedColor: color0,
+);
+
+// A color that uses [color1] for normal contrast mode, and [color0] for high
+// contrast mode.
+const Color contrastDependentColor1 = CupertinoDynamicColor(
+  color: color1,
+  darkColor: color1,
+  elevatedColor: color1,
+  darkElevatedColor: color1,
+  highContrastColor: color0,
+  darkHighContrastColor: color0,
+  highContrastElevatedColor: color0,
+  darkHighContrastElevatedColor: color0,
+);
+
+// A color that uses [color1] for base interface elevation, and [color0] for elevated
+// interface elevation.
+const Color elevationDependentColor1 = CupertinoDynamicColor(
+  color: color1,
+  darkColor: color1,
+  highContrastColor: color1,
+  darkHighContrastColor: color1,
+  elevatedColor: color0,
+  darkElevatedColor: color0,
+  highContrastElevatedColor: color0,
+  darkHighContrastElevatedColor: color0,
+);

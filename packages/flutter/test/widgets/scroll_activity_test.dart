@@ -7,12 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-List<Widget> children(int n) {
-  return List<Widget>.generate(n, (int i) {
-    return SizedBox(height: 100.0, child: Text('$i'));
-  });
-}
-
 void main() {
   testWidgets('Scrolling with list view changes, leaving the overscroll', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
@@ -354,4 +348,10 @@ class _Carousel62209State extends State<Carousel62209> {
       ),
     );
   }
+}
+
+List<Widget> children(int n) {
+  return List<Widget>.generate(n, (int i) {
+    return SizedBox(height: 100.0, child: Text('$i'));
+  });
 }

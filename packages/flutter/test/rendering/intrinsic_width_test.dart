@@ -7,44 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
-// before using this, consider using RenderSizedBox from rendering_tester.dart
-class RenderTestBox extends RenderBox {
-  RenderTestBox(this._intrinsicDimensions);
-
-  final BoxConstraints _intrinsicDimensions;
-
-  @override
-  double computeMinIntrinsicWidth(double height) {
-    return _intrinsicDimensions.minWidth;
-  }
-
-  @override
-  double computeMaxIntrinsicWidth(double height) {
-    return _intrinsicDimensions.maxWidth;
-  }
-
-  @override
-  double computeMinIntrinsicHeight(double width) {
-    return _intrinsicDimensions.minHeight;
-  }
-
-  @override
-  double computeMaxIntrinsicHeight(double width) {
-    return _intrinsicDimensions.maxHeight;
-  }
-
-  @override
-  bool get sizedByParent => true;
-
-  @override
-  void performResize() {
-    size = constraints.constrain(Size(
-      _intrinsicDimensions.minWidth + (_intrinsicDimensions.maxWidth - _intrinsicDimensions.minWidth) / 2.0,
-      _intrinsicDimensions.minHeight + (_intrinsicDimensions.maxHeight - _intrinsicDimensions.minHeight) / 2.0,
-    ));
-  }
-}
-
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
@@ -612,4 +574,42 @@ void main() {
       ),
     );
   });
+}
+
+// before using this, consider using RenderSizedBox from rendering_tester.dart
+class RenderTestBox extends RenderBox {
+  RenderTestBox(this._intrinsicDimensions);
+
+  final BoxConstraints _intrinsicDimensions;
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    return _intrinsicDimensions.minWidth;
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    return _intrinsicDimensions.maxWidth;
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    return _intrinsicDimensions.minHeight;
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    return _intrinsicDimensions.maxHeight;
+  }
+
+  @override
+  bool get sizedByParent => true;
+
+  @override
+  void performResize() {
+    size = constraints.constrain(Size(
+      _intrinsicDimensions.minWidth + (_intrinsicDimensions.maxWidth - _intrinsicDimensions.minWidth) / 2.0,
+      _intrinsicDimensions.minHeight + (_intrinsicDimensions.maxHeight - _intrinsicDimensions.minHeight) / 2.0,
+    ));
+  }
 }

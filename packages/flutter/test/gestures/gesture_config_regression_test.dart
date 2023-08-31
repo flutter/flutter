@@ -8,6 +8,55 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+void main() {
+  testWidgetsWithLeakTracking('Scroll Views get the same ScrollConfiguration as GestureDetectors', (WidgetTester tester) async {
+    tester.view.gestureSettings = const ui.GestureSettings(physicalTouchSlop: 4);
+    addTearDown(tester.view.reset);
+
+    final TestResult result = TestResult();
+
+    await tester.pumpWidget(MaterialApp(
+      title: 'Scroll Bug',
+      home: NestedScrollableCase(testResult: result),
+    ));
+
+    // By dragging the scroll view more than the configured touch slop above but less than
+    // the framework default value, we demonstrate that this causes gesture detectors
+    // that do not receive the same gesture settings to fire at different times than would
+    // be expected.
+    final Offset start = tester.getCenter(find.byKey(const ValueKey<int>(1)));
+    await tester.timedDragFrom(start, const Offset(0, 5), const Duration(milliseconds: 50));
+    await tester.pumpAndSettle();
+
+   expect(result.dragStarted, true);
+   expect(result.dragUpdate, true);
+  });
+
+  testWidgetsWithLeakTracking('Scroll Views get the same ScrollConfiguration as Draggables', (WidgetTester tester) async {
+    tester.view.gestureSettings = const ui.GestureSettings(physicalTouchSlop: 4);
+    addTearDown(tester.view.reset);
+
+    final TestResult result = TestResult();
+
+    await tester.pumpWidget(MaterialApp(
+      title: 'Scroll Bug',
+      home: NestedDraggableCase(testResult: result),
+    ));
+
+    // By dragging the scroll view more than the configured touch slop above but less than
+    // the framework default value, we demonstrate that this causes gesture detectors
+    // that do not receive the same gesture settings to fire at different times than would
+    // be expected.
+    final Offset start = tester.getCenter(find.byKey(const ValueKey<int>(1)));
+    await tester.timedDragFrom(start, const Offset(0, 5), const Duration(milliseconds: 50));
+    await tester.pumpAndSettle();
+
+   expect(result.dragStarted, true);
+   expect(result.dragUpdate, true);
+   expect(result.dragEnd, true);
+  });
+}
+
 class TestResult {
   bool dragStarted = false;
   bool dragUpdate = false;
@@ -90,53 +139,4 @@ class NestedDraggableCase extends StatelessWidget {
       ),
     );
   }
-}
-
-void main() {
-  testWidgetsWithLeakTracking('Scroll Views get the same ScrollConfiguration as GestureDetectors', (WidgetTester tester) async {
-    tester.view.gestureSettings = const ui.GestureSettings(physicalTouchSlop: 4);
-    addTearDown(tester.view.reset);
-
-    final TestResult result = TestResult();
-
-    await tester.pumpWidget(MaterialApp(
-      title: 'Scroll Bug',
-      home: NestedScrollableCase(testResult: result),
-    ));
-
-    // By dragging the scroll view more than the configured touch slop above but less than
-    // the framework default value, we demonstrate that this causes gesture detectors
-    // that do not receive the same gesture settings to fire at different times than would
-    // be expected.
-    final Offset start = tester.getCenter(find.byKey(const ValueKey<int>(1)));
-    await tester.timedDragFrom(start, const Offset(0, 5), const Duration(milliseconds: 50));
-    await tester.pumpAndSettle();
-
-   expect(result.dragStarted, true);
-   expect(result.dragUpdate, true);
-  });
-
-  testWidgetsWithLeakTracking('Scroll Views get the same ScrollConfiguration as Draggables', (WidgetTester tester) async {
-    tester.view.gestureSettings = const ui.GestureSettings(physicalTouchSlop: 4);
-    addTearDown(tester.view.reset);
-
-    final TestResult result = TestResult();
-
-    await tester.pumpWidget(MaterialApp(
-      title: 'Scroll Bug',
-      home: NestedDraggableCase(testResult: result),
-    ));
-
-    // By dragging the scroll view more than the configured touch slop above but less than
-    // the framework default value, we demonstrate that this causes gesture detectors
-    // that do not receive the same gesture settings to fire at different times than would
-    // be expected.
-    final Offset start = tester.getCenter(find.byKey(const ValueKey<int>(1)));
-    await tester.timedDragFrom(start, const Offset(0, 5), const Duration(milliseconds: 50));
-    await tester.pumpAndSettle();
-
-   expect(result.dragStarted, true);
-   expect(result.dragUpdate, true);
-   expect(result.dragEnd, true);
-  });
 }

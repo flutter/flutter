@@ -6,113 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-/// Adds the basic requirements for a Chip.
-Widget wrapForChip({
-  required Widget child,
-  TextDirection textDirection = TextDirection.ltr,
-  double textScaleFactor = 1.0,
-  Brightness brightness = Brightness.light,
-  bool? useMaterial3,
-}) {
-  return MaterialApp(
-    theme: ThemeData(brightness: brightness, useMaterial3: useMaterial3),
-    home: Directionality(
-      textDirection: textDirection,
-      child: MediaQuery(
-        data: MediaQueryData(textScaleFactor: textScaleFactor),
-        child: Material(child: child),
-      ),
-    ),
-  );
-}
-
-Future<void> pumpCheckmarkChip(
-  WidgetTester tester, {
-  required Widget chip,
-  Color? themeColor,
-  Brightness brightness = Brightness.light,
-  ThemeData? theme,
-}) async {
-  await tester.pumpWidget(
-    wrapForChip(
-      useMaterial3: false,
-      brightness: brightness,
-      child: Builder(
-        builder: (BuildContext context) {
-          final ChipThemeData chipTheme = ChipTheme.of(context);
-          return ChipTheme(
-            data: themeColor == null ? chipTheme : chipTheme.copyWith(
-              checkmarkColor: themeColor,
-            ),
-            child: chip,
-          );
-        },
-      ),
-    ),
-  );
-}
-
-Widget selectedFilterChip({ Color? checkmarkColor }) {
-  return FilterChip(
-    label: const Text('InputChip'),
-    selected: true,
-    showCheckmark: true,
-    checkmarkColor: checkmarkColor,
-    onSelected: (bool _) { },
-  );
-}
-
-void expectCheckmarkColor(Finder finder, Color color) {
-  expect(
-    finder,
-    paints
-      // Physical model path
-      ..path()
-      // The first layer that is painted is the selection overlay. We do not care
-      // how it is painted but it has to be added it to this pattern so that the
-      // check mark can be checked next.
-      ..rrect()
-      // The second layer that is painted is the check mark.
-      ..path(color: color),
-  );
-}
-
-RenderBox getMaterialBox(WidgetTester tester, Finder type) {
-  return tester.firstRenderObject<RenderBox>(
-    find.descendant(
-      of: type,
-      matching: find.byType(CustomPaint),
-    ),
-  );
-}
-
-void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
-  final Iterable<Material> materials = tester.widgetList<Material>(find.byType(Material));
-  // There should be two Material widgets, first Material is from the "_wrapForChip" and
-  // last Material is from the "RawChip".
-  expect(materials.length, 2);
-  // The last Material from `RawChip` should have the clip behavior.
-  expect(materials.last.clipBehavior, clipBehavior);
-}
-
-Material getMaterial(WidgetTester tester) {
-  return tester.widget<Material>(
-    find.descendant(
-      of: find.byType(FilterChip),
-      matching: find.byType(Material),
-    ),
-  );
-}
-
-DefaultTextStyle getLabelStyle(WidgetTester tester, String labelText) {
-  return tester.widget(
-    find.ancestor(
-      of: find.text(labelText),
-      matching: find.byType(DefaultTextStyle),
-    ).first,
-  );
-}
-
 void main() {
   testWidgetsWithLeakTracking('FilterChip defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
@@ -687,4 +580,111 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(FilterChip)).width, expectedWidth);
   });
+}
+
+/// Adds the basic requirements for a Chip.
+Widget wrapForChip({
+  required Widget child,
+  TextDirection textDirection = TextDirection.ltr,
+  double textScaleFactor = 1.0,
+  Brightness brightness = Brightness.light,
+  bool? useMaterial3,
+}) {
+  return MaterialApp(
+    theme: ThemeData(brightness: brightness, useMaterial3: useMaterial3),
+    home: Directionality(
+      textDirection: textDirection,
+      child: MediaQuery(
+        data: MediaQueryData(textScaleFactor: textScaleFactor),
+        child: Material(child: child),
+      ),
+    ),
+  );
+}
+
+Future<void> pumpCheckmarkChip(
+  WidgetTester tester, {
+  required Widget chip,
+  Color? themeColor,
+  Brightness brightness = Brightness.light,
+  ThemeData? theme,
+}) async {
+  await tester.pumpWidget(
+    wrapForChip(
+      useMaterial3: false,
+      brightness: brightness,
+      child: Builder(
+        builder: (BuildContext context) {
+          final ChipThemeData chipTheme = ChipTheme.of(context);
+          return ChipTheme(
+            data: themeColor == null ? chipTheme : chipTheme.copyWith(
+              checkmarkColor: themeColor,
+            ),
+            child: chip,
+          );
+        },
+      ),
+    ),
+  );
+}
+
+Widget selectedFilterChip({ Color? checkmarkColor }) {
+  return FilterChip(
+    label: const Text('InputChip'),
+    selected: true,
+    showCheckmark: true,
+    checkmarkColor: checkmarkColor,
+    onSelected: (bool _) { },
+  );
+}
+
+void expectCheckmarkColor(Finder finder, Color color) {
+  expect(
+    finder,
+    paints
+      // Physical model path
+      ..path()
+      // The first layer that is painted is the selection overlay. We do not care
+      // how it is painted but it has to be added it to this pattern so that the
+      // check mark can be checked next.
+      ..rrect()
+      // The second layer that is painted is the check mark.
+      ..path(color: color),
+  );
+}
+
+RenderBox getMaterialBox(WidgetTester tester, Finder type) {
+  return tester.firstRenderObject<RenderBox>(
+    find.descendant(
+      of: type,
+      matching: find.byType(CustomPaint),
+    ),
+  );
+}
+
+void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
+  final Iterable<Material> materials = tester.widgetList<Material>(find.byType(Material));
+  // There should be two Material widgets, first Material is from the "_wrapForChip" and
+  // last Material is from the "RawChip".
+  expect(materials.length, 2);
+  // The last Material from `RawChip` should have the clip behavior.
+  expect(materials.last.clipBehavior, clipBehavior);
+}
+
+Material getMaterial(WidgetTester tester) {
+  return tester.widget<Material>(
+    find.descendant(
+      of: find.byType(FilterChip),
+      matching: find.byType(Material),
+    ),
+  );
+}
+
+DefaultTextStyle getLabelStyle(WidgetTester tester, String labelText) {
+  return tester.widget(
+    find.ancestor(
+      of: find.text(labelText),
+      matching: find.byType(DefaultTextStyle),
+    ).first,
+  );
 }

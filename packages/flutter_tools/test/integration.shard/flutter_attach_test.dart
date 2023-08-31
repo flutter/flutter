@@ -13,14 +13,6 @@ import 'test_data/basic_project.dart';
 import 'test_driver.dart';
 import 'test_utils.dart';
 
-Future<int> getFreePort() async {
-  int port = 0;
-  final ServerSocket serverSocket = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
-  port = serverSocket.port;
-  await serverSocket.close();
-  return port;
-}
-
 void main() {
   final BasicProject project = BasicProject();
   late Directory tempDir;
@@ -217,4 +209,12 @@ void main() {
       expect(await isObservatoryAvailable(), true);
     });
   });
+}
+
+Future<int> getFreePort() async {
+  int port = 0;
+  final ServerSocket serverSocket = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
+  port = serverSocket.port;
+  await serverSocket.close();
+  return port;
 }

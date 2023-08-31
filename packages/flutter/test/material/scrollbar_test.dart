@@ -18,58 +18,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-const Duration _kScrollbarFadeDuration = Duration(milliseconds: 300);
-const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
-const Color _kAndroidThumbIdleColor = Color(0xffbcbcbc);
-const Rect _kAndroidTrackDimensions = Rect.fromLTRB(796.0, 0.0, 800.0, 600.0);
-const Radius _kDefaultThumbRadius = Radius.circular(8.0);
-const Color _kDefaultIdleThumbColor = Color(0x1a000000);
-const Offset _kTrackBorderPoint1 = Offset(796.0, 0.0);
-const Offset _kTrackBorderPoint2 = Offset(796.0, 600.0);
-
-Rect getStartingThumbRect({ required bool isAndroid }) {
-  return isAndroid
-    // On Android the thumb is slightly different. The thumb is only 4 pixels wide,
-    // and has no margin along the side of the viewport.
-    ? const Rect.fromLTRB(796.0, 0.0, 800.0, 90.0)
-    // The Material Design thumb is 8 pixels wide, with a 2
-    // pixel margin to the right edge of the viewport.
-    : const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0);
-}
-
-class TestCanvas implements Canvas {
-  final List<Invocation> invocations = <Invocation>[];
-
-  @override
-  void noSuchMethod(Invocation invocation) {
-    invocations.add(invocation);
-  }
-}
-
-Widget _buildBoilerplate({
-  TextDirection textDirection = TextDirection.ltr,
-  EdgeInsets padding = EdgeInsets.zero,
-  required Widget child,
-}) {
-  return Directionality(
-    textDirection: textDirection,
-    child: MediaQuery(
-      data: MediaQueryData(padding: padding),
-      child: ScrollConfiguration(
-        behavior: const NoScrollbarBehavior(),
-        child: child,
-      ),
-    ),
-  );
-}
-
-class NoScrollbarBehavior extends MaterialScrollBehavior {
-  const NoScrollbarBehavior();
-
-  @override
-  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) => child;
-}
-
 void main() {
   testWidgetsWithLeakTracking("Scrollbar doesn't show when tapping list", (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1845,4 +1793,56 @@ void main() {
         ),
     );
   });
+}
+
+const Duration _kScrollbarFadeDuration = Duration(milliseconds: 300);
+const Duration _kScrollbarTimeToFade = Duration(milliseconds: 600);
+const Color _kAndroidThumbIdleColor = Color(0xffbcbcbc);
+const Rect _kAndroidTrackDimensions = Rect.fromLTRB(796.0, 0.0, 800.0, 600.0);
+const Radius _kDefaultThumbRadius = Radius.circular(8.0);
+const Color _kDefaultIdleThumbColor = Color(0x1a000000);
+const Offset _kTrackBorderPoint1 = Offset(796.0, 0.0);
+const Offset _kTrackBorderPoint2 = Offset(796.0, 600.0);
+
+Rect getStartingThumbRect({ required bool isAndroid }) {
+  return isAndroid
+    // On Android the thumb is slightly different. The thumb is only 4 pixels wide,
+    // and has no margin along the side of the viewport.
+    ? const Rect.fromLTRB(796.0, 0.0, 800.0, 90.0)
+    // The Material Design thumb is 8 pixels wide, with a 2
+    // pixel margin to the right edge of the viewport.
+    : const Rect.fromLTRB(790.0, 0.0, 798.0, 90.0);
+}
+
+class TestCanvas implements Canvas {
+  final List<Invocation> invocations = <Invocation>[];
+
+  @override
+  void noSuchMethod(Invocation invocation) {
+    invocations.add(invocation);
+  }
+}
+
+Widget _buildBoilerplate({
+  TextDirection textDirection = TextDirection.ltr,
+  EdgeInsets padding = EdgeInsets.zero,
+  required Widget child,
+}) {
+  return Directionality(
+    textDirection: textDirection,
+    child: MediaQuery(
+      data: MediaQueryData(padding: padding),
+      child: ScrollConfiguration(
+        behavior: const NoScrollbarBehavior(),
+        child: child,
+      ),
+    ),
+  );
+}
+
+class NoScrollbarBehavior extends MaterialScrollBehavior {
+  const NoScrollbarBehavior();
+
+  @override
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) => child;
 }

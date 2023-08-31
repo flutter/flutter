@@ -7,21 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestIntent extends Intent {
-  const TestIntent();
-}
-
-class TestAction extends Action<Intent> {
-  TestAction();
-
-  int calls = 0;
-
-  @override
-  void invoke(Intent intent) {
-    calls += 1;
-  }
-}
-
 void main() {
   testWidgets('WidgetsApp with builder only', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
@@ -856,5 +841,20 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
         ),
       ],
     );
+  }
+}
+
+class TestIntent extends Intent {
+  const TestIntent();
+}
+
+class TestAction extends Action<Intent> {
+  TestAction();
+
+  int calls = 0;
+
+  @override
+  void invoke(Intent intent) {
+    calls += 1;
   }
 }

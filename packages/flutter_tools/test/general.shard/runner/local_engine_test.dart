@@ -12,10 +12,6 @@ import 'package:flutter_tools/src/runner/local_engine.dart';
 
 import '../../src/common.dart';
 
-const String kEngineRoot = '/flutter/engine';
-const String kArbitraryEngineRoot = '/arbitrary/engine';
-const String kDotPackages = '.packages';
-
 void main() {
   testWithoutContext('works if --local-engine is specified and --local-engine-src-path '
     'is determined by sky_engine', () async {
@@ -427,3 +423,7 @@ Matcher matchesEngineBuildPaths({
     .having((EngineBuildPaths paths) => paths.hostEngine, 'hostEngine', hostEngine)
     .having((EngineBuildPaths paths) => paths.targetEngine, 'targetEngine', targetEngine);
 }
+
+const String kEngineRoot = '/flutter/engine';
+const String kArbitraryEngineRoot = '/arbitrary/engine';
+const String kDotPackages = '.packages';

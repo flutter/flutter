@@ -32,18 +32,6 @@ import '../../src/context.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 
-class FakeTerminal extends Fake implements AnsiTerminal {
-  FakeTerminal({this.stdinHasTerminal = true});
-
-  @override
-  final bool stdinHasTerminal;
-}
-
-class FakeProcessInfo extends Fake implements ProcessInfo {
-  @override
-  int maxRss = 0;
-}
-
 void main() {
   testUsingContext('All build commands support null safety options', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
@@ -141,4 +129,16 @@ class FakeBuildSubCommand extends BuildSubCommand {
   Future<FlutterCommandResult> runCommand() {
     throw UnimplementedError();
   }
+}
+
+class FakeTerminal extends Fake implements AnsiTerminal {
+  FakeTerminal({this.stdinHasTerminal = true});
+
+  @override
+  final bool stdinHasTerminal;
+}
+
+class FakeProcessInfo extends Fake implements ProcessInfo {
+  @override
+  int maxRss = 0;
 }

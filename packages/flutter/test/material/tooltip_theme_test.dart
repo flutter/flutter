@@ -10,26 +10,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 
-const String tooltipText = 'TIP';
-const double _customPaddingValue = 10.0;
-
-void _ensureTooltipVisible(GlobalKey key) {
-  // This function uses "as dynamic"to defeat the static analysis. In general
-  // you want to avoid using this style in your code, as it will cause the
-  // analyzer to be unable to help you catch errors.
-  //
-  // In this case, we do it because we are trying to call internal methods of
-  // the tooltip code in order to test it. Normally, the state of a tooltip is a
-  // private class, but by using a GlobalKey we can get a handle to that object
-  // and by using "as dynamic" we can bypass the analyzer's type checks and call
-  // methods that we aren't supposed to be able to know about.
-  //
-  // It's ok to do this in tests, but you really don't want to do it in
-  // production code.
-  // ignore: avoid_dynamic_calls
-  (key.currentState as dynamic).ensureTooltipVisible();
-}
-
 void main() {
   test('TooltipThemeData copyWith, ==, hashCode basics', () {
     expect(const TooltipThemeData(), const TooltipThemeData().copyWith());
@@ -1334,4 +1314,24 @@ SemanticsNode findDebugSemantics(RenderObject object) {
     return object.debugSemantics!;
   }
   return findDebugSemantics(object.parent!);
+}
+
+const String tooltipText = 'TIP';
+const double _customPaddingValue = 10.0;
+
+void _ensureTooltipVisible(GlobalKey key) {
+  // This function uses "as dynamic"to defeat the static analysis. In general
+  // you want to avoid using this style in your code, as it will cause the
+  // analyzer to be unable to help you catch errors.
+  //
+  // In this case, we do it because we are trying to call internal methods of
+  // the tooltip code in order to test it. Normally, the state of a tooltip is a
+  // private class, but by using a GlobalKey we can get a handle to that object
+  // and by using "as dynamic" we can bypass the analyzer's type checks and call
+  // methods that we aren't supposed to be able to know about.
+  //
+  // It's ok to do this in tests, but you really don't want to do it in
+  // production code.
+  // ignore: avoid_dynamic_calls
+  (key.currentState as dynamic).ensureTooltipVisible();
 }

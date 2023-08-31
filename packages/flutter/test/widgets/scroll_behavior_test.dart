@@ -7,31 +7,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-late GestureVelocityTrackerBuilder lastCreatedBuilder;
-class TestScrollBehavior extends ScrollBehavior {
-  const TestScrollBehavior(this.flag);
-
-  final bool flag;
-
-  @override
-  ScrollPhysics getScrollPhysics(BuildContext context) {
-    return flag
-      ? const ClampingScrollPhysics()
-      : const BouncingScrollPhysics();
-  }
-
-  @override
-  bool shouldNotify(TestScrollBehavior old) => flag != old.flag;
-
-  @override
-  GestureVelocityTrackerBuilder velocityTrackerBuilder(BuildContext context) {
-      lastCreatedBuilder = flag
-        ? (PointerEvent ev) => VelocityTracker.withKind(ev.kind)
-        : (PointerEvent ev) => IOSScrollViewFlingVelocityTracker(ev.kind);
-      return lastCreatedBuilder;
-  }
-}
-
 void main() {
   testWidgets('Assert in buildScrollbar that controller != null when using it', (WidgetTester tester) async {
     const ScrollBehavior defaultBehavior = ScrollBehavior();
@@ -316,4 +291,29 @@ void main() {
       // For default glowing indicator
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
   });
+}
+
+late GestureVelocityTrackerBuilder lastCreatedBuilder;
+class TestScrollBehavior extends ScrollBehavior {
+  const TestScrollBehavior(this.flag);
+
+  final bool flag;
+
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) {
+    return flag
+      ? const ClampingScrollPhysics()
+      : const BouncingScrollPhysics();
+  }
+
+  @override
+  bool shouldNotify(TestScrollBehavior old) => flag != old.flag;
+
+  @override
+  GestureVelocityTrackerBuilder velocityTrackerBuilder(BuildContext context) {
+      lastCreatedBuilder = flag
+        ? (PointerEvent ev) => VelocityTracker.withKind(ev.kind)
+        : (PointerEvent ev) => IOSScrollViewFlingVelocityTracker(ev.kind);
+      return lastCreatedBuilder;
+  }
 }

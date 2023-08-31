@@ -10,8 +10,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../image_data.dart';
 
-late List<int> selectedTabs;
-
 void main() {
   setUp(() {
     selectedTabs = <int>[];
@@ -334,3 +332,5 @@ CupertinoTabBar _buildTabBar({ int selectedTab = 0 }) {
     onTap: (int newTab) => selectedTabs.add(newTab),
   );
 }
+
+late List<int> selectedTabs;

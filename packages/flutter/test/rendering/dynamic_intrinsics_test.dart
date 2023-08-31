@@ -7,74 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
-class RenderFixedSize extends RenderBox {
-  double dimension = 100.0;
-
-  void grow() {
-    dimension *= 2.0;
-    markNeedsLayout();
-  }
-
-  @override
-  double computeMinIntrinsicWidth(double height) => dimension;
-  @override
-  double computeMaxIntrinsicWidth(double height) => dimension;
-  @override
-  double computeMinIntrinsicHeight(double width) => dimension;
-  @override
-  double computeMaxIntrinsicHeight(double width) => dimension;
-
-  @override
-  void performLayout() {
-    size = Size.square(dimension);
-  }
-}
-
-class RenderParentSize extends RenderProxyBox {
-  RenderParentSize({ required RenderBox child }) : super(child);
-
-  @override
-  bool get sizedByParent => true;
-
-  @override
-  void performResize() {
-    size = constraints.biggest;
-  }
-
-  @override
-  void performLayout() {
-    child!.layout(constraints);
-  }
-}
-
-class RenderIntrinsicSize extends RenderProxyBox {
-  RenderIntrinsicSize({ required RenderBox child }) : super(child);
-
-  @override
-  void performLayout() {
-    child!.layout(constraints);
-    size = Size(
-      child!.getMinIntrinsicWidth(double.infinity),
-      child!.getMinIntrinsicHeight(double.infinity),
-    );
-  }
-}
-
-class RenderInvalidIntrinsics extends RenderBox {
-  @override
-  bool get sizedByParent => true;
-  @override
-  double computeMinIntrinsicWidth(double height) => -1;
-  @override
-  double computeMaxIntrinsicWidth(double height) => -1;
-  @override
-  double computeMinIntrinsicHeight(double width) => -1;
-  @override
-  double computeMaxIntrinsicHeight(double width) => -1;
-  @override
-  Size computeDryLayout(BoxConstraints constraints) => Size.zero;
-}
-
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
@@ -151,4 +83,72 @@ void _expectIntrinsicDimensions(RenderBox object, double dimension) {
   expect(object.getMaxIntrinsicWidth(double.infinity), equals(dimension));
   expect(object.getMinIntrinsicHeight(double.infinity), equals(dimension));
   expect(object.getMaxIntrinsicHeight(double.infinity), equals(dimension));
+}
+
+class RenderFixedSize extends RenderBox {
+  double dimension = 100.0;
+
+  void grow() {
+    dimension *= 2.0;
+    markNeedsLayout();
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) => dimension;
+  @override
+  double computeMaxIntrinsicWidth(double height) => dimension;
+  @override
+  double computeMinIntrinsicHeight(double width) => dimension;
+  @override
+  double computeMaxIntrinsicHeight(double width) => dimension;
+
+  @override
+  void performLayout() {
+    size = Size.square(dimension);
+  }
+}
+
+class RenderParentSize extends RenderProxyBox {
+  RenderParentSize({ required RenderBox child }) : super(child);
+
+  @override
+  bool get sizedByParent => true;
+
+  @override
+  void performResize() {
+    size = constraints.biggest;
+  }
+
+  @override
+  void performLayout() {
+    child!.layout(constraints);
+  }
+}
+
+class RenderIntrinsicSize extends RenderProxyBox {
+  RenderIntrinsicSize({ required RenderBox child }) : super(child);
+
+  @override
+  void performLayout() {
+    child!.layout(constraints);
+    size = Size(
+      child!.getMinIntrinsicWidth(double.infinity),
+      child!.getMinIntrinsicHeight(double.infinity),
+    );
+  }
+}
+
+class RenderInvalidIntrinsics extends RenderBox {
+  @override
+  bool get sizedByParent => true;
+  @override
+  double computeMinIntrinsicWidth(double height) => -1;
+  @override
+  double computeMaxIntrinsicWidth(double height) => -1;
+  @override
+  double computeMinIntrinsicHeight(double width) => -1;
+  @override
+  double computeMaxIntrinsicHeight(double width) => -1;
+  @override
+  Size computeDryLayout(BoxConstraints constraints) => Size.zero;
 }

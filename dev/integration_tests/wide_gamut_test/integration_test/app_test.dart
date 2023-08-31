@@ -11,6 +11,60 @@ import 'package:integration_test/integration_test.dart';
 
 import 'package:wide_gamut_test/main.dart' as app;
 
+void main() {
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  group('end-to-end test', () {
+    testWidgets('look for display p3 deepest red', (WidgetTester tester) async {
+      app.run(app.Setup.image);
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+
+      const MethodChannel channel = MethodChannel('flutter/screenshot');
+      final List<Object?> result =
+          await channel.invokeMethod('test') as List<Object?>;
+      expect(_findColor(result, _deepRed), isTrue);
+    });
+    testWidgets('look for display p3 deepest red', (WidgetTester tester) async {
+      app.run(app.Setup.canvasSaveLayer);
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+
+      const MethodChannel channel = MethodChannel('flutter/screenshot');
+      final List<Object?> result =
+          await channel.invokeMethod('test') as List<Object?>;
+      expect(_findColor(result, _deepRed), isTrue);
+    });
+    testWidgets('no p3 deepest red without image', (WidgetTester tester) async {
+      app.run(app.Setup.none);
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+
+      const MethodChannel channel = MethodChannel('flutter/screenshot');
+      final List<Object?> result =
+          await channel.invokeMethod('test') as List<Object?>;
+      expect(_findColor(result, _deepRed), isFalse);
+      expect(_findColor(result, <double>[0.0, 1.0, 0.0]), isFalse);
+    });
+    testWidgets('p3 deepest red with blur', (WidgetTester tester) async {
+      app.run(app.Setup.blur);
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+
+      const MethodChannel channel = MethodChannel('flutter/screenshot');
+      final List<Object?> result =
+          await channel.invokeMethod('test') as List<Object?>;
+      expect(_findColor(result, _deepRed), isTrue);
+      expect(_findColor(result, <double>[0.0, 1.0, 0.0]), isTrue);
+    });
+    testWidgets('draw image with wide gamut works', (WidgetTester tester) async {
+      app.run(app.Setup.drawnImage);
+      await tester.pumpAndSettle(const Duration(seconds: 2));
+
+      const MethodChannel channel = MethodChannel('flutter/screenshot');
+      final List<Object?> result =
+          await channel.invokeMethod('test') as List<Object?>;
+      expect(_findColor(result, <double>[0.0, 1.0, 0.0]), isTrue);
+    });
+  });
+}
+
 // See: https://developer.apple.com/documentation/metal/mtlpixelformat/mtlpixelformatbgr10_xr.
 double _decodeBGR10(int x) {
   const double max = 1.25098;
@@ -118,58 +172,4 @@ bool _findColor(List<Object?> result, List<double> color) {
   } else {
     fail('Unsupported pixel format: $format');
   }
-}
-
-void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-
-  group('end-to-end test', () {
-    testWidgets('look for display p3 deepest red', (WidgetTester tester) async {
-      app.run(app.Setup.image);
-      await tester.pumpAndSettle(const Duration(seconds: 2));
-
-      const MethodChannel channel = MethodChannel('flutter/screenshot');
-      final List<Object?> result =
-          await channel.invokeMethod('test') as List<Object?>;
-      expect(_findColor(result, _deepRed), isTrue);
-    });
-    testWidgets('look for display p3 deepest red', (WidgetTester tester) async {
-      app.run(app.Setup.canvasSaveLayer);
-      await tester.pumpAndSettle(const Duration(seconds: 2));
-
-      const MethodChannel channel = MethodChannel('flutter/screenshot');
-      final List<Object?> result =
-          await channel.invokeMethod('test') as List<Object?>;
-      expect(_findColor(result, _deepRed), isTrue);
-    });
-    testWidgets('no p3 deepest red without image', (WidgetTester tester) async {
-      app.run(app.Setup.none);
-      await tester.pumpAndSettle(const Duration(seconds: 2));
-
-      const MethodChannel channel = MethodChannel('flutter/screenshot');
-      final List<Object?> result =
-          await channel.invokeMethod('test') as List<Object?>;
-      expect(_findColor(result, _deepRed), isFalse);
-      expect(_findColor(result, <double>[0.0, 1.0, 0.0]), isFalse);
-    });
-    testWidgets('p3 deepest red with blur', (WidgetTester tester) async {
-      app.run(app.Setup.blur);
-      await tester.pumpAndSettle(const Duration(seconds: 2));
-
-      const MethodChannel channel = MethodChannel('flutter/screenshot');
-      final List<Object?> result =
-          await channel.invokeMethod('test') as List<Object?>;
-      expect(_findColor(result, _deepRed), isTrue);
-      expect(_findColor(result, <double>[0.0, 1.0, 0.0]), isTrue);
-    });
-    testWidgets('draw image with wide gamut works', (WidgetTester tester) async {
-      app.run(app.Setup.drawnImage);
-      await tester.pumpAndSettle(const Duration(seconds: 2));
-
-      const MethodChannel channel = MethodChannel('flutter/screenshot');
-      final List<Object?> result =
-          await channel.invokeMethod('test') as List<Object?>;
-      expect(_findColor(result, <double>[0.0, 1.0, 0.0]), isTrue);
-    });
-  });
 }

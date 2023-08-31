@@ -6,9 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-late TextStyle composingStyle;
-late TextStyle misspelledTextStyle;
-
 void main() {
   setUp(() {
     composingStyle = const TextStyle(decoration: TextDecoration.underline);
@@ -354,3 +351,6 @@ void main() {
     expect(textSpanTree, equals(expectedTextSpanTree));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
 }
+
+late TextStyle composingStyle;
+late TextStyle misspelledTextStyle;

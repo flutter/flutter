@@ -14,82 +14,6 @@ import 'package:flutter_tools/src/project.dart';
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 
-const String _kEmptyPubspecFile = '''
-name: path_provider_example
-
-dependencies:
-  flutter:
-    sdk: flutter
-''';
-
-const String _kEmptyPackageJson = '''
-{
-  "configVersion": 2,
-  "packages": [
-     {
-      "name": "path_provider_example",
-      "rootUri": "../",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    }
-  ]
-}
-''';
-
-const String _kSamplePackageJson = '''
-{
-  "configVersion": 2,
-  "packages": [
-    {
-      "name": "path_provider_linux",
-      "rootUri": "/path_provider_linux",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    },
-    {
-      "name": "path_provider_example",
-      "rootUri": "../",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    }
-  ]
-}
-''';
-
-const String _kSamplePackagesFile = '''
-path_provider_linux:/path_provider_linux/lib/
-path_provider_example:lib/
-''';
-
-const String _kSamplePubspecFile = '''
-name: path_provider_example
-description: Demonstrates how to use the path_provider plugin.
-
-dependencies:
-  flutter:
-    sdk: flutter
-  path_provider_linux: 1.0.0
-''';
-
-const String _kSamplePluginPubspec = '''
-name: path_provider_linux
-description: linux implementation of the path_provider plugin
-// version: 2.0.1
-// homepage: https://github.com/flutter/plugins/tree/master/packages/path_provider/path_provider_linux
-
-flutter:
-  plugin:
-    implements: path_provider
-    platforms:
-      linux:
-        dartPluginClass: PathProviderLinux
-        pluginClass: none
-
-environment:
-  sdk: '>=3.0.0-0 <4.0.0'
-  flutter: ">=1.20.0"
-''';
-
 void main() {
 
   group('Dart plugin registrant' , () {
@@ -396,3 +320,79 @@ void main() {
     });
   });
 }
+
+const String _kEmptyPubspecFile = '''
+name: path_provider_example
+
+dependencies:
+  flutter:
+    sdk: flutter
+''';
+
+const String _kEmptyPackageJson = '''
+{
+  "configVersion": 2,
+  "packages": [
+     {
+      "name": "path_provider_example",
+      "rootUri": "../",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    }
+  ]
+}
+''';
+
+const String _kSamplePackageJson = '''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "path_provider_linux",
+      "rootUri": "/path_provider_linux",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "path_provider_example",
+      "rootUri": "../",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    }
+  ]
+}
+''';
+
+const String _kSamplePackagesFile = '''
+path_provider_linux:/path_provider_linux/lib/
+path_provider_example:lib/
+''';
+
+const String _kSamplePubspecFile = '''
+name: path_provider_example
+description: Demonstrates how to use the path_provider plugin.
+
+dependencies:
+  flutter:
+    sdk: flutter
+  path_provider_linux: 1.0.0
+''';
+
+const String _kSamplePluginPubspec = '''
+name: path_provider_linux
+description: linux implementation of the path_provider plugin
+// version: 2.0.1
+// homepage: https://github.com/flutter/plugins/tree/master/packages/path_provider/path_provider_linux
+
+flutter:
+  plugin:
+    implements: path_provider
+    platforms:
+      linux:
+        dartPluginClass: PathProviderLinux
+        pluginClass: none
+
+environment:
+  sdk: '>=3.0.0-0 <4.0.0'
+  flutter: ">=1.20.0"
+''';

@@ -9,14 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'two_dimensional_utils.dart';
 
-Widget? _testChildBuilder(BuildContext context, ChildVicinity vicinity) {
-  return SizedBox(
-    height: 200,
-    width: 200,
-    child: Center(child: Text('C${vicinity.xIndex}:R${vicinity.yIndex}')),
-  );
-}
-
 void main() {
   group('TwoDimensionalScrollView',() {
     testWidgets('asserts the axis directions do not conflict with one another', (WidgetTester tester) async {
@@ -324,4 +316,12 @@ void main() {
       expect(scrollable.widget.dragStartBehavior, DragStartBehavior.down);
     }, variant: TargetPlatformVariant.all());
   });
+}
+
+Widget? _testChildBuilder(BuildContext context, ChildVicinity vicinity) {
+  return SizedBox(
+    height: 200,
+    width: 200,
+    child: Center(child: Text('C${vicinity.xIndex}:R${vicinity.yIndex}')),
+  );
 }

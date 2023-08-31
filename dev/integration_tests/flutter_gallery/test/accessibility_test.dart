@@ -8,20 +8,6 @@ import 'package:flutter_gallery/gallery/app.dart';
 import 'package:flutter_gallery/gallery/themes.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestMaterialApp extends StatelessWidget {
-  const TestMaterialApp({ super.key, required this.home });
-
-  final Widget home;
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(useMaterial3: false),
-      home: home,
-    );
-  }
-}
-
 void main() {
   group('All material demos meet recommended tap target sizes', () {
     testWidgets('backdrop_demo', (WidgetTester tester) async {
@@ -773,4 +759,18 @@ void main() {
       await expectLater(tester, meetsGuideline(textContrastGuideline));
     });
   });
+}
+
+class TestMaterialApp extends StatelessWidget {
+  const TestMaterialApp({ super.key, required this.home });
+
+  final Widget home;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      theme: ThemeData(useMaterial3: false),
+      home: home,
+    );
+  }
 }

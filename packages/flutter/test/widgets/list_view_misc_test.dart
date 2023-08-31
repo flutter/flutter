@@ -5,8 +5,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const Key blockKey = Key('test');
-
 void main() {
   testWidgets('Cannot scroll a non-overflowing block', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -239,3 +237,5 @@ void main() {
     expect(find.text('top'), findsOneWidget);
   });
 }
+
+const Key blockKey = Key('test');

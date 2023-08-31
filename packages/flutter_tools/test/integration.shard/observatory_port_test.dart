@@ -12,34 +12,6 @@ import '../src/common.dart';
 import 'test_data/basic_project.dart';
 import 'test_utils.dart';
 
-Future<int> getFreePort() async {
-  int port = 0;
-  final ServerSocket serverSocket = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
-  port = serverSocket.port;
-  await serverSocket.close();
-  return port;
-}
-
-Future<void> waitForVmServiceMessage(Process process, int port) async {
-  final Completer<void> completer = Completer<void>();
-  process.stdout
-    .transform(utf8.decoder)
-    .listen((String line) {
-      printOnFailure(line);
-      if (line.contains('A Dart VM Service on Flutter test device is available at')) {
-        if (line.contains('http://127.0.0.1:$port')) {
-          completer.complete();
-        } else {
-          completer.completeError(Exception('Did not forward to provided port $port, instead found $line'));
-        }
-      }
-    });
-  process.stderr
-    .transform(utf8.decoder)
-    .listen(printOnFailure);
-  return completer.future;
-}
-
 void main() {
   late Directory tempDir;
   final BasicProject project = BasicProject();
@@ -112,4 +84,32 @@ void main() {
     await process.exitCode;
   });
 
+}
+
+Future<int> getFreePort() async {
+  int port = 0;
+  final ServerSocket serverSocket = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
+  port = serverSocket.port;
+  await serverSocket.close();
+  return port;
+}
+
+Future<void> waitForVmServiceMessage(Process process, int port) async {
+  final Completer<void> completer = Completer<void>();
+  process.stdout
+    .transform(utf8.decoder)
+    .listen((String line) {
+      printOnFailure(line);
+      if (line.contains('A Dart VM Service on Flutter test device is available at')) {
+        if (line.contains('http://127.0.0.1:$port')) {
+          completer.complete();
+        } else {
+          completer.completeError(Exception('Did not forward to provided port $port, instead found $line'));
+        }
+      }
+    });
+  process.stderr
+    .transform(utf8.decoder)
+    .listen(printOnFailure);
+  return completer.future;
 }

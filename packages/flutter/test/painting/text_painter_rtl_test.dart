@@ -6,9 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const bool skipTestsWithKnownBugs = true;
-const bool skipExpectsWithKnownBugs = false;
-
 void main() {
   test('TextPainter - basic words', () {
     final TextPainter painter = TextPainter()
@@ -695,3 +692,6 @@ void main() {
 
 String lro(String s) => '${Unicode.LRO}L${s}L${Unicode.PDF}';
 String rlo(String s) => '${Unicode.RLO}R${s}R${Unicode.PDF}';
+
+const bool skipTestsWithKnownBugs = true;
+const bool skipExpectsWithKnownBugs = false;

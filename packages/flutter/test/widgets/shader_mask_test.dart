@@ -10,16 +10,6 @@ library;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Shader createShader(Rect bounds) {
-  return const LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: <Color>[Color(0x00FFFFFF), Color(0xFFFFFFFF)],
-    stops: <double>[0.1, 0.35],
-  ).createShader(bounds);
-}
-
-
 void main() {
   testWidgets('Can be constructed', (WidgetTester tester) async {
     const Widget child = SizedBox(width: 100.0, height: 100.0);
@@ -109,4 +99,13 @@ void main() {
       matchesGoldenFile('shader_mask.bounds.matches_top_left.png'),
     );
   });
+}
+
+Shader createShader(Rect bounds) {
+  return const LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: <Color>[Color(0x00FFFFFF), Color(0xFFFFFFFF)],
+    stops: <double>[0.1, 0.35],
+  ).createShader(bounds);
 }

@@ -10,18 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-bool refreshCalled = false;
-
-Future<void> refresh() {
-  refreshCalled = true;
-  return Future<void>.value();
-}
-
-Future<void> holdRefresh() {
-  refreshCalled = true;
-  return Completer<void>().future;
-}
-
 void main() {
   testWidgetsWithLeakTracking('RefreshIndicator', (WidgetTester tester) async {
     refreshCalled = false;
@@ -1056,4 +1044,16 @@ void main() {
     expect(refreshCalled, true);
     expect(stretchAccepted, false);
   });
+}
+
+bool refreshCalled = false;
+
+Future<void> refresh() {
+  refreshCalled = true;
+  return Future<void>.value();
+}
+
+Future<void> holdRefresh() {
+  refreshCalled = true;
+  return Completer<void>().future;
 }

@@ -5,37 +5,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestPointerSignalListener {
-  TestPointerSignalListener(this.event);
-
-  final PointerSignalEvent event;
-  bool callbackRan = false;
-
-  void callback(PointerSignalEvent event) {
-    expect(event, equals(this.event));
-    expect(callbackRan, isFalse);
-    callbackRan = true;
-  }
-}
-
-class PointerSignalTester {
-  final PointerSignalResolver resolver = PointerSignalResolver();
-  PointerSignalEvent event = const PointerScrollEvent();
-
-  TestPointerSignalListener addListener() {
-    final TestPointerSignalListener listener = TestPointerSignalListener(event);
-    resolver.register(event, listener.callback);
-    return listener;
-  }
-
-  /// Simulates a new event dispatch cycle by resolving the current event and
-  /// setting a new event to use for future calls.
-  void resolve() {
-    resolver.resolve(event);
-    event = const PointerScrollEvent();
-  }
-}
-
 void main() {
   test('Resolving with no entries should be a no-op', () {
     final PointerSignalTester tester = PointerSignalTester();
@@ -99,4 +68,35 @@ void main() {
 
     expect(events.single, same(transformedEvent));
   });
+}
+
+class TestPointerSignalListener {
+  TestPointerSignalListener(this.event);
+
+  final PointerSignalEvent event;
+  bool callbackRan = false;
+
+  void callback(PointerSignalEvent event) {
+    expect(event, equals(this.event));
+    expect(callbackRan, isFalse);
+    callbackRan = true;
+  }
+}
+
+class PointerSignalTester {
+  final PointerSignalResolver resolver = PointerSignalResolver();
+  PointerSignalEvent event = const PointerScrollEvent();
+
+  TestPointerSignalListener addListener() {
+    final TestPointerSignalListener listener = TestPointerSignalListener(event);
+    resolver.register(event, listener.callback);
+    return listener;
+  }
+
+  /// Simulates a new event dispatch cycle by resolving the current event and
+  /// setting a new event to use for future calls.
+  void resolve() {
+    resolver.resolve(event);
+    event = const PointerScrollEvent();
+  }
 }

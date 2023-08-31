@@ -18,18 +18,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import '../src/common.dart';
 import 'test_utils.dart';
 
-// This test depends on some files in ///dev/automated_tests/flutter_test/*
-
-final String automatedTestsDirectory = fileSystem.path.join('..', '..', 'dev', 'automated_tests');
-final String missingDependencyDirectory = fileSystem.path.join('..', '..', 'dev', 'missing_dependency_tests');
-final String flutterTestDirectory = fileSystem.path.join(automatedTestsDirectory, 'flutter_test');
-final String integrationTestDirectory = fileSystem.path.join(automatedTestsDirectory, 'integration_test');
-final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
-
-// Running Integration Tests in the Flutter Tester will still exercise the same
-// flows specific to Integration Tests.
-final List<String> integrationTestExtraArgs = <String>['-d', 'flutter-tester'];
-
 void main() {
   setUpAll(() async {
     expect(
@@ -508,3 +496,15 @@ Future<Process> _runFlutterTestConcurrent(
     workingDirectory: workingDirectory,
   );
 }
+
+// This test depends on some files in ///dev/automated_tests/flutter_test/*
+
+final String automatedTestsDirectory = fileSystem.path.join('..', '..', 'dev', 'automated_tests');
+final String missingDependencyDirectory = fileSystem.path.join('..', '..', 'dev', 'missing_dependency_tests');
+final String flutterTestDirectory = fileSystem.path.join(automatedTestsDirectory, 'flutter_test');
+final String integrationTestDirectory = fileSystem.path.join(automatedTestsDirectory, 'integration_test');
+final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
+
+// Running Integration Tests in the Flutter Tester will still exercise the same
+// flows specific to Integration Tests.
+final List<String> integrationTestExtraArgs = <String>['-d', 'flutter-tester'];

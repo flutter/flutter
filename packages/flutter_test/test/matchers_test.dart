@@ -12,45 +12,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix3;
 
-/// Class that makes it easy to mock common toStringDeep behavior.
-class _MockToStringDeep {
-  _MockToStringDeep(String str) : _lines = <String>[] {
-    final List<String> lines = str.split('\n');
-    for (int i = 0; i < lines.length - 1; ++i) {
-      _lines.add('${lines[i]}\n');
-    }
-
-    // If the last line is empty, that really just means that the previous
-    // line was terminated with a line break.
-    if (lines.isNotEmpty && lines.last.isNotEmpty) {
-      _lines.add(lines.last);
-    }
-  }
-
-  _MockToStringDeep.fromLines(this._lines);
-
-  /// Lines in the message to display when [toStringDeep] is called.
-  /// For correct toStringDeep behavior, each line should be terminated with a
-  /// line break.
-  final List<String> _lines;
-
-  String toStringDeep({ String prefixLineOne = '', String prefixOtherLines = '' }) {
-    final StringBuffer sb = StringBuffer();
-    if (_lines.isNotEmpty) {
-      sb.write('$prefixLineOne${_lines.first}');
-    }
-
-    for (int i = 1; i < _lines.length; ++i) {
-      sb.write('$prefixOtherLines${_lines[i]}');
-    }
-
-    return sb.toString();
-  }
-
-  @override
-  String toString() => toStringDeep();
-}
-
 void main() {
   test('hasOneLineDescription', () {
     expect('Hello', hasOneLineDescription);
@@ -1500,4 +1461,43 @@ class _CustomColor extends Color {
 
   @override
   int get hashCode => Object.hash(super.hashCode, isEqual);
+}
+
+/// Class that makes it easy to mock common toStringDeep behavior.
+class _MockToStringDeep {
+  _MockToStringDeep(String str) : _lines = <String>[] {
+    final List<String> lines = str.split('\n');
+    for (int i = 0; i < lines.length - 1; ++i) {
+      _lines.add('${lines[i]}\n');
+    }
+
+    // If the last line is empty, that really just means that the previous
+    // line was terminated with a line break.
+    if (lines.isNotEmpty && lines.last.isNotEmpty) {
+      _lines.add(lines.last);
+    }
+  }
+
+  _MockToStringDeep.fromLines(this._lines);
+
+  /// Lines in the message to display when [toStringDeep] is called.
+  /// For correct toStringDeep behavior, each line should be terminated with a
+  /// line break.
+  final List<String> _lines;
+
+  String toStringDeep({ String prefixLineOne = '', String prefixOtherLines = '' }) {
+    final StringBuffer sb = StringBuffer();
+    if (_lines.isNotEmpty) {
+      sb.write('$prefixLineOne${_lines.first}');
+    }
+
+    for (int i = 1; i < _lines.length; ++i) {
+      sb.write('$prefixOtherLines${_lines[i]}');
+    }
+
+    return sb.toString();
+  }
+
+  @override
+  String toString() => toStringDeep();
 }

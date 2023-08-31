@@ -6,40 +6,6 @@ import 'package:flutter/src/rendering/sliver.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class Wrapper extends StatelessWidget {
-  const Wrapper({
-    super.key,
-    required this.child,
-  });
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => child;
-}
-
-class StatefulWrapper extends StatefulWidget {
-  const StatefulWrapper({
-    super.key,
-    required this.child,
-  });
-
-  final Widget child;
-
-  @override
-  StatefulWrapperState createState() => StatefulWrapperState();
-}
-
-class StatefulWrapperState extends State<StatefulWrapper> {
-
-  void trigger() {
-    setState(() { /* for test purposes */ });
-  }
-
-  @override
-  Widget build(BuildContext context) => widget.child;
-}
-
 void main() {
   testWidgets('Moving global key inside a LayoutBuilder', (WidgetTester tester) async {
     final GlobalKey<StatefulWrapperState> key = GlobalKey<StatefulWrapperState>();
@@ -100,4 +66,38 @@ void main() {
 
     expect(tester.takeException(), null);
   });
+}
+
+class Wrapper extends StatelessWidget {
+  const Wrapper({
+    super.key,
+    required this.child,
+  });
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => child;
+}
+
+class StatefulWrapper extends StatefulWidget {
+  const StatefulWrapper({
+    super.key,
+    required this.child,
+  });
+
+  final Widget child;
+
+  @override
+  StatefulWrapperState createState() => StatefulWrapperState();
+}
+
+class StatefulWrapperState extends State<StatefulWrapper> {
+
+  void trigger() {
+    setState(() { /* for test purposes */ });
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }

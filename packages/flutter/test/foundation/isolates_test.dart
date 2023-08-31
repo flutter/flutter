@@ -10,6 +10,58 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:platform/platform.dart';
 
+void main() {
+  test('compute()', () async {
+    expect(await compute(test1, 0), 1);
+    expect(compute(test2, 0), throwsA(2));
+    expect(compute(test3, 0), throwsRemoteError);
+    expect(await compute(test4, 0), 1);
+    expect(compute(test5, 0), throwsRemoteError);
+
+    expect(await compute(test1Async, 0), 1);
+    expect(compute(test2Async, 0), throwsA(2));
+    expect(compute(test3Async, 0), throwsRemoteError);
+    expect(await compute(test4Async, 0), 1);
+    expect(compute(test5Async, 0), throwsRemoteError);
+
+    expect(await compute(test1CallCompute, 0), 1);
+    expect(compute(test2CallCompute, 0), throwsA(2));
+    expect(compute(test3CallCompute, 0), throwsRemoteError);
+    expect(await compute(test4CallCompute, 0), 1);
+    expect(compute(test5CallCompute, 0), throwsRemoteError);
+
+    expect(compute(testInvalidResponse, 0), throwsRemoteError);
+    expect(compute(testInvalidError, 0), throwsRemoteError);
+
+    expect(await computeStaticMethod(10), 100);
+    expect(await computeClosure(10), 100);
+    expect(computeInvalidClosure(10), throwsArgumentError);
+    expect(await computeInstanceMethod(10), 100);
+    expect(computeInvalidInstanceMethod(10), throwsArgumentError);
+
+    expect(await compute(testDebugName, null, debugLabel: 'debug_name'),
+        'debug_name');
+    expect(await compute(testReturnNull, null), null);
+  }, skip: kIsWeb); // [intended] isn't supported on the web.
+
+  group('compute() closes all ports', () {
+    test('with valid message', () async {
+      await expectFileSuccessfullyCompletes('_compute_caller.dart');
+    });
+    test('with invalid message', () async {
+      await expectFileSuccessfullyCompletes(
+          '_compute_caller_invalid_message.dart');
+    });
+    test('with valid error', () async {
+      await expectFileSuccessfullyCompletes('_compute_caller.dart');
+    });
+    test('with invalid error', () async {
+      await expectFileSuccessfullyCompletes(
+          '_compute_caller_invalid_message.dart');
+    });
+  }, skip: kIsWeb); // [intended] isn't supported on the web.
+}
+
 final Matcher throwsRemoteError = throwsA(isA<RemoteError>());
 
 int test1(int value) {
@@ -167,56 +219,4 @@ String? testDebugName(_) {
 
 int? testReturnNull(_) {
   return null;
-}
-
-void main() {
-  test('compute()', () async {
-    expect(await compute(test1, 0), 1);
-    expect(compute(test2, 0), throwsA(2));
-    expect(compute(test3, 0), throwsRemoteError);
-    expect(await compute(test4, 0), 1);
-    expect(compute(test5, 0), throwsRemoteError);
-
-    expect(await compute(test1Async, 0), 1);
-    expect(compute(test2Async, 0), throwsA(2));
-    expect(compute(test3Async, 0), throwsRemoteError);
-    expect(await compute(test4Async, 0), 1);
-    expect(compute(test5Async, 0), throwsRemoteError);
-
-    expect(await compute(test1CallCompute, 0), 1);
-    expect(compute(test2CallCompute, 0), throwsA(2));
-    expect(compute(test3CallCompute, 0), throwsRemoteError);
-    expect(await compute(test4CallCompute, 0), 1);
-    expect(compute(test5CallCompute, 0), throwsRemoteError);
-
-    expect(compute(testInvalidResponse, 0), throwsRemoteError);
-    expect(compute(testInvalidError, 0), throwsRemoteError);
-
-    expect(await computeStaticMethod(10), 100);
-    expect(await computeClosure(10), 100);
-    expect(computeInvalidClosure(10), throwsArgumentError);
-    expect(await computeInstanceMethod(10), 100);
-    expect(computeInvalidInstanceMethod(10), throwsArgumentError);
-
-    expect(await compute(testDebugName, null, debugLabel: 'debug_name'),
-        'debug_name');
-    expect(await compute(testReturnNull, null), null);
-  }, skip: kIsWeb); // [intended] isn't supported on the web.
-
-  group('compute() closes all ports', () {
-    test('with valid message', () async {
-      await expectFileSuccessfullyCompletes('_compute_caller.dart');
-    });
-    test('with invalid message', () async {
-      await expectFileSuccessfullyCompletes(
-          '_compute_caller_invalid_message.dart');
-    });
-    test('with valid error', () async {
-      await expectFileSuccessfullyCompletes('_compute_caller.dart');
-    });
-    test('with invalid error', () async {
-      await expectFileSuccessfullyCompletes(
-          '_compute_caller_invalid_message.dart');
-    });
-  }, skip: kIsWeb); // [intended] isn't supported on the web.
 }

@@ -20,47 +20,6 @@ import '../src/context.dart';
 import '../src/fake_devices.dart';
 import '../src/fake_vm_services.dart';
 
-final vm_service.Isolate isolate = vm_service.Isolate(
-  id: '1',
-  pauseEvent: vm_service.Event(
-      kind: vm_service.EventKind.kResume,
-      timestamp: 0
-  ),
-  breakpoints: <vm_service.Breakpoint>[],
-  libraries: <vm_service.LibraryRef>[
-    vm_service.LibraryRef(
-      id: '1',
-      uri: 'file:///hello_world/main.dart',
-      name: '',
-    ),
-  ],
-  livePorts: 0,
-  name: 'test',
-  number: '1',
-  pauseOnExit: false,
-  runnable: true,
-  startTime: 0,
-  isSystemIsolate: false,
-  isolateFlags: <vm_service.IsolateFlag>[],
-  extensionRPCs: <String>[kIntegrationTestMethod],
-);
-
-final FlutterView fakeFlutterView = FlutterView(
-  id: 'a',
-  uiIsolate: isolate,
-);
-
-final FakeVmServiceRequest listViewsRequest = FakeVmServiceRequest(
-  method: kListViewsMethod,
-  jsonResponse: <String, Object>{
-    'views': <Object>[
-      fakeFlutterView.toJson(),
-    ],
-  },
-);
-
-final Uri vmServiceUri = Uri.parse('http://localhost:1234');
-
 void main() {
   late FakeVmServiceHost fakeVmServiceHost;
   late TestDevice testDevice;
@@ -254,3 +213,44 @@ class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFa
 }
 
 class FakeApplicationPackage extends Fake implements ApplicationPackage { }
+
+final vm_service.Isolate isolate = vm_service.Isolate(
+  id: '1',
+  pauseEvent: vm_service.Event(
+      kind: vm_service.EventKind.kResume,
+      timestamp: 0
+  ),
+  breakpoints: <vm_service.Breakpoint>[],
+  libraries: <vm_service.LibraryRef>[
+    vm_service.LibraryRef(
+      id: '1',
+      uri: 'file:///hello_world/main.dart',
+      name: '',
+    ),
+  ],
+  livePorts: 0,
+  name: 'test',
+  number: '1',
+  pauseOnExit: false,
+  runnable: true,
+  startTime: 0,
+  isSystemIsolate: false,
+  isolateFlags: <vm_service.IsolateFlag>[],
+  extensionRPCs: <String>[kIntegrationTestMethod],
+);
+
+final FlutterView fakeFlutterView = FlutterView(
+  id: 'a',
+  uiIsolate: isolate,
+);
+
+final FakeVmServiceRequest listViewsRequest = FakeVmServiceRequest(
+  method: kListViewsMethod,
+  jsonResponse: <String, Object>{
+    'views': <Object>[
+      fakeFlutterView.toJson(),
+    ],
+  },
+);
+
+final Uri vmServiceUri = Uri.parse('http://localhost:1234');

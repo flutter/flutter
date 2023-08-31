@@ -18,11 +18,6 @@ import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
-final FakePlatform linux = FakePlatform();
-final FakePlatform windows = FakePlatform(
-  operatingSystem: 'windows',
-);
-
 void main() {
 
   testWithoutContext('LinuxDevice defaults', () async {
@@ -190,3 +185,8 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   @override
   HostPlatform get hostPlatform => _hostPlatform;
 }
+
+final FakePlatform linux = FakePlatform();
+final FakePlatform windows = FakePlatform(
+  operatingSystem: 'windows',
+);

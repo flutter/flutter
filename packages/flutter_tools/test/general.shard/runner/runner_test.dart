@@ -25,8 +25,6 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_http_client.dart';
 
-const String kCustomBugInstructions = 'These are instructions to report with a custom bug tracker.';
-
 void main() {
   int? firstExitCode;
   late MemoryFileSystem fileSystem;
@@ -571,3 +569,5 @@ class FakeAnalytics extends Fake implements Analytics {
   @override
   bool get telemetryEnabled => _fakeTelemetryStatus;
 }
+
+const String kCustomBugInstructions = 'These are instructions to report with a custom bug tracker.';

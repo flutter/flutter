@@ -6,34 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestScrollPhysics extends ScrollPhysics {
-  const TestScrollPhysics({
-    required this.name,
-    super.parent,
-  });
-  final String name;
-
-  @override
-  TestScrollPhysics applyTo(ScrollPhysics? ancestor) {
-    return TestScrollPhysics(
-      name: name,
-      parent: parent?.applyTo(ancestor) ?? ancestor!,
-    );
-  }
-
-  TestScrollPhysics get namedParent => parent! as TestScrollPhysics;
-  String get names => parent == null ? name : '$name ${namedParent.names}';
-
-  @override
-  String toString() {
-    if (parent == null) {
-      return '${objectRuntimeType(this, 'TestScrollPhysics')}($name)';
-    }
-    return '${objectRuntimeType(this, 'TestScrollPhysics')}($name) -> $parent';
-  }
-}
-
-
 void main() {
   test('ScrollPhysics applyTo()', () {
     const TestScrollPhysics a = TestScrollPhysics(name: 'a');
@@ -362,4 +334,31 @@ FlutterError
     ));
     await tester.fling(find.text('Index 2'), const Offset(0.0, -300.0), 10000.0);
   });
+}
+
+class TestScrollPhysics extends ScrollPhysics {
+  const TestScrollPhysics({
+    required this.name,
+    super.parent,
+  });
+  final String name;
+
+  @override
+  TestScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return TestScrollPhysics(
+      name: name,
+      parent: parent?.applyTo(ancestor) ?? ancestor!,
+    );
+  }
+
+  TestScrollPhysics get namedParent => parent! as TestScrollPhysics;
+  String get names => parent == null ? name : '$name ${namedParent.names}';
+
+  @override
+  String toString() {
+    if (parent == null) {
+      return '${objectRuntimeType(this, 'TestScrollPhysics')}($name)';
+    }
+    return '${objectRuntimeType(this, 'TestScrollPhysics')}($name) -> $parent';
+  }
 }

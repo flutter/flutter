@@ -5,26 +5,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestRoute extends PageRouteBuilder<void> {
-  TestRoute(Widget child) : super(
-    pageBuilder: (BuildContext _, Animation<double> __, Animation<double> ___) => child,
-  );
-}
-
-class IconTextBox extends StatelessWidget {
-  const IconTextBox(this.text, { super.key });
-  final String text;
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      alignment: Alignment.center,
-      child: Row(
-        children: <Widget>[const Icon(IconData(0x41, fontFamily: 'Roboto')), Text(text)],
-      ),
-    );
-  }
-}
-
 void main() {
   testWidgets('InheritedTheme.captureAll()', (WidgetTester tester) async {
     const double fontSize = 32;
@@ -251,4 +231,24 @@ void main() {
     expect(getTextStyle('World').fontSize, null);
     expect(getTextStyle('World').color, textColor);
   });
+}
+
+class TestRoute extends PageRouteBuilder<void> {
+  TestRoute(Widget child) : super(
+    pageBuilder: (BuildContext _, Animation<double> __, Animation<double> ___) => child,
+  );
+}
+
+class IconTextBox extends StatelessWidget {
+  const IconTextBox(this.text, { super.key });
+  final String text;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      alignment: Alignment.center,
+      child: Row(
+        children: <Widget>[const Icon(IconData(0x41, fontFamily: 'Roboto')), Text(text)],
+      ),
+    );
+  }
 }

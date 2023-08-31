@@ -41,60 +41,6 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_vm_services.dart';
 
-const List<VmServiceExpectation> kAttachLogExpectations =
-    <VmServiceExpectation>[
-  FakeVmServiceRequest(
-    method: 'streamListen',
-    args: <String, Object>{
-      'streamId': 'Stdout',
-    },
-  ),
-  FakeVmServiceRequest(
-    method: 'streamListen',
-    args: <String, Object>{
-      'streamId': 'Stderr',
-    },
-  ),
-];
-
-const List<VmServiceExpectation> kAttachIsolateExpectations =
-    <VmServiceExpectation>[
-  FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
-    'streamId': 'Isolate',
-  }),
-  FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
-    'service': kReloadSourcesServiceName,
-    'alias': kFlutterToolAlias,
-  }),
-  FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
-    'service': kFlutterVersionServiceName,
-    'alias': kFlutterToolAlias,
-  }),
-  FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
-    'service': kFlutterMemoryInfoServiceName,
-    'alias': kFlutterToolAlias,
-  }),
-  FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
-    'service': kFlutterGetIOSBuildOptionsServiceName,
-    'alias': kFlutterToolAlias,
-  }),
-  FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
-    'service': kFlutterGetIOSUniversalLinkSettingsServiceName,
-    'alias': kFlutterToolAlias,
-  }),
-  FakeVmServiceRequest(
-    method: 'streamListen',
-    args: <String, Object>{
-      'streamId': 'Extension',
-    },
-  ),
-];
-
-const List<VmServiceExpectation> kAttachExpectations = <VmServiceExpectation>[
-  ...kAttachLogExpectations,
-  ...kAttachIsolateExpectations,
-];
-
 void main() {
   late FakeDebugConnection debugConnection;
   late FakeChromeDevice chromeDevice;
@@ -1713,3 +1659,57 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
     throw UnimplementedError();
   }
 }
+
+const List<VmServiceExpectation> kAttachLogExpectations =
+    <VmServiceExpectation>[
+  FakeVmServiceRequest(
+    method: 'streamListen',
+    args: <String, Object>{
+      'streamId': 'Stdout',
+    },
+  ),
+  FakeVmServiceRequest(
+    method: 'streamListen',
+    args: <String, Object>{
+      'streamId': 'Stderr',
+    },
+  ),
+];
+
+const List<VmServiceExpectation> kAttachIsolateExpectations =
+    <VmServiceExpectation>[
+  FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{
+    'streamId': 'Isolate',
+  }),
+  FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
+    'service': kReloadSourcesServiceName,
+    'alias': kFlutterToolAlias,
+  }),
+  FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
+    'service': kFlutterVersionServiceName,
+    'alias': kFlutterToolAlias,
+  }),
+  FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
+    'service': kFlutterMemoryInfoServiceName,
+    'alias': kFlutterToolAlias,
+  }),
+  FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
+    'service': kFlutterGetIOSBuildOptionsServiceName,
+    'alias': kFlutterToolAlias,
+  }),
+  FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
+    'service': kFlutterGetIOSUniversalLinkSettingsServiceName,
+    'alias': kFlutterToolAlias,
+  }),
+  FakeVmServiceRequest(
+    method: 'streamListen',
+    args: <String, Object>{
+      'streamId': 'Extension',
+    },
+  ),
+];
+
+const List<VmServiceExpectation> kAttachExpectations = <VmServiceExpectation>[
+  ...kAttachLogExpectations,
+  ...kAttachIsolateExpectations,
+];

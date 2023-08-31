@@ -11,35 +11,6 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 
 import '../../src/common.dart';
 
-const String aotSizeOutput = '''
-[
-    {
-        "l": "dart:_internal",
-        "c": "SubListIterable",
-        "n": "[Optimized] skip",
-        "s": 2400
-    },
-    {
-        "l": "dart:_internal",
-        "c": "SubListIterable",
-        "n": "[Optimized] new SubListIterable.",
-        "s": 3560
-    },
-    {
-        "l": "dart:core",
-        "c": "RangeError",
-        "n": "[Optimized] new RangeError.range",
-        "s": 3920
-    },
-    {
-        "l": "dart:core",
-        "c": "ArgumentError",
-        "n": "[Stub] Allocate ArgumentError",
-        "s": 4650
-    }
-]
-''';
-
 void main() {
   late MemoryFileSystem fileSystem;
   late BufferLogger logger;
@@ -261,3 +232,32 @@ void main() {
         throwsToolExit());
   });
 }
+
+const String aotSizeOutput = '''
+[
+    {
+        "l": "dart:_internal",
+        "c": "SubListIterable",
+        "n": "[Optimized] skip",
+        "s": 2400
+    },
+    {
+        "l": "dart:_internal",
+        "c": "SubListIterable",
+        "n": "[Optimized] new SubListIterable.",
+        "s": 3560
+    },
+    {
+        "l": "dart:core",
+        "c": "RangeError",
+        "n": "[Optimized] new RangeError.range",
+        "s": 3920
+    },
+    {
+        "l": "dart:core",
+        "c": "ArgumentError",
+        "n": "[Stub] Allocate ArgumentError",
+        "s": 4650
+    }
+]
+''';

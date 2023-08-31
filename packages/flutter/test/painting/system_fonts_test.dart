@@ -11,30 +11,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Future<void> verifyMarkedNeedsLayoutDuringTransientCallbacksPhase(WidgetTester tester, RenderObject renderObject) async {
-  assert(!renderObject.debugNeedsLayout);
-
-  const Map<String, dynamic> data = <String, dynamic>{
-    'type': 'fontsChange',
-  };
-  await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
-    'flutter/system',
-    SystemChannels.system.codec.encodeMessage(data),
-    (ByteData? data) { },
-  );
-
-  final Completer<bool> animation = Completer<bool>();
-  tester.binding.scheduleFrameCallback((Duration timeStamp) {
-    animation.complete(renderObject.debugNeedsLayout);
-  });
-
-  // The fonts change does not mark the render object as needing layout
-  // immediately.
-  expect(renderObject.debugNeedsLayout, isFalse);
-  await tester.pump();
-  expect(await animation.future, isTrue);
-}
-
 void main() {
   testWidgets('RenderParagraph relayout upon system fonts changes', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -291,4 +267,28 @@ class _RenderCustomRelayoutWhenSystemFontsChange extends RenderBox with Relayout
     size = constraints.biggest;
     hasValidTextLayout = true;
   }
+}
+
+Future<void> verifyMarkedNeedsLayoutDuringTransientCallbacksPhase(WidgetTester tester, RenderObject renderObject) async {
+  assert(!renderObject.debugNeedsLayout);
+
+  const Map<String, dynamic> data = <String, dynamic>{
+    'type': 'fontsChange',
+  };
+  await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+    'flutter/system',
+    SystemChannels.system.codec.encodeMessage(data),
+    (ByteData? data) { },
+  );
+
+  final Completer<bool> animation = Completer<bool>();
+  tester.binding.scheduleFrameCallback((Duration timeStamp) {
+    animation.complete(renderObject.debugNeedsLayout);
+  });
+
+  // The fonts change does not mark the render object as needing layout
+  // immediately.
+  expect(renderObject.debugNeedsLayout, isFalse);
+  await tester.pump();
+  expect(await animation.future, isTrue);
 }

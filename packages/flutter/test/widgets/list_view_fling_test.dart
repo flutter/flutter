@@ -5,9 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const double kHeight = 10.0;
-const double kFlingOffset = kHeight * 20.0;
-
 void main() {
   testWidgets("Flings don't stutter", (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -35,3 +32,6 @@ void main() {
     }
   });
 }
+
+const double kHeight = 10.0;
+const double kFlingOffset = kHeight * 20.0;

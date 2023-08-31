@@ -13,9 +13,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
-// From bottom_sheet.dart.
-const Duration _bottomSheetExitDuration = Duration(milliseconds: 200);
-
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/103741
   testWidgets('extendBodyBehindAppBar change should not cause the body widget lose state', (WidgetTester tester) async {
@@ -2955,3 +2952,6 @@ class _CustomPageRoute<T> extends PageRoute<T> {
     return child;
   }
 }
+
+// From bottom_sheet.dart.
+const Duration _bottomSheetExitDuration = Duration(milliseconds: 200);

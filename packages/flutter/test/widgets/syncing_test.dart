@@ -5,47 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestWidget extends StatefulWidget {
-  const TestWidget({
-    super.key,
-    required this.child,
-    required this.persistentState,
-    required this.syncedState,
-  });
-
-  final Widget child;
-  final int persistentState;
-  final int syncedState;
-
-  @override
-  TestWidgetState createState() => TestWidgetState();
-}
-
-class TestWidgetState extends State<TestWidget> {
-  late int persistentState;
-  late int syncedState;
-  int updates = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    persistentState = widget.persistentState;
-    syncedState = widget.syncedState;
-  }
-
-  @override
-  void didUpdateWidget(TestWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    syncedState = widget.syncedState;
-    // we explicitly do NOT sync the persistentState from the new instance
-    // because we're using that to track whether we got recreated
-    updates += 1;
-  }
-
-  @override
-  Widget build(BuildContext context) => widget.child;
-}
-
 void main() {
 
   testWidgets('no change', (WidgetTester tester) async {
@@ -216,4 +175,45 @@ void main() {
     expect(second.persistentState, equals(0x62));
     expect(second.syncedState, equals(0x41));
   });
+}
+
+class TestWidget extends StatefulWidget {
+  const TestWidget({
+    super.key,
+    required this.child,
+    required this.persistentState,
+    required this.syncedState,
+  });
+
+  final Widget child;
+  final int persistentState;
+  final int syncedState;
+
+  @override
+  TestWidgetState createState() => TestWidgetState();
+}
+
+class TestWidgetState extends State<TestWidget> {
+  late int persistentState;
+  late int syncedState;
+  int updates = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    persistentState = widget.persistentState;
+    syncedState = widget.syncedState;
+  }
+
+  @override
+  void didUpdateWidget(TestWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    syncedState = widget.syncedState;
+    // we explicitly do NOT sync the persistentState from the new instance
+    // because we're using that to track whether we got recreated
+    updates += 1;
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }

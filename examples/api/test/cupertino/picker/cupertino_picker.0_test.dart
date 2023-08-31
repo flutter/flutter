@@ -6,8 +6,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_api_samples/cupertino/picker/cupertino_picker.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
-const Offset _kRowOffset = Offset(0.0, -50.0);
-
 void main() {
   testWidgets('Change selected fruit using CupertinoPicker', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -41,3 +39,5 @@ void main() {
     expect(picker.scrollController!.initialItem, 2);
   });
 }
+
+const Offset _kRowOffset = Offset(0.0, -50.0);

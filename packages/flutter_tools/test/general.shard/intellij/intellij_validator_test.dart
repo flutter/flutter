@@ -16,24 +16,6 @@ import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
-final Platform macPlatform = FakePlatform(
-  operatingSystem: 'macos',
-  environment: <String, String>{'HOME': '/foo/bar'}
-);
-final Platform linuxPlatform = FakePlatform(
-  environment: <String, String>{
-    'HOME': '/foo/bar',
-  },
-);
-final Platform windowsPlatform = FakePlatform(
-  operatingSystem: 'windows',
-  environment: <String, String>{
-    'USERPROFILE': r'C:\Users\foo',
-    'APPDATA': r'C:\Users\foo\AppData\Roaming',
-    'LOCALAPPDATA': r'C:\Users\foo\AppData\Local',
-  },
-);
-
 void main() {
   testWithoutContext('Intellij validator can parse plugin manifest from plugin JAR', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
@@ -496,3 +478,21 @@ void createIntellijDartPluginJar(String pluginJarPath, FileSystem fileSystem) {
     ..createSync(recursive: true)
     ..writeAsBytesSync(ZipEncoder().encode(dartPlugins)!);
 }
+
+final Platform macPlatform = FakePlatform(
+  operatingSystem: 'macos',
+  environment: <String, String>{'HOME': '/foo/bar'}
+);
+final Platform linuxPlatform = FakePlatform(
+  environment: <String, String>{
+    'HOME': '/foo/bar',
+  },
+);
+final Platform windowsPlatform = FakePlatform(
+  operatingSystem: 'windows',
+  environment: <String, String>{
+    'USERPROFILE': r'C:\Users\foo',
+    'APPDATA': r'C:\Users\foo\AppData\Roaming',
+    'LOCALAPPDATA': r'C:\Users\foo\AppData\Local',
+  },
+);

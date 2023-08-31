@@ -12,9 +12,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
 
-typedef TraversalTestFunction = Future<void> Function(TraversalTester tester);
-const Size tenByTen = Size(10.0, 10.0);
-
 void main() {
   setUp(() {
     debugResetSemanticsIdCounter();
@@ -361,3 +358,6 @@ class TestLayoutDelegate extends MultiChildLayoutDelegate {
   @override
   bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) => oldDelegate == this;
 }
+
+typedef TraversalTestFunction = Future<void> Function(TraversalTester tester);
+const Size tenByTen = Size(10.0, 10.0);

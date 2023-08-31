@@ -8,9 +8,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const double _crispText = 100.0; // this font size is selected to avoid needing any antialiasing.
-const String _expText = 'Éxp'; // renders in the test font as:
-
 // ########
 // ########
 // ########
@@ -152,3 +149,6 @@ Future<void> _expectColors(WidgetTester tester, Finder finder, Set<Color> allowe
     expect(actual, expected, reason: 'Pixel at $position is $actual but expected $expected.');
   });
 }
+
+const double _crispText = 100.0; // this font size is selected to avoid needing any antialiasing.
+const String _expText = 'Éxp'; // renders in the test font as:

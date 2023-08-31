@@ -12,80 +12,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
-RenderBox getRenderSegmentedControl(WidgetTester tester) {
-  return tester.allRenderObjects.firstWhere(
-    (RenderObject currentObject) {
-      return currentObject.toStringShort().contains('_RenderSegmentedControl');
-    },
-  ) as RenderBox;
-}
-
-Rect currentUnscaledThumbRect(WidgetTester tester, { bool useGlobalCoordinate = false }) {
-  final dynamic renderSegmentedControl = getRenderSegmentedControl(tester);
-  // Using dynamic to access private class in test.
-  // ignore: avoid_dynamic_calls
-  final Rect local = renderSegmentedControl.currentThumbRect as Rect;
-  if (!useGlobalCoordinate) {
-    return local;
-  }
-
-  final RenderBox segmentedControl = renderSegmentedControl as RenderBox;
-  return local.shift(segmentedControl.localToGlobal(Offset.zero));
-}
-
-int? getHighlightedIndex(WidgetTester tester) {
-  // Using dynamic to access private class in test.
-  // ignore: avoid_dynamic_calls
-  return (getRenderSegmentedControl(tester) as dynamic).highlightedIndex as int?;
-}
-
-Color getThumbColor(WidgetTester tester) {
-  // Using dynamic to access private class in test.
-  // ignore: avoid_dynamic_calls
-  return (getRenderSegmentedControl(tester) as dynamic).thumbColor as Color;
-}
-
-double currentThumbScale(WidgetTester tester) {
-  // Using dynamic to access private class in test.
-  // ignore: avoid_dynamic_calls
-  return (getRenderSegmentedControl(tester) as dynamic).thumbScale as double;
-}
-
-Widget setupSimpleSegmentedControl() {
-  const Map<int, Widget> children = <int, Widget>{
-    0: Text('Child 1'),
-    1: Text('Child 2'),
-  };
-
-  return boilerplate(
-    builder: (BuildContext context) {
-      return CupertinoSlidingSegmentedControl<int>(
-        children: children,
-        groupValue: groupValue,
-        onValueChanged: defaultCallback,
-      );
-    },
-  );
-}
-
-StateSetter? setState;
-int? groupValue = 0;
-void defaultCallback(int? newValue) {
-  setState!(() { groupValue = newValue; });
-}
-
-Widget boilerplate({ required WidgetBuilder builder }) {
-  return Directionality(
-    textDirection: TextDirection.ltr,
-    child: Center(
-      child: StatefulBuilder(builder: (BuildContext context, StateSetter setter) {
-        setState = setter;
-        return builder(context);
-      }),
-    ),
-  );
-}
-
 void main() {
 
   setUp(() {
@@ -1365,4 +1291,78 @@ void main() {
       kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
   });
+}
+
+RenderBox getRenderSegmentedControl(WidgetTester tester) {
+  return tester.allRenderObjects.firstWhere(
+    (RenderObject currentObject) {
+      return currentObject.toStringShort().contains('_RenderSegmentedControl');
+    },
+  ) as RenderBox;
+}
+
+Rect currentUnscaledThumbRect(WidgetTester tester, { bool useGlobalCoordinate = false }) {
+  final dynamic renderSegmentedControl = getRenderSegmentedControl(tester);
+  // Using dynamic to access private class in test.
+  // ignore: avoid_dynamic_calls
+  final Rect local = renderSegmentedControl.currentThumbRect as Rect;
+  if (!useGlobalCoordinate) {
+    return local;
+  }
+
+  final RenderBox segmentedControl = renderSegmentedControl as RenderBox;
+  return local.shift(segmentedControl.localToGlobal(Offset.zero));
+}
+
+int? getHighlightedIndex(WidgetTester tester) {
+  // Using dynamic to access private class in test.
+  // ignore: avoid_dynamic_calls
+  return (getRenderSegmentedControl(tester) as dynamic).highlightedIndex as int?;
+}
+
+Color getThumbColor(WidgetTester tester) {
+  // Using dynamic to access private class in test.
+  // ignore: avoid_dynamic_calls
+  return (getRenderSegmentedControl(tester) as dynamic).thumbColor as Color;
+}
+
+double currentThumbScale(WidgetTester tester) {
+  // Using dynamic to access private class in test.
+  // ignore: avoid_dynamic_calls
+  return (getRenderSegmentedControl(tester) as dynamic).thumbScale as double;
+}
+
+Widget setupSimpleSegmentedControl() {
+  const Map<int, Widget> children = <int, Widget>{
+    0: Text('Child 1'),
+    1: Text('Child 2'),
+  };
+
+  return boilerplate(
+    builder: (BuildContext context) {
+      return CupertinoSlidingSegmentedControl<int>(
+        children: children,
+        groupValue: groupValue,
+        onValueChanged: defaultCallback,
+      );
+    },
+  );
+}
+
+StateSetter? setState;
+int? groupValue = 0;
+void defaultCallback(int? newValue) {
+  setState!(() { groupValue = newValue; });
+}
+
+Widget boilerplate({ required WidgetBuilder builder }) {
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: Center(
+      child: StatefulBuilder(builder: (BuildContext context, StateSetter setter) {
+        setState = setter;
+        return builder(context);
+      }),
+    ),
+  );
 }

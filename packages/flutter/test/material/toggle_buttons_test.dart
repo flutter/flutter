@@ -14,27 +14,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 
-const double _defaultBorderWidth = 1.0;
-
-Widget boilerplate({
-  bool? useMaterial3,
-  MaterialTapTargetSize? tapTargetSize,
-  required Widget child,
-}) {
-  return Theme(
-    data: ThemeData(
-      useMaterial3: useMaterial3,
-      materialTapTargetSize: tapTargetSize,
-    ),
-    child: Directionality(
-      textDirection: TextDirection.ltr,
-      child: Center(
-        child: Material(child: child),
-      ),
-    ),
-  );
-}
-
 void main() {
   testWidgetsWithLeakTracking('Initial toggle state is reflected', (WidgetTester tester) async {
     TextStyle buttonTextStyle(String text) {
@@ -2040,4 +2019,25 @@ void main() {
 
     semantics.dispose();
   });
+}
+
+const double _defaultBorderWidth = 1.0;
+
+Widget boilerplate({
+  bool? useMaterial3,
+  MaterialTapTargetSize? tapTargetSize,
+  required Widget child,
+}) {
+  return Theme(
+    data: ThemeData(
+      useMaterial3: useMaterial3,
+      materialTapTargetSize: tapTargetSize,
+    ),
+    child: Directionality(
+      textDirection: TextDirection.ltr,
+      child: Center(
+        child: Material(child: child),
+      ),
+    ),
+  );
 }

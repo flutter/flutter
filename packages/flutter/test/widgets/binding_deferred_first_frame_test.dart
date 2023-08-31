@@ -9,9 +9,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const String _actualContent = 'Actual Content';
-const String _loading = 'Loading...';
-
 void main() {
   testWidgets('deferFirstFrame/allowFirstFrame stops sending frames to engine', (WidgetTester tester) async {
     expect(RendererBinding.instance.sendFramesToEngine, isTrue);
@@ -118,3 +115,6 @@ class _DeferringWidgetState extends State<_DeferringWidget> {
         : const Text(_loading);
   }
 }
+
+const String _actualContent = 'Actual Content';
+const String _loading = 'Loading...';

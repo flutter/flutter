@@ -6,13 +6,6 @@ import 'package:flutter/foundation.dart' show DiagnosticLevel, FlutterError;
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class SillyBorder extends BoxBorder {
-  const SillyBorder();
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => null;
-}
-
 void main() {
   test('BoxBorder.lerp', () {
     // names of the form fooAtX are foo, lerped X% of the way to null
@@ -689,4 +682,11 @@ void main() {
     expect(decoration2.scale(2.0), decoration4);
     expect(BoxDecoration.lerp(decoration2, decoration6, 0.5), decoration4);
   });
+}
+
+class SillyBorder extends BoxBorder {
+  const SillyBorder();
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
 }

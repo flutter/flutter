@@ -18,11 +18,6 @@ import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
 
-const String kBoundaryKey = '4d2d9609-c662-4571-afde-31410f96caa6';
-const String kElfAot = '--snapshot_kind=app-aot-elf';
-const String kAssemblyAot = '--snapshot_kind=app-aot-assembly';
-
-final Platform macPlatform = FakePlatform(operatingSystem: 'macos', environment: <String, String>{});
 void main() {
   late FakeProcessManager processManager;
   late Environment androidEnvironment;
@@ -589,3 +584,9 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 }
+
+const String kBoundaryKey = '4d2d9609-c662-4571-afde-31410f96caa6';
+const String kElfAot = '--snapshot_kind=app-aot-elf';
+const String kAssemblyAot = '--snapshot_kind=app-aot-assembly';
+
+final Platform macPlatform = FakePlatform(operatingSystem: 'macos', environment: <String, String>{});

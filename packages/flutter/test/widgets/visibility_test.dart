@@ -8,26 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
 
-class TestState extends StatefulWidget {
-  const TestState({ super.key, required this.child, required this.log });
-  final Widget child;
-  final List<String> log;
-  @override
-  State<TestState> createState() => _TestStateState();
-}
-
-class _TestStateState extends State<TestState> {
-  @override
-  void initState() {
-    super.initState();
-    widget.log.add('created new state');
-  }
-  @override
-  Widget build(BuildContext context) {
-    return widget.child;
-  }
-}
-
 void main() {
   testWidgets('Visibility', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -587,5 +567,25 @@ class _ShowVisibilityState extends State<_ShowVisibility> {
   @override
   Widget build(BuildContext context) {
     return Text('is visible ? ${Visibility.of(context)}');
+  }
+}
+
+class TestState extends StatefulWidget {
+  const TestState({ super.key, required this.child, required this.log });
+  final Widget child;
+  final List<String> log;
+  @override
+  State<TestState> createState() => _TestStateState();
+}
+
+class _TestStateState extends State<TestState> {
+  @override
+  void initState() {
+    super.initState();
+    widget.log.add('created new state');
+  }
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
   }
 }

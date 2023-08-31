@@ -22,9 +22,6 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/test_flutter_command_runner.dart';
 
-const String _kFlutterRoot = '/data/flutter';
-const int SIGABRT = -6;
-
 void main() {
   testWithoutContext('analyze generate correct errors message', () async {
     expect(
@@ -217,3 +214,6 @@ bool inRepo(List<String>? fileList, FileSystem fileSystem) {
   }
   return false;
 }
+
+const String _kFlutterRoot = '/data/flutter';
+const int SIGABRT = -6;

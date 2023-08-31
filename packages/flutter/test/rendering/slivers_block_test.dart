@@ -8,111 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
-class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
-  TestRenderSliverBoxChildManager({
-    required this.children,
-  });
-
-  late RenderSliverList _renderObject;
-  List<RenderBox> children;
-
-  RenderSliverList createRenderObject() {
-    _renderObject = RenderSliverList(childManager: this);
-    return _renderObject;
-  }
-
-  int? _currentlyUpdatingChildIndex;
-
-  @override
-  void createChild(int index, { required RenderBox? after }) {
-    if (index < 0 || index >= children.length) {
-      return;
-    }
-    try {
-      _currentlyUpdatingChildIndex = index;
-      _renderObject.insert(children[index], after: after);
-    } finally {
-      _currentlyUpdatingChildIndex = null;
-    }
-  }
-
-  @override
-  void removeChild(RenderBox child) {
-    _renderObject.remove(child);
-  }
-
-  @override
-  double estimateMaxScrollOffset(
-    SliverConstraints constraints, {
-    int? firstIndex,
-    int? lastIndex,
-    double? leadingScrollOffset,
-    double? trailingScrollOffset,
-  }) {
-    assert(lastIndex! >= firstIndex!);
-    return children.length * (trailingScrollOffset! - leadingScrollOffset!) / (lastIndex! - firstIndex! + 1);
-  }
-
-  @override
-  int get childCount => children.length;
-
-  @override
-  void didAdoptChild(RenderBox child) {
-    assert(_currentlyUpdatingChildIndex != null);
-    final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
-    childParentData.index = _currentlyUpdatingChildIndex;
-  }
-
-  @override
-  void setDidUnderflow(bool value) { }
-}
-
-class ViewportOffsetSpy extends ViewportOffset {
-  ViewportOffsetSpy(this._pixels);
-
-  double _pixels;
-
-  @override
-  double get pixels => _pixels;
-
-  @override
-  bool get hasPixels => true;
-
-  bool corrected = false;
-
-  @override
-  bool applyViewportDimension(double viewportDimension) => true;
-
-  @override
-  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) => true;
-
-  @override
-  void correctBy(double correction) {
-    _pixels += correction;
-    corrected = true;
-  }
-
-  @override
-  void jumpTo(double pixels) {
-    // Do nothing, not required in test.
-  }
-
-  @override
-  Future<void> animateTo(
-    double to, {
-    required Duration duration,
-    required Curve curve,
-  }) async {
-    // Do nothing, not required in test.
-  }
-
-  @override
-  ScrollDirection get userScrollDirection => ScrollDirection.idle;
-
-  @override
-  bool get allowImplicitScrolling => false;
-}
-
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
@@ -354,4 +249,109 @@ void main() {
     candidate.layoutOffset = 100.0;
     expect(candidate.toString(), 'index=-1; layoutOffset=100.0');
   });
+}
+
+class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
+  TestRenderSliverBoxChildManager({
+    required this.children,
+  });
+
+  late RenderSliverList _renderObject;
+  List<RenderBox> children;
+
+  RenderSliverList createRenderObject() {
+    _renderObject = RenderSliverList(childManager: this);
+    return _renderObject;
+  }
+
+  int? _currentlyUpdatingChildIndex;
+
+  @override
+  void createChild(int index, { required RenderBox? after }) {
+    if (index < 0 || index >= children.length) {
+      return;
+    }
+    try {
+      _currentlyUpdatingChildIndex = index;
+      _renderObject.insert(children[index], after: after);
+    } finally {
+      _currentlyUpdatingChildIndex = null;
+    }
+  }
+
+  @override
+  void removeChild(RenderBox child) {
+    _renderObject.remove(child);
+  }
+
+  @override
+  double estimateMaxScrollOffset(
+    SliverConstraints constraints, {
+    int? firstIndex,
+    int? lastIndex,
+    double? leadingScrollOffset,
+    double? trailingScrollOffset,
+  }) {
+    assert(lastIndex! >= firstIndex!);
+    return children.length * (trailingScrollOffset! - leadingScrollOffset!) / (lastIndex! - firstIndex! + 1);
+  }
+
+  @override
+  int get childCount => children.length;
+
+  @override
+  void didAdoptChild(RenderBox child) {
+    assert(_currentlyUpdatingChildIndex != null);
+    final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
+    childParentData.index = _currentlyUpdatingChildIndex;
+  }
+
+  @override
+  void setDidUnderflow(bool value) { }
+}
+
+class ViewportOffsetSpy extends ViewportOffset {
+  ViewportOffsetSpy(this._pixels);
+
+  double _pixels;
+
+  @override
+  double get pixels => _pixels;
+
+  @override
+  bool get hasPixels => true;
+
+  bool corrected = false;
+
+  @override
+  bool applyViewportDimension(double viewportDimension) => true;
+
+  @override
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) => true;
+
+  @override
+  void correctBy(double correction) {
+    _pixels += correction;
+    corrected = true;
+  }
+
+  @override
+  void jumpTo(double pixels) {
+    // Do nothing, not required in test.
+  }
+
+  @override
+  Future<void> animateTo(
+    double to, {
+    required Duration duration,
+    required Curve curve,
+  }) async {
+    // Do nothing, not required in test.
+  }
+
+  @override
+  ScrollDirection get userScrollDirection => ScrollDirection.idle;
+
+  @override
+  bool get allowImplicitScrolling => false;
 }

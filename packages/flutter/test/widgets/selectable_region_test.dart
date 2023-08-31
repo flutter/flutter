@@ -13,16 +13,6 @@ import 'clipboard_utils.dart';
 import 'keyboard_utils.dart';
 import 'semantics_tester.dart';
 
-Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
-  const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
-  final Offset localOffset = paragraph.getOffsetForCaret(TextPosition(offset: offset), caret);
-  return paragraph.localToGlobal(localOffset);
-}
-
-Offset globalize(Offset point, RenderBox box) {
-  return box.localToGlobal(point);
-}
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
@@ -3003,4 +2993,14 @@ class RenderSelectAll extends RenderProxyBox
     this.startHandle = startHandle;
     this.endHandle = endHandle;
   }
+}
+
+Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
+  const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
+  final Offset localOffset = paragraph.getOffsetForCaret(TextPosition(offset: offset), caret);
+  return paragraph.localToGlobal(localOffset);
+}
+
+Offset globalize(Offset point, RenderBox box) {
+  return box.localToGlobal(point);
 }

@@ -12,8 +12,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'clipboard_utils.dart';
 import 'editable_text_utils.dart';
 
-const int kSingleTapUpTimeout = 500;
-
 void main() {
   late int tapCount;
   late int singleTapUpCount;
@@ -1870,3 +1868,5 @@ class FakeTextSelectionDelegate extends Fake implements TextSelectionDelegate {
   @override
   void copySelection(SelectionChangedCause cause) { }
 }
+
+const int kSingleTapUpTimeout = 500;

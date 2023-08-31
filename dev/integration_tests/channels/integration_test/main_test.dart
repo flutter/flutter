@@ -6,11 +6,6 @@ import 'package:channels/main.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-final Finder statusField = find.byKey(const ValueKey<String>('status'));
-final Finder stepButton = find.byKey(const ValueKey<String>('step'));
-
-String getStatus(WidgetTester tester) => tester.widget<Text>(statusField).data!;
-
 void main() {
   testWidgets('step through', (WidgetTester tester) async {
     await tester.pumpWidget(const TestApp());
@@ -39,3 +34,8 @@ void main() {
     }
   });
 }
+
+final Finder statusField = find.byKey(const ValueKey<String>('status'));
+final Finder stepButton = find.byKey(const ValueKey<String>('step'));
+
+String getStatus(WidgetTester tester) => tester.widget<Text>(statusField).data!;

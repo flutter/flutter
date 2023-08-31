@@ -10,27 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class OnTapPage extends StatelessWidget {
-  const OnTapPage({super.key, required this.id, required this.onTap});
-
-  final String id;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Page $id')),
-      body: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: Center(
-          child: Text(id, style: Theme.of(context).textTheme.displaySmall),
-        ),
-      ),
-    );
-  }
-}
-
 void main() {
   testWidgets('Push and Pop should send platform messages', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -389,6 +368,27 @@ class TestPage extends Page<void> {
     return PageRouteBuilder<void>(
       settings: this,
       pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) => const Placeholder(),
+    );
+  }
+}
+
+class OnTapPage extends StatelessWidget {
+  const OnTapPage({super.key, required this.id, required this.onTap});
+
+  final String id;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Page $id')),
+      body: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Center(
+          child: Text(id, style: Theme.of(context).textTheme.displaySmall),
+        ),
+      ),
     );
   }
 }

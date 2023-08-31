@@ -9,26 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/clipboard_utils.dart';
 
-class TestMaterialLocalizations extends DefaultMaterialLocalizations {
-  @override
-  String formatCompactDate(DateTime date) {
-    return '${date.month}/${date.day}/${date.year}';
-  }
-}
-
-class TestMaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
-  @override
-  bool isSupported(Locale locale) => true;
-
-  @override
-  Future<MaterialLocalizations> load(Locale locale) {
-    return SynchronousFuture<MaterialLocalizations>(TestMaterialLocalizations());
-  }
-
-  @override
-  bool shouldReload(TestMaterialLocalizationsDelegate old) => false;
-}
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
@@ -377,4 +357,24 @@ void main() {
       expect(find.text(errorFormatText), findsOneWidget);
     });
   });
+}
+
+class TestMaterialLocalizations extends DefaultMaterialLocalizations {
+  @override
+  String formatCompactDate(DateTime date) {
+    return '${date.month}/${date.day}/${date.year}';
+  }
+}
+
+class TestMaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
+  @override
+  bool isSupported(Locale locale) => true;
+
+  @override
+  Future<MaterialLocalizations> load(Locale locale) {
+    return SynchronousFuture<MaterialLocalizations>(TestMaterialLocalizations());
+  }
+
+  @override
+  bool shouldReload(TestMaterialLocalizationsDelegate old) => false;
 }

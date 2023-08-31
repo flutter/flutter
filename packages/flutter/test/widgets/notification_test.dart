@@ -5,8 +5,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class MyNotification extends Notification { }
-
 void main() {
   testWidgets('Notification basics - toString', (WidgetTester tester) async {
     expect(MyNotification(), hasOneLineDescription);
@@ -95,3 +93,5 @@ void main() {
     expect(n2.metrics.pixels, 3.0);
   });
 }
+
+class MyNotification extends Notification { }

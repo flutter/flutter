@@ -7,24 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class OrderPainter extends CustomPainter {
-  const OrderPainter(this.index);
-
-  final int index;
-
-  static List<int> log = <int>[];
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    log.add(index);
-  }
-
-  @override
-  bool shouldRepaint(OrderPainter old) => false;
-}
-
-Widget log(int index) => CustomPaint(painter: OrderPainter(index));
-
 void main() {
   // NO DIRECTION
 
@@ -1147,3 +1129,21 @@ void main() {
     expect(renderBox.size.height, equals(0.0));
   });
 }
+
+class OrderPainter extends CustomPainter {
+  const OrderPainter(this.index);
+
+  final int index;
+
+  static List<int> log = <int>[];
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    log.add(index);
+  }
+
+  @override
+  bool shouldRepaint(OrderPainter old) => false;
+}
+
+Widget log(int index) => CustomPaint(painter: OrderPainter(index));

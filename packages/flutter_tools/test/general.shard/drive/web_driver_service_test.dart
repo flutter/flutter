@@ -22,18 +22,6 @@ import 'package:webdriver/sync_io.dart' as sync_io;
 import '../../src/common.dart';
 import '../../src/context.dart';
 
-const List<String> kChromeArgs = <String>[
-  '--bwsi',
-  '--disable-background-timer-throttling',
-  '--disable-default-apps',
-  '--disable-extensions',
-  '--disable-popup-blocking',
-  '--disable-translate',
-  '--no-default-browser-check',
-  '--no-sandbox',
-  '--no-first-run',
-];
-
 void main() {
   testWithoutContext('getDesiredCapabilities Chrome with headless on', () {
     final Map<String, dynamic> expected = <String, dynamic>{
@@ -379,3 +367,15 @@ class FakeDevice extends Fake implements Device {
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
 }
+
+const List<String> kChromeArgs = <String>[
+  '--bwsi',
+  '--disable-background-timer-throttling',
+  '--disable-default-apps',
+  '--disable-extensions',
+  '--disable-popup-blocking',
+  '--disable-translate',
+  '--no-default-browser-check',
+  '--no-sandbox',
+  '--no-first-run',
+];

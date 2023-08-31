@@ -7,51 +7,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class ExpandingBox extends StatefulWidget {
-  const ExpandingBox({ super.key, required this.collapsedSize, required this.expandedSize });
-
-  final double collapsedSize;
-  final double expandedSize;
-
-  @override
-  State<ExpandingBox> createState() => _ExpandingBoxState();
-}
-
-class _ExpandingBoxState extends State<ExpandingBox> with AutomaticKeepAliveClientMixin<ExpandingBox> {
-  late double _height;
-
-  @override
-  void initState() {
-    super.initState();
-    _height = widget.collapsedSize;
-  }
-
-  void toggleSize() {
-    setState(() {
-      _height = _height == widget.collapsedSize ? widget.expandedSize : widget.collapsedSize;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    return Container(
-      height: _height,
-      color: Colors.green,
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        child: TextButton(
-          onPressed: toggleSize,
-          child: const Text('Collapse'),
-        ),
-      ),
-    );
-  }
-
-  @override
-  bool get wantKeepAlive => true;
-}
-
 void main() {
   testWidgets('shrink listview', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
@@ -399,4 +354,49 @@ class RangeMaintainingTestScrollBehavior extends ScrollBehavior {
   ScrollPhysics getScrollPhysics(BuildContext context) {
     return const BouncingScrollPhysics(parent: RangeMaintainingScrollPhysics());
   }
+}
+
+class ExpandingBox extends StatefulWidget {
+  const ExpandingBox({ super.key, required this.collapsedSize, required this.expandedSize });
+
+  final double collapsedSize;
+  final double expandedSize;
+
+  @override
+  State<ExpandingBox> createState() => _ExpandingBoxState();
+}
+
+class _ExpandingBoxState extends State<ExpandingBox> with AutomaticKeepAliveClientMixin<ExpandingBox> {
+  late double _height;
+
+  @override
+  void initState() {
+    super.initState();
+    _height = widget.collapsedSize;
+  }
+
+  void toggleSize() {
+    setState(() {
+      _height = _height == widget.collapsedSize ? widget.expandedSize : widget.collapsedSize;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return Container(
+      height: _height,
+      color: Colors.green,
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: TextButton(
+          onPressed: toggleSize,
+          child: const Text('Collapse'),
+        ),
+      ),
+    );
+  }
+
+  @override
+  bool get wantKeepAlive => true;
 }

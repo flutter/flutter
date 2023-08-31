@@ -8,37 +8,6 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Object getAssertionErrorWithMessage() {
-  try {
-    assert(false, 'Message goes here.');
-  } catch (e) {
-    return e;
-  }
-  throw 'assert failed';
-}
-
-Object getAssertionErrorWithoutMessage() {
-  try {
-    assert(false);
-  } catch (e) {
-    return e;
-  }
-  throw 'assert failed';
-}
-
-Object getAssertionErrorWithLongMessage() {
-  try {
-    assert(false, 'word ' * 100);
-  } catch (e) {
-    return e;
-  }
-  throw 'assert failed';
-}
-
-Future<StackTrace> getSampleStack() async {
-  return Future<StackTrace>.sync(() => StackTrace.current);
-}
-
 Future<void> main() async {
   final List<String?> console = <String?>[];
 
@@ -259,4 +228,35 @@ When the exception was thrown, this was the stack:
     console.clear();
     FlutterError.resetErrorCount();
   });
+}
+
+Object getAssertionErrorWithMessage() {
+  try {
+    assert(false, 'Message goes here.');
+  } catch (e) {
+    return e;
+  }
+  throw 'assert failed';
+}
+
+Object getAssertionErrorWithoutMessage() {
+  try {
+    assert(false);
+  } catch (e) {
+    return e;
+  }
+  throw 'assert failed';
+}
+
+Object getAssertionErrorWithLongMessage() {
+  try {
+    assert(false, 'word ' * 100);
+  } catch (e) {
+    return e;
+  }
+  throw 'assert failed';
+}
+
+Future<StackTrace> getSampleStack() async {
+  return Future<StackTrace>.sync(() => StackTrace.current);
 }

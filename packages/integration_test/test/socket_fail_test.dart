@@ -7,13 +7,6 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
-class SocketExceptionHttpClient extends Fake implements HttpClient {
-  @override
-  Future<HttpClientRequest> openUrl(String method, Uri url) {
-    throw const SocketException('always throw');
-  }
-}
-
 Future<void> main() async {
   final IntegrationTestWidgetsFlutterBinding binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -29,4 +22,11 @@ Future<void> main() async {
     }
     expect(gotStateError, true);
   });
+}
+
+class SocketExceptionHttpClient extends Fake implements HttpClient {
+  @override
+  Future<HttpClientRequest> openUrl(String method, Uri url) {
+    throw const SocketException('always throw');
+  }
 }

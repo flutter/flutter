@@ -5,6 +5,15 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+void main() {
+  testWidgets('three-way setState() smoke test', (WidgetTester tester) async {
+    await tester.pumpWidget(const Changer(Wrapper(Leaf())));
+    await tester.pumpWidget(const Changer(Wrapper(Leaf())));
+    changer.test();
+    await tester.pump();
+  });
+}
+
 late ChangerState changer;
 
 class Changer extends StatefulWidget {
@@ -49,13 +58,4 @@ class Leaf extends StatefulWidget {
 class LeafState extends State<Leaf> {
   @override
   Widget build(BuildContext context) => const Text('leaf', textDirection: TextDirection.ltr);
-}
-
-void main() {
-  testWidgets('three-way setState() smoke test', (WidgetTester tester) async {
-    await tester.pumpWidget(const Changer(Wrapper(Leaf())));
-    await tester.pumpWidget(const Changer(Wrapper(Leaf())));
-    changer.test();
-    await tester.pump();
-  });
 }

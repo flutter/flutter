@@ -15,14 +15,6 @@ import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
 
-const List<int> _kTtfHeaderBytes = <int>[0, 1, 0, 0, 0, 15, 0, 128, 0, 3, 0, 112];
-
-const String inputPath = '/input/fonts/MaterialIcons-Regular.otf';
-const String outputPath = '/output/fonts/MaterialIcons-Regular.otf';
-const String relativePath = 'fonts/MaterialIcons-Regular.otf';
-
-final RegExp whitespace = RegExp(r'\s+');
-
 void main() {
   late BufferLogger logger;
   late MemoryFileSystem fileSystem;
@@ -668,3 +660,11 @@ const String invalidFontManifestJson = '''
   ]
 }
 ''';
+
+const List<int> _kTtfHeaderBytes = <int>[0, 1, 0, 0, 0, 15, 0, 128, 0, 3, 0, 112];
+
+const String inputPath = '/input/fonts/MaterialIcons-Regular.otf';
+const String outputPath = '/output/fonts/MaterialIcons-Regular.otf';
+const String relativePath = 'fonts/MaterialIcons-Regular.otf';
+
+final RegExp whitespace = RegExp(r'\s+');

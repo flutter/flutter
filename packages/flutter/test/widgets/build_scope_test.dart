@@ -7,6 +7,106 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'test_widgets.dart';
 
+void main() {
+  testWidgets('Legal times for setState', (WidgetTester tester) async {
+    final GlobalKey flipKey = GlobalKey();
+    expect(ProbeWidgetState.buildCount, equals(0));
+    await tester.pumpWidget(const ProbeWidget(key: Key('a')));
+    expect(ProbeWidgetState.buildCount, equals(1));
+    await tester.pumpWidget(const ProbeWidget(key: Key('b')));
+    expect(ProbeWidgetState.buildCount, equals(2));
+    await tester.pumpWidget(FlipWidget(
+      key: flipKey,
+      left: Container(),
+      right: const ProbeWidget(key: Key('c')),
+    ));
+    expect(ProbeWidgetState.buildCount, equals(2));
+    final FlipWidgetState flipState1 = flipKey.currentState! as FlipWidgetState;
+    flipState1.flip();
+    await tester.pump();
+    expect(ProbeWidgetState.buildCount, equals(3));
+    final FlipWidgetState flipState2 = flipKey.currentState! as FlipWidgetState;
+    flipState2.flip();
+    await tester.pump();
+    expect(ProbeWidgetState.buildCount, equals(3));
+    await tester.pumpWidget(Container());
+    expect(ProbeWidgetState.buildCount, equals(3));
+  });
+
+  testWidgets('Setting parent state during build is forbidden', (WidgetTester tester) async {
+    await tester.pumpWidget(const BadWidgetParent());
+    expect(tester.takeException(), isFlutterError);
+    await tester.pumpWidget(Container());
+  });
+
+  testWidgets('Setting state during dispose is forbidden', (WidgetTester tester) async {
+    await tester.pumpWidget(const BadDisposeWidget());
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(Container());
+    expect(tester.takeException(), isNotNull);
+  });
+
+  testWidgets('Dirty element list sort order', (WidgetTester tester) async {
+    final GlobalKey key1 = GlobalKey(debugLabel: 'key1');
+    final GlobalKey key2 = GlobalKey(debugLabel: 'key2');
+
+    bool didMiddle = false;
+    late Widget middle;
+    final List<StateSetter> setStates = <StateSetter>[];
+    Widget builder(BuildContext context, StateSetter setState) {
+      setStates.add(setState);
+      final bool returnMiddle = !didMiddle;
+      didMiddle = true;
+      return Wrapper(
+        child: Wrapper(
+          child: StatefulWrapper(
+            child: returnMiddle ? middle : Container(),
+          ),
+        ),
+      );
+    }
+    final Widget part1 = Wrapper(
+      child: KeyedSubtree(
+        key: key1,
+        child: StatefulBuilder(
+          builder: builder,
+        ),
+      ),
+    );
+    final Widget part2 = Wrapper(
+      child: KeyedSubtree(
+        key: key2,
+        child: StatefulBuilder(
+          builder: builder,
+        ),
+      ),
+    );
+
+    middle = part2;
+    await tester.pumpWidget(part1);
+
+    for (final StatefulWrapperState state in tester.stateList<StatefulWrapperState>(find.byType(StatefulWrapper))) {
+      expect(state.built, isNotNull);
+      state.oldBuilt = state.built!;
+      state.trigger();
+    }
+    for (final StateSetter setState in setStates) {
+      setState(() { });
+    }
+
+    StatefulWrapperState.buildId = 0;
+    middle = part1;
+    didMiddle = false;
+    await tester.pumpWidget(part2);
+
+    for (final StatefulWrapperState state in tester.stateList<StatefulWrapperState>(find.byType(StatefulWrapper))) {
+      expect(state.built, isNotNull);
+      expect(state.built, isNot(equals(state.oldBuilt)));
+    }
+
+  });
+}
+
 class ProbeWidget extends StatefulWidget {
   const ProbeWidget({ super.key });
   @override
@@ -130,104 +230,4 @@ class Wrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return child;
   }
-}
-
-void main() {
-  testWidgets('Legal times for setState', (WidgetTester tester) async {
-    final GlobalKey flipKey = GlobalKey();
-    expect(ProbeWidgetState.buildCount, equals(0));
-    await tester.pumpWidget(const ProbeWidget(key: Key('a')));
-    expect(ProbeWidgetState.buildCount, equals(1));
-    await tester.pumpWidget(const ProbeWidget(key: Key('b')));
-    expect(ProbeWidgetState.buildCount, equals(2));
-    await tester.pumpWidget(FlipWidget(
-      key: flipKey,
-      left: Container(),
-      right: const ProbeWidget(key: Key('c')),
-    ));
-    expect(ProbeWidgetState.buildCount, equals(2));
-    final FlipWidgetState flipState1 = flipKey.currentState! as FlipWidgetState;
-    flipState1.flip();
-    await tester.pump();
-    expect(ProbeWidgetState.buildCount, equals(3));
-    final FlipWidgetState flipState2 = flipKey.currentState! as FlipWidgetState;
-    flipState2.flip();
-    await tester.pump();
-    expect(ProbeWidgetState.buildCount, equals(3));
-    await tester.pumpWidget(Container());
-    expect(ProbeWidgetState.buildCount, equals(3));
-  });
-
-  testWidgets('Setting parent state during build is forbidden', (WidgetTester tester) async {
-    await tester.pumpWidget(const BadWidgetParent());
-    expect(tester.takeException(), isFlutterError);
-    await tester.pumpWidget(Container());
-  });
-
-  testWidgets('Setting state during dispose is forbidden', (WidgetTester tester) async {
-    await tester.pumpWidget(const BadDisposeWidget());
-    expect(tester.takeException(), isNull);
-    await tester.pumpWidget(Container());
-    expect(tester.takeException(), isNotNull);
-  });
-
-  testWidgets('Dirty element list sort order', (WidgetTester tester) async {
-    final GlobalKey key1 = GlobalKey(debugLabel: 'key1');
-    final GlobalKey key2 = GlobalKey(debugLabel: 'key2');
-
-    bool didMiddle = false;
-    late Widget middle;
-    final List<StateSetter> setStates = <StateSetter>[];
-    Widget builder(BuildContext context, StateSetter setState) {
-      setStates.add(setState);
-      final bool returnMiddle = !didMiddle;
-      didMiddle = true;
-      return Wrapper(
-        child: Wrapper(
-          child: StatefulWrapper(
-            child: returnMiddle ? middle : Container(),
-          ),
-        ),
-      );
-    }
-    final Widget part1 = Wrapper(
-      child: KeyedSubtree(
-        key: key1,
-        child: StatefulBuilder(
-          builder: builder,
-        ),
-      ),
-    );
-    final Widget part2 = Wrapper(
-      child: KeyedSubtree(
-        key: key2,
-        child: StatefulBuilder(
-          builder: builder,
-        ),
-      ),
-    );
-
-    middle = part2;
-    await tester.pumpWidget(part1);
-
-    for (final StatefulWrapperState state in tester.stateList<StatefulWrapperState>(find.byType(StatefulWrapper))) {
-      expect(state.built, isNotNull);
-      state.oldBuilt = state.built!;
-      state.trigger();
-    }
-    for (final StateSetter setState in setStates) {
-      setState(() { });
-    }
-
-    StatefulWrapperState.buildId = 0;
-    middle = part1;
-    didMiddle = false;
-    await tester.pumpWidget(part2);
-
-    for (final StatefulWrapperState state in tester.stateList<StatefulWrapperState>(find.byType(StatefulWrapper))) {
-      expect(state.built, isNotNull);
-      expect(state.built, isNot(equals(state.oldBuilt)));
-    }
-
-  });
 }

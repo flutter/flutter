@@ -9,11 +9,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const CupertinoDynamicColor _kScrollbarColor = CupertinoDynamicColor.withBrightness(
-  color: Color(0x59000000),
-  darkColor: Color(0x80FFFFFF),
-);
-
 void main() {
   const Duration kScrollbarTimeToFade = Duration(milliseconds: 1200);
   const Duration kScrollbarFadeDuration = Duration(milliseconds: 250);
@@ -1295,3 +1290,8 @@ void main() {
     );
   });
 }
+
+const CupertinoDynamicColor _kScrollbarColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0x59000000),
+  darkColor: Color(0x80FFFFFF),
+);

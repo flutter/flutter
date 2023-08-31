@@ -5,65 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-// This is a regression test for https://github.com/flutter/flutter/issues/5840.
-
-class Bar extends StatefulWidget {
-  const Bar({ super.key });
-  @override
-  BarState createState() => BarState();
-}
-
-class BarState extends State<Bar> {
-  final GlobalKey _fooKey = GlobalKey();
-
-  bool _mode = false;
-
-  void trigger() {
-    setState(() {
-      _mode = !_mode;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_mode) {
-      return SizedBox(
-        child: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
-            return StatefulCreationCounter(key: _fooKey);
-          },
-        ),
-      );
-    } else {
-      return LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
-          return StatefulCreationCounter(key: _fooKey);
-        },
-      );
-    }
-  }
-}
-
-class StatefulCreationCounter extends StatefulWidget {
-  const StatefulCreationCounter({ super.key });
-
-  @override
-  StatefulCreationCounterState createState() => StatefulCreationCounterState();
-}
-
-class StatefulCreationCounterState extends State<StatefulCreationCounter> {
-  static int creationCount = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    creationCount += 1;
-  }
-
-  @override
-  Widget build(BuildContext context) => Container();
-}
-
 void main() {
   testWidgets('reparent state with layout builder', (WidgetTester tester) async {
     expect(StatefulCreationCounterState.creationCount, 0);
@@ -155,4 +96,63 @@ void main() {
     await tester.pump();
     expect(layoutBuilderBuildCount, 2);
   });
+}
+
+// This is a regression test for https://github.com/flutter/flutter/issues/5840.
+
+class Bar extends StatefulWidget {
+  const Bar({ super.key });
+  @override
+  BarState createState() => BarState();
+}
+
+class BarState extends State<Bar> {
+  final GlobalKey _fooKey = GlobalKey();
+
+  bool _mode = false;
+
+  void trigger() {
+    setState(() {
+      _mode = !_mode;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_mode) {
+      return SizedBox(
+        child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return StatefulCreationCounter(key: _fooKey);
+          },
+        ),
+      );
+    } else {
+      return LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return StatefulCreationCounter(key: _fooKey);
+        },
+      );
+    }
+  }
+}
+
+class StatefulCreationCounter extends StatefulWidget {
+  const StatefulCreationCounter({ super.key });
+
+  @override
+  StatefulCreationCounterState createState() => StatefulCreationCounterState();
+}
+
+class StatefulCreationCounterState extends State<StatefulCreationCounter> {
+  static int creationCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    creationCount += 1;
+  }
+
+  @override
+  Widget build(BuildContext context) => Container();
 }

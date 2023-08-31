@@ -12,102 +12,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 
-class _CustomPhysics extends ClampingScrollPhysics {
-  const _CustomPhysics({ super.parent });
-
-  @override
-  _CustomPhysics applyTo(ScrollPhysics? ancestor) {
-    return _CustomPhysics(parent: buildParent(ancestor));
-  }
-
-  @override
-  Simulation createBallisticSimulation(ScrollMetrics position, double dragVelocity) {
-    return ScrollSpringSimulation(spring, 1000.0, 1000.0, 1000.0);
-  }
-}
-
-Widget buildTest({
-  ScrollController? controller,
-  String title = 'TTTTTTTT',
-  Key? key,
-  bool expanded = true,
-}) {
-  return MaterialApp(
-        home: Scaffold(
-          drawerDragStartBehavior: DragStartBehavior.down,
-          body: DefaultTabController(
-            length: 4,
-            child: NestedScrollView(
-              key: key,
-              dragStartBehavior: DragStartBehavior.down,
-              controller: controller,
-              headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-                return <Widget>[
-                  SliverAppBar(
-                    title: Text(title),
-                    pinned: true,
-                    expandedHeight: expanded ? 200.0 : 0.0,
-                    forceElevated: innerBoxIsScrolled,
-                    bottom: const TabBar(
-                      tabs: <Tab>[
-                        Tab(text: 'AA'),
-                        Tab(text: 'BB'),
-                        Tab(text: 'CC'),
-                        Tab(text: 'DD'),
-                      ],
-                    ),
-                  ),
-                ];
-              },
-              body: TabBarView(
-                children: <Widget>[
-                  ListView(
-                    children: const <Widget>[
-                      SizedBox(
-                        height: 300.0,
-                        child: Text('aaa1'),
-                      ),
-                      SizedBox(
-                        height: 200.0,
-                        child: Text('aaa2'),
-                      ),
-                      SizedBox(
-                        height: 100.0,
-                        child: Text('aaa3'),
-                      ),
-                      SizedBox(
-                        height: 50.0,
-                        child: Text('aaa4'),
-                      ),
-                    ],
-                  ),
-                  ListView(
-                    dragStartBehavior: DragStartBehavior.down,
-                    children: const <Widget>[
-                      SizedBox(
-                        height: 100.0,
-                        child: Text('bbb1'),
-                      ),
-                    ],
-                  ),
-                  const Center(child: Text('ccc1')),
-                  ListView(
-                    dragStartBehavior: DragStartBehavior.down,
-                    children: const <Widget>[
-                      SizedBox(
-                        height: 10000.0,
-                        child: Text('ddd1'),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-  );
-}
-
 void main() {
   testWidgets('ScrollDirection test', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/107101
@@ -3283,4 +3187,100 @@ class _TestLayoutExtentIsNegative extends StatelessWidget {
       ),
     );
   }
+}
+
+class _CustomPhysics extends ClampingScrollPhysics {
+  const _CustomPhysics({ super.parent });
+
+  @override
+  _CustomPhysics applyTo(ScrollPhysics? ancestor) {
+    return _CustomPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  Simulation createBallisticSimulation(ScrollMetrics position, double dragVelocity) {
+    return ScrollSpringSimulation(spring, 1000.0, 1000.0, 1000.0);
+  }
+}
+
+Widget buildTest({
+  ScrollController? controller,
+  String title = 'TTTTTTTT',
+  Key? key,
+  bool expanded = true,
+}) {
+  return MaterialApp(
+        home: Scaffold(
+          drawerDragStartBehavior: DragStartBehavior.down,
+          body: DefaultTabController(
+            length: 4,
+            child: NestedScrollView(
+              key: key,
+              dragStartBehavior: DragStartBehavior.down,
+              controller: controller,
+              headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+                return <Widget>[
+                  SliverAppBar(
+                    title: Text(title),
+                    pinned: true,
+                    expandedHeight: expanded ? 200.0 : 0.0,
+                    forceElevated: innerBoxIsScrolled,
+                    bottom: const TabBar(
+                      tabs: <Tab>[
+                        Tab(text: 'AA'),
+                        Tab(text: 'BB'),
+                        Tab(text: 'CC'),
+                        Tab(text: 'DD'),
+                      ],
+                    ),
+                  ),
+                ];
+              },
+              body: TabBarView(
+                children: <Widget>[
+                  ListView(
+                    children: const <Widget>[
+                      SizedBox(
+                        height: 300.0,
+                        child: Text('aaa1'),
+                      ),
+                      SizedBox(
+                        height: 200.0,
+                        child: Text('aaa2'),
+                      ),
+                      SizedBox(
+                        height: 100.0,
+                        child: Text('aaa3'),
+                      ),
+                      SizedBox(
+                        height: 50.0,
+                        child: Text('aaa4'),
+                      ),
+                    ],
+                  ),
+                  ListView(
+                    dragStartBehavior: DragStartBehavior.down,
+                    children: const <Widget>[
+                      SizedBox(
+                        height: 100.0,
+                        child: Text('bbb1'),
+                      ),
+                    ],
+                  ),
+                  const Center(child: Text('ccc1')),
+                  ListView(
+                    dragStartBehavior: DragStartBehavior.down,
+                    children: const <Widget>[
+                      SizedBox(
+                        height: 10000.0,
+                        child: Text('ddd1'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+  );
 }

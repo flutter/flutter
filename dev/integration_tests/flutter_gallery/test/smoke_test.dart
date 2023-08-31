@@ -10,6 +10,20 @@ import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
 import 'package:flutter_gallery/gallery/demos.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+void main() {
+  testWidgets(
+    'Flutter Gallery app smoke test',
+    smokeGallery,
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.macOS }),
+  );
+
+  testWidgets('Flutter Gallery app smoke test with semantics', (WidgetTester tester) async {
+    final SemanticsHandle handle = SemanticsBinding.instance.ensureSemantics();
+    await smokeGallery(tester);
+    handle.dispose();
+  });
+}
+
 // This title is visible on the home and demo category pages. It's
 // not visible when the demos are running.
 const String kGalleryTitle = 'Flutter gallery';
@@ -175,18 +189,4 @@ Future<void> smokeGallery(WidgetTester tester) async {
 
   await smokeOptionsPage(tester);
   expect(sendFeedbackButtonPressed, true);
-}
-
-void main() {
-  testWidgets(
-    'Flutter Gallery app smoke test',
-    smokeGallery,
-    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.macOS }),
-  );
-
-  testWidgets('Flutter Gallery app smoke test with semantics', (WidgetTester tester) async {
-    final SemanticsHandle handle = SemanticsBinding.instance.ensureSemantics();
-    await smokeGallery(tester);
-    handle.dispose();
-  });
 }

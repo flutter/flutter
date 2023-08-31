@@ -23,22 +23,6 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fakes.dart';
 
-const FakeCommand unameCommandForX64 = FakeCommand(
-  command: <String>[
-    'uname',
-    '-m',
-  ],
-  stdout: 'x86_64',
-);
-
-const FakeCommand unameCommandForArm64 = FakeCommand(
-  command: <String>[
-    'uname',
-    '-m',
-  ],
-  stdout: 'aarch64',
-);
-
 void main() {
   late FakeProcessManager fakeProcessManager;
 
@@ -1336,3 +1320,19 @@ class FakeArtifactUpdaterDownload extends ArtifactUpdater {
     downloadedFiles.addAll(files);
   }
 }
+
+const FakeCommand unameCommandForX64 = FakeCommand(
+  command: <String>[
+    'uname',
+    '-m',
+  ],
+  stdout: 'x86_64',
+);
+
+const FakeCommand unameCommandForArm64 = FakeCommand(
+  command: <String>[
+    'uname',
+    '-m',
+  ],
+  stdout: 'aarch64',
+);

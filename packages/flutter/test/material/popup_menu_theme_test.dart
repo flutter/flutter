@@ -8,45 +8,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-PopupMenuThemeData _popupMenuThemeM2() {
-  return PopupMenuThemeData(
-    color: Colors.orange,
-    shape: const BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
-    elevation: 12.0,
-    textStyle: const TextStyle(color: Color(0xffffffff), textBaseline: TextBaseline.alphabetic),
-    mouseCursor: MaterialStateProperty.resolveWith<MouseCursor?>((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return SystemMouseCursors.contextMenu;
-      }
-      return SystemMouseCursors.alias;
-    }),
-  );
-}
-
-PopupMenuThemeData _popupMenuThemeM3() {
-  return PopupMenuThemeData(
-    color: Colors.orange,
-    shape: const BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
-    elevation: 12.0,
-    shadowColor: const Color(0xff00ff00),
-    surfaceTintColor: const Color(0xff00ff00),
-    labelTextStyle: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return const TextStyle(color: Color(0xfff99ff0), fontSize: 12.0);
-      }
-      return const TextStyle(color: Color(0xfff12099), fontSize: 17.0);
-    }),
-    mouseCursor: MaterialStateProperty.resolveWith<MouseCursor?>((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
-        return SystemMouseCursors.contextMenu;
-      }
-      return SystemMouseCursors.alias;
-    }),
-    iconColor: const Color(0xfff12099),
-    iconSize: 17.0,
-  );
-}
-
 void main() {
   test('PopupMenuThemeData copyWith, ==, hashCode basics', () {
     expect(const PopupMenuThemeData(), const PopupMenuThemeData().copyWith());
@@ -747,4 +708,43 @@ TextStyle? _iconStyle(WidgetTester tester, IconData icon) {
     of: find.byIcon(icon),
     matching: find.byType(RichText),
   )).text.style;
+}
+
+PopupMenuThemeData _popupMenuThemeM2() {
+  return PopupMenuThemeData(
+    color: Colors.orange,
+    shape: const BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+    elevation: 12.0,
+    textStyle: const TextStyle(color: Color(0xffffffff), textBaseline: TextBaseline.alphabetic),
+    mouseCursor: MaterialStateProperty.resolveWith<MouseCursor?>((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return SystemMouseCursors.contextMenu;
+      }
+      return SystemMouseCursors.alias;
+    }),
+  );
+}
+
+PopupMenuThemeData _popupMenuThemeM3() {
+  return PopupMenuThemeData(
+    color: Colors.orange,
+    shape: const BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+    elevation: 12.0,
+    shadowColor: const Color(0xff00ff00),
+    surfaceTintColor: const Color(0xff00ff00),
+    labelTextStyle: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return const TextStyle(color: Color(0xfff99ff0), fontSize: 12.0);
+      }
+      return const TextStyle(color: Color(0xfff12099), fontSize: 17.0);
+    }),
+    mouseCursor: MaterialStateProperty.resolveWith<MouseCursor?>((Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return SystemMouseCursors.contextMenu;
+      }
+      return SystemMouseCursors.alias;
+    }),
+    iconColor: const Color(0xfff12099),
+    iconSize: 17.0,
+  );
 }

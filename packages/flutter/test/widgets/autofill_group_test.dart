@@ -5,9 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-final Matcher _matchesCommit = isMethodCall('TextInput.finishAutofillContext', arguments: true);
-final Matcher _matchesCancel = isMethodCall('TextInput.finishAutofillContext', arguments: false);
-
 void main() {
   testWidgets('AutofillGroup has the right clients', (WidgetTester tester) async {
     const Key outerKey = Key('outer');
@@ -261,3 +258,6 @@ void main() {
     );
   });
 }
+
+final Matcher _matchesCommit = isMethodCall('TextInput.finishAutofillContext', arguments: true);
+final Matcher _matchesCancel = isMethodCall('TextInput.finishAutofillContext', arguments: false);

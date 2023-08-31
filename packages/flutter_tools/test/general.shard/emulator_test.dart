@@ -20,30 +20,6 @@ import '../src/context.dart';
 import '../src/fake_process_manager.dart';
 import '../src/fakes.dart';
 
-const FakeEmulator emulator1 = FakeEmulator('Nexus_5', 'Nexus 5', 'Google');
-const FakeEmulator emulator2 = FakeEmulator('Nexus_5X_API_27_x86', 'Nexus 5X', 'Google');
-const FakeEmulator emulator3 = FakeEmulator('iOS Simulator', 'iOS Simulator', 'Apple');
-const List<Emulator> emulators = <Emulator>[
-  emulator1,
-  emulator2,
-  emulator3,
-];
-
-// We have to send a command that fails in order to get the list of valid
-// system images paths. This is an example of the output to use in the fake.
-const String fakeCreateFailureOutput =
-  'Error: Package path (-k) not specified. Valid system image paths are:\n'
-  'system-images;android-27;google_apis;x86\n'
-  'system-images;android-P;google_apis;x86\n'
-  'system-images;android-27;google_apis_playstore;x86\n'
-  'null\n'; // Yep, these really end with null (on dantup's machine at least)
-
-const FakeCommand kListEmulatorsCommand = FakeCommand(
-  command: <String>['avdmanager', 'create', 'avd', '-n', 'temp'],
-  stderr: fakeCreateFailureOutput,
-  exitCode: 1,
-);
-
 void main() {
   late FakeProcessManager fakeProcessManager;
   late FakeAndroidSdk sdk;
@@ -403,3 +379,27 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
   @override
   String getAvdPath() => 'avd';
 }
+
+const FakeEmulator emulator1 = FakeEmulator('Nexus_5', 'Nexus 5', 'Google');
+const FakeEmulator emulator2 = FakeEmulator('Nexus_5X_API_27_x86', 'Nexus 5X', 'Google');
+const FakeEmulator emulator3 = FakeEmulator('iOS Simulator', 'iOS Simulator', 'Apple');
+const List<Emulator> emulators = <Emulator>[
+  emulator1,
+  emulator2,
+  emulator3,
+];
+
+// We have to send a command that fails in order to get the list of valid
+// system images paths. This is an example of the output to use in the fake.
+const String fakeCreateFailureOutput =
+  'Error: Package path (-k) not specified. Valid system image paths are:\n'
+  'system-images;android-27;google_apis;x86\n'
+  'system-images;android-P;google_apis;x86\n'
+  'system-images;android-27;google_apis_playstore;x86\n'
+  'null\n'; // Yep, these really end with null (on dantup's machine at least)
+
+const FakeCommand kListEmulatorsCommand = FakeCommand(
+  command: <String>['avdmanager', 'create', 'avd', '-n', 'temp'],
+  stderr: fakeCreateFailureOutput,
+  exitCode: 1,
+);

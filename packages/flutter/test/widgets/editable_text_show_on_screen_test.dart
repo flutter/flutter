@@ -8,35 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/src/foundation/constants.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
-  _TestSliverPersistentHeaderDelegate({
-    required this.minExtent,
-    required this.maxExtent,
-    required this.child,
-    this.vsync = const TestVSync(),
-  });
-
-  final Widget child;
-
-  @override
-  final double maxExtent;
-
-  @override
-  final double minExtent;
-
-  @override
-  final TickerProvider? vsync;
-
-  @override
-  final PersistentHeaderShowOnScreenConfiguration showOnScreenConfiguration = const PersistentHeaderShowOnScreenConfiguration();
-
-  @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) => child;
-
-  @override
-  bool shouldRebuild(_TestSliverPersistentHeaderDelegate oldDelegate) => true;
-}
-
 void main() {
   const TextStyle textStyle = TextStyle();
   const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
@@ -808,4 +779,33 @@ class NoImplicitScrollPhysics extends AlwaysScrollableScrollPhysics {
   NoImplicitScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return NoImplicitScrollPhysics(parent: buildParent(ancestor));
   }
+}
+
+class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
+  _TestSliverPersistentHeaderDelegate({
+    required this.minExtent,
+    required this.maxExtent,
+    required this.child,
+    this.vsync = const TestVSync(),
+  });
+
+  final Widget child;
+
+  @override
+  final double maxExtent;
+
+  @override
+  final double minExtent;
+
+  @override
+  final TickerProvider? vsync;
+
+  @override
+  final PersistentHeaderShowOnScreenConfiguration showOnScreenConfiguration = const PersistentHeaderShowOnScreenConfiguration();
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) => child;
+
+  @override
+  bool shouldRebuild(_TestSliverPersistentHeaderDelegate oldDelegate) => true;
 }

@@ -19,43 +19,6 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart' show findRenderEditable, textOffsetToPosition;
 
-class _LongCupertinoLocalizationsDelegate extends LocalizationsDelegate<CupertinoLocalizations> {
-  const _LongCupertinoLocalizationsDelegate();
-
-  @override
-  bool isSupported(Locale locale) => locale.languageCode == 'en';
-
-  @override
-  Future<_LongCupertinoLocalizations> load(Locale locale) => _LongCupertinoLocalizations.load(locale);
-
-  @override
-  bool shouldReload(_LongCupertinoLocalizationsDelegate old) => false;
-
-  @override
-  String toString() => '_LongCupertinoLocalizations.delegate(en_US)';
-}
-
-class _LongCupertinoLocalizations extends DefaultCupertinoLocalizations {
-  const _LongCupertinoLocalizations();
-
-  @override
-  String get cutButtonLabel => 'Cutttttttttttttttttttttttttttttttttttttttttttt';
-  @override
-  String get copyButtonLabel => 'Copyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy';
-  @override
-  String get pasteButtonLabel => 'Pasteeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
-  @override
-  String get selectAllButtonLabel => 'Select Allllllllllllllllllllllllllllllll';
-
-  static Future<_LongCupertinoLocalizations> load(Locale locale) {
-    return SynchronousFuture<_LongCupertinoLocalizations>(const _LongCupertinoLocalizations());
-  }
-
-  static const LocalizationsDelegate<CupertinoLocalizations> delegate = _LongCupertinoLocalizationsDelegate();
-}
-
-const _LongCupertinoLocalizations _longLocalizations = _LongCupertinoLocalizations();
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
@@ -1010,3 +973,40 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 }
+
+class _LongCupertinoLocalizationsDelegate extends LocalizationsDelegate<CupertinoLocalizations> {
+  const _LongCupertinoLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) => locale.languageCode == 'en';
+
+  @override
+  Future<_LongCupertinoLocalizations> load(Locale locale) => _LongCupertinoLocalizations.load(locale);
+
+  @override
+  bool shouldReload(_LongCupertinoLocalizationsDelegate old) => false;
+
+  @override
+  String toString() => '_LongCupertinoLocalizations.delegate(en_US)';
+}
+
+class _LongCupertinoLocalizations extends DefaultCupertinoLocalizations {
+  const _LongCupertinoLocalizations();
+
+  @override
+  String get cutButtonLabel => 'Cutttttttttttttttttttttttttttttttttttttttttttt';
+  @override
+  String get copyButtonLabel => 'Copyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy';
+  @override
+  String get pasteButtonLabel => 'Pasteeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+  @override
+  String get selectAllButtonLabel => 'Select Allllllllllllllllllllllllllllllll';
+
+  static Future<_LongCupertinoLocalizations> load(Locale locale) {
+    return SynchronousFuture<_LongCupertinoLocalizations>(const _LongCupertinoLocalizations());
+  }
+
+  static const LocalizationsDelegate<CupertinoLocalizations> delegate = _LongCupertinoLocalizationsDelegate();
+}
+
+const _LongCupertinoLocalizations _longLocalizations = _LongCupertinoLocalizations();

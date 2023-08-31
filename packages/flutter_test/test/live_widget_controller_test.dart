@@ -8,89 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-// This test is very fragile and bypasses some zone-related checks.
-// It is written this way to verify some invariants that would otherwise
-// be difficult to check.
-// Do not use this test as a guide for writing good Flutter code.
-
-class TestBinding extends WidgetsFlutterBinding {
-  @override
-  void initInstances() {
-    super.initInstances();
-    _instance = this;
-  }
-
-  @override
-  bool debugCheckZone(String entryPoint) { return true; }
-
-  static TestBinding get instance => BindingBase.checkInstance(_instance);
-  static TestBinding? _instance;
-
-  static TestBinding ensureInitialized() {
-    if (TestBinding._instance == null) {
-      TestBinding();
-    }
-    return TestBinding.instance;
-  }
-}
-
-class CountButton extends StatefulWidget {
-  const CountButton({super.key});
-
-  @override
-  State<CountButton> createState() => _CountButtonState();
-}
-
-class _CountButtonState extends State<CountButton> {
-  int counter = 0;
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      child: Text('Counter $counter'),
-      onPressed: () {
-        setState(() {
-          counter += 1;
-        });
-      },
-    );
-  }
-}
-
-class AnimateSample extends StatefulWidget {
-  const AnimateSample({super.key});
-
-  @override
-  State<AnimateSample> createState() => _AnimateSampleState();
-}
-
-class _AnimateSampleState extends State<AnimateSample>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 1),
-    )..forward();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (BuildContext context, _) => Text('Value: ${_controller.value}'),
-    );
-  }
-}
-
 void main() {
   TestBinding.ensureInitialized();
 
@@ -189,4 +106,87 @@ void main() {
     }
     expect(logs.last, 'up $b');
   });
+}
+
+// This test is very fragile and bypasses some zone-related checks.
+// It is written this way to verify some invariants that would otherwise
+// be difficult to check.
+// Do not use this test as a guide for writing good Flutter code.
+
+class TestBinding extends WidgetsFlutterBinding {
+  @override
+  void initInstances() {
+    super.initInstances();
+    _instance = this;
+  }
+
+  @override
+  bool debugCheckZone(String entryPoint) { return true; }
+
+  static TestBinding get instance => BindingBase.checkInstance(_instance);
+  static TestBinding? _instance;
+
+  static TestBinding ensureInitialized() {
+    if (TestBinding._instance == null) {
+      TestBinding();
+    }
+    return TestBinding.instance;
+  }
+}
+
+class CountButton extends StatefulWidget {
+  const CountButton({super.key});
+
+  @override
+  State<CountButton> createState() => _CountButtonState();
+}
+
+class _CountButtonState extends State<CountButton> {
+  int counter = 0;
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      child: Text('Counter $counter'),
+      onPressed: () {
+        setState(() {
+          counter += 1;
+        });
+      },
+    );
+  }
+}
+
+class AnimateSample extends StatefulWidget {
+  const AnimateSample({super.key});
+
+  @override
+  State<AnimateSample> createState() => _AnimateSampleState();
+}
+
+class _AnimateSampleState extends State<AnimateSample>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    )..forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (BuildContext context, _) => Text('Value: ${_controller.value}'),
+    );
+  }
 }

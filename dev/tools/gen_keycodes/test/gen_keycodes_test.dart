@@ -18,17 +18,6 @@ import 'package:gen_keycodes/windows_code_gen.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
-String readDataFile(String fileName) {
-  return File(path.join(dataRoot, fileName)).readAsStringSync();
-}
-
-final PhysicalKeyData physicalData = PhysicalKeyData.fromJson(
-    json.decode(readDataFile('physical_key_data.g.json')) as Map<String, dynamic>);
-final LogicalKeyData logicalData = LogicalKeyData.fromJson(
-    json.decode(readDataFile('logical_key_data.g.json')) as Map<String, dynamic>);
-final Map<String, bool> keyGoals = parseMapOfBool(
-    readDataFile('layout_goals.json'));
-
 void main() {
   setUp(() {
     testDataRoot = path.canonicalize(path.join(Directory.current.absolute.path, 'data'));
@@ -168,3 +157,14 @@ void main() {
       -1);
   });
 }
+
+String readDataFile(String fileName) {
+  return File(path.join(dataRoot, fileName)).readAsStringSync();
+}
+
+final PhysicalKeyData physicalData = PhysicalKeyData.fromJson(
+    json.decode(readDataFile('physical_key_data.g.json')) as Map<String, dynamic>);
+final LogicalKeyData logicalData = LogicalKeyData.fromJson(
+    json.decode(readDataFile('logical_key_data.g.json')) as Map<String, dynamic>);
+final Map<String, bool> keyGoals = parseMapOfBool(
+    readDataFile('layout_goals.json'));

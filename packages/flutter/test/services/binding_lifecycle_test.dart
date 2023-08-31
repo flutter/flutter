@@ -7,6 +7,22 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+void main() {
+  final _TestBinding binding = _TestBinding();
+
+  test('can send message on completion of binding initialization', () async {
+    bool called = false;
+    binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall method) async {
+      if (method.method == 'System.initializationComplete') {
+        called = true;
+      }
+      return null;
+    });
+    await binding.initializationComplete();
+    expect(called, isTrue);
+  });
+}
+
 class _TestBinding extends BindingBase with SchedulerBinding, ServicesBinding {
   @override
   Future<void> initializationComplete() async {
@@ -26,20 +42,4 @@ class _TestBinding extends BindingBase with SchedulerBinding, ServicesBinding {
       outboundHandlers: <String, MessageHandler>{'flutter/keyboard': keyboardHandler},
     );
   }
-}
-
-void main() {
-  final _TestBinding binding = _TestBinding();
-
-  test('can send message on completion of binding initialization', () async {
-    bool called = false;
-    binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall method) async {
-      if (method.method == 'System.initializationComplete') {
-        called = true;
-      }
-      return null;
-    });
-    await binding.initializationComplete();
-    expect(called, isTrue);
-  });
 }

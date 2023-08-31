@@ -11,22 +11,6 @@ import 'package:flutter_test/flutter_test.dart';
 import '../image_data.dart';
 import '../widgets/semantics_tester.dart';
 
-Future<void> pumpWidgetWithBoilerplate(WidgetTester tester, Widget widget) async {
-  await tester.pumpWidget(
-    Localizations(
-      locale: const Locale('en', 'US'),
-      delegates: const <LocalizationsDelegate<dynamic>>[
-        DefaultWidgetsLocalizations.delegate,
-        DefaultCupertinoLocalizations.delegate,
-      ],
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: widget,
-      ),
-    ),
-  );
-}
-
 Future<void> main() async {
 
   testWidgets('Need at least 2 tabs', (WidgetTester tester) async {
@@ -658,4 +642,20 @@ Future<void> main() async {
       kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
   });
+}
+
+Future<void> pumpWidgetWithBoilerplate(WidgetTester tester, Widget widget) async {
+  await tester.pumpWidget(
+    Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: const <LocalizationsDelegate<dynamic>>[
+        DefaultWidgetsLocalizations.delegate,
+        DefaultCupertinoLocalizations.delegate,
+      ],
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: widget,
+      ),
+    ),
+  );
 }

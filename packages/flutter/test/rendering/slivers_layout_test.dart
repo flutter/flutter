@@ -7,17 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
-int layouts = 0;
-
-class RenderLayoutWatcher extends RenderProxyBox {
-  RenderLayoutWatcher(RenderBox super.child);
-  @override
-  void performLayout() {
-    layouts += 1;
-    super.performLayout();
-  }
-}
-
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
@@ -70,4 +59,15 @@ void main() {
     expect(box.localToGlobal(box.size.center(Offset.zero)), const Offset(400.0, 600.0 - 190.0));
   });
 
+}
+
+int layouts = 0;
+
+class RenderLayoutWatcher extends RenderProxyBox {
+  RenderLayoutWatcher(RenderBox super.child);
+  @override
+  void performLayout() {
+    layouts += 1;
+    super.performLayout();
+  }
 }

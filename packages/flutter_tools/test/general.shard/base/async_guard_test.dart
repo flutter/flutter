@@ -9,45 +9,6 @@ import 'package:flutter_tools/src/base/async_guard.dart';
 
 import '../../src/common.dart';
 
-Future<void> asyncError() {
-  final Completer<void> completer = Completer<void>();
-  final Completer<void> errorCompleter = Completer<void>();
-  errorCompleter.completeError(_CustomException('Async Doom'), StackTrace.current);
-  return completer.future;
-}
-
-/// Specialized exception to be caught.
-class _CustomException implements Exception {
-  _CustomException(this.message);
-
-  final String message;
-
-  @override
-  String toString() => message;
-}
-
-
-Future<void> syncError() {
-  throw _CustomException('Sync Doom');
-}
-
-Future<void> syncAndAsyncError() {
-  final Completer<void> errorCompleter = Completer<void>();
-  errorCompleter.completeError(_CustomException('Async Doom'), StackTrace.current);
-  throw _CustomException('Sync Doom');
-}
-
-Future<void> delayedThrow(FakeAsync time) {
-  final Future<void> result =
-    Future<void>.delayed(const Duration(milliseconds: 10))
-      .then((_) async {
-        throw _CustomException('Delayed Doom');
-      });
-  time.elapse(const Duration(seconds: 1));
-  time.flushMicrotasks();
-  return result;
-}
-
 void main() {
   late Completer<void> caughtInZone;
   bool caughtByZone = false;
@@ -310,4 +271,43 @@ void main() {
     expect(caughtByOnError, true);
     expect(nonNullStackTrace, true);
   });
+}
+
+Future<void> asyncError() {
+  final Completer<void> completer = Completer<void>();
+  final Completer<void> errorCompleter = Completer<void>();
+  errorCompleter.completeError(_CustomException('Async Doom'), StackTrace.current);
+  return completer.future;
+}
+
+/// Specialized exception to be caught.
+class _CustomException implements Exception {
+  _CustomException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
+
+Future<void> syncError() {
+  throw _CustomException('Sync Doom');
+}
+
+Future<void> syncAndAsyncError() {
+  final Completer<void> errorCompleter = Completer<void>();
+  errorCompleter.completeError(_CustomException('Async Doom'), StackTrace.current);
+  throw _CustomException('Sync Doom');
+}
+
+Future<void> delayedThrow(FakeAsync time) {
+  final Future<void> result =
+    Future<void>.delayed(const Duration(milliseconds: 10))
+      .then((_) async {
+        throw _CustomException('Delayed Doom');
+      });
+  time.elapse(const Duration(seconds: 1));
+  time.flushMicrotasks();
+  return result;
 }

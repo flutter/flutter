@@ -8,73 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 
-const Key avatarA = Key('A');
-const Key avatarC = Key('C');
-const Key avatarD = Key('D');
-
-Future<void> pumpTestWidget(
-  WidgetTester tester, {
-      bool withName = true,
-      bool withEmail = true,
-      bool withOnDetailsPressedHandler = true,
-      Size otherAccountsPictureSize = const Size.square(40.0),
-      Size currentAccountPictureSize  = const Size.square(72.0),
-      Color? primaryColor,
-      Color? colorSchemePrimary,
-    }) async {
-  await tester.pumpWidget(
-    MaterialApp(
-      theme: ThemeData(
-        primaryColor: primaryColor,
-        colorScheme: const ColorScheme.light().copyWith(primary: colorSchemePrimary),
-      ),
-      home: MediaQuery(
-        data: const MediaQueryData(
-          padding: EdgeInsets.only(
-            left: 10.0,
-            top: 20.0,
-            right: 30.0,
-            bottom: 40.0,
-          ),
-        ),
-        child: Material(
-          child: Center(
-            child: UserAccountsDrawerHeader(
-              onDetailsPressed: withOnDetailsPressedHandler ? () { } : null,
-              currentAccountPictureSize: currentAccountPictureSize,
-              otherAccountsPicturesSize: otherAccountsPictureSize,
-              currentAccountPicture: const ExcludeSemantics(
-                child: CircleAvatar(
-                  key: avatarA,
-                  child: Text('A'),
-                ),
-              ),
-              otherAccountsPictures: const <Widget>[
-                CircleAvatar(
-                  child: Text('B'),
-                ),
-                CircleAvatar(
-                  key: avatarC,
-                  child: Text('C'),
-                ),
-                CircleAvatar(
-                  key: avatarD,
-                  child: Text('D'),
-                ),
-                CircleAvatar(
-                  child: Text('E'),
-                ),
-              ],
-              accountName: withName ? const Text('name') : null,
-              accountEmail: withEmail ? const Text('email') : null,
-            ),
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
 void main() {
   // Find the exact transform which is the descendant of [UserAccountsDrawerHeader].
   final Finder findTransform = find.descendant(
@@ -642,4 +575,71 @@ void main() {
 
     semantics.dispose();
   });
+}
+
+const Key avatarA = Key('A');
+const Key avatarC = Key('C');
+const Key avatarD = Key('D');
+
+Future<void> pumpTestWidget(
+  WidgetTester tester, {
+      bool withName = true,
+      bool withEmail = true,
+      bool withOnDetailsPressedHandler = true,
+      Size otherAccountsPictureSize = const Size.square(40.0),
+      Size currentAccountPictureSize  = const Size.square(72.0),
+      Color? primaryColor,
+      Color? colorSchemePrimary,
+    }) async {
+  await tester.pumpWidget(
+    MaterialApp(
+      theme: ThemeData(
+        primaryColor: primaryColor,
+        colorScheme: const ColorScheme.light().copyWith(primary: colorSchemePrimary),
+      ),
+      home: MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.only(
+            left: 10.0,
+            top: 20.0,
+            right: 30.0,
+            bottom: 40.0,
+          ),
+        ),
+        child: Material(
+          child: Center(
+            child: UserAccountsDrawerHeader(
+              onDetailsPressed: withOnDetailsPressedHandler ? () { } : null,
+              currentAccountPictureSize: currentAccountPictureSize,
+              otherAccountsPicturesSize: otherAccountsPictureSize,
+              currentAccountPicture: const ExcludeSemantics(
+                child: CircleAvatar(
+                  key: avatarA,
+                  child: Text('A'),
+                ),
+              ),
+              otherAccountsPictures: const <Widget>[
+                CircleAvatar(
+                  child: Text('B'),
+                ),
+                CircleAvatar(
+                  key: avatarC,
+                  child: Text('C'),
+                ),
+                CircleAvatar(
+                  key: avatarD,
+                  child: Text('D'),
+                ),
+                CircleAvatar(
+                  child: Text('E'),
+                ),
+              ],
+              accountName: withName ? const Text('name') : null,
+              accountEmail: withEmail ? const Text('email') : null,
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
 }

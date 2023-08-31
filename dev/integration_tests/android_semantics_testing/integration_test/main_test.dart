@@ -14,49 +14,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
-// The accessibility focus actions are added when a semantics node receives or
-// lose accessibility focus. This test ignores these actions since it is hard to
-// predict which node has the accessibility focus after a screen changes.
-const List<AndroidSemanticsAction> ignoredAccessibilityFocusActions = <AndroidSemanticsAction>[
-  AndroidSemanticsAction.accessibilityFocus,
-  AndroidSemanticsAction.clearAccessibilityFocus,
-];
-
-const MethodChannel kSemanticsChannel = MethodChannel('semantics');
-
-Future<void> setClipboard(String message) async {
-  final Completer<void> completer = Completer<void>();
-  Future<void> completeSetClipboard([Object? _]) async {
-    await kSemanticsChannel.invokeMethod<dynamic>('setClipboard', <String, dynamic>{
-      'message': message,
-    });
-    completer.complete();
-  }
-  if (SchedulerBinding.instance.hasScheduledFrame) {
-    SchedulerBinding.instance.addPostFrameCallback(completeSetClipboard);
-  } else {
-    completeSetClipboard();
-  }
-  await completer.future;
-}
-
-Future<AndroidSemanticsNode> getSemantics(Finder finder, WidgetTester tester) async {
-  final int id = tester.getSemantics(finder).id;
-  final Completer<String> completer = Completer<String>();
-  Future<void> completeSemantics([Object? _]) async {
-    final dynamic result = await kSemanticsChannel.invokeMethod<dynamic>('getSemanticsNode', <String, dynamic>{
-      'id': id,
-    });
-    completer.complete(json.encode(result));
-  }
-  if (SchedulerBinding.instance.hasScheduledFrame) {
-    SchedulerBinding.instance.addPostFrameCallback(completeSemantics);
-  } else {
-    completeSemantics();
-  }
-  return AndroidSemanticsNode.deserialize(await completer.future);
-}
-
 Future<void> main() async {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -674,4 +631,47 @@ Future<void> main() async {
       }, timeout: Timeout.none);
     });
   });
+}
+
+// The accessibility focus actions are added when a semantics node receives or
+// lose accessibility focus. This test ignores these actions since it is hard to
+// predict which node has the accessibility focus after a screen changes.
+const List<AndroidSemanticsAction> ignoredAccessibilityFocusActions = <AndroidSemanticsAction>[
+  AndroidSemanticsAction.accessibilityFocus,
+  AndroidSemanticsAction.clearAccessibilityFocus,
+];
+
+const MethodChannel kSemanticsChannel = MethodChannel('semantics');
+
+Future<void> setClipboard(String message) async {
+  final Completer<void> completer = Completer<void>();
+  Future<void> completeSetClipboard([Object? _]) async {
+    await kSemanticsChannel.invokeMethod<dynamic>('setClipboard', <String, dynamic>{
+      'message': message,
+    });
+    completer.complete();
+  }
+  if (SchedulerBinding.instance.hasScheduledFrame) {
+    SchedulerBinding.instance.addPostFrameCallback(completeSetClipboard);
+  } else {
+    completeSetClipboard();
+  }
+  await completer.future;
+}
+
+Future<AndroidSemanticsNode> getSemantics(Finder finder, WidgetTester tester) async {
+  final int id = tester.getSemantics(finder).id;
+  final Completer<String> completer = Completer<String>();
+  Future<void> completeSemantics([Object? _]) async {
+    final dynamic result = await kSemanticsChannel.invokeMethod<dynamic>('getSemanticsNode', <String, dynamic>{
+      'id': id,
+    });
+    completer.complete(json.encode(result));
+  }
+  if (SchedulerBinding.instance.hasScheduledFrame) {
+    SchedulerBinding.instance.addPostFrameCallback(completeSemantics);
+  } else {
+    completeSemantics();
+  }
+  return AndroidSemanticsNode.deserialize(await completer.future);
 }

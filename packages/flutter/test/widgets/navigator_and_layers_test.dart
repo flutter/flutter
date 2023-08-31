@@ -7,24 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'test_widgets.dart';
 
-class TestCustomPainter extends CustomPainter {
-  TestCustomPainter({ required this.log, required this.name });
-
-  final List<String> log;
-  final String name;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    log.add(name);
-  }
-
-  @override
-  bool shouldRepaint(TestCustomPainter oldPainter) {
-    return name != oldPainter.name
-        || log != oldPainter.log;
-  }
-}
-
 void main() {
   testWidgets('Do we paint when coming back from a navigation', (WidgetTester tester) async {
     final List<String> log = <String>[];
@@ -83,4 +65,22 @@ void main() {
       '7',
     ]);
   });
+}
+
+class TestCustomPainter extends CustomPainter {
+  TestCustomPainter({ required this.log, required this.name });
+
+  final List<String> log;
+  final String name;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    log.add(name);
+  }
+
+  @override
+  bool shouldRepaint(TestCustomPainter oldPainter) {
+    return name != oldPainter.name
+        || log != oldPainter.log;
+  }
 }

@@ -5,6 +5,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+void main() {
+  test('BindingBase.debugBindingType', () async {
+    expect(BindingBase.debugBindingType(), isNull);
+    FooLibraryBinding.ensureInitialized();
+    expect(BindingBase.debugBindingType(), FooLibraryBinding);
+  });
+}
+
 // based on the sample code in foundation/binding.dart
 
 mixin FooBinding on BindingBase {
@@ -25,12 +33,4 @@ class FooLibraryBinding extends BindingBase with FooBinding {
     }
     return FooBinding.instance;
   }
-}
-
-void main() {
-  test('BindingBase.debugBindingType', () async {
-    expect(BindingBase.debugBindingType(), isNull);
-    FooLibraryBinding.ensureInitialized();
-    expect(BindingBase.debugBindingType(), FooLibraryBinding);
-  });
 }

@@ -8,72 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 
-class TestSliverChildListDelegate extends SliverChildListDelegate {
-  TestSliverChildListDelegate(super.children);
-
-  final List<String> log = <String>[];
-
-  @override
-  void didFinishLayout(int firstIndex, int lastIndex) {
-    log.add('didFinishLayout firstIndex=$firstIndex lastIndex=$lastIndex');
-  }
-}
-
-class Alive extends StatefulWidget {
-  const Alive(this.alive, this.index, { super.key });
-  final bool alive;
-  final int index;
-
-  @override
-  AliveState createState() => AliveState();
-
-  @override
-  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) => '$index $alive';
-}
-
-class AliveState extends State<Alive> with AutomaticKeepAliveClientMixin {
-  @override
-  bool get wantKeepAlive => widget.alive;
-
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    return Text('${widget.index}:$wantKeepAlive');
-  }
-}
-
-typedef WhetherToKeepAlive = bool Function(int);
-class _StatefulListView extends StatefulWidget {
-  const _StatefulListView(this.aliveCallback);
-
-  final WhetherToKeepAlive aliveCallback;
-  @override
-  _StatefulListViewState createState() => _StatefulListViewState();
-}
-
-class _StatefulListViewState extends State<_StatefulListView> {
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      // force a rebuild - the test(s) using this are verifying that the list is
-      // still correct after rebuild
-      onTap: () => setState,
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: ListView(
-          children: List<Widget>.generate(200, (int i) {
-            return Builder(
-              builder: (BuildContext context) {
-                return Alive(widget.aliveCallback(i), i);
-              },
-            );
-          }),
-        ),
-      ),
-    );
-  }
-}
-
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/100451
   testWidgets('ListView.builder respects findChildIndexCallback', (WidgetTester tester) async {
@@ -776,4 +710,70 @@ void main() {
     final RenderViewport renderObject = tester.allRenderObjects.whereType<RenderViewport>().first;
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
+}
+
+class TestSliverChildListDelegate extends SliverChildListDelegate {
+  TestSliverChildListDelegate(super.children);
+
+  final List<String> log = <String>[];
+
+  @override
+  void didFinishLayout(int firstIndex, int lastIndex) {
+    log.add('didFinishLayout firstIndex=$firstIndex lastIndex=$lastIndex');
+  }
+}
+
+class Alive extends StatefulWidget {
+  const Alive(this.alive, this.index, { super.key });
+  final bool alive;
+  final int index;
+
+  @override
+  AliveState createState() => AliveState();
+
+  @override
+  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) => '$index $alive';
+}
+
+class AliveState extends State<Alive> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => widget.alive;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return Text('${widget.index}:$wantKeepAlive');
+  }
+}
+
+typedef WhetherToKeepAlive = bool Function(int);
+class _StatefulListView extends StatefulWidget {
+  const _StatefulListView(this.aliveCallback);
+
+  final WhetherToKeepAlive aliveCallback;
+  @override
+  _StatefulListViewState createState() => _StatefulListViewState();
+}
+
+class _StatefulListViewState extends State<_StatefulListView> {
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      // force a rebuild - the test(s) using this are verifying that the list is
+      // still correct after rebuild
+      onTap: () => setState,
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView(
+          children: List<Widget>.generate(200, (int i) {
+            return Builder(
+              builder: (BuildContext context) {
+                return Alive(widget.aliveCallback(i), i);
+              },
+            );
+          }),
+        ),
+      ),
+    );
+  }
 }

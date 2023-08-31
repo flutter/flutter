@@ -7,24 +7,6 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class PrintOverrideTestBinding extends AutomatedTestWidgetsFlutterBinding {
-  @override
-  DebugPrintCallback get debugPrintOverride => _enablePrint ? debugPrint : _emptyPrint;
-
-  static void _emptyPrint(String? message, { int? wrapWidth }) {}
-
-  static bool _enablePrint = true;
-
-  static void runWithDebugPrintDisabled(void Function() f) {
-    try {
-      _enablePrint = false;
-      f();
-    } finally {
-      _enablePrint = true;
-    }
-  }
-}
-
 void main() {
   final MemoryAllocations ma = MemoryAllocations.instance;
 
@@ -229,4 +211,22 @@ Picture _createPicture() {
   const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 100.0);
   canvas.clipRect(rect);
   return recorder.endRecording();
+}
+
+class PrintOverrideTestBinding extends AutomatedTestWidgetsFlutterBinding {
+  @override
+  DebugPrintCallback get debugPrintOverride => _enablePrint ? debugPrint : _emptyPrint;
+
+  static void _emptyPrint(String? message, { int? wrapWidth }) {}
+
+  static bool _enablePrint = true;
+
+  static void runWithDebugPrintDisabled(void Function() f) {
+    try {
+      _enablePrint = false;
+      f();
+    } finally {
+      _enablePrint = true;
+    }
+  }
 }

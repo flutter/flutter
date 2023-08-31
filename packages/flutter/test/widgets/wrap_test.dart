@@ -6,13 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-void verify(WidgetTester tester, List<Offset> answerKey) {
-  final List<Offset> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Offset>(
-    (RenderBox target) => target.localToGlobal(Offset.zero),
-  ).toList();
-  expect(testAnswers, equals(answerKey));
-}
-
 void main() {
   testWidgets('Basic Wrap test (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -952,4 +945,11 @@ void main() {
     // the individual widths.
     expect(tester.getSize(find.byType(IntrinsicWidth)).width, 5 * 16 + 60 + 3 * 16);
   });
+}
+
+void verify(WidgetTester tester, List<Offset> answerKey) {
+  final List<Offset> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Offset>(
+    (RenderBox target) => target.localToGlobal(Offset.zero),
+  ).toList();
+  expect(testAnswers, equals(answerKey));
 }

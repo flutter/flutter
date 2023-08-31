@@ -5,8 +5,6 @@
 import 'package:flutter_api_samples/cupertino/date_picker/cupertino_timer_picker.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
-const Offset _kRowOffset = Offset(0.0, -50.0);
-
 void main() {
   testWidgets('Can pick a duration from CupertinoTimerPicker', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -31,3 +29,5 @@ void main() {
     expect(find.text('3:25:00.000000'), findsOneWidget);
   });
 }
+
+const Offset _kRowOffset = Offset(0.0, -50.0);

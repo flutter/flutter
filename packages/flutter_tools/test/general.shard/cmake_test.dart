@@ -12,9 +12,6 @@ import 'package:flutter_tools/src/project.dart';
 
 import '../src/common.dart';
 
-const String _kTestFlutterRoot = '/flutter';
-const String _kTestWindowsFlutterRoot = r'C:\flutter';
-
 void main() {
   late FileSystem fileSystem;
   late BufferLogger logger;
@@ -641,3 +638,6 @@ class _FakeProject implements CmakeBasedProject {
   Directory get _managedDirectory => _editableDirectory.childDirectory('flutter');
   Directory get _ephemeralDirectory => _managedDirectory.childDirectory('ephemeral');
 }
+
+const String _kTestFlutterRoot = '/flutter';
+const String _kTestWindowsFlutterRoot = r'C:\flutter';

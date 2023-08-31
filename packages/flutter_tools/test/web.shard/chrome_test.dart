@@ -18,25 +18,6 @@ import '../src/common.dart';
 import '../src/fake_process_manager.dart';
 import '../src/fakes.dart';
 
-const List<String> kChromeArgs = <String>[
-  '--disable-background-timer-throttling',
-  '--disable-extensions',
-  '--disable-popup-blocking',
-  '--bwsi',
-  '--no-first-run',
-  '--no-default-browser-check',
-  '--disable-default-apps',
-  '--disable-translate',
-];
-
-const List<String> kCodeCache = <String>[
-  'Cache',
-  'Code Cache',
-  'GPUCache',
-];
-
-const String kDevtoolsStderr = '\n\nDevTools listening\n\n';
-
 void main() {
   late FileExceptionHandler exceptionHandler;
   late ChromiumLauncher chromeLauncher;
@@ -680,3 +661,22 @@ class FakeChromeConnection extends Fake implements ChromeConnection {
   @override
   void close() {}
 }
+
+const List<String> kChromeArgs = <String>[
+  '--disable-background-timer-throttling',
+  '--disable-extensions',
+  '--disable-popup-blocking',
+  '--bwsi',
+  '--no-first-run',
+  '--no-default-browser-check',
+  '--disable-default-apps',
+  '--disable-translate',
+];
+
+const List<String> kCodeCache = <String>[
+  'Cache',
+  'Code Cache',
+  'GPUCache',
+];
+
+const String kDevtoolsStderr = '\n\nDevTools listening\n\n';

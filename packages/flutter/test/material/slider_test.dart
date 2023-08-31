@@ -16,89 +16,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
-// A thumb shape that also logs its repaint center.
-class LoggingThumbShape extends SliderComponentShape {
-  LoggingThumbShape(this.log);
-
-  final List<Offset> log;
-
-  @override
-  Size getPreferredSize(bool isEnabled, bool isDiscrete) {
-    return const Size(10.0, 10.0);
-  }
-
-  @override
-  void paint(
-    PaintingContext context,
-    Offset thumbCenter, {
-    required Animation<double> activationAnimation,
-    required Animation<double> enableAnimation,
-    required bool isDiscrete,
-    required TextPainter labelPainter,
-    required RenderBox parentBox,
-    required SliderThemeData sliderTheme,
-    required TextDirection textDirection,
-    required double value,
-    required double textScaleFactor,
-    required Size sizeWithOverflow,
-  }) {
-    log.add(thumbCenter);
-    final Paint thumbPaint = Paint()..color = Colors.red;
-    context.canvas.drawCircle(thumbCenter, 5.0, thumbPaint);
-  }
-}
-
-class TallSliderTickMarkShape extends SliderTickMarkShape {
-  @override
-  Size getPreferredSize({required SliderThemeData sliderTheme, required bool isEnabled}) {
-    return const Size(10.0, 200.0);
-  }
-
-  @override
-  void paint(
-    PaintingContext context,
-    Offset offset, {
-    required Offset thumbCenter,
-    required RenderBox parentBox,
-    required SliderThemeData sliderTheme,
-    required Animation<double> enableAnimation,
-    required bool isEnabled,
-    required TextDirection textDirection,
-  }) {
-    final Paint paint = Paint()..color = Colors.red;
-    context.canvas.drawRect(Rect.fromLTWH(offset.dx, offset.dy, 10.0, 20.0), paint);
-  }
-}
-
-class _StateDependentMouseCursor extends MaterialStateMouseCursor {
-  const _StateDependentMouseCursor({
-    this.disabled = SystemMouseCursors.none,
-    this.dragged = SystemMouseCursors.none,
-    this.hovered = SystemMouseCursors.none,
-  });
-
-  final MouseCursor disabled;
-  final MouseCursor hovered;
-  final MouseCursor dragged;
-
-  @override
-  MouseCursor resolve(Set<MaterialState> states) {
-    if (states.contains(MaterialState.disabled)) {
-      return disabled;
-    }
-    if (states.contains(MaterialState.dragged)) {
-      return dragged;
-    }
-    if (states.contains(MaterialState.hovered)) {
-      return hovered;
-    }
-    return SystemMouseCursors.none;
-  }
-
-  @override
-  String get debugDescription => '_StateDependentMouseCursor';
-}
-
 void main() {
   testWidgets('The initial value should respect the discrete value', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
@@ -4072,4 +3989,87 @@ void main() {
       expect(value, 1.0);
     });
   });
+}
+
+// A thumb shape that also logs its repaint center.
+class LoggingThumbShape extends SliderComponentShape {
+  LoggingThumbShape(this.log);
+
+  final List<Offset> log;
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) {
+    return const Size(10.0, 10.0);
+  }
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset thumbCenter, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
+  }) {
+    log.add(thumbCenter);
+    final Paint thumbPaint = Paint()..color = Colors.red;
+    context.canvas.drawCircle(thumbCenter, 5.0, thumbPaint);
+  }
+}
+
+class TallSliderTickMarkShape extends SliderTickMarkShape {
+  @override
+  Size getPreferredSize({required SliderThemeData sliderTheme, required bool isEnabled}) {
+    return const Size(10.0, 200.0);
+  }
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset offset, {
+    required Offset thumbCenter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required Animation<double> enableAnimation,
+    required bool isEnabled,
+    required TextDirection textDirection,
+  }) {
+    final Paint paint = Paint()..color = Colors.red;
+    context.canvas.drawRect(Rect.fromLTWH(offset.dx, offset.dy, 10.0, 20.0), paint);
+  }
+}
+
+class _StateDependentMouseCursor extends MaterialStateMouseCursor {
+  const _StateDependentMouseCursor({
+    this.disabled = SystemMouseCursors.none,
+    this.dragged = SystemMouseCursors.none,
+    this.hovered = SystemMouseCursors.none,
+  });
+
+  final MouseCursor disabled;
+  final MouseCursor hovered;
+  final MouseCursor dragged;
+
+  @override
+  MouseCursor resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.disabled)) {
+      return disabled;
+    }
+    if (states.contains(MaterialState.dragged)) {
+      return dragged;
+    }
+    if (states.contains(MaterialState.hovered)) {
+      return hovered;
+    }
+    return SystemMouseCursors.none;
+  }
+
+  @override
+  String get debugDescription => '_StateDependentMouseCursor';
 }

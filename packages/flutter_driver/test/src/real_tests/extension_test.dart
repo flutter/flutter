@@ -23,16 +23,6 @@ import 'stubs/stub_command_extension.dart';
 import 'stubs/stub_finder.dart';
 import 'stubs/stub_finder_extension.dart';
 
-Future<void> silenceDriverLogger(AsyncCallback callback) async {
-  final DriverLogCallback oldLogger = driverLog;
-  driverLog = (String source, String message) { };
-  try {
-    await callback();
-  } finally {
-    driverLog = oldLogger;
-  }
-}
-
 void main() {
   group('waitUntilNoTransientCallbacks', () {
     late FlutterDriverExtension driverExtension;
@@ -1245,4 +1235,14 @@ void main() {
       );
     });
   });
+}
+
+Future<void> silenceDriverLogger(AsyncCallback callback) async {
+  final DriverLogCallback oldLogger = driverLog;
+  driverLog = (String source, String message) { };
+  try {
+    await callback();
+  } finally {
+    driverLog = oldLogger;
+  }
 }

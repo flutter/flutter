@@ -5,15 +5,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestCanvas implements Canvas {
-  final List<Invocation> invocations = <Invocation>[];
-
-  @override
-  void noSuchMethod(Invocation invocation) {
-    invocations.add(invocation);
-  }
-}
-
 void main() {
   test('Border.fromBorderSide constructor', () {
     const BorderSide side = BorderSide();
@@ -487,4 +478,13 @@ class ShapeWithoutInterior extends ShapeBorder {
 
   @override
   void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) { }
+}
+
+class TestCanvas implements Canvas {
+  final List<Invocation> invocations = <Invocation>[];
+
+  @override
+  void noSuchMethod(Invocation invocation) {
+    invocations.add(invocation);
+  }
 }

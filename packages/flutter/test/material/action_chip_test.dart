@@ -6,62 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-/// Adds the basic requirements for a Chip.
-Widget wrapForChip({
-  required Widget child,
-  TextDirection textDirection = TextDirection.ltr,
-  double textScaleFactor = 1.0,
-  Brightness brightness = Brightness.light,
-  bool? useMaterial3,
-}) {
-  return MaterialApp(
-    theme: ThemeData(brightness: brightness, useMaterial3: useMaterial3),
-    home: Directionality(
-      textDirection: textDirection,
-      child: MediaQuery(
-        data: MediaQueryData(textScaleFactor: textScaleFactor),
-        child: Material(child: child),
-      ),
-    ),
-  );
-}
-
-RenderBox getMaterialBox(WidgetTester tester, Finder type) {
-  return tester.firstRenderObject<RenderBox>(
-    find.descendant(
-      of: type,
-      matching: find.byType(CustomPaint),
-    ),
-  );
-}
-
-Material getMaterial(WidgetTester tester) {
-  return tester.widget<Material>(
-    find.descendant(
-      of: find.byType(ActionChip),
-      matching: find.byType(Material),
-    ),
-  );
-}
-
-DefaultTextStyle getLabelStyle(WidgetTester tester, String labelText) {
-  return tester.widget(
-    find.ancestor(
-      of: find.text(labelText),
-      matching: find.byType(DefaultTextStyle),
-    ).first,
-  );
-}
-
-void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
-  final Iterable<Material> materials = tester.widgetList<Material>(find.byType(Material));
-  // There should be two Material widgets, first Material is from the "_wrapForChip" and
-  // last Material is from the "RawChip".
-  expect(materials.length, 2);
-  // The last Material from `RawChip` should have the clip behavior.
-  expect(materials.last.clipBehavior, clipBehavior);
-}
-
 void main() {
   testWidgetsWithLeakTracking('ActionChip defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
@@ -349,4 +293,60 @@ void main() {
     await tester.pumpWidget(wrapForChip(child: ActionChip(label: label, clipBehavior: Clip.antiAlias, onPressed: () { })));
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
+}
+
+/// Adds the basic requirements for a Chip.
+Widget wrapForChip({
+  required Widget child,
+  TextDirection textDirection = TextDirection.ltr,
+  double textScaleFactor = 1.0,
+  Brightness brightness = Brightness.light,
+  bool? useMaterial3,
+}) {
+  return MaterialApp(
+    theme: ThemeData(brightness: brightness, useMaterial3: useMaterial3),
+    home: Directionality(
+      textDirection: textDirection,
+      child: MediaQuery(
+        data: MediaQueryData(textScaleFactor: textScaleFactor),
+        child: Material(child: child),
+      ),
+    ),
+  );
+}
+
+RenderBox getMaterialBox(WidgetTester tester, Finder type) {
+  return tester.firstRenderObject<RenderBox>(
+    find.descendant(
+      of: type,
+      matching: find.byType(CustomPaint),
+    ),
+  );
+}
+
+Material getMaterial(WidgetTester tester) {
+  return tester.widget<Material>(
+    find.descendant(
+      of: find.byType(ActionChip),
+      matching: find.byType(Material),
+    ),
+  );
+}
+
+DefaultTextStyle getLabelStyle(WidgetTester tester, String labelText) {
+  return tester.widget(
+    find.ancestor(
+      of: find.text(labelText),
+      matching: find.byType(DefaultTextStyle),
+    ).first,
+  );
+}
+
+void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
+  final Iterable<Material> materials = tester.widgetList<Material>(find.byType(Material));
+  // There should be two Material widgets, first Material is from the "_wrapForChip" and
+  // last Material is from the "RawChip".
+  expect(materials.length, 2);
+  // The last Material from `RawChip` should have the clip behavior.
+  expect(materials.last.clipBehavior, clipBehavior);
 }

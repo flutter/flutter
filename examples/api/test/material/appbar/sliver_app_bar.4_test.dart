@@ -7,8 +7,6 @@ import 'package:flutter_api_samples/material/app_bar/sliver_app_bar.4.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';
 
-const Offset _kOffset = Offset(0.0, 200.0);
-
 void main() {
   testWidgets('SliverAppbar can be stretched', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -44,3 +42,5 @@ void main() {
     expect(tester.getBottomLeft(find.text('SliverAppBar')).dy, 184.0);
   });
 }
+
+const Offset _kOffset = Offset(0.0, 200.0);

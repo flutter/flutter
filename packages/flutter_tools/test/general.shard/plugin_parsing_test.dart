@@ -10,9 +10,6 @@ import 'package:yaml/yaml.dart';
 
 import '../src/common.dart';
 
-const String _kTestPluginName = 'test_plugin_name';
-const String _kTestPluginPath = 'test_plugin_path';
-
 void main() {
   testWithoutContext('Plugin creation from the legacy format', () {
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
@@ -421,3 +418,6 @@ void main() {
     );
   });
 }
+
+const String _kTestPluginName = 'test_plugin_name';
+const String _kTestPluginPath = 'test_plugin_path';

@@ -27,43 +27,6 @@ import '../../src/context.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
-class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInterpreter {
-
-  FakeXcodeProjectInterpreterWithBuildSettings({this.productBundleIdentifier, this.developmentTeam = 'abc'});
-
-  @override
-  Future<Map<String, String>> getBuildSettings(
-      String projectPath, {
-        XcodeProjectBuildContext? buildContext,
-        Duration timeout = const Duration(minutes: 1),
-      }) async {
-    return <String, String>{
-      'PRODUCT_BUNDLE_IDENTIFIER': productBundleIdentifier ?? 'io.flutter.someProject',
-      'TARGET_BUILD_DIR': 'build/ios/Release-iphoneos',
-      'WRAPPER_NAME': 'Runner.app',
-      if (developmentTeam != null) 'DEVELOPMENT_TEAM': developmentTeam!,
-    };
-  }
-
-  /// The value of 'PRODUCT_BUNDLE_IDENTIFIER'.
-  final String? productBundleIdentifier;
-
-  final String? developmentTeam;
-}
-
-final Platform macosPlatform = FakePlatform(
-  operatingSystem: 'macos',
-  environment: <String, String>{
-    'FLUTTER_ROOT': '/',
-    'HOME': '/',
-  }
-);
-final Platform notMacosPlatform = FakePlatform(
-  environment: <String, String>{
-    'FLUTTER_ROOT': '/',
-  }
-);
-
 void main() {
   late FileSystem fileSystem;
   late TestUsage usage;
@@ -1090,3 +1053,40 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   @override
   HostPlatform hostPlatform = HostPlatform.linux_x64;
 }
+
+class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInterpreter {
+
+  FakeXcodeProjectInterpreterWithBuildSettings({this.productBundleIdentifier, this.developmentTeam = 'abc'});
+
+  @override
+  Future<Map<String, String>> getBuildSettings(
+      String projectPath, {
+        XcodeProjectBuildContext? buildContext,
+        Duration timeout = const Duration(minutes: 1),
+      }) async {
+    return <String, String>{
+      'PRODUCT_BUNDLE_IDENTIFIER': productBundleIdentifier ?? 'io.flutter.someProject',
+      'TARGET_BUILD_DIR': 'build/ios/Release-iphoneos',
+      'WRAPPER_NAME': 'Runner.app',
+      if (developmentTeam != null) 'DEVELOPMENT_TEAM': developmentTeam!,
+    };
+  }
+
+  /// The value of 'PRODUCT_BUNDLE_IDENTIFIER'.
+  final String? productBundleIdentifier;
+
+  final String? developmentTeam;
+}
+
+final Platform macosPlatform = FakePlatform(
+  operatingSystem: 'macos',
+  environment: <String, String>{
+    'FLUTTER_ROOT': '/',
+    'HOME': '/',
+  }
+);
+final Platform notMacosPlatform = FakePlatform(
+  environment: <String, String>{
+    'FLUTTER_ROOT': '/',
+  }
+);

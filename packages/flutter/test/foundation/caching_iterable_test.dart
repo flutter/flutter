@@ -5,16 +5,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-int yieldCount = 0;
-
-Iterable<int> range(int start, int end) sync* {
-  assert(yieldCount == 0);
-  for (int index = start; index <= end; index += 1) {
-    yieldCount += 1;
-    yield index;
-  }
-}
-
 void main() {
   setUp(() {
     yieldCount = 0;
@@ -107,4 +97,14 @@ void main() {
     expect(expanded2, equals(<int>[1, 1, 2, 2, 3, 3, 4, 4, 5, 5]));
     expect(yieldCount, equals(5));
   });
+}
+
+int yieldCount = 0;
+
+Iterable<int> range(int start, int end) sync* {
+  assert(yieldCount == 0);
+  for (int index = start; index <= end; index += 1) {
+    yieldCount += 1;
+    yield index;
+  }
 }

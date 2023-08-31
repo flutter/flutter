@@ -19,8 +19,6 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 
-const String xcodebuild = '/usr/bin/xcodebuild';
-
 void main() {
   group('MockProcessManager', () {
     setUp(() {
@@ -1378,3 +1376,5 @@ flutter:
     });
   });
 }
+
+const String xcodebuild = '/usr/bin/xcodebuild';

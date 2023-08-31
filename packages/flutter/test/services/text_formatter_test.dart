@@ -6,15 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestTextInputFormatter extends TextInputFormatter {
-  const TestTextInputFormatter();
-
-  @override
-  void noSuchMethod(Invocation invocation) {
-    super.noSuchMethod(invocation);
-  }
-}
-
 void main() {
   TextEditingValue testOldValue = TextEditingValue.empty;
   TextEditingValue testNewValue = TextEditingValue.empty;
@@ -866,4 +857,13 @@ void main() {
       );
     });
   });
+}
+
+class TestTextInputFormatter extends TextInputFormatter {
+  const TestTextInputFormatter();
+
+  @override
+  void noSuchMethod(Invocation invocation) {
+    super.noSuchMethod(invocation);
+  }
 }

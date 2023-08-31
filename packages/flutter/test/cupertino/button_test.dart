@@ -11,11 +11,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
-const TextStyle testStyle = TextStyle(
-  fontSize: 10.0,
-  letterSpacing: 0.0,
-);
-
 void main() {
   testWidgets('Default layout minimum size', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -486,3 +481,8 @@ Widget boilerplate({ required Widget child }) {
     child: Center(child: child),
   );
 }
+
+const TextStyle testStyle = TextStyle(
+  fontSize: 10.0,
+  letterSpacing: 0.0,
+);

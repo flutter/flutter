@@ -22,46 +22,6 @@ import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
 import '../../../src/testbed.dart';
 
-const List<String> _kDart2jsLinuxArgs = <String>[
-  'Artifact.engineDartBinary.TargetPlatform.web_javascript',
-  '--disable-dart-dev',
-  'Artifact.dart2jsSnapshot.TargetPlatform.web_javascript',
-  '--platform-binaries=HostArtifact.webPlatformKernelFolder',
-  '--invoker=flutter_tool',
-];
-
-const List<String> _kDart2WasmLinuxArgs = <String> [
-  'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript',
-  '--disable-dart-dev',
-  'Artifact.dart2wasmSnapshot.TargetPlatform.web_javascript',
-  '--packages=.dart_tool/package_config.json',
-  '--dart-sdk=Artifact.engineDartSdkPath.TargetPlatform.web_javascript',
-  '--multi-root-scheme',
-  'org-dartlang-sdk',
-  '--multi-root',
-  'HostArtifact.flutterWebSdk',
-  '--multi-root',
-  _kDartSdkRoot,
-  '--libraries-spec',
-  'HostArtifact.flutterWebLibrariesJson',
-];
-
-const List<String> _kWasmOptLinuxArgrs = <String> [
-  'Artifact.wasmOptBinary.TargetPlatform.web_javascript',
-  '--all-features',
-  '--closed-world',
-  '--traps-never-happen',
-  '-O3',
-  '--type-ssa',
-  '--gufa',
-  '-O3',
-  '--type-merging',
-];
-
-/// The result of calling `.parent` on a Memory directory pointing to
-/// `'Artifact.engineDartSdkPath.TargetPlatform.web_javascript'`.
-const String _kDartSdkRoot = '.';
-
 void main() {
   late Testbed testbed;
   late Environment environment;
@@ -1096,3 +1056,43 @@ void main() {
     expect(canvasKitOutputAfter.readAsStringSync(), 'bar');
   }));
 }
+
+const List<String> _kDart2jsLinuxArgs = <String>[
+  'Artifact.engineDartBinary.TargetPlatform.web_javascript',
+  '--disable-dart-dev',
+  'Artifact.dart2jsSnapshot.TargetPlatform.web_javascript',
+  '--platform-binaries=HostArtifact.webPlatformKernelFolder',
+  '--invoker=flutter_tool',
+];
+
+const List<String> _kDart2WasmLinuxArgs = <String> [
+  'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript',
+  '--disable-dart-dev',
+  'Artifact.dart2wasmSnapshot.TargetPlatform.web_javascript',
+  '--packages=.dart_tool/package_config.json',
+  '--dart-sdk=Artifact.engineDartSdkPath.TargetPlatform.web_javascript',
+  '--multi-root-scheme',
+  'org-dartlang-sdk',
+  '--multi-root',
+  'HostArtifact.flutterWebSdk',
+  '--multi-root',
+  _kDartSdkRoot,
+  '--libraries-spec',
+  'HostArtifact.flutterWebLibrariesJson',
+];
+
+const List<String> _kWasmOptLinuxArgrs = <String> [
+  'Artifact.wasmOptBinary.TargetPlatform.web_javascript',
+  '--all-features',
+  '--closed-world',
+  '--traps-never-happen',
+  '-O3',
+  '--type-ssa',
+  '--gufa',
+  '-O3',
+  '--type-merging',
+];
+
+/// The result of calling `.parent` on a Memory directory pointing to
+/// `'Artifact.engineDartSdkPath.TargetPlatform.web_javascript'`.
+const String _kDartSdkRoot = '.';

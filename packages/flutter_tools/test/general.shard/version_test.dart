@@ -19,10 +19,6 @@ import '../src/context.dart';
 import '../src/fake_process_manager.dart';
 import '../src/fakes.dart' show FakeFlutterVersion;
 
-final SystemClock _testClock = SystemClock.fixed(DateTime.utc(2015));
-final DateTime _stampUpToDate = _testClock.ago(VersionFreshnessValidator.checkAgeConsideredUpToDate ~/ 2);
-final DateTime _stampOutOfDate = _testClock.ago(VersionFreshnessValidator.checkAgeConsideredUpToDate * 2);
-
 void main() {
   late FakeCache cache;
   late FakeProcessManager processManager;
@@ -926,3 +922,7 @@ class FakeCache extends Fake implements Cache {
     }
   }
 }
+
+final SystemClock _testClock = SystemClock.fixed(DateTime.utc(2015));
+final DateTime _stampUpToDate = _testClock.ago(VersionFreshnessValidator.checkAgeConsideredUpToDate ~/ 2);
+final DateTime _stampOutOfDate = _testClock.ago(VersionFreshnessValidator.checkAgeConsideredUpToDate * 2);

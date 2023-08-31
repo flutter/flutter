@@ -7,10 +7,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import '../src/common.dart';
 import 'test_utils.dart';
 
-final String toolBackend = fileSystem.path.join(getFlutterRoot(), 'packages', 'flutter_tools', 'bin', 'tool_backend.dart');
-final String examplePath = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
-final String dart = fileSystem.path.join(getFlutterRoot(), 'bin', platform.isWindows ? 'dart.bat' : 'dart');
-
 void main() {
   testWithoutContext('tool_backend.dart exits if PROJECT_DIR is not set', () async {
     final ProcessResult result = await processManager.run(<String>[
@@ -92,3 +88,7 @@ void main() {
     );
   });
 }
+
+final String toolBackend = fileSystem.path.join(getFlutterRoot(), 'packages', 'flutter_tools', 'bin', 'tool_backend.dart');
+final String examplePath = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
+final String dart = fileSystem.path.join(getFlutterRoot(), 'bin', platform.isWindows ? 'dart.bat' : 'dart');

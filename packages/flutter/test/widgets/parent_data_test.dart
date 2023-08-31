@@ -9,45 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'test_widgets.dart';
 
-class TestParentData {
-  TestParentData({ this.top, this.right, this.bottom, this.left });
-
-  final double? top;
-  final double? right;
-  final double? bottom;
-  final double? left;
-}
-
-void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
-  final MultiChildRenderObjectElement element = tester.element(
-    find.byElementPredicate((Element element) => element is MultiChildRenderObjectElement),
-  );
-  expect(element, isNotNull);
-  expect(element.renderObject, isA<RenderStack>());
-  final RenderStack renderObject = element.renderObject as RenderStack;
-  try {
-    RenderObject? child = renderObject.firstChild;
-    for (final TestParentData expected in expectedParentData) {
-      expect(child, isA<RenderDecoratedBox>());
-      final RenderDecoratedBox decoratedBox = child! as RenderDecoratedBox;
-      expect(decoratedBox.parentData, isA<StackParentData>());
-      final StackParentData parentData = decoratedBox.parentData! as StackParentData;
-      expect(parentData.top, equals(expected.top));
-      expect(parentData.right, equals(expected.right));
-      expect(parentData.bottom, equals(expected.bottom));
-      expect(parentData.left, equals(expected.left));
-      final StackParentData? decoratedBoxParentData = decoratedBox.parentData as StackParentData?;
-      child = decoratedBoxParentData?.nextSibling;
-    }
-    expect(child, isNull);
-  } catch (e) {
-    debugPrint(renderObject.toStringDeep());
-    rethrow;
-  }
-}
-
-final TestParentData kNonPositioned = TestParentData();
-
 void main() {
   testWidgets('ParentDataWidget control test', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -527,3 +488,42 @@ class DummyWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) => child;
 }
+
+class TestParentData {
+  TestParentData({ this.top, this.right, this.bottom, this.left });
+
+  final double? top;
+  final double? right;
+  final double? bottom;
+  final double? left;
+}
+
+void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
+  final MultiChildRenderObjectElement element = tester.element(
+    find.byElementPredicate((Element element) => element is MultiChildRenderObjectElement),
+  );
+  expect(element, isNotNull);
+  expect(element.renderObject, isA<RenderStack>());
+  final RenderStack renderObject = element.renderObject as RenderStack;
+  try {
+    RenderObject? child = renderObject.firstChild;
+    for (final TestParentData expected in expectedParentData) {
+      expect(child, isA<RenderDecoratedBox>());
+      final RenderDecoratedBox decoratedBox = child! as RenderDecoratedBox;
+      expect(decoratedBox.parentData, isA<StackParentData>());
+      final StackParentData parentData = decoratedBox.parentData! as StackParentData;
+      expect(parentData.top, equals(expected.top));
+      expect(parentData.right, equals(expected.right));
+      expect(parentData.bottom, equals(expected.bottom));
+      expect(parentData.left, equals(expected.left));
+      final StackParentData? decoratedBoxParentData = decoratedBox.parentData as StackParentData?;
+      child = decoratedBoxParentData?.nextSibling;
+    }
+    expect(child, isNull);
+  } catch (e) {
+    debugPrint(renderObject.toStringDeep());
+    rethrow;
+  }
+}
+
+final TestParentData kNonPositioned = TestParentData();

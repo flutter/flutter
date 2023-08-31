@@ -11,57 +11,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
-void _applyParentData(List<RenderBox> inlineRenderBoxes, InlineSpan span) {
-  int index = 0;
-  RenderBox? previousBox;
-  span.visitChildren((InlineSpan span) {
-    if (span is! WidgetSpan) {
-      return true;
-    }
-
-    final RenderBox box = inlineRenderBoxes[index];
-    box.parentData = TextParentData()
-                      ..span = span
-                      ..previousSibling = previousBox;
-    (previousBox?.parentData as TextParentData?)?.nextSibling = box;
-    index += 1;
-    previousBox = box;
-    return true;
-  });
-}
-
-class _FakeEditableTextState with TextSelectionDelegate {
-  @override
-  TextEditingValue textEditingValue = TextEditingValue.empty;
-
-  TextSelection? selection;
-
-  @override
-  void hideToolbar([bool hideHandles = true]) { }
-
-  @override
-  void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause) {
-    selection = value.selection;
-  }
-
-  @override
-  void bringIntoView(TextPosition position) { }
-
-  @override
-  void cutSelection(SelectionChangedCause cause) { }
-
-  @override
-  Future<void> pasteText(SelectionChangedCause cause) {
-    return Future<void>.value();
-  }
-
-  @override
-  void selectAll(SelectionChangedCause cause) { }
-
-  @override
-  void copySelection(SelectionChangedCause cause) { }
-}
-
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
@@ -1994,4 +1943,55 @@ class _TestRenderEditablePainter extends RenderEditablePainter {
 
   @override
   String toString() => '_TestRenderEditablePainter#${shortHash(this)}';
+}
+
+void _applyParentData(List<RenderBox> inlineRenderBoxes, InlineSpan span) {
+  int index = 0;
+  RenderBox? previousBox;
+  span.visitChildren((InlineSpan span) {
+    if (span is! WidgetSpan) {
+      return true;
+    }
+
+    final RenderBox box = inlineRenderBoxes[index];
+    box.parentData = TextParentData()
+                      ..span = span
+                      ..previousSibling = previousBox;
+    (previousBox?.parentData as TextParentData?)?.nextSibling = box;
+    index += 1;
+    previousBox = box;
+    return true;
+  });
+}
+
+class _FakeEditableTextState with TextSelectionDelegate {
+  @override
+  TextEditingValue textEditingValue = TextEditingValue.empty;
+
+  TextSelection? selection;
+
+  @override
+  void hideToolbar([bool hideHandles = true]) { }
+
+  @override
+  void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause) {
+    selection = value.selection;
+  }
+
+  @override
+  void bringIntoView(TextPosition position) { }
+
+  @override
+  void cutSelection(SelectionChangedCause cause) { }
+
+  @override
+  Future<void> pasteText(SelectionChangedCause cause) {
+    return Future<void>.value();
+  }
+
+  @override
+  void selectAll(SelectionChangedCause cause) { }
+
+  @override
+  void copySelection(SelectionChangedCause cause) { }
 }

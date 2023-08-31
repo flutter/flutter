@@ -7,40 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'gesture_tester.dart';
 
-// Down/move/up pair 1: normal tap sequence
-const PointerDownEvent down = PointerDownEvent(
-  pointer: 5,
-  position: Offset(10, 10),
-);
-
-const PointerUpEvent up = PointerUpEvent(
-  pointer: 5,
-  position: Offset(11, 9),
-);
-
-const PointerMoveEvent move = PointerMoveEvent(
-  pointer: 5,
-  position: Offset(100, 200),
-);
-
-// Down/up pair 2: normal tap sequence far away from pair 1
-const PointerDownEvent down2 = PointerDownEvent(
-  pointer: 6,
-  position: Offset(10, 10),
-);
-
-const PointerUpEvent up2 = PointerUpEvent(
-  pointer: 6,
-  position: Offset(11, 9),
-);
-
-// Down/up pair 3: tap sequence with secondary button
-const PointerDownEvent down3 = PointerDownEvent(
-  pointer: 7,
-  position: Offset(30, 30),
-  buttons: kSecondaryButton,
-);
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -793,3 +759,37 @@ void main() {
     longPress.dispose();
   });
 }
+
+// Down/move/up pair 1: normal tap sequence
+const PointerDownEvent down = PointerDownEvent(
+  pointer: 5,
+  position: Offset(10, 10),
+);
+
+const PointerUpEvent up = PointerUpEvent(
+  pointer: 5,
+  position: Offset(11, 9),
+);
+
+const PointerMoveEvent move = PointerMoveEvent(
+  pointer: 5,
+  position: Offset(100, 200),
+);
+
+// Down/up pair 2: normal tap sequence far away from pair 1
+const PointerDownEvent down2 = PointerDownEvent(
+  pointer: 6,
+  position: Offset(10, 10),
+);
+
+const PointerUpEvent up2 = PointerUpEvent(
+  pointer: 6,
+  position: Offset(11, 9),
+);
+
+// Down/up pair 3: tap sequence with secondary button
+const PointerDownEvent down3 = PointerDownEvent(
+  pointer: 7,
+  position: Offset(30, 30),
+  buttons: kSecondaryButton,
+);

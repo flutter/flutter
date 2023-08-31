@@ -8,40 +8,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class _MediaQueryAspectCase {
-  const _MediaQueryAspectCase(this.method, this.data);
-  final Function(BuildContext) method;
-  final MediaQueryData data;
-}
-
-class _MediaQueryAspectVariant extends TestVariant<_MediaQueryAspectCase> {
-  _MediaQueryAspectVariant({
-    required this.values
-  });
-
-  @override
-  final List<_MediaQueryAspectCase> values;
-
-  static _MediaQueryAspectCase? aspect;
-
-  @override
-  String describeValue(_MediaQueryAspectCase value) {
-    return value.method.toString();
-  }
-
-  @override
-  Future<_MediaQueryAspectCase?> setUp(_MediaQueryAspectCase value) async {
-    final _MediaQueryAspectCase? oldAspect = aspect;
-    aspect = value;
-    return oldAspect;
-  }
-
-  @override
-  Future<void> tearDown(_MediaQueryAspectCase value, _MediaQueryAspectCase? memento) async {
-    aspect = memento;
-  }
-}
-
 void main() {
   testWidgets('MediaQuery does not have a default', (WidgetTester tester) async {
     late final FlutterError error;
@@ -1536,4 +1502,38 @@ Future<void> pumpWidgetWithoutViewWrapper({required WidgetTester tester, require
   tester.binding.attachRootWidget(widget);
   tester.binding.scheduleFrame();
   return tester.binding.pump();
+}
+
+class _MediaQueryAspectCase {
+  const _MediaQueryAspectCase(this.method, this.data);
+  final Function(BuildContext) method;
+  final MediaQueryData data;
+}
+
+class _MediaQueryAspectVariant extends TestVariant<_MediaQueryAspectCase> {
+  _MediaQueryAspectVariant({
+    required this.values
+  });
+
+  @override
+  final List<_MediaQueryAspectCase> values;
+
+  static _MediaQueryAspectCase? aspect;
+
+  @override
+  String describeValue(_MediaQueryAspectCase value) {
+    return value.method.toString();
+  }
+
+  @override
+  Future<_MediaQueryAspectCase?> setUp(_MediaQueryAspectCase value) async {
+    final _MediaQueryAspectCase? oldAspect = aspect;
+    aspect = value;
+    return oldAspect;
+  }
+
+  @override
+  Future<void> tearDown(_MediaQueryAspectCase value, _MediaQueryAspectCase? memento) async {
+    aspect = memento;
+  }
 }

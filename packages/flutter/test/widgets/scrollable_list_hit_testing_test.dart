@@ -6,8 +6,6 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const List<int> items = <int>[0, 1, 2, 3, 4, 5];
-
 void main() {
   testWidgets('Tap item after scroll - horizontal', (WidgetTester tester) async {
     final List<int> tapped = <int>[];
@@ -186,3 +184,5 @@ void main() {
     expect(tapped, equals(<int>[0]));
   });
 }
+
+const List<int> items = <int>[0, 1, 2, 3, 4, 5];

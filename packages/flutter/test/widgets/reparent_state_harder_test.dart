@@ -5,92 +5,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-// This is a regression test for https://github.com/flutter/flutter/issues/5588.
-
-class OrderSwitcher extends StatefulWidget {
-  const OrderSwitcher({
-    super.key,
-    required this.a,
-    required this.b,
-  });
-
-  final Widget a;
-  final Widget b;
-
-  @override
-  OrderSwitcherState createState() => OrderSwitcherState();
-}
-
-class OrderSwitcherState extends State<OrderSwitcher> {
-
-  bool _aFirst = true;
-
-  void switchChildren() {
-    setState(() {
-      _aFirst = false;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      textDirection: TextDirection.ltr,
-      children: _aFirst
-        ? <Widget>[
-            KeyedSubtree(child: widget.a),
-            widget.b,
-          ]
-        : <Widget>[
-            KeyedSubtree(child: widget.b),
-            widget.a,
-          ],
-    );
-  }
-}
-
-class DummyStatefulWidget extends StatefulWidget {
-  const DummyStatefulWidget(Key? key) : super(key: key);
-
-  @override
-  DummyStatefulWidgetState createState() => DummyStatefulWidgetState();
-}
-
-class DummyStatefulWidgetState extends State<DummyStatefulWidget> {
-  @override
-  Widget build(BuildContext context) => const Text('LEAF', textDirection: TextDirection.ltr);
-}
-
-class RekeyableDummyStatefulWidgetWrapper extends StatefulWidget {
-  const RekeyableDummyStatefulWidgetWrapper({
-    super.key,
-    required this.initialKey,
-  });
-  final GlobalKey initialKey;
-  @override
-  RekeyableDummyStatefulWidgetWrapperState createState() => RekeyableDummyStatefulWidgetWrapperState();
-}
-
-class RekeyableDummyStatefulWidgetWrapperState extends State<RekeyableDummyStatefulWidgetWrapper> {
-  GlobalKey? _key;
-
-  @override
-  void initState() {
-    super.initState();
-    _key = widget.initialKey;
-  }
-
-  void _setChild(GlobalKey? value) {
-    setState(() {
-      _key = value;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return DummyStatefulWidget(_key);
-  }
-}
-
 void main() {
   testWidgets('Handle GlobalKey reparenting in weird orders', (WidgetTester tester) async {
 
@@ -175,4 +89,90 @@ void main() {
     expect(find.byType(RekeyableDummyStatefulWidgetWrapper), findsNWidgets(2));
     expect(find.byType(DummyStatefulWidget), findsNWidgets(2));
   });
+}
+
+// This is a regression test for https://github.com/flutter/flutter/issues/5588.
+
+class OrderSwitcher extends StatefulWidget {
+  const OrderSwitcher({
+    super.key,
+    required this.a,
+    required this.b,
+  });
+
+  final Widget a;
+  final Widget b;
+
+  @override
+  OrderSwitcherState createState() => OrderSwitcherState();
+}
+
+class OrderSwitcherState extends State<OrderSwitcher> {
+
+  bool _aFirst = true;
+
+  void switchChildren() {
+    setState(() {
+      _aFirst = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      textDirection: TextDirection.ltr,
+      children: _aFirst
+        ? <Widget>[
+            KeyedSubtree(child: widget.a),
+            widget.b,
+          ]
+        : <Widget>[
+            KeyedSubtree(child: widget.b),
+            widget.a,
+          ],
+    );
+  }
+}
+
+class DummyStatefulWidget extends StatefulWidget {
+  const DummyStatefulWidget(Key? key) : super(key: key);
+
+  @override
+  DummyStatefulWidgetState createState() => DummyStatefulWidgetState();
+}
+
+class DummyStatefulWidgetState extends State<DummyStatefulWidget> {
+  @override
+  Widget build(BuildContext context) => const Text('LEAF', textDirection: TextDirection.ltr);
+}
+
+class RekeyableDummyStatefulWidgetWrapper extends StatefulWidget {
+  const RekeyableDummyStatefulWidgetWrapper({
+    super.key,
+    required this.initialKey,
+  });
+  final GlobalKey initialKey;
+  @override
+  RekeyableDummyStatefulWidgetWrapperState createState() => RekeyableDummyStatefulWidgetWrapperState();
+}
+
+class RekeyableDummyStatefulWidgetWrapperState extends State<RekeyableDummyStatefulWidgetWrapper> {
+  GlobalKey? _key;
+
+  @override
+  void initState() {
+    super.initState();
+    _key = widget.initialKey;
+  }
+
+  void _setChild(GlobalKey? value) {
+    setState(() {
+      _key = value;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DummyStatefulWidget(_key);
+  }
 }

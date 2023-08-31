@@ -17,51 +17,6 @@ import 'editable_text_utils.dart';
 import 'live_text_utils.dart';
 import 'semantics_tester.dart';
 
-Matcher matchesMethodCall(String method, { dynamic args }) => _MatchesMethodCall(method, arguments: args == null ? null : wrapMatcher(args));
-
-class _MatchesMethodCall extends Matcher {
-  const _MatchesMethodCall(this.name, {this.arguments});
-
-  final String name;
-  final Matcher? arguments;
-
-  @override
-  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    if (item is MethodCall && item.method == name) {
-      return arguments?.matches(item.arguments, matchState) ?? true;
-    }
-    return false;
-  }
-
-  @override
-  Description describe(Description description) {
-    final Description newDescription = description.add('has method name: ').addDescriptionOf(name);
-    if (arguments != null) {
-      newDescription.add(' with arguments: ').addDescriptionOf(arguments);
-    }
-    return newDescription;
-  }
-}
-
-late TextEditingController controller;
-final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Node');
-final FocusScopeNode focusScopeNode = FocusScopeNode(debugLabel: 'EditableText Scope Node');
-const TextStyle textStyle = TextStyle();
-const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
-
-enum HandlePositionInViewport {
-  leftEdge, rightEdge, within,
-}
-
-typedef _VoidFutureCallback = Future<void> Function();
-
-TextEditingValue collapsedAtEnd(String text) {
-  return TextEditingValue(
-    text: text,
-    selection: TextSelection.collapsed(offset: text.length),
-  );
-}
-
 void main() {
   setUp(() async {
     final MockClipboard mockClipboard = MockClipboard();
@@ -17014,3 +16969,48 @@ class _TestScrollController extends ScrollController {
 }
 
 class FakeSpellCheckService extends DefaultSpellCheckService {}
+
+Matcher matchesMethodCall(String method, { dynamic args }) => _MatchesMethodCall(method, arguments: args == null ? null : wrapMatcher(args));
+
+class _MatchesMethodCall extends Matcher {
+  const _MatchesMethodCall(this.name, {this.arguments});
+
+  final String name;
+  final Matcher? arguments;
+
+  @override
+  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+    if (item is MethodCall && item.method == name) {
+      return arguments?.matches(item.arguments, matchState) ?? true;
+    }
+    return false;
+  }
+
+  @override
+  Description describe(Description description) {
+    final Description newDescription = description.add('has method name: ').addDescriptionOf(name);
+    if (arguments != null) {
+      newDescription.add(' with arguments: ').addDescriptionOf(arguments);
+    }
+    return newDescription;
+  }
+}
+
+late TextEditingController controller;
+final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Node');
+final FocusScopeNode focusScopeNode = FocusScopeNode(debugLabel: 'EditableText Scope Node');
+const TextStyle textStyle = TextStyle();
+const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
+
+enum HandlePositionInViewport {
+  leftEdge, rightEdge, within,
+}
+
+typedef _VoidFutureCallback = Future<void> Function();
+
+TextEditingValue collapsedAtEnd(String text) {
+  return TextEditingValue(
+    text: text,
+    selection: TextSelection.collapsed(offset: text.length),
+  );
+}

@@ -5,19 +5,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestStatusTransitionWidget extends StatusTransitionWidget {
-  const TestStatusTransitionWidget({
-    super.key,
-    required this.builder,
-    required super.animation,
-  });
-
-  final WidgetBuilder builder;
-
-  @override
-  Widget build(BuildContext context) => builder(context);
-}
-
 void main() {
   testWidgets('Status transition control test', (WidgetTester tester) async {
     bool didBuild = false;
@@ -85,4 +72,17 @@ void main() {
     controller.stop();
     anotherController.stop();
   });
+}
+
+class TestStatusTransitionWidget extends StatusTransitionWidget {
+  const TestStatusTransitionWidget({
+    super.key,
+    required this.builder,
+    required super.animation,
+  });
+
+  final WidgetBuilder builder;
+
+  @override
+  Widget build(BuildContext context) => builder(context);
 }

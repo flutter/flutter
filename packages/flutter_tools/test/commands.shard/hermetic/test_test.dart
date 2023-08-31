@@ -32,33 +32,6 @@ import '../../src/fake_vm_services.dart';
 import '../../src/logging_logger.dart';
 import '../../src/test_flutter_command_runner.dart';
 
-const String _pubspecContents = '''
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-  integration_test:
-    sdk: flutter''';
-final String _packageConfigContents = json.encode(<String, Object>{
-  'configVersion': 2,
-  'packages': <Map<String, Object>>[
-    <String, String>{
-      'name': 'test_api',
-      'rootUri': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/test_api-0.2.19',
-      'packageUri': 'lib/',
-      'languageVersion': '2.12',
-    },
-    <String, String>{
-      'name': 'integration_test',
-      'rootUri': 'file:///path/to/flutter/packages/integration_test',
-      'packageUri': 'lib/',
-      'languageVersion': '2.12',
-    },
-  ],
-  'generated': '2021-02-24T07:55:20.084834Z',
-  'generator': 'pub',
-  'generatorVersion': '2.13.0-68.0.dev',
-});
-
 void main() {
   Cache.disableLocking();
   late MemoryFileSystem fs;
@@ -1118,3 +1091,30 @@ class _FakeDeviceManager extends DeviceManager {
     return _connectedDevices;
   }
 }
+
+const String _pubspecContents = '''
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter''';
+final String _packageConfigContents = json.encode(<String, Object>{
+  'configVersion': 2,
+  'packages': <Map<String, Object>>[
+    <String, String>{
+      'name': 'test_api',
+      'rootUri': 'file:///path/to/pubcache/.pub-cache/hosted/pub.dartlang.org/test_api-0.2.19',
+      'packageUri': 'lib/',
+      'languageVersion': '2.12',
+    },
+    <String, String>{
+      'name': 'integration_test',
+      'rootUri': 'file:///path/to/flutter/packages/integration_test',
+      'packageUri': 'lib/',
+      'languageVersion': '2.12',
+    },
+  ],
+  'generated': '2021-02-24T07:55:20.084834Z',
+  'generator': 'pub',
+  'generatorVersion': '2.13.0-68.0.dev',
+});

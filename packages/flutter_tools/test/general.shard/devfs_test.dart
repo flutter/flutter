@@ -32,30 +32,6 @@ import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
 import '../src/logging_logger.dart';
 
-final FakeVmServiceRequest createDevFSRequest = FakeVmServiceRequest(
-  method: '_createDevFS',
-  args: <String, Object>{
-    'fsName': 'test',
-  },
-  jsonResponse: <String, Object>{
-    'uri': Uri.parse('test').toString(),
-  }
-);
-
-const FakeVmServiceRequest failingCreateDevFSRequest = FakeVmServiceRequest(
-  method: '_createDevFS',
-  args: <String, Object>{
-    'fsName': 'test',
-  },
-  errorCode: RPCErrorCodes.kServiceDisappeared,
-);
-
-const FakeVmServiceRequest failingDeleteDevFSRequest = FakeVmServiceRequest(
-  method: '_deleteDevFS',
-  args: <String, dynamic>{'fsName': 'test'},
-  errorCode: RPCErrorCodes.kServiceDisappeared,
-);
-
 void main() {
   testWithoutContext('DevFSByteContent', () {
     final DevFSByteContent content = DevFSByteContent(<int>[4, 5, 6]);
@@ -818,3 +794,27 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
     return DevFSByteContent(await inputShader.contentsAsBytes());
   }
 }
+
+final FakeVmServiceRequest createDevFSRequest = FakeVmServiceRequest(
+  method: '_createDevFS',
+  args: <String, Object>{
+    'fsName': 'test',
+  },
+  jsonResponse: <String, Object>{
+    'uri': Uri.parse('test').toString(),
+  }
+);
+
+const FakeVmServiceRequest failingCreateDevFSRequest = FakeVmServiceRequest(
+  method: '_createDevFS',
+  args: <String, Object>{
+    'fsName': 'test',
+  },
+  errorCode: RPCErrorCodes.kServiceDisappeared,
+);
+
+const FakeVmServiceRequest failingDeleteDevFSRequest = FakeVmServiceRequest(
+  method: '_deleteDevFS',
+  args: <String, dynamic>{'fsName': 'test'},
+  errorCode: RPCErrorCodes.kServiceDisappeared,
+);

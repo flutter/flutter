@@ -9,8 +9,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestChannelBuffersFlutterBinding extends BindingBase with SchedulerBinding, ServicesBinding { }
-
 void main() {
   ByteData makeByteData(String str) {
     return ByteData.sublistView(utf8.encode(str));
@@ -43,3 +41,5 @@ void main() {
     expect(didCallCallback, isTrue);
   });
 }
+
+class TestChannelBuffersFlutterBinding extends BindingBase with SchedulerBinding, ServicesBinding { }

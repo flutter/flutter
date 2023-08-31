@@ -5,10 +5,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-// IMPORTANT: keep this in sync with the same constant defined
-//            in foundation/timeline.dart
-const int kSliceSize = 500;
-
 void main() {
   setUp(() {
     FlutterTimeline.debugReset();
@@ -141,3 +137,7 @@ void main() {
     );
   });
 }
+
+// IMPORTANT: keep this in sync with the same constant defined
+//            in foundation/timeline.dart
+const int kSliceSize = 500;

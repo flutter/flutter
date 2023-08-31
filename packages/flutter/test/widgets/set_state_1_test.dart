@@ -5,6 +5,17 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+void main() {
+  testWidgets('setState() smoke test', (WidgetTester tester) async {
+    await tester.pumpWidget(const Outside());
+    final Offset location = tester.getCenter(find.text('INSIDE'));
+    final TestGesture gesture = await tester.startGesture(location);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+  });
+}
+
 class Inside extends StatefulWidget {
   const Inside({ super.key });
   @override
@@ -62,15 +73,4 @@ class OutsideState extends State<Outside> {
   Widget build(BuildContext context) {
     return const Middle(child: Inside());
   }
-}
-
-void main() {
-  testWidgets('setState() smoke test', (WidgetTester tester) async {
-    await tester.pumpWidget(const Outside());
-    final Offset location = tester.getCenter(find.text('INSIDE'));
-    final TestGesture gesture = await tester.startGesture(location);
-    await tester.pump();
-    await gesture.up();
-    await tester.pump();
-  });
 }

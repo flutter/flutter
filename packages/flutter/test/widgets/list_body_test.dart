@@ -6,27 +6,6 @@ import 'package:flutter/src/foundation/assertions.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const List<Widget> children = <Widget>[
-  SizedBox(width: 200.0, height: 150.0),
-  SizedBox(width: 200.0, height: 150.0),
-  SizedBox(width: 200.0, height: 150.0),
-  SizedBox(width: 200.0, height: 150.0),
-];
-
-void expectRects(WidgetTester tester, List<Rect> expected) {
-  final Finder finder = find.byType(SizedBox);
-  final List<Rect> actual = <Rect>[];
-  finder.runCached(() {
-    for (int i = 0; i < expected.length; ++i) {
-      final Finder current = finder.at(i);
-      expect(current, findsOneWidget);
-      actual.add(tester.getRect(finder.at(i)));
-    }
-  });
-  expect(() => finder.at(expected.length), throwsRangeError);
-  expect(actual, equals(expected));
-}
-
 void main() {
 
   testWidgets('ListBody down', (WidgetTester tester) async {
@@ -193,4 +172,25 @@ void main() {
       '   This is relatively expensive, however.\n',
     ));
   });
+}
+
+const List<Widget> children = <Widget>[
+  SizedBox(width: 200.0, height: 150.0),
+  SizedBox(width: 200.0, height: 150.0),
+  SizedBox(width: 200.0, height: 150.0),
+  SizedBox(width: 200.0, height: 150.0),
+];
+
+void expectRects(WidgetTester tester, List<Rect> expected) {
+  final Finder finder = find.byType(SizedBox);
+  final List<Rect> actual = <Rect>[];
+  finder.runCached(() {
+    for (int i = 0; i < expected.length; ++i) {
+      final Finder current = finder.at(i);
+      expect(current, findsOneWidget);
+      actual.add(tester.getRect(finder.at(i)));
+    }
+  });
+  expect(() => finder.at(expected.length), throwsRangeError);
+  expect(actual, equals(expected));
 }

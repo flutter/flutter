@@ -6,60 +6,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestFlowDelegate extends FlowDelegate {
-  TestFlowDelegate({required this.startOffset}) : super(repaint: startOffset);
-
-  final Animation<double> startOffset;
-
-  @override
-  BoxConstraints getConstraintsForChild(int i, BoxConstraints constraints) {
-    return constraints.loosen();
-  }
-
-  @override
-  void paintChildren(FlowPaintingContext context) {
-    double dy = startOffset.value;
-    for (int i = 0; i < context.childCount; ++i) {
-      context.paintChild(i, transform: Matrix4.translationValues(0.0, dy, 0.0));
-      dy += 0.75 * context.getChildSize(i)!.height;
-    }
-  }
-
-  @override
-  bool shouldRepaint(TestFlowDelegate oldDelegate) => startOffset == oldDelegate.startOffset;
-}
-
-class OpacityFlowDelegate extends FlowDelegate {
-  OpacityFlowDelegate(this.opacity);
-
-  double opacity;
-
-  @override
-  void paintChildren(FlowPaintingContext context) {
-    for (int i = 0; i < context.childCount; ++i) {
-      context.paintChild(i, opacity: opacity);
-    }
-  }
-
-  @override
-  bool shouldRepaint(OpacityFlowDelegate oldDelegate) => opacity != oldDelegate.opacity;
-}
-
-// OpacityFlowDelegate that paints one of its children twice
-class DuplicatePainterOpacityFlowDelegate extends OpacityFlowDelegate {
-  DuplicatePainterOpacityFlowDelegate(super.opacity);
-
-  @override
-  void paintChildren(FlowPaintingContext context) {
-    for (int i = 0; i < context.childCount; ++i) {
-      context.paintChild(i, opacity: opacity);
-    }
-    if (context.childCount > 0) {
-      context.paintChild(0, opacity: opacity);
-    }
-  }
-}
-
 void main() {
   testWidgets('Flow control test', (WidgetTester tester) async {
     final AnimationController startOffset = AnimationController.unbounded(
@@ -214,4 +160,58 @@ void main() {
       expect(renderObject.clipBehavior, clip);
     }
   });
+}
+
+class TestFlowDelegate extends FlowDelegate {
+  TestFlowDelegate({required this.startOffset}) : super(repaint: startOffset);
+
+  final Animation<double> startOffset;
+
+  @override
+  BoxConstraints getConstraintsForChild(int i, BoxConstraints constraints) {
+    return constraints.loosen();
+  }
+
+  @override
+  void paintChildren(FlowPaintingContext context) {
+    double dy = startOffset.value;
+    for (int i = 0; i < context.childCount; ++i) {
+      context.paintChild(i, transform: Matrix4.translationValues(0.0, dy, 0.0));
+      dy += 0.75 * context.getChildSize(i)!.height;
+    }
+  }
+
+  @override
+  bool shouldRepaint(TestFlowDelegate oldDelegate) => startOffset == oldDelegate.startOffset;
+}
+
+class OpacityFlowDelegate extends FlowDelegate {
+  OpacityFlowDelegate(this.opacity);
+
+  double opacity;
+
+  @override
+  void paintChildren(FlowPaintingContext context) {
+    for (int i = 0; i < context.childCount; ++i) {
+      context.paintChild(i, opacity: opacity);
+    }
+  }
+
+  @override
+  bool shouldRepaint(OpacityFlowDelegate oldDelegate) => opacity != oldDelegate.opacity;
+}
+
+// OpacityFlowDelegate that paints one of its children twice
+class DuplicatePainterOpacityFlowDelegate extends OpacityFlowDelegate {
+  DuplicatePainterOpacityFlowDelegate(super.opacity);
+
+  @override
+  void paintChildren(FlowPaintingContext context) {
+    for (int i = 0; i < context.childCount; ++i) {
+      context.paintChild(i, opacity: opacity);
+    }
+    if (context.childCount > 0) {
+      context.paintChild(0, opacity: opacity);
+    }
+  }
 }

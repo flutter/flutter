@@ -11,6 +11,80 @@ import 'package:flutter_gallery/demo_lists.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
+void main([List<String> args = const <String>[]]) {
+  final bool withSemantics = args.contains('--with_semantics');
+  final bool hybrid = args.contains('--hybrid');
+  group('flutter gallery transitions', () {
+    late FlutterDriver driver;
+    setUpAll(() async {
+      driver = await FlutterDriver.connect();
+
+      // Wait for the first frame to be rasterized.
+      await driver.waitUntilFirstFrameRasterized();
+      if (withSemantics) {
+        print('Enabling semantics...');
+        await driver.setSemantics(true);
+      }
+
+      // See _handleMessages() in transitions_perf.dart.
+      _allDemos = List<String>.from(json.decode(await driver.requestData('demoNames')) as List<dynamic>);
+      if (_allDemos.isEmpty) {
+        throw 'no demo names found';
+      }
+    });
+
+    tearDownAll(() async {
+        await driver.close();
+    });
+
+    test('find.bySemanticsLabel', () async {
+      // Assert that we can use semantics related finders in profile mode.
+      final int id = await driver.getSemanticsId(find.bySemanticsLabel('Material'));
+      expect(id, greaterThan(-1));
+    },
+        skip: !withSemantics, // [intended] test only makes sense when semantics are turned on.
+        timeout: Timeout.none,
+    );
+
+    test('all demos', () async {
+      // Collect timeline data for just a limited set of demos to avoid OOMs.
+      final Timeline timeline = await driver.traceAction(
+        () async {
+          if (hybrid) {
+            await driver.requestData('profileDemos');
+          } else {
+            await runDemos(kProfiledDemos, driver);
+          }
+        },
+        streams: const <TimelineStream>[
+          TimelineStream.dart,
+          TimelineStream.embedder,
+          TimelineStream.gc,
+        ],
+      );
+
+      // Save the duration (in microseconds) of the first timeline Frame event
+      // that follows a 'Start Transition' event. The Gallery app adds a
+      // 'Start Transition' event when a demo is launched (see GalleryItem).
+      final TimelineSummary summary = TimelineSummary.summarize(timeline);
+      await summary.writeTimelineToFile('transitions', pretty: true);
+      final String histogramPath = path.join(testOutputsDirectory, 'transition_durations.timeline.json');
+      await saveDurationsHistogram(
+          List<Map<String, dynamic>>.from(timeline.json['traceEvents'] as List<dynamic>),
+          histogramPath);
+
+      // Execute the remaining tests.
+      if (hybrid) {
+        await driver.requestData('restDemos');
+      } else {
+        final Set<String> unprofiledDemos = Set<String>.from(_allDemos)..removeAll(kProfiledDemos);
+        await runDemos(unprofiledDemos.toList(), driver);
+      }
+
+    }, timeout: Timeout.none);
+  });
+}
+
 const FileSystem _fs = LocalFileSystem();
 
 /// The demos we don't run as part of the integration test.
@@ -160,78 +234,4 @@ Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
 
   // Return to the home screen
   await driver.tap(find.byTooltip('Back'));
-}
-
-void main([List<String> args = const <String>[]]) {
-  final bool withSemantics = args.contains('--with_semantics');
-  final bool hybrid = args.contains('--hybrid');
-  group('flutter gallery transitions', () {
-    late FlutterDriver driver;
-    setUpAll(() async {
-      driver = await FlutterDriver.connect();
-
-      // Wait for the first frame to be rasterized.
-      await driver.waitUntilFirstFrameRasterized();
-      if (withSemantics) {
-        print('Enabling semantics...');
-        await driver.setSemantics(true);
-      }
-
-      // See _handleMessages() in transitions_perf.dart.
-      _allDemos = List<String>.from(json.decode(await driver.requestData('demoNames')) as List<dynamic>);
-      if (_allDemos.isEmpty) {
-        throw 'no demo names found';
-      }
-    });
-
-    tearDownAll(() async {
-        await driver.close();
-    });
-
-    test('find.bySemanticsLabel', () async {
-      // Assert that we can use semantics related finders in profile mode.
-      final int id = await driver.getSemanticsId(find.bySemanticsLabel('Material'));
-      expect(id, greaterThan(-1));
-    },
-        skip: !withSemantics, // [intended] test only makes sense when semantics are turned on.
-        timeout: Timeout.none,
-    );
-
-    test('all demos', () async {
-      // Collect timeline data for just a limited set of demos to avoid OOMs.
-      final Timeline timeline = await driver.traceAction(
-        () async {
-          if (hybrid) {
-            await driver.requestData('profileDemos');
-          } else {
-            await runDemos(kProfiledDemos, driver);
-          }
-        },
-        streams: const <TimelineStream>[
-          TimelineStream.dart,
-          TimelineStream.embedder,
-          TimelineStream.gc,
-        ],
-      );
-
-      // Save the duration (in microseconds) of the first timeline Frame event
-      // that follows a 'Start Transition' event. The Gallery app adds a
-      // 'Start Transition' event when a demo is launched (see GalleryItem).
-      final TimelineSummary summary = TimelineSummary.summarize(timeline);
-      await summary.writeTimelineToFile('transitions', pretty: true);
-      final String histogramPath = path.join(testOutputsDirectory, 'transition_durations.timeline.json');
-      await saveDurationsHistogram(
-          List<Map<String, dynamic>>.from(timeline.json['traceEvents'] as List<dynamic>),
-          histogramPath);
-
-      // Execute the remaining tests.
-      if (hybrid) {
-        await driver.requestData('restDemos');
-      } else {
-        final Set<String> unprofiledDemos = Set<String>.from(_allDemos)..removeAll(kProfiledDemos);
-        await runDemos(unprofiledDemos.toList(), driver);
-      }
-
-    }, timeout: Timeout.none);
-  });
 }

@@ -11,16 +11,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'feedback_tester.dart';
 
-Widget wrap({ required Widget child }) {
-  return MediaQuery(
-    data: const MediaQueryData(),
-    child: Directionality(
-      textDirection: TextDirection.ltr,
-      child: Material(child: child),
-    ),
-  );
-}
-
 void main() {
   testWidgetsWithLeakTracking('CheckboxListTile control test', (WidgetTester tester) async {
     final List<dynamic> log = <dynamic>[];
@@ -1196,4 +1186,14 @@ class _SelectedGrabMouseCursor extends MaterialStateMouseCursor {
 
   @override
   String get debugDescription => '_SelectedGrabMouseCursor()';
+}
+
+Widget wrap({ required Widget child }) {
+  return MediaQuery(
+    data: const MediaQueryData(),
+    child: Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(child: child),
+    ),
+  );
 }

@@ -12,42 +12,6 @@ import 'package:flutter_tools/src/macos/xcode.dart';
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
-const FakeCommand kWhichSysctlCommand = FakeCommand(
-  command: <String>[
-    'which',
-    'sysctl',
-  ],
-);
-
-const FakeCommand kARMCheckCommand = FakeCommand(
-  command: <String>[
-    'sysctl',
-    'hw.optional.arm64',
-  ],
-  exitCode: 1,
-);
-
-const List<String> kDefaultClang = <String>[
-  '-miphoneos-version-min=11.0',
-  '-isysroot',
-  'path/to/sdk',
-  '-dynamiclib',
-  '-Xlinker',
-  '-rpath',
-  '-Xlinker',
-  '@executable_path/Frameworks',
-  '-Xlinker',
-  '-rpath',
-  '-Xlinker',
-  '@loader_path/Frameworks',
-  '-fapplication-extension',
-  '-install_name',
-  '@rpath/App.framework/App',
-  '-o',
-  'build/foo/App.framework/App',
-  'build/foo/snapshot_assembly.o',
-];
-
 void main() {
   group('SnapshotType', () {
     test('does not throw, if target platform is null', () {
@@ -572,3 +536,39 @@ void main() {
     });
   });
 }
+
+const FakeCommand kWhichSysctlCommand = FakeCommand(
+  command: <String>[
+    'which',
+    'sysctl',
+  ],
+);
+
+const FakeCommand kARMCheckCommand = FakeCommand(
+  command: <String>[
+    'sysctl',
+    'hw.optional.arm64',
+  ],
+  exitCode: 1,
+);
+
+const List<String> kDefaultClang = <String>[
+  '-miphoneos-version-min=11.0',
+  '-isysroot',
+  'path/to/sdk',
+  '-dynamiclib',
+  '-Xlinker',
+  '-rpath',
+  '-Xlinker',
+  '@executable_path/Frameworks',
+  '-Xlinker',
+  '-rpath',
+  '-Xlinker',
+  '@loader_path/Frameworks',
+  '-fapplication-extension',
+  '-install_name',
+  '@rpath/App.framework/App',
+  '-o',
+  'build/foo/App.framework/App',
+  'build/foo/snapshot_assembly.o',
+];

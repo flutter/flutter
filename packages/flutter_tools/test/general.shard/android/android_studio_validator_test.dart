@@ -19,12 +19,6 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 
-const String home = '/home/me';
-
-final Platform linuxPlatform = FakePlatform(
-  environment: <String, String>{'HOME': home}
-);
-
 void main() {
 
   late FileSystem fileSystem;
@@ -108,3 +102,9 @@ class _FakeAndroidStudio extends Fake implements AndroidStudio {
   @override
   String get javaPath => 'android-studio/jbr/bin/java';
 }
+
+const String home = '/home/me';
+
+final Platform linuxPlatform = FakePlatform(
+  environment: <String, String>{'HOME': home}
+);

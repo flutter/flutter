@@ -6,15 +6,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestPaintingContext implements PaintingContext {
-  final List<Invocation> invocations = <Invocation>[];
-
-  @override
-  void noSuchMethod(Invocation invocation) {
-    invocations.add(invocation);
-  }
-}
-
 void main() {
   group('AnimatedSize', () {
     testWidgets('animates forwards then backwards with stable-sized children', (WidgetTester tester) async {
@@ -434,4 +425,13 @@ void main() {
       );
     });
   });
+}
+
+class TestPaintingContext implements PaintingContext {
+  final List<Invocation> invocations = <Invocation>[];
+
+  @override
+  void noSuchMethod(Invocation invocation) {
+    invocations.add(invocation);
+  }
 }

@@ -17,81 +17,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
-RenderBox getRenderSegmentedControl(WidgetTester tester) {
-  return tester.allRenderObjects.firstWhere(
-    (RenderObject currentObject) {
-      return currentObject.toStringShort().contains('_RenderSegmentedControl');
-    },
-  ) as RenderBox;
-}
-
-StatefulBuilder setupSimpleSegmentedControl() {
-  final Map<int, Widget> children = <int, Widget>{};
-  children[0] = const Text('Child 1');
-  children[1] = const Text('Child 2');
-  int sharedValue = 0;
-
-  return StatefulBuilder(
-    builder: (BuildContext context, StateSetter setState) {
-      return boilerplate(
-        child: CupertinoSegmentedControl<int>(
-          children: children,
-          onValueChanged: (int newValue) {
-            setState(() {
-              sharedValue = newValue;
-            });
-          },
-          groupValue: sharedValue,
-        ),
-      );
-    },
-  );
-}
-
-Widget boilerplate({ required Widget child }) {
-  return Directionality(
-    textDirection: TextDirection.ltr,
-    child: Center(child: child),
-  );
-}
-
-int getChildCount(WidgetTester tester) {
-  return (getRenderSegmentedControl(tester) as RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>>)
-      .getChildrenAsList().length;
-}
-
-ui.RRect getSurroundingRect(WidgetTester tester, {int child = 0}) {
-  // Using dynamic so the test can access private classes.
-  // ignore: avoid_dynamic_calls
-  return ((getRenderSegmentedControl(tester) as RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>>)
-      .getChildrenAsList()[child].parentData! as dynamic).surroundingRect as ui.RRect;
-}
-
-Size getChildSize(WidgetTester tester, {int child = 0}) {
-  // Using dynamic so the test can access private classes.
-  // ignore: avoid_dynamic_calls
-  return (getRenderSegmentedControl(tester) as RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>>)
-      .getChildrenAsList()[child].size;
-}
-
-Color getBorderColor(WidgetTester tester) {
-  // Using dynamic so the test can access a private class.
-  // ignore: avoid_dynamic_calls
-  return (getRenderSegmentedControl(tester) as dynamic).borderColor as Color;
-}
-
-int? getSelectedIndex(WidgetTester tester) {
-  // Using dynamic so the test can access a private class.
-  // ignore: avoid_dynamic_calls
-  return (getRenderSegmentedControl(tester) as dynamic).selectedIndex as int?;
-}
-
-Color getBackgroundColor(WidgetTester tester, int childIndex) {
-  // Using dynamic so the test can access a private class.
-  // ignore: avoid_dynamic_calls
-  return (getRenderSegmentedControl(tester) as dynamic).backgroundColors[childIndex] as Color;
-}
-
 void main() {
   testWidgets('Tap changes toggle state', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
@@ -1622,4 +1547,79 @@ void main() {
       kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
   });
+}
+
+RenderBox getRenderSegmentedControl(WidgetTester tester) {
+  return tester.allRenderObjects.firstWhere(
+    (RenderObject currentObject) {
+      return currentObject.toStringShort().contains('_RenderSegmentedControl');
+    },
+  ) as RenderBox;
+}
+
+StatefulBuilder setupSimpleSegmentedControl() {
+  final Map<int, Widget> children = <int, Widget>{};
+  children[0] = const Text('Child 1');
+  children[1] = const Text('Child 2');
+  int sharedValue = 0;
+
+  return StatefulBuilder(
+    builder: (BuildContext context, StateSetter setState) {
+      return boilerplate(
+        child: CupertinoSegmentedControl<int>(
+          children: children,
+          onValueChanged: (int newValue) {
+            setState(() {
+              sharedValue = newValue;
+            });
+          },
+          groupValue: sharedValue,
+        ),
+      );
+    },
+  );
+}
+
+Widget boilerplate({ required Widget child }) {
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: Center(child: child),
+  );
+}
+
+int getChildCount(WidgetTester tester) {
+  return (getRenderSegmentedControl(tester) as RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>>)
+      .getChildrenAsList().length;
+}
+
+ui.RRect getSurroundingRect(WidgetTester tester, {int child = 0}) {
+  // Using dynamic so the test can access private classes.
+  // ignore: avoid_dynamic_calls
+  return ((getRenderSegmentedControl(tester) as RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>>)
+      .getChildrenAsList()[child].parentData! as dynamic).surroundingRect as ui.RRect;
+}
+
+Size getChildSize(WidgetTester tester, {int child = 0}) {
+  // Using dynamic so the test can access private classes.
+  // ignore: avoid_dynamic_calls
+  return (getRenderSegmentedControl(tester) as RenderBoxContainerDefaultsMixin<RenderBox, ContainerBoxParentData<RenderBox>>)
+      .getChildrenAsList()[child].size;
+}
+
+Color getBorderColor(WidgetTester tester) {
+  // Using dynamic so the test can access a private class.
+  // ignore: avoid_dynamic_calls
+  return (getRenderSegmentedControl(tester) as dynamic).borderColor as Color;
+}
+
+int? getSelectedIndex(WidgetTester tester) {
+  // Using dynamic so the test can access a private class.
+  // ignore: avoid_dynamic_calls
+  return (getRenderSegmentedControl(tester) as dynamic).selectedIndex as int?;
+}
+
+Color getBackgroundColor(WidgetTester tester, int childIndex) {
+  // Using dynamic so the test can access a private class.
+  // ignore: avoid_dynamic_calls
+  return (getRenderSegmentedControl(tester) as dynamic).backgroundColors[childIndex] as Color;
 }

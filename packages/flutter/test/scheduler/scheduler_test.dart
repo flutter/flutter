@@ -11,27 +11,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'scheduler_tester.dart';
 
-class TestSchedulerBinding extends BindingBase with SchedulerBinding, ServicesBinding {
-  final Map<String, List<Map<String, dynamic>>> eventsDispatched = <String, List<Map<String, dynamic>>>{};
-
-  @override
-  void postEvent(String eventKind, Map<String, dynamic> eventData) {
-    getEventsDispatched(eventKind).add(eventData);
-  }
-
-  List<Map<String, dynamic>> getEventsDispatched(String eventKind) {
-    return eventsDispatched.putIfAbsent(eventKind, () => <Map<String, dynamic>>[]);
-  }
-}
-
-class TestStrategy {
-  int allowedPriority = 10000;
-
-  bool shouldRunTaskWithPriority({ required int priority, required SchedulerBinding scheduler }) {
-    return priority >= allowedPriority;
-  }
-}
-
 void main() {
   late TestSchedulerBinding scheduler;
 
@@ -288,4 +267,25 @@ class DummyTimer implements Timer {
 
   @override
   int get tick => 0;
+}
+
+class TestSchedulerBinding extends BindingBase with SchedulerBinding, ServicesBinding {
+  final Map<String, List<Map<String, dynamic>>> eventsDispatched = <String, List<Map<String, dynamic>>>{};
+
+  @override
+  void postEvent(String eventKind, Map<String, dynamic> eventData) {
+    getEventsDispatched(eventKind).add(eventData);
+  }
+
+  List<Map<String, dynamic>> getEventsDispatched(String eventKind) {
+    return eventsDispatched.putIfAbsent(eventKind, () => <Map<String, dynamic>>[]);
+  }
+}
+
+class TestStrategy {
+  int allowedPriority = 10000;
+
+  bool shouldRunTaskWithPriority({ required int priority, required SchedulerBinding scheduler }) {
+    return priority >= allowedPriority;
+  }
 }

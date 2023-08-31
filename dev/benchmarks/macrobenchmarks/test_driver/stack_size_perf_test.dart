@@ -12,8 +12,6 @@ import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 import 'util.dart';
 
-const JsonEncoder _prettyEncoder = JsonEncoder.withIndent('  ');
-
 void main() {
   test('stack_size', () async {
     late int stackSizeInBytes;
@@ -36,3 +34,5 @@ void main() {
 String _encodeJson(Map<String, dynamic> jsonObject) {
   return _prettyEncoder.convert(jsonObject);
 }
+
+const JsonEncoder _prettyEncoder = JsonEncoder.withIndent('  ');

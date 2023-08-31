@@ -5,28 +5,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-typedef TestCallback = void Function(BuildContext context);
-
-class TestWidget extends StatefulWidget {
-  const TestWidget(this.callback, { super.key });
-
-  final TestCallback callback;
-
-  @override
-  TestWidgetState createState() => TestWidgetState();
-}
-
-class TestWidgetState extends State<TestWidget> {
-  @override
-  void dispose() {
-    widget.callback(context);
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => const Text('test', textDirection: TextDirection.ltr);
-}
-
 void main() {
   testWidgets('dependOnInheritedWidgetOfExactType() called from dispose() throws error', (WidgetTester tester) async {
     bool disposeCalled = false;
@@ -119,4 +97,26 @@ void main() {
 
 
 
+}
+
+typedef TestCallback = void Function(BuildContext context);
+
+class TestWidget extends StatefulWidget {
+  const TestWidget(this.callback, { super.key });
+
+  final TestCallback callback;
+
+  @override
+  TestWidgetState createState() => TestWidgetState();
+}
+
+class TestWidgetState extends State<TestWidget> {
+  @override
+  void dispose() {
+    widget.callback(context);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => const Text('test', textDirection: TextDirection.ltr);
 }

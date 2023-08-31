@@ -13,16 +13,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'clipboard_utils.dart';
 import 'keyboard_utils.dart';
 
-Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
-  const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
-  final Offset localOffset = paragraph.getOffsetForCaret(TextPosition(offset: offset), caret);
-  return paragraph.localToGlobal(localOffset);
-}
-
-Offset globalize(Offset point, RenderBox box) {
-  return box.localToGlobal(point);
-}
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
@@ -1112,4 +1102,14 @@ void main() {
       expect(clipboardData['text'], 'em 0It');
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
   });
+}
+
+Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
+  const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
+  final Offset localOffset = paragraph.getOffsetForCaret(TextPosition(offset: offset), caret);
+  return paragraph.localToGlobal(localOffset);
+}
+
+Offset globalize(Offset point, RenderBox box) {
+  return box.localToGlobal(point);
 }

@@ -5,6 +5,21 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+void main() {
+  testWidgets('Can animate scroll after setState', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Foo(),
+      ),
+    );
+    expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 0.0);
+    await tester.tap(find.byType(GestureDetector).first);
+    await tester.pumpAndSettle();
+    expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 200.0);
+  });
+}
+
 class Foo extends StatefulWidget {
   const Foo({ super.key });
   @override
@@ -78,19 +93,4 @@ class FooScrollBehavior extends ScrollBehavior {
 
   @override
   bool shouldNotify(FooScrollBehavior old) => true;
-}
-
-void main() {
-  testWidgets('Can animate scroll after setState', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const Directionality(
-        textDirection: TextDirection.ltr,
-        child: Foo(),
-      ),
-    );
-    expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 0.0);
-    await tester.tap(find.byType(GestureDetector).first);
-    await tester.pumpAndSettle();
-    expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 200.0);
-  });
 }

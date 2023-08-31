@@ -6,39 +6,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-int buildCount = 0;
-CupertinoThemeData? actualTheme;
-IconThemeData? actualIconTheme;
-
-final Widget singletonThemeSubtree = Builder(
-  builder: (BuildContext context) {
-    buildCount++;
-    actualTheme = CupertinoTheme.of(context);
-    actualIconTheme = IconTheme.of(context);
-    return const Placeholder();
-  },
-);
-
-Future<CupertinoThemeData> testTheme(WidgetTester tester, CupertinoThemeData theme) async {
-  await tester.pumpWidget(
-    CupertinoTheme(
-      data: theme,
-      child: singletonThemeSubtree,
-    ),
-  );
-  return actualTheme!;
-}
-
-Future<IconThemeData> testIconTheme(WidgetTester tester, CupertinoThemeData theme) async {
-  await tester.pumpWidget(
-    CupertinoTheme(
-      data: theme,
-      child: singletonThemeSubtree,
-    ),
-  );
-  return actualIconTheme!;
-}
-
 void main() {
   setUp(() {
     buildCount = 0;
@@ -273,4 +240,37 @@ void main() {
 
   currentBrightness = Brightness.dark;
   group('dark colors', dynamicColorsTestGroup);
+}
+
+int buildCount = 0;
+CupertinoThemeData? actualTheme;
+IconThemeData? actualIconTheme;
+
+final Widget singletonThemeSubtree = Builder(
+  builder: (BuildContext context) {
+    buildCount++;
+    actualTheme = CupertinoTheme.of(context);
+    actualIconTheme = IconTheme.of(context);
+    return const Placeholder();
+  },
+);
+
+Future<CupertinoThemeData> testTheme(WidgetTester tester, CupertinoThemeData theme) async {
+  await tester.pumpWidget(
+    CupertinoTheme(
+      data: theme,
+      child: singletonThemeSubtree,
+    ),
+  );
+  return actualTheme!;
+}
+
+Future<IconThemeData> testIconTheme(WidgetTester tester, CupertinoThemeData theme) async {
+  await tester.pumpWidget(
+    CupertinoTheme(
+      data: theme,
+      child: singletonThemeSubtree,
+    ),
+  );
+  return actualIconTheme!;
 }

@@ -10,8 +10,6 @@ import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
-final String platformLineSep = Platform.isWindows ? '\r\n': '\n';
-
 /// Tests that AARs can be built on module projects.
 Future<void> main() async {
   await task(() async {
@@ -264,3 +262,5 @@ Future<void> main() async {
     }
   });
 }
+
+final String platformLineSep = Platform.isWindows ? '\r\n': '\n';

@@ -6,24 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-const Color _kAndroidThumbIdleColor = Color(0xffbcbcbc);
-
-Widget _buildSingleChildScrollViewWithScrollbar({
-  TextDirection textDirection = TextDirection.ltr,
-  EdgeInsets padding = EdgeInsets.zero,
-  Widget? child,
-}) {
-  return Directionality(
-    textDirection: textDirection,
-    child: MediaQuery(
-      data: MediaQueryData(padding: padding),
-      child: Scrollbar(
-        child: SingleChildScrollView(child: child),
-      ),
-    ),
-  );
-}
-
 void main() {
   testWidgetsWithLeakTracking('Viewport basic test (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(_buildSingleChildScrollViewWithScrollbar(
@@ -149,4 +131,22 @@ void main() {
     expect(find.byType(Scrollbar), isNot(paints..rect()));
   });
 
+}
+
+const Color _kAndroidThumbIdleColor = Color(0xffbcbcbc);
+
+Widget _buildSingleChildScrollViewWithScrollbar({
+  TextDirection textDirection = TextDirection.ltr,
+  EdgeInsets padding = EdgeInsets.zero,
+  Widget? child,
+}) {
+  return Directionality(
+    textDirection: textDirection,
+    child: MediaQuery(
+      data: MediaQueryData(padding: padding),
+      child: Scrollbar(
+        child: SingleChildScrollView(child: child),
+      ),
+    ),
+  );
 }

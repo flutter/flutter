@@ -6,8 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_api_samples/material/app_bar/app_bar.1.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
-const Offset _kOffset = Offset(0.0, -100.0);
-
 void main() {
   testWidgets('Appbar Material 3 test', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -53,3 +51,5 @@ Material _getAppBarMaterial(WidgetTester tester) {
     ),
   );
 }
+
+const Offset _kOffset = Offset(0.0, -100.0);

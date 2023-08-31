@@ -9,42 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 import 'semantics_tester.dart';
 
-class TestScrollPosition extends ScrollPositionWithSingleContext {
-  TestScrollPosition({
-    required super.physics,
-    required ScrollContext state,
-    double super.initialPixels,
-    super.oldPosition,
-  }) : super(
-    context: state,
-  );
-}
-
-class TestScrollController extends ScrollController {
-  @override
-  ScrollPosition createScrollPosition(ScrollPhysics physics, ScrollContext context, ScrollPosition? oldPosition) {
-    return TestScrollPosition(
-      physics: physics,
-      state: context,
-      initialPixels: initialScrollOffset,
-      oldPosition: oldPosition,
-    );
-  }
-}
-
-Widget primaryScrollControllerBoilerplate({ required Widget child, required ScrollController controller }) {
-  return Directionality(
-    textDirection: TextDirection.ltr,
-    child: MediaQuery(
-      data: const MediaQueryData(),
-      child: PrimaryScrollController(
-        controller: controller,
-        child: child,
-      ),
-    ),
-  );
-}
-
 void main() {
   testWidgets('SingleChildScrollView overflow and clipRect test', (WidgetTester tester) async {
     // the test widowSize is Size(800.0, 600.0)
@@ -992,4 +956,40 @@ void main() {
     await tester.pumpAndSettle();
     expect(textField.focusNode!.hasFocus, isTrue);
   });
+}
+
+class TestScrollPosition extends ScrollPositionWithSingleContext {
+  TestScrollPosition({
+    required super.physics,
+    required ScrollContext state,
+    double super.initialPixels,
+    super.oldPosition,
+  }) : super(
+    context: state,
+  );
+}
+
+class TestScrollController extends ScrollController {
+  @override
+  ScrollPosition createScrollPosition(ScrollPhysics physics, ScrollContext context, ScrollPosition? oldPosition) {
+    return TestScrollPosition(
+      physics: physics,
+      state: context,
+      initialPixels: initialScrollOffset,
+      oldPosition: oldPosition,
+    );
+  }
+}
+
+Widget primaryScrollControllerBoilerplate({ required Widget child, required ScrollController controller }) {
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: MediaQuery(
+      data: const MediaQueryData(),
+      child: PrimaryScrollController(
+        controller: controller,
+        child: child,
+      ),
+    ),
+  );
 }

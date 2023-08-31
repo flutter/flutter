@@ -12,14 +12,6 @@ import '../../src/common.dart';
 import '../../src/fake_http_client.dart';
 import '../../src/fakes.dart';
 
-// The environment variables used to override some URLs
-const String kTestEnvPubHost = 'https://pub.flutter-io.cn';
-const String kTestEnvGCloudHost = 'https://storage.flutter-io.cn';
-const Map<String, String> kTestEnvironment = <String, String>{
-  'PUB_HOSTED_URL': kTestEnvPubHost,
-  'FLUTTER_STORAGE_BASE_URL': kTestEnvGCloudHost,
-};
-
 void main() {
   group('http host validator', () {
     const List<String> osTested = <String>['windows', 'macos', 'linux'];
@@ -314,3 +306,11 @@ Handshake error in client (OS Error:
     );
   });
 }
+
+// The environment variables used to override some URLs
+const String kTestEnvPubHost = 'https://pub.flutter-io.cn';
+const String kTestEnvGCloudHost = 'https://storage.flutter-io.cn';
+const Map<String, String> kTestEnvironment = <String, String>{
+  'PUB_HOSTED_URL': kTestEnvPubHost,
+  'FLUTTER_STORAGE_BASE_URL': kTestEnvGCloudHost,
+};

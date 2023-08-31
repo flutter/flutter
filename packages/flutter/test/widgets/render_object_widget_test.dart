@@ -6,74 +6,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-final BoxDecoration kBoxDecorationA = BoxDecoration(border: nonconst(null));
-final BoxDecoration kBoxDecorationB = BoxDecoration(border: nonconst(null));
-final BoxDecoration kBoxDecorationC = BoxDecoration(border: nonconst(null));
-
-class TestWidget extends StatelessWidget {
-  const TestWidget({
-    super.key,
-    required this.child,
-  });
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => child;
-}
-
-class TestOrientedBox extends SingleChildRenderObjectWidget {
-  const TestOrientedBox({ super.key, super.child });
-
-  Decoration _getDecoration(BuildContext context) {
-    final Orientation orientation = MediaQuery.orientationOf(context);
-    switch (orientation) {
-      case Orientation.landscape:
-        return const BoxDecoration(color: Color(0xFF00FF00));
-      case Orientation.portrait:
-        return const BoxDecoration(color: Color(0xFF0000FF));
-    }
-  }
-
-  @override
-  RenderDecoratedBox createRenderObject(BuildContext context) => RenderDecoratedBox(decoration: _getDecoration(context));
-
-  @override
-  void updateRenderObject(BuildContext context, RenderDecoratedBox renderObject) {
-    renderObject.decoration = _getDecoration(context);
-  }
-}
-
-class TestNonVisitingWidget extends SingleChildRenderObjectWidget {
-  const TestNonVisitingWidget({ super.key, required Widget super.child });
-
-  @override
-  RenderObject createRenderObject(BuildContext context) => TestNonVisitingRenderObject();
-}
-
-class TestNonVisitingRenderObject extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
-  @override
-  Size computeDryLayout(BoxConstraints constraints) {
-    return child!.getDryLayout(constraints);
-  }
-
-  @override
-  void performLayout() {
-    child!.layout(constraints, parentUsesSize: true);
-    size = child!.size;
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    context.paintChild(child!, offset);
-  }
-
-  @override
-  void visitChildren(RenderObjectVisitor visitor) {
-    // oops!
-  }
-}
-
 void main() {
   testWidgets('RenderObjectWidget smoke test', (WidgetTester tester) async {
     await tester.pumpWidget(DecoratedBox(decoration: kBoxDecorationA));
@@ -262,4 +194,72 @@ void main() {
     expect(error, isFlutterError);
     expect(error.toString(), contains("A RenderObject was not visited by the parent's visitChildren"));
   });
+}
+
+final BoxDecoration kBoxDecorationA = BoxDecoration(border: nonconst(null));
+final BoxDecoration kBoxDecorationB = BoxDecoration(border: nonconst(null));
+final BoxDecoration kBoxDecorationC = BoxDecoration(border: nonconst(null));
+
+class TestWidget extends StatelessWidget {
+  const TestWidget({
+    super.key,
+    required this.child,
+  });
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => child;
+}
+
+class TestOrientedBox extends SingleChildRenderObjectWidget {
+  const TestOrientedBox({ super.key, super.child });
+
+  Decoration _getDecoration(BuildContext context) {
+    final Orientation orientation = MediaQuery.orientationOf(context);
+    switch (orientation) {
+      case Orientation.landscape:
+        return const BoxDecoration(color: Color(0xFF00FF00));
+      case Orientation.portrait:
+        return const BoxDecoration(color: Color(0xFF0000FF));
+    }
+  }
+
+  @override
+  RenderDecoratedBox createRenderObject(BuildContext context) => RenderDecoratedBox(decoration: _getDecoration(context));
+
+  @override
+  void updateRenderObject(BuildContext context, RenderDecoratedBox renderObject) {
+    renderObject.decoration = _getDecoration(context);
+  }
+}
+
+class TestNonVisitingWidget extends SingleChildRenderObjectWidget {
+  const TestNonVisitingWidget({ super.key, required Widget super.child });
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => TestNonVisitingRenderObject();
+}
+
+class TestNonVisitingRenderObject extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    return child!.getDryLayout(constraints);
+  }
+
+  @override
+  void performLayout() {
+    child!.layout(constraints, parentUsesSize: true);
+    size = child!.size;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    context.paintChild(child!, offset);
+  }
+
+  @override
+  void visitChildren(RenderObjectVisitor visitor) {
+    // oops!
+  }
 }

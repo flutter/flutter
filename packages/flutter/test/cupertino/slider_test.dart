@@ -12,17 +12,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
-const CupertinoDynamicColor _kSystemFill = CupertinoDynamicColor(
-  color: Color.fromARGB(51, 120, 120, 128),
-  darkColor: Color.fromARGB(91, 120, 120, 128),
-  highContrastColor: Color.fromARGB(71, 120, 120, 128),
-  darkHighContrastColor: Color.fromARGB(112, 120, 120, 128),
-  elevatedColor: Color.fromARGB(51, 120, 120, 128),
-  darkElevatedColor: Color.fromARGB(91, 120, 120, 128),
-  highContrastElevatedColor: Color.fromARGB(71, 120, 120, 128),
-  darkHighContrastElevatedColor: Color.fromARGB(112, 120, 120, 128),
-);
-
 void main() {
 
   Future<void> dragSlider(WidgetTester tester, Key sliderKey) {
@@ -657,3 +646,14 @@ void main() {
     );
   });
 }
+
+const CupertinoDynamicColor _kSystemFill = CupertinoDynamicColor(
+  color: Color.fromARGB(51, 120, 120, 128),
+  darkColor: Color.fromARGB(91, 120, 120, 128),
+  highContrastColor: Color.fromARGB(71, 120, 120, 128),
+  darkHighContrastColor: Color.fromARGB(112, 120, 120, 128),
+  elevatedColor: Color.fromARGB(51, 120, 120, 128),
+  darkElevatedColor: Color.fromARGB(91, 120, 120, 128),
+  highContrastElevatedColor: Color.fromARGB(71, 120, 120, 128),
+  darkHighContrastElevatedColor: Color.fromARGB(112, 120, 120, 128),
+);

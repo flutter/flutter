@@ -5,8 +5,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const String kApiDocsLink = 'See "Types with special considerations" at https://api.flutter.dev/flutter/animation/Tween-class.html for more information.';
-
 void main() {
   test('throws flutter error when tweening types that do not fully satisfy tween requirements - Object', () {
     final Tween<Object> objectTween = Tween<Object>(
@@ -220,3 +218,5 @@ void main() {
     expect(tween.lerp(0.0), null);
   });
 }
+
+const String kApiDocsLink = 'See "Types with special considerations" at https://api.flutter.dev/flutter/animation/Tween-class.html for more information.';

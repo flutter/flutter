@@ -6,8 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const double _doubleColorPrecision = 0.01;
-
 void main() {
   test('HSVColor control test', () {
     const HSVColor color = HSVColor.fromAHSV(0.7, 28.0, 0.3, 0.6);
@@ -499,3 +497,5 @@ void main() {
     expect(first == third, true);
   });
 }
+
+const double _doubleColorPrecision = 0.01;

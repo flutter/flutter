@@ -12,9 +12,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'mouse_tracker_test_utils.dart';
 
-typedef MethodCallHandler = Future<dynamic> Function(MethodCall call);
-typedef SimpleAnnotationFinder = Iterable<HitTestTarget> Function(Offset offset);
-
 void main() {
   final TestMouseTrackerFlutterBinding binding = TestMouseTrackerFlutterBinding();
   MethodCallHandler? methodCallHandler;
@@ -486,3 +483,6 @@ class _CursorUpdateDetails extends MethodCall {
     return '_CursorUpdateDetails(method: $method, arguments: $arguments)';
   }
 }
+
+typedef MethodCallHandler = Future<dynamic> Function(MethodCall call);
+typedef SimpleAnnotationFinder = Iterable<HitTestTarget> Function(Offset offset);

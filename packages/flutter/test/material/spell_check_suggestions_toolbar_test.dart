@@ -8,11 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-// Vertical position at which to anchor the toolbar for testing.
-const double _kAnchor = 200;
-// Amount for toolbar to overlap bottom padding for testing.
-const double _kTestToolbarOverlap = 10;
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -159,3 +154,8 @@ class _FakeEditableTextState extends EditableTextState {
     );
   }
 }
+
+// Vertical position at which to anchor the toolbar for testing.
+const double _kAnchor = 200;
+// Amount for toolbar to overlap bottom padding for testing.
+const double _kTestToolbarOverlap = 10;

@@ -5,8 +5,6 @@
 import 'package:flutter_api_samples/cupertino/date_picker/cupertino_date_picker.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
-const Offset _kRowOffset = Offset(0.0, -50.0);
-
 void main() {
   testWidgets('Can change date, time and dateTime using CupertinoDatePicker', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -65,3 +63,5 @@ void main() {
     expect(find.text('8-3-2016 15:43'), findsOneWidget);
   });
 }
+
+const Offset _kRowOffset = Offset(0.0, -50.0);

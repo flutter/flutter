@@ -11,9 +11,6 @@ import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
-final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
-final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
-
 /// Tests that we respect storage proxy URLs in gradle dependencies.
 Future<void> main() async {
   await task(() async {
@@ -94,3 +91,6 @@ task printEngineMavenUrl() {
     return TaskResult.success(null);
   });
 }
+
+final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
+final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';

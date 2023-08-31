@@ -12,84 +12,6 @@ import 'package:flutter_test/flutter_test.dart';
 import '../image_data.dart';
 import '../painting/image_test_utils.dart';
 
-const Duration animationDuration = Duration(milliseconds: 50);
-
-class FadeInImageParts {
-  const FadeInImageParts(this.fadeInImageElement, this.placeholder, this.target);
-
-  final ComponentElement fadeInImageElement;
-  final FadeInImageElements? placeholder;
-  final FadeInImageElements target;
-
-  State? get state {
-    StatefulElement? animatedFadeOutFadeInElement;
-    fadeInImageElement.visitChildren((Element child) {
-      expect(animatedFadeOutFadeInElement, isNull);
-      animatedFadeOutFadeInElement = child as StatefulElement;
-    });
-    expect(animatedFadeOutFadeInElement, isNotNull);
-    return animatedFadeOutFadeInElement!.state;
-  }
-}
-
-class FadeInImageElements {
-  const FadeInImageElements(this.rawImageElement);
-
-  final Element rawImageElement;
-
-  RawImage get rawImage => rawImageElement.widget as RawImage;
-  double get opacity => rawImage.opacity?.value ?? 1.0;
-  BoxFit? get fit => rawImage.fit;
-  FilterQuality? get filterQuality => rawImage.filterQuality;
-}
-
-class LoadTestImageProvider extends ImageProvider<Object> {
-  LoadTestImageProvider(this.provider);
-
-  final ImageProvider provider;
-
-  ImageStreamCompleter testLoad(Object key, DecoderBufferCallback decode) {
-    return provider.loadBuffer(key, decode);
-  }
-
-  @override
-  Future<Object> obtainKey(ImageConfiguration configuration) {
-    throw UnimplementedError();
-  }
-
-  @override
-  ImageStreamCompleter load(Object key, DecoderCallback decode) {
-    throw UnimplementedError();
-  }
-}
-
-FadeInImageParts findFadeInImage(WidgetTester tester) {
-  final List<FadeInImageElements> elements = <FadeInImageElements>[];
-  final Iterable<Element> rawImageElements = tester.elementList(find.byType(RawImage));
-  ComponentElement? fadeInImageElement;
-  for (final Element rawImageElement in rawImageElements) {
-    rawImageElement.visitAncestorElements((Element ancestor) {
-      if (ancestor.widget is FadeInImage) {
-        if (fadeInImageElement == null) {
-          fadeInImageElement = ancestor as ComponentElement;
-        } else {
-          expect(fadeInImageElement, same(ancestor));
-        }
-        return false;
-      }
-      return true;
-    });
-    expect(fadeInImageElement, isNotNull);
-    elements.add(FadeInImageElements(rawImageElement));
-  }
-  if (elements.length == 2) {
-    return FadeInImageParts(fadeInImageElement!, elements.last, elements.first);
-  } else {
-    expect(elements, hasLength(1));
-    return FadeInImageParts(fadeInImageElement!, null, elements.first);
-  }
-}
-
 Future<void> main() async {
   // These must run outside test zone to complete
   final ui.Image targetImage = await createTestImage();
@@ -576,4 +498,82 @@ Future<void> main() async {
       });
     });
   });
+}
+
+const Duration animationDuration = Duration(milliseconds: 50);
+
+class FadeInImageParts {
+  const FadeInImageParts(this.fadeInImageElement, this.placeholder, this.target);
+
+  final ComponentElement fadeInImageElement;
+  final FadeInImageElements? placeholder;
+  final FadeInImageElements target;
+
+  State? get state {
+    StatefulElement? animatedFadeOutFadeInElement;
+    fadeInImageElement.visitChildren((Element child) {
+      expect(animatedFadeOutFadeInElement, isNull);
+      animatedFadeOutFadeInElement = child as StatefulElement;
+    });
+    expect(animatedFadeOutFadeInElement, isNotNull);
+    return animatedFadeOutFadeInElement!.state;
+  }
+}
+
+class FadeInImageElements {
+  const FadeInImageElements(this.rawImageElement);
+
+  final Element rawImageElement;
+
+  RawImage get rawImage => rawImageElement.widget as RawImage;
+  double get opacity => rawImage.opacity?.value ?? 1.0;
+  BoxFit? get fit => rawImage.fit;
+  FilterQuality? get filterQuality => rawImage.filterQuality;
+}
+
+class LoadTestImageProvider extends ImageProvider<Object> {
+  LoadTestImageProvider(this.provider);
+
+  final ImageProvider provider;
+
+  ImageStreamCompleter testLoad(Object key, DecoderBufferCallback decode) {
+    return provider.loadBuffer(key, decode);
+  }
+
+  @override
+  Future<Object> obtainKey(ImageConfiguration configuration) {
+    throw UnimplementedError();
+  }
+
+  @override
+  ImageStreamCompleter load(Object key, DecoderCallback decode) {
+    throw UnimplementedError();
+  }
+}
+
+FadeInImageParts findFadeInImage(WidgetTester tester) {
+  final List<FadeInImageElements> elements = <FadeInImageElements>[];
+  final Iterable<Element> rawImageElements = tester.elementList(find.byType(RawImage));
+  ComponentElement? fadeInImageElement;
+  for (final Element rawImageElement in rawImageElements) {
+    rawImageElement.visitAncestorElements((Element ancestor) {
+      if (ancestor.widget is FadeInImage) {
+        if (fadeInImageElement == null) {
+          fadeInImageElement = ancestor as ComponentElement;
+        } else {
+          expect(fadeInImageElement, same(ancestor));
+        }
+        return false;
+      }
+      return true;
+    });
+    expect(fadeInImageElement, isNotNull);
+    elements.add(FadeInImageElements(rawImageElement));
+  }
+  if (elements.length == 2) {
+    return FadeInImageParts(fadeInImageElement!, elements.last, elements.first);
+  } else {
+    expect(elements, hasLength(1));
+    return FadeInImageParts(fadeInImageElement!, null, elements.first);
+  }
 }

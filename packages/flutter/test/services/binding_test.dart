@@ -12,50 +12,6 @@ import 'package:flutter/services.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 
-const String license1 = '''
-L1Package1
-L1Package2
-L1Package3
-
-L1Paragraph1
-
-L1Paragraph2
-
-L1Paragraph3''';
-
-const String license2 = '''
-L2Package1
-L2Package2
-L2Package3
-
-L2Paragraph1
-
-L2Paragraph2
-
-L2Paragraph3''';
-
-const String combinedLicenses = '''
-$license1
---------------------------------------------------------------------------------
-$license2
-''';
-
-class TestBinding extends BindingBase with SchedulerBinding, ServicesBinding {
-  @override
-  TestDefaultBinaryMessenger get defaultBinaryMessenger => super.defaultBinaryMessenger as TestDefaultBinaryMessenger;
-
-  @override
-  TestDefaultBinaryMessenger createBinaryMessenger() {
-    Future<ByteData?> keyboardHandler(ByteData? message) async {
-      return const StandardMethodCodec().encodeSuccessEnvelope(<int, int>{1:1});
-    }
-    return TestDefaultBinaryMessenger(
-      super.createBinaryMessenger(),
-      outboundHandlers: <String, MessageHandler>{'flutter/keyboard': keyboardHandler},
-    );
-  }
-}
-
 void main() {
   final TestBinding binding = TestBinding();
 
@@ -161,4 +117,48 @@ void main() {
     expect(physicalKeys.first, const PhysicalKeyboardKey(1));
     expect(logicalKeys.first, const LogicalKeyboardKey(1));
   });
+}
+
+const String license1 = '''
+L1Package1
+L1Package2
+L1Package3
+
+L1Paragraph1
+
+L1Paragraph2
+
+L1Paragraph3''';
+
+const String license2 = '''
+L2Package1
+L2Package2
+L2Package3
+
+L2Paragraph1
+
+L2Paragraph2
+
+L2Paragraph3''';
+
+const String combinedLicenses = '''
+$license1
+--------------------------------------------------------------------------------
+$license2
+''';
+
+class TestBinding extends BindingBase with SchedulerBinding, ServicesBinding {
+  @override
+  TestDefaultBinaryMessenger get defaultBinaryMessenger => super.defaultBinaryMessenger as TestDefaultBinaryMessenger;
+
+  @override
+  TestDefaultBinaryMessenger createBinaryMessenger() {
+    Future<ByteData?> keyboardHandler(ByteData? message) async {
+      return const StandardMethodCodec().encodeSuccessEnvelope(<int, int>{1:1});
+    }
+    return TestDefaultBinaryMessenger(
+      super.createBinaryMessenger(),
+      outboundHandlers: <String, MessageHandler>{'flutter/keyboard': keyboardHandler},
+    );
+  }
 }

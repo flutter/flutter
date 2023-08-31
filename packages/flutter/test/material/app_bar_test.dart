@@ -11,72 +11,6 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/semantics_tester.dart';
 
-Widget buildSliverAppBarApp({
-  bool floating = false,
-  bool pinned = false,
-  double? collapsedHeight,
-  double? expandedHeight,
-  bool snap = false,
-  double toolbarHeight = kToolbarHeight,
-}) {
-  return MaterialApp(
-    home: Scaffold(
-      body: DefaultTabController(
-        length: 3,
-        child: CustomScrollView(
-          primary: true,
-          slivers: <Widget>[
-            SliverAppBar(
-              title: const Text('AppBar Title'),
-              floating: floating,
-              pinned: pinned,
-              collapsedHeight: collapsedHeight,
-              expandedHeight: expandedHeight,
-              toolbarHeight: toolbarHeight,
-              snap: snap,
-              bottom: TabBar(
-                tabs: <String>['A','B','C'].map<Widget>((String t) => Tab(text: 'TAB $t')).toList(),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: Container(
-                height: 1200.0,
-                color: Colors.orange[400],
-              ),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
-ScrollController primaryScrollController(WidgetTester tester) {
-  return PrimaryScrollController.of(tester.element(find.byType(CustomScrollView)));
-}
-
-TextStyle? _iconStyle(WidgetTester tester, IconData icon) {
-  final RichText iconRichText = tester.widget<RichText>(
-    find.descendant(of: find.byIcon(icon).first, matching: find.byType(RichText)),
-  );
-  return iconRichText.text.style;
-}
-
-void _verifyTextNotClipped(Finder textFinder, WidgetTester tester) {
-  final Rect clipRect = tester.getRect(find.ancestor(of: textFinder, matching: find.byType(ClipRect)).first);
-  final Rect textRect = tester.getRect(textFinder);
-  expect(textRect.top, inInclusiveRange(clipRect.top, clipRect.bottom));
-  expect(textRect.bottom, inInclusiveRange(clipRect.top, clipRect.bottom));
-  expect(textRect.left, inInclusiveRange(clipRect.left, clipRect.right));
-  expect(textRect.right, inInclusiveRange(clipRect.left, clipRect.right));
-}
-
-double appBarHeight(WidgetTester tester) => tester.getSize(find.byType(AppBar, skipOffstage: false)).height;
-double appBarTop(WidgetTester tester) => tester.getTopLeft(find.byType(AppBar, skipOffstage: false)).dy;
-double appBarBottom(WidgetTester tester) => tester.getBottomLeft(find.byType(AppBar, skipOffstage: false)).dy;
-
-double tabBarHeight(WidgetTester tester) => tester.getSize(find.byType(TabBar, skipOffstage: false)).height;
-
 void main() {
   setUp(() {
     debugResetSemanticsIdCounter();
@@ -5575,3 +5509,69 @@ void main() {
     });
   });
 }
+
+Widget buildSliverAppBarApp({
+  bool floating = false,
+  bool pinned = false,
+  double? collapsedHeight,
+  double? expandedHeight,
+  bool snap = false,
+  double toolbarHeight = kToolbarHeight,
+}) {
+  return MaterialApp(
+    home: Scaffold(
+      body: DefaultTabController(
+        length: 3,
+        child: CustomScrollView(
+          primary: true,
+          slivers: <Widget>[
+            SliverAppBar(
+              title: const Text('AppBar Title'),
+              floating: floating,
+              pinned: pinned,
+              collapsedHeight: collapsedHeight,
+              expandedHeight: expandedHeight,
+              toolbarHeight: toolbarHeight,
+              snap: snap,
+              bottom: TabBar(
+                tabs: <String>['A','B','C'].map<Widget>((String t) => Tab(text: 'TAB $t')).toList(),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Container(
+                height: 1200.0,
+                color: Colors.orange[400],
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+ScrollController primaryScrollController(WidgetTester tester) {
+  return PrimaryScrollController.of(tester.element(find.byType(CustomScrollView)));
+}
+
+TextStyle? _iconStyle(WidgetTester tester, IconData icon) {
+  final RichText iconRichText = tester.widget<RichText>(
+    find.descendant(of: find.byIcon(icon).first, matching: find.byType(RichText)),
+  );
+  return iconRichText.text.style;
+}
+
+void _verifyTextNotClipped(Finder textFinder, WidgetTester tester) {
+  final Rect clipRect = tester.getRect(find.ancestor(of: textFinder, matching: find.byType(ClipRect)).first);
+  final Rect textRect = tester.getRect(textFinder);
+  expect(textRect.top, inInclusiveRange(clipRect.top, clipRect.bottom));
+  expect(textRect.bottom, inInclusiveRange(clipRect.top, clipRect.bottom));
+  expect(textRect.left, inInclusiveRange(clipRect.left, clipRect.right));
+  expect(textRect.right, inInclusiveRange(clipRect.left, clipRect.right));
+}
+
+double appBarHeight(WidgetTester tester) => tester.getSize(find.byType(AppBar, skipOffstage: false)).height;
+double appBarTop(WidgetTester tester) => tester.getTopLeft(find.byType(AppBar, skipOffstage: false)).dy;
+double appBarBottom(WidgetTester tester) => tester.getBottomLeft(find.byType(AppBar, skipOffstage: false)).dy;
+
+double tabBarHeight(WidgetTester tester) => tester.getSize(find.byType(TabBar, skipOffstage: false)).height;

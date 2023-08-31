@@ -16,141 +16,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../image_data.dart';
 
-ByteData testByteData(double scale) => ByteData(8)..setFloat64(0, scale);
-double scaleOf(ByteData data) => data.getFloat64(0);
-
-final Map<Object?, Object?> testManifest = <Object?, Object?>{
-  'assets/image.png' : <Map<String, Object>>[
-    <String, String>{'asset': 'assets/image.png'},
-    <String, Object>{'asset': 'assets/1.5x/image.png', 'dpr': 1.5},
-    <String, Object>{'asset': 'assets/2.0x/image.png', 'dpr': 2.0},
-    <String, Object>{'asset': 'assets/3.0x/image.png', 'dpr': 3.0},
-    <String, Object>{'asset': 'assets/4.0x/image.png', 'dpr': 4.0}
-  ],
-};
-
-class TestAssetBundle extends CachingAssetBundle {
-  TestAssetBundle({ required Map<Object?, Object?> manifest }) {
-    this.manifest = const StandardMessageCodec().encodeMessage(manifest)!;
-  }
-
-  late final ByteData manifest;
-
-  @override
-  Future<ByteData> load(String key) {
-    late ByteData data;
-    switch (key) {
-      case 'AssetManifest.bin':
-        data = manifest;
-      case 'assets/image.png':
-        data = testByteData(1.0);
-      case 'assets/1.0x/image.png':
-        data = testByteData(10.0); // see "...with a main asset and a 1.0x asset"
-      case 'assets/1.5x/image.png':
-        data = testByteData(1.5);
-      case 'assets/2.0x/image.png':
-        data = testByteData(2.0);
-      case 'assets/3.0x/image.png':
-        data = testByteData(3.0);
-      case 'assets/4.0x/image.png':
-        data = testByteData(4.0);
-    }
-    return SynchronousFuture<ByteData>(data);
-  }
-
-  @override
-  String toString() => '${describeIdentity(this)}()';
-}
-
-class FakeImageStreamCompleter extends ImageStreamCompleter {
-  FakeImageStreamCompleter(Future<ImageInfo> image) {
-    image.then<void>(setImage);
-  }
-}
-
-class TestAssetImage extends AssetImage {
-  const TestAssetImage(super.assetName, this.images);
-
-  final Map<double, ui.Image> images;
-
-  @override
-  ImageStreamCompleter loadImage(AssetBundleImageKey key, ImageDecoderCallback decode) {
-    late ImageInfo imageInfo;
-    key.bundle.load(key.name).then<void>((ByteData data) {
-      final ui.Image image = images[scaleOf(data)]!;
-      imageInfo = ImageInfo(image: image, scale: key.scale);
-    });
-    return FakeImageStreamCompleter(
-      SynchronousFuture<ImageInfo>(imageInfo),
-    );
-  }
-}
-
-Widget buildImageAtRatio(String imageName, Key key, double ratio, bool inferSize, Map<double, ui.Image> images, [ AssetBundle? bundle ]) {
-  const double windowSize = 500.0; // 500 logical pixels
-  const double imageSize = 200.0; // 200 logical pixels
-
-  return MediaQuery(
-    data: MediaQueryData(
-      size: const Size(windowSize, windowSize),
-      devicePixelRatio: ratio,
-    ),
-    child: DefaultAssetBundle(
-      bundle: bundle ?? TestAssetBundle(manifest: testManifest),
-      child: Center(
-        child: inferSize ?
-          Image(
-            key: key,
-            excludeFromSemantics: true,
-            image: TestAssetImage(imageName, images),
-          ) :
-          Image(
-            key: key,
-            excludeFromSemantics: true,
-            image: TestAssetImage(imageName, images),
-            height: imageSize,
-            width: imageSize,
-            fit: BoxFit.fill,
-          ),
-      ),
-    ),
-  );
-}
-
-Widget buildImageCacheResized(String name, Key key, int width, int height, int cacheWidth, int cacheHeight) {
-  return Center(
-    child: RepaintBoundary(
-      child: SizedBox(
-        width: 250,
-        height: 250,
-        child: Center(
-          child: Image.memory(
-            Uint8List.fromList(kTransparentImage),
-            key: key,
-            excludeFromSemantics: true,
-            color: const Color(0xFF00FFFF),
-            colorBlendMode: BlendMode.plus,
-            width: width.toDouble(),
-            height: height.toDouble(),
-            cacheWidth: cacheWidth,
-            cacheHeight: cacheHeight,
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
-RenderImage getRenderImage(WidgetTester tester, Key key) {
-  return tester.renderObject<RenderImage>(find.byKey(key));
-}
-
-Future<void> pumpTreeToLayout(WidgetTester tester, Widget widget) {
-  const Duration pumpDuration = Duration.zero;
-  const EnginePhase pumpPhase = EnginePhase.layout;
-  return tester.pumpWidget(widget, pumpDuration, pumpPhase);
-}
-
 void main() {
   const String image = 'assets/image.png';
 
@@ -342,4 +207,139 @@ void main() {
     await testRatio(ratio: 2.25, expectedScale: 1.5);
     await testRatio(ratio: 10.0, expectedScale: 1.5);
   });
+}
+
+ByteData testByteData(double scale) => ByteData(8)..setFloat64(0, scale);
+double scaleOf(ByteData data) => data.getFloat64(0);
+
+final Map<Object?, Object?> testManifest = <Object?, Object?>{
+  'assets/image.png' : <Map<String, Object>>[
+    <String, String>{'asset': 'assets/image.png'},
+    <String, Object>{'asset': 'assets/1.5x/image.png', 'dpr': 1.5},
+    <String, Object>{'asset': 'assets/2.0x/image.png', 'dpr': 2.0},
+    <String, Object>{'asset': 'assets/3.0x/image.png', 'dpr': 3.0},
+    <String, Object>{'asset': 'assets/4.0x/image.png', 'dpr': 4.0}
+  ],
+};
+
+class TestAssetBundle extends CachingAssetBundle {
+  TestAssetBundle({ required Map<Object?, Object?> manifest }) {
+    this.manifest = const StandardMessageCodec().encodeMessage(manifest)!;
+  }
+
+  late final ByteData manifest;
+
+  @override
+  Future<ByteData> load(String key) {
+    late ByteData data;
+    switch (key) {
+      case 'AssetManifest.bin':
+        data = manifest;
+      case 'assets/image.png':
+        data = testByteData(1.0);
+      case 'assets/1.0x/image.png':
+        data = testByteData(10.0); // see "...with a main asset and a 1.0x asset"
+      case 'assets/1.5x/image.png':
+        data = testByteData(1.5);
+      case 'assets/2.0x/image.png':
+        data = testByteData(2.0);
+      case 'assets/3.0x/image.png':
+        data = testByteData(3.0);
+      case 'assets/4.0x/image.png':
+        data = testByteData(4.0);
+    }
+    return SynchronousFuture<ByteData>(data);
+  }
+
+  @override
+  String toString() => '${describeIdentity(this)}()';
+}
+
+class FakeImageStreamCompleter extends ImageStreamCompleter {
+  FakeImageStreamCompleter(Future<ImageInfo> image) {
+    image.then<void>(setImage);
+  }
+}
+
+class TestAssetImage extends AssetImage {
+  const TestAssetImage(super.assetName, this.images);
+
+  final Map<double, ui.Image> images;
+
+  @override
+  ImageStreamCompleter loadImage(AssetBundleImageKey key, ImageDecoderCallback decode) {
+    late ImageInfo imageInfo;
+    key.bundle.load(key.name).then<void>((ByteData data) {
+      final ui.Image image = images[scaleOf(data)]!;
+      imageInfo = ImageInfo(image: image, scale: key.scale);
+    });
+    return FakeImageStreamCompleter(
+      SynchronousFuture<ImageInfo>(imageInfo),
+    );
+  }
+}
+
+Widget buildImageAtRatio(String imageName, Key key, double ratio, bool inferSize, Map<double, ui.Image> images, [ AssetBundle? bundle ]) {
+  const double windowSize = 500.0; // 500 logical pixels
+  const double imageSize = 200.0; // 200 logical pixels
+
+  return MediaQuery(
+    data: MediaQueryData(
+      size: const Size(windowSize, windowSize),
+      devicePixelRatio: ratio,
+    ),
+    child: DefaultAssetBundle(
+      bundle: bundle ?? TestAssetBundle(manifest: testManifest),
+      child: Center(
+        child: inferSize ?
+          Image(
+            key: key,
+            excludeFromSemantics: true,
+            image: TestAssetImage(imageName, images),
+          ) :
+          Image(
+            key: key,
+            excludeFromSemantics: true,
+            image: TestAssetImage(imageName, images),
+            height: imageSize,
+            width: imageSize,
+            fit: BoxFit.fill,
+          ),
+      ),
+    ),
+  );
+}
+
+Widget buildImageCacheResized(String name, Key key, int width, int height, int cacheWidth, int cacheHeight) {
+  return Center(
+    child: RepaintBoundary(
+      child: SizedBox(
+        width: 250,
+        height: 250,
+        child: Center(
+          child: Image.memory(
+            Uint8List.fromList(kTransparentImage),
+            key: key,
+            excludeFromSemantics: true,
+            color: const Color(0xFF00FFFF),
+            colorBlendMode: BlendMode.plus,
+            width: width.toDouble(),
+            height: height.toDouble(),
+            cacheWidth: cacheWidth,
+            cacheHeight: cacheHeight,
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+RenderImage getRenderImage(WidgetTester tester, Key key) {
+  return tester.renderObject<RenderImage>(find.byKey(key));
+}
+
+Future<void> pumpTreeToLayout(WidgetTester tester, Widget widget) {
+  const Duration pumpDuration = Duration.zero;
+  const EnginePhase pumpPhase = EnginePhase.layout;
+  return tester.pumpWidget(widget, pumpDuration, pumpPhase);
 }

@@ -9,54 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'common.dart';
 
-final Set<String> interestingLabels = <String>{
-  'BUILD',
-  'LAYOUT',
-  'UPDATING COMPOSITING BITS',
-  'PAINT',
-  'COMPOSITING',
-  'FINALIZE TREE',
-  '$Placeholder',
-  '$CustomPaint',
-  '$RenderCustomPaint',
-};
-
-class TestRoot extends StatefulWidget {
-  const TestRoot({ super.key });
-
-  static late final TestRootState state;
-
-  @override
-  State<TestRoot> createState() => TestRootState();
-}
-
-class TestRootState extends State<TestRoot> {
-  @override
-  void initState() {
-    super.initState();
-    TestRoot.state = this;
-  }
-
-  Widget _widget = const Placeholder();
-
-  void updateWidget(Widget newWidget) {
-    setState(() {
-      _widget = newWidget;
-    });
-  }
-
-  void rebuild() {
-    setState(() {
-      // no change, just force a rebuild
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _widget;
-  }
-}
-
 void main() {
   ZoneIgnoringTestBinding.ensureInitialized();
   initTimelineTests();
@@ -156,4 +108,52 @@ void main() {
     debugEnhancePaintTimelineArguments = false;
 
   }, skip: isBrowser); // [intended] uses dart:isolate and io.
+}
+
+final Set<String> interestingLabels = <String>{
+  'BUILD',
+  'LAYOUT',
+  'UPDATING COMPOSITING BITS',
+  'PAINT',
+  'COMPOSITING',
+  'FINALIZE TREE',
+  '$Placeholder',
+  '$CustomPaint',
+  '$RenderCustomPaint',
+};
+
+class TestRoot extends StatefulWidget {
+  const TestRoot({ super.key });
+
+  static late final TestRootState state;
+
+  @override
+  State<TestRoot> createState() => TestRootState();
+}
+
+class TestRootState extends State<TestRoot> {
+  @override
+  void initState() {
+    super.initState();
+    TestRoot.state = this;
+  }
+
+  Widget _widget = const Placeholder();
+
+  void updateWidget(Widget newWidget) {
+    setState(() {
+      _widget = newWidget;
+    });
+  }
+
+  void rebuild() {
+    setState(() {
+      // no change, just force a rebuild
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _widget;
+  }
 }

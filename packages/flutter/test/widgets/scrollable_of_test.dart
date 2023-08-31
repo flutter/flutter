@@ -5,123 +5,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class ScrollPositionListener extends StatefulWidget {
-  const ScrollPositionListener({ super.key, required this.child, required this.log});
-
-  final Widget child;
-  final ValueChanged<String> log;
-
-  @override
-  State<ScrollPositionListener> createState() => _ScrollPositionListenerState();
-}
-
-class _ScrollPositionListenerState extends State<ScrollPositionListener> {
-  ScrollPosition? _position;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _position?.removeListener(listener);
-    _position = Scrollable.maybeOf(context)?.position;
-    _position?.addListener(listener);
-    widget.log('didChangeDependencies ${_position?.pixels.toStringAsFixed(1)}');
-  }
-
-  @override
-  void dispose() {
-    _position?.removeListener(listener);
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => widget.child;
-
-  void listener() {
-    widget.log('listener ${_position?.pixels.toStringAsFixed(1)}');
-  }
-}
-
-class TestScrollController extends ScrollController {
-  TestScrollController({ required this.deferLoading });
-
-  final bool deferLoading;
-
-  @override
-  ScrollPosition createScrollPosition(ScrollPhysics physics, ScrollContext context, ScrollPosition? oldPosition) {
-    return TestScrollPosition(
-      physics: physics,
-      context: context,
-      oldPosition: oldPosition,
-      deferLoading: deferLoading,
-    );
-  }
-}
-
-class TestScrollPosition extends ScrollPositionWithSingleContext {
-  TestScrollPosition({
-    required super.physics,
-    required super.context,
-    super.oldPosition,
-    required this.deferLoading,
-  });
-
-  final bool deferLoading;
-
-  @override
-  bool recommendDeferredLoading(BuildContext context) => deferLoading;
-}
-
-class TestScrollable extends StatefulWidget {
-  const TestScrollable({ super.key, required this.child });
-
-  final Widget child;
-
-  @override
-  State<StatefulWidget> createState() => TestScrollableState();
-}
-
-class TestScrollableState extends State<TestScrollable> {
-  int dependenciesChanged = 0;
-
-  @override
-  void didChangeDependencies() {
-    dependenciesChanged += 1;
-    super.didChangeDependencies();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return widget.child;
-  }
-}
-
-class TestChild extends StatefulWidget {
-  const TestChild({ super.key });
-
-  @override
-  State<TestChild> createState() => TestChildState();
-}
-
-class TestChildState extends State<TestChild> {
-  int dependenciesChanged = 0;
-  late ScrollableState scrollable;
-
-  @override
-  void didChangeDependencies() {
-    dependenciesChanged += 1;
-    scrollable = Scrollable.of(context, axis: Axis.horizontal);
-    super.didChangeDependencies();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox.square(
-      dimension: 1000,
-      child: Text(scrollable.axisDirection.toString()),
-    );
-  }
-}
-
 void main() {
   testWidgets('Scrollable.of() dependent rebuilds when Scrollable position changes', (WidgetTester tester) async {
     late String logValue;
@@ -253,4 +136,121 @@ void main() {
     expect(verticalKey.currentState!.dependenciesChanged, 1);
     expect(childKey.currentState!.dependenciesChanged, 2);
   });
+}
+
+class ScrollPositionListener extends StatefulWidget {
+  const ScrollPositionListener({ super.key, required this.child, required this.log});
+
+  final Widget child;
+  final ValueChanged<String> log;
+
+  @override
+  State<ScrollPositionListener> createState() => _ScrollPositionListenerState();
+}
+
+class _ScrollPositionListenerState extends State<ScrollPositionListener> {
+  ScrollPosition? _position;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _position?.removeListener(listener);
+    _position = Scrollable.maybeOf(context)?.position;
+    _position?.addListener(listener);
+    widget.log('didChangeDependencies ${_position?.pixels.toStringAsFixed(1)}');
+  }
+
+  @override
+  void dispose() {
+    _position?.removeListener(listener);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+
+  void listener() {
+    widget.log('listener ${_position?.pixels.toStringAsFixed(1)}');
+  }
+}
+
+class TestScrollController extends ScrollController {
+  TestScrollController({ required this.deferLoading });
+
+  final bool deferLoading;
+
+  @override
+  ScrollPosition createScrollPosition(ScrollPhysics physics, ScrollContext context, ScrollPosition? oldPosition) {
+    return TestScrollPosition(
+      physics: physics,
+      context: context,
+      oldPosition: oldPosition,
+      deferLoading: deferLoading,
+    );
+  }
+}
+
+class TestScrollPosition extends ScrollPositionWithSingleContext {
+  TestScrollPosition({
+    required super.physics,
+    required super.context,
+    super.oldPosition,
+    required this.deferLoading,
+  });
+
+  final bool deferLoading;
+
+  @override
+  bool recommendDeferredLoading(BuildContext context) => deferLoading;
+}
+
+class TestScrollable extends StatefulWidget {
+  const TestScrollable({ super.key, required this.child });
+
+  final Widget child;
+
+  @override
+  State<StatefulWidget> createState() => TestScrollableState();
+}
+
+class TestScrollableState extends State<TestScrollable> {
+  int dependenciesChanged = 0;
+
+  @override
+  void didChangeDependencies() {
+    dependenciesChanged += 1;
+    super.didChangeDependencies();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
+}
+
+class TestChild extends StatefulWidget {
+  const TestChild({ super.key });
+
+  @override
+  State<TestChild> createState() => TestChildState();
+}
+
+class TestChildState extends State<TestChild> {
+  int dependenciesChanged = 0;
+  late ScrollableState scrollable;
+
+  @override
+  void didChangeDependencies() {
+    dependenciesChanged += 1;
+    scrollable = Scrollable.of(context, axis: Axis.horizontal);
+    super.didChangeDependencies();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox.square(
+      dimension: 1000,
+      child: Text(scrollable.axisDirection.toString()),
+    );
+  }
 }

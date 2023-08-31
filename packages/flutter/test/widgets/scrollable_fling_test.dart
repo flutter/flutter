@@ -6,30 +6,6 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const TextStyle testFont = TextStyle(
-  color: Color(0xFF00FF00),
-);
-
-Future<void> pumpTest(WidgetTester tester, TargetPlatform platform) async {
-  await tester.pumpWidget(Container());
-  await tester.pumpWidget(MaterialApp(
-    theme: ThemeData(
-      platform: platform,
-    ),
-    home: ColoredBox(
-      color: const Color(0xFF111111),
-      child: ListView.builder(
-        dragStartBehavior: DragStartBehavior.down,
-        itemBuilder: (BuildContext context, int index) {
-          return Text('$index', style: testFont);
-        },
-      ),
-    ),
-  ));
-}
-
-const double dragOffset = 213.82;
-
 void main() {
   testWidgets('Flings on different platforms', (WidgetTester tester) async {
     double getCurrentOffset() {
@@ -155,3 +131,27 @@ void main() {
     expect(log, equals(<String>['tap 21', 'tap 49']));
   });
 }
+
+const TextStyle testFont = TextStyle(
+  color: Color(0xFF00FF00),
+);
+
+Future<void> pumpTest(WidgetTester tester, TargetPlatform platform) async {
+  await tester.pumpWidget(Container());
+  await tester.pumpWidget(MaterialApp(
+    theme: ThemeData(
+      platform: platform,
+    ),
+    home: ColoredBox(
+      color: const Color(0xFF111111),
+      child: ListView.builder(
+        dragStartBehavior: DragStartBehavior.down,
+        itemBuilder: (BuildContext context, int index) {
+          return Text('$index', style: testFont);
+        },
+      ),
+    ),
+  ));
+}
+
+const double dragOffset = 213.82;

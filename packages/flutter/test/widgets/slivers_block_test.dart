@@ -6,62 +6,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Future<void> test(WidgetTester tester, double offset) {
-  return tester.pumpWidget(
-    Directionality(
-      textDirection: TextDirection.ltr,
-      child: Viewport(
-        offset: ViewportOffset.fixed(offset),
-        slivers: <Widget>[
-          SliverList(
-            delegate: SliverChildListDelegate(const <Widget>[
-              SizedBox(height: 400.0, child: Text('a')),
-              SizedBox(height: 400.0, child: Text('b')),
-              SizedBox(height: 400.0, child: Text('c')),
-              SizedBox(height: 400.0, child: Text('d')),
-              SizedBox(height: 400.0, child: Text('e')),
-            ]),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-Future<void> testWithConstChildDelegate(WidgetTester tester, double offset) {
-  return tester.pumpWidget(
-    Directionality(
-      textDirection: TextDirection.ltr,
-      child: Viewport(
-        offset: ViewportOffset.fixed(offset),
-        slivers: const <Widget>[
-          SliverList(
-            delegate: SliverChildListDelegate.fixed(<Widget>[
-              SizedBox(height: 400.0, child: Text('a')),
-              SizedBox(height: 400.0, child: Text('b')),
-              SizedBox(height: 400.0, child: Text('c')),
-              SizedBox(height: 400.0, child: Text('d')),
-              SizedBox(height: 400.0, child: Text('e')),
-            ]),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-void verify(WidgetTester tester, List<Offset> answerKey, String text) {
-  final List<Offset> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Offset>(
-    (RenderBox target) => target.localToGlobal(Offset.zero),
-  ).toList();
-  expect(testAnswers, equals(answerKey));
-  final String foundText =
-    tester.widgetList<Text>(find.byType(Text))
-    .map<String>((Text widget) => widget.data!)
-    .reduce((String value, String element) => value + element);
-  expect(foundText, equals(text));
-}
-
 void main() {
   testWidgets('Viewport+SliverBlock basic test', (WidgetTester tester) async {
     await test(tester, 0.0);
@@ -381,4 +325,60 @@ void main() {
 
     expect(find.byType(Viewport), paints..clipRect());
   });
+}
+
+Future<void> test(WidgetTester tester, double offset) {
+  return tester.pumpWidget(
+    Directionality(
+      textDirection: TextDirection.ltr,
+      child: Viewport(
+        offset: ViewportOffset.fixed(offset),
+        slivers: <Widget>[
+          SliverList(
+            delegate: SliverChildListDelegate(const <Widget>[
+              SizedBox(height: 400.0, child: Text('a')),
+              SizedBox(height: 400.0, child: Text('b')),
+              SizedBox(height: 400.0, child: Text('c')),
+              SizedBox(height: 400.0, child: Text('d')),
+              SizedBox(height: 400.0, child: Text('e')),
+            ]),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+Future<void> testWithConstChildDelegate(WidgetTester tester, double offset) {
+  return tester.pumpWidget(
+    Directionality(
+      textDirection: TextDirection.ltr,
+      child: Viewport(
+        offset: ViewportOffset.fixed(offset),
+        slivers: const <Widget>[
+          SliverList(
+            delegate: SliverChildListDelegate.fixed(<Widget>[
+              SizedBox(height: 400.0, child: Text('a')),
+              SizedBox(height: 400.0, child: Text('b')),
+              SizedBox(height: 400.0, child: Text('c')),
+              SizedBox(height: 400.0, child: Text('d')),
+              SizedBox(height: 400.0, child: Text('e')),
+            ]),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+void verify(WidgetTester tester, List<Offset> answerKey, String text) {
+  final List<Offset> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Offset>(
+    (RenderBox target) => target.localToGlobal(Offset.zero),
+  ).toList();
+  expect(testAnswers, equals(answerKey));
+  final String foundText =
+    tester.widgetList<Text>(find.byType(Text))
+    .map<String>((Text widget) => widget.data!)
+    .reduce((String value, String element) => value + element);
+  expect(foundText, equals(text));
 }

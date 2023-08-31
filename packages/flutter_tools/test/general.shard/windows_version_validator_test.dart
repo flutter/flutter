@@ -9,32 +9,6 @@ import 'package:test/fake.dart';
 
 import '../src/common.dart';
 
-/// Fake [_WindowsUtils] to use for testing
-class FakeValidOperatingSystemUtils extends Fake
-    implements OperatingSystemUtils {
-  FakeValidOperatingSystemUtils(
-      [this.name = 'Microsoft Windows [Version 11.0.22621.963]']);
-
-  @override
-  final String name;
-}
-
-/// The expected validation result object for
-/// a passing windows version test
-const ValidationResult validWindows10ValidationResult = ValidationResult(
-  ValidationType.success,
-  <ValidationMessage>[],
-  statusInfo: 'Installed version of Windows is version 10 or higher',
-);
-
-/// The expected validation result object for
-/// a passing windows version test
-const ValidationResult invalidWindowsValidationResult = ValidationResult(
-  ValidationType.missing,
-  <ValidationMessage>[],
-  statusInfo: 'Unable to confirm if installed Windows version is 10 or greater',
-);
-
 void main() {
   testWithoutContext('Successfully running windows version check on windows 10',
       () async {
@@ -100,3 +74,29 @@ OS 版本:          10.0.22621 暂缺 Build 22621
         reason: 'There should be only 5 matches for the pattern provided');
   });
 }
+
+/// Fake [_WindowsUtils] to use for testing
+class FakeValidOperatingSystemUtils extends Fake
+    implements OperatingSystemUtils {
+  FakeValidOperatingSystemUtils(
+      [this.name = 'Microsoft Windows [Version 11.0.22621.963]']);
+
+  @override
+  final String name;
+}
+
+/// The expected validation result object for
+/// a passing windows version test
+const ValidationResult validWindows10ValidationResult = ValidationResult(
+  ValidationType.success,
+  <ValidationMessage>[],
+  statusInfo: 'Installed version of Windows is version 10 or higher',
+);
+
+/// The expected validation result object for
+/// a passing windows version test
+const ValidationResult invalidWindowsValidationResult = ValidationResult(
+  ValidationType.missing,
+  <ValidationMessage>[],
+  statusInfo: 'Unable to confirm if installed Windows version is 10 or greater',
+);

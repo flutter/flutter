@@ -11,9 +11,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import '../src/common.dart';
 import 'test_utils.dart';
 
-final String flutterRootPath = getFlutterRoot();
-final Directory flutterRoot = fileSystem.directory(flutterRootPath);
-
 Future<void> main() async {
   test('verify terminating flutter/bin/dart terminates the underlying dart process', () async {
     final Completer<void> childReadyCompleter = Completer<void>();
@@ -69,3 +66,6 @@ File get dartBash {
       .childFile('dart')
       .absolute;
 }
+
+final String flutterRootPath = getFlutterRoot();
+final Directory flutterRoot = fileSystem.directory(flutterRootPath);

@@ -5,19 +5,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestValueKey<T> extends ValueKey<T> {
-  const TestValueKey(super.value);
-}
-
-@immutable
-class NotEquals {
-  const NotEquals();
-  @override
-  bool operator ==(Object other) => false;
-  @override
-  int get hashCode => 0;
-}
-
 void main() {
   testWidgets('Keys', (WidgetTester tester) async {
     expect(ValueKey<int>(nonconst(3)) == ValueKey<int>(nonconst(3)), isTrue);
@@ -57,4 +44,17 @@ void main() {
     expect(GlobalKey(debugLabel: 'hello'), hasOneLineDescription);
     expect(const GlobalObjectKey(true), hasOneLineDescription);
   });
+}
+
+class TestValueKey<T> extends ValueKey<T> {
+  const TestValueKey(super.value);
+}
+
+@immutable
+class NotEquals {
+  const NotEquals();
+  @override
+  bool operator ==(Object other) => false;
+  @override
+  int get hashCode => 0;
 }

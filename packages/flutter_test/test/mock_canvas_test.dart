@@ -5,51 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class MyPainter extends CustomPainter {
-  const MyPainter({
-    required this.color,
-  });
-
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    canvas.drawColor(color, BlendMode.color);
-  }
-
-  @override
-  bool shouldRepaint(MyPainter oldDelegate) {
-    return true;
-  }
-}
-
-@immutable
-class MethodAndArguments {
-  const MethodAndArguments(this.method, this.arguments);
-
-  final Symbol method;
-  final List<dynamic> arguments;
-
-  @override
-  bool operator ==(Object other) {
-    if (!(other is MethodAndArguments && other.method == method)) {
-      return false;
-    }
-    for (int i = 0; i < arguments.length; i++) {
-      if (arguments[i] != other.arguments[i]) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  @override
-  int get hashCode => method.hashCode;
-
-  @override
-  String toString() => '$method, $arguments';
-}
-
 void main() {
   group('something', () {
     testWidgets('matches when the predicate returns true', (WidgetTester tester) async {
@@ -240,4 +195,49 @@ void main() {
       );
     });
   });
+}
+
+class MyPainter extends CustomPainter {
+  const MyPainter({
+    required this.color,
+  });
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawColor(color, BlendMode.color);
+  }
+
+  @override
+  bool shouldRepaint(MyPainter oldDelegate) {
+    return true;
+  }
+}
+
+@immutable
+class MethodAndArguments {
+  const MethodAndArguments(this.method, this.arguments);
+
+  final Symbol method;
+  final List<dynamic> arguments;
+
+  @override
+  bool operator ==(Object other) {
+    if (!(other is MethodAndArguments && other.method == method)) {
+      return false;
+    }
+    for (int i = 0; i < arguments.length; i++) {
+      if (arguments[i] != other.arguments[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  @override
+  int get hashCode => method.hashCode;
+
+  @override
+  String toString() => '$method, $arguments';
 }

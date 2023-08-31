@@ -8,14 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'gesture_tester.dart';
 
-class TestGestureArenaMember extends GestureArenaMember {
-  @override
-  void acceptGesture(int key) { }
-
-  @override
-  void rejectGesture(int key) { }
-}
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -1119,4 +1111,12 @@ void main() {
 
     expect(didTap, isFalse);
   });
+}
+
+class TestGestureArenaMember extends GestureArenaMember {
+  @override
+  void acceptGesture(int key) { }
+
+  @override
+  void rejectGesture(int key) { }
 }

@@ -14,68 +14,6 @@ import '../image_data.dart';
 import 'fake_codec.dart';
 import 'mocks_for_image_cache.dart';
 
-class FakeFrameInfo implements FrameInfo {
-  const FakeFrameInfo(this._duration, this._image);
-
-  final Duration _duration;
-  final Image _image;
-
-  @override
-  Duration get duration => _duration;
-
-  @override
-  Image get image => _image;
-
-  FakeFrameInfo clone() {
-    return FakeFrameInfo(
-      _duration,
-      _image.clone(),
-    );
-  }
-}
-
-class MockCodec implements Codec {
-  @override
-  late int frameCount;
-
-  @override
-  late int repetitionCount;
-
-  int numFramesAsked = 0;
-
-  Completer<FrameInfo> _nextFrameCompleter = Completer<FrameInfo>();
-
-  @override
-  Future<FrameInfo> getNextFrame() {
-    numFramesAsked += 1;
-    return _nextFrameCompleter.future;
-  }
-
-  void completeNextFrame(FrameInfo frameInfo) {
-    _nextFrameCompleter.complete(frameInfo);
-    _nextFrameCompleter = Completer<FrameInfo>();
-  }
-
-  void failNextFrame(String err) {
-    _nextFrameCompleter.completeError(err);
-  }
-
-  @override
-  void dispose() { }
-
-}
-
-class FakeEventReportingImageStreamCompleter extends ImageStreamCompleter {
-  FakeEventReportingImageStreamCompleter({Stream<ImageChunkEvent>? chunkEvents}) {
-    if (chunkEvents != null) {
-      chunkEvents.listen((ImageChunkEvent event) {
-          reportImageChunkEvent(event);
-        },
-      );
-    }
-  }
-}
-
 void main() {
   late Image image20x10;
   late Image image200x100;
@@ -870,4 +808,66 @@ void main() {
 
     expect(synchronouslyCalled, false);
   });
+}
+
+class FakeFrameInfo implements FrameInfo {
+  const FakeFrameInfo(this._duration, this._image);
+
+  final Duration _duration;
+  final Image _image;
+
+  @override
+  Duration get duration => _duration;
+
+  @override
+  Image get image => _image;
+
+  FakeFrameInfo clone() {
+    return FakeFrameInfo(
+      _duration,
+      _image.clone(),
+    );
+  }
+}
+
+class MockCodec implements Codec {
+  @override
+  late int frameCount;
+
+  @override
+  late int repetitionCount;
+
+  int numFramesAsked = 0;
+
+  Completer<FrameInfo> _nextFrameCompleter = Completer<FrameInfo>();
+
+  @override
+  Future<FrameInfo> getNextFrame() {
+    numFramesAsked += 1;
+    return _nextFrameCompleter.future;
+  }
+
+  void completeNextFrame(FrameInfo frameInfo) {
+    _nextFrameCompleter.complete(frameInfo);
+    _nextFrameCompleter = Completer<FrameInfo>();
+  }
+
+  void failNextFrame(String err) {
+    _nextFrameCompleter.completeError(err);
+  }
+
+  @override
+  void dispose() { }
+
+}
+
+class FakeEventReportingImageStreamCompleter extends ImageStreamCompleter {
+  FakeEventReportingImageStreamCompleter({Stream<ImageChunkEvent>? chunkEvents}) {
+    if (chunkEvents != null) {
+      chunkEvents.listen((ImageChunkEvent event) {
+          reportImageChunkEvent(event);
+        },
+      );
+    }
+  }
 }

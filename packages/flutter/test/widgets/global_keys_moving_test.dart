@@ -5,6 +5,19 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+void main() {
+  testWidgets('moving subtrees with global keys - smoketest', (WidgetTester tester) async {
+    await tester.pumpWidget(builder());
+    final StatefulLeafState leaf = tester.firstState(find.byType(StatefulLeaf));
+    leaf.markNeedsBuild();
+    await tester.pump();
+    final Item lastItem = items[1];
+    items.remove(lastItem);
+    items.insert(0, lastItem);
+    await tester.pumpWidget(builder()); // this marks the app dirty and rebuilds it
+  });
+}
+
 class Item {
   GlobalKey key1 = GlobalKey();
   GlobalKey key2 = GlobalKey();
@@ -52,17 +65,4 @@ Widget builder() {
       KeyedWrapper(items[0].key1, items[0].key2),
     ],
   );
-}
-
-void main() {
-  testWidgets('moving subtrees with global keys - smoketest', (WidgetTester tester) async {
-    await tester.pumpWidget(builder());
-    final StatefulLeafState leaf = tester.firstState(find.byType(StatefulLeaf));
-    leaf.markNeedsBuild();
-    await tester.pump();
-    final Item lastItem = items[1];
-    items.remove(lastItem);
-    items.insert(0, lastItem);
-    await tester.pumpWidget(builder()); // this marks the app dirty and rebuilds it
-  });
 }

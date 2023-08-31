@@ -5,20 +5,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const List<int> items = <int>[0, 1, 2, 3, 4, 5];
-
-Widget buildFrame() {
-  return Directionality(
-    textDirection: TextDirection.ltr,
-    child: ListView(
-      itemExtent: 290.0,
-      children: items.map<Widget>((int item) {
-        return Text('$item');
-      }).toList(),
-    ),
-  );
-}
-
 void main() {
   testWidgets('Drag vertically', (WidgetTester tester) async {
     await tester.pumpWidget(buildFrame());
@@ -101,4 +87,18 @@ void main() {
     expect(find.text('4'), findsNothing);
     expect(find.text('5'), findsNothing);
   });
+}
+
+const List<int> items = <int>[0, 1, 2, 3, 4, 5];
+
+Widget buildFrame() {
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: ListView(
+      itemExtent: 290.0,
+      children: items.map<Widget>((int item) {
+        return Text('$item');
+      }).toList(),
+    ),
+  );
 }

@@ -13,62 +13,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/test_border.dart' show TestBorder;
 
-class NotifyMaterial extends StatelessWidget {
-  const NotifyMaterial({ super.key });
-  @override
-  Widget build(BuildContext context) {
-    const LayoutChangedNotification().dispatch(context);
-    return Container();
-  }
-}
-
-Widget buildMaterial({
-  double elevation = 0.0,
-  Color shadowColor = const Color(0xFF00FF00),
-  Color? surfaceTintColor,
-  Color color = const Color(0xFF0000FF),
-}) {
-  return Center(
-    child: SizedBox(
-      height: 100.0,
-      width: 100.0,
-      child: Material(
-        color: color,
-        shadowColor: shadowColor,
-        surfaceTintColor: surfaceTintColor,
-        elevation: elevation,
-        shape: const CircleBorder(),
-      ),
-    ),
-  );
-}
-
-RenderPhysicalShape getModel(WidgetTester tester) {
-  return tester.renderObject(find.byType(PhysicalShape));
-}
-
-class PaintRecorder extends CustomPainter {
-  PaintRecorder(this.log);
-
-  final List<Size> log;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    log.add(size);
-    final Paint paint = Paint()..color = const Color(0xFF0000FF);
-    canvas.drawRect(Offset.zero & size, paint);
-  }
-
-  @override
-  bool shouldRepaint(PaintRecorder oldDelegate) => false;
-}
-
-class ElevationColor {
-  const ElevationColor(this.elevation, this.color);
-  final double elevation;
-  final Color color;
-}
-
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/81504
   testWidgetsWithLeakTracking('MaterialApp.home nullable and update test', (WidgetTester tester) async {
@@ -1220,4 +1164,60 @@ class TrackPaintInkFeature extends InkFeature {
   void paintFeature(Canvas canvas, Matrix4 transform) {
     paintCount += 1;
   }
+}
+
+class NotifyMaterial extends StatelessWidget {
+  const NotifyMaterial({ super.key });
+  @override
+  Widget build(BuildContext context) {
+    const LayoutChangedNotification().dispatch(context);
+    return Container();
+  }
+}
+
+Widget buildMaterial({
+  double elevation = 0.0,
+  Color shadowColor = const Color(0xFF00FF00),
+  Color? surfaceTintColor,
+  Color color = const Color(0xFF0000FF),
+}) {
+  return Center(
+    child: SizedBox(
+      height: 100.0,
+      width: 100.0,
+      child: Material(
+        color: color,
+        shadowColor: shadowColor,
+        surfaceTintColor: surfaceTintColor,
+        elevation: elevation,
+        shape: const CircleBorder(),
+      ),
+    ),
+  );
+}
+
+RenderPhysicalShape getModel(WidgetTester tester) {
+  return tester.renderObject(find.byType(PhysicalShape));
+}
+
+class PaintRecorder extends CustomPainter {
+  PaintRecorder(this.log);
+
+  final List<Size> log;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    log.add(size);
+    final Paint paint = Paint()..color = const Color(0xFF0000FF);
+    canvas.drawRect(Offset.zero & size, paint);
+  }
+
+  @override
+  bool shouldRepaint(PaintRecorder oldDelegate) => false;
+}
+
+class ElevationColor {
+  const ElevationColor(this.elevation, this.color);
+  final double elevation;
+  final Color color;
 }

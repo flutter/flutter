@@ -40,16 +40,6 @@ import '../../src/context.dart';
 import '../../src/fake_devices.dart';
 import '../../src/test_flutter_command_runner.dart';
 
-class FakeStdio extends Fake implements Stdio {
-  @override
-  bool stdinHasTerminal = false;
-}
-
-class FakeProcessInfo extends Fake implements ProcessInfo {
-  @override
-  int maxRss = 0;
-}
-
 void main() {
   tearDown(() {
     MacOSDesignedForIPadDevices.allowDiscovery = false;
@@ -1608,4 +1598,14 @@ class FakeTerminal extends Fake implements AnsiTerminal {
 
   @override
   Stream<String> get keystrokes => StreamController<String>().stream;
+}
+
+class FakeStdio extends Fake implements Stdio {
+  @override
+  bool stdinHasTerminal = false;
+}
+
+class FakeProcessInfo extends Fake implements ProcessInfo {
+  @override
+  int maxRss = 0;
 }

@@ -5,6 +5,13 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+void main() {
+  testWidgets('setState() catches being used inside a constructor', (WidgetTester tester) async {
+    await tester.pumpWidget(const BadWidget());
+    expect(tester.takeException(), isFlutterError);
+  });
+}
+
 class BadWidget extends StatefulWidget {
   const BadWidget({ super.key });
   @override
@@ -24,11 +31,4 @@ class BadWidgetState extends State<BadWidget> {
   Widget build(BuildContext context) {
     return Text(_count.toString());
   }
-}
-
-void main() {
-  testWidgets('setState() catches being used inside a constructor', (WidgetTester tester) async {
-    await tester.pumpWidget(const BadWidget());
-    expect(tester.takeException(), isFlutterError);
-  });
 }

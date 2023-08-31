@@ -5,9 +5,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-// ignore: unused_field
-enum _TestEnum { a, b, c, d, e, f, g, h }
-
 void main() {
   test('BitField control test', () {
     final BitField<_TestEnum> field = BitField<_TestEnum>(8);
@@ -50,3 +47,6 @@ void main() {
     expect(field2[_TestEnum.d], isFalse);
   }, skip: isBrowser); // [intended] BitField is not supported when compiled to Javascript.
 }
+
+// ignore: unused_field
+enum _TestEnum { a, b, c, d, e, f, g, h }

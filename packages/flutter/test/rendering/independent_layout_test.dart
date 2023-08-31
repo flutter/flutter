@@ -7,28 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
-class TestLayout {
-  TestLayout() {
-    // incoming constraints are tight 800x600
-    root = RenderPositionedBox(
-      child: RenderConstrainedBox(
-        additionalConstraints: const BoxConstraints.tightFor(width: 800.0),
-        child: RenderCustomPaint(
-          painter: TestCallbackPainter(
-            onPaint: () { painted = true; },
-          ),
-          child: child = RenderConstrainedBox(
-            additionalConstraints: const BoxConstraints.tightFor(height: 10.0, width: 10.0),
-          ),
-        ),
-      ),
-    );
-  }
-  late RenderBox root;
-  late RenderBox child;
-  bool painted = false;
-}
-
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
@@ -97,4 +75,26 @@ void main() {
     expect(onscreen.painted, isTrue);
     expect(onscreen.child.size, equals(const Size(800.0, 10.0)));
   });
+}
+
+class TestLayout {
+  TestLayout() {
+    // incoming constraints are tight 800x600
+    root = RenderPositionedBox(
+      child: RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints.tightFor(width: 800.0),
+        child: RenderCustomPaint(
+          painter: TestCallbackPainter(
+            onPaint: () { painted = true; },
+          ),
+          child: child = RenderConstrainedBox(
+            additionalConstraints: const BoxConstraints.tightFor(height: 10.0, width: 10.0),
+          ),
+        ),
+      ),
+    );
+  }
+  late RenderBox root;
+  late RenderBox child;
+  bool painted = false;
 }

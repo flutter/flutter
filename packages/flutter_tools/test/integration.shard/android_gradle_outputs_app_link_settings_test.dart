@@ -14,116 +14,6 @@ import 'package:xml/xml.dart';
 import '../src/common.dart';
 import 'test_utils.dart';
 
-final XmlElement pureHttpIntentFilter = XmlElement(
-  XmlName('intent-filter'),
-  <XmlAttribute>[XmlAttribute(XmlName('autoVerify', 'android'), 'true')],
-  <XmlElement>[
-    XmlElement(
-      XmlName('action'),
-      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.action.VIEW')],
-    ),
-    XmlElement(
-      XmlName('category'),
-      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.DEFAULT')],
-    ),
-    XmlElement(
-      XmlName('category'),
-      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.BROWSABLE')],
-    ),
-    XmlElement(
-      XmlName('data'),
-      <XmlAttribute>[
-        XmlAttribute(XmlName('scheme', 'android'), 'http'),
-        XmlAttribute(XmlName('host', 'android'), 'pure-http.com'),
-      ],
-    ),
-  ],
-);
-
-final XmlElement nonHttpIntentFilter = XmlElement(
-  XmlName('intent-filter'),
-  <XmlAttribute>[XmlAttribute(XmlName('autoVerify', 'android'), 'true')],
-  <XmlElement>[
-    XmlElement(
-      XmlName('action'),
-      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.action.VIEW')],
-    ),
-    XmlElement(
-      XmlName('category'),
-      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.DEFAULT')],
-    ),
-    XmlElement(
-      XmlName('category'),
-      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.BROWSABLE')],
-    ),
-    XmlElement(
-      XmlName('data'),
-      <XmlAttribute>[
-        XmlAttribute(XmlName('scheme', 'android'), 'custom'),
-        XmlAttribute(XmlName('host', 'android'), 'custom.com'),
-      ],
-    ),
-  ],
-);
-
-final XmlElement hybridIntentFilter = XmlElement(
-  XmlName('intent-filter'),
-  <XmlAttribute>[XmlAttribute(XmlName('autoVerify', 'android'), 'true')],
-  <XmlElement>[
-    XmlElement(
-      XmlName('action'),
-      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.action.VIEW')],
-    ),
-    XmlElement(
-      XmlName('category'),
-      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.DEFAULT')],
-    ),
-    XmlElement(
-      XmlName('category'),
-      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.BROWSABLE')],
-    ),
-    XmlElement(
-      XmlName('data'),
-      <XmlAttribute>[
-        XmlAttribute(XmlName('scheme', 'android'), 'custom'),
-        XmlAttribute(XmlName('host', 'android'), 'hybrid.com'),
-      ],
-    ),
-    XmlElement(
-      XmlName('data'),
-      <XmlAttribute>[
-        XmlAttribute(XmlName('scheme', 'android'), 'http'),
-      ],
-    ),
-  ],
-);
-
-final XmlElement nonAutoVerifyIntentFilter = XmlElement(
-  XmlName('intent-filter'),
-  <XmlAttribute>[],
-  <XmlElement>[
-    XmlElement(
-      XmlName('action'),
-      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.action.VIEW')],
-    ),
-    XmlElement(
-      XmlName('category'),
-      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.DEFAULT')],
-    ),
-    XmlElement(
-      XmlName('category'),
-      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.BROWSABLE')],
-    ),
-    XmlElement(
-      XmlName('data'),
-      <XmlAttribute>[
-        XmlAttribute(XmlName('scheme', 'android'), 'http'),
-        XmlAttribute(XmlName('host', 'android'), 'non-auto-verify.com'),
-      ],
-    ),
-  ],
-);
-
 void main() {
   late Directory tempDir;
 
@@ -237,3 +127,113 @@ void main() {
     expect(deeplinks.length, 0);
   });
 }
+
+final XmlElement pureHttpIntentFilter = XmlElement(
+  XmlName('intent-filter'),
+  <XmlAttribute>[XmlAttribute(XmlName('autoVerify', 'android'), 'true')],
+  <XmlElement>[
+    XmlElement(
+      XmlName('action'),
+      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.action.VIEW')],
+    ),
+    XmlElement(
+      XmlName('category'),
+      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.DEFAULT')],
+    ),
+    XmlElement(
+      XmlName('category'),
+      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.BROWSABLE')],
+    ),
+    XmlElement(
+      XmlName('data'),
+      <XmlAttribute>[
+        XmlAttribute(XmlName('scheme', 'android'), 'http'),
+        XmlAttribute(XmlName('host', 'android'), 'pure-http.com'),
+      ],
+    ),
+  ],
+);
+
+final XmlElement nonHttpIntentFilter = XmlElement(
+  XmlName('intent-filter'),
+  <XmlAttribute>[XmlAttribute(XmlName('autoVerify', 'android'), 'true')],
+  <XmlElement>[
+    XmlElement(
+      XmlName('action'),
+      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.action.VIEW')],
+    ),
+    XmlElement(
+      XmlName('category'),
+      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.DEFAULT')],
+    ),
+    XmlElement(
+      XmlName('category'),
+      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.BROWSABLE')],
+    ),
+    XmlElement(
+      XmlName('data'),
+      <XmlAttribute>[
+        XmlAttribute(XmlName('scheme', 'android'), 'custom'),
+        XmlAttribute(XmlName('host', 'android'), 'custom.com'),
+      ],
+    ),
+  ],
+);
+
+final XmlElement hybridIntentFilter = XmlElement(
+  XmlName('intent-filter'),
+  <XmlAttribute>[XmlAttribute(XmlName('autoVerify', 'android'), 'true')],
+  <XmlElement>[
+    XmlElement(
+      XmlName('action'),
+      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.action.VIEW')],
+    ),
+    XmlElement(
+      XmlName('category'),
+      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.DEFAULT')],
+    ),
+    XmlElement(
+      XmlName('category'),
+      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.BROWSABLE')],
+    ),
+    XmlElement(
+      XmlName('data'),
+      <XmlAttribute>[
+        XmlAttribute(XmlName('scheme', 'android'), 'custom'),
+        XmlAttribute(XmlName('host', 'android'), 'hybrid.com'),
+      ],
+    ),
+    XmlElement(
+      XmlName('data'),
+      <XmlAttribute>[
+        XmlAttribute(XmlName('scheme', 'android'), 'http'),
+      ],
+    ),
+  ],
+);
+
+final XmlElement nonAutoVerifyIntentFilter = XmlElement(
+  XmlName('intent-filter'),
+  <XmlAttribute>[],
+  <XmlElement>[
+    XmlElement(
+      XmlName('action'),
+      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.action.VIEW')],
+    ),
+    XmlElement(
+      XmlName('category'),
+      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.DEFAULT')],
+    ),
+    XmlElement(
+      XmlName('category'),
+      <XmlAttribute>[XmlAttribute(XmlName('name', 'android'), 'android.intent.category.BROWSABLE')],
+    ),
+    XmlElement(
+      XmlName('data'),
+      <XmlAttribute>[
+        XmlAttribute(XmlName('scheme', 'android'), 'http'),
+        XmlAttribute(XmlName('host', 'android'), 'non-auto-verify.com'),
+      ],
+    ),
+  ],
+);

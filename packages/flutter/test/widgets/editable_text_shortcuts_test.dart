@@ -10,17 +10,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'clipboard_utils.dart';
 import 'keyboard_utils.dart';
 
-Iterable<SingleActivator> allModifierVariants(LogicalKeyboardKey trigger) {
-  const Iterable<bool> trueFalse = <bool>[false, true];
-  return trueFalse.expand((bool shift) {
-    return trueFalse.expand((bool control) {
-      return trueFalse.expand((bool alt) {
-        return trueFalse.map((bool meta) => SingleActivator(trigger, shift: shift, control: control, alt: alt, meta: meta));
-      });
-    });
-  });
-}
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
@@ -2365,4 +2354,15 @@ void main() {
       );
     }, variant: TargetPlatformVariant.desktop());
   }, skip: !kIsWeb); // [intended] specific tests target web.
+}
+
+Iterable<SingleActivator> allModifierVariants(LogicalKeyboardKey trigger) {
+  const Iterable<bool> trueFalse = <bool>[false, true];
+  return trueFalse.expand((bool shift) {
+    return trueFalse.expand((bool control) {
+      return trueFalse.expand((bool alt) {
+        return trueFalse.map((bool meta) => SingleActivator(trigger, shift: shift, control: control, alt: alt, meta: meta));
+      });
+    });
+  });
 }

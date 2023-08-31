@@ -5,17 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class MockOnEndFunction {
-  int called = 0;
-
-  void handler() {
-    called++;
-  }
-}
-
-const Duration animationDuration = Duration(milliseconds:1000);
-const Duration additionalDelay = Duration(milliseconds:1);
-
 void main() {
   late MockOnEndFunction mockOnEndFunction;
   const Key switchKey = Key('switchKey');
@@ -941,3 +930,14 @@ class _TestAnimatedThemeWidgetState extends _TestAnimatedWidgetState {
     );
   }
 }
+
+class MockOnEndFunction {
+  int called = 0;
+
+  void handler() {
+    called++;
+  }
+}
+
+const Duration animationDuration = Duration(milliseconds:1000);
+const Duration additionalDelay = Duration(milliseconds:1);

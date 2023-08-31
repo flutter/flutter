@@ -8,33 +8,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-RenderBox getMaterialBox(WidgetTester tester) {
-  return tester.firstRenderObject<RenderBox>(
-    find.descendant(
-      of: find.byType(RawChip),
-      matching: find.byType(CustomPaint),
-    ),
-  );
-}
-
-Material getMaterial(WidgetTester tester) {
-  return tester.widget<Material>(
-    find.descendant(
-      of: find.byType(RawChip),
-      matching: find.byType(Material),
-    ),
-  );
-}
-
-DefaultTextStyle getLabelStyle(WidgetTester tester) {
-  return tester.widget(
-    find.descendant(
-      of: find.byType(RawChip),
-      matching: find.byType(DefaultTextStyle),
-    ).last,
-  );
-}
-
 void main() {
   test('ChipThemeData copyWith, ==, hashCode basics', () {
     expect(const ChipThemeData(), const ChipThemeData().copyWith());
@@ -1004,4 +977,31 @@ class _MaterialStateBorderSide extends MaterialStateBorderSide {
 
   @override
   BorderSide? resolve(Set<MaterialState> states) => resolver(states);
+}
+
+RenderBox getMaterialBox(WidgetTester tester) {
+  return tester.firstRenderObject<RenderBox>(
+    find.descendant(
+      of: find.byType(RawChip),
+      matching: find.byType(CustomPaint),
+    ),
+  );
+}
+
+Material getMaterial(WidgetTester tester) {
+  return tester.widget<Material>(
+    find.descendant(
+      of: find.byType(RawChip),
+      matching: find.byType(Material),
+    ),
+  );
+}
+
+DefaultTextStyle getLabelStyle(WidgetTester tester) {
+  return tester.widget(
+    find.descendant(
+      of: find.byType(RawChip),
+      matching: find.byType(DefaultTextStyle),
+    ).last,
+  );
 }

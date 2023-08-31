@@ -7,36 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
-class RenderTestBox extends RenderBox {
-  late Size boxSize;
-  int calls = 0;
-  double value = 0.0;
-  double next() {
-    value += 1.0;
-    return value;
-  }
-  @override
-  double computeMinIntrinsicWidth(double height) => next();
-  @override
-  double computeMaxIntrinsicWidth(double height) => next();
-  @override
-  double computeMinIntrinsicHeight(double width) => next();
-  @override
-  double computeMaxIntrinsicHeight(double width) => next();
-
-  @override
-  void performLayout() {
-    size = constraints.biggest;
-    boxSize = size;
-  }
-
-  @override
-  double? computeDistanceToActualBaseline(TextBaseline baseline) {
-    calls += 1;
-    return boxSize.height / 2.0;
-  }
-}
-
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
@@ -134,4 +104,34 @@ void main() {
 
     expect(test.calls, 3); // Use the cached data if the layout constraints do not change.
   });
+}
+
+class RenderTestBox extends RenderBox {
+  late Size boxSize;
+  int calls = 0;
+  double value = 0.0;
+  double next() {
+    value += 1.0;
+    return value;
+  }
+  @override
+  double computeMinIntrinsicWidth(double height) => next();
+  @override
+  double computeMaxIntrinsicWidth(double height) => next();
+  @override
+  double computeMinIntrinsicHeight(double width) => next();
+  @override
+  double computeMaxIntrinsicHeight(double width) => next();
+
+  @override
+  void performLayout() {
+    size = constraints.biggest;
+    boxSize = size;
+  }
+
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    calls += 1;
+    return boxSize.height / 2.0;
+  }
 }

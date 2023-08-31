@@ -5,32 +5,6 @@
 import 'package:android_semantics_testing/android_semantics_testing.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-// JSON matching a serialized Android AccessibilityNodeInfo.
-const String source = r'''
-{
-  "id": 23,
-  "flags": {
-    "isChecked": false,
-    "isCheckable": false,
-    "isEditable": false,
-    "isFocusable": false,
-    "isFocused": false,
-    "isPassword": false,
-    "isLongClickable": false
-  },
-  "text": "hello",
-  "contentDescription": "other hello",
-  "className": "android.view.View",
-  "rect": {
-    "left": 0,
-    "top": 0,
-    "right": 10,
-    "bottom": 10
-  },
-  "actions": [1, 2, 4]
-}
-''';
-
 void main() {
   group(AndroidSemanticsNode, () {
     test('can be parsed from json data', () {
@@ -94,3 +68,29 @@ void main() {
     });
   });
 }
+
+// JSON matching a serialized Android AccessibilityNodeInfo.
+const String source = r'''
+{
+  "id": 23,
+  "flags": {
+    "isChecked": false,
+    "isCheckable": false,
+    "isEditable": false,
+    "isFocusable": false,
+    "isFocused": false,
+    "isPassword": false,
+    "isLongClickable": false
+  },
+  "text": "hello",
+  "contentDescription": "other hello",
+  "className": "android.view.View",
+  "rect": {
+    "left": 0,
+    "top": 0,
+    "right": 10,
+    "bottom": 10
+  },
+  "actions": [1, 2, 4]
+}
+''';

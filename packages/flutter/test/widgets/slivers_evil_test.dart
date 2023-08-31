@@ -6,56 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
-  TestSliverPersistentHeaderDelegate(this._maxExtent);
-
-  final double _maxExtent;
-
-  @override
-  double get maxExtent => _maxExtent;
-
-  @override
-  double get minExtent => 16.0;
-
-  @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Column(
-      children: <Widget>[
-        Container(height: minExtent),
-        Expanded(child: Container()),
-      ],
-    );
-  }
-
-  @override
-  bool shouldRebuild(TestSliverPersistentHeaderDelegate oldDelegate) => false;
-}
-
-class TestBehavior extends ScrollBehavior {
-  const TestBehavior();
-
-  @override
-  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
-    return GlowingOverscrollIndicator(
-      axisDirection: details.direction,
-      color: const Color(0xFFFFFFFF),
-      child: child,
-    );
-  }
-}
-
-class TestScrollPhysics extends ClampingScrollPhysics {
-  const TestScrollPhysics({ super.parent });
-
-  @override
-  TestScrollPhysics applyTo(ScrollPhysics? ancestor) {
-    return TestScrollPhysics(parent: parent?.applyTo(ancestor) ?? ancestor);
-  }
-
-  @override
-  Tolerance toleranceFor(ScrollMetrics metrics) => const Tolerance(velocity: 20.0, distance: 1.0);
-}
-
 void main() {
   testWidgets('Evil test of sliver features - 1', (WidgetTester tester) async {
     final GlobalKey centerKey = GlobalKey();
@@ -248,4 +198,54 @@ void main() {
     // of what's supposed to be item 6 had we not re-shifted.
     expect(tester.getBottomLeft(find.widgetWithText(ColoredBox, '9')).dy, 600.0);
   });
+}
+
+class TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
+  TestSliverPersistentHeaderDelegate(this._maxExtent);
+
+  final double _maxExtent;
+
+  @override
+  double get maxExtent => _maxExtent;
+
+  @override
+  double get minExtent => 16.0;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Column(
+      children: <Widget>[
+        Container(height: minExtent),
+        Expanded(child: Container()),
+      ],
+    );
+  }
+
+  @override
+  bool shouldRebuild(TestSliverPersistentHeaderDelegate oldDelegate) => false;
+}
+
+class TestBehavior extends ScrollBehavior {
+  const TestBehavior();
+
+  @override
+  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
+    return GlowingOverscrollIndicator(
+      axisDirection: details.direction,
+      color: const Color(0xFFFFFFFF),
+      child: child,
+    );
+  }
+}
+
+class TestScrollPhysics extends ClampingScrollPhysics {
+  const TestScrollPhysics({ super.parent });
+
+  @override
+  TestScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return TestScrollPhysics(parent: parent?.applyTo(ancestor) ?? ancestor);
+  }
+
+  @override
+  Tolerance toleranceFor(ScrollMetrics metrics) => const Tolerance(velocity: 20.0, distance: 1.0);
 }

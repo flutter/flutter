@@ -8,113 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-void _checkCaretOffsetsLtrAt(String text, List<int> boundaries) {
-  expect(boundaries.first, 0);
-  expect(boundaries.last, text.length);
-
-  final TextPainter painter = TextPainter()
-    ..textDirection = TextDirection.ltr;
-
-  // Lay out the string up to each boundary, and record the width.
-  final List<double> prefixWidths = <double>[];
-  for (final int boundary in boundaries) {
-    painter.text = TextSpan(text: text.substring(0, boundary));
-    painter.layout();
-    prefixWidths.add(painter.width);
-  }
-
-  // The painter has the full text laid out.  Check the caret offsets.
-  double caretOffset(int offset) {
-    final TextPosition position = ui.TextPosition(offset: offset);
-    return painter.getOffsetForCaret(position, ui.Rect.zero).dx;
-  }
-  expect(boundaries.map(caretOffset).toList(), prefixWidths);
-  double lastOffset = caretOffset(0);
-  for (int i = 1; i <= text.length; i++) {
-    final double offset = caretOffset(i);
-    expect(offset, greaterThanOrEqualTo(lastOffset));
-    lastOffset = offset;
-  }
-  painter.dispose();
-}
-
-/// Check the caret offsets are accurate for the given single line of LTR text.
-///
-/// This lays out the given text as a single line with [TextDirection.ltr]
-/// and checks the following invariants, which should always hold if the text
-/// is made up of LTR characters:
-///  * The caret offsets go monotonically from 0.0 to the width of the text.
-///  * At each character (that is, grapheme cluster) boundary, the caret
-///    offset equals the width that the text up to that point would have
-///    if laid out on its own.
-///
-/// If you have a [TextSpan] instead of a plain [String],
-/// see [caretOffsetsForTextSpan].
-void checkCaretOffsetsLtr(String text) {
-  final List<int> characterBoundaries = <int>[];
-  final CharacterRange range = CharacterRange.at(text, 0);
-  while (true) {
-    characterBoundaries.add(range.current.length);
-    if (range.stringAfterLength <= 0) {
-      break;
-    }
-    range.expandNext();
-  }
-  _checkCaretOffsetsLtrAt(text, characterBoundaries);
-}
-
-/// Check the caret offsets are accurate for the given single line of LTR text,
-/// ignoring character boundaries within each given cluster.
-///
-/// This concatenates [clusters] into a string and then performs the same
-/// checks as [checkCaretOffsetsLtr], except that instead of checking the
-/// offset-equals-prefix-width invariant at every character boundary,
-/// it does so only at the boundaries between the elements of [clusters].
-///
-/// The elements of [clusters] should be composed of whole characters: each
-/// element should be a valid character range in the concatenated string.
-///
-/// Consider using [checkCaretOffsetsLtr] instead of this function.  If that
-/// doesn't pass, you may have an instance of <https://github.com/flutter/flutter/issues/122478>.
-void checkCaretOffsetsLtrFromPieces(List<String> clusters) {
-  final StringBuffer buffer = StringBuffer();
-  final List<int> boundaries = <int>[];
-  boundaries.add(buffer.length);
-  for (final String cluster in clusters) {
-    buffer.write(cluster);
-    boundaries.add(buffer.length);
-  }
-  _checkCaretOffsetsLtrAt(buffer.toString(), boundaries);
-}
-
-/// Compute the caret offsets for the given single line of text, a [TextSpan].
-///
-/// This lays out the given text as a single line with the given [textDirection]
-/// and returns a full list of caret offsets, one at each code unit boundary.
-///
-/// This also checks that the offset at the very start or very end, if the text
-/// direction is RTL or LTR respectively, equals the line's width.
-///
-/// If you have a [String] instead of a nontrivial [TextSpan],
-/// consider using [checkCaretOffsetsLtr] instead.
-List<double> caretOffsetsForTextSpan(TextDirection textDirection, TextSpan text) {
-  final TextPainter painter = TextPainter()
-    ..textDirection = textDirection
-    ..text = text
-    ..layout();
-  final int length = text.toPlainText().length;
-  final List<double> result = List<double>.generate(length + 1, (int offset) {
-    final TextPosition position = ui.TextPosition(offset: offset);
-    return painter.getOffsetForCaret(position, ui.Rect.zero).dx;
-  });
-  switch (textDirection) {
-    case TextDirection.ltr: expect(result[length], painter.width);
-    case TextDirection.rtl: expect(result[0], painter.width);
-  }
-  painter.dispose();
-  return result;
-}
-
 void main() {
   test('TextPainter caret test', () {
     final TextPainter painter = TextPainter()
@@ -1538,4 +1431,111 @@ class MockCanvasWithDrawParagraph extends Fake implements Canvas {
     offsetX = offset.dx;
     centerX = offset.dx + paragraph.width / 2;
   }
+}
+
+void _checkCaretOffsetsLtrAt(String text, List<int> boundaries) {
+  expect(boundaries.first, 0);
+  expect(boundaries.last, text.length);
+
+  final TextPainter painter = TextPainter()
+    ..textDirection = TextDirection.ltr;
+
+  // Lay out the string up to each boundary, and record the width.
+  final List<double> prefixWidths = <double>[];
+  for (final int boundary in boundaries) {
+    painter.text = TextSpan(text: text.substring(0, boundary));
+    painter.layout();
+    prefixWidths.add(painter.width);
+  }
+
+  // The painter has the full text laid out.  Check the caret offsets.
+  double caretOffset(int offset) {
+    final TextPosition position = ui.TextPosition(offset: offset);
+    return painter.getOffsetForCaret(position, ui.Rect.zero).dx;
+  }
+  expect(boundaries.map(caretOffset).toList(), prefixWidths);
+  double lastOffset = caretOffset(0);
+  for (int i = 1; i <= text.length; i++) {
+    final double offset = caretOffset(i);
+    expect(offset, greaterThanOrEqualTo(lastOffset));
+    lastOffset = offset;
+  }
+  painter.dispose();
+}
+
+/// Check the caret offsets are accurate for the given single line of LTR text.
+///
+/// This lays out the given text as a single line with [TextDirection.ltr]
+/// and checks the following invariants, which should always hold if the text
+/// is made up of LTR characters:
+///  * The caret offsets go monotonically from 0.0 to the width of the text.
+///  * At each character (that is, grapheme cluster) boundary, the caret
+///    offset equals the width that the text up to that point would have
+///    if laid out on its own.
+///
+/// If you have a [TextSpan] instead of a plain [String],
+/// see [caretOffsetsForTextSpan].
+void checkCaretOffsetsLtr(String text) {
+  final List<int> characterBoundaries = <int>[];
+  final CharacterRange range = CharacterRange.at(text, 0);
+  while (true) {
+    characterBoundaries.add(range.current.length);
+    if (range.stringAfterLength <= 0) {
+      break;
+    }
+    range.expandNext();
+  }
+  _checkCaretOffsetsLtrAt(text, characterBoundaries);
+}
+
+/// Check the caret offsets are accurate for the given single line of LTR text,
+/// ignoring character boundaries within each given cluster.
+///
+/// This concatenates [clusters] into a string and then performs the same
+/// checks as [checkCaretOffsetsLtr], except that instead of checking the
+/// offset-equals-prefix-width invariant at every character boundary,
+/// it does so only at the boundaries between the elements of [clusters].
+///
+/// The elements of [clusters] should be composed of whole characters: each
+/// element should be a valid character range in the concatenated string.
+///
+/// Consider using [checkCaretOffsetsLtr] instead of this function.  If that
+/// doesn't pass, you may have an instance of <https://github.com/flutter/flutter/issues/122478>.
+void checkCaretOffsetsLtrFromPieces(List<String> clusters) {
+  final StringBuffer buffer = StringBuffer();
+  final List<int> boundaries = <int>[];
+  boundaries.add(buffer.length);
+  for (final String cluster in clusters) {
+    buffer.write(cluster);
+    boundaries.add(buffer.length);
+  }
+  _checkCaretOffsetsLtrAt(buffer.toString(), boundaries);
+}
+
+/// Compute the caret offsets for the given single line of text, a [TextSpan].
+///
+/// This lays out the given text as a single line with the given [textDirection]
+/// and returns a full list of caret offsets, one at each code unit boundary.
+///
+/// This also checks that the offset at the very start or very end, if the text
+/// direction is RTL or LTR respectively, equals the line's width.
+///
+/// If you have a [String] instead of a nontrivial [TextSpan],
+/// consider using [checkCaretOffsetsLtr] instead.
+List<double> caretOffsetsForTextSpan(TextDirection textDirection, TextSpan text) {
+  final TextPainter painter = TextPainter()
+    ..textDirection = textDirection
+    ..text = text
+    ..layout();
+  final int length = text.toPlainText().length;
+  final List<double> result = List<double>.generate(length + 1, (int offset) {
+    final TextPosition position = ui.TextPosition(offset: offset);
+    return painter.getOffsetForCaret(position, ui.Rect.zero).dx;
+  });
+  switch (textDirection) {
+    case TextDirection.ltr: expect(result[length], painter.width);
+    case TextDirection.rtl: expect(result[0], painter.width);
+  }
+  painter.dispose();
+  return result;
 }

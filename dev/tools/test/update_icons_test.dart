@@ -6,21 +6,6 @@ import 'package:test/test.dart';
 
 import '../update_icons.dart';
 
-Map<String, String> codepointsA = <String, String>{
-  'airplane': '111',
-  'boat': '222',
-};
-Map<String, String> codepointsB = <String, String>{
-  'airplane': '333',
-};
-Map<String, String> codepointsC = <String, String>{
-  'airplane': '111',
-  'train': '444',
-};
-Map<String, String> codepointsUnderscore = <String, String>{
-  'airplane__123': '111',
-};
-
 void main() {
   group('safety checks', () {
     test('superset', () {
@@ -119,3 +104,18 @@ void main() {
     );
   });
 }
+
+Map<String, String> codepointsA = <String, String>{
+  'airplane': '111',
+  'boat': '222',
+};
+Map<String, String> codepointsB = <String, String>{
+  'airplane': '333',
+};
+Map<String, String> codepointsC = <String, String>{
+  'airplane': '111',
+  'train': '444',
+};
+Map<String, String> codepointsUnderscore = <String, String>{
+  'airplane__123': '111',
+};

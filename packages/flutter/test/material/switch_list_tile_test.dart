@@ -12,16 +12,6 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
-Widget wrap({ required Widget child }) {
-  return MediaQuery(
-    data: const MediaQueryData(),
-    child: Directionality(
-      textDirection: TextDirection.ltr,
-      child: Material(child: child),
-    ),
-  );
-}
-
 void main() {
   testWidgetsWithLeakTracking('SwitchListTile control test', (WidgetTester tester) async {
     final List<dynamic> log = <dynamic>[];
@@ -1639,4 +1629,14 @@ void main() {
       paints..rrect()..rrect(color: hoveredTrackColor, style: PaintingStyle.stroke)
     );
   });
+}
+
+Widget wrap({ required Widget child }) {
+  return MediaQuery(
+    data: const MediaQueryData(),
+    child: Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(child: child),
+    ),
+  );
 }

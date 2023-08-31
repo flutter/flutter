@@ -18,58 +18,6 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/test_flutter_command_runner.dart';
 
-class ProjectValidatorDummy extends ProjectValidator {
-  @override
-  Future<List<ProjectValidatorResult>> start(FlutterProject project, {Logger? logger, FileSystem? fileSystem}) async{
-    return <ProjectValidatorResult>[
-      const ProjectValidatorResult(name: 'pass', value: 'value', status: StatusProjectValidator.success),
-      const ProjectValidatorResult(name: 'fail', value: 'my error', status: StatusProjectValidator.error),
-      const ProjectValidatorResult(name: 'pass two', value: 'pass', warning: 'my warning', status: StatusProjectValidator.warning),
-    ];
-  }
-
-  @override
-  bool supportsProject(FlutterProject project) {
-    return true;
-  }
-
-  @override
-  String get title => 'First Dummy';
-}
-
-class ProjectValidatorSecondDummy extends ProjectValidator {
-  @override
-  Future<List<ProjectValidatorResult>> start(FlutterProject project, {Logger? logger, FileSystem? fileSystem}) async{
-    return <ProjectValidatorResult>[
-      const ProjectValidatorResult(name: 'second', value: 'pass', status: StatusProjectValidator.success),
-      const ProjectValidatorResult(name: 'other fail', value: 'second fail', status: StatusProjectValidator.error),
-    ];
-  }
-
-  @override
-  bool supportsProject(FlutterProject project) {
-    return true;
-  }
-
-  @override
-  String get title => 'Second Dummy';
-}
-
-class ProjectValidatorCrash extends ProjectValidator {
-  @override
-  Future<List<ProjectValidatorResult>> start(FlutterProject project, {Logger? logger, FileSystem? fileSystem}) async{
-    throw Exception('my exception');
-  }
-
-  @override
-  bool supportsProject(FlutterProject project) {
-    return true;
-  }
-
-  @override
-  String get title => 'Crash';
-}
-
 void main() {
   late FileSystem fileSystem;
   late Terminal terminal;
@@ -159,4 +107,56 @@ void main() {
       expect(result, throwsToolExit(message: 'flag --watch is not compatible with --suggestions'));
     });
   });
+}
+
+class ProjectValidatorDummy extends ProjectValidator {
+  @override
+  Future<List<ProjectValidatorResult>> start(FlutterProject project, {Logger? logger, FileSystem? fileSystem}) async{
+    return <ProjectValidatorResult>[
+      const ProjectValidatorResult(name: 'pass', value: 'value', status: StatusProjectValidator.success),
+      const ProjectValidatorResult(name: 'fail', value: 'my error', status: StatusProjectValidator.error),
+      const ProjectValidatorResult(name: 'pass two', value: 'pass', warning: 'my warning', status: StatusProjectValidator.warning),
+    ];
+  }
+
+  @override
+  bool supportsProject(FlutterProject project) {
+    return true;
+  }
+
+  @override
+  String get title => 'First Dummy';
+}
+
+class ProjectValidatorSecondDummy extends ProjectValidator {
+  @override
+  Future<List<ProjectValidatorResult>> start(FlutterProject project, {Logger? logger, FileSystem? fileSystem}) async{
+    return <ProjectValidatorResult>[
+      const ProjectValidatorResult(name: 'second', value: 'pass', status: StatusProjectValidator.success),
+      const ProjectValidatorResult(name: 'other fail', value: 'second fail', status: StatusProjectValidator.error),
+    ];
+  }
+
+  @override
+  bool supportsProject(FlutterProject project) {
+    return true;
+  }
+
+  @override
+  String get title => 'Second Dummy';
+}
+
+class ProjectValidatorCrash extends ProjectValidator {
+  @override
+  Future<List<ProjectValidatorResult>> start(FlutterProject project, {Logger? logger, FileSystem? fileSystem}) async{
+    throw Exception('my exception');
+  }
+
+  @override
+  bool supportsProject(FlutterProject project) {
+    return true;
+  }
+
+  @override
+  String get title => 'Crash';
 }

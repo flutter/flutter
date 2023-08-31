@@ -6,63 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-enum RadiusType {
-  Sharp,
-  Shifting,
-  Round
-}
-
-void matches(BorderRadius? borderRadius, RadiusType top, RadiusType bottom) {
-  final Radius cardRadius = kMaterialEdges[MaterialType.card]!.topLeft;
-
-  if (top == RadiusType.Sharp) {
-    expect(borderRadius?.topLeft, equals(Radius.zero));
-    expect(borderRadius?.topRight, equals(Radius.zero));
-  } else if (top == RadiusType.Shifting) {
-    expect(borderRadius?.topLeft.x, greaterThan(0.0));
-    expect(borderRadius?.topLeft.x, lessThan(cardRadius.x));
-    expect(borderRadius?.topLeft.y, greaterThan(0.0));
-    expect(borderRadius?.topLeft.y, lessThan(cardRadius.y));
-    expect(borderRadius?.topRight.x, greaterThan(0.0));
-    expect(borderRadius?.topRight.x, lessThan(cardRadius.x));
-    expect(borderRadius?.topRight.y, greaterThan(0.0));
-    expect(borderRadius?.topRight.y, lessThan(cardRadius.y));
-  } else {
-    expect(borderRadius?.topLeft, equals(cardRadius));
-    expect(borderRadius?.topRight, equals(cardRadius));
-  }
-
-  if (bottom == RadiusType.Sharp) {
-    expect(borderRadius?.bottomLeft, equals(Radius.zero));
-    expect(borderRadius?.bottomRight, equals(Radius.zero));
-  } else if (bottom == RadiusType.Shifting) {
-    expect(borderRadius?.bottomLeft.x, greaterThan(0.0));
-    expect(borderRadius?.bottomLeft.x, lessThan(cardRadius.x));
-    expect(borderRadius?.bottomLeft.y, greaterThan(0.0));
-    expect(borderRadius?.bottomLeft.y, lessThan(cardRadius.y));
-    expect(borderRadius?.bottomRight.x, greaterThan(0.0));
-    expect(borderRadius?.bottomRight.x, lessThan(cardRadius.x));
-    expect(borderRadius?.bottomRight.y, greaterThan(0.0));
-    expect(borderRadius?.bottomRight.y, lessThan(cardRadius.y));
-  } else {
-    expect(borderRadius?.bottomLeft, equals(cardRadius));
-    expect(borderRadius?.bottomRight, equals(cardRadius));
-  }
-}
-
-// Returns the border radius decoration of an item within a MergeableMaterial.
-// This depends on the exact structure of objects built by the Material and
-// MergeableMaterial widgets.
-BorderRadius? getBorderRadius(WidgetTester tester, int index) {
-  final List<Element> containers = tester.elementList(find.byType(Container))
-                                   .toList();
-
-  final Container container = containers[index].widget as Container;
-  final BoxDecoration? boxDecoration = container.decoration as BoxDecoration?;
-
-  return boxDecoration!.borderRadius as BorderRadius?;
-}
-
 void main() {
   testWidgetsWithLeakTracking('MergeableMaterial empty', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1373,4 +1316,61 @@ void main() {
     boxDecoration = tester.widget<Container>(find.byType(Container).last).decoration! as BoxDecoration;
     expect(boxDecoration.color, themeCardColor);
   });
+}
+
+enum RadiusType {
+  Sharp,
+  Shifting,
+  Round
+}
+
+void matches(BorderRadius? borderRadius, RadiusType top, RadiusType bottom) {
+  final Radius cardRadius = kMaterialEdges[MaterialType.card]!.topLeft;
+
+  if (top == RadiusType.Sharp) {
+    expect(borderRadius?.topLeft, equals(Radius.zero));
+    expect(borderRadius?.topRight, equals(Radius.zero));
+  } else if (top == RadiusType.Shifting) {
+    expect(borderRadius?.topLeft.x, greaterThan(0.0));
+    expect(borderRadius?.topLeft.x, lessThan(cardRadius.x));
+    expect(borderRadius?.topLeft.y, greaterThan(0.0));
+    expect(borderRadius?.topLeft.y, lessThan(cardRadius.y));
+    expect(borderRadius?.topRight.x, greaterThan(0.0));
+    expect(borderRadius?.topRight.x, lessThan(cardRadius.x));
+    expect(borderRadius?.topRight.y, greaterThan(0.0));
+    expect(borderRadius?.topRight.y, lessThan(cardRadius.y));
+  } else {
+    expect(borderRadius?.topLeft, equals(cardRadius));
+    expect(borderRadius?.topRight, equals(cardRadius));
+  }
+
+  if (bottom == RadiusType.Sharp) {
+    expect(borderRadius?.bottomLeft, equals(Radius.zero));
+    expect(borderRadius?.bottomRight, equals(Radius.zero));
+  } else if (bottom == RadiusType.Shifting) {
+    expect(borderRadius?.bottomLeft.x, greaterThan(0.0));
+    expect(borderRadius?.bottomLeft.x, lessThan(cardRadius.x));
+    expect(borderRadius?.bottomLeft.y, greaterThan(0.0));
+    expect(borderRadius?.bottomLeft.y, lessThan(cardRadius.y));
+    expect(borderRadius?.bottomRight.x, greaterThan(0.0));
+    expect(borderRadius?.bottomRight.x, lessThan(cardRadius.x));
+    expect(borderRadius?.bottomRight.y, greaterThan(0.0));
+    expect(borderRadius?.bottomRight.y, lessThan(cardRadius.y));
+  } else {
+    expect(borderRadius?.bottomLeft, equals(cardRadius));
+    expect(borderRadius?.bottomRight, equals(cardRadius));
+  }
+}
+
+// Returns the border radius decoration of an item within a MergeableMaterial.
+// This depends on the exact structure of objects built by the Material and
+// MergeableMaterial widgets.
+BorderRadius? getBorderRadius(WidgetTester tester, int index) {
+  final List<Element> containers = tester.elementList(find.byType(Container))
+                                   .toList();
+
+  final Container container = containers[index].widget as Container;
+  final BoxDecoration? boxDecoration = container.decoration as BoxDecoration?;
+
+  return boxDecoration!.borderRadius as BorderRadius?;
 }

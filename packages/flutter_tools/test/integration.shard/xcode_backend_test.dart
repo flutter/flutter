@@ -11,20 +11,6 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import '../src/common.dart';
 import 'test_utils.dart';
 
-const String xcodeBackendPath = 'bin/xcode_backend.sh';
-const String xcodeBackendErrorHeader = '========================================================================';
-
-// Acceptable $CONFIGURATION/$FLUTTER_BUILD_MODE values should be debug, profile, or release
-const Map<String, String> unknownConfiguration = <String, String>{
-  'CONFIGURATION': 'Custom',
-};
-
-// $FLUTTER_BUILD_MODE will override $CONFIGURATION
-const Map<String, String> unknownFlutterBuildMode = <String, String>{
-  'FLUTTER_BUILD_MODE': 'Custom',
-  'CONFIGURATION': 'Debug',
-};
-
 void main() {
   Future<void> expectXcodeBackendFails(Map<String, String> environment) async {
     final ProcessResult result = await Process.run(
@@ -185,3 +171,17 @@ void main() {
     });
   }, skip: !io.Platform.isMacOS); // [intended] requires macos toolchain.
 }
+
+const String xcodeBackendPath = 'bin/xcode_backend.sh';
+const String xcodeBackendErrorHeader = '========================================================================';
+
+// Acceptable $CONFIGURATION/$FLUTTER_BUILD_MODE values should be debug, profile, or release
+const Map<String, String> unknownConfiguration = <String, String>{
+  'CONFIGURATION': 'Custom',
+};
+
+// $FLUTTER_BUILD_MODE will override $CONFIGURATION
+const Map<String, String> unknownFlutterBuildMode = <String, String>{
+  'FLUTTER_BUILD_MODE': 'Custom',
+  'CONFIGURATION': 'Debug',
+};

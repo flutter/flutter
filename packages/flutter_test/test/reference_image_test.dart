@@ -6,18 +6,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter_test/flutter_test.dart';
 
-Future<ui.Image> createTestImage(int width, int height, ui.Color color) {
-  final ui.Paint paint = ui.Paint()
-    ..style = ui.PaintingStyle.stroke
-    ..strokeWidth = 1.0
-    ..color = color;
-  final ui.PictureRecorder recorder = ui.PictureRecorder();
-  final ui.Canvas pictureCanvas = ui.Canvas(recorder);
-  pictureCanvas.drawCircle(Offset.zero, 20.0, paint);
-  final ui.Picture picture = recorder.endRecording();
-  return picture.toImage(width, height);
-}
-
 void main() {
   const ui.Color red = ui.Color.fromARGB(255, 255, 0, 0);
   const ui.Color green = ui.Color.fromARGB(255, 0, 255, 0);
@@ -70,4 +58,16 @@ void main() {
       );
     });
   });
+}
+
+Future<ui.Image> createTestImage(int width, int height, ui.Color color) {
+  final ui.Paint paint = ui.Paint()
+    ..style = ui.PaintingStyle.stroke
+    ..strokeWidth = 1.0
+    ..color = color;
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final ui.Canvas pictureCanvas = ui.Canvas(recorder);
+  pictureCanvas.drawCircle(Offset.zero, 20.0, paint);
+  final ui.Picture picture = recorder.endRecording();
+  return picture.toImage(width, height);
 }

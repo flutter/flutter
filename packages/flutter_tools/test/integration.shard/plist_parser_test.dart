@@ -14,37 +14,6 @@ import '../src/common.dart';
 import '../src/fakes.dart';
 import 'test_utils.dart';
 
-const String base64PlistXml =
-    'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPCFET0NUWVBFIHBsaXN0I'
-    'FBVQkxJQyAiLS8vQXBwbGUvL0RURCBQTElTVCAxLjAvL0VOIiAiaHR0cDovL3d3dy5hcHBsZS'
-    '5jb20vRFREcy9Qcm9wZXJ0eUxpc3QtMS4wLmR0ZCI+CjxwbGlzdCB2ZXJzaW9uPSIxLjAiPgo'
-    '8ZGljdD4KICA8a2V5PkNGQnVuZGxlRXhlY3V0YWJsZTwva2V5PgogIDxzdHJpbmc+QXBwPC9z'
-    'dHJpbmc+CiAgPGtleT5DRkJ1bmRsZUlkZW50aWZpZXI8L2tleT4KICA8c3RyaW5nPmlvLmZsd'
-    'XR0ZXIuZmx1dHRlci5hcHA8L3N0cmluZz4KPC9kaWN0Pgo8L3BsaXN0Pgo=';
-
-const String base64PlistBinary =
-    'YnBsaXN0MDDSAQIDBF8QEkNGQnVuZGxlRXhlY3V0YWJsZV8QEkNGQnVuZGxlSWRlbnRpZmllc'
-    'lNBcHBfEBZpby5mbHV0dGVyLmZsdXR0ZXIuYXBwCA0iNzsAAAAAAAABAQAAAAAAAAAFAAAAAA'
-    'AAAAAAAAAAAAAAVA==';
-
-const String base64PlistJson =
-    'eyJDRkJ1bmRsZUV4ZWN1dGFibGUiOiJBcHAiLCJDRkJ1bmRsZUlkZW50aWZpZXIiOiJpby5mb'
-    'HV0dGVyLmZsdXR0ZXIuYXBwIn0=';
-
-const String base64PlistXmlWithComplexDatatypes =
-    'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPCFET0NUWVBFIHBsaXN0I'
-    'FBVQkxJQyAiLS8vQXBwbGUvL0RURCBQTElTVCAxLjAvL0VOIiAiaHR0cDovL3d3dy5hcHBsZS'
-    '5jb20vRFREcy9Qcm9wZXJ0eUxpc3QtMS4wLmR0ZCI+CjxwbGlzdCB2ZXJzaW9uPSIxLjAiPgo'
-    '8ZGljdD4KICA8a2V5PkNGQnVuZGxlRXhlY3V0YWJsZTwva2V5PgogIDxzdHJpbmc+QXBwPC9z'
-    'dHJpbmc+CiAgPGtleT5DRkJ1bmRsZUlkZW50aWZpZXI8L2tleT4KICA8c3RyaW5nPmlvLmZsd'
-    'XR0ZXIuZmx1dHRlci5hcHA8L3N0cmluZz4KICA8a2V5PmludFZhbHVlPC9rZXk+CiAgPGludG'
-    'VnZXI+MjwvaW50ZWdlcj4KICA8a2V5PmRvdWJsZVZhbHVlPC9rZXk+CiAgPHJlYWw+MS41PC9'
-    'yZWFsPgogIDxrZXk+YmluYXJ5VmFsdWU8L2tleT4KICA8ZGF0YT5ZV0pqWkE9PTwvZGF0YT4K'
-    'ICA8a2V5PmFycmF5VmFsdWU8L2tleT4KICA8YXJyYXk+CiAgICA8dHJ1ZSAvPgogICAgPGZhb'
-    'HNlIC8+CiAgICA8aW50ZWdlcj4zPC9pbnRlZ2VyPgogIDwvYXJyYXk+CiAgPGtleT5kYXRlVm'
-    'FsdWU8L2tleT4KICA8ZGF0ZT4yMDIxLTEyLTAxVDEyOjM0OjU2WjwvZGF0ZT4KPC9kaWN0Pgo'
-    '8L3BsaXN0Pg==';
-
 void main() {
   // The tests herein explicitly don't use `MemoryFileSystem` or a mocked
   // `ProcessManager` because doing so wouldn't actually test what we want to
@@ -214,3 +183,34 @@ void main() {
     expect(logger.errorText, isEmpty);
   }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
 }
+
+const String base64PlistXml =
+    'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPCFET0NUWVBFIHBsaXN0I'
+    'FBVQkxJQyAiLS8vQXBwbGUvL0RURCBQTElTVCAxLjAvL0VOIiAiaHR0cDovL3d3dy5hcHBsZS'
+    '5jb20vRFREcy9Qcm9wZXJ0eUxpc3QtMS4wLmR0ZCI+CjxwbGlzdCB2ZXJzaW9uPSIxLjAiPgo'
+    '8ZGljdD4KICA8a2V5PkNGQnVuZGxlRXhlY3V0YWJsZTwva2V5PgogIDxzdHJpbmc+QXBwPC9z'
+    'dHJpbmc+CiAgPGtleT5DRkJ1bmRsZUlkZW50aWZpZXI8L2tleT4KICA8c3RyaW5nPmlvLmZsd'
+    'XR0ZXIuZmx1dHRlci5hcHA8L3N0cmluZz4KPC9kaWN0Pgo8L3BsaXN0Pgo=';
+
+const String base64PlistBinary =
+    'YnBsaXN0MDDSAQIDBF8QEkNGQnVuZGxlRXhlY3V0YWJsZV8QEkNGQnVuZGxlSWRlbnRpZmllc'
+    'lNBcHBfEBZpby5mbHV0dGVyLmZsdXR0ZXIuYXBwCA0iNzsAAAAAAAABAQAAAAAAAAAFAAAAAA'
+    'AAAAAAAAAAAAAAVA==';
+
+const String base64PlistJson =
+    'eyJDRkJ1bmRsZUV4ZWN1dGFibGUiOiJBcHAiLCJDRkJ1bmRsZUlkZW50aWZpZXIiOiJpby5mb'
+    'HV0dGVyLmZsdXR0ZXIuYXBwIn0=';
+
+const String base64PlistXmlWithComplexDatatypes =
+    'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPCFET0NUWVBFIHBsaXN0I'
+    'FBVQkxJQyAiLS8vQXBwbGUvL0RURCBQTElTVCAxLjAvL0VOIiAiaHR0cDovL3d3dy5hcHBsZS'
+    '5jb20vRFREcy9Qcm9wZXJ0eUxpc3QtMS4wLmR0ZCI+CjxwbGlzdCB2ZXJzaW9uPSIxLjAiPgo'
+    '8ZGljdD4KICA8a2V5PkNGQnVuZGxlRXhlY3V0YWJsZTwva2V5PgogIDxzdHJpbmc+QXBwPC9z'
+    'dHJpbmc+CiAgPGtleT5DRkJ1bmRsZUlkZW50aWZpZXI8L2tleT4KICA8c3RyaW5nPmlvLmZsd'
+    'XR0ZXIuZmx1dHRlci5hcHA8L3N0cmluZz4KICA8a2V5PmludFZhbHVlPC9rZXk+CiAgPGludG'
+    'VnZXI+MjwvaW50ZWdlcj4KICA8a2V5PmRvdWJsZVZhbHVlPC9rZXk+CiAgPHJlYWw+MS41PC9'
+    'yZWFsPgogIDxrZXk+YmluYXJ5VmFsdWU8L2tleT4KICA8ZGF0YT5ZV0pqWkE9PTwvZGF0YT4K'
+    'ICA8a2V5PmFycmF5VmFsdWU8L2tleT4KICA8YXJyYXk+CiAgICA8dHJ1ZSAvPgogICAgPGZhb'
+    'HNlIC8+CiAgICA8aW50ZWdlcj4zPC9pbnRlZ2VyPgogIDwvYXJyYXk+CiAgPGtleT5kYXRlVm'
+    'FsdWU8L2tleT4KICA8ZGF0ZT4yMDIxLTEyLTAxVDEyOjM0OjU2WjwvZGF0ZT4KPC9kaWN0Pgo'
+    '8L3BsaXN0Pg==';

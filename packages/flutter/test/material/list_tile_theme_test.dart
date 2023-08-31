@@ -8,42 +8,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-class TestIcon extends StatefulWidget {
-  const TestIcon({ super.key });
-
-  @override
-  TestIconState createState() => TestIconState();
-}
-
-class TestIconState extends State<TestIcon> {
-  late IconThemeData iconTheme;
-
-  @override
-  Widget build(BuildContext context) {
-    iconTheme = IconTheme.of(context);
-    return const Icon(Icons.add);
-  }
-}
-
-class TestText extends StatefulWidget {
-  const TestText(this.text, { super.key });
-
-  final String text;
-
-  @override
-  TestTextState createState() => TestTextState();
-}
-
-class TestTextState extends State<TestText> {
-  late TextStyle textStyle;
-
-  @override
-  Widget build(BuildContext context) {
-    textStyle = DefaultTextStyle.of(context).style;
-    return Text(widget.text);
-  }
-}
-
 void main() {
   test('ListTileThemeData copyWith, ==, hashCode, basics', () {
     expect(const ListTileThemeData(), const ListTileThemeData().copyWith());
@@ -905,4 +869,40 @@ RenderParagraph _getTextRenderObject(WidgetTester tester, String text) {
     of: find.byType(ListTile),
     matching: find.text(text),
   ));
+}
+
+class TestIcon extends StatefulWidget {
+  const TestIcon({ super.key });
+
+  @override
+  TestIconState createState() => TestIconState();
+}
+
+class TestIconState extends State<TestIcon> {
+  late IconThemeData iconTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    iconTheme = IconTheme.of(context);
+    return const Icon(Icons.add);
+  }
+}
+
+class TestText extends StatefulWidget {
+  const TestText(this.text, { super.key });
+
+  final String text;
+
+  @override
+  TestTextState createState() => TestTextState();
+}
+
+class TestTextState extends State<TestText> {
+  late TextStyle textStyle;
+
+  @override
+  Widget build(BuildContext context) {
+    textStyle = DefaultTextStyle.of(context).style;
+    return Text(widget.text);
+  }
 }

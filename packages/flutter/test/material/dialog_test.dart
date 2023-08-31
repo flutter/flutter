@@ -12,58 +12,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 
-MaterialApp _buildAppWithDialog(
-  Widget dialog, {
-  ThemeData? theme,
-  double textScaleFactor = 1.0,
-  TraversalEdgeBehavior? traversalEdgeBehavior,
-}) {
-  return MaterialApp(
-    theme: theme,
-    home: Material(
-      child: Builder(
-        builder: (BuildContext context) {
-          return Center(
-            child: ElevatedButton(
-              child: const Text('X'),
-              onPressed: () {
-                showDialog<void>(
-                  context: context,
-                  traversalEdgeBehavior: traversalEdgeBehavior,
-                  builder: (BuildContext context) {
-                    return MediaQuery(
-                      data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
-                      child: dialog,
-                    );
-                  },
-                );
-              },
-            ),
-          );
-        },
-      ),
-    ),
-  );
-}
-
-Material _getMaterialFromDialog(WidgetTester tester) {
-  return tester.widget<Material>(find.descendant(of: find.byType(Dialog), matching: find.byType(Material)));
-}
-
-RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text) {
-  return tester.element<StatelessElement>(find.descendant(of: find.byType(Dialog), matching: find.text(text))).renderObject! as RenderParagraph;
-}
-
-// What was the AlertDialog's ButtonBar when many of these tests were written,
-// is now a Padding widget with an OverflowBar child. The Padding widget's size
-// and location match the original ButtonBar's size and location.
-Finder _findButtonBar() {
-  return find.ancestor(of: find.byType(OverflowBar), matching: find.byType(Padding)).first;
-}
-
-const ShapeBorder _defaultM2DialogShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
-final ShapeBorder _defaultM3DialogShape =  RoundedRectangleBorder(borderRadius: BorderRadius.circular(28.0));
-
 void main() {
 
   final ThemeData material3Theme = ThemeData(useMaterial3: true, brightness: Brightness.dark);
@@ -2871,3 +2819,55 @@ class _ClosureNavigatorObserver extends NavigatorObserver {
   @override
   void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) => onDidChange(newRoute!);
 }
+
+MaterialApp _buildAppWithDialog(
+  Widget dialog, {
+  ThemeData? theme,
+  double textScaleFactor = 1.0,
+  TraversalEdgeBehavior? traversalEdgeBehavior,
+}) {
+  return MaterialApp(
+    theme: theme,
+    home: Material(
+      child: Builder(
+        builder: (BuildContext context) {
+          return Center(
+            child: ElevatedButton(
+              child: const Text('X'),
+              onPressed: () {
+                showDialog<void>(
+                  context: context,
+                  traversalEdgeBehavior: traversalEdgeBehavior,
+                  builder: (BuildContext context) {
+                    return MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+                      child: dialog,
+                    );
+                  },
+                );
+              },
+            ),
+          );
+        },
+      ),
+    ),
+  );
+}
+
+Material _getMaterialFromDialog(WidgetTester tester) {
+  return tester.widget<Material>(find.descendant(of: find.byType(Dialog), matching: find.byType(Material)));
+}
+
+RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text) {
+  return tester.element<StatelessElement>(find.descendant(of: find.byType(Dialog), matching: find.text(text))).renderObject! as RenderParagraph;
+}
+
+// What was the AlertDialog's ButtonBar when many of these tests were written,
+// is now a Padding widget with an OverflowBar child. The Padding widget's size
+// and location match the original ButtonBar's size and location.
+Finder _findButtonBar() {
+  return find.ancestor(of: find.byType(OverflowBar), matching: find.byType(Padding)).first;
+}
+
+const ShapeBorder _defaultM2DialogShape = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0)));
+final ShapeBorder _defaultM3DialogShape =  RoundedRectangleBorder(borderRadius: BorderRadius.circular(28.0));

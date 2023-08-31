@@ -19,8 +19,6 @@ import 'package:standard_message_codec/standard_message_codec.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 
-const String shaderLibDir = '/./shader_lib';
-
 void main() {
   group('AssetBundle.build', () {
     late FileSystem testFileSystem;
@@ -843,3 +841,5 @@ flutter:
     Platform: () => FakePlatform(),
   });
 }
+
+const String shaderLibDir = '/./shader_lib';

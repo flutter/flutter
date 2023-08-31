@@ -7,53 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'test_widgets.dart';
 
-class TestInherited extends InheritedWidget {
-  const TestInherited({ super.key, required super.child, this.shouldNotify = true });
-
-  final bool shouldNotify;
-
-  @override
-  bool updateShouldNotify(InheritedWidget oldWidget) {
-    return shouldNotify;
-  }
-}
-
-class ValueInherited extends InheritedWidget {
-  const ValueInherited({ super.key, required super.child, required this.value });
-
-  final int value;
-
-  @override
-  bool updateShouldNotify(ValueInherited oldWidget) => value != oldWidget.value;
-}
-
-class ExpectFail extends StatefulWidget {
-  const ExpectFail(this.onError, { super.key });
-  final VoidCallback onError;
-
-  @override
-  ExpectFailState createState() => ExpectFailState();
-}
-
-class ExpectFailState extends State<ExpectFail> {
-  @override
-  void initState() {
-    super.initState();
-    try {
-      context.dependOnInheritedWidgetOfExactType<TestInherited>(); // should fail
-    } catch (e) {
-      widget.onError();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) => Container();
-}
-
-class ChangeNotifierInherited extends InheritedNotifier<ChangeNotifier> {
-  const ChangeNotifierInherited({ super.key, required super.child, super.notifier });
-}
-
 void main() {
   testWidgets('Inherited notifies dependents', (WidgetTester tester) async {
     final List<TestInherited> log = <TestInherited>[];
@@ -498,4 +451,51 @@ void main() {
     ));
     expect(buildCount, equals(3));
   });
+}
+
+class TestInherited extends InheritedWidget {
+  const TestInherited({ super.key, required super.child, this.shouldNotify = true });
+
+  final bool shouldNotify;
+
+  @override
+  bool updateShouldNotify(InheritedWidget oldWidget) {
+    return shouldNotify;
+  }
+}
+
+class ValueInherited extends InheritedWidget {
+  const ValueInherited({ super.key, required super.child, required this.value });
+
+  final int value;
+
+  @override
+  bool updateShouldNotify(ValueInherited oldWidget) => value != oldWidget.value;
+}
+
+class ExpectFail extends StatefulWidget {
+  const ExpectFail(this.onError, { super.key });
+  final VoidCallback onError;
+
+  @override
+  ExpectFailState createState() => ExpectFailState();
+}
+
+class ExpectFailState extends State<ExpectFail> {
+  @override
+  void initState() {
+    super.initState();
+    try {
+      context.dependOnInheritedWidgetOfExactType<TestInherited>(); // should fail
+    } catch (e) {
+      widget.onError();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => Container();
+}
+
+class ChangeNotifierInherited extends InheritedNotifier<ChangeNotifier> {
+  const ChangeNotifierInherited({ super.key, required super.child, super.notifier });
 }

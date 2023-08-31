@@ -5,6 +5,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+void main() {
+  test('Pointer events are locked during reassemble', () async {
+    await binding.reassembleApplication();
+    expect(binding.wasLocked, isTrue);
+  });
+}
+
 class TestFoundationFlutterBinding extends BindingBase {
   bool? wasLocked;
 
@@ -16,10 +23,3 @@ class TestFoundationFlutterBinding extends BindingBase {
 }
 
 TestFoundationFlutterBinding binding = TestFoundationFlutterBinding();
-
-void main() {
-  test('Pointer events are locked during reassemble', () async {
-    await binding.reassembleApplication();
-    expect(binding.wasLocked, isTrue);
-  });
-}

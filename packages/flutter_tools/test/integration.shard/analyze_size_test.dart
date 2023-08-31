@@ -9,14 +9,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import '../src/common.dart';
 import 'test_utils.dart';
 
-// This test file does not use [getLocalEngineArguments] because it requires
-// multiple specific artifact output types.
-
-const String apkDebugMessage = 'A summary of your APK analysis can be found at: ';
-const String iosDebugMessage = 'A summary of your iOS bundle analysis can be found at: ';
-const String macOSDebugMessage = 'A summary of your macOS bundle analysis can be found at: ';
-const String runDevToolsMessage = 'dart devtools ';
-
 void main() {
   testWithoutContext('--analyze-size flag produces expected output on hello_world for Android', () async {
     final String workingDirectory = fileSystem.path.join(getFlutterRoot(), 'examples', 'hello_world');
@@ -223,3 +215,11 @@ void main() {
     tempDir.deleteSync(recursive: true);
   });
 }
+
+// This test file does not use [getLocalEngineArguments] because it requires
+// multiple specific artifact output types.
+
+const String apkDebugMessage = 'A summary of your APK analysis can be found at: ';
+const String iosDebugMessage = 'A summary of your iOS bundle analysis can be found at: ';
+const String macOSDebugMessage = 'A summary of your macOS bundle analysis can be found at: ';
+const String runDevToolsMessage = 'dart devtools ';

@@ -8,6 +8,24 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+void main() {
+  _binding = TestGestureFlutterBinding();
+
+  test('Pointer events are locked during reassemble', () async {
+    final List<PointerEvent> events = <PointerEvent>[];
+    _binding.callback = events.add;
+    bool tested = false;
+    await _binding.test(() {
+      expect(events.length, 0);
+      tested = true;
+    });
+    expect(tested, isTrue);
+    expect(events.length, 2);
+    expect(events[0], isA<PointerDownEvent>());
+    expect(events[1], isA<PointerUpEvent>());
+  });
+}
+
 typedef HandleEventCallback = void Function(PointerEvent event);
 
 class TestGestureFlutterBinding extends BindingBase with GestureBinding {
@@ -37,21 +55,3 @@ class TestGestureFlutterBinding extends BindingBase with GestureBinding {
 }
 
 late TestGestureFlutterBinding _binding;
-
-void main() {
-  _binding = TestGestureFlutterBinding();
-
-  test('Pointer events are locked during reassemble', () async {
-    final List<PointerEvent> events = <PointerEvent>[];
-    _binding.callback = events.add;
-    bool tested = false;
-    await _binding.test(() {
-      expect(events.length, 0);
-      tested = true;
-    });
-    expect(tested, isTrue);
-    expect(events.length, 2);
-    expect(events[0], isA<PointerDownEvent>());
-    expect(events[1], isA<PointerUpEvent>());
-  });
-}

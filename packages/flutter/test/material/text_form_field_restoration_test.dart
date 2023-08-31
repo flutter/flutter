@@ -5,9 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const String text = 'Hello World! How are you? Life is good!';
-const String alternativeText = 'Everything is awesome!!';
-
 void main() {
   testWidgets('TextField restoration', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -248,3 +245,6 @@ Future<void> skipPastScrollingAnimation(WidgetTester tester) async {
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 200));
 }
+
+const String text = 'Hello World! How are you? Life is good!';
+const String alternativeText = 'Everything is awesome!!';

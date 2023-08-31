@@ -16,12 +16,6 @@ import 'package:flutter_tools/src/ios/code_signing.dart';
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
-const String kCertificates = '''
-1) 86f7e437faa5a7fce15d1ddcb9eaeaea377667b8 "iPhone Developer: Profile 1 (1111AAAA11)"
-2) da4b9237bacccdf19c0760cab7aec4a8359010b0 "iPhone Developer: Profile 2 (2222BBBB22)"
-3) 5bf1fd927dfb8679496a2e6cf00cbe50c1c87145 "iPhone Developer: Profile 3 (3333CCCC33)"
-    3 valid identities found''';
-
 void main() {
   group('Auto signing', () {
     late Config testConfig;
@@ -600,3 +594,9 @@ class TestTerminal extends AnsiTerminal {
   @override
   int get preferredStyle => 0;
 }
+
+const String kCertificates = '''
+1) 86f7e437faa5a7fce15d1ddcb9eaeaea377667b8 "iPhone Developer: Profile 1 (1111AAAA11)"
+2) da4b9237bacccdf19c0760cab7aec4a8359010b0 "iPhone Developer: Profile 2 (2222BBBB22)"
+3) 5bf1fd927dfb8679496a2e6cf00cbe50c1c87145 "iPhone Developer: Profile 3 (3333CCCC33)"
+    3 valid identities found''';

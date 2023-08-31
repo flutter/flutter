@@ -14,30 +14,6 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
-const FakeCommand kAdbVersionCommand = FakeCommand(
-  command: <String>['adb', 'version'],
-  stdout: 'Android Debug Bridge version 1.0.39',
-);
-const FakeCommand kAdbStartServerCommand = FakeCommand(
-  command: <String>['adb', 'start-server']
-);
-const FakeCommand kInstallCommand = FakeCommand(
-  command: <String>[
-    'adb',
-    '-s',
-    '1234',
-    'install',
-    '-t',
-    '-r',
-    '--user',
-    '10',
-    'app-debug.apk',
-  ],
-);
-const FakeCommand kStoreShaCommand = FakeCommand(
-  command: <String>['adb', '-s', '1234', 'shell', 'echo', '-n', '', '>', '/data/local/tmp/sky.app.sha1']
-);
-
 void main() {
   late FileSystem fileSystem;
   late BufferLogger logger;
@@ -316,3 +292,27 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
   @override
   String get adbPath => 'adb';
 }
+
+const FakeCommand kAdbVersionCommand = FakeCommand(
+  command: <String>['adb', 'version'],
+  stdout: 'Android Debug Bridge version 1.0.39',
+);
+const FakeCommand kAdbStartServerCommand = FakeCommand(
+  command: <String>['adb', 'start-server']
+);
+const FakeCommand kInstallCommand = FakeCommand(
+  command: <String>[
+    'adb',
+    '-s',
+    '1234',
+    'install',
+    '-t',
+    '-r',
+    '--user',
+    '10',
+    'app-debug.apk',
+  ],
+);
+const FakeCommand kStoreShaCommand = FakeCommand(
+  command: <String>['adb', '-s', '1234', 'shell', 'echo', '-n', '', '>', '/data/local/tmp/sky.app.sha1']
+);

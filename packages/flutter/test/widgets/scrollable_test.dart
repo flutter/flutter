@@ -13,101 +13,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
 
-Future<void> pumpTest(
-  WidgetTester tester,
-  TargetPlatform? platform, {
-  bool scrollable = true,
-  bool reverse = false,
-  Set<LogicalKeyboardKey>? axisModifier,
-  Axis scrollDirection = Axis.vertical,
-  ScrollController? controller,
-  bool enableMouseDrag = true,
-}) async {
-  await tester.pumpWidget(MaterialApp(
-    scrollBehavior: const NoScrollbarBehavior().copyWith(
-      dragDevices: enableMouseDrag
-        ? <ui.PointerDeviceKind>{...ui.PointerDeviceKind.values}
-        : null,
-      pointerAxisModifiers: axisModifier,
-    ),
-    theme: ThemeData(
-      platform: platform,
-    ),
-    home: CustomScrollView(
-      controller: controller,
-      reverse: reverse,
-      scrollDirection: scrollDirection,
-      physics: scrollable ? null : const NeverScrollableScrollPhysics(),
-      slivers: <Widget>[
-        SliverToBoxAdapter(child: SizedBox(
-          height: scrollDirection == Axis.vertical ? 2000.0 : null,
-          width: scrollDirection == Axis.horizontal ? 2000.0 : null,
-        )),
-      ],
-    ),
-  ));
-  await tester.pump(const Duration(seconds: 5)); // to let the theme animate
-}
-
-class NoScrollbarBehavior extends MaterialScrollBehavior {
-  const NoScrollbarBehavior();
-
-  @override
-  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) => child;
-}
-
-// Pump a nested scrollable. The outer scrollable contains a sliver of a
-// 300-pixel-long scrollable followed by a 2000-pixel-long content.
-Future<void> pumpDoubleScrollableTest(
-  WidgetTester tester,
-  TargetPlatform platform,
-) async {
-  await tester.pumpWidget(MaterialApp(
-    theme: ThemeData(
-      platform: platform,
-    ),
-    home: const CustomScrollView(
-      slivers: <Widget>[
-        SliverToBoxAdapter(
-          child: SizedBox(
-            height: 300,
-            child: CustomScrollView(
-              slivers: <Widget>[
-                SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
-              ],
-            ),
-          ),
-        ),
-        SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
-      ],
-    ),
-  ));
-  await tester.pump(const Duration(seconds: 5)); // to let the theme animate
-}
-
-const double dragOffset = 200.0;
-
-double getScrollOffset(WidgetTester tester, {bool last = true}) {
-  Finder viewportFinder = find.byType(Viewport);
-  if (last) {
-    viewportFinder = viewportFinder.last;
-  }
-  final RenderViewport viewport = tester.renderObject(viewportFinder);
-  return viewport.offset.pixels;
-}
-
-double getScrollVelocity(WidgetTester tester) {
-  final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
-  final ScrollPosition position = viewport.offset as ScrollPosition;
-  return position.activity!.velocity;
-}
-
-void resetScrollOffset(WidgetTester tester) {
-  final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
-  final ScrollPosition position = viewport.offset as ScrollPosition;
-  position.jumpTo(0.0);
-}
-
 void main() {
   testWidgets('Flings on different platforms', (WidgetTester tester) async {
     await pumpTest(tester, TargetPlatform.android);
@@ -1502,4 +1407,99 @@ class TestTickerProvider extends TickerProvider {
   Ticker createTicker(TickerCallback onTick) {
     return Ticker(onTick);
   }
+}
+
+Future<void> pumpTest(
+  WidgetTester tester,
+  TargetPlatform? platform, {
+  bool scrollable = true,
+  bool reverse = false,
+  Set<LogicalKeyboardKey>? axisModifier,
+  Axis scrollDirection = Axis.vertical,
+  ScrollController? controller,
+  bool enableMouseDrag = true,
+}) async {
+  await tester.pumpWidget(MaterialApp(
+    scrollBehavior: const NoScrollbarBehavior().copyWith(
+      dragDevices: enableMouseDrag
+        ? <ui.PointerDeviceKind>{...ui.PointerDeviceKind.values}
+        : null,
+      pointerAxisModifiers: axisModifier,
+    ),
+    theme: ThemeData(
+      platform: platform,
+    ),
+    home: CustomScrollView(
+      controller: controller,
+      reverse: reverse,
+      scrollDirection: scrollDirection,
+      physics: scrollable ? null : const NeverScrollableScrollPhysics(),
+      slivers: <Widget>[
+        SliverToBoxAdapter(child: SizedBox(
+          height: scrollDirection == Axis.vertical ? 2000.0 : null,
+          width: scrollDirection == Axis.horizontal ? 2000.0 : null,
+        )),
+      ],
+    ),
+  ));
+  await tester.pump(const Duration(seconds: 5)); // to let the theme animate
+}
+
+class NoScrollbarBehavior extends MaterialScrollBehavior {
+  const NoScrollbarBehavior();
+
+  @override
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) => child;
+}
+
+// Pump a nested scrollable. The outer scrollable contains a sliver of a
+// 300-pixel-long scrollable followed by a 2000-pixel-long content.
+Future<void> pumpDoubleScrollableTest(
+  WidgetTester tester,
+  TargetPlatform platform,
+) async {
+  await tester.pumpWidget(MaterialApp(
+    theme: ThemeData(
+      platform: platform,
+    ),
+    home: const CustomScrollView(
+      slivers: <Widget>[
+        SliverToBoxAdapter(
+          child: SizedBox(
+            height: 300,
+            child: CustomScrollView(
+              slivers: <Widget>[
+                SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
+              ],
+            ),
+          ),
+        ),
+        SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
+      ],
+    ),
+  ));
+  await tester.pump(const Duration(seconds: 5)); // to let the theme animate
+}
+
+const double dragOffset = 200.0;
+
+double getScrollOffset(WidgetTester tester, {bool last = true}) {
+  Finder viewportFinder = find.byType(Viewport);
+  if (last) {
+    viewportFinder = viewportFinder.last;
+  }
+  final RenderViewport viewport = tester.renderObject(viewportFinder);
+  return viewport.offset.pixels;
+}
+
+double getScrollVelocity(WidgetTester tester) {
+  final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
+  final ScrollPosition position = viewport.offset as ScrollPosition;
+  return position.activity!.velocity;
+}
+
+void resetScrollOffset(WidgetTester tester) {
+  final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
+  final ScrollPosition position = viewport.offset as ScrollPosition;
+  position.jumpTo(0.0);
 }

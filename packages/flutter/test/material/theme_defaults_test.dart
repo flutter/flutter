@@ -5,8 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const Duration defaultButtonDuration = Duration(milliseconds: 200);
-
 void main() {
   group('FloatingActionButton', () {
     const BoxConstraints defaultFABConstraints = BoxConstraints.tightFor(width: 56.0, height: 56.0);
@@ -131,3 +129,5 @@ void main() {
     });
   });
 }
+
+const Duration defaultButtonDuration = Duration(milliseconds: 200);

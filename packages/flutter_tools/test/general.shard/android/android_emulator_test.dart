@@ -13,12 +13,6 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
-const String emulatorID = 'i1234';
-const String errorText = '[Android emulator test error]';
-const List<String> kEmulatorLaunchCommand = <String>[
-  'emulator', '-avd', emulatorID,
-];
-
 void main() {
   group('android_emulator', () {
     testWithoutContext('flags emulators without config', () {
@@ -223,3 +217,9 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
   @override
   String? emulatorPath;
 }
+
+const String emulatorID = 'i1234';
+const String errorText = '[Android emulator test error]';
+const List<String> kEmulatorLaunchCommand = <String>[
+  'emulator', '-avd', emulatorID,
+];

@@ -9,10 +9,6 @@ import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
-const Map<String, String> kDyLdLibEntry = <String, String>{
-  'DYLD_LIBRARY_PATH': '/path/to/libs',
-};
-
 void main() {
   // By default, the .forward() method will try every port between 1024
   // and 65535; this test verifies we are killing iproxy processes when
@@ -46,3 +42,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 }
+
+const Map<String, String> kDyLdLibEntry = <String, String>{
+  'DYLD_LIBRARY_PATH': '/path/to/libs',
+};

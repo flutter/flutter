@@ -8,43 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class Leaf extends StatefulWidget {
-  const Leaf({
-    super.key,
-    required this.child,
-  });
-  final Widget child;
-  @override
-  State<Leaf> createState() => _LeafState();
-}
-
-class _LeafState extends State<Leaf> {
-  bool _keepAlive = false;
-
-  void setKeepAlive(bool value) {
-    setState(() { _keepAlive = value; });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return KeepAlive(
-      keepAlive: _keepAlive,
-      child: widget.child,
-    );
-  }
-}
-
-List<Widget> generateList(Widget child) {
-  return List<Widget>.generate(
-    100,
-    (int index) => Leaf(
-      key: GlobalObjectKey<_LeafState>(index),
-      child: child,
-    ),
-    growable: false,
-  );
-}
-
 void main() {
   testWidgets('KeepAlive with ListView with itemExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -589,4 +552,41 @@ void main() {
       '                               preferredSize: Size(Infinity, Infinity)\n',
     ));
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87876
+}
+
+class Leaf extends StatefulWidget {
+  const Leaf({
+    super.key,
+    required this.child,
+  });
+  final Widget child;
+  @override
+  State<Leaf> createState() => _LeafState();
+}
+
+class _LeafState extends State<Leaf> {
+  bool _keepAlive = false;
+
+  void setKeepAlive(bool value) {
+    setState(() { _keepAlive = value; });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return KeepAlive(
+      keepAlive: _keepAlive,
+      child: widget.child,
+    );
+  }
+}
+
+List<Widget> generateList(Widget child) {
+  return List<Widget>.generate(
+    100,
+    (int index) => Leaf(
+      key: GlobalObjectKey<_LeafState>(index),
+      child: child,
+    ),
+    growable: false,
+  );
 }

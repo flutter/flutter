@@ -31,43 +31,6 @@ import '../../src/context.dart';
 import '../../src/fake_devices.dart';
 import '../../src/fakes.dart';
 
-/// Runs a callback using FakeAsync.run while continually pumping the
-/// microtask queue. This avoids a deadlock when tests `await` a Future
-/// which queues a microtask that will not be processed unless the queue
-/// is flushed.
-Future<T> _runFakeAsync<T>(Future<T> Function(FakeAsync time) f) async {
-  return FakeAsync().run((FakeAsync time) async {
-    bool pump = true;
-    final Future<T> future = f(time).whenComplete(() => pump = false);
-    while (pump) {
-      time.flushMicrotasks();
-    }
-    return future;
-  });
-}
-
-class FakeDaemonStreams implements DaemonStreams {
-  final StreamController<DaemonMessage> inputs = StreamController<DaemonMessage>();
-  final StreamController<DaemonMessage> outputs = StreamController<DaemonMessage>();
-
-  @override
-  Stream<DaemonMessage> get inputStream {
-    return inputs.stream;
-  }
-
-  @override
-  void send(Map<String, Object?> message, [ List<int>? binary ]) {
-    outputs.add(DaemonMessage(message, binary != null ? Stream<List<int>>.value(binary) : null));
-  }
-
-  @override
-  Future<void> dispose() async {
-    await inputs.close();
-    // In some tests, outputs have no listeners. We don't wait for outputs to close.
-    unawaited(outputs.close());
-  }
-}
-
 void main() {
   late Daemon daemon;
   late NotifyingLogger notifyingLogger;
@@ -1176,4 +1139,41 @@ class FakeSocket extends Fake implements io.Socket {
 
   @override
   void destroy() {}
+}
+
+/// Runs a callback using FakeAsync.run while continually pumping the
+/// microtask queue. This avoids a deadlock when tests `await` a Future
+/// which queues a microtask that will not be processed unless the queue
+/// is flushed.
+Future<T> _runFakeAsync<T>(Future<T> Function(FakeAsync time) f) async {
+  return FakeAsync().run((FakeAsync time) async {
+    bool pump = true;
+    final Future<T> future = f(time).whenComplete(() => pump = false);
+    while (pump) {
+      time.flushMicrotasks();
+    }
+    return future;
+  });
+}
+
+class FakeDaemonStreams implements DaemonStreams {
+  final StreamController<DaemonMessage> inputs = StreamController<DaemonMessage>();
+  final StreamController<DaemonMessage> outputs = StreamController<DaemonMessage>();
+
+  @override
+  Stream<DaemonMessage> get inputStream {
+    return inputs.stream;
+  }
+
+  @override
+  void send(Map<String, Object?> message, [ List<int>? binary ]) {
+    outputs.add(DaemonMessage(message, binary != null ? Stream<List<int>>.value(binary) : null));
+  }
+
+  @override
+  Future<void> dispose() async {
+    await inputs.close();
+    // In some tests, outputs have no listeners. We don't wait for outputs to close.
+    unawaited(outputs.close());
+  }
 }

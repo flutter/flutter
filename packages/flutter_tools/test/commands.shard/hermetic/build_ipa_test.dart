@@ -26,47 +26,6 @@ import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
-class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInterpreter {
-  FakeXcodeProjectInterpreterWithBuildSettings({ this.overrides = const <String, String>{} });
-
-  final Map<String, String> overrides;
-
-  @override
-  Future<Map<String, String>> getBuildSettings(
-      String projectPath, {
-        XcodeProjectBuildContext? buildContext,
-        Duration timeout = const Duration(minutes: 1),
-      }) async {
-    return <String, String>{
-      ...overrides,
-      'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
-      'DEVELOPMENT_TEAM': 'abc',
-    };
-  }
-}
-
-final Platform macosPlatform = FakePlatform(
-  operatingSystem: 'macos',
-  environment: <String, String>{
-    'FLUTTER_ROOT': '/',
-    'HOME': '/',
-  }
-);
-final Platform notMacosPlatform = FakePlatform(
-  environment: <String, String>{
-    'FLUTTER_ROOT': '/',
-  }
-);
-
-class FakePlistUtils extends Fake implements PlistParser {
-  final Map<String, Map<String, Object>> fileContents = <String, Map<String, Object>>{};
-
-  @override
-  T? getValueFromFile<T>(String plistFilePath, String key) {
-    return fileContents[plistFilePath]![key] as T?;
-  }
-}
-
 void main() {
   late FileSystem fileSystem;
   late TestUsage usage;
@@ -1791,3 +1750,44 @@ void main() {
 
 const String _xcBundleFilePath = '/.tmp_rand0/flutter_ios_build_temp_dirrand0/temporary_xcresult_bundle';
 const String _exportOptionsPlist = '/.tmp_rand0/flutter_build_ios.rand0/ExportOptions.plist';
+
+class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInterpreter {
+  FakeXcodeProjectInterpreterWithBuildSettings({ this.overrides = const <String, String>{} });
+
+  final Map<String, String> overrides;
+
+  @override
+  Future<Map<String, String>> getBuildSettings(
+      String projectPath, {
+        XcodeProjectBuildContext? buildContext,
+        Duration timeout = const Duration(minutes: 1),
+      }) async {
+    return <String, String>{
+      ...overrides,
+      'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
+      'DEVELOPMENT_TEAM': 'abc',
+    };
+  }
+}
+
+final Platform macosPlatform = FakePlatform(
+  operatingSystem: 'macos',
+  environment: <String, String>{
+    'FLUTTER_ROOT': '/',
+    'HOME': '/',
+  }
+);
+final Platform notMacosPlatform = FakePlatform(
+  environment: <String, String>{
+    'FLUTTER_ROOT': '/',
+  }
+);
+
+class FakePlistUtils extends Fake implements PlistParser {
+  final Map<String, Map<String, Object>> fileContents = <String, Map<String, Object>>{};
+
+  @override
+  T? getValueFromFile<T>(String plistFilePath, String key) {
+    return fileContents[plistFilePath]![key] as T?;
+  }
+}

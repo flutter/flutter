@@ -5,62 +5,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const int primaryKey = 4;
-
-class TestGestureArenaMember extends GestureArenaMember {
-  bool acceptRan = false;
-
-  @override
-  void acceptGesture(int key) {
-    expect(key, equals(primaryKey));
-    acceptRan = true;
-  }
-  bool rejectRan = false;
-
-  @override
-  void rejectGesture(int key) {
-    expect(key, equals(primaryKey));
-    rejectRan = true;
-  }
-}
-
-class GestureTester {
-  GestureArenaManager arena = GestureArenaManager();
-  TestGestureArenaMember first = TestGestureArenaMember();
-  TestGestureArenaMember second = TestGestureArenaMember();
-
-  late GestureArenaEntry firstEntry;
-  void addFirst() {
-    firstEntry = arena.add(primaryKey, first);
-  }
-
-  late GestureArenaEntry secondEntry;
-  void addSecond() {
-    secondEntry = arena.add(primaryKey, second);
-  }
-
-  void expectNothing() {
-    expect(first.acceptRan, isFalse);
-    expect(first.rejectRan, isFalse);
-    expect(second.acceptRan, isFalse);
-    expect(second.rejectRan, isFalse);
-  }
-
-  void expectFirstWin() {
-    expect(first.acceptRan, isTrue);
-    expect(first.rejectRan, isFalse);
-    expect(second.acceptRan, isFalse);
-    expect(second.rejectRan, isTrue);
-  }
-
-  void expectSecondWin() {
-    expect(first.acceptRan, isFalse);
-    expect(first.rejectRan, isTrue);
-    expect(second.acceptRan, isTrue);
-    expect(second.rejectRan, isFalse);
-  }
-}
-
 void main() {
   test('Should win by accepting', () {
     final GestureTester tester = GestureTester();
@@ -166,4 +110,60 @@ void main() {
     tester.arena.close(primaryKey);
     tester.expectSecondWin();
   });
+}
+
+const int primaryKey = 4;
+
+class TestGestureArenaMember extends GestureArenaMember {
+  bool acceptRan = false;
+
+  @override
+  void acceptGesture(int key) {
+    expect(key, equals(primaryKey));
+    acceptRan = true;
+  }
+  bool rejectRan = false;
+
+  @override
+  void rejectGesture(int key) {
+    expect(key, equals(primaryKey));
+    rejectRan = true;
+  }
+}
+
+class GestureTester {
+  GestureArenaManager arena = GestureArenaManager();
+  TestGestureArenaMember first = TestGestureArenaMember();
+  TestGestureArenaMember second = TestGestureArenaMember();
+
+  late GestureArenaEntry firstEntry;
+  void addFirst() {
+    firstEntry = arena.add(primaryKey, first);
+  }
+
+  late GestureArenaEntry secondEntry;
+  void addSecond() {
+    secondEntry = arena.add(primaryKey, second);
+  }
+
+  void expectNothing() {
+    expect(first.acceptRan, isFalse);
+    expect(first.rejectRan, isFalse);
+    expect(second.acceptRan, isFalse);
+    expect(second.rejectRan, isFalse);
+  }
+
+  void expectFirstWin() {
+    expect(first.acceptRan, isTrue);
+    expect(first.rejectRan, isFalse);
+    expect(second.acceptRan, isFalse);
+    expect(second.rejectRan, isTrue);
+  }
+
+  void expectSecondWin() {
+    expect(first.acceptRan, isFalse);
+    expect(first.rejectRan, isTrue);
+    expect(second.acceptRan, isTrue);
+    expect(second.rejectRan, isFalse);
+  }
 }

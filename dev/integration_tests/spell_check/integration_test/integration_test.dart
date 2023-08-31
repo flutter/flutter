@@ -13,40 +13,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:spell_check/main.dart';
 
-late DefaultSpellCheckService defaultSpellCheckService;
-late Locale locale;
-
-/// Waits to find [EditableText] that displays text with misspelled
-/// words marked the same as the [TextSpan] provided and returns
-/// true if it is found before timing out at 20 seconds.
-Future<bool> findTextSpanTree(
-  WidgetTester tester,
-  TextSpan inlineSpan,
-) async {
-  final RenderObject root = tester.renderObject(find.byType(EditableText));
-  expect(root, isNotNull);
-
-  RenderEditable? renderEditable;
-  void recursiveFinder(RenderObject child) {
-    if (child is RenderEditable && child.text == inlineSpan) {
-      renderEditable = child;
-      return;
-    }
-    child.visitChildren(recursiveFinder);
-  }
-
-  final DateTime endTime = tester.binding.clock.now().add(const Duration(seconds: 20));
-  do {
-    if (tester.binding.clock.now().isAfter(endTime)) {
-      return false;
-    }
-    await tester.pump(const Duration(seconds: 1));
-    root.visitChildren(recursiveFinder);
-  } while (renderEditable == null);
-
-  return true;
-}
-
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -180,4 +146,38 @@ void main() {
 
     expect(expectedTextSpanTreeFound, isTrue);
   });
+}
+
+late DefaultSpellCheckService defaultSpellCheckService;
+late Locale locale;
+
+/// Waits to find [EditableText] that displays text with misspelled
+/// words marked the same as the [TextSpan] provided and returns
+/// true if it is found before timing out at 20 seconds.
+Future<bool> findTextSpanTree(
+  WidgetTester tester,
+  TextSpan inlineSpan,
+) async {
+  final RenderObject root = tester.renderObject(find.byType(EditableText));
+  expect(root, isNotNull);
+
+  RenderEditable? renderEditable;
+  void recursiveFinder(RenderObject child) {
+    if (child is RenderEditable && child.text == inlineSpan) {
+      renderEditable = child;
+      return;
+    }
+    child.visitChildren(recursiveFinder);
+  }
+
+  final DateTime endTime = tester.binding.clock.now().add(const Duration(seconds: 20));
+  do {
+    if (tester.binding.clock.now().isAfter(endTime)) {
+      return false;
+    }
+    await tester.pump(const Duration(seconds: 1));
+    root.visitChildren(recursiveFinder);
+  } while (renderEditable == null);
+
+  return true;
 }

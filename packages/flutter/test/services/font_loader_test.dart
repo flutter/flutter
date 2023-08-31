@@ -5,17 +5,6 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestFontLoader extends FontLoader {
-  TestFontLoader(super.family);
-
-  @override
-  Future<void> loadFont(Uint8List list, String family) async {
-    fontAssets.add(list);
-  }
-
-  List<Uint8List> fontAssets = <Uint8List>[];
-}
-
 void main() {
   test('Font loader test', () async {
     final TestFontLoader tfl = TestFontLoader('TestFamily');
@@ -33,4 +22,15 @@ void main() {
 
     expect(tfl.fontAssets, unorderedEquals(expectedAssets));
   });
+}
+
+class TestFontLoader extends FontLoader {
+  TestFontLoader(super.family);
+
+  @override
+  Future<void> loadFont(Uint8List list, String family) async {
+    fontAssets.add(list);
+  }
+
+  List<Uint8List> fontAssets = <Uint8List>[];
 }

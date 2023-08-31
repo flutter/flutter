@@ -5,18 +5,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestUniqueWidget extends UniqueWidget<TestUniqueWidgetState> {
-  const TestUniqueWidget({ required super.key });
-
-  @override
-  TestUniqueWidgetState createState() => TestUniqueWidgetState();
-}
-
-class TestUniqueWidgetState extends State<TestUniqueWidget> {
-  @override
-  Widget build(BuildContext context) => Container();
-}
-
 void main() {
   testWidgets('Unique widget control test', (WidgetTester tester) async {
     final TestUniqueWidget widget = TestUniqueWidget(key: GlobalKey<TestUniqueWidgetState>());
@@ -31,4 +19,16 @@ void main() {
 
     expect(widget.currentState, equals(state));
   });
+}
+
+class TestUniqueWidget extends UniqueWidget<TestUniqueWidgetState> {
+  const TestUniqueWidget({ required super.key });
+
+  @override
+  TestUniqueWidgetState createState() => TestUniqueWidgetState();
+}
+
+class TestUniqueWidgetState extends State<TestUniqueWidget> {
+  @override
+  Widget build(BuildContext context) => Container();
 }

@@ -8,14 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
-int countSemanticsChildren(RenderObject object) {
-  int count = 0;
-  object.visitChildrenForSemantics((RenderObject child) {
-    count += 1;
-  });
-  return count;
-}
-
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
@@ -72,4 +64,12 @@ void main() {
     controller.value = 0.0;
     expect(countSemanticsChildren(box), 0);
   });
+}
+
+int countSemanticsChildren(RenderObject object) {
+  int count = 0;
+  object.visitChildrenForSemantics((RenderObject child) {
+    count += 1;
+  });
+  return count;
 }

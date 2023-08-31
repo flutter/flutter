@@ -6,22 +6,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-void verifyPaintPosition(GlobalKey key, Offset ideal, bool visible) {
-  final RenderSliver target = key.currentContext!.findRenderObject()! as RenderSliver;
-  expect(target.parent, isA<RenderViewport>());
-  final SliverPhysicalParentData parentData = target.parentData! as SliverPhysicalParentData;
-  final Offset actual = parentData.paintOffset;
-  expect(actual, ideal);
-  final SliverGeometry geometry = target.geometry!;
-  expect(geometry.visible, visible);
-}
-
-void verifyActualBoxPosition(WidgetTester tester, Finder finder, int index, Rect ideal) {
-  final RenderBox box = tester.renderObjectList<RenderBox>(finder).elementAt(index);
-  final Rect rect = Rect.fromPoints(box.localToGlobal(Offset.zero), box.localToGlobal(box.size.bottomRight(Offset.zero)));
-  expect(rect, equals(ideal));
-}
-
 void main() {
   testWidgets('Sliver appbars - pinned', (WidgetTester tester) async {
     const double bigHeight = 550.0;
@@ -373,4 +357,20 @@ class BigSliver extends LeafRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderBigSliver renderObject) {
     renderObject.height = height;
   }
+}
+
+void verifyPaintPosition(GlobalKey key, Offset ideal, bool visible) {
+  final RenderSliver target = key.currentContext!.findRenderObject()! as RenderSliver;
+  expect(target.parent, isA<RenderViewport>());
+  final SliverPhysicalParentData parentData = target.parentData! as SliverPhysicalParentData;
+  final Offset actual = parentData.paintOffset;
+  expect(actual, ideal);
+  final SliverGeometry geometry = target.geometry!;
+  expect(geometry.visible, visible);
+}
+
+void verifyActualBoxPosition(WidgetTester tester, Finder finder, int index, Rect ideal) {
+  final RenderBox box = tester.renderObjectList<RenderBox>(finder).elementAt(index);
+  final Rect rect = Rect.fromPoints(box.localToGlobal(Offset.zero), box.localToGlobal(box.size.bottomRight(Offset.zero)));
+  expect(rect, equals(ideal));
 }

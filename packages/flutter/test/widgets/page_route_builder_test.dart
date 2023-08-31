@@ -10,6 +10,28 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+void main() {
+  testWidgets('Material2 - Barriers show when using PageRouteBuilder', (WidgetTester tester) async {
+    await tester.pumpWidget(const TestPage(useMaterial3: false));
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byType(TestPage),
+      matchesGoldenFile('m2_page_route_builder.barrier.png'),
+    );
+  });
+
+  testWidgets('Material3 - Barriers show when using PageRouteBuilder', (WidgetTester tester) async {
+    await tester.pumpWidget(const TestPage(useMaterial3: true));
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byType(TestPage),
+      matchesGoldenFile('m3_page_route_builder.barrier.png'),
+    );
+  });
+}
+
 class TestPage extends StatelessWidget {
   const TestPage({ super.key, this.useMaterial3 });
 
@@ -90,26 +112,4 @@ class ModalPage extends StatelessWidget {
       ),
     );
   }
-}
-
-void main() {
-  testWidgets('Material2 - Barriers show when using PageRouteBuilder', (WidgetTester tester) async {
-    await tester.pumpWidget(const TestPage(useMaterial3: false));
-    await tester.tap(find.byType(FloatingActionButton));
-    await tester.pumpAndSettle();
-    await expectLater(
-      find.byType(TestPage),
-      matchesGoldenFile('m2_page_route_builder.barrier.png'),
-    );
-  });
-
-  testWidgets('Material3 - Barriers show when using PageRouteBuilder', (WidgetTester tester) async {
-    await tester.pumpWidget(const TestPage(useMaterial3: true));
-    await tester.tap(find.byType(FloatingActionButton));
-    await tester.pumpAndSettle();
-    await expectLater(
-      find.byType(TestPage),
-      matchesGoldenFile('m3_page_route_builder.barrier.png'),
-    );
-  });
 }

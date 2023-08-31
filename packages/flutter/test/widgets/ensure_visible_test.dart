@@ -8,63 +8,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Finder findKey(int i) => find.byKey(ValueKey<int>(i), skipOffstage: false);
-
-Widget buildSingleChildScrollView(Axis scrollDirection, { bool reverse = false }) {
-  return Directionality(
-    textDirection: TextDirection.ltr,
-    child: Center(
-      child: SizedBox(
-        width: 600.0,
-        height: 400.0,
-        child: SingleChildScrollView(
-          scrollDirection: scrollDirection,
-          reverse: reverse,
-          child: ListBody(
-            mainAxis: scrollDirection,
-            children: const <Widget>[
-              SizedBox(key: ValueKey<int>(0), width: 200.0, height: 200.0),
-              SizedBox(key: ValueKey<int>(1), width: 200.0, height: 200.0),
-              SizedBox(key: ValueKey<int>(2), width: 200.0, height: 200.0),
-              SizedBox(key: ValueKey<int>(3), width: 200.0, height: 200.0),
-              SizedBox(key: ValueKey<int>(4), width: 200.0, height: 200.0),
-              SizedBox(key: ValueKey<int>(5), width: 200.0, height: 200.0),
-              SizedBox(key: ValueKey<int>(6), width: 200.0, height: 200.0),
-            ],
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
-Widget buildListView(Axis scrollDirection, { bool reverse = false, bool shrinkWrap = false }) {
-  return Directionality(
-    textDirection: TextDirection.ltr,
-    child: Center(
-      child: SizedBox(
-        width: 600.0,
-        height: 400.0,
-        child: ListView(
-          scrollDirection: scrollDirection,
-          reverse: reverse,
-          addSemanticIndexes: false,
-          shrinkWrap: shrinkWrap,
-          children: const <Widget>[
-            SizedBox(key: ValueKey<int>(0), width: 200.0, height: 200.0),
-            SizedBox(key: ValueKey<int>(1), width: 200.0, height: 200.0),
-            SizedBox(key: ValueKey<int>(2), width: 200.0, height: 200.0),
-            SizedBox(key: ValueKey<int>(3), width: 200.0, height: 200.0),
-            SizedBox(key: ValueKey<int>(4), width: 200.0, height: 200.0),
-            SizedBox(key: ValueKey<int>(5), width: 200.0, height: 200.0),
-            SizedBox(key: ValueKey<int>(6), width: 200.0, height: 200.0),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
 void main() {
 
   group('SingleChildScrollView', () {
@@ -1050,4 +993,61 @@ void main() {
       expect(tester.getTopLeft(findKey(-3)).dy, equals(100.0));
     });
   });
+}
+
+Finder findKey(int i) => find.byKey(ValueKey<int>(i), skipOffstage: false);
+
+Widget buildSingleChildScrollView(Axis scrollDirection, { bool reverse = false }) {
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: Center(
+      child: SizedBox(
+        width: 600.0,
+        height: 400.0,
+        child: SingleChildScrollView(
+          scrollDirection: scrollDirection,
+          reverse: reverse,
+          child: ListBody(
+            mainAxis: scrollDirection,
+            children: const <Widget>[
+              SizedBox(key: ValueKey<int>(0), width: 200.0, height: 200.0),
+              SizedBox(key: ValueKey<int>(1), width: 200.0, height: 200.0),
+              SizedBox(key: ValueKey<int>(2), width: 200.0, height: 200.0),
+              SizedBox(key: ValueKey<int>(3), width: 200.0, height: 200.0),
+              SizedBox(key: ValueKey<int>(4), width: 200.0, height: 200.0),
+              SizedBox(key: ValueKey<int>(5), width: 200.0, height: 200.0),
+              SizedBox(key: ValueKey<int>(6), width: 200.0, height: 200.0),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+Widget buildListView(Axis scrollDirection, { bool reverse = false, bool shrinkWrap = false }) {
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: Center(
+      child: SizedBox(
+        width: 600.0,
+        height: 400.0,
+        child: ListView(
+          scrollDirection: scrollDirection,
+          reverse: reverse,
+          addSemanticIndexes: false,
+          shrinkWrap: shrinkWrap,
+          children: const <Widget>[
+            SizedBox(key: ValueKey<int>(0), width: 200.0, height: 200.0),
+            SizedBox(key: ValueKey<int>(1), width: 200.0, height: 200.0),
+            SizedBox(key: ValueKey<int>(2), width: 200.0, height: 200.0),
+            SizedBox(key: ValueKey<int>(3), width: 200.0, height: 200.0),
+            SizedBox(key: ValueKey<int>(4), width: 200.0, height: 200.0),
+            SizedBox(key: ValueKey<int>(5), width: 200.0, height: 200.0),
+            SizedBox(key: ValueKey<int>(6), width: 200.0, height: 200.0),
+          ],
+        ),
+      ),
+    ),
+  );
 }

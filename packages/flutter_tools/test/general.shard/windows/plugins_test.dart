@@ -14,8 +14,6 @@ import 'package:flutter_tools/src/project.dart';
 
 import '../../src/common.dart';
 
-const TemplateRenderer renderer = MustacheTemplateRenderer();
-
 void main() {
 
   testWithoutContext('Win32 injects Win32 plugins', () async {
@@ -54,3 +52,5 @@ void main() {
 void setUpProject(FileSystem fileSystem) {
   fileSystem.file('pubspec.yaml').createSync();
 }
+
+const TemplateRenderer renderer = MustacheTemplateRenderer();

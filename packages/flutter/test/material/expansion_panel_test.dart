@@ -6,112 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-class SimpleExpansionPanelListTestWidget extends StatefulWidget {
-  const SimpleExpansionPanelListTestWidget({
-    super.key,
-    this.firstPanelKey,
-    this.secondPanelKey,
-    this.canTapOnHeader = false,
-    this.expandedHeaderPadding,
-    this.dividerColor,
-    this.elevation = 2,
-  });
-
-  final Key? firstPanelKey;
-  final Key? secondPanelKey;
-  final bool canTapOnHeader;
-  final Color? dividerColor;
-  final double elevation;
-
-  /// If null, the default [ExpansionPanelList]'s expanded header padding value is applied via [defaultExpandedHeaderPadding]
-  final EdgeInsets? expandedHeaderPadding;
-
-  /// Mirrors the default expanded header padding as its source constants are private.
-  static EdgeInsets defaultExpandedHeaderPadding()
-  {
-    return const ExpansionPanelList().expandedHeaderPadding;
-  }
-
-  @override
-  State<SimpleExpansionPanelListTestWidget> createState() => _SimpleExpansionPanelListTestWidgetState();
-}
-
-class _SimpleExpansionPanelListTestWidgetState extends State<SimpleExpansionPanelListTestWidget> {
-  List<bool> extendedState = <bool>[false, false];
-
-  @override
-  Widget build(BuildContext context) {
-    return ExpansionPanelList(
-      expandedHeaderPadding: widget.expandedHeaderPadding ?? SimpleExpansionPanelListTestWidget.defaultExpandedHeaderPadding(),
-      expansionCallback: (int index, bool isExpanded) {
-        setState(() {
-          extendedState[index] = !extendedState[index];
-        });
-      },
-      dividerColor: widget.dividerColor,
-      elevation: widget.elevation,
-      children: <ExpansionPanel>[
-        ExpansionPanel(
-          headerBuilder: (BuildContext context, bool isExpanded) {
-            return Text(isExpanded ? 'B' : 'A', key: widget.firstPanelKey);
-          },
-          body: const SizedBox(height: 100.0),
-          canTapOnHeader: widget.canTapOnHeader,
-          isExpanded: extendedState[0],
-        ),
-        ExpansionPanel(
-          headerBuilder: (BuildContext context, bool isExpanded) {
-            return Text(isExpanded ? 'D' : 'C', key: widget.secondPanelKey);
-          },
-          body: const SizedBox(height: 100.0),
-          canTapOnHeader: widget.canTapOnHeader,
-          isExpanded: extendedState[1],
-        ),
-      ],
-    );
-  }
-}
-
-class ExpansionPanelListSemanticsTest extends StatefulWidget {
-  const ExpansionPanelListSemanticsTest({ super.key, required this.headerKey });
-
-  final Key headerKey;
-
-  @override
-  ExpansionPanelListSemanticsTestState createState() => ExpansionPanelListSemanticsTestState();
-}
-
-class ExpansionPanelListSemanticsTestState extends State<ExpansionPanelListSemanticsTest> {
-  bool headerTapped = false;
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      children: <Widget>[
-        ExpansionPanelList(
-          children: <ExpansionPanel>[
-            ExpansionPanel(
-              headerBuilder: (BuildContext context, bool isExpanded) {
-                return MergeSemantics(
-                  key: widget.headerKey,
-                  child: GestureDetector(
-                    onTap: () => headerTapped = true,
-                    child: const Text.rich(
-                      TextSpan(
-                        text:'head1',
-                      ),
-                    ),
-                  ),
-                );
-              },
-              body: const Placeholder(),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
 void main() {
   testWidgetsWithLeakTracking('ExpansionPanelList test', (WidgetTester tester) async {
     late int capturedIndex;
@@ -1803,4 +1697,110 @@ void main() {
       }
     }
   });
+}
+
+class SimpleExpansionPanelListTestWidget extends StatefulWidget {
+  const SimpleExpansionPanelListTestWidget({
+    super.key,
+    this.firstPanelKey,
+    this.secondPanelKey,
+    this.canTapOnHeader = false,
+    this.expandedHeaderPadding,
+    this.dividerColor,
+    this.elevation = 2,
+  });
+
+  final Key? firstPanelKey;
+  final Key? secondPanelKey;
+  final bool canTapOnHeader;
+  final Color? dividerColor;
+  final double elevation;
+
+  /// If null, the default [ExpansionPanelList]'s expanded header padding value is applied via [defaultExpandedHeaderPadding]
+  final EdgeInsets? expandedHeaderPadding;
+
+  /// Mirrors the default expanded header padding as its source constants are private.
+  static EdgeInsets defaultExpandedHeaderPadding()
+  {
+    return const ExpansionPanelList().expandedHeaderPadding;
+  }
+
+  @override
+  State<SimpleExpansionPanelListTestWidget> createState() => _SimpleExpansionPanelListTestWidgetState();
+}
+
+class _SimpleExpansionPanelListTestWidgetState extends State<SimpleExpansionPanelListTestWidget> {
+  List<bool> extendedState = <bool>[false, false];
+
+  @override
+  Widget build(BuildContext context) {
+    return ExpansionPanelList(
+      expandedHeaderPadding: widget.expandedHeaderPadding ?? SimpleExpansionPanelListTestWidget.defaultExpandedHeaderPadding(),
+      expansionCallback: (int index, bool isExpanded) {
+        setState(() {
+          extendedState[index] = !extendedState[index];
+        });
+      },
+      dividerColor: widget.dividerColor,
+      elevation: widget.elevation,
+      children: <ExpansionPanel>[
+        ExpansionPanel(
+          headerBuilder: (BuildContext context, bool isExpanded) {
+            return Text(isExpanded ? 'B' : 'A', key: widget.firstPanelKey);
+          },
+          body: const SizedBox(height: 100.0),
+          canTapOnHeader: widget.canTapOnHeader,
+          isExpanded: extendedState[0],
+        ),
+        ExpansionPanel(
+          headerBuilder: (BuildContext context, bool isExpanded) {
+            return Text(isExpanded ? 'D' : 'C', key: widget.secondPanelKey);
+          },
+          body: const SizedBox(height: 100.0),
+          canTapOnHeader: widget.canTapOnHeader,
+          isExpanded: extendedState[1],
+        ),
+      ],
+    );
+  }
+}
+
+class ExpansionPanelListSemanticsTest extends StatefulWidget {
+  const ExpansionPanelListSemanticsTest({ super.key, required this.headerKey });
+
+  final Key headerKey;
+
+  @override
+  ExpansionPanelListSemanticsTestState createState() => ExpansionPanelListSemanticsTestState();
+}
+
+class ExpansionPanelListSemanticsTestState extends State<ExpansionPanelListSemanticsTest> {
+  bool headerTapped = false;
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      children: <Widget>[
+        ExpansionPanelList(
+          children: <ExpansionPanel>[
+            ExpansionPanel(
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                return MergeSemantics(
+                  key: widget.headerKey,
+                  child: GestureDetector(
+                    onTap: () => headerTapped = true,
+                    child: const Text.rich(
+                      TextSpan(
+                        text:'head1',
+                      ),
+                    ),
+                  ),
+                );
+              },
+              body: const Placeholder(),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
 }

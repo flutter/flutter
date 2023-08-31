@@ -9,33 +9,6 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestAssetBundle extends CachingAssetBundle {
-  Map<String, int> loadCallCount = <String, int>{};
-
-  @override
-  Future<ByteData> load(String key) async {
-    loadCallCount[key] = (loadCallCount[key] ?? 0) + 1;
-    if (key == 'AssetManifest.json') {
-      return ByteData.sublistView(utf8.encode('{"one": ["one"]}'));
-    }
-
-    if (key == 'AssetManifest.bin') {
-      return const StandardMessageCodec()
-          .encodeMessage(<String, Object>{'one': <Object>[]})!;
-    }
-
-    if (key == 'counter') {
-      return ByteData.sublistView(utf8.encode(loadCallCount[key]!.toString()));
-    }
-
-    if (key == 'one') {
-      return ByteData(1)..setInt8(0, 49);
-    }
-
-    throw FlutterError('key not found');
-  }
-}
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -214,4 +187,31 @@ void main() {
     expect(assetManifest.keys.toList(), equals(<String>['one']));
     expect(assetManifest['one'], <Object>[]);
   });
+}
+
+class TestAssetBundle extends CachingAssetBundle {
+  Map<String, int> loadCallCount = <String, int>{};
+
+  @override
+  Future<ByteData> load(String key) async {
+    loadCallCount[key] = (loadCallCount[key] ?? 0) + 1;
+    if (key == 'AssetManifest.json') {
+      return ByteData.sublistView(utf8.encode('{"one": ["one"]}'));
+    }
+
+    if (key == 'AssetManifest.bin') {
+      return const StandardMessageCodec()
+          .encodeMessage(<String, Object>{'one': <Object>[]})!;
+    }
+
+    if (key == 'counter') {
+      return ByteData.sublistView(utf8.encode(loadCallCount[key]!.toString()));
+    }
+
+    if (key == 'one') {
+      return ByteData(1)..setInt8(0, 49);
+    }
+
+    throw FlutterError('key not found');
+  }
 }

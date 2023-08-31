@@ -14,117 +14,6 @@ import '../image_data.dart';
 import '../painting/mocks_for_image_cache.dart';
 import '../rendering/rendering_tester.dart';
 
-class TestCanvas implements Canvas {
-  final List<Invocation> invocations = <Invocation>[];
-
-  @override
-  void noSuchMethod(Invocation invocation) {
-    invocations.add(invocation);
-  }
-}
-
-class SynchronousTestImageProvider extends ImageProvider<int> {
-  const SynchronousTestImageProvider(this.image);
-
-  final ui.Image image;
-
-  @override
-  Future<int> obtainKey(ImageConfiguration configuration) {
-    return SynchronousFuture<int>(1);
-  }
-
-  @override
-  ImageStreamCompleter load(int key, DecoderCallback decode) {
-    return OneFrameImageStreamCompleter(
-      SynchronousFuture<ImageInfo>(TestImageInfo(key, image: image)),
-    );
-  }
-}
-
-class SynchronousErrorTestImageProvider extends ImageProvider<int> {
-  const SynchronousErrorTestImageProvider(this.throwable);
-
-  final Object throwable;
-
-  @override
-  Future<int> obtainKey(ImageConfiguration configuration) {
-    throw throwable;
-  }
-
-  @override
-  ImageStreamCompleter load(int key, DecoderCallback decode) {
-    throw throwable;
-  }
-}
-
-class AsyncTestImageProvider extends ImageProvider<int> {
-  AsyncTestImageProvider(this.image);
-
-  final ui.Image image;
-
-  @override
-  Future<int> obtainKey(ImageConfiguration configuration) {
-    return Future<int>.value(2);
-  }
-
-  @override
-  ImageStreamCompleter load(int key, DecoderCallback decode) {
-    return OneFrameImageStreamCompleter(
-      Future<ImageInfo>.value(TestImageInfo(key, image: image)),
-    );
-  }
-}
-
-class DelayedImageProvider extends ImageProvider<DelayedImageProvider> {
-  DelayedImageProvider(this.image);
-
-  final ui.Image image;
-
-  final Completer<ImageInfo> _completer = Completer<ImageInfo>();
-
-  @override
-  Future<DelayedImageProvider> obtainKey(ImageConfiguration configuration) {
-    return SynchronousFuture<DelayedImageProvider>(this);
-  }
-
-  @override
-  ImageStreamCompleter load(DelayedImageProvider key, DecoderCallback decode) {
-    return OneFrameImageStreamCompleter(_completer.future);
-  }
-
-  Future<void> complete() async {
-    _completer.complete(ImageInfo(image: image));
-  }
-
-  @override
-  String toString() => '${describeIdentity(this)}()';
-}
-
-class MultiFrameImageProvider extends ImageProvider<MultiFrameImageProvider> {
-  MultiFrameImageProvider(this.completer);
-
-  final MultiImageCompleter completer;
-
-  @override
-  Future<MultiFrameImageProvider> obtainKey(ImageConfiguration configuration) {
-    return SynchronousFuture<MultiFrameImageProvider>(this);
-  }
-
-  @override
-  ImageStreamCompleter load(MultiFrameImageProvider key, DecoderCallback decode) {
-    return completer;
-  }
-
-  @override
-  String toString() => '${describeIdentity(this)}()';
-}
-
-class MultiImageCompleter extends ImageStreamCompleter {
-  void testSetImage(ImageInfo info) {
-    setImage(info);
-  }
-}
-
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
@@ -813,4 +702,115 @@ void main() {
 
     info.dispose();
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
+}
+
+class TestCanvas implements Canvas {
+  final List<Invocation> invocations = <Invocation>[];
+
+  @override
+  void noSuchMethod(Invocation invocation) {
+    invocations.add(invocation);
+  }
+}
+
+class SynchronousTestImageProvider extends ImageProvider<int> {
+  const SynchronousTestImageProvider(this.image);
+
+  final ui.Image image;
+
+  @override
+  Future<int> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<int>(1);
+  }
+
+  @override
+  ImageStreamCompleter load(int key, DecoderCallback decode) {
+    return OneFrameImageStreamCompleter(
+      SynchronousFuture<ImageInfo>(TestImageInfo(key, image: image)),
+    );
+  }
+}
+
+class SynchronousErrorTestImageProvider extends ImageProvider<int> {
+  const SynchronousErrorTestImageProvider(this.throwable);
+
+  final Object throwable;
+
+  @override
+  Future<int> obtainKey(ImageConfiguration configuration) {
+    throw throwable;
+  }
+
+  @override
+  ImageStreamCompleter load(int key, DecoderCallback decode) {
+    throw throwable;
+  }
+}
+
+class AsyncTestImageProvider extends ImageProvider<int> {
+  AsyncTestImageProvider(this.image);
+
+  final ui.Image image;
+
+  @override
+  Future<int> obtainKey(ImageConfiguration configuration) {
+    return Future<int>.value(2);
+  }
+
+  @override
+  ImageStreamCompleter load(int key, DecoderCallback decode) {
+    return OneFrameImageStreamCompleter(
+      Future<ImageInfo>.value(TestImageInfo(key, image: image)),
+    );
+  }
+}
+
+class DelayedImageProvider extends ImageProvider<DelayedImageProvider> {
+  DelayedImageProvider(this.image);
+
+  final ui.Image image;
+
+  final Completer<ImageInfo> _completer = Completer<ImageInfo>();
+
+  @override
+  Future<DelayedImageProvider> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<DelayedImageProvider>(this);
+  }
+
+  @override
+  ImageStreamCompleter load(DelayedImageProvider key, DecoderCallback decode) {
+    return OneFrameImageStreamCompleter(_completer.future);
+  }
+
+  Future<void> complete() async {
+    _completer.complete(ImageInfo(image: image));
+  }
+
+  @override
+  String toString() => '${describeIdentity(this)}()';
+}
+
+class MultiFrameImageProvider extends ImageProvider<MultiFrameImageProvider> {
+  MultiFrameImageProvider(this.completer);
+
+  final MultiImageCompleter completer;
+
+  @override
+  Future<MultiFrameImageProvider> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<MultiFrameImageProvider>(this);
+  }
+
+  @override
+  ImageStreamCompleter load(MultiFrameImageProvider key, DecoderCallback decode) {
+    return completer;
+  }
+
+  @override
+  String toString() => '${describeIdentity(this)}()';
+}
+
+class MultiImageCompleter extends ImageStreamCompleter {
+  void testSetImage(ImageInfo info) {
+    setImage(info);
+  }
 }

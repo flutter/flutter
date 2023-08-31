@@ -11,12 +11,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/rendering_tester.dart';
 
-class SpyFixedExtentScrollController extends FixedExtentScrollController {
-  /// Override for test visibility only.
-  @override
-  bool get hasListeners => super.hasListeners;
-}
-
 void main() {
   testWidgets('Picker respects theme styling', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -585,4 +579,10 @@ void main() {
     expect(tappedChildren, const <int>[0, 1]);
   });
 
+}
+
+class SpyFixedExtentScrollController extends FixedExtentScrollController {
+  /// Override for test visibility only.
+  @override
+  bool get hasListeners => super.hasListeners;
 }

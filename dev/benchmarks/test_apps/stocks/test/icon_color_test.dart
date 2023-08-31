@@ -7,41 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stocks/main.dart' as stocks;
 import 'package:stocks/stock_data.dart' as stock_data;
 
-Element? findElementOfExactWidgetTypeGoingDown(Element node, Type targetType) {
-  void walker(Element child) {
-    if (child.widget.runtimeType == targetType) {
-      throw child;
-    }
-    child.visitChildElements(walker);
-  }
-  try {
-    walker(node);
-  } on Element catch (result) {
-    return result;
-  }
-  return null;
-}
-
-Element? findElementOfExactWidgetTypeGoingUp(Element node, Type targetType) {
-  Element? result;
-  bool walker(Element ancestor) {
-    if (ancestor.widget.runtimeType == targetType) {
-      result = ancestor;
-      return false;
-    }
-    return true;
-  }
-  node.visitAncestorElements(walker);
-  return result;
-}
-
-void checkIconColor(WidgetTester tester, String label, Color color) {
-  final Element listTile = findElementOfExactWidgetTypeGoingUp(tester.element(find.text(label)), ListTile)!;
-  final Element asset = findElementOfExactWidgetTypeGoingDown(listTile, RichText)!;
-  final RichText richText = asset.widget as RichText;
-  expect(richText.text.style!.color, equals(color));
-}
-
 void main() {
   stock_data.StockData.actuallyFetchData = false;
 
@@ -85,4 +50,39 @@ void main() {
     checkIconColor(tester, 'Account Balance', Colors.white38); // disabled
     checkIconColor(tester, 'About', Colors.white); // enabled
   });
+}
+
+Element? findElementOfExactWidgetTypeGoingDown(Element node, Type targetType) {
+  void walker(Element child) {
+    if (child.widget.runtimeType == targetType) {
+      throw child;
+    }
+    child.visitChildElements(walker);
+  }
+  try {
+    walker(node);
+  } on Element catch (result) {
+    return result;
+  }
+  return null;
+}
+
+Element? findElementOfExactWidgetTypeGoingUp(Element node, Type targetType) {
+  Element? result;
+  bool walker(Element ancestor) {
+    if (ancestor.widget.runtimeType == targetType) {
+      result = ancestor;
+      return false;
+    }
+    return true;
+  }
+  node.visitAncestorElements(walker);
+  return result;
+}
+
+void checkIconColor(WidgetTester tester, String label, Color color) {
+  final Element listTile = findElementOfExactWidgetTypeGoingUp(tester.element(find.text(label)), ListTile)!;
+  final Element asset = findElementOfExactWidgetTypeGoingDown(listTile, RichText)!;
+  final RichText richText = asset.widget as RichText;
+  expect(richText.text.style!.color, equals(color));
 }

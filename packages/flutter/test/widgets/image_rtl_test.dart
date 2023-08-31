@@ -8,24 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestImageProvider extends ImageProvider<TestImageProvider> {
-  const TestImageProvider(this.image);
-
-  final ui.Image image;
-
-  @override
-  Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {
-    return SynchronousFuture<TestImageProvider>(this);
-  }
-
-  @override
-  ImageStreamCompleter load(TestImageProvider key, DecoderCallback decode) {
-    return OneFrameImageStreamCompleter(
-      SynchronousFuture<ImageInfo>(ImageInfo(image: image)),
-    );
-  }
-}
-
 void main() {
   late ui.Image testImage;
   setUpAll(() async {
@@ -569,4 +551,22 @@ void main() {
       EnginePhase.layout, // so that we don't try to paint the fake images
     );
   });
+}
+
+class TestImageProvider extends ImageProvider<TestImageProvider> {
+  const TestImageProvider(this.image);
+
+  final ui.Image image;
+
+  @override
+  Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<TestImageProvider>(this);
+  }
+
+  @override
+  ImageStreamCompleter load(TestImageProvider key, DecoderCallback decode) {
+    return OneFrameImageStreamCompleter(
+      SynchronousFuture<ImageInfo>(ImageInfo(image: image)),
+    );
+  }
 }

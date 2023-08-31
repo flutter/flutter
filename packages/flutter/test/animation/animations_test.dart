@@ -7,13 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../scheduler/scheduler_tester.dart';
 
-class BogusCurve extends Curve {
-  const BogusCurve();
-
-  @override
-  double transform(double t) => 100.0;
-}
-
 void main() {
   setUp(() {
     WidgetsFlutterBinding.ensureInitialized();
@@ -498,4 +491,11 @@ FlutterError
     expect(animation.value, 10.0);
   });
 
+}
+
+class BogusCurve extends Curve {
+  const BogusCurve();
+
+  @override
+  double transform(double t) => 100.0;
 }

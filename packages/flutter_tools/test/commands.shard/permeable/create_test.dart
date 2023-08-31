@@ -36,27 +36,6 @@ import '../../src/fakes.dart';
 import '../../src/pubspec_schema.dart';
 import '../../src/test_flutter_command_runner.dart';
 
-const String _kNoPlatformsMessage = "You've created a plugin project that doesn't yet support any platforms.\n";
-const String frameworkRevision = '12345678';
-const String frameworkChannel = 'omega';
-const String _kDisabledPlatformRequestedMessage = 'currently not supported on your local environment.';
-
-// This needs to be created from the local platform due to re-entrant flutter calls made in this test.
-FakePlatform _kNoColorTerminalPlatform() => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
-FakePlatform _kNoColorTerminalMacOSPlatform() => FakePlatform.fromPlatform(const LocalPlatform())
-  ..stdoutSupportsAnsi = false
-  ..operatingSystem = 'macos';
-
-final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
-  Platform: _kNoColorTerminalPlatform,
-};
-
-const String samplesIndexJson = '''
-[
-  { "id": "sample1" },
-  { "id": "sample2" }
-]''';
-
 void main() {
   late Directory tempDir;
   late Directory projectDir;
@@ -3662,3 +3641,24 @@ bool _getBooleanValueFromPlist({required File plistFile, String? key}) {
   assert(keyIndex > 0);
   return plist[keyIndex+1].replaceAll('<', '').replaceAll('/>', '') == 'true';
 }
+
+const String _kNoPlatformsMessage = "You've created a plugin project that doesn't yet support any platforms.\n";
+const String frameworkRevision = '12345678';
+const String frameworkChannel = 'omega';
+const String _kDisabledPlatformRequestedMessage = 'currently not supported on your local environment.';
+
+// This needs to be created from the local platform due to re-entrant flutter calls made in this test.
+FakePlatform _kNoColorTerminalPlatform() => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
+FakePlatform _kNoColorTerminalMacOSPlatform() => FakePlatform.fromPlatform(const LocalPlatform())
+  ..stdoutSupportsAnsi = false
+  ..operatingSystem = 'macos';
+
+final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
+  Platform: _kNoColorTerminalPlatform,
+};
+
+const String samplesIndexJson = '''
+[
+  { "id": "sample1" },
+  { "id": "sample2" }
+]''';

@@ -11,14 +11,6 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
-class MockOnPressedFunction {
-  int called = 0;
-
-  void handler() {
-    called++;
-  }
-}
-
 void main() {
   late MockOnPressedFunction mockOnPressedFunction;
   const ColorScheme colorScheme = ColorScheme.light();
@@ -2840,4 +2832,12 @@ TextStyle? _iconStyle(WidgetTester tester, IconData icon) {
     find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
   );
   return iconRichText.text.style;
+}
+
+class MockOnPressedFunction {
+  int called = 0;
+
+  void handler() {
+    called++;
+  }
 }

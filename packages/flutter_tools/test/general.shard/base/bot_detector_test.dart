@@ -13,8 +13,6 @@ import '../../src/common.dart';
 import '../../src/fake_http_client.dart';
 import '../../src/fakes.dart';
 
-final Uri azureUrl = Uri.parse('http://169.254.169.254/metadata/instance');
-
 void main() {
   group('BotDetector', () {
     late FakePlatform fakePlatform;
@@ -180,3 +178,5 @@ void main() {
     });
   });
 }
+
+final Uri azureUrl = Uri.parse('http://169.254.169.254/metadata/instance');

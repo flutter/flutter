@@ -6,72 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-// A simple "flat" InheritedModel: the data model is just 3 integer
-// valued fields: a, b, c.
-class ABCModel extends InheritedModel<String> {
-  const ABCModel({
-    super.key,
-    this.a,
-    this.b,
-    this.c,
-    this.aspects,
-    required super.child,
-  });
-
-  final int? a;
-  final int? b;
-  final int? c;
-
-  // The aspects (fields) of this model that widgets can depend on with
-  // inheritFrom.
-  //
-  // This property is null by default, which means that the model supports
-  // all 3 fields.
-  final Set<String>? aspects;
-
-  @override
-  bool isSupportedAspect(Object aspect) {
-    return aspects == null || aspects!.contains(aspect);
-  }
-
-  @override
-  bool updateShouldNotify(ABCModel old) {
-    return !setEquals<String>(aspects, old.aspects) || a != old.a || b != old.b || c != old.c;
-  }
-
-  @override
-  bool updateShouldNotifyDependent(ABCModel old, Set<String> dependencies) {
-    return !setEquals<String>(aspects, old.aspects)
-        || (a != old.a && dependencies.contains('a'))
-        || (b != old.b && dependencies.contains('b'))
-        || (c != old.c && dependencies.contains('c'));
-  }
-
-  static ABCModel? of(BuildContext context, { String? fieldName }) {
-    return InheritedModel.inheritFrom<ABCModel>(context, aspect: fieldName);
-  }
-}
-
-class ShowABCField extends StatefulWidget {
-  const ShowABCField({ super.key, required this.fieldName });
-
-  final String fieldName;
-
-  @override
-  State<ShowABCField> createState() => _ShowABCFieldState();
-}
-
-class _ShowABCFieldState extends State<ShowABCField> {
-  int _buildCount = 0;
-
-  @override
-  Widget build(BuildContext context) {
-    final ABCModel abc = ABCModel.of(context, fieldName: widget.fieldName)!;
-    final int? value = widget.fieldName == 'a' ? abc.a : (widget.fieldName == 'b' ? abc.b : abc.c);
-    return Text('${widget.fieldName}: $value [${_buildCount++}]');
-  }
-}
-
 void main() {
   testWidgets('InheritedModel basics', (WidgetTester tester) async {
     int a = 0;
@@ -473,4 +407,70 @@ void main() {
     expect(find.text('c: null [5]'), findsOneWidget); // rebuilt showC now depends on the inner model
     expect(find.text('a: 101 b: 102 c: null'), findsOneWidget); // inner model's a, b, c
   });
+}
+
+// A simple "flat" InheritedModel: the data model is just 3 integer
+// valued fields: a, b, c.
+class ABCModel extends InheritedModel<String> {
+  const ABCModel({
+    super.key,
+    this.a,
+    this.b,
+    this.c,
+    this.aspects,
+    required super.child,
+  });
+
+  final int? a;
+  final int? b;
+  final int? c;
+
+  // The aspects (fields) of this model that widgets can depend on with
+  // inheritFrom.
+  //
+  // This property is null by default, which means that the model supports
+  // all 3 fields.
+  final Set<String>? aspects;
+
+  @override
+  bool isSupportedAspect(Object aspect) {
+    return aspects == null || aspects!.contains(aspect);
+  }
+
+  @override
+  bool updateShouldNotify(ABCModel old) {
+    return !setEquals<String>(aspects, old.aspects) || a != old.a || b != old.b || c != old.c;
+  }
+
+  @override
+  bool updateShouldNotifyDependent(ABCModel old, Set<String> dependencies) {
+    return !setEquals<String>(aspects, old.aspects)
+        || (a != old.a && dependencies.contains('a'))
+        || (b != old.b && dependencies.contains('b'))
+        || (c != old.c && dependencies.contains('c'));
+  }
+
+  static ABCModel? of(BuildContext context, { String? fieldName }) {
+    return InheritedModel.inheritFrom<ABCModel>(context, aspect: fieldName);
+  }
+}
+
+class ShowABCField extends StatefulWidget {
+  const ShowABCField({ super.key, required this.fieldName });
+
+  final String fieldName;
+
+  @override
+  State<ShowABCField> createState() => _ShowABCFieldState();
+}
+
+class _ShowABCFieldState extends State<ShowABCField> {
+  int _buildCount = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    final ABCModel abc = ABCModel.of(context, fieldName: widget.fieldName)!;
+    final int? value = widget.fieldName == 'a' ? abc.a : (widget.fieldName == 'b' ? abc.b : abc.c);
+    return Text('${widget.fieldName}: $value [${_buildCount++}]');
+  }
 }

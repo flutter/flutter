@@ -9,35 +9,6 @@ import 'package:flutter_test/flutter_test.dart' as flutter_test show expect;
 
 import 'package:matcher/expect.dart' as matcher show expect;
 
-// We have to use matcher's expect because the flutter_test expect() goes
-// out of its way to check that we're not leaking APIs and the whole point
-// of this test is to see how we handle leaking APIs.
-
-class TestAPI {
-  Future<Object?> testGuard1() {
-    return TestAsyncUtils.guard<Object?>(() async { return null; });
-  }
-  Future<Object?> testGuard2() {
-    return TestAsyncUtils.guard<Object?>(() async { return null; });
-  }
-}
-
-class TestAPISubclass extends TestAPI {
-  Future<Object?> testGuard3() {
-    return TestAsyncUtils.guard<Object?>(() async { return null; });
-  }
-}
-
-class RecognizableTestException implements Exception {
-  const RecognizableTestException();
-}
-
-Future<Object> _guardedThrower() {
-  return TestAsyncUtils.guard<Object>(() async {
-    throw const RecognizableTestException();
-  });
-}
-
 void main() {
   test('TestAsyncUtils - one class', () async {
     final TestAPI testAPI = TestAPI();
@@ -248,4 +219,33 @@ void main() {
   }, skip: !kIsWeb); // [intended] depends on platform-specific stack traces.
 
   // see also dev/manual_tests/test_data which contains tests run by the flutter_tools tests for 'flutter test'
+}
+
+// We have to use matcher's expect because the flutter_test expect() goes
+// out of its way to check that we're not leaking APIs and the whole point
+// of this test is to see how we handle leaking APIs.
+
+class TestAPI {
+  Future<Object?> testGuard1() {
+    return TestAsyncUtils.guard<Object?>(() async { return null; });
+  }
+  Future<Object?> testGuard2() {
+    return TestAsyncUtils.guard<Object?>(() async { return null; });
+  }
+}
+
+class TestAPISubclass extends TestAPI {
+  Future<Object?> testGuard3() {
+    return TestAsyncUtils.guard<Object?>(() async { return null; });
+  }
+}
+
+class RecognizableTestException implements Exception {
+  const RecognizableTestException();
+}
+
+Future<Object> _guardedThrower() {
+  return TestAsyncUtils.guard<Object>(() async {
+    throw const RecognizableTestException();
+  });
 }

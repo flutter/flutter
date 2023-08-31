@@ -4,14 +4,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 
-class X { }
-
-class Y extends X { }
-
-class A<U extends X> {
-  U? u;
-}
-
 void main() {
   test('Assignment through a covariant template throws exception', () {
     final A<Y> ay = A<Y>();
@@ -20,4 +12,12 @@ void main() {
       ayAsAx.u = X();
     }, throwsA(isA<TypeError>()));
   });
+}
+
+class X { }
+
+class Y extends X { }
+
+class A<U extends X> {
+  U? u;
 }

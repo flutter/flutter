@@ -11,211 +11,6 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
-Finder findRenderChipElement() {
-  return find.byElementPredicate((Element e) => '${e.renderObject.runtimeType}' == '_RenderChip');
-}
-
-RenderBox getMaterialBox(WidgetTester tester) {
-  return tester.firstRenderObject<RenderBox>(
-    find.descendant(
-      of: find.byType(RawChip),
-      matching: find.byType(CustomPaint),
-    ),
-  );
-}
-
-Material getMaterial(WidgetTester tester) {
-  return tester.widget<Material>(
-    find.descendant(
-      of: find.byType(RawChip),
-      matching: find.byType(Material),
-    ),
-  );
-}
-
-IconThemeData getIconData(WidgetTester tester) {
-  final IconTheme iconTheme = tester.firstWidget(
-    find.descendant(
-      of: find.byType(RawChip),
-      matching: find.byType(IconTheme),
-    ),
-  );
-  return iconTheme.data;
-}
-
-DefaultTextStyle getLabelStyle(WidgetTester tester, String labelText) {
-  return tester.widget(
-    find.ancestor(
-      of: find.text(labelText),
-      matching: find.byType(DefaultTextStyle),
-    ).first,
-  );
-}
-
-dynamic getRenderChip(WidgetTester tester) {
-  if (!tester.any(findRenderChipElement())) {
-    return null;
-  }
-  final Element element = tester.element(findRenderChipElement().first);
-  return element.renderObject;
-}
-
-// ignore: avoid_dynamic_calls
-double getSelectProgress(WidgetTester tester) => getRenderChip(tester)?.checkmarkAnimation?.value as double;
-// ignore: avoid_dynamic_calls
-double getAvatarDrawerProgress(WidgetTester tester) => getRenderChip(tester)?.avatarDrawerAnimation?.value as double;
-// ignore: avoid_dynamic_calls
-double getDeleteDrawerProgress(WidgetTester tester) => getRenderChip(tester)?.deleteDrawerAnimation?.value as double;
-
-/// Adds the basic requirements for a Chip.
-Widget wrapForChip({
-  required Widget child,
-  TextDirection textDirection = TextDirection.ltr,
-  double textScaleFactor = 1.0,
-  Brightness brightness = Brightness.light,
-  bool? useMaterial3,
-}) {
-  return MaterialApp(
-    theme: ThemeData(brightness: brightness, useMaterial3: useMaterial3),
-    home: Directionality(
-      textDirection: textDirection,
-      child: MediaQuery(
-        data: MediaQueryData(textScaleFactor: textScaleFactor),
-        child: Material(child: child),
-      ),
-    ),
-  );
-}
-
-/// Tests that a [Chip] that has its size constrained by its parent is
-/// further constraining the size of its child, the label widget.
-/// Optionally, adding an avatar or delete icon to the chip should not
-/// cause the chip or label to exceed its constrained height.
-Future<void> testConstrainedLabel(
-  WidgetTester tester, {
-  CircleAvatar? avatar,
-  VoidCallback? onDeleted,
-}) async {
-  const double labelWidth = 100.0;
-  const double labelHeight = 50.0;
-  const double chipParentWidth = 75.0;
-  const double chipParentHeight = 25.0;
-  final Key labelKey = UniqueKey();
-
-  await tester.pumpWidget(
-    wrapForChip(
-      child: Center(
-        child: SizedBox(
-          width: chipParentWidth,
-          height: chipParentHeight,
-          child: Chip(
-            avatar: avatar,
-            label: SizedBox(
-              key: labelKey,
-              width: labelWidth,
-              height: labelHeight,
-            ),
-            onDeleted: onDeleted,
-          ),
-        ),
-      ),
-    ),
-  );
-
-  final Size labelSize = tester.getSize(find.byKey(labelKey));
-  expect(labelSize.width, lessThan(chipParentWidth));
-  expect(labelSize.height, lessThanOrEqualTo(chipParentHeight));
-
-  final Size chipSize = tester.getSize(find.byType(Chip));
-  expect(chipSize.width, chipParentWidth);
-  expect(chipSize.height, chipParentHeight);
-}
-
-void doNothing() {}
-
-Widget chipWithOptionalDeleteButton({
-  Key? deleteButtonKey,
-  Key? labelKey,
-  required bool deletable,
-  TextDirection textDirection = TextDirection.ltr,
-  bool useDeleteButtonTooltip = true,
-  String? chipTooltip,
-  String? deleteButtonTooltipMessage,
-  VoidCallback? onPressed = doNothing,
-  bool? useMaterial3,
-}) {
-  return wrapForChip(
-    textDirection: textDirection,
-    useMaterial3: useMaterial3,
-    child: Wrap(
-      children: <Widget>[
-        RawChip(
-          tooltip: chipTooltip,
-          onPressed: onPressed,
-          onDeleted: deletable ? doNothing : null,
-          deleteIcon: Icon(Icons.close, key: deleteButtonKey),
-          useDeleteButtonTooltip: useDeleteButtonTooltip,
-          deleteButtonTooltipMessage: deleteButtonTooltipMessage,
-          label: Text(
-            deletable
-              ? 'Chip with Delete Button'
-              : 'Chip without Delete Button',
-            key: labelKey,
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-bool offsetsAreClose(Offset a, Offset b) => (a - b).distance < 1.0;
-bool radiiAreClose(double a, double b) => (a - b).abs() < 1.0;
-
-// Ripple pattern matches if there exists at least one ripple
-// with the [expectedCenter] and [expectedRadius].
-// This ensures the existence of a ripple.
-PaintPattern ripplePattern(Offset expectedCenter, double expectedRadius) {
-  return paints
-    ..something((Symbol method, List<dynamic> arguments) {
-        if (method != #drawCircle) {
-          return false;
-        }
-        final Offset center = arguments[0] as Offset;
-        final double radius = arguments[1] as double;
-        return offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius);
-      }
-    );
-}
-
-// Unique ripple pattern matches if there does not exist ripples
-// other than ones with the [expectedCenter] and [expectedRadius].
-// This ensures the nonexistence of two different ripples.
-PaintPattern uniqueRipplePattern(Offset expectedCenter, double expectedRadius) {
-  return paints
-    ..everything((Symbol method, List<dynamic> arguments) {
-        if (method != #drawCircle) {
-          return true;
-        }
-        final Offset center = arguments[0] as Offset;
-        final double radius = arguments[1] as double;
-        if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius)) {
-          return true;
-        }
-        throw '''
-              Expected: center == $expectedCenter, radius == $expectedRadius
-              Found: center == $center radius == $radius''';
-      }
-    );
-}
-
-// Finds any container of a tooltip.
-Finder findTooltipContainer(String tooltipText) {
-  return find.ancestor(
-    of: find.text(tooltipText),
-    matching: find.byType(Container),
-  );
-}
-
 void main() {
   testWidgets('M2 Chip defaults', (WidgetTester tester) async {
     late TextTheme textTheme;
@@ -3811,4 +3606,209 @@ class _MaterialStateBorderSide extends MaterialStateBorderSide {
 
   @override
   BorderSide? resolve(Set<MaterialState> states) => resolver(states);
+}
+
+Finder findRenderChipElement() {
+  return find.byElementPredicate((Element e) => '${e.renderObject.runtimeType}' == '_RenderChip');
+}
+
+RenderBox getMaterialBox(WidgetTester tester) {
+  return tester.firstRenderObject<RenderBox>(
+    find.descendant(
+      of: find.byType(RawChip),
+      matching: find.byType(CustomPaint),
+    ),
+  );
+}
+
+Material getMaterial(WidgetTester tester) {
+  return tester.widget<Material>(
+    find.descendant(
+      of: find.byType(RawChip),
+      matching: find.byType(Material),
+    ),
+  );
+}
+
+IconThemeData getIconData(WidgetTester tester) {
+  final IconTheme iconTheme = tester.firstWidget(
+    find.descendant(
+      of: find.byType(RawChip),
+      matching: find.byType(IconTheme),
+    ),
+  );
+  return iconTheme.data;
+}
+
+DefaultTextStyle getLabelStyle(WidgetTester tester, String labelText) {
+  return tester.widget(
+    find.ancestor(
+      of: find.text(labelText),
+      matching: find.byType(DefaultTextStyle),
+    ).first,
+  );
+}
+
+dynamic getRenderChip(WidgetTester tester) {
+  if (!tester.any(findRenderChipElement())) {
+    return null;
+  }
+  final Element element = tester.element(findRenderChipElement().first);
+  return element.renderObject;
+}
+
+// ignore: avoid_dynamic_calls
+double getSelectProgress(WidgetTester tester) => getRenderChip(tester)?.checkmarkAnimation?.value as double;
+// ignore: avoid_dynamic_calls
+double getAvatarDrawerProgress(WidgetTester tester) => getRenderChip(tester)?.avatarDrawerAnimation?.value as double;
+// ignore: avoid_dynamic_calls
+double getDeleteDrawerProgress(WidgetTester tester) => getRenderChip(tester)?.deleteDrawerAnimation?.value as double;
+
+/// Adds the basic requirements for a Chip.
+Widget wrapForChip({
+  required Widget child,
+  TextDirection textDirection = TextDirection.ltr,
+  double textScaleFactor = 1.0,
+  Brightness brightness = Brightness.light,
+  bool? useMaterial3,
+}) {
+  return MaterialApp(
+    theme: ThemeData(brightness: brightness, useMaterial3: useMaterial3),
+    home: Directionality(
+      textDirection: textDirection,
+      child: MediaQuery(
+        data: MediaQueryData(textScaleFactor: textScaleFactor),
+        child: Material(child: child),
+      ),
+    ),
+  );
+}
+
+/// Tests that a [Chip] that has its size constrained by its parent is
+/// further constraining the size of its child, the label widget.
+/// Optionally, adding an avatar or delete icon to the chip should not
+/// cause the chip or label to exceed its constrained height.
+Future<void> testConstrainedLabel(
+  WidgetTester tester, {
+  CircleAvatar? avatar,
+  VoidCallback? onDeleted,
+}) async {
+  const double labelWidth = 100.0;
+  const double labelHeight = 50.0;
+  const double chipParentWidth = 75.0;
+  const double chipParentHeight = 25.0;
+  final Key labelKey = UniqueKey();
+
+  await tester.pumpWidget(
+    wrapForChip(
+      child: Center(
+        child: SizedBox(
+          width: chipParentWidth,
+          height: chipParentHeight,
+          child: Chip(
+            avatar: avatar,
+            label: SizedBox(
+              key: labelKey,
+              width: labelWidth,
+              height: labelHeight,
+            ),
+            onDeleted: onDeleted,
+          ),
+        ),
+      ),
+    ),
+  );
+
+  final Size labelSize = tester.getSize(find.byKey(labelKey));
+  expect(labelSize.width, lessThan(chipParentWidth));
+  expect(labelSize.height, lessThanOrEqualTo(chipParentHeight));
+
+  final Size chipSize = tester.getSize(find.byType(Chip));
+  expect(chipSize.width, chipParentWidth);
+  expect(chipSize.height, chipParentHeight);
+}
+
+void doNothing() {}
+
+Widget chipWithOptionalDeleteButton({
+  Key? deleteButtonKey,
+  Key? labelKey,
+  required bool deletable,
+  TextDirection textDirection = TextDirection.ltr,
+  bool useDeleteButtonTooltip = true,
+  String? chipTooltip,
+  String? deleteButtonTooltipMessage,
+  VoidCallback? onPressed = doNothing,
+  bool? useMaterial3,
+}) {
+  return wrapForChip(
+    textDirection: textDirection,
+    useMaterial3: useMaterial3,
+    child: Wrap(
+      children: <Widget>[
+        RawChip(
+          tooltip: chipTooltip,
+          onPressed: onPressed,
+          onDeleted: deletable ? doNothing : null,
+          deleteIcon: Icon(Icons.close, key: deleteButtonKey),
+          useDeleteButtonTooltip: useDeleteButtonTooltip,
+          deleteButtonTooltipMessage: deleteButtonTooltipMessage,
+          label: Text(
+            deletable
+              ? 'Chip with Delete Button'
+              : 'Chip without Delete Button',
+            key: labelKey,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+bool offsetsAreClose(Offset a, Offset b) => (a - b).distance < 1.0;
+bool radiiAreClose(double a, double b) => (a - b).abs() < 1.0;
+
+// Ripple pattern matches if there exists at least one ripple
+// with the [expectedCenter] and [expectedRadius].
+// This ensures the existence of a ripple.
+PaintPattern ripplePattern(Offset expectedCenter, double expectedRadius) {
+  return paints
+    ..something((Symbol method, List<dynamic> arguments) {
+        if (method != #drawCircle) {
+          return false;
+        }
+        final Offset center = arguments[0] as Offset;
+        final double radius = arguments[1] as double;
+        return offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius);
+      }
+    );
+}
+
+// Unique ripple pattern matches if there does not exist ripples
+// other than ones with the [expectedCenter] and [expectedRadius].
+// This ensures the nonexistence of two different ripples.
+PaintPattern uniqueRipplePattern(Offset expectedCenter, double expectedRadius) {
+  return paints
+    ..everything((Symbol method, List<dynamic> arguments) {
+        if (method != #drawCircle) {
+          return true;
+        }
+        final Offset center = arguments[0] as Offset;
+        final double radius = arguments[1] as double;
+        if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius)) {
+          return true;
+        }
+        throw '''
+              Expected: center == $expectedCenter, radius == $expectedRadius
+              Found: center == $center radius == $radius''';
+      }
+    );
+}
+
+// Finds any container of a tooltip.
+Finder findTooltipContainer(String tooltipText) {
+  return find.ancestor(
+    of: find.text(tooltipText),
+    matching: find.byType(Container),
+  );
 }

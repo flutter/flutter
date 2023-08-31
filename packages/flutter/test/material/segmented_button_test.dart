@@ -12,13 +12,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
-Widget boilerplate({required Widget child}) {
-  return Directionality(
-    textDirection: TextDirection.ltr,
-    child: Center(child: child),
-  );
-}
-
 void main() {
 
   testWidgets('SegmentedButton is built with Material of type MaterialType.transparency', (WidgetTester tester) async {
@@ -587,4 +580,11 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
     expect(find.byTooltip('t2'), findsOneWidget);
     expect(find.byTooltip('t3'), findsOneWidget);
   });
+}
+
+Widget boilerplate({required Widget child}) {
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: Center(child: child),
+  );
 }

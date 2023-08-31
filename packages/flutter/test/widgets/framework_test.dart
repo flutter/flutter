@@ -9,18 +9,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-typedef ElementRebuildCallback = void Function(StatefulElement element);
-
-class TestState extends State<StatefulWidget> {
-  @override
-  Widget build(BuildContext context) => const SizedBox();
-}
-
-@optionalTypeArgs
-class _MyGlobalObjectKey<T extends State<StatefulWidget>> extends GlobalObjectKey<T> {
-  const _MyGlobalObjectKey(super.value);
-}
-
 void main() {
   testWidgets('UniqueKey control test', (WidgetTester tester) async {
     final Key key = UniqueKey();
@@ -2191,4 +2179,16 @@ class _RenderTestLeaderLayerWidget extends RenderProxyBox {
       context.pushLayer(LeaderLayer(link: _link!, offset: offset),(_, __){}, Offset.zero);
     }
   }
+}
+
+typedef ElementRebuildCallback = void Function(StatefulElement element);
+
+class TestState extends State<StatefulWidget> {
+  @override
+  Widget build(BuildContext context) => const SizedBox();
+}
+
+@optionalTypeArgs
+class _MyGlobalObjectKey<T extends State<StatefulWidget>> extends GlobalObjectKey<T> {
+  const _MyGlobalObjectKey(super.value);
 }

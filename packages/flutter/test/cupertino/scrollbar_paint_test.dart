@@ -5,13 +5,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const Color _kScrollbarColor = Color(0x59000000);
-
-// The `y` offset has to be larger than `ScrollDragController._bigThresholdBreakDistance`
-// to prevent [motionStartDistanceThreshold] from affecting the actual drag distance.
-const Offset _kGestureOffset = Offset(0, -25);
-const Radius _kScrollbarRadius = Radius.circular(1.5);
-
 void main() {
   testWidgets('Paints iOS spec', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -136,3 +129,10 @@ void main() {
     expect(find.byType(CupertinoScrollbar), isNot(paints..rrect()));
   });
 }
+
+const Color _kScrollbarColor = Color(0x59000000);
+
+// The `y` offset has to be larger than `ScrollDragController._bigThresholdBreakDistance`
+// to prevent [motionStartDistanceThreshold] from affecting the actual drag distance.
+const Offset _kGestureOffset = Offset(0, -25);
+const Radius _kScrollbarRadius = Radius.circular(1.5);

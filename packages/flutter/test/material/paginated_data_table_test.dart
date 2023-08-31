@@ -9,60 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'data_table_test_utils.dart';
 
-class TestDataSource extends DataTableSource {
-  TestDataSource({
-    this.allowSelection = false,
-  });
-
-  final bool allowSelection;
-
-  int get generation => _generation;
-  int _generation = 0;
-  set generation(int value) {
-    if (_generation == value) {
-      return;
-    }
-    _generation = value;
-    notifyListeners();
-  }
-
-  final Set<int> _selectedRows = <int>{};
-
-  void _handleSelected(int index, bool? selected) {
-    if (selected ?? false) {
-      _selectedRows.add(index);
-    } else {
-      _selectedRows.remove(index);
-    }
-    notifyListeners();
-  }
-
-  @override
-  DataRow getRow(int index) {
-    final Dessert dessert = kDesserts[index % kDesserts.length];
-    final int page = index ~/ kDesserts.length;
-    return DataRow.byIndex(
-      index: index,
-      selected: _selectedRows.contains(index),
-      cells: <DataCell>[
-        DataCell(Text('${dessert.name} ($page)')),
-        DataCell(Text('${dessert.calories}')),
-        DataCell(Text('$generation')),
-      ],
-      onSelectChanged: allowSelection ? (bool? selected) => _handleSelected(index, selected) : null,
-    );
-  }
-
-  @override
-  int get rowCount => 50 * kDesserts.length;
-
-  @override
-  bool get isRowCountApproximate => false;
-
-  @override
-  int get selectedRowCount => _selectedRows.length;
-}
-
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -1293,4 +1239,58 @@ void main() {
     final BoxDecoration tableRowBoxDecoration = tableRow.decoration! as BoxDecoration;
     expect(tableRowBoxDecoration.color, headingRowColor.resolve(<MaterialState>{}));
   });
+}
+
+class TestDataSource extends DataTableSource {
+  TestDataSource({
+    this.allowSelection = false,
+  });
+
+  final bool allowSelection;
+
+  int get generation => _generation;
+  int _generation = 0;
+  set generation(int value) {
+    if (_generation == value) {
+      return;
+    }
+    _generation = value;
+    notifyListeners();
+  }
+
+  final Set<int> _selectedRows = <int>{};
+
+  void _handleSelected(int index, bool? selected) {
+    if (selected ?? false) {
+      _selectedRows.add(index);
+    } else {
+      _selectedRows.remove(index);
+    }
+    notifyListeners();
+  }
+
+  @override
+  DataRow getRow(int index) {
+    final Dessert dessert = kDesserts[index % kDesserts.length];
+    final int page = index ~/ kDesserts.length;
+    return DataRow.byIndex(
+      index: index,
+      selected: _selectedRows.contains(index),
+      cells: <DataCell>[
+        DataCell(Text('${dessert.name} ($page)')),
+        DataCell(Text('${dessert.calories}')),
+        DataCell(Text('$generation')),
+      ],
+      onSelectChanged: allowSelection ? (bool? selected) => _handleSelected(index, selected) : null,
+    );
+  }
+
+  @override
+  int get rowCount => 50 * kDesserts.length;
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get selectedRowCount => _selectedRows.length;
 }

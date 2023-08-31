@@ -8,13 +8,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-Widget boilerplate({required Widget child}) {
-  return Directionality(
-    textDirection: TextDirection.ltr,
-    child: Center(child: child),
-  );
-}
-
 void main() {
   test('ToggleButtonsThemeData copyWith, ==, hashCode basics', () {
     expect(const ToggleButtonsThemeData(), const ToggleButtonsThemeData().copyWith());
@@ -628,5 +621,12 @@ void main() {
           ),
       );
     },
+  );
+}
+
+Widget boilerplate({required Widget child}) {
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: Center(child: child),
   );
 }

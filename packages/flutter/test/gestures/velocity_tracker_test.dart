@@ -6,17 +6,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'velocity_tracker_data.dart';
 
-bool _withinTolerance(double actual, double expected) {
-  const double kTolerance = 0.001; // Within .1% of expected value
-  final double diff = (actual - expected)/expected;
-  return diff.abs() < kTolerance;
-}
-
-bool _checkVelocity(Velocity actual, Offset expected) {
-  return _withinTolerance(actual.pixelsPerSecond.dx, expected.dx)
-      && _withinTolerance(actual.pixelsPerSecond.dy, expected.dy);
-}
-
 void main() {
   const List<Offset> expected = <Offset>[
     Offset(219.59280094228163, 1304.701682306001),
@@ -144,4 +133,15 @@ void main() {
       }
     }
   });
+}
+
+bool _withinTolerance(double actual, double expected) {
+  const double kTolerance = 0.001; // Within .1% of expected value
+  final double diff = (actual - expected)/expected;
+  return diff.abs() < kTolerance;
+}
+
+bool _checkVelocity(Velocity actual, Offset expected) {
+  return _withinTolerance(actual.pixelsPerSecond.dx, expected.dx)
+      && _withinTolerance(actual.pixelsPerSecond.dy, expected.dy);
 }

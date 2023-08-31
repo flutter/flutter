@@ -8,87 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-// This matcher verifies ui.TextStyle.toString (from dart:ui) reports a superset
-// of the given TextStyle's (from painting.dart) properties.
-class _DartUiTextStyleToStringMatcher extends Matcher {
-  _DartUiTextStyleToStringMatcher(this.textStyle);
-
-  final TextStyle textStyle;
-
-  late final List<String> propertiesInOrder = <String>[
-    _propertyToString('color', textStyle.color),
-    _propertyToString('decoration', textStyle.decoration),
-    _propertyToString('decorationColor', textStyle.decorationColor),
-    _propertyToString('decorationStyle', textStyle.decorationStyle),
-    _propertyToString('decorationThickness', textStyle.decorationThickness),
-    _propertyToString('fontWeight', textStyle.fontWeight),
-    _propertyToString('fontStyle', textStyle.fontStyle),
-    _propertyToString('textBaseline', textStyle.textBaseline),
-    _propertyToString('fontFamily', textStyle.fontFamily),
-    _propertyToString('fontFamilyFallback', textStyle.fontFamilyFallback),
-    _propertyToString('fontSize', textStyle.fontSize),
-    _propertyToString('letterSpacing', textStyle.letterSpacing),
-    _propertyToString('wordSpacing', textStyle.wordSpacing),
-    _propertyToString('height', textStyle.height),
-    // TODO(LongCatIsLooong): web support for
-    // https://github.com/flutter/flutter/issues/72521
-    if (!kIsWeb) _propertyToString('leadingDistribution', textStyle.leadingDistribution),
-    _propertyToString('locale', textStyle.locale),
-    _propertyToString('background', textStyle.background),
-    _propertyToString('foreground', textStyle.foreground),
-    _propertyToString('shadows', textStyle.shadows),
-    _propertyToString('fontFeatures', textStyle.fontFeatures),
-    _propertyToString('fontVariations', textStyle.fontVariations),
-  ];
-
-  static String _propertyToString(String name, Object? property) => '$name: ${property ?? 'unspecified'}';
-
-  @override
-  Description describe(Description description) => description.add('is a superset of $textStyle.');
-
-  @override
-  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    final String description = item.toString();
-    const String prefix = 'TextStyle(';
-    const String suffix = ')';
-    if (!description.startsWith(prefix) || !description.endsWith(suffix)) {
-      return false;
-    }
-
-    final String propertyDescription = description.substring(
-      prefix.length,
-      description.length - suffix.length,
-    );
-    int startIndex = 0;
-    for (final String property in propertiesInOrder) {
-      startIndex = propertyDescription.indexOf(property, startIndex);
-      if (startIndex < 0) {
-        matchState['missingProperty'] = property;
-        return false;
-      }
-      startIndex += property.length;
-    }
-    return true;
-  }
-
-  @override
-  Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
-    final Description description = super.describeMismatch(item, mismatchDescription, matchState, verbose);
-    final String? property = matchState['missingProperty'] as String?;
-    if (property != null) {
-      description.add("expect property: '$property'");
-      final int propertyIndex = propertiesInOrder.indexOf(property);
-      if (propertyIndex > 0) {
-        description.add(" after: '${propertiesInOrder[propertyIndex - 1]}'");
-      }
-      description.add('\n');
-    }
-    return description;
-  }
-}
-
-Matcher matchesToStringOf(TextStyle textStyle) => _DartUiTextStyleToStringMatcher(textStyle);
-
 void main() {
   test('TextStyle control test', () {
     expect(
@@ -588,3 +507,84 @@ void main() {
   });
 
 }
+
+// This matcher verifies ui.TextStyle.toString (from dart:ui) reports a superset
+// of the given TextStyle's (from painting.dart) properties.
+class _DartUiTextStyleToStringMatcher extends Matcher {
+  _DartUiTextStyleToStringMatcher(this.textStyle);
+
+  final TextStyle textStyle;
+
+  late final List<String> propertiesInOrder = <String>[
+    _propertyToString('color', textStyle.color),
+    _propertyToString('decoration', textStyle.decoration),
+    _propertyToString('decorationColor', textStyle.decorationColor),
+    _propertyToString('decorationStyle', textStyle.decorationStyle),
+    _propertyToString('decorationThickness', textStyle.decorationThickness),
+    _propertyToString('fontWeight', textStyle.fontWeight),
+    _propertyToString('fontStyle', textStyle.fontStyle),
+    _propertyToString('textBaseline', textStyle.textBaseline),
+    _propertyToString('fontFamily', textStyle.fontFamily),
+    _propertyToString('fontFamilyFallback', textStyle.fontFamilyFallback),
+    _propertyToString('fontSize', textStyle.fontSize),
+    _propertyToString('letterSpacing', textStyle.letterSpacing),
+    _propertyToString('wordSpacing', textStyle.wordSpacing),
+    _propertyToString('height', textStyle.height),
+    // TODO(LongCatIsLooong): web support for
+    // https://github.com/flutter/flutter/issues/72521
+    if (!kIsWeb) _propertyToString('leadingDistribution', textStyle.leadingDistribution),
+    _propertyToString('locale', textStyle.locale),
+    _propertyToString('background', textStyle.background),
+    _propertyToString('foreground', textStyle.foreground),
+    _propertyToString('shadows', textStyle.shadows),
+    _propertyToString('fontFeatures', textStyle.fontFeatures),
+    _propertyToString('fontVariations', textStyle.fontVariations),
+  ];
+
+  static String _propertyToString(String name, Object? property) => '$name: ${property ?? 'unspecified'}';
+
+  @override
+  Description describe(Description description) => description.add('is a superset of $textStyle.');
+
+  @override
+  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+    final String description = item.toString();
+    const String prefix = 'TextStyle(';
+    const String suffix = ')';
+    if (!description.startsWith(prefix) || !description.endsWith(suffix)) {
+      return false;
+    }
+
+    final String propertyDescription = description.substring(
+      prefix.length,
+      description.length - suffix.length,
+    );
+    int startIndex = 0;
+    for (final String property in propertiesInOrder) {
+      startIndex = propertyDescription.indexOf(property, startIndex);
+      if (startIndex < 0) {
+        matchState['missingProperty'] = property;
+        return false;
+      }
+      startIndex += property.length;
+    }
+    return true;
+  }
+
+  @override
+  Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
+    final Description description = super.describeMismatch(item, mismatchDescription, matchState, verbose);
+    final String? property = matchState['missingProperty'] as String?;
+    if (property != null) {
+      description.add("expect property: '$property'");
+      final int propertyIndex = propertiesInOrder.indexOf(property);
+      if (propertyIndex > 0) {
+        description.add(" after: '${propertiesInOrder[propertyIndex - 1]}'");
+      }
+      description.add('\n');
+    }
+    return description;
+  }
+}
+
+Matcher matchesToStringOf(TextStyle textStyle) => _DartUiTextStyleToStringMatcher(textStyle);

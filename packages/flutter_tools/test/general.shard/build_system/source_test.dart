@@ -14,10 +14,6 @@ import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/testbed.dart';
 
-final Platform windowsPlatform = FakePlatform(
-  operatingSystem: 'windows',
-);
-
 void main() {
   late Testbed testbed;
   late SourceVisitor visitor;
@@ -232,3 +228,7 @@ void main() {
     expect(visitor.sources.single.path, contains('engine.version'));
   }));
 }
+
+final Platform windowsPlatform = FakePlatform(
+  operatingSystem: 'windows',
+);

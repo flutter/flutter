@@ -9,6 +9,19 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+// END OF SENSITIVE SECTION
+
+void main() {
+  testWidgets('Stack parsing in non-normalized constraints error', (WidgetTester tester) async {
+    await tester.pumpWidget(const Foo(child: Placeholder()), Duration.zero, EnginePhase.layout);
+    final Object? exception = tester.takeException();
+    final String text = exception.toString();
+    expect(text, contains('BoxConstraints has non-normalized width constraints.'));
+    expect(text, contains('which probably computed the invalid constraints in question:\n  RenderFoo.performLayout ('));
+    expect(text, contains('non_normalized_constraints_test.dart:17:12'));
+  }, skip: kIsWeb); // [intended] stack traces on web are insufficiently predictable
+}
+
 class RenderFoo extends RenderShiftedBox {
   RenderFoo({ RenderBox? child }) : super(child);
 
@@ -27,17 +40,4 @@ class Foo extends SingleChildRenderObjectWidget {
   RenderFoo createRenderObject(BuildContext context) {
     return RenderFoo();
   }
-}
-
-// END OF SENSITIVE SECTION
-
-void main() {
-  testWidgets('Stack parsing in non-normalized constraints error', (WidgetTester tester) async {
-    await tester.pumpWidget(const Foo(child: Placeholder()), Duration.zero, EnginePhase.layout);
-    final Object? exception = tester.takeException();
-    final String text = exception.toString();
-    expect(text, contains('BoxConstraints has non-normalized width constraints.'));
-    expect(text, contains('which probably computed the invalid constraints in question:\n  RenderFoo.performLayout ('));
-    expect(text, contains('non_normalized_constraints_test.dart:17:12'));
-  }, skip: kIsWeb); // [intended] stack traces on web are insufficiently predictable
 }

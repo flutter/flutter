@@ -11,107 +11,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
 
-final List<String> results = <String>[];
-
-Set<TestRoute> routes = HashSet<TestRoute>();
-
-class TestRoute extends Route<String?> with LocalHistoryRoute<String?> {
-  TestRoute(this.name);
-  final String name;
-
-  @override
-  List<OverlayEntry> get overlayEntries => _entries;
-
-  final List<OverlayEntry> _entries = <OverlayEntry>[];
-
-  void log(String s) {
-    results.add('$name: $s');
-  }
-
-  @override
-  void install() {
-    log('install');
-    final OverlayEntry entry = OverlayEntry(
-      builder: (BuildContext context) => Container(),
-      opaque: true,
-    );
-    _entries.add(entry);
-    routes.add(this);
-    super.install();
-  }
-
-  @override
-  TickerFuture didPush() {
-    log('didPush');
-    return super.didPush();
-  }
-
-  @override
-  void didAdd() {
-    log('didAdd');
-    super.didAdd();
-  }
-
-  @override
-  void didReplace(Route<dynamic>? oldRoute) {
-    expect(oldRoute, isA<TestRoute>());
-    final TestRoute castRoute = oldRoute! as TestRoute;
-    log('didReplace ${castRoute.name}');
-    super.didReplace(castRoute);
-  }
-
-  @override
-  bool didPop(String? result) {
-    log('didPop $result');
-    bool returnValue;
-    if (returnValue = super.didPop(result)) {
-      navigator!.finalizeRoute(this);
-    }
-    return returnValue;
-  }
-
-  @override
-  void didPopNext(Route<dynamic> nextRoute) {
-    expect(nextRoute, isA<TestRoute>());
-    final TestRoute castRoute = nextRoute as TestRoute;
-    log('didPopNext ${castRoute.name}');
-    super.didPopNext(castRoute);
-  }
-
-  @override
-  void didChangeNext(Route<dynamic>? nextRoute) {
-    expect(nextRoute, anyOf(isNull, isA<TestRoute>()));
-    final TestRoute? castRoute = nextRoute as TestRoute?;
-    log('didChangeNext ${castRoute?.name}');
-    super.didChangeNext(castRoute);
-  }
-
-  @override
-  void dispose() {
-    log('dispose');
-    _entries.clear();
-    routes.remove(this);
-    super.dispose();
-  }
-
-}
-
-Future<void> runNavigatorTest(
-  WidgetTester tester,
-  NavigatorState host,
-  VoidCallback test,
-  List<String> expectations, [
-  List<String> expectationsAfterAnotherPump = const <String>[],
-]) async {
-  expect(host, isNotNull);
-  test();
-  expect(results, equals(expectations));
-  results.clear();
-  await tester.pump();
-  expect(results, equals(expectationsAfterAnotherPump));
-  results.clear();
-}
-
 void main() {
   testWidgets('Route settings', (WidgetTester tester) async {
     const RouteSettings settings = RouteSettings(name: 'A');
@@ -2179,4 +2078,105 @@ class _RestorableDialogTestWidget extends StatelessWidget {
       ),
     );
   }
+}
+
+final List<String> results = <String>[];
+
+Set<TestRoute> routes = HashSet<TestRoute>();
+
+class TestRoute extends Route<String?> with LocalHistoryRoute<String?> {
+  TestRoute(this.name);
+  final String name;
+
+  @override
+  List<OverlayEntry> get overlayEntries => _entries;
+
+  final List<OverlayEntry> _entries = <OverlayEntry>[];
+
+  void log(String s) {
+    results.add('$name: $s');
+  }
+
+  @override
+  void install() {
+    log('install');
+    final OverlayEntry entry = OverlayEntry(
+      builder: (BuildContext context) => Container(),
+      opaque: true,
+    );
+    _entries.add(entry);
+    routes.add(this);
+    super.install();
+  }
+
+  @override
+  TickerFuture didPush() {
+    log('didPush');
+    return super.didPush();
+  }
+
+  @override
+  void didAdd() {
+    log('didAdd');
+    super.didAdd();
+  }
+
+  @override
+  void didReplace(Route<dynamic>? oldRoute) {
+    expect(oldRoute, isA<TestRoute>());
+    final TestRoute castRoute = oldRoute! as TestRoute;
+    log('didReplace ${castRoute.name}');
+    super.didReplace(castRoute);
+  }
+
+  @override
+  bool didPop(String? result) {
+    log('didPop $result');
+    bool returnValue;
+    if (returnValue = super.didPop(result)) {
+      navigator!.finalizeRoute(this);
+    }
+    return returnValue;
+  }
+
+  @override
+  void didPopNext(Route<dynamic> nextRoute) {
+    expect(nextRoute, isA<TestRoute>());
+    final TestRoute castRoute = nextRoute as TestRoute;
+    log('didPopNext ${castRoute.name}');
+    super.didPopNext(castRoute);
+  }
+
+  @override
+  void didChangeNext(Route<dynamic>? nextRoute) {
+    expect(nextRoute, anyOf(isNull, isA<TestRoute>()));
+    final TestRoute? castRoute = nextRoute as TestRoute?;
+    log('didChangeNext ${castRoute?.name}');
+    super.didChangeNext(castRoute);
+  }
+
+  @override
+  void dispose() {
+    log('dispose');
+    _entries.clear();
+    routes.remove(this);
+    super.dispose();
+  }
+
+}
+
+Future<void> runNavigatorTest(
+  WidgetTester tester,
+  NavigatorState host,
+  VoidCallback test,
+  List<String> expectations, [
+  List<String> expectationsAfterAnotherPump = const <String>[],
+]) async {
+  expect(host, isNotNull);
+  test();
+  expect(results, equals(expectations));
+  results.clear();
+  await tester.pump();
+  expect(results, equals(expectationsAfterAnotherPump));
+  results.clear();
 }

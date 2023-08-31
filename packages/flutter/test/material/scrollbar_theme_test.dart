@@ -10,14 +10,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-// The const represents the starting position of the scrollbar thumb for
-// the below tests. The thumb is 90 pixels long, and 8 pixels wide, with a 2
-// pixel margin to the right edge of the viewport.
-const Rect _kMaterialDesignInitialThumbRect = Rect.fromLTRB(790.0, 0.0, 798.0, 90.0);
-const Radius _kDefaultThumbRadius = Radius.circular(8.0);
-const Color _kDefaultIdleThumbColor = Color(0x1a000000);
-const Color _kDefaultDragThumbColor = Color(0x99000000);
-
 void main() {
   test('ScrollbarThemeData copyWith, ==, hashCode basics', () {
     expect(const ScrollbarThemeData(), const ScrollbarThemeData().copyWith());
@@ -784,3 +776,11 @@ Color? _getTrackBorderColor(Set<MaterialState> states) {
   }
   return null;
 }
+
+// The const represents the starting position of the scrollbar thumb for
+// the below tests. The thumb is 90 pixels long, and 8 pixels wide, with a 2
+// pixel margin to the right edge of the viewport.
+const Rect _kMaterialDesignInitialThumbRect = Rect.fromLTRB(790.0, 0.0, 798.0, 90.0);
+const Radius _kDefaultThumbRadius = Radius.circular(8.0);
+const Color _kDefaultIdleThumbColor = Color(0x1a000000);
+const Color _kDefaultDragThumbColor = Color(0x99000000);

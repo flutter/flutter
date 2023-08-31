@@ -5,47 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestOverlayRoute extends OverlayRoute<void> {
-  TestOverlayRoute({ super.settings });
-  @override
-  Iterable<OverlayEntry> createOverlayEntries() sync* {
-    yield OverlayEntry(builder: _build);
-  }
-  Widget _build(BuildContext context) => const Text('Overlay');
-}
-
-class PersistentBottomSheetTest extends StatefulWidget {
-  const PersistentBottomSheetTest({ super.key });
-
-  @override
-  PersistentBottomSheetTestState createState() => PersistentBottomSheetTestState();
-}
-
-class PersistentBottomSheetTestState extends State<PersistentBottomSheetTest> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
-  bool setStateCalled = false;
-
-  void showBottomSheet() {
-    _scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
-      return const Text('bottomSheet');
-    })
-    .closed.whenComplete(() {
-      setState(() {
-        setStateCalled = true;
-      });
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      body: const Text('Sheet'),
-    );
-  }
-}
-
 void main() {
   testWidgets('Check onstage/offstage handling around transitions', (WidgetTester tester) async {
     final GlobalKey containerKey1 = GlobalKey();
@@ -371,4 +330,45 @@ void main() {
     expect(popCount, 1);
     expect(completeCount, 1);
   });
+}
+
+class TestOverlayRoute extends OverlayRoute<void> {
+  TestOverlayRoute({ super.settings });
+  @override
+  Iterable<OverlayEntry> createOverlayEntries() sync* {
+    yield OverlayEntry(builder: _build);
+  }
+  Widget _build(BuildContext context) => const Text('Overlay');
+}
+
+class PersistentBottomSheetTest extends StatefulWidget {
+  const PersistentBottomSheetTest({ super.key });
+
+  @override
+  PersistentBottomSheetTestState createState() => PersistentBottomSheetTestState();
+}
+
+class PersistentBottomSheetTestState extends State<PersistentBottomSheetTest> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  bool setStateCalled = false;
+
+  void showBottomSheet() {
+    _scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+      return const Text('bottomSheet');
+    })
+    .closed.whenComplete(() {
+      setState(() {
+        setStateCalled = true;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      key: _scaffoldKey,
+      body: const Text('Sheet'),
+    );
+  }
 }

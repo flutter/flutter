@@ -7,8 +7,6 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 
 import '../../src/common.dart';
 
-typedef _InstallationMessage = String Function(Platform);
-
 void main() {
   final FakePlatform macPlatform = FakePlatform(operatingSystem: 'macos');
   final FakePlatform linuxPlatform = FakePlatform();
@@ -37,3 +35,5 @@ void main() {
     expect(userMessages.xcodeIncomplete, contains('iOS and macOS'));
   });
 }
+
+typedef _InstallationMessage = String Function(Platform);

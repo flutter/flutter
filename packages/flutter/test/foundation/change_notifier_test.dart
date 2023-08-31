@@ -6,61 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-class TestNotifier extends ChangeNotifier {
-  void notify() {
-    notifyListeners();
-  }
-
-  bool get isListenedTo => hasListeners;
-}
-
-class HasListenersTester<T> extends ValueNotifier<T> {
-  HasListenersTester(super.value);
-  bool get testHasListeners => hasListeners;
-}
-
-class A {
-  bool result = false;
-  void test() {
-    result = true;
-  }
-}
-
-class B extends A with ChangeNotifier {
-  B() {
-    if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
-    }
-  }
-
-  @override
-  void test() {
-    notifyListeners();
-    super.test();
-  }
-}
-
-class Counter with ChangeNotifier {
-  Counter() {
-    if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
-    }
-  }
-
-  int get value => _value;
-  int _value = 0;
-  set value(int value) {
-    if (_value != value) {
-      _value = value;
-      notifyListeners();
-    }
-  }
-
-  void notify() {
-    notifyListeners();
-  }
-}
-
 void main() {
   testWidgetsWithLeakTracking('ChangeNotifier can not dispose in callback', (WidgetTester tester) async {
     final TestNotifier test = TestNotifier();
@@ -626,4 +571,59 @@ void main() {
     test.notify();
     expect(log, <String>[]);
   });
+}
+
+class TestNotifier extends ChangeNotifier {
+  void notify() {
+    notifyListeners();
+  }
+
+  bool get isListenedTo => hasListeners;
+}
+
+class HasListenersTester<T> extends ValueNotifier<T> {
+  HasListenersTester(super.value);
+  bool get testHasListeners => hasListeners;
+}
+
+class A {
+  bool result = false;
+  void test() {
+    result = true;
+  }
+}
+
+class B extends A with ChangeNotifier {
+  B() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+  }
+
+  @override
+  void test() {
+    notifyListeners();
+    super.test();
+  }
+}
+
+class Counter with ChangeNotifier {
+  Counter() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+  }
+
+  int get value => _value;
+  int _value = 0;
+  set value(int value) {
+    if (_value != value) {
+      _value = value;
+      notifyListeners();
+    }
+  }
+
+  void notify() {
+    notifyListeners();
+  }
 }

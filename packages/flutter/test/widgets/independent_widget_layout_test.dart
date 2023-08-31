@@ -8,6 +8,137 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+void main() {
+  // Override the bindings for this test suite so that we can track the number
+  // of times a frame has been scheduled.
+  ScheduledFrameTrackingBindings();
+
+  testWidgets('RenderObjectToWidgetAdapter.attachToRenderTree does not schedule frame', (WidgetTester tester) async {
+    expect(WidgetsBinding.instance, isA<ScheduledFrameTrackingBindings>());
+    final ScheduledFrameTrackingPlatformDispatcher platformDispatcher = tester.platformDispatcher as ScheduledFrameTrackingPlatformDispatcher;
+    platformDispatcher.resetScheduledFrameCount();
+    expect(platformDispatcher.scheduledFrameCount, isZero);
+    final OffscreenWidgetTree tree = OffscreenWidgetTree(tester.view);
+    tree.pumpWidget(const SizedBox.shrink());
+    expect(platformDispatcher.scheduledFrameCount, isZero);
+  });
+
+  testWidgets('no crosstalk between widget build owners', (WidgetTester tester) async {
+    final Trigger trigger1 = Trigger();
+    final Counter counter1 = Counter();
+    final Trigger trigger2 = Trigger();
+    final Counter counter2 = Counter();
+    final OffscreenWidgetTree tree = OffscreenWidgetTree(tester.view);
+    // Both counts should start at zero
+    expect(counter1.count, equals(0));
+    expect(counter2.count, equals(0));
+    // Lay out the "onscreen" in the default test binding
+    await tester.pumpWidget(TriggerableWidget(trigger: trigger1, counter: counter1));
+    // Only the "onscreen" widget should have built
+    expect(counter1.count, equals(1));
+    expect(counter2.count, equals(0));
+    // Lay out the "offscreen" in a separate tree
+    tree.pumpWidget(TriggerableWidget(trigger: trigger2, counter: counter2));
+    // Now both widgets should have built
+    expect(counter1.count, equals(1));
+    expect(counter2.count, equals(1));
+    // Mark both as needing layout
+    trigger1.fire();
+    trigger2.fire();
+    // Marking as needing layout shouldn't immediately build anything
+    expect(counter1.count, equals(1));
+    expect(counter2.count, equals(1));
+    // Pump the "onscreen" layout
+    await tester.pump();
+    // Only the "onscreen" widget should have rebuilt
+    expect(counter1.count, equals(2));
+    expect(counter2.count, equals(1));
+    // Pump the "offscreen" layout
+    tree.pumpFrame();
+    // Now both widgets should have rebuilt
+    expect(counter1.count, equals(2));
+    expect(counter2.count, equals(2));
+    // Mark both as needing layout, again
+    trigger1.fire();
+    trigger2.fire();
+    // Now pump the "offscreen" layout first
+    tree.pumpFrame();
+    // Only the "offscreen" widget should have rebuilt
+    expect(counter1.count, equals(2));
+    expect(counter2.count, equals(3));
+    // Pump the "onscreen" layout
+    await tester.pump();
+    // Now both widgets should have rebuilt
+    expect(counter1.count, equals(3));
+    expect(counter2.count, equals(3));
+  });
+
+  testWidgets('no crosstalk between focus nodes', (WidgetTester tester) async {
+    final OffscreenWidgetTree tree = OffscreenWidgetTree(tester.view);
+    final FocusNode onscreenFocus = FocusNode();
+    final FocusNode offscreenFocus = FocusNode();
+    await tester.pumpWidget(
+      TestFocusable(
+        focusNode: onscreenFocus,
+      ),
+    );
+    tree.pumpWidget(
+      TestFocusable(
+        focusNode: offscreenFocus,
+      ),
+    );
+
+    // Autofocus is delayed one frame.
+    await tester.pump();
+    tree.pumpFrame();
+
+    expect(onscreenFocus.hasFocus, isTrue);
+    expect(offscreenFocus.hasFocus, isTrue);
+  });
+
+  testWidgets('able to tear down offscreen tree', (WidgetTester tester) async {
+    final OffscreenWidgetTree tree = OffscreenWidgetTree(tester.view);
+    final List<WidgetState> states = <WidgetState>[];
+    tree.pumpWidget(SizedBox(child: TestStates(states: states)));
+    expect(states, <WidgetState>[WidgetState.initialized]);
+    expect(tree.renderView.child, isNotNull);
+    tree.pumpWidget(null); // The root node should be allowed to have no child.
+    expect(states, <WidgetState>[WidgetState.initialized, WidgetState.disposed]);
+    expect(tree.renderView.child, isNull);
+  });
+}
+
+enum WidgetState {
+  initialized,
+  disposed,
+}
+
+class TestStates extends StatefulWidget {
+  const TestStates({super.key, required this.states});
+
+  final List<WidgetState> states;
+
+  @override
+  TestStatesState createState() => TestStatesState();
+}
+
+class TestStatesState extends State<TestStates> {
+  @override
+  void initState() {
+    super.initState();
+    widget.states.add(WidgetState.initialized);
+  }
+
+  @override
+  void dispose() {
+    widget.states.add(WidgetState.disposed);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Container();
+}
+
 const Size _kTestViewSize = Size(800.0, 600.0);
 
 class ScheduledFrameTrackingPlatformDispatcher extends TestPlatformDispatcher {
@@ -161,135 +292,4 @@ class TestFocusableState extends State<TestFocusable> {
   Widget build(BuildContext context) {
     return const Text('Test focus node', textDirection: TextDirection.ltr);
   }
-}
-
-void main() {
-  // Override the bindings for this test suite so that we can track the number
-  // of times a frame has been scheduled.
-  ScheduledFrameTrackingBindings();
-
-  testWidgets('RenderObjectToWidgetAdapter.attachToRenderTree does not schedule frame', (WidgetTester tester) async {
-    expect(WidgetsBinding.instance, isA<ScheduledFrameTrackingBindings>());
-    final ScheduledFrameTrackingPlatformDispatcher platformDispatcher = tester.platformDispatcher as ScheduledFrameTrackingPlatformDispatcher;
-    platformDispatcher.resetScheduledFrameCount();
-    expect(platformDispatcher.scheduledFrameCount, isZero);
-    final OffscreenWidgetTree tree = OffscreenWidgetTree(tester.view);
-    tree.pumpWidget(const SizedBox.shrink());
-    expect(platformDispatcher.scheduledFrameCount, isZero);
-  });
-
-  testWidgets('no crosstalk between widget build owners', (WidgetTester tester) async {
-    final Trigger trigger1 = Trigger();
-    final Counter counter1 = Counter();
-    final Trigger trigger2 = Trigger();
-    final Counter counter2 = Counter();
-    final OffscreenWidgetTree tree = OffscreenWidgetTree(tester.view);
-    // Both counts should start at zero
-    expect(counter1.count, equals(0));
-    expect(counter2.count, equals(0));
-    // Lay out the "onscreen" in the default test binding
-    await tester.pumpWidget(TriggerableWidget(trigger: trigger1, counter: counter1));
-    // Only the "onscreen" widget should have built
-    expect(counter1.count, equals(1));
-    expect(counter2.count, equals(0));
-    // Lay out the "offscreen" in a separate tree
-    tree.pumpWidget(TriggerableWidget(trigger: trigger2, counter: counter2));
-    // Now both widgets should have built
-    expect(counter1.count, equals(1));
-    expect(counter2.count, equals(1));
-    // Mark both as needing layout
-    trigger1.fire();
-    trigger2.fire();
-    // Marking as needing layout shouldn't immediately build anything
-    expect(counter1.count, equals(1));
-    expect(counter2.count, equals(1));
-    // Pump the "onscreen" layout
-    await tester.pump();
-    // Only the "onscreen" widget should have rebuilt
-    expect(counter1.count, equals(2));
-    expect(counter2.count, equals(1));
-    // Pump the "offscreen" layout
-    tree.pumpFrame();
-    // Now both widgets should have rebuilt
-    expect(counter1.count, equals(2));
-    expect(counter2.count, equals(2));
-    // Mark both as needing layout, again
-    trigger1.fire();
-    trigger2.fire();
-    // Now pump the "offscreen" layout first
-    tree.pumpFrame();
-    // Only the "offscreen" widget should have rebuilt
-    expect(counter1.count, equals(2));
-    expect(counter2.count, equals(3));
-    // Pump the "onscreen" layout
-    await tester.pump();
-    // Now both widgets should have rebuilt
-    expect(counter1.count, equals(3));
-    expect(counter2.count, equals(3));
-  });
-
-  testWidgets('no crosstalk between focus nodes', (WidgetTester tester) async {
-    final OffscreenWidgetTree tree = OffscreenWidgetTree(tester.view);
-    final FocusNode onscreenFocus = FocusNode();
-    final FocusNode offscreenFocus = FocusNode();
-    await tester.pumpWidget(
-      TestFocusable(
-        focusNode: onscreenFocus,
-      ),
-    );
-    tree.pumpWidget(
-      TestFocusable(
-        focusNode: offscreenFocus,
-      ),
-    );
-
-    // Autofocus is delayed one frame.
-    await tester.pump();
-    tree.pumpFrame();
-
-    expect(onscreenFocus.hasFocus, isTrue);
-    expect(offscreenFocus.hasFocus, isTrue);
-  });
-
-  testWidgets('able to tear down offscreen tree', (WidgetTester tester) async {
-    final OffscreenWidgetTree tree = OffscreenWidgetTree(tester.view);
-    final List<WidgetState> states = <WidgetState>[];
-    tree.pumpWidget(SizedBox(child: TestStates(states: states)));
-    expect(states, <WidgetState>[WidgetState.initialized]);
-    expect(tree.renderView.child, isNotNull);
-    tree.pumpWidget(null); // The root node should be allowed to have no child.
-    expect(states, <WidgetState>[WidgetState.initialized, WidgetState.disposed]);
-    expect(tree.renderView.child, isNull);
-  });
-}
-
-enum WidgetState {
-  initialized,
-  disposed,
-}
-
-class TestStates extends StatefulWidget {
-  const TestStates({super.key, required this.states});
-
-  final List<WidgetState> states;
-
-  @override
-  TestStatesState createState() => TestStatesState();
-}
-
-class TestStatesState extends State<TestStates> {
-  @override
-  void initState() {
-    super.initState();
-    widget.states.add(WidgetState.initialized);
-  }
-
-  @override
-  void dispose() {
-    widget.states.add(WidgetState.disposed);
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => Container();
 }

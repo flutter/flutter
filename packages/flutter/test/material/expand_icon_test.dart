@@ -6,15 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-Widget wrap({ required Widget child, ThemeData? theme }) {
-  return MaterialApp(
-    theme: theme,
-    home: Center(
-      child: Material(child: child),
-    ),
-  );
-}
-
 void main() {
   testWidgetsWithLeakTracking('ExpandIcon test', (WidgetTester tester) async {
     bool expanded = false;
@@ -315,4 +306,13 @@ void main() {
     iconTheme = tester.firstWidget(find.byType(IconTheme).last);
     expect(iconTheme.data.color, equals(Colors.cyan));
   });
+}
+
+Widget wrap({ required Widget child, ThemeData? theme }) {
+  return MaterialApp(
+    theme: theme,
+    home: Center(
+      child: Material(child: child),
+    ),
+  );
 }

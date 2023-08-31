@@ -26,21 +26,6 @@ import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
-const String _kTestFlutterRoot = '/flutter';
-
-final Platform linuxPlatform = FakePlatform(
-  environment: <String, String>{
-    'FLUTTER_ROOT': _kTestFlutterRoot,
-    'HOME': '/',
-  }
-);
-final Platform notLinuxPlatform = FakePlatform(
-  operatingSystem: 'macos',
-  environment: <String, String>{
-    'FLUTTER_ROOT': _kTestFlutterRoot,
-  }
-);
-
 void main() {
   setUpAll(() {
     Cache.disableLocking();
@@ -728,3 +713,18 @@ class CustomFakeOperatingSystemUtils extends Fake implements OperatingSystemUtil
   @override
   List<File> whichAll(String execName) => <File>[];
 }
+
+const String _kTestFlutterRoot = '/flutter';
+
+final Platform linuxPlatform = FakePlatform(
+  environment: <String, String>{
+    'FLUTTER_ROOT': _kTestFlutterRoot,
+    'HOME': '/',
+  }
+);
+final Platform notLinuxPlatform = FakePlatform(
+  operatingSystem: 'macos',
+  environment: <String, String>{
+    'FLUTTER_ROOT': _kTestFlutterRoot,
+  }
+);

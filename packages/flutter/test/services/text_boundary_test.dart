@@ -6,49 +6,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-
-class _ConsistentTextRangeImplementationMatcher extends Matcher {
-  _ConsistentTextRangeImplementationMatcher(int length)
-    : range = TextRange(start: -1, end: length + 1),
-      assert(length >= 0);
-
-  final TextRange range;
-  @override
-  Description describe(Description description) {
-    return description.add('The implementation of TextBoundary.getTextBoundaryAt is consistent with its other methods.');
-  }
-
-  @override
-  Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
-    final TextBoundary boundary = matchState['textBoundary'] as TextBoundary;
-    final int position = matchState['position'] as int;
-    final int leading = boundary.getLeadingTextBoundaryAt(position) ?? -1;
-    final int trailing = boundary.getTrailingTextBoundaryAt(position) ?? -1;
-
-    return mismatchDescription.add(
-      'at position $position, expected ${TextRange(start: leading, end: trailing)} but got ${boundary.getTextBoundaryAt(position)}',
-    );
-  }
-
-  @override
-  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    for (int i = range.start; i <= range.end; i++) {
-      final int? leading = (item as TextBoundary).getLeadingTextBoundaryAt(i);
-      final int? trailing = item.getTrailingTextBoundaryAt(i);
-      final TextRange boundary = item.getTextBoundaryAt(i);
-      final bool consistent = boundary.start == (leading ?? -1) && boundary.end == (trailing ?? -1);
-      if (!consistent) {
-        matchState['textBoundary'] = item;
-        matchState['position'] = i;
-        return false;
-      }
-    }
-    return true;
-  }
-}
-
-Matcher _hasConsistentTextRangeImplementationWithinRange(int length) => _ConsistentTextRangeImplementationMatcher(length);
-
 void main() {
   test('Character boundary works', () {
     const CharacterBoundary boundary = CharacterBoundary('abc');
@@ -305,3 +262,45 @@ class TestTextLayoutMetrics extends TextLayoutMetrics {
     throw UnimplementedError();
   }
 }
+
+class _ConsistentTextRangeImplementationMatcher extends Matcher {
+  _ConsistentTextRangeImplementationMatcher(int length)
+    : range = TextRange(start: -1, end: length + 1),
+      assert(length >= 0);
+
+  final TextRange range;
+  @override
+  Description describe(Description description) {
+    return description.add('The implementation of TextBoundary.getTextBoundaryAt is consistent with its other methods.');
+  }
+
+  @override
+  Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
+    final TextBoundary boundary = matchState['textBoundary'] as TextBoundary;
+    final int position = matchState['position'] as int;
+    final int leading = boundary.getLeadingTextBoundaryAt(position) ?? -1;
+    final int trailing = boundary.getTrailingTextBoundaryAt(position) ?? -1;
+
+    return mismatchDescription.add(
+      'at position $position, expected ${TextRange(start: leading, end: trailing)} but got ${boundary.getTextBoundaryAt(position)}',
+    );
+  }
+
+  @override
+  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+    for (int i = range.start; i <= range.end; i++) {
+      final int? leading = (item as TextBoundary).getLeadingTextBoundaryAt(i);
+      final int? trailing = item.getTrailingTextBoundaryAt(i);
+      final TextRange boundary = item.getTextBoundaryAt(i);
+      final bool consistent = boundary.start == (leading ?? -1) && boundary.end == (trailing ?? -1);
+      if (!consistent) {
+        matchState['textBoundary'] = item;
+        matchState['position'] = i;
+        return false;
+      }
+    }
+    return true;
+  }
+}
+
+Matcher _hasConsistentTextRangeImplementationWithinRange(int length) => _ConsistentTextRangeImplementationMatcher(length);

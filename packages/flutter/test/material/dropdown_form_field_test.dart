@@ -8,144 +8,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
-void onChanged<T>(T _) { }
-final Type dropdownButtonType = DropdownButton<String>(
-  onChanged: (_) { },
-  items: const <DropdownMenuItem<String>>[],
-).runtimeType;
-
-Finder _iconRichText(Key iconKey) {
-  return find.descendant(
-    of: find.byKey(iconKey),
-    matching: find.byType(RichText),
-  );
-}
-
-Widget buildFormFrame({
-  Key? buttonKey,
-  AutovalidateMode autovalidateMode = AutovalidateMode.disabled,
-  int elevation = 8,
-  String? value = 'two',
-  ValueChanged<String?>? onChanged,
-  VoidCallback? onTap,
-  Widget? icon,
-  Color? iconDisabledColor,
-  Color? iconEnabledColor,
-  double iconSize = 24.0,
-  bool isDense = true,
-  bool isExpanded = false,
-  Widget? hint,
-  Widget? disabledHint,
-  Widget? underline,
-  List<String>? items = menuItems,
-  Alignment alignment = Alignment.center,
-  TextDirection textDirection = TextDirection.ltr,
-  AlignmentGeometry buttonAlignment = AlignmentDirectional.centerStart,
-}) {
-  return TestApp(
-    textDirection: textDirection,
-    child: Material(
-      child: Align(
-        alignment: alignment,
-        child: RepaintBoundary(
-          child: DropdownButtonFormField<String>(
-            key: buttonKey,
-            autovalidateMode: autovalidateMode,
-            elevation: elevation,
-            value: value,
-            hint: hint,
-            disabledHint: disabledHint,
-            onChanged: onChanged,
-            onTap: onTap,
-            icon: icon,
-            iconSize: iconSize,
-            iconDisabledColor: iconDisabledColor,
-            iconEnabledColor: iconEnabledColor,
-            isDense: isDense,
-            isExpanded: isExpanded,
-            items: items?.map<DropdownMenuItem<String>>((String item) {
-              return DropdownMenuItem<String>(
-                key: ValueKey<String>(item),
-                value: item,
-                child: Text(item, key: ValueKey<String>('${item}Text')),
-              );
-            }).toList(),
-            alignment: buttonAlignment,
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
-class _TestAppState extends State<TestApp> {
-  @override
-  Widget build(BuildContext context) {
-    return Localizations(
-      locale: const Locale('en', 'US'),
-      delegates: const <LocalizationsDelegate<dynamic>>[
-        DefaultWidgetsLocalizations.delegate,
-        DefaultMaterialLocalizations.delegate,
-      ],
-      child: MediaQuery(
-        data: const MediaQueryData().copyWith(size: widget.mediaSize),
-        child: Directionality(
-          textDirection: widget.textDirection,
-          child: Navigator(
-            onGenerateRoute: (RouteSettings settings) {
-              assert(settings.name == '/');
-              return MaterialPageRoute<void>(
-                settings: settings,
-                builder: (BuildContext context) => widget.child,
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class TestApp extends StatefulWidget {
-  const TestApp({
-    super.key,
-    required this.textDirection,
-    required this.child,
-    this.mediaSize,
-  });
-
-  final TextDirection textDirection;
-  final Widget child;
-  final Size? mediaSize;
-
-  @override
-  State<TestApp> createState() => _TestAppState();
-}
-
-void verifyPaintedShadow(Finder customPaint, int elevation) {
-  const Rect originalRectangle = Rect.fromLTRB(0.0, 0.0, 800, 208.0);
-
-  final List<BoxShadow> boxShadows = List<BoxShadow>.generate(3, (int index) => kElevationToShadow[elevation]![index]);
-  final List<RRect> rrects = List<RRect>.generate(3, (int index) {
-    return RRect.fromRectAndRadius(
-      originalRectangle.shift(
-        boxShadows[index].offset,
-      ).inflate(boxShadows[index].spreadRadius),
-      const Radius.circular(2.0),
-    );
-  });
-
-  expect(
-    customPaint,
-    paints
-      ..save()
-      ..rrect(rrect: rrects[0], color: boxShadows[0].color, hasMaskFilter: true)
-      ..rrect(rrect: rrects[1], color: boxShadows[1].color, hasMaskFilter: true)
-      ..rrect(rrect: rrects[2], color: boxShadows[2].color, hasMaskFilter: true),
-  );
-}
-
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/87102
   testWidgets('label position test - show hint', (WidgetTester tester) async {
@@ -1229,4 +1091,142 @@ void main() {
     inkWell = tester.widget<InkWell>(find.byType(InkWell));
     expect(inkWell.borderRadius, errorBorderRadius);
   });
+}
+
+const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
+void onChanged<T>(T _) { }
+final Type dropdownButtonType = DropdownButton<String>(
+  onChanged: (_) { },
+  items: const <DropdownMenuItem<String>>[],
+).runtimeType;
+
+Finder _iconRichText(Key iconKey) {
+  return find.descendant(
+    of: find.byKey(iconKey),
+    matching: find.byType(RichText),
+  );
+}
+
+Widget buildFormFrame({
+  Key? buttonKey,
+  AutovalidateMode autovalidateMode = AutovalidateMode.disabled,
+  int elevation = 8,
+  String? value = 'two',
+  ValueChanged<String?>? onChanged,
+  VoidCallback? onTap,
+  Widget? icon,
+  Color? iconDisabledColor,
+  Color? iconEnabledColor,
+  double iconSize = 24.0,
+  bool isDense = true,
+  bool isExpanded = false,
+  Widget? hint,
+  Widget? disabledHint,
+  Widget? underline,
+  List<String>? items = menuItems,
+  Alignment alignment = Alignment.center,
+  TextDirection textDirection = TextDirection.ltr,
+  AlignmentGeometry buttonAlignment = AlignmentDirectional.centerStart,
+}) {
+  return TestApp(
+    textDirection: textDirection,
+    child: Material(
+      child: Align(
+        alignment: alignment,
+        child: RepaintBoundary(
+          child: DropdownButtonFormField<String>(
+            key: buttonKey,
+            autovalidateMode: autovalidateMode,
+            elevation: elevation,
+            value: value,
+            hint: hint,
+            disabledHint: disabledHint,
+            onChanged: onChanged,
+            onTap: onTap,
+            icon: icon,
+            iconSize: iconSize,
+            iconDisabledColor: iconDisabledColor,
+            iconEnabledColor: iconEnabledColor,
+            isDense: isDense,
+            isExpanded: isExpanded,
+            items: items?.map<DropdownMenuItem<String>>((String item) {
+              return DropdownMenuItem<String>(
+                key: ValueKey<String>(item),
+                value: item,
+                child: Text(item, key: ValueKey<String>('${item}Text')),
+              );
+            }).toList(),
+            alignment: buttonAlignment,
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+class _TestAppState extends State<TestApp> {
+  @override
+  Widget build(BuildContext context) {
+    return Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: const <LocalizationsDelegate<dynamic>>[
+        DefaultWidgetsLocalizations.delegate,
+        DefaultMaterialLocalizations.delegate,
+      ],
+      child: MediaQuery(
+        data: const MediaQueryData().copyWith(size: widget.mediaSize),
+        child: Directionality(
+          textDirection: widget.textDirection,
+          child: Navigator(
+            onGenerateRoute: (RouteSettings settings) {
+              assert(settings.name == '/');
+              return MaterialPageRoute<void>(
+                settings: settings,
+                builder: (BuildContext context) => widget.child,
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class TestApp extends StatefulWidget {
+  const TestApp({
+    super.key,
+    required this.textDirection,
+    required this.child,
+    this.mediaSize,
+  });
+
+  final TextDirection textDirection;
+  final Widget child;
+  final Size? mediaSize;
+
+  @override
+  State<TestApp> createState() => _TestAppState();
+}
+
+void verifyPaintedShadow(Finder customPaint, int elevation) {
+  const Rect originalRectangle = Rect.fromLTRB(0.0, 0.0, 800, 208.0);
+
+  final List<BoxShadow> boxShadows = List<BoxShadow>.generate(3, (int index) => kElevationToShadow[elevation]![index]);
+  final List<RRect> rrects = List<RRect>.generate(3, (int index) {
+    return RRect.fromRectAndRadius(
+      originalRectangle.shift(
+        boxShadows[index].offset,
+      ).inflate(boxShadows[index].spreadRadius),
+      const Radius.circular(2.0),
+    );
+  });
+
+  expect(
+    customPaint,
+    paints
+      ..save()
+      ..rrect(rrect: rrects[0], color: boxShadows[0].color, hasMaskFilter: true)
+      ..rrect(rrect: rrects[1], color: boxShadows[1].color, hasMaskFilter: true)
+      ..rrect(rrect: rrects[2], color: boxShadows[2].color, hasMaskFilter: true),
+  );
 }

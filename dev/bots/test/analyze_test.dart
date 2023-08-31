@@ -10,33 +10,6 @@ import '../analyze.dart';
 import '../utils.dart';
 import 'common.dart';
 
-typedef AsyncVoidCallback = Future<void> Function();
-
-Future<String> capture(AsyncVoidCallback callback, { bool shouldHaveErrors = false }) async {
-  final StringBuffer buffer = StringBuffer();
-  final PrintCallback oldPrint = print;
-  try {
-    print = (Object? line) {
-      buffer.writeln(line);
-    };
-    await callback();
-    expect(
-      hasError,
-      shouldHaveErrors,
-      reason: buffer.isEmpty ? '(No output to report.)' : hasError ? 'Unexpected errors:\n$buffer' : 'Unexpected success:\n$buffer',
-    );
-  } finally {
-    print = oldPrint;
-    resetErrorStatus();
-  }
-  if (stdout.supportsAnsiEscapes) {
-    // Remove ANSI escapes when this test is running on a terminal.
-    return buffer.toString().replaceAll(RegExp(r'(\x9B|\x1B\[)[0-?]{1,3}[ -/]*[@-~]'), '');
-  } else {
-    return buffer.toString();
-  }
-}
-
 void main() {
   final String testRootPath = path.join('test', 'analyze-test-input', 'root');
   final String dartName = Platform.isWindows ? 'dart.exe' : 'dart';
@@ -208,4 +181,31 @@ void main() {
     expect(result, contains(':20'));
     expect(result, contains(':21'));
   });
+}
+
+typedef AsyncVoidCallback = Future<void> Function();
+
+Future<String> capture(AsyncVoidCallback callback, { bool shouldHaveErrors = false }) async {
+  final StringBuffer buffer = StringBuffer();
+  final PrintCallback oldPrint = print;
+  try {
+    print = (Object? line) {
+      buffer.writeln(line);
+    };
+    await callback();
+    expect(
+      hasError,
+      shouldHaveErrors,
+      reason: buffer.isEmpty ? '(No output to report.)' : hasError ? 'Unexpected errors:\n$buffer' : 'Unexpected success:\n$buffer',
+    );
+  } finally {
+    print = oldPrint;
+    resetErrorStatus();
+  }
+  if (stdout.supportsAnsiEscapes) {
+    // Remove ANSI escapes when this test is running on a terminal.
+    return buffer.toString().replaceAll(RegExp(r'(\x9B|\x1B\[)[0-?]{1,3}[ -/]*[@-~]'), '');
+  } else {
+    return buffer.toString();
+  }
 }

@@ -12,41 +12,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-MaterialApp _appWithDialog(WidgetTester tester, Widget dialog, { ThemeData? theme }) {
-  return MaterialApp(
-    theme: theme,
-    home: Material(
-      child: Builder(
-        builder: (BuildContext context) {
-          return Center(
-            child: ElevatedButton(
-              child: const Text('X'),
-              onPressed: () {
-                showDialog<void>(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return RepaintBoundary(key: _painterKey, child: dialog);
-                  },
-                );
-              },
-            ),
-          );
-        },
-      ),
-    ),
-  );
-}
-
-final Key _painterKey = UniqueKey();
-
-Material _getMaterialFromDialog(WidgetTester tester) {
-  return tester.widget<Material>(find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)));
-}
-
-RenderParagraph _getTextRenderObject(WidgetTester tester, String text) {
-  return tester.element<StatelessElement>(find.text(text)).renderObject! as RenderParagraph;
-}
-
 void main() {
   test('DialogTheme lerp special cases', () {
     expect(DialogTheme.lerp(null, null, 0), const DialogTheme());
@@ -499,4 +464,39 @@ void main() {
     final RenderParagraph content = _getTextRenderObject(tester, contentText);
     expect(content.text.style!.color, contentTextStyle.color);
   });
+}
+
+MaterialApp _appWithDialog(WidgetTester tester, Widget dialog, { ThemeData? theme }) {
+  return MaterialApp(
+    theme: theme,
+    home: Material(
+      child: Builder(
+        builder: (BuildContext context) {
+          return Center(
+            child: ElevatedButton(
+              child: const Text('X'),
+              onPressed: () {
+                showDialog<void>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return RepaintBoundary(key: _painterKey, child: dialog);
+                  },
+                );
+              },
+            ),
+          );
+        },
+      ),
+    ),
+  );
+}
+
+final Key _painterKey = UniqueKey();
+
+Material _getMaterialFromDialog(WidgetTester tester) {
+  return tester.widget<Material>(find.descendant(of: find.byType(AlertDialog), matching: find.byType(Material)));
+}
+
+RenderParagraph _getTextRenderObject(WidgetTester tester, String text) {
+  return tester.element<StatelessElement>(find.text(text)).renderObject! as RenderParagraph;
 }

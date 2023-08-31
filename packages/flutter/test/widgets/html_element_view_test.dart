@@ -17,11 +17,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:web/web.dart' as web;
 
-final Object _mockHtmlElement = Object();
-Object _mockViewFactory(int id, {Object? params}) {
-  return _mockHtmlElement;
-}
-
 void main() {
   late FakePlatformViewRegistry fakePlatformViewRegistry;
 
@@ -498,4 +493,9 @@ class FakePlatformViewRegistry implements ui_web.PlatformViewRegistry {
     _views.remove(view);
     return null;
   }
+}
+
+final Object _mockHtmlElement = Object();
+Object _mockViewFactory(int id, {Object? params}) {
+  return _mockHtmlElement;
 }

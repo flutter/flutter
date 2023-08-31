@@ -26,374 +26,6 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
 
-const String linuxFlutterRoot = '/flutter';
-const String windowsFlutterRoot = r'C:\flutter';
-
-const String defaultConfigLinux1 = r'''
-{
-  "$schema": "file:///flutter/packages/flutter_tools/static/custom-devices.schema.json",
-  "custom-devices": [
-    {
-      "id": "pi",
-      "label": "Raspberry Pi",
-      "sdkNameAndVersion": "Raspberry Pi 4 Model B+",
-      "platform": "linux-arm64",
-      "enabled": false,
-      "ping": [
-        "ping",
-        "-w",
-        "1",
-        "-c",
-        "1",
-        "raspberrypi"
-      ],
-      "pingSuccessRegex": null,
-      "postBuild": null,
-      "install": [
-        "scp",
-        "-r",
-        "-o",
-        "BatchMode=yes",
-        "${localPath}",
-        "pi@raspberrypi:/tmp/${appName}"
-      ],
-      "uninstall": [
-        "ssh",
-        "-o",
-        "BatchMode=yes",
-        "pi@raspberrypi",
-        "rm -rf \"/tmp/${appName}\""
-      ],
-      "runDebug": [
-        "ssh",
-        "-o",
-        "BatchMode=yes",
-        "pi@raspberrypi",
-        "flutter-pi \"/tmp/${appName}\""
-      ],
-      "forwardPort": [
-        "ssh",
-        "-o",
-        "BatchMode=yes",
-        "-o",
-        "ExitOnForwardFailure=yes",
-        "-L",
-        "127.0.0.1:${hostPort}:127.0.0.1:${devicePort}",
-        "pi@raspberrypi",
-        "echo 'Port forwarding success'; read"
-      ],
-      "forwardPortSuccessRegex": "Port forwarding success",
-      "screenshot": [
-        "ssh",
-        "-o",
-        "BatchMode=yes",
-        "pi@raspberrypi",
-        "fbgrab /tmp/screenshot.png && cat /tmp/screenshot.png | base64 | tr -d ' \\n\\t'"
-      ]
-    }
-  ]
-}
-''';
-const String defaultConfigLinux2 = r'''
-{
-  "custom-devices": [
-    {
-      "id": "pi",
-      "label": "Raspberry Pi",
-      "sdkNameAndVersion": "Raspberry Pi 4 Model B+",
-      "platform": "linux-arm64",
-      "enabled": false,
-      "ping": [
-        "ping",
-        "-w",
-        "1",
-        "-c",
-        "1",
-        "raspberrypi"
-      ],
-      "pingSuccessRegex": null,
-      "postBuild": null,
-      "install": [
-        "scp",
-        "-r",
-        "-o",
-        "BatchMode=yes",
-        "${localPath}",
-        "pi@raspberrypi:/tmp/${appName}"
-      ],
-      "uninstall": [
-        "ssh",
-        "-o",
-        "BatchMode=yes",
-        "pi@raspberrypi",
-        "rm -rf \"/tmp/${appName}\""
-      ],
-      "runDebug": [
-        "ssh",
-        "-o",
-        "BatchMode=yes",
-        "pi@raspberrypi",
-        "flutter-pi \"/tmp/${appName}\""
-      ],
-      "forwardPort": [
-        "ssh",
-        "-o",
-        "BatchMode=yes",
-        "-o",
-        "ExitOnForwardFailure=yes",
-        "-L",
-        "127.0.0.1:${hostPort}:127.0.0.1:${devicePort}",
-        "pi@raspberrypi",
-        "echo 'Port forwarding success'; read"
-      ],
-      "forwardPortSuccessRegex": "Port forwarding success",
-      "screenshot": [
-        "ssh",
-        "-o",
-        "BatchMode=yes",
-        "pi@raspberrypi",
-        "fbgrab /tmp/screenshot.png && cat /tmp/screenshot.png | base64 | tr -d ' \\n\\t'"
-      ]
-    }
-  ],
-  "$schema": "file:///flutter/packages/flutter_tools/static/custom-devices.schema.json"
-}
-''';
-
-final Platform windowsPlatform = FakePlatform(
-  operatingSystem: 'windows',
-  environment: <String, String>{
-    'FLUTTER_ROOT': windowsFlutterRoot,
-  }
-);
-
-class FakeTerminal implements Terminal {
-  factory FakeTerminal({required Platform platform}) {
-    return FakeTerminal._private(
-        stdio: FakeStdio(),
-        platform: platform
-    );
-  }
-
-  FakeTerminal._private({
-    required this.stdio,
-    required Platform platform
-  }) :
-    terminal = AnsiTerminal(
-      stdio: stdio,
-      platform: platform
-    );
-
-  final FakeStdio stdio;
-  final AnsiTerminal terminal;
-
-  void simulateStdin(String line) {
-    stdio.simulateStdin(line);
-  }
-
-  @override
-  set usesTerminalUi(bool value) => terminal.usesTerminalUi = value;
-
-  @override
-  bool get usesTerminalUi => terminal.usesTerminalUi;
-
-  @override
-  String bolden(String message) => terminal.bolden(message);
-
-  @override
-  String clearScreen() => terminal.clearScreen();
-
-  @override
-  String color(String message, TerminalColor color) => terminal.color(message, color);
-
-  @override
-  Stream<String> get keystrokes => terminal.keystrokes;
-
-  @override
-  Future<String> promptForCharInput(
-    List<String> acceptedCharacters, {
-    required Logger logger,
-    String? prompt,
-    int? defaultChoiceIndex,
-    bool displayAcceptedCharacters = true
-  }) => terminal.promptForCharInput(
-      acceptedCharacters,
-      logger: logger,
-      prompt: prompt,
-      defaultChoiceIndex: defaultChoiceIndex,
-      displayAcceptedCharacters: displayAcceptedCharacters
-    );
-
-  @override
-  bool get singleCharMode => terminal.singleCharMode;
-  @override
-  set singleCharMode(bool value) => terminal.singleCharMode = value;
-
-  @override
-  bool get stdinHasTerminal => terminal.stdinHasTerminal;
-
-  @override
-  String get successMark => terminal.successMark;
-
-  @override
-  bool get supportsColor => terminal.supportsColor;
-
-  @override
-  bool get isCliAnimationEnabled => terminal.isCliAnimationEnabled;
-
-  @override
-  bool get supportsEmoji => terminal.supportsEmoji;
-
-  @override
-  String get warningMark => terminal.warningMark;
-
-  @override
-  int get preferredStyle => terminal.preferredStyle;
-}
-
-class FakeCommandRunner extends FlutterCommandRunner {
-  FakeCommandRunner({
-    required Platform platform,
-    required FileSystem fileSystem,
-    required Logger logger,
-    UserMessages? userMessages
-  }) : _platform = platform,
-       _fileSystem = fileSystem,
-       _logger = logger,
-       _userMessages = userMessages ?? UserMessages();
-
-  final Platform _platform;
-  final FileSystem _fileSystem;
-  final Logger _logger;
-  final UserMessages _userMessages;
-
-  @override
-  Future<void> runCommand(ArgResults topLevelResults) async {
-    final Logger logger = (topLevelResults['verbose'] as bool) ? VerboseLogger(_logger) : _logger;
-
-    return context.run<void>(
-      overrides: <Type, Generator>{
-        Logger: () => logger,
-      },
-      body: () {
-        Cache.flutterRoot ??= Cache.defaultFlutterRoot(
-          platform: _platform,
-          fileSystem: _fileSystem,
-          userMessages: _userMessages,
-        );
-        // For compatibility with tests that set this to a relative path.
-        Cache.flutterRoot = _fileSystem.path.normalize(_fileSystem.path.absolute(Cache.flutterRoot!));
-        return super.runCommand(topLevelResults);
-      }
-    );
-  }
-}
-
-/// May take platform, logger, processManager and fileSystem from context if
-/// not explicitly specified.
-CustomDevicesCommand createCustomDevicesCommand({
-  CustomDevicesConfig Function(FileSystem, Logger)? config,
-  Terminal Function(Platform)? terminal,
-  Platform? platform,
-  FileSystem? fileSystem,
-  ProcessManager? processManager,
-  Logger? logger,
-  PrintFn? usagePrintFn,
-  bool featureEnabled = false
-}) {
-  platform ??= FakePlatform();
-  processManager ??= FakeProcessManager.any();
-  fileSystem ??= MemoryFileSystem.test();
-  usagePrintFn ??= print;
-  logger ??= BufferLogger.test();
-
-  return CustomDevicesCommand.test(
-    customDevicesConfig: config != null
-      ? config(fileSystem, logger)
-      : CustomDevicesConfig.test(
-        platform: platform,
-        fileSystem: fileSystem,
-        directory: fileSystem.directory('/'),
-        logger: logger
-      ),
-    operatingSystemUtils: FakeOperatingSystemUtils(
-      hostPlatform: platform.isLinux ? HostPlatform.linux_x64
-        : platform.isWindows ? HostPlatform.windows_x64
-        : platform.isMacOS ? HostPlatform.darwin_x64
-        : throw UnsupportedError('Unsupported operating system')
-    ),
-    terminal: terminal != null
-      ? terminal(platform)
-      : FakeTerminal(platform: platform),
-    platform: platform,
-    featureFlags: TestFeatureFlags(areCustomDevicesEnabled: featureEnabled),
-    processManager: processManager,
-    fileSystem: fileSystem,
-    logger: logger,
-    usagePrintFn: usagePrintFn,
-  );
-}
-
-/// May take platform, logger, processManager and fileSystem from context if
-/// not explicitly specified.
-CommandRunner<void> createCustomDevicesCommandRunner({
-  CustomDevicesConfig Function(FileSystem, Logger)? config,
-  Terminal Function(Platform)? terminal,
-  Platform? platform,
-  FileSystem? fileSystem,
-  ProcessManager? processManager,
-  Logger? logger,
-  PrintFn? usagePrintFn,
-  bool featureEnabled = false,
-}) {
-  platform ??= FakePlatform();
-  fileSystem ??= MemoryFileSystem.test();
-  logger ??= BufferLogger.test();
-
-  return FakeCommandRunner(
-    platform: platform,
-    fileSystem: fileSystem,
-    logger: logger
-  )..addCommand(
-    createCustomDevicesCommand(
-      config: config,
-      terminal: terminal,
-      platform: platform,
-      fileSystem: fileSystem,
-      processManager: processManager,
-      logger: logger,
-      usagePrintFn: usagePrintFn,
-      featureEnabled: featureEnabled
-    )
-  );
-}
-
-FakeTerminal createFakeTerminalForAddingSshDevice({
-  required Platform platform,
-  required String id,
-  required String label,
-  required String sdkNameAndVersion,
-  required String enabled,
-  required String hostname,
-  required String username,
-  required String runDebug,
-  required String usePortForwarding,
-  required String screenshot,
-  required String apply
-}) {
-  return FakeTerminal(platform: platform)
-    ..simulateStdin(id)
-    ..simulateStdin(label)
-    ..simulateStdin(sdkNameAndVersion)
-    ..simulateStdin(enabled)
-    ..simulateStdin(hostname)
-    ..simulateStdin(username)
-    ..simulateStdin(runDebug)
-    ..simulateStdin(usePortForwarding)
-    ..simulateStdin(screenshot)
-    ..simulateStdin(apply);
-}
-
 void main() {
   const String featureNotEnabledMessage = 'Custom devices feature must be enabled. Enable using `flutter config --enable-custom-devices`.';
 
@@ -1264,4 +896,372 @@ void main() {
       },
     );
   });
+}
+
+const String linuxFlutterRoot = '/flutter';
+const String windowsFlutterRoot = r'C:\flutter';
+
+const String defaultConfigLinux1 = r'''
+{
+  "$schema": "file:///flutter/packages/flutter_tools/static/custom-devices.schema.json",
+  "custom-devices": [
+    {
+      "id": "pi",
+      "label": "Raspberry Pi",
+      "sdkNameAndVersion": "Raspberry Pi 4 Model B+",
+      "platform": "linux-arm64",
+      "enabled": false,
+      "ping": [
+        "ping",
+        "-w",
+        "1",
+        "-c",
+        "1",
+        "raspberrypi"
+      ],
+      "pingSuccessRegex": null,
+      "postBuild": null,
+      "install": [
+        "scp",
+        "-r",
+        "-o",
+        "BatchMode=yes",
+        "${localPath}",
+        "pi@raspberrypi:/tmp/${appName}"
+      ],
+      "uninstall": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "pi@raspberrypi",
+        "rm -rf \"/tmp/${appName}\""
+      ],
+      "runDebug": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "pi@raspberrypi",
+        "flutter-pi \"/tmp/${appName}\""
+      ],
+      "forwardPort": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ExitOnForwardFailure=yes",
+        "-L",
+        "127.0.0.1:${hostPort}:127.0.0.1:${devicePort}",
+        "pi@raspberrypi",
+        "echo 'Port forwarding success'; read"
+      ],
+      "forwardPortSuccessRegex": "Port forwarding success",
+      "screenshot": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "pi@raspberrypi",
+        "fbgrab /tmp/screenshot.png && cat /tmp/screenshot.png | base64 | tr -d ' \\n\\t'"
+      ]
+    }
+  ]
+}
+''';
+const String defaultConfigLinux2 = r'''
+{
+  "custom-devices": [
+    {
+      "id": "pi",
+      "label": "Raspberry Pi",
+      "sdkNameAndVersion": "Raspberry Pi 4 Model B+",
+      "platform": "linux-arm64",
+      "enabled": false,
+      "ping": [
+        "ping",
+        "-w",
+        "1",
+        "-c",
+        "1",
+        "raspberrypi"
+      ],
+      "pingSuccessRegex": null,
+      "postBuild": null,
+      "install": [
+        "scp",
+        "-r",
+        "-o",
+        "BatchMode=yes",
+        "${localPath}",
+        "pi@raspberrypi:/tmp/${appName}"
+      ],
+      "uninstall": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "pi@raspberrypi",
+        "rm -rf \"/tmp/${appName}\""
+      ],
+      "runDebug": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "pi@raspberrypi",
+        "flutter-pi \"/tmp/${appName}\""
+      ],
+      "forwardPort": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ExitOnForwardFailure=yes",
+        "-L",
+        "127.0.0.1:${hostPort}:127.0.0.1:${devicePort}",
+        "pi@raspberrypi",
+        "echo 'Port forwarding success'; read"
+      ],
+      "forwardPortSuccessRegex": "Port forwarding success",
+      "screenshot": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "pi@raspberrypi",
+        "fbgrab /tmp/screenshot.png && cat /tmp/screenshot.png | base64 | tr -d ' \\n\\t'"
+      ]
+    }
+  ],
+  "$schema": "file:///flutter/packages/flutter_tools/static/custom-devices.schema.json"
+}
+''';
+
+final Platform windowsPlatform = FakePlatform(
+  operatingSystem: 'windows',
+  environment: <String, String>{
+    'FLUTTER_ROOT': windowsFlutterRoot,
+  }
+);
+
+class FakeTerminal implements Terminal {
+  factory FakeTerminal({required Platform platform}) {
+    return FakeTerminal._private(
+        stdio: FakeStdio(),
+        platform: platform
+    );
+  }
+
+  FakeTerminal._private({
+    required this.stdio,
+    required Platform platform
+  }) :
+    terminal = AnsiTerminal(
+      stdio: stdio,
+      platform: platform
+    );
+
+  final FakeStdio stdio;
+  final AnsiTerminal terminal;
+
+  void simulateStdin(String line) {
+    stdio.simulateStdin(line);
+  }
+
+  @override
+  set usesTerminalUi(bool value) => terminal.usesTerminalUi = value;
+
+  @override
+  bool get usesTerminalUi => terminal.usesTerminalUi;
+
+  @override
+  String bolden(String message) => terminal.bolden(message);
+
+  @override
+  String clearScreen() => terminal.clearScreen();
+
+  @override
+  String color(String message, TerminalColor color) => terminal.color(message, color);
+
+  @override
+  Stream<String> get keystrokes => terminal.keystrokes;
+
+  @override
+  Future<String> promptForCharInput(
+    List<String> acceptedCharacters, {
+    required Logger logger,
+    String? prompt,
+    int? defaultChoiceIndex,
+    bool displayAcceptedCharacters = true
+  }) => terminal.promptForCharInput(
+      acceptedCharacters,
+      logger: logger,
+      prompt: prompt,
+      defaultChoiceIndex: defaultChoiceIndex,
+      displayAcceptedCharacters: displayAcceptedCharacters
+    );
+
+  @override
+  bool get singleCharMode => terminal.singleCharMode;
+  @override
+  set singleCharMode(bool value) => terminal.singleCharMode = value;
+
+  @override
+  bool get stdinHasTerminal => terminal.stdinHasTerminal;
+
+  @override
+  String get successMark => terminal.successMark;
+
+  @override
+  bool get supportsColor => terminal.supportsColor;
+
+  @override
+  bool get isCliAnimationEnabled => terminal.isCliAnimationEnabled;
+
+  @override
+  bool get supportsEmoji => terminal.supportsEmoji;
+
+  @override
+  String get warningMark => terminal.warningMark;
+
+  @override
+  int get preferredStyle => terminal.preferredStyle;
+}
+
+class FakeCommandRunner extends FlutterCommandRunner {
+  FakeCommandRunner({
+    required Platform platform,
+    required FileSystem fileSystem,
+    required Logger logger,
+    UserMessages? userMessages
+  }) : _platform = platform,
+       _fileSystem = fileSystem,
+       _logger = logger,
+       _userMessages = userMessages ?? UserMessages();
+
+  final Platform _platform;
+  final FileSystem _fileSystem;
+  final Logger _logger;
+  final UserMessages _userMessages;
+
+  @override
+  Future<void> runCommand(ArgResults topLevelResults) async {
+    final Logger logger = (topLevelResults['verbose'] as bool) ? VerboseLogger(_logger) : _logger;
+
+    return context.run<void>(
+      overrides: <Type, Generator>{
+        Logger: () => logger,
+      },
+      body: () {
+        Cache.flutterRoot ??= Cache.defaultFlutterRoot(
+          platform: _platform,
+          fileSystem: _fileSystem,
+          userMessages: _userMessages,
+        );
+        // For compatibility with tests that set this to a relative path.
+        Cache.flutterRoot = _fileSystem.path.normalize(_fileSystem.path.absolute(Cache.flutterRoot!));
+        return super.runCommand(topLevelResults);
+      }
+    );
+  }
+}
+
+/// May take platform, logger, processManager and fileSystem from context if
+/// not explicitly specified.
+CustomDevicesCommand createCustomDevicesCommand({
+  CustomDevicesConfig Function(FileSystem, Logger)? config,
+  Terminal Function(Platform)? terminal,
+  Platform? platform,
+  FileSystem? fileSystem,
+  ProcessManager? processManager,
+  Logger? logger,
+  PrintFn? usagePrintFn,
+  bool featureEnabled = false
+}) {
+  platform ??= FakePlatform();
+  processManager ??= FakeProcessManager.any();
+  fileSystem ??= MemoryFileSystem.test();
+  usagePrintFn ??= print;
+  logger ??= BufferLogger.test();
+
+  return CustomDevicesCommand.test(
+    customDevicesConfig: config != null
+      ? config(fileSystem, logger)
+      : CustomDevicesConfig.test(
+        platform: platform,
+        fileSystem: fileSystem,
+        directory: fileSystem.directory('/'),
+        logger: logger
+      ),
+    operatingSystemUtils: FakeOperatingSystemUtils(
+      hostPlatform: platform.isLinux ? HostPlatform.linux_x64
+        : platform.isWindows ? HostPlatform.windows_x64
+        : platform.isMacOS ? HostPlatform.darwin_x64
+        : throw UnsupportedError('Unsupported operating system')
+    ),
+    terminal: terminal != null
+      ? terminal(platform)
+      : FakeTerminal(platform: platform),
+    platform: platform,
+    featureFlags: TestFeatureFlags(areCustomDevicesEnabled: featureEnabled),
+    processManager: processManager,
+    fileSystem: fileSystem,
+    logger: logger,
+    usagePrintFn: usagePrintFn,
+  );
+}
+
+/// May take platform, logger, processManager and fileSystem from context if
+/// not explicitly specified.
+CommandRunner<void> createCustomDevicesCommandRunner({
+  CustomDevicesConfig Function(FileSystem, Logger)? config,
+  Terminal Function(Platform)? terminal,
+  Platform? platform,
+  FileSystem? fileSystem,
+  ProcessManager? processManager,
+  Logger? logger,
+  PrintFn? usagePrintFn,
+  bool featureEnabled = false,
+}) {
+  platform ??= FakePlatform();
+  fileSystem ??= MemoryFileSystem.test();
+  logger ??= BufferLogger.test();
+
+  return FakeCommandRunner(
+    platform: platform,
+    fileSystem: fileSystem,
+    logger: logger
+  )..addCommand(
+    createCustomDevicesCommand(
+      config: config,
+      terminal: terminal,
+      platform: platform,
+      fileSystem: fileSystem,
+      processManager: processManager,
+      logger: logger,
+      usagePrintFn: usagePrintFn,
+      featureEnabled: featureEnabled
+    )
+  );
+}
+
+FakeTerminal createFakeTerminalForAddingSshDevice({
+  required Platform platform,
+  required String id,
+  required String label,
+  required String sdkNameAndVersion,
+  required String enabled,
+  required String hostname,
+  required String username,
+  required String runDebug,
+  required String usePortForwarding,
+  required String screenshot,
+  required String apply
+}) {
+  return FakeTerminal(platform: platform)
+    ..simulateStdin(id)
+    ..simulateStdin(label)
+    ..simulateStdin(sdkNameAndVersion)
+    ..simulateStdin(enabled)
+    ..simulateStdin(hostname)
+    ..simulateStdin(username)
+    ..simulateStdin(runDebug)
+    ..simulateStdin(usePortForwarding)
+    ..simulateStdin(screenshot)
+    ..simulateStdin(apply);
 }

@@ -8,11 +8,6 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as path;
 
-final String bat = Platform.isWindows ? '.bat' : '';
-final String _flutterBin = path.join(Directory.current.parent.parent.path, 'bin', 'flutter$bat');
-const String _integrationResultsPrefix = 'IntegrationTestWidgetsFlutterBinding test results:';
-const String _failureExcerpt = r'Expected: <false>\n  Actual: <true>';
-
 Future<void> main() async {
   group('Integration binding result', () {
     test('when multiple tests pass', () async {
@@ -90,3 +85,8 @@ Future<Map<String, dynamic>?> _runTest(String scriptPath) async {
 
   return jsonDecode(testResults) as Map<String, dynamic>?;
 }
+
+final String bat = Platform.isWindows ? '.bat' : '';
+final String _flutterBin = path.join(Directory.current.parent.parent.path, 'bin', 'flutter$bat');
+const String _integrationResultsPrefix = 'IntegrationTestWidgetsFlutterBinding test results:';
+const String _failureExcerpt = r'Expected: <false>\n  Actual: <true>';

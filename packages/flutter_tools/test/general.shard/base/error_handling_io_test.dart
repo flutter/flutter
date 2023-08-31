@@ -19,20 +19,6 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
-final Platform windowsPlatform = FakePlatform(
-  operatingSystem: 'windows',
-  environment: <String, String>{}
-);
-
-final Platform linuxPlatform = FakePlatform(
-  environment: <String, String>{}
-);
-
-final Platform macOSPlatform = FakePlatform(
-  operatingSystem: 'macos',
-  environment: <String, String>{}
-);
-
 void main() {
   testWithoutContext('deleteIfExists does not delete if file does not exist', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
@@ -1302,3 +1288,17 @@ class FakeFileSystem extends Fake implements FileSystem {
   @override
   set currentDirectory(dynamic path) { }
 }
+
+final Platform windowsPlatform = FakePlatform(
+  operatingSystem: 'windows',
+  environment: <String, String>{}
+);
+
+final Platform linuxPlatform = FakePlatform(
+  environment: <String, String>{}
+);
+
+final Platform macOSPlatform = FakePlatform(
+  operatingSystem: 'macos',
+  environment: <String, String>{}
+);

@@ -19,9 +19,6 @@ import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 import 'utils.dart';
 
-const String _kFlutterRoot = '/flutter/flutter';
-const String _kProjectRoot = '/project';
-
 void main() {
   group('FlutterCommandRunner', () {
     late MemoryFileSystem fileSystem;
@@ -299,3 +296,6 @@ class FakeStdio extends Stdio {
   @override
   bool get supportsAnsiEscapes => hasFakeTerminal;
 }
+
+const String _kFlutterRoot = '/flutter/flutter';
+const String _kProjectRoot = '/project';

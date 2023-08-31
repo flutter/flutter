@@ -15,110 +15,6 @@ import 'navigator_utils.dart';
 import 'observer_tester.dart';
 import 'semantics_tester.dart';
 
-class FirstWidget extends StatelessWidget {
-  const FirstWidget({ super.key });
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.pushNamed(context, '/second');
-      },
-      child: const ColoredBox(
-        color: Color(0xFFFFFF00),
-        child: Text('X'),
-      ),
-    );
-  }
-}
-
-class SecondWidget extends StatefulWidget {
-  const SecondWidget({ super.key });
-  @override
-  SecondWidgetState createState() => SecondWidgetState();
-}
-
-class SecondWidgetState extends State<SecondWidget> {
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => Navigator.pop(context),
-      child: const ColoredBox(
-        color: Color(0xFFFF00FF),
-        child: Text('Y'),
-      ),
-    );
-  }
-}
-
-typedef ExceptionCallback = void Function(dynamic exception);
-
-class ThirdWidget extends StatelessWidget {
-  const ThirdWidget({ super.key, required this.targetKey, required this.onException });
-
-  final Key targetKey;
-  final ExceptionCallback onException;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      key: targetKey,
-      onTap: () {
-        try {
-          Navigator.of(context);
-        } catch (e) {
-          onException(e);
-        }
-      },
-      behavior: HitTestBehavior.opaque,
-    );
-  }
-}
-
-class OnTapPage extends StatelessWidget {
-  const OnTapPage({ super.key, required this.id, this.onTap });
-
-  final String id;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Page $id')),
-      body: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: Center(
-          child: Text(id, style: Theme.of(context).textTheme.displaySmall),
-        ),
-      ),
-    );
-  }
-}
-
-class SlideInOutPageRoute<T> extends PageRouteBuilder<T> {
-  SlideInOutPageRoute({required WidgetBuilder bodyBuilder, super.settings}) : super(
-    pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) => bodyBuilder(context),
-    transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-        return SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(1.0, 0),
-            end: Offset.zero,
-          ).animate(animation),
-          child: SlideTransition(
-            position: Tween<Offset>(
-              begin: Offset.zero,
-              end: const Offset(-1.0, 0),
-            ).animate(secondaryAnimation),
-            child: child,
-          ),
-        );
-      },
-  );
-
-  @override
-  AnimationController? get controller => super.controller;
-}
-
 void main() {
   testWidgets('Can navigator navigate to and from a stateful widget', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -5301,4 +5197,108 @@ class _NestedNavigatorsPageState extends State<_NestedNavigatorsPage> {
       ),
     );
   }
+}
+
+class FirstWidget extends StatelessWidget {
+  const FirstWidget({ super.key });
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(context, '/second');
+      },
+      child: const ColoredBox(
+        color: Color(0xFFFFFF00),
+        child: Text('X'),
+      ),
+    );
+  }
+}
+
+class SecondWidget extends StatefulWidget {
+  const SecondWidget({ super.key });
+  @override
+  SecondWidgetState createState() => SecondWidgetState();
+}
+
+class SecondWidgetState extends State<SecondWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.pop(context),
+      child: const ColoredBox(
+        color: Color(0xFFFF00FF),
+        child: Text('Y'),
+      ),
+    );
+  }
+}
+
+typedef ExceptionCallback = void Function(dynamic exception);
+
+class ThirdWidget extends StatelessWidget {
+  const ThirdWidget({ super.key, required this.targetKey, required this.onException });
+
+  final Key targetKey;
+  final ExceptionCallback onException;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      key: targetKey,
+      onTap: () {
+        try {
+          Navigator.of(context);
+        } catch (e) {
+          onException(e);
+        }
+      },
+      behavior: HitTestBehavior.opaque,
+    );
+  }
+}
+
+class OnTapPage extends StatelessWidget {
+  const OnTapPage({ super.key, required this.id, this.onTap });
+
+  final String id;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Page $id')),
+      body: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Center(
+          child: Text(id, style: Theme.of(context).textTheme.displaySmall),
+        ),
+      ),
+    );
+  }
+}
+
+class SlideInOutPageRoute<T> extends PageRouteBuilder<T> {
+  SlideInOutPageRoute({required WidgetBuilder bodyBuilder, super.settings}) : super(
+    pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) => bodyBuilder(context),
+    transitionsBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(1.0, 0),
+            end: Offset.zero,
+          ).animate(animation),
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: Offset.zero,
+              end: const Offset(-1.0, 0),
+            ).animate(secondaryAnimation),
+            child: child,
+          ),
+        );
+      },
+  );
+
+  @override
+  AnimationController? get controller => super.controller;
 }

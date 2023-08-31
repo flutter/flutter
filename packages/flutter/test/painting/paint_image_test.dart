@@ -8,15 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestCanvas implements Canvas {
-  final List<Invocation> invocations = <Invocation>[];
-
-  @override
-  void noSuchMethod(Invocation invocation) {
-    invocations.add(invocation);
-  }
-}
-
 void main() {
   late ui.Image image300x300;
   late ui.Image image300x200;
@@ -267,4 +258,13 @@ void main() {
   });
 
   // See also the DecorationImage tests in: decoration_test.dart
+}
+
+class TestCanvas implements Canvas {
+  final List<Invocation> invocations = <Invocation>[];
+
+  @override
+  void noSuchMethod(Invocation invocation) {
+    invocations.add(invocation);
+  }
 }

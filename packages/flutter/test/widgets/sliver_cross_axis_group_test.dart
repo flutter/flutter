@@ -8,10 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/sliver_utils.dart';
 
-
-const double VIEWPORT_HEIGHT = 600;
-const double VIEWPORT_WIDTH = 300;
-
 void main() {
   testWidgets('SliverCrossAxisGroup is laid out properly', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(20, (int i) => i);
@@ -942,3 +938,6 @@ class TestDelegate extends SliverPersistentHeaderDelegate {
   @override
   bool shouldRebuild(TestDelegate oldDelegate) => true;
 }
+
+const double VIEWPORT_HEIGHT = 600;
+const double VIEWPORT_WIDTH = 300;

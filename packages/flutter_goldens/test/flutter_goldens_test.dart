@@ -17,16 +17,6 @@ import 'package:process/process.dart';
 
 import 'json_templates.dart';
 
-const String _kFlutterRoot = '/flutter';
-
-// 1x1 transparent pixel
-const List<int> _kTestPngBytes = <int>[
-  137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
-  1, 0, 0, 0, 1, 8, 6, 0, 0, 0, 31, 21, 196, 137, 0, 0, 0, 11, 73, 68, 65, 84,
-  120, 1, 99, 97, 0, 2, 0, 0, 25, 0, 5, 144, 240, 54, 245, 0, 0, 0, 0, 73, 69,
-  78, 68, 174, 66, 96, 130,
-];
-
 void main() {
   late MemoryFileSystem fs;
   late FakePlatform platform;
@@ -1186,3 +1176,13 @@ class FakeHttpImageResponse extends Fake implements HttpClientResponse {
     response.forEach(action);
   }
 }
+
+const String _kFlutterRoot = '/flutter';
+
+// 1x1 transparent pixel
+const List<int> _kTestPngBytes = <int>[
+  137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+  1, 0, 0, 0, 1, 8, 6, 0, 0, 0, 31, 21, 196, 137, 0, 0, 0, 11, 73, 68, 65, 84,
+  120, 1, 99, 97, 0, 2, 0, 0, 25, 0, 5, 144, 240, 54, 245, 0, 0, 0, 0, 73, 69,
+  78, 68, 174, 66, 96, 130,
+];

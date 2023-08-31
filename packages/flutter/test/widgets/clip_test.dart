@@ -14,49 +14,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'test_border.dart' show TestBorder;
 
-final List<String> log = <String>[];
-
-class PathClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    log.add('getClip');
-    return Path()
-      ..addRect(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
-  }
-  @override
-  bool shouldReclip(PathClipper oldClipper) => false;
-}
-
-class ValueClipper<T> extends CustomClipper<T> {
-  ValueClipper(this.message, this.value);
-
-  final String message;
-  final T value;
-
-  @override
-  T getClip(Size size) {
-    log.add(message);
-    return value;
-  }
-
-  @override
-  bool shouldReclip(ValueClipper<T> oldClipper) {
-    return oldClipper.message != message || oldClipper.value != value;
-  }
-}
-
-class NotifyClipper<T> extends CustomClipper<T> {
-  NotifyClipper({required this.clip}) : super(reclip: clip);
-
-  final ValueNotifier<T> clip;
-
-  @override
-  T getClip(Size size) => clip.value;
-
-  @override
-  bool shouldReclip(NotifyClipper<T> oldClipper) => clip != oldClipper.clip;
-}
-
 void main() {
   testWidgets('ClipRect with a FittedBox child sized to zero works with semantics', (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
@@ -969,4 +926,47 @@ void main() {
     await tester.pump();
     expect(renderClip.textDirection, TextDirection.rtl);
   });
+}
+
+final List<String> log = <String>[];
+
+class PathClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    log.add('getClip');
+    return Path()
+      ..addRect(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
+  }
+  @override
+  bool shouldReclip(PathClipper oldClipper) => false;
+}
+
+class ValueClipper<T> extends CustomClipper<T> {
+  ValueClipper(this.message, this.value);
+
+  final String message;
+  final T value;
+
+  @override
+  T getClip(Size size) {
+    log.add(message);
+    return value;
+  }
+
+  @override
+  bool shouldReclip(ValueClipper<T> oldClipper) {
+    return oldClipper.message != message || oldClipper.value != value;
+  }
+}
+
+class NotifyClipper<T> extends CustomClipper<T> {
+  NotifyClipper({required this.clip}) : super(reclip: clip);
+
+  final ValueNotifier<T> clip;
+
+  @override
+  T getClip(Size size) => clip.value;
+
+  @override
+  bool shouldReclip(NotifyClipper<T> oldClipper) => clip != oldClipper.clip;
 }

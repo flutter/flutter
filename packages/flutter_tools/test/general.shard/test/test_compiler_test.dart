@@ -19,19 +19,6 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/logging_logger.dart';
 
-final Platform linuxPlatform = FakePlatform(
-  environment: <String, String>{},
-);
-
-final BuildInfo debugBuild = BuildInfo(
-  BuildMode.debug,
-  '',
-  treeShakeIcons: false,
-  packageConfig: PackageConfig(<Package>[
-    Package('test_api', Uri.parse('file:///test_api/')),
-  ])
-);
-
 void main() {
   late FakeResidentCompiler residentCompiler;
   late FileSystem fileSystem;
@@ -253,3 +240,16 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     return Object();
   }
 }
+
+final Platform linuxPlatform = FakePlatform(
+  environment: <String, String>{},
+);
+
+final BuildInfo debugBuild = BuildInfo(
+  BuildMode.debug,
+  '',
+  treeShakeIcons: false,
+  packageConfig: PackageConfig(<Package>[
+    Package('test_api', Uri.parse('file:///test_api/')),
+  ])
+);

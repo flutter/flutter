@@ -19,28 +19,6 @@ import '../../src/context.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
-const String flutterRoot = r'C:\flutter';
-const String buildFilePath = r'windows\CMakeLists.txt';
-const String visualStudioPath =
-    r'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community';
-const String _cmakePath = visualStudioPath +
-    r'\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe';
-const String _defaultGenerator = 'Visual Studio 16 2019';
-
-final Platform windowsPlatform = FakePlatform(
-  operatingSystem: 'windows',
-  environment: <String, String>{
-    'PROGRAMFILES(X86)':  r'C:\Program Files (x86)\',
-    'FLUTTER_ROOT': flutterRoot,
-    'USERPROFILE': '/',
-  }
-);
-final Platform notWindowsPlatform = FakePlatform(
-  environment: <String, String>{
-    'FLUTTER_ROOT': flutterRoot,
-  }
-);
-
 void main() {
   late FileSystem fileSystem;
   late ProcessManager processManager;
@@ -1015,3 +993,25 @@ class FakeVisualStudio extends Fake implements VisualStudio {
   @override
   final String displayVersion;
 }
+
+const String flutterRoot = r'C:\flutter';
+const String buildFilePath = r'windows\CMakeLists.txt';
+const String visualStudioPath =
+    r'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community';
+const String _cmakePath = visualStudioPath +
+    r'\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe';
+const String _defaultGenerator = 'Visual Studio 16 2019';
+
+final Platform windowsPlatform = FakePlatform(
+  operatingSystem: 'windows',
+  environment: <String, String>{
+    'PROGRAMFILES(X86)':  r'C:\Program Files (x86)\',
+    'FLUTTER_ROOT': flutterRoot,
+    'USERPROFILE': '/',
+  }
+);
+final Platform notWindowsPlatform = FakePlatform(
+  environment: <String, String>{
+    'FLUTTER_ROOT': flutterRoot,
+  }
+);

@@ -7,10 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-final LogicalKeyboardKey modifierKey = defaultTargetPlatform == TargetPlatform.macOS
-  ? LogicalKeyboardKey.metaLeft
-  : LogicalKeyboardKey.controlLeft;
-
 void main() {
   group('ScrollableDetails', (){
     final ScrollController controller = ScrollController();
@@ -579,3 +575,7 @@ void main() {
     expect(find.text('The hair as yellow as corn'), findsOneWidget);
   });
 }
+
+final LogicalKeyboardKey modifierKey = defaultTargetPlatform == TargetPlatform.macOS
+  ? LogicalKeyboardKey.metaLeft
+  : LogicalKeyboardKey.controlLeft;

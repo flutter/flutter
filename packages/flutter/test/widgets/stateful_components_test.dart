@@ -5,44 +5,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class InnerWidget extends StatefulWidget {
-  const InnerWidget({ super.key });
-
-  @override
-  InnerWidgetState createState() => InnerWidgetState();
-}
-
-class InnerWidgetState extends State<InnerWidget> {
-  bool _didInitState = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _didInitState = true;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container();
-  }
-}
-
-class OuterContainer extends StatefulWidget {
-  const OuterContainer({ super.key, required this.child });
-
-  final InnerWidget child;
-
-  @override
-  OuterContainerState createState() => OuterContainerState();
-}
-
-class OuterContainerState extends State<OuterContainer> {
-  @override
-  Widget build(BuildContext context) {
-    return widget.child;
-  }
-}
-
 void main() {
   testWidgets('resync stateful widget', (WidgetTester tester) async {
     const Key innerKey = Key('inner');
@@ -83,4 +45,42 @@ void main() {
     expect(innerElementState.widget, equals(inner2));
     expect(innerElement.renderObject!.attached, isTrue);
   });
+}
+
+class InnerWidget extends StatefulWidget {
+  const InnerWidget({ super.key });
+
+  @override
+  InnerWidgetState createState() => InnerWidgetState();
+}
+
+class InnerWidgetState extends State<InnerWidget> {
+  bool _didInitState = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _didInitState = true;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+}
+
+class OuterContainer extends StatefulWidget {
+  const OuterContainer({ super.key, required this.child });
+
+  final InnerWidget child;
+
+  @override
+  OuterContainerState createState() => OuterContainerState();
+}
+
+class OuterContainerState extends State<OuterContainer> {
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
 }

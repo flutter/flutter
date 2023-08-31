@@ -10,8 +10,6 @@ import 'package:vector_math/vector_math_64.dart';
 
 import '../rendering/rendering_tester.dart';
 
-const int kMaxFrameworkAccessibilityIdentifier = (1<<16) - 1;
-
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
@@ -895,3 +893,5 @@ class TestRender extends RenderProxyBox {
 class CustomSortKey extends OrdinalSortKey {
   const CustomSortKey(super.order, {super.name});
 }
+
+const int kMaxFrameworkAccessibilityIdentifier = (1<<16) - 1;

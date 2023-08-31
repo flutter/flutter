@@ -8,63 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
 
-// These constants are copied from cupertino/text_selection_toolbar.dart.
-const double _kArrowScreenPadding = 26.0;
-const double _kToolbarContentDistance = 8.0;
-const double _kToolbarHeight = 45.0;
-
-// A custom text selection menu that just displays a single custom button.
-class _CustomCupertinoTextSelectionControls extends CupertinoTextSelectionControls {
-  @override
-  Widget buildToolbar(
-    BuildContext context,
-    Rect globalEditableRegion,
-    double textLineHeight,
-    Offset selectionMidpoint,
-    List<TextSelectionPoint> endpoints,
-    TextSelectionDelegate delegate,
-    ValueListenable<ClipboardStatus>? clipboardStatus,
-    Offset? lastSecondaryTapDownPosition,
-  ) {
-    final EdgeInsets mediaQueryPadding = MediaQuery.paddingOf(context);
-    final double anchorX = (selectionMidpoint.dx + globalEditableRegion.left).clamp(
-      _kArrowScreenPadding + mediaQueryPadding.left,
-      MediaQuery.sizeOf(context).width - mediaQueryPadding.right - _kArrowScreenPadding,
-    );
-    final Offset anchorAbove = Offset(
-      anchorX,
-      endpoints.first.point.dy - textLineHeight + globalEditableRegion.top,
-    );
-    final Offset anchorBelow = Offset(
-      anchorX,
-      endpoints.last.point.dy + globalEditableRegion.top,
-    );
-
-    return CupertinoTextSelectionToolbar(
-      anchorAbove: anchorAbove,
-      anchorBelow: anchorBelow,
-      children: <Widget>[
-        CupertinoTextSelectionToolbarButton(
-          onPressed: () {},
-          child: const Text('Custom button'),
-        ),
-      ],
-    );
-  }
-}
-
-class TestBox extends SizedBox {
-  const TestBox({super.key}) : super(width: itemWidth, height: itemHeight);
-
-  static const double itemHeight = 44.0;
-  static const double itemWidth = 100.0;
-}
-
-const CupertinoDynamicColor _kToolbarTextColor = CupertinoDynamicColor.withBrightness(
-  color: CupertinoColors.black,
-  darkColor: CupertinoColors.white,
-);
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -497,3 +440,60 @@ void main() {
     expect(shadow.offset.dy, equals(0.0));
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 }
+
+// These constants are copied from cupertino/text_selection_toolbar.dart.
+const double _kArrowScreenPadding = 26.0;
+const double _kToolbarContentDistance = 8.0;
+const double _kToolbarHeight = 45.0;
+
+// A custom text selection menu that just displays a single custom button.
+class _CustomCupertinoTextSelectionControls extends CupertinoTextSelectionControls {
+  @override
+  Widget buildToolbar(
+    BuildContext context,
+    Rect globalEditableRegion,
+    double textLineHeight,
+    Offset selectionMidpoint,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
+    Offset? lastSecondaryTapDownPosition,
+  ) {
+    final EdgeInsets mediaQueryPadding = MediaQuery.paddingOf(context);
+    final double anchorX = (selectionMidpoint.dx + globalEditableRegion.left).clamp(
+      _kArrowScreenPadding + mediaQueryPadding.left,
+      MediaQuery.sizeOf(context).width - mediaQueryPadding.right - _kArrowScreenPadding,
+    );
+    final Offset anchorAbove = Offset(
+      anchorX,
+      endpoints.first.point.dy - textLineHeight + globalEditableRegion.top,
+    );
+    final Offset anchorBelow = Offset(
+      anchorX,
+      endpoints.last.point.dy + globalEditableRegion.top,
+    );
+
+    return CupertinoTextSelectionToolbar(
+      anchorAbove: anchorAbove,
+      anchorBelow: anchorBelow,
+      children: <Widget>[
+        CupertinoTextSelectionToolbarButton(
+          onPressed: () {},
+          child: const Text('Custom button'),
+        ),
+      ],
+    );
+  }
+}
+
+class TestBox extends SizedBox {
+  const TestBox({super.key}) : super(width: itemWidth, height: itemHeight);
+
+  static const double itemHeight = 44.0;
+  static const double itemWidth = 100.0;
+}
+
+const CupertinoDynamicColor _kToolbarTextColor = CupertinoDynamicColor.withBrightness(
+  color: CupertinoColors.black,
+  darkColor: CupertinoColors.white,
+);

@@ -10,28 +10,6 @@ import 'package:flutter_tools/src/daemon.dart';
 
 import '../src/common.dart';
 
-class FakeDaemonStreams implements DaemonStreams {
-  final StreamController<DaemonMessage> inputs = StreamController<DaemonMessage>();
-  final StreamController<DaemonMessage> outputs = StreamController<DaemonMessage>();
-
-  @override
-  Stream<DaemonMessage> get inputStream {
-    return inputs.stream;
-  }
-
-  @override
-  void send(Map<String, dynamic> message, [ List<int>? binary ]) {
-    outputs.add(DaemonMessage(message, binary != null ? Stream<List<int>>.value(binary) : null));
-  }
-
-  @override
-  Future<void> dispose() async {
-    await inputs.close();
-    // In some tests, outputs have no listeners. We don't wait for outputs to close.
-    unawaited(outputs.close());
-  }
-}
-
 void main() {
   late BufferLogger bufferLogger;
   late FakeDaemonStreams daemonStreams;
@@ -398,4 +376,26 @@ Future<List<_DaemonMessageAndBinary>> _readAllBinaries(Stream<DaemonMessage> inp
     outputs.add(_DaemonMessageAndBinary(iterator.current, binary));
   }
   return outputs;
+}
+
+class FakeDaemonStreams implements DaemonStreams {
+  final StreamController<DaemonMessage> inputs = StreamController<DaemonMessage>();
+  final StreamController<DaemonMessage> outputs = StreamController<DaemonMessage>();
+
+  @override
+  Stream<DaemonMessage> get inputStream {
+    return inputs.stream;
+  }
+
+  @override
+  void send(Map<String, dynamic> message, [ List<int>? binary ]) {
+    outputs.add(DaemonMessage(message, binary != null ? Stream<List<int>>.value(binary) : null));
+  }
+
+  @override
+  Future<void> dispose() async {
+    await inputs.close();
+    // In some tests, outputs have no listeners. We don't wait for outputs to close.
+    unawaited(outputs.close());
+  }
 }

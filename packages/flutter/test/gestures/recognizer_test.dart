@@ -9,38 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'gesture_tester.dart';
 
-// Down/move/up pair 1: normal tap sequence
-const PointerDownEvent down = PointerDownEvent(
-  pointer: 5,
-  position: Offset(10, 10),
-);
-
-const PointerMoveEvent move = PointerMoveEvent(
-  pointer: 5,
-  position: Offset(15, 15),
-);
-
-const PointerUpEvent up = PointerUpEvent(
-  pointer: 5,
-  position: Offset(15, 15),
-);
-
-// Down/move/up pair 2: tap sequence with a large move in the middle
-const PointerDownEvent down2 = PointerDownEvent(
-  pointer: 6,
-  position: Offset(10, 10),
-);
-
-const PointerMoveEvent move2 = PointerMoveEvent(
-  pointer: 6,
-  position: Offset(100, 200),
-);
-
-const PointerUpEvent up2 = PointerUpEvent(
-  pointer: 6,
-  position: Offset(100, 200),
-);
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -252,3 +220,35 @@ class TestPrimaryPointerGestureRecognizer<T extends PointerEvent> extends Primar
   @override
   String get debugDescription => 'TestPrimaryPointer';
 }
+
+// Down/move/up pair 1: normal tap sequence
+const PointerDownEvent down = PointerDownEvent(
+  pointer: 5,
+  position: Offset(10, 10),
+);
+
+const PointerMoveEvent move = PointerMoveEvent(
+  pointer: 5,
+  position: Offset(15, 15),
+);
+
+const PointerUpEvent up = PointerUpEvent(
+  pointer: 5,
+  position: Offset(15, 15),
+);
+
+// Down/move/up pair 2: tap sequence with a large move in the middle
+const PointerDownEvent down2 = PointerDownEvent(
+  pointer: 6,
+  position: Offset(10, 10),
+);
+
+const PointerMoveEvent move2 = PointerMoveEvent(
+  pointer: 6,
+  position: Offset(100, 200),
+);
+
+const PointerUpEvent up2 = PointerUpEvent(
+  pointer: 6,
+  position: Offset(100, 200),
+);

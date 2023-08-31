@@ -5,6 +5,22 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+void main() {
+  testWidgets('ListView is a build function (smoketest)', (WidgetTester tester) async {
+    await tester.pumpWidget(buildFrame());
+    expect(find.text('one'), findsOneWidget);
+    expect(find.text('two'), findsOneWidget);
+    expect(find.text('three'), findsOneWidget);
+    expect(find.text('four'), findsOneWidget);
+    items.removeAt(2);
+    await tester.pumpWidget(buildFrame());
+    expect(find.text('one'), findsOneWidget);
+    expect(find.text('two'), findsOneWidget);
+    expect(find.text('three'), findsNothing);
+    expect(find.text('four'), findsOneWidget);
+  });
+}
+
 List<String> items = <String>[
   'one',
   'two',
@@ -37,20 +53,4 @@ Widget buildFrame() {
       itemBuilder: buildCard,
     ),
   );
-}
-
-void main() {
-  testWidgets('ListView is a build function (smoketest)', (WidgetTester tester) async {
-    await tester.pumpWidget(buildFrame());
-    expect(find.text('one'), findsOneWidget);
-    expect(find.text('two'), findsOneWidget);
-    expect(find.text('three'), findsOneWidget);
-    expect(find.text('four'), findsOneWidget);
-    items.removeAt(2);
-    await tester.pumpWidget(buildFrame());
-    expect(find.text('one'), findsOneWidget);
-    expect(find.text('two'), findsOneWidget);
-    expect(find.text('three'), findsNothing);
-    expect(find.text('four'), findsOneWidget);
-  });
 }

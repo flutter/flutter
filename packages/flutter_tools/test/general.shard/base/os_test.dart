@@ -14,10 +14,6 @@ import 'package:flutter_tools/src/base/platform.dart';
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
-const String kExecutable = 'foo';
-const String kPath1 = '/bar/bin/$kExecutable';
-const String kPath2 = '/another/bin/$kExecutable';
-
 void main() {
   late FakeProcessManager fakeProcessManager;
 
@@ -763,3 +759,7 @@ void main() {
     expect(OperatingSystemUtils.gzipLevel1.level, equals(1));
   });
 }
+
+const String kExecutable = 'foo';
+const String kPath1 = '/bar/bin/$kExecutable';
+const String kPath2 = '/another/bin/$kExecutable';

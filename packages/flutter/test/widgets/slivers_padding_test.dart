@@ -6,49 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class _MockRenderSliver extends RenderSliver {
-  @override
-  void performLayout() {
-    geometry = const SliverGeometry(
-      paintOrigin: 10,
-      paintExtent: 10,
-      maxPaintExtent: 10,
-    );
-  }
-
-}
-
-Future<void> test(WidgetTester tester, double offset, EdgeInsetsGeometry padding, AxisDirection axisDirection, TextDirection textDirection) {
-  return tester.pumpWidget(
-    Directionality(
-      textDirection: textDirection,
-      child: Viewport(
-        offset: ViewportOffset.fixed(offset),
-        axisDirection: axisDirection,
-        slivers: <Widget>[
-          const SliverToBoxAdapter(child: SizedBox(width: 400.0, height: 400.0, child: Text('before'))),
-          SliverPadding(
-            padding: padding,
-            sliver: const SliverToBoxAdapter(child: SizedBox(width: 400.0, height: 400.0, child: Text('padded'))),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(width: 400.0, height: 400.0, child: Text('after'))),
-        ],
-      ),
-    ),
-  );
-}
-
-void verify(WidgetTester tester, List<Rect> answerKey) {
-  final List<Rect> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox, skipOffstage: false)).map<Rect>(
-    (RenderBox target) {
-      final Offset topLeft = target.localToGlobal(Offset.zero);
-      final Offset bottomRight = target.localToGlobal(target.size.bottomRight(Offset.zero));
-      return Rect.fromPoints(topLeft, bottomRight);
-    },
-  ).toList();
-  expect(testAnswers, equals(answerKey));
-}
-
 void main() {
   testWidgets('Viewport+SliverPadding basic test (VISUAL)', (WidgetTester tester) async {
     const EdgeInsets padding = EdgeInsets.fromLTRB(25.0, 20.0, 15.0, 35.0);
@@ -575,4 +532,47 @@ void main() {
 void expectIsTextSpan(Object target, String text) {
   expect(target, isA<TextSpan>());
   expect((target as TextSpan).text, text);
+}
+
+class _MockRenderSliver extends RenderSliver {
+  @override
+  void performLayout() {
+    geometry = const SliverGeometry(
+      paintOrigin: 10,
+      paintExtent: 10,
+      maxPaintExtent: 10,
+    );
+  }
+
+}
+
+Future<void> test(WidgetTester tester, double offset, EdgeInsetsGeometry padding, AxisDirection axisDirection, TextDirection textDirection) {
+  return tester.pumpWidget(
+    Directionality(
+      textDirection: textDirection,
+      child: Viewport(
+        offset: ViewportOffset.fixed(offset),
+        axisDirection: axisDirection,
+        slivers: <Widget>[
+          const SliverToBoxAdapter(child: SizedBox(width: 400.0, height: 400.0, child: Text('before'))),
+          SliverPadding(
+            padding: padding,
+            sliver: const SliverToBoxAdapter(child: SizedBox(width: 400.0, height: 400.0, child: Text('padded'))),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(width: 400.0, height: 400.0, child: Text('after'))),
+        ],
+      ),
+    ),
+  );
+}
+
+void verify(WidgetTester tester, List<Rect> answerKey) {
+  final List<Rect> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox, skipOffstage: false)).map<Rect>(
+    (RenderBox target) {
+      final Offset topLeft = target.localToGlobal(Offset.zero);
+      final Offset bottomRight = target.localToGlobal(target.size.bottomRight(Offset.zero));
+      return Rect.fromPoints(topLeft, bottomRight);
+    },
+  ).toList();
+  expect(testAnswers, equals(answerKey));
 }

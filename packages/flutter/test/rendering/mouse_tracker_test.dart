@@ -11,10 +11,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'mouse_tracker_test_utils.dart';
 
-MouseTracker get _mouseTracker => RendererBinding.instance.mouseTracker;
-
-typedef SimpleAnnotationFinder = Iterable<TestAnnotationEntry> Function(Offset offset);
-
 void main() {
   final TestMouseTrackerFlutterBinding binding = TestMouseTrackerFlutterBinding();
   void setUpMouseAnnotationFinder(SimpleAnnotationFinder annotationFinder) {
@@ -767,3 +763,7 @@ class _EventListCriticalFieldsMatcher extends Matcher {
 Matcher _equalToEventsOnCriticalFields(List<BaseEventMatcher> source) {
   return _EventListCriticalFieldsMatcher(source);
 }
+
+MouseTracker get _mouseTracker => RendererBinding.instance.mouseTracker;
+
+typedef SimpleAnnotationFinder = Iterable<TestAnnotationEntry> Function(Offset offset);

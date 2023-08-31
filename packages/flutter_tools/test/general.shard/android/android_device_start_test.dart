@@ -16,29 +16,6 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
-const FakeCommand kAdbVersionCommand = FakeCommand(
-  command: <String>['adb', 'version'],
-  stdout: 'Android Debug Bridge version 1.0.39',
-);
-
-const FakeCommand kStartServer = FakeCommand(
-  command: <String>['adb', 'start-server'],
-);
-
-const FakeCommand kShaCommand = FakeCommand(
-  command: <String>[
-    'adb',
-    '-s',
-    '1234',
-    'shell',
-    'echo',
-    '-n',
-    '',
-    '>',
-    '/data/local/tmp/sky.FlutterApp.sha1',
-  ],
-);
-
 void main() {
   late FileSystem fileSystem;
   late FakeProcessManager processManager;
@@ -297,3 +274,26 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
   @override
   bool get licensesAvailable => false;
 }
+
+const FakeCommand kAdbVersionCommand = FakeCommand(
+  command: <String>['adb', 'version'],
+  stdout: 'Android Debug Bridge version 1.0.39',
+);
+
+const FakeCommand kStartServer = FakeCommand(
+  command: <String>['adb', 'start-server'],
+);
+
+const FakeCommand kShaCommand = FakeCommand(
+  command: <String>[
+    'adb',
+    '-s',
+    '1234',
+    'shell',
+    'echo',
+    '-n',
+    '',
+    '>',
+    '/data/local/tmp/sky.FlutterApp.sha1',
+  ],
+);

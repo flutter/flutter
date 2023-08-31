@@ -26,13 +26,6 @@ import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
-final Platform macosPlatform = FakePlatform(
-  operatingSystem: 'macos',
-  environment: <String, String>{
-    'HOME': '/',
-  },
-);
-
 void main() {
   late FakePlatform osx;
   late FileSystemUtils fsUtils;
@@ -1376,3 +1369,10 @@ class LaunchRequest {
   final String appIdentifier;
   final List<String>? launchArgs;
 }
+
+final Platform macosPlatform = FakePlatform(
+  operatingSystem: 'macos',
+  environment: <String, String>{
+    'HOME': '/',
+  },
+);

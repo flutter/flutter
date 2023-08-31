@@ -7,35 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
-class RenderLayoutTestBox extends RenderProxyBox {
-  RenderLayoutTestBox(this.onLayout, {
-    this.onPerformLayout,
-  });
-
-  final VoidCallback onLayout;
-  final VoidCallback? onPerformLayout;
-
-  @override
-  void layout(Constraints constraints, { bool parentUsesSize = false }) {
-    // Doing this in tests is ok, but if you're writing your own
-    // render object, you want to override performLayout(), not
-    // layout(). Overriding layout() would remove many critical
-    // performance optimizations of the rendering system, as well as
-    // many bypassing many checked-mode integrity checks.
-    super.layout(constraints, parentUsesSize: parentUsesSize);
-    onLayout();
-  }
-
-  @override
-  bool get sizedByParent => true;
-
-  @override
-  void performLayout() {
-    child?.layout(constraints, parentUsesSize: true);
-    onPerformLayout?.call();
-  }
-}
-
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
@@ -204,4 +175,33 @@ void main() {
       );
     });
   });
+}
+
+class RenderLayoutTestBox extends RenderProxyBox {
+  RenderLayoutTestBox(this.onLayout, {
+    this.onPerformLayout,
+  });
+
+  final VoidCallback onLayout;
+  final VoidCallback? onPerformLayout;
+
+  @override
+  void layout(Constraints constraints, { bool parentUsesSize = false }) {
+    // Doing this in tests is ok, but if you're writing your own
+    // render object, you want to override performLayout(), not
+    // layout(). Overriding layout() would remove many critical
+    // performance optimizations of the rendering system, as well as
+    // many bypassing many checked-mode integrity checks.
+    super.layout(constraints, parentUsesSize: parentUsesSize);
+    onLayout();
+  }
+
+  @override
+  bool get sizedByParent => true;
+
+  @override
+  void performLayout() {
+    child?.layout(constraints, parentUsesSize: true);
+    onPerformLayout?.call();
+  }
 }

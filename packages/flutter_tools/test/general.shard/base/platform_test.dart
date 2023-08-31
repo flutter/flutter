@@ -6,22 +6,6 @@ import 'package:flutter_tools/src/base/platform.dart';
 
 import '../../src/common.dart';
 
-void _expectPlatformsEqual(Platform actual, Platform expected) {
-  expect(actual.numberOfProcessors, expected.numberOfProcessors);
-  expect(actual.pathSeparator, expected.pathSeparator);
-  expect(actual.operatingSystem, expected.operatingSystem);
-  expect(actual.operatingSystemVersion, expected.operatingSystemVersion);
-  expect(actual.localHostname, expected.localHostname);
-  expect(actual.environment, expected.environment);
-  expect(actual.executable, expected.executable);
-  expect(actual.resolvedExecutable, expected.resolvedExecutable);
-  expect(actual.script, expected.script);
-  expect(actual.executableArguments, expected.executableArguments);
-  expect(actual.packageConfig, expected.packageConfig);
-  expect(actual.version, expected.version);
-  expect(actual.localeName, expected.localeName);
-}
-
 void main() {
   group('FakePlatform.fromPlatform', () {
     late FakePlatform fake;
@@ -51,4 +35,20 @@ void main() {
       expect(fake.executableArguments.last, 'ARG');
     });
   });
+}
+
+void _expectPlatformsEqual(Platform actual, Platform expected) {
+  expect(actual.numberOfProcessors, expected.numberOfProcessors);
+  expect(actual.pathSeparator, expected.pathSeparator);
+  expect(actual.operatingSystem, expected.operatingSystem);
+  expect(actual.operatingSystemVersion, expected.operatingSystemVersion);
+  expect(actual.localHostname, expected.localHostname);
+  expect(actual.environment, expected.environment);
+  expect(actual.executable, expected.executable);
+  expect(actual.resolvedExecutable, expected.resolvedExecutable);
+  expect(actual.script, expected.script);
+  expect(actual.executableArguments, expected.executableArguments);
+  expect(actual.packageConfig, expected.packageConfig);
+  expect(actual.version, expected.version);
+  expect(actual.localeName, expected.localeName);
 }

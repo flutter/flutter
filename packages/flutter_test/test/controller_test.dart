@@ -9,18 +9,6 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stack_trace/stack_trace.dart';
 
-class TestDragData {
-  const TestDragData(
-    this.slop,
-    this.dragDistance,
-    this.expectedOffsets,
-  );
-
-  final Offset slop;
-  final Offset dragDistance;
-  final List<Offset> expectedOffsets;
-}
-
 void main() {
   testWidgets(
     'WidgetTester.drag must break the offset into multiple parallel components if '
@@ -1062,4 +1050,16 @@ class _SemanticsTestCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class TestDragData {
+  const TestDragData(
+    this.slop,
+    this.dragDistance,
+    this.expectedOffsets,
+  );
+
+  final Offset slop;
+  final Offset dragDistance;
+  final List<Offset> expectedOffsets;
 }

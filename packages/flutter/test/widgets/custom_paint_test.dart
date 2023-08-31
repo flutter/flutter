@@ -6,39 +6,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestCustomPainter extends CustomPainter {
-  TestCustomPainter({ required this.log, this.name });
-
-  final List<String?> log;
-  final String? name;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    log.add(name);
-  }
-
-  @override
-  bool shouldRepaint(TestCustomPainter oldPainter) => true;
-}
-
-class MockCanvas extends Fake implements Canvas {
-  int saveCount = 0;
-  int saveCountDelta = 1;
-
-  @override
-  int getSaveCount() {
-    return saveCount += saveCountDelta;
-  }
-
-  @override
-  void save() { }
-}
-
-class MockPaintingContext extends Fake implements PaintingContext {
-  @override
-  final MockCanvas canvas = MockCanvas();
-}
-
 void main() {
   testWidgets('Control test for custom painting', (WidgetTester tester) async {
     final List<String?> log = <String?>[];
@@ -196,4 +163,37 @@ void main() {
     expect(inner.getMinIntrinsicHeight(double.infinity), 0);
     expect(inner.getMaxIntrinsicHeight(double.infinity), 0);
   });
+}
+
+class TestCustomPainter extends CustomPainter {
+  TestCustomPainter({ required this.log, this.name });
+
+  final List<String?> log;
+  final String? name;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    log.add(name);
+  }
+
+  @override
+  bool shouldRepaint(TestCustomPainter oldPainter) => true;
+}
+
+class MockCanvas extends Fake implements Canvas {
+  int saveCount = 0;
+  int saveCountDelta = 1;
+
+  @override
+  int getSaveCount() {
+    return saveCount += saveCountDelta;
+  }
+
+  @override
+  void save() { }
+}
+
+class MockPaintingContext extends Fake implements PaintingContext {
+  @override
+  final MockCanvas canvas = MockCanvas();
 }

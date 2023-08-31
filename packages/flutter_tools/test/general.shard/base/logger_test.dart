@@ -17,12 +17,6 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/fakes.dart';
 
-final Platform _kNoAnsiPlatform = FakePlatform();
-final String red = RegExp.escape(AnsiTerminal.red);
-final String bold = RegExp.escape(AnsiTerminal.bold);
-final String resetBold = RegExp.escape(AnsiTerminal.resetBold);
-final String resetColor = RegExp.escape(AnsiTerminal.resetColor);
-
 void main() {
   testWithoutContext('correct logger instance is created', () {
     final LoggerFactory loggerFactory = LoggerFactory(
@@ -1389,3 +1383,9 @@ class FakeStdout extends Fake implements Stdout {
   @override
   Future<void> get done => _completer.future;
 }
+
+final Platform _kNoAnsiPlatform = FakePlatform();
+final String red = RegExp.escape(AnsiTerminal.red);
+final String bold = RegExp.escape(AnsiTerminal.bold);
+final String resetBold = RegExp.escape(AnsiTerminal.resetBold);
+final String resetColor = RegExp.escape(AnsiTerminal.resetColor);

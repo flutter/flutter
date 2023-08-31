@@ -5,11 +5,6 @@
 import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
 import 'package:flutter_test/flutter_test.dart';
 
-Future<String> mockUpdateUrlFetcher() {
-  // A real implementation would connect to the network to retrieve this value
-  return Future<String>.value('http://www.example.com/');
-}
-
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   if (binding is LiveTestWidgetsFlutterBinding) {
@@ -46,4 +41,9 @@ void main() {
 
     expect(find.text('UPDATE'), findsNothing);
   });
+}
+
+Future<String> mockUpdateUrlFetcher() {
+  // A real implementation would connect to the network to retrieve this value
+  return Future<String>.value('http://www.example.com/');
 }

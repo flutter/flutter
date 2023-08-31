@@ -14,107 +14,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestServiceExtensionsBinding extends BindingBase
-  with SchedulerBinding,
-       ServicesBinding,
-       GestureBinding,
-       PaintingBinding,
-       SemanticsBinding,
-       RendererBinding,
-       WidgetsBinding,
-       TestDefaultBinaryMessengerBinding {
-
-  final Map<String, ServiceExtensionCallback> extensions = <String, ServiceExtensionCallback>{};
-
-  final Map<String, List<Map<String, dynamic>>> eventsDispatched = <String, List<Map<String, dynamic>>>{};
-
-  @override
-  @protected
-  void registerServiceExtension({
-    required String name,
-    required ServiceExtensionCallback callback,
-  }) {
-    expect(extensions.containsKey(name), isFalse);
-    extensions[name] = callback;
-  }
-
-  @override
-  void postEvent(String eventKind, Map<String, dynamic> eventData) {
-    getEventsDispatched(eventKind).add(eventData);
-  }
-
-  List<Map<String, dynamic>> getEventsDispatched(String eventKind) {
-    return eventsDispatched.putIfAbsent(eventKind, () => <Map<String, dynamic>>[]);
-  }
-
-  Iterable<Map<String, dynamic>> getServiceExtensionStateChangedEvents(String extensionName) {
-    return getEventsDispatched('Flutter.ServiceExtensionStateChanged')
-      .where((Map<String, dynamic> event) => event['extension'] == extensionName);
-  }
-
-  Future<Map<String, dynamic>> testExtension(String name, Map<String, String> arguments) {
-    expect(extensions.containsKey(name), isTrue);
-    return extensions[name]!(arguments);
-  }
-
-  int reassembled = 0;
-  bool pendingReassemble = false;
-  @override
-  Future<void> performReassemble() {
-    reassembled += 1;
-    pendingReassemble = true;
-    return super.performReassemble();
-  }
-
-  bool frameScheduled = false;
-  @override
-  void scheduleFrame() {
-    ensureFrameCallbacksRegistered();
-    frameScheduled = true;
-  }
-  Future<void> doFrame() async {
-    frameScheduled = false;
-    binding.platformDispatcher.onBeginFrame?.call(Duration.zero);
-    await flushMicrotasks();
-    binding.platformDispatcher.onDrawFrame?.call();
-    binding.platformDispatcher.onReportTimings?.call(<ui.FrameTiming>[]);
-  }
-
-  @override
-  void scheduleForcedFrame() {
-    expect(true, isFalse);
-  }
-
-  @override
-  void scheduleWarmUpFrame() {
-    expect(pendingReassemble, isTrue);
-    pendingReassemble = false;
-  }
-
-  Future<void> flushMicrotasks() {
-    final Completer<void> completer = Completer<void>();
-    Timer.run(completer.complete);
-    return completer.future;
-  }
-}
-
-late TestServiceExtensionsBinding binding;
-
-Future<Map<String, dynamic>> hasReassemble(Future<Map<String, dynamic>> pendingResult) async {
-  bool completed = false;
-  pendingResult.whenComplete(() { completed = true; });
-  expect(binding.frameScheduled, isFalse);
-  await binding.flushMicrotasks();
-  expect(binding.frameScheduled, isTrue);
-  expect(completed, isFalse);
-  await binding.flushMicrotasks();
-  await binding.doFrame();
-  await binding.flushMicrotasks();
-  expect(completed, isTrue);
-  expect(binding.frameScheduled, isFalse);
-  return pendingResult;
-}
-
 void main() {
   final Set<String> testedExtensions = <String>{}; // Add the name of an extension to this set in the test where it is tested.
   final List<String?> console = <String?>[];
@@ -1041,4 +940,105 @@ void main() {
 
     testedExtensions.add(FoundationServiceExtensions.connectedVmServiceUri.name);
   });
+}
+
+class TestServiceExtensionsBinding extends BindingBase
+  with SchedulerBinding,
+       ServicesBinding,
+       GestureBinding,
+       PaintingBinding,
+       SemanticsBinding,
+       RendererBinding,
+       WidgetsBinding,
+       TestDefaultBinaryMessengerBinding {
+
+  final Map<String, ServiceExtensionCallback> extensions = <String, ServiceExtensionCallback>{};
+
+  final Map<String, List<Map<String, dynamic>>> eventsDispatched = <String, List<Map<String, dynamic>>>{};
+
+  @override
+  @protected
+  void registerServiceExtension({
+    required String name,
+    required ServiceExtensionCallback callback,
+  }) {
+    expect(extensions.containsKey(name), isFalse);
+    extensions[name] = callback;
+  }
+
+  @override
+  void postEvent(String eventKind, Map<String, dynamic> eventData) {
+    getEventsDispatched(eventKind).add(eventData);
+  }
+
+  List<Map<String, dynamic>> getEventsDispatched(String eventKind) {
+    return eventsDispatched.putIfAbsent(eventKind, () => <Map<String, dynamic>>[]);
+  }
+
+  Iterable<Map<String, dynamic>> getServiceExtensionStateChangedEvents(String extensionName) {
+    return getEventsDispatched('Flutter.ServiceExtensionStateChanged')
+      .where((Map<String, dynamic> event) => event['extension'] == extensionName);
+  }
+
+  Future<Map<String, dynamic>> testExtension(String name, Map<String, String> arguments) {
+    expect(extensions.containsKey(name), isTrue);
+    return extensions[name]!(arguments);
+  }
+
+  int reassembled = 0;
+  bool pendingReassemble = false;
+  @override
+  Future<void> performReassemble() {
+    reassembled += 1;
+    pendingReassemble = true;
+    return super.performReassemble();
+  }
+
+  bool frameScheduled = false;
+  @override
+  void scheduleFrame() {
+    ensureFrameCallbacksRegistered();
+    frameScheduled = true;
+  }
+  Future<void> doFrame() async {
+    frameScheduled = false;
+    binding.platformDispatcher.onBeginFrame?.call(Duration.zero);
+    await flushMicrotasks();
+    binding.platformDispatcher.onDrawFrame?.call();
+    binding.platformDispatcher.onReportTimings?.call(<ui.FrameTiming>[]);
+  }
+
+  @override
+  void scheduleForcedFrame() {
+    expect(true, isFalse);
+  }
+
+  @override
+  void scheduleWarmUpFrame() {
+    expect(pendingReassemble, isTrue);
+    pendingReassemble = false;
+  }
+
+  Future<void> flushMicrotasks() {
+    final Completer<void> completer = Completer<void>();
+    Timer.run(completer.complete);
+    return completer.future;
+  }
+}
+
+late TestServiceExtensionsBinding binding;
+
+Future<Map<String, dynamic>> hasReassemble(Future<Map<String, dynamic>> pendingResult) async {
+  bool completed = false;
+  pendingResult.whenComplete(() { completed = true; });
+  expect(binding.frameScheduled, isFalse);
+  await binding.flushMicrotasks();
+  expect(binding.frameScheduled, isTrue);
+  expect(completed, isFalse);
+  await binding.flushMicrotasks();
+  await binding.doFrame();
+  await binding.flushMicrotasks();
+  expect(completed, isTrue);
+  expect(binding.frameScheduled, isFalse);
+  return pendingResult;
 }

@@ -5,32 +5,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestBinding extends LiveTestWidgetsFlutterBinding {
-  TestBinding();
-
-  int framesBegun = 0;
-  int framesDrawn = 0;
-
-  late bool handleBeginFrameMicrotaskRun;
-
-  @override
-  void handleBeginFrame(Duration? rawTimeStamp) {
-    handleBeginFrameMicrotaskRun = false;
-    framesBegun += 1;
-    Future<void>.microtask(() { handleBeginFrameMicrotaskRun = true; });
-    super.handleBeginFrame(rawTimeStamp);
-  }
-
-  @override
-  void handleDrawFrame() {
-    if (!handleBeginFrameMicrotaskRun) {
-      throw "Microtasks scheduled by 'handledBeginFrame' must be run before 'handleDrawFrame'.";
-    }
-    framesDrawn += 1;
-    super.handleDrawFrame();
-  }
-}
-
 void main() {
   late TestBinding binding;
 
@@ -71,4 +45,30 @@ void main() {
       mayRunWithAsserts: true,
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87871
+}
+
+class TestBinding extends LiveTestWidgetsFlutterBinding {
+  TestBinding();
+
+  int framesBegun = 0;
+  int framesDrawn = 0;
+
+  late bool handleBeginFrameMicrotaskRun;
+
+  @override
+  void handleBeginFrame(Duration? rawTimeStamp) {
+    handleBeginFrameMicrotaskRun = false;
+    framesBegun += 1;
+    Future<void>.microtask(() { handleBeginFrameMicrotaskRun = true; });
+    super.handleBeginFrame(rawTimeStamp);
+  }
+
+  @override
+  void handleDrawFrame() {
+    if (!handleBeginFrameMicrotaskRun) {
+      throw "Microtasks scheduled by 'handledBeginFrame' must be run before 'handleDrawFrame'.";
+    }
+    framesDrawn += 1;
+    super.handleDrawFrame();
+  }
 }

@@ -34,50 +34,6 @@ import '../../src/fake_devices.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
-List<String> _xattrArgs(FlutterProject flutterProject) {
-  return <String>[
-    'xattr',
-    '-r',
-    '-d',
-    'com.apple.FinderInfo',
-    flutterProject.directory.path,
-  ];
-}
-
-const List<String> kRunReleaseArgs = <String>[
-  'xcrun',
-  'xcodebuild',
-  '-configuration',
-  'Release',
-  '-quiet',
-  '-workspace',
-  'Runner.xcworkspace',
-  '-scheme',
-  'Runner',
-  'BUILD_DIR=/build/ios',
-  '-sdk',
-  'iphoneos',
-  '-destination',
-  'id=123',
-  'ONLY_ACTIVE_ARCH=YES',
-  'ARCHS=arm64',
-  '-resultBundlePath', '/.tmp_rand0/flutter_ios_build_temp_dirrand0/temporary_xcresult_bundle',
-  '-resultBundleVersion', '3',
-  'FLUTTER_SUPPRESS_ANALYTICS=true',
-  'COMPILER_INDEX_STORE_ENABLE=NO',
-];
-
-const String kConcurrentBuildErrorMessage = '''
-"/Developer/Xcode/DerivedData/foo/XCBuildData/build.db":
-database is locked
-Possibly there are two concurrent builds running in the same filesystem location.
-''';
-
-final FakePlatform macPlatform = FakePlatform(
-  operatingSystem: 'macos',
-  environment: <String, String>{},
-);
-
 void main() {
   late Artifacts artifacts;
   late String iosDeployPath;
@@ -810,3 +766,47 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
     return launchSuccess;
   }
 }
+
+List<String> _xattrArgs(FlutterProject flutterProject) {
+  return <String>[
+    'xattr',
+    '-r',
+    '-d',
+    'com.apple.FinderInfo',
+    flutterProject.directory.path,
+  ];
+}
+
+const List<String> kRunReleaseArgs = <String>[
+  'xcrun',
+  'xcodebuild',
+  '-configuration',
+  'Release',
+  '-quiet',
+  '-workspace',
+  'Runner.xcworkspace',
+  '-scheme',
+  'Runner',
+  'BUILD_DIR=/build/ios',
+  '-sdk',
+  'iphoneos',
+  '-destination',
+  'id=123',
+  'ONLY_ACTIVE_ARCH=YES',
+  'ARCHS=arm64',
+  '-resultBundlePath', '/.tmp_rand0/flutter_ios_build_temp_dirrand0/temporary_xcresult_bundle',
+  '-resultBundleVersion', '3',
+  'FLUTTER_SUPPRESS_ANALYTICS=true',
+  'COMPILER_INDEX_STORE_ENABLE=NO',
+];
+
+const String kConcurrentBuildErrorMessage = '''
+"/Developer/Xcode/DerivedData/foo/XCBuildData/build.db":
+database is locked
+Possibly there are two concurrent builds running in the same filesystem location.
+''';
+
+final FakePlatform macPlatform = FakePlatform(
+  operatingSystem: 'macos',
+  environment: <String, String>{},
+);

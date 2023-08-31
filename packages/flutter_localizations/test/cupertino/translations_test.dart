@@ -13,8 +13,6 @@ import 'package:path/path.dart' as path;
 
 import '../test_utils.dart';
 
-final String rootDirectoryPath = Directory.current.path;
-
 void main() {
   for (final String language in kCupertinoSupportedLanguages) {
     testWidgets('translations exist for $language', (WidgetTester tester) async {
@@ -263,3 +261,5 @@ class _FakeEditableTextState extends EditableTextState {
     );
   }
 }
+
+final String rootDirectoryPath = Directory.current.path;

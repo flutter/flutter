@@ -11,11 +11,6 @@ import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
 import '../../src/common.dart';
 import '../../src/custom_devices_common.dart';
 
-Map<String, dynamic> copyJsonObjectWith(
-  Map<String, dynamic> object,
-  Map<String, dynamic> overrides
-) => Map<String, dynamic>.of(object)..addAll(overrides);
-
 void main() {
   testWithoutContext("CustomDevicesConfig logs no error when 'custom-devices' key is missing in config", () {
     final BufferLogger logger = BufferLogger.test();
@@ -262,3 +257,8 @@ void main() {
     expect(logger.errorText, contains(msg));
   });
 }
+
+Map<String, dynamic> copyJsonObjectWith(
+  Map<String, dynamic> object,
+  Map<String, dynamic> overrides
+) => Map<String, dynamic>.of(object)..addAll(overrides);

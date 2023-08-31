@@ -10,95 +10,6 @@ import 'package:flutter_tools/src/linux/linux_doctor.dart';
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
-// A command that will return typical-looking 'clang++ --version' output with
-// the given version number.
-FakeCommand _clangPresentCommand(String version) {
-  return FakeCommand(
-    command: const <String>['clang++', '--version'],
-    stdout: '''
-clang version $version-6+build1
-Target: x86_64-pc-linux-gnu
-Thread model: posix
-InstalledDir: /usr/bin
-''',
-  );
-}
-
-// A command that will return typical-looking 'cmake --version' output with the
-// given version number.
-FakeCommand _cmakePresentCommand(String version) {
-  return FakeCommand(
-    command: const <String>['cmake', '--version'],
-    stdout: '''
-cmake version $version
-
-CMake suite maintained and supported by Kitware (kitware.com/cmake).
-''',
-  );
-}
-
-// A command that will return typical-looking 'ninja --version' output with the
-// given version number.
-FakeCommand _ninjaPresentCommand(String version) {
-  return FakeCommand(
-    command: const <String>['ninja', '--version'],
-    stdout: version,
-  );
-}
-
-// A command that will return typical-looking 'pkg-config --version' output with
-// the given version number.
-FakeCommand _pkgConfigPresentCommand(String version) {
-  return FakeCommand(
-    command: const <String>['pkg-config', '--version'],
-    stdout: version,
-  );
-}
-
-/// A command that returns either success or failure for a pkg-config query
-/// for [library], depending on [exists].
-FakeCommand _libraryCheckCommand(String library, {bool exists = true}) {
-  return FakeCommand(
-    command: <String>['pkg-config', '--exists', library],
-    exitCode: exists ? 0 : 1,
-  );
-}
-
-// Commands that give positive replies for all the GTK library pkg-config queries.
-List<FakeCommand> _gtkLibrariesPresentCommands() {
-  return <FakeCommand>[
-    _libraryCheckCommand('gtk+-3.0'),
-    _libraryCheckCommand('glib-2.0'),
-    _libraryCheckCommand('gio-2.0'),
-  ];
-}
-
-// Commands that give some failures for the GTK library pkg-config queries.
-List<FakeCommand> _gtkLibrariesMissingCommands() {
-  return <FakeCommand>[
-    _libraryCheckCommand('gtk+-3.0'),
-    _libraryCheckCommand('glib-2.0', exists: false),
-    // No more entries, since the first missing GTK library stops the
-    // checks.
-  ];
-}
-
-// A command that will failure when running '[binary] --version'.
-FakeCommand _missingBinaryCommand(String binary) {
-  return FakeCommand(
-    command: <String>[binary, '--version'],
-    exitCode: 1,
-  );
-}
-
-FakeCommand _missingBinaryException(String binary) {
-  return FakeCommand(
-    command: <String>[binary, '--version'],
-    exitCode: 1,
-    exception: ProcessException(binary, <String>[])
-  );
-}
-
 void main() {
   testWithoutContext('Full validation when everything is available at the necessary version',() async {
     final ProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
@@ -476,4 +387,93 @@ void main() {
     final ValidationResult result = await linuxDoctorValidator.validate();
     expect(result.type, ValidationType.missing);
   });
+}
+
+// A command that will return typical-looking 'clang++ --version' output with
+// the given version number.
+FakeCommand _clangPresentCommand(String version) {
+  return FakeCommand(
+    command: const <String>['clang++', '--version'],
+    stdout: '''
+clang version $version-6+build1
+Target: x86_64-pc-linux-gnu
+Thread model: posix
+InstalledDir: /usr/bin
+''',
+  );
+}
+
+// A command that will return typical-looking 'cmake --version' output with the
+// given version number.
+FakeCommand _cmakePresentCommand(String version) {
+  return FakeCommand(
+    command: const <String>['cmake', '--version'],
+    stdout: '''
+cmake version $version
+
+CMake suite maintained and supported by Kitware (kitware.com/cmake).
+''',
+  );
+}
+
+// A command that will return typical-looking 'ninja --version' output with the
+// given version number.
+FakeCommand _ninjaPresentCommand(String version) {
+  return FakeCommand(
+    command: const <String>['ninja', '--version'],
+    stdout: version,
+  );
+}
+
+// A command that will return typical-looking 'pkg-config --version' output with
+// the given version number.
+FakeCommand _pkgConfigPresentCommand(String version) {
+  return FakeCommand(
+    command: const <String>['pkg-config', '--version'],
+    stdout: version,
+  );
+}
+
+/// A command that returns either success or failure for a pkg-config query
+/// for [library], depending on [exists].
+FakeCommand _libraryCheckCommand(String library, {bool exists = true}) {
+  return FakeCommand(
+    command: <String>['pkg-config', '--exists', library],
+    exitCode: exists ? 0 : 1,
+  );
+}
+
+// Commands that give positive replies for all the GTK library pkg-config queries.
+List<FakeCommand> _gtkLibrariesPresentCommands() {
+  return <FakeCommand>[
+    _libraryCheckCommand('gtk+-3.0'),
+    _libraryCheckCommand('glib-2.0'),
+    _libraryCheckCommand('gio-2.0'),
+  ];
+}
+
+// Commands that give some failures for the GTK library pkg-config queries.
+List<FakeCommand> _gtkLibrariesMissingCommands() {
+  return <FakeCommand>[
+    _libraryCheckCommand('gtk+-3.0'),
+    _libraryCheckCommand('glib-2.0', exists: false),
+    // No more entries, since the first missing GTK library stops the
+    // checks.
+  ];
+}
+
+// A command that will failure when running '[binary] --version'.
+FakeCommand _missingBinaryCommand(String binary) {
+  return FakeCommand(
+    command: <String>[binary, '--version'],
+    exitCode: 1,
+  );
+}
+
+FakeCommand _missingBinaryException(String binary) {
+  return FakeCommand(
+    command: <String>[binary, '--version'],
+    exitCode: 1,
+    exception: ProcessException(binary, <String>[])
+  );
 }

@@ -10,8 +10,6 @@ import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
-final String platformLineSep = Platform.isWindows ? '\r\n': '\n';
-
 /// Tests that a plugin A can depend on platform code from a plugin B
 /// as long as plugin B is defined as a pub dependency of plugin A.
 ///
@@ -336,3 +334,5 @@ public class DummyPluginAClass {
     }
   });
 }
+
+final String platformLineSep = Platform.isWindows ? '\r\n': '\n';

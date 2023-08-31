@@ -7,6 +7,30 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+void main() {
+  setUp(() {
+    TestBinding.ensureInitialized();
+    WidgetsBinding.instance.resetEpoch();
+  });
+
+  test('WidgetBinding build rendering tree and warm up frame back to back', () {
+    final FakeAsync fakeAsync = FakeAsync();
+    fakeAsync.run((FakeAsync async) {
+      runApp(
+        const MaterialApp(
+          home: Material(
+            child: Text('test'),
+          ),
+        ),
+      );
+      // Rendering tree is not built synchronously.
+      expect(WidgetsBinding.instance.rootElement, isNull);
+      fakeAsync.flushTimers();
+      expect(WidgetsBinding.instance.rootElement, isNotNull);
+    });
+  });
+}
+
 // This test is very fragile and bypasses some zone-related checks.
 // It is written this way to verify some invariants that would otherwise
 // be difficult to check.
@@ -31,28 +55,4 @@ class TestBinding extends WidgetsFlutterBinding {
     }
     return TestBinding.instance;
   }
-}
-
-void main() {
-  setUp(() {
-    TestBinding.ensureInitialized();
-    WidgetsBinding.instance.resetEpoch();
-  });
-
-  test('WidgetBinding build rendering tree and warm up frame back to back', () {
-    final FakeAsync fakeAsync = FakeAsync();
-    fakeAsync.run((FakeAsync async) {
-      runApp(
-        const MaterialApp(
-          home: Material(
-            child: Text('test'),
-          ),
-        ),
-      );
-      // Rendering tree is not built synchronously.
-      expect(WidgetsBinding.instance.rootElement, isNull);
-      fakeAsync.flushTimers();
-      expect(WidgetsBinding.instance.rootElement, isNotNull);
-    });
-  });
 }

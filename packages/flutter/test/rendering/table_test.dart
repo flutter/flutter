@@ -7,12 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
-RenderBox sizedBox(double width, double height) {
-  return RenderConstrainedBox(
-    additionalConstraints: BoxConstraints.tight(Size(width, height)),
-  );
-}
-
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
@@ -309,4 +303,10 @@ void main() {
     // Same result.
     expect(columnWidth.flex(<RenderBox>[]), flexValue);
   });
+}
+
+RenderBox sizedBox(double width, double height) {
+  return RenderConstrainedBox(
+    additionalConstraints: BoxConstraints.tight(Size(width, height)),
+  );
 }

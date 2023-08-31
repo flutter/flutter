@@ -8,9 +8,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const Color green = Color(0xFF00FF00);
-const Color yellow = Color(0xFFFFFF00);
-
 void main() {
   testWidgets('SlottedRenderObjectWidget test', (WidgetTester tester) async {
     await tester.pumpWidget(buildWidget(
@@ -374,3 +371,6 @@ class _Slot {
 class _RenderTest extends RenderBox with SlottedContainerRenderObjectMixin<_Slot, RenderBox> {
   String publicNameForSlot(_Slot slot) => debugNameForSlot(slot);
 }
+
+const Color green = Color(0xFF00FF00);
+const Color yellow = Color(0xFFFFFF00);

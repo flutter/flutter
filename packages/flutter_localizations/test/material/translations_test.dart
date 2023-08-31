@@ -12,8 +12,6 @@ import 'package:path/path.dart' as path;
 
 import '../test_utils.dart';
 
-final String rootDirectoryPath = Directory.current.path;
-
 void main() {
   for (final String language in kMaterialSupportedLanguages) {
     testWidgets('translations exist for $language', (WidgetTester tester) async {
@@ -538,3 +536,5 @@ void main() {
     expect(localizations.tabLabel(tabIndex: 1, tabCount: 2), 'Välilehti 1 kautta 2');
   });
 }
+
+final String rootDirectoryPath = Directory.current.path;

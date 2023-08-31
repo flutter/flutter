@@ -11,23 +11,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-class TestResampleEventFlutterBinding extends AutomatedTestWidgetsFlutterBinding {
-  @override
-  SamplingClock? get debugSamplingClock => TestSamplingClock(this.clock);
-}
-
-class TestSamplingClock implements SamplingClock {
-  TestSamplingClock(this._clock);
-
-  @override
-  DateTime now() => _clock.now();
-
-  @override
-  Stopwatch stopwatch() => _clock.stopwatch();
-
-  final Clock _clock;
-}
-
 void main() {
   final TestWidgetsFlutterBinding binding = TestResampleEventFlutterBinding();
   testWidgetsWithLeakTracking('PointerEvent resampling on a widget', (WidgetTester tester) async {
@@ -148,4 +131,21 @@ void main() {
     // Expected to stop resampling, but the timer keeps active if _timer?.cancel() not be called.
     GestureBinding.instance.resamplingEnabled = false;
   });
+}
+
+class TestResampleEventFlutterBinding extends AutomatedTestWidgetsFlutterBinding {
+  @override
+  SamplingClock? get debugSamplingClock => TestSamplingClock(this.clock);
+}
+
+class TestSamplingClock implements SamplingClock {
+  TestSamplingClock(this._clock);
+
+  @override
+  DateTime now() => _clock.now();
+
+  @override
+  Stopwatch stopwatch() => _clock.stopwatch();
+
+  final Clock _clock;
 }

@@ -10,12 +10,6 @@ import 'package:integration_test/common.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:vm_service/vm_service.dart' as vm;
 
-vm.Timeline _kTimelines = vm.Timeline(
-  traceEvents: <vm.TimelineEvent>[],
-  timeOriginMicros: 100,
-  timeExtentMicros: 200,
-);
-
 Future<void> main() async {
   Future<Map<String, dynamic>>? request;
 
@@ -171,3 +165,9 @@ class FakeVM extends Fake implements vm.VmService {
     return vm.Success();
   }
 }
+
+vm.Timeline _kTimelines = vm.Timeline(
+  traceEvents: <vm.TimelineEvent>[],
+  timeOriginMicros: 100,
+  timeExtentMicros: 200,
+);

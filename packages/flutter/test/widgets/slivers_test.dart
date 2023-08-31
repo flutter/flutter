@@ -9,66 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
 
-Future<void> test(WidgetTester tester, double offset, { double anchor = 0.0 }) {
-  return tester.pumpWidget(
-    Directionality(
-      textDirection: TextDirection.ltr,
-      child: Viewport(
-        anchor: anchor / 600.0,
-        offset: ViewportOffset.fixed(offset),
-        slivers: const <Widget>[
-          SliverToBoxAdapter(child: SizedBox(height: 400.0)),
-          SliverToBoxAdapter(child: SizedBox(height: 400.0)),
-          SliverToBoxAdapter(child: SizedBox(height: 400.0)),
-          SliverToBoxAdapter(child: SizedBox(height: 400.0)),
-          SliverToBoxAdapter(child: SizedBox(height: 400.0)),
-        ],
-      ),
-    ),
-  );
-}
-
-Future<void> testSliverFixedExtentList(WidgetTester tester, List<String> items) {
-  return tester.pumpWidget(
-    Directionality(
-      textDirection: TextDirection.ltr,
-      child: CustomScrollView(
-        slivers: <Widget>[
-          SliverFixedExtentList(
-            itemExtent: 900,
-            delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) {
-                return Center(
-                  key: ValueKey<String>(items[index]),
-                  child: KeepAlive(
-                    items[index],
-                  ),
-                );
-              },
-              childCount : items.length,
-              findChildIndexCallback: (Key key) {
-                final ValueKey<String> valueKey = key as ValueKey<String>;
-                return items.indexOf(valueKey.value);
-              },
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-void verify(WidgetTester tester, List<Offset> idealPositions, List<bool> idealVisibles) {
-  final List<Offset> actualPositions = tester.renderObjectList<RenderBox>(find.byType(SizedBox, skipOffstage: false)).map<Offset>(
-    (RenderBox target) => target.localToGlobal(Offset.zero),
-  ).toList();
-  final List<bool> actualVisibles = tester.renderObjectList<RenderSliverToBoxAdapter>(find.byType(SliverToBoxAdapter, skipOffstage: false)).map<bool>(
-    (RenderSliverToBoxAdapter target) => target.geometry!.visible,
-  ).toList();
-  expect(actualPositions, equals(idealPositions));
-  expect(actualVisibles, equals(idealVisibles));
-}
-
 void main() {
   testWidgets('Viewport basic test', (WidgetTester tester) async {
     await test(tester, 0.0);
@@ -1493,4 +1433,64 @@ class KeepAliveState extends State<KeepAlive> with AutomaticKeepAliveClientMixin
 class _NullBuildContext implements BuildContext {
   @override
   dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
+}
+
+Future<void> test(WidgetTester tester, double offset, { double anchor = 0.0 }) {
+  return tester.pumpWidget(
+    Directionality(
+      textDirection: TextDirection.ltr,
+      child: Viewport(
+        anchor: anchor / 600.0,
+        offset: ViewportOffset.fixed(offset),
+        slivers: const <Widget>[
+          SliverToBoxAdapter(child: SizedBox(height: 400.0)),
+          SliverToBoxAdapter(child: SizedBox(height: 400.0)),
+          SliverToBoxAdapter(child: SizedBox(height: 400.0)),
+          SliverToBoxAdapter(child: SizedBox(height: 400.0)),
+          SliverToBoxAdapter(child: SizedBox(height: 400.0)),
+        ],
+      ),
+    ),
+  );
+}
+
+Future<void> testSliverFixedExtentList(WidgetTester tester, List<String> items) {
+  return tester.pumpWidget(
+    Directionality(
+      textDirection: TextDirection.ltr,
+      child: CustomScrollView(
+        slivers: <Widget>[
+          SliverFixedExtentList(
+            itemExtent: 900,
+            delegate: SliverChildBuilderDelegate(
+              (BuildContext context, int index) {
+                return Center(
+                  key: ValueKey<String>(items[index]),
+                  child: KeepAlive(
+                    items[index],
+                  ),
+                );
+              },
+              childCount : items.length,
+              findChildIndexCallback: (Key key) {
+                final ValueKey<String> valueKey = key as ValueKey<String>;
+                return items.indexOf(valueKey.value);
+              },
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+void verify(WidgetTester tester, List<Offset> idealPositions, List<bool> idealVisibles) {
+  final List<Offset> actualPositions = tester.renderObjectList<RenderBox>(find.byType(SizedBox, skipOffstage: false)).map<Offset>(
+    (RenderBox target) => target.localToGlobal(Offset.zero),
+  ).toList();
+  final List<bool> actualVisibles = tester.renderObjectList<RenderSliverToBoxAdapter>(find.byType(SliverToBoxAdapter, skipOffstage: false)).map<bool>(
+    (RenderSliverToBoxAdapter target) => target.geometry!.visible,
+  ).toList();
+  expect(actualPositions, equals(idealPositions));
+  expect(actualVisibles, equals(idealVisibles));
 }

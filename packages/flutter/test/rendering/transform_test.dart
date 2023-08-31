@@ -9,10 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
-Offset round(Offset value) {
-  return Offset(value.dx.roundToDouble(), value.dy.roundToDouble());
-}
-
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
@@ -196,4 +192,8 @@ Matrix4 rotateAroundXAxis(double a) {
     // col 4
     0.0, 0.0, 0.0, 1.0,
   ]);
+}
+
+Offset round(Offset value) {
+  return Offset(value.dx.roundToDouble(), value.dy.roundToDouble());
 }

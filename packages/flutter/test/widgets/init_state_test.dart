@@ -5,6 +5,22 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+void main() {
+  testWidgets('initState() is called when we are in the tree', (WidgetTester tester) async {
+    await tester.pumpWidget(const Parent(child: TestWidget()));
+    expect(ancestors, containsAllInOrder(<String>['Parent', 'View', 'RootWidget']));
+  });
+}
+
+class Parent extends StatelessWidget {
+  const Parent({ super.key, required this.child });
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => child;
+}
+
 List<String> ancestors = <String>[];
 
 class TestWidget extends StatefulWidget {
@@ -25,20 +41,4 @@ class TestWidgetState extends State<TestWidget> {
 
   @override
   Widget build(BuildContext context) => Container();
-}
-
-void main() {
-  testWidgets('initState() is called when we are in the tree', (WidgetTester tester) async {
-    await tester.pumpWidget(const Parent(child: TestWidget()));
-    expect(ancestors, containsAllInOrder(<String>['Parent', 'View', 'RootWidget']));
-  });
-}
-
-class Parent extends StatelessWidget {
-  const Parent({ super.key, required this.child });
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => child;
 }

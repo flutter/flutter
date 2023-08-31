@@ -14,8 +14,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
-int count = 0;
-
 void main() {
   testWidgets('Middle still in center with asymmetrical actions', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1581,3 +1579,5 @@ class _ExpectStyles extends StatelessWidget {
     return Container();
   }
 }
+
+int count = 0;

@@ -8,186 +8,6 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestTree extends Object with DiagnosticableTreeMixin {
-  TestTree({
-    this.name = '',
-    this.style,
-    this.children = const <TestTree>[],
-    this.properties = const <DiagnosticsNode>[],
-  });
-
-  final String name;
-  final List<TestTree> children;
-  final List<DiagnosticsNode> properties;
-  final DiagnosticsTreeStyle? style;
-
-  @override
-  List<DiagnosticsNode> debugDescribeChildren() => <DiagnosticsNode>[
-    for (final TestTree child in children)
-      child.toDiagnosticsNode(
-        name: 'child ${child.name}',
-        style: child.style,
-      ),
-  ];
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    if (style != null) {
-      properties.defaultDiagnosticsTreeStyle = style!;
-    }
-    this.properties.forEach(properties.add);
-  }
-}
-
-enum ExampleEnum {
-  hello,
-  world,
-  deferToChild,
-}
-
-/// Encode and decode to JSON to make sure all objects in the JSON for the
-/// [DiagnosticsNode] are valid JSON.
-Map<String, Object?> simulateJsonSerialization(DiagnosticsNode node) {
-  return json.decode(json.encode(node.toJsonMap(const DiagnosticsSerializationDelegate()))) as Map<String, Object?>;
-}
-
-void validateNodeJsonSerialization(DiagnosticsNode node) {
-  validateNodeJsonSerializationHelper(simulateJsonSerialization(node), node);
-}
-
-void validateNodeJsonSerializationHelper(Map<String, Object?> json, DiagnosticsNode node) {
-  expect(json['name'], equals(node.name));
-  expect(json['showSeparator'] ?? true, equals(node.showSeparator));
-  expect(json['description'], equals(node.toDescription()));
-  expect(json['level'] ?? DiagnosticLevel.info.name, equals(node.level.name));
-  expect(json['showName'] ?? true, equals(node.showName));
-  expect(json['emptyBodyDescription'], equals(node.emptyBodyDescription));
-  expect(json['style'] ?? DiagnosticsTreeStyle.sparse.name, equals(node.style!.name));
-  expect(json['type'], equals(node.runtimeType.toString()));
-  expect(json['hasChildren'] ?? false, equals(node.getChildren().isNotEmpty));
-}
-
-void validatePropertyJsonSerialization(DiagnosticsProperty<Object?> property) {
-  validatePropertyJsonSerializationHelper(simulateJsonSerialization(property), property);
-}
-
-void validateStringPropertyJsonSerialization(StringProperty property) {
-  final Map<String, Object?> json = simulateJsonSerialization(property);
-  expect(json['quoted'], equals(property.quoted));
-  validatePropertyJsonSerializationHelper(json, property);
-}
-
-void validateFlagPropertyJsonSerialization(FlagProperty property) {
-  final Map<String, Object?> json = simulateJsonSerialization(property);
-  expect(json['ifTrue'], equals(property.ifTrue));
-
-  if (property.ifTrue != null) {
-    expect(json['ifTrue'], equals(property.ifTrue));
-  } else {
-    expect(json.containsKey('ifTrue'), isFalse);
-  }
-
-  if (property.ifFalse != null) {
-    expect(json['ifFalse'], property.ifFalse);
-  } else {
-    expect(json.containsKey('isFalse'), isFalse);
-  }
-  validatePropertyJsonSerializationHelper(json, property);
-}
-
-void validateDoublePropertyJsonSerialization(DoubleProperty property) {
-  final Map<String, Object?> json = simulateJsonSerialization(property);
-  if (property.unit != null) {
-    expect(json['unit'], equals(property.unit));
-  } else {
-    expect(json.containsKey('unit'), isFalse);
-  }
-
-  expect(json['numberToString'], equals(property.numberToString()));
-
-  validatePropertyJsonSerializationHelper(json, property);
-}
-
-void validateObjectFlagPropertyJsonSerialization(ObjectFlagProperty<Object> property) {
-  final Map<String, Object?> json = simulateJsonSerialization(property);
-  if (property.ifPresent != null) {
-    expect(json['ifPresent'], equals(property.ifPresent));
-  } else {
-    expect(json.containsKey('ifPresent'), isFalse);
-  }
-
-  validatePropertyJsonSerializationHelper(json, property);
-}
-
-void validateIterableFlagsPropertyJsonSerialization(FlagsSummary<Object?> property) {
-  final Map<String, Object?> json = simulateJsonSerialization(property);
-  if (property.value.isNotEmpty) {
-    expect(json['values'], equals(
-      property.value.entries
-        .where((MapEntry<String, Object?> entry) => entry.value != null)
-        .map((MapEntry<String, Object?> entry) => entry.key).toList(),
-    ));
-  } else {
-    expect(json.containsKey('values'), isFalse);
-  }
-
-  validatePropertyJsonSerializationHelper(json, property);
-}
-
-void validateIterablePropertyJsonSerialization(IterableProperty<Object> property) {
-  final Map<String, Object?> json = simulateJsonSerialization(property);
-  if (property.value != null) {
-    final List<Object?> valuesJson = json['values']! as List<Object?>;
-    final List<String> expectedValues = property.value!.map<String>((Object value) => value.toString()).toList();
-    expect(listEquals(valuesJson, expectedValues), isTrue);
-  } else {
-    expect(json.containsKey('values'), isFalse);
-  }
-
-  validatePropertyJsonSerializationHelper(json, property);
-}
-
-void validatePropertyJsonSerializationHelper(final Map<String, Object?> json, DiagnosticsProperty<Object?> property) {
-  if (property.defaultValue != kNoDefaultValue) {
-    expect(json['defaultValue'], equals(property.defaultValue.toString()));
-  } else {
-    expect(json.containsKey('defaultValue'), isFalse);
-  }
-
-  if (property.ifEmpty != null) {
-    expect(json['ifEmpty'], equals(property.ifEmpty));
-  } else {
-    expect(json.containsKey('ifEmpty'), isFalse);
-  }
-  if (property.ifNull != null) {
-    expect(json['ifNull'], equals(property.ifNull));
-  } else {
-    expect(json.containsKey('ifNull'), isFalse);
-  }
-
-  if (property.tooltip != null) {
-    expect(json['tooltip'], equals(property.tooltip));
-  } else {
-    expect(json.containsKey('tooltip'), isFalse);
-  }
-
-  expect(json['missingIfNull'], equals(property.missingIfNull));
-  if (property.exception != null) {
-    expect(json['exception'], equals(property.exception.toString()));
-  } else {
-    expect(json.containsKey('exception'), isFalse);
-  }
-  expect(json['propertyType'], equals(property.propertyType.toString()));
-  expect(json.containsKey('defaultLevel'), isTrue);
-  if (property.value is Diagnosticable) {
-    expect(json['isDiagnosticableValue'], isTrue);
-  } else {
-    expect(json.containsKey('isDiagnosticableValue'), isFalse);
-  }
-  validateNodeJsonSerializationHelper(json, property);
-}
-
 void main() {
   test('TreeDiagnosticsMixin control test', () async {
     void goldenStyleTest(
@@ -2298,4 +2118,184 @@ void main() {
     expect(property.style, equals(DiagnosticsTreeStyle.none));
     expect(property.level, equals(DiagnosticLevel.off));
   });
+}
+
+class TestTree extends Object with DiagnosticableTreeMixin {
+  TestTree({
+    this.name = '',
+    this.style,
+    this.children = const <TestTree>[],
+    this.properties = const <DiagnosticsNode>[],
+  });
+
+  final String name;
+  final List<TestTree> children;
+  final List<DiagnosticsNode> properties;
+  final DiagnosticsTreeStyle? style;
+
+  @override
+  List<DiagnosticsNode> debugDescribeChildren() => <DiagnosticsNode>[
+    for (final TestTree child in children)
+      child.toDiagnosticsNode(
+        name: 'child ${child.name}',
+        style: child.style,
+      ),
+  ];
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    if (style != null) {
+      properties.defaultDiagnosticsTreeStyle = style!;
+    }
+    this.properties.forEach(properties.add);
+  }
+}
+
+enum ExampleEnum {
+  hello,
+  world,
+  deferToChild,
+}
+
+/// Encode and decode to JSON to make sure all objects in the JSON for the
+/// [DiagnosticsNode] are valid JSON.
+Map<String, Object?> simulateJsonSerialization(DiagnosticsNode node) {
+  return json.decode(json.encode(node.toJsonMap(const DiagnosticsSerializationDelegate()))) as Map<String, Object?>;
+}
+
+void validateNodeJsonSerialization(DiagnosticsNode node) {
+  validateNodeJsonSerializationHelper(simulateJsonSerialization(node), node);
+}
+
+void validateNodeJsonSerializationHelper(Map<String, Object?> json, DiagnosticsNode node) {
+  expect(json['name'], equals(node.name));
+  expect(json['showSeparator'] ?? true, equals(node.showSeparator));
+  expect(json['description'], equals(node.toDescription()));
+  expect(json['level'] ?? DiagnosticLevel.info.name, equals(node.level.name));
+  expect(json['showName'] ?? true, equals(node.showName));
+  expect(json['emptyBodyDescription'], equals(node.emptyBodyDescription));
+  expect(json['style'] ?? DiagnosticsTreeStyle.sparse.name, equals(node.style!.name));
+  expect(json['type'], equals(node.runtimeType.toString()));
+  expect(json['hasChildren'] ?? false, equals(node.getChildren().isNotEmpty));
+}
+
+void validatePropertyJsonSerialization(DiagnosticsProperty<Object?> property) {
+  validatePropertyJsonSerializationHelper(simulateJsonSerialization(property), property);
+}
+
+void validateStringPropertyJsonSerialization(StringProperty property) {
+  final Map<String, Object?> json = simulateJsonSerialization(property);
+  expect(json['quoted'], equals(property.quoted));
+  validatePropertyJsonSerializationHelper(json, property);
+}
+
+void validateFlagPropertyJsonSerialization(FlagProperty property) {
+  final Map<String, Object?> json = simulateJsonSerialization(property);
+  expect(json['ifTrue'], equals(property.ifTrue));
+
+  if (property.ifTrue != null) {
+    expect(json['ifTrue'], equals(property.ifTrue));
+  } else {
+    expect(json.containsKey('ifTrue'), isFalse);
+  }
+
+  if (property.ifFalse != null) {
+    expect(json['ifFalse'], property.ifFalse);
+  } else {
+    expect(json.containsKey('isFalse'), isFalse);
+  }
+  validatePropertyJsonSerializationHelper(json, property);
+}
+
+void validateDoublePropertyJsonSerialization(DoubleProperty property) {
+  final Map<String, Object?> json = simulateJsonSerialization(property);
+  if (property.unit != null) {
+    expect(json['unit'], equals(property.unit));
+  } else {
+    expect(json.containsKey('unit'), isFalse);
+  }
+
+  expect(json['numberToString'], equals(property.numberToString()));
+
+  validatePropertyJsonSerializationHelper(json, property);
+}
+
+void validateObjectFlagPropertyJsonSerialization(ObjectFlagProperty<Object> property) {
+  final Map<String, Object?> json = simulateJsonSerialization(property);
+  if (property.ifPresent != null) {
+    expect(json['ifPresent'], equals(property.ifPresent));
+  } else {
+    expect(json.containsKey('ifPresent'), isFalse);
+  }
+
+  validatePropertyJsonSerializationHelper(json, property);
+}
+
+void validateIterableFlagsPropertyJsonSerialization(FlagsSummary<Object?> property) {
+  final Map<String, Object?> json = simulateJsonSerialization(property);
+  if (property.value.isNotEmpty) {
+    expect(json['values'], equals(
+      property.value.entries
+        .where((MapEntry<String, Object?> entry) => entry.value != null)
+        .map((MapEntry<String, Object?> entry) => entry.key).toList(),
+    ));
+  } else {
+    expect(json.containsKey('values'), isFalse);
+  }
+
+  validatePropertyJsonSerializationHelper(json, property);
+}
+
+void validateIterablePropertyJsonSerialization(IterableProperty<Object> property) {
+  final Map<String, Object?> json = simulateJsonSerialization(property);
+  if (property.value != null) {
+    final List<Object?> valuesJson = json['values']! as List<Object?>;
+    final List<String> expectedValues = property.value!.map<String>((Object value) => value.toString()).toList();
+    expect(listEquals(valuesJson, expectedValues), isTrue);
+  } else {
+    expect(json.containsKey('values'), isFalse);
+  }
+
+  validatePropertyJsonSerializationHelper(json, property);
+}
+
+void validatePropertyJsonSerializationHelper(final Map<String, Object?> json, DiagnosticsProperty<Object?> property) {
+  if (property.defaultValue != kNoDefaultValue) {
+    expect(json['defaultValue'], equals(property.defaultValue.toString()));
+  } else {
+    expect(json.containsKey('defaultValue'), isFalse);
+  }
+
+  if (property.ifEmpty != null) {
+    expect(json['ifEmpty'], equals(property.ifEmpty));
+  } else {
+    expect(json.containsKey('ifEmpty'), isFalse);
+  }
+  if (property.ifNull != null) {
+    expect(json['ifNull'], equals(property.ifNull));
+  } else {
+    expect(json.containsKey('ifNull'), isFalse);
+  }
+
+  if (property.tooltip != null) {
+    expect(json['tooltip'], equals(property.tooltip));
+  } else {
+    expect(json.containsKey('tooltip'), isFalse);
+  }
+
+  expect(json['missingIfNull'], equals(property.missingIfNull));
+  if (property.exception != null) {
+    expect(json['exception'], equals(property.exception.toString()));
+  } else {
+    expect(json.containsKey('exception'), isFalse);
+  }
+  expect(json['propertyType'], equals(property.propertyType.toString()));
+  expect(json.containsKey('defaultLevel'), isTrue);
+  if (property.value is Diagnosticable) {
+    expect(json['isDiagnosticableValue'], isTrue);
+  } else {
+    expect(json.containsKey('isDiagnosticableValue'), isFalse);
+  }
+  validateNodeJsonSerializationHelper(json, property);
 }

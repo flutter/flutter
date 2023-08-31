@@ -21,12 +21,6 @@ import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
-final FakePlatform macOS = FakePlatform(
-  operatingSystem: 'macos',
-);
-
-final FakePlatform linux = FakePlatform();
-
 void main() {
   testWithoutContext('default configuration', () async {
     final MacOSDevice device = MacOSDevice(
@@ -260,3 +254,9 @@ class FakeMacOSApp extends Fake implements MacOSApp {
     };
   }
 }
+
+final FakePlatform macOS = FakePlatform(
+  operatingSystem: 'macos',
+);
+
+final FakePlatform linux = FakePlatform();

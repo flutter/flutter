@@ -27,26 +27,6 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
 
-
-void _writeCustomDevicesConfigFile(Directory dir, List<CustomDeviceConfig> configs) {
-  dir.createSync();
-
-  final File file = dir.childFile('.flutter_custom_devices.json');
-  file.writeAsStringSync(jsonEncode(
-    <String, dynamic>{
-      'custom-devices': configs.map<dynamic>((CustomDeviceConfig c) => c.toJson()).toList(),
-    }
-  ));
-}
-
-FlutterProject _setUpFlutterProject(Directory directory) {
-  final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory(
-    fileSystem: directory.fileSystem,
-    logger: BufferLogger.test(),
-  );
-  return flutterProjectFactory.fromDirectory(directory);
-}
-
 void main() {
   testWithoutContext('replacing string interpolation occurrences in custom device commands', () async {
     expect(
@@ -646,4 +626,23 @@ class FakeBundleBuilder extends Fake implements BundleBuilder {
     String? assetDirPath,
     @visibleForTesting BuildSystem? buildSystem
   }) async {}
+}
+
+void _writeCustomDevicesConfigFile(Directory dir, List<CustomDeviceConfig> configs) {
+  dir.createSync();
+
+  final File file = dir.childFile('.flutter_custom_devices.json');
+  file.writeAsStringSync(jsonEncode(
+    <String, dynamic>{
+      'custom-devices': configs.map<dynamic>((CustomDeviceConfig c) => c.toJson()).toList(),
+    }
+  ));
+}
+
+FlutterProject _setUpFlutterProject(Directory directory) {
+  final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory(
+    fileSystem: directory.fileSystem,
+    logger: BufferLogger.test(),
+  );
+  return flutterProjectFactory.fromDirectory(directory);
 }

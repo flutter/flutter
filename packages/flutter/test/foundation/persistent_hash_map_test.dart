@@ -5,20 +5,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-@immutable
-class _MockKey {
-  const _MockKey({required this.hashCode, required this.payload});
-
-  @override
-  final int hashCode;
-  final String payload;
-
-  @override
-  bool operator ==(Object other) {
-    return other is _MockKey && other.payload == payload;
-  }
-}
-
 void main() {
   test('PersistentHashMap - Simple Test', () {
     final List<PersistentHashMap<String, int>> maps =
@@ -79,4 +65,18 @@ void main() {
       }
     }
   });
+}
+
+@immutable
+class _MockKey {
+  const _MockKey({required this.hashCode, required this.payload});
+
+  @override
+  final int hashCode;
+  final String payload;
+
+  @override
+  bool operator ==(Object other) {
+    return other is _MockKey && other.payload == payload;
+  }
 }

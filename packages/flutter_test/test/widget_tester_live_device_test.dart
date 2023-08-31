@@ -7,13 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-// Only check the initial lines of the message, since the message walks the
-// entire widget tree back, and any changes to the widget tree break these
-// tests if we check the entire message.
-void _expectStartsWith(List<String?> actual, List<String?> matcher) {
-  expect(actual.sublist(0, matcher.length), equals(matcher));
-}
-
 void main() {
   final _MockLiveTestWidgetsFlutterBinding binding = _MockLiveTestWidgetsFlutterBinding();
 
@@ -152,4 +145,11 @@ class _MockLiveTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding {
       _storeDebugPrints = null;
     }
   }
+}
+
+// Only check the initial lines of the message, since the message walks the
+// entire widget tree back, and any changes to the widget tree break these
+// tests if we check the entire message.
+void _expectStartsWith(List<String?> actual, List<String?> matcher) {
+  expect(actual.sublist(0, matcher.length), equals(matcher));
 }

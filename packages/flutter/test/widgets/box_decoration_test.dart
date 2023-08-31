@@ -12,26 +12,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../image_data.dart';
 
-class TestImageProvider extends ImageProvider<TestImageProvider> {
-  TestImageProvider(this.future);
-
-  final Future<void> future;
-
-  static late ui.Image image;
-
-  @override
-  Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {
-    return SynchronousFuture<TestImageProvider>(this);
-  }
-
-  @override
-  ImageStreamCompleter load(TestImageProvider key, DecoderCallback decode) {
-    return OneFrameImageStreamCompleter(
-      future.then<ImageInfo>((void value) => ImageInfo(image: image)),
-    );
-  }
-}
-
 Future<void> main() async {
   AutomatedTestWidgetsFlutterBinding();
   TestImageProvider.image = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
@@ -562,4 +542,24 @@ Future<void> main() async {
       ),
     );
   });
+}
+
+class TestImageProvider extends ImageProvider<TestImageProvider> {
+  TestImageProvider(this.future);
+
+  final Future<void> future;
+
+  static late ui.Image image;
+
+  @override
+  Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<TestImageProvider>(this);
+  }
+
+  @override
+  ImageStreamCompleter load(TestImageProvider key, DecoderCallback decode) {
+    return OneFrameImageStreamCompleter(
+      future.then<ImageInfo>((void value) => ImageInfo(image: image)),
+    );
+  }
 }

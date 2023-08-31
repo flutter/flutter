@@ -12,71 +12,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const String _tab1Text = 'tab 1';
-const String _tab2Text = 'tab 2';
-const String _tab3Text = 'tab 3';
-
-final Key _painterKey = UniqueKey();
-
-const List<Tab> _tabs = <Tab>[
-  Tab(text: _tab1Text, icon: Icon(Icons.looks_one)),
-  Tab(text: _tab2Text, icon: Icon(Icons.looks_two)),
-  Tab(text: _tab3Text, icon: Icon(Icons.looks_3)),
-];
-
-final List<SizedBox> _sizedTabs = <SizedBox>[
-  SizedBox(key: UniqueKey(), width: 100.0, height: 50.0),
-  SizedBox(key: UniqueKey(), width: 100.0, height: 50.0),
-];
-
-Widget buildTabBar({
-  TabBarTheme? tabBarTheme,
-  bool secondaryTabBar = false,
-  List<Widget> tabs = _tabs,
-  bool isScrollable = false,
-  bool useMaterial3 = false,
-}) {
-  if (secondaryTabBar) {
-    return MaterialApp(
-      theme: ThemeData(tabBarTheme: tabBarTheme, useMaterial3: useMaterial3),
-      home: Scaffold(
-        body: RepaintBoundary(
-          key: _painterKey,
-          child: TabBar.secondary(
-            tabs: tabs,
-            isScrollable: isScrollable,
-            controller: TabController(length: tabs.length, vsync: const TestVSync()),
-          ),
-        ),
-      ),
-    );
-  }
-  return MaterialApp(
-    theme: ThemeData(tabBarTheme: tabBarTheme, useMaterial3: useMaterial3),
-    home: Scaffold(
-      body: RepaintBoundary(
-        key: _painterKey,
-        child: TabBar(
-          tabs: tabs,
-          isScrollable: isScrollable,
-          controller: TabController(length: tabs.length, vsync: const TestVSync()),
-        ),
-      ),
-    ),
-  );
-}
-
-
-RenderParagraph _getIcon(WidgetTester tester, IconData icon) {
-  return tester.renderObject<RenderParagraph>(
-    find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
-  );
-}
-
-RenderParagraph _getText(WidgetTester tester, String text) {
-  return  tester.renderObject<RenderParagraph>(find.text(text));
-}
-
 void main() {
   test('TabBarTheme copyWith, ==, hashCode, defaults', () {
     expect(const TabBarTheme(), const TabBarTheme().copyWith());
@@ -1216,4 +1151,69 @@ void main() {
     tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
     expect(tabBarBox,paints..line(color: tabBarThemeIndicatorColor));
   });
+}
+
+const String _tab1Text = 'tab 1';
+const String _tab2Text = 'tab 2';
+const String _tab3Text = 'tab 3';
+
+final Key _painterKey = UniqueKey();
+
+const List<Tab> _tabs = <Tab>[
+  Tab(text: _tab1Text, icon: Icon(Icons.looks_one)),
+  Tab(text: _tab2Text, icon: Icon(Icons.looks_two)),
+  Tab(text: _tab3Text, icon: Icon(Icons.looks_3)),
+];
+
+final List<SizedBox> _sizedTabs = <SizedBox>[
+  SizedBox(key: UniqueKey(), width: 100.0, height: 50.0),
+  SizedBox(key: UniqueKey(), width: 100.0, height: 50.0),
+];
+
+Widget buildTabBar({
+  TabBarTheme? tabBarTheme,
+  bool secondaryTabBar = false,
+  List<Widget> tabs = _tabs,
+  bool isScrollable = false,
+  bool useMaterial3 = false,
+}) {
+  if (secondaryTabBar) {
+    return MaterialApp(
+      theme: ThemeData(tabBarTheme: tabBarTheme, useMaterial3: useMaterial3),
+      home: Scaffold(
+        body: RepaintBoundary(
+          key: _painterKey,
+          child: TabBar.secondary(
+            tabs: tabs,
+            isScrollable: isScrollable,
+            controller: TabController(length: tabs.length, vsync: const TestVSync()),
+          ),
+        ),
+      ),
+    );
+  }
+  return MaterialApp(
+    theme: ThemeData(tabBarTheme: tabBarTheme, useMaterial3: useMaterial3),
+    home: Scaffold(
+      body: RepaintBoundary(
+        key: _painterKey,
+        child: TabBar(
+          tabs: tabs,
+          isScrollable: isScrollable,
+          controller: TabController(length: tabs.length, vsync: const TestVSync()),
+        ),
+      ),
+    ),
+  );
+}
+
+
+RenderParagraph _getIcon(WidgetTester tester, IconData icon) {
+  return tester.renderObject<RenderParagraph>(
+    find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
+  );
+}
+
+RenderParagraph _getText(WidgetTester tester, String text) {
+  return  tester.renderObject<RenderParagraph>(find.text(text));
 }

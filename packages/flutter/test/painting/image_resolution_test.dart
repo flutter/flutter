@@ -9,34 +9,6 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestAssetBundle extends CachingAssetBundle {
-  TestAssetBundle(this._assetBundleMap);
-
-  final Map<String, List<Map<Object?, Object?>>> _assetBundleMap;
-
-  Map<String, int> loadCallCount = <String, int>{};
-
-  @override
-  Future<ByteData> load(String key) async {
-    if (key == 'AssetManifest.bin') {
-      return const StandardMessageCodec().encodeMessage(_assetBundleMap)!;
-    }
-
-    loadCallCount[key] = loadCallCount[key] ?? 0 + 1;
-    if (key == 'one') {
-      return ByteData(1)
-        ..setInt8(0, 49);
-    }
-    throw FlutterError('key not found');
-  }
-
-  @override
-  Future<ui.ImmutableBuffer> loadBuffer(String key) async {
-    final ByteData data = await load(key);
-    return ui.ImmutableBuffer.fromUint8List(data.buffer.asUint8List());
-  }
-}
-
 void main() {
   group('1.0 scale device tests', () {
     void buildAndTestWithOneAsset(String mainAssetPath) {
@@ -209,4 +181,32 @@ void main() {
     });
   });
 
+}
+
+class TestAssetBundle extends CachingAssetBundle {
+  TestAssetBundle(this._assetBundleMap);
+
+  final Map<String, List<Map<Object?, Object?>>> _assetBundleMap;
+
+  Map<String, int> loadCallCount = <String, int>{};
+
+  @override
+  Future<ByteData> load(String key) async {
+    if (key == 'AssetManifest.bin') {
+      return const StandardMessageCodec().encodeMessage(_assetBundleMap)!;
+    }
+
+    loadCallCount[key] = loadCallCount[key] ?? 0 + 1;
+    if (key == 'one') {
+      return ByteData(1)
+        ..setInt8(0, 49);
+    }
+    throw FlutterError('key not found');
+  }
+
+  @override
+  Future<ui.ImmutableBuffer> loadBuffer(String key) async {
+    final ByteData data = await load(key);
+    return ui.ImmutableBuffer.fromUint8List(data.buffer.asUint8List());
+  }
 }

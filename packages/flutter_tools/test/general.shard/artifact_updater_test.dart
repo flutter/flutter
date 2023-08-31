@@ -17,8 +17,6 @@ import '../src/common.dart';
 import '../src/fake_http_client.dart';
 import '../src/fakes.dart';
 
-final Platform testPlatform = FakePlatform();
-
 void main() {
   testWithoutContext('ArtifactUpdater can download a zip archive', () async {
     final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
@@ -561,3 +559,5 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
       .createSync();
   }
 }
+
+final Platform testPlatform = FakePlatform();

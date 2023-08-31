@@ -23,134 +23,6 @@ import '../widgets/editable_text_utils.dart' show OverflowWidgetTextEditingContr
 import '../widgets/live_text_utils.dart';
 import '../widgets/semantics_tester.dart';
 
-// On web, the context menu (aka toolbar) is provided by the browser.
-const bool isContextMenuProvidedByPlatform = isBrowser;
-
-class MockTextSelectionControls extends TextSelectionControls {
-  @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Widget buildToolbar(
-    BuildContext context,
-    Rect globalEditableRegion,
-    double textLineHeight,
-    Offset position,
-    List<TextSelectionPoint> endpoints,
-    TextSelectionDelegate delegate,
-    ValueListenable<ClipboardStatus>? clipboardStatus,
-    Offset? lastSecondaryTapDownPosition,
-  ) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Size getHandleSize(double textLineHeight) {
-    throw UnimplementedError();
-  }
-}
-
-class PathBoundsMatcher extends Matcher {
-  const PathBoundsMatcher({
-    this.rectMatcher,
-    this.topMatcher,
-    this.leftMatcher,
-    this.rightMatcher,
-    this.bottomMatcher,
-  }) : super();
-
-  final Matcher? rectMatcher;
-  final Matcher? topMatcher;
-  final Matcher? leftMatcher;
-  final Matcher? rightMatcher;
-  final Matcher? bottomMatcher;
-
-  @override
-  bool matches(covariant Path item, Map<dynamic, dynamic> matchState) {
-    final Rect bounds = item.getBounds();
-
-    final List<Matcher?> matchers = <Matcher?> [rectMatcher, topMatcher, leftMatcher, rightMatcher, bottomMatcher];
-    final List<dynamic> values = <dynamic> [bounds, bounds.top, bounds.left, bounds.right, bounds.bottom];
-    final Map<Matcher, dynamic> failedMatcher = <Matcher, dynamic> {};
-
-    for (int idx = 0; idx < matchers.length; idx++) {
-      if (!(matchers[idx]?.matches(values[idx], matchState) ?? true)) {
-        failedMatcher[matchers[idx]!] = values[idx];
-      }
-    }
-
-    matchState['failedMatcher'] = failedMatcher;
-    return failedMatcher.isEmpty;
-  }
-
-  @override
-  Description describe(Description description) => description.add('The actual Rect does not match');
-
-  @override
-  Description describeMismatch(covariant Path item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
-    final Description description = super.describeMismatch(item, mismatchDescription, matchState, verbose);
-    final Map<Matcher, dynamic> map = matchState['failedMatcher'] as Map<Matcher, dynamic>;
-    final Iterable<String> descriptions = map.entries
-      .map<String>(
-        (MapEntry<Matcher, dynamic> entry) => entry.key.describeMismatch(entry.value, StringDescription(), matchState, verbose).toString(),
-      );
-
-    // description is guaranteed to be non-null.
-    return description
-        ..add('mismatch Rect: ${item.getBounds()}')
-        .addAll(': ', ', ', '. ', descriptions);
-  }
-}
-
-class PathPointsMatcher extends Matcher {
-  const PathPointsMatcher({
-    this.includes = const <Offset>[],
-    this.excludes = const <Offset>[],
-  }) : super();
-
-  final Iterable<Offset> includes;
-  final Iterable<Offset> excludes;
-
-  @override
-  bool matches(covariant Path item, Map<dynamic, dynamic> matchState) {
-    final Offset? notIncluded = includes.cast<Offset?>().firstWhere((Offset? offset) => !item.contains(offset!), orElse: () => null);
-    final Offset? notExcluded = excludes.cast<Offset?>().firstWhere((Offset? offset) => item.contains(offset!), orElse: () => null);
-
-    matchState['notIncluded'] = notIncluded;
-    matchState['notExcluded'] = notExcluded;
-    return (notIncluded ?? notExcluded) == null;
-  }
-
-  @override
-  Description describe(Description description) => description.add('must include these points $includes and must not include $excludes');
-
-  @override
-  Description describeMismatch(covariant Path item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
-    final Offset? notIncluded = matchState['notIncluded'] as Offset?;
-    final Offset? notExcluded = matchState['notExcluded'] as Offset?;
-    final Description desc = super.describeMismatch(item, mismatchDescription, matchState, verbose);
-
-    if ((notExcluded ?? notIncluded) != null) {
-      desc.add('Within the bounds of the path ${item.getBounds()}: ');
-    }
-
-    if (notIncluded != null) {
-      desc.add('$notIncluded is not included. ');
-    }
-    if (notExcluded != null) {
-      desc.add('$notExcluded is not excluded. ');
-    }
-    return desc;
-  }
-}
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
@@ -9867,4 +9739,132 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
     variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }),
   );
+}
+
+// On web, the context menu (aka toolbar) is provided by the browser.
+const bool isContextMenuProvidedByPlatform = isBrowser;
+
+class MockTextSelectionControls extends TextSelectionControls {
+  @override
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Widget buildToolbar(
+    BuildContext context,
+    Rect globalEditableRegion,
+    double textLineHeight,
+    Offset position,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
+    Offset? lastSecondaryTapDownPosition,
+  ) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Size getHandleSize(double textLineHeight) {
+    throw UnimplementedError();
+  }
+}
+
+class PathBoundsMatcher extends Matcher {
+  const PathBoundsMatcher({
+    this.rectMatcher,
+    this.topMatcher,
+    this.leftMatcher,
+    this.rightMatcher,
+    this.bottomMatcher,
+  }) : super();
+
+  final Matcher? rectMatcher;
+  final Matcher? topMatcher;
+  final Matcher? leftMatcher;
+  final Matcher? rightMatcher;
+  final Matcher? bottomMatcher;
+
+  @override
+  bool matches(covariant Path item, Map<dynamic, dynamic> matchState) {
+    final Rect bounds = item.getBounds();
+
+    final List<Matcher?> matchers = <Matcher?> [rectMatcher, topMatcher, leftMatcher, rightMatcher, bottomMatcher];
+    final List<dynamic> values = <dynamic> [bounds, bounds.top, bounds.left, bounds.right, bounds.bottom];
+    final Map<Matcher, dynamic> failedMatcher = <Matcher, dynamic> {};
+
+    for (int idx = 0; idx < matchers.length; idx++) {
+      if (!(matchers[idx]?.matches(values[idx], matchState) ?? true)) {
+        failedMatcher[matchers[idx]!] = values[idx];
+      }
+    }
+
+    matchState['failedMatcher'] = failedMatcher;
+    return failedMatcher.isEmpty;
+  }
+
+  @override
+  Description describe(Description description) => description.add('The actual Rect does not match');
+
+  @override
+  Description describeMismatch(covariant Path item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
+    final Description description = super.describeMismatch(item, mismatchDescription, matchState, verbose);
+    final Map<Matcher, dynamic> map = matchState['failedMatcher'] as Map<Matcher, dynamic>;
+    final Iterable<String> descriptions = map.entries
+      .map<String>(
+        (MapEntry<Matcher, dynamic> entry) => entry.key.describeMismatch(entry.value, StringDescription(), matchState, verbose).toString(),
+      );
+
+    // description is guaranteed to be non-null.
+    return description
+        ..add('mismatch Rect: ${item.getBounds()}')
+        .addAll(': ', ', ', '. ', descriptions);
+  }
+}
+
+class PathPointsMatcher extends Matcher {
+  const PathPointsMatcher({
+    this.includes = const <Offset>[],
+    this.excludes = const <Offset>[],
+  }) : super();
+
+  final Iterable<Offset> includes;
+  final Iterable<Offset> excludes;
+
+  @override
+  bool matches(covariant Path item, Map<dynamic, dynamic> matchState) {
+    final Offset? notIncluded = includes.cast<Offset?>().firstWhere((Offset? offset) => !item.contains(offset!), orElse: () => null);
+    final Offset? notExcluded = excludes.cast<Offset?>().firstWhere((Offset? offset) => item.contains(offset!), orElse: () => null);
+
+    matchState['notIncluded'] = notIncluded;
+    matchState['notExcluded'] = notExcluded;
+    return (notIncluded ?? notExcluded) == null;
+  }
+
+  @override
+  Description describe(Description description) => description.add('must include these points $includes and must not include $excludes');
+
+  @override
+  Description describeMismatch(covariant Path item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
+    final Offset? notIncluded = matchState['notIncluded'] as Offset?;
+    final Offset? notExcluded = matchState['notExcluded'] as Offset?;
+    final Description desc = super.describeMismatch(item, mismatchDescription, matchState, verbose);
+
+    if ((notExcluded ?? notIncluded) != null) {
+      desc.add('Within the bounds of the path ${item.getBounds()}: ');
+    }
+
+    if (notIncluded != null) {
+      desc.add('$notIncluded is not included. ');
+    }
+    if (notExcluded != null) {
+      desc.add('$notExcluded is not excluded. ');
+    }
+    return desc;
+  }
 }

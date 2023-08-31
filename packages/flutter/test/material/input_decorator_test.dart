@@ -15,146 +15,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Widget buildInputDecorator({
-  InputDecoration decoration = const InputDecoration(),
-  ThemeData? theme,
-  InputDecorationTheme? inputDecorationTheme,
-  TextDirection textDirection = TextDirection.ltr,
-  bool expands = false,
-  bool isEmpty = false,
-  bool isFocused = false,
-  bool isHovering = false,
-  bool useMaterial3 = false,
-  TextStyle? baseStyle,
-  TextAlignVertical? textAlignVertical,
-  VisualDensity? visualDensity,
-  Widget child = const Text(
-    'text',
-    style: TextStyle(fontSize: 16.0),
-  ),
-}) {
-  return MaterialApp(
-    theme: ThemeData(useMaterial3: false),
-    home: Material(
-      child: Builder(
-        builder: (BuildContext context) {
-          return Theme(
-            data: (theme ?? Theme.of(context)).copyWith(
-              inputDecorationTheme: inputDecorationTheme,
-              visualDensity: visualDensity,
-              useMaterial3: useMaterial3,
-              textTheme: const TextTheme(bodyLarge: TextStyle(fontSize: 16.0)),
-            ),
-            child: Align(
-              alignment: Alignment.topLeft,
-              child: Directionality(
-                textDirection: textDirection,
-                child: InputDecorator(
-                  expands: expands,
-                  decoration: decoration,
-                  isEmpty: isEmpty,
-                  isFocused: isFocused,
-                  isHovering: isHovering,
-                  baseStyle: baseStyle,
-                  textAlignVertical: textAlignVertical,
-                  child: child,
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    ),
-  );
-}
-
-Finder findBorderPainter() {
-  return find.descendant(
-    of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_BorderContainer'),
-    matching: find.byWidgetPredicate((Widget w) => w is CustomPaint),
-  );
-}
-
-double getBorderBottom(WidgetTester tester) {
-  final RenderBox box = InputDecorator.containerOf(tester.element(findBorderPainter()))!;
-  return box.size.height;
-}
-
-Finder findLabel() {
-  return find.descendant(
-    of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_Shaker'),
-    matching: find.byWidgetPredicate((Widget w) => w is Text),
-  );
-}
-
-Rect getLabelRect(WidgetTester tester) {
-  return tester.getRect(findLabel());
-}
-
-TextStyle getLabelStyle(WidgetTester tester) {
-  return tester.firstWidget<AnimatedDefaultTextStyle>(
-    find.ancestor(
-      of: find.text('label'),
-      matching: find.byType(AnimatedDefaultTextStyle),
-    ),
-  ).style;
-}
-
-InputBorder? getBorder(WidgetTester tester) {
-  if (!tester.any(findBorderPainter())) {
-    return null;
-  }
-  final CustomPaint customPaint = tester.widget(findBorderPainter());
-  final dynamic/*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
-  // ignore: avoid_dynamic_calls
-  final dynamic/*_InputBorderTween*/ inputBorderTween = inputBorderPainter.border;
-  // ignore: avoid_dynamic_calls
-  final Animation<double> animation = inputBorderPainter.borderAnimation as Animation<double>;
-  // ignore: avoid_dynamic_calls
-  final InputBorder border = inputBorderTween.evaluate(animation) as InputBorder;
-  return border;
-}
-
-BorderSide? getBorderSide(WidgetTester tester) {
-  return getBorder(tester)!.borderSide;
-}
-
-BorderRadius? getBorderRadius(WidgetTester tester) {
-  final InputBorder border = getBorder(tester)!;
-  if (border is UnderlineInputBorder) {
-    return border.borderRadius;
-  }
-  return null;
-}
-
-double getBorderWeight(WidgetTester tester) => getBorderSide(tester)!.width;
-
-Color getBorderColor(WidgetTester tester) => getBorderSide(tester)!.color;
-
-Color getContainerColor(WidgetTester tester) {
-  final CustomPaint customPaint = tester.widget(findBorderPainter());
-  final dynamic/*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
-  // ignore: avoid_dynamic_calls
-  return inputBorderPainter.blendedColor as Color;
-}
-
-double getOpacity(WidgetTester tester, String textValue) {
-  final FadeTransition opacityWidget = tester.widget<FadeTransition>(
-    find.ancestor(
-      of: find.text(textValue),
-      matching: find.byType(FadeTransition),
-    ).first,
-  );
-  return opacityWidget.opacity.value;
-}
-
-TextStyle? getIconStyle(WidgetTester tester, IconData icon) {
-  final RichText iconRichText = tester.widget<RichText>(
-    find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
-  );
-  return iconRichText.text.style;
-}
-
 void main() {
   runAllTests(useMaterial3: true);
   runAllTests(useMaterial3: false);
@@ -6570,4 +6430,144 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
     expect(find.byType(InputDecorator), findsOneWidget);
     expect(tester.renderObject<RenderBox>(find.text('COUNTER')).size, Size.zero);
   });
+}
+
+Widget buildInputDecorator({
+  InputDecoration decoration = const InputDecoration(),
+  ThemeData? theme,
+  InputDecorationTheme? inputDecorationTheme,
+  TextDirection textDirection = TextDirection.ltr,
+  bool expands = false,
+  bool isEmpty = false,
+  bool isFocused = false,
+  bool isHovering = false,
+  bool useMaterial3 = false,
+  TextStyle? baseStyle,
+  TextAlignVertical? textAlignVertical,
+  VisualDensity? visualDensity,
+  Widget child = const Text(
+    'text',
+    style: TextStyle(fontSize: 16.0),
+  ),
+}) {
+  return MaterialApp(
+    theme: ThemeData(useMaterial3: false),
+    home: Material(
+      child: Builder(
+        builder: (BuildContext context) {
+          return Theme(
+            data: (theme ?? Theme.of(context)).copyWith(
+              inputDecorationTheme: inputDecorationTheme,
+              visualDensity: visualDensity,
+              useMaterial3: useMaterial3,
+              textTheme: const TextTheme(bodyLarge: TextStyle(fontSize: 16.0)),
+            ),
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Directionality(
+                textDirection: textDirection,
+                child: InputDecorator(
+                  expands: expands,
+                  decoration: decoration,
+                  isEmpty: isEmpty,
+                  isFocused: isFocused,
+                  isHovering: isHovering,
+                  baseStyle: baseStyle,
+                  textAlignVertical: textAlignVertical,
+                  child: child,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    ),
+  );
+}
+
+Finder findBorderPainter() {
+  return find.descendant(
+    of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_BorderContainer'),
+    matching: find.byWidgetPredicate((Widget w) => w is CustomPaint),
+  );
+}
+
+double getBorderBottom(WidgetTester tester) {
+  final RenderBox box = InputDecorator.containerOf(tester.element(findBorderPainter()))!;
+  return box.size.height;
+}
+
+Finder findLabel() {
+  return find.descendant(
+    of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_Shaker'),
+    matching: find.byWidgetPredicate((Widget w) => w is Text),
+  );
+}
+
+Rect getLabelRect(WidgetTester tester) {
+  return tester.getRect(findLabel());
+}
+
+TextStyle getLabelStyle(WidgetTester tester) {
+  return tester.firstWidget<AnimatedDefaultTextStyle>(
+    find.ancestor(
+      of: find.text('label'),
+      matching: find.byType(AnimatedDefaultTextStyle),
+    ),
+  ).style;
+}
+
+InputBorder? getBorder(WidgetTester tester) {
+  if (!tester.any(findBorderPainter())) {
+    return null;
+  }
+  final CustomPaint customPaint = tester.widget(findBorderPainter());
+  final dynamic/*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
+  // ignore: avoid_dynamic_calls
+  final dynamic/*_InputBorderTween*/ inputBorderTween = inputBorderPainter.border;
+  // ignore: avoid_dynamic_calls
+  final Animation<double> animation = inputBorderPainter.borderAnimation as Animation<double>;
+  // ignore: avoid_dynamic_calls
+  final InputBorder border = inputBorderTween.evaluate(animation) as InputBorder;
+  return border;
+}
+
+BorderSide? getBorderSide(WidgetTester tester) {
+  return getBorder(tester)!.borderSide;
+}
+
+BorderRadius? getBorderRadius(WidgetTester tester) {
+  final InputBorder border = getBorder(tester)!;
+  if (border is UnderlineInputBorder) {
+    return border.borderRadius;
+  }
+  return null;
+}
+
+double getBorderWeight(WidgetTester tester) => getBorderSide(tester)!.width;
+
+Color getBorderColor(WidgetTester tester) => getBorderSide(tester)!.color;
+
+Color getContainerColor(WidgetTester tester) {
+  final CustomPaint customPaint = tester.widget(findBorderPainter());
+  final dynamic/*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
+  // ignore: avoid_dynamic_calls
+  return inputBorderPainter.blendedColor as Color;
+}
+
+double getOpacity(WidgetTester tester, String textValue) {
+  final FadeTransition opacityWidget = tester.widget<FadeTransition>(
+    find.ancestor(
+      of: find.text(textValue),
+      matching: find.byType(FadeTransition),
+    ).first,
+  );
+  return opacityWidget.opacity.value;
+}
+
+TextStyle? getIconStyle(WidgetTester tester, IconData icon) {
+  final RichText iconRichText = tester.widget<RichText>(
+    find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
+  );
+  return iconRichText.text.style;
 }

@@ -11,20 +11,6 @@ import 'package:flutter_tools/src/base/multi_root_file_system.dart';
 
 import '../../src/common.dart';
 
-void setupFileSystem({
-  required MemoryFileSystem fs,
-  required List<String> directories,
-  required List<String> files,
-}) {
-  for (final String directory in directories) {
-    fs.directory(directory).createSync(recursive: true);
-  }
-
-  for (final String file in files) {
-    fs.file(file).writeAsStringSync('Content: $file');
-  }
-}
-
 void main() {
   group('Posix style', () {
     runTest(FileSystemStyle.posix);
@@ -186,4 +172,18 @@ void runTest(FileSystemStyle style) {
     expect(fs.identicalSync('${root}foo${sep}in_both', 'scheme:///in_both'), true);
     expect(fs.identicalSync('${root}bar${sep}in_both', 'scheme:///in_both'), false);
   });
+}
+
+void setupFileSystem({
+  required MemoryFileSystem fs,
+  required List<String> directories,
+  required List<String> files,
+}) {
+  for (final String directory in directories) {
+    fs.directory(directory).createSync(recursive: true);
+  }
+
+  for (final String file in files) {
+    fs.file(file).writeAsStringSync('Content: $file');
+  }
 }

@@ -12,88 +12,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 
-class MockCanvas extends Fake implements Canvas {
-  late Path capturedPath;
-  late Paint capturedPaint;
-
-  @override
-  void drawPath(Path path, Paint paint) {
-    capturedPath = path;
-    capturedPaint = paint;
-  }
-
-  late double capturedSx;
-  late double capturedSy;
-
-  @override
-  void scale(double sx, [double? sy]) {
-    capturedSx = sx;
-    capturedSy = sy!;
-    invocations.add(RecordedScale(sx, sy));
-  }
-
-  final List<RecordedCanvasCall> invocations = <RecordedCanvasCall>[];
-
-  @override
-  void rotate(double radians) {
-    invocations.add(RecordedRotate(radians));
-  }
-
-  @override
-  void translate(double dx, double dy) {
-    invocations.add(RecordedTranslate(dx, dy));
-  }
-}
-
-@immutable
-abstract class RecordedCanvasCall {
-  const RecordedCanvasCall();
-}
-
-class RecordedRotate extends RecordedCanvasCall {
-  const RecordedRotate(this.radians);
-
-  final double radians;
-
-  @override
-  bool operator ==(Object other) {
-    return other is RecordedRotate && other.radians == radians;
-  }
-
-  @override
-  int get hashCode => radians.hashCode;
-}
-
-class RecordedTranslate extends RecordedCanvasCall {
-  const RecordedTranslate(this.dx, this.dy);
-
-  final double dx;
-  final double dy;
-
-  @override
-  bool operator ==(Object other) {
-    return other is RecordedTranslate && other.dx == dx && other.dy == dy;
-  }
-
-  @override
-  int get hashCode => Object.hash(dx, dy);
-}
-
-class RecordedScale extends RecordedCanvasCall {
-  const RecordedScale(this.sx, this.sy);
-
-  final double sx;
-  final double sy;
-
-  @override
-  bool operator ==(Object other) {
-    return other is RecordedScale && other.sx == sx && other.sy == sy;
-  }
-
-  @override
-  int get hashCode => Object.hash(sx, sy);
-}
-
 void main() {
   testWidgetsWithLeakTracking('IconTheme color', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -346,4 +264,86 @@ class PaintColorMatcher extends Matcher {
     final Paint actualPaint = item as Paint;
     return actualPaint.color == Color(expectedColor);
   }
+}
+
+class MockCanvas extends Fake implements Canvas {
+  late Path capturedPath;
+  late Paint capturedPaint;
+
+  @override
+  void drawPath(Path path, Paint paint) {
+    capturedPath = path;
+    capturedPaint = paint;
+  }
+
+  late double capturedSx;
+  late double capturedSy;
+
+  @override
+  void scale(double sx, [double? sy]) {
+    capturedSx = sx;
+    capturedSy = sy!;
+    invocations.add(RecordedScale(sx, sy));
+  }
+
+  final List<RecordedCanvasCall> invocations = <RecordedCanvasCall>[];
+
+  @override
+  void rotate(double radians) {
+    invocations.add(RecordedRotate(radians));
+  }
+
+  @override
+  void translate(double dx, double dy) {
+    invocations.add(RecordedTranslate(dx, dy));
+  }
+}
+
+@immutable
+abstract class RecordedCanvasCall {
+  const RecordedCanvasCall();
+}
+
+class RecordedRotate extends RecordedCanvasCall {
+  const RecordedRotate(this.radians);
+
+  final double radians;
+
+  @override
+  bool operator ==(Object other) {
+    return other is RecordedRotate && other.radians == radians;
+  }
+
+  @override
+  int get hashCode => radians.hashCode;
+}
+
+class RecordedTranslate extends RecordedCanvasCall {
+  const RecordedTranslate(this.dx, this.dy);
+
+  final double dx;
+  final double dy;
+
+  @override
+  bool operator ==(Object other) {
+    return other is RecordedTranslate && other.dx == dx && other.dy == dy;
+  }
+
+  @override
+  int get hashCode => Object.hash(dx, dy);
+}
+
+class RecordedScale extends RecordedCanvasCall {
+  const RecordedScale(this.sx, this.sy);
+
+  final double sx;
+  final double sy;
+
+  @override
+  bool operator ==(Object other) {
+    return other is RecordedScale && other.sx == sx && other.sy == sy;
+  }
+
+  @override
+  int get hashCode => Object.hash(sx, sy);
 }
