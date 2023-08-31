@@ -333,7 +333,7 @@ class IOSDeployDebugger {
   // Process 525 exited with status = -1 (0xffffffff) lost connection
   static final RegExp _lostConnectionPattern = RegExp(r'exited with status = -1 \(0xffffffff\) lost connection');
 
-  /// Whether ios-deploy received a messages matching [_lostConnectionPattern],
+  /// Whether ios-deploy received a message matching [_lostConnectionPattern],
   /// indicating that it lost connection to the device.
   bool get lostConnection => _lostConnection;
   bool _lostConnection = false;
