@@ -10,6 +10,10 @@
 #include "flutter/display_list/dl_op_receiver.h"
 #include "flutter/fml/macros.h"
 
+namespace impeller {
+struct Picture;
+}
+
 namespace flutter {
 
 class DlCanvasReceiver : public DlOpReceiver {
@@ -336,6 +340,10 @@ class DlCanvasToReceiver : public virtual DlCanvas,  //
   // |DlCanvas|
   void DrawDisplayList(const sk_sp<DisplayList> display_list,
                        SkScalar opacity = SK_Scalar1) override;
+  // |DlCanvas|
+  void DrawImpellerPicture(
+      const std::shared_ptr<const impeller::Picture>& picture,
+      SkScalar opacity = SK_Scalar1) override;
   // |DlCanvas|
   void DrawTextBlob(const sk_sp<SkTextBlob>& blob,
                     SkScalar x,

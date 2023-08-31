@@ -25,8 +25,9 @@ FlutterPlatformViewLayer::FlutterPlatformViewLayer(
 
 FlutterPlatformViewLayer::~FlutterPlatformViewLayer() = default;
 
-FlutterPlatformViewsController::FlutterPlatformViewsController()
-    : layer_pool_(std::make_unique<FlutterPlatformViewLayerPool>()),
+FlutterPlatformViewsController::FlutterPlatformViewsController(bool enable_impeller)
+    : enable_impeller_(enable_impeller),
+      layer_pool_(std::make_unique<FlutterPlatformViewLayerPool>()),
       weak_factory_(std::make_unique<fml::WeakPtrFactory<FlutterPlatformViewsController>>(this)) {
   mask_view_pool_.reset(
       [[FlutterClippingMaskViewPool alloc] initWithCapacity:kFlutterClippingMaskViewPoolCapacity]);
