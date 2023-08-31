@@ -2483,9 +2483,9 @@ void main() {
         equals(const <Rect>[
           Rect.fromLTRB(4.0, 0.0, 112.0, 48.0),
           Rect.fromLTRB(112.0, 0.0, 220.0, 48.0),
-          Rect.fromLTRB(220.0, 0.0, 328.0, 48.0),
-          Rect.fromLTRB(328.0, 0.0, 506.0, 48.0),
           Rect.fromLTRB(112.0, 104.0, 326.0, 152.0),
+          Rect.fromLTRB(220.0, 0.0, 328.0, 48.0),
+          Rect.fromLTRB(328.0, 0.0, 506.0, 48.0)
         ]),
       );
     });
@@ -2530,9 +2530,9 @@ void main() {
         equals(const <Rect>[
           Rect.fromLTRB(688.0, 0.0, 796.0, 48.0),
           Rect.fromLTRB(580.0, 0.0, 688.0, 48.0),
-          Rect.fromLTRB(472.0, 0.0, 580.0, 48.0),
-          Rect.fromLTRB(294.0, 0.0, 472.0, 48.0),
           Rect.fromLTRB(474.0, 104.0, 688.0, 152.0),
+          Rect.fromLTRB(472.0, 0.0, 580.0, 48.0),
+          Rect.fromLTRB(294.0, 0.0, 472.0, 48.0)
         ]),
       );
     });
@@ -2575,9 +2575,9 @@ void main() {
         equals(const <Rect>[
           Rect.fromLTRB(4.0, 0.0, 112.0, 48.0),
           Rect.fromLTRB(112.0, 0.0, 220.0, 48.0),
-          Rect.fromLTRB(220.0, 0.0, 328.0, 48.0),
-          Rect.fromLTRB(328.0, 0.0, 506.0, 48.0),
           Rect.fromLTRB(86.0, 104.0, 300.0, 152.0),
+          Rect.fromLTRB(220.0, 0.0, 328.0, 48.0),
+          Rect.fromLTRB(328.0, 0.0, 506.0, 48.0)
         ]),
       );
     });
@@ -2620,9 +2620,9 @@ void main() {
         equals(const <Rect>[
           Rect.fromLTRB(188.0, 0.0, 296.0, 48.0),
           Rect.fromLTRB(80.0, 0.0, 188.0, 48.0),
+          Rect.fromLTRB(0.0, 104.0, 214.0, 152.0),
           Rect.fromLTRB(-28.0, 0.0, 80.0, 48.0),
-          Rect.fromLTRB(-206.0, 0.0, -28.0, 48.0),
-          Rect.fromLTRB(0.0, 104.0, 214.0, 152.0)
+          Rect.fromLTRB(-206.0, 0.0, -28.0, 48.0)
         ]),
       );
     });
