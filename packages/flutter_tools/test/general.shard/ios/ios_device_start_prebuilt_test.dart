@@ -386,6 +386,42 @@ void main() {
     expect(await device.stopApp(iosApp), false);
   });
 
+  testWithoutContext('IOSDevice.startApp does not retry when ios-deploy loses connection if not in CI', () async {
+    final BufferLogger logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      attachDebuggerCommand(
+        stdout: '(lldb)     run\nsuccess\nProcess 525 exited with status = -1 (0xffffffff) lost connection',
+      ),
+    ]);
+    final IOSDevice device = setUpIOSDevice(
+      processManager: processManager,
+      fileSystem: fileSystem,
+      logger: logger,
+    );
+    final IOSApp iosApp = PrebuiltIOSApp(
+      projectBundleId: 'app',
+      bundleName: 'Runner',
+      uncompressedBundle: fileSystem.currentDirectory,
+      applicationPackage: fileSystem.currentDirectory,
+    );
+
+    device.portForwarder = const NoOpDevicePortForwarder();
+
+    final LaunchResult launchResult = await device.startApp(iosApp,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.enabled(
+        BuildInfo.debug,
+      ),
+      platformArgs: <String, dynamic>{},
+    );
+
+    expect(processManager, hasNoRemainingExpectations);
+    expect(launchResult.started, false);
+    expect(launchResult.hasVmService, false);
+    expect(await device.stopApp(iosApp), false);
+  });
+
   testWithoutContext('IOSDevice.startApp succeeds in release mode', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
