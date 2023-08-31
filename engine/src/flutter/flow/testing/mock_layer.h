@@ -150,15 +150,12 @@ class MockLayerCacheableItem : public LayerRasterCacheItem {
  public:
   using LayerRasterCacheItem::LayerRasterCacheItem;
 };
-class MockCacheableLayer : public MockLayer {
+class MockCacheableLayer : public MockLayer, public CacheableLayer {
  public:
   explicit MockCacheableLayer(SkPath path,
                               DlPaint paint = DlPaint(),
                               int render_limit = 3)
-      : MockLayer(path, paint) {
-    raster_cache_item_ =
-        std::make_unique<MockLayerCacheableItem>(this, render_limit);
-  }
+      : MockLayer(path, paint), render_limit_(render_limit) {}
 
   const LayerRasterCacheItem* raster_cache_item() const {
     return raster_cache_item_.get();
@@ -167,7 +164,11 @@ class MockCacheableLayer : public MockLayer {
   void Preroll(PrerollContext* context) override;
 
  private:
+  RasterCacheItem* realize_raster_cache_item() override;
+  void disable_raster_cache_item() override;
   std::unique_ptr<LayerRasterCacheItem> raster_cache_item_;
+
+  int render_limit_;
 };
 
 }  // namespace testing

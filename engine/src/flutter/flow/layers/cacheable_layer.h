@@ -9,39 +9,62 @@
 
 #include "flutter/flow/layers/container_layer.h"
 #include "flutter/flow/layers/layer_raster_cache_item.h"
+#include "flutter/flow/raster_cache_util.h"
 
 namespace flutter {
 
+class CacheableLayer {
+ protected:
+  virtual RasterCacheItem* realize_raster_cache_item() = 0;
+  virtual void disable_raster_cache_item() = 0;
+
+  friend class AutoCache;
+};
+
 class AutoCache {
  public:
-  AutoCache(RasterCacheItem* raster_cache_item,
+  AutoCache(CacheableLayer& item_provider,
             PrerollContext* context,
-            const SkMatrix& matrix);
+            bool caching_enabled = true);
 
   void ShouldNotBeCached() { raster_cache_item_ = nullptr; }
 
   ~AutoCache();
 
  private:
-  inline bool IsCacheEnabled();
   RasterCacheItem* raster_cache_item_ = nullptr;
   PrerollContext* context_ = nullptr;
-  const SkMatrix matrix_;
+  SkMatrix matrix_;
+
+  FML_DISALLOW_COPY_ASSIGN_AND_MOVE(AutoCache);
 };
 
-class CacheableContainerLayer : public ContainerLayer {
+class CacheableContainerLayer : public ContainerLayer, public CacheableLayer {
  public:
   explicit CacheableContainerLayer(
       int layer_cached_threshold =
           RasterCacheUtil::kMinimumRendersBeforeCachingFilterLayer,
-      bool can_cache_children = false);
+      bool can_cache_children = false)
+      : layer_cache_threshold_(layer_cached_threshold),
+        can_cache_children_(can_cache_children) {}
 
   const LayerRasterCacheItem* raster_cache_item() const {
     return layer_raster_cache_item_.get();
   }
 
+  void MarkCanCacheChildren(bool can_cache_children) {
+    if (layer_raster_cache_item_) {
+      layer_raster_cache_item_->MarkCanCacheChildren(can_cache_children);
+    }
+  }
+
  protected:
+  RasterCacheItem* realize_raster_cache_item() override;
+  virtual void disable_raster_cache_item() override;
   std::unique_ptr<LayerRasterCacheItem> layer_raster_cache_item_;
+
+  int layer_cache_threshold_;
+  bool can_cache_children_;
 };
 
 }  // namespace flutter

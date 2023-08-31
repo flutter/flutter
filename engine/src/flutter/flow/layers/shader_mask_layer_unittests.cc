@@ -334,39 +334,78 @@ TEST_F(ShaderMaskLayerTest, LayerCached) {
 
   use_mock_raster_cache();
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);
-  const auto* cacheable_shader_masker_item = layer->raster_cache_item();
 
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
-  EXPECT_EQ(cacheable_shader_masker_item->cache_state(),
-            RasterCacheItem::CacheState::kNone);
-  EXPECT_FALSE(cacheable_shader_masker_item->GetId().has_value());
+  EXPECT_EQ(layer->raster_cache_item(), nullptr);
 
   // frame 1.
   layer->Preroll(preroll_context());
+  EXPECT_NE(layer->raster_cache_item(), nullptr);
   LayerTree::TryToRasterCache(cacheable_items(), &paint_context());
 
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
-  EXPECT_EQ(cacheable_shader_masker_item->cache_state(),
+  EXPECT_EQ(layer->raster_cache_item()->cache_state(),
             RasterCacheItem::CacheState::kNone);
-  EXPECT_FALSE(cacheable_shader_masker_item->GetId().has_value());
+  EXPECT_FALSE(layer->raster_cache_item()->GetId().has_value());
 
   // frame 2.
   layer->Preroll(preroll_context());
   LayerTree::TryToRasterCache(cacheable_items(), &paint_context());
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
-  EXPECT_EQ(cacheable_shader_masker_item->cache_state(),
+  EXPECT_EQ(layer->raster_cache_item()->cache_state(),
             RasterCacheItem::CacheState::kNone);
-  EXPECT_FALSE(cacheable_shader_masker_item->GetId().has_value());
+  EXPECT_FALSE(layer->raster_cache_item()->GetId().has_value());
 
   // frame 3.
   layer->Preroll(preroll_context());
   LayerTree::TryToRasterCache(cacheable_items(), &paint_context());
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)1);
-  EXPECT_EQ(cacheable_shader_masker_item->cache_state(),
+  EXPECT_EQ(layer->raster_cache_item()->cache_state(),
             RasterCacheItem::CacheState::kCurrent);
 
-  EXPECT_TRUE(raster_cache()->Draw(
-      cacheable_shader_masker_item->GetId().value(), cache_canvas, &paint));
+  EXPECT_TRUE(raster_cache()->Draw(layer->raster_cache_item()->GetId().value(),
+                                   cache_canvas, &paint));
+}
+
+TEST_F(ShaderMaskLayerTest, NullRasterCacheResetsRasterCacheItem) {
+  auto dl_filter = MakeFilter(DlColor::kBlue());
+  DlPaint paint;
+  const SkRect layer_bounds = SkRect::MakeLTRB(2.0f, 4.0f, 20.5f, 20.5f);
+  const SkPath child_path = SkPath().addRect(SkRect::MakeWH(5.0f, 5.0f));
+  auto mock_layer = std::make_shared<MockLayer>(child_path);
+  auto layer = std::make_shared<ShaderMaskLayer>(dl_filter, layer_bounds,
+                                                 DlBlendMode::kSrc);
+  layer->Add(mock_layer);
+
+  ASSERT_EQ(layer->raster_cache_item(), nullptr);
+
+  layer->Preroll(preroll_context());
+  ASSERT_EQ(layer->raster_cache_item(), nullptr);
+
+  use_mock_raster_cache();
+
+  int limit = RasterCacheUtil::kMinimumRendersBeforeCachingFilterLayer;
+  for (int i = 1; i < limit; i++) {
+    layer->Preroll(preroll_context());
+    ASSERT_NE(layer->raster_cache_item(), nullptr);
+    ASSERT_EQ(layer->raster_cache_item()->cache_state(),
+              RasterCacheItem::kNone);
+    ASSERT_FALSE(
+        layer->raster_cache_item()->TryToPrepareRasterCache(paint_context()));
+  }
+
+  layer->Preroll(preroll_context());
+  ASSERT_NE(layer->raster_cache_item(), nullptr);
+  ASSERT_EQ(layer->raster_cache_item()->cache_state(),
+            RasterCacheItem::kCurrent);
+  ASSERT_TRUE(
+      layer->raster_cache_item()->TryToPrepareRasterCache(paint_context()));
+
+  use_null_raster_cache();
+
+  layer->Preroll(preroll_context());
+  ASSERT_NE(layer->raster_cache_item(), nullptr);
+  ASSERT_EQ(layer->raster_cache_item()->cache_state(), RasterCacheItem::kNone);
 }
 
 TEST_F(ShaderMaskLayerTest, OpacityInheritance) {

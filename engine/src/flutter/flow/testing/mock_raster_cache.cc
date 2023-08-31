@@ -62,7 +62,8 @@ void MockRasterCache::AddMockPicture(int width, int height) {
   DisplayListRasterCacheItem display_list_item(display_list, SkPoint(), true,
                                                false);
   for (size_t i = 0; i < access_threshold(); i++) {
-    AutoCache(&display_list_item, &preroll_context_, ctm);
+    display_list_item.PrerollSetup(&preroll_context_, ctm);
+    display_list_item.PrerollFinalize(&preroll_context_, ctm);
   }
   RasterCache::Context r_context = {
       // clang-format off

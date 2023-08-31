@@ -66,17 +66,29 @@ void MockLayer::Paint(PaintContext& context) const {
 void MockCacheableContainerLayer::Preroll(PrerollContext* context) {
   Layer::AutoPrerollSaveLayerState save =
       Layer::AutoPrerollSaveLayerState::Create(context);
-  auto cache = AutoCache(layer_raster_cache_item_.get(), context,
-                         context->state_stack.transform_3x3());
+  AutoCache cache(*this, context);
 
   ContainerLayer::Preroll(context);
+}
+
+RasterCacheItem* MockCacheableLayer::realize_raster_cache_item() {
+  if (!raster_cache_item_) {
+    raster_cache_item_ =
+        std::make_unique<MockLayerCacheableItem>(this, render_limit_);
+  }
+  return raster_cache_item_.get();
+}
+
+void MockCacheableLayer::disable_raster_cache_item() {
+  if (raster_cache_item_) {
+    raster_cache_item_->reset_cache_state();
+  }
 }
 
 void MockCacheableLayer::Preroll(PrerollContext* context) {
   Layer::AutoPrerollSaveLayerState save =
       Layer::AutoPrerollSaveLayerState::Create(context);
-  auto cache = AutoCache(raster_cache_item_.get(), context,
-                         context->state_stack.transform_3x3());
+  AutoCache cache(*this, context);
 
   MockLayer::Preroll(context);
 }

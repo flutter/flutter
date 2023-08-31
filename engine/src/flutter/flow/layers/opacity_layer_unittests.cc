@@ -103,29 +103,24 @@ TEST_F(OpacityLayerTest, CacheChild) {
   use_mock_raster_cache();
 
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
-
-  const auto* cacheable_opacity_item = layer->raster_cache_item();
-
-  EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
-  EXPECT_EQ(cacheable_opacity_item->cache_state(),
-            RasterCacheItem::CacheState::kNone);
-  EXPECT_FALSE(cacheable_opacity_item->GetId().has_value());
+  EXPECT_EQ(layer->raster_cache_item(), nullptr);
 
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);
   layer->Preroll(preroll_context());
+  EXPECT_NE(layer->raster_cache_item(), nullptr);
   LayerTree::TryToRasterCache(cacheable_items(), &paint_context());
 
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)1);
 
-  EXPECT_EQ(cacheable_opacity_item->cache_state(),
+  EXPECT_EQ(layer->raster_cache_item()->cache_state(),
             RasterCacheItem::CacheState::kChildren);
   EXPECT_EQ(
-      cacheable_opacity_item->GetId().value(),
+      layer->raster_cache_item()->GetId().value(),
       RasterCacheKeyID(RasterCacheKeyID::LayerChildrenIds(layer.get()).value(),
                        RasterCacheKeyType::kLayerChildren));
-  EXPECT_FALSE(raster_cache()->Draw(cacheable_opacity_item->GetId().value(),
+  EXPECT_FALSE(raster_cache()->Draw(layer->raster_cache_item()->GetId().value(),
                                     other_canvas, &paint));
-  EXPECT_TRUE(raster_cache()->Draw(cacheable_opacity_item->GetId().value(),
+  EXPECT_TRUE(raster_cache()->Draw(layer->raster_cache_item()->GetId().value(),
                                    cache_canvas, &paint));
 }
 
@@ -152,30 +147,59 @@ TEST_F(OpacityLayerTest, CacheChildren) {
   use_mock_raster_cache();
 
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
-
-  const auto* cacheable_opacity_item = layer->raster_cache_item();
-
-  EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
-  EXPECT_EQ(cacheable_opacity_item->cache_state(),
-            RasterCacheItem::CacheState::kNone);
-  EXPECT_FALSE(cacheable_opacity_item->GetId().has_value());
+  EXPECT_EQ(layer->raster_cache_item(), nullptr);
 
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);
   layer->Preroll(preroll_context());
+  EXPECT_NE(layer->raster_cache_item(), nullptr);
   LayerTree::TryToRasterCache(cacheable_items(), &paint_context());
 
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)1);
 
-  EXPECT_EQ(cacheable_opacity_item->cache_state(),
+  EXPECT_EQ(layer->raster_cache_item()->cache_state(),
             RasterCacheItem::CacheState::kChildren);
   EXPECT_EQ(
-      cacheable_opacity_item->GetId().value(),
+      layer->raster_cache_item()->GetId().value(),
       RasterCacheKeyID(RasterCacheKeyID::LayerChildrenIds(layer.get()).value(),
                        RasterCacheKeyType::kLayerChildren));
-  EXPECT_FALSE(raster_cache()->Draw(cacheable_opacity_item->GetId().value(),
+  EXPECT_FALSE(raster_cache()->Draw(layer->raster_cache_item()->GetId().value(),
                                     other_canvas, &paint));
-  EXPECT_TRUE(raster_cache()->Draw(cacheable_opacity_item->GetId().value(),
+  EXPECT_TRUE(raster_cache()->Draw(layer->raster_cache_item()->GetId().value(),
                                    cache_canvas, &paint));
+}
+
+TEST_F(OpacityLayerTest, NullRasterCacheResetsRasterCacheItem) {
+  const SkAlpha alpha_half = 255 / 2;
+  const SkPath child_path = SkPath().addRect(SkRect::MakeWH(5.0f, 5.0f));
+  auto mock_layer = std::make_shared<MockLayer>(child_path);
+  mock_layer->set_fake_opacity_compatible(false);
+  auto layer =
+      std::make_shared<OpacityLayer>(alpha_half, SkPoint::Make(0.0f, 0.0f));
+  layer->Add(mock_layer);
+
+  ASSERT_EQ(layer->raster_cache_item(), nullptr);
+
+  layer->Preroll(preroll_context());
+  ASSERT_EQ(layer->raster_cache_item(), nullptr);
+
+  use_mock_raster_cache();
+
+  // OpacityLayer will never cache itself, only its children
+  int limit = 10 * RasterCacheUtil::kMinimumRendersBeforeCachingFilterLayer;
+  for (int i = 1; i < limit; i++) {
+    layer->Preroll(preroll_context());
+    ASSERT_NE(layer->raster_cache_item(), nullptr);
+    ASSERT_EQ(layer->raster_cache_item()->cache_state(),
+              RasterCacheItem::kChildren);
+    ASSERT_TRUE(
+        layer->raster_cache_item()->TryToPrepareRasterCache(paint_context()));
+  }
+
+  use_null_raster_cache();
+
+  layer->Preroll(preroll_context());
+  ASSERT_NE(layer->raster_cache_item(), nullptr);
+  ASSERT_EQ(layer->raster_cache_item()->cache_state(), RasterCacheItem::kNone);
 }
 
 TEST_F(OpacityLayerTest, ShouldNotCacheChildren) {
@@ -190,24 +214,20 @@ TEST_F(OpacityLayerTest, ShouldNotCacheChildren) {
   use_mock_raster_cache();
 
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
-
-  const auto* cacheable_opacity_item = opacity_layer->raster_cache_item();
-
-  EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
-  EXPECT_EQ(cacheable_opacity_item->cache_state(),
-            RasterCacheItem::CacheState::kNone);
-  EXPECT_FALSE(cacheable_opacity_item->GetId().has_value());
+  EXPECT_EQ(opacity_layer->raster_cache_item(), nullptr);
 
   opacity_layer->Preroll(preroll_context());
+  EXPECT_NE(opacity_layer->raster_cache_item(), nullptr);
 
   EXPECT_EQ(context->renderable_state_flags,
             LayerStateStack::kCallerCanApplyOpacity);
   EXPECT_TRUE(opacity_layer->children_can_accept_opacity());
   LayerTree::TryToRasterCache(cacheable_items(), &paint_context());
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
-  EXPECT_EQ(cacheable_opacity_item->cache_state(),
+  EXPECT_EQ(opacity_layer->raster_cache_item()->cache_state(),
             RasterCacheItem::CacheState::kNone);
-  EXPECT_FALSE(cacheable_opacity_item->Draw(paint_context(), &paint));
+  EXPECT_FALSE(
+      opacity_layer->raster_cache_item()->Draw(paint_context(), &paint));
 }
 
 TEST_F(OpacityLayerTest, FullyOpaque) {
