@@ -23,9 +23,11 @@ void main() {
   late FakeProcessManager processManager;
   UpgradeCommand command;
   late CommandRunner<void> runner;
+  const String flutterRoot = '/path/to/flutter';
 
   setUpAll(() {
     Cache.disableLocking();
+    Cache.flutterRoot = flutterRoot;
   });
 
   setUp(() {
@@ -214,28 +216,35 @@ void main() {
       const FakeCommand(
         command: <String>['git', 'tag', '--points-at', 'HEAD'],
         stdout: startingTag,
+        workingDirectory: flutterRoot,
       ),
       const FakeCommand(
         command: <String>['git', 'fetch', '--tags'],
+        workingDirectory: flutterRoot,
       ),
       const FakeCommand(
         command: <String>['git', 'rev-parse', '--verify', '@{upstream}'],
         stdout: upstreamHeadRevision,
+        workingDirectory: flutterRoot,
       ),
       const FakeCommand(
         command: <String>['git', 'tag', '--points-at', upstreamHeadRevision],
         stdout: latestUpstreamTag,
+        workingDirectory: flutterRoot,
       ),
       const FakeCommand(
         command: <String>['git', 'status', '-s'],
+        workingDirectory: flutterRoot,
       ),
       const FakeCommand(
         command: <String>['git', 'reset', '--hard', upstreamHeadRevision],
+        workingDirectory: flutterRoot,
       ),
       FakeCommand(
         command: const <String>['bin/flutter', 'upgrade', '--continue', '--no-version-check'],
         onRun: reEnterTool,
         completer: reEntryCompleter,
+        workingDirectory: flutterRoot,
       ),
 
       // commands following this are from the re-entrant `flutter upgrade --continue` call
@@ -243,12 +252,15 @@ void main() {
       const FakeCommand(
         command: <String>['git', 'tag', '--points-at', 'HEAD'],
         stdout: latestUpstreamTag,
+        workingDirectory: flutterRoot,
       ),
       const FakeCommand(
         command: <String>['bin/flutter', '--no-color', '--no-version-check', 'precache'],
+        workingDirectory: flutterRoot,
       ),
       const FakeCommand(
         command: <String>['bin/flutter', '--no-version-check', 'doctor'],
+        workingDirectory: flutterRoot,
       ),
     ]);
     await runner.run(<String>['upgrade']);
