@@ -174,8 +174,7 @@ class _ConstVisitor extends RecursiveVisitor<void> {
 
 /// A kernel AST visitor that finds const references.
 class ConstFinder {
-  /// Creates a new ConstFinder class.  All arguments are required and must not
-  /// be null.
+  /// Creates a new ConstFinder class.
   ///
   /// The `kernelFilePath` is the path to a dill (kernel) file to process.
   ConstFinder({
