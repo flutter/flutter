@@ -2093,14 +2093,14 @@ class _VerticalOuterDimensionState extends ScrollableState {
         _evaluateLockedAxis(details.globalPosition);
         switch (lockedAxis) {
           case null:
-            // Prepare to scroll diagonally
+            // Prepare to scroll diagonally.
             dragForwarding.onDragStart?.call(details);
           case Axis.horizontal:
-            // Prepare to scroll vertically.
+            // Prepare to scroll horizontally.
             dragForwarding.onDragStart?.call(details);
             return;
           case Axis.vertical:
-            // Prepare to scroll horizontally.
+            // Prepare to scroll vertically.
             super._handleDragStart(details);
             return;
         }
