@@ -21,16 +21,16 @@ typedef LinkTapCallback = void Function(String linkString);
 /// These are distinct because sometimes a link may be split across multiple
 /// [TextSpan]s.
 ///
-/// Creates a [TapGestureRecognizer] and returns it so that its lifecycle can be
+/// Creates a [GestureRecognizer] and returns it so that its lifecycle can be
 /// maintained by the caller.
 ///
 /// {@template flutter.painting.LinkBuilder.recognizer}
-/// It's necessary to call [TapGestureRecognizer.dispose] on the returned
+/// It's necessary to call [GestureRecognizer.dispose] on the returned
 /// recognizer when the owning widget is disposed. See [TextSpan.recognizer].
 /// When using [LinkedText], this is done automatically for any recognizers
 /// returned from a [LinkBuilder].
 /// {@endtemplate}
-typedef LinkBuilder = (InlineSpan, TapGestureRecognizer) Function(
+typedef LinkBuilder = (InlineSpan, GestureRecognizer) Function(
   String displayString,
   String linkString,
 );
@@ -239,20 +239,20 @@ class LinkedText extends StatefulWidget {
 }
 
 class _LinkedTextState extends State<LinkedText> {
-  Iterable<TapGestureRecognizer>? _recognizers;
+  Iterable<GestureRecognizer>? _recognizers;
   late Iterable<InlineSpan> _linkedSpans;
 
   void _disposeRecognizers() {
     if (_recognizers == null) {
       return;
     }
-    for (final TapGestureRecognizer recognizer in _recognizers!) {
+    for (final GestureRecognizer recognizer in _recognizers!) {
       recognizer.dispose();
     }
   }
 
   void _linkSpans() {
-    final (Iterable<InlineSpan> linkedSpans, Iterable<TapGestureRecognizer> recognizers) =
+    final (Iterable<InlineSpan> linkedSpans, Iterable<GestureRecognizer> recognizers) =
         TextLinker.linkSpans(widget.spans, widget.textLinkers);
     _linkedSpans = linkedSpans;
     _disposeRecognizers();
@@ -385,13 +385,13 @@ class TextLinker {
   }
 
   /// Applies the given [TextLinker]s to the given [InlineSpan]s and returns the
-  /// new resulting spans and any created [TapGestureRecognizer]s.
+  /// new resulting spans and any created [GestureRecognizer]s.
   ///
   /// The [TextLinker.textRangesFinder]s must not produce any overlapping
   /// [TextRange]s.
   ///
   /// {@macro flutter.painting.LinkBuilder.recognizer}
-  static (Iterable<InlineSpan>, Iterable<TapGestureRecognizer>) linkSpans(Iterable<InlineSpan> spans, Iterable<TextLinker> textLinkers) {
+  static (Iterable<InlineSpan>, Iterable<GestureRecognizer>) linkSpans(Iterable<InlineSpan> spans, Iterable<TextLinker> textLinkers) {
     final _LinkedSpans linkedSpans = _LinkedSpans(
       spans: spans,
       textLinkers: textLinkers,
@@ -552,9 +552,9 @@ typedef _LinkSpanRecursion = (
   /// The provided _TextLinkerMatches, but with those completely used during
   /// linking removed.
   Iterable<_TextLinkerMatch> unusedTextLinkerMatches,
-  /// The TapGestureRecognizers produced when each link is created. These need
+  /// The GestureRecognizers produced when each link is created. These need
   /// to be disposed by a widget when no longer needed.
-  Iterable<TapGestureRecognizer> generatedRecognizers,
+  Iterable<GestureRecognizer> generatedRecognizers,
 );
 
 /// Signature for the output of linking a List of InlineSpans to some
@@ -565,9 +565,9 @@ typedef _LinkSpansRecursion = (
   /// The provided _TextLinkerMatches, but with those completely used during
   /// linking removed.
   Iterable<_TextLinkerMatch> unusedTextLinkerMatches,
-  /// The TapGestureRecognizers produced when each link is created. These need
+  /// The GestureRecognizers produced when each link is created. These need
   /// to be disposed by a widget when no longer needed.
-  Iterable<TapGestureRecognizer> generatedRecognizers,
+  Iterable<GestureRecognizer> generatedRecognizers,
 );
 
 /// Applies some [TextLinker]s to some [InlineSpan]s and produces a new list of
@@ -587,7 +587,7 @@ class _LinkedSpans {
           _TextLinkerMatch.fromTextLinkers(textLinkers, textCache.text),
         );
 
-    final (Iterable<InlineSpan> linkedSpans, Iterable<_TextLinkerMatch> _, Iterable<TapGestureRecognizer> recognizers) =
+    final (Iterable<InlineSpan> linkedSpans, Iterable<_TextLinkerMatch> _, Iterable<GestureRecognizer> recognizers) =
         _linkSpansRecurse(
           spans,
           textCache,
@@ -606,7 +606,7 @@ class _LinkedSpans {
   });
 
   final Iterable<InlineSpan> linkedSpans;
-  final Iterable<TapGestureRecognizer> recognizers;
+  final Iterable<GestureRecognizer> recognizers;
 
   static List<_TextLinkerMatch> _cleanTextLinkerMatches(Iterable<_TextLinkerMatch> textLinkerMatches) {
     final List<_TextLinkerMatch> nextTextLinkerMatches = textLinkerMatches.toList();
@@ -636,15 +636,15 @@ class _LinkedSpans {
   // `index` is the index of the start of `span` in the overall flattened tree
   // string.
   //
-  // The TapGestureRecognizers are returned so that they can be disposed by an
+  // The GestureRecognizers are returned so that they can be disposed by an
   // owning widget.
   static _LinkSpansRecursion _linkSpansRecurse(Iterable<InlineSpan> spans, _TextCache textCache, Iterable<_TextLinkerMatch> textLinkerMatches, [int index = 0]) {
     final List<InlineSpan> output = <InlineSpan>[];
     Iterable<_TextLinkerMatch> nextTextLinkerMatches = textLinkerMatches;
-    final List<TapGestureRecognizer> recognizers = <TapGestureRecognizer>[];
+    final List<GestureRecognizer> recognizers = <GestureRecognizer>[];
     int nextIndex = index;
     for (final InlineSpan span in spans) {
-      final (InlineSpan childSpan, Iterable<_TextLinkerMatch> childTextLinkerMatches, Iterable<TapGestureRecognizer> childRecognizers) = _linkSpanRecurse(
+      final (InlineSpan childSpan, Iterable<_TextLinkerMatch> childTextLinkerMatches, Iterable<GestureRecognizer> childRecognizers) = _linkSpanRecurse(
         span,
         textCache,
         nextTextLinkerMatches,
@@ -662,15 +662,15 @@ class _LinkedSpans {
   // `index` is the index of the start of `span` in the overall flattened tree
   // string.
   //
-  // The TapGestureRecognizers are returned so that they can be disposed by an
+  // The GestureRecognizers are returned so that they can be disposed by an
   // owning widget.
   static _LinkSpanRecursion _linkSpanRecurse(InlineSpan span, _TextCache textCache, Iterable<_TextLinkerMatch> textLinkerMatches, [int index = 0]) {
     if (span is! TextSpan) {
-      return (span, textLinkerMatches, <TapGestureRecognizer>[]);
+      return (span, textLinkerMatches, <GestureRecognizer>[]);
     }
 
     final List<InlineSpan> nextChildren = <InlineSpan>[];
-    final List<TapGestureRecognizer> recognizers = <TapGestureRecognizer>[];
+    final List<GestureRecognizer> recognizers = <GestureRecognizer>[];
     List<_TextLinkerMatch> nextTextLinkerMatches = <_TextLinkerMatch>[...textLinkerMatches];
     int lastLinkEnd = index;
     if (span.text?.isNotEmpty ?? false) {
@@ -700,7 +700,7 @@ class _LinkedSpans {
         // Add the link itself.
         final int linkStart = math.max(textLinkerMatch.textRange.start, index);
         lastLinkEnd = math.min(textLinkerMatch.textRange.end, textEnd);
-        final (InlineSpan nextChild, TapGestureRecognizer recognizer) = textLinkerMatch.linkBuilder(
+        final (InlineSpan nextChild, GestureRecognizer recognizer) = textLinkerMatch.linkBuilder(
           span.text!.substring(linkStart - index, lastLinkEnd - index),
           textLinkerMatch.linkString,
         );
@@ -729,7 +729,7 @@ class _LinkedSpans {
       final (
         Iterable<InlineSpan> childrenSpans,
         Iterable<_TextLinkerMatch> childrenTextLinkerMatches,
-        Iterable<TapGestureRecognizer> childrenRecognizers,
+        Iterable<GestureRecognizer> childrenRecognizers,
       ) = _linkSpansRecurse(
         span.children!,
         textCache,
@@ -752,7 +752,7 @@ class _LinkedSpans {
   }
 
   void dispose() {
-    for (final TapGestureRecognizer recognizer in recognizers) {
+    for (final GestureRecognizer recognizer in recognizers) {
       recognizer.dispose();
     }
   }

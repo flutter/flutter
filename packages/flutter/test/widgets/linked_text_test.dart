@@ -35,7 +35,7 @@ void main() {
         'https://subsub.www.example.com'
       ]) {
         test('converts the valid url $text to a link by default', () {
-          final (Iterable<InlineSpan> linkedSpans, Iterable<TapGestureRecognizer> recognizers) =
+          final (Iterable<InlineSpan> linkedSpans, Iterable<GestureRecognizer> recognizers) =
               TextLinker.linkSpans(
                  <InlineSpan>[
                    TextSpan(
@@ -75,7 +75,7 @@ void main() {
         'ftp://subdomain.example.net',
       ]) {
         test('does nothing to the invalid url $text', () {
-          final (Iterable<InlineSpan> linkedSpans, Iterable<TapGestureRecognizer> recognizers) =
+          final (Iterable<InlineSpan> linkedSpans, Iterable<GestureRecognizer> recognizers) =
               TextLinker.linkSpans(
                  <InlineSpan>[
                    TextSpan(
@@ -113,7 +113,7 @@ void main() {
         '(example.com)',
       ]) {
         test('can parse url $text with leading and trailing characters', () {
-          final (Iterable<InlineSpan> linkedSpans, Iterable<TapGestureRecognizer> recognizers) =
+          final (Iterable<InlineSpan> linkedSpans, Iterable<GestureRecognizer> recognizers) =
               TextLinker.linkSpans(
                  <InlineSpan>[
                    TextSpan(
@@ -170,7 +170,7 @@ void main() {
         textRangesFinder: TextLinker.textRangesFinderFromRegExp(hashTagRegExp),
         linkBuilder: LinkedText.getDefaultLinkBuilder((String text) {}),
       );
-      final (Iterable<InlineSpan> linkedSpans, Iterable<TapGestureRecognizer> recognizers) =
+      final (Iterable<InlineSpan> linkedSpans, Iterable<GestureRecognizer> recognizers) =
           TextLinker.linkSpans(
              <InlineSpan>[
                const TextSpan(
@@ -236,7 +236,7 @@ void main() {
     });
 
     test('complex span tree', () {
-      final (Iterable<InlineSpan> linkedSpans, Iterable<TapGestureRecognizer> recognizers) =
+      final (Iterable<InlineSpan> linkedSpans, Iterable<GestureRecognizer> recognizers) =
           TextLinker.linkSpans(
             const <InlineSpan>[
               TextSpan(
