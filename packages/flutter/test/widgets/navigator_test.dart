@@ -629,14 +629,36 @@ void main() {
   });
 
   testWidgets('$Route  dispatches memory events', (WidgetTester tester) async {
-    void createAndDisposeRoute() {
+    Future<void> createAndDisposeRoute() async {
       final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
-      const MaterialPage<void> page = MaterialPage<void>(child: Text('page'));
-      final Route<void> route = page.createRoute(nav.currentContext!);
+      await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: nav,
+        home: const Scaffold(
+          body: Text('home'),
+        )
+      )
+    );
+      const TestPage page = TestPage(name: 'page');
+      final Route<dynamic> route = page.createRoute(nav.currentContext!);
       // ignore: invalid_use_of_protected_member
       route.dispose();
     }
-    expect(createAndDisposeRoute, dispatchesMemoryEvents(Route<dynamic>));
+
+    final List<ObjectEvent> events = <ObjectEvent>[];
+    void listener(ObjectEvent event) {
+      if (event.object.runtimeType == MaterialPageRoute<void>) {
+        events.add(event);
+      }
+    }
+    MemoryAllocations.instance.addListener(listener);
+
+    await createAndDisposeRoute();
+    expect(events, hasLength(2));
+    expect(events.first, isA<ObjectCreated>());
+    expect(events.last, isA<ObjectDisposed>());
+
+    MemoryAllocations.instance.removeListener(listener);
   });
 
   testWidgets('Route didAdd and dispose in same frame work', (WidgetTester tester) async {
