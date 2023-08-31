@@ -137,10 +137,7 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
       anchorBelow: anchorBelow,
       child: ColoredBox(
         color: _kToolbarBackgroundColor.resolveFrom(context),
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: _kToolbarArrowSize.height),
-          child: child,
-        ),
+        child: child,
       ),
     );
     if (CupertinoTheme.brightnessOf(context) == Brightness.dark) {

@@ -270,7 +270,7 @@ void main() {
 
   testWidgets('positions itself at anchorAbove if it fits', (WidgetTester tester) async {
     late StateSetter setState;
-    const double height = 40.0;
+    const double height = 50.0;
     const double anchorBelowY = 500.0;
     double anchorAboveY = 0.0;
     const double paddingAbove = 12.0;
@@ -331,7 +331,7 @@ void main() {
     });
     await tester.pump();
     toolbarY = tester.getTopLeft(findToolbar()).dy;
-    expect(toolbarY, equals(anchorAboveY - height - _kToolbarArrowSize.height - _kToolbarContentDistance));
+    expect(toolbarY, equals(anchorAboveY - height + _kToolbarArrowSize.height - _kToolbarContentDistance));
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
   testWidgets('can create and use a custom toolbar', (WidgetTester tester) async {
