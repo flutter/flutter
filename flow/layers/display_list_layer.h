@@ -8,13 +8,14 @@
 #include <memory>
 
 #include "flutter/display_list/display_list.h"
+#include "flutter/flow/layers/cacheable_layer.h"
 #include "flutter/flow/layers/display_list_raster_cache_item.h"
 #include "flutter/flow/layers/layer.h"
 #include "flutter/flow/raster_cache_item.h"
 
 namespace flutter {
 
-class DisplayListLayer : public Layer {
+class DisplayListLayer : public Layer, public CacheableLayer {
  public:
   static constexpr size_t kMaxBytesToCompare = 10000;
 
@@ -47,12 +48,18 @@ class DisplayListLayer : public Layer {
   }
 
  private:
+  RasterCacheItem* realize_raster_cache_item() override;
+  void disable_raster_cache_item() override;
   std::unique_ptr<DisplayListRasterCacheItem> display_list_raster_cache_item_;
+
+  friend class AutoCache;
 
   SkPoint offset_;
   SkRect bounds_;
 
   sk_sp<DisplayList> display_list_;
+  bool is_complex_;
+  bool will_change_;
 
   static bool Compare(DiffContext::Statistics& statistics,
                       const DisplayListLayer* l1,
