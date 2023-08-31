@@ -34,7 +34,7 @@ Future<void> main() async {
       );
 
       final String stderrString = stderr.toString();
-      if (!stderrString.contains('The Xcode project defines schemes: free, paid')) {
+      if (!stderrString.contains('"build/app/outputs/flutter-apk/app-bogus-release.apk" does not exist.')) {
         print(stderrString);
         return TaskResult.failure('Should not succeed with bogus flavor');
       }
