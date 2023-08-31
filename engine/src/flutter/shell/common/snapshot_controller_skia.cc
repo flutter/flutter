@@ -137,13 +137,6 @@ sk_sp<DlImage> SnapshotControllerSkia::MakeRasterSnapshot(
   });
 }
 
-sk_sp<DlImage> SnapshotControllerSkia::MakeRasterSnapshot(
-    const std::shared_ptr<const impeller::Picture>& picture,
-    SkISize size) {
-  FML_DCHECK(false);
-  return sk_sp<DlImage>();
-}
-
 sk_sp<SkImage> SnapshotControllerSkia::ConvertToRasterImage(
     sk_sp<SkImage> image) {
   // If the rasterizer does not have a surface with a GrContext, then it will

@@ -114,7 +114,7 @@ class DlDashPathEffect final : public DlPathEffect {
   int count_;
   SkScalar phase_;
 
-  friend class DlOpRecorder;
+  friend class DisplayListBuilder;
   friend class DlPathEffect;
 
   FML_DISALLOW_COPY_ASSIGN_AND_MOVE(DlDashPathEffect);

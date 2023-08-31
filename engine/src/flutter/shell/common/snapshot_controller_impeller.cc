@@ -30,36 +30,13 @@ sk_sp<DlImage> SnapshotControllerImpeller::MakeRasterSnapshot(
   return result;
 }
 
-sk_sp<DlImage> SnapshotControllerImpeller::MakeRasterSnapshot(
-    const std::shared_ptr<const impeller::Picture>& picture,
-    SkISize size) {
-  sk_sp<DlImage> result;
-  if (!picture) {
-    return result;
-  }
-  GetDelegate().GetIsGpuDisabledSyncSwitch()->Execute(
-      fml::SyncSwitch::Handlers()
-          .SetIfTrue([&] {
-            // Do nothing.
-          })
-          .SetIfFalse([&] { result = DoMakeRasterSnapshot(*picture, size); }));
-
-  return result;
-}
-
 sk_sp<DlImage> SnapshotControllerImpeller::DoMakeRasterSnapshot(
     const sk_sp<DisplayList>& display_list,
     SkISize size) {
   TRACE_EVENT0("flutter", __FUNCTION__);
   impeller::DlDispatcher dispatcher;
   display_list->Dispatch(dispatcher);
-  return DoMakeRasterSnapshot(dispatcher.EndRecordingAsPicture(), size);
-}
-
-sk_sp<DlImage> SnapshotControllerImpeller::DoMakeRasterSnapshot(
-    const impeller::Picture& picture,
-    SkISize size) {
-  TRACE_EVENT0("flutter", __FUNCTION__);
+  impeller::Picture picture = dispatcher.EndRecordingAsPicture();
   auto context = GetDelegate().GetAiksContext();
   if (context) {
     auto max_size = context->GetContext()

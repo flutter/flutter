@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_DISPLAY_LIST_DL_OP_RECEIVER_H_
-#define FLUTTER_DISPLAY_LIST_DL_OP_RECEIVER_H_
+#ifndef FLUTTER_DISPLAY_LIST_DISPLAY_LIST_DISPATCHER_H_
+#define FLUTTER_DISPLAY_LIST_DISPLAY_LIST_DISPATCHER_H_
 
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/dl_blend_mode.h"
@@ -48,8 +48,6 @@ class DlOpReceiver {
  public:
   // MaxDrawPointsCount * sizeof(SkPoint) must be less than 1 << 32
   static constexpr int kMaxDrawPointsCount = ((1 << 29) - 1);
-
-  virtual ~DlOpReceiver() = default;
 
   // The following methods are nearly 1:1 with the methods on DlPaint and
   // carry the same meanings. Each method sets a persistent value for the
@@ -229,23 +227,23 @@ class DlOpReceiver {
                           uint32_t count,
                           const SkPoint points[]) = 0;
   virtual void drawVertices(const DlVertices* vertices, DlBlendMode mode) = 0;
-  virtual void drawImage(const sk_sp<DlImage>& image,
+  virtual void drawImage(const sk_sp<DlImage> image,
                          const SkPoint point,
                          DlImageSampling sampling,
                          bool render_with_attributes) = 0;
   virtual void drawImageRect(
-      const sk_sp<DlImage>& image,
+      const sk_sp<DlImage> image,
       const SkRect& src,
       const SkRect& dst,
       DlImageSampling sampling,
       bool render_with_attributes,
       SrcRectConstraint constraint = SrcRectConstraint::kFast) = 0;
-  virtual void drawImageNine(const sk_sp<DlImage>& image,
+  virtual void drawImageNine(const sk_sp<DlImage> image,
                              const SkIRect& center,
                              const SkRect& dst,
                              DlFilterMode filter,
                              bool render_with_attributes) = 0;
-  virtual void drawAtlas(const sk_sp<DlImage>& atlas,
+  virtual void drawAtlas(const sk_sp<DlImage> atlas,
                          const SkRSXform xform[],
                          const SkRect tex[],
                          const DlColor colors[],
@@ -254,9 +252,9 @@ class DlOpReceiver {
                          DlImageSampling sampling,
                          const SkRect* cull_rect,
                          bool render_with_attributes) = 0;
-  virtual void drawDisplayList(const sk_sp<DisplayList>& display_list,
+  virtual void drawDisplayList(const sk_sp<DisplayList> display_list,
                                SkScalar opacity = SK_Scalar1) = 0;
-  virtual void drawTextBlob(const sk_sp<SkTextBlob>& blob,
+  virtual void drawTextBlob(const sk_sp<SkTextBlob> blob,
                             SkScalar x,
                             SkScalar y) = 0;
   virtual void drawShadow(const SkPath& path,
@@ -268,4 +266,4 @@ class DlOpReceiver {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_DISPLAY_LIST_DL_OP_RECEIVER_H_
+#endif  // FLUTTER_DISPLAY_LIST_DISPLAY_LIST_DISPATCHER_H_

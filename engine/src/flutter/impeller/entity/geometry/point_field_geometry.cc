@@ -9,10 +9,10 @@
 
 namespace impeller {
 
-PointFieldGeometry::PointFieldGeometry(const std::vector<Point>& points,
+PointFieldGeometry::PointFieldGeometry(std::vector<Point> points,
                                        Scalar radius,
                                        bool round)
-    : points_(points), radius_(radius), round_(round) {}
+    : points_(std::move(points)), radius_(radius), round_(round) {}
 
 PointFieldGeometry::~PointFieldGeometry() = default;
 
