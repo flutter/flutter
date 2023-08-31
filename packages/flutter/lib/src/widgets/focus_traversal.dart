@@ -568,14 +568,9 @@ abstract class FocusTraversalPolicy with Diagnosticable {
           final FocusScopeNode? parentScope = nearestScope.enclosingScope;
           if (parentScope != null && parentScope != FocusManager.instance.rootScope) {
             focusedChild.unfocus();
-            if (parentScope.nextFocus()) {
-              // Verify the focus really has changed. The `parentScope.nextFocus`
-              // can return true even if the focus doesn't change because the
-              // `focusedChild` was unfocused before `parentScope.nextFocus` was
-              // called
-              return !focusedChild.hasPrimaryFocus;
-            }
-            return false;
+            parentScope.nextFocus();
+            // Verify the focus really has changed.
+            return focusedChild.enclosingScope?.focusedChild != focusedChild;
           }
           // No valid parent scope. Fallback to closed loop behavior.
           return _requestTabTraversalFocus(
@@ -600,14 +595,9 @@ abstract class FocusTraversalPolicy with Diagnosticable {
           final FocusScopeNode? parentScope = nearestScope.enclosingScope;
           if (parentScope != null && parentScope != FocusManager.instance.rootScope) {
             focusedChild.unfocus();
-            if (parentScope.previousFocus()) {
-              // Verify the focus really has changed. The `parentScope.previousFocus`
-              // can return true even if the focus doesn't change because the
-              // `focusedChild` was unfocused before `parentScope.previousFocus` was
-              // called
-              return !focusedChild.hasPrimaryFocus;
-            }
-            return false;
+            parentScope.previousFocus();
+            // Verify the focus really has changed.
+            return focusedChild.enclosingScope?.focusedChild != focusedChild;
           }
           // No valid parent scope. Fallback to closed loop behavior.
           return _requestTabTraversalFocus(
