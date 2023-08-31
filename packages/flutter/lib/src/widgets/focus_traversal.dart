@@ -1784,7 +1784,11 @@ class _FocusTraversalGroupNode extends FocusNode {
   _FocusTraversalGroupNode({
     super.debugLabel,
     required this.policy,
-  });
+  }) {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+  }
 
   FocusTraversalPolicy policy;
 }
