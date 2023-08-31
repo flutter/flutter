@@ -225,16 +225,23 @@ void testMain() {
       // font tree.
       final Set<String> testedFonts = <String>{};
       final Set<int> supportedUniqueCodePoints = <int>{};
-      final IntervalTree<NotoFont> notoTree =
-          renderer.fontCollection.fontFallbackManager!.notoTree;
-      for (final NotoFont font in renderer.fontCollection.fontFallbackManager!.fallbackFonts) {
-        testedFonts.add(font.name);
-        for (final CodePointRange range in font.computeUnicodeRanges()) {
-          for (int codePoint = range.start; codePoint < range.end; codePoint++) {
-            supportedUniqueCodePoints.add(codePoint);
+      renderer.fontCollection.fontFallbackManager!.codePointToComponents
+          .forEachRange((int start, int end, FallbackFontComponent component) {
+        if (component.fonts.isNotEmpty) {
+          bool componentHasEnabledFont = false;
+          for (final NotoFont font in component.fonts) {
+            if (font.enabled) {
+              testedFonts.add(font.name);
+              componentHasEnabledFont = true;
+            }
+          }
+          if (componentHasEnabledFont) {
+            for (int codePoint = start; codePoint <= end; codePoint++) {
+              supportedUniqueCodePoints.add(codePoint);
+            }
           }
         }
-      }
+      });
 
       expect(
           supportedUniqueCodePoints.length, greaterThan(10000)); // sanity check
@@ -402,7 +409,10 @@ void testMain() {
         }
         final Set<NotoFont> fonts = <NotoFont>{};
         for (final int codePoint in codePoints) {
-          final List<NotoFont> fontsForPoint = notoTree.intersections(codePoint);
+          final List<NotoFont> fontsForPoint = renderer
+              .fontCollection.fontFallbackManager!.codePointToComponents
+              .lookup(codePoint)
+              .fonts;
 
           // All code points are extracted from the same tree, so there must
           // be at least one font supporting each code point
@@ -411,10 +421,11 @@ void testMain() {
         }
 
         try {
-          renderer.fontCollection.fontFallbackManager!.findMinimumFontsForCodePoints(codePoints, fonts);
+          renderer.fontCollection.fontFallbackManager!
+              .findFontsForMissingCodePoints(codePoints.toList());
         } catch (e) {
           print(
-            'findMinimumFontsForCodePoints failed:\n'
+            'findFontsForMissingCodePoints failed:\n'
             '  Code points: ${codePoints.join(', ')}\n'
             '  Fonts: ${fonts.map((NotoFont f) => f.name).join(', ')}',
           );
