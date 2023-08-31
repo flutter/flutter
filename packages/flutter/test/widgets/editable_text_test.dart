@@ -16657,6 +16657,30 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       expect(calls, equals(kIsWeb ? 0 : 2));
     });
   });
+
+  testWidgets('Cursor color with an opacity is respected', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    const double opacity = 0.55;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          key: key,
+          cursorColor: cursorColor.withOpacity(opacity),
+          backgroundCursorColor: Colors.grey,
+          controller: TextEditingController(text: 'blah blah'),
+          focusNode: focusNode,
+          style: textStyle,
+        ),
+      ),
+    );
+
+    // Tap to show the cursor.
+    await tester.tap(find.byKey(key));
+    await tester.pumpAndSettle();
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.renderEditable.cursorColor, cursorColor.withOpacity(opacity));
+  });
 }
 
 class UnsettableController extends TextEditingController {
