@@ -4391,17 +4391,6 @@ static void ParseViewIdsCallback(const Dart_NativeArguments& args,
   ASSERT_EQ(exception, nullptr);
 }
 
-// Run the given task in the platform runner, and blocks until its finished.
-static void RunOnPlatformTaskRunner(Shell& shell, const fml::closure& task) {
-  fml::AutoResetWaitableEvent latch;
-  fml::TaskRunner::RunNowOrPostTask(
-      shell.GetTaskRunners().GetPlatformTaskRunner(), [&task, &latch]() {
-        task();
-        latch.Signal();
-      });
-  latch.Wait();
-}
-
 TEST_F(ShellTest, ShellStartsWithImplicitView) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   Settings settings = CreateSettingsForFixture();
@@ -4472,21 +4461,22 @@ TEST_F(ShellTest, ShellCanAddViewOrRemoveView) {
   ASSERT_EQ(viewIds.size(), 1u);
   ASSERT_EQ(viewIds[0], 0ll);
 
-  RunOnPlatformTaskRunner(*shell,
-                          [&shell] { shell->AddView(2, ViewportMetrics{}); });
+  PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(),
+           [&shell] { shell->AddView(2, ViewportMetrics{}); });
   reportLatch.Wait();
   ASSERT_TRUE(hasImplicitView);
   ASSERT_EQ(viewIds.size(), 2u);
   ASSERT_EQ(viewIds[1], 2ll);
 
-  RunOnPlatformTaskRunner(*shell, [&shell] { shell->RemoveView(2); });
+  PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(),
+           [&shell] { shell->RemoveView(2); });
   reportLatch.Wait();
   ASSERT_TRUE(hasImplicitView);
   ASSERT_EQ(viewIds.size(), 1u);
   ASSERT_EQ(viewIds[0], 0ll);
 
-  RunOnPlatformTaskRunner(*shell,
-                          [&shell] { shell->AddView(4, ViewportMetrics{}); });
+  PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(),
+           [&shell] { shell->AddView(4, ViewportMetrics{}); });
   reportLatch.Wait();
   ASSERT_TRUE(hasImplicitView);
   ASSERT_EQ(viewIds.size(), 2u);
@@ -4531,7 +4521,7 @@ TEST_F(ShellTest, ShellFlushesPlatformStatesByMain) {
   std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
   ASSERT_TRUE(shell);
 
-  RunOnPlatformTaskRunner(*shell, [&shell] {
+  PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(), [&shell] {
     auto platform_view = shell->GetPlatformView();
     // The construtor for ViewportMetrics{_, width, _, _, _} (only the 2nd
     // argument matters in this test).
