@@ -59,6 +59,49 @@ Future<void> main() async {
       final File marquee = File(path.join(flutterModuleLibSource.path, 'marquee'));
       marquee.copySync(path.join(flutterModuleLibDestination.path, 'marquee.dart'));
 
+      // Make a fake Dart-only plugin, since there are no existing examples.
+      section('Create local plugin');
+
+      const String dartPluginName = 'dartplugin';
+      await _createFakeDartPlugin(dartPluginName, tempDir);
+
+      // Make a package with native assets.
+      await flutter(
+        'config',
+        options: <String>['--enable-native-assets'],
+      );
+
+      section('Create package with native assets');
+
+      const String ffiPackageName = 'ffi_package';
+      await _createffiPackage(ffiPackageName, tempDir);
+
+      section('Add plugins');
+
+      final File pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
+      String content = await pubspec.readAsString();
+      content = content.replaceFirst(
+        '\ndependencies:\n',
+        // One framework, one Dart-only, one that does not support iOS, and one with a resource bundle.
+        '''
+dependencies:
+  url_launcher: 6.0.20
+  android_alarm_manager: 2.0.2
+  google_sign_in_ios: 5.5.0
+  $dartPluginName:
+    path: ../$dartPluginName
+  $ffiPackageName:
+    path: ../$ffiPackageName
+''',
+      );
+      await pubspec.writeAsString(content, flush: true);
+      await inDirectory(projectDir, () async {
+        await flutter(
+          'packages',
+          options: <String>['get'],
+        );
+      });
+
       section('Build ephemeral host app in release mode without CocoaPods');
 
       await inDirectory(projectDir, () async {
@@ -153,54 +196,6 @@ Future<void> main() async {
       await inDirectory(projectDir, () async {
         await flutter('clean');
       });
-
-      // Make a fake Dart-only plugin, since there are no existing examples.
-      section('Create local plugin');
-
-      const String dartPluginName = 'dartplugin';
-      await _createFakeDartPlugin(dartPluginName, tempDir);
-
-      // Make a package with native assets.
-      await flutter(
-        'config',
-        options: <String>['--enable-native-assets'],
-      );
-
-      section('Create package with native assets');
-
-      const String ffiPackageName = 'ffi_package';
-      await _createffiPackage(ffiPackageName, tempDir);
-
-      section('Add plugins');
-
-      final File pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
-      String content = await pubspec.readAsString();
-      content = content.replaceFirst(
-        '\ndependencies:\n',
-        // One framework, one Dart-only, one that does not support iOS, and one with a resource bundle.
-        '''
-dependencies:
-  url_launcher: 6.0.20
-  android_alarm_manager: 2.0.2
-  google_sign_in_ios: 5.5.0
-  $dartPluginName:
-    path: ../$dartPluginName
-  $ffiPackageName:
-    path: ../$ffiPackageName
-''',
-      );
-      await pubspec.writeAsString(content, flush: true);
-      await inDirectory(projectDir, () async {
-        await flutter(
-          'packages',
-          options: <String>['get'],
-        );
-      });
-
-      final File mainDart = File(path.join(projectDir.path, 'lib/main.dart'));
-      String mainDartContent = await mainDart.readAsString();
-      mainDartContent = mainDartContent.replaceAll('// UNCOMMENT: ', '');
-      await mainDart.writeAsString(mainDartContent, flush: true);
 
       section('Build ephemeral host app with CocoaPods');
 
