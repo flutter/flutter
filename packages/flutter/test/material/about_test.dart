@@ -57,7 +57,7 @@ void main() {
     expect(find.text('View licenses'), findsOneWidget);
   });
 
-  testWidgets('Material2 - AboutListTile control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - AboutListTile control test', (WidgetTester tester) async {
     const FlutterLogo logo = FlutterLogo();
 
     await tester.pumpWidget(
@@ -140,7 +140,7 @@ void main() {
     expect(find.text('Pirate license'), findsOneWidget);
   });
 
-  testWidgets('Material3 - AboutListTile control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - AboutListTile control test', (WidgetTester tester) async {
     const FlutterLogo logo = FlutterLogo();
 
     await tester.pumpWidget(
@@ -732,7 +732,7 @@ void main() {
       rootObserver = AboutDialogObserver();
     });
 
-    testWidgets('Barrier is dismissible with default parameter', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Barrier is dismissible with default parameter', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           navigatorObservers: <NavigatorObserver>[rootObserver],
@@ -764,7 +764,7 @@ void main() {
       expect(rootObserver.dialogCount, 0);
     });
 
-    testWidgets('Barrier is not dismissible with barrierDismissible is false', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Barrier is not dismissible with barrierDismissible is false', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           navigatorObservers: <NavigatorObserver>[rootObserver],
@@ -798,7 +798,7 @@ void main() {
     });
   });
 
-  testWidgets('Barrier color', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Barrier color', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -852,7 +852,7 @@ void main() {
     expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, Colors.pink);
   });
 
-  testWidgets('Barrier Label', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Barrier Label', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -1525,7 +1525,7 @@ void main() {
     expect(tester.getCenter(find.byType(ListView)), const Offset(160, 356));
   });
 
-  testWidgets('Material3 - LicensePage master view layout position - ltr', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - LicensePage master view layout position - ltr', (WidgetTester tester) async {
     const TextDirection textDirection = TextDirection.ltr;
     const Size defaultSize = Size(800.0, 600.0);
     const Size wideSize = Size(1200.0, 600.0);
@@ -1590,7 +1590,12 @@ void main() {
     expect(titleOffset, const Offset(292.0, 136.0));
     expect(titleOffset.dx, lessThan(wideSize.width - 320)); // Default master view width is 320.0.
     expect(tester.getCenter(find.byType(ListView)), const Offset(160, 356));
-  });
+  },
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    // TODO(polina-c): remove after fixing
+    // https://github.com/flutter/flutter/issues/133705
+    notDisposedAllowList: <String, int?> {'ValueNotifier<double>':5},
+  ));
 
   testWidgets('Material2 - LicensePage master view layout position - rtl', (WidgetTester tester) async {
     const TextDirection textDirection = TextDirection.rtl;
