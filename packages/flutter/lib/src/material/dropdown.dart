@@ -160,20 +160,23 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
   @override
   Widget build(BuildContext context) {
     final DropdownMenuItem<T> dropdownMenuItem = widget.route.items[widget.itemIndex].item!;
-    final CurvedAnimation opacity;
+
+    final Animation<double> opacity;
     final double unit = 0.5 / (widget.route.items.length + 1.5);
     if (widget.itemIndex == widget.route.selectedIndex) {
-      opacity = CurvedAnimation(parent: widget.route.animation!, curve: const Threshold(0.0));
+      opacity = CurveTween(curve: const Threshold(0.0)).animate(widget.route.animation!);
     } else {
       final double start = clampDouble(0.5 + (widget.itemIndex + 1) * unit, 0.0, 1.0);
       final double end = clampDouble(start + 1.5 * unit, 0.0, 1.0);
-      opacity = CurvedAnimation(parent: widget.route.animation!, curve: Interval(start, end));
+      opacity = CurveTween(curve: Interval(start, end)).animate(widget.route.animation!);
     }
+
     Widget child = Container(
       padding: widget.padding,
       height: widget.route.itemHeight,
       child: widget.route.items[widget.itemIndex],
     );
+
     // An [InkWell] is added to the item only if it is enabled
     if (dropdownMenuItem.enabled) {
       child = InkWell(
