@@ -8,6 +8,7 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -246,6 +247,9 @@ void main() {
           ],
         ),
   }, () async {
+    if (const LocalPlatform().isWindows) {
+      return; // Backslashes in commands, but we will never run these commands on Windows.
+    }
     final File packageConfig =
         environment.projectDir.childFile('.dart_tool/package_config.json');
     await packageConfig.parent.create();

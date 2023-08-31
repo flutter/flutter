@@ -273,6 +273,9 @@ void main() {
             ],
           ),
     }, () async {
+      if (const LocalPlatform().isWindows) {
+        return; // Backslashes in commands, but we will never run these commands on Windows.
+      }
       final File packageConfig =
           environment.projectDir.childFile('.dart_tool/package_config.json');
       await packageConfig.parent.create();
