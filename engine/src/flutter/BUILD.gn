@@ -149,6 +149,10 @@ group("unittests") {
         [ "//flutter/shell/platform/android:flutter_shell_native_unittests" ]
   }
 
+  if (is_ios) {
+    public_deps += [ "//flutter/shell/platform/darwin/ios:ios_test_flutter" ]
+  }
+
   # Compile all unittests targets if enabled.
   if (enable_unittests) {
     public_deps += [
