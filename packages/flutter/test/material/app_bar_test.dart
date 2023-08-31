@@ -3360,7 +3360,7 @@ void main() {
     expect(tester.getRect(find.byKey(key)), const Rect.fromLTRB(0, 0, 100, 56));
   });
 
-  testWidgets("AppBar with EndDrawer doesn't have leading", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("AppBar with EndDrawer doesn't have leading", (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         appBar: AppBar(),
