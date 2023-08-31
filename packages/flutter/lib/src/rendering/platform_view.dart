@@ -279,7 +279,10 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
   RenderDarwinPlatformView({
     required T viewController,
     required this.hitTestBehavior,
-  }) : _viewController = viewController;
+      required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
+  }) : _viewController = viewController {
+    updateGestureRecognizers(gestureRecognizers);
+  }
 
 
   /// The unique identifier of the platform view controlled by this controller.
@@ -312,6 +315,8 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
   bool get isRepaintBoundary => true;
 
   PointerEvent? _lastPointerDownEvent;
+
+  _UiKitViewGestureRecognizer? _gestureRecognizer;
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
@@ -374,6 +379,9 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
     GestureBinding.instance.pointerRouter.removeGlobalRoute(_handleGlobalPointerEvent);
     super.detach();
   }
+
+  /// {@macro flutter.rendering.PlatformViewRenderBox.updateGestureRecognizers}
+  void updateGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers);
 }
 
 /// A render object for an iOS UIKit UIView.
@@ -401,14 +409,11 @@ class RenderUiKitView extends RenderDarwinPlatformView<UiKitViewController> {
   RenderUiKitView({
       required super.viewController,
       required super.hitTestBehavior,
-      required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers
-    }) {
-    updateGestureRecognizers(gestureRecognizers);
-  }
+      required super.gestureRecognizers,
+    });
 
-  // TODO(schectman): Add gesture functionality to macOS platform view when implemented.
-  // https://github.com/flutter/flutter/issues/128519
   /// {@macro flutter.rendering.PlatformViewRenderBox.updateGestureRecognizers}
+  @override
   void updateGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {
     assert(
       _factoriesTypeSet(gestureRecognizers).length == gestureRecognizers.length,
@@ -431,13 +436,29 @@ class RenderUiKitView extends RenderDarwinPlatformView<UiKitViewController> {
     _lastPointerDownEvent = event.original ?? event;
   }
 
-  _UiKitViewGestureRecognizer? _gestureRecognizer;
-
   @override
   void detach() {
     _gestureRecognizer!.reset();
     super.detach();
   }
+}
+
+/// A render object for a macOS platform view.
+class RenderAppKitView extends RenderDarwinPlatformView<AppKitViewController> {
+  /// Creates a render object for a macOS AppKitView.
+  RenderAppKitView({
+    required super.viewController,
+    required super.hitTestBehavior,
+    required super.gestureRecognizers,
+  });
+
+  // TODO(schectman): Add gesture functionality to macOS platform view when implemented.
+  // https://github.com/flutter/flutter/issues/128519
+  // This method will need to behave the same as the same-named method for RenderUiKitView,
+  // but use a _AppKitViewGestureRecognizer or equivalent, whose constructor shall accept an
+  // AppKitViewController.
+  @override
+  void updateGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {}
 }
 
 // This recognizer constructs gesture recognizers from a set of gesture recognizer factories
