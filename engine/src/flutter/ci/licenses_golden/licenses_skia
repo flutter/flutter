@@ -1,4 +1,4 @@
-Signature: 86791114441efb1840df3892f550f42b
+Signature: addb92d1fea1588d4c7f77908e6c465f
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8968,6 +8968,8 @@ ORIGIN: ../../../third_party/skia/src/gpu/graphite/compute/VelloComputeSteps.cpp
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/compute/VelloComputeSteps.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/compute/VelloRenderer.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/compute/VelloRenderer.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/graphite/dawn/DawnComputePipeline.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/graphite/dawn/DawnComputePipeline.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/dawn/DawnErrorChecker.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/dawn/DawnErrorChecker.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/geom/AtlasShape.h + ../../../third_party/skia/LICENSE
@@ -9219,6 +9221,8 @@ FILE: ../../../third_party/skia/src/gpu/graphite/compute/VelloComputeSteps.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/compute/VelloComputeSteps.h
 FILE: ../../../third_party/skia/src/gpu/graphite/compute/VelloRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/compute/VelloRenderer.h
+FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnComputePipeline.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnComputePipeline.h
 FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnErrorChecker.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/dawn/DawnErrorChecker.h
 FILE: ../../../third_party/skia/src/gpu/graphite/geom/AtlasShape.h
