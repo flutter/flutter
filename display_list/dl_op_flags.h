@@ -75,13 +75,6 @@ class DisplayListFlags {
   // mitered extensions outside the pre-transformed bounding box.
   static constexpr int kMayHaveAcuteJoins_ = 1 << 8;
 
-  // Some primitives render with a different algorithm on Skia
-  // when the line width is a hairline and that algorithm does
-  // not apply inherited opacity appropriately. We mark these
-  // operations with a flag so that we only disallow opacity
-  // inheritance on hairlines for those primitives.
-  static constexpr int kMayHaveTroubleWithHairlines_ = 1 << 9;
-
   static constexpr int kAnySpecialGeometryMask_ =           //
       kMayHaveCaps_ | kMayHaveJoins_ | kButtCapIsSquare_ |  //
       kMayHaveDiagonalCaps_ | kMayHaveAcuteJoins_;
@@ -227,12 +220,6 @@ class DisplayListAttributeFlags : DisplayListFlagsBase {
             (style != DlDrawStyle::kFill && has_any(kIsDrawnGeometry_)));
   }
 
-  /// The operation may use an implementation for hairlines that
-  /// does not inherit opacity properly
-  constexpr bool may_have_trouble_with_hairlines() const {
-    return has_any(kMayHaveTroubleWithHairlines_);
-  }
-
   constexpr bool is_flood() const { return has_any(kFloodsSurface_); }
 
   constexpr bool operator==(DisplayListAttributeFlags const& other) const {
@@ -349,13 +336,12 @@ class DisplayListOpFlags : DisplayListFlags {
       kBASE_StrokeOrFillFlags_  //
   };
   static constexpr DisplayListAttributeFlags kDrawPathFlags{
-      kBASE_PaintFlags_ |            //
-      kBASE_StrokeOrFillFlags_ |     //
-      kMayHaveCaps_ |                //
-      kMayHaveDiagonalCaps_ |        //
-      kMayHaveJoins_ |               //
-      kMayHaveAcuteJoins_ |          //
-      kMayHaveTroubleWithHairlines_  //
+      kBASE_PaintFlags_ |         //
+      kBASE_StrokeOrFillFlags_ |  //
+      kMayHaveCaps_ |             //
+      kMayHaveDiagonalCaps_ |     //
+      kMayHaveJoins_ |            //
+      kMayHaveAcuteJoins_         //
   };
   static constexpr DisplayListAttributeFlags kDrawArcNoCenterFlags{
       kBASE_PaintFlags_ |         //
@@ -364,11 +350,10 @@ class DisplayListOpFlags : DisplayListFlags {
       kMayHaveDiagonalCaps_       //
   };
   static constexpr DisplayListAttributeFlags kDrawArcWithCenterFlags{
-      kBASE_PaintFlags_ |            //
-      kBASE_StrokeOrFillFlags_ |     //
-      kMayHaveJoins_ |               //
-      kMayHaveAcuteJoins_ |          //
-      kMayHaveTroubleWithHairlines_  //
+      kBASE_PaintFlags_ |         //
+      kBASE_StrokeOrFillFlags_ |  //
+      kMayHaveJoins_ |            //
+      kMayHaveAcuteJoins_         //
   };
   static constexpr DisplayListAttributeFlags kDrawPointsAsPointsFlags{
       kBASE_PaintFlags_ |   //

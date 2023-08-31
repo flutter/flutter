@@ -82,14 +82,12 @@ class EmbedderExternalView {
                                           ViewIdentifier::Equal>;
 
   EmbedderExternalView(const SkISize& frame_size,
-                       const SkMatrix& surface_transformation,
-                       bool enable_impeller);
+                       const SkMatrix& surface_transformation);
 
   EmbedderExternalView(const SkISize& frame_size,
                        const SkMatrix& surface_transformation,
                        ViewIdentifier view_identifier,
-                       std::unique_ptr<EmbeddedViewParams> params,
-                       bool enable_impeller);
+                       std::unique_ptr<EmbeddedViewParams> params);
 
   ~EmbedderExternalView();
 
@@ -122,7 +120,7 @@ class EmbedderExternalView {
   const SkMatrix surface_transformation_;
   ViewIdentifier view_identifier_;
   std::unique_ptr<EmbeddedViewParams> embedded_view_params_;
-  std::unique_ptr<EmbedderViewSlice> slice_;
+  std::unique_ptr<DisplayListEmbedderViewSlice> slice_;
   std::optional<bool> has_engine_rendered_contents_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderExternalView);

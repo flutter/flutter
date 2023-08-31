@@ -54,7 +54,7 @@ class ParagraphSkia : public Paragraph {
 
   void Layout(double width) override;
 
-  bool Paint(flutter::DlCanvas* canvas, double x, double y) override;
+  bool Paint(flutter::DisplayListBuilder* builder, double x, double y) override;
 
   std::vector<TextBox> GetRectsForRange(
       size_t start,

@@ -5,7 +5,7 @@
 #include <utility>
 
 #include "flutter/display_list/display_list.h"
-#include "flutter/display_list/display_list_builder.h"
+#include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_op_flags.h"
 #include "flutter/display_list/dl_sampling_options.h"
 #include "flutter/display_list/skia/dl_sk_canvas.h"

@@ -64,8 +64,6 @@ class Canvas {
 
   ~Canvas();
 
-  std::optional<Rect> BaseCullRect() const { return initial_cull_rect_; }
-
   void Save();
 
   void SaveLayer(const Paint& paint,
@@ -110,7 +108,7 @@ class Canvas {
 
   void DrawCircle(Point center, Scalar radius, const Paint& paint);
 
-  void DrawPoints(const std::vector<Point>&,
+  void DrawPoints(std::vector<Point>,
                   Scalar radius,
                   const Paint& paint,
                   PointStyle point_style);

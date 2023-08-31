@@ -41,7 +41,6 @@ class MockLayer;
 }  // namespace testing
 
 class ContainerLayer;
-class AiksLayer;
 class DisplayListLayer;
 class PerformanceOverlayLayer;
 class TextureLayer;
@@ -256,7 +255,6 @@ class Layer {
     return RasterCacheKeyID(unique_id_, RasterCacheKeyType::kLayer);
   }
   virtual const ContainerLayer* as_container_layer() const { return nullptr; }
-  virtual const AiksLayer* as_aiks_layer() const { return nullptr; }
   virtual const DisplayListLayer* as_display_list_layer() const {
     return nullptr;
   }

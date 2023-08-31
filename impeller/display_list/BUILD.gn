@@ -22,8 +22,6 @@ impeller_component("skia_conversions") {
 
 impeller_component("display_list") {
   sources = [
-    "dl_aiks_canvas.cc",
-    "dl_aiks_canvas.h",
     "dl_dispatcher.cc",
     "dl_dispatcher.h",
     "dl_image_impeller.cc",

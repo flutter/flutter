@@ -138,9 +138,6 @@ class DlSkCanvasAdapter final : public virtual DlCanvas {
                  DlImageSampling sampling,
                  const SkRect* cullRect,
                  const DlPaint* paint = nullptr) override;
-  void DrawImpellerPicture(
-      const std::shared_ptr<const impeller::Picture>& picture,
-      SkScalar opacity = SK_Scalar1) override;
   void DrawDisplayList(const sk_sp<DisplayList> display_list,
                        SkScalar opacity = SK_Scalar1) override;
   void DrawTextBlob(const sk_sp<SkTextBlob>& blob,

@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#pragma once
+#ifndef FLUTTER_DISPLAY_LIST_DL_OP_SPY_H_
+#define FLUTTER_DISPLAY_LIST_DL_OP_SPY_H_
 
 #include "flutter/display_list/dl_op_receiver.h"
 #include "flutter/display_list/utils/dl_receiver_utils.h"
@@ -59,23 +60,23 @@ class DlOpSpy final : public virtual DlOpReceiver,
                   uint32_t count,
                   const SkPoint points[]) override;
   void drawVertices(const DlVertices* vertices, DlBlendMode mode) override;
-  void drawImage(const sk_sp<DlImage>& image,
+  void drawImage(const sk_sp<DlImage> image,
                  const SkPoint point,
                  DlImageSampling sampling,
                  bool render_with_attributes) override;
   void drawImageRect(
-      const sk_sp<DlImage>& image,
+      const sk_sp<DlImage> image,
       const SkRect& src,
       const SkRect& dst,
       DlImageSampling sampling,
       bool render_with_attributes,
       SrcRectConstraint constraint = SrcRectConstraint::kFast) override;
-  void drawImageNine(const sk_sp<DlImage>& image,
+  void drawImageNine(const sk_sp<DlImage> image,
                      const SkIRect& center,
                      const SkRect& dst,
                      DlFilterMode filter,
                      bool render_with_attributes) override;
-  void drawAtlas(const sk_sp<DlImage>& atlas,
+  void drawAtlas(const sk_sp<DlImage> atlas,
                  const SkRSXform xform[],
                  const SkRect tex[],
                  const DlColor colors[],
@@ -84,9 +85,9 @@ class DlOpSpy final : public virtual DlOpReceiver,
                  DlImageSampling sampling,
                  const SkRect* cull_rect,
                  bool render_with_attributes) override;
-  void drawDisplayList(const sk_sp<DisplayList>& display_list,
+  void drawDisplayList(const sk_sp<DisplayList> display_list,
                        SkScalar opacity = SK_Scalar1) override;
-  void drawTextBlob(const sk_sp<SkTextBlob>& blob,
+  void drawTextBlob(const sk_sp<SkTextBlob> blob,
                     SkScalar x,
                     SkScalar y) override;
   void drawShadow(const SkPath& path,
@@ -104,3 +105,5 @@ class DlOpSpy final : public virtual DlOpReceiver,
 };
 
 }  // namespace flutter
+
+#endif  // FLUTTER_DISPLAY_LIST_DL_OP_SPY_H_
