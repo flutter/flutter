@@ -17,6 +17,7 @@ import 'icon_button.dart';
 import 'icons.dart';
 import 'ink_decoration.dart';
 import 'material_localizations.dart';
+import 'material_state.dart';
 import 'progress_indicator.dart';
 import 'theme.dart';
 
@@ -114,6 +115,7 @@ class PaginatedDataTable extends StatefulWidget {
     this.checkboxHorizontalMargin,
     this.controller,
     this.primary,
+    this.headingRowColor,
   }) : assert(actions == null || (header != null)),
        assert(columns.isNotEmpty),
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
@@ -287,6 +289,9 @@ class PaginatedDataTable extends StatefulWidget {
 
   /// {@macro flutter.widgets.scroll_view.primary}
   final bool? primary;
+
+   /// {@macro flutter.material.dataTable.headingRowColor}
+  final MaterialStateProperty<Color?>? headingRowColor;
 
   @override
   PaginatedDataTableState createState() => PaginatedDataTableState();
@@ -595,6 +600,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                     showCheckboxColumn: widget.showCheckboxColumn,
                     showBottomBorder: true,
                     rows: _getRows(_firstRowIndex, widget.rowsPerPage),
+                    headingRowColor: widget.headingRowColor,
                   ),
                 ),
               ),
