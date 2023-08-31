@@ -3313,28 +3313,23 @@ void main() {
       ),
     );
 
-    await tester.pump();
+    await tester.pumpAndSettle();
 
-    final double? abcLabelOpacity = tester.widget<DefaultTextStyle>(
-      find.ancestor(
-        of: find.text('Abc'),
-        matching: find.byType(DefaultTextStyle),
-      ).first,
-    ).style.color?.opacity;
-    final double? bcdLabelOpacity = tester.widget<DefaultTextStyle>(
-      find.ancestor(
-        of: find.text('Bcd'),
-        matching: find.byType(DefaultTextStyle),
-      ).first,
-    ).style.color?.opacity;
-
-    expect(abcLabelOpacity, 1.0);
-
-    if (bcdLabelOpacity == 1.0) {
-      fail('Bcd''s opacity should be lower than 1.0 since it is disabled');
+    double? defaultTextStyleOpacity(String text) {
+      final String? opacity = tester.widget<DefaultTextStyle>(
+        find.ancestor(
+          of: find.text(text),
+          matching: find.byType(DefaultTextStyle),
+        ).first,
+      ).style.color?.opacity.toStringAsFixed(2);
+      return double.tryParse(opacity ?? '');
     }
 
-    tester.pumpAndSettle();
+    final double? abcLabelOpacity = defaultTextStyleOpacity('Abc');
+    final double? bcdLabelOpacity = defaultTextStyleOpacity('Bcd');
+
+    expect(abcLabelOpacity, 1.0);
+    expect(bcdLabelOpacity, 0.38);
   });
 
   group('Material 2', () {
