@@ -99,8 +99,18 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     );
   }
 
+  /// The animation controller that is used to drive the resizing.
+  ///
+  /// The animation itself is exposed by the [animation] property.
+  @visibleForTesting
+  AnimationController get controller => _controller;
   late final AnimationController _controller;
+
+  /// The animation that drives the resizing.
+  @visibleForTesting
+  CurvedAnimation get animation => _animation;
   late final CurvedAnimation _animation;
+
   final SizeTween _sizeTween = SizeTween();
   late bool _hasVisualOverflow;
   double? _lastValue;
