@@ -23,13 +23,16 @@ GeometryResult CoverGeometry::GetPositionBuffer(const ContentContext& renderer,
       .vertex_buffer =
           {
               .vertex_buffer = host_buffer.Emplace(
-                  rect.GetPoints().data(), 8 * sizeof(float), alignof(float)),
+                  rect.GetTransformedPoints(entity.GetTransformation().Invert())
+                      .data(),
+                  8 * sizeof(float), alignof(float)),
               .index_buffer = host_buffer.Emplace(
                   kRectIndicies, 4 * sizeof(uint16_t), alignof(uint16_t)),
               .vertex_count = 4,
               .index_type = IndexType::k16bit,
           },
-      .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()),
+      .transform = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
+                   entity.GetTransformation(),
       .prevent_overdraw = false,
   };
 }

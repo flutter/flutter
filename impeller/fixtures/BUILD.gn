@@ -57,6 +57,7 @@ impellerc("runtime_stages") {
   shaders = [
     "ink_sparkle.frag",
     "runtime_stage_example.frag",
+    "gradient.frag",
   ]
   sl_file_extension = "iplr"
   shader_target_flag = "--runtime-stage-metal"
