@@ -416,6 +416,11 @@ class CreateCommand extends CreateBase {
         offline: boolArg('offline'),
         outputMode: PubOutputMode.summaryOnly,
       );
+      // Setting `includeIos` etc to false as with FlutterProjectType.package
+      // causes the example sub directory to not get os sub directories.
+      // This will lead to `flutter build ios` to fail in the example.
+      // TODO(dacoharkes): Uncouple the app and parent project platforms. https://github.com/flutter/flutter/issues/133874
+      // Then this if can be removed.
       if (!generateFfiPackage) {
         await project.ensureReadyForPlatformSpecificTooling(
           androidPlatform: includeAndroid,
