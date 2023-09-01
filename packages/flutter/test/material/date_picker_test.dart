@@ -181,7 +181,11 @@ void main() {
     leakTrackingTestConfig: const LeakTrackingTestConfig(
       // TODO(polina-c): fix and remove after merge
       // https://github.com/flutter/flutter/pull/133883
-      notDisposedAllowList: <String, int?>{'_RestorableDatePickerEntryMode': 3},
+      notDisposedAllowList: <String, int?>{
+        '_RestorableDatePickerEntryMode': 3,
+        '_RestorableAutovalidateMode': 1,
+        'RestorableDateTimeN': 3,
+      },
     ));
 
     testWidgets('Cancel, confirm, and help text is used', (WidgetTester tester) async {
