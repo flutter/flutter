@@ -45,7 +45,9 @@ Future<void> main(List<String> args) async {
     ]));
     final ProcessResult runResult = Process.runSync(dart, <String>[regularDill]);
     checkProcessResult(runResult);
-    String paintString = '"Paint.toString":"Paint(Color(0xffffffff))"';
+    // TODO(matanlurey): "dither: true" is now present by default, until it is
+    // remove entirely. See https://github.com/flutter/flutter/issues/112498.
+    String paintString = '"Paint.toString":"Paint(Color(0xffffffff); dither: true)"';
     if (buildDir.contains('release')) {
       paintString = '"Paint.toString":"Instance of \'Paint\'"';
     }
