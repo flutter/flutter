@@ -1617,6 +1617,8 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 // and to position the
 // candidates view for multi-stage input methods (e.g., Japanese) when using a
 // physical keyboard.
+// Returns the rect for the queried range, or a subrange through the end of line, if
+// the range encompasses multiple lines.
 - (CGRect)firstRectForRange:(UITextRange*)range {
   NSAssert([range.start isKindOfClass:[FlutterTextPosition class]],
            @"Expected a FlutterTextPosition for range.start (got %@).", [range.start class]);
@@ -1671,6 +1673,14 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   if (end < start) {
     first = end;
   }
+
+  CGRect startSelectionRect = CGRectNull;
+  CGRect endSelectionRect = CGRectNull;
+  // Selection rects from different langauges may have different minY/maxY.
+  // So we need to iterate through each rects to update minY/maxY.
+  CGFloat minY = CGFLOAT_MAX;
+  CGFloat maxY = CGFLOAT_MIN;
+
   FlutterTextRange* textRange = [FlutterTextRange
       rangeWithNSRange:fml::RangeForCharactersInRange(self.text, NSMakeRange(0, self.text.length))];
   for (NSUInteger i = 0; i < [_selectionRects count]; i++) {
@@ -1681,11 +1691,38 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
         !isLastSelectionRect && _selectionRects[i + 1].position > first;
     if (startsOnOrBeforeStartOfRange &&
         (endOfTextIsAfterStartOfRange || nextSelectionRectIsAfterStartOfRange)) {
-      return _selectionRects[i].rect;
+      // TODO(hellohaunlin): Remove iOS 17 check. The logic should also work for older versions.
+      if (@available(iOS 17, *)) {
+        startSelectionRect = _selectionRects[i].rect;
+      } else {
+        return _selectionRects[i].rect;
+      }
+    }
+    if (!CGRectIsNull(startSelectionRect)) {
+      minY = fmin(minY, CGRectGetMinY(_selectionRects[i].rect));
+      maxY = fmax(maxY, CGRectGetMaxY(_selectionRects[i].rect));
+      BOOL endsOnOrAfterEndOfRange = _selectionRects[i].position >= end - 1;  // end is exclusive
+      BOOL nextSelectionRectIsOnNextLine =
+          !isLastSelectionRect &&
+          // Selection rects from different langauges in 2 lines may overlap with each other.
+          // A good approximation is to check if the center of next rect is below the bottom of
+          // current rect.
+          // TODO(hellohuanlin): Consider passing the line break info from framework.
+          CGRectGetMidY(_selectionRects[i + 1].rect) > CGRectGetMaxY(_selectionRects[i].rect);
+      if (endsOnOrAfterEndOfRange || isLastSelectionRect || nextSelectionRectIsOnNextLine) {
+        endSelectionRect = _selectionRects[i].rect;
+        break;
+      }
     }
   }
-
-  return CGRectZero;
+  if (CGRectIsNull(startSelectionRect) || CGRectIsNull(endSelectionRect)) {
+    return CGRectZero;
+  } else {
+    // fmin/fmax to support both LTR and RTL languages.
+    CGFloat minX = fmin(CGRectGetMinX(startSelectionRect), CGRectGetMinX(endSelectionRect));
+    CGFloat maxX = fmax(CGRectGetMaxX(startSelectionRect), CGRectGetMaxX(endSelectionRect));
+    return CGRectMake(minX, minY, maxX - minX, maxY - minY);
+  }
 }
 
 - (CGRect)caretRectForPosition:(UITextPosition*)position {
