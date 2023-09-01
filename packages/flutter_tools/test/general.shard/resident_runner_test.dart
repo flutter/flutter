@@ -2332,78 +2332,77 @@ flutter:
   testUsingContext(
       'native assets',
       () => testbed.run(() async {
-            final FileSystem fileSystem = globals.fs;
-            final Environment environment = Environment.test(
-              fileSystem.currentDirectory,
-              inputs: <String, String>{},
-              artifacts: Artifacts.test(),
-              processManager: FakeProcessManager.empty(),
-              fileSystem: fileSystem,
-              logger: BufferLogger.test(),
-            );
-            final Uri projectUri = environment.projectDir.uri;
+        final FileSystem fileSystem = globals.fs;
+        final Environment environment = Environment.test(
+          fileSystem.currentDirectory,
+          inputs: <String, String>{},
+          artifacts: Artifacts.test(),
+          processManager: FakeProcessManager.empty(),
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+        );
+        final Uri projectUri = environment.projectDir.uri;
 
-            final FakeDevice device = FakeDevice(
-              targetPlatform: TargetPlatform.darwin,
-              sdkNameAndVersion: 'Macos',
-            );
-            final FakeFlutterDevice flutterDevice = FakeFlutterDevice()
-              ..testUri = testUri
-              ..vmServiceHost = (() => fakeVmServiceHost)
-              ..device = device
-              .._devFS = devFS
-              ..targetPlatform = TargetPlatform.darwin;
+        final FakeDevice device = FakeDevice(
+          targetPlatform: TargetPlatform.darwin,
+          sdkNameAndVersion: 'Macos',
+        );
+        final FakeFlutterDevice flutterDevice = FakeFlutterDevice()
+          ..testUri = testUri
+          ..vmServiceHost = (() => fakeVmServiceHost)
+          ..device = device
+          .._devFS = devFS
+          ..targetPlatform = TargetPlatform.darwin;
 
-            fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
-              listViews,
-              listViews,
-            ]);
-            globals.fs
-                .file(globals.fs.path.join('lib', 'main.dart'))
-                .createSync(recursive: true);
-            final FakeNativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
-              packagesWithNativeAssetsResult: <Package>[
-                Package('bar', projectUri),
-              ],
-              dryRunResult: FakeNativeAssetsBuilderResult(
-                assets: <Asset>[
-                  Asset(
-                    id: 'package:bar/bar.dart',
-                    linkMode: LinkMode.dynamic,
-                    target: native_assets_cli.Target.macOSArm64,
-                    path: AssetAbsolutePath(Uri.file('bar.dylib')),
-                  ),
-                ],
+        fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
+          listViews,
+          listViews,
+        ]);
+        globals.fs
+            .file(globals.fs.path.join('lib', 'main.dart'))
+            .createSync(recursive: true);
+        final FakeNativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
+          packagesWithNativeAssetsResult: <Package>[
+            Package('bar', projectUri),
+          ],
+          dryRunResult: FakeNativeAssetsBuilderResult(
+            assets: <Asset>[
+              Asset(
+                id: 'package:bar/bar.dart',
+                linkMode: LinkMode.dynamic,
+                target: native_assets_cli.Target.macOSArm64,
+                path: AssetAbsolutePath(Uri.file('bar.dylib')),
               ),
-            );
-            residentRunner = HotRunner(
-              <FlutterDevice>[
-                flutterDevice,
-              ],
-              stayResident: false,
-              debuggingOptions: DebuggingOptions.enabled(const BuildInfo(
-                BuildMode.debug,
-                '',
-                treeShakeIcons: false,
-                trackWidgetCreation: true,
-              )),
-              target: 'main.dart',
-              devtoolsHandler: createNoOpHandler,
-              buildRunner: buildRunner,
-            );
+            ],
+          ),
+        );
+        residentRunner = HotRunner(
+          <FlutterDevice>[
+            flutterDevice,
+          ],
+          stayResident: false,
+          debuggingOptions: DebuggingOptions.enabled(const BuildInfo(
+            BuildMode.debug,
+            '',
+            treeShakeIcons: false,
+            trackWidgetCreation: true,
+          )),
+          target: 'main.dart',
+          devtoolsHandler: createNoOpHandler,
+          buildRunner: buildRunner,
+        );
 
-            final int? result = await residentRunner.run();
-            expect(result, 0);
+        final int? result = await residentRunner.run();
+        expect(result, 0);
 
-            expect(buildRunner.buildInvocations, 0);
-            expect(buildRunner.dryRunInvocations, 1);
-            expect(buildRunner.hasPackageConfigInvocations, 1);
-            expect(buildRunner.packagesWithNativeAssetsInvocations, 0);
-          }),
+        expect(buildRunner.buildInvocations, 0);
+        expect(buildRunner.dryRunInvocations, 1);
+        expect(buildRunner.hasPackageConfigInvocations, 1);
+        expect(buildRunner.packagesWithNativeAssetsInvocations, 0);
+      }),
       overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
-        FeatureFlags: () =>
-            TestFeatureFlags(isNativeAssetsEnabled: true, isMacOSEnabled: true),
+        FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true, isMacOSEnabled: true),
       });
 }
 

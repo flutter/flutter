@@ -132,13 +132,10 @@ Map<AssetPath, List<Asset>> _fatAssetTargetLocations(List<Asset> nativeAssets, U
   return result;
 }
 
-Map<Asset, Asset> _assetTargetLocations(
-  List<Asset> nativeAssets,
-  Uri? absolutePath,
-) =>
-    <Asset, Asset>{
-      for (final Asset asset in nativeAssets) asset: _targetLocationMacOS(asset, absolutePath),
-    };
+Map<Asset, Asset> _assetTargetLocations(List<Asset> nativeAssets, Uri? absolutePath) => <Asset, Asset>{
+  for (final Asset asset in nativeAssets)
+    asset: _targetLocationMacOS(asset, absolutePath),
+};
 
 Asset _targetLocationMacOS(Asset asset, Uri? absolutePath) {
   final AssetPath path = asset.path;

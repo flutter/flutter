@@ -569,13 +569,13 @@ void main() {
       ];
 
       fakeFlutterDevice.updateDevFSReportCallback = () async => UpdateFSReport(
-            success: true,
-            invalidatedSourcesCount: 6,
-            syncedBytes: 8,
-            scannedSourcesCount: 16,
-            compileDuration: const Duration(seconds: 16),
-            transferDuration: const Duration(seconds: 32),
-          );
+        success: true,
+        invalidatedSourcesCount: 6,
+        syncedBytes: 8,
+        scannedSourcesCount: 16,
+        compileDuration: const Duration(seconds: 16),
+        transferDuration: const Duration(seconds: 32),
+      );
 
       (fakeFlutterDevice.devFS! as FakeDevFs).baseUri = Uri.parse('file:///base_uri');
 
@@ -616,8 +616,7 @@ void main() {
       FileSystem: () => fileSystem,
       Platform: () => FakePlatform(),
       ProcessManager: () => FakeProcessManager.empty(),
-      FeatureFlags: () =>
-          TestFeatureFlags(isNativeAssetsEnabled: true, isMacOSEnabled: true),
+      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true, isMacOSEnabled: true),
     });
 
     testUsingContext('native assets run unsupported', () async {
@@ -628,13 +627,13 @@ void main() {
       ];
 
       fakeFlutterDevice.updateDevFSReportCallback = () async => UpdateFSReport(
-            success: true,
-            invalidatedSourcesCount: 6,
-            syncedBytes: 8,
-            scannedSourcesCount: 16,
-            compileDuration: const Duration(seconds: 16),
-            transferDuration: const Duration(seconds: 32),
-          );
+        success: true,
+        invalidatedSourcesCount: 6,
+        syncedBytes: 8,
+        scannedSourcesCount: 16,
+        compileDuration: const Duration(seconds: 16),
+        transferDuration: const Duration(seconds: 32),
+      );
 
       (fakeFlutterDevice.devFS! as FakeDevFs).baseUri = Uri.parse('file:///base_uri');
 
@@ -666,7 +665,7 @@ void main() {
         throwsToolExit( message:
           'Package(s) bar require the native assets feature. '
           'This feature has not yet been implemented for `TargetPlatform.android_arm64`. '
-          'For more info see https://github.com/flutter/flutter/issues/129757.'
+          'For more info see https://github.com/flutter/flutter/issues/129757.',
         )
       );
 
@@ -676,8 +675,7 @@ void main() {
       FileSystem: () => fileSystem,
       Platform: () => FakePlatform(),
       ProcessManager: () => FakeProcessManager.empty(),
-      FeatureFlags: () =>
-          TestFeatureFlags(isNativeAssetsEnabled: true, isMacOSEnabled: true),
+      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true, isMacOSEnabled: true),
     });
   });
 }

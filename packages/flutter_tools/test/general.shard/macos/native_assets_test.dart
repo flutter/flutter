@@ -231,36 +231,36 @@ void main() {
     testUsingContext('build with assets$testName', overrides: <Type, Generator>{
       FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
       ProcessManager: () => FakeProcessManager.list(
-            <FakeCommand>[
-              const FakeCommand(
-                command: <Pattern>[
-                  'lipo',
-                  '-create',
-                  '-output',
-                  '/build/native_assets/macos/bar.dylib',
-                  'bar.dylib',
-                ],
-              ),
-              const FakeCommand(
-                command: <Pattern>[
-                  'install_name_tool',
-                  '-id',
-                  '@executable_path/Frameworks/bar.dylib',
-                  '/build/native_assets/macos/bar.dylib',
-                ],
-              ),
-              const FakeCommand(
-                command: <Pattern>[
-                  'codesign',
-                  '--force',
-                  '--sign',
-                  '-',
-                  '--timestamp=none',
-                  '/build/native_assets/macos/bar.dylib',
-                ],
-              ),
+        <FakeCommand>[
+          const FakeCommand(
+            command: <Pattern>[
+              'lipo',
+              '-create',
+              '-output',
+              '/build/native_assets/macos/bar.dylib',
+              'bar.dylib',
             ],
           ),
+          const FakeCommand(
+            command: <Pattern>[
+              'install_name_tool',
+              '-id',
+              '@executable_path/Frameworks/bar.dylib',
+              '/build/native_assets/macos/bar.dylib',
+            ],
+          ),
+          const FakeCommand(
+            command: <Pattern>[
+              'codesign',
+              '--force',
+              '--sign',
+              '-',
+              '--timestamp=none',
+              '/build/native_assets/macos/bar.dylib',
+            ],
+          ),
+        ],
+      ),
     }, () async {
       if (const LocalPlatform().isWindows) {
         return; // Backslashes in commands, but we will never run these commands on Windows.
@@ -356,17 +356,17 @@ void main() {
   testUsingContext('NativeAssetsBuildRunnerImpl.cCompilerConfig', overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
     ProcessManager: () => FakeProcessManager.list(
-          <FakeCommand>[
-            const FakeCommand(
-              command: <Pattern>['xcrun', 'clang', '--version'],
-              stdout: '''
+      <FakeCommand>[
+        const FakeCommand(
+          command: <Pattern>['xcrun', 'clang', '--version'],
+          stdout: '''
 Apple clang version 14.0.0 (clang-1400.0.29.202)
 Target: arm64-apple-darwin22.6.0
 Thread model: posix
 InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin''',
-            )
-          ],
-        ),
+        )
+      ],
+    ),
   }, () async {
     if (!const LocalPlatform().isMacOS) {
       // TODO(dacoharkes): Implement other OSes. https://github.com/flutter/flutter/issues/129757

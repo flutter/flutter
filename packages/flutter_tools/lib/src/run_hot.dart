@@ -462,8 +462,7 @@ class HotRunner extends ResidentRunner {
       return dryRunNativeAssetsMultipeOSes(
         projectUri: projectUri,
         fileSystem: fileSystem,
-        targetPlatforms:
-            flutterDevices.map((FlutterDevice d) => d.targetPlatform).nonNulls,
+        targetPlatforms: flutterDevices.map((FlutterDevice d) => d.targetPlatform).nonNulls,
         buildRunner: _buildRunner!,
       );
     }

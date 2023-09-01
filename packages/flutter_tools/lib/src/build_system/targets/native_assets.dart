@@ -160,24 +160,24 @@ class NativeAssets extends Target {
 
   @override
   List<String> get depfiles => <String>[
-        'native_assets.d',
-      ];
+    'native_assets.d',
+  ];
 
   @override
   List<Target> get dependencies => <Target>[];
 
   @override
   List<Source> get inputs => const <Source>[
-        Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/native_assets.dart'),
-        // If different packages are resolved, different native assets might need to be built.
-        Source.pattern('{PROJECT_DIR}/.dart_tool/package_config_subset'),
-      ];
+    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/native_assets.dart'),
+    // If different packages are resolved, different native assets might need to be built.
+    Source.pattern('{PROJECT_DIR}/.dart_tool/package_config_subset'),
+  ];
 
   @override
   String get name => 'native_assets';
 
   @override
   List<Source> get outputs => const <Source>[
-        Source.pattern('{BUILD_DIR}/native_assets.yaml'),
-      ];
+    Source.pattern('{BUILD_DIR}/native_assets.yaml'),
+  ];
 }

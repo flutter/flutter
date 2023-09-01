@@ -134,8 +134,9 @@ Map<AssetPath, List<Asset>> _fatAssetTargetLocations(List<Asset> nativeAssets) {
 }
 
 Map<Asset, Asset> _assetTargetLocations(List<Asset> nativeAssets) => <Asset, Asset>{
-      for (final Asset asset in nativeAssets) asset: _targetLocationiOS(asset),
-    };
+  for (final Asset asset in nativeAssets)
+    asset: _targetLocationiOS(asset),
+};
 
 Asset _targetLocationiOS(Asset asset) {
   final AssetPath path = asset.path;

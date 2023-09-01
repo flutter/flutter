@@ -74,8 +74,8 @@ void main() {
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
         FeatureFlags: () => TestFeatureFlags(
-              isNativeAssetsEnabled: isNativeAssetsEnabled,
-            ),
+          isNativeAssetsEnabled: isNativeAssetsEnabled,
+        ),
       },
       () async {
         final NativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner();

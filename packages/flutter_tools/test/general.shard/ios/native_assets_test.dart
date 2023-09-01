@@ -206,36 +206,36 @@ void main() {
   testUsingContext('build with assets', overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
     ProcessManager: () => FakeProcessManager.list(
-          <FakeCommand>[
-            const FakeCommand(
-              command: <Pattern>[
-                'lipo',
-                '-create',
-                '-output',
-                '/build/native_assets/ios/bar.dylib',
-                'bar.dylib',
-              ],
-            ),
-            const FakeCommand(
-              command: <Pattern>[
-                'install_name_tool',
-                '-id',
-                '@executable_path/Frameworks/bar.dylib',
-                '/build/native_assets/ios/bar.dylib',
-              ],
-            ),
-            const FakeCommand(
-              command: <Pattern>[
-                'codesign',
-                '--force',
-                '--sign',
-                '-',
-                '--timestamp=none',
-                '/build/native_assets/ios/bar.dylib',
-              ],
-            ),
+      <FakeCommand>[
+        const FakeCommand(
+          command: <Pattern>[
+            'lipo',
+            '-create',
+            '-output',
+            '/build/native_assets/ios/bar.dylib',
+            'bar.dylib',
           ],
         ),
+        const FakeCommand(
+          command: <Pattern>[
+            'install_name_tool',
+            '-id',
+            '@executable_path/Frameworks/bar.dylib',
+            '/build/native_assets/ios/bar.dylib',
+          ],
+        ),
+        const FakeCommand(
+          command: <Pattern>[
+            'codesign',
+            '--force',
+            '--sign',
+            '-',
+            '--timestamp=none',
+            '/build/native_assets/ios/bar.dylib',
+          ],
+        ),
+      ],
+    ),
   }, () async {
     if (const LocalPlatform().isWindows) {
       return; // Backslashes in commands, but we will never run these commands on Windows.
