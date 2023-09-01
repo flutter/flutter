@@ -427,8 +427,9 @@ void main() {
   }
 
   testWidgets('draws a shadow below the toolbar in light mode', (WidgetTester tester) async {
-    const double height = 40.0;
-    const double anchorAbove = 100.0;
+    late StateSetter setState;
+    const double height = 50.0;
+    double anchorAboveY = 0.0;
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -438,6 +439,7 @@ void main() {
         home: Center(
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setter) {
+              setState = setter;
               final MediaQueryData data = MediaQuery.of(context);
               // Add some custom vertical padding to make this test more strict.
               // By default in the testing environment, _kToolbarContentDistance
@@ -450,7 +452,7 @@ void main() {
                   ),
                 ),
                 child: CupertinoTextSelectionToolbar(
-                  anchorAbove: const Offset(50.0, anchorAbove),
+                  anchorAbove: Offset(50.0, anchorAboveY),
                   anchorBelow: const Offset(50.0, 500.0),
                   children: <Widget>[
                     Container(color: const Color(0xffff0000), width: 50.0, height: height),
@@ -465,13 +467,28 @@ void main() {
       ),
     );
 
+    final double dividerWidth = 1.0 / tester.view.devicePixelRatio;
+
     expect(
       find.byType(CupertinoTextSelectionToolbar),
-      paints..shadow(
-        includes: const <Offset>[Offset(50.0, anchorAbove - _kToolbarContentDistance - height / 2)],
-        color: const Color(0xbf000000),
-        elevation: 10.0,
-        transparentOccluder: false,
+      paints..rrect(
+        rrect: RRect.fromLTRBR(0.0, 14.0, 150 + 2 * dividerWidth, 50.0, const Radius.circular(8.0)),
+        color: const Color(0x33000000),
+      ),
+    );
+
+    // When the toolbar is above the content, the shadow sits around the arrow
+    // with no offset.
+    setState(() {
+      anchorAboveY = 80.0;
+    });
+    await tester.pump();
+
+    expect(
+      find.byType(CupertinoTextSelectionToolbar),
+      paints..rrect(
+        rrect: RRect.fromLTRBR(0.0, 7.0, 150 + 2 * dividerWidth, 43.0, const Radius.circular(8.0)),
+        color: const Color(0x33000000),
       ),
     );
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
