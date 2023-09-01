@@ -192,28 +192,28 @@ void main() {
       Pub: () => fakePub,
     }));
 
-  testUsingContext('package_ffi template not enabled', () async {
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
+    testUsingContext('package_ffi template not enabled', () async {
+      final CreateCommand command = CreateCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    expect(
-      runner.run(
-        <String>[
-          'create',
-          '--no-pub',
-          '--template=package_ffi',
-          'my_ffi_package',
-        ],
+      expect(
+        runner.run(
+          <String>[
+            'create',
+            '--no-pub',
+            '--template=package_ffi',
+            'my_ffi_package',
+          ],
+        ),
+        throwsUsageException(
+          message: '"package_ffi" is not an allowed value for option "template"',
+        ),
+      );
+    }, overrides: <Type, Generator>{
+      FeatureFlags: () => TestFeatureFlags(
+        isNativeAssetsEnabled: false, // ignore: avoid_redundant_argument_values, If we graduate the feature to true by default, don't break this test.
       ),
-      throwsUsageException(
-        message: '"package_ffi" is not an allowed value for option "template"',
-      ),
-    );
-  }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(
-      isNativeAssetsEnabled: false, // ignore: avoid_redundant_argument_values, If we graduate the feature to true by default, don't break this test.
-    ), 
-  });
+    });
   });
 }
 
