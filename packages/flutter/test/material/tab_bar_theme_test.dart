@@ -7,14 +7,10 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-import 'dart:ui' as ui show ParagraphBuilder;
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../rendering/mock_canvas.dart';
 
 const String _tab1Text = 'tab 1';
 const String _tab2Text = 'tab 2';
@@ -677,8 +673,8 @@ void main() {
         ..line(
           color: theme.colorScheme.primary,
           strokeWidth: indicatorWeight,
-          p1: Offset(ui.ParagraphBuilder.shouldDisableRoundingHack ? 65.75 : 65.5, indicatorY),
-          p2: Offset(ui.ParagraphBuilder.shouldDisableRoundingHack ? 134.25 : 134.5, indicatorY),
+          p1: const Offset(65.75, indicatorY),
+          p2: const Offset(134.25, indicatorY),
         ),
     );
   });
@@ -1133,5 +1129,164 @@ void main() {
       final double tabTwoRight = (800 / 2) + tabTwoRect.width + kTabLabelPadding.right;
       expect(tabTwoRect.right, equals(tabTwoRight));
     });
+  });
+
+  testWidgets('Material3 - TabBar indicator respects TabBarTheme.indicatorColor', (WidgetTester tester) async {
+    final List<Widget> tabs = List<Widget>.generate(4, (int index) {
+      return Tab(text: 'Tab $index');
+    });
+
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    const Color tabBarThemeIndicatorColor = Color(0xffff0000);
+
+    Widget buildTabBar({ required ThemeData theme }) {
+      return MaterialApp(
+        theme: theme,
+        home: Material(
+          child: Container(
+            alignment: Alignment.topLeft,
+            child: TabBar(
+              controller: controller,
+              tabs: tabs,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTabBar(theme: ThemeData(useMaterial3: true)));
+
+    RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    expect(tabBarBox,paints..rrect(color: ThemeData(useMaterial3: true).colorScheme.primary));
+
+    await tester.pumpWidget(buildTabBar(theme: ThemeData(
+      useMaterial3: true,
+      tabBarTheme: const TabBarTheme(indicatorColor: tabBarThemeIndicatorColor)
+    )));
+    await tester.pumpAndSettle();
+
+    tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    expect(tabBarBox,paints..rrect(color: tabBarThemeIndicatorColor));
+  });
+
+  testWidgets('Material2 - TabBar indicator respects TabBarTheme.indicatorColor', (WidgetTester tester) async {
+    final List<Widget> tabs = List<Widget>.generate(4, (int index) {
+      return Tab(text: 'Tab $index');
+    });
+
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    const Color themeIndicatorColor = Color(0xffff0000);
+    const Color tabBarThemeIndicatorColor = Color(0xffffff00);
+
+    Widget buildTabBar({ Color? themeIndicatorColor, Color? tabBarThemeIndicatorColor }) {
+      return MaterialApp(
+        theme: ThemeData(
+          indicatorColor: themeIndicatorColor,
+          tabBarTheme: TabBarTheme(indicatorColor: tabBarThemeIndicatorColor),
+          useMaterial3: false,
+        ),
+        home: Material(
+          child: Container(
+            alignment: Alignment.topLeft,
+            child: TabBar(
+              controller: controller,
+              tabs: tabs,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTabBar(themeIndicatorColor: themeIndicatorColor));
+
+    RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    expect(tabBarBox,paints..line(color: themeIndicatorColor));
+
+    await tester.pumpWidget(buildTabBar(tabBarThemeIndicatorColor: tabBarThemeIndicatorColor));
+    await tester.pumpAndSettle();
+
+    tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    expect(tabBarBox,paints..line(color: tabBarThemeIndicatorColor));
+  });
+
+   testWidgets('TabBarTheme.labelColor resolves material states', (WidgetTester tester) async {
+    const Color selectedColor = Color(0xff00ff00);
+    const Color unselectedColor = Color(0xffff0000);
+    final MaterialStateColor labelColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected)) {
+        return selectedColor;
+      }
+      return unselectedColor;
+    });
+
+    final TabBarTheme tabBarTheme = TabBarTheme(labelColor: labelColor);
+
+    // Test labelColor correctly resolves material states.
+    await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme));
+
+    final IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(_tab1Text)));
+    final IconThemeData uselectedTabIcon = IconTheme.of(tester.element(find.text(_tab2Text)));
+    final TextStyle selectedTextStyle = tester.renderObject<RenderParagraph>(find.text(_tab1Text)).text.style!;
+    final TextStyle unselectedTextStyle = tester.renderObject<RenderParagraph>(find.text(_tab2Text)).text.style!;
+
+    expect(selectedTabIcon.color, selectedColor);
+    expect(uselectedTabIcon.color, unselectedColor);
+    expect(selectedTextStyle.color, selectedColor);
+    expect(unselectedTextStyle.color, unselectedColor);
+  });
+
+  testWidgets('TabBarTheme.labelColor & TabBarTheme.unselectedLabelColor override material state TabBarTheme.labelColor',
+    (WidgetTester tester) async {
+      const Color selectedStateColor = Color(0xff00ff00);
+      const Color unselectedStateColor = Color(0xffff0000);
+      final MaterialStateColor labelColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
+        if (states.contains(MaterialState.selected)) {
+          return selectedStateColor;
+        }
+        return unselectedStateColor;
+      });
+      const Color selectedColor = Color(0xff00ffff);
+      const Color unselectedColor = Color(0xffff12ff);
+
+      TabBarTheme tabBarTheme = TabBarTheme(labelColor: labelColor);
+
+      // Test material state label color.
+      await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme));
+
+      IconThemeData selectedTabIcon = IconTheme.of(tester.element(find.text(_tab1Text)));
+      IconThemeData uselectedTabIcon = IconTheme.of(tester.element(find.text(_tab2Text)));
+      TextStyle selectedTextStyle = tester.renderObject<RenderParagraph>(find.text(_tab1Text)).text.style!;
+      TextStyle unselectedTextStyle = tester.renderObject<RenderParagraph>(find.text(_tab2Text)).text.style!;
+
+      expect(selectedTabIcon.color, selectedStateColor);
+      expect(uselectedTabIcon.color, unselectedStateColor);
+      expect(selectedTextStyle.color, selectedStateColor);
+      expect(unselectedTextStyle.color, unselectedStateColor);
+
+      // Test labelColor & unselectedLabelColor override material state labelColor.
+      tabBarTheme = const TabBarTheme(
+        labelColor: selectedColor,
+        unselectedLabelColor: unselectedColor,
+      );
+      await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme));
+      await tester.pumpAndSettle();
+
+      selectedTabIcon = IconTheme.of(tester.element(find.text(_tab1Text)));
+      uselectedTabIcon = IconTheme.of(tester.element(find.text(_tab2Text)));
+      selectedTextStyle = tester.renderObject<RenderParagraph>(find.text(_tab1Text)).text.style!;
+      unselectedTextStyle = tester.renderObject<RenderParagraph>(find.text(_tab2Text)).text.style!;
+
+      expect(selectedTabIcon.color, selectedColor);
+      expect(uselectedTabIcon.color, unselectedColor);
+      expect(selectedTextStyle.color, selectedColor);
+      expect(unselectedTextStyle.color, unselectedColor);
   });
 }

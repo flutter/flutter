@@ -17,6 +17,7 @@ import 'src/web/bench_clipped_out_pictures.dart';
 import 'src/web/bench_default_target_platform.dart';
 import 'src/web/bench_draw_rect.dart';
 import 'src/web/bench_dynamic_clip_on_static_picture.dart';
+import 'src/web/bench_harness.dart';
 import 'src/web/bench_image_decoding.dart';
 import 'src/web/bench_material_3.dart';
 import 'src/web/bench_material_3_semantics.dart';
@@ -43,7 +44,13 @@ const bool isSkwasm = bool.fromEnvironment('FLUTTER_WEB_USE_SKWASM');
 /// When adding a new benchmark, add it to this map. Make sure that the name
 /// of your benchmark is unique.
 final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
-  // Benchmarks that run both in CanvasKit and HTML modes
+  // Benchmarks the overhead of the benchmark harness itself.
+  BenchRawRecorder.benchmarkName: () => BenchRawRecorder(),
+  BenchWidgetRecorder.benchmarkName: () => BenchWidgetRecorder(),
+  BenchWidgetBuildRecorder.benchmarkName: () => BenchWidgetBuildRecorder(),
+  BenchSceneBuilderRecorder.benchmarkName: () => BenchSceneBuilderRecorder(),
+
+  // Benchmarks that run in all renderers.
   BenchDefaultTargetPlatform.benchmarkName: () => BenchDefaultTargetPlatform(),
   BenchBuildImage.benchmarkName: () => BenchBuildImage(),
   BenchCardInfiniteScroll.benchmarkName: () => BenchCardInfiniteScroll.forward(),

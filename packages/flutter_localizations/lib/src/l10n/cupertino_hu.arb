@@ -22,7 +22,9 @@
   "tabSemanticsLabel": "$tabCount/$tabIndex. lap",
   "modalBarrierDismissLabel": "Elvetés",
   "searchTextFieldPlaceholderLabel": "Keresés",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "menuDismissLabel": "Dismiss menu",
-  "lookUpButtonLabel": "Look Up"
+  "noSpellCheckReplacementsLabel": "Nem található javítás",
+  "menuDismissLabel": "Menü bezárása",
+  "lookUpButtonLabel": "Felfelé nézés",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

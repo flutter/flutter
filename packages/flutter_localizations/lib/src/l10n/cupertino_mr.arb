@@ -22,7 +22,9 @@
   "tabSemanticsLabel": "$tabCount पैकी $tabIndex टॅब",
   "modalBarrierDismissLabel": "डिसमिस करा",
   "searchTextFieldPlaceholderLabel": "शोधा",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "menuDismissLabel": "Dismiss menu",
-  "lookUpButtonLabel": "Look Up"
+  "noSpellCheckReplacementsLabel": "कोणतेही बदल आढळले नाहीत",
+  "menuDismissLabel": "मेनू डिसमिस करा",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

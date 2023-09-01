@@ -314,10 +314,6 @@ class TextField extends StatefulWidget {
     this.scribbleEnabled = true,
     this.enableIMEPersonalizedLearning = true,
     this.contextMenuBuilder = _defaultContextMenuBuilder,
-    @Deprecated(
-      'Use `focusNode` instead. '
-      'This feature was deprecated after v3.12.0-14.0.pre.',
-    )
     this.canRequestFocus = true,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
@@ -780,10 +776,6 @@ class TextField extends StatefulWidget {
   /// Defaults to true. If false, the text field will not request focus
   /// when tapped, or when its context menu is displayed. If false it will not
   /// be possible to move the focus to the text field with tab key.
-  @Deprecated(
-    'Use `focusNode` instead. '
-    'This feature was deprecated after v3.12.0-14.0.pre.',
-  )
   final bool canRequestFocus;
 
   /// {@macro flutter.widgets.undoHistory.controller}
@@ -1034,9 +1026,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     if (widget.controller == null) {
       _createLocalController();
     }
-    _effectiveFocusNode.canRequestFocus = widget.focusNode == null
-      ? widget.canRequestFocus && _isEnabled
-      : widget.focusNode!.canRequestFocus && _isEnabled;
+    _effectiveFocusNode.canRequestFocus = widget.canRequestFocus && _isEnabled;
     _effectiveFocusNode.addListener(_handleFocusChanged);
   }
 
@@ -1044,9 +1034,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
     switch (mode) {
       case NavigationMode.traditional:
-        return widget.focusNode == null
-          ? widget.canRequestFocus && _isEnabled
-          : widget.focusNode!.canRequestFocus && _isEnabled;
+        return widget.canRequestFocus && _isEnabled;
       case NavigationMode.directional:
         return true;
     }
@@ -1098,8 +1086,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   void _createLocalController([TextEditingValue? value]) {
     assert(_controller == null);
     _controller = value == null
-      ? RestorableTextEditingController()
-      : RestorableTextEditingController.fromValue(value);
+        ? RestorableTextEditingController()
+        : RestorableTextEditingController.fromValue(value);
     if (!restorePending) {
       _registerController();
     }
@@ -1260,7 +1248,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
     final ThemeData theme = Theme.of(context);
     final DefaultSelectionStyle selectionStyle = DefaultSelectionStyle.of(context);
-    final TextStyle style = _getInputStyleForState(theme.useMaterial3 ? _m3InputStyle(context) : theme.textTheme.titleMedium!).merge(widget.style);
+    final TextStyle? providedStyle = MaterialStateProperty.resolveAs(widget.style, _materialState);
+    final TextStyle style = _getInputStyleForState(theme.useMaterial3 ? _m3InputStyle(context) : theme.textTheme.titleMedium!).merge(providedStyle);
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? theme.brightness;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;

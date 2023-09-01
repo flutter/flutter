@@ -44,11 +44,11 @@ abstract class FeatureFlags {
   /// Whether custom devices are enabled.
   bool get areCustomDevicesEnabled => false;
 
-  /// Whether fast single widget reloads are enabled.
-  bool get isSingleWidgetReloadEnabled => false;
-
   /// Whether WebAssembly compilation for Flutter Web is enabled.
   bool get isFlutterWebWasmEnabled => false;
+
+  /// Whether animations are used in the command line interface.
+  bool get isCliAnimationEnabled => true;
 
   /// Whether a particular feature is enabled for the current channel.
   ///
@@ -62,12 +62,12 @@ const List<Feature> allFeatures = <Feature>[
   flutterLinuxDesktopFeature,
   flutterMacOSDesktopFeature,
   flutterWindowsDesktopFeature,
-  singleWidgetReload,
   flutterAndroidFeature,
   flutterIOSFeature,
   flutterFuchsiaFeature,
   flutterCustomDevicesFeature,
   flutterWebWasm,
+  cliAnimation,
 ];
 
 /// All current Flutter feature flags that can be configured.
@@ -126,7 +126,7 @@ const Feature flutterFuchsiaFeature = Feature(
 );
 
 const Feature flutterCustomDevicesFeature = Feature(
-  name: 'Early support for custom device types',
+  name: 'early support for custom device types',
   configSetting: 'enable-custom-devices',
   environmentOverride: 'FLUTTER_CUSTOM_DEVICES',
   master: FeatureChannelSetting(
@@ -140,20 +140,6 @@ const Feature flutterCustomDevicesFeature = Feature(
   ),
 );
 
-/// The fast hot reload feature for https://github.com/flutter/flutter/issues/61407.
-const Feature singleWidgetReload = Feature(
-  name: 'Hot reload optimization for changes to class body of a single widget',
-  configSetting: 'single-widget-reload-optimization',
-  environmentOverride: 'FLUTTER_SINGLE_WIDGET_RELOAD',
-  master: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  beta: FeatureChannelSetting(
-    available: true,
-  ),
-);
-
 /// Enabling WebAssembly compilation from `flutter build web`
 const Feature flutterWebWasm = Feature(
   name: 'WebAssembly compilation from flutter build web',
@@ -162,6 +148,14 @@ const Feature flutterWebWasm = Feature(
     available: true,
     enabledByDefault: true,
   ),
+);
+
+/// The [Feature] for CLI animations.
+///
+/// The TERM environment variable set to "dumb" turns this off.
+const Feature cliAnimation = Feature.fullyEnabled(
+  name: 'animations in the command line interface',
+  configSetting: 'cli-animations',
 );
 
 /// A [Feature] is a process for conditionally enabling tool features.
@@ -247,9 +241,9 @@ class Feature {
     ];
     // Add channel info for settings only on some channels.
     if (channels.length == 1) {
-      buffer.write('\nThis setting applies to only the ${channels.single} channel.');
+      buffer.write('\nThis setting applies only to the ${channels.single} channel.');
     } else if (channels.length == 2) {
-      buffer.write('\nThis setting applies to only the ${channels.join(' and ')} channels.');
+      buffer.write('\nThis setting applies only to the ${channels.join(' and ')} channels.');
     }
     if (extraHelpText != null) {
       buffer.write(' $extraHelpText');

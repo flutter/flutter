@@ -162,14 +162,38 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
           ..add(_heroController);
   }
 
+  GlobalKey<NavigatorState>? _ownedNavigatorKey;
+  GlobalKey<NavigatorState> get _navigatorKey {
+    if (widget.navigatorKey != null) {
+      return widget.navigatorKey!;
+    }
+    _ownedNavigatorKey ??= GlobalKey<NavigatorState>();
+    return _ownedNavigatorKey!;
+  }
+
+  // Whether this tab is currently the active tab.
+  bool get _isActive => TickerMode.of(context);
+
   @override
   Widget build(BuildContext context) {
-    return Navigator(
-      key: widget.navigatorKey,
+    final Widget child = Navigator(
+      key: _navigatorKey,
       onGenerateRoute: _onGenerateRoute,
       onUnknownRoute: _onUnknownRoute,
       observers: _navigatorObservers,
       restorationScopeId: widget.restorationScopeId,
+    );
+
+    // Handle system back gestures only if the tab is currently active.
+    return NavigatorPopHandler(
+      enabled: _isActive,
+      onPop: () {
+        if (!_isActive) {
+          return;
+        }
+        _navigatorKey.currentState!.pop();
+      },
+      child: child,
     );
   }
 

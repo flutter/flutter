@@ -22,7 +22,9 @@
   "tabSemanticsLabel": "Tab $tabIndex dari $tabCount",
   "modalBarrierDismissLabel": "Tutup",
   "searchTextFieldPlaceholderLabel": "Telusuri",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "menuDismissLabel": "Dismiss menu",
-  "lookUpButtonLabel": "Look Up"
+  "noSpellCheckReplacementsLabel": "Penggantian Tidak Ditemukan",
+  "menuDismissLabel": "Tutup menu",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

@@ -452,21 +452,16 @@ class DataTable extends StatelessWidget {
     this.checkboxHorizontalMargin,
     this.border,
     this.clipBehavior = Clip.none,
-  })  : assert(columns.isNotEmpty),
-        assert(sortColumnIndex == null ||
-            (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
-        assert(!rows.any((DataRow row) => row.cells.length != columns.length)),
-        assert(dividerThickness == null || dividerThickness >= 0),
-        assert(dataRowMinHeight == null ||
-            dataRowMaxHeight == null ||
-            dataRowMaxHeight >= dataRowMinHeight),
-        assert(
-            dataRowHeight == null ||
-                (dataRowMinHeight == null && dataRowMaxHeight == null),
-            'dataRowHeight ($dataRowHeight) must not be set if dataRowMinHeight ($dataRowMinHeight) or dataRowMaxHeight ($dataRowMaxHeight) are set.'),
-        dataRowMinHeight = dataRowHeight ?? dataRowMinHeight,
-        dataRowMaxHeight = dataRowHeight ?? dataRowMaxHeight,
-        _onlyTextColumn = _initOnlyTextColumn(columns);
+  }) : assert(columns.isNotEmpty),
+       assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
+       assert(!rows.any((DataRow row) => row.cells.length != columns.length), 'All rows must have the same number of cells as there are header cells (${columns.length})'),
+       assert(dividerThickness == null || dividerThickness >= 0),
+       assert(dataRowMinHeight == null || dataRowMaxHeight == null || dataRowMaxHeight >= dataRowMinHeight),
+       assert(dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null),
+         'dataRowHeight ($dataRowHeight) must not be set if dataRowMinHeight ($dataRowMinHeight) or dataRowMaxHeight ($dataRowMaxHeight) are set.'),
+       dataRowMinHeight = dataRowHeight ?? dataRowMinHeight,
+       dataRowMaxHeight = dataRowHeight ?? dataRowMaxHeight,
+       _onlyTextColumn = _initOnlyTextColumn(columns);
 
   /// The configuration and labels for the columns in the table.
   final List<DataColumn> columns;
@@ -482,6 +477,8 @@ class DataTable extends StatelessWidget {
   ///
   /// When this is null, it implies that the table's sort order does
   /// not correspond to any of the columns.
+  ///
+  /// The direction of the sort is specified using [sortAscending].
   final int? sortColumnIndex;
 
   /// Whether the column mentioned in [sortColumnIndex], if any, is sorted
@@ -494,6 +491,8 @@ class DataTable extends StatelessWidget {
   /// If false, the order is descending (meaning the rows with the
   /// smallest values for the current sort column are last in the
   /// table).
+  ///
+  /// Ascending order is represented by an upwards-facing arrow.
   final bool sortAscending;
 
   /// Invoked when the user selects or unselects every row, using the

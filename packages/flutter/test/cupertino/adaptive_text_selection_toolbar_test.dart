@@ -30,6 +30,13 @@ void main() {
     );
   });
 
+  Finder findOverflowNextButton() {
+    return find.byWidgetPredicate((Widget widget) =>
+      widget is CustomPaint &&
+          '${widget.painter?.runtimeType}' == '_RightCupertinoChevronPainter',
+      );
+  }
+
   testWidgets('Builds the right toolbar on each platform, including web, and shows buttonItems', (WidgetTester tester) async {
     const String buttonText = 'Click me';
 
@@ -169,6 +176,8 @@ void main() {
           onSelectAll: () {},
           onLiveTextInput: () {},
           onLookUp: () {},
+          onSearchWeb: () {},
+          onShare: () {},
         ),
       ),
     ));
@@ -178,6 +187,7 @@ void main() {
     expect(find.text('Cut'), findsOneWidget);
     expect(find.text('Select All'), findsOneWidget);
     expect(find.text('Paste'), findsOneWidget);
+    expect(find.text('Look Up'), findsOneWidget);
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -186,11 +196,14 @@ void main() {
         expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(6));
       case TargetPlatform.iOS:
         expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(6));
+        expect(findOverflowNextButton(), findsOneWidget);
+        await tester.tapAt(tester.getCenter(findOverflowNextButton()));
+        await tester.pumpAndSettle();
         expect(findLiveTextButton(), findsOneWidget);
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(6));
+        expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(8));
     }
   },
     skip: kIsWeb, // [intended] on web the browser handles the context menu.

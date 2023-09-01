@@ -9,12 +9,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter_test/flutter_test.dart';
 
-import '../foundation/leak_tracking.dart';
-import '../rendering/mock_canvas.dart';
-
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/105833
-  testWidgetsWithLeakTracking('Drag gesture uses provided gesture settings', (WidgetTester tester) async {
+  testWidgets('Drag gesture uses provided gesture settings', (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.1, 0.5);
     bool dragStarted = false;
     final Key sliderKey = UniqueKey();
@@ -120,7 +117,7 @@ void main() {
     expect(dragStarted, false);
   });
 
-  testWidgetsWithLeakTracking('Range Slider can move when tapped (continuous LTR)', (WidgetTester tester) async {
+  testWidgets('Range Slider can move when tapped (continuous LTR)', (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -174,7 +171,7 @@ void main() {
     expect(values.end, moreOrLessEquals(0.9, epsilon: 0.01));
   });
 
-  testWidgetsWithLeakTracking('Range Slider can move when tapped (continuous RTL)', (WidgetTester tester) async {
+  testWidgets('Range Slider can move when tapped (continuous RTL)', (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -228,7 +225,7 @@ void main() {
     expect(values.end, moreOrLessEquals(0.9, epsilon: 0.01));
   });
 
-  testWidgetsWithLeakTracking('Range Slider can move when tapped (discrete LTR)', (WidgetTester tester) async {
+  testWidgets('Range Slider can move when tapped (discrete LTR)', (WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
@@ -286,7 +283,7 @@ void main() {
     expect(values.end.round(), equals(90));
   });
 
-  testWidgetsWithLeakTracking('Range Slider can move when tapped (discrete RTL)', (WidgetTester tester) async {
+  testWidgets('Range Slider can move when tapped (discrete RTL)', (WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
@@ -344,7 +341,7 @@ void main() {
     expect(values.end.round(), equals(90));
   });
 
-  testWidgetsWithLeakTracking('Range Slider thumbs can be dragged to the min and max (continuous LTR)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged to the min and max (continuous LTR)', (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -388,7 +385,7 @@ void main() {
     expect(values.end, equals(1));
   });
 
-  testWidgetsWithLeakTracking('Range Slider thumbs can be dragged to the min and max (continuous RTL)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged to the min and max (continuous RTL)', (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -432,7 +429,7 @@ void main() {
     expect(values.start, equals(0));
   });
 
-  testWidgetsWithLeakTracking('Range Slider thumbs can be dragged to the min and max (discrete LTR)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged to the min and max (discrete LTR)', (WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
@@ -478,7 +475,7 @@ void main() {
     expect(values.end, equals(100));
   });
 
-  testWidgetsWithLeakTracking('Range Slider thumbs can be dragged to the min and max (discrete RTL)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged to the min and max (discrete RTL)', (WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
@@ -524,7 +521,7 @@ void main() {
     expect(values.start, equals(0));
   });
 
-  testWidgetsWithLeakTracking('Range Slider thumbs can be dragged together and the start thumb can be dragged apart (continuous LTR)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged together and the start thumb can be dragged apart (continuous LTR)', (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -574,7 +571,7 @@ void main() {
     expect(values.start, moreOrLessEquals(0.2, epsilon: 0.05));
   });
 
-  testWidgetsWithLeakTracking('Range Slider thumbs can be dragged together and the start thumb can be dragged apart (continuous RTL)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged together and the start thumb can be dragged apart (continuous RTL)', (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -624,7 +621,7 @@ void main() {
     expect(values.start, moreOrLessEquals(0.2, epsilon: 0.05));
   });
 
-  testWidgetsWithLeakTracking('Range Slider thumbs can be dragged together and the start thumb can be dragged apart (discrete LTR)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged together and the start thumb can be dragged apart (discrete LTR)', (WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
@@ -676,7 +673,7 @@ void main() {
     expect(values.start, moreOrLessEquals(20, epsilon: 0.01));
   });
 
-  testWidgetsWithLeakTracking('Range Slider thumbs can be dragged together and the start thumb can be dragged apart (discrete RTL)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged together and the start thumb can be dragged apart (discrete RTL)', (WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
@@ -728,7 +725,7 @@ void main() {
     expect(values.start, moreOrLessEquals(20, epsilon: 0.01));
   });
 
-  testWidgetsWithLeakTracking('Range Slider thumbs can be dragged together and the end thumb can be dragged apart (continuous LTR)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged together and the end thumb can be dragged apart (continuous LTR)', (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -778,7 +775,7 @@ void main() {
     expect(values.end, moreOrLessEquals(0.8, epsilon: 0.05));
   });
 
-  testWidgetsWithLeakTracking('Range Slider thumbs can be dragged together and the end thumb can be dragged apart (continuous RTL)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged together and the end thumb can be dragged apart (continuous RTL)', (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -828,7 +825,7 @@ void main() {
     expect(values.end, moreOrLessEquals(0.8, epsilon: 0.05));
   });
 
-  testWidgetsWithLeakTracking('Range Slider thumbs can be dragged together and the end thumb can be dragged apart (discrete LTR)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged together and the end thumb can be dragged apart (discrete LTR)', (WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
@@ -880,7 +877,7 @@ void main() {
     expect(values.end, moreOrLessEquals(80, epsilon: 0.01));
   });
 
-  testWidgetsWithLeakTracking('Range Slider thumbs can be dragged together and the end thumb can be dragged apart (discrete RTL)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged together and the end thumb can be dragged apart (discrete RTL)', (WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
@@ -932,7 +929,7 @@ void main() {
     expect(values.end, moreOrLessEquals(80, epsilon: 0.01));
   });
 
-  testWidgetsWithLeakTracking('Range Slider onChangeEnd and onChangeStart are called on an interaction initiated by tap', (WidgetTester tester) async {
+  testWidgets('Range Slider onChangeEnd and onChangeStart are called on an interaction initiated by tap', (WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
     RangeValues? startValues;
     RangeValues? endValues;
@@ -986,7 +983,7 @@ void main() {
     expect(endValues!.end, moreOrLessEquals(70, epsilon: 1));
   });
 
-  testWidgetsWithLeakTracking('Range Slider onChangeEnd and onChangeStart are called on an interaction initiated by drag', (WidgetTester tester) async {
+  testWidgets('Range Slider onChangeEnd and onChangeStart are called on an interaction initiated by drag', (WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
     late RangeValues startValues;
     late RangeValues endValues;
@@ -1101,7 +1098,7 @@ void main() {
     );
   }
 
-  testWidgetsWithLeakTracking('Range Slider uses the right theme colors for the right shapes for a default enabled slider', (WidgetTester tester) async {
+  testWidgets('Range Slider uses the right theme colors for the right shapes for a default enabled slider', (WidgetTester tester) async {
     final ThemeData theme = buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
@@ -1130,7 +1127,7 @@ void main() {
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.inactiveTickMarkColor)));
   });
 
-  testWidgetsWithLeakTracking('Range Slider uses the right theme colors for the right shapes when setting the active color', (WidgetTester tester) async {
+  testWidgets('Range Slider uses the right theme colors for the right shapes when setting the active color', (WidgetTester tester) async {
     const Color activeColor = Color(0xcafefeed);
     final ThemeData theme = buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
@@ -1158,7 +1155,7 @@ void main() {
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
   });
 
-  testWidgetsWithLeakTracking('Range Slider uses the right theme colors for the right shapes when setting the inactive color', (WidgetTester tester) async {
+  testWidgets('Range Slider uses the right theme colors for the right shapes when setting the inactive color', (WidgetTester tester) async {
     const Color inactiveColor = Color(0xdeadbeef);
     final ThemeData theme = buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
@@ -1185,7 +1182,7 @@ void main() {
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
   });
 
-  testWidgetsWithLeakTracking('Range Slider uses the right theme colors for the right shapes with active and inactive colors', (WidgetTester tester) async {
+  testWidgets('Range Slider uses the right theme colors for the right shapes with active and inactive colors', (WidgetTester tester) async {
     const Color activeColor = Color(0xcafefeed);
     const Color inactiveColor = Color(0xdeadbeef);
     final ThemeData theme = buildTheme();
@@ -1218,7 +1215,7 @@ void main() {
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
   });
 
-  testWidgetsWithLeakTracking('Range Slider uses the right theme colors for the right shapes for a discrete slider', (WidgetTester tester) async {
+  testWidgets('Range Slider uses the right theme colors for the right shapes for a discrete slider', (WidgetTester tester) async {
     final ThemeData theme = buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
@@ -1248,7 +1245,7 @@ void main() {
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
   });
 
-  testWidgetsWithLeakTracking('Range Slider uses the right theme colors for the right shapes for a discrete slider with active and inactive colors', (WidgetTester tester) async {
+  testWidgets('Range Slider uses the right theme colors for the right shapes for a discrete slider with active and inactive colors', (WidgetTester tester) async {
     const Color activeColor = Color(0xcafefeed);
     const Color inactiveColor = Color(0xdeadbeef);
     final ThemeData theme = buildTheme();
@@ -1289,7 +1286,7 @@ void main() {
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.inactiveTickMarkColor)));
   });
 
-  testWidgetsWithLeakTracking('Range Slider uses the right theme colors for the right shapes for a default disabled slider', (WidgetTester tester) async {
+  testWidgets('Range Slider uses the right theme colors for the right shapes for a default disabled slider', (WidgetTester tester) async {
     final ThemeData theme = buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
@@ -1309,7 +1306,7 @@ void main() {
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.inactiveTrackColor)));
   });
 
-  testWidgetsWithLeakTracking('Range Slider uses the right theme colors for the right shapes for a disabled slider with active and inactive colors', (WidgetTester tester) async {
+  testWidgets('Range Slider uses the right theme colors for the right shapes for a disabled slider with active and inactive colors', (WidgetTester tester) async {
     const Color activeColor = Color(0xcafefeed);
     const Color inactiveColor = Color(0xdeadbeef);
     final ThemeData theme = buildTheme();
@@ -1498,7 +1495,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgetsWithLeakTracking('Range Slider top thumb gets stroked when overlapping', (WidgetTester tester) async {
+  testWidgets('Range Slider top thumb gets stroked when overlapping', (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     final ThemeData theme = ThemeData(
@@ -1565,7 +1562,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Range Slider top value indicator gets stroked when overlapping', (WidgetTester tester) async {
+  testWidgets('Range Slider top value indicator gets stroked when overlapping', (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     final ThemeData theme = ThemeData(
@@ -1639,7 +1636,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgetsWithLeakTracking('Range Slider top value indicator gets stroked when overlapping with large text scale', (WidgetTester tester) async {
+  testWidgets('Range Slider top value indicator gets stroked when overlapping with large text scale', (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     final ThemeData theme = ThemeData(
@@ -1716,7 +1713,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgetsWithLeakTracking('Range Slider thumb gets stroked when overlapping', (WidgetTester tester) async {
+  testWidgets('Range Slider thumb gets stroked when overlapping', (WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     final ThemeData theme = ThemeData(
@@ -1797,7 +1794,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/101868
-  testWidgetsWithLeakTracking('RangeSlider.label info should not write to semantic node', (WidgetTester tester) async {
+  testWidgets('RangeSlider.label info should not write to semantic node', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Theme(
@@ -1855,7 +1852,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Range Slider Semantics - ltr', (WidgetTester tester) async {
+  testWidgets('Range Slider Semantics - ltr', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Theme(
@@ -1939,7 +1936,7 @@ void main() {
     ]);
   });
 
-  testWidgetsWithLeakTracking('Range Slider Semantics - rtl', (WidgetTester tester) async {
+  testWidgets('Range Slider Semantics - rtl', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Theme(
@@ -2021,7 +2018,7 @@ void main() {
     ]);
   });
 
-  testWidgetsWithLeakTracking('Range Slider implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Range Slider implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     RangeSlider(
@@ -2052,7 +2049,7 @@ void main() {
     ]);
   });
 
-  testWidgetsWithLeakTracking('Range Slider can be painted in a narrower constraint when track shape is RoundedRectRange', (WidgetTester tester) async {
+  testWidgets('Range Slider can be painted in a narrower constraint when track shape is RoundedRectRange', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Directionality(
@@ -2091,7 +2088,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Range Slider can be painted in a narrower constraint when track shape is Rectangular', (WidgetTester tester) async {
+  testWidgets('Range Slider can be painted in a narrower constraint when track shape is Rectangular', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -2136,7 +2133,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Update the divisions and values at the same time for RangeSlider', (WidgetTester tester) async {
+  testWidgets('Update the divisions and values at the same time for RangeSlider', (WidgetTester tester) async {
     // Regress test for https://github.com/flutter/flutter/issues/65943
     Widget buildFrame(double maxValue) {
       return MaterialApp(
@@ -2180,7 +2177,7 @@ void main() {
     expect(nearEqual(activeTrackRect.right, (800.0 - 24.0 - 24.0) * (8 / 15) + 24.0, 0.01), true);
   });
 
-  testWidgetsWithLeakTracking('RangeSlider changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgets('RangeSlider changes mouse cursor when hovered', (WidgetTester tester) async {
     const RangeValues values = RangeValues(50, 70);
 
     // Test default cursor.
@@ -2235,7 +2232,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
   });
 
-  testWidgetsWithLeakTracking('RangeSlider MaterialStateMouseCursor resolves correctly', (WidgetTester tester) async {
+  testWidgets('RangeSlider MaterialStateMouseCursor resolves correctly', (WidgetTester tester) async {
     RangeValues values = const RangeValues(50, 70);
     const MouseCursor disabledCursor = SystemMouseCursors.basic;
     const MouseCursor hoveredCursor = SystemMouseCursors.grab;
@@ -2309,7 +2306,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), draggedCursor);
   });
 
-  testWidgetsWithLeakTracking('RangeSlider can be hovered and has correct hover color', (WidgetTester tester) async {
+  testWidgets('RangeSlider can be hovered and has correct hover color', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     RangeValues values = const RangeValues(50, 70);
     final ThemeData theme = ThemeData();
@@ -2372,7 +2369,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('RangeSlider is draggable and has correct dragged color', (WidgetTester tester) async {
+  testWidgets('RangeSlider is draggable and has correct dragged color', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     RangeValues values = const RangeValues(50, 70);
     final ThemeData theme = ThemeData();
@@ -2428,7 +2425,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('RangeSlider overlayColor supports hovered and dragged states', (WidgetTester tester) async {
+  testWidgets('RangeSlider overlayColor supports hovered and dragged states', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     RangeValues values = const RangeValues(50, 70);
     const Color hoverColor = Color(0xffff0000);
@@ -2543,7 +2540,7 @@ void main() {
     );
   });
 
-   testWidgetsWithLeakTracking('RangeSlider onChangeStart and onChangeEnd fire once', (WidgetTester tester) async {
+   testWidgets('RangeSlider onChangeStart and onChangeEnd fire once', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/128433
 
     int startFired = 0;
