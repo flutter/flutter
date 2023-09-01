@@ -111,6 +111,7 @@ class MockFlutterWindowsEngine : public FlutterWindowsEngine {
   MockFlutterWindowsEngine() : FlutterWindowsEngine(GetTestProject()) {}
 
   MOCK_METHOD0(Stop, bool());
+  MOCK_METHOD(bool, PostRasterThreadTask, (fml::closure));
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockFlutterWindowsEngine);
@@ -1279,6 +1280,13 @@ TEST(FlutterWindowsViewTest, UpdatesVSyncOnDwmUpdates) {
       std::make_unique<NiceMock<MockWindowBindingHandler>>();
   std::unique_ptr<MockAngleSurfaceManager> surface_manager =
       std::make_unique<MockAngleSurfaceManager>();
+
+  EXPECT_CALL(*engine.get(), PostRasterThreadTask)
+      .Times(2)
+      .WillRepeatedly([](fml::closure callback) {
+        callback();
+        return true;
+      });
 
   EXPECT_CALL(*window_binding_handler.get(), NeedsVSync)
       .WillOnce(Return(true))

@@ -343,6 +343,13 @@ void AngleSurfaceManager::SetVSyncEnabled(bool enabled) {
     LogEglError("Unable to update the swap interval");
     return;
   }
+
+  if (eglMakeCurrent(egl_display_, EGL_NO_SURFACE, EGL_NO_SURFACE,
+                     EGL_NO_CONTEXT) != EGL_TRUE) {
+    LogEglError(
+        "Unable to release the context after updating the swap interval");
+    return;
+  }
 }
 
 bool AngleSurfaceManager::GetDevice(ID3D11Device** device) {
