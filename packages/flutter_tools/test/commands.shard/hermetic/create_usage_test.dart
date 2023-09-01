@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
+import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
@@ -190,6 +191,29 @@ void main() {
     }, overrides: <Type, Generator>{
       Pub: () => fakePub,
     }));
+
+  testUsingContext('package_ffi template not enabled', () async {
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    expect(
+      runner.run(
+        <String>[
+          'create',
+          '--no-pub',
+          '--template=package_ffi',
+          'my_ffi_package',
+        ],
+      ),
+      throwsUsageException(
+        message: '"package_ffi" is not an allowed value for option "template"',
+      ),
+    );
+  }, overrides: <Type, Generator>{
+    // If we graduate the feature to true by default, don't break this test.
+    // ignore: avoid_redundant_argument_values
+    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: false),
+  });
   });
 }
 

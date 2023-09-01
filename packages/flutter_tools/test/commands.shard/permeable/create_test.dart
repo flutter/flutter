@@ -2618,6 +2618,8 @@ void main() {
     await expectLater(
       runner.run(<String>['create', '--no-pub', '--template=package_ffi', '--platform=ios', projectDir.path])
       , throwsToolExit(message: 'The "--platforms" argument is not supported', exitCode: 2));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
   });
 
   testUsingContext('create a plugin with android, delete then re-create folders', () async {
@@ -3343,6 +3345,8 @@ void main() {
         runner.run(args),
         throwsToolExit(message: 'The "android-language" option is not supported with the $template template: the language will always be C or C++.'),
       );
+    }, overrides: <Type, Generator>{
+      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
     });
 
     testUsingContext('$template error ios language', () async {
@@ -3362,6 +3366,8 @@ void main() {
         runner.run(args),
         throwsToolExit(message: 'The "ios-language" option is not supported with the $template template: the language will always be C or C++.'),
       );
+    }, overrides: <Type, Generator>{
+      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
     });
   }
 
