@@ -38,7 +38,12 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
   settings.cache_directory = fml::paths::GetCachesDirectory();
   settings.enable_validation = enable_vulkan_validation;
 
-  FML_LOG(ERROR) << "Using the Impeller rendering backend (Vulkan).";
+  if (settings.enable_validation) {
+    FML_LOG(ERROR) << "Using the Impeller rendering backend (Vulkan with "
+                      "Validation Layers).";
+  } else {
+    FML_LOG(ERROR) << "Using the Impeller rendering backend (Vulkan).";
+  }
 
   return impeller::ContextVK::Create(std::move(settings));
 }
