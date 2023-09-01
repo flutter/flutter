@@ -106,8 +106,8 @@ void main() {
     final RenderBox handle = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
     expect(handle, paints..path(color: defaultSelectionHandleColor));
   },
-    // TODO(polina-c): remove after merge
-    // https://github.com/flutter/flutter/pull/133858
+    // TODO(polina-c): remove after fix
+    // https://github.com/flutter/flutter/issues/133860
     leakTrackingTestConfig: const LeakTrackingTestConfig(
       notDisposedAllowList: <String, int?>{
         'ValueNotifier<bool>': 2,
@@ -163,8 +163,8 @@ void main() {
     final RenderBox handle = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
     expect(handle, paints..path(color: defaultSelectionHandleColor));
   },
-    // TODO(polina-c): remove after merge
-    // https://github.com/flutter/flutter/pull/133858
+    // TODO(polina-c): remove after fix
+    // https://github.com/flutter/flutter/issues/133860
     leakTrackingTestConfig: const LeakTrackingTestConfig(
       notDisposedAllowList: <String, int?>{
         'ValueNotifier<bool>': 2,
