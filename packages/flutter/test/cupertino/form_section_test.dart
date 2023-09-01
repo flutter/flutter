@@ -125,7 +125,7 @@ void main() {
           data: const MediaQueryData(),
           child: Localizations(
             locale: const Locale('en', 'US'),
-            delegates: <LocalizationsDelegate<dynamic>>[
+            delegates: const <LocalizationsDelegate<dynamic>>[
               DefaultCupertinoLocalizations.delegate,
               DefaultWidgetsLocalizations.delegate,
             ],
