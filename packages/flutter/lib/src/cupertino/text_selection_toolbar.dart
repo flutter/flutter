@@ -364,12 +364,11 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
       final BoxShadow boxShadow = BoxShadow(
         color: _shadowColor!,
         blurRadius: 15.0,
-        offset: Offset(
-          0.0,
-          isAbove ? 0.0 : _kToolbarArrowSize.height,
-        ),
+        spreadRadius: _kToolbarArrowSize.height,
       );
-      final RRect shadowRRect = rrect.shift(boxShadow.offset).inflate(boxShadow.spreadRadius);
+      final RRect shadowRRect = rrect
+          .shift(offset + childParentData.offset + boxShadow.offset)
+          .inflate(boxShadow.spreadRadius);
       context.canvas.drawRRect(shadowRRect, boxShadow.toPaint());
     }
 

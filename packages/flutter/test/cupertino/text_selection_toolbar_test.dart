@@ -472,7 +472,7 @@ void main() {
     expect(
       find.byType(CupertinoTextSelectionToolbar),
       paints..rrect(
-        rrect: RRect.fromLTRBR(0.0, 14.0, 150 + 2 * dividerWidth, 50.0, const Radius.circular(8.0)),
+        rrect: RRect.fromLTRBR(1.0, 508.0, 165.0 + 2 * dividerWidth, 558.0, const Radius.circular(15.0)),
         color: const Color(0x33000000),
       ),
     );
@@ -487,7 +487,7 @@ void main() {
     expect(
       find.byType(CupertinoTextSelectionToolbar),
       paints..rrect(
-        rrect: RRect.fromLTRBR(0.0, 7.0, 150 + 2 * dividerWidth, 43.0, const Radius.circular(8.0)),
+        rrect: RRect.fromLTRBR(1.0, 22.0, 165.0 + 2 * dividerWidth, 72.0, const Radius.circular(15.0)),
         color: const Color(0x33000000),
       ),
     );
