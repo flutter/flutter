@@ -742,11 +742,7 @@ class MaterialStatePropertyAll<T> implements MaterialStateProperty<T> {
 /// changed with [update]; it should not be modified directly.
 class MaterialStatesController extends ValueNotifier<Set<MaterialState>> {
   /// Creates a MaterialStatesController.
-  MaterialStatesController([Set<MaterialState>? value]) : super(<MaterialState>{...?value}) {
-    if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
-    }
-  }
+  MaterialStatesController([Set<MaterialState>? value]) : super(<MaterialState>{...?value});
 
   /// Adds [state] to [value] if [add] is true, and removes it otherwise,
   /// and notifies listeners if [value] has changed.
