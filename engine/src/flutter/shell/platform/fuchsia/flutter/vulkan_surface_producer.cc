@@ -19,6 +19,7 @@
 #include "third_party/skia/include/gpu/GrBackendSemaphore.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
+#include "third_party/skia/include/gpu/ganesh/vk/GrVkBackendSurface.h"
 #include "third_party/skia/include/gpu/vk/GrVkBackendContext.h"
 #include "third_party/skia/include/gpu/vk/GrVkExtensions.h"
 #include "third_party/skia/include/gpu/vk/GrVkTypes.h"
@@ -228,7 +229,7 @@ bool VulkanSurfaceProducer::TransitionSurfacesToExternal(
       return false;
     }
     GrVkImageInfo imageInfo;
-    if (!backendRT.getVkImageInfo(&imageInfo)) {
+    if (!GrBackendRenderTargets::GetVkImageInfo(backendRT, &imageInfo)) {
       return false;
     }
 
@@ -259,7 +260,8 @@ bool VulkanSurfaceProducer::TransitionSurfacesToExternal(
             1, &image_barrier))
       return false;
 
-    backendRT.setVkImageLayout(image_barrier.newLayout);
+    GrBackendRenderTargets::SetVkImageLayout(&backendRT,
+                                             image_barrier.newLayout);
 
     if (!command_buffer->End())
       return false;
