@@ -2220,9 +2220,9 @@ class _VerticalOuterDimensionState extends ScrollableState {
         if (value) {
           // Replaces the typical vertical/horizontal drag gesture recognizers
           // with a pan gesture recognizer to allow bidirectional scrolling.
-          // Based on the diagonalDragBehavior, valid horizontal deltas are
-          // applied to this scrollable, while vertical deltas are routed to
-          // the vertical scrollable.
+          // Based on the diagonalDragBehavior, valid vertical deltas are
+          // applied to this scrollable, while horizontal deltas are routed to
+          // the horizontal scrollable.
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
             PanGestureRecognizer: GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
               () => PanGestureRecognizer(supportedDevices: _configuration.dragDevices),
@@ -2320,8 +2320,8 @@ class _HorizontalInnerDimensionState extends ScrollableState {
       case DiagonalDragBehavior.free:
         if (value) {
           // If a type of diagonal scrolling is enabled, a panning gesture
-          // recognizer will be created for the _InnerDimension. So in this
-          // case, the _OuterDimension does not require a gesture recognizer.
+          // recognizer will be created for the _OuterDimension. So in this
+          // case, the _InnerDimension does not require a gesture recognizer.
           _gestureRecognizers = const <Type, GestureRecognizerFactory>{};
           // Cancel the active hold/drag (if any) because the gesture recognizers
           // will soon be disposed by our RawGestureDetector, and we won't be
