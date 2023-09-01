@@ -47,7 +47,7 @@ Future<void> main() async {
 
       section('Run platform unit tests');
 
-      if (!await runXcodeTests(
+      if (!await runXcodeTestsInScript(
         platformDirectory: path.join(projectDirectory, 'macos'),
         destination: 'platform=macOS',
         testName: 'native_ui_tests_macos',

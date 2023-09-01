@@ -208,3 +208,94 @@ Future<bool> runXcodeTests({
   }
   return true;
 }
+
+Future<bool> runXcodeTestsInScript({
+  required String platformDirectory,
+  required String destination,
+  required String testName,
+  String configuration = 'Release',
+  bool skipCodesign = false,
+}) async {
+  final Map<String, String> environment = Platform.environment;
+  String? developmentTeam;
+  String? codeSignStyle;
+  String? provisioningProfile;
+  if (!skipCodesign) {
+    // If not running on CI, inject the Flutter team code signing properties.
+    developmentTeam = environment['FLUTTER_XCODE_DEVELOPMENT_TEAM'] ?? 'S8QB4VV633';
+    codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'];
+    provisioningProfile = environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
+  }
+  final String resultBundleTemp = Directory.systemTemp.createTempSync('flutter_xcresult.').path;
+  final String resultBundlePath = path.join(resultBundleTemp, 'result');
+
+  final String flutterRoot = path.dirname(path.dirname(path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))))));
+  print('Flutter root at $flutterRoot');
+
+  final File output = File(path.join(resultBundleTemp, 'output.txt'));
+
+  const String executable = 'xcodebuild';
+  final List<String> arguments = <String>[
+    '-workspace',
+    'Runner.xcworkspace',
+    '-scheme',
+    'Runner',
+    '-configuration',
+    configuration,
+    '-destination',
+    destination,
+    '-resultBundlePath',
+    resultBundlePath,
+    'test',
+    'COMPILER_INDEX_STORE_ENABLE=NO',
+    if (developmentTeam != null)
+      'DEVELOPMENT_TEAM=$developmentTeam',
+    if (codeSignStyle != null)
+      'CODE_SIGN_STYLE=$codeSignStyle',
+    if (provisioningProfile != null)
+      'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
+    '>',
+    output.path,
+    '2>&1'
+  ];
+
+  final String command = 'cd $platformDirectory && $executable ${arguments.join(" ")}';
+  final int testResultExit = await exec(
+    'osascript',
+    <String>[
+      '$flutterRoot/packages/flutter_tools/bin/do_script.applescript',
+      command
+    ],
+    canFail: true,
+  );
+
+  print(output.readAsStringSync());
+
+  if (testResultExit != 0) {
+    final Directory? dumpDirectory = hostAgent.dumpDirectory;
+    final Directory xcresultBundle = Directory(path.join(resultBundleTemp, 'result.xcresult'));
+    if (dumpDirectory != null) {
+      if (xcresultBundle.existsSync()) {
+        // Zip the test results to the artifacts directory for upload.
+        final String zipPath = path.join(dumpDirectory.path,
+            '$testName-${DateTime.now().toLocal().toIso8601String()}.zip');
+        await exec(
+          'zip',
+          <String>[
+            '-r',
+            '-9',
+            '-q',
+            zipPath,
+            path.basename(xcresultBundle.path),
+          ],
+          workingDirectory: resultBundleTemp,
+          canFail: true, // Best effort to get the logs.
+        );
+      } else {
+        print('xcresult bundle ${xcresultBundle.path} does not exist, skipping upload');
+      }
+    }
+    return false;
+  }
+  return true;
+}
