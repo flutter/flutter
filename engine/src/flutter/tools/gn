@@ -646,7 +646,9 @@ def to_gn_args(args):
   if args.unoptimized and args.target_os == 'android' and args.android_cpu == 'arm64':
     enable_vulkan_validation = True
 
-  if enable_vulkan_validation:
+  if enable_vulkan_validation or (args.enable_impeller_vulkan and
+                                  runtime_mode == 'debug' and
+                                  gn_args['target_cpu'] == 'arm64'):
     gn_args['enable_vulkan_validation_layers'] = True
     if args.target_os == 'android':
       gn_args['android_api_level'] = 26
