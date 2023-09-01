@@ -181,7 +181,7 @@ void main() {
     leakTrackingTestConfig: const LeakTrackingTestConfig(
       // TODO(polina-c): remove after fixing
       // https://github.com/flutter/flutter/issues/133862
-      notDisposedAllowList: <String, int?> {'MaterialStatesController': null},
+      allowAllNotDisposed: true,
     ));
 
     testWidgets('Cancel, confirm, and help text is used', (WidgetTester tester) async {
