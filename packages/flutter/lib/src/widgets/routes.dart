@@ -884,6 +884,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   @override
   void dispose() {
     focusScopeNode.dispose();
+    primaryScrollController.dispose();
     super.dispose();
   }
 
