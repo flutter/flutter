@@ -293,11 +293,10 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
     final BoxConstraints enforcedConstraint = constraints.loosen();
     child!.layout(enforcedConstraint, parentUsesSize: true);
 
-    // The content child is padded with arrow height on both top and bottom
-    // and so it can have the arrow clipped out of it on either side. By
+    // The buttons are padded on both top and bottom sufficiently to have
+    // the arrow clipped out of it on either side. By
     // using this approach, the buttons don't need any special padding that
     // depends on isAbove.
-
     // The height of one arrow will be clipped off of the child, so adjust the
     // size and position to remove that piece from the layout.
     final BoxParentData childParentData = child!.parentData! as BoxParentData;
