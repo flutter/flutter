@@ -233,6 +233,7 @@ Future<bool> runXcodeTestsInScript({
   print('Flutter root at $flutterRoot');
 
   final File output = File(path.join(resultBundleTemp, 'output.txt'));
+  final File exitCodeOutput = File(path.join(resultBundleTemp, 'exit_code_output.txt'));
 
   const String executable = 'xcodebuild';
   final List<String> arguments = <String>[
@@ -259,19 +260,29 @@ Future<bool> runXcodeTestsInScript({
     '2>&1'
   ];
 
-  final String command = 'cd "$platformDirectory" && $executable ${arguments.join(" ")}';
-  final int testResultExit = await exec(
+  final String command = '$executable ${arguments.join(" ")}';
+
+  final String exitCodeCommand = 'echo \$? > ${exitCodeOutput.path}';
+  final int testExecutation = await exec(
     'osascript',
     <String>[
-      '$flutterRoot/packages/flutter_tools/bin/do_script.applescript',
-      command
+      '-l',
+      'JavaScript',
+      '$flutterRoot/packages/flutter_tools/bin/run_in_terminal.js',
+      platformDirectory,
+      command,
+      exitCodeCommand
     ],
     canFail: true,
   );
 
   print(output.readAsStringSync());
 
-  if (testResultExit != 0) {
+  final String exitCodeString = exitCodeOutput.readAsStringSync().trim();
+  print('xcodebuild test exited with code $exitCodeString');
+  final int testResultExit = int.parse(exitCodeString);
+
+  if (testExecutation != 0 || testResultExit != 0) {
     final Directory? dumpDirectory = hostAgent.dumpDirectory;
     final Directory xcresultBundle = Directory(path.join(resultBundleTemp, 'result.xcresult'));
     if (dumpDirectory != null) {
