@@ -8398,12 +8398,33 @@ void main() {
     // https://github.com/flutter/flutter/pull/57139#issuecomment-629048058
   }, skip: isBrowser); // [intended] see above.
 
-  testWidgets('TextField throws when not descended from a Material widget', (WidgetTester tester) async {
-    const Widget textField = TextField();
+  testWidgets('TextField does not throw when not descended from a Material widget', (WidgetTester tester) async {
+    final Widget textField = Localizations(
+      delegates: const <LocalizationsDelegate<dynamic>>[
+        // TextField requires MaterialLocalizations to generate messages, labels,
+        // and abbreviations.
+        DefaultMaterialLocalizations.delegate,
+        DefaultWidgetsLocalizations.delegate,
+      ],
+      locale: const Locale('en', 'US'),
+      child: TextField(),
+    );
     await tester.pumpWidget(textField);
     final dynamic exception = tester.takeException();
-    expect(exception, isFlutterError);
-    expect(exception.toString(), startsWith('No Material widget found.'));
+    expect(exception, null);
+  });
+
+  testWidgets('TextField throws when not descended from a MaterialLocalizations', (WidgetTester tester) async {
+    final Widget textField = Localizations(
+      delegates: const <LocalizationsDelegate<dynamic>>[
+        DefaultWidgetsLocalizations.delegate,
+      ],
+      locale: const Locale('en', 'US'),
+      child: TextField(),
+    );
+    await tester.pumpWidget(textField);
+    final dynamic exception = tester.takeException();
+    expect(exception.toString(), startsWith('No MaterialLocalizations found.'));
   });
 
   testWidgets('TextField loses focus when disabled', (WidgetTester tester) async {
