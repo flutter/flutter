@@ -178,9 +178,11 @@ void main() {
         expect(find.text('Select date'), findsOneWidget);
       }, useMaterial3: true);
     },
-
-
-    );
+    leakTrackingTestConfig: const LeakTrackingTestConfig(
+      // TODO(polina-c): fix and remove after merge
+      // https://github.com/flutter/flutter/pull/133883
+      notDisposedAllowList: <String, int?>{'_RestorableDatePickerEntryMode': 3},
+    ));
 
     testWidgets('Cancel, confirm, and help text is used', (WidgetTester tester) async {
       cancelText = 'nope';
