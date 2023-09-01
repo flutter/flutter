@@ -6,6 +6,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../image_data.dart';
 
@@ -443,7 +444,7 @@ void main() {
     );
   });
 
-  testWidgets('generated scheme "on" colors meet a11y contrast guidelines', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('generated scheme "on" colors meet a11y contrast guidelines', (WidgetTester tester) async {
     final ColorScheme colors = ColorScheme.fromSeed(seedColor: Colors.teal);
 
     Widget label(String text, Color textColor, Color background) {
@@ -473,6 +474,7 @@ void main() {
     );
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
+    leakTrackingTestConfig: LeakTrackingTestConfig.debugNotDisposed(),
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
 }
