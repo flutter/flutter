@@ -178,11 +178,9 @@ void main() {
         expect(find.text('Select date'), findsOneWidget);
       }, useMaterial3: true);
     },
-    leakTrackingTestConfig: const LeakTrackingTestConfig(
-      // TODO(polina-c): remove after fixing
-      // https://github.com/flutter/flutter/issues/133862
-      allowAllNotDisposed: true,
-    ));
+
+
+    );
 
     testWidgets('Cancel, confirm, and help text is used', (WidgetTester tester) async {
       cancelText = 'nope';

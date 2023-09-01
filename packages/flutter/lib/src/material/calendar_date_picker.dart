@@ -868,6 +868,8 @@ class _DayPickerState extends State<_DayPicker> {
   /// List of [FocusNode]s, one for each day of the month.
   late List<FocusNode> _dayFocusNodes;
 
+  final MaterialStatesController _materialStatesController = MaterialStatesController();
+
   @override
   void initState() {
     super.initState();
@@ -893,6 +895,7 @@ class _DayPickerState extends State<_DayPicker> {
     for (final FocusNode node in _dayFocusNodes) {
       node.dispose();
     }
+    _materialStatesController.dispose();
     super.dispose();
   }
 
@@ -973,6 +976,8 @@ class _DayPickerState extends State<_DayPicker> {
           if (isSelectedDay) MaterialState.selected,
         };
 
+        _materialStatesController.value = states;
+
         final Color? dayForegroundColor = resolve<Color?>((DatePickerThemeData? theme) => isToday ? theme?.todayForegroundColor : theme?.dayForegroundColor, states);
         final Color? dayBackgroundColor = resolve<Color?>((DatePickerThemeData? theme) => isToday ? theme?.todayBackgroundColor : theme?.dayBackgroundColor, states);
         final MaterialStateProperty<Color?> dayOverlayColor = MaterialStateProperty.resolveWith<Color?>(
@@ -1008,7 +1013,7 @@ class _DayPickerState extends State<_DayPicker> {
             focusNode: _dayFocusNodes[day - 1],
             onTap: () => widget.onChanged(dayToBuild),
             radius: _dayPickerRowHeight / 2 + 4,
-            statesController: MaterialStatesController(states),
+            statesController: _materialStatesController,
             overlayColor: dayOverlayColor,
             child: Semantics(
               // We want the day of month to be spoken first irrespective of the
