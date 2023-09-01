@@ -31,6 +31,7 @@
   "continueButtonLabel": "המשך",
   "copyButtonLabel": "העתקה",
   "cutButtonLabel": "גזירה",
+  "scanTextButtonLabel": "סרוק טקסט",
   "okButtonLabel": "אישור",
   "pasteButtonLabel": "הדבקה",
   "selectAllButtonLabel": "בחירת הכול",
@@ -140,5 +141,11 @@
   "scrimLabel": "מיסוך",
   "bottomSheetLabel": "גיליון תחתון",
   "scrimOnTapHint": "סגירת $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

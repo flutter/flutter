@@ -106,7 +106,7 @@ class _TestWidgetState extends State<TestWidget> {
       calledDuringBuild++;
     });
     return SizedBox.expand(
-      child: Text(Directionality.of(context).toString()),
+      child: Text('${widget.value}: ${Directionality.of(context)}'),
     );
   }
 }

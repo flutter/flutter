@@ -156,8 +156,6 @@ class _ElevationOpacity {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
-
 // Surface tint opacities based on elevations according to the
 // Material Design 3 specification:
 //   https://m3.material.io/styles/color/the-color-system/color-roles

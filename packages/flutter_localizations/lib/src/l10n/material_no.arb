@@ -28,6 +28,7 @@
   "continueButtonLabel": "Fortsett",
   "copyButtonLabel": "Kopiér",
   "cutButtonLabel": "Klipp ut",
+  "scanTextButtonLabel": "Skann tekst",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "Lim inn",
   "selectAllButtonLabel": "Velg alle",
@@ -132,5 +133,11 @@
   "scrimLabel": "Vev",
   "bottomSheetLabel": "Felt nederst",
   "scrimOnTapHint": "Lukk $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

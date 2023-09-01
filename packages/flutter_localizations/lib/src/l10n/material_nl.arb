@@ -25,6 +25,7 @@
   "continueButtonLabel": "Doorgaan",
   "copyButtonLabel": "Kopiëren",
   "cutButtonLabel": "Knippen",
+  "scanTextButtonLabel": "Tekst scannen",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "Plakken",
   "selectAllButtonLabel": "Alles selecteren",
@@ -134,5 +135,11 @@
   "scrimLabel": "Scrim",
   "bottomSheetLabel": "Blad onderaan",
   "scrimOnTapHint": "$modalRouteContentName sluiten",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

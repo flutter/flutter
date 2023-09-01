@@ -694,6 +694,44 @@ void main() {
       'panend#2']);
   });
 
+  // This is a regression test for https://github.com/flutter/flutter/issues/129161.
+  testGesture('Beats TapGestureRecognizer and DoubleTapGestureRecognizer when the pointer has not moved and this recognizer is the first in the arena', (GestureTester tester) {
+    setUpTapAndPanGestureRecognizer();
+
+    final TapGestureRecognizer taps = TapGestureRecognizer()
+      ..onTapDown = (TapDownDetails details) {
+        events.add('tapdown');
+      }
+      ..onTapUp =  (TapUpDetails details) {
+        events.add('tapup');
+      }
+      ..onTapCancel = () {
+        events.add('tapscancel');
+      };
+
+    final DoubleTapGestureRecognizer doubleTaps = DoubleTapGestureRecognizer()
+      ..onDoubleTapDown = (TapDownDetails details) {
+        events.add('doubletapdown');
+      }
+      ..onDoubleTap =  () {
+        events.add('doubletapup');
+      }
+      ..onDoubleTapCancel = () {
+        events.add('doubletapcancel');
+      };
+
+    tapAndDrag.addPointer(down1);
+    taps.addPointer(down1);
+    doubleTaps.addPointer(down1);
+    tester.closeArena(1);
+    tester.route(down1);
+    tester.route(up1);
+    GestureBinding.instance.gestureArena.sweep(1);
+    // Wait for GestureArena to resolve itself.
+    tester.async.elapse(kDoubleTapTimeout);
+    expect(events, <String>['down#1', 'up#1']);
+  });
+
   testGesture('Beats TapGestureRecognizer when the pointer has not moved and this recognizer is the first in the arena', (GestureTester tester) {
     setUpTapAndPanGestureRecognizer();
 

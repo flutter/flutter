@@ -52,37 +52,19 @@ enum _FloatingActionButtonType {
 /// action button.
 ///
 /// {@tool dartpad}
-/// This example shows how to display a [FloatingActionButton] in a
-/// [Scaffold], with a pink [backgroundColor] and a thumbs up [Icon].
-///
-/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button.png)
+/// This example shows a [FloatingActionButton] in its usual position within a
+/// [Scaffold]. Pressing the button cycles it through a few variations in its
+/// [foregroundColor], [backgroundColor], and [shape]. The button automatically
+/// animates its segue from one set of visual parameters to another.
 ///
 /// ** See code in examples/api/lib/material/floating_action_button/floating_action_button.0.dart **
 /// {@end-tool}
 ///
 /// {@tool dartpad}
-/// This example shows how to make an extended [FloatingActionButton] in a
-/// [Scaffold], with a pink [backgroundColor], a thumbs up [Icon] and a
-/// [Text] label that reads "Approve".
-///
-/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_label.png)
+/// This sample shows all the variants of [FloatingActionButton] widget as
+/// described in: https://m3.material.io/components/floating-action-button/overview.
 ///
 /// ** See code in examples/api/lib/material/floating_action_button/floating_action_button.1.dart **
-/// {@end-tool}
-///
-/// Material Design 3 introduced new types of floating action buttons.
-/// {@tool dartpad}
-/// This sample shows the creation of [FloatingActionButton] widget in the typical location in a Scaffold,
-/// as described in: https://m3.material.io/components/floating-action-button/overview
-///
-/// ** See code in examples/api/lib/material/floating_action_button/floating_action_button.2.dart **
-/// {@end-tool}
-///
-/// {@tool dartpad}
-/// This sample shows the creation of all the variants of [FloatingActionButton] widget as
-/// described in: https://m3.material.io/components/floating-action-button/overview
-///
-/// ** See code in examples/api/lib/material/floating_action_button/floating_action_button.3.dart **
 /// {@end-tool}
 ///
 /// See also:
@@ -556,7 +538,7 @@ class FloatingActionButton extends StatelessWidget {
       data: IconThemeData(size: iconSize),
       child: child!,
     ) : child;
-    switch(_floatingActionButtonType) {
+    switch (_floatingActionButtonType) {
       case _FloatingActionButtonType.regular:
         sizeConstraints = floatingActionButtonTheme.sizeConstraints ?? defaults.sizeConstraints!;
       case _FloatingActionButtonType.small:
@@ -788,8 +770,6 @@ class _FABDefaultsM2 extends FloatingActionButtonThemeData {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _FABDefaultsM3 extends FloatingActionButtonThemeData {
   _FABDefaultsM3(this.context, this.type, this.hasChild)

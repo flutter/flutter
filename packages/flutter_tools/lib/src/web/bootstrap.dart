@@ -196,6 +196,12 @@ define("$bootstrapModule", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) 
       return dart.getSourceMap(url);
     });
   }
+  // Prevent DDC's requireJS to interfere with modern bundling.
+  if (typeof define === 'function' && define.amd) {
+    // Preserve a copy just in case...
+    define._amd = define.amd;
+    delete define.amd;
+  }
 });
 ''';
 }
@@ -218,9 +224,7 @@ String generateTestEntrypoint({
   ${testConfigPath != null ? "import '${Uri.file(testConfigPath)}' as test_config;" : ""}
   import 'package:stream_channel/stream_channel.dart';
   import 'package:flutter_test/flutter_test.dart';
-  import 'package:test_api/src/backend/stack_trace_formatter.dart'; // ignore: implementation_imports
-  import 'package:test_api/src/remote_listener.dart'; // ignore: implementation_imports
-  import 'package:test_api/src/backend/suite_channel_manager.dart'; // ignore: implementation_imports
+  import 'package:test_api/backend.dart';
 
   Future<void> main() async {
     ui.debugEmulateFlutterTesterEnvironment = true;

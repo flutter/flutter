@@ -87,6 +87,7 @@ class TextButton extends ButtonStyleButton {
     super.autofocus = false,
     super.clipBehavior = Clip.none,
     super.statesController,
+    super.isSemanticButton,
     required Widget super.child,
   });
 
@@ -200,9 +201,7 @@ class TextButton extends ButtonStyleButton {
       : disabledIconColor == null
         ? ButtonStyleButton.allOrNull<Color?>(iconColor)
         : _TextButtonDefaultIconColor(iconColor, disabledIconColor);
-    final MaterialStateProperty<MouseCursor>? mouseCursor = (enabledMouseCursor == null && disabledMouseCursor == null)
-      ? null
-      : _TextButtonDefaultMouseCursor(enabledMouseCursor!, disabledMouseCursor!);
+    final MaterialStateProperty<MouseCursor?> mouseCursor = _TextButtonDefaultMouseCursor(enabledMouseCursor, disabledMouseCursor);
 
     return ButtonStyle(
       textStyle: ButtonStyleButton.allOrNull<TextStyle>(textStyle),
@@ -316,7 +315,7 @@ class TextButton extends ButtonStyleButton {
   ///   * hovered - Theme.colorScheme.primary(0.08)
   ///   * focused or pressed - Theme.colorScheme.primary(0.12)
   ///   * others - null
-  /// * `shadowColor` - null
+  /// * `shadowColor` - Colors.transparent,
   /// * `surfaceTintColor` - null
   /// * `elevation` - 0
   /// * `padding`
@@ -419,10 +418,13 @@ class _TextButtonDefaultOverlay extends MaterialStateProperty<Color?> {
 
   @override
   Color? resolve(Set<MaterialState> states) {
+    if (states.contains(MaterialState.pressed)) {
+      return primary.withOpacity(0.12);
+    }
     if (states.contains(MaterialState.hovered)) {
       return primary.withOpacity(0.04);
     }
-    if (states.contains(MaterialState.focused) || states.contains(MaterialState.pressed)) {
+    if (states.contains(MaterialState.focused)) {
       return primary.withOpacity(0.12);
     }
     return null;
@@ -456,14 +458,14 @@ class _TextButtonDefaultIconColor extends MaterialStateProperty<Color?> {
 }
 
 @immutable
-class _TextButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor> with Diagnosticable {
+class _TextButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor?> with Diagnosticable {
   _TextButtonDefaultMouseCursor(this.enabledCursor, this.disabledCursor);
 
-  final MouseCursor enabledCursor;
-  final MouseCursor disabledCursor;
+  final MouseCursor? enabledCursor;
+  final MouseCursor? disabledCursor;
 
   @override
-  MouseCursor resolve(Set<MaterialState> states) {
+  MouseCursor? resolve(Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
       return disabledCursor;
     }
@@ -533,8 +535,6 @@ class _TextButtonWithIconChild extends StatelessWidget {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
-
 class _TextButtonDefaultsM3 extends ButtonStyle {
   _TextButtonDefaultsM3(this.context)
    : super(
@@ -566,13 +566,13 @@ class _TextButtonDefaultsM3 extends ButtonStyle {
   @override
   MaterialStateProperty<Color?>? get overlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.primary.withOpacity(0.12);
+      }
       if (states.contains(MaterialState.hovered)) {
         return _colors.primary.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.primary.withOpacity(0.12);
-      }
-      if (states.contains(MaterialState.pressed)) {
         return _colors.primary.withOpacity(0.12);
       }
       return null;

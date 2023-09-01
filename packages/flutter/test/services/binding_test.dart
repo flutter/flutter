@@ -46,7 +46,13 @@ class TestBinding extends BindingBase with SchedulerBinding, ServicesBinding {
 
   @override
   TestDefaultBinaryMessenger createBinaryMessenger() {
-    return TestDefaultBinaryMessenger(super.createBinaryMessenger());
+    Future<ByteData?> keyboardHandler(ByteData? message) async {
+      return const StandardMethodCodec().encodeSuccessEnvelope(<int, int>{1:1});
+    }
+    return TestDefaultBinaryMessenger(
+      super.createBinaryMessenger(),
+      outboundHandlers: <String, MessageHandler>{'flutter/keyboard': keyboardHandler},
+    );
   }
 }
 
@@ -96,7 +102,7 @@ void main() {
     expect(flutterAssetsCallCount, 2);
 
     final ByteData message = const JSONMessageCodec().encodeMessage(<String, dynamic>{'type': 'memoryPressure'})!;
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
+    await binding.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
 
     await rootBundle.loadString('test_asset');
     expect(flutterAssetsCallCount, 3);
@@ -110,7 +116,7 @@ void main() {
 
   test('initInstances sets a default method call handler for SystemChannels.textInput', () async {
     final ByteData message = const JSONMessageCodec().encodeMessage(<String, dynamic>{'method': 'TextInput.requestElementsInRect', 'args': null})!;
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/textinput', message, (ByteData? data) {
+    await binding.defaultBinaryMessenger.handlePlatformMessage('flutter/textinput', message, (ByteData? data) {
       expect(data, isNotNull);
      });
   });
@@ -144,5 +150,15 @@ void main() {
     expect(receivedReply, isTrue);
     expect(result, isNotNull);
     expect(result!['response'], equals('exit'));
+  });
+
+  test('initInstances synchronizes keyboard state', () async {
+    final Set<PhysicalKeyboardKey> physicalKeys = HardwareKeyboard.instance.physicalKeysPressed;
+    final Set<LogicalKeyboardKey> logicalKeys = HardwareKeyboard.instance.logicalKeysPressed;
+
+    expect(physicalKeys.length, 1);
+    expect(logicalKeys.length, 1);
+    expect(physicalKeys.first, const PhysicalKeyboardKey(1));
+    expect(logicalKeys.first, const LogicalKeyboardKey(1));
   });
 }

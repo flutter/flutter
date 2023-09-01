@@ -176,7 +176,6 @@ class AnalyzeCommand extends FlutterCommand {
     } else if (boolArg('watch')) {
       await AnalyzeContinuously(
         argResults!,
-        runner!.getRepoRoots(),
         runner!.getRepoPackages(),
         fileSystem: _fileSystem,
         logger: _logger,
@@ -189,7 +188,6 @@ class AnalyzeCommand extends FlutterCommand {
     } else {
       await AnalyzeOnce(
         argResults!,
-        runner!.getRepoRoots(),
         runner!.getRepoPackages(),
         workingDirectory: workingDirectory,
         fileSystem: _fileSystem,

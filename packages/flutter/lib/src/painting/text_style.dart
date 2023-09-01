@@ -595,14 +595,19 @@ class TextStyle with Diagnosticable {
   // in the [fontFamilyFallback] getter.
   final String? _package;
 
-  /// The size of glyphs (in logical pixels) to use when painting the text.
+  /// The size of fonts (in logical pixels) to use when painting the text.
+  ///
+  /// The value specified matches the dimension of the
+  /// [em square](https://fonts.google.com/knowledge/glossary/em) of the
+  /// underlying font, and more often then not isn't exactly the height or the
+  /// width of glyphs in the font.
   ///
   /// During painting, the [fontSize] is multiplied by the current
   /// `textScaleFactor` to let users make it easier to read text by increasing
   /// its size.
   ///
-  /// [getParagraphStyle] will default to 14 logical pixels if the font size
-  /// isn't specified here.
+  /// The [getParagraphStyle] method defaults to 14 logical pixels if [fontSize]
+  /// is set to null.
   final double? fontSize;
 
   /// The typeface thickness to use when painting the text (e.g., bold).

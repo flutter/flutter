@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
-
 import 'dart:async';
 
 import 'package:meta/meta.dart';
@@ -79,7 +77,7 @@ class DeviceReloadReport {
 
 class HotRunner extends ResidentRunner {
   HotRunner(
-    super.devices, {
+    super.flutterDevices, {
     required super.target,
     required super.debuggingOptions,
     this.benchmarkMode = false,
@@ -192,16 +190,21 @@ class HotRunner extends ResidentRunner {
     String isolateId,
     String expression,
     List<String> definitions,
+    List<String> definitionTypes,
     List<String> typeDefinitions,
+    List<String> typeBounds,
+    List<String> typeDefaults,
     String libraryUri,
     String? klass,
+    String? method,
     bool isStatic,
   ) async {
     for (final FlutterDevice? device in flutterDevices) {
       if (device!.generator != null) {
         final CompilerOutput? compilerOutput =
             await device.generator!.compileExpression(expression, definitions,
-                typeDefinitions, libraryUri, klass, isStatic);
+                definitionTypes, typeDefinitions, typeBounds, typeDefaults,
+                libraryUri, klass, method, isStatic);
         if (compilerOutput != null && compilerOutput.expressionData != null) {
           return base64.encode(compilerOutput.expressionData!);
         }
@@ -246,6 +249,7 @@ class HotRunner extends ResidentRunner {
       unawaited(residentDevtoolsHandler!.serveAndAnnounceDevTools(
         devToolsServerAddress: debuggingOptions.devToolsServerAddress,
         flutterDevices: flutterDevices,
+        isStartPaused: debuggingOptions.startPaused,
       ));
     }
 
@@ -1295,9 +1299,8 @@ Future<ReassembleResult> _defaultReassembleHelper(
     for (final FlutterView view in views) {
       // Check if the isolate is paused, and if so, don't reassemble. Ignore the
       // PostPauseEvent event - the client requesting the pause will resume the app.
-      final vm_service.Isolate? isolate = await device!.vmService!
-        .getIsolateOrNull(view.uiIsolate!.id!);
-      final vm_service.Event? pauseEvent = isolate?.pauseEvent;
+      final vm_service.Event? pauseEvent = await device!.vmService!
+        .getIsolatePauseEventOrNull(view.uiIsolate!.id!);
       if (pauseEvent != null
         && isPauseEvent(pauseEvent.kind!)
         && pauseEvent.kind != vm_service.EventKind.kPausePostRequest) {
@@ -1361,16 +1364,13 @@ Future<ReassembleResult> _defaultReassembleHelper(
       int postReloadPausedIsolatesFound = 0;
       String? serviceEventKind;
       for (final FlutterView view in reassembleViews.keys) {
-        final vm_service.Isolate? isolate = await reassembleViews[view]!
-          .getIsolateOrNull(view.uiIsolate!.id!);
-        if (isolate == null) {
-          continue;
-        }
-        if (isolate.pauseEvent != null && isPauseEvent(isolate.pauseEvent!.kind!)) {
+        final vm_service.Event? pauseEvent = await reassembleViews[view]!
+          .getIsolatePauseEventOrNull(view.uiIsolate!.id!);
+        if (pauseEvent != null && isPauseEvent(pauseEvent.kind!)) {
           postReloadPausedIsolatesFound += 1;
           if (serviceEventKind == null) {
-            serviceEventKind = isolate.pauseEvent!.kind;
-          } else if (serviceEventKind != isolate.pauseEvent!.kind) {
+            serviceEventKind = pauseEvent.kind;
+          } else if (serviceEventKind != pauseEvent.kind) {
             serviceEventKind = ''; // many kinds
           }
         }

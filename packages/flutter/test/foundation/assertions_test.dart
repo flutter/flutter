@@ -242,7 +242,7 @@ void main() {
         'This error should still help you solve your problem, however\n'
         'please also report this malformed error in the framework by\n'
         'filing a bug on GitHub:\n'
-        '  https://github.com/flutter/flutter/issues/new?template=2_bug.md\n'
+        '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml\n'
         '═════════════════════════════════════════════════════════════════\n',
       );
     }
@@ -279,7 +279,7 @@ void main() {
         'This error should still help you solve your problem, however\n'
         'please also report this malformed error in the framework by\n'
         'filing a bug on GitHub:\n'
-        '  https://github.com/flutter/flutter/issues/new?template=2_bug.md\n'
+        '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml\n'
         '═════════════════════════════════════════════════════════════════\n',
       );
     }
@@ -308,7 +308,7 @@ void main() {
         'This error should still help you solve your problem, however\n'
         'please also report this malformed error in the framework by\n'
         'filing a bug on GitHub:\n'
-        '  https://github.com/flutter/flutter/issues/new?template=2_bug.md\n'
+        '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml\n'
         '═════════════════════════════════════════════════════════════════\n',
       );
     }
@@ -408,7 +408,7 @@ void main() {
       'provide substantially more information in this error message to help you determine '
       'and fix the underlying cause.\n'
       'In either case, please report this assertion by filing a bug on GitHub:\n'
-      '  https://github.com/flutter/flutter/issues/new?template=2_bug.md',
+      '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
     );
     expect(builder.properties[4] is ErrorSpacer, true);
     final DiagnosticsStackTrace trace = builder.properties[5] as DiagnosticsStackTrace;

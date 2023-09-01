@@ -103,6 +103,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
     required VoidCallback? onCut,
     required VoidCallback? onPaste,
     required VoidCallback? onSelectAll,
+    required VoidCallback? onLiveTextInput,
     required this.anchors,
   }) : children = null,
        buttonItems = EditableText.getEditableButtonItems(
@@ -111,6 +112,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
          onCut: onCut,
          onPaste: onPaste,
          onSelectAll: onSelectAll,
+         onLiveTextInput: onLiveTextInput
        );
 
   /// Create an instance of [AdaptiveTextSelectionToolbar] with the default
@@ -213,6 +215,8 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
             return localizations.selectAllButtonLabel;
           case ContextMenuButtonType.delete:
             return localizations.deleteButtonTooltip.toUpperCase();
+          case ContextMenuButtonType.liveTextInput:
+            return localizations.scanTextButtonLabel;
           case ContextMenuButtonType.custom:
             return '';
         }
@@ -242,9 +246,8 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
         return buttonItems.map((ContextMenuButtonItem buttonItem) {
-            return CupertinoTextSelectionToolbarButton.text(
-              onPressed: buttonItem.onPressed,
-              text: getButtonLabel(context, buttonItem),
+            return CupertinoTextSelectionToolbarButton.buttonItem(
+              buttonItem: buttonItem,
             );
           });
       case TargetPlatform.fuchsia:
@@ -271,7 +274,6 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
       case TargetPlatform.macOS:
         return buttonItems.map((ContextMenuButtonItem buttonItem) {
           return CupertinoDesktopTextSelectionToolbarButton.text(
-            context: context,
             onPressed: buttonItem.onPressed,
             text: getButtonLabel(context, buttonItem),
           );

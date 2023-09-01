@@ -69,6 +69,7 @@ export 'src/frame_timing_summarizer.dart';
 export 'src/goldens.dart';
 export 'src/image.dart';
 export 'src/matchers.dart';
+export 'src/mock_event_channel.dart';
 export 'src/nonconst.dart';
 export 'src/platform.dart';
 export 'src/restoration.dart';

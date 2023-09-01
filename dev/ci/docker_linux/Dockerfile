@@ -12,8 +12,11 @@
 
 # Last manual update 2021-09-24 (changing this comment will re-build image)
 
-FROM ubuntu:bionic@sha256:eb1392bbdde63147bc2b4ff1a4053dcfe6d15e4dfd3cce29e9b9f52a4f88bc74
+FROM ubuntu:focal@sha256:f8f658407c35733471596f25fdb4ed748b80e545ab57e84efbdb1dbbb01bd70e
 MAINTAINER Flutter Developers <flutter-dev@googlegroups.com>
+
+ENV TZ=America/Los_Angeles
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 RUN apt-get update -y && \
   apt-get upgrade -y

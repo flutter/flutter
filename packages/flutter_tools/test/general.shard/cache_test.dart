@@ -880,6 +880,31 @@ void main() {
     ));
   });
 
+  testWithoutContext('LegacyCanvasKitRemover removes old canvaskit artifacts if they exist', () async {
+    final FileExceptionHandler handler = FileExceptionHandler();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test(opHandle: handler.opHandle);
+    final Cache cache = Cache.test(processManager: FakeProcessManager.any(), fileSystem: fileSystem);
+    final File canvasKitWasm = fileSystem.file(fileSystem.path.join(
+      cache.getRoot().path,
+      'canvaskit',
+      'canvaskit.wasm',
+    ));
+    canvasKitWasm.createSync(recursive: true);
+    canvasKitWasm.writeAsStringSync('hello world');
+
+    final LegacyCanvasKitRemover remover = LegacyCanvasKitRemover(cache);
+    expect(await remover.isUpToDate(fileSystem), false);
+    await remover.update(
+      FakeArtifactUpdater(),
+      BufferLogger.test(),
+      fileSystem,
+      FakeOperatingSystemUtils(),
+    );
+    expect(await remover.isUpToDate(fileSystem), true);
+
+    expect(canvasKitWasm.existsSync(), isFalse);
+  });
+
   testWithoutContext('Cache handles exception thrown if stamp file cannot be parsed', () {
     final FileExceptionHandler exceptionHandler = FileExceptionHandler();
     final FileSystem fileSystem = MemoryFileSystem.test(opHandle: exceptionHandler.opHandle);
@@ -1017,7 +1042,11 @@ void main() {
     });
 
     testWithoutContext('AndroidMavenArtifacts has a specified development artifact', () async {
-      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache!, platform: FakePlatform());
+      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(
+        cache!,
+        java: FakeJava(),
+        platform: FakePlatform(),
+      );
       expect(mavenArtifacts.developmentArtifact, DevelopmentArtifact.androidMaven);
     });
 
@@ -1025,7 +1054,11 @@ void main() {
       final String? oldRoot = Cache.flutterRoot;
       Cache.flutterRoot = '';
       try {
-        final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache!, platform: FakePlatform());
+        final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(
+          cache!,
+          java: FakeJava(),
+          platform: FakePlatform(),
+        );
         expect(await mavenArtifacts.isUpToDate(memoryFileSystem!), isFalse);
 
         final Directory gradleWrapperDir = cache!.getArtifactDirectory('gradle_wrapper')..createSync(recursive: true);
@@ -1057,7 +1090,11 @@ void main() {
     });
 
     testUsingContext('AndroidMavenArtifacts is a no-op if the Android SDK is absent', () async {
-      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(cache!, platform: FakePlatform());
+      final AndroidMavenArtifacts mavenArtifacts = AndroidMavenArtifacts(
+        cache!,
+        java: FakeJava(),
+        platform: FakePlatform(),
+      );
       expect(await mavenArtifacts.isUpToDate(memoryFileSystem!), isFalse);
 
       await mavenArtifacts.update(FakeArtifactUpdater(), BufferLogger.test(), memoryFileSystem!, FakeOperatingSystemUtils());

@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -107,6 +108,125 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 1));
     await callback(range);
   }
+
+  testWidgets('Default layout (calendar mode)', (WidgetTester tester) async {
+    await preparePicker(tester, (Future<DateTimeRange?> range) async {
+      final Finder helpText = find.text('Select range');
+      final Finder firstDateHeaderText = find.text('Jan 15');
+      final Finder lastDateHeaderText = find.text('Jan 25, 2016');
+      final Finder saveText = find.text('Save');
+
+      expect(helpText, findsOneWidget);
+      expect(firstDateHeaderText, findsOneWidget);
+      expect(lastDateHeaderText, findsOneWidget);
+      expect(saveText, findsOneWidget);
+
+      // Test the close button position.
+      final Offset closeButtonBottomRight = tester.getBottomRight(find.byType(CloseButton));
+      final Offset helpTextTopLeft = tester.getTopLeft(helpText);
+      expect(closeButtonBottomRight.dx, 56.0);
+      expect(closeButtonBottomRight.dy, helpTextTopLeft.dy);
+
+      // Test the save and entry buttons position.
+      final Offset saveButtonBottomLeft = tester.getBottomLeft(find.byType(TextButton));
+      final Offset entryButtonBottomLeft = tester.getBottomLeft(
+        find.widgetWithIcon(IconButton, Icons.edit_outlined),
+      );
+      expect(
+        saveButtonBottomLeft.dx,
+        const bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK') ? moreOrLessEquals(711.6, epsilon: 1e-5) : (800 - 89.0),
+      );
+      expect(saveButtonBottomLeft.dy, helpTextTopLeft.dy);
+      expect(entryButtonBottomLeft.dx, saveButtonBottomLeft.dx - 48.0);
+      expect(entryButtonBottomLeft.dy, helpTextTopLeft.dy);
+
+      // Test help text position.
+      final Offset helpTextBottomLeft = tester.getBottomLeft(helpText);
+      expect(helpTextBottomLeft.dx, 72.0);
+      // TODO(tahatesser): https://github.com/flutter/flutter/issues/99933
+      // A bug in the HTML renderer and/or Chrome 96+ causes a
+      // discrepancy in the paragraph height.
+      const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
+      expect(helpTextBottomLeft.dy, closeButtonBottomRight.dy + 20.0 + (hasIssue99933 ? 1.0 : 0.0));
+
+      // Test the header position.
+      final Offset firstDateHeaderTopLeft = tester.getTopLeft(firstDateHeaderText);
+      final Offset lastDateHeaderTopLeft = tester.getTopLeft(lastDateHeaderText);
+      expect(firstDateHeaderTopLeft.dx, 72.0);
+      expect(firstDateHeaderTopLeft.dy, helpTextBottomLeft.dy + 8.0);
+      final Offset firstDateHeaderTopRight = tester.getTopRight(firstDateHeaderText);
+      expect(lastDateHeaderTopLeft.dx, firstDateHeaderTopRight.dx + 66.0);
+      expect(lastDateHeaderTopLeft.dy, helpTextBottomLeft.dy + 8.0);
+
+      // Test the day headers position.
+      final Offset dayHeadersGridTopLeft = tester.getTopLeft(find.byType(GridView).first);
+      final Offset firstDateHeaderBottomLeft = tester.getBottomLeft(firstDateHeaderText);
+      expect(dayHeadersGridTopLeft.dx, (800 - 384) / 2);
+      expect(dayHeadersGridTopLeft.dy, firstDateHeaderBottomLeft.dy + 16.0);
+
+      // Test the calendar custom scroll view position.
+      final Offset calendarScrollViewTopLeft = tester.getTopLeft(find.byType(CustomScrollView));
+      final Offset dayHeadersGridBottomLeft = tester.getBottomLeft(find.byType(GridView).first);
+      expect(calendarScrollViewTopLeft.dx, 0.0);
+      expect(calendarScrollViewTopLeft.dy, dayHeadersGridBottomLeft.dy);
+    }, useMaterial3: true);
+  });
+
+  testWidgets('Default Dialog properties (calendar mode)', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    await preparePicker(tester, (Future<DateTimeRange?> range) async {
+      final Material dialogMaterial = tester.widget<Material>(
+        find.descendant(of: find.byType(Dialog),
+        matching: find.byType(Material),
+      ).first);
+
+      expect(dialogMaterial.color, theme.colorScheme.surface);
+      expect(dialogMaterial.shadowColor, Colors.transparent);
+      expect(dialogMaterial.surfaceTintColor, Colors.transparent);
+      expect(dialogMaterial.elevation, 0.0);
+      expect(dialogMaterial.shape, const RoundedRectangleBorder());
+      expect(dialogMaterial.clipBehavior, Clip.antiAlias);
+
+      final Dialog dialog = tester.widget<Dialog>(find.byType(Dialog));
+      expect(dialog.insetPadding, EdgeInsets.zero);
+    }, useMaterial3: theme.useMaterial3);
+  });
+
+  testWidgets('Default Dialog properties (input mode)', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    await preparePicker(tester, (Future<DateTimeRange?> range) async {
+      final Material dialogMaterial = tester.widget<Material>(
+        find.descendant(of: find.byType(Dialog),
+        matching: find.byType(Material),
+      ).first);
+
+      expect(dialogMaterial.color, theme.colorScheme.surface);
+      expect(dialogMaterial.shadowColor, Colors.transparent);
+      expect(dialogMaterial.surfaceTintColor, Colors.transparent);
+      expect(dialogMaterial.elevation, 0.0);
+      expect(dialogMaterial.shape, const RoundedRectangleBorder());
+      expect(dialogMaterial.clipBehavior, Clip.antiAlias);
+
+      final Dialog dialog = tester.widget<Dialog>(find.byType(Dialog));
+      expect(dialog.insetPadding, EdgeInsets.zero);
+    }, useMaterial3: theme.useMaterial3);
+  });
+
+  testWidgets('Scaffold and AppBar defaults', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    await preparePicker(tester, (Future<DateTimeRange?> range) async {
+      final Scaffold scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+      expect(scaffold.backgroundColor, null);
+
+      final AppBar appBar = tester.widget<AppBar>(find.byType(AppBar));
+      final IconThemeData iconTheme = IconThemeData(color: theme.colorScheme.onSurfaceVariant);
+      expect(appBar.iconTheme, iconTheme);
+      expect(appBar.actionsIconTheme, iconTheme);
+      expect(appBar.elevation, 0);
+      expect(appBar.scrolledUnderElevation, 0);
+      expect(appBar.backgroundColor, Colors.transparent);
+    }, useMaterial3: theme.useMaterial3);
+  });
 
   group('Landscape input-only date picker headers use headlineSmall', () {
     // Regression test for https://github.com/flutter/flutter/issues/122056
@@ -384,6 +504,7 @@ void main() {
   testWidgets('OK Cancel button layout', (WidgetTester tester) async {
      Widget buildFrame(TextDirection textDirection) {
        return MaterialApp(
+         theme: ThemeData(useMaterial3: false),
          home: Material(
            child: Center(
              child: Builder(
@@ -668,6 +789,49 @@ void main() {
       initialEntryMode = DatePickerEntryMode.input;
     });
 
+    testWidgets('Default Dialog properties (input mode)', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData(useMaterial3: true);
+      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+        final Material dialogMaterial = tester.widget<Material>(
+          find.descendant(of: find.byType(Dialog),
+          matching: find.byType(Material),
+        ).first);
+
+        expect(dialogMaterial.color, theme.colorScheme.surface);
+        expect(dialogMaterial.shadowColor, Colors.transparent);
+        expect(dialogMaterial.surfaceTintColor, theme.colorScheme.surfaceTint);
+        expect(dialogMaterial.elevation, 6.0);
+        expect(
+          dialogMaterial.shape,
+          const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(28.0))),
+        );
+        expect(dialogMaterial.clipBehavior, Clip.antiAlias);
+
+        final Dialog dialog = tester.widget<Dialog>(find.byType(Dialog));
+        expect(dialog.insetPadding, const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0));
+      }, useMaterial3: theme.useMaterial3);
+    });
+
+    testWidgets('Default InputDecoration', (WidgetTester tester) async {
+      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+        final InputDecoration startDateDecoration = tester.widget<TextField>(
+          find.byType(TextField).first).decoration!;
+        expect(startDateDecoration.border, const OutlineInputBorder());
+        expect(startDateDecoration.filled, false);
+        expect(startDateDecoration.hintText, 'mm/dd/yyyy');
+        expect(startDateDecoration.labelText, 'Start Date');
+        expect(startDateDecoration.errorText, null);
+
+        final InputDecoration endDateDecoration = tester.widget<TextField>(
+          find.byType(TextField).last).decoration!;
+        expect(endDateDecoration.border, const OutlineInputBorder());
+        expect(endDateDecoration.filled, false);
+        expect(endDateDecoration.hintText, 'mm/dd/yyyy');
+        expect(endDateDecoration.labelText, 'End Date');
+        expect(endDateDecoration.errorText, null);
+      }, useMaterial3: true);
+    });
+
     testWidgets('Initial entry mode is used', (WidgetTester tester) async {
       await preparePicker(tester, (Future<DateTimeRange?> range) async {
         expect(find.byType(TextField), findsNWidgets(2));
@@ -899,9 +1063,10 @@ void main() {
 
   testWidgets('DatePickerDialog is state restorable', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         restorationScopeId: 'app',
-        home: _RestorableDateRangePickerDialogTestWidget(),
+        home: const _RestorableDateRangePickerDialogTestWidget(),
       ),
     );
 
@@ -1187,6 +1352,272 @@ void main() {
       expect(picker.keyboardType, keyboardType ?? TextInputType.datetime);
     });
   }
+
+  testWidgets('honors switchToInputEntryModeIcon', (WidgetTester tester) async {
+    Widget buildApp({bool? useMaterial3, Icon? switchToInputEntryModeIcon}) {
+      return MaterialApp(
+        theme: ThemeData(
+          useMaterial3: useMaterial3 ?? false,
+        ),
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                child: const Text('Click X'),
+                onPressed: () {
+                  showDateRangePicker(
+                    context: context,
+                    firstDate: DateTime(2020),
+                    lastDate: DateTime(2030),
+                    switchToInputEntryModeIcon: switchToInputEntryModeIcon,
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.edit), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(buildApp(useMaterial3: true));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.edit_outlined), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(
+      buildApp(
+        switchToInputEntryModeIcon: const Icon(Icons.keyboard),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.keyboard), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.close));
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('honors switchToCalendarEntryModeIcon', (WidgetTester tester) async {
+    Widget buildApp({bool? useMaterial3, Icon? switchToCalendarEntryModeIcon}) {
+      return MaterialApp(
+        theme: ThemeData(
+          useMaterial3: useMaterial3 ?? false,
+        ),
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                child: const Text('Click X'),
+                onPressed: () {
+                  showDateRangePicker(
+                    context: context,
+                    firstDate: DateTime(2020),
+                    lastDate: DateTime(2030),
+                    switchToCalendarEntryModeIcon: switchToCalendarEntryModeIcon,
+                    initialEntryMode: DatePickerEntryMode.input,
+                    cancelText: 'CANCEL',
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.calendar_today), findsOneWidget);
+    await tester.tap(find.text('CANCEL'));
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(buildApp(useMaterial3: true));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.calendar_today), findsOneWidget);
+    await tester.tap(find.text('CANCEL'));
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(
+      buildApp(
+        switchToCalendarEntryModeIcon: const Icon(Icons.favorite),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.favorite), findsOneWidget);
+    await tester.tap(find.text('CANCEL'));
+    await tester.pumpAndSettle();
+  });
+
+
+  group('Material 2', () {
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
+
+    testWidgets('Default layout (calendar mode)', (WidgetTester tester) async {
+      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+        final Finder helpText = find.text('SELECT RANGE');
+        final Finder firstDateHeaderText = find.text('Jan 15');
+        final Finder lastDateHeaderText = find.text('Jan 25, 2016');
+        final Finder saveText = find.text('SAVE');
+
+        expect(helpText, findsOneWidget);
+        expect(firstDateHeaderText, findsOneWidget);
+        expect(lastDateHeaderText, findsOneWidget);
+        expect(saveText, findsOneWidget);
+
+        // Test the close button position.
+        final Offset closeButtonBottomRight = tester.getBottomRight(find.byType(CloseButton));
+        final Offset helpTextTopLeft = tester.getTopLeft(helpText);
+        expect(closeButtonBottomRight.dx, 56.0);
+        expect(closeButtonBottomRight.dy, helpTextTopLeft.dy - 6.0);
+
+        // Test the save and entry buttons position.
+        final Offset saveButtonBottomLeft = tester.getBottomLeft(find.byType(TextButton));
+        final Offset entryButtonBottomLeft = tester.getBottomLeft(
+          find.widgetWithIcon(IconButton, Icons.edit),
+        );
+        expect(saveButtonBottomLeft.dx, 800 - 80.0);
+        expect(saveButtonBottomLeft.dy, helpTextTopLeft.dy - 6.0);
+        expect(entryButtonBottomLeft.dx, saveButtonBottomLeft.dx - 48.0);
+        expect(entryButtonBottomLeft.dy, helpTextTopLeft.dy - 6.0);
+
+        // Test help text position.
+        final Offset helpTextBottomLeft = tester.getBottomLeft(helpText);
+        expect(helpTextBottomLeft.dx, 72.0);
+        expect(helpTextBottomLeft.dy, closeButtonBottomRight.dy + 16.0);
+
+        // Test the header position.
+        final Offset firstDateHeaderTopLeft = tester.getTopLeft(firstDateHeaderText);
+        final Offset lastDateHeaderTopLeft = tester.getTopLeft(lastDateHeaderText);
+        expect(firstDateHeaderTopLeft.dx, 72.0);
+        expect(firstDateHeaderTopLeft.dy, helpTextBottomLeft.dy + 8.0);
+        final Offset firstDateHeaderTopRight = tester.getTopRight(firstDateHeaderText);
+        expect(lastDateHeaderTopLeft.dx, firstDateHeaderTopRight.dx + 72.0);
+        expect(lastDateHeaderTopLeft.dy, helpTextBottomLeft.dy + 8.0);
+
+        // Test the day headers position.
+        final Offset dayHeadersGridTopLeft = tester.getTopLeft(find.byType(GridView).first);
+        final Offset firstDateHeaderBottomLeft = tester.getBottomLeft(firstDateHeaderText);
+        expect(dayHeadersGridTopLeft.dx, (800 - 384) / 2);
+        expect(dayHeadersGridTopLeft.dy, firstDateHeaderBottomLeft.dy + 16.0);
+
+        // Test the calendar custom scroll view position.
+        final Offset calendarScrollViewTopLeft = tester.getTopLeft(find.byType(CustomScrollView));
+        final Offset dayHeadersGridBottomLeft = tester.getBottomLeft(find.byType(GridView).first);
+        expect(calendarScrollViewTopLeft.dx, 0.0);
+        expect(calendarScrollViewTopLeft.dy, dayHeadersGridBottomLeft.dy);
+      });
+    });
+
+    testWidgets('Default Dialog properties (calendar mode)', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData(useMaterial3: false);
+      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+        final Material dialogMaterial = tester.widget<Material>(
+          find.descendant(of: find.byType(Dialog),
+          matching: find.byType(Material),
+        ).first);
+
+        expect(dialogMaterial.color, theme.colorScheme.surface);
+        expect(dialogMaterial.shadowColor, Colors.transparent);
+        expect(dialogMaterial.surfaceTintColor, Colors.transparent);
+        expect(dialogMaterial.elevation, 0.0);
+        expect(dialogMaterial.shape, const RoundedRectangleBorder());
+        expect(dialogMaterial.clipBehavior, Clip.antiAlias);
+
+        final Dialog dialog = tester.widget<Dialog>(find.byType(Dialog));
+        expect(dialog.insetPadding, EdgeInsets.zero);
+      });
+    });
+
+    testWidgets('Scaffold and AppBar defaults', (WidgetTester tester) async {
+      final ThemeData theme = ThemeData(useMaterial3: false);
+      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+        final Scaffold scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+        expect(scaffold.backgroundColor, theme.colorScheme.surface);
+
+        final AppBar appBar = tester.widget<AppBar>(find.byType(AppBar));
+        final IconThemeData iconTheme = IconThemeData(color: theme.colorScheme.onPrimary);
+        expect(appBar.iconTheme, iconTheme);
+        expect(appBar.actionsIconTheme, iconTheme);
+        expect(appBar.elevation, null);
+        expect(appBar.scrolledUnderElevation, null);
+        expect(appBar.backgroundColor, null);
+      });
+    });
+
+    group('Input mode', () {
+      setUp(() {
+        firstDate = DateTime(2015);
+        lastDate = DateTime(2017, DateTime.december, 31);
+        initialDateRange = DateTimeRange(
+          start: DateTime(2017, DateTime.january, 15),
+          end: DateTime(2017, DateTime.january, 17),
+        );
+        initialEntryMode = DatePickerEntryMode.input;
+      });
+
+      testWidgets('Default Dialog properties (input mode)', (WidgetTester tester) async {
+        final ThemeData theme = ThemeData(useMaterial3: false);
+        await preparePicker(tester, (Future<DateTimeRange?> range) async {
+          final Material dialogMaterial = tester.widget<Material>(
+            find.descendant(of: find.byType(Dialog),
+            matching: find.byType(Material),
+          ).first);
+
+          expect(dialogMaterial.color, theme.colorScheme.surface);
+          expect(dialogMaterial.shadowColor, theme.shadowColor);
+          expect(dialogMaterial.surfaceTintColor, null);
+          expect(dialogMaterial.elevation, 24.0);
+          expect(
+            dialogMaterial.shape,
+            const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
+          );
+          expect(dialogMaterial.clipBehavior, Clip.antiAlias);
+
+          final Dialog dialog = tester.widget<Dialog>(find.byType(Dialog));
+          expect(dialog.insetPadding, const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0));
+        });
+      });
+
+      testWidgets('Default InputDecoration', (WidgetTester tester) async {
+        await preparePicker(tester, (Future<DateTimeRange?> range) async {
+          final InputDecoration startDateDecoration = tester.widget<TextField>(
+            find.byType(TextField).first).decoration!;
+          expect(startDateDecoration.border, const UnderlineInputBorder());
+          expect(startDateDecoration.filled, false);
+          expect(startDateDecoration.hintText, 'mm/dd/yyyy');
+          expect(startDateDecoration.labelText, 'Start Date');
+          expect(startDateDecoration.errorText, null);
+
+          final InputDecoration endDateDecoration = tester.widget<TextField>(
+            find.byType(TextField).last).decoration!;
+          expect(endDateDecoration.border, const UnderlineInputBorder());
+          expect(endDateDecoration.filled, false);
+          expect(endDateDecoration.hintText, 'mm/dd/yyyy');
+          expect(endDateDecoration.labelText, 'End Date');
+          expect(endDateDecoration.errorText, null);
+        });
+      });
+    });
+  });
 }
 
 class _RestorableDateRangePickerDialogTestWidget extends StatefulWidget {

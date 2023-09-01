@@ -26,8 +26,8 @@ import 'transitions.dart';
 ///
 /// [GlowingOverscrollIndicator] generates [OverscrollIndicatorNotification]
 /// before showing an overscroll indication. To prevent the indicator from
-/// showing the indication, call [OverscrollIndicatorNotification.disallowGlow]
-/// on the notification.
+/// showing the indication, call
+/// [OverscrollIndicatorNotification.disallowIndicator] on the notification.
 ///
 /// Created automatically by [ScrollBehavior.buildOverscrollIndicator] on platforms
 /// (e.g., Android) that commonly use this type of overscroll indication.
@@ -261,14 +261,10 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
           }
         }
       }
-    } else if (notification is ScrollEndNotification || notification is ScrollUpdateNotification) {
-      // Using dynamic here to avoid layer violations of importing
-      // drag_details.dart from gestures.
-      // ignore: avoid_dynamic_calls
-      if ((notification as dynamic).dragDetails != null) {
-        _leadingController!.scrollEnd();
-        _trailingController!.scrollEnd();
-      }
+    } else if ((notification is ScrollEndNotification && notification.dragDetails != null) ||
+               (notification is ScrollUpdateNotification && notification.dragDetails != null)) {
+      _leadingController!.scrollEnd();
+      _trailingController!.scrollEnd();
     }
     _lastNotificationType = notification.runtimeType;
     return false;
@@ -1002,16 +998,6 @@ class OverscrollIndicatorNotification extends Notification with ViewportNotifica
   ///
   /// Defaults to true, cannot be null.
   bool accepted = true;
-
-  /// Call this method if the glow should be prevented. This method is
-  /// deprecated in favor of [disallowIndicator].
-  @Deprecated(
-    'Use disallowIndicator instead. '
-    'This feature was deprecated after v2.5.0-6.0.pre.',
-  )
-  void disallowGlow() {
-    accepted = false;
-  }
 
   /// Call this method if the overscroll indicator should be prevented.
   void disallowIndicator() {

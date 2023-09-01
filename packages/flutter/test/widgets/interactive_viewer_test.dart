@@ -1840,6 +1840,57 @@ void main() {
       expect(transformationController.value.getMaxScaleOnAxis(), moreOrLessEquals(1.499302500056767));
     });
 
+    testWidgets('trackpad pointer scroll events cause scale', (WidgetTester tester) async {
+      final TransformationController transformationController = TransformationController();
+      const double boundaryMargin = 50.0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: InteractiveViewer(
+                boundaryMargin: const EdgeInsets.all(boundaryMargin),
+                transformationController: transformationController,
+                trackpadScrollCausesScale: true,
+                child: const SizedBox(width: 200.0, height: 200.0),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(transformationController.value.getMaxScaleOnAxis(), 1.0);
+
+      // Send a vertical scroll.
+      final TestPointer pointer = TestPointer(1, PointerDeviceKind.trackpad);
+      final Offset center = tester.getCenter(find.byType(SizedBox));
+      Offset scrollAmnt = const Offset(0, -138.0);
+      await tester.sendEventToBinding(pointer.hover(center));
+      await tester.pump();
+      expect(transformationController.value.getMaxScaleOnAxis(), 1.0);
+      await tester.sendEventToBinding(pointer.scroll(scrollAmnt));
+      await tester.pump();
+      expect(transformationController.value.getMaxScaleOnAxis(), moreOrLessEquals(1.9937155332430823));
+
+      // Scroll should not have translated the box, so the box should still be at the
+      // center of the InteractiveViewer.
+      Vector3 translation = transformationController.value.getTranslation();
+      expect(translation.x, moreOrLessEquals(-99.37155332430822));
+      expect(translation.y, moreOrLessEquals(-99.37155332430822));
+
+      // Send a horizontal scroll.
+      scrollAmnt = const Offset(-138, 0);
+      await tester.sendEventToBinding(pointer.scroll(scrollAmnt));
+      await tester.pump();
+
+      // Horizontal scroll should not cause a scale change.
+      expect(transformationController.value.getMaxScaleOnAxis(), moreOrLessEquals(1.9937155332430823));
+
+      // Horizontal scroll should not have changed the translation of the box.
+      translation = transformationController.value.getTranslation();
+      expect(translation.x, moreOrLessEquals(-99.37155332430822));
+      expect(translation.y, moreOrLessEquals(-99.37155332430822));
+    });
+
     testWidgets('Scaling inertia', (WidgetTester tester) async {
       final TransformationController transformationController = TransformationController();
       const double boundaryMargin = 50.0;

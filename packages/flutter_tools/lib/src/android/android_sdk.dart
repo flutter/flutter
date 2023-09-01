@@ -2,17 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
-
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/os.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/version.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
-import 'android_studio.dart';
+import 'java.dart';
 
 // ANDROID_HOME is deprecated.
 // See https://developer.android.com/studio/command-line/variables.html#envar
@@ -36,15 +32,22 @@ final RegExp _sdkVersionRe = RegExp(r'^ro.build.version.sdk=([0-9]+)$');
 // $ANDROID_SDK_ROOT/platforms/android-23/android.jar
 // $ANDROID_SDK_ROOT/platforms/android-N/android.jar
 class AndroidSdk {
-  AndroidSdk(this.directory) {
+  AndroidSdk(this.directory, {
+    Java? java,
+  }): _java = java {
     reinitialize();
   }
 
+<<<<<<< HEAD
   static const String javaHomeEnvironmentVariable = 'JAVA_HOME';
   static const String _javaExecutable = 'java';
 
+=======
+>>>>>>> ff5b5b5fa6f35b717667719ddfdb1521d8bdd05a
   /// The Android SDK root directory.
   final Directory directory;
+
+  final Java? _java;
 
   List<AndroidSdkVersion> _sdkVersions = <AndroidSdkVersion>[];
   AndroidSdkVersion? _latestVersion;
@@ -411,6 +414,7 @@ class AndroidSdk {
     return null;
   }
 
+<<<<<<< HEAD
   /// Returns the version of java in the format \d(.\d)+(.\d)+
   /// Returns null if version not found.
   String? getJavaVersion({
@@ -567,6 +571,8 @@ class AndroidSdk {
     return _sdkManagerEnv!;
   }
 
+=======
+>>>>>>> ff5b5b5fa6f35b717667719ddfdb1521d8bdd05a
   /// Returns the version of the Android SDK manager tool or null if not found.
   String? get sdkManagerVersion {
     if (sdkManagerPath == null || !globals.processManager.canRun(sdkManagerPath)) {
@@ -577,7 +583,7 @@ class AndroidSdk {
     }
     final RunResult result = globals.processUtils.runSync(
       <String>[sdkManagerPath!, '--version'],
-      environment: sdkManagerEnv,
+      environment: _java?.environment,
     );
     if (result.exitCode != 0) {
       globals.printTrace('sdkmanager --version failed: exitCode: ${result.exitCode} stdout: ${result.stdout} stderr: ${result.stderr}');

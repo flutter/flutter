@@ -123,6 +123,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
   @override
   void onDragSelectionEnd(TapDragEndDetails details) {
     _state._requestKeyboard();
+    super.onDragSelectionEnd(details);
   }
 }
 
@@ -1331,7 +1332,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             key: editableTextKey,
             controller: controller,
             undoController: widget.undoController,
-            readOnly: widget.readOnly,
+            readOnly: widget.readOnly || !enabled,
             toolbarOptions: widget.toolbarOptions,
             showCursor: widget.showCursor,
             showSelectionHandles: _showSelectionHandles,

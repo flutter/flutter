@@ -27,6 +27,7 @@ import 'theme.dart';
 
 const double _kTabHeight = 46.0;
 const double _kTextAndIconTabHeight = 72.0;
+const double _kStartOffset = 52.0;
 
 /// Defines how the bounds of the selected tab indicator are computed.
 ///
@@ -47,6 +48,41 @@ enum TabBarIndicatorSize {
   /// This value is used to align the tab's label, typically a [Tab]
   /// widget's text or icon, with the selected tab indicator.
   label,
+}
+
+/// Defines how tabs are aligned horizontally in a [TabBar].
+///
+/// See also:
+///
+///   * [TabBar], which displays a row of tabs.
+///   * [TabBarView], which displays a widget for the currently selected tab.
+///   * [TabBar.tabAlignment], which defines the horizontal alignment of the
+///     tabs within the [TabBar].
+enum TabAlignment {
+  // TODO(tahatesser): Add a link to the Material Design spec for
+  // horizontal offset when it is available.
+  // It's currently sourced from androidx/compose/material3/TabRow.kt.
+  /// If [TabBar.isScrollable] is true, tabs are aligned to the
+  /// start of the [TabBar]. Otherwise throws an exception.
+  ///
+  /// It is not recommended to set [TabAlignment.start] when
+  /// [ThemeData.useMaterial3] is false.
+  start,
+
+  /// If [TabBar.isScrollable] is true, tabs are aligned to the
+  /// start of the [TabBar] with an offset of 52.0 pixels.
+  /// Otherwise throws an exception.
+  ///
+  /// It is not recommended to set [TabAlignment.startOffset] when
+  /// [ThemeData.useMaterial3] is false.
+  startOffset,
+
+  /// If [TabBar.isScrollable] is false, tabs are stretched to fill the
+  /// [TabBar]. Otherwise throws an exception.
+  fill,
+
+  /// Tabs are aligned to the center of the [TabBar].
+  center,
 }
 
 /// A Material Design [TabBar] tab.
@@ -306,9 +342,9 @@ class _TabLabelBar extends Flex {
   const _TabLabelBar({
     super.children,
     required this.onPerformLayout,
+    required super.mainAxisSize,
   }) : super(
     direction: Axis.horizontal,
-    mainAxisSize: MainAxisSize.max,
     mainAxisAlignment: MainAxisAlignment.start,
     crossAxisAlignment: CrossAxisAlignment.center,
     verticalDirection: VerticalDirection.down,
@@ -695,6 +731,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.physics,
     this.splashFactory,
     this.splashBorderRadius,
+    this.tabAlignment,
   }) : _isPrimary = true,
        assert(indicator != null || (indicatorWeight > 0.0));
 
@@ -744,6 +781,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.physics,
     this.splashFactory,
     this.splashBorderRadius,
+    this.tabAlignment,
   }) : _isPrimary = false,
        assert(indicator != null || (indicatorWeight > 0.0));
 
@@ -784,8 +822,16 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// The thickness of the line that appears below the selected tab.
   ///
-  /// The value of this parameter must be greater than zero and its default
-  /// value is 2.0.
+  /// The value of this parameter must be greater than zero.
+  ///
+  /// If [ThemeData.useMaterial3] is true and [TabBar] is used to create a
+  /// primary tab bar, the default value is 3.0. If the provided value is less
+  /// than 3.0, the default value is used.
+  ///
+  /// If [ThemeData.useMaterial3] is true and [TabBar.secondary] is used to
+  /// create a secondary tab bar, the default value is 2.0.
+  ///
+  /// If [ThemeData.useMaterial3] is false, the default value is 2.0.
   ///
   /// If [indicator] is specified or provided from [TabBarTheme],
   /// this property is ignored.
@@ -1027,6 +1073,25 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// If this property is null, it is interpreted as [BorderRadius.zero].
   final BorderRadius? splashBorderRadius;
 
+  /// Specifies the horizontal alignment of the tabs within a [TabBar].
+  ///
+  /// If [TabBar.isScrollable] is false, only [TabAlignment.fill] and
+  /// [TabAlignment.center] are supported. Otherwise an exception is thrown.
+  ///
+  /// If [TabBar.isScrollable] is true, only [TabAlignment.start], [TabAlignment.startOffset],
+  /// and [TabAlignment.center] are supported. Otherwise an exception is thrown.
+  ///
+  /// If this is null, then the value of [TabBarTheme.tabAlignment] is used.
+  ///
+  /// If [TabBarTheme.tabAlignment] is null and [ThemeData.useMaterial3] is true,
+  /// then [TabAlignment.startOffset] is used if [isScrollable] is true,
+  /// otherwise [TabAlignment.fill] is used.
+  ///
+  /// If [TabBarTheme.tabAlignment] is null and [ThemeData.useMaterial3] is false,
+  /// then [TabAlignment.center] is used if [isScrollable] is true,
+  /// otherwise [TabAlignment.fill] is used.
+  final TabAlignment? tabAlignment;
+
   /// A size whose height depends on if the tabs have both icons and text.
   ///
   /// [AppBar] uses this size to compute its own preferred size.
@@ -1089,14 +1154,14 @@ class _TabBarState extends State<TabBar> {
   TabBarTheme get _defaults {
     if (Theme.of(context).useMaterial3) {
       return widget._isPrimary
-          ? _TabsPrimaryDefaultsM3(context)
-          : _TabsSecondaryDefaultsM3(context);
+          ? _TabsPrimaryDefaultsM3(context, widget.isScrollable)
+          : _TabsSecondaryDefaultsM3(context, widget.isScrollable);
     } else {
-      return _TabsDefaultsM2(context);
+      return _TabsDefaultsM2(context, widget.isScrollable);
     }
   }
 
-  Decoration _getIndicator() {
+  Decoration _getIndicator(TabBarIndicatorSize indicatorSize) {
     final ThemeData theme = Theme.of(context);
     final TabBarTheme tabBarTheme = TabBarTheme.of(context);
 
@@ -1130,19 +1195,25 @@ class _TabBarState extends State<TabBar> {
       color = Colors.white;
     }
 
+    final bool primaryWithLabelIndicator = widget._isPrimary && indicatorSize == TabBarIndicatorSize.label;
+    final double effectiveIndicatorWeight = theme.useMaterial3 && primaryWithLabelIndicator
+      ? math.max(widget.indicatorWeight, _TabsPrimaryDefaultsM3.indicatorWeight)
+      : widget.indicatorWeight;
+    // Only Material 3 primary TabBar with label indicatorSize should be rounded.
+    final BorderRadius? effectiveBorderRadius = theme.useMaterial3 && primaryWithLabelIndicator
+      ? BorderRadius.only(
+          topLeft: Radius.circular(effectiveIndicatorWeight),
+          topRight: Radius.circular(effectiveIndicatorWeight),
+        )
+      : null;
     return UnderlineTabIndicator(
-      borderRadius: theme.useMaterial3 && widget._isPrimary
+      borderRadius: effectiveBorderRadius,
+      borderSide: BorderSide(
         // TODO(tahatesser): Make sure this value matches Material 3 Tabs spec
         // when `preferredSize`and `indicatorWeight` are updated to support Material 3
         // https://m3.material.io/components/tabs/specs#149a189f-9039-4195-99da-15c205d20e30,
         // https://github.com/flutter/flutter/issues/116136
-        ? const BorderRadius.only(
-            topLeft: Radius.circular(3.0),
-            topRight: Radius.circular(3.0),
-          )
-        : null,
-      borderSide: BorderSide(
-        width: widget.indicatorWeight,
+        width: effectiveIndicatorWeight,
         color: color,
       ),
     );
@@ -1187,10 +1258,13 @@ class _TabBarState extends State<TabBar> {
   void _initIndicatorPainter() {
     final ThemeData theme = Theme.of(context);
     final TabBarTheme tabBarTheme = TabBarTheme.of(context);
+    final TabBarIndicatorSize indicatorSize = widget.indicatorSize
+      ?? tabBarTheme.indicatorSize
+      ?? _defaults.indicatorSize!;
 
     _indicatorPainter = !_controllerIsValid ? null : _IndicatorPainter(
       controller: _controller!,
-      indicator: _getIndicator(),
+      indicator: _getIndicator(indicatorSize),
       indicatorSize: widget.indicatorSize ?? tabBarTheme.indicatorSize ?? _defaults.indicatorSize!,
       indicatorPadding: widget.indicatorPadding,
       tabKeys: _tabKeys,
@@ -1378,10 +1452,32 @@ class _TabBarState extends State<TabBar> {
     return true;
   }
 
+  bool _debugTabAlignmentIsValid(TabAlignment tabAlignment) {
+    assert(() {
+      if (widget.isScrollable && tabAlignment == TabAlignment.fill) {
+        throw FlutterError(
+          '$tabAlignment is only valid for non-scrollable tab bars.',
+        );
+      }
+      if (!widget.isScrollable
+        && (tabAlignment == TabAlignment.start
+          || tabAlignment == TabAlignment.startOffset)) {
+        throw FlutterError(
+          '$tabAlignment is only valid for scrollable tab bars.',
+        );
+      }
+      return true;
+    }());
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     assert(_debugScheduleCheckHasValidTabsCount());
+    final TabBarTheme tabBarTheme = TabBarTheme.of(context);
+    final TabAlignment effectiveTabAlignment = widget.tabAlignment ?? tabBarTheme.tabAlignment ?? _defaults.tabAlignment!;
+    assert(_debugTabAlignmentIsValid(effectiveTabAlignment));
 
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     if (_controller!.length == 0) {
@@ -1390,7 +1486,6 @@ class _TabBarState extends State<TabBar> {
       );
     }
 
-    final TabBarTheme tabBarTheme = TabBarTheme.of(context);
 
     final List<Widget> wrappedTabs = List<Widget>.generate(widget.tabs.length, (int index) {
       const double verticalAdjustment = (_kTextAndIconTabHeight - _kTabHeight)/2.0;
@@ -1491,7 +1586,7 @@ class _TabBarState extends State<TabBar> {
           ),
         ),
       );
-      if (!widget.isScrollable) {
+      if (!widget.isScrollable && effectiveTabAlignment == TabAlignment.fill) {
         wrappedTabs[index] = Expanded(child: wrappedTabs[index]);
       }
     }
@@ -1509,12 +1604,16 @@ class _TabBarState extends State<TabBar> {
         defaults: _defaults,
         child: _TabLabelBar(
           onPerformLayout: _saveTabOffsets,
+          mainAxisSize: effectiveTabAlignment == TabAlignment.fill ? MainAxisSize.max : MainAxisSize.min,
           children: wrappedTabs,
         ),
       ),
     );
 
     if (widget.isScrollable) {
+      final EdgeInsetsGeometry? effectivePadding = effectiveTabAlignment == TabAlignment.startOffset
+        ? const EdgeInsetsDirectional.only(start: _kStartOffset).add(widget.padding ?? EdgeInsets.zero)
+        : widget.padding;
       _scrollController ??= _TabBarScrollController(this);
       tabBar = ScrollConfiguration(
         // The scrolling tabs should not show an overscroll indicator.
@@ -1523,7 +1622,7 @@ class _TabBarState extends State<TabBar> {
           dragStartBehavior: widget.dragStartBehavior,
           scrollDirection: Axis.horizontal,
           controller: _scrollController,
-          padding: widget.padding,
+          padding: effectivePadding,
           physics: widget.physics,
           child: tabBar,
         ),
@@ -1794,6 +1893,10 @@ class _TabBarViewState extends State<TabBarView> {
       return false;
     }
 
+    if (!_controllerIsValid) {
+      return false;
+    }
+
     _scrollUnderwayCount += 1;
     if (notification is ScrollUpdateNotification && !_controller!.indexIsChanging) {
       final bool pageChanged = (_pageController.page! - _controller!.index).abs() > 1.0;
@@ -2030,10 +2133,11 @@ class TabPageSelector extends StatelessWidget {
 
 // Hand coded defaults based on Material Design 2.
 class _TabsDefaultsM2 extends TabBarTheme {
-  const _TabsDefaultsM2(this.context)
+  const _TabsDefaultsM2(this.context, this.isScrollable)
     : super(indicatorSize: TabBarIndicatorSize.tab);
 
   final BuildContext context;
+  final bool isScrollable;
 
   @override
   Color? get indicatorColor => Theme.of(context).indicatorColor;
@@ -2049,6 +2153,9 @@ class _TabsDefaultsM2 extends TabBarTheme {
 
   @override
   InteractiveInkFeatureFactory? get splashFactory => Theme.of(context).splashFactory;
+
+  @override
+  TabAlignment? get tabAlignment => isScrollable ? TabAlignment.start : TabAlignment.fill;
 }
 
 // BEGIN GENERATED TOKEN PROPERTIES - Tabs
@@ -2058,15 +2165,14 @@ class _TabsDefaultsM2 extends TabBarTheme {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
-
 class _TabsPrimaryDefaultsM3 extends TabBarTheme {
-  _TabsPrimaryDefaultsM3(this.context)
+  _TabsPrimaryDefaultsM3(this.context, this.isScrollable)
     : super(indicatorSize: TabBarIndicatorSize.label);
 
   final BuildContext context;
   late final ColorScheme _colors = Theme.of(context).colorScheme;
   late final TextTheme _textTheme = Theme.of(context).textTheme;
+  final bool isScrollable;
 
   @override
   Color? get dividerColor => _colors.surfaceVariant;
@@ -2090,16 +2196,19 @@ class _TabsPrimaryDefaultsM3 extends TabBarTheme {
   MaterialStateProperty<Color?> get overlayColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.primary.withOpacity(0.12);
+        }
         if (states.contains(MaterialState.hovered)) {
           return _colors.primary.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
           return _colors.primary.withOpacity(0.12);
         }
-        if (states.contains(MaterialState.pressed)) {
-          return _colors.primary.withOpacity(0.12);
-        }
         return null;
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.primary.withOpacity(0.12);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.onSurface.withOpacity(0.08);
@@ -2107,24 +2216,27 @@ class _TabsPrimaryDefaultsM3 extends TabBarTheme {
       if (states.contains(MaterialState.focused)) {
         return _colors.onSurface.withOpacity(0.12);
       }
-      if (states.contains(MaterialState.pressed)) {
-        return _colors.primary.withOpacity(0.12);
-      }
       return null;
     });
   }
 
   @override
   InteractiveInkFeatureFactory? get splashFactory => Theme.of(context).splashFactory;
+
+  @override
+  TabAlignment? get tabAlignment => isScrollable ? TabAlignment.start : TabAlignment.fill;
+
+  static double indicatorWeight = 3.0;
 }
 
 class _TabsSecondaryDefaultsM3 extends TabBarTheme {
-  _TabsSecondaryDefaultsM3(this.context)
+  _TabsSecondaryDefaultsM3(this.context, this.isScrollable)
     : super(indicatorSize: TabBarIndicatorSize.tab);
 
   final BuildContext context;
   late final ColorScheme _colors = Theme.of(context).colorScheme;
   late final TextTheme _textTheme = Theme.of(context).textTheme;
+  final bool isScrollable;
 
   @override
   Color? get dividerColor => _colors.surfaceVariant;
@@ -2148,24 +2260,24 @@ class _TabsSecondaryDefaultsM3 extends TabBarTheme {
   MaterialStateProperty<Color?> get overlayColor {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.onSurface.withOpacity(0.12);
+        }
         if (states.contains(MaterialState.hovered)) {
           return _colors.onSurface.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
           return _colors.onSurface.withOpacity(0.12);
         }
-        if (states.contains(MaterialState.pressed)) {
-          return _colors.onSurface.withOpacity(0.12);
-        }
         return null;
+      }
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.onSurface.withOpacity(0.12);
       }
       if (states.contains(MaterialState.hovered)) {
         return _colors.onSurface.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return _colors.onSurface.withOpacity(0.12);
-      }
-      if (states.contains(MaterialState.pressed)) {
         return _colors.onSurface.withOpacity(0.12);
       }
       return null;
@@ -2174,6 +2286,9 @@ class _TabsSecondaryDefaultsM3 extends TabBarTheme {
 
   @override
   InteractiveInkFeatureFactory? get splashFactory => Theme.of(context).splashFactory;
+
+  @override
+  TabAlignment? get tabAlignment => isScrollable ? TabAlignment.start : TabAlignment.fill;
 }
 
 // END GENERATED TOKEN PROPERTIES - Tabs

@@ -23,7 +23,7 @@ void main() {
 
     logoOffset = tester.getCenter(find.byType(FlutterLogo));
     expect(logoOffset.dx.roundToDouble(), 376.0);
-    expect(logoOffset.dy.roundToDouble(), 140.0);
+    expect(logoOffset.dy.roundToDouble(), 137.0);
 
     // Test X axis slider.
     final Offset x = tester.getCenter(find.text('X'));
@@ -32,6 +32,6 @@ void main() {
 
     logoOffset = tester.getCenter(find.byType(FlutterLogo));
     expect(logoOffset.dx.roundToDouble(), 178.0);
-    expect(logoOffset.dy.roundToDouble(), 140.0);
+    expect(logoOffset.dy.roundToDouble(), 137.0);
   });
 }

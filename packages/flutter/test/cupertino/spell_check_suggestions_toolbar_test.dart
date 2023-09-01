@@ -61,7 +61,11 @@ void main() {
     expect(labels, isNot(contains('yeller')));
   });
 
+<<<<<<< HEAD
   testWidgets('buildButtonItems builds a "No Replacements Found" button when no suggestions', (WidgetTester tester) async {
+=======
+  testWidgets('buildButtonItems builds a disabled "No Replacements Found" button when no suggestions', (WidgetTester tester) async {
+>>>>>>> ff5b5b5fa6f35b717667719ddfdb1521d8bdd05a
     await tester.pumpWidget(
       CupertinoApp(
         home: _FakeEditableText(),
@@ -73,8 +77,14 @@ void main() {
         CupertinoSpellCheckSuggestionsToolbar.buildButtonItems(editableTextState);
 
     expect(buttonItems, isNotNull);
+<<<<<<< HEAD
     expect(buttonItems!.length, 1);
     expect(buttonItems.first.label, 'No Replacements Found');
+=======
+    expect(buttonItems, hasLength(1));
+    expect(buttonItems!.first.label, 'No Replacements Found');
+    expect(buttonItems.first.onPressed, isNull);
+>>>>>>> ff5b5b5fa6f35b717667719ddfdb1521d8bdd05a
   });
 }
 

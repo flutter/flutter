@@ -25,6 +25,7 @@
   "continueButtonLabel": "Jatka",
   "copyButtonLabel": "Kopioi",
   "cutButtonLabel": "Leikkaa",
+  "scanTextButtonLabel": "Skannaa tekstiä",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "Liitä",
   "selectAllButtonLabel": "Valitse kaikki",
@@ -134,5 +135,11 @@
   "scrimLabel": "Sermi",
   "bottomSheetLabel": "Alapaneeli",
   "scrimOnTapHint": "Sulje $modalRouteContentName",
-  "keyboardKeyShift": "Vaihto"
+  "keyboardKeyShift": "Vaihto",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

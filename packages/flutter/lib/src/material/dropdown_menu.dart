@@ -284,6 +284,7 @@ class DropdownMenu<T> extends StatefulWidget {
 class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   final GlobalKey _anchorKey = GlobalKey();
   final GlobalKey _leadingKey = GlobalKey();
+  late List<GlobalKey> buttonItemKeys;
   final MenuController _controller = MenuController();
   late final TextEditingController _textEditingController;
   late bool _enableFilter;
@@ -299,6 +300,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     _textEditingController = widget.controller ?? TextEditingController();
     _enableFilter = widget.enableFilter;
     filteredEntries = widget.dropdownMenuEntries;
+    buttonItemKeys = List<GlobalKey>.generate(filteredEntries.length, (int index) => GlobalKey());
     _menuHasEnabledItem = filteredEntries.any((DropdownMenuEntry<T> entry) => entry.enabled);
 
     final int index = filteredEntries.indexWhere((DropdownMenuEntry<T> entry) => entry.value == widget.initialSelection);
@@ -313,7 +315,15 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   @override
   void didUpdateWidget(DropdownMenu<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.enableSearch != widget.enableSearch) {
+      if (!widget.enableSearch) {
+        currentHighlight = null;
+      }
+    }
     if (oldWidget.dropdownMenuEntries != widget.dropdownMenuEntries) {
+      currentHighlight = null;
+      filteredEntries = widget.dropdownMenuEntries;
+      buttonItemKeys = List<GlobalKey>.generate(filteredEntries.length, (int index) => GlobalKey());
       _menuHasEnabledItem = filteredEntries.any((DropdownMenuEntry<T> entry) => entry.enabled);
     }
     if (oldWidget.leadingIcon != widget.leadingIcon) {
@@ -354,11 +364,20 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     });
   }
 
+  void scrollToHighlight() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final BuildContext? highlightContext = buttonItemKeys[currentHighlight!].currentContext;
+      if (highlightContext != null) {
+        Scrollable.ensureVisible(highlightContext);
+      }
+    });
+  }
+
   double? getWidth(GlobalKey key) {
     final BuildContext? context = key.currentContext;
     if (context != null) {
       final RenderBox box = context.findRenderObject()! as RenderBox;
-      return box.size.width;
+      return box.hasSize ? box.size.width : null;
     }
     return null;
   }
@@ -384,7 +403,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     List<DropdownMenuEntry<T>> filteredEntries,
     TextEditingController textEditingController,
     TextDirection textDirection,
-    { int? focusedIndex }
+    { int? focusedIndex, bool enableScrollToHighlight = true}
   ) {
     final List<Widget> result = <Widget>[];
     final double padding = leadingPadding ?? _kDefaultHorizontalPadding;
@@ -416,6 +435,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         : effectiveStyle;
 
       final MenuItemButton menuItemButton = MenuItemButton(
+        key: enableScrollToHighlight ? buttonItemKeys[i] : null,
         style: effectiveStyle,
         leadingIcon: entry.leadingIcon,
         trailingIcon: entry.trailingIcon,
@@ -490,7 +510,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   @override
   Widget build(BuildContext context) {
     final TextDirection textDirection = Directionality.of(context);
-    _initialMenu ??= _buildButtons(widget.dropdownMenuEntries, _textEditingController, textDirection);
+    _initialMenu ??= _buildButtons(widget.dropdownMenuEntries, _textEditingController, textDirection, enableScrollToHighlight: false);
     final DropdownMenuThemeData theme = DropdownMenuTheme.of(context);
     final DropdownMenuThemeData defaults = _DropdownMenuDefaultsM3(context);
 
@@ -500,6 +520,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
     if (widget.enableSearch) {
       currentHighlight = search(filteredEntries, _textEditingController);
+      if (currentHighlight != null) {
+        scrollToHighlight();
+      }
     }
 
     final List<Widget> menu = _buildButtons(filteredEntries, _textEditingController, textDirection, focusedIndex: currentHighlight);
@@ -542,7 +565,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           controller: _controller,
           menuChildren: menu,
           crossAxisUnconstrained: false,
-          onClose: () { setState(() {}); }, // To update the status of the IconButton
           builder: (BuildContext context, MenuController controller, Widget? child) {
             assert(_initialMenu != null);
             final Widget trailingButton = Padding(
@@ -615,7 +637,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                     suffixIcon: trailingButton,
                   ).applyDefaults(effectiveInputDecorationTheme)
                 ),
-                for (Widget c in _initialMenu!) c,
+                for (final Widget c in _initialMenu!) c,
                 trailingButton,
                 leadingButton,
               ],
@@ -649,6 +671,11 @@ class _DropdownMenuBody extends MultiChildRenderObjectWidget {
       width: width,
     );
   }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderDropdownMenuBody renderObject) {
+    renderObject.width = width;
+  }
 }
 
 class _DropdownMenuBodyParentData extends ContainerBoxParentData<RenderBox> { }
@@ -658,10 +685,18 @@ class _RenderDropdownMenuBody extends RenderBox
         RenderBoxContainerDefaultsMixin<RenderBox, _DropdownMenuBodyParentData> {
 
   _RenderDropdownMenuBody({
-    this.width,
-  });
+    double? width,
+  }) : _width = width;
 
-  final double? width;
+  double? get width => _width;
+  double? _width;
+  set width(double? value) {
+    if (_width == value) {
+      return;
+    }
+    _width = value;
+    markNeedsLayout();
+  }
 
   @override
   void setupParentData(RenderBox child) {

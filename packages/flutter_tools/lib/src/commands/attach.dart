@@ -33,6 +33,7 @@ import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
+import '../runner/flutter_command_runner.dart';
 import '../vmservice.dart';
 
 /// A Flutter-command that attaches to applications that have been launched
@@ -227,7 +228,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
     debugPort;
     // Allow --ipv6 for iOS devices even if --debug-port and --debug-url
-    // are unknown
+    // are unknown.
     if (!_isIOSDevice(targetDevice) &&
         debugPort == null &&
         debugUri == null &&
@@ -298,9 +299,9 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
     final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
     final String hostname = usesIpv6 ? ipv6Loopback : ipv4Loopback;
-    final bool isNetworkDevice = (device is IOSDevice) && device.isWirelesslyConnected;
+    final bool isWirelessIOSDevice = (device is IOSDevice) && device.isWirelesslyConnected;
 
-    if ((debugPort == null && debugUri == null) || isNetworkDevice) {
+    if ((debugPort == null && debugUri == null) || isWirelessIOSDevice) {
       if (device is FuchsiaDevice) {
         final String? module = stringArg('module');
         if (module == null) {
@@ -323,10 +324,10 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         // Protocol Discovery relies on logging. On iOS earlier than 13, logging is gathered using syslog.
         // syslog is not available for iOS 13+. For iOS 13+, Protocol Discovery gathers logs from the VMService.
         // Since we don't have access to the VMService yet, Protocol Discovery cannot be used for iOS 13+.
-        // Also, network devices must be found using mDNS and cannot use Protocol Discovery.
+        // Also, wireless devices must be found using mDNS and cannot use Protocol Discovery.
         final bool compatibleWithProtocolDiscovery = (device is IOSDevice) &&
           device.majorSdkVersion < IOSDeviceLogReader.minimumUniversalLoggingSdkVersion &&
-          !isNetworkDevice;
+          !isWirelessIOSDevice;
 
         _logger.printStatus('Waiting for a connection from Flutter on ${device.name}...');
         final Status discoveryStatus = _logger.startSpinner(
@@ -357,7 +358,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           appId,
           device,
           usesIpv6: usesIpv6,
-          isNetworkDevice: isNetworkDevice,
+          useDeviceIPAsHost: isWirelessIOSDevice,
           deviceVmservicePort: devicePort,
         );
 
@@ -528,6 +529,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       ddsPort: ddsPort,
       devToolsServerAddress: devToolsServerAddress,
       serveObservatory: serveObservatory,
+      usingCISystem: usingCISystem,
     );
 
     return buildInfo.isDebug
@@ -535,7 +537,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           flutterDevices,
           target: targetFile,
           debuggingOptions: debuggingOptions,
-          packagesFilePath: globalResults!['packages'] as String?,
+          packagesFilePath: globalResults![FlutterGlobalOptions.kPackagesOption] as String?,
           projectRootPath: stringArg('project-root'),
           dillOutputPath: stringArg('output-dill'),
           ipv6: usesIpv6,

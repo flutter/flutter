@@ -50,6 +50,10 @@ void main() {
       expect(localizations.alertDialogLabel, isNotNull);
       expect(localizations.collapsedIconTapHint, isNotNull);
       expect(localizations.expandedIconTapHint, isNotNull);
+      expect(localizations.expansionTileExpandedHint, isNotNull);
+      expect(localizations.expansionTileCollapsedHint, isNotNull);
+      expect(localizations.collapsedHint, isNotNull);
+      expect(localizations.expandedHint, isNotNull);
       expect(localizations.refreshIndicatorSemanticLabel, isNotNull);
 
       expect(localizations.remainingTextFieldCharacterCount(0), isNotNull);
@@ -114,6 +118,14 @@ void main() {
     expect(localizations.lastPageTooltip, 'Ikhasi lokugcina');
   });
 
+  testWidgets('translations spot check expansionTileExpandedHint', (WidgetTester tester) async {
+    const Locale locale = Locale.fromSubtags(languageCode: 'en');
+    expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
+    final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
+    expect(localizations, isA<MaterialLocalizationEn>());
+    expect(localizations.expansionTileExpandedHint, 'double tap to collapse');
+  });
+
   testWidgets('spot check selectedRowCount translations', (WidgetTester tester) async {
     MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('en'));
     expect(localizations.selectedRowCountTitle(0), 'No items selected');
@@ -172,7 +184,7 @@ void main() {
     expect(localizations.formatFullDate(DateTime(2015, 7, 23)), 'Thursday, 23 July 2015');
 
     localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('es'));
-    expect(localizations.formatMediumDate(DateTime(2015, 7, 23)), 'jue., 23 jul.');
+    expect(localizations.formatMediumDate(DateTime(2015, 7, 23)), 'jue, 23 jul');
     expect(localizations.formatFullDate(DateTime(2015, 7, 23)), 'jueves, 23 de julio de 2015');
 
     localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('de'));

@@ -379,7 +379,10 @@ class Opacity extends SingleChildRenderObjectWidget {
 ///       tileMode: TileMode.mirror,
 ///     ).createShader(bounds);
 ///   },
-///   child: const Text('I’m burning the memories'),
+///   child: const Text(
+///     'I’m burning the memories',
+///     style: TextStyle(color: Colors.white),
+///   ),
 /// )
 /// ```
 /// {@end-tool}
@@ -847,7 +850,7 @@ class ClipRRect extends SingleChildRenderObjectWidget {
     this.clipper,
     this.clipBehavior = Clip.antiAlias,
     super.child,
-  }) : assert(borderRadius != null || clipper != null);
+  });
 
   /// The border radius of the rounded corners.
   ///
@@ -855,7 +858,7 @@ class ClipRRect extends SingleChildRenderObjectWidget {
   /// exceed width/height.
   ///
   /// This value is ignored if [clipper] is non-null.
-  final BorderRadiusGeometry? borderRadius;
+  final BorderRadiusGeometry borderRadius;
 
   /// If non-null, determines which clip to use.
   final CustomClipper<RRect>? clipper;
@@ -868,7 +871,7 @@ class ClipRRect extends SingleChildRenderObjectWidget {
   @override
   RenderClipRRect createRenderObject(BuildContext context) {
     return RenderClipRRect(
-      borderRadius: borderRadius!,
+      borderRadius: borderRadius,
       clipper: clipper,
       clipBehavior: clipBehavior,
       textDirection: Directionality.maybeOf(context),
@@ -878,7 +881,7 @@ class ClipRRect extends SingleChildRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, RenderClipRRect renderObject) {
     renderObject
-      ..borderRadius = borderRadius!
+      ..borderRadius = borderRadius
       ..clipBehavior = clipBehavior
       ..clipper = clipper
       ..textDirection = Directionality.maybeOf(context);
@@ -1368,7 +1371,7 @@ class Transform extends SingleChildRenderObjectWidget {
 
   /// Creates a widget that scales its child along the 2D plane.
   ///
-  /// The `scaleX` argument provides the scalar by which to multiply the `x` axis, and the `scaleY` argument provides the scalar by which to multiply the `y` axis. Either may be omitted, in which case that axis defaults to 1.0.
+  /// The `scaleX` argument provides the scalar by which to multiply the `x` axis, and the `scaleY` argument provides the scalar by which to multiply the `y` axis. Either may be omitted, in which case the scaling factor for that axis defaults to 1.0.
   ///
   /// For convenience, to scale the child uniformly, instead of providing `scaleX` and `scaleY`, the `scale` parameter may be used.
   ///
@@ -2260,7 +2263,7 @@ class LayoutId extends ParentDataWidget<MultiChildLayoutParentData> {
     final MultiChildLayoutParentData parentData = renderObject.parentData! as MultiChildLayoutParentData;
     if (parentData.id != id) {
       parentData.id = id;
-      final AbstractNode? targetParent = renderObject.parent;
+      final RenderObject? targetParent = renderObject.parent;
       if (targetParent is RenderObject) {
         targetParent.markNeedsLayout();
       }
@@ -4345,7 +4348,7 @@ class Positioned extends ParentDataWidget<StackParentData> {
     }
 
     if (needsLayout) {
-      final AbstractNode? targetParent = renderObject.parent;
+      final RenderObject? targetParent = renderObject.parent;
       if (targetParent is RenderObject) {
         targetParent.markNeedsLayout();
       }
@@ -5204,7 +5207,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
     }
 
     if (needsLayout) {
-      final AbstractNode? targetParent = renderObject.parent;
+      final RenderObject? targetParent = renderObject.parent;
       if (targetParent is RenderObject) {
         targetParent.markNeedsLayout();
       }
@@ -5729,24 +5732,7 @@ class RichText extends MultiChildRenderObjectWidget {
     this.selectionColor,
   }) : assert(maxLines == null || maxLines > 0),
        assert(selectionRegistrar == null || selectionColor != null),
-       super(children: _extractChildren(text));
-
-  // Traverses the InlineSpan tree and depth-first collects the list of
-  // child widgets that are created in WidgetSpans.
-  static List<Widget> _extractChildren(InlineSpan span) {
-    int index = 0;
-    final List<Widget> result = <Widget>[];
-    span.visitChildren((InlineSpan span) {
-      if (span is WidgetSpan) {
-        result.add(Semantics(
-          tagForChildren: PlaceholderSpanIndexSemanticsTag(index++),
-          child: span.child,
-        ));
-      }
-      return true;
-    });
-    return result;
-  }
+       super(children: WidgetSpan.extractFromInlineSpan(text, textScaleFactor));
 
   /// The text to display in this widget.
   final InlineSpan text;
@@ -6740,10 +6726,6 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 /// as usual. It just cannot be the target of located events, because it returns
 /// false from [RenderBox.hitTest].
 ///
-/// When [ignoringSemantics] is true, the subtree will be invisible to
-/// the semantics layer (and thus e.g. accessibility tools). If
-/// [ignoringSemantics] is null, it uses the value of [ignoring].
-///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=qV9pqHWxYgI}
 ///
 /// {@tool dartpad}
@@ -6756,6 +6738,24 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 /// ** See code in examples/api/lib/widgets/basic/ignore_pointer.0.dart **
 /// {@end-tool}
 ///
+/// ## Semantics
+///
+/// Using this widget may also affect how the semantics subtree underneath this
+/// widget is collected.
+///
+/// {@template flutter.widgets.IgnorePointer.Semantics}
+/// If [ignoringSemantics] is true, the semantics subtree is dropped. Therefore,
+/// the subtree will be invisible to assistive technologies.
+///
+/// If [ignoringSemantics] is false, the semantics subtree is collected as
+/// usual.
+///
+/// If [ignoringSemantics] is not set, then [ignoring] decides how the
+/// semantics subtree is collected. If [ignoring] is true, pointer-related
+/// [SemanticsAction]s are removed from the semantics subtree. Otherwise, the
+/// subtree remains untouched.
+/// {@endtemplate}
+///
 /// See also:
 ///
 ///  * [AbsorbPointer], which also prevents its children from receiving pointer
@@ -6764,11 +6764,14 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 class IgnorePointer extends SingleChildRenderObjectWidget {
   /// Creates a widget that is invisible to hit testing.
   ///
-  /// The [ignoring] argument must not be null. If [ignoringSemantics] is null,
-  /// this render object will be ignored for semantics if [ignoring] is true.
+  /// The [ignoring] argument must not be null.
   const IgnorePointer({
     super.key,
     this.ignoring = true,
+    @Deprecated(
+      'Use ExcludeSemantics or create a custom ignore pointer widget instead. '
+      'This feature was deprecated after v3.8.0-12.0.pre.'
+    )
     this.ignoringSemantics,
     super.child,
   });
@@ -6777,13 +6780,22 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
   ///
   /// Regardless of whether this widget is ignored during hit testing, it will
   /// still consume space during layout and be visible during painting.
+  ///
+  /// {@macro flutter.widgets.IgnorePointer.Semantics}
+  ///
+  /// Defaults to true.
   final bool ignoring;
 
-  /// Whether the semantics of this widget is ignored when compiling the semantics tree.
+  /// Whether the semantics of this widget is ignored when compiling the
+  /// semantics subtree.
   ///
-  /// If null, defaults to value of [ignoring].
+  /// {@macro flutter.widgets.IgnorePointer.Semantics}
   ///
   /// See [SemanticsNode] for additional information about the semantics tree.
+  @Deprecated(
+    'Use ExcludeSemantics or create a custom ignore pointer widget instead. '
+    'This feature was deprecated after v3.8.0-12.0.pre.'
+  )
   final bool? ignoringSemantics;
 
   @override
@@ -6817,6 +6829,9 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 /// from being the target of located events, because it returns true from
 /// [RenderBox.hitTest].
 ///
+/// When [ignoringSemantics] is true, the subtree will be invisible to
+/// the semantics layer (and thus e.g. accessibility tools).
+///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=65HoWqBboI8}
 ///
 /// {@tool dartpad}
@@ -6826,6 +6841,23 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 ///
 /// ** See code in examples/api/lib/widgets/basic/absorb_pointer.0.dart **
 /// {@end-tool}
+///
+/// ## Semantics
+///
+/// Using this widget may also affect how the semantics subtree underneath this
+/// widget is collected.
+///
+/// {@template flutter.widgets.AbsorbPointer.Semantics}
+/// If [ignoringSemantics] is true, the semantics subtree is dropped.
+///
+/// If [ignoringSemantics] is false, the semantics subtree is collected as
+/// usual.
+///
+/// If [ignoringSemantics] is not set, then [absorbing] decides how the
+/// semantics subtree is collected. If [absorbing] is true, pointer-related
+/// [SemanticsAction]s are removed from the semantics subtree. Otherwise, the
+/// subtree remains untouched.
+/// {@endtemplate}
 ///
 /// See also:
 ///
@@ -6838,8 +6870,12 @@ class AbsorbPointer extends SingleChildRenderObjectWidget {
   const AbsorbPointer({
     super.key,
     this.absorbing = true,
-    super.child,
+    @Deprecated(
+      'Use ExcludeSemantics or create a custom absorb pointer widget instead. '
+      'This feature was deprecated after v3.8.0-12.0.pre.'
+    )
     this.ignoringSemantics,
+    super.child,
   });
 
   /// Whether this widget absorbs pointers during hit testing.
@@ -6847,14 +6883,22 @@ class AbsorbPointer extends SingleChildRenderObjectWidget {
   /// Regardless of whether this render object absorbs pointers during hit
   /// testing, it will still consume space during layout and be visible during
   /// painting.
+  ///
+  /// {@macro flutter.widgets.AbsorbPointer.Semantics}
+  ///
+  /// Defaults to true.
   final bool absorbing;
 
   /// Whether the semantics of this render object is ignored when compiling the
   /// semantics tree.
   ///
-  /// If null, defaults to the value of [absorbing].
+  /// {@macro flutter.widgets.AbsorbPointer.Semantics}
   ///
   /// See [SemanticsNode] for additional information about the semantics tree.
+  @Deprecated(
+    'Use ExcludeSemantics or create a custom absorb pointer widget instead. '
+    'This feature was deprecated after v3.8.0-12.0.pre.'
+  )
   final bool? ignoringSemantics;
 
   @override
@@ -6939,6 +6983,8 @@ class MetaData extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
+///  * [SemanticsProperties], which contains a complete documentation for each
+///    of the constructor parameters that belongs to semantics properties.
 ///  * [MergeSemantics], which marks a subtree as being a single node for
 ///    accessibility purposes.
 ///  * [ExcludeSemantics], which excludes a subtree from the semantics tree
@@ -6960,6 +7006,8 @@ class Semantics extends SingleChildRenderObjectWidget {
   ///
   /// See also:
   ///
+  ///  * [SemanticsProperties], which contains a complete documentation for each
+  ///    of the constructor parameters that belongs to semantics properties.
   ///  * [SemanticsSortKey] for a class that determines accessibility traversal
   ///    order.
   Semantics({
@@ -6968,6 +7016,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool container = false,
     bool explicitChildNodes = false,
     bool excludeSemantics = false,
+    bool blockUserActions = false,
     bool? enabled,
     bool? checked,
     bool? mixed,
@@ -7033,6 +7082,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     container: container,
     explicitChildNodes: explicitChildNodes,
     excludeSemantics: excludeSemantics,
+    blockUserActions: blockUserActions,
     properties: SemanticsProperties(
       enabled: enabled,
       checked: checked,
@@ -7108,6 +7158,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     this.container = false,
     this.explicitChildNodes = false,
     this.excludeSemantics = false,
+    this.blockUserActions = false,
     required this.properties,
   });
 
@@ -7151,12 +7202,48 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// an [ExcludeSemantics] widget and then another [Semantics] widget.
   final bool excludeSemantics;
 
+  /// Whether to block user interactions for the rendering subtree.
+  ///
+  /// Setting this to true will prevent users from interacting with The
+  /// rendering object configured by this widget and its subtree through
+  /// pointer-related [SemanticsAction]s in assistive technologies.
+  ///
+  /// The [SemanticsNode] created from this widget is still focusable by
+  /// assistive technologies. Only pointer-related [SemanticsAction]s, such as
+  /// [SemanticsAction.tap] or its friends, are blocked.
+  ///
+  /// If this widget is merged into a parent semantics node, only the
+  /// [SemanticsAction]s of this widget and the widgets in the subtree are
+  /// blocked.
+  ///
+  /// For example:
+  /// ```dart
+  /// void _myTap() { }
+  /// void _myLongPress() { }
+  ///
+  /// Widget build(BuildContext context) {
+  ///   return Semantics(
+  ///     onTap: _myTap,
+  ///     child: Semantics(
+  ///       blockUserActions: true,
+  ///       onLongPress: _myLongPress,
+  ///       child: const Text('label'),
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  ///
+  /// The result semantics node will still have `_myTap`, but the `_myLongPress`
+  /// will be blocked.
+  final bool blockUserActions;
+
   @override
   RenderSemanticsAnnotations createRenderObject(BuildContext context) {
     return RenderSemanticsAnnotations(
       container: container,
       explicitChildNodes: explicitChildNodes,
       excludeSemantics: excludeSemantics,
+      blockUserActions: blockUserActions,
       properties: properties,
       textDirection: _getTextDirection(context),
     );
@@ -7186,6 +7273,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..container = container
       ..explicitChildNodes = explicitChildNodes
       ..excludeSemantics = excludeSemantics
+      ..blockUserActions = blockUserActions
       ..properties = properties
       ..textDirection = _getTextDirection(context);
   }

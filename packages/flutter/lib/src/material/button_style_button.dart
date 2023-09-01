@@ -42,6 +42,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
     required this.autofocus,
     required this.clipBehavior,
     this.statesController,
+    this.isSemanticButton = true,
     required this.child,
   });
 
@@ -99,6 +100,15 @@ abstract class ButtonStyleButton extends StatefulWidget {
 
   /// {@macro flutter.material.inkwell.statesController}
   final MaterialStatesController? statesController;
+
+  /// Determine whether this subtree represents a button.
+  ///
+  /// If this is null, the screen reader will not announce "button" when this
+  /// is focused. This is useful for [MenuItemButton] and [SubmenuButton] when we
+  /// traverse the menu system.
+  ///
+  /// Defaults to true.
+  final bool? isSemanticButton;
 
   /// Typically the button's label.
   ///
@@ -425,7 +435,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
 
     return Semantics(
       container: true,
-      button: true,
+      button: widget.isSemanticButton,
       enabled: widget.enabled,
       child: _InputPadding(
         minSize: minSize,

@@ -123,7 +123,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       FlutterValidator(
         fileSystem: globals.fs,
         platform: globals.platform,
-        flutterVersion: () => globals.flutterVersion,
+        flutterVersion: () => globals.flutterVersion.fetchTagsAndGetVersion(clock: globals.systemClock),
         devToolsVersion: () => globals.cache.devToolsVersion,
         processManager: globals.processManager,
         userMessages: userMessages,
@@ -138,7 +138,14 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (androidWorkflow!.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[androidValidator!, androidLicenseValidator!]),
       if (globals.iosWorkflow!.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
-        GroupedValidator(<DoctorValidator>[XcodeValidator(xcode: globals.xcode!, userMessages: userMessages), globals.cocoapodsValidator!]),
+        GroupedValidator(<DoctorValidator>[
+          XcodeValidator(
+            xcode: globals.xcode!,
+            userMessages: userMessages,
+            iosSimulatorUtils: globals.iosSimulatorUtils!,
+          ),
+          globals.cocoapodsValidator!,
+        ]),
       if (webWorkflow.appliesToHostPlatform)
         ChromeValidator(
           chromiumLauncher: ChromiumLauncher(
@@ -410,7 +417,7 @@ class Doctor {
       }
 
       for (final ValidationMessage message in result.messages) {
-        if (!message.isInformation || verbose == true) {
+        if (!message.isInformation || verbose) {
           int hangingIndent = 2;
           int indent = 4;
           final String indicator = showColor ? message.coloredIndicator : message.indicator;
@@ -577,14 +584,14 @@ class FlutterValidator extends DoctorValidator {
   ValidationMessage _getFlutterVersionMessage(String frameworkVersion, String versionChannel, String flutterRoot) {
     String flutterVersionMessage = _userMessages.flutterVersion(frameworkVersion, versionChannel, flutterRoot);
 
-    // The tool sets the channel as "unknown", if the current branch is on a
-    // "detached HEAD" state or doesn't have an upstream, and sets the
-    // frameworkVersion as "0.0.0-unknown" if  "git describe" on HEAD doesn't
-    // produce an expected format to be parsed for the frameworkVersion.
-    if (versionChannel != 'unknown' && frameworkVersion != '0.0.0-unknown') {
+    // The tool sets the channel as kUserBranch, if the current branch is on a
+    // "detached HEAD" state, doesn't have an upstream, or is on a user branch,
+    // and sets the frameworkVersion as "0.0.0-unknown" if "git describe" on
+    // HEAD doesn't produce an expected format to be parsed for the frameworkVersion.
+    if (versionChannel != kUserBranch && frameworkVersion != '0.0.0-unknown') {
       return ValidationMessage(flutterVersionMessage);
     }
-    if (versionChannel == 'unknown') {
+    if (versionChannel == kUserBranch) {
       flutterVersionMessage = '$flutterVersionMessage\n${_userMessages.flutterUnknownChannel}';
     }
     if (frameworkVersion == '0.0.0-unknown') {

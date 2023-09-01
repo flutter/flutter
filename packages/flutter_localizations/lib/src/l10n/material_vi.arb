@@ -25,6 +25,7 @@
   "continueButtonLabel": "Tiếp tục",
   "copyButtonLabel": "Sao chép",
   "cutButtonLabel": "Cắt",
+  "scanTextButtonLabel": "Quét văn bản",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "Dán",
   "selectAllButtonLabel": "Chọn tất cả",
@@ -134,5 +135,11 @@
   "scrimLabel": "Scrim",
   "bottomSheetLabel": "Bảng dưới cùng",
   "scrimOnTapHint": "Đóng $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

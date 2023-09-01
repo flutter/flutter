@@ -25,6 +25,7 @@
   "continueButtonLabel": "Напред",
   "copyButtonLabel": "Копиране",
   "cutButtonLabel": "Изрязване",
+  "scanTextButtonLabel": "Сканиране на текст",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "Поставяне",
   "selectAllButtonLabel": "Избиране на всички",
@@ -134,5 +135,11 @@
   "scrimLabel": "Скрим",
   "bottomSheetLabel": "Долен лист",
   "scrimOnTapHint": "Затваряне на $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

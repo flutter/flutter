@@ -18,8 +18,14 @@ import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 
+/// The function signature of the [print] function.
+typedef PrintFn = void Function(Object?);
+
 class PackagesCommand extends FlutterCommand {
-  PackagesCommand() {
+  PackagesCommand({
+    PrintFn usagePrintFn = print,
+  }) : _usagePrintFn = usagePrintFn
+  {
     addSubcommand(PackagesGetCommand('get', "Get the current package's dependencies.", PubContext.pubGet));
     addSubcommand(PackagesGetCommand('upgrade', "Upgrade the current package's dependencies to latest versions.", PubContext.pubUpgrade));
     addSubcommand(PackagesGetCommand('add', 'Add a dependency to pubspec.yaml.', PubContext.pubAdd));
@@ -40,6 +46,8 @@ class PackagesCommand extends FlutterCommand {
     addSubcommand(PackagesPassthroughCommand());
   }
 
+  final PrintFn _usagePrintFn;
+
   @override
   final String name = 'pub';
 
@@ -54,6 +62,9 @@ class PackagesCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async => FlutterCommandResult.fail();
+
+  @override
+  void printUsage() => _usagePrintFn(usage);
 }
 
 class PackagesTestCommand extends FlutterCommand {
@@ -305,8 +316,8 @@ class PackagesGetCommand extends FlutterCommand {
           name,
           ...subArgs,
           // `dart pub get` and friends defaults to `--no-example`.
-          if(!exampleWasParsed && target != null) '--example',
-          if(directoryOption == null && relativeTarget != null) ...<String>['--directory', relativeTarget],
+          if (!exampleWasParsed && target != null) '--example',
+          if (directoryOption == null && relativeTarget != null) ...<String>['--directory', relativeTarget],
         ],
         project: rootProject,
         context: _context,

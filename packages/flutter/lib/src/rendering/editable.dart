@@ -15,6 +15,7 @@ import 'package:flutter/services.dart';
 import 'box.dart';
 import 'custom_paint.dart';
 import 'layer.dart';
+import 'layout_helper.dart';
 import 'object.dart';
 import 'paragraph.dart';
 import 'viewport_offset.dart';
@@ -24,15 +25,10 @@ const double _kCaretHeightOffset = 2.0; // pixels
 
 // The additional size on the x and y axis with which to expand the prototype
 // cursor to render the floating cursor in pixels.
-const EdgeInsets _kFloatingCaretSizeIncrease = EdgeInsets.symmetric(horizontal: 0.5, vertical: 1.0);
+const EdgeInsets _kFloatingCursorSizeIncrease = EdgeInsets.symmetric(horizontal: 0.5, vertical: 1.0);
 
 // The corner radius of the floating cursor in pixels.
-const Radius _kFloatingCaretRadius = Radius.circular(1.0);
-
-/// Signature for the callback that reports when the caret location changes.
-///
-/// Used by [RenderEditable.onCaretChanged].
-typedef CaretChangedHandler = void Function(Rect caretRect);
+const Radius _kFloatingCursorRadius = Radius.circular(1.0);
 
 /// Represents the coordinates of the point in a selection, and the text
 /// direction at that point, relative to top left of the [RenderEditable] that
@@ -259,13 +255,10 @@ class VerticalCaretMovementRun implements Iterator<TextPosition> {
 /// position. The cursor is shown while [showCursor] is true. It is painted in
 /// the [cursorColor].
 ///
-/// If, when the render object paints, the caret is found to have changed
-/// location, [onCaretChanged] is called.
-///
 /// Keyboard handling, IME handling, scrolling, toggling the [showCursor] value
 /// to actually blink the cursor, and other features not mentioned above are the
 /// responsibility of higher layers and not handled by this object.
-class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, ContainerRenderObjectMixin<RenderBox, TextParentData>, RenderBoxContainerDefaultsMixin<RenderBox, TextParentData> implements TextLayoutMetrics {
+class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, ContainerRenderObjectMixin<RenderBox, TextParentData>, RenderInlineChildrenContainerDefaults implements TextLayoutMetrics {
   /// Creates a render object that implements the visual aspects of a text field.
   ///
   /// The [textAlign] argument must not be null. It defaults to [TextAlign.start].
@@ -298,7 +291,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     double textScaleFactor = 1.0,
     TextSelection? selection,
     required ViewportOffset offset,
-    this.onCaretChanged,
     this.ignorePointer = false,
     bool readOnly = false,
     bool forceLine = true,
@@ -385,14 +377,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _updateForegroundPainter(foregroundPainter);
     _updatePainter(painter);
     addAll(children);
-    _extractPlaceholderSpans(text);
-  }
-
-  @override
-  void setupParentData(RenderBox child) {
-    if (child.parentData is! TextParentData) {
-      child.parentData = TextParentData();
-    }
   }
 
   /// Child render objects
@@ -433,17 +417,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       _foregroundRenderObject?.painter = effectivePainter;
     }
     _foregroundPainter = newPainter;
-  }
-
-  late List<PlaceholderSpan> _placeholderSpans;
-  void _extractPlaceholderSpans(InlineSpan? span) {
-    _placeholderSpans = <PlaceholderSpan>[];
-    span?.visitChildren((InlineSpan span) {
-      if (span is PlaceholderSpan) {
-        _placeholderSpans.add(span);
-      }
-      return true;
-    });
   }
 
   /// The [RenderEditablePainter] to use for painting above this
@@ -492,8 +465,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   // Caret Painters:
-  // The floating painter. This painter paints the regular caret as well.
-  late final _FloatingCursorPainter _caretPainter = _FloatingCursorPainter(_onCaretChanged);
+  // A single painter for both the regular caret and the floating cursor.
+  late final _CaretPainter _caretPainter = _CaretPainter();
 
   // Text Highlight painters:
   final _TextHighlightPainter _selectionPainter = _TextHighlightPainter();
@@ -531,19 +504,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       _textLayoutLastMinWidth == constraints.minWidth,
       'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).',
     );
-  }
-
-  Rect? _lastCaretRect;
-  // TODO(LongCatIsLooong): currently EditableText uses this callback to keep
-  // the text field visible. But we don't always paint the caret, for example
-  // when the selection is not collapsed.
-  /// Called during the paint phase when the caret location changes.
-  CaretChangedHandler? onCaretChanged;
-  void _onCaretChanged(Rect caretRect) {
-    if (_lastCaretRect != caretRect) {
-      onCaretChanged?.call(caretRect);
-    }
-    _lastCaretRect = onCaretChanged == null ? null : caretRect;
   }
 
   /// Whether the [handleEvent] will propagate pointer events to selection
@@ -826,7 +786,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _textPainter.text = value;
     _cachedAttributedValue = null;
     _cachedCombinedSemanticsInfos = null;
-    _extractPlaceholderSpans(value);
+    _canComputeIntrinsicsCached = null;
     markNeedsTextLayout();
     markNeedsSemanticsUpdate();
   }
@@ -1287,7 +1247,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   // [assembleSemanticsNode] invocations.
   LinkedHashMap<Key, SemanticsNode>? _cachedChildNodes;
 
-  /// Returns a list of rects that bound the given selection.
+  /// Returns a list of rects that bound the given selection, and the text
+  /// direction. The text direction is used by the engine to calculate
+  /// the closest position to a given point.
   ///
   /// See [TextPainter.getBoxesForSelection] for more details.
   List<TextBox> getBoxesForSelection(TextSelection selection) {
@@ -1412,13 +1374,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
                children.elementAt(childIndex).isTagged(PlaceholderSpanIndexSemanticsTag(placeholderIndex))) {
           final SemanticsNode childNode = children.elementAt(childIndex);
           final TextParentData parentData = child!.parentData! as TextParentData;
-          assert(parentData.scale != null);
-          childNode.rect = Rect.fromLTWH(
-            childNode.rect.left,
-            childNode.rect.top,
-            childNode.rect.width * parentData.scale!,
-            childNode.rect.height * parentData.scale!,
-          );
+          assert(parentData.offset != null);
           newChildren.add(childNode);
           childIndex += 1;
         }
@@ -1931,9 +1887,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   @override
   @protected
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
-    // Hit test text spans.
-    bool hitText = false;
-
     final InlineSpan? textSpan = _textPainter.text;
     if (textSpan != null) {
       final Offset effectivePosition = position - _paintOffset;
@@ -1941,42 +1894,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       final Object? span = textSpan.getSpanForPosition(textPosition);
       if (span is HitTestTarget) {
         result.add(HitTestEntry(span));
-        hitText = true;
-      }
-    }
-    // Hit test render object children
-    RenderBox? child = firstChild;
-    int childIndex = 0;
-    while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes!.length) {
-      final TextParentData textParentData = child.parentData! as TextParentData;
-      final Matrix4 transform = Matrix4.translationValues(
-        textParentData.offset.dx,
-        textParentData.offset.dy,
-        0.0,
-      )..scale(
-        textParentData.scale,
-        textParentData.scale,
-        textParentData.scale,
-      );
-      final bool isHit = result.addWithPaintTransform(
-        transform: transform,
-        position: position,
-        hitTest: (BoxHitTestResult result, Offset transformed) {
-          assert(() {
-            final Offset manualPosition = (position - textParentData.offset) / textParentData.scale!;
-            return (transformed.dx - manualPosition.dx).abs() < precisionErrorTolerance
-              && (transformed.dy - manualPosition.dy).abs() < precisionErrorTolerance;
-          }());
-          return child!.hitTest(result, position: transformed);
-        },
-      );
-      if (isHit) {
         return true;
       }
-      child = childAfter(child);
-      childIndex += 1;
     }
-    return hitText;
+    return hitTestInlineChildren(result, position);
   }
 
   late TapGestureRecognizer _tap;
@@ -2124,9 +2045,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   void selectWordsInRange({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
     _computeTextMetricsIfNeeded();
     final TextPosition fromPosition = _textPainter.getPositionForOffset(globalToLocal(from - _paintOffset));
-    final TextSelection fromWord = _getWordAtOffset(fromPosition);
+    final TextSelection fromWord = getWordAtOffset(fromPosition);
     final TextPosition toPosition = to == null ? fromPosition : _textPainter.getPositionForOffset(globalToLocal(to - _paintOffset));
-    final TextSelection toWord = toPosition == fromPosition ? fromWord : _getWordAtOffset(toPosition);
+    final TextSelection toWord = toPosition == fromPosition ? fromWord : getWordAtOffset(toPosition);
     final bool isFromWordBeforeToWord = fromWord.start < toWord.end;
 
     _setSelection(
@@ -2156,7 +2077,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _setSelection(newSelection, cause);
   }
 
-  TextSelection _getWordAtOffset(TextPosition position) {
+  /// Returns a [TextSelection] that encompasses the word at the given
+  /// [TextPosition].
+  @visibleForTesting
+  TextSelection getWordAtOffset(TextPosition position) {
     debugAssertLayoutUpToDate();
     // When long-pressing past the end of the text, we want a collapsed cursor.
     if (position.offset >= plainText.length) {
@@ -2177,6 +2101,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       case TextAffinity.downstream:
         effectiveOffset = position.offset;
     }
+    assert(effectiveOffset >= 0);
 
     // On iOS, select the previous word if there is a previous word, or select
     // to the end of the next word if there is a next word. Select nothing if
@@ -2185,8 +2110,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     // If the platform is Android and the text is read only, try to select the
     // previous word if there is one; otherwise, select the single whitespace at
     // the position.
-    if (TextLayoutMetrics.isWhitespace(plainText.codeUnitAt(effectiveOffset))
-        && effectiveOffset > 0) {
+    if (effectiveOffset > 0
+        && TextLayoutMetrics.isWhitespace(plainText.codeUnitAt(effectiveOffset))) {
       final TextRange? previousWord = _getPreviousWord(word.start);
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
@@ -2234,77 +2159,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   // will be overwritten during intrinsic width/height calculations and must be
   // restored to the original values before final layout and painting.
   List<PlaceholderDimensions>? _placeholderDimensions;
-
-  // Layout the child inline widgets. We then pass the dimensions of the
-  // children to _textPainter so that appropriate placeholders can be inserted
-  // into the LibTxt layout. This does not do anything if no inline widgets were
-  // specified.
-  List<PlaceholderDimensions> _layoutChildren(BoxConstraints constraints, {bool dry = false}) {
-    if (childCount == 0) {
-      _textPainter.setPlaceholderDimensions(<PlaceholderDimensions>[]);
-      return <PlaceholderDimensions>[];
-    }
-    RenderBox? child = firstChild;
-    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty);
-    int childIndex = 0;
-    // Only constrain the width to the maximum width of the paragraph.
-    // Leave height unconstrained, which will overflow if expanded past.
-    BoxConstraints boxConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
-    // The content will be enlarged by textScaleFactor during painting phase.
-    // We reduce constraints by textScaleFactor, so that the content will fit
-    // into the box once it is enlarged.
-    boxConstraints = boxConstraints / textScaleFactor;
-    while (child != null) {
-      double? baselineOffset;
-      final Size childSize;
-      if (!dry) {
-        child.layout(
-          boxConstraints,
-          parentUsesSize: true,
-        );
-        childSize = child.size;
-        switch (_placeholderSpans[childIndex].alignment) {
-          case ui.PlaceholderAlignment.baseline:
-            baselineOffset = child.getDistanceToBaseline(
-              _placeholderSpans[childIndex].baseline!,
-            );
-          case ui.PlaceholderAlignment.aboveBaseline:
-          case ui.PlaceholderAlignment.belowBaseline:
-          case ui.PlaceholderAlignment.bottom:
-          case ui.PlaceholderAlignment.middle:
-          case ui.PlaceholderAlignment.top:
-            baselineOffset = null;
-        }
-      } else {
-        assert(_placeholderSpans[childIndex].alignment != ui.PlaceholderAlignment.baseline);
-        childSize = child.getDryLayout(boxConstraints);
-      }
-      placeholderDimensions[childIndex] = PlaceholderDimensions(
-        size: childSize,
-        alignment: _placeholderSpans[childIndex].alignment,
-        baseline: _placeholderSpans[childIndex].baseline,
-        baselineOffset: baselineOffset,
-      );
-      child = childAfter(child);
-      childIndex += 1;
-    }
-    return placeholderDimensions;
-  }
-
-  void _setParentData() {
-    RenderBox? child = firstChild;
-    int childIndex = 0;
-    while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes!.length) {
-      final TextParentData textParentData = child.parentData! as TextParentData;
-      textParentData.offset = Offset(
-        _textPainter.inlinePlaceholderBoxes![childIndex].left,
-        _textPainter.inlinePlaceholderBoxes![childIndex].top,
-      );
-      textParentData.scale = _textPainter.inlinePlaceholderScales![childIndex];
-      child = childAfter(child);
-      childIndex += 1;
-    }
-  }
 
   void _layoutText({ double minWidth = 0.0, double maxWidth = double.infinity }) {
     final double availableMaxWidth = math.max(0.0, maxWidth - _caretMargin);
@@ -2377,34 +2231,31 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       );
   }
 
-  bool _canComputeDryLayout() {
-    // Dry layout cannot be calculated without a full layout for
-    // alignments that require the baseline (baseline, aboveBaseline,
-    // belowBaseline).
-    for (final PlaceholderSpan span in _placeholderSpans) {
-      switch (span.alignment) {
-        case ui.PlaceholderAlignment.baseline:
-        case ui.PlaceholderAlignment.aboveBaseline:
-        case ui.PlaceholderAlignment.belowBaseline:
-          return false;
-        case ui.PlaceholderAlignment.top:
-        case ui.PlaceholderAlignment.middle:
-        case ui.PlaceholderAlignment.bottom:
-          continue;
-      }
-    }
-    return true;
+  bool _canComputeDryLayoutForInlineWidgets() {
+    return text?.visitChildren((InlineSpan span) {
+      return (span is! PlaceholderSpan) || switch (span.alignment) {
+        ui.PlaceholderAlignment.baseline ||
+        ui.PlaceholderAlignment.aboveBaseline ||
+        ui.PlaceholderAlignment.belowBaseline => false,
+        ui.PlaceholderAlignment.top ||
+        ui.PlaceholderAlignment.middle ||
+        ui.PlaceholderAlignment.bottom => true,
+      };
+    }) ?? true;
   }
+
+  bool? _canComputeIntrinsicsCached;
+  bool get _canComputeIntrinsics => _canComputeIntrinsicsCached ??= _canComputeDryLayoutForInlineWidgets();
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    if (!_canComputeDryLayout()) {
+    if (!_canComputeIntrinsics) {
       assert(debugCannotComputeDryLayout(
         reason: 'Dry layout not available for alignments that require baseline.',
       ));
       return Size.zero;
     }
-    _textPainter.setPlaceholderDimensions(_layoutChildren(constraints, dry: true));
+    _textPainter.setPlaceholderDimensions(layoutInlineChildren(constraints.maxWidth, ChildLayoutHelper.dryLayoutChild));
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     final double width = forceLine ? constraints.maxWidth : constraints
         .constrainWidth(_textPainter.size.width + _caretMargin);
@@ -2414,10 +2265,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
-    _placeholderDimensions = _layoutChildren(constraints);
+    _placeholderDimensions = layoutInlineChildren(constraints.maxWidth, ChildLayoutHelper.layoutChild);
     _textPainter.setPlaceholderDimensions(_placeholderDimensions);
     _computeTextMetricsIfNeeded();
-    _setParentData();
+    positionInlineChildren(_textPainter.inlinePlaceholderBoxes!);
     _computeCaretPrototype();
     // We grab _textPainter.size here because assigning to `size` on the next
     // line will trigger us to validate our intrinsic sizes, which will change
@@ -2523,8 +2374,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       _floatingCursorTextPosition = lastTextPosition;
       final double? animationValue = _resetFloatingCursorAnimationValue;
       final EdgeInsets sizeAdjustment = animationValue != null
-        ? EdgeInsets.lerp(_kFloatingCaretSizeIncrease, EdgeInsets.zero, animationValue)!
-        : _kFloatingCaretSizeIncrease;
+        ? EdgeInsets.lerp(_kFloatingCursorSizeIncrease, EdgeInsets.zero, animationValue)!
+        : _kFloatingCursorSizeIncrease;
       _caretPainter.floatingCursorRect = sizeAdjustment.inflateRect(_caretPrototype).shift(boundedOffset);
     } else {
       _caretPainter.floatingCursorRect = null;
@@ -2592,31 +2443,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
 
     _textPainter.paint(context.canvas, effectiveOffset);
-
-    RenderBox? child = firstChild;
-    int childIndex = 0;
-    // childIndex might be out of index of placeholder boxes. This can happen
-    // if engine truncates children due to ellipsis. Sadly, we would not know
-    // it until we finish layout, and RenderObject is in immutable state at
-    // this point.
-    while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes!.length) {
-      final TextParentData textParentData = child.parentData! as TextParentData;
-
-      final double scale = textParentData.scale!;
-      context.pushTransform(
-        needsCompositing,
-        effectiveOffset + textParentData.offset,
-        Matrix4.diagonal3Values(scale, scale, scale),
-        (PaintingContext context, Offset offset) {
-          context.paintChild(
-            child!,
-            offset,
-          );
-        },
-      );
-      child = childAfter(child);
-      childIndex += 1;
-    }
+    paintInlineChildren(context, effectiveOffset);
 
     if (foregroundChild != null) {
       context.paintChild(foregroundChild, offset);
@@ -2646,6 +2473,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
         Offset.zero,
       );
     }
+  }
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    if (child == _foregroundRenderObject || child == _backgroundRenderObject) {
+      return;
+    }
+    defaultApplyPaintTransform(child, transform);
   }
 
   @override
@@ -2920,8 +2755,8 @@ class _TextHighlightPainter extends RenderEditablePainter {
   }
 }
 
-class _FloatingCursorPainter extends RenderEditablePainter {
-  _FloatingCursorPainter(this.caretPaintCallback);
+class _CaretPainter extends RenderEditablePainter {
+  _CaretPainter();
 
   bool get shouldPaint => _shouldPaint;
   bool _shouldPaint = true;
@@ -2932,8 +2767,6 @@ class _FloatingCursorPainter extends RenderEditablePainter {
     _shouldPaint = value;
     notifyListeners();
   }
-
-  CaretChangedHandler caretPaintCallback;
 
   bool showRegularCaret = false;
 
@@ -3006,7 +2839,6 @@ class _FloatingCursorPainter extends RenderEditablePainter {
         canvas.drawRRect(caretRRect, caretPaint);
       }
     }
-    caretPaintCallback(integralRect);
   }
 
   @override
@@ -3040,7 +2872,7 @@ class _FloatingCursorPainter extends RenderEditablePainter {
     }
 
     canvas.drawRRect(
-      RRect.fromRectAndRadius(floatingCursorRect, _kFloatingCaretRadius),
+      RRect.fromRectAndRadius(floatingCursorRect, _kFloatingCursorRadius),
       floatingCursorPaint..color = floatingCursorColor,
     );
   }
@@ -3054,7 +2886,7 @@ class _FloatingCursorPainter extends RenderEditablePainter {
     if (oldDelegate == null) {
       return shouldPaint;
     }
-    return oldDelegate is! _FloatingCursorPainter
+    return oldDelegate is! _CaretPainter
         || oldDelegate.shouldPaint != shouldPaint
         || oldDelegate.showRegularCaret != showRegularCaret
         || oldDelegate.caretColor != caretColor

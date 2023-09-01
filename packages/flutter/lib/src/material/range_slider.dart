@@ -833,7 +833,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       ..team = team
       ..onTapDown = _handleTapDown
       ..onTapUp = _handleTapUp
-      ..onTapCancel = _handleTapCancel
       ..gestureSettings = gestureSettings;
     _overlayAnimation = CurvedAnimation(
       parent: _state.overlayController,
@@ -1129,6 +1128,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   }
 
   void _updateLabelPainter(Thumb thumb) {
+    final RangeLabels? labels = this.labels;
     if (labels == null) {
       return;
     }
@@ -1137,25 +1137,21 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     final TextPainter labelPainter;
     switch (thumb) {
       case Thumb.start:
-        text = labels!.start;
+        text = labels.start;
         labelPainter = _startLabelPainter;
       case Thumb.end:
-        text = labels!.end;
+        text = labels.end;
         labelPainter = _endLabelPainter;
     }
 
-    if (labels != null) {
-      labelPainter
-        ..text = TextSpan(
-          style: _sliderTheme.valueIndicatorTextStyle,
-          text: text,
-        )
-        ..textDirection = textDirection
-        ..textScaleFactor = textScaleFactor
-        ..layout();
-    } else {
-      labelPainter.text = null;
-    }
+    labelPainter
+      ..text = TextSpan(
+        style: _sliderTheme.valueIndicatorTextStyle,
+        text: text,
+      )
+      ..textDirection = textDirection
+      ..textScaleFactor = textScaleFactor
+      ..layout();
     // Changing the textDirection can result in the layout changing, because the
     // bidi algorithm might line up the glyphs differently which can result in
     // different ligatures, different shapes, etc. So we always markNeedsLayout.
@@ -1224,6 +1220,10 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   }
 
   void _startInteraction(Offset globalPosition) {
+    if (_active) {
+      return;
+    }
+
     _state.showValueIndicator();
     final double tapValue = clampDouble(_getValueFromGlobalPosition(globalPosition), 0.0, 1.0);
     _lastThumbSelection = sliderTheme.thumbSelector!(textDirection, values, tapValue, _thumbSize, size, 0);
@@ -1333,10 +1333,6 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   }
 
   void _handleTapUp(TapUpDetails details) {
-    _endInteraction();
-  }
-
-  void _handleTapCancel() {
     _endInteraction();
   }
 

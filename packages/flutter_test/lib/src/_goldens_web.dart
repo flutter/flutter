@@ -6,7 +6,7 @@ import 'dart:convert';
 import 'dart:html' as html;
 import 'dart:typed_data';
 
-import 'package:test_api/expect.dart' show fail;
+import 'package:matcher/expect.dart' show fail;
 
 import 'goldens.dart';
 

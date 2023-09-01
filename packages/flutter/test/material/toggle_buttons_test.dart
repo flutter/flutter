@@ -17,10 +17,22 @@ import '../widgets/semantics_tester.dart';
 
 const double _defaultBorderWidth = 1.0;
 
-Widget boilerplate({required Widget child}) {
-  return Directionality(
-    textDirection: TextDirection.ltr,
-    child: Center(child: child),
+Widget boilerplate({
+  bool? useMaterial3,
+  MaterialTapTargetSize? tapTargetSize,
+  required Widget child,
+}) {
+  return Theme(
+    data: ThemeData(
+      useMaterial3: useMaterial3,
+      materialTapTargetSize: tapTargetSize,
+    ),
+    child: Directionality(
+      textDirection: TextDirection.ltr,
+      child: Center(
+        child: Material(child: child),
+      ),
+    ),
   );
 }
 
@@ -34,16 +46,14 @@ void main() {
     }
     final ThemeData theme = ThemeData();
     await tester.pumpWidget(
-      Material(
-        child: boilerplate(
-          child: ToggleButtons(
-            onPressed: (int index) {},
-            isSelected: const <bool>[false, true],
-            children: const <Widget>[
-              Text('First child'),
-              Text('Second child'),
-            ],
-          ),
+      boilerplate(
+        child: ToggleButtons(
+          onPressed: (int index) {},
+          isSelected: const <bool>[false, true],
+          children: const <Widget>[
+            Text('First child'),
+            Text('Second child'),
+          ],
         ),
       ),
     );
@@ -70,25 +80,23 @@ void main() {
       final List<bool> isSelected = <bool>[false, true];
       final ThemeData theme = ThemeData();
       await tester.pumpWidget(
-        Material(
-          child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return boilerplate(
-                child: ToggleButtons(
-                  onPressed: (int index) {
-                    setState(() {
-                      isSelected[index] = !isSelected[index];
-                    });
-                  },
-                  isSelected: isSelected,
-                  children: const <Widget>[
-                    Text('First child'),
-                    Text('Second child'),
-                  ],
-                ),
-              );
-            },
-          ),
+        StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return boilerplate(
+              child: ToggleButtons(
+                onPressed: (int index) {
+                  setState(() {
+                    isSelected[index] = !isSelected[index];
+                  });
+                },
+                isSelected: isSelected,
+                children: const <Widget>[
+                  Text('First child'),
+                  Text('Second child'),
+                ],
+              ),
+            );
+          },
         ),
       );
 
@@ -132,15 +140,13 @@ void main() {
       final ThemeData theme = ThemeData();
 
       await tester.pumpWidget(
-        Material(
-          child: boilerplate(
-            child: ToggleButtons(
-              isSelected: isSelected,
-              children: const <Widget>[
-                Text('First child'),
-                Text('Second child'),
-              ],
-            ),
+        boilerplate(
+          child: ToggleButtons(
+            isSelected: isSelected,
+            children: const <Widget>[
+              Text('First child'),
+              Text('Second child'),
+            ],
           ),
         ),
       );
@@ -178,15 +184,13 @@ void main() {
     (WidgetTester tester) async {
       await expectLater(
         () => tester.pumpWidget(
-          Material(
-            child: boilerplate(
-              child: ToggleButtons(
-                isSelected: const <bool>[false],
-                children: const <Widget>[
-                  Text('First child'),
-                  Text('Second child'),
-                ],
-              ),
+          boilerplate(
+            child: ToggleButtons(
+              isSelected: const <bool>[false],
+              children: const <Widget>[
+                Text('First child'),
+                Text('Second child'),
+              ],
             ),
           ),
         ),
@@ -205,16 +209,14 @@ void main() {
   testWidgets('Default text style is applied', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     await tester.pumpWidget(
-      Material(
-        child: boilerplate(
-          child: ToggleButtons(
-            isSelected: const <bool>[false, true],
-            onPressed: (int index) {},
-            children: const <Widget>[
-              Text('First child'),
-              Text('Second child'),
-            ],
-          ),
+      boilerplate(
+        child: ToggleButtons(
+          isSelected: const <bool>[false, true],
+          onPressed: (int index) {},
+          children: const <Widget>[
+            Text('First child'),
+            Text('Second child'),
+          ],
         ),
       ),
     );
@@ -237,21 +239,19 @@ void main() {
 
   testWidgets('Custom text style except color is applied', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Material(
-        child: boilerplate(
-          child: ToggleButtons(
-            isSelected: const <bool>[false, true],
-            onPressed: (int index) {},
-            textStyle: const TextStyle(
-              textBaseline: TextBaseline.ideographic,
-              fontSize: 20.0,
-              color: Colors.orange,
-            ),
-            children: const <Widget>[
-              Text('First child'),
-              Text('Second child'),
-            ],
+      boilerplate(
+        child: ToggleButtons(
+          isSelected: const <bool>[false, true],
+          onPressed: (int index) {},
+          textStyle: const TextStyle(
+            textBaseline: TextBaseline.ideographic,
+            fontSize: 20.0,
+            color: Colors.orange,
           ),
+          children: const <Widget>[
+            Text('First child'),
+            Text('Second child'),
+          ],
         ),
       ),
     );
@@ -276,17 +276,15 @@ void main() {
 
   testWidgets('Default BoxConstraints', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Material(
-        child: boilerplate(
-          child: ToggleButtons(
-            isSelected: const <bool>[false, false, false],
-            onPressed: (int index) {},
-            children: const <Widget>[
-              Icon(Icons.check),
-              Icon(Icons.access_alarm),
-              Icon(Icons.cake),
-            ],
-          ),
+      boilerplate(
+        child: ToggleButtons(
+          isSelected: const <bool>[false, false, false],
+          onPressed: (int index) {},
+          children: const <Widget>[
+            Icon(Icons.check),
+            Icon(Icons.access_alarm),
+            Icon(Icons.cake),
+          ],
         ),
       ),
     );
@@ -305,21 +303,19 @@ void main() {
   testWidgets('Custom BoxConstraints', (WidgetTester tester) async {
     // Test for minimum constraints
     await tester.pumpWidget(
-      Material(
-        child: boilerplate(
-          child: ToggleButtons(
-            constraints: const BoxConstraints(
-              minWidth: 50.0,
-              minHeight: 60.0,
-            ),
-            isSelected: const <bool>[false, false, false],
-            onPressed: (int index) {},
-            children: const <Widget>[
-              Icon(Icons.check),
-              Icon(Icons.access_alarm),
-              Icon(Icons.cake),
-            ],
+      boilerplate(
+        child: ToggleButtons(
+          constraints: const BoxConstraints(
+            minWidth: 50.0,
+            minHeight: 60.0,
           ),
+          isSelected: const <bool>[false, false, false],
+          onPressed: (int index) {},
+          children: const <Widget>[
+            Icon(Icons.check),
+            Icon(Icons.access_alarm),
+            Icon(Icons.cake),
+          ],
         ),
       ),
     );
@@ -336,22 +332,20 @@ void main() {
 
     // Test for maximum constraints
     await tester.pumpWidget(
-      Material(
-        child: boilerplate(
-          child: ToggleButtons(
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            constraints: const BoxConstraints(
-              maxWidth: 20.0,
-              maxHeight: 10.0,
-            ),
-            isSelected: const <bool>[false, false, false],
-            onPressed: (int index) {},
-            children: const <Widget>[
-              Icon(Icons.check),
-              Icon(Icons.access_alarm),
-              Icon(Icons.cake),
-            ],
+      boilerplate(
+        child: ToggleButtons(
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          constraints: const BoxConstraints(
+            maxWidth: 20.0,
+            maxHeight: 10.0,
           ),
+          isSelected: const <bool>[false, false, false],
+          onPressed: (int index) {},
+          children: const <Widget>[
+            Icon(Icons.check),
+            Icon(Icons.access_alarm),
+            Icon(Icons.cake),
+          ],
         ),
       ),
     );
@@ -384,18 +378,16 @@ void main() {
       }
       final ThemeData theme = ThemeData();
       await tester.pumpWidget(
-        Material(
-          child: boilerplate(
-            child: ToggleButtons(
-              isSelected: const <bool>[false],
-              onPressed: (int index) {},
-              children: const <Widget>[
-                Row(children: <Widget>[
-                  Text('First child'),
-                  Icon(Icons.check),
-                ]),
-              ],
-            ),
+        boilerplate(
+          child: ToggleButtons(
+            isSelected: const <bool>[false],
+            onPressed: (int index) {},
+            children: const <Widget>[
+              Row(children: <Widget>[
+                Text('First child'),
+                Icon(Icons.check),
+              ]),
+            ],
           ),
         ),
       );
@@ -411,18 +403,16 @@ void main() {
       );
 
       await tester.pumpWidget(
-        Material(
-          child: boilerplate(
-            child: ToggleButtons(
-              isSelected: const <bool>[true],
-              onPressed: (int index) {},
-              children: const <Widget>[
-                Row(children: <Widget>[
-                  Text('First child'),
-                  Icon(Icons.check),
-                ]),
-              ],
-            ),
+        boilerplate(
+          child: ToggleButtons(
+            isSelected: const <bool>[true],
+            onPressed: (int index) {},
+            children: const <Widget>[
+              Row(children: <Widget>[
+                Text('First child'),
+                Icon(Icons.check),
+              ]),
+            ],
           ),
         ),
       );
@@ -438,17 +428,15 @@ void main() {
       );
 
       await tester.pumpWidget(
-        Material(
-          child: boilerplate(
-            child: ToggleButtons(
-              isSelected: const <bool>[true],
-              children: const <Widget>[
-                Row(children: <Widget>[
-                  Text('First child'),
-                  Icon(Icons.check),
-                ]),
-              ],
-            ),
+        boilerplate(
+          child: ToggleButtons(
+            isSelected: const <bool>[true],
+            children: const <Widget>[
+              Row(children: <Widget>[
+                Text('First child'),
+                Icon(Icons.check),
+              ]),
+            ],
           ),
         ),
       );
@@ -491,19 +479,17 @@ void main() {
       expect(theme.colorScheme.onSurface.withOpacity(0.38), isNot(disabledColor));
 
       await tester.pumpWidget(
-        Material(
-          child: boilerplate(
-            child: ToggleButtons(
-              color: enabledColor,
-              isSelected: const <bool>[false],
-              onPressed: (int index) {},
-              children: const <Widget>[
-                Row(children: <Widget>[
-                  Text('First child'),
-                  Icon(Icons.check),
-                ]),
-              ],
-            ),
+        boilerplate(
+          child: ToggleButtons(
+            color: enabledColor,
+            isSelected: const <bool>[false],
+            onPressed: (int index) {},
+            children: const <Widget>[
+              Row(children: <Widget>[
+                Text('First child'),
+                Icon(Icons.check),
+              ]),
+            ],
           ),
         ),
       );
@@ -513,19 +499,17 @@ void main() {
       expect(iconTheme(Icons.check).data.color, enabledColor);
 
       await tester.pumpWidget(
-        Material(
-          child: boilerplate(
-            child: ToggleButtons(
-              selectedColor: selectedColor,
-              isSelected: const <bool>[true],
-              onPressed: (int index) {},
-              children: const <Widget>[
-                Row(children: <Widget>[
-                  Text('First child'),
-                  Icon(Icons.check),
-                ]),
-              ],
-            ),
+        boilerplate(
+          child: ToggleButtons(
+            selectedColor: selectedColor,
+            isSelected: const <bool>[true],
+            onPressed: (int index) {},
+            children: const <Widget>[
+              Row(children: <Widget>[
+                Text('First child'),
+                Icon(Icons.check),
+              ]),
+            ],
           ),
         ),
       );
@@ -535,18 +519,16 @@ void main() {
       expect(iconTheme(Icons.check).data.color, selectedColor);
 
       await tester.pumpWidget(
-        Material(
-          child: boilerplate(
-            child: ToggleButtons(
-              disabledColor: disabledColor,
-              isSelected: const <bool>[true],
-              children: const <Widget>[
-                Row(children: <Widget>[
-                  Text('First child'),
-                  Icon(Icons.check),
-                ]),
-              ],
-            ),
+        boilerplate(
+          child: ToggleButtons(
+            disabledColor: disabledColor,
+            isSelected: const <bool>[true],
+            children: const <Widget>[
+              Row(children: <Widget>[
+                Text('First child'),
+                Icon(Icons.check),
+              ]),
+            ],
           ),
         ),
       );
@@ -560,17 +542,15 @@ void main() {
   testWidgets('Default button fillColor - unselected', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     await tester.pumpWidget(
-      Material(
-        child: boilerplate(
-          child: ToggleButtons(
-            isSelected: const <bool>[false],
-            onPressed: (int index) {},
-            children: const <Widget>[
-              Row(children: <Widget>[
-                Text('First child'),
-              ]),
-            ],
-          ),
+      boilerplate(
+        child: ToggleButtons(
+          isSelected: const <bool>[false],
+          onPressed: (int index) {},
+          children: const <Widget>[
+            Row(children: <Widget>[
+              Text('First child'),
+            ]),
+          ],
         ),
       ),
     );
@@ -589,17 +569,15 @@ void main() {
   testWidgets('Default button fillColor - selected', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     await tester.pumpWidget(
-      Material(
-        child: boilerplate(
-          child: ToggleButtons(
-            isSelected: const <bool>[true],
-            onPressed: (int index) {},
-            children: const <Widget>[
-              Row(children: <Widget>[
-                Text('First child'),
-              ]),
-            ],
-          ),
+      boilerplate(
+        child: ToggleButtons(
+          isSelected: const <bool>[true],
+          onPressed: (int index) {},
+          children: const <Widget>[
+            Row(children: <Widget>[
+              Text('First child'),
+            ]),
+          ],
         ),
       ),
     );
@@ -618,16 +596,14 @@ void main() {
   testWidgets('Default button fillColor - disabled', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     await tester.pumpWidget(
-      Material(
-        child: boilerplate(
-          child: ToggleButtons(
-            isSelected: const <bool>[true],
-            children: const <Widget>[
-              Row(children: <Widget>[
-                Text('First child'),
-              ]),
-            ],
-          ),
+      boilerplate(
+        child: ToggleButtons(
+          isSelected: const <bool>[true],
+          children: const <Widget>[
+            Row(children: <Widget>[
+              Text('First child'),
+            ]),
+          ],
         ),
       ),
     );
@@ -646,18 +622,16 @@ void main() {
   testWidgets('Custom button fillColor', (WidgetTester tester) async {
     const Color customFillColor = Colors.green;
     await tester.pumpWidget(
-      Material(
-        child: boilerplate(
-          child: ToggleButtons(
-            fillColor: customFillColor,
-            isSelected: const <bool>[true],
-            onPressed: (int index) {},
-            children: const <Widget>[
-              Row(children: <Widget>[
-                Text('First child'),
-              ]),
-            ],
-          ),
+      boilerplate(
+        child: ToggleButtons(
+          fillColor: customFillColor,
+          isSelected: const <bool>[true],
+          onPressed: (int index) {},
+          children: const <Widget>[
+            Row(children: <Widget>[
+              Text('First child'),
+            ]),
+          ],
         ),
       ),
     );
@@ -684,17 +658,15 @@ void main() {
     const Color selectedFillColor = Colors.yellow;
 
     await tester.pumpWidget(
-      Material(
-        child: boilerplate(
-          child: ToggleButtons(
-            fillColor: selectedFillColor,
-            isSelected: const <bool>[false, true],
-            onPressed: (int index) {},
-            children: const <Widget>[
-              Text('First child'),
-              Text('Second child'),
-            ],
-          ),
+      boilerplate(
+        child: ToggleButtons(
+          fillColor: selectedFillColor,
+          isSelected: const <bool>[false, true],
+          onPressed: (int index) {},
+          children: const <Widget>[
+            Text('First child'),
+            Text('Second child'),
+          ],
         ),
       ),
     );
@@ -705,16 +677,14 @@ void main() {
     expect(buttonColor('Second child').color, selectedFillColor);
 
     await tester.pumpWidget(
-      Material(
-        child: boilerplate(
-          child: ToggleButtons(
-            fillColor: selectedFillColor,
-            isSelected: const <bool>[false, true],
-            children: const <Widget>[
-              Text('First child'),
-              Text('Second child'),
-            ],
-          ),
+      boilerplate(
+        child: ToggleButtons(
+          fillColor: selectedFillColor,
+          isSelected: const <bool>[false, true],
+          children: const <Widget>[
+            Text('First child'),
+            Text('Second child'),
+          ],
         ),
       ),
     );
@@ -746,17 +716,15 @@ void main() {
     }
 
     await tester.pumpWidget(
-      Material(
-        child: boilerplate(
-          child: ToggleButtons(
-            fillColor: MaterialStateColor.resolveWith(getFillColor),
-            isSelected: const <bool>[false, true],
-            onPressed: (int index) {},
-            children: const <Widget>[
-              Text('First child'),
-              Text('Second child'),
-            ],
-          ),
+      boilerplate(
+        child: ToggleButtons(
+          fillColor: MaterialStateColor.resolveWith(getFillColor),
+          isSelected: const <bool>[false, true],
+          onPressed: (int index) {},
+          children: const <Widget>[
+            Text('First child'),
+            Text('Second child'),
+          ],
         ),
       ),
     );
@@ -768,16 +736,14 @@ void main() {
 
     // disabled
     await tester.pumpWidget(
-      Material(
-        child: boilerplate(
-          child: ToggleButtons(
-            fillColor: MaterialStateColor.resolveWith(getFillColor),
-            isSelected: const <bool>[false, true],
-            children: const <Widget>[
-              Text('First child'),
-              Text('Second child'),
-            ],
-          ),
+      boilerplate(
+        child: ToggleButtons(
+          fillColor: MaterialStateColor.resolveWith(getFillColor),
+          isSelected: const <bool>[false, true],
+          children: const <Widget>[
+            Text('First child'),
+            Text('Second child'),
+          ],
         ),
       ),
     );
@@ -792,28 +758,42 @@ void main() {
     final ThemeData theme = ThemeData();
     final FocusNode focusNode = FocusNode();
     await tester.pumpWidget(
-      Material(
-        child: boilerplate(
-          child: ToggleButtons(
-            isSelected: const <bool>[false],
-            onPressed: (int index) {},
-            focusNodes: <FocusNode>[focusNode],
-            children: const <Widget>[
-              Text('First child'),
-            ],
-          ),
+      boilerplate(
+        child: ToggleButtons(
+          isSelected: const <bool>[false],
+          onPressed: (int index) {},
+          focusNodes: <FocusNode>[focusNode],
+          children: const <Widget>[
+            Text('First child'),
+          ],
         ),
       ),
     );
 
     final Offset center = tester.getCenter(find.text('First child'));
 
+    // hoverColor
+    final TestGesture hoverGesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await hoverGesture.addPointer();
+    await hoverGesture.moveTo(center);
+    await tester.pumpAndSettle();
+    await hoverGesture.moveTo(Offset.zero);
+
+    RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
+      return object.runtimeType.toString() == '_RenderInkFeatures';
+    });
+    expect(
+      inkFeatures,
+      paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.04)),
+    );
+
     // splashColor
     final TestGesture touchGesture = await tester.createGesture();
-    await touchGesture.down(center);
+    await touchGesture.down(center); // The button is on hovered and pressed
     await tester.pumpAndSettle();
 
-    RenderObject inkFeatures;
     inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
@@ -825,23 +805,8 @@ void main() {
 
     await touchGesture.up();
     await tester.pumpAndSettle();
-
-    // hoverColor
-    final TestGesture hoverGesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-    );
-    await hoverGesture.addPointer();
-    await hoverGesture.moveTo(center);
+    await hoverGesture.moveTo(const Offset(0, 50));
     await tester.pumpAndSettle();
-    await hoverGesture.moveTo(Offset.zero);
-
-    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
-      return object.runtimeType.toString() == '_RenderInkFeatures';
-    });
-    expect(
-      inkFeatures,
-      paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.04)),
-    );
 
     // focusColor
     focusNode.requestFocus();
@@ -858,28 +823,42 @@ void main() {
     final ThemeData theme = ThemeData();
     final FocusNode focusNode = FocusNode();
     await tester.pumpWidget(
-      Material(
-        child: boilerplate(
-          child: ToggleButtons(
-            isSelected: const <bool>[true],
-            onPressed: (int index) {},
-            focusNodes: <FocusNode>[focusNode],
-            children: const <Widget>[
-              Text('First child'),
-            ],
-          ),
+      boilerplate(
+        child: ToggleButtons(
+          isSelected: const <bool>[true],
+          onPressed: (int index) {},
+          focusNodes: <FocusNode>[focusNode],
+          children: const <Widget>[
+            Text('First child'),
+          ],
         ),
       ),
     );
 
     final Offset center = tester.getCenter(find.text('First child'));
 
-    // splashColor
-    final TestGesture touchGesture = await tester.createGesture();
-    await touchGesture.down(center);
+    // hoverColor
+    final TestGesture hoverGesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await hoverGesture.addPointer();
+    await hoverGesture.moveTo(center);
     await tester.pumpAndSettle();
 
-    RenderObject inkFeatures;
+    RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
+      return object.runtimeType.toString() == '_RenderInkFeatures';
+    });
+    expect(
+      inkFeatures,
+      paints..rect(color: theme.colorScheme.primary.withOpacity(0.04)),
+    );
+    await hoverGesture.moveTo(Offset.zero);
+
+    // splashColor
+    final TestGesture touchGesture = await tester.createGesture();
+    await touchGesture.down(center); // The button is on hovered and pressed
+    await tester.pumpAndSettle();
+
     inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
@@ -891,23 +870,8 @@ void main() {
 
     await touchGesture.up();
     await tester.pumpAndSettle();
-
-    // hoverColor
-    final TestGesture hoverGesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-    );
-    await hoverGesture.addPointer();
-    await hoverGesture.moveTo(center);
+    await hoverGesture.moveTo(const Offset(0, 50));
     await tester.pumpAndSettle();
-
-    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
-      return object.runtimeType.toString() == '_RenderInkFeatures';
-    });
-    expect(
-      inkFeatures,
-      paints..rect(color: theme.colorScheme.primary.withOpacity(0.04)),
-    );
-    await hoverGesture.moveTo(Offset.zero);
 
     // focusColor
     focusNode.requestFocus();
@@ -928,20 +892,18 @@ void main() {
     final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
-      Material(
-        child: boilerplate(
-          child: ToggleButtons(
-            splashColor: splashColor,
-            highlightColor: highlightColor,
-            hoverColor: hoverColor,
-            focusColor: focusColor,
-            isSelected: const <bool>[true],
-            onPressed: (int index) {},
-            focusNodes: <FocusNode>[focusNode],
-            children: const <Widget>[
-              Text('First child'),
-            ],
-          ),
+      boilerplate(
+        child: ToggleButtons(
+          splashColor: splashColor,
+          highlightColor: highlightColor,
+          hoverColor: hoverColor,
+          focusColor: focusColor,
+          isSelected: const <bool>[true],
+          onPressed: (int index) {},
+          focusNodes: <FocusNode>[focusNode],
+          children: const <Widget>[
+            Text('First child'),
+          ],
         ),
       ),
     );
@@ -997,15 +959,13 @@ void main() {
       final ThemeData theme = ThemeData();
       const double defaultBorderWidth = 1.0;
       await tester.pumpWidget(
-        Material(
-          child: boilerplate(
-            child: ToggleButtons(
-              isSelected: const <bool>[false],
-              onPressed: (int index) {},
-              children: const <Widget>[
-                Text('First child'),
-              ],
-            ),
+        boilerplate(
+          child: ToggleButtons(
+            isSelected: const <bool>[false],
+            onPressed: (int index) {},
+            children: const <Widget>[
+              Text('First child'),
+            ],
           ),
         ),
       );
@@ -1027,15 +987,13 @@ void main() {
       );
 
       await tester.pumpWidget(
-        Material(
-          child: boilerplate(
-            child: ToggleButtons(
-              isSelected: const <bool>[true],
-              onPressed: (int index) {},
-              children: const <Widget>[
-                Text('First child'),
-              ],
-            ),
+        boilerplate(
+          child: ToggleButtons(
+            isSelected: const <bool>[true],
+            onPressed: (int index) {},
+            children: const <Widget>[
+              Text('First child'),
+            ],
           ),
         ),
       );
@@ -1056,14 +1014,12 @@ void main() {
       );
 
       await tester.pumpWidget(
-        Material(
-          child: boilerplate(
-            child: ToggleButtons(
-              isSelected: const <bool>[false],
-              children: const <Widget>[
-                Text('First child'),
-              ],
-            ),
+        boilerplate(
+          child: ToggleButtons(
+            isSelected: const <bool>[false],
+            children: const <Widget>[
+              Text('First child'),
+            ],
           ),
         ),
       );
@@ -1094,17 +1050,15 @@ void main() {
       const double customWidth = 2.0;
 
       await tester.pumpWidget(
-        Material(
-          child: boilerplate(
-            child: ToggleButtons(
-              borderColor: borderColor,
-              borderWidth: customWidth,
-              isSelected: const <bool>[false],
-              onPressed: (int index) {},
-              children: const <Widget>[
-                Text('First child'),
-              ],
-            ),
+        boilerplate(
+          child: ToggleButtons(
+            borderColor: borderColor,
+            borderWidth: customWidth,
+            isSelected: const <bool>[false],
+            onPressed: (int index) {},
+            children: const <Widget>[
+              Text('First child'),
+            ],
           ),
         ),
       );
@@ -1126,17 +1080,15 @@ void main() {
       );
 
       await tester.pumpWidget(
-        Material(
-          child: boilerplate(
-            child: ToggleButtons(
-              selectedBorderColor: selectedBorderColor,
-              borderWidth: customWidth,
-              isSelected: const <bool>[true],
-              onPressed: (int index) {},
-              children: const <Widget>[
-                Text('First child'),
-              ],
-            ),
+        boilerplate(
+          child: ToggleButtons(
+            selectedBorderColor: selectedBorderColor,
+            borderWidth: customWidth,
+            isSelected: const <bool>[true],
+            onPressed: (int index) {},
+            children: const <Widget>[
+              Text('First child'),
+            ],
           ),
         ),
       );
@@ -1157,16 +1109,14 @@ void main() {
       );
 
       await tester.pumpWidget(
-        Material(
-          child: boilerplate(
-            child: ToggleButtons(
-              disabledBorderColor: disabledBorderColor,
-              borderWidth: customWidth,
-              isSelected: const <bool>[false],
-              children: const <Widget>[
-                Text('First child'),
-              ],
-            ),
+        boilerplate(
+          child: ToggleButtons(
+            disabledBorderColor: disabledBorderColor,
+            borderWidth: customWidth,
+            isSelected: const <bool>[false],
+            children: const <Widget>[
+              Text('First child'),
+            ],
           ),
         ),
       );
@@ -1202,12 +1152,10 @@ void main() {
     ];
 
     await tester.pumpWidget(
-      Material(
-        child: boilerplate(
-          child: ToggleButtons(
-            isSelected: const <bool>[false, true, false],
-            children: children,
-          ),
+      boilerplate(
+        child: ToggleButtons(
+          isSelected: const <bool>[false, true, false],
+          children: children,
         ),
       ),
     );
@@ -1245,12 +1193,10 @@ void main() {
     ];
 
     await tester.pumpWidget(
-      Material(
-        child: boilerplate(
-          child: ToggleButtons(
-            isSelected: const <bool>[false, true, false],
-            children: children,
-          ),
+      boilerplate(
+        child: ToggleButtons(
+          isSelected: const <bool>[false, true, false],
+          children: children,
         ),
       ),
     );
@@ -1297,13 +1243,11 @@ void main() {
     // Update border width and widget sized to verify layout updates correctly
     const double customBorderWidth = 5.0;
     await tester.pumpWidget(
-      Material(
-        child: boilerplate(
-          child: ToggleButtons(
-            borderWidth: customBorderWidth,
-            isSelected: const <bool>[false, true, false],
-            children: childrenRebuilt,
-          ),
+      boilerplate(
+        child: ToggleButtons(
+          borderWidth: customBorderWidth,
+          isSelected: const <bool>[false, true, false],
+          children: childrenRebuilt,
         ),
       ),
     );
@@ -1329,27 +1273,30 @@ void main() {
     // The point size of the fonts must be a multiple of 4 until
     // https://github.com/flutter/flutter/issues/122066 is resolved.
     await tester.pumpWidget(
-      Material(
-        child: boilerplate(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: <Widget>[
-              ToggleButtons(
-                borderWidth: 5.0,
-                isSelected: const <bool>[false, true],
-                children: const <Widget>[
-                  Text('First child', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 8.0)),
-                  Text('Second child', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 8.0)),
-                ],
-              ),
-              const MaterialButton(
-                onPressed: null,
-                child: Text('Material Button', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0)),
-              ),
-              const Text('Text', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 28.0)),
-            ],
-          ),
+      boilerplate(
+        useMaterial3: false,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: <Widget>[
+            ToggleButtons(
+              borderWidth: 5.0,
+              isSelected: const <bool>[false, true],
+              children: const <Widget>[
+                Text('First child', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 8.0)),
+                Text('Second child', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 8.0)),
+              ],
+            ),
+            ElevatedButton(
+              onPressed: null,
+              style: ElevatedButton.styleFrom(textStyle: const TextStyle(
+                fontFamily: 'FlutterTest',
+                fontSize: 20.0,
+              )),
+              child: const Text('Elevated Button'),
+            ),
+            const Text('Text', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 28.0)),
+          ],
         ),
       ),
     );
@@ -1364,11 +1311,11 @@ void main() {
 
     final double firstToggleButtonDy = tester.getBottomLeft(find.text('First child')).dy;
     final double secondToggleButtonDy = tester.getBottomLeft(find.text('Second child')).dy;
-    final double materialButtonDy = tester.getBottomLeft(find.text('Material Button')).dy;
+    final double elevatedButtonDy = tester.getBottomLeft(find.text('Elevated Button')).dy;
     final double textDy = tester.getBottomLeft(find.text('Text')).dy;
 
     expect(firstToggleButtonDy, secondToggleButtonDy);
-    expect(firstToggleButtonDy, materialButtonDy - 3.0);
+    expect(firstToggleButtonDy, elevatedButtonDy - 3.0);
     expect(firstToggleButtonDy, textDy - 5.0);
   });
 
@@ -1425,17 +1372,15 @@ void main() {
     (WidgetTester tester) async {
       final ThemeData theme = ThemeData();
       await tester.pumpWidget(
-        Material(
-          child: boilerplate(
-            child: ToggleButtons(
-              isSelected: const <bool>[false, true, false],
-              onPressed: (int index) {},
-              children: const <Widget>[
-                Text('First child'),
-                Text('Second child'),
-                Text('Third child'),
-              ],
-            ),
+        boilerplate(
+          child: ToggleButtons(
+            isSelected: const <bool>[false, true, false],
+            onPressed: (int index) {},
+            children: const <Widget>[
+              Text('First child'),
+              Text('Second child'),
+              Text('Third child'),
+            ],
           ),
         ),
       );
@@ -1507,18 +1452,16 @@ void main() {
         (WidgetTester tester) async {
       final ThemeData theme = ThemeData();
       await tester.pumpWidget(
-        Material(
-          child: boilerplate(
-            child: ToggleButtons(
-              direction: Axis.vertical,
-              isSelected: const <bool>[false, true, false],
-              onPressed: (int index) {},
-              children: const <Widget>[
-                Text('First child'),
-                Text('Second child'),
-                Text('Third child'),
-              ],
-            ),
+        boilerplate(
+          child: ToggleButtons(
+            direction: Axis.vertical,
+            isSelected: const <bool>[false, true, false],
+            onPressed: (int index) {},
+            children: const <Widget>[
+              Text('First child'),
+              Text('Second child'),
+              Text('Third child'),
+            ],
           ),
         ),
       );
@@ -1595,19 +1538,17 @@ void main() {
     'VerticalDirection test when direction is vertical.',
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        Material(
-          child: boilerplate(
-            child: ToggleButtons(
-              direction: Axis.vertical,
-              verticalDirection: VerticalDirection.up,
-              isSelected: const <bool>[false, true, false],
-              onPressed: (int index) {},
-              children: const <Widget>[
-                Text('First child'),
-                Text('Second child'),
-                Text('Third child'),
-              ],
-            ),
+        boilerplate(
+          child: ToggleButtons(
+            direction: Axis.vertical,
+            verticalDirection: VerticalDirection.up,
+            isSelected: const <bool>[false, true, false],
+            onPressed: (int index) {},
+            children: const <Widget>[
+              Text('First child'),
+              Text('Second child'),
+              Text('Third child'),
+            ],
           ),
         ),
       );
@@ -1621,22 +1562,19 @@ void main() {
 
   testWidgets('Tap target size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
     Widget buildFrame(MaterialTapTargetSize tapTargetSize, Key key) {
-      return Theme(
-        data: ThemeData(materialTapTargetSize: tapTargetSize),
-        child: Material(
-          child: boilerplate(
-            child: ToggleButtons(
-              key: key,
-              constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
-              isSelected: const <bool>[false, true, false],
-              onPressed: (int index) {},
-              children: const <Widget>[
-                Text('First'),
-                Text('Second'),
-                Text('Third'),
-              ],
-            ),
-          ),
+      return boilerplate(
+        useMaterial3: false,
+        tapTargetSize: tapTargetSize,
+        child: ToggleButtons(
+          key: key,
+          constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
+          isSelected: const <bool>[false, true, false],
+          onPressed: (int index) {},
+          children: const <Widget>[
+            Text('First'),
+            Text('Second'),
+            Text('Third'),
+          ],
         ),
       );
     }
@@ -1652,20 +1590,19 @@ void main() {
 
   testWidgets('Tap target size is configurable', (WidgetTester tester) async {
     Widget buildFrame(MaterialTapTargetSize tapTargetSize, Key key) {
-      return Material(
-        child: boilerplate(
-          child: ToggleButtons(
-            key: key,
-            tapTargetSize: tapTargetSize,
-            constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
-            isSelected: const <bool>[false, true, false],
-            onPressed: (int index) {},
-            children: const <Widget>[
-              Text('First'),
-              Text('Second'),
-              Text('Third'),
-            ],
-          ),
+      return boilerplate(
+        useMaterial3: false,
+        child: ToggleButtons(
+          key: key,
+          tapTargetSize: tapTargetSize,
+          constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
+          isSelected: const <bool>[false, true, false],
+          onPressed: (int index) {},
+          children: const <Widget>[
+            Text('First'),
+            Text('Second'),
+            Text('Third'),
+          ],
         ),
       );
     }
@@ -1681,22 +1618,20 @@ void main() {
 
   testWidgets('Tap target size is configurable for vertical axis', (WidgetTester tester) async {
     Widget buildFrame(MaterialTapTargetSize tapTargetSize, Key key) {
-      return Material(
-        child: boilerplate(
-          child: ToggleButtons(
-            key: key,
-            tapTargetSize: tapTargetSize,
-            constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
-            direction: Axis.vertical,
-            isSelected: const <bool>[false, true, false],
-            onPressed: (int index) {},
-            children: const <Widget>[
-              Text('1'),
-              Text('2'),
-              Text('3'),
-            ],
-          ),
-        ),
+     return boilerplate(
+       child: ToggleButtons(
+         key: key,
+         tapTargetSize: tapTargetSize,
+         constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
+         direction: Axis.vertical,
+         isSelected: const <bool>[false, true, false],
+         onPressed: (int index) {},
+         children: const <Widget>[
+           Text('1'),
+           Text('2'),
+           Text('3'),
+         ],
+       ),
       );
     }
 
@@ -1711,19 +1646,18 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/73725
   testWidgets('Border radius paint test when there is only one button', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData();
+    final ThemeData theme = ThemeData(useMaterial3: false);
     await tester.pumpWidget(
-      Material(
-        child: boilerplate(
-          child: RepaintBoundary(
-            child: ToggleButtons(
-              borderRadius: const BorderRadius.all(Radius.circular(7.0)),
-              isSelected: const <bool>[true],
-              onPressed: (int index) {},
-              children: const <Widget>[
-                Text('First child'),
-              ],
-            ),
+      boilerplate(
+        useMaterial3: false,
+        child: RepaintBoundary(
+          child: ToggleButtons(
+            borderRadius: const BorderRadius.all(Radius.circular(7.0)),
+            isSelected: const <bool>[true],
+            onPressed: (int index) {},
+            children: const <Widget>[
+              Text('First child'),
+            ],
           ),
         ),
       ),
@@ -1758,22 +1692,21 @@ void main() {
 
   testWidgets('Border radius paint test when Radius.x or Radius.y equal 0.0', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Material(
-        child: boilerplate(
-          child: RepaintBoundary(
-            child: ToggleButtons(
-              borderRadius: const BorderRadius.only(
-                topRight: Radius.elliptical(10, 0),
-                topLeft: Radius.elliptical(0, 10),
-                bottomRight: Radius.elliptical(0, 10),
-                bottomLeft: Radius.elliptical(10, 0),
-              ),
-              isSelected: const <bool>[true],
-              onPressed: (int index) {},
-              children: const <Widget>[
-                Text('First child'),
-              ],
+      boilerplate(
+        useMaterial3: false,
+        child: RepaintBoundary(
+          child: ToggleButtons(
+            borderRadius: const BorderRadius.only(
+              topRight: Radius.elliptical(10, 0),
+              topLeft: Radius.elliptical(0, 10),
+              bottomRight: Radius.elliptical(0, 10),
+              bottomLeft: Radius.elliptical(10, 0),
             ),
+            isSelected: const <bool>[true],
+            onPressed: (int index) {},
+            children: const <Widget>[
+              Text('First child'),
+            ],
           ),
         ),
       ),
@@ -1825,19 +1758,17 @@ void main() {
 
   testWidgets('ToggleButtons changes mouse cursor when the button is hovered', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Material(
-        child: boilerplate(
-          child: MouseRegion(
-            cursor: SystemMouseCursors.forbidden,
-            child: ToggleButtons(
-              mouseCursor: SystemMouseCursors.text,
-              onPressed: (int index) {},
-              isSelected: const <bool>[false, true],
-              children: const <Widget>[
-                Text('First child'),
-                Text('Second child'),
-              ],
-            ),
+      boilerplate(
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: ToggleButtons(
+            mouseCursor: SystemMouseCursors.text,
+            onPressed: (int index) {},
+            isSelected: const <bool>[false, true],
+            children: const <Widget>[
+              Text('First child'),
+              Text('Second child'),
+            ],
           ),
         ),
       ),
@@ -1852,18 +1783,16 @@ void main() {
 
     // Test default cursor
     await tester.pumpWidget(
-      Material(
-        child: boilerplate(
-          child: MouseRegion(
-            cursor: SystemMouseCursors.forbidden,
-            child: ToggleButtons(
-              onPressed: (int index) {},
-              isSelected: const <bool>[false, true],
-              children: const <Widget>[
-                Text('First child'),
-                Text('Second child'),
-              ],
-            ),
+      boilerplate(
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: ToggleButtons(
+            onPressed: (int index) {},
+            isSelected: const <bool>[false, true],
+            children: const <Widget>[
+              Text('First child'),
+              Text('Second child'),
+            ],
           ),
         ),
       ),
@@ -1873,17 +1802,15 @@ void main() {
 
     // Test default cursor when disabled
     await tester.pumpWidget(
-      Material(
-        child: boilerplate(
-          child: MouseRegion(
-            cursor: SystemMouseCursors.forbidden,
-            child: ToggleButtons(
-              isSelected: const <bool>[false, true],
-              children: const <Widget>[
-                Text('First child'),
-                Text('Second child'),
-              ],
-            ),
+      boilerplate(
+        child: MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: ToggleButtons(
+            isSelected: const <bool>[false, true],
+            children: const <Widget>[
+              Text('First child'),
+              Text('Second child'),
+            ],
           ),
         ),
       ),
@@ -1895,14 +1822,12 @@ void main() {
   testWidgets('ToggleButtons focus, hover, and highlight elevations are 0', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = <FocusNode>[FocusNode(), FocusNode()];
     await tester.pumpWidget(
-      Material(
-        child: boilerplate(
-          child: ToggleButtons(
-            isSelected: const <bool>[true, false],
-            onPressed: (int index) { },
-            focusNodes: focusNodes,
-            children: const <Widget>[Text('one'), Text('two')],
-          ),
+      boilerplate(
+        child: ToggleButtons(
+          isSelected: const <bool>[true, false],
+          onPressed: (int index) { },
+          focusNodes: focusNodes,
+          children: const <Widget>[Text('one'), Text('two')],
         ),
       ),
     );
@@ -1942,17 +1867,15 @@ void main() {
 
   testWidgets('Toggle buttons height matches MaterialTapTargetSize.padded height', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Material(
-        child: boilerplate(
-          child: ToggleButtons(
-            isSelected: const <bool>[false, false, false],
-            onPressed: (int index) {},
-            children: const <Widget>[
-              Icon(Icons.check),
-              Icon(Icons.access_alarm),
-              Icon(Icons.cake),
-            ],
-          ),
+      boilerplate(
+        child: ToggleButtons(
+          isSelected: const <bool>[false, false, false],
+          onPressed: (int index) {},
+          children: const <Widget>[
+            Icon(Icons.check),
+            Icon(Icons.access_alarm),
+            Icon(Icons.cake),
+          ],
         ),
       ),
     );
@@ -1970,21 +1893,19 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      Material(
-        child: boilerplate(
-          child: ToggleButtons(
-            isSelected: const <bool>[false, false, false],
-            onPressed: (int index) {},
-            constraints: const BoxConstraints.tightFor(
-              width: 86,
-              height: 32,
-            ),
-            children: const <Widget>[
-              Icon(Icons.check),
-              Icon(Icons.access_alarm),
-              Icon(Icons.cake),
-            ],
+      boilerplate(
+        child: ToggleButtons(
+          isSelected: const <bool>[false, false, false],
+          onPressed: (int index) {},
+          constraints: const BoxConstraints.tightFor(
+            width: 86,
+            height: 32,
           ),
+          children: const <Widget>[
+            Icon(Icons.check),
+            Icon(Icons.access_alarm),
+            Icon(Icons.cake),
+          ],
         ),
       ),
     );
@@ -2058,16 +1979,14 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      Material(
-        child: boilerplate(
-          child: ToggleButtons(
-            isSelected: const <bool>[false, true],
-            onPressed: (int index) {},
-            children: const <Widget>[
-              Icon(Icons.check),
-              Icon(Icons.access_alarm),
-            ],
-          ),
+      boilerplate(
+        child: ToggleButtons(
+          isSelected: const <bool>[false, true],
+          onPressed: (int index) {},
+          children: const <Widget>[
+            Icon(Icons.check),
+            Icon(Icons.access_alarm),
+          ],
         ),
       ),
     );

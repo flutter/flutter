@@ -25,6 +25,7 @@
   "continueButtonLabel": "続行",
   "copyButtonLabel": "コピー",
   "cutButtonLabel": "切り取り",
+  "scanTextButtonLabel": "テキストをスキャン",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "貼り付け",
   "selectAllButtonLabel": "すべて選択",
@@ -134,5 +135,11 @@
   "scrimLabel": "スクリム",
   "bottomSheetLabel": "ボトムシート",
   "scrimOnTapHint": "$modalRouteContentName を閉じる",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

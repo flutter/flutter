@@ -14,7 +14,7 @@ import '../widgets/semantics_tester.dart';
 void main() {
   testWidgets('FilledButton, FilledButton.icon defaults', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
-    final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
+    final ThemeData theme = ThemeData.from(useMaterial3: false, colorScheme: colorScheme);
 
     // Enabled FilledButton
     await tester.pumpWidget(
@@ -277,6 +277,135 @@ void main() {
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
 
+  testWidgets('FilledButton default overlayColor and elevation resolve pressed state', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    final ThemeData theme = ThemeData(useMaterial3: true);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return FilledButton(
+                  onPressed: () {},
+                  focusNode: focusNode,
+                  child: const Text('FilledButton'),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    RenderObject overlayColor() {
+      return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    }
+
+    double elevation() {
+      return tester.widget<PhysicalShape>(
+        find.descendant(
+          of: find.byType(FilledButton),
+          matching: find.byType(PhysicalShape),
+        ),
+      ).elevation;
+    }
+
+    // Hovered.
+    final Offset center = tester.getCenter(find.byType(FilledButton));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    expect(elevation(), 1.0);
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.onPrimary.withOpacity(0.08)));
+
+    // Highlighted (pressed).
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+    expect(elevation(), 0.0);
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onPrimary.withOpacity(0.12)));
+    // Remove pressed and hovered states
+    await gesture.up();
+    await tester.pumpAndSettle();
+    await gesture.moveTo(const Offset(0, 50));
+    await tester.pumpAndSettle();
+
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(elevation(), 0.0);
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.onPrimary.withOpacity(0.12)));
+  });
+
+  testWidgets('FilledButton.tonal default overlayColor and elevation resolve pressed state', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    final ThemeData theme = ThemeData(useMaterial3: true);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return FilledButton.tonal(
+                  onPressed: () {},
+                  focusNode: focusNode,
+                  child: const Text('FilledButton'),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    RenderObject overlayColor() {
+      return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    }
+
+    double elevation() {
+      return tester.widget<PhysicalShape>(
+        find.descendant(
+          of: find.byType(FilledButton),
+          matching: find.byType(PhysicalShape),
+        ),
+      ).elevation;
+    }
+
+    // Hovered.
+    final Offset center = tester.getCenter(find.byType(FilledButton));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    expect(elevation(), 1.0);
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSecondaryContainer.withOpacity(0.08)));
+
+    // Highlighted (pressed).
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+    expect(elevation(), 0.0);
+    expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSecondaryContainer.withOpacity(0.12)));
+    // Remove pressed and hovered states
+    await gesture.up();
+    await tester.pumpAndSettle();
+    await gesture.moveTo(const Offset(0, 50));
+    await tester.pumpAndSettle();
+
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(elevation(), 0.0);
+    expect(overlayColor(), paints..rect(color: theme.colorScheme.onSecondaryContainer.withOpacity(0.12)));
+  });
 
   testWidgets('FilledButton uses stateful color for text color in different states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
@@ -755,18 +884,21 @@ void main() {
   testWidgets('Does FilledButton contribute semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: FilledButton(
-            style: const ButtonStyle(
-              // Specifying minimumSize to mimic the original minimumSize for
-              // RaisedButton so that the semantics tree's rect and transform
-              // match the original version of this test.
-              minimumSize: MaterialStatePropertyAll<Size>(Size(88, 36)),
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: FilledButton(
+              style: const ButtonStyle(
+                // Specifying minimumSize to mimic the original minimumSize for
+                // RaisedButton so that the semantics tree's rect and transform
+                // match the original version of this test.
+                minimumSize: MaterialStatePropertyAll<Size>(Size(88, 36)),
+              ),
+              onPressed: () { },
+              child: const Text('ABC'),
             ),
-            onPressed: () { },
-            child: const Text('ABC'),
           ),
         ),
       ),
@@ -807,7 +939,7 @@ void main() {
 
     Widget buildFrame(MaterialTapTargetSize tapTargetSize, Key key) {
       return Theme(
-        data: ThemeData(materialTapTargetSize: tapTargetSize),
+        data: ThemeData(useMaterial3: false, materialTapTargetSize: tapTargetSize),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
@@ -855,9 +987,7 @@ void main() {
     Future<void> buildTest(VisualDensity visualDensity, {bool useText = false}) async {
       return tester.pumpWidget(
         MaterialApp(
-          // Test was setup using fonts from Material 2, so make sure we always
-          // test against englishLike2014.
-          theme: ThemeData(textTheme: Typography.englishLike2014),
+          theme: ThemeData(useMaterial3: false),
           home: Directionality(
             textDirection: TextDirection.rtl,
             child: Center(
@@ -1050,10 +1180,7 @@ void main() {
             await tester.pumpWidget(
               MaterialApp(
                 theme: ThemeData(
-                  colorScheme: const ColorScheme.light(),
-                  // Force Material 2 defaults for the typography and size
-                  // default values as the test was designed against these settings.
-                  textTheme: Typography.englishLike2014,
+                  useMaterial3: false,
                   filledButtonTheme: FilledButtonThemeData(
                     style: FilledButton.styleFrom(minimumSize: const Size(64, 36)),
                   ),
@@ -1281,7 +1408,7 @@ void main() {
     const Color borderColor = Color(0xff4caf50);
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(colorScheme: const ColorScheme.light(), textTheme: Typography.englishLike2014),
+        theme: ThemeData(useMaterial3: false),
         home: Center(
           child: FilledButton(
             style: FilledButton.styleFrom(
@@ -1470,7 +1597,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(textTheme: Typography.englishLike2014),
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Center(
             child: Column(
@@ -1612,6 +1739,29 @@ void main() {
     );
 
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
+  });
+
+  testWidgets('FilledButton in SelectionArea changes mouse cursor when hovered', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/104595.
+    await tester.pumpWidget(MaterialApp(
+      home: SelectionArea(
+        child: FilledButton(
+          style: FilledButton.styleFrom(
+            enabledMouseCursor: SystemMouseCursors.click,
+            disabledMouseCursor: SystemMouseCursors.grab,
+          ),
+          onPressed: () {},
+          child: const Text('button'),
+        ),
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(Text)));
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
   });
 
   testWidgets('Ink Response shape matches Material shape', (WidgetTester tester) async {

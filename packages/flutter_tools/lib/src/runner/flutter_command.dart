@@ -82,18 +82,7 @@ class FlutterCommandResult {
   final DateTime? endTimeOverride;
 
   @override
-  String toString() {
-    switch (exitStatus) {
-      case ExitStatus.success:
-        return 'success';
-      case ExitStatus.warning:
-        return 'warning';
-      case ExitStatus.fail:
-        return 'fail';
-      case ExitStatus.killed:
-        return 'killed';
-    }
-  }
+  String toString() => exitStatus.name;
 }
 
 /// Common flutter command line options.
@@ -130,7 +119,7 @@ abstract final class FlutterOptions {
 }
 
 /// flutter command categories for usage.
-class FlutterCommandCategory {
+abstract final class FlutterCommandCategory {
   static const String sdk = 'Flutter SDK';
   static const String project = 'Project';
   static const String tools = 'Tools & Devices';
@@ -156,30 +145,6 @@ abstract class FlutterCommand extends Command<void> {
 
   /// The flag name for whether or not to use ipv6.
   static const String ipv6Flag = 'ipv6';
-
-  /// Maps command line web renderer strings to the corresponding web renderer mode
-  static const Map<String, WebRendererMode> _webRendererModeMap =
-  <String, WebRendererMode> {
-    'auto': WebRendererMode.autoDetect,
-    'canvaskit': WebRendererMode.canvaskit,
-    'html': WebRendererMode.html,
-  };
-
-  /// The map used to convert web renderer mode to a List of dart-defines.
-  static const Map<WebRendererMode, Iterable<String>> _webRendererDartDefines =
-  <WebRendererMode, Iterable<String>> {
-    WebRendererMode.autoDetect: <String>[
-      'FLUTTER_WEB_AUTO_DETECT=true',
-    ],
-    WebRendererMode.canvaskit: <String>[
-      'FLUTTER_WEB_AUTO_DETECT=false',
-      'FLUTTER_WEB_USE_SKIA=true',
-    ],
-    WebRendererMode.html: <String>[
-      'FLUTTER_WEB_AUTO_DETECT=false',
-      'FLUTTER_WEB_USE_SKIA=false',
-    ],
-  };
 
   @override
   ArgParser get argParser => _argParser;
@@ -339,7 +304,10 @@ abstract class FlutterCommand extends Command<void> {
   /// Path to the Dart's package config file.
   ///
   /// This can be overridden by some of its subclasses.
-  String? get packagesPath => globalResults?['packages'] as String?;
+  String? get packagesPath => stringArg(FlutterGlobalOptions.kPackagesOption, global: true);
+
+  /// Whether flutter is being run from our CI.
+  bool get usingCISystem => boolArg(FlutterGlobalOptions.kContinuousIntegrationFlag, global: true);
 
   /// The value of the `--filesystem-scheme` argument.
   ///
@@ -638,23 +606,23 @@ abstract class FlutterCommand extends Command<void> {
       FlutterOptions.kDartDefinesOption,
       aliases: <String>[ kDartDefines ], // supported for historical reasons
       help: 'Additional key-value pairs that will be available as constants '
-            'from the String.fromEnvironment, bool.fromEnvironment, int.fromEnvironment, '
-            'and double.fromEnvironment constructors.\n'
+            'from the String.fromEnvironment, bool.fromEnvironment, and int.fromEnvironment '
+            'constructors.\n'
             'Multiple defines can be passed by repeating "--${FlutterOptions.kDartDefinesOption}" multiple times.',
       valueHelp: 'foo=bar',
       splitCommas: false,
     );
-    useDartDefineConfigJsonFileOption();
+    useDartDefineFromFileOption();
   }
 
-  void useDartDefineConfigJsonFileOption() {
+  void useDartDefineFromFileOption() {
     argParser.addMultiOption(
       FlutterOptions.kDartDefineFromFileOption,
-      help: 'The path of a json format file where flutter define a global constant pool. '
-          'Json entry will be available as constants from the String.fromEnvironment, bool.fromEnvironment, '
-          'int.fromEnvironment, and double.fromEnvironment constructors; the key and field are json values.\n'
+      help:
+          'The path of a .json or .env file containing key-value pairs that will be available as environment variables.\n'
+          'These can be accessed using the String.fromEnvironment, bool.fromEnvironment, and int.fromEnvironment constructors.\n'
           'Multiple defines can be passed by repeating "--${FlutterOptions.kDartDefineFromFileOption}" multiple times.',
-      valueHelp: 'use-define-config.json',
+      valueHelp: 'use-define-config.json|.env',
       splitCommas: false,
     );
   }
@@ -662,14 +630,10 @@ abstract class FlutterCommand extends Command<void> {
   void usesWebRendererOption() {
     argParser.addOption(
       FlutterOptions.kWebRendererFlag,
-      defaultsTo: 'auto',
-      allowed: <String>['auto', 'canvaskit', 'html'],
+      defaultsTo: WebRendererMode.auto.name,
+      allowed: WebRendererMode.values.map((WebRendererMode e) => e.name),
       help: 'The renderer implementation to use when building for the web.',
-      allowedHelp: <String, String>{
-        'html': 'Always use the HTML renderer. This renderer uses a combination of HTML, CSS, SVG, 2D Canvas, and WebGL.',
-        'canvaskit': 'Always use the CanvasKit renderer. This renderer uses WebGL and WebAssembly to render graphics.',
-        'auto': 'Use the HTML renderer on mobile devices, and CanvasKit on desktop devices.',
-      }
+      allowedHelp: CliEnum.allowedHelp(WebRendererMode.values)
     );
   }
 
@@ -1211,7 +1175,7 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     final bool treeShakeIcons = argParser.options.containsKey('tree-shake-icons')
-      && buildMode.isPrecompiled == true
+      && buildMode.isPrecompiled
       && boolArg('tree-shake-icons');
 
     final String? bundleSkSLPath = argParser.options.containsKey(FlutterOptions.kBundleSkSLPathOption)
@@ -1226,15 +1190,12 @@ abstract class FlutterCommand extends Command<void> {
       ? stringArg(FlutterOptions.kPerformanceMeasurementFile)
       : null;
 
-    final Map<String, Object>? defineConfigJsonMap = extractDartDefineConfigJsonMap();
+    final Map<String, Object?> defineConfigJsonMap = extractDartDefineConfigJsonMap();
     List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
 
-    WebRendererMode webRenderer = WebRendererMode.autoDetect;
+    WebRendererMode webRenderer = WebRendererMode.auto;
     if (argParser.options.containsKey(FlutterOptions.kWebRendererFlag)) {
-      final WebRendererMode? mappedMode = _webRendererModeMap[stringArg(FlutterOptions.kWebRendererFlag)!];
-      if (mappedMode != null) {
-        webRenderer = mappedMode;
-      }
+      webRenderer = WebRendererMode.values.byName(stringArg(FlutterOptions.kWebRendererFlag)!);
       dartDefines = updateDartDefines(dartDefines, webRenderer);
     }
 
@@ -1362,44 +1323,52 @@ abstract class FlutterCommand extends Command<void> {
     }
   }
 
-  List<String> extractDartDefines({Map<String, Object>? defineConfigJsonMap}) {
+  List<String> extractDartDefines({required Map<String, Object?> defineConfigJsonMap}) {
     final List<String> dartDefines = <String>[];
 
     if (argParser.options.containsKey(FlutterOptions.kDartDefinesOption)) {
       dartDefines.addAll(stringsArg(FlutterOptions.kDartDefinesOption));
     }
 
-    if (defineConfigJsonMap == null) {
-      return dartDefines;
-    }
-    defineConfigJsonMap.forEach((String key, Object value) {
+    defineConfigJsonMap.forEach((String key, Object? value) {
       dartDefines.add('$key=$value');
     });
 
     return dartDefines;
   }
 
-  Map<String, Object>? extractDartDefineConfigJsonMap() {
-    final Map<String, Object> dartDefineConfigJsonMap = <String, Object>{};
+  Map<String, Object?> extractDartDefineConfigJsonMap() {
+    final Map<String, Object?> dartDefineConfigJsonMap = <String, Object?>{};
 
     if (argParser.options.containsKey(FlutterOptions.kDartDefineFromFileOption)) {
-      final List<String> configJsonPaths = stringsArg(
-          FlutterOptions.kDartDefineFromFileOption,
+      final List<String> configFilePaths = stringsArg(
+        FlutterOptions.kDartDefineFromFileOption,
       );
 
-      for (final String path in configJsonPaths) {
+      for (final String path in configFilePaths) {
         if (!globals.fs.isFileSync(path)) {
           throwToolExit('Json config define file "--${FlutterOptions
               .kDartDefineFromFileOption}=$path" is not a file, '
               'please fix first!');
         }
 
-        final String configJsonRaw = globals.fs.file(path).readAsStringSync();
+        final String configRaw = globals.fs.file(path).readAsStringSync();
+
+        // Determine whether the file content is JSON or .env format.
+        String configJsonRaw;
+        if (configRaw.trim().startsWith('{')) {
+          configJsonRaw = configRaw;
+        } else {
+
+          // Convert env file to JSON.
+          configJsonRaw = convertEnvFileToJsonRaw(configRaw);
+        }
+
         try {
           // Fix json convert Object value :type '_InternalLinkedHashMap<String, dynamic>' is not a subtype of type 'Map<String, Object>' in type cast
           (json.decode(configJsonRaw) as Map<String, dynamic>)
-              .forEach((String key, dynamic value) {
-            dartDefineConfigJsonMap[key] = value as Object;
+              .forEach((String key, Object? value) {
+            dartDefineConfigJsonMap[key] = value;
           });
         } on FormatException catch (err) {
           throwToolExit('Json config define file "--${FlutterOptions
@@ -1412,6 +1381,88 @@ abstract class FlutterCommand extends Command<void> {
     return dartDefineConfigJsonMap;
   }
 
+  /// Parse a property line from an env file.
+  /// Supposed property structure should be:
+  ///   key=value
+  ///
+  /// Where: key is a string without spaces and value is a string.
+  /// Value can also contain '=' char.
+  ///
+  /// Returns a record of key and value as strings.
+  MapEntry<String, String> _parseProperty(String line) {
+    final RegExp blockRegExp = RegExp(r'^\s*([a-zA-Z_]+[a-zA-Z0-9_]*)\s*=\s*"""\s*(.*)$');
+    if (blockRegExp.hasMatch(line)) {
+      throwToolExit('Multi-line value is not supported: $line');
+    }
+
+    final RegExp propertyRegExp = RegExp(r'^\s*([a-zA-Z_]+[a-zA-Z0-9_]*)\s*=\s*(.*)?$');
+    final Match? match = propertyRegExp.firstMatch(line);
+    if (match == null) {
+      throwToolExit('Unable to parse file provided for '
+        '--${FlutterOptions.kDartDefineFromFileOption}.\n'
+        'Invalid property line: $line');
+    }
+
+    final String key = match.group(1)!;
+    final String value = match.group(2) ?? '';
+
+    // Remove wrapping quotes and trailing line comment.
+    final RegExp doubleQuoteValueRegExp = RegExp(r'^"(.*)"\s*(\#\s*.*)?$');
+    final Match? doubleQuoteValue = doubleQuoteValueRegExp.firstMatch(value);
+    if (doubleQuoteValue != null) {
+      return MapEntry<String, String>(key, doubleQuoteValue.group(1)!);
+    }
+
+    final RegExp quoteValueRegExp = RegExp(r"^'(.*)'\s*(\#\s*.*)?$");
+    final Match? quoteValue = quoteValueRegExp.firstMatch(value);
+    if (quoteValue != null) {
+      return MapEntry<String, String>(key, quoteValue.group(1)!);
+    }
+
+    final RegExp backQuoteValueRegExp = RegExp(r'^`(.*)`\s*(\#\s*.*)?$');
+    final Match? backQuoteValue = backQuoteValueRegExp.firstMatch(value);
+    if (backQuoteValue != null) {
+      return MapEntry<String, String>(key, backQuoteValue.group(1)!);
+    }
+
+    final RegExp noQuoteValueRegExp = RegExp(r'^([^#\n\s]*)\s*(?:\s*#\s*(.*))?$');
+    final Match? noQuoteValue = noQuoteValueRegExp.firstMatch(value);
+    if (noQuoteValue != null) {
+      return MapEntry<String, String>(key, noQuoteValue.group(1)!);
+    }
+
+    return MapEntry<String, String>(key, value);
+  }
+
+  /// Converts an .env file string to its equivalent JSON string.
+  ///
+  /// For example, the .env file string
+  ///   key=value # comment
+  ///   complexKey="foo#bar=baz"
+  /// would be converted to a JSON string equivalent to:
+  ///   {
+  ///     "key": "value",
+  ///     "complexKey": "foo#bar=baz"
+  ///   }
+  ///
+  /// Multiline values are not supported.
+  String convertEnvFileToJsonRaw(String configRaw) {
+    final List<String> lines = configRaw
+        .split('\n')
+        .map((String line) => line.trim())
+        .where((String line) => line.isNotEmpty)
+        .where((String line) => !line.startsWith('#')) // Remove comment lines.
+        .toList();
+
+    final Map<String, String> propertyMap = <String, String>{};
+    for (final String line in lines) {
+      final MapEntry<String, String> property = _parseProperty(line);
+      propertyMap[property.key] = property.value;
+    }
+
+    return jsonEncode(propertyMap);
+  }
+
   /// Updates dart-defines based on [webRenderer].
   @visibleForTesting
   static List<String> updateDartDefines(List<String> dartDefines, WebRendererMode webRenderer) {
@@ -1420,10 +1471,7 @@ abstract class FlutterCommand extends Command<void> {
         && dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='))) {
       dartDefinesSet.removeWhere((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='));
     }
-    final Iterable<String>? webRendererDefine = _webRendererDartDefines[webRenderer];
-    if (webRendererDefine != null) {
-      dartDefinesSet.addAll(webRendererDefine);
-    }
+    dartDefinesSet.addAll(webRenderer.dartDefines);
     return dartDefinesSet.toList();
   }
 
@@ -1456,7 +1504,7 @@ abstract class FlutterCommand extends Command<void> {
 
     // Send timing.
     final List<String?> labels = <String?>[
-      getEnumName(commandResult.exitStatus),
+      commandResult.exitStatus.name,
       if (commandResult.timingLabelParts?.isNotEmpty ?? false)
         ...?commandResult.timingLabelParts,
     ];
@@ -1679,17 +1727,30 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
   ///
   /// If no flag named [name] was added to the [ArgParser], an [ArgumentError]
   /// will be thrown.
-  bool boolArg(String name) => argResults![name] as bool;
+  bool boolArg(String name, {bool global = false}) {
+    if (global) {
+      return globalResults![name] as bool;
+    }
+    return argResults![name] as bool;
+  }
 
   /// Gets the parsed command-line option named [name] as a `String`.
   ///
   /// If no option named [name] was added to the [ArgParser], an [ArgumentError]
   /// will be thrown.
-  String? stringArg(String name) => argResults![name] as String?;
+  String? stringArg(String name, {bool global = false}) {
+    if (global) {
+      return globalResults![name] as String?;
+    }
+    return argResults![name] as String?;
+  }
 
   /// Gets the parsed command-line option named [name] as `List<String>`.
-  List<String> stringsArg(String name) {
-    return argResults![name]! as List<String>? ?? <String>[];
+  List<String> stringsArg(String name, {bool global = false}) {
+    if (global) {
+      return globalResults![name] as List<String>;
+    }
+    return argResults![name] as List<String>;
   }
 }
 
