@@ -112,7 +112,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// property to null, the decoration will be removed entirely, including the
 /// extra padding introduced by the decoration to save space for the labels.
 ///
-/// If the text field does not have an ancestor [Material] widget, then the
+/// If the text field does not have an ancestor [MaterialApp] widget, then the
 /// [DefaultMaterialLocalizations.delegate] should be be provided by an ancestor.
 ///
 /// To integrate the [TextField] into a [Form] with other [FormField] widgets,
@@ -202,7 +202,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 class TextField extends StatefulWidget {
   /// Creates a Material Design text field.
   ///
-  /// If the text field does not have an ancestor [Material] widget, then the
+  /// If the text field does not have an ancestor [MaterialApp] widget, then the
   /// [DefaultMaterialLocalizations.delegate] should be be provided by an ancestor.
   ///
   /// To remove the decoration entirely (including the extra padding introduced
