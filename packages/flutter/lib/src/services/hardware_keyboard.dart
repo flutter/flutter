@@ -532,6 +532,10 @@ class HardwareKeyboard {
   }
 
   /// Query the engine and update _pressedKeys accordingly to the engine answer.
+  //
+  /// Both the framework and the engine maintain a state of the current pressed
+  /// keys. There are edge cases, related to startup and restart, where the framework
+  /// needs to resynchronize its keyboard state.
   Future<void> syncKeyboardState() async {
     final Map<int, int>? keyboardState = await SystemChannels.keyboard.invokeMapMethod<int, int>(
       'getKeyboardState',
