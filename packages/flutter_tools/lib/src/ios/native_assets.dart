@@ -18,7 +18,7 @@ import '../native_assets.dart';
 /// This does not build native assets, it only simulates what the final paths
 /// of all assets will be so that this can be embedded in the kernel file and
 /// the Xcode project.
-Future<Uri?> dryRunNativeAssetsiOS({
+Future<Uri?> dryRunNativeAssetsIOS({
   required NativeAssetsBuildRunner buildRunner,
   required Uri projectUri,
   required FileSystem fileSystem,
@@ -28,12 +28,12 @@ Future<Uri?> dryRunNativeAssetsiOS({
   }
 
   final Uri buildUri_ = nativeAssetsBuildUri(projectUri, OS.iOS);
-  final Iterable<Asset> assetTargetLocations = await dryRunNativeAssetsIosInternal(fileSystem, projectUri, buildRunner);
+  final Iterable<Asset> assetTargetLocations = await dryRunNativeAssetsIOSInternal(fileSystem, projectUri, buildRunner);
   final Uri nativeAssetsUri = await writeNativeAssetsYaml(assetTargetLocations, buildUri_, fileSystem);
   return nativeAssetsUri;
 }
 
-Future<Iterable<Asset>> dryRunNativeAssetsIosInternal(
+Future<Iterable<Asset>> dryRunNativeAssetsIOSInternal(
   FileSystem fileSystem,
   Uri projectUri,
   NativeAssetsBuildRunner buildRunner,
@@ -54,7 +54,7 @@ Future<Iterable<Asset>> dryRunNativeAssetsIosInternal(
 }
 
 /// Builds native assets.
-Future<List<Uri>> buildNativeAssetsiOS({
+Future<List<Uri>> buildNativeAssetsIOS({
   required NativeAssetsBuildRunner buildRunner,
   required List<DarwinArch> darwinArchs,
   required EnvironmentType environmentType,
@@ -74,7 +74,7 @@ Future<List<Uri>> buildNativeAssetsiOS({
 
   const OS targetOs = OS.iOS;
   final Uri buildUri_ = nativeAssetsBuildUri(projectUri, targetOs);
-  final IOSSdk iosSdk = _getIosSdk(environmentType);
+  final IOSSdk iosSdk = _getIOSSdk(environmentType);
 
   globals.logger.printTrace('Building native assets for $targets $buildModeCli.');
   final List<Asset> nativeAssets = <Asset>[];
@@ -102,7 +102,7 @@ Future<List<Uri>> buildNativeAssetsiOS({
   return dependencies.toList();
 }
 
-IOSSdk _getIosSdk(EnvironmentType environmentType) {
+IOSSdk _getIOSSdk(EnvironmentType environmentType) {
   switch (environmentType) {
     case EnvironmentType.physical:
       return IOSSdk.iPhoneOs;
@@ -126,7 +126,7 @@ Target _getNativeTarget(DarwinArch darwinArch) {
 Map<AssetPath, List<Asset>> _fatAssetTargetLocations(List<Asset> nativeAssets) {
   final Map<AssetPath, List<Asset>> result = <AssetPath, List<Asset>>{};
   for (final Asset asset in nativeAssets) {
-    final AssetPath path = _targetLocationiOS(asset).path;
+    final AssetPath path = _targetLocationIOS(asset).path;
     result[path] ??= <Asset>[];
     result[path]!.add(asset);
   }
@@ -135,10 +135,10 @@ Map<AssetPath, List<Asset>> _fatAssetTargetLocations(List<Asset> nativeAssets) {
 
 Map<Asset, Asset> _assetTargetLocations(List<Asset> nativeAssets) => <Asset, Asset>{
   for (final Asset asset in nativeAssets)
-    asset: _targetLocationiOS(asset),
+    asset: _targetLocationIOS(asset),
 };
 
-Asset _targetLocationiOS(Asset asset) {
+Asset _targetLocationIOS(Asset asset) {
   final AssetPath path = asset.path;
   switch (path) {
     case AssetSystemPath _:

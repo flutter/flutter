@@ -146,7 +146,7 @@ void main() {
           expect(stdout, isNot(contains('EXCEPTION CAUGHT BY WIDGETS LIBRARY')));
 
           if (device == 'macos') {
-            expectDylibIsBundledMacos(exampleDirectory, buildMode);
+            expectDylibIsBundledMacOS(exampleDirectory, buildMode);
           }
           if (device == hostOs) {
             expectCCompilerIsConfigured(exampleDirectory);
@@ -198,7 +198,7 @@ void main() {
           }
 
           if (buildSubcommand == 'macos') {
-            expectDylibIsBundledMacos(exampleDirectory, buildMode);
+            expectDylibIsBundledMacOS(exampleDirectory, buildMode);
           } else if (buildSubcommand == 'ios') {
             expectDylibIsBundledIos(exampleDirectory, buildMode);
           }
@@ -273,7 +273,7 @@ void main() {
 
 /// For `flutter build` we can't easily test whether running the app works.
 /// Check that we have the dylibs in the app.
-void expectDylibIsBundledMacos(Directory appDirectory, String buildMode) {
+void expectDylibIsBundledMacOS(Directory appDirectory, String buildMode) {
   final Directory appBundle = appDirectory.childDirectory('build/$hostOs/Build/Products/${buildMode.upperCaseFirst()}/$exampleAppName.app');
   expect(appBundle, exists);
   final Directory dylibsFolder = appBundle.childDirectory('Contents/Frameworks');

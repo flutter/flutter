@@ -283,8 +283,8 @@ Future<Uri?> dryRunNativeAssetsMultipeOSes({
   final Iterable<Asset> nativeAssetPaths = <Asset>[
     if (targetPlatforms.contains(build_info.TargetPlatform.darwin) ||
         (targetPlatforms.contains(build_info.TargetPlatform.tester) && OS.current == OS.macOS))
-      ...await dryRunNativeAssetsMacosInternal(fileSystem, projectUri, false, buildRunner),
-    if (targetPlatforms.contains(build_info.TargetPlatform.ios)) ...await dryRunNativeAssetsIosInternal(fileSystem, projectUri, buildRunner)
+      ...await dryRunNativeAssetsMacOSInternal(fileSystem, projectUri, false, buildRunner),
+    if (targetPlatforms.contains(build_info.TargetPlatform.ios)) ...await dryRunNativeAssetsIOSInternal(fileSystem, projectUri, buildRunner)
   ];
   final Uri nativeAssetsUri = await writeNativeAssetsYaml(nativeAssetPaths, buildUri_, fileSystem);
   return nativeAssetsUri;

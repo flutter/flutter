@@ -72,7 +72,7 @@ class NativeAssets extends Target {
           throw MissingDefineException(kSdkRoot, name);
         }
         final EnvironmentType environmentType = environmentTypeFromSdkroot(sdkRoot, environment.fileSystem)!;
-        dependencies = await buildNativeAssetsiOS(
+        dependencies = await buildNativeAssetsIOS(
           environmentType: environmentType,
           darwinArchs: iosArchs,
           buildMode: buildMode,

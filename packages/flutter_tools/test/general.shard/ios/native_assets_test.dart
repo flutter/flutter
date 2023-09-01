@@ -52,7 +52,7 @@ void main() {
     ProcessManager: () => FakeProcessManager.empty(),
   }, () async {
     expect(
-      await dryRunNativeAssetsiOS(
+      await dryRunNativeAssetsIOS(
         projectUri: projectUri,
         fileSystem: fileSystem,
         buildRunner: FakeNativeAssetsBuildRunner(
@@ -70,7 +70,7 @@ void main() {
   testUsingContext('build with no package config', overrides: <Type, Generator>{
     ProcessManager: () => FakeProcessManager.empty(),
   }, () async {
-    await buildNativeAssetsiOS(
+    await buildNativeAssetsIOS(
       darwinArchs: <DarwinArch>[DarwinArch.arm64],
       environmentType: EnvironmentType.simulator,
       projectUri: projectUri,
@@ -94,7 +94,7 @@ void main() {
     await packageConfig.parent.create();
     await packageConfig.create();
     expect(
-      () => dryRunNativeAssetsiOS(
+      () => dryRunNativeAssetsIOS(
         projectUri: projectUri,
         fileSystem: fileSystem,
         buildRunner: FakeNativeAssetsBuildRunner(
@@ -117,7 +117,7 @@ void main() {
     final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
     await packageConfig.parent.create();
     await packageConfig.create();
-    final Uri? nativeAssetsYaml = await dryRunNativeAssetsiOS(
+    final Uri? nativeAssetsYaml = await dryRunNativeAssetsIOS(
       projectUri: projectUri,
       fileSystem: fileSystem,
       buildRunner: FakeNativeAssetsBuildRunner(
@@ -157,7 +157,7 @@ void main() {
     await packageConfig.parent.create();
     await packageConfig.create();
     expect(
-      () => buildNativeAssetsiOS(
+      () => buildNativeAssetsIOS(
         darwinArchs: <DarwinArch>[DarwinArch.arm64],
         environmentType: EnvironmentType.simulator,
         projectUri: projectUri,
@@ -184,7 +184,7 @@ void main() {
     final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
     await packageConfig.parent.create();
     await packageConfig.create();
-    await buildNativeAssetsiOS(
+    await buildNativeAssetsIOS(
       darwinArchs: <DarwinArch>[DarwinArch.arm64],
       environmentType: EnvironmentType.simulator,
       projectUri: projectUri,
@@ -243,7 +243,7 @@ void main() {
     final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
     await packageConfig.parent.create();
     await packageConfig.create();
-    await buildNativeAssetsiOS(
+    await buildNativeAssetsIOS(
       darwinArchs: <DarwinArch>[DarwinArch.arm64],
       environmentType: EnvironmentType.simulator,
       projectUri: projectUri,

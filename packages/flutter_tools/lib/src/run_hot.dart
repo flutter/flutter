@@ -478,7 +478,7 @@ class HotRunner extends ResidentRunner {
           buildRunner: _buildRunner!,
         );
       case TargetPlatform.ios:
-        nativeAssetsYaml = await dryRunNativeAssetsiOS(
+        nativeAssetsYaml = await dryRunNativeAssetsIOS(
           projectUri: projectUri,
           fileSystem: fileSystem,
           buildRunner: _buildRunner!,
