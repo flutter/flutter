@@ -101,7 +101,11 @@ void DlStopwatchVisualizer::Visualize(DlCanvas* canvas,
   }
 
   // Actually draw.
-  // Note we use kSrcOver, because some of the colors above have opacity < 1.0.
+  // Use kSrcOver blend mode so that elements under the performance overlay are
+  // partially visible.
+  paint.setBlendMode(DlBlendMode::kSrcOver);
+  // The second blend mode does nothing since the paint has no additional color
+  // sources like a tiled image or gradient.
   canvas->DrawVertices(painter.IntoVertices(), DlBlendMode::kSrcOver, paint);
 }
 
