@@ -457,8 +457,7 @@ class HotRunner extends ResidentRunner {
   /// native assets after hot restart.
   Future<Uri?> _getNativeAssetsYaml() async {
     final Uri projectUri = Uri.directory(projectRootPath);
-    _buildRunner ??=
-        NativeAssetsBuildRunnerImpl(projectUri, fileSystem, globals.logger);
+    _buildRunner ??= NativeAssetsBuildRunnerImpl(projectUri, fileSystem, globals.logger);
     if (flutterDevices.length != 1) {
       return dryRunNativeAssetsMultipeOSes(
         projectUri: projectUri,

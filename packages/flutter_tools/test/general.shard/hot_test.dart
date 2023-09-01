@@ -577,11 +577,9 @@ void main() {
             transferDuration: const Duration(seconds: 32),
           );
 
-      (fakeFlutterDevice.devFS! as FakeDevFs).baseUri =
-          Uri.parse('file:///base_uri');
+      (fakeFlutterDevice.devFS! as FakeDevFs).baseUri = Uri.parse('file:///base_uri');
 
-      final FakeNativeAssetsBuildRunner buildRunner =
-          FakeNativeAssetsBuildRunner(
+      final FakeNativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', fileSystem.currentDirectory.uri),
         ],
@@ -638,11 +636,9 @@ void main() {
             transferDuration: const Duration(seconds: 32),
           );
 
-      (fakeFlutterDevice.devFS! as FakeDevFs).baseUri =
-          Uri.parse('file:///base_uri');
+      (fakeFlutterDevice.devFS! as FakeDevFs).baseUri = Uri.parse('file:///base_uri');
 
-      final FakeNativeAssetsBuildRunner buildRunner =
-          FakeNativeAssetsBuildRunner(
+      final FakeNativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <Package>[
           Package('bar', fileSystem.currentDirectory.uri),
         ],

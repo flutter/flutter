@@ -277,8 +277,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
           .directory(getBuildDirectory())
           .childDirectory('native_assets/ios/');
       if (await nativeAssetsDirectory.exists()) {
-        final ProcessResult rsyncResult =
-            await globals.processManager.run(<Object>[
+        final ProcessResult rsyncResult = await globals.processManager.run(<Object>[
           'rsync',
           '-av',
           '--filter',

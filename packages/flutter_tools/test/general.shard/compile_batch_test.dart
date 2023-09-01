@@ -438,8 +438,7 @@ void main() {
 
   testWithoutContext('KernelCompiler passes native assets', () async {
     final BufferLogger logger = BufferLogger.test();
-    final StdoutHandler stdoutHandler =
-        StdoutHandler(logger: logger, fileSystem: MemoryFileSystem.test());
+    final StdoutHandler stdoutHandler = StdoutHandler(logger: logger, fileSystem: MemoryFileSystem.test());
     final Completer<void> completer = Completer<void>();
 
     final KernelCompiler kernelCompiler = KernelCompiler(

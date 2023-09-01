@@ -2354,16 +2354,14 @@ flutter:
               .._devFS = devFS
               ..targetPlatform = TargetPlatform.darwin;
 
-            fakeVmServiceHost =
-                FakeVmServiceHost(requests: <VmServiceExpectation>[
+            fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[
               listViews,
               listViews,
             ]);
             globals.fs
                 .file(globals.fs.path.join('lib', 'main.dart'))
                 .createSync(recursive: true);
-            final FakeNativeAssetsBuildRunner buildRunner =
-                FakeNativeAssetsBuildRunner(
+            final FakeNativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
               packagesWithNativeAssetsResult: <Package>[
                 Package('bar', projectUri),
               ],

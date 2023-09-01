@@ -705,8 +705,7 @@ Your $application code is in $relativeAppMain.
     final String? projectName = templateContext['projectName'] as String?;
     final String exampleProjectName = '${projectName}_example';
     templateContext['projectName'] = exampleProjectName;
-    templateContext['description'] =
-        'Demonstrates how to use the $projectName package.';
+    templateContext['description'] = 'Demonstrates how to use the $projectName package.';
     templateContext['pluginProjectName'] = projectName;
 
     generatedCount += await generateApp(

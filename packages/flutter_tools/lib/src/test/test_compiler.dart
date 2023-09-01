@@ -168,8 +168,7 @@ class TestCompiler {
 
       Uri? nativeAssetsYaml;
       final Uri projectUri = FlutterProject.current().directory.uri;
-      final NativeAssetsBuildRunner buildRunner =
-          NativeAssetsBuildRunnerImpl(projectUri, globals.fs, globals.logger);
+      final NativeAssetsBuildRunner buildRunner = NativeAssetsBuildRunnerImpl(projectUri, globals.fs, globals.logger);
       if (globals.platform.isMacOS) {
         (nativeAssetsYaml, _) = await buildNativeAssetsMacOS(
           buildMode: BuildMode.debug,

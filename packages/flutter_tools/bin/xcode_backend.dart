@@ -232,10 +232,8 @@ class Context {
       projectPath = environment['FLUTTER_APPLICATION_PATH']!;
     }
     final String flutterBuildDir = environment['FLUTTER_BUILD_DIR']!;
-    final String nativeAssetsPath =
-        '$projectPath/$flutterBuildDir/native_assets/ios/';
-    final bool verbose =
-        (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
+    final String nativeAssetsPath = '$projectPath/$flutterBuildDir/native_assets/ios/';
+    final bool verbose = (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
     if (Directory(nativeAssetsPath).existsSync()) {
       if (verbose) {
         print('♦ Copying native assets from $nativeAssetsPath.');
