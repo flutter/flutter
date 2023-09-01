@@ -210,9 +210,9 @@ void main() {
       ),
     );
   }, overrides: <Type, Generator>{
-    // If we graduate the feature to true by default, don't break this test.
-    // ignore: avoid_redundant_argument_values
-    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: false),
+    FeatureFlags: () => TestFeatureFlags(
+      isNativeAssetsEnabled: false, // ignore: avoid_redundant_argument_values, If we graduate the feature to true by default, don't break this test.
+    ), 
   });
   });
 }
