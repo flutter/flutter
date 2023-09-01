@@ -1023,7 +1023,7 @@ void main() {
   });
 
   testWidgets('dataRowMinHeight & dataRowMaxHeight if not set will use DataTableTheme', (WidgetTester tester) async {
-    addTearDown(() => binding.setSurfaceSize(null));    
+    addTearDown(() => binding.setSurfaceSize(null));
     await binding.setSurfaceSize(const Size(800, 800));
 
     const double minMaxDataRowHeight = 30.0;
