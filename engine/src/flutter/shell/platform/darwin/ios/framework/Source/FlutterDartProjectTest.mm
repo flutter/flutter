@@ -73,6 +73,50 @@ FLUTTER_ASSERT_ARC
   XCTAssertNotNil(found);
 }
 
+- (void)testFLTGetApplicationBundleWhenCurrentTargetIsNotExtension {
+  NSBundle* bundle = FLTGetApplicationBundle();
+  XCTAssertEqual(bundle, [NSBundle mainBundle]);
+}
+
+- (void)testFLTGetApplicationBundleWhenCurrentTargetIsExtension {
+  id mockMainBundle = OCMPartialMock([NSBundle mainBundle]);
+  NSURL* url = [[NSBundle mainBundle].bundleURL URLByAppendingPathComponent:@"foo/ext.appex"];
+  OCMStub([mockMainBundle bundleURL]).andReturn(url);
+  NSBundle* bundle = FLTGetApplicationBundle();
+  [mockMainBundle stopMocking];
+  XCTAssertEqualObjects(bundle.bundleURL, [NSBundle mainBundle].bundleURL);
+}
+
+- (void)testFLTAssetsURLFromBundle {
+  {
+    // Found asset path in info.plist (even not reachable)
+    id mockBundle = OCMClassMock([NSBundle class]);
+    OCMStub([mockBundle objectForInfoDictionaryKey:@"FLTAssetsPath"]).andReturn(@"foo/assets");
+    NSURL* mockAssetsURL = OCMClassMock([NSURL class]);
+    OCMStub([mockBundle URLForResource:@"foo/assets" withExtension:nil]).andReturn(mockAssetsURL);
+    OCMStub([mockAssetsURL checkResourceIsReachableAndReturnError:NULL]).andReturn(NO);
+    OCMStub([mockAssetsURL path]).andReturn(@"foo/assets");
+    NSURL* url = FLTAssetsURLFromBundle(mockBundle);
+    XCTAssertEqualObjects(url.path, @"foo/assets");
+  }
+  {
+    // No asset path in info.plist, defaults to main bundle
+    id mockBundle = OCMClassMock([NSBundle class]);
+    id mockMainBundle = OCMPartialMock([NSBundle mainBundle]);
+    NSURL* mockAssetsURL = OCMClassMock([NSURL class]);
+    OCMStub([mockBundle URLForResource:@"Frameworks/App.framework/flutter_assets"
+                         withExtension:nil])
+        .andReturn(nil);
+    OCMStub([mockAssetsURL checkResourceIsReachableAndReturnError:NULL]).andReturn(NO);
+    OCMStub([mockAssetsURL path]).andReturn(@"path/to/foo/assets");
+    OCMStub([mockMainBundle URLForResource:@"Frameworks/App.framework/flutter_assets"
+                             withExtension:nil])
+        .andReturn(mockAssetsURL);
+    NSURL* url = FLTAssetsURLFromBundle(mockBundle);
+    XCTAssertEqualObjects(url.path, @"path/to/foo/assets");
+  }
+}
+
 - (void)testDisableImpellerSettingIsCorrectlyParsed {
   id mockMainBundle = OCMPartialMock([NSBundle mainBundle]);
   OCMStub([mockMainBundle objectForInfoDictionaryKey:@"FLTEnableImpeller"]).andReturn(@"NO");

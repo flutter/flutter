@@ -353,7 +353,8 @@ typedef enum {
  *
  * @param delegate The receiving object, such as the plugin's main class.
  */
-- (void)addApplicationDelegate:(NSObject<FlutterPlugin>*)delegate;
+- (void)addApplicationDelegate:(NSObject<FlutterPlugin>*)delegate
+    NS_EXTENSION_UNAVAILABLE_IOS("Disallowed in plugins used in app extensions");
 
 /**
  * Returns the file name for the given asset.

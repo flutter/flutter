@@ -8,7 +8,9 @@
 
 FLUTTER_ASSERT_ARC
 
-NSBundle* FLTFrameworkBundleInternal(NSString* bundleID, NSURL* searchURL) {
+const NSString* kDefaultAssetPath = @"Frameworks/App.framework/flutter_assets";
+
+NSBundle* FLTFrameworkBundleInternal(NSString* flutterFrameworkBundleID, NSURL* searchURL) {
   NSDirectoryEnumerator<NSURL*>* frameworkEnumerator = [NSFileManager.defaultManager
                  enumeratorAtURL:searchURL
       includingPropertiesForKeys:nil
@@ -18,19 +20,49 @@ NSBundle* FLTFrameworkBundleInternal(NSString* bundleID, NSURL* searchURL) {
                     errorHandler:nil];
 
   for (NSURL* candidate in frameworkEnumerator) {
-    NSBundle* bundle = [NSBundle bundleWithURL:candidate];
-    if ([bundle.bundleIdentifier isEqualToString:bundleID]) {
-      return bundle;
+    NSBundle* flutterFrameworkBundle = [NSBundle bundleWithURL:candidate];
+    if ([flutterFrameworkBundle.bundleIdentifier isEqualToString:flutterFrameworkBundleID]) {
+      return flutterFrameworkBundle;
     }
   }
   return nil;
 }
 
-NSBundle* FLTFrameworkBundleWithIdentifier(NSString* bundleID) {
-  NSBundle* bundle = FLTFrameworkBundleInternal(bundleID, NSBundle.mainBundle.privateFrameworksURL);
-  if (bundle != nil) {
-    return bundle;
+NSBundle* FLTGetApplicationBundle() {
+  NSBundle* mainBundle = [NSBundle mainBundle];
+  // App extension bundle is in <AppName>.app/PlugIns/Extension.appex.
+  if ([mainBundle.bundleURL.pathExtension isEqualToString:@"appex"]) {
+    // Up two levels.
+    return [NSBundle bundleWithURL:mainBundle.bundleURL.URLByDeletingLastPathComponent
+                                       .URLByDeletingLastPathComponent];
   }
-  // Fallback to slow implementation.
-  return [NSBundle bundleWithIdentifier:bundleID];
+  return mainBundle;
+}
+
+NSBundle* FLTFrameworkBundleWithIdentifier(NSString* flutterFrameworkBundleID) {
+  NSBundle* appBundle = FLTGetApplicationBundle();
+  NSBundle* flutterFrameworkBundle =
+      FLTFrameworkBundleInternal(flutterFrameworkBundleID, appBundle.privateFrameworksURL);
+  if (flutterFrameworkBundle == nil) {
+    // Fallback to slow implementation.
+    flutterFrameworkBundle = [NSBundle bundleWithIdentifier:flutterFrameworkBundleID];
+  }
+  if (flutterFrameworkBundle == nil) {
+    flutterFrameworkBundle = [NSBundle mainBundle];
+  }
+  return flutterFrameworkBundle;
+}
+
+NSString* FLTAssetPath(NSBundle* bundle) {
+  return [bundle objectForInfoDictionaryKey:@"FLTAssetsPath"] ?: kDefaultAssetPath;
+}
+
+NSURL* FLTAssetsURLFromBundle(NSBundle* bundle) {
+  NSString* flutterAssetsPath = FLTAssetPath(bundle);
+  NSURL* assets = [bundle URLForResource:flutterAssetsPath withExtension:nil];
+
+  if (!assets) {
+    assets = [[NSBundle mainBundle] URLForResource:flutterAssetsPath withExtension:nil];
+  }
+  return assets;
 }
