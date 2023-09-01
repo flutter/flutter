@@ -8407,7 +8407,7 @@ void main() {
         DefaultWidgetsLocalizations.delegate,
       ],
       locale: const Locale('en', 'US'),
-      child: TextField(),
+      child: const TextField(),
     );
     await tester.pumpWidget(textField);
     final dynamic exception = tester.takeException();
@@ -8420,7 +8420,7 @@ void main() {
         DefaultWidgetsLocalizations.delegate,
       ],
       locale: const Locale('en', 'US'),
-      child: TextField(),
+      child: const TextField(),
     );
     await tester.pumpWidget(textField);
     final dynamic exception = tester.takeException();

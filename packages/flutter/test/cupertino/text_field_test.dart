@@ -9877,7 +9877,7 @@ void main() {
         DefaultWidgetsLocalizations.delegate,
       ],
       locale: const Locale('en', 'US'),
-      child: CupertinoTextField(),
+      child: const CupertinoTextField(),
     );
     await tester.pumpWidget(textField);
     final dynamic exception = tester.takeException();
@@ -9890,7 +9890,7 @@ void main() {
         DefaultWidgetsLocalizations.delegate,
       ],
       locale: const Locale('en', 'US'),
-      child: CupertinoTextField(),
+      child: const CupertinoTextField(),
     );
     await tester.pumpWidget(textField);
     final dynamic exception = tester.takeException();
