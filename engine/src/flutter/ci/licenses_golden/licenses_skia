@@ -1,4 +1,4 @@
-Signature: b0474aaa2801ed8b9bc3ecbc69796629
+Signature: 6d57901632a0cfc7e1c298439c27b7b8
 
 ====================================================================================================
 LIBRARY: etc1
@@ -385,6 +385,7 @@ FILE: ../../../third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../third_party/skia/modules/skparagraph/test.html
 FILE: ../../../third_party/skia/package-lock.json
+FILE: ../../../third_party/skia/relnotes/grdirectctx.md
 FILE: ../../../third_party/skia/relnotes/makewithfilter.md
 FILE: ../../../third_party/skia/relnotes/sksl_always_on.md
 FILE: ../../../third_party/skia/relnotes/sksl_comma_array.md
