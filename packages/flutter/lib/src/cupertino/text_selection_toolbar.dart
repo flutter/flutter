@@ -547,11 +547,15 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
     final Color color = _kToolbarTextColor.resolveFrom(context);
 
     return IgnorePointer(
-      child: CustomPaint(
-        painter: isLeft
-          ? _LeftCupertinoChevronPainter(color: color)
-          : _RightCupertinoChevronPainter(color: color),
-        size: const Size.square(_kToolbarChevronSize),
+      child: Center(
+        // If widthFactor is not set to 0, the button is given unbounded width.
+        widthFactor: 0,
+        child: CustomPaint(
+          painter: isLeft
+            ? _LeftCupertinoChevronPainter(color: color)
+            : _RightCupertinoChevronPainter(color: color),
+          size: const Size.square(_kToolbarChevronSize),
+        ),
       ),
     );
   }
@@ -995,6 +999,17 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
         toolbarWidth = currentButtonPosition;
       }
     });
+
+    // Re-layout slotted children using max. child height to allow
+    // the back/next buttons to be centered vertically.
+    _backButton!.layout(
+      BoxConstraints.tightFor(width: _backButton!.size.width, height: greatestHeight),
+      parentUsesSize: true,
+    );
+    _nextButton!.layout(
+      BoxConstraints.tightFor(width: _nextButton!.size.width, height: greatestHeight),
+      parentUsesSize: true,
+    );
 
     // It shouldn't be possible to navigate beyond the last page.
     assert(page <= currentPage);
