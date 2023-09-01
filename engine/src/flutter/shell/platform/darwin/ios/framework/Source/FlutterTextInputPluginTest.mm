@@ -1543,22 +1543,262 @@ FLUTTER_ASSERT_ARC
                                   [inputView firstRectForRange:range]));
 }
 
-- (void)testFirstRectForRangeReturnsCorrectSelectionRect {
+- (void)testFirstRectForRangeReturnsCorrectRectOnASingleLineLeftToRight {
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
   [inputView setTextInputState:@{@"text" : @"COMPOSING"}];
 
-  FlutterTextRange* range = [FlutterTextRange rangeWithNSRange:NSMakeRange(1, 1)];
-  CGRect testRect = CGRectMake(100, 100, 100, 100);
   [inputView setSelectionRects:@[
     [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 0, 100, 100) position:0U],
-    [FlutterTextSelectionRect selectionRectWithRect:testRect position:1U],
-    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(200, 200, 100, 100) position:2U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(100, 0, 100, 100) position:1U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(200, 0, 100, 100) position:2U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(300, 0, 100, 100) position:3U],
   ]];
-  XCTAssertTrue(CGRectEqualToRect(testRect, [inputView firstRectForRange:range]));
+  FlutterTextRange* singleRectRange = [FlutterTextRange rangeWithNSRange:NSMakeRange(1, 1)];
+  XCTAssertTrue(CGRectEqualToRect(CGRectMake(100, 0, 100, 100),
+                                  [inputView firstRectForRange:singleRectRange]));
+
+  FlutterTextRange* multiRectRange = [FlutterTextRange rangeWithNSRange:NSMakeRange(1, 3)];
+
+  if (@available(iOS 17, *)) {
+    XCTAssertTrue(CGRectEqualToRect(CGRectMake(100, 0, 300, 100),
+                                    [inputView firstRectForRange:multiRectRange]));
+  } else {
+    XCTAssertTrue(CGRectEqualToRect(CGRectMake(100, 0, 100, 100),
+                                    [inputView firstRectForRange:multiRectRange]));
+  }
 
   [inputView setTextInputState:@{@"text" : @"COM"}];
   FlutterTextRange* rangeOutsideBounds = [FlutterTextRange rangeWithNSRange:NSMakeRange(3, 1)];
   XCTAssertTrue(CGRectEqualToRect(CGRectZero, [inputView firstRectForRange:rangeOutsideBounds]));
+}
+
+- (void)testFirstRectForRangeReturnsCorrectRectOnASingleLineRightToLeft {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [inputView setTextInputState:@{@"text" : @"COMPOSING"}];
+
+  [inputView setSelectionRects:@[
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(300, 0, 100, 100) position:0U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(200, 0, 100, 100) position:1U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(100, 0, 100, 100) position:2U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 0, 100, 100) position:3U],
+  ]];
+  FlutterTextRange* singleRectRange = [FlutterTextRange rangeWithNSRange:NSMakeRange(1, 1)];
+  XCTAssertTrue(CGRectEqualToRect(CGRectMake(200, 0, 100, 100),
+                                  [inputView firstRectForRange:singleRectRange]));
+
+  FlutterTextRange* multiRectRange = [FlutterTextRange rangeWithNSRange:NSMakeRange(1, 3)];
+  if (@available(iOS 17, *)) {
+    XCTAssertTrue(CGRectEqualToRect(CGRectMake(0, 0, 300, 100),
+                                    [inputView firstRectForRange:multiRectRange]));
+  } else {
+    XCTAssertTrue(CGRectEqualToRect(CGRectMake(200, 0, 100, 100),
+                                    [inputView firstRectForRange:multiRectRange]));
+  }
+
+  [inputView setTextInputState:@{@"text" : @"COM"}];
+  FlutterTextRange* rangeOutsideBounds = [FlutterTextRange rangeWithNSRange:NSMakeRange(3, 1)];
+  XCTAssertTrue(CGRectEqualToRect(CGRectZero, [inputView firstRectForRange:rangeOutsideBounds]));
+}
+
+- (void)testFirstRectForRangeReturnsCorrectRectOnMultipleLinesLeftToRight {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [inputView setTextInputState:@{@"text" : @"COMPOSING"}];
+
+  [inputView setSelectionRects:@[
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 0, 100, 100) position:0U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(100, 0, 100, 100) position:1U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(200, 0, 100, 100) position:2U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(300, 0, 100, 100) position:3U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 100, 100, 100) position:4U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(100, 100, 100, 100) position:5U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(200, 100, 100, 100) position:6U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(300, 100, 100, 100) position:7U],
+  ]];
+  FlutterTextRange* singleRectRange = [FlutterTextRange rangeWithNSRange:NSMakeRange(1, 1)];
+  XCTAssertTrue(CGRectEqualToRect(CGRectMake(100, 0, 100, 100),
+                                  [inputView firstRectForRange:singleRectRange]));
+
+  FlutterTextRange* multiRectRange = [FlutterTextRange rangeWithNSRange:NSMakeRange(1, 4)];
+
+  if (@available(iOS 17, *)) {
+    XCTAssertTrue(CGRectEqualToRect(CGRectMake(100, 0, 300, 100),
+                                    [inputView firstRectForRange:multiRectRange]));
+  } else {
+    XCTAssertTrue(CGRectEqualToRect(CGRectMake(100, 0, 100, 100),
+                                    [inputView firstRectForRange:multiRectRange]));
+  }
+}
+
+- (void)testFirstRectForRangeReturnsCorrectRectOnMultipleLinesRightToLeft {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [inputView setTextInputState:@{@"text" : @"COMPOSING"}];
+
+  [inputView setSelectionRects:@[
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(300, 0, 100, 100) position:0U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(200, 0, 100, 100) position:1U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(100, 0, 100, 100) position:2U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 0, 100, 100) position:3U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(300, 100, 100, 100) position:4U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(200, 100, 100, 100) position:5U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(100, 100, 100, 100) position:6U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 100, 100, 100) position:7U],
+  ]];
+  FlutterTextRange* singleRectRange = [FlutterTextRange rangeWithNSRange:NSMakeRange(1, 1)];
+  XCTAssertTrue(CGRectEqualToRect(CGRectMake(200, 0, 100, 100),
+                                  [inputView firstRectForRange:singleRectRange]));
+
+  FlutterTextRange* multiRectRange = [FlutterTextRange rangeWithNSRange:NSMakeRange(1, 4)];
+  if (@available(iOS 17, *)) {
+    XCTAssertTrue(CGRectEqualToRect(CGRectMake(0, 0, 300, 100),
+                                    [inputView firstRectForRange:multiRectRange]));
+  } else {
+    XCTAssertTrue(CGRectEqualToRect(CGRectMake(200, 0, 100, 100),
+                                    [inputView firstRectForRange:multiRectRange]));
+  }
+}
+
+- (void)testFirstRectForRangeReturnsCorrectRectOnSingleLineWithVaryingMinYAndMaxYLeftToRight {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [inputView setTextInputState:@{@"text" : @"COMPOSING"}];
+
+  [inputView setSelectionRects:@[
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 0, 100, 100) position:0U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(100, 10, 100, 80)
+                                           position:1U],  // shorter
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(200, -10, 100, 120)
+                                           position:2U],  // taller
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(300, 0, 100, 100) position:3U],
+  ]];
+
+  FlutterTextRange* multiRectRange = [FlutterTextRange rangeWithNSRange:NSMakeRange(1, 3)];
+
+  if (@available(iOS 17, *)) {
+    XCTAssertTrue(CGRectEqualToRect(CGRectMake(100, -10, 300, 120),
+                                    [inputView firstRectForRange:multiRectRange]));
+  } else {
+    XCTAssertTrue(CGRectEqualToRect(CGRectMake(100, 10, 100, 80),
+                                    [inputView firstRectForRange:multiRectRange]));
+  }
+}
+
+- (void)testFirstRectForRangeReturnsCorrectRectOnSingleLineWithVaryingMinYAndMaxYRightToLeft {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [inputView setTextInputState:@{@"text" : @"COMPOSING"}];
+
+  [inputView setSelectionRects:@[
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(300, 0, 100, 100) position:0U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(200, -10, 100, 120)
+                                           position:1U],  // taller
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(100, 10, 100, 80)
+                                           position:2U],  // shorter
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 0, 100, 100) position:3U],
+  ]];
+
+  FlutterTextRange* multiRectRange = [FlutterTextRange rangeWithNSRange:NSMakeRange(1, 3)];
+
+  if (@available(iOS 17, *)) {
+    XCTAssertTrue(CGRectEqualToRect(CGRectMake(0, -10, 300, 120),
+                                    [inputView firstRectForRange:multiRectRange]));
+  } else {
+    XCTAssertTrue(CGRectEqualToRect(CGRectMake(200, -10, 100, 120),
+                                    [inputView firstRectForRange:multiRectRange]));
+  }
+}
+
+- (void)testFirstRectForRangeReturnsCorrectRectWithOverlappingRectsExceedingThresholdLeftToRight {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [inputView setTextInputState:@{@"text" : @"COMPOSING"}];
+
+  [inputView setSelectionRects:@[
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 0, 100, 100) position:0U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(100, 0, 100, 100) position:1U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(200, 0, 100, 100) position:2U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(300, 0, 100, 100) position:3U],
+    // y=60 exceeds threshold, so treat it as a new line.
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 60, 100, 100) position:4U],
+  ]];
+
+  FlutterTextRange* multiRectRange = [FlutterTextRange rangeWithNSRange:NSMakeRange(1, 4)];
+
+  if (@available(iOS 17, *)) {
+    XCTAssertTrue(CGRectEqualToRect(CGRectMake(100, 0, 300, 100),
+                                    [inputView firstRectForRange:multiRectRange]));
+  } else {
+    XCTAssertTrue(CGRectEqualToRect(CGRectMake(100, 0, 100, 100),
+                                    [inputView firstRectForRange:multiRectRange]));
+  }
+}
+
+- (void)testFirstRectForRangeReturnsCorrectRectWithOverlappingRectsExceedingThresholdRightToLeft {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [inputView setTextInputState:@{@"text" : @"COMPOSING"}];
+
+  [inputView setSelectionRects:@[
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(300, 0, 100, 100) position:0U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(200, 0, 100, 100) position:1U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(100, 0, 100, 100) position:2U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 0, 100, 100) position:3U],
+    // y=60 exceeds threshold, so treat it as a new line.
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(300, 60, 100, 100) position:4U],
+  ]];
+
+  FlutterTextRange* multiRectRange = [FlutterTextRange rangeWithNSRange:NSMakeRange(1, 4)];
+
+  if (@available(iOS 17, *)) {
+    XCTAssertTrue(CGRectEqualToRect(CGRectMake(0, 0, 300, 100),
+                                    [inputView firstRectForRange:multiRectRange]));
+  } else {
+    XCTAssertTrue(CGRectEqualToRect(CGRectMake(200, 0, 100, 100),
+                                    [inputView firstRectForRange:multiRectRange]));
+  }
+}
+
+- (void)testFirstRectForRangeReturnsCorrectRectWithOverlappingRectsWithinThresholdLeftToRight {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [inputView setTextInputState:@{@"text" : @"COMPOSING"}];
+
+  [inputView setSelectionRects:@[
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 0, 100, 100) position:0U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(100, 0, 100, 100) position:1U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(200, 0, 100, 100) position:2U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(300, 0, 100, 100) position:3U],
+    // y=40 is within line threshold, so treat it as the same line
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(400, 40, 100, 100) position:4U],
+  ]];
+
+  FlutterTextRange* multiRectRange = [FlutterTextRange rangeWithNSRange:NSMakeRange(1, 4)];
+
+  if (@available(iOS 17, *)) {
+    XCTAssertTrue(CGRectEqualToRect(CGRectMake(100, 0, 400, 140),
+                                    [inputView firstRectForRange:multiRectRange]));
+  } else {
+    XCTAssertTrue(CGRectEqualToRect(CGRectMake(100, 0, 100, 100),
+                                    [inputView firstRectForRange:multiRectRange]));
+  }
+}
+
+- (void)testFirstRectForRangeReturnsCorrectRectWithOverlappingRectsWithinThresholdRightToLeft {
+  FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
+  [inputView setTextInputState:@{@"text" : @"COMPOSING"}];
+
+  [inputView setSelectionRects:@[
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(400, 0, 100, 100) position:0U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(300, 0, 100, 100) position:1U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(200, 0, 100, 100) position:2U],
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(100, 0, 100, 100) position:3U],
+    // y=40 is within line threshold, so treat it as the same line
+    [FlutterTextSelectionRect selectionRectWithRect:CGRectMake(0, 40, 100, 100) position:4U],
+  ]];
+
+  FlutterTextRange* multiRectRange = [FlutterTextRange rangeWithNSRange:NSMakeRange(1, 4)];
+
+  if (@available(iOS 17, *)) {
+    XCTAssertTrue(CGRectEqualToRect(CGRectMake(0, 0, 400, 140),
+                                    [inputView firstRectForRange:multiRectRange]));
+  } else {
+    XCTAssertTrue(CGRectEqualToRect(CGRectMake(300, 0, 100, 100),
+                                    [inputView firstRectForRange:multiRectRange]));
+  }
 }
 
 - (void)testClosestPositionToPoint {
