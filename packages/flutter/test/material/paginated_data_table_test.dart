@@ -1023,7 +1023,6 @@ void main() {
   });
 
   testWidgets('dataRowMinHeight & dataRowMaxHeight if not set will use DataTableTheme', (WidgetTester tester) async {
-    final Size originalSize = binding.renderView.size;
     addTearDown(() => binding.setSurfaceSize(null));    
     await binding.setSurfaceSize(const Size(800, 800));
 
