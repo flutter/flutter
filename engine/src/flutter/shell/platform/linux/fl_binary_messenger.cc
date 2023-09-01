@@ -324,12 +324,14 @@ static GBytes* send_on_channel_finish(FlBinaryMessenger* messenger,
 static gboolean finish_method(GObject* object,
                               GAsyncResult* result,
                               GError** error) {
-  g_autoptr(FlMethodResponse) response = fl_method_channel_invoke_method_finish(
-      FL_METHOD_CHANNEL(object), result, error);
+  g_autoptr(GBytes) response = fl_binary_messenger_send_on_channel_finish(
+      FL_BINARY_MESSENGER(object), result, error);
   if (response == nullptr) {
     return FALSE;
   }
-  return fl_method_response_get_result(response, error) != nullptr;
+  g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
+  return fl_method_codec_decode_response(FL_METHOD_CODEC(codec), response,
+                                         error) != nullptr;
 }
 
 // Called when a response is received for the resize channel message.
