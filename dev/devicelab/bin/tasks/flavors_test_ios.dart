@@ -15,31 +15,33 @@ Future<void> main() async {
     await createIntegrationTestFlavorsTest().call();
     // test install and uninstall of flavors app
     final TaskResult installTestsResult = await inDirectory(
-        '${flutterDirectory.path}/dev/integration_tests/flavors', () async {
-      await flutter(
-        'install',
-        options: <String>['--flavor', 'paid'],
-      );
-      await flutter(
-        'install',
-        options: <String>['--flavor', 'paid', '--uninstall-only'],
-      );
-      final StringBuffer stderr = StringBuffer();
-      await evalFlutter(
-        'install',
-        canFail: true,
-        stderr: stderr,
-        options: <String>['--flavor', 'bogus'],
-      );
+      '${flutterDirectory.path}/dev/integration_tests/flavors',
+      () async {
+        await flutter(
+          'install',
+          options: <String>['--flavor', 'paid'],
+        );
+        await flutter(
+          'install',
+          options: <String>['--flavor', 'paid', '--uninstall-only'],
+        );
+        final StringBuffer stderr = StringBuffer();
+        await evalFlutter(
+          'install',
+          canFail: true,
+          stderr: stderr,
+          options: <String>['--flavor', 'bogus'],
+        );
 
-      final String stderrString = stderr.toString();
-      if (!stderrString.contains('The Xcode project defines schemes: free, paid')) {
-        print(stderrString);
-        return TaskResult.failure('Should not succeed with bogus flavor');
-      }
+        final String stderrString = stderr.toString();
+        if (!stderrString.contains('The Xcode project defines schemes: free, paid')) {
+          print(stderrString);
+          return TaskResult.failure('Should not succeed with bogus flavor');
+        }
 
-      return TaskResult.success(null);
-    });
+        return TaskResult.success(null);
+      },
+    );
 
     return installTestsResult;
   });

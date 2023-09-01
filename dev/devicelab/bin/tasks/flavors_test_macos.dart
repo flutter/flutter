@@ -15,27 +15,29 @@ Future<void> main() async {
     await createIntegrationTestFlavorsTest().call();
 
     final TaskResult installTestsResult = await inDirectory(
-        '${flutterDirectory.path}/dev/integration_tests/flavors', () async {
-      final StringBuffer stderr = StringBuffer();
+      '${flutterDirectory.path}/dev/integration_tests/flavors',
+      () async {
+        final StringBuffer stderr = StringBuffer();
 
-      await evalFlutter(
-        'install',
-        canFail: true,
-        stderr: stderr,
-        options: <String>[
-          '--d', 'macos',
-          '--flavor', 'free'
-        ],
-      );
+        await evalFlutter(
+          'install',
+          canFail: true,
+          stderr: stderr,
+          options: <String>[
+            '--d', 'macos',
+            '--flavor', 'free'
+          ],
+        );
 
-      final String stderrString = stderr.toString();
-      if (!stderrString.contains('Host and target are the same. Nothing to install.')) {
-        print(stderrString);
-        return TaskResult.failure('Installing a macOS app on macOS should no-op');
-      }
+        final String stderrString = stderr.toString();
+        if (!stderrString.contains('Host and target are the same. Nothing to install.')) {
+          print(stderrString);
+          return TaskResult.failure('Installing a macOS app on macOS should no-op');
+        }
 
-      return TaskResult.success(null);
-    });
+        return TaskResult.success(null);
+      },
+    );
 
     return installTestsResult;
   });

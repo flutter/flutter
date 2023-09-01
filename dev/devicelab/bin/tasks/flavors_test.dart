@@ -15,32 +15,34 @@ Future<void> main() async {
     await createIntegrationTestFlavorsTest().call();
 
     final TaskResult installTestsResult = await inDirectory(
-        '${flutterDirectory.path}/dev/integration_tests/flavors', () async {
-      await flutter(
-        'install',
-        options: <String>['--debug', '--flavor', 'paid'],
-      );
-      await flutter(
-        'install',
-        options: <String>['--debug', '--flavor', 'paid', '--uninstall-only'],
-      );
+      '${flutterDirectory.path}/dev/integration_tests/flavors',
+      () async {
+        await flutter(
+          'install',
+          options: <String>['--debug', '--flavor', 'paid'],
+        );
+        await flutter(
+          'install',
+          options: <String>['--debug', '--flavor', 'paid', '--uninstall-only'],
+        );
 
-      final StringBuffer stderr = StringBuffer();
-      await evalFlutter(
-        'install',
-        canFail: true,
-        stderr: stderr,
-        options: <String>['--flavor', 'bogus'],
-      );
+        final StringBuffer stderr = StringBuffer();
+        await evalFlutter(
+          'install',
+          canFail: true,
+          stderr: stderr,
+          options: <String>['--flavor', 'bogus'],
+        );
 
-      final String stderrString = stderr.toString();
-      if (!stderrString.contains('"build/app/outputs/flutter-apk/app-bogus-release.apk" does not exist.')) {
-        print(stderrString);
-        return TaskResult.failure('Should not succeed with bogus flavor');
-      }
+        final String stderrString = stderr.toString();
+        if (!stderrString.contains('"build/app/outputs/flutter-apk/app-bogus-release.apk" does not exist.')) {
+          print(stderrString);
+          return TaskResult.failure('Should not succeed with bogus flavor');
+        }
 
-      return TaskResult.success(null);
-    });
+        return TaskResult.success(null);
+      },
+    );
 
     return installTestsResult;
   });
