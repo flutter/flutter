@@ -9867,4 +9867,33 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
     variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }),
   );
+
+  testWidgets('CupertinoTextField does not throw when not descended from a CupertinoApp widget', (WidgetTester tester) async {
+    final Widget textField = Localizations(
+      delegates: const <LocalizationsDelegate<dynamic>>[
+        // CupertinoTextField requires CupertinoLocalizations to generate messages, labels,
+        // and abbreviations.
+        DefaultCupertinoLocalizations.delegate,
+        DefaultWidgetsLocalizations.delegate,
+      ],
+      locale: const Locale('en', 'US'),
+      child: CupertinoTextField(),
+    );
+    await tester.pumpWidget(textField);
+    final dynamic exception = tester.takeException();
+    expect(exception, null);
+  });
+
+  testWidgets('CupertinoTextField throws when not descended from a CupertinoLocalizations', (WidgetTester tester) async {
+    final Widget textField = Localizations(
+      delegates: const <LocalizationsDelegate<dynamic>>[
+        DefaultWidgetsLocalizations.delegate,
+      ],
+      locale: const Locale('en', 'US'),
+      child: CupertinoTextField(),
+    );
+    await tester.pumpWidget(textField);
+    final dynamic exception = tester.takeException();
+    expect(exception.toString(), startsWith('No CupertinoLocalizations found.'));
+  });
 }
