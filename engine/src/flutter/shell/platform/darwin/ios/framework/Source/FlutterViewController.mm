@@ -1973,7 +1973,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 #endif
       [self requestGeometryUpdateForWindowScenes:scenes];
     } else {
-      UIInterfaceOrientationMask currentInterfaceOrientation;
+      UIInterfaceOrientationMask currentInterfaceOrientation = 0;
       if (@available(iOS 13.0, *)) {
         UIWindowScene* windowScene = [self flutterWindowSceneIfViewLoaded];
         if (!windowScene) {
@@ -1983,7 +1983,13 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
         }
         currentInterfaceOrientation = 1 << windowScene.interfaceOrientation;
       } else {
+#if APPLICATION_EXTENSION_API_ONLY
+        FML_LOG(ERROR) << "Application based status bar orentiation update is not supported in "
+                          "app extension. Orientation: "
+                       << currentInterfaceOrientation;
+#else
         currentInterfaceOrientation = 1 << [[UIApplication sharedApplication] statusBarOrientation];
+#endif
       }
       if (!(_orientationPreferences & currentInterfaceOrientation)) {
         [UIViewController attemptRotationToDeviceOrientation];
@@ -2108,6 +2114,10 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 }
 
 - (CGFloat)textScaleFactor {
+#if APPLICATION_EXTENSION_API_ONLY
+  FML_LOG(WARNING) << "Dynamic content size update is not supported in app extension.";
+  return 1.0;
+#else
   UIContentSizeCategory category = [UIApplication sharedApplication].preferredContentSizeCategory;
   // The delta is computed by approximating Apple's typography guidelines:
   // https://developer.apple.com/ios/human-interface-guidelines/visual-design/typography/
@@ -2158,6 +2168,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   } else {
     return 1.0;
   }
+#endif
 }
 
 - (BOOL)isAlwaysUse24HourFormat {
