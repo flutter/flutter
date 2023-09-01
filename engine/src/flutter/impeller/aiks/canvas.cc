@@ -527,9 +527,9 @@ void Canvas::SaveLayer(const Paint& paint,
   // Only apply opacity peephole on default blending.
   if (paint.blend_mode == BlendMode::kSourceOver) {
     new_layer_pass.SetDelegate(
-        std::make_unique<OpacityPeepholePassDelegate>(paint));
+        std::make_shared<OpacityPeepholePassDelegate>(paint));
   } else {
-    new_layer_pass.SetDelegate(std::make_unique<PaintPassDelegate>(paint));
+    new_layer_pass.SetDelegate(std::make_shared<PaintPassDelegate>(paint));
   }
 }
 

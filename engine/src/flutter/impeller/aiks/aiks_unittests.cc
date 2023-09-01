@@ -3119,6 +3119,42 @@ TEST_P(AiksTest, CanCanvasDrawPicture) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, CanCanvasDrawPictureWithAdvancedBlend) {
+  Canvas subcanvas;
+  subcanvas.DrawRect(
+      Rect::MakeLTRB(-100, -50, 100, 50),
+      {.color = Color::CornflowerBlue(), .blend_mode = BlendMode::kColorDodge});
+  auto picture = subcanvas.EndRecordingAsPicture();
+
+  Canvas canvas;
+  canvas.Translate({200, 200});
+  canvas.DrawPicture(picture);
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_P(AiksTest, CanCanvasDrawPictureWithBackdropFilter) {
+  Canvas subcanvas;
+  subcanvas.SaveLayer({}, {},
+                      [](const FilterInput::Ref& input,
+                         const Matrix& effect_transform, bool is_subpass) {
+                        return FilterContents::MakeGaussianBlur(
+                            input, Sigma(20.0), Sigma(20.0));
+                      });
+  auto image = std::make_shared<Image>(CreateTextureForFixture("kalimba.jpg"));
+  Paint paint;
+  paint.color = Color::Red();
+  subcanvas.DrawImage(image, Point::MakeXY(100.0, 100.0), paint);
+
+  auto picture = subcanvas.EndRecordingAsPicture();
+
+  Canvas canvas;
+  canvas.Translate({200, 200});
+  canvas.DrawPicture(picture);
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 TEST_P(AiksTest, DrawPictureWithText) {
   Canvas subcanvas;
   ASSERT_TRUE(RenderTextInCanvasSkia(
