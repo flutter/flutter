@@ -1487,22 +1487,19 @@ class Paint {
     _data.setInt32(_kDitherOffset, value ? 1 : 0, _kFakeHostEndian);
   }
 
-  /// Whether to dither the output when drawing images.
+  /// Whether to dither the output when drawing some elements such as gradients.
   ///
-  /// If false, the default value, dithering will be enabled when the input
-  /// color depth is higher than the output color depth. For example,
-  /// drawing an RGB8 image onto an RGB565 canvas.
-  ///
-  /// This value also controls dithering of [shader]s, which can make
-  /// gradients appear smoother.
-  ///
-  /// Whether or not dithering affects the output is implementation defined.
-  /// Some implementations may choose to ignore this completely, if they're
-  /// unable to control dithering.
-  ///
-  /// To ensure that dithering is consistently enabled for your entire
-  /// application, set this to true before invoking any drawing related code.
-  static bool enableDithering = false;
+  /// It is not expected that this flag will be used in the future; please leave
+  /// feedback in <https://github.com/flutter/flutter/issues/112498> if there is
+  /// a use case for this flag to remain long term.
+  @Deprecated(
+    'Dithering is now enabled by default on some elements (such as gradients) '
+    'and further support for dithering is expected to be handled by custom '
+    'shaders, so this flag is being removed: '
+    'https://github.com/flutter/flutter/issues/112498.'
+    'This feature was deprecated after 3.14.0-0.1.pre.'
+  )
+  static bool enableDithering = true;
 
   @override
   String toString() {
