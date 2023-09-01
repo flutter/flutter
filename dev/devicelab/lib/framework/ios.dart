@@ -259,7 +259,7 @@ Future<bool> runXcodeTestsInScript({
     '2>&1'
   ];
 
-  final String command = 'cd $platformDirectory && $executable ${arguments.join(" ")}';
+  final String command = 'cd "$platformDirectory" && $executable ${arguments.join(" ")}';
   final int testResultExit = await exec(
     'osascript',
     <String>[
