@@ -36,7 +36,10 @@ class _MenuAnchorExampleState extends State<MenuAnchorExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('MenuAnchorButton')),
+      appBar: AppBar(
+        title: const Text('MenuAnchorButton'),
+        backgroundColor: Theme.of(context).primaryColorLight,
+      ),
       body: Center(
         child: MenuAnchor(
           builder:

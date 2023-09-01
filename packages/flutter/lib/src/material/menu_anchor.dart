@@ -291,7 +291,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
   // for the anchor's region that the CustomSingleChildLayout's delegate
   // uses to determine where to place the menu on the screen and to avoid the
   // view's edges.
-  final GlobalKey _anchorKey = GlobalKey(debugLabel: kReleaseMode ? null : 'MenuAnchor');
+  final GlobalKey<_MenuAnchorState> _anchorKey = GlobalKey<_MenuAnchorState>(debugLabel: kReleaseMode ? null : 'MenuAnchor');
   _MenuAnchorState? _parent;
   late final FocusScopeNode _menuScopeNode;
   MenuController? _internalMenuController;
@@ -408,10 +408,10 @@ class _MenuAnchorState extends State<MenuAnchor> {
   Widget _buildContents(BuildContext context) {
     return Actions(
       actions: <Type, Action<Intent>>{
-        //DirectionalFocusIntent: _MenuDirectionalFocusAction(),
+        DirectionalFocusIntent: _MenuDirectionalFocusAction(),
         PreviousFocusIntent: _MenuPreviousFocusAction(),
         NextFocusIntent: _MenuNextFocusAction(),
-        //DismissIntent: DismissMenuAction(controller: _menuController),
+        DismissIntent: DismissMenuAction(controller: _menuController),
       },
       child:  Builder(
         key: _anchorKey,
@@ -456,22 +456,46 @@ class _MenuAnchorState extends State<MenuAnchor> {
     assert(_debugMenuInfo('Tree:\n${widget.toStringDeep()}'));
   }
 
-  _MenuAnchorState? get _nextSibling {
-    final int index = _parent!._anchorChildren.indexOf(this);
-    assert(index != -1, 'Unable to find this widget $this in parent $_parent');
-    if (index < _parent!._anchorChildren.length - 1) {
-      return _parent!._anchorChildren[index + 1];
-    }
-    return null;
+  List<_MenuAnchorState> _getFocusableChildren() {
+    return _parent!._anchorChildren.where((_MenuAnchorState menu) {
+      return menu.widget.childFocusNode?.canRequestFocus ?? false;
+    },).toList();
   }
 
-  _MenuAnchorState? get _previousSibling {
-    final int index = _parent!._anchorChildren.indexOf(this);
-    assert(index != -1, 'Unable to find this widget $this in parent $_parent');
-    if (index > 0) {
-      return _parent!._anchorChildren[index - 1];
+  _MenuAnchorState? get _nextFocusableSibling {
+    final List<_MenuAnchorState> focusable = _getFocusableChildren();
+    if (focusable.isEmpty) {
+      return null;
     }
-    return null;
+    final int index = focusable.indexOf(this);
+    if (focusable.length == 1 || index == -1) {
+      // No other focusable widgets besides this one.
+      return focusable.first;
+    }
+    if (index < focusable.length - 1) {
+      return focusable[index + 1];
+    } else {
+      // Wrap around
+      return focusable.first;
+    }
+  }
+
+  _MenuAnchorState? get _previousFocusableSibling {
+    final List<_MenuAnchorState> focusable = _getFocusableChildren();
+    if (focusable.isEmpty) {
+      return null;
+    }
+    final int index = focusable.indexOf(this);
+    if (focusable.length == 1 || index == -1) {
+      // No other focusable widgets besides this one.
+      return focusable.last;
+    }
+    if (index > 0) {
+      return focusable[index - 1];
+    } else {
+      // Wrap around
+      return focusable.last;
+    }
   }
 
   _MenuAnchorState get _root {
@@ -581,7 +605,11 @@ class _MenuAnchorState extends State<MenuAnchor> {
       // currently disposing.
       _parent?._childChangedOpenState();
       widget.onClose?.call();
-      setState(() {});
+      if (mounted) {
+        setState(() {
+          // Mark dirty, but only if mounted.
+        });
+      }
     }
   }
 
@@ -1933,6 +1961,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
             controller._anchor!._focusButton();
           }
         }
+        debugPrint('Rebuilding semantics with isExpanded: ${controller.isOpen}');
         child = MergeSemantics(
           child: Semantics(
             expanded: controller.isOpen,
@@ -2372,19 +2401,12 @@ class _MenuPreviousFocusAction extends PreviousFocusAction {
       return super.invoke(intent);
     }
 
-    return _moveToPrevious(anchor);
+    return _moveToPreviousFocusable(anchor);
   }
 
-  bool _moveToPrevious(_MenuAnchorState currentMenu) {
-final _MenuAnchorState? sibling = currentMenu._previousSibling;
-    if (sibling == null) {
-      // Wrap around to the last sibling.
-      assert(_debugMenuInfo('Wrapping focus to last item in menu: ${currentMenu._parent!._anchorChildren.last.widget.child}'));
-      currentMenu._parent!._anchorChildren.last._focusButton();
-    } else {
-      assert(_debugMenuInfo('Moving focus to previous item in menu: ${sibling.widget.child}'));
-      sibling._focusButton();
-    }
+  bool _moveToPreviousFocusable(_MenuAnchorState currentMenu) {
+    final _MenuAnchorState? sibling = currentMenu._previousFocusableSibling;
+    sibling?._focusButton();
     return true;
   }
 }
@@ -2405,19 +2427,12 @@ class _MenuNextFocusAction extends NextFocusAction {
     debugPrint('Primary focus context is $context');
     debugPrint('Current anchor is $anchor');
 
-    return _moveToNext(anchor);
+    return _moveToNextFocusable(anchor);
   }
 
-  bool _moveToNext(_MenuAnchorState currentMenu) {
-    final _MenuAnchorState? sibling = currentMenu._nextSibling;
-    if (sibling == null) {
-      // Wrap around to the first sibling.
-      assert(_debugMenuInfo('Wrapping focus to first item in menu: ${currentMenu._parent!._anchorChildren.first.widget.child}'));
-      currentMenu._parent!._anchorChildren.first._focusButton();
-    } else {
-      assert(_debugMenuInfo('Moving focus to previous item in menu: ${sibling.widget.child}'));
-      sibling._focusButton();
-    }
+  bool _moveToNextFocusable(_MenuAnchorState currentMenu) {
+    final _MenuAnchorState? sibling = currentMenu._nextFocusableSibling;
+    sibling?._focusButton();
     return true;
   }
 
@@ -2500,19 +2515,19 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
                     return;
                   }
                 } else {
-                  if (_moveToNextTopLevel(anchor)) {
+                  if (_moveToNextFocusableTopLevel(anchor)) {
                     return;
                   }
                 }
               case TextDirection.ltr:
                 switch (anchor._parent!._orientation) {
                   case Axis.horizontal:
-                    if (_moveToPreviousTopLevel(anchor)) {
+                    if (_moveToPreviousFocusableTopLevel(anchor)) {
                       return;
                     }
                   case Axis.vertical:
                     if (buttonIsFocused) {
-                      if (_moveToPreviousTopLevel(anchor)) {
+                      if (_moveToPreviousFocusableTopLevel(anchor)) {
                         return;
                       }
                     } else {
@@ -2541,7 +2556,7 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
               case TextDirection.rtl:
                 switch (anchor._parent!._orientation) {
                   case Axis.horizontal:
-                    if (_moveToPreviousTopLevel(anchor)) {
+                    if (_moveToPreviousFocusableTopLevel(anchor)) {
                       return;
                     }
                   case Axis.vertical:
@@ -2555,7 +2570,7 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
                     return;
                   }
                 } else {
-                  if (_moveToNextTopLevel(anchor)) {
+                  if (_moveToNextFocusableTopLevel(anchor)) {
                     return;
                   }
                 }
@@ -2571,23 +2586,18 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
     // otherwise the anti-hysteresis code will interfere with moving to the
     // correct node.
     if (currentMenu.widget.childFocusNode != null) {
-      final FocusTraversalPolicy? policy = FocusTraversalGroup.maybeOf(primaryFocus!.context!);
       if (currentMenu.widget.childFocusNode!.nearestScope != null) {
+        final FocusTraversalPolicy? policy = FocusTraversalGroup.maybeOf(primaryFocus!.context!);
         policy?.invalidateScopeData(currentMenu.widget.childFocusNode!.nearestScope!);
       }
     }
     return false;
   }
 
-  bool _moveToNextTopLevel(_MenuAnchorState currentMenu) {
-    final _MenuAnchorState? sibling = currentMenu._topLevel._nextSibling;
-    if (sibling == null) {
-      // Wrap around to the first top level.
-      currentMenu._topLevel._parent!._anchorChildren.first._focusButton();
-    } else {
-      sibling._focusButton();
-    }
-    return true;
+  bool _moveToNextFocusableTopLevel(_MenuAnchorState currentMenu) {
+    final _MenuAnchorState? sibling = currentMenu._topLevel._nextFocusableSibling;
+    sibling?._focusButton();
+      return true;
   }
 
   bool _moveToParent(_MenuAnchorState currentMenu) {
@@ -2604,23 +2614,17 @@ class _MenuDirectionalFocusAction extends DirectionalFocusAction {
     // otherwise the anti-hysteresis code will interfere with moving to the
     // correct node.
     if (currentMenu.widget.childFocusNode != null) {
-      final FocusTraversalPolicy? policy = FocusTraversalGroup.maybeOf(primaryFocus!.context!);
       if (currentMenu.widget.childFocusNode!.nearestScope != null) {
+        final FocusTraversalPolicy? policy = FocusTraversalGroup.maybeOf(primaryFocus!.context!);
         policy?.invalidateScopeData(currentMenu.widget.childFocusNode!.nearestScope!);
       }
-      return false;
     }
     return false;
   }
 
-  bool _moveToPreviousTopLevel(_MenuAnchorState currentMenu) {
-    final _MenuAnchorState? sibling = currentMenu._topLevel._previousSibling;
-    if (sibling == null) {
-      // Already on the first one, wrap around to the last one.
-      currentMenu._topLevel._parent!._anchorChildren.last._focusButton();
-    } else {
-      sibling._focusButton();
-    }
+  bool _moveToPreviousFocusableTopLevel(_MenuAnchorState currentMenu) {
+    final _MenuAnchorState? sibling = currentMenu._topLevel._previousFocusableSibling;
+    sibling?._focusButton();
     return true;
   }
 
@@ -2960,7 +2964,7 @@ class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
     super.initState();
     if (_platformSupportsAccelerators) {
       _showAccelerators = _altIsPressed();
-      HardwareKeyboard.instance.addHandler(_handleKeyEvent);
+      HardwareKeyboard.instance.addHandler(_listenToKeyEvent);
     }
     _updateDisplayLabel();
   }
@@ -2974,7 +2978,7 @@ class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
       _shortcutRegistryEntry = null;
       _shortcutRegistry = null;
       _anchor = null;
-      HardwareKeyboard.instance.removeHandler(_handleKeyEvent);
+      HardwareKeyboard.instance.removeHandler(_listenToKeyEvent);
     }
     super.dispose();
   }
@@ -3009,16 +3013,13 @@ class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
     ).isNotEmpty;
   }
 
-  bool _handleKeyEvent(KeyEvent event) {
+  bool _listenToKeyEvent(KeyEvent event) {
     assert(_platformSupportsAccelerators);
-    final bool altIsPressed = _altIsPressed();
-    if (altIsPressed != _showAccelerators) {
-      setState(() {
-        _showAccelerators = altIsPressed;
-        _updateAcceleratorShortcut();
-      });
-    }
-    // Just listening, does't ever handle a key.
+    setState(() {
+      _showAccelerators = _altIsPressed();
+      _updateAcceleratorShortcut();
+    });
+    // Just listening, so it doesn't ever handle a key.
     return false;
   }
 
@@ -3036,7 +3037,7 @@ class _MenuAcceleratorLabelState extends State<MenuAcceleratorLabel> {
     // 4) Is part of an anchor that either doesn't have a submenu, or doesn't
     //    have any submenus currently open (only the "deepest" open menu should
     //    have accelerator shortcuts registered).
-    if (_showAccelerators && _acceleratorIndex != -1 && _binding?.onInvoke != null && !(_binding!.hasSubmenu && (_anchor?._isOpen ?? false))) {
+    if (_showAccelerators && _acceleratorIndex != -1 && _binding?.onInvoke != null && (!_binding!.hasSubmenu || !(_anchor?._isOpen ?? false))) {
       final String acceleratorCharacter = _displayLabel[_acceleratorIndex].toLowerCase();
       _shortcutRegistryEntry = _shortcutRegistry?.addAll(
         <ShortcutActivator, Intent>{
