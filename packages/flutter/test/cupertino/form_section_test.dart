@@ -123,9 +123,16 @@ void main() {
         textDirection: TextDirection.ltr,
         child: MediaQuery(
           data: const MediaQueryData(),
-          child: CupertinoFormSection(
-            backgroundColor: backgroundColor,
-            children: <Widget>[CupertinoTextFormFieldRow()],
+          child: Localizations(
+            locale: const Locale('en', 'US'),
+            delegates: <LocalizationsDelegate<dynamic>>[
+              DefaultCupertinoLocalizations.delegate,
+              DefaultWidgetsLocalizations.delegate,
+            ],
+            child: CupertinoFormSection(
+              backgroundColor: backgroundColor,
+              children: <Widget>[CupertinoTextFormFieldRow()],
+            ),
           ),
         ),
       ),
