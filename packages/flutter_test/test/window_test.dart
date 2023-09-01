@@ -106,7 +106,7 @@ void main() {
         return WidgetsBinding.instance.window.platformBrightness;
       },
       propertyFaker: (TestWidgetsFlutterBinding binding, Brightness fakeValue) {
-        binding.window.platformBrightnessTestValue = fakeValue;
+        binding.platformDispatcher.platformBrightnessTestValue = fakeValue;
       },
     );
   });
