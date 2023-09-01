@@ -980,6 +980,7 @@
 ../../../third_party/angle/.git
 ../../../third_party/angle/.gitattributes
 ../../../third_party/angle/.gitignore
+../../../third_party/angle/.gitmodules
 ../../../third_party/angle/.gn
 ../../../third_party/angle/.style.yapf
 ../../../third_party/angle/.vpython
@@ -1118,6 +1119,7 @@
 ../../../third_party/angle/src/third_party/ceval/package.json
 ../../../third_party/angle/src/third_party/libXNVCtrl/README.chromium
 ../../../third_party/angle/src/third_party/volk
+../../../third_party/angle/testing
 ../../../third_party/angle/third_party
 ../../../third_party/angle/tools
 ../../../third_party/angle/util
