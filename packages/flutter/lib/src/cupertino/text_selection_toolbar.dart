@@ -135,6 +135,9 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
     final Widget outputChild = _CupertinoTextSelectionToolbarShape(
       anchorAbove: anchorAbove,
       anchorBelow: anchorBelow,
+      shadowColor: CupertinoTheme.brightnessOf(context) == Brightness.light
+          ? CupertinoColors.black.withOpacity(0.2)
+          : null,
       child: ColoredBox(
         color: _kToolbarBackgroundColor.resolveFrom(context),
         child: child,
@@ -203,17 +206,21 @@ class _CupertinoTextSelectionToolbarShape extends SingleChildRenderObjectWidget 
   const _CupertinoTextSelectionToolbarShape({
     required Offset anchorAbove,
     required Offset anchorBelow,
+    Color? shadowColor,
     super.child,
   }) : _anchorAbove = anchorAbove,
-       _anchorBelow = anchorBelow;
+       _anchorBelow = anchorBelow,
+       _shadowColor = shadowColor;
 
   final Offset _anchorAbove;
   final Offset _anchorBelow;
+  final Color? _shadowColor;
 
   @override
   _RenderCupertinoTextSelectionToolbarShape createRenderObject(BuildContext context) => _RenderCupertinoTextSelectionToolbarShape(
     _anchorAbove,
     _anchorBelow,
+    _shadowColor,
     null,
   );
 
@@ -221,7 +228,8 @@ class _CupertinoTextSelectionToolbarShape extends SingleChildRenderObjectWidget 
   void updateRenderObject(BuildContext context, _RenderCupertinoTextSelectionToolbarShape renderObject) {
     renderObject
       ..anchorAbove = _anchorAbove
-      ..anchorBelow = _anchorBelow;
+      ..anchorBelow = _anchorBelow
+      ..shadowColor = _shadowColor;
   }
 }
 
@@ -237,6 +245,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
   _RenderCupertinoTextSelectionToolbarShape(
     this._anchorAbove,
     this._anchorBelow,
+    this._shadowColor,
     super.child,
   );
 
@@ -261,6 +270,16 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
     }
     _anchorBelow = value;
     markNeedsLayout();
+  }
+
+  Color? get shadowColor => _shadowColor;
+  Color? _shadowColor;
+  set shadowColor(Color? value) {
+    if (value == _shadowColor) {
+      return;
+    }
+    _shadowColor = value;
+    markNeedsPaint();
   }
 
   bool get isAbove => anchorAbove.dy >= (child?.size.height ?? 0.0) - _kToolbarArrowSize.height * 2;
@@ -292,20 +311,23 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
     );
   }
 
+  // Returns the RRect inside which the child is painted.
+  RRect _shapeRRect() {
+    return RRect.fromRectAndRadius(
+      Offset(0.0, _kToolbarArrowSize.height)
+        & Size(
+            child!.size.width,
+            child!.size.height - _kToolbarArrowSize.height * 2,
+          ),
+      _kToolbarBorderRadius,
+    );
+  }
+
   // The path is described in the toolbar's coordinate system.
-  Path _clipPath() {
+  Path _clipPath(RRect rrect) {
     final BoxParentData childParentData = child!.parentData! as BoxParentData;
-    final Path rrect = Path()
-      ..addRRect(
-        RRect.fromRectAndRadius(
-          Offset(0.0, _kToolbarArrowSize.height)
-            & Size(
-                child!.size.width,
-                child!.size.height - _kToolbarArrowSize.height * 2,
-              ),
-          _kToolbarBorderRadius,
-        ),
-      );
+    final Path rrectPath = Path()
+      ..addRRect(rrect);
 
     final Offset localAnchor = globalToLocal(isAbove ? _anchorAbove : _anchorBelow);
     final double centerX = childParentData.offset.dx + child!.size.width / 2;
@@ -324,7 +346,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
       ..lineTo(arrowTipX + _kToolbarArrowSize.width / 2, arrowBaseY)
       ..close();
 
-    return Path.combine(PathOperation.union, rrect, arrow);
+    return Path.combine(PathOperation.union, rrectPath, arrow);
   }
 
   @override
@@ -335,13 +357,22 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
 
     final BoxParentData childParentData = child!.parentData! as BoxParentData;
 
-    final Path clipPath = _clipPath();
-    context.canvas.drawShadow(
-      clipPath.shift(offset + childParentData.offset),
-      CupertinoColors.black.withOpacity(0.75),
-      10.0,
-      false,
-    );
+    final RRect rrect = _shapeRRect();
+    final Path clipPath = _clipPath(rrect);
+
+    // If configured, paint the shadow beneath the shape.
+    if (_shadowColor != null) {
+      final BoxShadow boxShadow = BoxShadow(
+        color: _shadowColor!,
+        blurRadius: 15.0,
+        offset: Offset(
+          0.0,
+          isAbove ? 0.0 : _kToolbarArrowSize.height,
+        ),
+      );
+      final RRect shadowRRect = rrect.shift(boxShadow.offset).inflate(boxShadow.spreadRadius);
+      context.canvas.drawRRect(shadowRRect, boxShadow.toPaint());
+    }
 
     _clipPathLayer.layer = context.pushClipPath(
       needsCompositing,
@@ -381,7 +412,8 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
         ..style = PaintingStyle.stroke;
 
       final BoxParentData childParentData = child!.parentData! as BoxParentData;
-      context.canvas.drawPath(_clipPath().shift(offset + childParentData.offset), _debugPaint!);
+      final Path clipPath = _clipPath(_shapeRRect());
+      context.canvas.drawPath(clipPath.shift(offset + childParentData.offset), _debugPaint!);
       return true;
     }());
   }
