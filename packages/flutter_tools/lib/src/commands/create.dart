@@ -270,7 +270,7 @@ class CreateCommand extends CreateBase {
       includeLinux = false;
       includeMacos = false;
       includeWindows = false;
-    } else if (template == FlutterProjectType.package || template == FlutterProjectType.packageFfi) {
+    } else if (template == FlutterProjectType.package) {
       // The package template does not supports any platform.
       includeIos = false;
       includeAndroid = false;
@@ -416,14 +416,16 @@ class CreateCommand extends CreateBase {
         offline: boolArg('offline'),
         outputMode: PubOutputMode.summaryOnly,
       );
-      await project.ensureReadyForPlatformSpecificTooling(
-        androidPlatform: includeAndroid,
-        iosPlatform: includeIos,
-        linuxPlatform: includeLinux,
-        macOSPlatform: includeMacos,
-        windowsPlatform: includeWindows,
-        webPlatform: includeWeb,
-      );
+      if (!generateFfiPackage) {
+        await project.ensureReadyForPlatformSpecificTooling(
+          androidPlatform: includeAndroid,
+          iosPlatform: includeIos,
+          linuxPlatform: includeLinux,
+          macOSPlatform: includeMacos,
+          windowsPlatform: includeWindows,
+          webPlatform: includeWeb,
+        );
+      }
     }
     if (sampleCode != null) {
       _applySample(relativeDir, sampleCode);
