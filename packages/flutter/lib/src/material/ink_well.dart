@@ -850,7 +850,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       widget.onTap?.call();
     }
     // Delay the call to `updateHighlight` to simulate a pressed delay
-    // and let a chance to MaterialStatesController listeners to react.
+    // and give MaterialStatesController listeners a chance to react.
     _activationTimer = Timer(_activationDuration, () {
       updateHighlight(_HighlightType.pressed, value: false);
     });
