@@ -18,6 +18,7 @@
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
+#include "third_party/skia/include/gpu/ganesh/vk/GrVkBackendSurface.h"
 #include "vulkan/vulkan_core.h"
 #include "vulkan/vulkan_fuchsia.h"
 
@@ -408,8 +409,8 @@ bool VulkanSurface::SetupSkiaSurface(sk_sp<GrDirectContext> context,
   image_info.fSampleCount = 1;
   image_info.fLevelCount = image_create_info.mipLevels;
 
-  GrBackendRenderTarget sk_render_target(size.width(), size.height(),
-                                         image_info);
+  auto sk_render_target =
+      GrBackendRenderTargets::MakeVk(size.width(), size.height(), image_info);
 
   SkSurfaceProps sk_surface_props(0, kUnknown_SkPixelGeometry);
 
