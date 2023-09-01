@@ -112,8 +112,8 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// property to null, the decoration will be removed entirely, including the
 /// extra padding introduced by the decoration to save space for the labels.
 ///
-/// If [decoration] is non-null (which is the default), the text field requires
-/// one of its ancestors to be a [Material] widget.
+/// If the text field does not have an ancestor [Material] widget, then the
+/// [DefaultMaterialLocalizations.delegate] should be be provided by an ancestor.
 ///
 /// To integrate the [TextField] into a [Form] with other [FormField] widgets,
 /// consider using [TextFormField].
@@ -202,8 +202,8 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 class TextField extends StatefulWidget {
   /// Creates a Material Design text field.
   ///
-  /// If [decoration] is non-null (which is the default), the text field requires
-  /// one of its ancestors to be a [Material] widget.
+  /// If the text field does not have an ancestor [Material] widget, then the
+  /// [DefaultMaterialLocalizations.delegate] should be be provided by an ancestor.
   ///
   /// To remove the decoration entirely (including the extra padding introduced
   /// by the decoration to save space for the labels), set the [decoration] to
@@ -1237,7 +1237,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
   @override
   Widget build(BuildContext context) {
-    assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasDirectionality(context));
     assert(

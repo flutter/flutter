@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart';
 
 import 'adaptive_text_selection_toolbar.dart';
 import 'colors.dart';
+import 'debug.dart';
 import 'desktop_text_selection.dart';
 import 'icons.dart';
 import 'magnifier.dart';
@@ -135,6 +136,9 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 /// This widget corresponds to both a `UITextField` and an editable `UITextView`
 /// on iOS.
 ///
+/// If the text field does not have an ancestor [CupertinoApp] widget, then the
+/// [DefaultCupertinoLocalizations.delegate] should be be provided by an ancestor.
+///
 /// The text field calls the [onChanged] callback whenever the user changes the
 /// text in the field. If the user indicates that they are done typing in the
 /// field (e.g., by pressing a button on the soft keyboard), the text field
@@ -174,6 +178,9 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/controls/text-fields/>
 class CupertinoTextField extends StatefulWidget {
   /// Creates an iOS-style text field.
+  ///
+  /// If the text field does not have an ancestor [CupertinoApp] widget, then the
+  /// [DefaultCupertinoLocalizations.delegate] should be be provided by an ancestor.
   ///
   /// To provide a prefilled text entry, pass in a [TextEditingController] with
   /// an initial value to the [controller] parameter.
@@ -1228,6 +1235,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   @override
   Widget build(BuildContext context) {
     super.build(context); // See AutomaticKeepAliveClientMixin.
+    assert(debugCheckHasCupertinoLocalizations(context));
     assert(debugCheckHasDirectionality(context));
     final TextEditingController controller = _effectiveController;
 
