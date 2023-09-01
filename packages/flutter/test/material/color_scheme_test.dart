@@ -474,7 +474,6 @@ void main() {
     );
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
-    leakTrackingTestConfig: LeakTrackingTestConfig.debugNotDisposed(),
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
 }
