@@ -304,7 +304,7 @@ void main() {
   testWidgets('PaginatedDataTable Last Page Empty Space', (WidgetTester tester) async {
     final TestDataSource source = TestDataSource();
     int rowsPerPage = 3;
-    int rowCount = source.rowCount;
+    final int rowCount = source.rowCount;
 
     Widget buildTable(TestDataSource source, int rowsPerPage) {
       return PaginatedDataTable(
