@@ -17,11 +17,16 @@ static const SEL kSelectorsHandledByPlugins[] = {
     @selector(application:performFetchWithCompletionHandler:)};
 
 @interface FlutterPluginAppLifeCycleDelegate ()
-- (void)handleDidEnterBackground:(NSNotification*)notification;
-- (void)handleWillEnterForeground:(NSNotification*)notification;
-- (void)handleWillResignActive:(NSNotification*)notification;
-- (void)handleDidBecomeActive:(NSNotification*)notification;
-- (void)handleWillTerminate:(NSNotification*)notification;
+- (void)handleDidEnterBackground:(NSNotification*)notification
+    NS_EXTENSION_UNAVAILABLE_IOS("Disallowed in app extensions");
+- (void)handleWillEnterForeground:(NSNotification*)notification
+    NS_EXTENSION_UNAVAILABLE_IOS("Disallowed in app extensions");
+- (void)handleWillResignActive:(NSNotification*)notification
+    NS_EXTENSION_UNAVAILABLE_IOS("Disallowed in app extensions");
+- (void)handleDidBecomeActive:(NSNotification*)notification
+    NS_EXTENSION_UNAVAILABLE_IOS("Disallowed in app extensions");
+- (void)handleWillTerminate:(NSNotification*)notification
+    NS_EXTENSION_UNAVAILABLE_IOS("Disallowed in app extensions");
 @end
 
 @implementation FlutterPluginAppLifeCycleDelegate {
@@ -46,6 +51,7 @@ static const SEL kSelectorsHandledByPlugins[] = {
     _notificationUnsubscribers = [[NSMutableArray alloc] init];
     std::string cachePath = fml::paths::JoinPaths({getenv("HOME"), kCallbackCacheSubDir});
     [FlutterCallbackCache setCachePath:[NSString stringWithUTF8String:cachePath.c_str()]];
+#if not APPLICATION_EXTENSION_API_ONLY
     [self addObserverFor:UIApplicationDidEnterBackgroundNotification
                 selector:@selector(handleDidEnterBackground:)];
     [self addObserverFor:UIApplicationWillEnterForegroundNotification
@@ -56,6 +62,7 @@ static const SEL kSelectorsHandledByPlugins[] = {
                 selector:@selector(handleDidBecomeActive:)];
     [self addObserverFor:UIApplicationWillTerminateNotification
                 selector:@selector(handleWillTerminate:)];
+#endif
     _delegates = [[NSPointerArray weakObjectsPointerArray] retain];
     _debugBackgroundTask = UIBackgroundTaskInvalid;
   }
@@ -134,7 +141,8 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
   return YES;
 }
 
-- (void)handleDidEnterBackground:(NSNotification*)notification {
+- (void)handleDidEnterBackground:(NSNotification*)notification
+    NS_EXTENSION_UNAVAILABLE_IOS("Disallowed in app extensions") {
   UIApplication* application = [UIApplication sharedApplication];
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
   // The following keeps the Flutter session alive when the device screen locks
@@ -166,7 +174,8 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
   }
 }
 
-- (void)handleWillEnterForeground:(NSNotification*)notification {
+- (void)handleWillEnterForeground:(NSNotification*)notification
+    NS_EXTENSION_UNAVAILABLE_IOS("Disallowed in app extensions") {
   UIApplication* application = [UIApplication sharedApplication];
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
   if (_debugBackgroundTask != UIBackgroundTaskInvalid) {
@@ -184,7 +193,8 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
   }
 }
 
-- (void)handleWillResignActive:(NSNotification*)notification {
+- (void)handleWillResignActive:(NSNotification*)notification
+    NS_EXTENSION_UNAVAILABLE_IOS("Disallowed in app extensions") {
   UIApplication* application = [UIApplication sharedApplication];
   for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
     if (!delegate) {
@@ -196,7 +206,8 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
   }
 }
 
-- (void)handleDidBecomeActive:(NSNotification*)notification {
+- (void)handleDidBecomeActive:(NSNotification*)notification
+    NS_EXTENSION_UNAVAILABLE_IOS("Disallowed in app extensions") {
   UIApplication* application = [UIApplication sharedApplication];
   for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
     if (!delegate) {
@@ -208,7 +219,8 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
   }
 }
 
-- (void)handleWillTerminate:(NSNotification*)notification {
+- (void)handleWillTerminate:(NSNotification*)notification
+    NS_EXTENSION_UNAVAILABLE_IOS("Disallowed in app extensions") {
   UIApplication* application = [UIApplication sharedApplication];
   for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
     if (!delegate) {

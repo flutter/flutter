@@ -50,9 +50,11 @@
 
   FlutterResult result = ^(id result) {
     OCMVerify([mockPlugin searchWeb:@"Testing Word!"]);
+#if not APPLICATION_EXTENSION_API_ONLY
     OCMVerify([mockApplication openURL:[NSURL URLWithString:@"x-web-search://?Testing%20Word!"]
                                options:@{}
                      completionHandler:nil]);
+#endif
     [invokeExpectation fulfill];
   };
 
@@ -82,9 +84,11 @@
 
   FlutterResult result = ^(id result) {
     OCMVerify([mockPlugin searchWeb:@"Test"]);
+#if not APPLICATION_EXTENSION_API_ONLY
     OCMVerify([mockApplication openURL:[NSURL URLWithString:@"x-web-search://?Test"]
                                options:@{}
                      completionHandler:nil]);
+#endif
     [invokeExpectation fulfill];
   };
 
