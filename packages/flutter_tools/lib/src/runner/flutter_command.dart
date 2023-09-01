@@ -1247,10 +1247,13 @@ abstract class FlutterCommand extends Command<void> {
       }
     }
 
+    final String? flavor = stringArg('flavor');
+    if (flavor != null) {
+      dartDefines.add('FLUTTER_APP_FLAVOR=$flavor');
+    }
+
     return BuildInfo(buildMode,
-      argParser.options.containsKey('flavor')
-        ? stringArg('flavor')
-        : null,
+      flavor,
       trackWidgetCreation: trackWidgetCreation,
       frontendServerStarterPath: argParser.options
               .containsKey(FlutterOptions.kFrontendServerStarterPath)
