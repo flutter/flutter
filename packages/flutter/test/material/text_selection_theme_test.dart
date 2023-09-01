@@ -106,8 +106,8 @@ void main() {
     final RenderBox handle = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
     expect(handle, paints..path(color: defaultSelectionHandleColor));
   },
-    // TODO(polina-c): remove after fixing
-    // ???
+    // TODO(polina-c): remove after merge
+    // https://github.com/flutter/flutter/pull/133858
     leakTrackingTestConfig: const LeakTrackingTestConfig(
       notDisposedAllowList: <String, int?>{
         'ValueNotifier<bool>': 2,
@@ -163,14 +163,13 @@ void main() {
     final RenderBox handle = tester.firstRenderObject<RenderBox>(find.byType(CustomPaint));
     expect(handle, paints..path(color: defaultSelectionHandleColor));
   },
-    // TODO(polina-c): remove after fixing
-    // ???
-    // leakTrackingTestConfig: const LeakTrackingTestConfig(
-    //   notDisposedAllowList: <String, int?>{
-    //     'ValueNotifier<bool>': 2,
-    //   },
-    // ),
-    leakTrackingTestConfig: LeakTrackingTestConfig.debugNotDisposed(),
+    // TODO(polina-c): remove after merge
+    // https://github.com/flutter/flutter/pull/133858
+    leakTrackingTestConfig: const LeakTrackingTestConfig(
+      notDisposedAllowList: <String, int?>{
+        'ValueNotifier<bool>': 2,
+      },
+    ),
   );
 
   testWidgets('ThemeData.textSelectionTheme will be used if provided', (WidgetTester tester) async {
