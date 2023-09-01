@@ -214,6 +214,13 @@ public class FlutterLoader {
     }
   }
 
+  private static boolean areValidationLayersOnByDefault() {
+    if (BuildConfig.DEBUG && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      return Build.SUPPORTED_ABIS[0].equals("arm64-v8a");
+    }
+    return false;
+  }
+
   /**
    * Blocks until initialization of the native system has completed.
    *
@@ -324,7 +331,8 @@ public class FlutterLoader {
         if (metaData.getBoolean(ENABLE_IMPELLER_META_DATA_KEY, false)) {
           shellArgs.add("--enable-impeller");
         }
-        if (metaData.getBoolean(ENABLE_VULKAN_VALIDATION_META_DATA_KEY, false)) {
+        if (metaData.getBoolean(
+            ENABLE_VULKAN_VALIDATION_META_DATA_KEY, areValidationLayersOnByDefault())) {
           shellArgs.add("--enable-vulkan-validation");
         }
         String backend = metaData.getString(IMPELLER_BACKEND_META_DATA_KEY);
