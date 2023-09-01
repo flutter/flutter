@@ -266,7 +266,7 @@ targets:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:33v6"},
-          {"dependency": "android_virtual_device", "version": "33"},
+          {"dependency": "android_virtual_device", "version": "34"},
           {"dependency": "open_jdk", "version": "version:11"}
         ]
       tags: >
@@ -1574,7 +1574,7 @@ targets:
       task_name: android_defines_test
       dependencies: >-
         [
-          {"dependency": "android_virtual_device", "version": "33"}
+          {"dependency": "android_virtual_device", "version": "34"}
         ]
 
   - name: Linux_android android_obfuscate_test
