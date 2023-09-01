@@ -797,24 +797,15 @@ class ListTile extends StatelessWidget {
 
     Widget? subtitleText;
     TextStyle? subtitleStyle;
-
     if (subtitle != null) {
-      subtitleStyle = subtitleTextStyle ?? tileTheme.subtitleTextStyle;
-      if (theme.useMaterial3) {
-        subtitleStyle = (subtitleStyle ?? defaults.subtitleTextStyle)!.copyWith(
-          color: effectiveColor,
-          fontSize: _isDenseLayout(theme, tileTheme) ? 12.0 : null,
-        );
-      } else {
-        subtitleStyle = subtitleTextStyle?.copyWith(
-          color: effectiveColor,
-          fontSize: _isDenseLayout(theme, tileTheme) ? 12.0 : null,
-        );
-        subtitleStyle ??= defaults.subtitleTextStyle!.copyWith(
-          color: effectiveColor ??  theme.textTheme.bodySmall!.color,
-          fontSize: _isDenseLayout(theme, tileTheme) ? 12.0 : null,
-        );
-      }
+      subtitleStyle = subtitleTextStyle
+        ?? tileTheme.subtitleTextStyle
+        ?? defaults.subtitleTextStyle!;
+      final Color? subtitleColor = effectiveColor;
+      subtitleStyle = subtitleStyle.copyWith(
+        color: subtitleColor,
+        fontSize: _isDenseLayout(theme, tileTheme) ? 12.0 : null,
+      );
       subtitleText = AnimatedDefaultTextStyle(
         style: subtitleStyle,
         duration: kThemeChangeDuration,
@@ -1541,7 +1532,8 @@ class _LisTileDefaultsM2 extends ListTileThemeData {
   }
 
   @override
-  TextStyle? get subtitleTextStyle => _textTheme.bodyMedium;
+  TextStyle? get subtitleTextStyle => _textTheme.bodyMedium!
+    .copyWith(color: _textTheme.bodySmall!.color);
 
   @override
   TextStyle? get leadingAndTrailingTextStyle => _textTheme.bodyMedium;
