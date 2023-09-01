@@ -936,7 +936,7 @@ class EditableText extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [showCursor], which controls the visibility of the cursor.
+  /// * [showSelectionHandles], which controls the visibility of the selection handles.
   final bool showSelectionHandles;
 
   /// {@template flutter.widgets.editableText.showCursor}
@@ -947,7 +947,7 @@ class EditableText extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [showSelectionHandles], which controls the visibility of the selection handles.
+  ///  * [showCursor], which controls the visibility of the cursor.
   final bool showCursor;
 
   /// {@template flutter.widgets.editableText.autocorrect}
