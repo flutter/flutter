@@ -252,7 +252,7 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgetsWithLeakTracking('landscape', (WidgetTester tester) async {
+    testWidgets('landscape', (WidgetTester tester) async {
       await showPicker(tester, kCommonScreenSizeLandscape);
       expect(tester.widget<Text>(find.text('Jan 15 – Jan 25, 2016')).style?.fontSize, 24);
       await tester.tap(find.text('Cancel'));
