@@ -203,6 +203,10 @@ void main() {
   }
 
   test('Simple gradient', () async {
+    // TODO(matanl): While deprecated, we still don't want to accidentally
+    // change the behavior of the old API,
+    // https://github.com/flutter/flutter/issues/112498.
+    // ignore: deprecated_member_use
     Paint.enableDithering = false;
     final Image image = await toImage((Canvas canvas) {
       final Paint paint = Paint()..shader = makeGradient();
@@ -217,6 +221,8 @@ void main() {
   }, skip: !Platform.isLinux); // https://github.com/flutter/flutter/issues/53784
 
   test('Simple dithered gradient', () async {
+    // TODO(matanl): Reword this test once we remove the deprecated API.
+    // ignore: deprecated_member_use
     Paint.enableDithering = true;
     final Image image = await toImage((Canvas canvas) {
       final Paint paint = Paint()..shader = makeGradient();
