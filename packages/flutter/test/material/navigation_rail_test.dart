@@ -3316,20 +3316,19 @@ void main() {
     await tester.pumpAndSettle();
 
     double? defaultTextStyleOpacity(String text) {
-      final String? opacity = tester.widget<DefaultTextStyle>(
+      return tester.widget<DefaultTextStyle>(
         find.ancestor(
           of: find.text(text),
           matching: find.byType(DefaultTextStyle),
         ).first,
-      ).style.color?.opacity.toStringAsFixed(2);
-      return double.tryParse(opacity ?? '');
+      ).style.color?.opacity;
     }
 
     final double? abcLabelOpacity = defaultTextStyleOpacity('Abc');
     final double? bcdLabelOpacity = defaultTextStyleOpacity('Bcd');
 
     expect(abcLabelOpacity, 1.0);
-    expect(bcdLabelOpacity, 0.38);
+    expect(bcdLabelOpacity, closeTo(0.38, 0.01));
   });
 
   group('Material 2', () {
