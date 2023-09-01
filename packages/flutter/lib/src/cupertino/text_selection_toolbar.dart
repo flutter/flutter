@@ -547,9 +547,13 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
     final Color color = _kToolbarTextColor.resolveFrom(context);
 
     return IgnorePointer(
-      child: Center(
-        // If widthFactor is not set to 0, the button is given unbounded width.
-        widthFactor: 0,
+      // Use Align with widthFactor and heightFactor of 1.0 so
+      // _CupertinoTextSelectionToolbarItems can get the natural size
+      // of the buttons and then expand vertically as needed i.e. if children
+      // have higher height than that.
+      child: Align(
+        widthFactor: 1.0,
+        heightFactor: 1.0,
         child: CustomPaint(
           painter: isLeft
             ? _LeftCupertinoChevronPainter(color: color)
@@ -612,7 +616,7 @@ abstract class _CupertinoChevronPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    assert(size.height == size.width, 'size must have the same height and width');
+    assert(size.height == size.width, 'size must have the same height and width: $size');
 
     final double iconSize = size.height;
 
@@ -929,6 +933,10 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
     _backButton!.layout(constraints.loosen(), parentUsesSize: true);
     _nextButton!.layout(constraints.loosen(), parentUsesSize: true);
 
+    // Require the children to have at least the height of the nav buttons.
+    final double minHeight =
+        clampDouble(constraints.minHeight, _backButton!.size.height, _nextButton!.size.height);
+
     final double subsequentPageButtonsWidth =
         _backButton!.size.width + _nextButton!.size.width;
     double currentButtonPosition = 0.0;
@@ -940,8 +948,7 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
     visitChildren((RenderObject renderObjectChild) {
       i++;
       final RenderBox child = renderObjectChild as RenderBox;
-      final ToolbarItemsParentData childParentData =
-          child.parentData! as ToolbarItemsParentData;
+      final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
       childParentData.shouldPaint = false;
 
       // Skip slotted children and children on pages after the visible page.
@@ -953,18 +960,19 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
       if (currentPage == 0) {
         // If this is the last child, it's ok to fit without a forward button.
         // Note childCount doesn't include slotted children which come before the list ones.
-        paginationButtonsWidth =
-            i == childCount + 1 ? 0.0 : _nextButton!.size.width;
+        paginationButtonsWidth = i == childCount + 1 ? 0.0 : _nextButton!.size.width;
       } else {
         paginationButtonsWidth = subsequentPageButtonsWidth;
       }
 
       // The width of the menu is set by the first page.
       child.layout(
-        BoxConstraints.loose(Size(
-          (currentPage == 0 ? constraints.maxWidth : firstPageWidth) - paginationButtonsWidth,
-          constraints.maxHeight,
-        )),
+        BoxConstraints(
+          minWidth: 0.0,
+          maxWidth: (currentPage == 0 ? constraints.maxWidth : firstPageWidth) - paginationButtonsWidth,
+          minHeight: minHeight,
+          maxHeight: constraints.maxHeight,
+        ),
         parentUsesSize: true,
       );
 
@@ -974,8 +982,7 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
 
       // If this child causes the current page to overflow, move to the next
       // page and relayout the child.
-      final double currentWidth =
-          currentButtonPosition + paginationButtonsWidth + child.size.width;
+      final double currentWidth = currentButtonPosition + paginationButtonsWidth + child.size.width;
       if (currentWidth > constraints.maxWidth) {
         currentPage++;
         currentButtonPosition = _backButton!.size.width + dividerWidth;
@@ -1000,16 +1007,20 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
       }
     });
 
-    // Re-layout slotted children using max. child height to allow
+    // If needed, re-layout slotted children using max. child height to allow
     // the back/next buttons to be centered vertically.
-    _backButton!.layout(
-      BoxConstraints.tightFor(width: _backButton!.size.width, height: greatestHeight),
-      parentUsesSize: true,
-    );
-    _nextButton!.layout(
-      BoxConstraints.tightFor(width: _nextButton!.size.width, height: greatestHeight),
-      parentUsesSize: true,
-    );
+    if (greatestHeight > _backButton!.size.height) {
+      _backButton!.layout(
+        BoxConstraints.tightFor(width: _backButton!.size.width, height: greatestHeight),
+        parentUsesSize: true,
+      );
+    }
+    if (greatestHeight > _nextButton!.size.height) {
+      _nextButton!.layout(
+        BoxConstraints.tightFor(width: _nextButton!.size.width, height: greatestHeight),
+        parentUsesSize: true,
+      );
+    }
 
     // It shouldn't be possible to navigate beyond the last page.
     assert(page <= currentPage);
