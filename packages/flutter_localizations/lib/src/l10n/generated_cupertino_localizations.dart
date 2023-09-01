@@ -119,6 +119,9 @@ class CupertinoLocalizationAf extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Kies alles';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'Oortjie $tabIndex van $tabCount';
 
   @override
@@ -276,6 +279,9 @@ class CupertinoLocalizationAm extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'ሁሉንም ምረጥ';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'ትር $tabIndex ከ$tabCount';
@@ -437,6 +443,9 @@ class CupertinoLocalizationAr extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'اختيار الكل';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'علامة التبويب $tabIndex من $tabCount';
 
   @override
@@ -594,6 +603,9 @@ class CupertinoLocalizationAs extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'সকলো বাছনি কৰক';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'$tabCount টা টেবৰ $tabIndex নম্বৰটো';
@@ -755,6 +767,9 @@ class CupertinoLocalizationAz extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Hamısını seçin';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'Tab $tabIndex/$tabCount';
 
   @override
@@ -912,6 +927,9 @@ class CupertinoLocalizationBe extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Выбраць усе';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'Укладка $tabIndex з $tabCount';
@@ -1073,6 +1091,9 @@ class CupertinoLocalizationBg extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Избиране на всички';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'Раздел $tabIndex от $tabCount';
 
   @override
@@ -1230,6 +1251,9 @@ class CupertinoLocalizationBn extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'সব বেছে নিন';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'$tabCount-এর মধ্যে $tabIndex নম্বর ট্যাব';
@@ -1391,6 +1415,9 @@ class CupertinoLocalizationBs extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Odaberi sve';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'Kartica $tabIndex od $tabCount';
 
   @override
@@ -1548,6 +1575,9 @@ class CupertinoLocalizationCa extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Selecciona-ho tot';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'Pestanya $tabIndex de $tabCount';
@@ -1709,6 +1739,9 @@ class CupertinoLocalizationCs extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Vybrat vše';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'Karta $tabIndex z $tabCount';
 
   @override
@@ -1866,6 +1899,9 @@ class CupertinoLocalizationCy extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Dewis y Cyfan';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'Tab $tabIndex o $tabCount';
@@ -2027,6 +2063,9 @@ class CupertinoLocalizationDa extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Vælg alle';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'Fane $tabIndex af $tabCount';
 
   @override
@@ -2184,6 +2223,9 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Alles auswählen';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'Tab $tabIndex von $tabCount';
@@ -2366,6 +2408,9 @@ class CupertinoLocalizationEl extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Επιλογή όλων';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'Καρτέλα $tabIndex από $tabCount';
 
   @override
@@ -2523,6 +2568,9 @@ class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Select All';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'Tab $tabIndex of $tabCount';
@@ -2916,6 +2964,9 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Seleccionar todo';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'Pestaña $tabIndex de $tabCount';
@@ -3977,6 +4028,9 @@ class CupertinoLocalizationEt extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Vali kõik';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'$tabIndex. vaheleht $tabCount-st';
 
   @override
@@ -4134,6 +4188,9 @@ class CupertinoLocalizationEu extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Hautatu dena';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'$tabIndex/$tabCount fitxa';
@@ -4295,6 +4352,9 @@ class CupertinoLocalizationFa extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'انتخاب همه';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'برگه $tabIndex از $tabCount';
 
   @override
@@ -4452,6 +4512,9 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Valitse kaikki';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'Välilehti $tabIndex kautta $tabCount';
@@ -4613,6 +4676,9 @@ class CupertinoLocalizationFil extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Piliin Lahat';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'Tab $tabIndex ng $tabCount';
 
   @override
@@ -4770,6 +4836,9 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Tout sélect.';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'Onglet $tabIndex sur $tabCount';
@@ -4976,6 +5045,9 @@ class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Seleccionar todo';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'Pestana $tabIndex de $tabCount';
 
   @override
@@ -5133,6 +5205,9 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Alles auswählen';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'Tab $tabIndex von $tabCount';
@@ -5294,6 +5369,9 @@ class CupertinoLocalizationGu extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'બધા પસંદ કરો';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'$tabCountમાંથી $tabIndex ટૅબ';
 
   @override
@@ -5451,6 +5529,9 @@ class CupertinoLocalizationHe extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'בחירת הכול';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'כרטיסייה $tabIndex מתוך $tabCount';
@@ -5612,6 +5693,9 @@ class CupertinoLocalizationHi extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'सभी चुनें';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'$tabCount का टैब $tabIndex';
 
   @override
@@ -5769,6 +5853,9 @@ class CupertinoLocalizationHr extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Odaberi sve';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'Kartica $tabIndex od $tabCount';
@@ -5930,6 +6017,9 @@ class CupertinoLocalizationHu extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Összes kijelölése';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'$tabCount/$tabIndex. lap';
 
   @override
@@ -6087,6 +6177,9 @@ class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Նշել բոլորը';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'Ներդիր $tabIndex՝ $tabCount-ից';
@@ -6248,6 +6341,9 @@ class CupertinoLocalizationId extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Pilih Semua';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'Tab $tabIndex dari $tabCount';
 
   @override
@@ -6405,6 +6501,9 @@ class CupertinoLocalizationIs extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Velja allt';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'Flipi $tabIndex af $tabCount';
@@ -6566,6 +6665,9 @@ class CupertinoLocalizationIt extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Seleziona tutto';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'Scheda $tabIndex di $tabCount';
 
   @override
@@ -6723,6 +6825,9 @@ class CupertinoLocalizationJa extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'すべて選択';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'タブ: $tabIndex/$tabCount';
@@ -6884,6 +6989,9 @@ class CupertinoLocalizationKa extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'ყველას არჩევა';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'ჩანართი $tabIndex / $tabCount-დან';
 
   @override
@@ -7041,6 +7149,9 @@ class CupertinoLocalizationKk extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Барлығын таңдау';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'Қойынды: $tabIndex/$tabCount';
@@ -7202,6 +7313,9 @@ class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'ជ្រើសរើស​ទាំងអស់';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'ផ្ទាំងទី $tabIndex នៃ $tabCount';
 
   @override
@@ -7359,6 +7473,9 @@ class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => '\u{c8e}\u{cb2}\u{ccd}\u{cb2}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc2}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => '\u{24}\u{74}\u{61}\u{62}\u{43}\u{6f}\u{75}\u{6e}\u{74}\u{20}\u{cb0}\u{cb2}\u{ccd}\u{cb2}\u{cbf}\u{ca8}\u{20}\u{24}\u{74}\u{61}\u{62}\u{49}\u{6e}\u{64}\u{65}\u{78}\u{20}\u{c9f}\u{ccd}\u{caf}\u{cbe}\u{cac}\u{ccd}';
@@ -7520,6 +7637,9 @@ class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => '전체 선택';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'탭 $tabCount개 중 $tabIndex번째';
 
   @override
@@ -7677,6 +7797,9 @@ class CupertinoLocalizationKy extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Баарын тандоо';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'$tabCount ичинен $tabIndex-өтмөк';
@@ -7838,6 +7961,9 @@ class CupertinoLocalizationLo extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'ເລືອກທັງໝົດ';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'ແຖບທີ $tabIndex ຈາກທັງໝົດ $tabCount';
 
   @override
@@ -7995,6 +8121,9 @@ class CupertinoLocalizationLt extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Pasirinkti viską';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'$tabIndex skirtukas iš $tabCount';
@@ -8156,6 +8285,9 @@ class CupertinoLocalizationLv extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Atlasīt visu';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'$tabIndex. cilne no $tabCount';
 
   @override
@@ -8313,6 +8445,9 @@ class CupertinoLocalizationMk extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Избери ги сите';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'Картичка $tabIndex од $tabCount';
@@ -8474,6 +8609,9 @@ class CupertinoLocalizationMl extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'എല്ലാം തിരഞ്ഞെടുക്കുക';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'$tabCount ടാബിൽ $tabIndex-ാമത്തേത്';
 
   @override
@@ -8631,6 +8769,9 @@ class CupertinoLocalizationMn extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Бүгдийг сонгох';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'$tabCount-н $tabIndex-р таб';
@@ -8792,6 +8933,9 @@ class CupertinoLocalizationMr extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'सर्व निवडा';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'$tabCount पैकी $tabIndex टॅब';
 
   @override
@@ -8949,6 +9093,9 @@ class CupertinoLocalizationMs extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Pilih Semua';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'Tab $tabIndex daripada $tabCount';
@@ -9110,6 +9257,9 @@ class CupertinoLocalizationMy extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'အားလုံး ရွေးရန်';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'တဘ် $tabCount ခုအနက် $tabIndex ခု';
 
   @override
@@ -9267,6 +9417,9 @@ class CupertinoLocalizationNb extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Velg alle';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'Fane $tabIndex av $tabCount';
@@ -9428,6 +9581,9 @@ class CupertinoLocalizationNe extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'सबै चयन गर्नुहोस्';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'$tabCount मध्ये $tabIndex ट्याब';
 
   @override
@@ -9585,6 +9741,9 @@ class CupertinoLocalizationNl extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Alles selecteren';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'Tabblad $tabIndex van $tabCount';
@@ -9746,6 +9905,9 @@ class CupertinoLocalizationNo extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Velg alle';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'Fane $tabIndex av $tabCount';
 
   @override
@@ -9903,6 +10065,9 @@ class CupertinoLocalizationOr extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'ସମସ୍ତ ଚୟନ କରନ୍ତୁ';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'$tabCountର $tabIndex ଟାବ୍';
@@ -10064,6 +10229,9 @@ class CupertinoLocalizationPa extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'ਸਭ ਚੁਣੋ';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'$tabCount ਵਿੱਚੋਂ $tabIndex ਟੈਬ';
 
   @override
@@ -10223,6 +10391,9 @@ class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Wybierz wszystkie';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'Karta $tabIndex z $tabCount';
 
   @override
@@ -10380,6 +10551,9 @@ class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Selecionar Tudo';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'Guia $tabIndex de $tabCount';
@@ -10589,6 +10763,9 @@ class CupertinoLocalizationRo extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Selectați-le pe toate';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'Fila $tabIndex din $tabCount';
 
   @override
@@ -10746,6 +10923,9 @@ class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Выбрать все';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'Вкладка $tabIndex из $tabCount';
@@ -10907,6 +11087,9 @@ class CupertinoLocalizationSi extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'සියල්ල තෝරන්න';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'ටැබ $tabCount න් $tabIndex';
 
   @override
@@ -11064,6 +11247,9 @@ class CupertinoLocalizationSk extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Vybrať všetko';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'Karta $tabIndex z $tabCount';
@@ -11225,6 +11411,9 @@ class CupertinoLocalizationSl extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Izberi vse';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'Zavihek $tabIndex od $tabCount';
 
   @override
@@ -11384,6 +11573,9 @@ class CupertinoLocalizationSq extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Zgjidhi të gjitha';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'Skeda $tabIndex nga $tabCount';
 
   @override
@@ -11541,6 +11733,9 @@ class CupertinoLocalizationSr extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Изабери све';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'$tabIndex. картица од $tabCount';
@@ -11822,6 +12017,9 @@ class CupertinoLocalizationSv extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Markera alla';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'Flik $tabIndex av $tabCount';
 
   @override
@@ -11979,6 +12177,9 @@ class CupertinoLocalizationSw extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Teua Zote';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'Kichupo cha $tabIndex kati ya $tabCount';
@@ -12140,6 +12341,9 @@ class CupertinoLocalizationTa extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'எல்லாம் தேர்ந்தெடு';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'தாவல் $tabIndex / $tabCount';
 
   @override
@@ -12297,6 +12501,9 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'అన్నింటినీ ఎంచుకోండి';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'$tabCountలో $tabIndexవ ట్యాబ్';
@@ -12458,6 +12665,9 @@ class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'เลือกทั้งหมด';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'แท็บที่ $tabIndex จาก $tabCount';
 
   @override
@@ -12615,6 +12825,9 @@ class CupertinoLocalizationTl extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Piliin Lahat';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'Tab $tabIndex ng $tabCount';
@@ -12776,6 +12989,9 @@ class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Tümünü Seç';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'Sekme $tabIndex/$tabCount';
 
   @override
@@ -12933,6 +13149,9 @@ class CupertinoLocalizationUk extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Вибрати все';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'Вкладка $tabIndex з $tabCount';
@@ -13094,6 +13313,9 @@ class CupertinoLocalizationUr extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'سبھی منتخب کریں';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'$tabCount میں سے $tabIndex ٹیب';
 
   @override
@@ -13251,6 +13473,9 @@ class CupertinoLocalizationUz extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Barchasini tanlash';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'$tabCount varaqdan $tabIndex';
@@ -13412,6 +13637,9 @@ class CupertinoLocalizationVi extends GlobalCupertinoLocalizations {
   String get selectAllButtonLabel => 'Chọn tất cả';
 
   @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
   String get tabSemanticsLabelRaw => r'Thẻ $tabIndex/$tabCount';
 
   @override
@@ -13569,6 +13797,9 @@ class CupertinoLocalizationZh extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => '全选';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'第 $tabIndex 个标签，共 $tabCount 个';
@@ -13890,6 +14121,9 @@ class CupertinoLocalizationZu extends GlobalCupertinoLocalizations {
 
   @override
   String get selectAllButtonLabel => 'Khetha konke';
+
+  @override
+  String get shareButtonLabel => 'Share...';
 
   @override
   String get tabSemanticsLabelRaw => r'Ithebhu $tabIndex kwangu-$tabCount';

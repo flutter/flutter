@@ -6570,4 +6570,25 @@ testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular
     expect(find.byType(InputDecorator), findsOneWidget);
     expect(tester.renderObject<RenderBox>(find.text('COUNTER')).size, Size.zero);
   });
+
+  group('isCollapsed parameter works with themeData', () {
+    test('parameter is provided in InputDecorationTheme', () {
+      final InputDecoration decoration = const InputDecoration(
+        hintText: 'Hello, Flutter!',
+      ).applyDefaults(const InputDecorationTheme(
+          isCollapsed: true,
+      ));
+
+      expect(decoration.isCollapsed, true);
+    });
+
+    test('parameter is provided in InputDecoration', () {
+      final InputDecoration decoration = const InputDecoration(
+        isCollapsed: true,
+        hintText: 'Hello, Flutter!',
+      ).applyDefaults(const InputDecorationTheme());
+
+      expect(decoration.isCollapsed, true);
+    });
+  });
 }

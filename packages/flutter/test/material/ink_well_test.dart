@@ -2229,4 +2229,63 @@ testWidgetsWithLeakTracking('InkResponse radius can be updated', (WidgetTester t
 
     await gesture.up();
   });
+
+  testWidgetsWithLeakTracking('try out hoverDuration property', (WidgetTester tester) async {
+    final List<String> log = <String>[];
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: Center(
+          child: InkWell(
+            hoverDuration: const Duration(milliseconds: 1000),
+            onTap: () {
+              log.add('tap');
+            },
+          ),
+        ),
+      ),
+    ));
+
+    await tester.tap(find.byType(InkWell), pointer: 1);
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(log, equals(<String>['tap']));
+    log.clear();
+  });
+
+  testWidgetsWithLeakTracking('InkWell activation action does not end immediately', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/132377.
+    final MaterialStatesController controller = MaterialStatesController();
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Shortcuts(
+        shortcuts: const <ShortcutActivator, Intent>{
+          SingleActivator(LogicalKeyboardKey.enter): ButtonActivateIntent(),
+        },
+        child: Material(
+          child: Center(
+            child: InkWell(
+              autofocus: true,
+              onTap: () {},
+              statesController: controller,
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    // Invoke the InkWell activation action.
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+
+    // The InkWell is in pressed state.
+    await tester.pump(const Duration(milliseconds: 99));
+    expect(controller.value.contains(MaterialState.pressed), isTrue);
+
+    await tester.pumpAndSettle();
+    expect(controller.value.contains(MaterialState.pressed), isFalse);
+
+    controller.dispose();
+  });
 }

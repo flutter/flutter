@@ -25,5 +25,6 @@
   "noSpellCheckReplacementsLabel": "수정사항 없음",
   "menuDismissLabel": "메뉴 닫기",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

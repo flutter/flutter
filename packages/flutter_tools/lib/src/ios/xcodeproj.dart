@@ -412,21 +412,6 @@ class XcodeProjectBuildContext {
   }
 }
 
-/// The settings that are relevant for setting up universal links
-@immutable
-class XcodeUniversalLinkSettings {
-  const XcodeUniversalLinkSettings({
-    this.bundleIdentifier,
-    this.teamIdentifier,
-    this.associatedDomains = const <String>[],
-  });
-
-  final String? bundleIdentifier;
-  final String? teamIdentifier;
-  final List<String> associatedDomains;
-}
-
-
 /// Information about an Xcode project.
 ///
 /// Represents the output of `xcodebuild -list`.
