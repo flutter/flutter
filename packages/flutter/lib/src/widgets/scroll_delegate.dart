@@ -933,8 +933,8 @@ class TwoDimensionalChildBuilderDelegate extends TwoDimensionalChildDelegate {
     required this.builder,
     int? maxXIndex,
     int? maxYIndex,
-  }) : assert(maxYIndex == null || maxYIndex >= 0),
-       assert(maxXIndex == null || maxXIndex >= 0),
+  }) : assert(maxYIndex == null || maxYIndex >= -1),
+       assert(maxXIndex == null || maxXIndex >= -1),
        _maxYIndex = maxYIndex,
        _maxXIndex = maxXIndex;
 
@@ -976,7 +976,9 @@ class TwoDimensionalChildBuilderDelegate extends TwoDimensionalChildDelegate {
   /// [TwoDimensionalViewport] subclass to learn how this value is applied in
   /// the specific use case.
   ///
-  /// If not null, the value must be non-negative.
+  /// If not null, the value must be greater than or equal to -1, where -1
+  /// indicates there will be no children at all provided to the
+  /// [TwoDimensionalViewport].
   ///
   /// If the value changes, the delegate will call [notifyListeners]. This
   /// informs the [RenderTwoDimensionalViewport] that any cached information
@@ -997,7 +999,7 @@ class TwoDimensionalChildBuilderDelegate extends TwoDimensionalChildDelegate {
     if (value == maxXIndex) {
       return;
     }
-    assert(value == null || value >= 0);
+    assert(value == null || value >= -1);
     _maxXIndex = value;
     notifyListeners();
   }
@@ -1020,7 +1022,7 @@ class TwoDimensionalChildBuilderDelegate extends TwoDimensionalChildDelegate {
     if (maxYIndex == value) {
       return;
     }
-    assert(value == null || value >= 0);
+    assert(value == null || value >= -1);
     _maxYIndex = value;
     notifyListeners();
   }
