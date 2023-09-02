@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -258,7 +259,7 @@ void main() {
     expect(find.text('endDrawer'), findsNothing);
   });
 
-  testWidgets('Scaffold.drawer state restoration test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scaffold.drawer state restoration test', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
@@ -287,7 +288,12 @@ void main() {
 
     await tester.restoreFrom(data);
     expect(find.text('drawer'), findsOneWidget);
-  });
+  },
+  leakTrackingTestConfig: LeakTrackingTestConfig(
+    // TODO(polina-c): investigate and fix after merge of
+    // https://github.com/flutter/flutter/pull/133911
+    notDisposedAllowList: {'TestRestorationManager', 1},
+  ));
 
   testWidgets('Scaffold.endDrawer state restoration test', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
