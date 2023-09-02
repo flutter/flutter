@@ -44,29 +44,40 @@ class MockFlutterWindow : public FlutterWindow {
     return HandleMessage(message, wparam, lparam);
   }
 
-  MOCK_METHOD1(OnDpiScale, void(unsigned int));
-  MOCK_METHOD2(OnResize, void(unsigned int, unsigned int));
-  MOCK_METHOD4(OnPointerMove,
-               void(double, double, FlutterPointerDeviceKind, int32_t));
-  MOCK_METHOD5(OnPointerDown,
-               void(double, double, FlutterPointerDeviceKind, int32_t, UINT));
-  MOCK_METHOD5(OnPointerUp,
-               void(double, double, FlutterPointerDeviceKind, int32_t, UINT));
-  MOCK_METHOD4(OnPointerLeave,
-               void(double, double, FlutterPointerDeviceKind, int32_t));
-  MOCK_METHOD0(OnSetCursor, void());
-  MOCK_METHOD0(GetScrollOffsetMultiplier, float());
-  MOCK_METHOD0(GetHighContrastEnabled, bool());
-  MOCK_METHOD0(GetDpiScale, float());
-  MOCK_METHOD0(IsVisible, bool());
-  MOCK_METHOD1(UpdateCursorRect, void(const Rect&));
-  MOCK_METHOD0(OnResetImeComposing, void());
-  MOCK_METHOD3(Win32DispatchMessage, UINT(UINT, WPARAM, LPARAM));
-  MOCK_METHOD4(Win32PeekMessage, BOOL(LPMSG, UINT, UINT, UINT));
-  MOCK_METHOD1(Win32MapVkToChar, uint32_t(uint32_t));
-  MOCK_METHOD0(GetPlatformWindow, HWND());
-  MOCK_METHOD0(GetAxFragmentRootDelegate, ui::AXFragmentRootDelegateWin*());
-  MOCK_METHOD1(OnWindowStateEvent, void(WindowStateEvent));
+  MOCK_METHOD(void, OnDpiScale, (unsigned int), (override));
+  MOCK_METHOD(void, OnResize, (unsigned int, unsigned int), (override));
+  MOCK_METHOD(void,
+              OnPointerMove,
+              (double, double, FlutterPointerDeviceKind, int32_t, int),
+              (override));
+  MOCK_METHOD(void,
+              OnPointerDown,
+              (double, double, FlutterPointerDeviceKind, int32_t, UINT),
+              (override));
+  MOCK_METHOD(void,
+              OnPointerUp,
+              (double, double, FlutterPointerDeviceKind, int32_t, UINT),
+              (override));
+  MOCK_METHOD(void,
+              OnPointerLeave,
+              (double, double, FlutterPointerDeviceKind, int32_t),
+              (override));
+  MOCK_METHOD(void, OnSetCursor, (), (override));
+  MOCK_METHOD(float, GetScrollOffsetMultiplier, (), (override));
+  MOCK_METHOD(bool, GetHighContrastEnabled, (), (override));
+  MOCK_METHOD(float, GetDpiScale, (), (override));
+  MOCK_METHOD(bool, IsVisible, (), (override));
+  MOCK_METHOD(void, UpdateCursorRect, (const Rect&), (override));
+  MOCK_METHOD(void, OnResetImeComposing, (), (override));
+  MOCK_METHOD(UINT, Win32DispatchMessage, (UINT, WPARAM, LPARAM), (override));
+  MOCK_METHOD(BOOL, Win32PeekMessage, (LPMSG, UINT, UINT, UINT), (override));
+  MOCK_METHOD(uint32_t, Win32MapVkToChar, (uint32_t), (override));
+  MOCK_METHOD(HWND, GetPlatformWindow, (), (override));
+  MOCK_METHOD(ui::AXFragmentRootDelegateWin*,
+              GetAxFragmentRootDelegate,
+              (),
+              (override));
+  MOCK_METHOD(void, OnWindowStateEvent, (WindowStateEvent), (override));
 
  protected:
   // |KeyboardManager::WindowDelegate|
@@ -88,8 +99,10 @@ class MockFlutterWindowsView : public FlutterWindowsView {
       : FlutterWindowsView(std::move(window_binding)) {}
   ~MockFlutterWindowsView() {}
 
-  MOCK_METHOD2(NotifyWinEventWrapper,
-               void(ui::AXPlatformNodeWin*, ax::mojom::Event));
+  MOCK_METHOD(void,
+              NotifyWinEventWrapper,
+              (ui::AXPlatformNodeWin*, ax::mojom::Event),
+              (override));
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockFlutterWindowsView);

@@ -22,41 +22,47 @@ class MockBinaryMessenger {
 
   operator FlBinaryMessenger*();
 
-  MOCK_METHOD5(fl_binary_messenger_set_message_handler_on_channel,
-               void(FlBinaryMessenger* messenger,
-                    const gchar* channel,
-                    FlBinaryMessengerMessageHandler handler,
-                    gpointer user_data,
-                    GDestroyNotify destroy_notify));
+  MOCK_METHOD(void,
+              fl_binary_messenger_set_message_handler_on_channel,
+              (FlBinaryMessenger * messenger,
+               const gchar* channel,
+               FlBinaryMessengerMessageHandler handler,
+               gpointer user_data,
+               GDestroyNotify destroy_notify));
 
-  MOCK_METHOD4(fl_binary_messenger_send_response,
-               gboolean(FlBinaryMessenger* messenger,
-                        FlBinaryMessengerResponseHandle* response_handle,
-                        GBytes* response,
-                        GError** error));
+  MOCK_METHOD(gboolean,
+              fl_binary_messenger_send_response,
+              (FlBinaryMessenger * messenger,
+               FlBinaryMessengerResponseHandle* response_handle,
+               GBytes* response,
+               GError** error));
 
-  MOCK_METHOD6(fl_binary_messenger_send_on_channel,
-               void(FlBinaryMessenger* messenger,
-                    const gchar* channel,
-                    GBytes* message,
-                    GCancellable* cancellable,
-                    GAsyncReadyCallback callback,
-                    gpointer user_data));
+  MOCK_METHOD(void,
+              fl_binary_messenger_send_on_channel,
+              (FlBinaryMessenger * messenger,
+               const gchar* channel,
+               GBytes* message,
+               GCancellable* cancellable,
+               GAsyncReadyCallback callback,
+               gpointer user_data));
 
-  MOCK_METHOD3(fl_binary_messenger_send_on_channel_finish,
-               GBytes*(FlBinaryMessenger* messenger,
-                       GAsyncResult* result,
-                       GError** error));
+  MOCK_METHOD(GBytes*,
+              fl_binary_messenger_send_on_channel_finish,
+              (FlBinaryMessenger * messenger,
+               GAsyncResult* result,
+               GError** error));
 
-  MOCK_METHOD3(fl_binary_messenger_resize_channel,
-               void(FlBinaryMessenger* messenger,
-                    const gchar* channel,
-                    int64_t new_size));
+  MOCK_METHOD(void,
+              fl_binary_messenger_resize_channel,
+              (FlBinaryMessenger * messenger,
+               const gchar* channel,
+               int64_t new_size));
 
-  MOCK_METHOD3(fl_binary_messenger_set_allow_channel_overflow,
-               void(FlBinaryMessenger* messenger,
-                    const gchar* channel,
-                    bool allowed));
+  MOCK_METHOD(void,
+              fl_binary_messenger_set_allow_channel_overflow,
+              (FlBinaryMessenger * messenger,
+               const gchar* channel,
+               bool allowed));
 
   bool HasMessageHandler(const gchar* channel) const;
 

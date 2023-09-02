@@ -67,75 +67,110 @@ using ::testing::Return;
 
 namespace {
 class MockPlatformViewDelegate : public PlatformView::Delegate {
-  MOCK_METHOD1(OnPlatformViewCreated, void(std::unique_ptr<Surface> surface));
+  MOCK_METHOD(void,
+              OnPlatformViewCreated,
+              (std::unique_ptr<Surface> surface),
+              (override));
 
-  MOCK_METHOD0(OnPlatformViewDestroyed, void());
+  MOCK_METHOD(void, OnPlatformViewDestroyed, (), (override));
 
-  MOCK_METHOD0(OnPlatformViewScheduleFrame, void());
+  MOCK_METHOD(void, OnPlatformViewScheduleFrame, (), (override));
 
-  MOCK_METHOD1(OnPlatformViewSetNextFrameCallback,
-               void(const fml::closure& closure));
+  MOCK_METHOD(void,
+              OnPlatformViewSetNextFrameCallback,
+              (const fml::closure& closure),
+              (override));
 
-  MOCK_METHOD2(OnPlatformViewSetViewportMetrics,
-               void(int64_t view_id, const ViewportMetrics& metrics));
+  MOCK_METHOD(void,
+              OnPlatformViewSetViewportMetrics,
+              (int64_t view_id, const ViewportMetrics& metrics),
+              (override));
 
-  MOCK_METHOD1(OnPlatformViewDispatchPlatformMessage,
-               void(std::unique_ptr<PlatformMessage> message));
+  MOCK_METHOD(void,
+              OnPlatformViewDispatchPlatformMessage,
+              (std::unique_ptr<PlatformMessage> message),
+              (override));
 
-  MOCK_METHOD1(OnPlatformViewDispatchPointerDataPacket,
-               void(std::unique_ptr<PointerDataPacket> packet));
+  MOCK_METHOD(void,
+              OnPlatformViewDispatchPointerDataPacket,
+              (std::unique_ptr<PointerDataPacket> packet),
+              (override));
 
-  MOCK_METHOD3(OnPlatformViewDispatchSemanticsAction,
-               void(int32_t id,
-                    SemanticsAction action,
-                    fml::MallocMapping args));
+  MOCK_METHOD(void,
+              OnPlatformViewDispatchSemanticsAction,
+              (int32_t id, SemanticsAction action, fml::MallocMapping args),
+              (override));
 
-  MOCK_METHOD1(OnPlatformViewSetSemanticsEnabled, void(bool enabled));
+  MOCK_METHOD(void,
+              OnPlatformViewSetSemanticsEnabled,
+              (bool enabled),
+              (override));
 
-  MOCK_METHOD1(OnPlatformViewSetAccessibilityFeatures, void(int32_t flags));
+  MOCK_METHOD(void,
+              OnPlatformViewSetAccessibilityFeatures,
+              (int32_t flags),
+              (override));
 
-  MOCK_METHOD1(OnPlatformViewRegisterTexture,
-               void(std::shared_ptr<Texture> texture));
+  MOCK_METHOD(void,
+              OnPlatformViewRegisterTexture,
+              (std::shared_ptr<Texture> texture),
+              (override));
 
-  MOCK_METHOD1(OnPlatformViewUnregisterTexture, void(int64_t texture_id));
+  MOCK_METHOD(void,
+              OnPlatformViewUnregisterTexture,
+              (int64_t texture_id),
+              (override));
 
-  MOCK_METHOD1(OnPlatformViewMarkTextureFrameAvailable,
-               void(int64_t texture_id));
+  MOCK_METHOD(void,
+              OnPlatformViewMarkTextureFrameAvailable,
+              (int64_t texture_id),
+              (override));
 
   MOCK_METHOD(const Settings&,
               OnPlatformViewGetSettings,
               (),
               (const, override));
 
-  MOCK_METHOD3(LoadDartDeferredLibrary,
-               void(intptr_t loading_unit_id,
-                    std::unique_ptr<const fml::Mapping> snapshot_data,
-                    std::unique_ptr<const fml::Mapping> snapshot_instructions));
+  MOCK_METHOD(void,
+              LoadDartDeferredLibrary,
+              (intptr_t loading_unit_id,
+               std::unique_ptr<const fml::Mapping> snapshot_data,
+               std::unique_ptr<const fml::Mapping> snapshot_instructions),
+              (override));
 
-  MOCK_METHOD3(LoadDartDeferredLibraryError,
-               void(intptr_t loading_unit_id,
-                    const std::string error_message,
-                    bool transient));
+  MOCK_METHOD(void,
+              LoadDartDeferredLibraryError,
+              (intptr_t loading_unit_id,
+               const std::string error_message,
+               bool transient),
+              (override));
 
-  MOCK_METHOD2(UpdateAssetResolverByType,
-               void(std::unique_ptr<AssetResolver> updated_asset_resolver,
-                    AssetResolver::AssetResolverType type));
+  MOCK_METHOD(void,
+              UpdateAssetResolverByType,
+              (std::unique_ptr<AssetResolver> updated_asset_resolver,
+               AssetResolver::AssetResolverType type),
+              (override));
 };
 
 class MockSurface : public Surface {
  public:
-  MOCK_METHOD0(IsValid, bool());
+  MOCK_METHOD(bool, IsValid, (), (override));
 
-  MOCK_METHOD1(AcquireFrame,
-               std::unique_ptr<SurfaceFrame>(const SkISize& size));
+  MOCK_METHOD(std::unique_ptr<SurfaceFrame>,
+              AcquireFrame,
+              (const SkISize& size),
+              (override));
 
-  MOCK_CONST_METHOD0(GetRootTransformation, SkMatrix());
+  MOCK_METHOD(SkMatrix, GetRootTransformation, (), (const, override));
 
-  MOCK_METHOD0(GetContext, GrDirectContext*());
+  MOCK_METHOD(GrDirectContext*, GetContext, (), (override));
 
-  MOCK_METHOD0(MakeRenderContextCurrent, std::unique_ptr<GLContextResult>());
+  MOCK_METHOD(std::unique_ptr<GLContextResult>,
+              MakeRenderContextCurrent,
+              (),
+              (override));
 
-  MOCK_METHOD0(ClearRenderContext, bool());
+  MOCK_METHOD(bool, ClearRenderContext, (), (override));
 };
 
 class MockPlatformView : public PlatformView {
@@ -143,27 +178,38 @@ class MockPlatformView : public PlatformView {
   MockPlatformView(MockPlatformViewDelegate& delegate,
                    const TaskRunners& task_runners)
       : PlatformView(delegate, task_runners) {}
-  MOCK_METHOD0(CreateRenderingSurface, std::unique_ptr<Surface>());
-  MOCK_CONST_METHOD0(GetPlatformMessageHandler,
-                     std::shared_ptr<PlatformMessageHandler>());
+  MOCK_METHOD(std::unique_ptr<Surface>, CreateRenderingSurface, (), (override));
+  MOCK_METHOD(std::shared_ptr<PlatformMessageHandler>,
+              GetPlatformMessageHandler,
+              (),
+              (const, override));
 };
 
 class TestPlatformView : public PlatformView {
  public:
   TestPlatformView(Shell& shell, const TaskRunners& task_runners)
       : PlatformView(shell, task_runners) {}
-  MOCK_METHOD0(CreateRenderingSurface, std::unique_ptr<Surface>());
+  MOCK_METHOD(std::unique_ptr<Surface>, CreateRenderingSurface, (), (override));
 };
 
 class MockPlatformMessageHandler : public PlatformMessageHandler {
  public:
-  MOCK_METHOD1(HandlePlatformMessage,
-               void(std::unique_ptr<PlatformMessage> message));
-  MOCK_CONST_METHOD0(DoesHandlePlatformMessageOnPlatformThread, bool());
-  MOCK_METHOD2(InvokePlatformMessageResponseCallback,
-               void(int response_id, std::unique_ptr<fml::Mapping> mapping));
-  MOCK_METHOD1(InvokePlatformMessageEmptyResponseCallback,
-               void(int response_id));
+  MOCK_METHOD(void,
+              HandlePlatformMessage,
+              (std::unique_ptr<PlatformMessage> message),
+              (override));
+  MOCK_METHOD(bool,
+              DoesHandlePlatformMessageOnPlatformThread,
+              (),
+              (const, override));
+  MOCK_METHOD(void,
+              InvokePlatformMessageResponseCallback,
+              (int response_id, std::unique_ptr<fml::Mapping> mapping),
+              (override));
+  MOCK_METHOD(void,
+              InvokePlatformMessageEmptyResponseCallback,
+              (int response_id),
+              (override));
 };
 
 class MockPlatformMessageResponse : public PlatformMessageResponse {
@@ -171,8 +217,8 @@ class MockPlatformMessageResponse : public PlatformMessageResponse {
   static fml::RefPtr<MockPlatformMessageResponse> Create() {
     return fml::AdoptRef(new MockPlatformMessageResponse());
   }
-  MOCK_METHOD1(Complete, void(std::unique_ptr<fml::Mapping> data));
-  MOCK_METHOD0(CompleteEmpty, void());
+  MOCK_METHOD(void, Complete, (std::unique_ptr<fml::Mapping> data), (override));
+  MOCK_METHOD(void, CompleteEmpty, (), (override));
 };
 }  // namespace
 

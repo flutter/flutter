@@ -15,64 +15,88 @@
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
 
-///\note Deprecated MOCK_METHOD macros used until this issue is resolved:
-// https://github.com/google/googletest/issues/2490
-
 namespace flutter {
 
 namespace {
 
 class MockDelegate : public Engine::Delegate {
  public:
-  MOCK_METHOD2(OnEngineUpdateSemantics,
-               void(SemanticsNodeUpdates, CustomAccessibilityActionUpdates));
-  MOCK_METHOD1(OnEngineHandlePlatformMessage,
-               void(std::unique_ptr<PlatformMessage>));
-  MOCK_METHOD0(OnPreEngineRestart, void());
-  MOCK_METHOD0(OnRootIsolateCreated, void());
-  MOCK_METHOD2(UpdateIsolateDescription, void(const std::string, int64_t));
-  MOCK_METHOD1(SetNeedsReportTimings, void(bool));
-  MOCK_METHOD1(ComputePlatformResolvedLocale,
-               std::unique_ptr<std::vector<std::string>>(
-                   const std::vector<std::string>&));
-  MOCK_METHOD1(RequestDartDeferredLibrary, void(intptr_t));
-  MOCK_METHOD0(GetCurrentTimePoint, fml::TimePoint());
-  MOCK_CONST_METHOD0(GetPlatformMessageHandler,
-                     const std::shared_ptr<PlatformMessageHandler>&());
-  MOCK_METHOD2(OnEngineChannelUpdate, void(std::string, bool));
-  MOCK_CONST_METHOD2(GetScaledFontSize,
-                     double(double font_size, int configuration_id));
+  MOCK_METHOD(void,
+              OnEngineUpdateSemantics,
+              (SemanticsNodeUpdates, CustomAccessibilityActionUpdates),
+              (override));
+  MOCK_METHOD(void,
+              OnEngineHandlePlatformMessage,
+              (std::unique_ptr<PlatformMessage>),
+              (override));
+  MOCK_METHOD(void, OnPreEngineRestart, (), (override));
+  MOCK_METHOD(void, OnRootIsolateCreated, (), (override));
+  MOCK_METHOD(void,
+              UpdateIsolateDescription,
+              (const std::string, int64_t),
+              (override));
+  MOCK_METHOD(void, SetNeedsReportTimings, (bool), (override));
+  MOCK_METHOD(std::unique_ptr<std::vector<std::string>>,
+              ComputePlatformResolvedLocale,
+              (const std::vector<std::string>&),
+              (override));
+  MOCK_METHOD(void, RequestDartDeferredLibrary, (intptr_t), (override));
+  MOCK_METHOD(fml::TimePoint, GetCurrentTimePoint, (), (override));
+  MOCK_METHOD(const std::shared_ptr<PlatformMessageHandler>&,
+              GetPlatformMessageHandler,
+              (),
+              (const, override));
+  MOCK_METHOD(void, OnEngineChannelUpdate, (std::string, bool), (override));
+  MOCK_METHOD(double,
+              GetScaledFontSize,
+              (double font_size, int configuration_id),
+              (const, override));
 };
 
 class MockResponse : public PlatformMessageResponse {
  public:
-  MOCK_METHOD1(Complete, void(std::unique_ptr<fml::Mapping> data));
-  MOCK_METHOD0(CompleteEmpty, void());
+  MOCK_METHOD(void, Complete, (std::unique_ptr<fml::Mapping> data), (override));
+  MOCK_METHOD(void, CompleteEmpty, (), (override));
 };
 
 class MockRuntimeDelegate : public RuntimeDelegate {
  public:
-  MOCK_METHOD0(ImplicitViewEnabled, bool());
-  MOCK_METHOD0(DefaultRouteName, std::string());
-  MOCK_METHOD1(ScheduleFrame, void(bool));
-  MOCK_METHOD2(Render, void(std::unique_ptr<flutter::LayerTree>, float));
-  MOCK_METHOD2(UpdateSemantics,
-               void(SemanticsNodeUpdates, CustomAccessibilityActionUpdates));
-  MOCK_METHOD1(HandlePlatformMessage, void(std::unique_ptr<PlatformMessage>));
-  MOCK_METHOD0(GetFontCollection, FontCollection&());
-  MOCK_METHOD0(GetAssetManager, std::shared_ptr<AssetManager>());
-  MOCK_METHOD0(OnRootIsolateCreated, void());
-  MOCK_METHOD2(UpdateIsolateDescription, void(const std::string, int64_t));
-  MOCK_METHOD1(SetNeedsReportTimings, void(bool));
-  MOCK_METHOD1(ComputePlatformResolvedLocale,
-               std::unique_ptr<std::vector<std::string>>(
-                   const std::vector<std::string>&));
-  MOCK_METHOD1(RequestDartDeferredLibrary, void(intptr_t));
-  MOCK_CONST_METHOD0(GetPlatformMessageHandler,
-                     std::weak_ptr<PlatformMessageHandler>());
-  MOCK_METHOD2(SendChannelUpdate, void(std::string, bool));
-  MOCK_CONST_METHOD2(GetScaledFontSize,
-                     double(double font_size, int configuration_id));
+  MOCK_METHOD(std::string, DefaultRouteName, (), (override));
+  MOCK_METHOD(void, ScheduleFrame, (bool), (override));
+  MOCK_METHOD(void,
+              Render,
+              (std::unique_ptr<flutter::LayerTree>, float),
+              (override));
+  MOCK_METHOD(void,
+              UpdateSemantics,
+              (SemanticsNodeUpdates, CustomAccessibilityActionUpdates),
+              (override));
+  MOCK_METHOD(void,
+              HandlePlatformMessage,
+              (std::unique_ptr<PlatformMessage>),
+              (override));
+  MOCK_METHOD(FontCollection&, GetFontCollection, (), (override));
+  MOCK_METHOD(std::shared_ptr<AssetManager>, GetAssetManager, (), (override));
+  MOCK_METHOD(void, OnRootIsolateCreated, (), (override));
+  MOCK_METHOD(void,
+              UpdateIsolateDescription,
+              (const std::string, int64_t),
+              (override));
+  MOCK_METHOD(void, SetNeedsReportTimings, (bool), (override));
+  MOCK_METHOD(std::unique_ptr<std::vector<std::string>>,
+              ComputePlatformResolvedLocale,
+              (const std::vector<std::string>&),
+              (override));
+  MOCK_METHOD(void, RequestDartDeferredLibrary, (intptr_t), (override));
+  MOCK_METHOD(std::weak_ptr<PlatformMessageHandler>,
+              GetPlatformMessageHandler,
+              (),
+              (const, override));
+  MOCK_METHOD(void, SendChannelUpdate, (std::string, bool), (override));
+  MOCK_METHOD(double,
+              GetScaledFontSize,
+              (double font_size, int configuration_id),
+              (const, override));
 };
 
 class MockRuntimeController : public RuntimeController {
@@ -80,12 +104,17 @@ class MockRuntimeController : public RuntimeController {
   MockRuntimeController(RuntimeDelegate& client,
                         const TaskRunners& p_task_runners)
       : RuntimeController(client, p_task_runners) {}
-  MOCK_METHOD0(IsRootIsolateRunning, bool());
-  MOCK_METHOD1(DispatchPlatformMessage, bool(std::unique_ptr<PlatformMessage>));
-  MOCK_METHOD3(LoadDartDeferredLibraryError,
-               void(intptr_t, const std::string, bool));
-  MOCK_CONST_METHOD0(GetDartVM, DartVM*());
-  MOCK_METHOD1(NotifyIdle, bool(fml::TimeDelta));
+  MOCK_METHOD(bool, IsRootIsolateRunning, (), (override));
+  MOCK_METHOD(bool,
+              DispatchPlatformMessage,
+              (std::unique_ptr<PlatformMessage>),
+              (override));
+  MOCK_METHOD(void,
+              LoadDartDeferredLibraryError,
+              (intptr_t, const std::string, bool),
+              (override));
+  MOCK_METHOD(DartVM*, GetDartVM, (), (const, override));
+  MOCK_METHOD(bool, NotifyIdle, (fml::TimeDelta), (override));
 };
 
 std::unique_ptr<PlatformMessage> MakePlatformMessage(
