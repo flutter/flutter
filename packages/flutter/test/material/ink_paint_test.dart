@@ -270,12 +270,13 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('The InkWell widget renders an SelectAction or ActivateAction-induced ink ripple', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('The InkWell widget renders an SelectAction or ActivateAction-induced ink ripple', (WidgetTester tester) async {
     const Color highlightColor = Color(0xAAFF0000);
     const Color splashColor = Color(0xB40000FF);
     const BorderRadius borderRadius = BorderRadius.all(Radius.circular(6.0));
 
     final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+    addTearDown(() => focusNode.dispose());
     Future<void> buildTest(Intent intent) async {
       return tester.pumpWidget(
         Shortcuts(
@@ -453,9 +454,13 @@ void main() {
     }));
   });
 
-  testWidgets('The InkWell widget on OverlayPortal does not throw', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('The InkWell widget on OverlayPortal does not throw', (WidgetTester tester) async {
     final OverlayPortalController controller = OverlayPortalController();
     controller.show();
+
+    late OverlayEntry overlayEntry;
+    addTearDown(() => overlayEntry.dispose());
+
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -465,7 +470,7 @@ void main() {
               textDirection: TextDirection.ltr,
               child: Overlay(
                 initialEntries: <OverlayEntry>[
-                  OverlayEntry(
+                  overlayEntry = OverlayEntry(
                     builder: (BuildContext context) {
                       return Center(
                         child: SizedBox.square(
@@ -511,7 +516,12 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
 
     expect(tester.takeException(), isNull);
-  });
+  },
+  // TODO(polina-c): remove after fixing
+  // https://github.com/flutter/flutter/issues/133920
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    notDisposedAllowList: <String, int?>{'ValueNotifier<_OverlayEntryWidgetState?>': 1},
+  ));
 
   testWidgetsWithLeakTracking('Custom rectCallback renders an ink splash from its center', (WidgetTester tester) async {
     const Color splashColor = Color(0xff00ff00);
