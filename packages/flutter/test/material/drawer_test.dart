@@ -289,10 +289,10 @@ void main() {
     await tester.restoreFrom(data);
     expect(find.text('drawer'), findsOneWidget);
   },
-  leakTrackingTestConfig: LeakTrackingTestConfig(
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
     // TODO(polina-c): investigate and fix after merge of
     // https://github.com/flutter/flutter/pull/133911
-    notDisposedAllowList: {'TestRestorationManager', 1},
+    notDisposedAllowList: <String, int?> {'TestRestorationManager': 1},
   ));
 
   testWidgets('Scaffold.endDrawer state restoration test', (WidgetTester tester) async {
