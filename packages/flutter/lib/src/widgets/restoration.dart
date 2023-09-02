@@ -454,6 +454,13 @@ class _RootRestorationScopeState extends State<RootRestorationScope> {
 ///  * [RestorationManager], which describes how state restoration works in
 ///    Flutter.
 abstract class RestorableProperty<T> extends ChangeNotifier {
+  /// Creates a [RestorableProperty].
+  RestorableProperty(){
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+  }
+
   /// Called by the [RestorationMixin] if no restoration data is available to
   /// restore the value of the property from to obtain the default value for the
   /// property.
