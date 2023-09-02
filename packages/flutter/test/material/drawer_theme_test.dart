@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('copyWith, ==, hashCode basics', () {
@@ -18,7 +19,7 @@ void main() {
     expect(identical(DrawerThemeData.lerp(data, data, 0.5), data), true);
   });
 
-  testWidgets('Default debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DrawerThemeData().debugFillProperties(builder);
 
