@@ -453,4 +453,9 @@ PathBuilder& PathBuilder::AddPath(const Path& path) {
   return *this;
 }
 
+PathBuilder& PathBuilder::Shift(Point offset) {
+  prototype_.Shift(offset);
+  return *this;
+}
+
 }  // namespace impeller

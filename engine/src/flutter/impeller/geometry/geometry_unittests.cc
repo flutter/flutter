@@ -605,17 +605,18 @@ TEST(GeometryTest, EmptyPath) {
 }
 
 TEST(GeometryTest, SimplePath) {
-  Path path;
+  PathBuilder builder;
 
-  path.AddLinearComponent({0, 0}, {100, 100})
-      .AddQuadraticComponent({100, 100}, {200, 200}, {300, 300})
-      .AddCubicComponent({300, 300}, {400, 400}, {500, 500}, {600, 600});
+  auto path = builder.AddLine({0, 0}, {100, 100})
+                  .AddQuadraticCurve({100, 100}, {200, 200}, {300, 300})
+                  .AddCubicCurve({300, 300}, {400, 400}, {500, 500}, {600, 600})
+                  .TakePath();
 
-  ASSERT_EQ(path.GetComponentCount(), 4u);
+  ASSERT_EQ(path.GetComponentCount(), 6u);
   ASSERT_EQ(path.GetComponentCount(Path::ComponentType::kLinear), 1u);
   ASSERT_EQ(path.GetComponentCount(Path::ComponentType::kQuadratic), 1u);
   ASSERT_EQ(path.GetComponentCount(Path::ComponentType::kCubic), 1u);
-  ASSERT_EQ(path.GetComponentCount(Path::ComponentType::kContour), 1u);
+  ASSERT_EQ(path.GetComponentCount(Path::ComponentType::kContour), 3u);
 
   path.EnumerateComponents(
       [](size_t index, const LinearPathComponent& linear) {
@@ -629,7 +630,7 @@ TEST(GeometryTest, SimplePath) {
         Point p1(100, 100);
         Point cp(200, 200);
         Point p2(300, 300);
-        ASSERT_EQ(index, 2u);
+        ASSERT_EQ(index, 3u);
         ASSERT_EQ(quad.p1, p1);
         ASSERT_EQ(quad.cp, cp);
         ASSERT_EQ(quad.p2, p2);
@@ -639,23 +640,35 @@ TEST(GeometryTest, SimplePath) {
         Point cp1(400, 400);
         Point cp2(500, 500);
         Point p2(600, 600);
-        ASSERT_EQ(index, 3u);
+        ASSERT_EQ(index, 5u);
         ASSERT_EQ(cubic.p1, p1);
         ASSERT_EQ(cubic.cp1, cp1);
         ASSERT_EQ(cubic.cp2, cp2);
         ASSERT_EQ(cubic.p2, p2);
       },
       [](size_t index, const ContourComponent& contour) {
-        Point p1(0, 0);
-        ASSERT_EQ(index, 0u);
-        ASSERT_EQ(contour.destination, p1);
+        // There is an initial countour added for each curve.
+        if (index == 0u) {
+          Point p1(0, 0);
+          ASSERT_EQ(contour.destination, p1);
+        } else if (index == 2u) {
+          Point p1(100, 100);
+          ASSERT_EQ(contour.destination, p1);
+        } else if (index == 4u) {
+          Point p1(300, 300);
+          ASSERT_EQ(contour.destination, p1);
+        } else {
+          ASSERT_FALSE(true);
+        }
         ASSERT_FALSE(contour.is_closed);
       });
 }
 
 TEST(GeometryTest, BoundingBoxCubic) {
-  Path path;
-  path.AddCubicComponent({120, 160}, {25, 200}, {220, 260}, {220, 40});
+  PathBuilder builder;
+  auto path =
+      builder.AddCubicCurve({120, 160}, {25, 200}, {220, 260}, {220, 40})
+          .TakePath();
   auto box = path.GetBoundingBox();
   Rect expected(93.9101, 40, 126.09, 158.862);
   ASSERT_TRUE(box.has_value());
@@ -2007,14 +2020,14 @@ TEST(GeometryTest, CubicPathComponentPolylineDoesNotIncludePointOne) {
 }
 
 TEST(GeometryTest, PathCreatePolyLineDoesNotDuplicatePoints) {
-  Path path;
-  path.AddContourComponent({10, 10});
-  path.AddLinearComponent({10, 10}, {20, 20});
-  path.AddLinearComponent({20, 20}, {30, 30});
-  path.AddContourComponent({40, 40});
-  path.AddLinearComponent({40, 40}, {50, 50});
+  PathBuilder builder;
+  builder.MoveTo({10, 10});
+  builder.LineTo({20, 20});
+  builder.LineTo({30, 30});
+  builder.MoveTo({40, 40});
+  builder.LineTo({50, 50});
 
-  auto polyline = path.CreatePolyline(1.0f);
+  auto polyline = builder.TakePath().CreatePolyline(1.0f);
 
   ASSERT_EQ(polyline.contours.size(), 2u);
   ASSERT_EQ(polyline.points.size(), 5u);
@@ -2381,8 +2394,8 @@ TEST(GeometryTest, PathShifting) {
           .AddCubicCurve(Point(20, 20), Point(25, 25), Point(-5, -5),
                          Point(30, 30))
           .Close()
+          .Shift(Point(1, 1))
           .TakePath();
-  path.Shift(Point(1, 1));
 
   ContourComponent contour;
   LinearPathComponent linear;

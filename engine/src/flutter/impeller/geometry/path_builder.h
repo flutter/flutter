@@ -37,18 +37,31 @@ class PathBuilder {
 
   PathBuilder& Close();
 
+  /// @brief Insert a line from the current position to `point`.
+  ///
+  /// If `relative` is true, then `point` is relative to the current location.
   PathBuilder& LineTo(Point point, bool relative = false);
 
   PathBuilder& HorizontalLineTo(Scalar x, bool relative = false);
 
   PathBuilder& VerticalLineTo(Scalar y, bool relative = false);
 
+  /// @brief Insert a quadradic curve from the current position to `point` using
+  /// the control point `controlPoint`.
+  ///
+  /// If `relative` is true the `point` and `controlPoint` are relative to
+  /// current location.
   PathBuilder& QuadraticCurveTo(Point controlPoint,
                                 Point point,
                                 bool relative = false);
 
   PathBuilder& SmoothQuadraticCurveTo(Point point, bool relative = false);
 
+  /// @brief Insert a cubic curve from the curren position to `point` using the
+  /// control points `controlPoint1` and `controlPoint2`.
+  ///
+  /// If `relative` is true the `point`, `controlPoint1`, and `controlPoint2`
+  /// are relative to current location.
   PathBuilder& CubicCurveTo(Point controlPoint1,
                             Point controlPoint2,
                             Point point,
@@ -69,11 +82,20 @@ class PathBuilder {
 
   PathBuilder& AddOval(const Rect& rect);
 
+  /// @brief Move to point `p1`, then insert a line from `p1` to `p2`.
   PathBuilder& AddLine(const Point& p1, const Point& p2);
 
+  /// @brief Move to point `p1`, then insert a quadradic curve from `p1` to `p2`
+  /// with the control point `cp`.
   PathBuilder& AddQuadraticCurve(Point p1, Point cp, Point p2);
 
+  /// @brief Move to point `p1`, then insert a cubic curve from `p1` to `p2`
+  /// with control points `cp1` and `cp2`.
   PathBuilder& AddCubicCurve(Point p1, Point cp1, Point cp2, Point p2);
+
+  /// @brief Transform the existing path segments and contours by the given
+  /// `offset`.
+  PathBuilder& Shift(Point offset);
 
   struct RoundingRadii {
     Point top_left;

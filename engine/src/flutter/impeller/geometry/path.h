@@ -48,8 +48,8 @@ enum class Convexity {
 ///             All shapes supported by Impeller are paths either directly or
 ///             via approximation (in the case of circles).
 ///
-///             Creating paths that describe complex shapes is usually done by a
-///             path builder.
+///             Paths are externally immutable once created, Creating paths must
+///             be done using a path builder.
 ///
 class Path {
  public:
@@ -95,24 +95,9 @@ class Path {
 
   size_t GetComponentCount(std::optional<ComponentType> type = {}) const;
 
-  void SetFillType(FillType fill);
-
   FillType GetFillType() const;
 
   bool IsConvex() const;
-
-  Path& AddLinearComponent(Point p1, Point p2);
-
-  Path& AddQuadraticComponent(Point p1, Point cp, Point p2);
-
-  Path& AddCubicComponent(Point p1, Point cp1, Point cp2, Point p2);
-
-  Path& AddContourComponent(Point destination, bool is_closed = false);
-
-  void SetContourClosed(bool is_closed);
-
-  /// @brief Transform the path by the given offset in-place.
-  void Shift(Point shift);
 
   template <class T>
   using Applier = std::function<void(size_t index, const T& component)>;
@@ -133,17 +118,6 @@ class Path {
   bool GetContourComponentAtIndex(size_t index,
                                   ContourComponent& contour) const;
 
-  bool UpdateLinearComponentAtIndex(size_t index,
-                                    const LinearPathComponent& linear);
-
-  bool UpdateQuadraticComponentAtIndex(size_t index,
-                                       const QuadraticPathComponent& quadratic);
-
-  bool UpdateCubicComponentAtIndex(size_t index, CubicPathComponent& cubic);
-
-  bool UpdateContourComponentAtIndex(size_t index,
-                                     const ContourComponent& contour);
-
   /// Callers must provide the scale factor for how this path will be
   /// transformed.
   ///
@@ -161,6 +135,31 @@ class Path {
   friend class PathBuilder;
 
   void SetConvexity(Convexity value);
+
+  void SetFillType(FillType fill);
+
+  Path& AddLinearComponent(Point p1, Point p2);
+
+  Path& AddQuadraticComponent(Point p1, Point cp, Point p2);
+
+  Path& AddCubicComponent(Point p1, Point cp1, Point cp2, Point p2);
+
+  Path& AddContourComponent(Point destination, bool is_closed = false);
+
+  void SetContourClosed(bool is_closed);
+
+  void Shift(Point shift);
+
+  bool UpdateLinearComponentAtIndex(size_t index,
+                                    const LinearPathComponent& linear);
+
+  bool UpdateQuadraticComponentAtIndex(size_t index,
+                                       const QuadraticPathComponent& quadratic);
+
+  bool UpdateCubicComponentAtIndex(size_t index, CubicPathComponent& cubic);
+
+  bool UpdateContourComponentAtIndex(size_t index,
+                                     const ContourComponent& contour);
 
   struct ComponentIndexPair {
     ComponentType type = ComponentType::kLinear;
