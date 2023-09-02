@@ -340,6 +340,8 @@ void main() {
       bool hovering = false;
       bool focusing = false;
 
+      addTearDown(focusNode.dispose);
+
       Future<void> buildTest(bool enabled) async {
         await tester.pumpWidget(
           Center(
@@ -393,8 +395,6 @@ void main() {
       await buildTest(true);
       expect(hovering, isFalse);
       expect(focusing, isFalse);
-
-      focusNode.dispose();
     });
 
     testWidgetsWithLeakTracking('FocusableActionDetector changes mouse cursor when hovered', (WidgetTester tester) async {
@@ -867,6 +867,8 @@ void main() {
       (WidgetTester tester) async {
         final FocusNode buttonNode = FocusNode(debugLabel: 'Test');
 
+        addTearDown(buttonNode.dispose);
+
         await tester.pumpWidget(
           MaterialApp(
             home: FocusableActionDetector(
@@ -903,8 +905,6 @@ void main() {
         buttonNode.requestFocus();
         await tester.pump();
         expect(buttonNode.hasFocus, isFalse);
-
-        buttonNode.dispose();
       },
     );
 
@@ -914,6 +914,12 @@ void main() {
         final FocusNode buttonNode1 = FocusNode(debugLabel: 'Button Node 1');
         final FocusNode buttonNode2 = FocusNode(debugLabel: 'Button Node 2');
         final FocusNode skipTraversalNode = FocusNode(skipTraversal: true);
+
+        addTearDown(() {
+          buttonNode1.dispose();
+          buttonNode2.dispose();
+          skipTraversalNode.dispose();
+        });
 
         await tester.pumpWidget(
           MaterialApp(
@@ -977,10 +983,6 @@ void main() {
         await tester.pump();
         expect(buttonNode1.hasFocus, isTrue);
         expect(buttonNode2.hasFocus, isFalse);
-
-        buttonNode1.dispose();
-        buttonNode2.dispose();
-        skipTraversalNode.dispose();
       },
     );
 

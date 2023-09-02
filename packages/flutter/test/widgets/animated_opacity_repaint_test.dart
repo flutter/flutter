@@ -78,6 +78,9 @@ void main() {
     RenderTestObject.paintCount = 0;
     final AnimationController controller = AnimationController(vsync: const TestVSync(), duration: const Duration(seconds: 1));
     final Tween<double> opacityTween = Tween<double>(begin: 0.99, end: 0);
+
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       ColoredBox(
         color: Colors.red,
