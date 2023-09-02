@@ -442,21 +442,6 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     _platformDispatcher.sendPlatformMessage(name, data, callback);
   }
 
-  @Deprecated(
-    'Instead of calling this callback, use ServicesBinding.instance.channelBuffers.push. '
-    'This feature was deprecated after v2.1.0-10.0.pre.'
-  )
-  @override
-  PlatformMessageCallback? get onPlatformMessage => _platformDispatcher.onPlatformMessage;
-  @Deprecated(
-    'Instead of setting this callback, use ServicesBinding.instance.defaultBinaryMessenger.setMessageHandler. '
-    'This feature was deprecated after v2.1.0-10.0.pre.'
-  )
-  @override
-  set onPlatformMessage(PlatformMessageCallback? callback) {
-    _platformDispatcher.onPlatformMessage = callback;
-  }
-
   /// Delete any test value properties that have been set on this [TestPlatformDispatcher]
   /// and return to reporting the real [PlatformDispatcher] values for all
   /// [PlatformDispatcher] properties.
@@ -1173,7 +1158,7 @@ class _UnsupportedDisplay implements TestDisplay {
 ///   // Fake the desired properties of the TestWindow. All code running
 ///   // within this test will perceive the following fake text scale
 ///   // factor as the real text scale factor of the window.
-///   testBinding.window.textScaleFactorTestValue = 2.5; // ignore: deprecated_member_use
+///   testBinding.platformDispatcher.textScaleFactorTestValue = 2.5;
 ///
 ///   // Test code that depends on text scale factor here.
 /// });
@@ -1548,24 +1533,6 @@ class TestWindow implements SingletonFlutterWindow {
   )
   @override
   double get textScaleFactor => platformDispatcher.textScaleFactor;
-  /// Hides the real text scale factor and reports the given
-  /// [textScaleFactorTestValue] instead.
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.textScaleFactorTestValue instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  set textScaleFactorTestValue(double textScaleFactorTestValue) { // ignore: avoid_setters_without_getters
-    platformDispatcher.textScaleFactorTestValue = textScaleFactorTestValue;
-  }
-  /// Deletes any existing test text scale factor and returns to using the real
-  /// text scale factor.
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.clearTextScaleFactorTestValue() instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  void clearTextScaleFactorTestValue() {
-    platformDispatcher.clearTextScaleFactorTestValue();
-  }
 
   @Deprecated(
     'Use WidgetTester.platformDispatcher.platformBrightness instead. '
@@ -1589,24 +1556,6 @@ class TestWindow implements SingletonFlutterWindow {
   @override
   set onPlatformBrightnessChanged(VoidCallback? callback) {
     platformDispatcher.onPlatformBrightnessChanged = callback;
-  }
-  /// Hides the real text scale factor and reports the given
-  /// [platformBrightnessTestValue] instead.
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.platformBrightnessTestValue instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  set platformBrightnessTestValue(Brightness platformBrightnessTestValue) { // ignore: avoid_setters_without_getters
-    platformDispatcher.platformBrightnessTestValue = platformBrightnessTestValue;
-  }
-  /// Deletes any existing test platform brightness and returns to using the
-  /// real platform brightness.
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.clearPlatformBrightnessTestValue() instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  void clearPlatformBrightnessTestValue() {
-    platformDispatcher.clearPlatformBrightnessTestValue();
   }
 
   @Deprecated(
@@ -1836,21 +1785,6 @@ class TestWindow implements SingletonFlutterWindow {
     PlatformMessageResponseCallback? callback,
   ) {
     platformDispatcher.sendPlatformMessage(name, data, callback);
-  }
-
-  @Deprecated(
-    'Instead of calling this callback, use ServicesBinding.instance.channelBuffers.push. '
-    'This feature was deprecated after v2.1.0-10.0.pre.'
-  )
-  @override
-  PlatformMessageCallback? get onPlatformMessage => platformDispatcher.onPlatformMessage;
-  @Deprecated(
-    'Instead of setting this callback, use ServicesBinding.instance.defaultBinaryMessenger.setMessageHandler. '
-    'This feature was deprecated after v2.1.0-10.0.pre.'
-  )
-  @override
-  set onPlatformMessage(PlatformMessageCallback? callback) {
-    platformDispatcher.onPlatformMessage = callback;
   }
 
   /// Delete any test value properties that have been set on this [TestWindow]

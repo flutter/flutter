@@ -119,13 +119,29 @@ void main() {
     renderObject.paint(context, Offset.zero); // ignore: avoid_dynamic_calls
     expect(context.clipBehavior, equals(Clip.hardEdge));
 
-    // 3rd, pump a new widget to check that the render object can update its clip behavior.
+    // 3rd, check that the underlying Scrollable has the same clipBehavior
+    // Regression test for https://github.com/flutter/flutter/issues/133330
+    Finder scrollable = find.byWidgetPredicate((Widget widget) => widget is Scrollable);
+    expect(
+      (tester.widget(scrollable) as Scrollable).clipBehavior,
+      Clip.hardEdge,
+    );
+
+    // 4th, pump a new widget to check that the render object can update its clip behavior.
     await tester.pumpWidget(SingleChildScrollView(clipBehavior: Clip.antiAlias, child: Container(height: 2000.0)));
     expect(renderObject.clipBehavior, equals(Clip.antiAlias)); // ignore: avoid_dynamic_calls
 
-    // 4th, check that a non-default clip behavior can be sent to the painting context.
+    // 5th, check that a non-default clip behavior can be sent to the painting context.
     renderObject.paint(context, Offset.zero); // ignore: avoid_dynamic_calls
     expect(context.clipBehavior, equals(Clip.antiAlias));
+
+    // 6th, check that the underlying Scrollable has the same clipBehavior
+    // Regression test for https://github.com/flutter/flutter/issues/133330
+    scrollable = find.byWidgetPredicate((Widget widget) => widget is Scrollable);
+    expect(
+      (tester.widget(scrollable) as Scrollable).clipBehavior,
+      Clip.antiAlias,
+    );
   });
 
   testWidgets('SingleChildScrollView control test', (WidgetTester tester) async {
