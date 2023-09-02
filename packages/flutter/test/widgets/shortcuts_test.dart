@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   group(LogicalKeySet, () {
@@ -667,16 +668,7 @@ void main() {
     });
 
     test('$ShortcutManager dispatches object creation in constructor', () {
-      int eventCount = 0;
-      void listener(ObjectEvent event) => eventCount++;
-      MemoryAllocations.instance.addListener(listener);
-
-      final ShortcutManager registry = ShortcutManager();
-
-      expect(eventCount, 1);
-
-      registry.dispose();
-      MemoryAllocations.instance.removeListener(listener);
+      expect(()=> ShortcutManager().dispose(), dispatchesMemoryEvents(ShortcutManager));
     });
 
     testWidgets("Shortcuts passes to the next Shortcuts widget if it doesn't map the key", (WidgetTester tester) async {
@@ -1867,16 +1859,7 @@ void main() {
     });
 
     test('dispatches object creation in constructor', () {
-      int eventCount = 0;
-      void listener(ObjectEvent event) => eventCount++;
-      MemoryAllocations.instance.addListener(listener);
-
-      final ShortcutRegistry registry = ShortcutRegistry();
-
-      expect(eventCount, 1);
-
-      registry.dispose();
-      MemoryAllocations.instance.removeListener(listener);
+      expect(()=> ShortcutRegistry().dispose(), dispatchesMemoryEvents(ShortcutRegistry));
     });
   });
 }
