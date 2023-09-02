@@ -1078,7 +1078,7 @@ void main() {
     });
   });
 
-  testWidgets('InkFeature skips painting if intermediate node skips', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('InkFeature skips painting if intermediate node skips', (WidgetTester tester) async {
     final GlobalKey sizedBoxKey = GlobalKey();
     final GlobalKey materialKey = GlobalKey();
     await tester.pumpWidget(Material(
@@ -1093,6 +1093,7 @@ void main() {
       controller: controller,
       referenceBox: sizedBoxKey.currentContext!.findRenderObject()! as RenderBox,
     );
+    addTearDown(() => tracker.dispose());
     controller.addInkFeature(tracker);
     expect(tracker.paintCount, 0);
 
@@ -1114,7 +1115,13 @@ void main() {
     // Force a repaint again. This time, it gets repainted because it is onstage.
     materialKey.currentContext!.findRenderObject()!.paint(PaintingContext(ContainerLayer(), Rect.largest), Offset.zero);
     expect(tracker.paintCount, 2);
-  });
+  },
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    notDisposedAllowList: <String, int?>{
+      'PictureLayer': 2,
+      'ContainerLayer': 2,
+    }
+  ));
 
   group('LookupBoundary', () {
     testWidgetsWithLeakTracking('hides Material from Material.maybeOf', (WidgetTester tester) async {
