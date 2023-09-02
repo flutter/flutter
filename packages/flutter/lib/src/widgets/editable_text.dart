@@ -2125,7 +2125,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   late final Simulation _iosBlinkCursorSimulation = _DiscreteKeyFrameSimulation.iOSBlinkingCaret();
 
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(true);
-  ValueNotifier<bool>? _debugCursorVisibilityNotifier;
   final GlobalKey _editableKey = GlobalKey();
 
   /// Detects whether the clipboard can paste.
@@ -2957,7 +2956,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     clipboardStatus.removeListener(_onChangedClipboardStatus);
     clipboardStatus.dispose();
     _cursorVisibilityNotifier.dispose();
-    _debugCursorVisibilityNotifier?.dispose();
     FocusManager.instance.removeListener(_unflagInternalFocus);
     super.dispose();
     assert(_batchEditDepth <= 0, 'unfinished batch edits: $_batchEditDepth');
@@ -3877,7 +3875,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void _onCursorColorTick() {
     final double effectiveOpacity = math.min(widget.cursorColor.alpha / 255.0, _cursorBlinkOpacityController.value);
     renderEditable.cursorColor = widget.cursorColor.withOpacity(effectiveOpacity);
-    _cursorVisibilityNotifier.value = widget.showCursor && _cursorBlinkOpacityController.value > 0;
+    if (!EditableText.debugDeterministicCursor ) {
+      _cursorVisibilityNotifier.value = widget.showCursor && _cursorBlinkOpacityController.value > 0;
+    }
   }
 
   bool get _showBlinkingCursor => _hasFocus && _value.selection.isCollapsed && widget.showCursor && _tickersEnabled;
@@ -4771,13 +4771,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       (null, null)                         => MediaQuery.textScalerOf(context),
     };
 
-    final ValueNotifier<bool> showCursor;
-    if (EditableText.debugDeterministicCursor) {
-      showCursor = _debugCursorVisibilityNotifier ??= ValueNotifier<bool>(widget.showCursor);
-    } else {
-      showCursor = _cursorVisibilityNotifier;
-    }
-
     return _CompositionCallback(
       compositeCallback: _compositeCallback,
       enabled: _hasInputConnection,
@@ -4865,7 +4858,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                             value: _value,
                             cursorColor: _cursorColor,
                             backgroundCursorColor: widget.backgroundCursorColor,
-                            showCursor: showCursor,
+                            showCursor: _cursorVisibilityNotifier,
                             forceLine: widget.forceLine,
                             readOnly: widget.readOnly,
                             hasFocus: _hasFocus,
