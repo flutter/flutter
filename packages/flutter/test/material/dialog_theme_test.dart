@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 MaterialApp _appWithDialog(WidgetTester tester, Widget dialog, { ThemeData? theme }) {
   return MaterialApp(
@@ -54,7 +55,7 @@ void main() {
     expect(identical(DialogTheme.lerp(theme, theme, 0.5), theme), true);
   });
 
-  testWidgets('Dialog Theme implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dialog Theme implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DialogTheme(
       backgroundColor: Color(0xff123456),
