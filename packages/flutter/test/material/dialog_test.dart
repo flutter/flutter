@@ -2704,14 +2704,7 @@ void main() {
       await tester.tapAt(const Offset(10.0, 10.0));
       await tester.pumpAndSettle();
     }
-  },
-  // // TODO(polina-c): remove after fix
-  // // https://github.com/flutter/flutter/issues/133912
-  // leakTrackingTestConfig: const LeakTrackingTestConfig(
-  //   notDisposedAllowList: <String, int?> {'ScrollController': 4},
-  // ),
-  leakTrackingTestConfig: LeakTrackingTestConfig.debugNotDisposed(),
-  );
+  });
 
   testWidgets('showAdaptiveDialog should not allow dismiss on barrier on iOS by default', (WidgetTester tester) async {
     await tester.pumpWidget(
