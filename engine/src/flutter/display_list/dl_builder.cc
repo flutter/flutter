@@ -1225,7 +1225,7 @@ void DisplayListBuilder::DrawDisplayList(const sk_sp<DisplayList> display_list,
       auto rtree = display_list->rtree();
       if (rtree) {
         std::list<SkRect> rects =
-            rtree->searchAndConsolidateRects(bounds, false);
+            rtree->searchAndConsolidateRects(GetLocalClipBounds(), false);
         accumulated = false;
         for (const SkRect& rect : rects) {
           // TODO (https://github.com/flutter/flutter/issues/114919): Attributes
