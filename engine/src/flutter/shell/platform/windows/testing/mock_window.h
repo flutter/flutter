@@ -35,38 +35,59 @@ class MockWindow : public Window {
 
   void InjectMessageList(int count, const Win32Message* messages);
 
-  MOCK_METHOD1(OnDpiScale, void(unsigned int));
-  MOCK_METHOD2(OnResize, void(unsigned int, unsigned int));
-  MOCK_METHOD0(OnPaint, void());
-  MOCK_METHOD5(OnPointerMove,
-               void(double, double, FlutterPointerDeviceKind, int32_t, int));
-  MOCK_METHOD5(OnPointerDown,
-               void(double, double, FlutterPointerDeviceKind, int32_t, UINT));
-  MOCK_METHOD5(OnPointerUp,
-               void(double, double, FlutterPointerDeviceKind, int32_t, UINT));
-  MOCK_METHOD4(OnPointerLeave,
-               void(double, double, FlutterPointerDeviceKind, int32_t));
-  MOCK_METHOD0(OnSetCursor, void());
-  MOCK_METHOD1(OnText, void(const std::u16string&));
-  MOCK_METHOD7(OnKey,
-               void(int, int, int, char32_t, bool, bool, KeyEventCallback));
-  MOCK_METHOD1(OnUpdateSemanticsEnabled, void(bool));
-  MOCK_METHOD0(GetNativeViewAccessible, gfx::NativeViewAccessible());
-  MOCK_METHOD4(OnScroll,
-               void(double, double, FlutterPointerDeviceKind, int32_t));
-  MOCK_METHOD0(OnComposeBegin, void());
-  MOCK_METHOD0(OnComposeCommit, void());
-  MOCK_METHOD0(OnComposeEnd, void());
-  MOCK_METHOD2(OnComposeChange, void(const std::u16string&, int));
-  MOCK_METHOD3(OnImeComposition, void(UINT const, WPARAM const, LPARAM const));
+  MOCK_METHOD(void, OnDpiScale, (unsigned int), (override));
+  MOCK_METHOD(void, OnResize, (unsigned int, unsigned int), (override));
+  MOCK_METHOD(void, OnPaint, (), (override));
+  MOCK_METHOD(void,
+              OnPointerMove,
+              (double, double, FlutterPointerDeviceKind, int32_t, int),
+              (override));
+  MOCK_METHOD(void,
+              OnPointerDown,
+              (double, double, FlutterPointerDeviceKind, int32_t, UINT),
+              (override));
+  MOCK_METHOD(void,
+              OnPointerUp,
+              (double, double, FlutterPointerDeviceKind, int32_t, UINT),
+              (override));
+  MOCK_METHOD(void,
+              OnPointerLeave,
+              (double, double, FlutterPointerDeviceKind, int32_t),
+              (override));
+  MOCK_METHOD(void, OnSetCursor, (), (override));
+  MOCK_METHOD(void, OnText, (const std::u16string&), (override));
+  MOCK_METHOD(void,
+              OnKey,
+              (int, int, int, char32_t, bool, bool, KeyEventCallback),
+              (override));
+  MOCK_METHOD(void, OnUpdateSemanticsEnabled, (bool), (override));
+  MOCK_METHOD(gfx::NativeViewAccessible,
+              GetNativeViewAccessible,
+              (),
+              (override));
+  MOCK_METHOD(void,
+              OnScroll,
+              (double, double, FlutterPointerDeviceKind, int32_t),
+              (override));
+  MOCK_METHOD(void, OnComposeBegin, (), (override));
+  MOCK_METHOD(void, OnComposeCommit, (), (override));
+  MOCK_METHOD(void, OnComposeEnd, (), (override));
+  MOCK_METHOD(void, OnComposeChange, (const std::u16string&, int), (override));
+  MOCK_METHOD(void,
+              OnImeComposition,
+              (UINT const, WPARAM const, LPARAM const),
+              (override));
 
-  MOCK_METHOD0(OnThemeChange, void());
+  MOCK_METHOD(void, OnThemeChange, (), (override));
 
-  MOCK_METHOD0(GetAxFragmentRootDelegate, ui::AXFragmentRootDelegateWin*());
+  MOCK_METHOD(ui::AXFragmentRootDelegateWin*,
+              GetAxFragmentRootDelegate,
+              (),
+              (override));
 
-  MOCK_METHOD3(OnGetObject, LRESULT(UINT, WPARAM, LPARAM));
+  MOCK_METHOD(LRESULT, OnGetObject, (UINT, WPARAM, LPARAM), (override));
 
-  MOCK_METHOD1(OnWindowStateEvent, void(WindowStateEvent));
+  MOCK_METHOD(void, OnWindowStateEvent, (WindowStateEvent), (override));
 
   void CallOnImeComposition(UINT const message,
                             WPARAM const wparam,

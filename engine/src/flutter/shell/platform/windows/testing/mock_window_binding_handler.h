@@ -19,24 +19,29 @@ class MockWindowBindingHandler : public WindowBindingHandler {
   MockWindowBindingHandler();
   virtual ~MockWindowBindingHandler();
 
-  MOCK_METHOD1(SetView, void(WindowBindingHandlerDelegate* view));
-  MOCK_METHOD0(GetRenderTarget, WindowsRenderTarget());
-  MOCK_METHOD0(GetPlatformWindow, PlatformWindow());
-  MOCK_METHOD0(GetDpiScale, float());
-  MOCK_METHOD0(IsVisible, bool());
-  MOCK_METHOD0(OnWindowResized, void());
-  MOCK_METHOD0(GetPhysicalWindowBounds, PhysicalWindowBounds());
-  MOCK_METHOD1(UpdateFlutterCursor, void(const std::string& cursor_name));
-  MOCK_METHOD1(SetFlutterCursor, void(HCURSOR cursor_name));
-  MOCK_METHOD1(OnCursorRectUpdated, void(const Rect& rect));
-  MOCK_METHOD0(OnResetImeComposing, void());
-  MOCK_METHOD3(OnBitmapSurfaceUpdated,
-               bool(const void* allocation, size_t row_bytes, size_t height));
-  MOCK_METHOD0(GetPrimaryPointerLocation, PointerLocation());
-  MOCK_METHOD0(SendInitialAccessibilityFeatures, void());
-  MOCK_METHOD0(GetAlertDelegate, AlertPlatformNodeDelegate*());
-  MOCK_METHOD0(GetAlert, ui::AXPlatformNodeWin*());
-  MOCK_METHOD0(NeedsVSync, bool());
+  MOCK_METHOD(void, SetView, (WindowBindingHandlerDelegate * view), (override));
+  MOCK_METHOD(WindowsRenderTarget, GetRenderTarget, (), (override));
+  MOCK_METHOD(PlatformWindow, GetPlatformWindow, (), (override));
+  MOCK_METHOD(float, GetDpiScale, (), (override));
+  MOCK_METHOD(bool, IsVisible, (), (override));
+  MOCK_METHOD(void, OnWindowResized, (), (override));
+  MOCK_METHOD(PhysicalWindowBounds, GetPhysicalWindowBounds, (), (override));
+  MOCK_METHOD(void,
+              UpdateFlutterCursor,
+              (const std::string& cursor_name),
+              (override));
+  MOCK_METHOD(void, SetFlutterCursor, (HCURSOR cursor_name), (override));
+  MOCK_METHOD(void, OnCursorRectUpdated, (const Rect& rect), (override));
+  MOCK_METHOD(void, OnResetImeComposing, (), (override));
+  MOCK_METHOD(bool,
+              OnBitmapSurfaceUpdated,
+              (const void* allocation, size_t row_bytes, size_t height),
+              (override));
+  MOCK_METHOD(PointerLocation, GetPrimaryPointerLocation, (), (override));
+  MOCK_METHOD(void, SendInitialAccessibilityFeatures, (), (override));
+  MOCK_METHOD(AlertPlatformNodeDelegate*, GetAlertDelegate, (), (override));
+  MOCK_METHOD(ui::AXPlatformNodeWin*, GetAlert, (), (override));
+  MOCK_METHOD(bool, NeedsVSync, (), (override));
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockWindowBindingHandler);

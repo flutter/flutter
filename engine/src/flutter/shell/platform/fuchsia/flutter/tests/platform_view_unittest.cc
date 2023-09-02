@@ -176,8 +176,8 @@ class MockPlatformViewDelegate : public flutter::PlatformView::Delegate {
 
 class MockResponse : public flutter::PlatformMessageResponse {
  public:
-  MOCK_METHOD1(Complete, void(std::unique_ptr<fml::Mapping> data));
-  MOCK_METHOD0(CompleteEmpty, void());
+  MOCK_METHOD(void, Complete, (std::unique_ptr<fml::Mapping> data), (override));
+  MOCK_METHOD(void, CompleteEmpty, (), (override));
 };
 
 class TestPlatformMessageResponse : public flutter::PlatformMessageResponse {

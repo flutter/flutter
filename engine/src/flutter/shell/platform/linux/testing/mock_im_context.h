@@ -18,31 +18,34 @@ class MockIMContext {
 
   operator GtkIMContext*();
 
-  MOCK_METHOD2(gtk_im_context_set_client_window,
-               void(GtkIMContext* context, GdkWindow* window));
-  MOCK_METHOD4(gtk_im_context_get_preedit_string,
-               void(GtkIMContext* context,
-                    gchar** str,
-                    PangoAttrList** attrs,
-                    gint* cursor_pos));
-  MOCK_METHOD2(gtk_im_context_filter_keypress,
-               gboolean(GtkIMContext* context, GdkEventKey* event));
-  MOCK_METHOD1(gtk_im_context_focus_in, gboolean(GtkIMContext* context));
-  MOCK_METHOD1(gtk_im_context_focus_out, void(GtkIMContext* context));
-  MOCK_METHOD1(gtk_im_context_reset, void(GtkIMContext* context));
-  MOCK_METHOD2(gtk_im_context_set_cursor_location,
-               void(GtkIMContext* context, GdkRectangle* area));
-  MOCK_METHOD2(gtk_im_context_set_use_preedit,
-               void(GtkIMContext* context, gboolean use_preedit));
-  MOCK_METHOD4(gtk_im_context_set_surrounding,
-               void(GtkIMContext* context,
-                    const gchar* text,
-                    gint len,
-                    gint cursor_index));
-  MOCK_METHOD3(gtk_im_context_get_surrounding,
-               gboolean(GtkIMContext* context,
-                        gchar** text,
-                        gint* cursor_index));
+  MOCK_METHOD(void,
+              gtk_im_context_set_client_window,
+              (GtkIMContext * context, GdkWindow* window));
+  MOCK_METHOD(void,
+              gtk_im_context_get_preedit_string,
+              (GtkIMContext * context,
+               gchar** str,
+               PangoAttrList** attrs,
+               gint* cursor_pos));
+  MOCK_METHOD(gboolean,
+              gtk_im_context_filter_keypress,
+              (GtkIMContext * context, GdkEventKey* event));
+  MOCK_METHOD(gboolean, gtk_im_context_focus_in, (GtkIMContext * context));
+  MOCK_METHOD(void, gtk_im_context_focus_out, (GtkIMContext * context));
+  MOCK_METHOD(void, gtk_im_context_reset, (GtkIMContext * context));
+  MOCK_METHOD(void,
+              gtk_im_context_set_cursor_location,
+              (GtkIMContext * context, GdkRectangle* area));
+  MOCK_METHOD(void,
+              gtk_im_context_set_use_preedit,
+              (GtkIMContext * context, gboolean use_preedit));
+  MOCK_METHOD(
+      void,
+      gtk_im_context_set_surrounding,
+      (GtkIMContext * context, const gchar* text, gint len, gint cursor_index));
+  MOCK_METHOD(gboolean,
+              gtk_im_context_get_surrounding,
+              (GtkIMContext * context, gchar** text, gint* cursor_index));
 
  private:
   GtkIMContext* instance_ = nullptr;

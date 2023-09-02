@@ -17,111 +17,151 @@ namespace testing {
 class MockDeviceBuffer : public DeviceBuffer {
  public:
   MockDeviceBuffer(const DeviceBufferDescriptor& desc) : DeviceBuffer(desc) {}
-  MOCK_METHOD3(CopyHostBuffer,
-               bool(const uint8_t* source, Range source_range, size_t offset));
 
-  MOCK_METHOD1(SetLabel, bool(const std::string& label));
+  MOCK_METHOD(bool, SetLabel, (const std::string& label), (override));
 
-  MOCK_METHOD2(SetLabel, bool(const std::string& label, Range range));
+  MOCK_METHOD(bool,
+              SetLabel,
+              (const std::string& label, Range range),
+              (override));
 
-  MOCK_CONST_METHOD0(OnGetContents, uint8_t*());
+  MOCK_METHOD(uint8_t*, OnGetContents, (), (const, override));
 
-  MOCK_METHOD3(OnCopyHostBuffer,
-               bool(const uint8_t* source, Range source_range, size_t offset));
+  MOCK_METHOD(bool,
+              OnCopyHostBuffer,
+              (const uint8_t* source, Range source_range, size_t offset),
+              (override));
 };
 
 class MockAllocator : public Allocator {
  public:
-  MOCK_CONST_METHOD0(GetMaxTextureSizeSupported, ISize());
-  MOCK_METHOD1(
-      OnCreateBuffer,
-      std::shared_ptr<DeviceBuffer>(const DeviceBufferDescriptor& desc));
-  MOCK_METHOD1(OnCreateTexture,
-               std::shared_ptr<Texture>(const TextureDescriptor& desc));
+  MOCK_METHOD(ISize, GetMaxTextureSizeSupported, (), (const, override));
+  MOCK_METHOD(std::shared_ptr<DeviceBuffer>,
+              OnCreateBuffer,
+              (const DeviceBufferDescriptor& desc),
+              (override));
+  MOCK_METHOD(std::shared_ptr<Texture>,
+              OnCreateTexture,
+              (const TextureDescriptor& desc),
+              (override));
 };
 
 class MockBlitPass : public BlitPass {
  public:
-  MOCK_CONST_METHOD0(IsValid, bool());
-  MOCK_CONST_METHOD1(
-      EncodeCommands,
-      bool(const std::shared_ptr<Allocator>& transients_allocator));
-  MOCK_METHOD1(OnSetLabel, void(std::string label));
+  MOCK_METHOD(bool, IsValid, (), (const, override));
+  MOCK_METHOD(bool,
+              EncodeCommands,
+              (const std::shared_ptr<Allocator>& transients_allocator),
+              (const, override));
+  MOCK_METHOD(void, OnSetLabel, (std::string label), (override));
 
-  MOCK_METHOD5(OnCopyTextureToTextureCommand,
-               bool(std::shared_ptr<Texture> source,
-                    std::shared_ptr<Texture> destination,
-                    IRect source_region,
-                    IPoint destination_origin,
-                    std::string label));
+  MOCK_METHOD(bool,
+              OnCopyTextureToTextureCommand,
+              (std::shared_ptr<Texture> source,
+               std::shared_ptr<Texture> destination,
+               IRect source_region,
+               IPoint destination_origin,
+               std::string label),
+              (override));
 
-  MOCK_METHOD5(OnCopyTextureToBufferCommand,
-               bool(std::shared_ptr<Texture> source,
-                    std::shared_ptr<DeviceBuffer> destination,
-                    IRect source_region,
-                    size_t destination_offset,
-                    std::string label));
-  MOCK_METHOD4(OnCopyBufferToTextureCommand,
-               bool(BufferView source,
-                    std::shared_ptr<Texture> destination,
-                    IPoint destination_origin,
-                    std::string label));
-  MOCK_METHOD2(OnGenerateMipmapCommand,
-               bool(std::shared_ptr<Texture> texture, std::string label));
+  MOCK_METHOD(bool,
+              OnCopyTextureToBufferCommand,
+              (std::shared_ptr<Texture> source,
+               std::shared_ptr<DeviceBuffer> destination,
+               IRect source_region,
+               size_t destination_offset,
+               std::string label),
+              (override));
+  MOCK_METHOD(bool,
+              OnCopyBufferToTextureCommand,
+              (BufferView source,
+               std::shared_ptr<Texture> destination,
+               IPoint destination_origin,
+               std::string label),
+              (override));
+  MOCK_METHOD(bool,
+              OnGenerateMipmapCommand,
+              (std::shared_ptr<Texture> texture, std::string label),
+              (override));
 };
 
 class MockCommandBuffer : public CommandBuffer {
  public:
   MockCommandBuffer(std::weak_ptr<const Context> context)
       : CommandBuffer(context) {}
-  MOCK_CONST_METHOD0(IsValid, bool());
-  MOCK_CONST_METHOD1(SetLabel, void(const std::string& label));
-  MOCK_METHOD0(OnCreateBlitPass, std::shared_ptr<BlitPass>());
-  MOCK_METHOD1(OnSubmitCommands, bool(CompletionCallback callback));
-  MOCK_METHOD0(OnWaitUntilScheduled, void());
-  MOCK_METHOD0(OnCreateComputePass, std::shared_ptr<ComputePass>());
-  MOCK_METHOD1(OnCreateRenderPass,
-               std::shared_ptr<RenderPass>(RenderTarget render_target));
+  MOCK_METHOD(bool, IsValid, (), (const, override));
+  MOCK_METHOD(void, SetLabel, (const std::string& label), (const, override));
+  MOCK_METHOD(std::shared_ptr<BlitPass>, OnCreateBlitPass, (), (override));
+  MOCK_METHOD(bool,
+              OnSubmitCommands,
+              (CompletionCallback callback),
+              (override));
+  MOCK_METHOD(void, OnWaitUntilScheduled, (), (override));
+  MOCK_METHOD(std::shared_ptr<ComputePass>,
+              OnCreateComputePass,
+              (),
+              (override));
+  MOCK_METHOD(std::shared_ptr<RenderPass>,
+              OnCreateRenderPass,
+              (RenderTarget render_target),
+              (override));
 };
 
 class MockImpellerContext : public Context {
  public:
-  MOCK_CONST_METHOD0(GetBackendType, Context::BackendType());
+  MOCK_METHOD(Context::BackendType, GetBackendType, (), (const, override));
 
-  MOCK_CONST_METHOD0(DescribeGpuModel, std::string());
+  MOCK_METHOD(std::string, DescribeGpuModel, (), (const, override));
 
-  MOCK_CONST_METHOD0(IsValid, bool());
+  MOCK_METHOD(bool, IsValid, (), (const, override));
 
-  MOCK_METHOD0(Shutdown, void());
+  MOCK_METHOD(void, Shutdown, (), (override));
 
-  MOCK_CONST_METHOD0(GetResourceAllocator, std::shared_ptr<Allocator>());
+  MOCK_METHOD(std::shared_ptr<Allocator>,
+              GetResourceAllocator,
+              (),
+              (const, override));
 
-  MOCK_CONST_METHOD0(GetShaderLibrary, std::shared_ptr<ShaderLibrary>());
+  MOCK_METHOD(std::shared_ptr<ShaderLibrary>,
+              GetShaderLibrary,
+              (),
+              (const, override));
 
-  MOCK_CONST_METHOD0(GetSamplerLibrary, std::shared_ptr<SamplerLibrary>());
+  MOCK_METHOD(std::shared_ptr<SamplerLibrary>,
+              GetSamplerLibrary,
+              (),
+              (const, override));
 
-  MOCK_CONST_METHOD0(GetPipelineLibrary, std::shared_ptr<PipelineLibrary>());
+  MOCK_METHOD(std::shared_ptr<PipelineLibrary>,
+              GetPipelineLibrary,
+              (),
+              (const, override));
 
-  MOCK_CONST_METHOD0(CreateCommandBuffer, std::shared_ptr<CommandBuffer>());
+  MOCK_METHOD(std::shared_ptr<CommandBuffer>,
+              CreateCommandBuffer,
+              (),
+              (const, override));
 
-  MOCK_CONST_METHOD0(GetCapabilities,
-                     const std::shared_ptr<const Capabilities>&());
+  MOCK_METHOD(const std::shared_ptr<const Capabilities>&,
+              GetCapabilities,
+              (),
+              (const, override));
 };
 
 class MockTexture : public Texture {
  public:
   MockTexture(const TextureDescriptor& desc) : Texture(desc) {}
-  MOCK_METHOD1(SetLabel, void(std::string_view label));
-  MOCK_METHOD3(SetContents,
-               bool(const uint8_t* contents, size_t length, size_t slice));
-  MOCK_METHOD2(SetContents,
-               bool(std::shared_ptr<const fml::Mapping> mapping, size_t slice));
-  MOCK_CONST_METHOD0(IsValid, bool());
-  MOCK_CONST_METHOD0(GetSize, ISize());
-  MOCK_METHOD3(OnSetContents,
-               bool(const uint8_t* contents, size_t length, size_t slice));
-  MOCK_METHOD2(OnSetContents,
-               bool(std::shared_ptr<const fml::Mapping> mapping, size_t slice));
+  MOCK_METHOD(void, SetLabel, (std::string_view label), (override));
+  MOCK_METHOD(bool, IsValid, (), (const, override));
+  MOCK_METHOD(ISize, GetSize, (), (const, override));
+  MOCK_METHOD(bool,
+              OnSetContents,
+              (const uint8_t* contents, size_t length, size_t slice),
+              (override));
+  MOCK_METHOD(bool,
+              OnSetContents,
+              (std::shared_ptr<const fml::Mapping> mapping, size_t slice),
+              (override));
 };
 
 }  // namespace testing

@@ -6,9 +6,10 @@ namespace flutter {
 namespace testing {
 class MockAPKAssetProviderImpl : public APKAssetProviderInternal {
  public:
-  MOCK_CONST_METHOD1(
-      GetAsMapping,
-      std::unique_ptr<fml::Mapping>(const std::string& asset_name));
+  MOCK_METHOD(std::unique_ptr<fml::Mapping>,
+              GetAsMapping,
+              (const std::string& asset_name),
+              (const, override));
 };
 
 TEST(APKAssetProvider, Clone) {
