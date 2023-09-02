@@ -459,7 +459,7 @@ void main() {
     controller.show();
 
     late OverlayEntry overlayEntry;
-    addTearDown(() => overlayEntry.dispose());
+    addTearDown(() => overlayEntry..remove()..dispose());
 
     await tester.pumpWidget(
       Center(
@@ -516,12 +516,7 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
 
     expect(tester.takeException(), isNull);
-  },
-  // TODO(polina-c): remove after fixing
-  // https://github.com/flutter/flutter/issues/133920
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    notDisposedAllowList: <String, int?>{'ValueNotifier<_OverlayEntryWidgetState?>': 1},
-  ));
+  });
 
   testWidgetsWithLeakTracking('Custom rectCallback renders an ink splash from its center', (WidgetTester tester) async {
     const Color splashColor = Color(0xff00ff00);
