@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/widgets/linked_text/linked_text.2.dart' as e
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('can tap different link types with different results', (WidgetTester tester) async {
+  testWidgets('can tap links generated from TextSpans', (WidgetTester tester) async {
     await tester.pumpWidget(
       const example.LinkedTextApp(),
     );
@@ -19,18 +19,9 @@ void main() {
     expect(textFinder, findsOneWidget);
     expect(find.byType(AlertDialog), findsNothing);
 
-    await tester.tapAt(tester.getTopLeft(textFinder));
-    await tester.pumpAndSettle();
-    expect(find.byType(AlertDialog), findsOneWidget);
-    expect(find.text('You tapped: https://www.twitter.com/FlutterDev'), findsOneWidget);
-
-    await tester.tapAt(tester.getTopLeft(find.byType(Scaffold)));
-    await tester.pumpAndSettle();
-    expect(find.byType(AlertDialog), findsNothing);
-
     await tester.tapAt(tester.getCenter(textFinder));
     await tester.pumpAndSettle();
     expect(find.byType(AlertDialog), findsOneWidget);
-    expect(find.text('You tapped: www.flutter.dev'), findsOneWidget);
+    expect(find.text('You tapped: https://www.flutter.dev'), findsOneWidget);
   });
 }

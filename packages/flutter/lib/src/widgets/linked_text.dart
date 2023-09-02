@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
@@ -15,26 +13,6 @@ import 'text.dart';
 /// been tapped.
 typedef LinkTapCallback = void Function(String linkString);
 
-/// Signature for a function that builds an [InlineSpan] link.
-///
-/// The link displays [displayString] and links to [linkString] when tapped.
-/// These are distinct because sometimes a link may be split across multiple
-/// [TextSpan]s.
-///
-/// Creates a [GestureRecognizer] and returns it so that its lifecycle can be
-/// maintained by the caller.
-///
-/// {@template flutter.painting.LinkBuilder.recognizer}
-/// It's necessary to call [GestureRecognizer.dispose] on the returned
-/// recognizer when the owning widget is disposed. See [TextSpan.recognizer].
-/// When using [LinkedText], this is done automatically for any recognizers
-/// returned from a [LinkBuilder].
-/// {@endtemplate}
-typedef LinkBuilder = (InlineSpan, GestureRecognizer) Function(
-  String displayString,
-  String linkString,
-);
-
 /// Singature for a function that builds the [Widget] output by [LinkedText].
 ///
 /// Typically a [Text.rich] containing a [TextSpan] whose children are the
@@ -43,9 +21,6 @@ typedef LinkedTextWidgetBuilder = Widget Function (
   BuildContext context,
   Iterable<InlineSpan> linkedSpans,
 );
-
-/// Singature for a function that finds [TextRange]s in the given [String].
-typedef TextRangesFinder = Iterable<TextRange> Function(String text);
 
 /// A widget that displays text with parts of it made interactive.
 ///
@@ -62,6 +37,7 @@ typedef TextRangesFinder = Iterable<TextRange> Function(String text);
 /// ** See code in examples/api/lib/widgets/linked_text/linked_text.0.dart **
 /// {@end-tool}
 class LinkedText extends StatefulWidget {
+  // TODO(justinmc): Update docs.
   /// Creates an instance of [LinkedText] from the given [text] or [spans],
   /// highlighting any URLs by default.
   ///
@@ -78,10 +54,17 @@ class LinkedText extends StatefulWidget {
   /// {@end-tool}
   ///
   /// {@tool dartpad}
+  /// This example shows how to use [LinkedText] to link Twitter handles by
+  /// passing in a custom [RegExp].
+  ///
+  /// ** See code in examples/api/lib/widgets/linked_text/linked_text.1.dart **
+  /// {@end-tool}
+  ///
+  /// {@tool dartpad}
   /// This example shows how to use [LinkedText] to link URLs in a TextSpan tree
   /// instead of in a flat string.
   ///
-  /// ** See code in examples/api/lib/widgets/linked_text/linked_text.3.dart **
+  /// ** See code in examples/api/lib/widgets/linked_text/linked_text.2.dart **
   /// {@end-tool}
   ///
   /// See also:
@@ -90,23 +73,20 @@ class LinkedText extends StatefulWidget {
   ///    control over matching and building different types of links.
   LinkedText({
     super.key,
+    required this.onTap,
     this.builder = _defaultBuilder,
-    required LinkTapCallback onTap,
+    this.regExp,
     List<InlineSpan>? spans,
     String? text,
   }) : assert((text == null) != (spans == null), 'Must specify exactly one to link: either text or spans.'),
-       textLinkers = <TextLinker>[
-         TextLinker(
-           textRangesFinder: defaultTextRangesFinder,
-           linkBuilder: getDefaultLinkBuilder(onTap),
-         ),
-       ],
        spans = spans ?? <InlineSpan>[
          TextSpan(
            text: text,
          ),
-       ];
+       ],
+       textLinkers = null;
 
+  // TODO(justinmc): Useful still?
   /// Creates an instance of [LinkedText] where the given [textLinkers] are
   /// applied.
   ///
@@ -119,13 +99,6 @@ class LinkedText extends StatefulWidget {
   /// The [TextLinker.textRangesFinder] must not produce overlapping
   /// [TextRange]s.
   ///
-  /// {@tool dartpad}
-  /// This example shows how to use [LinkedText.textLinkers] to link both URLs
-  /// and Twitter handles independently.
-  ///
-  /// ** See code in examples/api/lib/widgets/linked_text/linked_text.2.dart **
-  /// {@end-tool}
-  ///
   /// See also:
   ///
   ///  * [TextLinker.regExp], which can be used to easily create a [TextLinker]
@@ -137,42 +110,56 @@ class LinkedText extends StatefulWidget {
     this.builder = _defaultBuilder,
     String? text,
     List<InlineSpan>? spans,
-    required this.textLinkers,
+    required List<TextLinker> textLinkers,
   }) : assert((text == null) != (spans == null), 'Must specify exactly one to link: either text or spans.'),
        assert(textLinkers.isNotEmpty),
+       textLinkers = textLinkers, // ignore: prefer_initializing_formals
        spans = spans ?? <InlineSpan>[
          TextSpan(
            text: text,
          ),
-       ];
+       ],
+       onTap = null,
+       regExp = null;
 
-  static final RegExp _urlRegExp = RegExp(r'(?<!@[a-zA-Z0-9-]*)(?<![\/\.a-zA-Z0-9-])((https?:\/\/)?(([a-zA-Z0-9-]*\.)*[a-zA-Z0-9-]+(\.[a-zA-Z]+)+))(?::\d{1,5})?(?:\/[^\s]*)?(?:\?[^\s#]*)?(?:#[^\s]*)?(?![a-zA-Z0-9-]*@)');
-
-  /// A [TextRangesFinder] that returns [TextRange]s for URLs.
+  /// The spans on which to create links.
   ///
-  /// Matches full (https://www.example.com/?q=1) and shortened (example.com)
-  /// URLs.
-  ///
-  /// Excludes:
-  ///
-  ///   * URLs with any protocol other than http or https.
-  ///   * Email addresses.
-  static final TextRangesFinder defaultTextRangesFinder = TextLinker.textRangesFinderFromRegExp(_urlRegExp);
-
-  /// The spans on which to create links by applying [textLinkers].
+  /// It's also possible to specify a plain string by using the `text`
+  /// parameter instead.
   final List<InlineSpan> spans;
-
-  /// Defines what parts of the text to match and how to link them.
-  ///
-  /// [TextLinker]s are applied in the order given. Overlapping matches are not
-  /// supported and will produce an error.
-  final List<TextLinker> textLinkers;
 
   /// Builds the [Widget] that is output by [LinkedText].
   ///
   /// By default, builds a [Text.rich] with a single [TextSpan] whose children
   /// are the linked [TextSpan]s, and whose style is [DefaultTextStyle].
   final LinkedTextWidgetBuilder builder;
+
+  /// Handles tapping on a link.
+  ///
+  /// This is irrelevant when using [LinkedText.textLinkers], where this is
+  /// controlled with an [InlineLinkBuilder] instead.
+  final LinkTapCallback? onTap;
+
+  /// Matches the text that should be turned into a link.
+  ///
+  /// This is irrelevant when using [LinkedText.textLinkers], where this is
+  /// controlled with an [TextRangesFinder] instead.
+  ///
+  /// {@tool dartpad}
+  /// This example shows how to use [LinkedText] to link Twitter handles by
+  /// passing in a custom [RegExp].
+  ///
+  /// ** See code in examples/api/lib/widgets/linked_text/linked_text.1.dart **
+  /// {@end-tool}
+  final RegExp? regExp;
+
+  /// Defines what parts of the text to match and how to link them.
+  ///
+  /// [TextLinker]s are applied in the order given. Overlapping matches are not
+  /// supported and will produce an error.
+  final List<TextLinker>? textLinkers;
+
+  static final RegExp _urlRegExp = RegExp(r'(?<!@[a-zA-Z0-9-]*)(?<![\/\.a-zA-Z0-9-])((https?:\/\/)?(([a-zA-Z0-9-]*\.)*[a-zA-Z0-9-]+(\.[a-zA-Z]+)+))(?::\d{1,5})?(?:\/[^\s]*)?(?:\?[^\s#]*)?(?:#[^\s]*)?(?![a-zA-Z0-9-]*@)');
 
   /// The default value of [builder].
   ///
@@ -190,23 +177,6 @@ class LinkedText extends StatefulWidget {
         children: linkedSpans.toList(),
       ),
     );
-  }
-
-  /// Returns a [LinkBuilder] that highlights the given text and sets the given
-  /// [onTap] handler.
-  static LinkBuilder getDefaultLinkBuilder(LinkTapCallback onTap) {
-    return (String displayString, String linkString) {
-      final TapGestureRecognizer recognizer = TapGestureRecognizer()
-          ..onTap = () => onTap(linkString);
-      return (
-        _InlineLinkSpan(
-          recognizer: recognizer,
-          style: defaultLinkStyle,
-          text: displayString,
-        ),
-        recognizer,
-      );
-    };
   }
 
   static Color get _linkColor {
@@ -234,34 +204,63 @@ class LinkedText extends StatefulWidget {
     decoration: TextDecoration.underline,
   );
 
+  /// A [TextRangesFinder] that returns [TextRange]s for URLs.
+  ///
+  /// Matches full (https://www.example.com/?q=1) and shortened (example.com)
+  /// URLs.
+  ///
+  /// Excludes:
+  ///
+  ///   * URLs with any protocol other than http or https.
+  ///   * Email addresses.
+  static final TextRangesFinder defaultTextRangesFinder = TextLinker.textRangesFinderFromRegExp(_urlRegExp);
+
   @override
   State<LinkedText> createState() => _LinkedTextState();
 }
 
 class _LinkedTextState extends State<LinkedText> {
-  Iterable<GestureRecognizer>? _recognizers;
+  final List<GestureRecognizer> _recognizers = <GestureRecognizer>[];
   late Iterable<InlineSpan> _linkedSpans;
+  late final List<TextLinker> _textLinkers;
 
   void _disposeRecognizers() {
-    if (_recognizers == null) {
-      return;
-    }
-    for (final GestureRecognizer recognizer in _recognizers!) {
+    for (final GestureRecognizer recognizer in _recognizers) {
       recognizer.dispose();
     }
+    _recognizers.clear();
   }
 
   void _linkSpans() {
-    final (Iterable<InlineSpan> linkedSpans, Iterable<GestureRecognizer> recognizers) =
-        TextLinker.linkSpans(widget.spans, widget.textLinkers);
-    _linkedSpans = linkedSpans;
     _disposeRecognizers();
-    _recognizers = recognizers;
+    final Iterable<InlineSpan> linkedSpans = TextLinker.linkSpans(
+      widget.spans,
+      _textLinkers,
+    );
+    _linkedSpans = linkedSpans;
   }
 
   @override
   void initState() {
     super.initState();
+    _textLinkers = widget.textLinkers ?? <TextLinker>[
+       TextLinker(
+         textRangesFinder: widget.regExp == null
+             ? LinkedText.defaultTextRangesFinder
+             : TextLinker.textRangesFinderFromRegExp(widget.regExp!),
+         linkBuilder: (String displayString, String linkString) {
+           final TapGestureRecognizer recognizer = TapGestureRecognizer()
+               ..onTap = () => widget.onTap!(linkString);
+           // Keep track of created recognizers so that they can be disposed.
+           _recognizers.add(recognizer);
+           return _InlineLinkSpan(
+             recognizer: recognizer,
+             style: LinkedText.defaultLinkStyle,
+             text: displayString,
+           );
+         },
+       ),
+     ];
     _linkSpans();
   }
 
@@ -327,433 +326,4 @@ class _InlineLinkSpan extends TextSpan {
     decorationColor: _linkColor,
     decoration: TextDecoration.underline,
   );
-}
-
-/// Specifies a way to find and style parts of some text.
-///
-/// [TextLinker]s can be applied to some text using the [linkSpans] method.
-///
-/// [textRangesFinder] must not produce overlapping [TextRange]s.
-///
-/// See also:
-///
-///  * [LinkedText.textLinkers], which uses [TextLinker]s to allow full control
-///    over matching and building different types of links.
-class TextLinker {
-  /// Creates an instance of [TextLinker].
-  const TextLinker({
-    required this.textRangesFinder,
-    required this.linkBuilder,
-  });
-
-  /// Creates an instance of [TextLinker] where the [textRangesFinder] is
-  /// defined by a given [RegExp].
-  ///
-  /// The [RegExp] must not produce overlapping matches.
-  ///
-  /// {@tool dartpad}
-  /// This example shows how to use [TextLinker.regExp] to link Twitter handles.
-  ///
-  /// ** See code in examples/api/lib/widgets/linked_text/linked_text.1.dart **
-  /// {@end-tool}
-  ///
-  /// See also:
-  ///
-  ///  * [LinkedText.textLinkers], which uses [TextLinker]s to allow full
-  ///    control over matching and building different types of links.
-  TextLinker.regExp({
-    required RegExp regExp,
-    required this.linkBuilder,
-  }) : textRangesFinder = TextLinker.textRangesFinderFromRegExp(regExp);
-
-  /// Builds an [InlineSpan] to display the text that it's passed.
-  final LinkBuilder linkBuilder;
-
-  /// Returns [TextRange]s that should be built with [linkBuilder].
-  ///
-  /// Throws if overlapping [TextRange]s are produced.
-  final TextRangesFinder textRangesFinder;
-
-  /// Creates a [TextRangesFinder] that finds all the matches of the given [RegExp].
-  static TextRangesFinder textRangesFinderFromRegExp(RegExp regExp) {
-    return (String text) {
-      return _textRangesFromText(
-        text: text,
-        regExp: regExp,
-      );
-    };
-  }
-
-  /// Applies the given [TextLinker]s to the given [InlineSpan]s and returns the
-  /// new resulting spans and any created [GestureRecognizer]s.
-  ///
-  /// The [TextLinker.textRangesFinder]s must not produce any overlapping
-  /// [TextRange]s.
-  ///
-  /// {@macro flutter.painting.LinkBuilder.recognizer}
-  static (Iterable<InlineSpan>, Iterable<GestureRecognizer>) linkSpans(Iterable<InlineSpan> spans, Iterable<TextLinker> textLinkers) {
-    final _LinkedSpans linkedSpans = _LinkedSpans(
-      spans: spans,
-      textLinkers: textLinkers,
-    );
-    return (
-      linkedSpans.linkedSpans,
-      linkedSpans.recognizers,
-    );
-  }
-
-  // Turns all matches from the regExp into a list of TextRanges.
-  static Iterable<TextRange> _textRangesFromText({
-    required String text,
-    required RegExp regExp,
-  }) {
-    final Iterable<RegExpMatch> matches = regExp.allMatches(text);
-    return matches.map((RegExpMatch match) {
-      return TextRange(
-        start: match.start,
-        end: match.end,
-      );
-    });
-  }
-
-  /// Apply this [TextLinker] to a [String].
-  Iterable<_TextLinkerMatch> _link(String text) {
-    final Iterable<TextRange> textRanges = textRangesFinder(text);
-    return textRanges.map((TextRange textRange) {
-      return _TextLinkerMatch(
-        textRange: textRange,
-        linkBuilder: linkBuilder,
-        linkString: text.substring(textRange.start, textRange.end),
-      );
-    });
-  }
-
-  @override
-  String toString() => '${objectRuntimeType(this, 'TextLinker')}($linkBuilder, $textRangesFinder)';
-}
-
-/// A matched replacement on some string.
-///
-/// Produced by applying a [TextLinker]'s [TextRangesFinder] to a string.
-class _TextLinkerMatch {
-  _TextLinkerMatch({
-    required this.textRange,
-    required this.linkBuilder,
-    required this.linkString,
-  }) : assert(textRange.end - textRange.start == linkString.length);
-
-  final LinkBuilder linkBuilder;
-  final TextRange textRange;
-
-  /// The string that [textRange] matches.
-  final String linkString;
-
-  /// Get all [_TextLinkerMatch]s obtained from applying the given
-  /// `textLinker`s with the given `text`.
-  static List<_TextLinkerMatch> fromTextLinkers(Iterable<TextLinker> textLinkers, String text) {
-    return textLinkers
-        .fold<List<_TextLinkerMatch>>(
-          <_TextLinkerMatch>[],
-          (List<_TextLinkerMatch> previousValue, TextLinker value) {
-            return previousValue..addAll(value._link(text));
-        });
-  }
-
-  @override
-  String toString() => '${objectRuntimeType(this, '_TextLinkerMatch')}($textRange, $linkBuilder, $linkString)';
-}
-
-/// Used to cache information about a span's recursive text.
-///
-/// Avoids repeatedly calling [TextSpan.toPlainText].
-class _TextCache {
-  factory _TextCache({
-    required InlineSpan span,
-  }) {
-    if (span is! TextSpan) {
-      return _TextCache._(
-        text: '',
-        lengths: <InlineSpan, int>{span: 0},
-      );
-    }
-
-    _TextCache childrenTextCache = _TextCache._empty();
-    for (final InlineSpan child in span.children ?? <InlineSpan>[]) {
-      final _TextCache childTextCache = _TextCache(
-        span: child,
-      );
-      childrenTextCache = childrenTextCache._merge(childTextCache);
-    }
-
-    final String text = (span.text ?? '') + childrenTextCache.text;
-    return _TextCache._(
-      text: text,
-      lengths: <InlineSpan, int>{
-        span: text.length,
-        ...childrenTextCache._lengths,
-      },
-    );
-  }
-
-  factory _TextCache.fromMany({
-    required Iterable<InlineSpan> spans,
-  }) {
-    _TextCache textCache = _TextCache._empty();
-    for (final InlineSpan span in spans) {
-      final _TextCache spanTextCache = _TextCache(
-        span: span,
-      );
-      textCache = textCache._merge(spanTextCache);
-    }
-    return textCache;
-  }
-
-  _TextCache._empty(
-  ) : text = '',
-      _lengths = <InlineSpan, int>{};
-
-  const _TextCache._({
-    required this.text,
-    required Map<InlineSpan, int> lengths,
-  }) : _lengths = lengths;
-
-  /// The flattened text of all spans in the span tree.
-  final String text;
-
-  /// A [Map] containing the lengths of all spans in the span tree.
-  ///
-  /// The length is defined as the length of the flattened text at the point in
-  /// the tree where the node resides.
-  ///
-  /// The length of [text] is the length of the root node in [_lengths].
-  final Map<InlineSpan, int> _lengths;
-
-  /// Merges the given _TextCache with this one by appending it to the end.
-  ///
-  /// Returns a new _TextCache and makes no modifications to either passed in.
-  _TextCache _merge(_TextCache other) {
-    return _TextCache._(
-      text: text + other.text,
-      lengths: Map<InlineSpan, int>.from(_lengths)..addAll(other._lengths),
-    );
-  }
-
-  int? getLength(InlineSpan span) => _lengths[span];
-
-  @override
-  String toString() => '${objectRuntimeType(this, '_TextCache')}($text, $_lengths)';
-}
-
-/// Signature for the output of linking an InlineSpan to some
-/// _TextLinkerMatches.
-typedef _LinkSpanRecursion = (
-  /// The output of linking the input InlineSpan.
-  InlineSpan linkedSpan,
-  /// The provided _TextLinkerMatches, but with those completely used during
-  /// linking removed.
-  Iterable<_TextLinkerMatch> unusedTextLinkerMatches,
-  /// The GestureRecognizers produced when each link is created. These need
-  /// to be disposed by a widget when no longer needed.
-  Iterable<GestureRecognizer> generatedRecognizers,
-);
-
-/// Signature for the output of linking a List of InlineSpans to some
-/// _TextLinkerMatches.
-typedef _LinkSpansRecursion = (
-  /// The output of linking the input InlineSpans.
-  Iterable<InlineSpan> linkedSpans,
-  /// The provided _TextLinkerMatches, but with those completely used during
-  /// linking removed.
-  Iterable<_TextLinkerMatch> unusedTextLinkerMatches,
-  /// The GestureRecognizers produced when each link is created. These need
-  /// to be disposed by a widget when no longer needed.
-  Iterable<GestureRecognizer> generatedRecognizers,
-);
-
-/// Applies some [TextLinker]s to some [InlineSpan]s and produces a new list of
-/// [linkedSpans] as well as the [recognizers] created for each generated link.
-class _LinkedSpans {
-  factory _LinkedSpans({
-    required Iterable<InlineSpan> spans,
-    required Iterable<TextLinker> textLinkers,
-  }) {
-    // Flatten the spans and store all string lengths, so that matches across
-    // span boundaries can be matched in the flat string. This is calculated
-    // once in the beginning to avoid recomputing.
-    final _TextCache textCache = _TextCache.fromMany(spans: spans);
-
-    final Iterable<_TextLinkerMatch> textLinkerMatches =
-        _cleanTextLinkerMatches(
-          _TextLinkerMatch.fromTextLinkers(textLinkers, textCache.text),
-        );
-
-    final (Iterable<InlineSpan> linkedSpans, Iterable<_TextLinkerMatch> _, Iterable<GestureRecognizer> recognizers) =
-        _linkSpansRecurse(
-          spans,
-          textCache,
-          textLinkerMatches,
-        );
-
-    return _LinkedSpans._(
-      linkedSpans: linkedSpans,
-      recognizers: recognizers,
-    );
-  }
-
-  const _LinkedSpans._({
-    required this.linkedSpans,
-    required this.recognizers,
-  });
-
-  final Iterable<InlineSpan> linkedSpans;
-  final Iterable<GestureRecognizer> recognizers;
-
-  static List<_TextLinkerMatch> _cleanTextLinkerMatches(Iterable<_TextLinkerMatch> textLinkerMatches) {
-    final List<_TextLinkerMatch> nextTextLinkerMatches = textLinkerMatches.toList();
-
-    // Sort by start.
-    nextTextLinkerMatches.sort((_TextLinkerMatch a, _TextLinkerMatch b) {
-      return a.textRange.start.compareTo(b.textRange.start);
-    });
-
-    // Validate that there are no overlapping matches.
-    int lastEnd = 0;
-    for (final _TextLinkerMatch textLinkerMatch in nextTextLinkerMatches) {
-      if (textLinkerMatch.textRange.start < lastEnd) {
-        throw ArgumentError('Matches must not overlap. Overlapping text was "${textLinkerMatch.linkString}" located at ${textLinkerMatch.textRange.start}-${textLinkerMatch.textRange.end}.');
-      }
-      lastEnd = textLinkerMatch.textRange.end;
-    }
-
-    // Remove empty ranges.
-    nextTextLinkerMatches.removeWhere((_TextLinkerMatch textLinkerMatch) {
-      return textLinkerMatch.textRange.start == textLinkerMatch.textRange.end;
-    });
-
-    return nextTextLinkerMatches;
-  }
-
-  // `index` is the index of the start of `span` in the overall flattened tree
-  // string.
-  //
-  // The GestureRecognizers are returned so that they can be disposed by an
-  // owning widget.
-  static _LinkSpansRecursion _linkSpansRecurse(Iterable<InlineSpan> spans, _TextCache textCache, Iterable<_TextLinkerMatch> textLinkerMatches, [int index = 0]) {
-    final List<InlineSpan> output = <InlineSpan>[];
-    Iterable<_TextLinkerMatch> nextTextLinkerMatches = textLinkerMatches;
-    final List<GestureRecognizer> recognizers = <GestureRecognizer>[];
-    int nextIndex = index;
-    for (final InlineSpan span in spans) {
-      final (InlineSpan childSpan, Iterable<_TextLinkerMatch> childTextLinkerMatches, Iterable<GestureRecognizer> childRecognizers) = _linkSpanRecurse(
-        span,
-        textCache,
-        nextTextLinkerMatches,
-        nextIndex,
-      );
-      output.add(childSpan);
-      nextTextLinkerMatches = childTextLinkerMatches;
-      recognizers.addAll(childRecognizers);
-      nextIndex += textCache.getLength(span)!;
-    }
-
-    return (output, nextTextLinkerMatches, recognizers);
-  }
-
-  // `index` is the index of the start of `span` in the overall flattened tree
-  // string.
-  //
-  // The GestureRecognizers are returned so that they can be disposed by an
-  // owning widget.
-  static _LinkSpanRecursion _linkSpanRecurse(InlineSpan span, _TextCache textCache, Iterable<_TextLinkerMatch> textLinkerMatches, [int index = 0]) {
-    if (span is! TextSpan) {
-      return (span, textLinkerMatches, <GestureRecognizer>[]);
-    }
-
-    final List<InlineSpan> nextChildren = <InlineSpan>[];
-    final List<GestureRecognizer> recognizers = <GestureRecognizer>[];
-    List<_TextLinkerMatch> nextTextLinkerMatches = <_TextLinkerMatch>[...textLinkerMatches];
-    int lastLinkEnd = index;
-    if (span.text?.isNotEmpty ?? false) {
-      final int textEnd = index + span.text!.length;
-      for (final _TextLinkerMatch textLinkerMatch in textLinkerMatches) {
-        if (textLinkerMatch.textRange.start >= textEnd) {
-          // Because ranges is ordered, there are no more relevant ranges for this
-          // text.
-          break;
-        }
-        if (textLinkerMatch.textRange.end <= index) {
-          // This range ends before this span and is therefore irrelevant to it.
-          // It should have been removed from ranges.
-          assert(false, 'Invalid ranges.');
-          nextTextLinkerMatches.removeAt(0);
-          continue;
-        }
-        if (textLinkerMatch.textRange.start > index) {
-          // Add the unlinked text before the range.
-          nextChildren.add(TextSpan(
-            text: span.text!.substring(
-              lastLinkEnd - index,
-              textLinkerMatch.textRange.start - index,
-            ),
-          ));
-        }
-        // Add the link itself.
-        final int linkStart = math.max(textLinkerMatch.textRange.start, index);
-        lastLinkEnd = math.min(textLinkerMatch.textRange.end, textEnd);
-        final (InlineSpan nextChild, GestureRecognizer recognizer) = textLinkerMatch.linkBuilder(
-          span.text!.substring(linkStart - index, lastLinkEnd - index),
-          textLinkerMatch.linkString,
-        );
-        nextChildren.add(nextChild);
-        recognizers.add(recognizer);
-        if (textLinkerMatch.textRange.end > textEnd) {
-          // If we only partially used this range, keep it in nextRanges. Since
-          // overlapping ranges have been removed, this must be the last relevant
-          // range for this span.
-          break;
-        }
-        nextTextLinkerMatches.removeAt(0);
-      }
-
-      // Add any extra text after any ranges.
-      final String remainingText = span.text!.substring(lastLinkEnd - index);
-      if (remainingText.isNotEmpty) {
-        nextChildren.add(TextSpan(
-          text: remainingText,
-        ));
-      }
-    }
-
-    // Recurse on the children.
-    if (span.children?.isNotEmpty ?? false) {
-      final (
-        Iterable<InlineSpan> childrenSpans,
-        Iterable<_TextLinkerMatch> childrenTextLinkerMatches,
-        Iterable<GestureRecognizer> childrenRecognizers,
-      ) = _linkSpansRecurse(
-        span.children!,
-        textCache,
-        nextTextLinkerMatches,
-        index + (span.text?.length ?? 0),
-      );
-      nextTextLinkerMatches = childrenTextLinkerMatches.toList();
-      nextChildren.addAll(childrenSpans);
-      recognizers.addAll(childrenRecognizers);
-    }
-
-    return (
-      TextSpan(
-        style: span.style,
-        children: nextChildren,
-      ),
-      nextTextLinkerMatches,
-      recognizers,
-    );
-  }
-
-  void dispose() {
-    for (final GestureRecognizer recognizer in recognizers) {
-      recognizer.dispose();
-    }
-  }
 }
