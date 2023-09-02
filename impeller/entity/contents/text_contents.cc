@@ -4,6 +4,7 @@
 
 #include "impeller/entity/contents/text_contents.h"
 
+#include <cstring>
 #include <optional>
 #include <type_traits>
 #include <utility>
@@ -193,7 +194,7 @@ bool TextContents::Render(const ContentContext& renderer,
 
             for (const Point& point : unit_points) {
               vtx.unit_position = point;
-              ::memcpy(vtx_contents++, &vtx, sizeof(VS::PerVertexData));
+              std::memcpy(vtx_contents++, &vtx, sizeof(VS::PerVertexData));
             }
           }
         }
