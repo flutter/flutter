@@ -350,6 +350,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
 
   @override
   void dispose() {
+    _controller.dispose();
     _clipRectLayer.layer = null;
     super.dispose();
   }
