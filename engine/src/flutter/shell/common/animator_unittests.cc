@@ -25,18 +25,24 @@ namespace testing {
 
 class FakeAnimatorDelegate : public Animator::Delegate {
  public:
-  MOCK_METHOD2(OnAnimatorBeginFrame,
-               void(fml::TimePoint frame_target_time, uint64_t frame_number));
+  MOCK_METHOD(void,
+              OnAnimatorBeginFrame,
+              (fml::TimePoint frame_target_time, uint64_t frame_number),
+              (override));
 
   void OnAnimatorNotifyIdle(fml::TimeDelta deadline) override {
     notify_idle_called_ = true;
   }
 
-  MOCK_METHOD1(OnAnimatorUpdateLatestFrameTargetTime,
-               void(fml::TimePoint frame_target_time));
+  MOCK_METHOD(void,
+              OnAnimatorUpdateLatestFrameTargetTime,
+              (fml::TimePoint frame_target_time),
+              (override));
 
-  MOCK_METHOD1(OnAnimatorDraw,
-               void(std::shared_ptr<LayerTreePipeline> pipeline));
+  MOCK_METHOD(void,
+              OnAnimatorDraw,
+              (std::shared_ptr<LayerTreePipeline> pipeline),
+              (override));
 
   void OnAnimatorDrawLastLayerTree(
       std::unique_ptr<FrameTimingsRecorder> frame_timings_recorder) override {}

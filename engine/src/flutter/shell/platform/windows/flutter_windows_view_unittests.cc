@@ -110,8 +110,8 @@ class MockFlutterWindowsEngine : public FlutterWindowsEngine {
  public:
   MockFlutterWindowsEngine() : FlutterWindowsEngine(GetTestProject()) {}
 
-  MOCK_METHOD0(Stop, bool());
-  MOCK_METHOD(bool, PostRasterThreadTask, (fml::closure));
+  MOCK_METHOD(bool, Stop, (), (override));
+  MOCK_METHOD(bool, PostRasterThreadTask, (fml::closure), (override));
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockFlutterWindowsEngine);
@@ -121,11 +121,17 @@ class MockAngleSurfaceManager : public AngleSurfaceManager {
  public:
   MockAngleSurfaceManager() : AngleSurfaceManager(false) {}
 
-  MOCK_METHOD4(CreateSurface, bool(WindowsRenderTarget*, EGLint, EGLint, bool));
-  MOCK_METHOD4(ResizeSurface, void(WindowsRenderTarget*, EGLint, EGLint, bool));
-  MOCK_METHOD0(DestroySurface, void());
+  MOCK_METHOD(bool,
+              CreateSurface,
+              (WindowsRenderTarget*, EGLint, EGLint, bool),
+              (override));
+  MOCK_METHOD(void,
+              ResizeSurface,
+              (WindowsRenderTarget*, EGLint, EGLint, bool),
+              (override));
+  MOCK_METHOD(void, DestroySurface, (), (override));
 
-  MOCK_METHOD1(SetVSyncEnabled, void(bool));
+  MOCK_METHOD(void, SetVSyncEnabled, (bool), (override));
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockAngleSurfaceManager);

@@ -70,23 +70,33 @@ class MockPlatformHandler : public PlatformHandler {
 
   virtual ~MockPlatformHandler() = default;
 
-  MOCK_METHOD2(GetPlainText,
-               void(std::unique_ptr<MethodResult<rapidjson::Document>>,
-                    std::string_view key));
-  MOCK_METHOD1(GetHasStrings,
-               void(std::unique_ptr<MethodResult<rapidjson::Document>>));
-  MOCK_METHOD2(SetPlainText,
-               void(const std::string&,
-                    std::unique_ptr<MethodResult<rapidjson::Document>>));
-  MOCK_METHOD2(SystemSoundPlay,
-               void(const std::string&,
-                    std::unique_ptr<MethodResult<rapidjson::Document>>));
+  MOCK_METHOD(void,
+              GetPlainText,
+              (std::unique_ptr<MethodResult<rapidjson::Document>>,
+               std::string_view key),
+              (override));
+  MOCK_METHOD(void,
+              GetHasStrings,
+              (std::unique_ptr<MethodResult<rapidjson::Document>>),
+              (override));
+  MOCK_METHOD(void,
+              SetPlainText,
+              (const std::string&,
+               std::unique_ptr<MethodResult<rapidjson::Document>>),
+              (override));
+  MOCK_METHOD(void,
+              SystemSoundPlay,
+              (const std::string&,
+               std::unique_ptr<MethodResult<rapidjson::Document>>),
+              (override));
 
-  MOCK_METHOD4(QuitApplication,
-               void(std::optional<HWND> hwnd,
-                    std::optional<WPARAM> wparam,
-                    std::optional<LPARAM> lparam,
-                    UINT exit_code));
+  MOCK_METHOD(void,
+              QuitApplication,
+              (std::optional<HWND> hwnd,
+               std::optional<WPARAM> wparam,
+               std::optional<LPARAM> lparam,
+               UINT exit_code),
+              (override));
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockPlatformHandler);

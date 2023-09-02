@@ -26,12 +26,12 @@ class MockSettingsPlugin : public SettingsPlugin {
   bool is_high_contrast() { return is_high_contrast_; }
 
   // |SettingsPlugin|
-  MOCK_METHOD0(GetAlwaysUse24HourFormat, bool());
-  MOCK_METHOD0(GetTextScaleFactor, float());
-  MOCK_METHOD0(GetPreferredBrightness, PlatformBrightness());
+  MOCK_METHOD(bool, GetAlwaysUse24HourFormat, (), (override));
+  MOCK_METHOD(float, GetTextScaleFactor, (), (override));
+  MOCK_METHOD(PlatformBrightness, GetPreferredBrightness, (), (override));
 
-  MOCK_METHOD0(WatchPreferredBrightnessChanged, void());
-  MOCK_METHOD0(WatchTextScaleFactorChanged, void());
+  MOCK_METHOD(void, WatchPreferredBrightnessChanged, (), (override));
+  MOCK_METHOD(void, WatchTextScaleFactorChanged, (), (override));
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockSettingsPlugin);

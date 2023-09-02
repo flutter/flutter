@@ -16,46 +16,79 @@ namespace flutter {
 namespace testing {
 namespace {
 class MockDelegate : public PlatformView::Delegate {
-  MOCK_METHOD1(OnPlatformViewCreated, void(std::unique_ptr<Surface>));
-  MOCK_METHOD0(OnPlatformViewDestroyed, void());
-  MOCK_METHOD0(OnPlatformViewScheduleFrame, void());
-  MOCK_METHOD1(OnPlatformViewSetNextFrameCallback,
-               void(const fml::closure& closure));
-  MOCK_METHOD2(OnPlatformViewSetViewportMetrics,
-               void(int64_t view_id, const ViewportMetrics& metrics));
-  MOCK_METHOD1(OnPlatformViewDispatchPlatformMessage,
-               void(std::unique_ptr<PlatformMessage> message));
-  MOCK_METHOD1(OnPlatformViewDispatchPointerDataPacket,
-               void(std::unique_ptr<PointerDataPacket> packet));
-  MOCK_METHOD3(OnPlatformViewDispatchSemanticsAction,
-               void(int32_t id,
-                    SemanticsAction action,
-                    fml::MallocMapping args));
-  MOCK_METHOD1(OnPlatformViewSetSemanticsEnabled, void(bool enabled));
-  MOCK_METHOD1(OnPlatformViewSetAccessibilityFeatures, void(int32_t flags));
-  MOCK_METHOD1(OnPlatformViewRegisterTexture,
-               void(std::shared_ptr<Texture> texture));
-  MOCK_METHOD1(OnPlatformViewUnregisterTexture, void(int64_t texture_id));
-  MOCK_METHOD1(OnPlatformViewMarkTextureFrameAvailable,
-               void(int64_t texture_id));
-  MOCK_METHOD3(LoadDartDeferredLibrary,
-               void(intptr_t loading_unit_id,
-                    std::unique_ptr<const fml::Mapping> snapshot_data,
-                    std::unique_ptr<const fml::Mapping> snapshot_instructions));
-  MOCK_METHOD3(LoadDartDeferredLibraryError,
-               void(intptr_t loading_unit_id,
-                    const std::string error_message,
-                    bool transient));
-  MOCK_METHOD2(UpdateAssetResolverByType,
-               void(std::unique_ptr<AssetResolver> updated_asset_resolver,
-                    AssetResolver::AssetResolverType type));
-  MOCK_CONST_METHOD0(OnPlatformViewGetSettings, const Settings&());
+  MOCK_METHOD(void,
+              OnPlatformViewCreated,
+              (std::unique_ptr<Surface>),
+              (override));
+  MOCK_METHOD(void, OnPlatformViewDestroyed, (), (override));
+  MOCK_METHOD(void, OnPlatformViewScheduleFrame, (), (override));
+  MOCK_METHOD(void,
+              OnPlatformViewSetNextFrameCallback,
+              (const fml::closure& closure),
+              (override));
+  MOCK_METHOD(void,
+              OnPlatformViewSetViewportMetrics,
+              (int64_t view_id, const ViewportMetrics& metrics),
+              (override));
+  MOCK_METHOD(void,
+              OnPlatformViewDispatchPlatformMessage,
+              (std::unique_ptr<PlatformMessage> message),
+              (override));
+  MOCK_METHOD(void,
+              OnPlatformViewDispatchPointerDataPacket,
+              (std::unique_ptr<PointerDataPacket> packet),
+              (override));
+  MOCK_METHOD(void,
+              OnPlatformViewDispatchSemanticsAction,
+              (int32_t id, SemanticsAction action, fml::MallocMapping args),
+              (override));
+  MOCK_METHOD(void,
+              OnPlatformViewSetSemanticsEnabled,
+              (bool enabled),
+              (override));
+  MOCK_METHOD(void,
+              OnPlatformViewSetAccessibilityFeatures,
+              (int32_t flags),
+              (override));
+  MOCK_METHOD(void,
+              OnPlatformViewRegisterTexture,
+              (std::shared_ptr<Texture> texture),
+              (override));
+  MOCK_METHOD(void,
+              OnPlatformViewUnregisterTexture,
+              (int64_t texture_id),
+              (override));
+  MOCK_METHOD(void,
+              OnPlatformViewMarkTextureFrameAvailable,
+              (int64_t texture_id),
+              (override));
+  MOCK_METHOD(void,
+              LoadDartDeferredLibrary,
+              (intptr_t loading_unit_id,
+               std::unique_ptr<const fml::Mapping> snapshot_data,
+               std::unique_ptr<const fml::Mapping> snapshot_instructions),
+              (override));
+  MOCK_METHOD(void,
+              LoadDartDeferredLibraryError,
+              (intptr_t loading_unit_id,
+               const std::string error_message,
+               bool transient),
+              (override));
+  MOCK_METHOD(void,
+              UpdateAssetResolverByType,
+              (std::unique_ptr<AssetResolver> updated_asset_resolver,
+               AssetResolver::AssetResolverType type),
+              (override));
+  MOCK_METHOD(const Settings&,
+              OnPlatformViewGetSettings,
+              (),
+              (const, override));
 };
 
 class MockResponse : public PlatformMessageResponse {
  public:
-  MOCK_METHOD1(Complete, void(std::unique_ptr<fml::Mapping> data));
-  MOCK_METHOD0(CompleteEmpty, void());
+  MOCK_METHOD(void, Complete, (std::unique_ptr<fml::Mapping> data), (override));
+  MOCK_METHOD(void, CompleteEmpty, (), (override));
 };
 }  // namespace
 

@@ -21,9 +21,15 @@ class MockTextInputManager : public TextInputManager {
   MockTextInputManager();
   virtual ~MockTextInputManager();
 
-  MOCK_CONST_METHOD0(GetComposingString, std::optional<std::u16string>());
-  MOCK_CONST_METHOD0(GetResultString, std::optional<std::u16string>());
-  MOCK_CONST_METHOD0(GetComposingCursorPosition, long());
+  MOCK_METHOD(std::optional<std::u16string>,
+              GetComposingString,
+              (),
+              (const, override));
+  MOCK_METHOD(std::optional<std::u16string>,
+              GetResultString,
+              (),
+              (const, override));
+  MOCK_METHOD(long, GetComposingCursorPosition, (), (const, override));
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockTextInputManager);

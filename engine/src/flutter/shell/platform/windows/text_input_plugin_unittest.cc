@@ -100,8 +100,8 @@ class MockTextInputPluginDelegate : public TextInputPluginDelegate {
   MockTextInputPluginDelegate() {}
   virtual ~MockTextInputPluginDelegate() = default;
 
-  MOCK_METHOD1(OnCursorRectUpdated, void(const Rect&));
-  MOCK_METHOD0(OnResetImeComposing, void());
+  MOCK_METHOD(void, OnCursorRectUpdated, (const Rect&), (override));
+  MOCK_METHOD(void, OnResetImeComposing, (), (override));
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockTextInputPluginDelegate);

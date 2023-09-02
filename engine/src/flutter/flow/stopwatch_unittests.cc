@@ -13,7 +13,7 @@ namespace testing {
 
 class MockRefreshRateUpdater : public Stopwatch::RefreshRateUpdater {
  public:
-  MOCK_CONST_METHOD0(GetFrameBudget, fml::Milliseconds());
+  MOCK_METHOD(fml::Milliseconds, GetFrameBudget, (), (const, override));
 };
 
 TEST(Instrumentation, GetDefaultFrameBudgetTest) {

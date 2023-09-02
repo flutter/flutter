@@ -19,7 +19,7 @@ class MockDirectManipulationOwner : public DirectManipulationOwner {
       : DirectManipulationOwner(window){};
   virtual ~MockDirectManipulationOwner() = default;
 
-  MOCK_METHOD1(SetContact, void(UINT contact_id));
+  MOCK_METHOD(void, SetContact, (UINT contact_id), (override));
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockDirectManipulationOwner);

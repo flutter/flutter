@@ -50,7 +50,7 @@ class MockSignalHandler : public SignalHandler {
   MockSignalHandler(gpointer instance, const gchar* name)
       : SignalHandler(instance, name, G_CALLBACK(OnSignal)) {}
 
-  MOCK_METHOD0(Handler, void());
+  MOCK_METHOD(void, Handler, ());
 
  private:
   static void OnSignal(MockSignalHandler* mock) { mock->Handler(); }
@@ -63,7 +63,7 @@ class MockSignalHandler1 : public SignalHandler {
   MockSignalHandler1(gpointer instance, const gchar* name)
       : SignalHandler(instance, name, G_CALLBACK(OnSignal1)) {}
 
-  MOCK_METHOD1(Handler1, void(A1 a1));
+  MOCK_METHOD(void, Handler1, (A1 a1));
 
  private:
   static void OnSignal1(MockSignalHandler1* mock, A1 a1) { mock->Handler1(a1); }
@@ -76,7 +76,7 @@ class MockSignalHandler2 : public SignalHandler {
   MockSignalHandler2(gpointer instance, const gchar* name)
       : SignalHandler(instance, name, G_CALLBACK(OnSignal2)) {}
 
-  MOCK_METHOD2(Handler2, void(A1 a1, A2 a2));
+  MOCK_METHOD(void, Handler2, (A1 a1, A2 a2));
 
  private:
   static void OnSignal2(MockSignalHandler2* mock, A1 a1, A2 a2) {

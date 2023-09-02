@@ -20,18 +20,21 @@ class MockSettings {
 
   operator FlSettings*();
 
-  MOCK_METHOD1(fl_settings_get_clock_format,
-               FlClockFormat(FlSettings* settings));
+  MOCK_METHOD(FlClockFormat,
+              fl_settings_get_clock_format,
+              (FlSettings * settings));
 
-  MOCK_METHOD1(fl_settings_get_color_scheme,
-               FlColorScheme(FlSettings* settings));
+  MOCK_METHOD(FlColorScheme,
+              fl_settings_get_color_scheme,
+              (FlSettings * settings));
 
-  MOCK_METHOD1(fl_settings_get_enable_animations, bool(FlSettings* settings));
+  MOCK_METHOD(bool, fl_settings_get_enable_animations, (FlSettings * settings));
 
-  MOCK_METHOD1(fl_settings_get_high_contrast, bool(FlSettings* settings));
+  MOCK_METHOD(bool, fl_settings_get_high_contrast, (FlSettings * settings));
 
-  MOCK_METHOD1(fl_settings_get_text_scaling_factor,
-               gdouble(FlSettings* settings));
+  MOCK_METHOD(gdouble,
+              fl_settings_get_text_scaling_factor,
+              (FlSettings * settings));
 
  private:
   FlSettings* instance_ = nullptr;

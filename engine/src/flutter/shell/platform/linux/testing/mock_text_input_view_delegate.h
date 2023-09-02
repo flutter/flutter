@@ -22,12 +22,13 @@ class MockTextInputViewDelegate {
 
   operator FlTextInputViewDelegate*();
 
-  MOCK_METHOD5(fl_text_input_view_delegate_translate_coordinates,
-               void(FlTextInputViewDelegate* delegate,
-                    gint view_x,
-                    gint view_y,
-                    gint* window_x,
-                    gint* window_y));
+  MOCK_METHOD(void,
+              fl_text_input_view_delegate_translate_coordinates,
+              (FlTextInputViewDelegate * delegate,
+               gint view_x,
+               gint view_y,
+               gint* window_x,
+               gint* window_y));
 
  private:
   FlTextInputViewDelegate* instance_ = nullptr;
