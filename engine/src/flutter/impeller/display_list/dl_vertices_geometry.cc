@@ -46,7 +46,8 @@ std::shared_ptr<impeller::VerticesGeometry> MakeVertices(
   if (vertices->colors()) {
     colors.reserve(vertices->vertex_count());
     for (auto i = 0; i < vertices->vertex_count(); i++) {
-      colors.push_back(skia_conversions::ToColor(vertices->colors()[i]));
+      colors.push_back(
+          skia_conversions::ToColor(vertices->colors()[i]).Premultiply());
     }
   }
   std::vector<Point> texture_coordinates;
