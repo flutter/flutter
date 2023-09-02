@@ -197,6 +197,15 @@ platform_properties:
         ]
       os: Windows-10
       device_type: none
+  windows_arm64:
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "certs", "version": "version:9563bb"}
+        ]
+      os: Windows-10
+      device_type: none
+      cpu: arm64
   windows_android:
     properties:
       dependencies: >-
@@ -4979,6 +4988,20 @@ targets:
     properties:
       tags: >
         ["devicelab", "hostonly", "windows"]
+      dependencies: >-
+        [
+          {"dependency": "vs_build", "version": "version:vs2019"}
+        ]
+      task_name: hello_world_win_desktop__compile
+
+  - name: Windows_arm64 hello_world_win_desktop__compile
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "windows", "arm64"]
       dependencies: >-
         [
           {"dependency": "vs_build", "version": "version:vs2019"}

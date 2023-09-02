@@ -180,7 +180,7 @@ void main() {
     },
     leakTrackingTestConfig: const LeakTrackingTestConfig(
       // TODO(polina-c): fix and remove after merge
-      // https://github.com/flutter/flutter/pull/133883
+      // https://github.com/flutter/flutter/issues/133862
       notDisposedAllowList: <String, int?>{
         '_RestorableDatePickerEntryMode': 3,
         '_RestorableAutovalidateMode': 1,
