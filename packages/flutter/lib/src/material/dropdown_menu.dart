@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -45,6 +44,7 @@ class DropdownMenuEntry<T> {
   const DropdownMenuEntry({
     required this.value,
     required this.label,
+    this.labelWidget,
     this.leadingIcon,
     this.trailingIcon,
     this.enabled = true,
@@ -58,6 +58,17 @@ class DropdownMenuEntry<T> {
 
   /// The label displayed in the center of the menu item.
   final String label;
+
+  /// Overrides the default label widget which is `Text(label)`.
+  ///
+  /// {@tool dartpad}
+  /// This sample shows how to override the default label [Text]
+  /// widget with one that forces the menu entry to appear on one line
+  /// by specifying [Text.maxLines] and [Text.overflow].
+  ///
+  /// ** See code in examples/api/lib/material/dropdown_menu/dropdown_menu_entry_label_widget.0.dart **
+  /// {@end-tool}
+  final Widget? labelWidget;
 
   /// An optional icon to display before the label.
   final Widget? leadingIcon;
@@ -230,7 +241,7 @@ class DropdownMenu<T> extends StatefulWidget {
 
   /// The text style for the [TextField] of the [DropdownMenu];
   ///
-  /// Defaults to the overall theme's [TextTheme.labelLarge]
+  /// Defaults to the overall theme's [TextTheme.bodyLarge]
   /// if the dropdown menu theme's value is null.
   final TextStyle? textStyle;
 
@@ -310,7 +321,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   int? currentHighlight;
   double? leadingPadding;
   bool _menuHasEnabledItem = false;
-  late final FocusNode _focusNode;
 
   @override
   void initState() {
@@ -328,18 +338,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           TextSelection.collapsed(offset: _textEditingController.text.length);
     }
     refreshLeadingPadding();
-    _focusNode = FocusNode(
-      canRequestFocus: canRequestFocus(),
-    );
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final bool widgetCanRequestFocus = canRequestFocus();
-    if (widgetCanRequestFocus != _focusNode.canRequestFocus) {
-      _focusNode.canRequestFocus = widgetCanRequestFocus;
-    }
   }
 
   @override
@@ -367,10 +365,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
             TextSelection.collapsed(offset: _textEditingController.text.length);
       }
     }
-    final bool widgetCanRequestFocus = canRequestFocus();
-    if (widgetCanRequestFocus != _focusNode.canRequestFocus) {
-      _focusNode.canRequestFocus = widgetCanRequestFocus;
-    }
   }
 
   bool canRequestFocus() {
@@ -378,7 +372,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       return widget.requestFocusOnTap!;
     }
 
-    switch (defaultTargetPlatform) {
+    switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -459,6 +453,15 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       final Color focusedBackgroundColor = effectiveStyle.foregroundColor?.resolve(<MaterialState>{MaterialState.focused})
         ?? Theme.of(context).colorScheme.onSurface;
 
+      Widget label = entry.labelWidget ?? Text(entry.label);
+      if (widget.width != null) {
+        final double horizontalPadding = padding + _kDefaultHorizontalPadding;
+        label = ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: widget.width! - horizontalPadding),
+          child: label,
+        );
+      }
+
       // Simulate the focused state because the text field should always be focused
       // during traversal. If the menu item has a custom foreground color, the "focused"
       // color will also change to foregroundColor.withOpacity(0.12).
@@ -468,7 +471,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           )
         : effectiveStyle;
 
-      final MenuItemButton menuItemButton = MenuItemButton(
+      final Widget  menuItemButton = MenuItemButton(
         key: enableScrollToHighlight ? buttonItemKeys[i] : null,
         style: effectiveStyle,
         leadingIcon: entry.leadingIcon,
@@ -483,7 +486,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
             }
           : null,
         requestFocusOnHover: false,
-        child: Text(entry.label),
+        child: label,
       );
       result.add(menuItemButton);
     }
@@ -610,8 +613,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         final Widget textField = TextField(
             key: _anchorKey,
             mouseCursor: effectiveMouseCursor,
-            focusNode: _focusNode,
-            readOnly: !canRequestFocus(),
+            canRequestFocus: canRequestFocus(),
             enableInteractiveSelection: canRequestFocus(),
             textAlignVertical: TextAlignVertical.center,
             style: effectiveTextStyle,
@@ -935,7 +937,7 @@ class _DropdownMenuDefaultsM3 extends DropdownMenuThemeData {
   late final ThemeData _theme = Theme.of(context);
 
   @override
-  TextStyle? get textStyle => _theme.textTheme.labelLarge;
+  TextStyle? get textStyle => _theme.textTheme.bodyLarge;
 
   @override
   MenuStyle get menuStyle {

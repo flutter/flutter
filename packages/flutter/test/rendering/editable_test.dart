@@ -9,8 +9,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/src/services/text_input.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'mock_canvas.dart';
-import 'recording_canvas.dart';
 import 'rendering_tester.dart';
 
 void _applyParentData(List<RenderBox> inlineRenderBoxes, InlineSpan span) {
@@ -1720,6 +1718,89 @@ void main() {
       result = BoxHitTestResult();
       editable.hitTest(result, position: const Offset(5.0, 15.0));
       expect(result.path, hasLength(0));
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
+
+    test('hits correct WidgetSpan when scrolled', () {
+      final String text = '${"\n" * 10}test';
+      final TextSelectionDelegate delegate = _FakeEditableTextState()
+        ..textEditingValue = TextEditingValue(
+            text: text,
+            selection: const TextSelection.collapsed(offset: 13),
+          );
+      final List<RenderBox> renderBoxes = <RenderBox>[
+        RenderParagraph(const TextSpan(text: 'a'), textDirection: TextDirection.ltr),
+        RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr),
+        RenderParagraph(const TextSpan(text: 'c'), textDirection: TextDirection.ltr),
+      ];
+      final RenderEditable editable = RenderEditable(
+        maxLines: null,
+        text: TextSpan(
+          style: const TextStyle(height: 1.0, fontSize: 10.0),
+          children: <InlineSpan>[
+            TextSpan(text: text),
+            const WidgetSpan(child: Text('a')),
+            const TextSpan(children: <InlineSpan>[
+                WidgetSpan(child: Text('b')),
+                WidgetSpan(child: Text('c')),
+              ],
+            ),
+          ],
+        ),
+        startHandleLayerLink: LayerLink(),
+        endHandleLayerLink: LayerLink(),
+        textDirection: TextDirection.ltr,
+        offset: ViewportOffset.fixed(100.0), // equal to the height of the 10 empty lines
+        textSelectionDelegate: delegate,
+        selection: const TextSelection.collapsed(
+          offset: 0,
+        ),
+        children: renderBoxes,
+      );
+      _applyParentData(renderBoxes, editable.text!);
+      layout(editable, constraints: BoxConstraints.loose(const Size(500.0, 500.0)));
+      // Prepare for painting after layout.
+      pumpFrame(phase: EnginePhase.compositingBits);
+      BoxHitTestResult result = BoxHitTestResult();
+      editable.hitTest(result, position: Offset.zero);
+      // We expect two hit test entries in the path because the RenderEditable
+      // will add itself as well.
+      expect(result.path, hasLength(2));
+      HitTestTarget target = result.path.first.target;
+      expect(target, isA<TextSpan>());
+      expect((target as TextSpan).text, text);
+      // Only testing the RenderEditable entry here once, not anymore below.
+      expect(result.path.last.target, isA<RenderEditable>());
+      result = BoxHitTestResult();
+      editable.hitTest(result, position: const Offset(15.0, 0.0));
+      expect(result.path, hasLength(2));
+      target = result.path.first.target;
+      expect(target, isA<TextSpan>());
+      expect((target as TextSpan).text, text);
+
+      result = BoxHitTestResult();
+      editable.hitTest(result, position: const Offset(41.0, 0.0));
+      expect(result.path, hasLength(3));
+      target = result.path.first.target;
+      expect(target, isA<TextSpan>());
+      expect((target as TextSpan).text, 'a');
+
+      result = BoxHitTestResult();
+      editable.hitTest(result, position: const Offset(55.0, 0.0));
+      expect(result.path, hasLength(3));
+      target = result.path.first.target;
+      expect(target, isA<TextSpan>());
+      expect((target as TextSpan).text, 'b');
+
+      result = BoxHitTestResult();
+      editable.hitTest(result, position: const Offset(69.0, 5.0));
+      expect(result.path, hasLength(3));
+      target = result.path.first.target;
+      expect(target, isA<TextSpan>());
+      expect((target as TextSpan).text, 'c');
+
+      result = BoxHitTestResult();
+      editable.hitTest(result, position: const Offset(5.0, 15.0));
+      expect(result.path, hasLength(2));
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
   });
 

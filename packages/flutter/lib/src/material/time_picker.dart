@@ -2104,6 +2104,8 @@ typedef EntryModeChangeCallback = void Function(TimePickerEntryMode);
 /// selected [TimeOfDay] if the user taps the "OK" button, or null if the user
 /// taps the "CANCEL" button. The selected time is reported by calling
 /// [Navigator.pop].
+///
+/// Use [showTimePicker] to show a dialog already containing a [TimePickerDialog].
 class TimePickerDialog extends StatefulWidget {
   /// Creates a Material Design time picker.
   ///
@@ -2382,6 +2384,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
                 overflowAlignment: OverflowBarAlignment.end,
                 children: <Widget>[
                   TextButton(
+                    style: pickerTheme.cancelButtonStyle ?? defaultTheme.cancelButtonStyle,
                     onPressed: _handleCancel,
                     child: Text(widget.cancelText ??
                         (theme.useMaterial3
@@ -2389,6 +2392,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
                             : localizations.cancelButtonLabel.toUpperCase())),
                   ),
                   TextButton(
+                    style: pickerTheme.confirmButtonStyle ?? defaultTheme.confirmButtonStyle,
                     onPressed: _handleOk,
                     child: Text(widget.confirmText ?? localizations.okButtonLabel),
                   ),
@@ -3590,7 +3594,7 @@ class _TimePickerDefaultsM3 extends _TimePickerDefaults {
   @override
   TextStyle get hourMinuteTextStyle {
     return MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
-      // TODO(tahatesser): Update this when https://github.com/flutter/flutter/issues/127035 is fixed.
+      // TODO(tahatesser): Update this when https://github.com/flutter/flutter/issues/131247 is fixed.
       // This is using the correct text style from Material 3 spec.
       // https://m3.material.io/components/time-pickers/specs#fd0b6939-edab-4058-82e1-93d163945215
       return _textTheme.displayMedium!.copyWith(color: _hourMinuteTextColor.resolve(states));

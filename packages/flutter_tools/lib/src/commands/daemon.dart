@@ -335,6 +335,7 @@ class DaemonDomain extends Domain {
     registerHandler('version', version);
     registerHandler('shutdown', shutdown);
     registerHandler('getSupportedPlatforms', getSupportedPlatforms);
+    registerHandler('setNotifyVerbose', setNotifyVerbose);
 
     sendEvent(
       'daemon.connected',
@@ -346,7 +347,7 @@ class DaemonDomain extends Domain {
 
     _subscription = daemon.notifyingLogger!.onMessage.listen((LogMessage message) {
       if (daemon.logToStdout) {
-        if (message.level == 'status') {
+        if (message.level == 'status' || message.level == 'trace') {
           // We use `print()` here instead of `stdout.writeln()` in order to
           // capture the print output for testing.
           // ignore: avoid_print
@@ -460,6 +461,11 @@ class DaemonDomain extends Domain {
         ],
       };
     }
+  }
+
+  /// If notifyVerbose is set, the daemon will forward all verbose logs.
+  Future<void> setNotifyVerbose(Map<String, Object?> args) async {
+    daemon.notifyingLogger?.notifyVerbose = _getBoolArg(args, 'verbose') ?? true;
   }
 }
 
@@ -1210,7 +1216,7 @@ Object? _toJsonable(Object? obj) {
 }
 
 class NotifyingLogger extends DelegatingLogger {
-  NotifyingLogger({ required this.verbose, required Logger parent }) : super(parent) {
+  NotifyingLogger({ required this.verbose, required Logger parent, this.notifyVerbose = false }) : super(parent) {
     _messageController = StreamController<LogMessage>.broadcast(
       onListen: _onListen,
     );
@@ -1219,6 +1225,8 @@ class NotifyingLogger extends DelegatingLogger {
   final bool verbose;
   final List<LogMessage> messageBuffer = <LogMessage>[];
   late StreamController<LogMessage> _messageController;
+
+  bool notifyVerbose = false;
 
   void _onListen() {
     if (messageBuffer.isNotEmpty) {
@@ -1277,6 +1285,10 @@ class NotifyingLogger extends DelegatingLogger {
 
   @override
   void printTrace(String message) {
+    if (notifyVerbose) {
+      _sendMessage(LogMessage('trace', message));
+      return;
+    }
     if (!verbose) {
       return;
     }

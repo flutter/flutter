@@ -136,12 +136,14 @@
   "bottomSheetLabel": "Alapaneeli",
   "scrimOnTapHint": "Sulje $modalRouteContentName",
   "keyboardKeyShift": "Vaihto",
-  "expansionTileExpandedHint": "double tap to collapse'",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded",
-  "menuDismissLabel": "Dismiss menu",
-  "lookUpButtonLabel": "Look Up"
+  "expansionTileExpandedHint": "tiivistä kaksoisnapauttamalla",
+  "expansionTileCollapsedHint": "laajenna kaksoisnapauttamalla",
+  "expansionTileExpandedTapHint": "Tiivistä",
+  "expansionTileCollapsedTapHint": "Katso lisätietoja laajentamalla",
+  "expandedHint": "Tiivistetty",
+  "collapsedHint": "Laajennettu",
+  "menuDismissLabel": "Hylkää valikko",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }
