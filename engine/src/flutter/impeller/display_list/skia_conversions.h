@@ -38,11 +38,12 @@ std::vector<Matrix> ToRSXForms(const SkRSXform xform[], int count);
 
 PathBuilder::RoundingRadii ToRoundingRadii(const SkRRect& rrect);
 
-Path ToPath(const SkPath& path);
+Path ToPath(const SkPath& path, Point shift = Point(0, 0));
 
 Path ToPath(const SkRRect& rrect);
 
-Path PathDataFromTextBlob(const sk_sp<SkTextBlob>& blob);
+Path PathDataFromTextBlob(const sk_sp<SkTextBlob>& blob,
+                          Point shift = Point(0, 0));
 
 std::optional<impeller::PixelFormat> ToPixelFormat(SkColorType type);
 
