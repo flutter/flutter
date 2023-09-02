@@ -2664,7 +2664,7 @@ void main() {
     okNode.dispose();
   });
 
-  testWidgets('Adaptive AlertDialog shows correct widget on each platform', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Adaptive AlertDialog shows correct widget on each platform', (WidgetTester tester) async {
     final AlertDialog dialog = AlertDialog.adaptive(
       content: Container(
         height: 5000.0,
@@ -2704,7 +2704,12 @@ void main() {
       await tester.tapAt(const Offset(10.0, 10.0));
       await tester.pumpAndSettle();
     }
-  });
+  },
+  // TODO(polina-c): remove after fix
+  // https://github.com/flutter/flutter/issues/133912
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    notDisposedAllowList: <String, int?> {'ScrollController': 4},
+  ));
 
   testWidgets('showAdaptiveDialog should not allow dismiss on barrier on iOS by default', (WidgetTester tester) async {
     await tester.pumpWidget(
