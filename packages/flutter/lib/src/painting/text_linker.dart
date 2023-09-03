@@ -29,7 +29,6 @@ typedef InlineLinkBuilder = InlineSpan Function(
 /// Singature for a function that finds [TextRange]s in the given [String].
 typedef TextRangesFinder = Iterable<TextRange> Function(String text);
 
-// TODO(justinmc): Create test file for this file.
 /// Specifies a way to find and style parts of some text.
 ///
 /// [TextLinker]s can be applied to some text using the [linkSpans] method.

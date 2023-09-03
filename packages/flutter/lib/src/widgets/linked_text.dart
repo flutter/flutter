@@ -75,6 +75,7 @@ class LinkedText extends StatefulWidget {
     super.key,
     required this.onTap,
     this.builder = _defaultBuilder,
+    // TODO(justinmc): Should it be possible to pass a TextRangesFinder?
     this.regExp,
     List<InlineSpan>? spans,
     String? text,
@@ -86,7 +87,7 @@ class LinkedText extends StatefulWidget {
        ],
        textLinkers = null;
 
-  // TODO(justinmc): Useful still?
+  // TODO(justinmc): Useful still? Write an example similar to text_linker.0.dart but that uses LinkedText.textLiners. I'm thinking remove it.
   /// Creates an instance of [LinkedText] where the given [textLinkers] are
   /// applied.
   ///
