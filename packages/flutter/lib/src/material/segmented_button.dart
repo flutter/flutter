@@ -325,11 +325,10 @@ class _SegmentedButtonState<T> extends State<SegmentedButton<T>> {
         : segment.label != null
           ? segment.icon
           : null;
-      final MaterialStatesController controller = MaterialStatesController(
-        <MaterialState>{
+      final MaterialStatesController controller = _statesControllers.putIfAbsent(segment, () => MaterialStatesController());
+      controller.value = <MaterialState>{
           if (segmentSelected) MaterialState.selected,
-        }
-      );
+      };
 
       final Widget button = icon != null
         ? TextButton.icon(
@@ -388,6 +387,14 @@ class _SegmentedButtonState<T> extends State<SegmentedButton<T>> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    for (final MaterialStatesController controller in _statesControllers.values) {
+      controller.dispose();
+    }
+    super.dispose();
   }
 }
 class _SegmentedButtonRenderWidget<T> extends MultiChildRenderObjectWidget {
