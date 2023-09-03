@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   const TextTheme defaultGeometryTheme = Typography.englishLike2014;
@@ -19,7 +20,7 @@ void main() {
     expect(tween.lerp(0.25), equals(ThemeData.lerp(light, dark, 0.25)));
   });
 
-  testWidgets('PopupMenu inherits app theme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PopupMenu inherits app theme', (WidgetTester tester) async {
     final Key popupMenuButtonKey = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
