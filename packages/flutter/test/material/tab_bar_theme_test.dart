@@ -106,7 +106,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Tab bar defaults (primary)',
   // TODO(polina-c): investigate and remove after merge:
-  //
+  // https://github.com/flutter/flutter/pull/133952
   leakTrackingTestConfig: const LeakTrackingTestConfig(notDisposedAllowList: <String, int?>{'TabController': 1}),
   (WidgetTester tester) async {
     // Test default label color and label styles.
