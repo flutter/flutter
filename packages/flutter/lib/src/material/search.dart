@@ -377,6 +377,14 @@ abstract class SearchDelegate<T> {
   }
 
   _SearchPageRoute<T>? _route;
+
+  /// Releases the resources.
+  @mustCallSuper
+  void dispose() {
+    _currentBodyNotifier.dispose();
+    _focusNode?.dispose();
+    _queryTextController.dispose();
+  }
 }
 
 /// Describes the body that is currently shown under the [AppBar] in the
