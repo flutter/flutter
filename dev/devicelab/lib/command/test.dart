@@ -13,7 +13,7 @@ class TestCommand extends Command<void> {
         help: 'The name of a task listed under bin/tasks.\n'
             '   Example: complex_layout__start_up.\n');
     argParser.addMultiOption('task-args',
-        help: 'The name of a task listed under bin/tasks.\n'
+        help: 'List of arguments to pass to the task.\n'
             'For example, "--task-args build" is passed as "bin/task/task.dart --build"');
     argParser.addOption(
       'device-id',
