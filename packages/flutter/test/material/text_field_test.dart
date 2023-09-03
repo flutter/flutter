@@ -1556,7 +1556,7 @@ void main() {
     EditableText.debugDeterministicCursor = false;
   });
 
-  testWidgets('Overflowing a line with spaces stops the cursor at the end', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Overflowing a line with spaces stops the cursor at the end', (WidgetTester tester) async {
     final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
