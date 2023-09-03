@@ -6,6 +6,7 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'data_table_test_utils.dart';
 
@@ -66,7 +67,7 @@ class TestDataSource extends DataTableSource {
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('PaginatedDataTable paging', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PaginatedDataTable paging', (WidgetTester tester) async {
     final TestDataSource source = TestDataSource();
 
     final List<String> log = <String>[];
@@ -1219,6 +1220,7 @@ void main() {
   testWidgets('PaginatedDataTable can be scrolled using ScrollController', (WidgetTester tester) async {
     final TestDataSource source = TestDataSource();
     final ScrollController scrollController = ScrollController();
+    addTearDown(() => scrollController.dispose());
 
     Widget buildTable(TestDataSource source) {
       return Align(
@@ -1268,6 +1270,7 @@ void main() {
   testWidgets('PaginatedDataTable uses PrimaryScrollController when primary ', (WidgetTester tester) async {
     final ScrollController primaryScrollController = ScrollController();
     final TestDataSource source = TestDataSource();
+    addTearDown(() { primaryScrollController.dispose(); source.dispose(); });
 
     await tester.pumpWidget(
       MaterialApp(
