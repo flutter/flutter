@@ -59,6 +59,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Can place app inside FocusScope', (WidgetTester tester) async {
     final FocusScopeNode focusScopeNode = FocusScopeNode();
+    addTearDown(() => focusScopeNode.dispose());
 
     await tester.pumpWidget(FocusScope(
       autofocus: true,
@@ -69,7 +70,6 @@ void main() {
     ));
 
     expect(find.text('Home'), findsOneWidget);
-    focusScopeNode.dispose();
   });
 
   testWidgetsWithLeakTracking('Can show grid without losing sync', (WidgetTester tester) async {
@@ -1165,12 +1165,12 @@ void main() {
         uri: Uri.parse('initial'),
       ),
     );
+    addTearDown(() => provider.dispose());
     await tester.pumpWidget(MaterialApp.router(
       routeInformationProvider: provider,
       routerDelegate: delegate,
     ));
     expect(tester.takeException(), isAssertionError);
-    provider.dispose();
   });
 
   testWidgetsWithLeakTracking('MaterialApp.router throw if route configuration is provided along with other delegate', (WidgetTester tester) async {

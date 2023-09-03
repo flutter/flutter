@@ -211,6 +211,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Semantic label', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
+    addTearDown(() => semantics.dispose());
 
     await tester.pumpWidget(
       const Directionality(
@@ -225,8 +226,6 @@ void main() {
     );
 
     expect(semantics, includesNodeWith(label: 'a label'));
-
-    semantics.dispose();
   });
 
   testWidgetsWithLeakTracking('Inherited text direction rtl', (WidgetTester tester) async {

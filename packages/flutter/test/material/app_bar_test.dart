@@ -1659,6 +1659,7 @@ void main() {
         forceMaterialTransparency:true,
         onPressed:() { buttonWasPressed = true; },
       );
+      addTearDown(() => controller.dispose());
       await tester.pumpWidget(widget);
 
       final Material material = getSliverAppBarMaterial(tester);
@@ -1668,8 +1669,6 @@ void main() {
       await tester.tap(buttonFinder);
       await tester.pump();
       expect(buttonWasPressed, isTrue);
-
-      controller.dispose();
     });
 
     testWidgetsWithLeakTracking(
@@ -1683,6 +1682,7 @@ void main() {
         forceMaterialTransparency:false,
         onPressed:() { buttonWasPressed = true; },
       );
+      addTearDown(() => controller.dispose());
       await tester.pumpWidget(widget);
 
       final Material material = getSliverAppBarMaterial(tester);
@@ -1692,8 +1692,6 @@ void main() {
       await tester.tap(buttonFinder, warnIfMissed:false);
       await tester.pump();
       expect(buttonWasPressed, isFalse);
-
-      controller.dispose();
     });
   });
 
@@ -2341,6 +2339,7 @@ void main() {
 
   testWidgetsWithLeakTracking('SliverAppBar provides correct semantics in LTR', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
+    addTearDown(() => semantics.dispose());
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2416,12 +2415,11 @@ void main() {
       ignoreTransform: true,
       ignoreId: true,
     ));
-
-    semantics.dispose();
   });
 
   testWidgetsWithLeakTracking('SliverAppBar provides correct semantics in RTL', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
+    addTearDown(() => semantics.dispose());
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2508,12 +2506,11 @@ void main() {
       ignoreTransform: true,
       ignoreId: true,
     ));
-
-    semantics.dispose();
   });
 
   testWidgetsWithLeakTracking('AppBar excludes header semantics correctly', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
+    addTearDown(() => semantics.dispose());
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2564,12 +2561,11 @@ void main() {
       ignoreTransform: true,
       ignoreId: true,
     ));
-
-    semantics.dispose();
   });
 
   testWidgetsWithLeakTracking('SliverAppBar excludes header semantics correctly', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
+    addTearDown(() => semantics.dispose());
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -2633,13 +2629,12 @@ void main() {
       ignoreTransform: true,
       ignoreId: true,
     ));
-
-    semantics.dispose();
   });
 
   testWidgetsWithLeakTracking('SliverAppBar with flexible space has correct semantics order', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/64922.
     final SemanticsTester semantics = SemanticsTester(tester);
+    addTearDown(() => semantics.dispose());
 
     await tester.pumpWidget(
       const MaterialApp(
@@ -2710,8 +2705,6 @@ void main() {
       ignoreTransform: true,
       ignoreId: true,
     ));
-
-    semantics.dispose();
   });
 
   testWidgetsWithLeakTracking('Material2 - AppBar draws a light system bar for a dark background', (WidgetTester tester) async {
@@ -4283,6 +4276,8 @@ void main() {
       testWidgetsWithLeakTracking('_handleScrollNotification safely calls setState()', (WidgetTester tester) async {
         // Regression test for failures found in Google internal issue b/185192049.
         final ScrollController controller = ScrollController(initialScrollOffset: 400);
+        addTearDown(() => controller.dispose());
+
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
@@ -4304,8 +4299,6 @@ void main() {
         );
 
         expect(tester.takeException(), isNull);
-
-        controller.dispose();
       });
 
       testWidgetsWithLeakTracking('does not trigger on horizontal scroll', (WidgetTester tester) async {

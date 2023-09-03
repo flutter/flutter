@@ -115,6 +115,7 @@ void main() {
     final GlobalKey key = GlobalKey();
     final TextEditingController controller = TextEditingController();
     final FocusNode focusNode = FocusNode();
+    addTearDown(() { controller.dispose(); focusNode.dispose(); });
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -172,8 +173,6 @@ void main() {
       case TargetPlatform.macOS:
         expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsOneWidget);
     }
-    controller.dispose();
-    focusNode.dispose();
   },
     skip: kIsWeb, // [intended] on web the browser handles the context menu.
     variant: TargetPlatformVariant.all(),
@@ -245,6 +244,7 @@ void main() {
       Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
       final TextEditingController controller = TextEditingController();
       final FocusNode focusNode = FocusNode();
+      addTearDown(() { focusNode.dispose(); controller.dispose(); });
 
       await tester.pumpWidget(
         MaterialApp(
@@ -328,9 +328,6 @@ void main() {
         case TargetPlatform.macOS:
           expect(buttonTypes, isNot(contains(ContextMenuButtonType.selectAll)));
       }
-
-      focusNode.dispose();
-      controller.dispose();
     },
       variant: TargetPlatformVariant.all(),
       skip: kIsWeb, // [intended]
