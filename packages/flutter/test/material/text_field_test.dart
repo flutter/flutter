@@ -82,6 +82,7 @@ Widget overlay({ required Widget child }) {
       );
     },
   );
+  addTearDown(() { entry.remove(); entry.dispose(); });
   return overlayWithEntry(entry);
 }
 
@@ -895,7 +896,7 @@ void main() {
     expect(editableTextWidget.onEditingComplete, onEditingComplete);
   });
 
-  testWidgets('TextField has consistent size', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('TextField has consistent size', (WidgetTester tester) async {
     final Key textFieldKey = UniqueKey();
     String? textFieldValue;
 
