@@ -572,7 +572,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   }
 }
 
-class _DropdownRoutePage<T> extends StatelessWidget {
+class _DropdownRoutePage<T> extends StatefulWidget {
   const _DropdownRoutePage({
     super.key,
     required this.route,
@@ -603,6 +603,13 @@ class _DropdownRoutePage<T> extends StatelessWidget {
   final BorderRadius? borderRadius;
 
   @override
+  State<_DropdownRoutePage<T>> createState() => _DropdownRoutePageState<T>();
+}
+
+class _DropdownRoutePageState<T> extends State<_DropdownRoutePage<T>> {
+  bool _nullOutScrollController = false;
+
+  @override
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
 
@@ -612,20 +619,21 @@ class _DropdownRoutePage<T> extends StatelessWidget {
     // and all of the items' intrinsic heights are less than kMinInteractiveDimension.
     // Otherwise the initialScrollOffset is just a rough approximation based on
     // treating the items as if their heights were all equal to kMinInteractiveDimension.
-    if (route.scrollController == null) {
-      final _MenuLimits menuLimits = route.getMenuLimits(buttonRect, constraints.maxHeight, selectedIndex);
-      route.scrollController = ScrollController(initialScrollOffset: menuLimits.scrollOffset);
+    if (widget.route.scrollController == null) {
+      final _MenuLimits menuLimits = widget.route.getMenuLimits(widget.buttonRect, widget.constraints.maxHeight, widget.selectedIndex);
+      widget.route.scrollController = ScrollController(initialScrollOffset: menuLimits.scrollOffset);
+      _nullOutScrollController = true;
     }
 
     final TextDirection? textDirection = Directionality.maybeOf(context);
     final Widget menu = _DropdownMenu<T>(
-      route: route,
-      padding: padding.resolve(textDirection),
-      buttonRect: buttonRect,
-      constraints: constraints,
-      dropdownColor: dropdownColor,
-      enableFeedback: enableFeedback,
-      borderRadius: borderRadius,
+      route: widget.route,
+      padding: widget.padding.resolve(textDirection),
+      buttonRect: widget.buttonRect,
+      constraints: widget.constraints,
+      dropdownColor: widget.dropdownColor,
+      enableFeedback: widget.enableFeedback,
+      borderRadius: widget.borderRadius,
     );
 
     return MediaQuery.removePadding(
@@ -638,15 +646,24 @@ class _DropdownRoutePage<T> extends StatelessWidget {
         builder: (BuildContext context) {
           return CustomSingleChildLayout(
             delegate: _DropdownMenuRouteLayout<T>(
-              buttonRect: buttonRect,
-              route: route,
+              buttonRect: widget.buttonRect,
+              route: widget.route,
               textDirection: textDirection,
             ),
-            child: capturedThemes.wrap(menu),
+            child: widget.capturedThemes.wrap(menu),
           );
         },
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    if (_nullOutScrollController) {
+      widget.route.scrollController?.dispose();
+      widget.route.scrollController = null;
+    }
+    super.dispose();
   }
 }
 
