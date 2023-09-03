@@ -241,6 +241,7 @@ class SegmentedButton<T> extends StatefulWidget {
 
 class _SegmentedButtonState<T> extends State<SegmentedButton<T>> {
   bool get _enabled => widget.onSelectionChanged != null;
+  final Map<ButtonSegment<T>, MaterialStatesController> _statesControllers = <ButtonSegment<T>, MaterialStatesController>{};
 
   void _handleOnPressed(T segmentValue) {
     if (!_enabled) {
@@ -313,7 +314,7 @@ class _SegmentedButtonState<T> extends State<SegmentedButton<T>> {
     final ButtonStyle segmentStyle = segmentStyleFor(widget.style);
     final ButtonStyle segmentThemeStyle = segmentStyleFor(theme.style).merge(segmentStyleFor(defaults.style));
     final Widget? selectedIcon = widget.showSelectedIcon
-      ? this.widget.selectedIcon ?? theme.selectedIcon ?? defaults.selectedIcon
+      ? widget.selectedIcon ?? theme.selectedIcon ?? defaults.selectedIcon
       : null;
 
     Widget buttonFor(ButtonSegment<T> segment) {
