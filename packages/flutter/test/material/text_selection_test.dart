@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart' show findRenderEditable, globalize, textOffsetToPosition;
@@ -45,11 +46,14 @@ void main() {
     }) {
       final TextEditingController controller = TextEditingController(text: text)
         ..selection = selection ?? const TextSelection.collapsed(offset: -1);
+      final FocusNode focusNode = FocusNode();
+      addTearDown(() { controller.dispose(); focusNode.dispose(); });
+
       return MaterialApp(
         home: EditableText(
           key: key,
           controller: controller,
-          focusNode: FocusNode(),
+          focusNode: focusNode,
           style: const TextStyle(),
           cursorColor: Colors.black,
           backgroundCursorColor: Colors.black,
@@ -57,7 +61,7 @@ void main() {
       );
     }
 
-    testWidgets('should return false when there is no text', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('should return false when there is no text', (WidgetTester tester) async {
       final GlobalKey<EditableTextState> key = GlobalKey();
       await tester.pumpWidget(createEditableText(key: key));
       expect(materialTextSelectionControls.canSelectAll(key.currentState!), false);
