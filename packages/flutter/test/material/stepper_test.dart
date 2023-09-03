@@ -1144,36 +1144,36 @@ testWidgetsWithLeakTracking('Stepper custom indexed controls test', (WidgetTeste
   });
 
   testWidgetsWithLeakTracking('ScrollController is passed to the stepper listview', (WidgetTester tester) async {
-      final ScrollController controller = ScrollController();
-      addTearDown(() => controller.dispose());
-      for (final StepperType type in StepperType.values) {
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Material(
-              child: Stepper(
-                controller: controller,
-                type: type,
-                steps: const <Step>[
-                  Step(
-                    title: Text('Step 1'),
-                    content: SizedBox(
-                      width: 100.0,
-                      height: 100.0,
-                    ),
+    final ScrollController controller = ScrollController();
+    addTearDown(() => controller.dispose());
+    for (final StepperType type in StepperType.values) {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Stepper(
+              controller: controller,
+              type: type,
+              steps: const <Step>[
+                Step(
+                  title: Text('Step 1'),
+                  content: SizedBox(
+                    width: 100.0,
+                    height: 100.0,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-        );
+        ),
+      );
 
-        final ListView listView = tester.widget<ListView>(
-          find.descendant(of: find.byType(Stepper),
-          matching: find.byType(ListView),
-        ));
-        expect(listView.controller, controller);
-      }
-    });
+      final ListView listView = tester.widget<ListView>(
+        find.descendant(of: find.byType(Stepper),
+        matching: find.byType(ListView),
+      ));
+      expect(listView.controller, controller);
+    }
+  });
 
   testWidgetsWithLeakTracking('Stepper horizontal size test', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/77732
