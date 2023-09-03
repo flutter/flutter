@@ -67,7 +67,7 @@ void main() {
       expect(materialTextSelectionControls.canSelectAll(key.currentState!), false);
     });
 
-    testWidgets('should return true when there is text and collapsed selection', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('should return true when there is text and collapsed selection', (WidgetTester tester) async {
       final GlobalKey<EditableTextState> key = GlobalKey();
       await tester.pumpWidget(createEditableText(
         key: key,
@@ -76,7 +76,7 @@ void main() {
       expect(materialTextSelectionControls.canSelectAll(key.currentState!), true);
     });
 
-    testWidgets('should return true when there is text and partial uncollapsed selection', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('should return true when there is text and partial uncollapsed selection', (WidgetTester tester) async {
       final GlobalKey<EditableTextState> key = GlobalKey();
       await tester.pumpWidget(createEditableText(
         key: key,
@@ -86,7 +86,7 @@ void main() {
       expect(materialTextSelectionControls.canSelectAll(key.currentState!), true);
     });
 
-    testWidgets('should return false when there is text and full selection', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('should return false when there is text and full selection', (WidgetTester tester) async {
       final GlobalKey<EditableTextState> key = GlobalKey();
       await tester.pumpWidget(createEditableText(
         key: key,
@@ -98,8 +98,9 @@ void main() {
   });
 
   group('Text selection menu overflow (Android)', () {
-    testWidgets('All menu items show when they fit.', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('All menu items show when they fit.', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+      addTearDown(controller.dispose);
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(platform: TargetPlatform.android),
         home: Directionality(
@@ -160,12 +161,13 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
-    testWidgets("When menu items don't fit, an overflow menu is used.", (WidgetTester tester) async {
+    testWidgetsWithLeakTracking("When menu items don't fit, an overflow menu is used.", (WidgetTester tester) async {
       // Set the screen size to more narrow, so that Select all can't fit.
       tester.view.physicalSize = const Size(1000, 800);
       addTearDown(tester.view.reset);
 
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+      addTearDown(controller.dispose);
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(platform: TargetPlatform.android),
         home: Directionality(
@@ -234,12 +236,13 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
-    testWidgets('A smaller menu bumps more items to the overflow menu.', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('A smaller menu bumps more items to the overflow menu.', (WidgetTester tester) async {
       // Set the screen size so narrow that only Cut and Copy can fit.
       tester.view.physicalSize = const Size(800, 800);
       addTearDown(tester.view.reset);
 
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+      addTearDown(controller.dispose);
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(platform: TargetPlatform.android),
         home: Directionality(
@@ -299,12 +302,13 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
-    testWidgets('When the menu renders below the text, the overflow menu back button is at the top.', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('When the menu renders below the text, the overflow menu back button is at the top.', (WidgetTester tester) async {
       // Set the screen size to more narrow, so that Select all can't fit.
       tester.view.physicalSize = const Size(1000, 800);
       addTearDown(tester.view.reset);
 
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+      addTearDown(controller.dispose);
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(platform: TargetPlatform.android),
         home: Directionality(
@@ -373,12 +377,13 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
-    testWidgets('When the menu items change, the menu is closed and _closedWidth reset.', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('When the menu items change, the menu is closed and _closedWidth reset.', (WidgetTester tester) async {
       // Set the screen size to more narrow, so that Select all can't fit.
       tester.view.physicalSize = const Size(1000, 800);
       addTearDown(tester.view.reset);
 
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
+      addTearDown(controller.dispose);
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(platform: TargetPlatform.android, useMaterial3: false),
         home: Directionality(
@@ -481,8 +486,9 @@ void main() {
   });
 
   group('menu position', () {
-    testWidgets('When renders below a block of text, menu appears below bottom endpoint', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('When renders below a block of text, menu appears below bottom endpoint', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'abc\ndef\nghi\njkl\nmno\npqr');
+      addTearDown(controller.dispose);
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(platform: TargetPlatform.android),
         home: Directionality(
@@ -553,11 +559,12 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
-    testWidgets(
+    testWidgetsWithLeakTracking(
       'When selecting multiple lines over max lines',
       (WidgetTester tester) async {
         final TextEditingController controller =
             TextEditingController(text: 'abc\ndef\nghi\njkl\nmno\npqr');
+        addTearDown(controller.dispose);
         await tester.pumpWidget(MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android),
           home: Directionality(
@@ -631,7 +638,7 @@ void main() {
   });
 
   group('material handles', () {
-    testWidgets('draws transparent handle correctly', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('draws transparent handle correctly', (WidgetTester tester) async {
       await tester.pumpWidget(RepaintBoundary(
         child: Theme(
           data: ThemeData(
@@ -665,7 +672,7 @@ void main() {
       );
     });
 
-    testWidgets('works with 3 positional parameters', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('works with 3 positional parameters', (WidgetTester tester) async {
       await tester.pumpWidget(Theme(
         data: ThemeData(
           textSelectionTheme: const TextSelectionThemeData(
@@ -698,10 +705,11 @@ void main() {
     });
   });
 
-  testWidgets('Paste only appears when clipboard has contents', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Paste only appears when clipboard has contents', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
