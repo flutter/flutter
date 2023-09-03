@@ -1061,7 +1061,9 @@ void main() {
     expect(textField.clipBehavior, Clip.hardEdge);
   });
 
-  testWidgets('Overflow clipBehavior none golden', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Overflow clipBehavior none golden', (WidgetTester tester) async {
+    final OverflowWidgetTextEditingController controller = OverflowWidgetTextEditingController();
+    addTearDown(controller.dispose);
     final Widget widget = Theme(
       data: ThemeData(useMaterial3: false),
       child: overlay(
@@ -1075,7 +1077,7 @@ void main() {
                 // Make sure the input field is not high enough for the WidgetSpan.
                 height: 50,
                 child: TextField(
-                  controller: OverflowWidgetTextEditingController(),
+                  controller: controller,
                   clipBehavior: Clip.none,
                 ),
               ),
