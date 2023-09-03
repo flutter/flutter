@@ -26,10 +26,11 @@ void main() {
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
 
-  testWidgets('can use the desktop cut/copy/paste buttons on Mac', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can use the desktop cut/copy/paste buttons on Mac', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -106,6 +107,7 @@ void main() {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -243,7 +245,6 @@ void main() {
     expect(controller.text, ' blah2blah1');
     expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 0));
     expect(find.byType(CupertinoButton), findsNothing);
-    controller.dispose();
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux, TargetPlatform.windows }),
     skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
@@ -255,6 +256,7 @@ void main() {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -273,7 +275,6 @@ void main() {
     await tester.tapAt(startBlah1);
     await tester.pumpAndSettle();
     await tester.pump();
-    controller.dispose();
   },
     skip: kIsWeb, // [intended] we don't supply the cut/copy/paste buttons on the web.
   );
@@ -282,6 +283,7 @@ void main() {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -326,6 +328,7 @@ void main() {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -1100,6 +1103,7 @@ void main() {
     final TextEditingController controller = TextEditingController(
       text: 'blah1 blah2',
     );
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
