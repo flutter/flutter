@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: avoid_redundant_argument_values
+
 // reduced-test-set:
 //   This file is run as part of a reduced test set in CI on Mac and Windows
 //   machines.
@@ -23,6 +25,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart';
@@ -154,6 +157,18 @@ class TestFormatter extends TextInputFormatter {
   }
 }
 
+FocusNode _focusNode() {
+  final FocusNode result = FocusNode();
+  addTearDown(result.dispose);
+  return result;
+}
+
+TextEditingController _textEditingController({String text = ''}) {
+  final TextEditingController result = TextEditingController(text: text);
+  addTearDown(result.dispose);
+  return result;
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
@@ -204,14 +219,14 @@ void main() {
     );
   }
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'Live Text button shows and hides correctly when LiveTextStatus changes',
     (WidgetTester tester) async {
       final LiveTextInputTester liveTextInputTester = LiveTextInputTester();
       addTearDown(liveTextInputTester.dispose);
-      final TextEditingController controller = TextEditingController(text: '');
+      final TextEditingController controller = _textEditingController(text: '');
       const Key key = ValueKey<String>('TextField');
-      final FocusNode focusNode = FocusNode();
+      final FocusNode focusNode = _focusNode();
       final Widget app = MaterialApp(
         theme: ThemeData(platform: TargetPlatform.iOS),
         home: Scaffold(
@@ -298,7 +313,7 @@ void main() {
 
   testWidgets('Composing change does not hide selection handle caret', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/108673
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       overlay(
@@ -387,7 +402,7 @@ void main() {
   });
 
   testWidgets('can use the desktop cut/copy/paste buttons on Mac', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'blah1 blah2',
     );
     await tester.pumpWidget(
@@ -462,7 +477,7 @@ void main() {
   );
 
   testWidgets('can use the desktop cut/copy/paste buttons on Windows and Linux', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'blah1 blah2',
     );
     await tester.pumpWidget(
@@ -616,7 +631,7 @@ void main() {
       return null;
     });
 
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'Test ',
     );
     await tester.pumpWidget(
@@ -665,7 +680,7 @@ void main() {
       return null;
     });
 
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'Test ',
     );
     await tester.pumpWidget(
@@ -714,7 +729,7 @@ void main() {
       return null;
     });
 
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'Test ',
     );
     await tester.pumpWidget(
@@ -805,7 +820,7 @@ void main() {
   testWidgets('Activates the text field when receives semantics focus on desktops', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
-    final FocusNode focusNode = FocusNode();
+    final FocusNode focusNode = _focusNode();
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -967,7 +982,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/78918.
   testWidgets('RenderEditable sets correct text editing value', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(text: 'how are you');
+    final TextEditingController controller = _textEditingController(text: 'how are you');
     final UniqueKey icon = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -1149,8 +1164,8 @@ void main() {
       actualOldValue = oldValue;
       actualNewValue = newValue;
     }
-    final FocusNode focusNode = FocusNode();
-    final TextEditingController controller = TextEditingController(text: '123');
+    final FocusNode focusNode = _focusNode();
+    final TextEditingController controller = _textEditingController(text: '123');
     await tester.pumpWidget(
       boilerplate(
         child: TextField(
@@ -1237,7 +1252,7 @@ void main() {
 
   testWidgets('text field toolbar options correctly changes options',
       (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
     // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
@@ -1287,7 +1302,7 @@ void main() {
   );
 
   testWidgets('text selection style 1', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure\nhi\nwasssup!',
     );
     await tester.pumpWidget(
@@ -1336,7 +1351,7 @@ void main() {
   });
 
   testWidgets('text selection style 2', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure\nhi\nwasssup!',
     );
     await tester.pumpWidget(
@@ -1403,7 +1418,7 @@ void main() {
   testWidgets(
     'text field toolbar options correctly changes options',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
@@ -1446,7 +1461,7 @@ void main() {
     final TextEditingController controller = TextEditingController.fromValue(
       const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
     );
-    final FocusNode focusNode = FocusNode();
+    final FocusNode focusNode = _focusNode();
     EditableText.debugDeterministicCursor = true;
     await tester.pumpWidget(
       Theme(
@@ -1476,7 +1491,7 @@ void main() {
     final TextEditingController controller = TextEditingController.fromValue(
       const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
     );
-    final FocusNode focusNode = FocusNode();
+    final FocusNode focusNode = _focusNode();
     EditableText.debugDeterministicCursor = true;
     await tester.pumpWidget(
       Theme(
@@ -1507,7 +1522,7 @@ void main() {
     final TextEditingController controller = TextEditingController.fromValue(
       const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
     );
-    final FocusNode focusNode = FocusNode();
+    final FocusNode focusNode = _focusNode();
     EditableText.debugDeterministicCursor = true;
     await tester.pumpWidget(
       Theme(
@@ -1535,7 +1550,7 @@ void main() {
   });
 
   testWidgets('Overflowing a line with spaces stops the cursor at the end', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       Theme(
@@ -1717,7 +1732,7 @@ void main() {
   }));
 
   testWidgets('Caret position is updated on tap', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       overlay(
@@ -1744,7 +1759,7 @@ void main() {
   });
 
   testWidgets('enableInteractiveSelection = false, tap', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       overlay(
@@ -1772,7 +1787,7 @@ void main() {
   });
 
   testWidgets('Can long press to select', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       overlay(
@@ -1807,7 +1822,7 @@ void main() {
   });
 
   testWidgets("Slight movements in longpress don't hide/show handles", (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       overlay(
@@ -1864,7 +1879,7 @@ void main() {
   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
   testWidgets('Entering text hides selection handle caret', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       overlay(
@@ -1907,7 +1922,7 @@ void main() {
 
   testWidgets('selection handles are excluded from the semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       overlay(
@@ -1952,7 +1967,7 @@ void main() {
   });
 
   testWidgets('Mouse long press is just like a tap', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       overlay(
@@ -1983,7 +1998,7 @@ void main() {
   });
 
   testWidgets('Read only text field basic', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(text: 'readonly');
+    final TextEditingController controller = _textEditingController(text: 'readonly');
 
     await tester.pumpWidget(
         overlay(
@@ -2066,7 +2081,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
 
   testWidgets('Swapping controllers should update selection', (WidgetTester tester) async {
-    TextEditingController controller = TextEditingController(text: 'readonly');
+    TextEditingController controller = _textEditingController(text: 'readonly');
     final OverlayEntry entry = OverlayEntry(
       builder: (BuildContext context) {
         return Center(
@@ -2130,7 +2145,7 @@ void main() {
   });
 
   testWidgets('Dynamically switching between read only and not read only should hide or show collapse cursor', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(text: 'readonly');
+    final TextEditingController controller = _textEditingController(text: 'readonly');
     bool readOnly = true;
     final OverlayEntry entry = OverlayEntry(
       builder: (BuildContext context) {
@@ -2165,7 +2180,7 @@ void main() {
   });
 
   testWidgets('Dynamically switching to read only should close input connection', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(text: 'readonly');
+    final TextEditingController controller = _textEditingController(text: 'readonly');
     bool readOnly = false;
     final OverlayEntry entry = OverlayEntry(
       builder: (BuildContext context) {
@@ -2193,7 +2208,7 @@ void main() {
   });
 
   testWidgets('Dynamically switching to non read only should open input connection', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(text: 'readonly');
+    final TextEditingController controller = _textEditingController(text: 'readonly');
     bool readOnly = true;
     final OverlayEntry entry = OverlayEntry(
       builder: (BuildContext context) {
@@ -2221,7 +2236,7 @@ void main() {
   });
 
   testWidgets('enableInteractiveSelection = false, long-press', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       overlay(
@@ -2249,7 +2264,7 @@ void main() {
   });
 
   testWidgets('Selection updates on tap down (Desktop platforms)', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2288,7 +2303,7 @@ void main() {
   );
 
   testWidgets('Selection updates on tap up (Mobile platforms)', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
     final bool isTargetPlatformApple = defaultTargetPlatform == TargetPlatform.iOS;
 
     await tester.pumpWidget(
@@ -2343,7 +2358,7 @@ void main() {
 
   testWidgets('Can select text with a mouse when wrapped in a GestureDetector with tap/double tap callbacks', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/129161.
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2388,7 +2403,7 @@ void main() {
   }, variant: TargetPlatformVariant.desktop());
 
   testWidgets('Can select text by dragging with a mouse', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2420,7 +2435,7 @@ void main() {
   });
 
   testWidgets('Can move cursor when dragging, when tap is on collapsed selection (iOS)', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2467,7 +2482,7 @@ void main() {
   );
 
   testWidgets('Cursor should not move on a quick touch drag when touch does not begin on previous selection (iOS)', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2512,7 +2527,7 @@ void main() {
   );
 
   testWidgets('Can move cursor when dragging, when tap is on collapsed selection (iOS) - multiline', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2562,7 +2577,7 @@ void main() {
   testWidgets('Can move cursor when dragging, when tap is on collapsed selection (iOS) - ListView', (WidgetTester tester) async {
     // This is a regression test for
     // https://github.com/flutter/flutter/issues/122519
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2637,7 +2652,7 @@ void main() {
   );
 
   testWidgets('Can move cursor when dragging (Android)', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2681,7 +2696,7 @@ void main() {
   );
 
   testWidgets('Can move cursor when dragging (Android) - multiline', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2728,7 +2743,7 @@ void main() {
   testWidgets('Can move cursor when dragging (Android) - ListView', (WidgetTester tester) async {
     // This is a regression test for
     // https://github.com/flutter/flutter/issues/122519
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2799,7 +2814,7 @@ void main() {
   testWidgets('Continuous dragging does not cause flickering', (WidgetTester tester) async {
     int selectionChangedCount = 0;
     const String testValue = 'abc def ghi';
-    final TextEditingController controller = TextEditingController(text: testValue);
+    final TextEditingController controller = _textEditingController(text: testValue);
 
     controller.addListener(() {
       selectionChangedCount++;
@@ -2849,7 +2864,7 @@ void main() {
   });
 
   testWidgets('Dragging in opposite direction also works', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2881,7 +2896,7 @@ void main() {
   });
 
   testWidgets('Slow mouse dragging also selects text', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2912,7 +2927,7 @@ void main() {
   });
 
   testWidgets('Can drag handles to change selection on Apple platforms', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       overlay(
@@ -3024,7 +3039,7 @@ void main() {
   );
 
   testWidgets('Can drag handles to change selection on non-Apple platforms', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       overlay(
@@ -3134,7 +3149,7 @@ void main() {
       // Text is longer than textfield width.
       const String testValue =
           'aaaaaaaaaaaaaaaaaaaaaaaaaaa bbbbbbbbbbbbbbbbbbbbbbbbbbb';
-      final TextEditingController controller = TextEditingController(text: testValue);
+      final TextEditingController controller = _textEditingController(text: testValue);
       final ScrollController scrollController = ScrollController();
 
       await tester.pumpWidget(
@@ -3221,7 +3236,7 @@ void main() {
       // Text is longer than textfield width.
       const String testValue =
           'aaaaaaaaaaaaaaaaaaaaaaaaaaa bbbbbbbbbbbbbbbbbbbbbbbbbbb';
-      final TextEditingController controller = TextEditingController(text: testValue);
+      final TextEditingController controller = _textEditingController(text: testValue);
       final ScrollController scrollController = ScrollController();
 
       await tester.pumpWidget(
@@ -3294,7 +3309,7 @@ void main() {
   testWidgets('Drag handles trigger feedback', (WidgetTester tester) async {
     final FeedbackTester feedback = FeedbackTester();
     addTearDown(feedback.dispose);
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
     await tester.pumpWidget(
       overlay(
         child: TextField(
@@ -3349,7 +3364,7 @@ void main() {
   testWidgets('Dragging a collapsed handle should trigger feedback.', (WidgetTester tester) async {
     final FeedbackTester feedback = FeedbackTester();
     addTearDown(feedback.dispose);
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
     await tester.pumpWidget(
       overlay(
         child: TextField(
@@ -3402,7 +3417,7 @@ void main() {
   });
 
   testWidgets('Cannot drag one handle past the other', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       overlay(
@@ -3462,7 +3477,7 @@ void main() {
   });
 
   testWidgets('Dragging between multiple lines keeps the contact point at the same place on the handle on Android', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       // 11 first line, 19 second line, 17 third line = length 49
       text: 'a big house\njumped over a mouse\nOne more line yay',
     );
@@ -3650,7 +3665,7 @@ void main() {
   );
 
   testWidgets('Dragging between multiple lines keeps the contact point at the same place on the handle on iOS', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       // 11 first line, 19 second line, 17 third line = length 49
       text: 'a big house\njumped over a mouse\nOne more line yay',
     );
@@ -3918,7 +3933,7 @@ void main() {
   );
 
   testWidgets('Can use selection toolbar', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       overlay(
@@ -4016,7 +4031,7 @@ void main() {
     (WidgetTester tester) async {
       // This is a regression test for
       // https://github.com/flutter/flutter/issues/29808
-      final TextEditingController controller = TextEditingController();
+      final TextEditingController controller = _textEditingController();
 
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
@@ -4068,7 +4083,7 @@ void main() {
   testWidgets(
     'the toolbar adjusts its position above/below when bottom inset changes',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
+      final TextEditingController controller = _textEditingController();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -4138,7 +4153,7 @@ void main() {
     (WidgetTester tester) async {
       // This is a regression test for
       // https://github.com/flutter/flutter/issues/36749
-      final TextEditingController controller = TextEditingController();
+      final TextEditingController controller = _textEditingController();
 
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -4191,7 +4206,7 @@ void main() {
   );
 
   testWidgets('Selection toolbar fades in', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       overlay(
@@ -4240,7 +4255,7 @@ void main() {
     // This is a regression test for
     // https://github.com/flutter/flutter/issues/32845
 
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
     Widget buildFrame(bool obscureText) {
       return overlay(
         child: TextField(
@@ -4267,7 +4282,7 @@ void main() {
     // This is a regression test for
     // https://github.com/flutter/flutter/issues/32845
 
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
     Widget buildFrame(bool obscureText, bool enableInteractiveSelection) {
       return overlay(
         child: TextField(
@@ -4295,7 +4310,7 @@ void main() {
     // This is a regression test for
     // https://github.com/flutter/flutter/issues/32845
 
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
     Widget buildFrame(bool obscureText, bool readOnly) {
       return overlay(
         child: TextField(
@@ -4320,7 +4335,7 @@ void main() {
   });
 
   testWidgets('An obscured TextField is selected as one word', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(overlay(
       child: TextField(
@@ -4342,7 +4357,7 @@ void main() {
   });
 
   testWidgets('An obscured TextField has correct default context menu', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(overlay(
       child: TextField(
@@ -4827,7 +4842,7 @@ void main() {
   });
 
   testWidgets('Can drag handles to change selection in multiline', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       Theme(
@@ -4927,7 +4942,7 @@ void main() {
 
   testWidgets('Can scroll multiline input', (WidgetTester tester) async {
     final Key textFieldKey = UniqueKey();
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: kMoreThanFourLines,
     );
 
@@ -5214,7 +5229,7 @@ void main() {
     await tester.pumpWidget(
       overlay(
         child: TextField(
-          controller: TextEditingController(text: 'some text'),
+          controller: _textEditingController(text: 'some text'),
           decoration: const InputDecoration(
             prefixText: 'Prefix',
             suffixText: 'Suffix',
@@ -5590,10 +5605,10 @@ void main() {
   });
 
   testWidgets('Controller can update server', (WidgetTester tester) async {
-    final TextEditingController controller1 = TextEditingController(
+    final TextEditingController controller1 = _textEditingController(
       text: 'Initial Text',
     );
-    final TextEditingController controller2 = TextEditingController(
+    final TextEditingController controller2 = _textEditingController(
       text: 'More Text',
     );
 
@@ -5673,7 +5688,7 @@ void main() {
   });
 
   testWidgets('Cannot enter new lines onto single line TextField', (WidgetTester tester) async {
-    final TextEditingController textController = TextEditingController();
+    final TextEditingController textController = _textEditingController();
 
     await tester.pumpWidget(boilerplate(
       child: TextField(controller: textController, decoration: null),
@@ -5685,7 +5700,7 @@ void main() {
   });
 
   testWidgets('Injected formatters are chained', (WidgetTester tester) async {
-    final TextEditingController textController = TextEditingController();
+    final TextEditingController textController = _textEditingController();
 
     await tester.pumpWidget(boilerplate(
       child: TextField(
@@ -5706,7 +5721,7 @@ void main() {
   });
 
   testWidgets('Injected formatters are chained (deprecated names)', (WidgetTester tester) async {
-    final TextEditingController textController = TextEditingController();
+    final TextEditingController textController = _textEditingController();
 
     await tester.pumpWidget(boilerplate(
       child: TextField(
@@ -5727,7 +5742,7 @@ void main() {
   });
 
   testWidgets('Chained formatters are in sequence', (WidgetTester tester) async {
-    final TextEditingController textController = TextEditingController();
+    final TextEditingController textController = _textEditingController();
 
     await tester.pumpWidget(boilerplate(
       child: TextField(
@@ -5754,7 +5769,7 @@ void main() {
   });
 
   testWidgets('Chained formatters are in sequence (deprecated names)', (WidgetTester tester) async {
-    final TextEditingController textController = TextEditingController();
+    final TextEditingController textController = _textEditingController();
 
     await tester.pumpWidget(boilerplate(
       child: TextField(
@@ -5781,7 +5796,7 @@ void main() {
   });
 
   testWidgets('Pasted values are formatted', (WidgetTester tester) async {
-    final TextEditingController textController = TextEditingController();
+    final TextEditingController textController = _textEditingController();
 
     await tester.pumpWidget(
       overlay(
@@ -5819,7 +5834,7 @@ void main() {
   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
   testWidgets('Pasted values are formatted (deprecated names)', (WidgetTester tester) async {
-    final TextEditingController textController = TextEditingController();
+    final TextEditingController textController = _textEditingController();
 
     await tester.pumpWidget(
       overlay(
@@ -5873,7 +5888,7 @@ void main() {
   });
 
   testWidgets('Text field scrolls the caret into view', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       Theme(
@@ -5916,7 +5931,7 @@ void main() {
   });
 
   testWidgets('Multiline text field scrolls the caret into view', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       overlay(
@@ -5956,7 +5971,7 @@ void main() {
   testWidgets('haptic feedback', (WidgetTester tester) async {
     final FeedbackTester feedback = FeedbackTester();
     addTearDown(feedback.dispose);
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       overlay(
@@ -5984,7 +5999,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/103341.
     final Key key1 = UniqueKey();
     final Key key2 = UniqueKey();
-    final TextEditingController controller1 = TextEditingController();
+    final TextEditingController controller1 = _textEditingController();
     const Color selectionColor = Colors.orange;
     const Color cursorColor = Colors.red;
 
@@ -6036,7 +6051,7 @@ void main() {
   });
 
   testWidgets('Selection is consistent with text length', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     controller.text = 'abcde';
     controller.selection = const TextSelection.collapsed(offset: 5);
@@ -6065,7 +6080,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/35848
   testWidgets('Clearing text field with suffixIcon does not cause text selection exception', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'Prefilled text.',
     );
 
@@ -6088,7 +6103,7 @@ void main() {
   });
 
   testWidgets('maxLength limits input.', (WidgetTester tester) async {
-    final TextEditingController textController = TextEditingController();
+    final TextEditingController textController = _textEditingController();
 
     await tester.pumpWidget(boilerplate(
       child: TextField(
@@ -6102,7 +6117,7 @@ void main() {
   });
 
   testWidgets('maxLength limits input with surrogate pairs.', (WidgetTester tester) async {
-    final TextEditingController textController = TextEditingController();
+    final TextEditingController textController = _textEditingController();
 
     await tester.pumpWidget(boilerplate(
       child: TextField(
@@ -6117,7 +6132,7 @@ void main() {
   });
 
   testWidgets('maxLength limits input with grapheme clusters.', (WidgetTester tester) async {
-    final TextEditingController textController = TextEditingController();
+    final TextEditingController textController = _textEditingController();
 
     await tester.pumpWidget(boilerplate(
       child: TextField(
@@ -6133,7 +6148,7 @@ void main() {
 
   testWidgets('maxLength limits input in the center of a maxed-out field.', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/37420.
-    final TextEditingController textController = TextEditingController();
+    final TextEditingController textController = _textEditingController();
     const String testValue = '0123456789';
 
     await tester.pumpWidget(boilerplate(
@@ -6159,7 +6174,7 @@ void main() {
   testWidgets(
     'maxLength limits input in the center of a maxed-out field, with collapsed selection',
     (WidgetTester tester) async {
-      final TextEditingController textController = TextEditingController();
+      final TextEditingController textController = _textEditingController();
       const String testValue = '0123456789';
 
       await tester.pumpWidget(boilerplate(
@@ -6204,7 +6219,7 @@ void main() {
   testWidgets(
     'maxLength limits input in the center of a maxed-out field, with non-collapsed selection',
     (WidgetTester tester) async {
-      final TextEditingController textController = TextEditingController();
+      final TextEditingController textController = _textEditingController();
       const String testValue = '0123456789';
 
       await tester.pumpWidget(boilerplate(
@@ -6237,7 +6252,7 @@ void main() {
   );
 
   testWidgets('maxLength limits input length even if decoration is null.', (WidgetTester tester) async {
-    final TextEditingController textController = TextEditingController();
+    final TextEditingController textController = _textEditingController();
 
     await tester.pumpWidget(boilerplate(
       child: TextField(
@@ -6252,7 +6267,7 @@ void main() {
   });
 
   testWidgets('maxLength still works with other formatters', (WidgetTester tester) async {
-    final TextEditingController textController = TextEditingController();
+    final TextEditingController textController = _textEditingController();
 
     await tester.pumpWidget(boilerplate(
       child: TextField(
@@ -6273,7 +6288,7 @@ void main() {
   });
 
   testWidgets('maxLength still works with other formatters (deprecated names)', (WidgetTester tester) async {
-    final TextEditingController textController = TextEditingController();
+    final TextEditingController textController = _textEditingController();
 
     await tester.pumpWidget(boilerplate(
       child: TextField(
@@ -6294,7 +6309,7 @@ void main() {
   });
 
   testWidgets("maxLength isn't enforced when maxLengthEnforcement.none.", (WidgetTester tester) async {
-    final TextEditingController textController = TextEditingController();
+    final TextEditingController textController = _textEditingController();
 
     await tester.pumpWidget(boilerplate(
       child: TextField(
@@ -6309,7 +6324,7 @@ void main() {
   });
 
   testWidgets('maxLength shows warning when maxLengthEnforcement.none.', (WidgetTester tester) async {
-    final TextEditingController textController = TextEditingController();
+    final TextEditingController textController = _textEditingController();
     const TextStyle testStyle = TextStyle(color: Colors.deepPurpleAccent);
 
     await tester.pumpWidget(boilerplate(
@@ -6339,7 +6354,7 @@ void main() {
   });
 
   testWidgets('maxLength shows warning in Material 3', (WidgetTester tester) async {
-    final TextEditingController textController = TextEditingController();
+    final TextEditingController textController = _textEditingController();
     final ThemeData theme = ThemeData.from(
       colorScheme: const ColorScheme.light().copyWith(error: Colors.deepPurpleAccent),
       useMaterial3: true,
@@ -6371,7 +6386,7 @@ void main() {
   });
 
   testWidgets('maxLength shows warning when maxLengthEnforcement.none with surrogate pairs.', (WidgetTester tester) async {
-    final TextEditingController textController = TextEditingController();
+    final TextEditingController textController = _textEditingController();
     const TextStyle testStyle = TextStyle(color: Colors.deepPurpleAccent);
 
     await tester.pumpWidget(boilerplate(
@@ -6401,7 +6416,7 @@ void main() {
   });
 
   testWidgets('maxLength shows warning when maxLengthEnforcement.none with grapheme clusters.', (WidgetTester tester) async {
-    final TextEditingController textController = TextEditingController();
+    final TextEditingController textController = _textEditingController();
     const TextStyle testStyle = TextStyle(color: Colors.deepPurpleAccent);
 
     await tester.pumpWidget(boilerplate(
@@ -6431,7 +6446,7 @@ void main() {
   });
 
   testWidgets('maxLength limits input with surrogate pairs.', (WidgetTester tester) async {
-    final TextEditingController textController = TextEditingController();
+    final TextEditingController textController = _textEditingController();
 
     await tester.pumpWidget(boilerplate(
       child: TextField(
@@ -6446,7 +6461,7 @@ void main() {
   });
 
   testWidgets('maxLength limits input with grapheme clusters.', (WidgetTester tester) async {
-    final TextEditingController textController = TextEditingController();
+    final TextEditingController textController = _textEditingController();
 
     await tester.pumpWidget(boilerplate(
       child: TextField(
@@ -6612,7 +6627,7 @@ void main() {
         home: Material(
           child: Center(
             child: TextField(
-              controller: TextEditingController(text: 'text'),
+              controller: _textEditingController(text: 'text'),
               maxLength: 10,
               enabled: false,
             ),
@@ -6694,7 +6709,7 @@ void main() {
   });
 
   testWidgets('Disabled text field has default M2 disabled text style for the input text', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
 
@@ -6716,7 +6731,7 @@ void main() {
   });
 
   testWidgets('Disabled text field has default M3 disabled text style for the input text', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
 
@@ -6740,7 +6755,7 @@ void main() {
   });
 
   testWidgets('Provided style correctly resolves for material states', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
 
@@ -6776,7 +6791,7 @@ void main() {
 
   testWidgets('currentValueLength/maxValueLength are in the tree', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -6883,12 +6898,12 @@ void main() {
     late TextEditingController controller;
 
     setUp( () {
-      controller = TextEditingController();
+      controller = _textEditingController();
     });
 
     Future<void> setupWidget(WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
-      controller = TextEditingController();
+      final FocusNode focusNode = _focusNode();
+      controller = _textEditingController();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -7042,7 +7057,7 @@ void main() {
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Read only keyboard selection test', (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(text: 'readonly');
+      final TextEditingController controller = _textEditingController(text: 'readonly');
       await tester.pumpWidget(
           overlay(
             child: TextField(
@@ -7063,8 +7078,8 @@ void main() {
   }, skip: areKeyEventsHandledByPlatform); // [intended] only applies to platforms where we handle key events.
 
   testWidgets('Copy paste test', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
-    final TextEditingController controller = TextEditingController();
+    final FocusNode focusNode = _focusNode();
+    final TextEditingController controller = _textEditingController();
     final TextField textField =
       TextField(
         controller: controller,
@@ -7141,8 +7156,8 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/78219
   testWidgets('Paste does not crash after calling TextController.text setter', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
-    final TextEditingController controller = TextEditingController();
+    final FocusNode focusNode = _focusNode();
+    final TextEditingController controller = _textEditingController();
     final TextField textField = TextField(
       controller: controller,
       obscureText: true,
@@ -7193,8 +7208,8 @@ void main() {
   );
 
   testWidgets('Cut test', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
-    final TextEditingController controller = TextEditingController();
+    final FocusNode focusNode = _focusNode();
+    final TextEditingController controller = _textEditingController();
     final TextField textField =
       TextField(
         controller: controller,
@@ -7272,8 +7287,8 @@ void main() {
   );
 
   testWidgets('Select all test', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
-    final TextEditingController controller = TextEditingController();
+    final FocusNode focusNode = _focusNode();
+    final TextEditingController controller = _textEditingController();
     final TextField textField =
       TextField(
         controller: controller,
@@ -7323,8 +7338,8 @@ void main() {
   );
 
   testWidgets('Delete test', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
-    final TextEditingController controller = TextEditingController();
+    final FocusNode focusNode = _focusNode();
+    final TextEditingController controller = _textEditingController();
     final TextField textField =
       TextField(
         controller: controller,
@@ -7378,11 +7393,11 @@ void main() {
 
   testWidgets('Changing positions of text fields', (WidgetTester tester) async {
 
-    final FocusNode focusNode = FocusNode();
+    final FocusNode focusNode = _focusNode();
     final List<RawKeyEvent> events = <RawKeyEvent>[];
 
-    final TextEditingController c1 = TextEditingController();
-    final TextEditingController c2 = TextEditingController();
+    final TextEditingController c1 = _textEditingController();
+    final TextEditingController c2 = _textEditingController();
     final Key key1 = UniqueKey();
     final Key key2 = UniqueKey();
 
@@ -7472,11 +7487,11 @@ void main() {
   );
 
   testWidgets('Changing focus test', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
+    final FocusNode focusNode = _focusNode();
     final List<RawKeyEvent> events = <RawKeyEvent>[];
 
-    final TextEditingController c1 = TextEditingController();
-    final TextEditingController c2 = TextEditingController();
+    final TextEditingController c1 = _textEditingController();
+    final TextEditingController c2 = _textEditingController();
     final Key key1 = UniqueKey();
     final Key key2 = UniqueKey();
 
@@ -7549,7 +7564,7 @@ void main() {
   );
 
   testWidgets('Caret works when maxLines is null', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
 
     await tester.pumpWidget(
       overlay(
@@ -7576,8 +7591,8 @@ void main() {
   });
 
   testWidgets('TextField baseline alignment no-strut', (WidgetTester tester) async {
-    final TextEditingController controllerA = TextEditingController(text: 'A');
-    final TextEditingController controllerB = TextEditingController(text: 'B');
+    final TextEditingController controllerA = _textEditingController(text: 'A');
+    final TextEditingController controllerB = _textEditingController(text: 'B');
     final Key keyA = UniqueKey();
     final Key keyB = UniqueKey();
 
@@ -7638,8 +7653,8 @@ void main() {
   });
 
   testWidgets('TextField baseline alignment', (WidgetTester tester) async {
-    final TextEditingController controllerA = TextEditingController(text: 'A');
-    final TextEditingController controllerB = TextEditingController(text: 'B');
+    final TextEditingController controllerA = _textEditingController(text: 'A');
+    final TextEditingController controllerB = _textEditingController(text: 'B');
     final Key keyA = UniqueKey();
     final Key keyB = UniqueKey();
 
@@ -7700,7 +7715,7 @@ void main() {
 
   testWidgets('TextField semantics include label when unfocused and label/hint when focused if input is empty', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    final TextEditingController controller = TextEditingController(text: '');
+    final TextEditingController controller = _textEditingController(text: '');
     final Key key = UniqueKey();
 
     await tester.pumpWidget(
@@ -7732,7 +7747,7 @@ void main() {
 
   testWidgets('TextField semantics alway include label and not hint when input value is not empty', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    final TextEditingController controller = TextEditingController(text: 'value');
+    final TextEditingController controller = _textEditingController(text: 'value');
     final Key key = UniqueKey();
 
     await tester.pumpWidget(
@@ -7764,7 +7779,7 @@ void main() {
 
   testWidgets('TextField semantics always include label when no hint is given', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    final TextEditingController controller = TextEditingController(text: 'value');
+    final TextEditingController controller = _textEditingController(text: 'value');
     final Key key = UniqueKey();
 
     await tester.pumpWidget(
@@ -7795,7 +7810,7 @@ void main() {
 
   testWidgets('TextField semantics only include hint when it is visible', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    final TextEditingController controller = TextEditingController(text: 'value');
+    final TextEditingController controller = _textEditingController(text: 'value');
     final Key key = UniqueKey();
 
     await tester.pumpWidget(
@@ -7834,7 +7849,7 @@ void main() {
 
   testWidgets('TextField semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
     final Key key = UniqueKey();
 
     await tester.pumpWidget(
@@ -7967,7 +7982,7 @@ void main() {
   // Regressing test for https://github.com/flutter/flutter/issues/99763
   testWidgets('Update textField semantics when obscureText changes', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
     await tester.pumpWidget(_ObscureTextTestWidget(controller: controller));
 
     controller.text = 'Hello';
@@ -8020,7 +8035,7 @@ void main() {
 
   testWidgets('TextField semantics, enableInteractiveSelection = false', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
     final Key key = UniqueKey();
 
     await tester.pumpWidget(
@@ -8063,7 +8078,7 @@ void main() {
 
   testWidgets('TextField semantics for selections', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    final TextEditingController controller = TextEditingController()
+    final TextEditingController controller = _textEditingController()
       ..text = 'Hello';
     final Key key = UniqueKey();
 
@@ -8155,7 +8170,7 @@ void main() {
   testWidgets('TextField change selection with semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
-    final TextEditingController controller = TextEditingController()
+    final TextEditingController controller = _textEditingController()
       ..text = 'Hello';
     final Key key = UniqueKey();
 
@@ -8256,7 +8271,7 @@ void main() {
 
     final SemanticsTester semantics = SemanticsTester(tester);
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
-    final TextEditingController controller = TextEditingController()
+    final TextEditingController controller = _textEditingController()
       ..text = textInTextField;
     final Key key = UniqueKey();
 
@@ -8326,7 +8341,7 @@ void main() {
 
     final SemanticsTester semantics = SemanticsTester(tester);
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
-    final TextEditingController controller = TextEditingController()
+    final TextEditingController controller = _textEditingController()
       ..text = textInTextField;
     final Key key = UniqueKey();
 
@@ -8519,7 +8534,7 @@ void main() {
 
   testWidgets('TextField semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
     final Key key = UniqueKey();
 
     await tester.pumpWidget(
@@ -8611,7 +8626,7 @@ void main() {
 
   testWidgets('InputDecoration counterText can have a semanticCounterText', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
     final Key key = UniqueKey();
 
     await tester.pumpWidget(
@@ -8660,7 +8675,7 @@ void main() {
 
   testWidgets('InputDecoration errorText semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
     final Key key = UniqueKey();
 
     await tester.pumpWidget(
@@ -8702,7 +8717,7 @@ void main() {
   });
 
   testWidgets('floating label does not overlap with value at large textScaleFactors', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(text: 'Just some text');
+    final TextEditingController controller = _textEditingController(text: 'Just some text');
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -9129,7 +9144,7 @@ void main() {
   testWidgets(
     'tap moves cursor to the edge of the word it tapped',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
@@ -9164,7 +9179,7 @@ void main() {
   testWidgets(
     'tap with a mouse does not move cursor to the edge of the word',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
@@ -9198,7 +9213,7 @@ void main() {
   );
 
   testWidgets('tap moves cursor to the position tapped', (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
@@ -9231,7 +9246,7 @@ void main() {
   testWidgets(
     'two slow taps do not trigger a word selection',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
@@ -9269,7 +9284,7 @@ void main() {
   testWidgets(
     'Tapping on a collapsed selection toggles the toolbar',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neigse Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
       );
       // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
@@ -9356,7 +9371,7 @@ void main() {
   testWidgets(
     'Tapping on a non-collapsed selection toggles the toolbar and retains the selection',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
@@ -9432,7 +9447,7 @@ void main() {
   testWidgets(
     'double tap selects word and first tap of double tap moves cursor (iOS)',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
@@ -9478,7 +9493,7 @@ void main() {
   );
 
   testWidgets('iOS selectWordEdge works correctly', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'blah1 blah2',
     );
     await tester.pumpWidget(
@@ -9511,7 +9526,7 @@ void main() {
   testWidgets(
     'double tap does not select word on read-only obscured field',
         (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
@@ -9560,7 +9575,7 @@ void main() {
   testWidgets(
     'double tap selects word and first tap of double tap moves cursor and shows toolbar',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
@@ -9607,7 +9622,7 @@ void main() {
   testWidgets(
     'Custom toolbar test - Android text selection controls',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
@@ -9641,7 +9656,7 @@ void main() {
   testWidgets(
     'Custom toolbar test - Cupertino text selection controls',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
@@ -9692,7 +9707,7 @@ void main() {
   testWidgets(
     'Can double click + drag with a mouse to select word by word',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
+      final TextEditingController controller = _textEditingController();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -9741,7 +9756,7 @@ void main() {
   testWidgets(
     'Can double tap + drag to select word by word',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
+      final TextEditingController controller = _textEditingController();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -9808,7 +9823,7 @@ void main() {
       'Can triple tap to select a paragraph on mobile platforms when tapping at a word edge',
       (WidgetTester tester) async {
         // TODO(Renzo-Olivares): Enable for iOS, currently broken because selection overlay blocks the TextSelectionGestureDetector https://github.com/flutter/flutter/issues/123415.
-        final TextEditingController controller = TextEditingController();
+        final TextEditingController controller = _textEditingController();
         final bool isTargetPlatformApple = defaultTargetPlatform == TargetPlatform.iOS;
 
         await tester.pumpWidget(
@@ -9865,7 +9880,7 @@ void main() {
     testWidgets(
       'Can triple tap to select a paragraph on mobile platforms',
       (WidgetTester tester) async {
-        final TextEditingController controller = TextEditingController();
+        final TextEditingController controller = _textEditingController();
         final bool isTargetPlatformApple = defaultTargetPlatform == TargetPlatform.iOS;
 
         await tester.pumpWidget(
@@ -9922,7 +9937,7 @@ void main() {
       'Triple click at the beginning of a line should not select the previous paragraph',
       (WidgetTester tester) async {
         // Regression test for https://github.com/flutter/flutter/issues/132126
-        final TextEditingController controller = TextEditingController();
+        final TextEditingController controller = _textEditingController();
 
         await tester.pumpWidget(
           MaterialApp(
@@ -9977,7 +9992,7 @@ void main() {
       'Triple click at the end of text should select the previous paragraph',
       (WidgetTester tester) async {
         // Regression test for https://github.com/flutter/flutter/issues/132126.
-        final TextEditingController controller = TextEditingController();
+        final TextEditingController controller = _textEditingController();
 
         await tester.pumpWidget(
           MaterialApp(
@@ -10032,7 +10047,7 @@ void main() {
     testWidgets(
       'triple tap chains work on Non-Apple mobile platforms',
       (WidgetTester tester) async {
-        final TextEditingController controller = TextEditingController(
+        final TextEditingController controller = _textEditingController(
           text: 'Atwater Peel Sherbrooke Bonaventure',
         );
         await tester.pumpWidget(
@@ -10123,7 +10138,7 @@ void main() {
     testWidgets(
       'triple tap chains work on Apple platforms',
       (WidgetTester tester) async {
-        final TextEditingController controller = TextEditingController(
+        final TextEditingController controller = _textEditingController(
           text: 'Atwater Peel Sherbrooke Bonaventure\nThe fox jumped over the fence.',
         );
         await tester.pumpWidget(
@@ -10219,7 +10234,7 @@ void main() {
     testWidgets(
       'triple click chains work',
       (WidgetTester tester) async {
-        final TextEditingController controller = TextEditingController(
+        final TextEditingController controller = _textEditingController(
           text: testValueA,
         );
         await tester.pumpWidget(
@@ -10340,7 +10355,7 @@ void main() {
     testWidgets(
       'triple click after a click on desktop platforms',
       (WidgetTester tester) async {
-        final TextEditingController controller = TextEditingController(
+        final TextEditingController controller = _textEditingController(
           text: testValueA,
         );
         await tester.pumpWidget(
@@ -10408,7 +10423,7 @@ void main() {
     testWidgets(
       'Can triple tap to select all on a single-line textfield on mobile platforms',
       (WidgetTester tester) async {
-        final TextEditingController controller = TextEditingController(
+        final TextEditingController controller = _textEditingController(
           text: testValueB,
         );
         final bool isTargetPlatformApple = defaultTargetPlatform == TargetPlatform.iOS;
@@ -10463,7 +10478,7 @@ void main() {
     testWidgets(
       'Can triple click to select all on a single-line textfield on desktop platforms',
       (WidgetTester tester) async {
-        final TextEditingController controller = TextEditingController(
+        final TextEditingController controller = _textEditingController(
           text: testValueA,
         );
 
@@ -10519,7 +10534,7 @@ void main() {
     testWidgets(
       'Can triple click to select a line on Linux',
       (WidgetTester tester) async {
-        final TextEditingController controller = TextEditingController();
+        final TextEditingController controller = _textEditingController();
 
         await tester.pumpWidget(
           MaterialApp(
@@ -10578,7 +10593,7 @@ void main() {
     testWidgets(
       'Can triple click to select a paragraph',
       (WidgetTester tester) async {
-        final TextEditingController controller = TextEditingController();
+        final TextEditingController controller = _textEditingController();
 
         await tester.pumpWidget(
           MaterialApp(
@@ -10637,7 +10652,7 @@ void main() {
     testWidgets(
       'Can triple click + drag to select line by line on Linux',
       (WidgetTester tester) async {
-        final TextEditingController controller = TextEditingController();
+        final TextEditingController controller = _textEditingController();
 
         await tester.pumpWidget(
           MaterialApp(
@@ -10738,7 +10753,7 @@ void main() {
     testWidgets(
       'Can triple click + drag to select paragraph by paragraph',
       (WidgetTester tester) async {
-        final TextEditingController controller = TextEditingController();
+        final TextEditingController controller = _textEditingController();
 
         await tester.pumpWidget(
           MaterialApp(
@@ -10839,7 +10854,7 @@ void main() {
     testWidgets(
       'Going past triple click retains the selection on Apple platforms',
       (WidgetTester tester) async {
-        final TextEditingController controller = TextEditingController(
+        final TextEditingController controller = _textEditingController(
           text: testValueA,
         );
         await tester.pumpWidget(
@@ -10926,7 +10941,7 @@ void main() {
     testWidgets(
       'Tap count resets when going past a triple tap on Android, Fuchsia, and Linux',
       (WidgetTester tester) async {
-        final TextEditingController controller = TextEditingController(
+        final TextEditingController controller = _textEditingController(
           text: testValueA,
         );
         await tester.pumpWidget(
@@ -11040,7 +11055,7 @@ void main() {
     testWidgets(
       'Double click and triple click alternate on Windows',
       (WidgetTester tester) async {
-        final TextEditingController controller = TextEditingController(
+        final TextEditingController controller = _textEditingController(
           text: testValueA,
         );
         await tester.pumpWidget(
@@ -11158,7 +11173,7 @@ void main() {
   testWidgets(
     'double tap on top of cursor also selects word',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
@@ -11209,7 +11224,7 @@ void main() {
   testWidgets(
     'double double tap just shows the selection menu',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: '',
       );
       await tester.pumpWidget(
@@ -11244,7 +11259,7 @@ void main() {
   testWidgets(
     'double long press just shows the selection menu',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: '',
       );
       await tester.pumpWidget(
@@ -11275,7 +11290,7 @@ void main() {
   testWidgets(
     'A single tap hides the selection menu',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: '',
       );
       await tester.pumpWidget(
@@ -11304,7 +11319,7 @@ void main() {
   );
 
   testWidgets('Drag selection hides the selection menu', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'blah1 blah2',
     );
     await tester.pumpWidget(
@@ -11356,7 +11371,7 @@ void main() {
   testWidgets(
     'Long press on an autofocused field shows the selection menu',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: '',
       );
       await tester.pumpWidget(
@@ -11387,7 +11402,7 @@ void main() {
   testWidgets(
     'double tap hold selects word',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
@@ -11438,7 +11453,7 @@ void main() {
   testWidgets(
     'tap after a double tap select is not affected',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
@@ -11488,7 +11503,7 @@ void main() {
   testWidgets(
     'long press moves cursor to the exact long press position and shows toolbar when the field is focused',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
@@ -11532,7 +11547,7 @@ void main() {
   testWidgets(
     'long press that starts on an unfocused TextField selects the word at the exact long press position and shows toolbar',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
@@ -11571,7 +11586,7 @@ void main() {
   testWidgets(
     'long press selects word and shows toolbar',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
@@ -11605,7 +11620,7 @@ void main() {
   testWidgets(
     'long press tap cannot initiate a double tap',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
@@ -11651,7 +11666,7 @@ void main() {
   testWidgets(
     'long press drag extends the selection to the word under the drag and shows toolbar on lift on non-Apple platforms',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
@@ -11729,7 +11744,7 @@ void main() {
   testWidgets(
     'long press drag on a focused TextField moves the cursor under the drag and shows toolbar on lift',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
@@ -11805,7 +11820,7 @@ void main() {
   testWidgets(
     'long press drag on an unfocused TextField selects word-by-word and shows toolbar on lift',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
@@ -11872,7 +11887,7 @@ void main() {
   );
 
   testWidgets('long press drag can edge scroll on non-Apple platforms', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
     );
     await tester.pumpWidget(
@@ -11961,7 +11976,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
 
   testWidgets('long press drag can edge scroll on Apple platforms - unfocused TextField', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
     );
     await tester.pumpWidget(
@@ -12051,7 +12066,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('long press drag can edge scroll on Apple platforms - focused TextField', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
     );
     await tester.pumpWidget(
@@ -12148,7 +12163,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('mouse click and drag can edge scroll', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
     );
     await tester.pumpWidget(
@@ -12217,7 +12232,7 @@ void main() {
   }, variant: TargetPlatformVariant.all());
 
   testWidgets('keyboard selection change scrolls the field', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
     );
     await tester.pumpWidget(
@@ -12288,7 +12303,7 @@ void main() {
   );
 
   testWidgets('long press drag can edge scroll vertically', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neigse Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
     );
     await tester.pumpWidget(
@@ -12367,7 +12382,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('keyboard selection change scrolls the field vertically', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
     );
     await tester.pumpWidget(
@@ -12441,7 +12456,7 @@ void main() {
   );
 
   testWidgets('mouse click and drag can edge scroll vertically', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges Atwater Peel Sherbrooke Bonaventure Angrignon Peel Côte-des-Neiges',
     );
     await tester.pumpWidget(
@@ -12522,7 +12537,7 @@ void main() {
   testWidgets(
     'long tap after a double tap select is not affected',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
@@ -12575,7 +12590,7 @@ void main() {
   testWidgets(
     'double tap after a long tap is not affected',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       // On iOS/iPadOS, during a tap we select the edge of the word closest to the tap.
@@ -12633,7 +12648,7 @@ void main() {
   testWidgets(
     'double click after a click on desktop platforms',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
@@ -12692,7 +12707,7 @@ void main() {
   testWidgets(
     'double tap chains work',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
@@ -12767,7 +12782,7 @@ void main() {
   testWidgets(
     'double click chains work',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
       );
       await tester.pumpWidget(
@@ -12857,7 +12872,7 @@ void main() {
   );
 
   testWidgets('double tapping a space selects the previous word on iOS', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: ' blah blah  \n  blah',
     );
     await tester.pumpWidget(
@@ -12928,7 +12943,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('selecting a space selects the space on non-iOS platforms', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: ' blah blah',
     );
     await tester.pumpWidget(
@@ -12983,7 +12998,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia, TargetPlatform.android }));
 
   testWidgets('selecting a space selects the space on Desktop platforms', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: ' blah blah',
     );
     await tester.pumpWidget(
@@ -13055,7 +13070,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.windows, TargetPlatform.linux }));
 
   testWidgets('Force press does not set selection on Android or Fuchsia touch devices', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
     await tester.pumpWidget(
@@ -13098,7 +13113,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia }));
 
   testWidgets('Force press sets selection on desktop platforms that do not support it', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
     await tester.pumpWidget(
@@ -13141,7 +13156,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux, TargetPlatform.windows }));
 
   testWidgets('force press selects word', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
     await tester.pumpWidget(
@@ -13190,7 +13205,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('tap on non-force-press-supported devices work', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
     await tester.pumpWidget(Container(key: GlobalKey()));
@@ -13626,7 +13641,7 @@ void main() {
 
   testWidgets('selection handles are rendered and not faded away', (WidgetTester tester) async {
     const String testText = 'lorem ipsum';
-    final TextEditingController controller = TextEditingController(text: testText);
+    final TextEditingController controller = _textEditingController(text: testText);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -13659,7 +13674,7 @@ void main() {
 
   testWidgets('iOS selection handles are rendered and not faded away', (WidgetTester tester) async {
     const String testText = 'lorem ipsum';
-    final TextEditingController controller = TextEditingController(text: testText);
+    final TextEditingController controller = _textEditingController(text: testText);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -13690,7 +13705,7 @@ void main() {
 
   testWidgets('iPad Scribble selection change shows selection handles', (WidgetTester tester) async {
     const String testText = 'lorem ipsum';
-    final TextEditingController controller = TextEditingController(text: testText);
+    final TextEditingController controller = _textEditingController(text: testText);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -13721,7 +13736,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
   testWidgets('Tap shows handles but not toolbar', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'abc def ghi',
     );
 
@@ -13745,7 +13760,7 @@ void main() {
   testWidgets(
     'Tap in empty text field does not show handles nor toolbar',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
+      final TextEditingController controller = _textEditingController();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -13766,7 +13781,7 @@ void main() {
   );
 
   testWidgets('Long press shows handles and toolbar', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'abc def ghi',
     );
 
@@ -13790,7 +13805,7 @@ void main() {
   testWidgets(
     'Long press in empty text field shows handles and toolbar',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
+      final TextEditingController controller = _textEditingController();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -13811,7 +13826,7 @@ void main() {
   );
 
   testWidgets('Double tap shows handles and toolbar', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'abc def ghi',
     );
 
@@ -13837,7 +13852,7 @@ void main() {
   testWidgets(
     'Double tap in empty text field shows toolbar but not handles',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
+      final TextEditingController controller = _textEditingController();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -13862,7 +13877,7 @@ void main() {
   testWidgets(
     'Mouse tap does not show handles nor toolbar',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: 'abc def ghi',
       );
 
@@ -13894,7 +13909,7 @@ void main() {
   testWidgets(
     'Mouse long press does not show handles nor toolbar',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: 'abc def ghi',
       );
 
@@ -13926,7 +13941,7 @@ void main() {
   testWidgets(
     'Mouse double tap does not show handles nor toolbar',
     (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: 'abc def ghi',
       );
 
@@ -13960,7 +13975,7 @@ void main() {
   );
 
   testWidgets('Does not show handles when updated from the web engine', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'abc def ghi',
     );
 
@@ -14002,7 +14017,7 @@ void main() {
   });
 
   testWidgets('Tapping selection handles toggles the toolbar', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'abc def ghi',
     );
 
@@ -14208,11 +14223,11 @@ void main() {
     });
   });
   testWidgets("Arrow keys don't move input focus", (WidgetTester tester) async {
-    final TextEditingController controller1 = TextEditingController();
-    final TextEditingController controller2 = TextEditingController();
-    final TextEditingController controller3 = TextEditingController();
-    final TextEditingController controller4 = TextEditingController();
-    final TextEditingController controller5 = TextEditingController();
+    final TextEditingController controller1 = _textEditingController();
+    final TextEditingController controller2 = _textEditingController();
+    final TextEditingController controller3 = _textEditingController();
+    final TextEditingController controller4 = _textEditingController();
+    final TextEditingController controller5 = _textEditingController();
     final FocusNode focusNode1 = FocusNode(debugLabel: 'Field 1');
     final FocusNode focusNode2 = FocusNode(debugLabel: 'Field 2');
     final FocusNode focusNode3 = FocusNode(debugLabel: 'Field 3');
@@ -14367,7 +14382,7 @@ void main() {
     (WidgetTester tester) async {
       // This is a regression test for
       // https://github.com/flutter/flutter/issues/43787
-      final TextEditingController controller = TextEditingController(
+      final TextEditingController controller = _textEditingController(
         text: 'This is a test that shows some odd behavior with Text Selection!',
       );
 
@@ -14404,7 +14419,7 @@ void main() {
   );
 
   testWidgets('clipboard status is checked via hasStrings without getting the full clipboard contents', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
     await tester.pumpWidget(
@@ -14614,7 +14629,7 @@ void main() {
   });
 
   testWidgets('Text selection menu does not change mouse cursor when hovered', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
     await tester.pumpWidget(
@@ -14656,7 +14671,7 @@ void main() {
     bool isWide = false;
     const double wideWidth = 300.0;
     const double narrowWidth = 200.0;
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController controller = _textEditingController();
     await tester.pumpWidget(
       boilerplate(
         child: StatefulBuilder(
@@ -14711,7 +14726,7 @@ void main() {
   });
 
   testWidgets('Text selection menu hides after select all on desktop', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
     await tester.pumpWidget(
@@ -14762,7 +14777,7 @@ void main() {
 
   // Regressing test for https://github.com/flutter/flutter/issues/70625
   testWidgets('TextFields can inherit [FloatingLabelBehaviour] from InputDecorationTheme.', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
+    final FocusNode focusNode = _focusNode();
     Widget textFieldBuilder({ FloatingLabelBehavior behavior = FloatingLabelBehavior.auto }) {
       return MaterialApp(
         theme: ThemeData(
@@ -15064,7 +15079,7 @@ void main() {
   });
 
   testWidgets('Focused TextField does not push any layers with alwaysNeedsAddToScene', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
+    final FocusNode focusNode = _focusNode();
     await tester.pumpWidget(
       MaterialApp(
         home:  Material(
@@ -15081,7 +15096,7 @@ void main() {
   });
 
   testWidgets('TextField does not push any layers with alwaysNeedsAddToScene after toolbar is dismissed', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
+    final FocusNode focusNode = _focusNode();
     await tester.pumpWidget(
       MaterialApp(
         home:  Material(
@@ -15119,7 +15134,7 @@ void main() {
   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
   testWidgets('cursor blinking respects TickerMode', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
+    final FocusNode focusNode = _focusNode();
     Widget builder({required bool tickerMode}) {
       return MaterialApp(
         home:  Material(
@@ -15199,7 +15214,7 @@ void main() {
   });
 
   testWidgets('can shift + tap to select with a keyboard (Apple platforms)', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
     await tester.pumpWidget(
@@ -15242,7 +15257,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('can shift + tap to select with a keyboard (non-Apple platforms)', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
     await tester.pumpWidget(
@@ -15287,10 +15302,10 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
 
   testWidgets('shift tapping an unfocused field', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
-    final FocusNode focusNode = FocusNode();
+    final FocusNode focusNode = _focusNode();
     await tester.pumpWidget(
       MaterialApp(
         home:  Material(
@@ -15342,7 +15357,7 @@ void main() {
   }, variant: TargetPlatformVariant.all());
 
   testWidgets('can shift + tap + drag to select with a keyboard (Apple platforms)', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
     final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.iOS;
@@ -15447,7 +15462,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('can shift + tap + drag to select with a keyboard (non-Apple platforms)', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
     final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.android
@@ -15555,7 +15570,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.linux, TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.windows }));
 
   testWidgets('can shift + tap + drag to select with a keyboard, reversed (Apple platforms)', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
     final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.iOS;
@@ -15659,7 +15674,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('can shift + tap + drag to select with a keyboard, reversed (non-Apple platforms)', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
     final bool isTargetPlatformMobile = defaultTargetPlatform == TargetPlatform.android
@@ -15768,7 +15783,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/101587.
   testWidgets('Right clicking menu behavior', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'blah1 blah2',
     );
     await tester.pumpWidget(
@@ -15847,7 +15862,7 @@ void main() {
   );
 
   testWidgets('Cannot request focus when canRequestFocus is false', (WidgetTester tester) async {
-    final FocusNode focusNode = FocusNode();
+    final FocusNode focusNode = _focusNode();
 
     // Default test. The canRequestFocus is true by default and the text field can be focused
     await tester.pumpWidget(
@@ -15891,8 +15906,8 @@ void main() {
   group('Right click focus', () {
     testWidgets('Can right click to focus multiple times', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/pull/103228
-      final FocusNode focusNode1 = FocusNode();
-      final FocusNode focusNode2 = FocusNode();
+      final FocusNode focusNode1 = _focusNode();
+      final FocusNode focusNode2 = _focusNode();
       final UniqueKey key1 = UniqueKey();
       final UniqueKey key2 = UniqueKey();
       await tester.pumpWidget(
@@ -15945,9 +15960,9 @@ void main() {
     });
 
     testWidgets('Can right click to focus on previously selected word on Apple platforms', (WidgetTester tester) async {
-      final FocusNode focusNode1 = FocusNode();
-      final FocusNode focusNode2 = FocusNode();
-      final TextEditingController controller = TextEditingController(
+      final FocusNode focusNode1 = _focusNode();
+      final FocusNode focusNode2 = _focusNode();
+      final TextEditingController controller = _textEditingController(
         text: 'first second',
       );
       final UniqueKey key1 = UniqueKey();
@@ -16044,7 +16059,7 @@ void main() {
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
     testWidgets('Right clicking cannot request focus if canRequestFocus is false', (WidgetTester tester) async {
-      final FocusNode focusNode = FocusNode();
+      final FocusNode focusNode = _focusNode();
       final UniqueKey key = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
@@ -16074,7 +16089,7 @@ void main() {
 
   group('context menu', () {
     testWidgets('builds AdaptiveTextSelectionToolbar by default', (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(text: '');
+      final TextEditingController controller = _textEditingController(text: '');
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -16106,7 +16121,7 @@ void main() {
 
     testWidgets('contextMenuBuilder is used in place of the default text selection toolbar', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
-      final TextEditingController controller = TextEditingController(text: '');
+      final TextEditingController controller = _textEditingController(text: '');
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -16144,7 +16159,7 @@ void main() {
 
     testWidgets('contextMenuBuilder changes from default to null', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
-      final TextEditingController controller = TextEditingController(text: '');
+      final TextEditingController controller = _textEditingController(text: '');
       await tester.pumpWidget(MaterialApp(home: Material(child: TextField(key: key, controller: controller))));
 
       await tester.pump(); // Wait for autofocus to take effect.
@@ -16284,7 +16299,7 @@ void main() {
     testWidgets(
         'Can drag handles to show, unshow, and update magnifier',
         (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
+      final TextEditingController controller = _textEditingController();
       await tester.pumpWidget(
         overlay(
           child: TextField(
@@ -16346,7 +16361,7 @@ void main() {
     });
 
     testWidgets('Can drag to show, unshow, and update magnifier', (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
+      final TextEditingController controller = _textEditingController();
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -16447,7 +16462,7 @@ void main() {
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
 
     testWidgets('Can long press to show, unshow, and update magnifier', (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController();
+      final TextEditingController controller = _textEditingController();
       final bool isTargetPlatformAndroid = defaultTargetPlatform == TargetPlatform.android;
       await tester.pumpWidget(
         MaterialApp(
@@ -16631,7 +16646,7 @@ void main() {
 
     testWidgets("Tapping on toolbar doesn't lose focus", (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
-      final TextEditingController controller  = TextEditingController(text: 'A B C');
+      final TextEditingController controller  = _textEditingController(text: 'A B C');
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -16888,7 +16903,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
 
   testWidgets('text selection toolbar is hidden on tap down', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
+    final TextEditingController controller = _textEditingController(
       text: 'blah1 blah2',
     );
     await tester.pumpWidget(
