@@ -1464,6 +1464,7 @@ void main() {
     final TextEditingController controller = TextEditingController.fromValue(
       const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
     );
+    addTearDown(() => controller.dispose());
     final FocusNode focusNode = _focusNode();
     EditableText.debugDeterministicCursor = true;
     await tester.pumpWidget(
@@ -1490,10 +1491,11 @@ void main() {
     EditableText.debugDeterministicCursor = false;
   });
 
-  testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('cursor layout has correct radius', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController.fromValue(
       const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
     );
+    addTearDown(() => controller.dispose());
     final FocusNode focusNode = _focusNode();
     EditableText.debugDeterministicCursor = true;
     await tester.pumpWidget(
@@ -1525,7 +1527,9 @@ void main() {
     final TextEditingController controller = TextEditingController.fromValue(
       const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
     );
+    addTearDown(controller.dispose);
     final FocusNode focusNode = _focusNode();
+
     EditableText.debugDeterministicCursor = true;
     await tester.pumpWidget(
       Theme(
@@ -1864,9 +1868,12 @@ void main() {
   });
 
   testWidgets('Long pressing a field with selection 0,0 shows the selection menu', (WidgetTester tester) async {
+    late final TextEditingController controller;
+    addTearDown(() => controller.dispose());
+
     await tester.pumpWidget(overlay(
       child: TextField(
-        controller: TextEditingController.fromValue(
+        controller: controller = TextEditingController.fromValue(
           const TextEditingValue(
             selection: TextSelection(baseOffset: 0, extentOffset: 0),
           ),
@@ -2115,6 +2122,7 @@ void main() {
         extentOffset: 7,
       )),
     );
+    addTearDown(() => controller.dispose());
 
     // Mark entry to be dirty in order to trigger overlay update.
     entry.markNeedsBuild();
@@ -2132,6 +2140,7 @@ void main() {
             composing: TextRange(start: 0, end: 8), // Simulate text composing.
         ),
     );
+    addTearDown(() => controller.dispose());
 
     await tester.pumpWidget(
         overlay(
@@ -3881,6 +3890,7 @@ void main() {
         ),
       ),
     );
+    addTearDown(() => controller.dispose());
     await tester.pumpWidget(
       overlay(
         child: TextField(
