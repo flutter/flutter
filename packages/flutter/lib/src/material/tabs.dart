@@ -1369,7 +1369,9 @@ class _TabBarState extends State<TabBar> {
       _controller!.animation!.removeListener(_handleTabControllerAnimationTick);
       _controller!.removeListener(_handleTabControllerTick);
     }
+    _controller?.dispose();
     _controller = null;
+    _scrollController?.dispose();
     // We don't own the _controller Animation, so it's not disposed here.
     super.dispose();
   }

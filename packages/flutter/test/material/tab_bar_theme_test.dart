@@ -11,6 +11,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 const String _tab1Text = 'tab 1';
 const String _tab2Text = 'tab 2';
@@ -103,7 +104,11 @@ void main() {
     expect(identical(TabBarTheme.lerp(theme, theme, 0.5), theme), true);
   });
 
-  testWidgets('Tab bar defaults (primary)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tab bar defaults (primary)',
+  // TODO(polina-c): investigate and remove after merge:
+  //
+  leakTrackingTestConfig: const LeakTrackingTestConfig(notDisposedAllowList: <String, int?>{'TabController': 1}),
+  (WidgetTester tester) async {
     // Test default label color and label styles.
     await tester.pumpWidget(buildTabBar(useMaterial3: true));
 
