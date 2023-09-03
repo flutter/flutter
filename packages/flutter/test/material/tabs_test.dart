@@ -312,21 +312,21 @@ void main() {
     expect(tester.renderObject(find.byType(CustomPaint)).debugNeedsPaint, true);
   });
 
-  testWidgets('Tab sizing - icon', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tab sizing - icon', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(home: Center(child: Material(child: Tab(icon: SizedBox(width: 10.0, height: 10.0))))),
     );
     expect(tester.getSize(find.byType(Tab)), const Size(10.0, 46.0));
   });
 
-  testWidgets('Tab sizing - child', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tab sizing - child', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(home: Center(child: Material(child: Tab(child: SizedBox(width: 10.0, height: 10.0))))),
     );
     expect(tester.getSize(find.byType(Tab)), const Size(10.0, 46.0));
   });
 
-  testWidgets('Tab sizing - text', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tab sizing - text', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(fontFamily: 'FlutterTest');
     final bool material3 = theme.useMaterial3;
     await tester.pumpWidget(
@@ -339,7 +339,7 @@ void main() {
     );
   });
 
-  testWidgets('Tab sizing - icon and text', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tab sizing - icon and text', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(fontFamily: 'FlutterTest');
     final bool material3 = theme.useMaterial3;
     await tester.pumpWidget(
@@ -351,7 +351,7 @@ void main() {
       material3 ? const Size(14.25, 72.0) : const Size(14.0, 72.0));
   });
 
-  testWidgets('Tab sizing - icon, iconMargin and text', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tab sizing - icon, iconMargin and text', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(fontFamily: 'FlutterTest'),
@@ -375,7 +375,7 @@ void main() {
     expect(tester.getSize(find.byType(Tab)), const Size(210.0, 72.0));
   });
 
-  testWidgets('Tab sizing - icon and child', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tab sizing - icon and child', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(fontFamily: 'FlutterTest');
     final bool material3 = theme.useMaterial3;
     await tester.pumpWidget(
@@ -387,7 +387,7 @@ void main() {
       material3 ? const Size(14.25, 72.0) : const Size(14.0, 72.0));
   });
 
-  testWidgets('Tab color - normal', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tab color - normal', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(fontFamily: 'FlutterTest');
     final bool material3 = theme.useMaterial3;
     final Widget tabBar = TabBar(tabs: const <Widget>[SizedBox.shrink()], controller: _tabController(length: 1, vsync: tester));
@@ -397,7 +397,7 @@ void main() {
     expect(find.byType(TabBar), paints..line(color: material3 ? theme.colorScheme.surfaceVariant : Colors.blue[500]));
   });
 
-  testWidgets('Tab color - match', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tab color - match', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     final bool material3 = theme.useMaterial3;
     final Widget tabBar = TabBar(tabs: const <Widget>[SizedBox.shrink()], controller: _tabController(length: 1, vsync: tester));
@@ -407,7 +407,7 @@ void main() {
     expect(find.byType(TabBar), paints..line(color: material3 ? theme.colorScheme.surfaceVariant : Colors.white));
   });
 
-  testWidgets('Tab color - transparency', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tab color - transparency', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     final bool material3 = theme.useMaterial3;
     final Widget tabBar = TabBar(tabs: const <Widget>[SizedBox.shrink()], controller: _tabController(length: 1, vsync: tester));
@@ -417,7 +417,7 @@ void main() {
     expect(find.byType(TabBar), paints..line(color: material3 ? theme.colorScheme.surfaceVariant : Colors.blue[500]));
   });
 
-  testWidgets('TabBar default selected/unselected label style (primary)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('TabBar default selected/unselected label style (primary)', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     final List<String> tabs = <String>['A', 'B', 'C'];
 
