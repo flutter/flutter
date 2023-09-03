@@ -1093,7 +1093,6 @@ void main() {
       controller: controller,
       referenceBox: sizedBoxKey.currentContext!.findRenderObject()! as RenderBox,
     );
-    addTearDown(() => tracker.dispose());
     controller.addInkFeature(tracker);
     expect(tracker.paintCount, 0);
 
@@ -1117,6 +1116,8 @@ void main() {
     expect(tracker.paintCount, 2);
   },
   leakTrackingTestConfig: const LeakTrackingTestConfig(
+    // TODO(polina-c): remove after fixing:
+    // https://github.com/flutter/flutter/issues/133939
     notDisposedAllowList: <String, int?>{
       'PictureLayer': 2,
       'ContainerLayer': 2,
