@@ -96,7 +96,7 @@ class ButtonSegment<T> {
 ///     [ToggleButtons].
 ///   * [Radio], an alternative way to present the user with a mutually exclusive set of options.
 ///   * [FilterChip], [ChoiceChip], which can be used when you need to show more than five options.
-class SegmentedButton<T> extends StatelessWidget {
+class SegmentedButton<T> extends StatefulWidget {
   /// Creates a const [SegmentedButton].
   ///
   /// [segments] must contain at least one segment, but it is recommended
@@ -235,27 +235,32 @@ class SegmentedButton<T> extends StatelessWidget {
   /// Defaults to an [Icon] with [Icons.check].
   final Widget? selectedIcon;
 
-  bool get _enabled => onSelectionChanged != null;
+  @override
+  State<SegmentedButton<T>> createState() => _SegmentedButtonState<T>();
+}
+
+class _SegmentedButtonState<T> extends State<SegmentedButton<T>> {
+  bool get _enabled => widget.onSelectionChanged != null;
 
   void _handleOnPressed(T segmentValue) {
     if (!_enabled) {
       return;
     }
-    final bool onlySelectedSegment = selected.length == 1 && selected.contains(segmentValue);
-    final bool validChange = emptySelectionAllowed || !onlySelectedSegment;
+    final bool onlySelectedSegment = widget.selected.length == 1 && widget.selected.contains(segmentValue);
+    final bool validChange = widget.emptySelectionAllowed || !onlySelectedSegment;
     if (validChange) {
-      final bool toggle = multiSelectionEnabled || (emptySelectionAllowed && onlySelectedSegment);
+      final bool toggle = widget.multiSelectionEnabled || (widget.emptySelectionAllowed && onlySelectedSegment);
       final Set<T> pressedSegment = <T>{segmentValue};
       late final Set<T> updatedSelection;
       if (toggle) {
-        updatedSelection = selected.contains(segmentValue)
-          ? selected.difference(pressedSegment)
-          : selected.union(pressedSegment);
+        updatedSelection = widget.selected.contains(segmentValue)
+          ? widget.selected.difference(pressedSegment)
+          : widget.selected.union(pressedSegment);
       } else {
         updatedSelection = pressedSegment;
       }
-      if (!setEquals(updatedSelection, selected)) {
-        onSelectionChanged!(updatedSelection);
+      if (!setEquals(updatedSelection, widget.selected)) {
+        widget.onSelectionChanged!(updatedSelection);
       }
     }
   }
@@ -271,7 +276,7 @@ class SegmentedButton<T> extends StatelessWidget {
     final Set<MaterialState> currentState = _enabled ? enabledState : disabledState;
 
     P? effectiveValue<P>(P? Function(ButtonStyle? style) getProperty) {
-      late final P? widgetValue  = getProperty(style);
+      late final P? widgetValue  = getProperty(widget.style);
       late final P? themeValue   = getProperty(theme.style);
       late final P? defaultValue = getProperty(defaults.style);
       return widgetValue ?? themeValue ?? defaultValue;
@@ -305,16 +310,16 @@ class SegmentedButton<T> extends StatelessWidget {
       );
     }
 
-    final ButtonStyle segmentStyle = segmentStyleFor(style);
+    final ButtonStyle segmentStyle = segmentStyleFor(widget.style);
     final ButtonStyle segmentThemeStyle = segmentStyleFor(theme.style).merge(segmentStyleFor(defaults.style));
-    final Widget? selectedIcon = showSelectedIcon
-      ? this.selectedIcon ?? theme.selectedIcon ?? defaults.selectedIcon
+    final Widget? selectedIcon = widget.showSelectedIcon
+      ? this.widget.selectedIcon ?? theme.selectedIcon ?? defaults.selectedIcon
       : null;
 
     Widget buttonFor(ButtonSegment<T> segment) {
       final Widget label = segment.label ?? segment.icon ?? const SizedBox.shrink();
-      final bool segmentSelected = selected.contains(segment.value);
-      final Widget? icon = (segmentSelected && showSelectedIcon)
+      final bool segmentSelected = widget.selected.contains(segment.value);
+      final Widget? icon = (segmentSelected && widget.showSelectedIcon)
         ? selectedIcon
         : segment.label != null
           ? segment.icon
@@ -350,7 +355,7 @@ class SegmentedButton<T> extends StatelessWidget {
       return MergeSemantics(
         child: Semantics(
           checked: segmentSelected,
-          inMutuallyExclusiveGroup: multiSelectionEnabled ? null : true,
+          inMutuallyExclusiveGroup: widget.multiSelectionEnabled ? null : true,
           child: buttonWithTooltip,
         ),
       );
@@ -363,7 +368,7 @@ class SegmentedButton<T> extends StatelessWidget {
     final OutlinedBorder enabledBorder = resolvedEnabledBorder.copyWith(side: enabledSide);
     final OutlinedBorder disabledBorder = resolvedDisabledBorder.copyWith(side: disabledSide);
 
-    final List<Widget> buttons = segments.map(buttonFor).toList();
+    final List<Widget> buttons = widget.segments.map(buttonFor).toList();
 
     return Material(
       type: MaterialType.transparency,
@@ -374,7 +379,7 @@ class SegmentedButton<T> extends StatelessWidget {
       child: TextButtonTheme(
         data: TextButtonThemeData(style: segmentThemeStyle),
         child: _SegmentedButtonRenderWidget<T>(
-          segments: segments,
+          segments: widget.segments,
           enabledBorder: _enabled ? enabledBorder : disabledBorder,
           disabledBorder: disabledBorder,
           direction: direction,
