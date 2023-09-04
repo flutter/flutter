@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('TimePickerThemeData copyWith, ==, hashCode basics', () {
@@ -44,7 +45,7 @@ void main() {
     expect(timePickerTheme.shape, null);
   });
 
-  testWidgets('Default TimePickerThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default TimePickerThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const TimePickerThemeData().debugFillProperties(builder);
 
@@ -56,7 +57,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('TimePickerThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('TimePickerThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const TimePickerThemeData(
       backgroundColor: Color(0xfffffff0),
@@ -122,7 +123,7 @@ void main() {
     ]));
   });
 
-  testWidgets('Material2 - Passing no TimePickerThemeData uses defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - Passing no TimePickerThemeData uses defaults', (WidgetTester tester) async {
     final ThemeData defaultTheme = ThemeData(useMaterial3: false);
     await tester.pumpWidget(_TimePickerLauncher(themeData: defaultTheme));
     await tester.tap(find.text('X'));
@@ -255,7 +256,7 @@ void main() {
     expect(confirmButtonStyle.toString(), equalsIgnoringHashCodes(TextButton.styleFrom().toString()));
   });
 
-  testWidgets('Material3 - Passing no TimePickerThemeData uses defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - Passing no TimePickerThemeData uses defaults', (WidgetTester tester) async {
     final ThemeData defaultTheme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(_TimePickerLauncher(themeData: defaultTheme));
     await tester.tap(find.text('X'));
@@ -403,7 +404,7 @@ void main() {
     expect(confirmButtonStyle.toString(), equalsIgnoringHashCodes(TextButton.styleFrom().toString()));
   });
 
-  testWidgets('Material2 - Passing no TimePickerThemeData uses defaults - input mode', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - Passing no TimePickerThemeData uses defaults - input mode', (WidgetTester tester) async {
     final ThemeData defaultTheme = ThemeData(useMaterial3: false);
     await tester.pumpWidget(_TimePickerLauncher(themeData: defaultTheme, entryMode: TimePickerEntryMode.input));
     await tester.tap(find.text('X'));
@@ -445,7 +446,7 @@ void main() {
     expect(confirmButtonStyle.toString(), equalsIgnoringHashCodes(TextButton.styleFrom().toString()));
   });
 
-  testWidgets('Material3 - Passing no TimePickerThemeData uses defaults - input mode', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - Passing no TimePickerThemeData uses defaults - input mode', (WidgetTester tester) async {
     final ThemeData defaultTheme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(_TimePickerLauncher(themeData: defaultTheme, entryMode: TimePickerEntryMode.input));
     await tester.tap(find.text('X'));
@@ -490,7 +491,7 @@ void main() {
     expect(confirmButtonStyle.toString(), equalsIgnoringHashCodes(TextButton.styleFrom().toString()));
   });
 
-  testWidgets('Material2 - Time picker uses values from TimePickerThemeData', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - Time picker uses values from TimePickerThemeData', (WidgetTester tester) async {
     final TimePickerThemeData timePickerTheme = _timePickerTheme();
     final ThemeData theme = ThemeData(timePickerTheme: timePickerTheme, useMaterial3: false);
     await tester.pumpWidget(_TimePickerLauncher(themeData: theme));
@@ -613,7 +614,7 @@ void main() {
     expect(confirmButtonStyle.toString(), equalsIgnoringHashCodes(timePickerTheme.confirmButtonStyle.toString()));
   });
 
-  testWidgets('Material3 - Time picker uses values from TimePickerThemeData', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - Time picker uses values from TimePickerThemeData', (WidgetTester tester) async {
     final TimePickerThemeData timePickerTheme = _timePickerTheme();
     final ThemeData theme = ThemeData(timePickerTheme: timePickerTheme, useMaterial3: true);
     await tester.pumpWidget(_TimePickerLauncher(themeData: theme));
@@ -736,7 +737,7 @@ void main() {
     expect(confirmButtonStyle.toString(), equalsIgnoringHashCodes(timePickerTheme.confirmButtonStyle.toString()));
   });
 
-  testWidgets('Time picker uses values from TimePickerThemeData with InputDecorationTheme - input mode', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Time picker uses values from TimePickerThemeData with InputDecorationTheme - input mode', (WidgetTester tester) async {
     final TimePickerThemeData timePickerTheme = _timePickerTheme(includeInputDecoration: true);
     final ThemeData theme = ThemeData(timePickerTheme: timePickerTheme);
     await tester.pumpWidget(_TimePickerLauncher(themeData: theme, entryMode: TimePickerEntryMode.input));
@@ -753,7 +754,7 @@ void main() {
     expect(hourDecoration.hintStyle, timePickerTheme.inputDecorationTheme!.hintStyle);
   });
 
-  testWidgets('Time picker uses values from TimePickerThemeData without InputDecorationTheme - input mode', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Time picker uses values from TimePickerThemeData without InputDecorationTheme - input mode', (WidgetTester tester) async {
     final TimePickerThemeData timePickerTheme = _timePickerTheme();
     final ThemeData theme = ThemeData(timePickerTheme: timePickerTheme);
     await tester.pumpWidget(_TimePickerLauncher(themeData: theme, entryMode: TimePickerEntryMode.input));
