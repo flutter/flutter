@@ -40,6 +40,7 @@ void main() {
 
   testWidgets('can pass custom regexp', (WidgetTester tester) async {
     String? lastTappedLink;
+    final List<TapGestureRecognizer> recognizers = <TapGestureRecognizer>[];
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -47,11 +48,20 @@ void main() {
             builder: (BuildContext context) {
               return LinkedText.textLinkers(
                 textLinkers: <TextLinker>[
-                  TextLinker.regExp(
-                    regExp: hashTagRegExp,
-                    linkBuilder: LinkedText.getDefaultLinkBuilder((String urlString) {
-                      lastTappedLink = urlString;
-                    }),
+                  TextLinker(
+                    textRangesFinder: TextLinker.textRangesFinderFromRegExp(hashTagRegExp),
+                    linkBuilder: (String displayString, String linkString) {
+                      final TapGestureRecognizer recognizer = TapGestureRecognizer()
+                          ..onTap = () {
+                            lastTappedLink = linkString;
+                          };
+                      recognizers.add(recognizer);
+                      return TextSpan(
+                        style: LinkedText.defaultLinkStyle,
+                        text: displayString,
+                        recognizer: recognizer,
+                      );
+                    },
                   ),
                 ],
                 text: 'Flutter is great #crossplatform #declarative',
@@ -67,21 +77,45 @@ void main() {
 
     await tester.tapAt(tester.getCenter(find.byType(RichText)));
     expect(lastTappedLink, '#crossplatform');
+
+    expect(recognizers, hasLength(2));
+    for (final TapGestureRecognizer recognizer in recognizers) {
+      recognizer.dispose();
+    }
   });
 
   testWidgets('can link multiple different types', (WidgetTester tester) async {
     String? lastTappedLink;
+    final List<TapGestureRecognizer> recognizers = <TapGestureRecognizer>[];
     final TextLinker urlTextLinker = TextLinker(
       textRangesFinder: TextLinker.textRangesFinderFromRegExp(urlRegExp),
-      linkBuilder: LinkedText.getDefaultLinkBuilder((String text) {
-        lastTappedLink = text;
-      }),
+      linkBuilder: (String displayString, String linkString) {
+        final TapGestureRecognizer recognizer = TapGestureRecognizer()
+            ..onTap = () {
+              lastTappedLink = linkString;
+            };
+        recognizers.add(recognizer);
+        return TextSpan(
+          style: LinkedText.defaultLinkStyle,
+          text: displayString,
+          recognizer: recognizer,
+        );
+      },
     );
     final TextLinker hashTagTextLinker = TextLinker(
       textRangesFinder: TextLinker.textRangesFinderFromRegExp(hashTagRegExp),
-      linkBuilder: LinkedText.getDefaultLinkBuilder((String text) {
-        lastTappedLink = text;
-      }),
+      linkBuilder: (String displayString, String linkString) {
+        final TapGestureRecognizer recognizer = TapGestureRecognizer()
+            ..onTap = () {
+              lastTappedLink = linkString;
+            };
+        recognizers.add(recognizer);
+        return TextSpan(
+          style: LinkedText.defaultLinkStyle,
+          text: displayString,
+          recognizer: recognizer,
+        );
+      },
     );
     await tester.pumpWidget(
       MaterialApp(
@@ -106,10 +140,16 @@ void main() {
 
     await tester.tapAt(tester.getCenter(find.byType(RichText)));
     expect(lastTappedLink, '#crossplatform');
+
+    expect(recognizers, hasLength(3));
+    for (final TapGestureRecognizer recognizer in recognizers) {
+      recognizer.dispose();
+    }
   });
 
   testWidgets('can customize linkBuilder', (WidgetTester tester) async {
     String? lastTappedLink;
+    final List<TapGestureRecognizer> recognizers = <TapGestureRecognizer>[];
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -124,13 +164,11 @@ void main() {
                           ..onTap = () {
                             lastTappedLink = linkString;
                           };
-                      return (
-                        TextSpan(
-                          recognizer: recognizer,
-                          text: displayString,
-                          mouseCursor: SystemMouseCursors.help,
-                        ),
-                        recognizer,
+                      recognizers.add(recognizer);
+                      return TextSpan(
+                        recognizer: recognizer,
+                        text: displayString,
+                        mouseCursor: SystemMouseCursors.help,
                       );
                     },
                   ),
@@ -155,6 +193,11 @@ void main() {
 
     await tester.tapAt(tester.getCenter(find.byType(RichText)));
     expect(lastTappedLink, 'flutter.dev');
+
+    expect(recognizers, hasLength(1));
+    for (final TapGestureRecognizer recognizer in recognizers) {
+      recognizer.dispose();
+    }
   });
 
   testWidgets('can take nested spans', (WidgetTester tester) async {
