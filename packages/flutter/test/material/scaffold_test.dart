@@ -50,6 +50,42 @@ void main() {
     expect(controller.position.pixels, 100.0);
   });
 
+  testWidgets('Scaffold materialBuilder overrides default material', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        materialBuilder: (BuildContext context, Widget child) {
+          return Material(
+            textStyle: const TextStyle(
+              color: Colors.red,
+            ),
+            child: child,
+          );
+        },
+        appBar: const PreferredSize(
+          preferredSize: Size(50, 50),
+          child: Text ('Foo1'),
+        ),
+        body: const Center(
+          child: Text('Foo2'),
+        ),
+        floatingActionButton: const Text('Foo3'),
+      ),
+    ));
+
+    final RichText foo1 = tester.firstWidget(find.descendant(of: find.text('Foo1'), matching: find.byType(RichText)));
+    final RichText foo2 = tester.firstWidget(find.descendant(of: find.text('Foo2'), matching: find.byType(RichText)));
+    final RichText foo3 = tester.firstWidget(find.descendant(of: find.text('Foo3'), matching: find.byType(RichText)));
+
+    expect(foo1, isNotNull);
+    expect(foo1.text.style!.color,Colors.red);
+
+    expect(foo2, isNotNull);
+    expect(foo2.text.style!.color,Colors.red);
+
+    expect(foo3, isNotNull);
+    expect(foo3.text.style!.color,Colors.red);
+  });
+
   testWidgets('Scaffold drawer callback test', (WidgetTester tester) async {
     bool isDrawerOpen = false;
     bool isEndDrawerOpen = false;
