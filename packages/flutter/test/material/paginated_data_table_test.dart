@@ -67,8 +67,9 @@ class TestDataSource extends DataTableSource {
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgetsWithLeakTracking('PaginatedDataTable paging', (WidgetTester tester) async {
+  testWidgets('PaginatedDataTable paging', (WidgetTester tester) async {
     final TestDataSource source = TestDataSource();
+    addTearDown(source.dispose);
 
     final List<String> log = <String>[];
 
@@ -1220,7 +1221,7 @@ void main() {
   testWidgets('PaginatedDataTable can be scrolled using ScrollController', (WidgetTester tester) async {
     final TestDataSource source = TestDataSource();
     final ScrollController scrollController = ScrollController();
-    addTearDown(() => scrollController.dispose());
+    addTearDown(() { source.dispose(); scrollController.dispose(); });
 
     Widget buildTable(TestDataSource source) {
       return Align(
