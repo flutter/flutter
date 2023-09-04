@@ -24,7 +24,7 @@ void main() {
     return tester.widget<Material>(find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first);
   }
 
-  testWidgets('Material2 - Dialog size - dial mode', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - Dialog size - dial mode', (WidgetTester tester) async {
     addTearDown(tester.view.reset);
 
     const Size timePickerPortraitSize =  Size(310, 468);
