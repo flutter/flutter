@@ -198,9 +198,6 @@ class TextFormField extends FormField<String> {
              field.didChange(value);
              onChanged?.call(value);
            }
-           if (statesController !=  null) {
-            statesController.update(MaterialState.error, field.errorText != null);
-           }
            return UnmanagedRestorationScope(
              bucket: field.bucket,
              child: TextField(
