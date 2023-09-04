@@ -7,7 +7,11 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_value.h"
 
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(PangoContext, g_object_unref)
+// PangoLayout g_autoptr macro weren't added until 1.49.4. Add them manually.
+// https://gitlab.gnome.org/GNOME/pango/-/commit/0b84e14
+#if !PANGO_VERSION_CHECK(1, 49, 4)
 G_DEFINE_AUTOPTR_CLEANUP_FUNC(PangoLayout, g_object_unref)
+#endif
 
 typedef bool (*FlTextBoundaryCallback)(const PangoLogAttr* attr);
 
