@@ -783,6 +783,9 @@ mixin SchedulerBinding on BindingBase {
   /// This function calls all the pre-rendering callbacks registered by
   /// [addPreRenderCallback].
   void handlePreRenderScene() {
+    if (_preRenderCallbacks.isEmpty) {
+      return;
+    }
     final List<VoidCallback> localPreRenderCallbacks = List<VoidCallback>.of(_preRenderCallbacks);
     _preRenderCallbacks.clear();
     localPreRenderCallbacks.forEach(_invokePreRenderCallback);
