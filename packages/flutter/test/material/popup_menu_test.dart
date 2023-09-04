@@ -3737,6 +3737,113 @@ void main() {
     expect(_labelStyle(tester, 'Item 1')!.fontWeight, customTextStyle.fontWeight);
     expect(_labelStyle(tester, 'Item 1')!.fontStyle, customTextStyle.fontStyle);
   });
+
+  testWidgets('CheckedPopupMenuItem.onTap callback is called when defined', (WidgetTester tester) async {
+    final List<int> menuItemTapCounters = <int>[0, 0];
+
+    await tester.pumpWidget(
+      TestApp(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: RepaintBoundary(
+            child: PopupMenuButton<void>(
+              child: const Text('Actions'),
+              itemBuilder: (BuildContext context) => <PopupMenuItem<void>>[
+                CheckedPopupMenuItem<void>(
+                  child: const Text('First option'),
+                  onTap: () {
+                    menuItemTapCounters[0] += 1;
+                  },
+                ),
+                CheckedPopupMenuItem<void>(
+                  child: const Text('Second option'),
+                  onTap: () {
+                    menuItemTapCounters[1] += 1;
+                  },
+                ),
+                const CheckedPopupMenuItem<void>(
+                  child: Text('Option without onTap'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Tap the first time
+    await tester.tap(find.text('Actions'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('First option'));
+    await tester.pumpAndSettle();
+    expect(menuItemTapCounters, <int>[1, 0]);
+
+    // Tap the item again
+    await tester.tap(find.text('Actions'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('First option'));
+    await tester.pumpAndSettle();
+    expect(menuItemTapCounters, <int>[2, 0]);
+
+    // Tap a different item
+    await tester.tap(find.text('Actions'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Second option'));
+    await tester.pumpAndSettle();
+    expect(menuItemTapCounters, <int>[2, 1]);
+
+    // Tap an item without onTap
+    await tester.tap(find.text('Actions'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Option without onTap'));
+    await tester.pumpAndSettle();
+    expect(menuItemTapCounters, <int>[2, 1]);
+  });
+
+  testWidgets('Material2 - CheckedPopupMenuItem honors textStyle', (WidgetTester tester) async {
+    final Key popupMenuButtonKey = UniqueKey();
+    final ThemeData theme = ThemeData(useMaterial3: false);
+
+    Widget buildMenu() {
+      return MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              key: popupMenuButtonKey,
+              child: const Text('button'),
+              onSelected: (String result) { },
+              itemBuilder: (BuildContext context) {
+                return <PopupMenuItem<String>>[
+                   // Popup menu item with a Text widget.
+                   const CheckedPopupMenuItem<String>(
+                    value: '0',
+                    textStyle: TextStyle(color: Colors.red),
+                    child: Text('Item 0'),
+                  ),
+                  // Popup menu item with a ListTile widget.
+                  const CheckedPopupMenuItem<String>(
+                    value: '1',
+                    textStyle: TextStyle(color: Colors.green),
+                    child: ListTile(title: Text('Item 1')),
+                  ),
+                ];
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildMenu());
+
+    // Show the menu.
+    await tester.tap(find.byKey(popupMenuButtonKey));
+    await tester.pumpAndSettle();
+
+    expect(_labelStyle(tester, 'Item 0')!.color, Colors.red);
+    expect(_labelStyle(tester, 'Item 1')!.color, Colors.green);
+  });
 }
 
 class TestApp extends StatelessWidget {
