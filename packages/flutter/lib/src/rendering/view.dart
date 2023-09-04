@@ -5,9 +5,9 @@
 import 'dart:io' show Platform;
 import 'dart:ui' as ui show FlutterView, Scene, SceneBuilder, SemanticsUpdate;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 import 'binding.dart';
 import 'box.dart';
