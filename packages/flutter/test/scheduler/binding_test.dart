@@ -45,4 +45,15 @@ void main() {
     SchedulerBinding.instance.handleDrawFrame();
     expect(calledBack, true);
   });
+
+  test('Schedule a pre-rendering callback', () {
+    int calledBack = 0;
+    SchedulerBinding.instance.addPreRenderCallback(() {
+      calledBack++;
+    });
+    SchedulerBinding.instance.handlePreRenderScene();
+    expect(calledBack, 1);
+    SchedulerBinding.instance.handlePreRenderScene();
+    expect(calledBack, 1);
+  });
 }
