@@ -2851,6 +2851,9 @@ void main() {
     // `are` is selected.
     expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
     await tester.pumpAndSettle();
+
+    await gesture.up();
+    await tester.pumpAndSettle();
     // Text selection toolbar has appeared.
     expect(find.text('Copy'), findsOneWidget);
 
@@ -3018,6 +3021,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     // `are` is selected.
     expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
+
+    await gesture.up();
     await tester.pumpAndSettle();
 
     expect(buttonTypes, contains(ContextMenuButtonType.copy));
