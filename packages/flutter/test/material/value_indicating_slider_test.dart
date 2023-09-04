@@ -13,7 +13,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 
 void main() {
-  testWidgets('Slider value indicator', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Slider value indicator', (WidgetTester tester) async {
     await _buildValueIndicatorStaticSlider(
       tester,
       value: 0,
