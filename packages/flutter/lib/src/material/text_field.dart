@@ -459,8 +459,8 @@ class TextField extends StatefulWidget {
   final bool autofocus;
 
   /// Represents the interactive "state" of this widget in terms of
-  /// a set of [MaterialState]s, like [MaterialState.disabled] and
-  /// [MaterialState.focused].
+  /// a set of [MaterialState]s, including [MaterialState.disabled], [MaterialState.hovered],
+  /// [MaterialState.error], and [MaterialState.focused].
   ///
   /// Classes based on this one can provide their own
   /// [MaterialStatesController] to which they've added listeners.
