@@ -1978,6 +1978,14 @@ class _HourMinuteTextFieldState extends State<_HourMinuteTextField> with Restora
   }
 
   @override
+  void dispose() {
+    controller.dispose();
+    focusNode.dispose();
+    controllerHasBeenSet.dispose();
+    super.dispose();
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Only set the text value if it has not been populated with a localized

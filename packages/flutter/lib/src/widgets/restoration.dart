@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'restoration_properties.dart';
 
 export 'package:flutter/services.dart' show RestorationBucket;
 
@@ -791,9 +792,14 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
            '"$restorationId" is already registered to another property.',
     );
     final bool hasSerializedValue = bucket?.contains(restorationId) ?? false;
+
     final Object? initialValue = hasSerializedValue
         ? property.fromPrimitives(bucket!.read<Object>(restorationId))
         : property.createDefaultValue();
+
+    if (initialValue is RestorableValue) {
+
+    }
 
     if (!property.isRegistered) {
       property._register(restorationId, this);
@@ -1014,9 +1020,11 @@ mixin RestorationMixin<S extends StatefulWidget> on State<S> {
 
   @override
   void dispose() {
-    _properties.forEach((RestorableProperty<Object?> property, VoidCallback listener) {
+    final keys = _properties.keys.toList();
+
+    keys.forEach((RestorableProperty<Object?> property) {
       if (!property._disposed) {
-        property.removeListener(listener);
+        property.dispose();
       }
     });
     _bucket?.dispose();

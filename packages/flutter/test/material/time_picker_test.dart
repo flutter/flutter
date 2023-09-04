@@ -65,7 +65,9 @@ void main() {
     );
   });
 
-  testWidgets('Material2 - Dialog size - input mode', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - Dialog size - input mode',
+  leakTrackingTestConfig: LeakTrackingTestConfig.debugNotDisposed(),
+  (WidgetTester tester) async {
     const TimePickerEntryMode entryMode = TimePickerEntryMode.input;
     const Size timePickerInputSize = Size(312, 216);
     const Size dayPeriodPortraitSize = Size(52, 80);
