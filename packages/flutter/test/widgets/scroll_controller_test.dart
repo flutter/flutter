@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'states.dart';
 
@@ -392,5 +393,9 @@ void main() {
     // When the listener was notified, the value of the isScrollingNotifier
     // should have been true
     expect(isScrolling, isTrue);
+  });
+
+  test('$ScrollController dispatches object creation in constructor', () {
+    expect(()=> ScrollController().dispose(), dispatchesMemoryEvents(ScrollController));
   });
 }

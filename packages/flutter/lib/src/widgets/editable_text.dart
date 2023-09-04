@@ -2125,7 +2125,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   late final Simulation _iosBlinkCursorSimulation = _DiscreteKeyFrameSimulation.iOSBlinkingCaret();
 
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(true);
-  late final ValueNotifier<bool> _debugCursorNotifier;
+  final ValueNotifier<bool> _debugCursorNotifier = ValueNotifier<bool>(true);
   final GlobalKey _editableKey = GlobalKey();
 
   /// Detects whether the clipboard can paste.
@@ -2219,7 +2219,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   bool get wantKeepAlive => widget.focusNode.hasFocus;
 
-  Color get _cursorColor => widget.cursorColor.withOpacity(_cursorBlinkOpacityController.value);
+  Color get _cursorColor {
+    final double effectiveOpacity = math.min(widget.cursorColor.alpha / 255.0, _cursorBlinkOpacityController.value);
+    return widget.cursorColor.withOpacity(effectiveOpacity);
+  }
 
   @override
   bool get cutEnabled {
@@ -2790,7 +2793,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _scrollController.addListener(_onEditableScroll);
     _cursorVisibilityNotifier.value = widget.showCursor;
     _spellCheckConfiguration = _inferSpellCheckConfiguration(widget.spellCheckConfiguration);
-    _debugCursorNotifier = ValueNotifier<bool>(widget.showCursor);
   }
 
   // Whether `TickerMode.of(context)` is true and animations (like blinking the
@@ -2800,6 +2802,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    _debugCursorNotifier.value = widget.showCursor;
 
     _style = MediaQuery.boldTextOf(context)
         ? widget.style.merge(const TextStyle(fontWeight: FontWeight.bold))
@@ -2935,7 +2939,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void dispose() {
-    _debugCursorNotifier.dispose();
     _internalScrollController?.dispose();
     _currentAutofillScope?.unregister(autofillId);
     widget.controller.removeListener(_didChangeTextEditingValue);
@@ -2956,6 +2959,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     clipboardStatus.removeListener(_onChangedClipboardStatus);
     clipboardStatus.dispose();
     _cursorVisibilityNotifier.dispose();
+    _debugCursorNotifier.dispose();
     FocusManager.instance.removeListener(_unflagInternalFocus);
     super.dispose();
     assert(_batchEditDepth <= 0, 'unfinished batch edits: $_batchEditDepth');
@@ -3873,7 +3877,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _onCursorColorTick() {
-    renderEditable.cursorColor = widget.cursorColor.withOpacity(_cursorBlinkOpacityController.value);
+    final double effectiveOpacity = math.min(widget.cursorColor.alpha / 255.0, _cursorBlinkOpacityController.value);
+    renderEditable.cursorColor = widget.cursorColor.withOpacity(effectiveOpacity);
     _cursorVisibilityNotifier.value = widget.showCursor && _cursorBlinkOpacityController.value > 0;
   }
 
