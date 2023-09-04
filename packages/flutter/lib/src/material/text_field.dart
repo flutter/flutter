@@ -273,6 +273,7 @@ class TextField extends StatefulWidget {
     this.toolbarOptions,
     this.showCursor,
     this.autofocus = false,
+    this.statesController,
     this.obscuringCharacter = '•',
     this.obscureText = false,
     this.autocorrect = true,
@@ -456,6 +457,9 @@ class TextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.autofocus}
   final bool autofocus;
+
+  /// {@macro flutter.material.inkwell.statesController}
+  final MaterialStatesController? statesController;
 
   /// {@macro flutter.widgets.editableText.obscuringCharacter}
   final String obscuringCharacter;
@@ -968,11 +972,19 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
   bool get _isEnabled =>  widget.enabled ?? widget.decoration?.enabled ?? true;
 
+  bool _isWidgetEnabled(TextField widget) {
+    return widget.enabled ?? widget.decoration?.enabled ?? true;
+  }
+
   int get _currentLength => _effectiveController.value.text.characters.length;
 
   bool get _hasIntrinsicError => widget.maxLength != null && widget.maxLength! > 0 && _effectiveController.value.text.characters.length > widget.maxLength!;
 
   bool get _hasError => widget.decoration?.errorText != null || widget.decoration?.error != null || _hasIntrinsicError;
+
+  bool _widgetHasError(TextField widget) {
+    return widget.decoration?.errorText != null || _hasIntrinsicError;
+  }
 
   Color get _errorColor => widget.cursorErrorColor ?? widget.decoration?.errorStyle?.color ?? Theme.of(context).colorScheme.error;
 
@@ -1055,6 +1067,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     }
     _effectiveFocusNode.canRequestFocus = widget.canRequestFocus && _isEnabled;
     _effectiveFocusNode.addListener(_handleFocusChanged);
+    initStatesController();
   }
 
   bool get _canRequestFocus {
@@ -1096,6 +1109,21 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
         _showSelectionHandles = !widget.readOnly;
       }
     }
+
+    if (widget.statesController != oldWidget.statesController) {
+      oldWidget.statesController?.removeListener(_handleStatesControllerChange);
+      if (widget.statesController != null) {
+        internalStatesController?.dispose();
+        internalStatesController = null;
+      }
+      initStatesController();
+    }
+    if (_isWidgetEnabled(widget) != _isWidgetEnabled(oldWidget)) {
+      statesController.update(MaterialState.disabled, !_isEnabled);
+    }
+    if (_widgetHasError(widget) != _widgetHasError(oldWidget)) {
+      statesController.update(MaterialState.error, _hasError);
+    }
   }
 
   @override
@@ -1128,6 +1156,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     _effectiveFocusNode.removeListener(_handleFocusChanged);
     _focusNode?.dispose();
     _controller?.dispose();
+    statesController.removeListener(_handleStatesControllerChange);
+    internalStatesController?.dispose();
     super.dispose();
   }
 
@@ -1172,6 +1202,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       // Rebuild the widget on focus change to show/hide the text selection
       // highlight.
     });
+    statesController.update(MaterialState.focused, _effectiveFocusNode.hasFocus);
   }
 
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
@@ -1220,7 +1251,26 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       setState(() {
         _isHovering = hovering;
       });
+      statesController.update(MaterialState.hovered, _isHovering);
     }
+  }
+
+  // Material states controller.
+  MaterialStatesController? internalStatesController;
+
+  void _handleStatesControllerChange() {
+    // Force a rebuild to resolve MaterialStateProperty properties
+    setState(() { });
+  }
+
+  MaterialStatesController get statesController => widget.statesController ?? internalStatesController!;
+
+  void initStatesController() {
+    if (widget.statesController == null) {
+      internalStatesController = MaterialStatesController();
+    }
+    statesController.update(MaterialState.disabled, !_isEnabled);
+    statesController.addListener(_handleStatesControllerChange);
   }
 
   // AutofillClient implementation start.
