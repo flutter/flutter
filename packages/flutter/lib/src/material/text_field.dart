@@ -458,7 +458,15 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.autofocus}
   final bool autofocus;
 
-  /// {@macro flutter.material.inkwell.statesController}
+  /// Represents the interactive "state" of this widget in terms of
+  /// a set of [MaterialState]s, like [MaterialState.disabled] and
+  /// [MaterialState.focused].
+  ///
+  /// Classes based on this one can provide their own
+  /// [MaterialStatesController] to which they've added listeners.
+  /// They can also update the controller's [MaterialStatesController.value]
+  /// however, this may only be done when it's safe to call
+  /// [State.setState], like in an event handler.
   final MaterialStatesController? statesController;
 
   /// {@macro flutter.widgets.editableText.obscuringCharacter}
@@ -1259,7 +1267,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   MaterialStatesController? _internalStatesController;
 
   void _handleStatesControllerChange() {
-    // Force a rebuild to resolve MaterialStateProperty properties
+    // Force a rebuild to resolve MaterialStateProperty properties.
     setState(() { });
   }
 
