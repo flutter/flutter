@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -172,11 +173,16 @@ void main() {
       }, useMaterial3: theme.useMaterial3);
     });
 
-    testWidgets('Material3 uses sentence case labels', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Material3 uses sentence case labels', (WidgetTester tester) async {
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
         expect(find.text('Select date'), findsOneWidget);
       }, useMaterial3: true);
-    });
+    },
+    leakTrackingTestConfig: const LeakTrackingTestConfig(
+      // TODO(polina-c): remove after fixing
+      // https://github.com/flutter/flutter/issues/133862
+      allowAllNotDisposed: true,
+    ));
 
     testWidgets('Cancel, confirm, and help text is used', (WidgetTester tester) async {
       cancelText = 'nope';
