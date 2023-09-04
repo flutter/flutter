@@ -112,8 +112,10 @@ void main() {
     ]);
   });
 
-  testWidgets('Tooltip verticalOffset, preferBelow; center prefer above fits - ThemeData.tooltipTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip verticalOffset, preferBelow; center prefer above fits - ThemeData.tooltipTheme', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
+    late final OverlayEntry entry;
+    addTearDown(() { entry.remove(); entry.dispose(); });
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -128,7 +130,7 @@ void main() {
           ),
           child: Overlay(
             initialEntries: <OverlayEntry>[
-              OverlayEntry(
+              entry = OverlayEntry(
                 builder: (BuildContext context) {
                   return Stack(
                     children: <Widget>[
