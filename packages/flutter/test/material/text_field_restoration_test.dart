@@ -21,7 +21,7 @@ void main() {
     await restoreAndVerify(tester);
   });
 
-  testWidgetsWithLeakTracking('TextField restoration with external controller', (WidgetTester tester) async {
+  testWidgets('TextField restoration with external controller', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         restorationScopeId: 'root',
