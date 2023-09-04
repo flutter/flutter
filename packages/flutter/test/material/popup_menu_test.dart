@@ -3743,7 +3743,7 @@ void main() {
     final UniqueKey key1 = UniqueKey();
     final UniqueKey key2 = UniqueKey();
     final UniqueKey key3 = UniqueKey();
-    
+
     await tester.pumpWidget(
       TestApp(
         textDirection: TextDirection.ltr,
