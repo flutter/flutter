@@ -2,15 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ParagraphBuilder;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -632,12 +629,8 @@ void main() {
       ),
     );
 
-    final Size textButtonSize = ui.ParagraphBuilder.shouldDisableRoundingHack
-      ? const Size(68.5, 48.0)
-      : const Size(69.0, 48.0);
-    final Size textSize = ui.ParagraphBuilder.shouldDisableRoundingHack
-      ? const Size(52.5, 18.0)
-      : const Size(53.0, 18.0);
+    const Size textButtonSize = Size(68.5, 48.0);
+    const Size textSize = Size(52.5, 18.0);
     expect(tester.getSize(find.byType(TextButton)), textButtonSize);
     expect(tester.getSize(find.byType(Text)), textSize);
 

@@ -968,17 +968,23 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
 
     const String continueStr = 'Continue';
     const String cancelStr = 'Cancel';
-    const Rect continueButtonRect = Rect.fromLTRB(24.0, 212.0, 169.0, 260.0);
-    const Rect cancelButtonRect = Rect.fromLTRB(177.0, 212.0, 294.0, 260.0);
+    const Rect continueButtonRect = Rect.fromLTRB(24.0, 212.0, 168.8, 260.0);
+    const Rect cancelButtonRect = Rect.fromLTRB(176.8, 212.0, 293.4, 260.0);
     expect(buttonMaterial(continueStr).color!.value, themeLight.colorScheme.primary.value);
     expect(buttonMaterial(continueStr).textStyle!.color!.value, 0xffffffff);
     expect(buttonMaterial(continueStr).shape, buttonShape);
-    expect(tester.getRect(find.widgetWithText(TextButton, continueStr)), continueButtonRect);
+    expect(
+      tester.getRect(find.widgetWithText(TextButton, continueStr)),
+      rectMoreOrLessEquals(continueButtonRect, epsilon: 0.001),
+    );
 
     expect(buttonMaterial(cancelStr).color!.value, 0);
     expect(buttonMaterial(cancelStr).textStyle!.color!.value, 0x8a000000);
     expect(buttonMaterial(cancelStr).shape, buttonShape);
-    expect(tester.getRect(find.widgetWithText(TextButton, cancelStr)), cancelButtonRect);
+    expect(
+      tester.getRect(find.widgetWithText(TextButton, cancelStr)),
+      rectMoreOrLessEquals(cancelButtonRect, epsilon: 0.001),
+    );
 
     final ThemeData themeDark = ThemeData.dark(useMaterial3: true);
     await tester.pumpWidget(buildFrame(themeDark));
@@ -987,12 +993,18 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     expect(buttonMaterial(continueStr).color!.value, 0);
     expect(buttonMaterial(continueStr).textStyle!.color!.value, themeDark.colorScheme.onSurface.value);
     expect(buttonMaterial(continueStr).shape, buttonShape);
-    expect(tester.getRect(find.widgetWithText(TextButton, continueStr)), continueButtonRect);
+    expect(
+      tester.getRect(find.widgetWithText(TextButton, continueStr)),
+      rectMoreOrLessEquals(continueButtonRect, epsilon: 0.001),
+    );
 
     expect(buttonMaterial(cancelStr).color!.value, 0);
     expect(buttonMaterial(cancelStr).textStyle!.color!.value, 0xb3ffffff);
     expect(buttonMaterial(cancelStr).shape, buttonShape);
-    expect(tester.getRect(find.widgetWithText(TextButton, cancelStr)), cancelButtonRect);
+    expect(
+      tester.getRect(find.widgetWithText(TextButton, cancelStr)),
+      rectMoreOrLessEquals(cancelButtonRect, epsilon: 0.001),
+    );
   });
 
   testWidgets('Material2 - Stepper disabled button styles', (WidgetTester tester) async {

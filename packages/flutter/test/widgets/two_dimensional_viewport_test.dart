@@ -120,27 +120,29 @@ void main() {
           }
         );
         // Update
+        delegate.maxXIndex = -1; // No exception.
         expect(
           () {
-            delegate.maxXIndex = -1;
+            delegate.maxXIndex = -2;
           },
           throwsA(
             isA<AssertionError>().having(
               (AssertionError error) => error.toString(),
               'description',
-              contains('value == null || value >= 0'),
+              contains('value == null || value >= -1'),
             ),
           ),
         );
+        delegate.maxYIndex = -1; // No exception
         expect(
           () {
-            delegate.maxYIndex = -1;
+            delegate.maxYIndex = -2;
           },
           throwsA(
             isA<AssertionError>().having(
               (AssertionError error) => error.toString(),
               'description',
-              contains('value == null || value >= 0'),
+              contains('value == null || value >= -1'),
             ),
           ),
         );
@@ -148,7 +150,7 @@ void main() {
         expect(
           () {
             TwoDimensionalChildBuilderDelegate(
-              maxXIndex: -1,
+              maxXIndex: -2,
               maxYIndex: 0,
               builder: (BuildContext context, ChildVicinity vicinity) {
                 return const SizedBox.shrink();
@@ -159,7 +161,7 @@ void main() {
             isA<AssertionError>().having(
               (AssertionError error) => error.toString(),
               'description',
-              contains('maxXIndex == null || maxXIndex >= 0'),
+              contains('maxXIndex == null || maxXIndex >= -1'),
             ),
           ),
         );
@@ -167,7 +169,7 @@ void main() {
           () {
             TwoDimensionalChildBuilderDelegate(
               maxXIndex: 0,
-              maxYIndex: -1,
+              maxYIndex: -2,
               builder: (BuildContext context, ChildVicinity vicinity) {
                 return const SizedBox.shrink();
               }
@@ -177,7 +179,7 @@ void main() {
             isA<AssertionError>().having(
               (AssertionError error) => error.toString(),
               'description',
-              contains('maxYIndex == null || maxYIndex >= 0'),
+              contains('maxYIndex == null || maxYIndex >= -1'),
             ),
           ),
         );
@@ -212,6 +214,172 @@ void main() {
       testWidgets('shouldRebuild', (WidgetTester tester) async {
         expect(builderDelegate.shouldRebuild(builderDelegate), isTrue);
       }, variant: TargetPlatformVariant.all());
+
+      testWidgets('builder delegate supports automatic keep alive - default true', (WidgetTester tester) async {
+        const ChildVicinity firstCell = ChildVicinity(xIndex: 0, yIndex: 0);
+        final ScrollController verticalController = ScrollController();
+        final UniqueKey checkBoxKey = UniqueKey();
+        final TwoDimensionalChildBuilderDelegate builderDelegate = TwoDimensionalChildBuilderDelegate(
+          maxXIndex: 5,
+          maxYIndex: 5,
+          builder: (BuildContext context, ChildVicinity vicinity) {
+            return SizedBox.square(
+              dimension: 200,
+              child: Center(child: vicinity == firstCell
+                ? KeepAliveCheckBox(key: checkBoxKey)
+                : Text('R${vicinity.xIndex}:C${vicinity.yIndex}')
+              ),
+            );
+          }
+        );
+
+        await tester.pumpWidget(simpleBuilderTest(
+          delegate: builderDelegate,
+          verticalDetails: ScrollableDetails.vertical(controller: verticalController),
+        ));
+        await tester.pumpAndSettle();
+
+        expect(verticalController.hasClients, isTrue);
+        expect(verticalController.position.pixels, 0.0);
+        expect(find.byKey(checkBoxKey), findsOneWidget);
+        expect(
+          tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).checkValue,
+          isFalse,
+        );
+        expect(
+          tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).wantKeepAlive,
+          isFalse,
+        );
+        // Scroll away, disposing of the checkbox.
+        verticalController.jumpTo(verticalController.position.maxScrollExtent);
+        await tester.pump();
+        expect(verticalController.position.pixels, 600.0);
+        expect(find.byKey(checkBoxKey), findsNothing);
+
+        // Bring back into view, still unchecked, not kept alive.
+        verticalController.jumpTo(0.0);
+        await tester.pump();
+        expect(verticalController.position.pixels, 0.0);
+        expect(find.byKey(checkBoxKey), findsOneWidget);
+        await tester.tap(find.byKey(checkBoxKey));
+        await tester.pumpAndSettle();
+        expect(
+          tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).checkValue,
+          isTrue,
+        );
+        expect(
+          tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).wantKeepAlive,
+          isTrue,
+        );
+
+        // Scroll away again, checkbox should be kept alive now.
+        verticalController.jumpTo(verticalController.position.maxScrollExtent);
+        await tester.pump();
+        expect(verticalController.position.pixels, 600.0);
+        expect(find.byKey(checkBoxKey), findsOneWidget);
+        expect(
+          tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).checkValue,
+          isTrue,
+        );
+        expect(
+          tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).wantKeepAlive,
+          isTrue,
+        );
+
+        // Bring back into view, still checked, after being kept alive.
+        verticalController.jumpTo(0.0);
+        await tester.pump();
+        expect(verticalController.position.pixels, 0.0);
+        expect(find.byKey(checkBoxKey), findsOneWidget);
+        expect(
+          tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).checkValue,
+          isTrue,
+        );
+        expect(
+          tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).wantKeepAlive,
+          isTrue,
+        );
+      });
+
+      testWidgets('builder delegate will not add automatic keep alives', (WidgetTester tester) async {
+        const ChildVicinity firstCell = ChildVicinity(xIndex: 0, yIndex: 0);
+        final ScrollController verticalController = ScrollController();
+        final UniqueKey checkBoxKey = UniqueKey();
+        final TwoDimensionalChildBuilderDelegate builderDelegate = TwoDimensionalChildBuilderDelegate(
+          maxXIndex: 5,
+          maxYIndex: 5,
+          addAutomaticKeepAlives: false, // No keeping alive this time
+          builder: (BuildContext context, ChildVicinity vicinity) {
+            return SizedBox.square(
+              dimension: 200,
+              child: Center(child: vicinity == firstCell
+                ? KeepAliveCheckBox(key: checkBoxKey)
+                : Text('R${vicinity.xIndex}:C${vicinity.yIndex}')
+              ),
+            );
+          }
+        );
+
+        await tester.pumpWidget(simpleBuilderTest(
+          delegate: builderDelegate,
+          verticalDetails: ScrollableDetails.vertical(controller: verticalController),
+        ));
+        await tester.pumpAndSettle();
+
+        expect(verticalController.hasClients, isTrue);
+        expect(verticalController.position.pixels, 0.0);
+        expect(find.byKey(checkBoxKey), findsOneWidget);
+        expect(
+          tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).checkValue,
+          isFalse,
+        );
+        expect(
+          tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).wantKeepAlive,
+          isFalse,
+        );
+        // Scroll away, disposing of the checkbox.
+        verticalController.jumpTo(verticalController.position.maxScrollExtent);
+        await tester.pump();
+        expect(verticalController.position.pixels, 600.0);
+        expect(find.byKey(checkBoxKey), findsNothing);
+
+        // Bring back into view, still unchecked, not kept alive.
+        verticalController.jumpTo(0.0);
+        await tester.pump();
+        expect(verticalController.position.pixels, 0.0);
+        expect(find.byKey(checkBoxKey), findsOneWidget);
+        await tester.tap(find.byKey(checkBoxKey));
+        await tester.pumpAndSettle();
+        expect(
+          tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).checkValue,
+          isTrue,
+        );
+        expect(
+          tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).wantKeepAlive,
+          isTrue,
+        );
+
+        // Scroll away again, checkbox should not be kept alive since the
+        // delegate did not add automatic keep alive.
+        verticalController.jumpTo(verticalController.position.maxScrollExtent);
+        await tester.pump();
+        expect(verticalController.position.pixels, 600.0);
+        expect(find.byKey(checkBoxKey), findsNothing);
+
+        // Bring back into view, not checked, having not been kept alive.
+        verticalController.jumpTo(0.0);
+        await tester.pump();
+        expect(verticalController.position.pixels, 0.0);
+        expect(find.byKey(checkBoxKey), findsOneWidget);
+        expect(
+          tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).checkValue,
+          isFalse,
+        );
+        expect(
+          tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).wantKeepAlive,
+          isFalse,
+        );
+      });
     });
 
     group('TwoDimensionalChildListDelegate', () {
@@ -337,6 +505,174 @@ void main() {
 
         expect(delegate.shouldRebuild(oldDelegate), isTrue);
       }, variant: TargetPlatformVariant.all());
+    });
+
+    testWidgets('list delegate supports automatic keep alive - default true', (WidgetTester tester) async {
+      final UniqueKey checkBoxKey = UniqueKey();
+      final Widget originCell = SizedBox.square(
+        dimension: 200,
+        child: Center(child: KeepAliveCheckBox(key: checkBoxKey)
+        ),
+      );
+      const Widget otherCell = SizedBox.square(dimension: 200);
+      final ScrollController verticalController = ScrollController();
+      final TwoDimensionalChildListDelegate listDelegate = TwoDimensionalChildListDelegate(
+        children: <List<Widget>>[
+          <Widget>[originCell, otherCell, otherCell, otherCell, otherCell],
+          <Widget>[otherCell, otherCell, otherCell, otherCell, otherCell],
+          <Widget>[otherCell, otherCell, otherCell, otherCell, otherCell],
+          <Widget>[otherCell, otherCell, otherCell, otherCell, otherCell],
+          <Widget>[otherCell, otherCell, otherCell, otherCell, otherCell],
+        ],
+      );
+
+      await tester.pumpWidget(simpleListTest(
+        delegate: listDelegate,
+        verticalDetails: ScrollableDetails.vertical(controller: verticalController),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(verticalController.hasClients, isTrue);
+      expect(verticalController.position.pixels, 0.0);
+      expect(find.byKey(checkBoxKey), findsOneWidget);
+      expect(
+        tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).checkValue,
+        isFalse,
+      );
+      expect(
+        tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).wantKeepAlive,
+        isFalse,
+      );
+      // Scroll away, disposing of the checkbox.
+      verticalController.jumpTo(verticalController.position.maxScrollExtent);
+      await tester.pump();
+      expect(verticalController.position.pixels, 400.0);
+      expect(find.byKey(checkBoxKey), findsNothing);
+
+      // Bring back into view, still unchecked, not kept alive.
+      verticalController.jumpTo(0.0);
+      await tester.pump();
+      expect(verticalController.position.pixels, 0.0);
+      expect(find.byKey(checkBoxKey), findsOneWidget);
+      await tester.tap(find.byKey(checkBoxKey));
+      await tester.pumpAndSettle();
+      expect(
+        tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).checkValue,
+        isTrue,
+      );
+      expect(
+        tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).wantKeepAlive,
+        isTrue,
+      );
+
+      // Scroll away again, checkbox should be kept alive now.
+      verticalController.jumpTo(verticalController.position.maxScrollExtent);
+      await tester.pump();
+      expect(verticalController.position.pixels, 400.0);
+      expect(find.byKey(checkBoxKey), findsOneWidget);
+      expect(
+        tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).checkValue,
+        isTrue,
+      );
+      expect(
+        tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).wantKeepAlive,
+        isTrue,
+      );
+
+      // Bring back into view, still checked, after being kept alive.
+      verticalController.jumpTo(0.0);
+      await tester.pump();
+      expect(verticalController.position.pixels, 0.0);
+      expect(find.byKey(checkBoxKey), findsOneWidget);
+      expect(
+        tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).checkValue,
+        isTrue,
+      );
+      expect(
+        tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).wantKeepAlive,
+        isTrue,
+      );
+    });
+
+    testWidgets('list delegate will not add automatic keep alives', (WidgetTester tester) async {
+      final UniqueKey checkBoxKey = UniqueKey();
+      final Widget originCell = SizedBox.square(
+        dimension: 200,
+        child: Center(child: KeepAliveCheckBox(key: checkBoxKey)
+        ),
+      );
+      const Widget otherCell = SizedBox.square(dimension: 200);
+      final ScrollController verticalController = ScrollController();
+      final TwoDimensionalChildListDelegate listDelegate = TwoDimensionalChildListDelegate(
+        addAutomaticKeepAlives: false,
+        children: <List<Widget>>[
+          <Widget>[originCell, otherCell, otherCell, otherCell, otherCell],
+          <Widget>[otherCell, otherCell, otherCell, otherCell, otherCell],
+          <Widget>[otherCell, otherCell, otherCell, otherCell, otherCell],
+          <Widget>[otherCell, otherCell, otherCell, otherCell, otherCell],
+          <Widget>[otherCell, otherCell, otherCell, otherCell, otherCell],
+        ],
+      );
+
+      await tester.pumpWidget(simpleListTest(
+        delegate: listDelegate,
+        verticalDetails: ScrollableDetails.vertical(controller: verticalController),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(verticalController.hasClients, isTrue);
+      expect(verticalController.position.pixels, 0.0);
+      expect(find.byKey(checkBoxKey), findsOneWidget);
+      expect(
+        tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).checkValue,
+        isFalse,
+      );
+      expect(
+        tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).wantKeepAlive,
+        isFalse,
+      );
+      // Scroll away, disposing of the checkbox.
+      verticalController.jumpTo(verticalController.position.maxScrollExtent);
+      await tester.pump();
+      expect(verticalController.position.pixels, 400.0);
+      expect(find.byKey(checkBoxKey), findsNothing);
+
+      // Bring back into view, still unchecked, not kept alive.
+      verticalController.jumpTo(0.0);
+      await tester.pump();
+      expect(verticalController.position.pixels, 0.0);
+      expect(find.byKey(checkBoxKey), findsOneWidget);
+      await tester.tap(find.byKey(checkBoxKey));
+      await tester.pumpAndSettle();
+      expect(
+        tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).checkValue,
+        isTrue,
+      );
+      expect(
+        tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).wantKeepAlive,
+        isTrue,
+      );
+
+      // Scroll away again, checkbox should not be kept alive since the
+      // delegate did not add automatic keep alive.
+      verticalController.jumpTo(verticalController.position.maxScrollExtent);
+      await tester.pump();
+      expect(verticalController.position.pixels, 400.0);
+      expect(find.byKey(checkBoxKey), findsNothing);
+
+      // Bring back into view, not checked, having not been kept alive.
+      verticalController.jumpTo(0.0);
+      await tester.pump();
+      expect(verticalController.position.pixels, 0.0);
+      expect(find.byKey(checkBoxKey), findsOneWidget);
+      expect(
+        tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).checkValue,
+        isFalse,
+      );
+      expect(
+        tester.state<KeepAliveCheckBoxState>(find.byKey(checkBoxKey)).wantKeepAlive,
+        isFalse,
+      );
     });
   });
 
@@ -1025,7 +1361,7 @@ void main() {
     expect(
       parentData.toString(),
       'vicinity=(xIndex: 10, yIndex: 10); layoutOffset=Offset(20.0, 20.0); '
-      'paintOffset=Offset(20.0, 20.0); not visible ',
+      'paintOffset=Offset(20.0, 20.0); not visible; ',
     );
   });
 
@@ -1180,7 +1516,7 @@ void main() {
         maxXIndex: 5,
         maxYIndex: 5,
         builder: (BuildContext context, ChildVicinity vicinity) {
-          childKeys[vicinity] = UniqueKey();
+          childKeys[vicinity] = childKeys[vicinity] ?? UniqueKey();
           return SizedBox.square(key: childKeys[vicinity], dimension: 200);
         }
       );
@@ -1268,7 +1604,7 @@ void main() {
         maxXIndex: 5,
         maxYIndex: 5,
         builder: (BuildContext context, ChildVicinity vicinity) {
-          childKeys[vicinity] = UniqueKey();
+          childKeys[vicinity] = childKeys[vicinity] ?? UniqueKey();
           return SizedBox.square(key: childKeys[vicinity], dimension: 200);
         }
       );
@@ -1397,7 +1733,7 @@ void main() {
         maxXIndex: 5,
         maxYIndex: 5,
         builder: (BuildContext context, ChildVicinity vicinity) {
-          childKeys[vicinity] = UniqueKey();
+          childKeys[vicinity] = childKeys[vicinity] ?? UniqueKey();
           return SizedBox.square(key: childKeys[vicinity], dimension: 200);
         }
       );
@@ -1563,7 +1899,7 @@ void main() {
         maxXIndex: 19,
         maxYIndex: 19,
         builder: (BuildContext context, ChildVicinity vicinity) {
-          childKeys[vicinity] = UniqueKey();
+          childKeys[vicinity] = childKeys[vicinity] ?? UniqueKey();
           return SizedBox.square(
             dimension: 200,
             child: Center(
@@ -1631,7 +1967,7 @@ void main() {
         maxXIndex: 5,
         maxYIndex: 5,
         builder: (BuildContext context, ChildVicinity vicinity) {
-          childKeys[vicinity] = UniqueKey();
+          childKeys[vicinity] = childKeys[vicinity] ?? UniqueKey();
           return SizedBox.square(key: childKeys[vicinity], dimension: 200);
         }
       );
@@ -1667,7 +2003,7 @@ void main() {
         maxXIndex: 5,
         maxYIndex: 5,
         builder: (BuildContext context, ChildVicinity vicinity) {
-          childKeys[vicinity] = UniqueKey();
+          childKeys[vicinity] = childKeys[vicinity] ?? UniqueKey();
           return SizedBox.square(key: childKeys[vicinity], dimension: 200);
         }
       );
@@ -1785,7 +2121,7 @@ void main() {
         maxXIndex: 5,
         maxYIndex: 5,
         builder: (BuildContext context, ChildVicinity vicinity) {
-          childKeys[vicinity] = UniqueKey();
+          childKeys[vicinity] = childKeys[vicinity] ?? UniqueKey();
           return SizedBox.square(key: childKeys[vicinity], dimension: 200);
         }
       );

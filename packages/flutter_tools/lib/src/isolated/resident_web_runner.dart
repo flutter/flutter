@@ -446,7 +446,6 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
         fullRestart: true,
         reason: reason,
         overallTimeInMs: elapsed.inMilliseconds,
-        fastReassemble: false,
       ).send();
     }
     return OperationResult.ok;
