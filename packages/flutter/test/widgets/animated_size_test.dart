@@ -454,9 +454,11 @@ void main() {
         const Center(),
       );
 
-      expect(box.animation.isDisposed, isTrue);
-      await expectLater(
-        () => box.controller.dispose(),
+      expect(box.debugAnimation, isNotNull);
+      expect(box.debugAnimation!.isDisposed, isTrue);
+      expect(box.debugController, isNotNull);
+      expect(
+        () => box.debugController!.dispose(),
         throwsA(isA<AssertionError>().having(
           (AssertionError error) => error.message,
           'message',

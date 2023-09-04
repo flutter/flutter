@@ -99,16 +99,40 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     );
   }
 
-  /// The animation controller that is used to drive the resizing.
+  /// When asserts are enabled, returns the animation controller that is used
+  /// to drive the resizing.
   ///
-  /// The animation itself is exposed by the [animation] property.
+  /// Otherwise, returns null.
+  ///
+  /// This getter is intended for use in framework unit tests. Applications must
+  /// not depend on its value.
   @visibleForTesting
-  AnimationController get controller => _controller;
-  late final AnimationController _controller;
+  AnimationController? get debugController {
+    AnimationController? controller;
+    assert(() {
+      controller = _controller;
+      return true;
+    }());
+    return controller;
+  }
 
-  /// The animation that drives the resizing.
+  /// When asserts are enabled, returns the animation that drives the resizing.
+  ///
+  /// Otherwise, returns null.
+  ///
+  /// This getter is intended for use in framework unit tests. Applications must
+  /// not depend on its value.
   @visibleForTesting
-  CurvedAnimation get animation => _animation;
+  CurvedAnimation? get debugAnimation {
+    CurvedAnimation? animation;
+    assert(() {
+      animation = _animation;
+      return true;
+    }());
+    return animation;
+  }
+
+  late final AnimationController _controller;
   late final CurvedAnimation _animation;
 
   final SizeTween _sizeTween = SizeTween();
