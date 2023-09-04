@@ -321,7 +321,7 @@ void main() {
     expect(find.text('endDrawer'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('Both drawer and endDrawer state restoration test', (WidgetTester tester) async {
+  testWidgets('Both drawer and endDrawer state restoration test', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
