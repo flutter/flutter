@@ -1067,7 +1067,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     }
     _effectiveFocusNode.canRequestFocus = widget.canRequestFocus && _isEnabled;
     _effectiveFocusNode.addListener(_handleFocusChanged);
-    initStatesController();
+    _initStatesController();
   }
 
   bool get _canRequestFocus {
@@ -1113,16 +1113,16 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     if (widget.statesController != oldWidget.statesController) {
       oldWidget.statesController?.removeListener(_handleStatesControllerChange);
       if (widget.statesController != null) {
-        internalStatesController?.dispose();
-        internalStatesController = null;
+        _internalStatesController?.dispose();
+        _internalStatesController = null;
       }
-      initStatesController();
+      _initStatesController();
     }
     if (_isWidgetEnabled(widget) != _isWidgetEnabled(oldWidget)) {
-      statesController.update(MaterialState.disabled, !_isEnabled);
+      _statesController.update(MaterialState.disabled, !_isEnabled);
     }
     if (_widgetHasError(widget) != _widgetHasError(oldWidget)) {
-      statesController.update(MaterialState.error, _hasError);
+      _statesController.update(MaterialState.error, _hasError);
     }
   }
 
@@ -1156,8 +1156,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     _effectiveFocusNode.removeListener(_handleFocusChanged);
     _focusNode?.dispose();
     _controller?.dispose();
-    statesController.removeListener(_handleStatesControllerChange);
-    internalStatesController?.dispose();
+    _statesController.removeListener(_handleStatesControllerChange);
+    _internalStatesController?.dispose();
     super.dispose();
   }
 
@@ -1202,7 +1202,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       // Rebuild the widget on focus change to show/hide the text selection
       // highlight.
     });
-    statesController.update(MaterialState.focused, _effectiveFocusNode.hasFocus);
+    _statesController.update(MaterialState.focused, _effectiveFocusNode.hasFocus);
   }
 
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
@@ -1251,26 +1251,26 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       setState(() {
         _isHovering = hovering;
       });
-      statesController.update(MaterialState.hovered, _isHovering);
+      _statesController.update(MaterialState.hovered, _isHovering);
     }
   }
 
   // Material states controller.
-  MaterialStatesController? internalStatesController;
+  MaterialStatesController? _internalStatesController;
 
   void _handleStatesControllerChange() {
     // Force a rebuild to resolve MaterialStateProperty properties
     setState(() { });
   }
 
-  MaterialStatesController get statesController => widget.statesController ?? internalStatesController!;
+  MaterialStatesController get _statesController => widget.statesController ?? _internalStatesController!;
 
-  void initStatesController() {
+  void _initStatesController() {
     if (widget.statesController == null) {
-      internalStatesController = MaterialStatesController();
+      _internalStatesController = MaterialStatesController();
     }
-    statesController.update(MaterialState.disabled, !_isEnabled);
-    statesController.addListener(_handleStatesControllerChange);
+    _statesController.update(MaterialState.disabled, !_isEnabled);
+    _statesController.addListener(_handleStatesControllerChange);
   }
 
   // AutofillClient implementation start.
