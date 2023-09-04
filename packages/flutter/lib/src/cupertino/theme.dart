@@ -181,7 +181,7 @@ Map<Object, CupertinoThemeExtension<dynamic>> _themeExtensionIterableToMap(Itera
   });
 }
 
-/// Returns a copy of the current [extensions] with all the fields resolved 
+/// Returns a copy of the current [extensions] with all the fields resolved
 /// against the given [BuildContext].
 Map<Object, CupertinoThemeExtension<dynamic>>? _resolveThemeExtensions(Map<Object, CupertinoThemeExtension<dynamic>>? extensions, BuildContext context) {
   final Map<Object, CupertinoThemeExtension<dynamic>>? newExtensions = extensions?.map((Object id, CupertinoThemeExtension<dynamic> extension) {
