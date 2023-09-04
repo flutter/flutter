@@ -3740,7 +3740,10 @@ void main() {
 
   testWidgets('CheckedPopupMenuItem.onTap callback is called when defined', (WidgetTester tester) async {
     final List<int> menuItemTapCounters = <int>[0, 0];
-
+    final UniqueKey key1 = UniqueKey();
+    final UniqueKey key2 = UniqueKey();
+    final UniqueKey key3 = UniqueKey();
+    
     await tester.pumpWidget(
       TestApp(
         textDirection: TextDirection.ltr,
@@ -3750,19 +3753,22 @@ void main() {
               child: const Text('Actions'),
               itemBuilder: (BuildContext context) => <PopupMenuItem<void>>[
                 CheckedPopupMenuItem<void>(
+                  key: key1,
                   child: const Text('First option'),
                   onTap: () {
                     menuItemTapCounters[0] += 1;
                   },
                 ),
                 CheckedPopupMenuItem<void>(
+                  key: key2,
                   child: const Text('Second option'),
                   onTap: () {
                     menuItemTapCounters[1] += 1;
                   },
                 ),
-                const CheckedPopupMenuItem<void>(
-                  child: Text('Option without onTap'),
+                CheckedPopupMenuItem<void>(
+                  key: key3,
+                  child: const Text('Option without onTap'),
                 ),
               ],
             ),
@@ -3774,28 +3780,28 @@ void main() {
     // Tap the first time
     await tester.tap(find.text('Actions'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('First option'));
+    await tester.tap(find.byKey(key1));
     await tester.pumpAndSettle();
     expect(menuItemTapCounters, <int>[1, 0]);
 
     // Tap the item again
     await tester.tap(find.text('Actions'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('First option'));
+    await tester.tap(find.byKey(key1));
     await tester.pumpAndSettle();
     expect(menuItemTapCounters, <int>[2, 0]);
 
     // Tap a different item
     await tester.tap(find.text('Actions'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Second option'));
+    await tester.tap(find.byKey(key2));
     await tester.pumpAndSettle();
     expect(menuItemTapCounters, <int>[2, 1]);
 
     // Tap an item without onTap
     await tester.tap(find.text('Actions'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Option without onTap'));
+    await tester.tap(find.byKey(key3));
     await tester.pumpAndSettle();
     expect(menuItemTapCounters, <int>[2, 1]);
   });
