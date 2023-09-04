@@ -23,9 +23,7 @@ Future<void> holdRefresh() {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('RefreshIndicator',
-  leakTrackingTestConfig: LeakTrackingTestConfig.debugNotDisposed(),
-  (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RefreshIndicator', (WidgetTester tester) async {
     refreshCalled = false;
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
