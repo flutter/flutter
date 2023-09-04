@@ -11,6 +11,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
@@ -65,9 +66,7 @@ void main() {
     );
   });
 
-  testWidgetsWithLeakTracking('Material2 - Dialog size - input mode',
-  leakTrackingTestConfig: LeakTrackingTestConfig.debugNotDisposed(),
-  (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - Dialog size - input mode', (WidgetTester tester) async {
     const TimePickerEntryMode entryMode = TimePickerEntryMode.input;
     const Size timePickerInputSize = Size(312, 216);
     const Size dayPeriodPortraitSize = Size(52, 80);
