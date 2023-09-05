@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 const Duration defaultButtonDuration = Duration(milliseconds: 200);
 
@@ -14,7 +15,7 @@ void main() {
     const ShapeBorder defaultFABShapeM3 = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0)));
     const EdgeInsets defaultFABPadding = EdgeInsets.zero;
 
-    testWidgets('Material2 - theme: ThemeData.light(), enabled: true', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Material2 - theme: ThemeData.light(), enabled: true', (WidgetTester tester) async {
       final ThemeData theme = ThemeData.light(useMaterial3: false);
       await tester.pumpWidget(
         MaterialApp(
@@ -42,7 +43,7 @@ void main() {
       expect(raw.materialTapTargetSize, MaterialTapTargetSize.padded);
     });
 
-    testWidgets('Material3 - theme: ThemeData.light(), enabled: true', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Material3 - theme: ThemeData.light(), enabled: true', (WidgetTester tester) async {
       final ThemeData theme = ThemeData.light(useMaterial3: true);
       await tester.pumpWidget(
         MaterialApp(
@@ -70,7 +71,7 @@ void main() {
       expect(raw.materialTapTargetSize, MaterialTapTargetSize.padded);
     });
 
-    testWidgets('Material2 - theme: ThemeData.light(), enabled: false', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Material2 - theme: ThemeData.light(), enabled: false', (WidgetTester tester) async {
       final ThemeData theme = ThemeData.light(useMaterial3: false);
       await tester.pumpWidget(
         MaterialApp(
@@ -100,7 +101,7 @@ void main() {
       expect(raw.materialTapTargetSize, MaterialTapTargetSize.padded);
     });
 
-    testWidgets('Material3 - theme: ThemeData.light(), enabled: false', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Material3 - theme: ThemeData.light(), enabled: false', (WidgetTester tester) async {
       final ThemeData theme = ThemeData.light(useMaterial3: true);
       await tester.pumpWidget(
         MaterialApp(

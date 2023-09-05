@@ -11,6 +11,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
@@ -23,7 +24,7 @@ void main() {
     return tester.widget<Material>(find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first);
   }
 
-  testWidgets('Material2 - Dialog size - dial mode', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - Dialog size - dial mode', (WidgetTester tester) async {
     addTearDown(tester.view.reset);
 
     const Size timePickerPortraitSize =  Size(310, 468);

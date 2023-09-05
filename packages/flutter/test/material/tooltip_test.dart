@@ -24,14 +24,17 @@ Finder _findTooltipContainer(String tooltipText) {
 }
 
 void main() {
-  testWidgets('Does tooltip end up in the right place - center', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Does tooltip end up in the right place - center', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
+    late final OverlayEntry entry;
+    addTearDown(() => entry..remove()..dispose());
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Overlay(
           initialEntries: <OverlayEntry>[
-            OverlayEntry(
+            entry = OverlayEntry(
               builder: (BuildContext context) {
                 return Stack(
                   children: <Widget>[
@@ -78,8 +81,11 @@ void main() {
     expect(tipInGlobal.dy, 20.0);
   });
 
-  testWidgets('Does tooltip end up in the right place - center with padding outside overlay', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Does tooltip end up in the right place - center with padding outside overlay', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
+    late final OverlayEntry entry;
+    addTearDown(() => entry..remove()..dispose());
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -87,7 +93,7 @@ void main() {
           padding: const EdgeInsets.all(20),
           child: Overlay(
             initialEntries: <OverlayEntry>[
-              OverlayEntry(
+              entry = OverlayEntry(
                 builder: (BuildContext context) {
                   return Stack(
                     children: <Widget>[
@@ -137,8 +143,11 @@ void main() {
     expect(tipInGlobal.dy, 40.0);
   });
 
-  testWidgets('Does tooltip end up in the right place - top left', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Does tooltip end up in the right place - top left', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
+    late final OverlayEntry entry;
+    addTearDown(() => entry..remove()..dispose());
+
     await tester.pumpWidget(
       Theme(
         data: ThemeData(useMaterial3: false),
@@ -146,7 +155,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Overlay(
             initialEntries: <OverlayEntry>[
-              OverlayEntry(
+              entry = OverlayEntry(
                 builder: (BuildContext context) {
                   return Stack(
                     children: <Widget>[
@@ -191,14 +200,17 @@ void main() {
     expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)), equals(const Offset(10.0, 20.0)));
   });
 
-  testWidgets('Does tooltip end up in the right place - center prefer above fits', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Does tooltip end up in the right place - center prefer above fits', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
+    late final OverlayEntry entry;
+    addTearDown(() => entry..remove()..dispose());
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Overlay(
           initialEntries: <OverlayEntry>[
-            OverlayEntry(
+            entry = OverlayEntry(
               builder: (BuildContext context) {
                 return Stack(
                   children: <Widget>[
@@ -244,14 +256,17 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(200.0));
   });
 
-  testWidgets('Does tooltip end up in the right place - center prefer above does not fit', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Does tooltip end up in the right place - center prefer above does not fit', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
+    late final OverlayEntry entry;
+    addTearDown(() => entry..remove()..dispose());
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Overlay(
           initialEntries: <OverlayEntry>[
-            OverlayEntry(
+            entry = OverlayEntry(
               builder: (BuildContext context) {
                 return Stack(
                   children: <Widget>[
@@ -308,14 +323,17 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(589.0));
   });
 
-  testWidgets('Does tooltip end up in the right place - center prefer below fits', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Does tooltip end up in the right place - center prefer below fits', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
+    late final OverlayEntry entry;
+    addTearDown(() => entry..remove()..dispose());
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Overlay(
           initialEntries: <OverlayEntry>[
-            OverlayEntry(
+            entry = OverlayEntry(
               builder: (BuildContext context) {
                 return Stack(
                   children: <Widget>[
@@ -360,8 +378,11 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(590.0));
   });
 
-  testWidgets('Does tooltip end up in the right place - way off to the right', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Does tooltip end up in the right place - way off to the right', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
+    late final OverlayEntry entry;
+    addTearDown(() => entry..remove()..dispose());
+
     await tester.pumpWidget(
       Theme(
         data: ThemeData(useMaterial3: false),
@@ -369,7 +390,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Overlay(
             initialEntries: <OverlayEntry>[
-              OverlayEntry(
+              entry = OverlayEntry(
                 builder: (BuildContext context) {
                   return Stack(
                     children: <Widget>[
@@ -417,8 +438,11 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(324.0));
   });
 
-  testWidgets('Does tooltip end up in the right place - near the edge', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Does tooltip end up in the right place - near the edge', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
+    late final OverlayEntry entry;
+    addTearDown(() => entry..remove()..dispose());
+
     await tester.pumpWidget(
       Theme(
         data: ThemeData(useMaterial3: false),
@@ -426,7 +450,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Overlay(
             initialEntries: <OverlayEntry>[
-              OverlayEntry(
+              entry = OverlayEntry(
                 builder: (BuildContext context) {
                   return Stack(
                     children: <Widget>[
@@ -474,7 +498,7 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(324.0));
   });
 
-  testWidgets('Tooltip should be fully visible when MediaQuery.viewInsets > 0', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip should be fully visible when MediaQuery.viewInsets > 0', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/23666
     Widget materialAppWithViewInsets(double viewInsetsHeight) {
       final Widget scaffold = Scaffold(
@@ -529,15 +553,18 @@ void main() {
     expect(tooltipTopRight.dy, lessThan(fabTopRight.dy));
   });
 
-  testWidgets('Custom tooltip margin', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Custom tooltip margin', (WidgetTester tester) async {
     const double customMarginValue = 10.0;
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
+    late final OverlayEntry entry;
+    addTearDown(() => entry..remove()..dispose());
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Overlay(
           initialEntries: <OverlayEntry>[
-            OverlayEntry(
+            entry = OverlayEntry(
               builder: (BuildContext context) {
                 return Tooltip(
                   key: tooltipKey,
@@ -766,8 +793,11 @@ void main() {
     expect(textStyle.decorationStyle, isNot(TextDecorationStyle.double));
   });
 
-  testWidgets('Does tooltip end up with the right default size, shape, and color', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Does tooltip end up with the right default size, shape, and color', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
+    late final OverlayEntry entry;
+    addTearDown(() => entry..remove()..dispose());
+
     await tester.pumpWidget(
       Theme(
         data: ThemeData(useMaterial3: false),
@@ -775,7 +805,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Overlay(
             initialEntries: <OverlayEntry>[
-              OverlayEntry(
+              entry = OverlayEntry(
                 builder: (BuildContext context) {
                   return Tooltip(
                     key: tooltipKey,
@@ -2277,7 +2307,7 @@ void main() {
     expect(element.dirty, isFalse);
   });
 
-  testWidgets('Tooltip does not initialize animation controller in dispose process', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip does not initialize animation controller in dispose process', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Center(
@@ -2296,7 +2326,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Tooltip does not crash when showing the tooltip but the OverlayPortal is unmounted, during dispose', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tooltip does not crash when showing the tooltip but the OverlayPortal is unmounted, during dispose', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: SelectionArea(
