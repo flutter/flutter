@@ -492,6 +492,11 @@ action("android_jar") {
 
   if (enable_vulkan_validation_layers) {
     assert(impeller_enable_vulkan)
+
+    # We use a different toolchain here so that vulkan validation layers are
+    # built against API level 26, which they require, rather than the default.
+    # This is safe because the Engine can do a version check before loading the
+    # .so for the validation layers.
     apilevel26_toolchain = "//build/toolchain/android:clang_arm64_apilevel26"
     validation_layer_target =
         "//third_party/vulkan_validation_layers($apilevel26_toolchain)"
