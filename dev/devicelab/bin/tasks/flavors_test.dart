@@ -7,6 +7,7 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:flutter_devicelab/tasks/integration_tests.dart';
+import 'package:path/path.dart' as path;
 
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.android;
@@ -35,7 +36,8 @@ Future<void> main() async {
         );
 
         final String stderrString = stderr.toString();
-        if (!stderrString.contains('"build/app/outputs/flutter-apk/app-bogus-release.apk" does not exist.')) {
+        final String expectedPath = path.join('build', 'app', 'outputs', 'flutter-apk', 'app-bogus-release.apk');
+        if (!stderrString.contains('"$expectedPath" does not exist.')) {
           print(stderrString);
           return TaskResult.failure('Should not succeed with bogus flavor');
         }
