@@ -980,10 +980,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
   bool get _isEnabled =>  widget.enabled ?? widget.decoration?.enabled ?? true;
 
-  bool _isWidgetEnabled(TextField widget) {
-    return widget.enabled ?? widget.decoration?.enabled ?? true;
-  }
-
   int get _currentLength => _effectiveController.value.text.characters.length;
 
   bool get _hasIntrinsicError => widget.maxLength != null && widget.maxLength! > 0 && _effectiveController.value.text.characters.length > widget.maxLength!;
@@ -995,6 +991,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   }
 
   Color get _errorColor => widget.cursorErrorColor ?? widget.decoration?.errorStyle?.color ?? Theme.of(context).colorScheme.error;
+
+  bool? _hadError;
 
   InputDecoration _getEffectiveDecoration() {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
@@ -1076,6 +1074,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     _effectiveFocusNode.canRequestFocus = widget.canRequestFocus && _isEnabled;
     _effectiveFocusNode.addListener(_handleFocusChanged);
     _initStatesController();
+    _hadError = _hasError;
   }
 
   bool get _canRequestFocus {
@@ -1126,11 +1125,16 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       }
       _initStatesController();
     }
-    if (_isWidgetEnabled(widget) != _isWidgetEnabled(oldWidget)) {
+
+    final bool isOldWidgetEnabled = oldWidget.enabled ?? oldWidget.decoration?.enabled ?? true;
+
+    if (_isEnabled != isOldWidgetEnabled) {
       _statesController.update(MaterialState.disabled, !_isEnabled);
     }
-    if (_widgetHasError(widget) != _widgetHasError(oldWidget)) {
+
+    if (_hasError != _hadError) {
       _statesController.update(MaterialState.error, _hasError);
+      _hadError = _hasError;
     }
   }
 
