@@ -276,7 +276,7 @@ void main() {
     const BorderRadius borderRadius = BorderRadius.all(Radius.circular(6.0));
 
     final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
-    addTearDown(() => focusNode.dispose());
+    addTearDown(focusNode.dispose);
     Future<void> buildTest(Intent intent) async {
       return tester.pumpWidget(
         Shortcuts(

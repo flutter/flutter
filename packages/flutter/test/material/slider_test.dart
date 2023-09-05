@@ -1710,7 +1710,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Slider is focusable and has correct focus color', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Slider');
-    addTearDown(() => focusNode.dispose());
+    addTearDown(focusNode.dispose);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final ThemeData theme = ThemeData(useMaterial3: true);
     double value = 0.5;
@@ -1759,7 +1759,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Slider has correct focus color from overlayColor property', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Slider');
-    addTearDown(() => focusNode.dispose());
+    addTearDown(focusNode.dispose);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     double value = 0.5;
     Widget buildApp({bool enabled = true}) {
@@ -1948,7 +1948,7 @@ void main() {
     final ThemeData theme = ThemeData(useMaterial3: true);
     final Key sliderKey = UniqueKey();
     final FocusNode focusNode = FocusNode();
-    addTearDown(() => focusNode.dispose());
+    addTearDown(focusNode.dispose);
 
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
@@ -2022,7 +2022,7 @@ void main() {
     double value = 0.5;
     final Key sliderKey = UniqueKey();
     final FocusNode focusNode = FocusNode();
-    addTearDown(() => focusNode.dispose());
+    addTearDown(focusNode.dispose);
 
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
@@ -2089,7 +2089,7 @@ void main() {
 
   testWidgetsWithLeakTracking('OverlayColor property is correctly applied when activeColor is also provided', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Slider');
-    addTearDown(() => focusNode.dispose());
+    addTearDown(focusNode.dispose);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     double value = 0.5;
     const Color activeColor = Color(0xffff0000);
@@ -2495,7 +2495,7 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
     final FocusNode focusNode = FocusNode();
-    addTearDown(() => focusNode.dispose());
+    addTearDown(focusNode.dispose);
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -3463,7 +3463,7 @@ void main() {
     double value = 0.5;
     const Color overlayColor = Color(0xffff0000);
     final FocusNode focusNode = FocusNode();
-    addTearDown(() => focusNode.dispose());
+    addTearDown(focusNode.dispose);
 
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
@@ -3578,7 +3578,7 @@ void main() {
   testWidgetsWithLeakTracking('Value indicator remains when Slider is in focus on desktop', (WidgetTester tester) async {
     double value = 0.5;
     final FocusNode focusNode = FocusNode();
-    addTearDown(() => focusNode.dispose());
+    addTearDown(focusNode.dispose);
 
     Widget buildApp({bool enabled = true}) {
       return MaterialApp(
@@ -3768,7 +3768,7 @@ void main() {
 
     testWidgetsWithLeakTracking('Slider is focusable and has correct focus color', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode(debugLabel: 'Slider');
-      addTearDown(() => focusNode.dispose());
+      addTearDown(focusNode.dispose);
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       final ThemeData theme = ThemeData();
       double value = 0.5;
@@ -3820,7 +3820,7 @@ void main() {
       final ThemeData theme = ThemeData();
       final Key sliderKey = UniqueKey();
       final FocusNode focusNode = FocusNode();
-      addTearDown(() => focusNode.dispose());
+      addTearDown(focusNode.dispose);
 
       Widget buildApp({bool enabled = true}) {
         return MaterialApp(

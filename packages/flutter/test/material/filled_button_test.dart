@@ -239,7 +239,7 @@ void main() {
 
   testWidgets('Default FilledButton meets a11y contrast guidelines', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
-    addTearDown(() => focusNode.dispose());
+    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       MaterialApp(

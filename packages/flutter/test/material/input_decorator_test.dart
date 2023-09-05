@@ -1823,7 +1823,7 @@ void runAllTests({ required bool useMaterial3 }) {
 
   testWidgetsWithLeakTracking('InputDecoration default floatingLabelStyle resolves hovered/focused states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
-    addTearDown(() => focusNode.dispose());
+    addTearDown(focusNode.dispose);
     final ThemeData theme = ThemeData(useMaterial3: true);
 
     await tester.pumpWidget(

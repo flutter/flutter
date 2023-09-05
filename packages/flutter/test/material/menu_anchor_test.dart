@@ -81,7 +81,7 @@ void main() {
     TextDirection textDirection = TextDirection.ltr,
   }) {
     final FocusNode focusNode = FocusNode();
-    addTearDown(() => focusNode.dispose());
+    addTearDown(focusNode.dispose);
     return MaterialApp(
       theme: ThemeData(useMaterial3: false),
       home: Material(

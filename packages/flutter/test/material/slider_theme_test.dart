@@ -803,7 +803,7 @@ void main() {
       }),
     );
     final FocusNode focusNode = FocusNode(debugLabel: 'Slider');
-    addTearDown(() => focusNode.dispose());
+    addTearDown(focusNode.dispose);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     double value = 0.5;
 

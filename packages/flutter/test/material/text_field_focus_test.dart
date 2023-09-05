@@ -32,7 +32,7 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
 
     final FocusNode focusNode = FocusNode(debugLabel: 'Editable Text Node');
-    addTearDown(() => focusNode.dispose());
+    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -74,7 +74,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Request focus shows keyboard', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
-    addTearDown(() => focusNode.dispose());
+    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -163,7 +163,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Focus triggers keep-alive', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
-    addTearDown(() => focusNode.dispose());
+    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -204,7 +204,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Focus keep-alive works with GlobalKey reparenting', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
-    addTearDown(() => focusNode.dispose());
+    addTearDown(focusNode.dispose);
 
     Widget makeTest(String? prefix) {
       return MaterialApp(
