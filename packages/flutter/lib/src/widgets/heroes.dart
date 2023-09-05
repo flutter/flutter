@@ -612,6 +612,19 @@ class _HeroFlight {
     navigator.userGestureInProgressNotifier.addListener(delayedPerformAnimationUpdate);
   }
 
+  /// Releases resources.
+  @mustCallSuper
+  void dispose() {
+    if (overlayEntry != null) {
+      overlayEntry!.remove();
+      overlayEntry!.dispose();
+      overlayEntry = null;
+      _proxyAnimation.parent = null;
+      _proxyAnimation.removeListener(onTick);
+      _proxyAnimation.removeStatusListener(_handleAnimationUpdate);
+    }
+  }
+
   void onTick() {
     final RenderBox? toHeroBox = (!_aborted && manifest.toHero.mounted)
       ? manifest.toHero.context.findRenderObject() as RenderBox?
@@ -1026,6 +1039,14 @@ class HeroController extends NavigatorObserver {
           child: toHero.child);
       },
     );
+  }
+
+  /// Releases resources.
+  @mustCallSuper
+  void dispose() {
+    for (final _HeroFlight flight in _flights.values) {
+      flight.dispose();
+    }
   }
 }
 
