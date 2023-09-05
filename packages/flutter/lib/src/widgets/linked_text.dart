@@ -36,36 +36,23 @@ typedef LinkedTextWidgetBuilder = Widget Function (
 ///
 /// ** See code in examples/api/lib/widgets/linked_text/linked_text.0.dart **
 /// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows how to use [LinkedText] to link Twitter handles by
+/// passing in a custom [RegExp].
+///
+/// ** See code in examples/api/lib/widgets/linked_text/linked_text.1.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows how to use [LinkedText] to link URLs in a TextSpan tree
+/// instead of in a flat string.
+///
+/// ** See code in examples/api/lib/widgets/linked_text/linked_text.2.dart **
+/// {@end-tool}
 class LinkedText extends StatefulWidget {
-  // TODO(justinmc): Update docs.
   /// Creates an instance of [LinkedText] from the given [text] or [spans],
-  /// highlighting any URLs by default.
-  ///
-  /// {@template flutter.widgets.LinkedText.new}
-  /// By default, highlights URLs in the [text] or [spans] and makes them
-  /// tappable with [onTap].
-  /// {@endtemplate}
-  ///
-  /// {@tool dartpad}
-  /// This example shows how to create a [LinkedText] that turns URLs into
-  /// working links.
-  ///
-  /// ** See code in examples/api/lib/widgets/linked_text/linked_text.0.dart **
-  /// {@end-tool}
-  ///
-  /// {@tool dartpad}
-  /// This example shows how to use [LinkedText] to link Twitter handles by
-  /// passing in a custom [RegExp].
-  ///
-  /// ** See code in examples/api/lib/widgets/linked_text/linked_text.1.dart **
-  /// {@end-tool}
-  ///
-  /// {@tool dartpad}
-  /// This example shows how to use [LinkedText] to link URLs in a TextSpan tree
-  /// instead of in a flat string.
-  ///
-  /// ** See code in examples/api/lib/widgets/linked_text/linked_text.2.dart **
-  /// {@end-tool}
+  /// turning any URLs into links by default.
   ///
   /// See also:
   ///
@@ -75,7 +62,6 @@ class LinkedText extends StatefulWidget {
     super.key,
     required this.onTap,
     this.builder = _defaultBuilder,
-    // TODO(justinmc): Should it be possible to pass a TextRangesFinder?
     this.regExp,
     List<InlineSpan>? spans,
     String? text,
@@ -90,19 +76,22 @@ class LinkedText extends StatefulWidget {
   /// Creates an instance of [LinkedText] where the given [textLinkers] are
   /// applied.
   ///
-  /// {@template flutter.widgets.LinkedText.textLinkers}
   /// Useful for independently matching different types of strings with
   /// different behaviors. For example, highlighting both URLs and Twitter
   /// handles with different style and/or behavior.
-  /// {@endtemplate}
   ///
   /// The [TextLinker.textRangesFinder] must not produce overlapping
   /// [TextRange]s.
   ///
+  /// {@tool dartpad}
+  /// This example shows how to use [LinkedText] to link both URLs and Twitter
+  /// handles in the same text.
+  ///
+  /// ** See code in examples/api/lib/widgets/linked_text/linked_text.3.dart **
+  /// {@end-tool}
+  ///
   /// See also:
   ///
-  ///  * [TextLinker.regExp], which can be used to easily create a [TextLinker]
-  ///    from a given [RegExp].
   ///  * [LinkedText.new], which can be passed [TextRange]s directly or
   ///    otherwise matches URLs by default.
   LinkedText.textLinkers({
@@ -157,6 +146,13 @@ class LinkedText extends StatefulWidget {
   ///
   /// [TextLinker]s are applied in the order given. Overlapping matches are not
   /// supported and will produce an error.
+  ///
+  /// {@tool dartpad}
+  /// This example shows how to use [LinkedText] to link both URLs and Twitter
+  /// handles in the same text with [TextLinker]s.
+  ///
+  /// ** See code in examples/api/lib/widgets/linked_text/linked_text.3.dart **
+  /// {@end-tool}
   final List<TextLinker>? textLinkers;
 
   static final RegExp _urlRegExp = RegExp(r'(?<!@[a-zA-Z0-9-]*)(?<![\/\.a-zA-Z0-9-])((https?:\/\/)?(([a-zA-Z0-9-]*\.)*[a-zA-Z0-9-]+(\.[a-zA-Z]+)+))(?::\d{1,5})?(?:\/[^\s]*)?(?:\?[^\s#]*)?(?:#[^\s]*)?(?![a-zA-Z0-9-]*@)');
