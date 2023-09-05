@@ -203,7 +203,7 @@ platform_properties:
         [
           {"dependency": "certs", "version": "version:9563bb"}
         ]
-      os: Windows-11
+      os: Windows
       device_type: none
       cpu: arm64
   windows_android:
