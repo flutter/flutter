@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'adaptive_text_selection_toolbar.dart';
 import 'color_scheme.dart';
@@ -1074,7 +1075,11 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     _effectiveFocusNode.canRequestFocus = widget.canRequestFocus && _isEnabled;
     _effectiveFocusNode.addListener(_handleFocusChanged);
     _initStatesController();
-    _hadError = _hasError;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _hadError = _hasError;
+      }
+    });
   }
 
   bool get _canRequestFocus {
