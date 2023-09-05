@@ -1684,7 +1684,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
-  testWidgets('ElevatedButton in SelectionArea changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ElevatedButton in SelectionArea changes mouse cursor when hovered', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/104595.
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
