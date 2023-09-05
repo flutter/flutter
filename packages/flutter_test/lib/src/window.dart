@@ -1158,7 +1158,7 @@ class _UnsupportedDisplay implements TestDisplay {
 ///   // Fake the desired properties of the TestWindow. All code running
 ///   // within this test will perceive the following fake text scale
 ///   // factor as the real text scale factor of the window.
-///   testBinding.window.textScaleFactorTestValue = 2.5; // ignore: deprecated_member_use
+///   testBinding.platformDispatcher.textScaleFactorTestValue = 2.5;
 ///
 ///   // Test code that depends on text scale factor here.
 /// });
@@ -1533,24 +1533,6 @@ class TestWindow implements SingletonFlutterWindow {
   )
   @override
   double get textScaleFactor => platformDispatcher.textScaleFactor;
-  /// Hides the real text scale factor and reports the given
-  /// [textScaleFactorTestValue] instead.
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.textScaleFactorTestValue instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  set textScaleFactorTestValue(double textScaleFactorTestValue) { // ignore: avoid_setters_without_getters
-    platformDispatcher.textScaleFactorTestValue = textScaleFactorTestValue;
-  }
-  /// Deletes any existing test text scale factor and returns to using the real
-  /// text scale factor.
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.clearTextScaleFactorTestValue() instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  void clearTextScaleFactorTestValue() {
-    platformDispatcher.clearTextScaleFactorTestValue();
-  }
 
   @Deprecated(
     'Use WidgetTester.platformDispatcher.platformBrightness instead. '
@@ -1574,24 +1556,6 @@ class TestWindow implements SingletonFlutterWindow {
   @override
   set onPlatformBrightnessChanged(VoidCallback? callback) {
     platformDispatcher.onPlatformBrightnessChanged = callback;
-  }
-  /// Hides the real text scale factor and reports the given
-  /// [platformBrightnessTestValue] instead.
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.platformBrightnessTestValue instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  set platformBrightnessTestValue(Brightness platformBrightnessTestValue) { // ignore: avoid_setters_without_getters
-    platformDispatcher.platformBrightnessTestValue = platformBrightnessTestValue;
-  }
-  /// Deletes any existing test platform brightness and returns to using the
-  /// real platform brightness.
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.clearPlatformBrightnessTestValue() instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  void clearPlatformBrightnessTestValue() {
-    platformDispatcher.clearPlatformBrightnessTestValue();
   }
 
   @Deprecated(
