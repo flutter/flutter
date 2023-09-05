@@ -3739,7 +3739,7 @@ void main() {
   });
 
   testWidgets('CheckedPopupMenuItem.onTap callback is called when defined', (WidgetTester tester) async {
-    final List<int> menuItemTapCounters = <int>[0, 0];
+    int count = 0;
     final UniqueKey key1 = UniqueKey();
     final UniqueKey key2 = UniqueKey();
 
@@ -3755,7 +3755,7 @@ void main() {
                   key: key1,
                   child: const Text('First option'),
                   onTap: () {
-                    menuItemTapCounters[0] += 1;
+                    count += 1;
                   },
                 ),
                 CheckedPopupMenuItem<void>(
@@ -3774,14 +3774,14 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(key1));
     await tester.pumpAndSettle();
-    expect(menuItemTapCounters, <int>[1, 0]);
+    expect(count, 1);
 
     // Tap an item without onTap
     await tester.tap(find.text('Actions'));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(key2));
     await tester.pumpAndSettle();
-    expect(menuItemTapCounters, <int>[1, 0]);
+    expect(count, 1);
   });
 }
 
