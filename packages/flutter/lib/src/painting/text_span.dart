@@ -16,7 +16,7 @@ import 'text_scaler.dart';
 // Examples can assume:
 // late TextSpan myTextSpan;
 
-/// An immutable span of text.
+/// An immutable span of text?
 ///
 /// A [TextSpan] object can be styled using its [style] property. The style will
 /// be applied to the [text] and the [children].
