@@ -58,6 +58,7 @@ void main() {
     final RenderSliverMainAxisGroup renderGroup =
         tester.renderObject<RenderSliverMainAxisGroup>(find.byType(SliverMainAxisGroup));
     expect(renderGroup.geometry!.scrollExtent, equals(300 * 20 + 200 * 20));
+    expect(renderGroup.geometry!.hasVisualOverflow, isTrue);
   });
 
   testWidgets('SliverMainAxisGroup is laid out properly when reversed', (WidgetTester tester) async {
@@ -109,6 +110,7 @@ void main() {
     final RenderSliverMainAxisGroup renderGroup =
         tester.renderObject<RenderSliverMainAxisGroup>(find.byType(SliverMainAxisGroup));
     expect(renderGroup.geometry!.scrollExtent, equals(300 * 20 + 200 * 20));
+    expect(renderGroup.geometry!.hasVisualOverflow, isTrue);
   });
 
   testWidgets('SliverMainAxisGroup is laid out properly when horizontal', (WidgetTester tester) async {
@@ -165,6 +167,7 @@ void main() {
     final RenderSliverMainAxisGroup renderGroup =
         tester.renderObject<RenderSliverMainAxisGroup>(find.byType(SliverMainAxisGroup));
     expect(renderGroup.geometry!.scrollExtent, equals(300 * 20 + 200 * 20));
+    expect(renderGroup.geometry!.hasVisualOverflow, isTrue);
   });
 
   testWidgets('SliverMainAxisGroup is laid out properly when horizontal, reversed', (WidgetTester tester) async {
@@ -222,6 +225,7 @@ void main() {
     final RenderSliverMainAxisGroup renderGroup =
         tester.renderObject<RenderSliverMainAxisGroup>(find.byType(SliverMainAxisGroup));
     expect(renderGroup.geometry!.scrollExtent, equals(300 * 20 + 200 * 20));
+    expect(renderGroup.geometry!.hasVisualOverflow, isTrue);
   });
 
   testWidgets('Hit test works properly on various parts of SliverMainAxisGroup', (WidgetTester tester) async {

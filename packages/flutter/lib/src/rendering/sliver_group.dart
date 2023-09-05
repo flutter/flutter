@@ -286,6 +286,7 @@ class RenderSliverMainAxisGroup extends RenderSliver with ContainerRenderObjectM
       scrollExtent: totalScrollExtent,
       paintExtent: calculatePaintOffset(constraints, from: 0, to: totalScrollExtent),
       maxPaintExtent: maxPaintExtent,
+      hasVisualOverflow: totalScrollExtent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
     );
   }
 
