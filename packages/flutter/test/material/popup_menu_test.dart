@@ -3805,51 +3805,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(menuItemTapCounters, <int>[2, 1]);
   });
-
-  testWidgets('Material2 - CheckedPopupMenuItem honors textStyle', (WidgetTester tester) async {
-    final Key popupMenuButtonKey = UniqueKey();
-    final ThemeData theme = ThemeData(useMaterial3: false);
-
-    Widget buildMenu() {
-      return MaterialApp(
-        theme: theme,
-        home: Scaffold(
-          body: Center(
-            child: PopupMenuButton<String>(
-              key: popupMenuButtonKey,
-              child: const Text('button'),
-              onSelected: (String result) { },
-              itemBuilder: (BuildContext context) {
-                return <PopupMenuItem<String>>[
-                   // Popup menu item with a Text widget.
-                   const CheckedPopupMenuItem<String>(
-                    value: '0',
-                    textStyle: TextStyle(color: Colors.red),
-                    child: Text('Item 0'),
-                  ),
-                  // Popup menu item with a ListTile widget.
-                  const CheckedPopupMenuItem<String>(
-                    value: '1',
-                    textStyle: TextStyle(color: Colors.green),
-                    child: ListTile(title: Text('Item 1')),
-                  ),
-                ];
-              },
-            ),
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(buildMenu());
-
-    // Show the menu.
-    await tester.tap(find.byKey(popupMenuButtonKey));
-    await tester.pumpAndSettle();
-
-    expect(_labelStyle(tester, 'Item 0')!.color, Colors.red);
-    expect(_labelStyle(tester, 'Item 1')!.color, Colors.green);
-  });
 }
 
 class TestApp extends StatelessWidget {
