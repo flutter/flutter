@@ -6873,8 +6873,10 @@ void main() {
 
   testWidgetsWithLeakTracking("Disabled TextField can't be traversed to.", (WidgetTester tester) async {
     final FocusNode focusNode1 = FocusNode(debugLabel: 'TextField 1');
+    addTearDown(focusNode1.dispose);
     final FocusNode focusNode2 = FocusNode(debugLabel: 'TextField 2');
-    addTearDown(() {focusNode1.dispose(); focusNode2.dispose(); });
+    addTearDown(focusNode2.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Material(

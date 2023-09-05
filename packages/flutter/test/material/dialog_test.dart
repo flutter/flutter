@@ -2768,8 +2768,9 @@ void main() {
 
   testWidgetsWithLeakTracking('Uses open focus traversal when overridden', (WidgetTester tester) async {
     final FocusNode okNode = FocusNode();
+    addTearDown(okNode.dispose);
     final FocusNode cancelNode = FocusNode();
-    addTearDown(() { okNode.dispose(); cancelNode.dispose(); });
+    addTearDown(cancelNode.dispose);
 
     Future<bool> nextFocus() async {
       final bool result = Actions.invoke(

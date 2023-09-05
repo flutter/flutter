@@ -1219,8 +1219,9 @@ void main() {
 
   testWidgets('PaginatedDataTable can be scrolled using ScrollController', (WidgetTester tester) async {
     final TestDataSource source = TestDataSource();
+    addTearDown(source.dispose);
     final ScrollController scrollController = ScrollController();
-    addTearDown(() { source.dispose(); scrollController.dispose(); });
+    scrollController.dispose();
 
     Widget buildTable(TestDataSource source) {
       return Align(
@@ -1269,8 +1270,9 @@ void main() {
 
   testWidgets('PaginatedDataTable uses PrimaryScrollController when primary ', (WidgetTester tester) async {
     final ScrollController primaryScrollController = ScrollController();
+    addTearDown(primaryScrollController.dispose);
     final TestDataSource source = TestDataSource();
-    addTearDown(() { primaryScrollController.dispose(); source.dispose(); });
+    addTearDown(source.dispose);
 
     await tester.pumpWidget(
       MaterialApp(

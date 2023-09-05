@@ -263,8 +263,10 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
 
     final FocusScopeNode focusScopeNode0 = FocusScopeNode();
+    addTearDown(focusScopeNode0.dispose);
     final FocusScopeNode focusScopeNode1 = FocusScopeNode();
-    addTearDown(() { focusScopeNode0.dispose(); focusScopeNode1.dispose(); });
+    addTearDown(focusScopeNode1.dispose);
+
     final Key textField0 = UniqueKey();
     final Key textField1 = UniqueKey();
 
@@ -403,8 +405,10 @@ void main() {
 
   testWidgetsWithLeakTracking('A Focused text-field will lose focus when clicking outside of its hitbox with a mouse on desktop', (WidgetTester tester) async {
     final FocusNode focusNodeA = FocusNode();
+    addTearDown(focusNodeA.dispose);
     final FocusNode focusNodeB = FocusNode();
-    addTearDown(() { focusNodeA.dispose(); focusNodeB.dispose(); });
+    addTearDown(focusNodeB.dispose);
+
     final Key key = UniqueKey();
 
     await tester.pumpWidget(
@@ -499,8 +503,10 @@ void main() {
 
   testWidgetsWithLeakTracking('A Focused text-field will lose focus when clicking outside of its hitbox with a mouse on desktop after tab navigation', (WidgetTester tester) async {
     final FocusNode focusNodeA = FocusNode(debugLabel: 'A');
+    addTearDown(focusNodeA.dispose);
     final FocusNode focusNodeB = FocusNode(debugLabel: 'B');
-    addTearDown(() { focusNodeA.dispose(); focusNodeB.dispose(); });
+    addTearDown(focusNodeB.dispose);
+
     final Key key = UniqueKey();
 
     await tester.pumpWidget(

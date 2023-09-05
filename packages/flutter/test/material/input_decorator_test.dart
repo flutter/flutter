@@ -894,8 +894,10 @@ void runAllTests({ required bool useMaterial3 }) {
       testWidgetsWithLeakTracking('multiline TextField', (WidgetTester tester) async {
         const String text = 'text';
         final FocusNode focusNode = FocusNode();
+        addTearDown(focusNode.dispose);
         final TextEditingController controller = TextEditingController();
-        addTearDown(() { focusNode.dispose(); controller.dispose(); });
+        addTearDown(controller.dispose);
+
         Widget buildFrame(bool alignLabelWithHint) {
           return MaterialApp(
             theme: ThemeData(useMaterial3: false),
@@ -947,8 +949,10 @@ void runAllTests({ required bool useMaterial3 }) {
       testWidgetsWithLeakTracking('multiline TextField with outline border', (WidgetTester tester) async {
         const String text = 'text';
         final FocusNode focusNode = FocusNode();
+        addTearDown(focusNode.dispose);
         final TextEditingController controller = TextEditingController();
-        addTearDown(() { focusNode.dispose(); controller.dispose(); });
+        addTearDown(controller.dispose);
+
         Widget buildFrame(bool alignLabelWithHint) {
           return MaterialApp(
             theme: ThemeData(useMaterial3: false),
@@ -5786,8 +5790,9 @@ testWidgetsWithLeakTracking('OutlineInputBorder with BorderRadius.zero should dr
     final Typography typography = Typography.material2018();
 
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     final TextEditingController controller = TextEditingController();
-    addTearDown(() { focusNode.dispose(); controller.dispose(); });
+    addTearDown(controller.dispose);
 
     // The dense theme uses ideographic baselines
     Widget buildFrame(bool alignLabelWithHint) {

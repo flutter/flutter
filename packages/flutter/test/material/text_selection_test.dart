@@ -46,8 +46,9 @@ void main() {
     }) {
       final TextEditingController controller = TextEditingController(text: text)
         ..selection = selection ?? const TextSelection.collapsed(offset: -1);
+      addTearDown(controller.dispose);
       final FocusNode focusNode = FocusNode();
-      addTearDown(() { controller.dispose(); focusNode.dispose(); });
+      addTearDown(focusNode.dispose);
 
       return MaterialApp(
         home: EditableText(
