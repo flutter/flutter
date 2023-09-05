@@ -3875,7 +3875,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void _onCursorColorTick() {
     final double effectiveOpacity = math.min(widget.cursorColor.alpha / 255.0, _cursorBlinkOpacityController.value);
     renderEditable.cursorColor = widget.cursorColor.withOpacity(effectiveOpacity);
-    if (!EditableText.debugDeterministicCursor ) {
+    if (!EditableText.debugDeterministicCursor) {
       _cursorVisibilityNotifier.value = widget.showCursor && _cursorBlinkOpacityController.value > 0;
     }
   }
