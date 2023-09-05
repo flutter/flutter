@@ -1075,11 +1075,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     _effectiveFocusNode.canRequestFocus = widget.canRequestFocus && _isEnabled;
     _effectiveFocusNode.addListener(_handleFocusChanged);
     _initStatesController();
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _hadError = _hasError;
-      }
-    });
   }
 
   bool get _canRequestFocus {
