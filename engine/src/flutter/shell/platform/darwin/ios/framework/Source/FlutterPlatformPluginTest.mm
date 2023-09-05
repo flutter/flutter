@@ -139,6 +139,10 @@
   FlutterViewController* engineViewController =
       [[[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil] autorelease];
   FlutterViewController* mockEngineViewController = OCMPartialMock(engineViewController);
+  OCMStub([mockEngineViewController
+      presentViewController:[OCMArg isKindOfClass:[UIActivityViewController class]]
+                   animated:YES
+                 completion:nil]);
 
   FlutterPlatformPlugin* plugin =
       [[[FlutterPlatformPlugin alloc] initWithEngine:_weakFactory->GetWeakPtr()] autorelease];
