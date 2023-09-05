@@ -274,7 +274,7 @@ RenderParagraph _getText(WidgetTester tester, String text) {
 
 TabController _tabController({required int length, required TickerProvider vsync, int initialIndex = 0, Duration? animationDuration}) {
   final TabController result = TabController(length: length, vsync: vsync, initialIndex: initialIndex, animationDuration: animationDuration);
-  addTearDown(() => result.dispose());
+  addTearDown(result.dispose);
   return result;
 }
 

@@ -1890,7 +1890,7 @@ void main() {
       count += 1;
     }
     final MaterialStatesController controller = MaterialStatesController();
-    addTearDown(() => controller.dispose());
+    addTearDown(controller.dispose);
     controller.addListener(valueChanged);
 
     await tester.pumpWidget(
@@ -2005,7 +2005,7 @@ void main() {
       count += 1;
     }
     final MaterialStatesController controller = MaterialStatesController();
-    addTearDown(() => controller.dispose());
+    addTearDown(controller.dispose);
     controller.addListener(valueChanged);
 
     await tester.pumpWidget(

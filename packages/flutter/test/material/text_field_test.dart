@@ -1462,7 +1462,7 @@ void main() {
     final TextEditingController controller = TextEditingController.fromValue(
       const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
     );
-    addTearDown(() => controller.dispose());
+    addTearDown(controller.dispose);
     final FocusNode focusNode = _focusNode();
     EditableText.debugDeterministicCursor = true;
     await tester.pumpWidget(
@@ -1493,7 +1493,7 @@ void main() {
     final TextEditingController controller = TextEditingController.fromValue(
       const TextEditingValue(selection: TextSelection.collapsed(offset: 0)),
     );
-    addTearDown(() => controller.dispose());
+    addTearDown(controller.dispose);
     final FocusNode focusNode = _focusNode();
     EditableText.debugDeterministicCursor = true;
     await tester.pumpWidget(
@@ -2121,7 +2121,7 @@ void main() {
         extentOffset: 7,
       )),
     );
-    addTearDown(() => controller.dispose());
+    addTearDown(controller.dispose);
 
     // Mark entry to be dirty in order to trigger overlay update.
     entry.markNeedsBuild();
@@ -2139,7 +2139,7 @@ void main() {
             composing: TextRange(start: 0, end: 8), // Simulate text composing.
         ),
     );
-    addTearDown(() => controller.dispose());
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
         overlay(
@@ -3894,7 +3894,7 @@ void main() {
         ),
       ),
     );
-    addTearDown(() => controller.dispose());
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       overlay(
         child: TextField(

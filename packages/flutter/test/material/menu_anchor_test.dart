@@ -493,7 +493,7 @@ void main() {
 
   testWidgetsWithLeakTracking('focus is returned to previous focus before invoking onPressed', (WidgetTester tester) async {
     final FocusNode buttonFocus = FocusNode(debugLabel: 'Button Focus');
-    addTearDown(() => buttonFocus.dispose());
+    addTearDown(buttonFocus.dispose);
     FocusNode? focusInOnPressed;
 
     void onMenuSelected(TestMenu item) {
@@ -1473,7 +1473,7 @@ void main() {
 
     testWidgetsWithLeakTracking('menus close on ancestor scroll', (WidgetTester tester) async {
       final ScrollController scrollController = ScrollController();
-      addTearDown(() => scrollController.dispose());
+      addTearDown(scrollController.dispose);
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -1513,7 +1513,7 @@ void main() {
     testWidgetsWithLeakTracking('menus do not close on root menu internal scroll', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/122168.
       final ScrollController scrollController = ScrollController();
-      addTearDown(() => scrollController.dispose());
+      addTearDown(scrollController.dispose);
       bool rootOpened = false;
 
       await tester.pumpWidget(
@@ -1585,7 +1585,7 @@ void main() {
 
     testWidgetsWithLeakTracking('menus close on view size change', (WidgetTester tester) async {
       final ScrollController scrollController = ScrollController();
-      addTearDown(() => scrollController.dispose());
+      addTearDown(scrollController.dispose);
       final MediaQueryData mediaQueryData = MediaQueryData.fromView(tester.view);
 
       Widget build(Size size) {

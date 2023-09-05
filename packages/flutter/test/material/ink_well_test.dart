@@ -2103,7 +2103,7 @@ testWidgetsWithLeakTracking('InkResponse radius can be updated', (WidgetTester t
     }
 
     final MaterialStatesController controller = MaterialStatesController();
-    addTearDown(() => controller.dispose());
+    addTearDown(controller.dispose);
     int pressedCount = 0;
     controller.addListener(() {
       if (controller.value.contains(MaterialState.pressed)) {

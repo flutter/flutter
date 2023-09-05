@@ -380,7 +380,7 @@ void main() {
 
       testWidgetsWithLeakTracking('Uses the PrimaryScrollController when available', (WidgetTester tester) async {
         final ScrollController primary = ScrollController();
-        addTearDown(() => primary.dispose());
+        addTearDown(primary.dispose);
         final Widget reorderableList = ReorderableListView(
           children: const <Widget>[
             SizedBox(width: 100.0, height: 100.0, key: Key('C'), child: Text('C')),
@@ -411,7 +411,7 @@ void main() {
 
         // Now try changing the primary scroll controller and checking that the scroll view gets updated.
         final ScrollController primary2 = ScrollController();
-        addTearDown(() => primary2.dispose());
+        addTearDown(primary2.dispose);
 
         await tester.pumpWidget(buildWithScrollController(primary2));
         scrollView = tester.widget(
@@ -425,7 +425,7 @@ void main() {
         const Key secondBox = Key('B');
         const Key thirdBox = Key('A');
         final ScrollController customController = ScrollController();
-        addTearDown(() => customController.dispose());
+        addTearDown(customController.dispose);
 
         await tester.pumpWidget(
           MaterialApp(
@@ -487,7 +487,7 @@ void main() {
       testWidgetsWithLeakTracking('ReorderableList auto scrolling is fast enough', (WidgetTester tester) async {
         // Regression test for https://github.com/flutter/flutter/issues/121603.
         final ScrollController controller = ScrollController();
-        addTearDown(() => controller.dispose());
+        addTearDown(controller.dispose);
 
         await tester.pumpWidget(
           MaterialApp(
@@ -1857,7 +1857,7 @@ void main() {
     Future<double> pumpListAndDrag({required double autoScrollerVelocityScalar}) async {
       final List<int> items = List<int>.generate(10, (int index) => index);
       final ScrollController scrollController = ScrollController();
-      addTearDown(() => scrollController.dispose());
+      addTearDown(scrollController.dispose);
 
       await tester.pumpWidget(
         MaterialApp(

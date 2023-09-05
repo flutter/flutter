@@ -6155,7 +6155,7 @@ testWidgetsWithLeakTracking('OutlineInputBorder with BorderRadius.zero should dr
 
   testWidgetsWithLeakTracking('A vertically constrained TextField still positions its text inside of itself', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'A');
-    addTearDown(() => controller.dispose());
+    addTearDown(controller.dispose);
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: Center(
@@ -6285,7 +6285,7 @@ testWidgetsWithLeakTracking('OutlineInputBorder with BorderRadius.zero should dr
 
   testWidgetsWithLeakTracking('min intrinsic height for TextField with prefix icon', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'input');
-    addTearDown(() => controller.dispose());
+    addTearDown(controller.dispose);
 
     // Regression test for: https://github.com/flutter/flutter/issues/87403
     await tester.pumpWidget(MaterialApp(
@@ -6316,7 +6316,7 @@ testWidgetsWithLeakTracking('OutlineInputBorder with BorderRadius.zero should dr
 
   testWidgetsWithLeakTracking('min intrinsic height for TextField with suffix icon', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'input');
-    addTearDown(() => controller.dispose());
+    addTearDown(controller.dispose);
 
     // Regression test for: https://github.com/flutter/flutter/issues/87403
     await tester.pumpWidget(MaterialApp(
@@ -6347,7 +6347,7 @@ testWidgetsWithLeakTracking('OutlineInputBorder with BorderRadius.zero should dr
 
   testWidgetsWithLeakTracking('min intrinsic height for TextField with prefix', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'input');
-    addTearDown(() => controller.dispose());
+    addTearDown(controller.dispose);
 
     // Regression test for: https://github.com/flutter/flutter/issues/87403
     await tester.pumpWidget(MaterialApp(
@@ -6378,7 +6378,7 @@ testWidgetsWithLeakTracking('OutlineInputBorder with BorderRadius.zero should dr
 
   testWidgetsWithLeakTracking('min intrinsic height for TextField with suffix', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'input');
-    addTearDown(() => controller.dispose());
+    addTearDown(controller.dispose);
 
     // Regression test for: https://github.com/flutter/flutter/issues/87403
     await tester.pumpWidget(MaterialApp(
@@ -6409,7 +6409,7 @@ testWidgetsWithLeakTracking('OutlineInputBorder with BorderRadius.zero should dr
 
   testWidgetsWithLeakTracking('min intrinsic height for TextField with icon', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'input');
-    addTearDown(() => controller.dispose());
+    addTearDown(controller.dispose);
 
     // Regression test for: https://github.com/flutter/flutter/issues/87403
     await tester.pumpWidget(MaterialApp(

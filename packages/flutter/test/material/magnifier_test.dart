@@ -60,7 +60,7 @@ void main() {
       final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
       final ValueNotifier<MagnifierInfo> magnifierPositioner = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
-      addTearDown(() => magnifierPositioner.dispose());
+      addTearDown(magnifierPositioner.dispose);
 
       final Widget? builtWidget = TextMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
         context,
@@ -80,7 +80,7 @@ void main() {
       final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
       final ValueNotifier<MagnifierInfo> magnifierPositioner = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
-      addTearDown(() => magnifierPositioner.dispose());
+      addTearDown(magnifierPositioner.dispose);
 
       final Widget? builtWidget = TextMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
         context,
@@ -100,7 +100,7 @@ void main() {
       final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
       final ValueNotifier<MagnifierInfo> magnifierPositioner = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
-      addTearDown(() => magnifierPositioner.dispose());
+      addTearDown(magnifierPositioner.dispose);
 
       final Widget? builtWidget = TextMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
         context,
@@ -165,7 +165,7 @@ void main() {
           // The tap position is dragBelow units below the text field.
           globalGesturePosition: fakeTextFieldRect.center,
         ));
-        addTearDown(() => magnifierInfo.dispose());
+        addTearDown(magnifierInfo.dispose);
 
         await showMagnifier(context, tester, magnifierInfo);
 
@@ -428,7 +428,7 @@ void main() {
             globalGesturePosition: reasonableTextField.center,
           ),
         );
-        addTearDown(() => magnifierPositioner.dispose());
+        addTearDown(magnifierPositioner.dispose);
 
         await showMagnifier(context, tester, magnifierPositioner);
 
@@ -464,7 +464,7 @@ void main() {
             globalGesturePosition: reasonableTextField.center,
           ),
         );
-        addTearDown(() => magnifierPositioner.dispose());
+        addTearDown(magnifierPositioner.dispose);
 
         await showMagnifier(context, tester, magnifierPositioner);
 
@@ -500,7 +500,7 @@ void main() {
             globalGesturePosition: reasonableTextField.center,
           ),
         );
-        addTearDown(() => magnifierPositioner.dispose());
+        addTearDown(magnifierPositioner.dispose);
 
         await showMagnifier(context, tester, magnifierPositioner);
 

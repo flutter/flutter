@@ -465,7 +465,7 @@ void main() {
 
   testWidgetsWithLeakTracking('A Focused text-field will not lose focus when clicking on its decoration', (WidgetTester tester) async {
     final FocusNode focusNodeA = FocusNode();
-    addTearDown(() => focusNodeA.dispose());
+    addTearDown(focusNodeA.dispose);
     final Key iconKey = UniqueKey();
 
     await tester.pumpWidget(

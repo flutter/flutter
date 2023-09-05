@@ -59,7 +59,7 @@ void main() {
   group('RestorableTimeOfDay tests', () {
     testWidgetsWithLeakTracking('value is not accessible when not registered', (WidgetTester tester) async {
       final RestorableTimeOfDay property = RestorableTimeOfDay(const TimeOfDay(hour: 20, minute: 4));
-      addTearDown(() => property.dispose());
+      addTearDown(property.dispose);
       expect(() => property.value, throwsAssertionError);
     });
 

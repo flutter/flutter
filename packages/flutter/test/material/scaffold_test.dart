@@ -21,7 +21,7 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/103741
   testWidgetsWithLeakTracking('extendBodyBehindAppBar change should not cause the body widget lose state', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
-    addTearDown(() => controller.dispose());
+    addTearDown(controller.dispose);
 
     Widget buildFrame({required bool extendBodyBehindAppBar}) {
       return MediaQuery(
@@ -451,7 +451,7 @@ void main() {
     const double appBarHeight = 256.0;
 
     final ScrollController scrollOffset = ScrollController();
-    addTearDown(() => scrollOffset.dispose());
+    addTearDown(scrollOffset.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
