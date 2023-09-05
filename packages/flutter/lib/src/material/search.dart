@@ -384,6 +384,7 @@ abstract class SearchDelegate<T> {
     _currentBodyNotifier.dispose();
     _focusNode?.dispose();
     _queryTextController.dispose();
+    _proxyAnimation.parent = null;
   }
 }
 
