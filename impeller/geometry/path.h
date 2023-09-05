@@ -138,6 +138,8 @@ class Path {
 
   void SetFillType(FillType fill);
 
+  void SetBounds(Rect rect);
+
   Path& AddLinearComponent(Point p1, Point p2);
 
   Path& AddQuadraticComponent(Point p1, Point cp, Point p2);
@@ -145,6 +147,12 @@ class Path {
   Path& AddCubicComponent(Point p1, Point cp1, Point cp2, Point p2);
 
   Path& AddContourComponent(Point destination, bool is_closed = false);
+
+  /// @brief Called by `PathBuilder` to compute the bounds for certain paths.
+  ///
+  /// `PathBuilder` may set the bounds directly, in case they come from a source
+  /// with already computed bounds, such as an SkPath.
+  void ComputeBounds();
 
   void SetContourClosed(bool is_closed);
 
@@ -178,6 +186,8 @@ class Path {
   std::vector<QuadraticPathComponent> quads_;
   std::vector<CubicPathComponent> cubics_;
   std::vector<ContourComponent> contours_;
+
+  std::optional<Rect> computed_bounds_;
 };
 
 }  // namespace impeller
