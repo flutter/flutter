@@ -1308,19 +1308,10 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   }
   // AutofillClient implementation end.
 
-  Set<MaterialState> get _materialState {
-    return <MaterialState>{
-      if (!_isEnabled) MaterialState.disabled,
-      if (_isHovering) MaterialState.hovered,
-      if (_effectiveFocusNode.hasFocus) MaterialState.focused,
-      if (_hasError) MaterialState.error,
-    };
-  }
-
   TextStyle _getInputStyleForState(TextStyle style) {
     final ThemeData theme = Theme.of(context);
-    final TextStyle stateStyle = MaterialStateProperty.resolveAs(theme.useMaterial3 ? _m3StateInputStyle(context)! : _m2StateInputStyle(context)!, _materialState);
-    final TextStyle providedStyle = MaterialStateProperty.resolveAs(style, _materialState);
+    final TextStyle stateStyle = MaterialStateProperty.resolveAs(theme.useMaterial3 ? _m3StateInputStyle(context)! : _m2StateInputStyle(context)!, _statesController.value);
+    final TextStyle providedStyle = MaterialStateProperty.resolveAs(style, _statesController.value);
     return providedStyle.merge(stateStyle);
   }
 
@@ -1337,7 +1328,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
     final ThemeData theme = Theme.of(context);
     final DefaultSelectionStyle selectionStyle = DefaultSelectionStyle.of(context);
-    final TextStyle? providedStyle = MaterialStateProperty.resolveAs(widget.style, _materialState);
+    final TextStyle? providedStyle = MaterialStateProperty.resolveAs(widget.style, _statesController.value);
     final TextStyle style = _getInputStyleForState(theme.useMaterial3 ? _m3InputStyle(context) : theme.textTheme.titleMedium!).merge(providedStyle);
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? theme.brightness;
     final TextEditingController controller = _effectiveController;
@@ -1552,7 +1543,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     }
     final MouseCursor effectiveMouseCursor = MaterialStateProperty.resolveAs<MouseCursor>(
       widget.mouseCursor ?? MaterialStateMouseCursor.textable,
-      _materialState,
+      _statesController.value,
     );
 
     final int? semanticsMaxValueLength;
