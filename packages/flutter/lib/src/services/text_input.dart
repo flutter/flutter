@@ -1261,6 +1261,9 @@ class SelectionRect {
 
 /// An interface to receive granular information from [TextInput].
 ///
+/// Mixin with [TextInputClient] to receive any default implementations from
+/// [TextInputClient].
+///
 /// See also:
 ///
 ///  * [TextInput.attach]
