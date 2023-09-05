@@ -69,6 +69,10 @@
                     "language": "dart",
                     "name": "test: Lint android host",
                     "script": "flutter/tools/android_lint/bin/main.dart"
+                },
+                {
+                    "name": "Check build configs",
+                    "script": "flutter/ci/check_build_configs.sh"
                 }
             ]
         },

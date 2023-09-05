@@ -1,0 +1,61 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+name: engine_build_configs
+publish_to: none
+environment:
+  sdk: '>=3.1.0-0 <4.0.0'
+
+# Do not add any dependencies that require more than what is provided in
+# //third_party/pkg, //third_party/dart/pkg, or
+# //third_party/dart/third_party/pkg. In particular, package:test is not usable
+# here.
+
+# If you do add packages here, make sure you can run `pub get --offline`, and
+# check the .packages and .package_config to make sure all the paths are
+# relative to this directory into //third_party/dart
+
+dependencies:
+  args: any
+  engine_repo_tools:
+    path: ../engine_repo_tools
+  file: any
+  meta: any
+  path: any
+  platform: any
+  process_runner: any
+
+dev_dependencies:
+  async_helper: any
+  expect: any
+  litetest: any
+  smith: any
+
+dependency_overrides:
+  args:
+    path: ../../../../third_party/dart/third_party/pkg/args
+  async:
+    path: ../../../../third_party/dart/third_party/pkg/async
+  async_helper:
+    path: ../../../../third_party/dart/pkg/async_helper
+  collection:
+    path: ../../../../third_party/dart/third_party/pkg/collection
+  expect:
+    path: ../../../../third_party/dart/pkg/expect
+  file:
+    path: ../../../../third_party/pkg/file/packages/file
+  litetest:
+    path: ../../../testing/litetest
+  meta:
+    path: ../../../../third_party/dart/pkg/meta
+  path:
+    path: ../../../../third_party/dart/third_party/pkg/path
+  platform:
+    path: ../../../../third_party/pkg/platform
+  process:
+    path: ../../../../third_party/pkg/process
+  process_runner:
+    path: ../../../../third_party/pkg/process_runner
+  smith:
+    path: ../../../../third_party/dart/pkg/smith
