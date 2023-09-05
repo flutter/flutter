@@ -880,6 +880,12 @@ class _MaterialAppState extends State<MaterialApp> {
     _heroController = MaterialApp.createMaterialHeroController();
   }
 
+  @override
+  void dispose() {
+    _heroController.dispose();
+    super.dispose();
+  }
+
   // Combine the Localizations for Material with the ones contributed
   // by the localizationsDelegates parameter, if any. Only the first delegate
   // of a particular LocalizationsDelegate.type is loaded so the
