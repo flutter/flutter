@@ -244,7 +244,7 @@ class SegmentedButton<T> extends StatefulWidget {
 class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
   bool get _enabled => widget.onSelectionChanged != null;
 
-  /// Sontrollers for the [ButtonSegment]s.
+  /// Controllers for the [ButtonSegment]s.
   @visibleForTesting
   final Map<ButtonSegment<T>, MaterialStatesController> statesControllers = <ButtonSegment<T>, MaterialStatesController>{};
 
