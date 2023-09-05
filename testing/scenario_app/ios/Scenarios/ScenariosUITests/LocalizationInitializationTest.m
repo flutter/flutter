@@ -26,10 +26,17 @@ FLUTTER_ASSERT_ARC
   NSTimeInterval timeout = 10.0;
 
   // The locales received by dart:ui are exposed onBeginFrame via semantics label.
-  // There should only be one locale, since the default iOS app only has en_US as
-  // the locale. The list should consist of just the en locale.
+  // There should only be one locale. The list should consist of the default
+  // locale provided by the iOS app.
+  NSArray<NSString*>* preferredLocales = [NSLocale preferredLanguages];
+  XCTAssertEqual(preferredLocales.count, 1);
+  // Dart connects the locale parts with `_` while iOS connects them with `-`.
+  // Converts to dart format before comparing.
+  NSString* localeDart = [preferredLocales.firstObject stringByReplacingOccurrencesOfString:@"-"
+                                                                                 withString:@"_"];
+  NSString* expectedIdentifier = [NSString stringWithFormat:@"[%@]", localeDart];
   XCUIElement* textInputSemanticsObject =
-      [self.application.textFields matchingIdentifier:@"[en]"].element;
+      [self.application.textFields matchingIdentifier:expectedIdentifier].element;
   XCTAssertTrue([textInputSemanticsObject waitForExistenceWithTimeout:timeout]);
 
   [textInputSemanticsObject tap];
