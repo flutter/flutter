@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   final GlobalKey widgetKey = GlobalKey();
@@ -1610,38 +1611,11 @@ void main() {
   });
 
   test('$FocusManager dispatches object creation in constructor', () {
-    final List<ObjectEvent> events = <ObjectEvent>[];
-    void listener(ObjectEvent event) {
-      if (event.object.runtimeType == FocusManager) {
-        events.add(event);
-      }
-    }
-    MemoryAllocations.instance.addListener(listener);
-
-    final FocusManager focusManager = FocusManager();
-
-    expect(events, hasLength(1));
-
-    focusManager.dispose();
-
-    MemoryAllocations.instance.removeListener(listener);
+    expect(()=> FocusManager().dispose(), dispatchesMemoryEvents(FocusManager));
   });
 
   test('$FocusNode dispatches object creation in constructor', () {
-    final List<ObjectEvent> events = <ObjectEvent>[];
-    void listener(ObjectEvent event) {
-      if (event.object.runtimeType == FocusNode) {
-        events.add(event);
-      }
-    }
-    MemoryAllocations.instance.addListener(listener);
-
-    final FocusNode focusManager = FocusNode();
-
-    expect(events, hasLength(1));
-
-    focusManager.dispose();
-    MemoryAllocations.instance.removeListener(listener);
+    expect(()=> FocusNode().dispose(), dispatchesMemoryEvents(FocusNode));
   });
 
   testWidgets('FocusManager notifies listeners when a widget loses focus because it was removed.', (WidgetTester tester) async {
