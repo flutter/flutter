@@ -122,6 +122,8 @@ Path ToPath(const SkPath& path, Point shift) {
   builder.SetConvexity(path.isConvex() ? Convexity::kConvex
                                        : Convexity::kUnknown);
   builder.Shift(shift);
+  auto sk_bounds = path.getBounds().makeOutset(shift.x, shift.y);
+  builder.SetBounds(ToRect(sk_bounds));
   return builder.TakePath(fill_type);
 }
 
@@ -129,6 +131,7 @@ Path ToPath(const SkRRect& rrect) {
   return PathBuilder{}
       .AddRoundedRect(ToRect(rrect.getBounds()), ToRoundingRadii(rrect))
       .SetConvexity(Convexity::kConvex)
+      .SetBounds(ToRect(rrect.getBounds()))
       .TakePath();
 }
 

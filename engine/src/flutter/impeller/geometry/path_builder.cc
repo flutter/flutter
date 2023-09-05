@@ -22,6 +22,10 @@ Path PathBuilder::TakePath(FillType fill) {
   auto path = prototype_;
   path.SetFillType(fill);
   path.SetConvexity(convexity_);
+  if (!did_compute_bounds_) {
+    path.ComputeBounds();
+  }
+  did_compute_bounds_ = false;
   return path;
 }
 
@@ -455,6 +459,12 @@ PathBuilder& PathBuilder::AddPath(const Path& path) {
 
 PathBuilder& PathBuilder::Shift(Point offset) {
   prototype_.Shift(offset);
+  return *this;
+}
+
+PathBuilder& PathBuilder::SetBounds(Rect bounds) {
+  prototype_.SetBounds(bounds);
+  did_compute_bounds_ = true;
   return *this;
 }
 

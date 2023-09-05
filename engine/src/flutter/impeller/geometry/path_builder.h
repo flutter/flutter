@@ -97,6 +97,14 @@ class PathBuilder {
   /// `offset`.
   PathBuilder& Shift(Point offset);
 
+  /// @brief Set the bounding box that will be used by `Path.GetBoundingBox` in
+  /// place of performing the computation.
+  ///
+  ///        When Impeller recieves Skia Path objects, many of these already
+  ///        have computed bounds. This method is used to avoid needlessly
+  ///        recomputing these bounds.
+  PathBuilder& SetBounds(Rect bounds);
+
   struct RoundingRadii {
     Point top_left;
     Point bottom_left;
@@ -133,6 +141,7 @@ class PathBuilder {
   Point current_;
   Path prototype_;
   Convexity convexity_;
+  bool did_compute_bounds_ = false;
 
   PathBuilder& AddRoundedRectTopLeft(Rect rect, RoundingRadii radii);
 
