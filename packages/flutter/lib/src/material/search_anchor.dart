@@ -1179,9 +1179,6 @@ class _SearchBarState extends State<SearchBar> {
   @override
   void dispose() {
     _internalStatesController.dispose();
-    if (widget.focusNode == null) {
-      _focusNode.dispose();
-    }
     super.dispose();
   }
 
