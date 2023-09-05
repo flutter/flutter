@@ -309,7 +309,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
                   platform: Theme.of(context).platform,
                 ),
                 child: PrimaryScrollController(
-                  controller: widget.route.scrollController!,
+                  controller: widget.scrollController,
                   child: Scrollbar(
                     thumbVisibility: true,
                     child: ListView(
@@ -452,7 +452,6 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   final BorderRadius? borderRadius;
 
   final List<double> itemHeights;
-  ScrollController? scrollController;
 
   @override
   Duration get transitionDuration => _kDropdownMenuDuration;
