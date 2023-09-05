@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: avoid_redundant_argument_values
-
 // reduced-test-set:
 //   This file is run as part of a reduced test set in CI on Mac and Windows
 //   machines.
@@ -225,7 +223,7 @@ void main() {
     (WidgetTester tester) async {
       final LiveTextInputTester liveTextInputTester = LiveTextInputTester();
       addTearDown(liveTextInputTester.dispose);
-      final TextEditingController controller = _textEditingController(text: '');
+      final TextEditingController controller = _textEditingController();
       const Key key = ValueKey<String>('TextField');
       final FocusNode focusNode = _focusNode();
       final Widget app = MaterialApp(
@@ -7735,7 +7733,7 @@ void main() {
 
   testWidgetsWithLeakTracking('TextField semantics include label when unfocused and label/hint when focused if input is empty', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    final TextEditingController controller = _textEditingController(text: '');
+    final TextEditingController controller = _textEditingController();
     final Key key = UniqueKey();
 
     await tester.pumpWidget(
@@ -11248,7 +11246,7 @@ void main() {
     'double double tap just shows the selection menu',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
-        text: '',
+
       );
       await tester.pumpWidget(
         MaterialApp(
@@ -11283,7 +11281,7 @@ void main() {
     'double long press just shows the selection menu',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
-        text: '',
+
       );
       await tester.pumpWidget(
         MaterialApp(
@@ -11314,7 +11312,7 @@ void main() {
     'A single tap hides the selection menu',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
-        text: '',
+
       );
       await tester.pumpWidget(
         MaterialApp(
@@ -11395,7 +11393,7 @@ void main() {
     'Long press on an autofocused field shows the selection menu',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
-        text: '',
+
       );
       await tester.pumpWidget(
         MaterialApp(
@@ -16122,7 +16120,7 @@ void main() {
 
   group('context menu', () {
     testWidgetsWithLeakTracking('builds AdaptiveTextSelectionToolbar by default', (WidgetTester tester) async {
-      final TextEditingController controller = _textEditingController(text: '');
+      final TextEditingController controller = _textEditingController();
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -16154,7 +16152,7 @@ void main() {
 
     testWidgetsWithLeakTracking('contextMenuBuilder is used in place of the default text selection toolbar', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
-      final TextEditingController controller = _textEditingController(text: '');
+      final TextEditingController controller = _textEditingController();
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -16192,7 +16190,7 @@ void main() {
 
     testWidgetsWithLeakTracking('contextMenuBuilder changes from default to null', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
-      final TextEditingController controller = _textEditingController(text: '');
+      final TextEditingController controller = _textEditingController();
       await tester.pumpWidget(MaterialApp(home: Material(child: TextField(key: key, controller: controller))));
 
       await tester.pump(); // Wait for autofocus to take effect.
