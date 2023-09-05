@@ -102,9 +102,11 @@ class _DropdownMenuItemButton<T> extends StatefulWidget {
     required this.constraints,
     required this.itemIndex,
     required this.enableFeedback,
+    required this.scrollController,
   });
 
   final _DropdownRoute<T> route;
+  final ScrollController scrollController;
   final EdgeInsets? padding;
   final Rect buttonRect;
   final BoxConstraints constraints;
@@ -131,7 +133,7 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
         widget.constraints.maxHeight,
         widget.itemIndex,
       );
-      widget.route.scrollController!.animateTo(
+      widget.scrollController.animateTo(
         menuLimits.scrollOffset,
         curve: Curves.easeInOut,
         duration: const Duration(milliseconds: 100),
@@ -205,6 +207,7 @@ class _DropdownMenu<T> extends StatefulWidget {
     this.dropdownColor,
     required this.enableFeedback,
     this.borderRadius,
+    required this.scrollController,
   });
 
   final _DropdownRoute<T> route;
@@ -214,6 +217,7 @@ class _DropdownMenu<T> extends StatefulWidget {
   final Color? dropdownColor;
   final bool enableFeedback;
   final BorderRadius? borderRadius;
+  final ScrollController scrollController;
 
   @override
   _DropdownMenuState<T> createState() => _DropdownMenuState<T>();
@@ -264,6 +268,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
           constraints: widget.constraints,
           itemIndex: itemIndex,
           enableFeedback: widget.enableFeedback,
+          scrollController: widget.scrollController,
         ),
       ];
 
@@ -607,11 +612,11 @@ class _DropdownRoutePage<T> extends StatefulWidget {
 }
 
 class _DropdownRoutePageState<T> extends State<_DropdownRoutePage<T>> {
-  bool _nullOutScrollController = false;
+  late ScrollController _scrollSontroller;
 
   @override
-  Widget build(BuildContext context) {
-    assert(debugCheckHasDirectionality(context));
+  void initState(){
+    super.initState();
 
     // Computing the initialScrollOffset now, before the items have been laid
     // out. This only works if the item heights are effectively fixed, i.e. either
@@ -619,11 +624,14 @@ class _DropdownRoutePageState<T> extends State<_DropdownRoutePage<T>> {
     // and all of the items' intrinsic heights are less than kMinInteractiveDimension.
     // Otherwise the initialScrollOffset is just a rough approximation based on
     // treating the items as if their heights were all equal to kMinInteractiveDimension.
-    if (widget.route.scrollController == null) {
-      final _MenuLimits menuLimits = widget.route.getMenuLimits(widget.buttonRect, widget.constraints.maxHeight, widget.selectedIndex);
-      widget.route.scrollController = ScrollController(initialScrollOffset: menuLimits.scrollOffset);
-      _nullOutScrollController = true;
-    }
+    final _MenuLimits menuLimits = widget.route.getMenuLimits(widget.buttonRect, widget.constraints.maxHeight, widget.selectedIndex);
+    _scrollSontroller = ScrollController(initialScrollOffset: menuLimits.scrollOffset);
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    assert(debugCheckHasDirectionality(context));
 
     final TextDirection? textDirection = Directionality.maybeOf(context);
     final Widget menu = _DropdownMenu<T>(
@@ -634,6 +642,7 @@ class _DropdownRoutePageState<T> extends State<_DropdownRoutePage<T>> {
       dropdownColor: widget.dropdownColor,
       enableFeedback: widget.enableFeedback,
       borderRadius: widget.borderRadius,
+      scrollController: _scrollSontroller,
     );
 
     return MediaQuery.removePadding(
@@ -659,10 +668,7 @@ class _DropdownRoutePageState<T> extends State<_DropdownRoutePage<T>> {
 
   @override
   void dispose() {
-    if (_nullOutScrollController) {
-      widget.route.scrollController?.dispose();
-      widget.route.scrollController = null;
-    }
+    _scrollSontroller.dispose();
     super.dispose();
   }
 }
