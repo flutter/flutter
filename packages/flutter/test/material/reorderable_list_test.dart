@@ -269,7 +269,7 @@ void main() {
         );
 
         late final OverlayEntry entry;
-        addTearDown(() { entry.remove(); entry.dispose(); });
+        addTearDown(() => entry..remove()..dispose());
 
         await tester.pumpWidget(MaterialApp(
           home: Container(
@@ -536,7 +536,7 @@ void main() {
         );
 
         late final OverlayEntry entry;
-        addTearDown(() { entry.remove(); entry.dispose(); });
+        addTearDown(() => entry..remove()..dispose());
 
         final Widget overlay = Overlay(
           initialEntries: <OverlayEntry>[
@@ -964,7 +964,7 @@ void main() {
         );
 
         late final OverlayEntry entry;
-        addTearDown(() { entry.remove(); entry.dispose(); });
+        addTearDown(() => entry..remove()..dispose());
 
         await tester.pumpWidget(MaterialApp(
           home: Container(

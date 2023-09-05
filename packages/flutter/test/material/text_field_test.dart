@@ -80,7 +80,7 @@ Widget overlay({ required Widget child }) {
       );
     },
   );
-  addTearDown(() { entry.remove(); entry.dispose(); });
+  addTearDown(() => entry..remove()..dispose());
   return overlayWithEntry(entry);
 }
 
@@ -2102,7 +2102,7 @@ void main() {
         );
       },
     );
-    addTearDown(() { entry.remove(); entry.dispose(); });
+    addTearDown(() => entry..remove()..dispose());
     await tester.pumpWidget(overlayWithEntry(entry));
     const int dIndex = 3;
     final Offset dPos = textOffsetToPosition(tester, dIndex);
@@ -2170,7 +2170,7 @@ void main() {
         );
       },
     );
-    addTearDown(() { entry.remove(); entry.dispose(); });
+    addTearDown(() => entry..remove()..dispose());
     await tester.pumpWidget(overlayWithEntry(entry));
     await tester.tap(find.byType(TextField));
     await tester.pump();
@@ -2206,7 +2206,7 @@ void main() {
         );
       },
     );
-    addTearDown(() { entry.remove(); entry.dispose(); });
+    addTearDown(() => entry..remove()..dispose());
     await tester.pumpWidget(overlayWithEntry(entry));
     await tester.tap(find.byType(TextField));
     await tester.pump();
@@ -2235,7 +2235,7 @@ void main() {
         );
       },
     );
-    addTearDown(() { entry.remove(); entry.dispose(); });
+    addTearDown(() => entry..remove()..dispose());
     await tester.pumpWidget(overlayWithEntry(entry));
     await tester.tap(find.byType(TextField));
     await tester.pump();

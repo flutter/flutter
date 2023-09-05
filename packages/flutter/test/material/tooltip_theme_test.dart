@@ -115,7 +115,7 @@ void main() {
   testWidgetsWithLeakTracking('Tooltip verticalOffset, preferBelow; center prefer above fits - ThemeData.tooltipTheme', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     late final OverlayEntry entry;
-    addTearDown(() { entry.remove(); entry.dispose(); });
+    addTearDown(() => entry..remove()..dispose());
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -175,7 +175,7 @@ void main() {
     final GlobalKey key = GlobalKey();
 
     late final OverlayEntry entry;
-    addTearDown(() { entry.remove(); entry.dispose(); });
+    addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
       Directionality(
@@ -233,7 +233,7 @@ void main() {
   testWidgetsWithLeakTracking('Tooltip verticalOffset, preferBelow; center prefer above does not fit - ThemeData.tooltipTheme', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     late final OverlayEntry entry;
-    addTearDown(() { entry.remove(); entry.dispose(); });
+    addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
       Directionality(
@@ -305,7 +305,7 @@ void main() {
     final GlobalKey key = GlobalKey();
 
     late final OverlayEntry entry;
-    addTearDown(() { entry.remove(); entry.dispose(); });
+    addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
       Directionality(
@@ -374,7 +374,7 @@ void main() {
   testWidgetsWithLeakTracking('Tooltip verticalOffset, preferBelow; center preferBelow fits - ThemeData.tooltipTheme', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     late final OverlayEntry entry;
-    addTearDown(() { entry.remove(); entry.dispose(); });
+    addTearDown(() => entry..remove()..dispose());
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -433,7 +433,7 @@ void main() {
     final GlobalKey key = GlobalKey();
 
     late final OverlayEntry entry;
-    addTearDown(() { entry.remove(); entry.dispose(); });
+    addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
       Directionality(
@@ -491,7 +491,7 @@ void main() {
     final GlobalKey key = GlobalKey();
 
     late final OverlayEntry entry;
-    addTearDown(() { entry.remove(); entry.dispose(); });
+    addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
       Directionality(
@@ -549,7 +549,7 @@ void main() {
   testWidgetsWithLeakTracking('Tooltip margin - TooltipTheme', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     late final OverlayEntry entry;
-    addTearDown(() { entry.remove(); entry.dispose(); });
+    addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
       Directionality(
@@ -707,7 +707,7 @@ void main() {
       color: Color(0x80800000),
     );
     late final OverlayEntry entry;
-    addTearDown(() { entry.remove(); entry.dispose(); });
+    addTearDown(() => entry..remove()..dispose());
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -752,7 +752,7 @@ void main() {
     );
 
     late final OverlayEntry entry;
-    addTearDown(() { entry.remove(); entry.dispose(); });
+    addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
       Theme(
@@ -794,7 +794,7 @@ void main() {
     const double customPaddingVal = 20.0;
 
     late final OverlayEntry entry;
-    addTearDown(() { entry.remove(); entry.dispose(); });
+    addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
       Directionality(
@@ -843,7 +843,7 @@ void main() {
     const double customTooltipHeight = 100.0;
     const double customPaddingValue = 20.0;
     late final OverlayEntry entry;
-    addTearDown(() { entry.remove(); entry.dispose(); });
+    addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
       Directionality(

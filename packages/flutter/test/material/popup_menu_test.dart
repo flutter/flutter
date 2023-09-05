@@ -845,7 +845,7 @@ void main() {
   testWidgetsWithLeakTracking('PopupMenu positioning inside nested Overlay', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     late final OverlayEntry entry;
-    addTearDown(() { entry.remove(); entry.dispose(); });
+    addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
       MaterialApp(

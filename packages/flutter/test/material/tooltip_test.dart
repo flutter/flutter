@@ -27,7 +27,7 @@ void main() {
   testWidgetsWithLeakTracking('Does tooltip end up in the right place - center', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     late final OverlayEntry entry;
-    addTearDown(() { entry.remove(); entry.dispose(); });
+    addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
       Directionality(
@@ -84,7 +84,7 @@ void main() {
   testWidgetsWithLeakTracking('Does tooltip end up in the right place - center with padding outside overlay', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     late final OverlayEntry entry;
-    addTearDown(() { entry.remove(); entry.dispose(); });
+    addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
       Directionality(
@@ -146,7 +146,7 @@ void main() {
   testWidgetsWithLeakTracking('Does tooltip end up in the right place - top left', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     late final OverlayEntry entry;
-    addTearDown(() { entry.remove(); entry.dispose(); });
+    addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
       Theme(
@@ -203,7 +203,7 @@ void main() {
   testWidgetsWithLeakTracking('Does tooltip end up in the right place - center prefer above fits', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     late final OverlayEntry entry;
-    addTearDown(() { entry.remove(); entry.dispose(); });
+    addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
       Directionality(
@@ -259,7 +259,7 @@ void main() {
   testWidgetsWithLeakTracking('Does tooltip end up in the right place - center prefer above does not fit', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     late final OverlayEntry entry;
-    addTearDown(() { entry.remove(); entry.dispose(); });
+    addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
       Directionality(
@@ -326,7 +326,7 @@ void main() {
   testWidgetsWithLeakTracking('Does tooltip end up in the right place - center prefer below fits', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     late final OverlayEntry entry;
-    addTearDown(() { entry.remove(); entry.dispose(); });
+    addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
       Directionality(
@@ -381,7 +381,7 @@ void main() {
   testWidgetsWithLeakTracking('Does tooltip end up in the right place - way off to the right', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     late final OverlayEntry entry;
-    addTearDown(() { entry.remove(); entry.dispose(); });
+    addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
       Theme(
@@ -441,7 +441,7 @@ void main() {
   testWidgetsWithLeakTracking('Does tooltip end up in the right place - near the edge', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     late final OverlayEntry entry;
-    addTearDown(() { entry.remove(); entry.dispose(); });
+    addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
       Theme(
@@ -557,7 +557,7 @@ void main() {
     const double customMarginValue = 10.0;
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     late final OverlayEntry entry;
-    addTearDown(() { entry.remove(); entry.dispose(); });
+    addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
       Directionality(
@@ -796,7 +796,7 @@ void main() {
   testWidgetsWithLeakTracking('Does tooltip end up with the right default size, shape, and color', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     late final OverlayEntry entry;
-    addTearDown(() { entry.remove(); entry.dispose(); });
+    addTearDown(() => entry..remove()..dispose());
 
     await tester.pumpWidget(
       Theme(
