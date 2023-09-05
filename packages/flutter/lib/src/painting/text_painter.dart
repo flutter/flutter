@@ -29,7 +29,7 @@ export 'package:flutter/services.dart' show TextRange, TextSelection;
 
 // The default font size if none is specified. This should be kept in
 // sync with the default values in text_style.dart, as well as the
-// defaults set in the engine (eg, LibTxt's text_style.h, paragraph_style.h).
+// defaults set in the engine (LibTxt's text_style.h, paragraph_style.h).
 const double _kDefaultFontSize = 14.0;
 
 /// How overflowing text should be handled.
