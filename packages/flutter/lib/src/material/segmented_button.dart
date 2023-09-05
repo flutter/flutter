@@ -241,7 +241,24 @@ class SegmentedButton<T> extends StatefulWidget {
 
 class _SegmentedButtonState<T> extends State<SegmentedButton<T>> {
   bool get _enabled => widget.onSelectionChanged != null;
-  final Map<ButtonSegment<T>, MaterialStatesController> _statesControllers = <ButtonSegment<T>, MaterialStatesController>{};
+
+  @visibleForTesting
+  final Map<ButtonSegment<T>, MaterialStatesController> statesControllers = <ButtonSegment<T>, MaterialStatesController>{};
+
+  @override
+  void didUpdateWidget(covariant SegmentedButton<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget != widget) {
+      statesControllers.removeWhere((ButtonSegment<T> segment, MaterialStatesController controller) {
+        if (widget.segments.contains(segment)) {
+          return false;
+        } else {
+          controller.dispose();
+          return true;
+        }
+      });
+    }
+  }
 
   void _handleOnPressed(T segmentValue) {
     if (!_enabled) {
@@ -325,7 +342,7 @@ class _SegmentedButtonState<T> extends State<SegmentedButton<T>> {
         : segment.label != null
           ? segment.icon
           : null;
-      final MaterialStatesController controller = _statesControllers.putIfAbsent(segment, () => MaterialStatesController());
+      final MaterialStatesController controller = statesControllers.putIfAbsent(segment, () => MaterialStatesController());
       controller.value = <MaterialState>{
           if (segmentSelected) MaterialState.selected,
       };
@@ -391,7 +408,7 @@ class _SegmentedButtonState<T> extends State<SegmentedButton<T>> {
 
   @override
   void dispose() {
-    for (final MaterialStatesController controller in _statesControllers.values) {
+    for (final MaterialStatesController controller in statesControllers.values) {
       controller.dispose();
     }
     super.dispose();
