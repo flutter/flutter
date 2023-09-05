@@ -2125,7 +2125,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   late final Simulation _iosBlinkCursorSimulation = _DiscreteKeyFrameSimulation.iOSBlinkingCaret();
 
   final ValueNotifier<bool> _cursorVisibilityNotifier = ValueNotifier<bool>(true);
-  late final ValueNotifier<bool> _debugCursorNotifier;
   final GlobalKey _editableKey = GlobalKey();
 
   /// Detects whether the clipboard can paste.
@@ -2790,7 +2789,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _scrollController.addListener(_onEditableScroll);
     _cursorVisibilityNotifier.value = widget.showCursor;
     _spellCheckConfiguration = _inferSpellCheckConfiguration(widget.spellCheckConfiguration);
-    _debugCursorNotifier = ValueNotifier<bool>(widget.showCursor);
   }
 
   // Whether `TickerMode.of(context)` is true and animations (like blinking the
@@ -2935,7 +2933,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void dispose() {
-    _debugCursorNotifier.dispose();
     _internalScrollController?.dispose();
     _currentAutofillScope?.unregister(autofillId);
     widget.controller.removeListener(_didChangeTextEditingValue);
@@ -4856,7 +4853,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                             cursorColor: _cursorColor,
                             backgroundCursorColor: widget.backgroundCursorColor,
                             showCursor: EditableText.debugDeterministicCursor
-                                ? _debugCursorNotifier
+                                ? ValueNotifier<bool>(widget.showCursor)
                                 : _cursorVisibilityNotifier,
                             forceLine: widget.forceLine,
                             readOnly: widget.readOnly,
