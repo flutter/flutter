@@ -3740,8 +3740,7 @@ void main() {
 
   testWidgets('CheckedPopupMenuItem.onTap callback is called when defined', (WidgetTester tester) async {
     int count = 0;
-    final UniqueKey key1 = UniqueKey();
-    final UniqueKey key2 = UniqueKey();
+    final Type menuItemType = const CheckedPopupMenuItem<void>(child: Text('item')).runtimeType;
 
     await tester.pumpWidget(
       TestApp(
@@ -3752,15 +3751,13 @@ void main() {
               child: const Text('Actions'),
               itemBuilder: (BuildContext context) => <PopupMenuItem<void>>[
                 CheckedPopupMenuItem<void>(
-                  key: key1,
                   child: const Text('First option'),
                   onTap: () {
                     count += 1;
                   },
                 ),
-                CheckedPopupMenuItem<void>(
-                  key: key2,
-                  child: const Text('Option without onTap'),
+                const CheckedPopupMenuItem<void>(
+                  child: Text('Option without onTap'),
                 ),
               ],
             ),
@@ -3772,14 +3769,14 @@ void main() {
     // Tap the first time
     await tester.tap(find.text('Actions'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(key1));
+    await tester.tap(find.widgetWithText(menuItemType, 'First option'));
     await tester.pumpAndSettle();
     expect(count, 1);
 
     // Tap an item without onTap
     await tester.tap(find.text('Actions'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(key2));
+    await tester.tap(find.widgetWithText(menuItemType, 'Option without onTap'));
     await tester.pumpAndSettle();
     expect(count, 1);
   });
