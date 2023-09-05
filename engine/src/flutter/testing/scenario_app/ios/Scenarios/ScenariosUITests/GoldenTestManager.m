@@ -76,7 +76,7 @@ NSDictionary* launchArgsMap;
 - (void)checkGoldenForTest:(XCTestCase*)test {
   XCUIScreenshot* screenshot = [[XCUIScreen mainScreen] screenshot];
   if (!_goldenImage.image) {
-    XCTAttachment* attachment = [XCTAttachment attachmentWithScreenshot:screenshot.image];
+    XCTAttachment* attachment = [XCTAttachment attachmentWithScreenshot:screenshot];
     attachment.name = [_goldenImage.goldenName stringByAppendingString:@"_new.png"];
     attachment.lifetime = XCTAttachmentLifetimeKeepAlways;
     [test addAttachment:attachment];
