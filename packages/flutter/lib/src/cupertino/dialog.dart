@@ -188,7 +188,7 @@ bool _isInAccessibilityMode(BuildContext context) {
 ///  * [CupertinoDialogAction], which is an iOS-style dialog button.
 ///  * [AlertDialog], a Material Design alert dialog.
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
-class CupertinoAlertDialog extends StatefulWidget {
+class CupertinoAlertDialog extends StatelessWidget {
   /// Creates an iOS-style alert dialog.
   ///
   /// The [actions] must not be null.
@@ -233,6 +233,9 @@ class CupertinoAlertDialog extends StatefulWidget {
   ///    section when there are many actions.
   final ScrollController? scrollController;
 
+  ScrollController get _effectiveScrollController =>
+    scrollController ?? ScrollController();
+
   /// A scroll controller that can be used to control the scrolling of the
   /// actions in the dialog.
   ///
@@ -244,49 +247,37 @@ class CupertinoAlertDialog extends StatefulWidget {
   ///    section when it is long.
   final ScrollController? actionScrollController;
 
+  ScrollController get _effectiveActionScrollController =>
+    actionScrollController ?? ScrollController();
+
   /// {@macro flutter.material.dialog.insetAnimationDuration}
   final Duration insetAnimationDuration;
 
   /// {@macro flutter.material.dialog.insetAnimationCurve}
   final Curve insetAnimationCurve;
 
-  @override
-  State<CupertinoAlertDialog> createState() => _CupertinoAlertDialogState();
-}
-
-class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
-  ScrollController? _backupScrollController;
-
-  ScrollController? _backupActionScrollController;
-
-  ScrollController get _effectiveScrollController =>
-    widget.scrollController ?? (_backupScrollController ??= ScrollController());
-
-  ScrollController get _effectiveActionScrollController =>
-    widget.actionScrollController ?? (_backupActionScrollController ??= ScrollController());
-
   Widget _buildContent(BuildContext context) {
     final double textScaleFactor = MediaQuery.textScalerOf(context).textScaleFactor;
 
     final List<Widget> children = <Widget>[
-      if (widget.title != null || widget.content != null)
+      if (title != null || content != null)
         Flexible(
           flex: 3,
           child: _CupertinoAlertContentSection(
-            title: widget.title,
-            message: widget.content,
+            title: title,
+            message: content,
             scrollController: _effectiveScrollController,
             titlePadding: EdgeInsets.only(
               left: _kDialogEdgePadding,
               right: _kDialogEdgePadding,
-              bottom: widget.content == null ? _kDialogEdgePadding : 1.0,
+              bottom: content == null ? _kDialogEdgePadding : 1.0,
               top: _kDialogEdgePadding * textScaleFactor,
             ),
             messagePadding: EdgeInsets.only(
               left: _kDialogEdgePadding,
               right: _kDialogEdgePadding,
               bottom: _kDialogEdgePadding * textScaleFactor,
-              top: widget.title == null ? _kDialogEdgePadding : 1.0,
+              top: title == null ? _kDialogEdgePadding : 1.0,
             ),
             titleTextStyle: _kCupertinoDialogTitleStyle.copyWith(
               color: CupertinoDynamicColor.resolve(CupertinoColors.label, context),
@@ -312,10 +303,10 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
     Widget actionSection = Container(
       height: 0.0,
     );
-    if (widget.actions.isNotEmpty) {
+    if (actions.isNotEmpty) {
       actionSection = _CupertinoAlertActionSection(
         scrollController: _effectiveActionScrollController,
-        children: widget.actions,
+        children: actions,
       );
     }
 
@@ -339,8 +330,8 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
               return AnimatedPadding(
                 padding: MediaQuery.viewInsetsOf(context) +
                     const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
-                duration: widget.insetAnimationDuration,
-                curve: widget.insetAnimationCurve,
+                duration: insetAnimationDuration,
+                curve: insetAnimationCurve,
                 child: MediaQuery.removeViewInsets(
                   removeLeft: true,
                   removeTop: true,
@@ -376,13 +367,6 @@ class _CupertinoAlertDialogState extends State<CupertinoAlertDialog> {
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _backupScrollController?.dispose();
-    _backupActionScrollController?.dispose();
-    super.dispose();
   }
 }
 
