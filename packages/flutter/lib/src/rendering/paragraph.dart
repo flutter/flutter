@@ -438,9 +438,6 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   void dispose() {
     _removeSelectionRegistrarSubscription();
     _disposeSelectableFragments();
-    // _lastSelectableFragments may hold references to this RenderParagraph.
-    // Release them manually to avoid retain cycles.
-    _lastSelectableFragments = null;
     _textPainter.dispose();
     super.dispose();
   }
