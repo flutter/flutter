@@ -303,6 +303,7 @@ Future<Process> startProcess(
     <String>[executable, ...?arguments],
     environment: newEnvironment,
     workingDirectory: finalWorkingDirectory,
+    runInShell: true,
   );
   final ProcessInfo processInfo = ProcessInfo(command, process);
   _runningProcesses.add(processInfo);
