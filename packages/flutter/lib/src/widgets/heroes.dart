@@ -615,8 +615,14 @@ class _HeroFlight {
   /// Releases resources.
   @mustCallSuper
   void dispose() {
-    overlayEntry?.remove();
-    overlayEntry?.dispose();
+    if (overlayEntry != null) {
+      overlayEntry!.remove();
+      overlayEntry!.dispose();
+      overlayEntry = null;
+      _proxyAnimation.parent = null;
+      _proxyAnimation.removeListener(onTick);
+      _proxyAnimation.removeStatusListener(_handleAnimationUpdate);
+    }
   }
 
   void onTick() {
