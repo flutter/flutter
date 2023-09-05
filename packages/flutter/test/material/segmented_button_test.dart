@@ -62,9 +62,10 @@ void main() {
       ),
     );
 
-    final State<StatefulWidget> state = tester.state(find.byType(SegmentedButton<int>));
-
-
+    final SegmentedButtonState<int> state = tester.state(find.byType(SegmentedButton<int>));
+    expect(state.statesControllers, hasLength(2));
+    expect(state.statesControllers.keys.first.value, 2);
+    expect(state.statesControllers.keys.last.value, 3);
   });
 
   testWidgetsWithLeakTracking('SegmentedButton is built with Material of type MaterialType.transparency', (WidgetTester tester) async {

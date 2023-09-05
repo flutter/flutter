@@ -236,10 +236,12 @@ class SegmentedButton<T> extends StatefulWidget {
   final Widget? selectedIcon;
 
   @override
-  State<SegmentedButton<T>> createState() => _SegmentedButtonState<T>();
+  State<SegmentedButton<T>> createState() => SegmentedButtonState<T>();
 }
 
-class _SegmentedButtonState<T> extends State<SegmentedButton<T>> {
+/// State for [SegmentedButton].
+@visibleForTesting
+class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
   bool get _enabled => widget.onSelectionChanged != null;
 
   @visibleForTesting
