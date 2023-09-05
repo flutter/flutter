@@ -1221,7 +1221,7 @@ void main() {
     final TestDataSource source = TestDataSource();
     addTearDown(source.dispose);
     final ScrollController scrollController = ScrollController();
-    scrollController.dispose();
+    addTearDown(scrollController.dispose);
 
     Widget buildTable(TestDataSource source) {
       return Align(
