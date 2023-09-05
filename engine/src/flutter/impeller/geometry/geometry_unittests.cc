@@ -2422,6 +2422,25 @@ TEST(GeometryTest, PathShifting) {
   ASSERT_EQ(cubic.p2, Point(31, 31));
 }
 
+TEST(GeometryTest, PathBuilderWillComputeBounds) {
+  PathBuilder builder;
+  auto path_1 = builder.AddLine({0, 0}, {1, 1}).TakePath();
+
+  ASSERT_EQ(path_1.GetBoundingBox().value(), Rect::MakeLTRB(0, 0, 1, 1));
+
+  auto path_2 = builder.AddLine({-1, -1}, {1, 1}).TakePath();
+
+  // Verify that PathBuilder recomputes the bounds.
+  ASSERT_EQ(path_2.GetBoundingBox().value(), Rect::MakeLTRB(-1, -1, 1, 1));
+
+  // PathBuilder can set the bounds to whatever it wants
+  auto path_3 = builder.AddLine({0, 0}, {1, 1})
+                    .SetBounds(Rect::MakeLTRB(0, 0, 100, 100))
+                    .TakePath();
+
+  ASSERT_EQ(path_3.GetBoundingBox().value(), Rect::MakeLTRB(0, 0, 100, 100));
+}
+
 }  // namespace testing
 }  // namespace impeller
 
