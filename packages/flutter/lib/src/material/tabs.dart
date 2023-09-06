@@ -1774,7 +1774,7 @@ class TabBarView extends StatefulWidget {
 class _TabBarViewState extends State<TabBarView> {
   TabController? _controller;
   late PageController _pageController;
-  bool _pageControllerCreated = false;
+  bool _pageControllerCreatedAndNotDisposed = false;
   late List<Widget> _childrenWithKey;
   int? _currentIndex;
   int _warpUnderwayCount = 0;
@@ -1841,14 +1841,14 @@ class _TabBarViewState extends State<TabBarView> {
     super.didChangeDependencies();
     _updateTabController();
     _currentIndex = _controller!.index;
-    if (_pageControllerCreated) {
+    if (_pageControllerCreatedAndNotDisposed) {
       _pageController.dispose();
     }
     _pageController = PageController(
       initialPage: _currentIndex!,
       viewportFraction: widget.viewportFraction,
     );
-    _pageControllerCreated = true;
+    _pageControllerCreatedAndNotDisposed = true;
   }
 
   @override
@@ -1872,7 +1872,7 @@ class _TabBarViewState extends State<TabBarView> {
       _controller!.animation!.removeListener(_handleTabControllerAnimationTick);
     }
     _controller = null;
-    if (_pageControllerCreated) {
+    if (_pageControllerCreatedAndNotDisposed) {
       _pageController.dispose();
     }
     // We don't own the _controller Animation, so it's not disposed here.
