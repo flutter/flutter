@@ -608,6 +608,56 @@ TEST_F(FlutterEngineTest, FlutterTextureRegistryDoesNotReturnEngine) {
   EXPECT_EQ(weakEngine, nil);
 }
 
+TEST_F(FlutterEngineTest, PublishedValueNilForUnknownPlugin) {
+  NSString* fixtures = @(flutter::testing::GetFixturesPath());
+  FlutterDartProject* project = [[FlutterDartProject alloc]
+      initWithAssetsPath:fixtures
+             ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test"
+                                                      project:project
+                                       allowHeadlessExecution:YES];
+
+  EXPECT_EQ([engine valuePublishedByPlugin:@"NoSuchPlugin"], nil);
+}
+
+TEST_F(FlutterEngineTest, PublishedValueNSNullIfNoPublishedValue) {
+  NSString* fixtures = @(flutter::testing::GetFixturesPath());
+  FlutterDartProject* project = [[FlutterDartProject alloc]
+      initWithAssetsPath:fixtures
+             ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test"
+                                                      project:project
+                                       allowHeadlessExecution:YES];
+  NSString* pluginName = @"MyPlugin";
+  // Request the registarar to register the plugin as existing.
+  [engine registrarForPlugin:pluginName];
+
+  // The documented behavior is that a plugin that exists but hasn't published
+  // anything returns NSNull, rather than nil, as on iOS.
+  EXPECT_EQ([engine valuePublishedByPlugin:pluginName], [NSNull null]);
+}
+
+TEST_F(FlutterEngineTest, PublishedValueReturnsLastPublished) {
+  NSString* fixtures = @(flutter::testing::GetFixturesPath());
+  FlutterDartProject* project = [[FlutterDartProject alloc]
+      initWithAssetsPath:fixtures
+             ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test"
+                                                      project:project
+                                       allowHeadlessExecution:YES];
+  NSString* pluginName = @"MyPlugin";
+  id<FlutterPluginRegistrar> registrar = [engine registrarForPlugin:pluginName];
+
+  NSString* firstValue = @"A published value";
+  NSArray* secondValue = @[ @"A different published value" ];
+
+  [registrar publish:firstValue];
+  EXPECT_EQ([engine valuePublishedByPlugin:pluginName], firstValue);
+
+  [registrar publish:secondValue];
+  EXPECT_EQ([engine valuePublishedByPlugin:pluginName], secondValue);
+}
+
 // If a channel overrides a previous channel with the same name, cleaning
 // the previous channel should not affect the new channel.
 //
