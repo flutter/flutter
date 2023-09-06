@@ -133,6 +133,50 @@ void main() {
         Cache: () => cache,
       });
 
+      testUsingContext('does not crash when git log outputs malformed output', () async {
+        const String flutterUpstreamUrl = 'https://github.com/flutter/flutter.git';
+
+        final String malformedGitLogOutput = '${getChannelUpToDateVersion()}[0x7FF9E2A75000] ANOMALY: meaningless REX prefix used';
+        processManager.addCommands(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['git', '-c', 'log.showSignature=false', 'log', '-n', '1', '--pretty=format:%H'],
+            stdout: '1234abcd',
+          ),
+          const FakeCommand(
+            command: <String>['git', 'tag', '--points-at', '1234abcd'],
+          ),
+          const FakeCommand(
+            command: <String>['git', 'describe', '--match', '*.*.*', '--long', '--tags', '1234abcd'],
+            stdout: '0.1.2-3-1234abcd',
+          ),
+          FakeCommand(
+            command: const <String>['git', 'symbolic-ref', '--short', 'HEAD'],
+            stdout: channel,
+          ),
+          FakeCommand(
+            command: const <String>['git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{upstream}'],
+            stdout: 'origin/$channel',
+          ),
+          const FakeCommand(
+            command: <String>['git', 'ls-remote', '--get-url', 'origin'],
+            stdout: flutterUpstreamUrl,
+          ),
+          FakeCommand(
+            command: const <String>['git', '-c', 'log.showSignature=false', 'log', 'HEAD', '-n', '1', '--pretty=format:%ad', '--date=iso'],
+            stdout: malformedGitLogOutput,
+          ),
+        ]);
+
+        final FlutterVersion flutterVersion = FlutterVersion(clock: _testClock, fs: fs, flutterRoot: flutterRoot);
+        await flutterVersion.checkFlutterVersionFreshness();
+
+        expect(testLogger.statusText, isEmpty);
+        expect(processManager, hasNoRemainingExpectations);
+      }, overrides: <Type, Generator>{
+        ProcessManager: () => processManager,
+        Cache: () => cache,
+      });
+
       testWithoutContext('prints nothing when Flutter installation looks out-of-date but is actually up-to-date', () async {
         final FakeFlutterVersion flutterVersion = FakeFlutterVersion(branch: channel);
         final BufferLogger logger = BufferLogger.test();
