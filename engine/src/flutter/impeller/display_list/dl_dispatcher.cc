@@ -34,7 +34,6 @@
 #include "impeller/geometry/path_builder.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/sigma.h"
-#include "impeller/typographer/backends/skia/text_frame_skia.h"
 
 #if IMPELLER_ENABLE_3D
 #include "impeller/entity/contents/scene_contents.h"
@@ -1110,20 +1109,14 @@ void DlDispatcher::drawDisplayList(
 void DlDispatcher::drawTextBlob(const sk_sp<SkTextBlob> blob,
                                 SkScalar x,
                                 SkScalar y) {
-  const auto maybe_text_frame = MakeTextFrameFromTextBlobSkia(blob);
-  if (!maybe_text_frame.has_value()) {
-    return;
-  }
-  const auto text_frame = maybe_text_frame.value();
-  if (paint_.style == Paint::Style::kStroke ||
-      paint_.color_source.GetType() != ColorSource::Type::kColor) {
-    auto bounds = blob->bounds();
-    auto path = skia_conversions::PathDataFromTextBlob(
-        blob, Point(x + bounds.left(), y + bounds.top()));
-    canvas_.DrawPath(path, paint_);
-    return;
-  }
+  // When running with Impeller enabled Skia text blobs are converted to
+  // Impeller text frames in paragraph_skia.cc
+  UNIMPLEMENTED;
+}
 
+void DlDispatcher::drawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
+                                 SkScalar x,
+                                 SkScalar y) {
   canvas_.DrawTextFrame(text_frame,             //
                         impeller::Point{x, y},  //
                         paint_                  //

@@ -160,6 +160,14 @@ void MockCanvas::DrawTextBlob(const sk_sp<SkTextBlob>& text,
                                    paint, SkPoint::Make(x, y)}});
 }
 
+void MockCanvas::DrawTextFrame(
+    const std::shared_ptr<impeller::TextFrame>& text_frame,
+    SkScalar x,
+    SkScalar y,
+    const DlPaint& paint) {
+  FML_DCHECK(false);
+}
+
 void MockCanvas::DrawRect(const SkRect& rect, const DlPaint& paint) {
   draw_calls_.emplace_back(DrawCall{current_layer_, DrawRectData{rect, paint}});
 }

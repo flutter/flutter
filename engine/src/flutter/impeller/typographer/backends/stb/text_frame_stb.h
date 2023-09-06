@@ -10,8 +10,9 @@
 
 namespace impeller {
 
-TextFrame MakeTextFrameSTB(const std::shared_ptr<TypefaceSTB>& typeface_stb,
-                           Font::Metrics metrics,
-                           const std::string& text);
+std::shared_ptr<TextFrame> MakeTextFrameSTB(
+    const std::shared_ptr<TypefaceSTB>& typeface_stb,
+    Font::Metrics metrics,
+    const std::string& text);
 
 }  // namespace impeller

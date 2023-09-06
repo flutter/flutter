@@ -87,6 +87,7 @@ source_set("display_list") {
   public_deps = [
     "//flutter/fml",
     "//flutter/impeller/runtime_stage",
+    "//flutter/impeller/typographer",
     "//third_party/skia",
   ]
 

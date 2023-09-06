@@ -81,6 +81,7 @@ source_set("txt") {
   public_deps = [
     "//flutter/display_list",
     "//flutter/fml",
+    "//flutter/impeller/typographer/backends/skia:typographer_skia_backend",
     "//third_party/harfbuzz",
     "//third_party/icu",
     "//third_party/skia",

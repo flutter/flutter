@@ -581,6 +581,11 @@ void DisplayListMetalComplexityCalculator::MetalHelper::drawTextBlob(
   draw_text_blob_count_++;
 }
 
+void DisplayListMetalComplexityCalculator::MetalHelper::drawTextFrame(
+    const std::shared_ptr<impeller::TextFrame>& text_frame,
+    SkScalar x,
+    SkScalar y) {}
+
 void DisplayListMetalComplexityCalculator::MetalHelper::drawShadow(
     const SkPath& path,
     const DlColor color,
