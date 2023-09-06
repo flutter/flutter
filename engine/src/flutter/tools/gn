@@ -650,8 +650,6 @@ def to_gn_args(args):
                                   runtime_mode == 'debug' and
                                   gn_args['target_cpu'] == 'arm64'):
     gn_args['enable_vulkan_validation_layers'] = True
-    if args.target_os == 'android':
-      gn_args['android_api_level'] = 26
 
   # Enable pointer compression on 64-bit mobile targets. iOS is excluded due to
   # its inability to allocate address space without allocating memory.
