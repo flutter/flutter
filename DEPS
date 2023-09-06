@@ -631,7 +631,7 @@ deps = {
    Var('swiftshader_git') + '/SwiftShader.git' + '@' + '5f9ed9b16931c7155171d31f75004f73f0a3abc8',
 
    'src/third_party/angle':
-   Var('chromium_git') + '/angle/angle.git' + '@' + '7b0bb0f6e785ec810761984c0fc09f603a1c4bde',
+   Var('chromium_git') + '/angle/angle.git' + '@' + '00daa451320c3edf8dc8add9eb0f3cfcf2aca70d',
 
    'src/third_party/vulkan_memory_allocator':
    Var('chromium_git') + '/external/github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator' + '@' + '7de5cc00de50e71a3aab22dea52fbb7ff4efceb6',
