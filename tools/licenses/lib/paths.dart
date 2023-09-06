@@ -38,6 +38,7 @@ final Set<String> skippedPaths = <String>{
   r'fuchsia/sdk/linux/docs',
   r'fuchsia/sdk/linux/meta',
   r'fuchsia/sdk/linux/NOTICE.fuchsia', // covers things that contribute to the Fuchsia SDK; see fxb/94240
+  r'fuchsia/sdk/linux/packages/blobs', // See https://github.com/flutter/flutter/issues/134042.
   r'fuchsia/sdk/linux/tools',
   r'fuchsia/sdk/mac/docs',
   r'fuchsia/sdk/mac/meta',

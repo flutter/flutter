@@ -624,6 +624,8 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.softmac/meta.json
 ../../../fuchsia/sdk/linux/fidl/zx/meta.json
 ../../../fuchsia/sdk/linux/meta
+../../../fuchsia/sdk/linux/packages/blobs
+../../../fuchsia/sdk/linux/packages/realm_builder_server/meta.json
 ../../../fuchsia/sdk/linux/pkg/async-cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/async-default/meta.json
 ../../../fuchsia/sdk/linux/pkg/async-loop-cpp/meta.json
