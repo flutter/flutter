@@ -155,8 +155,11 @@ Future<bool> runXcodeTests({
   final String resultBundleTemp = Directory.systemTemp.createTempSync('flutter_xcresult.').path;
   final String resultBundlePath = path.join(resultBundleTemp, 'result');
   final int testResultExit = await exec(
-    'xcodebuild',
+    '/usr/bin/arch',
     <String>[
+      '-arm64e',
+      'xcrun',
+      'xcodebuild',
       '-workspace',
       'Runner.xcworkspace',
       '-scheme',
