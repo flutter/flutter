@@ -415,7 +415,7 @@ void main() {
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_leftOffsetX, _floatOffsetY));
     });
 
-    testWidgets('centerFloat', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('centerFloat', (WidgetTester tester) async {
       await tester.pumpWidget(_singleFabScaffold(FloatingActionButtonLocation.centerFloat));
 
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_centerOffsetX, _floatOffsetY));
@@ -1037,7 +1037,7 @@ void main() {
       );
     });
 
-    testWidgets('centerFloat', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('centerFloat', (WidgetTester tester) async {
       const Rect defaultRect = Rect.fromLTRB(372.0, 478.0, 428.0, 534.0);
       // Positioned relative to BottomNavigationBar
       const Rect bottomNavigationBarRect = Rect.fromLTRB(372.0, 422.0, 428.0, 478.0);
