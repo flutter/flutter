@@ -129,6 +129,7 @@ class IOSDeploy {
     required DeviceConnectionInterface interfaceType,
     Directory? appDeltaDirectory,
     required bool uninstallFirst,
+    bool skipInstall = false,
   }) {
     appDeltaDirectory?.createSync(recursive: true);
     // Interactive debug session to support sending the lldb detach command.
@@ -148,6 +149,8 @@ class IOSDeploy {
       ],
       if (uninstallFirst)
         '--uninstall',
+      if (skipInstall)
+        '--noinstall',
       '--debug',
       if (interfaceType != DeviceConnectionInterface.wireless)
         '--no-wifi',
@@ -327,6 +330,14 @@ class IOSDeployDebugger {
   /// The future should be completed once the backtraces are logged.
   Completer<void>? _processResumeCompleter;
 
+  // Process 525 exited with status = -1 (0xffffffff) lost connection
+  static final RegExp _lostConnectionPattern = RegExp(r'exited with status = -1 \(0xffffffff\) lost connection');
+
+  /// Whether ios-deploy received a message matching [_lostConnectionPattern],
+  /// indicating that it lost connection to the device.
+  bool get lostConnection => _lostConnection;
+  bool _lostConnection = false;
+
   /// Launch the app on the device, and attach the debugger.
   ///
   /// Returns whether or not the debugger successfully attached.
@@ -448,6 +459,9 @@ class IOSDeployDebugger {
           // The app exited or crashed, so exit. Continue passing debugging
           // messages to the log reader until it exits to capture crash dumps.
           _logger.printTrace(line);
+          if (line.contains(_lostConnectionPattern)) {
+            _lostConnection = true;
+          }
           exit();
           return;
         }
