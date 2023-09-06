@@ -9,6 +9,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -21,7 +22,9 @@ Widget boilerplate({required Widget child}) {
 
 void main() {
 
-  testWidgets('SegmentedButton is built with Material of type MaterialType.transparency', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SegmentedButton is built with Material of type MaterialType.transparency',
+  leakTrackingTestConfig: LeakTrackingTestConfig.debugNotDisposed(),
+  (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
       MaterialApp(
