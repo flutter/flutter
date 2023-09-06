@@ -84,14 +84,7 @@ void main() {
     await tester.pump();
     expect(tabController.index, 2);
     expect(indicatorColors(tester), const <Color>[kUnselectedColor, kUnselectedColor, kSelectedColor]);
-  },
-  // TODO(someone): remove after fixing
-  // https://github.com/flutter/flutter/issues/133755
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    notDisposedAllowList: <String, int?>{
-      'PageController': 1,
-    },
-  ));
+  });
 
   testWidgetsWithLeakTracking('PageSelector responds correctly to TabController.animateTo()', (WidgetTester tester) async {
     final TabController tabController = TabController(
