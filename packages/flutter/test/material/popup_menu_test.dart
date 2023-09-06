@@ -3740,43 +3740,45 @@ void main() {
 
   testWidgets('CheckedPopupMenuItem.onTap callback is called when defined', (WidgetTester tester) async {
     int count = 0;
-    final Type menuItemType = const CheckedPopupMenuItem<void>(child: Text('item')).runtimeType;
-
     await tester.pumpWidget(
       TestApp(
         textDirection: TextDirection.ltr,
         child: Material(
           child: RepaintBoundary(
-            child: PopupMenuButton<void>(
-              child: const Text('Actions'),
-              itemBuilder: (BuildContext context) => <PopupMenuItem<void>>[
-                CheckedPopupMenuItem<void>(
-                  child: const Text('First option'),
-                  onTap: () {
-                    count += 1;
-                  },
-                ),
-                const CheckedPopupMenuItem<void>(
-                  child: Text('Option without onTap'),
-                ),
-              ],
+            child: PopupMenuButton<String>(
+              child: const Text('button'),
+              itemBuilder: (BuildContext context) {
+                  return  <PopupMenuItem<String>>[
+                  CheckedPopupMenuItem<String>(
+                    onTap: () {
+                      count += 1;
+                    },
+                    value: 'item1',
+                    child: const Text('Item with onTap'),
+                  ),
+                  const CheckedPopupMenuItem<String>(
+                    value: 'item2',
+                    child: Text('Item without onTap'),
+                  ),
+                ];
+              },
             ),
           ),
         ),
       ),
     );
 
-    // Tap the first time
-    await tester.tap(find.text('Actions'));
+    // Tap a checked menu item with onTap.
+    await tester.tap(find.text('button'));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(menuItemType, 'First option'));
+    await tester.tap(find.widgetWithText(CheckedPopupMenuItem<String>, 'Item with onTap'));
     await tester.pumpAndSettle();
     expect(count, 1);
 
-    // Tap an item without onTap
-    await tester.tap(find.text('Actions'));
+    // Tap a checked menu item without onTap.
+    await tester.tap(find.text('button'));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(menuItemType, 'Option without onTap'));
+    await tester.tap(find.widgetWithText(CheckedPopupMenuItem<String>, 'Item without onTap'));
     await tester.pumpAndSettle();
     expect(count, 1);
   });
