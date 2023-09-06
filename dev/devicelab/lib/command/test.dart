@@ -24,6 +24,11 @@ class TestCommand extends Command<void> {
           'settings in the test case, and will results in error if no device\n'
           'with given ID/ID prefix is found.',
     );
+    argParser.addFlag(
+      'exit',
+      help: 'Exit on the first test failure. Currently flakes are intentionally (though '
+            'incorrectly) not considered to be failures.',
+    );
     argParser.addOption(
       'git-branch',
       help: '[Flutter infrastructure] Git branch of the current commit. LUCI\n'
@@ -78,6 +83,7 @@ class TestCommand extends Command<void> {
     // Prepend '--' to convert args to options when passed to task
     final List<String> taskArgs = taskArgsRaw.map((String taskArg) => '--$taskArg').toList();
     print(taskArgs);
+    print('@andrewkolos ${argResults!['exit']}');
     await runTasks(
       <String>[argResults!['task'] as String],
       deviceId: argResults!['device-id'] as String?,
@@ -90,6 +96,7 @@ class TestCommand extends Command<void> {
       silent: (argResults!['silent'] as bool?) ?? false,
       useEmulator: (argResults!['use-emulator'] as bool?) ?? false,
       taskArgs: taskArgs,
+      exitOnFirstTestFailure: argResults!['exit'] as bool,
     );
   }
 }
