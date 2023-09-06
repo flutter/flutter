@@ -190,10 +190,12 @@ migration:
 
   testUsingContext('enabledValues does not contain packageFfi if native-assets not enabled', () {
     expect(FlutterProjectType.enabledValues, isNot(contains(FlutterProjectType.packageFfi)));
+    expect(FlutterProjectType.enabledValues, contains(FlutterProjectType.plugin));
   });
 
   testUsingContext('enabledValues contains packageFfi if natives-assets enabled', () {
     expect(FlutterProjectType.enabledValues, contains(FlutterProjectType.packageFfi));
+    expect(FlutterProjectType.enabledValues, contains(FlutterProjectType.plugin));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
   });
