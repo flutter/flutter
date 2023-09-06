@@ -26,9 +26,7 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
   });
 
-  testWidgetsWithLeakTracking('Changing query moves cursor to the end of query',
-  leakTrackingTestConfig: LeakTrackingTestConfig.debugNotDisposed(),
-  (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Changing query moves cursor to the end of query', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
     addTearDown(() => delegate.dispose());
 
