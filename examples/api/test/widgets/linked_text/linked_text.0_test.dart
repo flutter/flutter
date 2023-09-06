@@ -22,6 +22,6 @@ void main() {
     await tester.tapAt(tester.getCenter(textFinder));
     await tester.pumpAndSettle();
     expect(find.byType(AlertDialog), findsOneWidget);
-    expect(find.text('You tapped: www.flutter.dev'), findsOneWidget);
+    expect(find.text('You tapped: https://www.flutter.dev'), findsOneWidget);
   });
 }

@@ -36,12 +36,7 @@ class MyHomePage extends StatelessWidget {
 
   final String title;
 
-  void _onTapUrl (BuildContext context, String urlString) {
-    final Uri? uri = Uri.tryParse(urlString);
-    if (uri == null) {
-      throw Exception('Failed to parse $urlString.');
-    }
-
+  void _onTapUri (BuildContext context, Uri uri) {
     // A package like url_launcher would be useful for actually opening the URL
     // here instead of just showing a dialog.
     Navigator.of(context).push(
@@ -66,7 +61,7 @@ class MyHomePage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   LinkedText(
-                    onTap: (String urlString) => _onTapUrl(context, urlString),
+                    onTapUri: (Uri uri) => _onTapUri(context, uri),
                     spans: <InlineSpan>[
                       TextSpan(
                         text: 'Check out https://www.',

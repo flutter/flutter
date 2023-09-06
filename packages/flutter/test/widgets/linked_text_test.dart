@@ -12,17 +12,46 @@ void main() {
   final RegExp urlRegExp = RegExp(r'(?<!@[a-zA-Z0-9-]*)(?<![\/\.a-zA-Z0-9-])((https?:\/\/)?(([a-zA-Z0-9-]*\.)*[a-zA-Z0-9-]+(\.[a-zA-Z]+)+))(?::\d{1,5})?(?:\/[^\s]*)?(?:\?[^\s#]*)?(?:#[^\s]*)?(?![a-zA-Z0-9-]*@)');
 
   testWidgets('links urls by default', (WidgetTester tester) async {
-    String? lastTappedLink;
+    Uri? lastTappedUri;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Builder(
             builder: (BuildContext context) {
               return LinkedText(
-                onTap: (String text) {
-                  lastTappedLink = text;
+                onTapUri: (Uri uri) {
+                  lastTappedUri = uri;
                 },
                 text: 'Check out flutter.dev.',
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(RichText), findsOneWidget);
+    expect(lastTappedUri, isNull);
+
+    await tester.tapAt(tester.getCenter(find.byType(RichText)));
+
+    // The https:// host is automatically added.
+    expect(lastTappedUri, Uri.parse('https://flutter.dev'));
+  });
+
+  testWidgets('can pass custom regexp', (WidgetTester tester) async {
+    String? lastTappedLink;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return LinkedText.regExp(
+                regExp: hashTagRegExp,
+                onTap: (String linkString) {
+                  lastTappedLink = linkString;
+                },
+                text: 'Flutter is great #crossplatform #declarative',
               );
             },
           ),
@@ -34,11 +63,10 @@ void main() {
     expect(lastTappedLink, isNull);
 
     await tester.tapAt(tester.getCenter(find.byType(RichText)));
-
-    expect(lastTappedLink, 'flutter.dev');
+    expect(lastTappedLink, '#crossplatform');
   });
 
-  testWidgets('can pass custom regexp', (WidgetTester tester) async {
+  testWidgets('can pass custom regexp with .textLinkers', (WidgetTester tester) async {
     String? lastTappedLink;
     final List<TapGestureRecognizer> recognizers = <TapGestureRecognizer>[];
     await tester.pumpWidget(
@@ -201,15 +229,15 @@ void main() {
   });
 
   testWidgets('can take nested spans', (WidgetTester tester) async {
-    String? lastTappedLink;
+    Uri? lastTappedUri;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Builder(
             builder: (BuildContext context) {
               return LinkedText(
-                onTap: (String text) {
-                  lastTappedLink = text;
+                onTapUri: (Uri uri) {
+                  lastTappedUri = uri;
                 },
                 spans: <InlineSpan>[
                   TextSpan(
@@ -244,23 +272,24 @@ void main() {
     );
 
     expect(find.byType(RichText), findsOneWidget);
-    expect(lastTappedLink, isNull);
+    expect(lastTappedUri, isNull);
 
     await tester.tapAt(tester.getCenter(find.byType(RichText)));
 
-    expect(lastTappedLink, 'flutter.dev');
+    // The https:// host is automatically added.
+    expect(lastTappedUri, Uri.parse('https://flutter.dev'));
   });
 
   testWidgets('can handle WidgetSpans', (WidgetTester tester) async {
-    String? lastTappedLink;
+    Uri? lastTappedUri;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Builder(
             builder: (BuildContext context) {
               return LinkedText(
-                onTap: (String text) {
-                  lastTappedLink = text;
+                onTapUri: (Uri uri) {
+                  lastTappedUri = uri;
                 },
                 spans: <InlineSpan>[
                   TextSpan(
@@ -298,13 +327,13 @@ void main() {
     );
 
     expect(find.byType(RichText), findsOneWidget);
-    expect(lastTappedLink, isNull);
+    expect(lastTappedUri, isNull);
 
     await tester.tapAt(tester.getCenter(find.byType(RichText)));
 
     // The WidgetSpan is ignored, so a link is still produced even though it has
     // a FlutterLogo in the middle of it.
-    expect(lastTappedLink, 'flutter.dev');
+    expect(lastTappedUri, Uri.parse('https://flutter.dev'));
   });
 
   testWidgets('builds the widget specified by builder', (WidgetTester tester) async {
@@ -314,7 +343,7 @@ void main() {
           body: Builder(
             builder: (BuildContext context) {
               return LinkedText(
-                onTap: (String text) {},
+                onTapUri: (Uri uri) {},
                 text: 'Check out flutter.dev.',
                 builder: (BuildContext context, Iterable<InlineSpan> linkedSpans) {
                   return RichText(

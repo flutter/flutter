@@ -9,10 +9,6 @@ import 'basic.dart';
 import 'framework.dart';
 import 'text.dart';
 
-/// Signature for a callback that passes a [String] representing a link that has
-/// been tapped.
-typedef LinkTapCallback = void Function(String linkString);
-
 /// Singature for a function that builds the [Widget] output by [LinkedText].
 ///
 /// Typically a [Text.rich] containing a [TextSpan] whose children are the
@@ -52,17 +48,49 @@ typedef LinkedTextWidgetBuilder = Widget Function (
 /// {@end-tool}
 class LinkedText extends StatefulWidget {
   /// Creates an instance of [LinkedText] from the given [text] or [spans],
-  /// turning any URLs into links by default.
+  /// turning any URLs into interactive links.
   ///
   /// See also:
   ///
+  ///  * [LinkedText.regExp], which matches based on any given [RegExp].
   ///  * [LinkedText.textLinkers], which uses [TextLinker]s to allow full
   ///    control over matching and building different types of links.
   LinkedText({
     super.key,
-    required this.onTap,
+    required ValueChanged<Uri> onTapUri,
     this.builder = _defaultBuilder,
-    this.regExp,
+    List<InlineSpan>? spans,
+    String? text,
+  }) : assert((text == null) != (spans == null), 'Must specify exactly one to link: either text or spans.'),
+       spans = spans ?? <InlineSpan>[
+         TextSpan(
+           text: text,
+         ),
+       ],
+       onTap = _getOnTap(onTapUri),
+       regExp = null,
+       textLinkers = null;
+
+  /// Creates an instance of [LinkedText] from the given [text] or [spans],
+  /// turning anything matched by [regExp] into interactive links.
+  ///
+  /// {@tool dartpad}
+  /// This example shows how to use [LinkedText] to link Twitter handles by
+  /// passing in a custom [RegExp].
+  ///
+  /// ** See code in examples/api/lib/widgets/linked_text/linked_text.1.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [LinkedText.new], which matches [Uri]s.
+  ///  * [LinkedText.textLinkers], which uses [TextLinker]s to allow full
+  ///    control over matching and building different types of links.
+  LinkedText.regExp({
+    super.key,
+    required this.onTap,
+    required this.regExp,
+    this.builder = _defaultBuilder,
     List<InlineSpan>? spans,
     String? text,
   }) : assert((text == null) != (spans == null), 'Must specify exactly one to link: either text or spans.'),
@@ -92,8 +120,8 @@ class LinkedText extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [LinkedText.new], which can be passed [TextRange]s directly or
-  ///    otherwise matches URLs by default.
+  ///  * [LinkedText.new], which matches [Uri]s.
+  ///  * [LinkedText.regExp], which matches based on any given [RegExp].
   LinkedText.textLinkers({
     super.key,
     this.builder = _defaultBuilder,
@@ -127,7 +155,7 @@ class LinkedText extends StatefulWidget {
   ///
   /// This is irrelevant when using [LinkedText.textLinkers], where this is
   /// controlled with an [InlineLinkBuilder] instead.
-  final LinkTapCallback? onTap;
+  final ValueChanged<String>? onTap;
 
   /// Matches the text that should be turned into a link.
   ///
@@ -156,6 +184,20 @@ class LinkedText extends StatefulWidget {
   final List<TextLinker>? textLinkers;
 
   static final RegExp _urlRegExp = RegExp(r'(?<!@[a-zA-Z0-9-]*)(?<![\/\.a-zA-Z0-9-])((https?:\/\/)?(([a-zA-Z0-9-]*\.)*[a-zA-Z0-9-]+(\.[a-zA-Z]+)+))(?::\d{1,5})?(?:\/[^\s]*)?(?:\?[^\s#]*)?(?:#[^\s]*)?(?![a-zA-Z0-9-]*@)');
+
+  /// Returns a generic [ValueChanged]<String> given a callback specifically for
+  /// tapping on a [Uri].
+  static ValueChanged<String> _getOnTap(ValueChanged<Uri> onTapUri) {
+    return (String linkString) {
+      Uri uri = Uri.parse(linkString);
+      if (uri.host.isEmpty) {
+        // _urlRegExp matches URLs without a host, but packages like
+        // url_launcher require a host to launch a URL. So add the host.
+        uri = Uri.parse('https://$linkString');
+      }
+      onTapUri(uri);
+    };
+  }
 
   /// The default value of [builder].
   ///

@@ -36,12 +36,7 @@ class MyHomePage extends StatelessWidget {
   final String title;
   static const String _text = 'Check out https://www.flutter.dev, or maybe just flutter.dev or www.flutter.dev.';
 
-  void _handleTapUri(BuildContext context, String urlString) {
-    final Uri? uri = Uri.tryParse(urlString);
-    if (uri == null) {
-      throw Exception('Failed to parse $urlString.');
-    }
-
+  void _handleTapUri(BuildContext context, Uri uri) {
     // A package like url_launcher would be useful for actually opening the URL
     // here instead of just showing a dialog.
     Navigator.of(context).push(
@@ -67,7 +62,7 @@ class MyHomePage extends StatelessWidget {
                 children: <Widget>[
                   LinkedText(
                     text: _text,
-                    onTap: (String urlString) => _handleTapUri(context, urlString),
+                    onTapUri: (Uri uri) => _handleTapUri(context, uri),
                   ),
                 ],
               ),

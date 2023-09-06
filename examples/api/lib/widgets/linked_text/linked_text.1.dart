@@ -69,7 +69,7 @@ class MyHomePage extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  LinkedText(
+                  LinkedText.regExp(
                     text: _text,
                     regExp: _twitterHandleRegExp,
                     onTap: (String urlString) => _handleTapTwitterHandle(context, urlString),
