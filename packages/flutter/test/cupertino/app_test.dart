@@ -397,6 +397,8 @@ void main() {
 
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
+    final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -409,7 +411,7 @@ void main() {
               return EditableText(
                 backgroundCursorColor: DefaultSelectionStyle.of(context).selectionColor!,
                 cursorColor: DefaultSelectionStyle.of(context).cursorColor!,
-                controller: TextEditingController(),
+                controller: controller,
                 focusNode: focusNode,
                 style: const TextStyle(),
               );
