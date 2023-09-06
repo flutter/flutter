@@ -12566,6 +12566,168 @@ class CupertinoLocalizationTe extends GlobalCupertinoLocalizations {
   String get todayLabel => 'ఈరోజు';
 }
 
+/// The translations for Tajik (`tg`).
+class CupertinoLocalizationTg extends GlobalCupertinoLocalizations {
+  /// Create an instance of the translation bundle for Tajik.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  const CupertinoLocalizationTg({
+    super.localeName = 'tg',
+    required super.fullYearFormat,
+    required super.dayFormat,
+    required super.mediumDateFormat,
+    required super.singleDigitHourFormat,
+    required super.singleDigitMinuteFormat,
+    required super.doubleDigitMinuteFormat,
+    required super.singleDigitSecondFormat,
+    required super.decimalFormat,
+  });
+
+  @override
+  String get alertDialogLabel => 'Огоҳӣ';
+
+  @override
+  String get anteMeridiemAbbreviation => 'АМ';
+
+  @override
+  String get copyButtonLabel => 'Нусхабардорӣ';
+
+  @override
+  String get cutButtonLabel => 'Бурриш';
+
+  @override
+  String get datePickerDateOrderString => 'dmy';
+
+  @override
+  String get datePickerDateTimeOrderString => 'date_time_dayPeriod';
+
+  @override
+  String? get datePickerHourSemanticsLabelFew => r'$hour соат';
+
+  @override
+  String? get datePickerHourSemanticsLabelMany => r'$hour соатҳо';
+
+  @override
+  String? get datePickerHourSemanticsLabelOne => r'$hour соат';
+
+  @override
+  String get datePickerHourSemanticsLabelOther => r'$hour соат';
+
+  @override
+  String? get datePickerHourSemanticsLabelTwo => null;
+
+  @override
+  String? get datePickerHourSemanticsLabelZero => null;
+
+  @override
+  String? get datePickerMinuteSemanticsLabelFew => r'$minute дақиқаҳо';
+
+  @override
+  String? get datePickerMinuteSemanticsLabelMany => r'$minute дақиқа';
+
+  @override
+  String? get datePickerMinuteSemanticsLabelOne => '1 дақиқа';
+
+  @override
+  String get datePickerMinuteSemanticsLabelOther => r'$minute дақиқаҳо';
+
+  @override
+  String? get datePickerMinuteSemanticsLabelTwo => null;
+
+  @override
+  String? get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get lookUpButtonLabel => 'Ҷустуҷӯ кардан';
+
+  @override
+  String get menuDismissLabel => 'Менюро қатъ кунед';
+
+  @override
+  String get modalBarrierDismissLabel => 'Пӯшидан';
+
+  @override
+  String get noSpellCheckReplacementsLabel => 'Ягон ивазкунанда ёфт нашуд';
+
+  @override
+  String get pasteButtonLabel => 'Гузоштан';
+
+  @override
+  String get postMeridiemAbbreviation => 'PM';
+
+  @override
+  String get searchTextFieldPlaceholderLabel => 'Ҷустуҷӯ';
+
+  @override
+  String get searchWebButtonLabel => 'Ҷустуҷӯи веб';
+
+  @override
+  String get selectAllButtonLabel => 'Ҳамаро интихоб кунед';
+
+  @override
+  String get shareButtonLabel => 'Share...';
+
+  @override
+  String get tabSemanticsLabelRaw => r'Варақаи замима $tabIndex из $tabCount';
+
+  @override
+  String? get timerPickerHourLabelFew => 'соат';
+
+  @override
+  String? get timerPickerHourLabelMany => 'соатҳо';
+
+  @override
+  String? get timerPickerHourLabelOne => 'соат';
+
+  @override
+  String get timerPickerHourLabelOther => 'соат';
+
+  @override
+  String? get timerPickerHourLabelTwo => null;
+
+  @override
+  String? get timerPickerHourLabelZero => null;
+
+  @override
+  String? get timerPickerMinuteLabelFew => 'дақ.';
+
+  @override
+  String? get timerPickerMinuteLabelMany => 'дақ.';
+
+  @override
+  String? get timerPickerMinuteLabelOne => 'дақ.';
+
+  @override
+  String get timerPickerMinuteLabelOther => 'дақ.';
+
+  @override
+  String? get timerPickerMinuteLabelTwo => null;
+
+  @override
+  String? get timerPickerMinuteLabelZero => null;
+
+  @override
+  String? get timerPickerSecondLabelFew => 'сон.';
+
+  @override
+  String? get timerPickerSecondLabelMany => 'сон.';
+
+  @override
+  String? get timerPickerSecondLabelOne => 'сон.';
+
+  @override
+  String get timerPickerSecondLabelOther => 'сон.';
+
+  @override
+  String? get timerPickerSecondLabelTwo => null;
+
+  @override
+  String? get timerPickerSecondLabelZero => null;
+
+  @override
+  String get todayLabel => 'Имрӯз';
+}
+
 /// The translations for Thai (`th`).
 class CupertinoLocalizationTh extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Thai.
@@ -14267,6 +14429,7 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
   'sw', // Swahili
   'ta', // Tamil
   'te', // Telugu
+  'tg', // Tajik
   'th', // Thai
   'tl', // Tagalog
   'tr', // Turkish
@@ -14357,6 +14520,7 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
 ///  * `sw` - Swahili
 ///  * `ta` - Tamil
 ///  * `te` - Telugu
+///  * `tg` - Tajik
 ///  * `th` - Thai
 ///  * `tl` - Tagalog
 ///  * `tr` - Turkish
@@ -14606,6 +14770,8 @@ GlobalCupertinoLocalizations? getCupertinoTranslation(
       return CupertinoLocalizationTa(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'te':
       return CupertinoLocalizationTe(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+    case 'tg':
+      return CupertinoLocalizationTg(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'th':
       return CupertinoLocalizationTh(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'tl':

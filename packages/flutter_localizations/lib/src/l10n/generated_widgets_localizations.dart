@@ -2237,6 +2237,32 @@ class WidgetsLocalizationTe extends GlobalWidgetsLocalizations {
   String get reorderItemUp => 'పైకి జరపండి';
 }
 
+/// The translations for Tajik (`tg`).
+class WidgetsLocalizationTg extends GlobalWidgetsLocalizations {
+  /// Create an instance of the translation bundle for Tajik.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalWidgetsLocalizations].
+  const WidgetsLocalizationTg() : super(TextDirection.ltr);
+
+  @override
+  String get reorderItemDown => 'Ба поён ҳаракат кунед';
+
+  @override
+  String get reorderItemLeft => 'Ба чап ҳаракат кунед';
+
+  @override
+  String get reorderItemRight => 'Ба рост ҳаракат кунед';
+
+  @override
+  String get reorderItemToEnd => 'Ба охир ҳаракат кунед';
+
+  @override
+  String get reorderItemToStart => 'Ба оғоз ҳаракат кунед';
+
+  @override
+  String get reorderItemUp => 'Ба боло ҳаракат кунед';
+}
+
 /// The translations for Thai (`th`).
 class WidgetsLocalizationTh extends GlobalWidgetsLocalizations {
   /// Create an instance of the translation bundle for Thai.
@@ -2609,6 +2635,7 @@ final Set<String> kWidgetsSupportedLanguages = HashSet<String>.from(const <Strin
   'sw', // Swahili
   'ta', // Tamil
   'te', // Telugu
+  'tg', // Tajik
   'th', // Thai
   'tl', // Tagalog
   'tr', // Turkish
@@ -2700,6 +2727,7 @@ final Set<String> kWidgetsSupportedLanguages = HashSet<String>.from(const <Strin
 ///  * `sw` - Swahili
 ///  * `ta` - Tamil
 ///  * `te` - Telugu
+///  * `tg` - Tajik
 ///  * `th` - Thai
 ///  * `tl` - Tagalog
 ///  * `tr` - Turkish
@@ -2943,6 +2971,8 @@ GlobalWidgetsLocalizations? getWidgetsTranslation(
       return const WidgetsLocalizationTa();
     case 'te':
       return const WidgetsLocalizationTe();
+    case 'tg':
+      return const WidgetsLocalizationTg();
     case 'th':
       return const WidgetsLocalizationTh();
     case 'tl':
