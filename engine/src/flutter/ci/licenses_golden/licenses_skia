@@ -1,4 +1,4 @@
-Signature: 4aa47856082884f7d54611b40f501be0
+Signature: 1c29498dd42162a6e735496b20bf7bfc
 
 ====================================================================================================
 LIBRARY: etc1
@@ -8978,6 +8978,8 @@ ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanDescriptorSet.cpp + 
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanDescriptorSet.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanGraphicsPipeline.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanGraphicsPipeline.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanRenderPass.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanRenderPass.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanSampler.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/graphite/vk/VulkanSampler.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/image/SkImageGeneratorPriv.h + ../../../third_party/skia/LICENSE
@@ -9235,6 +9237,8 @@ FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanDescriptorSet.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanDescriptorSet.h
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanGraphicsPipeline.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanGraphicsPipeline.h
+FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanRenderPass.cpp
+FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanRenderPass.h
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanSampler.cpp
 FILE: ../../../third_party/skia/src/gpu/graphite/vk/VulkanSampler.h
 FILE: ../../../third_party/skia/src/image/SkImageGeneratorPriv.h
