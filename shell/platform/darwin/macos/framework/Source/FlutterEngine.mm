@@ -25,6 +25,8 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewEngineProvider.h"
 
+@class FlutterEngineRegistrar;
+
 NSString* const kFlutterPlatformChannel = @"flutter/platform";
 NSString* const kFlutterSettingsChannel = @"flutter/settings";
 NSString* const kFlutterLifecycleChannel = @"flutter/lifecycle";
@@ -94,6 +96,12 @@ constexpr char kTextPlainFormat[] = "text/plain";
  * All delegates added via plugin calls to addApplicationDelegate.
  */
 @property(nonatomic, strong) NSPointerArray* pluginAppDelegates;
+
+/**
+ * All registrars returned from registrarForPlugin:
+ */
+@property(nonatomic, readonly)
+    NSMutableDictionary<NSString*, FlutterEngineRegistrar*>* pluginRegistrars;
 
 - (nullable FlutterViewController*)viewControllerForId:(FlutterViewId)viewId;
 
@@ -274,12 +282,19 @@ constexpr char kTextPlainFormat[] = "text/plain";
 - (instancetype)initWithPlugin:(nonnull NSString*)pluginKey
                  flutterEngine:(nonnull FlutterEngine*)flutterEngine;
 
-- (NSView*)viewForId:(FlutterViewId)viewId;
+- (nullable NSView*)viewForId:(FlutterViewId)viewId;
+
+/**
+ * The value published by this plugin, or NSNull if nothing has been published.
+ *
+ * The unusual NSNull is for the documented behavior of valuePublishedByPlugin:.
+ */
+@property(nonatomic, readonly, nonnull) NSObject* publishedValue;
 @end
 
 @implementation FlutterEngineRegistrar {
   NSString* _pluginKey;
-  FlutterEngine* _flutterEngine;
+  __weak FlutterEngine* _flutterEngine;
 }
 
 @dynamic view;
@@ -289,6 +304,7 @@ constexpr char kTextPlainFormat[] = "text/plain";
   if (self) {
     _pluginKey = [pluginKey copy];
     _flutterEngine = flutterEngine;
+    _publishedValue = [NSNull null];
   }
   return self;
 }
@@ -338,6 +354,10 @@ constexpr char kTextPlainFormat[] = "text/plain";
 - (void)registerViewFactory:(nonnull NSObject<FlutterPlatformViewFactory>*)factory
                      withId:(nonnull NSString*)factoryId {
   [[_flutterEngine platformViewController] registerViewFactory:factory withId:factoryId];
+}
+
+- (void)publish:(NSObject*)value {
+  _publishedValue = value;
 }
 
 - (NSString*)lookupKeyForAsset:(NSString*)asset {
@@ -438,6 +458,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
   _messengerHandlers = [[NSMutableDictionary alloc] init];
   _binaryMessenger = [[FlutterBinaryMessengerRelay alloc] initWithParent:self];
   _pluginAppDelegates = [NSPointerArray weakObjectsPointerArray];
+  _pluginRegistrars = [[NSMutableDictionary alloc] init];
   _currentMessengerConnection = 1;
   _allowHeadlessExecution = allowHeadlessExecution;
   _semanticsEnabled = NO;
@@ -493,6 +514,11 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
         [lifecycleProvider removeApplicationLifecycleDelegate:delegate];
       }
     }
+  }
+  // Clear any published values, just in case a plugin has created a retain cycle with the
+  // registrar.
+  for (NSString* pluginName in _pluginRegistrars) {
+    [_pluginRegistrars[pluginName] publish:[NSNull null]];
   }
   @synchronized(_isResponseValid) {
     [_isResponseValid removeAllObjects];
@@ -1334,7 +1360,18 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FlutterEngi
 #pragma mark - FlutterPluginRegistry
 
 - (id<FlutterPluginRegistrar>)registrarForPlugin:(NSString*)pluginName {
-  return [[FlutterEngineRegistrar alloc] initWithPlugin:pluginName flutterEngine:self];
+  id<FlutterPluginRegistrar> registrar = self.pluginRegistrars[pluginName];
+  if (!registrar) {
+    FlutterEngineRegistrar* registrarImpl =
+        [[FlutterEngineRegistrar alloc] initWithPlugin:pluginName flutterEngine:self];
+    self.pluginRegistrars[pluginName] = registrarImpl;
+    registrar = registrarImpl;
+  }
+  return registrar;
+}
+
+- (nullable NSObject*)valuePublishedByPlugin:(NSString*)pluginName {
+  return self.pluginRegistrars[pluginName].publishedValue;
 }
 
 #pragma mark - FlutterTextureRegistrar

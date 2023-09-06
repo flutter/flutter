@@ -72,6 +72,20 @@ FLUTTER_DARWIN_EXPORT
                      withId:(nonnull NSString*)factoryId;
 
 /**
+ * Publishes a value for external use of the plugin.
+ *
+ * Plugins may publish a single value, such as an instance of the
+ * plugin's main class, for situations where external control or
+ * interaction is needed.
+ *
+ * The published value will be available from the `FlutterPluginRegistry`.
+ * Repeated calls overwrite any previous publication.
+ *
+ * @param value The value to be published.
+ */
+- (void)publish:(nonnull NSObject*)value;
+
+/**
  * Returns the file name for the given asset.
  * The returned file name can be used to access the asset in the application's main bundle.
  *
@@ -118,5 +132,15 @@ FLUTTER_DARWIN_EXPORT
  * @param pluginKey The unique key identifying the plugin.
  */
 - (nonnull id<FlutterPluginRegistrar>)registrarForPlugin:(nonnull NSString*)pluginKey;
+
+/**
+ * Returns a value published by the specified plugin.
+ *
+ * @param pluginKey The unique key identifying the plugin.
+ * @return An object published by the plugin, if any. Will be `NSNull` if
+ *   nothing has been published. Will be `nil` if the plugin has not been
+ *   registered.
+ */
+- (nullable NSObject*)valuePublishedByPlugin:(nonnull NSString*)pluginKey;
 
 @end
