@@ -325,6 +325,14 @@ void DlSkCanvasAdapter::DrawTextBlob(const sk_sp<SkTextBlob>& blob,
   delegate_->drawTextBlob(blob, x, y, ToSk(paint));
 }
 
+void DlSkCanvasAdapter::DrawTextFrame(
+    const std::shared_ptr<impeller::TextFrame>& text_frame,
+    SkScalar x,
+    SkScalar y,
+    const DlPaint& paint) {
+  FML_CHECK(false);
+}
+
 void DlSkCanvasAdapter::DrawShadow(const SkPath& path,
                                    const DlColor color,
                                    const SkScalar elevation,

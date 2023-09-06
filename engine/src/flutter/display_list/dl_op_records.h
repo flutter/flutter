@@ -12,6 +12,7 @@
 #include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/fml/macros.h"
 
+#include "impeller/typographer/text_frame.h"
 #include "third_party/skia/include/core/SkRSXform.h"
 
 namespace flutter {
@@ -1080,6 +1081,25 @@ struct DrawTextBlobOp final : DrawOpBase {
   void dispatch(DispatchContext& ctx) const {
     if (op_needed(ctx)) {
       ctx.receiver.drawTextBlob(blob, x, y);
+    }
+  }
+};
+
+struct DrawTextFrameOp final : DrawOpBase {
+  static const auto kType = DisplayListOpType::kDrawTextFrame;
+
+  DrawTextFrameOp(const std::shared_ptr<impeller::TextFrame>& text_frame,
+                  SkScalar x,
+                  SkScalar y)
+      : x(x), y(y), text_frame(text_frame) {}
+
+  const SkScalar x;
+  const SkScalar y;
+  const std::shared_ptr<impeller::TextFrame> text_frame;
+
+  void dispatch(DispatchContext& ctx) const {
+    if (op_needed(ctx)) {
+      ctx.receiver.drawTextFrame(text_frame, x, y);
     }
   }
 };

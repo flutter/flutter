@@ -139,7 +139,7 @@ class Canvas {
 
   void DrawPicture(const Picture& picture);
 
-  void DrawTextFrame(const TextFrame& text_frame,
+  void DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
                      Point position,
                      const Paint& paint);
 

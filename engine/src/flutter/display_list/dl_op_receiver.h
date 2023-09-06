@@ -257,6 +257,10 @@ class DlOpReceiver {
   virtual void drawTextBlob(const sk_sp<SkTextBlob> blob,
                             SkScalar x,
                             SkScalar y) = 0;
+  virtual void drawTextFrame(
+      const std::shared_ptr<impeller::TextFrame>& text_frame,
+      SkScalar x,
+      SkScalar y) = 0;
   virtual void drawShadow(const SkPath& path,
                           const DlColor color,
                           const SkScalar elevation,
