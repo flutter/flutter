@@ -127,6 +127,14 @@ void DlOpSpy::drawTextBlob(const sk_sp<SkTextBlob> blob,
                            SkScalar y) {
   did_draw_ |= will_draw_;
 }
+
+void DlOpSpy::drawTextFrame(
+    const std::shared_ptr<impeller::TextFrame>& text_frame,
+    SkScalar x,
+    SkScalar y) {
+  did_draw_ |= will_draw_;
+}
+
 void DlOpSpy::drawShadow(const SkPath& path,
                          const DlColor color,
                          const SkScalar elevation,
