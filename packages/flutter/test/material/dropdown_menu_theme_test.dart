@@ -100,7 +100,7 @@ void main() {
     expect(material.textStyle?.color, themeData.colorScheme.onSurface);
   });
 
-  testWidgets('ThemeData.dropdownMenuTheme overrides defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ThemeData.dropdownMenuTheme overrides defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       dropdownMenuTheme: DropdownMenuThemeData(
         textStyle: TextStyle(
