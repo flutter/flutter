@@ -2567,7 +2567,6 @@ targets:
   - name: Linux_pixel_7pro textfield_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
