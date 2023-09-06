@@ -395,6 +395,9 @@ void main() {
       return renderEditable!;
     }
 
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
     await tester.pumpWidget(
       CupertinoApp(
         theme: const CupertinoThemeData(
@@ -407,7 +410,7 @@ void main() {
                 backgroundCursorColor: DefaultSelectionStyle.of(context).selectionColor!,
                 cursorColor: DefaultSelectionStyle.of(context).cursorColor!,
                 controller: TextEditingController(),
-                focusNode: FocusNode(),
+                focusNode: focusNode,
                 style: const TextStyle(),
               );
             },
