@@ -92,7 +92,10 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
 
   @override
   Future<bool> hasPackageConfig() {
-    final File packageConfigJson = fileSystem.directory(projectUri.toFilePath()).childFile('.dart_tool/package_config.json');
+    final File packageConfigJson = fileSystem
+        .directory(projectUri.toFilePath())
+        .childDirectory('.dart_tool')
+        .childFile('package_config.json');
     return packageConfigJson.exists();
   }
 

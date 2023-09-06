@@ -10,6 +10,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../build_info.dart';
+import '../convert.dart';
 import '../globals.dart' as globals;
 
 /// The target location for native assets on macOS.
@@ -128,8 +129,7 @@ Future<CCompilerConfig> cCompilerConfigMacOS() async {
   if (xcrunResult.exitCode != 0) {
     throwToolExit('Failed to find clang with xcrun:\n${xcrunResult.stderr}');
   }
-  final String installPath = (xcrunResult.stdout as String)
-    .split('\n')
+  final String installPath = LineSplitter.split(xcrunResult.stdout as String)
     .firstWhere((String s) => s.startsWith('InstalledDir: '))
     .split(' ')
     .last;

@@ -220,6 +220,7 @@ class Context {
     // Embed the actual Flutter.framework that the Flutter app expects to run against,
     // which could be a local build or an arch/type specific build.
     runRsync(
+      delete: true,
       '${environment['BUILT_PRODUCTS_DIR']}/Flutter.framework',
       '$xcodeFrameworksDir/',
     );
