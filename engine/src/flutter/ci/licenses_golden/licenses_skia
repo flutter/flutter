@@ -1,4 +1,4 @@
-Signature: eba0b2fa5ab5ab2c48b011d32769b82d
+Signature: de224600d3796d9b12e1ac303e82d98f
 
 ====================================================================================================
 LIBRARY: etc1
@@ -385,13 +385,7 @@ FILE: ../../../third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../third_party/skia/modules/skparagraph/test.html
 FILE: ../../../third_party/skia/package-lock.json
-FILE: ../../../third_party/skia/relnotes/grdirectctx.md
-FILE: ../../../third_party/skia/relnotes/makewithfilter.md
-FILE: ../../../third_party/skia/relnotes/sksl_always_on.md
-FILE: ../../../third_party/skia/relnotes/sksl_comma_array.md
-FILE: ../../../third_party/skia/relnotes/sksl_ganesh_dawn_removed.md
-FILE: ../../../third_party/skia/relnotes/sktime.md
-FILE: ../../../third_party/skia/relnotes/vk_backend_surface.md
+FILE: ../../../third_party/skia/relnotes/directcontext_submit.md
 FILE: ../../../third_party/skia/src/core/SkOrderedReadBuffer.h
 FILE: ../../../third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
@@ -8835,12 +8829,10 @@ ORIGIN: ../../../third_party/skia/include/private/chromium/SkImageChromium.h + .
 ORIGIN: ../../../third_party/skia/include/private/gpu/ganesh/GrTextureGenerator.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/bentleyottmann/include/BentleyOttmann1.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/bentleyottmann/include/EventQueue.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/modules/bentleyottmann/include/Int96.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/bentleyottmann/include/Point.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/bentleyottmann/include/Segment.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/bentleyottmann/src/BentleyOttmann1.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/bentleyottmann/src/EventQueue.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/modules/bentleyottmann/src/Int96.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/bentleyottmann/src/Point.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/bentleyottmann/src/Segment.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/base/SkBezierCurves.h + ../../../third_party/skia/LICENSE
@@ -9092,12 +9084,10 @@ FILE: ../../../third_party/skia/include/private/chromium/SkImageChromium.h
 FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrTextureGenerator.h
 FILE: ../../../third_party/skia/modules/bentleyottmann/include/BentleyOttmann1.h
 FILE: ../../../third_party/skia/modules/bentleyottmann/include/EventQueue.h
-FILE: ../../../third_party/skia/modules/bentleyottmann/include/Int96.h
 FILE: ../../../third_party/skia/modules/bentleyottmann/include/Point.h
 FILE: ../../../third_party/skia/modules/bentleyottmann/include/Segment.h
 FILE: ../../../third_party/skia/modules/bentleyottmann/src/BentleyOttmann1.cpp
 FILE: ../../../third_party/skia/modules/bentleyottmann/src/EventQueue.cpp
-FILE: ../../../third_party/skia/modules/bentleyottmann/src/Int96.cpp
 FILE: ../../../third_party/skia/modules/bentleyottmann/src/Point.cpp
 FILE: ../../../third_party/skia/modules/bentleyottmann/src/Segment.cpp
 FILE: ../../../third_party/skia/src/base/SkBezierCurves.h
