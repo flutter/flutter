@@ -1,4 +1,4 @@
-Signature: 9a31319fc49dcb0a9eed7caba8bc94aa
+Signature: ba6463628187613a22cdde62a73696f0
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -536,6 +536,12 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libpthread.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/librt.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libzircon.so
 FILE: ../../../fuchsia/sdk/linux/data/config/symbol_index/config.json
+FILE: ../../../fuchsia/sdk/linux/packages/realm_builder_server/arm64/release/content_checklist_path
+FILE: ../../../fuchsia/sdk/linux/packages/realm_builder_server/arm64/release/package_manifest.json
+FILE: ../../../fuchsia/sdk/linux/packages/realm_builder_server/riscv64/release/content_checklist_path
+FILE: ../../../fuchsia/sdk/linux/packages/realm_builder_server/riscv64/release/package_manifest.json
+FILE: ../../../fuchsia/sdk/linux/packages/realm_builder_server/x64/release/content_checklist_path
+FILE: ../../../fuchsia/sdk/linux/packages/realm_builder_server/x64/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-default/async-default.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_runtime_shared_lib/driver_runtime.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/fdio.ifs
@@ -2340,6 +2346,12 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libpthread.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/librt.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libzircon.so
 FILE: ../../../fuchsia/sdk/linux/data/config/symbol_index/config.json
+FILE: ../../../fuchsia/sdk/linux/packages/realm_builder_server/arm64/release/content_checklist_path
+FILE: ../../../fuchsia/sdk/linux/packages/realm_builder_server/arm64/release/package_manifest.json
+FILE: ../../../fuchsia/sdk/linux/packages/realm_builder_server/riscv64/release/content_checklist_path
+FILE: ../../../fuchsia/sdk/linux/packages/realm_builder_server/riscv64/release/package_manifest.json
+FILE: ../../../fuchsia/sdk/linux/packages/realm_builder_server/x64/release/content_checklist_path
+FILE: ../../../fuchsia/sdk/linux/packages/realm_builder_server/x64/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-default/async-default.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_runtime_shared_lib/driver_runtime.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/fdio.ifs
@@ -4242,6 +4254,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/clock.fidl + ../.
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/common.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/composite.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/composite_connector.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/device_type.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/plug.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/ring_buffer_format.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/history.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -4299,6 +4312,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/clock.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/common.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/composite.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/composite_connector.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/device_type.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/plug.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.audio/ring_buffer_format.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/history.fidl
@@ -4908,6 +4922,12 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libpthread.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/librt.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libzircon.so
 FILE: ../../../fuchsia/sdk/linux/data/config/symbol_index/config.json
+FILE: ../../../fuchsia/sdk/linux/packages/realm_builder_server/arm64/release/content_checklist_path
+FILE: ../../../fuchsia/sdk/linux/packages/realm_builder_server/arm64/release/package_manifest.json
+FILE: ../../../fuchsia/sdk/linux/packages/realm_builder_server/riscv64/release/content_checklist_path
+FILE: ../../../fuchsia/sdk/linux/packages/realm_builder_server/riscv64/release/package_manifest.json
+FILE: ../../../fuchsia/sdk/linux/packages/realm_builder_server/x64/release/content_checklist_path
+FILE: ../../../fuchsia/sdk/linux/packages/realm_builder_server/x64/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/pkg/async-default/async-default.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_runtime_shared_lib/driver_runtime.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/fdio.ifs
