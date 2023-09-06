@@ -506,6 +506,12 @@ class _CupertinoAppState extends State<CupertinoApp> {
     _heroController = CupertinoApp.createCupertinoHeroController();
   }
 
+  @override
+  void dispose() {
+    _heroController.dispose();
+    super.dispose();
+  }
+
   // Combine the default localization for Cupertino with the ones contributed
   // by the localizationsDelegates parameter, if any. Only the first delegate
   // of a particular LocalizationsDelegate.type is loaded so the
