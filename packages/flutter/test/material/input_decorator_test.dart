@@ -1688,7 +1688,7 @@ void runAllTests({ required bool useMaterial3 }) {
         ),
       ),
     );
-    await tester.pumpAndSettle(); // border changes are animated
+    await tester.pumpAndSettle(); // Border changes are animated.
     expect(getBorder(tester), focusedErrorBorder);
 
     await tester.pumpWidget(
@@ -1703,7 +1703,7 @@ void runAllTests({ required bool useMaterial3 }) {
         ),
       ),
     );
-    await tester.pumpAndSettle(); // border changes are animated
+    await tester.pumpAndSettle(); // Border changes are animated.
     expect(getBorder(tester), errorBorder);
 
     await tester.pumpWidget(
@@ -1718,7 +1718,7 @@ void runAllTests({ required bool useMaterial3 }) {
         ),
       ),
     );
-    await tester.pumpAndSettle(); // border changes are animated
+    await tester.pumpAndSettle(); // Border changes are animated.
     expect(getBorder(tester), errorBorder);
 
     await tester.pumpWidget(
@@ -1733,7 +1733,7 @@ void runAllTests({ required bool useMaterial3 }) {
         ),
       ),
     );
-    await tester.pumpAndSettle(); // border changes are animated
+    await tester.pumpAndSettle(); // Border changes are animated.
     expect(getBorder(tester), focusedErrorBorder);
 
     await tester.pumpWidget(
@@ -1748,7 +1748,7 @@ void runAllTests({ required bool useMaterial3 }) {
         ),
       ),
     );
-    await tester.pumpAndSettle(); // border changes are animated
+    await tester.pumpAndSettle(); // Border changes are animated.
     expect(getBorder(tester), errorBorder);
 
     await tester.pumpWidget(
@@ -1763,7 +1763,7 @@ void runAllTests({ required bool useMaterial3 }) {
         ),
       ),
     );
-    await tester.pumpAndSettle(); // border changes are animated
+    await tester.pumpAndSettle(); // Border changes are animated.
     expect(getBorder(tester), errorBorder);
   });
 
