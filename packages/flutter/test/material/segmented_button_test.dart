@@ -21,7 +21,7 @@ Widget boilerplate({required Widget child}) {
 }
 
 void main() {
-  testWidgetsWithLeakTracking('SegmentedButton is built with Material of type MaterialType.transparency', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SegmentedButton releases state controllers for deleted segments', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     final Key key = UniqueKey();
 
