@@ -903,6 +903,10 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
   return [_engine registrarForPlugin:pluginName];
 }
 
+- (NSObject*)valuePublishedByPlugin:(NSString*)pluginKey {
+  return [_engine valuePublishedByPlugin:pluginKey];
+}
+
 #pragma mark - FlutterKeyboardViewDelegate
 
 - (void)sendKeyEvent:(const FlutterKeyEvent&)event
