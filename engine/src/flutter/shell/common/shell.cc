@@ -144,6 +144,23 @@ void PerformInitializationTasks(Settings& settings) {
 
 }  // namespace
 
+std::pair<DartVMRef, fml::RefPtr<const DartSnapshot>>
+Shell::InferVmInitDataFromSettings(Settings& settings) {
+  // Always use the `vm_snapshot` and `isolate_snapshot` provided by the
+  // settings to launch the VM.  If the VM is already running, the snapshot
+  // arguments are ignored.
+  auto vm_snapshot = DartSnapshot::VMSnapshotFromSettings(settings);
+  auto isolate_snapshot = DartSnapshot::IsolateSnapshotFromSettings(settings);
+  auto vm = DartVMRef::Create(settings, vm_snapshot, isolate_snapshot);
+
+  // If the settings did not specify an `isolate_snapshot`, fall back to the
+  // one the VM was launched with.
+  if (!isolate_snapshot) {
+    isolate_snapshot = vm->GetVMData()->GetIsolateSnapshot();
+  }
+  return {std::move(vm), isolate_snapshot};
+}
+
 std::unique_ptr<Shell> Shell::Create(
     const PlatformData& platform_data,
     const TaskRunners& task_runners,
@@ -156,19 +173,7 @@ std::unique_ptr<Shell> Shell::Create(
 
   TRACE_EVENT0("flutter", "Shell::Create");
 
-  // Always use the `vm_snapshot` and `isolate_snapshot` provided by the
-  // settings to launch the VM.  If the VM is already running, the snapshot
-  // arguments are ignored.
-  auto vm_snapshot = DartSnapshot::VMSnapshotFromSettings(settings);
-  auto isolate_snapshot = DartSnapshot::IsolateSnapshotFromSettings(settings);
-  auto vm = DartVMRef::Create(settings, vm_snapshot, isolate_snapshot);
-  FML_CHECK(vm) << "Must be able to initialize the VM.";
-
-  // If the settings did not specify an `isolate_snapshot`, fall back to the
-  // one the VM was launched with.
-  if (!isolate_snapshot) {
-    isolate_snapshot = vm->GetVMData()->GetIsolateSnapshot();
-  }
+  auto [vm, isolate_snapshot] = InferVmInitDataFromSettings(settings);
   auto resource_cache_limit_calculator =
       std::make_shared<ResourceCacheLimitCalculator>(
           settings.resource_cache_max_bytes_threshold);
