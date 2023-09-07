@@ -22,9 +22,7 @@ Widget boilerplate({required Widget child}) {
 
 void main() {
 
-  testWidgetsWithLeakTracking('SegmentedButton is built with Material of type MaterialType.transparency',
-  leakTrackingTestConfig: LeakTrackingTestConfig.debugNotDisposed(),
-  (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SegmentedButton is built with Material of type MaterialType.transparency', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
       MaterialApp(
