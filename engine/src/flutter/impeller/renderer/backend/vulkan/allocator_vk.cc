@@ -365,8 +365,8 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
                      << vk::to_string(result);
       return;
     }
-    resource_.Reset(ImageResource(ImageVMA{allocator, allocation, image},
-                                  std::move(image_view)));
+    resource_.Swap(ImageResource(ImageVMA{allocator, allocation, image},
+                                 std::move(image_view)));
     is_valid_ = true;
   }
 
