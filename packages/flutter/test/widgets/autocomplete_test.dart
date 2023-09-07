@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class User {
   const User({
@@ -45,7 +46,7 @@ void main() {
     User(name: 'Charlie', email: 'charlie123@gmail.com'),
   ];
 
-  testWidgets('can filter and select a list of string options', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can filter and select a list of string options', (WidgetTester tester) async {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();
     late Iterable<String> lastOptions;
@@ -129,7 +130,7 @@ void main() {
     expect(lastOptions.elementAt(5), 'northern white rhinoceros');
   });
 
-  testWidgets('tapping on an option selects it', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('tapping on an option selects it', (WidgetTester tester) async {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();
     late Iterable<String> lastOptions;
@@ -199,7 +200,7 @@ void main() {
     expect(textEditingController.text, equals(kOptions[2]));
   });
 
-  testWidgets('can filter and select a list of custom User options', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can filter and select a list of custom User options', (WidgetTester tester) async {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();
     late Iterable<User> lastOptions;
@@ -277,7 +278,7 @@ void main() {
     expect(lastOptions.elementAt(0), kOptionsUsers[1]);
   });
 
-  testWidgets('can specify a custom display string for a list of custom User options', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can specify a custom display string for a list of custom User options', (WidgetTester tester) async {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();
     late Iterable<User> lastOptions;
@@ -360,7 +361,7 @@ void main() {
     expect(lastOptions.elementAt(0), kOptionsUsers[1]);
   });
 
-  testWidgets('onFieldSubmitted selects the first option', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('onFieldSubmitted selects the first option', (WidgetTester tester) async {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();
     late Iterable<String> lastOptions;
@@ -422,7 +423,7 @@ void main() {
   });
 
   group('optionsViewOpenDirection', () {
-    testWidgets('unset (default behavior): open downward', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('unset (default behavior): open downward', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -445,7 +446,7 @@ void main() {
         offsetMoreOrLessEquals(tester.getTopLeft(find.text('a'))));
     });
 
-    testWidgets('down: open downward', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('down: open downward', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -469,7 +470,7 @@ void main() {
         offsetMoreOrLessEquals(tester.getTopLeft(find.text('a'))));
     });
 
-    testWidgets('up: open upward', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('up: open upward', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -494,10 +495,12 @@ void main() {
     });
 
     group('fieldViewBuilder not passed', () {
-      testWidgets('down', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('down', (WidgetTester tester) async {
         final GlobalKey autocompleteKey = GlobalKey();
         final TextEditingController controller = TextEditingController();
+        addTearDown(controller.dispose);
         final FocusNode focusNode = FocusNode();
+        addTearDown(focusNode.dispose);
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
@@ -525,10 +528,12 @@ void main() {
           offsetMoreOrLessEquals(tester.getTopLeft(find.text('a'))));
       });
 
-      testWidgets('up', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('up', (WidgetTester tester) async {
         final GlobalKey autocompleteKey = GlobalKey();
         final TextEditingController controller = TextEditingController();
+        addTearDown(controller.dispose);
         final FocusNode focusNode = FocusNode();
+        addTearDown(focusNode.dispose);
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
@@ -559,7 +564,7 @@ void main() {
     });
   });
 
-  testWidgets('options follow field when it moves', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('options follow field when it moves', (WidgetTester tester) async {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();
     late StateSetter setState;
@@ -633,7 +638,7 @@ void main() {
     expect(optionsOffsetOpen.dy, fieldOffset.dy + fieldSize.height);
   });
 
-  testWidgets('can prevent options from showing by returning an empty iterable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can prevent options from showing by returning an empty iterable', (WidgetTester tester) async {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();
     late Iterable<String> lastOptions;
@@ -696,13 +701,15 @@ void main() {
     expect(lastOptions.elementAt(1), 'elephant');
   });
 
-  testWidgets('can create a field outside of fieldViewBuilder', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can create a field outside of fieldViewBuilder', (WidgetTester tester) async {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();
     final GlobalKey autocompleteKey = GlobalKey();
     late Iterable<String> lastOptions;
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     final TextEditingController textEditingController = TextEditingController();
+    addTearDown(textEditingController.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -762,7 +769,7 @@ void main() {
     expect(textEditingController.text, lastOptions.elementAt(0));
   });
 
-  testWidgets('initialValue sets initial text field value', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('initialValue sets initial text field value', (WidgetTester tester) async {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();
     late Iterable<String> lastOptions;
@@ -822,9 +829,11 @@ void main() {
     expect(textEditingController.text, selection);
   });
 
-  testWidgets('initialValue cannot be defined if TextEditingController is defined', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('initialValue cannot be defined if TextEditingController is defined', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     final TextEditingController textEditingController = TextEditingController();
+    addTearDown(textEditingController.dispose);
 
     expect(
       () {
@@ -854,7 +863,7 @@ void main() {
     );
   });
 
-  testWidgets('support asynchronous options builder', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('support asynchronous options builder', (WidgetTester tester) async {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();
     late FocusNode focusNode;
@@ -915,7 +924,7 @@ void main() {
     expect(lastOptions, <String>['dingo', 'flamingo']);
   });
 
-  testWidgets('can navigate options with the keyboard', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can navigate options with the keyboard', (WidgetTester tester) async {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();
     late Iterable<String> lastOptions;
@@ -1001,7 +1010,7 @@ void main() {
     expect(textEditingController.text, 'goose');
   });
 
-  testWidgets('can hide and show options with the keyboard', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can hide and show options with the keyboard', (WidgetTester tester) async {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();
     late Iterable<String> lastOptions;
@@ -1091,7 +1100,7 @@ void main() {
     expect(find.byKey(optionsKey), findsNothing);
   });
 
-  testWidgets('re-invokes DismissIntent if options not shown', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('re-invokes DismissIntent if options not shown', (WidgetTester tester) async {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();
     late FocusNode focusNode;
@@ -1150,7 +1159,7 @@ void main() {
     expect(wrappingActionInvoked, true);
   });
 
-  testWidgets('optionsViewBuilders can use AutocompleteHighlightedOption to highlight selected option', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('optionsViewBuilders can use AutocompleteHighlightedOption to highlight selected option', (WidgetTester tester) async {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();
     late Iterable<String> lastOptions;
@@ -1231,7 +1240,7 @@ void main() {
     expect(lastHighlighted, 5);
   });
 
-  testWidgets('floating menu goes away on select', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('floating menu goes away on select', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/99749.
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();
