@@ -392,7 +392,7 @@ Future<bool> runShXcodeTests({
   final File runFile = File(path.join(resultBundleTemp, 'run_test.sh'));
   runFile.createSync();
   runFile.writeAsStringSync(
-    'cd $platformDirectory\n'
+    'cd "$platformDirectory"\n'
     '$command\n'
     'echo \$? > ${exitCodeOutput.path}'
   );
