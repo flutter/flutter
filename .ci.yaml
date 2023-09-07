@@ -3843,7 +3843,6 @@ targets:
 
   - name: Mac_ios flutter_gallery_ios__start_up
     recipe: devicelab/devicelab_drone
-    presubmit: true # TODO: remove before merging
     timeout: 60
     properties:
       tags: >
