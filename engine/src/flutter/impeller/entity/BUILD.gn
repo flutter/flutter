@@ -40,8 +40,6 @@ impeller_shaders("entity_shaders") {
     "shaders/color_matrix_color_filter.vert",
     "shaders/conical_gradient_fill.frag",
     "shaders/gaussian_blur/gaussian_blur.vert",
-    "shaders/gaussian_blur/gaussian_blur_alpha_decal.frag",
-    "shaders/gaussian_blur/gaussian_blur_alpha_nodecal.frag",
     "shaders/gaussian_blur/gaussian_blur_noalpha_decal.frag",
     "shaders/gaussian_blur/gaussian_blur_noalpha_nodecal.frag",
     "shaders/glyph_atlas.frag",

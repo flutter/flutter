@@ -1329,8 +1329,6 @@ ORIGIN: ../../../flutter/impeller/entity/shaders/debug/checkerboard.frag + ../..
 ORIGIN: ../../../flutter/impeller/entity/shaders/debug/checkerboard.vert + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/gaussian_blur/gaussian_blur.glsl + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/gaussian_blur/gaussian_blur.vert + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/entity/shaders/gaussian_blur/gaussian_blur_alpha_decal.frag + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/entity/shaders/gaussian_blur/gaussian_blur_alpha_nodecal.frag + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/gaussian_blur/gaussian_blur_noalpha_decal.frag + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/gaussian_blur/gaussian_blur_noalpha_nodecal.frag + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/entity/shaders/geometry/points.comp + ../../../flutter/LICENSE
@@ -4075,8 +4073,6 @@ FILE: ../../../flutter/impeller/entity/shaders/debug/checkerboard.frag
 FILE: ../../../flutter/impeller/entity/shaders/debug/checkerboard.vert
 FILE: ../../../flutter/impeller/entity/shaders/gaussian_blur/gaussian_blur.glsl
 FILE: ../../../flutter/impeller/entity/shaders/gaussian_blur/gaussian_blur.vert
-FILE: ../../../flutter/impeller/entity/shaders/gaussian_blur/gaussian_blur_alpha_decal.frag
-FILE: ../../../flutter/impeller/entity/shaders/gaussian_blur/gaussian_blur_alpha_nodecal.frag
 FILE: ../../../flutter/impeller/entity/shaders/gaussian_blur/gaussian_blur_noalpha_decal.frag
 FILE: ../../../flutter/impeller/entity/shaders/gaussian_blur/gaussian_blur_noalpha_nodecal.frag
 FILE: ../../../flutter/impeller/entity/shaders/geometry/points.comp

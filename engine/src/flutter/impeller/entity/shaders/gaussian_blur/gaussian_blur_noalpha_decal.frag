@@ -4,7 +4,6 @@
 
 precision mediump float;
 
-#define ENABLE_ALPHA_MASK 0
 #define ENABLE_DECAL_SPECIALIZATION 1
 
 #include "gaussian_blur.glsl"
