@@ -11,6 +11,7 @@ impeller_component("vulkan_unittests") {
     "blit_command_vk_unittests.cc",
     "context_vk_unittests.cc",
     "pass_bindings_cache_unittests.cc",
+    "resource_manager_vk_unittests.cc",
     "test/mock_vulkan.cc",
     "test/mock_vulkan.h",
   ]
