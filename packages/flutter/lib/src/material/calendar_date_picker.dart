@@ -868,7 +868,7 @@ class _DayPickerState extends State<_DayPicker> {
   /// List of [FocusNode]s, one for each day of the month.
   late List<FocusNode> _dayFocusNodes;
 
-  final MaterialStatesController _materialStatesController = MaterialStatesController();
+  final Map<int, MaterialStatesController> _statesControllers = <int, MaterialStatesController>{};
 
   @override
   void initState() {
@@ -895,7 +895,9 @@ class _DayPickerState extends State<_DayPicker> {
     for (final FocusNode node in _dayFocusNodes) {
       node.dispose();
     }
-    _materialStatesController.dispose();
+    for (final MaterialStatesController controller in _statesControllers.values) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -976,7 +978,8 @@ class _DayPickerState extends State<_DayPicker> {
           if (isSelectedDay) MaterialState.selected,
         };
 
-        _materialStatesController.value = states;
+        final MaterialStatesController statesController = _statesControllers.putIfAbsent(day, () => MaterialStatesController());
+        statesController.value = states;
 
         final Color? dayForegroundColor = resolve<Color?>((DatePickerThemeData? theme) => isToday ? theme?.todayForegroundColor : theme?.dayForegroundColor, states);
         final Color? dayBackgroundColor = resolve<Color?>((DatePickerThemeData? theme) => isToday ? theme?.todayBackgroundColor : theme?.dayBackgroundColor, states);
@@ -1013,7 +1016,7 @@ class _DayPickerState extends State<_DayPicker> {
             focusNode: _dayFocusNodes[day - 1],
             onTap: () => widget.onChanged(dayToBuild),
             radius: _dayPickerRowHeight / 2 + 4,
-            statesController: _materialStatesController,
+            statesController: statesController,
             overlayColor: dayOverlayColor,
             child: Semantics(
               // We want the day of month to be spoken first irrespective of the
