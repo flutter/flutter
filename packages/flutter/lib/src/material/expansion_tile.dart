@@ -678,7 +678,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       : _ExpansionTileDefaultsM2(context);
     if (widget.collapsedShape != oldWidget.collapsedShape
       || widget.shape != oldWidget.shape) {
-      _updateShapeBorder(theme, expansionTileTheme, defaults);
+      _updateShapeBorder(expansionTileTheme, theme);
     }
     if (widget.collapsedTextColor != oldWidget.collapsedTextColor
       || widget.textColor != oldWidget.textColor) {
@@ -701,18 +701,14 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     final ExpansionTileThemeData defaults = theme.useMaterial3
       ? _ExpansionTileDefaultsM3(context)
       : _ExpansionTileDefaultsM2(context);
-    _updateShapeBorder(theme, expansionTileTheme, defaults);
+    _updateShapeBorder(expansionTileTheme, theme);
     _updateHeaderColor(expansionTileTheme, defaults);
     _updateIconColor(expansionTileTheme, defaults);
     _updateBackgroundColor(expansionTileTheme);
     super.didChangeDependencies();
   }
 
-  void _updateShapeBorder(
-    ThemeData theme,
-    ExpansionTileThemeData expansionTileTheme,
-    ExpansionTileThemeData defaults,
-  ) {
+  void _updateShapeBorder(ExpansionTileThemeData expansionTileTheme, ThemeData theme) {
     _borderTween
       ..begin = widget.collapsedShape
         ?? expansionTileTheme.collapsedShape
