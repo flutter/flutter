@@ -4,9 +4,10 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('AnimatedSwitcher fades in a new child.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedSwitcher fades in a new child.', (WidgetTester tester) async {
     final UniqueKey containerOne = UniqueKey();
     final UniqueKey containerTwo = UniqueKey();
     final UniqueKey containerThree = UniqueKey();
@@ -50,7 +51,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('AnimatedSwitcher can handle back-to-back changes.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedSwitcher can handle back-to-back changes.', (WidgetTester tester) async {
     final UniqueKey container1 = UniqueKey();
     final UniqueKey container2 = UniqueKey();
     final UniqueKey container3 = UniqueKey();
@@ -85,7 +86,7 @@ void main() {
     expect(find.byKey(container3), findsOneWidget);
   });
 
-  testWidgets("AnimatedSwitcher doesn't transition in a new child of the same type.", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("AnimatedSwitcher doesn't transition in a new child of the same type.", (WidgetTester tester) async {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
@@ -111,7 +112,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('AnimatedSwitcher handles null children.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedSwitcher handles null children.', (WidgetTester tester) async {
     await tester.pumpWidget(
       const AnimatedSwitcher(
         duration: Duration(milliseconds: 100),
@@ -166,7 +167,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets("AnimatedSwitcher doesn't start any animations after dispose.", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("AnimatedSwitcher doesn't start any animations after dispose.", (WidgetTester tester) async {
     await tester.pumpWidget(AnimatedSwitcher(
       duration: const Duration(milliseconds: 100),
       child: Container(color: const Color(0xff000000)),
@@ -178,7 +179,7 @@ void main() {
     expect(await tester.pumpAndSettle(), equals(1));
   });
 
-  testWidgets('AnimatedSwitcher uses custom layout.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedSwitcher uses custom layout.', (WidgetTester tester) async {
     Widget newLayoutBuilder(Widget? currentChild, List<Widget> previousChildren) {
       return Column(
         children: <Widget>[
@@ -199,7 +200,7 @@ void main() {
     expect(find.byType(Column), findsOneWidget);
   });
 
-  testWidgets('AnimatedSwitcher uses custom transitions.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedSwitcher uses custom transitions.', (WidgetTester tester) async {
     late List<Widget> foundChildren;
     Widget newLayoutBuilder(Widget? currentChild, List<Widget> previousChildren) {
       foundChildren = <Widget>[
@@ -254,7 +255,7 @@ void main() {
     }
   });
 
-  testWidgets("AnimatedSwitcher doesn't reset state of the children in transitions.", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("AnimatedSwitcher doesn't reset state of the children in transitions.", (WidgetTester tester) async {
     final UniqueKey statefulOne = UniqueKey();
     final UniqueKey statefulTwo = UniqueKey();
     final UniqueKey statefulThree = UniqueKey();
@@ -305,7 +306,7 @@ void main() {
     expect(StatefulTestState.generation, equals(3));
   });
 
-  testWidgets('AnimatedSwitcher updates widgets without animating if they are isomorphic.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedSwitcher updates widgets without animating if they are isomorphic.', (WidgetTester tester) async {
     Future<void> pumpChild(Widget child) async {
       return tester.pumpWidget(
         Directionality(
@@ -332,7 +333,7 @@ void main() {
     expect(find.text('2'), findsOneWidget);
   });
 
-  testWidgets('AnimatedSwitcher updates previous child transitions if the transitionBuilder changes.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedSwitcher updates previous child transitions if the transitionBuilder changes.', (WidgetTester tester) async {
     final UniqueKey containerOne = UniqueKey();
     final UniqueKey containerTwo = UniqueKey();
     final UniqueKey containerThree = UniqueKey();
@@ -416,7 +417,7 @@ void main() {
     }
   });
 
-  testWidgets('AnimatedSwitcher does not duplicate animations if the same child is entered twice.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedSwitcher does not duplicate animations if the same child is entered twice.', (WidgetTester tester) async {
     Future<void> pumpChild(Widget child) async {
       return tester.pumpWidget(
         Directionality(
