@@ -734,7 +734,6 @@ class _RouterState<T> extends State<Router<T>> with RestorationMixin {
     widget.backButtonDispatcher?.removeCallback(_handleBackButtonDispatcherNotification);
     widget.routerDelegate.removeListener(_handleRouterDelegateNotification);
     _currentRouterTransaction = null;
-    _routeInformation.dispose();
     super.dispose();
   }
 
