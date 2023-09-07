@@ -26,6 +26,7 @@
 #include "third_party/skia/include/core/SkSerialProcs.h"
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/core/SkSurface.h"
+#include "third_party/skia/include/encode/SkPngEncoder.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
@@ -696,6 +697,9 @@ static sk_sp<SkData> ScreenshotLayerTreeAsPicture(
 #else
   SkSerialProcs procs = {0};
   procs.fTypefaceProc = SerializeTypefaceWithData;
+  procs.fImageProc = [](SkImage* img, void*) -> sk_sp<SkData> {
+    return SkPngEncoder::Encode(nullptr, img, SkPngEncoder::Options{});
+  };
 #endif
 
   return recorder.finishRecordingAsPicture()->serialize(&procs);
