@@ -1890,6 +1890,7 @@ void main() {
       count += 1;
     }
     final MaterialStatesController controller = MaterialStatesController();
+    addTearDown(controller.dispose);
     controller.addListener(valueChanged);
 
     await tester.pumpWidget(
@@ -1990,20 +1991,21 @@ void main() {
     await gesture.removePointer();
   }
 
-  testWidgets('OutlinedButton statesController', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('OutlinedButton statesController', (WidgetTester tester) async {
     testStatesController(null, tester);
   });
 
-  testWidgets('OutlinedButton.icon statesController', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('OutlinedButton.icon statesController', (WidgetTester tester) async {
     testStatesController(const Icon(Icons.add), tester);
   });
 
-  testWidgets('Disabled OutlinedButton statesController', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Disabled OutlinedButton statesController', (WidgetTester tester) async {
     int count = 0;
     void valueChanged() {
       count += 1;
     }
     final MaterialStatesController controller = MaterialStatesController();
+    addTearDown(controller.dispose);
     controller.addListener(valueChanged);
 
     await tester.pumpWidget(

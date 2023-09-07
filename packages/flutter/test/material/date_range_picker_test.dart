@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'feedback_tester.dart';
 
 void main() {
@@ -252,19 +251,12 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgetsWithLeakTracking('landscape', (WidgetTester tester) async {
+    testWidgets('landscape', (WidgetTester tester) async {
       await showPicker(tester, kCommonScreenSizeLandscape);
       expect(tester.widget<Text>(find.text('Jan 15 – Jan 25, 2016')).style?.fontSize, 24);
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
-    },
-      // TODO(polina-c): remove after resolving
-      // https://github.com/flutter/flutter/issues/130354
-      leakTrackingTestConfig: const LeakTrackingTestConfig(
-        allowAllNotGCed: true,
-        allowAllNotDisposed: true,
-      ),
-    );
+    });
   });
 
   testWidgets('Save and help text is used', (WidgetTester tester) async {
