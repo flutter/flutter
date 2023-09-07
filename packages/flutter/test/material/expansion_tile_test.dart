@@ -1198,5 +1198,4 @@ void main() {
     final ExpansionTileController? controller2 = ExpansionTileController.maybeOf(nonDescendantKey.currentContext!);
     expect(controller2, isNull);
   });
-
 }
