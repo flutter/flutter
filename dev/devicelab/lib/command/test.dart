@@ -83,7 +83,6 @@ class TestCommand extends Command<void> {
     // Prepend '--' to convert args to options when passed to task
     final List<String> taskArgs = taskArgsRaw.map((String taskArg) => '--$taskArg').toList();
     print(taskArgs);
-    print('@andrewkolos ${argResults!['exit']}');
     await runTasks(
       <String>[argResults!['task'] as String],
       deviceId: argResults!['device-id'] as String?,
