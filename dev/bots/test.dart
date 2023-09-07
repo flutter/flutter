@@ -1004,6 +1004,23 @@ Future<void> _runFrameworkTests() async {
       // Web-specific tests depend on Chromium, so they run as part of the web_long_running_tests shard.
       '--exclude-tags=web',
     ]);
+    // Run java unit tests for integration_test
+    //
+    // Generate Gradle wrapper if it doesn't exist.
+    Process.runSync(
+      flutter,
+      <String>['build', 'apk', '--config-only'],
+      workingDirectory: path.join(flutterRoot, 'packages', 'integration_test', 'example', 'android'),
+    );
+    await runCommand(
+      path.join(flutterRoot, 'packages', 'integration_test', 'example', 'android', 'gradlew$bat'),
+      <String>[
+        ':integration_test:testDebugUnitTest',
+        '--tests',
+        'dev.flutter.plugins.integration_test.FlutterDeviceScreenshotTest',
+      ],
+      workingDirectory: path.join(flutterRoot, 'packages', 'integration_test', 'example', 'android'),
+    );
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'));
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'));
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
