@@ -857,7 +857,7 @@ class DataTable extends StatelessWidget {
       height: effectiveHeadingRowHeight,
       alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
       child: AnimatedDefaultTextStyle(
-        style: effectiveHeadingTextStyle,
+        style: DefaultTextStyle.of(context).style.merge(effectiveHeadingTextStyle),
         softWrap: false,
         duration: _sortArrowAnimationDuration,
         child: label,
@@ -926,9 +926,9 @@ class DataTable extends StatelessWidget {
       constraints: BoxConstraints(minHeight: effectiveDataRowMinHeight, maxHeight: effectiveDataRowMaxHeight),
       alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
       child: DefaultTextStyle(
-        style: effectiveDataTextStyle.copyWith(
-          color: placeholder ? effectiveDataTextStyle.color!.withOpacity(0.6) : null,
-        ),
+        style: DefaultTextStyle.of(context).style
+          .merge(effectiveDataTextStyle)
+          .copyWith(color: placeholder ? effectiveDataTextStyle.color!.withOpacity(0.6) : null),
         child: DropdownButtonHideUnderline(child: label),
       ),
     );
