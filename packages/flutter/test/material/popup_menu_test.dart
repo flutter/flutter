@@ -3740,6 +3740,51 @@ void main() {
     expect(_labelStyle(tester, 'Item 1')!.fontWeight, customTextStyle.fontWeight);
     expect(_labelStyle(tester, 'Item 1')!.fontStyle, customTextStyle.fontStyle);
   });
+
+  testWidgets('CheckedPopupMenuItem.onTap callback is called when defined', (WidgetTester tester) async {
+    int count = 0;
+    await tester.pumpWidget(
+      TestApp(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: RepaintBoundary(
+            child: PopupMenuButton<String>(
+              child: const Text('button'),
+              itemBuilder: (BuildContext context) {
+                  return  <PopupMenuItem<String>>[
+                  CheckedPopupMenuItem<String>(
+                    onTap: () {
+                      count += 1;
+                    },
+                    value: 'item1',
+                    child: const Text('Item with onTap'),
+                  ),
+                  const CheckedPopupMenuItem<String>(
+                    value: 'item2',
+                    child: Text('Item without onTap'),
+                  ),
+                ];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Tap a checked menu item with onTap.
+    await tester.tap(find.text('button'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(CheckedPopupMenuItem<String>, 'Item with onTap'));
+    await tester.pumpAndSettle();
+    expect(count, 1);
+
+    // Tap a checked menu item without onTap.
+    await tester.tap(find.text('button'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(CheckedPopupMenuItem<String>, 'Item without onTap'));
+    await tester.pumpAndSettle();
+    expect(count, 1);
+  });
 }
 
 class TestApp extends StatelessWidget {
