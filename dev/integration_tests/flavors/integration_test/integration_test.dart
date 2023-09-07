@@ -17,7 +17,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('paid'), findsOneWidget);
-      expect(flavor, 'paid');
+      expect(appFlavor, 'paid');
     });
   });
 }
