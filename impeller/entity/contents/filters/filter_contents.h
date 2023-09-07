@@ -37,7 +37,7 @@ class FilterContents : public Contents {
       Vector2 direction,
       BlurStyle blur_style = BlurStyle::kNormal,
       Entity::TileMode tile_mode = Entity::TileMode::kDecal,
-      FilterInput::Ref alpha_mask = nullptr,
+      bool is_second_pass = false,
       Sigma secondary_sigma = {},
       const Matrix& effect_transform = Matrix());
 

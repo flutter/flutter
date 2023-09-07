@@ -27,7 +27,7 @@ class DirectionalGaussianBlurFilterContents final : public FilterContents {
 
   void SetTileMode(Entity::TileMode tile_mode);
 
-  void SetSourceOverride(FilterInput::Ref alpha_mask);
+  void SetIsSecondPass(bool is_second_pass);
 
   // |FilterContents|
   std::optional<Rect> GetFilterCoverage(
@@ -49,10 +49,7 @@ class DirectionalGaussianBlurFilterContents final : public FilterContents {
   Vector2 blur_direction_;
   BlurStyle blur_style_ = BlurStyle::kNormal;
   Entity::TileMode tile_mode_ = Entity::TileMode::kDecal;
-  bool src_color_factor_ = false;
-  bool inner_blur_factor_ = true;
-  bool outer_blur_factor_ = true;
-  FilterInput::Ref source_override_;
+  bool is_second_pass_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(DirectionalGaussianBlurFilterContents);
 };

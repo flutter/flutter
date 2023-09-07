@@ -282,10 +282,6 @@ ContentContext::ContentContext(
       CreateDefaultPipeline<PositionUVPipeline>(*context_);
   tiled_texture_pipelines_[default_options_] =
       CreateDefaultPipeline<TiledTexturePipeline>(*context_);
-  gaussian_blur_alpha_decal_pipelines_[default_options_] =
-      CreateDefaultPipeline<GaussianBlurAlphaDecalPipeline>(*context_);
-  gaussian_blur_alpha_nodecal_pipelines_[default_options_] =
-      CreateDefaultPipeline<GaussianBlurAlphaPipeline>(*context_);
   gaussian_blur_noalpha_decal_pipelines_[default_options_] =
       CreateDefaultPipeline<GaussianBlurDecalPipeline>(*context_);
   gaussian_blur_noalpha_nodecal_pipelines_[default_options_] =

@@ -63,8 +63,6 @@
 #include "impeller/entity/yuv_to_rgb_filter.vert.h"
 
 #include "impeller/entity/gaussian_blur.vert.h"
-#include "impeller/entity/gaussian_blur_alpha_decal.frag.h"
-#include "impeller/entity/gaussian_blur_alpha_nodecal.frag.h"
 #include "impeller/entity/gaussian_blur_noalpha_decal.frag.h"
 #include "impeller/entity/gaussian_blur_noalpha_nodecal.frag.h"
 
@@ -158,12 +156,6 @@ using PositionUVPipeline =
     RenderPipelineT<TextureFillVertexShader, TiledTextureFillFragmentShader>;
 using TiledTexturePipeline =
     RenderPipelineT<TextureFillVertexShader, TiledTextureFillFragmentShader>;
-using GaussianBlurAlphaDecalPipeline =
-    RenderPipelineT<GaussianBlurVertexShader,
-                    GaussianBlurAlphaDecalFragmentShader>;
-using GaussianBlurAlphaPipeline =
-    RenderPipelineT<GaussianBlurVertexShader,
-                    GaussianBlurAlphaNodecalFragmentShader>;
 using GaussianBlurDecalPipeline =
     RenderPipelineT<GaussianBlurVertexShader,
                     GaussianBlurNoalphaDecalFragmentShader>;
@@ -451,16 +443,6 @@ class ContentContext {
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetTiledTexturePipeline(
       ContentContextOptions opts) const {
     return GetPipeline(tiled_texture_pipelines_, opts);
-  }
-
-  std::shared_ptr<Pipeline<PipelineDescriptor>>
-  GetGaussianBlurAlphaDecalPipeline(ContentContextOptions opts) const {
-    return GetPipeline(gaussian_blur_alpha_decal_pipelines_, opts);
-  }
-
-  std::shared_ptr<Pipeline<PipelineDescriptor>> GetGaussianBlurAlphaPipeline(
-      ContentContextOptions opts) const {
-    return GetPipeline(gaussian_blur_alpha_nodecal_pipelines_, opts);
   }
 
   std::shared_ptr<Pipeline<PipelineDescriptor>> GetGaussianBlurDecalPipeline(
@@ -772,10 +754,6 @@ class ContentContext {
 #endif  // IMPELLER_ENABLE_OPENGLES
   mutable Variants<PositionUVPipeline> position_uv_pipelines_;
   mutable Variants<TiledTexturePipeline> tiled_texture_pipelines_;
-  mutable Variants<GaussianBlurAlphaDecalPipeline>
-      gaussian_blur_alpha_decal_pipelines_;
-  mutable Variants<GaussianBlurAlphaPipeline>
-      gaussian_blur_alpha_nodecal_pipelines_;
   mutable Variants<GaussianBlurDecalPipeline>
       gaussian_blur_noalpha_decal_pipelines_;
   mutable Variants<GaussianBlurPipeline>

@@ -32,17 +32,6 @@ uniform BlurInfo {
 }
 blur_info;
 
-#if ENABLE_ALPHA_MASK
-uniform f16sampler2D alpha_mask_sampler;
-
-uniform MaskInfo {
-  float16_t src_factor;
-  float16_t inner_blur_factor;
-  float16_t outer_blur_factor;
-}
-mask_info;
-#endif
-
 f16vec4 Sample(f16sampler2D tex, vec2 coords) {
 #if ENABLE_DECAL_SPECIALIZATION
   return IPHalfSampleDecal(tex, coords);
@@ -76,19 +65,4 @@ void main() {
   }
 
   frag_color = total_color / gaussian_integral;
-
-#if ENABLE_ALPHA_MASK
-  f16vec4 src_color = Sample(alpha_mask_sampler,   // sampler
-                             v_src_texture_coords  // texture coordinates
-  );
-
-  float16_t blur_factor;
-  if (src_color.a > 0.0hf) {
-    blur_factor = mask_info.inner_blur_factor;
-  } else if (src_color.a == 0.0hf) {
-    blur_factor = mask_info.outer_blur_factor;
-  }
-
-  frag_color = frag_color * blur_factor + src_color * mask_info.src_factor;
-#endif
 }
