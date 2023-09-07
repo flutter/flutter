@@ -41,7 +41,6 @@ f16vec4 Sample(f16sampler2D tex, vec2 coords) {
 }
 
 in vec2 v_texture_coords;
-in vec2 v_src_texture_coords;
 
 out f16vec4 frag_color;
 
