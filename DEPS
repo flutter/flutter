@@ -932,7 +932,7 @@ deps = {
    },
 
   'src/third_party/impeller-cmake-example': {
-     'url': Var('github_git') + '/bdero/impeller-cmake-example.git' + '@' + '142507046e11f593b54d94af328998bbe45a88ef',
+     'url': Var('github_git') + '/bdero/impeller-cmake-example.git' + '@' + '1f606c40651029fd944236e5be64710a6ddb75de',
      'condition': 'download_impeller_cmake_example',
   },
 
