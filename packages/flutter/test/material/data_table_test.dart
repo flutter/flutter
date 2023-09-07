@@ -2279,4 +2279,46 @@ void main() {
     // Test that cursor is updated for the row.
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.copy);
   });
+
+  // This is a regression test for https://github.com/flutter/flutter/issues/114470.
+  testWidgetsWithLeakTracking('DataTable text styles are merged with default text style', (WidgetTester tester) async {
+    late DefaultTextStyle defaultTextStyle;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              defaultTextStyle = DefaultTextStyle.of(context);
+              return DataTable(
+                headingTextStyle: const TextStyle(),
+                dataTextStyle: const TextStyle(),
+                columns: const <DataColumn>[
+                  DataColumn(label: Text('Header 1')),
+                  DataColumn(label: Text('Header 2')),
+                ],
+                rows: const <DataRow>[
+                  DataRow(
+                    cells: <DataCell>[
+                      DataCell(Text('Data 1')),
+                      DataCell(Text('Data 2')),
+                    ],
+                  ),
+                ],
+              );
+            }
+          ),
+        ),
+      ),
+    );
+
+    final TextStyle? headingTextStyle = _getTextRenderObject(tester, 'Header 1').text.style;
+    expect(headingTextStyle, defaultTextStyle.style);
+
+    final TextStyle? dataTextStyle = _getTextRenderObject(tester, 'Data 1').text.style;
+    expect(dataTextStyle, defaultTextStyle.style);
+  });
+}
+
+RenderParagraph _getTextRenderObject(WidgetTester tester, String text) {
+  return tester.renderObject(find.text(text));
 }
