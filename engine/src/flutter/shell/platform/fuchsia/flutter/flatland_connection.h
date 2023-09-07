@@ -16,6 +16,7 @@
 
 #include <cstdint>
 #include <mutex>
+#include <queue>
 #include <string>
 
 namespace flutter_runner {
@@ -23,10 +24,10 @@ namespace flutter_runner {
 using on_frame_presented_event =
     std::function<void(fuchsia::scenic::scheduling::FramePresentedInfo)>;
 
-// 2ms interval to target vsync is only used until Scenic sends presentation
-// feedback, or when we run out of present credits.
-static constexpr fml::TimeDelta kDefaultFlatlandPresentationInterval =
-    fml::TimeDelta::FromMilliseconds(2);
+// 10ms interval to target vsync is only used until Scenic sends presentation
+// feedback.
+static constexpr fml::TimeDelta kInitialFlatlandVsyncOffset =
+    fml::TimeDelta::FromMilliseconds(10);
 
 // The component residing on the raster thread that is responsible for
 // maintaining the Flatland instance connection and presenting updates.
@@ -35,9 +36,7 @@ class FlatlandConnection final {
   FlatlandConnection(std::string debug_label,
                      fuchsia::ui::composition::FlatlandHandle flatland,
                      fml::closure error_callback,
-                     on_frame_presented_event on_frame_presented_callback,
-                     uint64_t max_frames_in_flight,
-                     fml::TimeDelta vsync_offset);
+                     on_frame_presented_event on_frame_presented_callback);
 
   ~FlatlandConnection();
 
@@ -70,6 +69,12 @@ class FlatlandConnection final {
   void OnFramePresented(fuchsia::scenic::scheduling::FramePresentedInfo info);
   void DoPresent();
 
+  fml::TimePoint GetNextPresentationTime(const fml::TimePoint& now);
+  bool MaybeRunInitialVsyncCallback(const fml::TimePoint& now,
+                                    FireCallbackCallback& callback);
+  void RunVsyncCallback(const fml::TimePoint& now,
+                        FireCallbackCallback& callback);
+
   fuchsia::ui::composition::FlatlandPtr flatland_;
 
   fml::closure error_callback_;
@@ -78,7 +83,6 @@ class FlatlandConnection final {
   uint64_t next_content_id_ = 0;
 
   on_frame_presented_event on_frame_presented_callback_;
-  uint32_t present_credits_ = 1;
   bool present_waiting_for_credit_ = false;
 
   // A flow event trace id for following |Flatland::Present| calls into Scenic.
@@ -89,10 +93,13 @@ class FlatlandConnection final {
   // You should always lock mutex_ before touching anything in this struct
   struct {
     std::mutex mutex_;
-    FireCallbackCallback fire_callback_;
-    bool first_present_called_ = false;
-    bool on_next_frame_pending_ = false;
-    fml::TimePoint next_presentation_time_;
+    std::queue<fml::TimePoint> next_presentation_times_;
+    fml::TimeDelta vsync_interval_ = kInitialFlatlandVsyncOffset;
+    fml::TimeDelta vsync_offset_ = kInitialFlatlandVsyncOffset;
+    fml::TimePoint last_presentation_time_;
+    FireCallbackCallback pending_fire_callback_;
+    uint32_t present_credits_ = 1;
+    bool first_feedback_received_ = false;
   } threadsafe_state_;
 
   std::vector<zx::event> acquire_fences_;

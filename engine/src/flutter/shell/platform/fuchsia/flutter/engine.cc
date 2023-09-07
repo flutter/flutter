@@ -354,8 +354,6 @@ void Engine::Initialize(
        view_protocols = std::move(view_protocols),
        request = parent_viewport_watcher.NewRequest(),
        view_ref_pair = std::move(view_ref_pair),
-       max_frames_in_flight = product_config.get_max_frames_in_flight(),
-       vsync_offset = product_config.get_vsync_offset(),
        software_rendering = product_config.software_rendering()]() mutable {
         if (software_rendering) {
           surface_producer_ = std::make_shared<SoftwareSurfaceProducer>();
@@ -365,8 +363,7 @@ void Engine::Initialize(
 
         flatland_connection_ = std::make_shared<FlatlandConnection>(
             thread_label_, std::move(flatland),
-            std::move(session_error_callback), [](auto) {},
-            max_frames_in_flight, vsync_offset);
+            std::move(session_error_callback), [](auto) {});
 
         fuchsia::ui::views::ViewIdentityOnCreation view_identity = {
             .view_ref = std::move(view_ref_pair.second),
