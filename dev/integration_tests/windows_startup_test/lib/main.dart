@@ -28,7 +28,10 @@ void drawHelloWorld(ui.FlutterView view) {
     ..addPicture(ui.Offset.zero, picture)
     ..pop();
 
-  view.render(sceneBuilder.build());
+  ui.PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
+    view.render(sceneBuilder.build());
+  };
+  ui.PlatformDispatcher.instance.scheduleFrame();
 }
 
 void main() async {
