@@ -1773,8 +1773,7 @@ class TabBarView extends StatefulWidget {
 
 class _TabBarViewState extends State<TabBarView> {
   TabController? _controller;
-  late PageController _pageController;
-  bool _pageControllerCreatedAndNotDisposed = false;
+  PageController? _pageController;
   late List<Widget> _childrenWithKey;
   int? _currentIndex;
   int _warpUnderwayCount = 0;
@@ -1816,7 +1815,7 @@ class _TabBarViewState extends State<TabBarView> {
 
   void _jumpToPage(int page) {
     _warpUnderwayCount += 1;
-    _pageController.jumpToPage(page);
+    _pageController!.jumpToPage(page);
     _warpUnderwayCount -= 1;
   }
 
@@ -1826,7 +1825,7 @@ class _TabBarViewState extends State<TabBarView> {
     required Curve curve,
   }) async {
     _warpUnderwayCount += 1;
-    await _pageController.animateToPage(page, duration: duration, curve: curve);
+    await _pageController!.animateToPage(page, duration: duration, curve: curve);
     _warpUnderwayCount -= 1;
   }
 
@@ -1841,14 +1840,11 @@ class _TabBarViewState extends State<TabBarView> {
     super.didChangeDependencies();
     _updateTabController();
     _currentIndex = _controller!.index;
-    if (_pageControllerCreatedAndNotDisposed) {
-      _pageController.dispose();
-    }
+    _pageController?.dispose();
     _pageController = PageController(
       initialPage: _currentIndex!,
       viewportFraction: widget.viewportFraction,
     );
-    _pageControllerCreatedAndNotDisposed = true;
   }
 
   @override
@@ -1872,9 +1868,7 @@ class _TabBarViewState extends State<TabBarView> {
       _controller!.animation!.removeListener(_handleTabControllerAnimationTick);
     }
     _controller = null;
-    if (_pageControllerCreatedAndNotDisposed) {
-      _pageController.dispose();
-    }
+    _pageController?.dispose();
     // We don't own the _controller Animation, so it's not disposed here.
     super.dispose();
   }
@@ -1895,7 +1889,7 @@ class _TabBarViewState extends State<TabBarView> {
   }
 
   void _warpToCurrentIndex() {
-    if (!mounted || _pageController.page == _currentIndex!.toDouble()) {
+    if (!mounted || _pageController!.page == _currentIndex!.toDouble()) {
       return;
     }
 
@@ -1955,7 +1949,7 @@ class _TabBarViewState extends State<TabBarView> {
   }
 
   void _syncControllerOffset() {
-    _controller!.offset = clampDouble(_pageController.page! - _controller!.index, -1.0, 1.0);
+    _controller!.offset = clampDouble(_pageController!.page! - _controller!.index, -1.0, 1.0);
   }
 
   // Called when the PageView scrolls
@@ -1973,15 +1967,16 @@ class _TabBarViewState extends State<TabBarView> {
     }
 
     _scrollUnderwayCount += 1;
+    final double page = _pageController!.page!;
     if (notification is ScrollUpdateNotification && !_controller!.indexIsChanging) {
-      final bool pageChanged = (_pageController.page! - _controller!.index).abs() > 1.0;
+      final bool pageChanged = (page - _controller!.index).abs() > 1.0;
       if (pageChanged) {
-        _controller!.index = _pageController.page!.round();
+        _controller!.index = page.round();
         _currentIndex =_controller!.index;
       }
       _syncControllerOffset();
     } else if (notification is ScrollEndNotification) {
-      _controller!.index = _pageController.page!.round();
+      _controller!.index = page.round();
       _currentIndex = _controller!.index;
       if (!_controller!.indexIsChanging) {
         _syncControllerOffset();
