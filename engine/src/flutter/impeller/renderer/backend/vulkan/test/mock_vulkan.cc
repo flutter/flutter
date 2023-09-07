@@ -346,6 +346,52 @@ void vkCmdSetViewport(VkCommandBuffer commandBuffer,
   mock_command_buffer->called_functions_->push_back("vkCmdSetViewport");
 }
 
+void vkFreeCommandBuffers(VkDevice device,
+                          VkCommandPool commandPool,
+                          uint32_t commandBufferCount,
+                          const VkCommandBuffer* pCommandBuffers) {
+  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  mock_device->called_functions_->push_back("vkFreeCommandBuffers");
+}
+
+void vkDestroyCommandPool(VkDevice device,
+                          VkCommandPool commandPool,
+                          const VkAllocationCallbacks* pAllocator) {
+  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  mock_device->called_functions_->push_back("vkDestroyCommandPool");
+}
+
+VkResult vkEndCommandBuffer(VkCommandBuffer commandBuffer) {
+  return VK_SUCCESS;
+}
+
+VkResult vkCreateFence(VkDevice device,
+                       const VkFenceCreateInfo* pCreateInfo,
+                       const VkAllocationCallbacks* pAllocator,
+                       VkFence* pFence) {
+  *pFence = reinterpret_cast<VkFence>(0xfe0ce);
+  return VK_SUCCESS;
+}
+
+VkResult vkQueueSubmit(VkQueue queue,
+                       uint32_t submitCount,
+                       const VkSubmitInfo* pSubmits,
+                       VkFence fence) {
+  return VK_SUCCESS;
+}
+
+VkResult vkWaitForFences(VkDevice device,
+                         uint32_t fenceCount,
+                         const VkFence* pFences,
+                         VkBool32 waitAll,
+                         uint64_t timeout) {
+  return VK_SUCCESS;
+}
+
+VkResult vkGetFenceStatus(VkDevice device, VkFence fence) {
+  return VK_SUCCESS;
+}
+
 PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
                                             const char* pName) {
   if (strcmp("vkEnumerateInstanceExtensionProperties", pName) == 0) {
@@ -424,6 +470,20 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return (PFN_vkVoidFunction)vkCmdSetScissor;
   } else if (strcmp("vkCmdSetViewport", pName) == 0) {
     return (PFN_vkVoidFunction)vkCmdSetViewport;
+  } else if (strcmp("vkDestroyCommandPool", pName) == 0) {
+    return (PFN_vkVoidFunction)vkDestroyCommandPool;
+  } else if (strcmp("vkFreeCommandBuffers", pName) == 0) {
+    return (PFN_vkVoidFunction)vkFreeCommandBuffers;
+  } else if (strcmp("vkEndCommandBuffer", pName) == 0) {
+    return (PFN_vkVoidFunction)vkEndCommandBuffer;
+  } else if (strcmp("vkCreateFence", pName) == 0) {
+    return (PFN_vkVoidFunction)vkCreateFence;
+  } else if (strcmp("vkQueueSubmit", pName) == 0) {
+    return (PFN_vkVoidFunction)vkQueueSubmit;
+  } else if (strcmp("vkWaitForFences", pName) == 0) {
+    return (PFN_vkVoidFunction)vkWaitForFences;
+  } else if (strcmp("vkGetFenceStatus", pName) == 0) {
+    return (PFN_vkVoidFunction)vkGetFenceStatus;
   }
   return noop;
 }

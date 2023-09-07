@@ -34,13 +34,7 @@ class TrackedObjectsVK {
     if (!buffer_) {
       return;
     }
-    auto pool = pool_.lock();
-    if (!pool) {
-      // The buffer can not be freed if its command pool has been destroyed.
-      buffer_.release();
-      return;
-    }
-    pool->CollectGraphicsCommandBuffer(std::move(buffer_));
+    pool_->CollectGraphicsCommandBuffer(std::move(buffer_));
   }
 
   bool IsValid() const { return is_valid_; }
@@ -86,7 +80,8 @@ class TrackedObjectsVK {
 
  private:
   DescriptorPoolVK desc_pool_;
-  std::weak_ptr<CommandPoolVK> pool_;
+  // `shared_ptr` since command buffers have a link to the command pool.
+  std::shared_ptr<CommandPoolVK> pool_;
   vk::UniqueCommandBuffer buffer_;
   std::set<std::shared_ptr<SharedObjectVK>> tracked_objects_;
   std::set<std::shared_ptr<const Buffer>> tracked_buffers_;
