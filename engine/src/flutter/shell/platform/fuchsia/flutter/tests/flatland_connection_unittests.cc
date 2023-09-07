@@ -52,11 +52,17 @@ void AwaitVsyncChecked(FlatlandConnection& flatland_connection,
 }
 
 std::vector<fuchsia::scenic::scheduling::PresentationInfo>
-CreateFuturePresentationInfos(int presentation_time) {
+CreateFuturePresentationInfos(const fml::TimePoint& presentation_time_1,
+                              const fml::TimePoint& presentation_time_2) {
   fuchsia::scenic::scheduling::PresentationInfo info_1;
-  info_1.set_presentation_time(presentation_time);
+  info_1.set_presentation_time(
+      presentation_time_1.ToEpochDelta().ToNanoseconds());
   std::vector<fuchsia::scenic::scheduling::PresentationInfo> infos;
   infos.push_back(std::move(info_1));
+  fuchsia::scenic::scheduling::PresentationInfo info_2;
+  info_2.set_presentation_time(
+      presentation_time_2.ToEpochDelta().ToNanoseconds());
+  infos.push_back(std::move(info_2));
   return infos;
 }
 
@@ -81,14 +87,24 @@ class FlatlandConnectionTest : public ::testing::Test {
   }
 
   // Syntactic sugar for OnNextFrameBegin
-  void OnNextFrameBegin(int num_present_credits, int presentation_time = 345) {
+  void OnNextFrameBegin(int num_present_credits,
+                        const fml::TimePoint& presentation_time_1,
+                        const fml::TimePoint& presentation_time_2) {
     fuchsia::ui::composition::OnNextFrameBeginValues on_next_frame_begin_values;
     on_next_frame_begin_values.set_additional_present_credits(
         num_present_credits);
     on_next_frame_begin_values.set_future_presentation_infos(
-        CreateFuturePresentationInfos(presentation_time));
+        CreateFuturePresentationInfos(presentation_time_1,
+                                      presentation_time_2));
     fake_flatland().FireOnNextFrameBeginEvent(
         std::move(on_next_frame_begin_values));
+  }
+  void OnNextFrameBegin(int num_present_credits) {
+    const auto now = fml::TimePoint::Now();
+    const auto kPresentationTime1 = now + fml::TimeDelta::FromSeconds(100);
+    const auto kPresentationTime2 = now + fml::TimeDelta::FromSeconds(200);
+    OnNextFrameBegin(num_present_credits, kPresentationTime1,
+                     kPresentationTime2);
   }
 
  private:
@@ -106,13 +122,13 @@ TEST_F(FlatlandConnectionTest, Initialization) {
   const std::string debug_name = GetCurrentTestName();
   flutter_runner::FlatlandConnection flatland_connection(
       debug_name, TakeFlatlandHandle(), []() { FAIL(); },
-      [](auto...) { FAIL(); }, 1, fml::TimeDelta::Zero());
+      [](auto...) { FAIL(); });
   EXPECT_EQ(fake_flatland().debug_name(), "");
 
-  // Simulate an AwaitVsync that comes immediately.
+  // Simulate an AwaitVsync that returns immediately.
   bool await_vsync_fired = false;
   AwaitVsyncChecked(flatland_connection, await_vsync_fired,
-                    kDefaultFlatlandPresentationInterval);
+                    kInitialFlatlandVsyncOffset);
   EXPECT_TRUE(await_vsync_fired);
 
   // Ensure the debug name is set.
@@ -129,7 +145,7 @@ TEST_F(FlatlandConnectionTest, FlatlandDisconnect) {
   // completed yet.
   flutter_runner::FlatlandConnection flatland_connection(
       GetCurrentTestName(), TakeFlatlandHandle(), std::move(on_session_error),
-      [](auto...) { FAIL(); }, 1, fml::TimeDelta::Zero());
+      [](auto...) { FAIL(); });
   EXPECT_FALSE(error_fired);
 
   // Simulate a flatland disconnection, then Pump the loop.  The error callback
@@ -163,7 +179,7 @@ TEST_F(FlatlandConnectionTest, BasicPresent) {
   // completed yet.
   flutter_runner::FlatlandConnection flatland_connection(
       GetCurrentTestName(), TakeFlatlandHandle(), []() { FAIL(); },
-      std::move(on_frame_presented), 1, fml::TimeDelta::Zero());
+      std::move(on_frame_presented));
   EXPECT_EQ(presents_called, 0u);
   EXPECT_EQ(vsyncs_handled, 0u);
 
@@ -175,7 +191,7 @@ TEST_F(FlatlandConnectionTest, BasicPresent) {
   // Simulate an AwaitVsync that comes after the first call.
   bool await_vsync_fired = false;
   AwaitVsyncChecked(flatland_connection, await_vsync_fired,
-                    kDefaultFlatlandPresentationInterval);
+                    kInitialFlatlandVsyncOffset);
   EXPECT_TRUE(await_vsync_fired);
 
   // Call Present and Pump the loop; `Present` and its callback is called. No
@@ -193,17 +209,17 @@ TEST_F(FlatlandConnectionTest, BasicPresent) {
   EXPECT_FALSE(await_vsync_fired);
 
   // Fire the `OnNextFrameBegin` event. AwaitVsync should be fired.
-  const int kPresentationTime = 123;
-  AwaitVsyncChecked(flatland_connection, await_vsync_fired,
-                    fml::TimePoint::FromEpochDelta(
-                        fml::TimeDelta::FromNanoseconds(kPresentationTime)));
+  const auto now = fml::TimePoint::Now();
+  const auto kPresentationTime1 = now + fml::TimeDelta::FromSeconds(100);
+  const auto kPresentationTime2 = now + fml::TimeDelta::FromSeconds(200);
   fuchsia::ui::composition::OnNextFrameBeginValues on_next_frame_begin_values;
   on_next_frame_begin_values.set_additional_present_credits(3);
   on_next_frame_begin_values.set_future_presentation_infos(
-      CreateFuturePresentationInfos(kPresentationTime));
+      CreateFuturePresentationInfos(kPresentationTime1, kPresentationTime2));
   fake_flatland().FireOnNextFrameBeginEvent(
       std::move(on_next_frame_begin_values));
   loop().RunUntilIdle();
+  AwaitVsyncChecked(flatland_connection, await_vsync_fired, kPresentationTime1);
   EXPECT_TRUE(await_vsync_fired);
 
   // Fire the `OnFramePresented` event associated with the first `Present`,
@@ -219,9 +235,14 @@ TEST_F(FlatlandConnectionTest, BasicPresent) {
   loop().RunUntilIdle();
   EXPECT_EQ(presents_called, 2u);
   EXPECT_EQ(release_fence_handle, first_release_fence_handle);
+
+  // AwaitVsync should be fired with the second present.
+  await_vsync_fired = false;
+  AwaitVsyncChecked(flatland_connection, await_vsync_fired, kPresentationTime2);
+  EXPECT_TRUE(await_vsync_fired);
 }
 
-TEST_F(FlatlandConnectionTest, AwaitVsyncBeforePresent) {
+TEST_F(FlatlandConnectionTest, AwaitVsyncsBeforeOnNextFrameBegin) {
   // Set up callbacks which allow sensing of how many presents were handled.
   size_t presents_called = 0u;
   fake_flatland().SetPresentHandler(
@@ -231,7 +252,7 @@ TEST_F(FlatlandConnectionTest, AwaitVsyncBeforePresent) {
   // completed yet.
   flutter_runner::FlatlandConnection flatland_connection(
       GetCurrentTestName(), TakeFlatlandHandle(), []() { FAIL(); },
-      [](auto...) {}, 1, fml::TimeDelta::Zero());
+      [](auto...) {});
   EXPECT_EQ(presents_called, 0u);
 
   // Pump the loop. Nothing is called.
@@ -241,28 +262,20 @@ TEST_F(FlatlandConnectionTest, AwaitVsyncBeforePresent) {
   // Simulate an AwaitVsync that comes before the first Present.
   bool await_vsync_callback_fired = false;
   AwaitVsyncChecked(flatland_connection, await_vsync_callback_fired,
-                    kDefaultFlatlandPresentationInterval);
+                    kInitialFlatlandVsyncOffset);
   EXPECT_TRUE(await_vsync_callback_fired);
 
-  // Another AwaitVsync that comes before the first Present.
-  await_vsync_callback_fired = false;
-  AwaitVsyncChecked(flatland_connection, await_vsync_callback_fired,
-                    kDefaultFlatlandPresentationInterval);
-  EXPECT_TRUE(await_vsync_callback_fired);
-
-  // Queue Present.
-  flatland_connection.Present();
-  loop().RunUntilIdle();
-  EXPECT_EQ(presents_called, 1u);
-
-  // Set the callback with AwaitVsync, callback should not be fired
-  await_vsync_callback_fired = false;
-  AwaitVsyncChecked(flatland_connection, await_vsync_callback_fired,
-                    kDefaultFlatlandPresentationInterval);
-  EXPECT_FALSE(await_vsync_callback_fired);
+  // AwaitVsync that comes before the first Present.
+  bool await_vsync_secondary_callback_fired = false;
+  flatland_connection.AwaitVsyncForSecondaryCallback(
+      [&await_vsync_secondary_callback_fired](fml::TimePoint frame_start,
+                                              fml::TimePoint frame_end) {
+        await_vsync_secondary_callback_fired = true;
+      });
+  EXPECT_TRUE(await_vsync_secondary_callback_fired);
 }
 
-TEST_F(FlatlandConnectionTest, OutOfOrderAwait) {
+TEST_F(FlatlandConnectionTest, RunsOutOfFuturePresentationInfos) {
   // Set up callbacks which allow sensing of how many presents were handled.
   size_t presents_called = 0u;
   fake_flatland().SetPresentHandler(
@@ -279,7 +292,7 @@ TEST_F(FlatlandConnectionTest, OutOfOrderAwait) {
   // completed yet.
   flutter_runner::FlatlandConnection flatland_connection(
       GetCurrentTestName(), TakeFlatlandHandle(), []() { FAIL(); },
-      std::move(on_frame_presented), 1, fml::TimeDelta::Zero());
+      std::move(on_frame_presented));
   EXPECT_EQ(presents_called, 0u);
   EXPECT_EQ(vsyncs_handled, 0u);
 
@@ -291,7 +304,7 @@ TEST_F(FlatlandConnectionTest, OutOfOrderAwait) {
   // Simulate an AwaitVsync that comes before the first Present.
   bool await_vsync_callback_fired = false;
   AwaitVsyncChecked(flatland_connection, await_vsync_callback_fired,
-                    kDefaultFlatlandPresentationInterval);
+                    kInitialFlatlandVsyncOffset);
   EXPECT_TRUE(await_vsync_callback_fired);
 
   // Queue Present.
@@ -299,49 +312,30 @@ TEST_F(FlatlandConnectionTest, OutOfOrderAwait) {
   loop().RunUntilIdle();
   EXPECT_EQ(presents_called, 1u);
 
-  // Set the callback with AwaitVsync, callback should not be fired
-  await_vsync_callback_fired = false;
-  const int kPresentationTime1 = 567;
-  AwaitVsyncChecked(flatland_connection, await_vsync_callback_fired,
-                    fml::TimePoint::FromEpochDelta(
-                        fml::TimeDelta::FromNanoseconds(kPresentationTime1)));
-  EXPECT_FALSE(await_vsync_callback_fired);
-
   // Fire the `OnNextFrameBegin` event. AwaitVsync callback should be fired with
-  // the given presentation time.
+  // the first presentation time.
   await_vsync_callback_fired = false;
-  OnNextFrameBegin(1, kPresentationTime1);
+  const auto kPresentationTime1 =
+      fml::TimePoint::Now() + fml::TimeDelta::FromSeconds(123);
+  const auto kVsyncInterval = fml::TimeDelta::FromSeconds(234);
+  const auto kPresentationTime2 = kPresentationTime1 + kVsyncInterval;
+  OnNextFrameBegin(1, kPresentationTime1, kPresentationTime2);
   loop().RunUntilIdle();
+  AwaitVsyncChecked(flatland_connection, await_vsync_callback_fired,
+                    kPresentationTime1);
   EXPECT_TRUE(await_vsync_callback_fired);
 
-  // Second consecutive ONFB should not call the fire callback and should
-  // instead set it to be pending to fire on next AwaitVsync
-  await_vsync_callback_fired = false;
-  const int kPresentationTime2 = 678;
-  OnNextFrameBegin(1, kPresentationTime2);
-  loop().RunUntilIdle();
-  EXPECT_FALSE(await_vsync_callback_fired);
-
-  // Now an AwaitVsync should immediately fire the pending callback with the
-  // default presentation interval.
+  // Second consecutive AwaitVsync callback should be fired with
+  // the second presentation time.
   await_vsync_callback_fired = false;
   AwaitVsyncChecked(flatland_connection, await_vsync_callback_fired,
-                    kDefaultFlatlandPresentationInterval);
+                    kPresentationTime2);
   EXPECT_TRUE(await_vsync_callback_fired);
 
-  // With the pending callback fired, The new callback should be set for the
-  // next OnNextFrameBegin to call
+  // Another AwaitVsync callback should be fired with vsync_interval.
   await_vsync_callback_fired = false;
-  const int kPresentationTime3 = 789;
   AwaitVsyncChecked(flatland_connection, await_vsync_callback_fired,
-                    fml::TimePoint::FromEpochDelta(
-                        fml::TimeDelta::FromNanoseconds(kPresentationTime3)));
-  EXPECT_FALSE(await_vsync_callback_fired);
-
-  // Now OnNextFrameBegin should fire the callback
-  await_vsync_callback_fired = false;
-  OnNextFrameBegin(1, kPresentationTime3);
-  loop().RunUntilIdle();
+                    kPresentationTime2 + kVsyncInterval);
   EXPECT_TRUE(await_vsync_callback_fired);
 }
 
@@ -371,7 +365,7 @@ TEST_F(FlatlandConnectionTest, PresentCreditExhaustion) {
   on_frame_presented_event on_frame_presented = [](auto...) {};
   flutter_runner::FlatlandConnection flatland_connection(
       GetCurrentTestName(), TakeFlatlandHandle(), []() { FAIL(); },
-      std::move(on_frame_presented), 1, fml::TimeDelta::Zero());
+      std::move(on_frame_presented));
   EXPECT_EQ(num_presents_called, 0u);
 
   // Pump the loop. Nothing is called.
