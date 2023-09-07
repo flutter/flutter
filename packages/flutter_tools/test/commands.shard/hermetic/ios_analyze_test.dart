@@ -19,10 +19,9 @@ import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/project_validator.dart';
 import 'package:test/fake.dart';
-import 'package:test/test.dart';
 
+import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/fake_process_manager.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -65,7 +64,7 @@ void main() {
       }
     });
 
-    test('can output json file', () async {
+    testWithoutContext('can output json file', () async {
       final MockIosProject ios = MockIosProject();
       final MockFlutterProject project = MockFlutterProject(ios);
       const String expectedConfig = 'someConfig';
@@ -87,7 +86,7 @@ void main() {
       expect(ios.outputTarget, expectedTarget);
     });
 
-    test('can list build options', () async {
+    testWithoutContext('can list build options', () async {
       final MockIosProject ios = MockIosProject();
       final MockFlutterProject project = MockFlutterProject(ios);
       const List<String> targets = <String>['target1', 'target2'];

@@ -135,8 +135,7 @@ class AnalyzeCommand extends FlutterCommand {
 
     argParser.addOption('build-variant',
       help: 'Sets the Android build variant to be analyzed.',
-      valueHelp: 'use "flutter analyze --android --list-build-variants" to get '
-          'all available build variants',
+      valueHelp: 'build variant',
       hide: !verboseHelp,
     );
 
@@ -159,22 +158,19 @@ class AnalyzeCommand extends FlutterCommand {
 
     argParser.addOption('configuration',
       help: 'Sets the iOS build configuration to be analyzed.',
-      valueHelp: 'use "flutter analyze --ios --list-build-options" to get '
-          'all available build configuration',
+      valueHelp: 'configuration',
       hide: !verboseHelp,
     );
 
     argParser.addOption('scheme',
       help: 'Sets the iOS build scheme to be analyzed.',
-      valueHelp: 'use "flutter analyze --ios --list-build-options" to get '
-          'all available build scheme',
+      valueHelp: 'scheme',
       hide: !verboseHelp,
     );
 
     argParser.addOption('target',
       help: 'Sets the iOS build target to be analyzed.',
-      valueHelp: 'use "flutter analyze --ios --list-build-options" to get '
-          'all available build target',
+      valueHelp: 'target',
       hide: !verboseHelp,
     );
   }
