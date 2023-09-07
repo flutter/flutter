@@ -231,6 +231,8 @@ class _TabStyle extends AnimatedWidget {
     // details: https://github.com/flutter/flutter/pull/109541#issuecomment-1294241417
     Color selectedColor = labelColor
         ?? tabBarTheme.labelColor
+        ?? labelStyle?.color
+        ?? tabBarTheme.labelStyle?.color
         ?? defaults.labelColor!;
 
     final Color unselectedColor;
@@ -243,6 +245,8 @@ class _TabStyle extends AnimatedWidget {
       // when labelColor is a MaterialStateColor.
       unselectedColor = unselectedLabelColor
           ?? tabBarTheme.unselectedLabelColor
+          ?? unselectedLabelStyle?.color
+          ?? tabBarTheme.unselectedLabelStyle?.color
           ?? (themeData.useMaterial3
                ? defaults.unselectedLabelColor!
                : selectedColor.withAlpha(0xB2)); // 70% alpha
@@ -267,18 +271,18 @@ class _TabStyle extends AnimatedWidget {
 
     // To enable TextStyle.lerp(style1, style2, value), both styles must have
     // the same value of inherit. Force that to be inherit=true here.
-    final TextStyle defaultStyle = (labelStyle
+    final TextStyle selectedStyle = (labelStyle
       ?? tabBarTheme.labelStyle
       ?? defaults.labelStyle!
     ).copyWith(inherit: true);
-    final TextStyle defaultUnselectedStyle = (unselectedLabelStyle
+    final TextStyle unselectedStyle = (unselectedLabelStyle
       ?? tabBarTheme.unselectedLabelStyle
       ?? labelStyle
       ?? defaults.unselectedLabelStyle!
     ).copyWith(inherit: true);
     final TextStyle textStyle = isSelected
-      ? TextStyle.lerp(defaultStyle, defaultUnselectedStyle, animation.value)!
-      : TextStyle.lerp(defaultUnselectedStyle, defaultStyle, animation.value)!;
+      ? TextStyle.lerp(selectedStyle, unselectedStyle, animation.value)!
+      : TextStyle.lerp(unselectedStyle, selectedStyle, animation.value)!;
     final Color color = _resolveWithLabelColor(context).resolve(states);
 
     return DefaultTextStyle(
@@ -955,8 +959,9 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// [MaterialState.selected] state, i.e. if the [Tab] is selected or not,
   /// ignoring [unselectedLabelColor] even if it's non-null.
   ///
-  /// The color specified in the [labelStyle] and the [TabBarTheme.labelStyle]
-  /// do not affect the effective [labelColor].
+  /// When this color or the [TabBarTheme.labelColor] is specified, it overrides
+  /// the [TextStyle.color] specified for the [labelStyle] or the
+  /// [TabBarTheme.labelStyle].
   ///
   /// See also:
   ///
@@ -975,9 +980,9 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// will be used, otherwise unselected tab labels are rendered with
   /// [labelColor] at 70% opacity.
   ///
-  /// The color specified in the [unselectedLabelStyle] and the
-  /// [TabBarTheme.unselectedLabelStyle] are ignored in [unselectedLabelColor]'s
-  /// precedence calculation.
+  /// When this color or the [TabBarTheme.unselectedLabelColor] is specified, it
+  /// overrides the [TextStyle.color] specified for the [unselectedLabelStyle]
+  /// or the [TabBarTheme.unselectedLabelStyle].
   ///
   /// See also:
   ///
@@ -986,27 +991,32 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// The text style of the selected tab labels.
   ///
-  /// This does not influence color of the tab labels even if [TextStyle.color]
-  /// is non-null. Refer [labelColor] to color selected tab labels instead.
+  /// The color specified in [labelStyle] and [TabBarTheme.labelStyle] is used
+  /// to style the label when [labelColor] or [TabBarTheme.labelColor] are not
+  /// specified.
   ///
   /// If [unselectedLabelStyle] is null, then this text style will be used for
   /// both selected and unselected label styles.
   ///
-  /// If this property is null and [ThemeData.useMaterial3] is true, [TextTheme.titleSmall]
+  /// If this property is null, then [TabBarTheme.labelStyle] will be used.
+  ///
+  /// If that is also null and [ThemeData.useMaterial3] is true, [TextTheme.titleSmall]
   /// will be used, otherwise the text style of the [ThemeData.primaryTextTheme]'s
   /// [TextTheme.bodyLarge] definition is used.
   final TextStyle? labelStyle;
 
   /// The text style of the unselected tab labels.
   ///
-  /// This does not influence color of the tab labels even if [TextStyle.color]
-  /// is non-null. Refer [unselectedLabelColor] to color unselected tab labels
-  /// instead.
+  /// The color specified in [unselectedLabelStyle] and [TabBarTheme.unselectedLabelStyle]
+  /// is used to style the label when [unselectedLabelColor] or [TabBarTheme.unselectedLabelColor]
+  /// are not specified.
   ///
-  /// If this property is null and [ThemeData.useMaterial3] is true,
-  /// [TextTheme.titleSmall] will be used, otherwise then the [labelStyle] value
-  /// is used. If [labelStyle] is null, the text style of the
-  /// [ThemeData.primaryTextTheme]'s [TextTheme.bodyLarge] definition is used.
+  /// If this property is null, then [TabBarTheme.unselectedLabelStyle] will be used.
+  ///
+  /// If that is also null and [ThemeData.useMaterial3] is true, [TextTheme.titleSmall]
+  /// will be used, otherwise then the [labelStyle] value is used. If [labelStyle] is null,
+  /// the text style of the [ThemeData.primaryTextTheme]'s [TextTheme.bodyLarge]
+  /// definition is used.
   final TextStyle? unselectedLabelStyle;
 
   /// The padding added to each of the tab labels.
