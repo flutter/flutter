@@ -6,21 +6,28 @@
 
 #include "flutter/fml/thread.h"
 #include "flutter/fml/trace_event.h"
+#include "fml/logging.h"
 
 namespace impeller {
 
 std::shared_ptr<ResourceManagerVK> ResourceManagerVK::Create() {
-  return std::shared_ptr<ResourceManagerVK>(new ResourceManagerVK());
+  auto manager = std::shared_ptr<ResourceManagerVK>(new ResourceManagerVK());
+  manager->waiter_ = std::thread([manager]() { manager->Start(); });
+  manager->waiter_.detach();
+  return manager;
 }
 
-ResourceManagerVK::ResourceManagerVK() : waiter_([&]() { Main(); }) {}
+ResourceManagerVK::ResourceManagerVK() {}
 
 ResourceManagerVK::~ResourceManagerVK() {
   Terminate();
   waiter_.join();
 }
 
-void ResourceManagerVK::Main() {
+void ResourceManagerVK::Start() {
+  // This thread should not be started more than once.
+  FML_DCHECK(!should_exit_);
+
   fml::Thread::SetCurrentThreadName(
       fml::Thread::ThreadConfig{"io.flutter.impeller.resource_manager"});
 
@@ -65,6 +72,9 @@ void ResourceManagerVK::Reclaim(std::unique_ptr<ResourceVK> resource) {
 }
 
 void ResourceManagerVK::Terminate() {
+  // The thread should not be terminated more than once.
+  FML_DCHECK(!should_exit_);
+
   {
     std::scoped_lock lock(reclaimables_mutex_);
     should_exit_ = true;
