@@ -594,7 +594,9 @@ class _RailDestination extends StatelessWidget {
       child: icon,
     );
     final Widget styledLabel = DefaultTextStyle(
-      style: labelTextStyle,
+      style: disabled
+        ? labelTextStyle.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.38))
+        : labelTextStyle,
       child: label,
     );
 
