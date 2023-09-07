@@ -669,12 +669,46 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   }
 
   @override
+  void didUpdateWidget(covariant ExpansionTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final ThemeData theme = Theme.of(context);
+    final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
+    final ExpansionTileThemeData defaults = theme.useMaterial3
+      ? _ExpansionTileDefaultsM3(context)
+      : _ExpansionTileDefaultsM2(context);
+    if (widget.collapsedShape != oldWidget.collapsedShape
+      || widget.shape != oldWidget.shape) {
+      _updateShapeBorder(expansionTileTheme, theme);
+    }
+    if (widget.collapsedTextColor != oldWidget.collapsedTextColor
+      || widget.textColor != oldWidget.textColor) {
+      _updateHeaderColor(expansionTileTheme, defaults);
+    }
+    if (widget.collapsedIconColor != oldWidget.collapsedIconColor
+      || widget.iconColor != oldWidget.iconColor) {
+      _updateIconColor(expansionTileTheme, defaults);
+    }
+    if (widget.backgroundColor != oldWidget.backgroundColor
+      || widget.collapsedBackgroundColor != oldWidget.collapsedBackgroundColor) {
+      _updateBackgroundColor(expansionTileTheme);
+    }
+  }
+
+  @override
   void didChangeDependencies() {
     final ThemeData theme = Theme.of(context);
     final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
     final ExpansionTileThemeData defaults = theme.useMaterial3
       ? _ExpansionTileDefaultsM3(context)
       : _ExpansionTileDefaultsM2(context);
+    _updateShapeBorder(expansionTileTheme, theme);
+    _updateHeaderColor(expansionTileTheme, defaults);
+    _updateIconColor(expansionTileTheme, defaults);
+    _updateBackgroundColor(expansionTileTheme);
+    super.didChangeDependencies();
+  }
+
+  void _updateShapeBorder(ExpansionTileThemeData expansionTileTheme, ThemeData theme) {
     _borderTween
       ..begin = widget.collapsedShape
         ?? expansionTileTheme.collapsedShape
@@ -688,20 +722,28 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
           top: BorderSide(color: theme.dividerColor),
           bottom: BorderSide(color: theme.dividerColor),
         );
+  }
+
+  void _updateHeaderColor(ExpansionTileThemeData expansionTileTheme, ExpansionTileThemeData defaults) {
     _headerColorTween
       ..begin = widget.collapsedTextColor
         ?? expansionTileTheme.collapsedTextColor
         ?? defaults.collapsedTextColor
       ..end = widget.textColor ?? expansionTileTheme.textColor ?? defaults.textColor;
+  }
+
+  void _updateIconColor(ExpansionTileThemeData expansionTileTheme, ExpansionTileThemeData defaults) {
     _iconColorTween
       ..begin = widget.collapsedIconColor
         ?? expansionTileTheme.collapsedIconColor
         ?? defaults.collapsedIconColor
       ..end = widget.iconColor ?? expansionTileTheme.iconColor ?? defaults.iconColor;
+  }
+
+  void _updateBackgroundColor(ExpansionTileThemeData expansionTileTheme) {
     _backgroundColorTween
       ..begin = widget.collapsedBackgroundColor ?? expansionTileTheme.collapsedBackgroundColor
       ..end = widget.backgroundColor ?? expansionTileTheme.backgroundColor;
-    super.didChangeDependencies();
   }
 
   @override
