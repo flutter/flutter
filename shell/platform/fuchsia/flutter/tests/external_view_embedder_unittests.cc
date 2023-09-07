@@ -414,12 +414,9 @@ class ExternalViewEmbedderTest : public ::testing::Test {
 
     const auto test_name =
         ::testing::UnitTest::GetInstance()->current_test_info()->name();
-    const auto max_frames_in_flight = 1;
-    const auto vsync_offset = fml::TimeDelta::Zero();
     return std::make_shared<FlatlandConnection>(
         std::move(test_name), std::move(flatland),
-        /*error_callback=*/[] { FAIL(); }, /*ofpe_callback=*/[](auto...) {},
-        max_frames_in_flight, vsync_offset);
+        /*error_callback=*/[] { FAIL(); }, /*ofpe_callback=*/[](auto...) {});
   }
 
   // Primary loop and subloop for the FakeFlatland instance to process its
