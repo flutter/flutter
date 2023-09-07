@@ -541,6 +541,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
   @override
   void dispose() {
+    if (widget.controller == null) {
+      _textEditingController.dispose();
+    }
     super.dispose();
   }
 

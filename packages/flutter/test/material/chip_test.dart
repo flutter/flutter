@@ -3503,6 +3503,85 @@ void main() {
     expect(calledDelete, isTrue);
   });
 
+  // This is a regression test for https://github.com/flutter/flutter/pull/133615.
+  testWidgets('Material3 - Custom shape without provided side uses default side', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: const Material(
+          child: Center(
+            child: RawChip(
+              // No side provided.
+              shape: StadiumBorder(),
+              label: Text('RawChip'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Chip should have the default side.
+    expect(
+      getMaterial(tester).shape,
+      StadiumBorder(side: BorderSide(color: theme.colorScheme.outline)),
+    );
+  });
+
+  testWidgets("Material3 - RawChip.shape's side is used when provided", (WidgetTester tester) async {
+    Widget buildChip({ OutlinedBorder? shape, BorderSide? side }) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Material(
+          child: Center(
+            child: RawChip(
+              shape: shape,
+              side: side,
+              label: const Text('RawChip'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test [RawChip.shape] with a side.
+    await tester.pumpWidget(buildChip(
+      shape: const RoundedRectangleBorder(
+        side: BorderSide(color: Color(0xffff00ff)),
+        borderRadius: BorderRadius.all(Radius.circular(7.0)),
+      )),
+    );
+
+    // Chip should have the provided shape and the side from [RawChip.shape].
+    expect(
+      getMaterial(tester).shape,
+      const RoundedRectangleBorder(
+        side: BorderSide(color: Color(0xffff00ff)),
+        borderRadius: BorderRadius.all(Radius.circular(7.0)),
+      ),
+    );
+
+    // Test [RawChip.shape] with a side and [RawChip.side].
+    await tester.pumpWidget(buildChip(
+      shape: const RoundedRectangleBorder(
+        side: BorderSide(color: Color(0xffff00ff)),
+        borderRadius: BorderRadius.all(Radius.circular(7.0)),
+      ),
+      side: const BorderSide(color: Color(0xfffff000))),
+    );
+    await tester.pumpAndSettle();
+
+    // Chip use shape from [RawChip.shape] and the side from [RawChip.side].
+    // [RawChip.shape]'s side should be ignored.
+    expect(
+      getMaterial(tester).shape,
+      const RoundedRectangleBorder(
+        side: BorderSide(color: Color(0xfffff000)),
+        borderRadius: BorderRadius.all(Radius.circular(7.0)),
+      ),
+    );
+  });
+
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
     // support is deprecated and the APIs are removed, these tests
