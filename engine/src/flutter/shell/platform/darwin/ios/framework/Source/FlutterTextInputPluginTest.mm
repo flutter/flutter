@@ -457,38 +457,6 @@ FLUTTER_ASSERT_ARC
   }
 }
 
-- (void)testSetSelectionRectsNotifiesTextChangeAfterIOS17AndDoesNotNotifyBeforeIOS17 {
-  FlutterTextInputPlugin* myInputPlugin =
-      [[FlutterTextInputPlugin alloc] initWithDelegate:OCMClassMock([FlutterEngine class])];
-
-  FlutterMethodCall* setClientCall =
-      [FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
-                                        arguments:@[ @(123), self.mutableTemplateCopy ]];
-  [myInputPlugin handleMethodCall:setClientCall
-                           result:^(id _Nullable result){
-                           }];
-
-  id mockInputDelegate = OCMProtocolMock(@protocol(UITextInputDelegate));
-  myInputPlugin.activeView.inputDelegate = mockInputDelegate;
-
-  NSArray<NSNumber*>* selectionRect = [NSArray arrayWithObjects:@0, @0, @100, @100, @0, @1, nil];
-  NSArray* selectionRects = [NSArray arrayWithObjects:selectionRect, nil];
-  FlutterMethodCall* methodCall =
-      [FlutterMethodCall methodCallWithMethodName:@"Scribble.setSelectionRects"
-                                        arguments:selectionRects];
-  [myInputPlugin handleMethodCall:methodCall
-                           result:^(id _Nullable result){
-                           }];
-
-  if (@available(iOS 17.0, *)) {
-    OCMVerify([mockInputDelegate textWillChange:myInputPlugin.activeView]);
-    OCMVerify([mockInputDelegate textDidChange:myInputPlugin.activeView]);
-  } else {
-    OCMVerify(never(), [mockInputDelegate textWillChange:myInputPlugin.activeView]);
-    OCMVerify(never(), [mockInputDelegate textDidChange:myInputPlugin.activeView]);
-  }
-}
-
 - (void)testTextRangeFromPositionMatchesUITextViewBehavior {
   FlutterTextInputView* inputView = [[FlutterTextInputView alloc] initWithOwner:textInputPlugin];
   FlutterTextPosition* fromPosition = [FlutterTextPosition positionWithIndex:2];

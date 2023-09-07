@@ -2540,21 +2540,10 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
                                                          : NSWritingDirectionRightToLeft]];
   }
 
-  BOOL shouldNotifyTextChange = NO;
-  if (@available(iOS 17, *)) {
-    // Force UIKit to query the selectionRects again on iOS 17+
-    // This is to fix a bug on iOS 17+ where UIKit queries the outdated selectionRects after
-    // entering a character, resulting in auto-correction highlight region missing the last
-    // character.
-    shouldNotifyTextChange = YES;
-  }
-  if (shouldNotifyTextChange) {
-    [_activeView.inputDelegate textWillChange:_activeView];
-  }
+  // TODO(hellohuanlin): Investigate why notifying the text input system about text changes (via
+  // textWillChange and textDidChange APIs) causes a bug where we cannot enter text with IME
+  // keyboards. Issue: https://github.com/flutter/flutter/issues/133908
   _activeView.selectionRects = rectsAsRect;
-  if (shouldNotifyTextChange) {
-    [_activeView.inputDelegate textDidChange:_activeView];
-  }
 }
 
 - (void)startLiveTextInput {
