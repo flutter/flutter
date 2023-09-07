@@ -47,13 +47,20 @@ Future<void> main() async {
 
       section('Run platform unit tests');
 
-      if (!await runXcodeTests(
+      if (!await runMacOSXcodeTests(
         platformDirectory: path.join(projectDirectory, 'macos'),
         destination: 'platform=macOS',
         testName: 'native_ui_tests_macos',
         skipCodesign: true,
       )) {
-        return TaskResult.failure('Platform unit tests failed');
+        if (!await runShXcodeTests(
+          platformDirectory: path.join(projectDirectory, 'macos'),
+          destination: 'platform=macOS',
+          testName: 'native_ui_tests_macos',
+          skipCodesign: true,
+        )) {
+          return TaskResult.failure('Platform unit tests failed');
+        }
       }
     } finally {
       if (device != null && device.canStreamLogs) {
