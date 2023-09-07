@@ -96,7 +96,7 @@ const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 /// {@tool dartpad}
 /// This example shows how to migrate the above [Drawer] to a [NavigationDrawer].
 ///
-/// ** See code in examples/api/lib/material/navigation_drawer/navigation_drawer.1.dart **
+/// ** See code in examples/api/lib/material/navigation_drawer/navigation_drawer.0.dart **
 /// {@end-tool}
 ///
 /// An open drawer may be closed with a swipe to close gesture, pressing the
