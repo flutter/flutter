@@ -98,8 +98,8 @@ class _TwitterAndUrlLinkedText extends StatefulWidget {
   });
 
   final String text;
-  final LinkTapCallback onTapUrl;
-  final LinkTapCallback onTapTwitterHandle;
+  final ValueChanged<String> onTapUrl;
+  final ValueChanged<String> onTapTwitterHandle;
 
   @override
   State<_TwitterAndUrlLinkedText> createState() => _TwitterAndUrlLinkedTextState();
