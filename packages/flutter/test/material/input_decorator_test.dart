@@ -1668,6 +1668,105 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(find.text('errorText'), findsOneWidget);
   });
 
+  testWidgets('InputDecoration shows error border for errorText and error widget', (WidgetTester tester) async {
+    const InputBorder errorBorder = OutlineInputBorder(
+      borderSide: BorderSide(color: Colors.red, width: 1.5),
+    );
+    const InputBorder focusedErrorBorder = OutlineInputBorder(
+      borderSide: BorderSide(color: Colors.teal, width: 5.0),
+    );
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        isFocused: true,
+        decoration: const InputDecoration(
+          errorText: 'error',
+          // enabled: true (default)
+          errorBorder: errorBorder,
+          focusedErrorBorder: focusedErrorBorder,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle(); // Border changes are animated.
+    expect(getBorder(tester), focusedErrorBorder);
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          errorText: 'error',
+          // enabled: true (default)
+          errorBorder: errorBorder,
+          focusedErrorBorder: focusedErrorBorder,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle(); // Border changes are animated.
+    expect(getBorder(tester), errorBorder);
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          errorText: 'error',
+          enabled: false,
+          errorBorder: errorBorder,
+          focusedErrorBorder: focusedErrorBorder,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle(); // Border changes are animated.
+    expect(getBorder(tester), errorBorder);
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        isFocused: true,
+        decoration: const InputDecoration(
+          error: Text('error'),
+          // enabled: true (default)
+          errorBorder: errorBorder,
+          focusedErrorBorder: focusedErrorBorder,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle(); // Border changes are animated.
+    expect(getBorder(tester), focusedErrorBorder);
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          error: Text('error'),
+          // enabled: true (default)
+          errorBorder: errorBorder,
+          focusedErrorBorder: focusedErrorBorder,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle(); // Border changes are animated.
+    expect(getBorder(tester), errorBorder);
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          error: Text('error'),
+          enabled: false,
+          errorBorder: errorBorder,
+          focusedErrorBorder: focusedErrorBorder,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle(); // Border changes are animated.
+    expect(getBorder(tester), errorBorder);
+  });
+
   testWidgetsWithLeakTracking('InputDecorator shows error widget', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(

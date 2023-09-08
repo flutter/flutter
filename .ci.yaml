@@ -2124,7 +2124,6 @@ targets:
 
   - name: Linux_android very_long_picture_scrolling_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 120
     properties:
