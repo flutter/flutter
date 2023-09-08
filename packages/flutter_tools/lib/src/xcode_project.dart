@@ -215,11 +215,11 @@ class IosProject extends XcodeBasedProject {
     return parent.isModule || _editableDirectory.existsSync();
   }
 
-  /// Output universal link related project settings of the iOS sub-project into
+  /// Outputs universal link related project settings of the iOS sub-project into
   /// a json file.
   ///
   /// The return future will resolve to string path to the output file.
-  Future<String> outputUniversalLinkSettings({
+  Future<String> outputsUniversalLinkSettings({
     required String configuration,
     required String scheme,
     required String target,
