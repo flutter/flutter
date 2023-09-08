@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+import '_html_element_view_io.dart' if (dart.library.js_util) '_html_element_view_web.dart';
 import 'basic.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
@@ -324,6 +325,48 @@ class UiKitView extends _DarwinView {
   State<UiKitView> createState() => _UiKitViewState();
 }
 
+/// Widget that contains a macOS AppKit view.
+///
+/// Embedding macOS views is an expensive operation and should be avoided where
+/// a Flutter equivalent is possible.
+///
+/// The platform view's lifetime is the same as the lifetime of the [State]
+/// object for this widget. When the [State] is disposed the platform view (and
+/// auxiliary resources) are lazily released (some resources are immediately
+/// released and some by platform garbage collector). A stateful widget's state
+/// is disposed when the widget is removed from the tree or when it is moved
+/// within the tree. If the stateful widget has a key and it's only moved
+/// relative to its siblings, or it has a [GlobalKey] and it's moved within the
+/// tree, it will not be disposed.
+///
+/// Construction of AppKitViews is done asynchronously, before the underlying
+/// NSView is ready this widget paints nothing while maintaining the same
+/// layout constraints.
+class AppKitView extends _DarwinView {
+  /// Creates a widget that embeds a macOS AppKit NSView.
+  const AppKitView({
+    super.key,
+    required super.viewType,
+    super.onPlatformViewCreated,
+    super.hitTestBehavior = PlatformViewHitTestBehavior.opaque,
+    super.layoutDirection,
+    super.creationParams,
+    super.creationParamsCodec,
+    super.gestureRecognizers,
+  });
+
+  @override
+  State<AppKitView> createState() => _AppKitViewState();
+}
+
+/// Callback signature for when the platform view's DOM element was created.
+///
+/// [element] is the DOM element that was created.
+///
+/// Also see [HtmlElementView.fromTagName] that uses this callback
+/// signature.
+typedef ElementCreatedCallback = void Function(Object element);
+
 /// Embeds an HTML element in the Widget hierarchy in Flutter Web.
 ///
 /// *NOTE*: This only works in Flutter Web. To embed web content on other
@@ -368,6 +411,52 @@ class HtmlElementView extends StatelessWidget {
     this.creationParams,
   });
 
+  /// Creates a platform view that creates a DOM element specified by [tagName].
+  ///
+  /// [isVisible] indicates whether the view is visible to the user or not.
+  /// Setting this to false allows the rendering pipeline to perform extra
+  /// optimizations knowing that the view will not result in any pixels painted
+  /// on the screen.
+  ///
+  /// [onElementCreated] is called when the DOM element is created. It can be
+  /// used by the app to customize the element by adding attributes and styles.
+  ///
+  /// ```dart
+  /// import 'package:flutter/widgets.dart';
+  /// import 'package:web/web.dart' as web;
+  ///
+  /// // ...
+  ///
+  /// class MyWidget extends StatelessWidget {
+  ///   const MyWidget({super.key});
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return HtmlElementView.fromTagName(
+  ///       tagName: 'div',
+  ///       onElementCreated: (Object element) {
+  ///         element as web.HTMLElement;
+  ///         element.style
+  ///             ..backgroundColor = 'blue'
+  ///             ..border = '1px solid red';
+  ///       },
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  factory HtmlElementView.fromTagName({
+    Key? key,
+    required String tagName,
+    bool isVisible = true,
+    ElementCreatedCallback? onElementCreated,
+  }) =>
+      HtmlElementViewImpl.createFromTagName(
+        key: key,
+        tagName: tagName,
+        isVisible: isVisible,
+        onElementCreated: onElementCreated,
+      );
+
   /// The unique identifier for the HTML view type to be embedded by this widget.
   ///
   /// A PlatformViewFactory for this type must have been registered.
@@ -382,83 +471,7 @@ class HtmlElementView extends StatelessWidget {
   final Object? creationParams;
 
   @override
-  Widget build(BuildContext context) {
-    assert(kIsWeb, 'HtmlElementView is only available on Flutter Web.');
-    return PlatformViewLink(
-      viewType: viewType,
-      onCreatePlatformView: _createHtmlElementView,
-      surfaceFactory: (BuildContext context, PlatformViewController controller) {
-        return PlatformViewSurface(
-          controller: controller,
-          gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
-          hitTestBehavior: PlatformViewHitTestBehavior.opaque,
-        );
-      },
-    );
-  }
-
-  /// Creates the controller and kicks off its initialization.
-  _HtmlElementViewController _createHtmlElementView(PlatformViewCreationParams params) {
-    final _HtmlElementViewController controller = _HtmlElementViewController(
-      params.id,
-      viewType,
-      creationParams,
-    );
-    controller._initialize().then((_) {
-      params.onPlatformViewCreated(params.id);
-      onPlatformViewCreated?.call(params.id);
-    });
-    return controller;
-  }
-}
-
-class _HtmlElementViewController extends PlatformViewController {
-  _HtmlElementViewController(
-    this.viewId,
-    this.viewType,
-    this.creationParams,
-  );
-
-  @override
-  final int viewId;
-
-  /// The unique identifier for the HTML view type to be embedded by this widget.
-  ///
-  /// A PlatformViewFactory for this type must have been registered.
-  final String viewType;
-
-  final dynamic creationParams;
-
-  bool _initialized = false;
-
-  Future<void> _initialize() async {
-    final Map<String, dynamic> args = <String, dynamic>{
-      'id': viewId,
-      'viewType': viewType,
-      'params': creationParams,
-    };
-    await SystemChannels.platform_views.invokeMethod<void>('create', args);
-    _initialized = true;
-  }
-
-  @override
-  Future<void> clearFocus() async {
-    // Currently this does nothing on Flutter Web.
-    // TODO(het): Implement this. See https://github.com/flutter/flutter/issues/39496
-  }
-
-  @override
-  Future<void> dispatchPointerEvent(PointerEvent event) async {
-    // We do not dispatch pointer events to HTML views because they may contain
-    // cross-origin iframes, which only accept user-generated events.
-  }
-
-  @override
-  Future<void> dispose() async {
-    if (_initialized) {
-      await SystemChannels.platform_views.invokeMethod<void>('dispose', viewId);
-    }
-  }
+  Widget build(BuildContext context) => buildImpl(context);
 }
 
 class _AndroidViewState extends State<AndroidView> {
@@ -732,6 +745,31 @@ class _UiKitViewState extends _DarwinViewState<UiKitView, UiKitViewController, R
   }
 }
 
+class _AppKitViewState extends _DarwinViewState<AppKitView, AppKitViewController, RenderAppKitView, _AppKitPlatformView> {
+  @override
+  Future<AppKitViewController> createNewViewController(int id) async {
+    return PlatformViewsService.initAppKitView(
+      id: id,
+      viewType: widget.viewType,
+      layoutDirection: _layoutDirection!,
+      creationParams: widget.creationParams,
+      creationParamsCodec: widget.creationParamsCodec,
+      onFocus: () {
+        focusNode?.requestFocus();
+      }
+    );
+  }
+
+  @override
+  _AppKitPlatformView childPlatformView() {
+    return _AppKitPlatformView(
+        controller: _controller!,
+        hitTestBehavior: widget.hitTestBehavior,
+        gestureRecognizers: widget.gestureRecognizers ?? _DarwinViewState._emptyRecognizersSet,
+      );
+  }
+}
+
 class _AndroidPlatformView extends LeafRenderObjectWidget {
   const _AndroidPlatformView({
     required this.controller,
@@ -779,7 +817,8 @@ abstract class _DarwinPlatformView<TController extends DarwinPlatformViewControl
   void updateRenderObject(BuildContext context, TRender renderObject) {
     renderObject
       ..viewController = controller
-      ..hitTestBehavior = hitTestBehavior;
+      ..hitTestBehavior = hitTestBehavior
+      ..updateGestureRecognizers(gestureRecognizers);
   }
 }
 
@@ -794,11 +833,18 @@ class _UiKitPlatformView extends _DarwinPlatformView<UiKitViewController, Render
       gestureRecognizers: gestureRecognizers,
     );
   }
+}
+
+class _AppKitPlatformView extends _DarwinPlatformView<AppKitViewController, RenderAppKitView> {
+  const _AppKitPlatformView({required super.controller, required super.hitTestBehavior, required super.gestureRecognizers});
 
   @override
-  void updateRenderObject(BuildContext context, RenderUiKitView renderObject) {
-    super.updateRenderObject(context, renderObject);
-    renderObject.updateGestureRecognizers(gestureRecognizers);
+  RenderObject createRenderObject(BuildContext context) {
+    return RenderAppKitView(
+      viewController: controller,
+      hitTestBehavior: hitTestBehavior,
+      gestureRecognizers: gestureRecognizers,
+    );
   }
 }
 

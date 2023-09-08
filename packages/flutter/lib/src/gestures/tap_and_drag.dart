@@ -684,6 +684,13 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
 /// pointer does travel enough distance then the recognizer that entered the arena
 /// first will win. The gesture detected in this case is a drag.
 ///
+/// {@tool dartpad}
+/// This example shows how to use the [TapAndPanGestureRecognizer] along with a
+/// [RawGestureDetector] to scale a Widget.
+///
+/// ** See code in examples/api/lib/gestures/tap_and_drag/tap_and_drag.0.dart **
+/// {@end-tool}
+///
 /// {@tool snippet}
 ///
 /// This example shows how to hook up [TapAndPanGestureRecognizer]s' to nested

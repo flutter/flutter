@@ -136,12 +136,14 @@
   "bottomSheetLabel": "Felt i bunden",
   "scrimOnTapHint": "Luk $modalRouteContentName",
   "keyboardKeyShift": "Shift",
-  "expansionTileExpandedHint": "double tap to collapse'",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded",
-  "menuDismissLabel": "Dismiss menu",
-  "lookUpButtonLabel": "Look Up"
+  "expansionTileExpandedHint": "tryk to gange for at skjule",
+  "expansionTileCollapsedHint": "tryk to gange for at udvide",
+  "expansionTileExpandedTapHint": "Skjul",
+  "expansionTileCollapsedTapHint": "Udvid for at få flere oplysninger",
+  "expandedHint": "Skjult",
+  "collapsedHint": "Udvidet",
+  "menuDismissLabel": "Luk menu",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

@@ -9,9 +9,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import '../foundation/leak_tracking.dart';
-import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 Widget boilerplate({required Widget child}) {
@@ -22,6 +21,52 @@ Widget boilerplate({required Widget child}) {
 }
 
 void main() {
+  testWidgetsWithLeakTracking('SegmentedButton releases state controllers for deleted segments', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    final Key key = UniqueKey();
+
+    Widget buildApp(Widget button) {
+      return MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: button,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+      buildApp(
+        SegmentedButton<int>(
+          key: key,
+          segments: const <ButtonSegment<int>>[
+            ButtonSegment<int>(value: 1, label: Text('1')),
+            ButtonSegment<int>(value: 2, label: Text('2')),
+          ],
+          selected: const <int>{2},
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(
+      buildApp(
+        SegmentedButton<int>(
+          key: key,
+          segments: const <ButtonSegment<int>>[
+            ButtonSegment<int>(value: 2, label: Text('2')),
+            ButtonSegment<int>(value: 3, label: Text('3')),
+          ],
+          selected: const <int>{2},
+        ),
+      ),
+    );
+
+    final SegmentedButtonState<int> state = tester.state(find.byType(SegmentedButton<int>));
+    expect(state.statesControllers, hasLength(2));
+    expect(state.statesControllers.keys.first.value, 2);
+    expect(state.statesControllers.keys.last.value, 3);
+  });
 
   testWidgetsWithLeakTracking('SegmentedButton is built with Material of type MaterialType.transparency', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
@@ -331,7 +376,7 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
 
   });
 
-  testWidgetsWithLeakTracking('SegmentedButtons have correct semantics', (WidgetTester tester) async {
+  testWidgets('SegmentedButtons have correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -410,7 +455,7 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
   });
 
 
-  testWidgetsWithLeakTracking('Multi-select SegmentedButtons have correct semantics', (WidgetTester tester) async {
+  testWidgets('Multi-select SegmentedButtons have correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -487,7 +532,7 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
     semantics.dispose();
   });
 
-  testWidgetsWithLeakTracking('SegmentedButton default overlayColor and foregroundColor resolve pressed state', (WidgetTester tester) async {
+  testWidgets('SegmentedButton default overlayColor and foregroundColor resolve pressed state', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
 
     await tester.pumpWidget(
@@ -535,7 +580,7 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
     expect(material.textStyle?.color, theme.colorScheme.onSurface);
   });
 
-  testWidgetsWithLeakTracking('SegmentedButton has no tooltips by default', (WidgetTester tester) async {
+  testWidgets('SegmentedButton has no tooltips by default', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
       MaterialApp(
@@ -559,7 +604,7 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
     expect(find.byType(Tooltip), findsNothing);
   });
 
-  testWidgetsWithLeakTracking('SegmentedButton has correct tooltips', (WidgetTester tester) async {
+  testWidgets('SegmentedButton has correct tooltips', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
       MaterialApp(

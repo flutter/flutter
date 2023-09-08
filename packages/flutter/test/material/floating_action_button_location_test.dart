@@ -7,8 +7,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   group('Basic floating action button locations', () {
@@ -185,7 +184,7 @@ void main() {
         await tester.pumpAndSettle();
       });
 
-      testWidgetsWithLeakTracking('interrupting motion towards the StartTop location.', (WidgetTester tester) async {
+      testWidgets('interrupting motion towards the StartTop location.', (WidgetTester tester) async {
         await tester.pumpWidget(_buildFrame(location: FloatingActionButtonLocation.centerFloat, listener: geometryListener));
         setupListener(tester);
 
@@ -198,7 +197,7 @@ void main() {
         await tester.pumpAndSettle();
       });
 
-      testWidgetsWithLeakTracking('interrupting entrance to remove the fab.', (WidgetTester tester) async {
+      testWidgets('interrupting entrance to remove the fab.', (WidgetTester tester) async {
         await tester.pumpWidget(_buildFrame(fab: null, location: FloatingActionButtonLocation.centerFloat, listener: geometryListener));
         setupListener(tester);
 
@@ -217,7 +216,7 @@ void main() {
         await tester.pumpAndSettle();
       });
 
-      testWidgetsWithLeakTracking('interrupting entrance of a new fab.', (WidgetTester tester) async {
+      testWidgets('interrupting entrance of a new fab.', (WidgetTester tester) async {
         await tester.pumpWidget(
           _buildFrame(
             fab: null,
@@ -416,7 +415,7 @@ void main() {
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_leftOffsetX, _floatOffsetY));
     });
 
-    testWidgets('centerFloat', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('centerFloat', (WidgetTester tester) async {
       await tester.pumpWidget(_singleFabScaffold(FloatingActionButtonLocation.centerFloat));
 
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_centerOffsetX, _floatOffsetY));
@@ -1038,7 +1037,7 @@ void main() {
       );
     });
 
-    testWidgets('centerFloat', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('centerFloat', (WidgetTester tester) async {
       const Rect defaultRect = Rect.fromLTRB(372.0, 478.0, 428.0, 534.0);
       // Positioned relative to BottomNavigationBar
       const Rect bottomNavigationBarRect = Rect.fromLTRB(372.0, 422.0, 428.0, 478.0);

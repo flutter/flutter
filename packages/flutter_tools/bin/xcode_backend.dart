@@ -345,6 +345,10 @@ class Context {
       flutterArgs.add('--local-engine=${environment['LOCAL_ENGINE']}');
     }
 
+    if (environment['LOCAL_ENGINE_HOST'] != null && environment['LOCAL_ENGINE_HOST']!.isNotEmpty) {
+      flutterArgs.add('--local-engine-host=${environment['LOCAL_ENGINE_HOST']}');
+    }
+
     flutterArgs.addAll(<String>[
       'assemble',
       '--no-version-check',

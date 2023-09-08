@@ -22,7 +22,9 @@
   "tabSemanticsLabel": "แท็บที่ $tabIndex จาก $tabCount",
   "modalBarrierDismissLabel": "ปิด",
   "searchTextFieldPlaceholderLabel": "ค้นหา",
-  "noSpellCheckReplacementsLabel": "No Replacements Found",
-  "menuDismissLabel": "Dismiss menu",
-  "lookUpButtonLabel": "Look Up"
+  "noSpellCheckReplacementsLabel": "ไม่พบรายการแทนที่",
+  "menuDismissLabel": "ปิดเมนู",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

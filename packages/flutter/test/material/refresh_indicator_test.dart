@@ -8,8 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 bool refreshCalled = false;
 
@@ -424,6 +423,8 @@ void main() {
     expect(controller.offset, greaterThan(lastScrollOffset));
     expect(controller.offset, lessThan(0.0));
     expect(refreshCalled, isTrue);
+
+    controller.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgetsWithLeakTracking('RefreshIndicator does not force child to relayout', (WidgetTester tester) async {
@@ -619,6 +620,8 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
     expect(tester.getCenter(find.byType(RefreshProgressIndicator)).dy, lessThan(300.0));
+
+    scrollController.dispose();
   });
 
   testWidgetsWithLeakTracking('Reverse RefreshIndicator(anywhere mode) should be shown when dragging from non-zero scroll position', (WidgetTester tester) async {
@@ -655,6 +658,8 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
     expect(tester.getCenter(find.byType(RefreshProgressIndicator)).dy, lessThan(300.0));
+
+    scrollController.dispose();
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/71936
@@ -692,6 +697,8 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
     expect(find.byType(RefreshProgressIndicator), findsNothing);
+
+    scrollController.dispose();
   });
 
   testWidgetsWithLeakTracking('Top RefreshIndicator(onEdge mode) should not be shown when dragging from non-zero scroll position', (WidgetTester tester) async {
@@ -726,6 +733,8 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
     expect(find.byType(RefreshProgressIndicator), findsNothing);
+
+    scrollController.dispose();
   });
 
   testWidgetsWithLeakTracking('Reverse RefreshIndicator(onEdge mode) should be shown when dragging from non-zero scroll position', (WidgetTester tester) async {
@@ -761,6 +770,8 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     await tester.pump(const Duration(seconds: 1)); // finish the indicator settle animation
     expect(find.byType(RefreshProgressIndicator), findsNothing);
+
+    scrollController.dispose();
   });
 
   testWidgetsWithLeakTracking('ScrollController.jumpTo should not trigger the refresh indicator', (WidgetTester tester) async {
@@ -793,6 +804,8 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the indicator hide animation
 
     expect(refreshCalled, false);
+
+    scrollController.dispose();
   });
 
   testWidgetsWithLeakTracking('RefreshIndicator.adaptive', (WidgetTester tester) async {
