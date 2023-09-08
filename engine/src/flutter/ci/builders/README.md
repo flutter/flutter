@@ -543,11 +543,6 @@ interfering with the production artifacts.
         "destination": "ios/artifacts.zip",
         "realm": "production"
     },
-    {
-        "source": "out/debug/ios-objcdoc.zip",
-        "destination": "ios-objcdoc.zip",
-        "realm": "experimental"
-    }
 ]
 ```
 
