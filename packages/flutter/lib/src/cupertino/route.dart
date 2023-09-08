@@ -122,6 +122,12 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
   }
 
   @override
+  void dispose() {
+    _previousTitle?.dispose();
+    super.dispose();
+  }
+
+  @override
   void didChangePrevious(Route<dynamic>? previousRoute) {
     final String? previousTitleString = previousRoute is CupertinoRouteTransitionMixin
       ? previousRoute.title

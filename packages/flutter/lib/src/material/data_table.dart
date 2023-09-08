@@ -234,10 +234,7 @@ class DataRow {
   /// See also:
   ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor].
   final MaterialStateProperty<MouseCursor?>? mouseCursor;
-
-  bool get _debugInteractive =>
-      onSelectChanged != null ||
-      cells.any((DataCell cell) => cell._debugInteractive);
+bool get _debugInteractive => onSelectChanged != null || cells.any((DataCell cell) => cell._debugInteractive);
 }
 
 /// The data for a cell of a [DataTable].
@@ -871,7 +868,7 @@ class DataTable extends StatelessWidget {
       alignment:
           numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
       child: AnimatedDefaultTextStyle(
-        style: effectiveHeadingTextStyle,
+        style: DefaultTextStyle.of(context).style.merge(effectiveHeadingTextStyle),
         softWrap: false,
         duration: _sortArrowAnimationDuration,
         child: label,
@@ -943,11 +940,9 @@ class DataTable extends StatelessWidget {
       alignment:
           numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
       child: DefaultTextStyle(
-        style: effectiveDataTextStyle.copyWith(
-          color: placeholder
-              ? effectiveDataTextStyle.color!.withOpacity(0.6)
-              : null,
-        ),
+        style: DefaultTextStyle.of(context).style
+          .merge(effectiveDataTextStyle)
+          .copyWith(color: placeholder ? effectiveDataTextStyle.color!.withOpacity(0.6) : null),
         child: DropdownButtonHideUnderline(child: label),
       ),
     );
