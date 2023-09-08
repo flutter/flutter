@@ -71,15 +71,18 @@ void main() async {
     }
 
     bool firstFrame = true;
-    ui.PlatformDispatcher.instance.onBeginFrame = (Duration duration) async {
-      if (await isWindowVisible()) {
-        if (firstFrame) {
-          throw 'Window should be hidden on first frame';
-        }
-
-        if (!visibilityCompleter.isCompleted) {
-          visibilityCompleter.complete('success');
-        }
+    ui.PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
+      if (firstFrame) {
+        // Don't await here, because `FlutterView.render` (in `drawHelloWorld`)
+        // must be synchronously within the onBeginFrame callback.
+        isWindowVisible().then((bool visible) {
+          if (visible) {
+            throw 'Window should be hidden on first frame';
+          }
+          if (!visibilityCompleter.isCompleted) {
+            visibilityCompleter.complete('success');
+          }
+        });
       }
 
       // Draw something to trigger the first frame callback that displays the
