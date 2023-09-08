@@ -520,6 +520,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   void _handleMouseDragStart(TapDragStartDetails details) {
     switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
       case 1:
+        _clearSelection();
         _selectStartTo(offset: details.globalPosition);
     }
     _updateSelectedContentIfNeeded();
@@ -1018,6 +1019,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///  * [_selectWordAt], which selects a whole word at the location.
   ///  * [selectAll], which selects the entire content.
   void _collapseSelectionAt({required Offset offset}) {
+    _clearSelection();
     _selectStartTo(offset: offset);
     _selectEndTo(offset: offset);
   }
