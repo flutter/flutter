@@ -718,7 +718,11 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
 
   @override
   void dispose() {
-    widget.controller?._detach(disposeExtent: true);
+    if (widget.controller == null) {
+      _extent.dispose();
+    } else {
+      widget.controller!._detach(disposeExtent: true);
+    }
     _scrollController.dispose();
     super.dispose();
   }
