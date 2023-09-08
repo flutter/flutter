@@ -8,10 +8,15 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'restoration.dart';
 
 void main() {
+  testWidgetsWithLeakTracking('$RestorationManager dispatches memory events', (WidgetTester tester) async {
+    expect(() => RestorationManager().dispose(), dispatchesMemoryEvents(RestorationManager));
+  });
+
   group('RestorationManager', () {
     testWidgets('root bucket retrieval', (WidgetTester tester) async {
       final List<MethodCall> callsToEngine = <MethodCall>[];
