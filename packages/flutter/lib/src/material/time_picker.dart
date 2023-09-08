@@ -2207,6 +2207,15 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
   static const Size _kTimePickerMinInputSize = Size(312, 196);
 
   @override
+  void dispose() {
+    _selectedTime.dispose();
+    _entryMode.dispose();
+    _autovalidateMode.dispose();
+    _orientation.dispose();
+    super.dispose();
+  }
+
+  @override
   String? get restorationId => widget.restorationId;
 
   @override
@@ -2586,6 +2595,13 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
   void dispose() {
     _vibrateTimer?.cancel();
     _vibrateTimer = null;
+    _orientation.dispose();
+    _selectedTime.dispose();
+    _hourMinuteMode.dispose();
+    _lastModeAnnounced.dispose();
+    _autofocusHour.dispose();
+    _autofocusMinute.dispose();
+    _announcedInitialTime.dispose();
     super.dispose();
   }
 
