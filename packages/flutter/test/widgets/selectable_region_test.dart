@@ -2810,20 +2810,28 @@ void main() {
     expect(content, isNotNull);
     expect(content!.plainText, 'How are');
 
+    // Long press to select 'you'.
+    await touchGesture.down(textOffsetToPosition(paragraph, 9));
+    await tester.pumpAndSettle(kLongPressTimeout);
+    expect(content, isNotNull);
+    expect(content!.plainText, 'you');
+    await touchGesture.up();
+    await tester.pumpAndSettle();
+
     // Called while moving selection handles.
     final List<TextBox> boxes = paragraph.getBoxesForSelection(paragraph.selections[0]);
     expect(boxes.length, 1);
     final Offset startHandlePos = globalize(boxes[0].toRect().bottomLeft, paragraph);
     final Offset endHandlePos = globalize(boxes[0].toRect().bottomRight, paragraph);
     final Offset startPos = Offset(textOffsetToPosition(paragraph, 4).dx, startHandlePos.dy);
-    final Offset endPos = Offset(textOffsetToPosition(paragraph, 11).dx, endHandlePos.dy);
+    final Offset endPos = Offset(textOffsetToPosition(paragraph, 6).dx, endHandlePos.dy);
 
     // Start handle.
     await touchGesture.down(startHandlePos);
     await touchGesture.moveTo(startPos);
     await tester.pumpAndSettle();
     expect(content, isNotNull);
-    expect(content!.plainText, 'are');
+    expect(content!.plainText, 'are you');
     await touchGesture.up();
     await tester.pumpAndSettle();
 
@@ -2832,7 +2840,7 @@ void main() {
     await touchGesture.moveTo(endPos);
     await tester.pumpAndSettle();
     expect(content, isNotNull);
-    expect(content!.plainText, 'are you');
+    expect(content!.plainText, 'ar');
     await touchGesture.up();
     await tester.pumpAndSettle();
   });
