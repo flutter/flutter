@@ -1393,7 +1393,7 @@ void main() {
       TextSelection? selection1;
       bool isAfterFirstCall1 = false;
       void onSelectionEvent1(TextSelection? selection, SelectionEvent event) {
-        if(isAfterFirstCall1) {
+        if (isAfterFirstCall1) {
           expect(selection1, isNot(selection));
         }
         isAfterFirstCall1 = true;
@@ -1404,7 +1404,7 @@ void main() {
       TextSelection? selection2;
       bool isAfterFirstCall2 = false;
       void onSelectionEvent2(TextSelection? selection, SelectionEvent event) {
-        if(isAfterFirstCall2) {
+        if (isAfterFirstCall2) {
           expect(selection2, isNot(selection));
         }
         isAfterFirstCall2 = true;
@@ -1415,7 +1415,7 @@ void main() {
       TextSelection? selection3;
       bool isAfterFirstCall3 = false;
       void onSelectionEvent3(TextSelection? selection, SelectionEvent event) {
-        if(isAfterFirstCall3) {
+        if (isAfterFirstCall3) {
           expect(selection3, isNot(selection));
         }
         isAfterFirstCall3 = true;

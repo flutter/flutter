@@ -1453,7 +1453,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
       _didChangeSelection();
       if (onSelectionEvent != null) {
         TextSelection? selection;
-        if(_textSelectionStart != null && _textSelectionEnd != null) {
+        if (_textSelectionStart != null && _textSelectionEnd != null) {
           final int start = math.min(_textSelectionStart!.offset, _textSelectionEnd!.offset);
           final int end = math.max(_textSelectionStart!.offset, _textSelectionEnd!.offset);
           selection = TextSelection(baseOffset: start, extentOffset: end);
