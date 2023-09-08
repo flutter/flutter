@@ -1191,12 +1191,11 @@ TEST_P(EntityTest, MorphologyFilter) {
     input = texture;
     input_size = input_rect.size;
 
-    auto effect_transform = Matrix::MakeScale(
-        Vector2{effect_transform_scale, effect_transform_scale});
-
     auto contents = FilterContents::MakeMorphology(
         FilterInput::Make(input), Radius{radius[0]}, Radius{radius[1]},
-        morphology_types[selected_morphology_type], effect_transform);
+        morphology_types[selected_morphology_type]);
+    contents->SetEffectTransform(Matrix::MakeScale(
+        Vector2{effect_transform_scale, effect_transform_scale}));
 
     auto ctm = Matrix::MakeScale(GetContentScale()) *
                Matrix::MakeTranslation(Vector3(offset[0], offset[1])) *

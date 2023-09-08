@@ -58,6 +58,10 @@ ColorFilter::ColorFilterProc BlendColorFilter::GetCPUColorFilterProc() const {
   };
 }
 
+std::shared_ptr<ColorFilter> BlendColorFilter::Clone() const {
+  return std::make_shared<BlendColorFilter>(*this);
+}
+
 /*******************************************************************************
  ******* MatrixColorFilter
  ******************************************************************************/
@@ -82,6 +86,10 @@ ColorFilter::ColorFilterProc MatrixColorFilter::GetCPUColorFilterProc() const {
   };
 }
 
+std::shared_ptr<ColorFilter> MatrixColorFilter::Clone() const {
+  return std::make_shared<MatrixColorFilter>(*this);
+}
+
 /*******************************************************************************
  ******* SrgbToLinearColorFilter
  ******************************************************************************/
@@ -104,6 +112,10 @@ ColorFilter::ColorFilterProc SrgbToLinearColorFilter::GetCPUColorFilterProc()
   return [](Color color) { return color.SRGBToLinear(); };
 }
 
+std::shared_ptr<ColorFilter> SrgbToLinearColorFilter::Clone() const {
+  return std::make_shared<SrgbToLinearColorFilter>(*this);
+}
+
 /*******************************************************************************
  ******* LinearToSrgbColorFilter
  ******************************************************************************/
@@ -124,6 +136,10 @@ LinearToSrgbColorFilter::WrapWithGPUColorFilter(
 ColorFilter::ColorFilterProc LinearToSrgbColorFilter::GetCPUColorFilterProc()
     const {
   return [](Color color) { return color.LinearToSRGB(); };
+}
+
+std::shared_ptr<ColorFilter> LinearToSrgbColorFilter::Clone() const {
+  return std::make_shared<LinearToSrgbColorFilter>(*this);
 }
 
 }  // namespace impeller

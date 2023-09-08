@@ -67,4 +67,12 @@ void FilterContentsFilterInput::SetLeafInputs(
   filter_->SetLeafInputs(inputs);
 }
 
+void FilterContentsFilterInput::SetEffectTransform(const Matrix& matrix) {
+  filter_->SetEffectTransform(matrix);
+}
+
+void FilterContentsFilterInput::SetIsForSubpass(bool is_for_subpass) {
+  filter_->SetIsForSubpass(is_for_subpass);
+}
+
 }  // namespace impeller
