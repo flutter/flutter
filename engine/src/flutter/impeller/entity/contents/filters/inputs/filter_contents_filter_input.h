@@ -42,6 +42,12 @@ class FilterContentsFilterInput final : public FilterInput {
   // |FilterInput|
   void SetLeafInputs(const FilterInput::Vector& inputs) override;
 
+  // |FilterInput|
+  virtual void SetEffectTransform(const Matrix& matrix) override;
+
+  // |FilterInput|
+  virtual void SetIsForSubpass(bool is_for_subpass) override;
+
  private:
   explicit FilterContentsFilterInput(std::shared_ptr<FilterContents> filter);
 

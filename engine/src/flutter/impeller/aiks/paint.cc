@@ -85,11 +85,13 @@ std::shared_ptr<Contents> Paint::WithImageFilter(
     std::shared_ptr<Contents> input,
     const Matrix& effect_transform,
     bool is_subpass) const {
-  if (image_filter) {
-    input =
-        image_filter(FilterInput::Make(input), effect_transform, is_subpass);
+  if (!image_filter) {
+    return input;
   }
-  return input;
+  auto filter = image_filter->WrapInput(FilterInput::Make(input));
+  filter->SetIsForSubpass(is_subpass);
+  filter->SetEffectTransform(effect_transform);
+  return filter;
 }
 
 std::shared_ptr<Contents> Paint::WithColorFilter(
@@ -146,7 +148,7 @@ std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
   if (color_source_contents->IsSolidColor() && !color_filter) {
     return FilterContents::MakeGaussianBlur(
         FilterInput::Make(color_source_contents), sigma, sigma, style,
-        Entity::TileMode::kDecal, Matrix());
+        Entity::TileMode::kDecal);
   }
 
   /// 1. Create an opaque white mask of the original geometry.
@@ -158,8 +160,7 @@ std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
   /// 2. Blur the mask.
 
   auto blurred_mask = FilterContents::MakeGaussianBlur(
-      FilterInput::Make(mask), sigma, sigma, style, Entity::TileMode::kDecal,
-      Matrix());
+      FilterInput::Make(mask), sigma, sigma, style, Entity::TileMode::kDecal);
 
   /// 3. Replace the geometry of the original color source with a rectangle that
   ///    covers the full region of the blurred mask. Note that geometry is in
@@ -193,10 +194,9 @@ std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
     bool is_solid_color) const {
   if (is_solid_color) {
     return FilterContents::MakeGaussianBlur(input, sigma, sigma, style,
-                                            Entity::TileMode::kDecal, Matrix());
+                                            Entity::TileMode::kDecal);
   }
-  return FilterContents::MakeBorderMaskBlur(input, sigma, sigma, style,
-                                            Matrix());
+  return FilterContents::MakeBorderMaskBlur(input, sigma, sigma, style);
 }
 
 bool Paint::HasColorFilter() const {

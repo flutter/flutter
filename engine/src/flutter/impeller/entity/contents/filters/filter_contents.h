@@ -38,44 +38,36 @@ class FilterContents : public Contents {
       BlurStyle blur_style = BlurStyle::kNormal,
       Entity::TileMode tile_mode = Entity::TileMode::kDecal,
       bool is_second_pass = false,
-      Sigma secondary_sigma = {},
-      const Matrix& effect_transform = Matrix());
+      Sigma secondary_sigma = {});
 
   static std::shared_ptr<FilterContents> MakeGaussianBlur(
       const FilterInput::Ref& input,
       Sigma sigma_x,
       Sigma sigma_y,
       BlurStyle blur_style = BlurStyle::kNormal,
-      Entity::TileMode tile_mode = Entity::TileMode::kDecal,
-      const Matrix& effect_transform = Matrix());
+      Entity::TileMode tile_mode = Entity::TileMode::kDecal);
 
   static std::shared_ptr<FilterContents> MakeBorderMaskBlur(
       FilterInput::Ref input,
       Sigma sigma_x,
       Sigma sigma_y,
-      BlurStyle blur_style = BlurStyle::kNormal,
-      const Matrix& effect_transform = Matrix());
+      BlurStyle blur_style = BlurStyle::kNormal);
 
   static std::shared_ptr<FilterContents> MakeDirectionalMorphology(
       FilterInput::Ref input,
       Radius radius,
       Vector2 direction,
-      MorphType morph_type,
-      const Matrix& effect_transform = Matrix());
+      MorphType morph_type);
 
-  static std::shared_ptr<FilterContents> MakeMorphology(
-      FilterInput::Ref input,
-      Radius radius_x,
-      Radius radius_y,
-      MorphType morph_type,
-      const Matrix& effect_transform = Matrix());
+  static std::shared_ptr<FilterContents> MakeMorphology(FilterInput::Ref input,
+                                                        Radius radius_x,
+                                                        Radius radius_y,
+                                                        MorphType morph_type);
 
   static std::shared_ptr<FilterContents> MakeMatrixFilter(
       FilterInput::Ref input,
       const Matrix& matrix,
-      const SamplerDescriptor& desc,
-      const Matrix& effect_transform,
-      bool is_subpass);
+      const SamplerDescriptor& desc);
 
   static std::shared_ptr<FilterContents> MakeLocalMatrixFilter(
       FilterInput::Ref input,
@@ -99,7 +91,11 @@ class FilterContents : public Contents {
 
   /// @brief  Sets the transform which gets appended to the effect of this
   ///         filter. Note that this is in addition to the entity's transform.
-  void SetEffectTransform(Matrix effect_transform);
+  ///
+  ///         This is useful for subpass rendering scenarios where it's
+  ///         difficult to encode the current transform of the layer into the
+  ///         Entity being rendered.
+  void SetEffectTransform(const Matrix& effect_transform);
 
   /// @brief  Create an Entity that renders this filter's output.
   std::optional<Entity> GetEntity(
@@ -137,10 +133,18 @@ class FilterContents : public Contents {
   ///         children.
   bool IsLeaf() const;
 
-  /// @brief  Replaces the leaf of all leaf `FilterContents` with a new set
-  ///         of `inputs`.
+  /// @brief  Replaces the set of all leaf `FilterContents` with a new set
+  ///         of `FilterInput`s.
   /// @see    `FilterContents::IsLeaf`
   void SetLeafInputs(const FilterInput::Vector& inputs);
+
+  /// @brief  Marks this filter chain as applying in a subpass scenario.
+  ///
+  ///         Subpasses render in screenspace, and this setting informs filters
+  ///         that the current transformation matrix of the entity is not stored
+  ///         in the Entity transformation matrix. Instead, the effect transform
+  ///         is used in this case.
+  virtual void SetIsForSubpass(bool is_subpass);
 
  private:
   virtual std::optional<Rect> GetFilterCoverage(

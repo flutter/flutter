@@ -37,8 +37,7 @@ std::shared_ptr<FilterContents> FilterContents::MakeDirectionalGaussianBlur(
     BlurStyle blur_style,
     Entity::TileMode tile_mode,
     bool is_second_pass,
-    Sigma secondary_sigma,
-    const Matrix& effect_transform) {
+    Sigma secondary_sigma) {
   auto blur = std::make_shared<DirectionalGaussianBlurFilterContents>();
   blur->SetInputs({std::move(input)});
   blur->SetSigma(sigma);
@@ -47,7 +46,6 @@ std::shared_ptr<FilterContents> FilterContents::MakeDirectionalGaussianBlur(
   blur->SetTileMode(tile_mode);
   blur->SetIsSecondPass(is_second_pass);
   blur->SetSecondarySigma(secondary_sigma);
-  blur->SetEffectTransform(effect_transform);
   return blur;
 }
 
@@ -56,14 +54,12 @@ std::shared_ptr<FilterContents> FilterContents::MakeGaussianBlur(
     Sigma sigma_x,
     Sigma sigma_y,
     BlurStyle blur_style,
-    Entity::TileMode tile_mode,
-    const Matrix& effect_transform) {
-  auto x_blur = MakeDirectionalGaussianBlur(input, sigma_x, Point(1, 0),
-                                            BlurStyle::kNormal, tile_mode,
-                                            false, {}, effect_transform);
+    Entity::TileMode tile_mode) {
+  auto x_blur = MakeDirectionalGaussianBlur(
+      input, sigma_x, Point(1, 0), BlurStyle::kNormal, tile_mode, false, {});
   auto y_blur = MakeDirectionalGaussianBlur(FilterInput::Make(x_blur), sigma_y,
                                             Point(0, 1), blur_style, tile_mode,
-                                            true, sigma_x, effect_transform);
+                                            true, sigma_x);
   return y_blur;
 }
 
@@ -71,13 +67,11 @@ std::shared_ptr<FilterContents> FilterContents::MakeBorderMaskBlur(
     FilterInput::Ref input,
     Sigma sigma_x,
     Sigma sigma_y,
-    BlurStyle blur_style,
-    const Matrix& effect_transform) {
+    BlurStyle blur_style) {
   auto filter = std::make_shared<BorderMaskBlurFilterContents>();
   filter->SetInputs({std::move(input)});
   filter->SetSigma(sigma_x, sigma_y);
   filter->SetBlurStyle(blur_style);
-  filter->SetEffectTransform(effect_transform);
   return filter;
 }
 
@@ -85,14 +79,12 @@ std::shared_ptr<FilterContents> FilterContents::MakeDirectionalMorphology(
     FilterInput::Ref input,
     Radius radius,
     Vector2 direction,
-    MorphType morph_type,
-    const Matrix& effect_transform) {
+    MorphType morph_type) {
   auto filter = std::make_shared<DirectionalMorphologyFilterContents>();
   filter->SetInputs({std::move(input)});
   filter->SetRadius(radius);
   filter->SetDirection(direction);
   filter->SetMorphType(morph_type);
-  filter->SetEffectTransform(effect_transform);
   return filter;
 }
 
@@ -100,28 +92,22 @@ std::shared_ptr<FilterContents> FilterContents::MakeMorphology(
     FilterInput::Ref input,
     Radius radius_x,
     Radius radius_y,
-    MorphType morph_type,
-    const Matrix& effect_transform) {
-  auto x_morphology = MakeDirectionalMorphology(
-      std::move(input), radius_x, Point(1, 0), morph_type, effect_transform);
-  auto y_morphology =
-      MakeDirectionalMorphology(FilterInput::Make(x_morphology), radius_y,
-                                Point(0, 1), morph_type, effect_transform);
+    MorphType morph_type) {
+  auto x_morphology = MakeDirectionalMorphology(std::move(input), radius_x,
+                                                Point(1, 0), morph_type);
+  auto y_morphology = MakeDirectionalMorphology(
+      FilterInput::Make(x_morphology), radius_y, Point(0, 1), morph_type);
   return y_morphology;
 }
 
 std::shared_ptr<FilterContents> FilterContents::MakeMatrixFilter(
     FilterInput::Ref input,
     const Matrix& matrix,
-    const SamplerDescriptor& desc,
-    const Matrix& effect_transform,
-    bool is_subpass) {
+    const SamplerDescriptor& desc) {
   auto filter = std::make_shared<MatrixFilterContents>();
   filter->SetInputs({std::move(input)});
   filter->SetMatrix(matrix);
   filter->SetSamplerDescriptor(desc);
-  filter->SetEffectTransform(effect_transform);
-  filter->SetIsSubpass(is_subpass);
   return filter;
 }
 
@@ -153,8 +139,12 @@ void FilterContents::SetInputs(FilterInput::Vector inputs) {
   inputs_ = std::move(inputs);
 }
 
-void FilterContents::SetEffectTransform(Matrix effect_transform) {
+void FilterContents::SetEffectTransform(const Matrix& effect_transform) {
   effect_transform_ = effect_transform;
+
+  for (auto& input : inputs_) {
+    input->SetEffectTransform(effect_transform);
+  }
 }
 
 bool FilterContents::Render(const ContentContext& renderer,
@@ -293,6 +283,12 @@ void FilterContents::SetLeafInputs(const FilterInput::Vector& inputs) {
   }
   for (auto& input : inputs_) {
     input->SetLeafInputs(inputs);
+  }
+}
+
+void FilterContents::SetIsForSubpass(bool is_subpass) {
+  for (auto& input : inputs_) {
+    input->SetIsForSubpass(is_subpass);
   }
 }
 

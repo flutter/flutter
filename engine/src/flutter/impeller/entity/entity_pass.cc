@@ -604,13 +604,15 @@ EntityPass::EntityResult EntityPass::GetEntityForElement(
       // right thing.
       return EntityPass::EntityResult::Failure();
     }
-
-    element_entity.SetCapture(capture.CreateChild("Entity (Subpass texture)"));
+    Capture subpass_texture_capture =
+        capture.CreateChild("Entity (Subpass texture)");
+    element_entity.SetCapture(subpass_texture_capture);
     element_entity.SetContents(std::move(offscreen_texture_contents));
     element_entity.SetStencilDepth(subpass->stencil_depth_);
     element_entity.SetBlendMode(subpass->blend_mode_);
-    element_entity.SetTransformation(Matrix::MakeTranslation(
-        Vector3(subpass_coverage->origin - global_pass_position)));
+    element_entity.SetTransformation(subpass_texture_capture.AddMatrix(
+        "Transform", Matrix::MakeTranslation(Vector3(subpass_coverage->origin -
+                                                     global_pass_position))));
   } else {
     FML_UNREACHABLE();
   }

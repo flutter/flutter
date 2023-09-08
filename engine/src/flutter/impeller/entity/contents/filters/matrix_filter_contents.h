@@ -17,7 +17,8 @@ class MatrixFilterContents final : public FilterContents {
 
   void SetMatrix(Matrix matrix);
 
-  void SetIsSubpass(bool is_subpass);
+  // |FilterContents|
+  void SetIsForSubpass(bool is_for_subpass) override;
 
   void SetSamplerDescriptor(SamplerDescriptor desc);
 
@@ -39,7 +40,7 @@ class MatrixFilterContents final : public FilterContents {
 
   Matrix matrix_;
   SamplerDescriptor sampler_descriptor_ = {};
-  bool is_subpass_ = false;
+  bool is_for_subpass_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(MatrixFilterContents);
 };

@@ -9,6 +9,7 @@
 #include "flutter/fml/macros.h"
 #include "impeller/aiks/color_filter.h"
 #include "impeller/aiks/color_source.h"
+#include "impeller/aiks/image_filter.h"
 #include "impeller/entity/contents/contents.h"
 #include "impeller/entity/contents/filters/color_filter_contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
@@ -62,7 +63,7 @@ struct Paint {
   BlendMode blend_mode = BlendMode::kSourceOver;
   bool invert_colors = false;
 
-  ImageFilterProc image_filter = nullptr;
+  std::shared_ptr<ImageFilter> image_filter;
   std::shared_ptr<ColorFilter> color_filter;
   std::optional<MaskBlurDescriptor> mask_blur_descriptor;
 
