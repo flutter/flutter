@@ -868,6 +868,8 @@ class _DayPickerState extends State<_DayPicker> {
   /// List of [FocusNode]s, one for each day of the month.
   late List<FocusNode> _dayFocusNodes;
 
+  /// TODO(polina-c): a cleaner solution is to create separate statefull widget for a day,
+  /// that would own the controller.
   final Map<int, MaterialStatesController> _statesControllers = <int, MaterialStatesController>{};
 
   @override
