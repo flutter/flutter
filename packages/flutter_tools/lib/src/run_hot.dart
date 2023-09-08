@@ -21,8 +21,6 @@ import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
-import 'ios/native_assets.dart';
-import 'macos/native_assets.dart';
 import 'native_assets.dart';
 import 'project.dart';
 import 'reporting/reporting.dart';
@@ -367,7 +365,14 @@ class HotRunner extends ResidentRunner {
   }) async {
     await _calculateTargetPlatform();
 
-    final Uri? nativeAssetsYaml = await _getNativeAssetsYaml();
+    final Uri projectUri = Uri.directory(projectRootPath);
+    _buildRunner ??= NativeAssetsBuildRunnerImpl(projectUri, fileSystem, globals.logger);
+    final Uri? nativeAssetsYaml = await dryRunNativeAssets(
+      projectUri: projectUri,
+      fileSystem: fileSystem,
+      buildRunner: _buildRunner!,
+      flutterDevices: flutterDevices,
+    );
 
     final Stopwatch appStartedTimer = Stopwatch()..start();
     final File mainFile = globals.fs.file(mainPath);
@@ -448,78 +453,6 @@ class HotRunner extends ResidentRunner {
       enableDevTools: enableDevTools,
       needsFullRestart: false,
     );
-  }
-
-  /// Gets the native asset id to dylib mapping to embed in the kernel file.
-  ///
-  /// Run hot compiles a kernel file that is pushed to the device after hot
-  /// restart. We need to embed the native assets mapping in order to access
-  /// native assets after hot restart.
-  Future<Uri?> _getNativeAssetsYaml() async {
-    final Uri projectUri = Uri.directory(projectRootPath);
-    _buildRunner ??= NativeAssetsBuildRunnerImpl(projectUri, fileSystem, globals.logger);
-    if (flutterDevices.length != 1) {
-      return dryRunNativeAssetsMultipeOSes(
-        projectUri: projectUri,
-        fileSystem: fileSystem,
-        targetPlatforms: flutterDevices.map((FlutterDevice d) => d.targetPlatform).nonNulls,
-        buildRunner: _buildRunner!,
-      );
-    }
-    final FlutterDevice flutterDevice = flutterDevices.single;
-    final TargetPlatform targetPlatform = flutterDevice.targetPlatform!;
-
-    final Uri? nativeAssetsYaml;
-    switch (targetPlatform) {
-      case TargetPlatform.darwin:
-        nativeAssetsYaml = await dryRunNativeAssetsMacOS(
-          projectUri: projectUri,
-          fileSystem: fileSystem,
-          buildRunner: _buildRunner!,
-        );
-      case TargetPlatform.ios:
-        nativeAssetsYaml = await dryRunNativeAssetsIOS(
-          projectUri: projectUri,
-          fileSystem: fileSystem,
-          buildRunner: _buildRunner!,
-        );
-      case TargetPlatform.tester:
-        if (const LocalPlatform().isMacOS) {
-          nativeAssetsYaml = await dryRunNativeAssetsMacOS(
-            projectUri: projectUri,
-            flutterTester: true,
-            fileSystem: fileSystem,
-            buildRunner: _buildRunner!,
-          );
-        } else {
-          await ensureNoNativeAssetsOrOsIsSupported(
-            projectUri,
-            const LocalPlatform().operatingSystem,
-            fileSystem,
-            _buildRunner!,
-          );
-          nativeAssetsYaml = null;
-        }
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
-      case TargetPlatform.android_x86:
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
-      case TargetPlatform.linux_arm64:
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.web_javascript:
-      case TargetPlatform.windows_x64:
-        await ensureNoNativeAssetsOrOsIsSupported(
-          projectUri,
-          targetPlatform.toString(),
-          fileSystem,
-          _buildRunner!,
-        );
-        nativeAssetsYaml = null;
-    }
-    return nativeAssetsYaml;
   }
 
   Future<List<Uri?>> _initDevFS() async {

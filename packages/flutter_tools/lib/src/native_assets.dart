@@ -12,6 +12,7 @@ import 'package:package_config/package_config_types.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
+import 'base/platform.dart';
 import 'build_info.dart' as build_info;
 import 'cache.dart';
 import 'features.dart';
@@ -19,6 +20,7 @@ import 'globals.dart' as globals;
 import 'ios/native_assets.dart';
 import 'macos/native_assets.dart';
 import 'macos/native_assets_host.dart';
+import 'resident_runner.dart';
 
 /// Programmatic API to be used by Dart launchers to invoke native builds.
 ///
@@ -267,6 +269,81 @@ void ensureNoLinkModeStatic(List<Asset> nativeAssets) {
 Uri nativeAssetsBuildUri(Uri projectUri, OS os) {
   final String buildDir = build_info.getBuildDirectory();
   return projectUri.resolve('$buildDir/native_assets/$os/');
+}
+
+/// Gets the native asset id to dylib mapping to embed in the kernel file.
+///
+/// Run hot compiles a kernel file that is pushed to the device after hot
+/// restart. We need to embed the native assets mapping in order to access
+/// native assets after hot restart.
+Future<Uri?> dryRunNativeAssets({
+  required Uri projectUri,
+  required FileSystem fileSystem,
+  required NativeAssetsBuildRunner buildRunner,
+  required List<FlutterDevice> flutterDevices,
+}) async {
+  if (flutterDevices.length != 1) {
+    return dryRunNativeAssetsMultipeOSes(
+      projectUri: projectUri,
+      fileSystem: fileSystem,
+      targetPlatforms: flutterDevices.map((FlutterDevice d) => d.targetPlatform).nonNulls,
+      buildRunner: buildRunner,
+    );
+  }
+  final FlutterDevice flutterDevice = flutterDevices.single;
+  final build_info.TargetPlatform targetPlatform = flutterDevice.targetPlatform!;
+
+  final Uri? nativeAssetsYaml;
+  switch (targetPlatform) {
+    case build_info.TargetPlatform.darwin:
+      nativeAssetsYaml = await dryRunNativeAssetsMacOS(
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        buildRunner: buildRunner,
+      );
+    case build_info.TargetPlatform.ios:
+      nativeAssetsYaml = await dryRunNativeAssetsIOS(
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        buildRunner: buildRunner,
+      );
+    case build_info.TargetPlatform.tester:
+      if (const LocalPlatform().isMacOS) {
+        nativeAssetsYaml = await dryRunNativeAssetsMacOS(
+          projectUri: projectUri,
+          flutterTester: true,
+          fileSystem: fileSystem,
+          buildRunner: buildRunner,
+        );
+      } else {
+        await ensureNoNativeAssetsOrOsIsSupported(
+          projectUri,
+          const LocalPlatform().operatingSystem,
+          fileSystem,
+          buildRunner,
+        );
+        nativeAssetsYaml = null;
+      }
+    case build_info.TargetPlatform.android_arm:
+    case build_info.TargetPlatform.android_arm64:
+    case build_info.TargetPlatform.android_x64:
+    case build_info.TargetPlatform.android_x86:
+    case build_info.TargetPlatform.android:
+    case build_info.TargetPlatform.fuchsia_arm64:
+    case build_info.TargetPlatform.fuchsia_x64:
+    case build_info.TargetPlatform.linux_arm64:
+    case build_info.TargetPlatform.linux_x64:
+    case build_info.TargetPlatform.web_javascript:
+    case build_info.TargetPlatform.windows_x64:
+      await ensureNoNativeAssetsOrOsIsSupported(
+        projectUri,
+        targetPlatform.toString(),
+        fileSystem,
+        buildRunner,
+      );
+      nativeAssetsYaml = null;
+  }
+  return nativeAssetsYaml;
 }
 
 /// Dry run the native builds for multiple OSes.
