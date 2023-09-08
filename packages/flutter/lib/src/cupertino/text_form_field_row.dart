@@ -219,7 +219,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
                 onEditingComplete: onEditingComplete,
                 onSubmitted: onFieldSubmitted,
                 inputFormatters: inputFormatters,
-                enabled: enabled,
+                enabled: enabled ?? true,
                 cursorWidth: cursorWidth,
                 cursorHeight: cursorHeight,
                 cursorColor: cursorColor,
