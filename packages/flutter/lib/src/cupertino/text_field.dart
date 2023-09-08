@@ -1110,11 +1110,12 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   }
 
   void _onClearButtonTapped() {
-    // Special handle onChanged for ClearButton
-    // Also call onChanged when the clear button is tapped.
     final bool hadText = _effectiveController.text.isNotEmpty;
     _effectiveController.clear();
     if (hadText) {
+      // Tapping the clear button is also considered a "user initiated" change
+      // (instead of a programmatical one), so call `onChanged` if the text
+      // changed as a result.
       widget.onChanged?.call(_effectiveController.text);
     }
   }
@@ -1150,6 +1151,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         final String? placeholderText = widget.placeholder;
         final Widget? placeholder = placeholderText == null
           ? null
+          // Make the placeholder invisible when hasText is true.
           : Visibility(
               maintainAnimation: true,
               maintainSize: true,
@@ -1197,7 +1199,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
               // Ideally this should be baseline aligned. However that comes at
               // the cost of the ability to compute the intrinsic dimensions of
               // this widget.
-              // See also https://github.com/flutter/flutter/issues/13715
+              // See also https://github.com/flutter/flutter/issues/13715.
               alignment: AlignmentDirectional.center,
               textDirection: widget.textDirection,
               children: <Widget>[
