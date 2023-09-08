@@ -32,8 +32,8 @@ TEST(FilterInputTest, IsLeaf) {
       ColorFilterContents::MakeBlend(BlendMode::kSource, {});
   ASSERT_TRUE(leaf->IsLeaf());
 
-  auto base = ColorFilterContents::MakeMatrixFilter(
-      FilterInput::Make(leaf), Matrix(), {}, Matrix(), false);
+  auto base = ColorFilterContents::MakeMatrixFilter(FilterInput::Make(leaf),
+                                                    Matrix(), {});
 
   ASSERT_TRUE(leaf->IsLeaf());
   ASSERT_FALSE(base->IsLeaf());
@@ -44,8 +44,8 @@ TEST(FilterInputTest, SetCoverageInputs) {
       ColorFilterContents::MakeBlend(BlendMode::kSource, {});
   ASSERT_TRUE(leaf->IsLeaf());
 
-  auto base = ColorFilterContents::MakeMatrixFilter(
-      FilterInput::Make(leaf), Matrix(), {}, Matrix(), false);
+  auto base = ColorFilterContents::MakeMatrixFilter(FilterInput::Make(leaf),
+                                                    Matrix(), {});
 
   {
     auto result = base->GetCoverage({});

@@ -48,6 +48,8 @@ class ColorFilter {
   /// @brief Returns a function that can be used to filter unpremultiplied
   ///        Impeller Colors on the CPU.
   virtual ColorFilterProc GetCPUColorFilterProc() const = 0;
+
+  virtual std::shared_ptr<ColorFilter> Clone() const = 0;
 };
 
 /*******************************************************************************
@@ -67,6 +69,9 @@ class BlendColorFilter final : public ColorFilter {
 
   // |ColorFilter|
   ColorFilterProc GetCPUColorFilterProc() const override;
+
+  // |ColorFilter|
+  std::shared_ptr<ColorFilter> Clone() const override;
 
  private:
   BlendMode blend_mode_;
@@ -91,6 +96,9 @@ class MatrixColorFilter final : public ColorFilter {
   // |ColorFilter|
   ColorFilterProc GetCPUColorFilterProc() const override;
 
+  // |ColorFilter|
+  std::shared_ptr<ColorFilter> Clone() const override;
+
  private:
   ColorMatrix color_matrix_;
 };
@@ -112,6 +120,9 @@ class SrgbToLinearColorFilter final : public ColorFilter {
 
   // |ColorFilter|
   ColorFilterProc GetCPUColorFilterProc() const override;
+
+  // |ColorFilter|
+  std::shared_ptr<ColorFilter> Clone() const override;
 };
 
 /*******************************************************************************
@@ -131,6 +142,9 @@ class LinearToSrgbColorFilter final : public ColorFilter {
 
   // |ColorFilter|
   ColorFilterProc GetCPUColorFilterProc() const override;
+
+  // |ColorFilter|
+  std::shared_ptr<ColorFilter> Clone() const override;
 };
 
 }  // namespace impeller

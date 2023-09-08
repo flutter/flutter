@@ -82,4 +82,8 @@ bool FilterInput::IsLeaf() const {
 
 void FilterInput::SetLeafInputs(const FilterInput::Vector& inputs) {}
 
+void FilterInput::SetEffectTransform(const Matrix& matrix) {}
+
+void FilterInput::SetIsForSubpass(bool is_for_subpass) {}
+
 }  // namespace impeller
