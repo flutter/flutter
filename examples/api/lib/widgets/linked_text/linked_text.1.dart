@@ -72,7 +72,7 @@ class MyHomePage extends StatelessWidget {
                   LinkedText.regExp(
                     text: _text,
                     regExp: _twitterHandleRegExp,
-                    onTap: (String urlString) => _handleTapTwitterHandle(context, urlString),
+                    onTap: (String twitterHandleString) => _handleTapTwitterHandle(context, twitterHandleString),
                   ),
                 ],
               ),

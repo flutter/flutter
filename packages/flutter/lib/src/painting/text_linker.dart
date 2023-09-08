@@ -21,6 +21,14 @@ import 'text_span.dart';
 /// [GestureRecognizer]s created in this function, such as for handling a tap on
 /// the link. See [TextSpan.recognizer] for more.
 /// {@endtemplate}
+///
+/// {@tool dartpad}
+/// This example shows how to use [TextLinker] to link both URLs and Twitter
+/// handles in a [TextSpan] tree. It also illustrates the difference between
+/// `displayString` and `linkString`.
+///
+/// ** See code in examples/api/lib/painting/text_linker/text_linker.1.dart **
+/// {@end-tool}
 typedef InlineLinkBuilder = InlineSpan Function(
   String displayString,
   String linkString,
@@ -40,6 +48,13 @@ typedef TextRangesFinder = Iterable<TextRange> Function(String text);
 /// handles in the same text.
 ///
 /// ** See code in examples/api/lib/painting/text_linker/text_linker.0.dart **
+/// {@end-tool}
+///
+/// {@tool dartpad}
+/// This example shows how to use [TextLinker] to link both URLs and Twitter
+/// handles in a [TextSpan] tree instead of a flat string.
+///
+/// ** See code in examples/api/lib/painting/text_linker/text_linker.1.dart **
 /// {@end-tool}
 ///
 /// See also:

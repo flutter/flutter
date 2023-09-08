@@ -5,8 +5,8 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-// This example demonstrates highlighting both URLs and Twitter handles with
-// different actions and different styles.
+// This example demonstrates creating links in a TextSpan tree instead of a flat
+// String.
 
 void main() {
   runApp(const TextLinkerApp());
@@ -24,7 +24,7 @@ class TextLinkerApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Link Twitter Handle Demo'),
+      home: const MyHomePage(title: 'Flutter TextLinker Span Demo'),
     );
   }
 }
@@ -36,7 +36,6 @@ class MyHomePage extends StatelessWidget {
   });
 
   final String title;
-  static const String _text = '@FlutterDev is our Twitter account, or find us at www.flutter.dev';
 
   void _handleTapTwitterHandle(BuildContext context, String linkString) {
     final String handleWithoutAt = linkString.substring(1);
@@ -78,7 +77,24 @@ class MyHomePage extends StatelessWidget {
           builder: (BuildContext context) {
             return SelectionArea(
               child: _TwitterAndUrlLinkedText(
-                text: _text,
+                spans: <InlineSpan>[
+                  TextSpan(
+                    text: '@FlutterDev is our Twitter, or find us at www.',
+                    style: DefaultTextStyle.of(context).style,
+                    children: const <InlineSpan>[
+                      TextSpan(
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                        ),
+                        text: 'flutter',
+                      ),
+                    ],
+                  ),
+                  TextSpan(
+                    text: '.dev',
+                    style: DefaultTextStyle.of(context).style,
+                  ),
+                ],
                 onTapUrl: (String urlString) => _handleTapUrl(context, urlString),
                 onTapTwitterHandle: (String handleString) => _handleTapTwitterHandle(context, handleString),
               ),
@@ -92,12 +108,12 @@ class MyHomePage extends StatelessWidget {
 
 class _TwitterAndUrlLinkedText extends StatefulWidget {
   const _TwitterAndUrlLinkedText({
-    required this.text,
+    required this.spans,
     required this.onTapUrl,
     required this.onTapTwitterHandle,
   });
 
-  final String text;
+  final List<InlineSpan> spans;
   final ValueChanged<String> onTapUrl;
   final ValueChanged<String> onTapTwitterHandle;
 
@@ -122,7 +138,7 @@ class _TwitterAndUrlLinkedTextState extends State<_TwitterAndUrlLinkedText> {
   void _linkSpans() {
     _disposeRecognizers();
     final Iterable<InlineSpan> linkedSpans = TextLinker.linkSpans(
-      <TextSpan>[TextSpan(text: widget.text)],
+      widget.spans,
       _textLinkers,
     );
     _linkedSpans = linkedSpans;
@@ -137,9 +153,15 @@ class _TwitterAndUrlLinkedTextState extends State<_TwitterAndUrlLinkedText> {
         textRangesFinder: LinkedText.defaultTextRangesFinder,
         linkBuilder: (String displayString, String linkString) {
           final TapGestureRecognizer recognizer = TapGestureRecognizer()
+              // The linkString always contains the full matched text, so that's
+              // what should be linked to.
               ..onTap = () => widget.onTapUrl(linkString);
           _recognizers.add(recognizer);
           return _MyInlineLinkSpan(
+            // The displayString contains only the portion of the matched text
+            // in a given TextSpan. For example, the bold "flutter" text in
+            // the overall "www.flutter.dev" URL is in its own TextSpan with its
+            // bold styling. linkBuilder is called separately for each part.
             text: displayString,
             color: const Color(0xff0000ee),
             recognizer: recognizer,
@@ -168,7 +190,7 @@ class _TwitterAndUrlLinkedTextState extends State<_TwitterAndUrlLinkedText> {
   void didUpdateWidget(_TwitterAndUrlLinkedText oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.text != oldWidget.text
+    if (widget.spans != oldWidget.spans
       || widget.onTapUrl != oldWidget.onTapUrl
       || widget.onTapTwitterHandle != oldWidget.onTapTwitterHandle) {
       _linkSpans();
