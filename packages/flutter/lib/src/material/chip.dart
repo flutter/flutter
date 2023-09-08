@@ -76,8 +76,9 @@ abstract interface class ChipAttributes {
 
   /// The style to be applied to the chip's label.
   ///
-  /// The default label style is [TextTheme.bodyLarge] from the overall
-  /// theme's [ThemeData.textTheme].
+  /// If this is null and [ThemeData.useMaterial3] is true, then
+  /// [TextTheme.labelLarge] is used. Otherwise, [TextTheme.bodyLarge]
+  /// is used.
   //
   /// This only has an effect on widgets that respect the [DefaultTextStyle],
   /// such as [Text].
@@ -95,12 +96,17 @@ abstract interface class ChipAttributes {
   /// The color and weight of the chip's outline.
   ///
   /// Defaults to the border side in the ambient [ChipThemeData]. If the theme
-  /// border side resolves to null, the default is the border side of [shape].
+  /// border side resolves to null and [ThemeData.useMaterial3] is true, then
+  /// [BorderSide] with a [ColorScheme.outline] color is used when the chip is
+  /// enabled, and [BorderSide] with a [ColorScheme.onSurface] color with an
+  /// opacity of 0.12 is used when the chip is disabled. Otherwise, it defaults
+  /// to null.
   ///
   /// This value is combined with [shape] to create a shape decorated with an
-  /// outline. If it is a [MaterialStateBorderSide],
-  /// [MaterialStateProperty.resolve] is used for the following
-  /// [MaterialState]s:
+  /// outline. To omit the outline entirely, pass [BorderSide.none] to [side].
+  ///
+  /// If it is a [MaterialStateBorderSide], [MaterialStateProperty.resolve] is
+  /// used for the following [MaterialState]s:
   ///
   ///  * [MaterialState.disabled].
   ///  * [MaterialState.selected].
@@ -112,12 +118,15 @@ abstract interface class ChipAttributes {
   /// The [OutlinedBorder] to draw around the chip.
   ///
   /// Defaults to the shape in the ambient [ChipThemeData]. If the theme
-  /// shape resolves to null, the default is [StadiumBorder].
+  /// shape resolves to null and [ThemeData.useMaterial3] is true, then
+  /// [RoundedRectangleBorder] with a circular border radius of 8.0 is used.
+  /// Otherwise, [StadiumBorder] is used.
   ///
   /// This shape is combined with [side] to create a shape decorated with an
-  /// outline. If it is a [MaterialStateOutlinedBorder],
-  /// [MaterialStateProperty.resolve] is used for the following
-  /// [MaterialState]s:
+  /// outline. To omit the outline entirely, pass [BorderSide.none] to [side].
+  ///
+  /// If it is a [MaterialStateOutlinedBorder], [MaterialStateProperty.resolve]
+  /// is used for the following [MaterialState]s:
   ///
   ///  * [MaterialState.disabled].
   ///  * [MaterialState.selected].
@@ -139,6 +148,8 @@ abstract interface class ChipAttributes {
 
   /// The color that fills the chip, in all [MaterialState]s.
   ///
+  /// Defaults to null.
+  ///
   /// Resolves in the following states:
   ///  * [MaterialState.selected].
   ///  * [MaterialState.disabled].
@@ -151,7 +162,9 @@ abstract interface class ChipAttributes {
 
   /// The padding between the contents of the chip and the outside [shape].
   ///
-  /// Defaults to 4 logical pixels on all sides.
+  /// If this is null and [ThemeData.useMaterial3] is true, then
+  /// a padding of 8.0 logical pixels on all sides is used. Otherwise,
+  /// it defaults to a padding of 4.0 logical pixels on all sides.
   EdgeInsetsGeometry? get padding;
 
   /// Defines how compact the chip's layout will be.
@@ -190,18 +203,25 @@ abstract interface class ChipAttributes {
 
   /// Color of the chip's shadow when the elevation is greater than 0.
   ///
-  /// The default is null.
+  /// If this is null and [ThemeData.useMaterial3] is true, then
+  /// [Colors.transparent] color is used. Otherwise, it defaults to null.
   Color? get shadowColor;
 
   /// Color of the chip's surface tint overlay when its elevation is
   /// greater than 0.
   ///
-  /// The default is null.
+  /// If this is null and [ThemeData.useMaterial3] is true, then
+  /// [ColorScheme.surfaceTint] color is used. Otherwise, it defaults
+  /// to null.
   Color? get surfaceTintColor;
 
   /// Theme used for all icons in the chip.
   ///
-  /// The default is null.
+  /// If this is null and [ThemeData.useMaterial3] is true, then [IconThemeData]
+  /// with a [ColorScheme.primary] color and a size of 18.0 is used when
+  /// the chip is enabled, and [IconThemeData] with a [ColorScheme.onSurface]
+  /// color and a size of 18.0 is used when the chip is disabled. Otherwise,
+  /// it defaults to null.
   IconThemeData? get iconTheme;
 }
 
