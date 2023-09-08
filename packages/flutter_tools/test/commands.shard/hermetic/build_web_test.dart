@@ -154,7 +154,7 @@ void main() {
     setupFileSystemForEndToEndTest(fileSystem);
     await expectLater(
       () => runner.run(<String>['build', 'web', '--no-pub', '--no-web-resources-cdn', '--dart-define=foo=a', '--dart2js-optimization=O0']),
-      throwsUsageException(message: 'foo'),
+      throwsUsageException(message: '"O0" is not an allowed value for option "dart2js-optimization"'),
     );
 
     final Directory buildDir = fileSystem.directory(fileSystem.path.join('build', 'web'));
