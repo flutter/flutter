@@ -179,7 +179,7 @@ void main() {
       }, useMaterial3: true);
     },
     leakTrackingTestConfig: const LeakTrackingTestConfig(
-      // TODO(polina-c): investifage and fix after merge
+      // TODO(polina-c): investigate and fix after merge
       // https://github.com/flutter/flutter/pull/133884
       notDisposedAllowList: <String, int?>{
         '_RestorableDatePickerEntryMode': 3,
