@@ -74,7 +74,7 @@ class BuildWebCommand extends BuildSubCommand {
       help: 'Sets the optimization level used for Dart compilation to JavaScript. '
           'Valid values range from O1 to O4.',
       defaultsTo: JsCompilerConfig.kDart2jsDefaultOptimizationLevel,
-      allowed: const <String>['01', '02', '03', '04'],
+      allowed: const <String>['O1', 'O2', 'O3', 'O4'],
     );
     argParser.addFlag('dump-info', negatable: false,
       help: 'Passes "--dump-info" to the Javascript compiler which generates '
