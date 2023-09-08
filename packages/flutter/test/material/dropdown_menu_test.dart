@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -11,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  const String longText = 'one two three four five six seven eight nine ten eleven twelve';
   final List<DropdownMenuEntry<TestMenu>> menuChildren = <DropdownMenuEntry<TestMenu>>[];
 
   for (final TestMenu value in TestMenu.values) {
@@ -39,15 +39,19 @@ void main() {
     await tester.pumpWidget(buildTest(themeData, menuChildren));
 
     final EditableText editableText = tester.widget(find.byType(EditableText));
-    expect(editableText.style.color, themeData.textTheme.labelLarge!.color);
-    expect(editableText.style.background, themeData.textTheme.labelLarge!.background);
-    expect(editableText.style.shadows, themeData.textTheme.labelLarge!.shadows);
-    expect(editableText.style.decoration, themeData.textTheme.labelLarge!.decoration);
-    expect(editableText.style.locale, themeData.textTheme.labelLarge!.locale);
-    expect(editableText.style.wordSpacing, themeData.textTheme.labelLarge!.wordSpacing);
+    expect(editableText.style.color, themeData.textTheme.bodyLarge!.color);
+    expect(editableText.style.background, themeData.textTheme.bodyLarge!.background);
+    expect(editableText.style.shadows, themeData.textTheme.bodyLarge!.shadows);
+    expect(editableText.style.decoration, themeData.textTheme.bodyLarge!.decoration);
+    expect(editableText.style.locale, themeData.textTheme.bodyLarge!.locale);
+    expect(editableText.style.wordSpacing, themeData.textTheme.bodyLarge!.wordSpacing);
+    expect(editableText.style.fontSize, 16.0);
+    expect(editableText.style.height, 1.5);
 
     final TextField textField = tester.widget(find.byType(TextField));
     expect(textField.decoration?.border, const OutlineInputBorder());
+    expect(textField.style?.fontSize, 16.0);
+    expect(textField.style?.height, 1.5);
 
     await tester.tap(find.widgetWithIcon(IconButton, Icons.arrow_drop_down).first);
     await tester.pump();
@@ -74,6 +78,8 @@ void main() {
     expect(material.elevation, 0.0);
     expect(material.shape, const RoundedRectangleBorder());
     expect(material.textStyle?.color, themeData.colorScheme.onSurface);
+    expect(material.textStyle?.fontSize, 14.0);
+    expect(material.textStyle?.height, 1.43);
   });
 
   testWidgets('DropdownMenu can be disabled', (WidgetTester tester) async {
@@ -177,7 +183,7 @@ void main() {
 
     final Finder textField = find.byType(TextField);
     final double anchorWidth = tester.getSize(textField).width;
-    expect(anchorWidth, 195.0);
+    expect(anchorWidth, closeTo(180.5, 0.1));
 
     await tester.tap(find.byType(DropdownMenu<TestMenu>));
     await tester.pumpAndSettle();
@@ -187,7 +193,7 @@ void main() {
       matching: find.byType(Material),
     );
     final double menuWidth = tester.getSize(menuMaterial).width;
-    expect(menuWidth, 195.0);
+    expect(menuWidth, closeTo(180.5, 0.1));
 
     // The text field should have same width as the menu
     // when the width property is not null.
@@ -391,7 +397,8 @@ void main() {
     matching: find.byType(Padding),
   ).first;
   final Size menuViewSize = tester.getSize(menuView);
-  expect(menuViewSize, const Size(195.0, 304.0)); // 304 = 288 + vertical padding(2 * 8)
+  expect(menuViewSize.width, closeTo(180.6, 0.1));
+  expect(menuViewSize.height, equals(304.0)); // 304 = 288 + vertical padding(2 * 8)
 
   // Constrains the menu height.
   await tester.pumpWidget(Container());
@@ -407,7 +414,8 @@ void main() {
   ).first;
 
   final Size updatedMenuSize = tester.getSize(updatedMenu);
-  expect(updatedMenuSize, const Size(195.0, 100.0));
+  expect(updatedMenuSize.width, closeTo(180.6, 0.1));
+  expect(updatedMenuSize.height, equals(100.0));
 });
 
   testWidgets('The text in the menu button should be aligned with the text of '
@@ -1518,6 +1526,160 @@ void main() {
     expect(find.text('Item 5').hitTestable(), findsOneWidget);
   });
 
+  // This is a regression test for https://github.com/flutter/flutter/issues/131676.
+  testWidgets('Material3 - DropdownMenu uses correct text styles', (WidgetTester tester) async {
+    const TextStyle inputTextThemeStyle = TextStyle(
+      fontSize: 18.5,
+      fontStyle: FontStyle.italic,
+      wordSpacing: 1.2,
+      decoration: TextDecoration.lineThrough,
+    );
+    const TextStyle menuItemTextThemeStyle = TextStyle(
+      fontSize: 20.5,
+      fontStyle: FontStyle.italic,
+      wordSpacing: 2.1,
+      decoration: TextDecoration.underline,
+    );
+    final ThemeData themeData = ThemeData(
+      useMaterial3: true,
+      textTheme: const TextTheme(
+        bodyLarge: inputTextThemeStyle,
+        labelLarge: menuItemTextThemeStyle,
+      ),
+    );
+    await tester.pumpWidget(buildTest(themeData, menuChildren));
+
+    // Test input text style uses the TextTheme.bodyLarge.
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.style.fontSize, inputTextThemeStyle.fontSize);
+    expect(editableText.style.fontStyle, inputTextThemeStyle.fontStyle);
+    expect(editableText.style.wordSpacing, inputTextThemeStyle.wordSpacing);
+    expect(editableText.style.decoration, inputTextThemeStyle.decoration);
+
+    // Open the menu.
+    await tester.tap(find.widgetWithIcon(IconButton, Icons.arrow_drop_down).first);
+    await tester.pump();
+
+    final Finder buttonMaterial = find.descendant(
+      of: find.byType(TextButton),
+      matching: find.byType(Material),
+    ).last;
+
+    // Test menu item text style uses the TextTheme.labelLarge.
+    final Material material = tester.widget<Material>(buttonMaterial);
+    expect(material.textStyle?.fontSize, menuItemTextThemeStyle.fontSize);
+    expect(material.textStyle?.fontStyle, menuItemTextThemeStyle.fontStyle);
+    expect(material.textStyle?.wordSpacing, menuItemTextThemeStyle.wordSpacing);
+    expect(material.textStyle?.decoration, menuItemTextThemeStyle.decoration);
+  });
+
+  testWidgets('DropdownMenuEntries do not overflow when width is specified', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/126882
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            controller: controller,
+            width: 100,
+            dropdownMenuEntries: TestMenu.values.map<DropdownMenuEntry<TestMenu>>((TestMenu item) {
+              return DropdownMenuEntry<TestMenu>(
+                value: item,
+                label: '${item.label} $longText',
+              );
+            }).toList(),
+          ),
+        ),
+      ),
+    );
+
+    // Opening the width=100 menu should not crash.
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    expect(tester.takeException(), isNull);
+    await tester.pumpAndSettle();
+
+    Finder findMenuItemText(String label) {
+      final String labelText = '$label $longText';
+      return find.descendant(
+        of: find.widgetWithText(MenuItemButton, labelText),
+        matching: find.byType(Text),
+      ).last;
+    }
+
+    // Actual size varies a little on web platforms.
+    final Matcher closeTo300 = closeTo(300, 0.25);
+    expect(tester.getSize(findMenuItemText('Item 0')).height, closeTo300);
+    expect(tester.getSize(findMenuItemText('Menu 1')).height, closeTo300);
+    expect(tester.getSize(findMenuItemText('Item 2')).height, closeTo300);
+    expect(tester.getSize(findMenuItemText('Item 3')).height, closeTo300);
+
+    await tester.tap(findMenuItemText('Item 0'));
+    await tester.pumpAndSettle();
+    expect(controller.text, 'Item 0 $longText');
+  });
+
+  testWidgets('DropdownMenuEntry.labelWidget is Text that specifies maxLines 1 or 2', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/126882
+    final TextEditingController controller = TextEditingController();
+
+    Widget buildFrame({ required int maxLines }) {
+      return MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            key: ValueKey<int>(maxLines),
+            controller: controller,
+            width: 100,
+            dropdownMenuEntries: TestMenu.values.map<DropdownMenuEntry<TestMenu>>((TestMenu item) {
+              return DropdownMenuEntry<TestMenu>(
+                value: item,
+                label: '${item.label} $longText',
+                labelWidget: Text('${item.label} $longText', maxLines: maxLines),
+              );
+            }).toList(),
+          ),
+        )
+      );
+    }
+
+    Finder findMenuItemText(String label) {
+      final String labelText = '$label $longText';
+      return find.descendant(
+        of: find.widgetWithText(MenuItemButton, labelText),
+        matching: find.byType(Text),
+      ).last;
+    }
+
+    await tester.pumpWidget(buildFrame(maxLines: 1));
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+
+    // Actual size varies a little on web platforms.
+    final Matcher closeTo20 = closeTo(20, 0.05);
+    expect(tester.getSize(findMenuItemText('Item 0')).height, closeTo20);
+    expect(tester.getSize(findMenuItemText('Menu 1')).height, closeTo20);
+    expect(tester.getSize(findMenuItemText('Item 2')).height, closeTo20);
+    expect(tester.getSize(findMenuItemText('Item 3')).height, closeTo20);
+
+    // Close the menu
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+    expect(controller.text, ''); // nothing selected
+
+    await tester.pumpWidget(buildFrame(maxLines: 2));
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+
+    // Actual size varies a little on web platforms.
+    final Matcher closeTo40 = closeTo(40, 0.05);
+    expect(tester.getSize(findMenuItemText('Item 0')).height, closeTo40);
+    expect(tester.getSize(findMenuItemText('Menu 1')).height, closeTo40);
+    expect(tester.getSize(findMenuItemText('Item 2')).height, closeTo40);
+    expect(tester.getSize(findMenuItemText('Item 3')).height, closeTo40);
+
+    // Close the menu
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+    expect(controller.text, ''); // nothing selected
+  });
 }
 
 enum TestMenu {

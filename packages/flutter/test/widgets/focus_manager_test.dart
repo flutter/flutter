@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   final GlobalKey widgetKey = GlobalKey();
@@ -1607,6 +1608,14 @@ void main() {
     notifyCount = 0;
 
     tester.binding.focusManager.removeListener(handleFocusChange);
+  });
+
+  test('$FocusManager dispatches object creation in constructor', () {
+    expect(()=> FocusManager().dispose(), dispatchesMemoryEvents(FocusManager));
+  });
+
+  test('$FocusNode dispatches object creation in constructor', () {
+    expect(()=> FocusNode().dispose(), dispatchesMemoryEvents(FocusNode));
   });
 
   testWidgets('FocusManager notifies listeners when a widget loses focus because it was removed.', (WidgetTester tester) async {

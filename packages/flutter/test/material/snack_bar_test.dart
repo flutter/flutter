@@ -14,6 +14,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   testWidgets('SnackBar control test', (WidgetTester tester) async {
@@ -2542,7 +2543,9 @@ void main() {
     expect(find.text(secondHeader), findsOneWidget);
   });
 
-  testWidgets('Should have only one SnackBar during back swipe navigation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Should have only one SnackBar during back swipe navigation',
+  leakTrackingTestConfig: LeakTrackingTestConfig.debugNotDisposed(),
+  (WidgetTester tester) async {
     const String snackBarText = 'hello snackbar';
     const Key snackTarget = Key('snack-target');
     const Key transitionTarget = Key('transition-target');

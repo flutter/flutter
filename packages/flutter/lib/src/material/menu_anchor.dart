@@ -27,6 +27,7 @@ import 'menu_style.dart';
 import 'menu_theme.dart';
 import 'radio.dart';
 import 'text_button.dart';
+import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -3676,6 +3677,7 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
   final BuildContext context;
 
   late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
 
   @override
   MaterialStateProperty<Color?>? get backgroundColor {
@@ -3791,7 +3793,9 @@ class _MenuButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<TextStyle?> get textStyle {
-    return MaterialStatePropertyAll<TextStyle?>(Theme.of(context).textTheme.bodyLarge);
+    // TODO(tahatesser): This is taken from https://m3.material.io/components/menus/specs
+    // Update this when the token is available.
+    return MaterialStatePropertyAll<TextStyle?>(_textTheme.labelLarge);
   }
 
   @override

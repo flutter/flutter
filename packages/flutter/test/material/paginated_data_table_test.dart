@@ -6,6 +6,7 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'data_table_test_utils.dart';
 
@@ -66,8 +67,9 @@ class TestDataSource extends DataTableSource {
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('PaginatedDataTable paging', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PaginatedDataTable paging', (WidgetTester tester) async {
     final TestDataSource source = TestDataSource();
+    addTearDown(source.dispose);
 
     final List<String> log = <String>[];
 
@@ -1022,6 +1024,38 @@ void main() {
     await binding.setSurfaceSize(originalSize);
   });
 
+  testWidgets('dataRowMinHeight & dataRowMaxHeight if not set will use DataTableTheme', (WidgetTester tester) async {
+    addTearDown(() => binding.setSurfaceSize(null));
+    await binding.setSurfaceSize(const Size(800, 800));
+
+    const double minMaxDataRowHeight = 30.0;
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        dataTableTheme: const DataTableThemeData(
+          dataRowMinHeight: minMaxDataRowHeight,
+          dataRowMaxHeight: minMaxDataRowHeight,
+        ),
+      ),
+      home: PaginatedDataTable(
+        header: const Text('Test table'),
+        source: TestDataSource(allowSelection: true),
+        columns: const <DataColumn>[
+          DataColumn(label: Text('Name')),
+          DataColumn(label: Text('Calories'), numeric: true),
+          DataColumn(label: Text('Generation')),
+        ],
+      ),
+    ));
+
+    final Container rowContainer = tester.widget<Container>(find.descendant(
+      of: find.byType(Table),
+      matching: find.byType(Container),
+    ).last);
+    expect(rowContainer.constraints?.minHeight, minMaxDataRowHeight);
+    expect(rowContainer.constraints?.maxHeight, minMaxDataRowHeight);
+  });
+
   testWidgets('PaginatedDataTable custom checkboxHorizontalMargin properly applied', (WidgetTester tester) async {
     const double customCheckboxHorizontalMargin = 15.0;
     const double customHorizontalMargin = 10.0;
@@ -1186,7 +1220,9 @@ void main() {
 
   testWidgets('PaginatedDataTable can be scrolled using ScrollController', (WidgetTester tester) async {
     final TestDataSource source = TestDataSource();
+    addTearDown(source.dispose);
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
 
     Widget buildTable(TestDataSource source) {
       return Align(
@@ -1235,7 +1271,9 @@ void main() {
 
   testWidgets('PaginatedDataTable uses PrimaryScrollController when primary ', (WidgetTester tester) async {
     final ScrollController primaryScrollController = ScrollController();
+    addTearDown(primaryScrollController.dispose);
     final TestDataSource source = TestDataSource();
+    addTearDown(source.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1263,5 +1301,34 @@ void main() {
     // Footer does not use primaryScrollController
     final Scrollable footerScrollView = tester.widget(find.byType(Scrollable).last);
     expect(footerScrollView.controller, null);
+  });
+
+  testWidgets('PaginatedDataTable custom heading row color', (WidgetTester tester) async {
+    const MaterialStateProperty<Color> headingRowColor = MaterialStatePropertyAll<Color>(Color(0xffFF0000));
+    final TestDataSource source = TestDataSource();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: PaginatedDataTable(
+            primary: true,
+            header: const Text('Test table'),
+            source: source,
+            rowsPerPage: 2,
+            headingRowColor: headingRowColor,
+            columns: const <DataColumn>[
+              DataColumn(label: Text('Name')),
+              DataColumn(label: Text('Calories'), numeric: true),
+              DataColumn(label: Text('Generation')),
+            ],
+          ),
+        ),
+      )
+    );
+
+    final Table table = tester.widget(find.byType(Table));
+    final TableRow tableRow = table.children[0];
+    final BoxDecoration tableRowBoxDecoration = tableRow.decoration! as BoxDecoration;
+    expect(tableRowBoxDecoration.color, headingRowColor.resolve(<MaterialState>{}));
   });
 }

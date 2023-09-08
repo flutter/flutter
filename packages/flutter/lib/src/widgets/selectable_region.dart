@@ -1567,6 +1567,13 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
 /// This class optimize the selection update by keeping track of the
 /// [Selectable]s that currently contain the selection edges.
 abstract class MultiSelectableSelectionContainerDelegate extends SelectionContainerDelegate with ChangeNotifier {
+  /// Creates an instance of [MultiSelectableSelectionContainerDelegate].
+  MultiSelectableSelectionContainerDelegate() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+  }
+
   /// Gets the list of selectables this delegate is managing.
   List<Selectable> selectables = <Selectable>[];
 
@@ -2045,14 +2052,14 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       if (globalRect.contains(event.globalPosition)) {
         final SelectionGeometry existingGeometry = selectables[index].value;
         lastSelectionResult = dispatchSelectionEventToChild(selectables[index], event);
+        if (index == selectables.length - 1 && lastSelectionResult == SelectionResult.next) {
+          return SelectionResult.next;
+        }
         if (lastSelectionResult == SelectionResult.next) {
           continue;
         }
         if (index == 0 && lastSelectionResult == SelectionResult.previous) {
           return SelectionResult.previous;
-        }
-        if (index == selectables.length - 1 && lastSelectionResult == SelectionResult.next) {
-          return SelectionResult.next;
         }
         if (selectables[index].value != existingGeometry) {
           // Geometry has changed as a result of select word, need to clear the

@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'navigator_utils.dart';
 import 'observer_tester.dart';
@@ -625,6 +626,41 @@ void main() {
     expect(observations[2].operation, 'push');
     expect(observations[2].current, '/A/B');
     expect(observations[2].previous, '/A');
+  });
+
+  testWidgetsWithLeakTracking('$Route  dispatches memory events', (WidgetTester tester) async {
+    Future<void> createAndDisposeRoute() async {
+      final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: nav,
+          home: const Scaffold(
+            body: Text('home'),
+          )
+        )
+      );
+
+      nav.currentState!.push(MaterialPageRoute<void>(builder: (_) => const Placeholder())); // This should create a route
+      await tester.pumpAndSettle();
+
+      nav.currentState!.pop();
+      await tester.pumpAndSettle(); // this should dispose the route.
+    }
+
+    final List<ObjectEvent> events = <ObjectEvent>[];
+    void listener(ObjectEvent event) {
+      if (event.object.runtimeType == MaterialPageRoute<void>) {
+        events.add(event);
+      }
+    }
+    MemoryAllocations.instance.addListener(listener);
+
+    await createAndDisposeRoute();
+    expect(events, hasLength(2));
+    expect(events.first, isA<ObjectCreated>());
+    expect(events.last, isA<ObjectDisposed>());
+
+    MemoryAllocations.instance.removeListener(listener);
   });
 
   testWidgets('Route didAdd and dispose in same frame work', (WidgetTester tester) async {
@@ -1451,29 +1487,34 @@ void main() {
         return result;
       },
     ));
-    expect(log, <String>['building page 1 - false']);
+    final List<String> expected = <String>['building page 1 - false'];
+    expect(log, expected);
     key.currentState!.pushReplacement(PageRouteBuilder<int>(
       pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
         log.add('building page 2 - ${ModalRoute.of(context)!.canPop}');
         return const Placeholder();
       },
     ));
-    expect(log, <String>['building page 1 - false']);
+    expect(log, expected);
     await tester.pump();
-    expect(log, <String>['building page 1 - false', 'building page 2 - false']);
+    expected.add('building page 2 - false');
+    expected.add('building page 1 - false'); // page 1 is rebuilt again because isCurrent changed.
+    expect(log, expected);
     await tester.pump(const Duration(milliseconds: 150));
-    expect(log, <String>['building page 1 - false', 'building page 2 - false']);
+    expect(log, expected);
     key.currentState!.pushReplacement(PageRouteBuilder<int>(
       pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
         log.add('building page 3 - ${ModalRoute.of(context)!.canPop}');
         return const Placeholder();
       },
     ));
-    expect(log, <String>['building page 1 - false', 'building page 2 - false']);
+    expect(log, expected);
     await tester.pump();
-    expect(log, <String>['building page 1 - false', 'building page 2 - false', 'building page 3 - false']);
+    expected.add('building page 3 - false');
+    expected.add('building page 2 - false'); // page 2 is rebuilt again because isCurrent changed.
+    expect(log, expected);
     await tester.pump(const Duration(milliseconds: 200));
-    expect(log, <String>['building page 1 - false', 'building page 2 - false', 'building page 3 - false']);
+    expect(log, expected);
   });
 
   testWidgets('route semantics', (WidgetTester tester) async {
@@ -4159,11 +4200,7 @@ void main() {
 
   group('Android Predictive Back', () {
     bool? lastFrameworkHandlesBack;
-    setUp(() {
-      // Initialize to false. Because this uses a static boolean internally, it
-      // is not reset between tests or calls to pumpWidget. Explicitly setting
-      // it to false before each test makes them behave deterministically.
-      SystemNavigator.setFrameworkHandlesBack(false);
+    setUp(() async {
       lastFrameworkHandlesBack = null;
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
@@ -4173,12 +4210,17 @@ void main() {
           }
           return;
         });
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .handlePlatformMessage(
+            'flutter/lifecycle',
+            const StringCodec().encodeMessage(AppLifecycleState.resumed.toString()),
+            (ByteData? data) {},
+          );
     });
 
     tearDown(() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(SystemChannels.platform, null);
-      SystemNavigator.setFrameworkHandlesBack(true);
     });
 
     testWidgets('a single route is already defaulted to false', (WidgetTester tester) async {
