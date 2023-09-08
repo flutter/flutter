@@ -1,4 +1,4 @@
-Signature: bf77076d58ab052ff9c7c57094fe6834
+Signature: e86e902ecf0b1898f69fe6e360079ead
 
 ====================================================================================================
 LIBRARY: etc1
@@ -386,7 +386,6 @@ FILE: ../../../third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../third_party/skia/modules/skparagraph/test.html
 FILE: ../../../third_party/skia/package-lock.json
 FILE: ../../../third_party/skia/relnotes/directcontext_submit.md
-FILE: ../../../third_party/skia/relnotes/procs-functional.md
 FILE: ../../../third_party/skia/relnotes/shadowflags.md
 FILE: ../../../third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
