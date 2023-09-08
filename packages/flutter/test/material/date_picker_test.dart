@@ -173,20 +173,11 @@ void main() {
       }, useMaterial3: theme.useMaterial3);
     });
 
-    testWidgetsWithLeakTracking('Material3 uses sentence case labels', (WidgetTester tester) async {
+    testWidgets('Material3 uses sentence case labels', (WidgetTester tester) async {
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
         expect(find.text('Select date'), findsOneWidget);
       }, useMaterial3: true);
-    },
-    leakTrackingTestConfig: const LeakTrackingTestConfig(
-      // TODO(polina-c): investigate and fix after merge
-      // https://github.com/flutter/flutter/pull/133884
-      notDisposedAllowList: <String, int?>{
-        '_RestorableDatePickerEntryMode': 3,
-        '_RestorableAutovalidateMode': 1,
-        'RestorableDateTimeN': 3,
-      },
-    ));
+    });
 
     testWidgets('Cancel, confirm, and help text is used', (WidgetTester tester) async {
       cancelText = 'nope';
