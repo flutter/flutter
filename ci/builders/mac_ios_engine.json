@@ -155,13 +155,6 @@
                 "language": "python3"
             },
             {
-                "name": "obj-c-doc",
-                "parameters": [
-                    "out/debug"
-                ],
-                "script": "flutter/tools/gen_objcdoc.sh"
-            },
-            {
                 "name": "Release-ios-Flutter.xcframework",
                 "parameters": [
                     "--dst",
@@ -208,11 +201,6 @@
         {
             "source": "out/profile/artifacts.zip",
             "destination": "ios-profile/artifacts.zip",
-            "realm": "production"
-        },
-        {
-            "source": "out/debug/ios-objcdoc.zip",
-            "destination": "ios-objcdoc.zip",
             "realm": "production"
         },
         {
