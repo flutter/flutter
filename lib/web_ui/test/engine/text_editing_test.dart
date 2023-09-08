@@ -1757,6 +1757,156 @@ Future<void> testMain() async {
       hideKeyboard();
     });
 
+    test('Supports deletion at inverted selection', () async {
+      final MethodCall setClient = MethodCall(
+          'TextInput.setClient', <dynamic>[123, createFlutterConfig('text', enableDeltaModel: true)]);
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
+
+      const MethodCall setEditingState =
+      MethodCall('TextInput.setEditingState', <String, dynamic>{
+        'text': 'Hello world',
+        'selectionBase': 9,
+        'selectionExtent': 3,
+      });
+      sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
+
+      const MethodCall show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
+
+      // The "setSizeAndTransform" message has to be here before we call
+      // checkInputEditingState, since on some platforms (e.g. Desktop Safari)
+      // we don't put the input element into the DOM until we get its correct
+      // dimensions from the framework.
+      final MethodCall setSizeAndTransform =
+          configureSetSizeAndTransformMethodCall(150, 50,
+              Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList());
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+      await waitForDesktopSafariFocus();
+
+      final DomHTMLInputElement input = textEditing!.strategy.domElement! as
+          DomHTMLInputElement;
+
+      final DomInputEvent testEvent = createDomInputEvent(
+        'beforeinput',
+        <Object?, Object?>{
+          'inputType': 'deleteContentBackward',
+        },
+      );
+      input.dispatchEvent(testEvent);
+
+      final EditingState editingState = EditingState(
+        text: 'Helld',
+        baseOffset: 3,
+        extentOffset: 3,
+      );
+      editingState.applyToDomElement(input);
+      input.dispatchEvent(createDomEvent('Event', 'input'));
+
+      expect(spy.messages, hasLength(1));
+      expect(spy.messages[0].channel, 'flutter/textinput');
+      expect(spy.messages[0].methodName, 'TextInputClient.updateEditingStateWithDeltas');
+      expect(
+        spy.messages[0].methodArguments,
+        <dynamic>[
+          123, // Client ID
+          <String, dynamic>{
+            'deltas': <Map<String, dynamic>>[
+              <String, dynamic>{
+                'oldText': 'Hello world',
+                'deltaText': '',
+                'deltaStart': 3,
+                'deltaEnd': 9,
+                'selectionBase': 3,
+                'selectionExtent': 3,
+                'composingBase': -1,
+                'composingExtent': -1
+              }
+            ],
+          }
+        ],
+      );
+      spy.messages.clear();
+
+      hideKeyboard();
+      // TODO(Renzo-Olivares): https://github.com/flutter/flutter/issues/134271
+    }, skip: isSafari);
+
+    test('Supports new line at inverted selection', () async {
+      final MethodCall setClient = MethodCall(
+          'TextInput.setClient', <dynamic>[123, createFlutterConfig('text', enableDeltaModel: true)]);
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
+
+      const MethodCall setEditingState =
+      MethodCall('TextInput.setEditingState', <String, dynamic>{
+        'text': 'Hello world',
+        'selectionBase': 9,
+        'selectionExtent': 3,
+      });
+      sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
+
+      const MethodCall show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
+
+      // The "setSizeAndTransform" message has to be here before we call
+      // checkInputEditingState, since on some platforms (e.g. Desktop Safari)
+      // we don't put the input element into the DOM until we get its correct
+      // dimensions from the framework.
+      final MethodCall setSizeAndTransform =
+          configureSetSizeAndTransformMethodCall(150, 50,
+              Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList());
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+      await waitForDesktopSafariFocus();
+
+      final DomHTMLInputElement input = textEditing!.strategy.domElement! as
+          DomHTMLInputElement;
+
+      final DomInputEvent testEvent = createDomInputEvent(
+        'beforeinput',
+        <Object?, Object?>{
+          'inputType': 'insertLineBreak',
+        },
+      );
+      input.dispatchEvent(testEvent);
+
+      final EditingState editingState = EditingState(
+        text: 'Hel\nld',
+        baseOffset: 3,
+        extentOffset: 3,
+      );
+      editingState.applyToDomElement(input);
+      input.dispatchEvent(createDomEvent('Event', 'input'));
+
+      expect(spy.messages, hasLength(1));
+      expect(spy.messages[0].channel, 'flutter/textinput');
+      expect(spy.messages[0].methodName, 'TextInputClient.updateEditingStateWithDeltas');
+      expect(
+        spy.messages[0].methodArguments,
+        <dynamic>[
+          123, // Client ID
+          <String, dynamic>{
+            'deltas': <Map<String, dynamic>>[
+              <String, dynamic>{
+                'oldText': 'Hello world',
+                'deltaText': '\n',
+                'deltaStart': 3,
+                'deltaEnd': 9,
+                'selectionBase': 3,
+                'selectionExtent': 3,
+                'composingBase': -1,
+                'composingExtent': -1
+              }
+            ],
+          }
+        ],
+      );
+      spy.messages.clear();
+
+      hideKeyboard();
+      // TODO(Renzo-Olivares): https://github.com/flutter/flutter/issues/134271
+    }, skip: isSafari);
+
     test('multiTextField Autofill sync updates back to Flutter', () async {
       // Create a configuration with an AutofillGroup of four text fields.
       const String hintForFirstElement = 'familyName';
