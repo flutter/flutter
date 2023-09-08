@@ -1834,14 +1834,7 @@ void main() {
     );
 
     scrollController.dispose();
-  },
-  // TODO(someone): remove after fixing
-  // https://github.com/flutter/flutter/issues/133755
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    notDisposedAllowList: <String, int?>{
-      'PageController': 2,
-    },
-  ));
+  });
 
   testWidgetsWithLeakTracking('Scrollbar scrollOrientation works correctly', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();

@@ -81,12 +81,5 @@ void main() {
     // should not crash.
     await tester.tap(find.text('Tab 2'));
     await tester.pumpAndSettle();
-  },
-  // TODO(someone): remove after fixing
-  // https://github.com/flutter/flutter/issues/133755
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    notDisposedAllowList: <String, int?>{
-      'PageController': 1,
-    },
-  ));
+  });
 }
