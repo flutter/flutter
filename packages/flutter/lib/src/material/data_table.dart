@@ -234,7 +234,8 @@ class DataRow {
   /// See also:
   ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor].
   final MaterialStateProperty<MouseCursor?>? mouseCursor;
-bool get _debugInteractive => onSelectChanged != null || cells.any((DataCell cell) => cell._debugInteractive);
+
+  bool get _debugInteractive => onSelectChanged != null || cells.any((DataCell cell) => cell._debugInteractive);
 }
 
 /// The data for a cell of a [DataTable].
