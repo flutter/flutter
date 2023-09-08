@@ -53,6 +53,8 @@ dependency_overrides:
     path: ../../third_party/dart/pkg/dart_internal
   dart2js_info:
     path: ../../third_party/dart/pkg/dart2js_info
+  dart2wasm:
+    path: ../../third_party/dart/pkg/dart2wasm
   dev_compiler:
     path: ../../third_party/dart/pkg/dev_compiler
   expect:
@@ -113,5 +115,7 @@ dependency_overrides:
     path: ../../third_party/dart/pkg/vm_service
   vm_snapshot_analysis:
     path: ../../third_party/dart/pkg/vm_snapshot_analysis
+  wasm_builder:
+    path: ../../third_party/dart/pkg/wasm_builder
   yaml:
     path: ../../third_party/dart/third_party/pkg/yaml
