@@ -653,6 +653,8 @@ class CupertinoTextField extends StatefulWidget {
   /// Text fields in disabled states have a light grey background and don't
   /// respond to touch events including the [prefix], [suffix] and the clear
   /// button.
+  ///
+  /// Defaults to true.
   final bool enabled;
 
   /// {@macro flutter.widgets.editableText.cursorWidth}
