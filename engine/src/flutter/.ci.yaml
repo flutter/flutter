@@ -465,10 +465,6 @@ targets:
       add_recipes_cq: "true"
       release_build: "true"
       config_name: mac_ios_engine
-      dependencies: >-
-        [
-          {"dependency": "jazzy", "version": "0.14.1"}
-        ]
       $flutter/osx_sdk : >-
         {
           "sdk_version": "14e300c"

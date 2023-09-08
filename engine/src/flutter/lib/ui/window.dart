@@ -737,8 +737,8 @@ class SingletonFlutterWindow extends FlutterView {
   ///
   /// ## iOS
   ///
-  /// On iOS, the initial route can be set on the `initialRoute`
-  /// parameter of the [FlutterViewController](/objcdoc/Classes/FlutterViewController.html)'s
+  /// On iOS, the initial route can be set with the
+  /// [`FlutterViewController.setInitialRoute`](/ios-embedder/interface_flutter_view_controller.html#a7f269c2da73312f856d42611cc12a33f)
   /// initializer.
   ///
   /// On a standalone engine, see https://flutter.dev/docs/development/add-to-app/ios/add-flutter-screen#route.
