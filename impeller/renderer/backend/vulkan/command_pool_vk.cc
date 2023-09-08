@@ -111,10 +111,6 @@ void CommandPoolVK::Reset() {
   is_valid_ = false;
 }
 
-vk::CommandPool CommandPoolVK::GetGraphicsCommandPool() const {
-  return graphics_pool_.get();
-}
-
 vk::UniqueCommandBuffer CommandPoolVK::CreateGraphicsCommandBuffer() {
   std::shared_ptr<const DeviceHolder> strong_device = device_holder_.lock();
   if (!strong_device) {
