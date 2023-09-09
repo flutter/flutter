@@ -682,9 +682,17 @@ class _ViewContentState extends State<_ViewContent> {
     super.initState();
     _viewRect = widget.viewRect;
     _controller = widget.searchController;
+    _controller.addListener(updateSuggestions);
+
     if (!_focusNode.hasFocus) {
       _focusNode.requestFocus();
     }
+  }
+
+  @override
+  void dispose(){
+    _controller.removeListener(updateSuggestions);
+    super.dispose();
   }
 
   @override
