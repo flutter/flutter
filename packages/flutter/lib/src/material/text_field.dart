@@ -782,7 +782,7 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.undoHistory.controller}
   final UndoHistoryController? undoController;
 
-  /// Determine if  onTapOutside can be called when the text field is not focused.
+  /// Determine if onTapOutside can be called when the [TextField] is not focused.
   final bool canTapOutsideFocus;
 
   static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
