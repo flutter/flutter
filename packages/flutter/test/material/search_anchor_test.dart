@@ -1491,7 +1491,7 @@ void main() {
 
   testWidgets('SearchAnchor should update suggestions on changes to search controller', (WidgetTester tester) async {
     final SearchController controller = SearchController();
-    const List<String> suggestions = ['foo','far','bim'];
+    const List<String> suggestions = <String>['foo','far','bim'];
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(MaterialApp(
@@ -1506,30 +1506,30 @@ void main() {
                   return const Icon(Icons.search);
                 },
                 suggestionsBuilder: (BuildContext context, SearchController controller) {
-                    final String searchText  = controller.text.toLowerCase();
-                    if(searchText.isEmpty){
-                      return <Widget>[
-                        const Center(
-                          child: Text('No Search'),
-                        ),
-                      ];
-                    }
-                    final Iterable<String> filterSuggestions = suggestions.where(
-                      (String suggestion) => suggestion.toLowerCase().contains(searchText),
-                    );
-                    return filterSuggestions.map((String suggestion) {
-                      return ListTile(
-                        title: Text(suggestion),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.call_missed),
-                          onPressed: () {
-                            controller.text = suggestion;
-                          },
-                        ),
-                        onTap: () {
-                          controller.closeView(suggestion);
+                  final String searchText = controller.text.toLowerCase();
+                  if (searchText.isEmpty) {
+                    return const <Widget>[
+                      Center(
+                        child: Text('No Search'),
+                      ),
+                    ];
+                  }
+                  final Iterable<String> filterSuggestions = suggestions.where(
+                    (String suggestion) => suggestion.toLowerCase().contains(searchText),
+                  );
+                  return filterSuggestions.map((String suggestion) {
+                    return ListTile(
+                      title: Text(suggestion),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.call_missed),
+                        onPressed: () {
+                          controller.text = suggestion;
                         },
-                      );
+                      ),
+                      onTap: () {
+                        controller.closeView(suggestion);
+                      },
+                    );
                   }).toList();
                 },
               ),
