@@ -1159,9 +1159,9 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   /// it executes the [widget.onTapOutside] callback.
   TapRegionCallback? _handleOnTapOutside() {
     if (_effectiveFocusNode.hasFocus && widget.onTapOutside != null && !widget.canTapOutsideFocus) {
-      return widget.onTapOutside!();
+      return widget.onTapOutside;
     } else if (widget.canTapOutsideFocus) {
-      return widget.onTapOutside!();
+      return widget.onTapOutside;
     }
     return null;
   }
