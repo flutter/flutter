@@ -163,6 +163,12 @@ class VulkanProcTable : public fml::RefCountedThreadSafe<VulkanProcTable> {
   PFN_vkVoidFunction AcquireProc(const char* proc_name,
                                  const VulkanHandle<VkDevice>& device) const;
 
+  PFN_vkVoidFunction AcquireThreadsafeSubmitQueue(
+      const VulkanHandle<VkDevice>& device) const;
+
+  PFN_vkVoidFunction AcquireThreadsafeQueueWaitIdle(
+      const VulkanHandle<VkDevice>& device) const;
+
  private:
   fml::RefPtr<fml::NativeLibrary> handle_;
   bool acquired_mandatory_proc_addresses_;
