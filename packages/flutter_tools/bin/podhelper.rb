@@ -21,10 +21,6 @@ def flutter_macos_podfile_setup; end
 
 # Determine whether the target depends on Flutter (including transitive dependency)
 def depends_on_flutter(target, engine_pod_name)
-  unless defined? engine_pod_name
-    raise 'Platform parameter can only be ios or macos.'
-  end
-
   target.dependencies.any? do |dependency|
     if dependency.name == engine_pod_name
       return true
