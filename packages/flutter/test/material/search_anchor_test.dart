@@ -1555,6 +1555,7 @@ void main() {
 
     await tester.enterText(find.byType(SearchBar), 'f');
     await tester.pumpAndSettle();
+    expect(textWidget,findsNothing);
     expect(listTile1, findsOneWidget);
     expect(listTile2, findsOneWidget);
     expect(listTile3, findsNothing);
@@ -1562,6 +1563,7 @@ void main() {
     await tester.tap(iconInListTile1);
     await tester.pumpAndSettle();
     expect(controller.value.text, 'foo');
+    expect(textWidget,findsNothing);
     expect(listTile1, findsOneWidget);
     expect(listTile2, findsNothing);
     expect(listTile3, findsNothing);
@@ -1570,6 +1572,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.isOpen, false);
     expect(controller.value.text, 'foo');
+    expect(textWidget,findsNothing);
     expect(listTile1, findsNothing);
     expect(listTile2, findsNothing);
     expect(listTile3, findsNothing);
