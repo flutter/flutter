@@ -1444,53 +1444,10 @@ void main() {
     // Search view top right should be the same as the anchor top right
     expect(searchViewRect.topRight, anchorRect.topRight);
   });
+
   testWidgets('SearchAnchor respects suggestionsBuilder property', (WidgetTester tester) async {
-      final SearchController controller = SearchController();
-      const String suggestion = 'suggestion text';
-
-      await tester.pumpWidget(MaterialApp(
-        home: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Material(
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: SearchAnchor(
-                  searchController: controller,
-                  builder: (BuildContext context, SearchController controller) {
-                    return const Icon(Icons.search);
-                  },
-                  suggestionsBuilder: (BuildContext context, SearchController controller) {
-                    return <Widget>[
-                      ListTile(
-                        title: const Text(suggestion),
-                        onTap: () {
-                          setState(() {
-                            controller.closeView(suggestion);
-                          });
-                      }),
-                    ];
-                  },
-                ),
-              ),
-            );
-          }
-        ),
-      ));
-      await tester.tap(find.byIcon(Icons.search));
-      await tester.pumpAndSettle();
-
-      final Finder listTile = find.widgetWithText(ListTile, suggestion);
-      expect(listTile, findsOneWidget);
-      await tester.tap(listTile);
-      await tester.pumpAndSettle();
-
-      expect(controller.isOpen, false);
-      expect(controller.value.text, suggestion);
-    });
-
-  testWidgets('SearchAnchor respects suggestionsBuilder property with filter', (WidgetTester tester) async {
     final SearchController controller = SearchController();
-    const List<String> suggestions = ['foo','far','bim'];
+    const String suggestion = 'suggestion text';
 
     await tester.pumpWidget(MaterialApp(
       home: StatefulBuilder(
@@ -1504,24 +1461,15 @@ void main() {
                   return const Icon(Icons.search);
                 },
                 suggestionsBuilder: (BuildContext context, SearchController controller) {
-                  final String searchText  = controller.text.toLowerCase();
-                  final Iterable<String> filterSuggestions = suggestions.where(
-                    (String suggestion) => suggestion.toLowerCase().contains(searchText),
-                  );
-                  return filterSuggestions.map((String suggestion) {
-                  return ListTile(
-                    title: Text(suggestion),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.call_missed),
-                      onPressed: () {
-                        controller.text = suggestion;
-                      },
-                    ),
-                    onTap: () {
-                      controller.closeView(suggestion);
-                    },
-                  );
-                }).toList();
+                  return <Widget>[
+                    ListTile(
+                      title: const Text(suggestion),
+                      onTap: () {
+                        setState(() {
+                          controller.closeView(suggestion);
+                        });
+                    }),
+                  ];
                 },
               ),
             ),
@@ -1531,18 +1479,82 @@ void main() {
     ));
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
+
+    final Finder listTile = find.widgetWithText(ListTile, suggestion);
+    expect(listTile, findsOneWidget);
+    await tester.tap(listTile);
+    await tester.pumpAndSettle();
+
+    expect(controller.isOpen, false);
+    expect(controller.value.text, suggestion);
+  });
+
+  testWidgets('SearchAnchor should update suggestions on changes to search controller', (WidgetTester tester) async {
+    final SearchController controller = SearchController();
+    const List<String> suggestions = ['foo','far','bim'];
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(MaterialApp(
+      home: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Material(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: SearchAnchor(
+                searchController: controller,
+                builder: (BuildContext context, SearchController controller) {
+                  return const Icon(Icons.search);
+                },
+                suggestionsBuilder: (BuildContext context, SearchController controller) {
+                    final String searchText  = controller.text.toLowerCase();
+                    if(searchText.isEmpty){
+                      return <Widget>[
+                        const Center(
+                          child: Text('No Search'),
+                        ),
+                      ];
+                    }
+                    final Iterable<String> filterSuggestions = suggestions.where(
+                      (String suggestion) => suggestion.toLowerCase().contains(searchText),
+                    );
+                    return filterSuggestions.map((String suggestion) {
+                      return ListTile(
+                        title: Text(suggestion),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.call_missed),
+                          onPressed: () {
+                            controller.text = suggestion;
+                          },
+                        ),
+                        onTap: () {
+                          controller.closeView(suggestion);
+                        },
+                      );
+                  }).toList();
+                },
+              ),
+            ),
+          );
+        }
+      ),
+    ));
+
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+
     final Finder listTile1 = find.widgetWithText(ListTile, 'foo');
     final Finder listTile2 = find.widgetWithText(ListTile, 'far');
     final Finder listTile3 = find.widgetWithText(ListTile, 'bim');
+    final Finder textWidget = find.widgetWithText(Center, 'No Search');
     final Finder iconInListTile1 = find.descendant(of: listTile1, matching: find.byIcon(Icons.call_missed));
 
+    expect(textWidget,findsOneWidget);
     expect(listTile1, findsNothing);
     expect(listTile2, findsNothing);
     expect(listTile3, findsNothing);
 
     await tester.enterText(find.byType(SearchBar), 'f');
     await tester.pumpAndSettle();
-
     expect(listTile1, findsOneWidget);
     expect(listTile2, findsOneWidget);
     expect(listTile3, findsNothing);
@@ -1556,7 +1568,6 @@ void main() {
 
     await tester.tap(listTile1);
     await tester.pumpAndSettle();
-
     expect(controller.isOpen, false);
     expect(controller.value.text, 'foo');
     expect(listTile1, findsNothing);
