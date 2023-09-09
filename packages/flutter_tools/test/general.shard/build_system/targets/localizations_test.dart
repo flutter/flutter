@@ -49,23 +49,24 @@ required-resource-attributes: false
 nullable-getter: false
 ''');
 
-    final LocalizationOptions options = parseLocalizationsOptions(
+    final LocalizationOptions options = parseLocalizationsOptionsFromYAML(
       file: configFile,
       logger: BufferLogger.test(),
+      defaultArbDir: fileSystem.path.join('lib', 'l10n'),
     );
 
-    expect(options.arbDirectory, Uri.parse('arb'));
-    expect(options.templateArbFile, Uri.parse('example.arb'));
-    expect(options.outputLocalizationsFile, Uri.parse('bar'));
-    expect(options.untranslatedMessagesFile, Uri.parse('untranslated'));
+    expect(options.arbDir, Uri.parse('arb').path);
+    expect(options.templateArbFile, Uri.parse('example.arb').path);
+    expect(options.outputLocalizationFile, Uri.parse('bar').path);
+    expect(options.untranslatedMessagesFile, Uri.parse('untranslated').path);
     expect(options.outputClass, 'Foo');
-    expect(options.headerFile, Uri.parse('header'));
+    expect(options.headerFile, Uri.parse('header').path);
     expect(options.header, 'HEADER');
-    expect(options.deferredLoading, true);
+    expect(options.useDeferredLoading, true);
     expect(options.preferredSupportedLocales, <String>['en_US']);
-    expect(options.useSyntheticPackage, false);
-    expect(options.areResourceAttributesRequired, false);
-    expect(options.usesNullableGetter, false);
+    expect(options.syntheticPackage, false);
+    expect(options.requiredResourceAttributes, false);
+    expect(options.nullableGetter, false);
   });
 
   testWithoutContext('parseLocalizationsOptions handles preferredSupportedLocales as list', () async {
@@ -74,9 +75,10 @@ nullable-getter: false
 preferred-supported-locales: ['en_US', 'de']
 ''');
 
-    final LocalizationOptions options = parseLocalizationsOptions(
+    final LocalizationOptions options = parseLocalizationsOptionsFromYAML(
       file: configFile,
       logger: BufferLogger.test(),
+      defaultArbDir: fileSystem.path.join('lib', 'l10n'),
     );
 
     expect(options.preferredSupportedLocales, <String>['en_US', 'de']);
@@ -91,9 +93,10 @@ use-deferred-loading: string
 ''');
 
     expect(
-      () => parseLocalizationsOptions(
+      () => parseLocalizationsOptionsFromYAML(
         file: configFile,
         logger: BufferLogger.test(),
+        defaultArbDir: fileSystem.path.join('lib', 'l10n'),
       ),
       throwsException,
     );
@@ -106,9 +109,10 @@ template-arb-file: {name}_en.arb
 ''');
 
     expect(
-      () => parseLocalizationsOptions(
+      () => parseLocalizationsOptionsFromYAML(
         file: configFile,
         logger: BufferLogger.test(),
+        defaultArbDir: fileSystem.path.join('lib', 'l10n'),
       ),
       throwsToolExit(),
     );

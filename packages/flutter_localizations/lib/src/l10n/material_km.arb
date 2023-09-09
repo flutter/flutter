@@ -25,6 +25,7 @@
   "continueButtonLabel": "បន្ត",
   "copyButtonLabel": "ចម្លង",
   "cutButtonLabel": "កាត់",
+  "scanTextButtonLabel": "ស្កេនអត្ថបទ",
   "okButtonLabel": "យល់ព្រម",
   "pasteButtonLabel": "ដាក់​ចូល",
   "selectAllButtonLabel": "ជ្រើសរើស​ទាំងអស់",
@@ -134,5 +135,11 @@
   "scrimLabel": "ផ្ទាំងស្រអាប់",
   "bottomSheetLabel": "សន្លឹក​ខាងក្រោម",
   "scrimOnTapHint": "បិទ $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

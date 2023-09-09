@@ -9,6 +9,7 @@ import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
 import 'colors.dart';
+import 'input_decorator.dart';
 import 'material_state.dart';
 import 'text_theme.dart';
 import 'theme.dart';
@@ -67,6 +68,8 @@ class DatePickerThemeData with Diagnosticable {
     this.rangePickerHeaderHelpStyle,
     this.rangeSelectionBackgroundColor,
     this.rangeSelectionOverlayColor,
+    this.dividerColor,
+    this.inputDecorationTheme,
   });
 
   /// Overrides the default value of [Dialog.backgroundColor].
@@ -282,6 +285,15 @@ class DatePickerThemeData with Diagnosticable {
   /// [DateRangePickerDialog] is focused, hovered, or pressed.
   final MaterialStateProperty<Color?>? rangeSelectionOverlayColor;
 
+  /// Overrides the default color used to paint the horizontal divider
+  /// below the header text when dialog is in in portrait orientation
+  /// and vertical divider when the dialog is in landscape orientation.
+  final Color? dividerColor;
+
+  /// Overrides the [InputDatePickerFormField]'s input decoration theme.
+  /// If this is null, [ThemeData.inputDecorationTheme] is used instead.
+  final InputDecorationTheme? inputDecorationTheme;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   DatePickerThemeData copyWith({
@@ -317,6 +329,8 @@ class DatePickerThemeData with Diagnosticable {
     TextStyle? rangePickerHeaderHelpStyle,
     Color? rangeSelectionBackgroundColor,
     MaterialStateProperty<Color?>? rangeSelectionOverlayColor,
+    Color? dividerColor,
+    InputDecorationTheme? inputDecorationTheme,
   }) {
     return DatePickerThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -351,6 +365,8 @@ class DatePickerThemeData with Diagnosticable {
       rangePickerHeaderHelpStyle: rangePickerHeaderHelpStyle ?? this.rangePickerHeaderHelpStyle,
       rangeSelectionBackgroundColor: rangeSelectionBackgroundColor ?? this.rangeSelectionBackgroundColor,
       rangeSelectionOverlayColor: rangeSelectionOverlayColor ?? this.rangeSelectionOverlayColor,
+      dividerColor: dividerColor ?? this.dividerColor,
+      inputDecorationTheme: inputDecorationTheme ?? this.inputDecorationTheme,
     );
   }
 
@@ -392,6 +408,8 @@ class DatePickerThemeData with Diagnosticable {
       rangePickerHeaderHelpStyle: TextStyle.lerp(a?.rangePickerHeaderHelpStyle, b?.rangePickerHeaderHelpStyle, t),
       rangeSelectionBackgroundColor: Color.lerp(a?.rangeSelectionBackgroundColor, b?.rangeSelectionBackgroundColor, t),
       rangeSelectionOverlayColor: MaterialStateProperty.lerp<Color?>(a?.rangeSelectionOverlayColor, b?.rangeSelectionOverlayColor, t, Color.lerp),
+      dividerColor: Color.lerp(a?.dividerColor, b?.dividerColor, t),
+      inputDecorationTheme: t < 0.5 ? a?.inputDecorationTheme : b?.inputDecorationTheme,
     );
   }
 
@@ -439,6 +457,8 @@ class DatePickerThemeData with Diagnosticable {
     rangePickerHeaderHelpStyle,
     rangeSelectionBackgroundColor,
     rangeSelectionOverlayColor,
+    dividerColor,
+    inputDecorationTheme,
   ]);
 
   @override
@@ -478,7 +498,9 @@ class DatePickerThemeData with Diagnosticable {
       && other.rangePickerHeaderHeadlineStyle == rangePickerHeaderHeadlineStyle
       && other.rangePickerHeaderHelpStyle == rangePickerHeaderHelpStyle
       && other.rangeSelectionBackgroundColor == rangeSelectionBackgroundColor
-      && other.rangeSelectionOverlayColor == rangeSelectionOverlayColor;
+      && other.rangeSelectionOverlayColor == rangeSelectionOverlayColor
+      && other.dividerColor == dividerColor
+      && other.inputDecorationTheme == inputDecorationTheme;
   }
 
   @override
@@ -516,6 +538,8 @@ class DatePickerThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<TextStyle>('rangePickerHeaderHelpStyle', rangePickerHeaderHelpStyle, defaultValue: null));
     properties.add(ColorProperty('rangeSelectionBackgroundColor', rangeSelectionBackgroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('rangeSelectionOverlayColor', rangeSelectionOverlayColor, defaultValue: null));
+    properties.add(ColorProperty('dividerColor', dividerColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<InputDecorationTheme>('inputDecorationTheme', inputDecorationTheme, defaultValue: null));
   }
 }
 
@@ -675,23 +699,23 @@ class _DatePickerDefaultsM2 extends DatePickerThemeData {
   MaterialStateProperty<Color?>? get dayOverlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.onPrimary.withOpacity(0.38);
+        }
         if (states.contains(MaterialState.hovered)) {
           return _colors.onPrimary.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
           return _colors.onPrimary.withOpacity(0.12);
         }
-        if (states.contains(MaterialState.pressed)) {
-          return _colors.onPrimary.withOpacity(0.38);
-        }
       } else {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.onSurfaceVariant.withOpacity(0.12);
+        }
         if (states.contains(MaterialState.hovered)) {
           return _colors.onSurfaceVariant.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.onSurfaceVariant.withOpacity(0.12);
-        }
-        if (states.contains(MaterialState.pressed)) {
           return _colors.onSurfaceVariant.withOpacity(0.12);
         }
       }
@@ -746,23 +770,23 @@ class _DatePickerDefaultsM2 extends DatePickerThemeData {
   MaterialStateProperty<Color?>? get rangeSelectionOverlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.onPrimary.withOpacity(0.38);
+        }
         if (states.contains(MaterialState.hovered)) {
           return _colors.onPrimary.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
           return _colors.onPrimary.withOpacity(0.12);
         }
-        if (states.contains(MaterialState.pressed)) {
-          return _colors.onPrimary.withOpacity(0.38);
-        }
       } else {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.onSurfaceVariant.withOpacity(0.12);
+        }
         if (states.contains(MaterialState.hovered)) {
           return _colors.onSurfaceVariant.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.onSurfaceVariant.withOpacity(0.12);
-        }
-        if (states.contains(MaterialState.pressed)) {
           return _colors.onSurfaceVariant.withOpacity(0.12);
         }
       }
@@ -776,8 +800,6 @@ class _DatePickerDefaultsM2 extends DatePickerThemeData {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _DatePickerDefaultsM3 extends DatePickerThemeData {
   _DatePickerDefaultsM3(this.context)
@@ -846,23 +868,23 @@ class _DatePickerDefaultsM3 extends DatePickerThemeData {
   MaterialStateProperty<Color?>? get dayOverlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.onPrimary.withOpacity(0.12);
+        }
         if (states.contains(MaterialState.hovered)) {
           return _colors.onPrimary.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
           return _colors.onPrimary.withOpacity(0.12);
         }
-        if (states.contains(MaterialState.pressed)) {
-          return _colors.onPrimary.withOpacity(0.12);
-        }
       } else {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.onSurfaceVariant.withOpacity(0.12);
+        }
         if (states.contains(MaterialState.hovered)) {
           return _colors.onSurfaceVariant.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.onSurfaceVariant.withOpacity(0.12);
-        }
-        if (states.contains(MaterialState.pressed)) {
           return _colors.onSurfaceVariant.withOpacity(0.12);
         }
       }
@@ -913,23 +935,23 @@ class _DatePickerDefaultsM3 extends DatePickerThemeData {
   MaterialStateProperty<Color?>? get yearOverlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.onPrimary.withOpacity(0.12);
+        }
         if (states.contains(MaterialState.hovered)) {
           return _colors.onPrimary.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
           return _colors.onPrimary.withOpacity(0.12);
         }
-        if (states.contains(MaterialState.pressed)) {
-          return _colors.onPrimary.withOpacity(0.12);
-        }
       } else {
+        if (states.contains(MaterialState.pressed)) {
+          return _colors.onSurfaceVariant.withOpacity(0.12);
+        }
         if (states.contains(MaterialState.hovered)) {
           return _colors.onSurfaceVariant.withOpacity(0.08);
         }
         if (states.contains(MaterialState.focused)) {
-          return _colors.onSurfaceVariant.withOpacity(0.12);
-        }
-        if (states.contains(MaterialState.pressed)) {
           return _colors.onSurfaceVariant.withOpacity(0.12);
         }
       }
@@ -948,14 +970,14 @@ class _DatePickerDefaultsM3 extends DatePickerThemeData {
   @override
   MaterialStateProperty<Color?>? get rangeSelectionOverlayColor =>
     MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        return _colors.onPrimaryContainer.withOpacity(0.12);
+      }
       if (states.contains(MaterialState.hovered)) {
-        return null;
+        return _colors.onPrimaryContainer.withOpacity(0.08);
       }
       if (states.contains(MaterialState.focused)) {
-        return null;
-      }
-      if (states.contains(MaterialState.pressed)) {
-        return null;
+        return _colors.onPrimaryContainer.withOpacity(0.12);
       }
       return null;
     });

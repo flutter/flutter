@@ -19,9 +19,8 @@ import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
 void main() {
-
-  final ThemeData material3Theme = ThemeData.light().copyWith(useMaterial3: true);
-  final ThemeData material2Theme = ThemeData.light().copyWith(useMaterial3: false);
+  final ThemeData material3Theme = ThemeData(useMaterial3: true);
+  final ThemeData material2Theme = ThemeData(useMaterial3: false);
 
   testWidgets('Floating Action Button control test', (WidgetTester tester) async {
     bool didPressButton = false;
@@ -950,6 +949,7 @@ void main() {
     const Color splashColor = Color(0xcafefeed);
 
     await tester.pumpWidget(MaterialApp(
+      theme: material2Theme,
       home: FloatingActionButton(
         onPressed: () {},
         splashColor: splashColor,
@@ -1051,6 +1051,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: material2Theme,
         home: Scaffold(
           floatingActionButton: FloatingActionButton.extended(
             label: const Text('', key: labelKey),
@@ -1073,8 +1074,9 @@ void main() {
   });
 
   group('Material 2', () {
-    // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
-    // is turned on by default, these tests can be removed.
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
 
     testWidgets('Floating Action Button elevation when highlighted - effect', (WidgetTester tester) async {
       await tester.pumpWidget(

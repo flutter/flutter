@@ -87,7 +87,7 @@ class SemanticsController {
     RenderObject? renderObject = element.findRenderObject();
     SemanticsNode? result = renderObject?.debugSemantics;
     while (renderObject != null && (result == null || result.isMergedIntoParent)) {
-      renderObject = renderObject.parent as RenderObject?;
+      renderObject = renderObject.parent;
       result = renderObject?.debugSemantics;
     }
     if (result == null) {
@@ -366,7 +366,7 @@ abstract class WidgetController {
     final RenderObject object = element.renderObject!;
     RenderObject current = object;
     while (current.debugLayer == null) {
-      current = current.parent! as RenderObject;
+      current = current.parent!;
     }
     final ContainerLayer layer = current.debugLayer!;
     return _walkLayers(layer);
@@ -1091,7 +1091,7 @@ abstract class WidgetController {
           ),
         ]),
       ...<PointerEventRecord>[
-        for(int t = 0; t <= intervals; t += 1)
+        for (int t = 0; t <= intervals; t += 1)
           PointerEventRecord(timeStamps[t], <PointerEvent>[
             PointerMoveEvent(
               timeStamp: timeStamps[t],
@@ -1192,7 +1192,8 @@ abstract class WidgetController {
   /// Forwards the given location to the binding's hitTest logic.
   HitTestResult hitTestOnBinding(Offset location) {
     final HitTestResult result = HitTestResult();
-    binding.hitTest(result, location);
+    // TODO(goderbauer): Support multiple views in flutter_test pointer event handling, https://github.com/flutter/flutter/issues/128281
+    binding.hitTest(result, location); // ignore: deprecated_member_use
     return result;
   }
 
@@ -1313,7 +1314,8 @@ abstract class WidgetController {
     final Offset location = box.localToGlobal(sizeToPoint(box.size));
     if (warnIfMissed) {
       final HitTestResult result = HitTestResult();
-      binding.hitTest(result, location);
+      // TODO(goderbauer): Support multiple views in flutter_test pointer event handling, https://github.com/flutter/flutter/issues/128281
+      binding.hitTest(result, location); // ignore: deprecated_member_use
       bool found = false;
       for (final HitTestEntry entry in result.path) {
         if (entry.target == box) {

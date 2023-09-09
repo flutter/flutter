@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import static groovy.io.FileType.FILES
+// This file exists solely for the compatibility with projects that have
+// not migrated to the declarative apply of the Flutter Gradle Plugin.
 
+<<<<<<< HEAD
 import com.android.builder.model.AndroidProject
 import com.android.build.OutputFile
 import groovy.json.JsonSlurper
@@ -1326,3 +1328,7 @@ class FlutterTask extends BaseFlutterTask {
         buildBundle()
     }
 }
+=======
+def pathToThisDirectory = buildscript.sourceFile.parentFile
+apply from: "$pathToThisDirectory/src/main/groovy/flutter.groovy"
+>>>>>>> 2524052335ec76bb03e04ede244b071f1b86d190

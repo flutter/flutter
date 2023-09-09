@@ -302,7 +302,7 @@ void main() {
   });
 
   testWidgets('Light theme SnackBar has dark background', (WidgetTester tester) async {
-    final ThemeData lightTheme = ThemeData.light();
+    final ThemeData lightTheme = ThemeData.light(useMaterial3: false);
     await tester.pumpWidget(
       MaterialApp(
         theme: lightTheme,
@@ -383,7 +383,7 @@ void main() {
   });
 
   testWidgets('Dark theme SnackBar has primary text buttons', (WidgetTester tester) async {
-    final ThemeData darkTheme = ThemeData.dark();
+    final ThemeData darkTheme = ThemeData.dark(useMaterial3: false);
     await tester.pumpWidget(
       MaterialApp(
         theme: darkTheme,
@@ -445,7 +445,6 @@ void main() {
     final ThemeData theme = ThemeData.light().copyWith(
       visualDensity: VisualDensity.standard,
       primaryColor: Colors.black,
-      primaryColorBrightness: Brightness.dark,
       primaryColorLight: Colors.black,
       primaryColorDark: Colors.black,
       canvasColor: Colors.black,
@@ -962,6 +961,7 @@ void main() {
 
   testWidgets('SnackBar button text alignment', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
       home: MediaQuery(
         data: const MediaQueryData(
           padding: EdgeInsets.only(
@@ -1011,6 +1011,7 @@ void main() {
     'Custom padding between SnackBar and its contents when set to SnackBarBehavior.fixed',
     (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: MediaQuery(
           data: const MediaQueryData(
             padding: EdgeInsets.only(
@@ -1121,6 +1122,7 @@ void main() {
   testWidgets('Floating SnackBar button text alignment', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
+        useMaterial3: false,
         snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating),
       ),
       home: MediaQuery(
@@ -1173,6 +1175,7 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(
+          useMaterial3: false,
           snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating),
         ),
         home: MediaQuery(
@@ -1903,8 +1906,9 @@ void main() {
     testWidgets('Snackbar with SnackBarBehavior.floating will assert when offset too high by a large Scaffold.persistentFooterButtons', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/84263
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: const Scaffold(
             persistentFooterButtons: <Widget>[SizedBox(height: 1000)],
           ),
         ),
@@ -1918,8 +1922,9 @@ void main() {
     testWidgets('Snackbar with SnackBarBehavior.floating will assert when offset too high by a large Scaffold.bottomNavigationBar', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/84263
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: const Scaffold(
             bottomNavigationBar: SizedBox(height: 1000),
           ),
         ),
@@ -2081,7 +2086,7 @@ void main() {
     Widget buildApp() {
       final PageTransitionsTheme pageTransitionTheme = PageTransitionsTheme(
         builders: <TargetPlatform, PageTransitionsBuilder>{
-          for(final TargetPlatform platform in TargetPlatform.values)
+          for (final TargetPlatform platform in TargetPlatform.values)
             platform: const CupertinoPageTransitionsBuilder(),
         },
       );
@@ -2150,8 +2155,9 @@ void main() {
   });
 
   testWidgets('SnackBars should be shown above the bottomSheet', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(
-      home: Scaffold(
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
+      home: const Scaffold(
         bottomSheet: SizedBox(
           width: 200,
           height: 50,
@@ -2233,6 +2239,7 @@ void main() {
 
   testWidgets('ScaffoldMessenger presents SnackBars to only the root Scaffold when Scaffolds are nested.', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
       home: Scaffold(
         body: const Scaffold(),
         floatingActionButton: FloatingActionButton(onPressed: () {}),
@@ -2434,6 +2441,7 @@ void main() {
   testWidgets('Snackbar by default clips BackdropFilter', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/98205
     await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
       home: Scaffold(
         body: const Scaffold(),
         floatingActionButton: FloatingActionButton(onPressed: () {}),
@@ -2464,8 +2472,9 @@ void main() {
   });
 
   testWidgets('Floating snackbar can display optional icon', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(
-      home: Scaffold(
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
+      home: const Scaffold(
         bottomSheet: SizedBox(
           width: 200,
           height: 50,
@@ -2495,8 +2504,9 @@ void main() {
   });
 
   testWidgets('Fixed width snackbar can display optional icon', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(
-      home: Scaffold(
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
+      home: const Scaffold(
         bottomSheet: SizedBox(
           width: 200,
           height: 50,
@@ -2521,8 +2531,9 @@ void main() {
   });
 
     testWidgets('Fixed snackbar can display optional icon without action', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(
-      home: Scaffold(
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
+      home: const Scaffold(
         bottomSheet: SizedBox(
           width: 200,
           height: 50,
@@ -2549,8 +2560,9 @@ void main() {
 
   testWidgets(
       'Floating width snackbar can display optional icon without action', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(
-      home: Scaffold(
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
+      home: const Scaffold(
         bottomSheet: SizedBox(
           width: 200,
           height: 50,
@@ -2575,8 +2587,9 @@ void main() {
   });
 
   testWidgets('Floating multi-line snackbar with icon is aligned correctly', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(
-      home: Scaffold(
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
+      home: const Scaffold(
         bottomSheet: SizedBox(
           width: 200,
           height: 50,
@@ -2602,8 +2615,9 @@ void main() {
   });
 
   testWidgets('Floating multi-line snackbar with icon and actionOverflowThreshold=1 is aligned correctly', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(
-      home: Scaffold(
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
+      home: const Scaffold(
         bottomSheet: SizedBox(
           width: 200,
           height: 50,
@@ -2622,10 +2636,10 @@ void main() {
       behavior: SnackBarBehavior.floating,
       actionOverflowThreshold: 1,
     ));
-    await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
+    await tester.pumpAndSettle(); // Have the SnackBar fully animate in.
 
     await expectLater(find.byType(MaterialApp),
-        matchesGoldenFile('snack_bar.goldenTest.multiLineWithIconWithZeroActionOverflowThreshold.png'));
+      matchesGoldenFile('snack_bar.goldenTest.multiLineWithIconWithZeroActionOverflowThreshold.png'));
   });
 
   testWidgets(
@@ -2856,6 +2870,50 @@ testWidgets('SnackBarAction backgroundColor works as a Color', (WidgetTester tes
       'description',
       contains('disabledBackgroundColor must not be provided when background color is a MaterialStateColor'))
     );
+  });
+
+  testWidgets('SnackBar material applies SnackBar.clipBehavior', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Container(),
+        ),
+      ),
+    );
+
+    final ScaffoldMessengerState scaffoldMessengerState = tester.state(find.byType(ScaffoldMessenger));
+    scaffoldMessengerState.showSnackBar(
+      const SnackBar(content: Text('I am a snack bar.')),
+    );
+
+    await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
+
+    Material material = tester.widget<Material>(
+      find.descendant(of: find.byType(SnackBar),
+      matching: find.byType(Material))
+    );
+
+    expect(material.clipBehavior, Clip.hardEdge);
+
+    scaffoldMessengerState.hideCurrentSnackBar(); // Hide the SnackBar.
+
+    await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
+
+    scaffoldMessengerState.showSnackBar(
+      const SnackBar(
+        content: Text('I am a snack bar.'),
+        clipBehavior: Clip.antiAlias,
+      ),
+    );
+
+    await tester.pumpAndSettle(); // Have the SnackBar fully animate in.
+
+    material = tester.widget<Material>(
+      find.descendant(of: find.byType(SnackBar),
+      matching: find.byType(Material))
+    );
+
+    expect(material.clipBehavior, Clip.antiAlias);
   });
 }
 

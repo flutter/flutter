@@ -2720,7 +2720,7 @@ class CupertinoLocalizationEs extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Buscar';
 
   @override
-  String get selectAllButtonLabel => 'Seleccionar todos';
+  String get selectAllButtonLabel => 'Seleccionar todo';
 
   @override
   String get tabSemanticsLabelRaw => r'Pestaña $tabIndex de $tabCount';
@@ -9410,7 +9410,11 @@ class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
   String get modalBarrierDismissLabel => 'Zamknij';
 
   @override
+<<<<<<< HEAD
   String get noSpellCheckReplacementsLabel => 'No Replacements Found';
+=======
+  String get noSpellCheckReplacementsLabel => 'Nie znaleziono zastąpień';
+>>>>>>> 2524052335ec76bb03e04ede244b071f1b86d190
 
   @override
   String get pasteButtonLabel => 'Wklej';
@@ -9422,7 +9426,7 @@ class CupertinoLocalizationPl extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Szukaj';
 
   @override
-  String get selectAllButtonLabel => 'Wybierz wszystkie';
+  String get selectAllButtonLabel => 'Zaznacz wszystko';
 
   @override
   String get tabSemanticsLabelRaw => r'Karta $tabIndex z $tabCount';
@@ -9572,7 +9576,7 @@ class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
   String get searchTextFieldPlaceholderLabel => 'Pesquisar';
 
   @override
-  String get selectAllButtonLabel => 'Selecionar Tudo';
+  String get selectAllButtonLabel => 'Selecionar tudo';
 
   @override
   String get tabSemanticsLabelRaw => r'Guia $tabIndex de $tabCount';
@@ -9666,9 +9670,6 @@ class CupertinoLocalizationPtPt extends CupertinoLocalizationPt {
 
   @override
   String get timerPickerSecondLabelOther => 'seg';
-
-  @override
-  String get selectAllButtonLabel => 'Selecionar tudo';
 
   @override
   String get modalBarrierDismissLabel => 'Ignorar';

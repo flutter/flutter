@@ -235,11 +235,6 @@ class TestContext extends Context {
   String stderr = '';
 
   @override
-  bool existsDir(String path) {
-    return fileSystem.directory(path).existsSync();
-  }
-
-  @override
   bool existsFile(String path) {
     return fileSystem.file(path).existsSync();
   }

@@ -50,7 +50,7 @@ abstract class UnpackMacOS extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'unpack_macos');
     }
-    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final String basePath = environment.artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: buildMode);
 
     final ProcessResult result = environment.processManager.runSync(<String>[
@@ -62,6 +62,8 @@ abstract class UnpackMacOS extends Target {
       basePath,
       environment.outputDir.path,
     ]);
+
+    _removeDenylistedFiles(environment.outputDir);
     if (result.exitCode != 0) {
       throw Exception(
         'Failed to copy framework (exit ${result.exitCode}:\n'
@@ -79,6 +81,19 @@ abstract class UnpackMacOS extends Target {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
     }
     _thinFramework(environment, frameworkBinaryPath);
+  }
+
+  static const List<String> _copyDenylist = <String>['entitlements.txt', 'without_entitlements.txt'];
+
+  void _removeDenylistedFiles(Directory directory) {
+    for (final FileSystemEntity entity in directory.listSync(recursive: true)) {
+      if (entity is! File) {
+        continue;
+      }
+      if (_copyDenylist.contains(entity.basename)) {
+        entity.deleteSync();
+      }
+    }
   }
 
   void _thinFramework(Environment environment, String frameworkBinaryPath) {
@@ -191,7 +206,7 @@ class DebugMacOSFramework extends Target {
       ?? <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64];
 
     final Iterable<String> darwinArchArguments =
-        darwinArchs.expand((DarwinArch arch) => <String>['-arch', getNameForDarwinArch(arch)]);
+        darwinArchs.expand((DarwinArch arch) => <String>['-arch', arch.name]);
 
     outputFile.createSync(recursive: true);
     final File debugApp = environment.buildDir.childFile('debug_app.cc')
@@ -245,7 +260,7 @@ class CompileMacOSFramework extends Target {
     if (targetPlatformEnvironment == null) {
       throw MissingDefineException(kTargetPlatform, 'kernel_snapshot');
     }
-    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     if (buildMode == BuildMode.debug) {
       throw Exception('precompiled macOS framework only supported in release/profile builds.');
     }
@@ -277,10 +292,10 @@ class CompileMacOSFramework extends Target {
       if (codeSizeDirectory != null) {
         final File codeSizeFile = environment.fileSystem
           .directory(codeSizeDirectory)
-          .childFile('snapshot.${getNameForDarwinArch(darwinArch)}.json');
+          .childFile('snapshot.${darwinArch.name}.json');
         final File precompilerTraceFile = environment.fileSystem
           .directory(codeSizeDirectory)
-          .childFile('trace.${getNameForDarwinArch(darwinArch)}.json');
+          .childFile('trace.${darwinArch.name}.json');
         extraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
         extraGenSnapshotOptions.add('--trace-precompiler-to=${precompilerTraceFile.path}');
       }
@@ -288,7 +303,7 @@ class CompileMacOSFramework extends Target {
       pending.add(snapshotter.build(
         buildMode: buildMode,
         mainPath: environment.buildDir.childFile('app.dill').path,
-        outputPath: environment.fileSystem.path.join(buildOutputPath, getNameForDarwinArch(darwinArch)),
+        outputPath: environment.fileSystem.path.join(buildOutputPath, darwinArch.name),
         platform: TargetPlatform.darwin,
         darwinArch: darwinArch,
         splitDebugInfo: splitDebugInfo,
@@ -372,7 +387,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'compile_macos_framework');
     }
-    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final Directory frameworkRootDirectory = environment
         .outputDir
         .childDirectory('App.framework');
@@ -419,11 +434,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
       targetPlatform: TargetPlatform.darwin,
       shaderTarget: ShaderTarget.sksl,
     );
-    final DepfileService depfileService = DepfileService(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-    );
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       assetDepfile,
       environment.buildDir.childFile('flutter_assets.d'),
     );

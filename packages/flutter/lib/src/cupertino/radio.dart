@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -78,6 +79,7 @@ class CupertinoRadio<T> extends StatefulWidget {
     this.focusColor,
     this.focusNode,
     this.autofocus = false,
+    this.useCheckmarkStyle = false,
   });
 
   /// The value represented by this radio button.
@@ -144,6 +146,12 @@ class CupertinoRadio<T> extends StatefulWidget {
   /// ** See code in examples/api/lib/cupertino/radio/cupertino_radio.toggleable.0.dart **
   /// {@end-tool}
   final bool toggleable;
+
+  /// Controls whether the radio displays in a checkbox style or the default iOS
+  /// radio style.
+  ///
+  /// Defaults to false.
+  final bool useCheckmarkStyle;
 
   /// The color to use when this radio button is selected.
   ///
@@ -232,9 +240,24 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> with TickerProvid
 
     final Color effectiveFillColor = widget.fillColor ?? CupertinoColors.white;
 
+    final bool? accessibilitySelected;
+    // Apple devices also use `selected` to annotate radio button's semantics
+    // state.
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        accessibilitySelected = null;
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        accessibilitySelected = widget._selected;
+    }
+
     return Semantics(
       inMutuallyExclusiveGroup: true,
       checked: widget._selected,
+      selected: accessibilitySelected,
       child: buildToggleable(
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
@@ -247,7 +270,8 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> with TickerProvid
           ..activeColor = downPosition != null ? effectiveActivePressedOverlayColor : effectiveActiveColor
           ..inactiveColor = effectiveInactiveColor
           ..fillColor = effectiveFillColor
-          ..value = value,
+          ..value = value
+          ..checkmarkStyle = widget.useCheckmarkStyle,
       ),
     );
   }
@@ -274,28 +298,61 @@ class _RadioPainter extends ToggleablePainter {
     notifyListeners();
   }
 
+  bool get checkmarkStyle => _checkmarkStyle;
+  bool _checkmarkStyle = false;
+  set checkmarkStyle(bool value) {
+    if (value == _checkmarkStyle) {
+      return;
+    }
+    _checkmarkStyle = value;
+    notifyListeners();
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
 
     final Offset center = (Offset.zero & size).center;
 
-    // Outer border
     final Paint paint = Paint()
-      ..color = inactiveColor
-      ..style = PaintingStyle.fill
-      ..strokeWidth = 0.1;
-    canvas.drawCircle(center, _kOuterRadius, paint);
+        ..color = inactiveColor
+        ..style = PaintingStyle.fill
+        ..strokeWidth = 0.1;
 
-    paint.style = PaintingStyle.stroke;
-    paint.color = CupertinoColors.inactiveGray;
-    canvas.drawCircle(center, _kOuterRadius, paint);
-
-    if (value ?? false) {
-      paint.style = PaintingStyle.fill;
-      paint.color = activeColor;
+    if (checkmarkStyle) {
+      if (value ?? false) {
+        final Path path = Path();
+        final Paint checkPaint = Paint()
+          ..color = activeColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2
+          ..strokeCap = StrokeCap.round;
+        final double width = _size.width;
+        final Offset origin = Offset(center.dx - (width/2), center.dy - (width/2));
+        final Offset start = Offset(width * 0.25, width * 0.52);
+        final Offset mid = Offset(width * 0.46, width * 0.75);
+        final Offset end = Offset(width * 0.85, width * 0.29);
+        path.moveTo(origin.dx + start.dx, origin.dy + start.dy);
+        path.lineTo(origin.dx + mid.dx, origin.dy + mid.dy);
+        canvas.drawPath(path, checkPaint);
+        path.moveTo(origin.dx + mid.dx, origin.dy + mid.dy);
+        path.lineTo(origin.dx + end.dx, origin.dy + end.dy);
+        canvas.drawPath(path, checkPaint);
+      }
+    } else {
+      // Outer border
       canvas.drawCircle(center, _kOuterRadius, paint);
-      paint.color = fillColor;
-      canvas.drawCircle(center, _kInnerRadius, paint);
+
+      paint.style = PaintingStyle.stroke;
+      paint.color = CupertinoColors.inactiveGray;
+      canvas.drawCircle(center, _kOuterRadius, paint);
+
+      if (value ?? false) {
+        paint.style = PaintingStyle.fill;
+        paint.color = activeColor;
+        canvas.drawCircle(center, _kOuterRadius, paint);
+        paint.color = fillColor;
+        canvas.drawCircle(center, _kInnerRadius, paint);
+      }
     }
 
     if (isFocused) {

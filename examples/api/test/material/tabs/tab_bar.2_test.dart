@@ -24,45 +24,40 @@ void main() {
     final TabBar secondaryTabBar = tester.widget<TabBar>(find.byType(TabBar).first);
     expect(secondaryTabBar.tabs.length, 2);
 
-    final Finder primaryTab1 = find.widgetWithText(Tab, primaryTabLabel1);
-    final Finder primaryTab2 = find.widgetWithText(Tab, primaryTabLabel2);
-    final Finder primaryTab3 = find.widgetWithText(Tab, primaryTabLabel3);
-    final Finder secondaryTab2 = find.widgetWithText(Tab, secondaryTabLabel2);
-
     String tabBarViewText = '$primaryTabLabel2: $secondaryTabLabel1 tab';
     expect(find.text(tabBarViewText), findsOneWidget);
 
-    await tester.tap(primaryTab1);
+    await tester.tap(find.text(primaryTabLabel1));
     await tester.pumpAndSettle();
 
     tabBarViewText = '$primaryTabLabel1: $secondaryTabLabel1 tab';
     expect(find.text(tabBarViewText), findsOneWidget);
 
-    await tester.tap(secondaryTab2);
+    await tester.tap(find.text(secondaryTabLabel2));
     await tester.pumpAndSettle();
 
     tabBarViewText = '$primaryTabLabel1: $secondaryTabLabel2 tab';
     expect(find.text(tabBarViewText), findsOneWidget);
 
-    await tester.tap(primaryTab2);
+    await tester.tap(find.text(primaryTabLabel2));
     await tester.pumpAndSettle();
 
     tabBarViewText = '$primaryTabLabel2: $secondaryTabLabel1 tab';
     expect(find.text(tabBarViewText), findsOneWidget);
 
-    await tester.tap(secondaryTab2);
+    await tester.tap(find.text(secondaryTabLabel2));
     await tester.pumpAndSettle();
 
     tabBarViewText = '$primaryTabLabel2: $secondaryTabLabel2 tab';
     expect(find.text(tabBarViewText), findsOneWidget);
 
-    await tester.tap(primaryTab3);
+    await tester.tap(find.text(primaryTabLabel3));
     await tester.pumpAndSettle();
 
     tabBarViewText = '$primaryTabLabel3: $secondaryTabLabel1 tab';
     expect(find.text(tabBarViewText), findsOneWidget);
 
-    await tester.tap(secondaryTab2);
+    await tester.tap(find.text(secondaryTabLabel2));
     await tester.pumpAndSettle();
 
     tabBarViewText = '$primaryTabLabel3: $secondaryTabLabel2 tab';

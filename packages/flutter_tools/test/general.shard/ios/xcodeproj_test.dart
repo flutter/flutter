@@ -632,6 +632,7 @@ Information about project "Runner":
     expect(XcodeProjectInfo.expectedSchemeFor(const BuildInfo(BuildMode.profile, 'HELLO', treeShakeIcons: false)), 'HELLO');
     expect(XcodeProjectInfo.expectedSchemeFor(const BuildInfo(BuildMode.release, 'Hello', treeShakeIcons: false)), 'Hello');
   });
+
   testWithoutContext('expected build configuration for flavored build is Mode-Flavor', () {
     expect(XcodeProjectInfo.expectedBuildConfigurationFor(const BuildInfo(BuildMode.debug, 'hello', treeShakeIcons: false), 'Hello'), 'Debug-Hello');
     expect(XcodeProjectInfo.expectedBuildConfigurationFor(const BuildInfo(BuildMode.profile, 'HELLO', treeShakeIcons: false), 'Hello'), 'Profile-Hello');
@@ -1304,6 +1305,76 @@ flutter:
         expectedBuildName: '1.0.0',
         expectedBuildNumber: '1',
       );
+    });
+
+    group('CoreDevice', () {
+      testUsingContext('sets BUILD_DIR for core devices in debug mode', () async {
+        const BuildInfo buildInfo = BuildInfo.debug;
+        final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
+        await updateGeneratedXcodeProperties(
+          project: project,
+          buildInfo: buildInfo,
+          useMacOSConfig: true,
+          usingCoreDevice: true,
+        );
+
+        final File config = fs.file('path/to/project/macos/Flutter/ephemeral/Flutter-Generated.xcconfig');
+        expect(config.existsSync(), isTrue);
+
+        final String contents = config.readAsStringSync();
+        expect(contents, contains('\nBUILD_DIR=/build/ios\n'));
+      }, overrides: <Type, Generator>{
+        Artifacts: () => localIosArtifacts,
+        Platform: () => macOS,
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+      });
+
+      testUsingContext('does not set BUILD_DIR for core devices in release mode', () async {
+        const BuildInfo buildInfo = BuildInfo.release;
+        final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
+        await updateGeneratedXcodeProperties(
+          project: project,
+          buildInfo: buildInfo,
+          useMacOSConfig: true,
+          usingCoreDevice: true,
+        );
+
+        final File config = fs.file('path/to/project/macos/Flutter/ephemeral/Flutter-Generated.xcconfig');
+        expect(config.existsSync(), isTrue);
+
+        final String contents = config.readAsStringSync();
+        expect(contents.contains('\nBUILD_DIR'), isFalse);
+      }, overrides: <Type, Generator>{
+        Artifacts: () => localIosArtifacts,
+        Platform: () => macOS,
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+      });
+
+      testUsingContext('does not set BUILD_DIR for non core devices', () async {
+        const BuildInfo buildInfo = BuildInfo.debug;
+        final FlutterProject project = FlutterProject.fromDirectoryTest(fs.directory('path/to/project'));
+        await updateGeneratedXcodeProperties(
+          project: project,
+          buildInfo: buildInfo,
+          useMacOSConfig: true,
+        );
+
+        final File config = fs.file('path/to/project/macos/Flutter/ephemeral/Flutter-Generated.xcconfig');
+        expect(config.existsSync(), isTrue);
+
+        final String contents = config.readAsStringSync();
+        expect(contents.contains('\nBUILD_DIR'), isFalse);
+      }, overrides: <Type, Generator>{
+        Artifacts: () => localIosArtifacts,
+        Platform: () => macOS,
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+      });
     });
   });
 }

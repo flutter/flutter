@@ -25,6 +25,7 @@
   "continueButtonLabel": "Lanjutkan",
   "copyButtonLabel": "Salin",
   "cutButtonLabel": "Potong",
+  "scanTextButtonLabel": "Pindai teks",
   "okButtonLabel": "OKE",
   "pasteButtonLabel": "Tempel",
   "selectAllButtonLabel": "Pilih semua",
@@ -134,5 +135,11 @@
   "scrimLabel": "Scrim",
   "bottomSheetLabel": "Sheet Bawah",
   "scrimOnTapHint": "Tutup $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

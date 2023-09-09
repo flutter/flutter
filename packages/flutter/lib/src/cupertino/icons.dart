@@ -59,6 +59,7 @@ import 'package:flutter/widgets.dart';
 /// See also:
 ///
 ///  * [Icon], used to show these icons.
+/// {@hideConstantImplementations}
 @staticIconProvider
 abstract final class CupertinoIcons {
   /// The icon font used for Cupertino icons.

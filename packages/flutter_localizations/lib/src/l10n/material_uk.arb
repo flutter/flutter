@@ -31,6 +31,7 @@
   "continueButtonLabel": "Продовжити",
   "copyButtonLabel": "Копіювати",
   "cutButtonLabel": "Вирізати",
+  "scanTextButtonLabel": "Сканувати текст",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "Вставити",
   "selectAllButtonLabel": "Вибрати всі",
@@ -140,5 +141,11 @@
   "scrimLabel": "Маскувальний фон",
   "bottomSheetLabel": "Нижній екран",
   "scrimOnTapHint": "Закрити: $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

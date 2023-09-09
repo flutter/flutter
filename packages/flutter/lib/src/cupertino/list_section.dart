@@ -211,6 +211,7 @@ class CupertinoListSection extends StatelessWidget {
     double? additionalDividerMargin,
     this.topMargin = _kMarginTop,
     bool hasLeading = true,
+    this.separatorColor,
   }) : assert((children != null && children.length > 0) || header != null),
        type = CupertinoListSectionType.base,
        additionalDividerMargin = additionalDividerMargin ??
@@ -274,6 +275,7 @@ class CupertinoListSection extends StatelessWidget {
     double? additionalDividerMargin,
     this.topMargin,
     bool hasLeading = true,
+    this.separatorColor,
   }) : assert((children != null && children.length > 0) || header != null),
        type = CupertinoListSectionType.insetGrouped,
        additionalDividerMargin = additionalDividerMargin ??
@@ -344,9 +346,15 @@ class CupertinoListSection extends StatelessWidget {
   /// matches iOS style by default.
   final double? topMargin;
 
+  /// Sets the color for the dividers between rows, and borders on top and
+  /// bottom of the rows.
+  ///
+  /// If null, defaults to [CupertinoColors.separator].
+  final Color? separatorColor;
+
   @override
   Widget build(BuildContext context) {
-    final Color dividerColor = CupertinoColors.separator.resolveFrom(context);
+    final Color dividerColor = separatorColor ?? CupertinoColors.separator.resolveFrom(context);
     final double dividerHeight = 1.0 / MediaQuery.devicePixelRatioOf(context);
 
     // Long divider is used for wrapping the top and bottom of rows.
@@ -394,8 +402,7 @@ class CupertinoListSection extends StatelessWidget {
       );
     }
 
-    BorderRadius? childrenGroupBorderRadius;
-    DecoratedBox? decoratedChildrenGroup;
+    Widget? decoratedChildrenGroup;
     if (children != null && children!.isNotEmpty) {
       // We construct childrenWithDividers as follows:
       // Insert a short divider between all rows.
@@ -417,15 +424,11 @@ class CupertinoListSection extends StatelessWidget {
         childrenWithDividers.add(longDivider);
       }
 
-      switch (type) {
-        case CupertinoListSectionType.insetGrouped:
-          childrenGroupBorderRadius = _kDefaultInsetGroupedBorderRadius;
-        case CupertinoListSectionType.base:
-          childrenGroupBorderRadius = BorderRadius.zero;
-      }
+      final BorderRadius childrenGroupBorderRadius = switch (type) {
+        CupertinoListSectionType.insetGrouped => _kDefaultInsetGroupedBorderRadius,
+        CupertinoListSectionType.base => BorderRadius.zero,
+      };
 
-      // Refactored the decorate children group in one place to avoid repeating it
-      // twice down bellow in the returned widget.
       decoratedChildrenGroup = DecoratedBox(
         decoration: decoration ??
             BoxDecoration(
@@ -436,6 +439,17 @@ class CupertinoListSection extends StatelessWidget {
               borderRadius: childrenGroupBorderRadius,
             ),
         child: Column(children: childrenWithDividers),
+      );
+
+      decoratedChildrenGroup = Padding(
+        padding: margin,
+        child: clipBehavior == Clip.none
+            ? decoratedChildrenGroup
+            : ClipRRect(
+                borderRadius: childrenGroupBorderRadius,
+                clipBehavior: clipBehavior,
+                child: decoratedChildrenGroup,
+              ),
       );
     }
 
@@ -456,17 +470,8 @@ class CupertinoListSection extends StatelessWidget {
                 child: headerWidget,
               ),
             ),
-          if (children != null && children!.isNotEmpty)
-            Padding(
-              padding: margin,
-              child: clipBehavior == Clip.none
-                  ? decoratedChildrenGroup
-                  : ClipRRect(
-                      borderRadius: childrenGroupBorderRadius,
-                      clipBehavior: clipBehavior,
-                      child: decoratedChildrenGroup,
-                    ),
-            ),
+          if (decoratedChildrenGroup != null)
+            decoratedChildrenGroup,
           if (footerWidget != null)
             Align(
               alignment: AlignmentDirectional.centerStart,

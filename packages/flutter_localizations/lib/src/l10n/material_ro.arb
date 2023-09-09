@@ -29,6 +29,7 @@
   "continueButtonLabel": "Continuați",
   "copyButtonLabel": "Copiați",
   "cutButtonLabel": "Decupați",
+  "scanTextButtonLabel": "Scanați textul",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "Inserați",
   "selectAllButtonLabel": "Selectați tot",
@@ -138,5 +139,11 @@
   "scrimLabel": "Material",
   "bottomSheetLabel": "Foaie din partea de jos",
   "scrimOnTapHint": "Închideți $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

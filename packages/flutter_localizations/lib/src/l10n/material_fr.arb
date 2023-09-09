@@ -26,6 +26,7 @@
   "continueButtonLabel": "Continuer",
   "copyButtonLabel": "Copier",
   "cutButtonLabel": "Couper",
+  "scanTextButtonLabel": "Numériser du texte",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "Coller",
   "selectAllButtonLabel": "Tout sélectionner",
@@ -135,5 +136,11 @@
   "scrimLabel": "Fond",
   "bottomSheetLabel": "Bottom sheet",
   "scrimOnTapHint": "Fermer $modalRouteContentName",
-  "keyboardKeyShift": "Maj"
+  "keyboardKeyShift": "Maj",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

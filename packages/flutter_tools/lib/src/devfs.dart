@@ -348,7 +348,7 @@ class _DevFSHttpWriter implements DevFSWriter {
     DevFSContent content, {
     int retry = 0,
   }) async {
-    while(true) {
+    while (true) {
       try {
         final HttpClientRequest request = await _client.putUrl(httpAddress!);
         request.headers.removeAll(HttpHeaders.acceptEncodingHeader);

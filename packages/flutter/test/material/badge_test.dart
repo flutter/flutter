@@ -50,7 +50,10 @@ void main() {
     expect(tester.getTopLeft(find.text('0')), const Offset(16, -4));
 
     final RenderBox box = tester.renderObject(find.byType(Badge));
-    expect(box, paints..rrect(rrect: RRect.fromLTRBR(12, -4, 32, 12, const Radius.circular(8)), color: theme.colorScheme.error));
+    final RRect rrect = const bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')
+      ? RRect.fromLTRBR(12, -4, 31.5, 12, const Radius.circular(8))
+      : RRect.fromLTRBR(12, -4, 32, 12, const Radius.circular(8));
+    expect(box, paints..rrect(rrect: rrect, color: theme.colorScheme.error));
   });
 
   testWidgets('Large Badge defaults with RTL', (WidgetTester tester) async {
@@ -89,7 +92,10 @@ void main() {
     expect(tester.getTopLeft(find.text('0')), const Offset(0, -4));
 
     final RenderBox box = tester.renderObject(find.byType(Badge));
-    expect(box, paints..rrect(rrect: RRect.fromLTRBR(-4, -4, 16, 12, const Radius.circular(8)), color: theme.colorScheme.error));
+    final RRect rrect = const bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')
+      ? RRect.fromLTRBR(-4, -4, 15.5, 12, const Radius.circular(8))
+      : RRect.fromLTRBR(-4, -4, 16, 12, const Radius.circular(8));
+    expect(box, paints..rrect(rrect: rrect, color: theme.colorScheme.error));
   });
 
   // Essentially the same as 'Large Badge defaults'
@@ -143,7 +149,10 @@ void main() {
     // T = alignment.top
     // R = L + '0'.width + padding.width
     // B = T + largeSize, R = largeSize/2
-    expect(box, paints..rrect(rrect: RRect.fromLTRBR(12, -4, 32, 12, const Radius.circular(8)), color: theme.colorScheme.error));
+    final RRect rrect = const bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')
+      ? RRect.fromLTRBR(12, -4, 31.5, 12, const Radius.circular(8))
+      : RRect.fromLTRBR(12, -4, 32, 12, const Radius.circular(8));
+    expect(box, paints..rrect(rrect: rrect, color: theme.colorScheme.error));
 
     await tester.pumpWidget(buildFrame(1000));
     expect(find.text('999+'), findsOneWidget);

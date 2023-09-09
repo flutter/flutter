@@ -32,6 +32,7 @@
   "continueButtonLabel": "Продолжить",
   "copyButtonLabel": "Копировать",
   "cutButtonLabel": "Вырезать",
+  "scanTextButtonLabel": "Сканировать текст",
   "okButtonLabel": "ОК",
   "pasteButtonLabel": "Вставить",
   "selectAllButtonLabel": "Выбрать все",
@@ -141,5 +142,11 @@
   "scrimLabel": "Маска",
   "bottomSheetLabel": "Нижний экран",
   "scrimOnTapHint": "Закрыть $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

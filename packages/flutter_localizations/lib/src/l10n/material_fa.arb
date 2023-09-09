@@ -25,6 +25,7 @@
   "continueButtonLabel": "ادامه",
   "copyButtonLabel": "کپی",
   "cutButtonLabel": "برش",
+  "scanTextButtonLabel": "اسکن متن",
   "okButtonLabel": "تأیید",
   "pasteButtonLabel": "جای‌گذاری",
   "selectAllButtonLabel": "انتخاب همه",
@@ -134,5 +135,11 @@
   "scrimLabel": "رویه",
   "bottomSheetLabel": "برگ زیرین",
   "scrimOnTapHint": "بستن $modalRouteContentName",
-  "keyboardKeyShift": "کلید تبدیل"
+  "keyboardKeyShift": "کلید تبدیل",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

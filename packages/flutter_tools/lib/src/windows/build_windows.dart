@@ -18,6 +18,7 @@ import '../convert.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../migrations/cmake_custom_command_migration.dart';
+import 'migrations/show_window_migration.dart';
 import 'migrations/version_migration.dart';
 import 'visual_studio.dart';
 
@@ -54,6 +55,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
   final List<ProjectMigrator> migrators = <ProjectMigrator>[
     CmakeCustomCommandMigration(windowsProject, globals.logger),
     VersionMigration(windowsProject, globals.logger),
+    ShowWindowMigration(windowsProject, globals.logger),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
@@ -76,7 +78,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {
         'Please run `flutter doctor` for more details.');
   }
 
-  final String buildModeName = getNameForBuildMode(buildInfo.mode);
+  final String buildModeName = buildInfo.mode.cliName;
   final Directory buildDirectory = globals.fs.directory(getWindowsBuildDirectory());
   final Status status = globals.logger.startProgress(
     'Building Windows application...',

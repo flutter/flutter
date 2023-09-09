@@ -28,6 +28,7 @@
   "continueButtonLabel": "Nastavi",
   "copyButtonLabel": "Kopiraj",
   "cutButtonLabel": "Izreži",
+  "scanTextButtonLabel": "Skeniraj tekst",
   "okButtonLabel": "Uredu",
   "pasteButtonLabel": "Zalijepi",
   "selectAllButtonLabel": "Odaberi sve",
@@ -137,5 +138,11 @@
   "scrimLabel": "Rubno",
   "bottomSheetLabel": "Donja tabela",
   "scrimOnTapHint": "Zatvori: $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

@@ -25,6 +25,7 @@
   "continueButtonLabel": "ଜାରି ରଖନ୍ତୁ",
   "copyButtonLabel": "କପି କରନ୍ତୁ",
   "cutButtonLabel": "କଟ୍ କରନ୍ତୁ",
+  "scanTextButtonLabel": "ପାଠ୍ୟ ସ୍କାନ୍ କରନ୍ତୁ",
   "okButtonLabel": "ଠିକ୍ ଅଛି",
   "pasteButtonLabel": "ପେଷ୍ଟ କରନ୍ତୁ",
   "selectAllButtonLabel": "ସବୁ ଚୟନ କରନ୍ତୁ",
@@ -133,5 +134,11 @@
   "scrimLabel": "ସ୍କ୍ରିମ",
   "bottomSheetLabel": "ବଟମ ସିଟ",
   "scrimOnTapHint": "$modalRouteContentNameକୁ ବନ୍ଦ କରନ୍ତୁ",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

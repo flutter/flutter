@@ -596,7 +596,7 @@ class ManifestAssetBundle implements AssetBundle {
       if (packageName == null)
         ...manifest.fontsDescriptor
       else
-        for (Font font in _parsePackageFonts(
+        for (final Font font in _parsePackageFonts(
           manifest,
           packageName,
           packageConfig,

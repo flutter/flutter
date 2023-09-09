@@ -1616,7 +1616,7 @@ abstract class DiagnosticsNode {
           'showSeparator': showSeparator,
         if (level != DiagnosticLevel.info)
           'level': level.name,
-        if (showName == false)
+        if (!showName)
           'showName': showName,
         if (emptyBodyDescription != null)
           'emptyBodyDescription': emptyBodyDescription,
@@ -3292,6 +3292,8 @@ mixin Diagnosticable {
   /// {@end-tool}
   ///
   /// Used by [toDiagnosticsNode] and [toString].
+  ///
+  /// Do not add values, that have lifetime shorter than the object.
   @protected
   @mustCallSuper
   void debugFillProperties(DiagnosticPropertiesBuilder properties) { }

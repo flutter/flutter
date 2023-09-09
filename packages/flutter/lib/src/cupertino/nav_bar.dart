@@ -602,7 +602,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.heroTag = _defaultHeroTag,
     this.stretch = false,
   }) : assert(
-         automaticallyImplyTitle == true || largeTitle != null,
+         automaticallyImplyTitle || largeTitle != null,
          'No largeTitle has been provided but automaticallyImplyTitle is also '
          'false. Either provide a largeTitle or set automaticallyImplyTitle to '
          'true.',

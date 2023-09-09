@@ -58,12 +58,18 @@ import 'ticker_provider.dart';
 /// As a result listeners of the [OverlayEntry] can get notified for one last
 /// time after the [dispose] call, when the widget is eventually unmounted.
 ///
+/// {@macro flutter.widgets.overlayPortalVsOverlayEntry}
+///
 /// See also:
 ///
-///  * [Overlay]
-///  * [OverlayState]
-///  * [WidgetsApp]
-///  * [MaterialApp]
+///  * [OverlayPortal], an alternative API for inserting widgets into an
+///    [Overlay] using a builder callback.
+///  * [Overlay], a stack of entries that can be managed independently.
+///  * [OverlayState], the current state of an Overlay.
+///  * [WidgetsApp], a convenience widget that wraps a number of widgets that
+///    are commonly required for an application.
+///  * [MaterialApp], a convenience widget that wraps a number of widgets that
+///    are commonly required for Material Design applications.
 class OverlayEntry implements Listenable {
   /// Creates an overlay entry.
   ///
@@ -297,7 +303,7 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
       return;
     }
     _OverlayEntryLocation? candidate = reversed ? children.last : children.first;
-    while(candidate != null) {
+    while (candidate != null) {
       final RenderBox? renderBox = candidate._overlayChildRenderBox;
       candidate = reversed ? candidate.previous : candidate.next;
       if (renderBox != null) {
@@ -906,7 +912,7 @@ class _RenderTheater extends RenderBox with ContainerRenderObjectMixin<RenderBox
       final _TheaterParentData childParentData = child.parentData! as _TheaterParentData;
       final Iterator<RenderBox>? iterator = childParentData.paintOrderIterator;
       if (iterator != null) {
-        while(iterator.moveNext()) {
+        while (iterator.moveNext()) {
           iterator.current.attach(owner);
         }
       }
@@ -1404,20 +1410,22 @@ class OverlayPortalController {
 /// [OverlayPortalController.show] was called. The last [OverlayPortal] to have
 /// called `show` gets to paint its overlay child in the foreground.
 ///
+/// {@template flutter.widgets.overlayPortalVsOverlayEntry}
 /// ### Differences between [OverlayPortal] and [OverlayEntry]
 ///
 /// The main difference between [OverlayEntry] and [OverlayPortal] is that
 /// [OverlayEntry] builds its widget subtree as a child of the target [Overlay],
-/// while [OverlayPortal] uses [overlayChildBuilder] to build a child widget of
-/// itself. This allows [OverlayPortal]'s overlay child to depend on the same
-/// set of [InheritedWidget]s as [OverlayPortal], and it's also guaranteed that
-/// the overlay child will not outlive its [OverlayPortal].
+/// while [OverlayPortal] uses [OverlayPortal.overlayChildBuilder] to build a
+/// child widget of itself. This allows [OverlayPortal]'s overlay child to depend
+/// on the same set of [InheritedWidget]s as [OverlayPortal], and it's also
+/// guaranteed that the overlay child will not outlive its [OverlayPortal].
 ///
 /// On the other hand, [OverlayPortal]'s implementation is more complex. For
 /// instance, it does a bit more work than a regular widget during global key
 /// reparenting. If the content to be shown on the [Overlay] doesn't benefit
 /// from being a part of [OverlayPortal]'s subtree, consider using an
 /// [OverlayEntry] instead.
+/// {@endtemplate}
 ///
 /// See also:
 ///
@@ -1484,47 +1492,35 @@ class _OverlayPortalState extends State<OverlayPortal> {
   // used as the slot of the overlay child widget.
   //
   // The developer must call `show` to reveal the overlay so we can get a unique
-  // timestamp of the user interaction for sorting.
+  // timestamp of the user interaction for determining the z-index of the
+  // overlay child in the overlay.
   //
   // Avoid invalidating the cache if possible, since the framework uses `==` to
   // compare slots, and _OverlayEntryLocation can't override that operator since
-  // it's mutable.
+  // it's mutable. Changing slots can be relatively slow.
   bool _childModelMayHaveChanged = true;
   _OverlayEntryLocation? _locationCache;
+  static bool _isTheSameLocation(_OverlayEntryLocation locationCache, _RenderTheaterMarker marker) {
+    return locationCache._childModel == marker.overlayEntryWidgetState
+        && locationCache._theater == marker.theater;
+  }
+
   _OverlayEntryLocation _getLocation(int zOrderIndex, bool targetRootOverlay) {
     final _OverlayEntryLocation? cachedLocation = _locationCache;
-    if (cachedLocation != null && !_childModelMayHaveChanged) {
+    late final _RenderTheaterMarker marker = _RenderTheaterMarker.of(context, targetRootOverlay: targetRootOverlay);
+    final bool isCacheValid = cachedLocation != null
+                           && (!_childModelMayHaveChanged || _isTheSameLocation(cachedLocation, marker));
+    _childModelMayHaveChanged = false;
+    if (isCacheValid) {
       assert(cachedLocation._zOrderIndex == zOrderIndex);
+      assert(cachedLocation._debugIsLocationValid());
       return cachedLocation;
     }
-    _childModelMayHaveChanged = false;
-    final _RenderTheaterMarker? marker = _RenderTheaterMarker.maybeOf(context, targetRootOverlay: targetRootOverlay);
-    if (marker == null) {
-      throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('No Overlay widget found.'),
-        ErrorDescription(
-          '${widget.runtimeType} widgets require an Overlay widget ancestor.\n'
-          'An overlay lets widgets float on top of other widget children.',
-        ),
-        ErrorHint(
-          'To introduce an Overlay widget, you can either directly '
-          'include one, or use a widget that contains an Overlay itself, '
-          'such as a Navigator, WidgetApp, MaterialApp, or CupertinoApp.',
-        ),
-        ...context.describeMissingAncestor(expectedAncestorType: Overlay),
-      ]);
-    }
-    final _OverlayEntryLocation returnValue;
-    if (cachedLocation == null) {
-      returnValue = _OverlayEntryLocation(zOrderIndex, marker.overlayEntryWidgetState, marker.theater);
-    } else if (cachedLocation._childModel != marker.overlayEntryWidgetState || cachedLocation._theater != marker.theater) {
-      cachedLocation._dispose();
-      returnValue = _OverlayEntryLocation(zOrderIndex, marker.overlayEntryWidgetState, marker.theater);
-    } else {
-      returnValue = cachedLocation;
-    }
-    assert(returnValue._zOrderIndex == zOrderIndex);
-    return _locationCache = returnValue;
+    // Otherwise invalidate the cache and create a new location.
+    cachedLocation?._debugMarkLocationInvalid();
+    final _OverlayEntryLocation newLocation = _OverlayEntryLocation(zOrderIndex, marker.overlayEntryWidgetState, marker.theater);
+    assert(newLocation._zOrderIndex == zOrderIndex);
+    return _locationCache = newLocation;
   }
 
   @override
@@ -1565,8 +1561,9 @@ class _OverlayPortalState extends State<OverlayPortal> {
 
   @override
   void dispose() {
+    assert(widget.controller._attachTarget == this);
     widget.controller._attachTarget = null;
-    _locationCache?._dispose();
+    _locationCache?._debugMarkLocationInvalid();
     _locationCache = null;
     super.dispose();
   }
@@ -1577,14 +1574,14 @@ class _OverlayPortalState extends State<OverlayPortal> {
       '${widget.controller.runtimeType}.show() should not be called during build.'
     );
     setState(() { _zOrderIndex = zOrderIndex; });
-    _locationCache?._dispose();
+    _locationCache?._debugMarkLocationInvalid();
     _locationCache = null;
   }
 
   void hide() {
     assert(SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks);
     setState(() { _zOrderIndex = null; });
-    _locationCache?._dispose();
+    _locationCache?._debugMarkLocationInvalid();
     _locationCache = null;
   }
 
@@ -1665,7 +1662,7 @@ final class _OverlayEntryLocation extends LinkedListEntry<_OverlayEntryLocation>
   }
 
   void _addChild(_RenderDeferredLayoutBox child) {
-    assert(_debugNotDisposed());
+    assert(_debugIsLocationValid());
     _addToChildModel(child);
     _theater._addDeferredChild(child);
     assert(child.parent == _theater);
@@ -1680,7 +1677,7 @@ final class _OverlayEntryLocation extends LinkedListEntry<_OverlayEntryLocation>
 
   void _moveChild(_RenderDeferredLayoutBox child, _OverlayEntryLocation fromLocation) {
     assert(fromLocation != this);
-    assert(_debugNotDisposed());
+    assert(_debugIsLocationValid());
     final _RenderTheater fromTheater = fromLocation._theater;
     final _OverlayEntryWidgetState fromModel = fromLocation._childModel;
 
@@ -1696,34 +1693,54 @@ final class _OverlayEntryLocation extends LinkedListEntry<_OverlayEntryLocation>
   }
 
   void _activate(_RenderDeferredLayoutBox child) {
-    assert(_debugNotDisposed());
+    // This call is allowed even when this location is invalidated.
+    // See _OverlayPortalElement.activate.
     assert(_overlayChildRenderBox == null, '$_overlayChildRenderBox');
-    _theater.adoptChild(child);
+    _theater._addDeferredChild(child);
     _overlayChildRenderBox = child;
   }
 
   void _deactivate(_RenderDeferredLayoutBox child) {
-    assert(_debugNotDisposed());
-    _theater.dropChild(child);
+    // This call is allowed even when this location is invalidated.
+    _theater._removeDeferredChild(child);
     _overlayChildRenderBox = null;
   }
 
-  bool _debugNotDisposed() {
-    if (_debugDisposedStackTrace == null) {
+  // Throws a StateError if this location is already invalidated and shouldn't
+  // be used as an OverlayPortal slot. Must be used in asserts.
+  //
+  // Generally, `assert(_debugIsLocationValid())` should be used to prevent
+  // invalid accesses to an invalid `_OverlayEntryLocation` object. Exceptions
+  // to this rule are _removeChild, _deactive, which will be called when the
+  // OverlayPortal is being removed from the widget tree and may use the
+  // location information to perform cleanup tasks.
+  //
+  // Another exception is the _activate method which is called by
+  // _OverlayPortalElement.activate. See the comment in _OverlayPortalElement.activate.
+  bool _debugIsLocationValid() {
+    if (_debugMarkLocationInvalidStackTrace == null) {
       return true;
     }
-    throw StateError('$this is already disposed. Stack trace: $_debugDisposedStackTrace');
+    throw StateError('$this is already disposed. Stack trace: $_debugMarkLocationInvalidStackTrace');
   }
 
-  StackTrace? _debugDisposedStackTrace;
+  // The StackTrace of the first _debugMarkLocationInvalid call. It's only for
+  // debugging purposes and the StackTrace will only be captured in debug builds.
+  //
+  // The effect of this method is not reversible. Once marked invalid, this
+  // object can't be marked as valid again.
+  StackTrace? _debugMarkLocationInvalidStackTrace;
   @mustCallSuper
-  void _dispose() {
-    assert(_debugNotDisposed());
+  void _debugMarkLocationInvalid() {
+    assert(_debugIsLocationValid());
     assert(() {
-      _debugDisposedStackTrace = StackTrace.current;
+      _debugMarkLocationInvalidStackTrace = StackTrace.current;
       return true;
     }());
   }
+
+  @override
+  String toString() => '${objectRuntimeType(this, '_OverlayEntryLocation')}[${shortHash(this)}] ${_debugMarkLocationInvalidStackTrace != null ? "(INVALID)":""}';
 }
 
 class _RenderTheaterMarker extends InheritedWidget {
@@ -1742,13 +1759,31 @@ class _RenderTheaterMarker extends InheritedWidget {
         || oldWidget.overlayEntryWidgetState != overlayEntryWidgetState;
   }
 
-  static _RenderTheaterMarker? maybeOf(BuildContext context, { bool targetRootOverlay = false }) {
+  static _RenderTheaterMarker of(BuildContext context, { bool targetRootOverlay = false }) {
+    final _RenderTheaterMarker? marker;
     if (targetRootOverlay) {
       final InheritedElement? ancestor = _rootRenderTheaterMarkerOf(context.getElementForInheritedWidgetOfExactType<_RenderTheaterMarker>());
       assert(ancestor == null || ancestor.widget is _RenderTheaterMarker);
-      return ancestor != null ? context.dependOnInheritedElement(ancestor) as _RenderTheaterMarker? : null;
+      marker = ancestor != null ? context.dependOnInheritedElement(ancestor) as _RenderTheaterMarker? : null;
+    } else {
+      marker = context.dependOnInheritedWidgetOfExactType<_RenderTheaterMarker>();
     }
-    return context.dependOnInheritedWidgetOfExactType<_RenderTheaterMarker>();
+    if (marker != null) {
+      return marker;
+    }
+    throw FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary('No Overlay widget found.'),
+      ErrorDescription(
+        '${context.widget.runtimeType} widgets require an Overlay widget ancestor.\n'
+        'An overlay lets widgets float on top of other widget children.',
+      ),
+      ErrorHint(
+        'To introduce an Overlay widget, you can either directly '
+        'include one, or use a widget that contains an Overlay itself, '
+        'such as a Navigator, WidgetApp, MaterialApp, or CupertinoApp.',
+      ),
+      ...context.describeMissingAncestor(expectedAncestorType: Overlay),
+    ]);
   }
 
   static InheritedElement? _rootRenderTheaterMarkerOf(InheritedElement? theaterMarkerElement) {
@@ -1776,7 +1811,7 @@ class _OverlayPortal extends RenderObjectWidget {
     required this.overlayChild,
     required this.child,
   }) : assert(overlayChild == null || overlayLocation != null),
-       assert(overlayLocation == null || overlayLocation._debugNotDisposed());
+       assert(overlayLocation == null || overlayLocation._debugIsLocationValid());
 
   final Widget? overlayChild;
 
@@ -1847,6 +1882,9 @@ class _OverlayPortalElement extends RenderObjectElement {
       if (box != null) {
         assert(!box.attached);
         assert(renderObject._deferredLayoutChild == box);
+        // updateChild has not been called at this point so the RenderTheater in
+        // the overlay location could be detached. Adding children to a detached
+        // RenderObject is still allowed however this isn't the most efficient.
         (overlayChild.slot! as _OverlayEntryLocation)._activate(box);
       }
     }
@@ -1856,12 +1894,8 @@ class _OverlayPortalElement extends RenderObjectElement {
   void deactivate() {
     final Element? overlayChild = _overlayChild;
     // Instead of just detaching the render objects, removing them from the
-    // render subtree entirely such that if the widget gets reparented to a
-    // different overlay entry, the overlay child is inserted in the right
-    // position in the overlay's child list.
-    //
-    // This is also a workaround for the !renderObject.attached assert in the
-    // `RenderObjectElement.deactive()` method.
+    // render subtree entirely. This is a workaround for the
+    // !renderObject.attached assert in the `super.deactive()` method.
     if (overlayChild != null) {
       final _RenderDeferredLayoutBox? box = overlayChild.renderObject as _RenderDeferredLayoutBox?;
       if (box != null) {
@@ -1886,7 +1920,7 @@ class _OverlayPortalElement extends RenderObjectElement {
   // reparenting between _overlayChild and _child, thus the non-null-typed slots.
   @override
   void moveRenderObjectChild(_RenderDeferredLayoutBox child, _OverlayEntryLocation oldSlot, _OverlayEntryLocation newSlot) {
-    assert(newSlot._debugNotDisposed());
+    assert(newSlot._debugIsLocationValid());
     newSlot._moveChild(child, oldSlot);
   }
 
@@ -1972,7 +2006,7 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox with _RenderTheaterM
 
   @override
   _RenderTheater get theater {
-    final AbstractNode? parent = this.parent;
+    final RenderObject? parent = this.parent;
     return parent is _RenderTheater
       ? parent
       : throw FlutterError('$parent of $this is not a _RenderTheater');

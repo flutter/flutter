@@ -3,26 +3,30 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
-
 import 'gen_l10n_templates.dart';
 import 'gen_l10n_types.dart';
 import 'localizations_utils.dart';
 import 'message_parser.dart';
 
 /// Run the localizations generation script with the configuration [options].
-LocalizationsGenerator generateLocalizations({
+Future<LocalizationsGenerator> generateLocalizations({
   required Directory projectDir,
   Directory? dependenciesDir,
   required LocalizationOptions options,
   required Logger logger,
   required FileSystem fileSystem,
-}) {
+  required Artifacts artifacts,
+  required ProcessManager processManager,
+}) async {
   // If generating a synthetic package, generate a warning if
   // flutter: generate is not set.
   final FlutterManifest? flutterManifest = FlutterManifest.createFromPath(
@@ -30,7 +34,7 @@ LocalizationsGenerator generateLocalizations({
     fileSystem: projectDir.fileSystem,
     logger: logger,
   );
-  if (options.useSyntheticPackage && (flutterManifest == null || !flutterManifest.generateSyntheticPackage)) {
+  if (options.syntheticPackage && (flutterManifest == null || !flutterManifest.generateSyntheticPackage)) {
     throwToolExit(
       'Attempted to generate localizations code without having '
       'the flutter: generate flag turned on.'
@@ -43,28 +47,25 @@ LocalizationsGenerator generateLocalizations({
 
   precacheLanguageAndRegionTags();
 
-  final String inputPathString = options.arbDirectory?.path ?? fileSystem.path.join('lib', 'l10n');
-  final String templateArbFileName = options.templateArbFile?.toFilePath() ?? 'app_en.arb';
-  final String outputFileString = options.outputLocalizationsFile?.toFilePath() ?? 'app_localizations.dart';
   LocalizationsGenerator generator;
   try {
     generator = LocalizationsGenerator(
       fileSystem: fileSystem,
       inputsAndOutputsListPath: dependenciesDir?.path,
       projectPathString: projectDir.path,
-      inputPathString: inputPathString,
-      templateArbFileName: templateArbFileName,
-      outputFileString: outputFileString,
-      outputPathString: options.outputDirectory?.path,
-      classNameString: options.outputClass ?? 'AppLocalizations',
+      inputPathString: options.arbDir,
+      templateArbFileName: options.templateArbFile,
+      outputFileString: options.outputLocalizationFile,
+      outputPathString: options.outputDir,
+      classNameString: options.outputClass,
       preferredSupportedLocales: options.preferredSupportedLocales,
       headerString: options.header,
-      headerFile: options.headerFile?.toFilePath(),
-      useDeferredLoading: options.deferredLoading ?? false,
-      useSyntheticPackage: options.useSyntheticPackage,
-      areResourceAttributesRequired: options.areResourceAttributesRequired,
-      untranslatedMessagesFile: options.untranslatedMessagesFile?.toFilePath(),
-      usesNullableGetter: options.usesNullableGetter,
+      headerFile: options.headerFile,
+      useDeferredLoading: options.useDeferredLoading,
+      useSyntheticPackage: options.syntheticPackage,
+      areResourceAttributesRequired: options.requiredResourceAttributes,
+      untranslatedMessagesFile: options.untranslatedMessagesFile,
+      usesNullableGetter: options.nullableGetter,
       useEscaping: options.useEscaping,
       logger: logger,
       suppressWarnings: options.suppressWarnings,
@@ -74,6 +75,37 @@ LocalizationsGenerator generateLocalizations({
   } on L10nException catch (e) {
     throwToolExit(e.message);
   }
+
+  final List<String> outputFileList = generator.outputFileList;
+  final File? untranslatedMessagesFile = generator.untranslatedMessagesFile;
+
+  // All other post processing.
+  if (options.format) {
+    final List<String> formatFileList = outputFileList.toList();
+    if (untranslatedMessagesFile != null) {
+      // Don't format the messages file using `dart format`.
+      formatFileList.remove(untranslatedMessagesFile.absolute.path);
+    }
+    if (formatFileList.isEmpty) {
+      return generator;
+    }
+    final String dartBinary = artifacts.getArtifactPath(Artifact.engineDartBinary);
+    final List<String> command = <String>[dartBinary, 'format', ...formatFileList];
+    final ProcessResult result = await processManager.run(command);
+    if (result.exitCode != 0) {
+      throw ProcessException(
+        dartBinary,
+        command,
+        '''
+`dart format` failed with exit code ${result.exitCode}
+
+stdout:\n${result.stdout}\n
+stderr:\n${result.stderr}''',
+        result.exitCode,
+      );
+    }
+  }
+
   return generator;
 }
 
@@ -1125,13 +1157,14 @@ class LocalizationsGenerator {
       // When traversing through a placeholderExpr node, return "$placeholderName".
       // When traversing through a pluralExpr node, return "$tempVarN" and add variable declaration in "tempVariables".
       // When traversing through a selectExpr node, return "$tempVarN" and add variable declaration in "tempVariables".
+      // When traversing through an argumentExpr node, return "$tempVarN" and add variable declaration in "tempVariables".
       // When traversing through a message node, return concatenation of all of "generateVariables(child)" for each child.
       String generateVariables(Node node, { bool isRoot = false }) {
         switch (node.type) {
           case ST.message:
             final List<String> expressions = node.children.map<String>((Node node) {
               if (node.type == ST.string) {
-                return node.value!;
+                return generateString(node.value!);
               }
               return generateVariables(node);
             }).toList();
@@ -1225,6 +1258,34 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
               .replaceAll('@(varName)', tempVarName)
               .replaceAll('@(choice)', identifier.value!)
               .replaceAll('@(selectCases)', selectLogicArgs.join('\n'))
+            );
+            return '\$$tempVarName';
+          case ST.argumentExpr:
+            requiresIntlImport = true;
+            assert(node.children[1].type == ST.identifier);
+            assert(node.children[3].type == ST.argType);
+            assert(node.children[7].type == ST.identifier);
+            final String identifierName = node.children[1].value!;
+            final Node formatType = node.children[7];
+            // Check that formatType is a valid intl.DateFormat.
+            if (!validDateFormats.contains(formatType.value)) {
+              throw L10nParserException(
+                'Date format "${formatType.value!}" for placeholder '
+                '$identifierName does not have a corresponding DateFormat '
+                "constructor\n. Check the intl library's DateFormat class "
+                'constructors for allowed date formats, or set "isCustomDateFormat" attribute '
+                'to "true".',
+                _inputFileNames[locale]!,
+                message.resourceId,
+                translationForMessage,
+                formatType.positionInMessage,
+              );
+            }
+            final String tempVarName = getTempVariableName();
+            tempVariables.add(dateVariableTemplate
+              .replaceAll('@(varName)', tempVarName)
+              .replaceAll('@(formatType)', formatType.value!)
+              .replaceAll('@(argument)', identifierName)
             );
             return '\$$tempVarName';
           // ignore: no_default_cases

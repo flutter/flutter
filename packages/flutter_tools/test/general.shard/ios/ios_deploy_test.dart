@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/ios_deploy.dart';
@@ -145,6 +146,28 @@ void main () {
         expect(logger.traceText, contains('PROCESS_STOPPED'));
         expect(logger.traceText, contains('thread backtrace all'));
         expect(logger.traceText, contains('* thread #1'));
+      });
+
+      testWithoutContext('debugger attached and stop failed', () async {
+        final StreamController<List<int>> stdin = StreamController<List<int>>();
+        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: const <String>['ios-deploy'],
+            stdout: '(lldb)     run\r\nsuccess\r\nsuccess\r\nprocess signal SIGSTOP\r\n\r\nerror: Failed to send signal 17: failed to send signal 17',
+            stdin: IOSink(stdin.sink),
+          ),
+        ]);
+        final IOSDeployDebuggerWaitForExit iosDeployDebugger = IOSDeployDebuggerWaitForExit.test(
+          processManager: processManager,
+          logger: logger,
+        );
+
+        expect(iosDeployDebugger.logLines, emitsInOrder(<String>[
+          'success',
+        ]));
+
+        expect(await iosDeployDebugger.launchAndAttach(), isTrue);
+        await iosDeployDebugger.exitCompleter.future;
       });
 
       testWithoutContext('handle processing logging after process exit', () async {
@@ -428,6 +451,93 @@ process continue
         'process detach',
       ]);
     });
+
+    group('Check for symbols', () {
+      late String symbolsDirectoryPath;
+
+      setUp(() {
+        fileSystem = MemoryFileSystem.test();
+        symbolsDirectoryPath = '/Users/swarming/Library/Developer/Xcode/iOS DeviceSupport/16.2 (20C65) arm64e/Symbols';
+      });
+
+      testWithoutContext('and no path provided', () async {
+        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              'ios-deploy',
+            ],
+            stdout:
+            '(lldb) Process 6156 stopped',
+          ),
+        ]);
+        final BufferLogger logger = BufferLogger.test();
+        final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
+          processManager: processManager,
+          logger: logger,
+        );
+        await iosDeployDebugger.launchAndAttach();
+        await iosDeployDebugger.checkForSymbolsFiles(fileSystem);
+        expect(iosDeployDebugger.symbolsDirectoryPath, isNull);
+        expect(logger.traceText, contains('No path provided for Symbols directory.'));
+      });
+
+      testWithoutContext('and unable to find directory', () async {
+        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: const <String>[
+              'ios-deploy',
+            ],
+            stdout:
+            '[ 95%] Developer disk image mounted successfully\n'
+            'Symbol Path: $symbolsDirectoryPath\n'
+            '[100%] Connecting to remote debug server',
+          ),
+        ]);
+        final BufferLogger logger = BufferLogger.test();
+        final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
+          processManager: processManager,
+          logger: logger,
+        );
+        await iosDeployDebugger.launchAndAttach();
+        await iosDeployDebugger.checkForSymbolsFiles(fileSystem);
+        expect(iosDeployDebugger.symbolsDirectoryPath, symbolsDirectoryPath);
+        expect(logger.traceText, contains('Unable to find Symbols directory'));
+      });
+
+      testWithoutContext('and find status', () async {
+        final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: const <String>[
+              'ios-deploy',
+            ],
+            stdout:
+            '[ 95%] Developer disk image mounted successfully\n'
+            'Symbol Path: $symbolsDirectoryPath\n'
+            '[100%] Connecting to remote debug server',
+          ),
+        ]);
+        final BufferLogger logger = BufferLogger.test();
+        final IOSDeployDebugger iosDeployDebugger = IOSDeployDebugger.test(
+          processManager: processManager,
+          logger: logger,
+        );
+        final Directory symbolsDirectory = fileSystem.directory(symbolsDirectoryPath);
+        symbolsDirectory.createSync(recursive: true);
+
+        final File copyingStatusFile = symbolsDirectory.parent.childFile('.copying_lock');
+        copyingStatusFile.createSync();
+
+        final File processingStatusFile = symbolsDirectory.parent.childFile('.processing_lock');
+        processingStatusFile.createSync();
+
+        await iosDeployDebugger.launchAndAttach();
+        await iosDeployDebugger.checkForSymbolsFiles(fileSystem);
+        expect(iosDeployDebugger.symbolsDirectoryPath, symbolsDirectoryPath);
+        expect(logger.traceText, contains('Symbol files:'));
+        expect(logger.traceText, contains('.copying_lock'));
+        expect(logger.traceText, contains('.processing_lock'));
+      });
+    });
   });
 
   group('IOSDeploy.uninstallApp', () {
@@ -503,4 +613,38 @@ IOSDeploy setUpIOSDeploy(ProcessManager processManager, {
     artifacts: artifacts ?? Artifacts.test(),
     cache: cache,
   );
+}
+
+class IOSDeployDebuggerWaitForExit extends IOSDeployDebugger {
+  IOSDeployDebuggerWaitForExit({
+    required super.logger,
+    required super.processUtils,
+    required super.launchCommand,
+    required super.iosDeployEnv
+  });
+
+  /// Create a [IOSDeployDebugger] for testing.
+  ///
+  /// Sets the command to "ios-deploy" and environment to an empty map.
+  factory IOSDeployDebuggerWaitForExit.test({
+    required ProcessManager processManager,
+    Logger? logger,
+  }) {
+    final Logger debugLogger = logger ?? BufferLogger.test();
+    return IOSDeployDebuggerWaitForExit(
+      logger: debugLogger,
+      processUtils: ProcessUtils(logger: debugLogger, processManager: processManager),
+      launchCommand: <String>['ios-deploy'],
+      iosDeployEnv: <String, String>{},
+    );
+  }
+
+  final Completer<void> exitCompleter = Completer<void>();
+
+  @override
+  bool exit() {
+    final bool status = super.exit();
+    exitCompleter.complete();
+    return status;
+  }
 }

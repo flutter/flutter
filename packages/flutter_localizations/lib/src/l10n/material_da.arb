@@ -25,6 +25,7 @@
   "continueButtonLabel": "Fortsæt",
   "copyButtonLabel": "Kopiér",
   "cutButtonLabel": "Klip",
+  "scanTextButtonLabel": "Scan tekst",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "Indsæt",
   "selectAllButtonLabel": "Markér alt",
@@ -134,5 +135,11 @@
   "scrimLabel": "Dæmpeskærm",
   "bottomSheetLabel": "Felt i bunden",
   "scrimOnTapHint": "Luk $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

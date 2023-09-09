@@ -20,12 +20,16 @@ function generate_docs() {
     # Install and activate dartdoc.
     # When updating to a new dartdoc version, please also update
     # `dartdoc_options.yaml` to include newly introduced error and warning types.
+<<<<<<< HEAD
     "$DART" pub global activate dartdoc 6.2.2
+=======
+    "$DART" pub global activate dartdoc 6.3.0
+>>>>>>> 2524052335ec76bb03e04ede244b071f1b86d190
 
     # Install and activate the snippets tool, which resides in the
     # assets-for-api-docs repo:
     # https://github.com/flutter/assets-for-api-docs/tree/master/packages/snippets
-    "$DART" pub global activate snippets 0.3.0
+    "$DART" pub global activate snippets 0.3.1
 
     # This script generates a unified doc set, and creates
     # a custom index.html, placing everything into dev/docs/doc.

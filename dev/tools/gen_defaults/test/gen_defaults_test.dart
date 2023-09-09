@@ -2,13 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:gen_defaults/template.dart';
+import 'package:gen_defaults/token_logger.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 void main() {
+  final TokenLogger logger = tokenLogger;
+  logger.init(allTokens: <String, dynamic>{}, versionMap: <String, List<String>>{});
+
   test('Templates will append to the end of a file', () {
     final Directory tempDir = Directory.systemTemp.createTempSync('gen_defaults');
     try {
@@ -37,8 +42,6 @@ void main() {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: 0.0
 
 static final String tokenFoo = 'Foobar';
 static final String tokenBar = 'Barfoo';
@@ -69,8 +72,6 @@ static final String tokenBar = 'Barfoo';
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: 0.0
-
 static final String tokenFoo = 'Foobar';
 static final String tokenBar = 'Barfoo';
 
@@ -93,8 +94,6 @@ static final String tokenBar = 'Barfoo';
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: 0.0
 
 static final String tokenFoo = 'foo';
 static final String tokenBar = 'bar';
@@ -136,8 +135,6 @@ static final String tokenBar = 'bar';
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: 0.0
-
 static final String tokenFoo = 'foo';
 static final String tokenBar = 'bar';
 
@@ -162,8 +159,6 @@ static final String tokenBar = 'bar';
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: 0.0
-
 static final String tokenFoo = 'foo';
 static final String tokenBar = 'bar';
 
@@ -175,8 +170,6 @@ static final String tokenBar = 'bar';
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: 0.0
 
 static final String tokenFoo = 'bar';
 static final String tokenBar = 'foo';
@@ -202,8 +195,6 @@ static final String tokenBar = 'foo';
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: 0.0
-
 static final String tokenFoo = 'FOO';
 static final String tokenBar = 'BAR';
 
@@ -215,8 +206,6 @@ static final String tokenBar = 'BAR';
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: 0.0
 
 static final String tokenFoo = 'bar';
 static final String tokenBar = 'foo';
@@ -248,6 +237,127 @@ static final String tokenBar = 'foo';
     expect(template.shape('foo'), 'const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(1.0), topRight: Radius.circular(2.0), bottomLeft: Radius.circular(3.0), bottomRight: Radius.circular(4.0)))');
     expect(template.shape('bar'), 'const StadiumBorder()');
   });
+
+  group('Tokens logger', () {
+    final List<String> printLog = List<String>.empty(growable: true);
+    final Map<String, List<String>> versionMap = <String, List<String>>{};
+    final Map<String, dynamic> allTokens = <String, dynamic>{};
+
+    // Add to printLog instead of printing to stdout
+    void Function() overridePrint(void Function() testFn) => () {
+      final ZoneSpecification spec = ZoneSpecification(
+        print: (_, __, ___, String msg) {
+          printLog.add(msg);
+        }
+      );
+      return Zone.current.fork(specification: spec).run<void>(testFn);
+    };
+
+    setUp(() {
+      logger.init(allTokens: allTokens, versionMap: versionMap);
+    });
+
+    tearDown(() {
+      logger.clear();
+      printLog.clear();
+      versionMap.clear();
+      allTokens.clear();
+    });
+
+    String errorColoredString(String str) => '\x1B[31m$str\x1B[0m';
+
+    const Map<String, List<String>> testVersions = <String, List<String>>{
+      'v1.0.0': <String>['file_1.json'],
+      'v2.0.0': <String>['file_2.json, file_3.json'],
+    };
+
+    test('can print empty usage', overridePrint(() {
+      logger.printVersionUsage(verbose: true);
+      expect(printLog, contains('Versions used: '));
+
+      logger.printTokensUsage(verbose: true);
+      expect(printLog, contains('Tokens used: 0/0'));
+    }));
+
+    test('can print version usage', overridePrint(() {
+      versionMap.addAll(testVersions);
+
+      logger.printVersionUsage(verbose: false);
+
+      expect(printLog, contains('Versions used: v1.0.0, v2.0.0'));
+    }));
+
+    test('can print version usage (verbose)', overridePrint(() {
+      versionMap.addAll(testVersions);
+
+      logger.printVersionUsage(verbose: true);
+
+      expect(printLog, contains('Versions used: v1.0.0, v2.0.0'));
+      expect(printLog, contains('  v1.0.0:'));
+      expect(printLog, contains('    file_1.json'));
+      expect(printLog, contains('  v2.0.0:'));
+      expect(printLog, contains('    file_2.json, file_3.json'));
+    }));
+
+    test('can log and print tokens usage', overridePrint(() {
+      allTokens['foo'] = 'value';
+
+      logger.log('foo');
+      logger.printTokensUsage(verbose: false);
+
+      expect(printLog, contains('Tokens used: 1/1'));
+    }));
+
+    test('can log and print tokens usage (verbose)', overridePrint(() {
+      allTokens['foo'] = 'value';
+
+      logger.log('foo');
+      logger.printTokensUsage(verbose: true);
+
+      expect(printLog, contains('✅ foo'));
+      expect(printLog, contains('Tokens used: 1/1'));
+    }));
+
+    test('detects invalid logs', overridePrint(() {
+      allTokens['foo'] = 'value';
+
+      logger.log('baz');
+      logger.log('foobar');
+      logger.printTokensUsage(verbose: true);
+
+      expect(printLog, contains(errorColoredString('Token unavailable: baz')));
+      expect(printLog, contains(errorColoredString('Token unavailable: foobar')));
+      expect(printLog, contains('❌ foo'));
+      expect(printLog, contains('Tokens used: 0/1'));
+    }));
+
+    test('can log and dump versions & tokens to a file', overridePrint(() {
+      versionMap.addAll(testVersions);
+      allTokens['foo'] = 'value';
+      allTokens['bar'] = 'value';
+
+      logger.log('foo');
+      logger.log('bar');
+      logger.dumpToFile('test.json');
+
+      final String fileContent = File('test.json').readAsStringSync();
+      expect(fileContent, contains('Versions used, v1.0.0, v2.0.0'));
+      expect(fileContent, contains('bar,'));
+      expect(fileContent, contains('foo'));
+    }));
+
+    test('integration test', overridePrint(() {
+      allTokens['foo'] = 'value';
+      allTokens['bar'] = 'value';
+
+      TestTemplate('block', 'filename', allTokens).generate();
+      logger.printTokensUsage(verbose: true);
+
+      expect(printLog, contains('✅ foo'));
+      expect(printLog, contains('✅ bar'));
+      expect(printLog, contains('Tokens used: 2/2'));
+    }));
+  });
 }
 
 class TestTemplate extends TokenTemplate {
@@ -255,7 +365,7 @@ class TestTemplate extends TokenTemplate {
 
   @override
   String generate() => '''
-static final String tokenFoo = '${tokens['foo']}';
-static final String tokenBar = '${tokens['bar']}';
+static final String tokenFoo = '${getToken('foo')}';
+static final String tokenBar = '${getToken('bar')}';
 ''';
 }

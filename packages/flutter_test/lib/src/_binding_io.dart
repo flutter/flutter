@@ -9,11 +9,9 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
-// ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' as test_package;
+import 'package:test_api/scaffolding.dart' as test_package;
 
 import 'binding.dart';
-import 'deprecated.dart';
 
 /// Ensure the appropriate test binding is initialized.
 TestWidgetsFlutterBinding ensureInitialized([@visibleForTesting Map<String, String>? environment]) {
@@ -40,9 +38,9 @@ void mockFlutterAssets() {
 
   /// Navigation related actions (pop, push, replace) broadcasts these actions via
   /// platform messages.
-  SystemChannels.navigation.setMockMethodCallHandler((MethodCall methodCall) async {});
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (MethodCall methodCall) async { return null; });
 
-  ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) {
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) {
     assert(message != null);
     String key = utf8.decode(message!.buffer.asUint8List());
     File asset = File(path.join(assetFolderPath, key));

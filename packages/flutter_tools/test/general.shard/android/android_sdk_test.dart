@@ -4,20 +4,13 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
-import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:test/fake.dart';
 
-import '../../integration.shard/test_utils.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/fakes.dart' show FakeAndroidStudio, FakeOperatingSystemUtils;
 
 void main() {
   late MemoryFileSystem fileSystem;
@@ -348,6 +341,7 @@ void main() {
       Platform: () => FakePlatform(operatingSystem: 'windows'),
       Config: () => config,
     });
+<<<<<<< HEAD
 
     group('findJavaBinary', () {
       testUsingContext('returns the path of the JDK bundled with Android Studio, if it exists', () {
@@ -555,6 +549,8 @@ OpenJDK 64-Bit Server VM 18.9 (build 11.0.2+9, mixed mode)
         Platform: () => FakePlatform(environment: <String, String>{}),
       });
     });
+=======
+>>>>>>> 2524052335ec76bb03e04ede244b071f1b86d190
   });
 }
 
@@ -636,30 +632,3 @@ ro.build.version.incremental=1624448
 ro.build.version.sdk=24
 ro.build.version.codename=REL
 ''';
-
-class FakeAndroidStudioWithJdk extends Fake implements AndroidStudio {
-  @override
-  String? get javaPath => '/fake/android_studio/java/path/';
-}
-
-class FakeAndroidStudioWithoutJdk extends Fake implements AndroidStudio {
-  @override
-  String? get javaPath => null;
-}
-
-class FakeOperatingSystemUtilsWithJava extends Fake implements OperatingSystemUtils {
-  @override
-  File? which(String execName) {
-    if (execName == 'java') {
-      return globals.fs.file('/fake/which/java/path');
-    }
-    return null;
-  }
-}
-
-class FakeOperatingSystemUtilsWithoutJava extends Fake implements OperatingSystemUtils {
-  @override
-  File? which(String execName) {
-    return null;
-  }
-}

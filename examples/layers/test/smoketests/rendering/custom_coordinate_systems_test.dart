@@ -4,8 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
-// ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
+import 'package:flutter_test/flutter_test.dart' hide TypeMatcher, isInstanceOf;
 
 import '../../../rendering/custom_coordinate_systems.dart' as demo;
 

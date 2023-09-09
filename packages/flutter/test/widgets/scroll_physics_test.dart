@@ -271,6 +271,20 @@ void main() {
       expect(smallListOverscrollApplied, greaterThan(1.0));
       expect(smallListOverscrollApplied, lessThan(20.0));
     });
+
+    test('frictionFactor', () {
+      const BouncingScrollPhysics mobile = BouncingScrollPhysics();
+      const BouncingScrollPhysics desktop = BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast);
+
+      expect(desktop.frictionFactor(0), 0.26);
+      expect(mobile.frictionFactor(0), 0.52);
+
+      expect(desktop.frictionFactor(0.4), moreOrLessEquals(0.0936));
+      expect(mobile.frictionFactor(0.4), moreOrLessEquals(0.1872));
+
+      expect(desktop.frictionFactor(0.8), moreOrLessEquals(0.0104));
+      expect(mobile.frictionFactor(0.8), moreOrLessEquals(0.0208));
+    });
   });
 
   test('ClampingScrollPhysics assertion test', () {

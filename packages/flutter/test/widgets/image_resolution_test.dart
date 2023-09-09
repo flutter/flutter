@@ -69,7 +69,7 @@ class FakeImageStreamCompleter extends ImageStreamCompleter {
 }
 
 class TestAssetImage extends AssetImage {
-  const TestAssetImage(super.name, this.images);
+  const TestAssetImage(super.assetName, this.images);
 
   final Map<double, ui.Image> images;
 

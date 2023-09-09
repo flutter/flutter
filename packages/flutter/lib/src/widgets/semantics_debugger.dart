@@ -171,8 +171,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
         child: Listener(
           onPointerDown: _handlePointerDown,
           behavior: HitTestBehavior.opaque,
-          child: IgnorePointer(
-            ignoringSemantics: false,
+          child: _IgnorePointerWithSemantics(
             child: widget.child,
           ),
         ),
@@ -392,4 +391,23 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     }
     canvas.restore();
   }
+}
+
+/// A widget ignores pointer event but still keeps semantics actions.
+class _IgnorePointerWithSemantics extends SingleChildRenderObjectWidget {
+  const _IgnorePointerWithSemantics({
+    super.child,
+  });
+
+  @override
+  _RenderIgnorePointerWithSemantics createRenderObject(BuildContext context) {
+    return _RenderIgnorePointerWithSemantics();
+  }
+}
+
+class _RenderIgnorePointerWithSemantics extends RenderProxyBox {
+  _RenderIgnorePointerWithSemantics();
+
+  @override
+  bool hitTest(BoxHitTestResult result, { required Offset position }) => false;
 }

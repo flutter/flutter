@@ -158,7 +158,7 @@ dev_dependencies:
   });
 
   testUsingContext(
-      'Confirmation that the reporter and timeout args are not set by default',
+      'Confirmation that the reporter, timeout, and concurrency args are not set by default',
       () async {
     final FakePackageTest fakePackageTest = FakePackageTest();
 
@@ -175,6 +175,7 @@ dev_dependencies:
     expect(fakePackageTest.lastArgs, isNot(contains('compact')));
     expect(fakePackageTest.lastArgs, isNot(contains('--timeout')));
     expect(fakePackageTest.lastArgs, isNot(contains('30s')));
+    expect(fakePackageTest.lastArgs, isNot(contains('--concurrency')));
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
@@ -600,6 +601,25 @@ dev_dependencies:
       ProcessManager: () => FakeProcessManager.any(),
     });
 
+    testUsingContext('Overrides concurrency when running web tests', () async {
+      final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
+
+      final TestCommand testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>[
+        'test',
+        '--no-pub',
+        '--concurrency=100',
+        '--platform=chrome',
+      ]);
+
+      expect(testRunner.lastConcurrency, 1);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
     testUsingContext('when running integration tests', () async {
       final FakeFlutterTestRunner testRunner = FakeFlutterTestRunner(0);
 
@@ -852,6 +872,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
   late DebuggingOptions lastDebuggingOptionsValue;
   String? lastFileReporterValue;
   String? lastReporterOption;
+  int? lastConcurrency;
 
   @override
   Future<int> runTests(
@@ -890,6 +911,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     lastDebuggingOptionsValue = debuggingOptions;
     lastFileReporterValue = fileReporter;
     lastReporterOption = reporter;
+    lastConcurrency = concurrency;
 
     if (leastRunTime != null) {
       await Future<void>.delayed(leastRunTime!);

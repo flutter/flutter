@@ -11,6 +11,7 @@ import 'package:file/src/interface/file.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -467,6 +468,64 @@ void main() {
       });
     });
 
+    testUsingContext('device.startDartDevelopmentService and .shutdownDartDevelopmentService starts and stops DDS', () async {
+      daemon = Daemon(
+        daemonConnection,
+        notifyingLogger: notifyingLogger,
+      );
+      final FakePollingDeviceDiscovery discoverer = FakePollingDeviceDiscovery();
+      daemon.deviceDomain.addDeviceDiscoverer(discoverer);
+      final FakeAndroidDevice device = FakeAndroidDevice();
+      discoverer.addDevice(device);
+
+      final Completer<void> ddsDoneCompleter = Completer<void>();
+      device.dds.done = ddsDoneCompleter.future;
+      final Uri fakeDdsUri = Uri.parse('http://fake_dds_uri');
+      device.dds.uri = fakeDdsUri;
+
+      // Try starting DDS.
+      expect(device.dds.startCalled, false);
+      daemonStreams.inputs.add(DaemonMessage(<String, Object?>{
+        'id': 0,
+        'method': 'device.startDartDevelopmentService',
+        'params': <String, Object?>{
+          'deviceId': 'device',
+          'disableServiceAuthCodes': false,
+          'vmServiceUri': 'http://fake_uri/auth_code',
+        },
+      }));
+      final Stream<DaemonMessage> broadcastOutput = daemonStreams.outputs.stream.asBroadcastStream();
+      final DaemonMessage startResponse = await broadcastOutput.firstWhere(_notEvent);
+      expect(startResponse.data['id'], 0);
+      expect(startResponse.data['error'], isNull);
+      final String? ddsUri = startResponse.data['result'] as String?;
+      expect(ddsUri, fakeDdsUri.toString());
+      expect(device.dds.startCalled, true);
+      expect(device.dds.startDisableServiceAuthCodes, false);
+      expect(device.dds.startVMServiceUri, Uri.parse('http://fake_uri/auth_code'));
+
+      // dds.done event should be sent to the client.
+      ddsDoneCompleter.complete();
+      final DaemonMessage startEvent = await broadcastOutput.firstWhere(
+        (DaemonMessage message) => message.data['event'] != null && message.data['event'] == 'device.dds.done.device',
+      );
+      expect(startEvent, isNotNull);
+
+      // Try stopping DDS.
+      expect(device.dds.shutdownCalled, false);
+      daemonStreams.inputs.add(DaemonMessage(<String, Object?>{
+        'id': 1,
+        'method': 'device.shutdownDartDevelopmentService',
+        'params': <String, Object?>{
+          'deviceId': 'device',
+        },
+      }));
+      final DaemonMessage stopResponse = await broadcastOutput.firstWhere(_notEvent);
+      expect(stopResponse.data['id'], 1);
+      expect(stopResponse.data['error'], isNull);
+      expect(device.dds.shutdownCalled, true);
+    });
+
     testUsingContext('emulator.launch without an emulatorId should report an error', () async {
       daemon = Daemon(
         daemonConnection,
@@ -877,6 +936,9 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   @override
   bool get supportsStartPaused => true;
 
+  @override
+  final FakeDartDevelopmentService dds = FakeDartDevelopmentService();
+
   BuildMode? supportsRuntimeModeCalledBuildMode;
   @override
   Future<bool> supportsRuntimeMode(BuildMode buildMode) async {
@@ -917,6 +979,39 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   }) async {
     stopAppPackage = app;
     return true;
+  }
+}
+
+class FakeDartDevelopmentService extends Fake implements DartDevelopmentService {
+  bool startCalled = false;
+  late Uri startVMServiceUri;
+  bool? startDisableServiceAuthCodes;
+
+  bool shutdownCalled = false;
+
+  @override
+  late Future<void> done;
+
+  @override
+  Uri? uri;
+
+  @override
+  Future<void> startDartDevelopmentService(
+    Uri vmServiceUri, {
+    required Logger logger,
+    int? hostPort,
+    bool? ipv6,
+    bool? disableServiceAuthCodes,
+    bool cacheStartupProfile = false,
+  }) async {
+    startCalled = true;
+    startVMServiceUri = vmServiceUri;
+    startDisableServiceAuthCodes = disableServiceAuthCodes;
+  }
+
+  @override
+  Future<void> shutdown() async {
+    shutdownCalled = true;
   }
 }
 

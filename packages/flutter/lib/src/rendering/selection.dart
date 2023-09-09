@@ -58,7 +58,7 @@ enum SelectionResult {
 /// The abstract interface to handle [SelectionEvent]s.
 ///
 /// This interface is extended by [Selectable] and [SelectionContainerDelegate]
-/// and is typically not use directly.
+/// and is typically not used directly.
 ///
 /// {@template flutter.rendering.SelectionHandler}
 /// This class returns a [SelectionGeometry] as its [value], and is responsible
@@ -576,8 +576,8 @@ enum SelectionStatus {
 /// The geometry of the current selection.
 ///
 /// This includes details such as the locations of the selection start and end,
-/// line height, etc. This information is used for drawing selection controls
-/// for mobile platforms.
+/// line height, the rects that encompass the selection, etc. This information
+/// is used for drawing selection controls for mobile platforms.
 ///
 /// The positions in geometry are in local coordinates of the [SelectionHandler]
 /// or [Selectable].
@@ -590,6 +590,7 @@ class SelectionGeometry {
   const SelectionGeometry({
     this.startSelectionPoint,
     this.endSelectionPoint,
+    this.selectionRects = const <Rect>[],
     required this.status,
     required this.hasContent,
   }) : assert((startSelectionPoint == null && endSelectionPoint == null) || status != SelectionStatus.none);
@@ -627,6 +628,10 @@ class SelectionGeometry {
   /// The status of ongoing selection in the [Selectable] or [SelectionHandler].
   final SelectionStatus status;
 
+  /// The rects in the local coordinates of the containing [Selectable] that
+  /// represent the selection if there is any.
+  final List<Rect> selectionRects;
+
   /// Whether there is any selectable content in the [Selectable] or
   /// [SelectionHandler].
   final bool hasContent;
@@ -638,12 +643,14 @@ class SelectionGeometry {
   SelectionGeometry copyWith({
     SelectionPoint? startSelectionPoint,
     SelectionPoint? endSelectionPoint,
+    List<Rect>? selectionRects,
     SelectionStatus? status,
     bool? hasContent,
   }) {
     return SelectionGeometry(
       startSelectionPoint: startSelectionPoint ?? this.startSelectionPoint,
       endSelectionPoint: endSelectionPoint ?? this.endSelectionPoint,
+      selectionRects: selectionRects ?? this.selectionRects,
       status: status ?? this.status,
       hasContent: hasContent ?? this.hasContent,
     );
@@ -660,6 +667,7 @@ class SelectionGeometry {
     return other is SelectionGeometry
         && other.startSelectionPoint == startSelectionPoint
         && other.endSelectionPoint == endSelectionPoint
+        && other.selectionRects == selectionRects
         && other.status == status
         && other.hasContent == hasContent;
   }
@@ -669,6 +677,7 @@ class SelectionGeometry {
     return Object.hash(
       startSelectionPoint,
       endSelectionPoint,
+      selectionRects,
       status,
       hasContent,
     );

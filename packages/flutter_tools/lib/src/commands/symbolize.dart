@@ -200,7 +200,7 @@ class DwarfSymbolizationService {
       .listen((String line) {
         try {
           output.writeln(line);
-        } on Exception catch(e, s) {
+        } on Exception catch (e, s) {
           subscription?.cancel().whenComplete(() {
             if (!onDone.isCompleted) {
               onDone.completeError(e, s);

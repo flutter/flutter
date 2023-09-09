@@ -1479,6 +1479,8 @@ TerminalHandler setUpTerminalHandler(List<FakeVmServiceRequest> requests, {
         ..isRunningDebug = false
         ..isRunningProfile = false
         ..isRunningRelease = true;
+    case _:
+      // NOOP
   }
   return TerminalHandler(
     residentRunner,
@@ -1494,7 +1496,6 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler { }
 
 class TestRunner extends Fake implements ResidentRunner {
   bool hasHelpBeenPrinted = false;
-  String? receivedCommand;
 
   @override
   Future<void> cleanupAfterSignal() async { }

@@ -646,6 +646,45 @@ void main() {
 
     expect(tester.widget<CustomScrollView>(find.byType(CustomScrollView)).clipBehavior, clipBehavior);
   });
+
+  testWidgets('AnimatedGrid applies MediaQuery padding', (WidgetTester tester) async {
+    const EdgeInsets padding = EdgeInsets.all(30.0);
+    EdgeInsets? innerMediaQueryPadding;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(
+            padding: EdgeInsets.all(30.0),
+          ),
+          child: AnimatedGrid(
+            initialItemCount: 6,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+            ),
+            itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+              innerMediaQueryPadding = MediaQuery.paddingOf(context);
+              return const Placeholder();
+            },
+          ),
+        ),
+      ),
+    );
+    final Offset topLeft = tester.getTopLeft(find.byType(Placeholder).first);
+    // Automatically apply the top padding into sliver.
+    expect(topLeft, Offset(0.0, padding.top));
+
+    // Scroll to the bottom.
+    await tester.drag(find.byType(AnimatedGrid), const Offset(0.0, -1000.0));
+    await tester.pumpAndSettle();
+
+    final Offset bottomRight = tester.getBottomRight(find.byType(Placeholder).last);
+    // Automatically apply the bottom padding into sliver.
+    expect(bottomRight, Offset(800.0, 600.0 - padding.bottom));
+
+    // Verify that the left/right padding is not applied.
+    expect(innerMediaQueryPadding, const EdgeInsets.symmetric(horizontal: 30.0));
+  });
 }
 
 class _StatefulListItem extends StatefulWidget {

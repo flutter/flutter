@@ -57,7 +57,7 @@ dynamic getRenderChip(WidgetTester tester) {
   if (!tester.any(findRenderChipElement())) {
     return null;
   }
-  final Element element = tester.element(findRenderChipElement());
+  final Element element = tester.element(findRenderChipElement().first);
   return element.renderObject;
 }
 
@@ -74,9 +74,10 @@ Widget wrapForChip({
   TextDirection textDirection = TextDirection.ltr,
   double textScaleFactor = 1.0,
   Brightness brightness = Brightness.light,
+  bool? useMaterial3,
 }) {
   return MaterialApp(
-    theme: ThemeData(brightness: brightness),
+    theme: ThemeData(brightness: brightness, useMaterial3: useMaterial3),
     home: Directionality(
       textDirection: textDirection,
       child: MediaQuery(
@@ -142,9 +143,11 @@ Widget chipWithOptionalDeleteButton({
   String? chipTooltip,
   String? deleteButtonTooltipMessage,
   VoidCallback? onPressed = doNothing,
+  bool? useMaterial3,
 }) {
   return wrapForChip(
     textDirection: textDirection,
+    useMaterial3: useMaterial3,
     child: Wrap(
       children: <Widget>[
         RawChip(
@@ -220,7 +223,7 @@ void main() {
 
     Widget buildFrame(Brightness brightness) {
       return MaterialApp(
-        theme: ThemeData(brightness: brightness),
+        theme: ThemeData(brightness: brightness, useMaterial3: false),
         home: Scaffold(
           body: Center(
             child: Builder(
@@ -579,6 +582,7 @@ void main() {
     const TextStyle style = TextStyle(fontSize: 10.0);
     await tester.pumpWidget(
       wrapForChip(
+        useMaterial3: false,
         child: const Row(
           children: <Widget>[
             Chip(label: Text('Test'), labelStyle: style),
@@ -615,6 +619,7 @@ void main() {
   testWidgets('Chip responds to materialTapTargetSize', (WidgetTester tester) async {
       await tester.pumpWidget(
         wrapForChip(
+          useMaterial3: false,
           child: const Column(
             children: <Widget>[
               Chip(
@@ -731,6 +736,7 @@ void main() {
   testWidgets('Chip responds to textScaleFactor', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapForChip(
+        useMaterial3: false,
         child: const Column(
           children: <Widget>[
             Chip(
@@ -809,6 +815,7 @@ void main() {
     final Key keyB = GlobalKey();
     await tester.pumpWidget(
       wrapForChip(
+        useMaterial3: false,
         child: Column(
           children: <Widget>[
             Chip(
@@ -946,6 +953,7 @@ void main() {
     Future<void> pushChip({ Widget? avatar }) async {
       return tester.pumpWidget(
         wrapForChip(
+          useMaterial3: false,
           child: Wrap(
             children: <Widget>[
               RawChip(
@@ -1060,6 +1068,7 @@ void main() {
     Future<void> pushChip({ bool deletable = false }) async {
       return tester.pumpWidget(
         wrapForChip(
+          useMaterial3: false,
           child: Wrap(
             children: <Widget>[
               StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
@@ -1211,6 +1220,7 @@ void main() {
 
     await tester.pumpWidget(
       chipWithOptionalDeleteButton(
+        useMaterial3: false,
         labelKey: labelKey,
         deleteButtonKey: deleteButtonKey,
         deletable: true,
@@ -1293,6 +1303,7 @@ void main() {
 
     await tester.pumpWidget(
       chipWithOptionalDeleteButton(
+        useMaterial3: false,
         labelKey: labelKey,
         deleteButtonKey: deleteButtonKey,
         deletable: true,
@@ -1346,6 +1357,7 @@ void main() {
 
     await tester.pumpWidget(
       chipWithOptionalDeleteButton(
+        useMaterial3: false,
         labelKey: labelKey,
         onPressed: null,
         deleteButtonKey: deleteButtonKey,
@@ -1430,6 +1442,7 @@ void main() {
 
     await tester.pumpWidget(
       chipWithOptionalDeleteButton(
+        useMaterial3: false,
         labelKey: labelKey,
         deletable: false,
       ),
@@ -1484,6 +1497,7 @@ void main() {
     Future<void> pushChip({ Widget? avatar, bool selectable = false }) async {
       return tester.pumpWidget(
         wrapForChip(
+          useMaterial3: false,
           child: Wrap(
             children: <Widget>[
               StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
@@ -1564,6 +1578,7 @@ void main() {
     Future<void> pushChip({ bool selectable = false }) async {
       return tester.pumpWidget(
         wrapForChip(
+          useMaterial3: false,
           child: Wrap(
             children: <Widget>[
               StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
@@ -1637,6 +1652,7 @@ void main() {
     Future<void> pushChip({ Widget? avatar, bool selectable = false }) async {
       return tester.pumpWidget(
         wrapForChip(
+          useMaterial3: false,
           child: Wrap(
             children: <Widget>[
               StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
@@ -1689,6 +1705,7 @@ void main() {
 
   testWidgets('Chip uses ThemeData chip theme if present', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
+      useMaterial3: false,
       platform: TargetPlatform.android,
       primarySwatch: Colors.red,
     );
@@ -1792,7 +1809,7 @@ void main() {
     await tester.pumpWidget(
       wrapForChip(
         child: Theme(
-          data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.padded),
+          data: ThemeData(useMaterial3: false, materialTapTargetSize: MaterialTapTargetSize.padded),
           child: Center(
             child: RawChip(
               key: key1,
@@ -1809,7 +1826,7 @@ void main() {
     await tester.pumpWidget(
       wrapForChip(
         child: Theme(
-          data: ThemeData(materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+          data: ThemeData(useMaterial3: false, materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
           child: Center(
             child: RawChip(
               key: key2,
@@ -2466,6 +2483,7 @@ void main() {
 
   testWidgets('Chip elevation and shadow color work correctly', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
+      useMaterial3: false,
       platform: TargetPlatform.android,
       primarySwatch: Colors.red,
     );
@@ -2570,12 +2588,17 @@ void main() {
   });
 
   testWidgets('selected chip and avatar draw darkened layer within avatar circle', (WidgetTester tester) async {
-    await tester.pumpWidget(wrapForChip(child: const FilterChip(
-      avatar: CircleAvatar(child: Text('t')),
-      label: Text('test'),
-      selected: true,
-      onSelected: null,
-    )));
+    await tester.pumpWidget(
+      wrapForChip(
+        useMaterial3: false,
+        child: const FilterChip(
+          avatar: CircleAvatar(child: Text('t')),
+          label: Text('test'),
+          selected: true,
+          onSelected: null,
+        ),
+      ),
+    );
     final RenderBox rawChip = tester.firstRenderObject<RenderBox>(
       find.descendant(
         of: find.byType(RawChip),
@@ -2725,6 +2748,7 @@ void main() {
 
     Widget chipWidget({ bool enabled = true, bool selected = false }) {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Focus(
             focusNode: focusNode,
@@ -2804,6 +2828,7 @@ void main() {
 
     Widget chipWidget({ bool enabled = true, bool selected = false }) {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Focus(
             focusNode: focusNode,
@@ -2886,6 +2911,7 @@ void main() {
 
     Widget chipWidget({ bool enabled = true, bool selected = false }) {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Focus(
             focusNode: focusNode,
@@ -2963,6 +2989,7 @@ void main() {
 
     Widget chipWidget({ bool enabled = true, bool selected = false }) {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: Focus(
             focusNode: focusNode,
@@ -3035,6 +3062,7 @@ void main() {
     Widget chipWidget({ bool enabled = true, bool selected = false }) {
       return MaterialApp(
         theme: ThemeData(
+          useMaterial3: false,
           chipTheme: ThemeData.light().chipTheme.copyWith(
             shape: themeShape,
             side: themeBorderSide,
@@ -3071,6 +3099,7 @@ void main() {
     Future<void> buildTest(VisualDensity visualDensity) async {
       return tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Material(
             child: Center(
               child: Column(
@@ -3283,6 +3312,388 @@ void main() {
     ));
 
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Chip background color and shape are drawn on Ink', (WidgetTester tester) async {
+    const Color backgroundColor = Color(0xff00ff00);
+    const OutlinedBorder shape = ContinuousRectangleBorder();
+
+    await tester.pumpWidget(wrapForChip(
+      useMaterial3: false,
+      child: const RawChip(
+        label: Text('text'),
+        backgroundColor: backgroundColor,
+        shape: shape,
+      ),
+    ));
+
+    final Ink ink = tester.widget(find.descendant(
+      of: find.byType(RawChip),
+      matching: find.byType(Ink),
+    ));
+    final ShapeDecoration decoration = ink.decoration! as ShapeDecoration;
+    expect(decoration.color, backgroundColor);
+    expect(decoration.shape, shape);
+  });
+
+  testWidgets('Chip highlight color is drawn on top of the backgroundColor', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'RawChip');
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    const Color backgroundColor = Color(0xff00ff00);
+
+    await tester.pumpWidget(wrapForChip(
+      child: RawChip(
+        label: const Text('text'),
+        backgroundColor: backgroundColor,
+        autofocus: true,
+        focusNode: focusNode,
+        onPressed: () {},
+      ),
+    ));
+
+    await tester.pumpAndSettle();
+
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(
+      find.byType(Material).last,
+      paints
+        // Background color is drawn first.
+        ..rrect(color: backgroundColor)
+        // Highlight color is drawn on top of the background color.
+        ..rect(color: const Color(0x1f000000)),
+    );
+  });
+
+  testWidgets('RawChip.color resolves material states', (WidgetTester tester) async {
+    const Color disabledSelectedColor = Color(0xffffff00);
+    const Color disabledColor = Color(0xff00ff00);
+    const Color backgroundColor = Color(0xff0000ff);
+    const Color selectedColor = Color(0xffff0000);
+    Widget buildApp({ required bool enabled, required bool selected }) {
+      return wrapForChip(
+        useMaterial3: true,
+        child: RawChip(
+          isEnabled: enabled,
+          selected: selected,
+          color: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            if (states.contains(MaterialState.disabled) && states.contains(MaterialState.selected)) {
+              return disabledSelectedColor;
+            }
+            if (states.contains(MaterialState.disabled)) {
+              return disabledColor;
+            }
+            if (states.contains(MaterialState.selected)) {
+              return selectedColor;
+            }
+            return backgroundColor;
+          }),
+          label: const Text('RawChip'),
+        ),
+      );
+    }
+
+    // Test enabled chip.
+    await tester.pumpWidget(buildApp(enabled: true, selected: false));
+
+    // Enabled chip should have the provided backgroundColor.
+    expect(getMaterialBox(tester), paints..rrect(color: backgroundColor));
+
+    // Test disabled chip.
+    await tester.pumpWidget(buildApp(enabled: false, selected: false));
+    await tester.pumpAndSettle();
+
+    // Disabled chip should have the provided disabledColor.
+    expect(getMaterialBox(tester), paints..rrect(color: disabledColor));
+
+    // Test enabled & selected chip.
+    await tester.pumpWidget(buildApp(enabled: true, selected: true));
+    await tester.pumpAndSettle();
+
+    // Enabled & selected chip should have the provided selectedColor.
+    expect(getMaterialBox(tester), paints..rrect(color: selectedColor));
+
+    // Test disabled & selected chip.
+    await tester.pumpWidget(buildApp(enabled: false, selected: true));
+    await tester.pumpAndSettle();
+
+    // Disabled & selected chip should have the provided disabledSelectedColor.
+    expect(getMaterialBox(tester), paints..rrect(color: disabledSelectedColor));
+  });
+
+  testWidgets('RawChip uses provided state color properties', (WidgetTester tester) async {
+    const Color disabledColor = Color(0xff00ff00);
+    const Color backgroundColor = Color(0xff0000ff);
+    const Color selectedColor = Color(0xffff0000);
+    Widget buildApp({ required bool enabled, required bool selected }) {
+      return wrapForChip(
+        useMaterial3: true,
+        child: RawChip(
+          isEnabled: enabled,
+          selected: selected,
+          disabledColor: disabledColor,
+          backgroundColor: backgroundColor,
+          selectedColor: selectedColor,
+          label: const Text('RawChip'),
+        ),
+      );
+    }
+
+    // Test enabled chip.
+    await tester.pumpWidget(buildApp(enabled: true, selected: false));
+
+    // Enabled chip should have the provided backgroundColor.
+    expect(getMaterialBox(tester), paints..rrect(color: backgroundColor));
+
+    // Test disabled chip.
+    await tester.pumpWidget(buildApp(enabled: false, selected: false));
+    await tester.pumpAndSettle();
+
+    // Disabled chip should have the provided disabledColor.
+    expect(getMaterialBox(tester), paints..rrect(color: disabledColor));
+
+    // Test enabled & selected chip.
+    await tester.pumpWidget(buildApp(enabled: true, selected: true));
+    await tester.pumpAndSettle();
+
+    // Enabled & selected chip should have the provided selectedColor.
+    expect(getMaterialBox(tester), paints..rrect(color: selectedColor));
+  });
+
+  group('Material 2', () {
+    // These tests are only relevant for Material 2. Once Material 2
+    // support is deprecated and the APIs are removed, these tests
+    // can be deleted.
+
+    testWidgets('M2 Chip defaults', (WidgetTester tester) async {
+      late TextTheme textTheme;
+
+      Widget buildFrame(Brightness brightness) {
+        return MaterialApp(
+          theme: ThemeData(brightness: brightness, useMaterial3: false),
+          home: Scaffold(
+            body: Center(
+              child: Builder(
+                builder: (BuildContext context) {
+                  textTheme = Theme.of(context).textTheme;
+                  return Chip(
+                    avatar: const CircleAvatar(child: Text('A')),
+                    label: const Text('Chip A'),
+                    onDeleted: () { },
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildFrame(Brightness.light));
+      expect(getMaterialBox(tester), paints..rrect()..circle(color: const Color(0xff1976d2)));
+      expect(tester.getSize(find.byType(Chip)), const Size(156.0, 48.0));
+      expect(getMaterial(tester).color, null);
+      expect(getMaterial(tester).elevation, 0);
+      expect(getMaterial(tester).shape, const StadiumBorder());
+      expect(getIconData(tester).color?.value, 0xffffffff);
+      expect(getIconData(tester).opacity, null);
+      expect(getIconData(tester).size, null);
+
+      TextStyle labelStyle = getLabelStyle(tester, 'Chip A').style;
+      expect(labelStyle.color?.value, 0xde000000);
+      expect(labelStyle.fontFamily, textTheme.bodyLarge?.fontFamily);
+      expect(labelStyle.fontFamilyFallback, textTheme.bodyLarge?.fontFamilyFallback);
+      expect(labelStyle.fontFeatures, textTheme.bodyLarge?.fontFeatures);
+      expect(labelStyle.fontSize, textTheme.bodyLarge?.fontSize);
+      expect(labelStyle.fontStyle, textTheme.bodyLarge?.fontStyle);
+      expect(labelStyle.fontWeight, textTheme.bodyLarge?.fontWeight);
+      expect(labelStyle.height, textTheme.bodyLarge?.height);
+      expect(labelStyle.inherit, textTheme.bodyLarge?.inherit);
+      expect(labelStyle.leadingDistribution, textTheme.bodyLarge?.leadingDistribution);
+      expect(labelStyle.letterSpacing, textTheme.bodyLarge?.letterSpacing);
+      expect(labelStyle.overflow, textTheme.bodyLarge?.overflow);
+      expect(labelStyle.textBaseline, textTheme.bodyLarge?.textBaseline);
+      expect(labelStyle.wordSpacing, textTheme.bodyLarge?.wordSpacing);
+
+      await tester.pumpWidget(buildFrame(Brightness.dark));
+      await tester.pumpAndSettle(); // Theme transition animation
+      expect(getMaterialBox(tester), paints..rrect(color: const Color(0x1fffffff)));
+      expect(tester.getSize(find.byType(Chip)), const Size(156.0, 48.0));
+      expect(getMaterial(tester).color, null);
+      expect(getMaterial(tester).elevation, 0);
+      expect(getMaterial(tester).shape, const StadiumBorder());
+      expect(getIconData(tester).color?.value, 0xffffffff);
+      expect(getIconData(tester).opacity, null);
+      expect(getIconData(tester).size, null);
+
+      labelStyle = getLabelStyle(tester, 'Chip A').style;
+      expect(labelStyle.color?.value, 0xdeffffff);
+      expect(labelStyle.fontFamily, textTheme.bodyLarge?.fontFamily);
+      expect(labelStyle.fontFamilyFallback, textTheme.bodyLarge?.fontFamilyFallback);
+      expect(labelStyle.fontFeatures, textTheme.bodyLarge?.fontFeatures);
+      expect(labelStyle.fontSize, textTheme.bodyLarge?.fontSize);
+      expect(labelStyle.fontStyle, textTheme.bodyLarge?.fontStyle);
+      expect(labelStyle.fontWeight, textTheme.bodyLarge?.fontWeight);
+      expect(labelStyle.height, textTheme.bodyLarge?.height);
+      expect(labelStyle.inherit, textTheme.bodyLarge?.inherit);
+      expect(labelStyle.leadingDistribution, textTheme.bodyLarge?.leadingDistribution);
+      expect(labelStyle.letterSpacing, textTheme.bodyLarge?.letterSpacing);
+      expect(labelStyle.overflow, textTheme.bodyLarge?.overflow);
+      expect(labelStyle.textBaseline, textTheme.bodyLarge?.textBaseline);
+      expect(labelStyle.wordSpacing, textTheme.bodyLarge?.wordSpacing);
+    });
+
+    testWidgets('Chip uses the right theme colors for the right components', (WidgetTester tester) async {
+      final ThemeData themeData = ThemeData(
+        platform: TargetPlatform.android,
+        primarySwatch: Colors.blue,
+        useMaterial3: false,
+      );
+      final ChipThemeData defaultChipTheme = ChipThemeData.fromDefaults(
+        brightness: themeData.brightness,
+        secondaryColor: Colors.blue,
+        labelStyle: themeData.textTheme.bodyLarge!,
+      );
+      bool value = false;
+      Widget buildApp({
+        ChipThemeData? chipTheme,
+        Widget? avatar,
+        Widget? deleteIcon,
+        bool isSelectable = true,
+        bool isPressable = false,
+        bool isDeletable = true,
+        bool showCheckmark = true,
+      }) {
+        chipTheme ??= defaultChipTheme;
+        return wrapForChip(
+          child: Theme(
+            data: themeData,
+            child: ChipTheme(
+              data: chipTheme,
+              child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+                return RawChip(
+                  showCheckmark: showCheckmark,
+                  onDeleted: isDeletable ? () { } : null,
+                  avatar: avatar,
+                  deleteIcon: deleteIcon,
+                  isEnabled: isSelectable || isPressable,
+                  shape: chipTheme?.shape,
+                  selected: isSelectable && value,
+                  label: Text('$value'),
+                  onSelected: isSelectable
+                    ? (bool newValue) {
+                        setState(() {
+                          value = newValue;
+                        });
+                      }
+                    : null,
+                  onPressed: isPressable
+                    ? () {
+                        setState(() {
+                          value = true;
+                        });
+                      }
+                    : null,
+                );
+              }),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildApp());
+
+      RenderBox materialBox = getMaterialBox(tester);
+      IconThemeData iconData = getIconData(tester);
+      DefaultTextStyle labelStyle = getLabelStyle(tester, 'false');
+
+      // Check default theme for enabled chip.
+      expect(materialBox, paints..rrect(color: defaultChipTheme.backgroundColor));
+      expect(iconData.color, equals(const Color(0xde000000)));
+      expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
+
+      // Check default theme for disabled chip.
+      await tester.pumpWidget(buildApp(isSelectable: false));
+      await tester.pumpAndSettle();
+      materialBox = getMaterialBox(tester);
+      labelStyle = getLabelStyle(tester, 'false');
+      expect(materialBox, paints..rrect(color: defaultChipTheme.disabledColor));
+      expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
+
+      // Check default theme for enabled and selected chip.
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(RawChip));
+      await tester.pumpAndSettle();
+      materialBox = getMaterialBox(tester);
+      expect(materialBox, paints..rrect(color: defaultChipTheme.selectedColor));
+
+      // Check default theme for disabled and selected chip.
+      await tester.pumpWidget(buildApp(isSelectable: false));
+      await tester.pumpAndSettle();
+      materialBox = getMaterialBox(tester);
+      labelStyle = getLabelStyle(tester, 'true');
+      expect(materialBox, paints..rrect(color: defaultChipTheme.disabledColor));
+      expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
+
+      // Enable the chip again.
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+      // Tap to unselect the chip.
+      await tester.tap(find.byType(RawChip));
+      await tester.pumpAndSettle();
+
+      // Apply a custom theme.
+      const Color customColor1 = Color(0xcafefeed);
+      const Color customColor2 = Color(0xdeadbeef);
+      const Color customColor3 = Color(0xbeefcafe);
+      const Color customColor4 = Color(0xaddedabe);
+      final ChipThemeData customTheme = defaultChipTheme.copyWith(
+        brightness: Brightness.dark,
+        backgroundColor: customColor1,
+        disabledColor: customColor2,
+        selectedColor: customColor3,
+        deleteIconColor: customColor4,
+      );
+      await tester.pumpWidget(buildApp(chipTheme: customTheme));
+      await tester.pumpAndSettle();
+      materialBox = getMaterialBox(tester);
+      iconData = getIconData(tester);
+      labelStyle = getLabelStyle(tester, 'false');
+
+      // Check custom theme for enabled chip.
+      expect(materialBox, paints..rrect(color: customTheme.backgroundColor));
+      expect(iconData.color, equals(customTheme.deleteIconColor));
+      expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
+
+      // Check custom theme with disabled widget.
+      await tester.pumpWidget(buildApp(
+        chipTheme: customTheme,
+        isSelectable: false,
+      ));
+      await tester.pumpAndSettle();
+      materialBox = getMaterialBox(tester);
+      labelStyle = getLabelStyle(tester, 'false');
+      expect(materialBox, paints..rrect(color: customTheme.disabledColor));
+      expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
+
+      // Check custom theme for enabled and selected chip.
+      await tester.pumpWidget(buildApp(chipTheme: customTheme));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(RawChip));
+      await tester.pumpAndSettle();
+      materialBox = getMaterialBox(tester);
+      expect(materialBox, paints..rrect(color: customTheme.selectedColor));
+
+      // Check custom theme for disabled and selected chip.
+      await tester.pumpWidget(buildApp(
+        chipTheme: customTheme,
+        isSelectable: false,
+      ));
+      await tester.pumpAndSettle();
+      materialBox = getMaterialBox(tester);
+      labelStyle = getLabelStyle(tester, 'true');
+      expect(materialBox, paints..rrect(color: customTheme.disabledColor));
+      expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
+    });
   });
 }
 

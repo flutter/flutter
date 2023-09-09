@@ -289,8 +289,9 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
         builder.addText('\uFFFD');
       }
     }
+    final List<InlineSpan>? children = this.children;
     if (children != null) {
-      for (final InlineSpan child in children!) {
+      for (final InlineSpan child in children) {
         child.build(
           builder,
           textScaleFactor: textScaleFactor,
@@ -310,14 +311,26 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   /// returns false, then the walk will end.
   @override
   bool visitChildren(InlineSpanVisitor visitor) {
-    if (text != null) {
-      if (!visitor(this)) {
-        return false;
+    if (text != null && !visitor(this)) {
+      return false;
+    }
+    final List<InlineSpan>? children = this.children;
+    if (children != null) {
+      for (final InlineSpan child in children) {
+        if (!child.visitChildren(visitor)) {
+          return false;
+        }
       }
     }
+    return true;
+  }
+
+  @override
+  bool visitDirectChildren(InlineSpanVisitor visitor) {
+    final List<InlineSpan>? children = this.children;
     if (children != null) {
-      for (final InlineSpan child in children!) {
-        if (!child.visitChildren(visitor)) {
+      for (final InlineSpan child in children) {
+        if (!visitor(child)) {
           return false;
         }
       }
@@ -389,8 +402,9 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
         recognizer: recognizer,
       ));
     }
+    final List<InlineSpan>? children = this.children;
     if (children != null) {
-      for (final InlineSpan child in children!) {
+      for (final InlineSpan child in children) {
         if (child is TextSpan) {
           child.computeSemanticsInformation(
             collector,
@@ -426,10 +440,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   /// Any [GestureRecognizer]s are added to `semanticsElements`. Null is added to
   /// `semanticsElements` for [PlaceholderSpan]s.
   void describeSemantics(Accumulator offset, List<int> semanticsOffsets, List<dynamic> semanticsElements) {
-    if (
-      recognizer != null &&
-      (recognizer is TapGestureRecognizer || recognizer is LongPressGestureRecognizer)
-    ) {
+    if (recognizer is TapGestureRecognizer || recognizer is LongPressGestureRecognizer) {
       final int length = semanticsLabel?.length ?? text!.length;
       semanticsOffsets.add(offset.value);
       semanticsOffsets.add(offset.value + length);
@@ -573,11 +584,8 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    if (children == null) {
-      return const <DiagnosticsNode>[];
-    }
-    return children!.map<DiagnosticsNode>((InlineSpan child) {
+    return children?.map<DiagnosticsNode>((InlineSpan child) {
       return child.toDiagnosticsNode();
-    }).toList();
+    }).toList() ?? const <DiagnosticsNode>[];
   }
 }

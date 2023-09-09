@@ -6,8 +6,9 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:test_api/src/expect/async_matcher.dart'; // ignore: implementation_imports
-import 'package:test_api/test_api.dart'; // ignore: deprecated_member_use
+import 'package:matcher/expect.dart';
+import 'package:matcher/src/expect/async_matcher.dart'; // ignore: implementation_imports
+import 'package:test_api/hooks.dart' show TestFailure;
 
 import 'binding.dart';
 import 'finders.dart';
@@ -76,7 +77,7 @@ class MatchesGoldenFile extends AsyncMatcher {
       } on TestFailure catch (ex) {
         return ex.message;
       }
-    }, additionalTime: const Duration(seconds: 22));
+    });
     _renderElement(view, _findRepaintBoundary(e));
     return result;
   }
@@ -92,7 +93,7 @@ RenderObject _findRepaintBoundary(Element element) {
   assert(element.renderObject != null);
   RenderObject renderObject = element.renderObject!;
   while (!renderObject.isRepaintBoundary) {
-    renderObject = renderObject.parent! as RenderObject;
+    renderObject = renderObject.parent!;
   }
   return renderObject;
 }

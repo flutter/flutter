@@ -22,10 +22,15 @@ enum ST {
   number,
   identifier,
   empty,
+  colon,
+  date,
+  time,
   // Nonterminal Types
   message,
 
   placeholderExpr,
+
+  argumentExpr,
 
   pluralExpr,
   pluralParts,
@@ -34,6 +39,8 @@ enum ST {
   selectExpr,
   selectParts,
   selectPart,
+
+  argType,
 }
 
 // The grammar of the syntax.
@@ -43,6 +50,7 @@ Map<ST, List<List<ST>>> grammar = <ST, List<List<ST>>>{
     <ST>[ST.placeholderExpr, ST.message],
     <ST>[ST.pluralExpr, ST.message],
     <ST>[ST.selectExpr, ST.message],
+    <ST>[ST.argumentExpr, ST.message],
     <ST>[ST.empty],
   ],
   ST.placeholderExpr: <List<ST>>[
@@ -73,6 +81,13 @@ Map<ST, List<List<ST>>> grammar = <ST, List<List<ST>>>{
     <ST>[ST.number, ST.openBrace, ST.message, ST.closeBrace],
     <ST>[ST.other, ST.openBrace, ST.message, ST.closeBrace],
   ],
+  ST.argumentExpr: <List<ST>>[
+    <ST>[ST.openBrace, ST.identifier, ST.comma, ST.argType, ST.comma, ST.colon, ST.colon, ST.identifier, ST.closeBrace],
+  ],
+  ST.argType: <List<ST>>[
+    <ST>[ST.date],
+    <ST>[ST.time],
+  ],
 };
 
 class Node {
@@ -100,6 +115,8 @@ class Node {
   Node.selectKeyword(this.positionInMessage): type = ST.select, value = 'select';
   Node.otherKeyword(this.positionInMessage): type = ST.other, value = 'other';
   Node.empty(this.positionInMessage): type = ST.empty, value = '';
+  Node.dateKeyword(this.positionInMessage): type = ST.date, value = 'date';
+  Node.timeKeyword(this.positionInMessage): type = ST.time, value = 'time';
 
   String? value;
   late ST type;
@@ -131,7 +148,7 @@ $indent])''';
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes, hash_and_equals
   bool operator==(covariant Node other) {
-    if(value != other.value
+    if (value != other.value
       || type != other.type
       || positionInMessage != other.positionInMessage
       || children.length != other.children.length
@@ -162,6 +179,7 @@ RegExp numeric = RegExp(r'[0-9]+');
 RegExp alphanumeric = RegExp(r'[a-zA-Z0-9|_]+');
 RegExp comma = RegExp(r',');
 RegExp equalSign = RegExp(r'=');
+RegExp colon = RegExp(r':');
 
 // List of token matchers ordered by precedence
 Map<ST, RegExp> matchers = <ST, RegExp>{
@@ -169,6 +187,7 @@ Map<ST, RegExp> matchers = <ST, RegExp>{
   ST.number: numeric,
   ST.comma: comma,
   ST.equalSign: equalSign,
+  ST.colon: colon,
   ST.identifier: alphanumeric,
 };
 
@@ -305,13 +324,17 @@ class Parser {
         } else {
           // Handle keywords separately. Otherwise, lexer will assume parts of identifiers may be keywords.
           final String tokenStr = match.group(0)!;
-          switch(tokenStr) {
+          switch (tokenStr) {
             case 'plural':
               matchedType = ST.plural;
             case 'select':
               matchedType = ST.select;
             case 'other':
               matchedType = ST.other;
+            case 'date':
+              matchedType = ST.date;
+            case 'time':
+              matchedType = ST.time;
           }
           tokens.add(Node(matchedType!, startIndex, value: match.group(0)));
           startIndex = match.end;
@@ -351,12 +374,12 @@ class Parser {
       final ST symbol = parsingStack.removeLast();
 
       // Figure out which production rule to use.
-      switch(symbol) {
+      switch (symbol) {
         case ST.message:
           if (tokens.isEmpty) {
-            parseAndConstructNode(ST.message, 4);
+            parseAndConstructNode(ST.message, 5);
           } else if (tokens[0].type == ST.closeBrace) {
-            parseAndConstructNode(ST.message, 4);
+            parseAndConstructNode(ST.message, 5);
           } else if (tokens[0].type == ST.string) {
             parseAndConstructNode(ST.message, 0);
           } else if (tokens[0].type == ST.openBrace) {
@@ -364,6 +387,8 @@ class Parser {
               parseAndConstructNode(ST.message, 2);
             } else if (3 < tokens.length && tokens[3].type == ST.select) {
               parseAndConstructNode(ST.message, 3);
+            } else if (3 < tokens.length && (tokens[3].type == ST.date || tokens[3].type == ST.time)) {
+              parseAndConstructNode(ST.message, 4);
             } else {
               parseAndConstructNode(ST.message, 1);
             }
@@ -373,6 +398,16 @@ class Parser {
           }
         case ST.placeholderExpr:
           parseAndConstructNode(ST.placeholderExpr, 0);
+        case ST.argumentExpr:
+          parseAndConstructNode(ST.argumentExpr, 0);
+        case ST.argType:
+          if (tokens.isNotEmpty && tokens[0].type == ST.date) {
+            parseAndConstructNode(ST.argType, 0);
+          } else if (tokens.isNotEmpty && tokens[0].type == ST.time) {
+            parseAndConstructNode(ST.argType, 1);
+          } else {
+            throw L10nException('ICU Syntax Error. Found unknown argument type.');
+          }
         case ST.pluralExpr:
           parseAndConstructNode(ST.pluralExpr, 0);
         case ST.pluralParts:
@@ -530,7 +565,7 @@ class Parser {
   // plural parts and select parts.
   void checkExtraRules(Node syntaxTree) {
     final List<Node> children = syntaxTree.children;
-    switch(syntaxTree.type) {
+    switch (syntaxTree.type) {
       case ST.pluralParts:
         // Must have an "other" case.
         if (children.every((Node node) => node.children[0].type != ST.other)) {

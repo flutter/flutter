@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
@@ -266,6 +268,84 @@ void main() {
     expect(tester.binding.transientCallbackCount, greaterThan(0));
   });
 
+  testWidgets('Floating action button shrinks when bottom sheet becomes dominant', (WidgetTester tester) async {
+    final DraggableScrollableController draggableController = DraggableScrollableController();
+    const double kBottomSheetDominatesPercentage = 0.3;
+
+    await tester.pumpWidget(MaterialApp(home: Scaffold(
+      floatingActionButton: const FloatingActionButton(
+        key: Key('one'),
+        onPressed: null,
+        child: Text('1'),
+      ),
+      bottomSheet: DraggableScrollableSheet(
+        expand: false,
+        controller: draggableController,
+        builder: (BuildContext context, ScrollController scrollController) {
+          return SingleChildScrollView(
+            controller: scrollController,
+            child: const SizedBox(),
+          );
+        },
+      ),
+    )));
+
+    double getScale() => tester.firstWidget<ScaleTransition>(find.byType(ScaleTransition)).scale.value;
+
+    for (double i = 0, extent = i / 10; i <= 10; i++, extent = i / 10) {
+      draggableController.jumpTo(extent);
+
+      final double extentRemaining = 1.0 - extent;
+      if (extentRemaining < kBottomSheetDominatesPercentage) {
+        final double visValue = extentRemaining * kBottomSheetDominatesPercentage * 10;
+        // since FAB uses easeIn curve, we're testing this by using the fact that
+        // easeIn curve is always less than or equal to x=y curve.
+        expect(getScale(), lessThanOrEqualTo(visValue));
+      } else {
+        expect(getScale(), equals(1.0));
+      }
+    }
+  });
+
+  testWidgets('Scaffold shows scrim when bottom sheet becomes dominant', (WidgetTester tester) async {
+    final DraggableScrollableController draggableController = DraggableScrollableController();
+    const double kBottomSheetDominatesPercentage = 0.3;
+    const double kMinBottomSheetScrimOpacity = 0.1;
+    const double kMaxBottomSheetScrimOpacity = 0.6;
+
+    await tester.pumpWidget(MaterialApp(home: Scaffold(
+      bottomSheet: DraggableScrollableSheet(
+        expand: false,
+        controller: draggableController,
+        builder: (BuildContext context, ScrollController scrollController) {
+          return SingleChildScrollView(
+            controller: scrollController,
+            child: const SizedBox(),
+          );
+        },
+      ),
+    )));
+
+    Finder findModalBarrier() => find.descendant(of: find.byType(Scaffold), matching: find.byType(ModalBarrier));
+    double getOpacity() => tester.firstWidget<ModalBarrier>(findModalBarrier()).color!.opacity;
+    double getExpectedOpacity(double visValue) => math.max(kMinBottomSheetScrimOpacity, kMaxBottomSheetScrimOpacity - visValue);
+
+    for (double i = 0, extent = i / 10; i <= 10; i++, extent = i / 10) {
+      draggableController.jumpTo(extent);
+      await tester.pump();
+
+      final double extentRemaining = 1.0 - extent;
+      if (extentRemaining < kBottomSheetDominatesPercentage) {
+        final double visValue = extentRemaining * kBottomSheetDominatesPercentage * 10;
+
+        expect(findModalBarrier(), findsOneWidget);
+        expect(getOpacity(), moreOrLessEquals(getExpectedOpacity(visValue), epsilon: 0.02));
+      } else {
+        expect(findModalBarrier(), findsNothing);
+      }
+    }
+  });
+
   testWidgets('Floating action button directionality', (WidgetTester tester) async {
     Widget build(TextDirection textDirection) {
       return Directionality(
@@ -501,7 +581,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.android),
+        theme: ThemeData(platform: TargetPlatform.android, useMaterial3: false),
         home: Scaffold(
           appBar: AppBar(
             title: const Text('Title'),
@@ -666,6 +746,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/pull/92039
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: MediaQuery(
           data: const MediaQueryData(
             // Representing a navigational notch at the bottom of the screen
@@ -911,9 +992,9 @@ void main() {
       late double mediaQueryBottom;
 
       Widget buildFrame({ required bool extendBody, bool? resizeToAvoidBottomInset, double viewInsetBottom = 0.0 }) {
-        return Directionality(
-          textDirection: TextDirection.ltr,
-          child: MediaQuery(
+        return MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: MediaQuery(
             data: MediaQueryData(
               viewInsets: EdgeInsets.only(bottom: viewInsetBottom),
             ),
@@ -2421,7 +2502,7 @@ void main() {
         'MaterialApp at the top of your application widget tree.\n',
       ),
     );
-    expect(error.toStringDeep(), equalsIgnoringHashCodes(
+    expect(error.toStringDeep(), startsWith(
       'FlutterError\n'
       '   No ScaffoldMessenger widget found.\n'
       '   Builder widgets require a ScaffoldMessenger widget ancestor.\n'
@@ -2429,32 +2510,8 @@ void main() {
       '   ancestor was:\n'
       '     Builder\n'
       '   The ancestors of this widget were:\n'
-      '     KeyedSubtree-[GlobalKey#00000]\n'
-      '     _BodyBuilder\n'
-      '     MediaQuery\n'
-      '     LayoutId-[<_ScaffoldSlot.body>]\n'
-      '     CustomMultiChildLayout\n'
-      '     _ActionsScope\n'
-      '     Actions\n'
-      '     AnimatedBuilder\n'
-      '     DefaultTextStyle\n'
-      '     AnimatedDefaultTextStyle\n'
-      '     _InkFeatures-[GlobalKey#00000 ink renderer]\n'
-      '     NotificationListener<LayoutChangedNotification>\n'
-      '     PhysicalModel\n'
-      '     AnimatedPhysicalModel\n'
-      '     Material\n'
-      '     _ScrollNotificationObserverScope\n'
-      '     NotificationListener<ScrollNotification>\n'
-      '     NotificationListener<ScrollMetricsNotification>\n'
-      '     ScrollNotificationObserver\n'
-      '     _ScaffoldScope\n'
-      '     Scaffold\n'
-      '     Directionality\n'
-      '     MediaQuery\n'
-      '     _MediaQueryFromView\n'
-      '     _ViewScope\n'
-      '     View-[GlobalObjectKey TestFlutterView#e6136]\n'
+    ));
+    expect(error.toStringDeep(), endsWith(
       '     [root]\n'
       '   Typically, the ScaffoldMessenger widget is introduced by the\n'
       '   MaterialApp at the top of your application widget tree.\n',
@@ -2489,7 +2546,7 @@ void main() {
                             ),
                             TextButton(
                               onPressed: () {
-                                Navigator.pop(context, null);
+                                Navigator.pop(context);
                               },
                               child: const Text('Pop route'),
                             ),
@@ -2698,6 +2755,111 @@ void main() {
 
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('showBottomSheet removes scrim when draggable sheet is dismissed', (WidgetTester tester) async {
+    final DraggableScrollableController draggableController = DraggableScrollableController();
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
+    PersistentBottomSheetController<void>? sheetController;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body')),
+      ),
+    ));
+
+    sheetController = scaffoldKey.currentState!.showBottomSheet<void>((_) {
+      return DraggableScrollableSheet(
+        expand: false,
+        controller: draggableController,
+        builder: (BuildContext context, ScrollController scrollController) {
+          return SingleChildScrollView(
+            controller: scrollController,
+            child: const Placeholder(),
+          );
+        },
+      );
+    });
+
+    Finder findModalBarrier() => find.descendant(of: find.byType(Scaffold), matching: find.byType(ModalBarrier));
+
+    await tester.pump();
+    expect(find.byType(BottomSheet), findsOneWidget);
+
+    // The scrim is not present yet.
+    expect(findModalBarrier(), findsNothing);
+
+    // Expand the sheet to 80% of parent height to show the scrim.
+    draggableController.jumpTo(0.8);
+    await tester.pump();
+    expect(findModalBarrier(), findsOneWidget);
+
+    // Dismiss the sheet.
+    sheetController.close();
+    await tester.pumpAndSettle();
+
+    // The scrim should be gone.
+    expect(findModalBarrier(), findsNothing);
+  });
+
+  testWidgets("Closing bottom sheet & removing FAB at the same time doesn't throw assertion", (WidgetTester tester) async {
+      final Key bottomSheetKey = UniqueKey();
+      PersistentBottomSheetController<void>? controller;
+      bool show = true;
+
+      await tester.pumpWidget(StatefulBuilder(
+        builder: (_, StateSetter setState) => MaterialApp(
+          home: Scaffold(
+            body: Center(
+            child: Builder(
+              builder: (BuildContext context) => ElevatedButton(
+                onPressed: () {
+                  if (controller == null) {
+                    controller = showBottomSheet(
+                      context: context,
+                      builder: (_) => Container(
+                        key: bottomSheetKey,
+                        height: 200,
+                      ),
+                    );
+                  } else {
+                    controller!.close();
+                    controller = null;
+                  }
+                },
+                child: const Text('BottomSheet'),
+              )),
+            ),
+            floatingActionButton: show
+              ? FloatingActionButton(onPressed: () => setState(() => show = false))
+              : null,
+          ),
+        ),
+      ));
+
+      // Show bottom sheet.
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+
+      // Bottom sheet and FAB are visible.
+      expect(find.byType(FloatingActionButton), findsOneWidget);
+      expect(find.byKey(bottomSheetKey), findsOneWidget);
+
+      // Close bottom sheet while removing FAB.
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pump(); // start animation
+      await tester.tap(find.byType(ElevatedButton));
+      // Let the animation finish.
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+
+      // Bottom sheet and FAB are gone.
+      expect(find.byType(FloatingActionButton), findsNothing);
+      expect(find.byKey(bottomSheetKey), findsNothing);
+
+      // No exception is thrown.
+      expect(tester.takeException(), isNull);
+  });
+
 }
 
 class _GeometryListener extends StatefulWidget {

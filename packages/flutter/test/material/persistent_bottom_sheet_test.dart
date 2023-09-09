@@ -185,6 +185,44 @@ void main() {
     expect(find.text('Two'), findsNothing);
   });
 
+  testWidgets('Verify DraggableScrollableSheet.shouldCloseOnMinExtent == false prevents dismissal', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body')),
+      ),
+    ));
+
+    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+      return DraggableScrollableSheet(
+        expand: false,
+        shouldCloseOnMinExtent: false,
+        builder: (_, ScrollController controller) {
+          return ListView(
+            controller: controller,
+            shrinkWrap: true,
+            children: const <Widget>[
+              SizedBox(height: 100.0, child: Text('One')),
+              SizedBox(height: 100.0, child: Text('Two')),
+              SizedBox(height: 100.0, child: Text('Three')),
+            ],
+          );
+        },
+      );
+    });
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Two'), findsOneWidget);
+
+    await tester.drag(find.text('Two'), const Offset(0.0, 400.0));
+    await tester.pumpAndSettle();
+
+     expect(find.text('Two'), findsOneWidget);
+  });
+
   testWidgets('Verify that a BottomSheet animates non-linearly', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -496,6 +534,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: const Placeholder(),
           bottomSheet: Container(

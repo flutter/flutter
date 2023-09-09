@@ -211,6 +211,15 @@ abstract class SearchDelegate<T> {
   ///
   PreferredSizeWidget? buildBottom(BuildContext context) => null;
 
+  /// Widget to display a flexible space in the [AppBar].
+  ///
+  /// Returns null by default, i.e. a flexible space widget is not included.
+  ///
+  /// See also:
+  ///
+  ///  * [AppBar.flexibleSpace], the intended use for the return value of this method.
+  Widget? buildFlexibleSpace(BuildContext context) => null;
+
   /// The theme used to configure the search page.
   ///
   /// The returned [ThemeData] will be used to wrap the entire search page,
@@ -538,7 +547,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     final String searchFieldLabel = widget.delegate.searchFieldLabel
       ?? MaterialLocalizations.of(context).searchFieldLabel;
     Widget? body;
-    switch(widget.delegate._currentBody) {
+    switch (widget.delegate._currentBody) {
       case _SearchBody.suggestions:
         body = KeyedSubtree(
           key: const ValueKey<_SearchBody>(_SearchBody.suggestions),
@@ -581,11 +590,10 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
               style: widget.delegate.searchFieldStyle ?? theme.textTheme.titleLarge,
               textInputAction: widget.delegate.textInputAction,
               keyboardType: widget.delegate.keyboardType,
-              onSubmitted: (String _) {
-                widget.delegate.showResults(context);
-              },
+              onSubmitted: (String _) => widget.delegate.showResults(context),
               decoration: InputDecoration(hintText: searchFieldLabel),
             ),
+            flexibleSpace: widget.delegate.buildFlexibleSpace(context),
             actions: widget.delegate.buildActions(context),
             bottom: widget.delegate.buildBottom(context),
           ),

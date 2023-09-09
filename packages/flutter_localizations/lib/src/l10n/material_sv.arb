@@ -25,6 +25,7 @@
   "continueButtonLabel": "Fortsätt",
   "copyButtonLabel": "Kopiera",
   "cutButtonLabel": "Klipp ut",
+  "scanTextButtonLabel": "Skanna text",
   "okButtonLabel": "OK",
   "pasteButtonLabel": "Klistra in",
   "selectAllButtonLabel": "Markera allt",
@@ -134,5 +135,11 @@
   "scrimLabel": "Scrim",
   "bottomSheetLabel": "Ark på nedre delen av skärmen",
   "scrimOnTapHint": "Stäng $modalRouteContentName",
-  "keyboardKeyShift": "Skift"
+  "keyboardKeyShift": "Skift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

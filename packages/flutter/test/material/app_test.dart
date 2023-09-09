@@ -995,6 +995,7 @@ void main() {
     const Color secondaryColor = Color(0xff008800);
     final Color glowSecondaryColor = secondaryColor.withOpacity(0.05);
     final ThemeData theme = ThemeData.from(
+      useMaterial3: false,
       colorScheme: const ColorScheme.light().copyWith(secondary: secondaryColor),
     );
     await tester.pumpWidget(
@@ -1085,17 +1086,17 @@ void main() {
 
   testWidgets('MaterialApp.router works', (WidgetTester tester) async {
     final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
-      initialRouteInformation: const RouteInformation(
-        location: 'initial',
+      initialRouteInformation: RouteInformation(
+        uri: Uri.parse('initial'),
       ),
     );
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
-        return Text(information.location!);
+        return Text(information.uri.toString());
       },
       onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
-        delegate.routeInformation = const RouteInformation(
-          location: 'popped',
+        delegate.routeInformation = RouteInformation(
+          uri: Uri.parse('popped'),
         );
         return route.didPop(result);
       },
@@ -1109,7 +1110,7 @@ void main() {
 
     // Simulate android back button intent.
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
   });
@@ -1117,16 +1118,16 @@ void main() {
   testWidgets('MaterialApp.router route information parser is optional', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
-        return Text(information.location!);
+        return Text(information.uri.toString());
       },
       onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
-        delegate.routeInformation = const RouteInformation(
-          location: 'popped',
+        delegate.routeInformation = RouteInformation(
+          uri: Uri.parse('popped'),
         );
         return route.didPop(result);
       },
     );
-    delegate.routeInformation = const RouteInformation(location: 'initial');
+    delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
     await tester.pumpWidget(MaterialApp.router(
       routerDelegate: delegate,
     ));
@@ -1134,7 +1135,7 @@ void main() {
 
     // Simulate android back button intent.
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
   });
@@ -1142,19 +1143,19 @@ void main() {
   testWidgets('MaterialApp.router throw if route information provider is provided but no route information parser', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
-        return Text(information.location!);
+        return Text(information.uri.toString());
       },
       onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
-        delegate.routeInformation = const RouteInformation(
-          location: 'popped',
+        delegate.routeInformation = RouteInformation(
+          uri: Uri.parse('popped'),
         );
         return route.didPop(result);
       },
     );
-    delegate.routeInformation = const RouteInformation(location: 'initial');
+    delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
     final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
-      initialRouteInformation: const RouteInformation(
-        location: 'initial',
+      initialRouteInformation: RouteInformation(
+        uri: Uri.parse('initial'),
       ),
     );
     await tester.pumpWidget(MaterialApp.router(
@@ -1167,16 +1168,16 @@ void main() {
   testWidgets('MaterialApp.router throw if route configuration is provided along with other delegate', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
-        return Text(information.location!);
+        return Text(information.uri.toString());
       },
       onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
-        delegate.routeInformation = const RouteInformation(
-          location: 'popped',
+        delegate.routeInformation = RouteInformation(
+          uri: Uri.parse('popped'),
         );
         return route.didPop(result);
       },
     );
-    delegate.routeInformation = const RouteInformation(location: 'initial');
+    delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
     final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(routerDelegate: delegate);
     await tester.pumpWidget(MaterialApp.router(
       routerDelegate: delegate,
@@ -1188,18 +1189,18 @@ void main() {
   testWidgets('MaterialApp.router router config works', (WidgetTester tester) async {
     final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(
         routeInformationProvider: PlatformRouteInformationProvider(
-          initialRouteInformation: const RouteInformation(
-            location: 'initial',
+          initialRouteInformation: RouteInformation(
+            uri: Uri.parse('initial'),
           ),
         ),
         routeInformationParser: SimpleRouteInformationParser(),
         routerDelegate: SimpleNavigatorRouterDelegate(
           builder: (BuildContext context, RouteInformation information) {
-            return Text(information.location!);
+            return Text(information.uri.toString());
           },
           onPopPage: (Route<void> route, void result, SimpleNavigatorRouterDelegate delegate) {
-            delegate.routeInformation = const RouteInformation(
-              location: 'popped',
+            delegate.routeInformation = RouteInformation(
+              uri: Uri.parse('popped'),
             );
             return route.didPop(result);
           },
@@ -1213,7 +1214,7 @@ void main() {
 
     // Simulate android back button intent.
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
   });
@@ -1264,6 +1265,7 @@ void main() {
 
   testWidgets('ScrollBehavior default android overscroll indicator', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
       scrollBehavior: const MaterialScrollBehavior(),
       home: ListView(
         children: const <Widget>[
@@ -1476,7 +1478,7 @@ void main() {
     );
     final Widget child = Container();
 
-    switch(defaultTargetPlatform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
@@ -1522,7 +1524,7 @@ void main() {
     );
     final Widget child = Container();
 
-    switch(defaultTargetPlatform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
@@ -1601,7 +1603,7 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
           child: Text('base'),
         ),
         MaterialPage<void>(
-          key: ValueKey<String>(routeInformation.location!),
+          key: ValueKey<String>(routeInformation.uri.toString()),
           child: builder(context, routeInformation),
         ),
       ],

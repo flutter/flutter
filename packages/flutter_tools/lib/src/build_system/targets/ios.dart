@@ -9,8 +9,10 @@ import '../../base/build.dart';
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
+import '../../base/process.dart';
 import '../../build_info.dart';
 import '../../globals.dart' as globals;
+import '../../ios/mac.dart';
 import '../../macos/xcode.dart';
 import '../../project.dart';
 import '../../reporting/reporting.dart';
@@ -56,7 +58,7 @@ abstract class AotAssemblyBase extends Target {
     }
 
     final List<String> extraGenSnapshotOptions = decodeCommaSeparated(environment.defines, kExtraGenSnapshotOptions);
-    final BuildMode buildMode = getBuildModeForName(environmentBuildMode);
+    final BuildMode buildMode = BuildMode.fromCliName(environmentBuildMode);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environmentTargetPlatform);
     final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
     final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';
@@ -86,10 +88,10 @@ abstract class AotAssemblyBase extends Target {
       if (codeSizeDirectory != null) {
         final File codeSizeFile = environment.fileSystem
           .directory(codeSizeDirectory)
-          .childFile('snapshot.${getNameForDarwinArch(darwinArch)}.json');
+          .childFile('snapshot.${darwinArch.name}.json');
         final File precompilerTraceFile = environment.fileSystem
           .directory(codeSizeDirectory)
-          .childFile('trace.${getNameForDarwinArch(darwinArch)}.json');
+          .childFile('trace.${darwinArch.name}.json');
         archExtraGenSnapshotOptions.add('--write-v8-snapshot-profile-to=${codeSizeFile.path}');
         archExtraGenSnapshotOptions.add('--trace-precompiler-to=${precompilerTraceFile.path}');
       }
@@ -97,7 +99,7 @@ abstract class AotAssemblyBase extends Target {
         platform: targetPlatform,
         buildMode: buildMode,
         mainPath: environment.buildDir.childFile('app.dill').path,
-        outputPath: environment.fileSystem.path.join(buildOutputPath, getNameForDarwinArch(darwinArch)),
+        outputPath: environment.fileSystem.path.join(buildOutputPath, darwinArch.name),
         darwinArch: darwinArch,
         sdkRoot: sdkRoot,
         quiet: true,
@@ -296,7 +298,7 @@ abstract class UnpackIOS extends Target {
     if (buildMode == BuildMode.release) {
       _bitcodeStripFramework(environment, frameworkBinaryPath);
     }
-    _signFramework(environment, frameworkBinaryPath, buildMode);
+    await _signFramework(environment, frameworkBinary, buildMode);
   }
 
   void _copyFramework(Environment environment, String sdkRoot) {
@@ -461,9 +463,9 @@ abstract class IosAssetBundle extends Target {
     if (environmentBuildMode == null) {
       throw MissingDefineException(kBuildMode, name);
     }
-    final BuildMode buildMode = getBuildModeForName(environmentBuildMode);
+    final BuildMode buildMode = BuildMode.fromCliName(environmentBuildMode);
     final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
-    final String frameworkBinaryPath = frameworkDirectory.childFile('App').path;
+    final File frameworkBinary = frameworkDirectory.childFile('App');
     final Directory assetDirectory = frameworkDirectory.childDirectory('flutter_assets');
     frameworkDirectory.createSync(recursive: true);
     assetDirectory.createSync();
@@ -474,7 +476,7 @@ abstract class IosAssetBundle extends Target {
       environment.buildDir
         .childDirectory('App.framework')
         .childFile('App')
-        .copySync(frameworkBinaryPath);
+        .copySync(frameworkBinary.path);
 
       final String vmSnapshotData = environment.artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug);
       final String isolateSnapshotData = environment.artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug);
@@ -486,7 +488,7 @@ abstract class IosAssetBundle extends Target {
           .copySync(assetDirectory.childFile('isolate_snapshot_data').path);
     } else {
       environment.buildDir.childDirectory('App.framework').childFile('App')
-        .copySync(frameworkBinaryPath);
+        .copySync(frameworkBinary.path);
     }
 
     // Copy the dSYM
@@ -524,11 +526,7 @@ abstract class IosAssetBundle extends Target {
         flutterProject.ios.appFrameworkInfoPlist,
       ],
     );
-    final DepfileService depfileService = DepfileService(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-    );
-    depfileService.writeToFile(
+    environment.depFileService.writeToFile(
       assetDepfile,
       environment.buildDir.childFile('flutter_assets.d'),
     );
@@ -539,7 +537,7 @@ abstract class IosAssetBundle extends Target {
       .childDirectory('App.framework')
       .childFile('Info.plist').path);
 
-    _signFramework(environment, frameworkBinaryPath, buildMode);
+    await _signFramework(environment, frameworkBinary, buildMode);
   }
 }
 
@@ -667,7 +665,7 @@ Future<void> _createStubAppFramework(File outputFile, Environment environment,
     await globals.xcode!.clang(<String>[
       '-x',
       'c',
-      for (String arch in iosArchNames ?? <String>{}) ...<String>['-arch', arch],
+      for (final String arch in iosArchNames ?? <String>{}) ...<String>['-arch', arch],
       stubSource.path,
       '-dynamiclib',
       // Keep version in sync with AOTSnapshotter flag
@@ -692,10 +690,16 @@ Future<void> _createStubAppFramework(File outputFile, Environment environment,
     }
   }
 
-  _signFramework(environment, outputFile.path, BuildMode.debug);
+  await _signFramework(environment, outputFile, BuildMode.debug);
 }
 
-void _signFramework(Environment environment, String binaryPath, BuildMode buildMode) {
+Future<void> _signFramework(Environment environment, File binary, BuildMode buildMode) async {
+  await removeFinderExtendedAttributes(
+    binary,
+    ProcessUtils(processManager: environment.processManager, logger: environment.logger),
+    environment.logger,
+  );
+
   String? codesignIdentity = environment.defines[kCodesignIdentity];
   if (codesignIdentity == null || codesignIdentity.isEmpty) {
     codesignIdentity = '-';
@@ -709,13 +713,13 @@ void _signFramework(Environment environment, String binaryPath, BuildMode buildM
       // Mimic Xcode's timestamp codesigning behavior on non-release binaries.
       '--timestamp=none',
     ],
-    binaryPath,
+    binary.path,
   ]);
   if (result.exitCode != 0) {
     final String stdout = (result.stdout as String).trim();
     final String stderr = (result.stderr as String).trim();
     final StringBuffer output = StringBuffer();
-    output.writeln('Failed to codesign $binaryPath with identity $codesignIdentity.');
+    output.writeln('Failed to codesign ${binary.path} with identity $codesignIdentity.');
     if (stdout.isNotEmpty) {
       output.writeln(stdout);
     }
