@@ -35,14 +35,6 @@ import 'theme.dart';
 // late int tabCount;
 // late TickerProvider tickerProvider;
 
-/// Signature for a widget builder that builds the [Material] widget used by a [Scaffold].
-///
-/// Use the given `scaffoldContent` when building the child of the [Material] widget.
-typedef MaterialBuilderCallback = Widget Function(
-  BuildContext context,
-  Widget scaffoldContent,
-);
-
 const FloatingActionButtonLocation _kDefaultFloatingActionButtonLocation = FloatingActionButtonLocation.endFloat;
 const FloatingActionButtonAnimator _kDefaultFloatingActionButtonAnimator = FloatingActionButtonAnimator.scaling;
 
@@ -1621,7 +1613,6 @@ class Scaffold extends StatefulWidget {
     this.drawerEnableOpenDragGesture = true,
     this.endDrawerEnableOpenDragGesture = true,
     this.restorationId,
-    this.materialBuilder,
   });
 
   /// If true, and [bottomNavigationBar] or [persistentFooterButtons]
@@ -1877,11 +1868,6 @@ class Scaffold extends StatefulWidget {
   ///  * [RestorationManager], which explains how state restoration works in
   ///    Flutter.
   final String? restorationId;
-
-  /// Builds the [Material] widget used by this widget.
-  ///
-  /// If null, then this widget builds its own material widget.
-  final MaterialBuilderCallback? materialBuilder;
 
   /// Finds the [ScaffoldState] from the closest instance of this class that
   /// encloses the given context.
@@ -3005,45 +2991,38 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     // extendBody locked when keyboard is open
     final bool extendBody = minInsets.bottom <= 0 && widget.extendBody;
 
-    final Widget child = AnimatedBuilder(
-      animation: _floatingActionButtonMoveController,
-      builder: (BuildContext context, Widget? child) {
-        return Actions(
-          actions: <Type, Action<Intent>>{
-            DismissIntent: _DismissDrawerAction(context),
-          },
-          child: CustomMultiChildLayout(
-            delegate: _ScaffoldLayout(
-              extendBody: extendBody,
-              extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
-              minInsets: minInsets,
-              minViewPadding: minViewPadding,
-              currentFloatingActionButtonLocation: _floatingActionButtonLocation!,
-              floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,
-              floatingActionButtonMotionAnimator: _floatingActionButtonAnimator,
-              geometryNotifier: _geometryNotifier,
-              previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation!,
-              textDirection: textDirection,
-              isSnackBarFloating: isSnackBarFloating,
-              extendBodyBehindMaterialBanner: extendBodyBehindMaterialBanner,
-              snackBarWidth: snackBarWidth,
-            ),
-            children: children,
-          ),
-        );
-      },
-    );
-
     return _ScaffoldScope(
       hasDrawer: hasDrawer,
       geometryNotifier: _geometryNotifier,
       child: ScrollNotificationObserver(
-        child: widget.materialBuilder != null
-          ? widget.materialBuilder!(context, child)
-          : Material(
-              color: widget.backgroundColor ?? themeData.scaffoldBackgroundColor,
-              child: child,
-            ),
+        child: Material(
+          color: widget.backgroundColor ?? themeData.scaffoldBackgroundColor,
+          child: AnimatedBuilder(animation: _floatingActionButtonMoveController, builder: (BuildContext context, Widget? child) {
+            return Actions(
+              actions: <Type, Action<Intent>>{
+                DismissIntent: _DismissDrawerAction(context),
+              },
+              child: CustomMultiChildLayout(
+                delegate: _ScaffoldLayout(
+                  extendBody: extendBody,
+                  extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
+                  minInsets: minInsets,
+                  minViewPadding: minViewPadding,
+                  currentFloatingActionButtonLocation: _floatingActionButtonLocation!,
+                  floatingActionButtonMoveAnimationProgress: _floatingActionButtonMoveController.value,
+                  floatingActionButtonMotionAnimator: _floatingActionButtonAnimator,
+                  geometryNotifier: _geometryNotifier,
+                  previousFloatingActionButtonLocation: _previousFloatingActionButtonLocation!,
+                  textDirection: textDirection,
+                  isSnackBarFloating: isSnackBarFloating,
+                  extendBodyBehindMaterialBanner: extendBodyBehindMaterialBanner,
+                  snackBarWidth: snackBarWidth,
+                ),
+                children: children,
+              ),
+            );
+          }),
+        ),
       ),
     );
   }
