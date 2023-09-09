@@ -1460,11 +1460,6 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///
 /// This class provides APIs for showing drawers and bottom sheets.
 ///
-/// This widget's internal [Material] widget will override any parent
-/// [DefaultTextStyle]. The [Material] widget's text style defaults to
-/// [TextTheme.bodyMedium]. To override this behavior, use [materialBuilder]
-/// and build a [Material] widget with a custom [TextStyle].
-///
 /// To display a persistent bottom sheet, obtain the
 /// [ScaffoldState] for the current [BuildContext] via [Scaffold.of] and use the
 /// [ScaffoldState.showBottomSheet] function.

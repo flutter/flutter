@@ -298,11 +298,6 @@ class Material extends StatefulWidget {
   final Color? surfaceTintColor;
 
   /// The typographical style to use for text within this material.
-  ///
-  /// The text style defined by this widget will override any parent [DefaultTextStyle].
-  ///
-  /// This value will default to [TextTheme.bodyMedium] from the nearest [Theme]
-  /// ancestor in the widget tree.
   final TextStyle? textStyle;
 
   /// Defines the material's shape as well its shadow.
