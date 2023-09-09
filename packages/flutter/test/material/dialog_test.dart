@@ -2816,6 +2816,64 @@ void main() {
     expect(okNode.hasFocus, false);
     expect(cancelNode.hasFocus, false);
   });
+
+  testWidgetsWithLeakTracking('Adaptive AlertDialog with Adaptive Alert Actions shows correct widget on each platform', (WidgetTester tester) async {
+    final AdaptiveAlertAction positionAlertAction = AdaptiveAlertAction(
+      onPressed: () {},
+      child: const Text('OK'),
+    );
+
+    final AdaptiveAlertAction negativeAlertAction = AdaptiveAlertAction(
+      onPressed: () {},
+      child: const Text('Cancel'),
+    );
+
+    final AlertDialog dialog = AlertDialog.adaptive(
+      content: Container(
+        height: 5000.0,
+        width: 300.0,
+        color: Colors.green[500],
+      ),
+      actions: <Widget>[
+        negativeAlertAction,
+        positionAlertAction,
+      ],
+    );
+
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+      await tester.pumpWidget(_buildAppWithDialog(dialog, theme: ThemeData(platform: platform)));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(CupertinoAlertDialog), findsOneWidget);
+      expect(find.byType(CupertinoDialogAction), findsOneWidget);
+      expect(find.byType(TextButton), findsNothing);
+      expect(find.text('OK'), findsOneWidget);
+      expect(find.text('Cancel'), findsOneWidget);
+
+      await tester.tapAt(const Offset(10.0, 10.0));
+      await tester.pumpAndSettle();
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.android, TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows ]) {
+      await tester.pumpWidget(_buildAppWithDialog(dialog, theme: ThemeData(platform: platform)));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(CupertinoAlertDialog), findsNothing);
+      expect(find.byType(CupertinoDialogAction), findsNothing);
+      expect(find.byType(TextButton), findsOneWidget);
+      expect(find.text('OK'), findsOneWidget);
+      expect(find.text('Cancel'), findsOneWidget);
+
+      await tester.tapAt(const Offset(10.0, 10.0));
+      await tester.pumpAndSettle();
+    }
+  });
 }
 
 class _RestorableDialogTestWidget extends StatelessWidget {

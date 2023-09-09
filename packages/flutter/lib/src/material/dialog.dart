@@ -13,6 +13,7 @@ import 'dialog_theme.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'text_button.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -948,6 +949,68 @@ class _AdaptiveAlertDialog extends AlertDialog {
         );
     }
     return super.build(context);
+  }
+}
+
+/// A widget representing an action button for an alert dialog.
+///
+/// The [AdaptiveAlertAction] class is a stateless widget used to create action buttons
+/// for alert dialogs or similar user interface components. It takes a [child] parameter
+/// to specify the button's content and an [onPressed] callback to define the action when
+/// the button is pressed.
+///
+/// Example usage:
+///
+/// ```dart
+/// AdaptiveAlertAction(
+///   child: Text('OK'),
+///   onPressed: () {
+///     // Define the action to be taken when the button is pressed.
+///     // For example, closing the dialog.
+///     Navigator.of(context).pop();
+///   },
+/// )
+/// ```
+///
+class AdaptiveAlertAction extends StatelessWidget {
+  /// Creates an [AdaptiveAlertAction] widget.
+  ///
+  /// The [child] parameter is required and represents the content of the action button.
+  ///
+  /// The [onPressed] parameter is required and defines the action to be taken when
+  /// the button is pressed.
+  ///
+  const AdaptiveAlertAction({
+    super.key,
+    required this.child,
+    required this.onPressed,
+  });
+
+  /// The content of the action button, typically a label or text.
+  final Widget child;
+
+  /// The callback function to be executed when the button is pressed.
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    switch (theme.platform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return TextButton(
+          onPressed: onPressed,
+          child: child,
+        );
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        return CupertinoDialogAction(
+          onPressed: onPressed,
+          child: child,
+        );
+    }
   }
 }
 
