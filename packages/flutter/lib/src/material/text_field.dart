@@ -317,6 +317,7 @@ class TextField extends StatefulWidget {
     this.canRequestFocus = true,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
+    this.canTapOutsideFocus = true,
   }) : assert(obscuringCharacter.length == 1),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
@@ -781,6 +782,9 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.undoHistory.controller}
   final UndoHistoryController? undoController;
 
+  /// Determine if  onTapOutside can be called when the text field is not focused.
+  final bool canTapOutsideFocus;
+
   static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
     return AdaptiveTextSelectionToolbar.editableText(
       editableTextState: editableTextState,
@@ -1147,6 +1151,21 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     });
   }
 
+  /// Handles the tap outside of the TextField.
+  ///
+  /// This method is called when a tap occurs outside of the TextField widget.
+  /// It checks if the TextField has focus and whether tapping outside is allowed
+  /// based on the [widget.canTapOutsideFocus] property. If both conditions are met,
+  /// it executes the [widget.onTapOutside] callback.
+  void _handleOnTapOutside() {
+    if (_effectiveFocusNode.hasFocus && widget.onTapOutside != null && !widget.canTapOutsideFocus) {
+      widget.onTapOutside!();
+    } else if (widget.canTapOutsideFocus) {
+      widget.onTapOutside!();
+    }
+  }
+
+
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
     final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
     if (willShowSelectionHandles != _showSelectionHandles) {
@@ -1408,7 +1427,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           onSubmitted: widget.onSubmitted,
           onAppPrivateCommand: widget.onAppPrivateCommand,
           onSelectionHandleTapped: _handleSelectionHandleTapped,
-          onTapOutside: widget.onTapOutside,
+          onTapOutside: _handleOnTapOutside(),
           inputFormatters: formatters,
           rendererIgnoresPointer: true,
           mouseCursor: MouseCursor.defer, // TextField will handle the cursor
