@@ -143,5 +143,6 @@
   "collapsedHint": "ဖြန့်ထားသည်",
   "menuDismissLabel": "မီနူးကိုပယ်ပါ",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

@@ -195,6 +195,63 @@ void main() {
       Logger: () => notifyingLogger,
     });
 
+    testUsingContext('printTrace should send daemon.logMessage event when notifyVerbose is enabled', () async {
+      daemon = Daemon(
+        daemonConnection,
+        notifyingLogger: notifyingLogger,
+      );
+      notifyingLogger.notifyVerbose = false;
+      globals.printTrace('daemon.logMessage test 1');
+      notifyingLogger.notifyVerbose = true;
+      globals.printTrace('daemon.logMessage test 2');
+      final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere((DaemonMessage message) {
+        return message.data['event'] == 'daemon.logMessage' && (message.data['params']! as Map<String, Object?>)['level'] == 'trace';
+      });
+      expect(response.data['id'], isNull);
+      expect(response.data['event'], 'daemon.logMessage');
+      final Map<String, String> logMessage = castStringKeyedMap(response.data['params'])!.cast<String, String>();
+      expect(logMessage['level'], 'trace');
+      expect(logMessage['message'], 'daemon.logMessage test 2');
+    }, overrides: <Type, Generator>{
+      Logger: () => notifyingLogger,
+    });
+
+    testUsingContext('daemon.setNotifyVerbose command should update the notify verbose status to true', () async {
+      daemon = Daemon(
+        daemonConnection,
+        notifyingLogger: notifyingLogger,
+      );
+      expect(notifyingLogger.notifyVerbose, false);
+
+      daemonStreams.inputs.add(DaemonMessage(<String, Object?>{
+        'id': 0,
+        'method': 'daemon.setNotifyVerbose',
+        'params': <String, Object?>{
+          'verbose': true,
+        },
+      }));
+      await daemonStreams.outputs.stream.firstWhere(_notEvent);
+      expect(notifyingLogger.notifyVerbose, true);
+    });
+
+    testUsingContext('daemon.setNotifyVerbose command should update the notify verbose status to false', () async {
+      daemon = Daemon(
+        daemonConnection,
+        notifyingLogger: notifyingLogger,
+      );
+      notifyingLogger.notifyVerbose = false;
+
+      daemonStreams.inputs.add(DaemonMessage(<String, Object?>{
+        'id': 0,
+        'method': 'daemon.setNotifyVerbose',
+        'params': <String, Object?>{
+          'verbose': false,
+        },
+      }));
+      await daemonStreams.outputs.stream.firstWhere(_notEvent);
+      expect(notifyingLogger.notifyVerbose, false);
+    });
+
     testUsingContext('daemon.shutdown command should stop daemon', () async {
       daemon = Daemon(
         daemonConnection,
@@ -751,6 +808,19 @@ void main() {
       final LogMessage message = await messageResult;
 
       expect(message.level, 'status');
+      expect(message.message, 'hello');
+      expect(bufferLogger.errorText, isEmpty);
+    });
+
+    testUsingContext('sends trace messages in notify verbose mode', () async {
+      final NotifyingLogger logger = NotifyingLogger(verbose: false, parent: bufferLogger, notifyVerbose: true);
+
+      final Future<LogMessage> messageResult = logger.onMessage.first;
+      logger.printTrace('hello');
+
+      final LogMessage message = await messageResult;
+
+      expect(message.level, 'trace');
       expect(message.message, 'hello');
       expect(bufferLogger.errorText, isEmpty);
     });

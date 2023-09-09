@@ -25,5 +25,6 @@
   "noSpellCheckReplacementsLabel": "Korvaavia sanoja ei löydy",
   "menuDismissLabel": "Hylkää valikko",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

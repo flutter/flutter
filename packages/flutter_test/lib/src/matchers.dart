@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:matcher/expect.dart';
 import 'package:matcher/src/expect/async_matcher.dart'; // ignore: implementation_imports
+import 'package:vector_math/vector_math_64.dart' show Matrix3;
 
 import '_matchers_io.dart' if (dart.library.html) '_matchers_web.dart' show MatchesGoldenFile, captureImage;
 import 'accessibility.dart';
@@ -345,8 +346,22 @@ Matcher rectMoreOrLessEquals(Rect value, { double epsilon = precisionErrorTolera
 ///
 ///  * [moreOrLessEquals], which is for [double]s.
 ///  * [offsetMoreOrLessEquals], which is for [Offset]s.
+///  * [matrix3MoreOrLessEquals], which is for [Matrix3]s.
 Matcher matrixMoreOrLessEquals(Matrix4 value, { double epsilon = precisionErrorTolerance }) {
   return _IsWithinDistance<Matrix4>(_matrixDistance, value, epsilon);
+}
+
+/// Asserts that two [Matrix3]s are equal, within some tolerated error.
+///
+/// {@macro flutter.flutter_test.moreOrLessEquals}
+///
+/// See also:
+///
+///  * [moreOrLessEquals], which is for [double]s.
+///  * [offsetMoreOrLessEquals], which is for [Offset]s.
+///  * [matrixMoreOrLessEquals], which is for [Matrix4]s.
+Matcher matrix3MoreOrLessEquals(Matrix3 value, { double epsilon = precisionErrorTolerance }) {
+  return _IsWithinDistance<Matrix3>(_matrix3Distance, value, epsilon);
 }
 
 /// Asserts that two [Offset]s are equal, within some tolerated error.
@@ -1438,6 +1453,14 @@ double _rectDistance(Rect a, Rect b) {
 double _matrixDistance(Matrix4 a, Matrix4 b) {
   double delta = 0.0;
   for (int i = 0; i < 16; i += 1) {
+    delta = math.max<double>((a[i] - b[i]).abs(), delta);
+  }
+  return delta;
+}
+
+double _matrix3Distance(Matrix3 a, Matrix3 b) {
+  double delta = 0.0;
+  for (int i = 0; i < 9; i += 1) {
     delta = math.max<double>((a[i] - b[i]).abs(), delta);
   }
   return delta;

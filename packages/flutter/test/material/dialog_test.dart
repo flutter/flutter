@@ -9,8 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 
 MaterialApp _buildAppWithDialog(
@@ -112,7 +111,7 @@ void main() {
     expect(materialWidget.color, customColor);
   });
 
-  testWidgets('Dialog Defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dialog Defaults', (WidgetTester tester) async {
     const AlertDialog dialog = AlertDialog(
       title: Text('Title'),
       content: Text('Y'),
@@ -147,7 +146,7 @@ void main() {
     expect(material3Widget.elevation, 6.0);
   });
 
-  testWidgets('Dialog.fullscreen Defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dialog.fullscreen Defaults', (WidgetTester tester) async {
     const String dialogTextM2 = 'Fullscreen Dialog - M2';
     const String dialogTextM3 = 'Fullscreen Dialog - M3';
 
@@ -448,7 +447,7 @@ void main() {
     expect(textRect.bottom, dialogRect.bottom - customPadding.bottom);
   });
 
-  testWidgets('Barrier dismissible', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Barrier dismissible', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -645,7 +644,7 @@ void main() {
     expect(actionsSize.width, dialogSize.width - (30.0 * 2));
   });
 
-  testWidgets('AlertDialog.buttonPadding defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AlertDialog.buttonPadding defaults', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
 
@@ -1905,7 +1904,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Dismissible.confirmDismiss defers to an AlertDialog', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dismissible.confirmDismiss defers to an AlertDialog', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final List<int> dismissedItems = <int>[];
 
@@ -2036,7 +2035,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/28505.
-  testWidgets('showDialog only gets Theme from context on the first call', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('showDialog only gets Theme from context on the first call', (WidgetTester tester) async {
     Widget buildFrame(Key builderKey) {
       return MaterialApp(
         home: Center(
@@ -2073,7 +2072,7 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('showDialog safe area', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('showDialog safe area', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         builder: (BuildContext context, Widget? child) {
@@ -2417,7 +2416,7 @@ void main() {
     });
   });
 
-  testWidgets('Dialog with RouteSettings', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dialog with RouteSettings', (WidgetTester tester) async {
     late RouteSettings currentRouteSetting;
 
     await tester.pumpWidget(
@@ -2660,9 +2659,12 @@ void main() {
     expect(await previousFocus(), true);
     expect(okNode.hasFocus, true);
     expect(cancelNode.hasFocus, false);
+
+    cancelNode.dispose();
+    okNode.dispose();
   });
 
-  testWidgets('Adaptive AlertDialog shows correct widget on each platform', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Adaptive AlertDialog shows correct widget on each platform', (WidgetTester tester) async {
     final AlertDialog dialog = AlertDialog.adaptive(
       content: Container(
         height: 5000.0,
@@ -2704,7 +2706,7 @@ void main() {
     }
   });
 
-  testWidgets('showAdaptiveDialog should not allow dismiss on barrier on iOS by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('showAdaptiveDialog should not allow dismiss on barrier on iOS by default', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.iOS),
@@ -2766,7 +2768,9 @@ void main() {
 
   testWidgetsWithLeakTracking('Uses open focus traversal when overridden', (WidgetTester tester) async {
     final FocusNode okNode = FocusNode();
+    addTearDown(okNode.dispose);
     final FocusNode cancelNode = FocusNode();
+    addTearDown(cancelNode.dispose);
 
     Future<bool> nextFocus() async {
       final bool result = Actions.invoke(

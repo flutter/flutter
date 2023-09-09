@@ -35,5 +35,6 @@
   "noSpellCheckReplacementsLabel": "לא נמצאו חלופות",
   "menuDismissLabel": "סגירת התפריט",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

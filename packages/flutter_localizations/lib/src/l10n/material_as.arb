@@ -143,5 +143,6 @@
   "collapsedHint": "বিস্তাৰ কৰা আছে",
   "menuDismissLabel": "অগ্ৰাহ্য কৰাৰ মেনু",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

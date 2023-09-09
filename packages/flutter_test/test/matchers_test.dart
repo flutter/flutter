@@ -10,6 +10,7 @@ import 'dart:typed_data';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:vector_math/vector_math_64.dart' show Matrix3;
 
 /// Class that makes it easy to mock common toStringDeep behavior.
 class _MockToStringDeep {
@@ -251,6 +252,35 @@ void main() {
     );
   });
 
+  test('matrix3MoreOrLessEquals', () {
+    expect(
+      Matrix3.rotationZ(math.pi),
+      matrix3MoreOrLessEquals(Matrix3.fromList(<double>[
+       -1,  0, 0,
+        0, -1, 0,
+        0,  0, 1,
+      ]))
+    );
+
+    expect(
+      Matrix3.rotationZ(math.pi),
+      matrix3MoreOrLessEquals(Matrix3.fromList(<double>[
+       -2,  0, 0,
+        0, -2, 0,
+        0,  0, 1,
+      ]), epsilon: 2)
+    );
+
+    expect(
+      Matrix3.rotationZ(math.pi),
+      isNot(matrix3MoreOrLessEquals(Matrix3.fromList(<double>[
+       -2,  0, 0,
+        0, -2, 0,
+        0,  0, 1,
+      ])))
+    );
+  });
+
   test('rectMoreOrLessEquals', () {
     expect(
       const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
@@ -436,6 +466,14 @@ void main() {
 
       testWidgets('future list of integers', (WidgetTester tester) async {
         await expectLater(Future<List<int>>.value(<int>[1, 2]), matchesGoldenFile('foo.png'));
+        expect(comparator.invocation, _ComparatorInvocation.compare);
+        expect(comparator.imageBytes, equals(<int>[1, 2]));
+        expect(comparator.golden, Uri.parse('foo.png'));
+      });
+
+      testWidgets('future nullable list of integers',
+          (WidgetTester tester) async {
+        await expectLater(Future<List<int>?>.value(<int>[1, 2]), matchesGoldenFile('foo.png'));
         expect(comparator.invocation, _ComparatorInvocation.compare);
         expect(comparator.imageBytes, equals(<int>[1, 2]));
         expect(comparator.golden, Uri.parse('foo.png'));

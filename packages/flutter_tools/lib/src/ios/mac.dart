@@ -72,6 +72,7 @@ class IMobileDevice {
   /// Create an [IMobileDevice] for testing.
   factory IMobileDevice.test({ required ProcessManager processManager }) {
     return IMobileDevice(
+      // ignore: invalid_use_of_visible_for_testing_member
       artifacts: Artifacts.test(),
       cache: Cache.test(processManager: processManager),
       processManager: processManager,

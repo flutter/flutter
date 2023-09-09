@@ -341,7 +341,20 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     _gestureRecognizers[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
           () => TapGestureRecognizer(debugOwner: this),
           (TapGestureRecognizer instance) {
-        instance.onTap = _clearSelection;
+        instance.onTapUp = (TapUpDetails details) {
+          if (defaultTargetPlatform == TargetPlatform.iOS && _positionIsOnActiveSelection(globalPosition: details.globalPosition)) {
+            // On iOS when the tap occurs on the previous selection, instead of
+            // moving the selection, the context menu will be toggled.
+            final bool toolbarIsVisible = _selectionOverlay?.toolbarIsVisible ?? false;
+            if (toolbarIsVisible) {
+              hideToolbar(false);
+            } else {
+              _showToolbar(location: details.globalPosition);
+            }
+          } else {
+            _clearSelection();
+          }
+        };
         instance.onSecondaryTapDown = _handleRightClickDown;
       },
     );
@@ -529,7 +542,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _handleTouchLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
-    _selectEndTo(offset: details.globalPosition);
+    _selectEndTo(offset: details.globalPosition, textGranularity: TextGranularity.word);
   }
 
   void _handleTouchLongPressEnd(LongPressEndDetails details) {
@@ -1554,6 +1567,13 @@ class _SelectableRegionContainerDelegate extends MultiSelectableSelectionContain
 /// This class optimize the selection update by keeping track of the
 /// [Selectable]s that currently contain the selection edges.
 abstract class MultiSelectableSelectionContainerDelegate extends SelectionContainerDelegate with ChangeNotifier {
+  /// Creates an instance of [MultiSelectableSelectionContainerDelegate].
+  MultiSelectableSelectionContainerDelegate() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+  }
+
   /// Gets the list of selectables this delegate is managing.
   List<Selectable> selectables = <Selectable>[];
 
@@ -2032,14 +2052,14 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       if (globalRect.contains(event.globalPosition)) {
         final SelectionGeometry existingGeometry = selectables[index].value;
         lastSelectionResult = dispatchSelectionEventToChild(selectables[index], event);
+        if (index == selectables.length - 1 && lastSelectionResult == SelectionResult.next) {
+          return SelectionResult.next;
+        }
         if (lastSelectionResult == SelectionResult.next) {
           continue;
         }
         if (index == 0 && lastSelectionResult == SelectionResult.previous) {
           return SelectionResult.previous;
-        }
-        if (index == selectables.length - 1 && lastSelectionResult == SelectionResult.next) {
-          return SelectionResult.next;
         }
         if (selectables[index].value != existingGeometry) {
           // Geometry has changed as a result of select word, need to clear the

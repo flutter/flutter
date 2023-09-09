@@ -7,8 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -3289,6 +3288,47 @@ void main() {
 
     // Wait for any pending shader compilation.
     tester.pumpAndSettle();
+  });
+
+  testWidgetsWithLeakTracking("Destination's label with the right opacity while disabled", (WidgetTester tester) async {
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        selectedIndex: 0,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('Bcd'),
+            disabled: true,
+          ),
+        ],
+        onDestinationSelected: (int index) {},
+        labelType: NavigationRailLabelType.all,
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    double? defaultTextStyleOpacity(String text) {
+      return tester.widget<DefaultTextStyle>(
+        find.ancestor(
+          of: find.text(text),
+          matching: find.byType(DefaultTextStyle),
+        ).first,
+      ).style.color?.opacity;
+    }
+
+    final double? abcLabelOpacity = defaultTextStyleOpacity('Abc');
+    final double? bcdLabelOpacity = defaultTextStyleOpacity('Bcd');
+
+    expect(abcLabelOpacity, 1.0);
+    expect(bcdLabelOpacity, closeTo(0.38, 0.01));
   });
 
   group('Material 2', () {

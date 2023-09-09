@@ -192,7 +192,7 @@ void main() {
     ));
     await commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']);
   }, overrides: <Type, Generator>{
-    Artifacts: () => Artifacts.test(localEngine: 'out/host_release'),
+    Artifacts: () => Artifacts.testLocalEngine(localEngine: 'out/host_release', localEngineHost: 'out/host_release'),
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
