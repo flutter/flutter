@@ -737,7 +737,7 @@ void main() {
             method: kListViewsMethod,
             jsonResponse: <String, Object>{
               'views': <Object>[
-                for (FlutterView view in views) view.toJson(),
+                for (final FlutterView view in views) view.toJson(),
               ],
             },
           ),

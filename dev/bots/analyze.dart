@@ -87,6 +87,9 @@ Future<void> run(List<String> arguments) async {
     foundError(<String>['The analyze.dart script must be run with --enable-asserts.']);
   }
 
+  printProgress('TargetPlatform tool/framework consistency');
+  await verifyTargetPlatform(flutterRoot);
+
   printProgress('No Double.clamp');
   await verifyNoDoubleClamp(flutterRoot);
 
@@ -111,6 +114,9 @@ Future<void> run(List<String> arguments) async {
 
   printProgress('Trailing spaces...');
   await verifyNoTrailingSpaces(flutterRoot); // assumes no unexpected binaries, so should be after verifyNoBinaries
+
+  printProgress('Spaces after flow control statements...');
+  await verifySpacesAfterFlowControlStatements(flutterRoot);
 
   printProgress('Deprecations...');
   await verifyDeprecations(flutterRoot);
@@ -184,6 +190,13 @@ Future<void> run(List<String> arguments) async {
     workingDirectory: flutterRoot,
   );
 
+  // Make sure that all of the existing samples are linked from at least one API doc comment.
+  printProgress('Code sample link validation...');
+  await runCommand(dart,
+    <String>['--enable-asserts', path.join(flutterRoot, 'dev', 'bots', 'check_code_samples.dart')],
+    workingDirectory: flutterRoot,
+  );
+
   // Try analysis against a big version of the gallery; generate into a temporary directory.
   printProgress('Dart analysis (mega gallery)...');
   final Directory outDir = Directory.systemTemp.createTempSync('flutter_mega_gallery.');
@@ -236,7 +249,15 @@ class _DoubleClampVisitor extends RecursiveAstVisitor<CompilationUnit> {
 
   @override
   CompilationUnit? visitMethodInvocation(MethodInvocation node) {
-    if (node.methodName.name == 'clamp') {
+    final NodeList<Expression> arguments = node.argumentList.arguments;
+    // This may produce false positives when `node.target` is not a subtype of
+    // num. The static type of `node.target` isn't guaranteed to be resolved at
+    // this time. Check whether the argument list consists of 2 positional args
+    // to reduce false positives.
+    final bool isNumClampInvocation = node.methodName.name == 'clamp'
+                                   && arguments.length == 2
+                                   && !arguments.any((Expression exp) => exp is NamedExpression);
+    if (isNumClampInvocation) {
       final _Line line = _getLine(parseResult, node.function.offset);
       if (!line.content.contains('// ignore_clamp_double_lint')) {
         clamps.add(line);
@@ -245,6 +266,84 @@ class _DoubleClampVisitor extends RecursiveAstVisitor<CompilationUnit> {
 
     node.visitChildren(this);
     return null;
+  }
+}
+
+Future<void> verifyTargetPlatform(String workingDirectory) async {
+  final File framework = File('$workingDirectory/packages/flutter/lib/src/foundation/platform.dart');
+  final Set<String> frameworkPlatforms = <String>{};
+  List<String> lines = framework.readAsLinesSync();
+  int index = 0;
+  while (true) {
+    if (index >= lines.length) {
+      foundError(<String>['${framework.path}: Can no longer find TargetPlatform enum.']);
+      return;
+    }
+    if (lines[index].startsWith('enum TargetPlatform {')) {
+      index += 1;
+      break;
+    }
+    index += 1;
+  }
+  while (true) {
+    if (index >= lines.length) {
+      foundError(<String>['${framework.path}: Could not find end of TargetPlatform enum.']);
+      return;
+    }
+    String line = lines[index].trim();
+    final int comment = line.indexOf('//');
+    if (comment >= 0) {
+      line = line.substring(0, comment);
+    }
+    if (line == '}') {
+      break;
+    }
+    if (line.isNotEmpty) {
+      if (line.endsWith(',')) {
+        frameworkPlatforms.add(line.substring(0, line.length - 1));
+      } else {
+        foundError(<String>['${framework.path}:$index: unparseable line when looking for TargetPlatform values']);
+      }
+    }
+    index += 1;
+  }
+  final File tool = File('$workingDirectory/packages/flutter_tools/lib/src/resident_runner.dart');
+  final Set<String> toolPlatforms = <String>{};
+  lines = tool.readAsLinesSync();
+  index = 0;
+  while (true) {
+    if (index >= lines.length) {
+      foundError(<String>['${tool.path}: Can no longer find nextPlatform logic.']);
+      return;
+    }
+    if (lines[index].trim().startsWith('const List<String> platforms = <String>[')) {
+      index += 1;
+      break;
+    }
+    index += 1;
+  }
+  while (true) {
+    if (index >= lines.length) {
+      foundError(<String>['${tool.path}: Could not find end of nextPlatform logic.']);
+      return;
+    }
+    final String line = lines[index].trim();
+    if (line.startsWith("'") && line.endsWith("',")) {
+      toolPlatforms.add(line.substring(1, line.length - 2));
+    } else if (line == '];') {
+      break;
+    } else {
+      foundError(<String>['${tool.path}:$index: unparseable line when looking for nextPlatform values']);
+    }
+    index += 1;
+  }
+  final Set<String> frameworkExtra = frameworkPlatforms.difference(toolPlatforms);
+  if (frameworkExtra.isNotEmpty) {
+    foundError(<String>['TargetPlatform has some extra values not found in the tool: ${frameworkExtra.join(", ")}']);
+  }
+  final Set<String> toolExtra = toolPlatforms.difference(frameworkPlatforms);
+  if (toolExtra.isNotEmpty) {
+    foundError(<String>['The nextPlatform logic in the tool has some extra values not found in TargetPlatform: ${toolExtra.join(", ")}']);
   }
 }
 
@@ -1033,6 +1132,38 @@ Future<void> verifyNoTrailingSpaces(String workingDirectory, { int minimumMatche
     }
     if (lines.isNotEmpty && lines.last == '') {
       problems.add('${file.path}:${lines.length}: trailing blank line');
+    }
+  }
+  if (problems.isNotEmpty) {
+    foundError(problems);
+  }
+}
+
+final RegExp _flowControlStatementWithoutSpace = RegExp(r'(^|[ \t])(if|switch|for|do|while|catch)\(', multiLine: true);
+
+Future<void> verifySpacesAfterFlowControlStatements(String workingDirectory, { int minimumMatches = 4000 }) async {
+  const Set<String> extensions = <String>{
+    '.dart',
+    '.java',
+    '.js',
+    '.kt',
+    '.swift',
+    '.c',
+    '.cc',
+    '.cpp',
+    '.h',
+    '.m',
+  };
+  final List<File> files = await _allFiles(workingDirectory, null, minimumMatches: minimumMatches)
+    .where((File file) => extensions.contains(path.extension(file.path)))
+    .toList();
+  final List<String> problems = <String>[];
+  for (final File file in files) {
+    final List<String> lines = file.readAsLinesSync();
+    for (int index = 0; index < lines.length; index += 1) {
+      if (lines[index].contains(_flowControlStatementWithoutSpace)) {
+        problems.add('${file.path}:${index + 1}: no space after flow control statement');
+      }
     }
   }
   if (problems.isNotEmpty) {

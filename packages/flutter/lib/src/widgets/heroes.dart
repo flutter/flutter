@@ -568,6 +568,7 @@ class _HeroFlight {
 
       assert(overlayEntry != null);
       overlayEntry!.remove();
+      overlayEntry!.dispose();
       overlayEntry = null;
       // We want to keep the hero underneath the current page hidden. If
       // [AnimationStatus.completed], toHero will be the one on top and we keep
@@ -609,6 +610,19 @@ class _HeroFlight {
     assert(navigator.userGestureInProgress);
     _scheduledPerformAnimationUpdate = true;
     navigator.userGestureInProgressNotifier.addListener(delayedPerformAnimationUpdate);
+  }
+
+  /// Releases resources.
+  @mustCallSuper
+  void dispose() {
+    if (overlayEntry != null) {
+      overlayEntry!.remove();
+      overlayEntry!.dispose();
+      overlayEntry = null;
+      _proxyAnimation.parent = null;
+      _proxyAnimation.removeListener(onTick);
+      _proxyAnimation.removeStatusListener(_handleAnimationUpdate);
+    }
   }
 
   void onTick() {
@@ -849,40 +863,47 @@ class HeroController extends NavigatorObserver {
     HeroFlightDirection flightType,
     bool isUserGestureTransition,
   ) {
-    if (toRoute != fromRoute && toRoute is PageRoute<dynamic> && fromRoute is PageRoute<dynamic>) {
-      final PageRoute<dynamic> from = fromRoute;
-      final PageRoute<dynamic> to = toRoute;
+    if (toRoute == fromRoute ||
+        toRoute is! PageRoute<dynamic> ||
+        fromRoute is! PageRoute<dynamic>) {
+      return;
+    }
 
-      // A user gesture may have already completed the pop, or we might be the initial route
-      switch (flightType) {
-        case HeroFlightDirection.pop:
-          if (from.animation!.value == 0.0) {
-            return;
-          }
-        case HeroFlightDirection.push:
-          if (to.animation!.value == 1.0) {
-            return;
-          }
-      }
+    final PageRoute<dynamic> from = fromRoute;
+    final PageRoute<dynamic> to = toRoute;
 
-      // For pop transitions driven by a user gesture: if the "to" page has
-      // maintainState = true, then the hero's final dimensions can be measured
-      // immediately because their page's layout is still valid.
-      if (isUserGestureTransition && flightType == HeroFlightDirection.pop && to.maintainState) {
+    // A user gesture may have already completed the pop, or we might be the initial route
+    switch (flightType) {
+      case HeroFlightDirection.pop:
+        if (from.animation!.value == 0.0) {
+          return;
+        }
+      case HeroFlightDirection.push:
+        if (to.animation!.value == 1.0) {
+          return;
+        }
+    }
+
+    // For pop transitions driven by a user gesture: if the "to" page has
+    // maintainState = true, then the hero's final dimensions can be measured
+    // immediately because their page's layout is still valid.
+    if (isUserGestureTransition && flightType == HeroFlightDirection.pop && to.maintainState) {
+      _startHeroTransition(from, to, flightType, isUserGestureTransition);
+    } else {
+      // Otherwise, delay measuring until the end of the next frame to allow
+      // the 'to' route to build and layout.
+
+      // Putting a route offstage changes its animation value to 1.0. Once this
+      // frame completes, we'll know where the heroes in the `to` route are
+      // going to end up, and the `to` route will go back onstage.
+      to.offstage = to.animation!.value == 0.0;
+
+      WidgetsBinding.instance.addPostFrameCallback((Duration value) {
+        if (from.navigator == null || to.navigator == null) {
+          return;
+        }
         _startHeroTransition(from, to, flightType, isUserGestureTransition);
-      } else {
-        // Otherwise, delay measuring until the end of the next frame to allow
-        // the 'to' route to build and layout.
-
-        // Putting a route offstage changes its animation value to 1.0. Once this
-        // frame completes, we'll know where the heroes in the `to` route are
-        // going to end up, and the `to` route will go back onstage.
-        to.offstage = to.animation!.value == 0.0;
-
-        WidgetsBinding.instance.addPostFrameCallback((Duration value) {
-          _startHeroTransition(from, to, flightType, isUserGestureTransition);
-        });
-      }
+      });
     }
   }
 
@@ -1018,6 +1039,14 @@ class HeroController extends NavigatorObserver {
           child: toHero.child);
       },
     );
+  }
+
+  /// Releases resources.
+  @mustCallSuper
+  void dispose() {
+    for (final _HeroFlight flight in _flights.values) {
+      flight.dispose();
+    }
   }
 }
 

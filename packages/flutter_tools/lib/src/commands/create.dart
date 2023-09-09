@@ -267,6 +267,14 @@ class CreateCommand extends CreateBase {
       includeLinux = false;
       includeMacos = false;
       includeWindows = false;
+    } else if (template == FlutterProjectType.package) {
+      // The package template does not supports any platform.
+      includeIos = false;
+      includeAndroid = false;
+      includeWeb = false;
+      includeLinux = false;
+      includeMacos = false;
+      includeWindows = false;
     } else {
       includeIos = featureFlags.isIOSEnabled && platforms.contains('ios');
       includeAndroid = featureFlags.isAndroidEnabled && platforms.contains('android');
@@ -674,7 +682,7 @@ Your $application code is in $relativeAppMain.
 
   List<String> _getSupportedPlatformsFromTemplateContext(Map<String, Object?> templateContext) {
     return <String>[
-      for (String platform in kAllCreatePlatforms)
+      for (final String platform in kAllCreatePlatforms)
         if (templateContext[platform] == true) platform,
     ];
   }

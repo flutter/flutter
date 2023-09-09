@@ -11,8 +11,6 @@ import '../base/terminal.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
-import 'android_sdk.dart';
-import 'android_studio.dart';
 import 'gradle_utils.dart';
 import 'multidex.dart';
 
@@ -85,6 +83,7 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   zipExceptionHandler,
   incompatibleJavaAndGradleVersionsHandler,
   remoteTerminatedHandshakeHandler,
+  couldNotOpenCacheDirectoryHandler,
 ];
 
 const String _boxTitle = 'Flutter Fix';
@@ -159,7 +158,7 @@ final GradleHandledError multidexErrorHandler = GradleHandledError(
             prompt: 'Do you want to continue with adding multidex support for Android?',
             defaultChoiceIndex: 0,
           );
-        } on StateError catch(e) {
+        } on StateError catch (e) {
           globals.printError(
             e.message,
             indent: 0,
@@ -273,7 +272,7 @@ final GradleHandledError zipExceptionHandler = GradleHandledError(
           defaultChoiceIndex: 0,
         );
         shouldDeleteUserGradle = selection == 'y';
-      } on StateError catch(e) {
+      } on StateError catch (e) {
         globals.printError(
           e.message,
           indent: 0,
@@ -379,10 +378,7 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
       ],
       throwOnError: true,
       workingDirectory: project.android.hostAppGradleRoot.path,
-      environment: <String, String>{
-        if (javaPath != null)
-          AndroidSdk.javaHomeEnvironmentVariable: javaPath!,
-      },
+      environment: globals.java?.environment,
     );
     // Extract build types and product flavors.
     final Set<String> variants = <String>{};
@@ -719,4 +715,23 @@ final GradleHandledError remoteTerminatedHandshakeHandler = GradleHandledError(
     return GradleBuildStatus.retry;
   },
   eventLabel: 'remote-terminated-handshake',
+);
+
+@visibleForTesting
+final GradleHandledError couldNotOpenCacheDirectoryHandler = GradleHandledError(
+  test: (String line) => line.contains('> Could not open cache directory '),
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+    required bool multidexEnabled,
+  }) async {
+    globals.printError(
+      '${globals.logger.terminal.warningMark} '
+      'Gradle threw an error while resolving dependencies.'
+    );
+
+    return GradleBuildStatus.retry;
+  },
+  eventLabel: 'could-not-open-cache-directory',
 );

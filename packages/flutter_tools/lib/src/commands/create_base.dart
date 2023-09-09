@@ -407,8 +407,8 @@ abstract class CreateBase extends FlutterCommand {
       'iosLanguage': iosLanguage,
       'hasIosDevelopmentTeam': iosDevelopmentTeam != null && iosDevelopmentTeam.isNotEmpty,
       'iosDevelopmentTeam': iosDevelopmentTeam ?? '',
-      'flutterRevision': globals.flutterVersion.frameworkRevision,
-      'flutterChannel': globals.flutterVersion.channel,
+      'flutterRevision': escapeYamlString(globals.flutterVersion.frameworkRevision),
+      'flutterChannel': escapeYamlString(globals.flutterVersion.getBranchName()), // may contain PII
       'ios': ios,
       'android': android,
       'web': web,
@@ -571,10 +571,11 @@ abstract class CreateBase extends FlutterCommand {
       final FlutterProjectMetadata metadata = FlutterProjectMetadata.explicit(
         file: metadataFile,
         versionRevision: globals.flutterVersion.frameworkRevision,
-        versionChannel: globals.flutterVersion.channel,
+        versionChannel: globals.flutterVersion.getBranchName(), // may contain PII
         projectType: projectType,
         migrateConfig: MigrateConfig(),
-        logger: globals.logger);
+        logger: globals.logger,
+      );
       metadata.populate(
         platforms: platformsForMigrateConfig,
         projectDirectory: directory,
@@ -783,12 +784,38 @@ bool isValidPackageName(String name) {
       !_keywords.contains(name);
 }
 
+/// Returns a potential valid name from the given [name].
+///
+/// If a valid name cannot be found, returns `null`.
+@visibleForTesting
+String? potentialValidPackageName(String name){
+  String newName = name.toLowerCase();
+  if (newName.startsWith(RegExp(r'[0-9]'))) {
+    newName = '_$newName';
+  }
+  newName = newName.replaceAll('-', '_');
+  if (isValidPackageName(newName)) {
+    return newName;
+  } else {
+    return null;
+  }
+}
+
 // Return null if the project name is legal. Return a validation message if
 // we should disallow the project name.
 String? _validateProjectName(String projectName) {
   if (!isValidPackageName(projectName)) {
-    return '"$projectName" is not a valid Dart package name.\n\n'
-        'See https://dart.dev/tools/pub/pubspec#name for more information.';
+    final String? potentialValidName = potentialValidPackageName(projectName);
+
+    return <String>[
+      '"$projectName" is not a valid Dart package name.',
+      '\n\n',
+      'The name should be all lowercase, with underscores to separate words, "just_like_this".',
+      'Use only basic Latin letters and Arabic digits: [a-z0-9_].',
+      "Also, make sure the name is a valid Dart identifier—that it doesn't start with digits and isn't a reserved word.\n",
+      'See https://dart.dev/tools/pub/pubspec#name for more information.',
+      if (potentialValidName != null) '\nTry "$potentialValidName" instead.',
+    ].join();
   }
   if (_packageDependencies.contains(projectName)) {
     return "Invalid project name: '$projectName' - this will conflict with Flutter "

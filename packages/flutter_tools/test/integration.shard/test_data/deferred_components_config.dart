@@ -77,7 +77,7 @@ class DeferredComponentModule {
     apply plugin: "com.android.dynamic-feature"
 
     android {
-        compileSdkVersion 31
+        compileSdkVersion 33
 
         sourceSets {
             applicationVariants.all { variant ->
@@ -87,8 +87,8 @@ class DeferredComponentModule {
         }
 
         defaultConfig {
-            minSdkVersion 16
-            targetSdkVersion 31
+            minSdkVersion 19
+            targetSdkVersion 33
             versionCode flutterVersionCode.toInteger()
             versionName flutterVersionName
         }

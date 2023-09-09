@@ -1,0 +1,22 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+name: "Pull Request Labeler"
+on:
+- pull_request_target
+
+# Declare default permissions as read only.
+permissions: read-all
+
+jobs:
+  triage:
+    if: ${{ github.repository == 'flutter/flutter' }}
+    permissions:
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+    # Source available at https://github.com/actions/labeler/blob/main/README.md
+    - uses: actions/labeler@ac9175f8a1f3625fd0d4fb234536d26811351594
+      with:
+        sync-labels: ''

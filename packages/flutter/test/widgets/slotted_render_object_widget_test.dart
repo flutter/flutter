@@ -8,8 +8,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
-
 const Color green = Color(0xFF00FF00);
 const Color yellow = Color(0xFFFFFF00);
 
@@ -222,16 +220,18 @@ void main() {
       equalsIgnoringHashCodes(
         '_RenderDiagonal#00000 relayoutBoundary=up1\n'
         ' │ creator: _Diagonal ← Align ← Directionality ← MediaQuery ←\n'
-        ' │   _MediaQueryFromView ← _ViewScope ← View-[GlobalObjectKey\n'
-        ' │   TestFlutterView#00000] ← [root]\n'
+        ' │   _MediaQueryFromView ← _PipelineOwnerScope ← _ViewScope ←\n'
+        ' │   _RawView-[_DeprecatedRawViewKey TestFlutterView#00000] ← View ←\n'
+        ' │   [root]\n'
         ' │ parentData: offset=Offset(0.0, 0.0) (can use size)\n'
         ' │ constraints: BoxConstraints(0.0<=w<=800.0, 0.0<=h<=600.0)\n'
         ' │ size: Size(190.0, 220.0)\n'
         ' │\n'
         ' ├─topLeft: RenderConstrainedBox#00000 relayoutBoundary=up2\n'
         ' │   creator: SizedBox ← _Diagonal ← Align ← Directionality ←\n'
-        ' │     MediaQuery ← _MediaQueryFromView ← _ViewScope ←\n'
-        ' │     View-[GlobalObjectKey TestFlutterView#00000] ← [root]\n'
+        ' │     MediaQuery ← _MediaQueryFromView ← _PipelineOwnerScope ←\n'
+        ' │     _ViewScope ← _RawView-[_DeprecatedRawViewKey\n'
+        ' │     TestFlutterView#00000] ← View ← [root]\n'
         ' │   parentData: offset=Offset(0.0, 0.0) (can use size)\n'
         ' │   constraints: BoxConstraints(unconstrained)\n'
         ' │   size: Size(80.0, 100.0)\n'
@@ -239,8 +239,9 @@ void main() {
         ' │\n'
         ' └─bottomRight: RenderConstrainedBox#00000 relayoutBoundary=up2\n'
         '     creator: SizedBox ← _Diagonal ← Align ← Directionality ←\n'
-        '       MediaQuery ← _MediaQueryFromView ← _ViewScope ←\n'
-        '       View-[GlobalObjectKey TestFlutterView#00000] ← [root]\n'
+        '       MediaQuery ← _MediaQueryFromView ← _PipelineOwnerScope ←\n'
+        '       _ViewScope ← _RawView-[_DeprecatedRawViewKey\n'
+        '       TestFlutterView#00000] ← View ← [root]\n'
         '     parentData: offset=Offset(80.0, 100.0) (can use size)\n'
         '     constraints: BoxConstraints(unconstrained)\n'
         '     size: Size(110.0, 120.0)\n'
@@ -269,7 +270,7 @@ enum _DiagonalSlot {
   bottomRight,
 }
 
-class _Diagonal extends RenderObjectWidget with SlottedMultiChildRenderObjectWidgetMixin<_DiagonalSlot?> {
+class _Diagonal extends RenderObjectWidget with SlottedMultiChildRenderObjectWidgetMixin<_DiagonalSlot?, RenderBox> {
   const _Diagonal({
     this.topLeft,
     this.bottomRight,
@@ -296,14 +297,14 @@ class _Diagonal extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
   }
 
   @override
-  SlottedContainerRenderObjectMixin<_DiagonalSlot?> createRenderObject(
+  SlottedContainerRenderObjectMixin<_DiagonalSlot?, RenderBox> createRenderObject(
     BuildContext context,
   ) {
     return _RenderDiagonal();
   }
 }
 
-class _RenderDiagonal extends RenderBox with SlottedContainerRenderObjectMixin<_DiagonalSlot?> {
+class _RenderDiagonal extends RenderBox with SlottedContainerRenderObjectMixin<_DiagonalSlot?, RenderBox> {
   RenderBox? get _topLeft => childForSlot(_DiagonalSlot.topLeft);
   RenderBox? get _bottomRight => childForSlot(_DiagonalSlot.bottomRight);
   RenderBox? get _nullSlot => childForSlot(null);
@@ -370,6 +371,6 @@ class _Slot {
   String toString() => describeIdentity(this);
 }
 
-class _RenderTest extends RenderBox with SlottedContainerRenderObjectMixin<_Slot> {
+class _RenderTest extends RenderBox with SlottedContainerRenderObjectMixin<_Slot, RenderBox> {
   String publicNameForSlot(_Slot slot) => debugNameForSlot(slot);
 }

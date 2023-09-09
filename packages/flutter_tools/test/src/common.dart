@@ -17,6 +17,7 @@ import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:test/test.dart' as test_package show test;
 import 'package:test/test.dart' hide test;
 
+export 'package:path/path.dart' show Context; // flutter_ignore: package_path_import
 export 'package:test/test.dart' hide isInstanceOf, test;
 
 void tryToDelete(FileSystemEntity fileEntity) {
@@ -130,7 +131,7 @@ Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher)
   try {
     await future;
     fail('ToolExit expected, but nothing thrown');
-  } on ToolExit catch(e) {
+  } on ToolExit catch (e) {
     expect(e.message, messageMatcher);
   // Catch all exceptions to give a better test failure message.
   } catch (e, trace) { // ignore: avoid_catches_without_on_clauses

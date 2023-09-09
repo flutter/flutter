@@ -51,8 +51,9 @@ void main() {
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
     };
+    const TemplatePathProvider templatePathProvider = TemplatePathProvider();
 
-    testUsingContext('templateImageDirectory returns parent template directory if passed null name', () async {
+    testUsingContext('templatePathProvider.imageDirectory returns parent template directory if passed null name', () async {
       final String packageConfigPath = globals.fs.path.join(
         Cache.flutterRoot!,
         'packages',
@@ -77,7 +78,7 @@ void main() {
 }
 ''');
       expect(
-          (await templateImageDirectory(null, globals.fs, globals.logger)).path,
+          (await templatePathProvider.imageDirectory(null, globals.fs, globals.logger)).path,
           globals.fs.path.absolute(
             'flutter_template_images',
             'templates',
@@ -85,7 +86,7 @@ void main() {
       );
     }, overrides: overrides);
 
-    testUsingContext('templateImageDirectory returns the directory containing the `name` template directory', () async {
+    testUsingContext('templatePathProvider.imageDirectory returns the directory containing the `name` template directory', () async {
       final String packageConfigPath = globals.fs.path.join(
         Cache.flutterRoot!,
         'packages',
@@ -109,7 +110,7 @@ void main() {
 }
 ''');
       expect(
-        (await templateImageDirectory('app_shared', globals.fs, globals.logger)).path,
+        (await templatePathProvider.imageDirectory('app_shared', globals.fs, globals.logger)).path,
         globals.fs.path.absolute(
           'flutter_template_images',
           'templates',
@@ -193,6 +194,23 @@ void main() {
       expect(logger.errorText, isEmpty);
       expect(logger.statusText, isEmpty);
     });
+  });
+
+  testWithoutContext('escapeYamlString', () {
+    expect(escapeYamlString(''), r'""');
+    expect(escapeYamlString('\x00\n\r\t\b'), r'"\0\n\r\t\x08"');
+    expect(escapeYamlString('test'), r'"test"');
+    expect(escapeYamlString('test\n test'), r'"test\n test"');
+    expect(escapeYamlString('\x00\x01\x02\x0c\x19\xab'), r'"\0\x01\x02\x0c\x19«"');
+    expect(escapeYamlString('"'), r'"\""');
+    expect(escapeYamlString(r'\'), r'"\\"');
+    expect(escapeYamlString('[user branch]'), r'"[user branch]"');
+    expect(escapeYamlString('main'), r'"main"');
+    expect(escapeYamlString('TEST_BRANCH'), r'"TEST_BRANCH"');
+    expect(escapeYamlString(' '), r'" "');
+    expect(escapeYamlString(' \n '), r'" \n "');
+    expect(escapeYamlString('""'), r'"\"\""');
+    expect(escapeYamlString('"\x01\u{0263A}\u{1F642}'), r'"\"\x01☺🙂"');
   });
 }
 

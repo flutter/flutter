@@ -1,4 +1,7 @@
 {
+  "lookUpButtonLabel": "查詢",
+  "noSpellCheckReplacementsLabel": "找不到替換字詞",
+  "menuDismissLabel": "閂選單",
   "searchTextFieldPlaceholderLabel": "搜尋",
   "tabSemanticsLabel": "$tabCount 個分頁中嘅第 $tabIndex 個",
   "datePickerHourSemanticsLabelOne": "$hour 點",

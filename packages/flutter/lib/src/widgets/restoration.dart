@@ -106,15 +106,26 @@ class RestorationScope extends StatefulWidget {
     final RestorationBucket? bucket = maybeOf(context);
     assert(() {
       if (bucket == null) {
-        throw FlutterError(
-          'RestorationScope.of() was called with a context that does not contain a '
-          'RestorationScope widget.\n'
-          'No RestorationScope widget ancestor could be found starting from the '
-          'context that was passed to RestorationScope.of(). This can happen '
-          'because you are using a widget that looks for a RestorationScope '
-          'ancestor, but no such ancestor exists.\n'
-          'The context used was:\n'
-          '  $context',
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary(
+            'RestorationScope.of() was called with a context that does not '
+            'contain a RestorationScope widget. '
+          ),
+          ErrorDescription(
+            'No RestorationScope widget ancestor could be found starting from '
+            'the context that was passed to RestorationScope.of(). This can '
+            'happen because you are using a widget that looks for a '
+            'RestorationScope ancestor, but no such ancestor exists.\n'
+            'The context used was:\n'
+            '  $context'
+          ),
+          ErrorHint(
+            'State restoration must be enabled for a RestorationScope to exist. '
+            'This can be done by passing a restorationScopeId to MaterialApp, '
+            'CupertinoApp, or WidgetsApp at the root of the widget tree or by '
+            'wrapping the widget tree in a RootRestorationScope.'
+          ),
+        ],
         );
       }
       return true;
@@ -443,6 +454,13 @@ class _RootRestorationScopeState extends State<RootRestorationScope> {
 ///  * [RestorationManager], which describes how state restoration works in
 ///    Flutter.
 abstract class RestorableProperty<T> extends ChangeNotifier {
+  /// Creates a [RestorableProperty].
+  RestorableProperty(){
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+  }
+
   /// Called by the [RestorationMixin] if no restoration data is available to
   /// restore the value of the property from to obtain the default value for the
   /// property.

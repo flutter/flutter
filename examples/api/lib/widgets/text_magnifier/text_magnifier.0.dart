@@ -17,11 +17,10 @@ class TextMagnifierExampleApp extends StatelessWidget {
   final TextDirection textDirection;
   final String text;
 
-  static const Size loupeSize = Size(200, 200);
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(useMaterial3: true),
       home: Scaffold(
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 48.0),

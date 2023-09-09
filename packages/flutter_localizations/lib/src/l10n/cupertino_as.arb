@@ -22,5 +22,9 @@
   "tabSemanticsLabel": "$tabCount টা টেবৰ $tabIndex নম্বৰটো",
   "modalBarrierDismissLabel": "অগ্ৰাহ্য কৰক",
   "searchTextFieldPlaceholderLabel": "সন্ধান কৰক",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "এইটোৰ সলনি ব্যৱহাৰ কৰিব পৰা শব্দ পোৱা নগ’ল",
+  "menuDismissLabel": "অগ্ৰাহ্য কৰাৰ মেনু",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

@@ -9,6 +9,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   /*
@@ -18,8 +19,9 @@ void main() {
 
   LiveTestWidgetsFlutterBinding().framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.onlyPumps;
 
-  testWidgets('Should show event indicator for pointer events', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Should show event indicator for pointer events', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200), allLayers: true);
+    addTearDown(animationSheet.dispose);
     final List<Offset> taps = <Offset>[];
     Widget target({bool recording = true}) => Container(
       padding: const EdgeInsets.fromLTRB(20, 10, 25, 20),
@@ -76,8 +78,9 @@ void main() {
     // Currently skipped due to daily flake: https://github.com/flutter/flutter/issues/87588
   }, skip: true); // Typically skip: isBrowser https://github.com/flutter/flutter/issues/42767
 
-  testWidgets('Should show event indicator for pointer events with setSurfaceSize', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Should show event indicator for pointer events with setSurfaceSize', (WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200), allLayers: true);
+    addTearDown(animationSheet.dispose);
     final List<Offset> taps = <Offset>[];
     Widget target({bool recording = true}) => Container(
       padding: const EdgeInsets.fromLTRB(20, 10, 25, 20),
@@ -132,5 +135,9 @@ void main() {
       animationSheet.collate(6),
       matchesGoldenFile('LiveBinding.press.animation.2.png'),
     );
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
+  },
+    skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
+    // TODO(polina-c): remove after fixing https://github.com/flutter/flutter/issues/133071
+    leakTrackingTestConfig: const LeakTrackingTestConfig(allowAllNotDisposed: true),
+  );
 }

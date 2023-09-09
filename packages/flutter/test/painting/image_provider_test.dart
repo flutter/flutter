@@ -159,6 +159,12 @@ void main() {
     expect(imageCache.statusForKey(provider).untracked, false);
     expect(imageCache.pendingImageCount, 1);
   }, skip: kIsWeb); // [intended] The web cannot load files.
+
+  test('ImageProvider toStrings', () async {
+    expect(const NetworkImage('test', scale: 1.21).toString(), 'NetworkImage("test", scale: 1.2)');
+    expect(const ExactAssetImage('test', scale: 1.21).toString(), 'ExactAssetImage(name: "test", scale: 1.2, bundle: null)');
+    expect(MemoryImage(Uint8List(0), scale: 1.21).toString(), equalsIgnoringHashCodes('MemoryImage(Uint8List#00000, scale: 1.2)'));
+  });
 }
 
 class FakeCodec implements Codec {

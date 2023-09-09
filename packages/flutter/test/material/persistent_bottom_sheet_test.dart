@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   // Pumps and ensures that the BottomSheet animates non-linearly.
@@ -95,7 +96,7 @@ void main() {
     await tester.pumpWidget(buildFrame(const Text('I love Flutter!')));
   });
 
-  testWidgets('Verify that a BottomSheet can be rebuilt with ScaffoldFeatureController.setState()', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Verify that a BottomSheet can be rebuilt with ScaffoldFeatureController.setState()', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     int buildCount = 0;
 
@@ -153,7 +154,7 @@ void main() {
     expect(find.text('Two'), findsOneWidget);
   });
 
-  testWidgets('Verify that a scrollable BottomSheet can be dismissed', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Verify that a scrollable BottomSheet can be dismissed', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(MaterialApp(
@@ -185,7 +186,45 @@ void main() {
     expect(find.text('Two'), findsNothing);
   });
 
-  testWidgets('Verify that a BottomSheet animates non-linearly', (WidgetTester tester) async {
+  testWidgets('Verify DraggableScrollableSheet.shouldCloseOnMinExtent == false prevents dismissal', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body')),
+      ),
+    ));
+
+    scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+      return DraggableScrollableSheet(
+        expand: false,
+        shouldCloseOnMinExtent: false,
+        builder: (_, ScrollController controller) {
+          return ListView(
+            controller: controller,
+            shrinkWrap: true,
+            children: const <Widget>[
+              SizedBox(height: 100.0, child: Text('One')),
+              SizedBox(height: 100.0, child: Text('Two')),
+              SizedBox(height: 100.0, child: Text('Three')),
+            ],
+          );
+        },
+      );
+    });
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Two'), findsOneWidget);
+
+    await tester.drag(find.text('Two'), const Offset(0.0, 400.0));
+    await tester.pumpAndSettle();
+
+     expect(find.text('Two'), findsOneWidget);
+  });
+
+  testWidgetsWithLeakTracking('Verify that a BottomSheet animates non-linearly', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(MaterialApp(
@@ -424,7 +463,7 @@ void main() {
     expect(find.byType(FloatingActionButton).hitTestable(), findsNothing);
   });
 
-  testWidgets('showBottomSheet()', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('showBottomSheet()', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -448,7 +487,7 @@ void main() {
     expect(buildCount, equals(1));
   });
 
-  testWidgets('Scaffold removes top MediaQuery padding', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scaffold removes top MediaQuery padding', (WidgetTester tester) async {
     late BuildContext scaffoldContext;
     late BuildContext bottomSheetContext;
 
@@ -496,6 +535,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: const Placeholder(),
           bottomSheet: Container(
@@ -573,7 +613,7 @@ void main() {
     },
   );
 
-  testWidgets('Verify that visual properties are passed through', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Verify that visual properties are passed through', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     const Color color = Colors.pink;
     const double elevation = 9.0;
@@ -608,7 +648,7 @@ void main() {
     expect(bottomSheet.clipBehavior, clipBehavior);
   });
 
-  testWidgets('PersistentBottomSheetController.close dismisses the bottom sheet', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PersistentBottomSheetController.close dismisses the bottom sheet', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(

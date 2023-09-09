@@ -39,6 +39,13 @@ class FakeAndroidBuilder implements AndroidBuilder {
 
   @override
   Future<List<String>> getBuildVariants({required FlutterProject project}) async => const <String>[];
+
+  @override
+  Future<void> outputsAppLinkSettings(
+    String buildVariant, {
+    required FlutterProject project,
+  }) async {}
+
 }
 
 /// Creates a [FlutterProject] in a directory named [flutter_project]

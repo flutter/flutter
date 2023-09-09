@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import static groovy.io.FileType.FILES
-
 import com.android.build.OutputFile
 import groovy.json.JsonSlurper
-import java.nio.file.Path
+import groovy.json.JsonGenerator
+import groovy.xml.QName
 import java.nio.file.Paths
-import java.util.regex.Matcher
-import java.util.regex.Pattern
+import java.util.Set
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
@@ -30,7 +28,6 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
-import org.gradle.util.VersionNumber
 
 /**
  * For apps only. Provides the flutter extension used in app/build.gradle.
@@ -47,15 +44,20 @@ class FlutterExtension {
     static int compileSdkVersion = 33
 
     /** Sets the minSdkVersion used by default in Flutter app projects. */
-    static int minSdkVersion = 16
+    static int minSdkVersion = 19
 
-    /** Sets the targetSdkVersion used by default in Flutter app projects. */
+    /**
+     * Sets the targetSdkVersion used by default in Flutter app projects.
+     * targetSdkVersion should always be the latest available stable version.
+     *
+     * See https://developer.android.com/guide/topics/manifest/uses-sdk-element.
+     */
     static int targetSdkVersion = 33
 
     /**
      * Sets the ndkVersion used by default in Flutter app projects.
      * Chosen as default version of the AGP version below as found in
-     * https://developer.android.com/studio/projects/install-ndk#default-ndk-per-agp
+     * https://developer.android.com/studio/projects/install-ndk#default-ndk-per-agp.
      */
     static String ndkVersion = "23.1.7779620"
 
@@ -159,9 +161,11 @@ class FlutterPlugin implements Plugin<Project> {
     private File flutterRoot
     private File flutterExecutable
     private String localEngine
+    private String localEngineHost
     private String localEngineSrcPath
     private Properties localProperties
     private String engineVersion
+    private String engineRealm
 
     /**
      * Flutter Docs Website URLs for help messages.
@@ -187,11 +191,29 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
+        String flutterRootPath = resolveProperty("flutter.sdk", System.env.FLUTTER_ROOT)
+        if (flutterRootPath == null) {
+            throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file or with a FLUTTER_ROOT environment variable.")
+        }
+        flutterRoot = project.file(flutterRootPath)
+        if (!flutterRoot.isDirectory()) {
+            throw new GradleException("flutter.sdk must point to the Flutter SDK directory")
+        }
+
+        engineVersion = useLocalEngine()
+            ? "+" // Match any version since there's only one.
+            : "1.0.0-" + Paths.get(flutterRoot.absolutePath, "bin", "internal", "engine.version").toFile().text.trim()
+
+        engineRealm = Paths.get(flutterRoot.absolutePath, "bin", "internal", "engine.realm").toFile().text.trim()
+        if (engineRealm) {
+            engineRealm = engineRealm + "/"
+        }
+
         // Configure the Maven repository.
         String hostedRepository = System.env.FLUTTER_STORAGE_BASE_URL ?: DEFAULT_MAVEN_HOST
         String repository = useLocalEngine()
             ? project.property('local-engine-repo')
-            : "$hostedRepository/download.flutter.io"
+            : "$hostedRepository/${engineRealm}download.flutter.io"
         rootProject.allprojects {
             repositories {
                 maven {
@@ -240,19 +262,6 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
         }
-
-        String flutterRootPath = resolveProperty("flutter.sdk", System.env.FLUTTER_ROOT)
-        if (flutterRootPath == null) {
-            throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file or with a FLUTTER_ROOT environment variable.")
-        }
-        flutterRoot = project.file(flutterRootPath)
-        if (!flutterRoot.isDirectory()) {
-            throw new GradleException("flutter.sdk must point to the Flutter SDK directory")
-        }
-
-        engineVersion = useLocalEngine()
-            ? "+" // Match any version since there's only one.
-            : "1.0.0-" + Paths.get(flutterRoot.absolutePath, "bin", "internal", "engine.version").toFile().text.trim()
 
         String flutterExecutableName = Os.isFamily(Os.FAMILY_WINDOWS) ? "flutter.bat" : "flutter"
         flutterExecutable = Paths.get(flutterRoot.absolutePath, "bin", flutterExecutableName).toFile();
@@ -313,6 +322,13 @@ class FlutterPlugin implements Plugin<Project> {
             }
             localEngine = engineOut.name
             localEngineSrcPath = engineOut.parentFile.parent
+
+            String engineHostOutPath = project.property('local-engine-host-out')
+            File engineHostOut = project.file(engineHostOutPath)
+            if (!engineHostOut.isDirectory()) {
+                throw new GradleException('local-engine-host-out must point to a local engine host build')
+            }
+            localEngineHost = engineHostOut.name
         }
         project.android.buildTypes.all this.&addFlutterDependencies
     }
@@ -731,6 +747,95 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
+    // Add a task that can be called on Flutter projects that outputs app link related project
+    // settings into a json file.
+    //
+    // See https://developer.android.com/training/app-links/ for more information about app link.
+    //
+    // The json will be stored in <project>/build/app/app-link-settings-<variant>.json
+    //
+    // An example json:
+    // {
+    //   applicationId: "com.example.app",
+    //   deeplinks: [
+    //     {"scheme":"http", "host":"example.com", "path":".*"},
+    //     {"scheme":"https","host":"example.com","path":".*"}
+    //   ]
+    // }
+    //
+    // The output file is parsed and used by devtool.
+    private static void addTasksForOutputsAppLinkSettings(Project project) {
+        project.android.applicationVariants.all { variant ->
+            // Warning: The name of this task is used by AndroidBuilder.outputsAppLinkSettings
+            project.tasks.register("output${variant.name.capitalize()}AppLinkSettings") {
+                description "stores app links settings for the given build variant of this Android project into a json file."
+                variant.outputs.all { output ->
+                    // Deeplinks are defined in AndroidManifest.xml and is only available after
+                    // `processResourcesProvider`.
+                    def processResources = output.hasProperty("processResourcesProvider") ?
+                            output.processResourcesProvider.get() : output.processResources
+                    dependsOn processResources.name
+                }
+                doLast {
+                    def appLinkSettings = new AppLinkSettings()
+                    appLinkSettings.applicationId = variant.applicationId
+                    appLinkSettings.deeplinks = [] as Set<Deeplink>
+                    variant.outputs.all { output ->
+                        def processResources = output.hasProperty("processResourcesProvider") ?
+                                output.processResourcesProvider.get() : output.processResources
+                        def manifest = new XmlParser().parse(processResources.manifestFile)
+                        manifest.application.activity.each { activity ->
+                            activity.'intent-filter'.each { appLinkIntent ->
+                                // Print out the host attributes in data tags.
+                                def schemes = [] as Set<String>
+                                def hosts = [] as Set<String>
+                                def paths = [] as Set<String>
+                                appLinkIntent.data.each { data ->
+                                    data.attributes().each { entry ->
+                                        if (entry.key instanceof QName) {
+                                            switch (entry.key.getLocalPart()) {
+                                                case "scheme":
+                                                    schemes.add(entry.value)
+                                                    break
+                                                case "host":
+                                                    hosts.add(entry.value)
+                                                    break
+                                                case "pathAdvancedPattern":
+                                                case "pathPattern":
+                                                case "path":
+                                                    paths.add(entry.value)
+                                                    break
+                                                case "pathPrefix":
+                                                    paths.add("${entry.value}.*")
+                                                    break
+                                                case "pathSuffix":
+                                                    paths.add(".*${entry.value}")
+                                                    break
+                                            }
+                                        }
+                                    }
+                                }
+                                schemes.each {scheme ->
+                                    hosts.each { host ->
+                                        if (!paths) {
+                                            appLinkSettings.deeplinks.add(new Deeplink(scheme: scheme, host: host, path: ".*"))
+                                        } else {
+                                            paths.each { path ->
+                                                appLinkSettings.deeplinks.add(new Deeplink(scheme: scheme, host: host, path: path))
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    def generator = new JsonGenerator.Options().build()
+                    new File(project.buildDir, "app-link-settings-${variant.name}.json").write(generator.toJson(appLinkSettings))
+                }
+            }
+        }
+    }
+
     /**
      * Returns a Flutter build mode suitable for the specified Android buildType.
      *
@@ -904,7 +1009,10 @@ class FlutterPlugin implements Plugin<Project> {
             validateDeferredComponentsValue = project.property('validate-deferred-components').toBoolean()
         }
         addTaskForJavaVersion(project)
-        addTaskForPrintBuildVariants(project)
+        if(isFlutterAppProject()) {
+            addTaskForPrintBuildVariants(project)
+            addTasksForOutputsAppLinkSettings(project)
+        }
         def targetPlatforms = getTargetPlatforms()
         def addFlutterDeps = { variant ->
             if (shouldSplitPerAbi()) {
@@ -933,6 +1041,7 @@ class FlutterPlugin implements Plugin<Project> {
                 flutterExecutable this.flutterExecutable
                 buildMode variantBuildMode
                 localEngine this.localEngine
+                localEngineHost this.localEngineHost
                 localEngineSrcPath this.localEngineSrcPath
                 targetPath getFlutterTarget()
                 verbose this.isVerbose()
@@ -1081,7 +1190,7 @@ class FlutterPlugin implements Plugin<Project> {
         // Flutter host module project (Add-to-app).
         String hostAppProjectName = project.rootProject.hasProperty('flutter.hostAppProjectName') ? project.rootProject.property('flutter.hostAppProjectName') : "app"
         Project appProject = project.rootProject.findProject(":${hostAppProjectName}")
-        assert appProject != null : "Project :${hostAppProjectName} doesn't exist. To custom the host app project name, set `org.gradle.project.flutter.hostAppProjectName=<project-name>` in gradle.properties."
+        assert appProject != null : "Project :${hostAppProjectName} doesn't exist. To customize the host app project name, set `flutter.hostAppProjectName=<project-name>` in gradle.properties."
         // Wait for the host app project configuration.
         appProject.afterEvaluate {
             assert appProject.android != null
@@ -1131,6 +1240,24 @@ class FlutterPlugin implements Plugin<Project> {
     }
 }
 
+class AppLinkSettings {
+    String applicationId
+    Set<Deeplink> deeplinks
+}
+
+class Deeplink {
+    String scheme, host, path
+    boolean equals(o) {
+        if (o == null)
+            throw new NullPointerException()
+        if (o.getClass() != getClass())
+            return false
+        return scheme == o.scheme &&
+                host == o.host &&
+                path == o.path
+    }
+}
+
 abstract class BaseFlutterTask extends DefaultTask {
     @Internal
     File flutterRoot
@@ -1140,6 +1267,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     String buildMode
     @Optional @Input
     String localEngine
+    @Optional @Input
+    String localEngineHost
     @Optional @Input
     String localEngineSrcPath
     @Optional @Input
@@ -1218,6 +1347,9 @@ abstract class BaseFlutterTask extends DefaultTask {
             if (localEngine != null) {
                 args "--local-engine", localEngine
                 args "--local-engine-src-path", localEngineSrcPath
+            }
+            if (localEngineHost != null) {
+                args "--local-engine-host", localEngineHost
             }
             if (verbose) {
                 args "--verbose"

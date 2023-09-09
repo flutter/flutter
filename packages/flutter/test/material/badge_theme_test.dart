@@ -5,8 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../rendering/mock_canvas.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('BadgeThemeData copyWith, ==, hashCode basics', () {
@@ -32,7 +31,7 @@ void main() {
     expect(themeData.offset, null);
   });
 
-  testWidgets('Default BadgeThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default BadgeThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const BadgeThemeData().debugFillProperties(builder);
 
@@ -44,7 +43,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('BadgeThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('BadgeThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const BadgeThemeData(
       backgroundColor: Color(0xfffffff0),
@@ -74,7 +73,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Badge uses ThemeData badge theme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Badge uses ThemeData badge theme', (WidgetTester tester) async {
     const Color green = Color(0xff00ff00);
     const Color black = Color(0xff000000);
     const BadgeThemeData badgeTheme = BadgeThemeData(
@@ -123,7 +122,7 @@ void main() {
   // This test is essentially the same as 'Badge uses ThemeData badge theme'. In
   // this case the theme is introduced with the BadgeTheme widget instead of
   // ThemeData.badgeTheme.
-  testWidgets('Badge uses BadgeTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Badge uses BadgeTheme', (WidgetTester tester) async {
     const Color green = Color(0xff00ff00);
     const Color black = Color(0xff000000);
     const BadgeThemeData badgeTheme = BadgeThemeData(

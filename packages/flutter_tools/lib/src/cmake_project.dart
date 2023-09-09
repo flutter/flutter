@@ -64,6 +64,9 @@ class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject
   /// The native entrypoint's CMake specification.
   File get runnerCmakeFile => runnerDirectory.childFile('CMakeLists.txt');
 
+  /// The native entrypoint's file that adds Flutter to the window.
+  File get runnerFlutterWindowFile => runnerDirectory.childFile('flutter_window.cpp');
+
   /// The native entrypoint's resource file. Used to configure things
   /// like the application icon, name, and version.
   File get runnerResourceFile => runnerDirectory.childFile('Runner.rc');

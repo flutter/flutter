@@ -5,6 +5,7 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/executable.dart' as executable;
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
@@ -15,6 +16,14 @@ import '../src/testbed.dart';
 import 'runner/utils.dart';
 
 void main() {
+  setUpAll(() {
+    Cache.disableLocking();
+  });
+
+  tearDownAll(() {
+    Cache.enableLocking();
+  });
+
   test('Help for command line arguments is consistently styled and complete', () => Testbed().run(() {
     final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
     executable.generateCommands(
@@ -30,11 +39,53 @@ void main() {
     }
   }));
 
+  testUsingContext('Global arg results are available in FlutterCommands', () async {
+    final DummyFlutterCommand command = DummyFlutterCommand(
+      commandFunction: () async {
+        return const FlutterCommandResult(ExitStatus.success);
+      },
+    );
+
+    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
+
+    runner.addCommand(command);
+    await runner.run(<String>['dummy', '--${FlutterGlobalOptions.kContinuousIntegrationFlag}']);
+
+    expect(command.globalResults, isNotNull);
+    expect(command.boolArg(FlutterGlobalOptions.kContinuousIntegrationFlag, global: true), true);
+  });
+
+  testUsingContext('Global arg results are available in FlutterCommands sub commands', () async {
+    final DummyFlutterCommand command = DummyFlutterCommand(
+      commandFunction: () async {
+        return const FlutterCommandResult(ExitStatus.success);
+      },
+    );
+
+    final DummyFlutterCommand subcommand = DummyFlutterCommand(
+      name: 'sub',
+      commandFunction: () async {
+        return const FlutterCommandResult(ExitStatus.success);
+      },
+    );
+
+    command.addSubcommand(subcommand);
+
+    final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
+
+    runner.addCommand(command);
+    runner.addCommand(subcommand);
+    await runner.run(<String>['dummy', 'sub', '--${FlutterGlobalOptions.kContinuousIntegrationFlag}']);
+
+    expect(subcommand.globalResults, isNotNull);
+    expect(subcommand.boolArg(FlutterGlobalOptions.kContinuousIntegrationFlag, global: true), true);
+  });
+
   testUsingContext('bool? safe argResults', () async {
     final DummyFlutterCommand command = DummyFlutterCommand(
-        commandFunction: () async {
-          return const FlutterCommandResult(ExitStatus.success);
-        }
+      commandFunction: () async {
+        return const FlutterCommandResult(ExitStatus.success);
+      },
     );
     final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
     command.argParser.addFlag('key');
@@ -58,9 +109,9 @@ void main() {
 
   testUsingContext('String? safe argResults', () async {
     final DummyFlutterCommand command = DummyFlutterCommand(
-        commandFunction: () async {
-          return const FlutterCommandResult(ExitStatus.success);
-        }
+      commandFunction: () async {
+        return const FlutterCommandResult(ExitStatus.success);
+      },
     );
     final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
     command.argParser.addOption('key');
@@ -80,9 +131,9 @@ void main() {
 
   testUsingContext('List<String> safe argResults', () async {
     final DummyFlutterCommand command = DummyFlutterCommand(
-        commandFunction: () async {
-          return const FlutterCommandResult(ExitStatus.success);
-        }
+      commandFunction: () async {
+        return const FlutterCommandResult(ExitStatus.success);
+      },
     );
     final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: true);
     command.argParser.addMultiOption(
@@ -124,7 +175,7 @@ void verifyCommand(Command<Object?> runner) {
   final String firstDescriptionLine = runner.description.split('\n').first;
   expect(firstDescriptionLine, matches(_allowedTrailingPatterns), reason: "command ${runner.name}'s description does not end with the expected single period that a full sentence should end with");
 
-  if (runner.hidden == false && runner.parent == null) {
+  if (!runner.hidden && runner.parent == null) {
     expect(
       runner.category,
       anyOf(

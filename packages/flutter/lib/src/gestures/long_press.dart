@@ -629,7 +629,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     }
 
     if (event is PointerUpEvent) {
-      if (_longPressAccepted == true) {
+      if (_longPressAccepted) {
         _checkLongPressEnd(event);
       } else {
         // Pointer is lifted before timeout.
@@ -645,7 +645,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
       _initialButtons = event.buttons;
       _checkLongPressDown(event);
     } else if (event is PointerMoveEvent) {
-      if (event.buttons != _initialButtons) {
+      if (event.buttons != _initialButtons && !_longPressAccepted) {
         resolve(GestureDisposition.rejected);
         stopTrackingPointer(primaryPointer!);
       } else if (_longPressAccepted) {

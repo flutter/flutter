@@ -19,7 +19,7 @@ class _${blockName}DefaultsM3 extends AppBarTheme {
       elevation: ${elevation('md.comp.top-app-bar.small.container')},
       scrolledUnderElevation: ${elevation('md.comp.top-app-bar.small.on-scroll.container')},
       titleSpacing: NavigationToolbar.kMiddleSpacing,
-      toolbarHeight: ${tokens['md.comp.top-app-bar.small.container.height']},
+      toolbarHeight: ${getToken('md.comp.top-app-bar.small.container.height')},
     );
 
   final BuildContext context;
@@ -42,13 +42,13 @@ class _${blockName}DefaultsM3 extends AppBarTheme {
   @override
   IconThemeData? get iconTheme => IconThemeData(
     color: ${componentColor('md.comp.top-app-bar.small.leading-icon')},
-    size: ${tokens['md.comp.top-app-bar.small.leading-icon.size']},
+    size: ${getToken('md.comp.top-app-bar.small.leading-icon.size')},
   );
 
   @override
   IconThemeData? get actionsIconTheme => IconThemeData(
     color: ${componentColor('md.comp.top-app-bar.small.trailing-icon')},
-    size: ${tokens['md.comp.top-app-bar.small.trailing-icon.size']},
+    size: ${getToken('md.comp.top-app-bar.small.trailing-icon.size')},
   );
 
   @override
@@ -67,8 +67,8 @@ class _MediumScrollUnderFlexibleConfig with _ScrollUnderFlexibleConfig {
   late final ColorScheme _colors = _theme.colorScheme;
   late final TextTheme _textTheme = _theme.textTheme;
 
-  static const double collapsedHeight = ${tokens['md.comp.top-app-bar.small.container.height']};
-  static const double expandedHeight = ${tokens['md.comp.top-app-bar.medium.container.height']};
+  static const double collapsedHeight = ${getToken('md.comp.top-app-bar.small.container.height')};
+  static const double expandedHeight = ${getToken('md.comp.top-app-bar.medium.container.height')};
 
   @override
   TextStyle? get collapsedTextStyle =>
@@ -79,13 +79,7 @@ class _MediumScrollUnderFlexibleConfig with _ScrollUnderFlexibleConfig {
     ${textStyle('md.comp.top-app-bar.medium.headline')}?.apply(color: ${color('md.comp.top-app-bar.medium.headline.color')});
 
   @override
-  EdgeInsetsGeometry? get collapsedTitlePadding => const EdgeInsetsDirectional.only(start: 40);
-
-  @override
-  EdgeInsetsGeometry? get collapsedCenteredTitlePadding => const EdgeInsetsDirectional.only(start: 40);
-
-  @override
-  EdgeInsetsGeometry? get expandedTitlePadding => const EdgeInsets.fromLTRB(16, 0, 16, 20);
+  EdgeInsetsGeometry get expandedTitlePadding => const EdgeInsets.fromLTRB(16, 0, 16, 20);
 }
 
 class _LargeScrollUnderFlexibleConfig with _ScrollUnderFlexibleConfig {
@@ -96,8 +90,8 @@ class _LargeScrollUnderFlexibleConfig with _ScrollUnderFlexibleConfig {
   late final ColorScheme _colors = _theme.colorScheme;
   late final TextTheme _textTheme = _theme.textTheme;
 
-  static const double collapsedHeight = ${tokens['md.comp.top-app-bar.small.container.height']};
-  static const double expandedHeight = ${tokens['md.comp.top-app-bar.large.container.height']};
+  static const double collapsedHeight = ${getToken('md.comp.top-app-bar.small.container.height')};
+  static const double expandedHeight = ${getToken('md.comp.top-app-bar.large.container.height')};
 
   @override
   TextStyle? get collapsedTextStyle =>
@@ -108,13 +102,7 @@ class _LargeScrollUnderFlexibleConfig with _ScrollUnderFlexibleConfig {
     ${textStyle('md.comp.top-app-bar.large.headline')}?.apply(color: ${color('md.comp.top-app-bar.large.headline.color')});
 
   @override
-  EdgeInsetsGeometry? get collapsedTitlePadding => const EdgeInsetsDirectional.only(start: 40);
-
-  @override
-  EdgeInsetsGeometry? get collapsedCenteredTitlePadding => const EdgeInsetsDirectional.only(start: 40);
-
-  @override
-  EdgeInsetsGeometry? get expandedTitlePadding => const EdgeInsets.fromLTRB(16, 0, 16, 28);
+  EdgeInsetsGeometry get expandedTitlePadding => const EdgeInsets.fromLTRB(16, 0, 16, 28);
 }
 ''';
 }

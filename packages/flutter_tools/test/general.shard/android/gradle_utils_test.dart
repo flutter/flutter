@@ -216,6 +216,20 @@ void main() {
       expect(getGradlewFileName(windowsPlatform), 'gradlew.bat');
     });
 
+    testWithoutContext('returns the gradle properties file', () async {
+      final Directory androidDirectory = fileSystem.directory('/android')
+        ..createSync();
+      final Directory wrapperDirectory = androidDirectory
+          .childDirectory(gradleDirectoryName)
+          .childDirectory(gradleWrapperDirectoryName)
+        ..createSync(recursive: true);
+      final File expectedFile = await wrapperDirectory
+          .childFile(gradleWrapperPropertiesFilename)
+          .create();
+      final File gradleWrapperFile = getGradleWrapperFile(androidDirectory);
+      expect(gradleWrapperFile.path, expectedFile.path);
+    });
+
     testWithoutContext('returns the gradle wrapper version', () async {
       const String expectedVersion = '7.4.2';
       final Directory androidDirectory = fileSystem.directory('/android')
@@ -533,6 +547,32 @@ allprojects {
               reason: 'G: ${data.gradleVersion}, AGP: ${data.agpVersion}');
         });
       }
+    });
+
+    group('Parse gradle version from distribution url', () {
+      testWithoutContext('null distribution url returns null version', () {
+        expect(parseGradleVersionFromDistributionUrl(null), null);
+      });
+
+      testWithoutContext('unparseable format returns null', () {
+        const String distributionUrl = 'aString';
+        expect(parseGradleVersionFromDistributionUrl(distributionUrl), null);
+      });
+
+      testWithoutContext("recognizable 'all' format returns correct version", () {
+        const String distributionUrl = r'distributionUrl=https\://services.gradle.org/distributions/gradle-6.7-all.zip';
+        expect(parseGradleVersionFromDistributionUrl(distributionUrl), '6.7');
+      });
+
+      testWithoutContext("recognizable 'bin' format returns correct version", () {
+        const String distributionUrl = r'distributionUrl=https\://services.gradle.org/distributions/gradle-6.7-bin.zip';
+        expect(parseGradleVersionFromDistributionUrl(distributionUrl), '6.7');
+      });
+
+      testWithoutContext("recognizable 'rc' format returns correct version", () {
+        const String distributionUrl = r'distributionUrl=https\://services.gradle.org/distributions/gradle-8.1-rc-3-all.zip';
+        expect(parseGradleVersionFromDistributionUrl(distributionUrl), '8.1');
+      });
     });
 
     group('validates java/gradle versions', () {

@@ -11,6 +11,7 @@ import 'color_scheme.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'icons.dart';
+import 'material_state.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
@@ -39,6 +40,16 @@ import 'theme_data.dart';
 /// When the user taps the delete icon, the chip will be deleted.
 ///
 /// ** See code in examples/api/lib/material/input_chip/input_chip.0.dart **
+/// {@end-tool}
+///
+///
+/// {@tool dartpad}
+/// The following example shows how to generate [InputChip]s from
+/// user text input. When the user enters a pizza topping in the text field,
+/// the user is presented with a list of suggestions. When selecting one of the
+/// suggestions, an [InputChip] is generated in the text field.
+///
+/// ** See code in examples/api/lib/material/input_chip/input_chip.1.dart **
 /// {@end-tool}
 ///
 /// ## Material Design 3
@@ -99,6 +110,7 @@ class InputChip extends StatelessWidget
     this.clipBehavior = Clip.none,
     this.focusNode,
     this.autofocus = false,
+    this.color,
     this.backgroundColor,
     this.padding,
     this.visualDensity,
@@ -162,6 +174,8 @@ class InputChip extends StatelessWidget
   @override
   final bool autofocus;
   @override
+  final MaterialStateProperty<Color?>? color;
+  @override
   final Color? backgroundColor;
   @override
   final EdgeInsetsGeometry? padding;
@@ -223,6 +237,7 @@ class InputChip extends StatelessWidget
       clipBehavior: clipBehavior,
       focusNode: focusNode,
       autofocus: autofocus,
+      color: color,
       backgroundColor: backgroundColor,
       padding: padding,
       visualDensity: visualDensity,
@@ -246,8 +261,6 @@ class InputChip extends StatelessWidget
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_162
-
 class _InputChipDefaultsM3 extends ChipThemeData {
   _InputChipDefaultsM3(this.context, this.isEnabled, this.isSelected)
     : super(
@@ -266,7 +279,19 @@ class _InputChipDefaultsM3 extends ChipThemeData {
   TextStyle? get labelStyle => _textTheme.labelLarge;
 
   @override
-  Color? get backgroundColor => null;
+  MaterialStateProperty<Color?>? get color =>
+    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      if (states.contains(MaterialState.selected) && states.contains(MaterialState.disabled)) {
+        return _colors.onSurface.withOpacity(0.12);
+      }
+      if (states.contains(MaterialState.disabled)) {
+        return null;
+      }
+      if (states.contains(MaterialState.selected)) {
+        return _colors.secondaryContainer;
+      }
+      return null;
+    });
 
   @override
   Color? get shadowColor => Colors.transparent;
@@ -275,15 +300,7 @@ class _InputChipDefaultsM3 extends ChipThemeData {
   Color? get surfaceTintColor => Colors.transparent;
 
   @override
-  Color? get selectedColor => isEnabled
-    ? _colors.secondaryContainer
-    : _colors.onSurface.withOpacity(0.12);
-
-  @override
   Color? get checkmarkColor => null;
-
-  @override
-  Color? get disabledColor => null;
 
   @override
   Color? get deleteIconColor => _colors.onSecondaryContainer;
@@ -314,7 +331,7 @@ class _InputChipDefaultsM3 extends ChipThemeData {
   EdgeInsetsGeometry? get labelPadding => EdgeInsets.lerp(
     const EdgeInsets.symmetric(horizontal: 8.0),
     const EdgeInsets.symmetric(horizontal: 4.0),
-    clampDouble(MediaQuery.textScaleFactorOf(context) - 1.0, 0.0, 1.0),
+    clampDouble(MediaQuery.textScalerOf(context).textScaleFactor - 1.0, 0.0, 1.0),
   )!;
 }
 

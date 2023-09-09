@@ -141,7 +141,7 @@ Future<void> buildMacOS({
     throwToolExit('Build process failed');
   }
   if (buildInfo.codeSizeDirectory != null && sizeAnalyzer != null) {
-    final String arch = getNameForDarwinArch(DarwinArch.x86_64);
+    final String arch = DarwinArch.x86_64.name;
     final File aotSnapshot = globals.fs.directory(buildInfo.codeSizeDirectory)
       .childFile('snapshot.$arch.json');
     final File precompilerTrace = globals.fs.directory(buildInfo.codeSizeDirectory)

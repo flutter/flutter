@@ -136,7 +136,7 @@ class WebFlutterDriver extends FlutterDriver {
       }
 
       _logCommunication('<<< $response');
-    } on DriverError catch(_) {
+    } on DriverError catch (_) {
       rethrow;
     } catch (error, stackTrace) {
       throw DriverError(

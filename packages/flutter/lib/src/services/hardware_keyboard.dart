@@ -7,7 +7,9 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 
 import 'binding.dart';
+import 'debug.dart';
 import 'raw_keyboard.dart';
+import 'system_channels.dart';
 
 export 'dart:ui' show KeyData;
 
@@ -15,6 +17,41 @@ export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
 
 export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
 export 'raw_keyboard.dart' show RawKeyEvent, RawKeyboard;
+
+// When using _keyboardDebug, always call it like so:
+//
+// assert(_keyboardDebug(() => 'Blah $foo'));
+//
+// It needs to be inside the assert in order to be removed in release mode, and
+// it needs to use a closure to generate the string in order to avoid string
+// interpolation when debugPrintKeyboardEvents is false.
+//
+// It will throw a StateError if you try to call it when the app is in release
+// mode.
+bool _keyboardDebug(
+  String Function() messageFunc, [
+  Iterable<Object> Function()? detailsFunc,
+]) {
+  if (kReleaseMode) {
+    throw StateError(
+      '_keyboardDebug was called in Release mode, which means they are called '
+      'without being wrapped in an assert. Always call _keyboardDebug like so:\n'
+      r"  assert(_keyboardDebug(() => 'Blah $foo'));"
+    );
+  }
+  if (!debugPrintKeyboardEvents) {
+    return true;
+  }
+  debugPrint('KEYBOARD: ${messageFunc()}');
+  final Iterable<Object> details = detailsFunc?.call() ?? const <Object>[];
+  if (details.isNotEmpty) {
+    for (final Object detail in details) {
+      debugPrint('    $detail');
+    }
+  }
+  // Return true so that it can be used inside of an assert.
+  return true;
+}
 
 /// Represents a lock mode of a keyboard, such as [KeyboardLockMode.capsLock].
 ///
@@ -494,6 +531,24 @@ class HardwareKeyboard {
     }
   }
 
+  /// Query the engine and update _pressedKeys accordingly to the engine answer.
+  //
+  /// Both the framework and the engine maintain a state of the current pressed
+  /// keys. There are edge cases, related to startup and restart, where the framework
+  /// needs to resynchronize its keyboard state.
+  Future<void> syncKeyboardState() async {
+    final Map<int, int>? keyboardState = await SystemChannels.keyboard.invokeMapMethod<int, int>(
+      'getKeyboardState',
+    );
+    if (keyboardState != null) {
+      for (final int key in keyboardState.keys) {
+        final PhysicalKeyboardKey physicalKey = PhysicalKeyboardKey(key);
+        final LogicalKeyboardKey logicalKey = LogicalKeyboardKey(keyboardState[key]!);
+        _pressedKeys[physicalKey] = logicalKey;
+      }
+    }
+  }
+
   bool _dispatchKeyEvent(KeyEvent event) {
     // This dispatching could have used the same algorithm as [ChangeNotifier],
     // but since 1) it shouldn't be necessary to support reentrantly
@@ -531,9 +586,22 @@ class HardwareKeyboard {
     return handled;
   }
 
+  List<String> _debugPressedKeysDetails() {
+    if (_pressedKeys.isEmpty) {
+      return <String>['Empty'];
+    }
+    final List<String> details = <String>[];
+    for (final PhysicalKeyboardKey physicalKey in _pressedKeys.keys) {
+      details.add('$physicalKey: ${_pressedKeys[physicalKey]}');
+    }
+    return details;
+  }
+
   /// Process a new [KeyEvent] by recording the state changes and dispatching
   /// to handlers.
   bool handleKeyEvent(KeyEvent event) {
+    assert(_keyboardDebug(() => 'Key event received: $event'));
+    assert(_keyboardDebug(() => 'Pressed state before processing the event:', _debugPressedKeysDetails));
     _assertEventIsRegular(event);
     final PhysicalKeyboardKey physicalKey = event.physicalKey;
     final LogicalKeyboardKey logicalKey = event.logicalKey;
@@ -553,6 +621,7 @@ class HardwareKeyboard {
       // Empty
     }
 
+    assert(_keyboardDebug(() => 'Pressed state after processing the event:', _debugPressedKeysDetails));
     return _dispatchKeyEvent(event);
   }
 
@@ -723,14 +792,42 @@ typedef KeyMessageHandler = bool Function(KeyMessage message);
 /// and [RawKeyboard] for recording keeping, and then dispatches the [KeyMessage]
 /// to [keyMessageHandler], the global message handler.
 ///
-/// [KeyEventManager] also resolves cross-platform compatibility of keyboard
-/// implementations. Legacy platforms might have not implemented the new key
-/// data API and only send raw key data on each key message. [KeyEventManager]
-/// recognize platform types as [KeyDataTransitMode] and dispatches events in
-/// different ways accordingly.
-///
 /// [KeyEventManager] is typically created, owned, and invoked by
 /// [ServicesBinding].
+///
+/// ## On embedder implementation
+///
+/// Currently, Flutter has two sets of key event APIs running in parallel.
+///
+/// * The legacy "raw key event" route receives messages from the
+///   "flutter/keyevent" message channel ([SystemChannels.keyEvent]) and
+///   dispatches [RawKeyEvent] to [RawKeyboard] and [Focus.onKey] as well as
+///   similar methods.
+/// * The newer "hardware key event" route receives messages from the
+///   "flutter/keydata" message channel (embedder API
+///   `FlutterEngineSendKeyEvent`) and dispatches [KeyEvent] to
+///   [HardwareKeyboard] and some methods such as [Focus.onKeyEvent].
+///
+/// [KeyEventManager] resolves cross-platform compatibility of keyboard
+/// implementations, since legacy platforms might have not implemented the new
+/// key data API and only send raw key data on each key message.
+/// [KeyEventManager] recognizes the platform support by detecting whether a
+/// message comes from platform channel "flutter/keyevent" before one from
+/// "flutter/keydata", or vice versa, at the beginning of the app.
+///
+/// * If a "flutter/keyevent" message is received first, then this platform is
+///   considered a legacy platform. The raw key event is transformed into a
+///   hardware key event at best effort. No messages from "flutter/keydata" are
+///   expected.
+/// * If a "flutter/keydata" message is received first, then this platform is
+///   considered a newer platform. The hardware key events are stored, and
+///   dispatched only when a raw key message is received.
+///
+/// Therefore, to correctly implement a platform that supports
+/// `FlutterEngineSendKeyEvent`, the platform must ensure that
+/// `FlutterEngineSendKeyEvent` is called before sending a message to
+/// "flutter/keyevent" at the beginning of the app, and every physical key event
+/// is ended with a "flutter/keyevent" message.
 class KeyEventManager {
   /// Create an instance.
   ///

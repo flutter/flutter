@@ -64,19 +64,19 @@ class Visibility extends StatelessWidget {
     this.maintainSemantics = false,
     this.maintainInteractivity = false,
   }) : assert(
-         maintainState == true || maintainAnimation == false,
+         maintainState || !maintainAnimation,
          'Cannot maintain animations if the state is not also maintained.',
        ),
        assert(
-         maintainAnimation == true || maintainSize == false,
+         maintainAnimation || !maintainSize,
          'Cannot maintain size if animations are not maintained.',
        ),
        assert(
-         maintainSize == true || maintainSemantics == false,
+         maintainSize || !maintainSemantics,
          'Cannot maintain semantics if size is not maintained.',
        ),
        assert(
-         maintainSize == true || maintainInteractivity == false,
+         maintainSize || !maintainInteractivity,
          'Cannot maintain interactivity if size is not maintained.',
        );
 
@@ -354,19 +354,19 @@ class SliverVisibility extends StatelessWidget {
     this.maintainSemantics = false,
     this.maintainInteractivity = false,
   }) : assert(
-         maintainState == true || maintainAnimation == false,
+         maintainState || !maintainAnimation,
          'Cannot maintain animations if the state is not also maintained.',
        ),
        assert(
-         maintainAnimation == true || maintainSize == false,
+         maintainAnimation || !maintainSize,
          'Cannot maintain size if animations are not maintained.',
        ),
        assert(
-         maintainSize == true || maintainSemantics == false,
+         maintainSize || !maintainSemantics,
          'Cannot maintain semantics if size is not maintained.',
        ),
        assert(
-         maintainSize == true || maintainInteractivity == false,
+         maintainSize || !maintainInteractivity,
          'Cannot maintain interactivity if size is not maintained.',
        );
 

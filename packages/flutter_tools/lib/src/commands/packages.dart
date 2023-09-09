@@ -6,8 +6,10 @@ import 'package:args/args.dart';
 
 import '../base/common.dart';
 import '../base/os.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
+import '../build_system/targets/localizations.dart';
 import '../cache.dart';
 import '../dart/generate_synthetic_packages.dart';
 import '../dart/pub.dart';
@@ -18,8 +20,14 @@ import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 
+/// The function signature of the [print] function.
+typedef PrintFn = void Function(Object?);
+
 class PackagesCommand extends FlutterCommand {
-  PackagesCommand() {
+  PackagesCommand({
+    PrintFn usagePrintFn = print,
+  }) : _usagePrintFn = usagePrintFn
+  {
     addSubcommand(PackagesGetCommand('get', "Get the current package's dependencies.", PubContext.pubGet));
     addSubcommand(PackagesGetCommand('upgrade', "Upgrade the current package's dependencies to latest versions.", PubContext.pubUpgrade));
     addSubcommand(PackagesGetCommand('add', 'Add a dependency to pubspec.yaml.', PubContext.pubAdd));
@@ -40,6 +48,8 @@ class PackagesCommand extends FlutterCommand {
     addSubcommand(PackagesPassthroughCommand());
   }
 
+  final PrintFn _usagePrintFn;
+
   @override
   final String name = 'pub';
 
@@ -54,6 +64,9 @@ class PackagesCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async => FlutterCommandResult.fail();
+
+  @override
+  void printUsage() => _usagePrintFn(usage);
 }
 
 class PackagesTestCommand extends FlutterCommand {
@@ -293,6 +306,32 @@ class PackagesGetCommand extends FlutterCommand {
           environment: environment,
           buildSystem: globals.buildSystem,
         );
+      } else if (rootProject.directory.childFile('l10n.yaml').existsSync()) {
+        final Environment environment = Environment(
+          artifacts: globals.artifacts!,
+          logger: globals.logger,
+          cacheDir: globals.cache.getRoot(),
+          engineVersion: globals.flutterVersion.engineRevision,
+          fileSystem: globals.fs,
+          flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+          outputDir: globals.fs.directory(getBuildDirectory()),
+          processManager: globals.processManager,
+          platform: globals.platform,
+          usage: globals.flutterUsage,
+          projectDir: rootProject.directory,
+          generateDartPluginRegistry: true,
+        );
+        final BuildResult result = await globals.buildSystem.build(
+          const GenerateLocalizationsTarget(),
+          environment,
+        );
+        if (result.hasException) {
+          throwToolExit(
+            'Generating synthetic localizations package failed with ${result.exceptions.length} ${pluralize('error', result.exceptions.length)}:'
+            '\n\n'
+            '${result.exceptions.values.map<Object?>((ExceptionMeasurement e) => e.exception).join('\n\n')}',
+          );
+        }
       }
     }
     final String? relativeTarget = target == null ? null : globals.fs.path.relative(target);
@@ -305,8 +344,8 @@ class PackagesGetCommand extends FlutterCommand {
           name,
           ...subArgs,
           // `dart pub get` and friends defaults to `--no-example`.
-          if(!exampleWasParsed && target != null) '--example',
-          if(directoryOption == null && relativeTarget != null) ...<String>['--directory', relativeTarget],
+          if (!exampleWasParsed && target != null) '--example',
+          if (directoryOption == null && relativeTarget != null) ...<String>['--directory', relativeTarget],
         ],
         project: rootProject,
         context: _context,

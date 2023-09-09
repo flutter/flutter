@@ -1009,7 +1009,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
       isInDebugMode = true;
       return true;
     }());
-    final bool reportError = isInDebugMode || details.silent != true; // could be null
+    final bool reportError = isInDebugMode || !details.silent;
     if (!reportError && !forceReport) {
       return;
     }
@@ -1117,7 +1117,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
 
     // Only include packages we actually elided from.
     final List<String> where = <String>[
-      for (MapEntry<String, int> entry in removedPackagesAndClasses.entries)
+      for (final MapEntry<String, int> entry in removedPackagesAndClasses.entries)
         if (entry.value > 0)
           entry.key,
     ]..sort();

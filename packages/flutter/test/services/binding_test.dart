@@ -46,7 +46,13 @@ class TestBinding extends BindingBase with SchedulerBinding, ServicesBinding {
 
   @override
   TestDefaultBinaryMessenger createBinaryMessenger() {
-    return TestDefaultBinaryMessenger(super.createBinaryMessenger());
+    Future<ByteData?> keyboardHandler(ByteData? message) async {
+      return const StandardMethodCodec().encodeSuccessEnvelope(<int, int>{1:1});
+    }
+    return TestDefaultBinaryMessenger(
+      super.createBinaryMessenger(),
+      outboundHandlers: <String, MessageHandler>{'flutter/keyboard': keyboardHandler},
+    );
   }
 }
 
@@ -83,7 +89,7 @@ void main() {
     int flutterAssetsCallCount = 0;
     binding.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) async {
       flutterAssetsCallCount += 1;
-      return Uint8List.fromList('test_asset_data'.codeUnits).buffer.asByteData();
+      return ByteData.sublistView(utf8.encode('test_asset_data'));
     });
 
     await rootBundle.loadString('test_asset');
@@ -144,5 +150,15 @@ void main() {
     expect(receivedReply, isTrue);
     expect(result, isNotNull);
     expect(result!['response'], equals('exit'));
+  });
+
+  test('initInstances synchronizes keyboard state', () async {
+    final Set<PhysicalKeyboardKey> physicalKeys = HardwareKeyboard.instance.physicalKeysPressed;
+    final Set<LogicalKeyboardKey> logicalKeys = HardwareKeyboard.instance.logicalKeysPressed;
+
+    expect(physicalKeys.length, 1);
+    expect(logicalKeys.length, 1);
+    expect(physicalKeys.first, const PhysicalKeyboardKey(1));
+    expect(logicalKeys.first, const LogicalKeyboardKey(1));
   });
 }

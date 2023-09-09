@@ -7,10 +7,15 @@ import 'package:flutter/foundation.dart';
 import 'asset_bundle.dart';
 import 'message_codecs.dart';
 
+// We use .bin as the extension since it is well-known to represent
+// data in some arbitrary binary format. Using a well-known extension here
+// is important for web, because some web servers will not serve files with
+// unrecognized file extensions by default.
+// See https://github.com/flutter/flutter/issues/128456.
 const String _kAssetManifestFilename = 'AssetManifest.bin';
 
 /// Contains details about available assets and their variants.
-/// See [Asset variants](https://docs.flutter.dev/development/ui/assets-and-images#asset-variants)
+/// See [Resolution-aware image assets](https://docs.flutter.dev/ui/assets-and-images#resolution-aware)
 /// to learn about asset variants and how to declare them.
 abstract class AssetManifest {
   /// Loads asset manifest data from an [AssetBundle] object and creates an
@@ -26,15 +31,15 @@ abstract class AssetManifest {
   /// file at build time.
   ///
   /// See [Specifying assets](https://docs.flutter.dev/development/ui/assets-and-images#specifying-assets)
-  /// and [Loading assets](https://docs.flutter.dev/development/ui/assets-and-images#loading-assets) for more
-  /// information.
+  /// and [Loading assets](https://docs.flutter.dev/development/ui/assets-and-images#loading-assets)
+  /// for more information.
   List<String> listAssets();
 
   /// Retrieves metadata about an asset and its variants. Returns null if the
   /// key was not found in the asset manifest.
   ///
-  /// This method considers a main asset to be a variant of itself and
-  /// includes it in the returned list.
+  /// This method considers a main asset to be a variant of itself. The returned
+  /// list will include it if it exists.
   List<AssetMetadata>? getAssetVariants(String key);
 }
 
@@ -73,22 +78,21 @@ class _AssetManifestBin implements AssetManifest {
       }
       _typeCastedData[key] = ((_data[key] ?? <Object?>[]) as Iterable<Object?>)
         .cast<Map<Object?, Object?>>()
-        .map((Map<Object?, Object?> data) => AssetMetadata(
+        .map((Map<Object?, Object?> data) {
+          final String asset = data['asset']! as String;
+          final Object? dpr = data['dpr'];
+          return AssetMetadata(
             key: data['asset']! as String,
-            targetDevicePixelRatio: data['dpr']! as double,
-            main: false,
-        ))
+            targetDevicePixelRatio: dpr as double?,
+            main: key == asset,
+          );
+        })
         .toList();
 
       _data.remove(key);
     }
 
-    final AssetMetadata mainAsset = AssetMetadata(key: key,
-      targetDevicePixelRatio: null,
-      main: true
-    );
-
-    return <AssetMetadata>[mainAsset, ..._typeCastedData[key]!];
+    return _typeCastedData[key]!;
   }
 
   @override
@@ -115,7 +119,7 @@ class AssetMetadata {
   /// This will be null if the parent folder name is not a ratio value followed
   /// by an "x".
   ///
-  /// See [Declaring resolution-aware image assets](https://docs.flutter.dev/development/ui/assets-and-images#resolution-aware)
+  /// See [Resolution-aware image assets](https://docs.flutter.dev/development/ui/assets-and-images#resolution-aware)
   /// for more information.
   final double? targetDevicePixelRatio;
 
@@ -125,8 +129,5 @@ class AssetMetadata {
 
   /// Whether or not this is a main asset. In other words, this is true if
   /// this asset is not a variant of another asset.
-  ///
-  /// See [Asset variants](https://docs.flutter.dev/development/ui/assets-and-images#asset-variants)
-  /// for more about asset variants.
   final bool main;
 }

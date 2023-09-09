@@ -72,7 +72,7 @@ class PlatformViewsService {
   static final PlatformViewsService _instance = PlatformViewsService._();
 
   Future<void> _onMethodCall(MethodCall call) {
-    switch(call.method) {
+    switch (call.method) {
       case 'viewFocused':
         final int id = call.arguments as int;
         if (_focusCallbacks.containsKey(id)) {
@@ -196,13 +196,6 @@ class PlatformViewsService {
     return controller;
   }
 
-  /// Whether the render surface of the Android `FlutterView` should be converted to a `FlutterImageView`.
-  @Deprecated(
-    'No longer necessary to improve performance. '
-    'This feature was deprecated after v2.11.0-0.1.pre.',
-  )
-  static Future<void> synchronizeToNativeViewHierarchy(bool yes) async {}
-
   // TODO(amirh): reference the iOS plugin API for registering a UIView factory once it lands.
   /// This is work in progress, not yet ready to be used, and requires a custom engine build. Creates a controller for a new iOS UIView.
   ///
@@ -227,6 +220,7 @@ class PlatformViewsService {
     assert(creationParams == null || creationParamsCodec != null);
 
     // TODO(amirh): pass layoutDirection once the system channel supports it.
+    // https://github.com/flutter/flutter/issues/133682
     final Map<String, dynamic> args = <String, dynamic>{
       'id': id,
       'viewType': viewType,
@@ -244,6 +238,49 @@ class PlatformViewsService {
       _instance._focusCallbacks[id] = onFocus;
     }
     return UiKitViewController._(id, layoutDirection);
+  }
+
+  /// Factory method to create an `AppKitView`.
+  ///
+  /// `id` is an unused unique identifier generated with [platformViewsRegistry].
+  ///
+  /// `viewType` is the identifier of the iOS view type to be created, a
+  /// factory for this view type must have been registered on the platform side.
+  /// Platform view factories are typically registered by plugin code.
+  ///
+  /// `onFocus` is a callback that will be invoked when the UIKit view asks to
+  /// get the input focus.
+  /// The `id, `viewType, and `layoutDirection` parameters must not be null.
+  /// If `creationParams` is non null then `creationParamsCodec` must not be null.
+  static Future<AppKitViewController> initAppKitView({
+    required int id,
+    required String viewType,
+    required TextDirection layoutDirection,
+    dynamic creationParams,
+    MessageCodec<dynamic>? creationParamsCodec,
+    VoidCallback? onFocus,
+  }) async {
+    assert(creationParams == null || creationParamsCodec != null);
+
+    // TODO(amirh): pass layoutDirection once the system channel supports it.
+    // https://github.com/flutter/flutter/issues/133682
+    final Map<String, dynamic> args = <String, dynamic>{
+      'id': id,
+      'viewType': viewType,
+    };
+    if (creationParams != null) {
+      final ByteData paramsByteData = creationParamsCodec!.encodeMessage(creationParams)!;
+      args['params'] = Uint8List.view(
+        paramsByteData.buffer,
+        0,
+        paramsByteData.lengthInBytes,
+      );
+    }
+    await SystemChannels.platform_views.invokeMethod<void>('create', args);
+    if (onFocus != null) {
+      _instance._focusCallbacks[id] = onFocus;
+    }
+    return AppKitViewController._(id, layoutDirection);
   }
 }
 
@@ -1158,10 +1195,10 @@ abstract class _AndroidViewControllerInternals {
       'id': viewId,
       'viewType': viewType,
       'direction': AndroidViewController._getAndroidDirection(layoutDirection),
-      if (hybrid == true) 'hybrid': hybrid,
+      if (hybrid) 'hybrid': hybrid,
       if (size != null) 'width': size.width,
       if (size != null) 'height': size.height,
-      if (hybridFallback == true) 'hybridFallback': hybridFallback,
+      if (hybridFallback) 'hybridFallback': hybridFallback,
       if (position != null) 'left': position.dx,
       if (position != null) 'top': position.dy,
     };
@@ -1313,15 +1350,16 @@ class _HybridAndroidViewControllerInternals extends _AndroidViewControllerIntern
   }
 }
 
-/// Controls an iOS UIView.
+/// Base class for iOS and macOS view controllers.
 ///
-/// Typically created with [PlatformViewsService.initUiKitView].
-class UiKitViewController {
-  UiKitViewController._(
+/// View controllers are used to create and interact with the UIView or NSView
+/// underlying a platform view.
+abstract class DarwinPlatformViewController {
+  /// Public default for subclasses to override.
+  DarwinPlatformViewController(
     this.id,
     TextDirection layoutDirection,
   ) : _layoutDirection = layoutDirection;
-
 
   /// The unique identifier of the iOS view controlled by this controller.
   ///
@@ -1380,6 +1418,26 @@ class UiKitViewController {
     await SystemChannels.platform_views.invokeMethod<void>('dispose', id);
     PlatformViewsService._instance._focusCallbacks.remove(id);
   }
+}
+
+/// Controller for an iOS platform view.
+///
+/// View controllers create and interact with the underlying UIView.
+///
+/// Typically created with [PlatformViewsService.initUiKitView].
+class UiKitViewController extends DarwinPlatformViewController {
+  UiKitViewController._(
+    super.id,
+    super.layoutDirection,
+  );
+}
+
+/// Controller for a macOS platform view.
+class AppKitViewController extends DarwinPlatformViewController {
+  AppKitViewController._(
+    super.id,
+    super.layoutDirection,
+  );
 }
 
 /// An interface for controlling a single platform view.

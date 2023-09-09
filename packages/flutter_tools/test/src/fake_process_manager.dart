@@ -33,6 +33,7 @@ class FakeCommand {
     this.stdin,
     this.exception,
     this.outputFollowsExit = false,
+    this.processStartMode,
   });
 
   /// The exact commands that must be matched for this [FakeCommand] to be
@@ -102,22 +103,28 @@ class FakeCommand {
   /// [Future] on [io.Process] completes.
   final bool outputFollowsExit;
 
+  final io.ProcessStartMode? processStartMode;
+
   void _matches(
     List<String> command,
     String? workingDirectory,
     Map<String, String>? environment,
     Encoding? encoding,
+    io.ProcessStartMode? mode,
   ) {
     final List<dynamic> matchers = this.command.map((Pattern x) => x is String ? x : matches(x)).toList();
     expect(command, matchers);
+    if (processStartMode != null) {
+      expect(mode, processStartMode);
+    }
     if (this.workingDirectory != null) {
-      expect(this.workingDirectory, workingDirectory);
+      expect(workingDirectory, this.workingDirectory);
     }
     if (this.environment != null) {
-      expect(this.environment, environment);
+      expect(environment, this.environment);
     }
     if (this.encoding != null) {
-      expect(this.encoding, encoding);
+      expect(encoding, this.encoding);
     }
   }
 }
@@ -267,18 +274,26 @@ abstract class FakeProcessManager implements ProcessManager {
     String? workingDirectory,
     Map<String, String>? environment,
     Encoding? encoding,
+    io.ProcessStartMode? mode,
   );
 
   int _pid = 9999;
 
   FakeProcess _runCommand(
-    List<String> command,
+    List<String> command, {
     String? workingDirectory,
     Map<String, String>? environment,
     Encoding? encoding,
-  ) {
+    io.ProcessStartMode? mode,
+  }) {
     _pid += 1;
-    final FakeCommand fakeCommand = findCommand(command, workingDirectory, environment, encoding);
+    final FakeCommand fakeCommand = findCommand(
+      command,
+      workingDirectory,
+      environment,
+      encoding,
+      mode,
+    );
     if (fakeCommand.exception != null) {
       assert(fakeCommand.exception is Exception || fakeCommand.exception is Error);
       throw fakeCommand.exception!; // ignore: only_throw_errors
@@ -305,9 +320,15 @@ abstract class FakeProcessManager implements ProcessManager {
     Map<String, String>? environment,
     bool includeParentEnvironment = true, // ignored
     bool runInShell = false, // ignored
-    io.ProcessStartMode mode = io.ProcessStartMode.normal, // ignored
+    io.ProcessStartMode mode = io.ProcessStartMode.normal,
   }) {
-    final FakeProcess process = _runCommand(command.cast<String>(), workingDirectory, environment, io.systemEncoding);
+    final FakeProcess process = _runCommand(
+      command.cast<String>(),
+      workingDirectory: workingDirectory,
+      environment: environment,
+      encoding: io.systemEncoding,
+      mode: mode,
+    );
     if (process._completer != null) {
       _fakeRunningProcesses[process.pid] = process;
       process.exitCode.whenComplete(() {
@@ -327,7 +348,12 @@ abstract class FakeProcessManager implements ProcessManager {
     Encoding? stdoutEncoding = io.systemEncoding,
     Encoding? stderrEncoding = io.systemEncoding,
   }) async {
-    final FakeProcess process = _runCommand(command.cast<String>(), workingDirectory, environment, stdoutEncoding);
+    final FakeProcess process = _runCommand(
+      command.cast<String>(),
+      workingDirectory: workingDirectory,
+      environment: environment,
+      encoding: stdoutEncoding,
+    );
     await process.exitCode;
     return io.ProcessResult(
       process.pid,
@@ -347,7 +373,12 @@ abstract class FakeProcessManager implements ProcessManager {
     Encoding? stdoutEncoding = io.systemEncoding,
     Encoding? stderrEncoding = io.systemEncoding,
   }) {
-    final FakeProcess process = _runCommand(command.cast<String>(), workingDirectory, environment, stdoutEncoding);
+    final FakeProcess process = _runCommand(
+      command.cast<String>(),
+      workingDirectory: workingDirectory,
+      environment: environment,
+      encoding: stdoutEncoding,
+    );
     return io.ProcessResult(
       process.pid,
       process._exitCode,
@@ -385,12 +416,14 @@ class _FakeAnyProcessManager extends FakeProcessManager {
     String? workingDirectory,
     Map<String, String>? environment,
     Encoding? encoding,
+    io.ProcessStartMode? mode,
   ) {
     return FakeCommand(
       command: command,
       workingDirectory: workingDirectory,
       environment: environment,
       encoding: encoding,
+      processStartMode: mode,
     );
   }
 
@@ -415,12 +448,13 @@ class _SequenceProcessManager extends FakeProcessManager {
     String? workingDirectory,
     Map<String, String>? environment,
     Encoding? encoding,
+    io.ProcessStartMode? mode,
   ) {
     expect(_commands, isNotEmpty,
       reason: 'ProcessManager was told to execute $command (in $workingDirectory) '
               'but the FakeProcessManager.list expected no more processes.'
     );
-    _commands.first._matches(command, workingDirectory, environment, encoding);
+    _commands.first._matches(command, workingDirectory, environment, encoding, mode);
     return _commands.removeAt(0);
   }
 

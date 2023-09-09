@@ -201,13 +201,16 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
   final int height = testImage.height;
 
   if (width != masterImage.width || height != masterImage.height) {
-    return ComparisonResult(
+    final ComparisonResult result =  ComparisonResult(
       passed: false,
       diffPercent: 1.0,
       error: 'Pixel test failed, image sizes do not match.\n'
         'Master Image: ${masterImage.width} X ${masterImage.height}\n'
         'Test Image: ${testImage.width} X ${testImage.height}',
     );
+    masterImage.dispose();
+    testImage.dispose();
+    return result;
   }
 
   int pixelDiffCount = 0;
@@ -264,6 +267,8 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
       },
     );
   }
+  masterImage.dispose();
+  testImage.dispose();
   return ComparisonResult(passed: true, diffPercent: 0.0);
 }
 

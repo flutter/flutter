@@ -6,6 +6,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../image_data.dart';
 
@@ -52,9 +53,6 @@ void main() {
     expect(scheme.onInverseSurface, scheme.surface);
     expect(scheme.inversePrimary, scheme.onPrimary);
     expect(scheme.surfaceTint, scheme.primary);
-
-    expect(scheme.primaryVariant, const Color(0xff3700b3));
-    expect(scheme.secondaryVariant, const Color(0xff018786));
   });
 
   test('dark scheme matches the spec', () {
@@ -94,9 +92,6 @@ void main() {
     expect(scheme.onInverseSurface, scheme.surface);
     expect(scheme.inversePrimary, scheme.onPrimary);
     expect(scheme.surfaceTint, scheme.primary);
-
-    expect(scheme.primaryVariant, const Color(0xff3700b3));
-    expect(scheme.secondaryVariant, const Color(0xff03dac6));
   });
 
   test('high contrast light scheme matches the spec', () {
@@ -136,9 +131,6 @@ void main() {
     expect(scheme.onInverseSurface, scheme.surface);
     expect(scheme.inversePrimary, scheme.onPrimary);
     expect(scheme.surfaceTint, scheme.primary);
-
-    expect(scheme.primaryVariant, const Color(0xff000088));
-    expect(scheme.secondaryVariant, const Color(0xff018786));
   });
 
   test('high contrast dark scheme matches the spec', () {
@@ -178,9 +170,6 @@ void main() {
     expect(scheme.onInverseSurface, scheme.surface);
     expect(scheme.inversePrimary, scheme.onPrimary);
     expect(scheme.surfaceTint, scheme.primary);
-
-    expect(scheme.primaryVariant, const Color(0xffbe9eff));
-    expect(scheme.secondaryVariant, const Color(0xff66fff9));
   });
 
   test('can generate a light scheme from a seed color', () {
@@ -251,9 +240,6 @@ void main() {
         onInverseSurface: const Color(0x0000001A),
         inversePrimary: const Color(0x0000001B),
         surfaceTint: const Color(0x0000001C),
-
-        primaryVariant: const Color(0x0000001D),
-        secondaryVariant: const Color(0x0000001F),
     );
 
     expect(scheme.brightness, Brightness.dark);
@@ -287,9 +273,6 @@ void main() {
     expect(scheme.onInverseSurface, const Color(0x0000001A));
     expect(scheme.inversePrimary, const Color(0x0000001B));
     expect(scheme.surfaceTint, const Color(0x0000001C));
-
-    expect(scheme.primaryVariant, const Color(0x0000001D));
-    expect(scheme.secondaryVariant, const Color(0x0000001F));
   });
 
   test('can generate a dark scheme from a seed color', () {
@@ -406,9 +389,6 @@ void main() {
     expect(scheme.onInverseSurface, const Color(0xfff3eff4));
     expect(scheme.inversePrimary, const Color(0xffc0c1ff));
     expect(scheme.surfaceTint, const Color(0xff4040f3));
-
-    expect(scheme.primaryVariant, const Color(0xff4040f3));
-    expect(scheme.secondaryVariant, const Color(0xff5d5c72));
   }, skip: isBrowser, // [intended] uses dart:typed_data.
 );
 
@@ -446,8 +426,6 @@ void main() {
     expect(scheme.inverseSurface, const Color(0xffe5e1e6));
     expect(scheme.onInverseSurface, const Color(0xff313034));
     expect(scheme.inversePrimary, const Color(0xff4040f3));
-    expect(scheme.primaryVariant, const Color(0xffc0c1ff));
-    expect(scheme.secondaryVariant, const Color(0xffc6c4dd));
     expect(scheme.surfaceTint, const Color(0xffc0c1ff));
     }, skip: isBrowser, // [intended] uses dart:isolate and io.
   );
@@ -466,7 +444,7 @@ void main() {
     );
   });
 
-  testWidgets('generated scheme "on" colors meet a11y contrast guidelines', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('generated scheme "on" colors meet a11y contrast guidelines', (WidgetTester tester) async {
     final ColorScheme colors = ColorScheme.fromSeed(seedColor: Colors.teal);
 
     Widget label(String text, Color textColor, Color background) {

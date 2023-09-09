@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 
 const Widget divider = SizedBox(height: 10);
 const double narrowScreenWidthThreshold = 400;
-const double imageSize = 150;
 
 void main() => runApp(DynamicColorExample());
 

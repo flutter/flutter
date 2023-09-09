@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
@@ -332,6 +333,7 @@ class InkResponse extends StatelessWidget {
     this.onFocusChange,
     this.autofocus = false,
     this.statesController,
+    this.hoverDuration,
   });
 
   /// The widget below this widget in the tree.
@@ -621,6 +623,11 @@ class InkResponse extends StatelessWidget {
   /// {@endtemplate}
   final MaterialStatesController? statesController;
 
+  /// The duration of the animation that animates the hover effect.
+  ///
+  /// The default is 50ms.
+  final Duration? hoverDuration;
+
   @override
   Widget build(BuildContext context) {
     final _ParentInkResponseState? parentState = _ParentInkResponseProvider.maybeOf(context);
@@ -659,6 +666,7 @@ class InkResponse extends StatelessWidget {
       getRectCallback: getRectCallback,
       debugCheckContext: debugCheckContext,
       statesController: statesController,
+      hoverDuration: hoverDuration,
       child: child,
     );
   }
@@ -715,6 +723,7 @@ class _InkResponseStateWidget extends StatefulWidget {
     this.getRectCallback,
     required this.debugCheckContext,
     this.statesController,
+    this.hoverDuration,
   });
 
   final Widget? child;
@@ -752,6 +761,7 @@ class _InkResponseStateWidget extends StatefulWidget {
   final _GetRectCallback? getRectCallback;
   final _CheckContext debugCheckContext;
   final MaterialStatesController? statesController;
+  final Duration? hoverDuration;
 
   @override
   _InkResponseState createState() => _InkResponseState();
@@ -800,14 +810,17 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   bool _hovering = false;
   final Map<_HighlightType, InkHighlight?> _highlights = <_HighlightType, InkHighlight?>{};
   late final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
-    ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: simulateTap),
-    ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(onInvoke: simulateTap),
+    ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: activateOnIntent),
+    ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(onInvoke: activateOnIntent),
   };
   MaterialStatesController? internalStatesController;
 
   bool get highlightsExist => _highlights.values.where((InkHighlight? highlight) => highlight != null).isNotEmpty;
 
   final ObserverList<_ParentInkResponseState> _activeChildren = ObserverList<_ParentInkResponseState>();
+
+  static const Duration _activationDuration = Duration(milliseconds: 100);
+  Timer? _activationTimer;
 
   @override
   void markChildInkResponsePressed(_ParentInkResponseState childState, bool value) {
@@ -823,6 +836,25 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     }
   }
   bool get _anyChildInkResponsePressed => _activeChildren.isNotEmpty;
+
+  void activateOnIntent(Intent? intent) {
+    _activationTimer?.cancel();
+    _activationTimer = null;
+    _startNewSplash(context: context);
+    _currentSplash?.confirm();
+    _currentSplash = null;
+    if (widget.onTap != null) {
+      if (widget.enableFeedback) {
+        Feedback.forTap(context);
+      }
+      widget.onTap?.call();
+    }
+    // Delay the call to `updateHighlight` to simulate a pressed delay
+    // and give MaterialStatesController listeners a chance to react.
+    _activationTimer = Timer(_activationDuration, () {
+      updateHighlight(_HighlightType.pressed, value: false);
+    });
+  }
 
   void simulateTap([Intent? intent]) {
     _startNewSplash(context: context);
@@ -908,6 +940,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     FocusManager.instance.removeHighlightModeListener(handleFocusHighlightModeChange);
     statesController.removeListener(handleStatesControllerChange);
     internalStatesController?.dispose();
+    _activationTimer?.cancel();
+    _activationTimer = null;
     super.dispose();
   }
 
@@ -920,7 +954,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         return const Duration(milliseconds: 200);
       case _HighlightType.hover:
       case _HighlightType.focus:
-        return const Duration(milliseconds: 50);
+        return widget.hoverDuration ?? const Duration(milliseconds: 50);
     }
   }
 
@@ -1456,6 +1490,7 @@ class InkWell extends InkResponse {
     super.onFocusChange,
     super.autofocus,
     super.statesController,
+    super.hoverDuration,
   }) : super(
     containedInkWell: true,
     highlightShape: BoxShape.rectangle,

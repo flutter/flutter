@@ -35,7 +35,7 @@ void main() {
   late BufferLogger logger;
   late Platform platform;
   late FakeDeviceManager fakeDeviceManager;
-  late Signals signals;
+  late FakeSignals signals;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -83,6 +83,43 @@ void main() {
 
     expect(logger.errorText, contains('Screenshot not supported for FakeDevice'));
     expect(logger.statusText, isEmpty);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    Pub: () => FakePub(),
+    DeviceManager: () => fakeDeviceManager,
+  });
+
+  testUsingContext('does not register screenshot signal handler if --screenshot not provided', () async {
+    final DriveCommand command = DriveCommand(
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: platform,
+      signals: signals,
+      flutterDriverFactory: FailingFakeFlutterDriverFactory(),
+    );
+    fileSystem.file('lib/main.dart').createSync(recursive: true);
+    fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
+    fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.directory('drive_screenshots').createSync();
+
+    final Device screenshotDevice = ScreenshotDevice();
+    fakeDeviceManager.attachedDevices = <Device>[screenshotDevice];
+
+    await expectLater(() => createTestCommandRunner(command).run(
+      <String>[
+        'drive',
+        '--no-pub',
+        '-d',
+        screenshotDevice.id,
+        '--use-existing-app',
+        'http://localhost:8181',
+        '--keep-app-running',
+      ]),
+      throwsToolExit(),
+    );
+    expect(logger.statusText, isNot(contains('Screenshot written to ')));
+    expect(signals.addedHandlers, isEmpty);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
     ProcessManager: () => FakeProcessManager.any(),
@@ -388,6 +425,7 @@ void main() {
       '--enable-software-rendering',
       '--skia-deterministic-rendering',
       '--enable-embedder-api',
+      '--ci',
     ]), throwsToolExit());
 
     final DebuggingOptions options = await command.createDebuggingOptions(false);
@@ -403,6 +441,7 @@ void main() {
     expect(options.traceSystrace, true);
     expect(options.enableSoftwareRendering, true);
     expect(options.skiaDeterministicRendering, true);
+    expect(options.usingCISystem, true);
   }, overrides: <Type, Generator>{
     Cache: () => Cache.test(processManager: FakeProcessManager.any()),
     FileSystem: () => MemoryFileSystem.test(),
@@ -671,4 +710,17 @@ class FakeIosDevice extends Fake implements IOSDevice {
 
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
+}
+
+class FakeSignals extends Fake implements Signals {
+  List<SignalHandler> addedHandlers = <SignalHandler>[];
+
+  @override
+  Object addHandler(ProcessSignal signal, SignalHandler handler) {
+    addedHandlers.add(handler);
+    return const Object();
+  }
+
+  @override
+  Future<bool> removeHandler(ProcessSignal signal, Object token) async => true;
 }
