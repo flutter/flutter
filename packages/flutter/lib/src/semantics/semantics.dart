@@ -535,9 +535,10 @@ class SemanticsData with Diagnosticable {
   /// The reading direction is given by [textDirection].
   final String tooltip;
 
-  /// The hierarchy level of the widget as a header.
+  /// If non-null, indicates that this subtree represents a heading.
   ///
-  /// This should only be set when [SemanticsFlag.isHeader] is set.
+  /// The value should be a number between 1 and 6, indicating the hierarchical
+  /// level as a heading.
   final int? headingLevel;
 
   /// The reading direction for the text in [label], [value],
@@ -1348,8 +1349,6 @@ class SemanticsProperties extends DiagnosticableTree {
   /// with aria-level="1", usually indicates the main heading of a page,
   /// a level 2 heading, defined with aria-level="2" the first subsection,
   /// a level 3 is a subsection of that, and so on.
-  ///
-  /// This should only be set when [header] is set.
   final int? headingLevel;
 
   /// Provides hint values which override the default hints on supported
@@ -2481,12 +2480,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
   int? get currentValueLength => _currentValueLength;
   int? _currentValueLength;
 
-  /// The level of the widget (when it's defined as a header) within
-  /// the structural hierarchy of the screen. A value of 1 indicates the highest
-  /// level of structural hierarchy. A value of 2 indicates the next level,
-  /// and so on.
-  ///
-  /// This should only be set when [header] is set.
+  /// The level of the widget as a heading within the structural hierarchy
+  /// of the screen. A value of 1 indicates the highest level of structural
+  /// hierarchy. A value of 2 indicates the next level, and so on.
   int? get headingLevel => _headingLevel;
   int? _headingLevel;
 
@@ -4567,8 +4563,7 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.isHeader, value);
   }
 
-  /// Indicates the heading level in the document structure. Only applied
-  /// if the owning [RenderObject] is a header (this is given by [isHeader]).
+  /// Indicates the heading level in the document structure.
   ///
   /// This is only used for web semantics, and is ignored on other platforms.
   int? get headingLevel => _headingLevel;
