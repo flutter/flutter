@@ -190,7 +190,7 @@ void main() {
   testWidgetsWithLeakTracking('entering text does not scroll when scrollPhysics.allowImplicitScrolling = false', (WidgetTester tester) async {
     // regression test for https://github.com/flutter/flutter/issues/19523
 
-    final ScrollController scrollController = ScrollController(initialScrollOffset: 100);
+    final ScrollController scrollController = ScrollController(initialScrollOffset: 100.0);
     addTearDown(scrollController.dispose);
     final TextEditingController controller = TextEditingController();
     addTearDown(controller.dispose);
