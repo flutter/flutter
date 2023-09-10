@@ -8,9 +8,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('HardwareKeyboard records pressed keys and enabled locks', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('HardwareKeyboard records pressed keys and enabled locks', (WidgetTester tester) async {
     await simulateKeyDownEvent(LogicalKeyboardKey.numLock, platform: 'windows');
     expect(HardwareKeyboard.instance.physicalKeysPressed,
       equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numLock}));
@@ -68,7 +69,7 @@ void main() {
       equals(<KeyboardLockMode>{}));
   }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
 
-  testWidgets('KeyboardManager synthesizes modifier keys in rawKeyData mode', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('KeyboardManager synthesizes modifier keys in rawKeyData mode', (WidgetTester tester) async {
     final List<KeyEvent> events = <KeyEvent>[];
     HardwareKeyboard.instance.addHandler((KeyEvent event) {
       events.add(event);
@@ -96,7 +97,7 @@ void main() {
     expect(events[1].synthesized, false);
   });
 
-  testWidgets('Dispatch events to all handlers', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Dispatch events to all handlers', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     final List<int> logs = <int>[];
 
@@ -192,7 +193,10 @@ void main() {
       true);
     expect(logs, <int>[3, 2, 1]);
     logs.clear();
-  }, variant: KeySimulatorTransitModeVariant.all());
+  }, variant: KeySimulatorTransitModeVariant.all(),
+      // TODO(NobodyForNothing): remove after fixing
+      // https://github.com/flutter/flutter/issues/134379
+      leakTrackingTestConfig: const LeakTrackingTestConfig(notDisposedAllowList: <String, int?>{'FocusNode': 2}));
 
   // Regression test for https://github.com/flutter/flutter/issues/99196 .
   //
