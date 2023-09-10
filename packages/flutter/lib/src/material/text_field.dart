@@ -1151,21 +1151,22 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     });
   }
 
-  /// Handles the tap outside of the TextField.
+  /// Handles taps that occur outside the TextField widget.
   ///
-  /// This method is called when a tap occurs outside of the TextField widget.
-  /// It checks if the TextField has focus and whether tapping outside is allowed
-  /// based on the [widget.canTapOutsideFocus] property. If both conditions are met,
-  /// it executes the [widget.onTapOutside] callback.
+  /// This method is invoked when a tap event occurs outside the TextField widget.
+  /// It evaluates whether the TextField has focus and whether tapping outside is
+  /// permitted according to the [widget.canTapOutsideFocus] property. If either the
+  /// TextField has focus or tapping outside is allowed, it triggers the
+  /// [widget.onTapOutside] callback.
+  ///
+  /// Returns the [widget.onTapOutside] callback if conditions are met; otherwise,
+  /// returns null.
   TapRegionCallback? _handleOnTapOutside() {
-    if (_effectiveFocusNode.hasFocus && widget.onTapOutside != null && !widget.canTapOutsideFocus) {
-      return widget.onTapOutside;
-    } else if (widget.canTapOutsideFocus) {
+    if (_effectiveFocusNode.hasFocus || widget.canTapOutsideFocus) {
       return widget.onTapOutside;
     }
     return null;
   }
-
 
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
     final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
@@ -1428,7 +1429,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           onSubmitted: widget.onSubmitted,
           onAppPrivateCommand: widget.onAppPrivateCommand,
           onSelectionHandleTapped: _handleSelectionHandleTapped,
-          onTapOutside: _handleOnTapOutside(),
+          onTapOutside: _handleOnTapOutside,
           inputFormatters: formatters,
           rendererIgnoresPointer: true,
           mouseCursor: MouseCursor.defer, // TextField will handle the cursor
