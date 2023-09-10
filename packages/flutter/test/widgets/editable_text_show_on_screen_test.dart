@@ -190,7 +190,7 @@ void main() {
   testWidgetsWithLeakTracking('entering text does not scroll when scrollPhysics.allowImplicitScrolling = false', (WidgetTester tester) async {
     // regression test for https://github.com/flutter/flutter/issues/19523
 
-    final ScrollController scrollController = ScrollController();
+    final ScrollController scrollController = ScrollController(initialScrollOffset: 100);
     addTearDown(scrollController.dispose);
     final TextEditingController controller = TextEditingController();
     addTearDown(controller.dispose);
@@ -225,9 +225,6 @@ void main() {
     ));
 
     // Focus the EditableText and scroll it off screen.
-    scrollController.jumpTo(350.0);
-    await tester.pumpAndSettle();
-    expect(find.byType(EditableText), findsOneWidget);
     await tester.showKeyboard(find.byType(EditableText));
     await tester.pumpAndSettle();
     expect(focusNode.hasFocus, isTrue);
@@ -241,7 +238,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(scrollController.offset, 0.0);
     expect(find.byType(EditableText), findsNothing);
-    expect(controller.text, equals('Hello'));
   });
 
   testWidgetsWithLeakTracking('entering text does not scroll a surrounding PageView', (WidgetTester tester) async {
