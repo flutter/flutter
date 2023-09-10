@@ -4180,7 +4180,7 @@ void main() {
       verifyAutocorrectionRectVisibility(expectVisible: false);
     },
     leakTrackingTestConfig: const LeakTrackingTestConfig(
-      // TODO(someone): remove after fixing
+      // TODO(ksokolovskyi): remove after fixing
       // https://github.com/flutter/flutter/issues/134386
       notDisposedAllowList: <String, int?> {'LeaderLayer': 5},
     ),
@@ -13616,7 +13616,7 @@ void main() {
     EditableText.debugDeterministicCursor = false;
   },
   leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(someone): remove after fixing
+    // TODO(ksokolovskyi): remove after fixing
     // https://github.com/flutter/flutter/issues/134386
     notDisposedAllowList: <String, int?> {'LeaderLayer': 2},
   ));
@@ -13805,7 +13805,7 @@ void main() {
     EditableText.debugDeterministicCursor = false;
   },
   leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(someone): remove after fixing
+    // TODO(ksokolovskyi): remove after fixing
     // https://github.com/flutter/flutter/issues/134386
     notDisposedAllowList: <String, int?> {'LeaderLayer': 8},
   ));

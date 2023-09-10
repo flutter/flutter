@@ -289,7 +289,7 @@ void main() {
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
   },
   leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(someone): remove after fixing
+    // TODO(ksokolovskyi): remove after fixing
     // https://github.com/flutter/flutter/issues/134386
     notDisposedAllowList: <String, int?> {'LeaderLayer': 5},
   ));
@@ -333,7 +333,7 @@ void main() {
   },
   variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(someone): remove after fixing
+    // TODO(ksokolovskyi): remove after fixing
     // https://github.com/flutter/flutter/issues/134386
     notDisposedAllowList: <String, int?> {'LeaderLayer': 6},
   ));
@@ -377,7 +377,7 @@ void main() {
     EditableText.debugDeterministicCursor = false;
   },
   leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(someone): remove after fixing
+    // TODO(ksokolovskyi): remove after fixing
     // https://github.com/flutter/flutter/issues/134386
     notDisposedAllowList: <String, int?> {'LeaderLayer': 4},
   ));
@@ -464,7 +464,7 @@ void main() {
   },
   variant: KeySimulatorTransitModeVariant.all(),
   leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(someone): remove after fixing
+    // TODO(ksokolovskyi): remove after fixing
     // https://github.com/flutter/flutter/issues/134386
     notDisposedAllowList: <String, int?> {'LeaderLayer': 18},
   ));
@@ -497,7 +497,7 @@ void main() {
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
   },
   leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(someone): remove after fixing
+    // TODO(ksokolovskyi): remove after fixing
     // https://github.com/flutter/flutter/issues/134386
     notDisposedAllowList: <String, int?> {'LeaderLayer': 3},
   ));
@@ -535,7 +535,7 @@ void main() {
     expect(renderEditable, isNot(paintsExactlyCountTimes(#drawRect, 0)));
   },
   leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(someone): remove after fixing
+    // TODO(ksokolovskyi): remove after fixing
     // https://github.com/flutter/flutter/issues/134386
     notDisposedAllowList: <String, int?> {'LeaderLayer': 2},
   ));
@@ -1075,7 +1075,7 @@ void main() {
   },
   variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(someone): remove after fixing
+    // TODO(ksokolovskyi): remove after fixing
     // https://github.com/flutter/flutter/issues/134386
     notDisposedAllowList: <String, int?> {'LeaderLayer': 4},
   ));
@@ -1348,7 +1348,7 @@ void main() {
   },
   skip: isBrowser && !isCanvasKit,
   leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(someone): remove after fixing
+    // TODO(ksokolovskyi): remove after fixing
     // https://github.com/flutter/flutter/issues/134386
     notDisposedAllowList: <String, int?> {'LeaderLayer': 1},
   )); // https://github.com/flutter/flutter/issues/56308
@@ -1401,7 +1401,7 @@ void main() {
   },
   variant: TargetPlatformVariant.all(),
   leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(someone): remove after fixing
+    // TODO(ksokolovskyi): remove after fixing
     // https://github.com/flutter/flutter/issues/134386
     notDisposedAllowList: <String, int?> {'LeaderLayer': 792},
   ));
