@@ -13,21 +13,23 @@ import 'colors.dart';
 import 'text_selection_toolbar_button.dart';
 import 'theme.dart';
 
-// Values extracted from https://developer.apple.com/design/resources/.
+// The radius of the toolbar RRect shape.
+// Value extracted from https://developer.apple.com/design/resources/.
+const Radius _kToolbarBorderRadius = Radius.circular(8.0);
 
 // Vertical distance between the tip of the arrow and the line of text the arrow
 // is pointing to. The value used here is eyeballed.
 const double _kToolbarContentDistance = 8.0;
 
-// The size of the arrow button to navigate between pages.
+// The size of the arrow pointing to the anchor. Eyeballed value.
 const Size _kToolbarArrowSize = Size(14.0, 7.0);
 
 // Minimal padding from tip of the selection toolbar arrow to horizontal edges of the
 // screen. Eyeballed value.
 const double _kArrowScreenPadding = 26.0;
 
-const Radius _kToolbarBorderRadius = Radius.circular(8.0);
-
+// The size and thickness of the chevron icon used for navigating between toolbar pages.
+// Eyeballed values.
 const double _kToolbarChevronSize = 10.0;
 const double _kToolbarChevronThickness = 2.0;
 
