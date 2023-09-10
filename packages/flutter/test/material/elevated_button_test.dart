@@ -160,7 +160,7 @@ void main() {
     expect(material.type, MaterialType.button);
   });
 
-  testWidgets('Default ElevatedButton meets a11y contrast guidelines', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default ElevatedButton meets a11y contrast guidelines', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
@@ -1882,15 +1882,15 @@ void main() {
     await gesture.removePointer();
   }
 
-  testWidgets('ElevatedButton statesController', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ElevatedButton statesController', (WidgetTester tester) async {
     testStatesController(null, tester);
   });
 
-  testWidgets('ElevatedButton.icon statesController', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ElevatedButton.icon statesController', (WidgetTester tester) async {
     testStatesController(const Icon(Icons.add), tester);
   });
 
-  testWidgets('Disabled ElevatedButton statesController', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Disabled ElevatedButton statesController', (WidgetTester tester) async {
     int count = 0;
     void valueChanged() {
       count += 1;
