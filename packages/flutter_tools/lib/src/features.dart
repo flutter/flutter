@@ -50,6 +50,9 @@ abstract class FeatureFlags {
   /// Whether animations are used in the command line interface.
   bool get isCliAnimationEnabled => true;
 
+  /// Whether native assets compilation and bundling is enabled.
+  bool get isNativeAssetsEnabled => false;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -68,6 +71,7 @@ const List<Feature> allFeatures = <Feature>[
   flutterCustomDevicesFeature,
   flutterWebWasm,
   cliAnimation,
+  nativeAssets,
 ];
 
 /// All current Flutter feature flags that can be configured.
@@ -156,6 +160,16 @@ const Feature flutterWebWasm = Feature(
 const Feature cliAnimation = Feature.fullyEnabled(
   name: 'animations in the command line interface',
   configSetting: 'cli-animations',
+);
+
+/// Enable native assets compilation and bundling.
+const Feature nativeAssets = Feature(
+  name: 'native assets compilation and bundling',
+  configSetting: 'enable-native-assets',
+  environmentOverride: 'FLUTTER_NATIVE_ASSETS',
+  master: FeatureChannelSetting(
+    available: true,
+  ),
 );
 
 /// A [Feature] is a process for conditionally enabling tool features.
