@@ -27,11 +27,11 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:{{pluginProjectName}}/{{pluginProjectName}}.dart';
 {{/withPlatformChannelPluginHook}}
-{{#withFfiPluginHook}}
+{{#withFfi}}
 import 'dart:async';
 
 import 'package:{{pluginProjectName}}/{{pluginProjectName}}.dart' as {{pluginProjectName}};
-{{/withFfiPluginHook}}
+{{/withFfi}}
 
 void main() {
   runApp(const MyApp());
@@ -213,7 +213,7 @@ class _MyAppState extends State<MyApp> {
   }
 }
 {{/withPlatformChannelPluginHook}}
-{{#withFfiPluginHook}}
+{{#withFfi}}
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
@@ -279,5 +279,5 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
-{{/withFfiPluginHook}}
+{{/withFfi}}
 {{/withEmptyMain}}

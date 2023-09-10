@@ -240,6 +240,7 @@ class KernelCompiler {
     required bool trackWidgetCreation,
     required List<String> dartDefines,
     required PackageConfig packageConfig,
+    String? nativeAssets,
   }) async {
     final TargetPlatform? platform = targetModel == TargetModel.dartdevc ? TargetPlatform.web_javascript : null;
     final String frontendServer = _artifacts.getArtifactPath(
@@ -337,6 +338,10 @@ class KernelCompiler {
         'package:flutter/src/dart_plugin_registrant.dart',
         '-Dflutter.dart_plugin_registrant=$dartPluginRegistrantUri',
       ],
+      if (nativeAssets != null) ...<String>[
+        '--native-assets',
+        nativeAssets,
+      ],
       // See: https://github.com/flutter/flutter/issues/103994
       '--verbosity=error',
       ...?extraFrontEndOptions,
@@ -381,9 +386,10 @@ class _RecompileRequest extends _CompilationRequest {
     this.invalidatedFiles,
     this.outputPath,
     this.packageConfig,
-    this.suppressErrors,
-    {this.additionalSourceUri}
-  );
+    this.suppressErrors, {
+    this.additionalSourceUri,
+    this.nativeAssetsYamlUri,
+  });
 
   Uri mainUri;
   List<Uri>? invalidatedFiles;
@@ -391,6 +397,7 @@ class _RecompileRequest extends _CompilationRequest {
   PackageConfig packageConfig;
   bool suppressErrors;
   final Uri? additionalSourceUri;
+  final Uri? nativeAssetsYamlUri;
 
   @override
   Future<CompilerOutput?> _run(DefaultResidentCompiler compiler) async =>
@@ -515,6 +522,7 @@ abstract class ResidentCompiler {
     bool suppressErrors = false,
     bool checkDartPluginRegistry = false,
     File? dartPluginRegistrant,
+    Uri? nativeAssetsYaml,
   });
 
   Future<CompilerOutput?> compileExpression(
@@ -663,6 +671,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     File? dartPluginRegistrant,
     String? projectRootPath,
     FileSystem? fs,
+    Uri? nativeAssetsYaml,
   }) async {
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
@@ -681,6 +690,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       packageConfig,
       suppressErrors,
       additionalSourceUri: additionalSourceUri,
+      nativeAssetsYamlUri: nativeAssetsYaml,
     ));
     return completer.future;
   }
@@ -699,12 +709,22 @@ class DefaultResidentCompiler implements ResidentCompiler {
         toMultiRootPath(request.additionalSourceUri!, fileSystemScheme, fileSystemRoots, _platform.isWindows);
     }
 
+    final String? nativeAssets = request.nativeAssetsYamlUri?.toString();
     final Process? server = _server;
     if (server == null) {
-      return _compile(mainUri, request.outputPath, additionalSourceUri: additionalSourceUri);
+      return _compile(
+        mainUri,
+        request.outputPath,
+        additionalSourceUri: additionalSourceUri,
+        nativeAssetsUri: nativeAssets,
+      );
     }
     final String inputKey = Uuid().generateV4();
 
+    if (nativeAssets != null && nativeAssets.isNotEmpty) {
+      server.stdin.writeln('native-assets $nativeAssets');
+      _logger.printTrace('<- native-assets $nativeAssets');
+    }
     server.stdin.writeln('recompile $mainUri $inputKey');
     _logger.printTrace('<- recompile $mainUri $inputKey');
     final List<Uri>? invalidatedFiles = request.invalidatedFiles;
@@ -746,9 +766,10 @@ class DefaultResidentCompiler implements ResidentCompiler {
 
   Future<CompilerOutput?> _compile(
     String scriptUri,
-    String? outputPath,
-    {String? additionalSourceUri}
-  ) async {
+    String? outputPath, {
+    String? additionalSourceUri,
+    String? nativeAssetsUri,
+  }) async {
     final TargetPlatform? platform = (targetModel == TargetModel.dartdevc) ? TargetPlatform.web_javascript : null;
     final String frontendServer = artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk,
@@ -806,6 +827,10 @@ class DefaultResidentCompiler implements ResidentCompiler {
         'package:flutter/src/dart_plugin_registrant.dart',
         '-Dflutter.dart_plugin_registrant=$additionalSourceUri',
       ],
+      if (nativeAssetsUri != null) ...<String>[
+        '--native-assets',
+        nativeAssetsUri,
+      ],
       if (platformDill != null) ...<String>[
         '--platform',
         platformDill!,
@@ -841,6 +866,11 @@ class DefaultResidentCompiler implements ResidentCompiler {
         throwToolExit('the Dart compiler exited unexpectedly.');
       }
     }));
+
+    if (nativeAssetsUri != null && nativeAssetsUri.isNotEmpty) {
+      _server?.stdin.writeln('native-assets $nativeAssetsUri');
+      _logger.printTrace('<- native-assets $nativeAssetsUri');
+    }
 
     _server?.stdin.writeln('compile $scriptUri');
     _logger.printTrace('<- compile $scriptUri');

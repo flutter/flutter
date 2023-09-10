@@ -50,6 +50,11 @@ dependencies:
   async: 2.11.0
   unified_analytics: 3.0.0
 
+  cli_config: 0.1.1
+  graphs: 2.3.1
+  native_assets_builder: 0.2.0
+  native_assets_cli: 0.2.0
+
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so when upgrading
   # this, make sure the tests are still running correctly.
@@ -107,4 +112,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: a4aa
+# PUBSPEC CHECKSUM: 284b

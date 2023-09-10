@@ -36,10 +36,11 @@ class CreateCommand extends CreateBase {
     argParser.addOption(
       'template',
       abbr: 't',
-      allowed: FlutterProjectType.values.map<String>((FlutterProjectType e) => e.cliName),
+      allowed: FlutterProjectType.enabledValues
+          .map<String>((FlutterProjectType e) => e.cliName),
       help: 'Specify the type of project to create.',
       valueHelp: 'type',
-      allowedHelp: CliEnum.allowedHelp(FlutterProjectType.values),
+      allowedHelp: CliEnum.allowedHelp(FlutterProjectType.enabledValues),
     );
     argParser.addOption(
       'sample',
@@ -206,12 +207,14 @@ class CreateCommand extends CreateBase {
     final FlutterProjectType template = _getProjectType(projectDir);
     final bool generateModule = template == FlutterProjectType.module;
     final bool generateMethodChannelsPlugin = template == FlutterProjectType.plugin;
+    final bool generateFfiPackage = template == FlutterProjectType.packageFfi;
     final bool generateFfiPlugin = template == FlutterProjectType.pluginFfi;
+    final bool generateFfi = generateFfiPlugin || generateFfiPackage;
     final bool generatePackage = template == FlutterProjectType.package;
 
     final List<String> platforms = stringsArg('platforms');
     // `--platforms` does not support module or package.
-    if (argResults!.wasParsed('platforms') && (generateModule || generatePackage)) {
+    if (argResults!.wasParsed('platforms') && (generateModule || generatePackage || generateFfiPackage)) {
       final String template = generateModule ? 'module' : 'package';
       throwToolExit(
         'The "--platforms" argument is not supported in $template template.',
@@ -225,15 +228,15 @@ class CreateCommand extends CreateBase {
         'The web platform is not supported in plugin_ffi template.',
         exitCode: 2,
       );
-    } else if (generateFfiPlugin && argResults!.wasParsed('ios-language')) {
+    } else if (generateFfi && argResults!.wasParsed('ios-language')) {
       throwToolExit(
-        'The "ios-language" option is not supported with the plugin_ffi '
+        'The "ios-language" option is not supported with the ${template.cliName} '
         'template: the language will always be C or C++.',
         exitCode: 2,
       );
-    } else if (generateFfiPlugin && argResults!.wasParsed('android-language')) {
+    } else if (generateFfi && argResults!.wasParsed('android-language')) {
       throwToolExit(
-        'The "android-language" option is not supported with the plugin_ffi '
+        'The "android-language" option is not supported with the ${template.cliName} '
         'template: the language will always be C or C++.',
         exitCode: 2,
       );
@@ -306,6 +309,7 @@ class CreateCommand extends CreateBase {
       flutterRoot: flutterRoot,
       withPlatformChannelPluginHook: generateMethodChannelsPlugin,
       withFfiPluginHook: generateFfiPlugin,
+      withFfiPackage: generateFfiPackage,
       withEmptyMain: emptyArgument,
       androidLanguage: stringArg('android-language'),
       iosLanguage: stringArg('ios-language'),
@@ -393,6 +397,15 @@ class CreateCommand extends CreateBase {
           projectType: template,
         );
         pubContext = PubContext.createPlugin;
+      case FlutterProjectType.packageFfi:
+        generatedFileCount += await _generateFfiPackage(
+          relativeDir,
+          templateContext,
+          overwrite: overwrite,
+          printStatusWhenWriting: !creatingNewProject,
+          projectType: template,
+        );
+        pubContext = PubContext.createPackage;
     }
 
     if (boolArg('pub')) {
@@ -403,14 +416,21 @@ class CreateCommand extends CreateBase {
         offline: boolArg('offline'),
         outputMode: PubOutputMode.summaryOnly,
       );
-      await project.ensureReadyForPlatformSpecificTooling(
-        androidPlatform: includeAndroid,
-        iosPlatform: includeIos,
-        linuxPlatform: includeLinux,
-        macOSPlatform: includeMacos,
-        windowsPlatform: includeWindows,
-        webPlatform: includeWeb,
-      );
+      // Setting `includeIos` etc to false as with FlutterProjectType.package
+      // causes the example sub directory to not get os sub directories.
+      // This will lead to `flutter build ios` to fail in the example.
+      // TODO(dacoharkes): Uncouple the app and parent project platforms. https://github.com/flutter/flutter/issues/133874
+      // Then this if can be removed.
+      if (!generateFfiPackage) {
+        await project.ensureReadyForPlatformSpecificTooling(
+          androidPlatform: includeAndroid,
+          iosPlatform: includeIos,
+          linuxPlatform: includeLinux,
+          macOSPlatform: includeMacos,
+          windowsPlatform: includeWindows,
+          webPlatform: includeWeb,
+        );
+      }
     }
     if (sampleCode != null) {
       _applySample(relativeDir, sampleCode);
@@ -650,6 +670,48 @@ Your $application code is in $relativeAppMain.
     templateContext['description'] = 'Demonstrates how to use the $projectName plugin.';
     templateContext['pluginProjectName'] = projectName;
     templateContext['androidPluginIdentifier'] = androidPluginIdentifier;
+
+    generatedCount += await generateApp(
+      <String>['app'],
+      project.example.directory,
+      templateContext,
+      overwrite: overwrite,
+      pluginExampleApp: true,
+      printStatusWhenWriting: printStatusWhenWriting,
+      projectType: projectType,
+    );
+    return generatedCount;
+  }
+
+  Future<int> _generateFfiPackage(
+    Directory directory,
+    Map<String, Object?> templateContext, {
+    bool overwrite = false,
+    bool printStatusWhenWriting = true,
+    required FlutterProjectType projectType,
+  }) async {
+    int generatedCount = 0;
+    final String? description = argResults!.wasParsed('description')
+        ? stringArg('description')
+        : 'A new Dart FFI package project.';
+    templateContext['description'] = description;
+    generatedCount += await renderMerged(
+      <String>[
+        'package_ffi',
+      ],
+      directory,
+      templateContext,
+      overwrite: overwrite,
+      printStatusWhenWriting: printStatusWhenWriting,
+    );
+
+    final FlutterProject project = FlutterProject.fromDirectory(directory);
+
+    final String? projectName = templateContext['projectName'] as String?;
+    final String exampleProjectName = '${projectName}_example';
+    templateContext['projectName'] = exampleProjectName;
+    templateContext['description'] = 'Demonstrates how to use the $projectName package.';
+    templateContext['pluginProjectName'] = projectName;
 
     generatedCount += await generateApp(
       <String>['app'],

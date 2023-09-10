@@ -449,6 +449,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.areCustomDevicesEnabled = false,
     this.isFlutterWebWasmEnabled = false,
     this.isCliAnimationEnabled = true,
+    this.isNativeAssetsEnabled = false,
   });
 
   @override
@@ -482,6 +483,9 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isCliAnimationEnabled;
 
   @override
+  final bool isNativeAssetsEnabled;
+
+  @override
   bool isEnabled(Feature feature) {
     switch (feature) {
       case flutterWebFeature:
@@ -502,6 +506,8 @@ class TestFeatureFlags implements FeatureFlags {
         return areCustomDevicesEnabled;
       case cliAnimation:
         return isCliAnimationEnabled;
+      case nativeAssets:
+        return isNativeAssetsEnabled;
     }
     return false;
   }
