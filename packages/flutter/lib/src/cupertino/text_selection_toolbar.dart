@@ -550,11 +550,11 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
     final Color color = _kToolbarTextColor.resolveFrom(context);
 
     return IgnorePointer(
-      // Use Align with widthFactor and heightFactor of 1.0 so
+      // Use Center with widthFactor and heightFactor of 1.0 so
       // _CupertinoTextSelectionToolbarItems can get the natural size
       // of the buttons and then expand vertically as needed i.e. if children
       // have higher height than that.
-      child: Align(
+      child: Center(
         widthFactor: 1.0,
         heightFactor: 1.0,
         child: CustomPaint(
