@@ -1882,7 +1882,7 @@ void main() {
     await gesture.removePointer();
   }
 
-  testWidgetsWithLeakTracking('ElevatedButton statesController', (WidgetTester tester) async {
+  testWidgets('ElevatedButton statesController', (WidgetTester tester) async {
     testStatesController(null, tester);
   });
 
@@ -1890,7 +1890,7 @@ void main() {
     testStatesController(const Icon(Icons.add), tester);
   });
 
-  testWidgetsWithLeakTracking('Disabled ElevatedButton statesController', (WidgetTester tester) async {
+  testWidgets('Disabled ElevatedButton statesController', (WidgetTester tester) async {
     int count = 0;
     void valueChanged() {
       count += 1;
