@@ -72,10 +72,13 @@ void main() {
 
 
   testWidgetsWithLeakTracking('builds the default context menu by default', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: SelectionArea(
-          focusNode: FocusNode(),
+          focusNode: focusNode,
           child: const Text('How are you?'),
         ),
       ),
@@ -100,10 +103,13 @@ void main() {
 
   testWidgetsWithLeakTracking('builds a custom context menu if provided', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: SelectionArea(
-          focusNode: FocusNode(),
+          focusNode: focusNode,
           contextMenuBuilder: (
             BuildContext context,
             SelectableRegionState selectableRegionState,
@@ -167,6 +173,9 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('stopping drag of end handle will show the toolbar', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
     // Regression test for https://github.com/flutter/flutter/issues/119314
     await tester.pumpWidget(
       MaterialApp(
@@ -178,7 +187,7 @@ void main() {
               children: <Widget>[
                 const Text('How are you?'),
                 SelectionArea(
-                  focusNode: FocusNode(),
+                  focusNode: focusNode,
                   child: const Text('Good, and you?'),
                 ),
                 const Text('Fine, thank you.'),
