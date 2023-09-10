@@ -313,7 +313,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
   }
 
   // Returns the RRect inside which the child is painted.
-  RRect _shapeRRect() {
+  RRect get _shapeRRect {
     return RRect.fromRectAndRadius(
       Offset(0.0, _kToolbarArrowSize.height)
         & Size(
