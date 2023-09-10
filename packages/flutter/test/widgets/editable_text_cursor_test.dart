@@ -23,18 +23,26 @@ const TextStyle textStyle = TextStyle();
 const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
 
 void main() {
+  late TextEditingController controller;
+  late FocusNode focusNode;
+  late FocusScopeNode focusScopeNode;
+
   setUp(() async {
     // Fill the clipboard so that the Paste option is available in the text
     // selection menu.
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
+    controller = TextEditingController();
+    focusNode = FocusNode();
+    focusScopeNode = FocusScopeNode();
+  });
+
+  tearDown(() {
+    controller.dispose();
+    focusNode.dispose();
+    focusScopeNode.dispose();
   });
 
   testWidgetsWithLeakTracking('cursor has expected width, height, and radius', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
-    addTearDown(controller.dispose);
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
-
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(),
@@ -63,10 +71,6 @@ void main() {
   testWidgetsWithLeakTracking('cursor layout has correct width', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
-    final TextEditingController controller = TextEditingController();
-    addTearDown(controller.dispose);
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
 
     late String changedValue;
     final Widget widget = MaterialApp(
@@ -122,10 +126,6 @@ void main() {
 
   testWidgetsWithLeakTracking('cursor layout has correct radius', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
-    final TextEditingController controller = TextEditingController();
-    addTearDown(controller.dispose);
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
 
     late String changedValue;
     final Widget widget = MaterialApp(
@@ -386,10 +386,7 @@ void main() {
     debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
 
     const String testText = 'Some text long enough to move the cursor around';
-    final TextEditingController controller = TextEditingController(text: testText);
-    addTearDown(controller.dispose);
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
+    controller.text = testText;
 
     final Widget widget = MaterialApp(
       home: EditableText(
@@ -504,9 +501,6 @@ void main() {
 
   testWidgetsWithLeakTracking('Cursor does not show when not focused', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/106512 .
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
-
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -558,12 +552,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Cursor gets placed correctly after going out of bounds', (WidgetTester tester) async {
     const String text = 'hello world this is fun and cool and awesome!';
-    final TextEditingController controller = TextEditingController(text: text);
-    addTearDown(controller.dispose);
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
-    final FocusScopeNode focusScopeNode = FocusScopeNode();
-    addTearDown(focusScopeNode.dispose);
+    controller.text = text;
 
     await tester.pumpWidget(
       MediaQuery(
@@ -657,12 +646,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Updating the floating cursor correctly moves the cursor', (WidgetTester tester) async {
     const String text = 'hello world this is fun and cool and awesome!';
-    final TextEditingController controller = TextEditingController(text: text);
-    addTearDown(controller.dispose);
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
-    final FocusScopeNode focusScopeNode = FocusScopeNode();
-    addTearDown(focusScopeNode.dispose);
+    controller.text = text;
 
     await tester.pumpWidget(
       MediaQuery(
@@ -718,12 +702,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Updating the floating cursor can end without update', (WidgetTester tester) async {
     const String text = 'hello world this is fun and cool and awesome!';
-    final TextEditingController controller = TextEditingController(text: text);
-    addTearDown(controller.dispose);
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
-    final FocusScopeNode focusScopeNode = FocusScopeNode();
-    addTearDown(focusScopeNode.dispose);
+    controller.text = text;
 
     await tester.pumpWidget(
       MediaQuery(
@@ -766,12 +745,7 @@ void main() {
 
   testWidgetsWithLeakTracking("Drag the floating cursor, it won't blink.", (WidgetTester tester) async {
     const String text = 'hello world this is fun and cool and awesome!';
-    final TextEditingController controller = TextEditingController(text: text);
-    addTearDown(controller.dispose);
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
-    final FocusScopeNode focusScopeNode = FocusScopeNode();
-    addTearDown(focusScopeNode.dispose);
+    controller.text = text;
 
     await tester.pumpWidget(
       MediaQuery(
@@ -842,10 +816,6 @@ void main() {
     EditableText.debugDeterministicCursor = false;
     addTearDown(() { EditableText.debugDeterministicCursor = debugDeterministicCursor; });
     const Key key = Key('EditableText');
-    final TextEditingController controller = TextEditingController();
-    addTearDown(controller.dispose);
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
 
     Widget buildEditableText({ required bool showCursor }) {
       return MediaQuery(
@@ -890,12 +860,7 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/pull/30475.
   testWidgetsWithLeakTracking('Trying to select with the floating cursor does not crash', (WidgetTester tester) async {
     const String text = 'hello world this is fun and cool and awesome!';
-    final TextEditingController controller = TextEditingController(text: text);
-    addTearDown(controller.dispose);
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
-    final FocusScopeNode focusScopeNode = FocusScopeNode();
-    addTearDown(focusScopeNode.dispose);
+    controller.text = text;
 
     await tester.pumpWidget(
       MediaQuery(
@@ -960,12 +925,7 @@ void main() {
 
   testWidgetsWithLeakTracking('autofocus sets cursor to the end of text', (WidgetTester tester) async {
     const String text = 'hello world';
-    final FocusScopeNode focusScopeNode = FocusScopeNode();
-    addTearDown(focusScopeNode.dispose);
-    final TextEditingController controller = TextEditingController(text: text);
-    addTearDown(controller.dispose);
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
+    controller.text = text;
 
     await tester.pumpWidget(
       MediaQuery(
@@ -996,10 +956,7 @@ void main() {
   testWidgetsWithLeakTracking('Floating cursor is painted', (WidgetTester tester) async {
     const TextStyle textStyle = TextStyle();
     const String text = 'hello world this is fun and cool and awesome!';
-    final TextEditingController controller = TextEditingController(text: text);
-    addTearDown(controller.dispose);
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
+    controller.text = text;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1083,10 +1040,6 @@ void main() {
   testWidgetsWithLeakTracking('cursor layout', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
-    final TextEditingController controller = TextEditingController();
-    addTearDown(controller.dispose);
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
 
     late String changedValue;
     final Widget widget = MaterialApp(
@@ -1148,10 +1101,6 @@ void main() {
   testWidgetsWithLeakTracking('cursor layout has correct height', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
-    final TextEditingController controller = TextEditingController();
-    addTearDown(controller.dispose);
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
 
     late String changedValue;
     final Widget widget = MaterialApp(
@@ -1217,10 +1166,6 @@ void main() {
     addTearDown(() {
       EditableText.debugDeterministicCursor = debugDeterministicCursor;
     });
-    final TextEditingController controller = TextEditingController();
-    addTearDown(controller.dispose);
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(MaterialApp(
       home: EditableText(
@@ -1255,16 +1200,12 @@ void main() {
     EditableText.debugDeterministicCursor = true;
     addTearDown(() { EditableText.debugDeterministicCursor = false; });
     const String text = '12';
-
-    final TextEditingController controller = TextEditingController.fromValue(
+    controller = TextEditingController.fromValue(
       const TextEditingValue(
         text: text,
         selection: TextSelection.collapsed(offset: text.length),
       ),
     );
-    addTearDown(controller.dispose);
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
 
     final Widget widget = EditableText(
       autofocus: true,
@@ -1303,15 +1244,12 @@ void main() {
     EditableText.debugDeterministicCursor = true;
     addTearDown(() { EditableText.debugDeterministicCursor = false; });
     final String text = 'test${' ' * 1000}';
-    final TextEditingController controller = TextEditingController.fromValue(
+    controller = TextEditingController.fromValue(
       TextEditingValue(
         text: text,
         selection: TextSelection.collapsed(offset: text.length, affinity: TextAffinity.upstream),
       ),
     );
-    addTearDown(controller.dispose);
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
 
     final Widget widget = EditableText(
       autofocus: true,
@@ -1359,14 +1297,10 @@ void main() {
     final String text = 'test${' ' * 50}\n'
                         '2nd line\n'
                         '\n';
-
-    final TextEditingController controller = TextEditingController.fromValue(TextEditingValue(
+    controller = TextEditingController.fromValue(TextEditingValue(
       text: text,
       selection: const TextSelection.collapsed(offset: 0),
     ));
-    addTearDown(controller.dispose);
-    final FocusNode focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
 
     final Widget widget = EditableText(
       autofocus: true,
