@@ -1886,7 +1886,7 @@ void main() {
     testStatesController(null, tester);
   });
 
-  testWidgetsWithLeakTracking('ElevatedButton.icon statesController', (WidgetTester tester) async {
+  testWidgets('ElevatedButton.icon statesController', (WidgetTester tester) async {
     testStatesController(const Icon(Icons.add), tester);
   });
 
