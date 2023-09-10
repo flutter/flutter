@@ -1142,6 +1142,7 @@ void main() {
     const BorderRadius enabledBorder = BorderRadius.all(Radius.circular(9.0));
 
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
 
     const String errorText = 'This is an error';
     bool showError = false;

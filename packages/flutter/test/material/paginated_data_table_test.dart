@@ -67,10 +67,11 @@ class TestDataSource extends DataTableSource {
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgetsWithLeakTracking('PaginatedDataTable paging', (WidgetTester tester) async {
-    final TestDataSource source = TestDataSource();
-    addTearDown(source.dispose);
+  late TestDataSource source;
+  setUp(() => source = TestDataSource());
+  tearDown(() => source.dispose());
 
+  testWidgetsWithLeakTracking('PaginatedDataTable paging', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
     await tester.pumpWidget(MaterialApp(
@@ -173,7 +174,6 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('PaginatedDataTable footer page number', (WidgetTester tester) async {
-    final TestDataSource source = TestDataSource();
     int rowsPerPage = 2;
 
     Widget buildTable(TestDataSource source, int rowsPerPage) {
@@ -306,6 +306,7 @@ void main() {
   testWidgetsWithLeakTracking('PaginatedDataTable control test', (WidgetTester tester) async {
     TestDataSource source = TestDataSource()
       ..generation = 42;
+    addTearDown(source.dispose);
 
     final List<String> log = <String>[];
 
@@ -369,6 +370,7 @@ void main() {
 
     source = TestDataSource()
       ..generation = 15;
+    addTearDown(source.dispose);
 
     await tester.pumpWidget(MaterialApp(
       home: buildTable(source),
@@ -400,7 +402,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: PaginatedDataTable(
         header: const Text('HEADER'),
-        source: TestDataSource(),
+        source: source,
         rowsPerPage: 8,
         availableRowsPerPage: const <int>[
           8, 9,
@@ -424,11 +426,14 @@ void main() {
     final List<Widget> actions = <Widget>[
       IconButton(onPressed: () {}, icon: const Icon(Icons.add)),
     ];
+    final TestDataSource source = TestDataSource(allowSelection: true);
+    addTearDown(source.dispose);
+
     Widget buildTable({String? header, List<Widget>? actions}) => MaterialApp(
       home: PaginatedDataTable(
         header: header != null ? Text(header) : null,
         actions: actions,
-        source: TestDataSource(allowSelection: true),
+        source: source,
         columns: const <DataColumn>[
           DataColumn(label: Text('Name')),
           DataColumn(label: Text('Calories'), numeric: true),
@@ -455,7 +460,6 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('PaginatedDataTable with large text', (WidgetTester tester) async {
-    final TestDataSource source = TestDataSource();
     await tester.pumpWidget(MaterialApp(
       home: MediaQuery(
         data: const MediaQueryData(
@@ -492,7 +496,6 @@ void main() {
   }, skip: isBrowser);  // https://github.com/flutter/flutter/issues/43433
 
   testWidgetsWithLeakTracking('PaginatedDataTable footer scrolls', (WidgetTester tester) async {
-    final TestDataSource source = TestDataSource();
     await tester.pumpWidget(
       MaterialApp(
         home: Align(
@@ -528,8 +531,6 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('PaginatedDataTable custom row height', (WidgetTester tester) async {
-    final TestDataSource source = TestDataSource();
-
     Widget buildCustomHeightPaginatedTable({
       double? dataRowHeight,
       double? dataRowMinHeight,
@@ -635,6 +636,7 @@ void main() {
     await binding.setSurfaceSize(const Size(width, height));
 
     final TestDataSource source = TestDataSource(allowSelection: true);
+    addTearDown(source.dispose);
     Finder cellContent;
     Finder checkbox;
     Finder padding;
@@ -787,7 +789,6 @@ void main() {
     const double defaultColumnSpacing = 56.0;
     const double customHorizontalMargin = 10.0;
     const double customColumnSpacing = 15.0;
-    final TestDataSource source = TestDataSource();
     Finder cellContent;
     Finder padding;
 
@@ -906,8 +907,6 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('PaginatedDataTable table fills Card width', (WidgetTester tester) async {
-    final TestDataSource source = TestDataSource();
-
     // 800 is wide enough to ensure that all of the columns fit in the
     // Card. The test makes sure that the DataTable is exactly as wide
     // as the Card, minus the Card's margin.
@@ -972,11 +971,13 @@ void main() {
   testWidgetsWithLeakTracking('PaginatedDataTable with optional column checkbox', (WidgetTester tester) async {
     await binding.setSurfaceSize(const Size(800, 800));
     addTearDown(() => binding.setSurfaceSize(null));
+    final TestDataSource source = TestDataSource(allowSelection: true);
+    addTearDown(source.dispose);
 
     Widget buildTable(bool checkbox) => MaterialApp(
       home: PaginatedDataTable(
         header: const Text('Test table'),
-        source: TestDataSource(allowSelection: true),
+        source: source,
         showCheckboxColumn: checkbox,
         columns: const <DataColumn>[
           DataColumn(label: Text('Name')),
@@ -998,6 +999,9 @@ void main() {
     await binding.setSurfaceSize(const Size(800, 800));
 
     Widget buildTable() {
+      final TestDataSource source = TestDataSource(allowSelection: true);
+      addTearDown(source.dispose);
+
       return MaterialApp(
         theme: ThemeData.light().copyWith(
             dataTableTheme: const DataTableThemeData(
@@ -1006,7 +1010,7 @@ void main() {
         ),
         home: PaginatedDataTable(
           header: const Text('Test table'),
-          source: TestDataSource(allowSelection: true),
+          source: source,
           columns: const <DataColumn>[
             DataColumn(label: Text('Name')),
             DataColumn(label: Text('Calories'), numeric: true),
@@ -1030,6 +1034,9 @@ void main() {
 
     const double minMaxDataRowHeight = 30.0;
 
+    final TestDataSource source = TestDataSource(allowSelection: true);
+    addTearDown(source.dispose);
+
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
         dataTableTheme: const DataTableThemeData(
@@ -1039,7 +1046,7 @@ void main() {
       ),
       home: PaginatedDataTable(
         header: const Text('Test table'),
-        source: TestDataSource(allowSelection: true),
+        source: source,
         columns: const <DataColumn>[
           DataColumn(label: Text('Name')),
           DataColumn(label: Text('Calories'), numeric: true),
@@ -1070,6 +1077,8 @@ void main() {
     await binding.setSurfaceSize(const Size(width, height));
 
     final TestDataSource source = TestDataSource(allowSelection: true);
+    addTearDown(source.dispose);
+
     Finder cellContent;
     Finder checkbox;
     Finder padding;
@@ -1127,12 +1136,15 @@ void main() {
     final ColorScheme colors = const ColorScheme.light().copyWith(secondary: selectedTextColor);
     final ThemeData theme = ThemeData.from(colorScheme: colors);
 
+    final TestDataSource source = TestDataSource(allowSelection: true);
+    addTearDown(source.dispose);
+
     Widget buildTable() {
       return MaterialApp(
         theme: theme,
         home: PaginatedDataTable(
           header: const Text('Test table'),
-          source: TestDataSource(allowSelection: true),
+          source: source,
           columns: const <DataColumn>[
             DataColumn(label: Text('Name')),
             DataColumn(label: Text('Calories'), numeric: true),
@@ -1172,7 +1184,7 @@ void main() {
           arrowHeadColor: arrowHeadColor,
           showFirstLastButtons: true,
           header: const Text('Test table'),
-          source: TestDataSource(),
+          source: source,
           columns: const <DataColumn>[
             DataColumn(label: Text('Name')),
             DataColumn(label: Text('Calories'), numeric: true),
@@ -1199,7 +1211,7 @@ void main() {
         home: PaginatedDataTable(
           header: header,
           rowsPerPage: 2,
-          source: TestDataSource(),
+          source: source,
           columns: const <DataColumn>[
             DataColumn(label: Text('Name')),
             DataColumn(label: Text('Calories'), numeric: true),
@@ -1219,8 +1231,6 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('PaginatedDataTable can be scrolled using ScrollController', (WidgetTester tester) async {
-    final TestDataSource source = TestDataSource();
-    addTearDown(source.dispose);
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
 
@@ -1272,8 +1282,6 @@ void main() {
   testWidgetsWithLeakTracking('PaginatedDataTable uses PrimaryScrollController when primary ', (WidgetTester tester) async {
     final ScrollController primaryScrollController = ScrollController();
     addTearDown(primaryScrollController.dispose);
-    final TestDataSource source = TestDataSource();
-    addTearDown(source.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1305,7 +1313,6 @@ void main() {
 
   testWidgetsWithLeakTracking('PaginatedDataTable custom heading row color', (WidgetTester tester) async {
     const MaterialStateProperty<Color> headingRowColor = MaterialStatePropertyAll<Color>(Color(0xffFF0000));
-    final TestDataSource source = TestDataSource();
 
     await tester.pumpWidget(
       MaterialApp(
