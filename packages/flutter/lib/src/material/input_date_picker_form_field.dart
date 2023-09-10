@@ -5,6 +5,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'date.dart';
+import 'date_picker_theme.dart';
 import 'input_border.dart';
 import 'input_decorator.dart';
 import 'material_localizations.dart';
@@ -248,16 +249,19 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
     final ThemeData theme = Theme.of(context);
     final bool useMaterial3 = theme.useMaterial3;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final DatePickerThemeData datePickerTheme = theme.datePickerTheme;
     final InputDecorationTheme inputTheme = theme.inputDecorationTheme;
-    final InputBorder inputBorder = inputTheme.border
+    final InputBorder effectiveInputBorder =  datePickerTheme.inputDecorationTheme?.border
+      ?? theme.inputDecorationTheme.border
       ?? (useMaterial3 ? const OutlineInputBorder() : const UnderlineInputBorder());
 
     return TextFormField(
       decoration: InputDecoration(
-        border: inputBorder,
-        filled: inputTheme.filled,
         hintText: widget.fieldHintText ?? localizations.dateHelpText,
         labelText: widget.fieldLabelText ?? localizations.dateInputLabel,
+      ).applyDefaults(inputTheme
+        .merge(datePickerTheme.inputDecorationTheme)
+        .copyWith(border: effectiveInputBorder),
       ),
       validator: _validateDate,
       keyboardType: widget.keyboardType ?? TextInputType.datetime,

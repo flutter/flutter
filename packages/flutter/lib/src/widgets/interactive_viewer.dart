@@ -975,7 +975,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   void _receivedPointerSignal(PointerSignalEvent event) {
     final double scaleChange;
     if (event is PointerScrollEvent) {
-      if (event.kind == PointerDeviceKind.trackpad) {
+      if (event.kind == PointerDeviceKind.trackpad && !widget.trackpadScrollCausesScale) {
         // Trackpad scroll, so treat it as a pan.
         widget.onInteractionStart?.call(
           ScaleStartDetails(

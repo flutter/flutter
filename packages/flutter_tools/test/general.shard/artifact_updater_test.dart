@@ -74,6 +74,49 @@ void main() {
     expect(fileSystem.file('out/test/foo.txt'), isNot(exists));
   });
 
+  testWithoutContext('ArtifactUpdater will delete any denylisted files from the outputDirectory', () async {
+    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
+    final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+    final BufferLogger logger = BufferLogger.test();
+    final Directory tempStorage = fileSystem.currentDirectory.childDirectory('temp');
+    final String localZipPath = tempStorage.childFile('test.zip').path;
+    File? desiredArtifact;
+    File? entitlementsFile;
+    File? nestedWithoutEntitlementsFile;
+    operatingSystemUtils.unzipCallbacks[localZipPath] = (Directory outputDirectory) {
+      desiredArtifact = outputDirectory.childFile('artifact.bin')..createSync();
+      entitlementsFile = outputDirectory.childFile('entitlements.txt')..createSync();
+      nestedWithoutEntitlementsFile = outputDirectory
+          .childDirectory('dir')
+          .childFile('without_entitlements.txt')
+          ..createSync(recursive: true);
+    };
+    final ArtifactUpdater artifactUpdater = ArtifactUpdater(
+      fileSystem: fileSystem,
+      logger: logger,
+      operatingSystemUtils: operatingSystemUtils,
+      platform: testPlatform,
+      httpClient: FakeHttpClient.any(),
+      tempStorage: tempStorage..createSync(),
+      allowedBaseUrls: <String>['http://test.zip'],
+    );
+
+    // entitlements file cached from before the tool had a denylist
+    final File staleEntitlementsFile = fileSystem.file('out/path/to/entitlements.txt')..createSync(recursive: true);
+
+    expect(staleEntitlementsFile, exists);
+    await artifactUpdater.downloadZipArchive(
+      'test message',
+      Uri.parse('http://test.zip'),
+      fileSystem.currentDirectory.childDirectory('out'),
+    );
+    expect(logger.statusText, contains('test message'));
+    expect(desiredArtifact, exists);
+    expect(entitlementsFile, isNot(exists));
+    expect(nestedWithoutEntitlementsFile, isNot(exists));
+    expect(staleEntitlementsFile, isNot(exists));
+  });
+
   testWithoutContext('ArtifactUpdater will not validate the md5 hash if the '
     'x-goog-hash header is present but missing an md5 entry', () async {
     final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
@@ -328,7 +371,7 @@ void main() {
   });
 
   testWithoutContext('ArtifactUpdater will de-download a file if unzipping fails on windows', () async {
-    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils(windows: true);
+    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     final ArtifactUpdater artifactUpdater = ArtifactUpdater(
@@ -378,7 +421,7 @@ void main() {
   });
 
   testWithoutContext('ArtifactUpdater will bail if unzipping fails more than twice on Windows', () async {
-    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils(windows: true);
+    final FakeOperatingSystemUtils operatingSystemUtils = FakeOperatingSystemUtils();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     final ArtifactUpdater artifactUpdater = ArtifactUpdater(
@@ -486,10 +529,13 @@ void main() {
 }
 
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
-  FakeOperatingSystemUtils({this.windows = false});
-
   int failures = 0;
-  final bool windows;
+
+  /// A mapping of zip [file] paths to callbacks that receive the [targetDirectory].
+  ///
+  /// Use this to have [unzip] generate an arbitrary set of [FileSystemEntity]s
+  /// under [targetDirectory].
+  final Map<String, void Function(Directory)> unzipCallbacks = <String, void Function(Directory)>{};
 
   @override
   void unzip(File file, Directory targetDirectory) {
@@ -497,8 +543,12 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
       failures -= 1;
       throw Exception();
     }
-    targetDirectory.childFile(file.fileSystem.path.basenameWithoutExtension(file.path))
-      .createSync();
+    if (unzipCallbacks.containsKey(file.path)) {
+      unzipCallbacks[file.path]!(targetDirectory);
+    } else {
+      targetDirectory.childFile(file.fileSystem.path.basenameWithoutExtension(file.path))
+        .createSync();
+    }
   }
 
   @override

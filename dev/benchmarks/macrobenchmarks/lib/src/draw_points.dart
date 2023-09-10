@@ -3,10 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
-
-import 'web/platform_views/web.dart';
 
 class DrawPointsPage extends StatefulWidget  {
   const DrawPointsPage({super.key});
@@ -73,10 +72,10 @@ class PointsPainter extends CustomPainter {
     }
     canvas.drawPaint(Paint()..color = Colors.white);
     for (int i = 0; i < 8; i++) {
-      final double x = ((size.width / i) + tick) % size.width;
+      final double x = ((size.width / (i + 1)) + tick) % size.width;
       for (int j = 0; j < data.length; j += 2) {
         data[j] = x;
-        data[j + 1] = (size.height / j) + 200;
+        data[j + 1] = (size.height / (j + 1)) + 200;
       }
       final Paint paint = Paint()
         ..color = kColors[i]

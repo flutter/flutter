@@ -2,27 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:html';
-
-final AnchorElement _urlParsingNode = AnchorElement();
-
 /// Extracts the pathname part of a full [url].
 ///
 /// Example: for the url `http://example.com/foo`, the extracted pathname will
 /// be `/foo`.
 String extractPathname(String url) {
-  _urlParsingNode.href = url; // ignore: unsafe_html, node is never exposed to the user
-  final String pathname = _urlParsingNode.pathname ?? '';
-  return (pathname.isEmpty || pathname[0] == '/') ? pathname : '/$pathname';
+  return ensureLeadingSlash(Uri.parse(url).path);
 }
-
-// The <base> element in the document.
-final Element? _baseElement = document.querySelector('base');
-
-/// Returns the `href` attribute of the <base> element in the document.
-///
-/// Returns null if the element isn't found.
-String? getBaseElementHrefFromDom() => _baseElement?.getAttribute('href');
 
 /// Checks that [baseHref] is set.
 ///

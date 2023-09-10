@@ -65,7 +65,11 @@ class ScrollController extends ChangeNotifier {
     this.debugLabel,
     this.onAttach,
     this.onDetach,
-  }) : _initialScrollOffset = initialScrollOffset;
+  }) : _initialScrollOffset = initialScrollOffset {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+  }
 
   /// The initial value to use for [offset].
   ///

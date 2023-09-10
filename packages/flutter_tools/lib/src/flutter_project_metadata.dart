@@ -7,7 +7,9 @@ import 'package:yaml/yaml.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
+import 'features.dart';
 import 'project.dart';
+import 'template.dart';
 import 'version.dart';
 
 enum FlutterProjectType implements CliEnum {
@@ -26,6 +28,9 @@ enum FlutterProjectType implements CliEnum {
   /// This is a Flutter Dart package project. It doesn't have any native
   /// components, only Dart.
   package,
+
+  /// This is a Dart package project with external builds for native components.
+  packageFfi,
 
   /// This is a native plugin project.
   plugin,
@@ -51,6 +56,10 @@ enum FlutterProjectType implements CliEnum {
           'Generate a shareable Flutter project containing an API '
           'in Dart code with a platform-specific implementation through dart:ffi for Android, iOS, '
           'Linux, macOS, Windows, or any combination of these.',
+        FlutterProjectType.packageFfi =>
+          'Generate a shareable Dart/Flutter project containing an API '
+          'in Dart code with a platform-specific implementation through dart:ffi for Android, iOS, '
+          'Linux, macOS, and Windows.',
         FlutterProjectType.module =>
           'Generate a project to add a Flutter module to an existing Android or iOS application.',
       };
@@ -62,6 +71,16 @@ enum FlutterProjectType implements CliEnum {
       }
     }
     return null;
+  }
+
+  static List<FlutterProjectType> get enabledValues {
+    return <FlutterProjectType>[
+      for (final FlutterProjectType value in values)
+        if (value == FlutterProjectType.packageFfi) ...<FlutterProjectType>[
+          if (featureFlags.isNativeAssetsEnabled) value
+        ] else
+          value,
+    ];
   }
 }
 
@@ -172,11 +191,11 @@ class FlutterProjectMetadata {
 # This file tracks properties of this Flutter project.
 # Used by Flutter tool to assess capabilities and perform upgrades etc.
 #
-# This file should be version controlled.
+# This file should be version controlled and should not be manually edited.
 
 version:
-  revision: $_versionRevision
-  channel: $_versionChannel
+  revision: ${escapeYamlString(_versionRevision ?? '')}
+  channel: ${escapeYamlString(_versionChannel ?? kUserBranch)}
 
 project_type: ${projectType == null ? '' : projectType!.cliName}
 ${migrateConfig.getOutputFileString()}''';

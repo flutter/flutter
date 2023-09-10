@@ -185,8 +185,8 @@ void test(
 /// should explain why the group is skipped; this reason will be printed instead
 /// of running the group's tests.
 @isTestGroup
-void group(Object description, void Function() body, { dynamic skip }) {
-  _declarer.group(description.toString(), body, skip: skip);
+void group(Object description, void Function() body, { dynamic skip, int? retry }) {
+  _declarer.group(description.toString(), body, skip: skip, retry: retry);
 }
 
 /// Registers a function to be run before tests.

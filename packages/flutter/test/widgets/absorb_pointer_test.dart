@@ -4,11 +4,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('AbsorbPointers do not block siblings', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AbsorbPointers do not block siblings', (WidgetTester tester) async {
     bool tapped = false;
     await tester.pumpWidget(
       Column(
@@ -29,7 +30,7 @@ void main() {
   });
 
   group('AbsorbPointer semantics', () {
-    testWidgets('does not change semantics when not absorbing', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('does not change semantics when not absorbing', (WidgetTester tester) async {
       final UniqueKey key = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
@@ -56,7 +57,7 @@ void main() {
       );
     });
 
-    testWidgets('drops semantics when its ignoreSemantics is true', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('drops semantics when its ignoreSemantics is true', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final UniqueKey key = UniqueKey();
       await tester.pumpWidget(
@@ -75,7 +76,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('ignores user interactions', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('ignores user interactions', (WidgetTester tester) async {
       final UniqueKey key = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(

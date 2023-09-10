@@ -77,4 +77,37 @@ void main() {
     expect(find.text('bobcat'), findsNothing);
     expect(find.text('chameleon'), findsOneWidget);
   });
+
+  testWidgets('multiple pending requests', (WidgetTester tester) async {
+    await tester.pumpWidget(const example.AutocompleteExampleApp());
+
+    await tester.enterText(find.byType(TextFormField), 'a');
+
+    // Wait until the debounce duration has expired, but the request is still
+    // pending.
+    await tester.pump(example.debounceDuration);
+
+    expect(find.text('aardvark'), findsNothing);
+    expect(find.text('bobcat'), findsNothing);
+    expect(find.text('chameleon'), findsNothing);
+
+    await tester.enterText(find.byType(TextFormField), 'aa');
+
+    // Wait until the first request has completed.
+    await tester.pump(example.fakeAPIDuration - example.debounceDuration);
+
+    // The results from the first request are thrown away since the query has
+    // changed.
+    expect(find.text('aardvark'), findsNothing);
+    expect(find.text('bobcat'), findsNothing);
+    expect(find.text('chameleon'), findsNothing);
+
+    // Wait until the second request has completed.
+    await tester.pump(example.fakeAPIDuration);
+
+    // The results of the second request are reflected.
+    expect(find.text('aardvark'), findsOneWidget);
+    expect(find.text('bobcat'), findsNothing);
+    expect(find.text('chameleon'), findsNothing);
+  });
 }

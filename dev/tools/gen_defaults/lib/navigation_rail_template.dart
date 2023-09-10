@@ -19,7 +19,7 @@ class _${blockName}DefaultsM3 extends NavigationRailThemeData {
         groupAlignment: -1,
         labelType: NavigationRailLabelType.none,
         useIndicator: true,
-        minWidth: ${tokens["md.comp.navigation-rail.container.width"]},
+        minWidth: ${getToken('md.comp.navigation-rail.container.width')},
         minExtendedWidth: 256,
       );
 
@@ -39,14 +39,14 @@ class _${blockName}DefaultsM3 extends NavigationRailThemeData {
 
   @override IconThemeData? get unselectedIconTheme {
     return IconThemeData(
-      size: ${tokens["md.comp.navigation-rail.icon.size"]},
+      size: ${getToken("md.comp.navigation-rail.icon.size")},
       color: ${componentColor("md.comp.navigation-rail.inactive.icon")},
     );
   }
 
   @override IconThemeData? get selectedIconTheme {
     return IconThemeData(
-      size: ${tokens["md.comp.navigation-rail.icon.size"]},
+      size: ${getToken("md.comp.navigation-rail.icon.size")},
       color: ${componentColor("md.comp.navigation-rail.active.icon")},
     );
   }

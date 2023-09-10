@@ -654,10 +654,9 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     valueIndicatorController.dispose();
     enableController.dispose();
     positionController.dispose();
-    if (overlayEntry != null) {
-      overlayEntry!.remove();
-      overlayEntry = null;
-    }
+    overlayEntry?.remove();
+    overlayEntry?.dispose();
+    overlayEntry = null;
     _focusNode?.dispose();
     super.dispose();
   }
@@ -684,6 +683,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   void _actionHandler(_AdjustSliderIntent intent) {
     final _RenderSlider renderSlider = _renderObjectKey.currentContext!.findRenderObject()! as _RenderSlider;
     final TextDirection textDirection = Directionality.of(_renderObjectKey.currentContext!);
+
     switch (intent.type) {
       case _SliderAdjustmentType.right:
         switch (textDirection) {
@@ -888,8 +888,8 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       // This needs to be updated when accessibility
       // guidelines are available on the material specs page
       // https://m3.material.io/components/sliders/accessibility.
-      ? math.min(MediaQuery.textScaleFactorOf(context), 1.3)
-      : MediaQuery.textScaleFactorOf(context);
+      ? MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.3).textScaleFactor
+      : MediaQuery.textScalerOf(context).textScaleFactor;
 
     return Semantics(
       container: true,
@@ -1115,8 +1115,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       parent: _state.valueIndicatorController,
       curve: Curves.fastOutSlowIn,
     )..addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.dismissed && _state.overlayEntry != null) {
-        _state.overlayEntry!.remove();
+      if (status == AnimationStatus.dismissed) {
+        _state.overlayEntry?.remove();
+        _state.overlayEntry?.dispose();
         _state.overlayEntry = null;
       }
     });
@@ -1483,6 +1484,9 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   void _startInteraction(Offset globalPosition) {
+    if (!_state.mounted) {
+      return;
+    }
     _state.showValueIndicator();
     if (!_active && isInteractive) {
       switch (allowedInteraction) {
@@ -1511,8 +1515,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           _state.interactionTimer?.cancel();
           _state.interactionTimer = Timer(_minimumInteractionTime * timeDilation, () {
             _state.interactionTimer = null;
-            if (!_active && !hasFocus &&
-                _state.valueIndicatorController.status == AnimationStatus.completed) {
+            if (!_active && _state.valueIndicatorController.status == AnimationStatus.completed) {
               _state.valueIndicatorController.reverse();
             }
           });
@@ -1530,10 +1533,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       onChangeEnd?.call(_discretize(_currentDragValue));
       _active = false;
       _currentDragValue = 0.0;
-      if (!hasFocus) {
-        _state.overlayController.reverse();
-      }
-
+      _state.overlayController.reverse();
       if (showValueIndicator && _state.interactionTimer == null) {
         _state.valueIndicatorController.reverse();
       }
@@ -1802,14 +1802,32 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   void increaseAction() {
     if (isInteractive) {
-      onChanged!(clampDouble(value + _semanticActionUnit, 0.0, 1.0));
+      onChangeStart!(currentValue);
+      final double increase = increaseValue();
+      onChanged!(increase);
+      onChangeEnd!(increase);
     }
   }
 
   void decreaseAction() {
     if (isInteractive) {
-      onChanged!(clampDouble(value - _semanticActionUnit, 0.0, 1.0));
+      onChangeStart!(currentValue);
+      final double decrease = decreaseValue();
+      onChanged!(decrease);
+      onChangeEnd!(decrease);
     }
+  }
+
+  double get currentValue {
+    return clampDouble(value, 0.0, 1.0);
+  }
+
+  double increaseValue() {
+    return clampDouble(value + _semanticActionUnit, 0.0, 1.0);
+  }
+
+  double decreaseValue() {
+    return clampDouble(value - _semanticActionUnit, 0.0, 1.0);
   }
 }
 
@@ -1957,8 +1975,6 @@ class _SliderDefaultsM2 extends SliderThemeData {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _SliderDefaultsM3 extends SliderThemeData {
   _SliderDefaultsM3(this.context)

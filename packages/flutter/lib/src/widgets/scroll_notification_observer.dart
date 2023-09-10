@@ -71,6 +71,15 @@ final class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
 /// This widget is similar to [NotificationListener]. It supports a listener
 /// list instead of just a single listener and its listeners run
 /// unconditionally, they do not require a gating boolean return value.
+///
+/// {@tool dartpad}
+/// This sample shows a "Scroll to top" button that uses [ScrollNotificationObserver]
+/// to listen for scroll notifications from [ListView]. The button is only visible
+/// when the user has scrolled down. When pressed, the button animates the scroll
+/// position of the [ListView] back to the top.
+///
+/// ** See code in examples/api/lib/widgets/scroll_notification_observer/scroll_notification_observer.0.dart **
+/// {@end-tool}
 class ScrollNotificationObserver extends StatefulWidget {
   /// Create a [ScrollNotificationObserver].
   ///

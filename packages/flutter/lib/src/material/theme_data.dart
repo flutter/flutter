@@ -179,68 +179,15 @@ enum MaterialTapTargetSize {
 /// for the subtree that appears below the new [Theme], or insert a widget
 /// that creates a new BuildContext, like [Builder].
 ///
-/// {@tool snippet}
-/// In this example, the [Container] widget uses [Theme.of] to retrieve the
-/// primary color from the theme's [colorScheme] to draw an amber square.
-/// The [Builder] widget separates the parent theme's [BuildContext] from the
-/// child's [BuildContext].
+/// {@tool dartpad}
+/// This example demonstrates how a typical [MaterialApp] specifies
+/// and uses a custom [Theme]. The theme's [ColorScheme] is based on a
+/// single "seed" color and configures itself to match the platform's
+/// current light or dark color configuration. The theme overrides the
+/// default configuration of [FloatingActionButton] to show how to
+/// customize the appearance a class of components.
 ///
-/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/theme_data.png)
-///
-/// ```dart
-/// Theme(
-///   data: ThemeData.from(
-///     colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.amber),
-///   ),
-///   child: Builder(
-///     builder: (BuildContext context) {
-///       return Container(
-///         width: 100,
-///         height: 100,
-///         color: Theme.of(context).colorScheme.primary,
-///       );
-///     },
-///   ),
-/// )
-/// ```
-/// {@end-tool}
-///
-/// {@tool snippet}
-///
-/// This sample creates a [MaterialApp] with a [Theme] whose
-/// [ColorScheme] is based on [Colors.blue], but with the color
-/// scheme's [ColorScheme.secondary] color overridden to be green. The
-/// [AppBar] widget uses the color scheme's [ColorScheme.primary] as
-/// its default background color and the [FloatingActionButton] widget
-/// uses the color scheme's [ColorScheme.secondary] for its default
-/// background. By default, the [Text] widget uses
-/// [TextTheme.bodyMedium], and the color of that [TextStyle] has been
-/// changed to purple.
-///
-/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/material_app_theme_data.png)
-///
-/// ```dart
-/// MaterialApp(
-///   theme: ThemeData(
-///     colorScheme: ColorScheme.fromSwatch().copyWith(
-///       secondary: Colors.green,
-///     ),
-///     textTheme: const TextTheme(bodyMedium: TextStyle(color: Colors.purple)),
-///   ),
-///   home: Scaffold(
-///     appBar: AppBar(
-///       title: const Text('ThemeData Demo'),
-///     ),
-///     floatingActionButton: FloatingActionButton(
-///       child: const Icon(Icons.add),
-///       onPressed: () {},
-///     ),
-///     body: const Center(
-///       child: Text('Button pressed 0 times'),
-///     ),
-///   ),
-/// )
-/// ```
+/// ** See code in examples/api/lib/material/theme_data/theme_data.0.dart **
 /// {@end-tool}
 ///
 /// See <https://material.io/design/color/> for
@@ -307,8 +254,8 @@ class ThemeData with Diagnosticable {
     VisualDensity? visualDensity,
     // COLOR
     // [colorScheme] is the preferred way to configure colors. The other color
-    // properties (as well as primaryColorBrightness, and primarySwatch)
-    // will gradually be phased out, see https://github.com/flutter/flutter/issues/91772.
+    // properties (as well as primarySwatch) will gradually be phased out, see
+    // https://github.com/flutter/flutter/issues/91772.
     Brightness? brightness,
     Color? canvasColor,
     Color? cardColor,
@@ -390,16 +337,6 @@ class ThemeData with Diagnosticable {
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
-      'This feature was deprecated after v2.6.0-11.0.pre.',
-    )
-    Brightness? primaryColorBrightness,
-    @Deprecated(
-      'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
-      'This feature was deprecated after v2.13.0-0.0.pre.'
-    )
-    AndroidOverscrollIndicator? androidOverscrollIndicator,
-    @Deprecated(
-      'No longer used by the framework, please remove any reference to it. '
       'For more information, consult the migration guide at '
       'https://flutter.dev/docs/release/breaking-changes/toggleable-active-color#migration-guide. '
       'This feature was deprecated after v3.4.0-19.0.pre.',
@@ -444,7 +381,7 @@ class ThemeData with Diagnosticable {
     pageTransitionsTheme ??= const PageTransitionsTheme();
     scrollbarTheme ??= const ScrollbarThemeData();
     visualDensity ??= VisualDensity.defaultDensityForPlatform(platform);
-    useMaterial3 ??= false;
+    useMaterial3 ??= true;
     final bool useInkSparkle = platform == TargetPlatform.android && !kIsWeb;
     splashFactory ??= useMaterial3
       ? useInkSparkle ? InkSparkle.splashFactory : InkRipple.splashFactory
@@ -469,7 +406,6 @@ class ThemeData with Diagnosticable {
 
       // Default some of the color settings to values from the color scheme
       primaryColor ??= primarySurfaceColor;
-      primaryColorBrightness = ThemeData.estimateBrightnessForColor(primarySurfaceColor);
       canvasColor ??= colorScheme.background;
       scaffoldBackgroundColor ??= colorScheme.background;
       bottomAppBarColor ??= colorScheme.surface;
@@ -549,7 +485,7 @@ class ThemeData with Diagnosticable {
     }
     textTheme = defaultTextTheme.merge(textTheme);
     primaryTextTheme = defaultPrimaryTextTheme.merge(primaryTextTheme);
-    iconTheme ??= isDark ? const IconThemeData(color: kDefaultIconLightColor) : const IconThemeData(color: kDefaultIconDarkColor);
+    iconTheme ??= isDark ? IconThemeData(color: kDefaultIconLightColor) : IconThemeData(color: kDefaultIconDarkColor);
     primaryIconTheme ??= primaryIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
 
     // COMPONENT THEMES
@@ -599,7 +535,6 @@ class ThemeData with Diagnosticable {
     tooltipTheme ??= const TooltipThemeData();
 
     // DEPRECATED (newest deprecations at the bottom)
-    primaryColorBrightness = estimatedPrimaryColorBrightness;
     errorColor ??= Colors.red[700]!;
     backgroundColor ??= isDark ? Colors.grey[700]! : primarySwatch[200]!;
     bottomAppBarColor ??= colorSchemeSeed != null ? colorScheme.surface : isDark ? Colors.grey[800]! : Colors.white;
@@ -696,8 +631,6 @@ class ThemeData with Diagnosticable {
       toggleButtonsTheme: toggleButtonsTheme,
       tooltipTheme: tooltipTheme,
       // DEPRECATED (newest deprecations at the bottom)
-      primaryColorBrightness: primaryColorBrightness,
-      androidOverscrollIndicator: androidOverscrollIndicator,
       toggleableActiveColor: toggleableActiveColor,
       selectedRowColor: selectedRowColor,
       errorColor: errorColor,
@@ -810,16 +743,6 @@ class ThemeData with Diagnosticable {
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
-      'This feature was deprecated after v2.6.0-11.0.pre.',
-    )
-    Brightness? primaryColorBrightness,
-    @Deprecated(
-      'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
-      'This feature was deprecated after v2.13.0-0.0.pre.'
-    )
-    this.androidOverscrollIndicator,
-    @Deprecated(
-      'No longer used by the framework, please remove any reference to it. '
       'For more information, consult the migration guide at '
       'https://flutter.dev/docs/release/breaking-changes/toggleable-active-color#migration-guide. '
       'This feature was deprecated after v3.4.0-19.0.pre.',
@@ -848,7 +771,6 @@ class ThemeData with Diagnosticable {
 
   }) : // DEPRECATED (newest deprecations at the bottom)
        // should not be `required`, use getter pattern to avoid breakages.
-       _primaryColorBrightness = primaryColorBrightness,
        _toggleableActiveColor = toggleableActiveColor,
        _selectedRowColor = selectedRowColor,
        _errorColor = errorColor,
@@ -856,7 +778,6 @@ class ThemeData with Diagnosticable {
        _bottomAppBarColor = bottomAppBarColor,
        assert(toggleableActiveColor != null),
         // DEPRECATED (newest deprecations at the bottom)
-       assert(primaryColorBrightness != null),
        assert(errorColor != null),
        assert(backgroundColor != null);
 
@@ -903,7 +824,6 @@ class ThemeData with Diagnosticable {
       colorScheme: colorScheme,
       brightness: colorScheme.brightness,
       primaryColor: primarySurfaceColor,
-      primaryColorBrightness: ThemeData.estimateBrightnessForColor(primarySurfaceColor),
       canvasColor: colorScheme.background,
       scaffoldBackgroundColor: colorScheme.background,
       bottomAppBarColor: colorScheme.surface,
@@ -919,7 +839,7 @@ class ThemeData with Diagnosticable {
     );
   }
 
-  /// A default light blue theme.
+  /// A default light theme.
   ///
   /// This theme does not contain text geometry. Instead, it is expected that
   /// this theme is localized using text geometry using [ThemeData.localize].
@@ -928,7 +848,7 @@ class ThemeData with Diagnosticable {
     useMaterial3: useMaterial3,
   );
 
-  /// A default dark theme with a teal secondary [ColorScheme] color.
+  /// A default dark theme.
   ///
   /// This theme does not contain text geometry. Instead, it is expected that
   /// this theme is localized using text geometry using [ThemeData.localize].
@@ -1099,21 +1019,16 @@ class ThemeData with Diagnosticable {
   ///    splash with sparkle effects.
   final InteractiveInkFeatureFactory splashFactory;
 
-  /// A temporary flag used to opt-in to Material 3 features.
+  /// A temporary flag that can be used to opt-out of Material 3 features.
   ///
-  /// If true, then widgets that have been migrated to Material 3 will
-  /// use new colors, typography and other features of Material 3. If false,
-  /// they will use the Material 2 look and feel.
+  /// This flag is _true_ by default. If false, then components will
+  /// continue to use the colors, typography and other features of
+  /// Material 2.
   ///
-  /// During the migration to Material 3, turning this on may yield
-  /// inconsistent look and feel in your app as some widgets are migrated
-  /// while others have yet to be.
-  ///
-  /// Defaults to false. When the Material 3 specification is complete
-  /// and all widgets are migrated on stable, we will change this flag to be
-  /// true by default. After that change has landed on stable, we will deprecate
-  /// this flag and remove all uses of it. At that point, the `material` library
-  /// will aim to only support Material 3.
+  /// In the long run this flag will be deprecated and eventually
+  /// only Material 3 will be supported. We recommend that applications
+  /// migrate to Material 3 as soon as that's practical. Until that migration
+  /// is complete, this flag can be set to false.
   ///
   /// ## Defaults
   ///
@@ -1147,14 +1062,13 @@ class ThemeData with Diagnosticable {
   ///   * Typography: [Typography] (see table above)
   ///
   /// ### Components
-  /// \* *new* means the new widgets/methods created since the last stable release.
   ///   * Badges: [Badge]
   ///   * Bottom app bar: [BottomAppBar]
   ///   * Bottom sheets: [BottomSheet]
   ///   * Buttons
   ///     - Common buttons: [ElevatedButton], [FilledButton], [FilledButton.tonal], [OutlinedButton], [TextButton]
   ///     - FAB: [FloatingActionButton], [FloatingActionButton.extended]
-  ///     - Icon buttons: [IconButton], [IconButton.filled] (*new*), [IconButton.filledTonal] (*new*), [IconButton.outlined] (*new*)
+  ///     - Icon buttons: [IconButton], [IconButton.filled] (*new*), [IconButton.filledTonal], [IconButton.outlined]
   ///     - Segmented buttons: [SegmentedButton] (replacing [ToggleButtons])
   ///   * Cards: [Card]
   ///   * Checkbox: [Checkbox], [CheckboxListTile]
@@ -1172,11 +1086,11 @@ class ThemeData with Diagnosticable {
   ///   * Navigation rail: [NavigationRail]
   ///   * Progress indicators: [CircularProgressIndicator], [LinearProgressIndicator]
   ///   * Radio button: [Radio], [RadioListTile]
-  ///   * Search: [SearchBar] (*new*), [SearchAnchor] (*new*),
+  ///   * Search: [SearchBar], [SearchAnchor],
   ///   * Snack bar: [SnackBar]
   ///   * Slider: [Slider], [RangeSlider]
   ///   * Switch: [Switch], [SwitchListTile]
-  ///   * Tabs: [TabBar], [TabBar.secondary] (*new*)
+  ///   * Tabs: [TabBar], [TabBar.secondary]
   ///   * TextFields: [TextField] together with its [InputDecoration]
   ///   * Time pickers: [showTimePicker], [TimePickerDialog]
   ///   * Top app bar: [AppBar], [SliverAppBar], [SliverAppBar.medium], [SliverAppBar.large]
@@ -1524,43 +1438,6 @@ class ThemeData with Diagnosticable {
 
   // DEPRECATED (newest deprecations at the bottom)
 
-  /// Obsolete property that was originally used to determine the color
-  /// of text and icons placed on top of the primary color (e.g. toolbar text).
-  ///
-  /// The material library no longer uses this property. The [appBarTheme] can
-  /// be used to configure the appearance of [AppBar]s. The appearance of
-  /// Keyboards for [TextField]s now uses the overall theme's
-  /// [ThemeData.brightness] and can also be customized with
-  /// [TextField.keyboardAppearance]. The brightness of any color can be found
-  /// with [ThemeData.estimateBrightnessForColor].
-  @Deprecated(
-    'No longer used by the framework, please remove any reference to it. '
-    'This feature was deprecated after v2.6.0-11.0.pre.',
-  )
-  Brightness get primaryColorBrightness => _primaryColorBrightness!;
-  final Brightness? _primaryColorBrightness;
-
-  /// Specifies which overscroll indicator to use on [TargetPlatform.android].
-  ///
-  /// When null, the default value of
-  /// [MaterialScrollBehavior.androidOverscrollIndicator] is
-  /// [AndroidOverscrollIndicator.glow].
-  ///
-  /// This property is deprecated. Use the [useMaterial3] flag instead, or
-  /// override [ScrollBehavior.buildOverscrollIndicator].
-  ///
-  /// See also:
-  ///
-  ///   * [StretchingOverscrollIndicator], a Material Design edge effect
-  ///     that transforms the contents of a scrollable when overscrolled.
-  ///   * [GlowingOverscrollIndicator], an edge effect that paints a glow
-  ///     over the contents of a scrollable when overscrolled.
-  @Deprecated(
-    'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
-    'This feature was deprecated after v2.13.0-0.0.pre.'
-  )
-  final AndroidOverscrollIndicator? androidOverscrollIndicator;
-
   /// Obsolete property that was used for input validation errors, e.g. in
   /// [TextField] fields. Use [ColorScheme.error] instead.
   @Deprecated(
@@ -1616,7 +1493,6 @@ class ThemeData with Diagnosticable {
     TargetPlatform? platform,
     ScrollbarThemeData? scrollbarTheme,
     InteractiveInkFeatureFactory? splashFactory,
-    bool? useMaterial3,
     VisualDensity? visualDensity,
     // COLOR
     // [colorScheme] is the preferred way to configure colors. The other color
@@ -1698,16 +1574,6 @@ class ThemeData with Diagnosticable {
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
-      'This feature was deprecated after v2.6.0-11.0.pre.',
-    )
-    Brightness? primaryColorBrightness,
-    @Deprecated(
-      'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
-      'This feature was deprecated after v2.13.0-0.0.pre.'
-    )
-    AndroidOverscrollIndicator? androidOverscrollIndicator,
-    @Deprecated(
-      'No longer used by the framework, please remove any reference to it. '
       'For more information, consult the migration guide at '
       'https://flutter.dev/docs/release/breaking-changes/toggleable-active-color#migration-guide. '
       'This feature was deprecated after v3.4.0-19.0.pre.',
@@ -1733,6 +1599,14 @@ class ThemeData with Diagnosticable {
       'This feature was deprecated after v3.3.0-0.6.pre.',
     )
     Color? bottomAppBarColor,
+    @Deprecated(
+      'Use a ThemeData constructor (.from, .light, or .dark) instead. '
+      'These constructors all have a useMaterial3 argument, '
+      'and they set appropriate default values based on its value. '
+      'See the useMaterial3 API documentation for full details. '
+      'This feature was deprecated after v3.13.0-0.2.pre.',
+    )
+    bool? useMaterial3,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
@@ -1827,8 +1701,6 @@ class ThemeData with Diagnosticable {
       toggleButtonsTheme: toggleButtonsTheme ?? this.toggleButtonsTheme,
       tooltipTheme: tooltipTheme ?? this.tooltipTheme,
       // DEPRECATED (newest deprecations at the bottom)
-      primaryColorBrightness: primaryColorBrightness ?? _primaryColorBrightness,
-      androidOverscrollIndicator: androidOverscrollIndicator ?? this.androidOverscrollIndicator,
       toggleableActiveColor: toggleableActiveColor ?? _toggleableActiveColor,
       selectedRowColor: selectedRowColor ?? _selectedRowColor,
       errorColor: errorColor ?? _errorColor,
@@ -2022,8 +1894,6 @@ class ThemeData with Diagnosticable {
       toggleButtonsTheme: ToggleButtonsThemeData.lerp(a.toggleButtonsTheme, b.toggleButtonsTheme, t)!,
       tooltipTheme: TooltipThemeData.lerp(a.tooltipTheme, b.tooltipTheme, t)!,
       // DEPRECATED (newest deprecations at the bottom)
-      primaryColorBrightness: t < 0.5 ? a.primaryColorBrightness : b.primaryColorBrightness,
-      androidOverscrollIndicator:t < 0.5 ? a.androidOverscrollIndicator : b.androidOverscrollIndicator,
       toggleableActiveColor: Color.lerp(a.toggleableActiveColor, b.toggleableActiveColor, t),
       selectedRowColor: Color.lerp(a.selectedRowColor, b.selectedRowColor, t),
       errorColor: Color.lerp(a.errorColor, b.errorColor, t),
@@ -2129,8 +1999,6 @@ class ThemeData with Diagnosticable {
         other.toggleButtonsTheme == toggleButtonsTheme &&
         other.tooltipTheme == tooltipTheme &&
         // DEPRECATED (newest deprecations at the bottom)
-        other.primaryColorBrightness == primaryColorBrightness &&
-        other.androidOverscrollIndicator == androidOverscrollIndicator &&
         other.toggleableActiveColor == toggleableActiveColor &&
         other.selectedRowColor == selectedRowColor &&
         other.errorColor == errorColor &&
@@ -2233,8 +2101,6 @@ class ThemeData with Diagnosticable {
       toggleButtonsTheme,
       tooltipTheme,
       // DEPRECATED (newest deprecations at the bottom)
-      primaryColorBrightness,
-      androidOverscrollIndicator,
       toggleableActiveColor,
       selectedRowColor,
       errorColor,
@@ -2339,8 +2205,6 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<ToggleButtonsThemeData>('toggleButtonsTheme', toggleButtonsTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<TooltipThemeData>('tooltipTheme', tooltipTheme, level: DiagnosticLevel.debug));
     // DEPRECATED (newest deprecations at the bottom)
-    properties.add(EnumProperty<Brightness>('primaryColorBrightness', primaryColorBrightness, defaultValue: defaultData.primaryColorBrightness, level: DiagnosticLevel.debug));
-    properties.add(EnumProperty<AndroidOverscrollIndicator>('androidOverscrollIndicator', androidOverscrollIndicator, defaultValue: null, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('toggleableActiveColor', toggleableActiveColor, defaultValue: defaultData.toggleableActiveColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('selectedRowColor', selectedRowColor, defaultValue: defaultData.selectedRowColor, level: DiagnosticLevel.debug));
     properties.add(ColorProperty('errorColor', errorColor, defaultValue: defaultData.errorColor, level: DiagnosticLevel.debug));
@@ -2762,8 +2626,6 @@ class VisualDensity with Diagnosticable {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 const ColorScheme _colorSchemeLightM3 = ColorScheme(
   brightness: Brightness.light,

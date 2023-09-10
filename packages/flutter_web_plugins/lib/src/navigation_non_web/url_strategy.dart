@@ -5,7 +5,9 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
-import '../navigation_common/platform_location.dart';
+import 'platform_location.dart';
+
+export 'platform_location.dart';
 
 /// Callback that receives the new state of the browser history entry.
 typedef PopStateListener = void Function(Object? state);
@@ -97,8 +99,10 @@ void usePathUrlStrategy() {
 /// ```dart
 /// import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 ///
-/// // Somewhere before calling `runApp()` do:
-/// setUrlStrategy(const HashUrlStrategy());
+/// void main() {
+///   // Somewhere before calling `runApp()` do:
+///   setUrlStrategy(const HashUrlStrategy());
+/// }
 /// ```
 class HashUrlStrategy extends UrlStrategy {
   /// Creates an instance of [HashUrlStrategy].
@@ -115,13 +119,15 @@ class HashUrlStrategy extends UrlStrategy {
 /// ```dart
 /// import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 ///
-/// // Somewhere before calling `runApp()` do:
-/// setUrlStrategy(PathUrlStrategy());
+/// void main() {
+///   // Somewhere before calling `runApp()` do:
+///   setUrlStrategy(PathUrlStrategy());
+/// }
 /// ```
 class PathUrlStrategy extends HashUrlStrategy {
   /// Creates an instance of [PathUrlStrategy].
   ///
   /// The [PlatformLocation] parameter is useful for testing to mock out browser
   /// integrations.
-  PathUrlStrategy([PlatformLocation? _]);
+  const PathUrlStrategy([PlatformLocation? _]);
 }

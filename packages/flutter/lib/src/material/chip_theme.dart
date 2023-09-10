@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'material_state.dart';
 import 'theme.dart';
 
 /// Applies a chip theme to descendant [RawChip]-based widgets, like [Chip],
@@ -178,6 +179,7 @@ class ChipThemeData with Diagnosticable {
   /// This will rarely be used directly. It is used by [lerp] to
   /// create intermediate themes based on two themes.
   const ChipThemeData({
+    this.color,
     this.backgroundColor,
     this.deleteIconColor,
     this.disabledColor,
@@ -267,6 +269,12 @@ class ChipThemeData with Diagnosticable {
       pressElevation: 8.0,
     );
   }
+
+  /// Overrides the default for [ChipAttributes.color].
+  ///
+  /// This property applies to [ActionChip], [Chip], [ChoiceChip],
+  /// [FilterChip], [InputChip], [RawChip].
+  final MaterialStateProperty<Color?>? color;
 
   /// Overrides the default for [ChipAttributes.backgroundColor]
   /// which is used for unselected, enabled chip backgrounds.
@@ -433,6 +441,7 @@ class ChipThemeData with Diagnosticable {
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   ChipThemeData copyWith({
+    MaterialStateProperty<Color?>? color,
     Color? backgroundColor,
     Color? deleteIconColor,
     Color? disabledColor,
@@ -455,6 +464,7 @@ class ChipThemeData with Diagnosticable {
     IconThemeData? iconTheme,
   }) {
     return ChipThemeData(
+      color: color ?? this.color,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       deleteIconColor: deleteIconColor ?? this.deleteIconColor,
       disabledColor: disabledColor ?? this.disabledColor,
@@ -488,6 +498,7 @@ class ChipThemeData with Diagnosticable {
       return a;
     }
     return ChipThemeData(
+      color: MaterialStateProperty.lerp<Color?>(a?.color, b?.color, t, Color.lerp),
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       deleteIconColor: Color.lerp(a?.deleteIconColor, b?.deleteIconColor, t),
       disabledColor: Color.lerp(a?.disabledColor, b?.disabledColor, t),
@@ -537,6 +548,7 @@ class ChipThemeData with Diagnosticable {
 
   @override
   int get hashCode => Object.hashAll(<Object?>[
+    color,
     backgroundColor,
     deleteIconColor,
     disabledColor,
@@ -568,6 +580,7 @@ class ChipThemeData with Diagnosticable {
       return false;
     }
     return other is ChipThemeData
+        && other.color == color
         && other.backgroundColor == backgroundColor
         && other.deleteIconColor == deleteIconColor
         && other.disabledColor == disabledColor
@@ -593,6 +606,7 @@ class ChipThemeData with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('color', color, defaultValue: null));
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(ColorProperty('deleteIconColor', deleteIconColor, defaultValue: null));
     properties.add(ColorProperty('disabledColor', disabledColor, defaultValue: null));

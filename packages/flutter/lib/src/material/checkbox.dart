@@ -44,6 +44,12 @@ enum _CheckboxType { material, adaptive }
 /// ** See code in examples/api/lib/material/checkbox/checkbox.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This example shows what the checkbox error state looks like.
+///
+/// ** See code in examples/api/lib/material/checkbox/checkbox.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CheckboxListTile], which combines this widget with a [ListTile] so that
@@ -894,8 +900,6 @@ class _CheckboxDefaultsM2 extends CheckboxThemeData {
 // "END GENERATED" comments are generated from data in the Material
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// Token database version: v0_162
 
 class _CheckboxDefaultsM3 extends CheckboxThemeData {
   _CheckboxDefaultsM3(BuildContext context)

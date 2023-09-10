@@ -9,8 +9,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 Widget boilerplate({required Widget child}) {
@@ -21,8 +21,54 @@ Widget boilerplate({required Widget child}) {
 }
 
 void main() {
+  testWidgetsWithLeakTracking('SegmentedButton releases state controllers for deleted segments', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    final Key key = UniqueKey();
 
-  testWidgets('SegmentedButton is built with Material of type MaterialType.transparency', (WidgetTester tester) async {
+    Widget buildApp(Widget button) {
+      return MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: button,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+      buildApp(
+        SegmentedButton<int>(
+          key: key,
+          segments: const <ButtonSegment<int>>[
+            ButtonSegment<int>(value: 1, label: Text('1')),
+            ButtonSegment<int>(value: 2, label: Text('2')),
+          ],
+          selected: const <int>{2},
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(
+      buildApp(
+        SegmentedButton<int>(
+          key: key,
+          segments: const <ButtonSegment<int>>[
+            ButtonSegment<int>(value: 2, label: Text('2')),
+            ButtonSegment<int>(value: 3, label: Text('3')),
+          ],
+          selected: const <int>{2},
+        ),
+      ),
+    );
+
+    final SegmentedButtonState<int> state = tester.state(find.byType(SegmentedButton<int>));
+    expect(state.statesControllers, hasLength(2));
+    expect(state.statesControllers.keys.first.value, 2);
+    expect(state.statesControllers.keys.last.value, 3);
+  });
+
+  testWidgetsWithLeakTracking('SegmentedButton is built with Material of type MaterialType.transparency', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
       MaterialApp(
@@ -532,5 +578,60 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
     await tester.pumpAndSettle();
     expect(overlayColor(), paints..rect()..rect(color: theme.colorScheme.onSurface.withOpacity(0.12)));
     expect(material.textStyle?.color, theme.colorScheme.onSurface);
+  });
+
+  testWidgets('SegmentedButton has no tooltips by default', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: SegmentedButton<int>(
+              segments: const <ButtonSegment<int>>[
+                ButtonSegment<int>(value: 1, label: Text('1')),
+                ButtonSegment<int>(value: 2, label: Text('2')),
+                ButtonSegment<int>(value: 3, label: Text('3'), enabled: false),
+              ],
+              selected: const <int>{2},
+              onSelectionChanged: (Set<int> selected) { },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(Tooltip), findsNothing);
+  });
+
+  testWidgets('SegmentedButton has correct tooltips', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: Center(
+            child: SegmentedButton<int>(
+              segments: const <ButtonSegment<int>>[
+                ButtonSegment<int>(value: 1, label: Text('1')),
+                ButtonSegment<int>(value: 2, label: Text('2'), tooltip: 't2'),
+                ButtonSegment<int>(
+                    value: 3,
+                    label: Text('3'),
+                    tooltip: 't3',
+                    enabled: false,
+                ),
+              ],
+              selected: const <int>{2},
+              onSelectionChanged: (Set<int> selected) { },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(Tooltip), findsNWidgets(2));
+    expect(find.byTooltip('t2'), findsOneWidget);
+    expect(find.byTooltip('t3'), findsOneWidget);
   });
 }

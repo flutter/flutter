@@ -4,10 +4,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   group('TimeOfDay.format', () {
-    testWidgets('respects alwaysUse24HourFormat option', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('respects alwaysUse24HourFormat option', (WidgetTester tester) async {
       Future<String> pumpTest(bool alwaysUse24HourFormat) async {
         late String formattedValue;
         await tester.pumpWidget(MaterialApp(
@@ -27,7 +28,7 @@ void main() {
     });
   });
 
-  testWidgets('hourOfPeriod returns correct value', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('hourOfPeriod returns correct value', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/59158.
     expect(const TimeOfDay(minute: 0, hour:  0).hourOfPeriod, 12);
     expect(const TimeOfDay(minute: 0, hour:  1).hourOfPeriod,  1);
@@ -56,11 +57,13 @@ void main() {
   });
 
   group('RestorableTimeOfDay tests', () {
-    testWidgets('value is not accessible when not registered', (WidgetTester tester) async {
-      expect(() => RestorableTimeOfDay(const TimeOfDay(hour: 20, minute: 4)).value, throwsAssertionError);
+    testWidgetsWithLeakTracking('value is not accessible when not registered', (WidgetTester tester) async {
+      final RestorableTimeOfDay property = RestorableTimeOfDay(const TimeOfDay(hour: 20, minute: 4));
+      addTearDown(property.dispose);
+      expect(() => property.value, throwsAssertionError);
     });
 
-    testWidgets('work when not in restoration scope', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('work when not in restoration scope', (WidgetTester tester) async {
       await tester.pumpWidget(const _RestorableWidget());
 
       final _RestorableWidgetState state = tester.state(find.byType(_RestorableWidget));
@@ -193,4 +196,10 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
 
   @override
   String get restorationId => 'widget';
+
+  @override
+  void dispose() {
+    timeOfDay.dispose();
+    super.dispose();
+  }
 }

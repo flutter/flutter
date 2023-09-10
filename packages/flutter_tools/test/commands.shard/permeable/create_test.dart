@@ -78,7 +78,7 @@ void main() {
     projectDir = tempDir.childDirectory('flutter_project');
     fakeFlutterVersion = FakeFlutterVersion(
       frameworkRevision: frameworkRevision,
-      channel: frameworkChannel,
+      branch: frameworkChannel,
     );
     fakeProcessManager = FakeProcessManager.empty();
     mockStdio = FakeStdio();
@@ -735,10 +735,13 @@ void main() {
   testUsingContext('plugin project with invalid custom project name', () async {
     expect(
       () => _createProject(projectDir,
-        <String>['--no-pub', '--template=plugin', '--project-name', 'xyz.xyz', '--platforms', 'android,ios',],
+        <String>['--no-pub', '--template=plugin', '--project-name', 'xyz-xyz', '--platforms', 'android,ios',],
         <String>[],
       ),
-      throwsToolExit(message: '"xyz.xyz" is not a valid Dart package name.'),
+      allOf(
+        throwsToolExit(message: '"xyz-xyz" is not a valid Dart package name.'),
+        throwsToolExit(message: 'Try "xyz_xyz" instead.'),
+      ),
     );
   });
 
@@ -1269,8 +1272,8 @@ void main() {
     expectExists(versionPath);
     final String version = globals.fs.file(globals.fs.path.join(projectDir.path, versionPath)).readAsStringSync();
     expect(version, contains('version:'));
-    expect(version, contains('revision: 12345678'));
-    expect(version, contains('channel: omega'));
+    expect(version, contains('revision: "12345678"'));
+    expect(version, contains('channel: "omega"'));
 
     // IntelliJ metadata
     final String intelliJSdkMetadataPath = globals.fs.path.join('.idea', 'libraries', 'Dart_SDK.xml');
@@ -1349,8 +1352,8 @@ void main() {
     expectExists(versionPath);
     final String version = globals.fs.file(globals.fs.path.join(projectDir.path, versionPath)).readAsStringSync();
     expect(version, contains('version:'));
-    expect(version, contains('revision: 12345678'));
-    expect(version, contains('channel: omega'));
+    expect(version, contains('revision: "12345678"'));
+    expect(version, contains('channel: "omega"'));
 
     // IntelliJ metadata
     final String intelliJSdkMetadataPath = globals.fs.path.join('.idea', 'libraries', 'Dart_SDK.xml');
@@ -2607,6 +2610,18 @@ void main() {
       , throwsToolExit(message: 'The "--platforms" argument is not supported', exitCode: 2));
   });
 
+  testUsingContext('create an ffi package with --platforms throws error.', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await expectLater(
+      runner.run(<String>['create', '--no-pub', '--template=package_ffi', '--platform=ios', projectDir.path])
+      , throwsToolExit(message: 'The "--platforms" argument is not supported', exitCode: 2));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+  });
+
   testUsingContext('create a plugin with android, delete then re-create folders', () async {
     Cache.flutterRoot = '../..';
 
@@ -2919,6 +2934,48 @@ void main() {
     expect(buildGradleContent.contains('if (project.android.hasProperty("namespace")) {'), true);
   });
 
+  testUsingContext('Flutter module Android project contains namespace', () async {
+    const String moduleBuildGradleFilePath = '.android/build.gradle';
+    const String moduleAppBuildGradleFlePath = '.android/app/build.gradle';
+    const String moduleFlutterBuildGradleFilePath = '.android/Flutter/build.gradle';
+    await _createProject(
+      projectDir,
+      <String>['--template=module', '--org', 'com.bar.foo'],
+      <String>[moduleBuildGradleFilePath,
+        moduleAppBuildGradleFlePath,
+        moduleFlutterBuildGradleFilePath,
+      ],
+    );
+
+    final String moduleBuildGradleFileContent = await globals.fs.file(globals.fs.path.join(projectDir.path, moduleBuildGradleFilePath)).readAsString();
+    final String moduleAppBuildGradleFileContent = await globals.fs.file(globals.fs.path.join(projectDir.path, moduleAppBuildGradleFlePath)).readAsString();
+    final String moduleFlutterBuildGradleFileContent = await globals.fs.file(globals.fs.path.join(projectDir.path, moduleFlutterBuildGradleFilePath)).readAsString();
+
+    // Each build file should contain the expected namespace.
+    const String expectedNameSpace = "namespace 'com.bar.foo.flutter_project'";
+    expect(moduleBuildGradleFileContent.contains(expectedNameSpace), true);
+    expect(moduleFlutterBuildGradleFileContent.contains(expectedNameSpace), true);
+    const String expectedHostNameSpace = 'namespace "com.bar.foo.flutter_project.host"';
+    expect(moduleAppBuildGradleFileContent.contains(expectedHostNameSpace), true);
+
+    // The namespaces should be conditionalized for AGP <4.2.
+    const String expectedConditional = 'if (project.android.hasProperty("namespace")) {';
+    expect(moduleBuildGradleFileContent.contains(expectedConditional), true);
+    expect(moduleAppBuildGradleFileContent.contains(expectedConditional), true);
+    expect(moduleFlutterBuildGradleFileContent.contains(expectedConditional), true);
+
+  }, overrides: <Type, Generator>{
+    Pub: () => Pub.test(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
+      usage: globals.flutterUsage,
+      botDetector: globals.botDetector,
+      platform: globals.platform,
+      stdio: mockStdio,
+    ),
+  });
+
   testUsingContext('Linux plugins handle partially camel-case project names correctly', () async {
     Cache.flutterRoot = '../..';
 
@@ -3224,6 +3281,24 @@ void main() {
     ),
   });
 
+  testUsingContext('should escape ":" in project description', () async {
+    await _createProject(
+      projectDir,
+      <String>[
+        '--no-pub',
+        '--description',
+        'a: b',
+      ],
+      <String>[
+        'pubspec.yaml',
+      ],
+    );
+
+    final String rawPubspec = await projectDir.childFile('pubspec.yaml').readAsString();
+    final Pubspec pubspec = Pubspec.parse(rawPubspec);
+    expect(pubspec.description, 'a: b');
+  });
+
   testUsingContext('create an FFI plugin with ios, then add macos', () async {
     Cache.flutterRoot = '../..';
 
@@ -3252,43 +3327,49 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
-  testUsingContext('FFI plugins error android language', () async {
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-    final List<String> args = <String>[
-      'create',
-      '--no-pub',
-      '--template=plugin_ffi',
-      '-a',
-      'kotlin',
-      '--platforms=android',
-      projectDir.path,
-    ];
+  for (final String template in <String>['package_ffi', 'plugin_ffi']) {
+    testUsingContext('$template error android language', () async {
+      final CreateCommand command = CreateCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      final List<String> args = <String>[
+        'create',
+        '--no-pub',
+        '--template=$template',
+        '-a',
+        'kotlin',
+        if (template == 'plugin_ffi') '--platforms=android',
+        projectDir.path,
+      ];
 
-    await expectLater(
-      runner.run(args),
-      throwsToolExit(message: 'The "android-language" option is not supported with the plugin_ffi template: the language will always be C or C++.'),
-    );
-  });
+      await expectLater(
+        runner.run(args),
+        throwsToolExit(message: 'The "android-language" option is not supported with the $template template: the language will always be C or C++.'),
+      );
+    }, overrides: <Type, Generator>{
+      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+    });
 
-  testUsingContext('FFI plugins error ios language', () async {
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-    final List<String> args = <String>[
-      'create',
-      '--no-pub',
-      '--template=plugin_ffi',
-      '--ios-language',
-      'swift',
-      '--platforms=ios',
-      projectDir.path,
-    ];
+    testUsingContext('$template error ios language', () async {
+      final CreateCommand command = CreateCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      final List<String> args = <String>[
+        'create',
+        '--no-pub',
+        '--template=$template',
+        '--ios-language',
+        'swift',
+        if (template == 'plugin_ffi') '--platforms=ios',
+        projectDir.path,
+      ];
 
-    await expectLater(
-      runner.run(args),
-      throwsToolExit(message: 'The "ios-language" option is not supported with the plugin_ffi template: the language will always be C or C++.'),
-    );
-  });
+      await expectLater(
+        runner.run(args),
+        throwsToolExit(message: 'The "ios-language" option is not supported with the $template template: the language will always be C or C++.'),
+      );
+    }, overrides: <Type, Generator>{
+      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+    });
+  }
 
   testUsingContext('FFI plugins error web platform', () async {
     final CreateCommand command = CreateCommand();
@@ -3320,6 +3401,32 @@ void main() {
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
     Logger: () => logger,
+  });
+
+  testUsingContext('Does not double quote description in index.html on web', () async {
+    await _createProject(
+      projectDir,
+      <String>['--no-pub', '--platforms=web'],
+      <String>['pubspec.yaml', 'web/index.html'],
+    );
+
+    final String rawIndexHtml = await projectDir.childDirectory('web').childFile('index.html').readAsString();
+    const String expectedDescription = '<meta name="description" content="A new Flutter project.">';
+
+    expect(rawIndexHtml.contains(expectedDescription), isTrue);
+  });
+
+  testUsingContext('Does not double quote description in manifest.json on web', () async {
+    await _createProject(
+      projectDir,
+      <String>['--no-pub', '--platforms=web'],
+      <String>['pubspec.yaml', 'web/manifest.json'],
+    );
+
+    final String rawManifestJson = await projectDir.childDirectory('web').childFile('manifest.json').readAsString();
+    const String expectedDescription = '"description": "A new Flutter project."';
+
+    expect(rawManifestJson.contains(expectedDescription), isTrue);
   });
 }
 

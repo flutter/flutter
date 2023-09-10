@@ -30,7 +30,34 @@ import 'toggle_buttons_theme.dart';
 /// correlated by their index in the list. The length of [isSelected] has to
 /// match the length of the [children] list.
 ///
+/// There is a Material 3 version of this component, [SegmentedButton],
+/// that's preferred for applications that are configured for Material 3
+/// (see [ThemeData.useMaterial3]).
+///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=kVEguaQWGAY}
+///
+/// ## Updating to [SegmentedButton]
+///
+/// There is a Material 3 version of this component, [SegmentedButton],
+/// that's preferred for applications that are configured for Material 3
+/// (see [ThemeData.useMaterial3]). The [SegmentedButton] widget's visuals
+/// are a little bit different, see the Material 3 spec at
+/// <https://m3.material.io/components/segmented-buttons/overview> for
+/// more details. The [SegmentedButton] widget's API is also slightly different.
+/// While the [ToggleButtons] widget can have list of widgets, the
+/// [SegmentedButton] widget has a list of [ButtonSegment]s with
+/// a type value. While the [ToggleButtons] uses a list of boolean values
+/// to determine the selection state of each button, the [SegmentedButton]
+/// uses a set of type values to determine the selection state of each segment.
+/// The [SegmentedButton.style] is a [ButtonStyle] style field, which can be
+/// used to customize the entire segmented button and the individual segments.
+///
+/// {@tool dartpad}
+/// This sample shows how to migrate [ToggleButtons] that allows multiple
+/// or no selection to [SegmentedButton] that allows multiple or no selection.
+///
+/// ** See code in examples/api/lib/material/toggle_buttons/toggle_buttons.1.dart **
+/// {@end-tool}
 ///
 /// {@tool dartpad}
 /// This example showcase [ToggleButtons] in various configurations.

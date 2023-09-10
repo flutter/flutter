@@ -147,7 +147,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
       'xcrun',
       'xcodebuild',
       '-create-xcframework',
-      for (Directory framework in frameworks) ...<String>[
+      for (final Directory framework in frameworks) ...<String>[
         '-framework',
         framework.path,
         ...framework.parent
@@ -270,6 +270,28 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
 
       final Status status = globals.logger.startProgress(
         ' └─Moving to ${globals.fs.path.relative(modeDirectory.path)}');
+
+      // Copy the native assets. The native assets have already been signed in
+      // buildNativeAssetsMacOS.
+      final Directory nativeAssetsDirectory = globals.fs
+          .directory(getBuildDirectory())
+          .childDirectory('native_assets/ios/');
+      if (await nativeAssetsDirectory.exists()) {
+        final ProcessResult rsyncResult = await globals.processManager.run(<Object>[
+          'rsync',
+          '-av',
+          '--filter',
+          '- .DS_Store',
+          '--filter',
+          '- native_assets.yaml',
+          nativeAssetsDirectory.path,
+          modeDirectory.path,
+        ]);
+        if (rsyncResult.exitCode != 0) {
+          throwToolExit('Failed to copy native assets:\n${rsyncResult.stderr}');
+        }
+      }
+
       try {
         // Delete the intermediaries since they would have been copied into our
         // output frameworks.

@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import 'semantics_tester.dart';
 
 void main() {
@@ -1137,6 +1136,72 @@ void main() {
       ..save()
       ..clipRect(rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 600.0))
       ..restore(),
+    );
+  });
+
+  testWidgets('OverlayEntry throws if inserted to an invalid Overlay', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(),
+      ),
+    );
+    final OverlayState overlay = tester.state(find.byType(Overlay));
+    final OverlayEntry entry = OverlayEntry(builder: (BuildContext context) => const SizedBox());
+    expect(
+      () => overlay.insert(entry),
+      returnsNormally,
+    );
+
+    // Throws when inserted to the same Overlay.
+    expect(
+      () => overlay.insert(entry),
+      throwsA(isA<FlutterError>().having(
+        (FlutterError error) => error.toString(),
+        'toString()',
+        allOf(
+          contains('The specified entry is already present in the target Overlay.'),
+          contains('The OverlayEntry was'),
+          contains('The Overlay the OverlayEntry was trying to insert to was'),
+        ),
+      )),
+    );
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: SizedBox(child: Overlay()),
+      ),
+    );
+
+    // Throws if inserted to an already disposed Overlay.
+    expect(
+      () => overlay.insert(entry),
+      throwsA(isA<FlutterError>().having(
+        (FlutterError error) => error.toString(),
+        'toString()',
+        allOf(
+          contains('Attempted to insert an OverlayEntry to an already disposed Overlay.'),
+          contains('The OverlayEntry was'),
+          contains('The Overlay the OverlayEntry was trying to insert to was'),
+        ),
+      )),
+    );
+
+    final OverlayState newOverlay = tester.state(find.byType(Overlay));
+    // Throws when inserted to a different Overlay without calling remove.
+    expect(
+      () => newOverlay.insert(entry),
+      throwsA(isA<FlutterError>().having(
+        (FlutterError error) => error.toString(),
+        'toString()',
+        allOf(
+          contains('The specified entry is already present in a different Overlay.'),
+          contains('The OverlayEntry was'),
+          contains('The Overlay the OverlayEntry was trying to insert to was'),
+          contains("The OverlayEntry's current Overlay was"),
+        ),
+      )),
     );
   });
 
