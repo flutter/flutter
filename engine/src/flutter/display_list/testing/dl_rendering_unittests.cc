@@ -25,6 +25,7 @@
 #include "third_party/skia/include/effects/SkImageFilters.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/gpu/GrRecordingContext.h"
+#include "third_party/skia/include/gpu/GrTypes.h"
 
 namespace flutter {
 namespace testing {
@@ -501,7 +502,7 @@ class RenderEnvironment {
 
     if (GrDirectContext* dContext =
             GrAsDirectContext(surface->recordingContext())) {
-      dContext->flushAndSubmit(surface, /*syncCpu=*/true);
+      dContext->flushAndSubmit(surface.get(), GrSyncCpu::kYes);
     }
     return std::make_unique<RenderResult>(surface);
   }
@@ -4203,7 +4204,8 @@ class DisplayListNopTest : public DisplayListCanvas {
       if (GrDirectContext* direct_context = GrAsDirectContext(
               result_surface->sk_surface()->recordingContext())) {
         direct_context->flushAndSubmit();
-        direct_context->flushAndSubmit(result_surface->sk_surface(), true);
+        direct_context->flushAndSubmit(result_surface->sk_surface().get(),
+                                       GrSyncCpu::kYes);
       }
       auto result_pixels =
           std::make_unique<RenderResult>(result_surface->sk_surface());
@@ -4264,7 +4266,8 @@ class DisplayListNopTest : public DisplayListCanvas {
       if (GrDirectContext* direct_context = GrAsDirectContext(
               result_surface->sk_surface()->recordingContext())) {
         direct_context->flushAndSubmit();
-        direct_context->flushAndSubmit(result_surface->sk_surface(), true);
+        direct_context->flushAndSubmit(result_surface->sk_surface().get(),
+                                       GrSyncCpu::kYes);
       }
       auto result_pixels =
           std::make_unique<RenderResult>(result_surface->sk_surface());

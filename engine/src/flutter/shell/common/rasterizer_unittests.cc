@@ -17,6 +17,7 @@
 
 #include "third_party/skia/include/core/SkColorSpace.h"
 #include "third_party/skia/include/core/SkSurface.h"
+#include "third_party/skia/include/gpu/GrTypes.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
 
 #include "gmock/gmock.h"
@@ -1014,7 +1015,7 @@ TEST(RasterizerTest, TeardownFreesResourceCache) {
 
   SkPaint paint;
   sk_surface->getCanvas()->drawPaint(paint);
-  context->flushAndSubmit(true);
+  context->flushAndSubmit(GrSyncCpu::kYes);
 
   EXPECT_EQ(context->getResourceCachePurgeableBytes(), 0ul);
 

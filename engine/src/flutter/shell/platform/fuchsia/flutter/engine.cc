@@ -27,6 +27,7 @@
 #include "flutter/shell/common/thread_host.h"
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkSerialProcs.h"
+#include "third_party/skia/include/gpu/GrTypes.h"
 #include "third_party/skia/include/ports/SkFontMgr_fuchsia.h"
 
 #include "../runtime/dart/utils/files.h"
@@ -944,7 +945,8 @@ void Engine::WarmupSkps(
             };
 
             surface_producer->gr_context()->flush(flush_info);
-            surface_producer->gr_context()->submit(synchronous);
+            surface_producer->gr_context()->submit(
+                synchronous ? GrSyncCpu::kYes : GrSyncCpu::kNo);
           }
         } else {
           if (i == count - 1) {

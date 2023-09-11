@@ -14,6 +14,7 @@
 #include "third_party/skia/include/core/SkTextBlob.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/gpu/GrRecordingContext.h"
+#include "third_party/skia/include/gpu/GrTypes.h"
 
 namespace flutter {
 namespace testing {
@@ -47,7 +48,7 @@ static void FlushSubmitCpuSync(const sk_sp<SkSurface>& surface) {
   }
   if (GrDirectContext* dContext =
           GrAsDirectContext(surface->recordingContext())) {
-    dContext->flushAndSubmit(surface, /*syncCpu=*/true);
+    dContext->flushAndSubmit(surface.get(), GrSyncCpu::kYes);
   }
 }
 
