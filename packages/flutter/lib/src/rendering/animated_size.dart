@@ -99,8 +99,42 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     );
   }
 
+  /// When asserts are enabled, returns the animation controller that is used
+  /// to drive the resizing.
+  ///
+  /// Otherwise, returns null.
+  ///
+  /// This getter is intended for use in framework unit tests. Applications must
+  /// not depend on its value.
+  @visibleForTesting
+  AnimationController? get debugController {
+    AnimationController? controller;
+    assert(() {
+      controller = _controller;
+      return true;
+    }());
+    return controller;
+  }
+
+  /// When asserts are enabled, returns the animation that drives the resizing.
+  ///
+  /// Otherwise, returns null.
+  ///
+  /// This getter is intended for use in framework unit tests. Applications must
+  /// not depend on its value.
+  @visibleForTesting
+  CurvedAnimation? get debugAnimation {
+    CurvedAnimation? animation;
+    assert(() {
+      animation = _animation;
+      return true;
+    }());
+    return animation;
+  }
+
   late final AnimationController _controller;
   late final CurvedAnimation _animation;
+
   final SizeTween _sizeTween = SizeTween();
   late bool _hasVisualOverflow;
   double? _lastValue;
@@ -351,6 +385,8 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   @override
   void dispose() {
     _clipRectLayer.layer = null;
+    _controller.dispose();
+    _animation.dispose();
     super.dispose();
   }
 }
