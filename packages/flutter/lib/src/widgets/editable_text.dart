@@ -2804,6 +2804,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         ? widget.style.merge(const TextStyle(fontWeight: FontWeight.bold))
         : widget.style;
 
+    if (_value.text.isNotEmpty) {
+      final TextEditingValue? formattedValue = _formatByInputFormatters(_value);
+      if (formattedValue != null && spellCheckEnabled && formattedValue.text.isNotEmpty) {
+        _performSpellCheck(formattedValue.text);
+      }
+    }
+
     final AutofillGroupState? newAutofillGroup = AutofillGroup.maybeOf(context);
     if (currentAutofillScope != newAutofillGroup) {
       _currentAutofillScope?.unregister(autofillId);
@@ -3749,6 +3756,32 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _lastBottomViewInset = view.viewInsets.bottom;
   }
 
+  TextEditingValue? _formatByInputFormatters(TextEditingValue value) {
+    // Only apply input formatters if the text has changed (including uncommitted
+    // text in the composing region), or when the user committed the composing
+    // text.
+    // Gboard is very persistent in restoring the composing region. Applying
+    // input formatters on composing-region-only changes (except clearing the
+    // current composing region) is very infinite-loop-prone: the formatters
+    // will keep trying to modify the composing region while Gboard will keep
+    // trying to restore the original composing region.
+    try {
+      return widget.inputFormatters?.fold<TextEditingValue>(
+            value,
+            (TextEditingValue newValue, TextInputFormatter formatter) => formatter.formatEditUpdate(_value, newValue),
+          ) ??
+          value;
+    } catch (exception, stack) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'widgets',
+        context: ErrorDescription('while applying input formatters'),
+      ));
+      return null;
+    }
+  }
+
   Future<void> _performSpellCheck(final String text) async {
     try {
       final Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
@@ -3788,30 +3821,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final bool selectionChanged = oldValue.selection != value.selection;
 
     if (textChanged || textCommitted) {
-      // Only apply input formatters if the text has changed (including uncommitted
-      // text in the composing region), or when the user committed the composing
-      // text.
-      // Gboard is very persistent in restoring the composing region. Applying
-      // input formatters on composing-region-only changes (except clearing the
-      // current composing region) is very infinite-loop-prone: the formatters
-      // will keep trying to modify the composing region while Gboard will keep
-      // trying to restore the original composing region.
-      try {
-        value = widget.inputFormatters?.fold<TextEditingValue>(
-          value,
-          (TextEditingValue newValue, TextInputFormatter formatter) => formatter.formatEditUpdate(_value, newValue),
-        ) ?? value;
+      final TextEditingValue? formattedValue = _formatByInputFormatters(value);
+      if (formattedValue != null) {
+        value = formattedValue;
 
         if (spellCheckEnabled && value.text.isNotEmpty && _value.text != value.text) {
           _performSpellCheck(value.text);
         }
-      } catch (exception, stack) {
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'widgets',
-          context: ErrorDescription('while applying input formatters'),
-        ));
       }
     }
 
