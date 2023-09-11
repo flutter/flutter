@@ -516,6 +516,30 @@ void main() {
       expect(find.text('2017'), findsNothing);
     });
 
+    testWidgets('Selecting disabled date does not change current selection', (WidgetTester tester) async {
+      DateTime day(int day) => DateTime(2020, DateTime.may, day);
+
+      DateTime selection = day(2);
+      await tester.pumpWidget(calendarDatePicker(
+        initialDate: selection,
+        firstDate: day(2),
+        lastDate: day(3),
+        onDateChanged: (DateTime date) {
+          selection = date;
+        },
+      ));
+
+      await tester.tap(find.text('3'));
+      await tester.pumpAndSettle();
+      expect(selection, day(3));
+      await tester.tap(find.text('4'));
+      await tester.pumpAndSettle();
+      expect(selection, day(3));
+      await tester.tap(find.text('5'));
+      await tester.pumpAndSettle();
+      expect(selection, day(3));
+    });
+
     for (final bool useMaterial3 in <bool>[false, true]) {
       testWidgets('Updates to initialDate parameter are not reflected in the state (useMaterial3=$useMaterial3)', (WidgetTester tester) async {
         final Key pickerKey = UniqueKey();

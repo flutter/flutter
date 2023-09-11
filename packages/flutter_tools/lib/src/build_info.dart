@@ -777,6 +777,8 @@ TargetPlatform getTargetPlatformForName(String platform) {
       return TargetPlatform.windows_x64;
     case 'web-javascript':
       return TargetPlatform.web_javascript;
+    case 'flutter-tester':
+      return TargetPlatform.tester;
   }
   throw Exception('Unsupported platform name "$platform"');
 }
