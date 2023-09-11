@@ -4,7 +4,6 @@
 
 #include "flutter/vulkan/procs/vulkan_proc_table.h"
 
-#include <mutex>
 #include <utility>
 
 #include "flutter/fml/logging.h"
@@ -19,16 +18,6 @@
       !(name2 = AcquireProc("vk" #name2, context))) { \
     return false;                                     \
   }
-
-#if defined(__ANDROID__) && defined(__ARM_ARCH) && __ARM_ARCH >= 7 && \
-    defined(__ARM_32BIT_STATE)
-// 32bit Android appears to use different calling conventions.
-// See:
-// https://android.googlesource.com/platform/external/vulkan-headers/+/refs/heads/master/include/vulkan/vk_platform.h#46
-#define VKAPI_ATTR __attribute__((pcs("aapcs-vfp")))
-#else
-#define VKAPI_ATTR
-#endif
 
 namespace vulkan {
 
@@ -238,82 +227,6 @@ PFN_vkVoidFunction VulkanProcTable::AcquireProc(
   // A VK_NULL_HANDLE as the instance is an acceptable parameter.
   return reinterpret_cast<PFN_vkVoidFunction>(
       GetInstanceProcAddr(instance, proc_name));
-}
-
-namespace {
-// These are atomic since 2 threads could simultaneously call the
-// AcquireThreadsafe* functions.
-std::atomic<decltype(vkQueueSubmit)*> g_non_threadsafe_vkQueueSubmit;
-std::atomic<decltype(vkQueueWaitIdle)*> g_non_threadsafe_vkQueueWaitIdle;
-
-std::mutex& GetThreadsafeVkQueueSubmitMutex() {
-  // Initialization of function static variables are threadsafe in C++11.
-  static std::mutex* mutex_ptr = new std::mutex();
-  return *mutex_ptr;
-}
-
-VKAPI_ATTR VkResult vkQueueSubmitThreadsafe(VkQueue queue,
-                                            uint32_t submitCount,
-                                            const VkSubmitInfo* pSubmits,
-                                            VkFence fence) {
-  std::scoped_lock lock(GetThreadsafeVkQueueSubmitMutex());
-  return g_non_threadsafe_vkQueueSubmit.load()(queue, submitCount, pSubmits,
-                                               fence);
-}
-
-VKAPI_ATTR VkResult vkQueueWaitIdleThreadsafe(VkQueue queue) {
-  std::scoped_lock lock(GetThreadsafeVkQueueSubmitMutex());
-  return g_non_threadsafe_vkQueueWaitIdle.load()(queue);
-}
-
-template <typename T, typename U>
-struct CheckSameSignature : std::false_type {};
-
-template <typename Ret, typename... Args>
-struct CheckSameSignature<Ret(Args...), Ret(Args...)> : std::true_type {};
-
-// These static asserts don't work in platforms where the functions have calling
-// convention attributes, like on Android.  See |VKAPI_ATTR|.
-#if defined(FML_OS_MACOSX) || defined(FML_OS_LINUX)
-static_assert(CheckSameSignature<decltype(vkQueueSubmit),
-                                 decltype(vkQueueSubmitThreadsafe)>::value);
-static_assert(CheckSameSignature<decltype(vkQueueWaitIdle),
-                                 decltype(vkQueueWaitIdleThreadsafe)>::value);
-#endif
-}  // namespace
-
-PFN_vkVoidFunction VulkanProcTable::AcquireThreadsafeSubmitQueue(
-    const VulkanHandle<VkDevice>& device) const {
-  if (!device || !GetInstanceProcAddr) {
-    return nullptr;
-  }
-
-  auto non_threadsafe_vkQueueSubmit =
-      reinterpret_cast<decltype(vkQueueSubmit)*>(
-          GetDeviceProcAddr(device, "vkQueueSubmit"));
-  FML_DCHECK(g_non_threadsafe_vkQueueSubmit.load() == nullptr ||
-             g_non_threadsafe_vkQueueSubmit.load() ==
-                 non_threadsafe_vkQueueSubmit);
-  g_non_threadsafe_vkQueueSubmit.store(non_threadsafe_vkQueueSubmit);
-
-  return reinterpret_cast<PFN_vkVoidFunction>(vkQueueSubmitThreadsafe);
-}
-
-PFN_vkVoidFunction VulkanProcTable::AcquireThreadsafeQueueWaitIdle(
-    const VulkanHandle<VkDevice>& device) const {
-  if (!device || !GetInstanceProcAddr) {
-    return nullptr;
-  }
-
-  auto non_threadsafe_vkQueueWaitIdle =
-      reinterpret_cast<decltype(vkQueueWaitIdle)*>(
-          GetDeviceProcAddr(device, "vkQueueWaitIdle"));
-  FML_DCHECK(g_non_threadsafe_vkQueueWaitIdle.load() == nullptr ||
-             g_non_threadsafe_vkQueueWaitIdle.load() ==
-                 non_threadsafe_vkQueueWaitIdle);
-  g_non_threadsafe_vkQueueWaitIdle.store(non_threadsafe_vkQueueWaitIdle);
-
-  return reinterpret_cast<PFN_vkVoidFunction>(vkQueueWaitIdleThreadsafe);
 }
 
 PFN_vkVoidFunction VulkanProcTable::AcquireProc(

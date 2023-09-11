@@ -4,8 +4,6 @@
 
 #include "flutter/vulkan/vulkan_skia_proc_table.h"
 
-#include <cstring>
-
 namespace vulkan {
 
 GrVkGetProc CreateSkiaGetProc(const fml::RefPtr<vulkan::VulkanProcTable>& vk) {
@@ -15,17 +13,8 @@ GrVkGetProc CreateSkiaGetProc(const fml::RefPtr<vulkan::VulkanProcTable>& vk) {
 
   return [vk](const char* proc_name, VkInstance instance, VkDevice device) {
     if (device != VK_NULL_HANDLE) {
-      PFN_vkVoidFunction result = nullptr;
-      VulkanHandle<VkDevice> device_handle =
-          VulkanHandle<VkDevice>{device, nullptr};
-      if (strcmp(proc_name, "vkQueueSubmit") == 0) {
-        result = vk->AcquireThreadsafeSubmitQueue(device_handle);
-      } else if (strcmp(proc_name, "vkQueueWaitIdle") == 0) {
-        result = vk->AcquireThreadsafeQueueWaitIdle(device_handle);
-      } else {
-        result = vk->AcquireProc(proc_name, device_handle);
-      }
-
+      auto result =
+          vk->AcquireProc(proc_name, VulkanHandle<VkDevice>{device, nullptr});
       if (result != nullptr) {
         return result;
       }
