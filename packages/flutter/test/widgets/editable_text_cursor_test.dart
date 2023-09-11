@@ -1284,12 +1284,12 @@ void main() {
       paints..rect(color: cursorColor, rect: caretRect),
     );
   },
-  skip: isBrowser && !isCanvasKit,
+  skip: isBrowser && !isCanvasKit, // https://github.com/flutter/flutter/issues/56308
   leakTrackingTestConfig: const LeakTrackingTestConfig(
     // TODO(ksokolovskyi): remove after fixing
     // https://github.com/flutter/flutter/issues/134386
     notDisposedAllowList: <String, int?> {'LeaderLayer': 1},
-  )); // https://github.com/flutter/flutter/issues/56308
+  ));
 
   testWidgetsWithLeakTracking('getLocalRectForCaret reports the real caret Rect', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
