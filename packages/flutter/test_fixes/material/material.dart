@@ -318,9 +318,8 @@ void main() {
   );
   final Clip clip = details.clipBehavior;
 
-  // Changes made in https://github.com/flutter/flutter/pull/129942
-  // TODO(guidezpl): enable fix after https://github.com/dart-lang/sdk/issues/52902
-  // const Curve curve = standardEasing; expect Easing.legacy
-  // const Curve curve = accelerateEasing; expect Easing.legacyAccelerate
-  // const Curve curve = decelerateEasing; expect Easing.legacyDecelerate
+  // Changes made in https://github.com/flutter/flutter/pull/XXX
+  const Curve curve = standardEasing;
+  const Curve curve = accelerateEasing;
+  const Curve curve = decelerateEasing;
 }
