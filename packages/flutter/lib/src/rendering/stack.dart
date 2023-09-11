@@ -569,15 +569,11 @@ class RenderStack extends RenderBox
     double width = constraints.minWidth;
     double height = constraints.minHeight;
 
-    final BoxConstraints nonPositionedConstraints;
-    switch (fit) {
-      case StackFit.loose:
-        nonPositionedConstraints = constraints.loosen();
-      case StackFit.expand:
-        nonPositionedConstraints = BoxConstraints.tight(constraints.biggest);
-      case StackFit.passthrough:
-        nonPositionedConstraints = constraints;
-    }
+    final BoxConstraints nonPositionedConstraints = switch (fit) {
+      StackFit.loose => constraints.loosen(),
+      StackFit.expand => BoxConstraints.tight(constraints.biggest),
+      StackFit.passthrough => constraints,
+    };
 
     RenderBox? child = firstChild;
     while (child != null) {
