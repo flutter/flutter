@@ -372,7 +372,6 @@ mixin class ChangeNotifier implements Listenable {
   /// listeners or not immediately before disposal.
   @mustCallSuper
   void dispose() {
-    assert(ChangeNotifier.debugAssertNotDisposed(this));
     assert(
       _notificationCallStackDepth == 0,
       'The "dispose()" method on $this was called during the call to '
