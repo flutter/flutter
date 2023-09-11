@@ -272,6 +272,8 @@ class TabController extends ChangeNotifier {
 
   @override
   void dispose() {
+    print('!!!!!!!!! ${identityHashCode(this)} $runtimeType');
+    print(StackTrace.current);
     _animationController?.dispose();
     _animationController = null;
     super.dispose();
