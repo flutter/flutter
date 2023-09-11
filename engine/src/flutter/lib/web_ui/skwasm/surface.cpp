@@ -148,7 +148,7 @@ void Surface::_renderPicture(const SkPicture* picture, uint32_t callbackId) {
   auto canvas = _surface->getCanvas();
   canvas->drawColor(SK_ColorTRANSPARENT, SkBlendMode::kSrc);
   canvas->drawPicture(sk_ref_sp<SkPicture>(picture), &matrix, nullptr);
-  _grContext->flush(_surface);
+  _grContext->flush(_surface.get());
   skwasm_captureImageBitmap(this, _glContext, callbackId,
                             roundedOutRect.width(), roundedOutRect.height());
 }
