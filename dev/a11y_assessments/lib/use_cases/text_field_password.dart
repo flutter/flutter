@@ -28,14 +28,25 @@ class _MainWidget extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('TextField password'),
       ),
-      body: const Center(
-        child: TextField(
-          decoration: InputDecoration(
-            labelText: 'Password',
-            hintText: 'Enter your password',
+      body: ListView(
+        children: const <Widget>[
+          TextField(
+            autofocus: true,
+            decoration: InputDecoration(
+              labelText: 'Password',
+              hintText: 'Enter your password',
+            ),
+            obscureText: true,
           ),
-          obscureText: true,
-        )
+          TextField(
+            decoration: InputDecoration(
+              labelText: 'Password',
+              hintText: 'Enter your password',
+              enabled: false,
+            ),
+            obscureText: true,
+          ),
+        ],
       ),
     );
   }
