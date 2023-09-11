@@ -96,8 +96,6 @@ source_set("flutter_windows_source") {
     "text_input_manager.h",
     "text_input_plugin.cc",
     "text_input_plugin.h",
-    "window.cc",
-    "window.h",
     "window_binding_handler.h",
     "window_binding_handler_delegate.h",
     "window_proc_delegate_manager.cc",
