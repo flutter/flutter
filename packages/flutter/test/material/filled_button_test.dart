@@ -237,7 +237,7 @@ void main() {
     expect(material.type, MaterialType.button);
   });
 
-  testWidgets('Default FilledButton meets a11y contrast guidelines', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default FilledButton meets a11y contrast guidelines', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
@@ -1750,7 +1750,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
-  testWidgets('FilledButton in SelectionArea changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('FilledButton in SelectionArea changes mouse cursor when hovered', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/104595.
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(

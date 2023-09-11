@@ -271,7 +271,7 @@ void main() {
     expect(tester.binding.transientCallbackCount, greaterThan(0));
   });
 
-  testWidgets('Floating action button shrinks when bottom sheet becomes dominant', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Floating action button shrinks when bottom sheet becomes dominant', (WidgetTester tester) async {
     final DraggableScrollableController draggableController = DraggableScrollableController();
     const double kBottomSheetDominatesPercentage = 0.3;
 
@@ -310,7 +310,7 @@ void main() {
     }
   });
 
-  testWidgets('Scaffold shows scrim when bottom sheet becomes dominant', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scaffold shows scrim when bottom sheet becomes dominant', (WidgetTester tester) async {
     final DraggableScrollableController draggableController = DraggableScrollableController();
     const double kBottomSheetDominatesPercentage = 0.3;
     const double kMinBottomSheetScrimOpacity = 0.1;
@@ -621,7 +621,7 @@ void main() {
     expect(appBarBottomRight, equals(sheetTopRight));
   });
 
-  testWidgets('BottomSheet bottom padding is not consumed by viewInsets', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('BottomSheet bottom padding is not consumed by viewInsets', (WidgetTester tester) async {
     final Widget child = Directionality(
       textDirection: TextDirection.ltr,
       child: Scaffold(
@@ -2155,7 +2155,7 @@ void main() {
   });
 
   group('FlutterError control test', () {
-    testWidgets('showBottomSheet() while Scaffold has bottom sheet',
+    testWidgetsWithLeakTracking('showBottomSheet() while Scaffold has bottom sheet',
       (WidgetTester tester) async {
         final GlobalKey<ScaffoldState> key = GlobalKey<ScaffoldState>();
         await tester.pumpWidget(
@@ -2658,7 +2658,7 @@ void main() {
     expect(summary.toString(), 'The showSnackBar() method cannot be called during build.');
   });
 
-  testWidgets('Persistent BottomSheet is not dismissible via a11y means', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Persistent BottomSheet is not dismissible via a11y means', (WidgetTester tester) async {
     final Key bottomSheetKey = UniqueKey();
 
     await tester.pumpWidget(MaterialApp(
@@ -2681,7 +2681,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/117004
-  testWidgets('can rebuild and remove bottomSheet at the same time', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can rebuild and remove bottomSheet at the same time', (WidgetTester tester) async {
     bool themeIsLight = true;
     bool? defaultBottomSheet = true;
     final GlobalKey bottomSheetKey1 = GlobalKey();

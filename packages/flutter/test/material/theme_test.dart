@@ -196,7 +196,7 @@ void main() {
     expect(Theme.of(tester.element(find.text('menuItem'))).brightness, equals(Brightness.light));
   });
 
-  testWidgets('DropdownMenu inherits shadowed app theme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownMenu inherits shadowed app theme', (WidgetTester tester) async {
     final Key dropdownMenuButtonKey = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(

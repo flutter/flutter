@@ -243,7 +243,7 @@ void main() {
     expect(material.color, const Color(0xff00ff00));
   });
 
-  testWidgets('Default MaterialButton meets a11y contrast guidelines', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default MaterialButton meets a11y contrast guidelines', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(

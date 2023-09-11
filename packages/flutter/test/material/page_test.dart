@@ -1041,7 +1041,7 @@ void main() {
     expect(pageTapCount, 1);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('A MaterialPageRoute should slide out with CupertinoPageTransition when a compatible PageRoute is pushed on top of it', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('A MaterialPageRoute should slide out with CupertinoPageTransition when a compatible PageRoute is pushed on top of it', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/44864.
 
     await tester.pumpWidget(

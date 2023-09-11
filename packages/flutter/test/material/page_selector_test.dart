@@ -206,7 +206,7 @@ void main() {
     expect(indicatorColors(tester), const <Color>[kBlue, kRed, kRed]);
   });
 
-  testWidgets('PageSelector indicatorSize', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PageSelector indicatorSize', (WidgetTester tester) async {
     final TabController tabController = TabController(
       vsync: const TestVSync(),
       initialIndex: 1,

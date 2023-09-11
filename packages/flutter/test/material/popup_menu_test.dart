@@ -3741,7 +3741,7 @@ void main() {
     expect(_labelStyle(tester, 'Item 1')!.fontStyle, customTextStyle.fontStyle);
   });
 
-  testWidgets('CheckedPopupMenuItem.onTap callback is called when defined', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CheckedPopupMenuItem.onTap callback is called when defined', (WidgetTester tester) async {
     int count = 0;
     await tester.pumpWidget(
       TestApp(
