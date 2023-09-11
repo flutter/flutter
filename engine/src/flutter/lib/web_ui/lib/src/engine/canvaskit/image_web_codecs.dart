@@ -142,7 +142,7 @@ Future<ByteBuffer> readVideoFramePixelsUnmodified(VideoFrame videoFrame) async {
   // In dart2wasm, Uint8List is not the same as a JS Uint8Array. So we
   // explicitly construct the JS object here.
   final JSUint8Array destination = createUint8ArrayFromLength(size);
-  final JsPromise copyPromise = videoFrame.copyTo(destination);
+  final JSPromise copyPromise = videoFrame.copyTo(destination);
   await promiseToFuture<void>(copyPromise);
 
   // In dart2wasm, `toDart` incurs a copy here. On JS backends, this is a
