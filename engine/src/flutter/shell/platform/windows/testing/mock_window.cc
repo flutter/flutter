@@ -6,10 +6,13 @@
 
 namespace flutter {
 namespace testing {
-MockWindow::MockWindow() : Window(){};
+MockWindow::MockWindow() : FlutterWindow(1, 1){};
 MockWindow::MockWindow(std::unique_ptr<WindowsProcTable> window_proc_table,
                        std::unique_ptr<TextInputManager> text_input_manager)
-    : Window(std::move(window_proc_table), std::move(text_input_manager)){};
+    : FlutterWindow(1,
+                    1,
+                    std::move(window_proc_table),
+                    std::move(text_input_manager)){};
 
 MockWindow::~MockWindow() = default;
 
@@ -49,7 +52,7 @@ void MockWindow::InjectMessageList(int count, const Win32Message* messages) {
 void MockWindow::CallOnImeComposition(UINT const message,
                                       WPARAM const wparam,
                                       LPARAM const lparam) {
-  Window::OnImeComposition(message, wparam, lparam);
+  FlutterWindow::OnImeComposition(message, wparam, lparam);
 }
 
 }  // namespace testing

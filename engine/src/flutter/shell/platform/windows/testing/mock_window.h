@@ -6,15 +6,15 @@
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_MOCK_WIN32_WINDOW_H_
 
 #include "flutter/fml/macros.h"
+#include "flutter/shell/platform/windows/flutter_window.h"
 #include "flutter/shell/platform/windows/testing/test_keyboard.h"
-#include "flutter/shell/platform/windows/window.h"
 #include "gmock/gmock.h"
 
 namespace flutter {
 namespace testing {
 
-/// Mock for the |Window| base class.
-class MockWindow : public Window {
+/// Mock for the |FlutterWindow| base class.
+class MockWindow : public FlutterWindow {
  public:
   MockWindow();
   MockWindow(std::unique_ptr<WindowsProcTable> windows_proc_table,

@@ -3288,8 +3288,6 @@ ORIGIN: ../../../flutter/shell/platform/windows/text_input_manager.h + ../../../
 ORIGIN: ../../../flutter/shell/platform/windows/text_input_plugin.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/text_input_plugin.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/text_input_plugin_delegate.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/windows/window.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/shell/platform/windows/window.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/window_binding_handler.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/window_binding_handler_delegate.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/shell/platform/windows/window_proc_delegate_manager.cc + ../../../flutter/LICENSE
@@ -6060,8 +6058,6 @@ FILE: ../../../flutter/shell/platform/windows/text_input_manager.h
 FILE: ../../../flutter/shell/platform/windows/text_input_plugin.cc
 FILE: ../../../flutter/shell/platform/windows/text_input_plugin.h
 FILE: ../../../flutter/shell/platform/windows/text_input_plugin_delegate.h
-FILE: ../../../flutter/shell/platform/windows/window.cc
-FILE: ../../../flutter/shell/platform/windows/window.h
 FILE: ../../../flutter/shell/platform/windows/window_binding_handler.h
 FILE: ../../../flutter/shell/platform/windows/window_binding_handler_delegate.h
 FILE: ../../../flutter/shell/platform/windows/window_proc_delegate_manager.cc
