@@ -68,7 +68,7 @@ class LinkedText extends StatefulWidget {
          ),
        ],
        onTap = _getOnTap(onTapUri),
-       regExp = null,
+       regExp = defaultUriRegExp,
        textLinkers = null;
 
   /// Creates an instance of [LinkedText] from the given [text] or [spans],
@@ -107,9 +107,6 @@ class LinkedText extends StatefulWidget {
   /// Useful for independently matching different types of strings with
   /// different behaviors. For example, highlighting both URLs and Twitter
   /// handles with different style and/or behavior.
-  ///
-  /// The [TextLinker.textRangesFinder] must not produce overlapping
-  /// [TextRange]s.
   ///
   /// {@tool dartpad}
   /// This example shows how to use [LinkedText] to link both URLs and Twitter
@@ -159,8 +156,8 @@ class LinkedText extends StatefulWidget {
 
   /// Matches the text that should be turned into a link.
   ///
-  /// This is irrelevant when using [LinkedText.textLinkers], where this is
-  /// controlled with an [TextRangesFinder] instead.
+  /// This is irrelevant when using [LinkedText.textLinkers], where each
+  /// [TextLinker] specifies its own [TextLinker.regExp].
   ///
   /// {@tool dartpad}
   /// This example shows how to use [LinkedText] to link Twitter handles by
@@ -183,7 +180,11 @@ class LinkedText extends StatefulWidget {
   /// {@end-tool}
   final List<TextLinker>? textLinkers;
 
-  static final RegExp _urlRegExp = RegExp(r'(?<!@[a-zA-Z0-9-]*)(?<![\/\.a-zA-Z0-9-])((https?:\/\/)?(([a-zA-Z0-9-]*\.)*[a-zA-Z0-9-]+(\.[a-zA-Z]+)+))(?::\d{1,5})?(?:\/[^\s]*)?(?:\?[^\s#]*)?(?:#[^\s]*)?(?![a-zA-Z0-9-]*@)');
+  /// The default [RegExp], which matches [Uri]s by default.
+  ///
+  /// Matches with and without a host, but only "http" or "https". Ignores email
+  /// addresses.
+  static final RegExp defaultUriRegExp = RegExp(r'(?<!@[a-zA-Z0-9-]*)(?<![\/\.a-zA-Z0-9-])((https?:\/\/)?(([a-zA-Z0-9-]*\.)*[a-zA-Z0-9-]+(\.[a-zA-Z]+)+))(?::\d{1,5})?(?:\/[^\s]*)?(?:\?[^\s#]*)?(?:#[^\s]*)?(?![a-zA-Z0-9-]*@)');
 
   /// Returns a generic [ValueChanged]<String> given a callback specifically for
   /// tapping on a [Uri].
@@ -191,8 +192,8 @@ class LinkedText extends StatefulWidget {
     return (String linkString) {
       Uri uri = Uri.parse(linkString);
       if (uri.host.isEmpty) {
-        // _urlRegExp matches URLs without a host, but packages like
-        // url_launcher require a host to launch a URL. So add the host.
+        // defaultUriRegExp matches Uris without a host, but packages like
+        // url_launcher require a host to launch a Uri. So add the host.
         uri = Uri.parse('https://$linkString');
       }
       onTapUri(uri);
@@ -217,41 +218,9 @@ class LinkedText extends StatefulWidget {
     );
   }
 
-  static Color get _linkColor {
-    return switch (defaultTargetPlatform) {
-      // This value was taken from Safari on an iPhone 14 Pro iOS 16.4
-      // simulator.
-      TargetPlatform.iOS => const Color(0xff1717f0),
-      // This value was taken from Chrome on macOS 13.4.1.
-      TargetPlatform.macOS => const Color(0xff0000ee),
-      // This value was taken from Chrome on Android 14.
-      TargetPlatform.android || TargetPlatform.fuchsia => const Color(0xff0e0eef),
-      // This value was taken from the Chrome browser running on GNOME 43.3 on
-      // Debian.
-      TargetPlatform.linux => const Color(0xff0026e8),
-      // This value was taken from the Edge browser running on Windows 10.
-      TargetPlatform.windows => const Color(0xff1e2b8b),
-    };
-  }
-
   /// The style used for the link by default if none is given.
   @visibleForTesting
-  static TextStyle defaultLinkStyle = TextStyle(
-    color: _linkColor,
-    decorationColor: _linkColor,
-    decoration: TextDecoration.underline,
-  );
-
-  /// A [TextRangesFinder] that returns [TextRange]s for URLs.
-  ///
-  /// Matches full (https://www.example.com/?q=1) and shortened (example.com)
-  /// URLs.
-  ///
-  /// Excludes:
-  ///
-  ///   * URLs with any protocol other than http or https.
-  ///   * Email addresses.
-  static final TextRangesFinder defaultTextRangesFinder = TextLinker.textRangesFinderFromRegExp(_urlRegExp);
+  static TextStyle defaultLinkStyle = _InlineLinkSpan.defaultLinkStyle;
 
   @override
   State<LinkedText> createState() => _LinkedTextState();
@@ -283,9 +252,7 @@ class _LinkedTextState extends State<LinkedText> {
     super.initState();
     _textLinkers = widget.textLinkers ?? <TextLinker>[
        TextLinker(
-         textRangesFinder: widget.regExp == null
-             ? LinkedText.defaultTextRangesFinder
-             : TextLinker.textRangesFinderFromRegExp(widget.regExp!),
+         regExp: widget.regExp ?? LinkedText.defaultUriRegExp,
          linkBuilder: (String displayString, String linkString) {
            final TapGestureRecognizer recognizer = TapGestureRecognizer()
                ..onTap = () => widget.onTap!(linkString);

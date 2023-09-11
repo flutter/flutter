@@ -134,7 +134,7 @@ class _TwitterAndUrlLinkedTextState extends State<_TwitterAndUrlLinkedText> {
 
     _textLinkers = <TextLinker>[
       TextLinker(
-        textRangesFinder: LinkedText.defaultTextRangesFinder,
+        regExp: LinkedText.defaultUriRegExp,
         linkBuilder: (String displayString, String linkString) {
           final TapGestureRecognizer recognizer = TapGestureRecognizer()
               ..onTap = () => widget.onTapUrl(linkString);
@@ -147,7 +147,7 @@ class _TwitterAndUrlLinkedTextState extends State<_TwitterAndUrlLinkedText> {
         },
       ),
       TextLinker(
-        textRangesFinder: TextLinker.textRangesFinderFromRegExp(_twitterHandleRegExp),
+        regExp: _twitterHandleRegExp,
         linkBuilder: (String displayString, String linkString) {
           final TapGestureRecognizer recognizer = TapGestureRecognizer()
               ..onTap = () => widget.onTapTwitterHandle(linkString);

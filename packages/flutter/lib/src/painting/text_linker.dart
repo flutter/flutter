@@ -34,14 +34,9 @@ typedef InlineLinkBuilder = InlineSpan Function(
   String linkString,
 );
 
-/// Singature for a function that finds [TextRange]s in the given [String].
-typedef TextRangesFinder = Iterable<TextRange> Function(String text);
-
 /// Specifies a way to find and style parts of some text.
 ///
 /// [TextLinker]s can be applied to some text using the [linkSpans] method.
-///
-/// [textRangesFinder] must not produce overlapping [TextRange]s.
 ///
 /// {@tool dartpad}
 /// This example shows how to use [TextLinker] to link both URLs and Twitter
@@ -64,16 +59,14 @@ typedef TextRangesFinder = Iterable<TextRange> Function(String text);
 ///  * [LinkedText.new], which is simpler than using [TextLinker] and
 ///    automatically manages the lifecycle of any [GestureRecognizer]s.
 class TextLinker {
-  /// Creates an instance of [TextLinker] with a [TextRangesFinder] and an
+  /// Creates an instance of [TextLinker] with a [RegExp] and an [InlineLinkBuilder
   /// [InlineLinkBuilder].
-  ///
-  /// The [TextRangesFinder] must not produce overlapping matches.
   ///
   /// Does not manage the lifecycle of any [GestureRecognizer]s created in the
   /// [InlineLinkBuilder], so it's the responsibility of the caller to do so.
   /// See [TextSpan.recognizer] for more.
   TextLinker({
-    required this.textRangesFinder,
+    required this.regExp,
     required this.linkBuilder,
   });
 
@@ -82,26 +75,11 @@ class TextLinker {
   /// {@macro flutter.painting.LinkBuilder.recognizer}
   final InlineLinkBuilder linkBuilder;
 
-  /// Returns [TextRange]s that should be built with [linkBuilder].
-  ///
-  /// Throws if overlapping [TextRange]s are produced.
-  final TextRangesFinder textRangesFinder;
-
-  /// Creates a [TextRangesFinder] that finds all the matches of the given [RegExp].
-  static TextRangesFinder textRangesFinderFromRegExp(RegExp regExp) {
-    return (String text) {
-      return _textRangesFromText(
-        text: text,
-        regExp: regExp,
-      );
-    };
-  }
+  /// Matches text that should be turned into a link with [linkBuilder].
+  final RegExp regExp;
 
   /// Applies the given [TextLinker]s to the given [InlineSpan]s and returns the
   /// new resulting spans and any created [GestureRecognizer]s.
-  ///
-  /// The [TextLinker.textRangesFinder]s must not produce any overlapping
-  /// [TextRange]s.
   static Iterable<InlineSpan> linkSpans(Iterable<InlineSpan> spans, Iterable<TextLinker> textLinkers) {
     final _LinkedSpans linkedSpans = _LinkedSpans(
       spans: spans,
@@ -111,10 +89,7 @@ class TextLinker {
   }
 
   // Turns all matches from the regExp into a list of TextRanges.
-  static Iterable<TextRange> _textRangesFromText({
-    required String text,
-    required RegExp regExp,
-  }) {
+  static Iterable<TextRange> _textRangesFromText(String text, RegExp regExp) {
     final Iterable<RegExpMatch> matches = regExp.allMatches(text);
     return matches.map((RegExpMatch match) {
       return TextRange(
@@ -126,7 +101,7 @@ class TextLinker {
 
   /// Apply this [TextLinker] to a [String].
   Iterable<_TextLinkerMatch> _link(String text) {
-    final Iterable<TextRange> textRanges = textRangesFinder(text);
+    final Iterable<TextRange> textRanges = _textRangesFromText(text, regExp);
     return textRanges.map((TextRange textRange) {
       return _TextLinkerMatch(
         textRange: textRange,
@@ -137,12 +112,12 @@ class TextLinker {
   }
 
   @override
-  String toString() => '${objectRuntimeType(this, 'TextLinker')}($textRangesFinder)';
+  String toString() => '${objectRuntimeType(this, 'TextLinker')}($regExp)';
 }
 
 /// A matched replacement on some string.
 ///
-/// Produced by applying a [TextLinker]'s [TextRangesFinder] to a string.
+/// Produced by applying a [TextLinker]'s [RegExp] to a string.
 class _TextLinkerMatch {
   _TextLinkerMatch({
     required this.textRange,

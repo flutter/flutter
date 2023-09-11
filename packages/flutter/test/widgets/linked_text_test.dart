@@ -77,7 +77,7 @@ void main() {
               return LinkedText.textLinkers(
                 textLinkers: <TextLinker>[
                   TextLinker(
-                    textRangesFinder: TextLinker.textRangesFinderFromRegExp(hashTagRegExp),
+                    regExp: hashTagRegExp,
                     linkBuilder: (String displayString, String linkString) {
                       final TapGestureRecognizer recognizer = TapGestureRecognizer()
                           ..onTap = () {
@@ -116,7 +116,7 @@ void main() {
     String? lastTappedLink;
     final List<TapGestureRecognizer> recognizers = <TapGestureRecognizer>[];
     final TextLinker urlTextLinker = TextLinker(
-      textRangesFinder: TextLinker.textRangesFinderFromRegExp(urlRegExp),
+      regExp: urlRegExp,
       linkBuilder: (String displayString, String linkString) {
         final TapGestureRecognizer recognizer = TapGestureRecognizer()
             ..onTap = () {
@@ -131,7 +131,7 @@ void main() {
       },
     );
     final TextLinker hashTagTextLinker = TextLinker(
-      textRangesFinder: TextLinker.textRangesFinderFromRegExp(hashTagRegExp),
+      regExp: hashTagRegExp,
       linkBuilder: (String displayString, String linkString) {
         final TapGestureRecognizer recognizer = TapGestureRecognizer()
             ..onTap = () {
@@ -186,7 +186,7 @@ void main() {
               return LinkedText.textLinkers(
                 textLinkers: <TextLinker>[
                   TextLinker(
-                    textRangesFinder: LinkedText.defaultTextRangesFinder,
+                    regExp: LinkedText.defaultUriRegExp,
                     linkBuilder: (String displayString, String linkString) {
                       final TapGestureRecognizer recognizer = TapGestureRecognizer()
                           ..onTap = () {

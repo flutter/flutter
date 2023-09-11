@@ -41,7 +41,7 @@ void main() {
              ],
             <TextLinker>[
               TextLinker(
-                textRangesFinder: LinkedText.defaultTextRangesFinder,
+                regExp: LinkedText.defaultUriRegExp,
                 linkBuilder: (String displayString, String linkString) {
                   return TextSpan(
                     style: LinkedText.defaultLinkStyle,
@@ -80,7 +80,7 @@ void main() {
              ],
             <TextLinker>[
               TextLinker(
-                textRangesFinder: LinkedText.defaultTextRangesFinder,
+                regExp: LinkedText.defaultUriRegExp,
                 linkBuilder: (String displayString, String linkString) {
                   return TextSpan(
                     text: displayString,
@@ -119,7 +119,7 @@ void main() {
              ],
             <TextLinker>[
               TextLinker(
-                textRangesFinder: LinkedText.defaultTextRangesFinder,
+                regExp: LinkedText.defaultUriRegExp,
                 linkBuilder: (String displayString, String linkString) {
                   return TextSpan(
                     style: LinkedText.defaultLinkStyle,
@@ -160,7 +160,7 @@ void main() {
 
     test('multiple TextLinkers', () {
       final TextLinker urlTextLinker = TextLinker(
-        textRangesFinder: TextLinker.textRangesFinderFromRegExp(urlRegExp),
+        regExp: urlRegExp,
         linkBuilder: (String displayString, String linkString) {
           return TextSpan(
             style: LinkedText.defaultLinkStyle,
@@ -169,7 +169,7 @@ void main() {
         },
       );
       final TextLinker hashTagTextLinker = TextLinker(
-        textRangesFinder: TextLinker.textRangesFinderFromRegExp(hashTagRegExp),
+        regExp: hashTagRegExp,
         linkBuilder: (String displayString, String linkString) {
           return TextSpan(
             style: LinkedText.defaultLinkStyle,
@@ -256,7 +256,7 @@ void main() {
         ],
         <TextLinker>[
           TextLinker(
-            textRangesFinder: LinkedText.defaultTextRangesFinder,
+            regExp: LinkedText.defaultUriRegExp,
             linkBuilder: (String displayString, String linkString) {
               return TextSpan(
                 style: LinkedText.defaultLinkStyle,
