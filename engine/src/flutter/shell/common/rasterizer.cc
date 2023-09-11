@@ -29,6 +29,7 @@
 #include "third_party/skia/include/encode/SkPngEncoder.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
+#include "third_party/skia/include/gpu/GrTypes.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
 #include "third_party/skia/include/utils/SkBase64.h"
 
@@ -111,7 +112,7 @@ void Rasterizer::Teardown() {
     if (context_switch->GetResult()) {
       compositor_context_->OnGrContextDestroyed();
       if (auto* context = surface_->GetContext()) {
-        context->purgeUnlockedResources(/*scratchResourcesOnly=*/false);
+        context->purgeUnlockedResources(GrPurgeResourceOptions::kAllResources);
       }
     }
     surface_.reset();
