@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:js_interop';
 import 'dart:js_util' as js_util;
 import 'dart:typed_data';
 
@@ -332,18 +331,19 @@ Future<void> testMain() async {
     // The `orientation` property cannot be overridden, so this test overrides the entire `screen`.
     js_util.setProperty(domWindow, 'screen', js_util.jsify(<Object?, Object?>{
       'orientation': <Object?, Object?>{
-        'lock': (String lockType) {
+        'lock': allowInterop((String lockType) {
           lockCalls.add(lockType);
-          return futureToPromise(() async {
-            if (simulateError) {
-              throw Error();
+          return Promise<Object?>(allowInterop((PromiseResolver<Object?> resolve, PromiseRejecter reject) {
+            if (!simulateError) {
+              resolve.resolve(null);
+            } else {
+              reject.reject('Simulating error');
             }
-            return 0.toJS;
-          }());
-        }.toJS,
-        'unlock': () {
+          }));
+        }),
+        'unlock': allowInterop(() {
           unlockCount += 1;
-        }.toJS,
+        }),
       },
     }));
 

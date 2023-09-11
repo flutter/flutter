@@ -11,27 +11,40 @@ import 'package:js/js_util.dart' as js_util;
 
 import '../util.dart';
 
-extension CallExtension on JSFunction {
-  external void call(JSAny? this_, JSAny? object);
+@JS()
+@staticInterop
+class PromiseResolver<T extends Object?> {}
+
+extension PromiseResolverExtension<T extends Object?> on PromiseResolver<T> {
+  void resolve(T result) => js_util.callMethod(this, 'call', <Object>[this, if (result != null) result]);
 }
 
+@JS()
+@staticInterop
+class PromiseRejecter {}
+
+extension PromiseRejecterExtension on PromiseRejecter {
+  void reject(Object? error) => js_util.callMethod(this, 'call', <Object>[this, if (error != null) error]);
+}
+
+/// Type-safe JS Promises
 @JS('Promise')
-external JSAny get _promiseConstructor;
+@staticInterop
+abstract class Promise<T extends Object?> {
+  /// A constructor for a JS promise
+  external factory Promise(PromiseExecutor<T> executor);
+}
 
-JSPromise createPromise(JSFunction executor) =>
-  js_util.callConstructor(
-    _promiseConstructor,
-    <Object>[executor],
-  );
+/// The type of function that is used to create a Promise<T>
+typedef PromiseExecutor<T extends Object?> = void Function(PromiseResolver<T> resolve, PromiseRejecter reject);
 
-
-JSPromise futureToPromise<T extends JSAny>(Future<T> future) {
-  return createPromise((JSFunction resolver, JSFunction rejecter) {
+Promise<T> futureToPromise<T extends Object>(Future<T> future) {
+  return Promise<T>(js_util.allowInterop((PromiseResolver<T> resolver, PromiseRejecter rejecter) {
     future.then(
-      (T value) => resolver.call(null, value),
+      (T value) => resolver.resolve(value),
       onError: (Object? error) {
         printWarning('Rejecting promise with error: $error');
-        rejecter.call(null, null);
+        rejecter.reject(error);
       });
-  }.toJS);
+  }));
 }
