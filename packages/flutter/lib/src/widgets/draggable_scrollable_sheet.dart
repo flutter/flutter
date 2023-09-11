@@ -718,7 +718,11 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
 
   @override
   void dispose() {
-    widget.controller?._detach(disposeExtent: true);
+    if (widget.controller == null) {
+      _extent.dispose();
+    } else {
+      widget.controller!._detach(disposeExtent: true);
+    }
     _scrollController.dispose();
     super.dispose();
   }
@@ -1015,12 +1019,12 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
 /// in library users' code). Generally, it's easier to control the sheet
 /// directly by creating a controller and passing the controller to the sheet in
 /// its constructor (see [DraggableScrollableSheet.controller]).
-class DraggableScrollableActuator extends StatelessWidget {
+class DraggableScrollableActuator extends StatefulWidget {
   /// Creates a widget that can notify descendent [DraggableScrollableSheet]s
   /// to reset to their initial position.
   ///
   /// The [child] parameter is required.
-  DraggableScrollableActuator({
+  const DraggableScrollableActuator({
     super.key,
     required this.child,
   });
@@ -1031,7 +1035,6 @@ class DraggableScrollableActuator extends StatelessWidget {
   /// Must not be null.
   final Widget child;
 
-  final _ResetNotifier _notifier = _ResetNotifier();
 
   /// Notifies any descendant [DraggableScrollableSheet] that it should reset
   /// to its initial position.
@@ -1048,14 +1051,32 @@ class DraggableScrollableActuator extends StatelessWidget {
   }
 
   @override
+  State<DraggableScrollableActuator> createState() => _DraggableScrollableActuatorState();
+}
+
+class _DraggableScrollableActuatorState extends State<DraggableScrollableActuator> {
+  final _ResetNotifier _notifier = _ResetNotifier();
+
+  @override
   Widget build(BuildContext context) {
-    return _InheritedResetNotifier(notifier: _notifier, child: child);
+    return _InheritedResetNotifier(notifier: _notifier, child: widget.child);
+  }
+
+  @override
+  void dispose() {
+    _notifier.dispose();
+    super.dispose();
   }
 }
 
 /// A [ChangeNotifier] to use with [InheritedResetNotifier] to notify
 /// descendants that they should reset to initial state.
 class _ResetNotifier extends ChangeNotifier {
+  _ResetNotifier() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
+  }
   /// Whether someone called [sendReset] or not.
   ///
   /// This flag should be reset after checking it.

@@ -399,6 +399,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
           mouseCursor: _EffectiveMouseCursor(widget.mouseCursor, popupMenuTheme.mouseCursor),
           child: ListTileTheme.merge(
             contentPadding: EdgeInsets.zero,
+            titleTextStyle: style,
             child: item,
           ),
         ),
@@ -485,6 +486,7 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
     super.labelTextStyle,
     super.mouseCursor,
     super.child,
+    super.onTap,
   });
 
   /// Whether to display a checkmark next to the menu item.

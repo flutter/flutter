@@ -572,6 +572,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
           });
         }
         _lastOverlayEntry?.remove();
+        _lastOverlayEntry?.dispose();
         _lastOverlayEntry = null;
 
       case AnimationStatus.completed:
@@ -585,6 +586,7 @@ class _CupertinoContextMenuState extends State<CupertinoContextMenu> with Ticker
         // one frame.
         SchedulerBinding.instance.addPostFrameCallback((Duration _) {
           _lastOverlayEntry?.remove();
+          _lastOverlayEntry?.dispose();
           _lastOverlayEntry = null;
           _openController.reset();
         });

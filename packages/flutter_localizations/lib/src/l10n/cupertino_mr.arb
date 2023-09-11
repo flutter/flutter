@@ -25,5 +25,6 @@
   "noSpellCheckReplacementsLabel": "कोणतेही बदल आढळले नाहीत",
   "menuDismissLabel": "मेनू डिसमिस करा",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

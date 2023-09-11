@@ -217,7 +217,7 @@ Finder findTooltipContainer(String tooltipText) {
 }
 
 void main() {
-  testWidgets('M2 Chip defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('M2 Chip defaults', (WidgetTester tester) async {
     late TextTheme textTheme;
 
     Widget buildFrame(Brightness brightness) {
@@ -292,7 +292,12 @@ void main() {
     expect(labelStyle.overflow, textTheme.bodyLarge?.overflow);
     expect(labelStyle.textBaseline, textTheme.bodyLarge?.textBaseline);
     expect(labelStyle.wordSpacing, textTheme.bodyLarge?.wordSpacing);
-  });
+  },
+  // TODO(polina-c): remove after fixing
+  // https://github.com/flutter/flutter/issues/134394
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    notDisposedAllowList: <String, int?>{'OpacityLayer': 2},
+  ));
 
   testWidgetsWithLeakTracking('M3 Chip defaults', (WidgetTester tester) async {
     late TextTheme textTheme;
@@ -3501,6 +3506,85 @@ void main() {
     await tester.tapAt(Offset(labelCenter.dx + (labelSize.width / 2) + 0.01, labelCenter.dy));
     await tester.pump();
     expect(calledDelete, isTrue);
+  });
+
+  // This is a regression test for https://github.com/flutter/flutter/pull/133615.
+  testWidgets('Material3 - Custom shape without provided side uses default side', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: const Material(
+          child: Center(
+            child: RawChip(
+              // No side provided.
+              shape: StadiumBorder(),
+              label: Text('RawChip'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Chip should have the default side.
+    expect(
+      getMaterial(tester).shape,
+      StadiumBorder(side: BorderSide(color: theme.colorScheme.outline)),
+    );
+  });
+
+  testWidgets("Material3 - RawChip.shape's side is used when provided", (WidgetTester tester) async {
+    Widget buildChip({ OutlinedBorder? shape, BorderSide? side }) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: Material(
+          child: Center(
+            child: RawChip(
+              shape: shape,
+              side: side,
+              label: const Text('RawChip'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Test [RawChip.shape] with a side.
+    await tester.pumpWidget(buildChip(
+      shape: const RoundedRectangleBorder(
+        side: BorderSide(color: Color(0xffff00ff)),
+        borderRadius: BorderRadius.all(Radius.circular(7.0)),
+      )),
+    );
+
+    // Chip should have the provided shape and the side from [RawChip.shape].
+    expect(
+      getMaterial(tester).shape,
+      const RoundedRectangleBorder(
+        side: BorderSide(color: Color(0xffff00ff)),
+        borderRadius: BorderRadius.all(Radius.circular(7.0)),
+      ),
+    );
+
+    // Test [RawChip.shape] with a side and [RawChip.side].
+    await tester.pumpWidget(buildChip(
+      shape: const RoundedRectangleBorder(
+        side: BorderSide(color: Color(0xffff00ff)),
+        borderRadius: BorderRadius.all(Radius.circular(7.0)),
+      ),
+      side: const BorderSide(color: Color(0xfffff000))),
+    );
+    await tester.pumpAndSettle();
+
+    // Chip use shape from [RawChip.shape] and the side from [RawChip.side].
+    // [RawChip.shape]'s side should be ignored.
+    expect(
+      getMaterial(tester).shape,
+      const RoundedRectangleBorder(
+        side: BorderSide(color: Color(0xfffff000)),
+        borderRadius: BorderRadius.all(Radius.circular(7.0)),
+      ),
+    );
   });
 
   group('Material 2', () {

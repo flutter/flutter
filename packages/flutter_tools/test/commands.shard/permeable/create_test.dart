@@ -2610,6 +2610,18 @@ void main() {
       , throwsToolExit(message: 'The "--platforms" argument is not supported', exitCode: 2));
   });
 
+  testUsingContext('create an ffi package with --platforms throws error.', () async {
+    Cache.flutterRoot = '../..';
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await expectLater(
+      runner.run(<String>['create', '--no-pub', '--template=package_ffi', '--platform=ios', projectDir.path])
+      , throwsToolExit(message: 'The "--platforms" argument is not supported', exitCode: 2));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+  });
+
   testUsingContext('create a plugin with android, delete then re-create folders', () async {
     Cache.flutterRoot = '../..';
 
@@ -3315,43 +3327,49 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
-  testUsingContext('FFI plugins error android language', () async {
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-    final List<String> args = <String>[
-      'create',
-      '--no-pub',
-      '--template=plugin_ffi',
-      '-a',
-      'kotlin',
-      '--platforms=android',
-      projectDir.path,
-    ];
+  for (final String template in <String>['package_ffi', 'plugin_ffi']) {
+    testUsingContext('$template error android language', () async {
+      final CreateCommand command = CreateCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      final List<String> args = <String>[
+        'create',
+        '--no-pub',
+        '--template=$template',
+        '-a',
+        'kotlin',
+        if (template == 'plugin_ffi') '--platforms=android',
+        projectDir.path,
+      ];
 
-    await expectLater(
-      runner.run(args),
-      throwsToolExit(message: 'The "android-language" option is not supported with the plugin_ffi template: the language will always be C or C++.'),
-    );
-  });
+      await expectLater(
+        runner.run(args),
+        throwsToolExit(message: 'The "android-language" option is not supported with the $template template: the language will always be C or C++.'),
+      );
+    }, overrides: <Type, Generator>{
+      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+    });
 
-  testUsingContext('FFI plugins error ios language', () async {
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-    final List<String> args = <String>[
-      'create',
-      '--no-pub',
-      '--template=plugin_ffi',
-      '--ios-language',
-      'swift',
-      '--platforms=ios',
-      projectDir.path,
-    ];
+    testUsingContext('$template error ios language', () async {
+      final CreateCommand command = CreateCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      final List<String> args = <String>[
+        'create',
+        '--no-pub',
+        '--template=$template',
+        '--ios-language',
+        'swift',
+        if (template == 'plugin_ffi') '--platforms=ios',
+        projectDir.path,
+      ];
 
-    await expectLater(
-      runner.run(args),
-      throwsToolExit(message: 'The "ios-language" option is not supported with the plugin_ffi template: the language will always be C or C++.'),
-    );
-  });
+      await expectLater(
+        runner.run(args),
+        throwsToolExit(message: 'The "ios-language" option is not supported with the $template template: the language will always be C or C++.'),
+      );
+    }, overrides: <Type, Generator>{
+      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
+    });
+  }
 
   testUsingContext('FFI plugins error web platform', () async {
     final CreateCommand command = CreateCommand();
@@ -3383,6 +3401,32 @@ void main() {
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
     Logger: () => logger,
+  });
+
+  testUsingContext('Does not double quote description in index.html on web', () async {
+    await _createProject(
+      projectDir,
+      <String>['--no-pub', '--platforms=web'],
+      <String>['pubspec.yaml', 'web/index.html'],
+    );
+
+    final String rawIndexHtml = await projectDir.childDirectory('web').childFile('index.html').readAsString();
+    const String expectedDescription = '<meta name="description" content="A new Flutter project.">';
+
+    expect(rawIndexHtml.contains(expectedDescription), isTrue);
+  });
+
+  testUsingContext('Does not double quote description in manifest.json on web', () async {
+    await _createProject(
+      projectDir,
+      <String>['--no-pub', '--platforms=web'],
+      <String>['pubspec.yaml', 'web/manifest.json'],
+    );
+
+    final String rawManifestJson = await projectDir.childDirectory('web').childFile('manifest.json').readAsString();
+    const String expectedDescription = '"description": "A new Flutter project."';
+
+    expect(rawManifestJson.contains(expectedDescription), isTrue);
   });
 }
 
