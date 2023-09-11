@@ -16,6 +16,14 @@ import 'text_span.dart';
 /// These are distinct because sometimes a link may be split across multiple
 /// [TextSpan]s.
 ///
+/// For example, consider the [TextSpan]s
+/// `[TextSpan(text: 'http://'), TextSpan(text: 'google.com'), TextSpan(text: '/')]`.
+/// This builder would be called three times, with the following parameters:
+///
+///  1. `displayString: 'http://', linkString: 'http://google.com/'`
+///  2. `displayString: 'google.com', linkString: 'http://google.com/'`
+///  3. `displayString: '/', linkString: 'http://google.com/'`
+///
 /// {@template flutter.painting.LinkBuilder.recognizer}
 /// It's necessary for the owning widget to manage the lifecycle of any
 /// [GestureRecognizer]s created in this function, such as for handling a tap on
