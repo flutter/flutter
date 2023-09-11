@@ -15187,6 +15187,38 @@ void main() {
       tester.binding.platformDispatcher.clearNativeSpellCheckServiceDefined();
     });
 
+    testWidgets(
+        'Spell check initial text when spell check enabled',
+            (WidgetTester tester) async {
+          final _EverythingWrongSpellCheckService spellCheckService = _EverythingWrongSpellCheckService();
+
+          tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+          true;
+          await tester.pumpWidget(
+            MaterialApp(
+              home: EditableText(
+                controller: TextEditingController(text: 'A'),
+                focusNode: FocusNode(),
+                style: const TextStyle(),
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+                cursorOpacityAnimates: true,
+                autofillHints: null,
+                spellCheckConfiguration:
+                SpellCheckConfiguration(
+                  spellCheckService: spellCheckService,
+                  misspelledTextStyle: TextField.materialMisspelledTextStyle,
+                ),
+              ),
+            ),
+          );
+
+          final EditableTextState state =
+          tester.state<EditableTextState>(find.byType(EditableText));
+
+          expect(state.spellCheckResults!.spellCheckedText, 'A');
+        });
+
     testWidgetsWithLeakTracking(
       'findSuggestionSpanAtCursorIndex finds correct span with cursor in middle of a word',
         (WidgetTester tester) async {
@@ -17083,3 +17115,16 @@ class _TestScrollController extends ScrollController {
 }
 
 class FakeSpellCheckService extends DefaultSpellCheckService {}
+
+class _EverythingWrongSpellCheckService extends SpellCheckService {
+  @override
+  Future<List<SuggestionSpan>?> fetchSpellCheckSuggestions(Locale locale, String text) async {
+    final Iterable<RegExpMatch> matches = RegExp(r'\b\w+').allMatches(text);
+    return matches
+        .map((RegExpMatch match) => SuggestionSpan(
+      TextRange(start: match.start, end: match.end),
+      const <String>[],
+    ))
+        .toList();
+  }
+}
