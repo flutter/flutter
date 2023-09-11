@@ -11610,15 +11610,21 @@ void main() {
         ),
       ));
 
+      // The initial text should be formatted when spell checking.
+      final dynamic error1 = tester.takeException();
+      expect(error1, isFlutterError);
+      expect(error1.toString(), contains(errorText));
+      expect(controller.text, 'flutter is the best!');
+
       // Interact with the field to establish the input connection.
       await tester.tap(find.byType(EditableText));
       await tester.pump();
 
       await tester.enterText(find.byType(EditableText), 'text');
 
-      final dynamic error = tester.takeException();
-      expect(error, isFlutterError);
-      expect(error.toString(), contains(errorText));
+      final dynamic error2 = tester.takeException();
+      expect(error2, isFlutterError);
+      expect(error2.toString(), contains(errorText));
       expect(controller.text, 'text');
     });
   });
