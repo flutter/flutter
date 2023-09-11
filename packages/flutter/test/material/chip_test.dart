@@ -293,6 +293,8 @@ void main() {
     expect(labelStyle.textBaseline, textTheme.bodyLarge?.textBaseline);
     expect(labelStyle.wordSpacing, textTheme.bodyLarge?.wordSpacing);
   },
+  // TODO(polina-c): remove after fixing
+  // https://github.com/flutter/flutter/issues/134394
   leakTrackingTestConfig: const LeakTrackingTestConfig(
     notDisposedAllowList: <String, int?>{'OpacityLayer': 2},
   ));
