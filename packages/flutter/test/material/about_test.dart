@@ -1460,7 +1460,7 @@ void main() {
     expect(find.text('Exception: Injected failure'), findsOneWidget);
   });
 
-  testWidgets('Material2 - LicensePage master view layout position - ltr', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - LicensePage master view layout position - ltr', (WidgetTester tester) async {
     const TextDirection textDirection = TextDirection.ltr;
     const Size defaultSize = Size(800.0, 600.0);
     const Size wideSize = Size(1200.0, 600.0);
@@ -1592,7 +1592,7 @@ void main() {
     expect(tester.getCenter(find.byType(ListView)), const Offset(160, 356));
   });
 
-  testWidgets('Material2 - LicensePage master view layout position - rtl', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - LicensePage master view layout position - rtl', (WidgetTester tester) async {
     const TextDirection textDirection = TextDirection.rtl;
     const Size defaultSize = Size(800.0, 600.0);
     const Size wideSize = Size(1200.0, 600.0);
@@ -1657,7 +1657,7 @@ void main() {
     expect(tester.getCenter(find.byType(ListView)), const Offset(1040.0, 356.0));
   });
 
-  testWidgets('Material3 - LicensePage master view layout position - rtl', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - LicensePage master view layout position - rtl', (WidgetTester tester) async {
     const TextDirection textDirection = TextDirection.rtl;
     const Size defaultSize = Size(800.0, 600.0);
     const Size wideSize = Size(1200.0, 600.0);
@@ -1724,7 +1724,7 @@ void main() {
     expect(tester.getCenter(find.byType(ListView)), const Offset(1040.0, 356.0));
   });
 
-  testWidgets('License page title in lateral UI does not use AppBarTheme.foregroundColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('License page title in lateral UI does not use AppBarTheme.foregroundColor', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/108991
     final ThemeData theme = ThemeData(
       appBarTheme: const AppBarTheme(foregroundColor: Color(0xFFFFFFFF)),
