@@ -196,6 +196,7 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/126312.
   testWidgetsWithLeakTracking('when open input connection in didUpdateWidget, should not throw', (WidgetTester tester) async {
     final Key key = GlobalKey();
+    controller.text = 'blah blah';
 
     await tester.pumpWidget(
       MaterialApp(
@@ -11467,6 +11468,8 @@ void main() {
     const String errorText = 'Test EditableText callback error';
 
     testWidgetsWithLeakTracking('onSelectionChanged can throw errors', (WidgetTester tester) async {
+      controller.text = 'flutter is the best!';
+
       await tester.pumpWidget(MaterialApp(
         home: EditableText(
           showSelectionHandles: true,
@@ -11492,6 +11495,8 @@ void main() {
     });
 
     testWidgetsWithLeakTracking('onChanged can throw errors', (WidgetTester tester) async {
+      controller.text = 'flutter is the best!';
+
       await tester.pumpWidget(MaterialApp(
         home: EditableText(
           showSelectionHandles: true,
@@ -11516,6 +11521,8 @@ void main() {
     });
 
     testWidgetsWithLeakTracking('onEditingComplete can throw errors', (WidgetTester tester) async {
+      controller.text = 'flutter is the best!';
+
       await tester.pumpWidget(MaterialApp(
         home: EditableText(
           showSelectionHandles: true,
@@ -11545,6 +11552,8 @@ void main() {
     });
 
     testWidgetsWithLeakTracking('onSubmitted can throw errors', (WidgetTester tester) async {
+      controller.text = 'flutter is the best!';
+
       await tester.pumpWidget(MaterialApp(
         home: EditableText(
           showSelectionHandles: true,
@@ -11577,6 +11586,8 @@ void main() {
       final TextInputFormatter badFormatter = TextInputFormatter.withFunction(
         (TextEditingValue oldValue, TextEditingValue newValue) => throw FlutterError(errorText),
       );
+      controller.text = 'flutter is the best!';
+
       await tester.pumpWidget(MaterialApp(
         home: EditableText(
           showSelectionHandles: true,
@@ -15000,6 +15011,8 @@ void main() {
     testWidgetsWithLeakTracking(
       'Spell check configured properly when spell check disabled by default',
         (WidgetTester tester) async {
+      controller.text = 'A';
+
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
@@ -15022,6 +15035,8 @@ void main() {
     testWidgetsWithLeakTracking(
       'Spell check configured properly when spell check disabled manually',
         (WidgetTester tester) async {
+      controller.text = 'A';
+
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
@@ -15045,6 +15060,8 @@ void main() {
     testWidgetsWithLeakTracking(
       'Error thrown when spell check configuration defined without specifying misspelled text style',
         (WidgetTester tester) async {
+      controller.text = 'A';
+
       expect(
           () {
             EditableText(
@@ -15067,6 +15084,7 @@ void main() {
           (WidgetTester tester) async {
         tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
           true;
+        controller.text = 'A';
 
         await tester.pumpWidget(
           MaterialApp(
@@ -15100,6 +15118,7 @@ void main() {
       'Spell check configured properly with specified spell check service',
         (WidgetTester tester) async {
       final FakeSpellCheckService fakeSpellCheckService = FakeSpellCheckService();
+      controller.text = 'A';
 
       await tester.pumpWidget(
         MaterialApp(
@@ -15133,6 +15152,7 @@ void main() {
         (WidgetTester tester) async {
       tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
         false;
+      controller.text = 'A';
 
       await tester.pumpWidget(
         MaterialApp(
@@ -15164,6 +15184,8 @@ void main() {
         (WidgetTester tester) async {
       tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
         true;
+      controller.text = 'A';
+
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
@@ -15207,6 +15229,8 @@ void main() {
         (WidgetTester tester) async {
       tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
         true;
+      controller.text = 'A';
+
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
@@ -15249,6 +15273,8 @@ void main() {
         (WidgetTester tester) async {
       tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
         true;
+      controller.text = 'A';
+
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
@@ -15291,6 +15317,8 @@ void main() {
         (WidgetTester tester) async {
       tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
         true;
+      controller.text = 'A';
+
       await tester.pumpWidget(
         MaterialApp(
           home: EditableText(
@@ -16658,6 +16686,8 @@ void main() {
   testWidgetsWithLeakTracking('Cursor color with an opacity is respected', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     const double opacity = 0.55;
+    controller.text = 'blah blah';
+
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
