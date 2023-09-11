@@ -970,7 +970,7 @@ Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plug
 /// be created only if missing.
 ///
 /// This uses [project.flutterPluginsDependenciesFile], so it should only be
-/// run after refreshPluginList has been run since the last plugin change.
+/// run after [refreshPluginsList] has been run since the last plugin change.
 void createPluginSymlinks(FlutterProject project, {bool force = false, @visibleForTesting FeatureFlags? featureFlagsOverride}) {
   final FeatureFlags localFeatureFlags = featureFlagsOverride ?? featureFlags;
   Map<String, Object?>? platformPlugins;

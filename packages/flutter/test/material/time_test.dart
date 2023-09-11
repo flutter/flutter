@@ -58,10 +58,12 @@ void main() {
 
   group('RestorableTimeOfDay tests', () {
     testWidgetsWithLeakTracking('value is not accessible when not registered', (WidgetTester tester) async {
-      expect(() => RestorableTimeOfDay(const TimeOfDay(hour: 20, minute: 4)).value, throwsAssertionError);
+      final RestorableTimeOfDay property = RestorableTimeOfDay(const TimeOfDay(hour: 20, minute: 4));
+      addTearDown(property.dispose);
+      expect(() => property.value, throwsAssertionError);
     });
 
-    testWidgets('work when not in restoration scope', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('work when not in restoration scope', (WidgetTester tester) async {
       await tester.pumpWidget(const _RestorableWidget());
 
       final _RestorableWidgetState state = tester.state(find.byType(_RestorableWidget));
@@ -194,4 +196,10 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
 
   @override
   String get restorationId => 'widget';
+
+  @override
+  void dispose() {
+    timeOfDay.dispose();
+    super.dispose();
+  }
 }
