@@ -31,4 +31,11 @@ void VMADebugPrint(const char* message, ...) {
 }
 #endif
 
+#include "flutter/fml/logging.h"
+
+#define VMA_ASSERT(expr) \
+  FML_DCHECK((expr)) << "Vulkan Memory Allocator Failure!"
+#define VMA_HEAVY_ASSERT(expr) \
+  FML_DCHECK((expr)) << "Vulkan Memory Allocator Failure!"
+
 #include "flutter/flutter_vma/flutter_vma.h"
