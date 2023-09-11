@@ -207,11 +207,16 @@ class MouseTracker extends ChangeNotifier {
       _debugDuringDeviceUpdate = true;
       return true;
     }());
-    task();
-    assert(() {
-      _debugDuringDeviceUpdate = false;
-      return true;
-    }());
+    try {
+      task();
+    } catch (e) {
+      rethrow;
+    } finally {
+      assert(() {
+        _debugDuringDeviceUpdate = false;
+        return true;
+      }());
+    }
   }
 
   // Whether an observed event might update a device.
