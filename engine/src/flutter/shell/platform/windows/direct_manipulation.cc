@@ -7,7 +7,7 @@
 #include <algorithm>
 
 #include "flutter/shell/platform/windows/direct_manipulation.h"
-#include "flutter/shell/platform/windows/window.h"
+#include "flutter/shell/platform/windows/flutter_window.h"
 #include "flutter/shell/platform/windows/window_binding_handler_delegate.h"
 
 #define RETURN_IF_FAILED(operation)            \
@@ -172,7 +172,7 @@ ULONG STDMETHODCALLTYPE DirectManipulationEventHandler::Release() {
   return 0;
 }
 
-DirectManipulationOwner::DirectManipulationOwner(Window* window)
+DirectManipulationOwner::DirectManipulationOwner(FlutterWindow* window)
     : window_(window) {}
 
 int DirectManipulationOwner::Init(unsigned int width, unsigned int height) {
