@@ -14,8 +14,11 @@ import 'package:flutter/animation.dart';
 ///
 /// See also:
 /// * <https://material.io/design/motion/speed.html#easing>
-@Deprecated('Use Easing.legacy (M2) or Easing.standard (M3) instead. '
-    'This feature was deprecated after v3.14.0-0.2.pre.')
+@Deprecated(
+  'Use Easing.legacy (M2) or Easing.standard (M3) instead. '
+  'This curve is updated in M3. '
+  'This feature was deprecated after v3.14.0-0.2.pre.'
+)
 const Curve standardEasing = Curves.fastOutSlowIn;
 
 /// The accelerate easing curve in the Material 2 specification.
@@ -25,8 +28,11 @@ const Curve standardEasing = Curves.fastOutSlowIn;
 ///
 /// See also:
 /// * <https://material.io/design/motion/speed.html#easing>
-@Deprecated('Use Easing.legacyAccelerate (M2) or Easing.standardAccelerate (M3) instead. '
-    'This feature was deprecated after v3.14.0-0.2.pre.')
+@Deprecated(
+  'Use Easing.legacyAccelerate (M2) or Easing.standardAccelerate (M3) instead. '
+  'This curve is updated in M3. '
+  'This feature was deprecated after v3.14.0-0.2.pre.'
+)
 const Curve accelerateEasing = Cubic(0.4, 0.0, 1.0, 1.0);
 
 /// The decelerate easing curve in the Material 2 specification.
@@ -37,6 +43,9 @@ const Curve accelerateEasing = Cubic(0.4, 0.0, 1.0, 1.0);
 ///
 /// See also:
 /// * <https://material.io/design/motion/speed.html#easing>
-@Deprecated('Use Easing.legacyDecelerate (M2) or Easing.standardDecelerate (M3) instead. '
-    'This feature was deprecated after v3.14.0-0.2.pre.')
+@Deprecated(
+  'Use Easing.legacyDecelerate (M2) or Easing.standardDecelerate (M3) instead. '
+  'This curve is updated in M3. '
+  'This feature was deprecated after v3.14.0-0.2.pre.'
+)
 const Curve decelerateEasing = Cubic(0.0, 0.0, 0.2, 1.0);
