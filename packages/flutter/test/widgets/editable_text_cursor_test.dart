@@ -1200,12 +1200,13 @@ void main() {
     EditableText.debugDeterministicCursor = true;
     addTearDown(() { EditableText.debugDeterministicCursor = false; });
     const String text = '12';
-    controller = TextEditingController.fromValue(
+    final TextEditingController controller = TextEditingController.fromValue(
       const TextEditingValue(
         text: text,
         selection: TextSelection.collapsed(offset: text.length),
       ),
     );
+    addTearDown(controller.dispose);
 
     final Widget widget = EditableText(
       autofocus: true,
@@ -1244,12 +1245,13 @@ void main() {
     EditableText.debugDeterministicCursor = true;
     addTearDown(() { EditableText.debugDeterministicCursor = false; });
     final String text = 'test${' ' * 1000}';
-    controller = TextEditingController.fromValue(
+    final TextEditingController controller = TextEditingController.fromValue(
       TextEditingValue(
         text: text,
         selection: TextSelection.collapsed(offset: text.length, affinity: TextAffinity.upstream),
       ),
     );
+    addTearDown(controller.dispose);
 
     final Widget widget = EditableText(
       autofocus: true,
@@ -1297,10 +1299,11 @@ void main() {
     final String text = 'test${' ' * 50}\n'
                         '2nd line\n'
                         '\n';
-    controller = TextEditingController.fromValue(TextEditingValue(
+    final TextEditingController controller = TextEditingController.fromValue(TextEditingValue(
       text: text,
       selection: const TextSelection.collapsed(offset: 0),
     ));
+    addTearDown(controller.dispose);
 
     final Widget widget = EditableText(
       autofocus: true,
