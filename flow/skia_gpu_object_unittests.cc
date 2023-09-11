@@ -13,6 +13,7 @@
 #include "flutter/testing/thread_test.h"
 #include "gtest/gtest.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
+#include "third_party/skia/include/gpu/GrTypes.h"
 
 namespace flutter {
 namespace testing {
@@ -43,7 +44,7 @@ class TestResourceContext : public TestSkObject {
   ~TestResourceContext() = default;
   void performDeferredCleanup(std::chrono::milliseconds msNotUsed) {}
   void deleteBackendTexture(const GrBackendTexture& texture) {}
-  void flushAndSubmit(bool syncCpu) {}
+  void flushAndSubmit(GrSyncCpu sync) {}
 };
 
 class SkiaGpuObjectTest : public ThreadTest {

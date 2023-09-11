@@ -15,6 +15,7 @@
 #include "third_party/skia/include/core/SkRefCnt.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
+#include "third_party/skia/include/gpu/GrTypes.h"
 
 namespace flutter {
 
@@ -129,7 +130,7 @@ class UnrefQueue : public fml::RefCountedThreadSafe<UnrefQueue<T>> {
         context->performDeferredCleanup(std::chrono::milliseconds(0));
       }
 
-      context->flushAndSubmit(true);
+      context->flushAndSubmit(GrSyncCpu::kYes);
     }
   }
 
