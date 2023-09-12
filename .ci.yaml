@@ -1500,6 +1500,7 @@ targets:
       subshard: "5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
