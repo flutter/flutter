@@ -24,7 +24,7 @@ void setUpCanvasKitTest() {
 
   tearDown(() {
     HtmlViewEmbedder.instance.debugClear();
-    RenderCanvasFactory.instance.debugClear();
+    SurfaceFactory.instance.debugClear();
   });
 
   setUp(() =>

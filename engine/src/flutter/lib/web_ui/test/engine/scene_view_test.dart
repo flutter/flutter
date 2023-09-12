@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:js_interop';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
@@ -18,18 +19,17 @@ void main() {
 }
 
 class StubPictureRenderer implements PictureRenderer {
-  final DomCanvasElement scratchCanvasElement =
-      createDomCanvasElement(width: 500, height: 500);
+  final DomCanvasElement scratchCanvasElement = createDomCanvasElement(
+      width: 500, height: 500
+  );
 
   @override
   Future<DomImageBitmap> renderPicture(ScenePicture picture) async {
     final ui.Rect cullRect = picture.cullRect;
-    final DomImageBitmap bitmap = (await createSizedImageBitmap(
-        scratchCanvasElement,
-        0,
-        0,
-        cullRect.width.toInt(),
-        cullRect.height.toInt()))!;
+    final DomImageBitmap bitmap = (await createImageBitmap(
+      scratchCanvasElement as JSAny,
+      (x: 0, y: 0, width: cullRect.width.toInt(), height: cullRect.height.toInt())
+    ).toDart)! as DomImageBitmap;
     return bitmap;
   }
 }
@@ -58,11 +58,9 @@ void testMain() {
     final List<DomElement> children = sceneElement.children.toList();
     expect(children.length, 1);
     final DomElement containerElement = children.first;
-    expect(
-        containerElement.tagName, equalsIgnoringCase('flt-canvas-container'));
+    expect(containerElement.tagName, equalsIgnoringCase('flt-canvas-container'));
 
-    final List<DomElement> containerChildren =
-        containerElement.children.toList();
+    final List<DomElement> containerChildren = containerElement.children.toList();
     expect(containerChildren.length, 1);
     final DomElement canvasElement = containerChildren.first;
     final DomCSSStyleDeclaration style = canvasElement.style;
@@ -78,11 +76,12 @@ void testMain() {
     debugOverrideDevicePixelRatio(2.0);
 
     final PlatformView platformView = PlatformView(
-        1,
-        const ui.Size(100, 120),
-        const PlatformViewStyling(
-          position: PlatformViewPosition.offset(ui.Offset(50, 80)),
-        ));
+      1,
+      const ui.Size(100, 120),
+      const PlatformViewStyling(
+        position: PlatformViewPosition.offset(ui.Offset(50, 80)),
+      )
+    );
     final EngineRootLayer rootLayer = EngineRootLayer();
     rootLayer.slices.add(PlatformViewSlice(<PlatformView>[platformView], null));
     final EngineScene scene = EngineScene(rootLayer);
@@ -92,8 +91,7 @@ void testMain() {
     final List<DomElement> children = sceneElement.children.toList();
     expect(children.length, 1);
     final DomElement containerElement = children.first;
-    expect(
-        containerElement.tagName, equalsIgnoringCase('flt-platform-view-slot'));
+    expect(containerElement.tagName, equalsIgnoringCase('flt-platform-view-slot'));
 
     final DomCSSStyleDeclaration style = containerElement.style;
     expect(style.left, '25px');

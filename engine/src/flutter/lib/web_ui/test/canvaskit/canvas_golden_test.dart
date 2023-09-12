@@ -163,7 +163,7 @@ void testMain() {
     // Regression test for https://github.com/flutter/flutter/issues/121758
     test('resources used in temporary surfaces for Image.toByteData can cross to rendering overlays', () async {
       final Rasterizer rasterizer = CanvasKitRenderer.instance.rasterizer;
-      RenderCanvasFactory.instance.debugClear();
+      SurfaceFactory.instance.debugClear();
 
       ui_web.platformViewRegistry.registerViewFactory(
         'test-platform-view',
