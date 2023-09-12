@@ -167,8 +167,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
       : null;
   }
 
-  final Map<Object, TestFlutterView> _testViews = <Object, TestFlutterView>{};
-  final Map<Object, TestDisplay> _testDisplays = <Object, TestDisplay>{};
+  final Map<int, TestFlutterView> _testViews = <int, TestFlutterView>{};
+  final Map<int, TestDisplay> _testDisplays = <int, TestDisplay>{};
 
   @override
   VoidCallback? get onMetricsChanged => _platformDispatcher.onMetricsChanged;
@@ -395,10 +395,10 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   }
 
   @override
-  SemanticsActionCallback? get onSemanticsAction => _platformDispatcher.onSemanticsAction;
+  SemanticsActionEventCallback? get onSemanticsActionEvent => _platformDispatcher.onSemanticsActionEvent;
   @override
-  set onSemanticsAction(SemanticsActionCallback? callback) {
-    _platformDispatcher.onSemanticsAction = callback;
+  set onSemanticsActionEvent(SemanticsActionEventCallback? callback) {
+    _platformDispatcher.onSemanticsActionEvent = callback;
   }
 
   @override
@@ -440,21 +440,6 @@ class TestPlatformDispatcher implements PlatformDispatcher {
       PlatformMessageResponseCallback? callback,
       ) {
     _platformDispatcher.sendPlatformMessage(name, data, callback);
-  }
-
-  @Deprecated(
-    'Instead of calling this callback, use ServicesBinding.instance.channelBuffers.push. '
-    'This feature was deprecated after v2.1.0-10.0.pre.'
-  )
-  @override
-  PlatformMessageCallback? get onPlatformMessage => _platformDispatcher.onPlatformMessage;
-  @Deprecated(
-    'Instead of setting this callback, use ServicesBinding.instance.defaultBinaryMessenger.setMessageHandler. '
-    'This feature was deprecated after v2.1.0-10.0.pre.'
-  )
-  @override
-  set onPlatformMessage(PlatformMessageCallback? callback) {
-    _platformDispatcher.onPlatformMessage = callback;
   }
 
   /// Delete any test value properties that have been set on this [TestPlatformDispatcher]
@@ -509,6 +494,9 @@ class TestPlatformDispatcher implements PlatformDispatcher {
 
   @override
   Iterable<TestFlutterView> get views => _testViews.values;
+
+  @override
+  FlutterView? view({required int id}) => _testViews[id];
 
   @override
   Iterable<TestDisplay> get displays => _testDisplays.values;
@@ -678,7 +666,7 @@ class TestFlutterView implements FlutterView {
   final TestDisplay _display;
 
   @override
-  Object get viewId => _view.viewId;
+  int get viewId => _view.viewId;
 
   /// The device pixel ratio to use for this test.
   ///
@@ -1170,7 +1158,7 @@ class _UnsupportedDisplay implements TestDisplay {
 ///   // Fake the desired properties of the TestWindow. All code running
 ///   // within this test will perceive the following fake text scale
 ///   // factor as the real text scale factor of the window.
-///   testBinding.window.textScaleFactorFakeValue = 2.5;
+///   testBinding.platformDispatcher.textScaleFactorTestValue = 2.5;
 ///
 ///   // Test code that depends on text scale factor here.
 /// });
@@ -1183,7 +1171,7 @@ class _UnsupportedDisplay implements TestDisplay {
 /// If a test needs to override a real [SingletonFlutterWindow] property and
 /// then later return to using the real [SingletonFlutterWindow] property,
 /// [TestWindow] provides methods to clear each individual test value, e.g.,
-/// [clearLocaleTestValue].
+/// [clearDevicePixelRatioTestValue].
 ///
 /// To clear all fake test values in a [TestWindow], consider using
 /// [clearAllTestValues].
@@ -1504,22 +1492,6 @@ class TestWindow implements SingletonFlutterWindow {
   )
   @override
   Locale get locale => platformDispatcher.locale;
-  /// Hides the real locale and reports the given [localeTestValue] instead.
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.localeTestValue instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  set localeTestValue(Locale localeTestValue) { // ignore: avoid_setters_without_getters
-    platformDispatcher.localeTestValue = localeTestValue;
-  }
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.clearLocaleTestValue() instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  /// Deletes any existing test locale and returns to using the real locale.
-  void clearLocaleTestValue() {
-    platformDispatcher.clearLocaleTestValue();
-  }
 
   @Deprecated(
     'Use WidgetTester.platformDispatcher.locales instead. '
@@ -1528,22 +1500,6 @@ class TestWindow implements SingletonFlutterWindow {
   )
   @override
   List<Locale> get locales => platformDispatcher.locales;
-  /// Hides the real locales and reports the given [localesTestValue] instead.
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.localesTestValue instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  set localesTestValue(List<Locale> localesTestValue) { // ignore: avoid_setters_without_getters
-    platformDispatcher.localesTestValue = localesTestValue;
-  }
-  /// Deletes any existing test locales and returns to using the real locales.
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.clearLocalesTestValue() instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  void clearLocalesTestValue() {
-    platformDispatcher.clearLocalesTestValue();
-  }
 
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onLocaleChanged instead. '
@@ -1569,14 +1525,6 @@ class TestWindow implements SingletonFlutterWindow {
   )
   @override
   String get initialLifecycleState => platformDispatcher.initialLifecycleState;
-  /// Sets a faked initialLifecycleState for testing.
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.initialLifecycleStateTestValue instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  set initialLifecycleStateTestValue(String state) { // ignore: avoid_setters_without_getters
-    platformDispatcher.initialLifecycleStateTestValue = state;
-  }
 
   @Deprecated(
     'Use WidgetTester.platformDispatcher.textScaleFactor instead. '
@@ -1585,24 +1533,6 @@ class TestWindow implements SingletonFlutterWindow {
   )
   @override
   double get textScaleFactor => platformDispatcher.textScaleFactor;
-  /// Hides the real text scale factor and reports the given
-  /// [textScaleFactorTestValue] instead.
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.textScaleFactorTestValue instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  set textScaleFactorTestValue(double textScaleFactorTestValue) { // ignore: avoid_setters_without_getters
-    platformDispatcher.textScaleFactorTestValue = textScaleFactorTestValue;
-  }
-  /// Deletes any existing test text scale factor and returns to using the real
-  /// text scale factor.
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.clearTextScaleFactorTestValue() instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  void clearTextScaleFactorTestValue() {
-    platformDispatcher.clearTextScaleFactorTestValue();
-  }
 
   @Deprecated(
     'Use WidgetTester.platformDispatcher.platformBrightness instead. '
@@ -1627,24 +1557,6 @@ class TestWindow implements SingletonFlutterWindow {
   set onPlatformBrightnessChanged(VoidCallback? callback) {
     platformDispatcher.onPlatformBrightnessChanged = callback;
   }
-  /// Hides the real text scale factor and reports the given
-  /// [platformBrightnessTestValue] instead.
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.platformBrightnessTestValue instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  set platformBrightnessTestValue(Brightness platformBrightnessTestValue) { // ignore: avoid_setters_without_getters
-    platformDispatcher.platformBrightnessTestValue = platformBrightnessTestValue;
-  }
-  /// Deletes any existing test platform brightness and returns to using the
-  /// real platform brightness.
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.clearPlatformBrightnessTestValue() instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  void clearPlatformBrightnessTestValue() {
-    platformDispatcher.clearPlatformBrightnessTestValue();
-  }
 
   @Deprecated(
     'Use WidgetTester.platformDispatcher.alwaysUse24HourFormat instead. '
@@ -1653,24 +1565,6 @@ class TestWindow implements SingletonFlutterWindow {
   )
   @override
   bool get alwaysUse24HourFormat => platformDispatcher.alwaysUse24HourFormat;
-  /// Hides the real clock format and reports the given
-  /// [alwaysUse24HourFormatTestValue] instead.
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.alwaysUse24HourFormatTestValue instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  set alwaysUse24HourFormatTestValue(bool alwaysUse24HourFormatTestValue) { // ignore: avoid_setters_without_getters
-    platformDispatcher.alwaysUse24HourFormatTestValue = alwaysUse24HourFormatTestValue;
-  }
-  /// Deletes any existing test clock format and returns to using the real clock
-  /// format.
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.clearAlwaysUse24HourTestValue() instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  void clearAlwaysUse24HourTestValue() {
-    platformDispatcher.clearAlwaysUse24HourTestValue();
-  }
 
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onTextScaleFactorChanged instead. '
@@ -1712,15 +1606,6 @@ class TestWindow implements SingletonFlutterWindow {
   )
   @override
   bool get brieflyShowPassword => platformDispatcher.brieflyShowPassword;
-  /// Hides the real [brieflyShowPassword] and reports the given
-  /// `brieflyShowPasswordTestValue` instead.
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.brieflyShowPasswordTestValue instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  set brieflyShowPasswordTestValue(bool brieflyShowPasswordTestValue) { // ignore: avoid_setters_without_getters
-    platformDispatcher.brieflyShowPasswordTestValue = brieflyShowPasswordTestValue;
-  }
 
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onBeginFrame instead. '
@@ -1797,24 +1682,6 @@ class TestWindow implements SingletonFlutterWindow {
   )
   @override
   String get defaultRouteName => platformDispatcher.defaultRouteName;
-  /// Hides the real default route name and reports the given
-  /// [defaultRouteNameTestValue] instead.
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.defaultRouteNameTestValue instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  set defaultRouteNameTestValue(String defaultRouteNameTestValue) { // ignore: avoid_setters_without_getters
-    platformDispatcher.defaultRouteNameTestValue = defaultRouteNameTestValue;
-  }
-  /// Deletes any existing test default route name and returns to using the real
-  /// default route name.
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.clearDefaultRouteNameTestValue() instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  void clearDefaultRouteNameTestValue() {
-    platformDispatcher.clearDefaultRouteNameTestValue();
-  }
 
   @Deprecated(
     'Use WidgetTester.platformDispatcher.scheduleFrame() instead. '
@@ -1843,24 +1710,6 @@ class TestWindow implements SingletonFlutterWindow {
   )
   @override
   bool get semanticsEnabled => platformDispatcher.semanticsEnabled;
-  /// Hides the real semantics enabled and reports the given
-  /// [semanticsEnabledTestValue] instead.
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.semanticsEnabledTestValue instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  set semanticsEnabledTestValue(bool semanticsEnabledTestValue) { // ignore: avoid_setters_without_getters
-    platformDispatcher.semanticsEnabledTestValue = semanticsEnabledTestValue;
-  }
-  /// Deletes any existing test semantics enabled and returns to using the real
-  /// semantics enabled.
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.clearSemanticsEnabledTestValue() instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  void clearSemanticsEnabledTestValue() {
-    platformDispatcher.clearSemanticsEnabledTestValue();
-  }
 
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onSemanticsEnabledChanged instead. '
@@ -1880,50 +1729,12 @@ class TestWindow implements SingletonFlutterWindow {
   }
 
   @Deprecated(
-    'Use WidgetTester.platformDispatcher.onSemanticsAction instead. '
-    'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
-  )
-  @override
-  SemanticsActionCallback? get onSemanticsAction => platformDispatcher.onSemanticsAction;
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.onSemanticsAction instead. '
-    'Deprecated to prepare for the upcoming multi-window support. '
-    'This feature was deprecated after v3.9.0-0.1.pre.'
-  )
-  @override
-  set onSemanticsAction(SemanticsActionCallback? callback) {
-    platformDispatcher.onSemanticsAction = callback;
-  }
-
-  @Deprecated(
     'Use WidgetTester.platformDispatcher.accessibilityFeatures instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
     'This feature was deprecated after v3.9.0-0.1.pre.'
   )
   @override
   AccessibilityFeatures get accessibilityFeatures => platformDispatcher.accessibilityFeatures;
-  /// Hides the real accessibility features and reports the given
-  /// [accessibilityFeaturesTestValue] instead.
-  ///
-  /// Consider using [FakeAccessibilityFeatures] to provide specific
-  /// values for the various accessibility features under test.
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.accessibilityFeaturesTestValue instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  set accessibilityFeaturesTestValue(AccessibilityFeatures accessibilityFeaturesTestValue) { // ignore: avoid_setters_without_getters
-    platformDispatcher.accessibilityFeaturesTestValue = accessibilityFeaturesTestValue;
-  }
-  /// Deletes any existing test accessibility features and returns to using the
-  /// real accessibility features.
-  @Deprecated(
-    'Use WidgetTester.platformDispatcher.clearAccessibilityFeaturesTestValue() instead. '
-    'This feature was deprecated after v2.11.0-0.0.pre.'
-  )
-  void clearAccessibilityFeaturesTestValue() {
-    platformDispatcher.clearAccessibilityFeaturesTestValue();
-  }
 
   @Deprecated(
     'Use WidgetTester.platformDispatcher.onAccessibilityFeaturesChanged instead. '
@@ -1976,21 +1787,6 @@ class TestWindow implements SingletonFlutterWindow {
     platformDispatcher.sendPlatformMessage(name, data, callback);
   }
 
-  @Deprecated(
-    'Instead of calling this callback, use ServicesBinding.instance.channelBuffers.push. '
-    'This feature was deprecated after v2.1.0-10.0.pre.'
-  )
-  @override
-  PlatformMessageCallback? get onPlatformMessage => platformDispatcher.onPlatformMessage;
-  @Deprecated(
-    'Instead of setting this callback, use ServicesBinding.instance.defaultBinaryMessenger.setMessageHandler. '
-    'This feature was deprecated after v2.1.0-10.0.pre.'
-  )
-  @override
-  set onPlatformMessage(PlatformMessageCallback? callback) {
-    platformDispatcher.onPlatformMessage = callback;
-  }
-
   /// Delete any test value properties that have been set on this [TestWindow]
   /// as well as its [platformDispatcher].
   ///
@@ -1998,7 +1794,7 @@ class TestWindow implements SingletonFlutterWindow {
   /// [PlatformDispatcher] values are reported again.
   ///
   /// If desired, clearing of properties can be done on an individual basis,
-  /// e.g., [clearLocaleTestValue].
+  /// e.g., [clearDevicePixelRatioTestValue].
   @Deprecated(
     'Use WidgetTester.platformDispatcher.clearAllTestValues() and WidgetTester.view.reset() instead. '
     'Deprecated to prepare for the upcoming multi-window support. '
@@ -2105,7 +1901,7 @@ class TestWindow implements SingletonFlutterWindow {
     'This feature was deprecated after v3.9.0-0.1.pre.'
   )
   @override
-  Object get viewId => _view.viewId;
+  int get viewId => _view.viewId;
 
   /// This gives us some grace time when the dart:ui side adds something to
   /// [SingletonFlutterWindow], and makes things easier when we do rolls to give

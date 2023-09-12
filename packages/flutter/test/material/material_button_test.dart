@@ -6,8 +6,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../rendering/mock_canvas.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -15,7 +14,7 @@ void main() {
     debugResetSemanticsIdCounter();
   });
 
-  testWidgets('MaterialButton defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialButton defaults', (WidgetTester tester) async {
     final Finder rawButtonMaterial = find.descendant(
       of: find.byType(MaterialButton),
       matching: find.byType(Material),
@@ -23,11 +22,14 @@ void main() {
 
     // Enabled MaterialButton
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: MaterialButton(
-          onPressed: () { },
-          child: const Text('button'),
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MaterialButton(
+            onPressed: () { },
+            child: const Text('button'),
+          ),
         ),
       ),
     );
@@ -68,11 +70,14 @@ void main() {
 
     // Disabled MaterialButton
     await tester.pumpWidget(
-      const Directionality(
-        textDirection: TextDirection.ltr,
-        child: MaterialButton(
-          onPressed: null,
-          child: Text('button'),
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: MaterialButton(
+            onPressed: null,
+            child: Text('button'),
+          ),
         ),
       ),
     );
@@ -92,7 +97,7 @@ void main() {
     expect(material.type, MaterialType.transparency);
   });
 
-  testWidgets('Does MaterialButton work with hover', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Does MaterialButton work with hover', (WidgetTester tester) async {
     const Color hoverColor = Color(0xff001122);
 
     await tester.pumpWidget(
@@ -115,7 +120,7 @@ void main() {
     expect(inkFeatures, paints..rect(color: hoverColor));
   });
 
-  testWidgets('Does MaterialButton work with focus', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Does MaterialButton work with focus', (WidgetTester tester) async {
     const Color focusColor = Color(0xff001122);
 
     final FocusNode focusNode = FocusNode(debugLabel: 'MaterialButton Node');
@@ -137,9 +142,11 @@ void main() {
 
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(color: focusColor));
+
+    focusNode.dispose();
   });
 
-  testWidgets('MaterialButton elevation and colors have proper precedence', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialButton elevation and colors have proper precedence', (WidgetTester tester) async {
     const double elevation = 10.0;
     const double focusElevation = 11.0;
     const double hoverElevation = 12.0;
@@ -209,9 +216,11 @@ void main() {
     expect(inkFeatures, paints..rect(color: focusColor)..rect(color: highlightColor));
     expect(material.elevation, equals(highlightElevation));
     await gesture2.up();
+
+    focusNode.dispose();
   });
 
-  testWidgets("MaterialButton's disabledColor takes precedence over its default disabled color.", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("MaterialButton's disabledColor takes precedence over its default disabled color.", (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/30012.
 
     final Finder rawButtonMaterial = find.descendant(
@@ -234,7 +243,7 @@ void main() {
     expect(material.color, const Color(0xff00ff00));
   });
 
-  testWidgets('Default MaterialButton meets a11y contrast guidelines', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default MaterialButton meets a11y contrast guidelines', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -261,7 +270,7 @@ void main() {
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
 
-  testWidgets('MaterialButton gets focus when autofocus is set.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialButton gets focus when autofocus is set.', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'MaterialButton');
     await tester.pumpWidget(
       MaterialApp(
@@ -293,9 +302,11 @@ void main() {
 
     await tester.pump();
     expect(focusNode.hasPrimaryFocus, isTrue);
+
+    focusNode.dispose();
   });
 
-  testWidgets('MaterialButton onPressed and onLongPress callbacks are correctly called when non-null', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialButton onPressed and onLongPress callbacks are correctly called when non-null', (WidgetTester tester) async {
 
     bool wasPressed;
     Finder materialButton;
@@ -339,7 +350,7 @@ void main() {
     expect(tester.widget<MaterialButton>(materialButton).enabled, false);
   });
 
-  testWidgets('MaterialButton onPressed and onLongPress callbacks are distinctly recognized', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialButton onPressed and onLongPress callbacks are distinctly recognized', (WidgetTester tester) async {
     bool didPressButton = false;
     bool didLongPressButton = false;
 
@@ -370,7 +381,7 @@ void main() {
     expect(didLongPressButton, isTrue);
   });
 
-  testWidgets('MaterialButton changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialButton changes mouse cursor when hovered', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -424,7 +435,7 @@ void main() {
 
   // This test is very similar to the '...explicit splashColor and highlightColor' test
   // in icon_button_test.dart. If you change this one, you may want to also change that one.
-  testWidgets('MaterialButton with explicit splashColor and highlightColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialButton with explicit splashColor and highlightColor', (WidgetTester tester) async {
     const Color directSplashColor = Color(0xFF000011);
     const Color directHighlightColor = Color(0xFF000011);
 
@@ -442,6 +453,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Theme(
           data: ThemeData(
+            useMaterial3: false,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
           child: buttonWidget,
@@ -488,6 +500,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Theme(
           data: ThemeData(
+            useMaterial3: false,
             highlightColor: themeHighlightColor1,
             splashColor: themeSplashColor1,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -516,6 +529,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Theme(
           data: ThemeData(
+            useMaterial3: false,
             highlightColor: themeHighlightColor2,
             splashColor: themeSplashColor2,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -535,7 +549,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('MaterialButton has no clip by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialButton has no clip by default', (WidgetTester tester) async {
     final GlobalKey buttonKey = GlobalKey();
     final Widget buttonWidget = Center(
       child: MaterialButton(
@@ -562,7 +576,7 @@ void main() {
     );
   });
 
-  testWidgets('Disabled MaterialButton has same semantic size as enabled and exposes disabled semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Disabled MaterialButton has same semantic size as enabled and exposes disabled semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     const Rect expectedButtonSize = Rect.fromLTRB(0.0, 0.0, 116.0, 48.0);
@@ -574,15 +588,20 @@ void main() {
       );
 
     // enabled button
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: Center(
-        child: MaterialButton(
-          child: const Text('Button'),
-          onPressed: () { /* to make sure the button is enabled */ },
+    await tester.pumpWidget(
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: MaterialButton(
+              child: const Text('Button'),
+              onPressed: () { /* to make sure the button is enabled */ },
+            ),
+          ),
         ),
       ),
-    ));
+    );
 
     expect(semantics, hasSemantics(
       TestSemantics.root(
@@ -607,15 +626,20 @@ void main() {
     ));
 
     // disabled button
-    await tester.pumpWidget(const Directionality(
-      textDirection: TextDirection.ltr,
-      child: Center(
-        child: MaterialButton(
-          onPressed: null, // button is disabled
-          child: Text('Button'),
+    await tester.pumpWidget(
+      Theme(
+        data: ThemeData(useMaterial3: false),
+        child: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: MaterialButton(
+              onPressed: null, // button is disabled
+              child: Text('Button'),
+            ),
+          ),
         ),
       ),
-    ));
+    );
 
     expect(semantics, hasSemantics(
       TestSemantics.root(
@@ -639,7 +663,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('MaterialButton minWidth and height parameters', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialButton minWidth and height parameters', (WidgetTester tester) async {
     Widget buildFrame({ double? minWidth, double? height, EdgeInsets padding = EdgeInsets.zero, Widget? child }) {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -706,7 +730,7 @@ void main() {
     expect(tester.getSize(find.byType(MaterialButton)), const Size(18.0, 18.0));
   });
 
-  testWidgets('MaterialButton size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialButton size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
     final Key key1 = UniqueKey();
     await tester.pumpWidget(
       Theme(
@@ -746,7 +770,7 @@ void main() {
     expect(tester.getSize(find.byKey(key2)), const Size(88.0, 36.0));
   });
 
-  testWidgets('MaterialButton shape overrides ButtonTheme shape', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialButton shape overrides ButtonTheme shape', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/29146
     await tester.pumpWidget(
       Directionality(
@@ -766,13 +790,14 @@ void main() {
     expect(tester.widget<Material>(rawButtonMaterial).shape, const StadiumBorder());
   });
 
-  testWidgets('MaterialButton responds to density changes.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialButton responds to density changes.', (WidgetTester tester) async {
     const Key key = Key('test');
     const Key childKey = Key('test child');
 
     Future<void> buildTest(VisualDensity visualDensity, {bool useText = false}) async {
       return tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(useMaterial3: false),
           home: Directionality(
             textDirection: TextDirection.rtl,
             child: Center(
@@ -826,7 +851,7 @@ void main() {
     expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
   });
 
-  testWidgets('disabledElevation is passed to RawMaterialButton', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('disabledElevation is passed to RawMaterialButton', (WidgetTester tester) async {
     const double disabledElevation = 16;
 
     final Finder rawMaterialButtonFinder = find.descendant(
@@ -849,7 +874,7 @@ void main() {
     expect(rawMaterialButton.disabledElevation, equals(disabledElevation));
   });
 
-  testWidgets('MaterialButton.disabledElevation defaults to 0.0 when not provided', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialButton.disabledElevation defaults to 0.0 when not provided', (WidgetTester tester) async {
     final Finder rawMaterialButtonFinder = find.descendant(
       of: find.byType(MaterialButton),
       matching: find.byType(RawMaterialButton),

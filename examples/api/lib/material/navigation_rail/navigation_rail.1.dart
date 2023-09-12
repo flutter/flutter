@@ -14,7 +14,7 @@ class NavigationRailExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
+      theme: ThemeData(useMaterial3: true),
       home: const NavRailExample(),
     );
   }
@@ -73,13 +73,19 @@ class _NavRailExampleState extends State<NavRailExample> {
                   label: Text('First'),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.bookmark_border),
-                  selectedIcon: Icon(Icons.book),
+                  icon: Badge(child: Icon(Icons.bookmark_border)),
+                  selectedIcon: Badge(child: Icon(Icons.book)),
                   label: Text('Second'),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.star_border),
-                  selectedIcon: Icon(Icons.star),
+                  icon: Badge(
+                    label: Text('4'),
+                    child: Icon(Icons.star_border),
+                  ),
+                  selectedIcon: Badge(
+                    label: Text('4'),
+                    child: Icon(Icons.star),
+                  ),
                   label: Text('Third'),
                 ),
               ],

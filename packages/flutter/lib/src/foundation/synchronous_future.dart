@@ -14,6 +14,8 @@ import 'dart:async';
 /// rare occasions you want the ability to switch to an asynchronous model. **In
 /// general use of this class should be avoided as it is very difficult to debug
 /// such bimodal behavior.**
+///
+/// A [SynchronousFuture] will never complete with an error.
 class SynchronousFuture<T> implements Future<T> {
   /// Creates a synchronous future.
   ///

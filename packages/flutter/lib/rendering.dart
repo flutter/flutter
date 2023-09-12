@@ -37,6 +37,7 @@ export 'src/rendering/custom_layout.dart';
 export 'src/rendering/custom_paint.dart';
 export 'src/rendering/debug.dart';
 export 'src/rendering/debug_overflow_indicator.dart';
+export 'src/rendering/decorated_sliver.dart';
 export 'src/rendering/editable.dart';
 export 'src/rendering/error.dart';
 export 'src/rendering/flex.dart';

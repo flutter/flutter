@@ -123,7 +123,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       FlutterValidator(
         fileSystem: globals.fs,
         platform: globals.platform,
-        flutterVersion: () => globals.flutterVersion,
+        flutterVersion: () => globals.flutterVersion.fetchTagsAndGetVersion(clock: globals.systemClock),
         devToolsVersion: () => globals.cache.devToolsVersion,
         processManager: globals.processManager,
         userMessages: userMessages,
@@ -138,7 +138,14 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (androidWorkflow!.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[androidValidator!, androidLicenseValidator!]),
       if (globals.iosWorkflow!.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
-        GroupedValidator(<DoctorValidator>[XcodeValidator(xcode: globals.xcode!, userMessages: userMessages), globals.cocoapodsValidator!]),
+        GroupedValidator(<DoctorValidator>[
+          XcodeValidator(
+            xcode: globals.xcode!,
+            userMessages: userMessages,
+            iosSimulatorUtils: globals.iosSimulatorUtils!,
+          ),
+          globals.cocoapodsValidator!,
+        ]),
       if (webWorkflow.appliesToHostPlatform)
         ChromeValidator(
           chromiumLauncher: ChromiumLauncher(

@@ -774,7 +774,7 @@ class TargetDeviceSelection {
         throwToolExit('');
       }
       final int deviceIndex = int.parse(userInputString) - 1;
-      if (deviceIndex < devices.length) {
+      if (deviceIndex > -1 && deviceIndex < devices.length) {
         chosenDevice = devices[deviceIndex];
       }
     }

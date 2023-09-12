@@ -44,18 +44,22 @@ void main() {
       );
 
       // Pre-cache iOS engine Flutter.xcframework artifacts.
-      processManager.runSync(<String>[
-        flutterBin,
-        ...getLocalEngineArguments(),
-        'precache',
-        '--ios',
-      ], workingDirectory: tempDir.path);
+      ProcessResult result = processManager.runSync(
+        <String>[
+          flutterBin,
+          ...getLocalEngineArguments(),
+          'precache',
+          '--ios',
+        ],
+        workingDirectory: tempDir.path,
+      );
+      expect(result, const ProcessResultMatcher());
 
       // Pretend the SDK was on an external drive with stray "._" files in the xcframework
       hiddenFile = xcframeworkArtifact.childFile('._Info.plist')..createSync();
 
       // Test a plugin example app to allow plugins validation.
-      processManager.runSync(<String>[
+      result = processManager.runSync(<String>[
         flutterBin,
         ...getLocalEngineArguments(),
         'create',
@@ -65,6 +69,7 @@ void main() {
         'plugin',
         'hello',
       ], workingDirectory: tempDir.path);
+      expect(result, const ProcessResultMatcher());
 
       pluginRoot = tempDir.childDirectory('hello');
       projectRoot = pluginRoot.childDirectory('example').path;
@@ -249,6 +254,7 @@ void main() {
               'VERBOSE_SCRIPT_LOGGING': '1',
               'FLUTTER_BUILD_MODE': 'release',
               'ACTION': 'install',
+              'FLUTTER_BUILD_DIR': 'build',
               // Skip bitcode stripping since we just checked that above.
             },
           );

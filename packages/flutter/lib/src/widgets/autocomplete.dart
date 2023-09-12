@@ -77,6 +77,29 @@ typedef AutocompleteFieldViewBuilder = Widget Function(
 ///   * [RawAutocomplete.displayStringForOption], which is of this type.
 typedef AutocompleteOptionToString<T extends Object> = String Function(T option);
 
+/// A direction in which to open the options-view overlay.
+///
+/// See also:
+///
+///  * [RawAutocomplete.optionsViewOpenDirection], which is of this type.
+///  * [RawAutocomplete.optionsViewBuilder] to specify how to build the
+///    selectable-options widget.
+///  * [RawAutocomplete.fieldViewBuilder] to optionally specify how to build the
+///    corresponding field widget.
+enum OptionsViewOpenDirection {
+  /// Open upward.
+  ///
+  /// The bottom edge of the options view will align with the top edge
+  /// of the text field built by [RawAutocomplete.fieldViewBuilder].
+  up,
+
+  /// Open downward.
+  ///
+  /// The top edge of the options view will align with the bottom edge
+  /// of the text field built by [RawAutocomplete.fieldViewBuilder].
+  down,
+}
+
 // TODO(justinmc): Mention AutocompleteCupertino when it is implemented.
 /// {@template flutter.widgets.RawAutocomplete.RawAutocomplete}
 /// A widget for helping the user make a selection by entering some text and
@@ -128,6 +151,7 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
     super.key,
     required this.optionsViewBuilder,
     required this.optionsBuilder,
+    this.optionsViewOpenDirection = OptionsViewOpenDirection.down,
     this.displayStringForOption = defaultStringForOption,
     this.fieldViewBuilder,
     this.focusNode,
@@ -151,6 +175,9 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// Pass the provided [TextEditingController] to the field built here so that
   /// RawAutocomplete can listen for changes.
   /// {@endtemplate}
+  ///
+  /// If this parameter is null, then a [SizedBox.shrink] is built instead.
+  /// For how that pattern can be useful, see [textEditingController].
   final AutocompleteFieldViewBuilder? fieldViewBuilder;
 
   /// The [FocusNode] that is used for the text field.
@@ -161,9 +188,9 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// field built by [fieldViewBuilder]. For example, it may be desirable to
   /// place the text field in the AppBar and the options below in the main body.
   ///
-  /// When following this pattern, [fieldViewBuilder] can return
-  /// `SizedBox.shrink()` so that nothing is drawn where the text field would
-  /// normally be. A separate text field can be created elsewhere, and a
+  /// When following this pattern, [fieldViewBuilder] can be omitted,
+  /// so that a text field is not drawn where it would normally be.
+  /// A separate text field can be created elsewhere, and a
   /// FocusNode and TextEditingController can be passed both to that text field
   /// and to RawAutocomplete.
   ///
@@ -182,9 +209,10 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// {@template flutter.widgets.RawAutocomplete.optionsViewBuilder}
   /// Builds the selectable options widgets from a list of options objects.
   ///
-  /// The options are displayed floating below the field using a
+  /// The options are displayed floating below or above the field using a
   /// [CompositedTransformFollower] inside of an [Overlay], not at the same
-  /// place in the widget tree as [RawAutocomplete].
+  /// place in the widget tree as [RawAutocomplete]. To control whether it opens
+  /// upward or downward, use [optionsViewOpenDirection].
   ///
   /// In order to track which item is highlighted by keyboard navigation, the
   /// resulting options will be wrapped in an inherited
@@ -196,6 +224,13 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   ///
   /// {@endtemplate}
   final AutocompleteOptionsViewBuilder<T> optionsViewBuilder;
+
+  /// {@template flutter.widgets.RawAutocomplete.optionsViewOpenDirection}
+  /// The direction in which to open the options-view overlay.
+  ///
+  /// Defaults to [OptionsViewOpenDirection.down].
+  /// {@endtemplate}
+  final OptionsViewOpenDirection optionsViewOpenDirection;
 
   /// {@template flutter.widgets.RawAutocomplete.displayStringForOption}
   /// Returns the string to display in the field when the option is selected.
@@ -209,10 +244,6 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
 
   /// {@template flutter.widgets.RawAutocomplete.onSelected}
   /// Called when an option is selected by the user.
-  ///
-  /// Any [TextEditingController] listeners will not be called when the user
-  /// selects an option, even though the field will update with the selected
-  /// value, so use this to be informed of selection.
   /// {@endtemplate}
   final AutocompleteOnSelected<T>? onSelected;
 
@@ -415,13 +446,21 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     }
 
     _floatingOptions?.remove();
+    _floatingOptions?.dispose();
     if (_shouldShowOptions) {
       final OverlayEntry newFloatingOptions = OverlayEntry(
         builder: (BuildContext context) {
           return CompositedTransformFollower(
             link: _optionsLayerLink,
             showWhenUnlinked: false,
-            targetAnchor: Alignment.bottomLeft,
+            targetAnchor: switch (widget.optionsViewOpenDirection) {
+              OptionsViewOpenDirection.up => Alignment.topLeft,
+              OptionsViewOpenDirection.down => Alignment.bottomLeft,
+            },
+            followerAnchor: switch (widget.optionsViewOpenDirection) {
+              OptionsViewOpenDirection.up => Alignment.bottomLeft,
+              OptionsViewOpenDirection.down => Alignment.topLeft,
+            },
             child: TextFieldTapRegion(
               child: AutocompleteHighlightedOption(
                 highlightIndexNotifier: _highlightedOptionIndex,
@@ -524,7 +563,9 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       _focusNode.dispose();
     }
     _floatingOptions?.remove();
+    _floatingOptions?.dispose();
     _floatingOptions = null;
+    _highlightedOptionIndex.dispose();
     super.dispose();
   }
 

@@ -161,10 +161,8 @@ class FakeVM extends Fake implements vm.VmService {
     return vm.Timestamp(timestamp: lastTimeStamp);
   }
 
-  List<String> recordedStreams = <String>[];
   @override
   Future<vm.Success> setVMTimelineFlags(List<String> recordedStreams) async {
-    recordedStreams = recordedStreams;
     return vm.Success();
   }
 

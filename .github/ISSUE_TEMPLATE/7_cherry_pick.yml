@@ -1,4 +1,4 @@
-name: Request a cherry-pick.
+name: Request a cherry-pick
 description: As a contributor, you would like to request that a feature be cherry-picked into a release.
 title: '[CP] <title>'
 labels: ['cp: review']
@@ -9,7 +9,7 @@ body:
   - type: input
     id: issue_link
     attributes:
-      label: issue_link
+      label: Issue Link
       description: What is the link to the issue this cherry-pick is addressing?
     validations:
       required: true
@@ -33,7 +33,7 @@ body:
   - type: input
     id: pr_link
     attributes:
-      label: pr_link
+      label: PR Link
       description: >-
         Link to an open PR that cherrypick's this into the target release branch.
         The current branches can be found under release-caniddate-branch.version for [beta](https://github.com/flutter/flutter/blob/beta/bin/internal/release-candidate-branch.version) and [stable](https://github.com/flutter/flutter/blob/stable/bin/internal/release-candidate-branch.version)
