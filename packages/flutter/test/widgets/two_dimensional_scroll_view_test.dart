@@ -420,7 +420,7 @@ void main() {
       await tester.tap(find.byType(TwoDimensionalScrollable));
       await tester.pump(const Duration(milliseconds: 50));
       expect(log,
-          equals(<String>['Tapped: (xIndex: 0, yIndex: 0)', 'Tapped: (xIndex: 0, yIndex: 5)']));
-    }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+          equals(<String>['Tapped: (xIndex: 0, yIndex: 0)', 'Tapped: (xIndex: 0, yIndex: 4)']));
+    });
   });
 }
