@@ -255,6 +255,42 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('No relayout boundary between OverlayPortal and Overlay', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/133545.
+    final GlobalKey key = GlobalKey(debugLabel: 'key');
+    final Widget widget = Directionality(
+      textDirection: TextDirection.ltr,
+      child: Overlay(
+        initialEntries: <OverlayEntry>[
+          OverlayEntry(
+            builder: (BuildContext context) {
+              // The Positioned widget prevents a relayout boundary from being
+              // introduced between the Overlay and OverlayPortal.
+              return Positioned(
+                top: 0,
+                left: 0,
+                child: OverlayPortal(
+                  controller: controller1,
+                  overlayChildBuilder: (BuildContext context) => SizedBox(key: key),
+                  child: const SizedBox(),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+
+    controller1.hide();
+    await tester.pumpWidget(widget);
+
+    controller1.show();
+    await tester.pump();
+    expect(find.byKey(key), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    verifyTreeIsClean();
+  });
+
   testWidgets('Throws when the same controller is attached to multiple OverlayPortal', (WidgetTester tester) async {
     final OverlayPortalController controller = OverlayPortalController(debugLabel: 'local controller');
     final Widget widget = Directionality(
@@ -510,6 +546,52 @@ void main() {
     );
 
     expect(tester.takeException(), isNull);
+    setState(() { shouldShowChild = true; });
+
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('works in a LayoutBuilder 3', (WidgetTester tester) async {
+    late StateSetter setState;
+    bool shouldShowChild = false;
+
+    Widget layoutBuilder(BuildContext context, BoxConstraints constraints) {
+      return OverlayPortal(
+        controller: controller2,
+        overlayChildBuilder: (BuildContext context) => const SizedBox(),
+        child: const SizedBox(),
+      );
+    }
+    controller1.hide();
+    controller2.hide();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            OverlayStatefulEntry(builder: (BuildContext context, StateSetter setter) {
+              setState = setter;
+              // The Positioned widget ensures there's no relayout boundary
+              // between the Overlay and the OverlayPortal.
+              return Positioned(
+                top: 0,
+                left: 0,
+                child: OverlayPortal(
+                  controller: controller1,
+                  overlayChildBuilder: (BuildContext context) => const SizedBox(),
+                  child: shouldShowChild ? LayoutBuilder(builder: layoutBuilder) : null,
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+
+    controller1.show();
+    controller2.show();
     setState(() { shouldShowChild = true; });
 
     await tester.pump();
