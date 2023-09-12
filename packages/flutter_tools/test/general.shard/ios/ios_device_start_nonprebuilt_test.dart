@@ -577,8 +577,7 @@ void main() {
         expect(config.existsSync(), isTrue);
 
         String contents = config.readAsStringSync();
-        expect(contents, contains('\nBUILD_DIR=/build/ios\n'));
-        expect(contents, contains('\nCONFIGURATION=Debug\n'));
+        expect(contents, contains('CONFIGURATION_BUILD_DIR=/build/ios/iphoneos'));
 
         debugEndedCompleter.complete();
 
@@ -586,8 +585,7 @@ void main() {
 
         // Validate CoreDevice build settings were removed after launch
         contents = config.readAsStringSync();
-        expect(contents.contains('\nBUILD_DIR'), isFalse);
-        expect(contents.contains('\nCONFIGURATION'), isFalse);
+        expect(contents.contains('CONFIGURATION_BUILD_DIR'), isFalse);
       }, overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
         FileSystem: () => fileSystem,
