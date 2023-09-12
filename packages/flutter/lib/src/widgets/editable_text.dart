@@ -811,6 +811,7 @@ class EditableText extends StatefulWidget {
     this.spellCheckConfiguration,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
     this.undoController,
+    this.canTapOutsideFocus = true,
   }) : assert(obscuringCharacter.length == 1),
        smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
