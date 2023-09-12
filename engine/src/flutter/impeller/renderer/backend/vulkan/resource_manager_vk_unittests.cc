@@ -6,6 +6,7 @@
 #include <functional>
 #include <memory>
 #include <utility>
+#include "fml/logging.h"
 #include "fml/synchronization/waitable_event.h"
 #include "gtest/gtest.h"
 #include "impeller/renderer/backend/vulkan/resource_manager_vk.h"
@@ -56,6 +57,22 @@ TEST(ResourceManagerVKTest, ReclaimMovesAResourceAndDestroysIt) {
   }
 
   waiter.Wait();
+}
+
+// Regression test for https://github.com/flutter/flutter/issues/134482.
+TEST(ResourceManagerVKTest, TerminatesWhenOutOfScope) {
+  // Originally, this shared_ptr was never destroyed, and the thread never
+  // terminated. This test ensures that the thread terminates when the
+  // ResourceManagerVK is out of scope.
+  std::weak_ptr<ResourceManagerVK> manager;
+
+  {
+    auto shared = ResourceManagerVK::Create();
+    manager = shared;
+  }
+
+  // The thread should have terminated.
+  EXPECT_EQ(manager.lock(), nullptr);
 }
 
 }  // namespace testing
