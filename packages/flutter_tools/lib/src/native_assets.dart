@@ -5,6 +5,7 @@
 // Logic for native assets shared between all host OSes.
 
 import 'package:logging/logging.dart' as logging;
+import 'package:native_assets_builder/native_assets_builder.dart';
 import 'package:native_assets_builder/native_assets_builder.dart' as native_assets_builder;
 import 'package:native_assets_cli/native_assets_cli.dart';
 import 'package:package_config/package_config_types.dart';
@@ -37,7 +38,7 @@ abstract class NativeAssetsBuildRunner {
   Future<List<Package>> packagesWithNativeAssets();
 
   /// Runs all [packagesWithNativeAssets] `build.dart` in dry run.
-  Future<native_assets_builder.DryRunResult> dryRun({
+  Future<DryRunResult> dryRun({
     required bool includeParentEnvironment,
     required LinkModePreference linkModePreference,
     required OS targetOs,
@@ -45,7 +46,7 @@ abstract class NativeAssetsBuildRunner {
   });
 
   /// Runs all [packagesWithNativeAssets] `build.dart`.
-  Future<native_assets_builder.BuildResult> build({
+  Future<BuildResult> build({
     required bool includeParentEnvironment,
     required BuildMode buildMode,
     required LinkModePreference linkModePreference,
@@ -107,18 +108,15 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
 
   @override
   Future<List<Package>> packagesWithNativeAssets() async {
-    final native_assets_builder.PackageLayout packageLayout =
-        native_assets_builder.PackageLayout.fromPackageConfig(
+    final PackageLayout packageLayout = PackageLayout.fromPackageConfig(
       packageConfig,
-      projectUri.resolve(
-        '.dart_tool/package_config.json',
-      ),
+      projectUri.resolve('.dart_tool/package_config.json'),
     );
     return packageLayout.packagesWithNativeAssets;
   }
 
   @override
-  Future<native_assets_builder.DryRunResult> dryRun({
+  Future<DryRunResult> dryRun({
     required bool includeParentEnvironment,
     required LinkModePreference linkModePreference,
     required OS targetOs,
@@ -133,7 +131,7 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
   }
 
   @override
-  Future<native_assets_builder.BuildResult> build({
+  Future<BuildResult> build({
     required bool includeParentEnvironment,
     required BuildMode buildMode,
     required LinkModePreference linkModePreference,
