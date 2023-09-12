@@ -113,7 +113,7 @@ FLUTTER_ASSERT_ARC
 
 - (void)testDeallocated {
   __weak FlutterEngine* weakEngine = nil;
-  {
+  @autoreleasepool {
     FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
     weakEngine = engine;
     [engine run];
