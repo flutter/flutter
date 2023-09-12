@@ -25,10 +25,10 @@ Future<PackageConfig> loadPackageConfigWithLogging(File file, {
     file.absolute.uri,
     loader: (Uri uri) async {
       final File configFile = fileSystem.file(uri);
-      if (!configFile.existsSync()) {
+      if (!await configFile.exists()) {
         return null;
       }
-      return Future<Uint8List>.value(configFile.readAsBytesSync());
+      return Future<Uint8List>.value(await configFile.readAsBytes());
     },
     onError: (dynamic error) {
       if (!throwOnError) {

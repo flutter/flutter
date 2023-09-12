@@ -26,11 +26,16 @@ import 'platform_plugins.dart';
 import 'plugins.dart';
 import 'project.dart';
 
-void _renderTemplateToFile(String template, Object? context, File file, TemplateRenderer templateRenderer) {
+Future<void> _renderTemplateToFile(
+  String template,
+  Object? context,
+  File file,
+  TemplateRenderer templateRenderer,
+) async {
   final String renderedTemplate = templateRenderer
     .renderString(template, context);
-  file.createSync(recursive: true);
-  file.writeAsStringSync(renderedTemplate);
+  await file.create(recursive: true);
+  await file.writeAsString(renderedTemplate);
 }
 
 Future<Plugin?> _pluginFromPackage(String name, Uri packageRoot, Set<String> appDependencies,
@@ -446,7 +451,7 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
       templateContent = _androidPluginRegistryTemplateOldEmbedding;
   }
   globals.printTrace('Generating $registryPath');
-  _renderTemplateToFile(
+  await _renderTemplateToFile(
     templateContent,
     templateContext,
     globals.fs.file(registryPath),
@@ -775,20 +780,20 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
   };
   if (project.isModule) {
     final Directory registryDirectory = project.ios.pluginRegistrantHost;
-    _renderTemplateToFile(
+    await _renderTemplateToFile(
       _pluginRegistrantPodspecTemplate,
       context,
       registryDirectory.childFile('FlutterPluginRegistrant.podspec'),
       globals.templateRenderer,
     );
   }
-  _renderTemplateToFile(
+  await _renderTemplateToFile(
     _objcPluginRegistryHeaderTemplate,
     context,
     project.ios.pluginRegistrantHeader,
     globals.templateRenderer,
   );
-  _renderTemplateToFile(
+  await _renderTemplateToFile(
     _objcPluginRegistryImplementationTemplate,
     context,
     project.ios.pluginRegistrantImplementation,
@@ -830,13 +835,13 @@ Future<void> _writeLinuxPluginFiles(FlutterProject project, List<Plugin> plugins
 }
 
 Future<void> _writeLinuxPluginRegistrant(Directory destination, Map<String, Object> templateContext) async {
-  _renderTemplateToFile(
+  await _renderTemplateToFile(
     _linuxPluginRegistryHeaderTemplate,
     templateContext,
     destination.childFile('generated_plugin_registrant.h'),
     globals.templateRenderer,
   );
-  _renderTemplateToFile(
+  await _renderTemplateToFile(
     _linuxPluginRegistryImplementationTemplate,
     templateContext,
     destination.childFile('generated_plugin_registrant.cc'),
@@ -845,7 +850,7 @@ Future<void> _writeLinuxPluginRegistrant(Directory destination, Map<String, Obje
 }
 
 Future<void> _writePluginCmakefile(File destinationFile, Map<String, Object> templateContext, TemplateRenderer templateRenderer) async {
-  _renderTemplateToFile(
+  await _renderTemplateToFile(
     _pluginCmakefileTemplate,
     templateContext,
     destinationFile,
@@ -861,7 +866,7 @@ Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> pl
     'framework': 'FlutterMacOS',
     'methodChannelPlugins': macosMethodChannelPlugins,
   };
-  _renderTemplateToFile(
+  await _renderTemplateToFile(
     _swiftPluginRegistryTemplate,
     context,
     project.macos.managedDirectory.childFile('GeneratedPluginRegistrant.swift'),
@@ -932,13 +937,13 @@ Future<void> writeWindowsPluginFiles(FlutterProject project, List<Plugin> plugin
 }
 
 Future<void> _writeCppPluginRegistrant(Directory destination, Map<String, Object> templateContext, TemplateRenderer templateRenderer) async {
-  _renderTemplateToFile(
+  await _renderTemplateToFile(
     _cppPluginRegistryHeaderTemplate,
     templateContext,
     destination.childFile('generated_plugin_registrant.h'),
     templateRenderer,
   );
-  _renderTemplateToFile(
+  await _renderTemplateToFile(
     _cppPluginRegistryImplementationTemplate,
     templateContext,
     destination.childFile('generated_plugin_registrant.cc'),
@@ -956,7 +961,7 @@ Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plug
 
   final String template = webPlugins.isEmpty ? _noopDartPluginRegistryTemplate : _dartPluginRegistryTemplate;
 
-  _renderTemplateToFile(
+  await _renderTemplateToFile(
     template,
     context,
     pluginFile,
@@ -1429,7 +1434,7 @@ Future<void> generateMainDartWithPluginRegistrant(
     (templateContext[resolution.platform] as List<Object?>?)?.add(resolution.toMap());
   }
   try {
-    _renderTemplateToFile(
+    await _renderTemplateToFile(
       _dartPluginRegistryForNonWebTemplate,
       templateContext,
       newMainDart,
