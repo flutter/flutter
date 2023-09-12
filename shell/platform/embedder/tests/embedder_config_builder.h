@@ -53,7 +53,10 @@ class EmbedderConfigBuilder {
 
   void SetMetalRendererConfig(SkISize surface_size);
 
-  void SetVulkanRendererConfig(SkISize surface_size);
+  void SetVulkanRendererConfig(
+      SkISize surface_size,
+      std::optional<FlutterVulkanInstanceProcAddressCallback>
+          instance_proc_address_callback = {});
 
   // Used to explicitly set an `open_gl.fbo_callback`. Using this method will
   // cause your test to fail since the ctor for this class sets

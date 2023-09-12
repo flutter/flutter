@@ -361,6 +361,10 @@ if (enable_unittests) {
     if (test_enable_metal) {
       sources += [ "tests/embedder_metal_unittests.mm" ]
     }
+
+    if (test_enable_vulkan) {
+      sources += [ "tests/embedder_vk_unittests.cc" ]
+    }
   }
 
   executable("embedder_a11y_unittests") {
