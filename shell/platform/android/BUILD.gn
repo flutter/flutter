@@ -490,7 +490,7 @@ action("android_jar") {
     ":pom_libflutter",
   ]
 
-  if (enable_vulkan_validation_layers) {
+  if (impeller_enable_vulkan_validation_layers) {
     assert(impeller_enable_vulkan)
 
     # We use a different toolchain here so that vulkan validation layers are
