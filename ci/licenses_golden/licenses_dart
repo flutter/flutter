@@ -1,4 +1,4 @@
-Signature: 044dd90b91c540fd2a9d9b99a1fa34db
+Signature: 2842791947e56be69f6d021381e26966
 
 ====================================================================================================
 LIBRARY: dart
@@ -1460,9 +1460,7 @@ ORIGIN: ../../../third_party/dart/runtime/vm/json_stream.cc + ../../../third_par
 ORIGIN: ../../../third_party/dart/runtime/vm/json_stream.h + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/vm/native_api_impl.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/vm/native_symbol.h + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/runtime/vm/native_symbol_android.cc + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/runtime/vm/native_symbol_linux.cc + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/runtime/vm/native_symbol_macos.cc + ../../../third_party/dart/LICENSE
+ORIGIN: ../../../third_party/dart/runtime/vm/native_symbol_posix.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/vm/native_symbol_win.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/vm/object_id_ring.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/vm/object_id_ring.h + ../../../third_party/dart/LICENSE
@@ -1802,9 +1800,7 @@ FILE: ../../../third_party/dart/runtime/vm/json_stream.cc
 FILE: ../../../third_party/dart/runtime/vm/json_stream.h
 FILE: ../../../third_party/dart/runtime/vm/native_api_impl.cc
 FILE: ../../../third_party/dart/runtime/vm/native_symbol.h
-FILE: ../../../third_party/dart/runtime/vm/native_symbol_android.cc
-FILE: ../../../third_party/dart/runtime/vm/native_symbol_linux.cc
-FILE: ../../../third_party/dart/runtime/vm/native_symbol_macos.cc
+FILE: ../../../third_party/dart/runtime/vm/native_symbol_posix.cc
 FILE: ../../../third_party/dart/runtime/vm/native_symbol_win.cc
 FILE: ../../../third_party/dart/runtime/vm/object_id_ring.cc
 FILE: ../../../third_party/dart/runtime/vm/object_id_ring.h
@@ -2834,7 +2830,6 @@ ORIGIN: ../../../third_party/dart/runtime/vm/kernel_isolate.h + ../../../third_p
 ORIGIN: ../../../third_party/dart/runtime/vm/kernel_loader.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/vm/kernel_loader.h + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/vm/lockers.cc + ../../../third_party/dart/LICENSE
-ORIGIN: ../../../third_party/dart/runtime/vm/native_symbol_fuchsia.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/vm/object_reload.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/vm/object_service.cc + ../../../third_party/dart/LICENSE
 ORIGIN: ../../../third_party/dart/runtime/vm/os_fuchsia.cc + ../../../third_party/dart/LICENSE
@@ -3190,7 +3185,6 @@ FILE: ../../../third_party/dart/runtime/vm/kernel_isolate.h
 FILE: ../../../third_party/dart/runtime/vm/kernel_loader.cc
 FILE: ../../../third_party/dart/runtime/vm/kernel_loader.h
 FILE: ../../../third_party/dart/runtime/vm/lockers.cc
-FILE: ../../../third_party/dart/runtime/vm/native_symbol_fuchsia.cc
 FILE: ../../../third_party/dart/runtime/vm/object_reload.cc
 FILE: ../../../third_party/dart/runtime/vm/object_service.cc
 FILE: ../../../third_party/dart/runtime/vm/os_fuchsia.cc

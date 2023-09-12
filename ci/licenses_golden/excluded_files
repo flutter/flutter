@@ -1602,6 +1602,7 @@
 ../../../third_party/dart/runtime/tools/create_snapshot_bin.py
 ../../../third_party/dart/runtime/tools/create_snapshot_file.py
 ../../../third_party/dart/runtime/tools/create_string_literal.py
+../../../third_party/dart/runtime/tools/dart_profiler_symbols.py
 ../../../third_party/dart/runtime/tools/dartfuzz/README.md
 ../../../third_party/dart/runtime/tools/dartfuzz/README_minimize.md
 ../../../third_party/dart/runtime/tools/dartfuzz/analysis_options.yaml
