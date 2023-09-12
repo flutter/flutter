@@ -2391,6 +2391,68 @@ void main() {
     expect(find.text('Target'), findsOneWidget);
   });
 
+  testWidgets('Drag and drop - onAccept no called if dropped with null data', (WidgetTester tester) async {
+    bool onAcceptCalled = false;
+    bool onAcceptWithDetailsCalled = false;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Column(
+        children: <Widget>[
+          const Draggable<int>(
+            feedback: Text('Dragging'),
+            child: Text('Source'),
+          ),
+          DragTarget<int>(
+            builder: (BuildContext context, List<int?> data, List<dynamic> rejects) {
+              return const SizedBox(height: 100.0, child: Text('Target'));
+            },
+            onAccept: (int data) {
+              onAcceptCalled = true;
+            },
+            onAcceptWithDetails: (DragTargetDetails<int> details) {
+              onAcceptWithDetailsCalled =true;
+            },
+          ),
+        ],
+      ),
+    ));
+
+    expect(onAcceptCalled, isFalse);
+    expect(onAcceptWithDetailsCalled, isFalse);
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(find.text('Target'), findsOneWidget);
+
+    final Offset firstLocation = tester.getCenter(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
+
+    expect(onAcceptCalled, isFalse);
+    expect(onAcceptWithDetailsCalled, isFalse);
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsOneWidget);
+    expect(find.text('Target'), findsOneWidget);
+
+    final Offset secondLocation = tester.getCenter(find.text('Target'));
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+
+    expect(onAcceptCalled, isFalse);
+    expect(onAcceptWithDetailsCalled, isFalse);
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsOneWidget);
+    expect(find.text('Target'), findsOneWidget);
+
+    await gesture.up();
+    await tester.pump();
+
+    expect(onAcceptCalled, isFalse, reason: 'onAccept should not be called when data is null');
+    expect(onAcceptWithDetailsCalled, isFalse, reason: 'onAcceptWithDetails should not be called when data is null');
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(find.text('Target'), findsOneWidget);
+  });
+
   testWidgets('Draggable disposes recognizer', (WidgetTester tester) async {
     bool didTap = false;
     await tester.pumpWidget(
