@@ -486,6 +486,7 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
     super.labelTextStyle,
     super.mouseCursor,
     super.child,
+    super.onTap,
   });
 
   /// Whether to display a checkmark next to the menu item.
