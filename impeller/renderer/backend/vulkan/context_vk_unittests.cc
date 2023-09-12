@@ -83,5 +83,13 @@ TEST(ContextVKTest, DeletePipelineLibraryAfterContext) {
                         "vkDestroyDevice") != functions->end());
 }
 
+TEST(ContextVKTest, CanCreateContextInAbsenceOfValidationLayers) {
+  // The mocked methods don't report the presence of a validation layer but we
+  // explicitly ask for validation. Context creation should continue anyway.
+  auto context = CreateMockVulkanContext(
+      [](auto& settings) { settings.enable_validation = true; });
+  ASSERT_NE(context, nullptr);
+}
+
 }  // namespace testing
 }  // namespace impeller

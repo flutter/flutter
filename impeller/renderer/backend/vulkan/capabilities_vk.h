@@ -100,7 +100,7 @@ class CapabilitiesVK final : public Capabilities,
   PixelFormat GetDefaultDepthStencilFormat() const override;
 
  private:
-  const bool enable_validations_;
+  bool validations_enabled_ = false;
   std::map<std::string, std::set<std::string>> exts_;
   std::set<OptionalDeviceExtensionVK> optional_device_extensions_;
   mutable PixelFormat default_color_format_ = PixelFormat::kUnknown;
