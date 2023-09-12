@@ -357,6 +357,13 @@ class DataCell {
 /// [PaginatedDataTable] which automatically splits the data into
 /// multiple pages.
 ///
+/// ## Performance considerations when wrapping [DataTable] with [SingleChildScrollView]
+///
+/// Wrapping a [DataTable] with [SingleChildScrollView] is expensive as [SingleChildScrollView]
+/// mounts and paints the entire [DataTable] even when only some rows are visible. If scrolling in
+/// one direction is necessary, then consider using a [CustomScrollView], otherwise use [PaginatedDataTable]
+/// to split the data into smaller pages.
+///
 /// {@tool dartpad}
 /// This sample shows how to display a [DataTable] with three columns: name, age, and
 /// role. The columns are defined by three [DataColumn] objects. The table
@@ -857,7 +864,7 @@ class DataTable extends StatelessWidget {
       height: effectiveHeadingRowHeight,
       alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
       child: AnimatedDefaultTextStyle(
-        style: effectiveHeadingTextStyle,
+        style: DefaultTextStyle.of(context).style.merge(effectiveHeadingTextStyle),
         softWrap: false,
         duration: _sortArrowAnimationDuration,
         child: label,
@@ -926,9 +933,9 @@ class DataTable extends StatelessWidget {
       constraints: BoxConstraints(minHeight: effectiveDataRowMinHeight, maxHeight: effectiveDataRowMaxHeight),
       alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
       child: DefaultTextStyle(
-        style: effectiveDataTextStyle.copyWith(
-          color: placeholder ? effectiveDataTextStyle.color!.withOpacity(0.6) : null,
-        ),
+        style: DefaultTextStyle.of(context).style
+          .merge(effectiveDataTextStyle)
+          .copyWith(color: placeholder ? effectiveDataTextStyle.color!.withOpacity(0.6) : null),
         child: DropdownButtonHideUnderline(child: label),
       ),
     );

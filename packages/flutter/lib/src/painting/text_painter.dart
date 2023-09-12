@@ -279,12 +279,6 @@ class _TextLayout {
   // object when it's no logner needed.
   ui.Paragraph _paragraph;
 
-  // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/31707
-  // remove this hack as well as the flooring in `layout`.
-  @pragma('vm:prefer-inline')
-  // ignore: deprecated_member_use
-  static double _applyFloatingPointHack(double layoutValue) => ui.ParagraphBuilder.shouldDisableRoundingHack ? layoutValue : layoutValue.ceilToDouble();
-
   /// Whether this layout has been invalidated and disposed.
   ///
   /// Only for use when asserts are enabled.
@@ -294,23 +288,23 @@ class _TextLayout {
   ///
   /// If a line ends with trailing spaces, the trailing spaces may extend
   /// outside of the horizontal paint bounds defined by [width].
-  double get width => _applyFloatingPointHack(_paragraph.width);
+  double get width => _paragraph.width;
 
   /// The vertical space required to paint this text.
-  double get height => _applyFloatingPointHack(_paragraph.height);
+  double get height => _paragraph.height;
 
   /// The width at which decreasing the width of the text would prevent it from
   /// painting itself completely within its bounds.
-  double get minIntrinsicLineExtent => _applyFloatingPointHack(_paragraph.minIntrinsicWidth);
+  double get minIntrinsicLineExtent => _paragraph.minIntrinsicWidth;
 
   /// The width at which increasing the width of the text no longer decreases the height.
   ///
   /// Includes trailing spaces if any.
-  double get maxIntrinsicLineExtent => _applyFloatingPointHack(_paragraph.maxIntrinsicWidth);
+  double get maxIntrinsicLineExtent => _paragraph.maxIntrinsicWidth;
 
   /// The distance from the left edge of the leftmost glyph to the right edge of
   /// the rightmost glyph in the paragraph.
-  double get longestLine => _applyFloatingPointHack(_paragraph.longestLine);
+  double get longestLine => _paragraph.longestLine;
 
   /// Returns the distance from the top of the text to the first baseline of the
   /// given type.
@@ -359,13 +353,6 @@ class _TextPainterLayoutCacheWithOffset {
   ui.Paragraph get paragraph => layout._paragraph;
 
   static double _contentWidthFor(double minWidth, double maxWidth, TextWidthBasis widthBasis, _TextLayout layout) {
-    // TODO(LongCatIsLooong): remove the rounding when _applyFloatingPointHack
-    // is removed.
-    // ignore: deprecated_member_use
-    if (!ui.ParagraphBuilder.shouldDisableRoundingHack) {
-      minWidth = minWidth.floorToDouble();
-      maxWidth = maxWidth.floorToDouble();
-    }
     return switch (widthBasis) {
       TextWidthBasis.longestLine => clampDouble(layout.longestLine, minWidth, maxWidth),
       TextWidthBasis.parent => clampDouble(layout.maxIntrinsicLineExtent, minWidth, maxWidth),

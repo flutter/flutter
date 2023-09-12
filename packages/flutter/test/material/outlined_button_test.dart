@@ -322,7 +322,7 @@ void main() {
     focusNode.dispose();
   });
 
-  testWidgets('Default OutlinedButton meets a11y contrast guidelines', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default OutlinedButton meets a11y contrast guidelines', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
@@ -371,7 +371,7 @@ void main() {
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
 
-  testWidgets('OutlinedButton with colored theme meets a11y contrast guidelines', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('OutlinedButton with colored theme meets a11y contrast guidelines', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     Color getTextColor(Set<MaterialState> states) {
@@ -1837,7 +1837,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
-  testWidgets('OutlinedButton in SelectionArea changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('OutlinedButton in SelectionArea changes mouse cursor when hovered', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/104595.
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
@@ -1890,6 +1890,7 @@ void main() {
       count += 1;
     }
     final MaterialStatesController controller = MaterialStatesController();
+    addTearDown(controller.dispose);
     controller.addListener(valueChanged);
 
     await tester.pumpWidget(
@@ -1990,20 +1991,21 @@ void main() {
     await gesture.removePointer();
   }
 
-  testWidgets('OutlinedButton statesController', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('OutlinedButton statesController', (WidgetTester tester) async {
     testStatesController(null, tester);
   });
 
-  testWidgets('OutlinedButton.icon statesController', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('OutlinedButton.icon statesController', (WidgetTester tester) async {
     testStatesController(const Icon(Icons.add), tester);
   });
 
-  testWidgets('Disabled OutlinedButton statesController', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Disabled OutlinedButton statesController', (WidgetTester tester) async {
     int count = 0;
     void valueChanged() {
       count += 1;
     }
     final MaterialStatesController controller = MaterialStatesController();
+    addTearDown(controller.dispose);
     controller.addListener(valueChanged);
 
     await tester.pumpWidget(
