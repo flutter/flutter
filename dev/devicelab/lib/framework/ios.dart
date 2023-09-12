@@ -229,134 +229,6 @@ Future<bool> runMacOSXcodeTests({
     codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'];
     provisioningProfile = environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
   }
-  final String resultBundleTemp = Directory.systemTemp.createTempSync('flutter_xcresult.').path;
-  final String resultBundlePath = path.join(resultBundleTemp, 'build_result');
-  final String testProductsPath = path.join(resultBundleTemp, 'test_products');
-  final int buildResults = await exec(
-    '/usr/bin/arch',
-    <String>[
-      '-arm64e',
-      'xcrun',
-      'xcodebuild',
-      '-workspace',
-      'Runner.xcworkspace',
-      '-scheme',
-      'Runner',
-      '-configuration',
-      configuration,
-      '-destination',
-      destination,
-      '-resultBundlePath',
-      resultBundlePath,
-      'build-for-testing',
-      '-testProductsPath',
-      testProductsPath,
-      'COMPILER_INDEX_STORE_ENABLE=NO',
-      if (developmentTeam != null)
-        'DEVELOPMENT_TEAM=$developmentTeam',
-      if (codeSignStyle != null)
-        'CODE_SIGN_STYLE=$codeSignStyle',
-      if (provisioningProfile != null)
-        'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
-    ],
-    workingDirectory: platformDirectory,
-    canFail: true,
-  );
-
-  if (buildResults != 0) {
-    final Directory? dumpDirectory = hostAgent.dumpDirectory;
-    final Directory xcresultBundle = Directory(path.join(resultBundleTemp, 'build_result.xcresult'));
-    if (dumpDirectory != null) {
-      if (xcresultBundle.existsSync()) {
-        // Zip the test results to the artifacts directory for upload.
-        final String zipPath = path.join(dumpDirectory.path,
-            '$testName-${DateTime.now().toLocal().toIso8601String()}.zip');
-        await exec(
-          'zip',
-          <String>[
-            '-r',
-            '-9',
-            '-q',
-            zipPath,
-            path.basename(xcresultBundle.path),
-          ],
-          workingDirectory: resultBundleTemp,
-          canFail: true, // Best effort to get the logs.
-        );
-      } else {
-        print('xcresult bundle ${xcresultBundle.path} does not exist, skipping upload');
-      }
-    }
-    return false;
-  }
-
-  final String testResultBundlePath = path.join(resultBundleTemp, 'test_result');
-  final Directory xctestRun = Directory(path.join(resultBundleTemp, 'test_products.xctestproducts'));
-  final int testResults = await exec(
-    '/usr/bin/arch',
-    <String>[
-      '-arm64e',
-      'xcrun',
-      'xcodebuild',
-      '-destination',
-      destination,
-      '-resultBundlePath',
-      testResultBundlePath,
-      '-xctestrun',
-      xctestRun.path,
-      'test-without-building',
-    ],
-    workingDirectory: platformDirectory,
-    canFail: true,
-  );
-
-  if (testResults != 0) {
-    final Directory? dumpDirectory = hostAgent.dumpDirectory;
-    final Directory xcresultBundle = Directory(path.join(resultBundleTemp, 'test_result.xcresult'));
-    if (dumpDirectory != null) {
-      if (xcresultBundle.existsSync()) {
-        // Zip the test results to the artifacts directory for upload.
-        final String zipPath = path.join(dumpDirectory.path,
-            '$testName-${DateTime.now().toLocal().toIso8601String()}.zip');
-        await exec(
-          'zip',
-          <String>[
-            '-r',
-            '-9',
-            '-q',
-            zipPath,
-            path.basename(xcresultBundle.path),
-          ],
-          workingDirectory: resultBundleTemp,
-          canFail: true, // Best effort to get the logs.
-        );
-      } else {
-        print('xcresult bundle ${xcresultBundle.path} does not exist, skipping upload');
-      }
-    }
-    return false;
-  }
-  return true;
-}
-
-Future<bool> runShXcodeTests({
-  required String platformDirectory,
-  required String destination,
-  required String testName,
-  String configuration = 'Release',
-  bool skipCodesign = false,
-}) async {
-  print('Trying test with SH');
-  final Map<String, String> environment = Platform.environment;
-  String? developmentTeam;
-  String? codeSignStyle;
-  String? provisioningProfile;
-  if (!skipCodesign) {
-    // If not running on CI, inject the Flutter team code signing properties.
-    developmentTeam = environment['FLUTTER_XCODE_DEVELOPMENT_TEAM'] ?? 'S8QB4VV633';
-    codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'];
-    provisioningProfile = environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
-  }
 
   final String resultBundleTemp = Directory.systemTemp.createTempSync('flutter_xcresult.').path;
   final String resultBundlePath = path.join(resultBundleTemp, 'result');
@@ -391,11 +263,27 @@ Future<bool> runShXcodeTests({
   final String command = arguments.join(' ');
   final File runFile = File(path.join(resultBundleTemp, 'run_test.sh'));
   runFile.createSync();
+  // Script to run the xcodebuild test, save the exit code to a file, and then kill its parent Terminal process.
   runFile.writeAsStringSync(
     'cd "$platformDirectory"\n'
     '$command\n'
-    'echo \$? > ${exitCodeOutput.path}'
+    'echo \$? > ${exitCodeOutput.path}\n'
+    r'''
+pid=$$
+command=$(ps -p $pid -c -o command=)
+for i in {1..5}
+do
+  if [[ "$command" == "Terminal" ]]
+  then
+    kill $pid
+  fi
+  pid=$(ps -o ppid= $pid)
+  command=$(ps -p $pid -c -o command=)
+done
+'''
   );
+
+  print('Creating run_test.sh: \n ${runFile.readAsStringSync()}');
 
   final int updatePermissions = await exec(
     'chmod',
@@ -414,28 +302,17 @@ Future<bool> runShXcodeTests({
   final int testExecutation = await exec(
     'open',
     <String>[
-      runFile.path,
       '-a',
-      'Terminal.app'
+      'Terminal.app',
+      '-W',
+      '-n',
+      runFile.path,
     ],
     canFail: true,
   );
 
   if (testExecutation != 0) {
     print('Failed to open ${runFile.path} in the Terminal');
-    return false;
-  }
-
-  // Wait up to 60 seconds for test to finish running
-  for (int index = 0; index < 60; index++) {
-    if (exitCodeOutput.existsSync()) {
-      break;
-    }
-    await Future<void>.delayed(const Duration(seconds: 1));
-  }
-
-  if (!exitCodeOutput.existsSync()) {
-    print('Test did not finish within 1 minute');
     return false;
   }
 
