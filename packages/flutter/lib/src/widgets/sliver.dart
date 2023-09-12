@@ -177,8 +177,8 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   /// [SliverChildBuilderDelegate.addSemanticIndexes] property.
   ///
   /// {@tool snippet}
-  /// This example, which would be provided in [CustomScrollView.slivers]
-  /// list, shows an infinite number of items in varying shades of blue:
+  /// This example, which would be provided in [CustomScrollView.slivers],
+  /// shows an infinite number of items in varying shades of blue:
   ///
   /// ```dart
   /// SliverList.builder(
@@ -304,8 +304,8 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   /// [SliverChildBuilderDelegate.addSemanticIndexes] property.
   ///
   /// {@tool snippet}
-  /// This example, which would be provided in [CustomScrollView.slivers]
-  /// list, shows a list containing two [Text] widgets:
+  /// This example, which would be provided in [CustomScrollView.slivers],
+  /// shows a list containing two [Text] widgets:
   ///
   /// ```dart
   /// SliverList.list(
