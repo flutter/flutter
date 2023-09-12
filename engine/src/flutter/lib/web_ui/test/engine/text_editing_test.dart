@@ -2726,14 +2726,17 @@ Future<void> testMain() async {
       final DomHTMLInputElement input =
           defaultTextEditingRoot.querySelector('input')! as DomHTMLInputElement;
       input.value = 'Test';
-      input.selectionStart = 1;
-      input.selectionEnd = 2;
 
+      input.setSelectionRange(1, 2);
       editingState = EditingState.fromDomElement(input);
-
       expect(editingState.text, 'Test');
       expect(editingState.baseOffset, 1);
       expect(editingState.extentOffset, 2);
+
+      input.setSelectionRange(1, 2, 'backward');
+      editingState = EditingState.fromDomElement(input);
+      expect(editingState.baseOffset, 2);
+      expect(editingState.extentOffset, 1);
     });
 
     test('Get Editing State from text area element', () {
@@ -2747,14 +2750,17 @@ Future<void> testMain() async {
       final DomHTMLTextAreaElement input =
           defaultTextEditingRoot.querySelector('textarea')! as DomHTMLTextAreaElement;
       input.value = 'Test';
-      input.selectionStart = 1;
-      input.selectionEnd = 2;
 
+      input.setSelectionRange(1, 2);
       editingState = EditingState.fromDomElement(input);
-
       expect(editingState.text, 'Test');
       expect(editingState.baseOffset, 1);
       expect(editingState.extentOffset, 2);
+
+      input.setSelectionRange(1, 2, 'backward');
+      editingState = EditingState.fromDomElement(input);
+      expect(editingState.baseOffset, 2);
+      expect(editingState.extentOffset, 1);
     });
 
     group('comparing editing states', () {

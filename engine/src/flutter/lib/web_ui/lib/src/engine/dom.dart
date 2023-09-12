@@ -2068,6 +2068,10 @@ extension DomHTMLTextAreaElementExtension on DomHTMLTextAreaElement {
   external set _name(JSString value);
   set name(String value) => _name = value.toJS;
 
+  @JS('selectionDirection')
+  external JSString? get _selectionDirection;
+  String? get selectionDirection => _selectionDirection?.toDart;
+
   @JS('selectionStart')
   external JSNumber? get _selectionStart;
   double? get selectionStart => _selectionStart?.toDartDouble;
@@ -2703,6 +2707,10 @@ extension DomHTMLInputElementExtension on DomHTMLInputElement {
   @JS('autocomplete')
   external set _autocomplete(JSString value);
   set autocomplete(String value) => _autocomplete = value.toJS;
+
+  @JS('selectionDirection')
+  external JSString? get _selectionDirection;
+  String? get selectionDirection => _selectionDirection?.toDart;
 
   @JS('selectionStart')
   external JSNumber? get _selectionStart;

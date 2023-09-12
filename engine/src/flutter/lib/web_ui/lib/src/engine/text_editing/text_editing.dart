@@ -770,17 +770,31 @@ class EditingState {
   factory EditingState.fromDomElement(DomHTMLElement? domElement) {
     if (domInstanceOfString(domElement, 'HTMLInputElement')) {
       final DomHTMLInputElement element = domElement! as DomHTMLInputElement;
-      return EditingState(
-          text: element.value,
-          baseOffset: element.selectionStart?.toInt(),
-          extentOffset: element.selectionEnd?.toInt());
+      if (element.selectionDirection == 'backward') {
+        return EditingState(
+            text: element.value,
+            baseOffset: element.selectionEnd?.toInt(),
+            extentOffset: element.selectionStart?.toInt());
+      } else {
+        return EditingState(
+            text: element.value,
+            baseOffset: element.selectionStart?.toInt(),
+            extentOffset: element.selectionEnd?.toInt());
+        }
     } else if (domInstanceOfString(domElement, 'HTMLTextAreaElement')) {
       final DomHTMLTextAreaElement element = domElement! as
           DomHTMLTextAreaElement;
-      return EditingState(
-          text: element.value,
-          baseOffset: element.selectionStart?.toInt(),
-          extentOffset: element.selectionEnd?.toInt());
+      if (element.selectionDirection == 'backward') {
+        return EditingState(
+            text: element.value,
+            baseOffset: element.selectionEnd?.toInt(),
+            extentOffset: element.selectionStart?.toInt());
+      } else {
+        return EditingState(
+            text: element.value,
+            baseOffset: element.selectionStart?.toInt(),
+            extentOffset: element.selectionEnd?.toInt());
+      }
     } else {
       throw UnsupportedError('Initialized with unsupported input type');
     }
