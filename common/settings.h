@@ -146,6 +146,7 @@ struct Settings {
   std::optional<std::vector<std::string>> trace_skia_allowlist;
   bool trace_startup = false;
   bool trace_systrace = false;
+  std::string trace_to_file;
   bool enable_timeline_event_handler = true;
   bool dump_skp_on_shader_compilation = false;
   bool cache_sksl = false;

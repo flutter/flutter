@@ -354,6 +354,9 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   settings.trace_systrace =
       command_line.HasOption(FlagForSwitch(Switch::TraceSystrace));
 
+  command_line.GetOptionValue(FlagForSwitch(Switch::TraceToFile),
+                              &settings.trace_to_file);
+
   settings.skia_deterministic_rendering_on_cpu =
       command_line.HasOption(FlagForSwitch(Switch::SkiaDeterministicRendering));
 

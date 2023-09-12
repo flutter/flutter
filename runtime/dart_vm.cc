@@ -99,6 +99,12 @@ static const char* kDartSystraceTraceBufferArgs[] = {
     "--systrace_timeline",
 };
 
+static std::string DartFileRecorderArgs(const std::string& path) {
+  std::ostringstream oss;
+  oss << "--timeline_recorder=perfettofile:" << path;
+  return oss.str();
+}
+
 FML_ALLOW_UNUSED_TYPE
 static const char* kDartDefaultTraceStreamsArgs[]{
     "--timeline_streams=Dart,Embedder,GC",
@@ -386,6 +392,14 @@ DartVM::DartVM(const std::shared_ptr<const DartVMData>& vm_data,
   if (settings_.trace_systrace) {
     PushBackAll(&args, kDartSystraceTraceBufferArgs,
                 fml::size(kDartSystraceTraceBufferArgs));
+    PushBackAll(&args, kDartSystraceTraceStreamsArgs,
+                fml::size(kDartSystraceTraceStreamsArgs));
+  }
+
+  std::string file_recorder_args;
+  if (!settings_.trace_to_file.empty()) {
+    file_recorder_args = DartFileRecorderArgs(settings_.trace_to_file);
+    args.push_back(file_recorder_args.c_str());
     PushBackAll(&args, kDartSystraceTraceStreamsArgs,
                 fml::size(kDartSystraceTraceStreamsArgs));
   }

@@ -197,6 +197,11 @@ DEF_SWITCH(
     "Trace to the system tracer (instead of the timeline) on platforms where "
     "such a tracer is available. Currently only supported on Android and "
     "Fuchsia.")
+DEF_SWITCH(TraceToFile,
+           "trace-to-file",
+           "Write the timeline trace to a file at the specified path. The file "
+           "will be in Perfetto's proto format; it will be possible to load "
+           "the file into Perfetto's trace viewer.")
 DEF_SWITCH(UseTestFonts,
            "use-test-fonts",
            "Running tests that layout and measure text will not yield "
