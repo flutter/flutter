@@ -33,16 +33,17 @@ void _renderTemplateToFile(String template, Object? context, File file, Template
   file.writeAsStringSync(renderedTemplate);
 }
 
-Plugin? _pluginFromPackage(String name, Uri packageRoot, Set<String> appDependencies, {FileSystem? fileSystem}) {
+Future<Plugin?> _pluginFromPackage(String name, Uri packageRoot, Set<String> appDependencies,
+    {FileSystem? fileSystem}) async {
   final FileSystem fs = fileSystem ?? globals.fs;
   final File pubspecFile = fs.file(packageRoot.resolve('pubspec.yaml'));
-  if (!pubspecFile.existsSync()) {
+  if (!await pubspecFile.exists()) {
     return null;
   }
   Object? pubspec;
 
   try {
-    pubspec = loadYaml(pubspecFile.readAsStringSync());
+    pubspec = loadYaml(await pubspecFile.readAsString());
   } on YamlException catch (err) {
     globals.printTrace('Failed to parse plugin manifest for $name: $err');
     // Do nothing, potentially not a plugin.
@@ -85,7 +86,7 @@ Future<List<Plugin>> findPlugins(FlutterProject project, { bool throwOnError = t
   );
   for (final Package package in packageConfig.packages) {
     final Uri packageRoot = package.packageUriRoot.resolve('..');
-    final Plugin? plugin = _pluginFromPackage(
+    final Plugin? plugin = await _pluginFromPackage(
       package.name,
       packageRoot,
       project.manifest.dependencies,
@@ -1411,8 +1412,8 @@ Future<void> generateMainDartWithPluginRegistrant(
   final File newMainDart = rootProject.dartPluginRegistrant;
   if (resolutions.isEmpty) {
     try {
-      if (newMainDart.existsSync()) {
-        newMainDart.deleteSync();
+      if (await newMainDart.exists()) {
+        await newMainDart.delete();
       }
     } on FileSystemException catch (error) {
       globals.printWarning(

@@ -287,7 +287,7 @@ abstract class UnpackIOS extends Target {
     if (archs == null) {
       throw MissingDefineException(kIosArchs, name);
     }
-    _copyFramework(environment, sdkRoot);
+    await _copyFramework(environment, sdkRoot);
 
     final File frameworkBinary = environment.outputDir.childDirectory('Flutter.framework').childFile('Flutter');
     final String frameworkBinaryPath = frameworkBinary.path;
@@ -301,7 +301,7 @@ abstract class UnpackIOS extends Target {
     await _signFramework(environment, frameworkBinary, buildMode);
   }
 
-  void _copyFramework(Environment environment, String sdkRoot) {
+  Future<void> _copyFramework(Environment environment, String sdkRoot) async {
     final EnvironmentType? environmentType = environmentTypeFromSdkroot(sdkRoot, environment.fileSystem);
     final String basePath = environment.artifacts.getArtifactPath(
       Artifact.flutterFramework,
@@ -310,7 +310,7 @@ abstract class UnpackIOS extends Target {
       environmentType: environmentType,
     );
 
-    final ProcessResult result = environment.processManager.runSync(<String>[
+    final ProcessResult result = await environment.processManager.run(<String>[
       'rsync',
       '-av',
       '--delete',
