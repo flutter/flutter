@@ -13,7 +13,7 @@
 
 FLUTTER_ASSERT_NOT_ARC
 namespace {
-fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
+fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   auto thread = std::make_unique<fml::Thread>(name);
   auto runner = thread->GetTaskRunner();
   return runner;
@@ -48,8 +48,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   [vsyncClient await];
   [vsyncClient onDisplayLink:link];
   XCTAssertTrue(link.isPaused);
-
-  [vsyncClient release];
 }
 
 - (void)testSetCorrectVariableRefreshRates {
@@ -72,7 +70,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   } else {
     XCTAssertEqualWithAccuracy(link.preferredFramesPerSecond, maxFrameRate, 0.1);
   }
-  [vsyncClient release];
 }
 
 - (void)testDoNotSetVariableRefreshRatesIfCADisableMinimumFrameDurationOnPhoneIsNotOn {
@@ -95,7 +92,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   } else {
     XCTAssertEqualWithAccuracy(link.preferredFramesPerSecond, 0, 0.1);
   }
-  [vsyncClient release];
 }
 
 - (void)testDoNotSetVariableRefreshRatesIfCADisableMinimumFrameDurationOnPhoneIsNotSet {
@@ -114,7 +110,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
   } else {
     XCTAssertEqualWithAccuracy(link.preferredFramesPerSecond, 0, 0.1);
   }
-  [vsyncClient release];
 }
 
 - (void)testAwaitAndPauseWillWorkCorrectly {
@@ -132,8 +127,6 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name) {
 
   [vsyncClient pause];
   XCTAssertTrue(link.isPaused);
-
-  [vsyncClient release];
 }
 
 - (void)testRefreshRateUpdatedTo80WhenThraedsMerge {

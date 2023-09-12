@@ -47,26 +47,29 @@ API_AVAILABLE(ios(13.4))
 @property(readwrite, nonatomic) NSString* dataCharactersIgnoringModifiers;
 @end
 
-FlutterUIPressProxy* keyDownEvent(UIKeyboardHIDUsage keyCode,
-                                  UIKeyModifierFlags modifierFlags = 0x0,
-                                  NSTimeInterval timestamp = 0.0f,
-                                  const char* characters = "",
-                                  const char* charactersIgnoringModifiers = "")
+namespace flutter {
+namespace testing {
+extern FlutterUIPressProxy* keyDownEvent(UIKeyboardHIDUsage keyCode,
+                                         UIKeyModifierFlags modifierFlags = 0x0,
+                                         NSTimeInterval timestamp = 0.0f,
+                                         const char* characters = "",
+                                         const char* charactersIgnoringModifiers = "")
     API_AVAILABLE(ios(13.4));
 
-FlutterUIPressProxy* keyUpEvent(UIKeyboardHIDUsage keyCode,
-                                UIKeyModifierFlags modifierFlags = 0x0,
-                                NSTimeInterval timestamp = 0.0f,
-                                const char* characters = "",
-                                const char* charactersIgnoringModifiers = "")
-    API_AVAILABLE(ios(13.4));
-
-FlutterUIPressProxy* keyEventWithPhase(UIPressPhase phase,
-                                       UIKeyboardHIDUsage keyCode,
+extern FlutterUIPressProxy* keyUpEvent(UIKeyboardHIDUsage keyCode,
                                        UIKeyModifierFlags modifierFlags = 0x0,
                                        NSTimeInterval timestamp = 0.0f,
                                        const char* characters = "",
                                        const char* charactersIgnoringModifiers = "")
     API_AVAILABLE(ios(13.4));
 
+extern FlutterUIPressProxy* keyEventWithPhase(UIPressPhase phase,
+                                              UIKeyboardHIDUsage keyCode,
+                                              UIKeyModifierFlags modifierFlags = 0x0,
+                                              NSTimeInterval timestamp = 0.0f,
+                                              const char* characters = "",
+                                              const char* charactersIgnoringModifiers = "")
+    API_AVAILABLE(ios(13.4));
+}  // namespace testing
+}  // namespace flutter
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTER_FAKE_KEY_EVENTS_H_

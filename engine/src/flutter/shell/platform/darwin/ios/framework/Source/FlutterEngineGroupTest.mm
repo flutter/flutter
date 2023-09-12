@@ -132,6 +132,7 @@ FLUTTER_ASSERT_ARC
     FlutterDartProject* mockProject = OCMClassMock([FlutterDartProject class]);
     FlutterEngineGroup* group = [[FlutterEngineGroup alloc] initWithName:@"foo"
                                                                  project:mockProject];
+    XCTAssertNotNil(group);
     weakProject = mockProject;
     XCTAssertNotNil(weakProject);
     group = nil;

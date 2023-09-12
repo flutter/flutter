@@ -61,6 +61,7 @@ FLUTTER_ASSERT_ARC
     weakEngine = engine;
   }
   XCTAssertNil(weakEngine);
+  XCTAssertNotNil(strongRelay);
 }
 
 @end

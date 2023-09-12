@@ -15,6 +15,7 @@
 #include "flutter/shell/platform/embedder/test_utils/key_codes.g.h"
 
 using namespace flutter::testing::keycodes;
+using namespace flutter::testing;
 
 FLUTTER_ASSERT_ARC;
 
@@ -43,7 +44,7 @@ FLUTTER_ASSERT_ARC;
   if (event->character != nullptr) {
     size_t len = strlen(event->character);
     char* character = new char[len + 1];
-    strcpy(character, event->character);
+    strlcpy(character, event->character, len + 1);
     _data->character = character;
   }
   _callback = callback;
@@ -63,8 +64,9 @@ FLUTTER_ASSERT_ARC;
 }
 
 - (void)dealloc {
-  if (_data->character != nullptr)
+  if (_data->character != nullptr) {
     delete[] _data->character;
+  }
   delete _data;
 }
 @end
