@@ -14,11 +14,7 @@ namespace impeller {
 
 static constexpr const char* kInstanceLayer = "ImpellerInstance";
 
-CapabilitiesVK::CapabilitiesVK(bool enable_validations)
-    : enable_validations_(enable_validations) {
-  if (enable_validations_) {
-    FML_LOG(INFO) << "Vulkan validations are enabled.";
-  }
+CapabilitiesVK::CapabilitiesVK(bool enable_validations) {
   auto extensions = vk::enumerateInstanceExtensionProperties();
   auto layers = vk::enumerateInstanceLayerProperties();
 
@@ -42,6 +38,17 @@ CapabilitiesVK::CapabilitiesVK(bool enable_validations)
     }
   }
 
+  validations_enabled_ =
+      enable_validations && HasLayer("VK_LAYER_KHRONOS_validation");
+  if (enable_validations && !validations_enabled_) {
+    FML_LOG(ERROR)
+        << "Requested Impeller context creation with validations but the "
+           "validation layers could not be found. Expect no Vulkan validation "
+           "checks!";
+  }
+  if (validations_enabled_) {
+    FML_LOG(INFO) << "Vulkan validations are enabled.";
+  }
   is_valid_ = true;
 }
 
@@ -52,19 +59,15 @@ bool CapabilitiesVK::IsValid() const {
 }
 
 bool CapabilitiesVK::AreValidationsEnabled() const {
-  return enable_validations_;
+  return validations_enabled_;
 }
 
 std::optional<std::vector<std::string>> CapabilitiesVK::GetEnabledLayers()
     const {
   std::vector<std::string> required;
 
-  if (enable_validations_) {
-    if (!HasLayer("VK_LAYER_KHRONOS_validation")) {
-      VALIDATION_LOG
-          << "Requested validations but the validation layer was not found.";
-      return std::nullopt;
-    }
+  if (validations_enabled_) {
+    // The presence of this layer is already checked in the ctor.
     required.push_back("VK_LAYER_KHRONOS_validation");
   }
 
@@ -131,7 +134,7 @@ CapabilitiesVK::GetEnabledInstanceExtensions() const {
     return std::nullopt;
   }
 
-  if (enable_validations_) {
+  if (validations_enabled_) {
     if (!HasExtension("VK_EXT_debug_utils")) {
       VALIDATION_LOG << "Requested validations but could not find the "
                         "VK_EXT_debug_utils extension.";

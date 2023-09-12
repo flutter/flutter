@@ -38,14 +38,17 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
   settings.cache_directory = fml::paths::GetCachesDirectory();
   settings.enable_validation = enable_vulkan_validation;
 
-  if (settings.enable_validation) {
+  auto context = impeller::ContextVK::Create(std::move(settings));
+
+  if (context && impeller::CapabilitiesVK::Cast(*context->GetCapabilities())
+                     .AreValidationsEnabled()) {
     FML_LOG(ERROR) << "Using the Impeller rendering backend (Vulkan with "
                       "Validation Layers).";
   } else {
     FML_LOG(ERROR) << "Using the Impeller rendering backend (Vulkan).";
   }
 
-  return impeller::ContextVK::Create(std::move(settings));
+  return context;
 }
 
 AndroidContextVulkanImpeller::AndroidContextVulkanImpeller(

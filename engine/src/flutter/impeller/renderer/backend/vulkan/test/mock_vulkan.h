@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -15,7 +16,18 @@ namespace testing {
 std::shared_ptr<std::vector<std::string>> GetMockVulkanFunctions(
     VkDevice device);
 
-std::shared_ptr<ContextVK> CreateMockVulkanContext(void);
+//------------------------------------------------------------------------------
+/// @brief      Create a Vulkan context with Vulkan functions mocked. The caller
+///             is given a chance to tinker on the settings right before a
+///             context is created.
+///
+/// @param[in]  settings_callback  The settings callback
+///
+/// @return     A context if one can be created.
+///
+std::shared_ptr<ContextVK> CreateMockVulkanContext(
+    const std::function<void(ContextVK::Settings&)>& settings_callback =
+        nullptr);
 
 }  // namespace testing
 }  // namespace impeller
