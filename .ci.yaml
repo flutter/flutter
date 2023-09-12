@@ -203,8 +203,7 @@ platform_properties:
         [
           {"dependency": "certs", "version": "version:9563bb"}
         ]
-      os: Windows-10
-      device_type: none
+      os: Windows
       cpu: arm64
   windows_android:
     properties:
@@ -599,7 +598,7 @@ targets:
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
           {"dependency": "ninja", "version": "version:1.9.0"},
-          {"dependency": "open_jdk", "version": "version:11"},
+          {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "android_sdk", "version": "version:33v6"}
         ]
       shard: framework_tests
@@ -1141,6 +1140,8 @@ targets:
       subshard: "1_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1161,6 +1162,8 @@ targets:
       subshard: "2_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1181,6 +1184,8 @@ targets:
       subshard: "3_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1201,6 +1206,8 @@ targets:
       subshard: "4_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1221,6 +1228,8 @@ targets:
       subshard: "5_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1241,6 +1250,8 @@ targets:
       subshard: "0"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1261,6 +1272,8 @@ targets:
       subshard: "1"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1281,6 +1294,8 @@ targets:
       subshard: "2"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1301,6 +1316,8 @@ targets:
       subshard: "3"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1321,6 +1338,8 @@ targets:
       subshard: "4"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1341,6 +1360,8 @@ targets:
       subshard: "5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1361,6 +1382,8 @@ targets:
       subshard: "6"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1381,6 +1404,8 @@ targets:
       subshard: "7_last"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1401,6 +1426,8 @@ targets:
       subshard: "0"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1421,6 +1448,8 @@ targets:
       subshard: "1"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1441,6 +1470,8 @@ targets:
       subshard: "2"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1461,6 +1492,8 @@ targets:
       subshard: "3"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1481,6 +1514,8 @@ targets:
       subshard: "4"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1501,6 +1536,8 @@ targets:
       subshard: "5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1521,6 +1558,8 @@ targets:
       subshard: "6"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1541,6 +1580,8 @@ targets:
       subshard: "7_last"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1562,6 +1603,8 @@ targets:
       subshard: "1_1"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
+      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -2125,7 +2168,6 @@ targets:
 
   - name: Linux_android very_long_picture_scrolling_perf__e2e_summary
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 120
     properties:
@@ -3093,7 +3135,7 @@ targets:
         [
           {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
           {"dependency": "gems", "version": "v3.3.14"},
-          {"dependency": "open_jdk", "version": "version:11"},
+          {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "android_sdk", "version": "version:33v6"}
         ]
       shard: framework_tests
@@ -4071,6 +4113,26 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: microbenchmarks_ios
 
+  - name: Mac_ios native_assets_ios_simulator
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true # TODO(dacoharkes): Set to false in follow up PR and check that test works on CI.
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: native_assets_ios_simulator
+
+  - name: Mac_ios native_assets_ios
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true # TODO(dacoharkes): Set to false in follow up PR and check that test works on CI.
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: native_assets_ios
+
   - name: Mac_ios native_platform_view_ui_tests_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -4503,7 +4565,7 @@ targets:
         [
           {"dependency": "goldctl", "version": "git_revision:f808dcff91b221ae313e540c09d79696cd08b8de"},
           {"dependency": "vs_build", "version": "version:vs2019"},
-          {"dependency": "open_jdk", "version": "version:11"},
+          {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "android_sdk", "version": "version:33v6"}
         ]
       shard: framework_tests
@@ -4996,7 +5058,7 @@ targets:
 
   - name: Windows_arm64 hello_world_win_desktop__compile
     recipe: devicelab/devicelab_drone
-    bringup: true
+    bringup: true # https://github.com/flutter/flutter/issues/134083
     presubmit: false
     timeout: 60
     properties:
@@ -5084,7 +5146,6 @@ targets:
 
   - name: Windows_android channels_integration_test_win
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/130732
     presubmit: false
     timeout: 60
     properties:

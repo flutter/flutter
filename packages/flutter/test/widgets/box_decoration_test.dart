@@ -9,6 +9,7 @@ import 'dart:ui' as ui show Image;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../image_data.dart';
 
@@ -36,7 +37,7 @@ Future<void> main() async {
   AutomatedTestWidgetsFlutterBinding();
   TestImageProvider.image = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
 
-  testWidgets('DecoratedBox handles loading images', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DecoratedBox handles loading images', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     final Completer<void> completer = Completer<void>();
     await tester.pumpWidget(
@@ -59,7 +60,7 @@ Future<void> main() async {
     expect(tester.binding.hasScheduledFrame, isFalse);
   });
 
-  testWidgets('Moving a DecoratedBox', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Moving a DecoratedBox', (WidgetTester tester) async {
     final Completer<void> completer = Completer<void>();
     final Widget subtree = KeyedSubtree(
       key: GlobalKey(),
@@ -88,7 +89,7 @@ Future<void> main() async {
     expect(tester.binding.hasScheduledFrame, isFalse);
   });
 
-  testWidgets('Circles can have uniform borders', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Circles can have uniform borders', (WidgetTester tester) async {
     await tester.pumpWidget(
       Container(
         padding: const EdgeInsets.all(50.0),
@@ -101,7 +102,7 @@ Future<void> main() async {
     );
   });
 
-  testWidgets('Bordered Container insets its child', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Bordered Container insets its child', (WidgetTester tester) async {
     const Key key = Key('outerContainer');
     await tester.pumpWidget(
       Center(
@@ -118,7 +119,7 @@ Future<void> main() async {
     expect(tester.getSize(find.byKey(key)), equals(const Size(45.0, 45.0)));
   });
 
-  testWidgets('BoxDecoration paints its border correctly', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('BoxDecoration paints its border correctly', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/7672
 
     const Key key = Key('Container with BoxDecoration');
@@ -169,7 +170,7 @@ Future<void> main() async {
     );
   });
 
-  testWidgets('BoxDecoration paints its border correctly', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('BoxDecoration paints its border correctly', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/12165
     await tester.pumpWidget(
       Column(
@@ -254,7 +255,7 @@ Future<void> main() async {
     );
   });
 
-  testWidgets('Can hit test on BoxDecoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can hit test on BoxDecoration', (WidgetTester tester) async {
 
     late List<int> itemsTapped;
 
@@ -291,7 +292,7 @@ Future<void> main() async {
 
   });
 
-  testWidgets('Can hit test on BoxDecoration circle', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can hit test on BoxDecoration circle', (WidgetTester tester) async {
 
     late List<int> itemsTapped;
 
@@ -331,7 +332,7 @@ Future<void> main() async {
 
   });
 
-  testWidgets('Can hit test on BoxDecoration border', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can hit test on BoxDecoration border', (WidgetTester tester) async {
     late List<int> itemsTapped;
     const Key key = Key('Container with BoxDecoration');
     Widget buildFrame(Border border) {
@@ -369,7 +370,7 @@ Future<void> main() async {
     expect(itemsTapped, <int>[1,1]);
   });
 
-  testWidgets('BoxDecoration not tap outside rounded angles - Top Left', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('BoxDecoration not tap outside rounded angles - Top Left', (WidgetTester tester) async {
     const double height = 50.0;
     const double width = 50.0;
     const double radius = 12.3;
@@ -429,7 +430,7 @@ Future<void> main() async {
 
   });
 
-  testWidgets('BoxDecoration tap inside rounded angles - Top Left', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('BoxDecoration tap inside rounded angles - Top Left', (WidgetTester tester) async {
     const double height = 50.0;
     const double width = 50.0;
     const double radius = 12.3;
@@ -477,7 +478,7 @@ Future<void> main() async {
     expect(itemsTapped, <int>[1,1,1,1]);
   });
 
-  testWidgets('BoxDecoration rounded angles other corner works', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('BoxDecoration rounded angles other corner works', (WidgetTester tester) async {
     const double height = 50.0;
     const double width = 50.0;
     const double radius = 20;
@@ -545,7 +546,7 @@ Future<void> main() async {
     expect(itemsTapped, <int>[1,1,1,1,1], reason: 'top left tapped');
   });
 
-  testWidgets("BoxDecoration doesn't crash with BorderRadiusDirectional", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("BoxDecoration doesn't crash with BorderRadiusDirectional", (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/88039
 
     await tester.pumpWidget(

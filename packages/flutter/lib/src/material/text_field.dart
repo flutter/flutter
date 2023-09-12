@@ -945,7 +945,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
   bool get _hasIntrinsicError => widget.maxLength != null && widget.maxLength! > 0 && _effectiveController.value.text.characters.length > widget.maxLength!;
 
-  bool get _hasError => widget.decoration?.errorText != null || _hasIntrinsicError;
+  bool get _hasError => widget.decoration?.errorText != null || widget.decoration?.error != null || _hasIntrinsicError;
 
   Color get _errorColor => widget.decoration?.errorStyle?.color ?? Theme.of(context).colorScheme.error;
 

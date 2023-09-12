@@ -7,9 +7,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('Heroes work', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Heroes work', (WidgetTester tester) async {
     await tester.pumpWidget(CupertinoApp(
       home: ListView(children: <Widget>[
         const Hero(tag: 'a', child: Text('foo')),
@@ -394,6 +395,11 @@ void main() {
       return renderEditable!;
     }
 
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       CupertinoApp(
         theme: const CupertinoThemeData(
@@ -405,8 +411,8 @@ void main() {
               return EditableText(
                 backgroundCursorColor: DefaultSelectionStyle.of(context).selectionColor!,
                 cursorColor: DefaultSelectionStyle.of(context).cursorColor!,
-                controller: TextEditingController(),
-                focusNode: FocusNode(),
+                controller: controller,
+                focusNode: focusNode,
                 style: const TextStyle(),
               );
             },

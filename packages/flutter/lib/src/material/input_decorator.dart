@@ -1971,6 +1971,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
   TextAlign? get textAlign => widget.textAlign;
   bool get isFocused => widget.isFocused;
+  bool get _hasError => decoration.errorText != null || decoration.error != null;
   bool get isHovering => widget.isHovering && decoration.enabled;
   bool get isEmpty => widget.isEmpty;
   bool get _floatingLabelEnabled {
@@ -2011,7 +2012,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           ? Colors.transparent
           : themeData.disabledColor;
     }
-    if (decoration.errorText != null) {
+    if (_hasError) {
       return themeData.colorScheme.error;
     }
     if (isFocused) {
@@ -2107,7 +2108,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
   TextStyle _getFloatingLabelStyle(ThemeData themeData, InputDecorationTheme defaults) {
     TextStyle defaultTextStyle = MaterialStateProperty.resolveAs(defaults.floatingLabelStyle!, materialState);
-    if (decoration.errorText != null && decoration.errorStyle?.color != null) {
+    if (_hasError && decoration.errorStyle?.color != null) {
       defaultTextStyle = defaultTextStyle.copyWith(color: decoration.errorStyle?.color);
     }
     defaultTextStyle = defaultTextStyle.merge(decoration.floatingLabelStyle ?? decoration.labelStyle);
@@ -2137,7 +2138,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       if (!decoration.enabled) MaterialState.disabled,
       if (isFocused) MaterialState.focused,
       if (isHovering) MaterialState.hovered,
-      if (decoration.errorText != null) MaterialState.error,
+      if (_hasError) MaterialState.error,
     };
   }
 
@@ -2205,14 +2206,13 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       ),
     );
 
-    final bool isError = decoration.errorText != null;
     InputBorder? border;
     if (!decoration.enabled) {
-      border = isError ? decoration.errorBorder : decoration.disabledBorder;
+      border = _hasError ? decoration.errorBorder : decoration.disabledBorder;
     } else if (isFocused) {
-      border = isError ? decoration.focusedErrorBorder : decoration.focusedBorder;
+      border = _hasError ? decoration.focusedErrorBorder : decoration.focusedBorder;
     } else {
-      border = isError ? decoration.errorBorder : decoration.enabledBorder;
+      border = _hasError ? decoration.errorBorder : decoration.enabledBorder;
     }
     border ??= _getDefaultBorder(themeData, defaults);
 
