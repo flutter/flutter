@@ -291,12 +291,12 @@ abstract class UnpackIOS extends Target {
 
     final File frameworkBinary = environment.outputDir.childDirectory('Flutter.framework').childFile('Flutter');
     final String frameworkBinaryPath = frameworkBinary.path;
-    if (!frameworkBinary.existsSync()) {
+    if (!await frameworkBinary.exists()) {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
     }
-    _thinFramework(environment, frameworkBinaryPath, archs);
+    await _thinFramework(environment, frameworkBinaryPath, archs);
     if (buildMode == BuildMode.release) {
-      _bitcodeStripFramework(environment, frameworkBinaryPath);
+      await _bitcodeStripFramework(environment, frameworkBinaryPath);
     }
     await _signFramework(environment, frameworkBinary, buildMode);
   }
@@ -328,16 +328,22 @@ abstract class UnpackIOS extends Target {
   }
 
   /// Destructively thin Flutter.framework to include only the specified architectures.
-  void _thinFramework(Environment environment, String frameworkBinaryPath, String archs) {
+  Future<void> _thinFramework(
+    Environment environment,
+    String frameworkBinaryPath,
+    String archs,
+  ) async {
     final List<String> archList = archs.split(' ').toList();
-    final ProcessResult infoResult = environment.processManager.runSync(<String>[
+    final ProcessResult infoResult =
+        await environment.processManager.run(<String>[
       'lipo',
       '-info',
       frameworkBinaryPath,
     ]);
     final String lipoInfo = infoResult.stdout as String;
 
-    final ProcessResult verifyResult = environment.processManager.runSync(<String>[
+    final ProcessResult verifyResult =
+        await environment.processManager.run(<String>[
       'lipo',
       frameworkBinaryPath,
       '-verify_arch',
@@ -355,7 +361,7 @@ abstract class UnpackIOS extends Target {
     }
 
     // Thin in-place.
-    final ProcessResult extractResult = environment.processManager.runSync(<String>[
+    final ProcessResult extractResult = await environment.processManager.run(<String>[
       'lipo',
       '-output',
       frameworkBinaryPath,
@@ -374,8 +380,12 @@ abstract class UnpackIOS extends Target {
 
   /// Destructively strip bitcode from the framework. This can be removed
   /// when the framework is no longer built with bitcode.
-  void _bitcodeStripFramework(Environment environment, String frameworkBinaryPath) {
-    final ProcessResult stripResult = environment.processManager.runSync(<String>[
+  Future<void> _bitcodeStripFramework(
+    Environment environment,
+    String frameworkBinaryPath,
+  ) async {
+    final ProcessResult stripResult =
+        await environment.processManager.run(<String>[
       'xcrun',
       'bitcode_strip',
       frameworkBinaryPath,

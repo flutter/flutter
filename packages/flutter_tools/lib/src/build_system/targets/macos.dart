@@ -96,17 +96,22 @@ abstract class UnpackMacOS extends Target {
     }
   }
 
-  void _thinFramework(Environment environment, String frameworkBinaryPath) {
+  Future<void> _thinFramework(
+    Environment environment,
+    String frameworkBinaryPath,
+  ) async {
     final String archs = environment.defines[kDarwinArchs] ?? 'x86_64 arm64';
     final List<String> archList = archs.split(' ').toList();
-    final ProcessResult infoResult = environment.processManager.runSync(<String>[
+    final ProcessResult infoResult =
+        await environment.processManager.run(<String>[
       'lipo',
       '-info',
       frameworkBinaryPath,
     ]);
     final String lipoInfo = infoResult.stdout as String;
 
-    final ProcessResult verifyResult = environment.processManager.runSync(<String>[
+    final ProcessResult verifyResult =
+        await environment.processManager.run(<String>[
       'lipo',
       frameworkBinaryPath,
       '-verify_arch',
