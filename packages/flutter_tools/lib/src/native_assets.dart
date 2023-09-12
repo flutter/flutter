@@ -62,9 +62,15 @@ abstract class NativeAssetsBuildRunner {
 
 /// Uses `package:native_assets_builder` for its implementation.
 class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
-  NativeAssetsBuildRunnerImpl(this.projectUri, this.fileSystem, this.logger);
+  NativeAssetsBuildRunnerImpl(
+    this.projectUri,
+    this.packageConfig,
+    this.fileSystem,
+    this.logger,
+  );
 
   final Uri projectUri;
+  final PackageConfig packageConfig;
   final FileSystem fileSystem;
   final Logger logger;
 
@@ -90,8 +96,6 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
     dartExecutable: _dartExecutable,
   );
 
-  native_assets_builder.PackageLayout? _packageLayout;
-
   @override
   Future<bool> hasPackageConfig() {
     final File packageConfigJson = fileSystem
@@ -103,8 +107,14 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
 
   @override
   Future<List<Package>> packagesWithNativeAssets() async {
-    _packageLayout ??= await native_assets_builder.PackageLayout.fromRootPackageRoot(projectUri);
-    return _packageLayout!.packagesWithNativeAssets;
+    final native_assets_builder.PackageLayout packageLayout =
+        native_assets_builder.PackageLayout.fromPackageConfig(
+      packageConfig,
+      projectUri.resolve(
+        '.dart_tool/package_config.json',
+      ),
+    );
+    return packageLayout.packagesWithNativeAssets;
   }
 
   @override
