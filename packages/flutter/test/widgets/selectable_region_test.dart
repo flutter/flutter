@@ -3172,8 +3172,14 @@ void main() {
 
     // Backwards selection.
     await mouseGesture.down(textOffsetToPosition(paragraph, 3));
-    await tester.pumpAndSettle();
-    expect(content, isNull);
+    await tester.pump();
+    await mouseGesture.up();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+    expect(content, isNotNull);
+    expect(content!.plainText, '');
+
+    await mouseGesture.down(textOffsetToPosition(paragraph, 3));
+    await tester.pump();
 
     await mouseGesture.moveTo(textOffsetToPosition(paragraph, 0));
     await tester.pumpAndSettle();
@@ -3200,9 +3206,10 @@ void main() {
     // Called on tap.
     await mouseGesture.down(textOffsetToPosition(paragraph, 0));
     await tester.pumpAndSettle();
-    expect(content, isNull);
     await mouseGesture.up();
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+    expect(content, isNotNull);
+    expect(content!.plainText, '');
 
     // With touch gestures.
 
@@ -3379,7 +3386,7 @@ void main() {
     expect(paragraph2.selections.length, 1);
     expect(paragraph2.selections[0].start, 0);
     expect(paragraph2.selections[0].end, 8);
-    expect(paragraph3.selections.length, 0);
+    expect(paragraph3.selections.length, 1);
     expect(content, isNotNull);
     expect(content!.plainText, 'w are you?Good, an');
 
@@ -3388,8 +3395,8 @@ void main() {
     expect(paragraph1.selections.length, 1);
     expect(paragraph1.selections[0].start, 2);
     expect(paragraph1.selections[0].end, 7);
-    expect(paragraph2.selections.length, 0);
-    expect(paragraph3.selections.length, 0);
+    expect(paragraph2.selections.length, 1);
+    expect(paragraph3.selections.length, 1);
     expect(content, isNotNull);
     expect(content!.plainText, 'w are');
 
@@ -3398,8 +3405,8 @@ void main() {
     expect(paragraph1.selections.length, 1);
     expect(paragraph1.selections[0].start, 0);
     expect(paragraph1.selections[0].end, 2);
-    expect(paragraph2.selections.length, 0);
-    expect(paragraph3.selections.length, 0);
+    expect(paragraph2.selections.length, 1);
+    expect(paragraph3.selections.length, 1);
     expect(content, isNotNull);
     expect(content!.plainText, 'Ho');
   });
