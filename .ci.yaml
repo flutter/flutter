@@ -1140,8 +1140,6 @@ targets:
       subshard: "1_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1162,8 +1160,6 @@ targets:
       subshard: "2_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1184,8 +1180,6 @@ targets:
       subshard: "3_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1206,8 +1200,6 @@ targets:
       subshard: "4_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1228,8 +1220,6 @@ targets:
       subshard: "5_5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1250,8 +1240,6 @@ targets:
       subshard: "0"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1272,8 +1260,6 @@ targets:
       subshard: "1"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1294,8 +1280,6 @@ targets:
       subshard: "2"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1316,8 +1300,6 @@ targets:
       subshard: "3"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1338,8 +1320,6 @@ targets:
       subshard: "4"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1360,8 +1340,6 @@ targets:
       subshard: "5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1382,8 +1360,6 @@ targets:
       subshard: "6"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1404,8 +1380,6 @@ targets:
       subshard: "7_last"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1426,8 +1400,6 @@ targets:
       subshard: "0"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1448,8 +1420,6 @@ targets:
       subshard: "1"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1470,8 +1440,6 @@ targets:
       subshard: "2"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1492,8 +1460,6 @@ targets:
       subshard: "3"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1514,8 +1480,6 @@ targets:
       subshard: "4"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1536,8 +1500,6 @@ targets:
       subshard: "5"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1558,8 +1520,6 @@ targets:
       subshard: "6"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1580,8 +1540,6 @@ targets:
       subshard: "7_last"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/**
@@ -1603,8 +1561,6 @@ targets:
       subshard: "1_1"
       tags: >
         ["framework", "hostonly", "shard", "linux"]
-      # Retry for flakes caused by https://github.com/flutter/flutter/issues/132654
-      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/flutter_tools/**
