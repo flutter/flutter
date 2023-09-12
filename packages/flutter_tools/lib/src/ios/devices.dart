@@ -34,6 +34,7 @@ import 'ios_deploy.dart';
 import 'ios_workflow.dart';
 import 'iproxy.dart';
 import 'mac.dart';
+import 'xcode_build_settings.dart';
 import 'xcode_debug.dart';
 import 'xcodeproj.dart';
 
@@ -490,6 +491,16 @@ class IOSDevice extends Device {
       forceXcodeDebugWorkflow = true;
     }
 
+    // Core Device build settings only need to be included if using the Xcode
+    // Debug workflow on a non-pre-built project in debug or profile mode.
+    // Since Release mode does not use the Xcode Debug workflow and prebuilt
+    // applications use a different project setup, they do not need these
+    // additional settings.
+    final bool includeCoreDeviceBuildSettings = (isCoreDevice || forceXcodeDebugWorkflow) &&
+        !debuggingOptions.buildInfo.isRelease && !prebuiltApplication;
+
+    print('INCLUDE XCODE DEBUG SETTINGS: $includeCoreDeviceBuildSettings = ($isCoreDevice || $forceXcodeDebugWorkflow) && !${debuggingOptions.buildInfo.isRelease} && !$prebuiltApplication');
+
     if (!prebuiltApplication) {
       _logger.printTrace('Building ${package.name} for $id');
 
@@ -500,7 +511,7 @@ class IOSDevice extends Device {
           targetOverride: mainPath,
           activeArch: cpuArchitecture,
           deviceID: id,
-          isCoreDevice: isCoreDevice || forceXcodeDebugWorkflow,
+          includeCoreDeviceBuildSettings: includeCoreDeviceBuildSettings,
       );
       if (!buildResult.success) {
         _logger.printError('Could not build the precompiled application for the device.');
@@ -574,6 +585,19 @@ class IOSDevice extends Device {
 
       if (!debuggingOptions.debuggingEnabled) {
         return LaunchResult.succeeded();
+      }
+
+      // CoreDevices use additional settings to allow for Xcode automation.
+      // After successfully automating Xcode, reset the Generated settings to
+      // not include the CoreDevice settings. This is to prevent confusion if
+      // project is later ran via Xcode rather than Flutter CLI.
+      if (includeCoreDeviceBuildSettings) {
+        final FlutterProject project = FlutterProject.current();
+        unawaited(updateGeneratedXcodeProperties(
+          project: project,
+          buildInfo: debuggingOptions.buildInfo,
+          targetOverride: mainPath,
+        ));
       }
 
       _logger.printTrace('Application launched on the device. Waiting for Dart VM Service url.');

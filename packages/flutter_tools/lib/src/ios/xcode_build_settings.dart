@@ -35,7 +35,8 @@ Future<void> updateGeneratedXcodeProperties({
   String? targetOverride,
   bool useMacOSConfig = false,
   String? buildDirOverride,
-  bool usingCoreDevice = false,
+  bool includeCoreDeviceBuildSettings = false,
+  String? configuration,
 }) async {
   final List<String> xcodeBuildSettings = await _xcodeBuildSettingsLines(
     project: project,
@@ -43,7 +44,8 @@ Future<void> updateGeneratedXcodeProperties({
     targetOverride: targetOverride,
     useMacOSConfig: useMacOSConfig,
     buildDirOverride: buildDirOverride,
-    usingCoreDevice: usingCoreDevice,
+    includeCoreDeviceBuildSettings: includeCoreDeviceBuildSettings,
+    configuration: configuration,
   );
 
   _updateGeneratedXcodePropertiesFile(
@@ -145,7 +147,8 @@ Future<List<String>> _xcodeBuildSettingsLines({
   String? targetOverride,
   bool useMacOSConfig = false,
   String? buildDirOverride,
-  bool usingCoreDevice = false,
+  bool includeCoreDeviceBuildSettings = false,
+  String? configuration,
 }) async {
   final List<String> xcodeBuildSettings = <String>[];
 
@@ -174,9 +177,14 @@ Future<List<String>> _xcodeBuildSettingsLines({
   xcodeBuildSettings.add('FLUTTER_BUILD_NUMBER=$buildNumber');
 
   // CoreDevices in debug and profile mode are launched, but not built, via Xcode.
-  // Set the BUILD_DIR so Xcode knows where to find the app bundle to launch.
-  if (usingCoreDevice && !buildInfo.isRelease) {
+  // Set the BUILD_DIR and CONFIGURATION so Xcode knows where to find the app
+  // bundle to launch.
+  if (includeCoreDeviceBuildSettings) {
     xcodeBuildSettings.add('BUILD_DIR=${globals.fs.path.absolute(getIosBuildDirectory())}');
+    if (configuration == null) {
+      throwToolExit('CONFIGURATION is required when launching on a CoreDevice.');
+    }
+    xcodeBuildSettings.add('CONFIGURATION=$configuration');
   }
 
   final LocalEngineInfo? localEngineInfo = globals.artifacts?.localEngineInfo;
