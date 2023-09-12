@@ -33,6 +33,8 @@ class DoctorCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    print('waiting an hour...');
+    await Future<void>.delayed(const Duration(minutes: 60));
     if (argResults?.wasParsed('check-for-remote-artifacts') ?? false) {
       final String engineRevision = stringArg('check-for-remote-artifacts')!;
       if (engineRevision.startsWith(RegExp(r'[a-f0-9]{1,40}'))) {

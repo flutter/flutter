@@ -20,7 +20,6 @@ import 'src/context_runner.dart';
 import 'src/doctor.dart';
 import 'src/globals.dart' as globals;
 import 'src/reporting/crash_reporting.dart';
-import 'src/reporting/first_run.dart';
 import 'src/reporting/reporting.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
@@ -115,7 +114,7 @@ Future<int> run(
         // Triggering [runZoned]'s error callback does not necessarily mean that
         // we stopped executing the body. See https://github.com/dart-lang/sdk/issues/42150.
         if (firstError == null) {
-          return await _exit(0, shutdownHooks: shutdownHooks);
+          return await exitWithHooks(0, shutdownHooks: shutdownHooks);
         }
 
         // We already hit some error, so don't return success. The error path
@@ -151,7 +150,7 @@ Future<int> _handleToolError(
     globals.printError('${error.message}\n');
     globals.printError("Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and options.");
     // Argument error exit code.
-    return _exit(64, shutdownHooks: shutdownHooks);
+    return exitWithHooks(64, shutdownHooks: shutdownHooks);
   } else if (error is ToolExit) {
     if (error.message != null) {
       globals.printError(error.message!);
@@ -159,14 +158,14 @@ Future<int> _handleToolError(
     if (verbose) {
       globals.printError('\n$stackTrace\n');
     }
-    return _exit(error.exitCode ?? 1, shutdownHooks: shutdownHooks);
+    return exitWithHooks(error.exitCode ?? 1, shutdownHooks: shutdownHooks);
   } else if (error is ProcessExit) {
     // We've caught an exit code.
     if (error.immediate) {
       exit(error.exitCode);
       return error.exitCode;
     } else {
-      return _exit(error.exitCode, shutdownHooks: shutdownHooks);
+      return exitWithHooks(error.exitCode, shutdownHooks: shutdownHooks);
     }
   } else {
     // We've crashed; emit a log report.
@@ -176,7 +175,7 @@ Future<int> _handleToolError(
       // Print the stack trace on the bots - don't write a crash report.
       globals.stdio.stderrWrite('$error\n');
       globals.stdio.stderrWrite('$stackTrace\n');
-      return _exit(1, shutdownHooks: shutdownHooks);
+      return exitWithHooks(1, shutdownHooks: shutdownHooks);
     }
 
     // Report to both [Usage] and [CrashReportSender].
@@ -217,7 +216,7 @@ Future<int> _handleToolError(
       final File file = await _createLocalCrashReport(details);
       await globals.crashReporter!.informUser(details, file);
 
-      return _exit(1, shutdownHooks: shutdownHooks);
+      return exitWithHooks(1, shutdownHooks: shutdownHooks);
     // This catch catches all exceptions to ensure the message below is printed.
     } catch (error, st) { // ignore: avoid_catches_without_on_clauses
       globals.stdio.stderrWrite(
