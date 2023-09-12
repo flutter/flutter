@@ -7,6 +7,7 @@
 #include "impeller/compiler/reflector.h"
 
 #include <atomic>
+#include <limits>
 #include <optional>
 #include <set>
 #include <sstream>
@@ -216,9 +217,9 @@ std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
     if (auto storage_buffers_json =
             ReflectResources(shader_resources.storage_buffers);
         storage_buffers_json.has_value()) {
-      for (auto uniform_buffer : storage_buffers_json.value()) {
-        uniform_buffer["descriptor_type"] = "DescriptorType::kStorageBuffer";
-        buffers.emplace_back(std::move(uniform_buffer));
+      for (auto storage_buffer : storage_buffers_json.value()) {
+        storage_buffer["descriptor_type"] = "DescriptorType::kStorageBuffer";
+        buffers.emplace_back(std::move(storage_buffer));
       }
     } else {
       return std::nullopt;
@@ -258,6 +259,19 @@ std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
     for (auto value : samplers.value()) {
       value["descriptor_type"] = "DescriptorType::kSampledSampler";
       sampled_images.emplace_back(std::move(value));
+    }
+  }
+
+  {
+    if (auto inputs = ReflectResources(shader_resources.subpass_inputs);
+        inputs.has_value()) {
+      auto& subpass_inputs = root["subpass_inputs"] = nlohmann::json::array_t{};
+      for (auto input : inputs.value()) {
+        input["descriptor_type"] = "DescriptorType::kSubpassInput";
+        subpass_inputs.emplace_back(std::move(input));
+      }
+    } else {
+      return std::nullopt;
     }
   }
 
@@ -431,6 +445,14 @@ std::vector<size_t> Reflector::ComputeOffsets(
   return offsets;
 }
 
+static uint32_t GetResourceDecorationIfPresent(const CompilerBackend& compiler,
+                                               spirv_cross::ID id,
+                                               spv::Decoration decoration) {
+  return compiler->has_decoration(id, decoration)
+             ? compiler->get_decoration(id, decoration)
+             : std::numeric_limits<uint32_t>::max();
+}
+
 std::optional<nlohmann::json::object_t> Reflector::ReflectResource(
     const spirv_cross::Resource& resource,
     std::optional<size_t> offset) const {
@@ -445,6 +467,8 @@ std::optional<nlohmann::json::object_t> Reflector::ReflectResource(
       resource.id, spv::Decoration::DecorationDescriptorSet);
   result["location"] = compiler_->get_decoration(
       resource.id, spv::Decoration::DecorationLocation);
+  result["input_attachment_index"] = GetResourceDecorationIfPresent(
+      compiler_, resource.id, spv::Decoration::DecorationInputAttachmentIndex);
   result["index"] =
       compiler_->get_decoration(resource.id, spv::Decoration::DecorationIndex);
   result["ext_res_0"] = compiler_.GetExtendedMSLResourceBinding(

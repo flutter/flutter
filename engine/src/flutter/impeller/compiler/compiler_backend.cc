@@ -4,6 +4,8 @@
 
 #include "impeller/compiler/compiler_backend.h"
 
+#include <limits>
+
 #include "impeller/base/comparable.h"
 
 namespace impeller {
@@ -44,8 +46,7 @@ uint32_t CompilerBackend::GetExtendedMSLResourceBinding(
   if (auto compiler = GetGLSLCompiler()) {
     return compiler->get_decoration(id, spv::Decoration::DecorationBinding);
   }
-  const auto kOOBIndex = static_cast<uint32_t>(-1);
-  return kOOBIndex;
+  return std::numeric_limits<uint32_t>::max();
 }
 
 const spirv_cross::Compiler* CompilerBackend::GetCompiler() const {
