@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'base/common.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/utils.dart';
@@ -221,9 +222,12 @@ class IosProject extends XcodeBasedProject {
   /// The return future will resolve to string path to the output file.
   Future<String> outputsUniversalLinkSettings({
     required String configuration,
-    required String scheme,
-    required String target,
+    String? scheme,
+    String? target,
   }) async {
+    if ((scheme != null) == (target != null)) {
+      throwToolExit('Only one of scheme or target must be provide but not both');
+    }
     final XcodeProjectBuildContext context = XcodeProjectBuildContext(
       configuration: configuration,
       scheme: scheme,
@@ -233,6 +237,7 @@ class IosProject extends XcodeBasedProject {
         .childDirectory('deeplink_data')
         .childFile('universal-link-settings-$configuration-$scheme-$target.json')
         .create(recursive: true);
+
     await file.writeAsString(jsonEncode(<String, Object?>{
       'bundleIdentifier': await _productBundleIdentifierWithBuildContext(context),
       'teamIdentifier': await _getTeamIdentifier(context),

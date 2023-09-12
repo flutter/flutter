@@ -64,12 +64,11 @@ void main() {
       }
     });
 
-    testWithoutContext('can output json file', () async {
+    testWithoutContext('can output json file with scheme', () async {
       final MockIosProject ios = MockIosProject();
       final MockFlutterProject project = MockFlutterProject(ios);
       const String expectedConfig = 'someConfig';
       const String expectedScheme = 'someScheme';
-      const String expectedTarget = 'someConfig';
       const String expectedOutputFile = '/someFile';
       ios.outputFileLocation = expectedOutputFile;
       await IOSAnalyze(
@@ -77,13 +76,32 @@ void main() {
         option: IOSAnalyzeOption.outputUniversalLinkSettings,
         configuration: expectedConfig,
         scheme: expectedScheme,
-        target: expectedTarget,
         logger: logger,
       ).analyze();
       expect(logger.statusText, contains(expectedOutputFile));
       expect(ios.outputConfiguration, expectedConfig);
       expect(ios.outputScheme, expectedScheme);
+      expect(ios.outputTarget, null);
+    });
+
+    testWithoutContext('can output json file with target', () async {
+      final MockIosProject ios = MockIosProject();
+      final MockFlutterProject project = MockFlutterProject(ios);
+      const String expectedConfig = 'someConfig';
+      const String expectedTarget = 'someTarget';
+      const String expectedOutputFile = '/someFile';
+      ios.outputFileLocation = expectedOutputFile;
+      await IOSAnalyze(
+        project: project,
+        option: IOSAnalyzeOption.outputUniversalLinkSettings,
+        configuration: expectedConfig,
+        target: expectedTarget,
+        logger: logger,
+      ).analyze();
+      expect(logger.statusText, contains(expectedOutputFile));
+      expect(ios.outputConfiguration, expectedConfig);
       expect(ios.outputTarget, expectedTarget);
+      expect(ios.outputScheme, null);
     });
 
     testWithoutContext('can list build options', () async {
@@ -132,6 +150,30 @@ void main() {
         ),
       );
     });
+
+    testUsingContext('throws if too much parameters', () async {
+      final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('someTemp');
+      await expectLater(
+        runner.run(
+          <String>[
+            'analyze',
+            '--ios',
+            '--output-universal-link-settings',
+            '--configuration=config',
+            '--target=target',
+            '--scheme=scheme',
+            tempDir.path,
+          ],
+        ),
+        throwsA(
+          isA<Exception>().having(
+                (Exception e) => e.toString(),
+            'description',
+            contains('Only one of "--target" or "--scheme" must be provided but not both.'),
+          ),
+        ),
+      );
+    });
   });
 }
 
@@ -150,7 +192,7 @@ class MockIosProject extends Fake implements IosProject {
   late XcodeProjectInfo expectedProjectInfo;
 
   @override
-  Future<String> outputsUniversalLinkSettings({required String configuration, required String scheme, required String target}) async {
+  Future<String> outputsUniversalLinkSettings({required String configuration, String? scheme, String? target}) async {
     outputConfiguration = configuration;
     outputScheme = scheme;
     outputTarget = target;

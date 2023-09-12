@@ -733,7 +733,6 @@ apply plugin: 'kotlin-android'
 
           const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(
             target: 'Runner',
-            scheme: 'Debug',
             configuration: 'config',
           );
           xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
@@ -753,7 +752,6 @@ apply plugin: 'kotlin-android'
           );
           final String outputFilePath = await project.ios.outputsUniversalLinkSettings(
             target: 'Runner',
-            scheme: 'Debug',
             configuration: 'config',
           );
           final File outputFile = fs.file(outputFilePath);
@@ -781,7 +779,6 @@ apply plugin: 'kotlin-android'
 
           const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(
             target: 'Runner',
-            scheme: 'Debug',
             configuration: 'config',
           );
           xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
@@ -802,7 +799,6 @@ apply plugin: 'kotlin-android'
 
           final String outputFilePath = await project.ios.outputsUniversalLinkSettings(
             target: 'Runner',
-            scheme: 'Debug',
             configuration: 'config',
           );
           final File outputFile = fs.file(outputFilePath);
@@ -827,7 +823,6 @@ apply plugin: 'kotlin-android'
 
           const XcodeProjectBuildContext buildContext = XcodeProjectBuildContext(
             target: 'Runner',
-            scheme: 'Debug',
             configuration: 'config',
           );
           xcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
@@ -838,7 +833,6 @@ apply plugin: 'kotlin-android'
           testPlistUtils.setProperty(PlistParser.kCFBundleIdentifierKey, r'$(PRODUCT_BUNDLE_IDENTIFIER)');
           final String outputFilePath = await project.ios.outputsUniversalLinkSettings(
             target: 'Runner',
-            scheme: 'Debug',
             configuration: 'config',
           );
           final File outputFile = fs.file(outputFilePath);
@@ -846,6 +840,32 @@ apply plugin: 'kotlin-android'
           expect(json['teamIdentifier'], 'ABC');
           expect(json['bundleIdentifier'], 'io.flutter.someProject');
           expect(json['associatedDomains'], unorderedEquals(<String>[]));
+        });
+
+        testWithMocks('throws when both scheme and target are provided', () async {
+          final FlutterProject project = await someProject();
+          project.ios.xcodeProject.createSync();
+          project.ios.defaultHostInfoPlist.createSync(recursive: true);
+          expect(
+            () => project.ios.outputsUniversalLinkSettings(
+              target: 'Runner',
+              scheme: 'scheme',
+              configuration: 'config',
+            ),
+            throwsToolExit(),
+          );
+        });
+
+        testWithMocks('throws when non of the scheme and target is provided', () async {
+          final FlutterProject project = await someProject();
+          project.ios.xcodeProject.createSync();
+          project.ios.defaultHostInfoPlist.createSync(recursive: true);
+          expect(
+            () => project.ios.outputsUniversalLinkSettings(
+              configuration: 'config',
+            ),
+            throwsToolExit(),
+          );
         });
       });
 

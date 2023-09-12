@@ -36,7 +36,8 @@ class IOSAnalyze {
     this.target,
     required this.logger,
   }) : assert(option == IOSAnalyzeOption.listBuildOptions ||
-              (configuration != null && scheme != null && target != null));
+              (configuration != null &&
+               ((scheme != null) != (target != null))));
 
   final FlutterProject project;
   final IOSAnalyzeOption option;
@@ -61,8 +62,8 @@ class IOSAnalyze {
         }
         logger.printStatus(jsonEncode(result));
       case IOSAnalyzeOption.outputUniversalLinkSettings:
-        await project.ios.outputsUniversalLinkSettings(configuration: configuration!, scheme: scheme!, target: target!);
-        final String filePath = await project.ios.outputsUniversalLinkSettings(configuration: configuration!, scheme: scheme!, target: target!);
+        await project.ios.outputsUniversalLinkSettings(configuration: configuration!, scheme: scheme, target: target);
+        final String filePath = await project.ios.outputsUniversalLinkSettings(configuration: configuration!, scheme: scheme, target: target);
         logger.printStatus('result saved in $filePath');
     }
   }

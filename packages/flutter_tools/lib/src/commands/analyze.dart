@@ -152,7 +152,8 @@ class AnalyzeCommand extends FlutterCommand {
     argParser.addFlag('output-universal-link-settings',
       negatable: false,
       help: 'Output a JSON with iOS Xcode universal link settings into a file. '
-          'The "--configuration", "--scheme", and "--target" must also be set.',
+          'The "--configuration", and one of "--scheme" or "--target" must also '
+          'be set.',
       hide: !verboseHelp,
     );
 
@@ -280,12 +281,9 @@ class AnalyzeCommand extends FlutterCommand {
           throwToolExit('"--configuration" must be provided');
         }
         target = argResults!['target'] as String?;
-        if (target == null) {
-          throwToolExit('"--target" must be provided');
-        }
         scheme = argResults!['scheme'] as String?;
-        if (scheme == null) {
-          throwToolExit('"--scheme" must be provided');
+        if ((scheme == null) == (target == null)) {
+          throwToolExit('Only one of "--target" or "--scheme" must be provided but not both.');
         }
       } else {
         throwToolExit('No argument is provided to analyze. Use -h to see available commands.');
