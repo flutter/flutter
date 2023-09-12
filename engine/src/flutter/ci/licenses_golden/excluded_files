@@ -498,6 +498,7 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.component.decl/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.component.resolution/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.component.runner/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.component.sandbox/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.component.test/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.component.types/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.component/meta.json
@@ -525,6 +526,7 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.sensor/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.statecontrol/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.radar/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.rtc/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.temperature/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hwinfo/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.images/meta.json
