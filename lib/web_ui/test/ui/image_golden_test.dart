@@ -318,7 +318,7 @@ Future<void> testMain() async {
       image.src = url;
       await completer.future;
 
-      final DomImageBitmap bitmap = (await createImageBitmap(image as JSAny))!;
+      final DomImageBitmap bitmap = (await createImageBitmap(image as JSAny).toDart)! as DomImageBitmap;
       return renderer.createImageFromImageBitmap(bitmap);
     });
   }
