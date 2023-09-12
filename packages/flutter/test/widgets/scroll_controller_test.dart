@@ -4,9 +4,9 @@
 
 import 'dart:ui' as ui;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'states.dart';
 
@@ -396,19 +396,6 @@ void main() {
   });
 
   test('$ScrollController dispatches object creation in constructor', () {
-    final List<ObjectEvent> events = <ObjectEvent>[];
-    void listener(ObjectEvent event) {
-      if (event.object.runtimeType == ScrollController) {
-        events.add(event);
-      }
-    }
-    MemoryAllocations.instance.addListener(listener);
-
-    final ScrollController controller = ScrollController();
-
-    expect(events, hasLength(1));
-
-    controller.dispose();
-    MemoryAllocations.instance.removeListener(listener);
+    expect(()=> ScrollController().dispose(), dispatchesMemoryEvents(ScrollController));
   });
 }
