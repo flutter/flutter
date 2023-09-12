@@ -1847,8 +1847,8 @@ void _paragraphTests() {
   }, skip: isFirefox); // Intended: Headless firefox has no webgl support https://github.com/flutter/flutter/issues/109265
 
   group('getCanvasKitJsFileNames', () {
-    dynamic oldV8BreakIterator = v8BreakIterator;
-    dynamic oldIntlSegmenter = intlSegmenter;
+    JSAny? oldV8BreakIterator = v8BreakIterator;
+    JSAny? oldIntlSegmenter = intlSegmenter;
 
     setUp(() {
       oldV8BreakIterator = v8BreakIterator;
@@ -1861,8 +1861,8 @@ void _paragraphTests() {
     });
 
     test('in Chromium-based browsers', () {
-      v8BreakIterator = Object(); // Any non-null value.
-      intlSegmenter = Object(); // Any non-null value.
+      v8BreakIterator = Object().toJSBox; // Any non-null value.
+      intlSegmenter = Object().toJSBox; // Any non-null value.
       browserSupportsImageDecoder = true;
 
       expect(getCanvasKitJsFileNames(CanvasKitVariant.full), <String>['canvaskit.js']);
@@ -1874,7 +1874,7 @@ void _paragraphTests() {
     });
 
     test('in older versions of Chromium-based browsers', () {
-      v8BreakIterator = Object(); // Any non-null value.
+      v8BreakIterator = Object().toJSBox; // Any non-null value.
       intlSegmenter = null; // Older versions of Chromium didn't have the Intl.Segmenter API.
       browserSupportsImageDecoder = true;
 
@@ -1884,7 +1884,7 @@ void _paragraphTests() {
     });
 
     test('in other browsers', () {
-      intlSegmenter = Object(); // Any non-null value.
+      intlSegmenter = Object().toJSBox; // Any non-null value.
 
       v8BreakIterator = null;
       browserSupportsImageDecoder = true;
@@ -1892,7 +1892,7 @@ void _paragraphTests() {
       expect(getCanvasKitJsFileNames(CanvasKitVariant.chromium), <String>['chromium/canvaskit.js']);
       expect(getCanvasKitJsFileNames(CanvasKitVariant.auto), <String>['canvaskit.js']);
 
-      v8BreakIterator = Object();
+      v8BreakIterator = Object().toJSBox;
       browserSupportsImageDecoder = false;
       // TODO(mdebbar): we don't check image codecs for now.
       // https://github.com/flutter/flutter/issues/122331
@@ -1935,13 +1935,13 @@ void _paragraphTests() {
 
 
 @JS('window.Intl.v8BreakIterator')
-external dynamic get v8BreakIterator;
+external JSAny? get v8BreakIterator;
 
 @JS('window.Intl.v8BreakIterator')
-external set v8BreakIterator(dynamic x);
+external set v8BreakIterator(JSAny? x);
 
 @JS('window.Intl.Segmenter')
-external dynamic get intlSegmenter;
+external JSAny? get intlSegmenter;
 
 @JS('window.Intl.Segmenter')
-external set intlSegmenter(dynamic x);
+external set intlSegmenter(JSAny? x);
