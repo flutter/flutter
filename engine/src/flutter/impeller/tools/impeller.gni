@@ -47,6 +47,11 @@ declare_args() {
 }
 
 declare_args() {
+  # Wether to build and include the validation layers.
+  impeller_enable_vulkan_validation_layers =
+      impeller_enable_vulkan && flutter_runtime_mode == "debug" &&
+      target_cpu == "arm64"
+
   # Whether Impeller supports rendering on the platform.
   impeller_supports_rendering =
       impeller_enable_metal || impeller_enable_opengles ||
