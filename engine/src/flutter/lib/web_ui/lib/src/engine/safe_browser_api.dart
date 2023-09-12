@@ -196,20 +196,6 @@ bool get _defaultBrowserSupportsImageDecoder =>
 // enable it explicitly.
 bool get _isBrowserImageDecoderStable => browserEngine == BrowserEngine.blink;
 
-/// The signature of the function passed to the constructor of JavaScript `Promise`.
-typedef JsPromiseCallback = void Function(void Function(Object? value) resolve, void Function(Object? error) reject);
-
-/// Corresponds to JavaScript's `Promise`.
-///
-/// This type doesn't need any members. Instead, it should be first converted
-/// to Dart's [Future] using [promiseToFuture] then interacted with through the
-/// [Future] API.
-@JS('window.Promise')
-@staticInterop
-class JsPromise {
-  external factory JsPromise(JsPromiseCallback callback);
-}
-
 /// Corresponds to the browser's `ImageDecoder` type.
 ///
 /// See also:
@@ -228,7 +214,7 @@ extension ImageDecoderExtension on ImageDecoder {
   external JSBoolean get _complete;
   bool get complete => _complete.toDart;
 
-  external JsPromise decode(DecodeOptions options);
+  external JSPromise decode(DecodeOptions options);
   external JSVoid close();
 }
 
@@ -302,8 +288,8 @@ extension VideoFrameExtension on VideoFrame {
   double allocationSize() => _allocationSize().toDartDouble;
 
   @JS('copyTo')
-  external JsPromise _copyTo(JSAny destination);
-  JsPromise copyTo(Object destination) => _copyTo(destination.toJSAnyShallow);
+  external JSPromise _copyTo(JSAny destination);
+  JSPromise copyTo(Object destination) => _copyTo(destination.toJSAnyShallow);
 
   @JS('format')
   external JSString? get _format;
@@ -344,7 +330,7 @@ extension VideoFrameExtension on VideoFrame {
 class ImageTrackList {}
 
 extension ImageTrackListExtension on ImageTrackList {
-  external JsPromise get ready;
+  external JSPromise get ready;
   external ImageTrack? get selectedTrack;
 }
 
