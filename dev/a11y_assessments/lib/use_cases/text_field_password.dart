@@ -31,6 +31,7 @@ class _MainWidget extends StatelessWidget {
       body: ListView(
         children: const <Widget>[
           TextField(
+            key: Key('enabled password'),
             autofocus: true,
             decoration: InputDecoration(
               labelText: 'Password',
@@ -39,11 +40,12 @@ class _MainWidget extends StatelessWidget {
             obscureText: true,
           ),
           TextField(
+            key: Key('disabled password'),
             decoration: InputDecoration(
               labelText: 'Password',
               hintText: 'Enter your password',
-              enabled: false,
             ),
+            enabled: false,
             obscureText: true,
           ),
         ],

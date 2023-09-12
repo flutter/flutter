@@ -31,6 +31,7 @@ class _MainWidget extends StatelessWidget {
       body: ListView(
         children: <Widget>[
           const TextField(
+            key: Key('enabled text field'),
             autofocus: true,
             decoration: InputDecoration(
               labelText: 'Email',
@@ -39,13 +40,14 @@ class _MainWidget extends StatelessWidget {
             ),
           ),
           TextField(
+            key: const Key('disabled text field'),
             decoration: const InputDecoration(
               labelText: 'Email',
               suffixText: '@gmail.com',
               hintText: 'Enter your email',
-              enabled: false,
             ),
-            controller: TextEditingController(text: 'abc'),
+            enabled: false,
+            controller: TextEditingController(text: 'xyz'),
           ),
         ],
       ),
