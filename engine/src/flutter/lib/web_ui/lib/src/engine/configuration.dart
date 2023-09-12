@@ -257,15 +257,10 @@ class FlutterConfiguration {
     'FLUTTER_WEB_CANVASKIT_FORCE_CPU_ONLY',
   );
 
-  /// The maximum number of overlay surfaces that the CanvasKit renderer will use.
-  ///
-  /// Overlay surfaces are extra WebGL `<canvas>` elements used to paint on top
-  /// of platform views. Too many platform views can cause the browser to run
-  /// out of resources (memory, CPU, GPU) to handle the content efficiently.
-  /// The number of overlay surfaces is therefore limited.
-  ///
-  /// This value can be specified using either the `FLUTTER_WEB_MAXIMUM_SURFACES`
-  /// environment variable, or using the runtime configuration.
+  /// This is deprecated. The CanvasKit renderer will only ever create one
+  /// WebGL context, obviating the problem this configuration was meant to
+  /// solve originally.
+  @Deprecated('Setting canvasKitMaximumSurfaces has no effect')
   int get canvasKitMaximumSurfaces =>
       _configuration?.canvasKitMaximumSurfaces?.toInt() ?? _defaultCanvasKitMaximumSurfaces;
   static const int _defaultCanvasKitMaximumSurfaces = int.fromEnvironment(
