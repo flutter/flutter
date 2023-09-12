@@ -84,6 +84,9 @@ FLUTTER_ASSERT_ARC;
 }
 @end
 
+namespace flutter {
+namespace testing {
+
 FlutterUIPressProxy* keyDownEvent(UIKeyboardHIDUsage keyCode,
                                   UIKeyModifierFlags modifierFlags,
                                   NSTimeInterval timestamp,
@@ -123,3 +126,5 @@ FlutterUIPressProxy* keyEventWithPhase(UIPressPhase phase,
                                            type:UIEventTypePresses
                                       timestamp:timestamp];
 }
+}  // namespace testing
+}  // namespace flutter

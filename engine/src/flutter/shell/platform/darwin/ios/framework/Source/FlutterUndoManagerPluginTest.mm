@@ -41,7 +41,7 @@ FLUTTER_ASSERT_ARC
 
   self.undoManagerPlugin = [[FlutterUndoManagerPluginForTest alloc] initWithDelegate:self.engine];
 
-  self.viewController = [FlutterViewController new];
+  self.viewController = [[FlutterViewController alloc] init];
   self.undoManagerPlugin.viewController = self.viewController;
 
   self.undoManager = OCMClassMock([NSUndoManager class]);

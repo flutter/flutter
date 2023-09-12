@@ -16,10 +16,7 @@ FLUTTER_ASSERT_ARC;
   XCTAssertTrue([value isEqualToString:expected], \
                 @"String \"%@\" not equal to the expected value of \"%@\"", value, expected)
 
-namespace {
-API_AVAILABLE(ios(13.4))
-constexpr UIKeyboardHIDUsage keyACode = (UIKeyboardHIDUsage)0x4;  // KeyA iOS scan code.
-}  // namespace
+using namespace flutter::testing;
 
 API_AVAILABLE(ios(13.4))
 @interface FlutterChannelKeyResponderTest : XCTestCase
@@ -35,8 +32,8 @@ API_AVAILABLE(ios(13.4))
   } else {
     XCTSkip(@"Required API not present for test.");
   }
-  _testKeyDownEvent = keyDownEvent(keyACode, 0x0, 0.0f, "a", "a");
-  _testKeyUpEvent = keyUpEvent(keyACode, 0x0, 0.0f);
+  _testKeyDownEvent = keyDownEvent(UIKeyboardHIDUsageKeyboardA, 0x0, 0.0f, "a", "a");
+  _testKeyUpEvent = keyUpEvent(UIKeyboardHIDUsageKeyboardA, 0x0, 0.0f);
 }
 
 - (void)tearDown API_AVAILABLE(ios(13.4)) {
@@ -76,7 +73,7 @@ API_AVAILABLE(ios(13.4))
   XCTAssertEqual([messages count], 1u);
   XCTAssertStrEqual([messages lastObject][@"keymap"], @"ios");
   XCTAssertStrEqual([messages lastObject][@"type"], @"keydown");
-  XCTAssertEqual([[messages lastObject][@"keyCode"] intValue], keyACode);
+  XCTAssertEqual([[messages lastObject][@"keyCode"] intValue], UIKeyboardHIDUsageKeyboardA);
   XCTAssertEqual([[messages lastObject][@"modifiers"] intValue], 0x0);
   XCTAssertStrEqual([messages lastObject][@"characters"], @"a");
   XCTAssertStrEqual([messages lastObject][@"charactersIgnoringModifiers"], @"a");
@@ -97,7 +94,7 @@ API_AVAILABLE(ios(13.4))
   XCTAssertEqual([messages count], 1u);
   XCTAssertStrEqual([messages lastObject][@"keymap"], @"ios");
   XCTAssertStrEqual([messages lastObject][@"type"], @"keyup");
-  XCTAssertEqual([[messages lastObject][@"keyCode"] intValue], keyACode);
+  XCTAssertEqual([[messages lastObject][@"keyCode"] intValue], UIKeyboardHIDUsageKeyboardA);
   XCTAssertEqual([[messages lastObject][@"modifiers"] intValue], 0x0);
 
   XCTAssertEqual([responses count], 1u);
@@ -134,7 +131,7 @@ API_AVAILABLE(ios(13.4))
   XCTAssertEqual([messages count], 1u);
   XCTAssertStrEqual([messages lastObject][@"keymap"], @"ios");
   XCTAssertStrEqual([messages lastObject][@"type"], @"keydown");
-  XCTAssertEqual([[messages lastObject][@"keyCode"] intValue], keyACode);
+  XCTAssertEqual([[messages lastObject][@"keyCode"] intValue], UIKeyboardHIDUsageKeyboardA);
   XCTAssertEqual([[messages lastObject][@"modifiers"] intValue], 0x0);
   XCTAssertStrEqual([messages lastObject][@"characters"], @"a");
   XCTAssertStrEqual([messages lastObject][@"charactersIgnoringModifiers"], @"a");

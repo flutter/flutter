@@ -22,6 +22,8 @@
 
 FLUTTER_ASSERT_ARC
 
+using namespace flutter::testing;
+
 @interface FlutterEngine ()
 - (FlutterTextInputPlugin*)textInputPlugin;
 - (void)sendKeyEvent:(const FlutterKeyEvent&)event
@@ -57,8 +59,9 @@ FLUTTER_ASSERT_ARC
 - (void)sendKeyEvent:(const FlutterKeyEvent&)event
             callback:(FlutterKeyEventCallback)callback
             userData:(void*)userData API_AVAILABLE(ios(9.0)) {
-  if (callback == nil)
+  if (callback == nil) {
     return;
+  }
   // NSAssert(callback != nullptr, @"Invalid callback");
   // Response is async, so we have to post it to the run loop instead of calling
   // it directly.
@@ -1179,10 +1182,6 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   // Setup test.
   id settingsChannel = OCMClassMock([FlutterBasicMessageChannel class]);
   OCMStub([self.mockEngine settingsChannel]).andReturn(settingsChannel);
-
-  FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:self.mockEngine
-                                                                        nibName:nil
-                                                                         bundle:nil];
   id mockTraitCollection =
       [self fakeTraitCollectionWithUserInterfaceStyle:UIUserInterfaceStyleDark];
 
@@ -1190,7 +1189,9 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   // the UITraitCollection of our choice. Mocking the object under test is not
   // desirable, but given that the OS does not offer a DI approach to providing
   // our own UITraitCollection, this seems to be the least bad option.
-  id partialMockVC = OCMPartialMock(realVC);
+  id partialMockVC = OCMPartialMock([[FlutterViewController alloc] initWithEngine:self.mockEngine
+                                                                          nibName:nil
+                                                                           bundle:nil]);
   OCMStub([partialMockVC traitCollection]).andReturn(mockTraitCollection);
 
   // Exercise behavior under test.
@@ -1283,16 +1284,15 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   id settingsChannel = OCMClassMock([FlutterBasicMessageChannel class]);
   OCMStub([self.mockEngine settingsChannel]).andReturn(settingsChannel);
 
-  FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:self.mockEngine
-                                                                        nibName:nil
-                                                                         bundle:nil];
   id mockTraitCollection = [self fakeTraitCollectionWithContrast:UIAccessibilityContrastHigh];
 
   // We partially mock the real FlutterViewController to act as the OS and report
   // the UITraitCollection of our choice. Mocking the object under test is not
   // desirable, but given that the OS does not offer a DI approach to providing
   // our own UITraitCollection, this seems to be the least bad option.
-  id partialMockVC = OCMPartialMock(realVC);
+  id partialMockVC = OCMPartialMock([[FlutterViewController alloc] initWithEngine:self.mockEngine
+                                                                          nibName:nil
+                                                                           bundle:nil]);
   OCMStub([partialMockVC traitCollection]).andReturn(mockTraitCollection);
 
   // Exercise behavior under test.
@@ -1575,6 +1575,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
       [[XCTestExpectation alloc] initWithDescription:@"notification called"];
   id engine = [[MockEngine alloc] init];
   @autoreleasepool {
+    // NOLINTNEXTLINE(clang-analyzer-deadcode.DeadStores)
     FlutterViewController* realVC = [[FlutterViewController alloc] initWithEngine:engine
                                                                           nibName:nil
                                                                            bundle:nil];
@@ -1584,6 +1585,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                                   usingBlock:^(NSNotification* _Nonnull note) {
                                                     [expectation fulfill];
                                                   }];
+    XCTAssertNotNil(realVC);
     realVC = nil;
   }
   [self waitForExpectations:@[ expectation ] timeout:1.0];
