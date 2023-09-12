@@ -11,13 +11,15 @@
 namespace impeller {
 
 std::shared_ptr<ResourceManagerVK> ResourceManagerVK::Create() {
-  auto manager = std::shared_ptr<ResourceManagerVK>(new ResourceManagerVK());
-  manager->waiter_ = std::thread([manager]() { manager->Start(); });
-  manager->waiter_.detach();
-  return manager;
+  // It will be tempting to refactor this to create the waiter thread in the
+  // static method instead of the constructor. However, that causes the
+  // destructor never to be called, and the thread never terminates!
+  //
+  // See https://github.com/flutter/flutter/issues/134482.
+  return std::shared_ptr<ResourceManagerVK>(new ResourceManagerVK());
 }
 
-ResourceManagerVK::ResourceManagerVK() {}
+ResourceManagerVK::ResourceManagerVK() : waiter_([&]() { Start(); }) {}
 
 ResourceManagerVK::~ResourceManagerVK() {
   Terminate();
@@ -25,8 +27,10 @@ ResourceManagerVK::~ResourceManagerVK() {
 }
 
 void ResourceManagerVK::Start() {
-  // This thread should not be started more than once.
-  FML_DCHECK(!should_exit_);
+  // It's possible for Start() to be called when terminating:
+  // { ResourceManagerVK::Create(); }
+  //
+  // ... so no FML_DCHECK here.
 
   fml::Thread::SetCurrentThreadName(
       fml::Thread::ThreadConfig{"io.flutter.impeller.resource_manager"});
