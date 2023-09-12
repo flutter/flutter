@@ -250,7 +250,7 @@ class Configurator {
       'homepage: https://flutter.dev',
       'version: 0.0.0',
       'environment:',
-      "  sdk: '>=3.0.0-0 <4.0.0'",
+      "  sdk: '>=3.2.0-0 <4.0.0'",
       'dependencies:',
       for (final String package in findPackageNames(filesystem)) '  $package:\n    sdk: flutter',
       '  $kPlatformIntegrationPackageName: 0.0.1',
