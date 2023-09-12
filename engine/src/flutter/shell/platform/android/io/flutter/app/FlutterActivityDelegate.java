@@ -314,6 +314,9 @@ public final class FlutterActivityDelegate
     if (intent.getBooleanExtra("trace-systrace", false)) {
       args.add("--trace-systrace");
     }
+    if (intent.hasExtra("trace-to-file")) {
+      args.add("--trace-to-file=" + intent.getStringExtra("trace-to-file"));
+    }
     if (intent.getBooleanExtra("dump-skp-on-shader-compilation", false)) {
       args.add("--dump-skp-on-shader-compilation");
     }
