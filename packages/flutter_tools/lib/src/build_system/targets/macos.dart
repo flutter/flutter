@@ -80,7 +80,7 @@ abstract class UnpackMacOS extends Target {
     if (!frameworkBinary.existsSync()) {
       throw Exception('Binary $frameworkBinaryPath does not exist, cannot thin');
     }
-    _thinFramework(environment, frameworkBinaryPath);
+    await _thinFramework(environment, frameworkBinaryPath);
   }
 
   static const List<String> _copyDenylist = <String>['entitlements.txt', 'without_entitlements.txt'];
