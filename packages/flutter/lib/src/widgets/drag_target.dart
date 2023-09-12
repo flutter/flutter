@@ -713,6 +713,7 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
                                     (widget.onWillAccept != null &&
                                     widget.onWillAccept!(avatar.data as T?)) ||
                                     (widget.onWillAcceptWithDetails != null &&
+                                    avatar.data != null &&
                                     widget.onWillAcceptWithDetails!(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!)));
     if (resolvedWillAccept) {
       setState(() {
@@ -747,12 +748,14 @@ class _DragTargetState<T extends Object> extends State<DragTarget<T>> {
     setState(() {
       _candidateAvatars.remove(avatar);
     });
-    widget.onAccept?.call(avatar.data! as T);
-    widget.onAcceptWithDetails?.call(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
+    if (avatar.data != null)  {
+      widget.onAccept?.call(avatar.data! as T);
+      widget.onAcceptWithDetails?.call(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
+    }
   }
 
   void didMove(_DragAvatar<Object> avatar) {
-    if (!mounted) {
+    if (!mounted || avatar.data == null) {
       return;
     }
     widget.onMove?.call(DragTargetDetails<T>(data: avatar.data! as T, offset: avatar._lastOffset!));
