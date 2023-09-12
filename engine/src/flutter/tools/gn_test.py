@@ -20,7 +20,9 @@ class GNTestCase(unittest.TestCase):
     self._expect_build_dir(['--debug'], 'out/Debug')
     self._expect_build_dir(['--release'], 'out/Release')
     self._expect_build_dir(['--ios'], 'out/ios_Debug')
+    self._expect_build_dir(['--ios'], 'out/ios_Debug_extension_safe')
     self._expect_build_dir(['--ios', '--release'], 'out/ios_Release')
+    self._expect_build_dir(['--ios'], 'out/ios_Release_extension_safe')
     self._expect_build_dir(['--android'], 'out/android_Debug')
     self._expect_build_dir(['--android', '--release'], 'out/android_Release')
 
