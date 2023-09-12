@@ -400,8 +400,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
 
     // The icon size will be scaled by a factor of the accessibility text scale,
     // to follow the behavior of `UISearchTextField`.
-    final double scaledIconSize =
-        MediaQuery.textScaleFactorOf(context) * widget.itemSize;
+    final double scaledIconSize = MediaQuery.textScalerOf(context).textScaleFactor * widget.itemSize;
 
     // If decoration was not provided, create a decoration with the provided
     // background color and border radius.
@@ -445,7 +444,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       suffix: suffix,
       keyboardType: widget.keyboardType,
       onTap: widget.onTap,
-      enabled: widget.enabled,
+      enabled: widget.enabled ?? true,
       suffixMode: widget.suffixMode,
       placeholder: placeholder,
       placeholderStyle: placeholderStyle,

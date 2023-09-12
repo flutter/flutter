@@ -532,6 +532,10 @@ class HardwareKeyboard {
   }
 
   /// Query the engine and update _pressedKeys accordingly to the engine answer.
+  //
+  /// Both the framework and the engine maintain a state of the current pressed
+  /// keys. There are edge cases, related to startup and restart, where the framework
+  /// needs to resynchronize its keyboard state.
   Future<void> syncKeyboardState() async {
     final Map<int, int>? keyboardState = await SystemChannels.keyboard.invokeMapMethod<int, int>(
       'getKeyboardState',
@@ -788,14 +792,42 @@ typedef KeyMessageHandler = bool Function(KeyMessage message);
 /// and [RawKeyboard] for recording keeping, and then dispatches the [KeyMessage]
 /// to [keyMessageHandler], the global message handler.
 ///
-/// [KeyEventManager] also resolves cross-platform compatibility of keyboard
-/// implementations. Legacy platforms might have not implemented the new key
-/// data API and only send raw key data on each key message. [KeyEventManager]
-/// recognize platform types as [KeyDataTransitMode] and dispatches events in
-/// different ways accordingly.
-///
 /// [KeyEventManager] is typically created, owned, and invoked by
 /// [ServicesBinding].
+///
+/// ## On embedder implementation
+///
+/// Currently, Flutter has two sets of key event APIs running in parallel.
+///
+/// * The legacy "raw key event" route receives messages from the
+///   "flutter/keyevent" message channel ([SystemChannels.keyEvent]) and
+///   dispatches [RawKeyEvent] to [RawKeyboard] and [Focus.onKey] as well as
+///   similar methods.
+/// * The newer "hardware key event" route receives messages from the
+///   "flutter/keydata" message channel (embedder API
+///   `FlutterEngineSendKeyEvent`) and dispatches [KeyEvent] to
+///   [HardwareKeyboard] and some methods such as [Focus.onKeyEvent].
+///
+/// [KeyEventManager] resolves cross-platform compatibility of keyboard
+/// implementations, since legacy platforms might have not implemented the new
+/// key data API and only send raw key data on each key message.
+/// [KeyEventManager] recognizes the platform support by detecting whether a
+/// message comes from platform channel "flutter/keyevent" before one from
+/// "flutter/keydata", or vice versa, at the beginning of the app.
+///
+/// * If a "flutter/keyevent" message is received first, then this platform is
+///   considered a legacy platform. The raw key event is transformed into a
+///   hardware key event at best effort. No messages from "flutter/keydata" are
+///   expected.
+/// * If a "flutter/keydata" message is received first, then this platform is
+///   considered a newer platform. The hardware key events are stored, and
+///   dispatched only when a raw key message is received.
+///
+/// Therefore, to correctly implement a platform that supports
+/// `FlutterEngineSendKeyEvent`, the platform must ensure that
+/// `FlutterEngineSendKeyEvent` is called before sending a message to
+/// "flutter/keyevent" at the beginning of the app, and every physical key event
+/// is ended with a "flutter/keyevent" message.
 class KeyEventManager {
   /// Create an instance.
   ///

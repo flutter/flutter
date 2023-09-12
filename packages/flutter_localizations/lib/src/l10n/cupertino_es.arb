@@ -22,5 +22,9 @@
   "tabSemanticsLabel": "Pestaña $tabIndex de $tabCount",
   "modalBarrierDismissLabel": "Cerrar",
   "searchTextFieldPlaceholderLabel": "Buscar",
-  "noSpellCheckReplacementsLabel": "No Replacements Found"
+  "noSpellCheckReplacementsLabel": "No se ha encontrado ninguna sustitución",
+  "menuDismissLabel": "Cerrar menú",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

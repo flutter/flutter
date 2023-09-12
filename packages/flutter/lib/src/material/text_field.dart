@@ -805,7 +805,7 @@ class TextField extends StatefulWidget {
       decoration: TextDecoration.underline,
       decorationColor: Colors.red,
       decorationStyle: TextDecorationStyle.wavy,
-  );
+    );
 
   /// Default builder for [TextField]'s spell check suggestions toolbar.
   ///
@@ -945,7 +945,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
   bool get _hasIntrinsicError => widget.maxLength != null && widget.maxLength! > 0 && _effectiveController.value.text.characters.length > widget.maxLength!;
 
-  bool get _hasError => widget.decoration?.errorText != null || _hasIntrinsicError;
+  bool get _hasError => widget.decoration?.errorText != null || widget.decoration?.error != null || _hasIntrinsicError;
 
   Color get _errorColor => widget.decoration?.errorStyle?.color ?? Theme.of(context).colorScheme.error;
 
@@ -1248,7 +1248,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
     final ThemeData theme = Theme.of(context);
     final DefaultSelectionStyle selectionStyle = DefaultSelectionStyle.of(context);
-    final TextStyle style = _getInputStyleForState(theme.useMaterial3 ? _m3InputStyle(context) : theme.textTheme.titleMedium!).merge(widget.style);
+    final TextStyle? providedStyle = MaterialStateProperty.resolveAs(widget.style, _materialState);
+    final TextStyle style = _getInputStyleForState(theme.useMaterial3 ? _m3InputStyle(context) : theme.textTheme.titleMedium!).merge(providedStyle);
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? theme.brightness;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;

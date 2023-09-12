@@ -4,9 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
-import '../rendering/mock_canvas.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 /// Adds the basic requirements for a Chip.
 Widget wrapForChip({
@@ -65,7 +63,7 @@ void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
 }
 
 void main() {
-  testWidgets('ActionChip defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ActionChip defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     const String label = 'action chip';
 
@@ -85,7 +83,10 @@ void main() {
     );
 
     // Test default chip size.
-    expect(tester.getSize(find.byType(ActionChip)), const Size(190.0, 48.0));
+    expect(
+      tester.getSize(find.byType(ActionChip)),
+      within<Size>(distance: 0.01, from: const Size(189.1, 48.0)),
+    );
     // Test default label style.
     expect(
       getLabelStyle(tester, label).style.color!.value,
@@ -136,7 +137,7 @@ void main() {
     expect(decoration.color, null);
   });
 
-  testWidgets('ActionChip.elevated defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ActionChip.elevated defaults', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     const String label = 'action chip';
 
@@ -156,7 +157,10 @@ void main() {
     );
 
     // Test default chip size.
-    expect(tester.getSize(find.byType(ActionChip)), const Size(190.0, 48.0));
+    expect(
+      tester.getSize(find.byType(ActionChip)),
+      within<Size>(distance: 0.01, from: const Size(189.1, 48.0)),
+    );
     // Test default label style.
     expect(
       getLabelStyle(tester, label).style.color!.value,
@@ -207,7 +211,7 @@ void main() {
     expect(decoration.color, theme.colorScheme.onSurface.withOpacity(0.12));
   });
 
-  testWidgets('ActionChip.color resolves material states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ActionChip.color resolves material states', (WidgetTester tester) async {
     const Color disabledColor = Color(0xff00ff00);
     const Color backgroundColor = Color(0xff0000ff);
     final MaterialStateProperty<Color?> color = MaterialStateProperty.resolveWith((Set<MaterialState> states) {
@@ -266,7 +270,7 @@ void main() {
     );
   });
 
-  testWidgets('ActionChip uses provided state color properties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ActionChip uses provided state color properties', (WidgetTester tester) async {
     const Color disabledColor = Color(0xff00ff00);
     const Color backgroundColor = Color(0xff0000ff);
     Widget buildApp({ required bool enabled, required bool selected }) {

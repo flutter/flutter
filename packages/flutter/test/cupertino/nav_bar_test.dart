@@ -12,7 +12,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 int count = 0;
@@ -1230,10 +1229,10 @@ void main() {
     );
 
     expect(barItems.length, greaterThan(0));
-    expect(barItems.any((RichText t) => t.textScaleFactor != 1), isFalse);
+    expect(barItems, isNot(contains(predicate((RichText t) => t.textScaler != TextScaler.noScaling))));
 
     expect(contents.length, greaterThan(0));
-    expect(contents.any((RichText t) => t.textScaleFactor != 99), isFalse);
+    expect(contents, isNot(contains(predicate((RichText t) => t.textScaler != const TextScaler.linear(99.0)))));
 
     // Also works with implicitly added widgets.
     tester.state<NavigatorState>(find.byType(Navigator)).push(CupertinoPageRoute<void>(

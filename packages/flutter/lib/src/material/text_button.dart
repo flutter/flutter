@@ -248,7 +248,7 @@ class TextButton extends ButtonStyleButton {
   /// each state and "others" means all other states.
   ///
   /// The `textScaleFactor` is the value of
-  /// `MediaQuery.textScaleFactorOf(context)` and the names of the
+  /// `MediaQuery.textScalerOf(context).textScaleFactor` and the names of the
   /// EdgeInsets constructors and `EdgeInsetsGeometry.lerp` have been
   /// abbreviated for readability.
   ///
@@ -385,7 +385,7 @@ EdgeInsetsGeometry _scaledPadding(BuildContext context) {
     useMaterial3 ? const EdgeInsets.symmetric(horizontal: 12, vertical: 8) :  const EdgeInsets.all(8),
     const EdgeInsets.symmetric(horizontal: 8),
     const EdgeInsets.symmetric(horizontal: 4),
-    MediaQuery.textScaleFactorOf(context),
+    MediaQuery.textScalerOf(context).textScaleFactor,
   );
 }
 
@@ -500,7 +500,7 @@ class _TextButtonWithIcon extends TextButton {
       useMaterial3 ? const EdgeInsetsDirectional.fromSTEB(12, 8, 16, 8) : const EdgeInsets.all(8),
       const EdgeInsets.symmetric(horizontal: 4),
       const EdgeInsets.symmetric(horizontal: 4),
-      MediaQuery.textScaleFactorOf(context),
+      MediaQuery.textScalerOf(context).textScaleFactor,
     );
     return super.defaultStyleOf(context).copyWith(
       padding: MaterialStatePropertyAll<EdgeInsetsGeometry>(scaledPadding),
@@ -519,7 +519,7 @@ class _TextButtonWithIconChild extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double scale = MediaQuery.textScaleFactorOf(context);
+    final double scale = MediaQuery.textScalerOf(context).textScaleFactor;
     final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1))!;
     return Row(
       mainAxisSize: MainAxisSize.min,

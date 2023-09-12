@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 
 import 'common.dart';
+import 'src/animated_advanced_blend.dart';
 import 'src/animated_blur_backdrop_filter.dart';
 import 'src/animated_complex_image_filtered.dart';
 import 'src/animated_complex_opacity.dart';
@@ -18,7 +19,9 @@ import 'src/color_filter_cache.dart';
 import 'src/color_filter_with_unstable_child.dart';
 import 'src/cubic_bezier.dart';
 import 'src/cull_opacity.dart';
+import 'src/draw_atlas.dart';
 import 'src/draw_points.dart';
+import 'src/draw_vertices.dart';
 import 'src/filtered_child_animation.dart';
 import 'src/fullscreen_textfield.dart';
 import 'src/gradient_perf.dart';
@@ -28,6 +31,7 @@ import 'src/large_images.dart';
 import 'src/list_text_layout.dart';
 import 'src/multi_widget_construction.dart';
 import 'src/opacity_peephole.dart';
+import 'src/path_tessellation.dart';
 import 'src/picture_cache.dart';
 import 'src/picture_cache_complexity_scoring.dart';
 import 'src/post_backdrop_filter.dart';
@@ -38,6 +42,7 @@ import 'src/simple_scroll.dart';
 import 'src/sliders.dart';
 import 'src/stack_size.dart';
 import 'src/text.dart';
+import 'src/very_long_picture_scrolling.dart';
 
 const String kMacrobenchmarks = 'Macrobenchmarks';
 
@@ -63,6 +68,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kLargeImageChangerRouteName: (BuildContext context) => const LargeImageChangerPage(),
         kLargeImagesRouteName: (BuildContext context) => const LargeImagesPage(),
         kTextRouteName: (BuildContext context) => const TextPage(),
+        kPathTessellationRouteName: (BuildContext context) => const PathTessellationPage(),
         kFullscreenTextRouteName: (BuildContext context) => const TextFieldPage(),
         kAnimatedPlaceholderRouteName: (BuildContext context) => const AnimatedPlaceholderPage(),
         kClipperCacheRouteName: (BuildContext context) => const ClipperCachePage(),
@@ -89,6 +95,10 @@ class MacrobenchmarksApp extends StatelessWidget {
         kAnimatedBlurBackdropFilter: (BuildContext context) => const AnimatedBlurBackdropFilter(),
         kSlidersRouteName: (BuildContext context) => const SlidersPage(),
         kDrawPointsPageRougeName: (BuildContext context) => const DrawPointsPage(),
+        kDrawVerticesPageRouteName: (BuildContext context) => const DrawVerticesPage(),
+        kDrawAtlasPageRouteName: (BuildContext context) => const DrawAtlasPage(),
+        kAnimatedAdvancedBlend: (BuildContext context) => const AnimatedAdvancedBlend(),
+        kVeryLongPictureScrollingRouteName: (BuildContext context) => const VeryLongPictureScrollingPerf(),
       },
     );
   }
@@ -160,6 +170,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Large Images'),
             onPressed: () {
               Navigator.pushNamed(context, kLargeImagesRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kPathTessellationRouteName),
+            child: const Text('Path Tessellation'),
+            onPressed: () {
+              Navigator.pushNamed(context, kPathTessellationRouteName);
             },
           ),
           ElevatedButton(
@@ -336,7 +353,35 @@ class HomePage extends StatelessWidget {
             onPressed: () {
               Navigator.pushNamed(context, kDrawPointsPageRougeName);
             },
-          )
+          ),
+          ElevatedButton(
+            key: const Key(kDrawVerticesPageRouteName),
+            child: const Text('Draw Vertices'),
+            onPressed: () {
+              Navigator.pushNamed(context, kDrawVerticesPageRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kDrawAtlasPageRouteName),
+            child: const Text('Draw Atlas'),
+            onPressed: () {
+              Navigator.pushNamed(context, kDrawAtlasPageRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kAnimatedAdvancedBlend),
+            child: const Text('Animated Advanced Blend'),
+            onPressed: () {
+              Navigator.pushNamed(context, kAnimatedAdvancedBlend);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kVeryLongPictureScrollingRouteName),
+            child: const Text('Very Long Picture Scrolling'),
+            onPressed: () {
+              Navigator.pushNamed(context, kVeryLongPictureScrollingRouteName);
+            },
+          ),
         ],
       ),
     );

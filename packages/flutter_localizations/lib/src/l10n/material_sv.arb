@@ -136,10 +136,14 @@
   "bottomSheetLabel": "Ark på nedre delen av skärmen",
   "scrimOnTapHint": "Stäng $modalRouteContentName",
   "keyboardKeyShift": "Skift",
-  "expansionTileExpandedHint": "double tap to collapse'",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "tryck snabbt två gånger för att komprimera",
+  "expansionTileCollapsedHint": "tryck snabbt två gånger för att utöka",
+  "expansionTileExpandedTapHint": "Komprimera",
+  "expansionTileCollapsedTapHint": "Utöka för mer information",
+  "expandedHint": "Komprimerades",
+  "collapsedHint": "Utökades",
+  "menuDismissLabel": "Stäng menyn",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

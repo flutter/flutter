@@ -655,6 +655,63 @@ void main() {
     verifyTreeIsClean();
   });
 
+  testWidgets('Adding/Removing OverlayPortal in LayoutBuilder during layout', (WidgetTester tester) async {
+    final GlobalKey widgetKey = GlobalKey(debugLabel: 'widget');
+    final GlobalKey overlayKey = GlobalKey(debugLabel: 'overlay');
+    controller1.hide();
+    late StateSetter setState;
+    Size size = Size.zero;
+
+    final Widget overlayPortal = OverlayPortal(
+      key: widgetKey,
+      controller: controller1,
+      overlayChildBuilder: (BuildContext context) => const Placeholder(),
+      child: const Placeholder(),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          key: overlayKey,
+          initialEntries: <OverlayEntry>[
+            OverlayEntry(
+              builder: (BuildContext context) {
+                return StatefulBuilder(
+                  builder: (BuildContext context, StateSetter stateSetter) {
+                    setState = stateSetter;
+                    return Center(
+                      child: SizedBox.fromSize(
+                        size: size,
+                        child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+                          // This layout callback adds/removes an OverlayPortal during layout.
+                          return constraints.maxHeight > 0 ? overlayPortal : const SizedBox();
+                        }),
+                      ),
+                    );
+                  }
+                );
+              }
+            ),
+          ],
+        ),
+      ),
+    );
+    controller1.show();
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+
+    // Adds the OverlayPortal from within a LayoutBuilder, in a layout callback.
+    setState(() { size = const Size(300, 300); });
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+
+    // Removes the OverlayPortal from within a LayoutBuilder, in a layout callback.
+    setState(() { size = Size.zero; });
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Change overlay constraints', (WidgetTester tester) async {
     final GlobalKey widgetKey = GlobalKey(debugLabel: 'widget outer');
     final GlobalKey overlayKey = GlobalKey(debugLabel: 'overlay');

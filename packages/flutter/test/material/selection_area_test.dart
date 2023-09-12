@@ -8,6 +8,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+
 
 Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
   const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
@@ -16,7 +18,7 @@ Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
 }
 
 void main() {
-  testWidgets('SelectionArea uses correct selection controls', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SelectionArea uses correct selection controls', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: SelectionArea(
         child: Text('abc'),
@@ -38,7 +40,7 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('Does not crash when long pressing on padding after dragging', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Does not crash when long pressing on padding after dragging', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/123378
     await tester.pumpWidget(
       const MaterialApp(
@@ -69,11 +71,14 @@ void main() {
   });
 
 
-  testWidgets('builds the default context menu by default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('builds the default context menu by default', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: SelectionArea(
-          focusNode: FocusNode(),
+          focusNode: focusNode,
           child: const Text('How are you?'),
         ),
       ),
@@ -96,12 +101,15 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
-  testWidgets('builds a custom context menu if provided', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('builds a custom context menu if provided', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: SelectionArea(
-          focusNode: FocusNode(),
+          focusNode: focusNode,
           contextMenuBuilder: (
             BuildContext context,
             SelectableRegionState selectableRegionState,
@@ -132,7 +140,7 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
-  testWidgets('onSelectionChange is called when the selection changes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('onSelectionChange is called when the selection changes', (WidgetTester tester) async {
     SelectedContent? content;
 
     await tester.pumpWidget(MaterialApp(
@@ -155,6 +163,7 @@ void main() {
 
     // Backwards selection.
     await gesture.down(textOffsetToPosition(paragraph, 3));
+    await tester.pumpAndSettle();
     expect(content, isNull);
     await gesture.moveTo(textOffsetToPosition(paragraph, 0));
     await gesture.up();
@@ -163,7 +172,10 @@ void main() {
     expect(content!.plainText, 'How');
   });
 
-  testWidgets('stopping drag of end handle will show the toolbar', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('stopping drag of end handle will show the toolbar', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
     // Regression test for https://github.com/flutter/flutter/issues/119314
     await tester.pumpWidget(
       MaterialApp(
@@ -175,7 +187,7 @@ void main() {
               children: <Widget>[
                 const Text('How are you?'),
                 SelectionArea(
-                  focusNode: FocusNode(),
+                  focusNode: focusNode,
                   child: const Text('Good, and you?'),
                 ),
                 const Text('Fine, thank you.'),

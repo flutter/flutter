@@ -19,11 +19,11 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.repository == 'flutter/flutter' }}
     steps:
-      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
       - name: ./bin/flutter test --coverage
         run: pushd packages/flutter;../../bin/flutter test --coverage -j 1;popd
       - name: upload coverage
-        uses: codecov/codecov-action@894ff025c7b54547a9a2a1e9f228beae737ad3c2
+        uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d
         with:
           files: packages/flutter/coverage/lcov.info
           verbose: true

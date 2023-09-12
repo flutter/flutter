@@ -143,10 +143,14 @@
   "bottomSheetLabel": "Нижний экран",
   "scrimOnTapHint": "Закрыть $modalRouteContentName",
   "keyboardKeyShift": "Shift",
-  "expansionTileExpandedHint": "double tap to collapse'",
-  "expansionTileCollapsedHint": "double tap to expand",
-  "expansionTileExpandedTapHint": "Collapse",
-  "expansionTileCollapsedTapHint": "Expand for more details",
-  "expandedHint": "Collapsed",
-  "collapsedHint": "Expanded"
+  "expansionTileExpandedHint": "нажмите дважды, чтобы свернуть",
+  "expansionTileCollapsedHint": "нажмите дважды, чтобы развернуть",
+  "expansionTileExpandedTapHint": "Свернуть",
+  "expansionTileCollapsedTapHint": "Развернуть дополнительные сведения",
+  "expandedHint": "Свернуто",
+  "collapsedHint": "Развернуто",
+  "menuDismissLabel": "Закрыть меню",
+  "lookUpButtonLabel": "Look Up",
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

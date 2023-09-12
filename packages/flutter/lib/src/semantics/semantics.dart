@@ -870,6 +870,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.enabled,
     this.checked,
     this.mixed,
+    this.expanded,
     this.selected,
     this.toggled,
     this.button,
@@ -963,6 +964,14 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   /// This is mutually exclusive with [checked] and [toggled].
   final bool? mixed;
+
+  /// If non-null, indicates that this subtree represents something
+  /// that can be in an "expanded" or "collapsed" state.
+  ///
+  /// For example, if a [SubmenuButton] is opened, this property
+  /// should be set to true; otherwise, this property should be
+  /// false.
+  final bool? expanded;
 
   /// If non-null, indicates that this subtree represents a toggle switch
   /// or similar widget with an "on" state, and what its current
@@ -1612,6 +1621,7 @@ class SemanticsProperties extends DiagnosticableTree {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('checked', checked, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('mixed', mixed, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('expanded', expanded, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('selected', selected, defaultValue: null));
     properties.add(StringProperty('label', label, defaultValue: null));
     properties.add(AttributedStringProperty('attributedLabel', attributedLabel, defaultValue: null));
@@ -1999,25 +2009,29 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
   /// The owner for this node (null if unattached).
   ///
-  /// The entire subtree that this node belongs to will have the same owner.
+  /// The entire semantics tree that this node belongs to will have the same owner.
   SemanticsOwner? get owner => _owner;
   SemanticsOwner? _owner;
 
-  /// Whether this node is in a tree whose root is attached to something.
+  /// Whether the semantics tree this node belongs to is attached to a [SemanticsOwner].
   ///
   /// This becomes true during the call to [attach].
   ///
   /// This becomes false during the call to [detach].
   bool get attached => _owner != null;
 
-  /// The parent of this node in the tree.
+  /// The parent of this node in the semantics tree.
+  ///
+  /// The [parent] of the root node in the semantics tree is null.
   SemanticsNode? get parent => _parent;
   SemanticsNode? _parent;
 
-  /// The depth of this node in the tree.
+  /// The depth of this node in the semantics tree.
   ///
   /// The depth of nodes in a tree monotonically increases as you traverse down
-  /// the tree.
+  /// the tree.  There's no guarantee regarding depth between siblings.
+  ///
+  /// The depth is used to ensure that nodes are processed in depth order.
   int get depth => _depth;
   int _depth = 0;
 
@@ -2082,7 +2096,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
   }
 
-  /// Mark this node as detached.
+  /// Mark this node as detached from its owner.
   @visibleForTesting
   void detach() {
     assert(_owner != null);
@@ -4392,6 +4406,20 @@ class SemanticsConfiguration {
   bool get isSelected => _hasFlag(SemanticsFlag.isSelected);
   set isSelected(bool value) {
     _setFlag(SemanticsFlag.isSelected, value);
+  }
+
+  /// If this node has Boolean state that can be controlled by the user, whether
+  /// that state is expanded or collapsed, corresponding to true and false, respectively.
+  ///
+  /// Do not call the setter for this field if the owning [RenderObject] doesn't
+  /// have expanded/collapsed state that can be controlled by the user.
+  ///
+  /// The getter returns null if the owning [RenderObject] does not have
+  /// expanded/collapsed state.
+  bool? get isExpanded => _hasFlag(SemanticsFlag.hasExpandedState) ? _hasFlag(SemanticsFlag.isExpanded) : null;
+  set isExpanded(bool? value) {
+    _setFlag(SemanticsFlag.hasExpandedState, true);
+    _setFlag(SemanticsFlag.isExpanded, value!);
   }
 
   /// Whether the owning [RenderObject] is currently enabled.

@@ -7,7 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import '../rendering/mock_canvas.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
@@ -23,7 +23,7 @@ Widget wrap({ required Widget child }) {
 }
 
 void main() {
-  testWidgets('SwitchListTile control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SwitchListTile control test', (WidgetTester tester) async {
     final List<dynamic> log = <dynamic>[];
     await tester.pumpWidget(wrap(
       child: SwitchListTile(
@@ -38,7 +38,7 @@ void main() {
     expect(log, equals(<dynamic>[false, '-', false]));
   });
 
-  testWidgets('SwitchListTile semantics test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SwitchListTile semantics test', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(wrap(
       child: Column(
@@ -116,7 +116,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Material2 - SwitchListTile has the right colors', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - SwitchListTile has the right colors', (WidgetTester tester) async {
     bool value = false;
     await tester.pumpWidget(
       MediaQuery(
@@ -170,7 +170,7 @@ void main() {
     );
   });
 
-  testWidgets('Material3 - SwitchListTile has the right colors', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - SwitchListTile has the right colors', (WidgetTester tester) async {
     bool value = false;
     await tester.pumpWidget(
       MediaQuery(
@@ -221,7 +221,7 @@ void main() {
     );
   });
 
-  testWidgets('SwitchListTile.adaptive delegates to', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SwitchListTile.adaptive delegates to', (WidgetTester tester) async {
     bool value = false;
 
     Widget buildFrame(TargetPlatform platform) {
@@ -268,7 +268,7 @@ void main() {
     }
   });
 
-  testWidgets('SwitchListTile contentPadding', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SwitchListTile contentPadding', (WidgetTester tester) async {
     Widget buildFrame(TextDirection textDirection) {
       return MediaQuery(
         data: const MediaQueryData(),
@@ -306,7 +306,7 @@ void main() {
     expect(tester.getTopRight(find.text('L')).dx, 790.0); // 800 - contentPadding.start
   });
 
-  testWidgets('SwitchListTile can autofocus unless disabled.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SwitchListTile can autofocus unless disabled.', (WidgetTester tester) async {
     final GlobalKey childKey = GlobalKey();
 
     await tester.pumpWidget(
@@ -350,7 +350,7 @@ void main() {
     expect(Focus.of(childKey.currentContext!).hasPrimaryFocus, isFalse);
   });
 
-  testWidgets('SwitchListTile controlAffinity test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SwitchListTile controlAffinity test', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: SwitchListTile(
@@ -370,7 +370,7 @@ void main() {
     expect(listTile.trailing.runtimeType, Icon);
   });
 
-  testWidgets('SwitchListTile controlAffinity default value test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SwitchListTile controlAffinity default value test', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Material(
         child: SwitchListTile(
@@ -390,7 +390,7 @@ void main() {
     expect(listTile.trailing.runtimeType, Switch);
   });
 
-  testWidgets('SwitchListTile respects shape', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SwitchListTile respects shape', (WidgetTester tester) async {
     const ShapeBorder shapeBorder = RoundedRectangleBorder(
       borderRadius: BorderRadius.horizontal(right: Radius.circular(100)),
     );
@@ -409,7 +409,7 @@ void main() {
     expect(tester.widget<InkWell>(find.byType(InkWell)).customBorder, shapeBorder);
   });
 
-  testWidgets('SwitchListTile respects tileColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SwitchListTile respects tileColor', (WidgetTester tester) async {
     final Color tileColor = Colors.red.shade500;
 
     await tester.pumpWidget(
@@ -428,7 +428,7 @@ void main() {
     expect(find.byType(Material), paints..rect(color: tileColor));
   });
 
-  testWidgets('SwitchListTile respects selectedTileColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SwitchListTile respects selectedTileColor', (WidgetTester tester) async {
     final Color selectedTileColor = Colors.green.shade500;
 
     await tester.pumpWidget(
@@ -448,7 +448,7 @@ void main() {
     expect(find.byType(Material), paints..rect(color: selectedTileColor));
   });
 
-  testWidgets('SwitchListTile selected item text Color', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SwitchListTile selected item text Color', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/76909
 
     const Color activeColor = Color(0xff00ff00);
@@ -487,7 +487,7 @@ void main() {
     expect(textColor('title'), activeColor);
   });
 
-  testWidgets('SwitchListTile respects visualDensity', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SwitchListTile respects visualDensity', (WidgetTester tester) async {
     const Key key = Key('test');
     Future<void> buildTest(VisualDensity visualDensity) async {
       return tester.pumpWidget(
@@ -511,7 +511,7 @@ void main() {
     expect(box.size, equals(const Size(800, 56)));
   });
 
-  testWidgets('SwitchListTile respects focusNode', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SwitchListTile respects focusNode', (WidgetTester tester) async {
     final GlobalKey childKey = GlobalKey();
     await tester.pumpWidget(
       wrap(
@@ -533,7 +533,7 @@ void main() {
     expect(tileNode.hasPrimaryFocus, isTrue);
   });
 
-  testWidgets('SwitchListTile onFocusChange callback', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SwitchListTile onFocusChange callback', (WidgetTester tester) async {
     final FocusNode node = FocusNode(debugLabel: 'SwitchListTile onFocusChange');
     bool gotFocus = false;
     await tester.pumpWidget(
@@ -560,9 +560,10 @@ void main() {
     await tester.pump();
     expect(gotFocus, isFalse);
     expect(node.hasFocus, isFalse);
+    node.dispose();
   });
 
-  testWidgets('SwitchListTile.adaptive onFocusChange Callback', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SwitchListTile.adaptive onFocusChange Callback', (WidgetTester tester) async {
     final FocusNode node = FocusNode(debugLabel: 'SwitchListTile.adaptive onFocusChange');
     bool gotFocus = false;
     await tester.pumpWidget(
@@ -589,6 +590,7 @@ void main() {
     await tester.pump();
     expect(gotFocus, isFalse);
     expect(node.hasFocus, isFalse);
+    node.dispose();
   });
 
   group('feedback', () {
@@ -602,7 +604,7 @@ void main() {
       feedback.dispose();
     });
 
-    testWidgets('SwitchListTile respects enableFeedback', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('SwitchListTile respects enableFeedback', (WidgetTester tester) async {
       Future<void> buildTest(bool enableFeedback) async {
         return tester.pumpWidget(
           wrap(
@@ -631,7 +633,7 @@ void main() {
     });
   });
 
-  testWidgets('SwitchListTile respects hoverColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SwitchListTile respects hoverColor', (WidgetTester tester) async {
     const Key key = Key('test');
     await tester.pumpWidget(
       wrap(
@@ -671,7 +673,7 @@ void main() {
     );
   });
 
-  testWidgets('Material2 - SwitchListTile respects thumbColor in active/enabled states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - SwitchListTile respects thumbColor in active/enabled states', (WidgetTester tester) async {
     const Color activeEnabledThumbColor = Color(0xFF000001);
     const Color activeDisabledThumbColor = Color(0xFF000002);
     const Color inactiveEnabledThumbColor = Color(0xFF000003);
@@ -739,7 +741,7 @@ void main() {
     );
   });
 
-  testWidgets('Material3 - SwitchListTile respects thumbColor in active/enabled states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - SwitchListTile respects thumbColor in active/enabled states', (WidgetTester tester) async {
     const Color activeEnabledThumbColor = Color(0xFF000001);
     const Color activeDisabledThumbColor = Color(0xFF000002);
     const Color inactiveEnabledThumbColor = Color(0xFF000003);
@@ -807,7 +809,7 @@ void main() {
     );
   });
 
-  testWidgets('Material2 - SwitchListTile respects thumbColor in hovered/pressed states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - SwitchListTile respects thumbColor in hovered/pressed states', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Color hoveredThumbColor = Color(0xFF4caf50);
     const Color pressedThumbColor = Color(0xFFF44336);
@@ -863,7 +865,7 @@ void main() {
     );
   });
 
-  testWidgets('Material3 - SwitchListTile respects thumbColor in hovered/pressed states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - SwitchListTile respects thumbColor in hovered/pressed states', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Color hoveredThumbColor = Color(0xFF4caf50);
     const Color pressedThumbColor = Color(0xFFF44336);
@@ -919,7 +921,7 @@ void main() {
     );
   });
 
-  testWidgets('SwitchListTile respects trackColor in active/enabled states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SwitchListTile respects trackColor in active/enabled states', (WidgetTester tester) async {
     const Color activeEnabledTrackColor = Color(0xFF000001);
     const Color activeDisabledTrackColor = Color(0xFF000002);
     const Color inactiveEnabledTrackColor = Color(0xFF000003);
@@ -984,7 +986,7 @@ void main() {
     );
   });
 
-  testWidgets('SwitchListTile respects trackColor in hovered states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SwitchListTile respects trackColor in hovered states', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Color hoveredTrackColor = Color(0xFF4caf50);
 
@@ -1025,7 +1027,7 @@ void main() {
     );
   });
 
-  testWidgets('SwitchListTile respects thumbIcon - M3', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SwitchListTile respects thumbIcon - M3', (WidgetTester tester) async {
     const Icon activeIcon = Icon(Icons.check);
     const Icon inactiveIcon = Icon(Icons.close);
 
@@ -1110,7 +1112,7 @@ void main() {
     );
   });
 
-  testWidgets('Material2 - SwitchListTile respects materialTapTargetSize', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - SwitchListTile respects materialTapTargetSize', (WidgetTester tester) async {
     Widget buildSwitchListTile(MaterialTapTargetSize materialTapTargetSize) {
       return MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -1138,7 +1140,7 @@ void main() {
     expect(tester.getSize(find.byType(Switch)), const Size(59.0, 40.0));
   });
 
-  testWidgets('Material3 - SwitchListTile respects materialTapTargetSize', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - SwitchListTile respects materialTapTargetSize', (WidgetTester tester) async {
     Widget buildSwitchListTile(MaterialTapTargetSize materialTapTargetSize) {
       return MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -1166,7 +1168,7 @@ void main() {
     expect(tester.getSize(find.byType(Switch)), const Size(60.0, 40.0));
   });
 
-  testWidgets('Material2 - SwitchListTile.adaptive respects applyCupertinoTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - SwitchListTile.adaptive respects applyCupertinoTheme', (WidgetTester tester) async {
     Widget buildSwitchListTile(bool applyCupertinoTheme, TargetPlatform platform) {
       return MaterialApp(
         theme: ThemeData(useMaterial3: false, platform: platform),
@@ -1202,7 +1204,7 @@ void main() {
     }
   });
 
-  testWidgets('Material3 - SwitchListTile.adaptive respects applyCupertinoTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - SwitchListTile.adaptive respects applyCupertinoTheme', (WidgetTester tester) async {
     Widget buildSwitchListTile(bool applyCupertinoTheme, TargetPlatform platform) {
       return MaterialApp(
         theme: ThemeData(useMaterial3: true, platform: platform),
@@ -1238,7 +1240,7 @@ void main() {
     }
   });
 
-  testWidgets('Material2 - SwitchListTile respects materialTapTargetSize', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - SwitchListTile respects materialTapTargetSize', (WidgetTester tester) async {
     Widget buildSwitchListTile(MaterialTapTargetSize materialTapTargetSize) {
       return MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -1266,7 +1268,7 @@ void main() {
     expect(tester.getSize(find.byType(Switch)), const Size(59.0, 40.0));
   });
 
-  testWidgets('Material3 - SwitchListTile respects materialTapTargetSize', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material3 - SwitchListTile respects materialTapTargetSize', (WidgetTester tester) async {
     Widget buildSwitchListTile(MaterialTapTargetSize materialTapTargetSize) {
       return MaterialApp(
         theme: ThemeData(useMaterial3: true),
@@ -1294,7 +1296,7 @@ void main() {
     expect(tester.getSize(find.byType(Switch)), const Size(60.0, 40.0));
   });
 
-  testWidgets('SwitchListTile passes the value of dragStartBehavior to Switch', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SwitchListTile passes the value of dragStartBehavior to Switch', (WidgetTester tester) async {
     Widget buildSwitchListTile(DragStartBehavior dragStartBehavior) {
       return wrap(
         child: StatefulBuilder(
@@ -1317,7 +1319,7 @@ void main() {
     expect(switchWidget1.dragStartBehavior, DragStartBehavior.down);
   });
 
-  testWidgets('Switch on SwitchListTile changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Switch on SwitchListTile changes mouse cursor when hovered', (WidgetTester tester) async {
     // Test SwitchListTile.adaptive() constructor
     await tester.pumpWidget(wrap(
       child: StatefulBuilder(
@@ -1378,7 +1380,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
-  testWidgets('Switch with splash radius set', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Switch with splash radius set', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const double splashRadius = 35;
     await tester.pumpWidget(wrap(
@@ -1404,7 +1406,7 @@ void main() {
     );
   });
 
-  testWidgets('The overlay color for the thumb of the switch resolves in active/pressed/hovered states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('The overlay color for the thumb of the switch resolves in active/pressed/hovered states', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Color activeThumbColor = Color(0xFF000000);
     const Color inactiveThumbColor = Color(0xFF000010);
@@ -1525,7 +1527,7 @@ void main() {
     );
   });
 
-  testWidgets('SwitchListTile respects trackOutlineColor in active/enabled states', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SwitchListTile respects trackOutlineColor in active/enabled states', (WidgetTester tester) async {
     const Color activeEnabledTrackOutlineColor = Color(0xFF000001);
     const Color activeDisabledTrackOutlineColor = Color(0xFF000002);
     const Color inactiveEnabledTrackOutlineColor = Color(0xFF000003);
@@ -1594,7 +1596,7 @@ void main() {
     );
   });
 
-  testWidgets('SwitchListTile respects trackOutlineColor in hovered state', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SwitchListTile respects trackOutlineColor in hovered state', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Color hoveredTrackColor = Color(0xFF4caf50);
 
