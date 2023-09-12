@@ -33,6 +33,10 @@ class EmbedderTestContextVulkan : public EmbedderTestContext {
 
   bool PresentImage(VkImage image);
 
+  static void* InstanceProcAddr(void* user_data,
+                                FlutterVulkanInstanceHandle instance,
+                                const char* name);
+
  private:
   std::unique_ptr<TestVulkanSurface> surface_;
 
