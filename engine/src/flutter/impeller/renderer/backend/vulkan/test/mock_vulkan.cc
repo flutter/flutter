@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
+#include <vector>
+#include "fml/macros.h"
+#include "impeller/base/thread_safety.h"
 
 namespace impeller {
 namespace testing {
@@ -16,17 +19,37 @@ struct MockCommandBuffer {
   std::shared_ptr<std::vector<std::string>> called_functions_;
 };
 
-struct MockDevice {
-  MockDevice() : called_functions_(new std::vector<std::string>()) {}
+class MockDevice final {
+ public:
+  explicit MockDevice() : called_functions_(new std::vector<std::string>()) {}
+
   MockCommandBuffer* NewCommandBuffer() {
-    std::unique_ptr<MockCommandBuffer> buffer =
-        std::make_unique<MockCommandBuffer>(called_functions_);
+    auto buffer = std::make_unique<MockCommandBuffer>(called_functions_);
     MockCommandBuffer* result = buffer.get();
+    Lock lock(command_buffers_mutex_);
     command_buffers_.emplace_back(std::move(buffer));
     return result;
   }
-  std::shared_ptr<std::vector<std::string>> called_functions_;
-  std::vector<std::unique_ptr<MockCommandBuffer>> command_buffers_;
+
+  const std::shared_ptr<std::vector<std::string>>& GetCalledFunctions() {
+    return called_functions_;
+  }
+
+  void AddCalledFunction(const std::string& function) {
+    Lock lock(called_functions_mutex_);
+    called_functions_->push_back(function);
+  }
+
+ private:
+  FML_DISALLOW_COPY_AND_ASSIGN(MockDevice);
+
+  Mutex called_functions_mutex_;
+  std::shared_ptr<std::vector<std::string>> called_functions_
+      IPLR_GUARDED_BY(called_functions_mutex_);
+
+  Mutex command_buffers_mutex_;
+  std::vector<std::unique_ptr<MockCommandBuffer>> command_buffers_
+      IPLR_GUARDED_BY(command_buffers_mutex_);
 };
 
 void noop() {}
@@ -147,7 +170,7 @@ VkResult vkCreatePipelineCache(VkDevice device,
                                const VkAllocationCallbacks* pAllocator,
                                VkPipelineCache* pPipelineCache) {
   MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
-  mock_device->called_functions_->push_back("vkCreatePipelineCache");
+  mock_device->AddCalledFunction("vkCreatePipelineCache");
   *pPipelineCache = reinterpret_cast<VkPipelineCache>(0xb000dead);
   return VK_SUCCESS;
 }
@@ -270,14 +293,14 @@ VkResult vkCreateGraphicsPipelines(
     const VkAllocationCallbacks* pAllocator,
     VkPipeline* pPipelines) {
   MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
-  mock_device->called_functions_->push_back("vkCreateGraphicsPipelines");
+  mock_device->AddCalledFunction("vkCreateGraphicsPipelines");
   *pPipelines = reinterpret_cast<VkPipeline>(0x99999999);
   return VK_SUCCESS;
 }
 
 void vkDestroyDevice(VkDevice device, const VkAllocationCallbacks* pAllocator) {
   MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
-  mock_device->called_functions_->push_back("vkDestroyDevice");
+  mock_device->AddCalledFunction("vkDestroyDevice");
   delete reinterpret_cast<MockDevice*>(device);
 }
 
@@ -285,7 +308,7 @@ void vkDestroyPipeline(VkDevice device,
                        VkPipeline pipeline,
                        const VkAllocationCallbacks* pAllocator) {
   MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
-  mock_device->called_functions_->push_back("vkDestroyPipeline");
+  mock_device->AddCalledFunction("vkDestroyPipeline");
 }
 
 VkResult vkCreateShaderModule(VkDevice device,
@@ -293,7 +316,7 @@ VkResult vkCreateShaderModule(VkDevice device,
                               const VkAllocationCallbacks* pAllocator,
                               VkShaderModule* pShaderModule) {
   MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
-  mock_device->called_functions_->push_back("vkCreateShaderModule");
+  mock_device->AddCalledFunction("vkCreateShaderModule");
   *pShaderModule = reinterpret_cast<VkShaderModule>(0x11111111);
   return VK_SUCCESS;
 }
@@ -302,14 +325,14 @@ void vkDestroyShaderModule(VkDevice device,
                            VkShaderModule shaderModule,
                            const VkAllocationCallbacks* pAllocator) {
   MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
-  mock_device->called_functions_->push_back("vkDestroyShaderModule");
+  mock_device->AddCalledFunction("vkDestroyShaderModule");
 }
 
 void vkDestroyPipelineCache(VkDevice device,
                             VkPipelineCache pipelineCache,
                             const VkAllocationCallbacks* pAllocator) {
   MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
-  mock_device->called_functions_->push_back("vkDestroyPipelineCache");
+  mock_device->AddCalledFunction("vkDestroyPipelineCache");
 }
 
 void vkCmdBindPipeline(VkCommandBuffer commandBuffer,
@@ -351,14 +374,14 @@ void vkFreeCommandBuffers(VkDevice device,
                           uint32_t commandBufferCount,
                           const VkCommandBuffer* pCommandBuffers) {
   MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
-  mock_device->called_functions_->push_back("vkFreeCommandBuffers");
+  mock_device->AddCalledFunction("vkFreeCommandBuffers");
 }
 
 void vkDestroyCommandPool(VkDevice device,
                           VkCommandPool commandPool,
                           const VkAllocationCallbacks* pAllocator) {
   MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
-  mock_device->called_functions_->push_back("vkDestroyCommandPool");
+  mock_device->AddCalledFunction("vkDestroyCommandPool");
 }
 
 VkResult vkEndCommandBuffer(VkCommandBuffer commandBuffer) {
@@ -500,7 +523,7 @@ std::shared_ptr<ContextVK> CreateMockVulkanContext(void) {
 std::shared_ptr<std::vector<std::string>> GetMockVulkanFunctions(
     VkDevice device) {
   MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
-  return mock_device->called_functions_;
+  return mock_device->GetCalledFunctions();
 }
 
 }  // namespace testing
