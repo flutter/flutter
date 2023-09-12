@@ -393,6 +393,14 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   /// {@endtemplate}
   Offset trackpadScrollToScaleFactor;
 
+  /// The number of pointers being tracked by the gesture recognizer.
+  ///
+  /// Typically this is the number of fingers being used to pan the widget using the gesture
+  /// recognizer.
+  int get pointerCount {
+    return _pointerPanZooms.length + _pointerQueue.length;
+  }
+
   late Offset _initialFocalPoint;
   Offset? _currentFocalPoint;
   late double _initialSpan;
@@ -441,10 +449,6 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       scale *= p.scale / _initialPanZoomScaleFactor;
     }
     return scale;
-  }
-
-  int get _pointerCount {
-    return _pointerPanZooms.length + _pointerQueue.length;
   }
 
   double _computeRotationFactor() {
@@ -566,7 +570,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     for (final _PointerPanZoomData p in _pointerPanZooms.values) {
       focalPoint += p.focalPoint;
     }
-    _currentFocalPoint = _pointerCount > 0 ? focalPoint / _pointerCount.toDouble() : Offset.zero;
+    _currentFocalPoint = pointerCount > 0 ? focalPoint / pointerCount.toDouble() : Offset.zero;
 
     if (previousFocalPoint == null) {
       _localFocalPoint = PointerEvent.transformPosition(
@@ -662,9 +666,9 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
           if (pixelsPerSecond.distanceSquared > kMaxFlingVelocity * kMaxFlingVelocity) {
             velocity = Velocity(pixelsPerSecond: (pixelsPerSecond / pixelsPerSecond.distance) * kMaxFlingVelocity);
           }
-          invokeCallback<void>('onEnd', () => onEnd!(ScaleEndDetails(velocity: velocity, scaleVelocity: _scaleVelocityTracker?.getVelocity().pixelsPerSecond.dx ?? -1, pointerCount: _pointerCount)));
+          invokeCallback<void>('onEnd', () => onEnd!(ScaleEndDetails(velocity: velocity, scaleVelocity: _scaleVelocityTracker?.getVelocity().pixelsPerSecond.dx ?? -1, pointerCount: pointerCount)));
         } else {
-          invokeCallback<void>('onEnd', () => onEnd!(ScaleEndDetails(scaleVelocity: _scaleVelocityTracker?.getVelocity().pixelsPerSecond.dx ?? -1, pointerCount: _pointerCount)));
+          invokeCallback<void>('onEnd', () => onEnd!(ScaleEndDetails(scaleVelocity: _scaleVelocityTracker?.getVelocity().pixelsPerSecond.dx ?? -1, pointerCount: pointerCount)));
         }
       }
       _state = _ScaleState.accepted;
@@ -706,7 +710,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
             focalPoint: _currentFocalPoint!,
             localFocalPoint: _localFocalPoint,
             rotation: _computeRotationFactor(),
-            pointerCount: _pointerCount,
+            pointerCount: pointerCount,
             focalPointDelta: _delta,
           ));
         });
@@ -721,7 +725,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
         onStart!(ScaleStartDetails(
           focalPoint: _currentFocalPoint!,
           localFocalPoint: _localFocalPoint,
-          pointerCount: _pointerCount,
+          pointerCount: pointerCount,
         ));
       });
     }
