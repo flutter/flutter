@@ -499,8 +499,6 @@ class IOSDevice extends Device {
     final bool includeCoreDeviceBuildSettings = (isCoreDevice || forceXcodeDebugWorkflow) &&
         !debuggingOptions.buildInfo.isRelease && !prebuiltApplication;
 
-    print('INCLUDE XCODE DEBUG SETTINGS: $includeCoreDeviceBuildSettings = ($isCoreDevice || $forceXcodeDebugWorkflow) && !${debuggingOptions.buildInfo.isRelease} && !$prebuiltApplication');
-
     if (!prebuiltApplication) {
       _logger.printTrace('Building ${package.name} for $id');
 
