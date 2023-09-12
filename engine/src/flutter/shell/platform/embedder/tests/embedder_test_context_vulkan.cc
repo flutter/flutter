@@ -58,5 +58,15 @@ void EmbedderTestContextVulkan::SetupCompositor() {
       surface_size_, vulkan_context_->GetGrDirectContext());
 }
 
+void* EmbedderTestContextVulkan::InstanceProcAddr(
+    void* user_data,
+    FlutterVulkanInstanceHandle instance,
+    const char* name) {
+  auto proc_addr = reinterpret_cast<EmbedderTestContextVulkan*>(user_data)
+                       ->vulkan_context_->vk_->GetInstanceProcAddr(
+                           reinterpret_cast<VkInstance>(instance), name);
+  return reinterpret_cast<void*>(proc_addr);
+}
+
 }  // namespace testing
 }  // namespace flutter
