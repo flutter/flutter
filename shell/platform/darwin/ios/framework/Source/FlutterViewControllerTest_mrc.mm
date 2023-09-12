@@ -51,11 +51,10 @@ FLUTTER_ASSERT_NOT_ARC
   id mockDisplayLinkManager = [OCMockObject mockForClass:[DisplayLinkManager class]];
   double maxFrameRate = 120;
   [[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
-  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  FlutterEngine* engine = [[[FlutterEngine alloc] init] autorelease];
   [engine runWithEntrypoint:nil];
-  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
-                                                                                nibName:nil
-                                                                                 bundle:nil];
+  FlutterViewController* viewController =
+      [[[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil] autorelease];
   FlutterKeyboardAnimationCallback callback = ^(fml::TimePoint targetTime) {
   };
   [viewController setUpKeyboardAnimationVsyncClient:callback];
@@ -76,11 +75,10 @@ FLUTTER_ASSERT_NOT_ARC
   id mockDisplayLinkManager = [OCMockObject mockForClass:[DisplayLinkManager class]];
   double maxFrameRate = 120;
   [[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
-  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  FlutterEngine* engine = [[[FlutterEngine alloc] init] autorelease];
   [engine runWithEntrypoint:nil];
-  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
-                                                                                nibName:nil
-                                                                                 bundle:nil];
+  FlutterViewController* viewController =
+      [[[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil] autorelease];
   [viewController createTouchRateCorrectionVSyncClientIfNeeded];
   XCTAssertNotNil(viewController.touchRateCorrectionVSyncClient);
 }
@@ -90,11 +88,10 @@ FLUTTER_ASSERT_NOT_ARC
   double maxFrameRate = 120;
   [[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
 
-  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  FlutterEngine* engine = [[[FlutterEngine alloc] init] autorelease];
   [engine runWithEntrypoint:nil];
-  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
-                                                                                nibName:nil
-                                                                                 bundle:nil];
+  FlutterViewController* viewController =
+      [[[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil] autorelease];
   [viewController createTouchRateCorrectionVSyncClientIfNeeded];
   VSyncClient* clientBefore = viewController.touchRateCorrectionVSyncClient;
   XCTAssertNotNil(clientBefore);
@@ -110,11 +107,10 @@ FLUTTER_ASSERT_NOT_ARC
   id mockDisplayLinkManager = [OCMockObject mockForClass:[DisplayLinkManager class]];
   double maxFrameRate = 60;
   [[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
-  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  FlutterEngine* engine = [[[FlutterEngine alloc] init] autorelease];
   [engine runWithEntrypoint:nil];
-  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
-                                                                                nibName:nil
-                                                                                 bundle:nil];
+  FlutterViewController* viewController =
+      [[[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil] autorelease];
   [viewController createTouchRateCorrectionVSyncClientIfNeeded];
   XCTAssertNil(viewController.touchRateCorrectionVSyncClient);
 }
@@ -123,67 +119,72 @@ FLUTTER_ASSERT_NOT_ARC
   id mockDisplayLinkManager = [OCMockObject mockForClass:[DisplayLinkManager class]];
   double maxFrameRate = 120;
   [[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
-  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  FlutterEngine* engine = [[[FlutterEngine alloc] init] autorelease];
   [engine runWithEntrypoint:nil];
-  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
-                                                                                nibName:nil
-                                                                                 bundle:nil];
+  FlutterViewController* viewController =
+      [[[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil] autorelease];
   [viewController loadView];
   [viewController viewDidLoad];
 
   VSyncClient* client = viewController.touchRateCorrectionVSyncClient;
   CADisplayLink* link = [client getDisplayLink];
 
-  UITouch* fakeTouchBegan = [[UITouch alloc] init];
+  UITouch* fakeTouchBegan = [[[UITouch alloc] init] autorelease];
   fakeTouchBegan.phase = UITouchPhaseBegan;
 
-  UITouch* fakeTouchMove = [[UITouch alloc] init];
+  UITouch* fakeTouchMove = [[[UITouch alloc] init] autorelease];
   fakeTouchMove.phase = UITouchPhaseMoved;
 
-  UITouch* fakeTouchEnd = [[UITouch alloc] init];
+  UITouch* fakeTouchEnd = [[[UITouch alloc] init] autorelease];
   fakeTouchEnd.phase = UITouchPhaseEnded;
 
-  UITouch* fakeTouchCancelled = [[UITouch alloc] init];
+  UITouch* fakeTouchCancelled = [[[UITouch alloc] init] autorelease];
   fakeTouchCancelled.phase = UITouchPhaseCancelled;
 
   [viewController
-      triggerTouchRateCorrectionIfNeeded:[[NSSet alloc] initWithObjects:fakeTouchBegan, nil]];
+      triggerTouchRateCorrectionIfNeeded:[[[NSSet alloc] initWithObjects:fakeTouchBegan, nil]
+                                             autorelease]];
   XCTAssertFalse(link.isPaused);
 
   [viewController
-      triggerTouchRateCorrectionIfNeeded:[[NSSet alloc] initWithObjects:fakeTouchEnd, nil]];
+      triggerTouchRateCorrectionIfNeeded:[[[NSSet alloc] initWithObjects:fakeTouchEnd, nil]
+                                             autorelease]];
   XCTAssertTrue(link.isPaused);
 
   [viewController
-      triggerTouchRateCorrectionIfNeeded:[[NSSet alloc] initWithObjects:fakeTouchMove, nil]];
+      triggerTouchRateCorrectionIfNeeded:[[[NSSet alloc] initWithObjects:fakeTouchMove, nil]
+                                             autorelease]];
   XCTAssertFalse(link.isPaused);
 
   [viewController
-      triggerTouchRateCorrectionIfNeeded:[[NSSet alloc] initWithObjects:fakeTouchCancelled, nil]];
+      triggerTouchRateCorrectionIfNeeded:[[[NSSet alloc] initWithObjects:fakeTouchCancelled, nil]
+                                             autorelease]];
   XCTAssertTrue(link.isPaused);
 
   [viewController
-      triggerTouchRateCorrectionIfNeeded:[[NSSet alloc]
-                                             initWithObjects:fakeTouchBegan, fakeTouchEnd, nil]];
+      triggerTouchRateCorrectionIfNeeded:[[[NSSet alloc]
+                                             initWithObjects:fakeTouchBegan, fakeTouchEnd, nil]
+                                             autorelease]];
   XCTAssertFalse(link.isPaused);
 
   [viewController
-      triggerTouchRateCorrectionIfNeeded:[[NSSet alloc] initWithObjects:fakeTouchEnd,
-                                                                        fakeTouchCancelled, nil]];
+      triggerTouchRateCorrectionIfNeeded:[[[NSSet alloc]
+                                             initWithObjects:fakeTouchEnd, fakeTouchCancelled, nil]
+                                             autorelease]];
   XCTAssertTrue(link.isPaused);
 
   [viewController
-      triggerTouchRateCorrectionIfNeeded:[[NSSet alloc]
-                                             initWithObjects:fakeTouchMove, fakeTouchEnd, nil]];
+      triggerTouchRateCorrectionIfNeeded:[[[NSSet alloc]
+                                             initWithObjects:fakeTouchMove, fakeTouchEnd, nil]
+                                             autorelease]];
   XCTAssertFalse(link.isPaused);
 }
 
 - (void)testFlutterViewControllerStartKeyboardAnimationWillCreateVsyncClientCorrectly {
-  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  FlutterEngine* engine = [[[FlutterEngine alloc] init] autorelease];
   [engine runWithEntrypoint:nil];
-  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
-                                                                                nibName:nil
-                                                                                 bundle:nil];
+  FlutterViewController* viewController =
+      [[[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil] autorelease];
   viewController.targetViewInsetBottom = 100;
   [viewController startKeyBoardAnimation:0.25];
   XCTAssertNotNil(viewController.keyboardAnimationVSyncClient);
@@ -191,11 +192,10 @@ FLUTTER_ASSERT_NOT_ARC
 
 - (void)
     testSetupKeyboardAnimationVsyncClientWillNotCreateNewVsyncClientWhenKeyboardAnimationCallbackIsNil {
-  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  FlutterEngine* engine = [[[FlutterEngine alloc] init] autorelease];
   [engine runWithEntrypoint:nil];
-  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
-                                                                                nibName:nil
-                                                                                 bundle:nil];
+  FlutterViewController* viewController =
+      [[[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil] autorelease];
   [viewController setUpKeyboardAnimationVsyncClient:nil];
   XCTAssertNil(viewController.keyboardAnimationVSyncClient);
 }

@@ -60,6 +60,7 @@ FLUTTER_ASSERT_NOT_ARC
   engine.ensureSemanticsEnabledCalled = NO;
   [engine flutterViewAccessibilityDidCall];
   XCTAssertTrue(engine.ensureSemanticsEnabledCalled);
+  [engine release];
 }
 
 @end
