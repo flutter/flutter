@@ -782,7 +782,7 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.undoHistory.controller}
   final UndoHistoryController? undoController;
 
-  /// Determine if onTapOutside can be called when the [TextField] is not focused.
+  /// Determine whether [onTapOutside] can be called when the [TextField] is not focused.
   final bool canTapOutsideFocus;
 
   static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
@@ -1151,22 +1151,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     });
   }
 
-  /// Handles taps that occur outside the TextField widget.
-  ///
-  /// This method is invoked when a tap event occurs outside the TextField widget.
-  /// It evaluates whether the TextField has focus and whether tapping outside is
-  /// permitted according to the [widget.canTapOutsideFocus] property. If either the
-  /// TextField has focus or tapping outside is allowed, it triggers the
-  /// [widget.onTapOutside] callback.
-  ///
-  /// Returns the [widget.onTapOutside] callback if conditions are met; otherwise,
-  /// returns null.
-  TapRegionCallback? _handleOnTapOutside() {
-    if (_effectiveFocusNode.hasFocus || widget.canTapOutsideFocus) {
-      return widget.onTapOutside;
-    }
-    return null;
-  }
 
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
     final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
@@ -1429,7 +1413,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           onSubmitted: widget.onSubmitted,
           onAppPrivateCommand: widget.onAppPrivateCommand,
           onSelectionHandleTapped: _handleSelectionHandleTapped,
-          onTapOutside: _handleOnTapOutside(),
+          onTapOutside: widget.onTapOutside,
           inputFormatters: formatters,
           rendererIgnoresPointer: true,
           mouseCursor: MouseCursor.defer, // TextField will handle the cursor
@@ -1459,6 +1443,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
           contextMenuBuilder: widget.contextMenuBuilder,
           spellCheckConfiguration: spellCheckConfiguration,
           magnifierConfiguration: widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
+          canTapOutsideFocus: widget.canTapOutsideFocus,
         ),
       ),
     );
@@ -1556,7 +1541,7 @@ TextStyle? _m3StateInputStyle(BuildContext context) => MaterialStateTextStyle.re
   return TextStyle(color: Theme.of(context).textTheme.bodyLarge!.color);
 });
 
-TextStyle _m3InputStyle(BuildContext context) => Theme.of(context).textTheme.bodyLarge!;
+TextStyle _m3InputStyle(BuildContext context) => Theme.of(context).textTheme.bodyLarge;
 
 TextStyle _m3CounterErrorStyle(BuildContext context) =>
   Theme.of(context).textTheme.bodySmall!.copyWith(color: Theme.of(context).colorScheme.error);

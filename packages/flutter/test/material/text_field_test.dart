@@ -854,7 +854,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Activates the text field when receives semantics focus on desktops', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner;
     final FocusNode focusNode = _focusNode();
     await tester.pumpWidget(
       MaterialApp(
@@ -4291,12 +4291,12 @@ void main() {
     // Toolbar should fade in. Starting at 0% opacity.
     expect(find.text('Select all'), findsOneWidget);
     final Element target = tester.element(find.text('Select all'));
-    final FadeTransition opacity = target.findAncestorWidgetOfExactType<FadeTransition>()!;
+    final FadeTransition opacity = target.findAncestorWidgetOfExactType<FadeTransition>();
     expect(opacity.opacity.value, equals(0.0));
 
     // Still fading in.
     await tester.pump(const Duration(milliseconds: 50));
-    final FadeTransition opacity2 = target.findAncestorWidgetOfExactType<FadeTransition>()!;
+    final FadeTransition opacity2 = target.findAncestorWidgetOfExactType<FadeTransition>();
     expect(opacity, same(opacity2));
     expect(opacity.opacity.value, greaterThan(0.0));
     expect(opacity.opacity.value, lessThan(1.0));
@@ -8225,7 +8225,7 @@ void main() {
 
   testWidgetsWithLeakTracking('TextField change selection with semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner;
     final TextEditingController controller = _textEditingController()
       ..text = 'Hello';
     final Key key = UniqueKey();
@@ -8326,7 +8326,7 @@ void main() {
     const String textInTextField = 'Hello';
 
     final SemanticsTester semantics = SemanticsTester(tester);
-    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner;
     final TextEditingController controller = _textEditingController()
       ..text = textInTextField;
     final Key key = UniqueKey();
@@ -8396,7 +8396,7 @@ void main() {
     const String textInTextField = 'Hello';
 
     final SemanticsTester semantics = SemanticsTester(tester);
-    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner;
     final TextEditingController controller = _textEditingController()
       ..text = textInTextField;
     final Key key = UniqueKey();
@@ -15144,7 +15144,7 @@ void main() {
       ),
     );
 
-    expect(tester.layers.any((Layer layer) => layer.debugSubtreeNeedsAddToScene!), isFalse);
+    expect(tester.layers.any((Layer layer) => layer.debugSubtreeNeedsAddToScene), isFalse);
   });
 
   testWidgetsWithLeakTracking('Focused TextField does not push any layers with alwaysNeedsAddToScene', (WidgetTester tester) async {
@@ -15161,7 +15161,7 @@ void main() {
     await tester.showKeyboard(find.byType(TextField));
 
     expect(focusNode.hasFocus, isTrue);
-    expect(tester.layers.any((Layer layer) => layer.debugSubtreeNeedsAddToScene!), isFalse);
+    expect(tester.layers.any((Layer layer) => layer.debugSubtreeNeedsAddToScene), isFalse);
   });
 
   testWidgetsWithLeakTracking('TextField does not push any layers with alwaysNeedsAddToScene after toolbar is dismissed', (WidgetTester tester) async {
@@ -15199,7 +15199,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(find.text('Copy'), findsNothing); // Toolbar is not visible
 
-    expect(tester.layers.any((Layer layer) => layer.debugSubtreeNeedsAddToScene!), isFalse);
+    expect(tester.layers.any((Layer layer) => layer.debugSubtreeNeedsAddToScene), isFalse);
   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
   testWidgetsWithLeakTracking('cursor blinking respects TickerMode', (WidgetTester tester) async {
@@ -16863,6 +16863,79 @@ void main() {
             expect(focusNode.hasPrimaryFocus, isFalse);
         }
       }, variant: TargetPlatformVariant.all());
+    }
+    ////
+
+    for (final PointerDeviceKind pointerDeviceKind in PointerDeviceKind.values.toSet()..remove(PointerDeviceKind.trackpad)) {
+    testWidgetsWithLeakTracking('TextField onTapOutside Behavior for ${pointerDeviceKind.name}', (WidgetTester tester) async {
+      final FocusNode focusNode1 = FocusNode(debugLabel: 'TextField 1');
+      final FocusNode focusNode2 = FocusNode(debugLabel: 'TextField 2');
+      onTapOutside1() {}
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: <Widget>[
+                const Text('Outside'),
+                TextField(
+                  autofocus: true,
+                  focusNode: focusNode1,
+                  canTapOutsideFocus: false,
+                  onTapOutside: onTapOutside1,
+                ),
+                TextField(
+                  focusNode: focusNode2,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      Future<void> click(Finder finder) async {
+        final TestGesture gesture = await tester.startGesture(
+          tester.getCenter(finder),
+          kind: pointerDeviceKind,
+        );
+        await gesture.up();
+        await gesture.removePointer();
+      }
+
+      expect(focusNode1.hasPrimaryFocus, isTrue);
+      expect(focusNode2.hasPrimaryFocus, isFalse);
+
+      focusNode2.requestFocus();
+      await tester.pump();
+
+      expect(focusNode1.hasPrimaryFocus, isFalse);
+      expect(focusNode2.hasPrimaryFocus, isTrue);
+
+      await click(find.text('Outside'));
+
+      switch (pointerDeviceKind) {
+        case PointerDeviceKind.touch:
+          switch (defaultTargetPlatform) {
+            case TargetPlatform.iOS:
+            case TargetPlatform.android:
+            case TargetPlatform.fuchsia:
+              expect(focusNode1.hasPrimaryFocus, equals(!kIsWeb));
+            case TargetPlatform.linux:
+            case TargetPlatform.macOS:
+            case TargetPlatform.windows:
+              expect(focusNode1.hasPrimaryFocus, isFalse);
+          }
+        case PointerDeviceKind.mouse:
+        case PointerDeviceKind.stylus:
+        case PointerDeviceKind.invertedStylus:
+        case PointerDeviceKind.trackpad:
+        case PointerDeviceKind.unknown:
+          expect(focusNode1.hasPrimaryFocus, isFalse);
+      }
+      verifyNever(onTapOutside1());
+    }, variant: TargetPlatformVariant.all());
     }
   });
 
