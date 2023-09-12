@@ -116,6 +116,128 @@
                     "sdk_version": "14e300c"
                 }
             }
+        },
+        {
+            "drone_dimensions": [
+                "device_type=none",
+                "mac_model=Macmini8,1",
+                "os=Mac-12"
+            ],
+            "gn": [
+                "--ios",
+                "--runtime-mode",
+                "debug",
+                "--simulator",
+                "--no-lto",
+                "--darwin-extension-safe"
+            ],
+            "name": "ios_debug_sim_extension_safe",
+            "ninja": {
+                "config": "ios_debug_sim_extension_safe"
+            },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "14e300c"
+                }
+            }
+        },
+        {
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac-12"
+            ],
+            "gn": [
+                "--ios",
+                "--runtime-mode",
+                "debug",
+                "--simulator",
+                "--simulator-cpu=arm64",
+                "--no-lto",
+                "--darwin-extension-safe"
+            ],
+            "name": "ios_debug_sim_arm64_extension_safe",
+            "ninja": {
+                "config": "ios_debug_sim_arm64_extension_safe"
+            },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "14e300c"
+                }
+            }
+        },
+        {
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac-12"
+            ],
+            "gn": [
+                "--ios",
+                "--runtime-mode",
+                "debug",
+                "--darwin-extension-safe"
+            ],
+            "name": "ios_debug_extension_safe",
+            "ninja": {
+                "config": "ios_debug_extension_safe",
+                "targets": [
+                    "flutter/shell/platform/darwin/ios:flutter_framework"
+                ]
+            },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "14e300c"
+                }
+            }
+        },
+        {
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac-12"
+            ],
+            "gn": [
+                "--ios",
+                "--runtime-mode",
+                "profile",
+                "--darwin-extension-safe"
+            ],
+            "name": "ios_profile_extension_safe",
+            "ninja": {
+                "config": "ios_profile_extension_safe",
+                "targets": [
+                    "flutter/shell/platform/darwin/ios:flutter_framework",
+                    "flutter/lib/snapshot:generate_snapshot_bin"
+                ]
+            },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "14e300c"
+                }
+            }
+        },
+        {
+            "drone_dimensions": [
+                "device_type=none",
+                "os=Mac-12"
+            ],
+            "gn": [
+                "--ios",
+                "--runtime-mode",
+                "release",
+                "--darwin-extension-safe"
+            ],
+            "name": "ios_release_extension_safe",
+            "ninja": {
+                "config": "ios_release_extension_safe",
+                "targets": [
+                    "flutter/shell/platform/darwin/ios:flutter_framework",
+                    "flutter/lib/snapshot:generate_snapshot_bin"
+                ]
+            },
+            "properties": {
+                "$flutter/osx_sdk": {
+                    "sdk_version": "14e300c"
+                }
+            }
         }
     ],
     "generators": {
@@ -168,6 +290,53 @@
                 "language": "python3"
             },
             {
+                "name": "Debug-ios-Flutter-Extension-Safe.xcframework",
+                "parameters": [
+                    "--dst",
+                    "out/debug_extension_safe",
+                    "--arm64-out-dir",
+                    "out/ios_debug_extension_safe",
+                    "--simulator-x64-out-dir",
+                    "out/ios_debug_sim_extension_safe",
+                    "--simulator-arm64-out-dir",
+                    "out/ios_debug_sim_arm64_extension_safe"
+                ],
+                "script": "flutter/sky/tools/create_full_ios_framework.py",
+                "language": "python3"
+            },
+            {
+                "name": "Profile-ios-Flutter-Extension-Safe.xcframework",
+                "parameters": [
+                    "--dst",
+                    "out/profile_extension_safe",
+                    "--arm64-out-dir",
+                    "out/ios_profile_extension_safe",
+                    "--simulator-x64-out-dir",
+                    "out/ios_debug_sim_extension_safe",
+                    "--simulator-arm64-out-dir",
+                    "out/ios_debug_sim_arm64_extension_safe"
+                ],
+                "script": "flutter/sky/tools/create_full_ios_framework.py",
+                "language": "python3"
+            },
+            {
+                "name": "Release-ios-Flutter-Extension-Safe.xcframework",
+                "parameters": [
+                    "--dst",
+                    "out/release_extension_safe",
+                    "--arm64-out-dir",
+                    "out/ios_release_extension_safe",
+                    "--simulator-x64-out-dir",
+                    "out/ios_debug_sim_extension_safe",
+                    "--simulator-arm64-out-dir",
+                    "out/ios_debug_sim_arm64_extension_safe",
+                    "--dsym",
+                    "--strip"
+                ],
+                "script": "flutter/sky/tools/create_full_ios_framework.py",
+                "language": "python3"
+            },
+            {
                 "name": "Release-macos-gen-snapshots",
                 "parameters": [
                     "--dst",
@@ -207,6 +376,26 @@
         {
             "source": "out/release/Flutter.dSYM.zip",
             "destination": "ios-release/Flutter.dSYM.zip",
+            "realm": "production"
+        },
+        {
+            "source": "out/debug_extension_safe/artifacts.zip",
+            "destination": "ios-extension-safe/artifacts.zip",
+            "realm": "production"
+        },
+        {
+            "source": "out/profile_extension_safe/artifacts.zip",
+            "destination": "ios-profile-extension-safe/artifacts.zip",
+            "realm": "production"
+        },
+        {
+            "source": "out/release_extension_safe/artifacts.zip",
+            "destination": "ios-release-extension-safe/artifacts.zip",
+            "realm": "production"
+        },
+        {
+            "source": "out/release_extension_safe/Flutter.dSYM.zip",
+            "destination": "ios-release-extension-safe/Flutter.dSYM.zip",
             "realm": "production"
         }
     ]
