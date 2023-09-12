@@ -1175,19 +1175,21 @@ Future<void> _runWebLongRunningTests() async {
         silenceBrowserOutput: true,
       ),
       () => _runFlutterDriverWebTest(
-        testAppDirectory: path.join('packages', 'integration_test', 'example'),
-        target: path.join('integration_test', 'example_test.dart'),
-        driver: path.join('test_driver', 'integration_test.dart'),
-        buildMode: buildMode,
-        renderer: 'canvaskit',
-      ),
+            testAppDirectory: path.join('packages', 'integration_test', 'example'),
+            target: path.join('integration_test', 'example_test.dart'),
+            driver: path.join('test_driver', 'integration_test.dart'),
+            buildMode: buildMode,
+            renderer: 'canvaskit',
+            expectWriteResponseFile: true,
+          ),
       () => _runFlutterDriverWebTest(
-        testAppDirectory: path.join('packages', 'integration_test', 'example'),
-        target: path.join('integration_test', 'extended_test.dart'),
-        driver: path.join('test_driver', 'extended_integration_test.dart'),
-        buildMode: buildMode,
-        renderer: 'canvaskit',
-      ),
+            testAppDirectory: path.join('packages', 'integration_test', 'example'),
+            target: path.join('integration_test', 'extended_test.dart'),
+            driver: path.join('test_driver', 'extended_integration_test.dart'),
+            buildMode: buildMode,
+            renderer: 'canvaskit',
+            expectWriteResponseFile: true,
+          ),
     ],
 
     // This test doesn't do anything interesting w.r.t. rendering, so we don't run the full build mode x renderer matrix.
@@ -1319,6 +1321,7 @@ Future<void> _runFlutterDriverWebTest({
   String? driver,
   bool expectFailure = false,
   bool silenceBrowserOutput = false,
+  bool expectWriteResponseFile = false,
 }) async {
   printProgress('${green}Running integration tests $target in $buildMode mode.$reset');
   await runCommand(
@@ -1326,6 +1329,11 @@ Future<void> _runFlutterDriverWebTest({
     <String>[ 'clean' ],
     workingDirectory: testAppDirectory,
   );
+  final String responseFile =
+      path.join(testAppDirectory, 'integration_response_data.json');
+  if (File(responseFile).existsSync()) {
+    File(responseFile).deleteSync();
+  }
   await runCommand(
     flutter,
     <String>[
@@ -1354,6 +1362,11 @@ Future<void> _runFlutterDriverWebTest({
       return false;
     },
   );
+  if (expectWriteResponseFile != File(responseFile).existsSync()) {
+    foundError(<String>[
+      '$bold${red}Command did not write response file but expected response file written.$reset',
+    ]);
+  }
 }
 
 // Compiles a sample web app and checks that its JS doesn't contain certain
