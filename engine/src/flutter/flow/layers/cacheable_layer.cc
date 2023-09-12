@@ -6,39 +6,31 @@
 
 namespace flutter {
 
-AutoCache::AutoCache(CacheableLayer& cacheable_layer,
+AutoCache::AutoCache(RasterCacheItem* raster_cache_item,
                      PrerollContext* context,
-                     bool caching_enabled) {
-  if (context->raster_cache && caching_enabled) {
-    raster_cache_item_ = cacheable_layer.realize_raster_cache_item();
-    if (raster_cache_item_) {
-      context_ = context;
-      matrix_ = context->state_stack.transform_3x3();
-      raster_cache_item_->PrerollSetup(context_, matrix_);
-    }
-  } else {
-    cacheable_layer.disable_raster_cache_item();
+                     const SkMatrix& matrix)
+    : raster_cache_item_(raster_cache_item),
+      context_(context),
+      matrix_(matrix) {
+  if (IsCacheEnabled()) {
+    raster_cache_item->PrerollSetup(context, matrix);
   }
 }
 
+bool AutoCache::IsCacheEnabled() {
+  return raster_cache_item_ && context_ && context_->raster_cache;
+}
+
 AutoCache::~AutoCache() {
-  if (raster_cache_item_) {
+  if (IsCacheEnabled()) {
     raster_cache_item_->PrerollFinalize(context_, matrix_);
   }
 }
 
-RasterCacheItem* CacheableContainerLayer::realize_raster_cache_item() {
-  if (!layer_raster_cache_item_) {
-    layer_raster_cache_item_ = LayerRasterCacheItem::Make(
-        this, layer_cache_threshold_, can_cache_children_);
-  }
-  return layer_raster_cache_item_.get();
-}
-
-void CacheableContainerLayer::disable_raster_cache_item() {
-  if (layer_raster_cache_item_) {
-    layer_raster_cache_item_->reset_cache_state();
-  }
+CacheableContainerLayer::CacheableContainerLayer(int layer_cached_threshold,
+                                                 bool can_cache_children) {
+  layer_raster_cache_item_ = LayerRasterCacheItem::Make(
+      this, layer_cached_threshold, can_cache_children);
 }
 
 }  // namespace flutter

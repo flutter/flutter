@@ -56,7 +56,8 @@ void ImageFilterLayer::Preroll(PrerollContext* context) {
   Layer::AutoPrerollSaveLayerState save =
       Layer::AutoPrerollSaveLayerState::Create(context);
 
-  AutoCache cache(*this, context);
+  AutoCache cache = AutoCache(layer_raster_cache_item_.get(), context,
+                              context->state_stack.transform_3x3());
 
   SkRect child_bounds = SkRect::MakeEmpty();
 
@@ -86,9 +87,13 @@ void ImageFilterLayer::Preroll(PrerollContext* context) {
 
   // CacheChildren only when the transformed_filter_ doesn't equal null.
   // So in here we reset the LayerRasterCacheItem cache state.
+  layer_raster_cache_item_->MarkNotCacheChildren();
+
   transformed_filter_ =
       filter_->makeWithLocalMatrix(context->state_stack.transform_3x3());
-  MarkCanCacheChildren(transformed_filter_ != nullptr);
+  if (transformed_filter_) {
+    layer_raster_cache_item_->MarkCacheChildren();
+  }
 }
 
 void ImageFilterLayer::Paint(PaintContext& context) const {

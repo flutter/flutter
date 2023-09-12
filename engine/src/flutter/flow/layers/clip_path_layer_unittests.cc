@@ -519,72 +519,29 @@ TEST_F(ClipPathLayerTest, LayerCached) {
   use_mock_raster_cache();
   preroll_context()->state_stack.set_preroll_delegate(initial_transform);
 
-  EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
-  EXPECT_EQ(layer->raster_cache_item(), nullptr);
-
-  layer->Preroll(preroll_context());
-  EXPECT_NE(layer->raster_cache_item(), nullptr);
-  LayerTree::TryToRasterCache(cacheable_items(), &paint_context());
+  const auto* clip_cache_item = layer->raster_cache_item();
 
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
-  EXPECT_EQ(layer->raster_cache_item()->cache_state(),
-            RasterCacheItem::CacheState::kNone);
 
   layer->Preroll(preroll_context());
   LayerTree::TryToRasterCache(cacheable_items(), &paint_context());
+
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
-  EXPECT_EQ(layer->raster_cache_item()->cache_state(),
-            RasterCacheItem::CacheState::kNone);
+  EXPECT_EQ(clip_cache_item->cache_state(), RasterCacheItem::CacheState::kNone);
+
+  layer->Preroll(preroll_context());
+  LayerTree::TryToRasterCache(cacheable_items(), &paint_context());
+  EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)0);
+  EXPECT_EQ(clip_cache_item->cache_state(), RasterCacheItem::CacheState::kNone);
 
   layer->Preroll(preroll_context());
   LayerTree::TryToRasterCache(cacheable_items(), &paint_context());
   EXPECT_EQ(raster_cache()->GetLayerCachedEntriesCount(), (size_t)1);
-  EXPECT_EQ(layer->raster_cache_item()->cache_state(),
+  EXPECT_EQ(clip_cache_item->cache_state(),
             RasterCacheItem::CacheState::kCurrent);
   DlPaint paint;
-  EXPECT_TRUE(raster_cache()->Draw(layer->raster_cache_item()->GetId().value(),
+  EXPECT_TRUE(raster_cache()->Draw(clip_cache_item->GetId().value(),
                                    cache_canvas, &paint));
-}
-
-TEST_F(ClipPathLayerTest, NullRasterCacheResetsRasterCacheItem) {
-  auto path1 = SkPath().addRect({10, 10, 30, 30});
-  auto mock1 = MockLayer::MakeOpacityCompatible(path1);
-  auto layer_clip = SkPath()
-                        .addRect(SkRect::MakeLTRB(5, 5, 25, 25))
-                        .addOval(SkRect::MakeLTRB(20, 20, 40, 50));
-  auto layer =
-      std::make_shared<ClipPathLayer>(layer_clip, Clip::antiAliasWithSaveLayer);
-  layer->Add(mock1);
-
-  ASSERT_EQ(layer->raster_cache_item(), nullptr);
-
-  layer->Preroll(preroll_context());
-  ASSERT_EQ(layer->raster_cache_item(), nullptr);
-
-  use_mock_raster_cache();
-
-  int limit = RasterCacheUtil::kMinimumRendersBeforeCachingFilterLayer;
-  for (int i = 1; i < limit; i++) {
-    layer->Preroll(preroll_context());
-    ASSERT_NE(layer->raster_cache_item(), nullptr);
-    ASSERT_EQ(layer->raster_cache_item()->cache_state(),
-              RasterCacheItem::kNone);
-    ASSERT_FALSE(
-        layer->raster_cache_item()->TryToPrepareRasterCache(paint_context()));
-  }
-
-  layer->Preroll(preroll_context());
-  ASSERT_NE(layer->raster_cache_item(), nullptr);
-  ASSERT_EQ(layer->raster_cache_item()->cache_state(),
-            RasterCacheItem::kCurrent);
-  ASSERT_TRUE(
-      layer->raster_cache_item()->TryToPrepareRasterCache(paint_context()));
-
-  use_null_raster_cache();
-
-  layer->Preroll(preroll_context());
-  ASSERT_NE(layer->raster_cache_item(), nullptr);
-  ASSERT_EQ(layer->raster_cache_item()->cache_state(), RasterCacheItem::kNone);
 }
 
 TEST_F(ClipPathLayerTest, EmptyClipDoesNotCullPlatformView) {
