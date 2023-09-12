@@ -613,19 +613,15 @@ enum _StretchDirection {
 /// To prevent the indicator from showing the indication, call
 /// [OverscrollIndicatorNotification.disallowIndicator] on the notification.
 ///
-/// Created by [ScrollBehavior.buildOverscrollIndicator] on platforms
+/// Created by [MaterialScrollBehavior.buildOverscrollIndicator] on platforms
 /// (e.g., Android) that commonly use this type of overscroll indication when
-/// [ScrollBehavior.androidOverscrollIndicator] is
-/// [AndroidOverscrollIndicator.stretch]. Otherwise, the default
-/// [GlowingOverscrollIndicator] is applied.
-/// [ScrollBehavior.androidOverscrollIndicator] is deprecated, use
-/// [ThemeData.useMaterial3], or override
-/// [ScrollBehavior.buildOverscrollIndicator] to choose the desired indicator.
+/// [ThemeData.useMaterial3] is true. Otherwise, when [ThemeData.useMaterial3]
+/// is false, a [GlowingOverscrollIndicator] is used instead.=
 ///
 /// See also:
 ///
-///  * [OverscrollIndicatorNotification], which can be used to prevent the stretch
-///    effect from being applied at all.
+///  * [OverscrollIndicatorNotification], which can be used to prevent the
+///    stretch effect from being applied at all.
 ///  * [NotificationListener], to listen for the
 ///    [OverscrollIndicatorNotification].
 ///  * [GlowingOverscrollIndicator], the default overscroll indicator for
@@ -666,14 +662,6 @@ class StretchingOverscrollIndicator extends StatefulWidget {
   /// The overscroll indicator will apply a stretch effect to this child. This
   /// child (and its subtree) should include a source of [ScrollNotification]
   /// notifications.
-  ///
-  /// Typically a [StretchingOverscrollIndicator] is created by a
-  /// [ScrollBehavior.buildOverscrollIndicator] method when opted-in using the
-  /// [ScrollBehavior.androidOverscrollIndicator] flag. In this case
-  /// the child is usually the one provided as an argument to that method.
-  /// [ScrollBehavior.androidOverscrollIndicator] is deprecated, use
-  /// [ThemeData.useMaterial3], or override
-  /// [ScrollBehavior.buildOverscrollIndicator] to choose the desired indicator.
   final Widget? child;
 
   @override
@@ -798,10 +786,10 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
           );
 
           final double viewportDimension = _lastOverscrollNotification?.metrics.viewportDimension ?? mainAxisSize;
-
           final Widget transform = Transform(
             alignment: alignment,
             transform: Matrix4.diagonal3Values(x, y, 1.0),
+            filterQuality: stretch == 0 ? null : FilterQuality.low,
             child: widget.child,
           );
 

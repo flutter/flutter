@@ -244,6 +244,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// If [registerTestTextInput] returns true when this method is called,
   /// the [testTextInput] is configured to simulate the keyboard.
   void reset() {
+    _restorationManager?.dispose();
     _restorationManager = null;
     resetGestureBinding();
     testTextInput.reset();
@@ -492,7 +493,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
 
   /// Re-attempts the initialization of the lifecycle state after providing
-  /// test values in [TestWindow.initialLifecycleStateTestValue].
+  /// test values in [TestPlatformDispatcher.initialLifecycleStateTestValue].
   void readTestInitialLifecycleStateFromNativeWindow() {
     readInitialLifecycleStateFromNativeWindow();
   }

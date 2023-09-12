@@ -632,6 +632,12 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   }
 
   bool _shouldUpdatePosition(Scrollable oldWidget) {
+    if ((widget.scrollBehavior == null) != (oldWidget.scrollBehavior == null)) {
+      return true;
+    }
+    if (widget.scrollBehavior != null && oldWidget.scrollBehavior != null && widget.scrollBehavior!.shouldNotify(oldWidget.scrollBehavior!)) {
+      return true;
+    }
     ScrollPhysics? newPhysics = widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context);
     ScrollPhysics? oldPhysics = oldWidget.physics ?? oldWidget.scrollBehavior?.getScrollPhysics(context);
     do {

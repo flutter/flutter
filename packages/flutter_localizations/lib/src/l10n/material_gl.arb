@@ -145,5 +145,6 @@
   "collapsedHint": "Despregado",
   "menuDismissLabel": "Pechar menú",
   "lookUpButtonLabel": "Mirar cara arriba",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

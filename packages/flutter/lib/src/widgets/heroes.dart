@@ -568,6 +568,7 @@ class _HeroFlight {
 
       assert(overlayEntry != null);
       overlayEntry!.remove();
+      overlayEntry!.dispose();
       overlayEntry = null;
       // We want to keep the hero underneath the current page hidden. If
       // [AnimationStatus.completed], toHero will be the one on top and we keep
@@ -609,6 +610,19 @@ class _HeroFlight {
     assert(navigator.userGestureInProgress);
     _scheduledPerformAnimationUpdate = true;
     navigator.userGestureInProgressNotifier.addListener(delayedPerformAnimationUpdate);
+  }
+
+  /// Releases resources.
+  @mustCallSuper
+  void dispose() {
+    if (overlayEntry != null) {
+      overlayEntry!.remove();
+      overlayEntry!.dispose();
+      overlayEntry = null;
+      _proxyAnimation.parent = null;
+      _proxyAnimation.removeListener(onTick);
+      _proxyAnimation.removeStatusListener(_handleAnimationUpdate);
+    }
   }
 
   void onTick() {
@@ -1025,6 +1039,14 @@ class HeroController extends NavigatorObserver {
           child: toHero.child);
       },
     );
+  }
+
+  /// Releases resources.
+  @mustCallSuper
+  void dispose() {
+    for (final _HeroFlight flight in _flights.values) {
+      flight.dispose();
+    }
   }
 }
 

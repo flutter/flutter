@@ -3290,6 +3290,47 @@ void main() {
     tester.pumpAndSettle();
   });
 
+  testWidgetsWithLeakTracking("Destination's label with the right opacity while disabled", (WidgetTester tester) async {
+    await _pumpNavigationRail(
+      tester,
+      navigationRail: NavigationRail(
+        selectedIndex: 0,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('Abc'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('Bcd'),
+            disabled: true,
+          ),
+        ],
+        onDestinationSelected: (int index) {},
+        labelType: NavigationRailLabelType.all,
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    double? defaultTextStyleOpacity(String text) {
+      return tester.widget<DefaultTextStyle>(
+        find.ancestor(
+          of: find.text(text),
+          matching: find.byType(DefaultTextStyle),
+        ).first,
+      ).style.color?.opacity;
+    }
+
+    final double? abcLabelOpacity = defaultTextStyleOpacity('Abc');
+    final double? bcdLabelOpacity = defaultTextStyleOpacity('Bcd');
+
+    expect(abcLabelOpacity, 1.0);
+    expect(bcdLabelOpacity, closeTo(0.38, 0.01));
+  });
+
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2
     // support is deprecated and the APIs are removed, these tests

@@ -120,27 +120,29 @@ void main() {
           }
         );
         // Update
+        delegate.maxXIndex = -1; // No exception.
         expect(
           () {
-            delegate.maxXIndex = -1;
+            delegate.maxXIndex = -2;
           },
           throwsA(
             isA<AssertionError>().having(
               (AssertionError error) => error.toString(),
               'description',
-              contains('value == null || value >= 0'),
+              contains('value == null || value >= -1'),
             ),
           ),
         );
+        delegate.maxYIndex = -1; // No exception
         expect(
           () {
-            delegate.maxYIndex = -1;
+            delegate.maxYIndex = -2;
           },
           throwsA(
             isA<AssertionError>().having(
               (AssertionError error) => error.toString(),
               'description',
-              contains('value == null || value >= 0'),
+              contains('value == null || value >= -1'),
             ),
           ),
         );
@@ -148,7 +150,7 @@ void main() {
         expect(
           () {
             TwoDimensionalChildBuilderDelegate(
-              maxXIndex: -1,
+              maxXIndex: -2,
               maxYIndex: 0,
               builder: (BuildContext context, ChildVicinity vicinity) {
                 return const SizedBox.shrink();
@@ -159,7 +161,7 @@ void main() {
             isA<AssertionError>().having(
               (AssertionError error) => error.toString(),
               'description',
-              contains('maxXIndex == null || maxXIndex >= 0'),
+              contains('maxXIndex == null || maxXIndex >= -1'),
             ),
           ),
         );
@@ -167,7 +169,7 @@ void main() {
           () {
             TwoDimensionalChildBuilderDelegate(
               maxXIndex: 0,
-              maxYIndex: -1,
+              maxYIndex: -2,
               builder: (BuildContext context, ChildVicinity vicinity) {
                 return const SizedBox.shrink();
               }
@@ -177,7 +179,7 @@ void main() {
             isA<AssertionError>().having(
               (AssertionError error) => error.toString(),
               'description',
-              contains('maxYIndex == null || maxYIndex >= 0'),
+              contains('maxYIndex == null || maxYIndex >= -1'),
             ),
           ),
         );
@@ -1514,7 +1516,7 @@ void main() {
         maxXIndex: 5,
         maxYIndex: 5,
         builder: (BuildContext context, ChildVicinity vicinity) {
-          childKeys[vicinity] = UniqueKey();
+          childKeys[vicinity] = childKeys[vicinity] ?? UniqueKey();
           return SizedBox.square(key: childKeys[vicinity], dimension: 200);
         }
       );
@@ -1602,7 +1604,7 @@ void main() {
         maxXIndex: 5,
         maxYIndex: 5,
         builder: (BuildContext context, ChildVicinity vicinity) {
-          childKeys[vicinity] = UniqueKey();
+          childKeys[vicinity] = childKeys[vicinity] ?? UniqueKey();
           return SizedBox.square(key: childKeys[vicinity], dimension: 200);
         }
       );
@@ -1731,7 +1733,7 @@ void main() {
         maxXIndex: 5,
         maxYIndex: 5,
         builder: (BuildContext context, ChildVicinity vicinity) {
-          childKeys[vicinity] = UniqueKey();
+          childKeys[vicinity] = childKeys[vicinity] ?? UniqueKey();
           return SizedBox.square(key: childKeys[vicinity], dimension: 200);
         }
       );
@@ -1897,7 +1899,7 @@ void main() {
         maxXIndex: 19,
         maxYIndex: 19,
         builder: (BuildContext context, ChildVicinity vicinity) {
-          childKeys[vicinity] = UniqueKey();
+          childKeys[vicinity] = childKeys[vicinity] ?? UniqueKey();
           return SizedBox.square(
             dimension: 200,
             child: Center(
@@ -1965,7 +1967,7 @@ void main() {
         maxXIndex: 5,
         maxYIndex: 5,
         builder: (BuildContext context, ChildVicinity vicinity) {
-          childKeys[vicinity] = UniqueKey();
+          childKeys[vicinity] = childKeys[vicinity] ?? UniqueKey();
           return SizedBox.square(key: childKeys[vicinity], dimension: 200);
         }
       );
@@ -2001,7 +2003,7 @@ void main() {
         maxXIndex: 5,
         maxYIndex: 5,
         builder: (BuildContext context, ChildVicinity vicinity) {
-          childKeys[vicinity] = UniqueKey();
+          childKeys[vicinity] = childKeys[vicinity] ?? UniqueKey();
           return SizedBox.square(key: childKeys[vicinity], dimension: 200);
         }
       );
@@ -2119,7 +2121,7 @@ void main() {
         maxXIndex: 5,
         maxYIndex: 5,
         builder: (BuildContext context, ChildVicinity vicinity) {
-          childKeys[vicinity] = UniqueKey();
+          childKeys[vicinity] = childKeys[vicinity] ?? UniqueKey();
           return SizedBox.square(key: childKeys[vicinity], dimension: 200);
         }
       );

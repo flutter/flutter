@@ -185,7 +185,6 @@ void main() {
     await tester.fling(find.byType(TabBarView), const Offset(100.0, 0.0), 1000.0);
     await tester.pumpAndSettle();
     expect(indicatorColors(tester), const <Color>[kUnselectedColor, kSelectedColor, kUnselectedColor]);
-
   });
 
   testWidgetsWithLeakTracking('PageSelector indicatorColors', (WidgetTester tester) async {
@@ -207,7 +206,7 @@ void main() {
     expect(indicatorColors(tester), const <Color>[kBlue, kRed, kRed]);
   });
 
-  testWidgets('PageSelector indicatorSize', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PageSelector indicatorSize', (WidgetTester tester) async {
     final TabController tabController = TabController(
       vsync: const TestVSync(),
       initialIndex: 1,
@@ -228,7 +227,7 @@ void main() {
     expect(tester.getSize(find.byType(TabPageSelector)).height, 24.0);
   });
 
-    testWidgetsWithLeakTracking('PageSelector circle border', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PageSelector circle border', (WidgetTester tester) async {
     final TabController tabController = TabController(
       vsync: const TestVSync(),
       initialIndex: 1,

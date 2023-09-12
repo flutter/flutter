@@ -25,5 +25,6 @@
   "noSpellCheckReplacementsLabel": "Փոխարինումներ չեն գտնվել",
   "menuDismissLabel": "Փակել ընտրացանկը",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }
