@@ -262,7 +262,7 @@ class TextFormField extends FormField<String> {
                clipBehavior: clipBehavior,
                scribbleEnabled: scribbleEnabled,
                canRequestFocus: canRequestFocus,
-               canTapOutsideFocus:canTapOutsideFocus,
+               canTapOutsideFocus: canTapOutsideFocus,
              ),
            );
          },

@@ -854,7 +854,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Activates the text field when receives semantics focus on desktops', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner;
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
     final FocusNode focusNode = _focusNode();
     await tester.pumpWidget(
       MaterialApp(
@@ -4291,12 +4291,12 @@ void main() {
     // Toolbar should fade in. Starting at 0% opacity.
     expect(find.text('Select all'), findsOneWidget);
     final Element target = tester.element(find.text('Select all'));
-    final FadeTransition opacity = target.findAncestorWidgetOfExactType<FadeTransition>();
+    final FadeTransition opacity = target.findAncestorWidgetOfExactType<FadeTransition>()!;
     expect(opacity.opacity.value, equals(0.0));
 
     // Still fading in.
     await tester.pump(const Duration(milliseconds: 50));
-    final FadeTransition opacity2 = target.findAncestorWidgetOfExactType<FadeTransition>();
+    final FadeTransition opacity2 = target.findAncestorWidgetOfExactType<FadeTransition>()!;
     expect(opacity, same(opacity2));
     expect(opacity.opacity.value, greaterThan(0.0));
     expect(opacity.opacity.value, lessThan(1.0));
@@ -8225,7 +8225,7 @@ void main() {
 
   testWidgetsWithLeakTracking('TextField change selection with semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
-    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner;
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
     final TextEditingController controller = _textEditingController()
       ..text = 'Hello';
     final Key key = UniqueKey();
@@ -8326,7 +8326,7 @@ void main() {
     const String textInTextField = 'Hello';
 
     final SemanticsTester semantics = SemanticsTester(tester);
-    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner;
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
     final TextEditingController controller = _textEditingController()
       ..text = textInTextField;
     final Key key = UniqueKey();
@@ -8396,7 +8396,7 @@ void main() {
     const String textInTextField = 'Hello';
 
     final SemanticsTester semantics = SemanticsTester(tester);
-    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner;
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
     final TextEditingController controller = _textEditingController()
       ..text = textInTextField;
     final Key key = UniqueKey();
@@ -15144,7 +15144,7 @@ void main() {
       ),
     );
 
-    expect(tester.layers.any((Layer layer) => layer.debugSubtreeNeedsAddToScene), isFalse);
+    expect(tester.layers.any((Layer layer) => layer.debugSubtreeNeedsAddToScene!), isFalse);
   });
 
   testWidgetsWithLeakTracking('Focused TextField does not push any layers with alwaysNeedsAddToScene', (WidgetTester tester) async {
@@ -15161,7 +15161,7 @@ void main() {
     await tester.showKeyboard(find.byType(TextField));
 
     expect(focusNode.hasFocus, isTrue);
-    expect(tester.layers.any((Layer layer) => layer.debugSubtreeNeedsAddToScene), isFalse);
+    expect(tester.layers.any((Layer layer) => layer.debugSubtreeNeedsAddToScene!), isFalse);
   });
 
   testWidgetsWithLeakTracking('TextField does not push any layers with alwaysNeedsAddToScene after toolbar is dismissed', (WidgetTester tester) async {
@@ -15199,7 +15199,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(find.text('Copy'), findsNothing); // Toolbar is not visible
 
-    expect(tester.layers.any((Layer layer) => layer.debugSubtreeNeedsAddToScene), isFalse);
+    expect(tester.layers.any((Layer layer) => layer.debugSubtreeNeedsAddToScene!), isFalse);
   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
   testWidgetsWithLeakTracking('cursor blinking respects TickerMode', (WidgetTester tester) async {
@@ -16863,7 +16863,67 @@ void main() {
             expect(focusNode.hasPrimaryFocus, isFalse);
         }
       }, variant: TargetPlatformVariant.all());
-    }
+
+    for (final PointerDeviceKind pointerDeviceKind in PointerDeviceKind.values.toSet()
+    ..remove(PointerDeviceKind.trackpad)) {
+    testWidgets("TextField handling of onTapOutside when doesn't have focus for ${pointerDeviceKind.name}",
+        (WidgetTester tester) async {
+      final FocusNode focusNodeA = FocusNode(debugLabel: 'TextField 1');
+      addTearDown(focusNodeA.dispose);
+      final FocusNode focusNodeB = FocusNode(debugLabel: 'TextField 2');
+      addTearDown(focusNodeB.dispose);
+
+      int timesTriggered = 0;
+
+      Future<void> click(Finder finder) async {
+        final TestGesture gesture = await tester.startGesture(
+          tester.getCenter(finder),
+          kind: pointerDeviceKind,
+        );
+        await gesture.up();
+        await gesture.removePointer();
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: <Widget>[
+                const Text('Outside'),
+                TextField(
+                  autofocus: true,
+                  focusNode: focusNodeA,
+                  canTapOutsideFocus: false,
+                  onTapOutside: (PointerDownEvent event) {
+                    timesTriggered += 1;
+                  },
+                ),
+                TextField(
+                  focusNode: focusNodeB,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      expect(focusNodeA.hasPrimaryFocus, isTrue);
+      expect(focusNodeB.hasPrimaryFocus, isFalse);
+
+      focusNodeB.requestFocus();
+      await tester.pump();
+
+      expect(focusNodeA.hasPrimaryFocus, isFalse);
+      expect(focusNodeB.hasPrimaryFocus, isTrue);
+
+      await click(find.text('Outside'));
+      await tester.pumpAndSettle();
+
+      expect(timesTriggered, 0);
+    }, variant: TargetPlatformVariant.all());
+    }}
   });
 
   testWidgetsWithLeakTracking('Builds the corresponding default spell check toolbar by platform', (WidgetTester tester) async {

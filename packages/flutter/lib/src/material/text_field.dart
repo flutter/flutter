@@ -782,7 +782,7 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.undoHistory.controller}
   final UndoHistoryController? undoController;
 
-  /// Determine whether [onTapOutside] can be called when the [TextField] is not focused.
+  /// {@macro flutter.widgets.editableText.canTapOutsideFocus}
   final bool canTapOutsideFocus;
 
   static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
@@ -1150,7 +1150,6 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       // highlight.
     });
   }
-
 
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
     final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
@@ -1541,7 +1540,7 @@ TextStyle? _m3StateInputStyle(BuildContext context) => MaterialStateTextStyle.re
   return TextStyle(color: Theme.of(context).textTheme.bodyLarge!.color);
 });
 
-TextStyle _m3InputStyle(BuildContext context) => Theme.of(context).textTheme.bodyLarge;
+TextStyle _m3InputStyle(BuildContext context) => Theme.of(context).textTheme.bodyLarge!;
 
 TextStyle _m3CounterErrorStyle(BuildContext context) =>
   Theme.of(context).textTheme.bodySmall!.copyWith(color: Theme.of(context).colorScheme.error);

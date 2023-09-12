@@ -822,8 +822,7 @@ class CupertinoTextField extends StatefulWidget {
   /// {@macro flutter.widgets.undoHistory.controller}
   final UndoHistoryController? undoController;
 
-
-  /// Determine whether this [TextField] can be tapped when it is not focused.
+  /// {@macro flutter.widgets.editableText.canTapOutsideFocus}
   final bool canTapOutsideFocus;
 
   @override
@@ -1410,7 +1409,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             contentInsertionConfiguration: widget.contentInsertionConfiguration,
             contextMenuBuilder: widget.contextMenuBuilder,
             spellCheckConfiguration: spellCheckConfiguration,
-            canTapOutsideFocus: widget.canTapOutsideFocus,
           ),
         ),
       ),

@@ -1848,9 +1848,10 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.widgets.magnifier.TextMagnifierConfiguration.details}
   final TextMagnifierConfiguration magnifierConfiguration;
 
-  /// Determine whether [onTapOutside] can be called when the [TextField] is not focused.
+  /// {@template flutter.widgets.editableText.canTapOutsideFocus}
+  /// Determine whether [onTapOutside] is called when this widget is not focused.
+  /// {@endtemplate}
   final bool canTapOutsideFocus;
-
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
 
@@ -2685,7 +2686,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // widget.renderObject.getRectForComposingRange might fail. In cases where
     // the current frame is different from the previous we fall back to
     // renderObject.preferredLineHeight.
-    final InlineSpan span = renderEditable.text;
+    final InlineSpan span = renderEditable.text!;
     final String prevText = span.toPlainText();
     final String currText = textEditingValue.text;
     if (prevText != currText || !selection.isValid || selection.isCollapsed) {
@@ -2723,7 +2724,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextSelectionToolbarAnchors get contextMenuAnchors {
     if (renderEditable.lastSecondaryTapDownPosition != null) {
       return TextSelectionToolbarAnchors(
-        primaryAnchor: renderEditable.lastSecondaryTapDownPosition,
+        primaryAnchor: renderEditable.lastSecondaryTapDownPosition!,
       );
     }
 
@@ -3970,7 +3971,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // handles visible on Android.
       // Unregister as a listener to the text controller while making the change.
       widget.controller.removeListener(_didChangeTextEditingValue);
-      widget.controller.selection = _adjustedSelectionWhenFocused();
+      widget.controller.selection = _adjustedSelectionWhenFocused()!;
       widget.controller.addListener(_didChangeTextEditingValue);
     }
     _updateRemoteEditingValueIfNeeded();
@@ -4063,7 +4064,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       return;
     }
 
-    final InlineSpan inlineSpan = renderEditable.text;
+    final InlineSpan inlineSpan = renderEditable.text!;
     final TextScaler effectiveTextScaler = switch ((widget.textScaler, widget.textScaleFactor)) {
       (final TextScaler textScaler, _)     => textScaler,
       (null, final double textScaleFactor) => TextScaler.linear(textScaleFactor),
@@ -4724,23 +4725,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  // Handles taps that occur outside the TextField widget.
-  //
-  // This method is invoked when a tap event occurs outside the TextField widget.
-  // It evaluates whether the TextField has focus and whether tapping outside is
-  // permitted according to the [widget.canTapOutsideFocus] property. If either the
-  // TextField has focus or tapping outside is allowed, it triggers the
-  // [widget.onTapOutside] callback.
-  //
-  // Returns the [widget.onTapOutside] callback if conditions are met; otherwise,
-  // returns null.
-  void _handleOnTapOutside(PointerDownEvent event) {
-    if (widget.canTapOutsideFocus || widget.focusNode.hasFocus) {
-      return widget.onTapOutside?.call(event);
-    }
-    return _defaultOnTapOutside(event);
-  }
-
   late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
     DoNothingAndStopPropagationTextIntent: DoNothingAction(consumesKey: false),
     ReplaceTextIntent: _replaceTextAction,
@@ -4795,7 +4779,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       compositeCallback: _compositeCallback,
       enabled: _hasInputConnection,
       child: TextFieldTapRegion(
-        onTapOutside: _handleOnTapOutside,
+        onTapOutside: _hasFocus || widget.canTapOutsideFocus ? widget.onTapOutside ?? _defaultOnTapOutside : null,
         debugLabel: kReleaseMode ? null : 'EditableText',
         child: MouseRegion(
           cursor: widget.mouseCursor ?? SystemMouseCursors.text,
@@ -4981,8 +4965,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         _value,
         composingRegionOutOfRange,
         _style,
-        _spellCheckConfiguration.misspelledTextStyle,
-        spellCheckResults,
+        _spellCheckConfiguration.misspelledTextStyle!,
+        spellCheckResults!,
       );
     }
 
