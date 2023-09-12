@@ -11,7 +11,7 @@ dependencies:
   args: 2.4.2
   browser_launcher: 1.1.1
   dds: 2.9.4
-  dwds: 20.0.1
+  dwds: 21.0.0
   completion: 1.0.1
   coverage: 1.6.3
   crypto: 3.0.3
@@ -20,7 +20,7 @@ dependencies:
   html: 0.15.4
   http: 0.13.6
   intl: 0.18.1
-  meta: 1.9.1
+  meta: 1.10.0
   multicast_dns: 0.3.2+4
   mustache_template: 2.0.0
   package_config: 2.1.0
@@ -29,7 +29,7 @@ dependencies:
   stack_trace: 1.11.1
   usage: 4.1.1
   webdriver: 3.0.2
-  webkit_inspection_protocol: 1.2.0
+  webkit_inspection_protocol: 1.2.1
   xml: 6.4.2
   yaml: 3.1.2
   native_stack_traces: 0.5.6
@@ -52,7 +52,7 @@ dependencies:
 
   cli_config: 0.1.1
   graphs: 2.3.1
-  native_assets_builder: 0.2.0
+  native_assets_builder: 0.2.3
   native_assets_cli: 0.2.0
 
   # We depend on very specific internal implementation details of the
@@ -112,5 +112,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-
-# PUBSPEC CHECKSUM: 95ad
+# PUBSPEC CHECKSUM: f179
