@@ -378,6 +378,8 @@ InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault
         .directory(projectUri)
         .childDirectory('.dart_tool')
         .childFile('package_config.json');
+    await packagesFile.parent.create();
+    await packagesFile.create();
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       packagesFile,
       logger: environment.logger,
