@@ -1107,7 +1107,6 @@ void main() {
           ),
         ),
       );
-      tester.platformDispatcher.implicitView;
 
       RefreshProgressIndicator getIndicator() {
         return tester.widget<RefreshProgressIndicator>(
