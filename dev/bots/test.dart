@@ -1364,7 +1364,7 @@ Future<void> _runFlutterDriverWebTest({
   );
   if (expectWriteResponseFile && !File(responseFile).existsSync()) {
     foundError(<String>[
-      '$bold${red}Command did not write response file but expected response file written.$reset',
+      '$bold${red}Command did not write the response file but expected response file written.$reset',
     ]);
   }
 }
