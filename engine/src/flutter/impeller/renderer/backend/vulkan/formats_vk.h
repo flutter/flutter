@@ -274,21 +274,17 @@ constexpr vk::DescriptorType ToVKDescriptorType(DescriptorType type) {
   switch (type) {
     case DescriptorType::kSampledImage:
       return vk::DescriptorType::eCombinedImageSampler;
-      break;
     case DescriptorType::kUniformBuffer:
       return vk::DescriptorType::eUniformBuffer;
-      break;
     case DescriptorType::kStorageBuffer:
       return vk::DescriptorType::eStorageBuffer;
-      break;
     case DescriptorType::kImage:
       return vk::DescriptorType::eSampledImage;
-      break;
     case DescriptorType::kSampler:
       return vk::DescriptorType::eSampler;
-      break;
+    case DescriptorType::kSubpassInput:
+      return vk::DescriptorType::eInputAttachment;
   }
-
   FML_UNREACHABLE();
 }
 

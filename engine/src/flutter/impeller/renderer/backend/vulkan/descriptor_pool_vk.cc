@@ -24,7 +24,9 @@ static vk::UniqueDescriptorPool CreatePool(const vk::Device& device,
   std::vector<vk::DescriptorPoolSize> pools = {
       {vk::DescriptorType::eCombinedImageSampler, pool_count},
       {vk::DescriptorType::eUniformBuffer, pool_count},
-      {vk::DescriptorType::eStorageBuffer, pool_count}};
+      {vk::DescriptorType::eStorageBuffer, pool_count},
+      {vk::DescriptorType::eInputAttachment, pool_count},
+  };
 
   vk::DescriptorPoolCreateInfo pool_info;
   pool_info.setMaxSets(pools.size() * pool_count);
