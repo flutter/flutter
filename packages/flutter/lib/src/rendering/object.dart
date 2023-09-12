@@ -1960,7 +1960,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         final bool mutationsToDirtySubtreesAllowed = activeLayoutRoot.owner?._debugAllowMutationsToDirtySubtrees ?? false;
         final bool doingLayoutWithCallback = activeLayoutRoot._doingThisLayoutWithCallback;
         // Mutations on this subtree is allowed when:
-        // - the subtree is being mutated in a layout callback.
+        // - the "activeLayoutRoot" subtree is being mutated in a layout callback.
         // - a different part of the render tree is doing a layout callback,
         //   and this subtree is being reparented to that subtree, as a result
         //   of global key reparenting.
