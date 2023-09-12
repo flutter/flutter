@@ -19,26 +19,11 @@ DisplayListLayer::DisplayListLayer(const SkPoint& offset,
                                    sk_sp<DisplayList> display_list,
                                    bool is_complex,
                                    bool will_change)
-    : offset_(offset),
-      display_list_(std::move(display_list)),
-      is_complex_(is_complex),
-      will_change_(will_change) {
+    : offset_(offset), display_list_(std::move(display_list)) {
   if (display_list_) {
     bounds_ = display_list_->bounds().makeOffset(offset_.x(), offset_.y());
-  }
-}
-
-RasterCacheItem* DisplayListLayer::realize_raster_cache_item() {
-  if (!display_list_raster_cache_item_) {
     display_list_raster_cache_item_ = DisplayListRasterCacheItem::Make(
-        display_list_, offset_, is_complex_, will_change_);
-  }
-  return display_list_raster_cache_item_.get();
-}
-
-void DisplayListLayer::disable_raster_cache_item() {
-  if (display_list_raster_cache_item_) {
-    display_list_raster_cache_item_->reset_cache_state();
+        display_list_, offset_, is_complex, will_change);
   }
 }
 
@@ -110,7 +95,8 @@ bool DisplayListLayer::Compare(DiffContext::Statistics& statistics,
 void DisplayListLayer::Preroll(PrerollContext* context) {
   DisplayList* disp_list = display_list();
 
-  AutoCache cache(*this, context);
+  AutoCache cache = AutoCache(display_list_raster_cache_item_.get(), context,
+                              context->state_stack.transform_3x3());
   if (disp_list->can_apply_group_opacity()) {
     context->renderable_state_flags = LayerStateStack::kCallerCanApplyOpacity;
   }

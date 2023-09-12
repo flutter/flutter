@@ -474,46 +474,6 @@ TEST_F(DisplayListLayerTest, NoLayerTreeSnapshotsWhenDisabledByDefault) {
   EXPECT_EQ(0u, snapshot_store.Size());
 }
 
-TEST_F(DisplayListLayerTest, NullRasterCacheResetsRasterCacheItem) {
-  const SkPoint layer_offset = SkPoint::Make(1.5f, -0.5f);
-  const SkRect picture_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
-  DisplayListBuilder builder;
-  builder.DrawRect(picture_bounds, DlPaint());
-  auto display_list = builder.Build();
-  auto layer = std::make_shared<DisplayListLayer>(layer_offset, display_list,
-                                                  true, false);
-
-  ASSERT_EQ(layer->raster_cache_item(), nullptr);
-
-  layer->Preroll(preroll_context());
-  ASSERT_EQ(layer->raster_cache_item(), nullptr);
-
-  use_mock_raster_cache();
-
-  size_t limit = raster_cache()->access_threshold();
-  for (size_t i = 0; i < limit; i++) {
-    layer->Preroll(preroll_context());
-    ASSERT_NE(layer->raster_cache_item(), nullptr);
-    ASSERT_EQ(layer->raster_cache_item()->cache_state(),
-              RasterCacheItem::kNone);
-    ASSERT_FALSE(
-        layer->raster_cache_item()->TryToPrepareRasterCache(paint_context()));
-  }
-
-  layer->Preroll(preroll_context());
-  ASSERT_NE(layer->raster_cache_item(), nullptr);
-  ASSERT_EQ(layer->raster_cache_item()->cache_state(),
-            RasterCacheItem::kCurrent);
-  ASSERT_TRUE(
-      layer->raster_cache_item()->TryToPrepareRasterCache(paint_context()));
-
-  use_null_raster_cache();
-
-  layer->Preroll(preroll_context());
-  ASSERT_NE(layer->raster_cache_item(), nullptr);
-  ASSERT_EQ(layer->raster_cache_item()->cache_state(), RasterCacheItem::kNone);
-}
-
 TEST_F(DisplayListLayerTest, DisplayListAccessCountDependsOnVisibility) {
   const SkPoint layer_offset = SkPoint::Make(1.5f, -0.5f);
   const SkRect picture_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
@@ -525,9 +485,8 @@ TEST_F(DisplayListLayerTest, DisplayListAccessCountDependsOnVisibility) {
   auto layer = std::make_shared<DisplayListLayer>(layer_offset, display_list,
                                                   true, false);
 
+  auto raster_cache_item = layer->raster_cache_item();
   use_mock_raster_cache();
-
-  EXPECT_EQ(layer->raster_cache_item(), nullptr);
 
   // First Preroll the DisplayListLayer a few times where it does not intersect
   // the cull rect. No caching progress should occur during this time, the
@@ -537,19 +496,16 @@ TEST_F(DisplayListLayerTest, DisplayListAccessCountDependsOnVisibility) {
   for (int i = 0; i < 10; i++) {
     preroll_context()->raster_cached_entries->clear();
     layer->Preroll(preroll_context());
-    EXPECT_NE(layer->raster_cache_item(), nullptr);
-    ASSERT_EQ(layer->raster_cache_item()->cache_state(),
-              RasterCacheItem::kNone);
-    ASSERT_TRUE(layer->raster_cache_item()->GetId().has_value());
+    ASSERT_EQ(raster_cache_item->cache_state(), RasterCacheItem::kNone);
+    ASSERT_TRUE(raster_cache_item->GetId().has_value());
     ASSERT_EQ(preroll_context()->raster_cache->GetAccessCount(
-                  layer->raster_cache_item()->GetId().value(), SkMatrix::I()),
+                  raster_cache_item->GetId().value(), SkMatrix::I()),
               0);
     ASSERT_EQ(preroll_context()->raster_cached_entries->size(), size_t(1));
     ASSERT_EQ(preroll_context()->raster_cache->EstimatePictureCacheByteSize(),
               size_t(0));
-    ASSERT_FALSE(
-        layer->raster_cache_item()->TryToPrepareRasterCache(paint_context()));
-    ASSERT_FALSE(layer->raster_cache_item()->Draw(paint_context(), nullptr));
+    ASSERT_FALSE(raster_cache_item->TryToPrepareRasterCache(paint_context()));
+    ASSERT_FALSE(raster_cache_item->Draw(paint_context(), nullptr));
   }
 
   // Next Preroll the DisplayListLayer once where it does intersect
@@ -560,18 +516,16 @@ TEST_F(DisplayListLayerTest, DisplayListAccessCountDependsOnVisibility) {
   preroll_context()->state_stack.set_preroll_delegate(hit_cull_rect);
   preroll_context()->raster_cached_entries->clear();
   layer->Preroll(preroll_context());
-  EXPECT_NE(layer->raster_cache_item(), nullptr);
-  ASSERT_EQ(layer->raster_cache_item()->cache_state(), RasterCacheItem::kNone);
-  ASSERT_TRUE(layer->raster_cache_item()->GetId().has_value());
+  ASSERT_EQ(raster_cache_item->cache_state(), RasterCacheItem::kNone);
+  ASSERT_TRUE(raster_cache_item->GetId().has_value());
   ASSERT_EQ(preroll_context()->raster_cache->GetAccessCount(
-                layer->raster_cache_item()->GetId().value(), SkMatrix::I()),
+                raster_cache_item->GetId().value(), SkMatrix::I()),
             1);
   ASSERT_EQ(preroll_context()->raster_cached_entries->size(), size_t(1));
   ASSERT_EQ(preroll_context()->raster_cache->EstimatePictureCacheByteSize(),
             size_t(0));
-  ASSERT_FALSE(
-      layer->raster_cache_item()->TryToPrepareRasterCache(paint_context()));
-  ASSERT_FALSE(layer->raster_cache_item()->Draw(paint_context(), nullptr));
+  ASSERT_FALSE(raster_cache_item->TryToPrepareRasterCache(paint_context()));
+  ASSERT_FALSE(raster_cache_item->Draw(paint_context(), nullptr));
 
   // Now we can Preroll the DisplayListLayer again with a cull rect that
   // it does not intersect and it should continue to count these operations
@@ -582,19 +536,16 @@ TEST_F(DisplayListLayerTest, DisplayListAccessCountDependsOnVisibility) {
   for (int i = 0; i < 10; i++) {
     preroll_context()->raster_cached_entries->clear();
     layer->Preroll(preroll_context());
-    EXPECT_NE(layer->raster_cache_item(), nullptr);
-    ASSERT_EQ(layer->raster_cache_item()->cache_state(),
-              RasterCacheItem::kNone);
-    ASSERT_TRUE(layer->raster_cache_item()->GetId().has_value());
+    ASSERT_EQ(raster_cache_item->cache_state(), RasterCacheItem::kNone);
+    ASSERT_TRUE(raster_cache_item->GetId().has_value());
     ASSERT_EQ(preroll_context()->raster_cache->GetAccessCount(
-                  layer->raster_cache_item()->GetId().value(), SkMatrix::I()),
+                  raster_cache_item->GetId().value(), SkMatrix::I()),
               i + 2);
     ASSERT_EQ(preroll_context()->raster_cached_entries->size(), size_t(1));
     ASSERT_EQ(preroll_context()->raster_cache->EstimatePictureCacheByteSize(),
               size_t(0));
-    ASSERT_FALSE(
-        layer->raster_cache_item()->TryToPrepareRasterCache(paint_context()));
-    ASSERT_FALSE(layer->raster_cache_item()->Draw(paint_context(), nullptr));
+    ASSERT_FALSE(raster_cache_item->TryToPrepareRasterCache(paint_context()));
+    ASSERT_FALSE(raster_cache_item->Draw(paint_context(), nullptr));
   }
 
   // Finally Preroll the DisplayListLayer again where it does intersect
@@ -605,21 +556,18 @@ TEST_F(DisplayListLayerTest, DisplayListAccessCountDependsOnVisibility) {
   preroll_context()->state_stack.set_preroll_delegate(hit_cull_rect);
   preroll_context()->raster_cached_entries->clear();
   layer->Preroll(preroll_context());
-  EXPECT_NE(layer->raster_cache_item(), nullptr);
-  ASSERT_EQ(layer->raster_cache_item()->cache_state(),
-            RasterCacheItem::kCurrent);
-  ASSERT_TRUE(layer->raster_cache_item()->GetId().has_value());
+  ASSERT_EQ(raster_cache_item->cache_state(), RasterCacheItem::kCurrent);
+  ASSERT_TRUE(raster_cache_item->GetId().has_value());
   ASSERT_EQ(preroll_context()->raster_cache->GetAccessCount(
-                layer->raster_cache_item()->GetId().value(), SkMatrix::I()),
+                raster_cache_item->GetId().value(), SkMatrix::I()),
             12);
   ASSERT_EQ(preroll_context()->raster_cached_entries->size(), size_t(1));
   ASSERT_EQ(preroll_context()->raster_cache->EstimatePictureCacheByteSize(),
             size_t(0));
-  ASSERT_TRUE(
-      layer->raster_cache_item()->TryToPrepareRasterCache(paint_context()));
+  ASSERT_TRUE(raster_cache_item->TryToPrepareRasterCache(paint_context()));
   ASSERT_GT(preroll_context()->raster_cache->EstimatePictureCacheByteSize(),
             size_t(0));
-  ASSERT_TRUE(layer->raster_cache_item()->Draw(paint_context(), nullptr));
+  ASSERT_TRUE(raster_cache_item->Draw(paint_context(), nullptr));
 }
 
 TEST_F(DisplayListLayerTest, OverflowCachedDisplayListOpacityInheritance) {

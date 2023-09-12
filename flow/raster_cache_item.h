@@ -57,8 +57,6 @@ class RasterCacheItem {
 
   void set_matrix(const SkMatrix& matrix) { matrix_ = matrix; }
 
-  void reset_cache_state() { cache_state_ = kNone; }
-
   CacheState cache_state() const { return cache_state_; }
 
   bool need_caching() const { return cache_state_ != CacheState::kNone; }
