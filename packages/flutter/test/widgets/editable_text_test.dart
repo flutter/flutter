@@ -196,14 +196,18 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/126312.
   testWidgetsWithLeakTracking('when open input connection in didUpdateWidget, should not throw', (WidgetTester tester) async {
     final Key key = GlobalKey();
-    controller.text = 'blah blah';
+
+    final TextEditingController controller1 = TextEditingController(text: 'blah blah');
+    addTearDown(controller1.dispose);
+    final TextEditingController controller2 = TextEditingController(text: 'blah blah');
+    addTearDown(controller2.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
           key: key,
           backgroundCursorColor: Colors.grey,
-          controller: controller,
+          controller: controller1,
           focusNode: focusNode,
           readOnly: true,
           style: textStyle,
@@ -225,7 +229,7 @@ void main() {
           child: EditableText(
             key: key,
             backgroundCursorColor: Colors.grey,
-            controller: controller,
+            controller: controller2,
             focusNode: focusNode,
             style: textStyle,
             cursorColor: cursorColor,
@@ -1312,6 +1316,10 @@ void main() {
     addTearDown(controller1.dispose);
     final TextEditingController controller2 = TextEditingController();
     addTearDown(controller2.dispose);
+    final TextEditingController controller3 = TextEditingController();
+    addTearDown(controller3.dispose);
+    final TextEditingController controller4 = TextEditingController();
+    addTearDown(controller4.dispose);
     final Key key1 = UniqueKey();
     final Key key2 = UniqueKey();
 
@@ -1370,7 +1378,7 @@ void main() {
               children: <Widget>[
                 EditableText(
                   key: key1,
-                  controller: controller1,
+                  controller: controller3,
                   backgroundCursorColor: Colors.grey,
                   focusNode: focusNode,
                   style: const TextStyle(fontSize: 20),
@@ -1378,7 +1386,7 @@ void main() {
                 ),
                 EditableText(
                   key: key2,
-                  controller: controller2,
+                  controller: controller4,
                   backgroundCursorColor: Colors.grey,
                   focusNode: focusNode,
                   style: const TextStyle(fontSize: 9),
