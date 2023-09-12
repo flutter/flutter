@@ -434,5 +434,42 @@ void main() {
         const Size.square(150),
       );
     });
+
+    testWidgets('disposes animation and controller', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const Center(
+          child: AnimatedSize(
+            duration: Duration(milliseconds: 200),
+            child: SizedBox(
+              width: 100.0,
+              height: 100.0,
+            ),
+          ),
+        ),
+      );
+
+      final RenderAnimatedSize box = tester.renderObject(find.byType(AnimatedSize));
+
+      await tester.pumpWidget(
+        const Center(),
+      );
+
+      expect(box.debugAnimation, isNotNull);
+      expect(box.debugAnimation!.isDisposed, isTrue);
+      expect(box.debugController, isNotNull);
+      expect(
+        () => box.debugController!.dispose(),
+        throwsA(isA<AssertionError>().having(
+          (AssertionError error) => error.message,
+          'message',
+          equalsIgnoringHashCodes(
+            'AnimationController.dispose() called more than once.\n'
+            'A given AnimationController cannot be disposed more than once.\n'
+            'The following AnimationController object was disposed multiple times:\n'
+            '  AnimationController#00000(⏮ 0.000; paused; DISPOSED)',
+          ),
+        )),
+      );
+    });
   });
 }
