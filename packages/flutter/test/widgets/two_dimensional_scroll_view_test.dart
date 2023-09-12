@@ -323,5 +323,104 @@ void main() {
       expect(scrollable.widget.diagonalDragBehavior, DiagonalDragBehavior.weightedContinuous);
       expect(scrollable.widget.dragStartBehavior, DragStartBehavior.down);
     }, variant: TargetPlatformVariant.all());
+
+    testWidgets('Fling and tap to stop', (WidgetTester tester) async {
+      final List<String> log = <String>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: SimpleBuilderTableView(
+            diagonalDragBehavior: DiagonalDragBehavior.free,
+            delegate: TwoDimensionalChildBuilderDelegate(
+              maxXIndex: 100,
+              maxYIndex: 100,
+              builder: (BuildContext context, ChildVicinity vicinity) {
+                return GestureDetector(
+                  onTapUp: (TapUpDetails details) {
+                    log.add('Tapped: $vicinity');
+                  },
+                  child: Text('$vicinity'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(log, equals(<String>[]));
+
+      // Tap once
+      await tester.tap(find.byType(TwoDimensionalScrollable));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(log, equals(<String>['Tapped: (xIndex: 0, yIndex: 0)']));
+
+      // Fling the scrollview to get it scrolling, verify that no tap occurs.
+      await tester.fling(find.byType(TwoDimensionalScrollable), const Offset(0.0, -200.0), 2000.0);
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(log, equals(<String>['Tapped: (xIndex: 0, yIndex: 0)']));
+
+      // // Tap to stop the scroll movement, this should stop the fling but not tap anything
+      await tester.tap(find.byType(TwoDimensionalScrollable));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(log, equals(<String>['Tapped: (xIndex: 0, yIndex: 0)']));
+
+      // Another tap.
+      await tester.tap(find.byType(TwoDimensionalScrollable));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(log,
+          equals(<String>['Tapped: (xIndex: 0, yIndex: 0)', 'Tapped: (xIndex: 0, yIndex: 0)']));
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets('Fling, wait to stop and tap', (WidgetTester tester) async {
+      final List<String> log = <String>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: SimpleBuilderTableView(
+            diagonalDragBehavior: DiagonalDragBehavior.free,
+            delegate: TwoDimensionalChildBuilderDelegate(
+              maxXIndex: 100,
+              maxYIndex: 100,
+              builder: (BuildContext context, ChildVicinity vicinity) {
+                return GestureDetector(
+                  onTapUp: (TapUpDetails details) {
+                    log.add('Tapped: $vicinity');
+                  },
+                  child: Text('$vicinity'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(log, equals(<String>[]));
+
+      // Tap once
+      await tester.tap(find.byType(TwoDimensionalScrollable));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(log, equals(<String>['Tapped: (xIndex: 0, yIndex: 0)']));
+
+      // Fling the scrollview to get it scrolling, verify that no tap occurs.
+      await tester.fling(find.byType(TwoDimensionalScrollable), const Offset(0.0, -200.0), 2000.0);
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(log, equals(<String>['Tapped: (xIndex: 0, yIndex: 0)']));
+
+      // // Wait for the fling to finish.
+      await tester.pump(
+          const Duration(seconds: 150)); // long wait, so the fling will have ended at the end of it
+
+      // Another tap.
+      await tester.tap(find.byType(TwoDimensionalScrollable));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(log,
+          equals(<String>['Tapped: (xIndex: 0, yIndex: 0)', 'Tapped: (xIndex: 0, yIndex: 5)']));
+    }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
   });
 }
