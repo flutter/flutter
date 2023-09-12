@@ -34,13 +34,13 @@ class TestBuildSystem implements BuildSystem {
   @override
   Future<BuildResult> build(Target target, Environment environment, {BuildSystemConfig buildSystemConfig = const BuildSystemConfig()}) async {
     if (_onRun != null) {
-      _onRun?.call(target, environment);
+      _onRun.call(target, environment);
     }
     if (_exception != null) {
-      throw _exception!;
+      throw _exception;
     }
     if (_singleResult != null) {
-      return _singleResult!;
+      return _singleResult;
     }
     if (_nextResult >= _results.length) {
       throw StateError('Unexpected build request of ${target.name}');
@@ -51,13 +51,13 @@ class TestBuildSystem implements BuildSystem {
   @override
   Future<BuildResult> buildIncremental(Target target, Environment environment, BuildResult? previousBuild) async {
     if (_onRun != null) {
-      _onRun?.call(target, environment);
+      _onRun.call(target, environment);
     }
     if (_exception != null) {
-      throw _exception!;
+      throw _exception;
     }
     if (_singleResult != null) {
-      return _singleResult!;
+      return _singleResult;
     }
     if (_nextResult >= _results.length) {
       throw StateError('Unexpected buildIncremental request of ${target.name}');

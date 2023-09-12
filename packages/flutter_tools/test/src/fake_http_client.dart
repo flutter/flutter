@@ -341,7 +341,7 @@ class _FakeHttpClientRequest implements HttpClientRequest {
     });
     await completer.future;
     if (_responseError != null) {
-      return Future<HttpClientResponse>.error(_responseError!);
+      return Future<HttpClientResponse>.error(_responseError);
     }
     return _FakeHttpClientResponse(_response);
   }
