@@ -122,11 +122,16 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
     required OS targetOs,
     required Uri workingDirectory,
   }) {
+    final PackageLayout packageLayout = PackageLayout.fromPackageConfig(
+      packageConfig,
+      projectUri.resolve('.dart_tool/package_config.json'),
+    );
     return _buildRunner.dryRun(
       includeParentEnvironment: includeParentEnvironment,
       linkModePreference: linkModePreference,
       targetOs: targetOs,
       workingDirectory: workingDirectory,
+      packageLayout: packageLayout,
     );
   }
 
@@ -141,6 +146,10 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
     int? targetAndroidNdkApi,
     IOSSdk? targetIOSSdk,
   }) {
+    final PackageLayout packageLayout = PackageLayout.fromPackageConfig(
+      packageConfig,
+      projectUri.resolve('.dart_tool/package_config.json'),
+    );
     return _buildRunner.build(
       buildMode: buildMode,
       cCompilerConfig: cCompilerConfig,
@@ -150,6 +159,7 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
       targetAndroidNdkApi: targetAndroidNdkApi,
       targetIOSSdk: targetIOSSdk,
       workingDirectory: workingDirectory,
+      packageLayout: packageLayout,
     );
   }
 
