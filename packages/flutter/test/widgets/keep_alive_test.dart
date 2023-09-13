@@ -5,6 +5,7 @@
 import 'dart:io' show Platform;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
@@ -47,6 +48,14 @@ List<Widget> generateList(Widget child) {
 }
 
 void main() {
+  test('KeepAlive debugTypicalAncestor ', () {
+    final KeepAlive keepAlive = KeepAlive(keepAlive: false, child: Container());
+    expect(
+      keepAlive.debugTypicalAncestorWidgetClass,
+      RenderAbstractViewport,
+    );
+  });
+
   testWidgetsWithLeakTracking('KeepAlive with ListView with itemExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
