@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: prefer_final_locals, always_specify_types
+// Ignoring these rules helps to declutter the below switch expressions,
+// although reinstating prefer_final_locals could give a small performance boost.
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -103,6 +107,53 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
     properties.add(EnumProperty<DecorationPosition>('position', position, level: DiagnosticLevel.hidden));
     properties.add(DiagnosticsProperty<Decoration>(label, decoration));
   }
+}
+
+class _DynamicBox extends StatelessWidget {
+  /// This class determines which widget to build based on config's type.
+  const _DynamicBox(this.config, {required this.child});
+
+  final dynamic config;
+  final Widget? child;
+
+  Never error(String description) => throw Exception('$description: $config');
+
+  @override
+  Widget build(BuildContext context) => switch (config) {
+        null || (null, null) || (null, null, null) || (null, Clip.none) => child!,
+
+        EdgeInsets p when p.isNonNegative => Padding(padding: p, child: child),
+        EdgeInsets() => error('negative padding'),
+
+        (double? w, double? h, null) => SizedBox(width: w, height: h, child: child),
+        (double? w, double? h, BoxConstraints c) when c.debugAssertIsValid() => ConstrainedBox(
+            constraints: (w != null || h != null) ? c.tighten(width: w, height: h) : c,
+          ),
+        (_, _, BoxConstraints()) => error('invalid constraints'),
+
+        Color c => ColoredBox(color: c, child: child),
+
+        (Decoration d, Clip.none) when d.debugAssertIsValid() => DecoratedBox(decoration: d, child: child),
+        (Decoration d, Clip c) when d.debugAssertIsValid() => DecoratedBox(
+            decoration: d,
+            child: ClipPath(
+              clipper: _DecorationClipper(
+                textDirection: Directionality.maybeOf(context),
+                decoration: d,
+              ),
+              clipBehavior: c,
+              child: child,
+            ),
+          ),
+        (null, Clip c) when c != Clip.none => error('$c with no decoration'),
+        (Decoration(), _) => error('invalid foreground decoration'),
+
+        Alignment a => Align(alignment: a, child: child),
+
+        (Matrix4 t, AlignmentGeometry? a) => Transform(transform: t, alignment: a, child: child),
+
+        _ => error('problem with config type ${config.runtimeType}'),
+      };
 }
 
 /// A convenience widget that combines common painting, positioning, and sizing
@@ -247,35 +298,25 @@ class Container extends StatelessWidget {
   /// it would potentially result in the decoration drawing over the background
   /// color. To supply a decoration with a color, use `decoration:
   /// BoxDecoration(color: color)`.
-  Container({
+  const Container({
     super.key,
     this.alignment,
     this.padding,
     this.color,
     this.decoration,
     this.foregroundDecoration,
-    double? width,
-    double? height,
-    BoxConstraints? constraints,
+    this.width,
+    this.height,
+    this.constraints,
     this.margin,
     this.transform,
     this.transformAlignment,
     this.child,
     this.clipBehavior = Clip.none,
-  }) : assert(margin == null || margin.isNonNegative),
-       assert(padding == null || padding.isNonNegative),
-       assert(decoration == null || decoration.debugAssertIsValid()),
-       assert(constraints == null || constraints.debugAssertIsValid()),
-       assert(decoration != null || clipBehavior == Clip.none),
-       assert(color == null || decoration == null,
+  }) : assert(color == null || decoration == null,
          'Cannot provide both a color and a decoration\n'
          'To provide both, use "decoration: BoxDecoration(color: color)".',
-       ),
-       constraints =
-        (width != null || height != null)
-          ? constraints?.tighten(width: width, height: height)
-            ?? BoxConstraints.tightFor(width: width, height: height)
-          : constraints;
+       );
 
   /// The [child] contained by the container.
   ///
@@ -332,10 +373,12 @@ class Container extends StatelessWidget {
   /// The decoration to paint in front of the [child].
   final Decoration? foregroundDecoration;
 
+  /// Constraints for the [child]'s width/height, in logical pixels.
+  final double? width, height;
+
   /// Additional constraints to apply to the child.
   ///
-  /// The constructor `width` and `height` arguments are combined with the
-  /// `constraints` argument to set this property.
+  /// This widget generates constraints by combining this property with [width] and [height].
   ///
   /// The [padding] goes inside the constraints.
   final BoxConstraints? constraints;
@@ -365,77 +408,46 @@ class Container extends StatelessWidget {
   /// method throws an [UnsupportedError].)
   final Clip clipBehavior;
 
-  EdgeInsetsGeometry? get _paddingIncludingDecoration {
-    if (decoration == null) {
-      return padding;
-    }
-    final EdgeInsetsGeometry decorationPadding = decoration!.padding;
-    if (padding == null) {
-      return decorationPadding;
-    }
-    return padding!.add(decorationPadding);
-  }
+  EdgeInsetsGeometry? get _paddingIncludingDecoration => switch ((decoration?.padding, padding)) {
+        (null, final pad) || (final pad, null) => pad,
+        (final deco, final pad) => pad!.add(deco!),
+      };
+
+  bool get _noLooseConstraints => child == null && (constraints?.isTight ?? true);
+
+  static const Widget _defaultChild = LimitedBox(
+    maxWidth: 0.0,
+    maxHeight: 0.0,
+    child: SizedBox.expand(),
+  );
 
   @override
   Widget build(BuildContext context) {
-    Widget? current = child;
-
-    if (child == null && (constraints == null || !constraints!.isTight)) {
-      current = LimitedBox(
-        maxWidth: 0.0,
-        maxHeight: 0.0,
-        child: ConstrainedBox(constraints: const BoxConstraints.expand()),
-      );
-    } else if (alignment != null) {
-      current = Align(alignment: alignment!, child: current);
-    }
-
-    final EdgeInsetsGeometry? effectivePadding = _paddingIncludingDecoration;
-    if (effectivePadding != null) {
-      current = Padding(padding: effectivePadding, child: current);
-    }
-
-    if (color != null) {
-      current = ColoredBox(color: color!, child: current);
-    }
-
-    if (clipBehavior != Clip.none) {
-      assert(decoration != null);
-      current = ClipPath(
-        clipper: _DecorationClipper(
-          textDirection: Directionality.maybeOf(context),
-          decoration: decoration!,
+    return _DynamicBox(
+      (transform, transformAlignment),
+      child: _DynamicBox(
+        margin,
+        child: _DynamicBox(
+          color,
+          child: _DynamicBox(
+            (width, height, constraints),
+            child: _DynamicBox(
+              foregroundDecoration,
+              child: _DynamicBox(
+                (decoration, clipBehavior),
+                child: _DynamicBox(
+                  _paddingIncludingDecoration,
+                  child:
+                      _noLooseConstraints
+                          ? _defaultChild
+                          : _DynamicBox(alignment, child: child),
+                ),
+              ),
+            ),
+          ),
         ),
-        clipBehavior: clipBehavior,
-        child: current,
-      );
-    }
-
-    if (decoration != null) {
-      current = DecoratedBox(decoration: decoration!, child: current);
-    }
-
-    if (foregroundDecoration != null) {
-      current = DecoratedBox(
-        decoration: foregroundDecoration!,
-        position: DecorationPosition.foreground,
-        child: current,
-      );
-    }
-
-    if (constraints != null) {
-      current = ConstrainedBox(constraints: constraints!, child: current);
-    }
-
-    if (margin != null) {
-      current = Padding(padding: margin!, child: current);
-    }
-
-    if (transform != null) {
-      current = Transform(transform: transform!, alignment: transformAlignment, child: current);
-    }
-
-    return current!;
+      ),
+    );
   }
 
   @override
@@ -450,6 +462,8 @@ class Container extends StatelessWidget {
       properties.add(DiagnosticsProperty<Decoration>('bg', decoration, defaultValue: null));
     }
     properties.add(DiagnosticsProperty<Decoration>('fg', foregroundDecoration, defaultValue: null));
+    properties.add(DiagnosticsProperty<double>('width', width, defaultValue: null));
+    properties.add(DiagnosticsProperty<double>('height', height, defaultValue: null));
     properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
     properties.add(ObjectFlagProperty<Matrix4>.has('transform', transform));
