@@ -16,7 +16,7 @@ updates:
       - dependency-name: "github/codeql-action"
         update-types: ["version-update:semver-minor"]
   - package-ecosystem: "pub"
-    directory: "/lib/web_ui/pubspec.yaml"
+    directory: "/lib/web_ui"
     schedule:
       interval: "daily"
     labels:
