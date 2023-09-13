@@ -173,11 +173,10 @@ std::move({{ arg.argument_name }}){% if not loop.is_last %}, {% endif %}
   // ===========================================================================
   // Metadata for Vulkan =======================================================
   // ===========================================================================
-  static constexpr std::array<DescriptorSetLayout,{{length(buffers)+length(sampled_images)+length(subpass_inputs)}}> kDescriptorSetLayouts{
+  static constexpr std::array<DescriptorSetLayout,{{length(buffers)+length(sampled_images)}}> kDescriptorSetLayouts{
 {% for buffer in buffers %}
     DescriptorSetLayout{
       {{buffer.binding}}, // binding = {{buffer.binding}}
-      {{buffer.input_attachment_index}}, // input_attachment_index = {{buffer.input_attachment_index}}
       {{buffer.descriptor_type}}, // descriptor_type = {{buffer.descriptor_type}}
       {{to_shader_stage(shader_stage)}}, // shader_stage = {{to_shader_stage(shader_stage)}}
     },
@@ -185,16 +184,7 @@ std::move({{ arg.argument_name }}){% if not loop.is_last %}, {% endif %}
 {% for sampled_image in sampled_images %}
     DescriptorSetLayout{
       {{sampled_image.binding}}, // binding = {{sampled_image.binding}}
-      {{sampled_image.input_attachment_index}}, // input_attachment_index = {{sampled_image.input_attachment_index}}
       {{sampled_image.descriptor_type}}, // descriptor_type = {{sampled_image.descriptor_type}}
-      {{to_shader_stage(shader_stage)}}, // shader_stage = {{to_shader_stage(shader_stage)}}
-    },
-{% endfor %}
-{% for subpass_input in subpass_inputs %}
-    DescriptorSetLayout{
-      {{subpass_input.binding}}, // binding = {{subpass_input.binding}}
-      {{subpass_input.input_attachment_index}}, // input_attachment_index = {{subpass_input.input_attachment_index}}
-      {{subpass_input.descriptor_type}}, // descriptor_type = {{subpass_input.descriptor_type}}
       {{to_shader_stage(shader_stage)}}, // shader_stage = {{to_shader_stage(shader_stage)}}
     },
 {% endfor %}
