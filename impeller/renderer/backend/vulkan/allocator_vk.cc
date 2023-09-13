@@ -88,64 +88,47 @@ AllocatorVK::AllocatorVK(std::weak_ptr<Context> context,
                          const vk::PhysicalDevice& physical_device,
                          const std::shared_ptr<DeviceHolder>& device_holder,
                          const vk::Instance& instance,
-                         PFN_vkGetInstanceProcAddr get_instance_proc_address,
-                         PFN_vkGetDeviceProcAddr get_device_proc_address,
                          const CapabilitiesVK& capabilities)
     : context_(std::move(context)), device_holder_(device_holder) {
   TRACE_EVENT0("impeller", "CreateAllocatorVK");
-  vk_ = fml::MakeRefCounted<vulkan::VulkanProcTable>(get_instance_proc_address);
-
-  auto instance_handle = vulkan::VulkanHandle<VkInstance>(instance);
-  if (!vk_->SetupInstanceProcAddresses(instance_handle)) {
-    return;
-  }
-
-  auto device_handle =
-      vulkan::VulkanHandle<VkDevice>(device_holder->GetDevice());
-  if (!vk_->SetupDeviceProcAddresses(device_handle)) {
-    return;
-  }
 
   auto limits = physical_device.getProperties().limits;
   max_texture_size_.width = max_texture_size_.height =
       limits.maxImageDimension2D;
 
   VmaVulkanFunctions proc_table = {};
-  proc_table.vkGetInstanceProcAddr = get_instance_proc_address;
-  proc_table.vkGetDeviceProcAddr = get_device_proc_address;
 
-#define PROVIDE_PROC(tbl, proc, provider) tbl.vk##proc = provider->proc;
-  PROVIDE_PROC(proc_table, GetPhysicalDeviceProperties, vk_);
-  PROVIDE_PROC(proc_table, GetPhysicalDeviceMemoryProperties, vk_);
-  PROVIDE_PROC(proc_table, AllocateMemory, vk_);
-  PROVIDE_PROC(proc_table, FreeMemory, vk_);
-  PROVIDE_PROC(proc_table, MapMemory, vk_);
-  PROVIDE_PROC(proc_table, UnmapMemory, vk_);
-  PROVIDE_PROC(proc_table, FlushMappedMemoryRanges, vk_);
-  PROVIDE_PROC(proc_table, InvalidateMappedMemoryRanges, vk_);
-  PROVIDE_PROC(proc_table, BindBufferMemory, vk_);
-  PROVIDE_PROC(proc_table, BindImageMemory, vk_);
-  PROVIDE_PROC(proc_table, GetBufferMemoryRequirements, vk_);
-  PROVIDE_PROC(proc_table, GetImageMemoryRequirements, vk_);
-  PROVIDE_PROC(proc_table, CreateBuffer, vk_);
-  PROVIDE_PROC(proc_table, DestroyBuffer, vk_);
-  PROVIDE_PROC(proc_table, CreateImage, vk_);
-  PROVIDE_PROC(proc_table, DestroyImage, vk_);
-  PROVIDE_PROC(proc_table, CmdCopyBuffer, vk_);
-
-#define PROVIDE_PROC_COALESCE(tbl, proc, provider) \
-  tbl.vk##proc##KHR = provider->proc ? provider->proc : provider->proc##KHR;
-  // See the following link for why we have to pick either KHR version or
-  // promoted non-KHR version:
-  // https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/issues/203
-  PROVIDE_PROC_COALESCE(proc_table, GetBufferMemoryRequirements2, vk_);
-  PROVIDE_PROC_COALESCE(proc_table, GetImageMemoryRequirements2, vk_);
-  PROVIDE_PROC_COALESCE(proc_table, BindBufferMemory2, vk_);
-  PROVIDE_PROC_COALESCE(proc_table, BindImageMemory2, vk_);
-  PROVIDE_PROC_COALESCE(proc_table, GetPhysicalDeviceMemoryProperties2, vk_);
-#undef PROVIDE_PROC_COALESCE
-
-#undef PROVIDE_PROC
+#define BIND_VMA_PROC(x) proc_table.x = VULKAN_HPP_DEFAULT_DISPATCHER.x;
+#define BIND_VMA_PROC_KHR(x)                                \
+  proc_table.x##KHR = VULKAN_HPP_DEFAULT_DISPATCHER.x       \
+                          ? VULKAN_HPP_DEFAULT_DISPATCHER.x \
+                          : VULKAN_HPP_DEFAULT_DISPATCHER.x##KHR;
+  BIND_VMA_PROC(vkGetInstanceProcAddr);
+  BIND_VMA_PROC(vkGetDeviceProcAddr);
+  BIND_VMA_PROC(vkGetPhysicalDeviceProperties);
+  BIND_VMA_PROC(vkGetPhysicalDeviceMemoryProperties);
+  BIND_VMA_PROC(vkAllocateMemory);
+  BIND_VMA_PROC(vkFreeMemory);
+  BIND_VMA_PROC(vkMapMemory);
+  BIND_VMA_PROC(vkUnmapMemory);
+  BIND_VMA_PROC(vkFlushMappedMemoryRanges);
+  BIND_VMA_PROC(vkInvalidateMappedMemoryRanges);
+  BIND_VMA_PROC(vkBindBufferMemory);
+  BIND_VMA_PROC(vkBindImageMemory);
+  BIND_VMA_PROC(vkGetBufferMemoryRequirements);
+  BIND_VMA_PROC(vkGetImageMemoryRequirements);
+  BIND_VMA_PROC(vkCreateBuffer);
+  BIND_VMA_PROC(vkDestroyBuffer);
+  BIND_VMA_PROC(vkCreateImage);
+  BIND_VMA_PROC(vkDestroyImage);
+  BIND_VMA_PROC(vkCmdCopyBuffer);
+  BIND_VMA_PROC_KHR(vkGetBufferMemoryRequirements2);
+  BIND_VMA_PROC_KHR(vkGetImageMemoryRequirements2);
+  BIND_VMA_PROC_KHR(vkBindBufferMemory2);
+  BIND_VMA_PROC_KHR(vkBindImageMemory2);
+  BIND_VMA_PROC_KHR(vkGetPhysicalDeviceMemoryProperties2);
+#undef BIND_VMA_PROC_KHR
+#undef BIND_VMA_PROC
 
   VmaAllocatorCreateInfo allocator_info = {};
   allocator_info.vulkanApiVersion = vulkan_api_version;

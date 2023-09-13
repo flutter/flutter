@@ -331,14 +331,12 @@ void ContextVK::Setup(Settings settings) {
   /// Create the allocator.
   ///
   auto allocator = std::shared_ptr<AllocatorVK>(new AllocatorVK(
-      weak_from_this(),                  //
-      application_info.apiVersion,       //
-      device_holder->physical_device,    //
-      device_holder,                     //
-      device_holder->instance.get(),     //
-      dispatcher.vkGetInstanceProcAddr,  //
-      dispatcher.vkGetDeviceProcAddr,    //
-      *caps                              //
+      weak_from_this(),                //
+      application_info.apiVersion,     //
+      device_holder->physical_device,  //
+      device_holder,                   //
+      device_holder->instance.get(),   //
+      *caps                            //
       ));
 
   if (!allocator->IsValid()) {
