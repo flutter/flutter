@@ -253,6 +253,7 @@ StrokePathGeometry::CreateSolidStrokeVertices(
   for (size_t contour_i = 0; contour_i < polyline.contours.size();
        contour_i++) {
     auto contour = polyline.contours[contour_i];
+    size_t contour_component_i = 0;
     size_t contour_start_point_i, contour_end_point_i;
     std::tie(contour_start_point_i, contour_end_point_i) =
         polyline.GetContourPointBounds(contour_i);
@@ -308,27 +309,55 @@ StrokePathGeometry::CreateSolidStrokeVertices(
     // Generate contour geometry.
     for (size_t point_i = contour_start_point_i + 1;
          point_i < contour_end_point_i; point_i++) {
+      if ((contour_component_i + 1 >= contour.components.size()) &&
+          contour.components[contour_component_i + 1].component_start_index <=
+              point_i) {
+        // The point_i has entered the next component in this contour.
+        contour_component_i += 1;
+      }
       // Generate line rect.
       vtx.position = polyline.points[point_i - 1] + offset;
       vtx_builder.AppendVertex(vtx);
       vtx.position = polyline.points[point_i - 1] - offset;
       vtx_builder.AppendVertex(vtx);
-      vtx.position = polyline.points[point_i] + offset;
-      vtx_builder.AppendVertex(vtx);
-      vtx.position = polyline.points[point_i] - offset;
-      vtx_builder.AppendVertex(vtx);
 
-      if (point_i < contour_end_point_i - 1) {
-        compute_offset(point_i + 1);
+      auto is_end_of_contour = point_i == contour_end_point_i - 1;
 
-        // Generate join from the current line to the next line.
-        join_proc(vtx_builder, polyline.points[point_i], previous_offset,
-                  offset, scaled_miter_limit, scale);
+      if (!contour.components[contour_component_i].is_curve) {
+        // For line components, two additional points need to be appended prior
+        // to appending a join connecting the next component.
+        vtx.position = polyline.points[point_i] + offset;
+        vtx_builder.AppendVertex(vtx);
+        vtx.position = polyline.points[point_i] - offset;
+        vtx_builder.AppendVertex(vtx);
+
+        if (!is_end_of_contour) {
+          compute_offset(point_i + 1);
+          // Generate join from the current line to the next line.
+          join_proc(vtx_builder, polyline.points[point_i], previous_offset,
+                    offset, scaled_miter_limit, scale);
+        }
+      } else {
+        // For curve components, the polyline is detailed enough such that
+        // it can avoid worrying about joins altogether.
+        if (!is_end_of_contour) {
+          compute_offset(point_i + 1);
+        } else {
+          // If this is a curve and is the end of the contour, two end points
+          // need to be drawn with the contour end_direction.
+          auto end_offset =
+              Vector2(-contour.end_direction.y, contour.end_direction.x) *
+              stroke_width * 0.5;
+          vtx.position = polyline.points[contour_end_point_i - 1] + end_offset;
+          vtx_builder.AppendVertex(vtx);
+          vtx.position = polyline.points[contour_end_point_i - 1] - end_offset;
+          vtx_builder.AppendVertex(vtx);
+        }
       }
     }
 
     // Generate end cap or join.
-    if (!polyline.contours[contour_i].is_closed) {
+    if (!contour.is_closed) {
       auto cap_offset =
           Vector2(-contour.end_direction.y, contour.end_direction.x) *
           stroke_width * 0.5;  // Clockwise normal
