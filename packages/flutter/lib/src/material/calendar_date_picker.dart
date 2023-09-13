@@ -868,6 +868,10 @@ class _DayPickerState extends State<_DayPicker> {
   /// List of [FocusNode]s, one for each day of the month.
   late List<FocusNode> _dayFocusNodes;
 
+  // TODO(polina-c): a cleaner solution is to create separate statefull widget for a day.
+  // https://github.com/flutter/flutter/issues/134323
+  final Map<int, MaterialStatesController> _statesControllers = <int, MaterialStatesController>{};
+
   @override
   void initState() {
     super.initState();
@@ -892,6 +896,9 @@ class _DayPickerState extends State<_DayPicker> {
   void dispose() {
     for (final FocusNode node in _dayFocusNodes) {
       node.dispose();
+    }
+    for (final MaterialStatesController controller in _statesControllers.values) {
+      controller.dispose();
     }
     super.dispose();
   }
@@ -973,6 +980,9 @@ class _DayPickerState extends State<_DayPicker> {
           if (isSelectedDay) MaterialState.selected,
         };
 
+        final MaterialStatesController statesController = _statesControllers.putIfAbsent(day, () => MaterialStatesController());
+        statesController.value = states;
+
         final Color? dayForegroundColor = resolve<Color?>((DatePickerThemeData? theme) => isToday ? theme?.todayForegroundColor : theme?.dayForegroundColor, states);
         final Color? dayBackgroundColor = resolve<Color?>((DatePickerThemeData? theme) => isToday ? theme?.todayBackgroundColor : theme?.dayBackgroundColor, states);
         final MaterialStateProperty<Color?> dayOverlayColor = MaterialStateProperty.resolveWith<Color?>(
@@ -1008,7 +1018,7 @@ class _DayPickerState extends State<_DayPicker> {
             focusNode: _dayFocusNodes[day - 1],
             onTap: () => widget.onChanged(dayToBuild),
             radius: _dayPickerRowHeight / 2 + 4,
-            statesController: MaterialStatesController(states),
+            statesController: statesController,
             overlayColor: dayOverlayColor,
             child: Semantics(
               // We want the day of month to be spoken first irrespective of the
@@ -1137,7 +1147,8 @@ class YearPicker extends StatefulWidget {
 }
 
 class _YearPickerState extends State<YearPicker> {
-  late ScrollController _scrollController;
+  ScrollController? _scrollController;
+  final MaterialStatesController _statesController = MaterialStatesController();
 
   // The approximate number of years necessary to fill the available space.
   static const int minYears = 18;
@@ -1149,10 +1160,17 @@ class _YearPickerState extends State<YearPicker> {
   }
 
   @override
+  void dispose() {
+    _scrollController?.dispose();
+    _statesController.dispose();
+    super.dispose();
+  }
+
+  @override
   void didUpdateWidget(YearPicker oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.selectedDate != oldWidget.selectedDate && widget.selectedDate != null) {
-      _scrollController.jumpTo(_scrollOffsetForYear(widget.selectedDate!));
+      _scrollController!.jumpTo(_scrollOffsetForYear(widget.selectedDate!));
     }
   }
 
@@ -1245,10 +1263,11 @@ class _YearPickerState extends State<YearPicker> {
         assert(date.year == widget.lastDate.year);
         date = DateTime(year, widget.lastDate.month);
       }
+      _statesController.value = states;
       yearItem = InkWell(
         key: ValueKey<int>(year),
         onTap: () => widget.onChanged(date),
-        statesController: MaterialStatesController(states),
+        statesController: _statesController,
         overlayColor: overlayColor,
         child: yearItem,
       );
