@@ -189,6 +189,8 @@
 ../../../flutter/lib/ui/compositing/scene_builder_unittests.cc
 ../../../flutter/lib/ui/fixtures
 ../../../flutter/lib/ui/hooks_unittests.cc
+../../../flutter/lib/ui/painting/image_decoder_no_gl_unittests.cc
+../../../flutter/lib/ui/painting/image_decoder_no_gl_unittests.h
 ../../../flutter/lib/ui/painting/image_decoder_unittests.cc
 ../../../flutter/lib/ui/painting/image_dispose_unittests.cc
 ../../../flutter/lib/ui/painting/image_encoding_unittests.cc
