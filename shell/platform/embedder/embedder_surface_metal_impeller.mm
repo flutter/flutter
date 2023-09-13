@@ -11,7 +11,7 @@
 #include "flutter/fml/synchronization/sync_switch.h"
 #include "flutter/shell/gpu/gpu_surface_metal_delegate.h"
 #include "flutter/shell/gpu/gpu_surface_metal_impeller.h"
-#include "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalImpeller.h"
+#import "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalImpeller.h"
 #include "impeller/entity/mtl/entity_shaders.h"
 #include "impeller/entity/mtl/framebuffer_blend_shaders.h"
 #include "impeller/entity/mtl/modern_shaders.h"

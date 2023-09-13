@@ -5,7 +5,6 @@
 #pragma once
 
 #include <cstddef>
-#include <limits>
 #include <optional>
 #include <string_view>
 #include <vector>
@@ -145,21 +144,12 @@ enum class DescriptorType {
   kSampledImage,
   kImage,
   kSampler,
-  kSubpassInput,
 };
 
 struct DescriptorSetLayout {
   uint32_t binding;
-  uint32_t input_attachment_index;
   DescriptorType descriptor_type;
   ShaderStage shader_stage;
-
-  constexpr std::optional<uint32_t> GetInputAttachmentIndexIfValid() const {
-    if (std::numeric_limits<uint32_t>::max() == input_attachment_index) {
-      return std::nullopt;
-    }
-    return input_attachment_index;
-  }
 };
 
 template <size_t Size>
