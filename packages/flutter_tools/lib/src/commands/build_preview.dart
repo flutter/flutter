@@ -2,10 +2,12 @@ import 'package:file/file.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/io.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;
+import '../preview_device.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import '../windows/build_windows.dart';
@@ -45,35 +47,38 @@ class BuildPreviewCommand extends BuildSubCommand {
   static const BuildInfo buildInfo = BuildInfo(
     BuildMode.debug,
     null, // no flavor
+    // users may add icons later
     treeShakeIcons: false,
   );
+
+  @override
+  void requiresPubspecYaml() {}
 
   static const String appName = 'flutter_preview';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
     //final Directory targetDir = fs.systemTempDirectory.createTempSync('flutter-build-preview');
-    final Directory targetDir = fs.directory(flutterRoot).parent.createTempSync('flutter-build-preview-');
+    final Directory targetDir = fs.directory(flutterRoot).parent.createTempSync('flutter-build-preview-'); // TODO
     final FlutterProject flutterProject = await _createProject(targetDir);
     if (!globals.platform.isWindows) {
-      throwToolExit('"build _preview" is only supported on Windows hosts.');
+      throwToolExit('"build _preview" is currently only supported on Windows hosts.');
     }
     await buildWindows(
       flutterProject.windows,
       buildInfo,
     );
+
     final File previewDevice = targetDir
         .childDirectory(getWindowsBuildDirectory(TargetPlatform.windows_x64))
         .childDirectory('runner')
         .childDirectory('Debug')
         .childFile('$appName.exe');
+    // TODO test custom build dir
+    if (!previewDevice.existsSync()) {
+      throw StateError('Preview device not found at ${previewDevice.absolute.path}');
+    }
     previewDevice.copySync(artifacts.getArtifactPath(Artifact.flutterPreviewDevice));
-    //previewDevice.copySync(fs.path.join( // TODO
-    //  flutterRoot,
-    //  'artifacts_temp',
-    //  'Debug',
-    //  'flutter_preview.exe',
-    //));
     return FlutterCommandResult.success();
   }
 
@@ -91,10 +96,10 @@ class BuildPreviewCommand extends BuildSubCommand {
       allowReentrantFlutter: true,
     );
     if (result.exitCode != 0) {
-      logger.printError('${args.join(' ')} exited with code ${result.exitCode}');
-      logger.printError('stdout:\n${result.stdout}\n');
-      logger.printError('stderr:\n${result.stderr}\n');
-      throw 'yikes';
+      final StringBuffer buffer = StringBuffer('${args.join(' ')} exited with code ${result.exitCode}');
+      buffer.writeln('stdout:\n${result.stdout}\n');
+      buffer.writeln('stderr:\n${result.stderr}');
+      throw ProcessException(args.first, args.sublist(1), buffer.toString(), result.exitCode);
     }
     return FlutterProject.fromDirectory(targetDir);
   }
