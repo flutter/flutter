@@ -575,6 +575,7 @@ abstract class _TestRecordingCanvasMatcher extends Matcher {
       }
       matchState[this] = '$prefixMessage\n$description';
     }
+    context.dispose();
     return result;
   }
 

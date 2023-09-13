@@ -71,6 +71,7 @@ void main() {
 
     for (final Clip? clip in <Clip?>[null, ...Clip.values]) {
       final TestClipPaintingContext context = TestClipPaintingContext();
+      addTearDown(context.dispose);
       final RenderEditable editable;
       switch (clip) {
         case Clip.none:

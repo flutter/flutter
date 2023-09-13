@@ -537,6 +537,7 @@ void main() {
     const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
     for (final Clip? clip in <Clip?>[null, ...Clip.values]) {
       final TestClipPaintingContext context = TestClipPaintingContext();
+      addTearDown(context.dispose);
       final RenderFittedBox box;
       switch (clip) {
         case Clip.none:

@@ -60,6 +60,7 @@ void main() {
   test('Clip behavior is respected', () {
     const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
     final TestClipPaintingContext context = TestClipPaintingContext();
+    addTearDown(context.dispose);
     bool hadErrors = false;
 
     for (final Clip? clip in <Clip?>[null, ...Clip.values]) {

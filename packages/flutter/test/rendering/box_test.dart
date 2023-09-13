@@ -432,6 +432,7 @@ void main() {
       }
 
       final TestClipPaintingContext context = TestClipPaintingContext();
+      addTearDown(context.dispose);
       for (final Clip? clip in <Clip?>[null, ...Clip.values]) {
         final RenderConstraintsTransformBox box;
         switch (clip) {
@@ -702,6 +703,7 @@ void main() {
   test('clipBehavior is respected', () {
     const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
     final TestClipPaintingContext context = TestClipPaintingContext();
+    addTearDown(context.dispose);
 
     bool hadErrors = false;
     void expectOverflowedErrors() {

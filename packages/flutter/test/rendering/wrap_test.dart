@@ -207,6 +207,7 @@ void main() {
   test('Wrap respects clipBehavior', () {
     const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
     final TestClipPaintingContext context = TestClipPaintingContext();
+    addTearDown(context.dispose);
 
     for (final Clip? clip in <Clip?>[null, ...Clip.values]) {
       final RenderWrap wrap;

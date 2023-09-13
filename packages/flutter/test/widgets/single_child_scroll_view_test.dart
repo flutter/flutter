@@ -63,6 +63,7 @@ void main() {
 
     // 2nd, height == widow.height test: check that the painting context does not call pushClipRect .
     TestClipPaintingContext context = TestClipPaintingContext();
+    addTearDown(context.dispose);
     renderObject.paint(context, Offset.zero); // ignore: avoid_dynamic_calls
     expect(context.clipBehavior, equals(Clip.none));
 
@@ -116,6 +117,7 @@ void main() {
 
     // 2nd, check that the painting context has received the default clip behavior.
     final TestClipPaintingContext context = TestClipPaintingContext();
+    addTearDown(context.dispose);
     renderObject.paint(context, Offset.zero); // ignore: avoid_dynamic_calls
     expect(context.clipBehavior, equals(Clip.hardEdge));
 

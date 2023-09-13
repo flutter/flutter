@@ -32,6 +32,7 @@ void main() {
 
     // 2nd, check that the painting context has received the default clip behavior.
     final TestClipPaintingContext context = TestClipPaintingContext();
+    addTearDown(context.dispose);
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.hardEdge));
 

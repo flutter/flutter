@@ -68,6 +68,7 @@ void main() {
 
     for (final Clip? clip in <Clip?>[null, ...Clip.values]) {
       final TestClipPaintingContext context = TestClipPaintingContext();
+      addTearDown(context.dispose);
       final RenderBox child = box200x200;
       final RenderStack stack;
       switch (clip){
