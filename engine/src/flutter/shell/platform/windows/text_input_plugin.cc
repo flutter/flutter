@@ -196,7 +196,7 @@ void TextInputPlugin::ComposeChangeHook(const std::u16string& text,
   std::string text_before_change = active_model_->GetText();
   TextRange composing_before_change = active_model_->composing_range();
   active_model_->AddText(text);
-  cursor_pos += active_model_->composing_range().extent();
+  cursor_pos += active_model_->composing_range().start();
   active_model_->UpdateComposingText(text);
   active_model_->SetSelection(TextRange(cursor_pos, cursor_pos));
   std::string text_after_change = active_model_->GetText();
