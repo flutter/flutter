@@ -61,8 +61,17 @@ class Path {
   };
 
   struct PolylineContour {
+    struct Component {
+      size_t component_start_index;
+      /// Denotes whether this component is a curve.
+      ///
+      /// This is set to true when this component is generated from
+      /// QuadraticComponent or CubicPathComponent.
+      bool is_curve;
+    };
     /// Index that denotes the first point of this contour.
     size_t start_index;
+
     /// Denotes whether the last point of this contour is connected to the first
     /// point of this contour or not.
     bool is_closed;
@@ -71,6 +80,12 @@ class Path {
     Vector2 start_direction;
     /// The direction of the contour's end cap.
     Vector2 end_direction;
+
+    /// Distinct components in this contour.
+    ///
+    /// If this contour is generated from multiple path components, each
+    /// path component forms a component in this vector.
+    std::vector<Component> components;
   };
 
   /// One or more contours represented as a series of points and indices in
