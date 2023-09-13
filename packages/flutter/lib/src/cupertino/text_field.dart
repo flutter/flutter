@@ -1126,6 +1126,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   }
 
   Widget _buildClearButton() {
+    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
+
     return Semantics(
       button: true,
       label: widget.clearButtonSemanticLabel ?? localizations.clearButtonLabel,
