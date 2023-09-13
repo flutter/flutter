@@ -5,6 +5,7 @@
 import 'package:flutter/src/rendering/sliver.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class Wrapper extends StatelessWidget {
   const Wrapper({
@@ -41,7 +42,7 @@ class StatefulWrapperState extends State<StatefulWrapper> {
 }
 
 void main() {
-  testWidgets('Moving global key inside a LayoutBuilder', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Moving global key inside a LayoutBuilder', (WidgetTester tester) async {
     final GlobalKey<StatefulWrapperState> key = GlobalKey<StatefulWrapperState>();
     await tester.pumpWidget(
       LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
@@ -60,7 +61,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('Moving global key inside a SliverLayoutBuilder', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Moving global key inside a SliverLayoutBuilder', (WidgetTester tester) async {
     final GlobalKey<StatefulWrapperState> key = GlobalKey<StatefulWrapperState>();
 
     await tester.pumpWidget(
