@@ -92,7 +92,7 @@ typedef _BucketVisitor = void Function(RestorationBucket bucket);
 /// ## State Restoration on iOS
 ///
 /// To enable state restoration on iOS, a restoration identifier has to be
-/// assigned to the [FlutterViewController](https://api.flutter.dev/objcdoc/Classes/FlutterViewController.html).
+/// assigned to the [FlutterViewController](/ios-embedder/interface_flutter_view_controller.html).
 /// If the standard embedding (produced by `flutter create`) is used, this can
 /// be accomplished with the following steps:
 ///
@@ -154,6 +154,9 @@ class RestorationManager extends ChangeNotifier {
   /// Construct the restoration manager and set up the communications channels
   /// with the engine to get restoration messages (by calling [initChannels]).
   RestorationManager() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      maybeDispatchObjectCreation();
+    }
     initChannels();
   }
 
