@@ -4,7 +4,6 @@
 
 import 'package:ui/ui.dart' as ui;
 
-import '../dom.dart';
 import '../html/bitmap_canvas.dart';
 import '../html/painting.dart';
 import 'canvas_paragraph.dart';
@@ -78,23 +77,7 @@ class TextPaintService {
     final EngineTextStyle style = fragment.style;
 
     final String text = fragment.getText(paragraph);
-    final double? letterSpacing = style.letterSpacing;
-    if (letterSpacing == null || letterSpacing == 0.0) {
-      canvas.drawText(text, x, y,
-          style: style.foreground?.style, shadows: style.shadows);
-    } else {
-      // TODO(mdebbar): Implement letter-spacing on canvas more efficiently:
-      //                https://github.com/flutter/flutter/issues/51234
-      double charX = x;
-      final int len = text.length;
-      for (int i = 0; i < len; i++) {
-        final String char = text[i];
-        canvas.drawText(char, charX.roundToDouble(), y,
-            style: style.foreground?.style,
-            shadows: style.shadows);
-        charX += letterSpacing + canvas.measureText(char).width!;
-      }
-    }
+    canvas.drawText(text, x, y, style: style.foreground?.style, shadows: style.shadows);
 
     canvas.tearDownPaint();
   }

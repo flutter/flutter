@@ -648,6 +648,12 @@ class CanvasParagraphBuilder implements ui.ParagraphBuilder {
       return;
     }
 
+    final double? letterSpacing = style.letterSpacing;
+    if (letterSpacing != null && letterSpacing != 0.0) {
+      _canDrawOnCanvas = false;
+      return;
+    }
+
     final ui.TextDecoration? decoration = style.decoration;
     if (decoration != null && decoration != ui.TextDecoration.none) {
       _canDrawOnCanvas = false;
