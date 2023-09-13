@@ -1011,86 +1011,86 @@ class _DayState extends State<_Day> {
 
   @override
   Widget build(BuildContext context) {
-            final DatePickerThemeData defaults = DatePickerTheme.defaults(context);
-        final DatePickerThemeData datePickerTheme = DatePickerTheme.of(context);
-        final TextStyle? dayStyle = datePickerTheme.dayStyle ?? defaults.dayStyle;
-        T? effectiveValue<T>(T? Function(DatePickerThemeData? theme) getProperty) {
-          return getProperty(datePickerTheme) ?? getProperty(defaults);
-        }
+    final DatePickerThemeData defaults = DatePickerTheme.defaults(context);
+    final DatePickerThemeData datePickerTheme = DatePickerTheme.of(context);
+    final TextStyle? dayStyle = datePickerTheme.dayStyle ?? defaults.dayStyle;
+    T? effectiveValue<T>(T? Function(DatePickerThemeData? theme) getProperty) {
+      return getProperty(datePickerTheme) ?? getProperty(defaults);
+    }
 
-        T? resolve<T>(MaterialStateProperty<T>? Function(DatePickerThemeData? theme) getProperty, Set<MaterialState> states) {
-          return effectiveValue(
-            (DatePickerThemeData? theme) {
-              return getProperty(theme)?.resolve(states);
-            },
-          );
-        }
+    T? resolve<T>(MaterialStateProperty<T>? Function(DatePickerThemeData? theme) getProperty, Set<MaterialState> states) {
+      return effectiveValue(
+        (DatePickerThemeData? theme) {
+          return getProperty(theme)?.resolve(states);
+        },
+      );
+    }
 
-        final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-        final String semanticLabelSuffix = widget.isToday ? ', ${localizations.currentDateLabel}' : '';
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final String semanticLabelSuffix = widget.isToday ? ', ${localizations.currentDateLabel}' : '';
 
-        final Set<MaterialState> states = <MaterialState>{
-          if (widget.isDisabled) MaterialState.disabled,
-          if (widget.isSelectedDay) MaterialState.selected,
-        };
+    final Set<MaterialState> states = <MaterialState>{
+      if (widget.isDisabled) MaterialState.disabled,
+      if (widget.isSelectedDay) MaterialState.selected,
+    };
 
-        _statesController.value = states;
+    _statesController.value = states;
 
-        final Color? dayForegroundColor = resolve<Color?>((DatePickerThemeData? theme) => widget.isToday ? theme?.todayForegroundColor : theme?.dayForegroundColor, states);
-        final Color? dayBackgroundColor = resolve<Color?>((DatePickerThemeData? theme) => widget.isToday ? theme?.todayBackgroundColor : theme?.dayBackgroundColor, states);
-        final MaterialStateProperty<Color?> dayOverlayColor = MaterialStateProperty.resolveWith<Color?>(
-          (Set<MaterialState> states) => effectiveValue((DatePickerThemeData? theme) => theme?.dayOverlayColor?.resolve(states)),
-        );
-        final BoxDecoration decoration = widget.isToday
-          ? BoxDecoration(
-              color: dayBackgroundColor,
-              border: Border.fromBorderSide(
-                (datePickerTheme.todayBorder ?? defaults.todayBorder!)
-                  .copyWith(color: dayForegroundColor)
-              ),
-              shape: BoxShape.circle,
-            )
-          : BoxDecoration(
-              color: dayBackgroundColor,
-              shape: BoxShape.circle,
-            );
-
-        Widget dayWidget = Container(
-          decoration: decoration,
-          child: Center(
-            child: Text(localizations.formatDecimal(widget.day.day), style: dayStyle?.apply(color: dayForegroundColor)),
+    final Color? dayForegroundColor = resolve<Color?>((DatePickerThemeData? theme) => widget.isToday ? theme?.todayForegroundColor : theme?.dayForegroundColor, states);
+    final Color? dayBackgroundColor = resolve<Color?>((DatePickerThemeData? theme) => widget.isToday ? theme?.todayBackgroundColor : theme?.dayBackgroundColor, states);
+    final MaterialStateProperty<Color?> dayOverlayColor = MaterialStateProperty.resolveWith<Color?>(
+      (Set<MaterialState> states) => effectiveValue((DatePickerThemeData? theme) => theme?.dayOverlayColor?.resolve(states)),
+    );
+    final BoxDecoration decoration = widget.isToday
+      ? BoxDecoration(
+          color: dayBackgroundColor,
+          border: Border.fromBorderSide(
+            (datePickerTheme.todayBorder ?? defaults.todayBorder!)
+              .copyWith(color: dayForegroundColor)
           ),
+          shape: BoxShape.circle,
+        )
+      : BoxDecoration(
+          color: dayBackgroundColor,
+          shape: BoxShape.circle,
         );
 
-        if (widget.isDisabled) {
-          dayWidget = ExcludeSemantics(
-            child: dayWidget,
-          );
-        } else {
-          dayWidget = InkResponse(
-            focusNode: widget.focusNode,
-            onTap: () => widget.onChanged(widget.day),
-            radius: _dayPickerRowHeight / 2 + 4,
-            statesController: _statesController,
-            overlayColor: dayOverlayColor,
-            child: Semantics(
-              // We want the day of month to be spoken first irrespective of the
-              // locale-specific preferences or TextDirection. This is because
-              // an accessibility user is more likely to be interested in the
-              // day of month before the rest of the date, as they are looking
-              // for the day of month. To do that we prepend day of month to the
-              // formatted full date.
-              label: '${localizations.formatDecimal(widget.day.day)}, ${localizations.formatFullDate(widget.day)}$semanticLabelSuffix',
-              // Set button to true to make the date selectable.
-              button: true,
-              selected: widget.isSelectedDay,
-              excludeSemantics: true,
-              child: dayWidget,
-            ),
-          );
-        }
+    Widget dayWidget = Container(
+      decoration: decoration,
+      child: Center(
+        child: Text(localizations.formatDecimal(widget.day.day), style: dayStyle?.apply(color: dayForegroundColor)),
+      ),
+    );
 
-        return dayWidget;
+    if (widget.isDisabled) {
+      dayWidget = ExcludeSemantics(
+        child: dayWidget,
+      );
+    } else {
+      dayWidget = InkResponse(
+        focusNode: widget.focusNode,
+        onTap: () => widget.onChanged(widget.day),
+        radius: _dayPickerRowHeight / 2 + 4,
+        statesController: _statesController,
+        overlayColor: dayOverlayColor,
+        child: Semantics(
+          // We want the day of month to be spoken first irrespective of the
+          // locale-specific preferences or TextDirection. This is because
+          // an accessibility user is more likely to be interested in the
+          // day of month before the rest of the date, as they are looking
+          // for the day of month. To do that we prepend day of month to the
+          // formatted full date.
+          label: '${localizations.formatDecimal(widget.day.day)}, ${localizations.formatFullDate(widget.day)}$semanticLabelSuffix',
+          // Set button to true to make the date selectable.
+          button: true,
+          selected: widget.isSelectedDay,
+          excludeSemantics: true,
+          child: dayWidget,
+        ),
+      );
+    }
+
+    return dayWidget;
   }
 
   @override
@@ -1098,7 +1098,6 @@ class _DayState extends State<_Day> {
     _statesController.dispose();
     super.dispose();
   }
-
 }
 
 class _DayPickerGridDelegate extends SliverGridDelegate {
