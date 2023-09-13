@@ -618,7 +618,6 @@ Future<int> exitWithHooks(int code, {required ShutdownHooks shutdownHooks}) asyn
     globals.printTrace('ensureAnalyticsSent: ${stopwatch.elapsedMilliseconds}ms');
   }
 
-  print('running shutdown hooks');
   // Run shutdown hooks before flushing logs
   await shutdownHooks.runShutdownHooks(globals.logger);
 
