@@ -957,12 +957,12 @@ class _DayPickerState extends State<_DayPicker> {
         dayItems.add(
           _Day(
             dayToBuild,
+            key: ValueKey<DateTime>(dayToBuild),
             isDisabled: isDisabled,
             isSelectedDay: isSelectedDay,
             isToday: isToday,
             onChanged: widget.onChanged,
-            focusNode:
-            _dayFocusNodes[day - 1],
+            focusNode: _dayFocusNodes[day - 1],
           ),
         );
       }
@@ -987,6 +987,7 @@ class _DayPickerState extends State<_DayPicker> {
 class _Day extends StatefulWidget {
   const _Day(
     this.day, {
+    super.key,
     required this.isDisabled,
     required this.isSelectedDay,
     required this.isToday,
