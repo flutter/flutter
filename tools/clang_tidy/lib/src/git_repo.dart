@@ -5,6 +5,7 @@
 import 'dart:io' as io show Directory, File;
 
 import 'package:path/path.dart' as path;
+import 'package:process/process.dart';
 import 'package:process_runner/process_runner.dart';
 
 /// Utility methods for working with a git repo.
@@ -12,13 +13,17 @@ class GitRepo {
   /// The git repository rooted at `root`.
   GitRepo(this.root, {
     this.verbose = false,
-  });
+    ProcessManager processManager = const LocalProcessManager(),
+  }) : _processManager = processManager;
 
   /// Whether to produce verbose log output.
   final bool verbose;
 
   /// The root of the git repo.
   final io.Directory root;
+
+  /// The delegate to use for running processes.
+  final ProcessManager _processManager;
 
   List<io.File>? _changedFiles;
 
@@ -41,6 +46,7 @@ class GitRepo {
   Future<List<io.File>> _getChangedFiles() async {
     final ProcessRunner processRunner = ProcessRunner(
       defaultWorkingDirectory: root,
+      processManager: _processManager,
     );
     await _fetch(processRunner);
     ProcessRunnerResult mergeBaseResult = await processRunner.runProcess(
