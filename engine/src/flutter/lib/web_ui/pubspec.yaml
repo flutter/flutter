@@ -24,7 +24,7 @@ dev_dependencies:
   convert: any
   crypto: any
   html: 0.15.0
-  http: 0.13.5
+  http: 1.1.0
   http_multi_server: any
   image: 3.0.1
   matcher: 0.12.14
