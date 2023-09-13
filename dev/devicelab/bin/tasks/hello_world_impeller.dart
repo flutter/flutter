@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async' show StreamSubscription;
+import 'dart:async' show Completer, StreamSubscription;
 import 'dart:io' show Directory, Process;
 
 import 'package:flutter_devicelab/framework/devices.dart'
@@ -23,6 +23,7 @@ Future<TaskResult> run() async {
   bool isUsingValidationLayers = false;
   bool hasValidationErrors = false;
   int impellerBackendCount = 0;
+  final Completer<void> didReceiveBackendMessage = Completer<void>();
 
   await inDirectory(appDir, () async {
     await flutter('packages', options: <String>['get']);
@@ -33,6 +34,7 @@ Future<TaskResult> run() async {
           // Sometimes more than one of these will be printed out if there is a
           // fallback.
           impellerBackendCount += 1;
+          didReceiveBackendMessage.complete();
         }
         if (data.contains(
             'Using the Impeller rendering backend (Vulkan with Validation Layers)')) {
@@ -56,6 +58,7 @@ Future<TaskResult> run() async {
       ],
     );
 
+    await didReceiveBackendMessage.future;
     // Since we are waiting for the lack of errors, there is no determinate
     // amount of time we can wait.
     await Future<void>.delayed(const Duration(seconds: 30));
