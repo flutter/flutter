@@ -334,16 +334,14 @@ abstract class UnpackIOS extends Target {
     String archs,
   ) async {
     final List<String> archList = archs.split(' ').toList();
-    final ProcessResult infoResult =
-        await environment.processManager.run(<String>[
+    final ProcessResult infoResult = await environment.processManager.run(<String>[
       'lipo',
       '-info',
       frameworkBinaryPath,
     ]);
     final String lipoInfo = infoResult.stdout as String;
 
-    final ProcessResult verifyResult =
-        await environment.processManager.run(<String>[
+    final ProcessResult verifyResult = await environment.processManager.run(<String>[
       'lipo',
       frameworkBinaryPath,
       '-verify_arch',
@@ -384,8 +382,7 @@ abstract class UnpackIOS extends Target {
     Environment environment,
     String frameworkBinaryPath,
   ) async {
-    final ProcessResult stripResult =
-        await environment.processManager.run(<String>[
+    final ProcessResult stripResult = await environment.processManager.run(<String>[
       'xcrun',
       'bitcode_strip',
       frameworkBinaryPath,

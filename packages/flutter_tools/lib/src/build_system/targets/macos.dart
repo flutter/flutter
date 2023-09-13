@@ -110,8 +110,7 @@ abstract class UnpackMacOS extends Target {
     ]);
     final String lipoInfo = infoResult.stdout as String;
 
-    final ProcessResult verifyResult =
-        await environment.processManager.run(<String>[
+    final ProcessResult verifyResult = await environment.processManager.run(<String>[
       'lipo',
       frameworkBinaryPath,
       '-verify_arch',
