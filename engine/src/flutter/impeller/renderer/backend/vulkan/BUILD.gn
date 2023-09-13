@@ -110,7 +110,6 @@ impeller_component("vulkan") {
     "../../../blobcat:blobcat_lib",
     "//flutter/flutter_vma",
     "//flutter/fml",
-    "//flutter/vulkan/procs",
     "//third_party/vulkan-deps/vulkan-headers/src:vulkan_headers",
     "//third_party/vulkan_memory_allocator",
   ]

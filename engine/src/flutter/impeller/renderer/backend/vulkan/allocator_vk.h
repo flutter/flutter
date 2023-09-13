@@ -6,7 +6,6 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/ref_ptr.h"
-#include "flutter/vulkan/procs/vulkan_proc_table.h"
 #include "impeller/core/allocator.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
@@ -26,7 +25,6 @@ class AllocatorVK final : public Allocator {
  private:
   friend class ContextVK;
 
-  fml::RefPtr<vulkan::VulkanProcTable> vk_;
   UniqueAllocatorVMA allocator_;
   UniquePoolVMA staging_buffer_pool_;
   std::weak_ptr<Context> context_;
@@ -44,8 +42,6 @@ class AllocatorVK final : public Allocator {
               const vk::PhysicalDevice& physical_device,
               const std::shared_ptr<DeviceHolder>& device_holder,
               const vk::Instance& instance,
-              PFN_vkGetInstanceProcAddr get_instance_proc_address,
-              PFN_vkGetDeviceProcAddr get_device_proc_address,
               const CapabilitiesVK& capabilities);
 
   // |Allocator|
