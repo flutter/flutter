@@ -47,6 +47,14 @@ List<Widget> generateList(Widget child) {
 }
 
 void main() {
+  test('KeepAlive debugTypicalAncestorWidgetClass', () {
+    final KeepAlive keepAlive = KeepAlive(keepAlive: false, child: Container());
+    expect(
+      keepAlive.debugTypicalAncestorWidgetDescription,
+      'SliverWithKeepAliveWidget or TwoDimensionalViewport',
+    );
+  });
+
   testWidgetsWithLeakTracking('KeepAlive with ListView with itemExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
