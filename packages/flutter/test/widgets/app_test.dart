@@ -306,7 +306,7 @@ void main() {
     expect(find.text('popped'), findsOneWidget);
   },
   leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(someone): remove after fixing
+    // TODO(ksokolovskyi): remove after fixing
     // https://github.com/flutter/flutter/issues/134205
     notDisposedAllowList: <String, int?> {'_RestorableRouteInformation': 1},
   ));
@@ -338,7 +338,7 @@ void main() {
     expect(find.text('popped'), findsOneWidget);
   },
   leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(someone): remove after fixing
+    // TODO(ksokolovskyi): remove after fixing
     // https://github.com/flutter/flutter/issues/134205
     notDisposedAllowList: <String, int?> {'_RestorableRouteInformation': 1},
   ));
@@ -434,7 +434,7 @@ void main() {
     expect(find.text('popped'), findsOneWidget);
   },
   leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(someone): remove after fixing
+    // TODO(ksokolovskyi): remove after fixing
     // https://github.com/flutter/flutter/issues/134205
     notDisposedAllowList: <String, int?> {'_RestorableRouteInformation': 1},
   ));
@@ -455,7 +455,7 @@ void main() {
     expect(find.text('/'), findsOneWidget);
   },
   leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(someone): remove after fixing
+    // TODO(ksokolovskyi): remove after fixing
     // https://github.com/flutter/flutter/issues/134205
     notDisposedAllowList: <String, int?> {'_RestorableRouteInformation': 1},
   ));
