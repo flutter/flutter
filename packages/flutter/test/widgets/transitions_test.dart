@@ -243,6 +243,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: SizeTransition(
         sizeFactor: animation,
+        crossAxisSizeFactor: 2.0,
         child: const Text('Ready'),
       ),
     );
@@ -251,19 +252,24 @@ void main() {
 
     final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
     expect(actualPositionedBox.heightFactor, 0.0);
+    expect(actualPositionedBox.widthFactor, 2.0);
 
     controller.value = 0.0;
     await tester.pump();
     expect(actualPositionedBox.heightFactor, 0.0);
+    expect(actualPositionedBox.widthFactor, 2.0);
 
     controller.value = 0.75;
     await tester.pump();
     expect(actualPositionedBox.heightFactor, 0.5);
+    expect(actualPositionedBox.widthFactor, 2.0);
 
     controller.value = 1.0;
     await tester.pump();
     expect(actualPositionedBox.heightFactor, 1.0);
+    expect(actualPositionedBox.widthFactor, 2.0);
   });
+
 
   testWidgets('SizeTransition clamps negative size factors - horizontal axis', (WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
