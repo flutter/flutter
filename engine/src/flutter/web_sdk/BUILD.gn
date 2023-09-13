@@ -229,6 +229,11 @@ template("_compile_platform") {
     if (defined(invoker.null_environment) && invoker.null_environment) {
       args += [ "--null-environment" ]
     }
+    skwasm_library = "dart:_skwasm_stub"
+    if (invoker.kernel_target == "dart2wasm") {
+      skwasm_library = "dart:_skwasm_impl"
+    }
+
     args += [
       "--target",
       "${invoker.kernel_target}",
@@ -253,7 +258,7 @@ template("_compile_platform") {
       "--source",
       "dart:_engine",
       "--source",
-      "dart:_skwasm_stub",
+      skwasm_library,
       "--source",
       "dart:_web_unicode",
       "--source",
@@ -306,6 +311,14 @@ _compile_platform("flutter_dart2js_kernel_sdk_full_sound") {
   null_environment = true
 }
 
+_compile_platform("flutter_dart2wasm_kernel_sdk_full_sound") {
+  sound_null_safety = true
+  kernel_target = "dart2wasm"
+  summary_only = false
+  output_dill = "$root_out_dir/flutter_web_sdk/kernel/dart2wasm_platform.dill"
+  null_environment = true
+}
+
 # TODO(jacksongardner): remove these once they are no longer used by the flutter tool
 copy("flutter_dartdevc_kernel_sdk_outline_unsound_legacy") {
   sources = get_target_outputs(":flutter_dartdevc_kernel_sdk_outline_unsound")
@@ -328,6 +341,7 @@ group("flutter_platform_dills") {
   public_deps = [
     ":flutter_dart2js_kernel_sdk_full_sound",
     ":flutter_dart2js_kernel_sdk_full_unsound",
+    ":flutter_dart2wasm_kernel_sdk_full_sound",
     ":flutter_dartdevc_kernel_sdk_outline_sound",
     ":flutter_dartdevc_kernel_sdk_outline_unsound",
 
@@ -528,6 +542,7 @@ if (!is_fuchsia) {
     sources += get_target_outputs(":flutter_dartdevc_kernel_sdk_outline_sound")
     sources += get_target_outputs(":flutter_dart2js_kernel_sdk_full_unsound")
     sources += get_target_outputs(":flutter_dart2js_kernel_sdk_full_sound")
+    sources += get_target_outputs(":flutter_dart2wasm_kernel_sdk_full_sound")
     if (is_wasm) {
       sources += [
         "$root_out_dir/flutter_web_sdk/canvaskit/canvaskit.js",
