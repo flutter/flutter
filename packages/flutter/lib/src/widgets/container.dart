@@ -313,7 +313,8 @@ class Container extends StatelessWidget {
     this.transformAlignment,
     this.child,
     this.clipBehavior = Clip.none,
-  }) : assert(color == null || decoration == null,
+  }) : assert(decoration != null || clipBehavior == Clip.none),
+       assert(color == null || decoration == null,
          'Cannot provide both a color and a decoration\n'
          'To provide both, use "decoration: BoxDecoration(color: color)".',
        );
@@ -413,13 +414,19 @@ class Container extends StatelessWidget {
         (final deco, final pad) => pad!.add(deco!),
       };
 
-  bool get _noLooseConstraints => child == null && (constraints?.isTight ?? true);
-
-  static const Widget _defaultChild = LimitedBox(
-    maxWidth: 0.0,
-    maxHeight: 0.0,
-    child: SizedBox.expand(),
-  );
+  Widget? get _child {
+    if (child != null) {
+      return _DynamicBox(alignment, child: child);
+    }
+    if (constraints?.isTight ?? true) {
+      return const LimitedBox(
+      maxWidth: 0.0,
+      maxHeight: 0.0,
+      child: SizedBox.expand(),
+    );
+    }
+    return const SizedBox.shrink();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -437,10 +444,7 @@ class Container extends StatelessWidget {
                 (decoration, clipBehavior),
                 child: _DynamicBox(
                   _paddingIncludingDecoration,
-                  child:
-                      _noLooseConstraints
-                          ? _defaultChild
-                          : _DynamicBox(alignment, child: child),
+                  child: _child,
                 ),
               ),
             ),
