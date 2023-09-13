@@ -14,6 +14,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class LinkedScrollController extends ScrollController {
   LinkedScrollController({ this.before, this.after });
@@ -381,7 +382,7 @@ class _TestState extends State<Test> {
 }
 
 void main() {
-  testWidgets('LinkedScrollController - 1', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LinkedScrollController - 1', (WidgetTester tester) async {
     await tester.pumpWidget(const Test());
     expect(find.text('Hello A'), findsOneWidget);
     expect(find.text('Hello 1'), findsOneWidget);
@@ -459,7 +460,7 @@ void main() {
     expect(find.text('Hello D'), findsNothing);
     expect(find.text('Hello 4'), findsOneWidget);
   });
-  testWidgets('LinkedScrollController - 2', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('LinkedScrollController - 2', (WidgetTester tester) async {
     await tester.pumpWidget(const Test());
     expect(find.text('Hello A'), findsOneWidget);
     expect(find.text('Hello B'), findsOneWidget);

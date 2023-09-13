@@ -144,8 +144,8 @@ BuildApp() {
   RunCommand "${flutter_args[@]}"
 }
 
-# Adds the App.framework as an embedded binary and the flutter_assets as
-# resources.
+# Adds the App.framework as an embedded binary, the flutter_assets as
+# resources, and the native assets.
 EmbedFrameworks() {
   # Embed App.framework from Flutter into the app (after creating the Frameworks directory
   # if it doesn't already exist).
@@ -163,6 +163,17 @@ EmbedFrameworks() {
   if [[ -n "${EXPANDED_CODE_SIGN_IDENTITY:-}" ]]; then
     RunCommand codesign --force --verbose --sign "${EXPANDED_CODE_SIGN_IDENTITY}" -- "${xcode_frameworks_dir}/App.framework/App"
     RunCommand codesign --force --verbose --sign "${EXPANDED_CODE_SIGN_IDENTITY}" -- "${xcode_frameworks_dir}/FlutterMacOS.framework/FlutterMacOS"
+  fi
+
+  # Copy the native assets. These do not have to be codesigned here because,
+  # they are already codesigned in buildNativeAssetsMacOS.
+  local project_path="${SOURCE_ROOT}/.."
+  if [[ -n "$FLUTTER_APPLICATION_PATH" ]]; then
+      project_path="${FLUTTER_APPLICATION_PATH}"
+  fi
+  local native_assets_path="${project_path}/${FLUTTER_BUILD_DIR}/native_assets/macos/"
+  if [[ -d "$native_assets_path" ]]; then
+    RunCommand rsync -av --filter "- .DS_Store" --filter "- native_assets.yaml" "${native_assets_path}" "${xcode_frameworks_dir}"
   fi
 }
 
