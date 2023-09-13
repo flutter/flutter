@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'feedback_tester.dart';
 
@@ -211,7 +212,7 @@ void main() {
       expect(selectedDate, equals(DateTime(2018, DateTime.january, 4)));
     });
 
-    testWidgets('Changing year for february 29th', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Changing year for february 29th', (WidgetTester tester) async {
       DateTime? selectedDate;
       await tester.pumpWidget(calendarDatePicker(
         initialDate: DateTime(2020, DateTime.february, 29),
@@ -230,7 +231,7 @@ void main() {
       expect(selectedDate, equals(DateTime(2020, DateTime.february, 28)));
     });
 
-    testWidgets('Changing year does not change the month', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Changing year does not change the month', (WidgetTester tester) async {
       DateTime? displayedMonth;
       await tester.pumpWidget(calendarDatePicker(
         initialDate: DateTime(2016, DateTime.january, 15),
