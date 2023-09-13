@@ -28,8 +28,8 @@ import 'android_sdk.dart';
 // https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
 // https://kotlinlang.org/docs/releases.html#release-details
 const String templateDefaultGradleVersion = '7.5';
-const String templateAndroidGradlePluginVersion = '7.3.0';
-const String templateDefaultGradleVersionForModule = '7.3.0';
+const String templateAndroidGradlePluginVersion = '7.4.2';
+const String templateDefaultGradleVersionForModule = '7.4.2';
 const String templateKotlinGradlePluginVersion = '1.7.10';
 
 // These versions should match the values in Flutter Gradle Plugin (FlutterExtension).
@@ -53,7 +53,7 @@ const String _maxKnownAndSupportedGradleVersion = '8.0.2';
 const String maxKnownAgpVersion = '8.1';
 
 // Expected content:
-// "classpath 'com.android.tools.build:gradle:7.3.0'"
+// "classpath 'com.android.tools.build:gradle:7.4.2'"
 // Parentheticals are use to group which helps with version extraction.
 // "...build:gradle:(...)" where group(1) should be the version string.
 final RegExp _androidGradlePluginRegExp =
