@@ -38,6 +38,8 @@ Future<TaskResult> run() async {
             'Using the Impeller rendering backend (Vulkan with Validation Layers)')) {
           isUsingValidationLayers = true;
         }
+        // "ImpellerValidationBreak" comes from the engine:
+        // https://github.com/flutter/engine/blob/4160ebacdae2081d6f3160432f5f0dd87dbebec1/impeller/base/validation.cc#L40
         if (data.contains('ImpellerValidationBreak')) {
           hasValidationErrors = true;
         }
