@@ -290,7 +290,7 @@ class _WidgetSpanParentData extends ParentDataWidget<TextParentData> {
   }
 
   @override
-  String get debugTypicalAncestorWidgetClass => 'RichText';
+  Type get debugTypicalAncestorWidgetClass => RichText;
 }
 
 // A RenderObjectWidget that automatically applies text scaling on inline

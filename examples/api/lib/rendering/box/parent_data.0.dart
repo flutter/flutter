@@ -145,7 +145,7 @@ class TextCategory extends ParentDataWidget<TextFlowParentData> {
   }
 
   @override
-  String get debugTypicalAncestorWidgetClass => 'OpenLayout';
+  Type get debugTypicalAncestorWidgetClass => OpenLayout;
 }
 
 // This is one of the two layout variants. It is a widget that defers to

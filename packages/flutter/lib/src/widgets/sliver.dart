@@ -1368,7 +1368,10 @@ class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
   bool debugCanApplyOutOfTurn() => keepAlive;
 
   @override
-  String get debugTypicalAncestorWidgetClass => 'SliverWithKeepAliveWidget or TwoDimensionalViewport';
+  Type get debugTypicalAncestorWidgetClass => throw FlutterError('Multiple Types are supported, use debugTypicalAncestorWidgetDescription.');
+
+  @override
+  String get debugTypicalAncestorWidgetDescription => 'SliverWithKeepAliveWidget or TwoDimensionalViewport';
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -1456,7 +1459,7 @@ class _SliverZeroFlexParentDataWidget extends ParentDataWidget<SliverPhysicalPar
   }
 
   @override
-  String get debugTypicalAncestorWidgetClass => 'SliverCrossAxisGroup';
+  Type get debugTypicalAncestorWidgetClass => SliverCrossAxisGroup;
 }
 
 class _SliverConstrainedCrossAxis extends SingleChildRenderObjectWidget {
@@ -1527,7 +1530,7 @@ class SliverCrossAxisExpanded extends ParentDataWidget<SliverPhysicalContainerPa
   }
 
   @override
-  String get debugTypicalAncestorWidgetClass => 'SliverCrossAxisGroup';
+  Type get debugTypicalAncestorWidgetClass => SliverCrossAxisGroup;
 }
 
 

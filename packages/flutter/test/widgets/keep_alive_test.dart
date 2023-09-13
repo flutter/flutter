@@ -50,7 +50,7 @@ void main() {
   test('KeepAlive debugTypicalAncestorWidgetClass', () {
     final KeepAlive keepAlive = KeepAlive(keepAlive: false, child: Container());
     expect(
-      keepAlive.debugTypicalAncestorWidgetClass,
+      keepAlive.debugTypicalAncestorWidgetDescription,
       'SliverWithKeepAliveWidget or TwoDimensionalViewport',
     );
   });

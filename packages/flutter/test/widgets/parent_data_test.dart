@@ -474,7 +474,7 @@ class TestParentDataWidget extends ParentDataWidget<DummyParentData> {
   }
 
   @override
-  String get debugTypicalAncestorWidgetClass => 'OneAncestorWidget';
+  Type get debugTypicalAncestorWidgetClass => OneAncestorWidget;
 }
 
 class DummyParentData extends ParentData {

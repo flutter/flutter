@@ -160,7 +160,7 @@ class LayoutWithMissingId extends ParentDataWidget<MultiChildLayoutParentData> {
   void applyParentData(RenderObject renderObject) {}
 
   @override
-  String get debugTypicalAncestorWidgetClass => 'CustomMultiChildLayout';
+  Type get debugTypicalAncestorWidgetClass => CustomMultiChildLayout;
 }
 
 void main() {
