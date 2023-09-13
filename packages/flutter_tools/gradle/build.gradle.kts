@@ -30,5 +30,5 @@ dependencies {
     //  * ndkVersion in FlutterExtension in packages/flutter_tools/gradle/src/main/flutter.groovy
     //  * AGP version constants in packages/flutter_tools/lib/src/android/gradle_utils.dart
     //  * AGP version in buildscript block in packages/flutter_tools/gradle/src/main/flutter.groovy
-    compileOnly("com.android.tools.build:gradle:7.4.2")
+    compileOnly("com.android.tools.build:gradle:7.3.0")
 }
