@@ -47,7 +47,6 @@ Future<TaskResult> run() async {
         if (data.contains('ImpellerValidationBreak')) {
           hasValidationErrors = true;
         }
-        print('something: $data');
       },
     );
 
