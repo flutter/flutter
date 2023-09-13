@@ -1668,7 +1668,7 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(find.text('errorText'), findsOneWidget);
   });
 
-  testWidgets('InputDecoration shows error border for errorText and error widget', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('InputDecoration shows error border for errorText and error widget', (WidgetTester tester) async {
     const InputBorder errorBorder = OutlineInputBorder(
       borderSide: BorderSide(color: Colors.red, width: 1.5),
     );
