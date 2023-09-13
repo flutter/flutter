@@ -4599,6 +4599,7 @@ targets:
       task_name: hot_mode_dev_cycle_win_target__benchmark
 
   - name: Windows module_custom_host_app_name_test
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/134644
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -5101,6 +5102,7 @@ targets:
       task_name: basic_material_app_win__compile
 
   - name: Windows_android channels_integration_test_win
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/134636
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
