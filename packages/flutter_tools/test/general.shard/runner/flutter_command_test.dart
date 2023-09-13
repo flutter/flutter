@@ -11,6 +11,8 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
@@ -25,6 +27,7 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/fake.dart';
 
+import '../../commands.shard/hermetic/run_test.dart' show TestDeviceManager, TestRunCommandThatOnlyValidates;
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
@@ -698,6 +701,67 @@ void main() {
         final Device? device = await flutterCommand.findTargetDevice();
         expect(device, isNull);
         expect(testLogger.statusText, contains(UserMessages().flutterSpecifyDevice));
+      });
+    });
+
+    group('--flavor', () {
+      late TestDeviceManager testDeviceManager;
+      late Logger logger;
+      late FileSystem fileSystem;
+
+      setUp(() {
+        logger = BufferLogger.test();
+        testDeviceManager = TestDeviceManager(logger: logger);
+        fileSystem = MemoryFileSystem.test();
+      });
+
+      testUsingContext("tool exits when FLUTTER_APP_FLAVOR is already set in user's environment", () async {
+        fileSystem.file('lib/main.dart').createSync(recursive: true);
+        fileSystem.file('pubspec.yaml').createSync();
+        fileSystem.file('.packages').createSync();
+
+        final FakeDevice device = FakeDevice('name', 'id');
+        testDeviceManager.devices = <Device>[device];
+        final TestRunCommandThatOnlyValidates command = TestRunCommandThatOnlyValidates();
+        final CommandRunner<void> runner =  createTestCommandRunner(command);
+
+        expect(runner.run(<String>['run', '--no-pub', '--no-hot', '--flavor=strawberry']),
+          throwsToolExit(message: 'FLUTTER_APP_FLAVOR is used by the framework and cannot be set in the environment.'));
+
+      }, overrides: <Type, Generator>{
+        DeviceManager: () => testDeviceManager,
+        Platform: () => FakePlatform(
+          environment: <String, String>{
+            'FLUTTER_APP_FLAVOR': 'I was already set'
+          }
+        ),
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
+      testUsingContext('tool exits when FLUTTER_APP_FLAVOR is set in --dart-define or --dart-define-from-file', () async {
+        fileSystem.file('lib/main.dart').createSync(recursive: true);
+        fileSystem.file('pubspec.yaml').createSync();
+        fileSystem.file('.packages').createSync();
+        fileSystem.file('config.json')..createSync()..writeAsStringSync('{"FLUTTER_APP_FLAVOR": "strawberry"}');
+
+        final FakeDevice device = FakeDevice('name', 'id');
+        testDeviceManager.devices = <Device>[device];
+        final TestRunCommandThatOnlyValidates command = TestRunCommandThatOnlyValidates();
+        final CommandRunner<void> runner =  createTestCommandRunner(command);
+
+        expect(runner.run(<String>['run', '--dart-define=FLUTTER_APP_FLAVOR=strawberry', '--no-pub', '--no-hot', '--flavor=strawberry']),
+          throwsToolExit(message: 'FLUTTER_APP_FLAVOR is used by the framework and cannot be set using --dart-define or --dart-define-from-file'));
+
+        expect(runner.run(<String>['run', '--dart-define-from-file=config.json', '--no-pub', '--no-hot', '--flavor=strawberry']),
+          throwsToolExit(message: 'FLUTTER_APP_FLAVOR is used by the framework and cannot be set using --dart-define or --dart-define-from-file'));
+      }, overrides: <Type, Generator>{
+        DeviceManager: () => testDeviceManager,
+        Platform: () => FakePlatform(),
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
       });
     });
   });
