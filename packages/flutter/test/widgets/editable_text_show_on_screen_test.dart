@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/src/foundation/constants.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
   _TestSliverPersistentHeaderDelegate({
@@ -40,11 +41,23 @@ class _TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate
 void main() {
   const TextStyle textStyle = TextStyle();
   const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
-    final FocusNode focusNode = FocusNode();
 
-  testWidgets('tapping on a partly visible editable brings it fully on screen', (WidgetTester tester) async {
+  late TextEditingController controller;
+  late FocusNode focusNode;
+
+  setUp(() {
+    controller = TextEditingController();
+    focusNode = FocusNode();
+  });
+
+  tearDown(() {
+    controller.dispose();
+    focusNode.dispose();
+  });
+
+  testWidgetsWithLeakTracking('tapping on a partly visible editable brings it fully on screen', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
-    final TextEditingController controller = TextEditingController();
+    addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(MaterialApp(
       home: Center(
@@ -80,10 +93,9 @@ void main() {
     expect(scrollController.offset, 0.0);
   });
 
-  testWidgets('tapping on a partly visible editable brings it fully on screen with scrollInsets', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('tapping on a partly visible editable brings it fully on screen with scrollInsets', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
-    final TextEditingController controller = TextEditingController();
-    final FocusNode focusNode = FocusNode();
+    addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(MaterialApp(
       home: Center(
@@ -126,10 +138,9 @@ void main() {
     expect(scrollController.offset, greaterThan(200.0 - 50.0 - 5.0));
   });
 
-  testWidgets('editable comes back on screen when entering text while it is off-screen', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('editable comes back on screen when entering text while it is off-screen', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController(initialScrollOffset: 100.0);
-    final TextEditingController controller = TextEditingController();
-    final FocusNode focusNode = FocusNode();
+    addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(MaterialApp(
       home: Center(
@@ -173,12 +184,10 @@ void main() {
     expect(find.byType(EditableText), findsOneWidget);
   });
 
-  testWidgets('entering text does not scroll when scrollPhysics.allowImplicitScrolling = false', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('entering text does not scroll when scrollPhysics.allowImplicitScrolling = false', (WidgetTester tester) async {
     // regression test for https://github.com/flutter/flutter/issues/19523
-
     final ScrollController scrollController = ScrollController(initialScrollOffset: 100.0);
-    final TextEditingController controller = TextEditingController();
-    final FocusNode focusNode = FocusNode();
+    addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(MaterialApp(
       home: Center(
@@ -223,11 +232,10 @@ void main() {
     expect(find.byType(EditableText), findsNothing);
   });
 
-  testWidgets('entering text does not scroll a surrounding PageView', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('entering text does not scroll a surrounding PageView', (WidgetTester tester) async {
     // regression test for https://github.com/flutter/flutter/issues/19523
-
-    final TextEditingController textController = TextEditingController();
     final PageController pageController = PageController(initialPage: 1);
+    addTearDown(pageController.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -245,7 +253,7 @@ void main() {
                   ColoredBox(
                     color: Colors.green,
                     child: TextField(
-                      controller: textController,
+                      controller: controller,
                     ),
                   ),
                   Container(
@@ -261,7 +269,7 @@ void main() {
 
     await tester.showKeyboard(find.byType(EditableText));
     await tester.pumpAndSettle();
-    expect(textController.text, '');
+    expect(controller.text, '');
     tester.testTextInput.enterText('H');
     final int frames = await tester.pumpAndSettle();
 
@@ -269,13 +277,12 @@ void main() {
     // that the surrounding PageView is incorrectly scrolling back-and-forth.
     expect(frames, 1);
 
-    expect(textController.text, 'H');
+    expect(controller.text, 'H');
   });
 
-  testWidgets('focused multi-line editable scrolls caret back into view when typing', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('focused multi-line editable scrolls caret back into view when typing', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
-    final TextEditingController controller = TextEditingController();
-    final FocusNode focusNode = FocusNode();
+    addTearDown(scrollController.dispose);
     controller.text = "Start${'\n' * 39}End";
 
     await tester.pumpWidget(MaterialApp(
@@ -322,10 +329,9 @@ void main() {
     expect(scrollController.offset, greaterThan(0.0));
   });
 
-  testWidgets('focused multi-line editable does not scroll to old position when non-collapsed selection set', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('focused multi-line editable does not scroll to old position when non-collapsed selection set', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
-    final TextEditingController controller = TextEditingController();
-    final FocusNode focusNode = FocusNode();
+    addTearDown(scrollController.dispose);
     final String text = "Start${'\n' * 39}End";
     controller.value = TextEditingValue(text: text, selection: TextSelection.collapsed(offset: text.length - 3));
 
@@ -374,11 +380,9 @@ void main() {
     expect(scrollController.offset, 28.0);
   });
 
-  testWidgets('scrolls into view with scrollInserts after the keyboard pops up', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('scrolls into view with scrollInserts after the keyboard pops up', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
-    final TextEditingController controller = TextEditingController();
-    final FocusNode focusNode = FocusNode();
-
+    addTearDown(scrollController.dispose);
     const Key container = Key('container');
 
     await tester.pumpWidget(MaterialApp(
@@ -418,15 +422,14 @@ void main() {
     expect(find.byKey(container), findsNothing);
   });
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'A pinned persistent header should not scroll when its descendant EditableText gains focus',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/25507.
-      ScrollController controller;
-      final TextEditingController textEditingController = TextEditingController();
-      final FocusNode focusNode = FocusNode();
-
+      final ScrollController scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
       const Key headerKey = Key('header');
+
       await tester.pumpWidget(
         MaterialApp(
           home: Center(
@@ -434,7 +437,7 @@ void main() {
               height: 600.0,
               width: 600.0,
               child: CustomScrollView(
-                controller: controller = ScrollController(),
+                controller: scrollController,
                 slivers: List<Widget>.generate(50, (int i) {
                   return i == 10
                   ? SliverPersistentHeader(
@@ -447,7 +450,7 @@ void main() {
                         child: EditableText(
                           key: headerKey,
                           backgroundCursorColor: Colors.grey,
-                          controller: textEditingController,
+                          controller: controller,
                           focusNode: focusNode,
                           style: textStyle,
                           cursorColor: cursorColor,
@@ -469,24 +472,23 @@ void main() {
       );
 
       // The persistent header should now be pinned at the top.
-      controller.jumpTo(100.0 * 15);
+      scrollController.jumpTo(100.0 * 15);
       await tester.pumpAndSettle();
-      expect(controller.offset, 100.0 * 15);
+      expect(scrollController.offset, 100.0 * 15);
 
       focusNode.requestFocus();
       await tester.pumpAndSettle();
       // The scroll offset should remain the same.
-      expect(controller.offset, 100.0 * 15);
+      expect(scrollController.offset, 100.0 * 15);
     },
   );
 
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'A pinned persistent header should not scroll when its descendant EditableText gains focus (no animation)',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/25507.
-      ScrollController controller;
-      final TextEditingController textEditingController = TextEditingController();
-      final FocusNode focusNode = FocusNode();
+      final ScrollController scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
 
       const Key headerKey = Key('header');
       await tester.pumpWidget(
@@ -496,7 +498,7 @@ void main() {
               height: 600.0,
               width: 600.0,
               child: CustomScrollView(
-                controller: controller = ScrollController(),
+                controller: scrollController,
                 slivers: List<Widget>.generate(50, (int i) {
                   return i == 10
                     ? SliverPersistentHeader(
@@ -510,7 +512,7 @@ void main() {
                           child: EditableText(
                             key: headerKey,
                             backgroundCursorColor: Colors.grey,
-                            controller: textEditingController,
+                            controller: controller,
                             focusNode: focusNode,
                             style: textStyle,
                             cursorColor: cursorColor,
@@ -532,20 +534,19 @@ void main() {
       );
 
       // The persistent header should now be pinned at the top.
-      controller.jumpTo(100.0 * 15);
+      scrollController.jumpTo(100.0 * 15);
       await tester.pumpAndSettle();
-      expect(controller.offset, 100.0 * 15);
+      expect(scrollController.offset, 100.0 * 15);
 
       focusNode.requestFocus();
       await tester.pumpAndSettle();
       // The scroll offset should remain the same.
-      expect(controller.offset, 100.0 * 15);
+      expect(scrollController.offset, 100.0 * 15);
     },
   );
 
   void testShowCaretOnScreen({ required bool readOnly }) {
     group('EditableText._showCaretOnScreen, readOnly=$readOnly', () {
-      final TextEditingController textEditingController = TextEditingController();
       final TextInputFormatter rejectEverythingFormatter = TextInputFormatter.withFunction((TextEditingValue old, TextEditingValue value) => old);
 
       bool isCaretOnScreen(WidgetTester tester) {
@@ -574,7 +575,7 @@ void main() {
                 const SizedBox(height: 599),
                 EditableText(
                   backgroundCursorColor: Colors.grey,
-                  controller: textEditingController,
+                  controller: controller,
                   scrollController: editableScrollController,
                   inputFormatters: <TextInputFormatter>[if (rejectUserInputs) rejectEverythingFormatter],
                   focusNode: focusNode,
@@ -588,11 +589,13 @@ void main() {
         );
       }
 
-      testWidgets('focus-triggered showCaretOnScreen', (WidgetTester tester) async {
-        textEditingController.text = 'a' * 100;
-        textEditingController.selection = const TextSelection.collapsed(offset: 100);
+      testWidgetsWithLeakTracking('focus-triggered showCaretOnScreen', (WidgetTester tester) async {
+        controller.text = 'a' * 100;
+        controller.selection = const TextSelection.collapsed(offset: 100);
         final ScrollController scrollController = ScrollController();
+        addTearDown(scrollController.dispose);
         final ScrollController editableScrollController = ScrollController();
+        addTearDown(editableScrollController.dispose);
 
         await tester.pumpWidget(
           buildEditableText(
@@ -617,11 +620,13 @@ void main() {
         expect(editableScrollController.offset, readOnly ? 0.0 : greaterThan(0.0));
       });
 
-      testWidgets('selection-triggered showCaretOnScreen: virtual keyboard', (WidgetTester tester) async {
-        textEditingController.text = 'a' * 100;
-        textEditingController.selection = const TextSelection.collapsed(offset: 80);
+      testWidgetsWithLeakTracking('selection-triggered showCaretOnScreen: virtual keyboard', (WidgetTester tester) async {
+        controller.text = 'a' * 100;
+        controller.selection = const TextSelection.collapsed(offset: 80);
         final ScrollController scrollController = ScrollController();
+        addTearDown(scrollController.dispose);
         final ScrollController editableScrollController = ScrollController();
+        addTearDown(editableScrollController.dispose);
 
         await tester.pumpWidget(
           buildEditableText(
@@ -675,11 +680,13 @@ void main() {
         expect(editableScrollController.offset, readOnly && !kIsWeb ? 0.0 : greaterThan(0.0));
       });
 
-      testWidgets('selection-triggered showCaretOnScreen: text selection delegate', (WidgetTester tester) async {
-        textEditingController.text = 'a' * 100;
-        textEditingController.selection = const TextSelection.collapsed(offset: 80);
+      testWidgetsWithLeakTracking('selection-triggered showCaretOnScreen: text selection delegate', (WidgetTester tester) async {
+        controller.text = 'a' * 100;
+        controller.selection = const TextSelection.collapsed(offset: 80);
         final ScrollController scrollController = ScrollController();
+        addTearDown(scrollController.dispose);
         final ScrollController editableScrollController = ScrollController();
+        addTearDown(editableScrollController.dispose);
 
         await tester.pumpWidget(
           buildEditableText(
@@ -739,10 +746,11 @@ void main() {
       });
 
       // Regression text for https://github.com/flutter/flutter/pull/74722.
-      testWidgets('does NOT randomly trigger when cursor blinks', (WidgetTester tester) async {
-        textEditingController.text = 'a' * 100;
-        textEditingController.selection = const TextSelection.collapsed(offset: 0);
+      testWidgetsWithLeakTracking('does NOT randomly trigger when cursor blinks', (WidgetTester tester) async {
+        controller.text = 'a' * 100;
+        controller.selection = const TextSelection.collapsed(offset: 0);
         final ScrollController editableScrollController = ScrollController();
+        addTearDown(editableScrollController.dispose);
         final bool deterministicCursor = EditableText.debugDeterministicCursor;
         EditableText.debugDeterministicCursor = false;
 
@@ -751,7 +759,7 @@ void main() {
             home: Scaffold(
               body: EditableText(
                 backgroundCursorColor: Colors.grey,
-                controller: textEditingController,
+                controller: controller,
                 scrollController: editableScrollController,
                 focusNode: focusNode,
                 style: textStyle,
@@ -770,7 +778,7 @@ void main() {
         expect(editableScrollController.offset, 0.0);
 
         // Change the text but keep the cursor location.
-        state.updateEditingValue(textEditingController.value.copyWith(
+        state.updateEditingValue(controller.value.copyWith(
           text: 'a' * 101,
         ));
 

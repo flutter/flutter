@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'clipboard_utils.dart';
 import 'keyboard_utils.dart';
@@ -97,7 +98,7 @@ void main() {
       group('backspace', () {
         const LogicalKeyboardKey trigger = LogicalKeyboardKey.backspace;
 
-        testWidgets('backspace', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('backspace', (WidgetTester tester) async {
           controller.text = testText;
           // Move the selection to the beginning of the 2nd line (after the newline
           // character).
@@ -122,7 +123,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('backspace readonly', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('backspace readonly', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 20,
@@ -140,7 +141,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('backspace at start', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('backspace at start', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 0,
@@ -163,7 +164,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('backspace at end', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('backspace at end', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 72,
@@ -187,7 +188,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('backspace inside of a cluster', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('backspace inside of a cluster', (WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 1,
@@ -208,7 +209,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('backspace at cluster boundary', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('backspace at cluster boundary', (WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 8,
@@ -233,7 +234,7 @@ void main() {
       group('delete: ', () {
         const LogicalKeyboardKey trigger = LogicalKeyboardKey.delete;
 
-        testWidgets('delete', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('delete', (WidgetTester tester) async {
           controller.text = testText;
           // Move the selection to the beginning of the 2nd line (after the newline
           // character).
@@ -259,7 +260,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('delete readonly', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('delete readonly', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 20,
@@ -277,7 +278,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('delete at start', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('delete at start', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 0,
@@ -300,7 +301,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('delete at end', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('delete at end', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 72,
@@ -324,7 +325,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('delete inside of a cluster', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('delete inside of a cluster', (WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 1,
@@ -345,7 +346,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('delete at cluster boundary', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('delete at cluster boundary', (WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 8,
@@ -371,7 +372,7 @@ void main() {
         // This shares the same logic as backspace.
         const LogicalKeyboardKey trigger = LogicalKeyboardKey.delete;
 
-        testWidgets('inside of a cluster', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('inside of a cluster', (WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection(
             baseOffset: 9,
@@ -392,7 +393,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('at the boundaries of a cluster', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('at the boundaries of a cluster', (WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection(
             baseOffset: 8,
@@ -413,7 +414,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('cross-cluster', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('cross-cluster', (WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection(
             baseOffset: 1,
@@ -434,7 +435,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('cross-cluster obscured text', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('cross-cluster obscured text', (WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection(
             baseOffset: 1,
@@ -464,7 +465,7 @@ void main() {
           return SingleActivator(trigger, control: !isApple, alt: isApple);
         }
 
-        testWidgets('WordModifier-backspace', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('WordModifier-backspace', (WidgetTester tester) async {
           controller.text = testText;
           // Place the caret before "people".
           controller.selection = const TextSelection.collapsed(
@@ -489,7 +490,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('readonly', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('readonly', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 29,
@@ -507,7 +508,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('at start', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('at start', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 0,
@@ -530,7 +531,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('at end', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('at end', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 72,
@@ -554,7 +555,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('inside of a cluster', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('inside of a cluster', (WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 1,
@@ -575,7 +576,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('at cluster boundary', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('at cluster boundary', (WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 8,
@@ -604,7 +605,7 @@ void main() {
           return SingleActivator(trigger, control: !isApple, alt: isApple);
         }
 
-        testWidgets('WordModifier-delete', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('WordModifier-delete', (WidgetTester tester) async {
           controller.text = testText;
           // Place the caret after "all".
           controller.selection = const TextSelection.collapsed(
@@ -629,7 +630,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('readonly', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('readonly', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 23,
@@ -647,7 +648,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('at start', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('at start', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 0,
@@ -670,7 +671,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('at end', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('at end', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 72,
@@ -687,7 +688,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('inside of a cluster', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('inside of a cluster', (WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 1,
@@ -708,7 +709,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('at cluster boundary', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('at cluster boundary', (WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 8,
@@ -737,7 +738,7 @@ void main() {
           return SingleActivator(trigger, meta: isApple, alt: !isApple);
         }
 
-        testWidgets('alt-backspace', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('alt-backspace', (WidgetTester tester) async {
           controller.text = testText;
           // Place the caret before "people".
           controller.selection = const TextSelection.collapsed(
@@ -762,7 +763,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('softwrap line boundary, upstream', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('softwrap line boundary, upstream', (WidgetTester tester) async {
           controller.text = testSoftwrapText;
           // Place the caret at the end of the 2nd line.
           controller.selection = const TextSelection.collapsed(
@@ -786,7 +787,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('softwrap line boundary, downstream', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('softwrap line boundary, downstream', (WidgetTester tester) async {
           controller.text = testSoftwrapText;
           // Place the caret at the beginning of the 3rd line.
           controller.selection = const TextSelection.collapsed(
@@ -803,7 +804,7 @@ void main() {
           expect(controller.text, testSoftwrapText);
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('readonly', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('readonly', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 29,
@@ -821,7 +822,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('at start', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('at start', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 0,
@@ -844,7 +845,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('at end', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('at end', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 72,
@@ -867,7 +868,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('inside of a cluster', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('inside of a cluster', (WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 1,
@@ -888,7 +889,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('at cluster boundary', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('at cluster boundary', (WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 8,
@@ -917,7 +918,7 @@ void main() {
           return SingleActivator(trigger, meta: isApple, alt: !isApple);
         }
 
-        testWidgets('alt-delete', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('alt-delete', (WidgetTester tester) async {
           controller.text = testText;
           // Place the caret after "all".
           controller.selection = const TextSelection.collapsed(
@@ -942,7 +943,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('softwrap line boundary, upstream', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('softwrap line boundary, upstream', (WidgetTester tester) async {
           controller.text = testSoftwrapText;
           // Place the caret at the end of the 2nd line.
           controller.selection = const TextSelection.collapsed(
@@ -961,7 +962,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('softwrap line boundary, downstream', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('softwrap line boundary, downstream', (WidgetTester tester) async {
           controller.text = testSoftwrapText;
           // Place the caret at the beginning of the 3rd line.
           controller.selection = const TextSelection.collapsed(
@@ -984,7 +985,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('readonly', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('readonly', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 23,
@@ -1002,7 +1003,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('at start', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('at start', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 0,
@@ -1025,7 +1026,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('at end', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('at end', (WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 72,
@@ -1042,7 +1043,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('inside of a cluster', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('inside of a cluster', (WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 1,
@@ -1063,7 +1064,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('at cluster boundary', (WidgetTester tester) async {
+        testWidgetsWithLeakTracking('at cluster boundary', (WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 8,
@@ -1089,7 +1090,7 @@ void main() {
         group('left', () {
           const LogicalKeyboardKey trigger = LogicalKeyboardKey.arrowLeft;
 
-          testWidgets('at start', (WidgetTester tester) async {
+          testWidgetsWithLeakTracking('at start', (WidgetTester tester) async {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 0,
@@ -1109,7 +1110,7 @@ void main() {
             }
           }, variant: TargetPlatformVariant.all());
 
-          testWidgets('base arrow key movement', (WidgetTester tester) async {
+          testWidgetsWithLeakTracking('base arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 20,
@@ -1123,7 +1124,7 @@ void main() {
             ));
           }, variant: TargetPlatformVariant.all());
 
-          testWidgets('word modifier + arrow key movement', (WidgetTester tester) async {
+          testWidgetsWithLeakTracking('word modifier + arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 7,   // Before the first "the"
@@ -1137,7 +1138,7 @@ void main() {
             ));
           }, variant: allExceptApple);
 
-          testWidgets('line modifier + arrow key movement', (WidgetTester tester) async {
+          testWidgetsWithLeakTracking('line modifier + arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 24,   // Before the "good".
@@ -1155,7 +1156,7 @@ void main() {
         group('right', () {
           const LogicalKeyboardKey trigger = LogicalKeyboardKey.arrowRight;
 
-          testWidgets('at end', (WidgetTester tester) async {
+          testWidgetsWithLeakTracking('at end', (WidgetTester tester) async {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 72,
@@ -1172,7 +1173,7 @@ void main() {
             }
           }, variant: TargetPlatformVariant.all());
 
-          testWidgets('base arrow key movement', (WidgetTester tester) async {
+          testWidgetsWithLeakTracking('base arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 20,
@@ -1186,7 +1187,7 @@ void main() {
             ));
           }, variant: TargetPlatformVariant.all());
 
-          testWidgets('word modifier + arrow key movement', (WidgetTester tester) async {
+          testWidgetsWithLeakTracking('word modifier + arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 7,   // Before the first "the"
@@ -1200,7 +1201,7 @@ void main() {
             ));
           }, variant: allExceptApple);
 
-         testWidgets('line modifier + arrow key movement', (WidgetTester tester) async {
+         testWidgetsWithLeakTracking('line modifier + arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 24,   // Before the "good".
@@ -1217,7 +1218,7 @@ void main() {
         });
 
         group('With initial non-collapsed selection', () {
-          testWidgets('base arrow key movement', (WidgetTester tester) async {
+          testWidgetsWithLeakTracking('base arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
             // The word "all" is selected.
             controller.selection = const TextSelection(
@@ -1269,7 +1270,7 @@ void main() {
             ));
           }, variant: TargetPlatformVariant.all());
 
-          testWidgets('word modifier + arrow key movement', (WidgetTester tester) async {
+          testWidgetsWithLeakTracking('word modifier + arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
             // "good" to "come" is selected.
             controller.selection = const TextSelection(
@@ -1322,7 +1323,7 @@ void main() {
             ));
           }, variant: allExceptApple);
 
-         testWidgets('line modifier + arrow key movement', (WidgetTester tester) async {
+         testWidgetsWithLeakTracking('line modifier + arrow key movement', (WidgetTester tester) async {
             controller.text = testText;
             // "good" to "come" is selected.
             controller.selection = const TextSelection(
@@ -1378,7 +1379,7 @@ void main() {
         });
 
         group('vertical movement', () {
-          testWidgets('at start', (WidgetTester tester) async {
+          testWidgetsWithLeakTracking('at start', (WidgetTester tester) async {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 0,
@@ -1411,7 +1412,7 @@ void main() {
             }
           }, variant: TargetPlatformVariant.all());
 
-          testWidgets('at end', (WidgetTester tester) async {
+          testWidgetsWithLeakTracking('at end', (WidgetTester tester) async {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 72,
@@ -1438,7 +1439,7 @@ void main() {
             }
           }, variant: TargetPlatformVariant.all());
 
-          testWidgets('run', (WidgetTester tester) async {
+          testWidgetsWithLeakTracking('run', (WidgetTester tester) async {
             controller.text =
               'aa\n'     // 3
               'a\n'      // 3 + 2 = 5
@@ -1525,7 +1526,7 @@ void main() {
             ));
           }, variant: TargetPlatformVariant.all());
 
-          testWidgets('run with page down/up', (WidgetTester tester) async {
+          testWidgetsWithLeakTracking('run with page down/up', (WidgetTester tester) async {
             controller.text =
               'aa\n'     // 3
               'a\n'      // 3 + 2 = 5
@@ -1560,7 +1561,7 @@ void main() {
             ));
           }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS})); // intended: on macOS Page Up/Down only scrolls
 
-          testWidgets('run can be interrupted by layout changes', (WidgetTester tester) async {
+          testWidgetsWithLeakTracking('run can be interrupted by layout changes', (WidgetTester tester) async {
             controller.text =
               'aa\n'     // 3
               'a\n'      // 3 + 2 = 5
@@ -1589,7 +1590,7 @@ void main() {
             ));
           }, variant: TargetPlatformVariant.all());
 
-          testWidgets('run can be interrupted by selection changes', (WidgetTester tester) async {
+          testWidgetsWithLeakTracking('run can be interrupted by selection changes', (WidgetTester tester) async {
             controller.text =
               'aa\n'     // 3
               'a\n'      // 3 + 2 = 5
@@ -1624,7 +1625,7 @@ void main() {
             ));
           }, variant: TargetPlatformVariant.all());
 
-          testWidgets('long run with fractional text height', (WidgetTester tester) async {
+          testWidgetsWithLeakTracking('long run with fractional text height', (WidgetTester tester) async {
             controller.text = "${'źdźbło\n' * 49}źdźbło";
             controller.selection = const TextSelection.collapsed(offset: 2);
             await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 13.0, height: 1.17)));
@@ -1658,7 +1659,7 @@ void main() {
   group('macOS shortcuts', () {
     final TargetPlatformVariant macOSOnly = TargetPlatformVariant.only(TargetPlatform.macOS);
 
-    testWidgets('word modifier + arrowLeft', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('word modifier + arrowLeft', (WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(
         offset: 7,   // Before the first "the"
@@ -1672,7 +1673,7 @@ void main() {
       ));
     }, variant: macOSOnly);
 
-    testWidgets('word modifier + arrowRight', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('word modifier + arrowRight', (WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(
         offset: 7,   // Before the first "the"
@@ -1686,7 +1687,7 @@ void main() {
       ));
     }, variant: macOSOnly);
 
-    testWidgets('line modifier + arrowLeft', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('line modifier + arrowLeft', (WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(
         offset: 24,   // Before the "good".
@@ -1700,7 +1701,7 @@ void main() {
       ));
     }, variant: macOSOnly);
 
-    testWidgets('line modifier + arrowRight', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('line modifier + arrowRight', (WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(
         offset: 24,   // Before the "good".
@@ -1715,7 +1716,7 @@ void main() {
       ));
     }, variant: macOSOnly);
 
-    testWidgets('word modifier + arrow key movement', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('word modifier + arrow key movement', (WidgetTester tester) async {
       controller.text = testText;
       // "good" to "come" is selected.
       controller.selection = const TextSelection(
@@ -1768,7 +1769,7 @@ void main() {
       ));
     }, variant: macOSOnly);
 
-    testWidgets('line modifier + arrow key movement', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('line modifier + arrow key movement', (WidgetTester tester) async {
       controller.text = testText;
       // "good" to "come" is selected.
       controller.selection = const TextSelection(
@@ -1828,7 +1829,7 @@ void main() {
     const TargetPlatformVariant appleOnly = TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.iOS });
     group('macOS shortcuts', () {
 
-      testWidgets('word modifier + arrowLeft', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('word modifier + arrowLeft', (WidgetTester tester) async {
         controller.text = testText;
         controller.selection = const TextSelection.collapsed(
           offset: 7,   // Before the first "the"
@@ -1840,7 +1841,7 @@ void main() {
         expect(controller.selection, const TextSelection.collapsed(offset: 7));
       }, variant: appleOnly);
 
-      testWidgets('word modifier + arrowRight', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('word modifier + arrowRight', (WidgetTester tester) async {
         controller.text = testText;
         controller.selection = const TextSelection.collapsed(
           offset: 7,   // Before the first "the"
@@ -1852,7 +1853,7 @@ void main() {
         expect(controller.selection, const TextSelection.collapsed(offset: 7));
       }, variant: appleOnly);
 
-      testWidgets('line modifier + arrowLeft', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('line modifier + arrowLeft', (WidgetTester tester) async {
         controller.text = testText;
         controller.selection = const TextSelection.collapsed(
           offset: 24,   // Before the "good".
@@ -1864,7 +1865,7 @@ void main() {
         expect(controller.selection, const TextSelection.collapsed(offset: 24,));
       }, variant: appleOnly);
 
-      testWidgets('line modifier + arrowRight', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('line modifier + arrowRight', (WidgetTester tester) async {
         controller.text = testText;
         controller.selection = const TextSelection.collapsed(
           offset: 24,   // Before the "good".
@@ -1878,7 +1879,7 @@ void main() {
         ));
       }, variant: appleOnly);
 
-      testWidgets('word modifier + arrow key movement', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('word modifier + arrow key movement', (WidgetTester tester) async {
         controller.text = testText;
         controller.selection = const TextSelection(
           baseOffset: 24,
@@ -1931,7 +1932,7 @@ void main() {
         ));
       }, variant: appleOnly);
 
-      testWidgets('line modifier + arrow key movement', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('line modifier + arrow key movement', (WidgetTester tester) async {
         controller.text = testText;
         // "good" to "come" is selected.
         controller.selection = const TextSelection(
@@ -1988,7 +1989,7 @@ void main() {
       }, variant: appleOnly);
     });
 
-    testWidgets('vertical movement outside of selection',
+    testWidgetsWithLeakTracking('vertical movement outside of selection',
         (WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(
@@ -2014,7 +2015,7 @@ void main() {
       }
     }, variant: TargetPlatformVariant.all());
 
-    testWidgets('select all non apple', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('select all non apple', (WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(
         offset: 0,
@@ -2027,7 +2028,7 @@ void main() {
       expect(controller.selection, const TextSelection.collapsed(offset: 0));
     }, variant: allExceptApple);
 
-    testWidgets('select all apple', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('select all apple', (WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(
         offset: 0,
@@ -2040,7 +2041,7 @@ void main() {
       expect(controller.selection, const TextSelection.collapsed(offset: 0));
     }, variant: appleOnly);
 
-    testWidgets('copy non apple', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('copy non apple', (WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection(
         baseOffset: 0,
@@ -2055,7 +2056,7 @@ void main() {
       expect(clipboardData['text'], 'empty');
     }, variant: allExceptApple);
 
-    testWidgets('copy apple', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('copy apple', (WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection(
         baseOffset: 0,
@@ -2070,7 +2071,7 @@ void main() {
       expect(clipboardData['text'], 'empty');
     }, variant: appleOnly);
 
-    testWidgets('cut non apple', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('cut non apple', (WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection(
         baseOffset: 0,
@@ -2089,7 +2090,7 @@ void main() {
       ));
     }, variant: allExceptApple);
 
-    testWidgets('cut apple', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('cut apple', (WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection(
         baseOffset: 0,
@@ -2108,7 +2109,7 @@ void main() {
       ));
     }, variant: appleOnly);
 
-    testWidgets('paste non apple', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('paste non apple', (WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(offset: 0);
       mockClipboard.clipboardData = <String, dynamic>{
@@ -2121,7 +2122,7 @@ void main() {
       expect(controller.text, testText);
     }, variant: allExceptApple);
 
-    testWidgets('paste apple', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('paste apple', (WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(offset: 0);
       mockClipboard.clipboardData = <String, dynamic>{
@@ -2137,7 +2138,7 @@ void main() {
   }, skip: !kIsWeb);// [intended] specific tests target web.
 
   group('Web does accept', () {
-      testWidgets('select up', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('select up', (WidgetTester tester) async {
         const SingleActivator selectUp =
             SingleActivator(LogicalKeyboardKey.arrowUp, shift: true);
         controller.text = testVerticalText;
@@ -2159,7 +2160,7 @@ void main() {
         );
       }, variant: TargetPlatformVariant.desktop());
 
-      testWidgets('select down', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('select down', (WidgetTester tester) async {
         const SingleActivator selectDown =
             SingleActivator(LogicalKeyboardKey.arrowDown, shift: true);
         controller.text = testVerticalText;
@@ -2181,7 +2182,7 @@ void main() {
         );
       }, variant: TargetPlatformVariant.desktop());
 
-      testWidgets('select all up', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('select all up', (WidgetTester tester) async {
         final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
         final SingleActivator selectAllUp = isMacOS
             ? const SingleActivator(LogicalKeyboardKey.arrowUp,
@@ -2207,7 +2208,7 @@ void main() {
         );
       }, variant: TargetPlatformVariant.desktop());
 
-      testWidgets('select all down', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('select all down', (WidgetTester tester) async {
         final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
         final SingleActivator selectAllDown = isMacOS
             ? const SingleActivator(LogicalKeyboardKey.arrowDown,
@@ -2233,7 +2234,7 @@ void main() {
         );
     }, variant: TargetPlatformVariant.desktop());
 
-    testWidgets('select left', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('select left', (WidgetTester tester) async {
       const SingleActivator selectLeft =
           SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true);
       controller.text = 'testing';
@@ -2253,7 +2254,7 @@ void main() {
       );
     }, variant: TargetPlatformVariant.desktop());
 
-    testWidgets('select right', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('select right', (WidgetTester tester) async {
       const SingleActivator selectRight =
           SingleActivator(LogicalKeyboardKey.arrowRight, shift: true);
       controller.text = 'testing';
@@ -2273,7 +2274,7 @@ void main() {
       );
     }, variant: TargetPlatformVariant.desktop());
 
-    testWidgets(
+    testWidgetsWithLeakTracking(
         'select left should not expand selection if selection is disabled',
         (WidgetTester tester) async {
       const SingleActivator selectLeft =
@@ -2296,7 +2297,7 @@ void main() {
       );
     }, variant: TargetPlatformVariant.desktop());
 
-    testWidgets(
+    testWidgetsWithLeakTracking(
         'select right should not expand selection if selection is disabled',
         (WidgetTester tester) async {
       const SingleActivator selectRight =
@@ -2317,7 +2318,7 @@ void main() {
       );
     }, variant: TargetPlatformVariant.desktop());
 
-    testWidgets('select all left', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('select all left', (WidgetTester tester) async {
       final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
       final SingleActivator selectAllLeft = isMacOS
           ? const SingleActivator(LogicalKeyboardKey.arrowLeft,
@@ -2341,7 +2342,7 @@ void main() {
       );
     }, variant: TargetPlatformVariant.desktop());
 
-    testWidgets('select all right', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('select all right', (WidgetTester tester) async {
       final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
       final SingleActivator selectAllRight = isMacOS
           ? const SingleActivator(LogicalKeyboardKey.arrowRight,
