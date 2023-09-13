@@ -747,7 +747,9 @@ class MaterialStatePropertyAll<T> implements MaterialStateProperty<T> {
 /// the widget. The widget is responsible for ensuring that the
 /// controller's [value] tracks its intrinsic state. For example one
 /// cannot request the keyboard focus for a widget by adding
-/// [MaterialState.focused] to its controller.
+/// [MaterialState.focused] to its controller. When the widget gains the
+/// or loses the focus it will [update] its controller's [value] and
+/// notify listeners of the change.
 class MaterialStatesController extends ValueNotifier<Set<MaterialState>> {
   /// Creates a MaterialStatesController.
   MaterialStatesController([Set<MaterialState>? value]) : super(<MaterialState>{...?value});
