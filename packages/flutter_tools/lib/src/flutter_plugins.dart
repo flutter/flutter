@@ -42,7 +42,7 @@ Future<Plugin?> _pluginFromPackage(String name, Uri packageRoot, Set<String> app
     {FileSystem? fileSystem}) async {
   final FileSystem fs = fileSystem ?? globals.fs;
   final File pubspecFile = fs.file(packageRoot.resolve('pubspec.yaml'));
-  if (!await pubspecFile.exists()) {
+  if (!pubspecFile.existsSync()) {
     return null;
   }
   Object? pubspec;
