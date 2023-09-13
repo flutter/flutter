@@ -806,11 +806,6 @@ class _FocusedDate extends InheritedWidget {
   bool updateShouldNotify(_FocusedDate oldWidget) {
     return !DateUtils.isSameDay(date, oldWidget.date);
   }
-
-  static DateTime? maybeOf(BuildContext context) {
-    final _FocusedDate? focusedDate = context.dependOnInheritedWidgetOfExactType<_FocusedDate>();
-    return focusedDate?.date;
-  }
 }
 
 /// Displays the days of a given month and allows choosing a day.
@@ -864,45 +859,6 @@ class _DayPicker extends StatefulWidget {
 }
 
 class _DayPickerState extends State<_DayPicker> {
-
-  /// List of [FocusNode]s, one for each day of the month.
-  late List<FocusNode> _dayFocusNodes;
-
-  // TODO(polina-c): a cleaner solution is to create separate statefull widget for a day.
-  // https://github.com/flutter/flutter/issues/134323
-  final Map<int, MaterialStatesController> _statesControllers = <int, MaterialStatesController>{};
-
-  @override
-  void initState() {
-    super.initState();
-    final int daysInMonth = DateUtils.getDaysInMonth(widget.displayedMonth.year, widget.displayedMonth.month);
-    _dayFocusNodes = List<FocusNode>.generate(
-      daysInMonth,
-      (int index) => FocusNode(skipTraversal: true, debugLabel: 'Day ${index + 1}'),
-    );
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Check to see if the focused date is in this month, if so focus it.
-    final DateTime? focusedDate = _FocusedDate.maybeOf(context);
-    if (focusedDate != null && DateUtils.isSameMonth(widget.displayedMonth, focusedDate)) {
-      _dayFocusNodes[focusedDate.day - 1].requestFocus();
-    }
-  }
-
-  @override
-  void dispose() {
-    for (final FocusNode node in _dayFocusNodes) {
-      node.dispose();
-    }
-    for (final MaterialStatesController controller in _statesControllers.values) {
-      controller.dispose();
-    }
-    super.dispose();
-  }
-
   /// Builds widgets showing abbreviated days of week. The first widget in the
   /// returned list corresponds to the first day of week for the current locale.
   ///
