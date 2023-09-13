@@ -1673,8 +1673,7 @@ void main() {
   });
 
   group('Modal BottomSheet avoids overlapping display features', () {
-    testWidgetsWithLeakTracking('positioning using anchorPoint',
-    (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('positioning using anchorPoint', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           builder: (BuildContext context, Widget? child) {
@@ -1710,12 +1709,7 @@ void main() {
       // Should take the right side of the screen
       expect(tester.getTopLeft(find.byType(Placeholder)).dx, 410);
       expect(tester.getBottomRight(find.byType(Placeholder)).dx, 800);
-    },
-    leakTrackingTestConfig: const LeakTrackingTestConfig(
-      // TODO(polina-c): remove after fix
-      // https://github.com/flutter/flutter/issues/133594
-      notDisposedAllowList: <String, int?> {'ValueNotifier<EdgeInsets>': 1}
-    ));
+    });
 
     testWidgetsWithLeakTracking('positioning using Directionality', (WidgetTester tester) async {
       await tester.pumpWidget(

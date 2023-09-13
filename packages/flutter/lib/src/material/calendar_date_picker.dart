@@ -1147,7 +1147,8 @@ class YearPicker extends StatefulWidget {
 }
 
 class _YearPickerState extends State<YearPicker> {
-  late ScrollController _scrollController;
+  ScrollController? _scrollController;
+  final MaterialStatesController _statesController = MaterialStatesController();
 
   // The approximate number of years necessary to fill the available space.
   static const int minYears = 18;
@@ -1159,10 +1160,17 @@ class _YearPickerState extends State<YearPicker> {
   }
 
   @override
+  void dispose() {
+    _scrollController?.dispose();
+    _statesController.dispose();
+    super.dispose();
+  }
+
+  @override
   void didUpdateWidget(YearPicker oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.selectedDate != oldWidget.selectedDate && widget.selectedDate != null) {
-      _scrollController.jumpTo(_scrollOffsetForYear(widget.selectedDate!));
+      _scrollController!.jumpTo(_scrollOffsetForYear(widget.selectedDate!));
     }
   }
 
@@ -1255,10 +1263,11 @@ class _YearPickerState extends State<YearPicker> {
         assert(date.year == widget.lastDate.year);
         date = DateTime(year, widget.lastDate.month);
       }
+      _statesController.value = states;
       yearItem = InkWell(
         key: ValueKey<int>(year),
         onTap: () => widget.onChanged(date),
-        statesController: MaterialStatesController(states),
+        statesController: _statesController,
         overlayColor: overlayColor,
         child: yearItem,
       );

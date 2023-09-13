@@ -63,6 +63,8 @@ abstract class ScrollActivity {
   ScrollActivityDelegate get delegate => _delegate;
   ScrollActivityDelegate _delegate;
 
+  bool _isDisposed = false;
+
   /// Updates the activity's link to the [ScrollActivityDelegate].
   ///
   /// This should only be called when an activity is being moved from a defunct
@@ -134,7 +136,9 @@ abstract class ScrollActivity {
 
   /// Called when the scroll view stops performing this activity.
   @mustCallSuper
-  void dispose() { }
+  void dispose() {
+    _isDisposed = true;
+  }
 
   @override
   String toString() => describeIdentity(this);
@@ -535,7 +539,7 @@ class BallisticScrollActivity extends ScrollActivity {
     )
       ..addListener(_tick)
       ..animateWith(simulation)
-       .whenComplete(_end); // won't trigger if we dispose _controller first
+       .whenComplete(_end); // won't trigger if we dispose _controller before it completes.
   }
 
   late AnimationController _controller;
@@ -569,7 +573,11 @@ class BallisticScrollActivity extends ScrollActivity {
   }
 
   void _end() {
-    delegate.goBallistic(0.0);
+    // Check if the activity was disposed before going ballistic because _end might be called
+    // if _controller is disposed just after completion.
+    if (!_isDisposed) {
+      delegate.goBallistic(0.0);
+    }
   }
 
   @override
@@ -628,7 +636,7 @@ class DrivenScrollActivity extends ScrollActivity {
     )
       ..addListener(_tick)
       ..animateTo(to, duration: duration, curve: curve)
-       .whenComplete(_end); // won't trigger if we dispose _controller first
+       .whenComplete(_end); // won't trigger if we dispose _controller before it completes.
   }
 
   late final Completer<void> _completer;
@@ -648,7 +656,11 @@ class DrivenScrollActivity extends ScrollActivity {
   }
 
   void _end() {
-    delegate.goBallistic(velocity);
+    // Check if the activity was disposed before going ballistic because _end might be called
+    // if _controller is disposed just after completion.
+    if (!_isDisposed) {
+      delegate.goBallistic(velocity);
+    }
   }
 
   @override
