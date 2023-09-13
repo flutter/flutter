@@ -666,7 +666,7 @@ void main() {
     expect(context.clipBehavior, equals(Clip.none));
   },
   leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(someone): remove after fixing
+    // TODO(ksokolovskyi): remove after fixing
     notDisposedAllowList: <String, int?> {
       // https://github.com/flutter/flutter/issues/134575
       'OffsetLayer': 1,
@@ -741,7 +741,7 @@ void main() {
     expect(context.clipBehavior, equals(Clip.antiAlias));
   },
   leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(someone): remove after fixing
+    // TODO(ksokolovskyi): remove after fixing
     // https://github.com/flutter/flutter/issues/134572
     notDisposedAllowList: <String, int?> {'ContainerLayer': 1},
   ));
