@@ -841,32 +841,6 @@ apply plugin: 'kotlin-android'
           expect(json['bundleIdentifier'], 'io.flutter.someProject');
           expect(json['associatedDomains'], unorderedEquals(<String>[]));
         });
-
-        testWithMocks('throws when both scheme and target are provided', () async {
-          final FlutterProject project = await someProject();
-          project.ios.xcodeProject.createSync();
-          project.ios.defaultHostInfoPlist.createSync(recursive: true);
-          expect(
-            () => project.ios.outputsUniversalLinkSettings(
-              target: 'Runner',
-              scheme: 'scheme',
-              configuration: 'config',
-            ),
-            throwsToolExit(),
-          );
-        });
-
-        testWithMocks('throws when non of the scheme and target is provided', () async {
-          final FlutterProject project = await someProject();
-          project.ios.xcodeProject.createSync();
-          project.ios.defaultHostInfoPlist.createSync(recursive: true);
-          expect(
-            () => project.ios.outputsUniversalLinkSettings(
-              configuration: 'config',
-            ),
-            throwsToolExit(),
-          );
-        });
       });
 
       group('product bundle identifier', () {

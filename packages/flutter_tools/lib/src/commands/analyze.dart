@@ -152,20 +152,13 @@ class AnalyzeCommand extends FlutterCommand {
     argParser.addFlag('output-universal-link-settings',
       negatable: false,
       help: 'Output a JSON with iOS Xcode universal link settings into a file. '
-          'The "--configuration", and one of "--scheme" or "--target" must also '
-          'be set.',
+          'The "--configuration", and "--target" must also be set.',
       hide: !verboseHelp,
     );
 
     argParser.addOption('configuration',
       help: 'Sets the iOS build configuration to be analyzed.',
       valueHelp: 'configuration',
-      hide: !verboseHelp,
-    );
-
-    argParser.addOption('scheme',
-      help: 'Sets the iOS build scheme to be analyzed.',
-      valueHelp: 'scheme',
       hide: !verboseHelp,
     );
 
@@ -265,7 +258,6 @@ class AnalyzeCommand extends FlutterCommand {
       final IOSAnalyzeOption option;
       final String? configuration;
       final String? target;
-      final String? scheme;
       if (argResults!['list-build-options'] as bool && argResults!['output-universal-link-settings'] as bool) {
         throwToolExit('Only one of "--list-build-options" or "--output-universal-link-settings" can be provided');
       }
@@ -273,7 +265,6 @@ class AnalyzeCommand extends FlutterCommand {
         option = IOSAnalyzeOption.listBuildOptions;
         configuration = null;
         target = null;
-        scheme = null;
       } else if (argResults!['output-universal-link-settings'] as bool) {
         option = IOSAnalyzeOption.outputUniversalLinkSettings;
         configuration = argResults!['configuration'] as String?;
@@ -281,9 +272,8 @@ class AnalyzeCommand extends FlutterCommand {
           throwToolExit('"--configuration" must be provided');
         }
         target = argResults!['target'] as String?;
-        scheme = argResults!['scheme'] as String?;
-        if ((scheme == null) == (target == null)) {
-          throwToolExit('Only one of "--target" or "--scheme" must be provided but not both.');
+        if (target == null) {
+          throwToolExit('"--target" must be provided');
         }
       } else {
         throwToolExit('No argument is provided to analyze. Use -h to see available commands.');
@@ -302,7 +292,6 @@ class AnalyzeCommand extends FlutterCommand {
         option: option,
         configuration: configuration,
         target: target,
-        scheme: scheme,
         logger: _logger,
       ).analyze();
     } else if (boolArg('suggestions')) {
