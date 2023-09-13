@@ -56,7 +56,7 @@ Future<TaskResult> run() async {
 
     // Since we are waiting for the lack of errors, there is no determinate
     // amount of time we can wait.
-    await Future<void>.delayed(const Duration(seconds: 10));
+    await Future<void>.delayed(const Duration(seconds: 30));
     process.stdin.write('q');
     await adb.cancel();
   });
