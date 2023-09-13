@@ -114,13 +114,13 @@ class _DynamicBox extends StatelessWidget {
   const _DynamicBox(this.config, {required this.child});
 
   final dynamic config;
-  final Widget? child;
+  final Widget child;
 
   Never error(String description) => throw Exception('$description: $config');
 
   @override
   Widget build(BuildContext context) => switch (config) {
-        null || (null, null) || (null, null, null) || (null, Clip.none) => child!,
+        null || (null, null) || (null, null, null) || (null, Clip.none) => child,
 
         EdgeInsets p when p.isNonNegative => Padding(padding: p, child: child),
         EdgeInsets() => error('negative padding'),
@@ -128,6 +128,7 @@ class _DynamicBox extends StatelessWidget {
         (double? w, double? h, null) => SizedBox(width: w, height: h, child: child),
         (double? w, double? h, BoxConstraints c) when c.debugAssertIsValid() => ConstrainedBox(
             constraints: (w != null || h != null) ? c.tighten(width: w, height: h) : c,
+            child: child,
           ),
         (_, _, BoxConstraints()) => error('invalid constraints'),
 
@@ -414,44 +415,38 @@ class Container extends StatelessWidget {
         (final deco, final pad) => pad!.add(deco!),
       };
 
-  Widget? get _child {
+  Widget get _child {
     if (child != null) {
-      return _DynamicBox(alignment, child: child);
+      return _DynamicBox(alignment, child: child!);
     }
     if (constraints?.isTight ?? true) {
       return const LimitedBox(
-      maxWidth: 0.0,
-      maxHeight: 0.0,
-      child: SizedBox.expand(),
-    );
+        maxWidth: 0.0,
+        maxHeight: 0.0,
+        child: SizedBox.expand(),
+      );
     }
     return const SizedBox.shrink();
   }
 
+  List<dynamic> get _layers => [
+        _paddingIncludingDecoration,
+        (decoration, clipBehavior),
+        foregroundDecoration,
+        color,
+        (width, height, constraints),
+        margin,
+        (transform, transformAlignment),
+      ];
+
   @override
   Widget build(BuildContext context) {
-    return _DynamicBox(
-      (transform, transformAlignment),
-      child: _DynamicBox(
-        margin,
-        child: _DynamicBox(
-          color,
-          child: _DynamicBox(
-            (width, height, constraints),
-            child: _DynamicBox(
-              foregroundDecoration,
-              child: _DynamicBox(
-                (decoration, clipBehavior),
-                child: _DynamicBox(
-                  _paddingIncludingDecoration,
-                  child: _child,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
+    Widget current = _child;
+
+    for (final layer in _layers) {
+      current = _DynamicBox(layer, child: current);
+    }
+    return current;
   }
 
   @override
