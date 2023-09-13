@@ -18,7 +18,7 @@ dependencies:
     path: ../../third_party/web_test_fonts
 
 dev_dependencies:
-  archive: 3.1.2
+  archive: 3.3.9
   args: any
   async: any
   convert: any
