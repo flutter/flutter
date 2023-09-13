@@ -67,7 +67,7 @@ vars = {
   'dart_browser_launcher_rev': '1f69393d63a2f8d36d00b86cdd20df70c347af82',
   'dart_clock_rev': '1e75f08d3428bcd6f4b7cf70e788f24fc9b661e1',
   'dart_collection_rev': '91afde43f488eef618454b896301c6ff59af72e0',
-  'dart_devtools_rev': 'acbc179425b4596b7c2ba7d9c4263077f2e18098',
+  'dart_devtools_rev': 'adfb08c95c626248b28cc60df3b085c12ad8758e',
   'dart_libprotobuf_rev': '24487dd1045c7f3d64a21f38a3f0c06cc4cf2edb',
   'dart_perfetto_rev': 'b8da07095979310818f0efde2ef3c69ea70d62c5',
   'dart_protobuf_gn_rev': 'ca669f79945418f6229e4fef89b666b2a88cbb10',
@@ -336,7 +336,7 @@ deps = {
    Var('chromium_git') + '/external/github.com/WebAssembly/binaryen.git@cdb7aeab40b4c522de20b242019f7e88641445d5',
 
   'src/third_party/dart/third_party/devtools':
-   {'dep_type': 'cipd', 'packages': [{'package': 'dart/third_party/flutter/devtools', 'version': 'git_revision:acbc179425b4596b7c2ba7d9c4263077f2e18098'}]},
+   {'dep_type': 'cipd', 'packages': [{'package': 'dart/third_party/flutter/devtools', 'version': 'git_revision:adfb08c95c626248b28cc60df3b085c12ad8758e'}]},
 
   'src/third_party/dart/third_party/pkg/args':
    Var('dart_git') + '/args.git@5a4e16f1e4c08b01498a9dce8aeda1a60161cd52',
