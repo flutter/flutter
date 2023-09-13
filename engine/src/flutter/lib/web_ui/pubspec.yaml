@@ -31,7 +31,7 @@ dev_dependencies:
   package_config: any
   path: 1.8.0
   pool: any
-  quiver: 3.0.0
+  quiver: 3.2.1
   shelf: any
   shelf_packages_handler: any
   shelf_static: any
