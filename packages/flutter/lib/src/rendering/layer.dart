@@ -919,9 +919,9 @@ class PictureLayer extends Layer {
 ///
 /// See also:
 ///
-///  * <https://api.flutter.dev/javadoc/io/flutter/view/TextureRegistry.html>
+///  * [TextureRegistry](/javadoc/io/flutter/view/TextureRegistry.html)
 ///    for how to create and manage backend textures on Android.
-///  * <https://api.flutter.dev/objcdoc/Protocols/FlutterTextureRegistry.html>
+///  * [TextureRegistry Protocol](/ios-embedder/protocol_flutter_texture_registry-p.html)
 ///    for how to create and manage backend textures on iOS.
 class TextureLayer extends Layer {
   /// Creates a texture layer bounded by [rect] and with backend texture
