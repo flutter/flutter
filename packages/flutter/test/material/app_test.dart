@@ -334,15 +334,7 @@ void main() {
       expect(find.text('route "/a/b"'), findsNothing);
       expect(find.text('route "/b"'), findsNothing);
     }
-  },
-  // TODO(polina-c): remove after fixing
-  // https://github.com/flutter/flutter/issues/133695
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    notDisposedAllowList: <String, int?> {
-      'ValueNotifier<String?>': 3,
-      'MaterialPageRoute<dynamic>': 3,
-    },
-  ));
+  });
 
   testWidgetsWithLeakTracking('Make sure initialRoute is only used the first time', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
