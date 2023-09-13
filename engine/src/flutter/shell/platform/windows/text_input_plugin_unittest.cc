@@ -36,6 +36,8 @@ static constexpr char kSelectionAffinityKey[] = "selectionAffinity";
 static constexpr char kSelectionIsDirectionalKey[] = "selectionIsDirectional";
 static constexpr char kComposingBaseKey[] = "composingBase";
 static constexpr char kComposingExtentKey[] = "composingExtent";
+static constexpr char kUpdateEditingStateMethod[] =
+    "TextInputClient.updateEditingState";
 
 static std::unique_ptr<std::vector<uint8_t>> CreateResponse(bool handled) {
   auto response_doc =
@@ -243,7 +245,7 @@ TEST(TextInputPluginTest, VerifyInputActionNewlineInsertNewLine) {
   // Editing state should have been updated.
   auto encoded_arguments = EncodedEditingState("\n", TextRange(1));
   auto update_state_message = codec.EncodeMethodCall(
-      {"TextInputClient.updateEditingState", std::move(encoded_arguments)});
+      {kUpdateEditingStateMethod, std::move(encoded_arguments)});
 
   EXPECT_TRUE(std::equal(update_state_message->begin(),
                          update_state_message->end(),
@@ -364,6 +366,65 @@ TEST(TextInputPluginTest, TextEditingWorksWithDeltaModel) {
   handler.ComposeEndHook();
 
   // Passes if it did not crash
+}
+
+// Regression test for https://github.com/flutter/flutter/issues/123749
+TEST(TextInputPluginTest, CompositionCursorPos) {
+  int selection_base = -1;
+  TestBinaryMessenger messenger([&](const std::string& channel,
+                                    const uint8_t* message, size_t size,
+                                    BinaryReply reply) {
+    auto method = JsonMethodCodec::GetInstance().DecodeMethodCall(
+        std::vector<uint8_t>(message, message + size));
+    if (method->method_name() == kUpdateEditingStateMethod) {
+      const auto& args = *method->arguments();
+      const auto& editing_state = args[1];
+      auto base = editing_state.FindMember(kSelectionBaseKey);
+      auto extent = editing_state.FindMember(kSelectionExtentKey);
+      ASSERT_NE(base, editing_state.MemberEnd());
+      ASSERT_TRUE(base->value.IsInt());
+      ASSERT_NE(extent, editing_state.MemberEnd());
+      ASSERT_TRUE(extent->value.IsInt());
+      selection_base = base->value.GetInt();
+      EXPECT_EQ(extent->value.GetInt(), selection_base);
+    }
+  });
+  MockTextInputPluginDelegate delegate;
+
+  TextInputPlugin plugin(&messenger, &delegate);
+
+  auto args = std::make_unique<rapidjson::Document>(rapidjson::kArrayType);
+  auto& allocator = args->GetAllocator();
+  args->PushBack(123, allocator);  // client_id
+  rapidjson::Value client_config(rapidjson::kObjectType);
+  args->PushBack(client_config, allocator);
+  auto encoded = JsonMethodCodec::GetInstance().EncodeMethodCall(
+      MethodCall<rapidjson::Document>(kSetClientMethod, std::move(args)));
+  EXPECT_TRUE(messenger.SimulateEngineMessage(
+      kChannelName, encoded->data(), encoded->size(),
+      [](const uint8_t* reply, size_t reply_size) {}));
+
+  plugin.ComposeBeginHook();
+  EXPECT_EQ(selection_base, 0);
+  plugin.ComposeChangeHook(u"abc", 3);
+  EXPECT_EQ(selection_base, 3);
+
+  plugin.ComposeCommitHook();
+  plugin.ComposeEndHook();
+  EXPECT_EQ(selection_base, 3);
+
+  plugin.ComposeBeginHook();
+  plugin.ComposeChangeHook(u"1", 1);
+  EXPECT_EQ(selection_base, 4);
+
+  plugin.ComposeChangeHook(u"12", 2);
+  EXPECT_EQ(selection_base, 5);
+
+  plugin.ComposeChangeHook(u"12", 1);
+  EXPECT_EQ(selection_base, 4);
+
+  plugin.ComposeChangeHook(u"12", 2);
+  EXPECT_EQ(selection_base, 5);
 }
 
 TEST(TextInputPluginTest, TransformCursorRect) {
