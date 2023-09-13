@@ -7,6 +7,7 @@ import 'dart:io' as io show File, stderr, stdout;
 
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
+import 'package:process/process.dart';
 import 'package:process_runner/process_runner.dart';
 
 import 'src/command.dart';
@@ -43,17 +44,34 @@ class _SetStatusCommand {
 /// A class that runs clang-tidy on all or only the changed files in a git
 /// repo.
 class ClangTidy {
-  /// Given the path to the build commands for a repo and its root, builds
-  /// an instance of [ClangTidy].
+  /// Builds an instance of [ClangTidy] using a repo's [buildCommandPath].
   ///
-  /// `buildCommandsPath` is the path to the build_commands.json file.
-  /// `repoPath` is the path to the Engine repo.
-  /// `checksArg` are specific checks for clang-tidy to do.
-  /// `lintAll` when true indicates that all files should be linted.
-  /// `outSink` when provided is the destination for normal log messages, which
-  /// will otherwise go to stdout.
-  /// `errSink` when provided is the destination for error messages, which
-  /// will otherwise go to stderr.
+  /// ## Required
+  /// - [buildCommandsPath] is the path to the build_commands.json file.
+  ///
+  /// ## Optional
+  /// - [checksArg] are specific checks for clang-tidy to do.
+  ///
+  ///   If omitted, checks will be determined by the `.clang-tidy` file in the
+  ///   repo.
+  /// - [lintAll] when true indicates that all files should be linted.
+  ///
+  /// ## Optional (Test Overrides)
+  ///
+  /// _Most usages of this class will not need to override the following, which
+  /// are primarily used for testing (i.e. to avoid real interaction with I/O)._
+  ///
+  /// - [outSink] when provided is the destination for normal log messages.
+  ///
+  ///   If omitted, [io.stdout] will be used.
+  ///
+  /// - [errSink] when provided is the destination for error messages.
+  ///
+  ///   If omitted, [io.stderr] will be used.
+  ///
+  /// - [processManager] when provided is delegated to for running processes.
+  ///
+  ///   If omitted, [LocalProcessManager] will be used.
   ClangTidy({
     required io.File buildCommandsPath,
     String checksArg = '',
@@ -62,6 +80,7 @@ class ClangTidy {
     bool fix = false,
     StringSink? outSink,
     StringSink? errSink,
+    ProcessManager processManager = const LocalProcessManager(),
   }) :
     options = Options(
       buildCommandsPath: buildCommandsPath,
@@ -72,22 +91,26 @@ class ClangTidy {
       errSink: errSink,
     ),
     _outSink = outSink ?? io.stdout,
-    _errSink = errSink ?? io.stderr;
+    _errSink = errSink ?? io.stderr,
+    _processManager = processManager;
 
   /// Builds an instance of [ClangTidy] from a command line.
   ClangTidy.fromCommandLine(
     List<String> args, {
     StringSink? outSink,
     StringSink? errSink,
+    ProcessManager processManager = const LocalProcessManager(),
   }) :
     options = Options.fromCommandLine(args, errSink: errSink),
     _outSink = outSink ?? io.stdout,
-    _errSink = errSink ?? io.stderr;
+    _errSink = errSink ?? io.stderr,
+    _processManager = processManager;
 
   /// The [Options] that specify how this [ClangTidy] operates.
   final Options options;
   final StringSink _outSink;
   final StringSink _errSink;
+  final ProcessManager _processManager;
 
   late final DateTime _startTime;
 
@@ -185,6 +208,7 @@ class ClangTidy {
 
     final GitRepo repo = GitRepo(
       options.repoPath,
+      processManager: _processManager,
       verbose: options.verbose,
     );
     if (options.lintHead) {
@@ -351,7 +375,10 @@ class ClangTidy {
         totalJobs, completed, inProgress, pending, failed));
     }
 
-    final ProcessPool pool = ProcessPool(printReport: reporter);
+    final ProcessPool pool = ProcessPool(
+      printReport: reporter,
+      processRunner: ProcessRunner(processManager: _processManager),
+    );
     await for (final WorkerJob job in pool.startWorkers(jobs)) {
       pendingJobs.remove(job.name);
       if (pendingJobs.isNotEmpty && pendingJobs.length <= 3) {

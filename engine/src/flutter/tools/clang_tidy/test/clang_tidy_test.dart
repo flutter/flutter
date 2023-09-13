@@ -9,7 +9,61 @@ import 'package:clang_tidy/src/command.dart';
 import 'package:clang_tidy/src/options.dart';
 import 'package:litetest/litetest.dart';
 import 'package:path/path.dart' as path;
+import 'package:process/process.dart';
 import 'package:process_runner/process_runner.dart';
+
+import 'process_fakes.dart';
+
+/// A test fixture for the `clang-tidy` tool.
+final class Fixture {
+  /// Simulates running the tool with the given [args].
+  factory Fixture.fromCommandLine(List<String> args, {
+    ProcessManager? processManager,
+  }) {
+    processManager ??= FakeProcessManager();
+    final StringBuffer outBuffer = StringBuffer();
+    final StringBuffer errBuffer = StringBuffer();
+    return Fixture._(ClangTidy.fromCommandLine(
+      args,
+      outSink: outBuffer,
+      errSink: errBuffer,
+      processManager: processManager,
+    ), errBuffer, outBuffer);
+  }
+
+  /// Simulates running the tool with the given [options].
+  factory Fixture.fromOptions(Options options, {
+    ProcessManager? processManager,
+  }) {
+    processManager ??= FakeProcessManager();
+    final StringBuffer outBuffer = StringBuffer();
+    final StringBuffer errBuffer = StringBuffer();
+    return Fixture._(ClangTidy(
+      buildCommandsPath: options.buildCommandsPath,
+      lintAll: options.lintAll,
+      lintHead: options.lintHead,
+      fix: options.fix,
+      outSink: outBuffer,
+      errSink: errBuffer,
+      processManager: processManager,
+    ), errBuffer, outBuffer);
+  }
+
+  Fixture._(
+    this.tool,
+    this.errBuffer,
+    this.outBuffer,
+  );
+
+  /// The `clang-tidy` tool.
+  final ClangTidy tool;
+
+  /// Captured `stdout` from the tool.
+  final StringBuffer outBuffer;
+
+  /// Captured `stderr` from the tool.
+  final StringBuffer errBuffer;
+}
 
 // Recorded locally from clang-tidy.
 const String _tidyOutput = '''
@@ -61,21 +115,12 @@ Future<int> main(List<String> args) async {
   final String buildCommands = args[0];
 
   test('--help gives help', () async {
-    final StringBuffer outBuffer = StringBuffer();
-    final StringBuffer errBuffer = StringBuffer();
-    final ClangTidy clangTidy = ClangTidy.fromCommandLine(
-      <String>[
-      '--help',
-      ],
-      outSink: outBuffer,
-      errSink: errBuffer,
-    );
+    final Fixture fixture = Fixture.fromCommandLine(<String>['--help']);
+    final int result = await fixture.tool.run();
 
-    final int result = await clangTidy.run();
-
-    expect(clangTidy.options.help, isTrue);
+    expect(fixture.tool.options.help, isTrue);
     expect(result, equals(0));
-    expect(errBuffer.toString(), contains('Usage: '));
+    expect(fixture.errBuffer.toString(), contains('Usage: '));
   });
 
   test('trimmed clang-tidy output', () {
@@ -83,47 +128,36 @@ Future<int> main(List<String> args) async {
   });
 
   test('Error when --compile-commands and --target-variant are used together', () async {
-    final StringBuffer outBuffer = StringBuffer();
-    final StringBuffer errBuffer = StringBuffer();
-    final ClangTidy clangTidy = ClangTidy.fromCommandLine(
+    final Fixture fixture = Fixture.fromCommandLine(
       <String>[
         '--compile-commands',
         '/unused',
         '--target-variant',
         'unused'
       ],
-      outSink: outBuffer,
-      errSink: errBuffer,
     );
 
-    final int result = await clangTidy.run();
+    final int result = await fixture.tool.run();
 
-    expect(clangTidy.options.help, isFalse);
     expect(result, equals(1));
-    expect(errBuffer.toString(), contains(
+    expect(fixture.errBuffer.toString(), contains(
       'ERROR: --compile-commands option cannot be used with --target-variant.',
     ));
   });
 
   test('Error when --compile-commands and --src-dir are used together', () async {
-    final StringBuffer outBuffer = StringBuffer();
-    final StringBuffer errBuffer = StringBuffer();
-    final ClangTidy clangTidy = ClangTidy.fromCommandLine(
+    final Fixture fixture = Fixture.fromCommandLine(
       <String>[
         '--compile-commands',
         '/unused',
         '--src-dir',
         '/unused',
       ],
-      outSink: outBuffer,
-      errSink: errBuffer,
     );
+    final int result = await fixture.tool.run();
 
-    final int result = await clangTidy.run();
-
-    expect(clangTidy.options.help, isFalse);
     expect(result, equals(1));
-    expect(errBuffer.toString(), contains(
+    expect(fixture.errBuffer.toString(), contains(
       'ERROR: --compile-commands option cannot be used with --src-dir.',
     ));
   });
@@ -150,55 +184,38 @@ Future<int> main(List<String> args) async {
       ], errSink: errBuffer);
       expect(options.errorMessage, isNotNull);
       expect(options.shardId, isNull);
-      print('foo ${options.errorMessage}');
-      expect(
-          options.errorMessage,
-          contains(
-            'Invalid shard-id value',
-          ));
+      expect(options.errorMessage, contains('Invalid shard-id value'));
     });
   });
 
   test('Error when --compile-commands path does not exist', () async {
-    final StringBuffer outBuffer = StringBuffer();
-    final StringBuffer errBuffer = StringBuffer();
-    final ClangTidy clangTidy = ClangTidy.fromCommandLine(
+    final Fixture fixture = Fixture.fromCommandLine(
       <String>[
         '--compile-commands',
         '/does/not/exist',
       ],
-      outSink: outBuffer,
-      errSink: errBuffer,
     );
+    final int result = await fixture.tool.run();
 
-    final int result = await clangTidy.run();
-
-    expect(clangTidy.options.help, isFalse);
     expect(result, equals(1));
-    expect(errBuffer.toString().split('\n')[0], hasMatch(
+    expect(fixture.errBuffer.toString().split('\n')[0], hasMatch(
       r"ERROR: Build commands path .*/does/not/exist doesn't exist.",
     ));
   });
 
   test('Error when --src-dir path does not exist, uses target variant in path', () async {
-    final StringBuffer outBuffer = StringBuffer();
-    final StringBuffer errBuffer = StringBuffer();
-    final ClangTidy clangTidy = ClangTidy.fromCommandLine(
+    final Fixture fixture = Fixture.fromCommandLine(
       <String>[
         '--src-dir',
         '/does/not/exist',
         '--target-variant',
         'ios_debug_unopt',
       ],
-      outSink: outBuffer,
-      errSink: errBuffer,
     );
+    final int result = await fixture.tool.run();
 
-    final int result = await clangTidy.run();
-
-    expect(clangTidy.options.help, isFalse);
     expect(result, equals(1));
-    expect(errBuffer.toString().split('\n')[0], hasMatch(
+    expect(fixture.errBuffer.toString().split('\n')[0], hasMatch(
       r'ERROR: Build commands path .*/does/not/exist'
       r'[/\\]out[/\\]ios_debug_unopt[/\\]compile_commands.json'
       r" doesn't exist.",
@@ -206,77 +223,90 @@ Future<int> main(List<String> args) async {
   });
 
   test('Error when --lint-all and --lint-head are used together', () async {
-    final StringBuffer outBuffer = StringBuffer();
-    final StringBuffer errBuffer = StringBuffer();
-    final ClangTidy clangTidy = ClangTidy.fromCommandLine(
+    final Fixture fixture = Fixture.fromCommandLine(
       <String>[
         '--compile-commands',
         '/unused',
         '--lint-all',
         '--lint-head',
       ],
-      outSink: outBuffer,
-      errSink: errBuffer,
     );
+    final int result = await fixture.tool.run();
 
-    final int result = await clangTidy.run();
-
-    expect(clangTidy.options.help, isFalse);
     expect(result, equals(1));
-    expect(errBuffer.toString(), contains(
+    expect(fixture.errBuffer.toString(), contains(
       'ERROR: At most one of --lint-all and --lint-head can be passed.',
     ));
   });
 
   test('lintAll=true checks all files', () async {
-    final StringBuffer outBuffer = StringBuffer();
-    final StringBuffer errBuffer = StringBuffer();
-    final ClangTidy clangTidy = ClangTidy(
-      buildCommandsPath: io.File(buildCommands),
-      lintAll: true,
-      outSink: outBuffer,
-      errSink: errBuffer,
+    final Fixture fixture = Fixture.fromOptions(
+      Options(
+        buildCommandsPath: io.File(buildCommands),
+        lintAll: true,
+      ),
     );
-    final List<io.File> fileList = await clangTidy.computeFilesOfInterest();
+    final List<io.File> fileList = await fixture.tool.computeFilesOfInterest();
     expect(fileList.length, greaterThan(1000));
   });
 
   test('lintAll=false does not check all files', () async {
-    final StringBuffer outBuffer = StringBuffer();
-    final StringBuffer errBuffer = StringBuffer();
-    final ClangTidy clangTidy = ClangTidy(
-      buildCommandsPath: io.File(buildCommands),
-      outSink: outBuffer,
-      errSink: errBuffer,
+    final Fixture fixture = Fixture.fromOptions(
+      Options(
+        buildCommandsPath: io.File(buildCommands),
+        // Intentional:
+        // ignore: avoid_redundant_argument_values
+        lintAll: false,
+      ),
+      processManager: FakeProcessManager(
+        onStart: (List<String> command) {
+          if (command.first == 'git') {
+            // This just allows git to not actually be called.
+            return FakeProcess();
+          }
+          return FakeProcessManager.unhandledStart(command);
+        },
+      ),
     );
-    final List<io.File> fileList = await clangTidy.computeFilesOfInterest();
+    final List<io.File> fileList = await fixture.tool.computeFilesOfInterest();
     expect(fileList.length, lessThan(300));
   });
 
   test('Sharding', () async {
-    final StringBuffer outBuffer = StringBuffer();
-    final StringBuffer errBuffer = StringBuffer();
-    final ClangTidy clangTidy = ClangTidy(
-      buildCommandsPath: io.File(buildCommands),
-      lintAll: true,
-      outSink: outBuffer,
-      errSink: errBuffer,
+    final Fixture fixture = Fixture.fromOptions(
+      Options(
+        buildCommandsPath: io.File(buildCommands),
+        lintAll: true,
+      ),
+      processManager: FakeProcessManager(
+        onStart: (List<String> command) {
+          if (command.first == 'git') {
+            // This just allows git to not actually be called.
+            return FakeProcess();
+          }
+          return FakeProcessManager.unhandledStart(command);
+        },
+      ),
     );
-    Map<String, dynamic> makeBuildCommandEntry(String filePath) => <String, dynamic>{
-          'directory': '/unused',
-          'command': '../../buildtools/mac-x64/clang/bin/clang $filePath',
-          'file': filePath,
-        };
+
+    Map<String, String> makeBuildCommandEntry(String filePath) {
+      return <String, String>{
+        'directory': '/unused',
+        'command': '../../buildtools/mac-x64/clang/bin/clang $filePath',
+        'file': filePath,
+      };
+    }
+
     final List<String> filePaths = <String>[
       for (int i = 0; i < 10; ++i) '/path/to/a/source_file_$i.cc'
     ];
-    final List<dynamic> buildCommandsData =
+    final List<Map<String, String>> buildCommandsData =
         filePaths.map((String e) => makeBuildCommandEntry(e)).toList();
-    final List<dynamic> shardBuildCommandsData =
+    final List<Map<String, String>> shardBuildCommandsData =
       filePaths.sublist(6).map((String e) => makeBuildCommandEntry(e)).toList();
 
     {
-      final List<Command> commands = await clangTidy.getLintCommandsForFiles(
+      final List<Command> commands = await fixture.tool.getLintCommandsForFiles(
         buildCommandsData,
         filePaths.map((String e) => io.File(e)).toList(),
         <List<dynamic>>[shardBuildCommandsData],
@@ -296,10 +326,10 @@ Future<int> main(List<String> args) async {
       expect(commandFilePaths.contains('/path/to/a/source_file_9.cc'), false);
     }
     {
-      final List<Command> commands = await clangTidy.getLintCommandsForFiles(
+      final List<Command> commands = await fixture.tool.getLintCommandsForFiles(
         buildCommandsData,
         filePaths.map((String e) => io.File(e)).toList(),
-        <List<dynamic>>[shardBuildCommandsData],
+        <List<Map<String, String>>>[shardBuildCommandsData],
         1,
       );
 
@@ -319,14 +349,13 @@ Future<int> main(List<String> args) async {
   });
 
   test('No Commands are produced when no files changed', () async {
-    final StringBuffer outBuffer = StringBuffer();
-    final StringBuffer errBuffer = StringBuffer();
-    final ClangTidy clangTidy = ClangTidy(
-      buildCommandsPath: io.File(buildCommands),
-      lintAll: true,
-      outSink: outBuffer,
-      errSink: errBuffer,
+    final Fixture fixture = Fixture.fromOptions(
+      Options(
+        buildCommandsPath: io.File(buildCommands),
+        lintAll: true,
+      ),
     );
+
     const String filePath = '/path/to/a/source_file.cc';
     final List<dynamic> buildCommandsData = <Map<String, dynamic>>[
       <String, dynamic>{
@@ -335,7 +364,7 @@ Future<int> main(List<String> args) async {
         'file': filePath,
       },
     ];
-    final List<Command> commands = await clangTidy.getLintCommandsForFiles(
+    final List<Command> commands = await fixture.tool.getLintCommandsForFiles(
       buildCommandsData,
       <io.File>[],
       <List<dynamic>>[],
@@ -346,13 +375,11 @@ Future<int> main(List<String> args) async {
   });
 
   test('A Command is produced when a file is changed', () async {
-    final StringBuffer outBuffer = StringBuffer();
-    final StringBuffer errBuffer = StringBuffer();
-    final ClangTidy clangTidy = ClangTidy(
-      buildCommandsPath: io.File(buildCommands),
-      lintAll: true,
-      outSink: outBuffer,
-      errSink: errBuffer,
+    final Fixture fixture = Fixture.fromOptions(
+      Options(
+        buildCommandsPath: io.File(buildCommands),
+        lintAll: true,
+      ),
     );
 
     // This file needs to exist, and be UTF8 line-parsable.
@@ -364,7 +391,7 @@ Future<int> main(List<String> args) async {
         'file': filePath,
       },
     ];
-    final List<Command> commands = await clangTidy.getLintCommandsForFiles(
+    final List<Command> commands = await fixture.tool.getLintCommandsForFiles(
       buildCommandsData,
       <io.File>[io.File(filePath)],
       <List<dynamic>>[],

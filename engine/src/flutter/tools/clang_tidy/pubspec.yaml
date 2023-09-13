@@ -20,6 +20,7 @@ dependencies:
   args: any
   meta: any
   path: any
+  process: any
   process_runner: any
 
 dev_dependencies:
