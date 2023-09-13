@@ -7,6 +7,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class Leaf extends StatefulWidget {
   const Leaf({
@@ -46,7 +47,7 @@ List<Widget> generateList(Widget child) {
 }
 
 void main() {
-  testWidgets('KeepAlive with ListView with itemExtent', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('KeepAlive with ListView with itemExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -94,7 +95,7 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
   });
 
-  testWidgets('KeepAlive with ListView without itemExtent', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('KeepAlive with ListView without itemExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -141,7 +142,7 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
   });
 
-  testWidgets('KeepAlive with GridView', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('KeepAlive with GridView', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -190,7 +191,7 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
   });
 
-  testWidgets('KeepAlive render tree description', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('KeepAlive render tree description', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,

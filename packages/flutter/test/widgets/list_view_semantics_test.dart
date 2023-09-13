@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
@@ -14,9 +15,10 @@ void main() {
     const int itemCount = 10;
     const double itemHeight = 150.0;
 
-    testWidgets('forward vertical', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('forward vertical', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
 
       await tester.pumpWidget(
         Directionality(
@@ -44,9 +46,10 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('reverse vertical', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('reverse vertical', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
 
       await tester.pumpWidget(
         Directionality(
@@ -75,9 +78,10 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('forward horizontal', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('forward horizontal', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
 
       await tester.pumpWidget(
         Directionality(
@@ -106,9 +110,10 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('reverse horizontal', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('reverse horizontal', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final ScrollController controller = ScrollController();
+      addTearDown(controller.dispose);
 
       await tester.pumpWidget(
         Directionality(
