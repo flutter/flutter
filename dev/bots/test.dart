@@ -1330,7 +1330,7 @@ Future<void> _runFlutterDriverWebTest({
     workingDirectory: testAppDirectory,
   );
   final String responseFile =
-      path.join(testAppDirectory, 'integration_response_data.json');
+      path.join(testAppDirectory, 'build', 'integration_response_data.json');
   if (File(responseFile).existsSync()) {
     File(responseFile).deleteSync();
   }
