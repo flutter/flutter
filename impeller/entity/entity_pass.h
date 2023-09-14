@@ -141,6 +141,9 @@ class EntityPass {
 
   void SetEnableOffscreenCheckerboard(bool enabled);
 
+  //----------------------------------------------------------------------------
+  /// @brief  Get the coverage of an unfiltered subpass.
+  ///
   std::optional<Rect> GetSubpassCoverage(
       const EntityPass& subpass,
       std::optional<Rect> coverage_limit) const;

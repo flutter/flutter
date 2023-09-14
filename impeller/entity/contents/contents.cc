@@ -123,6 +123,10 @@ std::optional<Color> Contents::AsBackgroundColor(const Entity& entity,
   return {};
 }
 
+const FilterContents* Contents::AsFilter() const {
+  return nullptr;
+}
+
 bool Contents::ApplyColorFilter(
     const Contents::ColorFilterProc& color_filter_proc) {
   return false;

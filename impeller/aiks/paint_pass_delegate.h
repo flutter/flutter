@@ -32,6 +32,11 @@ class PaintPassDelegate final : public EntityPassDelegate {
       std::shared_ptr<Texture> target,
       const Matrix& effect_transform) override;
 
+  // |EntityPassDelgate|
+  std::shared_ptr<FilterContents> WithImageFilter(
+      const FilterInput::Variant& input,
+      const Matrix& effect_transform) const override;
+
  private:
   const Paint paint_;
 
@@ -60,6 +65,11 @@ class OpacityPeepholePassDelegate final : public EntityPassDelegate {
   std::shared_ptr<Contents> CreateContentsForSubpassTarget(
       std::shared_ptr<Texture> target,
       const Matrix& effect_transform) override;
+
+  // |EntityPassDelgate|
+  std::shared_ptr<FilterContents> WithImageFilter(
+      const FilterInput::Variant& input,
+      const Matrix& effect_transform) const override;
 
  private:
   const Paint paint_;

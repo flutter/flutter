@@ -37,6 +37,9 @@ class FilterContentsFilterInput final : public FilterInput {
       Scalar scale) override;
 
   // |FilterInput|
+  bool IsTranslationOnly() const override;
+
+  // |FilterInput|
   bool IsLeaf() const override;
 
   // |FilterInput|

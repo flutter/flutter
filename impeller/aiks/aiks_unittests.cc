@@ -3220,7 +3220,7 @@ TEST_P(AiksTest, MatrixSaveLayerFilter) {
     canvas.SaveLayer({.image_filter = ImageFilter::MakeMatrix(
                           Matrix::MakeTranslation(Vector2(1, 1) *
                                                   (200 + 100 * k1OverSqrt2)) *
-                              Matrix::MakeScale(Vector2(1, 1) * 0.2) *
+                              Matrix::MakeScale(Vector2(1, 1) * 0.5) *
                               Matrix::MakeTranslation(Vector2(-200, -200)),
                           SamplerDescriptor{})},
                      std::nullopt);
@@ -3248,7 +3248,7 @@ TEST_P(AiksTest, MatrixBackdropFilter) {
         {}, std::nullopt,
         ImageFilter::MakeMatrix(
             Matrix::MakeTranslation(Vector2(1, 1) * (100 + 100 * k1OverSqrt2)) *
-                Matrix::MakeScale(Vector2(1, 1) * 0.2) *
+                Matrix::MakeScale(Vector2(1, 1) * 0.5) *
                 Matrix::MakeTranslation(Vector2(-100, -100)),
             SamplerDescriptor{}));
     canvas.Restore();

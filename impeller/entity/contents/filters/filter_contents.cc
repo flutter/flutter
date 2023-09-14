@@ -259,12 +259,24 @@ std::optional<Snapshot> FilterContents::RenderToSnapshot(
   return std::nullopt;
 }
 
+const FilterContents* FilterContents::AsFilter() const {
+  return this;
+}
+
 Matrix FilterContents::GetLocalTransform(const Matrix& parent_transform) const {
   return Matrix();
 }
 
 Matrix FilterContents::GetTransform(const Matrix& parent_transform) const {
   return parent_transform * GetLocalTransform(parent_transform);
+}
+bool FilterContents::IsTranslationOnly() const {
+  for (auto& input : inputs_) {
+    if (!input->IsTranslationOnly()) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool FilterContents::IsLeaf() const {
