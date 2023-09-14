@@ -1,4 +1,4 @@
-Signature: 2842791947e56be69f6d021381e26966
+Signature: b34b2da659aa12578e2249aa3f5e9f1a
 
 ====================================================================================================
 LIBRARY: dart
@@ -4688,12 +4688,12 @@ ORIGIN: ../../../third_party/dart/runtime/third_party/double-conversion/src/bign
 ORIGIN: ../../../third_party/dart/runtime/third_party/double-conversion/src/bignum.cc
 ORIGIN: ../../../third_party/dart/runtime/third_party/double-conversion/src/bignum.h
 ORIGIN: ../../../third_party/dart/runtime/third_party/double-conversion/src/cached-powers.h
-ORIGIN: ../../../third_party/dart/runtime/third_party/double-conversion/src/diy-fp.cc
 ORIGIN: ../../../third_party/dart/runtime/third_party/double-conversion/src/diy-fp.h
-ORIGIN: ../../../third_party/dart/runtime/third_party/double-conversion/src/double-conversion.cc
+ORIGIN: ../../../third_party/dart/runtime/third_party/double-conversion/src/double-to-string.cc
 ORIGIN: ../../../third_party/dart/runtime/third_party/double-conversion/src/fast-dtoa.h
 ORIGIN: ../../../third_party/dart/runtime/third_party/double-conversion/src/fixed-dtoa.cc
 ORIGIN: ../../../third_party/dart/runtime/third_party/double-conversion/src/fixed-dtoa.h
+ORIGIN: ../../../third_party/dart/runtime/third_party/double-conversion/src/string-to-double.cc
 ORIGIN: ../../../third_party/dart/runtime/third_party/double-conversion/src/strtod.cc
 ORIGIN: ../../../third_party/dart/runtime/third_party/double-conversion/src/strtod.h
 ORIGIN: ../../../third_party/dart/runtime/third_party/double-conversion/src/utils.h
@@ -4703,12 +4703,12 @@ FILE: ../../../third_party/dart/runtime/third_party/double-conversion/src/bignum
 FILE: ../../../third_party/dart/runtime/third_party/double-conversion/src/bignum.cc
 FILE: ../../../third_party/dart/runtime/third_party/double-conversion/src/bignum.h
 FILE: ../../../third_party/dart/runtime/third_party/double-conversion/src/cached-powers.h
-FILE: ../../../third_party/dart/runtime/third_party/double-conversion/src/diy-fp.cc
 FILE: ../../../third_party/dart/runtime/third_party/double-conversion/src/diy-fp.h
-FILE: ../../../third_party/dart/runtime/third_party/double-conversion/src/double-conversion.cc
+FILE: ../../../third_party/dart/runtime/third_party/double-conversion/src/double-to-string.cc
 FILE: ../../../third_party/dart/runtime/third_party/double-conversion/src/fast-dtoa.h
 FILE: ../../../third_party/dart/runtime/third_party/double-conversion/src/fixed-dtoa.cc
 FILE: ../../../third_party/dart/runtime/third_party/double-conversion/src/fixed-dtoa.h
+FILE: ../../../third_party/dart/runtime/third_party/double-conversion/src/string-to-double.cc
 FILE: ../../../third_party/dart/runtime/third_party/double-conversion/src/strtod.cc
 FILE: ../../../third_party/dart/runtime/third_party/double-conversion/src/strtod.h
 FILE: ../../../third_party/dart/runtime/third_party/double-conversion/src/utils.h
@@ -4745,12 +4745,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 LIBRARY: double-conversion
 ORIGIN: ../../../third_party/dart/runtime/third_party/double-conversion/src/double-conversion.h
+ORIGIN: ../../../third_party/dart/runtime/third_party/double-conversion/src/double-to-string.h
 ORIGIN: ../../../third_party/dart/runtime/third_party/double-conversion/src/fast-dtoa.cc
 ORIGIN: ../../../third_party/dart/runtime/third_party/double-conversion/src/ieee.h
+ORIGIN: ../../../third_party/dart/runtime/third_party/double-conversion/src/string-to-double.h
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/runtime/third_party/double-conversion/src/double-conversion.h
+FILE: ../../../third_party/dart/runtime/third_party/double-conversion/src/double-to-string.h
 FILE: ../../../third_party/dart/runtime/third_party/double-conversion/src/fast-dtoa.cc
 FILE: ../../../third_party/dart/runtime/third_party/double-conversion/src/ieee.h
+FILE: ../../../third_party/dart/runtime/third_party/double-conversion/src/string-to-double.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2012 the V8 project authors. All rights reserved.
 
