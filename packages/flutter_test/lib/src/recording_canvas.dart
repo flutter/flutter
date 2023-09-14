@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 /// An [Invocation] and the [stack] trace that led to it.
@@ -97,8 +96,6 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
   /// Creates a [PaintingContext] for tests that use [TestRecordingCanvas].
   TestRecordingPaintingContext(this.canvas);
 
-  final List<OpacityLayer> _createdLayers = <OpacityLayer>[];
-
   @override
   final Canvas canvas;
 
@@ -173,17 +170,7 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
     canvas.saveLayer(null, Paint()); // TODO(ianh): Expose the alpha somewhere.
     painter(this, offset);
     canvas.restore();
-    final OpacityLayer layer = OpacityLayer();
-    _createdLayers.add(layer);
-    return layer;
-  }
-
-  /// Releases allocated resources.
-  @mustCallSuper
-  void dispose() {
-    for (final OpacityLayer layer in _createdLayers) {
-      layer.dispose();
-    }
+    return OpacityLayer();
   }
 
   @override
