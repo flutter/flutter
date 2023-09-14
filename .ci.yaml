@@ -3341,6 +3341,7 @@ targets:
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: plugin_test
+      presubmit_max_attempts: "2"
     runIf:
       - dev/**
       - packages/flutter_tools/**
