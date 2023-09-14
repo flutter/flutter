@@ -33,15 +33,15 @@ std::optional<BlendMode> InvertPorterDuffBlend(BlendMode blend_mode);
 
 class BlendFilterContents : public ColorFilterContents {
  public:
-  using AdvancedBlendProc =
-      std::function<std::optional<Entity>(const FilterInput::Vector& inputs,
-                                          const ContentContext& renderer,
-                                          const Entity& entity,
-                                          const Rect& coverage,
-                                          BlendMode blend_mode,
-                                          std::optional<Color> foreground_color,
-                                          bool absorb_opacity,
-                                          std::optional<Scalar> alpha)>;
+  using AdvancedBlendProc = std::function<std::optional<Entity>(
+      const FilterInput::Vector& inputs,
+      const ContentContext& renderer,
+      const Entity& entity,
+      const Rect& coverage,
+      BlendMode blend_mode,
+      std::optional<Color> foreground_color,
+      ColorFilterContents::AbsorbOpacity absorb_opacity,
+      std::optional<Scalar> alpha)>;
 
   BlendFilterContents();
 
@@ -75,7 +75,7 @@ class BlendFilterContents : public ColorFilterContents {
       Color foreground_color,
       BlendMode blend_mode,
       std::optional<Scalar> alpha,
-      bool absorb_opacity) const;
+      ColorFilterContents::AbsorbOpacity absorb_opacity) const;
 
   /// @brief Optimized porter-duff blend that avoids a second subpass when there
   ///        is only a single input and a foreground color.
@@ -89,7 +89,7 @@ class BlendFilterContents : public ColorFilterContents {
       Color foreground_color,
       BlendMode blend_mode,
       std::optional<Scalar> alpha,
-      bool absorb_opacity) const;
+      ColorFilterContents::AbsorbOpacity absorb_opacity) const;
 
   BlendMode blend_mode_ = BlendMode::kSourceOver;
   AdvancedBlendProc advanced_blend_proc_;

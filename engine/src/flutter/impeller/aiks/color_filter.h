@@ -43,7 +43,7 @@ class ColorFilter {
   ///         treated as color information.
   virtual std::shared_ptr<ColorFilterContents> WrapWithGPUColorFilter(
       std::shared_ptr<FilterInput> input,
-      bool absorb_opacity) const = 0;
+      ColorFilterContents::AbsorbOpacity absorb_opacity) const = 0;
 
   /// @brief Returns a function that can be used to filter unpremultiplied
   ///        Impeller Colors on the CPU.
@@ -65,7 +65,7 @@ class BlendColorFilter final : public ColorFilter {
   // |ColorFilter|
   std::shared_ptr<ColorFilterContents> WrapWithGPUColorFilter(
       std::shared_ptr<FilterInput> input,
-      bool absorb_opacity) const override;
+      ColorFilterContents::AbsorbOpacity absorb_opacity) const override;
 
   // |ColorFilter|
   ColorFilterProc GetCPUColorFilterProc() const override;
@@ -91,7 +91,7 @@ class MatrixColorFilter final : public ColorFilter {
   // |ColorFilter|
   std::shared_ptr<ColorFilterContents> WrapWithGPUColorFilter(
       std::shared_ptr<FilterInput> input,
-      bool absorb_opacity) const override;
+      ColorFilterContents::AbsorbOpacity absorb_opacity) const override;
 
   // |ColorFilter|
   ColorFilterProc GetCPUColorFilterProc() const override;
@@ -116,7 +116,7 @@ class SrgbToLinearColorFilter final : public ColorFilter {
   // |ColorFilter|
   std::shared_ptr<ColorFilterContents> WrapWithGPUColorFilter(
       std::shared_ptr<FilterInput> input,
-      bool absorb_opacity) const override;
+      ColorFilterContents::AbsorbOpacity absorb_opacity) const override;
 
   // |ColorFilter|
   ColorFilterProc GetCPUColorFilterProc() const override;
@@ -138,7 +138,7 @@ class LinearToSrgbColorFilter final : public ColorFilter {
   // |ColorFilter|
   std::shared_ptr<ColorFilterContents> WrapWithGPUColorFilter(
       std::shared_ptr<FilterInput> input,
-      bool absorb_opacity) const override;
+      ColorFilterContents::AbsorbOpacity absorb_opacity) const override;
 
   // |ColorFilter|
   ColorFilterProc GetCPUColorFilterProc() const override;
