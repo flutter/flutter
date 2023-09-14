@@ -4,6 +4,10 @@
 
 #pragma once
 
+#if !IMPELLER_ENABLE_3D
+static_assert(false);
+#endif
+
 #include <memory>
 
 #include "impeller/entity/contents/color_source_contents.h"
