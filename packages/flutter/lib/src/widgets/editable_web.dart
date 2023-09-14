@@ -426,7 +426,7 @@ class _EditableWebState extends State<EditableWeb> {
 
     // debug
     if (widget.textInputConfiguration.obscureText) {
-      inputEl.style.border = '1px solid red'; // debug
+      inputEl.style.outline = '1px solid red'; // debug
     }
 
     if (widget.selectionColor != null) {
