@@ -12,6 +12,7 @@ import '../base/net.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
+import '../base/version_range.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
 import '../features.dart';
@@ -884,13 +885,13 @@ void _printIncompatibleJavaAgpGradleVersionsWarning({
   required FlutterProjectType projectType,
   required String projectDirPath}) {
   // Determine if the Java version specified conflicts with the template Gradle or AGP version.
-  final bool javaGradleVersionsCompatible = gradle.validateJavaGradle(globals.logger, javaV: javaVersion, gradleV: templateGradleVersion);
-  bool javaAgpVersionsCompatible = gradle.validateJavaAgp(globals.logger, javaV: javaVersion, agpV: templateAgpVersion);
+  final bool javaGradleVersionsCompatible = gradle.validateJavaAndGradle(globals.logger, javaV: javaVersion, gradleV: templateGradleVersion);
+  bool javaAgpVersionsCompatible = gradle.validateJavaAndAgp(globals.logger, javaV: javaVersion, agpV: templateAgpVersion);
   String relevantTemplateAgpVersion = templateAgpVersion;
 
   if (projectType == FlutterProjectType.module && Version.parse(templateAgpVersion)! < Version.parse(templateAgpVersionForModule)!) {
     // If a module is being created, make sure to check for Java/AGP compatibility between the highest used version of AGP in the module template.
-    javaAgpVersionsCompatible = gradle.validateJavaAgp(globals.logger, javaV: javaVersion, agpV: templateAgpVersionForModule);
+    javaAgpVersionsCompatible = gradle.validateJavaAndAgp(globals.logger, javaV: javaVersion, agpV: templateAgpVersionForModule);
     relevantTemplateAgpVersion = templateAgpVersionForModule;
   }
 
@@ -959,7 +960,7 @@ String getIncompatibleJavaGradleAgpMessageHeader(
   String projectType) {
   final String incompatibleDependency = javaGradleVersionsCompatible ? 'Android Gradle Plugin (AGP)' :'Gradle' ;
   final String incompatibleDependencyVersion = javaGradleVersionsCompatible ? 'AGP version $templateAgpVersion' : 'Gradle version $templateGradleVersion';
-  final gradle.VersionRange validJavaRange = gradle.getJavaVersionFor(gradleV: templateGradleVersion, agpV: templateAgpVersion);
+  final VersionRange validJavaRange = gradle.getJavaVersionFor(gradleV: templateGradleVersion, agpV: templateAgpVersion);
   // validJavaRange should have non-null verisonMin and versionMax since it based on our template AGP and Gradle versions.
   final String validJavaRangeMessage = '(minimum compatible version: ${validJavaRange.versionMin!}, maximum compatible version: ${validJavaRange.versionMax!})';
 
@@ -988,7 +989,9 @@ String? _getBuildGradleWrapperPropertiesFilePath(FlutterProjectType projectType,
       case FlutterProjectType.package:
       case FlutterProjectType.plugin:
       case FlutterProjectType.pluginFfi:
-        // No gradle-wrapper.properties files not part of sample code.
+      case FlutterProjectType.packageFfi:
+        // No gradle-wrapper.properties files not part of sample code that
+        // can be determined.
         return null;
   }
   return gradleWrapperPropertiesFilePath;
@@ -1015,6 +1018,7 @@ List<String>? _getBuildGradleConfigurationFilePaths(FlutterProjectType projectTy
       case FlutterProjectType.plugin:
         buildGradleConfigurationFilePaths.add(globals.fs.path.join(projectDirPath, 'android/app/build.gradle'));
       case FlutterProjectType.package:
+      case FlutterProjectType.packageFfi:
         // No build.gradle file because there is no platform-specific implementation.
         return null;
   }

@@ -12,6 +12,7 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
+import '../base/version_range.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;
@@ -30,6 +31,12 @@ const String templateAndroidGradlePluginVersion = '7.3.0';
 const String templateAndroidGradlePluginVersionForModule = '7.3.0';
 const String templateKotlinGradlePluginVersion = '1.7.10';
 
+// The Flutter Gradle Plugin is only applied to app projects, and modules that
+// are built from source using (`include_flutter.groovy`). The remaining
+// projects are: plugins, and modules compiled as AARs. In modules, the
+// ephemeral directory `.android` is always regenerated after `flutter pub get`,
+// so new versions are picked up after a Flutter upgrade.
+//
 // Please see the README before changing any of these values.
 const String compileSdkVersion = '33';
 const String minSdkVersion = '19';
@@ -39,7 +46,7 @@ const String ndkVersion = '23.1.7779620';
 
 // Update these when new major versions of Java are supported by Gradle.
 // Source of truth: https://docs.gradle.org/current/userguide/compatibility.html
-const String oneMajorVersionHigherJavaVersion = '20';
+const String oneMajorVersionHigherJavaVersion = '21';
 
 // Update this when new versions of Gradle come out including minor versions
 // and should correspond to the maximum Gradle version we test in CI.
@@ -56,7 +63,7 @@ const String maxKnownAndSupportedGradleVersion = '8.0.2';
 const String maxKnownAndSupportedAgpVersion = '8.1';
 
 // Update this when new versions of AGP come out.
-const String maxKnownAgpVersion = '8.2';
+const String maxKnownAgpVersion = '8.3';
 
 // Oldest documented version of AGP that has a listed minimum
 // compatible Java version.
@@ -458,12 +465,12 @@ bool validateGradleAndAgp(Logger logger,
   return false;
 }
 
-// Validate that the [javaVersion] and Gradle version are compatible with
-// each other.
-//
-// Source of truth:
-// https://docs.gradle.org/current/userguide/compatibility.html#java
-bool validateJavaGradle(Logger logger,
+/// Validate that the [javaVersion] and Gradle version are compatible with
+/// each other.
+///
+/// Source of truth:
+/// https://docs.gradle.org/current/userguide/compatibility.html#java
+bool validateJavaAndGradle(Logger logger,
     {required String? javaV, required String? gradleV}) {
   // https://docs.gradle.org/current/userguide/compatibility.html#java
   const String oldestSupportedJavaVersion = '1.8';
@@ -516,8 +523,13 @@ bool validateJavaGradle(Logger logger,
   return false;
 }
 
-// Returns compatibility information for the valid range of Gradle versions for
-// the specified Java version.
+/// Returns compatibility information for the valid range of Gradle versions for
+/// the specified Java version.
+///
+/// Returns null when the tooling has not documented the compatibile Gradle
+/// versions for the Java version (either the version is too old or too new). If
+/// this seems like a mistake, the caller may need to update the
+/// [_javaGradleCompatList] detailing Java/Gradle compatibility.
 JavaGradleCompat? getValidGradleVersionRangeForJavaVersion(
   Logger logger, {
   required String javaV,
@@ -532,12 +544,16 @@ JavaGradleCompat? getValidGradleVersionRangeForJavaVersion(
   return null;
 }
 
-// Validate that the specified Java and Android Gradle Plugin (AGP) versions are
-// compatible with each other.
-//
-// Source of truth are the AGP release notes:
-// https://developer.android.com/build/releases/gradle-plugin
-bool validateJavaAgp(Logger logger,
+/// Validate that the specified Java and Android Gradle Plugin (AGP) versions are
+/// compatible with each other.
+///
+/// Note that this returns true when the specified Java and AGP versions are
+/// definitely compatible; otherwise, false is assumed by default. In addition,
+/// this will return false when either a null Java or AGP version is provided.
+///
+/// Source of truth are the AGP release notes:
+/// https://developer.android.com/build/releases/gradle-plugin
+bool validateJavaAndAgp(Logger logger,
     {required String? javaV, required String? agpV}) {
   if (javaV == null || agpV == null) {
     logger.printTrace(
@@ -569,8 +585,8 @@ bool validateJavaAgp(Logger logger,
   return false;
   }
 
-  // Returns compatibility information concerning the minimum AGP
-  // version for the specified Java version.
+  /// Returns compatibility information concerning the minimum AGP
+  /// version for the specified Java version.
   JavaAgpCompat? getMinimumAgpVersionForJavaVersion(Logger logger,
     {required String javaV}) {
   for (final JavaAgpCompat data in _javaAgpCompatList) {
@@ -729,6 +745,9 @@ void exitWithNoSdkMessage() {
 }
 
 // Data class to hold normal/defined Java <-> Gradle compatability criteria.
+//
+// Note that the [javaMax] is exclusive in terms of supported the noted
+// [gradleMin], whereas [javaMin] is inclusive.
 @immutable
 class JavaGradleCompat {
   const JavaGradleCompat({
@@ -756,6 +775,9 @@ class JavaGradleCompat {
 }
 
 // Data class to hold defined Java <-> AGP compatibility criteria.
+//
+// Note that the [agpMin] and [agpMax] are inclusive in terms of having the
+// noted [javaMin] and [javaDefault] versions.
 @immutable
 class JavaAgpCompat {
   const JavaAgpCompat({
@@ -794,27 +816,6 @@ class GradleForAgp {
   final String minRequiredGradle;
 }
 
-// Data class that represents a range of versions.
-@immutable
-class VersionRange{
-  const VersionRange(
-    this.versionMin,
-    this.versionMax,
-  );
-
-  final String? versionMin;
-  final String? versionMax;
-
-  @override
-  bool operator ==(Object other) =>
-      other is VersionRange &&
-      other.versionMin == versionMin &&
-      other.versionMax == versionMax;
-
-  @override
-  int get hashCode => Object.hash(versionMin, versionMax);
-}
-
 // Returns gradlew file name based on the platform.
 String getGradlewFileName(Platform platform) {
   if (platform.isWindows) {
@@ -824,12 +825,11 @@ String getGradlewFileName(Platform platform) {
   }
 }
 
-// List of compatible Java/Gradle versions, where javaMax versions are
-// exclusive.
-//
-// Should be updated when a new version of Java is supported by a new version
-// of Gradle, as https://docs.gradle.org/current/userguide/compatibility.html
-// details.
+/// List of compatible Java/Gradle versions.
+///
+/// Should be updated when a new version of Java is supported by a new version
+/// of Gradle, as https://docs.gradle.org/current/userguide/compatibility.html
+/// details.
 List<JavaGradleCompat> _javaGradleCompatList = const <JavaGradleCompat>[
     JavaGradleCompat(
       javaMin: '19',
@@ -918,8 +918,8 @@ List<JavaGradleCompat> _javaGradleCompatList = const <JavaGradleCompat>[
       agpMax: maxKnownAndSupportedAgpVersion,
     ),
     JavaAgpCompat(
-      javaMin: '1.11',
-      javaDefault: '1.11',
+      javaMin: '11',
+      javaDefault: '11',
       agpMin: '7.0',
       agpMax: '7.4',
     ),

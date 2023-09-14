@@ -7,6 +7,7 @@ import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/version_range.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/project.dart';
 import '../../src/common.dart';
@@ -474,10 +475,14 @@ allprojects {
         // max known gradle and max known agp versions are updated:
         // Newer tools version supports max gradle version.
         GradleAgpTestData(true, agpVersion: '8.2', gradleVersion: '8.0'),
-        // Newer tools version does not even meet current gradle version requiremnts.
+        // Newer tools version does not even meet current gradle version requirements.
         GradleAgpTestData(false, agpVersion: '8.2', gradleVersion: '7.3'),
         // Newer tools version requires newer gradle version.
         GradleAgpTestData(true, agpVersion: '8.3', gradleVersion: '8.1'),
+
+        // Template versions of Gradle/AGP.
+        GradleAgpTestData(true, agpVersion: templateAndroidGradlePluginVersion, gradleVersion: templateDefaultGradleVersion),
+        GradleAgpTestData(true, agpVersion: templateAndroidGradlePluginVersionForModule, gradleVersion: templateDefaultGradleVersion),
 
         // Minimums as defined in
         // https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
@@ -641,7 +646,7 @@ allprojects {
         testWithoutContext(
             '(Java, gradle): (${data.javaVersion}, ${data.gradleVersion})', () {
           expect(
-              validateJavaGradle(
+              validateJavaAndGradle(
                 BufferLogger.test(),
                 javaV: data.javaVersion,
                 gradleV: data.gradleVersion,
@@ -713,7 +718,7 @@ allprojects {
         testWithoutContext(
             '(Java, agp): (${data.javaVersion}, ${data.agpVersion})', () {
           expect(
-              validateJavaAgp(
+              validateJavaAndAgp(
                 BufferLogger.test(),
                 javaV: data.javaVersion,
                 agpV: data.agpVersion,
