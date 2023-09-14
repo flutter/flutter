@@ -8,7 +8,7 @@ publish_to: none
 homepage: https://github.com/flutter/engine/tree/main/tools/path_ops
 
 environment:
-  sdk: '>=3.0.0-0 <4.0.0'
+  sdk: '>=3.2.0-0 <4.0.0'
 
 dev_dependencies:
   litetest: any

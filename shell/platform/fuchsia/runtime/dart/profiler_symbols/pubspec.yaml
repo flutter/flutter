@@ -4,7 +4,7 @@
 
 name: profiler_symbols
 environment:
-  sdk: '>=3.0.0-0 <4.0.0'
+  sdk: '>=3.2.0-0 <4.0.0'
 version: 0
 description: Extracts a minimal symbols table for the Dart VM profiler
 author: Dart Team <misc@dartlang.org>
