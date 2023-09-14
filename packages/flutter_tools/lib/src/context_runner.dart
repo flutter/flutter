@@ -88,12 +88,30 @@ Future<T> runInContext<T>(
     body: runnerWrapper,
     overrides: overrides,
     fallbacks: <Type, Generator>{
-      Analytics: () => Analytics(
-        tool: DashTool.flutterTool,
-        flutterChannel: globals.flutterVersion.channel,
-        flutterVersion: globals.flutterVersion.frameworkVersion,
-        dartVersion: globals.flutterVersion.dartSdkVersion,
-      ),
+      Analytics: () {
+        final FlutterVersion flutterVersion = globals.flutterVersion;
+        final String version = flutterVersion.getVersionString(redactUnknownBranches: true);
+        final bool suppressEnvFlag = globals.platform.environment['FLUTTER_SUPPRESS_ANALYTICS'] == 'true';
+        if (
+          // Ignore local user branches.
+          version.startsWith('[user-branch]') ||
+          // Many CI systems don't do a full git checkout.
+          version.endsWith('/unknown') ||
+          // Ignore bots.
+          runningOnBot ||
+          // Ignore when suppressed by FLUTTER_SUPPRESS_ANALYTICS.
+          suppressEnvFlag
+        ) {
+          return NoOpAnalytics();
+        }
+
+         return Analytics(
+          tool: DashTool.flutterTool,
+          flutterChannel: globals.flutterVersion.channel,
+          flutterVersion: globals.flutterVersion.frameworkVersion,
+          dartVersion: globals.flutterVersion.dartSdkVersion,
+        );
+      },
       AndroidBuilder: () => AndroidGradleBuilder(
         java: globals.java,
         logger: globals.logger,
