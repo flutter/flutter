@@ -602,13 +602,19 @@ class _RailDestination extends StatelessWidget {
 
     Widget content;
 
+    // The indicator height is fixed and equal to _kIndicatorHeight.
+    // When the icon height is larger than the indicator height the indicator
+    // vertical offset is used to vertically center the indicator.
+    final bool isLargeIconSize = iconTheme.size != null && iconTheme.size! > _kIndicatorHeight;
+    final double indicatorVerticalOffset = isLargeIconSize ? (iconTheme.size! - _kIndicatorHeight) / 2 : 0;
+
     switch (labelType) {
       case NavigationRailLabelType.none:
         // Split the destination spacing across the top and bottom to keep the icon centered.
         final Widget? spacing = material3 ? const SizedBox(height: _verticalDestinationSpacingM3 / 2) : null;
         indicatorOffset = Offset(
           minWidth / 2 + destinationPadding.left,
-          _verticalDestinationSpacingM3 / 2 + destinationPadding.top,
+          _verticalDestinationSpacingM3 / 2 + destinationPadding.top + indicatorVerticalOffset,
         );
         final Widget iconPart = Column(
           children: <Widget>[
@@ -687,9 +693,15 @@ class _RailDestination extends StatelessWidget {
         final Widget bottomSpacing = SizedBox(height: material3 ? _verticalDestinationSpacingM3 : verticalPadding);
         final double indicatorHorizontalPadding = (destinationPadding.left / 2) - (destinationPadding.right / 2);
         final double indicatorVerticalPadding = destinationPadding.top;
-        indicatorOffset = Offset(minWidth / 2 + indicatorHorizontalPadding, indicatorVerticalPadding);
+        indicatorOffset = Offset(
+          minWidth / 2 + indicatorHorizontalPadding,
+          indicatorVerticalPadding + indicatorVerticalOffset,
+        );
         if (minWidth < _NavigationRailDefaultsM2(context).minWidth!) {
-          indicatorOffset = Offset(minWidth / 2 + _horizontalDestinationSpacingM3, indicatorVerticalPadding);
+          indicatorOffset = Offset(
+            minWidth / 2 + _horizontalDestinationSpacingM3,
+            indicatorVerticalPadding + indicatorVerticalOffset,
+          );
         }
         content = Container(
           constraints: BoxConstraints(
@@ -734,9 +746,15 @@ class _RailDestination extends StatelessWidget {
         final Widget bottomSpacing = SizedBox(height: material3 ? _verticalDestinationSpacingM3 : _verticalDestinationPaddingWithLabel);
         final double indicatorHorizontalPadding = (destinationPadding.left / 2) - (destinationPadding.right / 2);
         final double indicatorVerticalPadding = destinationPadding.top;
-        indicatorOffset = Offset(minWidth / 2 + indicatorHorizontalPadding, indicatorVerticalPadding);
+        indicatorOffset = Offset(
+          minWidth / 2 + indicatorHorizontalPadding,
+          indicatorVerticalPadding + indicatorVerticalOffset,
+        );
         if (minWidth < _NavigationRailDefaultsM2(context).minWidth!) {
-          indicatorOffset = Offset(minWidth / 2 + _horizontalDestinationSpacingM3, indicatorVerticalPadding);
+          indicatorOffset = Offset(
+            minWidth / 2 + _horizontalDestinationSpacingM3,
+            indicatorVerticalPadding + indicatorVerticalOffset,
+          );
         }
         content = Container(
           constraints: BoxConstraints(
