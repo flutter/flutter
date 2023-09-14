@@ -42,7 +42,7 @@ dev_dependencies:
   test_api: any
   test_core: any
   typed_data: any
-  uuid: 3.0.6
+  uuid: 4.0.0
   watcher: 1.1.0
   web_socket_channel: any
   webdriver: 3.0.1
