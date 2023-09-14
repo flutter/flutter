@@ -387,7 +387,7 @@ class TestClipPaintingContext extends PaintingContext {
 
   TestClipPaintingContext._(this._layer) : super(_layer, Rect.zero);
 
-  ContainerLayer _layer = ContainerLayer();
+  final ContainerLayer _layer;
 
   @override
   ClipRectLayer? pushClipRect(
