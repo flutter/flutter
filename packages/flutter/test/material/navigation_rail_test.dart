@@ -3117,6 +3117,9 @@ void main() {
     const double destinationWidth = 72.0;
     const double destinationHorizontalPadding = 8.0;
     const double indicatorWidth = destinationWidth - 2 * destinationHorizontalPadding; // 56.0
+    const double verticalSpacer = 8.0;
+    const double verticalIconLabelSpacing = 4.0;
+    const double verticalDestinationSpacing = 12.0;
 
     // The navigation rail width is larger than default because of the first destination long label.
     final double railWidth = tester.getSize(find.byType(NavigationRail)).width;
@@ -3127,6 +3130,12 @@ void main() {
     final Rect indicatorRect = Rect.fromLTRB(indicatorLeft, 0.0, indicatorRight, indicatorHeight);
     final Rect includedRect = indicatorRect;
     final Rect excludedRect = includedRect.inflate(10);
+
+    // Compute the vertical position for the selected destination (the one with 'bookmark' icon).
+    const double labelHeight = 16; // fontSize is 12 and height is 1.3.
+    const double destinationHeight = indicatorHeight + verticalIconLabelSpacing + labelHeight + verticalDestinationSpacing;
+    const double secondDestinationVerticalOffset = verticalSpacer + destinationHeight;
+    const double secondIndicatorVerticalOffset = secondDestinationVerticalOffset;
 
     expect(
       inkFeatures,
@@ -3152,7 +3161,116 @@ void main() {
           color: const Color(0x0a6750a4),
         )
         ..rrect(
-          rrect: RRect.fromLTRBR(indicatorLeft, 72.0, indicatorRight, 104.0, const Radius.circular(16)),
+          rrect: RRect.fromLTRBR(
+            indicatorLeft,
+            secondIndicatorVerticalOffset,
+            indicatorRight,
+            secondIndicatorVerticalOffset + indicatorHeight,
+            const Radius.circular(16),
+          ),
+          color: const Color(0xffe8def8),
+        ),
+    );
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+
+  testWidgetsWithLeakTracking('NavigationRail indicator renders properly with large icon', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/133799.
+    const double iconSize = 50;
+    await _pumpNavigationRail(
+      tester,
+      navigationRailTheme: const NavigationRailThemeData(
+        selectedIconTheme: IconThemeData(size: iconSize),
+        unselectedIconTheme: IconThemeData(size: iconSize),
+      ),
+      navigationRail: NavigationRail(
+        selectedIndex: 1,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('ABC'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('DEF'),
+          ),
+        ],
+        labelType: NavigationRailLabelType.all,
+      ),
+    );
+
+    // Hover the first destination.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byIcon(Icons.favorite_border)));
+    await tester.pumpAndSettle();
+
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+
+    // Default values from M3 specification.
+    const double railMinWidth = 80.0;
+    const double indicatorHeight = 32.0;
+    const double destinationWidth = 72.0;
+    const double destinationHorizontalPadding = 8.0;
+    const double indicatorWidth = destinationWidth - 2 * destinationHorizontalPadding; // 56.0
+    const double verticalSpacer = 8.0;
+    const double verticalIconLabelSpacing = 4.0;
+    const double verticalDestinationSpacing = 12.0;
+
+    // The navigation rail width is the default one because labels are short.
+    final double railWidth = tester.getSize(find.byType(NavigationRail)).width;
+    expect(railWidth, railMinWidth);
+
+    // Expected indicator position.
+    final double indicatorLeft = (railWidth - indicatorWidth) / 2;
+    final double indicatorRight = (railWidth + indicatorWidth) / 2;
+    const double indicatorTop = (iconSize - indicatorHeight) / 2;
+    const double indicatorBottom = (iconSize + indicatorHeight) / 2;
+    final Rect indicatorRect = Rect.fromLTRB(indicatorLeft, indicatorTop, indicatorRight, indicatorBottom);
+    final Rect includedRect = indicatorRect;
+    final Rect excludedRect = includedRect.inflate(10);
+
+    // Compute the vertical position for the selected destination (the one with 'bookmark' icon).
+    const double labelHeight = 16; // fontSize is 12 and height is 1.3.
+    const double destinationHeight = iconSize + verticalIconLabelSpacing + labelHeight + verticalDestinationSpacing;
+    const double secondDestinationVerticalOffset = verticalSpacer + destinationHeight;
+    const double indicatorOffset = (iconSize - indicatorHeight) / 2;
+    const double secondIndicatorVerticalOffset = secondDestinationVerticalOffset + indicatorOffset;
+
+    expect(
+      inkFeatures,
+      paints
+        ..clipPath(
+          pathMatcher: isPathThat(
+            includes: <Offset>[
+              includedRect.centerLeft,
+              includedRect.topCenter,
+              includedRect.centerRight,
+              includedRect.bottomCenter,
+            ],
+            excludes: <Offset>[
+              excludedRect.centerLeft,
+              excludedRect.topCenter,
+              excludedRect.centerRight,
+              excludedRect.bottomCenter,
+            ],
+          ),
+        )
+        // Hover highlight for the hovered destination (the one with 'favorite' icon).
+        ..rect(
+          rect: indicatorRect,
+          color: const Color(0x0a6750a4),
+        )
+        // Indicator for the selected destination (the one with 'bookmark' icon).
+        ..rrect(
+          rrect: RRect.fromLTRBR(
+            indicatorLeft,
+            secondIndicatorVerticalOffset,
+            indicatorRight,
+            secondIndicatorVerticalOffset + indicatorHeight,
+            const Radius.circular(16),
+          ),
           color: const Color(0xffe8def8),
         ),
     );
@@ -5228,10 +5346,14 @@ Future<void> _pumpNavigationRail(
   double textScaleFactor = 1.0,
   required NavigationRail navigationRail,
   bool useMaterial3 = true,
+  NavigationRailThemeData? navigationRailTheme,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
-      theme: ThemeData(useMaterial3: useMaterial3),
+      theme: ThemeData(
+        useMaterial3: useMaterial3,
+        navigationRailTheme: navigationRailTheme,
+      ),
       home: Builder(
         builder: (BuildContext context) {
           return MediaQuery(
