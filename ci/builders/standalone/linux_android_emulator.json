@@ -6,7 +6,9 @@
     "gn": [
          "--android",
          "--android-cpu=x64",
-         "--no-lto"
+         "--no-lto",
+         "--rbe",
+         "--no-goma"
     ],
     "name": "android_debug_x64",
     "ninja": {
