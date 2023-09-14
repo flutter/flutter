@@ -60,7 +60,8 @@ std::shared_ptr<Contents> Paint::WithFilters(
     std::shared_ptr<Contents> input) const {
   input = WithColorFilter(input, ColorFilterContents::AbsorbOpacity::kYes);
   input = WithInvertFilter(input);
-  auto image_filter = WithImageFilter(input, Matrix(), /*is_subpass=*/false);
+  auto image_filter =
+      WithImageFilter(input, Matrix(), Entity::RenderingMode::kDirect);
   if (image_filter) {
     input = image_filter;
   }
@@ -71,7 +72,7 @@ std::shared_ptr<Contents> Paint::WithFiltersForSubpassTarget(
     std::shared_ptr<Contents> input,
     const Matrix& effect_transform) const {
   auto image_filter =
-      WithImageFilter(input, effect_transform, /*is_subpass=*/true);
+      WithImageFilter(input, effect_transform, Entity::RenderingMode::kSubpass);
   if (image_filter) {
     input = image_filter;
   }
@@ -91,12 +92,12 @@ std::shared_ptr<Contents> Paint::WithMaskBlur(std::shared_ptr<Contents> input,
 std::shared_ptr<FilterContents> Paint::WithImageFilter(
     const FilterInput::Variant& input,
     const Matrix& effect_transform,
-    bool is_subpass) const {
+    Entity::RenderingMode rendering_mode) const {
   if (!image_filter) {
     return nullptr;
   }
   auto filter = image_filter->WrapInput(FilterInput::Make(input));
-  filter->SetIsForSubpass(is_subpass);
+  filter->SetRenderingMode(rendering_mode);
   filter->SetEffectTransform(effect_transform);
   return filter;
 }

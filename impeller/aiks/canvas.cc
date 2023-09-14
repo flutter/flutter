@@ -64,7 +64,7 @@ void Canvas::Save(bool create_subpass,
   entry.cull_rect = xformation_stack_.back().cull_rect;
   entry.stencil_depth = xformation_stack_.back().stencil_depth;
   if (create_subpass) {
-    entry.is_subpass = true;
+    entry.rendering_mode = Entity::RenderingMode::kSubpass;
     auto subpass = std::make_unique<EntityPass>();
     subpass->SetEnableOffscreenCheckerboard(
         debug_options.offscreen_texture_checkerboard);
@@ -72,10 +72,10 @@ void Canvas::Save(bool create_subpass,
       EntityPass::BackdropFilterProc backdrop_filter_proc =
           [backdrop_filter = backdrop_filter->Clone()](
               const FilterInput::Ref& input, const Matrix& effect_transform,
-              bool is_subpass) {
+              Entity::RenderingMode rendering_mode) {
             auto filter = backdrop_filter->WrapInput(input);
             filter->SetEffectTransform(effect_transform);
-            filter->SetIsForSubpass(is_subpass);
+            filter->SetRenderingMode(rendering_mode);
             return filter;
           };
       subpass->SetBackdropFilter(backdrop_filter_proc);
@@ -93,7 +93,8 @@ bool Canvas::Restore() {
   if (xformation_stack_.size() == 1) {
     return false;
   }
-  if (xformation_stack_.back().is_subpass) {
+  if (xformation_stack_.back().rendering_mode ==
+      Entity::RenderingMode::kSubpass) {
     current_pass_ = GetCurrentPass().GetSuperpass();
     FML_DCHECK(current_pass_);
   }

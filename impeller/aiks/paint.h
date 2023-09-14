@@ -26,7 +26,7 @@ struct Paint {
   using ImageFilterProc = std::function<std::shared_ptr<FilterContents>(
       FilterInput::Ref,
       const Matrix& effect_transform,
-      bool is_subpass)>;
+      Entity::RenderingMode rendering_mode)>;
   using MaskFilterProc = std::function<std::shared_ptr<FilterContents>(
       FilterInput::Ref,
       bool is_solid_color,
@@ -101,7 +101,7 @@ struct Paint {
   std::shared_ptr<FilterContents> WithImageFilter(
       const FilterInput::Variant& input,
       const Matrix& effect_transform,
-      bool is_subpass) const;
+      Entity::RenderingMode rendering_mode) const;
 
  private:
   std::shared_ptr<Contents> WithColorFilter(

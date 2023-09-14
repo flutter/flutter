@@ -85,7 +85,7 @@ class FilterInput {
   virtual void SetEffectTransform(const Matrix& matrix);
 
   /// @brief  Turns on subpass mode for filter inputs.
-  virtual void SetIsForSubpass(bool is_for_subpass);
+  virtual void SetRenderingMode(Entity::RenderingMode rendering_mode);
 };
 
 }  // namespace impeller
