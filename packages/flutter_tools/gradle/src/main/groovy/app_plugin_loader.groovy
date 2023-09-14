@@ -5,6 +5,10 @@ import org.gradle.api.initialization.Settings
 apply plugin: FlutterAppPluginLoaderPlugin
 
 class FlutterAppPluginLoaderPlugin implements Plugin<Settings> {
+    // This string must match _kFlutterPluginsHasNativeBuildKey defined in
+    // packages/flutter_tools/lib/src/flutter_plugins.dart.
+    private final String nativeBuildKey = 'native_build'
+
     @Override
     void apply(Settings settings) {
         def flutterProjectRoot = settings.settingsDir.parentFile
@@ -25,7 +29,7 @@ class FlutterAppPluginLoaderPlugin implements Plugin<Settings> {
             assert androidPlugin.path instanceof String
             // Skip plugins that have no native build (such as a Dart-only implementation
             // of a federated plugin).
-            def needsBuild = androidPlugin.containsKey('native_build') ? androidPlugin['native_build'] : true
+            def needsBuild = androidPlugin.containsKey(nativeBuildKey) ? androidPlugin[nativeBuildKey] : true
             if (!needsBuild) {
                 return
             }
