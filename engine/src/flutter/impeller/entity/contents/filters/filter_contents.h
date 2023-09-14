@@ -157,7 +157,7 @@ class FilterContents : public Contents {
   ///         that the current transformation matrix of the entity is not stored
   ///         in the Entity transformation matrix. Instead, the effect transform
   ///         is used in this case.
-  virtual void SetIsForSubpass(bool is_subpass);
+  virtual void SetRenderingMode(Entity::RenderingMode rendering_mode);
 
  private:
   virtual std::optional<Rect> GetFilterCoverage(

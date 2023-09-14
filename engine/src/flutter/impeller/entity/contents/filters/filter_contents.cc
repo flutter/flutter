@@ -298,9 +298,9 @@ void FilterContents::SetLeafInputs(const FilterInput::Vector& inputs) {
   }
 }
 
-void FilterContents::SetIsForSubpass(bool is_subpass) {
+void FilterContents::SetRenderingMode(Entity::RenderingMode rendering_mode) {
   for (auto& input : inputs_) {
-    input->SetIsForSubpass(is_subpass);
+    input->SetRenderingMode(rendering_mode);
   }
 }
 
