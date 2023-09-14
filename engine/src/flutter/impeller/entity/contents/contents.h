@@ -23,6 +23,7 @@ struct ContentContextOptions;
 class Entity;
 class Surface;
 class RenderPass;
+class FilterContents;
 
 ContentContextOptions OptionsFromPass(const RenderPass& pass);
 
@@ -154,6 +155,12 @@ class Contents {
   ///
   virtual std::optional<Color> AsBackgroundColor(const Entity& entity,
                                                  ISize target_size) const;
+
+  //----------------------------------------------------------------------------
+  /// @brief Cast to a filter. Returns `nullptr` if this Contents is not a
+  ///        filter.
+  ///
+  virtual const FilterContents* AsFilter() const;
 
   //----------------------------------------------------------------------------
   /// @brief      If possible, applies a color filter to this contents inputs on

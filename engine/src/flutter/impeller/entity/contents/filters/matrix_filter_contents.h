@@ -20,6 +20,9 @@ class MatrixFilterContents final : public FilterContents {
   // |FilterContents|
   void SetIsForSubpass(bool is_for_subpass) override;
 
+  // |FilterContents|
+  bool IsTranslationOnly() const override;
+
   void SetSamplerDescriptor(SamplerDescriptor desc);
 
   // |FilterContents|

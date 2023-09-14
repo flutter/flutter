@@ -91,6 +91,13 @@ class TestPassDelegate final : public EntityPassDelegate {
     return nullptr;
   }
 
+  // |EntityPassDelegate|
+  std::shared_ptr<FilterContents> WithImageFilter(
+      const FilterInput::Variant& input,
+      const Matrix& effect_transform) const override {
+    return nullptr;
+  }
+
  private:
   const std::optional<Rect> coverage_;
   const bool collapse_;
