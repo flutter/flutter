@@ -1095,7 +1095,7 @@
       "recipe": "engine_v2/tester_engine",
       "drone_dimensions": [
         "device_type=none",
-        "os=Mac"
+        "os=Mac-12"
       ],
       "gclient_variables": {
         "download_android_deps": false
@@ -1127,7 +1127,7 @@
       "recipe": "engine_v2/tester_engine",
       "drone_dimensions": [
         "device_type=none",
-        "os=Mac"
+        "os=Mac-12"
       ],
       "gclient_variables": {
         "download_android_deps": false
@@ -1159,7 +1159,7 @@
       "recipe": "engine_v2/tester_engine",
       "drone_dimensions": [
         "device_type=none",
-        "os=Mac"
+        "os=Mac-12"
       ],
       "gclient_variables": {
         "download_android_deps": false
@@ -1191,7 +1191,7 @@
       "recipe": "engine_v2/tester_engine",
       "drone_dimensions": [
         "device_type=none",
-        "os=Mac"
+        "os=Mac-12"
       ],
       "gclient_variables": {
         "download_android_deps": false
@@ -1223,7 +1223,7 @@
       "recipe": "engine_v2/tester_engine",
       "drone_dimensions": [
         "device_type=none",
-        "os=Mac"
+        "os=Mac-12"
       ],
       "gclient_variables": {
         "download_android_deps": false

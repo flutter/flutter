@@ -50,7 +50,7 @@
             "recipe": "engine_v2/tester_engine",
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac",
+                "os=Mac-12",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -82,7 +82,7 @@
             "recipe": "engine_v2/tester_engine",
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac",
+                "os=Mac-12",
                 "cpu=arm64"
             ],
             "gclient_variables": {
