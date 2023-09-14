@@ -81,6 +81,7 @@ def main():
 
   shutil.rmtree(fat_framework, True)
   shutil.copytree(arm64_framework, fat_framework, symlinks=True)
+
   regenerate_symlinks(fat_framework)
 
   fat_framework_binary = os.path.join(
@@ -91,6 +92,21 @@ def main():
   subprocess.check_call([
       'lipo', arm64_dylib, x64_dylib, '-create', '-output', fat_framework_binary
   ])
+
+  # Add group and other readability to all files.
+  versions_path = os.path.join(fat_framework, 'Versions')
+  subprocess.check_call(['chmod', '-R', 'og+r', versions_path])
+  # Find all the files below the target dir with owner execute permission
+  find_subprocess = subprocess.Popen([
+      'find', versions_path, '-perm', '-100', '-print0'
+  ],
+                                     stdout=subprocess.PIPE)
+  # Add execute permission for other and group for all files that had it for owner.
+  xargs_subprocess = subprocess.Popen(['xargs', '-0', 'chmod', 'og+x'],
+                                      stdin=find_subprocess.stdout)
+  find_subprocess.wait()
+  xargs_subprocess.wait()
+
   process_framework(dst, args, fat_framework, fat_framework_binary)
 
   return 0
