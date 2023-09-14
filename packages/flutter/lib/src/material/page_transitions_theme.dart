@@ -767,7 +767,7 @@ class PageTransitionsTheme with Diagnosticable {
   ) {
     TargetPlatform platform = Theme.of(context).platform;
 
-    if (CupertinoRouteTransitionMixin.isPopGestureInProgress(route)) {
+    if (CupertinoRouteTransitionMixin.isPopGestureInProgress(route)) { // The trouble maker
       platform = TargetPlatform.iOS;
     }
 
