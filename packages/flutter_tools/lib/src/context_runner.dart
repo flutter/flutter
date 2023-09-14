@@ -61,6 +61,7 @@ import 'persistent_tool_state.dart';
 import 'reporting/crash_reporting.dart';
 import 'reporting/first_run.dart';
 import 'reporting/reporting.dart';
+import 'reporting/unified_analytics.dart';
 import 'resident_runner.dart';
 import 'run_hot.dart';
 import 'runner/local_engine.dart';
@@ -88,30 +89,7 @@ Future<T> runInContext<T>(
     body: runnerWrapper,
     overrides: overrides,
     fallbacks: <Type, Generator>{
-      Analytics: () {
-        final FlutterVersion flutterVersion = globals.flutterVersion;
-        final String version = flutterVersion.getVersionString(redactUnknownBranches: true);
-        final bool suppressEnvFlag = globals.platform.environment['FLUTTER_SUPPRESS_ANALYTICS'] == 'true';
-        if (
-          // Ignore local user branches.
-          version.startsWith('[user-branch]') ||
-          // Many CI systems don't do a full git checkout.
-          version.endsWith('/unknown') ||
-          // Ignore bots.
-          runningOnBot ||
-          // Ignore when suppressed by FLUTTER_SUPPRESS_ANALYTICS.
-          suppressEnvFlag
-        ) {
-          return NoOpAnalytics();
-        }
-
-         return Analytics(
-          tool: DashTool.flutterTool,
-          flutterChannel: globals.flutterVersion.channel,
-          flutterVersion: globals.flutterVersion.frameworkVersion,
-          dartVersion: globals.flutterVersion.dartSdkVersion,
-        );
-      },
+      Analytics: () => getAnalytics(runningOnBot: runningOnBot),
       AndroidBuilder: () => AndroidGradleBuilder(
         java: globals.java,
         logger: globals.logger,
