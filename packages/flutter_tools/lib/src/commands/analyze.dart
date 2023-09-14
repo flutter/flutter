@@ -152,7 +152,7 @@ class AnalyzeCommand extends FlutterCommand {
     argParser.addFlag('output-universal-link-settings',
       negatable: false,
       help: 'Output a JSON with iOS Xcode universal link settings into a file. '
-          'The "--configuration", and "--target" must also be set.',
+          'The "--configuration" and "--target" must be set.',
       hide: !verboseHelp,
     );
 

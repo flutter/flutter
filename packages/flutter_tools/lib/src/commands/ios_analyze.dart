@@ -58,7 +58,10 @@ class IOSAnalyze {
         }
         logger.printStatus(jsonEncode(result));
       case IOSAnalyzeOption.outputUniversalLinkSettings:
-        final String filePath = await project.ios.outputsUniversalLinkSettings(configuration: configuration!, target: target!);
+        final String filePath = await project.ios.outputsUniversalLinkSettings(
+          configuration: configuration!,
+          target: target!,
+        );
         logger.printStatus('result saved in $filePath');
     }
   }
