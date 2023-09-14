@@ -177,8 +177,8 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   /// [SliverChildBuilderDelegate.addSemanticIndexes] property.
   ///
   /// {@tool snippet}
-  /// This example, which would be inserted into a [CustomScrollView.slivers]
-  /// list, shows an infinite number of items in varying shades of blue:
+  /// This example, which would be provided in [CustomScrollView.slivers],
+  /// shows an infinite number of items in varying shades of blue:
   ///
   /// ```dart
   /// SliverList.builder(
@@ -236,10 +236,11 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. The
   /// `addSemanticIndexes` argument corresponds to the
   /// [SliverChildBuilderDelegate.addSemanticIndexes] property.
-  /// {@tool snippet}
   ///
+  /// {@tool snippet}
   /// This example shows how to create a [SliverList] whose [Container] items
-  /// are separated by [Divider]s.
+  /// are separated by [Divider]s. The [SliverList] would be provided in
+  /// [CustomScrollView.slivers].
   ///
   /// ```dart
   /// SliverList.separated(
@@ -303,8 +304,8 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   /// [SliverChildBuilderDelegate.addSemanticIndexes] property.
   ///
   /// {@tool snippet}
-  /// This example, which would be inserted into a [CustomScrollView.slivers]
-  /// list, shows an infinite number of items in varying shades of blue:
+  /// This example, which would be provided in [CustomScrollView.slivers],
+  /// shows a list containing two [Text] widgets:
   ///
   /// ```dart
   /// SliverList.list(
@@ -1310,8 +1311,8 @@ class _SliverOffstageElement extends SingleChildRenderObjectElement {
 /// Mark a child as needing to stay alive even when it's in a lazy list that
 /// would otherwise remove it.
 ///
-/// This widget is for use in [SliverWithKeepAliveWidget]s, such as
-/// [SliverGrid] or [SliverList].
+/// This widget is for use in a [RenderAbstractViewport]s, such as
+/// [Viewport] or [TwoDimensionalViewport].
 ///
 /// This widget is rarely used directly. The [SliverChildBuilderDelegate] and
 /// [SliverChildListDelegate] delegates, used with [SliverList] and
@@ -1320,6 +1321,9 @@ class _SliverOffstageElement extends SingleChildRenderObjectElement {
 /// default, and which causes [AutomaticKeepAlive] widgets to be inserted around
 /// each child, causing [KeepAlive] widgets to be automatically added and
 /// configured in response to [KeepAliveNotification]s.
+///
+/// The same `addAutomaticKeepAlives` feature is supported by the
+/// [TwoDimensionalChildBuilderDelegate] and [TwoDimensionalChildListDelegate].
 ///
 /// Therefore, to keep a widget alive, it is more common to use those
 /// notifications than to directly deal with [KeepAlive] widgets.
@@ -1364,7 +1368,10 @@ class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
   bool debugCanApplyOutOfTurn() => keepAlive;
 
   @override
-  Type get debugTypicalAncestorWidgetClass => SliverWithKeepAliveWidget;
+  Type get debugTypicalAncestorWidgetClass => throw FlutterError('Multiple Types are supported, use debugTypicalAncestorWidgetDescription.');
+
+  @override
+  String get debugTypicalAncestorWidgetDescription => 'SliverWithKeepAliveWidget or TwoDimensionalViewport';
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

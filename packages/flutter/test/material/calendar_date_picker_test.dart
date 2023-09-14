@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'feedback_tester.dart';
 
@@ -211,7 +212,7 @@ void main() {
       expect(selectedDate, equals(DateTime(2018, DateTime.january, 4)));
     });
 
-    testWidgets('Changing year for february 29th', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Changing year for february 29th', (WidgetTester tester) async {
       DateTime? selectedDate;
       await tester.pumpWidget(calendarDatePicker(
         initialDate: DateTime(2020, DateTime.february, 29),
@@ -230,7 +231,7 @@ void main() {
       expect(selectedDate, equals(DateTime(2020, DateTime.february, 28)));
     });
 
-    testWidgets('Changing year does not change the month', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Changing year does not change the month', (WidgetTester tester) async {
       DateTime? displayedMonth;
       await tester.pumpWidget(calendarDatePicker(
         initialDate: DateTime(2016, DateTime.january, 15),
@@ -514,6 +515,30 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('May 2017'), findsOneWidget);
       expect(find.text('2017'), findsNothing);
+    });
+
+    testWidgets('Selecting disabled date does not change current selection', (WidgetTester tester) async {
+      DateTime day(int day) => DateTime(2020, DateTime.may, day);
+
+      DateTime selection = day(2);
+      await tester.pumpWidget(calendarDatePicker(
+        initialDate: selection,
+        firstDate: day(2),
+        lastDate: day(3),
+        onDateChanged: (DateTime date) {
+          selection = date;
+        },
+      ));
+
+      await tester.tap(find.text('3'));
+      await tester.pumpAndSettle();
+      expect(selection, day(3));
+      await tester.tap(find.text('4'));
+      await tester.pumpAndSettle();
+      expect(selection, day(3));
+      await tester.tap(find.text('5'));
+      await tester.pumpAndSettle();
+      expect(selection, day(3));
     });
 
     for (final bool useMaterial3 in <bool>[false, true]) {

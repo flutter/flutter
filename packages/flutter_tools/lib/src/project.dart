@@ -121,6 +121,9 @@ class FlutterProject {
   /// The location of this project.
   final Directory directory;
 
+  /// The location of the build folder.
+  Directory get buildDirectory => directory.childDirectory('build');
+
   /// The manifest of this project.
   final FlutterManifest manifest;
 
@@ -657,7 +660,7 @@ $javaGradleCompatUrl
 
   /// The build directory where the Android artifacts are placed.
   Directory get buildDirectory {
-    return parent.directory.childDirectory('build');
+    return parent.buildDirectory;
   }
 
   Future<void> ensureReadyForPlatformSpecificTooling({DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) async {

@@ -444,7 +444,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       suffix: suffix,
       keyboardType: widget.keyboardType,
       onTap: widget.onTap,
-      enabled: widget.enabled,
+      enabled: widget.enabled ?? true,
       suffixMode: widget.suffixMode,
       placeholder: placeholder,
       placeholderStyle: placeholderStyle,

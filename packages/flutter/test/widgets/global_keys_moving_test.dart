@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class Item {
   GlobalKey key1 = GlobalKey();
@@ -55,7 +56,7 @@ Widget builder() {
 }
 
 void main() {
-  testWidgets('moving subtrees with global keys - smoketest', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('moving subtrees with global keys - smoketest', (WidgetTester tester) async {
     await tester.pumpWidget(builder());
     final StatefulLeafState leaf = tester.firstState(find.byType(StatefulLeaf));
     leaf.markNeedsBuild();

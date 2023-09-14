@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   testWidgets('value is not accessible when not registered', (WidgetTester tester) async {
@@ -23,6 +24,10 @@ void main() {
     expect(() => RestorableEnumN<TestEnum>(TestEnum.one, values: TestEnum.values).value, throwsAssertionError);
     expect(() => RestorableEnum<TestEnum>(TestEnum.one, values: TestEnum.values).value, throwsAssertionError);
     expect(() => _TestRestorableValue().value, throwsAssertionError);
+  });
+
+  testWidgetsWithLeakTracking('$RestorableProperty dispatches creation in constructor', (WidgetTester widgetTester) async {
+    expect(()=> RestorableDateTimeN(null).dispose(), dispatchesMemoryEvents(RestorableDateTimeN));
   });
 
   testWidgets('work when not in restoration scope', (WidgetTester tester) async {
