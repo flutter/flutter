@@ -3274,7 +3274,7 @@ class _RouteEntry extends RouteTransitionRecord {
     );
     // Remove state that prevents a pop, e.g. LocalHistoryEntry[s].
     int attempt = 0;
-    while(route.willHandlePopInternally) {
+    while (route.willHandlePopInternally) {
       assert(
         () {
           attempt += 1;
