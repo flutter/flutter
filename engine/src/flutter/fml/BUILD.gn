@@ -319,6 +319,7 @@ if (enable_unittests) {
       "ascii_trie_unittests.cc",
       "backtrace_unittests.cc",
       "base32_unittest.cc",
+      "closure_unittests.cc",
       "command_line_unittest.cc",
       "container_unittests.cc",
       "endianness_unittests.cc",

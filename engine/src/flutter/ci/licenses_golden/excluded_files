@@ -83,6 +83,7 @@
 ../../../flutter/fml/ascii_trie_unittests.cc
 ../../../flutter/fml/backtrace_unittests.cc
 ../../../flutter/fml/base32_unittest.cc
+../../../flutter/fml/closure_unittests.cc
 ../../../flutter/fml/command_line_unittest.cc
 ../../../flutter/fml/container_unittests.cc
 ../../../flutter/fml/endianness_unittests.cc
