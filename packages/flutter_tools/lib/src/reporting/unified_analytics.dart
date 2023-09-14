@@ -4,18 +4,18 @@
 
 import 'package:unified_analytics/unified_analytics.dart';
 
-import '../globals.dart' as globals;
 import '../version.dart';
 
 /// This function is called from within the context runner to perform
 /// checks that are necessary for determining if a no-op version of
 /// [Analytics] gets returned.
-Analytics getAnalytics({required bool runningOnBot}) {
-  final FlutterVersion flutterVersion = globals.flutterVersion;
+Analytics getAnalytics({
+  required bool runningOnBot,
+  required FlutterVersion flutterVersion,
+  required bool suppressEnvFlag,
+}) {
   final String version =
       flutterVersion.getVersionString(redactUnknownBranches: true);
-  final bool suppressEnvFlag =
-      globals.platform.environment['FLUTTER_SUPPRESS_ANALYTICS'] == 'true';
   if (
       // Ignore local user branches.
       version.startsWith('[user-branch]') ||
@@ -29,8 +29,8 @@ Analytics getAnalytics({required bool runningOnBot}) {
   }
   return Analytics(
     tool: DashTool.flutterTool,
-    flutterChannel: globals.flutterVersion.channel,
-    flutterVersion: globals.flutterVersion.frameworkVersion,
-    dartVersion: globals.flutterVersion.dartSdkVersion,
+    flutterChannel: flutterVersion.channel,
+    flutterVersion: flutterVersion.frameworkVersion,
+    dartVersion: flutterVersion.dartSdkVersion,
   );
 }
