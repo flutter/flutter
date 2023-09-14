@@ -78,7 +78,7 @@ class SkwasmSurface {
     return completer.future;
   }
 
-  void _callbackHandler(JSNumber callbackId, JSNumber context, JSAny jsContext) {
+  void _callbackHandler(JSNumber callbackId, JSNumber context, JSAny? jsContext) {
     final Completer<JSAny> completer = _pendingCallbacks.remove(callbackId.toDartInt)!;
     if (jsContext.isUndefinedOrNull) {
       completer.complete(context);
