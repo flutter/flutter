@@ -125,9 +125,22 @@ class FilterContents : public Contents {
       bool msaa_enabled = true,
       const std::string& label = "Filter Snapshot") const override;
 
+  // |Contents|
+  const FilterContents* AsFilter() const override;
+
   virtual Matrix GetLocalTransform(const Matrix& parent_transform) const;
 
   Matrix GetTransform(const Matrix& parent_transform) const;
+
+  /// @brief  Returns true if this filter graph doesn't perform any basis
+  ///         transformations to the filtered content. For example: Rotating,
+  ///         scaling, and skewing are all basis transformations, but
+  ///         translating is not.
+  ///
+  ///         This is useful for determining whether a filtered object's space
+  ///         is compatible enough with the parent pass space to perform certain
+  ///         subpass clipping optimizations.
+  virtual bool IsTranslationOnly() const;
 
   /// @brief  Returns `true` if this filter does not have any `FilterInput`
   ///         children.

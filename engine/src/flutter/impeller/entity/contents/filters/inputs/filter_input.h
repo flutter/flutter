@@ -69,6 +69,9 @@ class FilterInput {
       const std::shared_ptr<LazyGlyphAtlas>& lazy_glyph_atlas,
       Scalar scale);
 
+  /// @see  `FilterContents::HasBasisTransformations`
+  virtual bool IsTranslationOnly() const;
+
   /// @brief  Returns `true` unless this input is a `FilterInput`, which may
   ///         take other inputs.
   virtual bool IsLeaf() const;

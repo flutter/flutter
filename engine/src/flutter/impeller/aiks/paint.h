@@ -98,11 +98,12 @@ struct Paint {
   std::shared_ptr<Contents> WithMaskBlur(std::shared_ptr<Contents> input,
                                          bool is_solid_color) const;
 
- private:
-  std::shared_ptr<Contents> WithImageFilter(std::shared_ptr<Contents> input,
-                                            const Matrix& effect_transform,
-                                            bool is_subpass) const;
+  std::shared_ptr<FilterContents> WithImageFilter(
+      const FilterInput::Variant& input,
+      const Matrix& effect_transform,
+      bool is_subpass) const;
 
+ private:
   std::shared_ptr<Contents> WithColorFilter(std::shared_ptr<Contents> input,
                                             bool absorb_opacity = false) const;
 

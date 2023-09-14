@@ -110,12 +110,39 @@ std::optional<Rect> EntityPass::GetElementsCoverage(
     if (auto entity = std::get_if<Entity>(&element)) {
       coverage = entity->GetCoverage();
 
+      // When the coverage limit is std::nullopt, that means there is no limit,
+      // as opposed to empty coverage.
       if (coverage.has_value() && coverage_limit.has_value()) {
+        const auto* filter = entity->GetContents()->AsFilter();
+        if (!filter || filter->IsTranslationOnly()) {
+          coverage = coverage->Intersection(coverage_limit.value());
+        }
+      }
+    } else if (auto subpass_ptr =
+                   std::get_if<std::unique_ptr<EntityPass>>(&element)) {
+      auto& subpass = *subpass_ptr->get();
+
+      std::optional<Rect> unfiltered_coverage =
+          GetSubpassCoverage(subpass, std::nullopt);
+      if (!unfiltered_coverage.has_value()) {
+        continue;
+      }
+
+      std::shared_ptr<FilterContents> image_filter =
+          subpass.delegate_->WithImageFilter(*unfiltered_coverage,
+                                             subpass.xformation_);
+      if (image_filter) {
+        Entity subpass_entity;
+        subpass_entity.SetTransformation(subpass.xformation_);
+        coverage = image_filter->GetCoverage(subpass_entity);
+      } else {
+        coverage = unfiltered_coverage;
+      }
+
+      if (coverage.has_value() && coverage_limit.has_value() &&
+          (!image_filter || image_filter->IsTranslationOnly())) {
         coverage = coverage->Intersection(coverage_limit.value());
       }
-    } else if (auto subpass =
-                   std::get_if<std::unique_ptr<EntityPass>>(&element)) {
-      coverage = GetSubpassCoverage(*subpass->get(), coverage_limit);
     } else {
       FML_UNREACHABLE();
     }
@@ -135,6 +162,16 @@ std::optional<Rect> EntityPass::GetElementsCoverage(
 std::optional<Rect> EntityPass::GetSubpassCoverage(
     const EntityPass& subpass,
     std::optional<Rect> coverage_limit) const {
+  std::shared_ptr<FilterContents> image_filter =
+      subpass.delegate_->WithImageFilter(Rect(), subpass.xformation_);
+
+  // If the filter graph transforms the basis of the subpass, then its space
+  // has deviated too much from the parent pass to safely intersect with the
+  // pass coverage limit.
+  coverage_limit =
+      (image_filter && image_filter->IsTranslationOnly() ? std::nullopt
+                                                         : coverage_limit);
+
   auto entities_coverage = subpass.GetElementsCoverage(coverage_limit);
   // The entities don't cover anything. There is nothing to do.
   if (!entities_coverage.has_value()) {
