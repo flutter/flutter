@@ -104,8 +104,10 @@ struct Paint {
       bool is_subpass) const;
 
  private:
-  std::shared_ptr<Contents> WithColorFilter(std::shared_ptr<Contents> input,
-                                            bool absorb_opacity = false) const;
+  std::shared_ptr<Contents> WithColorFilter(
+      std::shared_ptr<Contents> input,
+      ColorFilterContents::AbsorbOpacity absorb_opacity =
+          ColorFilterContents::AbsorbOpacity::kNo) const;
 
   std::shared_ptr<Contents> WithInvertFilter(
       std::shared_ptr<Contents> input) const;

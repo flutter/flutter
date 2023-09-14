@@ -13,6 +13,7 @@
 #include "impeller/entity/contents/anonymous_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/contents.h"
+#include "impeller/entity/contents/filters/color_filter_contents.h"
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
 #include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/entity.h"
@@ -76,7 +77,7 @@ static std::optional<Entity> AdvancedBlend(
     const Rect& coverage,
     BlendMode blend_mode,
     std::optional<Color> foreground_color,
-    bool absorb_opacity,
+    ColorFilterContents::AbsorbOpacity absorb_opacity,
     PipelineProc pipeline_proc,
     std::optional<Scalar> alpha) {
   using VS = typename TPipeline::VertexShader;
@@ -184,7 +185,10 @@ static std::optional<Entity> AdvancedBlend(
         dst_sampler_descriptor);
     FS::BindTextureSamplerDst(cmd, dst_snapshot->texture, dst_sampler);
     frame_info.dst_y_coord_scale = dst_snapshot->texture->GetYCoordScale();
-    blend_info.dst_input_alpha = absorb_opacity ? dst_snapshot->opacity : 1.0;
+    blend_info.dst_input_alpha =
+        absorb_opacity == ColorFilterContents::AbsorbOpacity::kYes
+            ? dst_snapshot->opacity
+            : 1.0;
 
     if (foreground_color.has_value()) {
       blend_info.color_factor = 1;
@@ -227,14 +231,17 @@ static std::optional<Entity> AdvancedBlend(
   }
 
   return Entity::FromSnapshot(
-      Snapshot{.texture = out_texture,
-               .transform = Matrix::MakeTranslation(subpass_coverage.origin),
-               // Since we absorbed the transform of the inputs and used the
-               // respective snapshot sampling modes when blending, pass on
-               // the default NN clamp sampler.
-               .sampler_descriptor = {},
-               .opacity = (absorb_opacity ? 1.0f : dst_snapshot->opacity) *
-                          alpha.value_or(1.0)},
+      Snapshot{
+          .texture = out_texture,
+          .transform = Matrix::MakeTranslation(subpass_coverage.origin),
+          // Since we absorbed the transform of the inputs and used the
+          // respective snapshot sampling modes when blending, pass on
+          // the default NN clamp sampler.
+          .sampler_descriptor = {},
+          .opacity = (absorb_opacity == ColorFilterContents::AbsorbOpacity::kYes
+                          ? 1.0f
+                          : dst_snapshot->opacity) *
+                     alpha.value_or(1.0)},
       entity.GetBlendMode(), entity.GetStencilDepth());
 }
 
@@ -246,7 +253,7 @@ std::optional<Entity> BlendFilterContents::CreateForegroundAdvancedBlend(
     Color foreground_color,
     BlendMode blend_mode,
     std::optional<Scalar> alpha,
-    bool absorb_opacity) const {
+    ColorFilterContents::AbsorbOpacity absorb_opacity) const {
   auto dst_snapshot =
       input->GetSnapshot("ForegroundAdvancedBlend", renderer, entity);
   if (!dst_snapshot.has_value()) {
@@ -353,7 +360,9 @@ std::optional<Entity> BlendFilterContents::CreateForegroundAdvancedBlend(
     FS::BindTextureSamplerDst(cmd, dst_snapshot->texture, dst_sampler);
     frame_info.dst_y_coord_scale = dst_snapshot->texture->GetYCoordScale();
     blend_info.dst_input_alpha =
-        absorb_opacity ? dst_snapshot->opacity * alpha.value_or(1.0) : 1.0;
+        absorb_opacity == ColorFilterContents::AbsorbOpacity::kYes
+            ? dst_snapshot->opacity * alpha.value_or(1.0)
+            : 1.0;
 
     blend_info.color_factor = 1;
     blend_info.color = foreground_color;
@@ -395,7 +404,7 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
     Color foreground_color,
     BlendMode blend_mode,
     std::optional<Scalar> alpha,
-    bool absorb_opacity) const {
+    ColorFilterContents::AbsorbOpacity absorb_opacity) const {
   if (blend_mode == BlendMode::kClear) {
     return std::nullopt;
   }
@@ -477,7 +486,9 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
         dst_snapshot->texture->GetYCoordScale();
 
     frag_info.input_alpha =
-        absorb_opacity ? dst_snapshot->opacity * alpha.value_or(1.0) : 1.0;
+        absorb_opacity == ColorFilterContents::AbsorbOpacity::kYes
+            ? dst_snapshot->opacity * alpha.value_or(1.0)
+            : 1.0;
     frag_info.output_alpha = 1.0;
 
     auto blend_coefficients =
@@ -520,7 +531,7 @@ static std::optional<Entity> PipelineBlend(
     const Rect& coverage,
     BlendMode blend_mode,
     std::optional<Color> foreground_color,
-    bool absorb_opacity,
+    ColorFilterContents::AbsorbOpacity absorb_opacity,
     std::optional<Scalar> alpha) {
   using VS = BlendPipeline::VertexShader;
   using FS = BlendPipeline::FragmentShader;
@@ -589,7 +600,10 @@ static std::optional<Entity> PipelineBlend(
           input->texture->GetYCoordScale();
 
       FS::FragInfo frag_info;
-      frag_info.input_alpha = absorb_opacity ? input->opacity : 1.0;
+      frag_info.input_alpha =
+          absorb_opacity == ColorFilterContents::AbsorbOpacity::kYes
+              ? input->opacity
+              : 1.0;
       FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
       VS::BindFrameInfo(cmd, host_buffer.EmplaceUniform(frame_info));
 
@@ -647,14 +661,17 @@ static std::optional<Entity> PipelineBlend(
   }
 
   return Entity::FromSnapshot(
-      Snapshot{.texture = out_texture,
-               .transform = Matrix::MakeTranslation(subpass_coverage.origin),
-               // Since we absorbed the transform of the inputs and used the
-               // respective snapshot sampling modes when blending, pass on
-               // the default NN clamp sampler.
-               .sampler_descriptor = {},
-               .opacity = (absorb_opacity ? 1.0f : dst_snapshot->opacity) *
-                          alpha.value_or(1.0)},
+      Snapshot{
+          .texture = out_texture,
+          .transform = Matrix::MakeTranslation(subpass_coverage.origin),
+          // Since we absorbed the transform of the inputs and used the
+          // respective snapshot sampling modes when blending, pass on
+          // the default NN clamp sampler.
+          .sampler_descriptor = {},
+          .opacity = (absorb_opacity == ColorFilterContents::AbsorbOpacity::kYes
+                          ? 1.0f
+                          : dst_snapshot->opacity) *
+                     alpha.value_or(1.0)},
       entity.GetBlendMode(), entity.GetStencilDepth());
 }
 
@@ -663,7 +680,8 @@ static std::optional<Entity> PipelineBlend(
     advanced_blend_proc_ =                                                    \
         [](const FilterInput::Vector& inputs, const ContentContext& renderer, \
            const Entity& entity, const Rect& coverage, BlendMode blend_mode,  \
-           std::optional<Color> fg_color, bool absorb_opacity,                \
+           std::optional<Color> fg_color,                                     \
+           ColorFilterContents::AbsorbOpacity absorb_opacity,                 \
            std::optional<Scalar> alpha) {                                     \
           PipelineProc p = &ContentContext::GetBlend##mode##Pipeline;         \
           return AdvancedBlend<Blend##mode##Pipeline>(                        \
@@ -726,7 +744,7 @@ std::optional<Entity> BlendFilterContents::RenderFilter(
 
   if (blend_mode_ <= Entity::kLastPipelineBlendMode) {
     if (inputs.size() == 1 && foreground_color_.has_value() &&
-        GetAbsorbOpacity()) {
+        GetAbsorbOpacity() == ColorFilterContents::AbsorbOpacity::kYes) {
       return CreateForegroundPorterDuffBlend(
           inputs[0], renderer, entity, coverage, foreground_color_.value(),
           blend_mode_, GetAlpha(), GetAbsorbOpacity());
@@ -737,7 +755,7 @@ std::optional<Entity> BlendFilterContents::RenderFilter(
 
   if (blend_mode_ <= Entity::kLastAdvancedBlendMode) {
     if (inputs.size() == 1 && foreground_color_.has_value() &&
-        GetAbsorbOpacity()) {
+        GetAbsorbOpacity() == ColorFilterContents::AbsorbOpacity::kYes) {
       return CreateForegroundAdvancedBlend(
           inputs[0], renderer, entity, coverage, foreground_color_.value(),
           blend_mode_, GetAlpha(), GetAbsorbOpacity());

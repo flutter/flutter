@@ -10,6 +10,7 @@
 #include "impeller/aiks/paint.h"
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/entity/contents/conical_gradient_contents.h"
+#include "impeller/entity/contents/filters/color_filter_contents.h"
 #include "impeller/entity/contents/linear_gradient_contents.h"
 #include "impeller/entity/contents/radial_gradient_contents.h"
 #include "impeller/entity/contents/runtime_effect_contents.h"
@@ -182,8 +183,8 @@ ColorSource ColorSource::MakeImage(std::shared_ptr<Texture> texture,
     if (paint.color_filter) {
       TiledTextureContents::ColorFilterProc filter_proc =
           [color_filter = paint.color_filter](FilterInput::Ref input) {
-            return color_filter->WrapWithGPUColorFilter(std::move(input),
-                                                        false);
+            return color_filter->WrapWithGPUColorFilter(
+                std::move(input), ColorFilterContents::AbsorbOpacity::kNo);
           };
       contents->SetColorFilter(filter_proc);
     }

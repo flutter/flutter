@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "impeller/aiks/image_filter.h"
+#include "impeller/entity/contents/filters/color_filter_contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
 
@@ -175,7 +176,8 @@ ColorImageFilter::~ColorImageFilter() = default;
 
 std::shared_ptr<FilterContents> ColorImageFilter::WrapInput(
     const FilterInput::Ref& input) const {
-  return color_filter_->WrapWithGPUColorFilter(input, false);
+  return color_filter_->WrapWithGPUColorFilter(
+      input, ColorFilterContents::AbsorbOpacity::kNo);
 }
 
 std::shared_ptr<ImageFilter> ColorImageFilter::Clone() const {

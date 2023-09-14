@@ -9,6 +9,7 @@
 #include "impeller/entity/contents/anonymous_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/contents.h"
+#include "impeller/entity/contents/filters/color_filter_contents.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/vector.h"
 #include "impeller/renderer/render_pass.h"
@@ -94,7 +95,10 @@ std::optional<Entity> ColorMatrixFilterContents::RenderFilter(
         matrix[3], matrix[8], matrix[13], matrix[18]
     );
     // clang-format on
-    frag_info.input_alpha = absorb_opacity ? input_snapshot->opacity : 1.0f;
+    frag_info.input_alpha =
+        absorb_opacity == ColorFilterContents::AbsorbOpacity::kYes
+            ? input_snapshot->opacity
+            : 1.0f;
     auto sampler = renderer.GetContext()->GetSamplerLibrary()->GetSampler({});
     FS::BindInputTexture(cmd, input_snapshot->texture, sampler);
     FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));

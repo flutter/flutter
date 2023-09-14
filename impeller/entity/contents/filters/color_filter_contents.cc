@@ -82,11 +82,12 @@ ColorFilterContents::ColorFilterContents() = default;
 
 ColorFilterContents::~ColorFilterContents() = default;
 
-void ColorFilterContents::SetAbsorbOpacity(bool absorb_opacity) {
+void ColorFilterContents::SetAbsorbOpacity(AbsorbOpacity absorb_opacity) {
   absorb_opacity_ = absorb_opacity;
 }
 
-bool ColorFilterContents::GetAbsorbOpacity() const {
+ColorFilterContents::AbsorbOpacity ColorFilterContents::GetAbsorbOpacity()
+    const {
   return absorb_opacity_;
 }
 
