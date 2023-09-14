@@ -46,7 +46,6 @@ class PluginTest {
   final String template;
 
   Future<TaskResult> call() async {
-    throw Exception('manual test auto retry');
     final Directory tempDir =
         Directory.systemTemp.createTempSync('flutter_devicelab_plugin_test.');
     // FFI plugins do not have support for `flutter test`.
