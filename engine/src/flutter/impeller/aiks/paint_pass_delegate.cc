@@ -51,7 +51,8 @@ std::shared_ptr<Contents> PaintPassDelegate::CreateContentsForSubpassTarget(
 std::shared_ptr<FilterContents> PaintPassDelegate::WithImageFilter(
     const FilterInput::Variant& input,
     const Matrix& effect_transform) const {
-  return paint_.WithImageFilter(input, effect_transform, true);
+  return paint_.WithImageFilter(input, effect_transform,
+                                Entity::RenderingMode::kSubpass);
 }
 
 /// OpacityPeepholePassDelegate
@@ -151,7 +152,8 @@ OpacityPeepholePassDelegate::CreateContentsForSubpassTarget(
 std::shared_ptr<FilterContents> OpacityPeepholePassDelegate::WithImageFilter(
     const FilterInput::Variant& input,
     const Matrix& effect_transform) const {
-  return paint_.WithImageFilter(input, effect_transform, true);
+  return paint_.WithImageFilter(input, effect_transform,
+                                Entity::RenderingMode::kSubpass);
 }
 
 }  // namespace impeller

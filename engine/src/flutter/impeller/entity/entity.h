@@ -23,6 +23,17 @@ class Entity {
   static constexpr BlendMode kLastPipelineBlendMode = BlendMode::kModulate;
   static constexpr BlendMode kLastAdvancedBlendMode = BlendMode::kLuminosity;
 
+  enum class RenderingMode {
+    /// In direct mode, the Entity's transform is used as the current
+    /// local-to-screen transformation matrix.
+    kDirect,
+    /// In subpass mode, the Entity passed through the filter is in screen space
+    /// rather than local space, and so some filters (namely,
+    /// MatrixFilterContents) need to interpret the given EffectTransform as the
+    /// current transformation matrix.
+    kSubpass,
+  };
+
   /// An enum to define how to repeat, fold, or omit colors outside of the
   /// typically defined range of the source of the colors (such as the
   /// bounds of an image or the defining geometry of a gradient).
