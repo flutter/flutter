@@ -63,6 +63,10 @@ const std::optional<Picture>& AiksInspector::RenderInspector(
   return last_picture_;
 }
 
+void AiksInspector::HackResetDueToTextureLeaks() {
+  last_picture_.reset();
+}
+
 static const auto kPropertiesProcTable = CaptureProcTable{
     .boolean =
         [](CaptureBooleanProperty& p) {
