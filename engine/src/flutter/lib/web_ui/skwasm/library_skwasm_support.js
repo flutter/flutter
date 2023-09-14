@@ -39,8 +39,9 @@ mergeInto(LibraryManager.library, {
               object.close();
             }
             associatedObjectsMap.delete(data.pointer);
+            return;
           default:
-            console.warn('unrecognized skwasm message');
+            console.warn(`unrecognized skwasm message: ${skwasmMessage}`);
         }
       };
       if (!threadId) {
