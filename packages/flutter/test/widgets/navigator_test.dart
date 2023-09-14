@@ -2988,7 +2988,7 @@ void main() {
         ),
       );
       final ModalRoute<void> route = ModalRoute.of(tester.element(find.text('page2')))!;
-      // PopScope only prevents user trigger action, e.g. Navigator.pop.
+      // PopScope only prevents user trigger action, e.g. Navigator.maybePop.
       // The page can still be popped by the system if it needs to.
       expect(route.willHandlePopInternally, false);
       expect(route.didPop(null), true);
