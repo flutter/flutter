@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'test_widgets.dart';
 
@@ -49,7 +50,7 @@ class Wrapper extends StatelessWidget {
 }
 
 void main() {
-  testWidgets('Calling setState on a widget that moves into a LayoutBuilder in the same frame', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Calling setState on a widget that moves into a LayoutBuilder in the same frame', (WidgetTester tester) async {
     StatefulWrapperState statefulWrapper;
     final Widget inner = Wrapper(
       child: StatefulWrapper(

@@ -1146,7 +1146,9 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
 /// The default value of [Navigator.routeTraversalEdgeBehavior].
 ///
 /// {@macro flutter.widgets.navigator.routeTraversalEdgeBehavior}
-const TraversalEdgeBehavior kDefaultRouteTraversalEdgeBehavior = TraversalEdgeBehavior.parentScope;
+const TraversalEdgeBehavior kDefaultRouteTraversalEdgeBehavior = kIsWeb
+  ? TraversalEdgeBehavior.leaveFlutterView
+  : TraversalEdgeBehavior.closedLoop;
 
 /// A widget that manages a set of child widgets with a stack discipline.
 ///
@@ -2790,6 +2792,9 @@ class Navigator extends StatefulWidget {
           );
           return true;
         }());
+        for (final Route<dynamic>? route in result) {
+          route?.dispose();
+        }
         result.clear();
       }
     } else if (initialRouteName != Navigator.defaultRouteName) {
