@@ -2314,7 +2314,6 @@ enum TextDirection {
 /// A rectangle enclosing a run of text.
 ///
 /// This is similar to [Rect] but includes an inherent [TextDirection].
-@pragma('vm:entry-point')
 class TextBox {
   /// Creates an object that describes a box containing text.
   const TextBox.fromLTRBD(
@@ -3004,13 +3003,11 @@ abstract class Paragraph {
   bool get debugDisposed;
 }
 
-@pragma('vm:entry-point')
 base class _NativeParagraph extends NativeFieldWrapperClass1 implements Paragraph {
   /// This class is created by the engine, and should not be instantiated
   /// or extended directly.
   ///
   /// To create a [Paragraph] object, use a [ParagraphBuilder].
-  @pragma('vm:entry-point')
   _NativeParagraph._();
 
   bool _needsLayout = true;
@@ -3322,7 +3319,6 @@ abstract class ParagraphBuilder {
 }
 
 base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements ParagraphBuilder {
-  @pragma('vm:entry-point')
   _NativeParagraphBuilder(ParagraphStyle style)
     : _defaultLeadingDistribution = style._leadingDistribution {
       List<String>? strutFontFamilies;
