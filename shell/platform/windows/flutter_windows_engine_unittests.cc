@@ -909,6 +909,28 @@ TEST_F(FlutterWindowsEngineTest, EnableApplicationLifecycle) {
                                                                0);
 }
 
+TEST_F(FlutterWindowsEngineTest, ApplicationLifecycleExternalWindow) {
+  FlutterWindowsEngineBuilder builder{GetContext()};
+
+  auto window_binding_handler =
+      std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>();
+  MockFlutterWindowsView view(std::move(window_binding_handler));
+  view.SetEngine(builder.Build());
+  FlutterWindowsEngine* engine = view.GetEngine();
+
+  EngineModifier modifier(engine);
+  modifier.embedder_api().RunsAOTCompiledDartCode = []() { return false; };
+  auto handler = std::make_unique<MockWindowsLifecycleManager>(engine);
+  ON_CALL(*handler, IsLastWindowOfProcess).WillByDefault([]() {
+    return false;
+  });
+  EXPECT_CALL(*handler, IsLastWindowOfProcess).Times(1);
+  modifier.SetLifecycleManager(std::move(handler));
+  engine->lifecycle_manager()->BeginProcessingExit();
+
+  engine->lifecycle_manager()->ExternalWindowMessage(0, WM_CLOSE, 0, 0);
+}
+
 TEST_F(FlutterWindowsEngineTest, AppStartsInResumedState) {
   FlutterWindowsEngineBuilder builder{GetContext()};
 
