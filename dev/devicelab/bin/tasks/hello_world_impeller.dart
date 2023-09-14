@@ -33,7 +33,7 @@ Future<TaskResult> run() async {
         if (data.contains('Using the Impeller rendering backend')) {
           // Sometimes more than one of these will be printed out if there is a
           // fallback.
-          if (impellerBackendCount == 0) {
+          if (!didReceiveBackendMessage.isCompleted) {
             didReceiveBackendMessage.complete();
           }
           impellerBackendCount += 1;
