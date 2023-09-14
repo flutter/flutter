@@ -1018,7 +1018,7 @@ List<String>? _getBuildGradleConfigurationFilePaths(FlutterProjectType projectTy
       case FlutterProjectType.plugin:
         buildGradleConfigurationFilePaths.add(globals.fs.path.join(projectDirPath, 'android/app/build.gradle'));
       case FlutterProjectType.package:
-      case FlutterProjectType.packageFfi:
+      case FlutterProjectType.packageFfi: // TODO(camsim99): verify behavior for packageFfi.
         // No build.gradle file because there is no platform-specific implementation.
         return null;
   }
