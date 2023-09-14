@@ -178,7 +178,7 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
     return layer;
   }
 
-  /// Releases allocated resources
+  /// Releases allocated resources.
   @mustCallSuper
   void dispose() {
     for (final OpacityLayer layer in _createdLayers) {
