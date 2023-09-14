@@ -8,7 +8,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:image/image.dart';
-import 'package:webdriver/io.dart' show WebDriver, createDriver;
+import 'package:webdriver/async_io.dart' show WebDriver, createDriver;
 
 import 'browser.dart';
 
