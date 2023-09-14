@@ -848,9 +848,7 @@ abstract class SemanticsUpdateBuilder {
   SemanticsUpdate build();
 }
 
-@pragma('vm:entry-point')
 base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1 implements SemanticsUpdateBuilder {
-  @pragma('vm:entry-point')
   _NativeSemanticsUpdateBuilder() { _constructor(); }
 
   @Native<Void Function(Handle)>(symbol: 'SemanticsUpdateBuilder::Create')
@@ -1039,13 +1037,11 @@ abstract class SemanticsUpdate {
   void dispose();
 }
 
-@pragma('vm:entry-point')
 base class _NativeSemanticsUpdate extends NativeFieldWrapperClass1 implements SemanticsUpdate {
   /// This class is created by the engine, and should not be instantiated
   /// or extended directly.
   ///
   /// To create a SemanticsUpdate object, use a [SemanticsUpdateBuilder].
-  @pragma('vm:entry-point')
   _NativeSemanticsUpdate._();
 
   @override

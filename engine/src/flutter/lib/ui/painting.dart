@@ -99,7 +99,6 @@ class Color {
   /// For example, to get a fully opaque orange, you would use `const
   /// Color(0xFFFF9000)` (`FF` for the alpha, `FF` for the red, `90` for the
   /// green, and `00` for the blue).
-  @pragma('vm:entry-point')
   const Color(int value) : value = value & 0xFFFFFFFF;
 
   /// Construct a color from the lower 8 bits of four integers.
@@ -2098,7 +2097,6 @@ abstract class Codec {
   void dispose();
 }
 
-@pragma('vm:entry-point')
 base class _NativeCodec extends NativeFieldWrapperClass1 implements Codec {
   //
   // This class is created by the engine, and should not be instantiated
@@ -2106,7 +2104,6 @@ base class _NativeCodec extends NativeFieldWrapperClass1 implements Codec {
   //
   // To obtain an instance of the [Codec] interface, see
   // [instantiateImageCodec].
-  @pragma('vm:entry-point')
   _NativeCodec._();
 
   int? _cachedFrameCount;
@@ -2574,11 +2571,9 @@ abstract class EngineLayer {
   void dispose();
 }
 
-@pragma('vm:entry-point')
 base class _NativeEngineLayer extends NativeFieldWrapperClass1 implements EngineLayer {
   /// This class is created by the engine, and should not be instantiated
   /// or extended directly.
-  @pragma('vm:entry-point')
   _NativeEngineLayer._();
 
   @override
@@ -2889,10 +2884,8 @@ abstract class Path {
   PathMetrics computeMetrics({bool forceClosed = false});
 }
 
-@pragma('vm:entry-point')
 base class _NativePath extends NativeFieldWrapperClass1 implements Path {
   /// Create a new empty [Path] object.
-  @pragma('vm:entry-point')
   _NativePath() { _constructor(); }
 
   /// Avoids creating a new native backing for the path for methods that will
@@ -5766,7 +5759,6 @@ abstract class Canvas {
 }
 
 base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
-  @pragma('vm:entry-point')
   _NativeCanvas(PictureRecorder recorder, [ Rect? cullRect ])  {
     if (recorder.isRecording) {
       throw ArgumentError('"recorder" must not already be associated with another Canvas.');
@@ -6305,13 +6297,11 @@ abstract class Picture {
   int get approximateBytesUsed;
 }
 
-@pragma('vm:entry-point')
 base class _NativePicture extends NativeFieldWrapperClass1 implements Picture {
   /// This class is created by the engine, and should not be instantiated
   /// or extended directly.
   ///
   /// To create a [Picture], use a [PictureRecorder].
-  @pragma('vm:entry-point')
   _NativePicture._();
 
   @override
@@ -6410,7 +6400,6 @@ abstract class PictureRecorder {
 }
 
 base class _NativePictureRecorder extends NativeFieldWrapperClass1 implements PictureRecorder {
-  @pragma('vm:entry-point')
   _NativePictureRecorder() { _constructor(); }
 
   @Native<Void Function(Handle)>(symbol: 'PictureRecorder::Create')

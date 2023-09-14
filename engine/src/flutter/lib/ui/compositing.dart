@@ -574,7 +574,6 @@ abstract class SceneBuilder {
 
 base class _NativeSceneBuilder extends NativeFieldWrapperClass1 implements SceneBuilder {
   /// Creates an empty [SceneBuilder] object.
-  @pragma('vm:entry-point')
   _NativeSceneBuilder() {
     _constructor();
   }

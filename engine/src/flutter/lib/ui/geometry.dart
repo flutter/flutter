@@ -632,7 +632,6 @@ class Rect {
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/rect_from_ltrb.png#gh-light-mode-only)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/rect_from_ltrb_dark.png#gh-dark-mode-only)
-  @pragma('vm:entry-point')
   const Rect.fromLTRB(this.left, this.top, this.right, this.bottom);
 
   /// Construct a rectangle from its left and top edges, its width, and its
