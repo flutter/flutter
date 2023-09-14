@@ -5,8 +5,8 @@
 // Logic for native assets shared between all host OSes.
 
 import 'package:logging/logging.dart' as logging;
-import 'package:native_assets_builder/native_assets_builder.dart';
-import 'package:native_assets_builder/native_assets_builder.dart' as native_assets_builder;
+import 'package:native_assets_builder/native_assets_builder.dart' hide NativeAssetsBuildRunner;
+import 'package:native_assets_builder/native_assets_builder.dart' as native_assets_builder show NativeAssetsBuildRunner;
 import 'package:native_assets_cli/native_assets_cli.dart';
 import 'package:package_config/package_config_types.dart';
 
