@@ -123,14 +123,17 @@ void Animator::BeginFrame(
           if (!self) {
             return;
           }
-          auto now = fml::TimeDelta::FromMicroseconds(Dart_TimelineGetMicros());
           // If there's a frame scheduled, bail.
           // If there's no frame scheduled, but we're not yet past the last
           // vsync deadline, bail.
-          if (!self->frame_scheduled_ && now > self->dart_frame_deadline_) {
-            TRACE_EVENT0("flutter", "BeginFrame idle callback");
-            self->delegate_.OnAnimatorNotifyIdle(
-                now + fml::TimeDelta::FromMilliseconds(100));
+          if (!self->frame_scheduled_) {
+            auto now =
+                fml::TimeDelta::FromMicroseconds(Dart_TimelineGetMicros());
+            if (now > self->dart_frame_deadline_) {
+              TRACE_EVENT0("flutter", "BeginFrame idle callback");
+              self->delegate_.OnAnimatorNotifyIdle(
+                  now + fml::TimeDelta::FromMilliseconds(100));
+            }
           }
         },
         kNotifyIdleTaskWaitTime);
