@@ -10,7 +10,9 @@
         "--runtime-mode",
         "release",
         "--prebuilt-dart-sdk",
-        "--build-embedder-examples"
+        "--build-embedder-examples",
+        "--rbe",
+        "--no-goma"
     ],
     "name": "host_release",
     "ninja": {
