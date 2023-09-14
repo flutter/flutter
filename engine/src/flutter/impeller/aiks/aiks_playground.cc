@@ -23,6 +23,11 @@ void AiksPlayground::SetTypographerContext(
   typographer_context_ = std::move(typographer_context);
 }
 
+void AiksPlayground::TearDown() {
+  inspector_.HackResetDueToTextureLeaks();
+  PlaygroundTest::TearDown();
+}
+
 bool AiksPlayground::OpenPlaygroundHere(Picture picture) {
   return OpenPlaygroundHere([&picture](AiksContext& renderer) -> Picture {
     return std::move(picture);
