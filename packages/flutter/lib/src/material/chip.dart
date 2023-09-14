@@ -2049,7 +2049,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     final Color disabledColor = _disabledColor;
     final int disabledColorAlpha = disabledColor.alpha;
     if (needsCompositing) {
-      context.pushOpacity(offset, disabledColorAlpha, paintWithOverlay);
+      context.pushLayer(OpacityLayer(alpha: disabledColorAlpha), paintWithOverlay, offset);
     } else {
       if (disabledColorAlpha != 0xff) {
         context.canvas.saveLayer(
