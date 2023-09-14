@@ -23,7 +23,7 @@ dev_dependencies:
   async: any
   convert: any
   crypto: any
-  html: 0.15.0
+  html: 0.15.4
   http: 1.1.0
   http_multi_server: any
   image: 3.0.1
