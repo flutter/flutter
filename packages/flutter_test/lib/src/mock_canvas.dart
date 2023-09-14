@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:matcher/expect.dart';
 
-import '../flutter_test.dart';
 import 'finders.dart';
 import 'recording_canvas.dart';
 import 'test_async_utils.dart';
@@ -548,7 +547,6 @@ abstract class _TestRecordingCanvasMatcher extends Matcher {
   bool matches(Object? object, Map<dynamic, dynamic> matchState) {
     final TestRecordingCanvas canvas = TestRecordingCanvas();
     final TestRecordingPaintingContext context = TestRecordingPaintingContext(canvas);
-    addTearDown(context.dispose);
     final StringBuffer description = StringBuffer();
     String prefixMessage = 'unexpectedly failed.';
     bool result = false;
