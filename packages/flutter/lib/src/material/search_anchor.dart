@@ -754,7 +754,6 @@ class _ViewContentState extends State<_ViewContent> {
         icon: const Icon(Icons.close),
         onPressed: () {
           _controller.clear();
-          updateSuggestions();
         },
       ),
     ];
