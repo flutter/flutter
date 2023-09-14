@@ -22,6 +22,8 @@ class AiksPlayground : public PlaygroundTest {
 
   ~AiksPlayground();
 
+  void TearDown() override;
+
   void SetTypographerContext(
       std::shared_ptr<TypographerContext> typographer_context);
 
