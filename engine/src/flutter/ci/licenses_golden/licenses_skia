@@ -1,4 +1,4 @@
-Signature: cd89e78b760471d6affd3011f86ea2ea
+Signature: 257f246d3a2495c012a2c54181bc6503
 
 ====================================================================================================
 LIBRARY: etc1
@@ -387,6 +387,7 @@ FILE: ../../../third_party/skia/modules/skparagraph/test.html
 FILE: ../../../third_party/skia/package-lock.json
 FILE: ../../../third_party/skia/relnotes/directcontext_submit.md
 FILE: ../../../third_party/skia/relnotes/minify-mesh.md
+FILE: ../../../third_party/skia/relnotes/patheffects.md
 FILE: ../../../third_party/skia/relnotes/shadowflags.md
 FILE: ../../../third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
@@ -5051,7 +5052,6 @@ ORIGIN: ../../../third_party/skia/include/core/SkFontMetrics.h + ../../../third_
 ORIGIN: ../../../third_party/skia/include/core/SkFontParameters.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/core/SkFontTypes.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/core/SkSpan.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/effects/SkOpPathEffect.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/effects/SkShaderMaskFilter.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/effects/SkTrimPathEffect.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/GrBackendDrawableInfo.h + ../../../third_party/skia/LICENSE
@@ -5124,8 +5124,6 @@ ORIGIN: ../../../third_party/skia/src/core/SkSafeRange.h + ../../../third_party/
 ORIGIN: ../../../third_party/skia/src/core/SkStrikeCache.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkTextBlobPriv.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkTypeface_remote.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/effects/SkOpPE.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/effects/SkOpPathEffect.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/effects/SkShaderMaskFilterImpl.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/effects/SkTrimPE.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/effects/SkTrimPathEffect.cpp + ../../../third_party/skia/LICENSE
@@ -5266,7 +5264,6 @@ FILE: ../../../third_party/skia/include/core/SkFontMetrics.h
 FILE: ../../../third_party/skia/include/core/SkFontParameters.h
 FILE: ../../../third_party/skia/include/core/SkFontTypes.h
 FILE: ../../../third_party/skia/include/core/SkSpan.h
-FILE: ../../../third_party/skia/include/effects/SkOpPathEffect.h
 FILE: ../../../third_party/skia/include/effects/SkShaderMaskFilter.h
 FILE: ../../../third_party/skia/include/effects/SkTrimPathEffect.h
 FILE: ../../../third_party/skia/include/gpu/GrBackendDrawableInfo.h
@@ -5339,8 +5336,6 @@ FILE: ../../../third_party/skia/src/core/SkSafeRange.h
 FILE: ../../../third_party/skia/src/core/SkStrikeCache.cpp
 FILE: ../../../third_party/skia/src/core/SkTextBlobPriv.h
 FILE: ../../../third_party/skia/src/core/SkTypeface_remote.h
-FILE: ../../../third_party/skia/src/effects/SkOpPE.h
-FILE: ../../../third_party/skia/src/effects/SkOpPathEffect.cpp
 FILE: ../../../third_party/skia/src/effects/SkShaderMaskFilterImpl.cpp
 FILE: ../../../third_party/skia/src/effects/SkTrimPE.h
 FILE: ../../../third_party/skia/src/effects/SkTrimPathEffect.cpp
@@ -6434,7 +6429,6 @@ ORIGIN: ../../../third_party/skia/gm/verifiers/gmverifier.h + ../../../third_par
 ORIGIN: ../../../third_party/skia/gm/widebuttcaps.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/core/SkM44.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/core/SkSamplingOptions.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/effects/SkStrokeAndFillPathEffect.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/GrDirectContext.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/mtl/GrMtlBackendContext.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/base/SkTPin.h + ../../../third_party/skia/LICENSE
@@ -6568,7 +6562,6 @@ FILE: ../../../third_party/skia/gm/verifiers/gmverifier.h
 FILE: ../../../third_party/skia/gm/widebuttcaps.cpp
 FILE: ../../../third_party/skia/include/core/SkM44.h
 FILE: ../../../third_party/skia/include/core/SkSamplingOptions.h
-FILE: ../../../third_party/skia/include/effects/SkStrokeAndFillPathEffect.h
 FILE: ../../../third_party/skia/include/gpu/GrDirectContext.h
 FILE: ../../../third_party/skia/include/gpu/mtl/GrMtlBackendContext.h
 FILE: ../../../third_party/skia/include/private/base/SkTPin.h
