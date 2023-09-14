@@ -81,7 +81,7 @@ class FakeAssetScope {
       return fetcher();
     }
     if (_parent != null) {
-      return _parent!.getAssetData(assetKey);
+      return _parent.getAssetData(assetKey);
     }
     return null;
   }

@@ -1004,7 +1004,7 @@ class BrowserManager {
           final String pathToTest = p.dirname(path);
 
           final String mapPath = p.join(
-            _sourceMapDirectory!.path,
+            _sourceMapDirectory.path,
             pathToTest,
             sourceMapFileName
           );

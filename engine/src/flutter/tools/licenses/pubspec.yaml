@@ -5,7 +5,7 @@
 name: licenses
 publish_to: none
 environment:
-  sdk: '>=3.0.0-0 <4.0.0'
+  sdk: '>=3.2.0-0 <4.0.0'
 
 # Do not add any dependencies that require more than what is provided
 # in //third_party.pkg, //third_party/dart/pkg, or
