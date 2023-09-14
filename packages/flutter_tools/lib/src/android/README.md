@@ -15,7 +15,7 @@ Follow the guides below when*...
 ### Updating the template version of...
 
 #### The Android SDK & NDK
-*Note:* All of the Android SDK/NDK versions noted in `gradle_utils.dart`
+All of the Android SDK/NDK versions noted in `gradle_utils.dart`
 (`compileSdkVersion`, `minSdkVersion`, `targetSdkVersion`, `ndkVersion`)
 versions should match the values in Flutter Gradle Plugin (`FlutterExtension`),
 so updating any of these versions also requires an update in
