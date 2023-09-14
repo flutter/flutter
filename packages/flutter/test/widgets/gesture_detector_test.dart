@@ -6,11 +6,12 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   const Offset forcePressOffset = Offset(400.0, 50.0);
 
-  testWidgets('Uncontested scrolls start immediately', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Uncontested scrolls start immediately', (WidgetTester tester) async {
     bool didStartDrag = false;
     double? updatedDragDelta;
     bool didEndDrag = false;
@@ -58,7 +59,7 @@ void main() {
     await tester.pumpWidget(Container());
   });
 
-  testWidgets('Match two scroll gestures in succession', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Match two scroll gestures in succession', (WidgetTester tester) async {
     int gestureCount = 0;
     double dragDistance = 0.0;
 
@@ -91,7 +92,7 @@ void main() {
     await tester.pumpWidget(Container());
   });
 
-  testWidgets("Pan doesn't crash", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Pan doesn't crash", (WidgetTester tester) async {
     bool didStartPan = false;
     Offset? panDelta;
     bool didEndPan = false;
@@ -135,7 +136,7 @@ void main() {
       },
     );
 
-    testWidgets('Translucent', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Translucent', (WidgetTester tester) async {
       bool didReceivePointerDown;
       bool didTap;
 
@@ -206,7 +207,7 @@ void main() {
       expect(didTap, isTrue);
     }, variant: buttonVariant);
 
-    testWidgets('Empty', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Empty', (WidgetTester tester) async {
       bool didTap = false;
       await tester.pumpWidget(
         Center(
@@ -228,7 +229,7 @@ void main() {
       expect(didTap, isTrue);
     }, variant: buttonVariant);
 
-    testWidgets('Only container', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Only container', (WidgetTester tester) async {
       bool didTap = false;
       await tester.pumpWidget(
         Center(
@@ -251,7 +252,7 @@ void main() {
       expect(didTap, isFalse);
     }, variant: buttonVariant);
 
-    testWidgets('cache render object', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('cache render object', (WidgetTester tester) async {
       void inputCallback() { }
 
       await tester.pumpWidget(
@@ -283,7 +284,7 @@ void main() {
       expect(renderObj1, same(renderObj2));
     }, variant: buttonVariant);
 
-    testWidgets('Tap down occurs after kPressTimeout', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Tap down occurs after kPressTimeout', (WidgetTester tester) async {
       int tapDown = 0;
       int tap = 0;
       int tapCancel = 0;
@@ -391,7 +392,7 @@ void main() {
       expect(longPress, 1);
     }, variant: buttonVariant);
 
-    testWidgets('Long Press Up Callback called after long press', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Long Press Up Callback called after long press', (WidgetTester tester) async {
       int longPressUp = 0;
 
       await tester.pumpWidget(
@@ -441,7 +442,7 @@ void main() {
     }, variant: buttonVariant);
   });
 
-  testWidgets('Primary and secondary long press callbacks should work together in GestureDetector', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Primary and secondary long press callbacks should work together in GestureDetector', (WidgetTester tester) async {
     bool primaryLongPress = false, secondaryLongPress = false;
 
     await tester.pumpWidget(
@@ -477,7 +478,7 @@ void main() {
     expect(secondaryLongPress, isTrue);
   });
 
-  testWidgets('Force Press Callback called after force press', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Force Press Callback called after force press', (WidgetTester tester) async {
     int forcePressStart = 0;
     int forcePressPeaked = 0;
     int forcePressUpdate = 0;
@@ -580,7 +581,7 @@ void main() {
     expect(forcePressEnded, 1);
   });
 
-  testWidgets('Force Press Callback not called if long press triggered before force press', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Force Press Callback not called if long press triggered before force press', (WidgetTester tester) async {
     int forcePressStart = 0;
     int longPressTimes = 0;
 
@@ -645,7 +646,7 @@ void main() {
     expect(forcePressStart, 0);
   });
 
-  testWidgets('Force Press Callback not called if drag triggered before force press', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Force Press Callback not called if drag triggered before force press', (WidgetTester tester) async {
     int forcePressStart = 0;
     int horizontalDragStart = 0;
 
@@ -706,7 +707,7 @@ void main() {
   });
 
   group("RawGestureDetectorState's debugFillProperties", () {
-    testWidgets('when default', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('when default', (WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(RawGestureDetector(
@@ -724,7 +725,7 @@ void main() {
       ]);
     });
 
-    testWidgets('should show gestures, custom semantics and behavior', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('should show gestures, custom semantics and behavior', (WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(RawGestureDetector(
@@ -761,7 +762,7 @@ void main() {
       ]);
     });
 
-    testWidgets('should not show semantics when excludeFromSemantics is true', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('should not show semantics when excludeFromSemantics is true', (WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(RawGestureDetector(
@@ -832,7 +833,7 @@ void main() {
         }
       });
 
-      testWidgets('replaceGestureRecognizers not during layout', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('replaceGestureRecognizers not during layout', (WidgetTester tester) async {
         final GlobalKey<RawGestureDetectorState> key = GlobalKey<RawGestureDetectorState>();
         await tester.pumpWidget(
           Directionality(
@@ -876,7 +877,7 @@ void main() {
     });
   });
 
-  testWidgets('supportedDevices update test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('supportedDevices update test', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/111716
     bool didStartPan = false;
     Offset? panDelta;
@@ -946,7 +947,7 @@ void main() {
     expect(didEndPan, isTrue);
   });
 
-  testWidgets('supportedDevices is respected', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('supportedDevices is respected', (WidgetTester tester) async {
     bool didStartPan = false;
     Offset? panDelta;
     bool didEndPan = false;
@@ -994,7 +995,7 @@ void main() {
   });
 
   group('DoubleTap', () {
-    testWidgets('onDoubleTap is called even if onDoubleTapDown has not been not provided', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('onDoubleTap is called even if onDoubleTapDown has not been not provided', (WidgetTester tester) async {
       final List<String> log = <String>[];
       await tester.pumpWidget(
         Directionality(
@@ -1017,7 +1018,7 @@ void main() {
       expect(log, <String>['double-tap']);
     });
 
-    testWidgets('onDoubleTapDown is called even if onDoubleTap has not been not provided', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('onDoubleTapDown is called even if onDoubleTap has not been not provided', (WidgetTester tester) async {
       final List<String> log = <String>[];
       await tester.pumpWidget(
         Directionality(
