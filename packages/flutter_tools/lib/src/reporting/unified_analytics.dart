@@ -9,10 +9,14 @@ import '../version.dart';
 /// This function is called from within the context runner to perform
 /// checks that are necessary for determining if a no-op version of
 /// [Analytics] gets returned.
+///
+/// When [enableAsserts] is set to `true`, various assert statements
+/// will be enabled to ensure usage of this class is within GA4 limitations.
 Analytics getAnalytics({
   required bool runningOnBot,
   required FlutterVersion flutterVersion,
   required Map<String, String> environment,
+  bool enableAsserts = false,
 }) {
   final String version =
       flutterVersion.getVersionString(redactUnknownBranches: true);
@@ -33,5 +37,6 @@ Analytics getAnalytics({
     flutterChannel: flutterVersion.channel,
     flutterVersion: flutterVersion.frameworkVersion,
     dartVersion: flutterVersion.dartSdkVersion,
+    enableAsserts: enableAsserts,
   );
 }
