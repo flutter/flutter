@@ -1999,7 +1999,7 @@ void main() {
     expect(find.text('30/7/2021'), findsOneWidget);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
 
-  testWidgets('DatePickerDialog state restoration - DatePickerEntryMode', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DatePickerDialog state restoration - DatePickerEntryMode', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         restorationScopeId: 'app',
