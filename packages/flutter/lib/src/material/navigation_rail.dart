@@ -581,9 +581,9 @@ class _RailDestination extends StatelessWidget {
     );
 
     final ThemeData theme = Theme.of(context);
-
+    final TextDirection textDirection = Directionality.of(context);
     final bool material3 = theme.useMaterial3;
-    final EdgeInsets destinationPadding = (padding ?? EdgeInsets.zero).resolve(Directionality.of(context));
+    final EdgeInsets destinationPadding = (padding ?? EdgeInsets.zero).resolve(textDirection);
     Offset indicatorOffset;
     bool applyXOffset = false;
 
@@ -798,6 +798,7 @@ class _RailDestination extends StatelessWidget {
               useMaterial3: material3,
               indicatorOffset: indicatorOffset,
               applyXOffset: applyXOffset,
+              textDirection: textDirection,
               child: content,
             ),
           ),
@@ -821,6 +822,7 @@ class _IndicatorInkWell extends InkResponse {
     required this.useMaterial3,
     required this.indicatorOffset,
     required this.applyXOffset,
+    required this.textDirection,
   }) : super(
     containedInkWell: true,
     highlightShape: BoxShape.rectangle,
@@ -829,16 +831,25 @@ class _IndicatorInkWell extends InkResponse {
   );
 
   final bool useMaterial3;
+
   // The offset used to position Ink highlight.
   final Offset indicatorOffset;
+
   // Whether the horizontal offset from indicatorOffset should be used to position Ink highlight.
   // If true, Ink highlight uses the indicator horizontal offset. If false, Ink highlight is centered horizontally.
   final bool applyXOffset;
 
+  // The text direction used to adjust the indicator horizontal offset.
+  final TextDirection textDirection;
+
   @override
   RectCallback? getRectCallback(RenderBox referenceBox) {
     if (useMaterial3) {
-      final double indicatorHorizontalCenter = applyXOffset ? indicatorOffset.dx : referenceBox.size.width / 2;
+      final double boxWidth = referenceBox.size.width;
+      double indicatorHorizontalCenter = applyXOffset ? indicatorOffset.dx : boxWidth / 2;
+      if (textDirection == TextDirection.rtl) {
+        indicatorHorizontalCenter = boxWidth - indicatorHorizontalCenter;
+      }
       return () {
         return Rect.fromLTWH(
           indicatorHorizontalCenter - (_kCircularIndicatorDiameter / 2),
