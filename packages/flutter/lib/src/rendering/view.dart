@@ -6,7 +6,6 @@ import 'dart:io' show Platform;
 import 'dart:ui' as ui show FlutterView, Scene, SceneBuilder, SemanticsUpdate;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'binding.dart';
@@ -254,7 +253,6 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       if (automaticSystemUiAdjustment) {
         _updateSystemChrome();
       }
-      SchedulerBinding.instance.handlePreRenderScene();
       _view.render(scene);
       scene.dispose();
       assert(() {

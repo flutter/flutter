@@ -592,6 +592,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     rootPipelineOwner.flushCompositingBits();
     rootPipelineOwner.flushPaint();
     if (sendFramesToEngine) {
+      SchedulerBinding.instance.handlePreRenderScene();
       for (final RenderView renderView in renderViews) {
         renderView.compositeFrame(); // this sends the bits to the GPU
       }

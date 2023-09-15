@@ -760,9 +760,8 @@ mixin SchedulerBinding on BindingBase {
 
   /// Schedule a callback to be executed just before rendering a frame.
   ///
-  /// The provided callback run immediately after compositing
-  /// a scene [ContainerLayer.buildScene] and before rendering
-  /// it [FlutterView.render].
+  /// The provided callback run before rendering [FlutterView.render] and
+  /// after updating the layout information for all dirty render objects.
   ///
   /// The callbacks are executed in the order in which they have been
   /// added.
@@ -777,8 +776,8 @@ mixin SchedulerBinding on BindingBase {
     _preRenderCallbacks.add(callback);
   }
 
-  /// Called by the framework after compositing [ContainerLayer.buildScene]
-  /// and before rendering [FlutterView.render].
+  /// Called by the framework before rendering [FlutterView.render] and after
+  /// updating the layout information for all dirty render objects.
   ///
   /// This function calls all the pre-rendering callbacks registered by
   /// [addPreRenderCallback].
