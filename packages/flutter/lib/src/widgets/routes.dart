@@ -1833,14 +1833,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   @override
-  bool get willHandlePopInternally {
-    final bool popEntriesCanPop = _popEntries.every((PopEntry popEntry) {
-      return popEntry.canPopNotifier.value;
-    });
-    return !popEntriesCanPop || super.willHandlePopInternally;
-  }
-
-  @override
   String toString() => '${objectRuntimeType(this, 'ModalRoute')}($settings, animation: $_animation)';
 }
 
