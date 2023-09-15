@@ -1083,6 +1083,7 @@ void main() {
 
     Future<void> testColor(Color color) async {
       final AnimationController positionController = AnimationController(vsync: const TestVSync());
+      addTearDown(positionController.dispose);
       // Correspond to [_setupColorTween].
       final Animation<Color?> valueColorAnimation = positionController.drive(
         ColorTween(

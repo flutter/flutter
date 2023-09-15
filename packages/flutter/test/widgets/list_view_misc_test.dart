@@ -169,6 +169,7 @@ void main() {
       vsync: const TestVSync(),
       duration: const Duration(milliseconds: 200),
     );
+    addTearDown(controller.dispose);
 
     // The overall height of the frame is (as ever) 600
     Widget buildFrame() {
