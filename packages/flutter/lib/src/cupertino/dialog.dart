@@ -537,18 +537,18 @@ class CupertinoActionSheet extends StatefulWidget {
 }
 
 class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
-  ScrollController get _effectiveMessageScrollController =>
+  late final ScrollController _effectiveMessageScrollController =
     widget.messageScrollController ?? ScrollController();
 
-  ScrollController get _effectiveActionScrollController =>
+  late final ScrollController _effectiveActionScrollController =
     widget.actionScrollController ?? ScrollController();
 
   @override
   void dispose() {
-    if (_effectiveMessageScrollController != widget.messageScrollController) {
+    if (widget.messageScrollController == null) {
       _effectiveMessageScrollController.dispose();
     }
-    if (_effectiveActionScrollController != widget.actionScrollController) {
+    if (widget.actionScrollController == null) {
       _effectiveActionScrollController.dispose();
     }
     super.dispose();
