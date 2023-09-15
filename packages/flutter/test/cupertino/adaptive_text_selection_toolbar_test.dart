@@ -102,17 +102,21 @@ void main() {
     skip: isBrowser, // [intended] see https://github.com/flutter/flutter/issues/108382
   );
 
-  testWidgets('Can build from EditableTextState', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can build from EditableTextState', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(CupertinoApp(
       home: Align(
         alignment: Alignment.topLeft,
         child: SizedBox(
           width: 400,
           child: EditableText(
-            controller: TextEditingController(),
+            controller: controller,
             backgroundCursorColor: const Color(0xff00ffff),
-            focusNode: FocusNode(),
+            focusNode: focusNode,
             style: const TextStyle(),
             cursorColor: const Color(0xff00ffff),
             selectionControls: cupertinoTextSelectionHandleControls,
