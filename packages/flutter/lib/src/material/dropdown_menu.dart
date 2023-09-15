@@ -320,7 +320,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     buttonItemKeys = List<GlobalKey>.generate(filteredEntries.length, (int index) => GlobalKey());
     _menuHasEnabledItem = filteredEntries.any((DropdownMenuEntry<T> entry) => entry.enabled);
 
-    
     _selectedValue = widget.initialSelection;
     changeTextEditingControllerStateBySelectedValue();
     
