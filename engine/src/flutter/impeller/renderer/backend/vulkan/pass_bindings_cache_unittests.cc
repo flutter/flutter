@@ -24,7 +24,7 @@ int32_t CountStringViewInstances(const std::vector<std::string>& strings,
 }  // namespace
 
 TEST(PassBindingsCacheTest, bindPipeline) {
-  auto context = CreateMockVulkanContext();
+  auto context = MockVulkanContextBuilder().Build();
   PassBindingsCache cache;
   auto encoder = std::make_unique<CommandEncoderFactoryVK>(context)->Create();
   auto buffer = encoder->GetCommandBuffer();
@@ -38,7 +38,7 @@ TEST(PassBindingsCacheTest, bindPipeline) {
 }
 
 TEST(PassBindingsCacheTest, setStencilReference) {
-  auto context = CreateMockVulkanContext();
+  auto context = MockVulkanContextBuilder().Build();
   PassBindingsCache cache;
   auto encoder = std::make_unique<CommandEncoderFactoryVK>(context)->Create();
   auto buffer = encoder->GetCommandBuffer();
@@ -53,7 +53,7 @@ TEST(PassBindingsCacheTest, setStencilReference) {
 }
 
 TEST(PassBindingsCacheTest, setScissor) {
-  auto context = CreateMockVulkanContext();
+  auto context = MockVulkanContextBuilder().Build();
   PassBindingsCache cache;
   auto encoder = std::make_unique<CommandEncoderFactoryVK>(context)->Create();
   auto buffer = encoder->GetCommandBuffer();
@@ -66,7 +66,7 @@ TEST(PassBindingsCacheTest, setScissor) {
 }
 
 TEST(PassBindingsCacheTest, setViewport) {
-  auto context = CreateMockVulkanContext();
+  auto context = MockVulkanContextBuilder().Build();
   PassBindingsCache cache;
   auto encoder = std::make_unique<CommandEncoderFactoryVK>(context)->Create();
   auto buffer = encoder->GetCommandBuffer();

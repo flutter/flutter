@@ -14,7 +14,7 @@ TEST(MockVulkanContextTest, IsThreadSafe) {
   // In a typical app, there is a single ContextVK per app, shared b/w threads.
   //
   // This test ensures that the (mock) ContextVK is thread-safe.
-  auto const context = CreateMockVulkanContext();
+  auto const context = MockVulkanContextBuilder().Build();
 
   // Spawn two threads, and have them create a CommandPoolVK each.
   std::thread thread1([&context]() {

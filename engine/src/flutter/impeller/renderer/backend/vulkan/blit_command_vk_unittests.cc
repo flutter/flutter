@@ -11,7 +11,7 @@ namespace impeller {
 namespace testing {
 
 TEST(BlitCommandVkTest, BlitCopyTextureToTextureCommandVK) {
-  auto context = CreateMockVulkanContext();
+  auto context = MockVulkanContextBuilder().Build();
   auto pool = CommandPoolVK::GetThreadLocal(context.get());
   auto encoder = std::make_unique<CommandEncoderFactoryVK>(context)->Create();
   BlitCopyTextureToTextureCommandVK cmd;
@@ -28,7 +28,7 @@ TEST(BlitCommandVkTest, BlitCopyTextureToTextureCommandVK) {
 }
 
 TEST(BlitCommandVkTest, BlitCopyTextureToBufferCommandVK) {
-  auto context = CreateMockVulkanContext();
+  auto context = MockVulkanContextBuilder().Build();
   auto encoder = std::make_unique<CommandEncoderFactoryVK>(context)->Create();
   BlitCopyTextureToBufferCommandVK cmd;
   cmd.source = context->GetResourceAllocator()->CreateTexture({
@@ -44,7 +44,7 @@ TEST(BlitCommandVkTest, BlitCopyTextureToBufferCommandVK) {
 }
 
 TEST(BlitCommandVkTest, BlitCopyBufferToTextureCommandVK) {
-  auto context = CreateMockVulkanContext();
+  auto context = MockVulkanContextBuilder().Build();
   auto encoder = std::make_unique<CommandEncoderFactoryVK>(context)->Create();
   BlitCopyBufferToTextureCommandVK cmd;
   cmd.destination = context->GetResourceAllocator()->CreateTexture({
@@ -62,7 +62,7 @@ TEST(BlitCommandVkTest, BlitCopyBufferToTextureCommandVK) {
 }
 
 TEST(BlitCommandVkTest, BlitGenerateMipmapCommandVK) {
-  auto context = CreateMockVulkanContext();
+  auto context = MockVulkanContextBuilder().Build();
   auto encoder = std::make_unique<CommandEncoderFactoryVK>(context)->Create();
   BlitGenerateMipmapCommandVK cmd;
   cmd.texture = context->GetResourceAllocator()->CreateTexture({
