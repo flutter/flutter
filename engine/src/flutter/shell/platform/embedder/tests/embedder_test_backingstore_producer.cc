@@ -11,6 +11,7 @@
 #include "third_party/skia/include/core/SkImageInfo.h"
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/core/SkSurface.h"
+#include "third_party/skia/include/gpu/GpuTypes.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
 #include "third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h"
@@ -281,7 +282,7 @@ bool EmbedderTestBackingStoreProducer::CreateMTLTexture(
   GrMtlTextureInfo skia_texture_info;
   skia_texture_info.fTexture.reset(SkCFSafeRetain(texture_info.texture));
   GrBackendTexture backend_texture(surface_size.width(), surface_size.height(),
-                                   GrMipmapped::kNo, skia_texture_info);
+                                   skgpu::Mipmapped::kNo, skia_texture_info);
 
   sk_sp<SkSurface> surface = SkSurfaces::WrapBackendTexture(
       context_.get(), backend_texture, kTopLeft_GrSurfaceOrigin, 1,

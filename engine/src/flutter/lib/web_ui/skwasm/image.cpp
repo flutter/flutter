@@ -12,6 +12,7 @@
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkImageInfo.h"
 #include "third_party/skia/include/core/SkPicture.h"
+#include "third_party/skia/include/gpu/GpuTypes.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/GrDirectContext.h"
 #include "third_party/skia/include/gpu/ganesh/GrExternalTextureGenerator.h"
@@ -90,7 +91,7 @@ class TextureSourceImageGenerator : public GrExternalTextureGenerator {
 
   std::unique_ptr<GrExternalTexture> generateExternalTexture(
       GrRecordingContext* context,
-      GrMipMapped mipmapped) override {
+      skgpu::Mipmapped mipmapped) override {
     GrGLTextureInfo glInfo;
     glInfo.fID = skwasm_createGlTextureFromTextureSource(
         _textureSourceWrapper->getTextureSource(), fInfo.width(),
