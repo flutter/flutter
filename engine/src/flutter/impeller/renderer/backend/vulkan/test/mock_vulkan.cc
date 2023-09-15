@@ -4,10 +4,13 @@
 
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
 #include <cstring>
+#include <utility>
 #include <vector>
 #include "fml/macros.h"
 #include "fml/thread_local.h"
 #include "impeller/base/thread_safety.h"
+#include "vulkan/vulkan_core.h"
+#include "vulkan/vulkan_enums.hpp"
 
 namespace impeller {
 namespace testing {
@@ -410,7 +413,15 @@ VkResult vkCreateFence(VkDevice device,
                        const VkFenceCreateInfo* pCreateInfo,
                        const VkAllocationCallbacks* pAllocator,
                        VkFence* pFence) {
-  *pFence = reinterpret_cast<VkFence>(0xfe0ce);
+  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  *pFence = reinterpret_cast<VkFence>(new MockFence());
+  return VK_SUCCESS;
+}
+
+VkResult vkDestroyFence(VkDevice device,
+                        VkFence fence,
+                        const VkAllocationCallbacks* pAllocator) {
+  delete reinterpret_cast<MockFence*>(fence);
   return VK_SUCCESS;
 }
 
@@ -430,7 +441,9 @@ VkResult vkWaitForFences(VkDevice device,
 }
 
 VkResult vkGetFenceStatus(VkDevice device, VkFence fence) {
-  return VK_SUCCESS;
+  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  MockFence* mock_fence = reinterpret_cast<MockFence*>(fence);
+  return mock_fence->GetStatus();
 }
 
 VkResult vkCreateDebugUtilsMessengerEXT(
@@ -533,6 +546,8 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return (PFN_vkVoidFunction)vkEndCommandBuffer;
   } else if (strcmp("vkCreateFence", pName) == 0) {
     return (PFN_vkVoidFunction)vkCreateFence;
+  } else if (strcmp("vkDestroyFence", pName) == 0) {
+    return (PFN_vkVoidFunction)vkDestroyFence;
   } else if (strcmp("vkQueueSubmit", pName) == 0) {
     return (PFN_vkVoidFunction)vkQueueSubmit;
   } else if (strcmp("vkWaitForFences", pName) == 0) {
