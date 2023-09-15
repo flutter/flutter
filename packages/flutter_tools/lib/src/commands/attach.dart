@@ -277,7 +277,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             logger: _logger,
           ),
           notifyingLogger: (_logger is NotifyingLogger)
-            ? _logger as NotifyingLogger
+            ? _logger
             : NotifyingLogger(verbose: _logger.isVerbose, parent: _logger),
           logToStdout: true,
         )
