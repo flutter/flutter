@@ -8,6 +8,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/semantics_tester.dart';
 
@@ -17,7 +18,7 @@ const TextStyle testStyle = TextStyle(
 );
 
 void main() {
-  testWidgets('Default layout minimum size', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default layout minimum size', (WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(child: const CupertinoButton(
         onPressed: null,
