@@ -472,14 +472,19 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      return false;
+    }
+
     // Positions outside of the clipped area of the child are not counted as
     // hits.
-    final BoxParentData childParentData = child!.parentData! as BoxParentData;
+    final BoxParentData childParentData = child.parentData! as BoxParentData;
     final Rect hitBox = Rect.fromLTWH(
       childParentData.offset.dx,
       childParentData.offset.dy + _kToolbarArrowSize.height,
-      child!.size.width,
-      child!.size.height - _kToolbarArrowSize.height * 2,
+      child.size.width,
+      child.size.height - _kToolbarArrowSize.height * 2,
     );
     if (!hitBox.contains(position)) {
       return false;
