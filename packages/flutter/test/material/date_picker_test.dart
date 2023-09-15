@@ -1946,7 +1946,7 @@ void main() {
     });
   });
 
-  testWidgets('DatePickerDialog is state restorable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DatePickerDialog is state restorable', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         restorationScopeId: 'app',
@@ -2201,6 +2201,13 @@ class _RestorableDatePickerDialogTestWidgetState extends State<_RestorableDatePi
       );
     },
   );
+
+  @override
+  void dispose() {
+    _selectedDate.dispose();
+    _restorableDatePickerRouteFuture.dispose();
+    super.dispose();
+  }
 
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
