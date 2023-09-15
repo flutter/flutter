@@ -213,7 +213,7 @@ void main() {
     expect(state.isEndDrawerOpen, equals(false));
   });
 
-  testWidgets('Scaffold.drawer - null restorationId ', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scaffold.drawer - null restorationId ', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
@@ -236,7 +236,7 @@ void main() {
     expect(find.text('drawer'), findsNothing);
   });
 
-  testWidgets('Scaffold.endDrawer - null restorationId ', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scaffold.endDrawer - null restorationId ', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
@@ -259,7 +259,7 @@ void main() {
     expect(find.text('endDrawer'), findsNothing);
   });
 
-  testWidgets('Scaffold.drawer state restoration test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scaffold.drawer state restoration test', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
@@ -290,7 +290,7 @@ void main() {
     expect(find.text('drawer'), findsOneWidget);
   });
 
-  testWidgets('Scaffold.endDrawer state restoration test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Scaffold.endDrawer state restoration test', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
@@ -321,7 +321,7 @@ void main() {
     expect(find.text('endDrawer'), findsOneWidget);
   });
 
-  testWidgets('Both drawer and endDrawer state restoration test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Both drawer and endDrawer state restoration test', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(

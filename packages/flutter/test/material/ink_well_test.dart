@@ -1041,7 +1041,7 @@ testWidgetsWithLeakTracking('InkResponse radius can be updated', (WidgetTester t
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
-  testWidgets('InkResponse containing selectable text changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('InkResponse containing selectable text changes mouse cursor when hovered', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/104595.
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
