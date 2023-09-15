@@ -55,7 +55,6 @@ library flutter_test;
 
 export 'dart:async' show Future;
 
-export 'src/_goldens_io.dart' if (dart.library.html) 'src/_goldens_web.dart';
 export 'src/_matchers_io.dart' if (dart.library.html) 'src/_matchers_web.dart';
 export 'src/accessibility.dart';
 export 'src/animation_sheet.dart';
@@ -67,6 +66,7 @@ export 'src/finders.dart';
 export 'src/frame_timing_summarizer.dart';
 export 'src/goldens.dart';
 export 'src/image.dart';
+export 'src/local_file_comparator_stub.dart' if (dart.library.io) 'src/local_file_comparator.dart';
 export 'src/matchers.dart';
 export 'src/mock_canvas.dart';
 export 'src/mock_event_channel.dart';
@@ -83,5 +83,6 @@ export 'src/test_pointer.dart';
 export 'src/test_text_input.dart';
 export 'src/test_vsync.dart';
 export 'src/tree_traversal.dart';
+export 'src/web_golden_comparator_stub.dart' if (dart.library.html) 'src/web_golden_comparator.dart';
 export 'src/widget_tester.dart';
 export 'src/window.dart';

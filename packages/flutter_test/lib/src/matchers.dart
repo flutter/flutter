@@ -14,13 +14,23 @@ import 'package:matcher/expect.dart';
 import 'package:matcher/src/expect/async_matcher.dart'; // ignore: implementation_imports
 import 'package:vector_math/vector_math_64.dart' show Matrix3;
 
-import '_matchers_io.dart' if (dart.library.html) '_matchers_web.dart' show MatchesGoldenFile, captureImage;
+import '_matchers_io.dart' if (dart.library.html) '_matchers_web.dart' show makeGoldenFileMatcher, makeGoldenFileMatcherForString;
 import 'accessibility.dart';
 import 'binding.dart';
 import 'controller.dart';
 import 'finders.dart';
 import 'goldens.dart';
+import 'image_golden_matcher.dart';
 import 'widget_tester.dart' show WidgetTester;
+
+/// Whether or not [captureImage] is supported.
+///
+/// This can be used to skip tests on platforms that don't support
+/// capturing images.
+///
+/// Currently this is true except when tests are running on the web using the
+/// HTML renderer (the CanvasKit renderer can capture images).
+bool canCaptureImage = isCanvasKit || !kIsWeb;
 
 /// Asserts that the [FinderBase] matches nothing in the available candidates.
 ///
@@ -547,9 +557,9 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 ///    may swap out the backend for this matcher.
 AsyncMatcher matchesGoldenFile(Object key, {int? version}) {
   if (key is Uri) {
-    return MatchesGoldenFile(key, version);
+    return makeGoldenFileMatcher(key, version);
   } else if (key is String) {
-    return MatchesGoldenFile.forStringPath(key, version);
+    return makeGoldenFileMatcherForString(key, version);
   }
   throw ArgumentError('Unexpected type for golden file: ${key.runtimeType}');
 }

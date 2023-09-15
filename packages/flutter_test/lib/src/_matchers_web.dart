@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:matcher/expect.dart';
@@ -13,29 +14,29 @@ import 'package:test_api/hooks.dart' show TestFailure;
 import 'binding.dart';
 import 'finders.dart';
 import 'goldens.dart';
+import 'image_golden_matcher.dart';
 
-/// An unsupported method that exists for API compatibility.
-Future<ui.Image> captureImage(Element element) {
-  throw UnsupportedError('captureImage is not supported on the web.');
-}
+/// Returns a [Matcher] for [matchesGoldenFile].
+AsyncMatcher makeGoldenFileMatcher(Uri key, int? version) => isCanvasKit
+    ? ImageGoldenMatcher(key, version)
+    : BrowserScreenshotMatcher(key, version);
 
-/// Whether or not [captureImage] is supported.
-///
-/// This can be used to skip tests on platforms that don't support
-/// capturing images.
-///
-/// Currently this is true except when tests are running in the context of a web
-/// browser (`flutter test --platform chrome`).
-const bool canCaptureImage = false;
+/// Returns a [Matcher] for [matchesGoldenFile] which takes a String path.
+AsyncMatcher makeGoldenFileMatcherForString(String path, int? version) =>
+    isCanvasKit
+        ? ImageGoldenMatcher.forStringPath(path, version)
+        : BrowserScreenshotMatcher.forStringPath(path, version);
 
 /// The matcher created by [matchesGoldenFile]. This class is enabled when the
-/// test is running in a web browser using conditional import.
-class MatchesGoldenFile extends AsyncMatcher {
-  /// Creates an instance of [MatchesGoldenFile]. Called by [matchesGoldenFile].
-  const MatchesGoldenFile(this.key, this.version);
+/// test is running in the HTML renderer, which cannot capture images directly,
+/// and must call out to the server to take a screenshot.
+class BrowserScreenshotMatcher extends AsyncMatcher {
+  /// Creates an instance of [BrowserScreenshotMatcher]. Called by [matchesGoldenFile].
+  const BrowserScreenshotMatcher(this.key, this.version);
 
-  /// Creates an instance of [MatchesGoldenFile]. Called by [matchesGoldenFile].
-  MatchesGoldenFile.forStringPath(String path, this.version) : key = Uri.parse(path);
+  /// Creates an instance of [BrowserScreenshotMatcher]. Called by [matchesGoldenFile].
+  BrowserScreenshotMatcher.forStringPath(String path, this.version)
+      : key = Uri.parse(path);
 
   /// The [key] to the golden image.
   final Uri key;
@@ -57,9 +58,11 @@ class MatchesGoldenFile extends AsyncMatcher {
     final Element element = elements.single;
     final RenderObject renderObject = _findRepaintBoundary(element);
     final Size size = renderObject.paintBounds.size;
-    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
+    final TestWidgetsFlutterBinding binding =
+        TestWidgetsFlutterBinding.instance;
     final ui.FlutterView view = binding.platformDispatcher.implicitView!;
-    final RenderView renderView = binding.renderViews.firstWhere((RenderView r) => r.flutterView == view);
+    final RenderView renderView =
+        binding.renderViews.firstWhere((RenderView r) => r.flutterView == view);
 
     // Unlike `flutter_tester`, we don't have the ability to render an element
     // to an image directly. Instead, we will use `window.render()` to render
@@ -72,7 +75,8 @@ class MatchesGoldenFile extends AsyncMatcher {
         return null;
       }
       try {
-        final bool success = await webGoldenComparator.compare(size.width, size.height, key);
+        final bool success =
+            await webGoldenComparator.compare(size.width, size.height, key);
         return success ? null : 'does not match';
       } on TestFailure catch (ex) {
         return ex.message;
@@ -85,7 +89,8 @@ class MatchesGoldenFile extends AsyncMatcher {
   @override
   Description describe(Description description) {
     final Uri testNameUri = webGoldenComparator.getTestUri(key, version);
-    return description.add('one widget whose rasterized image matches golden image "$testNameUri"');
+    return description.add(
+        'one widget whose rasterized image matches golden image "$testNameUri"');
   }
 }
 

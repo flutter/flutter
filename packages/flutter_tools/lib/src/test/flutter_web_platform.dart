@@ -65,7 +65,9 @@ class FlutterWebPlatform extends PlatformPlugin {
         ))
         .add(_handleStaticArtifact)
         .add(_localCanvasKitHandler)
-        .add(_goldenFileHandler)
+        .add(_screenshotHandler)
+        .add(_getGoldenHandler)
+        .add(_updateGoldenHandler)
         .add(_wrapperHandler)
         .add(_handleTestRequest)
         .add(createStaticHandler(
@@ -331,11 +333,9 @@ class FlutterWebPlatform extends PlatformPlugin {
     return shelf.Response.notFound('Not Found');
   }
 
-  Future<shelf.Response> _goldenFileHandler(shelf.Request request) async {
-    if (request.url.path.contains('flutter_goldens')) {
+  Future<shelf.Response> _screenshotHandler(shelf.Request request) async {
+    if (request.url.path.contains('flutter_screenshot')) {
       final Map<String, Object?> body = json.decode(await request.readAsString()) as Map<String, Object?>;
-      final Uri goldenKey = Uri.parse(body['key']! as String);
-      final Uri testUri = Uri.parse(body['testUri']! as String);
       final num width = body['width']! as num;
       final num height = body['height']! as num;
       Uint8List bytes;
@@ -367,6 +367,32 @@ class FlutterWebPlatform extends PlatformPlugin {
         _logger.printError('Caught FormatException: $ex');
         return shelf.Response.ok('Caught exception: $ex');
       }
+      return shelf.Response.ok(bytes);
+    } else {
+      return shelf.Response.notFound('Not Found');
+    }
+  }
+
+  Future<shelf.Response> _getGoldenHandler(shelf.Request request) async {
+    if (request.url.path.contains('get_flutter_golden')) {
+      final Map<String, Object?> body = json.decode(await request.readAsString()) as Map<String, Object?>;
+      final Uri goldenKey = Uri.parse(body['key']! as String);
+      final Uri testUri = Uri.parse(body['testUri']! as String);
+      Uint8List bytes;
+
+      final String? errorMessage = await _testGoldenComparator.compareGoldens(testUri, bytes, goldenKey, updateGoldens);
+      return shelf.Response.ok(errorMessage ?? 'true');
+    } else {
+      return shelf.Response.notFound('Not Found');
+    }
+  }
+
+  Future<shelf.Response> _updateGoldenHandler(shelf.Request request) async {
+    if (request.url.path.contains('update_flutter_golden')) {
+      final Map<String, Object?> body = json.decode(await request.readAsString()) as Map<String, Object?>;
+      final Uri goldenKey = Uri.parse(body['key']! as String);
+      final Uri testUri = Uri.parse(body['testUri']! as String);
+      final Uint8List data = base64.decode(body['data']! as String);
 
       final String? errorMessage = await _testGoldenComparator.compareGoldens(testUri, bytes, goldenKey, updateGoldens);
       return shelf.Response.ok(errorMessage ?? 'true');
