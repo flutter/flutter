@@ -1262,6 +1262,32 @@ TEST_P(AiksTest, CanRenderDifferencePaths) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+// Regression test for https://github.com/flutter/flutter/issues/134816.
+//
+// It should be possible to draw 3 lines, and not have an implicit close path.
+TEST_P(AiksTest, CanDrawAnOpenPath) {
+  Canvas canvas;
+
+  // Starting at (50, 50), draw lines from:
+  // 1. (50, height)
+  // 2. (width, height)
+  // 3. (width, 50)
+  PathBuilder builder;
+  builder.MoveTo({50, 50});
+  builder.LineTo({50, 100});
+  builder.LineTo({100, 100});
+  builder.LineTo({100, 50});
+
+  Paint paint;
+  paint.color = Color::Red();
+  paint.style = Paint::Style::kStroke;
+  paint.stroke_width = 10;
+
+  canvas.DrawPath(builder.TakePath(), paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 static sk_sp<SkData> OpenFixtureAsSkData(const char* fixture_name) {
   auto mapping = flutter::testing::OpenFixtureAsMapping(fixture_name);
   if (!mapping) {
