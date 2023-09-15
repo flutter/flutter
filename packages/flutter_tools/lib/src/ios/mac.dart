@@ -72,6 +72,7 @@ class IMobileDevice {
   /// Create an [IMobileDevice] for testing.
   factory IMobileDevice.test({ required ProcessManager processManager }) {
     return IMobileDevice(
+      // ignore: invalid_use_of_visible_for_testing_member
       artifacts: Artifacts.test(),
       cache: Cache.test(processManager: processManager),
       processManager: processManager,
@@ -132,7 +133,6 @@ Future<XcodeBuildResult> buildXcodeProject({
   DarwinArch? activeArch,
   bool codesign = true,
   String? deviceID,
-  bool isCoreDevice = false,
   bool configOnly = false,
   XcodeBuildAction buildAction = XcodeBuildAction.build,
 }) async {
@@ -241,7 +241,6 @@ Future<XcodeBuildResult> buildXcodeProject({
     project: project,
     targetOverride: targetOverride,
     buildInfo: buildInfo,
-    usingCoreDevice: isCoreDevice,
   );
   await processPodsIfNeeded(project.ios, getIosBuildDirectory(), buildInfo.mode);
   if (configOnly) {

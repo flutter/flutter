@@ -74,22 +74,6 @@ const List<VmServiceExpectation> kAttachIsolateExpectations =
     'service': kFlutterMemoryInfoServiceName,
     'alias': kFlutterToolAlias,
   }),
-  FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
-    'service': kFlutterGetIOSBuildOptionsServiceName,
-    'alias': kFlutterToolAlias,
-  }),
-  FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
-    'service': kFlutterGetAndroidBuildVariantsServiceName,
-    'alias': kFlutterToolAlias,
-  }),
-  FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
-    'service': kFlutterGetIOSUniversalLinkSettingsServiceName,
-    'alias': kFlutterToolAlias,
-  }),
-  FakeVmServiceRequest(method: 'registerService', args: <String, Object>{
-    'service': kFlutterGetAndroidAppLinkSettingsName,
-    'alias': kFlutterToolAlias,
-  }),
   FakeVmServiceRequest(
     method: 'streamListen',
     args: <String, Object>{
@@ -1460,6 +1444,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     bool suppressErrors = false,
     bool checkDartPluginRegistry = false,
     File? dartPluginRegistrant,
+    Uri? nativeAssetsYaml,
   }) async {
     return const CompilerOutput('foo.dill', 0, <Uri>[]);
   }

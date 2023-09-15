@@ -5,8 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestIcon extends StatefulWidget {
   const TestIcon({super.key});
@@ -893,6 +892,162 @@ void main() {
     );
     handle.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
+
+  testWidgetsWithLeakTracking('Collapsed ExpansionTile properties can be updated with setState', (WidgetTester tester) async {
+    const Key expansionTileKey = Key('expansionTileKey');
+    ShapeBorder collapsedShape = const RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(4)),
+    );
+    Color collapsedTextColor = const Color(0xffffffff);
+    Color collapsedBackgroundColor = const Color(0xffff0000);
+    Color collapsedIconColor = const Color(0xffffffff);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Column(
+              children: <Widget>[
+                ExpansionTile(
+                  key: expansionTileKey,
+                  collapsedShape: collapsedShape,
+                  collapsedTextColor: collapsedTextColor,
+                  collapsedBackgroundColor: collapsedBackgroundColor,
+                  collapsedIconColor: collapsedIconColor,
+                  title: const TestText('title'),
+                  trailing: const TestIcon(),
+                  children: const <Widget>[
+                    SizedBox(height: 100, width: 100),
+                  ],
+                ),
+                // This button is used to update the ExpansionTile properties.
+                FilledButton(
+                  onPressed: () {
+                    setState(() {
+                      collapsedShape = const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(16)),
+                      );
+                      collapsedTextColor = const Color(0xff000000);
+                      collapsedBackgroundColor = const Color(0xffffff00);
+                      collapsedIconColor = const Color(0xff000000);
+                    });
+                  },
+                  child: const Text('Update collapsed properties'),
+                ),
+              ],
+            );
+          }
+        ),
+      ),
+    ));
+
+    ShapeDecoration shapeDecoration =  tester.firstWidget<Container>(find.descendant(
+      of: find.byKey(expansionTileKey),
+      matching: find.byType(Container),
+    )).decoration! as ShapeDecoration;
+
+    // Test initial ExpansionTile properties.
+    expect(shapeDecoration.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))));
+    expect(shapeDecoration.color, const Color(0xffff0000));
+    expect(tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color, const Color(0xffffffff));
+    expect(tester.state<TestTextState>(find.byType(TestText)).textStyle.color, const Color(0xffffffff));
+
+    // Tap the button to update the ExpansionTile properties.
+    await tester.tap(find.text('Update collapsed properties'));
+    await tester.pumpAndSettle();
+
+    shapeDecoration =  tester.firstWidget<Container>(find.descendant(
+      of: find.byKey(expansionTileKey),
+      matching: find.byType(Container),
+    )).decoration! as ShapeDecoration;
+
+    // Test updated ExpansionTile properties.
+    expect(shapeDecoration.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))));
+    expect(shapeDecoration.color, const Color(0xffffff00));
+    expect(tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color, const Color(0xff000000));
+    expect(tester.state<TestTextState>(find.byType(TestText)).textStyle.color, const Color(0xff000000));
+  });
+
+  testWidgetsWithLeakTracking('Expanded ExpansionTile properties can be updated with setState', (WidgetTester tester) async {
+    const Key expansionTileKey = Key('expansionTileKey');
+    ShapeBorder shape = const RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(12)),
+    );
+    Color textColor = const Color(0xff00ffff);
+    Color backgroundColor = const Color(0xff0000ff);
+    Color iconColor = const Color(0xff00ffff);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Column(
+              children: <Widget>[
+                ExpansionTile(
+                  key: expansionTileKey,
+                  shape: shape,
+                  textColor: textColor,
+                  backgroundColor: backgroundColor,
+                  iconColor: iconColor,
+                  title: const TestText('title'),
+                  trailing: const TestIcon(),
+                  children: const <Widget>[
+                    SizedBox(height: 100, width: 100),
+                  ],
+                ),
+                // This button is used to update the ExpansionTile properties.
+                FilledButton(
+                  onPressed: () {
+                    setState(() {
+                      shape = const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(6)),
+                      );
+                      textColor = const Color(0xffffffff);
+                      backgroundColor = const Color(0xff123456);
+                      iconColor = const Color(0xffffffff);
+                    });
+                  },
+                  child: const Text('Update collapsed properties'),
+                ),
+              ],
+            );
+          }
+        ),
+      ),
+    ));
+
+    // Tap to expand the ExpansionTile.
+    await tester.tap(find.text('title'));
+    await tester.pumpAndSettle();
+
+    ShapeDecoration shapeDecoration =  tester.firstWidget<Container>(find.descendant(
+      of: find.byKey(expansionTileKey),
+      matching: find.byType(Container),
+    )).decoration! as ShapeDecoration;
+
+    // Test initial ExpansionTile properties.
+    expect(shapeDecoration.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))));
+    expect(shapeDecoration.color, const Color(0xff0000ff));
+    expect(tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color, const Color(0xff00ffff));
+    expect(tester.state<TestTextState>(find.byType(TestText)).textStyle.color, const Color(0xff00ffff));
+
+    // Tap the button to update the ExpansionTile properties.
+    await tester.tap(find.text('Update collapsed properties'));
+    await tester.pumpAndSettle();
+
+    shapeDecoration =  tester.firstWidget<Container>(find.descendant(
+      of: find.byKey(expansionTileKey),
+      matching: find.byType(Container),
+    )).decoration! as ShapeDecoration;
+    iconColor = tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color!;
+    textColor = tester.state<TestTextState>(find.byType(TestText)).textStyle.color!;
+
+    // Test updated ExpansionTile properties.
+    expect(shapeDecoration.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(6))));
+    expect(shapeDecoration.color, const Color(0xff123456));
+    expect(tester.state<TestIconState>(find.byType(TestIcon)).iconTheme.color, const Color(0xffffffff));
+    expect(tester.state<TestTextState>(find.byType(TestText)).textStyle.color, const Color(0xffffffff));
+  });
 
   group('Material 2', () {
     // These tests are only relevant for Material 2. Once Material 2

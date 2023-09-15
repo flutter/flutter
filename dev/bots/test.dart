@@ -213,13 +213,16 @@ String get shuffleSeed {
 ///
 /// Examples:
 /// SHARD=tool_tests bin/cache/dart-sdk/bin/dart dev/bots/test.dart
-/// bin/cache/dart-sdk/bin/dart dev/bots/test.dart --local-engine=host_debug_unopt
+/// bin/cache/dart-sdk/bin/dart dev/bots/test.dart --local-engine=host_debug_unopt --local-engine-host=host_debug_unopt
 Future<void> main(List<String> args) async {
   try {
     printProgress('STARTING ANALYSIS');
     for (final String arg in args) {
       if (arg.startsWith('--local-engine=')) {
         localEngineEnv['FLUTTER_LOCAL_ENGINE'] = arg.substring('--local-engine='.length);
+        flutterTestArgs.add(arg);
+      } else if (arg.startsWith('--local-engine-host=')) {
+        localEngineEnv['FLUTTER_LOCAL_ENGINE_HOST'] = arg.substring('--local-engine-host='.length);
         flutterTestArgs.add(arg);
       } else if (arg.startsWith('--local-engine-src-path=')) {
         localEngineEnv['FLUTTER_LOCAL_ENGINE_SRC_PATH'] = arg.substring('--local-engine-src-path='.length);
@@ -1001,6 +1004,23 @@ Future<void> _runFrameworkTests() async {
       // Web-specific tests depend on Chromium, so they run as part of the web_long_running_tests shard.
       '--exclude-tags=web',
     ]);
+    // Run java unit tests for integration_test
+    //
+    // Generate Gradle wrapper if it doesn't exist.
+    Process.runSync(
+      flutter,
+      <String>['build', 'apk', '--config-only'],
+      workingDirectory: path.join(flutterRoot, 'packages', 'integration_test', 'example', 'android'),
+    );
+    await runCommand(
+      path.join(flutterRoot, 'packages', 'integration_test', 'example', 'android', 'gradlew$bat'),
+      <String>[
+        ':integration_test:testDebugUnitTest',
+        '--tests',
+        'dev.flutter.plugins.integration_test.FlutterDeviceScreenshotTest',
+      ],
+      workingDirectory: path.join(flutterRoot, 'packages', 'integration_test', 'example', 'android'),
+    );
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'));
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'));
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
@@ -1229,6 +1249,7 @@ Future<void> _runWebLongRunningTests() async {
     () => runWebServiceWorkerTestWithCachingResources(headless: true, testType: ServiceWorkerTestType.withFlutterJsTrustedTypesOn),
     () => runWebServiceWorkerTestWithGeneratedEntrypoint(headless: true),
     () => runWebServiceWorkerTestWithBlockedServiceWorkers(headless: true),
+    () => runWebServiceWorkerTestWithCustomServiceWorkerVersion(headless: true),
     () => _runWebStackTraceTest('profile', 'lib/stack_trace.dart'),
     () => _runWebStackTraceTest('release', 'lib/stack_trace.dart'),
     () => _runWebStackTraceTest('profile', 'lib/framework_stack_trace.dart'),

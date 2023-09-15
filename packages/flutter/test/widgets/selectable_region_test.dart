@@ -338,6 +338,7 @@ void main() {
       expect(renderSelectionSpy.events[0].type, SelectionEventType.endEdgeUpdate);
       final SelectionEdgeUpdateEvent edgeEvent = renderSelectionSpy.events[0] as SelectionEdgeUpdateEvent;
       expect(edgeEvent.globalPosition, const Offset(200.0, 50.0));
+      expect(edgeEvent.granularity, TextGranularity.word);
     });
 
   testWidgets(
@@ -884,6 +885,78 @@ void main() {
 
       await gesture.up();
     });
+
+    testWidgets(
+      'single tap on the previous selection toggles the toolbar on iOS',
+      (WidgetTester tester) async {
+        Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
+        final UniqueKey toolbarKey = UniqueKey();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: SelectableRegion(
+              focusNode: FocusNode(),
+              selectionControls: materialTextSelectionHandleControls,
+              contextMenuBuilder: (
+                BuildContext context,
+                SelectableRegionState selectableRegionState,
+              ) {
+                buttonTypes = selectableRegionState.contextMenuButtonItems
+                  .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
+                  .toSet();
+                return SizedBox.shrink(key: toolbarKey);
+              },
+              child: const Column(
+                children: <Widget>[
+                  Text('How are you?'),
+                  Text('Good, and you?'),
+                  Text('Fine, thank you.'),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        expect(buttonTypes.isEmpty, true);
+        expect(find.byKey(toolbarKey), findsNothing);
+
+        final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+        final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2));
+        addTearDown(gesture.removePointer);
+        await tester.pump(const Duration(milliseconds: 500));
+        await gesture.up();
+        await tester.pumpAndSettle();
+        expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 3));
+        expect(buttonTypes, contains(ContextMenuButtonType.copy));
+        expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
+        expect(find.byKey(toolbarKey), findsOneWidget);
+
+        await gesture.down(textOffsetToPosition(paragraph, 2));
+        await tester.pump();
+        await gesture.up();
+        await tester.pumpAndSettle();
+        expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 3));
+        expect(buttonTypes, contains(ContextMenuButtonType.copy));
+        expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
+        expect(find.byKey(toolbarKey), findsNothing);
+
+        await gesture.down(textOffsetToPosition(paragraph, 2));
+        await tester.pump();
+        await gesture.up();
+        await tester.pumpAndSettle();
+        expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 3));
+        expect(buttonTypes, contains(ContextMenuButtonType.copy));
+        expect(buttonTypes, contains(ContextMenuButtonType.selectAll));
+        expect(find.byKey(toolbarKey), findsOneWidget);
+
+        // Clear selection.
+        await tester.tapAt(textOffsetToPosition(paragraph, 9));
+        await tester.pump();
+        expect(paragraph.selections.isEmpty, true);
+        expect(find.byKey(toolbarKey), findsNothing);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+      skip: kIsWeb, // [intended] Web uses its native context menu.
+    );
 
     testWidgets(
       'right-click mouse can select word at position on Apple platforms',
@@ -1497,7 +1570,6 @@ void main() {
       final UniqueKey outerText = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: false),
           home: SelectableRegion(
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
@@ -1522,8 +1594,13 @@ void main() {
         ),
       );
       final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.byKey(outerText), matching: find.byType(RichText)).first);
+
+      // Adjust `textOffsetToPosition` result because it returns the wrong vertical position (wrong line).
+      // TODO(bleroux): Remove when https://github.com/flutter/flutter/issues/133637 is fixed.
+      final Offset gestureOffset = textOffsetToPosition(paragraph, 125).translate(0, 10);
+
       // Right click to select word at position.
-      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 125), kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
+      final TestGesture gesture = await tester.startGesture(gestureOffset, kind: PointerDeviceKind.mouse, buttons: kSecondaryMouseButton);
       addTearDown(gesture.removePointer);
       await tester.pump();
       await gesture.up();
@@ -1656,7 +1733,7 @@ void main() {
       await gesture.up();
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
 
-    testWidgets('long press and drag touch selection', (WidgetTester tester) async {
+    testWidgets('long press and drag touch moves selection word by word', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
@@ -1681,9 +1758,9 @@ void main() {
       expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 7));
 
       final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Good, and you?'), matching: find.byType(RichText)));
-      await gesture.moveTo(textOffsetToPosition(paragraph2, 5));
+      await gesture.moveTo(textOffsetToPosition(paragraph2, 7));
       expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 12));
-      expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 5));
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 9));
       await gesture.up();
     });
 
@@ -2636,7 +2713,7 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
-  testWidgets('onSelectionChange is called when the selection changes', (WidgetTester tester) async {
+  testWidgets('onSelectionChange is called when the selection changes through gestures', (WidgetTester tester) async {
     SelectedContent? content;
 
     await tester.pumpWidget(
@@ -2651,27 +2728,264 @@ void main() {
         ),
       ),
     );
+
     final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you'), matching: find.byType(RichText)));
-    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 4), kind: PointerDeviceKind.mouse);
+    final TestGesture mouseGesture = await tester.startGesture(textOffsetToPosition(paragraph, 4), kind: PointerDeviceKind.mouse);
+    final TestGesture touchGesture = await tester.createGesture();
+
     expect(content, isNull);
-    addTearDown(gesture.removePointer);
+    addTearDown(mouseGesture.removePointer);
+    addTearDown(touchGesture.removePointer);
     await tester.pump();
 
-    await gesture.moveTo(textOffsetToPosition(paragraph, 7));
-    await gesture.up();
-    await tester.pump();
+    // Called on drag.
+    await mouseGesture.moveTo(textOffsetToPosition(paragraph, 7));
+    await tester.pumpAndSettle();
     expect(content, isNotNull);
     expect(content!.plainText, 'are');
 
+    // Updates on drag.
+    await mouseGesture.moveTo(textOffsetToPosition(paragraph, 10));
+    await tester.pumpAndSettle();
+    expect(content, isNotNull);
+    expect(content!.plainText, 'are yo');
+
+    // Called on drag end.
+    await mouseGesture.up();
+    await tester.pump();
+    expect(content, isNotNull);
+    expect(content!.plainText, 'are yo');
+
     // Backwards selection.
-    await gesture.down(textOffsetToPosition(paragraph, 3));
+    await mouseGesture.down(textOffsetToPosition(paragraph, 3));
     await tester.pumpAndSettle();
     expect(content, isNull);
-    await gesture.moveTo(textOffsetToPosition(paragraph, 0));
-    await gesture.up();
+
+    await mouseGesture.moveTo(textOffsetToPosition(paragraph, 0));
+    await tester.pumpAndSettle();
+    expect(content, isNotNull);
+    expect(content!.plainText, 'How');
+
+    await mouseGesture.up();
     await tester.pump();
     expect(content, isNotNull);
     expect(content!.plainText, 'How');
+
+    // Called on double tap.
+    await mouseGesture.down(textOffsetToPosition(paragraph, 6));
+    await tester.pump();
+    await mouseGesture.up();
+    await tester.pump();
+    await mouseGesture.down(textOffsetToPosition(paragraph, 6));
+    await tester.pumpAndSettle();
+    expect(content, isNotNull);
+    expect(content!.plainText, 'are');
+    await mouseGesture.up();
+    await tester.pumpAndSettle();
+
+    // Called on tap.
+    await mouseGesture.down(textOffsetToPosition(paragraph, 0));
+    await tester.pumpAndSettle();
+    expect(content, isNull);
+    await mouseGesture.up();
+    await tester.pumpAndSettle();
+
+    // With touch gestures.
+
+    // Called on long press start.
+    await touchGesture.down(textOffsetToPosition(paragraph, 0));
+    await tester.pumpAndSettle(kLongPressTimeout);
+    expect(content, isNotNull);
+    expect(content!.plainText, 'How');
+
+    // Called on long press update.
+    await touchGesture.moveTo(textOffsetToPosition(paragraph, 5));
+    await tester.pumpAndSettle();
+    expect(content, isNotNull);
+    expect(content!.plainText, 'How are');
+
+    // Called on long press end.
+    await touchGesture.up();
+    await tester.pumpAndSettle();
+    expect(content, isNotNull);
+    expect(content!.plainText, 'How are');
+
+    // Long press to select 'you'.
+    await touchGesture.down(textOffsetToPosition(paragraph, 9));
+    await tester.pumpAndSettle(kLongPressTimeout);
+    expect(content, isNotNull);
+    expect(content!.plainText, 'you');
+    await touchGesture.up();
+    await tester.pumpAndSettle();
+
+    // Called while moving selection handles.
+    final List<TextBox> boxes = paragraph.getBoxesForSelection(paragraph.selections[0]);
+    expect(boxes.length, 1);
+    final Offset startHandlePos = globalize(boxes[0].toRect().bottomLeft, paragraph);
+    final Offset endHandlePos = globalize(boxes[0].toRect().bottomRight, paragraph);
+    final Offset startPos = Offset(textOffsetToPosition(paragraph, 4).dx, startHandlePos.dy);
+    final Offset endPos = Offset(textOffsetToPosition(paragraph, 6).dx, endHandlePos.dy);
+
+    // Start handle.
+    await touchGesture.down(startHandlePos);
+    await touchGesture.moveTo(startPos);
+    await tester.pumpAndSettle();
+    expect(content, isNotNull);
+    expect(content!.plainText, 'are you');
+    await touchGesture.up();
+    await tester.pumpAndSettle();
+
+    // End handle.
+    await touchGesture.down(endHandlePos);
+    await touchGesture.moveTo(endPos);
+    await tester.pumpAndSettle();
+    expect(content, isNotNull);
+    expect(content!.plainText, 'ar');
+    await touchGesture.up();
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('onSelectionChange is called when the selection changes through keyboard actions', (WidgetTester tester) async {
+    SelectedContent? content;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          onSelectionChanged: (SelectedContent? selectedContent) => content = selectedContent,
+          focusNode: FocusNode(),
+          selectionControls: materialTextSelectionControls,
+          child: const Column(
+            children: <Widget>[
+              Text('How are you?'),
+              Text('Good, and you?'),
+              Text('Fine, thank you.'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(content, isNull);
+    await tester.pump();
+
+    final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+    final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Good, and you?'), matching: find.byType(RichText)));
+    final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Fine, thank you.'), matching: find.byType(RichText)));
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 2), kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.moveTo(textOffsetToPosition(paragraph1, 6));
+    await gesture.up();
+    await tester.pump();
+
+    expect(paragraph1.selections.length, 1);
+    expect(paragraph1.selections[0].start, 2);
+    expect(paragraph1.selections[0].end, 6);
+    expect(content, isNotNull);
+    expect(content!.plainText, 'w ar');
+
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true));
+    await tester.pump();
+    expect(paragraph1.selections.length, 1);
+    expect(paragraph1.selections[0].start, 2);
+    expect(paragraph1.selections[0].end, 7);
+    expect(content, isNotNull);
+    expect(content!.plainText, 'w are');
+
+    for (int i = 0; i < 5; i += 1) {
+      await sendKeyCombination(tester,
+          const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true));
+      await tester.pump();
+      expect(paragraph1.selections.length, 1);
+      expect(paragraph1.selections[0].start, 2);
+      expect(paragraph1.selections[0].end, 8 + i);
+      expect(content, isNotNull);
+    }
+    expect(content, isNotNull);
+    expect(content!.plainText, 'w are you?');
+
+    for (int i = 0; i < 5; i += 1) {
+      await sendKeyCombination(tester,
+          const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true));
+      await tester.pump();
+      expect(paragraph1.selections.length, 1);
+      expect(paragraph1.selections[0].start, 2);
+      expect(paragraph1.selections[0].end, 11 - i);
+      expect(content, isNotNull);
+    }
+    expect(content, isNotNull);
+    expect(content!.plainText, 'w are');
+
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true));
+    await tester.pump();
+    expect(paragraph1.selections.length, 1);
+    expect(paragraph1.selections[0].start, 2);
+    expect(paragraph1.selections[0].end, 12);
+    expect(paragraph2.selections.length, 1);
+    expect(paragraph2.selections[0].start, 0);
+    expect(paragraph2.selections[0].end, 8);
+    expect(content, isNotNull);
+    expect(content!.plainText, 'w are you?Good, an');
+
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true));
+    await tester.pump();
+    expect(paragraph1.selections.length, 1);
+    expect(paragraph1.selections[0].start, 2);
+    expect(paragraph1.selections[0].end, 12);
+    expect(paragraph2.selections.length, 1);
+    expect(paragraph2.selections[0].start, 0);
+    expect(paragraph2.selections[0].end, 14);
+    expect(paragraph3.selections.length, 1);
+    expect(paragraph3.selections[0].start, 0);
+    expect(paragraph3.selections[0].end, 9);
+    expect(content, isNotNull);
+    expect(content!.plainText, 'w are you?Good, and you?Fine, tha');
+
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true));
+    await tester.pump();
+    expect(paragraph1.selections.length, 1);
+    expect(paragraph1.selections[0].start, 2);
+    expect(paragraph1.selections[0].end, 12);
+    expect(paragraph2.selections.length, 1);
+    expect(paragraph2.selections[0].start, 0);
+    expect(paragraph2.selections[0].end, 14);
+    expect(paragraph3.selections.length, 1);
+    expect(paragraph3.selections[0].start, 0);
+    expect(paragraph3.selections[0].end, 16);
+    expect(content, isNotNull);
+    expect(content!.plainText, 'w are you?Good, and you?Fine, thank you.');
+
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true));
+    await tester.pump();
+    expect(paragraph1.selections.length, 1);
+    expect(paragraph1.selections[0].start, 2);
+    expect(paragraph1.selections[0].end, 12);
+    expect(paragraph2.selections.length, 1);
+    expect(paragraph2.selections[0].start, 0);
+    expect(paragraph2.selections[0].end, 8);
+    expect(paragraph3.selections.length, 0);
+    expect(content, isNotNull);
+    expect(content!.plainText, 'w are you?Good, an');
+
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true));
+    await tester.pump();
+    expect(paragraph1.selections.length, 1);
+    expect(paragraph1.selections[0].start, 2);
+    expect(paragraph1.selections[0].end, 7);
+    expect(paragraph2.selections.length, 0);
+    expect(paragraph3.selections.length, 0);
+    expect(content, isNotNull);
+    expect(content!.plainText, 'w are');
+
+    await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true));
+    await tester.pump();
+    expect(paragraph1.selections.length, 1);
+    expect(paragraph1.selections[0].start, 0);
+    expect(paragraph1.selections[0].end, 2);
+    expect(paragraph2.selections.length, 0);
+    expect(paragraph3.selections.length, 0);
+    expect(content, isNotNull);
+    expect(content!.plainText, 'Ho');
   });
 
   group('BrowserContextMenu', () {

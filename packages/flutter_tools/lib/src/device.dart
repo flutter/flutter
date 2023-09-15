@@ -393,7 +393,7 @@ class DeviceDiscoverySupportFilter {
     if (_flutterProject == null) {
       return true;
     }
-    return device.isSupportedForProject(_flutterProject!);
+    return device.isSupportedForProject(_flutterProject);
   }
 }
 

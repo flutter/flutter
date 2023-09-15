@@ -7,8 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
 void onChanged<T>(T _) { }
@@ -150,7 +149,7 @@ void verifyPaintedShadow(Finder customPaint, int elevation) {
 
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/87102
-  testWidgets('label position test - show hint', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('label position test - show hint', (WidgetTester tester) async {
     int? value;
 
     await tester.pumpWidget(
@@ -289,7 +288,7 @@ void main() {
     expect(hintEmptyLabel, const Offset(0.0, 12.0));
   });
 
-  testWidgets('label position test - show hint: enable + empty item', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('label position test - show hint: enable + empty item', (WidgetTester tester) async {
     int? value;
 
     await tester.pumpWidget(
@@ -444,7 +443,7 @@ void main() {
     expect(nonEmptyLabel, nullValueLabel);
   });
 
-  testWidgets('DropdownButtonFormField with autovalidation test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButtonFormField with autovalidation test', (WidgetTester tester) async {
     String? value = 'one';
     int validateCalled = 0;
 
@@ -699,7 +698,7 @@ void main() {
     expect(find.text('disabled'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking(
+  testWidgets(
     'DropdownButtonFormField - hint displays when the items list is '
     'empty, items is null, and disabledHint is null',
     (WidgetTester tester) async {
@@ -859,7 +858,7 @@ void main() {
     debugDisableShadows = true;
   });
 
-  testWidgets('DropdownButtonFormField - custom elevation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButtonFormField - custom elevation', (WidgetTester tester) async {
     debugDisableShadows = false;
     final Key buttonKeyOne = UniqueKey();
     final Key buttonKeyTwo = UniqueKey();
@@ -954,7 +953,7 @@ void main() {
     );
   });
 
-  testWidgets('DropdownButtonFormField - selectedItemBuilder builds custom buttons', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButtonFormField - selectedItemBuilder builds custom buttons', (WidgetTester tester) async {
     const List<String> items = <String>[
       'One',
       'Two',
@@ -998,7 +997,7 @@ void main() {
     expect(find.text('Two as an Arabic numeral: 2'), findsOneWidget);
   });
 
-  testWidgets('DropdownButton onTap callback is called when defined', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButton onTap callback is called when defined', (WidgetTester tester) async {
     int dropdownButtonTapCounter = 0;
     String? value = 'one';
     void onChanged(String? newValue) {
@@ -1044,7 +1043,7 @@ void main() {
     expect(dropdownButtonTapCounter, 2); // Should not change.
   });
 
-  testWidgets('DropdownButtonFormField should re-render if value param changes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DropdownButtonFormField should re-render if value param changes', (WidgetTester tester) async {
     String currentValue = 'two';
 
     await tester.pumpWidget(
@@ -1136,13 +1135,14 @@ void main() {
     );
   });
 
-  testWidgets('InputDecoration borders are used for clipping', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('InputDecoration borders are used for clipping', (WidgetTester tester) async {
     const BorderRadius errorBorderRadius = BorderRadius.all(Radius.circular(5.0));
     const BorderRadius focusedErrorBorderRadius = BorderRadius.all(Radius.circular(6.0));
     const BorderRadius focusedBorder = BorderRadius.all(Radius.circular(7.0));
     const BorderRadius enabledBorder = BorderRadius.all(Radius.circular(9.0));
 
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
 
     const String errorText = 'This is an error';
     bool showError = false;

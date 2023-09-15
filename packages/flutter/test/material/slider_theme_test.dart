@@ -6,8 +6,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('SliderThemeData copyWith, ==, hashCode basics', () {
@@ -104,7 +103,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Slider defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Slider defaults', (WidgetTester tester) async {
     debugDisableShadows = false;
     final ThemeData theme = ThemeData(useMaterial3: true);
     final ColorScheme colorScheme = theme.colorScheme;
@@ -235,7 +234,7 @@ void main() {
     }
   });
 
-  testWidgets('Slider uses the right theme colors for the right components', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Slider uses the right theme colors for the right components', (WidgetTester tester) async {
     debugDisableShadows = false;
     try {
       const Color customColor1 = Color(0xcafefeed);
@@ -804,6 +803,7 @@ void main() {
       }),
     );
     final FocusNode focusNode = FocusNode(debugLabel: 'Slider');
+    addTearDown(focusNode.dispose);
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     double value = 0.5;
 
@@ -2085,7 +2085,7 @@ void main() {
     // support is deprecated and the APIs are removed, these tests
     // can be deleted.
 
-    testWidgets('Slider defaults', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Slider defaults', (WidgetTester tester) async {
       debugDisableShadows = false;
       final ThemeData theme  = ThemeData(useMaterial3: false);
       const double trackHeight = 4.0;

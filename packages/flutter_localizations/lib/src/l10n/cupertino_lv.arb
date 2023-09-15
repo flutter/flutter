@@ -30,5 +30,6 @@
   "noSpellCheckReplacementsLabel": "Netika atrasts neviens vārds aizstāšanai",
   "menuDismissLabel": "Nerādīt izvēlni",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

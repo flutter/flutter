@@ -7,8 +7,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   group('Basic floating action button locations', () {
@@ -410,37 +409,37 @@ void main() {
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_rightOffsetX, _topOffsetY));
     });
 
-    testWidgets('startFloat', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('startFloat', (WidgetTester tester) async {
       await tester.pumpWidget(_singleFabScaffold(FloatingActionButtonLocation.startFloat));
 
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_leftOffsetX, _floatOffsetY));
     });
 
-    testWidgets('centerFloat', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('centerFloat', (WidgetTester tester) async {
       await tester.pumpWidget(_singleFabScaffold(FloatingActionButtonLocation.centerFloat));
 
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_centerOffsetX, _floatOffsetY));
     });
 
-    testWidgets('endFloat', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('endFloat', (WidgetTester tester) async {
       await tester.pumpWidget(_singleFabScaffold(FloatingActionButtonLocation.endFloat));
 
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_rightOffsetX, _floatOffsetY));
     });
 
-    testWidgets('startDocked', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('startDocked', (WidgetTester tester) async {
       await tester.pumpWidget(_singleFabScaffold(FloatingActionButtonLocation.startDocked));
 
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_leftOffsetX, _dockedOffsetY));
     });
 
-    testWidgets('centerDocked', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('centerDocked', (WidgetTester tester) async {
       await tester.pumpWidget(_singleFabScaffold(FloatingActionButtonLocation.centerDocked));
 
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_centerOffsetX, _dockedOffsetY));
     });
 
-    testWidgets('endDocked', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('endDocked', (WidgetTester tester) async {
       await tester.pumpWidget(_singleFabScaffold(FloatingActionButtonLocation.endDocked));
 
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_rightOffsetX, _dockedOffsetY));
@@ -464,31 +463,31 @@ void main() {
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_miniRightOffsetX, _topOffsetY));
     });
 
-    testWidgets('miniStartFloat', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('miniStartFloat', (WidgetTester tester) async {
       await tester.pumpWidget(_singleFabScaffold(FloatingActionButtonLocation.miniStartFloat));
 
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_miniLeftOffsetX, _miniFloatOffsetY));
     });
 
-    testWidgets('miniCenterFloat', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('miniCenterFloat', (WidgetTester tester) async {
       await tester.pumpWidget(_singleFabScaffold(FloatingActionButtonLocation.miniCenterFloat));
 
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_centerOffsetX, _miniFloatOffsetY));
     });
 
-    testWidgets('miniEndFloat', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('miniEndFloat', (WidgetTester tester) async {
       await tester.pumpWidget(_singleFabScaffold(FloatingActionButtonLocation.miniEndFloat));
 
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_miniRightOffsetX, _miniFloatOffsetY));
     });
 
-    testWidgets('miniStartDocked', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('miniStartDocked', (WidgetTester tester) async {
       await tester.pumpWidget(_singleFabScaffold(FloatingActionButtonLocation.miniStartDocked));
 
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_miniLeftOffsetX, _dockedOffsetY));
     });
 
-    testWidgets('miniEndDocked', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('miniEndDocked', (WidgetTester tester) async {
       await tester.pumpWidget(_singleFabScaffold(FloatingActionButtonLocation.miniEndDocked));
 
       expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(_miniRightOffsetX, _dockedOffsetY));
@@ -1001,7 +1000,7 @@ void main() {
       );
     }
 
-    testWidgets('startFloat', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('startFloat', (WidgetTester tester) async {
       const Rect defaultRect = Rect.fromLTRB(16.0, 478.0, 72.0, 534.0);
       // Positioned relative to BottomNavigationBar
       const Rect bottomNavigationBarRect = Rect.fromLTRB(16.0, 422.0, 72.0, 478.0);
@@ -1019,7 +1018,7 @@ void main() {
       );
     });
 
-    testWidgets('miniStartFloat', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('miniStartFloat', (WidgetTester tester) async {
       const Rect defaultRect = Rect.fromLTRB(12.0, 490.0, 60.0, 538.0);
       // Positioned relative to BottomNavigationBar
       const Rect bottomNavigationBarRect = Rect.fromLTRB(12.0, 434.0, 60.0, 482.0);
@@ -1038,7 +1037,7 @@ void main() {
       );
     });
 
-    testWidgets('centerFloat', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('centerFloat', (WidgetTester tester) async {
       const Rect defaultRect = Rect.fromLTRB(372.0, 478.0, 428.0, 534.0);
       // Positioned relative to BottomNavigationBar
       const Rect bottomNavigationBarRect = Rect.fromLTRB(372.0, 422.0, 428.0, 478.0);
@@ -1056,7 +1055,7 @@ void main() {
       );
     });
 
-    testWidgets('miniCenterFloat', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('miniCenterFloat', (WidgetTester tester) async {
       const Rect defaultRect = Rect.fromLTRB(376.0, 490.0, 424.0, 538.0);
       // Positioned relative to BottomNavigationBar
       const Rect bottomNavigationBarRect = Rect.fromLTRB(376.0, 434.0, 424.0, 482.0);
@@ -1075,7 +1074,7 @@ void main() {
       );
     });
 
-    testWidgets('endFloat', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('endFloat', (WidgetTester tester) async {
       const Rect defaultRect = Rect.fromLTRB(728.0, 478.0, 784.0, 534.0);
       // Positioned relative to BottomNavigationBar
       const Rect bottomNavigationBarRect = Rect.fromLTRB(728.0, 422.0, 784.0, 478.0);
@@ -1093,7 +1092,7 @@ void main() {
       );
     });
 
-    testWidgets('miniEndFloat', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('miniEndFloat', (WidgetTester tester) async {
       const Rect defaultRect = Rect.fromLTRB(740.0, 490.0, 788.0, 538.0);
       // Positioned relative to BottomNavigationBar
       const Rect bottomNavigationBarRect = Rect.fromLTRB(740.0, 434.0, 788.0, 482.0);
@@ -1364,7 +1363,7 @@ void main() {
       );
     }
 
-    testWidgets('startDocked', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('startDocked', (WidgetTester tester) async {
       const Rect defaultRect = Rect.fromLTRB(16.0, 494.0, 72.0, 550.0);
       // Positioned relative to BottomNavigationBar
       const Rect bottomNavigationBarRect = Rect.fromLTRB(16.0, 466.0, 72.0, 522.0);
@@ -1382,7 +1381,7 @@ void main() {
       );
     });
 
-    testWidgets('miniStartDocked', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('miniStartDocked', (WidgetTester tester) async {
       const Rect defaultRect = Rect.fromLTRB(12.0, 502.0, 60.0, 550.0);
       // Positioned relative to BottomNavigationBar
       const Rect bottomNavigationBarRect = Rect.fromLTRB(12.0, 470.0, 60.0, 518.0);
@@ -1401,7 +1400,7 @@ void main() {
       );
     });
 
-    testWidgets('centerDocked', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('centerDocked', (WidgetTester tester) async {
       const Rect defaultRect = Rect.fromLTRB(372.0, 494.0, 428.0, 550.0);
       // Positioned relative to BottomNavigationBar
       const Rect bottomNavigationBarRect = Rect.fromLTRB(372.0, 466.0, 428.0, 522.0);
@@ -1419,7 +1418,7 @@ void main() {
       );
     });
 
-    testWidgets('miniCenterDocked', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('miniCenterDocked', (WidgetTester tester) async {
       const Rect defaultRect = Rect.fromLTRB(376.0, 502.0, 424.0, 550.0);
       // Positioned relative to BottomNavigationBar
       const Rect bottomNavigationBarRect = Rect.fromLTRB(376.0, 470.0, 424.0, 518.0);
@@ -1438,7 +1437,7 @@ void main() {
       );
     });
 
-    testWidgets('endDocked', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('endDocked', (WidgetTester tester) async {
       const Rect defaultRect = Rect.fromLTRB(728.0, 494.0, 784.0, 550.0);
       // Positioned relative to BottomNavigationBar
       const Rect bottomNavigationBarRect = Rect.fromLTRB(728.0, 466.0, 784.0, 522.0);
@@ -1456,7 +1455,7 @@ void main() {
       );
     });
 
-    testWidgets('miniEndDocked', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('miniEndDocked', (WidgetTester tester) async {
       const Rect defaultRect = Rect.fromLTRB(740.0, 502.0, 788.0, 550.0);
       // Positioned relative to BottomNavigationBar
       const Rect bottomNavigationBarRect = Rect.fromLTRB(740.0, 470.0, 788.0, 518.0);

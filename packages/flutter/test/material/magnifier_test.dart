@@ -8,8 +8,7 @@ library;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../foundation/leak_tracking.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   final MagnifierController magnifierController = MagnifierController();
@@ -52,7 +51,7 @@ void main() {
   });
 
   group('adaptiveMagnifierControllerBuilder', () {
-    testWidgets('should return a TextEditingMagnifier on Android',
+    testWidgetsWithLeakTracking('should return a TextEditingMagnifier on Android',
         (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(
         home: Placeholder(),
@@ -60,16 +59,19 @@ void main() {
 
       final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
+      final ValueNotifier<MagnifierInfo> magnifierPositioner = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
+      addTearDown(magnifierPositioner.dispose);
+
       final Widget? builtWidget = TextMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
         context,
         MagnifierController(),
-        ValueNotifier<MagnifierInfo>(MagnifierInfo.empty),
+        magnifierPositioner,
       );
 
       expect(builtWidget, isA<TextMagnifier>());
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-    testWidgets('should return a CupertinoMagnifier on iOS',
+    testWidgetsWithLeakTracking('should return a CupertinoMagnifier on iOS',
         (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(
         home: Placeholder(),
@@ -77,16 +79,19 @@ void main() {
 
       final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
+      final ValueNotifier<MagnifierInfo> magnifierPositioner = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
+      addTearDown(magnifierPositioner.dispose);
+
       final Widget? builtWidget = TextMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
         context,
         MagnifierController(),
-        ValueNotifier<MagnifierInfo>(MagnifierInfo.empty),
+        magnifierPositioner,
       );
 
       expect(builtWidget, isA<CupertinoTextMagnifier>());
     }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
-    testWidgets('should return null on all platforms not Android, iOS',
+    testWidgetsWithLeakTracking('should return null on all platforms not Android, iOS',
         (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(
         home: Placeholder(),
@@ -94,10 +99,13 @@ void main() {
 
       final BuildContext context = tester.firstElement(find.byType(Placeholder));
 
+      final ValueNotifier<MagnifierInfo> magnifierPositioner = ValueNotifier<MagnifierInfo>(MagnifierInfo.empty);
+      addTearDown(magnifierPositioner.dispose);
+
       final Widget? builtWidget = TextMagnifier.adaptiveMagnifierConfiguration.magnifierBuilder(
         context,
         MagnifierController(),
-        ValueNotifier<MagnifierInfo>(MagnifierInfo.empty),
+        magnifierPositioner,
       );
 
       expect(builtWidget, isNull);
@@ -157,6 +165,7 @@ void main() {
           // The tap position is dragBelow units below the text field.
           globalGesturePosition: fakeTextFieldRect.center,
         ));
+        addTearDown(magnifierInfo.dispose);
 
         await showMagnifier(context, tester, magnifierInfo);
 
@@ -180,10 +189,13 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
+        late ValueNotifier<MagnifierInfo> magnifierPositioner;
+        addTearDown(() => magnifierPositioner.dispose());
+
         await showMagnifier(
           context,
           tester,
-          ValueNotifier<MagnifierInfo>(
+          magnifierPositioner = ValueNotifier<MagnifierInfo>(
             MagnifierInfo(
               currentLineBoundaries: reasonableTextField,
               // Inflate these two to make sure we're bounding on the
@@ -213,10 +225,13 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
+        late ValueNotifier<MagnifierInfo> magnifierPositioner;
+        addTearDown(() => magnifierPositioner.dispose());
+
         await showMagnifier(
           context,
           tester,
-          ValueNotifier<MagnifierInfo>(
+          magnifierPositioner = ValueNotifier<MagnifierInfo>(
             MagnifierInfo(
               currentLineBoundaries: reasonableTextField,
               // Inflate these two to make sure we're bounding on the
@@ -241,10 +256,13 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
+        late ValueNotifier<MagnifierInfo> magnifierPositioner;
+        addTearDown(() => magnifierPositioner.dispose());
+
         await showMagnifier(
             context,
             tester,
-            ValueNotifier<MagnifierInfo>(
+            magnifierPositioner = ValueNotifier<MagnifierInfo>(
                 MagnifierInfo(
               currentLineBoundaries: reasonableTextField,
               fieldBounds: reasonableTextField,
@@ -268,10 +286,13 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
+        late ValueNotifier<MagnifierInfo> magnifierPositioner;
+        addTearDown(() => magnifierPositioner.dispose());
+
         await showMagnifier(
           context,
           tester,
-          ValueNotifier<MagnifierInfo>(
+          magnifierPositioner = ValueNotifier<MagnifierInfo>(
             MagnifierInfo(
               currentLineBoundaries: topOfScreenTextFieldRect,
               fieldBounds: topOfScreenTextFieldRect,
@@ -301,10 +322,13 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
+        late ValueNotifier<MagnifierInfo> magnifierPositioner;
+        addTearDown(() => magnifierPositioner.dispose());
+
         await showMagnifier(
           context,
           tester,
-          ValueNotifier<MagnifierInfo>(
+          magnifierPositioner =  ValueNotifier<MagnifierInfo>(
             MagnifierInfo(
               currentLineBoundaries: reasonableTextField,
               fieldBounds: reasonableTextField,
@@ -332,10 +356,13 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
+        late ValueNotifier<MagnifierInfo> magnifierPositioner;
+        addTearDown(() => magnifierPositioner.dispose());
+
         await showMagnifier(
           context,
           tester,
-          ValueNotifier<MagnifierInfo>(
+          magnifierPositioner = ValueNotifier<MagnifierInfo>(
             MagnifierInfo(
               currentLineBoundaries: topOfScreenTextFieldRect,
               fieldBounds: topOfScreenTextFieldRect,
@@ -365,10 +392,13 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
+        late ValueNotifier<MagnifierInfo> magnifierInfo;
+        addTearDown(() => magnifierInfo.dispose());
+
         await showMagnifier(
           context,
           tester,
-          ValueNotifier<MagnifierInfo>(
+          magnifierInfo = ValueNotifier<MagnifierInfo>(
             MagnifierInfo(
               currentLineBoundaries: reasonableTextField,
               fieldBounds: reasonableTextField,
@@ -390,8 +420,7 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
-        final ValueNotifier<MagnifierInfo> magnifierPositioner =
-            ValueNotifier<MagnifierInfo>(
+        final ValueNotifier<MagnifierInfo> magnifierPositioner = ValueNotifier<MagnifierInfo>(
           MagnifierInfo(
             currentLineBoundaries: reasonableTextField,
             fieldBounds: reasonableTextField,
@@ -399,6 +428,7 @@ void main() {
             globalGesturePosition: reasonableTextField.center,
           ),
         );
+        addTearDown(magnifierPositioner.dispose);
 
         await showMagnifier(context, tester, magnifierPositioner);
 
@@ -426,8 +456,7 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
-        final ValueNotifier<MagnifierInfo> magnifierPositioner =
-            ValueNotifier<MagnifierInfo>(
+        final ValueNotifier<MagnifierInfo> magnifierPositioner = ValueNotifier<MagnifierInfo>(
           MagnifierInfo(
             currentLineBoundaries: reasonableTextField,
             fieldBounds: reasonableTextField,
@@ -435,6 +464,7 @@ void main() {
             globalGesturePosition: reasonableTextField.center,
           ),
         );
+        addTearDown(magnifierPositioner.dispose);
 
         await showMagnifier(context, tester, magnifierPositioner);
 
@@ -462,8 +492,7 @@ void main() {
         final BuildContext context =
             tester.firstElement(find.byType(Placeholder));
 
-        final ValueNotifier<MagnifierInfo> magnifierPositioner =
-            ValueNotifier<MagnifierInfo>(
+        final ValueNotifier<MagnifierInfo> magnifierPositioner = ValueNotifier<MagnifierInfo>(
           MagnifierInfo(
             currentLineBoundaries: reasonableTextField,
             fieldBounds: reasonableTextField,
@@ -471,6 +500,7 @@ void main() {
             globalGesturePosition: reasonableTextField.center,
           ),
         );
+        addTearDown(magnifierPositioner.dispose);
 
         await showMagnifier(context, tester, magnifierPositioner);
 

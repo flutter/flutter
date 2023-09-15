@@ -25,5 +25,6 @@
   "noSpellCheckReplacementsLabel": "Nuk u gjetën zëvendësime",
   "menuDismissLabel": "Hiqe menynë",
   "lookUpButtonLabel": "Look Up",
-  "searchWebButtonLabel": "Search Web"
+  "searchWebButtonLabel": "Search Web",
+  "shareButtonLabel": "Share..."
 }

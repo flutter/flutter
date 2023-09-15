@@ -105,6 +105,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
     required VoidCallback? onSelectAll,
     required VoidCallback? onLookUp,
     required VoidCallback? onSearchWeb,
+    required VoidCallback? onShare,
     required VoidCallback? onLiveTextInput,
     required this.anchors,
   }) : children = null,
@@ -116,6 +117,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
          onSelectAll: onSelectAll,
          onLookUp: onLookUp,
          onSearchWeb: onSearchWeb,
+         onShare: onShare,
          onLiveTextInput: onLiveTextInput
        );
 
@@ -222,6 +224,8 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
           case ContextMenuButtonType.lookUp:
             return localizations.lookUpButtonLabel;
           case ContextMenuButtonType.searchWeb:
+            return localizations.searchWebButtonLabel;
+          case ContextMenuButtonType.share:
             return localizations.searchWebButtonLabel;
           case ContextMenuButtonType.liveTextInput:
             return localizations.scanTextButtonLabel;

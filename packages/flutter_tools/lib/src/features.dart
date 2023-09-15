@@ -47,6 +47,12 @@ abstract class FeatureFlags {
   /// Whether WebAssembly compilation for Flutter Web is enabled.
   bool get isFlutterWebWasmEnabled => false;
 
+  /// Whether animations are used in the command line interface.
+  bool get isCliAnimationEnabled => true;
+
+  /// Whether native assets compilation and bundling is enabled.
+  bool get isNativeAssetsEnabled => false;
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -64,6 +70,8 @@ const List<Feature> allFeatures = <Feature>[
   flutterFuchsiaFeature,
   flutterCustomDevicesFeature,
   flutterWebWasm,
+  cliAnimation,
+  nativeAssets,
 ];
 
 /// All current Flutter feature flags that can be configured.
@@ -122,7 +130,7 @@ const Feature flutterFuchsiaFeature = Feature(
 );
 
 const Feature flutterCustomDevicesFeature = Feature(
-  name: 'Early support for custom device types',
+  name: 'early support for custom device types',
   configSetting: 'enable-custom-devices',
   environmentOverride: 'FLUTTER_CUSTOM_DEVICES',
   master: FeatureChannelSetting(
@@ -143,6 +151,24 @@ const Feature flutterWebWasm = Feature(
   master: FeatureChannelSetting(
     available: true,
     enabledByDefault: true,
+  ),
+);
+
+/// The [Feature] for CLI animations.
+///
+/// The TERM environment variable set to "dumb" turns this off.
+const Feature cliAnimation = Feature.fullyEnabled(
+  name: 'animations in the command line interface',
+  configSetting: 'cli-animations',
+);
+
+/// Enable native assets compilation and bundling.
+const Feature nativeAssets = Feature(
+  name: 'native assets compilation and bundling',
+  configSetting: 'enable-native-assets',
+  environmentOverride: 'FLUTTER_NATIVE_ASSETS',
+  master: FeatureChannelSetting(
+    available: true,
   ),
 );
 
@@ -229,9 +255,9 @@ class Feature {
     ];
     // Add channel info for settings only on some channels.
     if (channels.length == 1) {
-      buffer.write('\nThis setting applies to only the ${channels.single} channel.');
+      buffer.write('\nThis setting applies only to the ${channels.single} channel.');
     } else if (channels.length == 2) {
-      buffer.write('\nThis setting applies to only the ${channels.join(' and ')} channels.');
+      buffer.write('\nThis setting applies only to the ${channels.join(' and ')} channels.');
     }
     if (extraHelpText != null) {
       buffer.write(' $extraHelpText');

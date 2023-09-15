@@ -38,10 +38,6 @@ const Map<String, String> kManuallyPinnedDependencies = <String, String>{
   'url_launcher_android': '6.0.17',
   // https://github.com/flutter/flutter/issues/115660
   'archive': '3.3.2',
-  // https://github.com/flutter/flutter/issues/132222
-  'leak_tracker': '8.0.3',
-  // https://github.com/flutter/flutter/issues/132222
-  'leak_tracker_testing': '1.0.2',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -1757,7 +1753,7 @@ Directory createTemporaryFlutterSdk(
     // Fill in SDK dependency constraint.
     output.write('''
 environment:
-  sdk: '>=3.0.0-0 <4.0.0'
+  sdk: '>=3.2.0-0 <4.0.0'
 ''');
 
     output.writeln('dependencies:');
@@ -1789,7 +1785,7 @@ description: Dart SDK extensions for dart:ui
 homepage: http://flutter.io
 # sky_engine requires sdk_ext support in the analyzer which was added in 1.11.x
 environment:
-  sdk: '>=3.0.0-0 <4.0.0'
+  sdk: '>=3.2.0-0 <4.0.0'
 ''');
 
   return directory;
