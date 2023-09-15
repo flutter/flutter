@@ -40,7 +40,7 @@ void main() {
     expect(find.widgetWithText(Navigator, 'foo'), findsOneWidget);
   });
 
-  testWidgets('Has default cupertino localizations', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Has default cupertino localizations', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Builder(
@@ -178,7 +178,7 @@ void main() {
     expect(find.text('popped'), findsOneWidget);
   });
 
-  testWidgets('CupertinoApp.router route information parser is optional', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CupertinoApp.router route information parser is optional', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
@@ -190,6 +190,7 @@ void main() {
         return route.didPop(result);
       },
     );
+    addTearDown(delegate.dispose);
     delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
     await tester.pumpWidget(CupertinoApp.router(
       routerDelegate: delegate,
@@ -215,6 +216,7 @@ void main() {
         return route.didPop(result);
       },
     );
+    addTearDown(delegate.dispose);
     delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
     final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
       initialRouteInformation: RouteInformation(
@@ -240,6 +242,7 @@ void main() {
         return route.didPop(result);
       },
     );
+    addTearDown(delegate.dispose);
     delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
     final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(routerDelegate: delegate);
     await tester.pumpWidget(CupertinoApp.router(
@@ -250,6 +253,8 @@ void main() {
   });
 
   testWidgets('CupertinoApp.router router config works', (WidgetTester tester) async {
+    late SimpleNavigatorRouterDelegate delegate;
+    addTearDown(() => delegate.dispose());
     final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(
         routeInformationProvider: PlatformRouteInformationProvider(
           initialRouteInformation: RouteInformation(
@@ -257,7 +262,7 @@ void main() {
           ),
         ),
         routeInformationParser: SimpleRouteInformationParser(),
-        routerDelegate: SimpleNavigatorRouterDelegate(
+        routerDelegate: delegate = SimpleNavigatorRouterDelegate(
           builder: (BuildContext context, RouteInformation information) {
             return Text(information.uri.toString());
           },
