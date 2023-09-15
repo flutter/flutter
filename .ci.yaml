@@ -1567,16 +1567,6 @@ targets:
       - bin/**
       - .ci.yaml
 
-  - name: Linux_android hello_world_impeller
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    bringup: true
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux"]
-      task_name: hello_world_impeller
-
   - name: Linux_android android_defines_test
     recipe: devicelab/devicelab_drone
     presubmit: true
@@ -1731,6 +1721,16 @@ targets:
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: static_path_tessellation_perf__timeline_summary
+
+  - name: Linux_pixel_7pro hello_world_impeller
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: hello_world_impeller
 
   - name: Linux_android basic_material_app_android__compile
     recipe: devicelab/devicelab_drone
