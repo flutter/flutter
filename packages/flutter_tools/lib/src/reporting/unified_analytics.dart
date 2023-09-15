@@ -12,19 +12,20 @@ import '../version.dart';
 Analytics getAnalytics({
   required bool runningOnBot,
   required FlutterVersion flutterVersion,
-  required bool suppressEnvFlag,
+  required Map<String, String> environment,
 }) {
   final String version =
       flutterVersion.getVersionString(redactUnknownBranches: true);
-  if (
-      // Ignore local user branches.
+  final bool suppressEnvFlag = environment['FLUTTER_SUPPRESS_ANALYTICS']?.toLowerCase() == 'true';
+
+  if (// Ignore local user branches.
       version.startsWith('[user-branch]') ||
-          // Many CI systems don't do a full git checkout.
-          version.endsWith('/unknown') ||
-          // Ignore bots.
-          runningOnBot ||
-          // Ignore when suppressed by FLUTTER_SUPPRESS_ANALYTICS.
-          suppressEnvFlag) {
+      // Many CI systems don't do a full git checkout.
+      version.endsWith('/unknown') ||
+      // Ignore bots.
+      runningOnBot ||
+      // Ignore when suppressed by FLUTTER_SUPPRESS_ANALYTICS.
+      suppressEnvFlag) {
     return NoOpAnalytics();
   }
   return Analytics(

@@ -92,9 +92,7 @@ Future<T> runInContext<T>(
       Analytics: () => getAnalytics(
         runningOnBot: runningOnBot,
         flutterVersion: globals.flutterVersion,
-        suppressEnvFlag:
-            globals.platform.environment['FLUTTER_SUPPRESS_ANALYTICS'] ==
-                'true',
+        environment: globals.platform.environment,
       ),
       AndroidBuilder: () => AndroidGradleBuilder(
         java: globals.java,
