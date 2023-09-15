@@ -25,13 +25,21 @@ class TestAllocator : public Allocator {
 
   std::shared_ptr<DeviceBuffer> OnCreateBuffer(
       const DeviceBufferDescriptor& desc) override {
+    if (should_fail) {
+      return nullptr;
+    }
     return std::make_shared<MockDeviceBuffer>(desc);
   };
 
   virtual std::shared_ptr<Texture> OnCreateTexture(
       const TextureDescriptor& desc) override {
+    if (should_fail) {
+      return nullptr;
+    }
     return std::make_shared<MockTexture>(desc);
   };
+
+  bool should_fail = false;
 };
 
 TEST(RenderTargetCacheTest, CachesUsedTexturesAcrossFrames) {
@@ -60,6 +68,21 @@ TEST(RenderTargetCacheTest, CachesUsedTexturesAcrossFrames) {
 
   render_target_cache.End();
   ASSERT_EQ(render_target_cache.CachedTextureCount(), 1u);
+}
+
+TEST(RenderTargetCacheTest, DoesNotPersistFailedAllocations) {
+  auto allocator = std::make_shared<TestAllocator>();
+  auto render_target_cache = RenderTargetCache(allocator);
+  auto desc = TextureDescriptor{
+      .format = PixelFormat::kR8G8B8A8UNormInt,
+      .size = ISize(100, 100),
+      .usage = static_cast<TextureUsageMask>(TextureUsage::kRenderTarget)};
+
+  render_target_cache.Start();
+  allocator->should_fail = true;
+
+  ASSERT_EQ(render_target_cache.CreateTexture(desc), nullptr);
+  ASSERT_EQ(render_target_cache.CachedTextureCount(), 0u);
 }
 
 }  // namespace testing
