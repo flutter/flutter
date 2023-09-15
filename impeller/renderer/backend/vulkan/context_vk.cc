@@ -377,10 +377,6 @@ void ContextVK::Setup(Settings settings) {
   ///
   auto fence_waiter =
       std::shared_ptr<FenceWaiterVK>(new FenceWaiterVK(device_holder));
-  if (!fence_waiter->IsValid()) {
-    VALIDATION_LOG << "Could not create fence waiter.";
-    return;
-  }
 
   //----------------------------------------------------------------------------
   /// Create the resource manager.
