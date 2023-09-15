@@ -42,11 +42,13 @@ class FenceWaiterVK {
   std::condition_variable wait_set_cv_;
   WaitSet wait_set_;
   bool terminate_ = false;
-  bool is_valid_ = false;
 
   explicit FenceWaiterVK(std::weak_ptr<DeviceHolder> device_holder);
 
   void Main();
+
+  bool Wait();
+  void WaitUntilEmpty();
 
   FML_DISALLOW_COPY_AND_ASSIGN(FenceWaiterVK);
 };

@@ -6,6 +6,7 @@
 #include "gtest/gtest.h"
 #include "impeller/renderer/backend/vulkan/command_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
+#include "vulkan/vulkan_enums.hpp"
 
 namespace impeller {
 namespace testing {
@@ -31,6 +32,27 @@ TEST(MockVulkanContextTest, IsThreadSafe) {
   thread2.join();
 
   context->Shutdown();
+}
+
+TEST(MockVulkanContextTest, DefaultFenceAlwaysReportsSuccess) {
+  auto const context = MockVulkanContextBuilder().Build();
+  auto const device = context->GetDevice();
+
+  auto fence = device.createFenceUnique({}).value;
+  EXPECT_EQ(vk::Result::eSuccess, device.getFenceStatus(*fence));
+}
+
+TEST(MockVulkanContextTest, MockedFenceReportsStatus) {
+  auto const context = MockVulkanContextBuilder().Build();
+
+  auto const device = context->GetDevice();
+  auto fence = device.createFenceUnique({}).value;
+  MockFence::SetStatus(fence, vk::Result::eNotReady);
+
+  EXPECT_EQ(vk::Result::eNotReady, device.getFenceStatus(fence.get()));
+
+  MockFence::SetStatus(fence, vk::Result::eSuccess);
+  EXPECT_EQ(vk::Result::eSuccess, device.getFenceStatus(*fence));
 }
 
 }  // namespace testing
