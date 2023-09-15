@@ -107,11 +107,11 @@ class Response {
   /// Create a list of Strings from [_failureDetails].
   List<String> _failureDetailsAsString() {
     final List<String> list = <String>[];
-    if (_failureDetails == null || _failureDetails!.isEmpty) {
+    if (_failureDetails == null || _failureDetails.isEmpty) {
       return list;
     }
 
-    for (final Failure failure in _failureDetails!) {
+    for (final Failure failure in _failureDetails) {
       list.add(failure.toJson());
     }
 
