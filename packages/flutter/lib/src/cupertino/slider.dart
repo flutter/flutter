@@ -599,4 +599,11 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
 
   @override
   bool get validForMouseTracker => false;
+
+  @override
+  void dispose() {
+    _drag.dispose();
+    _position.dispose();
+    super.dispose();
+  }
 }
