@@ -322,7 +322,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
 
     _selectedValue = widget.initialSelection;
     changeTextEditingControllerStateBySelectedValue();
-    
     refreshLeadingPadding();
   }
 
