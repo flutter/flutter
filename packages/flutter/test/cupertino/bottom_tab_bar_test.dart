@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../image_data.dart';
 import '../widgets/semantics_tester.dart';
@@ -29,7 +30,7 @@ Future<void> pumpWidgetWithBoilerplate(WidgetTester tester, Widget widget) async
 
 Future<void> main() async {
 
-  testWidgets('Need at least 2 tabs', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Need at least 2 tabs', (WidgetTester tester) async {
     await expectLater(
       () => pumpWidgetWithBoilerplate(tester, CupertinoTabBar(
         items: <BottomNavigationBarItem>[
