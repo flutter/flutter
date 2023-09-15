@@ -1567,6 +1567,16 @@ targets:
       - bin/**
       - .ci.yaml
 
+  - name: Linux_android hello_world_impeller
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux"]
+      task_name: hello_world_impeller
+
   - name: Linux_android android_defines_test
     recipe: devicelab/devicelab_drone
     presubmit: true
@@ -1849,7 +1859,6 @@ targets:
   - name: Linux_pixel_7pro complex_layout_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -2355,7 +2364,6 @@ targets:
   # Pixel 7 Pro, Skia
   - name: Linux_pixel_7pro new_gallery__transition_perf
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -4078,6 +4086,10 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: microbenchmarks_ios_xcode_debug
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "14c18"
+        }
     bringup: true
 
   - name: Mac_ios native_assets_ios_simulator
