@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class SizeChanger extends StatefulWidget {
   const SizeChanger({
@@ -42,7 +43,7 @@ class SizeChangerState extends State<SizeChanger> {
 }
 
 void main() {
-  testWidgets('Applying parent data inside a LayoutBuilder', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Applying parent data inside a LayoutBuilder', (WidgetTester tester) async {
     int frame = 1;
     await tester.pumpWidget(SizeChanger( // when this is triggered, the child LayoutBuilder will build again
       child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
