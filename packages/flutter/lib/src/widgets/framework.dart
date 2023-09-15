@@ -1592,15 +1592,19 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
     return renderObject.parentData is T;
   }
 
-  /// The [RenderObjectWidget] that is typically used to set up the [ParentData]
-  /// that [applyParentData] will write to.
+  /// Describes the [RenderObjectWidget] that is typically used to set up the
+  /// [ParentData] that [applyParentData] will write to.
   ///
   /// This is only used in error messages to tell users what widget typically
-  /// wraps this [ParentDataWidget].
+  /// wraps this [ParentDataWidget] through
+  /// [debugTypicalAncestorWidgetDescription].
   ///
   /// ## Implementations
   ///
-  /// The returned type should be a subclass of `RenderObjectWidget`.
+  /// The returned Type should describe a subclass of `RenderObjectWidget`. If
+  /// more than one Type is supported, use
+  /// [debugTypicalAncestorWidgetDescription], which typically inserts this
+  /// value but can be overridden to describe more than one Type.
   ///
   /// ```dart
   ///   @override
@@ -1611,6 +1615,16 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
   /// a typical type argument (e.g. `Foo<int>` if `int` is typically how the
   /// type is specialized), or specifying the upper bound (e.g. `Foo<Object?>`).
   Type get debugTypicalAncestorWidgetClass;
+
+  /// Describes the [RenderObjectWidget] that is typically used to set up the
+  /// [ParentData] that [applyParentData] will write to.
+  ///
+  /// This is only used in error messages to tell users what widget typically
+  /// wraps this [ParentDataWidget].
+  ///
+  /// Returns [debugTypicalAncestorWidgetClass] by default as a String. This can
+  /// be overridden to describe more than one Type of valid parent.
+  String get debugTypicalAncestorWidgetDescription => '$debugTypicalAncestorWidgetClass';
 
   Iterable<DiagnosticsNode> _debugDescribeIncorrectParentDataType({
     required ParentData? parentData,
@@ -1632,7 +1646,7 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
         ),
       ErrorHint(
         'Usually, this means that the $runtimeType widget has the wrong ancestor RenderObjectWidget. '
-        'Typically, $runtimeType widgets are placed directly inside $debugTypicalAncestorWidgetClass widgets.',
+        'Typically, $runtimeType widgets are placed directly inside $debugTypicalAncestorWidgetDescription widgets.',
       ),
       if (parentDataCreator != null)
         ErrorHint(
@@ -6300,7 +6314,7 @@ abstract class RenderObjectElement extends Element {
             ErrorSummary('Incorrect use of ParentDataWidget.'),
             ErrorDescription('The following ParentDataWidgets are providing parent data to the same RenderObject:'),
             for (final ParentDataElement<ParentData> ancestor in badAncestors)
-              ErrorDescription('- ${ancestor.widget} (typically placed directly inside a ${(ancestor.widget as ParentDataWidget<ParentData>).debugTypicalAncestorWidgetClass} widget)'),
+              ErrorDescription('- ${ancestor.widget} (typically placed directly inside a ${(ancestor.widget as ParentDataWidget<ParentData>).debugTypicalAncestorWidgetDescription} widget)'),
             ErrorDescription('However, a RenderObject can only receive parent data from at most one ParentDataWidget.'),
             ErrorHint('Usually, this indicates that at least one of the offending ParentDataWidgets listed above is not placed directly inside a compatible ancestor widget.'),
             ErrorDescription('The ownership chain for the RenderObject that received the parent data was:\n  ${debugGetCreatorChain(10)}'),
