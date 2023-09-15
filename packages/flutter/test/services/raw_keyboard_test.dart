@@ -953,6 +953,7 @@ void main() {
 
     testWidgetsWithLeakTracking('Dispatch events to all handlers', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
       final List<int> logs = <int>[];
 
       await tester.pumpWidget(
@@ -1013,8 +1014,6 @@ void main() {
         false);
       expect(logs, <int>[1, 3, 2]);
       logs.clear();
-
-      focusNode.dispose();
     }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgetsWithLeakTracking('Exceptions from RawKeyboard listeners are caught and reported', (WidgetTester tester) async {
@@ -1311,6 +1310,7 @@ void main() {
 
       // Set up a widget that will receive focused text events.
       final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
+      addTearDown(focusNode.dispose);
       await tester.pumpWidget(
         Focus(
           focusNode: focusNode,
@@ -1332,8 +1332,6 @@ void main() {
       );
       expect(message, equals(<String, Object?>{ 'handled': true }));
       tester.binding.defaultBinaryMessenger.setMockMessageHandler(SystemChannels.keyEvent.name, null);
-
-      focusNode.dispose();
     });
 
     test('data.toString', () {
@@ -2116,6 +2114,7 @@ void main() {
           return KeyEventResult.ignored;
         },
       );
+      addTearDown(node.dispose);
       await tester.pumpWidget(RawKeyboardListener(
         focusNode: node,
         child: Container(),
@@ -2155,8 +2154,6 @@ void main() {
       expect(events, isEmpty);
       expect(lastHandled, true);
       expect(RawKeyboard.instance.keysPressed, isEmpty);
-
-      node.dispose();
     }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
 
     test('data.toString', () {

@@ -99,6 +99,7 @@ void main() {
 
   testWidgetsWithLeakTracking('Dispatch events to all handlers', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     final List<int> logs = <int>[];
 
     await tester.pumpWidget(
@@ -193,8 +194,6 @@ void main() {
       true);
     expect(logs, <int>[3, 2, 1]);
     logs.clear();
-
-    focusNode.dispose();
   }, variant: KeySimulatorTransitModeVariant.all(),);
 
   // Regression test for https://github.com/flutter/flutter/issues/99196 .
@@ -206,6 +205,7 @@ void main() {
   // where a ShiftLeft key down is dispatched but the modifier bit is not set.
   testWidgetsWithLeakTracking('Correctly convert down events that are synthesized released', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     final List<KeyEvent> events = <KeyEvent>[];
 
     await tester.pumpWidget(
@@ -243,14 +243,13 @@ void main() {
     expect(ServicesBinding.instance.keyboard.physicalKeysPressed, equals(<PhysicalKeyboardKey>{
       PhysicalKeyboardKey.keyA,
     }));
-
-    focusNode.dispose();
   }, variant: const KeySimulatorTransitModeVariant(<KeyDataTransitMode>{
     KeyDataTransitMode.rawKeyData,
   }));
 
   testWidgetsWithLeakTracking('Instantly dispatch synthesized key events when the queue is empty', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     final List<int> logs = <int>[];
 
     await tester.pumpWidget(
@@ -279,13 +278,13 @@ void main() {
     )), false);
     expect(logs, <int>[2, 1]);
     logs.clear();
-
-    focusNode.dispose();
   }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
 
   testWidgetsWithLeakTracking('Postpone synthesized key events when the queue is not empty', (WidgetTester tester) async {
     final FocusNode keyboardListenerFocusNode = FocusNode();
+    addTearDown(keyboardListenerFocusNode.dispose);
     final FocusNode rawKeyboardListenerFocusNode = FocusNode();
+    addTearDown(rawKeyboardListenerFocusNode.dispose);
     final List<String> logs = <String>[];
 
     await tester.pumpWidget(
@@ -333,9 +332,6 @@ void main() {
 
     expect(logs, <String>['RawKeyDownEvent', 'KeyDownEvent', 'KeyUpEvent']);
     logs.clear();
-
-    keyboardListenerFocusNode.dispose();
-    rawKeyboardListenerFocusNode.dispose();
   }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
 
   // The first key data received from the engine might be an empty key data.
