@@ -52,7 +52,7 @@ dependencies:
 
   cli_config: 0.1.1
   graphs: 2.3.1
-  native_assets_builder: 0.2.0
+  native_assets_builder: 0.2.3
   native_assets_cli: 0.2.0
 
   # We depend on very specific internal implementation details of the
@@ -112,4 +112,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 284b
+# PUBSPEC CHECKSUM: 7f4e

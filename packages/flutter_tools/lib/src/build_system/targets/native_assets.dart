@@ -4,11 +4,13 @@
 
 import 'package:meta/meta.dart';
 import 'package:native_assets_cli/native_assets_cli.dart' show Asset;
+import 'package:package_config/package_config_types.dart';
 
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/platform.dart';
 import '../../build_info.dart';
+import '../../dart/package_map.dart';
 import '../../ios/native_assets.dart';
 import '../../macos/native_assets.dart';
 import '../../macos/xcode.dart';
@@ -52,7 +54,21 @@ class NativeAssets extends Target {
 
     final Uri projectUri = environment.projectDir.uri;
     final FileSystem fileSystem = environment.fileSystem;
-    final NativeAssetsBuildRunner buildRunner = _buildRunner ?? NativeAssetsBuildRunnerImpl(projectUri, fileSystem, environment.logger);
+    final File packagesFile = fileSystem
+        .directory(projectUri)
+        .childDirectory('.dart_tool')
+        .childFile('package_config.json');
+    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+      packagesFile,
+      logger: environment.logger,
+    );
+    final NativeAssetsBuildRunner buildRunner = _buildRunner ??
+        NativeAssetsBuildRunnerImpl(
+          projectUri,
+          packageConfig,
+          fileSystem,
+          environment.logger,
+        );
 
     final List<Uri> dependencies;
     switch (targetPlatform) {

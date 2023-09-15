@@ -55,11 +55,15 @@ void main() {
   });
 
   testUsingContext('NativeAssets throws error if missing ios archs', () async {
+    await createPackageConfig(iosEnvironment);
+
     iosEnvironment.defines.remove(kIosArchs);
     expect(const NativeAssets().build(iosEnvironment), throwsA(isA<MissingDefineException>()));
   });
 
   testUsingContext('NativeAssets throws error if missing sdk root', () async {
+    await createPackageConfig(iosEnvironment);
+
     iosEnvironment.defines.remove(kSdkRoot);
     expect(const NativeAssets().build(iosEnvironment), throwsA(isA<MissingDefineException>()));
   });
@@ -78,6 +82,8 @@ void main() {
         ),
       },
       () async {
+        await createPackageConfig(iosEnvironment);
+
         final NativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner();
         await NativeAssets(buildRunner: buildRunner).build(iosEnvironment);
 
@@ -95,6 +101,8 @@ void main() {
       FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
     },
     () async {
+      await createPackageConfig(iosEnvironment);
+
       final NativeAssetsBuildRunner buildRunner = FakeNativeAssetsBuildRunner(
         buildResult: FakeNativeAssetsBuilderResult(assets: <native_assets_cli.Asset>[
           native_assets_cli.Asset(
@@ -137,4 +145,12 @@ void main() {
       );
     },
   );
+}
+
+Future<void> createPackageConfig(Environment iosEnvironment) async {
+  final File packageConfig = iosEnvironment.projectDir
+      .childDirectory('.dart_tool')
+      .childFile('package_config.json');
+  await packageConfig.parent.create();
+  await packageConfig.create();
 }
