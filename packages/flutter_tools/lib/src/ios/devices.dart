@@ -34,6 +34,7 @@ import 'ios_deploy.dart';
 import 'ios_workflow.dart';
 import 'iproxy.dart';
 import 'mac.dart';
+import 'xcode_build_settings.dart';
 import 'xcode_debug.dart';
 import 'xcodeproj.dart';
 
@@ -500,7 +501,6 @@ class IOSDevice extends Device {
           targetOverride: mainPath,
           activeArch: cpuArchitecture,
           deviceID: id,
-          isCoreDevice: isCoreDevice || forceXcodeDebugWorkflow,
       );
       if (!buildResult.success) {
         _logger.printError('Could not build the precompiled application for the device.');
@@ -573,6 +573,7 @@ class IOSDevice extends Device {
           debuggingOptions: debuggingOptions,
           package: package,
           launchArguments: launchArguments,
+          mainPath: mainPath,
           discoveryTimeout: discoveryTimeout,
           shutdownHooks: shutdownHooks ?? globals.shutdownHooks,
         ) ? 0 : 1;
@@ -737,6 +738,7 @@ class IOSDevice extends Device {
     required DebuggingOptions debuggingOptions,
     required IOSApp package,
     required List<String> launchArguments,
+    required String? mainPath,
     required ShutdownHooks shutdownHooks,
     @visibleForTesting Duration? discoveryTimeout,
   }) async {
@@ -775,6 +777,7 @@ class IOSDevice extends Device {
       });
 
       XcodeDebugProject debugProject;
+      final FlutterProject flutterProject = FlutterProject.current();
 
       if (package is PrebuiltIOSApp) {
         debugProject = await _xcodeDebug.createXcodeProjectWithCustomBundle(
@@ -783,6 +786,19 @@ class IOSDevice extends Device {
           verboseLogging: _logger.isVerbose,
         );
       } else if (package is BuildableIOSApp) {
+        // Before installing/launching/debugging with Xcode, update the build
+        // settings to use a custom configuration build directory so Xcode
+        // knows where to find the app bundle to launch.
+        final Directory bundle = _fileSystem.directory(
+          package.deviceBundlePath,
+        );
+        await updateGeneratedXcodeProperties(
+          project: flutterProject,
+          buildInfo: debuggingOptions.buildInfo,
+          targetOverride: mainPath,
+          configurationBuildDir: bundle.parent.absolute.path,
+        );
+
         final IosProject project = package.project;
         final XcodeProjectInfo? projectInfo = await project.projectInfo();
         if (projectInfo == null) {
@@ -821,6 +837,18 @@ class IOSDevice extends Device {
       // Kill Xcode on shutdown when running from CI
       if (debuggingOptions.usingCISystem) {
         shutdownHooks.addShutdownHook(() => _xcodeDebug.exit(force: true));
+      }
+
+      if (package is BuildableIOSApp) {
+        // After automating Xcode, reset the Generated settings to not include
+        // the custom configuration build directory. This is to prevent
+        // confusion if the project is later ran via Xcode rather than the
+        // Flutter CLI.
+        await updateGeneratedXcodeProperties(
+          project: flutterProject,
+          buildInfo: debuggingOptions.buildInfo,
+          targetOverride: mainPath,
+        );
       }
 
       return debugSuccess;
