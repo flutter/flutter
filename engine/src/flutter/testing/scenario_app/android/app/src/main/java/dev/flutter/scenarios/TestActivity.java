@@ -7,6 +7,7 @@ package dev.flutter.scenarios;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -113,14 +114,23 @@ public abstract class TestActivity extends TestableFlutterActivity {
     channel.send(
         null,
         (ByteBuffer reply) -> {
+          AssetFileDescriptor afd = null;
           try {
-            final FileDescriptor fd =
-                getContentResolver().openAssetFileDescriptor(logFile, "w").getFileDescriptor();
+            afd = getContentResolver().openAssetFileDescriptor(logFile, "w");
+            final FileDescriptor fd = afd.getFileDescriptor();
             final FileOutputStream outputStream = new FileOutputStream(fd);
             outputStream.write(reply.array());
             outputStream.close();
           } catch (IOException ex) {
             Log.e(TAG, "Could not write timeline file", ex);
+          } finally {
+            try {
+              if (afd != null) {
+                afd.close();
+              }
+            } catch (IOException e) {
+              Log.w(TAG, "Could not close", e);
+            }
           }
           finish();
         });
