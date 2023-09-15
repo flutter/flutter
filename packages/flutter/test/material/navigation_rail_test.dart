@@ -3276,6 +3276,105 @@ void main() {
     );
   }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
 
+  testWidgetsWithLeakTracking('NavigationRail indicator renders properly when text direction is rtl', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/134361.
+    await tester.pumpWidget(_buildWidget(
+      NavigationRail(
+        selectedIndex: 1,
+        extended: true,
+        destinations: const <NavigationRailDestination>[
+          NavigationRailDestination(
+            icon: Icon(Icons.favorite_border),
+            selectedIcon: Icon(Icons.favorite),
+            label: Text('ABC'),
+          ),
+          NavigationRailDestination(
+            icon: Icon(Icons.bookmark_border),
+            selectedIcon: Icon(Icons.bookmark),
+            label: Text('DEF'),
+          ),
+        ],
+      ),
+      isRTL: true,
+    ));
+
+    // Hover the first destination.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byIcon(Icons.favorite_border)));
+    await tester.pumpAndSettle();
+
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+
+    // Default values from M3 specification.
+    const double railMinExtendedWidth = 256.0;
+    const double indicatorHeight = 32.0;
+    const double destinationWidth = 72.0;
+    const double destinationHorizontalPadding = 8.0;
+    const double indicatorWidth = destinationWidth - 2 * destinationHorizontalPadding; // 56.0
+    const double verticalSpacer = 8.0;
+    const double verticalDestinationSpacingM3 = 12.0;
+
+    // The navigation rail width is the default one because labels are short.
+    final double railWidth = tester.getSize(find.byType(NavigationRail)).width;
+    expect(railWidth, railMinExtendedWidth);
+
+    // Expected indicator position.
+    final double indicatorLeft = railWidth - (destinationWidth - destinationHorizontalPadding / 2);
+    final double indicatorRight = indicatorLeft + indicatorWidth;
+    final Rect indicatorRect = Rect.fromLTRB(
+      indicatorLeft,
+      verticalDestinationSpacingM3 / 2,
+      indicatorRight,
+      verticalDestinationSpacingM3 / 2 + indicatorHeight,
+    );
+    final Rect includedRect = indicatorRect;
+    final Rect excludedRect = includedRect.inflate(10);
+
+    // Compute the vertical position for the selected destination (the one with 'bookmark' icon).
+    const double destinationHeight = indicatorHeight + verticalDestinationSpacingM3;
+    const double secondDestinationVerticalOffset = verticalSpacer + destinationHeight;
+    const double secondIndicatorVerticalOffset = secondDestinationVerticalOffset + verticalDestinationSpacingM3 / 2;
+    const double secondDestinationHorizontalOffset = 800 - railMinExtendedWidth; // RTL.
+
+    expect(
+      inkFeatures,
+      paints
+        ..clipPath(
+          pathMatcher: isPathThat(
+            includes: <Offset>[
+              includedRect.centerLeft,
+              includedRect.topCenter,
+              includedRect.centerRight,
+              includedRect.bottomCenter,
+            ],
+            excludes: <Offset>[
+              excludedRect.centerLeft,
+              excludedRect.topCenter,
+              excludedRect.centerRight,
+              excludedRect.bottomCenter,
+            ],
+          ),
+        )
+        // Hover highlight for the hovered destination (the one with 'favorite' icon).
+        ..rect(
+          rect: indicatorRect,
+          color: const Color(0x0a6750a4),
+        )
+        // Indicator for the selected destination (the one with 'bookmark' icon).
+        ..rrect(
+          rrect: RRect.fromLTRBR(
+            secondDestinationHorizontalOffset + indicatorLeft,
+            secondIndicatorVerticalOffset,
+            secondDestinationHorizontalOffset + indicatorRight,
+            secondIndicatorVerticalOffset + indicatorHeight,
+            const Radius.circular(16),
+          ),
+          color: const Color(0xffe8def8),
+        ),
+    );
+  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/99933
+
   testWidgetsWithLeakTracking('NavigationRail indicator scale transform', (WidgetTester tester) async {
     int selectedIndex = 0;
     Future<void> buildWidget() async {
