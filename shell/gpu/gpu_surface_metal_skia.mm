@@ -24,6 +24,7 @@
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/core/SkSurfaceProps.h"
+#include "third_party/skia/include/gpu/GpuTypes.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
 #include "third_party/skia/include/ports/SkCFObject.h"
@@ -44,7 +45,7 @@ sk_sp<SkSurface> CreateSurfaceFromMetalTexture(GrDirectContext* context,
                                                SkSurface::ReleaseContext release_context) {
   GrMtlTextureInfo info;
   info.fTexture.reset([texture retain]);
-  GrBackendTexture backend_texture(texture.width, texture.height, GrMipmapped::kNo, info);
+  GrBackendTexture backend_texture(texture.width, texture.height, skgpu::Mipmapped::kNo, info);
   return SkSurfaces::WrapBackendTexture(
       context, backend_texture, origin, static_cast<int>(sample_cnt), color_type,
       std::move(color_space), props, release_proc, release_context);
