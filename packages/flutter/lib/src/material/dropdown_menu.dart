@@ -510,7 +510,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     }
     setState(() {});
   }
-  
   void  changeTextEditingControllerStateBySelectedValue(){
     final int index = filteredEntries.indexWhere((DropdownMenuEntry<T> entry) => entry.value == _selectedValue);
     if (index != -1) {
