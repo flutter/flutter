@@ -18,7 +18,7 @@ TEST(CommandEncoderVKTest, DeleteEncoderAfterThreadDies) {
   // command buffers before it cleans up its command pool.
   std::shared_ptr<std::vector<std::string>> called_functions;
   {
-    auto context = CreateMockVulkanContext();
+    auto context = MockVulkanContextBuilder().Build();
     called_functions = GetMockVulkanFunctions(context->GetDevice());
     std::shared_ptr<CommandEncoderVK> encoder;
     std::thread thread([&] {
@@ -46,7 +46,7 @@ TEST(CommandEncoderVKTest, CleanupAfterSubmit) {
   {
     fml::AutoResetWaitableEvent wait_for_submit;
     fml::AutoResetWaitableEvent wait_for_thread_join;
-    auto context = CreateMockVulkanContext();
+    auto context = MockVulkanContextBuilder().Build();
     std::thread thread([&] {
       CommandEncoderFactoryVK factory(context);
       std::shared_ptr<CommandEncoderVK> encoder = factory.Create();
