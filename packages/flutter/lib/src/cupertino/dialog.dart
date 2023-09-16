@@ -474,7 +474,7 @@ class CupertinoPopupSurface extends StatelessWidget {
 ///
 ///  * [CupertinoActionSheetAction], which is an iOS-style action sheet button.
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/views/action-sheets/>
-class CupertinoActionSheet extends StatelessWidget {
+class CupertinoActionSheet extends StatefulWidget {
   /// Creates an iOS-style action sheet.
   ///
   /// An action sheet must have a non-null value for at least one of the
@@ -520,17 +520,11 @@ class CupertinoActionSheet extends StatelessWidget {
   /// short.
   final ScrollController? messageScrollController;
 
-  ScrollController get _effectiveMessageScrollController =>
-    messageScrollController ?? ScrollController();
-
   /// A scroll controller that can be used to control the scrolling of the
   /// [actions] in the action sheet.
   ///
   /// This attribute is typically not needed.
   final ScrollController? actionScrollController;
-
-  ScrollController get _effectiveActionScrollController =>
-    actionScrollController ?? ScrollController();
 
   /// The optional cancel button that is grouped separately from the other
   /// actions.
@@ -538,12 +532,34 @@ class CupertinoActionSheet extends StatelessWidget {
   /// Typically this is an [CupertinoActionSheetAction] widget.
   final Widget? cancelButton;
 
+  @override
+  State<CupertinoActionSheet> createState() => _CupertinoActionSheetState();
+}
+
+class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
+  ScrollController? _backupMessageScrollController;
+
+  ScrollController? _backupActionScrollController;
+
+  ScrollController get _effectiveMessageScrollController =>
+    widget.messageScrollController ?? (_backupMessageScrollController ??= ScrollController());
+
+  ScrollController get _effectiveActionScrollController =>
+    widget.actionScrollController ?? (_backupActionScrollController ??= ScrollController());
+
+  @override
+  void dispose() {
+    _backupMessageScrollController?.dispose();
+    _backupActionScrollController?.dispose();
+    super.dispose();
+  }
+
   Widget _buildContent(BuildContext context) {
     final List<Widget> content = <Widget>[];
-    if (title != null || message != null) {
+    if (widget.title != null || widget.message != null) {
       final Widget titleSection = _CupertinoAlertContentSection(
-        title: title,
-        message: message,
+        title: widget.title,
+        message: widget.message,
         scrollController: _effectiveMessageScrollController,
         titlePadding: const EdgeInsets.only(
           left: _kActionSheetContentHorizontalPadding,
@@ -554,13 +570,13 @@ class CupertinoActionSheet extends StatelessWidget {
         messagePadding: EdgeInsets.only(
           left: _kActionSheetContentHorizontalPadding,
           right: _kActionSheetContentHorizontalPadding,
-          bottom: title == null ? _kActionSheetContentVerticalPadding : 22.0,
-          top: title == null ? _kActionSheetContentVerticalPadding : 0.0,
+          bottom: widget.title == null ? _kActionSheetContentVerticalPadding : 22.0,
+          top: widget.title == null ? _kActionSheetContentVerticalPadding : 0.0,
         ),
-        titleTextStyle: message == null
+        titleTextStyle: widget.message == null
             ? _kActionSheetContentStyle
             : _kActionSheetContentStyle.copyWith(fontWeight: FontWeight.w600),
-        messageTextStyle: title == null
+        messageTextStyle: widget.title == null
             ? _kActionSheetContentStyle.copyWith(fontWeight: FontWeight.w600)
             : _kActionSheetContentStyle,
         additionalPaddingBetweenTitleAndMessage: const EdgeInsets.only(top: 8.0),
@@ -579,26 +595,26 @@ class CupertinoActionSheet extends StatelessWidget {
   }
 
   Widget _buildActions() {
-    if (actions == null || actions!.isEmpty) {
+    if (widget.actions == null || widget.actions!.isEmpty) {
       return Container(
         height: 0.0,
       );
     }
     return _CupertinoAlertActionSection(
       scrollController: _effectiveActionScrollController,
-      hasCancelButton: cancelButton != null,
+      hasCancelButton: widget.cancelButton != null,
       isActionSheet: true,
-      children: actions!,
+      children: widget.actions!,
     );
   }
 
   Widget _buildCancelButton() {
-    final double cancelPadding = (actions != null || message != null || title != null)
+    final double cancelPadding = (widget.actions != null || widget.message != null || widget.title != null)
         ? _kActionSheetCancelButtonPadding : 0.0;
     return Padding(
       padding: EdgeInsets.only(top: cancelPadding),
       child: _CupertinoActionSheetCancelButton(
-        child: cancelButton,
+        child: widget.cancelButton,
       ),
     );
   }
@@ -621,7 +637,7 @@ class CupertinoActionSheet extends StatelessWidget {
           ),
         ),
       ),
-      if (cancelButton != null) _buildCancelButton(),
+      if (widget.cancelButton != null) _buildCancelButton(),
     ];
 
     final Orientation orientation = MediaQuery.orientationOf(context);
