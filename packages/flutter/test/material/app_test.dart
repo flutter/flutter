@@ -1083,7 +1083,7 @@ void main() {
     expect(key1.currentState, isNull);
   });
 
-  testWidgetsWithLeakTracking('MaterialApp.router works', (WidgetTester tester) async {
+  testWidgets('MaterialApp.router works', (WidgetTester tester) async {
     final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
       initialRouteInformation: RouteInformation(
         uri: Uri.parse('initial'),
@@ -1116,7 +1116,7 @@ void main() {
     expect(find.text('popped'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('MaterialApp.router route information parser is optional', (WidgetTester tester) async {
+  testWidgets('MaterialApp.router route information parser is optional', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
@@ -1191,7 +1191,7 @@ void main() {
     expect(tester.takeException(), isAssertionError);
   });
 
-  testWidgetsWithLeakTracking('MaterialApp.router router config works', (WidgetTester tester) async {
+  testWidgets('MaterialApp.router router config works', (WidgetTester tester) async {
     late SimpleNavigatorRouterDelegate routerDelegate;
     addTearDown(() => routerDelegate.dispose());
     late PlatformRouteInformationProvider provider;

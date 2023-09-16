@@ -147,7 +147,7 @@ void main() {
     expect(key1.currentState, isNull);
   });
 
-  testWidgetsWithLeakTracking('CupertinoApp.router works', (WidgetTester tester) async {
+  testWidgets('CupertinoApp.router works', (WidgetTester tester) async {
     final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
       initialRouteInformation: RouteInformation(
         uri: Uri.parse('initial'),
@@ -180,7 +180,7 @@ void main() {
     expect(find.text('popped'), findsOneWidget);
   });
 
-  testWidgetsWithLeakTracking('CupertinoApp.router route information parser is optional', (WidgetTester tester) async {
+  testWidgets('CupertinoApp.router route information parser is optional', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
@@ -255,7 +255,7 @@ void main() {
     expect(tester.takeException(), isAssertionError);
   });
 
-  testWidgetsWithLeakTracking('CupertinoApp.router router config works', (WidgetTester tester) async {
+  testWidgets('CupertinoApp.router router config works', (WidgetTester tester) async {
     late SimpleNavigatorRouterDelegate delegate;
     addTearDown(() => delegate.dispose());
     final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
