@@ -65,7 +65,7 @@ class ObjectCreated extends ObjectEvent {
 
   /// Name of the instrumented library.
   ///
-  /// Suggested format: 'package:flutter/rendering.dart'.
+  /// Format chould be: 'package:flutter/rendering.dart'.
   final String library;
 
   /// Name of the instrumented class.
