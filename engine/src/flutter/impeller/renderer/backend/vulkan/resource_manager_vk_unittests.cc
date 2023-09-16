@@ -6,7 +6,6 @@
 #include <functional>
 #include <memory>
 #include <utility>
-#include "fml/logging.h"
 #include "fml/synchronization/waitable_event.h"
 #include "gtest/gtest.h"
 #include "impeller/renderer/backend/vulkan/resource_manager_vk.h"
@@ -69,6 +68,35 @@ TEST(ResourceManagerVKTest, TerminatesWhenOutOfScope) {
   {
     auto shared = ResourceManagerVK::Create();
     manager = shared;
+  }
+
+  // The thread should have terminated.
+  EXPECT_EQ(manager.lock(), nullptr);
+}
+
+TEST(ResourceManagerVKTest, IsThreadSafe) {
+  // In a typical app, there is a single ResourceManagerVK per app, shared b/w
+  // threads.
+  //
+  // This test ensures that the ResourceManagerVK is thread-safe.
+  std::weak_ptr<ResourceManagerVK> manager;
+
+  {
+    auto const manager = ResourceManagerVK::Create();
+
+    // Spawn two threads, and have them both put resources into the manager.
+    struct MockResource {};
+
+    std::thread thread1([&manager]() {
+      UniqueResourceVKT<MockResource>(manager, MockResource{});
+    });
+
+    std::thread thread2([&manager]() {
+      UniqueResourceVKT<MockResource>(manager, MockResource{});
+    });
+
+    thread1.join();
+    thread2.join();
   }
 
   // The thread should have terminated.

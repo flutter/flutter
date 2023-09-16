@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/testing/testing.h"
+#include "flutter/testing/testing.h"  // IWYU pragma: keep
 #include "impeller/renderer/backend/vulkan/blit_command_vk.h"
 #include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
@@ -12,7 +12,7 @@ namespace testing {
 
 TEST(BlitCommandVkTest, BlitCopyTextureToTextureCommandVK) {
   auto context = MockVulkanContextBuilder().Build();
-  auto pool = CommandPoolVK::GetThreadLocal(context.get());
+  auto pool = context->GetCommandPoolRecycler()->Get();
   auto encoder = std::make_unique<CommandEncoderFactoryVK>(context)->Create();
   BlitCopyTextureToTextureCommandVK cmd;
   cmd.source = context->GetResourceAllocator()->CreateTexture({
