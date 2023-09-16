@@ -170,7 +170,7 @@ void main() {
     handle.dispose();
   },
   skip: true, // temporarily skipped until engine change is landed (see issue 41435)
-  );
+)};
 
 class SemanticsUpdateTestBinding extends AutomatedTestWidgetsFlutterBinding {
   @override
