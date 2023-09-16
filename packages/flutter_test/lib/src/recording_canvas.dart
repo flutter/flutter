@@ -184,6 +184,7 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
     for (final OpacityLayer layer in _createdLayers) {
       layer.dispose();
     }
+    _createdLayers.clear();
   }
 
   @override
