@@ -153,6 +153,7 @@
 ../../../flutter/impeller/playground
 ../../../flutter/impeller/renderer/backend/vulkan/blit_command_vk_unittests.cc
 ../../../flutter/impeller/renderer/backend/vulkan/command_encoder_vk_unittests.cc
+../../../flutter/impeller/renderer/backend/vulkan/command_pool_vk_unittests.cc
 ../../../flutter/impeller/renderer/backend/vulkan/context_vk_unittests.cc
 ../../../flutter/impeller/renderer/backend/vulkan/fence_waiter_vk_unittests.cc
 ../../../flutter/impeller/renderer/backend/vulkan/pass_bindings_cache_unittests.cc

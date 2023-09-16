@@ -9,8 +9,7 @@
 #include "fml/macros.h"
 #include "fml/thread_local.h"
 #include "impeller/base/thread_safety.h"
-#include "vulkan/vulkan_core.h"
-#include "vulkan/vulkan_enums.hpp"
+#include "impeller/renderer/backend/vulkan/vk.h"  // IWYU pragma: keep.
 
 namespace impeller {
 namespace testing {
@@ -24,6 +23,8 @@ struct MockCommandBuffer {
   std::shared_ptr<std::vector<std::string>> called_functions_;
 };
 
+struct MockCommandPool {};
+
 class MockDevice final {
  public:
   explicit MockDevice() : called_functions_(new std::vector<std::string>()) {}
@@ -34,6 +35,25 @@ class MockDevice final {
     Lock lock(command_buffers_mutex_);
     command_buffers_.emplace_back(std::move(buffer));
     return result;
+  }
+
+  MockCommandPool* NewCommandPool() {
+    auto pool = std::make_unique<MockCommandPool>();
+    MockCommandPool* result = pool.get();
+    Lock lock(commmand_pools_mutex_);
+    command_pools_.emplace_back(std::move(pool));
+    return result;
+  }
+
+  void DeleteCommandPool(MockCommandPool* pool) {
+    Lock lock(commmand_pools_mutex_);
+    auto it = std::find_if(command_pools_.begin(), command_pools_.end(),
+                           [pool](const std::unique_ptr<MockCommandPool>& p) {
+                             return p.get() == pool;
+                           });
+    if (it != command_pools_.end()) {
+      command_pools_.erase(it);
+    }
   }
 
   const std::shared_ptr<std::vector<std::string>>& GetCalledFunctions() {
@@ -55,6 +75,10 @@ class MockDevice final {
   Mutex command_buffers_mutex_;
   std::vector<std::unique_ptr<MockCommandBuffer>> command_buffers_
       IPLR_GUARDED_BY(command_buffers_mutex_);
+
+  Mutex commmand_pools_mutex_;
+  std::vector<std::unique_ptr<MockCommandPool>> command_pools_
+      IPLR_GUARDED_BY(commmand_pools_mutex_);
 };
 
 void noop() {}
@@ -200,7 +224,16 @@ VkResult vkCreateCommandPool(VkDevice device,
                              const VkCommandPoolCreateInfo* pCreateInfo,
                              const VkAllocationCallbacks* pAllocator,
                              VkCommandPool* pCommandPool) {
-  *pCommandPool = reinterpret_cast<VkCommandPool>(0xc0de0001);
+  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  mock_device->AddCalledFunction("vkCreateCommandPool");
+  *pCommandPool =
+      reinterpret_cast<VkCommandPool>(mock_device->NewCommandPool());
+  return VK_SUCCESS;
+}
+
+VkResult vkResetCommandPool(VkDevice device,
+                            VkCommandPool commandPool,
+                            VkCommandPoolResetFlags flags) {
   return VK_SUCCESS;
 }
 
@@ -402,6 +435,8 @@ void vkDestroyCommandPool(VkDevice device,
                           VkCommandPool commandPool,
                           const VkAllocationCallbacks* pAllocator) {
   MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  mock_device->DeleteCommandPool(
+      reinterpret_cast<MockCommandPool*>(commandPool));
   mock_device->AddCalledFunction("vkDestroyCommandPool");
 }
 
@@ -486,6 +521,8 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return (PFN_vkVoidFunction)vkCreatePipelineCache;
   } else if (strcmp("vkCreateCommandPool", pName) == 0) {
     return (PFN_vkVoidFunction)vkCreateCommandPool;
+  } else if (strcmp("vkResetCommandPool", pName) == 0) {
+    return (PFN_vkVoidFunction)vkResetCommandPool;
   } else if (strcmp("vkAllocateCommandBuffers", pName) == 0) {
     return (PFN_vkVoidFunction)vkAllocateCommandBuffers;
   } else if (strcmp("vkBeginCommandBuffer", pName) == 0) {

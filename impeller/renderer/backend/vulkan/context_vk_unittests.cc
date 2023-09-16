@@ -15,8 +15,7 @@ TEST(ContextVKTest, DeletesCommandPools) {
   std::weak_ptr<CommandPoolVK> weak_pool;
   {
     std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
-    std::shared_ptr<CommandPoolVK> pool =
-        CommandPoolVK::GetThreadLocal(context.get());
+    auto const pool = context->GetCommandPoolRecycler()->Get();
     weak_pool = pool;
     weak_context = context;
     ASSERT_TRUE(weak_pool.lock());
