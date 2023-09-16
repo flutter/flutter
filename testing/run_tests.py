@@ -516,12 +516,31 @@ def run_cc_tests(build_dir, executable_filter, coverage, capture_core_dump):
         shuffle_flags + ['--enable_vulkan_validation'],
         coverage=coverage,
         extra_env=extra_env,
-        # TODO(117122): Remove this allowlist.
-        # https://github.com/flutter/flutter/issues/114872
+        # TODO(https://github.com/flutter/flutter/issues/123733): Remove this allowlist.
+        # See also https://github.com/flutter/flutter/issues/114872.
         allowed_failure_output=[
             '[MTLCompiler createVertexStageAndLinkPipelineWithFragment:',
             '[MTLCompiler pipelineStateWithVariant:',
         ]
+    )
+
+    # Run one interactive Vulkan test with validation enabled.
+    #
+    # TODO(matanlurey): https://github.com/flutter/flutter/issues/134852; enable
+    # more of the suite, and ideally we'd like to use Skia gold and take screen
+    # shots as well.
+    run_engine_executable(
+        build_dir,
+        'impeller_unittests',
+        executable_filter,
+        shuffle_flags + [
+            '--enable_vulkan_validation',
+            '--enable_playground',
+            '--playground_timeout_ms=4000',
+            '--gtest_filter="*ColorWheel/Vulkan"',
+        ],
+        coverage=coverage,
+        extra_env=extra_env,
     )
 
 
