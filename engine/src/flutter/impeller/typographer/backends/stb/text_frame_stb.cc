@@ -8,10 +8,9 @@
 
 namespace impeller {
 
-std::shared_ptr<TextFrame> MakeTextFrameSTB(
-    const std::shared_ptr<TypefaceSTB>& typeface_stb,
-    Font::Metrics metrics,
-    const std::string& text) {
+TextFrame MakeTextFrameSTB(const std::shared_ptr<TypefaceSTB>& typeface_stb,
+                           Font::Metrics metrics,
+                           const std::string& text) {
   TextRun run(Font(typeface_stb, metrics));
 
   // Shape the text run using STB. The glyph positions could also be resolved
@@ -62,8 +61,7 @@ std::shared_ptr<TextFrame> MakeTextFrameSTB(
   }
 
   std::vector<TextRun> runs = {run};
-  return std::make_shared<TextFrame>(
-      runs, result.value_or(Rect::MakeLTRB(0, 0, 0, 0)), false);
+  return TextFrame(runs, result.value_or(Rect::MakeLTRB(0, 0, 0, 0)), false);
 }
 
 }  // namespace impeller

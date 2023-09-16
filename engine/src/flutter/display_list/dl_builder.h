@@ -224,16 +224,6 @@ class DisplayListBuilder final : public virtual DlCanvas,
                     SkScalar x,
                     SkScalar y,
                     const DlPaint& paint) override;
-
-  void drawTextFrame(const std::shared_ptr<impeller::TextFrame>& text_frame,
-                     SkScalar x,
-                     SkScalar y) override;
-
-  void DrawTextFrame(const std::shared_ptr<impeller::TextFrame>& text_frame,
-                     SkScalar x,
-                     SkScalar y,
-                     const DlPaint& paint) override;
-
   // |DlCanvas|
   void DrawShadow(const SkPath& path,
                   const DlColor color,
