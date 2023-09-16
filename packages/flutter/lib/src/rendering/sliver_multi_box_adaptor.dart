@@ -436,6 +436,9 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// Called during layout to create, add, and layout the child before
   /// [firstChild].
   ///
+  /// Layout will be performed immediately if [layoutImmediate] is true,
+  /// otherwise, the caller is responsible for layout.
+  ///
   /// Calls [RenderSliverBoxChildManager.createChild] to actually create and add
   /// the child if necessary. The child may instead be obtained from a cache;
   /// see [SliverMultiBoxAdaptorParentData.keepAlive].
@@ -450,12 +453,15 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   RenderBox? insertAndLayoutLeadingChild(
     BoxConstraints childConstraints, {
     bool parentUsesSize = false,
+    bool layoutImmediate = true,
   }) {
     assert(_debugAssertChildListLocked());
     final int index = indexOf(firstChild!) - 1;
     _createOrObtainChild(index, after: null);
     if (indexOf(firstChild!) == index) {
-      firstChild!.layout(childConstraints, parentUsesSize: parentUsesSize);
+      if (layoutImmediate) {
+        firstChild!.layout(childConstraints, parentUsesSize: parentUsesSize);
+      }
       return firstChild;
     }
     childManager.setDidUnderflow(true);
@@ -464,6 +470,9 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
 
   /// Called during layout to create, add, and layout the child after
   /// the given child.
+  ///
+  /// Layout will be performed immediately if [layoutImmediate] is true,
+  /// otherwise, the caller is responsible for layout.
   ///
   /// Calls [RenderSliverBoxChildManager.createChild] to actually create and add
   /// the child if necessary. The child may instead be obtained from a cache;
@@ -479,6 +488,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
     BoxConstraints childConstraints, {
     required RenderBox? after,
     bool parentUsesSize = false,
+    bool layoutImmediate = true,
   }) {
     assert(_debugAssertChildListLocked());
     assert(after != null);
@@ -486,7 +496,9 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
     _createOrObtainChild(index, after: after);
     final RenderBox? child = childAfter(after);
     if (child != null && indexOf(child) == index) {
-      child.layout(childConstraints, parentUsesSize: parentUsesSize);
+      if (layoutImmediate) {
+        child.layout(childConstraints, parentUsesSize: parentUsesSize);
+      }
       return child;
     }
     childManager.setDidUnderflow(true);

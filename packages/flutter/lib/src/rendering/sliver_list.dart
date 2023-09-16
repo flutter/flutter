@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'box.dart';
+import 'object.dart';
 import 'sliver.dart';
 import 'sliver_multi_box_adaptor.dart';
 
@@ -40,22 +41,112 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
     required super.childManager,
   });
 
+  late BoxConstraints _childConstraints;
+  final Map<int, double> _cachedItemExtents = <int, double>{};
+  final Set<int> _childrenWithoutLayout = <int>{};
+  double? _lastCrossAxisExtent;
+  Axis? _lastAxis;
+
+  void _cacheItemExtent(RenderBox item) {
+    assert(!_cachedItemExtents.containsKey(indexOf(item)));
+    _cachedItemExtents[indexOf(item)] = paintExtentOf(item);
+  }
+
+  RenderBox? _obtainOneLeadingChild() {
+    final int leadingIndex = indexOf(firstChild!) - 1;
+    final bool layoutImmediate = !_cachedItemExtents.containsKey(leadingIndex);
+    final RenderBox? leadingChild = insertAndLayoutLeadingChild(
+      _childConstraints,
+      parentUsesSize: true,
+      layoutImmediate: layoutImmediate,
+    );
+    if (leadingChild != null) {
+      assert(leadingChild == firstChild);
+      if (layoutImmediate) {
+        _cacheItemExtent(firstChild!);
+      } else {
+        _childrenWithoutLayout.add(leadingIndex);
+      }
+    }
+    return leadingChild;
+  }
+
+  RenderBox? _obtainOneTrailingChild(RenderBox after) {
+    final int trailingIndex = indexOf(after) + 1;
+    final bool layoutImmediate = !_cachedItemExtents.containsKey(trailingIndex);
+    final RenderBox? trailingChild = insertAndLayoutChild(
+      _childConstraints,
+      after: after,
+      parentUsesSize: true,
+      layoutImmediate: layoutImmediate,
+    );
+    if (trailingChild != null) {
+      if (layoutImmediate) {
+        _cacheItemExtent(trailingChild);
+      } else {
+        _childrenWithoutLayout.add(trailingIndex);
+      }
+    }
+    return trailingChild;
+  }
+
+  void _processChildLayout(RenderBox child) {
+    final int childIndex = indexOf(child);
+    if (!_cachedItemExtents.containsKey(childIndex)) {
+      child.layout(_childConstraints, parentUsesSize: true);
+      _cacheItemExtent(child);
+    } else {
+      _childrenWithoutLayout.add(childIndex);
+    }
+  }
+
+  void _performLoadingScopeChildrenLayoutIfNeeded() {
+    for (RenderBox? child = firstChild; child != null ; child = childAfter(child)) {
+      final int index = indexOf(child);
+      if (_childrenWithoutLayout.contains(index)) {
+        child.layout(_childConstraints, parentUsesSize: true);
+        assert(super.paintExtentOf(child) == _cachedItemExtents[index]);
+      }
+    }
+  }
+
+  void _setup() {
+    _childrenWithoutLayout.clear();
+    _childConstraints = constraints.asBoxConstraints();
+    // Clear the cached extents if [crossAxisExtent] or [axis] changed.
+    if (constraints.crossAxisExtent != _lastCrossAxisExtent ||
+        constraints.axis != _lastAxis) {
+      _cachedItemExtents.clear();
+      _lastCrossAxisExtent = constraints.crossAxisExtent;
+      _lastAxis = constraints.axis;
+    }
+  }
+
+  @override
+  double paintExtentOf(RenderBox child) {
+    final int index = indexOf(child);
+    if (_cachedItemExtents.containsKey(index)) {
+      return _cachedItemExtents[index]!;
+    } else {
+      return super.paintExtentOf(child);
+    }
+  }
+
   @override
   void performLayout() {
     final SliverConstraints constraints = this.constraints;
     childManager.didStartLayout();
     childManager.setDidUnderflow(false);
+    _setup();
 
     final double scrollOffset = constraints.scrollOffset + constraints.cacheOrigin;
     assert(scrollOffset >= 0.0);
     final double remainingExtent = constraints.remainingCacheExtent;
     assert(remainingExtent >= 0.0);
     final double targetEndScrollOffset = scrollOffset + remainingExtent;
-    final BoxConstraints childConstraints = constraints.asBoxConstraints();
     int leadingGarbage = 0;
     int trailingGarbage = 0;
     bool reachedEnd = false;
-
     // This algorithm in principle is straight-forward: find the first child
     // that overlaps the given scrollOffset, creating more children at the top
     // of the list if necessary, then walk down the list updating and laying out
@@ -123,7 +214,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
         earliestScrollOffset > scrollOffset;
         earliestScrollOffset = childScrollOffset(earliestUsefulChild)!) {
       // We have to add children before the earliestUsefulChild.
-      earliestUsefulChild = insertAndLayoutLeadingChild(childConstraints, parentUsesSize: true);
+      earliestUsefulChild = _obtainOneLeadingChild();
       if (earliestUsefulChild == null) {
         final SliverMultiBoxAdaptorParentData childParentData = firstChild!.parentData! as SliverMultiBoxAdaptorParentData;
         childParentData.layoutOffset = 0.0;
@@ -132,7 +223,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
           // insertAndLayoutLeadingChild only lays out the children before
           // firstChild. In this case, nothing has been laid out. We have
           // to lay out firstChild manually.
-          firstChild!.layout(childConstraints, parentUsesSize: true);
+          _processChildLayout(firstChild!);
           earliestUsefulChild = firstChild;
           leadingChildWithLayout = earliestUsefulChild;
           trailingChildWithLayout ??= earliestUsefulChild;
@@ -180,7 +271,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
         // We correct one child at a time. If there are more children before
         // the earliestUsefulChild, we will correct it once the scroll offset
         // reaches zero again.
-        earliestUsefulChild = insertAndLayoutLeadingChild(childConstraints, parentUsesSize: true);
+        earliestUsefulChild = _obtainOneLeadingChild();
         assert(earliestUsefulChild != null);
         final double firstChildScrollOffset = earliestScrollOffset - paintExtentOf(firstChild!);
         final SliverMultiBoxAdaptorParentData childParentData = firstChild!.parentData! as SliverMultiBoxAdaptorParentData;
@@ -208,7 +299,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
 
     // Make sure we've laid out at least one child.
     if (leadingChildWithLayout == null) {
-      earliestUsefulChild!.layout(childConstraints, parentUsesSize: true);
+      _processChildLayout(earliestUsefulChild!);
       leadingChildWithLayout = earliestUsefulChild;
       trailingChildWithLayout = earliestUsefulChild;
     }
@@ -236,17 +327,14 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
       if (!inLayoutRange) {
         if (child == null || indexOf(child!) != index) {
           // We are missing a child. Insert it (and lay it out) if possible.
-          child = insertAndLayoutChild(childConstraints,
-            after: trailingChildWithLayout,
-            parentUsesSize: true,
-          );
+          child = _obtainOneTrailingChild(trailingChildWithLayout!);
           if (child == null) {
             // We have run out of children.
             return false;
           }
         } else {
           // Lay out the child.
-          child!.layout(childConstraints, parentUsesSize: true);
+          _processChildLayout(child!);
         }
         trailingChildWithLayout = child;
       }
@@ -295,8 +383,11 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
 
     // At this point everything should be good to go, we just have to clean up
     // the garbage and report the geometry.
-
     collectGarbage(leadingGarbage, trailingGarbage);
+
+    // Finally, only the children in the loading scope(pre-cacheExtent + viewport + post-cacheExtent)
+    // that have not yet been laid out need to be laid out.
+    _performLoadingScopeChildrenLayoutIfNeeded();
 
     assert(debugAssertChildListIsNonEmptyAndContiguous());
     final double estimatedMaxScrollOffset;
