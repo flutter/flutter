@@ -4,12 +4,13 @@
 
 #pragma once
 
+#include "flutter/fml/macros.h"
 #include "impeller/typographer/text_frame.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
 
 namespace impeller {
 
-std::shared_ptr<impeller::TextFrame> MakeTextFrameFromTextBlobSkia(
+std::optional<TextFrame> MakeTextFrameFromTextBlobSkia(
     const sk_sp<SkTextBlob>& blob);
 
 }  // namespace impeller

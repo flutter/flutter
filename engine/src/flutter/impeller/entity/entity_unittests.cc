@@ -2180,13 +2180,13 @@ TEST_P(EntityTest, InheritOpacityTest) {
   SkFont font;
   font.setSize(30);
   auto blob = SkTextBlob::MakeFromString("A", font);
-  auto frame = MakeTextFrameFromTextBlobSkia(blob);
+  auto frame = MakeTextFrameFromTextBlobSkia(blob).value();
   auto lazy_glyph_atlas =
       std::make_shared<LazyGlyphAtlas>(TypographerContextSkia::Make());
-  lazy_glyph_atlas->AddTextFrame(*frame, 1.0f);
+  lazy_glyph_atlas->AddTextFrame(frame, 1.0f);
 
   auto text_contents = std::make_shared<TextContents>();
-  text_contents->SetTextFrame(frame);
+  text_contents->SetTextFrame(std::move(frame));
   text_contents->SetColor(Color::Blue().WithAlpha(0.5));
 
   ASSERT_TRUE(text_contents->CanInheritOpacity(entity));

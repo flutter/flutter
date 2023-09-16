@@ -26,7 +26,7 @@ class TextContents final : public Contents {
 
   ~TextContents();
 
-  void SetTextFrame(const std::shared_ptr<TextFrame>& frame);
+  void SetTextFrame(TextFrame&& frame);
 
   void SetColor(Color color);
 
@@ -56,7 +56,7 @@ class TextContents final : public Contents {
               RenderPass& pass) const override;
 
  private:
-  std::shared_ptr<TextFrame> frame_;
+  TextFrame frame_;
   Scalar scale_ = 1.0;
   Color color_;
   Scalar inherited_opacity_ = 1.0;

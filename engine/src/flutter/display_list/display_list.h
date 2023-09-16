@@ -136,7 +136,6 @@ namespace flutter {
                                     \
   V(DrawDisplayList)                \
   V(DrawTextBlob)                   \
-  V(DrawTextFrame)                  \
                                     \
   V(DrawShadow)                     \
   V(DrawShadowTransparentOccluder)
