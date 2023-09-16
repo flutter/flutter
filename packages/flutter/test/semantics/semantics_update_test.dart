@@ -85,7 +85,7 @@ void main() {
     SemanticsUpdateBuilderSpy.observations.clear();
     handle.dispose();
   },
-    skip: true, // temporarily skipped until engine change is landed (see issue 41435)
+    skip: true, // https://github.com/flutter/engine/pull/41435
   );
 
   testWidgets('Semantics update receives attributed text', (WidgetTester tester) async {
@@ -169,7 +169,7 @@ void main() {
     SemanticsUpdateBuilderSpy.observations.clear();
     handle.dispose();
   },
-    skip: true, // temporarily skipped until engine change is landed (see issue 41435)
+    skip: true, // https://github.com/flutter/engine/pull/41435
   );
 }
 
