@@ -549,7 +549,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
 
   @override
   void dispose() {
-    _internalActionScrollController?.dispose();
+    _internalMessageScrollController?.dispose();
     _internalActionScrollController?.dispose();
     super.dispose();
   }
