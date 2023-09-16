@@ -2037,6 +2037,8 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     }
   }
 
+  final List<LayerHandle<OpacityLayer>> _createdLayers = <LayerHandle<OpacityLayer>>[];
+
   void _paintAvatar(PaintingContext context, Offset offset) {
     void paintWithOverlay(PaintingContext context, Offset offset) {
       context.paintChild(avatar!, _boxParentData(avatar!).offset + offset);
@@ -2049,7 +2051,9 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     final Color disabledColor = _disabledColor;
     final int disabledColorAlpha = disabledColor.alpha;
     if (needsCompositing) {
-      context.pushOpacity(offset, disabledColorAlpha, paintWithOverlay);
+      final OpacityLayer newLayer = OpacityLayer(alpha: disabledColorAlpha);
+      _createdLayers.add(LayerHandle<OpacityLayer>(newLayer));
+      context.pushLayer(newLayer, paintWithOverlay, offset);
     } else {
       if (disabledColorAlpha != 0xff) {
         context.canvas.saveLayer(
