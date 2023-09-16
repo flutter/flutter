@@ -219,8 +219,6 @@ class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilde
     required Int32List childrenInTraversalOrder,
     required Int32List childrenInHitTestOrder,
     required Int32List additionalActions,
-    // TODO: uncomment when headingLevel is added to SemanticsNodeUpdateObservation, after engine change has landed: https://github.com/flutter/engine/pull/41435
-    // int? headingLevel,
   }) {
     // Makes sure we don't send the same id twice.
     assert(!observations.containsKey(id));
@@ -232,8 +230,6 @@ class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilde
       value: value,
       valueAttributes: valueAttributes,
       childrenInTraversalOrder: childrenInTraversalOrder,
-      // TODO: uncomment when headingLevel is added to SemanticsNodeUpdateObservation, after engine change has landed: https://github.com/flutter/engine/pull/41435
-      // headingLevel: headingLevel,
     );
   }
 
@@ -254,8 +250,6 @@ class SemanticsNodeUpdateObservation {
     required this.hint,
     this.hintAttributes,
     required this.childrenInTraversalOrder,
-    // TODO: uncomment when headingLevel is added to SemanticsNodeUpdateObservation, after engine change has landed: https://github.com/flutter/engine/pull/41435
-    // this.headingLevel,
   });
 
   final String label;
@@ -265,6 +259,4 @@ class SemanticsNodeUpdateObservation {
   final String hint;
   final List<StringAttribute>? hintAttributes;
   final Int32List childrenInTraversalOrder;
-  // TODO: uncomment when headingLevel is added to SemanticsNodeUpdateObservation, after engine change has landed: https://github.com/flutter/engine/pull/41435
-  // final int? headingLevel;
 }
