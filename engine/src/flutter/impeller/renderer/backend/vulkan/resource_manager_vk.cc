@@ -22,6 +22,11 @@ std::shared_ptr<ResourceManagerVK> ResourceManagerVK::Create() {
 ResourceManagerVK::ResourceManagerVK() : waiter_([&]() { Start(); }) {}
 
 ResourceManagerVK::~ResourceManagerVK() {
+  FML_DCHECK(waiter_.get_id() != std::this_thread::get_id())
+      << "The ResourceManager being destructed on its own spawned thread is a "
+      << "sign that ContextVK was not properly destroyed. A usual fix for this "
+      << "is to ensure that ContextVK is shutdown (i.e. context->Shutdown()) "
+         "before the ResourceManager is destroyed (i.e. at the end of a test).";
   Terminate();
   waiter_.join();
 }

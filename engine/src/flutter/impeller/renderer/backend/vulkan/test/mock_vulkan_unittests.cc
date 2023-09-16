@@ -4,7 +4,6 @@
 
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
 #include "gtest/gtest.h"
-#include "impeller/renderer/backend/vulkan/command_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
 #include "vulkan/vulkan_enums.hpp"
 
@@ -19,12 +18,12 @@ TEST(MockVulkanContextTest, IsThreadSafe) {
 
   // Spawn two threads, and have them create a CommandPoolVK each.
   std::thread thread1([&context]() {
-    auto const pool = CommandPoolVK::GetThreadLocal(context.get());
+    auto const pool = context->GetCommandPoolRecycler()->Get();
     EXPECT_TRUE(pool);
   });
 
   std::thread thread2([&context]() {
-    auto const pool = CommandPoolVK::GetThreadLocal(context.get());
+    auto const pool = context->GetCommandPoolRecycler()->Get();
     EXPECT_TRUE(pool);
   });
 

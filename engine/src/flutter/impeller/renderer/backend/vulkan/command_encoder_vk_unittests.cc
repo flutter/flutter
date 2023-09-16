@@ -4,10 +4,9 @@
 
 #include <thread>
 
-#include "flutter/fml/synchronization/count_down_latch.h"
-#include "flutter/testing/testing.h"
+#include "flutter/testing/testing.h"  // IWYU pragma: keep
+#include "fml/synchronization/waitable_event.h"
 #include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
-#include "impeller/renderer/backend/vulkan/fence_waiter_vk.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
 
 namespace impeller {
@@ -26,6 +25,7 @@ TEST(CommandEncoderVKTest, DeleteEncoderAfterThreadDies) {
       encoder = factory.Create();
     });
     thread.join();
+    context->Shutdown();
   }
   auto destroy_pool =
       std::find(called_functions->begin(), called_functions->end(),
@@ -60,7 +60,9 @@ TEST(CommandEncoderVKTest, CleanupAfterSubmit) {
     wait_for_thread_join.Signal();
     wait_for_submit.Wait();
     called_functions = GetMockVulkanFunctions(context->GetDevice());
+    context->Shutdown();
   }
+
   auto destroy_pool =
       std::find(called_functions->begin(), called_functions->end(),
                 "vkDestroyCommandPool");

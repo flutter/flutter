@@ -5,7 +5,6 @@
 #include "impeller/renderer/backend/vulkan/command_encoder_vk.h"
 
 #include "flutter/fml/closure.h"
-#include "flutter/fml/trace_event.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/fence_waiter_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
@@ -21,7 +20,7 @@ class TrackedObjectsVK {
     if (!pool) {
       return;
     }
-    auto buffer = pool->CreateGraphicsCommandBuffer();
+    auto buffer = pool->CreateCommandBuffer();
     if (!buffer) {
       return;
     }
@@ -34,7 +33,7 @@ class TrackedObjectsVK {
     if (!buffer_) {
       return;
     }
-    pool_->CollectGraphicsCommandBuffer(std::move(buffer_));
+    pool_->CollectCommandBuffer(std::move(buffer_));
   }
 
   bool IsValid() const { return is_valid_; }
@@ -105,7 +104,11 @@ std::shared_ptr<CommandEncoderVK> CommandEncoderFactoryVK::Create() {
     return nullptr;
   }
   auto& context_vk = ContextVK::Cast(*context);
-  auto tls_pool = CommandPoolVK::GetThreadLocal(&context_vk);
+  auto recycler = context_vk.GetCommandPoolRecycler();
+  if (!recycler) {
+    return nullptr;
+  }
+  auto tls_pool = recycler->Get();
   if (!tls_pool) {
     return nullptr;
   }
