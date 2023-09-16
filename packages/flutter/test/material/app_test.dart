@@ -1083,7 +1083,7 @@ void main() {
     expect(key1.currentState, isNull);
   });
 
-  testWidgets('MaterialApp.router works', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialApp.router works', (WidgetTester tester) async {
     final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
       initialRouteInformation: RouteInformation(
         uri: Uri.parse('initial'),
@@ -1114,9 +1114,14 @@ void main() {
     await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
-  });
+  },
+  // TODO(polina-c): remove after fixing
+  // https://github.com/flutter/flutter/issues/134205
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    allowAllNotDisposed: true,
+  ));
 
-  testWidgets('MaterialApp.router route information parser is optional', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialApp.router route information parser is optional', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
@@ -1140,7 +1145,12 @@ void main() {
     await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
-  });
+  },
+  // TODO(polina-c): remove after fixing
+  // https://github.com/flutter/flutter/issues/134205
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    allowAllNotDisposed: true,
+  ));
 
   testWidgetsWithLeakTracking('MaterialApp.router throw if route information provider is provided but no route information parser', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
@@ -1191,7 +1201,7 @@ void main() {
     expect(tester.takeException(), isAssertionError);
   });
 
-  testWidgets('MaterialApp.router router config works', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('MaterialApp.router router config works', (WidgetTester tester) async {
     late SimpleNavigatorRouterDelegate routerDelegate;
     addTearDown(() => routerDelegate.dispose());
     late PlatformRouteInformationProvider provider;
@@ -1226,7 +1236,12 @@ void main() {
     await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
-  });
+  },
+  // TODO(polina-c): remove after fixing
+  // https://github.com/flutter/flutter/issues/134205
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    allowAllNotDisposed: true,
+  ));
 
   testWidgetsWithLeakTracking('MaterialApp.builder can build app without a Navigator', (WidgetTester tester) async {
     Widget? builderChild;

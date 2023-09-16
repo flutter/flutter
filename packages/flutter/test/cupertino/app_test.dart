@@ -147,7 +147,7 @@ void main() {
     expect(key1.currentState, isNull);
   });
 
-  testWidgets('CupertinoApp.router works', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CupertinoApp.router works', (WidgetTester tester) async {
     final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
       initialRouteInformation: RouteInformation(
         uri: Uri.parse('initial'),
@@ -178,9 +178,14 @@ void main() {
     await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
-  });
+  },
+  // TODO(polina-c): remove after fixing
+  // https://github.com/flutter/flutter/issues/134205
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    allowAllNotDisposed: true,
+  ));
 
-  testWidgets('CupertinoApp.router route information parser is optional', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CupertinoApp.router route information parser is optional', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
@@ -204,7 +209,12 @@ void main() {
     await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
-  });
+  },
+  // TODO(polina-c): remove after fixing
+  // https://github.com/flutter/flutter/issues/134205
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    allowAllNotDisposed: true,
+  ));
 
   testWidgetsWithLeakTracking('CupertinoApp.router throw if route information provider is provided but no route information parser', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
@@ -255,7 +265,7 @@ void main() {
     expect(tester.takeException(), isAssertionError);
   });
 
-  testWidgets('CupertinoApp.router router config works', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CupertinoApp.router router config works', (WidgetTester tester) async {
     late SimpleNavigatorRouterDelegate delegate;
     addTearDown(() => delegate.dispose());
     final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
@@ -290,7 +300,12 @@ void main() {
     await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
-  });
+  },
+  // TODO(polina-c): remove after fixing
+  // https://github.com/flutter/flutter/issues/134205
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    allowAllNotDisposed: true,
+  ));
 
   testWidgetsWithLeakTracking('CupertinoApp has correct default ScrollBehavior', (WidgetTester tester) async {
     late BuildContext capturedContext;
