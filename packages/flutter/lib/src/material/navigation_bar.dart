@@ -334,7 +334,7 @@ class NavigationDestination extends StatelessWidget {
   /// Defaults to null, in which case the [label] text will be used.
   final String? tooltip;
 
-  /// Indicates that this destination is accessible.
+  /// Indicates that this destination is selectable.
   ///
   /// Defaults to true.
   final bool enabled;
