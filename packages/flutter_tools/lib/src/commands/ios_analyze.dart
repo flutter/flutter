@@ -15,7 +15,7 @@ enum IOSAnalyzeOption {
   ///
   /// An example output:
   ///
-  /// {"configurations":["Debug","Release","Profile"],"schemes":["Runner"],"targets":["Runner","RunnerTests"]}
+  /// {"configurations":["Debug","Release","Profile"],"targets":["Runner","RunnerTests"]}
   listBuildOptions,
 
   /// Outputs universal link settings of the iOS Xcode sub-project into a file.
@@ -32,16 +32,14 @@ class IOSAnalyze {
     required this.project,
     required this.option,
     this.configuration,
-    this.scheme,
     this.target,
     required this.logger,
   }) : assert(option == IOSAnalyzeOption.listBuildOptions ||
-              (configuration != null && scheme != null && target != null));
+              (configuration != null && target != null));
 
   final FlutterProject project;
   final IOSAnalyzeOption option;
   final String? configuration;
-  final String? scheme;
   final String? target;
   final Logger logger;
 
@@ -55,14 +53,15 @@ class IOSAnalyze {
         } else {
           result = <String, List<String>>{
             'configurations': info.buildConfigurations,
-            'schemes': info.schemes,
             'targets': info.targets,
           };
         }
         logger.printStatus(jsonEncode(result));
       case IOSAnalyzeOption.outputUniversalLinkSettings:
-        await project.ios.outputsUniversalLinkSettings(configuration: configuration!, scheme: scheme!, target: target!);
-        final String filePath = await project.ios.outputsUniversalLinkSettings(configuration: configuration!, scheme: scheme!, target: target!);
+        final String filePath = await project.ios.outputsUniversalLinkSettings(
+          configuration: configuration!,
+          target: target!,
+        );
         logger.printStatus('result saved in $filePath');
     }
   }
