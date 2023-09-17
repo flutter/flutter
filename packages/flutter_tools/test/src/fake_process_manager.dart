@@ -401,7 +401,7 @@ abstract class FakeProcessManager implements ProcessManager {
       return false;
     }
     if (fakeProcess._completer != null) {
-      fakeProcess._completer!.complete();
+      fakeProcess._completer.complete();
     }
     return true;
   }

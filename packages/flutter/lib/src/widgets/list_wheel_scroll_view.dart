@@ -7,7 +7,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -709,12 +708,14 @@ class ListWheelScrollView extends StatefulWidget {
 
 class _ListWheelScrollViewState extends State<ListWheelScrollView> {
   int _lastReportedItemIndex = 0;
-  ScrollController? scrollController;
+  ScrollController? _backupController;
+
+  ScrollController get _effectiveController =>
+    widget.controller ?? (_backupController ??= FixedExtentScrollController());
 
   @override
   void initState() {
     super.initState();
-    scrollController = widget.controller ?? FixedExtentScrollController();
     if (widget.controller is FixedExtentScrollController) {
       final FixedExtentScrollController controller = widget.controller! as FixedExtentScrollController;
       _lastReportedItemIndex = controller.initialItem;
@@ -722,15 +723,9 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
   }
 
   @override
-  void didUpdateWidget(ListWheelScrollView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.controller != null && widget.controller != scrollController) {
-      final ScrollController? oldScrollController = scrollController;
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        oldScrollController!.dispose();
-      });
-      scrollController = widget.controller;
-    }
+  void dispose() {
+    _backupController?.dispose();
+    super.dispose();
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
@@ -754,7 +749,7 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: _FixedExtentScrollable(
-        controller: scrollController,
+        controller: _effectiveController,
         physics: widget.physics,
         itemExtent: widget.itemExtent,
         restorationId: widget.restorationId,

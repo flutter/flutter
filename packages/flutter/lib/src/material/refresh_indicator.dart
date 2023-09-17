@@ -275,6 +275,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   late Future<void> _pendingRefreshFuture;
   bool? _isIndicatorAtTop;
   double? _dragOffset;
+  late Color _effectiveValueColor = widget.color ?? Theme.of(context).colorScheme.primary;
 
   static final Animatable<double> _threeQuarterTween = Tween<double>(begin: 0.0, end: 0.75);
   static final Animatable<double> _kDragSizeFactorLimitTween = Tween<double>(begin: 0.0, end: _kDragSizeFactorLimit);
@@ -293,15 +294,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
 
   @override
   void didChangeDependencies() {
-    final ThemeData theme = Theme.of(context);
-    _valueColor = _positionController.drive(
-      ColorTween(
-        begin: (widget.color ?? theme.colorScheme.primary).withOpacity(0.0),
-        end: (widget.color ?? theme.colorScheme.primary).withOpacity(1.0),
-      ).chain(CurveTween(
-        curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit),
-      )),
-    );
+    _setupColorTween();
     super.didChangeDependencies();
   }
 
@@ -309,15 +302,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   void didUpdateWidget(covariant RefreshIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.color != widget.color) {
-      final ThemeData theme = Theme.of(context);
-      _valueColor = _positionController.drive(
-        ColorTween(
-          begin: (widget.color ?? theme.colorScheme.primary).withOpacity(0.0),
-          end: (widget.color ?? theme.colorScheme.primary).withOpacity(1.0),
-        ).chain(CurveTween(
-            curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit),
-        )),
-      );
+      _setupColorTween();
     }
   }
 
@@ -326,6 +311,28 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     _positionController.dispose();
     _scaleController.dispose();
     super.dispose();
+  }
+
+  void _setupColorTween() {
+    // Reset the current value color.
+    _effectiveValueColor = widget.color ?? Theme.of(context).colorScheme.primary;
+    final Color color = _effectiveValueColor;
+    if (color.alpha == 0x00) {
+      // Set an always stopped animation instead of a driven tween.
+      _valueColor = AlwaysStoppedAnimation<Color>(color);
+    } else {
+      // Respect the alpha of the given color.
+      _valueColor = _positionController.drive(
+        ColorTween(
+          begin: color.withAlpha(0),
+          end: color.withAlpha(color.alpha),
+        ).chain(
+          CurveTween(
+            curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit),
+          ),
+        ),
+      );
+    }
   }
 
   bool _shouldStart(ScrollNotification notification) {
@@ -448,7 +455,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       newValue = math.max(newValue, 1.0 / _kDragSizeFactorLimit);
     }
     _positionController.value = clampDouble(newValue, 0.0, 1.0); // this triggers various rebuilds
-    if (_mode == _RefreshIndicatorMode.drag && _valueColor.value!.alpha == 0xFF) {
+    if (_mode == _RefreshIndicatorMode.drag && _valueColor.value!.alpha == _effectiveValueColor.alpha) {
       _mode = _RefreshIndicatorMode.armed;
     }
   }
