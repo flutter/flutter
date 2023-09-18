@@ -80,8 +80,8 @@ class NavigationRail extends StatefulWidget {
   /// [minExtendedWidth] is specified, it must be non-negative and greater than
   /// [minWidth].
   ///
-  /// The argument [extended] must not be null. [extended] can only be set to
-  /// true when the [labelType] is null or [NavigationRailLabelType.none].
+  /// The [extended] argument can only be set to true when the [labelType] is
+  /// null or [NavigationRailLabelType.none].
   ///
   /// If [backgroundColor], [elevation], [groupAlignment], [labelType],
   /// [unselectedLabelTextStyle], [selectedLabelTextStyle],

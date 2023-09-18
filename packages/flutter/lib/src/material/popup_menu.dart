@@ -216,8 +216,6 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// Creates an item for a popup menu.
   ///
   /// By default, the item is [enabled].
-  ///
-  /// The `enabled` and `height` arguments must not be null.
   const PopupMenuItem({
     super.key,
     this.value,
@@ -474,8 +472,6 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
   ///
   /// By default, the menu item is [enabled] but unchecked. To mark the item as
   /// checked, set [checked] to true.
-  ///
-  /// The `checked` and `enabled` arguments must not be null.
   const CheckedPopupMenuItem({
     super.key,
     super.value,
@@ -1101,8 +1097,6 @@ typedef PopupMenuItemBuilder<T> = List<PopupMenuEntry<T>> Function(BuildContext 
 ///  * [showMenu], a method to dynamically show a popup menu at a given location.
 class PopupMenuButton<T> extends StatefulWidget {
   /// Creates a button that shows a popup menu.
-  ///
-  /// The [itemBuilder] argument must not be null.
   const PopupMenuButton({
     super.key,
     required this.itemBuilder,
@@ -1289,7 +1283,7 @@ class PopupMenuButton<T> extends StatefulWidget {
   ///
   /// The [clipBehavior] argument is used the clip shape of the menu.
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
   @override

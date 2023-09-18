@@ -80,8 +80,8 @@ enum BottomNavigationBarLandscapeLayout {
 /// [BottomNavigationBarType.fixed] when there are less than four items, and
 /// [BottomNavigationBarType.shifting] otherwise.
 ///
-/// The length of [items] must be at least two and each item's icon and title/label
-/// must not be null.
+/// The length of [items] must be at least two and each item's icon and
+/// title/label must not be null.
 ///
 ///  * [BottomNavigationBarType.fixed], the default when there are less than
 ///    four [items]. The selected item is rendered with the

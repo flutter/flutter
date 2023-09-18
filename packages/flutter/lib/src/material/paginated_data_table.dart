@@ -71,15 +71,11 @@ class PaginatedDataTable extends StatefulWidget {
   /// order is ascending, this should be true (the default), otherwise it should
   /// be false.
   ///
-  /// The [source] must not be null. The [source] should be a long-lived
-  /// [DataTableSource]. The same source should be provided each time a
-  /// particular [PaginatedDataTable] widget is created; avoid creating a new
-  /// [DataTableSource] with each new instance of the [PaginatedDataTable]
-  /// widget unless the data table really is to now show entirely different
-  /// data from a new source.
-  ///
-  /// The [rowsPerPage] and [availableRowsPerPage] must not be null (they
-  /// both have defaults, though, so don't have to be specified).
+  /// The [source] should be a long-lived [DataTableSource]. The same source
+  /// should be provided each time a particular [PaginatedDataTable] widget is
+  /// created; avoid creating a new [DataTableSource] with each new instance of
+  /// the [PaginatedDataTable] widget unless the data table really is to now
+  /// show entirely different data from a new source.
   ///
   /// Themed by [DataTableTheme]. [DataTableThemeData.decoration] is ignored.
   /// To modify the border or background color of the [PaginatedDataTable], use

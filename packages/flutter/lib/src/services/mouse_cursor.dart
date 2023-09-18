@@ -207,7 +207,7 @@ abstract class MouseCursor with Diagnosticable {
   /// to make debug information more readable. It is returned as the [toString]
   /// when the diagnostic level is at or above [DiagnosticLevel.info].
   ///
-  /// The [debugDescription] must not be null or empty string.
+  /// The [debugDescription] must not be empty.
   String get debugDescription;
 
   @override

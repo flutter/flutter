@@ -470,8 +470,6 @@ class TextPainter {
   /// The `text` and `textDirection` arguments are optional but [text] and
   /// [textDirection] must be non-null before calling [layout].
   ///
-  /// The [textAlign] property must not be null.
-  ///
   /// The [maxLines] property, if non-null, must be greater than zero.
   TextPainter({
     InlineSpan? text,
@@ -707,7 +705,7 @@ class TextPainter {
   ///
   /// After this is set, you must call [layout] before the next call to [paint].
   ///
-  /// The [textAlign] property must not be null. It defaults to [TextAlign.start].
+  /// The [textAlign] property defaults to [TextAlign.start].
   TextAlign get textAlign => _textAlign;
   TextAlign _textAlign;
   set textAlign(TextAlign value) {

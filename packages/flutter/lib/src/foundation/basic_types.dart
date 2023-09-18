@@ -229,8 +229,6 @@ class _LazyListIterator<E> implements Iterator<E> {
 /// A factory interface that also reports the type of the created objects.
 class Factory<T> {
   /// Creates a new factory.
-  ///
-  /// The `constructor` parameter must not be null.
   const Factory(this.constructor);
 
   /// Creates a new object of type T.

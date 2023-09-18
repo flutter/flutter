@@ -220,7 +220,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   ///
   /// The scrollbar track consumes this space.
   ///
-  /// Must not be null and defaults to 0.
+  /// Defaults to zero.
   double get crossAxisMargin => _crossAxisMargin;
   double _crossAxisMargin;
   set crossAxisMargin(double value) {
@@ -276,8 +276,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// partial obstructions such as display notches. If you only want additional
   /// margins around the scrollbar, see [mainAxisMargin].
   ///
-  /// Defaults to [EdgeInsets.zero]. Must not be null and offsets from all four
-  /// directions must be greater than or equal to zero.
+  /// Defaults to [EdgeInsets.zero]. Offsets from all four directions must be
+  /// greater than or equal to zero.
   EdgeInsets get padding => _padding;
   EdgeInsets _padding;
   set padding(EdgeInsets value) {
@@ -957,9 +957,6 @@ class RawScrollbar extends StatefulWidget {
   ///
   /// The [child], or a descendant of the [child], should be a source of
   /// [ScrollNotification] notifications, typically a [Scrollable] widget.
-  ///
-  /// The [child], [fadeDuration], [pressDuration], and [timeToFade] arguments
-  /// must not be null.
   const RawScrollbar({
     super.key,
     required this.child,
@@ -1307,7 +1304,7 @@ class RawScrollbar extends StatefulWidget {
   ///
   /// The scrollbar track consumes this space.
   ///
-  /// Must not be null and defaults to 0.
+  /// Defaults to zero.
   final double crossAxisMargin;
 
   /// The insets by which the scrollbar thumb and track should be padded.

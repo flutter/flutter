@@ -127,7 +127,7 @@ class SnackBarAction extends StatefulWidget {
   /// The button label.
   final String label;
 
-  /// The callback to be called when the button is pressed. Must not be null.
+  /// The callback to be called when the button is pressed.
   ///
   /// This callback will be called at most once each time this action is
   /// displayed in a [SnackBar].
@@ -471,7 +471,7 @@ class SnackBar extends StatefulWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.hardEdge], and must not be null.
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   // API for ScaffoldMessengerState.showSnackBar():

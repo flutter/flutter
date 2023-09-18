@@ -269,8 +269,6 @@ class ReverseAnimation extends Animation<double>
   with AnimationLazyListenerMixin, AnimationLocalStatusListenersMixin {
 
   /// Creates a reverse animation.
-  ///
-  /// The parent argument must not be null.
   ReverseAnimation(this.parent);
 
   /// The animation whose value and direction this animation is reversing.
@@ -376,8 +374,6 @@ class ReverseAnimation extends Animation<double>
 ///    [Curve].
 class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<double> {
   /// Creates a curved animation.
-  ///
-  /// The parent and curve arguments must not be null.
   CurvedAnimation({
     required this.parent,
     required this.curve,
