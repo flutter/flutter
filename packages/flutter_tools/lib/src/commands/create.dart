@@ -990,6 +990,7 @@ String? _getBuildGradleWrapperPropertiesFilePath(FlutterProjectType projectType,
       case FlutterProjectType.plugin:
       case FlutterProjectType.pluginFfi:
       case FlutterProjectType.packageFfi:
+        // TODO(camsim99): Add relevant file path for packageFfi when Android is supported.
         // No gradle-wrapper.properties files not part of sample code that
         // can be determined.
         return null;
@@ -1018,7 +1019,8 @@ List<String>? _getBuildGradleConfigurationFilePaths(FlutterProjectType projectTy
       case FlutterProjectType.plugin:
         buildGradleConfigurationFilePaths.add(globals.fs.path.join(projectDirPath, 'android/app/build.gradle'));
       case FlutterProjectType.package:
-      case FlutterProjectType.packageFfi: // TODO(camsim99): verify behavior for packageFfi.
+      case FlutterProjectType.packageFfi:
+        // TODO(camsim99): Add any relevant file paths for packageFfi when Android is supported.
         // No build.gradle file because there is no platform-specific implementation.
         return null;
   }
