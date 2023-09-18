@@ -433,7 +433,9 @@ abstract class FocusTraversalPolicy with Diagnosticable {
     // finds.
     assert((){
       final Set<FocusNode> difference = sortedDescendants.toSet().difference(scope.traversalDescendants.toSet());
-      if (currentNode.skipTraversal) {
+      if (currentNode.skipTraversal || !currentNode.canRequestFocus) {
+        // The scope.traversalDescendants will not contain currentNode if it
+        // skips traversal or not focusable.
         assert(
          difference.length == 1 && difference.contains(currentNode),
          'Sorted descendants contains different nodes than FocusScopeNode.traversalDescendants would. '
