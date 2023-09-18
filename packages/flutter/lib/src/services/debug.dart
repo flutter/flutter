@@ -25,10 +25,7 @@ KeyDataTransitMode? debugKeyEventSimulatorTransitModeOverride;
 /// The statistics include the total bytes transmitted and the average number of
 /// bytes per invocation in the last quantum. "Up" means in the direction of
 /// Flutter to the host platform, "down" is the host platform to flutter.
-///
-/// Contrary to other debugging toggles in this package, this will function even
-/// when [kReleaseMode] is true.
-bool debugProfilePlatformChannels = false;
+bool profilePlatformChannels = false;
 
 /// Setting to true will cause extensive logging to occur when key events are
 /// received.
@@ -49,7 +46,7 @@ bool debugAssertAllServicesVarsUnset(String reason) {
     if (debugKeyEventSimulatorTransitModeOverride != null) {
       throw FlutterError(reason);
     }
-    if (debugProfilePlatformChannels || debugPrintKeyboardEvents) {
+    if (profilePlatformChannels || debugPrintKeyboardEvents) {
       throw FlutterError(reason);
     }
     return true;

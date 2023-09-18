@@ -12,7 +12,7 @@ import '_background_isolate_binary_messenger_io.dart'
 
 import 'binary_messenger.dart';
 import 'binding.dart';
-import 'debug.dart' show debugProfilePlatformChannels;
+import 'debug.dart';
 import 'message_codec.dart';
 import 'message_codecs.dart';
 
@@ -23,9 +23,9 @@ export 'binary_messenger.dart' show BinaryMessenger;
 export 'binding.dart' show RootIsolateToken;
 export 'message_codec.dart' show MessageCodec, MethodCall, MethodCodec;
 
-bool _debugProfilePlatformChannelsIsRunning = false;
-const Duration _debugProfilePlatformChannelsRate = Duration(seconds: 1);
-final Expando<BinaryMessenger> _debugBinaryMessengers = Expando<BinaryMessenger>();
+bool _profilePlatformChannelsIsRunning = false;
+const Duration _profilePlatformChannelsRate = Duration(seconds: 1);
+final Expando<BinaryMessenger> _profiledBinaryMessengers = Expando<BinaryMessenger>();
 
 class _ProfiledBinaryMessenger implements BinaryMessenger {
   const _ProfiledBinaryMessenger(this.proxy, this.channelTypeName, this.codecTypeName);
@@ -88,17 +88,17 @@ class _PlatformChannelStats {
   double get averageDownPayload => _downBytes / _downCount;
 }
 
-final Map<String, _PlatformChannelStats> _debugProfilePlatformChannelsStats = <String, _PlatformChannelStats>{};
+final Map<String, _PlatformChannelStats> _profilePlatformChannelsStats = <String, _PlatformChannelStats>{};
 
 Future<void> _debugLaunchProfilePlatformChannels() async {
-  if (!_debugProfilePlatformChannelsIsRunning) {
-    _debugProfilePlatformChannelsIsRunning = true;
-    await Future<dynamic>.delayed(_debugProfilePlatformChannelsRate);
-    _debugProfilePlatformChannelsIsRunning = false;
+  if (!_profilePlatformChannelsIsRunning) {
+    _profilePlatformChannelsIsRunning = true;
+    await Future<dynamic>.delayed(_profilePlatformChannelsRate);
+    _profilePlatformChannelsIsRunning = false;
     final StringBuffer log = StringBuffer();
     log.writeln('Platform Channel Stats:');
     final List<_PlatformChannelStats> allStats =
-        _debugProfilePlatformChannelsStats.values.toList();
+        _profilePlatformChannelsStats.values.toList();
     // Sort highest combined bandwidth first.
     allStats.sort((_PlatformChannelStats x, _PlatformChannelStats y) =>
         (y.upBytes + y.downBytes) - (x.upBytes + x.downBytes));
@@ -107,14 +107,14 @@ Future<void> _debugLaunchProfilePlatformChannels() async {
           '  (name:"${stats.channel}" type:"${stats.type}" codec:"${stats.codec}" upBytes:${stats.upBytes} upBytes_avg:${stats.averageUpPayload.toStringAsFixed(1)} downBytes:${stats.downBytes} downBytes_avg:${stats.averageDownPayload.toStringAsFixed(1)})');
     }
     debugPrint(log.toString());
-    _debugProfilePlatformChannelsStats.clear();
+    _profilePlatformChannelsStats.clear();
   }
 }
 
 void _debugRecordUpStream(String channelTypeName, String name,
     String codecTypeName, ByteData? bytes) {
   final _PlatformChannelStats stats =
-      _debugProfilePlatformChannelsStats[name] ??=
+      _profilePlatformChannelsStats[name] ??=
           _PlatformChannelStats(name, codecTypeName, channelTypeName);
   stats.addUpStream(bytes?.lengthInBytes ?? 0);
   _debugLaunchProfilePlatformChannels();
@@ -123,7 +123,7 @@ void _debugRecordUpStream(String channelTypeName, String name,
 void _debugRecordDownStream(String channelTypeName, String name,
     String codecTypeName, ByteData? bytes) {
   final _PlatformChannelStats stats =
-      _debugProfilePlatformChannelsStats[name] ??=
+      _profilePlatformChannelsStats[name] ??=
           _PlatformChannelStats(name, codecTypeName, channelTypeName);
   stats.addDownStream(bytes?.lengthInBytes ?? 0);
   _debugLaunchProfilePlatformChannels();
@@ -178,8 +178,8 @@ class BasicMessageChannel<T> {
   /// [BackgroundIsolateBinaryMessenger.ensureInitialized].
   BinaryMessenger get binaryMessenger {
     final BinaryMessenger result = _binaryMessenger ?? _findBinaryMessenger();
-    return debugProfilePlatformChannels
-        ? _debugBinaryMessengers[this] ??= _ProfiledBinaryMessenger(
+    return profilePlatformChannels
+        ? _profiledBinaryMessengers[this] ??= _ProfiledBinaryMessenger(
             // ignore: no_runtimetype_tostring
             result, runtimeType.toString(), codec.runtimeType.toString())
         : result;
@@ -267,8 +267,8 @@ class MethodChannel {
   /// [BackgroundIsolateBinaryMessenger.ensureInitialized].
   BinaryMessenger get binaryMessenger {
     final BinaryMessenger result = _binaryMessenger ?? _findBinaryMessenger();
-    return debugProfilePlatformChannels
-        ? _debugBinaryMessengers[this] ??= _ProfiledBinaryMessenger(
+    return profilePlatformChannels
+        ? _profiledBinaryMessengers[this] ??= _ProfiledBinaryMessenger(
             // ignore: no_runtimetype_tostring
             result, runtimeType.toString(), codec.runtimeType.toString())
         : result;
@@ -298,7 +298,7 @@ class MethodChannel {
   Future<T?> _invokeMethod<T>(String method, { required bool missingOk, dynamic arguments }) async {
     final ByteData input = codec.encodeMethodCall(MethodCall(method, arguments));
     final ByteData? result =
-      debugProfilePlatformChannels ?
+      profilePlatformChannels ?
         await (binaryMessenger as _ProfiledBinaryMessenger).sendWithPostfix(name, '#$method', input) :
         await binaryMessenger.send(name, input);
     if (result == null) {
