@@ -2673,7 +2673,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   @override
   String toDescription({ TextTreeConfiguration? parentConfiguration }) {
     if (_description != null) {
-      return _addTooltip(_description!);
+      return _addTooltip(_description);
     }
 
     if (exception != null) {

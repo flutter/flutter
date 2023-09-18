@@ -5359,7 +5359,7 @@ class ErrorWidget extends LeafRenderObjectWidget {
     if (_flutterError == null) {
       properties.add(StringProperty('message', message, quoted: false));
     } else {
-      properties.add(_flutterError!.toDiagnosticsNode(style: DiagnosticsTreeStyle.whitespace));
+      properties.add(_flutterError.toDiagnosticsNode(style: DiagnosticsTreeStyle.whitespace));
     }
   }
 }

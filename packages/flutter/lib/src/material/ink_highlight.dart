@@ -130,7 +130,7 @@ class InkHighlight extends InteractiveInkFeature {
   void paintFeature(Canvas canvas, Matrix4 transform) {
     final Paint paint = Paint()..color = color.withAlpha(_alpha.value);
     final Offset? originOffset = MatrixUtils.getAsTranslation(transform);
-    final Rect rect = _rectCallback != null ? _rectCallback!() : Offset.zero & referenceBox.size;
+    final Rect rect = _rectCallback != null ? _rectCallback() : Offset.zero & referenceBox.size;
     if (originOffset == null) {
       canvas.save();
       canvas.transform(transform.storage);

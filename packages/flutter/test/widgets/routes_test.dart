@@ -2078,7 +2078,7 @@ class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
     if (_barrierCurve == null) {
       return super.barrierCurve;
     }
-    return _barrierCurve!;
+    return _barrierCurve;
   }
   final Curve? _barrierCurve;
 
