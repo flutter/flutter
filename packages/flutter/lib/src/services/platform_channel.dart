@@ -40,17 +40,12 @@ class _ProfiledBinaryMessenger implements BinaryMessenger {
 
   Future<ByteData?>? sendWithPostfix(String channel, String postfix, ByteData? message) async {
     _debugRecordUpStream(channelTypeName, '$channel$postfix', codecTypeName, message);
-    TimelineTask? debugTimelineTask;
-    if (!kReleaseMode) {
-      debugTimelineTask = TimelineTask()..start('Platform Channel send $channel$postfix');
-    }
+    final TimelineTask timelineTask = TimelineTask()..start('Platform Channel send $channel$postfix');
     final ByteData? result;
     try {
       result = await proxy.send(channel, message);
     } finally {
-      if (!kReleaseMode) {
-        debugTimelineTask!.finish();
-      }
+      timelineTask.finish();
     }
     _debugRecordDownStream(channelTypeName, '$channel$postfix', codecTypeName, result);
     return result;
@@ -183,7 +178,7 @@ class BasicMessageChannel<T> {
   /// [BackgroundIsolateBinaryMessenger.ensureInitialized].
   BinaryMessenger get binaryMessenger {
     final BinaryMessenger result = _binaryMessenger ?? _findBinaryMessenger();
-    return !kReleaseMode && debugProfilePlatformChannels
+    return debugProfilePlatformChannels
         ? _debugBinaryMessengers[this] ??= _ProfiledBinaryMessenger(
             // ignore: no_runtimetype_tostring
             result, runtimeType.toString(), codec.runtimeType.toString())
@@ -272,7 +267,7 @@ class MethodChannel {
   /// [BackgroundIsolateBinaryMessenger.ensureInitialized].
   BinaryMessenger get binaryMessenger {
     final BinaryMessenger result = _binaryMessenger ?? _findBinaryMessenger();
-    return !kReleaseMode && debugProfilePlatformChannels
+    return debugProfilePlatformChannels
         ? _debugBinaryMessengers[this] ??= _ProfiledBinaryMessenger(
             // ignore: no_runtimetype_tostring
             result, runtimeType.toString(), codec.runtimeType.toString())
@@ -303,7 +298,7 @@ class MethodChannel {
   Future<T?> _invokeMethod<T>(String method, { required bool missingOk, dynamic arguments }) async {
     final ByteData input = codec.encodeMethodCall(MethodCall(method, arguments));
     final ByteData? result =
-      !kReleaseMode && debugProfilePlatformChannels ?
+      debugProfilePlatformChannels ?
         await (binaryMessenger as _ProfiledBinaryMessenger).sendWithPostfix(name, '#$method', input) :
         await binaryMessenger.send(name, input);
     if (result == null) {
