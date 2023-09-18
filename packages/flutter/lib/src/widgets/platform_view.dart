@@ -665,6 +665,9 @@ abstract class _DarwinViewState<PlatformViewT extends _DarwinView, ControllerT e
 
     if (widget.viewType != oldWidget.viewType) {
       _controller?.dispose();
+      _controller = null;
+      focusNode?.dispose();
+      focusNode = null;
       _createNewUiKitView();
       return;
     }
