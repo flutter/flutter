@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:ui/src/engine/safe_browser_api.dart';
 import 'package:ui/ui.dart' as ui;
 
@@ -285,78 +283,6 @@ class FlutterViewEmbedder {
       // When physical size changes this value has to be recalculated.
       window.computeOnScreenKeyboardInsets(false);
       EnginePlatformDispatcher.instance.invokeOnMetricsChanged();
-    }
-  }
-
-  static const String orientationLockTypeAny = 'any';
-  static const String orientationLockTypeNatural = 'natural';
-  static const String orientationLockTypeLandscape = 'landscape';
-  static const String orientationLockTypePortrait = 'portrait';
-  static const String orientationLockTypePortraitPrimary = 'portrait-primary';
-  static const String orientationLockTypePortraitSecondary =
-      'portrait-secondary';
-  static const String orientationLockTypeLandscapePrimary = 'landscape-primary';
-  static const String orientationLockTypeLandscapeSecondary =
-      'landscape-secondary';
-
-  /// Sets preferred screen orientation.
-  ///
-  /// Specifies the set of orientations the application interface can be
-  /// displayed in.
-  ///
-  /// The [orientations] argument is a list of DeviceOrientation values.
-  /// The empty list uses Screen unlock api and causes the application to
-  /// defer to the operating system default.
-  ///
-  /// See w3c screen api: https://www.w3.org/TR/screen-orientation/
-  Future<bool> setPreferredOrientation(List<dynamic> orientations) {
-    final DomScreen? screen = domWindow.screen;
-    if (screen != null) {
-      final DomScreenOrientation? screenOrientation = screen.orientation;
-      if (screenOrientation != null) {
-        if (orientations.isEmpty) {
-          screenOrientation.unlock();
-          return Future<bool>.value(true);
-        } else {
-          final String? lockType =
-              _deviceOrientationToLockType(orientations.first as String?);
-          if (lockType != null) {
-            final Completer<bool> completer = Completer<bool>();
-            try {
-              screenOrientation.lock(lockType).then((dynamic _) {
-                completer.complete(true);
-              }).catchError((dynamic error) {
-                // On Chrome desktop an error with 'not supported on this device
-                // error' is fired.
-                completer.complete(false);
-              });
-            } catch (_) {
-              return Future<bool>.value(false);
-            }
-            return completer.future;
-          }
-        }
-      }
-    }
-    // API is not supported on this browser return false.
-    return Future<bool>.value(false);
-  }
-
-  // Converts device orientation to w3c OrientationLockType enum.
-  //
-  // See also: https://developer.mozilla.org/en-US/docs/Web/API/ScreenOrientation/lock
-  static String? _deviceOrientationToLockType(String? deviceOrientation) {
-    switch (deviceOrientation) {
-      case 'DeviceOrientation.portraitUp':
-        return orientationLockTypePortraitPrimary;
-      case 'DeviceOrientation.portraitDown':
-        return orientationLockTypePortraitSecondary;
-      case 'DeviceOrientation.landscapeLeft':
-        return orientationLockTypeLandscapePrimary;
-      case 'DeviceOrientation.landscapeRight':
-        return orientationLockTypeLandscapeSecondary;
-      default:
-        return null;
     }
   }
 

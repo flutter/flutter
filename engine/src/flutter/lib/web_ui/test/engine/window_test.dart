@@ -358,25 +358,25 @@ Future<void> testMain() async {
     unlockCount = 0;
 
     expect(await sendSetPreferredOrientations(<dynamic>['DeviceOrientation.portraitUp']), isTrue);
-    expect(lockCalls, <String>[FlutterViewEmbedder.orientationLockTypePortraitPrimary]);
+    expect(lockCalls, <String>[ScreenOrientation.lockTypePortraitPrimary]);
     expect(unlockCount, 0);
     lockCalls.clear();
     unlockCount = 0;
 
     expect(await sendSetPreferredOrientations(<dynamic>['DeviceOrientation.portraitDown']), isTrue);
-    expect(lockCalls, <String>[FlutterViewEmbedder.orientationLockTypePortraitSecondary]);
+    expect(lockCalls, <String>[ScreenOrientation.lockTypePortraitSecondary]);
     expect(unlockCount, 0);
     lockCalls.clear();
     unlockCount = 0;
 
     expect(await sendSetPreferredOrientations(<dynamic>['DeviceOrientation.landscapeLeft']), isTrue);
-    expect(lockCalls, <String>[FlutterViewEmbedder.orientationLockTypeLandscapePrimary]);
+    expect(lockCalls, <String>[ScreenOrientation.lockTypeLandscapePrimary]);
     expect(unlockCount, 0);
     lockCalls.clear();
     unlockCount = 0;
 
     expect(await sendSetPreferredOrientations(<dynamic>['DeviceOrientation.landscapeRight']), isTrue);
-    expect(lockCalls, <String>[FlutterViewEmbedder.orientationLockTypeLandscapeSecondary]);
+    expect(lockCalls, <String>[ScreenOrientation.lockTypeLandscapeSecondary]);
     expect(unlockCount, 0);
     lockCalls.clear();
     unlockCount = 0;
@@ -389,7 +389,7 @@ Future<void> testMain() async {
 
     simulateError = true;
     expect(await sendSetPreferredOrientations(<dynamic>['DeviceOrientation.portraitDown']), isFalse);
-    expect(lockCalls, <String>[FlutterViewEmbedder.orientationLockTypePortraitSecondary]);
+    expect(lockCalls, <String>[ScreenOrientation.lockTypePortraitSecondary]);
     expect(unlockCount, 0);
 
     js_util.setProperty(domWindow, 'screen', original);
