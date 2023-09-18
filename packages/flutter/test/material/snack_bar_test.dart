@@ -2544,7 +2544,6 @@ void main() {
   });
 
   testWidgetsWithLeakTracking('Should have only one SnackBar during back swipe navigation',
-  leakTrackingTestConfig: LeakTrackingTestConfig.debugNotDisposed(),
   (WidgetTester tester) async {
     const String snackBarText = 'hello snackbar';
     const Key snackTarget = Key('snack-target');

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
@@ -46,7 +47,7 @@ void main() {
   });
 
   group('ModalBarrier', () {
-    testWidgets('prevents interactions with widgets behind it', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('prevents interactions with widgets behind it', (WidgetTester tester) async {
       final Widget subject = Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
@@ -61,7 +62,7 @@ void main() {
       expect(tapped, isFalse, reason: 'because the tap is not prevented by ModalBarrier');
     });
 
-    testWidgets('prevents hover interactions with widgets behind it', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('prevents hover interactions with widgets behind it', (WidgetTester tester) async {
       final Widget subject = Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
@@ -88,7 +89,7 @@ void main() {
       expect(hovered, isFalse, reason: 'because the hover is not prevented by ModalBarrier');
     });
 
-    testWidgets('does not prevent interactions with widgets in front of it', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('does not prevent interactions with widgets in front of it', (WidgetTester tester) async {
       final Widget subject = Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
@@ -103,7 +104,7 @@ void main() {
       expect(tapped, isTrue, reason: 'because the tap is prevented by ModalBarrier');
     });
 
-    testWidgets('does not prevent interactions with translucent widgets in front of it', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('does not prevent interactions with translucent widgets in front of it', (WidgetTester tester) async {
       bool dragged = false;
       final Widget subject = Stack(
         textDirection: TextDirection.ltr,
@@ -130,7 +131,7 @@ void main() {
       expect(dragged, isTrue, reason: 'because the drag is prevented by ModalBarrier');
     });
 
-    testWidgets('does not prevent hover interactions with widgets in front of it', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('does not prevent hover interactions with widgets in front of it', (WidgetTester tester) async {
       final Widget subject = Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
@@ -158,7 +159,7 @@ void main() {
       hovered = false;
     });
 
-    testWidgets('plays system alert sound when user tries to dismiss it', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('plays system alert sound when user tries to dismiss it', (WidgetTester tester) async {
       final List<String> playedSystemSounds = <String>[];
       try {
         tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
@@ -187,7 +188,7 @@ void main() {
       expect(playedSystemSounds[0], SystemSoundType.alert.toString());
     });
 
-    testWidgets('pops the Navigator when dismissed by primary tap', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('pops the Navigator when dismissed by primary tap', (WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
         '/modal': (BuildContext context) => const SecondWidget(),
@@ -220,7 +221,7 @@ void main() {
       );
     });
 
-    testWidgets('pops the Navigator when dismissed by non-primary tap', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('pops the Navigator when dismissed by non-primary tap', (WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
         '/modal': (BuildContext context) => const SecondWidget(),
@@ -254,7 +255,7 @@ void main() {
       );
     });
 
-    testWidgets('may pop the Navigator when competing with other gestures', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('may pop the Navigator when competing with other gestures', (WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
         '/modal': (BuildContext context) => const SecondWidgetWithCompetence(),
@@ -282,7 +283,7 @@ void main() {
       );
     });
 
-    testWidgets('does not pop the Navigator with a WillPopScope that returns false', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('does not pop the Navigator with a WillPopScope that returns false', (WidgetTester tester) async {
       bool willPopCalled = false;
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
@@ -327,7 +328,7 @@ void main() {
       expect(willPopCalled, isTrue);
     });
 
-    testWidgets('pops the Navigator with a WillPopScope that returns true', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('pops the Navigator with a WillPopScope that returns true', (WidgetTester tester) async {
       bool willPopCalled = false;
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
@@ -372,7 +373,7 @@ void main() {
       expect(willPopCalled, isTrue);
     });
 
-    testWidgets('will call onDismiss callback', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('will call onDismiss callback', (WidgetTester tester) async {
       bool dismissCallbackCalled = false;
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
@@ -400,7 +401,7 @@ void main() {
       expect(dismissCallbackCalled, true);
     });
 
-    testWidgets('when onDismiss throws, should have correct context', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('when onDismiss throws, should have correct context', (WidgetTester tester) async {
       final FlutterExceptionHandler? handler = FlutterError.onError;
       FlutterErrorDetails? error;
       FlutterError.onError = (FlutterErrorDetails details) {
@@ -423,7 +424,7 @@ void main() {
       FlutterError.onError = handler;
     });
 
-    testWidgets('will not pop when given an onDismiss callback', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('will not pop when given an onDismiss callback', (WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
         '/modal': (BuildContext context) => SecondWidget(onDismiss: () {}),
@@ -450,7 +451,7 @@ void main() {
       );
     });
 
-    testWidgets('Undismissible ModalBarrier hidden in semantic tree', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Undismissible ModalBarrier hidden in semantic tree', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       await tester.pumpWidget(const ModalBarrier(dismissible: false));
 
@@ -460,7 +461,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('Dismissible ModalBarrier includes button in semantic tree on iOS, macOS and android', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Dismissible ModalBarrier includes button in semantic tree on iOS, macOS and android', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       await tester.pumpWidget(const Directionality(
         textDirection: TextDirection.ltr,
@@ -486,7 +487,7 @@ void main() {
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.android}));
   });
   group('AnimatedModalBarrier', () {
-    testWidgets('prevents interactions with widgets behind it', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('prevents interactions with widgets behind it', (WidgetTester tester) async {
       final Widget subject = Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
@@ -501,7 +502,7 @@ void main() {
       expect(tapped, isFalse, reason: 'because the tap is not prevented by ModalBarrier');
     });
 
-    testWidgets('prevents hover interactions with widgets behind it', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('prevents hover interactions with widgets behind it', (WidgetTester tester) async {
       final Widget subject = Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
@@ -528,7 +529,7 @@ void main() {
       expect(hovered, isFalse, reason: 'because the hover is not prevented by AnimatedModalBarrier');
     });
 
-    testWidgets('does not prevent interactions with widgets in front of it', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('does not prevent interactions with widgets in front of it', (WidgetTester tester) async {
       final Widget subject = Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
@@ -543,7 +544,7 @@ void main() {
       expect(tapped, isTrue, reason: 'because the tap is prevented by AnimatedModalBarrier');
     });
 
-    testWidgets('does not prevent interactions with translucent widgets in front of it', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('does not prevent interactions with translucent widgets in front of it', (WidgetTester tester) async {
       bool dragged = false;
       final Widget subject = Stack(
         textDirection: TextDirection.ltr,
@@ -570,7 +571,7 @@ void main() {
       expect(dragged, isTrue, reason: 'because the drag is prevented by AnimatedModalBarrier');
     });
 
-    testWidgets('does not prevent hover interactions with widgets in front of it', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('does not prevent hover interactions with widgets in front of it', (WidgetTester tester) async {
       final Widget subject = Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
@@ -598,7 +599,7 @@ void main() {
       hovered = false;
     });
 
-    testWidgets('plays system alert sound when user tries to dismiss it', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('plays system alert sound when user tries to dismiss it', (WidgetTester tester) async {
       final List<String> playedSystemSounds = <String>[];
       try {
         tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
@@ -627,7 +628,7 @@ void main() {
       expect(playedSystemSounds[0], SystemSoundType.alert.toString());
     });
 
-    testWidgets('pops the Navigator when dismissed by primary tap', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('pops the Navigator when dismissed by primary tap', (WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
         '/modal': (BuildContext context) => const AnimatedSecondWidget(),
@@ -660,7 +661,7 @@ void main() {
       );
     });
 
-    testWidgets('pops the Navigator when dismissed by non-primary tap', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('pops the Navigator when dismissed by non-primary tap', (WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
         '/modal': (BuildContext context) => const AnimatedSecondWidget(),
@@ -694,7 +695,7 @@ void main() {
       );
     });
 
-    testWidgets('may pop the Navigator when competing with other gestures', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('may pop the Navigator when competing with other gestures', (WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
         '/modal': (BuildContext context) => const AnimatedSecondWidgetWithCompetence(),
@@ -722,7 +723,7 @@ void main() {
       );
     });
 
-    testWidgets('does not pop the Navigator with a WillPopScope that returns false', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('does not pop the Navigator with a WillPopScope that returns false', (WidgetTester tester) async {
       bool willPopCalled = false;
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
@@ -767,7 +768,7 @@ void main() {
       expect(willPopCalled, isTrue);
     });
 
-    testWidgets('pops the Navigator with a WillPopScope that returns true', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('pops the Navigator with a WillPopScope that returns true', (WidgetTester tester) async {
       bool willPopCalled = false;
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
@@ -812,7 +813,7 @@ void main() {
       expect(willPopCalled, isTrue);
     });
 
-    testWidgets('will call onDismiss callback', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('will call onDismiss callback', (WidgetTester tester) async {
       bool dismissCallbackCalled = false;
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
@@ -840,7 +841,7 @@ void main() {
       expect(dismissCallbackCalled, true);
     });
 
-    testWidgets('will not pop when given an onDismiss callback', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('will not pop when given an onDismiss callback', (WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
         '/modal': (BuildContext context) => AnimatedSecondWidget(onDismiss: () {}),
@@ -867,7 +868,7 @@ void main() {
       );
     });
 
-    testWidgets('Undismissible AnimatedModalBarrier hidden in semantic tree', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Undismissible AnimatedModalBarrier hidden in semantic tree', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       await tester.pumpWidget(AnimatedModalBarrier(dismissible: false, color: colorAnimation));
 
@@ -877,7 +878,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('Dismissible AnimatedModalBarrier includes button in semantic tree on iOS, macOS and android', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Dismissible AnimatedModalBarrier includes button in semantic tree on iOS, macOS and android', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
@@ -904,9 +905,10 @@ void main() {
   });
 
   group('SemanticsClipper', () {
-    testWidgets('SemanticsClipper correctly clips Semantics.rect in four directions', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('SemanticsClipper correctly clips Semantics.rect in four directions', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final ValueNotifier<EdgeInsets> notifier = ValueNotifier<EdgeInsets>(const EdgeInsets.fromLTRB(10, 20, 30, 40));
+      addTearDown(notifier.dispose);
       const Rect fullScreen = TestSemantics.fullScreen;
       await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
@@ -933,7 +935,7 @@ void main() {
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.android}));
   });
 
-  testWidgets('uses default mouse cursor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('uses default mouse cursor', (WidgetTester tester) async {
     await tester.pumpWidget(const Stack(
       textDirection: TextDirection.ltr,
       children: <Widget>[
