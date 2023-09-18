@@ -290,6 +290,53 @@
                 "language": "python3"
             },
             {
+                "name": "Debug-ios-Flutter-Extension-Safe.xcframework",
+                "parameters": [
+                    "--dst",
+                    "out/debug_extension_safe",
+                    "--arm64-out-dir",
+                    "out/ios_debug_extension_safe",
+                    "--simulator-x64-out-dir",
+                    "out/ios_debug_sim_extension_safe",
+                    "--simulator-arm64-out-dir",
+                    "out/ios_debug_sim_arm64_extension_safe"
+                ],
+                "script": "flutter/sky/tools/create_full_ios_framework.py",
+                "language": "python3"
+            },
+            {
+                "name": "Profile-ios-Flutter-Extension-Safe.xcframework",
+                "parameters": [
+                    "--dst",
+                    "out/profile_extension_safe",
+                    "--arm64-out-dir",
+                    "out/ios_profile_extension_safe",
+                    "--simulator-x64-out-dir",
+                    "out/ios_debug_sim_extension_safe",
+                    "--simulator-arm64-out-dir",
+                    "out/ios_debug_sim_arm64_extension_safe"
+                ],
+                "script": "flutter/sky/tools/create_full_ios_framework.py",
+                "language": "python3"
+            },
+            {
+                "name": "Release-ios-Flutter-Extension-Safe.xcframework",
+                "parameters": [
+                    "--dst",
+                    "out/release_extension_safe",
+                    "--arm64-out-dir",
+                    "out/ios_release_extension_safe",
+                    "--simulator-x64-out-dir",
+                    "out/ios_debug_sim_extension_safe",
+                    "--simulator-arm64-out-dir",
+                    "out/ios_debug_sim_arm64_extension_safe",
+                    "--dsym",
+                    "--strip"
+                ],
+                "script": "flutter/sky/tools/create_full_ios_framework.py",
+                "language": "python3"
+            },
+            {
                 "name": "Release-macos-gen-snapshots",
                 "parameters": [
                     "--dst",
@@ -332,8 +379,23 @@
             "realm": "production"
         },
         {
-            "source": "out/release/extension_safe_Flutter.dSYM.zip",
-            "destination": "ios-release/extension_safe_Flutter.dSYM.zip",
+            "source": "out/debug_extension_safe/artifacts.zip",
+            "destination": "ios-extension-safe/artifacts.zip",
+            "realm": "production"
+        },
+        {
+            "source": "out/profile_extension_safe/artifacts.zip",
+            "destination": "ios-profile-extension-safe/artifacts.zip",
+            "realm": "production"
+        },
+        {
+            "source": "out/release_extension_safe/artifacts.zip",
+            "destination": "ios-release-extension-safe/artifacts.zip",
+            "realm": "production"
+        },
+        {
+            "source": "out/release_extension_safe/Flutter.dSYM.zip",
+            "destination": "ios-release-extension-safe/Flutter.dSYM.zip",
             "realm": "production"
         }
     ]
