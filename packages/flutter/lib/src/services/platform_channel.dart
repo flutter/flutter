@@ -12,7 +12,6 @@ import '_background_isolate_binary_messenger_io.dart'
 
 import 'binary_messenger.dart';
 import 'binding.dart';
-import 'debug.dart';
 import 'message_codec.dart';
 import 'message_codecs.dart';
 
@@ -22,6 +21,18 @@ export '_background_isolate_binary_messenger_io.dart'
 export 'binary_messenger.dart' show BinaryMessenger;
 export 'binding.dart' show RootIsolateToken;
 export 'message_codec.dart' show MessageCodec, MethodCall, MethodCodec;
+
+/// Profile and print statistics on Platform Channel usage.
+///
+/// When this is true statistics about the usage of Platform Channels will be
+/// printed out periodically to the console and Timeline events will show the
+/// time between sending and receiving a message (encoding and decoding time
+/// excluded).
+///
+/// The statistics include the total bytes transmitted and the average number of
+/// bytes per invocation in the last quantum. "Up" means in the direction of
+/// Flutter to the host platform, "down" is the host platform to flutter.
+bool profilePlatformChannels = false;
 
 bool _profilePlatformChannelsIsRunning = false;
 const Duration _profilePlatformChannelsRate = Duration(seconds: 1);
