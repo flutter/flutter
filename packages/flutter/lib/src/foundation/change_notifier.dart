@@ -207,7 +207,7 @@ mixin class ChangeNotifier implements Listenable {
   @protected
   bool get hasListeners => _count > 0;
 
-  /// Dispatches event of object creation to [MemoryAllocations.instance].
+  /// Dispatches event of the [object] creation to [MemoryAllocations.instance].
   ///
   /// If the event was already dispatched or [kFlutterMemoryAllocationsEnabled]
   /// is false, the method is noop.
