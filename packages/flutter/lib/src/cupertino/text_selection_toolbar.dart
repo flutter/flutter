@@ -386,7 +386,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
         ..lineTo(arrowTipX - _kToolbarArrowSize.width / 2, arrowBaseY); // left side of the arrow triangle
     } else {
       final double arrowBaseY = _kToolbarArrowSize.height;
-      final double arrowTipY = 0.0;
+      const double arrowTipY = 0.0;
       path
         ..moveTo(arrowTipX - _kToolbarArrowSize.width / 2, arrowBaseY)  // right side of the arrow triangle
         ..lineTo(arrowTipX, arrowTipY)                                  // The tip of the arrow
