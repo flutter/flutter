@@ -457,7 +457,7 @@ abstract class RestorableProperty<T> extends ChangeNotifier {
   /// Creates a [RestorableProperty].
   RestorableProperty(){
     if (kFlutterMemoryAllocationsEnabled) {
-      ChangeNotifier.maybeDispatchObjectCreation(this);
+      maybeDispatchObjectCreation();
     }
   }
 

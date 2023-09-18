@@ -340,7 +340,7 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
     this.reportConfiguration = false,
   }) {
     if (kFlutterMemoryAllocationsEnabled) {
-      ChangeNotifier.maybeDispatchObjectCreation(this);
+      maybeDispatchObjectCreation();
     }
   }
 

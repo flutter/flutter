@@ -2898,7 +2898,7 @@ class InspectorSelection with ChangeNotifier {
   /// Creates an instance of [InspectorSelection].
   InspectorSelection() {
     if (kFlutterMemoryAllocationsEnabled) {
-      ChangeNotifier.maybeDispatchObjectCreation(this);
+      maybeDispatchObjectCreation();
     }
   }
 
