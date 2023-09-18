@@ -59,7 +59,6 @@ export 'src/painting/shape_decoration.dart';
 export 'src/painting/stadium_border.dart';
 export 'src/painting/star_border.dart';
 export 'src/painting/strut_style.dart';
-export 'src/painting/text_linker.dart';
 export 'src/painting/text_painter.dart';
 export 'src/painting/text_scaler.dart';
 export 'src/painting/text_span.dart';
