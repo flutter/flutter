@@ -146,8 +146,6 @@ class TapRegionSurface extends SingleChildRenderObjectWidget {
 /// When a tap outside of a registered region or region group is detected, its
 /// [TapRegion.onTapOutside] callback is called. If the tap is outside one
 /// member of a group, but inside another, no notification is made.
-/// This method will not be called when [EditableText.canTapOutsideFocus] is set
-/// to false or when [EditableText] is not focused.
 ///
 /// When a tap inside of a registered region or region group is detected, its
 /// [TapRegion.onTapInside] callback is called. If the tap is inside one member
