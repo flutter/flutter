@@ -10,11 +10,13 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 
 FLUTTER_ASSERT_ARC
 
 @interface FlutterEngine ()
 - (nonnull FlutterUndoManagerPlugin*)undoManagerPlugin;
+- (nonnull FlutterTextInputPlugin*)textInputPlugin;
 @end
 
 @interface FlutterUndoManagerPluginForTest : FlutterUndoManagerPlugin
@@ -50,7 +52,6 @@ FLUTTER_ASSERT_ARC
 
 - (void)tearDown {
   [self.undoManager removeAllActionsWithTarget:self.undoManagerPlugin];
-  self.undoManagerPlugin = nil;
   self.engine = nil;
   self.viewController = nil;
   self.undoManager = nil;
@@ -138,6 +139,28 @@ FLUTTER_ASSERT_ARC
   undoHandler(self.undoManagerPlugin);
   XCTAssertEqual(1, delegateUndoCount);
   XCTAssertEqual(2, delegateRedoCount);
+}
+
+- (void)testSetUndoStateDoesInteractWithInputDelegate {
+  // Regression test for https://github.com/flutter/flutter/issues/133424
+  FlutterViewController* viewController = OCMPartialMock(self.viewController);
+  self.undoManagerPlugin.viewController = self.viewController;
+
+  FlutterTextInputPlugin* textInputPlugin = OCMClassMock([FlutterTextInputPlugin class]);
+  FlutterTextInputView* textInputView = OCMClassMock([FlutterTextInputView class]);
+
+  OCMStub([viewController engine]).andReturn(self.engine);
+  OCMStub([self.engine textInputPlugin]).andReturn(textInputPlugin);
+  OCMStub([textInputPlugin textInputView]).andReturn(textInputView);
+
+  FlutterMethodCall* setUndoStateCall =
+      [FlutterMethodCall methodCallWithMethodName:@"UndoManager.setUndoState"
+                                        arguments:@{@"canUndo" : @NO, @"canRedo" : @NO}];
+  [self.undoManagerPlugin handleMethodCall:setUndoStateCall
+                                    result:^(id _Nullable result){
+                                    }];
+
+  OCMVerify(never(), [textInputView inputDelegate]);
 }
 
 @end
