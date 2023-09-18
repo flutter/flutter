@@ -429,7 +429,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
       offset + childParentData.offset,
       Offset.zero & child.size,
       clipPath,
-      super.paint,
+      (PaintingContext innerContext, Offset innerOffset) => innerContext.paintChild(child!, innerOffset),
       oldLayer: _clipPathLayer.layer,
     );
   }
