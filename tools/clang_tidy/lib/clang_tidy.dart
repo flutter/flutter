@@ -5,6 +5,7 @@
 import 'dart:convert' show LineSplitter, jsonDecode;
 import 'dart:io' as io show File, stderr, stdout;
 
+import 'package:engine_repo_tools/engine_repo_tools.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
@@ -92,25 +93,29 @@ class ClangTidy {
     ),
     _outSink = outSink ?? io.stdout,
     _errSink = errSink ?? io.stderr,
-    _processManager = processManager;
+    _processManager = processManager,
+    _engine = null;
 
   /// Builds an instance of [ClangTidy] from a command line.
   ClangTidy.fromCommandLine(
     List<String> args, {
+    Engine? engine,
     StringSink? outSink,
     StringSink? errSink,
     ProcessManager processManager = const LocalProcessManager(),
   }) :
-    options = Options.fromCommandLine(args, errSink: errSink),
+    options = Options.fromCommandLine(args, errSink: errSink, engine: engine),
     _outSink = outSink ?? io.stdout,
     _errSink = errSink ?? io.stderr,
-    _processManager = processManager;
+    _processManager = processManager,
+    _engine = engine;
 
   /// The [Options] that specify how this [ClangTidy] operates.
   final Options options;
   final StringSink _outSink;
   final StringSink _errSink;
   final ProcessManager _processManager;
+  final Engine? _engine;
 
   late final DateTime _startTime;
 
@@ -119,12 +124,12 @@ class ClangTidy {
     _startTime = DateTime.now();
 
     if (options.help) {
-      options.printUsage();
+      options.printUsage(engine: _engine);
       return 0;
     }
 
     if (options.errorMessage != null) {
-      options.printUsage(message: options.errorMessage);
+      options.printUsage(message: options.errorMessage, engine: _engine);
       return 1;
     }
 

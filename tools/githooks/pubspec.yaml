@@ -18,9 +18,9 @@ environment:
 
 dependencies:
   args: any
+  clang_tidy: any
   meta: any
   path: any
-  clang_tidy: any
 
 dev_dependencies:
   async_helper: any
@@ -39,6 +39,8 @@ dependency_overrides:
     path: ../clang_tidy
   collection:
     path: ../../../third_party/dart/third_party/pkg/collection
+  engine_repo_tools:
+    path: ../pkg/engine_repo_tools
   expect:
     path: ../../../third_party/dart/pkg/expect
   file:
