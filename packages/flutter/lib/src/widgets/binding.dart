@@ -1147,6 +1147,10 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   }
 }
 
+/// This stopwatch is for warning users when they do too much work in their
+/// entrypoint before calling runApp.
+final _debugRunAppStopwatch = Stopwatch()..start();
+
 /// Inflate the given widget and attach it to the screen.
 ///
 /// The widget is given constraints during layout that force it to fill the
@@ -1190,6 +1194,20 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 void runApp(Widget app) {
   final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
   assert(binding.debugCheckZone('runApp'));
+
+  if (!kReleaseMode) {
+    final Duration mainTime = _debugRunAppStopwatch.elapsed;
+    const Duration maxDuration = Duration(microseconds: 5000);
+    if (mainTime > maxDuration) {
+      debugPrint('==================================================================================');
+      debugPrint('⏰ Warning: Excessive time spent in `main` before executing `runApp` (${_debugRunAppStopwatch.elapsed.inMicroseconds} ms).');
+      debugPrint('            This can result in poor user experience while they wait for their');
+      debugPrint('            app to launch. Consider moving startup code outside of `main` or');
+      debugPrint('            parallelizing asynchronous tasks launched in `main`.');
+      debugPrint('==================================================================================');
+    }
+  }
+
   binding
     ..scheduleAttachRootWidget(binding.wrapWithDefaultView(app))
     ..scheduleWarmUpFrame();
