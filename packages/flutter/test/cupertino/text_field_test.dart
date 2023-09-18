@@ -6837,7 +6837,7 @@ void main() {
             includes: <Offset> [
               // Expected center of the arrow. The arrow should stay clear of
               // the edges of the selection toolbar.
-              Offset(26.0, bottomLeftSelectionPosition.dy + 7.0 + 8.0 + 0.1),
+              Offset(26.0, bottomLeftSelectionPosition.dy + 8.0 + 0.1),
             ],
           ),
         ),
