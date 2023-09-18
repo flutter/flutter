@@ -1623,7 +1623,7 @@ class ListView extends BoxScrollView {
   ///
   /// If the main axis extent of child at a certain index changes, the [Key] of
   /// the item widget needs to be changed to drive the framework to invalidate
-  /// the cached value.
+  /// this child's cached value.
   ///
   /// All cached data will be cleared automatically if [scrollDirection] or
   /// [SliverConstraints.crossAxisExtent] changed.
