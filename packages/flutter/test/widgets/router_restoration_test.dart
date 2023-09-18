@@ -92,7 +92,7 @@ class _TestRouteInformationParser extends RouteInformationParser<String> {
 class _TestRouterDelegate extends RouterDelegate<String> with ChangeNotifier {
   _TestRouterDelegate() {
     if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
   }
 
@@ -136,7 +136,7 @@ class _TestRouterDelegate extends RouterDelegate<String> with ChangeNotifier {
 class _TestRouteInformationProvider extends RouteInformationProvider with ChangeNotifier {
   _TestRouteInformationProvider() {
     if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
   }
 

@@ -1321,7 +1321,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     required this.range,
   }) : assert(range.isValid && !range.isCollapsed && range.isNormalized) {
     if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
     _selectionGeometry = _getSelectionGeometry();
   }
