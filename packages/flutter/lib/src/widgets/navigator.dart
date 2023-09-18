@@ -3390,7 +3390,7 @@ class _History extends Iterable<_RouteEntry> with ChangeNotifier {
   /// Creates an instance of [_History].
   _History() {
     if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
   }
 
