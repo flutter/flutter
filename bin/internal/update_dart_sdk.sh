@@ -81,7 +81,7 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
         elif [ -f "/sbin/$SYSCTL" ]; then
           SYSCTL="/sbin/$SYSCTL"
         else
-          >&2 echo "You have neither \"arch\" nor \"sysctl\" installed on your system"
+          >&2 echo "You have neither \"arch\" nor \"sysctl\" on your \$PATH variable."
           exit 1
         fi
       fi
@@ -188,8 +188,6 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
     rm -f -- "$DART_SDK_ZIP"
     exit 1
   }
-  ls ~/git/flutter/bin/cache # TODO
-  echo "About to run unzip -o -q \"$DART_SDK_ZIP\" -d \"$FLUTTER_ROOT/bin/cache\"" # TODO
   unzip -o -q "$DART_SDK_ZIP" -d "$FLUTTER_ROOT/bin/cache" || {
     >&2 echo
     >&2 echo "It appears that the downloaded file is corrupt; please try again."
