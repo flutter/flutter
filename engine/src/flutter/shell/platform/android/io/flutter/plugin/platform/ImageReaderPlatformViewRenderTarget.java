@@ -9,6 +9,7 @@ import android.media.ImageReader;
 import android.os.Build;
 import android.os.Handler;
 import android.view.Surface;
+import io.flutter.Log;
 import io.flutter.view.TextureRegistry.ImageTextureEntry;
 
 @TargetApi(29)
@@ -34,7 +35,12 @@ public class ImageReaderPlatformViewRenderTarget implements PlatformViewRenderTa
       new ImageReader.OnImageAvailableListener() {
         @Override
         public void onImageAvailable(ImageReader reader) {
-          final Image image = reader.acquireLatestImage();
+          Image image = null;
+          try {
+            image = reader.acquireLatestImage();
+          } catch (IllegalStateException e) {
+            Log.e(TAG, "New image available that could not be acquired: " + e.toString());
+          }
           if (image == null) {
             return;
           }
@@ -49,10 +55,13 @@ public class ImageReaderPlatformViewRenderTarget implements PlatformViewRenderTa
     builder.setMaxImages(3);
     // Use PRIVATE image format so that we can support video decoding.
     // TODO(johnmccutchan): Should we always use PRIVATE here? It may impact our
-    // ability to read back texture data. If we don't always want to use it, how do we
-    // decide when to use it or not? Perhaps PlatformViews can indicate if they may contain
+    // ability to read back texture data. If we don't always want to use it, how do
+    // we
+    // decide when to use it or not? Perhaps PlatformViews can indicate if they may
+    // contain
     // DRM'd content.
-    // I need to investigate how PRIVATE impacts our ability to take screenshots or capture
+    // I need to investigate how PRIVATE impacts our ability to take screenshots or
+    // capture
     // the output of Flutter application.
     builder.setImageFormat(ImageFormat.PRIVATE);
     // Hint that consumed images will only be read by GPU.
@@ -69,7 +78,7 @@ public class ImageReaderPlatformViewRenderTarget implements PlatformViewRenderTa
             bufferWidth,
             bufferHeight,
             ImageFormat.PRIVATE,
-            2,
+            3,
             HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE);
     reader.setOnImageAvailableListener(this.onImageAvailableListener, onImageAvailableHandler);
     return reader;

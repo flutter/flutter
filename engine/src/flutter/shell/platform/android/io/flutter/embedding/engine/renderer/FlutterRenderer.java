@@ -351,11 +351,16 @@ public class FlutterRenderer implements TextureRegistry {
     }
 
     @Override
+    @TargetApi(19)
     public void release() {
       if (released) {
         return;
       }
       released = true;
+      if (image != null) {
+        image.close();
+        image = null;
+      }
       unregisterTexture(id);
     }
 
@@ -388,12 +393,18 @@ public class FlutterRenderer implements TextureRegistry {
     }
 
     @Override
+    @TargetApi(19)
     protected void finalize() throws Throwable {
       try {
         if (released) {
           return;
         }
-
+        if (image != null) {
+          // Be sure to finalize any cached image.
+          image.close();
+          image = null;
+        }
+        released = true;
         handler.post(new TextureFinalizerRunnable(id, flutterJNI));
       } finally {
         super.finalize();
