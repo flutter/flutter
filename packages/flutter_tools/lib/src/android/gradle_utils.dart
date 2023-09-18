@@ -548,7 +548,7 @@ JavaGradleCompat? getValidGradleVersionRangeForJavaVersion(
 /// Validate that the specified Java and Android Gradle Plugin (AGP) versions are
 /// compatible with each other.
 ///
-/// Note that this returns true when the specified Java and AGP versions are
+/// Returns true when the specified Java and AGP versions are
 /// definitely compatible; otherwise, false is assumed by default. In addition,
 /// this will return false when either a null Java or AGP version is provided.
 ///
@@ -747,8 +747,8 @@ void exitWithNoSdkMessage() {
 
 // Data class to hold normal/defined Java <-> Gradle compatability criteria.
 //
-// Note that the [javaMax] is exclusive in terms of supported the noted
-// [gradleMin], whereas [javaMin] is inclusive.
+// The [javaMax] is exclusive in terms of supported the noted [gradleMin],
+// whereas [javaMin] is inclusive.
 @immutable
 class JavaGradleCompat {
   const JavaGradleCompat({
@@ -777,7 +777,7 @@ class JavaGradleCompat {
 
 // Data class to hold defined Java <-> AGP compatibility criteria.
 //
-// Note that the [agpMin] and [agpMax] are inclusive in terms of having the
+// The [agpMin] and [agpMax] are inclusive in terms of having the
 // noted [javaMin] and [javaDefault] versions.
 @immutable
 class JavaAgpCompat {
