@@ -52,4 +52,26 @@ void main() {
 
     expect(find.text('You selected a Blue Smile'), findsOneWidget);
   });
+
+  testWidgets('DropdownMenu has focus when tapping on the text field', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const example.DropdownMenuExample(),
+    );
+
+    // Make sure the dropdown menus are there.
+    final Finder colorMenu = find.byType(DropdownMenu<example.ColorLabel>);
+    final Finder iconMenu = find.byType(DropdownMenu<example.IconLabel>);
+    expect(colorMenu, findsOneWidget);
+    expect(iconMenu, findsOneWidget);
+
+    // Tap on the color menu and make sure it is focused.
+    await tester.tap(colorMenu);
+    await tester.pumpAndSettle();
+    expect(FocusScope.of(tester.element(colorMenu)).hasFocus, isTrue);
+
+    // Tap on the icon menu and make sure it is focused.
+    await tester.tap(iconMenu);
+    await tester.pumpAndSettle();
+    expect(FocusScope.of(tester.element(iconMenu)).hasFocus, isTrue);
+  });
 }
