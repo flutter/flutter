@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../image_data.dart';
 import '../widgets/semantics_tester.dart';
@@ -29,7 +30,7 @@ Future<void> pumpWidgetWithBoilerplate(WidgetTester tester, Widget widget) async
 
 Future<void> main() async {
 
-  testWidgets('Need at least 2 tabs', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Need at least 2 tabs', (WidgetTester tester) async {
     await expectLater(
       () => pumpWidgetWithBoilerplate(tester, CupertinoTabBar(
         items: <BottomNavigationBarItem>[
@@ -47,7 +48,7 @@ Future<void> main() async {
     );
   });
 
-  testWidgets('Active and inactive colors', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Active and inactive colors', (WidgetTester tester) async {
     await pumpWidgetWithBoilerplate(tester, MediaQuery(
       data: const MediaQueryData(),
       child: CupertinoTabBar(
@@ -81,7 +82,7 @@ Future<void> main() async {
   });
 
 
-  testWidgets('BottomNavigationBar.label will create a text widget', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('BottomNavigationBar.label will create a text widget', (WidgetTester tester) async {
     await pumpWidgetWithBoilerplate(tester, MediaQuery(
       data: const MediaQueryData(),
       child: CupertinoTabBar(
@@ -103,7 +104,7 @@ Future<void> main() async {
     expect(find.text('Tab 2'), findsOneWidget);
   });
 
-  testWidgets('Active and inactive colors dark mode', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Active and inactive colors dark mode', (WidgetTester tester) async {
     const CupertinoDynamicColor dynamicActiveColor = CupertinoDynamicColor.withBrightness(
       color: Color(0xFF000000),
       darkColor: Color(0xFF000001),
@@ -191,7 +192,7 @@ Future<void> main() async {
     expect(decoration2.border!.top.color.value, 0x29000000);
   });
 
-  testWidgets('Tabs respects themes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tabs respects themes', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabBar(
@@ -255,7 +256,7 @@ Future<void> main() async {
     expect(actualActive.text.style!.color, isSameColorAs(CupertinoColors.activeBlue.darkColor));
   });
 
-  testWidgets('Use active icon', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Use active icon', (WidgetTester tester) async {
     final MemoryImage activeIcon = MemoryImage(Uint8List.fromList(kBlueSquarePng));
     final MemoryImage inactiveIcon = MemoryImage(Uint8List.fromList(kTransparentImage));
 
@@ -288,7 +289,7 @@ Future<void> main() async {
     expect(image.image, activeIcon);
   });
 
-  testWidgets('Adjusts height to account for bottom padding', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Adjusts height to account for bottom padding', (WidgetTester tester) async {
     final CupertinoTabBar tabBar = CupertinoTabBar(
       items: <BottomNavigationBarItem>[
         BottomNavigationBarItem(
@@ -327,7 +328,7 @@ Future<void> main() async {
     expect(tester.getSize(find.byType(CupertinoTabBar)).height, 90.0);
   });
 
-  testWidgets('Set custom height', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Set custom height', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/51704
     const double tabBarHeight = 56.0;
     final CupertinoTabBar tabBar = CupertinoTabBar(
@@ -370,7 +371,7 @@ Future<void> main() async {
     expect(tester.getSize(find.byType(CupertinoTabBar)).height, tabBarHeight + bottomPadding);
   });
 
-  testWidgets('Ensure bar height will not change when toggle keyboard', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Ensure bar height will not change when toggle keyboard', (WidgetTester tester) async {
     const double tabBarHeight = 56.0;
     final CupertinoTabBar tabBar = CupertinoTabBar(
       height: tabBarHeight,
@@ -424,7 +425,7 @@ Future<void> main() async {
     expect(tester.getSize(find.byType(CupertinoTabBar)).height, tabBarHeight + bottomPadding);
   });
 
-  testWidgets('Opaque background does not add blur effects', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Opaque background does not add blur effects', (WidgetTester tester) async {
     await pumpWidgetWithBoilerplate(tester, MediaQuery(
       data: const MediaQueryData(),
       child: CupertinoTabBar(
@@ -463,7 +464,7 @@ Future<void> main() async {
     expect(find.byType(BackdropFilter), findsNothing);
   });
 
-  testWidgets('Tap callback', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Tap callback', (WidgetTester tester) async {
     late int callbackTab;
 
     await pumpWidgetWithBoilerplate(tester, MediaQuery(
@@ -491,7 +492,7 @@ Future<void> main() async {
     expect(callbackTab, 1);
   });
 
-  testWidgets('tabs announce semantics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('tabs announce semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await pumpWidgetWithBoilerplate(tester, MediaQuery(
@@ -526,7 +527,7 @@ Future<void> main() async {
     semantics.dispose();
   });
 
-  testWidgets('Label of items should be nullable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Label of items should be nullable', (WidgetTester tester) async {
     final MemoryImage iconProvider = MemoryImage(Uint8List.fromList(kTransparentImage));
     final List<int> itemsTapped = <int>[];
 
@@ -563,7 +564,7 @@ Future<void> main() async {
     expect(itemsTapped, <int>[1]);
   });
 
-  testWidgets('Hide border hides the top border of the tabBar', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Hide border hides the top border of the tabBar', (WidgetTester tester) async {
     await pumpWidgetWithBoilerplate(
       tester,
       MediaQuery(
@@ -623,7 +624,7 @@ Future<void> main() async {
     expect(boxDecorationHiddenBorder.border, isNull);
   });
 
-  testWidgets('Hovering over tab bar item updates cursor to clickable on Web', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Hovering over tab bar item updates cursor to clickable on Web', (WidgetTester tester) async {
     await pumpWidgetWithBoilerplate(
       tester,
       MediaQuery(
