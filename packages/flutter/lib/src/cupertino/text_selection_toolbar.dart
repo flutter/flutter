@@ -335,7 +335,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
   // added, then this method returns the mutated path without closing it.
   static Path _addRRectToPath(Path path, RRect rrect, { required double startAngle }) {
     const double halfPI = math.pi / 2;
-    assert(startAngle % halfPI == 0);
+    assert(startAngle % halfPI == 0.0);
     final Rect rect = rrect.outerRect;
 
     final List<(Offset, Radius)> rrectCorners = <(Offset, Radius)>[
