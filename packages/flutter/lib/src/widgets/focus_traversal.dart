@@ -1788,7 +1788,7 @@ class _FocusTraversalGroupNode extends FocusNode {
     required this.policy,
   }) {
     if (kFlutterMemoryAllocationsEnabled) {
-      ChangeNotifier.maybeDispatchObjectCreation(this);
+      maybeDispatchObjectCreation();
     }
   }
 

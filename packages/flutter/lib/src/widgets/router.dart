@@ -1467,7 +1467,7 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
     required RouteInformation initialRouteInformation,
   }) : _value = initialRouteInformation {
     if (kFlutterMemoryAllocationsEnabled) {
-      ChangeNotifier.maybeDispatchObjectCreation(this);
+      maybeDispatchObjectCreation();
     }
   }
 

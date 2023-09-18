@@ -155,7 +155,7 @@ class RestorationManager extends ChangeNotifier {
   /// with the engine to get restoration messages (by calling [initChannels]).
   RestorationManager() {
     if (kFlutterMemoryAllocationsEnabled) {
-      ChangeNotifier.maybeDispatchObjectCreation(this);
+      maybeDispatchObjectCreation();
     }
     initChannels();
   }

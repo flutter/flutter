@@ -207,7 +207,7 @@ mixin class ChangeNotifier implements Listenable {
   @protected
   bool get hasListeners => _count > 0;
 
-  /// Dispatches event of the [object] creation to [MemoryAllocations.instance].
+  /// Dispatches event of object creation to [MemoryAllocations.instance].
   ///
   /// If the event was already dispatched or [kFlutterMemoryAllocationsEnabled]
   /// is false, the method is noop.
@@ -227,16 +227,16 @@ mixin class ChangeNotifier implements Listenable {
   /// Make sure to invoke it with condition `if (kFlutterMemoryAllocationsEnabled) ...`
   /// so that the method is tree-shaken away when the flag is false.
   @protected
-  static void maybeDispatchObjectCreation(ChangeNotifier object) {
+  void maybeDispatchObjectCreation() {
     // Tree shaker does not include this method and the class MemoryAllocations
     // if kFlutterMemoryAllocationsEnabled is false.
-    if (kFlutterMemoryAllocationsEnabled && !object._creationDispatched) {
+    if (kFlutterMemoryAllocationsEnabled && !_creationDispatched) {
       MemoryAllocations.instance.dispatchObjectCreated(
         library: _flutterFoundationLibrary,
         className: '$ChangeNotifier',
-        object: object,
+        object: this,
       );
-      object._creationDispatched = true;
+      _creationDispatched = true;
     }
   }
 
@@ -271,7 +271,7 @@ mixin class ChangeNotifier implements Listenable {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
 
     if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation(this);
+      maybeDispatchObjectCreation();
     }
 
     if (_count == _listeners.length) {
@@ -535,7 +535,7 @@ class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
   /// Creates a [ChangeNotifier] that wraps this value.
   ValueNotifier(this._value) {
     if (kFlutterMemoryAllocationsEnabled) {
-      ChangeNotifier.maybeDispatchObjectCreation(this);
+      maybeDispatchObjectCreation();
     }
   }
 

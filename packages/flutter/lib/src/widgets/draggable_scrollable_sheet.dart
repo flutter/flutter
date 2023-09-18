@@ -1074,7 +1074,7 @@ class _DraggableScrollableActuatorState extends State<DraggableScrollableActuato
 class _ResetNotifier extends ChangeNotifier {
   _ResetNotifier() {
     if (kFlutterMemoryAllocationsEnabled) {
-      ChangeNotifier.maybeDispatchObjectCreation(this);
+      maybeDispatchObjectCreation();
     }
   }
   /// Whether someone called [sendReset] or not.

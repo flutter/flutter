@@ -65,7 +65,7 @@ class ScrollController extends ChangeNotifier {
     this.onDetach,
   }) : _initialScrollOffset = initialScrollOffset {
     if (kFlutterMemoryAllocationsEnabled) {
-      ChangeNotifier.maybeDispatchObjectCreation(this);
+      maybeDispatchObjectCreation();
     }
   }
 

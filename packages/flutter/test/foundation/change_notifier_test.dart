@@ -29,7 +29,7 @@ class A {
 class B extends A with ChangeNotifier {
   B() {
     if (kFlutterMemoryAllocationsEnabled) {
-      ChangeNotifier.maybeDispatchObjectCreation(this);
+      maybeDispatchObjectCreation();
     }
   }
 
@@ -43,7 +43,7 @@ class B extends A with ChangeNotifier {
 class Counter with ChangeNotifier {
   Counter() {
     if (kFlutterMemoryAllocationsEnabled) {
-      ChangeNotifier.maybeDispatchObjectCreation(this);
+      maybeDispatchObjectCreation();
     }
   }
 
