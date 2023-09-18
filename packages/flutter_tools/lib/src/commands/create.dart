@@ -903,6 +903,12 @@ void _printIncompatibleJavaAgpGradleVersionsWarning({
   final String incompatibleVersionsAndRecommendedOptionMessage = getIncompatibleJavaGradleAgpMessageHeader(javaGradleVersionsCompatible, templateGradleVersion, relevantTemplateAgpVersion, projectType.cliName);
 
   if (!javaGradleVersionsCompatible) {
+
+    if (projectType == FlutterProjectType.plugin || projectType == FlutterProjectType.pluginFfi) {
+      // Only impacted files could be in sample code.
+      return;
+    }
+
     // Gradle template version incompatible with Java version.
     final gradle.JavaGradleCompat? validCompatibleGradleVersionRange = gradle.getValidGradleVersionRangeForJavaVersion(globals.logger, javaV: javaVersion);
     final String compatibleGradleVersionMessage = validCompatibleGradleVersionRange == null ? '' : ' (compatible Gradle version range: ${validCompatibleGradleVersionRange.gradleMin} - ${validCompatibleGradleVersionRange.gradleMax})';
@@ -986,9 +992,9 @@ String? _getGradleWrapperPropertiesFilePath(FlutterProjectType projectType, Stri
         gradleWrapperPropertiesFilePath = globals.fs.path.join(projectDirPath, 'android/gradle/wrapper/gradle-wrapper.properties');
       case FlutterProjectType.module:
         gradleWrapperPropertiesFilePath = globals.fs.path.join(projectDirPath, '.android/gradle/wrapper/gradle-wrapper.properties');
-      case FlutterProjectType.package:
       case FlutterProjectType.plugin:
       case FlutterProjectType.pluginFfi:
+      case FlutterProjectType.package:
       case FlutterProjectType.packageFfi:
         // TODO(camsim99): Add relevant file path for packageFfi when Android is supported.
         // No gradle-wrapper.properties files not part of sample code that
