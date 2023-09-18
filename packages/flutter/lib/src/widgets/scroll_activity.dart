@@ -614,8 +614,6 @@ class BallisticScrollActivity extends ScrollActivity {
 class DrivenScrollActivity extends ScrollActivity {
   /// Creates an activity that animates a scroll view based on animation
   /// parameters.
-  ///
-  /// All of the parameters must be non-null.
   DrivenScrollActivity(
     super.delegate, {
     required double from,

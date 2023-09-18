@@ -260,7 +260,7 @@ class PaginatedDataTable extends StatefulWidget {
   /// and no affordance will be provided to change the value.
   final ValueChanged<int?>? onRowsPerPageChanged;
 
-  /// The data source which provides data to show in each row. Must be non-null.
+  /// The data source which provides data to show in each row.
   ///
   /// This object should generally have a lifetime longer than the
   /// [PaginatedDataTable] widget itself; it should be reused each time the

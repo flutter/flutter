@@ -188,7 +188,7 @@ class BottomNavigationBar extends StatefulWidget {
   /// are two or three [items], [BottomNavigationBarType.shifting] otherwise.
   ///
   /// The [iconSize], [selectedFontSize], [unselectedFontSize], and [elevation]
-  /// arguments must be non-null and non-negative.
+  /// arguments must be non-negative.
   ///
   /// If [selectedLabelStyle].color and [unselectedLabelStyle].color values
   /// are non-null, they will be used instead of [selectedItemColor] and

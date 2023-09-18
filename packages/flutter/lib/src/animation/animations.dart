@@ -627,8 +627,9 @@ class TrainHoppingAnimation extends Animation<double>
 /// animation otherwise.
 abstract class CompoundAnimation<T> extends Animation<T>
   with AnimationLazyListenerMixin, AnimationLocalListenersMixin, AnimationLocalStatusListenersMixin {
-  /// Creates a CompoundAnimation. Both arguments must be non-null. Either can
-  /// be a CompoundAnimation itself to combine multiple animations.
+  /// Creates a CompoundAnimation.
+  ///
+  /// Either can be a CompoundAnimation itself to combine multiple animations.
   CompoundAnimation({
     required this.first,
     required this.next,
@@ -716,8 +717,8 @@ class AnimationMean extends CompoundAnimation<double> {
 class AnimationMax<T extends num> extends CompoundAnimation<T> {
   /// Creates an [AnimationMax].
   ///
-  /// Both arguments must be non-null. Either can be an [AnimationMax] itself
-  /// to combine multiple animations.
+  /// Either argument can be an [AnimationMax] itself to combine multiple
+  /// animations.
   AnimationMax(Animation<T> first, Animation<T> next) : super(first: first, next: next);
 
   @override
@@ -731,8 +732,8 @@ class AnimationMax<T extends num> extends CompoundAnimation<T> {
 class AnimationMin<T extends num> extends CompoundAnimation<T> {
   /// Creates an [AnimationMin].
   ///
-  /// Both arguments must be non-null. Either can be an [AnimationMin] itself
-  /// to combine multiple animations.
+  /// Either argument can be an [AnimationMin] itself to combine multiple
+  /// animations.
   AnimationMin(Animation<T> first, Animation<T> next) : super(first: first, next: next);
 
   @override

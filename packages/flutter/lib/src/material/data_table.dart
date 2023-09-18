@@ -669,7 +669,7 @@ class DataTable extends StatelessWidget {
   /// The data to show in each row (excluding the row that contains
   /// the column headings).
   ///
-  /// Must be non-null, but may be empty.
+  /// The list may be empty.
   final List<DataRow> rows;
 
   /// {@template flutter.material.dataTable.dividerThickness}

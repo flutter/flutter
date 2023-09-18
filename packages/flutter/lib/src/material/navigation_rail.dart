@@ -946,9 +946,9 @@ enum NavigationRailLabelType {
 class NavigationRailDestination {
   /// Creates a destination that is used with [NavigationRail.destinations].
   ///
-  /// [icon] and [label] must be non-null. When the [NavigationRail.labelType]
-  /// is [NavigationRailLabelType.none], the label is still used for semantics,
-  /// and may still be used if [NavigationRail.extended] is true.
+  /// When the [NavigationRail.labelType] is [NavigationRailLabelType.none], the
+  /// label is still used for semantics, and may still be used if
+  /// [NavigationRail.extended] is true.
   const NavigationRailDestination({
     required this.icon,
     Widget? selectedIcon,

@@ -102,7 +102,7 @@ class CupertinoPicker extends StatefulWidget {
   /// provided by the [itemBuilder].
   /// {@macro flutter.widgets.ListWheelChildBuilderDelegate.childCount}
   ///
-  /// The [itemExtent] argument must be non-null and positive.
+  /// The [itemExtent] argument must be positive.
   ///
   /// The [backgroundColor] defaults to null, which disables background painting entirely.
   /// (i.e. the picker is going to have a completely transparent background), to match
@@ -333,8 +333,8 @@ class CupertinoPickerDefaultSelectionOverlay extends StatelessWidget {
   /// area (or the currently selected item, depending on how you described it
   /// elsewhere) of a [CupertinoPicker].
   ///
-  /// The [background] argument default value is [CupertinoColors.tertiarySystemFill].
-  /// It must be non-null.
+  /// The [background] argument default value is
+  /// [CupertinoColors.tertiarySystemFill].
   ///
   /// The [capStartEdge] and [capEndEdge] arguments decide whether to add a
   /// default margin and use rounded corners on the left and right side of the

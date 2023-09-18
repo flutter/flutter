@@ -97,7 +97,7 @@ abstract class ScrollView extends StatelessWidget {
   ///
   /// If the [shrinkWrap] argument is true, the [center] argument must be null.
   ///
-  /// The [anchor] argument must be non-null and in the range 0.0 to 1.0.
+  /// The [anchor] argument must be in the range zero to one, inclusive.
   const ScrollView({
     super.key,
     this.scrollDirection = Axis.vertical,

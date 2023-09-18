@@ -1373,19 +1373,25 @@ class Transform extends SingleChildRenderObjectWidget {
 
   /// Creates a widget that scales its child along the 2D plane.
   ///
-  /// The `scaleX` argument provides the scalar by which to multiply the `x` axis, and the `scaleY` argument provides the scalar by which to multiply the `y` axis. Either may be omitted, in which case the scaling factor for that axis defaults to 1.0.
+  /// The `scaleX` argument provides the scalar by which to multiply the `x`
+  /// axis, and the `scaleY` argument provides the scalar by which to multiply
+  /// the `y` axis. Either may be omitted, in which case the scaling factor for
+  /// that axis defaults to 1.0.
   ///
-  /// For convenience, to scale the child uniformly, instead of providing `scaleX` and `scaleY`, the `scale` parameter may be used.
+  /// For convenience, to scale the child uniformly, instead of providing
+  /// `scaleX` and `scaleY`, the `scale` parameter may be used.
   ///
-  /// At least one of `scale`, `scaleX`, and `scaleY` must be non-null. If `scale` is provided, the other two must be null; similarly, if it is not provided, one of the other two must be provided.
+  /// At least one of `scale`, `scaleX`, and `scaleY` must be non-null. If
+  /// `scale` is provided, the other two must be null; similarly, if it is not
+  /// provided, one of the other two must be provided.
   ///
-  /// The [alignment] controls the origin of the scale; by default, this is
-  /// the center of the box.
+  /// The [alignment] controls the origin of the scale; by default, this is the
+  /// center of the box.
   ///
   /// {@tool snippet}
   ///
-  /// This example shrinks an orange box containing text such that each dimension
-  /// is half the size it would otherwise be.
+  /// This example shrinks an orange box containing text such that each
+  /// dimension is half the size it would otherwise be.
   ///
   /// ```dart
   /// Transform.scale(
@@ -1401,8 +1407,8 @@ class Transform extends SingleChildRenderObjectWidget {
   ///
   /// See also:
   ///
-  ///  * [ScaleTransition], which animates changes in scale smoothly
-  ///    over a given duration.
+  /// * [ScaleTransition], which animates changes in scale smoothly over a given
+  ///   duration.
   Transform.scale({
     super.key,
     double? scale,

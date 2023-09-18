@@ -102,8 +102,6 @@ class MouseCursorManager {
 ///    will no longer be used in the future.
 abstract class MouseCursorSession {
   /// Create a session.
-  ///
-  /// All arguments must be non-null.
   MouseCursorSession(this.cursor, this.device);
 
   /// The cursor that created this session.

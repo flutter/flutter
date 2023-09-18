@@ -83,8 +83,6 @@ enum SnackBarClosedReason {
 ///  * <https://material.io/design/components/snackbars.html>
 class SnackBarAction extends StatefulWidget {
   /// Creates an action for a [SnackBar].
-  ///
-  /// The [label] and [onPressed] arguments must be non-null.
   const SnackBarAction({
     super.key,
     this.textColor,
@@ -272,8 +270,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
 class SnackBar extends StatefulWidget {
   /// Creates a snack bar.
   ///
-  /// The [content] argument must be non-null. The [elevation] must be null or
-  /// non-negative.
+  /// The [elevation] must be null or non-negative.
   const SnackBar({
     super.key,
     required this.content,

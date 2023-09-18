@@ -2421,9 +2421,8 @@ class _FifoCache<K, V> {
 class VisualDensity with Diagnosticable {
   /// A const constructor for [VisualDensity].
   ///
-  /// All of the arguments must be non-null, and [horizontal] and [vertical]
-  /// must be in the interval between [minimumDensity] and [maximumDensity],
-  /// inclusive.
+  /// The [horizontal] and [vertical] arguments must be in the interval between
+  /// [minimumDensity] and [maximumDensity], inclusive.
   const VisualDensity({
     this.horizontal = 0.0,
     this.vertical = 0.0,

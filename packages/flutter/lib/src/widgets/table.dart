@@ -166,8 +166,7 @@ class Table extends RenderObjectWidget {
 
   /// The rows of the table.
   ///
-  /// Every row in a table must have the same number of children, and all the
-  /// children must be non-null.
+  /// Every row in a table must have the same number of children.
   final List<TableRow> children;
 
   /// How the horizontal extents of the columns of this table should be determined.

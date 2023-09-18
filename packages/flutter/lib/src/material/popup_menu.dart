@@ -1201,11 +1201,11 @@ class PopupMenuButton<T> extends StatefulWidget {
 
   /// Whether this popup menu button is interactive.
   ///
-  /// Must be non-null, defaults to `true`
+  /// Defaults to true.
   ///
-  /// If `true` the button will respond to presses by displaying the menu.
+  /// If true, the button will respond to presses by displaying the menu.
   ///
-  /// If `false`, the button is styled with the disabled color from the
+  /// If false, the button is styled with the disabled color from the
   /// current [Theme] and will not respond to presses or show the popup
   /// menu and [onSelected], [onCanceled] and [itemBuilder] will not be called.
   ///
