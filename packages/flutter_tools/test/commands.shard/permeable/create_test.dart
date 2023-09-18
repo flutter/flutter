@@ -3418,7 +3418,7 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', '--platforms=android', projectDir.path]);
 
-    expect(logger.statusText, isNot(contains(_kIncompatibleJavaVersionMessage)));
+    expect(logger.warningText, isNot(contains(_kIncompatibleJavaVersionMessage)));
   }, overrides: <Type, Generator>{
     Java: () => null,
     Logger: () => logger,
@@ -3441,10 +3441,10 @@ void main() {
     tryToDelete(projectDir);
     await runner.run(<String>['create', '--no-pub', '--template=plugin_ffi', projectDir.path]);
 
-    expect(logger.statusText, isNot(contains(getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, 'app'))));
-    expect(logger.statusText, isNot(contains(getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, 'package'))));
-    expect(logger.statusText, isNot(contains(getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, 'plugin'))));
-    expect(logger.statusText, isNot(contains(getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, 'pluginFfi'))));
+    expect(logger.warningText, isNot(contains(getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, 'app'))));
+    expect(logger.warningText, isNot(contains(getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, 'package'))));
+    expect(logger.warningText, isNot(contains(getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, 'plugin'))));
+    expect(logger.warningText, isNot(contains(getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, 'pluginFfi'))));
   }, overrides: <Type, Generator>{
     Java: () => FakeJava(version: const software.Version.withText(1000, 0, 0, '1000.0.0')), // Too high a version for template Gradle versions.
     Logger: () => logger,
@@ -3462,8 +3462,8 @@ void main() {
     // Test creating a package (Dart-only code).
     await runner.run(<String>['create', '--no-pub', '--template=package', projectDir.path]);
 
-    expect(logger.statusText, isNot(contains(getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, 'app'))));
-    expect(logger.statusText, isNot(contains(getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, 'package'))));
+    expect(logger.warningText, isNot(contains(getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, 'app'))));
+    expect(logger.warningText, isNot(contains(getIncompatibleJavaGradleAgpMessageHeader(false, templateDefaultGradleVersion, templateAndroidGradlePluginVersion, 'package'))));
   }, overrides: <Type, Generator>{
     Java: () => FakeJava(version: const software.Version.withText(0, 0, 0, '0.0.0')), // Too low a version for template AGP versions.
     Logger: () => logger,

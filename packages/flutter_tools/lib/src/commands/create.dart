@@ -912,7 +912,7 @@ $incompatibleVersionsAndRecommendedOptionMessage
 
 Alternatively, to continue using your configured Java version, update the Gradle
 version specified in the following file to a compatible Gradle version$compatibleGradleVersionMessage:
-${_getBuildGradleWrapperPropertiesFilePath(projectType, projectDirPath)}
+${_getGradleWrapperPropertiesFilePath(projectType, projectDirPath)}
 
 You may also update the Gradle version used by running
 `./gradlew wrapper --gradle-version=<COMPATIBLE_GRADLE_VERSION>`.
@@ -978,7 +978,7 @@ Note that this is a global configuration for Flutter.
 
 // Returns path of the gradle-wrapper.properties file for the specified
 // generated project type.
-String? _getBuildGradleWrapperPropertiesFilePath(FlutterProjectType projectType, String projectDirPath) {
+String? _getGradleWrapperPropertiesFilePath(FlutterProjectType projectType, String projectDirPath) {
   String gradleWrapperPropertiesFilePath = '';
   switch (projectType) {
       case FlutterProjectType.app:
