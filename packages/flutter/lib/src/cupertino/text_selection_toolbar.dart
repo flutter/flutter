@@ -315,9 +315,9 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
   }
 
   // Returns the RRect inside which the child is painted.
-  RRect _shapeRRect() {
+  RRect _shapeRRect(RenderBox child) {
     final Rect rect = Offset(0.0, _kToolbarArrowSize.height)
-        & Size(size.width, size.height - _kToolbarArrowSize.height);
+        & Size(child.size.width, child.size.height - _kToolbarArrowSize.height * 2);
     return RRect.fromRectAndRadius(rect, _kToolbarBorderRadius).scaleRadii();
   }
 
@@ -406,7 +406,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
 
     final BoxParentData childParentData = child.parentData! as BoxParentData;
 
-    final RRect rrect = _shapeRRect();
+    final RRect rrect = _shapeRRect(child);
     final Path clipPath = _clipPath(child, rrect);
 
     // If configured, paint the shadow beneath the shape.
@@ -464,7 +464,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
         ..style = PaintingStyle.stroke;
 
       final BoxParentData childParentData = child.parentData! as BoxParentData;
-      final Path clipPath = _clipPath(child, _shapeRRect());
+      final Path clipPath = _clipPath(child, _shapeRRect(child));
       context.canvas.drawPath(clipPath.shift(offset + childParentData.offset), debugPaint);
       return true;
     }());
