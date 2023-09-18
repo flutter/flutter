@@ -117,10 +117,10 @@ static ISize OptimumAtlasSizeForFontGlyphPairs(
     const std::vector<FontGlyphPair>& pairs,
     std::vector<Rect>& glyph_positions,
     const std::shared_ptr<GlyphAtlasContext>& atlas_context,
-    GlyphAtlas::Type type) {
+    GlyphAtlas::Type type,
+    const ISize& max_texture_size) {
   static constexpr auto kMinAtlasSize = 8u;
   static constexpr auto kMinAlphaBitmapSize = 1024u;
-  static constexpr auto kMaxAtlasSize = 4096u;
 
   TRACE_EVENT0("impeller", __FUNCTION__);
 
@@ -147,8 +147,8 @@ static ISize OptimumAtlasSizeForFontGlyphPairs(
           Allocation::NextPowerOfTwoSize(current_size.width + 1),
           Allocation::NextPowerOfTwoSize(current_size.height + 1));
     }
-  } while (current_size.width <= kMaxAtlasSize &&
-           current_size.height <= kMaxAtlasSize);
+  } while (current_size.width <= max_texture_size.width &&
+           current_size.height <= max_texture_size.height);
   return ISize{0, 0};
 }
 
@@ -366,7 +366,7 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
 
     // ---------------------------------------------------------------------------
     // Step 3a: Record the positions in the glyph atlas of the newly added
-    // glyphs.
+    //          glyphs.
     // ---------------------------------------------------------------------------
     for (size_t i = 0, count = glyph_positions.size(); i < count; i++) {
       last_atlas->AddTypefaceGlyphPosition(new_glyphs[i], glyph_positions[i]);
@@ -405,7 +405,12 @@ std::shared_ptr<GlyphAtlas> TypographerContextSkia::CreateGlyphAtlas(
   }
   auto glyph_atlas = std::make_shared<GlyphAtlas>(type);
   auto atlas_size = OptimumAtlasSizeForFontGlyphPairs(
-      font_glyph_pairs, glyph_positions, atlas_context, type);
+      font_glyph_pairs,                                             //
+      glyph_positions,                                              //
+      atlas_context,                                                //
+      type,                                                         //
+      context.GetResourceAllocator()->GetMaxTextureSizeSupported()  //
+  );
 
   atlas_context->UpdateGlyphAtlas(glyph_atlas, atlas_size);
   if (atlas_size.IsEmpty()) {
