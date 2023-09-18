@@ -6847,7 +6847,7 @@ void main() {
         find.byType(CupertinoTextSelectionToolbar),
         paints..clipPath(
           pathMatcher: PathBoundsMatcher(
-            topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 7 + 8, epsilon: 0.01),
+            topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8, epsilon: 0.01),
             leftMatcher: moreOrLessEquals(8),
             rightMatcher: lessThanOrEqualTo(400 - 8),
             bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8 + 44, epsilon: 0.01),
@@ -6898,7 +6898,7 @@ void main() {
             ],
             includes: <Offset> [
               // Expected center of the arrow.
-              Offset(400 - 26.0, bottomLeftSelectionPosition.dy + 7 + 8 + 0.1),
+              Offset(400 - 26.0, bottomLeftSelectionPosition.dy + 8 + 0.1),
             ],
           ),
         ),
@@ -6908,7 +6908,7 @@ void main() {
         find.byType(CupertinoTextSelectionToolbar),
         paints..clipPath(
           pathMatcher: PathBoundsMatcher(
-            topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 7 + 8, epsilon: 0.01),
+            topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8, epsilon: 0.01),
             rightMatcher: moreOrLessEquals(400.0 - 8),
             bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8 + 44, epsilon: 0.01),
             leftMatcher: greaterThanOrEqualTo(8),
