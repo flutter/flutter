@@ -1424,6 +1424,8 @@ class EditableText extends StatefulWidget {
   /// notification. It is possible that the event may occur outside of the
   /// immediate bounding box defined by the text field, although it will be
   /// within the bounding box of a [TextFieldTapRegion] member.
+  /// This method will not be called when [EditableText.canTapOutsideFocus] is set
+  /// to false or when [EditableText] is not focused.
   /// {@endtemplate}
   ///
   /// {@tool dartpad}
@@ -1850,8 +1852,6 @@ class EditableText extends StatefulWidget {
 
   /// {@template flutter.widgets.editableText.canTapOutsideFocus}
   /// Determine whether [onTapOutside] is called when this widget is not focused.
-  /// This method will not be called when [EditableText.canTapOutsideFocus] is set
-  /// to false or when [EditableText] is not focused.
   /// {@endtemplate}
   final bool canTapOutsideFocus;
 
