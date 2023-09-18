@@ -44,9 +44,10 @@ const String targetSdkVersion = '33';
 const String ndkVersion = '23.1.7779620';
 
 
-// Update these when new major versions of Java are supported by Gradle.
+// Update these when new major versions of Java are supported by new Gradle
+// versions that we support.
 // Source of truth: https://docs.gradle.org/current/userguide/compatibility.html
-const String oneMajorVersionHigherJavaVersion = '21';
+const String oneMajorVersionHigherJavaVersion = '20';
 
 // Update this when new versions of Gradle come out including minor versions
 // and should correspond to the maximum Gradle version we test in CI.
@@ -372,13 +373,13 @@ bool validateGradleAndAgp(Logger logger,
   }
 
   // Check highest supported version before checking unknown versions.
-  if (isWithinVersionRange(agpV, min: '8.0', max: maxKnownAgpVersion)) {
+  if (isWithinVersionRange(agpV, min: '8.0', max: maxKnownAndSupportedAgpVersion)) {
     return isWithinVersionRange(gradleV,
         min: '8.0', max: maxKnownAndSupportedGradleVersion);
   }
   // Check if versions are newer than the max known versions.
   if (isWithinVersionRange(agpV,
-      min: maxKnownAndSupportedGradleVersion, max: '100.100')) {
+      min: maxKnownAndSupportedAgpVersion, max: '100.100')) {
     // Assume versions we do not know about are valid but log.
     final bool validGradle =
         isWithinVersionRange(gradleV, min: '8.0', max: '100.00');
