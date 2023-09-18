@@ -111,7 +111,7 @@ export 'engine/js_interop/js_typed_data.dart';
 export 'engine/key_map.g.dart';
 export 'engine/keyboard_binding.dart';
 export 'engine/layers.dart';
-export 'engine/mouse_cursor.dart';
+export 'engine/mouse/cursor.dart';
 export 'engine/navigation/history.dart';
 export 'engine/noto_font.dart';
 export 'engine/noto_font_encoding.dart';

@@ -743,6 +743,7 @@ extension DomCSSStyleDeclarationExtension on DomCSSStyleDeclaration {
   set alignContent(String value) => setProperty('align-content', value);
   set textAlign(String value) => setProperty('text-align', value);
   set font(String value) => setProperty('font', value);
+  set cursor(String value) => setProperty('cursor', value);
   String get width => getPropertyValue('width');
   String get height => getPropertyValue('height');
   String get position => getPropertyValue('position');
@@ -807,6 +808,7 @@ extension DomCSSStyleDeclarationExtension on DomCSSStyleDeclaration {
   String get alignContent => getPropertyValue('align-content');
   String get textAlign => getPropertyValue('text-align');
   String get font => getPropertyValue('font');
+  String get cursor => getPropertyValue('cursor');
 
   @JS('getPropertyValue')
   external JSString _getPropertyValue(JSString property);
