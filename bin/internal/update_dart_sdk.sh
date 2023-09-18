@@ -63,7 +63,7 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
   if [ -z "$ARCH" ] && [ "$OS" = 'Darwin' ]; then
     # Allow non-zero exit so we can do control flow
     set +e
-    if command -v arch >/dev/null 2>&1; then # TODO
+    if command -v arch >/dev/null 2>&1; then
       echo "You have arch installed!"
       if ! ARCH=$(arch 2>/dev/null); then
         # if `arch` failed, unset ARCH var
@@ -73,13 +73,13 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
         ARCH='arm64'
       fi
     fi
-    SYSCTL='zsysctl'
+    SYSCTL='sysctl'
     if [ -z "$ARCH" ]; then
       if ! command -v "$SYSCTL" >/dev/null 2>&1; then
-        if [ -f /usr/sbin/$SYSCTL ]; then
-          SYSCTL="/usr/sbin/$SYSCTL"
-        elif [ -f "/sbin/$SYSCTL" ]; then
-          SYSCTL="/sbin/$SYSCTL"
+        if [ -f /usr/sbin/sysctl ]; then
+          SYSCTL='/usr/sbin/sysctl'
+        elif [ -f /sbin/sysctl ]; then
+          SYSCTL='/sbin/sysctl'
         else
           >&2 echo "You have neither \"arch\" nor \"sysctl\" on your \$PATH variable."
           exit 1
