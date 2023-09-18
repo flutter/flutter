@@ -439,7 +439,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     this.debugLabel = debugLabel;
 
     if (kFlutterMemoryAllocationsEnabled) {
-      ChangeNotifier.maybeDispatchObjectCreation(this);
+      maybeDispatchObjectCreation();
     }
   }
 
@@ -1468,7 +1468,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// documentation in that method for caveats to watch out for.
   FocusManager() {
     if (kFlutterMemoryAllocationsEnabled) {
-      ChangeNotifier.maybeDispatchObjectCreation(this);
+      maybeDispatchObjectCreation();
     }
     rootScope._manager = this;
   }
