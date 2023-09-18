@@ -187,7 +187,7 @@ void main() {
       io.Directory(p.join(emptyDir.path, 'src', 'out', 'host_debug_unopt_arm64')).createSync(recursive: true);
 
       final Engine engine = Engine.fromSrcPath(p.join(emptyDir.path, 'src'));
-      final List<String> outputs = engine.outputs().map((Output o) => p.basename(o.dir.path)).toList()..sort();
+      final List<String> outputs = engine.outputs().map((Output o) => p.basename(o.path.path)).toList()..sort();
       expect(outputs, <String>[
         'host_debug',
         'host_debug_unopt_arm64',
@@ -218,7 +218,7 @@ void main() {
       final Engine engine = Engine.fromSrcPath(p.join(emptyDir.path, 'src'));
       final Output? latestOutput = engine.latestOutput();
       expect(latestOutput, isNotNull);
-      expect(p.basename(latestOutput!.dir.path), 'host_debug_unopt_arm64');
+      expect(p.basename(latestOutput!.path.path), 'host_debug_unopt_arm64');
       expect(latestOutput.compileCommandsJson, isNotNull);
     } finally {
       tearDown();

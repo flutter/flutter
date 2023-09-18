@@ -7,6 +7,7 @@ import 'dart:io' as io show Directory, File, Platform, stderr;
 import 'package:clang_tidy/clang_tidy.dart';
 import 'package:clang_tidy/src/command.dart';
 import 'package:clang_tidy/src/options.dart';
+import 'package:engine_repo_tools/engine_repo_tools.dart';
 import 'package:litetest/litetest.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
@@ -19,6 +20,7 @@ final class Fixture {
   /// Simulates running the tool with the given [args].
   factory Fixture.fromCommandLine(List<String> args, {
     ProcessManager? processManager,
+    Engine? engine,
   }) {
     processManager ??= FakeProcessManager();
     final StringBuffer outBuffer = StringBuffer();
@@ -28,6 +30,7 @@ final class Fixture {
       outSink: outBuffer,
       errSink: errBuffer,
       processManager: processManager,
+      engine: engine,
     ), errBuffer, outBuffer);
   }
 
@@ -106,21 +109,58 @@ void _withTempFile(String prefix, void Function(String path) func) {
 }
 
 Future<int> main(List<String> args) async {
-  if (args.isEmpty) {
+  final String? buildCommands =
+      args.firstOrNull ??
+      Engine.findWithin().latestOutput()?.compileCommandsJson.path;
+
+  if (buildCommands == null || args.length > 1) {
     io.stderr.writeln(
       'Usage: clang_tidy_test.dart [path/to/compile_commands.json]',
     );
     return 1;
   }
-  final String buildCommands = args[0];
 
-  test('--help gives help', () async {
-    final Fixture fixture = Fixture.fromCommandLine(<String>['--help']);
-    final int result = await fixture.tool.run();
+  test('--help gives help, and uses host_debug by default outside of an engine root', () async {
+    final io.Directory rootDir = io.Directory.systemTemp.createTempSync('clang_tidy_test');
+    try {
+      final Fixture fixture = Fixture.fromCommandLine(
+        <String>['--help'],
+        engine: TestEngine.createTemp(rootDir: rootDir)
+      );
+      final int result = await fixture.tool.run();
 
-    expect(fixture.tool.options.help, isTrue);
-    expect(result, equals(0));
-    expect(fixture.errBuffer.toString(), contains('Usage: '));
+      expect(fixture.tool.options.help, isTrue);
+      expect(result, equals(0));
+
+      final String errors = fixture.errBuffer.toString();
+      expect(errors, contains('Usage: '));
+      expect(errors, contains('defaults to "host_debug"'));
+    } finally {
+      rootDir.deleteSync(recursive: true);
+    }
+  });
+
+  test('--help gives help, and uses the latest build by default outside in an engine root', () async {
+    final io.Directory rootDir = io.Directory.systemTemp.createTempSync('clang_tidy_test');
+    final io.Directory buildDir = io.Directory(path.join(rootDir.path, 'out', 'host_debug_unopt_arm64'))..createSync(recursive: true);
+    try {
+      final Fixture fixture = Fixture.fromCommandLine(
+        <String>['--help'],
+        engine: TestEngine.createTemp(rootDir: rootDir, outputs: <TestOutput>[
+          TestOutput(buildDir),
+        ])
+      );
+      final int result = await fixture.tool.run();
+
+      expect(fixture.tool.options.help, isTrue);
+      expect(result, equals(0));
+
+      final String errors = fixture.errBuffer.toString();
+      expect(errors, contains('Usage: '));
+      expect(errors, contains('defaults to "host_debug_unopt_arm64"'));
+    } finally {
+      rootDir.deleteSync(recursive: true);
+    }
   });
 
   test('trimmed clang-tidy output', () {
