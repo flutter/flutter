@@ -669,12 +669,7 @@ void FlutterWindowsView::UpdateSemanticsEnabled(bool enabled) {
 
 void FlutterWindowsView::OnDwmCompositionChanged() {
   if (engine_->surface_manager()) {
-    // Update the surface with the new composition state.
-    // Switch to the raster thread as this requires making the context current.
-    auto needs_vsync = binding_handler_->NeedsVSync();
-    engine_->PostRasterThreadTask([this, needs_vsync]() {
-      engine_->surface_manager()->SetVSyncEnabled(needs_vsync);
-    });
+    engine_->surface_manager()->SetVSyncEnabled(binding_handler_->NeedsVSync());
   }
 }
 
