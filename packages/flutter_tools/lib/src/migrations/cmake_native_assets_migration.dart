@@ -6,16 +6,10 @@ import '../base/file_system.dart';
 import '../base/project_migrator.dart';
 import '../cmake_project.dart';
 
-// CMake's add_custom_command() should use VERBATIM to handle escaping of spaces
-// and special characters correctly.
-// See https://github.com/flutter/flutter/issues/67270.
-
 /// Adds the snippet to the CMake file that copies the native assets.
 ///
 /// ```cmake
 /// # Copy the native assets provided by the build.dart from all packages.
-/// # For more info about native assets see:
-/// # https://github.com/flutter/flutter/issues/129757
 /// set(NATIVE_ASSETS_DIR "${PROJECT_BUILD_DIR}native_assets/linux/")
 /// install(DIRECTORY "${NATIVE_ASSETS_DIR}"
 ///    DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
@@ -45,8 +39,6 @@ class CmakeNativeAssetsMigration extends ProjectMigrator {
     final String copyNativeAssetsCommand = '''
 
 # Copy the native assets provided by the build.dart from all packages.
-# For more info about native assets see:
-# https://github.com/flutter/flutter/issues/129757
 set(NATIVE_ASSETS_DIR "\${PROJECT_BUILD_DIR}native_assets/$os/")
 install(DIRECTORY "\${NATIVE_ASSETS_DIR}"
    DESTINATION "\${INSTALL_BUNDLE_LIB_DIR}"

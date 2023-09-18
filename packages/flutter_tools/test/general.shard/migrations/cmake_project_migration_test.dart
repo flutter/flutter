@@ -209,8 +209,6 @@ add_custom_command(
       testWithoutContext('skipped if already migrated', () {
         const String contents = r'''
 # Copy the native assets provided by the build.dart from all packages.
-# For more info about native assets see:
-# https://github.com/flutter/flutter/issues/129757
 set(NATIVE_ASSETS_DIR "${PROJECT_BUILD_DIR}native_assets/linux/")
 install(DIRECTORY "${NATIVE_ASSETS_DIR}"
    DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
@@ -266,8 +264,6 @@ foreach(bundled_library ${PLUGIN_BUNDLED_LIBRARIES})
 endforeach(bundled_library)
 
 # Copy the native assets provided by the build.dart from all packages.
-# For more info about native assets see:
-# https://github.com/flutter/flutter/issues/129757
 set(NATIVE_ASSETS_DIR "${PROJECT_BUILD_DIR}native_assets/linux/")
 install(DIRECTORY "${NATIVE_ASSETS_DIR}"
    DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
