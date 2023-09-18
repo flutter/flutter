@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestTransition extends AnimatedWidget {
   const TestTransition({
@@ -57,7 +58,7 @@ void main() {
   const Duration kTwoTenthsOfTheTransitionDuration = Duration(milliseconds: 30);
   const Duration kFourTenthsOfTheTransitionDuration = Duration(milliseconds: 60);
 
-  testWidgets('Check onstage/offstage handling around transitions', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Check onstage/offstage handling around transitions', (WidgetTester tester) async {
 
     final GlobalKey insideKey = GlobalKey();
 
@@ -196,7 +197,7 @@ void main() {
 
   });
 
-  testWidgets('Check onstage/offstage handling of barriers around transitions', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Check onstage/offstage handling of barriers around transitions', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         onGenerateRoute: (RouteSettings settings) {

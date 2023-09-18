@@ -8,6 +8,7 @@ import 'dart:ui' as ui show Image;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../image_data.dart';
 import '../painting/fake_codec.dart';
@@ -17,7 +18,7 @@ Future<void> main() async {
   final FakeCodec fakeCodec = await FakeCodec.fromData(Uint8List.fromList(kAnimatedGif));
   final FakeImageProvider fakeImageProvider = FakeImageProvider(fakeCodec);
 
-  testWidgets('Obscured image does not animate', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Obscured image does not animate', (WidgetTester tester) async {
     final GlobalKey imageKey = GlobalKey();
     await tester.pumpWidget(
       MaterialApp(
