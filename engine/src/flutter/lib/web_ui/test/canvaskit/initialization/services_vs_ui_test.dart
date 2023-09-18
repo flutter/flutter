@@ -17,7 +17,6 @@ void testMain() {
 
     expect(findGlassPane(), isNull);
     expect(RawKeyboard.instance, isNull);
-    expect(MouseCursor.instance, isNull);
     expect(KeyboardBinding.instance, isNull);
     expect(PointerBinding.instance, isNull);
 
@@ -28,7 +27,6 @@ void testMain() {
 
     expect(findGlassPane(), isNull);
     expect(RawKeyboard.instance, isNull);
-    expect(MouseCursor.instance, isNull);
     expect(KeyboardBinding.instance, isNull);
     expect(PointerBinding.instance, isNull);
 
@@ -36,7 +34,6 @@ void testMain() {
     await initializeEngineUi();
     expect(findGlassPane(), isNotNull);
     expect(RawKeyboard.instance, isNotNull);
-    expect(MouseCursor.instance, isNotNull);
     expect(KeyboardBinding.instance, isNotNull);
     expect(PointerBinding.instance, isNotNull);
   });

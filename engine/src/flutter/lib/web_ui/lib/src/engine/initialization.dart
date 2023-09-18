@@ -226,7 +226,6 @@ Future<void> initializeEngineUi() async {
   _initializationState = DebugEngineInitializationState.initializingUi;
 
   RawKeyboard.initialize(onMacOs: operatingSystem == OperatingSystem.macOs);
-  MouseCursor.initialize();
   ensureFlutterViewEmbedderInitialized();
   _initializationState = DebugEngineInitializationState.initialized;
 }

@@ -2,23 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'embedder.dart';
-import 'util.dart';
+import '../dom.dart';
 
-/// Provides mouse cursor bindings, such as the `flutter/mousecursor` channel.
+/// Controls the mouse cursor in the given [element].
 class MouseCursor {
-  MouseCursor._();
+  MouseCursor(this.element);
 
-  /// Initializes the [MouseCursor] singleton.
-  ///
-  /// Use the [instance] getter to get the singleton after calling this method.
-  static void initialize() {
-    _instance ??= MouseCursor._();
-  }
-
-  /// The [MouseCursor] singleton.
-  static MouseCursor? get instance => _instance;
-  static MouseCursor? _instance;
+  final DomElement element;
 
   // Map from Flutter's kind values to CSS's cursor values.
   //
@@ -61,15 +51,12 @@ class MouseCursor {
     'zoomIn': 'zoom-in',
     'zoomOut': 'zoom-out',
   };
+
   static String _mapKindToCssValue(String? kind) {
     return _kindToCssValueMap[kind] ?? 'default';
   }
 
   void activateSystemCursor(String? kind) {
-    setElementStyle(
-      flutterViewEmbedder.flutterViewElement,
-      'cursor',
-      _mapKindToCssValue(kind),
-    );
+    element.style.cursor = _mapKindToCssValue(kind);
   }
 }
