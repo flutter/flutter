@@ -60,25 +60,47 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
   }
 
   # `uname -m` may be running in Rosetta mode, instead query sysctl
-  if [ "$OS" = 'Darwin' ]; then
+  if [ -z "$ARCH" ] && [ "$OS" = 'Darwin' ]; then
     # Allow non-zero exit so we can do control flow
     set +e
-    # -n means only print value, not key
-    QUERY="sysctl -n hw.optional.arm64"
-    # Do not wrap $QUERY in double quotes, otherwise the args will be treated as
-    # part of the command
-    QUERY_RESULT=$($QUERY 2>/dev/null)
-    if [ $? -eq 1 ]; then
-      # If this command fails, we're certainly not on ARM
-      ARCH='x64'
-    elif [ "$QUERY_RESULT" = '0' ]; then
-      # If this returns 0, we are also not on ARM
-      ARCH='x64'
-    elif [ "$QUERY_RESULT" = '1' ]; then
-      ARCH='arm64'
-    else
-      >&2 echo "'$QUERY' returned unexpected output: '$QUERY_RESULT'"
-      exit 1
+    if command -v arch >/dev/null 2>&1; then # TODO
+      echo "You have arch installed!"
+      if ! ARCH=$(arch 2>/dev/null); then
+        # if `arch` failed, unset ARCH var
+        unset ARCH
+      fi
+      if [ "$ARCH" = 'arm64e' ]; then
+        ARCH='arm64'
+      fi
+    fi
+    SYSCTL='zsysctl'
+    if [ -z "$ARCH" ]; then
+      if ! command -v "$SYSCTL" >/dev/null 2>&1; then
+        if [ -f /usr/sbin/$SYSCTL ]; then
+          SYSCTL="/usr/sbin/$SYSCTL"
+        elif [ -f "/sbin/$SYSCTL" ]; then
+          SYSCTL="/sbin/$SYSCTL"
+        else
+          >&2 echo "You have neither \"arch\" nor \"sysctl\" installed on your system"
+          exit 1
+        fi
+      fi
+      # -n means only print value, not key
+      QUERY="$SYSCTL -n hw.optional.arm64"
+      # Do not wrap $QUERY in double quotes, otherwise the args will be treated
+      # as part of the command
+      if ! QUERY_RESULT=$($QUERY 2>/dev/null); then
+        # If this command fails, we're certainly not on ARM
+        ARCH='x64'
+      elif [ "$QUERY_RESULT" = '0' ]; then
+        # If this returns 0, we are also not on ARM
+        ARCH='x64'
+      elif [ "$QUERY_RESULT" = '1' ]; then
+        ARCH='arm64'
+      else
+        >&2 echo "'$QUERY' returned unexpected output: '$QUERY_RESULT'"
+        exit 1
+      fi
     fi
     set -e
   else
@@ -166,6 +188,8 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
     rm -f -- "$DART_SDK_ZIP"
     exit 1
   }
+  ls ~/git/flutter/bin/cache # TODO
+  echo "About to run unzip -o -q \"$DART_SDK_ZIP\" -d \"$FLUTTER_ROOT/bin/cache\"" # TODO
   unzip -o -q "$DART_SDK_ZIP" -d "$FLUTTER_ROOT/bin/cache" || {
     >&2 echo
     >&2 echo "It appears that the downloaded file is corrupt; please try again."
