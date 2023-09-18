@@ -1625,6 +1625,9 @@ class ListView extends BoxScrollView {
   /// the item widget needs to be changed to drive the framework to invalidate
   /// the cached value.
   ///
+  /// All cached data will be cleared automatically if [scrollDirection] or
+  /// [SliverConstraints.crossAxisExtent] changed.
+  ///
   /// This has no effect if the extent of the children is predetermined,
   /// for example, the [itemExtent], [itemExtentBuilder] or [prototypeItem] have
   /// a non-null value, as they are already efficient.
