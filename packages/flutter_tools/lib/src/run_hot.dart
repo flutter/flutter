@@ -366,7 +366,12 @@ class HotRunner extends ResidentRunner {
     await _calculateTargetPlatform();
 
     final Uri projectUri = Uri.directory(projectRootPath);
-    _buildRunner ??= NativeAssetsBuildRunnerImpl(projectUri, fileSystem, globals.logger);
+    _buildRunner ??= NativeAssetsBuildRunnerImpl(
+      projectUri,
+      debuggingOptions.buildInfo.packageConfig,
+      fileSystem,
+      globals.logger,
+    );
     final Uri? nativeAssetsYaml = await dryRunNativeAssets(
       projectUri: projectUri,
       fileSystem: fileSystem,
