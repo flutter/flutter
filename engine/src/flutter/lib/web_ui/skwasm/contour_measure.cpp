@@ -6,6 +6,7 @@
 #include "helpers.h"
 
 #include "third_party/skia/include/core/SkContourMeasure.h"
+#include "third_party/skia/include/core/SkPath.h"
 
 using namespace Skwasm;
 
