@@ -543,6 +543,7 @@ class IOSDevice extends Device {
           debuggingOptions: debuggingOptions,
           launchArguments: launchArguments,
           ipv6: ipv6,
+          uninstallFirst: debuggingOptions.uninstallFirst,
         );
       }
 
@@ -695,6 +696,7 @@ class IOSDevice extends Device {
               debuggingOptions: debuggingOptions,
               launchArguments: launchArguments,
               ipv6: ipv6,
+              uninstallFirst: false,
               skipInstall: true,
             );
             installationResult = await iosDeployDebugger!.launchAndAttach() ? 0 : 1;
@@ -737,6 +739,7 @@ class IOSDevice extends Device {
     required DebuggingOptions debuggingOptions,
     required List<String> launchArguments,
     required bool ipv6,
+    required bool uninstallFirst,
     bool skipInstall = false,
   }) {
     final DeviceLogReader deviceLogReader = getLogReader(
@@ -753,7 +756,7 @@ class IOSDevice extends Device {
         appDeltaDirectory: package.appDeltaDirectory,
         launchArguments: launchArguments,
         interfaceType: connectionInterface,
-        uninstallFirst: debuggingOptions.uninstallFirst,
+        uninstallFirst: uninstallFirst,
         skipInstall: skipInstall,
       );
       if (deviceLogReader is IOSDeviceLogReader) {

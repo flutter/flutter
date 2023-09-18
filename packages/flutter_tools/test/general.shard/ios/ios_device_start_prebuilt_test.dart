@@ -75,6 +75,7 @@ FakeCommand attachDebuggerCommand({
   String stdout = '(lldb)     run\nsuccess',
   Completer<void>? completer,
   bool isWirelessDevice = false,
+  bool uninstallFirst = false,
   bool skipInstall = false,
 }) {
   return FakeCommand(
@@ -88,6 +89,8 @@ FakeCommand attachDebuggerCommand({
       '123',
       '--bundle',
       '/',
+      if (uninstallFirst)
+        '--uninstall',
       if (skipInstall)
         '--noinstall',
       '--debug',
@@ -349,6 +352,7 @@ void main() {
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
       attachDebuggerCommand(
         stdout: '(lldb)     run\nsuccess\nProcess 525 exited with status = -1 (0xffffffff) lost connection',
+        uninstallFirst: true,
       ),
       attachDebuggerCommand(
         stdout: '(lldb)     run\nsuccess\nThe Dart VM service is listening on http://127.0.0.1:456',
@@ -375,6 +379,7 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(
         BuildInfo.debug,
         usingCISystem: true,
+        uninstallFirst: true,
       ),
       platformArgs: <String, dynamic>{},
     );
