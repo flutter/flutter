@@ -532,7 +532,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
             return;
           case 'SystemChrome.setPreferredOrientations':
             final List<dynamic> arguments = decoded.arguments as List<dynamic>;
-            flutterViewEmbedder.setPreferredOrientation(arguments).then((bool success) {
+            ScreenOrientation.instance.setPreferredOrientation(arguments).then((bool success) {
               replyToPlatformMessage(
                   callback, codec.encodeSuccessEnvelope(success));
             });
