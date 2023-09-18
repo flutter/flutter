@@ -147,6 +147,8 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   // Whether software rendering is used.
   private boolean usesSoftwareRendering = false;
 
+  private static boolean enableHardwareBufferRenderingTarget = false;
+
   private final PlatformViewsChannel.PlatformViewsHandler channelHandler =
       new PlatformViewsChannel.PlatformViewsHandler() {
 
@@ -968,7 +970,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
   private static PlatformViewRenderTarget makePlatformViewRenderTarget(
       TextureRegistry textureRegistry) {
-    if (Build.VERSION.SDK_INT >= 29) {
+    if (enableHardwareBufferRenderingTarget && Build.VERSION.SDK_INT >= 29) {
       final TextureRegistry.ImageTextureEntry textureEntry = textureRegistry.createImageTexture();
       return new ImageReaderPlatformViewRenderTarget(textureEntry);
     }
