@@ -249,7 +249,7 @@ class ButtonThemeData with Diagnosticable {
   ///    child (typically the button's label).
   EdgeInsetsGeometry get padding {
     if (_padding != null) {
-      return _padding!;
+      return _padding;
     }
     switch (textTheme) {
       case ButtonTextTheme.normal:
@@ -277,7 +277,7 @@ class ButtonThemeData with Diagnosticable {
   ///    [Material].
   ShapeBorder get shape {
     if (_shape != null) {
-      return _shape!;
+      return _shape;
     }
     switch (textTheme) {
       case ButtonTextTheme.normal:
@@ -537,7 +537,7 @@ class ButtonThemeData with Diagnosticable {
       switch (getTextTheme(button)) {
         case ButtonTextTheme.normal:
         case ButtonTextTheme.accent:
-          return _splashColor!;
+          return _splashColor;
         case ButtonTextTheme.primary:
           break;
       }
@@ -642,7 +642,7 @@ class ButtonThemeData with Diagnosticable {
     }
 
     if (_padding != null) {
-      return _padding!;
+      return _padding;
     }
 
     switch (getTextTheme(button)) {

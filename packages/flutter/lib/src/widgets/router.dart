@@ -65,7 +65,7 @@ class RouteInformation {
   )
   String get location {
     if (_location != null) {
-      return _location!;
+      return _location;
     }
     return Uri.decodeComponent(
       Uri(
@@ -86,7 +86,7 @@ class RouteInformation {
   /// In web platform, the host and scheme are always empty.
   Uri get uri {
     if (_uri != null){
-      return _uri!;
+      return _uri;
     }
     return Uri.parse(_location!);
   }
