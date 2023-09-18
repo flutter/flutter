@@ -749,7 +749,7 @@ class ShortcutManager with Diagnosticable, ChangeNotifier {
     this.modal = false,
   })  : _shortcuts = shortcuts {
     if (kFlutterMemoryAllocationsEnabled) {
-      ChangeNotifier.maybeDispatchObjectCreation(this);
+      maybeDispatchObjectCreation();
     }
   }
 
@@ -1203,7 +1203,7 @@ class ShortcutRegistry with ChangeNotifier {
   /// Creates an instance of [ShortcutRegistry].
   ShortcutRegistry() {
     if (kFlutterMemoryAllocationsEnabled) {
-      ChangeNotifier.maybeDispatchObjectCreation(this);
+      maybeDispatchObjectCreation();
     }
   }
 
