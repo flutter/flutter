@@ -842,6 +842,17 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   }
 
   @override
+  Key? keyOf(int index) {
+    Key? key;
+    try {
+      final SliverMultiBoxAdaptorWidget adaptorWidget = widget as SliverMultiBoxAdaptorWidget;
+      key = adaptorWidget.delegate.build(this, index)?.key;
+    } finally {
+    }
+    return key;
+  }
+
+  @override
   void createChild(int index, { required RenderBox? after }) {
     assert(_currentlyUpdatingChildIndex == null);
     owner!.buildScope(this, () {

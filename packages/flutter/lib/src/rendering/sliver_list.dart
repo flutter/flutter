@@ -9,6 +9,14 @@ import 'object.dart';
 import 'sliver.dart';
 import 'sliver_multi_box_adaptor.dart';
 
+class _CachedExtent {
+  const _CachedExtent(this.childKey, this.mainAxisExtent);
+
+  // The key is saved to invalidate the cached value when the key changes.
+  final Key? childKey;
+  final double mainAxisExtent;
+}
+
 /// A sliver that places multiple box children in a linear array along the main
 /// axis.
 ///
@@ -67,7 +75,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
   }
 
   late BoxConstraints _childConstraints;
-  final Map<int, double> _cachedItemExtents = <int, double>{};
+  final Map<int, _CachedExtent> _cachedItemExtents = <int, _CachedExtent>{};
   final Set<int> _childrenWithoutLayout = <int>{};
   double? _lastCrossAxisExtent;
   Axis? _lastAxis;
@@ -75,12 +83,28 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
   void _cacheItemExtent(RenderBox item) {
     assert(enableItemExtentsCaching);
     assert(!_cachedItemExtents.containsKey(indexOf(item)));
-    _cachedItemExtents[indexOf(item)] = paintExtentOf(item);
+    final int index = indexOf(item);
+    _cachedItemExtents[index] = _CachedExtent(childManager.keyOf(index), paintExtentOf(item));
+  }
+
+  bool _canUseCachedExtent(int index) {
+    assert(enableItemExtentsCaching);
+    if (_cachedItemExtents.containsKey(index)) {
+      final Key? currentKey = childManager.keyOf(index);
+      if (_cachedItemExtents[index]!.childKey == currentKey) {
+        return true;
+      } else {
+        // Remove the cached extent if widget's key changed.
+        _cachedItemExtents.remove(index);
+        return false;
+      }
+    }
+    return false;
   }
 
   RenderBox? _obtainOneLeadingChild() {
     final int leadingIndex = indexOf(firstChild!) - 1;
-    final bool layoutImmediate = !enableItemExtentsCaching || !_cachedItemExtents.containsKey(leadingIndex);
+    final bool layoutImmediate = !enableItemExtentsCaching || !_canUseCachedExtent(leadingIndex);
     final RenderBox? leadingChild = insertAndLayoutLeadingChild(
       _childConstraints,
       parentUsesSize: true,
@@ -99,7 +123,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
 
   RenderBox? _obtainOneTrailingChild(RenderBox after) {
     final int trailingIndex = indexOf(after) + 1;
-    final bool layoutImmediate = !enableItemExtentsCaching || !_cachedItemExtents.containsKey(trailingIndex);
+    final bool layoutImmediate = !enableItemExtentsCaching || !_canUseCachedExtent(trailingIndex);
     final RenderBox? trailingChild = insertAndLayoutChild(
       _childConstraints,
       after: after,
@@ -118,7 +142,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
 
   void _processChildLayout(RenderBox child) {
     final int childIndex = indexOf(child);
-    final bool layoutImmediate = !enableItemExtentsCaching || !_cachedItemExtents.containsKey(childIndex);
+    final bool layoutImmediate = !enableItemExtentsCaching || !_canUseCachedExtent(childIndex);
     if (layoutImmediate) {
       child.layout(_childConstraints, parentUsesSize: true);
       if (enableItemExtentsCaching) {
@@ -137,14 +161,13 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
       final int index = indexOf(child);
       if (_childrenWithoutLayout.contains(index)) {
         child.layout(_childConstraints, parentUsesSize: true);
-        assert(super.paintExtentOf(child) == _cachedItemExtents[index]);
+        assert(super.paintExtentOf(child) == _cachedItemExtents[index]!.mainAxisExtent);
       }
     }
-    _childrenWithoutLayout.clear();
   }
 
   void _setup() {
-    assert(_childrenWithoutLayout.isEmpty);
+    _childrenWithoutLayout.clear();
     _childConstraints = constraints.asBoxConstraints();
     // Clear the cached extents if [crossAxisExtent] or [axis] changed.
     if (constraints.crossAxisExtent != _lastCrossAxisExtent ||
@@ -158,8 +181,8 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
   @override
   double paintExtentOf(RenderBox child) {
     final int index = indexOf(child);
-    if (enableItemExtentsCaching && _cachedItemExtents.containsKey(index)) {
-      return _cachedItemExtents[index]!;
+    if (enableItemExtentsCaching && _canUseCachedExtent(index)) {
+      return _cachedItemExtents[index]!.mainAxisExtent;
     } else {
       return super.paintExtentOf(child);
     }

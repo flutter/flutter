@@ -1614,11 +1614,16 @@ class ListView extends BoxScrollView {
   ///
   /// The default is false.
   ///
-  /// This caching mechanism is suitable for scenarios where the main axis extent
-  /// of children does not change during its life cycle. Using cached extent
-  /// dimensions will improve scrolling performance, especially in scenarios
-  /// that the scroll position changes drastically, as it will significantly
-  /// reduce the number of layout times if the children have been laid out before.
+  /// This caching mechanism is suitable for scenarios where the main axis extents
+  /// of children do not change or change infrequently during its life cycle.
+  /// Using cached extent dimensions will improve scrolling performance,
+  /// especially in scenarios that the scroll position changes drastically,
+  /// as it will significantly reduce the number of layout times if the children
+  /// have been laid out before.
+  ///
+  /// If the main axis extent of child at a certain index changes, the [Key] of
+  /// the item widget needs to be changed to drive the framework to invalidate
+  /// the cached value.
   ///
   /// This has no effect if the extent of the children is predetermined,
   /// for example, the [itemExtent], [itemExtentBuilder] or [prototypeItem] have

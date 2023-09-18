@@ -79,6 +79,12 @@ abstract class RenderSliverBoxChildManager {
   /// list).
   int get childCount;
 
+  /// Called to obtain the child widget's key.
+  ///
+  /// This will be used by [RenderSliver] to invalidate the cached main axis extent
+  /// if the child's key changes.
+  Key? keyOf(int index) => null;
+
   /// Called during [RenderSliverMultiBoxAdaptor.adoptChild] or
   /// [RenderSliverMultiBoxAdaptor.move].
   ///
