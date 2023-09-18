@@ -39,7 +39,32 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
   /// the main axis.
   RenderSliverList({
     required super.childManager,
-  });
+    bool enableItemExtentsCaching = false,
+  }) : _enableItemExtentsCaching = enableItemExtentsCaching;
+
+  /// Whether to cache the main axis extents of all laid out children.
+  ///
+  /// If true, the main axis extent of child will be cached as
+  /// index/extent pairs when the child first laid out.
+  ///
+  /// If false, the main axis extents of children will not be cached and
+  /// previously cached data will be cleared.
+  ///
+  /// The cached data will be used to efficiently determine the target children
+  /// within the lazy loading scope, which helps improve layout performance.
+  bool get enableItemExtentsCaching => _enableItemExtentsCaching;
+  bool _enableItemExtentsCaching;
+  set enableItemExtentsCaching(bool value) {
+    if (value != _enableItemExtentsCaching) {
+      _enableItemExtentsCaching = value;
+      if (!_enableItemExtentsCaching) {
+        _cachedItemExtents.clear();
+      } else {
+        assert(_cachedItemExtents.isEmpty);
+      }
+      markNeedsLayout();
+    }
+  }
 
   late BoxConstraints _childConstraints;
   final Map<int, double> _cachedItemExtents = <int, double>{};
@@ -48,19 +73,20 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
   Axis? _lastAxis;
 
   void _cacheItemExtent(RenderBox item) {
+    assert(enableItemExtentsCaching);
     assert(!_cachedItemExtents.containsKey(indexOf(item)));
     _cachedItemExtents[indexOf(item)] = paintExtentOf(item);
   }
 
   RenderBox? _obtainOneLeadingChild() {
     final int leadingIndex = indexOf(firstChild!) - 1;
-    final bool layoutImmediate = !_cachedItemExtents.containsKey(leadingIndex);
+    final bool layoutImmediate = !enableItemExtentsCaching || !_cachedItemExtents.containsKey(leadingIndex);
     final RenderBox? leadingChild = insertAndLayoutLeadingChild(
       _childConstraints,
       parentUsesSize: true,
       layoutImmediate: layoutImmediate,
     );
-    if (leadingChild != null) {
+    if (enableItemExtentsCaching && leadingChild != null) {
       assert(leadingChild == firstChild);
       if (layoutImmediate) {
         _cacheItemExtent(firstChild!);
@@ -73,14 +99,14 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
 
   RenderBox? _obtainOneTrailingChild(RenderBox after) {
     final int trailingIndex = indexOf(after) + 1;
-    final bool layoutImmediate = !_cachedItemExtents.containsKey(trailingIndex);
+    final bool layoutImmediate = !enableItemExtentsCaching || !_cachedItemExtents.containsKey(trailingIndex);
     final RenderBox? trailingChild = insertAndLayoutChild(
       _childConstraints,
       after: after,
       parentUsesSize: true,
       layoutImmediate: layoutImmediate,
     );
-    if (trailingChild != null) {
+    if (enableItemExtentsCaching && trailingChild != null) {
       if (layoutImmediate) {
         _cacheItemExtent(trailingChild);
       } else {
@@ -92,15 +118,21 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
 
   void _processChildLayout(RenderBox child) {
     final int childIndex = indexOf(child);
-    if (!_cachedItemExtents.containsKey(childIndex)) {
+    final bool layoutImmediate = !enableItemExtentsCaching || !_cachedItemExtents.containsKey(childIndex);
+    if (layoutImmediate) {
       child.layout(_childConstraints, parentUsesSize: true);
-      _cacheItemExtent(child);
+      if (enableItemExtentsCaching) {
+        _cacheItemExtent(child);
+      }
     } else {
       _childrenWithoutLayout.add(childIndex);
     }
   }
 
   void _performLoadingScopeChildrenLayoutIfNeeded() {
+    if (!enableItemExtentsCaching) {
+      return;
+    }
     for (RenderBox? child = firstChild; child != null ; child = childAfter(child)) {
       final int index = indexOf(child);
       if (_childrenWithoutLayout.contains(index)) {
@@ -108,10 +140,11 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
         assert(super.paintExtentOf(child) == _cachedItemExtents[index]);
       }
     }
+    _childrenWithoutLayout.clear();
   }
 
   void _setup() {
-    _childrenWithoutLayout.clear();
+    assert(_childrenWithoutLayout.isEmpty);
     _childConstraints = constraints.asBoxConstraints();
     // Clear the cached extents if [crossAxisExtent] or [axis] changed.
     if (constraints.crossAxisExtent != _lastCrossAxisExtent ||
@@ -125,7 +158,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
   @override
   double paintExtentOf(RenderBox child) {
     final int index = indexOf(child);
-    if (_cachedItemExtents.containsKey(index)) {
+    if (enableItemExtentsCaching && _cachedItemExtents.containsKey(index)) {
       return _cachedItemExtents[index]!;
     } else {
       return super.paintExtentOf(child);

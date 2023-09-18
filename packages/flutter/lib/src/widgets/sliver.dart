@@ -129,6 +129,11 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
 /// [SliverFixedExtentList] does not need to perform layout on its children to
 /// obtain their extent in the main axis and is therefore more efficient.
 ///
+/// [SliverList] will cache the main axis extents of all laid out children to
+/// improve layout performance if [enableItemExtentsCaching] is true. Consider
+/// set [enableItemExtentsCaching] to true if the main axis extent of children
+/// does not change during its life cycle.
+///
 /// {@macro flutter.widgets.SliverChildDelegate.lifecycle}
 ///
 /// See also:
@@ -150,6 +155,7 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   const SliverList({
     super.key,
     required super.delegate,
+    this.enableItemExtentsCaching = false,
   });
 
   /// A sliver that places multiple box children in a linear array along the main
@@ -200,6 +206,7 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
+    this.enableItemExtentsCaching = false,
   }) : super(delegate: SliverChildBuilderDelegate(
          itemBuilder,
          findChildIndexCallback: findChildIndexCallback,
@@ -264,6 +271,7 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
+    this.enableItemExtentsCaching = false,
   }) : super(delegate: SliverChildBuilderDelegate(
          (BuildContext context, int index) {
            final int itemIndex = index ~/ 2;
@@ -322,6 +330,7 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
+    this.enableItemExtentsCaching = false,
   }) : super(delegate: SliverChildListDelegate(
          children,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
@@ -329,13 +338,16 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
          addSemanticIndexes: addSemanticIndexes,
        ));
 
+  /// Whether to cache the main axis extents of all laid out children.
+  final bool enableItemExtentsCaching;
+
   @override
   SliverMultiBoxAdaptorElement createElement() => SliverMultiBoxAdaptorElement(this, replaceMovedChildren: true);
 
   @override
   RenderSliverList createRenderObject(BuildContext context) {
     final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
-    return RenderSliverList(childManager: element);
+    return RenderSliverList(childManager: element, enableItemExtentsCaching: enableItemExtentsCaching);
   }
 }
 

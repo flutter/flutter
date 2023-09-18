@@ -1233,6 +1233,7 @@ class ListView extends BoxScrollView {
     this.itemExtent,
     this.itemExtentBuilder,
     this.prototypeItem,
+    this.enableItemExtentsCaching = false,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
@@ -1309,6 +1310,7 @@ class ListView extends BoxScrollView {
     this.itemExtent,
     this.itemExtentBuilder,
     this.prototypeItem,
+    this.enableItemExtentsCaching = false,
     required NullableIndexedWidgetBuilder itemBuilder,
     ChildIndexGetter? findChildIndexCallback,
     int? itemCount,
@@ -1405,6 +1407,7 @@ class ListView extends BoxScrollView {
     ChildIndexGetter? findChildIndexCallback,
     required IndexedWidgetBuilder separatorBuilder,
     required int itemCount,
+    this.enableItemExtentsCaching = false,
     bool addAutomaticKeepAlives = true,
     bool addRepaintBoundaries = true,
     bool addSemanticIndexes = true,
@@ -1537,6 +1540,7 @@ class ListView extends BoxScrollView {
     this.itemExtent,
     this.prototypeItem,
     this.itemExtentBuilder,
+    this.enableItemExtentsCaching = false,
     required this.childrenDelegate,
     super.cacheExtent,
     super.semanticChildCount,
@@ -1599,6 +1603,29 @@ class ListView extends BoxScrollView {
   /// {@endtemplate}
   final ItemExtentBuilder? itemExtentBuilder;
 
+  /// {@template flutter.widgets.list_view.enableItemExtentsCaching}
+  /// Whether to cache the main axis extents of all laid out children.
+  ///
+  /// If true, the main axis extent of child will be cached as
+  /// index/extent pairs when the child first laid out.
+  ///
+  /// If false, the main axis extents of children will not be cached and
+  /// previously cached data will be cleared.
+  ///
+  /// The default is false.
+  ///
+  /// This caching mechanism is suitable for scenarios where the main axis extent
+  /// of children does not change during its life cycle. Using cached extent
+  /// dimensions will improve scrolling performance, especially in scenarios
+  /// that the scroll position changes drastically, as it will significantly
+  /// reduce the number of layout times if the children have been laid out before.
+  ///
+  /// This has no effect if the extent of the children is predetermined,
+  /// for example, the [itemExtent], [itemExtentBuilder] or [prototypeItem] have
+  /// a non-null value, as they are already efficient.
+  /// {@endtemplate}
+  final bool enableItemExtentsCaching;
+
   /// {@template flutter.widgets.list_view.prototypeItem}
   /// If non-null, forces the children to have the same extent as the given
   /// widget in the scroll direction.
@@ -1646,7 +1673,10 @@ class ListView extends BoxScrollView {
         prototypeItem: prototypeItem!,
       );
     }
-    return SliverList(delegate: childrenDelegate);
+    return SliverList(
+      delegate: childrenDelegate,
+      enableItemExtentsCaching: enableItemExtentsCaching,
+    );
   }
 
   @override
