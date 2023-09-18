@@ -81,6 +81,8 @@ AHardwareBuffer* HardwareBufferExternalTexture::GetLatestHardwareBuffer() {
       NDKHelpers::AHardwareBuffer_fromHardwareBuffer(
           env, hardware_buffer_java.obj());
   if (latest_hardware_buffer == nullptr) {
+    jni_facade_->HardwareBufferClose(hardware_buffer_java);
+    jni_facade_->ImageClose(image_java);
     return nullptr;
   }
 
