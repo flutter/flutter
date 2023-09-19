@@ -1,4 +1,4 @@
-Signature: 672d851f6fca7bd95c59e7a7c60503cd
+Signature: 4b2d1a29398b500d5c27e9d459eb2f6d
 
 ====================================================================================================
 LIBRARY: etc1
@@ -5740,6 +5740,7 @@ ORIGIN: ../../../third_party/skia/include/ports/SkCFObject.h + ../../../third_pa
 ORIGIN: ../../../third_party/skia/include/private/chromium/GrVkSecondaryCBDrawContext.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/gpu/ganesh/GrContext_Base.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/gpu/ganesh/GrImageContext.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/modules/skottie/include/TextShaper.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skottie/src/Composition.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skottie/src/Composition.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skottie/src/Layer.cpp + ../../../third_party/skia/LICENSE
@@ -5768,12 +5769,12 @@ ORIGIN: ../../../third_party/skia/modules/skottie/src/layers/NullLayer.cpp + ../
 ORIGIN: ../../../third_party/skia/modules/skottie/src/layers/SolidLayer.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skottie/src/text/RangeSelector.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skottie/src/text/RangeSelector.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/modules/skottie/src/text/SkottieShaper.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skottie/src/text/SkottieShaper.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skottie/src/text/TextAdapter.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skottie/src/text/TextAdapter.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skottie/src/text/TextAnimator.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skottie/src/text/TextAnimator.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/modules/skottie/src/text/TextShaper.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skottie/src/text/TextValue.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/skottie/src/text/TextValue.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/modules/sksg/include/SkSGRenderEffect.h + ../../../third_party/skia/LICENSE
@@ -5858,6 +5859,7 @@ FILE: ../../../third_party/skia/include/ports/SkCFObject.h
 FILE: ../../../third_party/skia/include/private/chromium/GrVkSecondaryCBDrawContext.h
 FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrContext_Base.h
 FILE: ../../../third_party/skia/include/private/gpu/ganesh/GrImageContext.h
+FILE: ../../../third_party/skia/modules/skottie/include/TextShaper.h
 FILE: ../../../third_party/skia/modules/skottie/src/Composition.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/Composition.h
 FILE: ../../../third_party/skia/modules/skottie/src/Layer.cpp
@@ -5886,12 +5888,12 @@ FILE: ../../../third_party/skia/modules/skottie/src/layers/NullLayer.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/layers/SolidLayer.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/text/RangeSelector.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/text/RangeSelector.h
-FILE: ../../../third_party/skia/modules/skottie/src/text/SkottieShaper.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/text/SkottieShaper.h
 FILE: ../../../third_party/skia/modules/skottie/src/text/TextAdapter.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/text/TextAdapter.h
 FILE: ../../../third_party/skia/modules/skottie/src/text/TextAnimator.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/text/TextAnimator.h
+FILE: ../../../third_party/skia/modules/skottie/src/text/TextShaper.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/text/TextValue.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/text/TextValue.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGRenderEffect.h
