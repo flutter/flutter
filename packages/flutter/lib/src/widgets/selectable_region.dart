@@ -2421,10 +2421,10 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     SelectionResult? finalResult;
     final bool isCurrentEdgeWithinViewport = isEnd ? _selectionGeometry.endSelectionPoint != null : _selectionGeometry.startSelectionPoint != null;
     final bool isOppositeEdgeWithinViewport = isEnd ? _selectionGeometry.startSelectionPoint != null : _selectionGeometry.endSelectionPoint != null;
-    // Determines if the edge being adjusted is within the current viewport boundaries.
+    // Determines if the edge being adjusted is within the current viewport.
     // If it is not, we attempt to locate the selection edge starting from the opposite end.
     // In cases where neither edge is within the viewport, the search for the new edge position
-    // commences from 0.
+    // begins at 0.
     int newIndex = switch ((isEnd, isCurrentEdgeWithinViewport, isOppositeEdgeWithinViewport)) {
       (true, true, true) => currentSelectionEndIndex,
       (true, true, false) => currentSelectionEndIndex,
