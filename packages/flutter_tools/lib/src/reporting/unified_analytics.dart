@@ -12,14 +12,17 @@ import '../version.dart';
 ///
 /// When [enableAsserts] is set to `true`, various assert statements
 /// will be enabled to ensure usage of this class is within GA4 limitations.
+///
+/// For testing purposes, pass in a [FakeAnalytics] instance initialized with
+/// an in-memory [FileSystem] to prevent writing to disk.
 Analytics getAnalytics({
   required bool runningOnBot,
   required FlutterVersion flutterVersion,
   required Map<String, String> environment,
   bool enableAsserts = false,
+  FakeAnalytics? analyticsOverride,
 }) {
-  final String version =
-      flutterVersion.getVersionString(redactUnknownBranches: true);
+  final String version = flutterVersion.getVersionString(redactUnknownBranches: true);
   final bool suppressEnvFlag = environment['FLUTTER_SUPPRESS_ANALYTICS']?.toLowerCase() == 'true';
 
   if (// Ignore local user branches.
@@ -32,6 +35,13 @@ Analytics getAnalytics({
       suppressEnvFlag) {
     return NoOpAnalytics();
   }
+
+  // Providing an override of the [Analytics] instance is preferred when
+  // running tests for this function to prevent writing to the filesystem
+  if (analyticsOverride != null) {
+    return analyticsOverride;
+  }
+
   return Analytics(
     tool: DashTool.flutterTool,
     flutterChannel: flutterVersion.channel,
