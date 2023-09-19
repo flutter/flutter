@@ -435,10 +435,12 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     for (int i = 0; i < filteredEntries.length; i++) {
       final DropdownMenuEntry<T> entry = filteredEntries[i];
 
-      // When the menu item doesn't have a leading icon, the text should be vertically
-      // aligned with the text in the text input field. When the menu item has a leading
-      // icon, the leading icon should only have a default horizontal padding instead
-      // of using the "leadingPadding".
+      // By default, when the text field has a leading icon but a menu entry doesn't
+      // have one, the label of the entry should have extra padding to be aligned
+      // with the text in the text input field. When both the text field and the
+      // menu entry have leading icons, the menu entry should remove the extra
+      // paddings so its leading icon will be aligned with the leading icon of
+      // the text field.
       final double padding = entry.leadingIcon == null ? (leadingPadding ?? _kDefaultHorizontalPadding) : _kDefaultHorizontalPadding;
       final ButtonStyle defaultStyle;
       switch (textDirection) {
