@@ -16,11 +16,11 @@
 #include <string>
 #include <utility>
 
+#include "flutter/fml/cpu_affinity.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/native_library.h"
-#include "flutter/fml/platform/android/cpu_affinity.h"
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/lib/ui/painting/image_generator_registry.h"
 #include "flutter/shell/common/rasterizer.h"

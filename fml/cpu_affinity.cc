@@ -3,12 +3,33 @@
 // found in the LICENSE file.
 
 #include "flutter/fml/cpu_affinity.h"
+#include "flutter/fml/build_config.h"
 
 #include <fstream>
 #include <optional>
 #include <string>
 
+#ifdef FML_OS_ANDROID
+#include "flutter/fml/platform/android/cpu_affinity.h"
+#endif  // FML_OS_ANDROID
+
 namespace fml {
+
+std::optional<size_t> EfficiencyCoreCount() {
+#ifdef FML_OS_ANDROID
+  return AndroidEfficiencyCoreCount();
+#else
+  return std::nullopt;
+#endif
+}
+
+bool RequestAffinity(CpuAffinity affinity) {
+#ifdef FML_OS_ANDROID
+  return AndroidRequestAffinity(affinity);
+#else
+  return true;
+#endif
+}
 
 CPUSpeedTracker::CPUSpeedTracker(std::vector<CpuIndexAndSpeed> data)
     : cpu_speeds_(std::move(data)) {
@@ -61,7 +82,6 @@ const std::vector<size_t>& CPUSpeedTracker::GetIndices(
 // required because files under /proc do not always return a valid size
 // when using fseek(0, SEEK_END) + ftell(). Nor can they be mmap()-ed.
 std::optional<int64_t> ReadIntFromFile(const std::string& path) {
-  // size_t data_length = 0u;
   std::ifstream file;
   file.open(path.c_str());
 

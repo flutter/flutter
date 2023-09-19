@@ -12,6 +12,11 @@
 namespace fml {
 namespace testing {
 
+TEST(CpuAffinity, NonAndroidPlatformDefaults) {
+  ASSERT_FALSE(fml::EfficiencyCoreCount().has_value());
+  ASSERT_TRUE(fml::RequestAffinity(fml::CpuAffinity::kEfficiency));
+}
+
 TEST(CpuAffinity, NormalSlowMedFastCores) {
   auto speeds = {CpuIndexAndSpeed{.index = 0, .speed = 1},
                  CpuIndexAndSpeed{.index = 1, .speed = 2},
