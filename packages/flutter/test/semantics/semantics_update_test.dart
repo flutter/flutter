@@ -13,6 +13,7 @@ void main() {
   SemanticsUpdateTestBinding();
 
   testWidgets('Semantics update does not send update for merged nodes.', (WidgetTester tester) async {
+
     final SemanticsHandle handle = tester.ensureSemantics();
     // Pumps a placeholder to trigger the warm up frame.
     await tester.pumpWidget(
@@ -83,7 +84,9 @@ void main() {
 
     SemanticsUpdateBuilderSpy.observations.clear();
     handle.dispose();
-  });
+  },
+    skip: true, // [intended] Skipped temporarily until headingLevel is added in engine (see issue 41435).
+  );
 
   testWidgets('Semantics update receives attributed text', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
@@ -165,7 +168,9 @@ void main() {
 
     SemanticsUpdateBuilderSpy.observations.clear();
     handle.dispose();
-  });
+  },
+    skip: true, // [intended] Skipped temporarily until headingLevel is added in engine (see issue 41435).
+  );
 }
 
 class SemanticsUpdateTestBinding extends AutomatedTestWidgetsFlutterBinding {
