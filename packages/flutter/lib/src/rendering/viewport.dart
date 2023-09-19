@@ -1138,7 +1138,6 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   /// in the viewport after it has been revealed. See [RevealedOffset.rect]
   /// for a full definition of this [Rect].
   ///
-  /// The parameters `viewport` and `offset` are required and cannot be null.
   /// If `descendant` is null, this is a no-op and `rect` is returned.
   ///
   /// If both `descendant` and `rect` are null, null is returned because there is

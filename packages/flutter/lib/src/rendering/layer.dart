@@ -2798,8 +2798,6 @@ class FollowerLayer extends ContainerLayer {
 /// if [opaque] is true and the layer's annotation is added.
 class AnnotatedRegionLayer<T extends Object> extends ContainerLayer {
   /// Creates a new layer that annotates its children with [value].
-  ///
-  /// The [value] provided cannot be null.
   AnnotatedRegionLayer(
     this.value, {
     this.size,

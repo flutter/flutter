@@ -56,8 +56,6 @@ enum TextOverflow {
 /// Placeholders specify an empty space in the text layout, which is used
 /// to later render arbitrary inline widgets into defined by a [WidgetSpan].
 ///
-/// The [size] and [alignment] properties are required and cannot be null.
-///
 /// See also:
 ///
 ///  * [WidgetSpan], a subclass of [InlineSpan] and [PlaceholderSpan] that

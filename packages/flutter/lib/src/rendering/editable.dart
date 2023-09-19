@@ -560,7 +560,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   /// Character used for obscuring text if [obscureText] is true.
   ///
-  /// Cannot be null, and must have a length of exactly one.
+  /// Must have a length of exactly one.
   String get obscuringCharacter => _obscuringCharacter;
   String _obscuringCharacter;
   set obscuringCharacter(String value) {
