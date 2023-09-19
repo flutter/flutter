@@ -70,28 +70,41 @@ void main() async {
       throw 'Window should be hidden at startup';
     }
 
-    bool firstFrame = true;
+    const int totalTestFrames = 10;
+    int frameCount = 0;
     ui.PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
-      if (firstFrame) {
-        // Don't await here, because `FlutterView.render` (in `drawHelloWorld`)
-        // must be synchronously within the onBeginFrame callback.
-        isWindowVisible().then((bool visible) {
-          if (visible) {
-            throw 'Window should be hidden on first frame';
+      // Our goal is to verify that it's `drawHelloWorld` that makes the window
+      // appear, not anything else. This requires checking the visibility right
+      // before drawing, but since `isWindowVisible` has to be async, and
+      // `FlutterView.render` (in `drawHelloWorld`) forbids async before it,
+      // this can not be done during a single onBeginFrame. However, we can
+      // verify in two frames to indirectly prove it: The first frame checks
+      // isWindowVisible(), while the subsequent frames draw. This ensures that
+      // no other mechanism can affect isWindowVisible in the first frame at all.
+      frameCount += 1;
+      // The window is made appear in the second frame.
+      // TODO(dkwingsmt): It should be frameCount > 2. Not sure why the window
+      // is still hidden at the beginning of the 3rd frame.
+      // https://github.com/flutter/flutter/issues/134986
+      bool shouldBeVisible = frameCount > 3;
+      isWindowVisible().then((bool visible) {
+        if (visible != shouldBeVisible) {
+          try {
+            throw 'Window should be ${shouldBeVisible ? 'visible' : 'hidden'} on frame ${frameCount}';
+          } catch (e) {
+            visibilityCompleter.completeError(e);
+            rethrow;
           }
-          if (!visibilityCompleter.isCompleted) {
-            visibilityCompleter.complete('success');
-          }
-        });
+        }
+        if (frameCount == totalTestFrames && !visibilityCompleter.isCompleted) {
+          visibilityCompleter.complete('success');
+        }
+        ui.PlatformDispatcher.instance.scheduleFrame();
+      });
+      if (frameCount > 1) {
+        drawHelloWorld(view);
       }
-
-      // Draw something to trigger the first frame callback that displays the
-      // window.
-      drawHelloWorld(view);
-      firstFrame = false;
     };
-
-    ui.PlatformDispatcher.instance.scheduleFrame();
   } catch (e) {
     visibilityCompleter.completeError(e);
     rethrow;
