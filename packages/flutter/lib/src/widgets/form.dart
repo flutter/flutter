@@ -436,7 +436,7 @@ class FormField<T> extends StatefulWidget {
   /// will auto-validate even without user interaction. If
   /// [AutovalidateMode.disabled], auto-validation will be disabled.
   ///
-  /// Defaults to [AutovalidateMode.disabled], cannot be null.
+  /// Defaults to [AutovalidateMode.disabled].
   /// {@endtemplate}
   final AutovalidateMode autovalidateMode;
 

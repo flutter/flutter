@@ -289,7 +289,7 @@ class NestedScrollView extends StatefulWidget {
   /// outer scrollable over the inner when scrolling back.
   ///
   /// This is useful for an outer scrollable containing a [SliverAppBar] that
-  /// is expected to float. This cannot be null.
+  /// is expected to float.
   final bool floatHeaderSlivers;
 
   /// {@macro flutter.material.Material.clipBehavior}

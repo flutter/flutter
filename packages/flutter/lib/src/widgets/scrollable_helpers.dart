@@ -28,8 +28,7 @@ export 'package:flutter/physics.dart' show Tolerance;
 /// information about the Scrollable in order to be initialized.
 @immutable
 class ScrollableDetails {
-  /// Creates a set of details describing the [Scrollable]. The [direction]
-  /// cannot be null.
+  /// Creates a set of details describing the [Scrollable].
   const ScrollableDetails({
     required this.direction,
     this.controller,

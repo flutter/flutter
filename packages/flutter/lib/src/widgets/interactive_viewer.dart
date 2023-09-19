@@ -303,7 +303,7 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// Defaults to 2.5.
   ///
-  /// Cannot be null, and must be greater than zero and greater than minScale.
+  /// Must be greater than zero and greater than [minScale].
   final double maxScale;
 
   /// The minimum allowed scale.
@@ -317,15 +317,14 @@ class InteractiveViewer extends StatefulWidget {
   ///
   /// Defaults to 0.8.
   ///
-  /// Cannot be null, and must be a finite number greater than zero and less
-  /// than maxScale.
+  /// Must be a finite number greater than zero and less than [maxScale].
   final double minScale;
 
   /// Changes the deceleration behavior after a gesture.
   ///
   /// Defaults to 0.0000135.
   ///
-  /// Cannot be null, and must be a finite number greater than zero.
+  /// Must be a finite number greater than zero.
   final double interactionEndFrictionCoefficient;
 
   /// Called when the user ends a pan or scale gesture on the widget.

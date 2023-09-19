@@ -258,7 +258,7 @@ class Hero extends StatefulWidget {
   /// [PageRoute.maintainState] set to true for a gesture triggered hero
   /// transition to work.
   ///
-  /// Defaults to false and cannot be null.
+  /// Defaults to false.
   final bool transitionOnUserGestures;
 
   // Returns a map of all of the heroes in `context` indexed by hero tag that
