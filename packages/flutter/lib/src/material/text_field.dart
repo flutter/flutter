@@ -1291,6 +1291,8 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       _internalStatesController = MaterialStatesController();
     }
     _statesController.update(MaterialState.disabled, !_isEnabled);
+    _statesController.update(MaterialState.error, _hasError);
+    _hadError = _hasError;
     _statesController.addListener(_handleStatesControllerChange);
   }
 
