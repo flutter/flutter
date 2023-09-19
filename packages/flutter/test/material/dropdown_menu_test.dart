@@ -1684,24 +1684,23 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/131350.
   testWidgets('DropdownMenuEntry.leadingIcon default layout', (WidgetTester tester) async {
     // The DropdownMenu should not get extra padding in DropdownMenuEntry items
-    // when both text field and DropdownMenuEntry have a leading icon.
-
-    Widget buildFrame() {
-      return const MaterialApp(
+    // when both text field and DropdownMenuEntry have leading icons.
+    await tester.pumpWidget(const MaterialApp(
         home: Scaffold(
           body: DropdownMenu<int>(
             leadingIcon: Icon(Icons.search),
             hintText: 'Hint',
             dropdownMenuEntries: <DropdownMenuEntry<int>>[
-              DropdownMenuEntry<int>(value: 0, label: 'Item 0', leadingIcon: Icon(Icons.alarm)),
+              DropdownMenuEntry<int>(
+                value: 0,
+                label: 'Item 0',
+                leadingIcon: Icon(Icons.alarm)
+              ),
               DropdownMenuEntry<int>(value: 1, label: 'Item 1'),
             ],
           ),
         )
-      );
-    }
-
-    await tester.pumpWidget(buildFrame());
+    ));
     await tester.tap(find.byType(DropdownMenu<int>));
     await tester.pumpAndSettle();
 
