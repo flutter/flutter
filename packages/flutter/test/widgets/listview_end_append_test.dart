@@ -5,9 +5,10 @@
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('ListView.builder() fixed itemExtent, scroll to end, append, scroll', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListView.builder() fixed itemExtent, scroll to end, append, scroll', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/9506
 
     Widget buildFrame(int itemCount) {
@@ -35,7 +36,7 @@ void main() {
     expect(find.text('item 3'), findsOneWidget);
   });
 
-  testWidgets('ListView.builder() fixed itemExtent, scroll to end, append, scroll', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListView.builder() fixed itemExtent, scroll to end, append, scroll', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/9506
 
     Widget buildFrame(int itemCount) {
