@@ -657,7 +657,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
       if (oldWidget.controller == null) {
         // The old controller was null, meaning the fallback cannot be null.
         // Dispose of the fallback.
-        assert(_fallbackScrollController !=  null);
+        assert(_fallbackScrollController != null);
         assert(widget.controller != null);
         _fallbackScrollController!.detach(position);
         _fallbackScrollController!.dispose();
@@ -1919,7 +1919,7 @@ class TwoDimensionalScrollableState extends State<TwoDimensionalScrollable> {
       if (oldWidget.horizontalDetails.controller == null) {
         // The old controller was null, meaning the fallback cannot be null.
         // Dispose of the fallback.
-        assert(_horizontalFallbackController !=  null);
+        assert(_horizontalFallbackController != null);
         assert(widget.horizontalDetails.controller != null);
         _horizontalFallbackController!.dispose();
         _horizontalFallbackController = null;

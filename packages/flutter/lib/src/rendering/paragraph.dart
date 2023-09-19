@@ -132,7 +132,7 @@ mixin RenderInlineChildrenContainerDefaults on RenderBox, ContainerRenderObjectM
             ui.PlaceholderAlignment.belowBaseline ||
             ui.PlaceholderAlignment.bottom ||
             ui.PlaceholderAlignment.middle ||
-            ui.PlaceholderAlignment.top      => null,
+            ui.PlaceholderAlignment.top => null,
             ui.PlaceholderAlignment.baseline => child.getDistanceToBaseline(span.baseline!),
           },
         );
