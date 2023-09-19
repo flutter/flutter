@@ -245,7 +245,7 @@ const NSDictionary* modifierFlagToKeyCode = @{
 const uint64_t kCapsLockPhysicalKey = 0x00070039;
 const uint64_t kCapsLockLogicalKey = 0x100000104;
 
-const std::vector<LayoutGoal> layoutGoals = {
+const std::vector<LayoutGoal> kLayoutGoals = {
     LayoutGoal{0x31, 0x20, false},  // Space
     LayoutGoal{0x27, 0x22, false},  // Quote
     LayoutGoal{0x2b, 0x2c, false},  // Comma

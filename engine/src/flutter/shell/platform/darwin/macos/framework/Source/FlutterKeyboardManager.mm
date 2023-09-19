@@ -275,7 +275,7 @@ typedef _Nullable _NSResponderPtr (^NextResponderProvider)();
 
   std::map<uint32_t, LayoutGoal> mandatoryGoalsByChar;
   std::map<uint32_t, LayoutGoal> usLayoutGoalsByKeyCode;
-  for (const LayoutGoal& goal : flutter::layoutGoals) {
+  for (const LayoutGoal& goal : flutter::kLayoutGoals) {
     if (goal.mandatory) {
       mandatoryGoalsByChar[goal.keyChar] = goal;
     } else {
