@@ -20,8 +20,8 @@ struct StreamHandlerError {
   const std::string error_message;
   const std::unique_ptr<T> error_details;
 
-  StreamHandlerError(const std::string error_code,
-                     const std::string error_message,
+  StreamHandlerError(const std::string& error_code,
+                     const std::string& error_message,
                      std::unique_ptr<T>&& error_details)
       : error_code(error_code),
         error_message(error_message),

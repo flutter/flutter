@@ -32,7 +32,7 @@ class Point {
 // variable-length type that includes types handled by the core standard codec.
 class SomeData {
  public:
-  SomeData(const std::string label, const std::vector<uint8_t>& data)
+  SomeData(const std::string& label, const std::vector<uint8_t>& data)
       : label_(label), data_(data) {}
   ~SomeData() = default;
 

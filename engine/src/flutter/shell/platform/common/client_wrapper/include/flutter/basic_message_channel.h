@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <string>
+#include <utility>
 
 #include "binary_messenger.h"
 #include "message_codec.h"
@@ -58,7 +59,8 @@ class BasicMessageChannel {
   void Send(const T& message, BinaryReply reply) {
     std::unique_ptr<std::vector<uint8_t>> raw_message =
         codec_->EncodeMessage(message);
-    messenger_->Send(name_, raw_message->data(), raw_message->size(), reply);
+    messenger_->Send(name_, raw_message->data(), raw_message->size(),
+                     std::move(reply));
   }
 
   // Registers a handler that should be called any time a message is
@@ -77,7 +79,7 @@ class BasicMessageChannel {
     BinaryMessageHandler binary_handler = [handler, codec, channel_name](
                                               const uint8_t* binary_message,
                                               const size_t binary_message_size,
-                                              BinaryReply binary_reply) {
+                                              const BinaryReply& binary_reply) {
       // Use this channel's codec to decode the message and build a reply
       // handler.
       std::unique_ptr<T> message =
