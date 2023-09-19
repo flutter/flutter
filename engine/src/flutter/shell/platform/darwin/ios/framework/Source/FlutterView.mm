@@ -48,6 +48,8 @@
     return NO;
   }
 
+  FML_DCHECK(self.screen);
+
   // This predicates the decision on the capabilities of the iOS device's
   // display.  This means external displays will not support wide gamut if the
   // device's display doesn't support it.  It practice that should be never.
@@ -68,10 +70,6 @@
   if (self) {
     _delegate = delegate;
     _isWideGamutEnabled = isWideGamutEnabled;
-    if (_isWideGamutEnabled && !self.isWideGamutSupported) {
-      FML_DLOG(WARNING) << "Rendering wide gamut colors is turned on but isn't "
-                           "supported, downgrading the color gamut to sRGB.";
-    }
     self.layer.opaque = opaque;
 
     // This line is necessary. CoreAnimation(or UIKit) may take this to do
@@ -82,6 +80,16 @@
   }
 
   return self;
+}
+
+static void PrintWideGamutWarningOnce() {
+  static BOOL did_print = NO;
+  if (did_print) {
+    return;
+  }
+  FML_DLOG(WARNING) << "Rendering wide gamut colors is turned on but isn't "
+                       "supported, downgrading the color gamut to sRGB.";
+  did_print = YES;
 }
 
 - (void)layoutSubviews {
@@ -97,7 +105,8 @@
     layer.contentsScale = screenScale;
     layer.rasterizationScale = screenScale;
     layer.framebufferOnly = flutter::Settings::kSurfaceDataAccessible ? NO : YES;
-    if (_isWideGamutEnabled && self.isWideGamutSupported) {
+    BOOL isWideGamutSupported = self.isWideGamutSupported;
+    if (_isWideGamutEnabled && isWideGamutSupported) {
       CGColorSpaceRef srgb = CGColorSpaceCreateWithName(kCGColorSpaceExtendedSRGB);
       layer.colorspace = srgb;
       CFRelease(srgb);
@@ -106,6 +115,8 @@
       // F16 was chosen over BGRA10_XR since Skia does not support decoding
       // BGRA10_XR.
       layer.pixelFormat = MTLPixelFormatRGBA16Float;
+    } else if (_isWideGamutEnabled && !isWideGamutSupported) {
+      PrintWideGamutWarningOnce();
     }
   }
 
