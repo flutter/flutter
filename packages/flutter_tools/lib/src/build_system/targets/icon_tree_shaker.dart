@@ -28,8 +28,6 @@ List<Map<String, Object?>> _getList(Object? object, String errorMessage) {
 class IconTreeShaker {
   /// Creates a wrapper for icon font subsetting.
   ///
-  /// The environment parameter must not be null.
-  ///
   /// If the `fontManifest` parameter is null, [enabled] will return false since
   /// there are no fonts to shake.
   ///
