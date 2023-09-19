@@ -143,8 +143,45 @@ FLUTTER_DARWIN_EXPORT
  * Adjusts the number of messages that will get buffered when sending messages to
  * channels that aren't fully set up yet.  For example, the engine isn't running
  * yet or the channel's message handler isn't set up on the Dart side yet.
+ *
+ * @param name The channel name.
+ * @param messenger The binary messenger.
+ * @param newSize The number of messages that will get buffered.
+ */
++ (void)resizeChannelWithName:(NSString*)name
+              binaryMessenger:(NSObject<FlutterBinaryMessenger>*)messenger
+                         size:(NSInteger)newSize;
+
+/**
+ * Adjusts the number of messages that will get buffered when sending messages to
+ * channels that aren't fully set up yet.  For example, the engine isn't running
+ * yet or the channel's message handler isn't set up on the Dart side yet.
+ *
+ * @param newSize The number of messages that will get buffered.
  */
 - (void)resizeChannelBuffer:(NSInteger)newSize;
+
+/**
+ * Defines whether the channel should show warning messages when discarding messages
+ * due to overflow.
+ *
+ * @param warns When false, the channel is expected to overflow and warning messages
+ *              will not be shown.
+ * @param name The channel name.
+ * @param messenger The binary messenger.
+ */
++ (void)setWarnsOnOverflow:(BOOL)warns
+        forChannelWithName:(NSString*)name
+           binaryMessenger:(NSObject<FlutterBinaryMessenger>*)messenger;
+
+/**
+ * Defines whether the channel should show warning messages when discarding messages
+ * due to overflow.
+ *
+ * @param warns When false, the channel is expected to overflow and warning messages
+ *              will not be shown.
+ */
+- (void)setWarnsOnOverflow:(BOOL)warns;
 
 @end
 
