@@ -444,11 +444,13 @@ class FlutterWebPlatform extends PlatformPlugin {
     final PoolResource lockResource = await _suiteLock.request();
 
     final Runtime browser = platform.runtime;
-    try {
-      _browserManager = await _launchBrowser(browser);
-    } on Error catch (_) {
-      await _suiteLock.close();
-      rethrow;
+    if (_browserManager == null) {
+      try {
+        _browserManager = await _launchBrowser(browser);
+      } on Error catch (_) {
+        await _suiteLock.close();
+        rethrow;
+      }
     }
 
     if (_closed) {
@@ -459,8 +461,6 @@ class FlutterWebPlatform extends PlatformPlugin {
     final Uri suiteUrl = url.resolveUri(_fileSystem.path.toUri('${_fileSystem.path.withoutExtension(pathFromTest)}.html'));
     final String relativePath = _fileSystem.path.relative(_fileSystem.path.normalize(path), from: _fileSystem.currentDirectory.path);
     final RunnerSuite suite = await _browserManager!.load(relativePath, suiteUrl, suiteConfig, message, onDone: () async {
-      await _browserManager!.close();
-      _browserManager = null;
       lockResource.release();
     });
     if (_closed) {
@@ -502,6 +502,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   Future<void> closeEphemeral() async {
     if (_browserManager != null) {
       await _browserManager!.close();
+      _browserManager = null;
     }
   }
 
@@ -513,6 +514,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       _server.close(),
       _testGoldenComparator.close(),
     ]);
+    _browserManager = null;
   });
 }
 
