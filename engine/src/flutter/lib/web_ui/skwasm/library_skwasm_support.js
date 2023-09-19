@@ -15,7 +15,7 @@ mergeInto(LibraryManager.library, {
         skwasmMessage: 'setAssociatedObject',
         pointer,
         object,
-      });
+      }, [object]);
     };
     _skwasm_getAssociatedObject = function(pointer) {
       return associatedObjectsMap.get(pointer);
@@ -34,11 +34,12 @@ mergeInto(LibraryManager.library, {
             associatedObjectsMap.set(data.pointer, data.object);
             return;
           case 'disposeAssociatedObject':
-            const object = { data };
+            const pointer = data.pointer;
+            const object = associatedObjectsMap.get(pointer);
             if (object.close) {
               object.close();
             }
-            associatedObjectsMap.delete(data.pointer);
+            associatedObjectsMap.delete(pointer);
             return;
           default:
             console.warn(`unrecognized skwasm message: ${skwasmMessage}`);
@@ -81,7 +82,7 @@ mergeInto(LibraryManager.library, {
         surface: surfaceHandle,
         callbackId,
         imageBitmap,
-      });
+      }, [imageBitmap]);
     };
     _skwasm_createGlTextureFromTextureSource = function(textureSource, width, height) {
       const glCtx = GL.currentContext.GLctx;
@@ -98,10 +99,10 @@ mergeInto(LibraryManager.library, {
       GL.textures[textureId] = newTexture;
       return textureId;
     };
-    _skwasm_disposeAssociatedObjectOnThread = function(threadId, object) {
+    _skwasm_disposeAssociatedObjectOnThread = function(threadId, pointer) {
       PThread.pthreads[threadId].postMessage({
         skwasmMessage: 'disposeAssociatedObject',
-        object,
+        pointer,
       });
     };
   },
