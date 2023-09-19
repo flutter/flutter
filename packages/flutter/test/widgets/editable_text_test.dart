@@ -3786,11 +3786,12 @@ void main() {
 
       verifyAutocorrectionRectVisibility(expectVisible: false);
     },
-    leakTrackingTestConfig: const LeakTrackingTestConfig(
-      // TODO(ksokolovskyi): remove after fixing
-      // https://github.com/flutter/flutter/issues/134386
-      notDisposedAllowList: <String, int?> {'LeaderLayer': 5},
-    ),
+    leakTrackingTestConfig: LeakTrackingTestConfig.debugNotDisposed(),
+    // leakTrackingTestConfig: const LeakTrackingTestConfig(
+    //   // TODO(ksokolovskyi): remove after fixing
+    //   // https://github.com/flutter/flutter/issues/134386
+    //   notDisposedAllowList: <String, int?> {'LeaderLayer': 5},
+    // ),
   );
 
   testWidgetsWithLeakTracking('Changing controller updates EditableText', (WidgetTester tester) async {

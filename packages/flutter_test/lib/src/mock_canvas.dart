@@ -547,35 +547,39 @@ abstract class _TestRecordingCanvasMatcher extends Matcher {
   bool matches(Object? object, Map<dynamic, dynamic> matchState) {
     final TestRecordingCanvas canvas = TestRecordingCanvas();
     final TestRecordingPaintingContext context = TestRecordingPaintingContext(canvas);
-    final StringBuffer description = StringBuffer();
-    String prefixMessage = 'unexpectedly failed.';
-    bool result = false;
     try {
-      if (!_evaluatePainter(object, canvas, context)) {
-        matchState[this] = 'was not one of the supported objects for the '
-          '"paints" matcher.';
-        return false;
-      }
-      result = _evaluatePredicates(canvas.invocations, description);
-      if (!result) {
-        prefixMessage = 'did not match the pattern.';
-      }
-    } catch (error, stack) {
-      prefixMessage = 'threw the following exception:';
-      description.writeln(error.toString());
-      description.write(stack.toString());
-      result = false;
-    }
-    if (!result) {
-      if (canvas.invocations.isNotEmpty) {
-        description.write('The complete display list was:');
-        for (final RecordedInvocation call in canvas.invocations) {
-          description.write('\n  * $call');
+      final StringBuffer description = StringBuffer();
+      String prefixMessage = 'unexpectedly failed.';
+      bool result = false;
+      try {
+        if (!_evaluatePainter(object, canvas, context)) {
+          matchState[this] = 'was not one of the supported objects for the '
+            '"paints" matcher.';
+          return false;
         }
+        result = _evaluatePredicates(canvas.invocations, description);
+        if (!result) {
+          prefixMessage = 'did not match the pattern.';
+        }
+      } catch (error, stack) {
+        prefixMessage = 'threw the following exception:';
+        description.writeln(error.toString());
+        description.write(stack.toString());
+        result = false;
       }
-      matchState[this] = '$prefixMessage\n$description';
+      if (!result) {
+        if (canvas.invocations.isNotEmpty) {
+          description.write('The complete display list was:');
+          for (final RecordedInvocation call in canvas.invocations) {
+            description.write('\n  * $call');
+          }
+        }
+        matchState[this] = '$prefixMessage\n$description';
+      }
+      return result;
+    } finally {
+      context.dispose();
     }
-    return result;
   }
 
   bool _evaluatePredicates(Iterable<RecordedInvocation> calls, StringBuffer description);

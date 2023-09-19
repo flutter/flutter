@@ -97,7 +97,7 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
   /// Creates a [PaintingContext] for tests that use [TestRecordingCanvas].
   TestRecordingPaintingContext(this.canvas);
 
-  final List<OpacityLayer> _createdLayers = <OpacityLayer>[];
+  final List<Layer> _layersToDispose = <Layer>[];
 
   @override
   final Canvas canvas;
@@ -174,17 +174,18 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
     painter(this, offset);
     canvas.restore();
     final OpacityLayer layer = OpacityLayer();
-    _createdLayers.add(layer);
+    _layersToDispose.add(layer);
     return layer;
   }
 
   /// Releases allocated resources.
   @mustCallSuper
   void dispose() {
-    for (final OpacityLayer layer in _createdLayers) {
+    for (final Layer layer in _layersToDispose) {
+      // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member, this is testing class
       layer.dispose();
     }
-    _createdLayers.clear();
+    _layersToDispose.clear();
   }
 
   @override
@@ -194,6 +195,7 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
     Offset offset, {
     Rect? childPaintBounds,
   }) {
+    _layersToDispose.add(childLayer);
     painter(this, offset);
   }
 
