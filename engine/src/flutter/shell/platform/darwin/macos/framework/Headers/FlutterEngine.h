@@ -16,7 +16,7 @@
 #import "FlutterPluginRegistrarMacOS.h"
 #import "FlutterTexture.h"
 
-// TODO: Merge this file with the iOS FlutterEngine.h.
+// TODO(stuartmorgan): Merge this file with the iOS FlutterEngine.h.
 
 @class FlutterViewController;
 
