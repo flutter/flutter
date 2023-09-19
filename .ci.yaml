@@ -949,10 +949,10 @@ targets:
       # This makes use of UpsideDownCake, a preview version of android. Preview versions eventually
       # get removed from the sdk manager, so it is hosted on CIPD to ensure integration testing
       # doesn't flake when that happens.
-      # https://chrome-infra-packages.appspot.com/p/flutter/android/sdk/all/mac-arm64/+/version:UDCv1
+      # https://chrome-infra-packages.appspot.com/p/flutter/android/sdk/all/mac-arm64/+/version:udcv1
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:UDCv1"},
+          {"dependency": "android_sdk", "version": "version:udcv1"},
           {"dependency": "chrome_and_driver", "version": "version:115.0"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -978,7 +978,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:UDCv1"},
+          {"dependency": "android_sdk", "version": "version:udcv1"},
           {"dependency": "chrome_and_driver", "version": "version:115.0"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -1004,7 +1004,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:UDCv1"},
+          {"dependency": "android_sdk", "version": "version:udcv1"},
           {"dependency": "chrome_and_driver", "version": "version:115.0"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -1030,7 +1030,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:UDCv1"},
+          {"dependency": "android_sdk", "version": "version:udcv1"},
           {"dependency": "chrome_and_driver", "version": "version:115.0"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
