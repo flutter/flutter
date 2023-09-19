@@ -330,9 +330,9 @@ class CupertinoDatePicker extends StatefulWidget {
     );
   }
 
-  /// The mode of the date picker as one of [CupertinoDatePickerMode].
-  /// Defaults to [CupertinoDatePickerMode.dateAndTime]. Cannot be null and
-  /// value cannot change after initial build.
+  /// The mode of the date picker as one of [CupertinoDatePickerMode]. Defaults
+  /// to [CupertinoDatePickerMode.dateAndTime]. Value cannot change after
+  /// initial build.
   final CupertinoDatePickerMode mode;
 
   /// The initial date and/or time of the picker. Defaults to the present date

@@ -110,7 +110,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   /// in the unselected state.
   ///
   /// Defaults to a [CupertinoDynamicColor] that matches the disabled foreground
-  /// color of the native `UITabBar` component. Cannot be null.
+  /// color of the native `UITabBar` component.
   final Color inactiveColor;
 
   /// The size of all of the [BottomNavigationBarItem] icons.

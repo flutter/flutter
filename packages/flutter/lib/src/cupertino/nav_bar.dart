@@ -293,8 +293,6 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// 3. Show a back chevron with the previous route's `title` if the current
   ///    route is a [CupertinoPageRoute] and the previous route is also a
   ///    [CupertinoPageRoute].
-  ///
-  /// This value cannot be null.
   /// {@endtemplate}
   final bool automaticallyImplyLeading;
 
@@ -303,8 +301,6 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// If true and [middle] is null, automatically fill in a [Text] widget with
   /// the current route's `title` if the route is a [CupertinoPageRoute].
   /// If [middle] widget is not null, this parameter has no effect.
-  ///
-  /// This value cannot be null.
   final bool automaticallyImplyMiddle;
 
   /// {@template flutter.cupertino.CupertinoNavigationBar.previousPageTitle}
@@ -395,7 +391,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// When set to true, only one navigation bar can be present per route unless
   /// [heroTag] is also set.
   ///
-  /// This value defaults to true and cannot be null.
+  /// This value defaults to true.
   /// {@endtemplate}
   final bool transitionBetweenRoutes;
 
@@ -411,8 +407,8 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// navigation bars per route or to transition between multiple
   /// [Navigator]s.
   ///
-  /// Cannot be null. To disable Hero transitions for this navigation bar,
-  /// set [transitionBetweenRoutes] to false.
+  /// To disable Hero transitions for this navigation bar, set
+  /// [transitionBetweenRoutes] to false.
   /// {@endtemplate}
   final Object heroTag;
 
@@ -639,8 +635,6 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// If true and [largeTitle] is null, automatically fill in a [Text] widget
   /// with the current route's `title` if the route is a [CupertinoPageRoute].
   /// If [largeTitle] widget is not null, this parameter has no effect.
-  ///
-  /// This value cannot be null.
   final bool automaticallyImplyTitle;
 
   /// Controls whether [middle] widget should always be visible (even in

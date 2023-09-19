@@ -1626,14 +1626,14 @@ class CupertinoDialogAction extends StatelessWidget {
   /// but more than one action can have this attribute set to true in the same
   /// [CupertinoAlertDialog].
   ///
-  /// This parameters defaults to false and cannot be null.
+  /// This parameters defaults to false.
   final bool isDefaultAction;
 
   /// Whether this action destroys an object.
   ///
   /// For example, an action that deletes an email is destructive.
   ///
-  /// Defaults to false and cannot be null.
+  /// Defaults to false.
   final bool isDestructiveAction;
 
   /// [TextStyle] to apply to any text that appears in this button.

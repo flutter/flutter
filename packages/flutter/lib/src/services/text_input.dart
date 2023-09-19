@@ -566,7 +566,7 @@ class TextInputConfiguration {
   /// [autocorrect], so that suggestions are only shown when [autocorrect] is
   /// true. On Android autocorrection and suggestion are controlled separately.
   ///
-  /// Defaults to true. Cannot be null.
+  /// Defaults to true.
   ///
   /// See also:
   ///
@@ -580,7 +580,7 @@ class TextInputConfiguration {
   /// change is sent through semantics actions and is directly disabled from
   /// the widget side.
   ///
-  /// Defaults to true. Cannot be null.
+  /// Defaults to true.
   final bool enableInteractiveSelection;
 
   /// What text to display in the text input control's action button.
@@ -612,7 +612,7 @@ class TextInputConfiguration {
   ///
   /// This flag only affects Android. On iOS, there is no equivalent flag.
   ///
-  /// Defaults to true. Cannot be null.
+  /// Defaults to true.
   ///
   /// See also:
   ///
@@ -684,7 +684,7 @@ class TextInputConfiguration {
   ///  * If [TextInputClient] is implemented then updates for the editing
   ///    state will come through [TextInputClient.updateEditingValue].
   ///
-  /// Defaults to false. Cannot be null.
+  /// Defaults to false.
   final bool enableDeltaModel;
 
   /// Returns a representation of this object as a JSON object.
@@ -1395,8 +1395,8 @@ class TextInputConnection {
   /// Send the smallest rect that covers the text in the client that's currently
   /// being composed.
   ///
-  /// The given `rect` can not be null. If any of the 4 coordinates of the given
-  /// [Rect] is not finite, a [Rect] of size (-1, -1) will be sent instead.
+  /// If any of the 4 coordinates of the given [Rect] is not finite, a [Rect] of
+  /// size (-1, -1) will be sent instead.
   ///
   /// This information is used for positioning the IME candidates menu on each
   /// platform.
