@@ -730,8 +730,8 @@ void main() {
     final String entrypointContents =
         fileSystem.file(webDevFS.mainUri).readAsStringSync();
     expect(entrypointContents, contains('// Flutter web bootstrap script'));
-    expect(entrypointContents, contains("import 'dart:ui' as ui;"));
-    expect(entrypointContents, contains('await ui.webOnlyWarmupEngine('));
+    expect(entrypointContents, contains("import 'dart:ui_web' as ui_web;"));
+    expect(entrypointContents, contains('await ui_web.bootstrapEngine('));
 
     expect(logger.statusText, contains('Restarted application in'));
     expect(result.code, 0);
