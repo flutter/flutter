@@ -7,7 +7,6 @@ import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;
-import '../preview_device.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import '../windows/build_windows.dart';
@@ -58,8 +57,7 @@ class BuildPreviewCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    //final Directory targetDir = fs.systemTempDirectory.createTempSync('flutter-build-preview');
-    final Directory targetDir = fs.directory(flutterRoot).parent.createTempSync('flutter-build-preview-'); // TODO
+    final Directory targetDir = fs.systemTempDirectory.createTempSync('flutter-build-preview');
     final FlutterProject flutterProject = await _createProject(targetDir);
     if (!globals.platform.isWindows) {
       throwToolExit('"build _preview" is currently only supported on Windows hosts.');

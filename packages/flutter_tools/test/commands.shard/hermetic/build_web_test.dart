@@ -170,7 +170,6 @@ void main() {
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
-      processUtils: processUtils,
       osUtils: FakeOperatingSystemUtils(),
       processUtils: processUtils,
     );
