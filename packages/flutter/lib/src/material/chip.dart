@@ -2037,7 +2037,13 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     }
   }
 
-  final LayerHandle<OpacityLayer> _layerHandle = LayerHandle<OpacityLayer>();
+  final LayerHandle<OpacityLayer> _avatarOpacityLayerHandler = LayerHandle<OpacityLayer>();
+
+  @override
+  void dispose() {
+    _avatarOpacityLayerHandler.layer = null;
+    super.dispose();
+  }
 
   void _paintAvatar(PaintingContext context, Offset offset) {
     void paintWithOverlay(PaintingContext context, Offset offset) {
@@ -2052,7 +2058,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     final int disabledColorAlpha = disabledColor.alpha;
     if (needsCompositing) {
       final OpacityLayer newLayer = OpacityLayer(alpha: disabledColorAlpha);
-      _layerHandle.layer = newLayer;
+      _avatarOpacityLayerHandler.layer = newLayer;
       context.pushLayer(newLayer, paintWithOverlay, offset);
     } else {
       if (disabledColorAlpha != 0xff) {
