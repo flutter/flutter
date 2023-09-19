@@ -950,8 +950,12 @@ void main() {
     });
 
     testWidgets(
-      'long press on iOS should show context menu on end',
+      'long press selection overlay behavior on iOS and Android',
       (WidgetTester tester) async {
+        // This test verifies that all platforms wait until long press end to
+        // show the context menu, and only Android waits until long press end to
+        // show the selection handles.
+        final bool isPlatformAndroid = defaultTargetPlatform == TargetPlatform.android;
         Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
         final UniqueKey toolbarKey = UniqueKey();
         await tester.pumpWidget(
@@ -982,17 +986,22 @@ void main() {
         await tester.pump(const Duration(milliseconds: 500));
         await tester.pumpAndSettle();
 
-        // Should show the selection handles when the long press starts.
+        // All platform except Android should show the selection handles when the
+        // long press starts.
         List<FadeTransition> transitions = find.descendant(
           of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay'),
           matching: find.byType(FadeTransition),
         ).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
-        expect(transitions.length, 2);
-        FadeTransition left = transitions[0];
-        FadeTransition right = transitions[1];
+        expect(transitions.length, isPlatformAndroid ? 0 : 2);
+        FadeTransition? left;
+        FadeTransition? right;
+        if (!isPlatformAndroid) {
+          left = transitions[0];
+          right = transitions[1];
+          expect(left.opacity.value, equals(1.0));
+          expect(right.opacity.value, equals(1.0));
+        }
         expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 3));
-        expect(left.opacity.value, equals(1.0));
-        expect(right.opacity.value, equals(1.0));
         expect(find.byKey(toolbarKey), findsNothing);
 
         await gesture.moveTo(textOffsetToPosition(paragraph, 8));
@@ -1001,14 +1010,16 @@ void main() {
           of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay'),
           matching: find.byType(FadeTransition),
         ).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
-        expect(transitions.length, 2);
-        left = transitions[0];
-        right = transitions[1];
-
-        // Should show the selection handles while doing a long press drag.
+        // All platform except Android should show the selection handles while doing
+        // a long press drag.
+        expect(transitions.length, isPlatformAndroid ? 0 : 2);
+        if (!isPlatformAndroid) {
+          left = transitions[0];
+          right = transitions[1];
+          expect(left.opacity.value, equals(1.0));
+          expect(right.opacity.value, equals(1.0));
+        }
         expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 11));
-        expect(left.opacity.value, equals(1.0));
-        expect(right.opacity.value, equals(1.0));
         expect(find.byKey(toolbarKey), findsNothing);
 
         await gesture.up();
@@ -1021,87 +1032,14 @@ void main() {
         left = transitions[0];
         right = transitions[1];
 
-        // Should show the selection handles and context menu when long press ends.
+        // All platforms should show the selection handles and context menu when
+        // the long press ends.
         expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 11));
         expect(left.opacity.value, equals(1.0));
         expect(right.opacity.value, equals(1.0));
         expect(find.byKey(toolbarKey), findsOneWidget);
       },
-      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-      skip: kIsWeb, // [intended] Web uses its native context menu.
-    );
-
-    testWidgets(
-      'long press on Android should show selection handles and context menu on end',
-      (WidgetTester tester) async {
-        Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
-        final UniqueKey toolbarKey = UniqueKey();
-        await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              focusNode: FocusNode(),
-              selectionControls: materialTextSelectionHandleControls,
-              contextMenuBuilder: (
-                BuildContext context,
-                SelectableRegionState selectableRegionState,
-              ) {
-                buttonTypes = selectableRegionState.contextMenuButtonItems
-                  .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
-                  .toSet();
-                return SizedBox.shrink(key: toolbarKey);
-              },
-              child: const Text('How are you?'),
-            ),
-          ),
-        );
-
-        expect(buttonTypes.isEmpty, true);
-        expect(find.byKey(toolbarKey), findsNothing);
-
-        final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
-        final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 2));
-        addTearDown(gesture.removePointer);
-        await tester.pump(const Duration(milliseconds: 500));
-        await tester.pumpAndSettle();
-        List<FadeTransition> transitions = find.descendant(
-          of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay'),
-          matching: find.byType(FadeTransition),
-        ).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
-
-        // Should not show context menu or selection handles on long press start.
-        expect(transitions.length, 0);
-        expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 3));
-        expect(find.byKey(toolbarKey), findsNothing);
-
-        await gesture.moveTo(textOffsetToPosition(paragraph, 8));
-        await tester.pumpAndSettle();
-        transitions = find.descendant(
-          of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay'),
-          matching: find.byType(FadeTransition),
-        ).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
-
-        // Should not show context menu or selection handles on long press drag.
-        expect(transitions.length, 0);
-        expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 11));
-        expect(find.byKey(toolbarKey), findsNothing);
-
-        await gesture.up();
-        await tester.pumpAndSettle();
-        transitions = find.descendant(
-          of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay'),
-          matching: find.byType(FadeTransition),
-        ).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
-
-        // Should show context menu and selection handles on long press end.
-        expect(transitions.length, 2);
-        final FadeTransition left = transitions[0];
-        final FadeTransition right = transitions[1];
-        expect(paragraph.selections[0], const TextSelection(baseOffset: 0, extentOffset: 11));
-        expect(left.opacity.value, equals(1.0));
-        expect(right.opacity.value, equals(1.0));
-        expect(find.byKey(toolbarKey), findsOneWidget);
-      },
-      variant: TargetPlatformVariant.only(TargetPlatform.android),
+      variant: TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }),
       skip: kIsWeb, // [intended] Web uses its native context menu.
     );
 
