@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'test_widgets.dart';
 
@@ -49,7 +50,7 @@ void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
 final TestParentData kNonPositioned = TestParentData();
 
 void main() {
-  testWidgets('ParentDataWidget control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ParentDataWidget control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Stack(
         textDirection: TextDirection.ltr,
@@ -249,7 +250,7 @@ void main() {
     checkTree(tester, <TestParentData>[]);
   });
 
-  testWidgets('ParentDataWidget conflicting data', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ParentDataWidget conflicting data', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -331,7 +332,7 @@ void main() {
     checkTree(tester, <TestParentData>[]);
   });
 
-  testWidgets('ParentDataWidget interacts with global keys', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ParentDataWidget interacts with global keys', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     await tester.pumpWidget(
@@ -389,7 +390,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Parent data invalid ancestor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Parent data invalid ancestor', (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Row(
@@ -424,7 +425,7 @@ void main() {
     );
   });
 
-  testWidgets('ParentDataWidget can be used with different ancestor RenderObjectWidgets', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ParentDataWidget can be used with different ancestor RenderObjectWidgets', (WidgetTester tester) async {
     await tester.pumpWidget(
       OneAncestorWidget(
         child: Container(),

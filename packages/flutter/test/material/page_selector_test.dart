@@ -84,14 +84,7 @@ void main() {
     await tester.pump();
     expect(tabController.index, 2);
     expect(indicatorColors(tester), const <Color>[kUnselectedColor, kUnselectedColor, kSelectedColor]);
-  },
-  // TODO(someone): remove after fixing
-  // https://github.com/flutter/flutter/issues/133755
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    notDisposedAllowList: <String, int?>{
-      'PageController': 1,
-    },
-  ));
+  });
 
   testWidgetsWithLeakTracking('PageSelector responds correctly to TabController.animateTo()', (WidgetTester tester) async {
     final TabController tabController = TabController(
@@ -134,14 +127,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(tabController.index, 2);
     expect(indicatorColors(tester), const <Color>[kUnselectedColor, kUnselectedColor, kSelectedColor]);
-  },
-  // TODO(someone): remove after fixing
-  // https://github.com/flutter/flutter/issues/133755
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    notDisposedAllowList: <String, int?>{
-      'PageController': 1,
-    },
-  ));
+  });
 
   testWidgetsWithLeakTracking('PageSelector responds correctly to TabBarView drags', (WidgetTester tester) async {
     final TabController tabController = TabController(
@@ -199,14 +185,7 @@ void main() {
     await tester.fling(find.byType(TabBarView), const Offset(100.0, 0.0), 1000.0);
     await tester.pumpAndSettle();
     expect(indicatorColors(tester), const <Color>[kUnselectedColor, kSelectedColor, kUnselectedColor]);
-  },
-  // TODO(someone): remove after fixing
-  // https://github.com/flutter/flutter/issues/133755
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    notDisposedAllowList: <String, int?>{
-      'PageController': 1,
-    },
-  ));
+  });
 
   testWidgetsWithLeakTracking('PageSelector indicatorColors', (WidgetTester tester) async {
     const Color kRed = Color(0xFFFF0000);
@@ -225,16 +204,9 @@ void main() {
     tabController.index = 0;
     await tester.pumpAndSettle();
     expect(indicatorColors(tester), const <Color>[kBlue, kRed, kRed]);
-  },
-  // TODO(someone): remove after fixing
-  // https://github.com/flutter/flutter/issues/133755
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    notDisposedAllowList: <String, int?>{
-      'PageController': 1,
-    },
-  ));
+  });
 
-  testWidgets('PageSelector indicatorSize', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PageSelector indicatorSize', (WidgetTester tester) async {
     final TabController tabController = TabController(
       vsync: const TestVSync(),
       initialIndex: 1,
@@ -299,12 +271,5 @@ void main() {
     for (final TabPageSelectorIndicator indicator in indicators) {
       expect(indicator.borderStyle, BorderStyle.solid);
     }
-  },
-  // TODO(someone): remove after fixing
-  // https://github.com/flutter/flutter/issues/133755
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    notDisposedAllowList: <String, int?>{
-      'PageController': 1,
-    },
-  ));
+  });
 }

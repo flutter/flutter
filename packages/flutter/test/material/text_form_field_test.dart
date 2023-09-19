@@ -1233,7 +1233,7 @@ void main() {
     expect(editableText.magnifierConfiguration, equals(myTextMagnifierConfiguration));
   });
 
-  testWidgets('Passes undoController to undoController TextField', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Passes undoController to undoController TextField', (WidgetTester tester) async {
     final UndoHistoryController undoController = UndoHistoryController(value: UndoHistoryValue.empty);
     addTearDown(undoController.dispose);
 
