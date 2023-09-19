@@ -8,6 +8,7 @@
 
 #include <syslog.h>
 
+#import <Metal/Metal.h>
 #include <sstream>
 #include <string>
 
@@ -22,6 +23,8 @@
 #import "flutter/shell/platform/darwin/common/command_line.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 
+FLUTTER_ASSERT_NOT_ARC
+
 extern "C" {
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
 // Used for debugging dart:* sources.
@@ -31,6 +34,23 @@ extern const intptr_t kPlatformStrongDillSize;
 }
 
 static const char* kApplicationKernelSnapshotFileName = "kernel_blob.bin";
+
+static BOOL DoesHardwareSupportWideGamut() {
+  static BOOL result = NO;
+  static dispatch_once_t once_token = 0;
+  dispatch_once(&once_token, ^{
+    id<MTLDevice> device = MTLCreateSystemDefaultDevice();
+    if (@available(iOS 13.0, *)) {
+      // MTLGPUFamilyApple2 = A9/A10
+      result = [device supportsFamily:MTLGPUFamilyApple2];
+    } else {
+      // A9/A10 on iOS 10+
+      result = [device supportsFeatureSet:MTLFeatureSet_iOS_GPUFamily3_v2];
+    }
+    [device release];
+  });
+  return result;
+}
 
 flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* processInfoOrNil) {
   auto command_line = flutter::CommandLineFromNSProcessInfo(processInfoOrNil);
@@ -153,9 +173,12 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
   // As of Xcode 14.1, the wide gamut surface pixel formats are not supported by
   // the simulator.
   settings.enable_wide_gamut = false;
+  // Removes unused function warning.
+  (void)DoesHardwareSupportWideGamut;
 #else
   NSNumber* nsEnableWideGamut = [mainBundle objectForInfoDictionaryKey:@"FLTEnableWideGamut"];
-  BOOL enableWideGamut = nsEnableWideGamut ? nsEnableWideGamut.boolValue : YES;
+  BOOL enableWideGamut =
+      (nsEnableWideGamut ? nsEnableWideGamut.boolValue : YES) && DoesHardwareSupportWideGamut();
   settings.enable_wide_gamut = enableWideGamut;
 #endif
 
