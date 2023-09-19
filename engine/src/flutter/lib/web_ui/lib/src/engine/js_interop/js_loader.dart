@@ -73,7 +73,7 @@ abstract class FlutterEngineInitializer{
 @JS()
 @anonymous
 @staticInterop
-abstract class FlutterAppRunner extends JSObject {
+abstract class FlutterAppRunner implements JSObject {
   factory FlutterAppRunner({required RunAppFn runApp,}) => FlutterAppRunner._(
     runApp: (([RunAppFnParameters? args]) => futureToPromise(runApp(args))).toJS
   );
@@ -101,7 +101,7 @@ typedef RunAppFn = Future<FlutterApp> Function([RunAppFnParameters?]);
 @JS()
 @anonymous
 @staticInterop
-abstract class FlutterApp extends JSObject {
+abstract class FlutterApp implements JSObject {
   /// Cleans a Flutter app
   external factory FlutterApp();
 }
