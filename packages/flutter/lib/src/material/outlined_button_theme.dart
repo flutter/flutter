@@ -91,8 +91,6 @@ class OutlinedButtonThemeData with Diagnosticable {
 ///    [ButtonStyle] for [OutlinedButton]s below the overall [Theme].
 class OutlinedButtonTheme extends InheritedTheme {
   /// Create a [OutlinedButtonTheme].
-  ///
-  /// The [data] parameter must not be null.
   const OutlinedButtonTheme({
     super.key,
     required this.data,
