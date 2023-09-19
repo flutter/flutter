@@ -147,7 +147,7 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)testResize {
-  NSString* channelName = @"foo";
+  NSString* channelName = @"flutter/test";
   id binaryMessenger = OCMStrictProtocolMock(@protocol(FlutterBinaryMessenger));
   id codec = OCMProtocolMock(@protocol(FlutterMethodCodec));
   FlutterBasicMessageChannel* channel =
@@ -156,11 +156,39 @@ FLUTTER_ASSERT_ARC
                                                  codec:codec];
   XCTAssertNotNil(channel);
 
-  NSString* expectedMessageString =
-      [NSString stringWithFormat:@"resize\r%@\r%@", channelName, @100];
-  NSData* expectedMessage = [expectedMessageString dataUsingEncoding:NSUTF8StringEncoding];
+  // The expected content was created from the following Dart code:
+  //   MethodCall call = MethodCall('resize', ['flutter/test',3]);
+  //   StandardMethodCodec().encodeMethodCall(call).buffer.asUint8List();
+  const unsigned char bytes[] = {7,   6,   114, 101, 115, 105, 122, 101, 12,  2,
+                                 7,   12,  102, 108, 117, 116, 116, 101, 114, 47,
+                                 116, 101, 115, 116, 3,   3,   0,   0,   0};
+  NSData* expectedMessage = [NSData dataWithBytes:bytes length:sizeof(bytes)];
+
   OCMExpect([binaryMessenger sendOnChannel:@"dev.flutter/channel-buffers" message:expectedMessage]);
-  [channel resizeChannelBuffer:100];
+  [channel resizeChannelBuffer:3];
+  OCMVerifyAll(binaryMessenger);
+  [binaryMessenger stopMocking];
+}
+
+- (bool)testSetWarnsOnOverflow {
+  NSString* channelName = @"flutter/test";
+  id binaryMessenger = OCMStrictProtocolMock(@protocol(FlutterBinaryMessenger));
+  id codec = OCMProtocolMock(@protocol(FlutterMethodCodec));
+  FlutterBasicMessageChannel* channel =
+      [[FlutterBasicMessageChannel alloc] initWithName:channelName
+                                       binaryMessenger:binaryMessenger
+                                                 codec:codec];
+  XCTAssertNotNil(channel);
+
+  // The expected content was created from the following Dart code:
+  //   MethodCall call = MethodCall('overflow',['flutter/test', true]);
+  //   StandardMethodCodec().encodeMethodCall(call).buffer.asUint8List();
+  const unsigned char bytes[] = {7,   8,   111, 118, 101, 114, 102, 108, 111, 119, 12,  2,   7, 12,
+                                 102, 108, 117, 116, 116, 101, 114, 47,  116, 101, 115, 116, 1};
+  NSData* expectedMessage = [NSData dataWithBytes:bytes length:sizeof(bytes)];
+
+  OCMExpect([binaryMessenger sendOnChannel:@"dev.flutter/channel-buffers" message:expectedMessage]);
+  [channel setWarnsOnOverflow:NO];
   OCMVerifyAll(binaryMessenger);
   [binaryMessenger stopMocking];
 }

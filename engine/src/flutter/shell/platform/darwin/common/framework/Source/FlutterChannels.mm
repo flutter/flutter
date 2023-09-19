@@ -9,12 +9,41 @@ FLUTTER_ASSERT_ARC
 #pragma mark - Basic message channel
 
 static NSString* const kFlutterChannelBuffersChannel = @"dev.flutter/channel-buffers";
+static NSString* const kResizeMethod = @"resize";
+static NSString* const kOverflowMethod = @"overflow";
 
 static void ResizeChannelBuffer(NSObject<FlutterBinaryMessenger>* binaryMessenger,
                                 NSString* channel,
                                 NSInteger newSize) {
-  NSString* messageString = [NSString stringWithFormat:@"resize\r%@\r%@", channel, @(newSize)];
-  NSData* message = [messageString dataUsingEncoding:NSUTF8StringEncoding];
+  NSCAssert(newSize >= 0, @"Channel buffer size must be non-negative");
+  // Cast newSize to int because the deserialization logic handles only 32 bits values,
+  // see
+  // https://github.com/flutter/engine/blob/93e8901490e78c7ba7e319cce4470d9c6478c6dc/lib/ui/channel_buffers.dart#L495.
+  NSArray* args = @[ channel, @(static_cast<int>(newSize)) ];
+  FlutterMethodCall* resizeMethodCall = [FlutterMethodCall methodCallWithMethodName:kResizeMethod
+                                                                          arguments:args];
+  NSObject<FlutterMethodCodec>* codec = [FlutterStandardMethodCodec sharedInstance];
+  NSData* message = [codec encodeMethodCall:resizeMethodCall];
+  [binaryMessenger sendOnChannel:kFlutterChannelBuffersChannel message:message];
+}
+
+/**
+ * Defines whether a channel should show warning messages when discarding messages
+ * due to overflow.
+ *
+ * @param binaryMessenger The binary messenger.
+ * @param channel The channel name.
+ * @param warns When false, the channel is expected to overflow and warning messages
+ *              will not be shown.
+ */
+static void SetWarnsOnOverflow(NSObject<FlutterBinaryMessenger>* binaryMessenger,
+                               NSString* channel,
+                               BOOL warns) {
+  FlutterMethodCall* overflowMethodCall =
+      [FlutterMethodCall methodCallWithMethodName:kOverflowMethod
+                                        arguments:@[ channel, @(!warns) ]];
+  NSObject<FlutterMethodCodec>* codec = [FlutterStandardMethodCodec sharedInstance];
+  NSData* message = [codec encodeMethodCall:overflowMethodCall];
   [binaryMessenger sendOnChannel:kFlutterChannelBuffersChannel message:message];
 }
 
@@ -114,8 +143,24 @@ static FlutterBinaryMessengerConnection SetMessageHandler(
   _connection = SetMessageHandler(_messenger, _name, messageHandler, _taskQueue);
 }
 
++ (void)resizeChannelWithName:(NSString*)name
+              binaryMessenger:(NSObject<FlutterBinaryMessenger>*)messenger
+                         size:(NSInteger)newSize {
+  ResizeChannelBuffer(messenger, name, newSize);
+}
+
 - (void)resizeChannelBuffer:(NSInteger)newSize {
   ResizeChannelBuffer(_messenger, _name, newSize);
+}
+
++ (void)setWarnsOnOverflow:(BOOL)warns
+        forChannelWithName:(NSString*)name
+           binaryMessenger:(NSObject<FlutterBinaryMessenger>*)messenger {
+  SetWarnsOnOverflow(messenger, name, warns);
+}
+
+- (void)setWarnsOnOverflow:(BOOL)warns {
+  SetWarnsOnOverflow(_messenger, _name, warns);
 }
 
 @end
