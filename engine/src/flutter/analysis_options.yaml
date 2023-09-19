@@ -7,6 +7,7 @@
 analyzer:
   language:
     strict-casts: true
+    strict-inference: true
     strict-raw-types: true
   errors:
     # allow self-reference to deprecated members (we do this because otherwise we have

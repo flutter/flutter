@@ -150,7 +150,7 @@ void testMain() {
           'getExtension',
           <String>['WEBGL_lose_context'],
         );
-        js_util.callMethod(loseContextExtension, 'loseContext', const <void>[]);
+        js_util.callMethod<void>(loseContextExtension, 'loseContext', const <void>[]);
 
         // Pump a timer to allow the "lose context" event to propagate.
         await Future<void>.delayed(Duration.zero);
@@ -160,7 +160,7 @@ void testMain() {
         expect(isContextLost, isTrue);
 
         // Emulate WebGL context restoration.
-        js_util.callMethod(loseContextExtension, 'restoreContext', const <void>[]);
+        js_util.callMethod<void>(loseContextExtension, 'restoreContext', const <void>[]);
 
         // Pump a timer to allow the "restore context" event to propagate.
         await Future<void>.delayed(Duration.zero);
