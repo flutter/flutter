@@ -9,6 +9,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 extern NSDictionary* launchArgsMap;
+const extern double kDefaultRmseThreshold;
 
 // Manages a `GoldenPlatformViewTests`.
 //
@@ -27,7 +28,7 @@ extern NSDictionary* launchArgsMap;
 
 // Take a sceenshot of the test app and check it has the same pixels with
 // goldenImage inside the `GoldenTestManager`.
-- (void)checkGoldenForTest:(XCTestCase*)test;
+- (void)checkGoldenForTest:(XCTestCase*)test rmesThreshold:(double)rmesThreshold;
 
 @end
 

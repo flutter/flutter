@@ -19,7 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 // Compare this GoldenImage to `image`.
 //
 // Return YES if the `image` of this GoldenImage have the same pixels of provided `image`.
-- (BOOL)compareGoldenToImage:(UIImage*)image;
+- (BOOL)compareGoldenToImage:(UIImage*)image rmesThreshold:(double)rmesThreshold;
 
 @end
 

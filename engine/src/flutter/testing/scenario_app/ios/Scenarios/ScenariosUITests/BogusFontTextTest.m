@@ -25,7 +25,7 @@ FLUTTER_ASSERT_ARC
   XCTAssertTrue([addTextField waitForExistenceWithTimeout:30]);
 
   GoldenTestManager* manager = [[GoldenTestManager alloc] initWithLaunchArg:@"--bogus-font-text"];
-  [manager checkGoldenForTest:self];
+  [manager checkGoldenForTest:self rmesThreshold:kDefaultRmseThreshold];
 }
 
 @end

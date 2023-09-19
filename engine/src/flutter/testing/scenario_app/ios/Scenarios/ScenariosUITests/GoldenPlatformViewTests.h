@@ -18,6 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface GoldenPlatformViewTests : XCTestCase
 
 @property(nonatomic, strong) XCUIApplication* application;
+@property(nonatomic, assign) double rmseThreadhold;
 
 // Initialize with a `GoldenTestManager`.
 - (instancetype)initWithManager:(GoldenTestManager*)manager invocation:(NSInvocation*)invocation;
