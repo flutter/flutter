@@ -344,6 +344,7 @@ class NavigationDestination extends StatelessWidget {
     final _NavigationDestinationInfo info = _NavigationDestinationInfo.of(context);
     const Set<MaterialState> selectedState = <MaterialState>{MaterialState.selected};
     const Set<MaterialState> unselectedState = <MaterialState>{};
+    const Set<MaterialState> disabledState = <MaterialState>{MaterialState.disabled};
 
     final NavigationBarThemeData navigationBarTheme = NavigationBarTheme.of(context);
     final NavigationBarThemeData defaults = _defaultsFor(context);
@@ -354,24 +355,22 @@ class NavigationDestination extends StatelessWidget {
       tooltip: tooltip,
       enabled: enabled,
       buildIcon: (BuildContext context) {
-        IconThemeData selectedIconTheme =
+        final IconThemeData selectedIconTheme =
           navigationBarTheme.iconTheme?.resolve(selectedState) ??
           defaults.iconTheme!.resolve(selectedState)!;
-        IconThemeData unselectedIconTheme =
+        final IconThemeData unselectedIconTheme =
           navigationBarTheme.iconTheme?.resolve(unselectedState)
           ?? defaults.iconTheme!.resolve(unselectedState)!;
-
-        if (!enabled) {
-          selectedIconTheme = selectedIconTheme.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38));
-          unselectedIconTheme = unselectedIconTheme.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38));
-        }
+        final IconThemeData disabledIconTheme =
+          navigationBarTheme.iconTheme?.resolve(disabledState)
+          ?? defaults.iconTheme!.resolve(disabledState)!;
 
         final Widget selectedIconWidget = IconTheme.merge(
-          data: selectedIconTheme,
+          data: enabled ? selectedIconTheme : disabledIconTheme,
           child: selectedIcon ?? icon,
         );
         final Widget unselectedIconWidget = IconTheme.merge(
-          data: unselectedIconTheme,
+          data: enabled ? unselectedIconTheme : disabledIconTheme,
           child: icon,
         );
 
@@ -395,19 +394,18 @@ class NavigationDestination extends StatelessWidget {
         );
       },
       buildLabel: (BuildContext context) {
-        TextStyle? effectiveSelectedLabelTextStyle = navigationBarTheme.labelTextStyle?.resolve(selectedState)
+        final TextStyle? effectiveSelectedLabelTextStyle = navigationBarTheme.labelTextStyle?.resolve(selectedState)
           ?? defaults.labelTextStyle!.resolve(selectedState);
-        TextStyle? effectiveUnselectedLabelTextStyle = navigationBarTheme.labelTextStyle?.resolve(unselectedState)
+        final TextStyle? effectiveUnselectedLabelTextStyle = navigationBarTheme.labelTextStyle?.resolve(unselectedState)
           ?? defaults.labelTextStyle!.resolve(unselectedState);
+        final TextStyle? effectiveDisabledLabelTextStyle = navigationBarTheme.labelTextStyle?.resolve(disabledState)
+          ?? defaults.labelTextStyle!.resolve(disabledState);
 
-        if (!enabled) {
-          effectiveSelectedLabelTextStyle = effectiveSelectedLabelTextStyle
-            ?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38));
-          effectiveUnselectedLabelTextStyle = effectiveUnselectedLabelTextStyle
-            ?.copyWith(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.38));
-        }
-
-        final TextStyle? textStyle = _isForwardOrCompleted(animation) ? effectiveSelectedLabelTextStyle : effectiveUnselectedLabelTextStyle;
+        final TextStyle? textStyle = enabled
+          ? _isForwardOrCompleted(animation)
+            ? effectiveSelectedLabelTextStyle
+            : effectiveUnselectedLabelTextStyle
+          : effectiveDisabledLabelTextStyle;
 
         return Padding(
           padding: const EdgeInsets.only(top: 4),
@@ -1351,9 +1349,11 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
       return IconThemeData(
         size: 24.0,
-        color: states.contains(MaterialState.selected)
-          ? _colors.onSecondaryContainer
-          : _colors.onSurfaceVariant,
+        color: states.contains(MaterialState.disabled)
+          ? _colors.onSurfaceVariant.withOpacity(0.38)
+          : states.contains(MaterialState.selected)
+            ? _colors.onSecondaryContainer
+            : _colors.onSurfaceVariant,
       );
     });
   }
@@ -1364,9 +1364,12 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
   @override MaterialStateProperty<TextStyle?>? get labelTextStyle {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
     final TextStyle style = _textTheme.labelMedium!;
-      return style.apply(color: states.contains(MaterialState.selected)
-        ? _colors.onSurface
-        : _colors.onSurfaceVariant
+      return style.apply(color:
+        states.contains(MaterialState.disabled)
+        ? _colors.onSurfaceVariant.withOpacity(0.38)
+        : states.contains(MaterialState.selected)
+            ? _colors.onSurface
+            : _colors.onSurfaceVariant
       );
     });
   }
