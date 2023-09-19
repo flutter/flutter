@@ -870,6 +870,8 @@ ORIGIN: ../../../flutter/fml/concurrent_message_loop.cc + ../../../flutter/LICEN
 ORIGIN: ../../../flutter/fml/concurrent_message_loop.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/concurrent_message_loop_factory.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/container.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/fml/cpu_affinity.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/fml/cpu_affinity.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/dart/dart_converter.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/dart/dart_converter.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/delayed_task.cc + ../../../flutter/LICENSE
@@ -916,6 +918,8 @@ ORIGIN: ../../../flutter/fml/message_loop_task_queues_benchmark.cc + ../../../fl
 ORIGIN: ../../../flutter/fml/native_library.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/paths.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/paths.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/fml/platform/android/cpu_affinity.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/fml/platform/android/cpu_affinity.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/platform/android/jni_util.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/platform/android/jni_util.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/fml/platform/android/jni_weak_ref.cc + ../../../flutter/LICENSE
@@ -3614,6 +3618,8 @@ FILE: ../../../flutter/fml/concurrent_message_loop.cc
 FILE: ../../../flutter/fml/concurrent_message_loop.h
 FILE: ../../../flutter/fml/concurrent_message_loop_factory.cc
 FILE: ../../../flutter/fml/container.h
+FILE: ../../../flutter/fml/cpu_affinity.cc
+FILE: ../../../flutter/fml/cpu_affinity.h
 FILE: ../../../flutter/fml/dart/dart_converter.cc
 FILE: ../../../flutter/fml/dart/dart_converter.h
 FILE: ../../../flutter/fml/delayed_task.cc
@@ -3660,6 +3666,8 @@ FILE: ../../../flutter/fml/message_loop_task_queues_benchmark.cc
 FILE: ../../../flutter/fml/native_library.h
 FILE: ../../../flutter/fml/paths.cc
 FILE: ../../../flutter/fml/paths.h
+FILE: ../../../flutter/fml/platform/android/cpu_affinity.cc
+FILE: ../../../flutter/fml/platform/android/cpu_affinity.h
 FILE: ../../../flutter/fml/platform/android/jni_util.cc
 FILE: ../../../flutter/fml/platform/android/jni_util.h
 FILE: ../../../flutter/fml/platform/android/jni_weak_ref.cc
