@@ -4,6 +4,7 @@
 
 #include "flutter/testing/testing.h"  // IWYU pragma: keep.
 #include "fml/synchronization/waitable_event.h"
+#include "impeller/renderer/backend/vulkan/command_pool_vk.h"
 #include "impeller/renderer/backend/vulkan/resource_manager_vk.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
 
@@ -13,26 +14,28 @@ namespace testing {
 TEST(CommandPoolRecyclerVKTest, GetsACommandPoolPerThread) {
   auto const context = MockVulkanContextBuilder().Build();
 
-  // Record the memory location of each pointer to a command pool.
-  int* pool1 = nullptr;
-  int* pool2 = nullptr;
+  {
+    // Record the memory location of each pointer to a command pool.
+    //
+    // These pools have to be held at this context, otherwise they will be
+    // dropped and recycled and potentially reused by another thread, causing
+    // flaky tests.
+    std::shared_ptr<CommandPoolVK> pool1;
+    std::shared_ptr<CommandPoolVK> pool2;
 
-  // Create a command pool in two threads and record the memory location.
-  std::thread thread1([&]() {
-    auto const pool = context->GetCommandPoolRecycler()->Get();
-    pool1 = reinterpret_cast<int*>(pool.get());
-  });
+    // Create a command pool in two threads and record the memory location.
+    std::thread thread1(
+        [&]() { pool1 = context->GetCommandPoolRecycler()->Get(); });
 
-  std::thread thread2([&]() {
-    auto const pool = context->GetCommandPoolRecycler()->Get();
-    pool2 = reinterpret_cast<int*>(pool.get());
-  });
+    std::thread thread2(
+        [&]() { pool2 = context->GetCommandPoolRecycler()->Get(); });
 
-  thread1.join();
-  thread2.join();
+    thread1.join();
+    thread2.join();
 
-  // The two command pools should be different.
-  EXPECT_NE(pool1, pool2);
+    // The two command pools should be different.
+    EXPECT_NE(pool1, pool2);
+  }
 
   context->Shutdown();
 }
