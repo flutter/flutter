@@ -432,21 +432,26 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     { int? focusedIndex, bool enableScrollToHighlight = true}
   ) {
     final List<Widget> result = <Widget>[];
-    final double padding = leadingPadding ?? _kDefaultHorizontalPadding;
-    final ButtonStyle defaultStyle;
-    switch (textDirection) {
-      case TextDirection.rtl:
-        defaultStyle = MenuItemButton.styleFrom(
-          padding: EdgeInsets.only(left: _kDefaultHorizontalPadding, right: padding),
-        );
-      case TextDirection.ltr:
-        defaultStyle = MenuItemButton.styleFrom(
-          padding: EdgeInsets.only(left: padding, right: _kDefaultHorizontalPadding),
-        );
-    }
-
     for (int i = 0; i < filteredEntries.length; i++) {
       final DropdownMenuEntry<T> entry = filteredEntries[i];
+
+      // When the menu item doesn't have a leading icon, the text should be vertically
+      // aligned with the text in the text input field. When the menu item has a leading
+      // icon, the leading icon should only have a default horizontal padding instead
+      // of using the "leadingPadding".
+      final double padding = entry.leadingIcon == null ? (leadingPadding ?? _kDefaultHorizontalPadding) : _kDefaultHorizontalPadding;
+      final ButtonStyle defaultStyle;
+      switch (textDirection) {
+        case TextDirection.rtl:
+          defaultStyle = MenuItemButton.styleFrom(
+            padding: EdgeInsets.only(left: _kDefaultHorizontalPadding, right: padding),
+          );
+        case TextDirection.ltr:
+          defaultStyle = MenuItemButton.styleFrom(
+            padding: EdgeInsets.only(left: padding, right: _kDefaultHorizontalPadding),
+          );
+      }
+
       ButtonStyle effectiveStyle = entry.style ?? defaultStyle;
       final Color focusedBackgroundColor = effectiveStyle.foregroundColor?.resolve(<MaterialState>{MaterialState.focused})
         ?? Theme.of(context).colorScheme.onSurface;
