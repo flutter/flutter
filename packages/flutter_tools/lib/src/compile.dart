@@ -227,6 +227,7 @@ class KernelCompiler {
     TargetModel targetModel = TargetModel.flutter,
     bool linkPlatformKernelIn = false,
     bool aot = false,
+    String? frontendServerStarterPath,
     List<String>? extraFrontEndOptions,
     List<String>? fileSystemRoots,
     String? fileSystemScheme,
@@ -243,10 +244,12 @@ class KernelCompiler {
     String? nativeAssets,
   }) async {
     final TargetPlatform? platform = targetModel == TargetModel.dartdevc ? TargetPlatform.web_javascript : null;
-    final String frontendServer = _artifacts.getArtifactPath(
-      Artifact.frontendServerSnapshotForEngineDartSdk,
-      platform: platform,
-    );
+    final String frontendServer = (frontendServerStarterPath == null || frontendServerStarterPath.isEmpty)
+        ? _artifacts.getArtifactPath(
+            Artifact.frontendServerSnapshotForEngineDartSdk,
+            platform: platform,
+          )
+        : frontendServerStarterPath;
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!sdkRoot.endsWith('/')) {
       sdkRoot = '$sdkRoot/';
@@ -490,6 +493,7 @@ abstract class ResidentCompiler {
     bool assumeInitializeFromDillUpToDate,
     TargetModel targetModel,
     bool unsafePackageSerialization,
+    String? frontendServerStarterPath,
     List<String> extraFrontEndOptions,
     String platformDill,
     List<String>? dartDefines,
@@ -605,6 +609,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     this.assumeInitializeFromDillUpToDate = false,
     this.targetModel = TargetModel.flutter,
     this.unsafePackageSerialization = false,
+    this.frontendServerStarterPath,
     this.extraFrontEndOptions,
     this.platformDill,
     List<String>? dartDefines,
@@ -635,6 +640,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
   final String? initializeFromDill;
   final bool assumeInitializeFromDillUpToDate;
   final bool unsafePackageSerialization;
+  final String? frontendServerStarterPath;
   final List<String>? extraFrontEndOptions;
   final List<String> dartDefines;
   final String? librariesSpec;
@@ -771,10 +777,12 @@ class DefaultResidentCompiler implements ResidentCompiler {
     String? nativeAssetsUri,
   }) async {
     final TargetPlatform? platform = (targetModel == TargetModel.dartdevc) ? TargetPlatform.web_javascript : null;
-    final String frontendServer = artifacts.getArtifactPath(
-      Artifact.frontendServerSnapshotForEngineDartSdk,
-      platform: platform,
-    );
+    final String frontendServer = (frontendServerStarterPath == null || frontendServerStarterPath!.isEmpty)
+        ? artifacts.getArtifactPath(
+            Artifact.frontendServerSnapshotForEngineDartSdk,
+            platform: platform,
+          )
+        : frontendServerStarterPath!;
     final List<String> command = <String>[
       artifacts.getArtifactPath(Artifact.engineDartBinary, platform: platform),
       '--disable-dart-dev',

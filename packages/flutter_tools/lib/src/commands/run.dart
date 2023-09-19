@@ -315,6 +315,7 @@ class RunCommand extends RunCommandBase {
     requiresPubspecYaml();
     usesFilesystemOptions(hide: !verboseHelp);
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
+    usesFrontendServerStarterPathOption(verboseHelp: verboseHelp);
     addEnableExperimentation(hide: !verboseHelp);
     usesInitializeFromDillOption(hide: !verboseHelp);
 
