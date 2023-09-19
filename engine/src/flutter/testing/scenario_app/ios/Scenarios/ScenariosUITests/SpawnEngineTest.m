@@ -21,7 +21,7 @@
 
   GoldenTestManager* manager =
       [[GoldenTestManager alloc] initWithLaunchArg:@"--spawn-engine-works"];
-  [manager checkGoldenForTest:self];
+  [manager checkGoldenForTest:self rmesThreshold:kDefaultRmseThreshold];
 }
 
 @end

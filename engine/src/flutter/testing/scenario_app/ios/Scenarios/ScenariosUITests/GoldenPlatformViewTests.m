@@ -22,6 +22,7 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
 - (instancetype)initWithManager:(GoldenTestManager*)manager invocation:(NSInvocation*)invocation {
   self = [super initWithInvocation:invocation];
   _manager = manager;
+  _rmseThreadhold = kDefaultRmseThreshold;
   return self;
 }
 
@@ -45,6 +46,6 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
             @(kSecondsToWaitForPlatformView));
   }
 
-  [self.manager checkGoldenForTest:self];
+  [self.manager checkGoldenForTest:self rmesThreshold:self.rmseThreadhold];
 }
 @end
