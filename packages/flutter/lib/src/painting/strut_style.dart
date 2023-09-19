@@ -405,7 +405,7 @@ class StrutStyle with Diagnosticable {
   /// constructor.
   List<String>? get fontFamilyFallback {
     if (_package != null && _fontFamilyFallback != null) {
-      return _fontFamilyFallback!.map((String family) => 'packages/$_package/$family').toList();
+      return _fontFamilyFallback.map((String family) => 'packages/$_package/$family').toList();
     }
     return _fontFamilyFallback;
   }

@@ -16,6 +16,7 @@ import '../bundle.dart';
 import '../compile.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
+import '../linux/native_assets.dart';
 import '../macos/native_assets.dart';
 import '../native_assets.dart';
 import '../project.dart';
@@ -168,7 +169,12 @@ class TestCompiler {
 
       Uri? nativeAssetsYaml;
       final Uri projectUri = FlutterProject.current().directory.uri;
-      final NativeAssetsBuildRunner buildRunner = NativeAssetsBuildRunnerImpl(projectUri, globals.fs, globals.logger);
+      final NativeAssetsBuildRunner buildRunner = NativeAssetsBuildRunnerImpl(
+        projectUri,
+        buildInfo.packageConfig,
+        globals.fs,
+        globals.logger,
+      );
       if (globals.platform.isMacOS) {
         (nativeAssetsYaml, _) = await buildNativeAssetsMacOS(
           buildMode: BuildMode.debug,
@@ -176,7 +182,15 @@ class TestCompiler {
           flutterTester: true,
           fileSystem: globals.fs,
           buildRunner: buildRunner,
-      );
+        );
+      } else if (globals.platform.isLinux) {
+        (nativeAssetsYaml, _) = await buildNativeAssetsLinux(
+          buildMode: BuildMode.debug,
+          projectUri: projectUri,
+          flutterTester: true,
+          fileSystem: globals.fs,
+          buildRunner: buildRunner,
+        );
       } else {
         await ensureNoNativeAssetsOrOsIsSupported(
           projectUri,

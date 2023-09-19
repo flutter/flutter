@@ -4,12 +4,15 @@
 
 import 'package:meta/meta.dart';
 import 'package:native_assets_cli/native_assets_cli.dart' show Asset;
+import 'package:package_config/package_config_types.dart';
 
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/platform.dart';
 import '../../build_info.dart';
+import '../../dart/package_map.dart';
 import '../../ios/native_assets.dart';
+import '../../linux/native_assets.dart';
 import '../../macos/native_assets.dart';
 import '../../macos/xcode.dart';
 import '../../native_assets.dart';
@@ -52,7 +55,21 @@ class NativeAssets extends Target {
 
     final Uri projectUri = environment.projectDir.uri;
     final FileSystem fileSystem = environment.fileSystem;
-    final NativeAssetsBuildRunner buildRunner = _buildRunner ?? NativeAssetsBuildRunnerImpl(projectUri, fileSystem, environment.logger);
+    final File packagesFile = fileSystem
+        .directory(projectUri)
+        .childDirectory('.dart_tool')
+        .childFile('package_config.json');
+    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+      packagesFile,
+      logger: environment.logger,
+    );
+    final NativeAssetsBuildRunner buildRunner = _buildRunner ??
+        NativeAssetsBuildRunnerImpl(
+          projectUri,
+          packageConfig,
+          fileSystem,
+          environment.logger,
+        );
 
     final List<Uri> dependencies;
     switch (targetPlatform) {
@@ -102,12 +119,36 @@ class NativeAssets extends Target {
           fileSystem: fileSystem,
           buildRunner: buildRunner,
         );
+      case TargetPlatform.linux_arm64:
+      case TargetPlatform.linux_x64:
+        final String? environmentBuildMode = environment.defines[kBuildMode];
+        if (environmentBuildMode == null) {
+          throw MissingDefineException(kBuildMode, name);
+        }
+        final BuildMode buildMode = BuildMode.fromCliName(environmentBuildMode);
+        (_, dependencies) = await buildNativeAssetsLinux(
+          targetPlatform: targetPlatform,
+          buildMode: buildMode,
+          projectUri: projectUri,
+          yamlParentDirectory: environment.buildDir.uri,
+          fileSystem: fileSystem,
+          buildRunner: buildRunner,
+        );
       case TargetPlatform.tester:
         if (const LocalPlatform().isMacOS) {
           (_, dependencies) = await buildNativeAssetsMacOS(
             buildMode: BuildMode.debug,
             projectUri: projectUri,
             codesignIdentity: environment.defines[kCodesignIdentity],
+            yamlParentDirectory: environment.buildDir.uri,
+            fileSystem: fileSystem,
+            buildRunner: buildRunner,
+            flutterTester: true,
+          );
+        } else if (const LocalPlatform().isLinux) {
+          (_, dependencies) = await buildNativeAssetsLinux(
+            buildMode: BuildMode.debug,
+            projectUri: projectUri,
             yamlParentDirectory: environment.buildDir.uri,
             fileSystem: fileSystem,
             buildRunner: buildRunner,
@@ -126,8 +167,6 @@ class NativeAssets extends Target {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
-      case TargetPlatform.linux_arm64:
-      case TargetPlatform.linux_x64:
       case TargetPlatform.web_javascript:
       case TargetPlatform.windows_x64:
         // TODO(dacoharkes): Implement other OSes. https://github.com/flutter/flutter/issues/129757

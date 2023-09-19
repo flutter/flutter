@@ -638,7 +638,7 @@ class RenderSliverMultiBoxAdaptorAlt extends RenderSliver with
 class LeakCheckerHandle with ChangeNotifier {
   LeakCheckerHandle() {
     if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
   }
 
