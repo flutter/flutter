@@ -58,7 +58,7 @@ class PlatformViewsRegistry {
 
 /// Callback signature for when a platform view was created.
 ///
-/// `id` is the platform view's unique identifier.
+/// The `id` parameter is the platform view's unique identifier.
 typedef PlatformViewCreatedCallback = void Function(int id);
 
 /// Provides access to the platform views service.
@@ -92,27 +92,27 @@ class PlatformViewsService {
   /// {@template flutter.services.PlatformViewsService.initAndroidView}
   /// Creates a controller for a new Android view.
   ///
-  /// `id` is an unused unique identifier generated with
+  /// The `id` argument is an unused unique identifier generated with
   /// [platformViewsRegistry].
   ///
-  /// `viewType` is the identifier of the Android view type to be created, a
-  /// factory for this view type must have been registered on the platform side.
-  /// Platform view factories are typically registered by plugin code. Plugins
-  /// can register a platform view factory with
+  /// The `viewType` argument is the identifier of the Android view type to be
+  /// created, a factory for this view type must have been registered on the
+  /// platform side. Platform view factories are typically registered by plugin
+  /// code. Plugins can register a platform view factory with
   /// [PlatformViewRegistry#registerViewFactory](/javadoc/io/flutter/plugin/platform/PlatformViewRegistry.html#registerViewFactory-java.lang.String-io.flutter.plugin.platform.PlatformViewFactory-).
   ///
-  /// `creationParams` will be passed as the args argument of
+  /// The `creationParams` argument will be passed as the args argument of
   /// [PlatformViewFactory#create](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html#create-android.content.Context-int-java.lang.Object-)
   ///
-  /// `creationParamsCodec` is the codec used to encode `creationParams` before
-  /// sending it to the platform side. It should match the codec passed to the
-  /// constructor of
+  /// The `creationParamsCodec` argument is the codec used to encode
+  /// `creationParams` before sending it to the platform side. It should match
+  /// the codec passed to the constructor of
   /// [PlatformViewFactory](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html#PlatformViewFactory-io.flutter.plugin.common.MessageCodec-).
   /// This is typically one of: [StandardMessageCodec], [JSONMessageCodec],
   /// [StringCodec], or [BinaryCodec].
   ///
-  /// `onFocus` is a callback that will be invoked when the Android View asks to
-  /// get the input focus.
+  /// The `onFocus` argument is a callback that will be invoked when the Android
+  /// View asks to get the input focus.
   ///
   /// The Android view will only be created after
   /// [AndroidViewController.setSize] is called for the first time.
@@ -207,15 +207,16 @@ class PlatformViewsService {
   /// This is work in progress, not yet ready to be used, and requires a custom
   /// engine build. Creates a controller for a new iOS UIView.
   ///
-  /// `id` is an unused unique identifier generated with
+  /// The `id` parameter is an unused unique identifier generated with
   /// [platformViewsRegistry].
   ///
-  /// `viewType` is the identifier of the iOS view type to be created, a factory
-  /// for this view type must have been registered on the platform side.
-  /// Platform view factories are typically registered by plugin code.
+  /// The `viewType` parameter is the identifier of the iOS view type to be
+  /// created, a factory for this view type must have been registered on the
+  /// platform side. Platform view factories are typically registered by plugin
+  /// code.
   ///
-  /// `onFocus` is a callback that will be invoked when the UIKit view asks to
-  /// get the input focus. If `creationParams` is non null then
+  /// The `onFocus` parameter is a callback that will be invoked when the UIKit
+  /// view asks to get the input focus. If `creationParams` is non null then
   /// `creationParamsCodec` must not be null.
   static Future<UiKitViewController> initUiKitView({
     required int id,
@@ -250,15 +251,16 @@ class PlatformViewsService {
 
   /// Factory method to create an `AppKitView`.
   ///
-  /// `id` is an unused unique identifier generated with
+  /// The `id` parameter is an unused unique identifier generated with
   /// [platformViewsRegistry].
   ///
-  /// `viewType` is the identifier of the iOS view type to be created, a factory
-  /// for this view type must have been registered on the platform side.
-  /// Platform view factories are typically registered by plugin code.
+  /// The `viewType` parameter is the identifier of the iOS view type to be
+  /// created, a factory for this view type must have been registered on the
+  /// platform side. Platform view factories are typically registered by plugin
+  /// code.
   ///
-  /// `onFocus` is a callback that will be invoked when the UIKit view asks to
-  /// get the input focus. If `creationParams` is non null then
+  /// The `onFocus` parameter is a callback that will be invoked when the UIKit
+  /// view asks to get the input focus. If `creationParams` is non null then
   /// `creationParamsCodec` must not be null.
   static Future<AppKitViewController> initAppKitView({
     required int id,

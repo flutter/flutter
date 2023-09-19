@@ -627,9 +627,9 @@ class TrainHoppingAnimation extends Animation<double>
 /// animation otherwise.
 abstract class CompoundAnimation<T> extends Animation<T>
   with AnimationLazyListenerMixin, AnimationLocalListenersMixin, AnimationLocalStatusListenersMixin {
-  /// Creates a CompoundAnimation.
+  /// Creates a [CompoundAnimation].
   ///
-  /// Either can be a CompoundAnimation itself to combine multiple animations.
+  /// Either argument can be a [CompoundAnimation] itself to combine multiple animations.
   CompoundAnimation({
     required this.first,
     required this.next,

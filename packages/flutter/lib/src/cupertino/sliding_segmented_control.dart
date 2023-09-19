@@ -401,7 +401,7 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
 
   /// The amount of space by which to inset the [children].
   ///
-  /// Defaults to EdgeInsets.symmetric(vertical: 2, horizontal: 3).
+  /// Defaults to `EdgeInsets.symmetric(vertical: 2, horizontal: 3)`.
   final EdgeInsetsGeometry padding;
 
   @override

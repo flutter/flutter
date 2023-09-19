@@ -63,6 +63,8 @@ import 'thumb_painter.dart';
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/switches/>
 class CupertinoSwitch extends StatefulWidget {
   /// Creates an iOS-style switch.
+  ///
+  /// The [dragStartBehavior] parameter defaults to [DragStartBehavior.start].
   const CupertinoSwitch({
     super.key,
     required this.value,

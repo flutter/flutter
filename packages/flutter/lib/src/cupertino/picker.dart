@@ -133,7 +133,7 @@ class CupertinoPicker extends StatefulWidget {
   ///
   /// For more details, see [ListWheelScrollView.diameterRatio].
   ///
-  /// Defaults to `1.1` to visually mimic iOS.
+  /// Defaults to 1.1 to visually mimic iOS.
   final double diameterRatio;
 
   /// Background color behind the children.
