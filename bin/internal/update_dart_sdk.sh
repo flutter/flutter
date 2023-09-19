@@ -65,12 +65,16 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
     set +e
     if command -v arch >/dev/null 2>&1; then
       echo "You have arch installed!"
-      if ! ARCH=$(arch 2>/dev/null); then
-        # if `arch` failed, unset ARCH var
-        unset ARCH
-      fi
-      if [ "$ARCH" = 'arm64e' ]; then
-        ARCH='arm64'
+      if ARCH_RESULT=$(arch 2>/dev/null); then
+        case "$ARCH_RESULT" in
+          # For some reason, some x86_64 mac bots on CI return i386
+          i386 | x86_64 | x86_64h)
+            ARCH='x64'
+            ;;
+          arm64 | arm64e)
+            ARCH='arm64'
+            ;;
+        esac
       fi
     fi
     SYSCTL='sysctl'
