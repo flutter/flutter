@@ -77,8 +77,8 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
         esac
       fi
     fi
-    SYSCTL='sysctl'
     if [ -z "$ARCH" ]; then
+      SYSCTL='sysctl'
       if ! command -v "$SYSCTL" >/dev/null 2>&1; then
         if [ -f /usr/sbin/sysctl ]; then
           SYSCTL='/usr/sbin/sysctl'
