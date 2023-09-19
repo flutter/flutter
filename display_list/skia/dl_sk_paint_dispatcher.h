@@ -6,6 +6,7 @@
 #define FLUTTER_DISPLAY_LIST_SKIA_DL_SK_PAINT_DISPATCHER_H_
 
 #include "flutter/display_list/dl_op_receiver.h"
+#include "flutter/display_list/skia/dl_sk_types.h"
 
 namespace flutter {
 
