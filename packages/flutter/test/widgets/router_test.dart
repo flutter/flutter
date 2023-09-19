@@ -1646,7 +1646,7 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
     this.reportConfiguration = false,
   }) {
     if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
   }
 
@@ -1734,7 +1734,7 @@ class SimpleRouteInformationProvider extends RouteInformationProvider with Chang
     this.onRouterReport,
   }) {
     if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
   }
 
@@ -1794,7 +1794,7 @@ class SimpleAsyncRouterDelegate extends RouterDelegate<RouteInformation> with Ch
     required this.builder,
   }) {
     if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
   }
 

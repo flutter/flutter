@@ -1570,7 +1570,7 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation> wit
     required this.builder,
     required this.onPopPage,
   }) {
-    maybeDispatchObjectCreation();
+    ChangeNotifier.maybeDispatchObjectCreation(this);
   }
 
   @override
