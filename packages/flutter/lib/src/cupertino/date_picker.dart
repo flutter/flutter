@@ -237,16 +237,17 @@ class CupertinoDatePicker extends StatefulWidget {
   /// to [CupertinoDatePickerMode.dateAndTime].
   ///
   /// [onDateTimeChanged] is the callback called when the selected date or time
-  /// changes. When in [CupertinoDatePickerMode.time] mode, the year, month and
-  /// day will be the same as [initialDateTime]. When in
+  /// changes and must not be null. When in [CupertinoDatePickerMode.time] mode,
+  /// the year, month and day will be the same as [initialDateTime]. When in
   /// [CupertinoDatePickerMode.date] mode, this callback will always report the
   /// start time of the currently selected day. When in
   /// [CupertinoDatePickerMode.monthYear] mode, the day and time will be the
   /// start time of the first day of the month.
   ///
   /// [initialDateTime] is the initial date time of the picker. Defaults to the
-  /// present date and time. The present must conform to the intervals set in
-  /// [minimumDate], [maximumDate], [minimumYear], and [maximumYear].
+  /// present date and time and must not be null. The present must conform to
+  /// the intervals set in [minimumDate], [maximumDate], [minimumYear], and
+  /// [maximumYear].
   ///
   /// [minimumDate] is the minimum selectable [DateTime] of the picker. When set
   /// to null, the picker does not limit the minimum [DateTime] the user can pick.
@@ -261,7 +262,7 @@ class CupertinoDatePicker extends StatefulWidget {
   /// maximum time the user can pick if it's set to a date later than that.
   ///
   /// [minimumYear] is the minimum year that the picker can be scrolled to in
-  /// [CupertinoDatePickerMode.date] mode. Defaults to 1.
+  /// [CupertinoDatePickerMode.date] mode. Defaults to 1 and must not be null.
   ///
   /// [maximumYear] is the maximum year that the picker can be scrolled to in
   /// [CupertinoDatePickerMode.date] mode. Null if there's no limit.
@@ -336,8 +337,8 @@ class CupertinoDatePicker extends StatefulWidget {
   final CupertinoDatePickerMode mode;
 
   /// The initial date and/or time of the picker. Defaults to the present date
-  /// and time. The present must conform to the intervals set in [minimumDate],
-  /// [maximumDate], [minimumYear], and [maximumYear].
+  /// and time and must not be null. The present must conform to the intervals
+  /// set in [minimumDate], [maximumDate], [minimumYear], and [maximumYear].
   ///
   /// Changing this value after the initial build will not affect the currently
   /// selected date time.
@@ -374,7 +375,7 @@ class CupertinoDatePicker extends StatefulWidget {
   final DateTime? maximumDate;
 
   /// Minimum year that the picker can be scrolled to in
-  /// [CupertinoDatePickerMode.date] mode. Defaults to 1.
+  /// [CupertinoDatePickerMode.date] mode. Defaults to 1 and must not be null.
   final int minimumYear;
 
   /// Maximum year that the picker can be scrolled to in
@@ -398,6 +399,8 @@ class CupertinoDatePicker extends StatefulWidget {
   /// Callback called when the selected date and/or time changes. If the new
   /// selected [DateTime] is not valid, or is not in the [minimumDate] through
   /// [maximumDate] range, this callback will not be called.
+  ///
+  /// Must not be null.
   final ValueChanged<DateTime> onDateTimeChanged;
 
   /// Background color of date picker.
@@ -1887,7 +1890,7 @@ class CupertinoTimerPicker extends StatefulWidget {
   /// defaults to [CupertinoTimerPickerMode.hms].
   ///
   /// [onTimerDurationChanged] is the callback called when the selected duration
-  /// changes.
+  /// changes and must not be null.
   ///
   /// [initialTimerDuration] defaults to 0 second and is limited from 0 second
   /// to 23 hours 59 minutes 59 seconds.
@@ -1937,7 +1940,7 @@ class CupertinoTimerPicker extends StatefulWidget {
 
   /// Defines how the timer picker should be positioned within its parent.
   ///
-  /// Defaults to [Alignment.center].
+  /// This property must not be null. It defaults to [Alignment.center].
   final AlignmentGeometry alignment;
 
   /// Background color of timer picker.

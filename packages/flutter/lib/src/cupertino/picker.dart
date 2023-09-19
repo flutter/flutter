@@ -53,7 +53,8 @@ const double _kOverAndUnderCenterOpacity = 0.447;
 class CupertinoPicker extends StatefulWidget {
   /// Creates a picker from a concrete list of children.
   ///
-  /// The [itemExtent] must be greater than zero.
+  /// The [diameterRatio] and [itemExtent] arguments must not be null. The
+  /// [itemExtent] must be greater than zero.
   ///
   /// The [backgroundColor] defaults to null, which disables background painting entirely.
   /// (i.e. the picker is going to have a completely transparent background), to match
@@ -98,11 +99,11 @@ class CupertinoPicker extends StatefulWidget {
   /// normally the builder is only called once for each index (except when
   /// rebuilding - the cache is cleared).
   ///
-  /// The [childCount] argument reflects the number of children that will be
-  /// provided by the [itemBuilder].
+  /// The [itemBuilder] argument must not be null. The [childCount] argument
+  /// reflects the number of children that will be provided by the [itemBuilder].
   /// {@macro flutter.widgets.ListWheelChildBuilderDelegate.childCount}
   ///
-  /// The [itemExtent] argument must be positive.
+  /// The [itemExtent] argument must be non-null and positive.
   ///
   /// The [backgroundColor] defaults to null, which disables background painting entirely.
   /// (i.e. the picker is going to have a completely transparent background), to match
@@ -133,7 +134,7 @@ class CupertinoPicker extends StatefulWidget {
   ///
   /// For more details, see [ListWheelScrollView.diameterRatio].
   ///
-  /// Defaults to `1.1` to visually mimic iOS.
+  /// Must not be null and defaults to `1.1` to visually mimic iOS.
   final double diameterRatio;
 
   /// Background color behind the children.
@@ -333,12 +334,13 @@ class CupertinoPickerDefaultSelectionOverlay extends StatelessWidget {
   /// area (or the currently selected item, depending on how you described it
   /// elsewhere) of a [CupertinoPicker].
   ///
-  /// The [background] argument default value is
-  /// [CupertinoColors.tertiarySystemFill].
+  /// The [background] argument default value is [CupertinoColors.tertiarySystemFill].
+  /// It must be non-null.
   ///
   /// The [capStartEdge] and [capEndEdge] arguments decide whether to add a
   /// default margin and use rounded corners on the left and right side of the
-  /// rectangular overlay, and they both default to true.
+  /// rectangular overlay.
+  /// Default to true and must not be null.
   const CupertinoPickerDefaultSelectionOverlay({
     super.key,
     this.background = CupertinoColors.tertiarySystemFill,

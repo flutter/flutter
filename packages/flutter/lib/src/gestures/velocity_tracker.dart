@@ -13,7 +13,9 @@ export 'dart:ui' show Offset, PointerDeviceKind;
 /// A velocity in two dimensions.
 @immutable
 class Velocity {
-  /// Creates a [Velocity].
+  /// Creates a velocity.
+  ///
+  /// The [pixelsPerSecond] argument must not be null.
   const Velocity({
     required this.pixelsPerSecond,
   });
@@ -88,6 +90,8 @@ class Velocity {
 ///    useful velocity operations.
 class VelocityEstimate {
   /// Creates a dimensional velocity estimate.
+  ///
+  /// [pixelsPerSecond], [confidence], [duration], and [offset] must not be null.
   const VelocityEstimate({
     required this.pixelsPerSecond,
     required this.confidence,

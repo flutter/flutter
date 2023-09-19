@@ -762,6 +762,9 @@ class TextEditingValue {
   /// The selection and composing range must be within the text. This is not
   /// checked during construction, and must be guaranteed by the caller.
   ///
+  /// The [text], [selection], and [composing] arguments must not be null but
+  /// each have default values.
+  ///
   /// The default value of [selection] is `TextSelection.collapsed(offset: -1)`.
   /// This indicates that there is no selection at all.
   const TextEditingValue({

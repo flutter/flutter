@@ -33,6 +33,9 @@ int runeToLowerCase(int rune) {
 ///  * [RawKeyboard], which uses this interface to expose key data.
 class RawKeyEventDataMacOs extends RawKeyEventData {
   /// Creates a key event data structure specific for macOS.
+  ///
+  /// The [characters], [charactersIgnoringModifiers], and [modifiers], arguments
+  /// must not be null.
   const RawKeyEventDataMacOs({
     this.characters = '',
     this.charactersIgnoringModifiers = '',

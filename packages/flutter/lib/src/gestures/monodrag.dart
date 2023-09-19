@@ -70,6 +70,8 @@ typedef GestureVelocityTrackerBuilder = VelocityTracker Function(PointerEvent ev
 abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Initialize the object.
   ///
+  /// [dragStartBehavior] must not be null.
+  ///
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   DragGestureRecognizer({
     super.debugOwner,

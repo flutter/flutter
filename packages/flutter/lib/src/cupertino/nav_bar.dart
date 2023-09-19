@@ -577,8 +577,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 class CupertinoSliverNavigationBar extends StatefulWidget {
   /// Creates a navigation bar for scrolling lists.
   ///
-  /// If [automaticallyImplyTitle] is false, then the [largeTitle] argument is
-  /// required.
+  /// The [largeTitle] argument is required and must not be null.
   const CupertinoSliverNavigationBar({
     super.key,
     this.largeTitle,
@@ -1403,6 +1402,8 @@ class _NavigationBarStaticComponents {
 class CupertinoNavigationBarBackButton extends StatelessWidget {
   /// Construct a [CupertinoNavigationBarBackButton] that can be used to pop
   /// the current route.
+  ///
+  /// The [color] parameter must not be null.
   const CupertinoNavigationBarBackButton({
     super.key,
     this.color,

@@ -56,6 +56,10 @@ bool _debugTextRangeIsValid(TextRange range, String text) {
 ///    to true.
 abstract class TextEditingDelta with Diagnosticable {
   /// Creates a delta for a given change to the editing state.
+  ///
+  /// {@template flutter.services.TextEditingDelta}
+  /// The [oldText], [selection], and [composing] arguments must not be null.
+  /// {@endtemplate}
   const TextEditingDelta({
     required this.oldText,
     required this.selection,
@@ -247,6 +251,8 @@ abstract class TextEditingDelta with Diagnosticable {
 class TextEditingDeltaInsertion extends TextEditingDelta {
   /// Creates an insertion delta for a given change to the editing state.
   ///
+  /// {@macro flutter.services.TextEditingDelta}
+  ///
   /// {@template flutter.services.TextEditingDelta.optIn}
   /// See also:
   ///
@@ -298,6 +304,8 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
 class TextEditingDeltaDeletion extends TextEditingDelta {
   /// Creates a deletion delta for a given change to the editing state.
   ///
+  /// {@macro flutter.services.TextEditingDelta}
+  ///
   /// {@macro flutter.services.TextEditingDelta.optIn}
   const TextEditingDeltaDeletion({
     required super.oldText,
@@ -347,6 +355,8 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
   ///
   /// A replacement can occur in cases such as auto-correct, suggestions, and
   /// when a selection is replaced by a single character.
+  ///
+  /// {@macro flutter.services.TextEditingDelta}
   ///
   /// {@macro flutter.services.TextEditingDelta.optIn}
   const TextEditingDeltaReplacement({
@@ -402,6 +412,8 @@ class TextEditingDeltaNonTextUpdate extends TextEditingDelta {
   /// A situation where this delta would be created is when dragging the selection
   /// handles. There are no changes to the text, but there are updates to the selection
   /// and potentially the composing region as well.
+  ///
+  /// {@macro flutter.services.TextEditingDelta}
   ///
   /// {@macro flutter.services.TextEditingDelta.optIn}
   const TextEditingDeltaNonTextUpdate({
