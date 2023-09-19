@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'hardware_keyboard.dart';
+import 'platform_channel.dart';
 
 export 'hardware_keyboard.dart' show KeyDataTransitMode;
 
