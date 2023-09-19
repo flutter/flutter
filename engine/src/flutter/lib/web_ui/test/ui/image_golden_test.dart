@@ -319,7 +319,17 @@ Future<void> testMain() async {
       await completer.future;
 
       final DomImageBitmap bitmap = (await createImageBitmap(image).toDart)! as DomImageBitmap;
-      return renderer.createImageFromImageBitmap(bitmap);
+
+      expect(bitmap.width.toDartInt, 150);
+      expect(bitmap.height.toDartInt, 150);
+      final ui.Image uiImage = await renderer.createImageFromImageBitmap(bitmap);
+
+      if (isSkwasm) {
+        // Skwasm transfers the bitmap to the web worker, so it should be disposed/consumed.
+        expect(bitmap.width.toDartInt, 0);
+        expect(bitmap.height.toDartInt, 0);
+      }
+      return uiImage;
     });
   }
 
