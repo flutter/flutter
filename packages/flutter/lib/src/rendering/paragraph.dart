@@ -388,6 +388,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     }
     _lastSelectableFragments ??= _getSelectableFragments();
     _lastSelectableFragments!.forEach(_registrar!.add);
+    markNeedsCompositingBitsUpdate();
   }
 
   void _removeSelectionRegistrarSubscription() {
@@ -424,6 +425,9 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
     }
     _lastSelectableFragments = null;
   }
+
+  @override
+  bool get alwaysNeedsCompositing => _lastSelectableFragments != null;
 
   @override
   void markNeedsLayout() {
