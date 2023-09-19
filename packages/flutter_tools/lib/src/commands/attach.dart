@@ -7,9 +7,7 @@ import 'dart:async';
 import 'package:vm_service/vm_service.dart';
 
 import '../android/android_device.dart';
-import '../artifacts.dart';
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -65,7 +63,6 @@ class AttachCommand extends FlutterCommand {
   AttachCommand({
     bool verboseHelp = false,
     HotRunnerFactory? hotRunnerFactory,
-    required Artifacts? artifacts,
     required Stdio stdio,
     required Logger logger,
     required Terminal terminal,
@@ -73,15 +70,14 @@ class AttachCommand extends FlutterCommand {
     required Platform platform,
     required ProcessInfo processInfo,
     required FileSystem fileSystem,
-  }): _artifacts = artifacts,
-      _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(),
-      _stdio = stdio,
-      _logger = logger,
-      _terminal = terminal,
-      _signals = signals,
-      _platform = platform,
-      _processInfo = processInfo,
-      _fileSystem = fileSystem {
+  }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(),
+       _stdio = stdio,
+       _logger = logger,
+       _terminal = terminal,
+       _signals = signals,
+       _platform = platform,
+       _processInfo = processInfo,
+       _fileSystem = fileSystem {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false, excludeRelease: true);
     usesTargetOption();
     usesPortOptions(verboseHelp: verboseHelp);
@@ -145,7 +141,6 @@ class AttachCommand extends FlutterCommand {
   }
 
   final HotRunnerFactory _hotRunnerFactory;
-  final Artifacts? _artifacts;
   final Stdio _stdio;
   final Logger _logger;
   final Terminal _terminal;
@@ -267,13 +262,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       throwToolExit('Did not find any valid target devices.');
     }
 
-    final Artifacts? overrideArtifacts = device.artifactOverrides ?? _artifacts;
-    await context.run<void>(
-      body: () => _attachToDevice(device),
-      overrides: <Type, Generator>{
-        Artifacts: () => overrideArtifacts,
-      },
-    );
+    await _attachToDevice(device);
 
     return FlutterCommandResult.success();
   }
@@ -288,7 +277,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             logger: _logger,
           ),
           notifyingLogger: (_logger is NotifyingLogger)
-            ? _logger as NotifyingLogger
+            ? _logger
             : NotifyingLogger(verbose: _logger.isVerbose, parent: _logger),
           logToStdout: true,
         )
@@ -501,6 +490,13 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       final List<ForwardedPort> ports = device.portForwarder!.forwardedPorts.toList();
       for (final ForwardedPort port in ports) {
         await device.portForwarder!.unforward(port);
+      }
+      // However we exited from the runner, ensure the terminal has line mode
+      // and echo mode enabled before we return the user to the shell.
+      try {
+        _terminal.singleCharMode = false;
+      } on StdinException {
+        // Do nothing, if the STDIN handle is no longer available, there is nothing actionable for us to do at this point
       }
     }
   }

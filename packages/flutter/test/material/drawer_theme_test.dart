@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('copyWith, ==, hashCode basics', () {
@@ -18,7 +19,7 @@ void main() {
     expect(identical(DrawerThemeData.lerp(data, data, 0.5), data), true);
   });
 
-  testWidgets('Default debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DrawerThemeData().debugFillProperties(builder);
 
@@ -30,7 +31,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('Custom debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Custom debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DrawerThemeData(
       backgroundColor: Color(0x00000099),
@@ -58,10 +59,9 @@ void main() {
     ]);
   });
 
-  testWidgets('Default values are used when no Drawer or DrawerThemeData properties are specified', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - Default values are used when no Drawer or DrawerThemeData properties are specified', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    final ThemeData theme = ThemeData();
-    final bool useMaterial3 = theme.useMaterial3;
+    final ThemeData theme = ThemeData(useMaterial3: false);
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -74,24 +74,45 @@ void main() {
     scaffoldKey.currentState!.openDrawer();
     await tester.pumpAndSettle();
 
-    expect(_drawerMaterial(tester).color, useMaterial3 ? theme.colorScheme.surface : null);
-    expect(_drawerMaterial(tester).elevation, useMaterial3 ? 1.0 : 16.0);
-    expect(_drawerMaterial(tester).shadowColor, useMaterial3 ? Colors.transparent : ThemeData().shadowColor);
-    expect(_drawerMaterial(tester).surfaceTintColor, useMaterial3 ? theme.colorScheme.surfaceTint : null);
+    expect(_drawerMaterial(tester).color, null);
+    expect(_drawerMaterial(tester).elevation, 16.0);
+    expect(_drawerMaterial(tester).shadowColor, theme.shadowColor);
+    expect(_drawerMaterial(tester).surfaceTintColor, null);
+    expect(_drawerMaterial(tester).shape, null);
+    expect(_scrim(tester).color, Colors.black54);
+    expect(_drawerRenderBox(tester).size.width, 304.0);
+  });
+
+  testWidgetsWithLeakTracking('Material3 - Default values are used when no Drawer or DrawerThemeData properties are specified', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          key: scaffoldKey,
+          drawer: const Drawer(),
+        ),
+      ),
+    );
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+
+    expect(_drawerMaterial(tester).color, theme.colorScheme.surface);
+    expect(_drawerMaterial(tester).elevation, 1.0);
+    expect(_drawerMaterial(tester).shadowColor, Colors.transparent);
+    expect(_drawerMaterial(tester).surfaceTintColor, theme.colorScheme.surfaceTint);
     expect(
       _drawerMaterial(tester).shape,
-      useMaterial3
-        ? const RoundedRectangleBorder(borderRadius: BorderRadius.horizontal(right:  Radius.circular(16.0)))
-        : null,
+      const RoundedRectangleBorder(borderRadius: BorderRadius.horizontal(right:  Radius.circular(16.0)))
     );
     expect(_scrim(tester).color, Colors.black54);
     expect(_drawerRenderBox(tester).size.width, 304.0);
   });
 
-  testWidgets('Default values are used when no Drawer or DrawerThemeData properties are specified in end drawer', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - Default values are used when no Drawer or DrawerThemeData properties are specified in end drawer', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    final ThemeData theme = ThemeData();
-    final bool useMaterial3 = theme.useMaterial3;
+    final ThemeData theme = ThemeData(useMaterial3: false);
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -104,21 +125,43 @@ void main() {
     scaffoldKey.currentState!.openEndDrawer();
     await tester.pumpAndSettle();
 
-    expect(_drawerMaterial(tester).color, useMaterial3 ? theme.colorScheme.surface : null);
-    expect(_drawerMaterial(tester).elevation, useMaterial3 ? 1.0 : 16.0);
-    expect(_drawerMaterial(tester).shadowColor, useMaterial3 ? Colors.transparent : ThemeData().shadowColor);
-    expect(_drawerMaterial(tester).surfaceTintColor, useMaterial3 ? ThemeData().colorScheme.surfaceTint : null);
+    expect(_drawerMaterial(tester).color, null);
+    expect(_drawerMaterial(tester).elevation, 16.0);
+    expect(_drawerMaterial(tester).shadowColor, theme.shadowColor);
+    expect(_drawerMaterial(tester).surfaceTintColor, null);
+    expect(_drawerMaterial(tester).shape, null);
+    expect(_scrim(tester).color, Colors.black54);
+    expect(_drawerRenderBox(tester).size.width, 304.0);
+  });
+
+  testWidgetsWithLeakTracking('Material3 - Default values are used when no Drawer or DrawerThemeData properties are specified in end drawer', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          key: scaffoldKey,
+          endDrawer: const Drawer(),
+        ),
+      ),
+    );
+    scaffoldKey.currentState!.openEndDrawer();
+    await tester.pumpAndSettle();
+
+    expect(_drawerMaterial(tester).color, theme.colorScheme.surface);
+    expect(_drawerMaterial(tester).elevation, 1.0);
+    expect(_drawerMaterial(tester).shadowColor, Colors.transparent);
+    expect(_drawerMaterial(tester).surfaceTintColor, theme.colorScheme.surfaceTint);
     expect(
       _drawerMaterial(tester).shape,
-      useMaterial3
-        ? const RoundedRectangleBorder(borderRadius: BorderRadius.horizontal(left:  Radius.circular(16.0)))
-        : null,
+      const RoundedRectangleBorder(borderRadius: BorderRadius.horizontal(left:  Radius.circular(16.0)))
     );
     expect(_scrim(tester).color, Colors.black54);
     expect(_drawerRenderBox(tester).size.width, 304.0);
   });
 
-  testWidgets('DrawerThemeData values are used when no Drawer properties are specified', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DrawerThemeData values are used when no Drawer properties are specified', (WidgetTester tester) async {
     const Color backgroundColor = Color(0x00000001);
     const Color scrimColor = Color(0x00000002);
     const double elevation = 7.0;
@@ -159,7 +202,7 @@ void main() {
     expect(_drawerRenderBox(tester).size.width, width);
   });
 
-  testWidgets('Drawer values take priority over DrawerThemeData values when both properties are specified', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drawer values take priority over DrawerThemeData values when both properties are specified', (WidgetTester tester) async {
     const Color backgroundColor = Color(0x00000001);
     const Color scrimColor = Color(0x00000002);
     const double elevation = 7.0;
@@ -206,7 +249,7 @@ void main() {
     expect(_drawerRenderBox(tester).size.width, width);
   });
 
-  testWidgets('DrawerTheme values take priority over ThemeData.drawerTheme values when both properties are specified', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DrawerTheme values take priority over ThemeData.drawerTheme values when both properties are specified', (WidgetTester tester) async {
     const Color backgroundColor = Color(0x00000001);
     const Color scrimColor = Color(0x00000002);
     const double elevation = 7.0;

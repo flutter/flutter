@@ -211,6 +211,15 @@ abstract class SearchDelegate<T> {
   ///
   PreferredSizeWidget? buildBottom(BuildContext context) => null;
 
+  /// Widget to display a flexible space in the [AppBar].
+  ///
+  /// Returns null by default, i.e. a flexible space widget is not included.
+  ///
+  /// See also:
+  ///
+  ///  * [AppBar.flexibleSpace], the intended use for the return value of this method.
+  Widget? buildFlexibleSpace(BuildContext context) => null;
+
   /// The theme used to configure the search page.
   ///
   /// The returned [ThemeData] will be used to wrap the entire search page,
@@ -368,6 +377,15 @@ abstract class SearchDelegate<T> {
   }
 
   _SearchPageRoute<T>? _route;
+
+  /// Releases the resources.
+  @mustCallSuper
+  void dispose() {
+    _currentBodyNotifier.dispose();
+    _focusNode?.dispose();
+    _queryTextController.dispose();
+    _proxyAnimation.parent = null;
+  }
 }
 
 /// Describes the body that is currently shown under the [AppBar] in the
@@ -581,11 +599,10 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
               style: widget.delegate.searchFieldStyle ?? theme.textTheme.titleLarge,
               textInputAction: widget.delegate.textInputAction,
               keyboardType: widget.delegate.keyboardType,
-              onSubmitted: (String _) {
-                widget.delegate.showResults(context);
-              },
+              onSubmitted: (String _) => widget.delegate.showResults(context),
               decoration: InputDecoration(hintText: searchFieldLabel),
             ),
+            flexibleSpace: widget.delegate.buildFlexibleSpace(context),
             actions: widget.delegate.buildActions(context),
             bottom: widget.delegate.buildBottom(context),
           ),

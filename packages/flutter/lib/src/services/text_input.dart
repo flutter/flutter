@@ -1038,17 +1038,33 @@ mixin TextSelectionDelegate {
   /// input.
   void bringIntoView(TextPosition position);
 
-  /// Whether cut is enabled, must not be null.
+  /// Whether cut is enabled.
   bool get cutEnabled => true;
 
-  /// Whether copy is enabled, must not be null.
+  /// Whether copy is enabled.
   bool get copyEnabled => true;
 
-  /// Whether paste is enabled, must not be null.
+  /// Whether paste is enabled.
   bool get pasteEnabled => true;
 
-  /// Whether select all is enabled, must not be null.
+  /// Whether select all is enabled.
   bool get selectAllEnabled => true;
+
+  /// Whether look up is enabled.
+  bool get lookUpEnabled => true;
+
+  /// Whether search web is enabled.
+  bool get searchWebEnabled => true;
+
+  /// Whether share is enabled.
+  bool get shareEnabled => true;
+
+  /// Whether Live Text input is enabled.
+  ///
+  /// See also:
+  ///  * [LiveText], where the availability of Live Text input can be obtained.
+  ///  * [LiveTextInputStatusNotifier], where the status of Live Text can be listened to.
+  bool get liveTextInputEnabled => false;
 
   /// Cut current selection to [Clipboard].
   ///

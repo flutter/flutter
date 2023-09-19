@@ -1148,10 +1148,8 @@ void main() {
 }
 
 class TestDeviceManager extends DeviceManager {
-  TestDeviceManager({required this.logger}) : super(logger: logger);
+  TestDeviceManager({required super.logger});
   List<Device> devices = <Device>[];
-
-  final Logger logger;
 
   @override
   List<DeviceDiscovery> get deviceDiscoverers {

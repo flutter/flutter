@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   test('SnackBarThemeData copyWith, ==, hashCode basics', () {
@@ -45,7 +46,7 @@ void main() {
         throwsAssertionError);
   });
 
-  testWidgets('Default SnackBarThemeData debugFillProperties',
+  testWidgetsWithLeakTracking('Default SnackBarThemeData debugFillProperties',
       (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SnackBarThemeData().debugFillProperties(builder);
@@ -58,7 +59,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('SnackBarThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SnackBarThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SnackBarThemeData(
       backgroundColor: Color(0xFFFFFFFF),
@@ -96,10 +97,43 @@ void main() {
     ]);
   });
 
-  testWidgets('Passing no SnackBarThemeData returns defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Material2 - Passing no SnackBarThemeData returns defaults', (WidgetTester tester) async {
     const String text = 'I am a snack bar.';
-    final ThemeData theme = ThemeData();
-    final bool material3 = theme.useMaterial3;
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(useMaterial3: false),
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return GestureDetector(
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: const Text(text),
+                  duration: const Duration(seconds: 2),
+                  action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+                ));
+              },
+              child: const Text('X'),
+            );
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final Material material = _getSnackBarMaterial(tester);
+    final RenderParagraph content = _getSnackBarTextRenderObject(tester, text);
+
+    expect(content.text.style, Typography.material2018().white.titleMedium);
+    expect(material.color, const Color(0xFF333333));
+    expect(material.elevation, 6.0);
+    expect(material.shape, null);
+  });
+
+  testWidgetsWithLeakTracking('Material3 - Passing no SnackBarThemeData returns defaults', (WidgetTester tester) async {
+    const String text = 'I am a snack bar.';
+    final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(MaterialApp(
       theme: theme,
       home: Scaffold(
@@ -126,15 +160,13 @@ void main() {
     final Material material = _getSnackBarMaterial(tester);
     final RenderParagraph content = _getSnackBarTextRenderObject(tester, text);
 
-    expect(content.text.style, material3
-      ? Typography.material2021().englishLike.bodyMedium?.merge(Typography.material2021().black.bodyMedium).copyWith(color: theme.colorScheme.onInverseSurface, decorationColor: theme.colorScheme.onSurface)
-      : Typography.material2018().white.titleMedium);
-    expect(material.color, material3 ? theme.colorScheme.inverseSurface : const Color(0xFF333333));
+    expect(content.text.style, Typography.material2021().englishLike.bodyMedium?.merge(Typography.material2021().black.bodyMedium).copyWith(color: theme.colorScheme.onInverseSurface, decorationColor: theme.colorScheme.onSurface));
+    expect(material.color, theme.colorScheme.inverseSurface);
     expect(material.elevation, 6.0);
     expect(material.shape, null);
   });
 
-  testWidgets('SnackBar uses values from SnackBarThemeData', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SnackBar uses values from SnackBarThemeData', (WidgetTester tester) async {
     const String text = 'I am a snack bar.';
     const String action = 'ACTION';
     final SnackBarThemeData snackBarTheme = _snackBarTheme(showCloseIcon: true);
@@ -175,7 +207,7 @@ void main() {
     expect(icon.icon, Icons.close);
   });
 
-  testWidgets('SnackBar widget properties take priority over theme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SnackBar widget properties take priority over theme', (WidgetTester tester) async {
     const Color backgroundColor = Colors.purple;
     const Color textColor = Colors.pink;
     const double elevation = 7.0;
@@ -235,7 +267,7 @@ void main() {
     expect(snackBarBottomRight.dx, (800 + snackBarWidth) / 2); // Device width is 800.
   });
 
-  testWidgets('SnackBarAction uses actionBackgroundColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SnackBarAction uses actionBackgroundColor', (WidgetTester tester) async {
     final MaterialStateColor actionBackgroundColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return Colors.blue;
@@ -284,7 +316,7 @@ void main() {
     expect(materialAfterDismissed.color, Colors.blue);
   });
 
-  testWidgets('SnackBarAction backgroundColor overrides SnackBarThemeData actionBackgroundColor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SnackBarAction backgroundColor overrides SnackBarThemeData actionBackgroundColor', (WidgetTester tester) async {
     final MaterialStateColor snackBarActionBackgroundColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return Colors.amber;
@@ -341,7 +373,7 @@ void main() {
     expect(materialAfterDismissed.color, Colors.amber);
   });
 
-  testWidgets('SnackBarThemeData asserts when actionBackgroundColor is a MaterialStateColor and disabledActionBackgroundColor is also provided', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SnackBarThemeData asserts when actionBackgroundColor is a MaterialStateColor and disabledActionBackgroundColor is also provided', (WidgetTester tester) async {
     final MaterialStateColor actionBackgroundColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return Colors.blue;
@@ -377,7 +409,7 @@ void main() {
     );
   });
 
-  testWidgets('SnackBar theme behavior is correct for floating', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SnackBar theme behavior is correct for floating', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
         snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating)),
@@ -417,7 +449,7 @@ void main() {
     expect(snackBarBottomCenter.dy == floatingActionButtonTopCenter.dy, true);
   });
 
-  testWidgets('SnackBar theme behavior is correct for fixed', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SnackBar theme behavior is correct for fixed', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
         snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.fixed),
@@ -498,7 +530,7 @@ void main() {
     );
   }
 
-  testWidgets('SnackBar theme behavior will assert properly for margin use', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SnackBar theme behavior will assert properly for margin use', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/84935
     // SnackBarBehavior.floating set in theme does not assert with margin
     await tester.pumpWidget(buildApp(
@@ -537,7 +569,7 @@ void main() {
    });
   }
 
-  testWidgets('SnackBar theme behavior will assert properly for width use', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SnackBar theme behavior will assert properly for width use', (WidgetTester tester) async {
     // SnackBarBehavior.floating set in theme does not assert with width
     await tester.pumpWidget(buildApp(
       themedBehavior: SnackBarBehavior.floating,

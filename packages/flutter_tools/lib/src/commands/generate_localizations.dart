@@ -5,6 +5,7 @@
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../localizations/gen_l10n.dart';
@@ -199,6 +200,13 @@ class GenerateLocalizationsCommand extends FlutterCommand {
       'suppress-warnings',
       help: 'When specified, all warnings will be suppressed.\n'
     );
+    argParser.addFlag(
+      'relax-syntax',
+      help: 'When specified, the syntax will be relaxed so that the special character '
+            '"{" is treated as a string if it is not followed by a valid placeholder '
+            'and "}" is treated as a string if it does not close any previous "{" '
+            'that is treated as a special character.',
+    );
   }
 
   final FileSystem _fileSystem;
@@ -217,6 +225,10 @@ class GenerateLocalizationsCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    // Validate the rest of the args.
+    if (argResults!.rest.isNotEmpty) {
+      throwToolExit('Unexpected positional argument "${argResults!.rest.first}".');
+    }
     // Keep in mind that this is also defined in the following locations:
     // 1. flutter_tools/lib/src/build_system/targets/localizations.dart
     // 2. flutter_tools/test/general.shard/build_system/targets/localizations_test.dart

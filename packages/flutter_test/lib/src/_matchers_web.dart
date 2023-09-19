@@ -58,8 +58,8 @@ class MatchesGoldenFile extends AsyncMatcher {
     final RenderObject renderObject = _findRepaintBoundary(element);
     final Size size = renderObject.paintBounds.size;
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
-    final Element e = binding.rootElement!;
     final ui.FlutterView view = binding.platformDispatcher.implicitView!;
+    final RenderView renderView = binding.renderViews.firstWhere((RenderView r) => r.flutterView == view);
 
     // Unlike `flutter_tester`, we don't have the ability to render an element
     // to an image directly. Instead, we will use `window.render()` to render
@@ -77,8 +77,8 @@ class MatchesGoldenFile extends AsyncMatcher {
       } on TestFailure catch (ex) {
         return ex.message;
       }
-    }, additionalTime: const Duration(seconds: 22));
-    _renderElement(view, _findRepaintBoundary(e));
+    });
+    _renderElement(view, renderView);
     return result;
   }
 

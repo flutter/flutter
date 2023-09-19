@@ -6,14 +6,14 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 import 'states.dart';
 
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/100451
-  testWidgets('GridView.builder respects findChildIndexCallback', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GridView.builder respects findChildIndexCallback', (WidgetTester tester) async {
     bool finderCalled = false;
     int itemCount = 7;
     late StateSetter stateSetter;
@@ -51,7 +51,7 @@ void main() {
     expect(finderCalled, true);
   });
 
-  testWidgets('Empty GridView', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Empty GridView', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -63,7 +63,7 @@ void main() {
     );
   });
 
-  testWidgets('GridView.count control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GridView.count control test', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
     await tester.pumpWidget(
@@ -136,7 +136,7 @@ void main() {
     log.clear();
   });
 
-  testWidgets('GridView.extent control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GridView.extent control test', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
     await tester.pumpWidget(
@@ -183,7 +183,7 @@ void main() {
     log.clear();
   });
 
-  testWidgets('GridView large scroll jump', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GridView large scroll jump', (WidgetTester tester) async {
     final List<int> log = <int>[];
 
     await tester.pumpWidget(
@@ -275,7 +275,7 @@ void main() {
     }
   });
 
-  testWidgets('GridView - change crossAxisCount', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GridView - change crossAxisCount', (WidgetTester tester) async {
     final List<int> log = <int>[];
 
     await tester.pumpWidget(
@@ -346,7 +346,7 @@ void main() {
     expect(find.text('4'), findsNothing);
   });
 
-  testWidgets('SliverGridRegularTileLayout - can handle close to zero mainAxisStride', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverGridRegularTileLayout - can handle close to zero mainAxisStride', (WidgetTester tester) async {
     const SliverGridDelegateWithMaxCrossAxisExtent delegate = SliverGridDelegateWithMaxCrossAxisExtent(
       childAspectRatio: 1e300,
       maxCrossAxisExtent: 500.0,
@@ -370,7 +370,7 @@ void main() {
     expect(layout.getMinChildIndexForScrollOffset(1000.0), 0.0);
   });
 
-  testWidgets('GridView - change maxChildCrossAxisExtent', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GridView - change maxChildCrossAxisExtent', (WidgetTester tester) async {
     final List<int> log = <int>[];
 
     await tester.pumpWidget(
@@ -441,7 +441,7 @@ void main() {
     expect(find.text('4'), findsNothing);
   });
 
-  testWidgets('One-line GridView paints', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('One-line GridView paints', (WidgetTester tester) async {
     const Color green = Color(0xFF00FF00);
 
     final Container container = Container(
@@ -470,7 +470,7 @@ void main() {
     expect(find.byType(GridView), isNot(paints..rect(color: green)..rect(color: green)..rect(color: green)));
   });
 
-  testWidgets('GridView in zero context', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GridView in zero context', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -491,7 +491,7 @@ void main() {
     expect(find.text('1'), findsNothing);
   });
 
-  testWidgets('GridView in unbounded context', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GridView in unbounded context', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -511,7 +511,7 @@ void main() {
     expect(find.text('19'), findsOneWidget);
   });
 
-  testWidgets('GridView.builder control test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GridView.builder control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -532,7 +532,7 @@ void main() {
     expect(find.text('12'), findsNothing);
   });
 
-  testWidgets('GridView.builder with undefined itemCount', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GridView.builder with undefined itemCount', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -554,7 +554,7 @@ void main() {
     expect(find.text('13'), findsOneWidget);
   });
 
-  testWidgets('GridView cross axis layout', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GridView cross axis layout', (WidgetTester tester) async {
     final Key target = UniqueKey();
 
     Widget build(TextDirection textDirection) {
@@ -580,7 +580,7 @@ void main() {
     expect(tester.getBottomRight(find.byKey(target)), const Offset(800.0, 200.0));
   });
 
-  testWidgets('GridView crossAxisSpacing', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GridView crossAxisSpacing', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/27151.
     final Key target = UniqueKey();
 
@@ -608,7 +608,7 @@ void main() {
     expect(tester.getBottomRight(find.byKey(target)), const Offset(800.0, 194.0));
   });
 
-  testWidgets('GridView does not cache itemBuilder calls', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GridView does not cache itemBuilder calls', (WidgetTester tester) async {
     final Map<int, int> counters = <int, int>{};
 
     await tester.pumpWidget(Directionality(
@@ -643,7 +643,7 @@ void main() {
     expect(counters[4], 2);
   });
 
-  testWidgets('GridView does not report visual overflow unnecessarily', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GridView does not report visual overflow unnecessarily', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -664,9 +664,18 @@ void main() {
     final TestClipPaintingContext context = TestClipPaintingContext();
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.none));
-  });
+  },
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    // TODO(ksokolovskyi): remove after fixing
+    notDisposedAllowList: <String, int?> {
+      // https://github.com/flutter/flutter/issues/134575
+      'OffsetLayer': 1,
+      // https://github.com/flutter/flutter/issues/134572
+      'ContainerLayer': 1,
+    },
+  ));
 
-  testWidgets('GridView respects clipBehavior', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GridView respects clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -730,9 +739,14 @@ void main() {
     // 4th, check that a non-default clip behavior can be sent to the painting context.
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.antiAlias));
-  });
+  },
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    // TODO(ksokolovskyi): remove after fixing
+    // https://github.com/flutter/flutter/issues/134572
+    notDisposedAllowList: <String, int?> {'ContainerLayer': 1},
+  ));
 
-  testWidgets('GridView.builder respects clipBehavior', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GridView.builder respects clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -748,7 +762,7 @@ void main() {
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
 
-  testWidgets('GridView.custom respects clipBehavior', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GridView.custom respects clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -766,7 +780,7 @@ void main() {
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
 
-  testWidgets('GridView.count respects clipBehavior', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GridView.count respects clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -781,7 +795,7 @@ void main() {
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
 
-  testWidgets('GridView.extent respects clipBehavior', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GridView.extent respects clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -796,7 +810,7 @@ void main() {
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
 
-  testWidgets('SliverGridDelegateWithFixedCrossAxisCount mainAxisExtent works as expected', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverGridDelegateWithFixedCrossAxisCount mainAxisExtent works as expected', (WidgetTester tester) async {
     const int crossAxisCount = 4;
     const double mainAxisExtent = 100.0;
 
@@ -822,7 +836,7 @@ void main() {
     expect(tester.getSize(find.text('4')), equals(const Size(200.0, mainAxisExtent)));
   });
 
-  testWidgets('SliverGridDelegateWithMaxCrossAxisExtent mainAxisExtent works as expected', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverGridDelegateWithMaxCrossAxisExtent mainAxisExtent works as expected', (WidgetTester tester) async {
     const double maxCrossAxisExtent = 200.0;
     const double mainAxisExtent = 100.0;
 
@@ -848,7 +862,7 @@ void main() {
     expect(tester.getSize(find.text('4')), equals(const Size(200.0, mainAxisExtent)));
   });
 
-  testWidgets('SliverGridDelegateWithMaxCrossAxisExtent throws assertion error when maxCrossAxisExtent is 0', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverGridDelegateWithMaxCrossAxisExtent throws assertion error when maxCrossAxisExtent is 0', (WidgetTester tester) async {
     const double maxCrossAxisExtent = 0;
 
     expect(() => Directionality(
@@ -857,6 +871,44 @@ void main() {
         maxCrossAxisExtent: maxCrossAxisExtent,
       ),
     ), throwsAssertionError);
+  });
 
+  testWidgetsWithLeakTracking('SliverGrid sets correct extent for null returning builder delegate', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/130685
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: GridView.builder(
+        controller: controller,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+        ),
+        itemBuilder: (BuildContext context, int index) {
+          if (index == 12) {
+            return null;
+          }
+          return Container(
+            height: 100,
+            width: 100,
+            color: const Color(0xFFFF8A80),
+            alignment: Alignment.center,
+            child: Text('item ${index+1}'),
+          );
+        },
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(controller.position.maxScrollExtent, double.infinity);
+    expect(controller.position.pixels, 0.0);
+    await tester.fling(find.byType(GridView), const Offset(0.0, -1300.0), 100.0);
+    await tester.pumpAndSettle();
+    // The actual extent of the children is 472.0. This should be reflected when
+    // the builder returns null (meaning we have reached the end).
+    expect(controller.position.maxScrollExtent, 472.0);
+    expect(controller.position.pixels, 472.0);
   });
 }

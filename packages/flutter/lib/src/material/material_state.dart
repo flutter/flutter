@@ -735,11 +735,21 @@ class MaterialStatePropertyAll<T> implements MaterialStateProperty<T> {
 ///
 /// Used by widgets that expose their internal state for the sake of
 /// extensions that add support for additional states. See
-/// [TextButton.statesController] for example.
+/// [TextButton] for an example.
 ///
 /// The controller's [value] is its current set of states. Listeners
 /// are notified whenever the [value] changes. The [value] should only be
 /// changed with [update]; it should not be modified directly.
+///
+/// The controller's [value] represents the set of states that a
+/// widget's visual properties, typically [MaterialStateProperty]
+/// values, are resolved against. It is _not_ the intrinsic state of
+/// the widget. The widget is responsible for ensuring that the
+/// controller's [value] tracks its intrinsic state. For example one
+/// cannot request the keyboard focus for a widget by adding
+/// [MaterialState.focused] to its controller. When the widget gains the
+/// or loses the focus it will [update] its controller's [value] and
+/// notify listeners of the change.
 class MaterialStatesController extends ValueNotifier<Set<MaterialState>> {
   /// Creates a MaterialStatesController.
   MaterialStatesController([Set<MaterialState>? value]) : super(<MaterialState>{...?value});

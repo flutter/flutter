@@ -38,7 +38,7 @@ class MultidexProject extends Project {
   final String pubspec = '''
   name: test
   environment:
-    sdk: '>=3.0.0-0 <4.0.0'
+    sdk: '>=3.2.0-0 <4.0.0'
 
   dependencies:
     flutter:
@@ -144,7 +144,7 @@ class MultidexProject extends Project {
   apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
   android {
-      compileSdkVersion 31
+      compileSdkVersion 33
 
       compileOptions {
           sourceCompatibility JavaVersion.VERSION_1_8
@@ -163,7 +163,7 @@ class MultidexProject extends Project {
           // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
           applicationId "com.example.multidextest2"
           minSdkVersion 19
-          targetSdkVersion 30
+          targetSdkVersion 33
           versionCode flutterVersionCode.toInteger()
           versionName flutterVersionName
       }
@@ -194,7 +194,7 @@ class MultidexProject extends Project {
   ''';
 
   String get androidGradleProperties => '''
-  org.gradle.jvmargs=-Xmx1536M
+  org.gradle.jvmargs=-Xmx4G
   android.useAndroidX=true
   android.enableJetifier=true
   android.enableR8=true

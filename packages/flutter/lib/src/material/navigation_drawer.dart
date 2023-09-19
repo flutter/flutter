@@ -165,12 +165,13 @@ class NavigationDrawer extends StatelessWidget {
         destinationIndex += 1;
       }
     }
+    final NavigationDrawerThemeData navigationDrawerTheme = NavigationDrawerTheme.of(context);
 
     return Drawer(
-      backgroundColor: backgroundColor,
-      shadowColor: shadowColor,
-      surfaceTintColor: surfaceTintColor,
-      elevation: elevation,
+      backgroundColor: backgroundColor ?? navigationDrawerTheme.backgroundColor,
+      shadowColor: shadowColor ?? navigationDrawerTheme.shadowColor,
+      surfaceTintColor: surfaceTintColor ?? navigationDrawerTheme.surfaceTintColor,
+      elevation: elevation ?? navigationDrawerTheme.elevation,
       child: SafeArea(
         bottom: false,
         child: ListView(
@@ -218,7 +219,7 @@ class NavigationDrawerDestination extends StatelessWidget {
   ///
   /// The icon will use [NavigationDrawerThemeData.iconTheme] with
   /// [MaterialState.selected]. If this is null, the default [IconThemeData]
-  /// would use a size of 24.0 and [ColorScheme.onSurfaceVariant].
+  /// would use a size of 24.0 and [ColorScheme.onSecondaryContainer].
   final Widget? selectedIcon;
 
   /// The text label that appears on the right of the icon
@@ -702,7 +703,7 @@ class _NavigationDrawerDefaultsM3 extends NavigationDrawerThemeData {
       return IconThemeData(
         size: 24.0,
         color: states.contains(MaterialState.selected)
-            ? null
+            ? _colors.onSecondaryContainer
             : _colors.onSurfaceVariant,
       );
     });

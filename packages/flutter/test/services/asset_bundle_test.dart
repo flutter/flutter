@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestAssetBundle extends CachingAssetBundle {
   Map<String, int> loadCallCount = <String, int>{};
@@ -16,17 +17,32 @@ class TestAssetBundle extends CachingAssetBundle {
   Future<ByteData> load(String key) async {
     loadCallCount[key] = (loadCallCount[key] ?? 0) + 1;
     if (key == 'AssetManifest.json') {
-      return ByteData.view(Uint8List.fromList(const Utf8Encoder().convert('{"one": ["one"]}')).buffer);
+      return ByteData.sublistView(utf8.encode('{"one": ["one"]}'));
     }
 
     if (key == 'AssetManifest.bin') {
-      return const StandardMessageCodec().encodeMessage(<String, Object>{
-        'one': <Object>[]
-      })!;
+      return const StandardMessageCodec()
+          .encodeMessage(<String, Object>{'one': <Object>[]})!;
+    }
+
+    if (key == 'AssetManifest.bin.json') {
+      // Encode the manifest data that will be used by the app
+      final ByteData data = const StandardMessageCodec().encodeMessage(<String, Object> {'one': <Object>[]})!;
+      // Simulate the behavior of NetworkAssetBundle.load here, for web tests
+      return ByteData.sublistView(
+        utf8.encode(
+          json.encode(
+            base64.encode(
+              // Encode only the actual bytes of the buffer, and no more...
+              data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes)
+            )
+          )
+        )
+      );
     }
 
     if (key == 'counter') {
-      return ByteData.view(Uint8List.fromList(const Utf8Encoder().convert(loadCallCount[key]!.toString())).buffer);
+      return ByteData.sublistView(utf8.encode(loadCallCount[key]!.toString()));
     }
 
     if (key == 'one') {
@@ -134,6 +150,26 @@ void main() {
       final Future<int> data = bundle.loadStructuredBinaryData('one', (ByteData data) => 2);
       expect(data, isA<SynchronousFuture<int>>());
       expect(await data, 1);
+    });
+
+    testWidgetsWithLeakTracking('loadStructuredData handles exceptions correctly', (WidgetTester tester) async {
+      final TestAssetBundle bundle = TestAssetBundle();
+      try {
+        await bundle.loadStructuredData('AssetManifest.json', (String value) => Future<String>.error('what do they say?'));
+        fail('expected exception did not happen');
+      } catch (e) {
+        expect(e.toString(), contains('what do they say?'));
+      }
+    });
+
+    testWidgetsWithLeakTracking('loadStructuredBinaryData handles exceptions correctly', (WidgetTester tester) async {
+      final TestAssetBundle bundle = TestAssetBundle();
+      try {
+        await bundle.loadStructuredBinaryData('AssetManifest.bin', (ByteData value) => Future<String>.error('buy more crystals'));
+        fail('expected exception did not happen');
+      } catch (e) {
+        expect(e.toString(), contains('buy more crystals'));
+      }
     });
   });
 

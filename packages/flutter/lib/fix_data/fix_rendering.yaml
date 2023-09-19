@@ -18,6 +18,50 @@
 # * Fixes in this file are from the Rendering library. *
 version: 1
 transforms:
+  # Change made in https://github.com/flutter/flutter/pull/128522
+  - title: "Migrate to 'textScaler'"
+    date: 2023-06-09
+    element:
+      uris: [ 'rendering.dart' ]
+      constructor: ''
+      inClass: 'RenderParagraph'
+    changes:
+      - kind: 'addParameter'
+        index: 5
+        name: 'textScaler'
+        style: optional_named
+        argumentValue:
+          expression: 'TextScaler.linear({% textScaleFactor %})'
+          requiredIf: "textScaleFactor != ''"
+      - kind: 'removeParameter'
+        name: 'textScaleFactor'
+    variables:
+      textScaleFactor:
+        kind: 'fragment'
+        value: 'arguments[textScaleFactor]'
+
+  # Change made in https://github.com/flutter/flutter/pull/128522
+  - title: "Migrate to 'textScaler'"
+    date: 2023-06-09
+    element:
+      uris: [ 'rendering.dart' ]
+      constructor: ''
+      inClass: 'RenderEditable'
+    changes:
+      - kind: 'addParameter'
+        index: 15
+        name: 'textScaler'
+        style: optional_named
+        argumentValue:
+          expression: 'TextScaler.linear({% textScaleFactor %})'
+          requiredIf: "textScaleFactor != ''"
+      - kind: 'removeParameter'
+        name: 'textScaleFactor'
+    variables:
+      textScaleFactor:
+        kind: 'fragment'
+        value: 'arguments[textScaleFactor]'
+
   # Changes made in https://github.com/flutter/flutter/pull/66305
   - title: "Migrate to 'clipBehavior'"
     date: 2020-09-22

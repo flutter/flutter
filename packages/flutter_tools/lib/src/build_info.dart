@@ -647,7 +647,7 @@ List<DarwinArch> defaultIOSArchsForEnvironment(
   // Handle single-arch local engines.
   final LocalEngineInfo? localEngineInfo = artifacts.localEngineInfo;
   if (localEngineInfo != null) {
-    final String localEngineName = localEngineInfo.localEngineName;
+    final String localEngineName = localEngineInfo.localTargetName;
     if (localEngineName.contains('_arm64')) {
       return <DarwinArch>[ DarwinArch.arm64 ];
     }
@@ -670,7 +670,7 @@ List<DarwinArch> defaultMacOSArchsForEnvironment(Artifacts artifacts) {
   // Handle single-arch local engines.
   final LocalEngineInfo? localEngineInfo = artifacts.localEngineInfo;
   if (localEngineInfo != null) {
-    if (localEngineInfo.localEngineName.contains('_arm64')) {
+    if (localEngineInfo.localTargetName.contains('_arm64')) {
       return <DarwinArch>[ DarwinArch.arm64 ];
     }
     return <DarwinArch>[ DarwinArch.x86_64 ];
@@ -777,6 +777,8 @@ TargetPlatform getTargetPlatformForName(String platform) {
       return TargetPlatform.windows_x64;
     case 'web-javascript':
       return TargetPlatform.web_javascript;
+    case 'flutter-tester':
+      return TargetPlatform.tester;
   }
   throw Exception('Unsupported platform name "$platform"');
 }
@@ -872,8 +874,9 @@ String getLinuxBuildDirectory([TargetPlatform? targetPlatform]) {
 }
 
 /// Returns the Windows build output directory.
-String getWindowsBuildDirectory() {
-  return globals.fs.path.join(getBuildDirectory(), 'windows');
+String getWindowsBuildDirectory(TargetPlatform targetPlatform) {
+  final String arch = targetPlatform.simpleName;
+  return globals.fs.path.join(getBuildDirectory(), 'windows', arch);
 }
 
 /// Returns the Fuchsia build output directory.

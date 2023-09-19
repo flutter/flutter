@@ -96,13 +96,13 @@ class RenderTest extends RenderProxyBox {
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
 
-    if (!_isSemanticBoundary) {
+    if (!isSemanticBoundary) {
       return;
     }
 
     config
-      ..isSemanticBoundary = _isSemanticBoundary
-      ..label = _label
+      ..isSemanticBoundary = isSemanticBoundary
+      ..label = label
       ..textDirection = TextDirection.ltr;
 
   }

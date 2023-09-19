@@ -189,6 +189,7 @@ class GalleryTransitionTest {
         '90th_percentile_frame_build_time_millis',
         '99th_percentile_frame_build_time_millis',
         'average_frame_rasterizer_time_millis',
+        'stddev_frame_rasterizer_time_millis',
         'worst_frame_rasterizer_time_millis',
         '90th_percentile_frame_rasterizer_time_millis',
         '99th_percentile_frame_rasterizer_time_millis',

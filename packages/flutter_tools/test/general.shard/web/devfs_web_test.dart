@@ -1190,6 +1190,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     bool suppressErrors = false,
     bool checkDartPluginRegistry = false,
     File? dartPluginRegistrant,
+    Uri? nativeAssetsYaml,
   }) async {
     return output;
   }
@@ -1211,10 +1212,8 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
 }
 
 class FakeDwds extends Fake implements Dwds {
-  FakeDwds(this.connectedAppsIterable) :
+  FakeDwds(Iterable<AppConnection> connectedAppsIterable) :
     connectedApps = Stream<AppConnection>.fromIterable(connectedAppsIterable);
-
-  final Iterable<AppConnection> connectedAppsIterable;
 
   @override
   final Stream<AppConnection> connectedApps;

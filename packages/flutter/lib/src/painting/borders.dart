@@ -840,7 +840,7 @@ class _CompoundBorder extends ShapeBorder {
   }
 
   @override
-  bool get preferPaintInterior => true;
+  bool get preferPaintInterior => borders.every((ShapeBorder border) => border.preferPaintInterior);
 
   @override
   void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {

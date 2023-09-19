@@ -32,17 +32,8 @@ Widget buildTest({
   Key? key,
   bool expanded = true,
 }) {
-  return Localizations(
-    locale: const Locale('en', 'US'),
-    delegates: const <LocalizationsDelegate<dynamic>>[
-      DefaultMaterialLocalizations.delegate,
-      DefaultWidgetsLocalizations.delegate,
-    ],
-    child: Directionality(
-      textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: const MediaQueryData(),
-        child: Scaffold(
+  return MaterialApp(
+        home: Scaffold(
           drawerDragStartBehavior: DragStartBehavior.down,
           body: DefaultTabController(
             length: 4,
@@ -114,8 +105,6 @@ Widget buildTest({
             ),
           ),
         ),
-      ),
-    ),
   );
 }
 
@@ -577,7 +566,7 @@ void main() {
     const List<String> tabs = <String>['Hello', 'World'];
     int buildCount = 0;
     await tester.pumpWidget(
-      MaterialApp(home: Material(child:
+      MaterialApp(theme: ThemeData(useMaterial3: false), home: Material(child:
         // THE FOLLOWING SECTION IS FROM THE NestedScrollView DOCUMENTATION
         // (EXCEPT FOR THE CHANGES TO THE buildCount COUNTER)
         DefaultTabController(
@@ -2274,6 +2263,7 @@ void main() {
     // Regression tests for https://github.com/flutter/flutter/issues/17096
     Widget buildBallisticTest(ScrollController controller) {
       return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
         home: Scaffold(
           body: NestedScrollView(
             controller: controller,

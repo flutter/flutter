@@ -5,7 +5,7 @@
 // To run this, from the root of the Flutter repository:
 //   bin/cache/dart-sdk/bin/dart --enable-asserts dev/bots/analyze_snippet_code.dart
 
-// In general, please prefer using full inline examples in API docs.
+// In general, please prefer using full linked examples in API docs.
 //
 // For documentation on creating sample code, see ../../examples/api/README.md
 // See also our style guide's discussion on documentation and sample code:
@@ -13,7 +13,7 @@
 //
 // This tool is used to analyze smaller snippets of code in the API docs.
 // Such snippets are wrapped in ```dart ... ``` blocks, which may themselves
-// be wrapped in {@tool snippet} ... {@endtool} blocks to set them apart
+// be wrapped in {@tool snippet} ... {@end-tool} blocks to set them apart
 // in the rendered output.
 //
 // Such snippets:
@@ -55,10 +55,17 @@
 //
 // At the top of a file you can say `// Examples can assume:` and then list some
 // commented-out declarations that will be included in the analysis for snippets
-// in that file.
+// in that file. This section may also contain explicit import statements.
 //
-// Snippets generally import all the main Flutter packages (including material
-// and flutter_test), as well as most core Dart packages with the usual prefixes.
+// For files without an `// Examples can assume:` section or if that section
+// contains no explicit imports, the snippets will implicitly import all the
+// main Flutter packages (including material and flutter_test), as well as most
+// core Dart packages with the usual prefixes.
+//
+// When invoked without an additional path argument, the script will analyze
+// the code snippets for all packages in the "packages" subdirectory that do
+// not specify "nodoc: true" in their pubspec.yaml (i.e. all packages for which
+// we publish docs will have their doc code snippets analyzed).
 
 import 'dart:async';
 import 'dart:convert';
@@ -70,7 +77,7 @@ import 'package:path/path.dart' as path;
 import 'package:watcher/watcher.dart';
 
 final String _flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
-final String _defaultFlutterPackage = path.join(_flutterRoot, 'packages', 'flutter', 'lib');
+final String _packageFlutter = path.join(_flutterRoot, 'packages', 'flutter', 'lib');
 final String _defaultDartUiLocation = path.join(_flutterRoot, 'bin', 'cache', 'pkg', 'sky_engine', 'lib', 'ui');
 final String _flutter = path.join(_flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
 
@@ -142,12 +149,28 @@ Future<void> main(List<String> arguments) async {
     exit(0);
   }
 
-  Directory flutterPackage;
+  final List<Directory> flutterPackages;
   if (parsedArguments.rest.length == 1) {
     // Used for testing.
-    flutterPackage = Directory(parsedArguments.rest.single);
+    flutterPackages = <Directory>[Directory(parsedArguments.rest.single)];
   } else {
-    flutterPackage = Directory(_defaultFlutterPackage);
+    // By default analyze snippets in all packages in the packages subdirectory
+    // that do not specify "nodoc: true" in their pubspec.yaml.
+    flutterPackages = <Directory>[];
+    final String packagesRoot = path.join(_flutterRoot, 'packages');
+    for (final FileSystemEntity entity in Directory(packagesRoot).listSync()) {
+      if (entity is! Directory) {
+        continue;
+      }
+      final File pubspec = File(path.join(entity.path, 'pubspec.yaml'));
+      if (!pubspec.existsSync()) {
+        throw StateError("Unexpected package '${entity.path}' found in packages directory");
+      }
+      if (!pubspec.readAsStringSync().contains('nodoc: true')) {
+        flutterPackages.add(Directory(path.join(entity.path, 'lib')));
+      }
+    }
+    assert(flutterPackages.length >= 4);
   }
 
   final bool includeDartUi = parsedArguments.wasParsed('dart-ui-location') || parsedArguments['include-dart-ui'] as bool;
@@ -165,14 +188,14 @@ Future<void> main(List<String> arguments) async {
 
   if (parsedArguments['interactive'] != null) {
     await _runInteractive(
-      flutterPackage: flutterPackage,
+      flutterPackages: flutterPackages,
       tempDirectory: parsedArguments['temp'] as String?,
       filePath: parsedArguments['interactive'] as String,
       dartUiLocation: includeDartUi ? dartUiLocation : null,
     );
   } else {
     if (await _SnippetChecker(
-        flutterPackage,
+        flutterPackages,
         tempDirectory: parsedArguments['temp'] as String?,
         verbose: parsedArguments['verbose'] as bool,
         dartUiLocation: includeDartUi ? dartUiLocation : null,
@@ -360,7 +383,7 @@ class _SnippetChecker {
   /// supplied, the default location of the `dart:ui` code in the Flutter
   /// repository is used (i.e. "<flutter repo>/bin/cache/pkg/sky_engine/lib/ui").
   _SnippetChecker(
-    this._flutterPackage, {
+    this._flutterPackages, {
     String? tempDirectory,
     this.verbose = false,
     Directory? dartUiLocation,
@@ -438,8 +461,8 @@ class _SnippetChecker {
   /// automatically if there are no errors unless _keepTmp is true.
   final Directory _tempDirectory;
 
-  /// The package directory for the flutter package within the flutter root dir.
-  final Directory _flutterPackage;
+  /// The package directories within the flutter root dir that will be checked.
+  final List<Directory> _flutterPackages;
 
   /// The directory for the dart:ui code to be analyzed with the flutter code.
   ///
@@ -453,12 +476,14 @@ class _SnippetChecker {
   }
 
   static const List<String> ignoresDirectives = <String>[
-    '// ignore_for_file: duplicate_ignore',
     '// ignore_for_file: directives_ordering',
+    '// ignore_for_file: duplicate_ignore',
+    '// ignore_for_file: no_leading_underscores_for_local_identifiers',
     '// ignore_for_file: prefer_final_locals',
     '// ignore_for_file: unnecessary_import',
     '// ignore_for_file: unreachable_from_main',
     '// ignore_for_file: unused_element',
+    '// ignore_for_file: unused_element_parameter',
     '// ignore_for_file: unused_local_variable',
   ];
 
@@ -480,7 +505,7 @@ class _SnippetChecker {
       "import 'dart:typed_data';",
       "import 'dart:ui' as ui;",
       "import 'package:flutter_test/flutter_test.dart';",
-      for (final File file in _listDartFiles(Directory(_defaultFlutterPackage)))
+      for (final File file in _listDartFiles(Directory(_packageFlutter)))
         "import 'package:flutter/${path.basename(file.path)}';",
     ].map<_Line>((String code) => _Line.generated(code: code)).toList();
   }
@@ -490,13 +515,14 @@ class _SnippetChecker {
   /// Returns true if any errors are found, false otherwise.
   Future<bool> checkSnippets() async {
     final Map<String, _SnippetFile> snippets = <String, _SnippetFile>{};
-    if (_dartUiLocation != null && !_dartUiLocation!.existsSync()) {
-      stderr.writeln('Unable to analyze engine dart snippets at ${_dartUiLocation!.path}.');
+    if (_dartUiLocation != null && !_dartUiLocation.existsSync()) {
+      stderr.writeln('Unable to analyze engine dart snippets at ${_dartUiLocation.path}.');
     }
     final List<File> filesToAnalyze = <File>[
-      ..._listDartFiles(_flutterPackage, recursive: true),
-      if (_dartUiLocation != null && _dartUiLocation!.existsSync())
-        ..._listDartFiles(_dartUiLocation!, recursive: true),
+      for (final Directory flutterPackage in _flutterPackages)
+        ..._listDartFiles(flutterPackage, recursive: true),
+      if (_dartUiLocation != null && _dartUiLocation.existsSync())
+        ..._listDartFiles(_dartUiLocation, recursive: true),
     ];
     final Set<Object> errors = <Object>{};
     errors.addAll(await _extractSnippets(filesToAnalyze, snippetMap: snippets));
@@ -564,6 +590,7 @@ class _SnippetChecker {
         final List<String> fileLines = file.readAsLinesSync();
         final List<_Line> ignorePreambleLinesOnly = <_Line>[];
         final List<_Line> preambleLines = <_Line>[];
+        final List<_Line> customImports = <_Line>[];
         bool inExamplesCanAssumePreamble = false; // Whether or not we're in the file-wide preamble section ("Examples can assume").
         bool inToolSection = false; // Whether or not we're in a code snippet
         bool inDartSection = false; // Whether or not we're in a '```dart' segment.
@@ -582,7 +609,11 @@ class _SnippetChecker {
               throw _SnippetCheckerException('Unexpected content in snippet code preamble.', file: relativeFilePath, line: lineNumber);
             } else {
               final _Line newLine = _Line(line: lineNumber, indent: 3, code: line.substring(3));
-              preambleLines.add(newLine);
+              if (newLine.code.startsWith('import ')) {
+               customImports.add(newLine);
+              } else {
+                preambleLines.add(newLine);
+              }
               if (line.startsWith('// // ignore_for_file: ')) {
                 ignorePreambleLinesOnly.add(newLine);
               }
@@ -602,7 +633,7 @@ class _SnippetChecker {
             }
             if (trimmedLine.startsWith(_codeBlockEndRegex)) {
               inDartSection = false;
-              final _SnippetFile snippet = _processBlock(startLine, block, preambleLines, ignorePreambleLinesOnly, relativeFilePath, lastExample);
+              final _SnippetFile snippet = _processBlock(startLine, block, preambleLines, ignorePreambleLinesOnly, relativeFilePath, lastExample, customImports);
               final String path = _writeSnippetFile(snippet).path;
               assert(!snippetMap.containsKey(path));
               snippetMap[path] = snippet;
@@ -645,6 +676,7 @@ class _SnippetChecker {
                        line.contains('```kotlin') ||
                        line.contains('```swift') ||
                        line.contains('```glsl') ||
+                       line.contains('```json') ||
                        line.contains('```csv')) {
               inOtherBlock = true;
             } else if (line.startsWith(_uncheckedCodeBlockStartRegex)) {
@@ -684,7 +716,7 @@ class _SnippetChecker {
   /// a primitive heuristic to make snippet blocks into valid Dart code.
   ///
   /// `block` argument will get mutated, but is copied before this function returns.
-  _SnippetFile _processBlock(_Line startingLine, List<String> block, List<_Line> assumptions, List<_Line> ignoreAssumptionsOnly, String filename, _SnippetFile? lastExample) {
+  _SnippetFile _processBlock(_Line startingLine, List<String> block, List<_Line> assumptions, List<_Line> ignoreAssumptionsOnly, String filename, _SnippetFile? lastExample, List<_Line> customImports) {
     if (block.isEmpty) {
       throw _SnippetCheckerException('${startingLine.asLocation(filename, 0)}: Empty ```dart block in snippet code.');
     }
@@ -745,7 +777,7 @@ class _SnippetChecker {
       return _SnippetFile.fromStrings(
         startingLine,
         block.toList(),
-        importPreviousExample ? <_Line>[] : headersWithoutImports,
+        headersWithoutImports,
         <_Line>[
           ...ignoreAssumptionsOnly,
           if (hasEllipsis)
@@ -754,13 +786,24 @@ class _SnippetChecker {
         'self-contained program',
         filename,
       );
-    } else if (hasStatefulWidgetComment) {
+    }
+
+    final List<_Line> headers = switch ((importPreviousExample, customImports.length)) {
+      (true, _) => <_Line>[],
+      (false, 0) => headersWithImports,
+      (false, _) => <_Line>[
+        ...headersWithoutImports,
+        const _Line.generated(code: '// ignore_for_file: unused_import'),
+        ...customImports,
+      ]
+    };
+    if (hasStatefulWidgetComment) {
       return _SnippetFile.fromStrings(
         startingLine,
         prefix: 'class _State extends State<StatefulWidget> {',
         block.toList(),
         postfix: '}',
-        importPreviousExample ? <_Line>[] : headersWithImports,
+        headers,
         preamble,
         'stateful widget',
         filename,
@@ -772,7 +815,7 @@ class _SnippetChecker {
       return _SnippetFile.fromStrings(
         startingLine,
         block.toList(),
-        importPreviousExample ? <_Line>[] : headersWithImports,
+        headers,
         preamble,
         'top-level declaration',
         filename,
@@ -785,7 +828,7 @@ class _SnippetChecker {
         prefix: 'Future<void> function() async {',
         block.toList(),
         postfix: '}',
-        importPreviousExample ? <_Line>[] : headersWithImports,
+        headers,
         preamble,
         'statement',
         filename,
@@ -797,7 +840,7 @@ class _SnippetChecker {
         prefix: 'class Class {',
         block.toList(),
         postfix: '}',
-        importPreviousExample ? <_Line>[] : headersWithImports,
+        headers,
         <_Line>[
           ...preamble,
           const _Line.generated(code: '// ignore_for_file: avoid_classes_with_only_static_members'),
@@ -839,7 +882,7 @@ class _SnippetChecker {
         prefix: 'dynamic expression = ',
         block.toList(),
         postfix: ';',
-        importPreviousExample ? <_Line>[] : headersWithImports,
+        headers,
         preamble,
         'expression',
         filename,
@@ -1083,7 +1126,7 @@ class _SnippetFile {
 
 Future<void> _runInteractive({
   required String? tempDirectory,
-  required Directory flutterPackage,
+  required List<Directory> flutterPackages,
   required String filePath,
   required Directory? dartUiLocation,
 }) async {
@@ -1105,7 +1148,7 @@ Future<void> _runInteractive({
   print('Starting up in interactive mode on ${path.relative(filePath, from: _flutterRoot)} ...');
   print('Type "q" to quit, or "r" to force a reload.');
 
-  final _SnippetChecker checker = _SnippetChecker(flutterPackage, tempDirectory: tempDirectory)
+  final _SnippetChecker checker = _SnippetChecker(flutterPackages, tempDirectory: tempDirectory)
     .._createConfigurationFiles();
 
   ProcessSignal.sigint.watch().listen((_) {

@@ -7,9 +7,12 @@ import 'dart:ui' show lerpDouble;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'button_style.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
+import 'input_decorator.dart';
 import 'material_state.dart';
+import 'text_button.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 
@@ -68,6 +71,9 @@ class DatePickerThemeData with Diagnosticable {
     this.rangeSelectionBackgroundColor,
     this.rangeSelectionOverlayColor,
     this.dividerColor,
+    this.inputDecorationTheme,
+    this.cancelButtonStyle,
+    this.confirmButtonStyle,
   });
 
   /// Overrides the default value of [Dialog.backgroundColor].
@@ -288,6 +294,16 @@ class DatePickerThemeData with Diagnosticable {
   /// and vertical divider when the dialog is in landscape orientation.
   final Color? dividerColor;
 
+  /// Overrides the [InputDatePickerFormField]'s input decoration theme.
+  /// If this is null, [ThemeData.inputDecorationTheme] is used instead.
+  final InputDecorationTheme? inputDecorationTheme;
+
+  /// Overrides the default style of the cancel button of a [DatePickerDialog].
+  final ButtonStyle? cancelButtonStyle;
+
+  /// Overrrides the default style of the confirm (OK) button of a [DatePickerDialog].
+  final ButtonStyle? confirmButtonStyle;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   DatePickerThemeData copyWith({
@@ -324,6 +340,9 @@ class DatePickerThemeData with Diagnosticable {
     Color? rangeSelectionBackgroundColor,
     MaterialStateProperty<Color?>? rangeSelectionOverlayColor,
     Color? dividerColor,
+    InputDecorationTheme? inputDecorationTheme,
+    ButtonStyle? cancelButtonStyle,
+    ButtonStyle? confirmButtonStyle,
   }) {
     return DatePickerThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -359,6 +378,9 @@ class DatePickerThemeData with Diagnosticable {
       rangeSelectionBackgroundColor: rangeSelectionBackgroundColor ?? this.rangeSelectionBackgroundColor,
       rangeSelectionOverlayColor: rangeSelectionOverlayColor ?? this.rangeSelectionOverlayColor,
       dividerColor: dividerColor ?? this.dividerColor,
+      inputDecorationTheme: inputDecorationTheme ?? this.inputDecorationTheme,
+      cancelButtonStyle: cancelButtonStyle ?? this.cancelButtonStyle,
+      confirmButtonStyle: confirmButtonStyle ?? this.confirmButtonStyle,
     );
   }
 
@@ -401,6 +423,9 @@ class DatePickerThemeData with Diagnosticable {
       rangeSelectionBackgroundColor: Color.lerp(a?.rangeSelectionBackgroundColor, b?.rangeSelectionBackgroundColor, t),
       rangeSelectionOverlayColor: MaterialStateProperty.lerp<Color?>(a?.rangeSelectionOverlayColor, b?.rangeSelectionOverlayColor, t, Color.lerp),
       dividerColor: Color.lerp(a?.dividerColor, b?.dividerColor, t),
+      inputDecorationTheme: t < 0.5 ? a?.inputDecorationTheme : b?.inputDecorationTheme,
+      cancelButtonStyle: ButtonStyle.lerp(a?.cancelButtonStyle, b?.cancelButtonStyle, t),
+      confirmButtonStyle: ButtonStyle.lerp(a?.confirmButtonStyle, b?.confirmButtonStyle, t),
     );
   }
 
@@ -449,6 +474,9 @@ class DatePickerThemeData with Diagnosticable {
     rangeSelectionBackgroundColor,
     rangeSelectionOverlayColor,
     dividerColor,
+    inputDecorationTheme,
+    cancelButtonStyle,
+    confirmButtonStyle,
   ]);
 
   @override
@@ -489,7 +517,10 @@ class DatePickerThemeData with Diagnosticable {
       && other.rangePickerHeaderHelpStyle == rangePickerHeaderHelpStyle
       && other.rangeSelectionBackgroundColor == rangeSelectionBackgroundColor
       && other.rangeSelectionOverlayColor == rangeSelectionOverlayColor
-      && other.dividerColor == dividerColor;
+      && other.dividerColor == dividerColor
+      && other.inputDecorationTheme == inputDecorationTheme
+      && other.cancelButtonStyle == cancelButtonStyle
+      && other.confirmButtonStyle == confirmButtonStyle;
   }
 
   @override
@@ -528,6 +559,9 @@ class DatePickerThemeData with Diagnosticable {
     properties.add(ColorProperty('rangeSelectionBackgroundColor', rangeSelectionBackgroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('rangeSelectionOverlayColor', rangeSelectionOverlayColor, defaultValue: null));
     properties.add(ColorProperty('dividerColor', dividerColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<InputDecorationTheme>('inputDecorationTheme', inputDecorationTheme, defaultValue: null));
+    properties.add(DiagnosticsProperty<ButtonStyle>('cancelButtonStyle', cancelButtonStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<ButtonStyle>('confirmButtonStyle', confirmButtonStyle, defaultValue: null));
   }
 }
 
@@ -645,6 +679,16 @@ class _DatePickerDefaultsM2 extends DatePickerThemeData {
 
   @override
   Color? get headerBackgroundColor => _isDark ? _colors.surface : _colors.primary;
+
+  @override
+  ButtonStyle get cancelButtonStyle {
+    return TextButton.styleFrom();
+  }
+
+  @override
+  ButtonStyle get confirmButtonStyle {
+    return TextButton.styleFrom();
+  }
 
   @override
   Color? get headerForegroundColor => _isDark ? _colors.onSurface : _colors.onPrimary;
@@ -805,6 +849,16 @@ class _DatePickerDefaultsM3 extends DatePickerThemeData {
 
   @override
   Color? get backgroundColor => _colors.surface;
+
+  @override
+  ButtonStyle get cancelButtonStyle {
+    return TextButton.styleFrom();
+  }
+
+  @override
+  ButtonStyle get confirmButtonStyle {
+    return TextButton.styleFrom();
+  }
 
   @override
   Color? get shadowColor => Colors.transparent;
@@ -981,8 +1035,6 @@ class _DatePickerDefaultsM3 extends DatePickerThemeData {
 
   @override
   TextStyle? get rangePickerHeaderHelpStyle => _textTheme.titleSmall;
-
-
 }
 
 // END GENERATED TOKEN PROPERTIES - DatePicker

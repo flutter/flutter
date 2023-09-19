@@ -7,6 +7,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class Leaf extends StatefulWidget {
   const Leaf({
@@ -46,7 +47,15 @@ List<Widget> generateList(Widget child) {
 }
 
 void main() {
-  testWidgets('KeepAlive with ListView with itemExtent', (WidgetTester tester) async {
+  test('KeepAlive debugTypicalAncestorWidgetClass', () {
+    final KeepAlive keepAlive = KeepAlive(keepAlive: false, child: Container());
+    expect(
+      keepAlive.debugTypicalAncestorWidgetDescription,
+      'SliverWithKeepAliveWidget or TwoDimensionalViewport',
+    );
+  });
+
+  testWidgetsWithLeakTracking('KeepAlive with ListView with itemExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -94,7 +103,7 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
   });
 
-  testWidgets('KeepAlive with ListView without itemExtent', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('KeepAlive with ListView without itemExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -141,7 +150,7 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
   });
 
-  testWidgets('KeepAlive with GridView', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('KeepAlive with GridView', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -190,7 +199,7 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
   });
 
-  testWidgets('KeepAlive render tree description', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('KeepAlive render tree description', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -205,7 +214,7 @@ void main() {
     );
     // The important lines below are the ones marked with "<----"
     expect(tester.binding.renderView.toStringDeep(minLevel: DiagnosticLevel.info), equalsIgnoringHashCodes(
-      'RenderView#00000\n'
+      '_ReusableRenderView#00000\n'
       ' │ debug mode enabled - ${Platform.operatingSystem}\n'
       ' │ view size: Size(2400.0, 1800.0) (in physical pixels)\n'
       ' │ device pixel ratio: 3.0 (physical pixels per logical pixel)\n'
@@ -379,7 +388,7 @@ void main() {
     await tester.drag(find.byType(ListView), const Offset(0.0, -1000.0));
     await tester.pump();
     expect(tester.binding.renderView.toStringDeep(minLevel: DiagnosticLevel.info), equalsIgnoringHashCodes(
-      'RenderView#00000\n'
+      '_ReusableRenderView#00000\n'
       ' │ debug mode enabled - ${Platform.operatingSystem}\n'
       ' │ view size: Size(2400.0, 1800.0) (in physical pixels)\n'
       ' │ device pixel ratio: 3.0 (physical pixels per logical pixel)\n'

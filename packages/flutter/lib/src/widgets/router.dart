@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -64,7 +65,7 @@ class RouteInformation {
   )
   String get location {
     if (_location != null) {
-      return _location!;
+      return _location;
     }
     return Uri.decodeComponent(
       Uri(
@@ -85,7 +86,7 @@ class RouteInformation {
   /// In web platform, the host and scheme are always empty.
   Uri get uri {
     if (_uri != null){
-      return _uri!;
+      return _uri;
     }
     return Uri.parse(_location!);
   }
@@ -1464,14 +1465,24 @@ class PlatformRouteInformationProvider extends RouteInformationProvider with Wid
   /// provider.
   PlatformRouteInformationProvider({
     required RouteInformation initialRouteInformation,
-  }) : _value = initialRouteInformation;
+  }) : _value = initialRouteInformation {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
+
+  static bool _equals(Uri a, Uri b) {
+    return a.path == b.path
+        && a.fragment == b.fragment
+        && const DeepCollectionEquality.unordered().equals(a.queryParametersAll, b.queryParametersAll);
+  }
 
   @override
   void routerReportsNewRouteInformation(RouteInformation routeInformation, {RouteInformationReportingType type = RouteInformationReportingType.none}) {
     final bool replace =
       type == RouteInformationReportingType.neglect ||
       (type == RouteInformationReportingType.none &&
-       _valueInEngine.uri == routeInformation.uri);
+      _equals(_valueInEngine.uri, routeInformation.uri));
     SystemNavigator.selectMultiEntryHistory();
     SystemNavigator.routeInformationUpdated(
       uri: routeInformation.uri,
