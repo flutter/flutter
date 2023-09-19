@@ -23,6 +23,8 @@ import 'ticker_provider.dart';
 ///  * [SizeTransition], which changes its size based on an [Animation].
 class AnimatedSize extends StatefulWidget {
   /// Creates a widget that animates its size to match that of its child.
+  ///
+  /// The [curve] and [duration] arguments must not be null.
   const AnimatedSize({
     super.key,
     this.child,
@@ -75,7 +77,7 @@ class AnimatedSize extends StatefulWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.hardEdge].
+  /// Defaults to [Clip.hardEdge], and must not be null.
   final Clip clipBehavior;
 
   @override

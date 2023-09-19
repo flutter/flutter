@@ -97,6 +97,8 @@ class MaterialBannerThemeData with Diagnosticable {
 
   /// Linearly interpolate between two Banner themes.
   ///
+  /// The argument `t` must not be null.
+  ///
   /// {@macro dart.ui.shadow.lerp}
   static MaterialBannerThemeData lerp(MaterialBannerThemeData? a, MaterialBannerThemeData? b, double t) {
     return MaterialBannerThemeData(

@@ -164,7 +164,8 @@ Offset pointerDragAnchorStrategy(Draggable<Object> draggable, BuildContext conte
 class Draggable<T extends Object> extends StatefulWidget {
   /// Creates a widget that can be dragged to a [DragTarget].
   ///
-  /// If [maxSimultaneousDrags] is non-null, it must be non-negative.
+  /// The [child] and [feedback] arguments must not be null. If
+  /// [maxSimultaneousDrags] is non-null, it must be non-negative.
   const Draggable({
     super.key,
     required this.child,
@@ -393,7 +394,8 @@ class Draggable<T extends Object> extends StatefulWidget {
 class LongPressDraggable<T extends Object> extends Draggable<T> {
   /// Creates a widget that can be dragged starting from long press.
   ///
-  /// If [maxSimultaneousDrags] is non-null, it must be non-negative.
+  /// The [child] and [feedback] arguments must not be null. If
+  /// [maxSimultaneousDrags] is non-null, it must be non-negative.
   const LongPressDraggable({
     super.key,
     required super.child,
@@ -584,6 +586,8 @@ class DraggableDetails {
 /// Represents the details when a pointer event occurred on the [DragTarget].
 class DragTargetDetails<T> {
   /// Creates details for a [DragTarget] callback.
+  ///
+  /// The [offset] must not be null.
   DragTargetDetails({required this.data, required this.offset});
 
   /// The data that was dropped onto this [DragTarget].
@@ -608,6 +612,8 @@ class DragTargetDetails<T> {
 ///  * [LongPressDraggable]
 class DragTarget<T extends Object> extends StatefulWidget {
   /// Creates a widget that receives drags.
+  ///
+  /// The [builder] argument must not be null.
   const DragTarget({
     super.key,
     required this.builder,

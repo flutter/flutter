@@ -49,6 +49,8 @@ import 'theme.dart';
 ///    the [RangeSlider]'s tick marks.
 class SliderTheme extends InheritedTheme {
   /// Applies the given theme [data] to [child].
+  ///
+  /// The [data] and [child] arguments must not be null.
   const SliderTheme({
     super.key,
     required this.data,
@@ -652,6 +654,8 @@ class SliderThemeData with Diagnosticable {
   }
 
   /// Linearly interpolate between two slider themes.
+  ///
+  /// The arguments must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
   static SliderThemeData lerp(SliderThemeData a, SliderThemeData b, double t) {

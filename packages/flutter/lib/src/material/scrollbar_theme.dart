@@ -172,6 +172,8 @@ class ScrollbarThemeData with Diagnosticable {
 
   /// Linearly interpolate between two Scrollbar themes.
   ///
+  /// The argument `t` must not be null.
+  ///
   /// {@macro dart.ui.shadow.lerp}
   static ScrollbarThemeData lerp(ScrollbarThemeData? a, ScrollbarThemeData? b, double t) {
     if (identical(a, b) && a != null) {

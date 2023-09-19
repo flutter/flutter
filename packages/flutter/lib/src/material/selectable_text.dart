@@ -174,9 +174,9 @@ class SelectableText extends StatefulWidget {
   /// closest enclosing [DefaultTextStyle].
   ///
 
-  /// If the [showCursor], [autofocus], [dragStartBehavior],
-  /// [selectionHeightStyle], [selectionWidthStyle] and [data] arguments are
-  /// specified, the [maxLines] argument must be greater than zero.
+  /// The [showCursor], [autofocus], [dragStartBehavior], [selectionHeightStyle],
+  /// [selectionWidthStyle] and [data] parameters must not be null. If specified,
+  /// the [maxLines] argument must be greater than zero.
   const SelectableText(
     String this.data, {
     super.key,
@@ -232,8 +232,10 @@ class SelectableText extends StatefulWidget {
 
   /// Creates a selectable text widget with a [TextSpan].
   ///
-  /// The [textSpan] parameter must only contain a [TextSpan] in
-  /// [textSpan].children. Other types of [InlineSpan] are not allowed.
+  /// The [textSpan] parameter must not be null and only contain [TextSpan] in
+  /// [textSpan].children. Other type of [InlineSpan] is not allowed.
+  ///
+  /// The [autofocus] and [dragStartBehavior] arguments must not be null.
   const SelectableText.rich(
     TextSpan this.textSpan, {
     super.key,

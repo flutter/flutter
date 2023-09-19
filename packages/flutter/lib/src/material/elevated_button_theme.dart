@@ -91,6 +91,8 @@ class ElevatedButtonThemeData with Diagnosticable {
 ///    [ButtonStyle] for [ElevatedButton]s below the overall [Theme].
 class ElevatedButtonTheme extends InheritedTheme {
   /// Create a [ElevatedButtonTheme].
+  ///
+  /// The [data] parameter must not be null.
   const ElevatedButtonTheme({
     super.key,
     required this.data,

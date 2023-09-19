@@ -25,6 +25,8 @@ typedef SliverLayoutWidgetBuilder = Widget Function(BuildContext context, Sliver
 ///  * [LayoutBuilder], the non-sliver version of this widget.
 class SliverLayoutBuilder extends ConstrainedLayoutBuilder<SliverConstraints> {
   /// Creates a sliver widget that defers its building until layout.
+  ///
+  /// The [builder] argument must not be null.
   const SliverLayoutBuilder({
     super.key,
     required super.builder,

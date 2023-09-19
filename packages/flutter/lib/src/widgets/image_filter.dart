@@ -34,6 +34,8 @@ import 'framework.dart';
 @immutable
 class ImageFiltered extends SingleChildRenderObjectWidget {
   /// Creates a widget that applies an [ImageFilter] to its child.
+  ///
+  /// The [imageFilter] must not be null.
   const ImageFiltered({
     super.key,
     required this.imageFilter,

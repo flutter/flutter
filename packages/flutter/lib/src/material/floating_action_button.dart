@@ -83,8 +83,9 @@ enum _FloatingActionButtonType {
 class FloatingActionButton extends StatelessWidget {
   /// Creates a circular floating action button.
   ///
-  /// The [elevation], [highlightElevation], and [disabledElevation] parameters,
-  /// if specified, must be non-negative.
+  /// The [mini] and [clipBehavior] arguments must not be null. Additionally,
+  /// [elevation], [highlightElevation], and [disabledElevation] (if specified)
+  /// must be non-negative.
   const FloatingActionButton({
     super.key,
     this.child,
@@ -126,8 +127,10 @@ class FloatingActionButton extends StatelessWidget {
   /// This constructor overrides the default size constraints of the floating
   /// action button.
   ///
-  /// The [elevation], [focusElevation], [hoverElevation], [highlightElevation],
-  /// and [disabledElevation] parameters, if specified, must be non-negative.
+  /// The [clipBehavior] and [autofocus] arguments must not be null.
+  /// Additionally, [elevation], [focusElevation], [hoverElevation],
+  /// [highlightElevation], and [disabledElevation] (if specified) must be
+  /// non-negative.
   const FloatingActionButton.small({
     super.key,
     this.child,
@@ -169,8 +172,10 @@ class FloatingActionButton extends StatelessWidget {
   /// This constructor overrides the default size constraints of the floating
   /// action button.
   ///
-  /// The [elevation], [focusElevation], [hoverElevation], [highlightElevation],
-  /// and [disabledElevation] parameters, if specified, must be non-negative.
+  /// The [clipBehavior] and [autofocus] arguments must not be null.
+  /// Additionally, [elevation], [focusElevation], [hoverElevation],
+  /// [highlightElevation], and [disabledElevation] (if specified) must be
+  /// non-negative.
   const FloatingActionButton.large({
     super.key,
     this.child,
@@ -210,8 +215,9 @@ class FloatingActionButton extends StatelessWidget {
   /// Creates a wider [StadiumBorder]-shaped floating action button with
   /// an optional [icon] and a [label].
   ///
-  /// The [elevation], [highlightElevation], and [disabledElevation] parameters,
-  /// if specified, must be non-negative.
+  /// The [label], [autofocus], and [clipBehavior] arguments must not be null.
+  /// Additionally, [elevation], [highlightElevation], and [disabledElevation]
+  /// (if specified) must be non-negative.
   ///
   /// See also:
   ///  * <https://m3.material.io/components/extended-fab>
@@ -412,7 +418,7 @@ class FloatingActionButton extends StatelessWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.none].
+  /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;
 
   /// True if this is an "extended" floating action button.

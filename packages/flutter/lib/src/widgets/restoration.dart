@@ -54,6 +54,8 @@ class RestorationScope extends StatefulWidget {
   ///
   /// Providing null as the [restorationId] turns off state restoration for
   /// the [child] and its descendants.
+  ///
+  /// The [child] must not be null.
   const RestorationScope({
     super.key,
     required this.restorationId,
@@ -197,6 +199,8 @@ class UnmanagedRestorationScope extends InheritedWidget {
   ///
   /// When [bucket] is null state restoration is turned off for the [child] and
   /// its descendants.
+  ///
+  /// The [child] must not be null.
   const UnmanagedRestorationScope({
     super.key,
     this.bucket,
@@ -269,6 +273,8 @@ class RootRestorationScope extends StatefulWidget {
   ///
   /// Providing null as the [restorationId] turns off state restoration for
   /// the [child] and its descendants.
+  ///
+  /// The [child] must not be null.
   const RootRestorationScope({
     super.key,
     required this.restorationId,

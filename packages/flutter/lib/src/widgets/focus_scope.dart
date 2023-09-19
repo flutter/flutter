@@ -111,6 +111,10 @@ import 'inherited_notifier.dart';
 ///    traversal policy on the [Focus] nodes below it in the widget hierarchy.
 class Focus extends StatefulWidget {
   /// Creates a widget that manages a [FocusNode].
+  ///
+  /// The [child] argument is required and must not be null.
+  ///
+  /// The [autofocus] argument must not be null.
   const Focus({
     super.key,
     required this.child,
@@ -199,7 +203,7 @@ class Focus extends StatefulWidget {
   /// If there is more than one widget with autofocus set, then the first one
   /// added to the tree will get focus.
   ///
-  /// Defaults to false.
+  /// Must not be null. Defaults to false.
   /// {@endtemplate}
   final bool autofocus;
 
@@ -346,7 +350,7 @@ class Focus extends StatefulWidget {
   /// It is not typical to set this to false, as that can affect the semantics
   /// information available to accessibility systems.
   ///
-  /// Defaults to true.
+  /// Must not be null, defaults to true.
   /// {@endtemplate}
   final bool includeSemantics;
 
@@ -742,6 +746,10 @@ class _FocusState extends State<Focus> {
 ///    policy for a widget subtree.
 class FocusScope extends Focus {
   /// Creates a widget that manages a [FocusScopeNode].
+  ///
+  /// The [child] argument is required and must not be null.
+  ///
+  /// The [autofocus] argument must not be null.
   const FocusScope({
     super.key,
     FocusScopeNode? node,
@@ -862,6 +870,10 @@ class _FocusInheritedScope extends InheritedNotifier<FocusNode> {
 ///    `descendantsAreFocusable` attribute.
 class ExcludeFocus extends StatelessWidget {
   /// Const constructor for [ExcludeFocus] widget.
+  ///
+  /// The [excluding] argument must not be null.
+  ///
+  /// The [child] argument is required, and must not be null.
   const ExcludeFocus({
     super.key,
     this.excluding = true,

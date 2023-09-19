@@ -112,6 +112,9 @@ class _TableElementRow {
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Table extends RenderObjectWidget {
   /// Creates a table.
+  ///
+  /// The [children], [defaultColumnWidth], and [defaultVerticalAlignment]
+  /// arguments must not be null.
   Table({
     super.key,
     this.children = const <TableRow>[],
@@ -166,7 +169,8 @@ class Table extends RenderObjectWidget {
 
   /// The rows of the table.
   ///
-  /// Every row in a table must have the same number of children.
+  /// Every row in a table must have the same number of children, and all the
+  /// children must be non-null.
   final List<TableRow> children;
 
   /// How the horizontal extents of the columns of this table should be determined.

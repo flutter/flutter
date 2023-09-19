@@ -91,6 +91,8 @@ class FilledButtonThemeData with Diagnosticable {
 ///    [ButtonStyle] for [FilledButton]s below the overall [Theme].
 class FilledButtonTheme extends InheritedTheme {
   /// Create a [FilledButtonTheme].
+  ///
+  /// The [data] parameter must not be null.
   const FilledButtonTheme({
     super.key,
     required this.data,

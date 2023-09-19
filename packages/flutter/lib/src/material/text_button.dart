@@ -73,7 +73,9 @@ import 'theme_data.dart';
 ///  * <https://material.io/design/components/buttons.html>
 ///  * <https://m3.material.io/components/buttons>
 class TextButton extends ButtonStyleButton {
-  /// Create a [TextButton].
+  /// Create a TextButton.
+  ///
+  /// The [autofocus] and [clipBehavior] arguments must not be null.
   const TextButton({
     super.key,
     required super.onPressed,
@@ -94,6 +96,8 @@ class TextButton extends ButtonStyleButton {
   ///
   /// The icon and label are arranged in a row and padded by 8 logical pixels
   /// at the ends, with an 8 pixel gap in between.
+  ///
+  /// The [icon] and [label] arguments must not be null.
   factory TextButton.icon({
     Key? key,
     required VoidCallback? onPressed,

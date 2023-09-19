@@ -369,26 +369,26 @@ class ToolbarOptions {
 
   /// Whether to show copy option in toolbar.
   ///
-  /// Defaults to false.
+  /// Defaults to false. Must not be null.
   final bool copy;
 
   /// Whether to show cut option in toolbar.
   ///
   /// If [EditableText.readOnly] is set to true, cut will be disabled regardless.
   ///
-  /// Defaults to false.
+  /// Defaults to false. Must not be null.
   final bool cut;
 
   /// Whether to show paste option in toolbar.
   ///
   /// If [EditableText.readOnly] is set to true, paste will be disabled regardless.
   ///
-  /// Defaults to false.
+  /// Defaults to false. Must not be null.
   final bool paste;
 
   /// Whether to show select all option in toolbar.
   ///
-  /// Defaults to false.
+  /// Defaults to false. Must not be null.
   final bool selectAll;
 }
 
@@ -904,7 +904,7 @@ class EditableText extends StatefulWidget {
   /// When this is set to true, the text cannot be modified
   /// by any shortcut or keyboard operation. The text is still selectable.
   ///
-  /// Defaults to false.
+  /// Defaults to false. Must not be null.
   /// {@endtemplate}
   final bool readOnly;
 
@@ -913,7 +913,7 @@ class EditableText extends StatefulWidget {
   /// When this is set to false, the width will be based on text width, which
   /// will also be affected by [textWidthBasis].
   ///
-  /// Defaults to true.
+  /// Defaults to true. Must not be null.
   ///
   /// See also:
   ///
@@ -1037,7 +1037,7 @@ class EditableText extends StatefulWidget {
   /// Only supports text keyboards, other keyboard types will ignore this
   /// configuration. Capitalization is locale-aware.
   ///
-  /// Defaults to [TextCapitalization.none].
+  /// Defaults to [TextCapitalization.none]. Must not be null.
   ///
   /// See also:
   ///

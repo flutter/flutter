@@ -141,6 +141,8 @@ class TabBarTheme with Diagnosticable {
 
   /// Linearly interpolate between two tab bar themes.
   ///
+  /// The arguments must not be null.
+  ///
   /// {@macro dart.ui.shadow.lerp}
   static TabBarTheme lerp(TabBarTheme a, TabBarTheme b, double t) {
     if (identical(a, b)) {

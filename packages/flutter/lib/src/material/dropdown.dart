@@ -730,7 +730,7 @@ class _DropdownMenuItemContainer extends StatelessWidget {
 
   /// Defines how the item is positioned within the container.
   ///
-  /// Defaults to [AlignmentDirectional.centerStart].
+  /// This property must not be null. It defaults to [AlignmentDirectional.centerStart].
   ///
   /// See also:
   ///
@@ -911,6 +911,12 @@ class DropdownButton<T> extends StatefulWidget {
   /// If [value] is null and the button is disabled, [disabledHint] will be displayed
   /// if it is non-null. If [disabledHint] is null, then [hint] will be displayed
   /// if it is non-null.
+  ///
+  /// The [elevation] and [iconSize] arguments must not be null (they both have
+  /// defaults, so do not need to be specified). The boolean [isDense] and
+  /// [isExpanded] arguments must not be null.
+  ///
+  /// The [autofocus] argument must not be null.
   ///
   /// The [dropdownColor] argument specifies the background color of the
   /// dropdown when it is open. If it is null, the current theme's
@@ -1209,7 +1215,7 @@ class DropdownButton<T> extends StatefulWidget {
 
   /// Defines how the hint or the selected item is positioned within the button.
   ///
-  /// Defaults to [AlignmentDirectional.centerStart].
+  /// This property must not be null. It defaults to [AlignmentDirectional.centerStart].
   ///
   /// See also:
   ///
@@ -1583,6 +1589,9 @@ class DropdownButtonFormField<T> extends FormField<T> {
   /// For a description of the `onSaved`, `validator`, or `autovalidateMode`
   /// parameters, see [FormField]. For the rest (other than [decoration]), see
   /// [DropdownButton].
+  ///
+  /// The `items`, `elevation`, `iconSize`, `isDense`, `isExpanded`,
+  /// `autofocus`, and `decoration`  parameters must not be null.
   DropdownButtonFormField({
     super.key,
     required List<DropdownMenuItem<T>>? items,

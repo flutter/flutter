@@ -66,6 +66,9 @@ enum ButtonBarLayoutBehavior {
 ///    depend on any inherited themes.
 class ButtonTheme extends InheritedTheme {
   /// Creates a button theme.
+  ///
+  /// The [textTheme], [minWidth], [height], and [colorScheme] arguments
+  /// must not be null.
   ButtonTheme({
     super.key,
     ButtonTextTheme textTheme = ButtonTextTheme.normal,
@@ -105,6 +108,8 @@ class ButtonTheme extends InheritedTheme {
        );
 
   /// Creates a button theme from [data].
+  ///
+  /// The [data] argument must not be null.
   const ButtonTheme.fromButtonThemeData({
     super.key,
     required this.data,
@@ -163,7 +168,9 @@ class ButtonThemeData with Diagnosticable {
   /// Create a button theme object that can be used with [ButtonTheme]
   /// or [ThemeData].
   ///
-  /// The [minWidth] and [height] parameters must greater than or equal to zero.
+  /// The [textTheme], [minWidth], [height], [alignedDropdown], and
+  /// [layoutBehavior] parameters must not be null. The [minWidth] and
+  /// [height] parameters must greater than or equal to zero.
   ///
   /// The ButtonTheme's methods that have a [MaterialButton] parameter and
   /// have a name with a `get` prefix are used to configure a

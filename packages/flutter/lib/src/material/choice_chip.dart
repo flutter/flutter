@@ -22,7 +22,8 @@ enum _ChipVariant { flat, elevated }
 /// [ChoiceChip]s represent a single choice from a set. Choice chips contain
 /// related descriptive text or categories.
 ///
-/// Requires one of its ancestors to be a [Material] widget.
+/// Requires one of its ancestors to be a [Material] widget. The [selected] and
+/// [label] arguments must not be null.
 ///
 /// {@tool dartpad}
 /// This example shows how to create [ChoiceChip]s with [onSelected]. When the

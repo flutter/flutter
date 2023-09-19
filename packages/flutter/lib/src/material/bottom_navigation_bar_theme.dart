@@ -170,6 +170,8 @@ class BottomNavigationBarThemeData with Diagnosticable {
 
   /// Linearly interpolate between two [BottomNavigationBarThemeData].
   ///
+  /// The argument `t` must not be null.
+  ///
   /// {@macro dart.ui.shadow.lerp}
   static BottomNavigationBarThemeData lerp(BottomNavigationBarThemeData? a, BottomNavigationBarThemeData? b, double t) {
     if (identical(a, b) && a != null) {
@@ -274,6 +276,8 @@ class BottomNavigationBarThemeData with Diagnosticable {
 class BottomNavigationBarTheme extends InheritedWidget {
   /// Constructs a bottom navigation bar theme that configures all descendant
   /// [BottomNavigationBar] widgets.
+  ///
+  /// The [data] must not be null.
   const BottomNavigationBarTheme({
     super.key,
     required this.data,

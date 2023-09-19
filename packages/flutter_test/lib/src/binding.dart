@@ -782,7 +782,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// The `description` is used by the [LiveTestWidgetsFlutterBinding] to
   /// show a label on the screen during the test. The description comes from
-  /// the value passed to [testWidgets].
+  /// the value passed to [testWidgets]. It must not be null.
   Future<void> runTest(
     Future<void> Function() testBody,
     VoidCallback invariantTester, {

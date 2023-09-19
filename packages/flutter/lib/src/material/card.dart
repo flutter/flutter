@@ -58,7 +58,8 @@ import 'theme.dart';
 class Card extends StatelessWidget {
   /// Creates a Material Design card.
   ///
-  /// The [elevation] must be null or non-negative.
+  /// The [elevation] must be null or non-negative. The [borderOnForeground]
+  /// must not be null.
   const Card({
     super.key,
     this.color,

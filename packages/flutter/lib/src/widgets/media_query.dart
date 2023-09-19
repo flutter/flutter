@@ -616,8 +616,8 @@ class MediaQueryData {
   /// Creates a copy of this media query data but with the given [padding]s
   /// replaced with zero.
   ///
-  /// If all four of the `removeLeft`, `removeTop`, `removeRight`, and
-  /// `removeBottom` arguments are false (the default), then this
+  /// The `removeLeft`, `removeTop`, `removeRight`, and `removeBottom` arguments
+  /// must not be null. If all four are false (the default) then this
   /// [MediaQueryData] is returned unmodified.
   ///
   /// See also:
@@ -656,8 +656,8 @@ class MediaQueryData {
   /// Creates a copy of this media query data but with the given [viewInsets]
   /// replaced with zero.
   ///
-  /// If all four of the `removeLeft`, `removeTop`, `removeRight`, and
-  /// `removeBottom` arguments are false (the default), then this
+  /// The `removeLeft`, `removeTop`, `removeRight`, and `removeBottom` arguments
+  /// must not be null. If all four are false (the default) then this
   /// [MediaQueryData] is returned unmodified.
   ///
   /// See also:
@@ -694,8 +694,8 @@ class MediaQueryData {
   /// Creates a copy of this media query data but with the given [viewPadding]
   /// replaced with zero.
   ///
-  /// If all four of the `removeLeft`, `removeTop`, `removeRight`, and
-  /// `removeBottom` arguments are false (the default), then this
+  /// The `removeLeft`, `removeTop`, `removeRight`, and `removeBottom` arguments
+  /// must not be null. If all four are false (the default) then this
   /// [MediaQueryData] is returned unmodified.
   ///
   /// See also:
@@ -884,6 +884,8 @@ class MediaQueryData {
 ///  * [MediaQueryData], the data structure that represents the metrics.
 class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// Creates a widget that provides [MediaQueryData] to its descendants.
+  ///
+  /// The [data] and [child] arguments must not be null.
   const MediaQuery({
     super.key,
     required this.data,
@@ -897,12 +899,15 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// is consumed by a widget in such a way that the padding is no longer
   /// exposed to the widget's descendants or siblings.
   ///
-  /// The [context] argument must have a [MediaQuery] in scope.
+  /// The [context] argument is required, must not be null, and must have a
+  /// [MediaQuery] in scope.
   ///
-  /// If all four of the `removeLeft`, `removeTop`, `removeRight`, and
-  /// `removeBottom` arguments are false (the default), then the returned
+  /// The `removeLeft`, `removeTop`, `removeRight`, and `removeBottom` arguments
+  /// must not be null. If all four are false (the default) then the returned
   /// [MediaQuery] reuses the ambient [MediaQueryData] unmodified, which is not
   /// particularly useful.
+  ///
+  /// The [child] argument is required and must not be null.
   ///
   /// See also:
   ///
@@ -941,12 +946,15 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// insets are consumed by a widget in such a way that the view insets are no
   /// longer exposed to the widget's descendants or siblings.
   ///
-  /// The [context] argument must have a [MediaQuery] in scope.
+  /// The [context] argument is required, must not be null, and must have a
+  /// [MediaQuery] in scope.
   ///
-  /// If all four of the `removeLeft`, `removeTop`, `removeRight`, and
-  /// `removeBottom` arguments are false (the default), then the returned
+  /// The `removeLeft`, `removeTop`, `removeRight`, and `removeBottom` arguments
+  /// must not be null. If all four are false (the default) then the returned
   /// [MediaQuery] reuses the ambient [MediaQueryData] unmodified, which is not
   /// particularly useful.
+  ///
+  /// The [child] argument is required and must not be null.
   ///
   /// See also:
   ///
@@ -983,12 +991,15 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   /// padding is consumed by a widget in such a way that the view padding is no
   /// longer exposed to the widget's descendants or siblings.
   ///
-  /// The [context] argument must have a [MediaQuery] in scope.
+  /// The [context] argument is required, must not be null, and must have a
+  /// [MediaQuery] in scope.
   ///
-  /// If all four of the `removeLeft`, `removeTop`, `removeRight`, and
-  /// `removeBottom` arguments are false (the default), then the returned
+  /// The `removeLeft`, `removeTop`, `removeRight`, and `removeBottom` arguments
+  /// must not be null. If all four are false (the default) then the returned
   /// [MediaQuery] reuses the ambient [MediaQueryData] unmodified, which is not
   /// particularly useful.
+  ///
+  /// The [child] argument is required and must not be null.
   ///
   /// See also:
   ///
@@ -1058,6 +1069,8 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   ///
   /// The injected [MediaQuery] automatically updates when any of the data used
   /// to construct it changes.
+  ///
+  /// The [view] and [child] arguments are required and must not be null.
   static Widget fromView({
     Key? key,
     required FlutterView view,

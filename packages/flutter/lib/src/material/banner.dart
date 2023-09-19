@@ -93,8 +93,9 @@ enum MaterialBannerClosedReason {
 class MaterialBanner extends StatefulWidget {
   /// Creates a [MaterialBanner].
   ///
-  /// The [actions].length must be greater than 0. The [elevation] must be null
-  /// or non-negative.
+  /// The [actions], [content], and [forceActionsBelow] must be non-null.
+  /// The [actions].length must be greater than 0. The [elevation] must be null or
+  /// non-negative.
   const MaterialBanner({
     super.key,
     required this.content,

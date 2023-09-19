@@ -171,7 +171,9 @@ abstract class MaterialInkController {
 class Material extends StatefulWidget {
   /// Creates a piece of material.
   ///
-  /// The [elevation] must be non-negative.
+  /// The [type], [elevation], [borderOnForeground],
+  /// [clipBehavior], and [animationDuration] arguments must not be null.
+  /// Additionally, [elevation] must be non-negative.
   ///
   /// If a [shape] is specified, then the [borderRadius] property must be
   /// null and the [type] property must not be [MaterialType.circle]. If the
@@ -322,7 +324,7 @@ class Material extends StatefulWidget {
   /// use cases.
   /// {@endtemplate}
   ///
-  /// Defaults to [Clip.none].
+  /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;
 
   /// Defines the duration of animated changes for [shape], [elevation],
@@ -839,7 +841,9 @@ class ShapeBorderTween extends Tween<ShapeBorder?> {
 class _MaterialInterior extends ImplicitlyAnimatedWidget {
   /// Creates a const instance of [_MaterialInterior].
   ///
-  /// The [elevation] must be specified and greater than or equal to zero.
+  /// The [child], [shape], [clipBehavior], [color], and [shadowColor] arguments
+  /// must not be null. The [elevation] must be specified and greater than or
+  /// equal to zero.
   const _MaterialInterior({
     required this.child,
     required this.shape,
@@ -872,7 +876,7 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.none].
+  /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;
 
   /// The target z-coordinate at which to place this physical object relative

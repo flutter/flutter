@@ -216,6 +216,8 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// Creates an item for a popup menu.
   ///
   /// By default, the item is [enabled].
+  ///
+  /// The `enabled` and `height` arguments must not be null.
   const PopupMenuItem({
     super.key,
     this.value,
@@ -472,6 +474,8 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
   ///
   /// By default, the menu item is [enabled] but unchecked. To mark the item as
   /// checked, set [checked] to true.
+  ///
+  /// The `checked` and `enabled` arguments must not be null.
   const CheckedPopupMenuItem({
     super.key,
     super.value,
@@ -1097,6 +1101,8 @@ typedef PopupMenuItemBuilder<T> = List<PopupMenuEntry<T>> Function(BuildContext 
 ///  * [showMenu], a method to dynamically show a popup menu at a given location.
 class PopupMenuButton<T> extends StatefulWidget {
   /// Creates a button that shows a popup menu.
+  ///
+  /// The [itemBuilder] argument must not be null.
   const PopupMenuButton({
     super.key,
     required this.itemBuilder,
@@ -1201,11 +1207,11 @@ class PopupMenuButton<T> extends StatefulWidget {
 
   /// Whether this popup menu button is interactive.
   ///
-  /// Defaults to true.
+  /// Must be non-null, defaults to `true`
   ///
-  /// If true, the button will respond to presses by displaying the menu.
+  /// If `true` the button will respond to presses by displaying the menu.
   ///
-  /// If false, the button is styled with the disabled color from the
+  /// If `false`, the button is styled with the disabled color from the
   /// current [Theme] and will not respond to presses or show the popup
   /// menu and [onSelected], [onCanceled] and [itemBuilder] will not be called.
   ///
@@ -1283,7 +1289,7 @@ class PopupMenuButton<T> extends StatefulWidget {
   ///
   /// The [clipBehavior] argument is used the clip shape of the menu.
   ///
-  /// Defaults to [Clip.none].
+  /// Defaults to [Clip.none], and must not be null.
   final Clip clipBehavior;
 
   @override

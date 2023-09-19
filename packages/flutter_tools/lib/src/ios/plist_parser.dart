@@ -44,6 +44,8 @@ class PlistParser {
   ///
   /// If [plistFilePath] points to a non-existent file or a file that's not a
   /// valid property list file, this will return null.
+  ///
+  /// The [plistFilePath] argument must not be null.
   String? plistXmlContent(String plistFilePath) {
     if (!_fileSystem.isFileSync(_plutilExecutable)) {
       throw const FileNotFoundException(_plutilExecutable);
@@ -99,6 +101,8 @@ class PlistParser {
   ///
   /// If [plistFilePath] points to a non-existent file or a file that's not a
   /// valid property list file, this will return an empty map.
+  ///
+  /// The [plistFilePath] argument must not be null.
   Map<String, Object> parseFile(String plistFilePath) {
     if (!_fileSystem.isFileSync(plistFilePath)) {
       return const <String, Object>{};
@@ -172,6 +176,8 @@ class PlistParser {
   /// valid property list file, this will return null.
   ///
   /// If [key] is not found in the property list, this will return null.
+  ///
+  /// The [plistFilePath] and [key] arguments must not be null.
   T? getValueFromFile<T>(String plistFilePath, String key) {
     final Map<String, dynamic> parsed = parseFile(plistFilePath);
     return parsed[key] as T?;

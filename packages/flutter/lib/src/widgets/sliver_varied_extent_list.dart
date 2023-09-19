@@ -114,6 +114,8 @@ class SliverVariedExtentList extends SliverMultiBoxAdaptorWidget {
 class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
   /// Creates a sliver that contains multiple box children that have a explicit
   /// extent in the main axis.
+  ///
+  /// The [childManager] argument must not be null.
   RenderSliverVariedExtentList({
     required super.childManager,
     required ItemExtentBuilder itemExtentBuilder,

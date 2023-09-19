@@ -26,6 +26,8 @@ typedef OrientationWidgetBuilder = Widget Function(BuildContext context, Orienta
 ///    landscape or portrait mode.
 class OrientationBuilder extends StatelessWidget {
   /// Creates an orientation builder.
+  ///
+  /// The [builder] argument must not be null.
   const OrientationBuilder({
     super.key,
     required this.builder,

@@ -36,6 +36,8 @@ import 'theme.dart';
 /// class.
 abstract class InteractiveInkFeature extends InkFeature {
   /// Creates an InteractiveInkFeature.
+  ///
+  /// The [controller] and [referenceBox] arguments must not be null.
   InteractiveInkFeature({
     required super.controller,
     required super.referenceBox,
@@ -294,6 +296,9 @@ class InkResponse extends StatelessWidget {
   /// Creates an area of a [Material] that responds to touch.
   ///
   /// Must have an ancestor [Material] widget in which to cause ink reactions.
+  ///
+  /// The [containedInkWell], [highlightShape], [enableFeedback],
+  /// and [excludeFromSemantics] arguments must not be null.
   const InkResponse({
     super.key,
     this.child,
@@ -1450,6 +1455,9 @@ class InkWell extends InkResponse {
   /// Creates an ink well.
   ///
   /// Must have an ancestor [Material] widget in which to cause ink reactions.
+  ///
+  /// The [enableFeedback], and [excludeFromSemantics] arguments
+  /// must not be null.
   const InkWell({
     super.key,
     super.child,

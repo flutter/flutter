@@ -49,7 +49,7 @@ class ExpandIcon extends StatefulWidget {
 
   /// The size of the icon.
   ///
-  /// Defaults to 24.
+  /// This property must not be null. It defaults to 24.0.
   final double size;
 
   /// The callback triggered when the icon is pressed and the state changes
@@ -61,7 +61,7 @@ class ExpandIcon extends StatefulWidget {
   /// The padding around the icon. The entire padded icon will react to input
   /// gestures.
   ///
-  /// Defaults to a padding of 8 on all sides.
+  /// This property must not be null. It defaults to 8.0 padding on all sides.
   final EdgeInsetsGeometry padding;
 
   /// {@template flutter.material.ExpandIcon.color}

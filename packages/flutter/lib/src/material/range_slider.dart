@@ -128,10 +128,11 @@ class RangeSlider extends StatefulWidget {
   /// [inactiveColor] properties, although more fine-grained control of the
   /// appearance is achieved using a [SliderThemeData].
   ///
-  /// The [min] must be less than or equal to the [max]. [values].start must be
-  /// less than or equal to [values].end. [values].start and [values].end must
-  /// be greater than or equal to the [min] and less than or equal to the [max].
-  /// The [divisions] must be null or greater than 0.
+  /// The [values], [min], [max] must not be null. The [min] must be less than
+  /// or equal to the [max]. [values].start must be less than or equal to
+  /// [values].end. [values].start and [values].end must be greater than or
+  /// equal to the [min] and less than or equal to the [max]. The [divisions]
+  /// must be null or greater than 0.
   RangeSlider({
     super.key,
     required this.values,

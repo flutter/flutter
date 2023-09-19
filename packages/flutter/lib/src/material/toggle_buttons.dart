@@ -205,8 +205,9 @@ class ToggleButtons extends StatelessWidget {
   ///
   /// Both [children] and [isSelected] properties arguments are required.
   ///
-  /// The [focusNodes] argument must be null or a list of nodes. If [direction]
-  /// is [Axis.vertical], [verticalDirection] must not be null.
+  /// [isSelected] values must be non-null. [focusNodes] must be null or a
+  /// list of non-null nodes. [renderBorder] and [direction] must not be null.
+  /// If [direction] is [Axis.vertical], [verticalDirection] must not be null.
   const ToggleButtons({
     super.key,
     required this.children,

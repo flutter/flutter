@@ -613,6 +613,8 @@ class RouteSettings {
 ///    history.
 abstract class Page<T> extends RouteSettings {
   /// Creates a page and initializes [key] for subclasses.
+  ///
+  /// The [arguments] argument must not be null.
   const Page({
     this.key,
     super.name,
@@ -1449,6 +1451,9 @@ const TraversalEdgeBehavior kDefaultRouteTraversalEdgeBehavior = kIsWeb
 class Navigator extends StatefulWidget {
   /// Creates a widget that maintains a stack-based history of child widgets.
   ///
+  /// The [onGenerateRoute], [pages], [onGenerateInitialRoutes],
+  /// [transitionDelegate], [observers] arguments must not be null.
+  ///
   /// If the [pages] is not empty, the [onPopPage] must not be null.
   const Navigator({
     super.key,
@@ -1647,7 +1652,7 @@ class Navigator extends StatefulWidget {
   /// In cases where clipping is not desired, consider setting this property to
   /// [Clip.none].
   ///
-  /// Defaults to [Clip.hardEdge].
+  /// Defaults to [Clip.hardEdge], and must not be null.
   final Clip clipBehavior;
 
   /// Whether or not the navigator and it's new topmost route should request focus
@@ -5904,6 +5909,8 @@ typedef RouteCompletionCallback<T> = void Function(T result);
 /// {@end-tool}
 class RestorableRouteFuture<T> extends RestorableProperty<String?> {
   /// Creates a [RestorableRouteFuture].
+  ///
+  /// The [onPresent] and [navigatorFinder] arguments must not be null.
   RestorableRouteFuture({
     this.navigatorFinder = _defaultNavigatorFinder,
     required this.onPresent,

@@ -220,10 +220,14 @@ class ScrollPhysics {
   /// Provides a heuristic to determine if expensive frame-bound tasks should be
   /// deferred.
   ///
-  /// The velocity parameter may be positive, negative, or zero.
+  /// The velocity parameter must not be null, but may be positive, negative, or
+  /// zero.
   ///
-  /// The context parameter normally refers to the [BuildContext] of the widget
-  /// making the call, such as an [Image] widget in a [ListView].
+  /// The metrics parameter must not be null.
+  ///
+  /// The context parameter must not be null. It normally refers to the
+  /// [BuildContext] of the widget making the call, such as an [Image] widget
+  /// in a [ListView].
   ///
   /// This can be used to determine whether decoding or fetching complex data
   /// for the currently visible part of the viewport should be delayed
