@@ -7,28 +7,46 @@
 
 namespace fml {
 
+// Default log levels. Negative values can be used for verbose log levels.
 typedef int LogSeverity;
 
-// Default log levels. Negative values can be used for verbose log levels.
-constexpr LogSeverity LOG_INFO = 0;
-constexpr LogSeverity LOG_WARNING = 1;
-constexpr LogSeverity LOG_ERROR = 2;
-constexpr LogSeverity LOG_FATAL = 3;
-constexpr LogSeverity LOG_NUM_SEVERITIES = 4;
+constexpr LogSeverity kLogInfo = 0;
+constexpr LogSeverity kLogWarning = 1;
+constexpr LogSeverity kLogError = 2;
+constexpr LogSeverity kLogFatal = 3;
+constexpr LogSeverity kLogNumSeverities = 4;
+
+// DEPRECATED: Use |kLogInfo|.
+constexpr LogSeverity LOG_INFO = kLogInfo;
+
+// DEPRECATED: Use |kLogWarning|.
+constexpr LogSeverity LOG_WARNING = kLogWarning;
+
+// DEPRECATED: Use |kLogError|.
+constexpr LogSeverity LOG_ERROR = kLogError;
+
+// DEPRECATED: Use |kLogFatal|.
+constexpr LogSeverity LOG_FATAL = kLogFatal;
+
+// DEPRECATED: Use |kLogNumSeverities|.
+constexpr LogSeverity LOG_NUM_SEVERITIES = kLogNumSeverities;
 
 // One of the Windows headers defines ERROR to 0. This makes the token
 // concatenation in FML_LOG(ERROR) to resolve to LOG_0. We define this back to
 // the appropriate log level.
 #ifdef _WIN32
-#define LOG_0 LOG_ERROR
+#define LOG_0 kLogError
 #endif
 
-// LOG_DFATAL is LOG_FATAL in debug mode, ERROR in normal mode
+// kLogDFatal is kLogFatal in debug mode, kLogError in normal mode
 #ifdef NDEBUG
-const LogSeverity LOG_DFATAL = LOG_ERROR;
+const LogSeverity kLogDFatal = kLogError;
 #else
-const LogSeverity LOG_DFATAL = LOG_FATAL;
+const LogSeverity kLogDFatal = kLogFatal;
 #endif
+
+// DEPRECATED: Use |kLogDFatal|.
+const LogSeverity LOG_DFATAL = kLogDFatal;
 
 }  // namespace fml
 
