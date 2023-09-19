@@ -7,6 +7,7 @@
 
 #include <functional>
 #include <string>
+#include <utility>
 
 #include "method_result.h"
 
@@ -36,7 +37,7 @@ class MethodResultFunctions : public MethodResult<T> {
                         ResultHandlerNotImplemented<T> on_not_implemented)
       : on_success_(on_success),
         on_error_(on_error),
-        on_not_implemented_(on_not_implemented) {}
+        on_not_implemented_(std::move(on_not_implemented)) {}
 
   virtual ~MethodResultFunctions() = default;
 
