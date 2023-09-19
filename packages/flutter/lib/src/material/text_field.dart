@@ -458,8 +458,8 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.autofocus}
   final bool autofocus;
 
-  /// Represents the interactive "state" of this widget in terms of
-  /// a set of [MaterialState]s, including [MaterialState.disabled], [MaterialState.hovered],
+  /// Represents the interactive "state" of this widget in terms of a set of
+  /// [MaterialState]s, including [MaterialState.disabled], [MaterialState.hovered],
   /// [MaterialState.error], and [MaterialState.focused].
   ///
   /// Classes based on this one can provide their own
@@ -467,6 +467,8 @@ class TextField extends StatefulWidget {
   /// They can also update the controller's [MaterialStatesController.value]
   /// however, this may only be done when it's safe to call
   /// [State.setState], like in an event handler.
+  ///
+  /// {@macro flutter.material.MaterialStatesController.details}
   final MaterialStatesController? statesController;
 
   /// {@macro flutter.widgets.editableText.obscuringCharacter}
