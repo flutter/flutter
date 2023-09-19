@@ -741,7 +741,6 @@ class MaterialStatePropertyAll<T> implements MaterialStateProperty<T> {
 /// are notified whenever the [value] changes. The [value] should only be
 /// changed with [update]; it should not be modified directly.
 ///
-/// {@template flutter.material.MaterialStatesController.details}
 /// The controller's [value] represents the set of states that a
 /// widget's visual properties, typically [MaterialStateProperty]
 /// values, are resolved against. It is _not_ the intrinsic state of
@@ -751,7 +750,6 @@ class MaterialStatePropertyAll<T> implements MaterialStateProperty<T> {
 /// [MaterialState.focused] to its controller. When the widget gains the
 /// or loses the focus it will [update] its controller's [value] and
 /// notify listeners of the change.
-/// {@endtemplate}
 class MaterialStatesController extends ValueNotifier<Set<MaterialState>> {
   /// Creates a MaterialStatesController.
   MaterialStatesController([Set<MaterialState>? value]) : super(<MaterialState>{...?value});
