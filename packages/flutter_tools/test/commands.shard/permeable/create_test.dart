@@ -3566,8 +3566,8 @@ void main() {
       await runner.run(<String>['create', '--no-pub', '--template=${projectType.cliName}', if (projectType != FlutterProjectType.module) '--platforms=android', projectDir.path]);
 
       // We do not expect warnings for incompatible Java/template AGP versions if they are in fact, compatible.
-      expect(logger.statusText, isNot(contains(unexpectedIncompatibleAgpMessage)));
-      expect(logger.statusText, isNot(contains(unexpectedIncompatibleGradleMessage)));
+      expect(logger.warningText, isNot(contains(unexpectedIncompatibleAgpMessage)));
+      expect(logger.warningText, isNot(contains(unexpectedIncompatibleGradleMessage)));
 
       // Cleanup to reuse projectDir and logger checks.
       tryToDelete(projectDir);
@@ -3593,8 +3593,8 @@ void main() {
       await runner.run(<String>['create', '--no-pub', '--template=${projectType.cliName}', if (projectType != FlutterProjectType.module) '--platforms=android', projectDir.path]);
 
       // We do not expect warnings for incompatible Java/template AGP versions if they are in fact, compatible.
-      expect(logger.statusText, isNot(contains(unexpectedIncompatibleAgpMessage)));
-      expect(logger.statusText, isNot(contains(unexpectedIncompatibleGradleMessage)));
+      expect(logger.warningText, isNot(contains(unexpectedIncompatibleAgpMessage)));
+      expect(logger.warningText, isNot(contains(unexpectedIncompatibleGradleMessage)));
 
       // Cleanup to reuse projectDir and logger checks.
       tryToDelete(projectDir);
@@ -3620,8 +3620,8 @@ void main() {
       await runner.run(<String>['create', '--no-pub', '--template=${projectType.cliName}', if (projectType != FlutterProjectType.module) '--platforms=android', projectDir.path]);
 
       // We do not expect warnings for incompatible Java/template AGP versions if they are in fact, compatible.
-      expect(logger.statusText, isNot(contains(unexpectedIncompatibleAgpMessage)));
-      expect(logger.statusText, isNot(contains(unexpectedIncompatibleGradleMessage)));
+      expect(logger.warningText, isNot(contains(unexpectedIncompatibleAgpMessage)));
+      expect(logger.warningText, isNot(contains(unexpectedIncompatibleGradleMessage)));
 
       // Cleanup to reuse projectDir and logger checks.
       tryToDelete(projectDir);

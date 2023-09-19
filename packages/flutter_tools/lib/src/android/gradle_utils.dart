@@ -600,9 +600,9 @@ bool validateJavaAndAgp(Logger logger,
   return null;
 }
 
-// Returns valid Java range for specified Gradle and AGP verisons.
-//
-// Assumes that gradleV and agpV are compatible versions.
+/// Returns valid Java range for specified Gradle and AGP verisons.
+///
+/// Assumes that gradleV and agpV are compatible versions.
 VersionRange getJavaVersionFor({required String gradleV, required String agpV}) {
   // Find minimum Java version based on AGP compatibility.
   String? minJavaVersion;
@@ -747,7 +747,7 @@ void exitWithNoSdkMessage() {
 
 // Data class to hold normal/defined Java <-> Gradle compatability criteria.
 //
-// The [javaMax] is exclusive in terms of supported the noted [gradleMin],
+// The [javaMax] is exclusive in terms of supporting the noted [gradleMin],
 // whereas [javaMin] is inclusive.
 @immutable
 class JavaGradleCompat {
