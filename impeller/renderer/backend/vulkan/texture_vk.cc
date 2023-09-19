@@ -93,7 +93,8 @@ bool TextureVK::OnSetContents(const uint8_t* contents,
   copy.imageExtent.width = desc.size.width;
   copy.imageExtent.height = desc.size.height;
   copy.imageExtent.depth = 1u;
-  copy.imageSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
+  copy.imageSubresource.aspectMask =
+      ToImageAspectFlags(GetTextureDescriptor().format);
   copy.imageSubresource.mipLevel = 0u;
   copy.imageSubresource.baseArrayLayer = slice;
   copy.imageSubresource.layerCount = 1u;
