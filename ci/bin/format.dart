@@ -99,7 +99,7 @@ Future<String> _runGit(
   return result.stdout;
 }
 
-typedef MessageCallback = Function(String? message, {MessageType type});
+typedef MessageCallback = void Function(String? message, {MessageType type});
 
 /// Base class for format checkers.
 ///

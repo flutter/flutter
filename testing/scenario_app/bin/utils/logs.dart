@@ -10,7 +10,7 @@ String _red = _supportsAnsi ? '\u001b[31m' : '';
 String _gray = _supportsAnsi ? '\u001b[90m' : '';
 String _reset = _supportsAnsi? '\u001B[0m' : '';
 
-Future<void> step(String msg, Function() fn) async {
+Future<void> step(String msg, Future<void> Function() fn) async {
   stdout.writeln('-> $_green$msg$_reset');
   try {
     await fn();
