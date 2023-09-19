@@ -275,6 +275,29 @@ TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImage10XR) {
       context);
   EXPECT_TRUE(did_call);
 }
+
+TEST(ImageEncodingImpellerTest, PngEncoding10XR) {
+  int width = 100;
+  int height = 100;
+  SkImageInfo info = SkImageInfo::Make(
+      width, height, kBGR_101010x_XR_SkColorType, kUnpremul_SkAlphaType);
+
+  auto surface = SkSurfaces::Raster(info);
+  SkCanvas* canvas = surface->getCanvas();
+
+  SkPaint paint;
+  paint.setColor(SK_ColorBLUE);
+  paint.setAntiAlias(true);
+
+  canvas->clear(SK_ColorWHITE);
+  canvas->drawCircle(width / 2, height / 2, 100, paint);
+
+  sk_sp<SkImage> image = surface->makeImageSnapshot();
+
+  sk_sp<SkData> png = EncodeImage(image, ImageByteFormat::kPNG);
+  EXPECT_TRUE(png);
+}
+
 #endif  // IMPELLER_SUPPORTS_RENDERING
 
 }  // namespace testing

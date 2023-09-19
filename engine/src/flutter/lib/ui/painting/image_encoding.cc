@@ -34,15 +34,6 @@ class Context;
 namespace flutter {
 namespace {
 
-// This must be kept in sync with the enum in painting.dart
-enum ImageByteFormat {
-  kRawRGBA,
-  kRawStraightRGBA,
-  kRawUnmodified,
-  kRawExtendedRgba128,
-  kPNG,
-};
-
 void FinalizeSkData(void* isolate_callback_data, void* peer) {
   SkData* buffer = reinterpret_cast<SkData*>(peer);
   buffer->unref();
@@ -105,44 +96,6 @@ sk_sp<SkData> CopyImageByteData(const sk_sp<SkImage>& raster_image,
   }
 
   return SkData::MakeWithCopy(pixmap.addr(), pixmap.computeByteSize());
-}
-
-sk_sp<SkData> EncodeImage(const sk_sp<SkImage>& raster_image,
-                          ImageByteFormat format) {
-  TRACE_EVENT0("flutter", __FUNCTION__);
-
-  if (!raster_image) {
-    return nullptr;
-  }
-
-  switch (format) {
-    case kPNG: {
-      auto png_image = SkPngEncoder::Encode(nullptr, raster_image.get(), {});
-
-      if (png_image == nullptr) {
-        FML_LOG(ERROR) << "Could not convert raster image to PNG.";
-        return nullptr;
-      };
-      return png_image;
-    }
-    case kRawRGBA:
-      return CopyImageByteData(raster_image, kRGBA_8888_SkColorType,
-                               kPremul_SkAlphaType);
-
-    case kRawStraightRGBA:
-      return CopyImageByteData(raster_image, kRGBA_8888_SkColorType,
-                               kUnpremul_SkAlphaType);
-
-    case kRawUnmodified:
-      return CopyImageByteData(raster_image, raster_image->colorType(),
-                               raster_image->alphaType());
-    case kRawExtendedRgba128:
-      return CopyImageByteData(raster_image, kRGBA_F32_SkColorType,
-                               kUnpremul_SkAlphaType);
-  }
-
-  FML_LOG(ERROR) << "Unknown error encoding image.";
-  return nullptr;
 }
 
 void EncodeImageAndInvokeDataCallback(
@@ -227,6 +180,44 @@ Dart_Handle EncodeImage(CanvasImage* canvas_image,
       }));
 
   return Dart_Null();
+}
+
+sk_sp<SkData> EncodeImage(const sk_sp<SkImage>& raster_image,
+                          ImageByteFormat format) {
+  TRACE_EVENT0("flutter", __FUNCTION__);
+
+  if (!raster_image) {
+    return nullptr;
+  }
+
+  switch (format) {
+    case kPNG: {
+      auto png_image = SkPngEncoder::Encode(nullptr, raster_image.get(), {});
+
+      if (png_image == nullptr) {
+        FML_LOG(ERROR) << "Could not convert raster image to PNG.";
+        return nullptr;
+      };
+      return png_image;
+    }
+    case kRawRGBA:
+      return CopyImageByteData(raster_image, kRGBA_8888_SkColorType,
+                               kPremul_SkAlphaType);
+
+    case kRawStraightRGBA:
+      return CopyImageByteData(raster_image, kRGBA_8888_SkColorType,
+                               kUnpremul_SkAlphaType);
+
+    case kRawUnmodified:
+      return CopyImageByteData(raster_image, raster_image->colorType(),
+                               raster_image->alphaType());
+    case kRawExtendedRgba128:
+      return CopyImageByteData(raster_image, kRGBA_F32_SkColorType,
+                               kUnpremul_SkAlphaType);
+  }
+
+  FML_LOG(ERROR) << "Unknown error encoding image.";
+  return nullptr;
 }
 
 }  // namespace flutter
