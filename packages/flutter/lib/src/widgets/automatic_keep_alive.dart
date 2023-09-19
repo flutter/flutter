@@ -294,8 +294,6 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
 /// [KeepAliveNotification] internally.
 class KeepAliveNotification extends Notification {
   /// Creates a notification to indicate that a subtree must be kept alive.
-  ///
-  /// The [handle] must not be null.
   const KeepAliveNotification(this.handle);
 
   /// A [Listenable] that will inform its clients when the widget that fired the
