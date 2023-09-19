@@ -3379,7 +3379,7 @@ void _testClickDebouncer() {
     );
 
     // Wait for the timer to expire to make sure pointer events are flushed.
-    await Future<void>.delayed(const Duration(milliseconds: 11));
+    await Future<void>.delayed(const Duration(milliseconds: 20));
 
     expect(
       reason: 'Queued up events should be flushed to the framework because the '
