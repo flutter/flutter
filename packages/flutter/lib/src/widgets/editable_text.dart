@@ -1002,7 +1002,7 @@ class EditableText extends StatefulWidget {
     if (_strutStyle == null) {
       return StrutStyle.fromTextStyle(style, forceStrutHeight: true);
     }
-    return _strutStyle!.inheritFromTextStyle(style);
+    return _strutStyle.inheritFromTextStyle(style);
   }
   final StrutStyle? _strutStyle;
 
@@ -2218,7 +2218,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   bool get wantKeepAlive => widget.focusNode.hasFocus;
 
-  Color get _cursorColor => widget.cursorColor.withOpacity(_cursorBlinkOpacityController.value);
+  Color get _cursorColor {
+    final double effectiveOpacity = math.min(widget.cursorColor.alpha / 255.0, _cursorBlinkOpacityController.value);
+    return widget.cursorColor.withOpacity(effectiveOpacity);
+  }
 
   @override
   bool get cutEnabled {
@@ -3870,8 +3873,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _onCursorColorTick() {
-    renderEditable.cursorColor = widget.cursorColor.withOpacity(_cursorBlinkOpacityController.value);
-    _cursorVisibilityNotifier.value = widget.showCursor && _cursorBlinkOpacityController.value > 0;
+    final double effectiveOpacity = math.min(widget.cursorColor.alpha / 255.0, _cursorBlinkOpacityController.value);
+    renderEditable.cursorColor = widget.cursorColor.withOpacity(effectiveOpacity);
+    _cursorVisibilityNotifier.value = widget.showCursor && (EditableText.debugDeterministicCursor || _cursorBlinkOpacityController.value > 0);
   }
 
   bool get _showBlinkingCursor => _hasFocus && _value.selection.isCollapsed && widget.showCursor && _tickersEnabled;
@@ -4852,9 +4856,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                             value: _value,
                             cursorColor: _cursorColor,
                             backgroundCursorColor: widget.backgroundCursorColor,
-                            showCursor: EditableText.debugDeterministicCursor
-                                ? ValueNotifier<bool>(widget.showCursor)
-                                : _cursorVisibilityNotifier,
+                            showCursor: _cursorVisibilityNotifier,
                             forceLine: widget.forceLine,
                             readOnly: widget.readOnly,
                             hasFocus: _hasFocus,

@@ -120,6 +120,7 @@ Future<void> main(List<String> rawArgs) async {
     await runTasks(taskNames,
       silent: silent,
       localEngine: localEngine,
+      localEngineHost: localEngineHost,
       localEngineSrcPath: localEngineSrcPath,
       deviceId: deviceId,
       exitOnFirstTestFailure: exitOnFirstTestFailure,
@@ -177,6 +178,7 @@ Future<void> _runABTest({
       taskName,
       silent: silent,
       localEngine: localEngine,
+      localEngineHost: localEngineHost,
       localWebSdk: localWebSdk,
       localEngineSrcPath: localEngineSrcPath,
       deviceId: deviceId,
@@ -291,7 +293,6 @@ ArgParser createArgParser(List<String> taskNames) {
     )
     ..addFlag(
       'exit',
-      defaultsTo: true,
       help: 'Exit on the first test failure. Currently flakes are intentionally (though '
             'incorrectly) not considered to be failures.',
     )

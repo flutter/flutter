@@ -294,7 +294,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
         }
       case 'windows':
         if (await exec(
-          path.join(rootPath, 'build', 'windows', 'plugins', 'plugintest', 'Release', 'plugintest_test.exe'),
+          path.join(rootPath, 'build', 'windows', 'x64', 'plugins', 'plugintest', 'Release', 'plugintest_test.exe'),
           <String>[],
           canFail: true,
         ) != 0) {
