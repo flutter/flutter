@@ -468,7 +468,15 @@ class TextField extends StatefulWidget {
   /// however, this may only be done when it's safe to call
   /// [State.setState], like in an event handler.
   ///
-  /// {@macro flutter.material.MaterialStatesController.details}
+  /// The controller's [MaterialStatesController.value] represents the set of
+  /// states that a widget's visual properties, typically [MaterialStateProperty]
+  /// values, are resolved against. It is _not_ the intrinsic state of the widget.
+  /// The widget is responsible for ensuring that the controller's
+  /// [MaterialStatesController.value] tracks its intrinsic state. For example
+  /// one cannot request the keyboard focus for a widget by adding [MaterialState.focused]
+  /// to its controller. When the widget gains the or loses the focus it will
+  /// [MaterialStatesController.update] its controller's [MaterialStatesController.value]
+  /// and notify listeners of the change.
   final MaterialStatesController? statesController;
 
   /// {@macro flutter.widgets.editableText.obscuringCharacter}
