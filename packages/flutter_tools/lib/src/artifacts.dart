@@ -217,8 +217,7 @@ String? _artifactToFileName(Artifact artifact, Platform hostPlatform, [ BuildMod
     case Artifact.flutterToolsFileGenerators:
       return '';
     case Artifact.flutterPreviewDevice:
-      return switch (hostPlatform) {
-      }
+      return 'TODO'; // TODO
   }
 }
 
@@ -580,6 +579,8 @@ class CachedArtifacts implements Artifacts {
       case Artifact.windowsDesktopPath:
       case Artifact.flutterToolsFileGenerators:
         return _getHostArtifactPath(artifact, platform, mode);
+      case Artifact.flutterPreviewDevice:
+        throw UnimplementedError('TODO!'); // TODO
     }
   }
 
@@ -619,6 +620,8 @@ class CachedArtifacts implements Artifacts {
       case Artifact.windowsDesktopPath:
       case Artifact.flutterToolsFileGenerators:
         return _getHostArtifactPath(artifact, platform, mode);
+      case Artifact.flutterPreviewDevice:
+        throw UnimplementedError('TODO!'); // TODO
     }
   }
 
@@ -670,6 +673,8 @@ class CachedArtifacts implements Artifacts {
       case Artifact.windowsDesktopPath:
       case Artifact.flutterToolsFileGenerators:
         return _getHostArtifactPath(artifact, platform, mode);
+      case Artifact.flutterPreviewDevice:
+        throw UnimplementedError('TODO!'); // TODO
     }
   }
 
@@ -751,6 +756,8 @@ class CachedArtifacts implements Artifacts {
         throw StateError('Artifact $artifact not available for platform $platform.');
       case Artifact.flutterToolsFileGenerators:
         return _getFileGeneratorsPath();
+      case Artifact.flutterPreviewDevice:
+        throw UnimplementedError('TODO!'); // TODO
     }
   }
 
@@ -1022,6 +1029,8 @@ class CachedLocalEngineArtifacts implements Artifacts {
         return _fileSystem.path.join(_getDartSdkPath(), 'bin', 'utils', artifactFileName);
       case Artifact.flutterToolsFileGenerators:
         return _getFileGeneratorsPath();
+      case Artifact.flutterPreviewDevice:
+        throw UnimplementedError('TODO!'); // TODO
     }
   }
 
@@ -1176,6 +1185,8 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
         case Artifact.constFinder:
         case Artifact.flutterToolsFileGenerators:
           break;
+        case Artifact.flutterPreviewDevice:
+          throw UnimplementedError('TODO!'); // TODO
       }
     }
     return _parent.getArtifactPath(artifact, platform: platform, mode: mode, environmentType: environmentType);
