@@ -13,7 +13,6 @@ void main() {
   SemanticsUpdateTestBinding();
 
   testWidgets('Semantics update does not send update for merged nodes.', (WidgetTester tester) async {
-
     final SemanticsHandle handle = tester.ensureSemantics();
     // Pumps a placeholder to trigger the warm up frame.
     await tester.pumpWidget(
@@ -84,9 +83,7 @@ void main() {
 
     SemanticsUpdateBuilderSpy.observations.clear();
     handle.dispose();
-  },
-    skip: true, // [intended] Skipped temporarily until headingLevel is added in engine (see issue 41435).
-  );
+  });
 
   testWidgets('Semantics update receives attributed text', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
@@ -168,9 +165,7 @@ void main() {
 
     SemanticsUpdateBuilderSpy.observations.clear();
     handle.dispose();
-  },
-    skip: true, // [intended] Skipped temporarily until headingLevel is added in engine (see issue 41435).
-  );
+  });
 }
 
 class SemanticsUpdateTestBinding extends AutomatedTestWidgetsFlutterBinding {
@@ -219,6 +214,7 @@ class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilde
     required Int32List childrenInTraversalOrder,
     required Int32List childrenInHitTestOrder,
     required Int32List additionalActions,
+    int? headingLevel,
   }) {
     // Makes sure we don't send the same id twice.
     assert(!observations.containsKey(id));
@@ -230,6 +226,7 @@ class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilde
       value: value,
       valueAttributes: valueAttributes,
       childrenInTraversalOrder: childrenInTraversalOrder,
+      headingLevel: headingLevel,
     );
   }
 
@@ -250,6 +247,7 @@ class SemanticsNodeUpdateObservation {
     required this.hint,
     this.hintAttributes,
     required this.childrenInTraversalOrder,
+    this.headingLevel,
   });
 
   final String label;
@@ -259,4 +257,5 @@ class SemanticsNodeUpdateObservation {
   final String hint;
   final List<StringAttribute>? hintAttributes;
   final Int32List childrenInTraversalOrder;
+  final int? headingLevel;
 }
