@@ -11,7 +11,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgets('FilledButton, FilledButton.icon defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('FilledButton, FilledButton.icon defaults', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     final ThemeData theme = ThemeData.from(useMaterial3: false, colorScheme: colorScheme);
 
@@ -124,7 +124,7 @@ void main() {
     expect(material.type, MaterialType.button);
   });
 
-  testWidgets('FilledButton.tonal, FilledButton.tonalIcon defaults', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('FilledButton.tonal, FilledButton.tonalIcon defaults', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
 
@@ -237,8 +237,9 @@ void main() {
     expect(material.type, MaterialType.button);
   });
 
-  testWidgets('Default FilledButton meets a11y contrast guidelines', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default FilledButton meets a11y contrast guidelines', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1749,7 +1750,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
-  testWidgets('FilledButton in SelectionArea changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('FilledButton in SelectionArea changes mouse cursor when hovered', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/104595.
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
@@ -1845,6 +1846,7 @@ void main() {
       count += 1;
     }
     final MaterialStatesController controller = MaterialStatesController();
+    addTearDown(controller.dispose);
     controller.addListener(valueChanged);
 
     await tester.pumpWidget(
@@ -1945,20 +1947,21 @@ void main() {
     await gesture.removePointer();
   }
 
-  testWidgets('FilledButton statesController', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('FilledButton statesController', (WidgetTester tester) async {
     testStatesController(null, tester);
   });
 
-  testWidgets('FilledButton.icon statesController', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('FilledButton.icon statesController', (WidgetTester tester) async {
     testStatesController(const Icon(Icons.add), tester);
   });
 
-  testWidgets('Disabled FilledButton statesController', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Disabled FilledButton statesController', (WidgetTester tester) async {
     int count = 0;
     void valueChanged() {
       count += 1;
     }
     final MaterialStatesController controller = MaterialStatesController();
+    addTearDown(controller.dispose);
     controller.addListener(valueChanged);
     await tester.pumpWidget(
       MaterialApp(

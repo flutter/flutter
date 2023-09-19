@@ -417,6 +417,14 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
   final _RestorableAutovalidateMode _autovalidateMode = _RestorableAutovalidateMode(AutovalidateMode.disabled);
 
   @override
+  void dispose() {
+    _selectedDate.dispose();
+    _entryMode.dispose();
+    _autovalidateMode.dispose();
+    super.dispose();
+  }
+
+  @override
   String? get restorationId => widget.restorationId;
 
   @override
@@ -543,6 +551,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
         spacing: 8,
         children: <Widget>[
           TextButton(
+            style: datePickerTheme.cancelButtonStyle ?? defaults.cancelButtonStyle,
             onPressed: _handleCancel,
             child: Text(widget.cancelText ?? (
               useMaterial3
@@ -551,6 +560,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
             )),
           ),
           TextButton(
+            style: datePickerTheme.confirmButtonStyle ?? defaults.confirmButtonStyle,
             onPressed: _handleOk,
             child: Text(widget.confirmText ?? localizations.okButtonLabel),
           ),
@@ -674,7 +684,12 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
           // Constrain the textScaleFactor to the largest supported value to prevent
           // layout issues.
           maxScaleFactor: _kMaxTextScaleFactor,
-          child: Builder(builder: (BuildContext context) {
+          child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+            final Size portraitDialogSize = useMaterial3 ? _inputPortraitDialogSizeM3 : _inputPortraitDialogSizeM2;
+            // Make sure the portrait dialog can fit the contents comfortably when
+            // resized from the landscape dialog.
+            final bool isFullyPortrait = constraints.maxHeight >= portraitDialogSize.height;
+
             switch (orientation) {
               case Orientation.portrait:
                 return Column(
@@ -683,8 +698,10 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
                   children: <Widget>[
                     header,
                     if (useMaterial3) Divider(height: 0, color: datePickerTheme.dividerColor),
-                    Expanded(child: picker),
-                    actions,
+                    if (isFullyPortrait) ...<Widget>[
+                      Expanded(child: picker),
+                      actions,
+                    ],
                   ],
                 );
               case Orientation.landscape:
@@ -2775,14 +2792,25 @@ class _InputDateRangePickerDialog extends StatelessWidget {
 
     switch (orientation) {
       case Orientation.portrait:
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            header,
-            Expanded(child: picker),
-            actions,
-          ],
+        return LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            final Size portraitDialogSize = useMaterial3 ? _inputPortraitDialogSizeM3 : _inputPortraitDialogSizeM2;
+            // Make sure the portrait dialog can fit the contents comfortably when
+            // resized from the landscape dialog.
+            final bool isFullyPortrait = constraints.maxHeight >= portraitDialogSize.height;
+
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                header,
+                if (isFullyPortrait) ...<Widget>[
+                  Expanded(child: picker),
+                  actions,
+                ],
+              ],
+            );
+          }
         );
 
       case Orientation.landscape:

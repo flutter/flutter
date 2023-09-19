@@ -4,9 +4,10 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('Directionality', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Directionality', (WidgetTester tester) async {
     final List<TextDirection> log = <TextDirection>[];
     final Widget inner = Builder(
       builder: (BuildContext context) {
@@ -51,7 +52,7 @@ void main() {
     expect(log, <TextDirection>[TextDirection.ltr, TextDirection.rtl, TextDirection.ltr]);
   });
 
-  testWidgets('Directionality default', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Directionality default', (WidgetTester tester) async {
     bool good = false;
     await tester.pumpWidget(Builder(
       builder: (BuildContext context) {
@@ -63,7 +64,7 @@ void main() {
     expect(good, isTrue);
   });
 
-  testWidgets('Directionality.maybeOf', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Directionality.maybeOf', (WidgetTester tester) async {
     final GlobalKey hasDirectionality = GlobalKey();
     final GlobalKey noDirectionality = GlobalKey();
     await tester.pumpWidget(
@@ -81,7 +82,7 @@ void main() {
     expect(Directionality.maybeOf(hasDirectionality.currentContext!), TextDirection.rtl);
   });
 
-  testWidgets('Directionality.of', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Directionality.of', (WidgetTester tester) async {
     final GlobalKey hasDirectionality = GlobalKey();
     final GlobalKey noDirectionality = GlobalKey();
     await tester.pumpWidget(

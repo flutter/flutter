@@ -437,9 +437,7 @@ class RenderParagraph extends RenderBox with ContainerRenderObjectMixin<RenderBo
   @override
   void dispose() {
     _removeSelectionRegistrarSubscription();
-    // _lastSelectableFragments may hold references to this RenderParagraph.
-    // Release them manually to avoid retain cycles.
-    _lastSelectableFragments = null;
+    _disposeSelectableFragments();
     _textPainter.dispose();
     super.dispose();
   }
@@ -1323,7 +1321,7 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     required this.range,
   }) : assert(range.isValid && !range.isCollapsed && range.isNormalized) {
     if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
     _selectionGeometry = _getSelectionGeometry();
   }

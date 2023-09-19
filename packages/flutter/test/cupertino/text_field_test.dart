@@ -1071,7 +1071,8 @@ void main() {
 
       await tester.enterText(find.byType(CupertinoTextField), 'input');
       await tester.pump();
-      expect(find.text('placeholder'), findsNothing);
+      final Element element = tester.element(find.text('placeholder'));
+      expect(Visibility.of(element), false);
     },
   );
 
@@ -1964,7 +1965,9 @@ void main() {
 
     expect(find.text('field 1'), findsOneWidget);
     expect(find.text("j'aime la poutine"), findsOneWidget);
-    expect(find.text('field 2'), findsNothing);
+
+    final Element placeholder2Element = tester.element(find.text('field 2'));
+    expect(Visibility.of(placeholder2Element), false);
   }, skip: isContextMenuProvidedByPlatform); // [intended] only applies to platforms where we supply the context menu.
 
   testWidgets(
@@ -6832,8 +6835,9 @@ void main() {
               bottomLeftSelectionPosition.translate(0, 8 + 0.1),
             ],
             includes: <Offset> [
-              // Expected center of the arrow.
-              Offset(26.0, bottomLeftSelectionPosition.dy + 8 + 0.1),
+              // Expected center of the arrow. The arrow should stay clear of
+              // the edges of the selection toolbar.
+              Offset(26.0, bottomLeftSelectionPosition.dy + 7.0 + 8.0 + 0.1),
             ],
           ),
         ),
@@ -6843,7 +6847,7 @@ void main() {
         find.byType(CupertinoTextSelectionToolbar),
         paints..clipPath(
           pathMatcher: PathBoundsMatcher(
-            topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8, epsilon: 0.01),
+            topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 7 + 8, epsilon: 0.01),
             leftMatcher: moreOrLessEquals(8),
             rightMatcher: lessThanOrEqualTo(400 - 8),
             bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8 + 45, epsilon: 0.01),
@@ -6894,7 +6898,7 @@ void main() {
             ],
             includes: <Offset> [
               // Expected center of the arrow.
-              Offset(400 - 26.0, bottomLeftSelectionPosition.dy + 8 + 0.1),
+              Offset(400 - 26.0, bottomLeftSelectionPosition.dy + 7 + 8 + 0.1),
             ],
           ),
         ),
@@ -6904,7 +6908,7 @@ void main() {
         find.byType(CupertinoTextSelectionToolbar),
         paints..clipPath(
           pathMatcher: PathBoundsMatcher(
-            topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8, epsilon: 0.01),
+            topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 7 + 8, epsilon: 0.01),
             rightMatcher: moreOrLessEquals(400.0 - 8),
             bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8 + 45, epsilon: 0.01),
             leftMatcher: greaterThanOrEqualTo(8),
@@ -8096,9 +8100,7 @@ void main() {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(
-          child: CupertinoTextField(
-            enabled: true,
-          ),
+          child: CupertinoTextField(),
         ),
       ),
     );
@@ -9867,4 +9869,59 @@ void main() {
     skip: isContextMenuProvidedByPlatform, // [intended] only applies to platforms where we supply the context menu.
     variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }),
   );
+
+  testWidgets('Does not shrink in height when enters text when there is large single-line placeholder', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/133241.
+    final TextEditingController controller = TextEditingController();
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Align(
+          alignment: Alignment.topCenter,
+          child: CupertinoTextField(
+            placeholderStyle: const TextStyle(fontSize: 100),
+            placeholder: 'p',
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    final Rect rectWithPlaceholder = tester.getRect(find.byType(CupertinoTextField));
+    controller.value = const TextEditingValue(text: 'input');
+    await tester.pump();
+
+    final Rect rectWithText = tester.getRect(find.byType(CupertinoTextField));
+    expect(rectWithPlaceholder, rectWithText);
+  });
+
+  testWidgets('Does not match the height of a multiline placeholder', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Align(
+          alignment: Alignment.topCenter,
+          child: CupertinoTextField(
+            placeholderStyle: const TextStyle(fontSize: 100),
+            placeholder: 'p' * 50,
+            maxLines: null,
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    final Rect rectWithPlaceholder = tester.getRect(find.byType(CupertinoTextField));
+    controller.value = const TextEditingValue(text: 'input');
+    await tester.pump();
+
+    final Rect rectWithText = tester.getRect(find.byType(CupertinoTextField));
+    // The text field is still top aligned.
+    expect(rectWithPlaceholder.top, rectWithText.top);
+    // But after entering text the text field should shrink since the
+    // placeholder text is huge and multiline.
+    expect(rectWithPlaceholder.height, greaterThan(rectWithText.height));
+    // But still should be taller than or the same height of the first line of
+    // placeholder.
+    expect(rectWithText.height, greaterThan(100));
+  });
 }
