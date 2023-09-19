@@ -86,11 +86,11 @@ void main() async {
       // TODO(dkwingsmt): It should be frameCount > 2. Not sure why the window
       // is still hidden at the beginning of the 3rd frame.
       // https://github.com/flutter/flutter/issues/134986
-      bool shouldBeVisible = frameCount > 3;
+      final bool shouldBeVisible = frameCount > 3;
       isWindowVisible().then((bool visible) {
         if (visible != shouldBeVisible) {
           try {
-            throw 'Window should be ${shouldBeVisible ? 'visible' : 'hidden'} on frame ${frameCount}';
+            throw 'Window should be ${shouldBeVisible ? 'visible' : 'hidden'} on frame $frameCount';
           } catch (e) {
             visibilityCompleter.completeError(e);
             rethrow;
