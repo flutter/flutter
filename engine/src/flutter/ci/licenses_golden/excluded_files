@@ -86,6 +86,7 @@
 ../../../flutter/fml/closure_unittests.cc
 ../../../flutter/fml/command_line_unittest.cc
 ../../../flutter/fml/container_unittests.cc
+../../../flutter/fml/cpu_affinity_unittests.cc
 ../../../flutter/fml/endianness_unittests.cc
 ../../../flutter/fml/file_unittest.cc
 ../../../flutter/fml/hash_combine_unittests.cc

@@ -19,6 +19,8 @@ source_set("fml") {
     "concurrent_message_loop.cc",
     "concurrent_message_loop.h",
     "container.h",
+    "cpu_affinity.cc",
+    "cpu_affinity.h",
     "delayed_task.cc",
     "delayed_task.h",
     "eintr_wrapper.h",
@@ -170,6 +172,8 @@ source_set("fml") {
 
   if (is_android) {
     sources += [
+      "platform/android/cpu_affinity.cc",
+      "platform/android/cpu_affinity.h",
       "platform/android/jni_util.cc",
       "platform/android/jni_util.h",
       "platform/android/jni_weak_ref.cc",
@@ -322,6 +326,7 @@ if (enable_unittests) {
       "closure_unittests.cc",
       "command_line_unittest.cc",
       "container_unittests.cc",
+      "cpu_affinity_unittests.cc",
       "endianness_unittests.cc",
       "file_unittest.cc",
       "hash_combine_unittests.cc",
