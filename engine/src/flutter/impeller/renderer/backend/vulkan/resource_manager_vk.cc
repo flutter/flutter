@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/backend/vulkan/resource_manager_vk.h"
 
+#include "flutter/fml/cpu_affinity.h"
 #include "flutter/fml/thread.h"
 #include "flutter/fml/trace_event.h"
 #include "fml/logging.h"
@@ -39,6 +40,9 @@ void ResourceManagerVK::Start() {
 
   fml::Thread::SetCurrentThreadName(
       fml::Thread::ThreadConfig{"io.flutter.impeller.resource_manager"});
+  // While this code calls destructors it doesn't need to be particularly fast
+  // with them, as long as it doesn't interrupt raster thread.
+  fml::RequestAffinity(fml::CpuAffinity::kEfficiency);
 
   bool should_exit = false;
   while (!should_exit) {

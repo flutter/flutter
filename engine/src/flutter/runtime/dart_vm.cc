@@ -11,6 +11,7 @@
 
 #include "flutter/common/settings.h"
 #include "flutter/fml/compiler_specific.h"
+#include "flutter/fml/cpu_affinity.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/size.h"
@@ -285,7 +286,9 @@ size_t DartVM::GetVMLaunchCount() {
 DartVM::DartVM(const std::shared_ptr<const DartVMData>& vm_data,
                std::shared_ptr<IsolateNameServer> isolate_name_server)
     : settings_(vm_data->GetSettings()),
-      concurrent_message_loop_(fml::ConcurrentMessageLoop::Create()),
+      concurrent_message_loop_(fml::ConcurrentMessageLoop::Create(
+          fml::EfficiencyCoreCount().value_or(
+              std::thread::hardware_concurrency()))),
       skia_concurrent_executor_(
           [runner = concurrent_message_loop_->GetTaskRunner()](
               const fml::closure& work) { runner->PostTask(work); }),

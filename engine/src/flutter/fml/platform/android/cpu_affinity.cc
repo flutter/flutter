@@ -11,6 +11,7 @@
 #include <mutex>
 #include <optional>
 #include <thread>
+#include "flutter/fml/logging.h"
 
 namespace fml {
 
@@ -36,15 +37,27 @@ void InitCPUInfo(size_t cpu_count) {
   gCPUTracker = new CPUSpeedTracker(cpu_speeds);
 }
 
-bool RequestAffinity(CpuAffinity affinity) {
+bool SetUpCPUTracker() {
   // Populate CPU Info if uninitialized.
   auto count = std::thread::hardware_concurrency();
   std::call_once(gCPUTrackerFlag, [count]() { InitCPUInfo(count); });
-  if (gCPUTracker == nullptr) {
+  if (gCPUTracker == nullptr || !gCPUTracker->IsValid()) {
+    return false;
+  }
+  return true;
+}
+
+std::optional<size_t> AndroidEfficiencyCoreCount() {
+  if (!SetUpCPUTracker()) {
     return true;
   }
+  auto result = gCPUTracker->GetIndices(CpuAffinity::kEfficiency).size();
+  FML_DCHECK(result > 0);
+  return result;
+}
 
-  if (!gCPUTracker->IsValid()) {
+bool AndroidRequestAffinity(CpuAffinity affinity) {
+  if (!SetUpCPUTracker()) {
     return true;
   }
 

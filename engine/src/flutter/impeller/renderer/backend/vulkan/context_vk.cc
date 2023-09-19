@@ -16,6 +16,7 @@
 #include <string>
 #include <vector>
 
+#include "flutter/fml/cpu_affinity.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/validation.h"
 #include "impeller/renderer/backend/vulkan/allocator_vk.h"
@@ -130,13 +131,16 @@ void ContextVK::Setup(Settings settings) {
 
   raster_message_loop_ = fml::ConcurrentMessageLoop::Create(
       std::min(4u, std::thread::hardware_concurrency()));
-#ifdef FML_OS_ANDROID
   raster_message_loop_->PostTaskToAllWorkers([]() {
+    // Currently we only use the worker task pool for small parts of a frame
+    // workload, if this changes this setting may need to be adjusted.
+    fml::RequestAffinity(fml::CpuAffinity::kNotPerformance);
+#ifdef FML_OS_ANDROID
     if (::setpriority(PRIO_PROCESS, gettid(), -5) != 0) {
       FML_LOG(ERROR) << "Failed to set Workers task runner priority";
     }
-  });
 #endif  // FML_OS_ANDROID
+  });
 
   auto& dispatcher = VULKAN_HPP_DEFAULT_DISPATCHER;
   dispatcher.init(settings.proc_address_callback);

@@ -8,14 +8,10 @@
 
 namespace fml {
 
-/// @brief Request the given affinity for the current thread.
-///
-///        Returns true if successfull, or if it was a no-op. This function is
-///        only supported on Android devices.
-///
-///        Affinity requests are based on documented CPU speed. This speed data
-///        is parsed from cpuinfo_max_freq files, see also:
-///        https://www.kernel.org/doc/Documentation/cpu-freq/user-guide.txt
-bool RequestAffinity(CpuAffinity affinity);
+/// @brief Android specific implementation of EfficiencyCoreCount.
+std::optional<size_t> AndroidEfficiencyCoreCount();
+
+/// @brief Android specific implementation of RequestAffinity.
+bool AndroidRequestAffinity(CpuAffinity affinity);
 
 }  // namespace fml
