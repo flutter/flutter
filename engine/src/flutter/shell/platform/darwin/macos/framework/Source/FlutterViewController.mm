@@ -400,7 +400,7 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
             @"In unit tests, this is likely because either the FlutterViewController or "
             @"the FlutterEngine is mocked. Please subclass these classes instead.",
             controller.engine, controller.viewId);
-  controller->_mouseTrackingMode = FlutterMouseTrackingModeInKeyWindow;
+  controller->_mouseTrackingMode = kFlutterMouseTrackingModeInKeyWindow;
   controller->_textInputPlugin = [[FlutterTextInputPlugin alloc] initWithViewController:controller];
   [controller initializeKeyboard];
   [controller notifySemanticsEnabledChanged];
@@ -642,17 +642,17 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
     // the view is actually loaded.
     return;
   }
-  if (_mouseTrackingMode != FlutterMouseTrackingModeNone && self.flutterView) {
+  if (_mouseTrackingMode != kFlutterMouseTrackingModeNone && self.flutterView) {
     NSTrackingAreaOptions options = NSTrackingMouseEnteredAndExited | NSTrackingMouseMoved |
                                     NSTrackingInVisibleRect | NSTrackingEnabledDuringMouseDrag;
     switch (_mouseTrackingMode) {
-      case FlutterMouseTrackingModeInKeyWindow:
+      case kFlutterMouseTrackingModeInKeyWindow:
         options |= NSTrackingActiveInKeyWindow;
         break;
-      case FlutterMouseTrackingModeInActiveApp:
+      case kFlutterMouseTrackingModeInActiveApp:
         options |= NSTrackingActiveInActiveApp;
         break;
-      case FlutterMouseTrackingModeAlways:
+      case kFlutterMouseTrackingModeAlways:
         options |= NSTrackingActiveAlways;
         break;
       default:
