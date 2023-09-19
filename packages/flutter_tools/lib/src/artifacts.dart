@@ -69,6 +69,9 @@ enum Artifact {
 
   /// The location of file generators.
   flutterToolsFileGenerators,
+
+  /// Pre-built desktop debug app.
+  flutterPreviewDevice,
 }
 
 /// A subset of [Artifact]s that are platform and build mode independent
@@ -213,6 +216,9 @@ String? _artifactToFileName(Artifact artifact, Platform hostPlatform, [ BuildMod
       return 'const_finder.dart.snapshot';
     case Artifact.flutterToolsFileGenerators:
       return '';
+    case Artifact.flutterPreviewDevice:
+      return switch (hostPlatform) {
+      }
   }
 }
 

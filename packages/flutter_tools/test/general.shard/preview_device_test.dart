@@ -24,10 +24,23 @@ import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
+  String? flutterRootBackup;
+  late MemoryFileSystem fs;
+
+  setUp(() {
+    fs = MemoryFileSystem.test(style: FileSystemStyle.windows);
+    flutterRootBackup = Cache.flutterRoot;
+    Cache.flutterRoot = r'C:\path\to\flutter';
+  });
+
+  tearDown(() {
+    Cache.flutterRoot = flutterRootBackup;
+  });
+
   testWithoutContext('PreviewDevice defaults', () async {
     final PreviewDevice device = PreviewDevice(
       artifacts: Artifacts.test(),
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fs,
       processManager: FakeProcessManager.any(),
       logger: BufferLogger.test(),
     );
@@ -35,7 +48,7 @@ void main() {
     expect(await device.isLocalEmulator, false);
     expect(device.name, 'preview');
     expect(await device.sdkNameAndVersion, 'preview');
-    expect(await device.targetPlatform, TargetPlatform.tester);
+    expect(await device.targetPlatform, TargetPlatform.windows_x64);
     expect(device.category, Category.desktop);
     expect(device.ephemeral, false);
     expect(device.id, 'preview');
@@ -48,13 +61,11 @@ void main() {
   });
 
   testUsingContext('Can build a simulator app', () async {
-    Cache.flutterRoot = '';
     final Completer<void> completer = Completer<void>();
-    final FileSystem fileSystem = MemoryFileSystem.test();
     final BufferLogger logger = BufferLogger.test();
     final PreviewDevice device = PreviewDevice(
       artifacts: Artifacts.test(),
-      fileSystem: fileSystem,
+      fileSystem: fs,
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: const <String>[
@@ -65,12 +76,17 @@ void main() {
         ),
       ]),
       logger: logger,
-      builderFactory: () => FakeBundleBuilder(fileSystem),
+      builderFactory: () => FakeBundleBuilder(fs),
     );
-    fileSystem
+    fs
       .directory('artifacts_temp')
       .childDirectory('Debug')
       .createSync(recursive: true);
+    final Directory previewDeviceCacheDir = fs
+      .directory(Cache.flutterRoot)
+      .childDirectory('Artifact.windowsDesktopPath.TargetPlatform.windows_x64.debug')
+      ..createSync(recursive: true);
+    previewDeviceCacheDir.childFile('flutter_windows.dll').writeAsStringSync('1010101');
 
     final LaunchResult result = await device.startApp(
       FakeApplicationPackage(),

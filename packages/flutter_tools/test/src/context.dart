@@ -381,7 +381,7 @@ class NoopCrashReporter implements CrashReporter {
 
 class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
   LocalFileSystemBlockingSetCurrentDirectory() : super.test(
-    signals: LocalSignals.instance,
+    signals: globals.signals,
   );
 
   @override
