@@ -3606,7 +3606,7 @@ mixin _ButtonedEventMixin on _BasicEventContext {
     });
     // timeStamp can't be set in the constructor, need to override the getter.
     if (timeStamp != null) {
-      js_util.callMethod(
+      js_util.callMethod<void>(
         objectConstructor,
         'defineProperty',
         <dynamic>[
