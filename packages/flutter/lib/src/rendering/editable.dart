@@ -267,8 +267,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// the number of lines. By default, it is 1, meaning this is a single-line
   /// text field. If it is not null, it must be greater than zero.
   ///
-  /// You can use [ViewportOffset.zero] for the [offset] if you have no need
-  /// for scrolling.
+  /// Use [ViewportOffset.zero] for the [offset] if there is no need for
+  /// scrolling.
   RenderEditable({
     InlineSpan? text,
     required TextDirection textDirection,
