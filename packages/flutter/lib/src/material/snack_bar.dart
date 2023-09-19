@@ -463,7 +463,7 @@ class SnackBar extends StatefulWidget {
 
   /// The direction in which the SnackBar can be dismissed.
   ///
-  /// Cannot be null, defaults to [DismissDirection.down].
+  /// Defaults to [DismissDirection.down].
   final DismissDirection dismissDirection;
 
   /// {@macro flutter.material.Material.clipBehavior}

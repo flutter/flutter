@@ -1907,6 +1907,10 @@ class _SubmenuButtonState extends State<SubmenuButton> {
             controller._anchor!._focusButton();
           }
         }
+<<<<<<< Updated upstream
+=======
+        // debugPrint('Rebuilding semantics with isExpanded: ${controller.isOpen}');
+>>>>>>> Stashed changes
         child = MergeSemantics(
           child: Semantics(
             expanded: controller.isOpen,

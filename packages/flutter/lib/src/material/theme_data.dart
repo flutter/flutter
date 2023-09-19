@@ -784,8 +784,6 @@ class ThemeData with Diagnosticable {
   /// Create a [ThemeData] based on the colors in the given [colorScheme] and
   /// text styles of the optional [textTheme].
   ///
-  /// The [colorScheme] can not be null.
-  ///
   /// If [colorScheme].brightness is [Brightness.dark] then
   /// [ThemeData.applyElevationOverlayColor] will be set to true to support
   /// the Material dark theme method for indicating elevation by applying

@@ -900,7 +900,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 
 /// Show a popup menu that contains the `items` at `position`.
 ///
-/// `items` should be non-null and not empty.
+/// The `items` parameter must not be empty.
 ///
 /// If `initialValue` is specified then the first item with a matching value
 /// will be highlighted and the value of `position` gives the rectangle whose

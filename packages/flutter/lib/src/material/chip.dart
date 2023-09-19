@@ -447,7 +447,7 @@ abstract interface class DisabledChipAttributes {
   /// For classes which don't have this as a constructor argument, [isEnabled]
   /// returns true if their user action callback is set.
   ///
-  /// Defaults to true. Cannot be null.
+  /// Defaults to true.
   bool get isEnabled;
 
   /// The color used for the chip's background to indicate that it is not
