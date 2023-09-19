@@ -195,8 +195,8 @@ TEST(FlutterViewController, CanSetMouseTrackingModeBeforeViewLoaded) {
       initWithAssetsPath:fixtures
              ICUDataPath:[fixtures stringByAppendingString:@"/icudtl.dat"]];
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithProject:project];
-  viewController.mouseTrackingMode = FlutterMouseTrackingModeInActiveApp;
-  ASSERT_EQ(viewController.mouseTrackingMode, FlutterMouseTrackingModeInActiveApp);
+  viewController.mouseTrackingMode = kFlutterMouseTrackingModeInActiveApp;
+  ASSERT_EQ(viewController.mouseTrackingMode, kFlutterMouseTrackingModeInActiveApp);
 }
 
 TEST(FlutterViewControllerTest, TestKeyEventsAreSentToFramework) {
