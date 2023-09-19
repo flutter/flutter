@@ -1039,7 +1039,7 @@ void main() {
         expect(right.opacity.value, equals(1.0));
         expect(find.byKey(toolbarKey), findsOneWidget);
       },
-      variant: TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }),
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }),
       skip: kIsWeb, // [intended] Web uses its native context menu.
     );
 
