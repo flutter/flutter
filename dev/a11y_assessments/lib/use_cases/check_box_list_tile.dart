@@ -43,7 +43,6 @@ class _MainWidgetState extends State<_MainWidget> {
             title: const Text('a check box list title'),
           ),
           CheckboxListTile(
-            autofocus: true,
             value: _checked,
             onChanged: (bool? value) {
               setState(() {

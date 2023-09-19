@@ -8,6 +8,12 @@ import 'package:flutter/rendering.dart';
 
 import 'use_cases/use_cases.dart';
 
+// TODO(yjbanov): https://github.com/flutter/flutter/issues/83809
+//                Currently this app (as most Flutter Web apps) relies on the
+//                `autofocus` property to guide the a11y focus when navigating
+//                across routes (screen transitions, dialogs, etc). We may want
+//                to revisit this after we figure out a long-term story for a11y
+//                focus. See also https://github.com/flutter/flutter/issues/97747
 void main() {
   runApp(const App());
   if (kIsWeb) {
