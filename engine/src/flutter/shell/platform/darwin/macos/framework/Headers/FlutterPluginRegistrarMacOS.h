@@ -11,8 +11,8 @@
 #import "FlutterPluginMacOS.h"
 #import "FlutterTexture.h"
 
-// TODO: Merge this file and FlutterPluginMacOS.h with the iOS FlutterPlugin.h, sharing all but
-// the platform-specific methods.
+// TODO(stuartmorgan): Merge this file and FlutterPluginMacOS.h with the iOS FlutterPlugin.h,
+// sharing all but the platform-specific methods.
 
 /**
  * The protocol for an object managing registration for a plugin. It provides access to application
