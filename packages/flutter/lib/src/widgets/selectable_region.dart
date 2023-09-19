@@ -541,8 +541,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     _selectWordAt(offset: details.globalPosition);
     // Platforms besides Android will show the text selection handles when
     // the long press is initiated. Android shows the text selection handles when
-    // the long press has ended, usually after the user has lifted their finger
-    // off the screen.
+    // the long press has ended, usually after a pointer up event is received.
     if (defaultTargetPlatform != TargetPlatform.android) {
       _showHandles();
     }
