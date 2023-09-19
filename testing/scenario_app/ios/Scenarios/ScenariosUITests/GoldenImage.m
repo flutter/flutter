@@ -8,8 +8,6 @@
 #import <os/log.h>
 #include <sys/sysctl.h>
 
-static const double kRmseThreshold = 0.5;
-
 @interface GoldenImage ()
 
 @end
@@ -28,7 +26,7 @@ static const double kRmseThreshold = 0.5;
   return self;
 }
 
-- (BOOL)compareGoldenToImage:(UIImage*)image {
+- (BOOL)compareGoldenToImage:(UIImage*)image rmesThreshold:(double)rmesThreshold {
   if (!self.image || !image) {
     os_log_error(OS_LOG_DEFAULT, "GOLDEN DIFF FAILED: image does not exists.");
     return NO;
@@ -91,11 +89,11 @@ static const double kRmseThreshold = 0.5;
     }
   }
   double rmse = sqrt(sum / size);
-  if (rmse > kRmseThreshold) {
+  if (rmse > rmesThreshold) {
     os_log_error(
         OS_LOG_DEFAULT,
         "GOLDEN DIFF FAILED: image diff greater than threshold. Current diff: %@, threshold: %@",
-        @(rmse), @(kRmseThreshold));
+        @(rmse), @(rmesThreshold));
     return NO;
   }
   return YES;
