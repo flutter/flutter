@@ -7,9 +7,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('Heroes work', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Heroes work', (WidgetTester tester) async {
     await tester.pumpWidget(CupertinoApp(
       home: ListView(children: <Widget>[
         const Hero(tag: 'a', child: Text('foo')),
@@ -39,7 +40,7 @@ void main() {
     expect(find.widgetWithText(Navigator, 'foo'), findsOneWidget);
   });
 
-  testWidgets('Has default cupertino localizations', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Has default cupertino localizations', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Builder(
@@ -61,7 +62,7 @@ void main() {
     expect(find.text('Thu Oct 4 '), findsOneWidget);
   });
 
-  testWidgets('Can use dynamic color', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can use dynamic color', (WidgetTester tester) async {
     const CupertinoDynamicColor dynamicColor = CupertinoDynamicColor.withBrightness(
       color: Color(0xFF000000),
       darkColor: Color(0xFF000001),
@@ -83,7 +84,7 @@ void main() {
     expect(tester.widget<Title>(find.byType(Title)).color.value, 0xFF000001);
   });
 
-  testWidgets('Can customize initial routes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can customize initial routes', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       CupertinoApp(
@@ -130,7 +131,7 @@ void main() {
     expect(find.text('regular page two'), findsNothing);
   });
 
-  testWidgets('CupertinoApp.navigatorKey can be updated', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CupertinoApp.navigatorKey can be updated', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> key1 = GlobalKey<NavigatorState>();
     await tester.pumpWidget(CupertinoApp(
       navigatorKey: key1,
@@ -146,12 +147,13 @@ void main() {
     expect(key1.currentState, isNull);
   });
 
-  testWidgets('CupertinoApp.router works', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CupertinoApp.router works', (WidgetTester tester) async {
     final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
       initialRouteInformation: RouteInformation(
         uri: Uri.parse('initial'),
       ),
     );
+    addTearDown(provider.dispose);
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
@@ -163,6 +165,7 @@ void main() {
         return route.didPop(result);
       },
     );
+    addTearDown(delegate.dispose);
     await tester.pumpWidget(CupertinoApp.router(
       routeInformationProvider: provider,
       routeInformationParser: SimpleRouteInformationParser(),
@@ -175,9 +178,14 @@ void main() {
     await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
-  });
+  },
+  // TODO(polina-c): remove after fixing
+  // https://github.com/flutter/flutter/issues/134205
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    allowAllNotDisposed: true,
+  ));
 
-  testWidgets('CupertinoApp.router route information parser is optional', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CupertinoApp.router route information parser is optional', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
@@ -189,6 +197,7 @@ void main() {
         return route.didPop(result);
       },
     );
+    addTearDown(delegate.dispose);
     delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
     await tester.pumpWidget(CupertinoApp.router(
       routerDelegate: delegate,
@@ -200,9 +209,14 @@ void main() {
     await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
-  });
+  },
+  // TODO(polina-c): remove after fixing
+  // https://github.com/flutter/flutter/issues/134205
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    allowAllNotDisposed: true,
+  ));
 
-  testWidgets('CupertinoApp.router throw if route information provider is provided but no route information parser', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CupertinoApp.router throw if route information provider is provided but no route information parser', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
@@ -214,12 +228,14 @@ void main() {
         return route.didPop(result);
       },
     );
+    addTearDown(delegate.dispose);
     delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
     final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
       initialRouteInformation: RouteInformation(
         uri: Uri.parse('initial'),
       ),
     );
+    addTearDown(provider.dispose);
     await tester.pumpWidget(CupertinoApp.router(
       routeInformationProvider: provider,
       routerDelegate: delegate,
@@ -227,7 +243,7 @@ void main() {
     expect(tester.takeException(), isAssertionError);
   });
 
-  testWidgets('CupertinoApp.router throw if route configuration is provided along with other delegate', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CupertinoApp.router throw if route configuration is provided along with other delegate', (WidgetTester tester) async {
     final SimpleNavigatorRouterDelegate delegate = SimpleNavigatorRouterDelegate(
       builder: (BuildContext context, RouteInformation information) {
         return Text(information.uri.toString());
@@ -239,6 +255,7 @@ void main() {
         return route.didPop(result);
       },
     );
+    addTearDown(delegate.dispose);
     delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
     final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(routerDelegate: delegate);
     await tester.pumpWidget(CupertinoApp.router(
@@ -248,15 +265,19 @@ void main() {
     expect(tester.takeException(), isAssertionError);
   });
 
-  testWidgets('CupertinoApp.router router config works', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CupertinoApp.router router config works', (WidgetTester tester) async {
+    late SimpleNavigatorRouterDelegate delegate;
+    addTearDown(() => delegate.dispose());
+    final PlatformRouteInformationProvider provider = PlatformRouteInformationProvider(
+      initialRouteInformation: RouteInformation(
+        uri: Uri.parse('initial'),
+      ),
+    );
+    addTearDown(provider.dispose);
     final RouterConfig<RouteInformation> routerConfig = RouterConfig<RouteInformation>(
-        routeInformationProvider: PlatformRouteInformationProvider(
-          initialRouteInformation: RouteInformation(
-            uri: Uri.parse('initial'),
-          ),
-        ),
+        routeInformationProvider: provider,
         routeInformationParser: SimpleRouteInformationParser(),
-        routerDelegate: SimpleNavigatorRouterDelegate(
+        routerDelegate: delegate = SimpleNavigatorRouterDelegate(
           builder: (BuildContext context, RouteInformation information) {
             return Text(information.uri.toString());
           },
@@ -279,9 +300,14 @@ void main() {
     await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
     expect(find.text('popped'), findsOneWidget);
-  });
+  },
+  // TODO(polina-c): remove after fixing
+  // https://github.com/flutter/flutter/issues/134205
+  leakTrackingTestConfig: const LeakTrackingTestConfig(
+    allowAllNotDisposed: true,
+  ));
 
-  testWidgets('CupertinoApp has correct default ScrollBehavior', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CupertinoApp has correct default ScrollBehavior', (WidgetTester tester) async {
     late BuildContext capturedContext;
     await tester.pumpWidget(
       CupertinoApp(
@@ -296,7 +322,7 @@ void main() {
     expect(ScrollConfiguration.of(capturedContext).runtimeType, CupertinoScrollBehavior);
   });
 
-  testWidgets('A ScrollBehavior can be set for CupertinoApp', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('A ScrollBehavior can be set for CupertinoApp', (WidgetTester tester) async {
     late BuildContext capturedContext;
     await tester.pumpWidget(
       CupertinoApp(
@@ -314,7 +340,7 @@ void main() {
     expect(scrollBehavior.getScrollPhysics(capturedContext).runtimeType, NeverScrollableScrollPhysics);
   });
 
-  testWidgets('When `useInheritedMediaQuery` is true an existing MediaQuery is used if one is available', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('When `useInheritedMediaQuery` is true an existing MediaQuery is used if one is available', (WidgetTester tester) async {
     late BuildContext capturedContext;
     final UniqueKey uniqueKey = UniqueKey();
     await tester.pumpWidget(
@@ -334,7 +360,7 @@ void main() {
     expect(capturedContext.dependOnInheritedWidgetOfExactType<MediaQuery>()?.key, uniqueKey);
   });
 
-  testWidgets('Text color is correctly resolved when CupertinoThemeData.brightness is null', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Text color is correctly resolved when CupertinoThemeData.brightness is null', (WidgetTester tester) async {
     debugBrightnessOverride = Brightness.dark;
 
     await tester.pumpWidget(
@@ -373,7 +399,7 @@ void main() {
     debugBrightnessOverride = null;
   });
 
-  testWidgets('Cursor color is resolved when CupertinoThemeData.brightness is null', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Cursor color is resolved when CupertinoThemeData.brightness is null', (WidgetTester tester) async {
     debugBrightnessOverride = Brightness.dark;
 
     RenderEditable findRenderEditable(WidgetTester tester) {
@@ -394,6 +420,11 @@ void main() {
       return renderEditable!;
     }
 
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       CupertinoApp(
         theme: const CupertinoThemeData(
@@ -405,8 +436,8 @@ void main() {
               return EditableText(
                 backgroundCursorColor: DefaultSelectionStyle.of(context).selectionColor!,
                 cursorColor: DefaultSelectionStyle.of(context).cursorColor!,
-                controller: TextEditingController(),
-                focusNode: FocusNode(),
+                controller: controller,
+                focusNode: focusNode,
                 style: const TextStyle(),
               );
             },
@@ -425,7 +456,7 @@ void main() {
     debugBrightnessOverride = null;
   });
 
-  testWidgets('Assert in buildScrollbar that controller != null when using it', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Assert in buildScrollbar that controller != null when using it', (WidgetTester tester) async {
     const ScrollBehavior defaultBehavior = CupertinoScrollBehavior();
     late BuildContext capturedContext;
 

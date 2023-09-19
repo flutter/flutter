@@ -76,8 +76,9 @@ abstract interface class ChipAttributes {
 
   /// The style to be applied to the chip's label.
   ///
-  /// The default label style is [TextTheme.bodyLarge] from the overall
-  /// theme's [ThemeData.textTheme].
+  /// If this is null and [ThemeData.useMaterial3] is true, then
+  /// [TextTheme.labelLarge] is used. Otherwise, [TextTheme.bodyLarge]
+  /// is used.
   //
   /// This only has an effect on widgets that respect the [DefaultTextStyle],
   /// such as [Text].
@@ -95,12 +96,17 @@ abstract interface class ChipAttributes {
   /// The color and weight of the chip's outline.
   ///
   /// Defaults to the border side in the ambient [ChipThemeData]. If the theme
-  /// border side resolves to null, the default is the border side of [shape].
+  /// border side resolves to null and [ThemeData.useMaterial3] is true, then
+  /// [BorderSide] with a [ColorScheme.outline] color is used when the chip is
+  /// enabled, and [BorderSide] with a [ColorScheme.onSurface] color with an
+  /// opacity of 0.12 is used when the chip is disabled. Otherwise, it defaults
+  /// to null.
   ///
   /// This value is combined with [shape] to create a shape decorated with an
-  /// outline. If it is a [MaterialStateBorderSide],
-  /// [MaterialStateProperty.resolve] is used for the following
-  /// [MaterialState]s:
+  /// outline. To omit the outline entirely, pass [BorderSide.none] to [side].
+  ///
+  /// If it is a [MaterialStateBorderSide], [MaterialStateProperty.resolve] is
+  /// used for the following [MaterialState]s:
   ///
   ///  * [MaterialState.disabled].
   ///  * [MaterialState.selected].
@@ -112,12 +118,15 @@ abstract interface class ChipAttributes {
   /// The [OutlinedBorder] to draw around the chip.
   ///
   /// Defaults to the shape in the ambient [ChipThemeData]. If the theme
-  /// shape resolves to null, the default is [StadiumBorder].
+  /// shape resolves to null and [ThemeData.useMaterial3] is true, then
+  /// [RoundedRectangleBorder] with a circular border radius of 8.0 is used.
+  /// Otherwise, [StadiumBorder] is used.
   ///
   /// This shape is combined with [side] to create a shape decorated with an
-  /// outline. If it is a [MaterialStateOutlinedBorder],
-  /// [MaterialStateProperty.resolve] is used for the following
-  /// [MaterialState]s:
+  /// outline. To omit the outline entirely, pass [BorderSide.none] to [side].
+  ///
+  /// If it is a [MaterialStateOutlinedBorder], [MaterialStateProperty.resolve]
+  /// is used for the following [MaterialState]s:
   ///
   ///  * [MaterialState.disabled].
   ///  * [MaterialState.selected].
@@ -139,6 +148,8 @@ abstract interface class ChipAttributes {
 
   /// The color that fills the chip, in all [MaterialState]s.
   ///
+  /// Defaults to null.
+  ///
   /// Resolves in the following states:
   ///  * [MaterialState.selected].
   ///  * [MaterialState.disabled].
@@ -151,7 +162,9 @@ abstract interface class ChipAttributes {
 
   /// The padding between the contents of the chip and the outside [shape].
   ///
-  /// Defaults to 4 logical pixels on all sides.
+  /// If this is null and [ThemeData.useMaterial3] is true, then
+  /// a padding of 8.0 logical pixels on all sides is used. Otherwise,
+  /// it defaults to a padding of 4.0 logical pixels on all sides.
   EdgeInsetsGeometry? get padding;
 
   /// Defines how compact the chip's layout will be.
@@ -190,18 +203,25 @@ abstract interface class ChipAttributes {
 
   /// Color of the chip's shadow when the elevation is greater than 0.
   ///
-  /// The default is null.
+  /// If this is null and [ThemeData.useMaterial3] is true, then
+  /// [Colors.transparent] color is used. Otherwise, it defaults to null.
   Color? get shadowColor;
 
   /// Color of the chip's surface tint overlay when its elevation is
   /// greater than 0.
   ///
-  /// The default is null.
+  /// If this is null and [ThemeData.useMaterial3] is true, then
+  /// [ColorScheme.surfaceTint] color is used. Otherwise, it defaults
+  /// to null.
   Color? get surfaceTintColor;
 
   /// Theme used for all icons in the chip.
   ///
-  /// The default is null.
+  /// If this is null and [ThemeData.useMaterial3] is true, then [IconThemeData]
+  /// with a [ColorScheme.primary] color and a size of 18.0 is used when
+  /// the chip is enabled, and [IconThemeData] with a [ColorScheme.onSurface]
+  /// color and a size of 18.0 is used when the chip is disabled. Otherwise,
+  /// it defaults to null.
   IconThemeData? get iconTheme;
 }
 
@@ -259,16 +279,6 @@ abstract interface class DeletableChipAttributes {
   /// If null, the default [MaterialLocalizations.deleteButtonTooltip] will be
   /// used.
   String? get deleteButtonTooltipMessage;
-
-  /// Whether to use a tooltip on the chip's delete button showing the
-  /// [deleteButtonTooltipMessage].
-  ///
-  /// Defaults to true.
-  @Deprecated(
-    'Migrate to deleteButtonTooltipMessage. '
-    'This feature was deprecated after v2.10.0-0.3.pre.'
-  )
-  bool get useDeleteButtonTooltip;
 }
 
 /// An interface for Material Design chips that can have check marks.
@@ -577,11 +587,6 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.shadowColor,
     this.surfaceTintColor,
     this.iconTheme,
-    @Deprecated(
-      'Migrate to deleteButtonTooltipMessage. '
-      'This feature was deprecated after v2.10.0-0.3.pre.'
-    )
-    this.useDeleteButtonTooltip = true,
   }) : assert(elevation == null || elevation >= 0.0);
 
   @override
@@ -628,12 +633,6 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   final Color? surfaceTintColor;
   @override
   final IconThemeData? iconTheme;
-  @override
-  @Deprecated(
-    'Migrate to deleteButtonTooltipMessage. '
-    'This feature was deprecated after v2.10.0-0.3.pre.'
-  )
-  final bool useDeleteButtonTooltip;
 
   @override
   Widget build(BuildContext context) {
@@ -646,7 +645,6 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
       deleteIcon: deleteIcon,
       onDeleted: onDeleted,
       deleteIconColor: deleteIconColor,
-      useDeleteButtonTooltip: useDeleteButtonTooltip,
       deleteButtonTooltipMessage: deleteButtonTooltipMessage,
       tapEnabled: false,
       side: side,
@@ -751,11 +749,6 @@ class RawChip extends StatefulWidget
     this.showCheckmark,
     this.checkmarkColor,
     this.avatarBorder = const CircleBorder(),
-    @Deprecated(
-      'Migrate to deleteButtonTooltipMessage. '
-      'This feature was deprecated after v2.10.0-0.3.pre.'
-    )
-    this.useDeleteButtonTooltip = true,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        deleteIcon = deleteIcon ?? _kDefaultDeleteIcon;
@@ -835,12 +828,6 @@ class RawChip extends StatefulWidget
   final Color? checkmarkColor;
   @override
   final ShapeBorder avatarBorder;
-  @override
-  @Deprecated(
-    'Migrate to deleteButtonTooltipMessage. '
-    'This feature was deprecated after v2.10.0-0.3.pre.'
-  )
-  final bool useDeleteButtonTooltip;
 
   /// If set, this indicates that the chip should be disabled if all of the
   /// tap callbacks ([onSelected], [onPressed]) are null.
@@ -992,13 +979,21 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
 
   OutlinedBorder _getShape(ThemeData theme, ChipThemeData chipTheme, ChipThemeData chipDefaults) {
     final BorderSide? resolvedSide = MaterialStateProperty.resolveAs<BorderSide?>(widget.side, materialStates)
-      ?? MaterialStateProperty.resolveAs<BorderSide?>(chipTheme.side, materialStates)
-      ?? MaterialStateProperty.resolveAs<BorderSide?>(chipDefaults.side, materialStates);
+      ?? MaterialStateProperty.resolveAs<BorderSide?>(chipTheme.side, materialStates);
     final OutlinedBorder resolvedShape = MaterialStateProperty.resolveAs<OutlinedBorder?>(widget.shape, materialStates)
       ?? MaterialStateProperty.resolveAs<OutlinedBorder?>(chipTheme.shape, materialStates)
       ?? MaterialStateProperty.resolveAs<OutlinedBorder?>(chipDefaults.shape, materialStates)
+      // TODO(tahatesser): Remove this fallback when Material 2 is deprecated.
       ?? const StadiumBorder();
-    return resolvedShape.copyWith(side: resolvedSide);
+    // If the side is provided, shape uses the provided side.
+    if (resolvedSide != null) {
+      return resolvedShape.copyWith(side: resolvedSide);
+    }
+    // If the side is not provided and the shape's side is not [BorderSide.none],
+    // then the shape's side is used. Otherwise, the default side is used.
+    return resolvedShape.side != BorderSide.none
+      ? resolvedShape
+      : resolvedShape.copyWith(side: chipDefaults.side);
   }
 
   Color? resolveColor({
@@ -1131,9 +1126,8 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
       container: true,
       button: true,
       child: _wrapWithTooltip(
-        tooltip: widget.useDeleteButtonTooltip
-          ? widget.deleteButtonTooltipMessage ?? MaterialLocalizations.of(context).deleteButtonTooltip
-          : null,
+        tooltip: widget.deleteButtonTooltipMessage
+          ?? MaterialLocalizations.of(context).deleteButtonTooltip,
         enabled: widget.onDeleted != null,
         child: InkWell(
           // Radius should be slightly less than the full size of the chip.

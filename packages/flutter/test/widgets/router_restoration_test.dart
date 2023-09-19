@@ -90,6 +90,12 @@ class _TestRouteInformationParser extends RouteInformationParser<String> {
 }
 
 class _TestRouterDelegate extends RouterDelegate<String> with ChangeNotifier {
+  _TestRouterDelegate() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
+
   final List<String> newRoutePaths = <String>[];
   final List<String> restoredRoutePaths = <String>[];
 
@@ -128,6 +134,12 @@ class _TestRouterDelegate extends RouterDelegate<String> with ChangeNotifier {
 }
 
 class _TestRouteInformationProvider extends RouteInformationProvider with ChangeNotifier {
+  _TestRouteInformationProvider() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
+
   @override
   RouteInformation get value => _value;
   RouteInformation _value = RouteInformation(uri: Uri.parse('/home'));

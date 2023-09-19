@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class Leaf extends StatefulWidget {
   const Leaf({ required Key key, required this.child }) : super(key: key);
@@ -20,7 +22,7 @@ class _LeafState extends State<Leaf> {
 
   @override
   void deactivate() {
-    _handle?.release();
+    _handle?.dispose();
     _handle = null;
     super.deactivate();
   }
@@ -33,7 +35,7 @@ class _LeafState extends State<Leaf> {
         KeepAliveNotification(_handle!).dispatch(context);
       }
     } else {
-      _handle?.release();
+      _handle?.dispose();
       _handle = null;
     }
   }
@@ -66,7 +68,7 @@ List<Widget> generateList(Widget child, { required bool impliedMode }) {
 }
 
 void tests({ required bool impliedMode }) {
-  testWidgets('AutomaticKeepAlive with ListView with itemExtent', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AutomaticKeepAlive with ListView with itemExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -114,7 +116,7 @@ void tests({ required bool impliedMode }) {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
   });
 
-  testWidgets('AutomaticKeepAlive with ListView without itemExtent', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AutomaticKeepAlive with ListView without itemExtent', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -164,7 +166,7 @@ void tests({ required bool impliedMode }) {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
   });
 
-  testWidgets('AutomaticKeepAlive with GridView', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AutomaticKeepAlive with GridView', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -221,7 +223,7 @@ void main() {
   group('Explicit automatic keep-alive', () { tests(impliedMode: false); });
   group('Implied automatic keep-alive', () { tests(impliedMode: true); });
 
-  testWidgets('AutomaticKeepAlive double', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AutomaticKeepAlive double', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -305,7 +307,7 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
   });
 
-  testWidgets('AutomaticKeepAlive double 2', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AutomaticKeepAlive double 2', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -473,7 +475,7 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(0), skipOffstage: false), findsNothing);
   });
 
-  testWidgets('AutomaticKeepAlive with keepAlive set to true before initState', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AutomaticKeepAlive with keepAlive set to true before initState', (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: ListView.builder(
@@ -508,7 +510,7 @@ void main() {
     expect(find.text('FooBar 2'), findsNothing);
   });
 
-  testWidgets('AutomaticKeepAlive with keepAlive set to true before initState and widget goes out of scope', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AutomaticKeepAlive with keepAlive set to true before initState and widget goes out of scope', (WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: ListView.builder(
@@ -547,19 +549,22 @@ void main() {
     expect(find.text('FooBar 73'), findsOneWidget);
   });
 
-  testWidgets('AutomaticKeepAlive with SliverKeepAliveWidget', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AutomaticKeepAlive with SliverKeepAliveWidget', (WidgetTester tester) async {
     // We're just doing a basic test here to make sure that the functionality of
     // RenderSliverWithKeepAliveMixin doesn't get regressed or deleted. As testing
     // the full functionality would be cumbersome.
     final RenderSliverMultiBoxAdaptorAlt alternate = RenderSliverMultiBoxAdaptorAlt();
+    addTearDown(alternate.dispose);
     final RenderBox child = RenderBoxKeepAlive();
+    addTearDown(child.dispose);
     alternate.insert(child);
 
     expect(alternate.children.length, 1);
   });
 
-  testWidgets('Keep alive Listenable has its listener removed once called', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Keep alive Listenable has its listener removed once called', (WidgetTester tester) async {
     final LeakCheckerHandle handle = LeakCheckerHandle();
+    addTearDown(handle.dispose);
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: ListView.builder(
@@ -631,6 +636,12 @@ class RenderSliverMultiBoxAdaptorAlt extends RenderSliver with
 }
 
 class LeakCheckerHandle with ChangeNotifier {
+  LeakCheckerHandle() {
+    if (kFlutterMemoryAllocationsEnabled) {
+      ChangeNotifier.maybeDispatchObjectCreation(this);
+    }
+  }
+
   @override
   bool get hasListeners => super.hasListeners;
 }

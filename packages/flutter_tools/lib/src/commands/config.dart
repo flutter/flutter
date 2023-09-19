@@ -11,11 +11,15 @@ import '../features.dart';
 import '../globals.dart' as globals;
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
+import '../runner/flutter_command_runner.dart';
 
 class ConfigCommand extends FlutterCommand {
   ConfigCommand({ bool verboseHelp = false }) {
     argParser.addFlag('analytics',
-      help: 'Enable or disable reporting anonymously tool usage statistics and crash reports.');
+      hide: !verboseHelp,
+      help: 'Enable or disable reporting anonymously tool usage statistics and crash reports.\n'
+      '(An alias for "--${FlutterGlobalOptions.kEnableAnalyticsFlag}" '
+            'and "--${FlutterGlobalOptions.kDisableAnalyticsFlag}" top level flags.)');
     argParser.addFlag('clear-ios-signing-cert',
       negatable: false,
       help: 'Clear the saved development certificate choice used to sign apps for iOS device deployment.');
