@@ -1907,10 +1907,6 @@ class _SubmenuButtonState extends State<SubmenuButton> {
             controller._anchor!._focusButton();
           }
         }
-<<<<<<< Updated upstream
-=======
-        // debugPrint('Rebuilding semantics with isExpanded: ${controller.isOpen}');
->>>>>>> Stashed changes
         child = MergeSemantics(
           child: Semantics(
             expanded: controller.isOpen,
@@ -3218,7 +3214,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
       } else if (offBottom(y)) {
         final double newY = anchorRect.top - childSize.height;
         if (!offTop(newY)) {
-          // Only move the menu up if its parent is horizontal (MenuAchor/MenuBar).
+          // Only move the menu up if its parent is horizontal (MenuAnchor/MenuBar).
           if (parentOrientation == Axis.horizontal) {
             y = newY - alignmentOffset.dy;
           } else {
