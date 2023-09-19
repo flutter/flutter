@@ -190,8 +190,6 @@ bool _isInAccessibilityMode(BuildContext context) {
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
 class CupertinoAlertDialog extends StatefulWidget {
   /// Creates an iOS-style alert dialog.
-  ///
-  /// The [actions] must not be null.
   const CupertinoAlertDialog({
     super.key,
     this.title,
@@ -686,8 +684,6 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
 ///    more choices related to the current context.
 class CupertinoActionSheetAction extends StatelessWidget {
   /// Creates an action for an iOS-style action sheet.
-  ///
-  /// The [child] and [onPressed] arguments must not be null.
   const CupertinoActionSheetAction({
     super.key,
     required this.onPressed,
@@ -697,8 +693,6 @@ class CupertinoActionSheetAction extends StatelessWidget {
   });
 
   /// The callback that is called when the button is tapped.
-  ///
-  /// This attribute must not be null.
   final VoidCallback onPressed;
 
   /// Whether this action is the default choice in the action sheet.
