@@ -64,7 +64,6 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
     # Allow non-zero exit so we can do control flow
     set +e
     if command -v arch >/dev/null 2>&1; then
-      echo "You have arch installed!"
       if ARCH_RESULT=$(arch 2>/dev/null); then
         case "$ARCH_RESULT" in
           # For some reason, some x86_64 mac bots on CI return i386
