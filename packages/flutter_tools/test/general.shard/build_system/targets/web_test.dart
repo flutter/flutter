@@ -51,10 +51,6 @@ const List<String> _kWasmOptLinuxArgrs = <String> [
   '--type-merging',
 ];
 
-/// The result of calling `.parent` on a Memory directory pointing to
-/// `'Artifact.engineDartSdkPath.TargetPlatform.web_javascript'`.
-const String _kDartSdkRoot = '.';
-
 void main() {
   late Testbed testbed;
   late Environment environment;
