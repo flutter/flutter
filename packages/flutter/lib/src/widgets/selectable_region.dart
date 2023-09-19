@@ -520,7 +520,6 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   void _handleMouseDragStart(TapDragStartDetails details) {
     switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
       case 1:
-        _clearSelection();
         _selectStartTo(offset: details.globalPosition);
     }
     _updateSelectedContentIfNeeded();
@@ -1019,7 +1018,6 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///  * [_selectWordAt], which selects a whole word at the location.
   ///  * [selectAll], which selects the entire content.
   void _collapseSelectionAt({required Offset offset}) {
-    _clearSelection();
     _selectStartTo(offset: offset);
     _selectEndTo(offset: offset);
   }
@@ -2421,7 +2419,22 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       return true;
     }());
     SelectionResult? finalResult;
-    int newIndex = isEnd ? currentSelectionEndIndex : currentSelectionStartIndex;
+    final bool isCurrentEdgeWithinViewport = isEnd ? _selectionGeometry.endSelectionPoint != null : _selectionGeometry.startSelectionPoint != null;
+    final bool isOppositeEdgeWithinViewport = isEnd ? _selectionGeometry.startSelectionPoint != null : _selectionGeometry.endSelectionPoint != null;
+    // Determines if the edge being adjusted is within the current viewport boundaries.
+    // If it is not, we attempt to locate the selection edge starting from the opposite end.
+    // In cases where neither edge is within the viewport, the search for the new edge position
+    // commences from 0.
+    int newIndex = switch ((isEnd, isCurrentEdgeWithinViewport, isOppositeEdgeWithinViewport)) {
+      (true, true, true) => currentSelectionEndIndex,
+      (true, true, false) => currentSelectionEndIndex,
+      (true, false, true) => currentSelectionStartIndex,
+      (true, false, false) => 0,
+      (false, true, true) => currentSelectionStartIndex,
+      (false, true, false) => currentSelectionStartIndex,
+      (false, false, true) => currentSelectionEndIndex,
+      (false, false, false) => 0,
+    };
     bool? forward;
     late SelectionResult currentSelectableResult;
     // This loop sends the selection event to the

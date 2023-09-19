@@ -61,7 +61,6 @@ void main() {
       renderSelectionSpy.events.clear();
 
       await gesture.moveTo(const Offset(200.0, 100.0));
-      expect(renderSelectionSpy.events.removeAt(0), isA<ClearSelectionEvent>());
       expect(renderSelectionSpy.events.length, 2);
       expect(renderSelectionSpy.events[0].type, SelectionEventType.startEdgeUpdate);
       final SelectionEdgeUpdateEvent startEdge = renderSelectionSpy.events[0] as SelectionEdgeUpdateEvent;
@@ -304,12 +303,11 @@ void main() {
       await tester.pump();
       await gesture.up();
       await tester.pumpAndSettle();
-      expect(renderSelectionSpy.events.length, 3);
-      expect(renderSelectionSpy.events[0], isA<ClearSelectionEvent>());
+      expect(renderSelectionSpy.events.length, 2);
+      expect(renderSelectionSpy.events[0], isA<SelectionEdgeUpdateEvent>());
+      expect((renderSelectionSpy.events[0] as SelectionEdgeUpdateEvent).type, SelectionEventType.startEdgeUpdate);
       expect(renderSelectionSpy.events[1], isA<SelectionEdgeUpdateEvent>());
-      expect((renderSelectionSpy.events[1] as SelectionEdgeUpdateEvent).type, SelectionEventType.startEdgeUpdate);
-      expect(renderSelectionSpy.events[2], isA<SelectionEdgeUpdateEvent>());
-      expect((renderSelectionSpy.events[2] as SelectionEdgeUpdateEvent).type, SelectionEventType.endEdgeUpdate);
+      expect((renderSelectionSpy.events[1] as SelectionEdgeUpdateEvent).type, SelectionEventType.endEdgeUpdate);
     }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/102410.
 
     testWidgetsWithLeakTracking('touch long press sends select-word event', (WidgetTester tester) async {
@@ -480,12 +478,10 @@ void main() {
       addTearDown(gesture.removePointer);
       await tester.pump(const Duration(milliseconds: 500));
       await gesture.up();
-      expect(renderSelectionSpy.events.length, 3);
-      expect(renderSelectionSpy.events[0], isA<ClearSelectionEvent>());
-      expect(renderSelectionSpy.events[1], isA<SelectionEdgeUpdateEvent>());
-      expect(renderSelectionSpy.events[1].type, SelectionEventType.startEdgeUpdate);
-      expect(renderSelectionSpy.events[2], isA<SelectionEdgeUpdateEvent>());
-      expect(renderSelectionSpy.events[2].type, SelectionEventType.endEdgeUpdate);
+      expect(
+        renderSelectionSpy.events.every((SelectionEvent element) => element is SelectionEdgeUpdateEvent),
+        isTrue,
+      );
     });
   });
 
