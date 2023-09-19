@@ -2039,12 +2039,6 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
 
   final LayerHandle<OpacityLayer> _avatarOpacityLayerHandler = LayerHandle<OpacityLayer>();
 
-  @override
-  void dispose() {
-    _avatarOpacityLayerHandler.layer = null;
-    super.dispose();
-  }
-
   void _paintAvatar(PaintingContext context, Offset offset) {
     final OpacityLayer? oldLayer = _avatarOpacityLayerHandler.layer;
     _avatarOpacityLayerHandler.layer = null;
@@ -2075,19 +2069,25 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     }
   }
 
+  final LayerHandle<OpacityLayer> _childOpacityLayerHandler = LayerHandle<OpacityLayer>();
+
   void _paintChild(PaintingContext context, Offset offset, RenderBox? child, bool? isEnabled) {
+    final OpacityLayer? oldLayer = _childOpacityLayerHandler.layer;
+    _childOpacityLayerHandler.layer = null;
+
     if (child == null) {
       return;
     }
     final int disabledColorAlpha = _disabledColor.alpha;
     if (!enableAnimation.isCompleted) {
       if (needsCompositing) {
-        context.pushLayer(
-          OpacityLayer(alpha: disabledColorAlpha),
+        _childOpacityLayerHandler.layer = context.pushOpacity(
+          offset,
+          disabledColorAlpha,
           (PaintingContext context, Offset offset) {
             context.paintChild(child, _boxParentData(child).offset + offset);
           },
-          offset,
+          oldLayer: oldLayer,
         );
       } else {
         final Rect childRect = _boxRect(child).shift(offset);
@@ -2098,6 +2098,13 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     } else {
       context.paintChild(child, _boxParentData(child).offset + offset);
     }
+  }
+
+  @override
+  void dispose() {
+    _avatarOpacityLayerHandler.layer = null;
+    _childOpacityLayerHandler.layer = null;
+    super.dispose();
   }
 
   @override
