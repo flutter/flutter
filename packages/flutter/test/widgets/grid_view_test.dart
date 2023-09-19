@@ -664,16 +664,7 @@ void main() {
     final TestClipPaintingContext context = TestClipPaintingContext();
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.none));
-  },
-  leakTrackingTestConfig: const LeakTrackingTestConfig(
-    // TODO(ksokolovskyi): remove after fixing
-    notDisposedAllowList: <String, int?> {
-      // https://github.com/flutter/flutter/issues/134575
-      'OffsetLayer': 1,
-      // https://github.com/flutter/flutter/issues/134572
-      'ContainerLayer': 1,
-    },
-  ));
+  });
 
   testWidgetsWithLeakTracking('GridView respects clipBehavior', (WidgetTester tester) async {
     await tester.pumpWidget(
