@@ -6,11 +6,12 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('Can set opacity for an Icon', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can set opacity for an Icon', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -27,7 +28,7 @@ void main() {
     expect(text.text.style!.color, const Color(0xFF666666).withOpacity(0.5));
   });
 
-  testWidgets('Icon sizing - no theme, default size', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Icon sizing - no theme, default size', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -41,7 +42,7 @@ void main() {
     expect(renderObject.size, equals(const Size.square(24.0)));
   });
 
-  testWidgets('Icon sizing - no theme, explicit size', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Icon sizing - no theme, explicit size', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -58,7 +59,7 @@ void main() {
     expect(renderObject.size, equals(const Size.square(96.0)));
   });
 
-  testWidgets('Icon sizing - sized theme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Icon sizing - sized theme', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -75,7 +76,7 @@ void main() {
     expect(renderObject.size, equals(const Size.square(36.0)));
   });
 
-  testWidgets('Icon sizing - sized theme, explicit size', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Icon sizing - sized theme, explicit size', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -95,7 +96,7 @@ void main() {
     expect(renderObject.size, equals(const Size.square(48.0)));
   });
 
-  testWidgets('Icon sizing - sizeless theme, default size', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Icon sizing - sizeless theme, default size', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -113,7 +114,7 @@ void main() {
   });
 
 
-  testWidgets('Icon with custom font', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Icon with custom font', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -127,7 +128,7 @@ void main() {
     expect(richText.text.style!.fontFamily, equals('Roboto'));
   });
 
-  testWidgets('Icon with custom fontFamilyFallback', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Icon with custom fontFamilyFallback', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -141,7 +142,7 @@ void main() {
     expect(richText.text.style!.fontFamilyFallback, equals(<String>['FallbackFont']));
   });
 
-  testWidgets('Icon with semantic label', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Icon with semantic label', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -161,7 +162,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Null icon with semantic label', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Null icon with semantic label', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -181,7 +182,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets("Changing semantic label from null doesn't rebuild tree ", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Changing semantic label from null doesn't rebuild tree ", (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -212,7 +213,7 @@ void main() {
     expect(richText2, same(richText1));
   });
 
-  testWidgets('IconData comparison', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('IconData comparison', (WidgetTester tester) async {
     expect(const IconData(123), const IconData(123));
     expect(const IconData(123), isNot(const IconData(123, matchTextDirection: true)));
     expect(const IconData(123), isNot(const IconData(123, fontFamily: 'f')));
@@ -225,7 +226,7 @@ void main() {
   });
 
 
-  testWidgets('Fill, weight, grade, and optical size variations are passed', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Fill, weight, grade, and optical size variations are passed', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -258,7 +259,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Fill, weight, grade, and optical size can be set at the theme-level', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Fill, weight, grade, and optical size can be set at the theme-level', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -283,7 +284,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Theme-level fill, weight, grade, and optical size can be overridden', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Theme-level fill, weight, grade, and optical size can be overridden', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,

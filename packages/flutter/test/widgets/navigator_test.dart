@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'navigator_utils.dart';
 import 'observer_tester.dart';
@@ -625,6 +626,41 @@ void main() {
     expect(observations[2].operation, 'push');
     expect(observations[2].current, '/A/B');
     expect(observations[2].previous, '/A');
+  });
+
+  testWidgetsWithLeakTracking('$Route  dispatches memory events', (WidgetTester tester) async {
+    Future<void> createAndDisposeRoute() async {
+      final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: nav,
+          home: const Scaffold(
+            body: Text('home'),
+          )
+        )
+      );
+
+      nav.currentState!.push(MaterialPageRoute<void>(builder: (_) => const Placeholder())); // This should create a route
+      await tester.pumpAndSettle();
+
+      nav.currentState!.pop();
+      await tester.pumpAndSettle(); // this should dispose the route.
+    }
+
+    final List<ObjectEvent> events = <ObjectEvent>[];
+    void listener(ObjectEvent event) {
+      if (event.object.runtimeType == MaterialPageRoute<void>) {
+        events.add(event);
+      }
+    }
+    MemoryAllocations.instance.addListener(listener);
+
+    await createAndDisposeRoute();
+    expect(events, hasLength(2));
+    expect(events.first, isA<ObjectCreated>());
+    expect(events.last, isA<ObjectDisposed>());
+
+    MemoryAllocations.instance.removeListener(listener);
   });
 
   testWidgets('Route didAdd and dispose in same frame work', (WidgetTester tester) async {
@@ -2872,6 +2908,90 @@ void main() {
         firstError!.exception.toString(),
         'The Navigator.pages must not be empty to use the Navigator.pages API',
       );
+    });
+
+    testWidgets('Can pop route with local history entries using page api', (WidgetTester tester) async {
+      List<Page<void>> myPages = const <Page<void>>[
+        MaterialPage<void>(child: Text('page1')),
+        MaterialPage<void>(child: Text('page2')),
+      ];
+      await tester.pumpWidget(
+        MediaQuery(
+          data: MediaQueryData.fromView(tester.view),
+          child: Localizations(
+            locale: const Locale('en', 'US'),
+            delegates: const <LocalizationsDelegate<dynamic>>[
+              DefaultMaterialLocalizations.delegate,
+              DefaultWidgetsLocalizations.delegate,
+            ],
+            child: Navigator(
+              pages: myPages,
+              onPopPage: (_, __) => false,
+            ),
+          ),
+        ),
+      );
+      expect(find.text('page2'), findsOneWidget);
+      final ModalRoute<void> route = ModalRoute.of(tester.element(find.text('page2')))!;
+      bool entryRemoved = false;
+      route.addLocalHistoryEntry(LocalHistoryEntry(onRemove: () => entryRemoved = true));
+      expect(route.willHandlePopInternally, true);
+
+      myPages = const <Page<void>>[
+        MaterialPage<void>(child: Text('page1')),
+      ];
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: MediaQueryData.fromView(tester.view),
+          child: Localizations(
+            locale: const Locale('en', 'US'),
+            delegates: const <LocalizationsDelegate<dynamic>>[
+              DefaultMaterialLocalizations.delegate,
+              DefaultWidgetsLocalizations.delegate,
+            ],
+            child: Navigator(
+              pages: myPages,
+              onPopPage: (_, __) => false,
+            ),
+          ),
+        ),
+      );
+      expect(find.text('page1'), findsOneWidget);
+      expect(entryRemoved, isTrue);
+    });
+
+    testWidgets('ModalRoute must comply with willHandlePopInternally when there is a PopScope', (WidgetTester tester) async {
+      const List<Page<void>> myPages = <Page<void>>[
+        MaterialPage<void>(child: Text('page1')),
+        MaterialPage<void>(
+          child: PopScope(
+            canPop: false,
+            child: Text('page2'),
+          ),
+        ),
+      ];
+      await tester.pumpWidget(
+        MediaQuery(
+          data: MediaQueryData.fromView(tester.view),
+          child: Localizations(
+            locale: const Locale('en', 'US'),
+            delegates: const <LocalizationsDelegate<dynamic>>[
+              DefaultMaterialLocalizations.delegate,
+              DefaultWidgetsLocalizations.delegate,
+            ],
+            child: Navigator(
+              pages: myPages,
+              onPopPage: (_, __) => false,
+            ),
+          ),
+        ),
+      );
+      final ModalRoute<void> route = ModalRoute.of(tester.element(find.text('page2')))!;
+      // PopScope only prevents user trigger action, e.g. Navigator.maybePop.
+      // The page can still be popped by the system if it needs to.
+      expect(route.willHandlePopInternally, false);
+      expect(route.didPop(null), true);
     });
 
     testWidgets('can push and pop pages using page api', (WidgetTester tester) async {

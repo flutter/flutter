@@ -11,12 +11,14 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
+import '../project.dart';
 import '../project_validator.dart';
 import '../runner/flutter_command.dart';
 import 'analyze_base.dart';
 import 'analyze_continuously.dart';
 import 'analyze_once.dart';
 import 'android_analyze.dart';
+import 'ios_analyze.dart';
 import 'validate_project.dart';
 
 class AnalyzeCommand extends FlutterCommand {
@@ -107,6 +109,12 @@ class AnalyzeCommand extends FlutterCommand {
       hide: !verboseHelp,
     );
 
+    argParser.addFlag('ios',
+      negatable: false,
+      help: 'Analyze iOS Xcode sub-project. Used by internal tools only.',
+      hide: !verboseHelp,
+    );
+
     if (verboseHelp) {
       argParser.addSeparator('Usage: flutter analyze --android [arguments]');
     }
@@ -127,8 +135,36 @@ class AnalyzeCommand extends FlutterCommand {
 
     argParser.addOption('build-variant',
       help: 'Sets the Android build variant to be analyzed.',
-      valueHelp: 'use "flutter analyze --android --list-build-variants" to get '
-          'all available build variants',
+      valueHelp: 'build variant',
+      hide: !verboseHelp,
+    );
+
+    if (verboseHelp) {
+      argParser.addSeparator('Usage: flutter analyze --ios [arguments]');
+    }
+
+    argParser.addFlag('list-build-options',
+      help: 'Print out a list of available build options for the '
+          'iOS Xcode sub-project.',
+      hide: !verboseHelp,
+    );
+
+    argParser.addFlag('output-universal-link-settings',
+      negatable: false,
+      help: 'Output a JSON with iOS Xcode universal link settings into a file. '
+          'The "--configuration" and "--target" must be set.',
+      hide: !verboseHelp,
+    );
+
+    argParser.addOption('configuration',
+      help: 'Sets the iOS build configuration to be analyzed.',
+      valueHelp: 'configuration',
+      hide: !verboseHelp,
+    );
+
+    argParser.addOption('target',
+      help: 'Sets the iOS build target to be analyzed.',
+      valueHelp: 'target',
       hide: !verboseHelp,
     );
   }
@@ -216,6 +252,46 @@ class AnalyzeCommand extends FlutterCommand {
         option: option,
         userPath: directoryPath,
         buildVariant: buildVariant,
+        logger: _logger,
+      ).analyze();
+    } else if (boolArg('ios')) {
+      final IOSAnalyzeOption option;
+      final String? configuration;
+      final String? target;
+      if (argResults!['list-build-options'] as bool && argResults!['output-universal-link-settings'] as bool) {
+        throwToolExit('Only one of "--list-build-options" or "--output-universal-link-settings" can be provided');
+      }
+      if (argResults!['list-build-options'] as bool) {
+        option = IOSAnalyzeOption.listBuildOptions;
+        configuration = null;
+        target = null;
+      } else if (argResults!['output-universal-link-settings'] as bool) {
+        option = IOSAnalyzeOption.outputUniversalLinkSettings;
+        configuration = argResults!['configuration'] as String?;
+        if (configuration == null) {
+          throwToolExit('"--configuration" must be provided');
+        }
+        target = argResults!['target'] as String?;
+        if (target == null) {
+          throwToolExit('"--target" must be provided');
+        }
+      } else {
+        throwToolExit('No argument is provided to analyze. Use -h to see available commands.');
+      }
+      final Set<String> items = findDirectories(argResults!, _fileSystem);
+      final String directoryPath;
+      if (items.isEmpty) { // user did not specify any path
+        directoryPath = _fileSystem.currentDirectory.path;
+      } else if (items.length > 1) { // if the user sends more than one path
+        throwToolExit('The iOS analyze can process only one directory path');
+      } else {
+        directoryPath = items.first;
+      }
+      await IOSAnalyze(
+        project: FlutterProject.fromDirectory(_fileSystem.directory(directoryPath)),
+        option: option,
+        configuration: configuration,
+        target: target,
         logger: _logger,
       ).analyze();
     } else if (boolArg('suggestions')) {
