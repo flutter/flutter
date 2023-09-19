@@ -331,7 +331,7 @@ class Opacity extends SingleChildRenderObjectWidget {
   /// An opacity of one is fully opaque. An opacity of zero is fully transparent
   /// (i.e., invisible).
   ///
-  /// Values one and zeri are painted with a fast path. Other values require
+  /// Values one and zero are painted with a fast path. Other values require
   /// painting the child into an intermediate buffer, which is expensive.
   final double opacity;
 

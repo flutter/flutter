@@ -663,7 +663,9 @@ class ListWheelScrollView extends StatefulWidget {
   /// {@macro flutter.rendering.RenderListWheelViewport.overAndUnderCenterOpacity}
   final double overAndUnderCenterOpacity;
 
-  /// Size of each child in the main axis. Must be positive.
+  /// Size of each child in the main axis.
+  ///
+  /// Must be positive.
   final double itemExtent;
 
   /// {@macro flutter.rendering.RenderListWheelViewport.squeeze}
