@@ -14,7 +14,10 @@ import 'restoration.dart';
 
 void main() {
   testWidgetsWithLeakTracking('$RestorationManager dispatches memory events', (WidgetTester tester) async {
-    expect(() => RestorationManager().dispose(), dispatchesMemoryEvents(RestorationManager));
+    await expectLater(
+      await memoryEvents(() => RestorationManager().dispose(), RestorationManager),
+      areCreateAndDispose,
+    );
   });
 
   group('RestorationManager', () {
