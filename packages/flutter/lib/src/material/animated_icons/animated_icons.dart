@@ -29,8 +29,8 @@ part of material_animated_icons; // ignore: use_string_in_part_of_directives
 class AnimatedIcon extends StatelessWidget {
   /// Creates an AnimatedIcon.
   ///
-  /// The [progress] and [icon] arguments must not be null.
-  /// The [size] and [color] default to the value given by the current [IconTheme].
+  /// The [size] and [color] default to the value given by the current
+  /// [IconTheme].
   const AnimatedIcon({
     super.key,
     required this.icon,

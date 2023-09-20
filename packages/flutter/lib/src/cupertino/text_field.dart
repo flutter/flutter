@@ -194,8 +194,7 @@ class CupertinoTextField extends StatefulWidget {
   ///
   /// The [selectionHeightStyle] and [selectionWidthStyle] properties allow
   /// changing the shape of the selection highlighting. These properties default
-  /// to [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight] respectively and
-  /// must not be null.
+  /// to [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight], respectively.
   ///
   /// The [autocorrect], [autofocus], [clearButtonMode], [dragStartBehavior],
   /// [expands], [obscureText], [prefixMode], [readOnly], [scrollPadding],
@@ -332,13 +331,7 @@ class CupertinoTextField extends StatefulWidget {
   ///
   /// The [selectionHeightStyle] and [selectionWidthStyle] properties allow
   /// changing the shape of the selection highlighting. These properties default
-  /// to [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight] respectively and
-  /// must not be null.
-  ///
-  /// The [autocorrect], [autofocus], [clearButtonMode], [dragStartBehavior],
-  /// [expands], [obscureText], [prefixMode], [readOnly], [scrollPadding],
-  /// [suffixMode], [textAlign], [selectionHeightStyle], [selectionWidthStyle],
-  /// and [enableSuggestions] properties must not be null.
+  /// to [ui.BoxHeightStyle.tight] and [ui.BoxWidthStyle.tight] respectively.
   ///
   /// See also:
   ///
@@ -489,7 +482,7 @@ class CupertinoTextField extends StatefulWidget {
   /// Controls the visibility of the [prefix] widget based on the state of
   /// text entry when the [prefix] argument is not null.
   ///
-  /// Defaults to [OverlayVisibilityMode.always] and cannot be null.
+  /// Defaults to [OverlayVisibilityMode.always].
   ///
   /// Has no effect when [prefix] is null.
   final OverlayVisibilityMode prefixMode;
@@ -500,7 +493,7 @@ class CupertinoTextField extends StatefulWidget {
   /// Controls the visibility of the [suffix] widget based on the state of
   /// text entry when the [suffix] argument is not null.
   ///
-  /// Defaults to [OverlayVisibilityMode.always] and cannot be null.
+  /// Defaults to [OverlayVisibilityMode.always].
   ///
   /// Has no effect when [suffix] is null.
   final OverlayVisibilityMode suffixMode;
@@ -512,7 +505,7 @@ class CupertinoTextField extends StatefulWidget {
   ///
   /// Will only appear if no [suffix] widget is appearing.
   ///
-  /// Defaults to never appearing and cannot be null.
+  /// Defaults to [OverlayVisibilityMode.never].
   final OverlayVisibilityMode clearButtonMode;
 
   /// {@macro flutter.widgets.editableText.keyboardType}

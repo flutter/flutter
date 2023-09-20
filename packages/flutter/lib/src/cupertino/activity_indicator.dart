@@ -67,7 +67,7 @@ class CupertinoActivityIndicator extends StatefulWidget {
 
   /// Radius of the spinner widget.
   ///
-  /// Defaults to 10px. Must be positive and cannot be null.
+  /// Defaults to 10 pixels. Must be positive.
   final double radius;
 
   /// Determines the percentage of spinner ticks that will be shown. Typical usage would
@@ -75,7 +75,7 @@ class CupertinoActivityIndicator extends StatefulWidget {
   /// during pull-to-refresh when the drag-down action shows one tick at a time as
   /// the user continues to drag down.
   ///
-  /// Defaults to 1.0. Must be between 0.0 and 1.0 inclusive, and cannot be null.
+  /// Defaults to one. Must be between zero and one, inclusive.
   final double progress;
 
   @override

@@ -299,9 +299,9 @@ class _SegmentSeparatorState extends State<_SegmentSeparator> with TickerProvide
 class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   /// Creates an iOS-style segmented control bar.
   ///
-  /// The [children] and [onValueChanged] arguments must not be null. The
-  /// [children] argument must be an ordered [Map] such as a [LinkedHashMap].
-  /// Further, the length of the [children] list must be greater than one.
+  /// The [children] argument must be an ordered [Map] such as a
+  /// [LinkedHashMap]. Further, the length of the [children] list must be
+  /// greater than one.
   ///
   /// Each widget value in the map of [children] must have an associated key
   /// that uniquely identifies this widget. This key is what will be returned
@@ -342,8 +342,6 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   final T? groupValue;
 
   /// The callback that is called when a new option is tapped.
-  ///
-  /// This attribute must not be null.
   ///
   /// The segmented control passes the newly selected widget's associated key
   /// to the callback but does not actually change state until the parent
@@ -403,7 +401,7 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
 
   /// The amount of space by which to inset the [children].
   ///
-  /// Must not be null. Defaults to EdgeInsets.symmetric(vertical: 2, horizontal: 3).
+  /// Defaults to `EdgeInsets.symmetric(vertical: 2, horizontal: 3)`.
   final EdgeInsetsGeometry padding;
 
   @override
