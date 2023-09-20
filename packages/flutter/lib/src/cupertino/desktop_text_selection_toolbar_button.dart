@@ -31,8 +31,6 @@ const EdgeInsets _kToolbarButtonPadding = EdgeInsets.fromLTRB(
 /// A button in the style of the Mac context menu buttons.
 class CupertinoDesktopTextSelectionToolbarButton extends StatefulWidget {
   /// Creates an instance of CupertinoDesktopTextSelectionToolbarButton.
-  ///
-  /// [child] cannot be null.
   const CupertinoDesktopTextSelectionToolbarButton({
     super.key,
     required this.onPressed,
@@ -51,8 +49,6 @@ class CupertinoDesktopTextSelectionToolbarButton extends StatefulWidget {
 
   /// Create an instance of [CupertinoDesktopTextSelectionToolbarButton] from
   /// the given [ContextMenuButtonItem].
-  ///
-  /// [buttonItem] cannot be null.
   CupertinoDesktopTextSelectionToolbarButton.buttonItem({
     super.key,
     required ContextMenuButtonItem this.buttonItem,
