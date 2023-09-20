@@ -162,10 +162,11 @@ BinaryMessenger _findBinaryMessenger() {
 ///
 /// See: <https://flutter.dev/platform-channels/>
 class BasicMessageChannel<T> {
-  /// Creates a [BasicMessageChannel] with the specified [name], [codec] and [binaryMessenger].
+  /// Creates a [BasicMessageChannel] with the specified [name], [codec] and
+  /// [binaryMessenger].
   ///
-  /// The [name] and [codec] arguments cannot be null. The default [ServicesBinding.defaultBinaryMessenger]
-  /// instance is used if [binaryMessenger] is null.
+  /// The default [ServicesBinding.defaultBinaryMessenger] instance is used if
+  /// [binaryMessenger] is null.
   const BasicMessageChannel(this.name, this.codec, { BinaryMessenger? binaryMessenger })
       : _binaryMessenger = binaryMessenger;
 
@@ -253,8 +254,8 @@ class MethodChannel {
   /// The [codec] used will be [StandardMethodCodec], unless otherwise
   /// specified.
   ///
-  /// The [name] and [codec] arguments cannot be null. The default [ServicesBinding.defaultBinaryMessenger]
-  /// instance is used if [binaryMessenger] is null.
+  /// The default [ServicesBinding.defaultBinaryMessenger] instance is used if
+  /// [binaryMessenger] is null.
   const MethodChannel(this.name, [this.codec = const StandardMethodCodec(), BinaryMessenger? binaryMessenger ])
       : _binaryMessenger = binaryMessenger;
 
