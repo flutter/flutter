@@ -576,7 +576,9 @@ AsyncMatcher matchesGoldenFile(Object key, {int? version}) {
 ///   final ui.Canvas pictureCanvas = ui.Canvas(recorder);
 ///   pictureCanvas.drawCircle(Offset.zero, 20.0, paint);
 ///   final ui.Picture picture = recorder.endRecording();
+///   addTearDown(picture.dispose);
 ///   ui.Image referenceImage = await picture.toImage(50, 50);
+///   addTearDown(referenceImage.dispose);
 ///
 ///   await expectLater(find.text('Save'), matchesReferenceImage(referenceImage));
 ///   await expectLater(image, matchesReferenceImage(referenceImage));
@@ -2139,10 +2141,13 @@ class _MatchesReferenceImage extends AsyncMatcher {
   @override
   Future<String?> matchAsync(dynamic item) async {
     Future<ui.Image> imageFuture;
+    final bool disposeImage; // set to true if the matcher created and owns the image and must therefore dispose it.
     if (item is Future<ui.Image>) {
       imageFuture = item;
+      disposeImage = false;
     } else if (item is ui.Image) {
       imageFuture = Future<ui.Image>.value(item);
+      disposeImage = false;
     } else {
       final Finder finder = item as Finder;
       final Iterable<Element> elements = finder.evaluate();
@@ -2152,30 +2157,37 @@ class _MatchesReferenceImage extends AsyncMatcher {
         return 'matched too many widgets';
       }
       imageFuture = captureImage(elements.single);
+      disposeImage = true;
     }
 
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
     return binding.runAsync<String?>(() async {
       final ui.Image image = await imageFuture;
-      final ByteData? bytes = await image.toByteData();
-      if (bytes == null) {
-        return 'could not be encoded.';
-      }
+      try {
+        final ByteData? bytes = await image.toByteData();
+        if (bytes == null) {
+          return 'could not be encoded.';
+        }
 
-      final ByteData? referenceBytes = await referenceImage.toByteData();
-      if (referenceBytes == null) {
-        return 'could not have its reference image encoded.';
-      }
+        final ByteData? referenceBytes = await referenceImage.toByteData();
+        if (referenceBytes == null) {
+          return 'could not have its reference image encoded.';
+        }
 
-      if (referenceImage.height != image.height || referenceImage.width != image.width) {
-        return 'does not match as width or height do not match. $image != $referenceImage';
-      }
+        if (referenceImage.height != image.height || referenceImage.width != image.width) {
+          return 'does not match as width or height do not match. $image != $referenceImage';
+        }
 
-      final int countDifferentPixels = _countDifferentPixels(
-        Uint8List.view(bytes.buffer),
-        Uint8List.view(referenceBytes.buffer),
-      );
-      return countDifferentPixels == 0 ? null : 'does not match on $countDifferentPixels pixels';
+        final int countDifferentPixels = _countDifferentPixels(
+          Uint8List.view(bytes.buffer),
+          Uint8List.view(referenceBytes.buffer),
+        );
+        return countDifferentPixels == 0 ? null : 'does not match on $countDifferentPixels pixels';
+      } finally {
+        if (disposeImage) {
+          image.dispose();
+        }
+      }
     });
   }
 
