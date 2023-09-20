@@ -31,6 +31,25 @@ void drawHelloWorld(ui.FlutterView view) {
   view.render(sceneBuilder.build());
 }
 
+Future<void> _waitUntilWindowVisible() async {
+  while (!await isWindowVisible()) {
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+  }
+}
+
+void _expectVisible(bool current, bool expect, Completer<String> completer, int frameCount) {
+  if (current != expect) {
+    try {
+      throw 'Window should be ${expect ? 'visible' : 'hidden'} on frame $frameCount';
+    } catch (e) {
+      if (!completer.isCompleted) {
+        completer.completeError(e);
+      }
+      rethrow;
+    }
+  }
+}
+
 void main() async {
   // TODO(goderbauer): Create a window if embedder doesn't provide an implicit view to draw into.
   assert(ui.PlatformDispatcher.instance.implicitView != null);
@@ -82,27 +101,38 @@ void main() async {
       // isWindowVisible(), while the subsequent frames draw. This ensures that
       // no other mechanism can affect isWindowVisible in the first frame at all.
       frameCount += 1;
-      // The window is made appear in the second frame.
-      // TODO(dkwingsmt): It should be frameCount > 2. Not sure why the window
-      // is still hidden at the beginning of the 3rd frame.
-      // https://github.com/flutter/flutter/issues/134986
-      final bool shouldBeVisible = frameCount > 3;
-      isWindowVisible().then((bool visible) {
-        if (visible != shouldBeVisible) {
-          try {
-            throw 'Window should be ${shouldBeVisible ? 'visible' : 'hidden'} on frame $frameCount';
-          } catch (e) {
-            visibilityCompleter.completeError(e);
-            rethrow;
-          }
-        }
-        if (frameCount == totalTestFrames && !visibilityCompleter.isCompleted) {
-          visibilityCompleter.complete('success');
-        }
-        ui.PlatformDispatcher.instance.scheduleFrame();
-      });
-      if (frameCount > 1) {
-        drawHelloWorld(view);
+      switch (frameCount) {
+        // The 1st frame: render nothing, just verify that the window is hidden.
+        case 1:
+          isWindowVisible().then((bool visible) {
+            _expectVisible(visible, false, visibilityCompleter, frameCount);
+            ui.PlatformDispatcher.instance.scheduleFrame();
+          });
+        // The 2nd frame: render, meanwhile verify that the window is hidden.
+        case 2:
+        // TODO(dkwingsmt): It should be frameCount > 2. Not sure why the window
+        // is still hidden at the beginning of the 3rd frame.
+        // case 3:
+          isWindowVisible().then((bool visible) {
+            _expectVisible(visible, false, visibilityCompleter, frameCount);
+            ui.PlatformDispatcher.instance.scheduleFrame();
+          });
+          drawHelloWorld(view);
+        // The 3nd frame: render nothing, just wait for the window to appear.
+        case 3:
+          _waitUntilWindowVisible().then((_) {
+            ui.PlatformDispatcher.instance.scheduleFrame();
+          });
+        // Others: Render and verify the window is shown.
+        default:
+          isWindowVisible().then((bool visible) {
+            _expectVisible(visible, true, visibilityCompleter, frameCount);
+            ui.PlatformDispatcher.instance.scheduleFrame();
+            if (frameCount == totalTestFrames && !visibilityCompleter.isCompleted) {
+              visibilityCompleter.complete('success');
+            }
+          });
+          drawHelloWorld(view);
       }
     };
   } catch (e) {
