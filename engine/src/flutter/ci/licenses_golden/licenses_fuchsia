@@ -1,4 +1,4 @@
-Signature: c3fd941dfa4989c98789c7cebb5617fc
+Signature: f16d65317d75c8c97f9ad5c10e688e5a
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -9,6 +9,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_khronos_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libdriver_runtime.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libfdio.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libheapdump_instrumentation.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libtrace-engine.so
@@ -18,6 +19,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libdriver_runtime.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libfdio.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libheapdump_instrumentation.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libmagma_client.a
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsync.a
@@ -186,6 +188,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/riscv64/dist/VkLayer_khronos_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/dist/libdriver_runtime.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/dist/libfdio.so
+FILE: ../../../fuchsia/sdk/linux/arch/riscv64/dist/libheapdump_instrumentation.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/dist/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/dist/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/dist/libtrace-engine.so
@@ -195,6 +198,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libdriver_runtime.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libfdio.so
+FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libheapdump_instrumentation.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libmagma_client.a
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libsync.a
@@ -363,6 +367,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_khronos_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libdriver_runtime.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libfdio.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libheapdump_instrumentation.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libtrace-engine.so
@@ -372,6 +377,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libdriver_runtime.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libfdio.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libheapdump_instrumentation.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libmagma_client.a
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsync.a
@@ -536,6 +542,12 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libpthread.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/librt.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libzircon.so
 FILE: ../../../fuchsia/sdk/linux/data/config/symbol_index/config.json
+FILE: ../../../fuchsia/sdk/linux/packages/heapdump-collector/arm64/release/content_checklist_path
+FILE: ../../../fuchsia/sdk/linux/packages/heapdump-collector/arm64/release/package_manifest.json
+FILE: ../../../fuchsia/sdk/linux/packages/heapdump-collector/riscv64/release/content_checklist_path
+FILE: ../../../fuchsia/sdk/linux/packages/heapdump-collector/riscv64/release/package_manifest.json
+FILE: ../../../fuchsia/sdk/linux/packages/heapdump-collector/x64/release/content_checklist_path
+FILE: ../../../fuchsia/sdk/linux/packages/heapdump-collector/x64/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/realm_builder_server/arm64/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/realm_builder_server/arm64/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/realm_builder_server/riscv64/release/content_checklist_path
@@ -545,6 +557,7 @@ FILE: ../../../fuchsia/sdk/linux/packages/realm_builder_server/x64/release/packa
 FILE: ../../../fuchsia/sdk/linux/pkg/async-default/async-default.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_runtime_shared_lib/driver_runtime.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/fdio.ifs
+FILE: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/heapdump_instrumentation.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/inspect.json
 FILE: ../../../fuchsia/sdk/linux/pkg/svc/svc.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_shard_sdk.json
@@ -1821,6 +1834,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_khronos_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libdriver_runtime.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libfdio.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libheapdump_instrumentation.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libtrace-engine.so
@@ -1830,6 +1844,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libdriver_runtime.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libfdio.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libheapdump_instrumentation.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libmagma_client.a
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsync.a
@@ -1998,6 +2013,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/riscv64/dist/VkLayer_khronos_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/dist/libdriver_runtime.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/dist/libfdio.so
+FILE: ../../../fuchsia/sdk/linux/arch/riscv64/dist/libheapdump_instrumentation.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/dist/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/dist/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/dist/libtrace-engine.so
@@ -2007,6 +2023,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libdriver_runtime.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libfdio.so
+FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libheapdump_instrumentation.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libmagma_client.a
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libsync.a
@@ -2175,6 +2192,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_khronos_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libdriver_runtime.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libfdio.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libheapdump_instrumentation.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libtrace-engine.so
@@ -2184,6 +2202,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libdriver_runtime.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libfdio.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libheapdump_instrumentation.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libmagma_client.a
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsync.a
@@ -2348,6 +2367,12 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libpthread.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/librt.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libzircon.so
 FILE: ../../../fuchsia/sdk/linux/data/config/symbol_index/config.json
+FILE: ../../../fuchsia/sdk/linux/packages/heapdump-collector/arm64/release/content_checklist_path
+FILE: ../../../fuchsia/sdk/linux/packages/heapdump-collector/arm64/release/package_manifest.json
+FILE: ../../../fuchsia/sdk/linux/packages/heapdump-collector/riscv64/release/content_checklist_path
+FILE: ../../../fuchsia/sdk/linux/packages/heapdump-collector/riscv64/release/package_manifest.json
+FILE: ../../../fuchsia/sdk/linux/packages/heapdump-collector/x64/release/content_checklist_path
+FILE: ../../../fuchsia/sdk/linux/packages/heapdump-collector/x64/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/realm_builder_server/arm64/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/realm_builder_server/arm64/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/realm_builder_server/riscv64/release/content_checklist_path
@@ -2357,6 +2382,7 @@ FILE: ../../../fuchsia/sdk/linux/packages/realm_builder_server/x64/release/packa
 FILE: ../../../fuchsia/sdk/linux/pkg/async-default/async-default.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_runtime_shared_lib/driver_runtime.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/fdio.ifs
+FILE: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/heapdump_instrumentation.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/inspect.json
 FILE: ../../../fuchsia/sdk/linux/pkg/svc/svc.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_shard_sdk.json
@@ -3945,6 +3971,13 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_driver/include/lib/fidl_driver/cpp/u
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_driver/include/lib/fidl_driver/cpp/wire_client.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_driver/include/lib/fidl_driver/cpp/wire_messaging_declarations.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_driver/unknown_interactions.cc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_driver_natural/include/lib/fidl_driver/cpp/internal/endpoint_conversions.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_driver_natural/include/lib/fidl_driver/cpp/internal/natural_client_details.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_driver_natural/include/lib/fidl_driver/cpp/natural_client.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_driver_natural/include/lib/fidl_driver/cpp/natural_messaging.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_driver_natural/include/lib/fidl_driver/cpp/natural_types.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_driver_natural/include/lib/fidl_driver/cpp/unified_messaging_declarations.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_driver_natural/natural_messaging.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/inline_any.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/internal/inline_any.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/input_report_reader/reader.cc + ../../../fuchsia/sdk/linux/LICENSE
@@ -4194,6 +4227,13 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_driver/include/lib/fidl_driver/cpp/unk
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_driver/include/lib/fidl_driver/cpp/wire_client.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_driver/include/lib/fidl_driver/cpp/wire_messaging_declarations.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_driver/unknown_interactions.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/fidl_driver_natural/include/lib/fidl_driver/cpp/internal/endpoint_conversions.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fidl_driver_natural/include/lib/fidl_driver/cpp/internal/natural_client_details.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fidl_driver_natural/include/lib/fidl_driver/cpp/natural_client.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fidl_driver_natural/include/lib/fidl_driver/cpp/natural_messaging.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fidl_driver_natural/include/lib/fidl_driver/cpp/natural_types.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fidl_driver_natural/include/lib/fidl_driver/cpp/unified_messaging_declarations.h
+FILE: ../../../fuchsia/sdk/linux/pkg/fidl_driver_natural/natural_messaging.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/inline_any.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/internal/inline_any.h
 FILE: ../../../fuchsia/sdk/linux/pkg/input_report_reader/reader.cc
@@ -4289,6 +4329,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/component_outgoing_cpp/include/lib/compon
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_component_cpp/driver_base.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_component_cpp/include/lib/driver/component/cpp/driver_export.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_component_cpp/include/lib/driver/component/cpp/internal/basic_factory.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_component_cpp/include/lib/driver/component/cpp/internal/driver_server.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_component_cpp/include/lib/driver/component/cpp/internal/lifecycle.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_component_cpp/include/lib/driver/component/cpp/prepare_stop_completer.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_component_cpp/include/lib/driver/component/cpp/start_completer.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -4306,6 +4347,9 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_testing_cpp/driver_runtime.cc + ..
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_testing_cpp/environment_variables.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_testing_cpp/test_environment.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_testing_cpp/test_node.cc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/bind.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/snapshot.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/stats.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect/offer.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect/use.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/sync_cpp/include/lib/sync/cpp/mutex.h + ../../../fuchsia/sdk/linux/LICENSE
@@ -4350,6 +4394,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/component_outgoing_cpp/include/lib/componen
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_component_cpp/driver_base.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_component_cpp/include/lib/driver/component/cpp/driver_export.h
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_component_cpp/include/lib/driver/component/cpp/internal/basic_factory.h
+FILE: ../../../fuchsia/sdk/linux/pkg/driver_component_cpp/include/lib/driver/component/cpp/internal/driver_server.h
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_component_cpp/include/lib/driver/component/cpp/internal/lifecycle.h
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_component_cpp/include/lib/driver/component/cpp/prepare_stop_completer.h
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_component_cpp/include/lib/driver/component/cpp/start_completer.h
@@ -4367,6 +4412,9 @@ FILE: ../../../fuchsia/sdk/linux/pkg/driver_testing_cpp/driver_runtime.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_testing_cpp/environment_variables.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_testing_cpp/test_environment.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_testing_cpp/test_node.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/bind.h
+FILE: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/snapshot.h
+FILE: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/include/heapdump/stats.h
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/offer.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/use.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/sync_cpp/include/lib/sync/cpp/mutex.h
@@ -4407,6 +4455,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_khronos_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libdriver_runtime.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libfdio.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libheapdump_instrumentation.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libtrace-engine.so
@@ -4416,6 +4465,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libdriver_runtime.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libfdio.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libheapdump_instrumentation.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libmagma_client.a
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsync.a
@@ -4584,6 +4634,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/riscv64/dist/VkLayer_khronos_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/dist/libdriver_runtime.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/dist/libfdio.so
+FILE: ../../../fuchsia/sdk/linux/arch/riscv64/dist/libheapdump_instrumentation.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/dist/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/dist/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/dist/libtrace-engine.so
@@ -4593,6 +4644,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libdriver_runtime.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libfdio.so
+FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libheapdump_instrumentation.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libmagma_client.a
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libsync.a
@@ -4761,6 +4813,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_khronos_validation.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libdriver_runtime.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libfdio.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libheapdump_instrumentation.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libtrace-engine.so
@@ -4770,6 +4823,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libdriver_runtime.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libfdio.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libheapdump_instrumentation.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libmagma_client.a
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsync.a
@@ -4934,6 +4988,12 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libpthread.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/librt.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/lib/libzircon.so
 FILE: ../../../fuchsia/sdk/linux/data/config/symbol_index/config.json
+FILE: ../../../fuchsia/sdk/linux/packages/heapdump-collector/arm64/release/content_checklist_path
+FILE: ../../../fuchsia/sdk/linux/packages/heapdump-collector/arm64/release/package_manifest.json
+FILE: ../../../fuchsia/sdk/linux/packages/heapdump-collector/riscv64/release/content_checklist_path
+FILE: ../../../fuchsia/sdk/linux/packages/heapdump-collector/riscv64/release/package_manifest.json
+FILE: ../../../fuchsia/sdk/linux/packages/heapdump-collector/x64/release/content_checklist_path
+FILE: ../../../fuchsia/sdk/linux/packages/heapdump-collector/x64/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/realm_builder_server/arm64/release/content_checklist_path
 FILE: ../../../fuchsia/sdk/linux/packages/realm_builder_server/arm64/release/package_manifest.json
 FILE: ../../../fuchsia/sdk/linux/packages/realm_builder_server/riscv64/release/content_checklist_path
@@ -4943,6 +5003,7 @@ FILE: ../../../fuchsia/sdk/linux/packages/realm_builder_server/x64/release/packa
 FILE: ../../../fuchsia/sdk/linux/pkg/async-default/async-default.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/driver_runtime_shared_lib/driver_runtime.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/fdio.ifs
+FILE: ../../../fuchsia/sdk/linux/pkg/heapdump_instrumentation/heapdump_instrumentation.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/inspect.json
 FILE: ../../../fuchsia/sdk/linux/pkg/svc/svc.ifs
 FILE: ../../../fuchsia/sdk/linux/pkg/sys/component/realm_builder_shard_sdk.json
