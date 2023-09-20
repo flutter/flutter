@@ -106,10 +106,49 @@ def main():
       args, dst, framework, arm64_framework, simulator_framework,
       simulator_x64_framework, simulator_arm64_framework
   )
+
+  extension_safe_dst = os.path.join(dst, 'extension_safe')
+  create_extension_safe_framework(
+      args, extension_safe_dst, '%s_extension_safe' % arm64_out_dir,
+      '%s_extension_safe' % simulator_x64_out_dir,
+      '%s_extension_safe' % simulator_arm64_out_dir
+  )
+
   generate_gen_snapshot(args, dst, x64_out_dir, arm64_out_dir)
   zip_archive(dst)
   return 0
 
+def create_extension_safe_framework( # pylint: disable=too-many-arguments
+    args, dst, arm64_out_dir, simulator_x64_out_dir, simulator_arm64_out_dir
+):
+  framework = os.path.join(dst, 'Flutter.framework')
+  simulator_framework = os.path.join(dst, 'sim', 'Flutter.framework')
+  arm64_framework = os.path.join(arm64_out_dir, 'Flutter.framework')
+  simulator_x64_framework = os.path.join(
+      simulator_x64_out_dir, 'Flutter.framework'
+  )
+  simulator_arm64_framework = os.path.join(
+      simulator_arm64_out_dir, 'Flutter.framework'
+  )
+
+  if not os.path.isdir(arm64_framework):
+    print(
+        'Cannot find extension safe iOS arm64 Framework at %s' % arm64_framework
+    )
+    return 1
+
+  if not os.path.isdir(simulator_x64_framework):
+    print(
+        'Cannot find extension safe iOS x64 simulator Framework at %s' %
+        simulator_x64_framework
+    )
+    return 1
+
+  create_framework(
+      args, dst, framework, arm64_framework, simulator_framework,
+      simulator_x64_framework, simulator_arm64_framework
+  )
+  return 0
 
 def create_framework(  # pylint: disable=too-many-arguments
     args, dst, framework, arm64_framework, simulator_framework,
@@ -173,7 +212,9 @@ def zip_archive(dst):
   ios_file_with_entitlements = ['gen_snapshot_arm64']
   ios_file_without_entitlements = [
       'Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
-      'Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter'
+      'Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
+      'extension_safe/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
+      'extension_safe/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter'
   ]
   embed_codesign_configuration(
       os.path.join(dst, 'entitlements.txt'), ios_file_with_entitlements
@@ -192,10 +233,17 @@ def zip_archive(dst):
       'Flutter.xcframework',
       'entitlements.txt',
       'without_entitlements.txt',
+      'extension_safe/Flutter.xcframework',
   ],
                         cwd=dst)
   if os.path.exists(os.path.join(dst, 'Flutter.dSYM')):
     subprocess.check_call(['zip', '-r', 'Flutter.dSYM.zip', 'Flutter.dSYM'],
+                          cwd=dst)
+
+  if os.path.exists(os.path.join(dst, 'extension_safe', 'Flutter.dSYM')):
+    subprocess.check_call([
+        'zip', '-r', 'extension_safe_Flutter.dSYM.zip', 'Flutter.dSYM'
+    ],
                           cwd=dst)
 
 
