@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class ExpandingBox extends StatefulWidget {
   const ExpandingBox({ super.key, required this.collapsedSize, required this.expandedSize });
@@ -53,7 +54,7 @@ class _ExpandingBoxState extends State<ExpandingBox> with AutomaticKeepAliveClie
 }
 
 void main() {
-  testWidgets('shrink listview', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('shrink listview', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: ListView.builder(
         itemBuilder: (BuildContext context, int index) => index == 0
@@ -98,7 +99,7 @@ void main() {
     expect(position.pixels, 100.0);
   });
 
-  testWidgets('shrink listview while dragging', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('shrink listview while dragging', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: ListView.builder(
         itemBuilder: (BuildContext context, int index) => index == 0
@@ -157,7 +158,7 @@ void main() {
     expect(position.pixels, 50.0);
   });
 
-  testWidgets('shrink listview while ballistic', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('shrink listview while ballistic', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: GestureDetector(
         onTap: () { assert(false); },
@@ -220,7 +221,7 @@ void main() {
     expect(position.pixels, 0.0);
   });
 
-  testWidgets('expanding page views', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('expanding page views', (WidgetTester tester) async {
     await tester.pumpWidget(const Padding(padding: EdgeInsets.only(right: 200.0), child: TabBarDemo()));
     await tester.tap(find.text('bike'));
     await tester.pump();
@@ -231,7 +232,7 @@ void main() {
     expect(bike2.center, bike1.shift(const Offset(100.0, 0.0)).center);
   });
 
-  testWidgets('changing the size of the viewport when overscrolled', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('changing the size of the viewport when overscrolled', (WidgetTester tester) async {
     Widget build(double height) {
       return Directionality(
         textDirection: TextDirection.rtl,
@@ -265,7 +266,7 @@ void main() {
     expect(oldPosition, newPosition);
   });
 
-  testWidgets('inserting and removing an item when overscrolled', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('inserting and removing an item when overscrolled', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/62890
 
     const double itemExtent = 100.0;
