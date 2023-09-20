@@ -175,8 +175,6 @@ class AnimationSheetBuilder {
   /// [collate]. If neither condition is met, the frames are not recorded, which
   /// is useful during setup phases.
   ///
-  /// The `child` must not be null.
-  ///
   /// See also:
   ///
   ///  * [WidgetTester.pumpFrames], which renders a widget in a series of frames
