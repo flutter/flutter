@@ -464,7 +464,7 @@ Engine test example:
 {
   "tests": [
     {
-       "name": "test: lint android_debug_arm64",
+       "name": "test: clang_tidy android_debug_arm64",
        "recipe": "engine_v2/tester_engine",
        "drone_dimensions": [
          "device_type=none",
@@ -476,7 +476,7 @@ Engine test example:
        ],
        "tasks": [
          {
-            "name": "test: lint android_debug_arm64",
+            "name": "test: clang_tidy android_debug_arm64",
             "parameters": [
               "--variant",
               "android_debug_arm64",
@@ -485,7 +485,7 @@ Engine test example:
               "--shard-variants=host_debug"
             ],
             "max_attempts": 1,
-            "script": "flutter/ci/lint.sh"
+            "script": "flutter/ci/clang_tidy.sh"
          }
        ]
     }
@@ -513,7 +513,7 @@ Example task configuration:
 
 ```json
 {
-    "name": "test: lint android_debug_arm64",
+    "name": "test: clang_tidy android_debug_arm64",
     "parameters": [
        "--variant",
        "android_debug_arm64",
@@ -522,7 +522,7 @@ Example task configuration:
        "--shard-variants=host_debug"
     ],
     "max_attempts": 1,
-    "script": "flutter/ci/lint.sh"
+    "script": "flutter/ci/clang_tidy.sh"
 }
 ```
 

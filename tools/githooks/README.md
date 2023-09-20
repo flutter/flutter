@@ -21,8 +21,8 @@ scripts have the names that `git` will look for.
 This hooks runs when pushing commits to a remote branch, for example to
 create or update a pull request: `git push origin my-local-branch`.
 
-The `pre-push` hook runs `ci/lint.sh` and `ci/format.sh`. `ci/analyze.sh` and
-`ci/licenses.sh` are more expensive and are not run.
+The `pre-push` hook runs `ci/clang_tidy.sh`, `ci/pylint.sh` and `ci/format.sh`.
+`ci/analyze.sh` and `ci/licenses.sh` are more expensive and are not run.
 
 ### Adding new pre-push checks
 
