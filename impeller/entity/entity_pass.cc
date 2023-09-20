@@ -1091,6 +1091,10 @@ void EntityPass::SetBlendMode(BlendMode blend_mode) {
 
 Color EntityPass::GetClearColor(ISize target_size) const {
   Color result = Color::BlackTransparent();
+  if (backdrop_filter_proc_) {
+    return result;
+  }
+
   for (const Element& element : elements_) {
     auto [entity_color, blend_mode] =
         ElementAsBackgroundColor(element, target_size);
