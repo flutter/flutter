@@ -200,8 +200,6 @@ class AppBarTheme with Diagnosticable {
 
   /// Linearly interpolate between two AppBar themes.
   ///
-  /// The argument `t` must not be null.
-  ///
   /// {@macro dart.ui.shadow.lerp}
   static AppBarTheme lerp(AppBarTheme? a, AppBarTheme? b, double t) {
     if (identical(a, b) && a != null) {
