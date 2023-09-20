@@ -2368,6 +2368,35 @@ TEST_P(AiksTest, ClipRectElidesNoOpClips) {
   ASSERT_EQ(render_pass->GetCommands().size(), 0llu);
 }
 
+TEST_P(AiksTest, ClearColorOptimizationDoesNotApplyForBackdropFilters) {
+  Canvas canvas;
+  canvas.SaveLayer({}, std::nullopt,
+                   ImageFilter::MakeBlur(Sigma(3), Sigma(3),
+                                         FilterContents::BlurStyle::kNormal,
+                                         Entity::TileMode::kClamp));
+  canvas.DrawPaint({.color = Color::Red(), .blend_mode = BlendMode::kSource});
+  canvas.DrawPaint({.color = Color::CornflowerBlue().WithAlpha(0.75),
+                    .blend_mode = BlendMode::kSourceOver});
+  canvas.Restore();
+
+  Picture picture = canvas.EndRecordingAsPicture();
+
+  std::optional<Color> actual_color;
+  picture.pass->IterateAllElements([&](EntityPass::Element& element) -> bool {
+    if (auto subpass = std::get_if<std::unique_ptr<EntityPass>>(&element)) {
+      actual_color = subpass->get()->GetClearColor();
+    }
+    // Fail if the first element isn't a subpass.
+    return true;
+  });
+
+  ASSERT_TRUE(actual_color.has_value());
+  if (!actual_color) {
+    return;
+  }
+  ASSERT_EQ(actual_color.value(), Color::BlackTransparent());
+}
+
 TEST_P(AiksTest, CollapsedDrawPaintInSubpass) {
   Canvas canvas;
   canvas.DrawPaint(
