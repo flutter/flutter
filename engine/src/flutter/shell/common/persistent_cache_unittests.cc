@@ -42,7 +42,7 @@ static void CheckTwoSkSLsAreLoaded() {
 
 TEST_F(PersistentCacheTest, CanLoadSkSLsFromAsset) {
   // Avoid polluting unit tests output by hiding INFO level logging.
-  fml::LogSettings warning_only = {fml::LOG_WARNING};
+  fml::LogSettings warning_only = {fml::kLogWarning};
   fml::ScopedSetLogSettings scoped_set_log_settings(warning_only);
 
   // The SkSL key is Base32 encoded. "IE" is the encoding of "A" and "II" is the
