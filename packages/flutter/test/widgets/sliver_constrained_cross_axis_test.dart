@@ -5,12 +5,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 const double VIEWPORT_HEIGHT = 500;
 const double VIEWPORT_WIDTH = 300;
 
 void main() {
-  testWidgets('SliverConstrainedCrossAxis basic test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverConstrainedCrossAxis basic test', (WidgetTester tester) async {
     await tester.pumpWidget(_buildSliverConstrainedCrossAxis(maxExtent: 50));
 
     final RenderBox box = tester.renderObject(find.byType(Container));
@@ -21,7 +22,7 @@ void main() {
     expect(sliver.geometry!.paintExtent, equals(100));
   });
 
-  testWidgets('SliverConstrainedCrossAxis updates correctly', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverConstrainedCrossAxis updates correctly', (WidgetTester tester) async {
     await tester.pumpWidget(_buildSliverConstrainedCrossAxis(maxExtent: 50));
 
     final RenderBox box1 = tester.renderObject(find.byType(Container));
@@ -35,7 +36,7 @@ void main() {
     expect(box2.size.width, 80);
   });
 
-  testWidgets('SliverConstrainedCrossAxis uses parent extent if maxExtent is greater', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverConstrainedCrossAxis uses parent extent if maxExtent is greater', (WidgetTester tester) async {
     await tester.pumpWidget(_buildSliverConstrainedCrossAxis(maxExtent: 400));
 
     final RenderBox box = tester.renderObject(find.byType(Container));
@@ -43,7 +44,7 @@ void main() {
     expect(box.size.width, VIEWPORT_WIDTH);
   });
 
-  testWidgets('SliverConstrainedCrossAxis constrains the height when direction is horizontal', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverConstrainedCrossAxis constrains the height when direction is horizontal', (WidgetTester tester) async {
     await tester.pumpWidget(_buildSliverConstrainedCrossAxis(
       maxExtent: 50,
       scrollDirection: Axis.horizontal,
@@ -53,7 +54,7 @@ void main() {
     expect(box.size.height, 50);
   });
 
-  testWidgets('SliverConstrainedCrossAxis sets its own flex to 0', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverConstrainedCrossAxis sets its own flex to 0', (WidgetTester tester) async {
     await tester.pumpWidget(_buildSliverConstrainedCrossAxis(
       maxExtent: 50,
     ));
