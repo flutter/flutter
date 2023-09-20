@@ -137,7 +137,7 @@ const DlPaint* Paint::paint(DlPaint& paint,
 
   if (flags.applies_alpha_or_color()) {
     uint32_t encoded_color = uint_data[kColorIndex];
-    paint.setColor(encoded_color ^ kColorDefault);
+    paint.setColor(DlColor(encoded_color ^ kColorDefault));
   }
 
   if (flags.applies_blend()) {
@@ -248,7 +248,7 @@ void Paint::toDlPaint(DlPaint& paint) const {
   paint.setAntiAlias(uint_data[kIsAntiAliasIndex] == 0);
 
   uint32_t encoded_color = uint_data[kColorIndex];
-  paint.setColor(encoded_color ^ kColorDefault);
+  paint.setColor(DlColor(encoded_color ^ kColorDefault));
 
   uint32_t encoded_blend_mode = uint_data[kBlendModeIndex];
   uint32_t blend_mode = encoded_blend_mode ^ kBlendModeDefault;

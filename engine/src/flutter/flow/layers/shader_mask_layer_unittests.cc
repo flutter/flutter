@@ -396,7 +396,7 @@ TEST_F(ShaderMaskLayerTest, OpacityInheritance) {
     {
       expected_builder.Translate(offset.fX, offset.fY);
       /* ShaderMaskLayer::Paint() */ {
-        DlPaint sl_paint = DlPaint(opacity_alpha << 24);
+        DlPaint sl_paint = DlPaint(DlColor(opacity_alpha << 24));
         expected_builder.SaveLayer(&child_path.getBounds(), &sl_paint);
         {
           /* child layer paint */ {

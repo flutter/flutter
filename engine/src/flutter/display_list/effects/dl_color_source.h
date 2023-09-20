@@ -191,7 +191,7 @@ class DlColorColorSource final : public DlColorSource {
   DlColorSourceType type() const override { return DlColorSourceType::kColor; }
   size_t size() const override { return sizeof(*this); }
 
-  bool is_opaque() const override { return (color_ >> 24) == 255; }
+  bool is_opaque() const override { return color_.getAlpha() == 255; }
 
   DlColor color() const { return color_; }
 
@@ -290,7 +290,7 @@ class DlGradientColorSourceBase : public DlMatrixColorSourceBase {
     }
     const DlColor* my_colors = colors();
     for (uint32_t i = 0; i < stop_count_; i++) {
-      if ((my_colors[i] >> 24) < 255) {
+      if (my_colors[i].getAlpha() < 255) {
         return false;
       }
     }

@@ -439,11 +439,11 @@ TEST_F(ColorFilterLayerTest, OpacityInheritance) {
       expected_builder.Translate(offset.fX, offset.fY);
       /* ColorFilterLayer::Paint() */ {
         DlPaint dl_paint;
-        dl_paint.setColor(opacity_alpha << 24);
+        dl_paint.setColor(DlColor(opacity_alpha << 24));
         dl_paint.setColorFilter(&layer_filter);
         expected_builder.SaveLayer(&child_path.getBounds(), &dl_paint);
         /* MockLayer::Paint() */ {
-          expected_builder.DrawPath(child_path, DlPaint(0xFF000000));
+          expected_builder.DrawPath(child_path, DlPaint(DlColor(0xFF000000)));
         }
         expected_builder.Restore();
       }

@@ -181,7 +181,7 @@ TEST_F(PerformanceOverlayLayerTest, SimpleRasterizerStatistics) {
       paint_context().raster_time, "Raster", "");
   auto overlay_text_data = overlay_text->serialize(SkSerialProcs{});
   // Historically SK_ColorGRAY (== 0xFF888888) was used here
-  DlPaint text_paint(0xFF888888);
+  DlPaint text_paint(DlColor(0xFF888888));
   SkPoint text_position = SkPoint::Make(16.0f, 22.0f);
 
   // TODO(https://github.com/flutter/flutter/issues/82202): Remove once the

@@ -214,7 +214,7 @@ void Canvas::getLocalClipBounds(Dart_Handle rect_handle) {
 
 void Canvas::drawColor(SkColor color, DlBlendMode blend_mode) {
   if (display_list_builder_) {
-    builder()->DrawColor(color, blend_mode);
+    builder()->DrawColor(DlColor(color), blend_mode);
   }
 }
 
@@ -638,7 +638,7 @@ void Canvas::drawShadow(const CanvasPath* path,
     // that situation we bypass the canvas interface and inject the
     // shadow parameters directly into the underlying DisplayList.
     // See: https://bugs.chromium.org/p/skia/issues/detail?id=12125
-    builder()->DrawShadow(path->path(), color, SafeNarrow(elevation),
+    builder()->DrawShadow(path->path(), DlColor(color), SafeNarrow(elevation),
                           transparentOccluder, dpr);
   }
 }

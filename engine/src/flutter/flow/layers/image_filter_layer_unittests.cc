@@ -603,7 +603,7 @@ TEST_F(ImageFilterLayerTest, OpacityInheritance) {
       expected_builder.Translate(offset.fX, offset.fY);
       /* ImageFilterLayer::Paint() */ {
         DlPaint image_filter_paint;
-        image_filter_paint.setColor(opacity_alpha << 24);
+        image_filter_paint.setColor(DlColor(opacity_alpha << 24));
         image_filter_paint.setImageFilter(dl_image_filter.get());
         expected_builder.SaveLayer(&child_path.getBounds(),
                                    &image_filter_paint);

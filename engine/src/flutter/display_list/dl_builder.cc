@@ -351,7 +351,7 @@ void DisplayListBuilder::SetAttributesFromPaint(
     setDither(paint.isDither());
   }
   if (flags.applies_alpha_or_color()) {
-    setColor(paint.getColor().argb);
+    setColor(paint.getColor());
   }
   if (flags.applies_blend()) {
     setBlendMode(paint.getBlendMode());

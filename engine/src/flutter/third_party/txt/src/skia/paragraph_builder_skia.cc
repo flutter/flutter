@@ -102,7 +102,7 @@ skt::ParagraphStyle ParagraphBuilderSkia::TxtToSkia(const ParagraphStyle& txt) {
 
   // Convert the default color of an SkParagraph text style into a DlPaint.
   flutter::DlPaint dl_paint;
-  dl_paint.setColor(text_style.getColor());
+  dl_paint.setColor(flutter::DlColor(text_style.getColor()));
   text_style.setForegroundPaintID(CreatePaintID(dl_paint));
 
   text_style.setFontStyle(MakeSkFontStyle(txt.font_weight, txt.font_style));
@@ -178,7 +178,7 @@ skt::TextStyle ParagraphBuilderSkia::TxtToSkia(const TextStyle& txt) {
     skia.setForegroundPaintID(CreatePaintID(txt.foreground.value()));
   } else {
     flutter::DlPaint dl_paint;
-    dl_paint.setColor(txt.color);
+    dl_paint.setColor(flutter::DlColor(txt.color));
     skia.setForegroundPaintID(CreatePaintID(dl_paint));
   }
 

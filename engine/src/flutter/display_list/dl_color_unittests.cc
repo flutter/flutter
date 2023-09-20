@@ -14,7 +14,7 @@ static void arraysEqual(const uint32_t* ints,
                         const DlColor* colors,
                         int count) {
   for (int i = 0; i < count; i++) {
-    EXPECT_TRUE(ints[i] == colors[i]);
+    EXPECT_TRUE(ints[i] == colors[i].argb());
   }
 }
 

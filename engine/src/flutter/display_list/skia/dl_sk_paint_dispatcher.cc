@@ -63,8 +63,8 @@ void DlSkPaintDispatchHelper::setStrokeMiter(SkScalar limit) {
   paint_.setStrokeMiter(limit);
 }
 void DlSkPaintDispatchHelper::setColor(DlColor color) {
-  current_color_ = color;
-  paint_.setColor(color);
+  current_color_ = ToSk(color);
+  paint_.setColor(ToSk(color));
   if (has_opacity()) {
     paint_.setAlphaf(paint_.getAlphaf() * opacity());
   }
