@@ -131,7 +131,9 @@ class DlImage : public SkRefCnt {
 
   bool Equals(const DlImage& other) const { return Equals(&other); }
 
-  bool Equals(sk_sp<const DlImage> other) const { return Equals(other.get()); }
+  bool Equals(const sk_sp<const DlImage>& other) const {
+    return Equals(other.get());
+  }
 
  protected:
   DlImage();

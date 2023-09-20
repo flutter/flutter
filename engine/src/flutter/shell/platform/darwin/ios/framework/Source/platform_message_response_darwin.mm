@@ -9,7 +9,7 @@ namespace flutter {
 PlatformMessageResponseDarwin::PlatformMessageResponseDarwin(
     PlatformMessageResponseCallback callback,
     fml::RefPtr<fml::TaskRunner> platform_task_runner)
-    : callback_(callback, fml::OwnershipPolicy::Retain),
+    : callback_(callback, fml::OwnershipPolicy::kRetain),
       platform_task_runner_(std::move(platform_task_runner)) {}
 
 PlatformMessageResponseDarwin::~PlatformMessageResponseDarwin() = default;

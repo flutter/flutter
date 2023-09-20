@@ -32,11 +32,11 @@ struct IsByteSwappable
           integral_constant<bool, std::is_integral_v<T> || std::is_enum_v<T>> {
 };
 template <typename T>
-constexpr bool IsByteSwappableV = IsByteSwappable<T>::value;
+constexpr bool kIsByteSwappableV = IsByteSwappable<T>::value;
 
 /// @brief  Flips the endianness of the given value.
 ///         The given value must be an integral type of size 1, 2, 4, or 8.
-template <typename T, class = std::enable_if_t<IsByteSwappableV<T>>>
+template <typename T, class = std::enable_if_t<kIsByteSwappableV<T>>>
 constexpr T ByteSwap(T n) {
   if constexpr (sizeof(T) == 1) {
     return n;
@@ -55,7 +55,7 @@ constexpr T ByteSwap(T n) {
 ///         current architecture. This is effectively a cross platform
 ///         ntohl/ntohs (as network byte order is always Big Endian).
 ///         The given value must be an integral type of size 1, 2, 4, or 8.
-template <typename T, class = std::enable_if_t<IsByteSwappableV<T>>>
+template <typename T, class = std::enable_if_t<kIsByteSwappableV<T>>>
 constexpr T BigEndianToArch(T n) {
 #if FML_ARCH_CPU_LITTLE_ENDIAN
   return ByteSwap<T>(n);
@@ -67,7 +67,7 @@ constexpr T BigEndianToArch(T n) {
 /// @brief  Convert a known little endian value to match the endianness of the
 ///         current architecture.
 ///         The given value must be an integral type of size 1, 2, 4, or 8.
-template <typename T, class = std::enable_if_t<IsByteSwappableV<T>>>
+template <typename T, class = std::enable_if_t<kIsByteSwappableV<T>>>
 constexpr T LittleEndianToArch(T n) {
 #if !FML_ARCH_CPU_LITTLE_ENDIAN
   return ByteSwap<T>(n);
