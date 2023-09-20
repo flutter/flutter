@@ -178,7 +178,7 @@ class DlColorSource : public DlAttribute<DlColorSource, DlColorSourceType> {
 
 class DlColorColorSource final : public DlColorSource {
  public:
-  DlColorColorSource(DlColor color) : color_(color) {}
+  explicit DlColorColorSource(DlColor color) : color_(color) {}
 
   bool isUIThreadSafe() const override { return true; }
 
@@ -216,7 +216,7 @@ class DlMatrixColorSourceBase : public DlColorSource {
   }
 
  protected:
-  DlMatrixColorSourceBase(const SkMatrix* matrix)
+  explicit DlMatrixColorSourceBase(const SkMatrix* matrix)
       : matrix_(matrix ? *matrix : SkMatrix::I()) {}
 
  private:
@@ -232,7 +232,7 @@ class DlImageColorSource final : public SkRefCnt,
                      DlImageSampling sampling = DlImageSampling::kLinear,
                      const SkMatrix* matrix = nullptr)
       : DlMatrixColorSourceBase(matrix),
-        image_(image),
+        image_(std::move(image)),
         horizontal_tile_mode_(horizontal_tile_mode),
         vertical_tile_mode_(vertical_tile_mode),
         sampling_(sampling) {}
@@ -405,7 +405,8 @@ class DlLinearGradientColorSource final : public DlGradientColorSourceBase {
     store_color_stops(this + 1, colors, stops);
   }
 
-  DlLinearGradientColorSource(const DlLinearGradientColorSource* source)
+  explicit DlLinearGradientColorSource(
+      const DlLinearGradientColorSource* source)
       : DlGradientColorSourceBase(source->stop_count(),
                                   source->tile_mode(),
                                   source->matrix_ptr()),
@@ -468,7 +469,8 @@ class DlRadialGradientColorSource final : public DlGradientColorSourceBase {
     store_color_stops(this + 1, colors, stops);
   }
 
-  DlRadialGradientColorSource(const DlRadialGradientColorSource* source)
+  explicit DlRadialGradientColorSource(
+      const DlRadialGradientColorSource* source)
       : DlGradientColorSourceBase(source->stop_count(),
                                   source->tile_mode(),
                                   source->matrix_ptr()),
@@ -540,7 +542,8 @@ class DlConicalGradientColorSource final : public DlGradientColorSourceBase {
     store_color_stops(this + 1, colors, stops);
   }
 
-  DlConicalGradientColorSource(const DlConicalGradientColorSource* source)
+  explicit DlConicalGradientColorSource(
+      const DlConicalGradientColorSource* source)
       : DlGradientColorSourceBase(source->stop_count(),
                                   source->tile_mode(),
                                   source->matrix_ptr()),
@@ -610,7 +613,7 @@ class DlSweepGradientColorSource final : public DlGradientColorSourceBase {
     store_color_stops(this + 1, colors, stops);
   }
 
-  DlSweepGradientColorSource(const DlSweepGradientColorSource* source)
+  explicit DlSweepGradientColorSource(const DlSweepGradientColorSource* source)
       : DlGradientColorSourceBase(source->stop_count(),
                                   source->tile_mode(),
                                   source->matrix_ptr()),
