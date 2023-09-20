@@ -5,6 +5,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void verifyPaintPosition(GlobalKey key, Offset ideal, bool visible) {
   final RenderSliver target = key.currentContext!.findRenderObject()! as RenderSliver;
@@ -23,7 +24,7 @@ void verifyActualBoxPosition(WidgetTester tester, Finder finder, int index, Rect
 }
 
 void main() {
-  testWidgets('Sliver appbars - pinned', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Sliver appbars - pinned', (WidgetTester tester) async {
     const double bigHeight = 550.0;
     GlobalKey key1, key2, key3, key4, key5;
     await tester.pumpWidget(
@@ -59,7 +60,7 @@ void main() {
     verifyPaintPosition(key5, const Offset(0.0, 50.0), true);
   });
 
-  testWidgets('Sliver appbars - toStringDeep of maxExtent that throws', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Sliver appbars - toStringDeep of maxExtent that throws', (WidgetTester tester) async {
     final TestDelegateThatCanThrow delegateThatCanThrow = TestDelegateThatCanThrow();
     GlobalKey key;
     await tester.pumpWidget(
@@ -121,7 +122,7 @@ void main() {
     );
   });
 
-  testWidgets('Sliver appbars - pinned with slow scroll', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Sliver appbars - pinned with slow scroll', (WidgetTester tester) async {
     const double bigHeight = 550.0;
     GlobalKey key1, key2, key3, key4, key5;
     await tester.pumpWidget(
@@ -214,7 +215,7 @@ void main() {
     verifyPaintPosition(key5, const Offset(0.0, 550.0), true);
   });
 
-  testWidgets('Sliver appbars - pinned with less overlap', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Sliver appbars - pinned with less overlap', (WidgetTester tester) async {
     const double bigHeight = 650.0;
     GlobalKey key1, key2, key3, key4, key5;
     await tester.pumpWidget(
@@ -250,7 +251,7 @@ void main() {
     verifyPaintPosition(key5, Offset.zero, true);
   });
 
-  testWidgets('Sliver appbars - overscroll gap is below header', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Sliver appbars - overscroll gap is below header', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,

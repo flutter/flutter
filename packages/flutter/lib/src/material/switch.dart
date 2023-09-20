@@ -710,7 +710,7 @@ class _MaterialSwitch extends StatefulWidget {
   final MaterialStateProperty<Color?>? overlayColor;
   final double? splashRadius;
   final FocusNode? focusNode;
-  final Function(bool)? onFocusChange;
+  final ValueChanged<bool>? onFocusChange;
   final bool autofocus;
   final Size size;
 
