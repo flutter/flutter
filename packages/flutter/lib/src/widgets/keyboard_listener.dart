@@ -53,9 +53,6 @@ class KeyboardListener extends StatelessWidget {
   });
 
   /// Controls whether this widget has keyboard focus.
-  ///
-  /// The owner will be responsible for calling [FocusNode.dispose] on the focus
-  /// node when it is done with it.
   final FocusNode focusNode;
 
   /// {@macro flutter.widgets.Focus.autofocus}

@@ -194,7 +194,7 @@ void main() {
       true);
     expect(logs, <int>[3, 2, 1]);
     logs.clear();
-  }, variant: KeySimulatorTransitModeVariant.all(),);
+  }, variant: KeySimulatorTransitModeVariant.all());
 
   // Regression test for https://github.com/flutter/flutter/issues/99196 .
   //
