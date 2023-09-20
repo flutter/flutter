@@ -150,6 +150,10 @@ buildscript {
         classpath 'com.android.tools.build:gradle:7.3.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
+
+    configurations.classpath {
+        resolutionStrategy.activateDependencyLocking()
+    }
 }
 
 allprojects {
@@ -160,11 +164,19 @@ allprojects {
 }
 
 rootProject.buildDir = '../build'
+
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
 }
 subprojects {
     project.evaluationDependsOn(':app')
+    dependencyLocking {
+        ignoredDependencies.add('io.flutter:*')
+        lockFile = file("${rootProject.projectDir}/project-${project.name}.lockfile")
+        if (!project.hasProperty('local-engine-repo')) {
+          lockAllConfigurations()
+        }
+    }
 }
 
 tasks.register("clean", Delete) {
