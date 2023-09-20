@@ -80,7 +80,7 @@ void main () {
 
       expect(iosDeployDebugger.logLines, emits('Did finish launching.'));
       expect(await iosDeployDebugger.launchAndAttach(), isTrue);
-      await iosDeployDebugger.logLines.drain();
+      await iosDeployDebugger.logLines.drain<Object?>();
       expect(processManager, hasNoRemainingExpectations);
       expect(appDeltaDirectory, exists);
     });
@@ -141,7 +141,7 @@ void main () {
           'process detach',
         ]));
         expect(await iosDeployDebugger.launchAndAttach(), isTrue);
-        await logLines.drain();
+        await logLines.drain<Object?>();
 
         expect(logger.traceText, contains('PROCESS_STOPPED'));
         expect(logger.traceText, contains('thread backtrace all'));
@@ -189,7 +189,7 @@ void main () {
 
         expect(iosDeployDebugger.logLines, emitsDone);
         expect(await iosDeployDebugger.launchAndAttach(), isFalse);
-        await iosDeployDebugger.logLines.drain();
+        await iosDeployDebugger.logLines.drain<Object?>();
       });
 
       testWithoutContext('app exit', () async {
@@ -209,7 +209,7 @@ void main () {
         ]));
 
         expect(await iosDeployDebugger.launchAndAttach(), isTrue);
-        await iosDeployDebugger.logLines.drain();
+        await iosDeployDebugger.logLines.drain<Object?>();
       });
 
       testWithoutContext('app crash', () async {
@@ -239,7 +239,7 @@ void main () {
         ]));
 
         expect(await iosDeployDebugger.launchAndAttach(), isTrue);
-        await iosDeployDebugger.logLines.drain();
+        await iosDeployDebugger.logLines.drain<Object?>();
 
         expect(logger.traceText, contains('Process 6156 stopped'));
         expect(logger.traceText, contains('thread backtrace all'));
@@ -263,7 +263,7 @@ void main () {
         expect(iosDeployDebugger.logLines, emitsDone);
 
         expect(await iosDeployDebugger.launchAndAttach(), isFalse);
-        await iosDeployDebugger.logLines.drain();
+        await iosDeployDebugger.logLines.drain<Object?>();
       });
 
       testWithoutContext('no provisioning profile 1, stdout', () async {
@@ -364,7 +364,7 @@ void main () {
           'Log on attach2',
         ]));
         expect(await iosDeployDebugger.launchAndAttach(), isTrue);
-        await logLines.drain();
+        await logLines.drain<Object?>();
 
         expect(LineSplitter.split(logger.traceText), containsOnce('Received logs from ios-deploy.'));
       });

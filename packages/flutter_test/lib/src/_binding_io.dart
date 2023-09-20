@@ -128,7 +128,7 @@ class _MockHttpClient implements HttpClient {
   bool Function(X509Certificate cert, String host, int port)? badCertificateCallback;
 
   @override
-  Function(String line)? keyLog;
+  void Function(String line)? keyLog;
 
   @override
   void close({ bool force = false }) { }

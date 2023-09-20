@@ -174,7 +174,7 @@ class RootPage extends StatelessWidget {
             ElevatedButton(
               style: buttonStyle,
               onPressed: () {
-                showDialog(
+                showDialog<void>(
                   context: context,
                   useRootNavigator: false,
                   builder: _buildDialog,
@@ -186,9 +186,9 @@ class RootPage extends StatelessWidget {
             ElevatedButton(
               style: buttonStyle,
               onPressed: () {
-                showDialog(
+                showDialog<void>(
                   context: context,
-                  useRootNavigator: true,
+                  useRootNavigator: true, // ignore: avoid_redundant_argument_values
                   builder: _buildDialog,
                 );
               },
@@ -200,7 +200,7 @@ class RootPage extends StatelessWidget {
                 return ElevatedButton(
                   style: buttonStyle,
                   onPressed: () {
-                    showBottomSheet(
+                    showBottomSheet<void>(
                       context: context,
                       builder: (BuildContext context) {
                         return Container(

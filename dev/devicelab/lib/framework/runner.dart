@@ -42,7 +42,7 @@ Future<void> runTasks(
   List<String>? taskArgs,
   bool useEmulator = false,
   @visibleForTesting Map<String, String>? isolateParams,
-  @visibleForTesting Function(String) print = print,
+  @visibleForTesting void Function(String) print = print,
   @visibleForTesting List<String>? logs,
 }) async {
   for (final String taskName in taskNames) {

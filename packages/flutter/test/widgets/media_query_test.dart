@@ -11,7 +11,7 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class _MediaQueryAspectCase {
   const _MediaQueryAspectCase(this.method, this.data);
-  final Function(BuildContext) method;
+  final void Function(BuildContext) method;
   final MediaQueryData data;
 }
 
