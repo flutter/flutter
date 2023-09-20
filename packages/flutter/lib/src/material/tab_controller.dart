@@ -95,12 +95,12 @@ class TabController extends ChangeNotifier {
   /// Creates an object that manages the state required by [TabBar] and a
   /// [TabBarView].
   ///
-  /// The [length] must not be null or negative. Typically it's a value greater
-  /// than one, i.e. typically there are two or more tabs. The [length] must
-  /// match [TabBar.tabs]'s and [TabBarView.children]'s length.
+  /// The [length] must not be negative. Typically it's a value greater than
+  /// one, i.e. typically there are two or more tabs. The [length] must match
+  /// [TabBar.tabs]'s and [TabBarView.children]'s length.
   ///
-  /// The `initialIndex` must be valid given [length] and must not be null. If
-  /// [length] is zero, then `initialIndex` must be 0 (the default).
+  /// The `initialIndex` must be valid given [length]. If [length] is zero, then
+  /// `initialIndex` must be 0 (the default).
   TabController({
     int initialIndex = 0,
     Duration? animationDuration,
@@ -342,8 +342,6 @@ class DefaultTabController extends StatefulWidget {
   ///
   /// The [length] argument is typically greater than one. The [length] must
   /// match [TabBar.tabs]'s and [TabBarView.children]'s length.
-  ///
-  /// The [initialIndex] argument must not be null.
   const DefaultTabController({
     super.key,
     required this.length,

@@ -42,8 +42,6 @@ import 'theme.dart';
 ///    application.
 class ChipTheme extends InheritedTheme {
   /// Applies the given theme [data] to [child].
-  ///
-  /// The [data] and [child] arguments must not be null.
   const ChipTheme({
     super.key,
     required this.data,
@@ -489,8 +487,6 @@ class ChipThemeData with Diagnosticable {
   }
 
   /// Linearly interpolate between two chip themes.
-  ///
-  /// The arguments must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
   static ChipThemeData? lerp(ChipThemeData? a, ChipThemeData? b, double t) {

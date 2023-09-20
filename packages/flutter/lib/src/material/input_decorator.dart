@@ -1797,8 +1797,6 @@ class InputDecorator extends StatefulWidget {
   ///
   /// Null [InputDecoration] properties are initialized with the corresponding
   /// values from [ThemeData.inputDecorationTheme].
-  ///
-  /// Must not be null.
   final InputDecoration decoration;
 
   /// The style on which to base the label, hint, counter, and error styles
@@ -2555,8 +2553,6 @@ class InputDecoration {
   /// defaults [isDense] to false and [filled] to false. The default border is
   /// an instance of [UnderlineInputBorder]. If [border] is [InputBorder.none]
   /// then no border is drawn.
-  ///
-  /// The [enabled] argument must not be null.
   ///
   /// Only one of [prefix] and [prefixText] can be specified.
   ///
@@ -3834,9 +3830,6 @@ class InputDecoration {
 class InputDecorationTheme with Diagnosticable {
   /// Creates a value for [ThemeData.inputDecorationTheme] that
   /// defines default values for [InputDecorator].
-  ///
-  /// The values of [isDense], [isCollapsed], [filled], [floatingLabelAlignment],
-  /// and [border] must not be null.
   const InputDecorationTheme({
     this.labelStyle,
     this.floatingLabelStyle,

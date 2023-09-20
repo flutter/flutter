@@ -74,8 +74,6 @@ typedef ExpansionPanelHeaderBuilder = Widget Function(BuildContext context, bool
 class ExpansionPanel {
   /// Creates an expansion panel to be used as a child for [ExpansionPanelList].
   /// See [ExpansionPanelList] for an example on how to use this widget.
-  ///
-  /// The [headerBuilder], [body], and [isExpanded] arguments must not be null.
   ExpansionPanel({
     required this.headerBuilder,
     required this.body,
@@ -120,8 +118,7 @@ class ExpansionPanel {
 class ExpansionPanelRadio extends ExpansionPanel {
   /// An expansion panel that allows for radio functionality.
   ///
-  /// A unique [value] must be passed into the constructor. The
-  /// [headerBuilder], [body], [value] must not be null.
+  /// A unique [value] must be passed into the constructor.
   ExpansionPanelRadio({
     required this.value,
     required super.headerBuilder,
@@ -160,8 +157,6 @@ class ExpansionPanelRadio extends ExpansionPanel {
 class ExpansionPanelList extends StatefulWidget {
   /// Creates an expansion panel list widget. The [expansionCallback] is
   /// triggered when an expansion panel expand/collapse button is pushed.
-  ///
-  /// The [children] and [animationDuration] arguments must not be null.
   const ExpansionPanelList({
     super.key,
     this.children = const <ExpansionPanel>[],
@@ -177,10 +172,9 @@ class ExpansionPanelList extends StatefulWidget {
 
   /// Creates a radio expansion panel list widget.
   ///
-  /// This widget allows for at most one panel in the list to be open.
-  /// The expansion panel callback is triggered when an expansion panel
-  /// expand/collapse button is pushed. The [children] and [animationDuration]
-  /// arguments must not be null. The [children] objects must be instances
+  /// This widget allows for at most one panel in the list to be open. The
+  /// expansion panel callback is triggered when an expansion panel
+  /// expand/collapse button is pushed. The [children] objects must be instances
   /// of [ExpansionPanelRadio].
   ///
   /// {@tool dartpad}
