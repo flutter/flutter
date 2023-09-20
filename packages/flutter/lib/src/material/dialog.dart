@@ -963,7 +963,7 @@ class _AdaptiveAlertDialog extends AlertDialog {
 ///
 /// ```dart
 /// AdaptiveAlertAction(
-///   child: Text('OK'),
+///   child: const Text('OK'),
 ///   onPressed: () {
 ///     // Define the action to be taken when the button is pressed.
 ///     // For example, closing the dialog.
