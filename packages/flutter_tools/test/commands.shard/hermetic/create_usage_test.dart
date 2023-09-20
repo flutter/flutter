@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
@@ -141,7 +142,10 @@ void main() {
 
       await runner.run(<String>['create', '--no-pub', '--template=package_ffi', 'testy6']);
       expect((await command.usageValues).commandCreateProjectType, 'package_ffi');
-    }));
+    }),
+    overrides: <Type, Generator>{
+      Java: () => FakeJava(),
+    });
 
     testUsingContext('set iOS host language type as usage value', () => testbed.run(() async {
       final CreateCommand command = CreateCommand();
@@ -160,8 +164,10 @@ void main() {
         'testy',
       ]);
       expect((await command.usageValues).commandCreateIosLanguage, 'objc');
-
-    }));
+    }),
+    overrides: <Type, Generator>{
+      Java: () => FakeJava(),
+    });
 
     testUsingContext('set Android host language type as usage value', () => testbed.run(() async {
       final CreateCommand command = CreateCommand();
@@ -178,7 +184,9 @@ void main() {
         'testy',
       ]);
       expect((await command.usageValues).commandCreateAndroidLanguage, 'java');
-    }));
+    }), overrides: <Type, Generator>{
+      Java: () => FakeJava(),
+    });
 
     testUsingContext('create --offline', () => testbed.run(() async {
       final CreateCommand command = CreateCommand();
@@ -189,6 +197,7 @@ void main() {
       expect(command.argParser.options.containsKey('offline'), true);
       expect(command.shouldUpdateCache, true);
     }, overrides: <Type, Generator>{
+      Java: () => null,
       Pub: () => fakePub,
     }));
 

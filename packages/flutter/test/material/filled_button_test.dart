@@ -1976,9 +1976,7 @@ void main() {
     );
     expect(controller.value, <MaterialState>{MaterialState.disabled});
     expect(count, 1);
-  },
-  leakTrackingTestConfig: LeakTrackingTestConfig.debugNotDisposed(),
-  );
+  });
 
 }
 
