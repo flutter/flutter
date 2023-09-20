@@ -4,9 +4,10 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('SharedAppData basics', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SharedAppData basics', (WidgetTester tester) async {
     int columnBuildCount = 0;
     int child1BuildCount = 0;
     int child2BuildCount = 0;
@@ -116,7 +117,7 @@ void main() {
     expect(find.text('null').evaluate().length, 2);
   });
 
-  testWidgets('WidgetsApp SharedAppData ', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('WidgetsApp SharedAppData ', (WidgetTester tester) async {
     int parentBuildCount = 0;
     int childBuildCount = 0;
 
@@ -154,7 +155,7 @@ void main() {
     expect(find.text('child'), findsOneWidget);
   });
 
-  testWidgets('WidgetsApp SharedAppData Shadowing', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('WidgetsApp SharedAppData Shadowing', (WidgetTester tester) async {
     int innerTapCount = 0;
     int outerTapCount = 0;
 
