@@ -66,7 +66,6 @@ class AndroidView extends StatefulWidget {
   /// Creates a widget that embeds an Android view.
   ///
   /// {@template flutter.widgets.AndroidView.constructorArgs}
-  /// The `viewType` and `hitTestBehavior` parameters must not be null.
   /// If `creationParams` is not null then `creationParamsCodec` must not be null.
   /// {@endtemplate}
   const AndroidView({
@@ -189,7 +188,7 @@ class AndroidView extends StatefulWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.hardEdge], and must not be null.
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   @override
@@ -939,8 +938,6 @@ typedef CreatePlatformViewCallback = PlatformViewController Function(PlatformVie
 class PlatformViewLink extends StatefulWidget {
   /// Construct a [PlatformViewLink] widget.
   ///
-  /// The `surfaceFactory` and the `onCreatePlatformView` must not be null.
-  ///
   /// See also:
   ///
   ///  * [PlatformViewSurface] for details on the widget returned by `surfaceFactory`.
@@ -1082,8 +1079,6 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
 class PlatformViewSurface extends LeafRenderObjectWidget {
 
   /// Construct a [PlatformViewSurface].
-  ///
-  /// The [controller] must not be null.
   const PlatformViewSurface({
     super.key,
     required this.controller,

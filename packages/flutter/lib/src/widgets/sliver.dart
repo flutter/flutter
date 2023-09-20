@@ -1113,8 +1113,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 class SliverOpacity extends SingleChildRenderObjectWidget {
   /// Creates a sliver that makes its sliver child partially transparent.
   ///
-  /// The [opacity] argument must not be null and must be between 0.0 and 1.0
-  /// (inclusive).
+  /// The [opacity] argument must be between zero and one, inclusive.
   const SliverOpacity({
     super.key,
     required this.opacity,
@@ -1127,8 +1126,6 @@ class SliverOpacity extends SingleChildRenderObjectWidget {
   ///
   /// An opacity of 1.0 is fully opaque. An opacity of 0.0 is fully transparent
   /// (i.e. invisible).
-  ///
-  /// The opacity must not be null.
   ///
   /// Values 1.0 and 0.0 are painted with a fast path. Other values
   /// require painting the sliver child into an intermediate buffer, which is
@@ -1193,8 +1190,6 @@ class SliverOpacity extends SingleChildRenderObjectWidget {
 ///  * [IgnorePointer], the equivalent widget for boxes.
 class SliverIgnorePointer extends SingleChildRenderObjectWidget {
   /// Creates a sliver widget that is invisible to hit testing.
-  ///
-  /// The [ignoring] argument must not be null.
   const SliverIgnorePointer({
     super.key,
     this.ignoring = true,
@@ -1333,8 +1328,6 @@ class _SliverOffstageElement extends SingleChildRenderObjectElement {
 /// for that mixin class for details.
 class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
   /// Marks a child as needing to remain alive.
-  ///
-  /// The [child] and [keepAlive] arguments must not be null.
   const KeepAlive({
     super.key,
     required this.keepAlive,

@@ -96,8 +96,6 @@ typedef TwoDimensionalViewportBuilder = Widget Function(BuildContext context, Vi
 ///    the scroll position without using a [ScrollController].
 class Scrollable extends StatefulWidget {
   /// Creates a widget that scrolls.
-  ///
-  /// The [axisDirection] and [viewportBuilder] arguments must not be null.
   const Scrollable({
     super.key,
     this.axisDirection = AxisDirection.down,
