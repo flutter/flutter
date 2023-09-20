@@ -6269,7 +6269,7 @@ abstract class RenderObjectElement extends Element {
   List<ParentDataElement<ParentData>> _findAncestorParentDataElements() {
     // More than one ParentDataWidget can contribute ParentData, but there are
     // some constraints.
-    // 1. ParentData can only be written by unique ParentDataWidgets.
+    // 1. ParentData can only be written by unique ParentDataWidget types.
     //    For example, two KeepAlive ParentDataWidgets trying to write to the
     //    same child is not allowed.
     // 2. The ParentData itself must be compatible with all ParentDataWidgets
