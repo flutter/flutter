@@ -4,11 +4,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgets('Traversal order handles touching elements', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Traversal order handles touching elements', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       MaterialApp(
