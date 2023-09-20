@@ -105,6 +105,25 @@ A configuration file defines a top-level builder that will show up as a column
 in the
 [Flutter Dashboard](https://flutter-dashboard.appspot.com/#/build?repo=engine&branch=master).
 
+
+### Magic variables
+
+Magic variables are special environment variables that can be used as parameters
+for generators and test commands in the local and global contexts.
+
+Magic environment variables have the following limitations:
+only `${FLUTTER_LOGS_DIR}` is currently supported and it needs to be used
+alone within the parameter string(e.g. `["${FLUTTER_LOGS_DIR}"]` is OK
+but `["path=${FLUTTER_LOGS_DIR}"]` is not).
+
+The current list of supported magic variables is:
+
+* `${FLUTTER_LOGS_DIR}` - translated to the path of the temporary
+  folder where logs are being placed.
+* `${LUCI_WORKDIR}` - translated to the LUCI chroot working directory.
+* `${LUCI_CLEANUP}` - translated to the LUCI chroot temp directory.
+* `${REVISION}` - translated to the engine commit under test.
+
 ### Build
 
 A build is a dictionary with a gn command, a ninja command, zero or more
@@ -299,10 +318,7 @@ permissions to run in the target platform.
 * **name** - the name of the step running the script.
 * **parameters** - flags or parameters passed to the script. Parameters
 accept magic environment variables(placeholders replaced before executing
-the test). Magic environment variables have the following limitations:
-only `${FLUTTER_LOGS_DIR}` is currently supported and it needs to be used
-alone within the parameter string(e.g. `["${FLUTTER_LOGS_DIR}"]` is OK
-but `["path=${FLUTTER_LOGS_DIR}"]` is not).
+the test).
 * **Script** - the path to the script to execute relative to the checkout
 directory.
 * **contexts** - a list of available contexts to add to the text execution step.
