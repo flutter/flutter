@@ -36,10 +36,14 @@ DART="${DART_BIN}/dart"
 # FLUTTER_LINT_PRINT_FIX will make it so that fix is executed and the generated
 # diff is printed to stdout if clang-tidy fails. This is helpful for enabling
 # new lints.
+
+# To run on CI, just uncomment the following line:
+# FLUTTER_LINT_PRINT_FIX=1
+
 if [[ -z "${FLUTTER_LINT_PRINT_FIX}" ]]; then
   fix_flag=""
 else
-  fix_flag="--fix"
+  fix_flag="--fix --lint-all"
 fi
 
 COMPILE_COMMANDS="$SRC_DIR/out/host_debug/compile_commands.json"
