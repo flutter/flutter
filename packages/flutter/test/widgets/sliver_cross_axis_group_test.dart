@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import '../rendering/sliver_utils.dart';
 
@@ -13,9 +14,10 @@ const double VIEWPORT_HEIGHT = 600;
 const double VIEWPORT_WIDTH = 300;
 
 void main() {
-  testWidgets('SliverCrossAxisGroup is laid out properly', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverCrossAxisGroup is laid out properly', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(20, (int i) => i);
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(_buildSliverCrossAxisGroup(
       controller: controller,
@@ -60,7 +62,7 @@ void main() {
     expect(renderGroup.geometry!.scrollExtent, equals(300 * 20));
   });
 
-  testWidgets('SliverExpanded is laid out properly', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverExpanded is laid out properly', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(20, (int i) => i);
     await tester.pumpWidget(_buildSliverCrossAxisGroup(
       slivers: <Widget>[
@@ -98,7 +100,7 @@ void main() {
     expect(renderGroup.geometry!.scrollExtent, equals(300 * 20));
   });
 
-  testWidgets('SliverConstrainedCrossAxis is laid out properly', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverConstrainedCrossAxis is laid out properly', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(20, (int i) => i);
     await tester.pumpWidget(_buildSliverCrossAxisGroup(
       slivers: <Widget>[
@@ -127,7 +129,7 @@ void main() {
     expect(renderGroup.geometry!.scrollExtent, equals(300 * 20));
   });
 
-  testWidgets('Mix of slivers is laid out properly', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Mix of slivers is laid out properly', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(20, (int i) => i);
     await tester.pumpWidget(_buildSliverCrossAxisGroup(
       slivers: <Widget>[
@@ -160,7 +162,7 @@ void main() {
     expect(renderGroup.geometry!.scrollExtent, equals(300 * 20));
   });
 
-  testWidgets('Mix of slivers is laid out properly when horizontal', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Mix of slivers is laid out properly when horizontal', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(20, (int i) => i);
     await tester.pumpWidget(_buildSliverCrossAxisGroup(
       scrollDirection: Axis.horizontal,
@@ -215,7 +217,7 @@ void main() {
     expect(renderGroup.geometry!.scrollExtent, equals(300 * 20));
   });
 
-  testWidgets('Mix of slivers is laid out properly when reversed horizontal', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Mix of slivers is laid out properly when reversed horizontal', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(20, (int i) => i);
     await tester.pumpWidget(_buildSliverCrossAxisGroup(
       scrollDirection: Axis.horizontal,
@@ -271,7 +273,7 @@ void main() {
     expect(renderGroup.geometry!.scrollExtent, equals(300 * 20));
   });
 
-  testWidgets('Mix of slivers is laid out properly when reversed vertical', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Mix of slivers is laid out properly when reversed vertical', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(20, (int i) => i);
     await tester.pumpWidget(_buildSliverCrossAxisGroup(
       reverse: true,
@@ -354,9 +356,10 @@ void main() {
     );
   });
 
-  testWidgets('Hit test works properly on various parts of SliverCrossAxisGroup', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Hit test works properly on various parts of SliverCrossAxisGroup', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(20, (int i) => i);
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
 
     String? clickedTile;
 
@@ -425,7 +428,7 @@ void main() {
     expect(clickedTile, equals('Group 1 Tile 2'));
   });
 
-   testWidgets('Constrained sliver takes up remaining space', (WidgetTester tester) async {
+   testWidgetsWithLeakTracking('Constrained sliver takes up remaining space', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(20, (int i) => i);
     await tester.pumpWidget(_buildSliverCrossAxisGroup(
       slivers: <Widget>[
@@ -454,7 +457,7 @@ void main() {
     expect(renderGroup.geometry!.scrollExtent, equals(300 * 20));
   });
 
-  testWidgets('Assertion error when constrained widget runs out of cross axis extent', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Assertion error when constrained widget runs out of cross axis extent', (WidgetTester tester) async {
     final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
     final Function(FlutterErrorDetails)? oldHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
@@ -476,7 +479,7 @@ void main() {
     );
   });
 
-  testWidgets('Assertion error when expanded widget runs out of cross axis extent', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Assertion error when expanded widget runs out of cross axis extent', (WidgetTester tester) async {
     final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
     final Function(FlutterErrorDetails)? oldHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
@@ -499,7 +502,7 @@ void main() {
     );
   });
 
-  testWidgets('applyPaintTransform is implemented properly', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('applyPaintTransform is implemented properly', (WidgetTester tester) async {
     await tester.pumpWidget(_buildSliverCrossAxisGroup(
       slivers: <Widget>[
         const SliverToBoxAdapter(child: Text('first box')),
@@ -515,8 +518,9 @@ void main() {
     expect(second.localToGlobal(Offset.zero), const Offset(VIEWPORT_WIDTH / 2, 0));
   });
 
-  testWidgets('SliverPinnedPersistentHeader is painted within bounds of SliverCrossAxisGroup', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverPinnedPersistentHeader is painted within bounds of SliverCrossAxisGroup', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(_buildSliverCrossAxisGroup(
       controller: controller,
       slivers: <Widget>[
@@ -540,8 +544,9 @@ void main() {
     expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-20.0));
   });
 
-  testWidgets('SliverFloatingPersistentHeader is painted within bounds of SliverCrossAxisGroup', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverFloatingPersistentHeader is painted within bounds of SliverCrossAxisGroup', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(_buildSliverCrossAxisGroup(
       controller: controller,
       slivers: <Widget>[
@@ -569,8 +574,9 @@ void main() {
     expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
   });
 
-  testWidgets('SliverPinnedPersistentHeader is painted within bounds of SliverCrossAxisGroup with different minExtent/maxExtent', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverPinnedPersistentHeader is painted within bounds of SliverCrossAxisGroup with different minExtent/maxExtent', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(_buildSliverCrossAxisGroup(
       controller: controller,
       slivers: <Widget>[
@@ -599,8 +605,9 @@ void main() {
     expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
   });
 
-  testWidgets('SliverFloatingPersistentHeader is painted within bounds of SliverCrossAxisGroup with different minExtent/maxExtent', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverFloatingPersistentHeader is painted within bounds of SliverCrossAxisGroup with different minExtent/maxExtent', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(_buildSliverCrossAxisGroup(
       controller: controller,
       slivers: <Widget>[
@@ -635,8 +642,9 @@ void main() {
     expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
   });
 
-  testWidgets('SliverPinnedFloatingPersistentHeader is painted within bounds of SliverCrossAxisGroup with different minExtent/maxExtent', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverPinnedFloatingPersistentHeader is painted within bounds of SliverCrossAxisGroup with different minExtent/maxExtent', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(_buildSliverCrossAxisGroup(
       controller: controller,
       slivers: <Widget>[
@@ -672,8 +680,9 @@ void main() {
     expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
   });
 
-  testWidgets('SliverAppBar with floating: false, pinned: false, snap: false is painted within bounds of SliverCrossAxisGroup', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverAppBar with floating: false, pinned: false, snap: false is painted within bounds of SliverCrossAxisGroup', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(_buildSliverCrossAxisGroup(
       controller: controller,
       slivers: <Widget>[
@@ -701,8 +710,9 @@ void main() {
     expect(renderHeader.geometry!.paintExtent, equals(0.0));
   });
 
-  testWidgets('SliverAppBar with floating: true, pinned: false, snap: true is painted within bounds of SliverCrossAxisGroup', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverAppBar with floating: true, pinned: false, snap: true is painted within bounds of SliverCrossAxisGroup', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(_buildSliverCrossAxisGroup(
       controller: controller,
       slivers: <Widget>[
@@ -741,8 +751,9 @@ void main() {
     expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-50.0));
   });
 
-  testWidgets('SliverAppBar with floating: true, pinned: true, snap: true is painted within bounds of SliverCrossAxisGroup', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverAppBar with floating: true, pinned: true, snap: true is painted within bounds of SliverCrossAxisGroup', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(_buildSliverCrossAxisGroup(
       controller: controller,
       slivers: <Widget>[
@@ -781,8 +792,9 @@ void main() {
     expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-50.0));
   });
 
-  testWidgets('SliverFloatingPersistentHeader scroll direction is not affected by controller.jumpTo', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverFloatingPersistentHeader scroll direction is not affected by controller.jumpTo', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(_buildSliverCrossAxisGroup(
       controller: controller,
       slivers: <Widget>[
@@ -810,8 +822,9 @@ void main() {
     expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
   });
 
-  testWidgets('SliverCrossAxisGroup skips painting invisible children', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SliverCrossAxisGroup skips painting invisible children', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
 
     int counter = 0;
     void incrementCounter() {
