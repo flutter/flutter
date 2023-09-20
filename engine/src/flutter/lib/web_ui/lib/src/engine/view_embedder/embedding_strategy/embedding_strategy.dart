@@ -20,7 +20,7 @@ import 'full_page_embedding_strategy.dart';
 /// * [CustomElementEmbeddingStrategy] - Flutter is rendered inside a custom host
 ///   element, provided by the web app programmer through the engine
 ///   initialization.
-abstract class EmbeddingStrategy with _ContextMenu {
+abstract class EmbeddingStrategy {
   EmbeddingStrategy() {
     // Initialize code to handle hot-restart (debug only).
     assert(() {
@@ -54,73 +54,5 @@ abstract class EmbeddingStrategy with _ContextMenu {
   @mustCallSuper
   void registerElementForCleanup(DomElement element) {
     _hotRestartCache?.registerElement(element);
-  }
-}
-
-/// Provides functionality to disable and enable the browser's context menu.
-mixin _ContextMenu {
-  /// False when the context menu has been disabled, otherwise true.
-  bool _contextMenuEnabled = true;
-
-  /// Listener for contextmenu events that prevents the browser's context menu
-  /// from being shown.
-  final DomEventListener _disablingContextMenuListener = createDomEventListener((DomEvent event) {
-    event.preventDefault();
-  });
-
-  /// Disables the browser's context menu for this part of the DOM.
-  ///
-  /// By default, when a Flutter web app starts, the context menu is enabled.
-  ///
-  /// Can be re-enabled by calling [enableContextMenu].
-  ///
-  /// See also:
-  ///
-  ///  * [disableContextMenuOn], which is like this but takes the relevant
-  ///    [DomElement] as a parameter.
-  void disableContextMenu();
-
-  /// Disables the browser's context menu for the given [DomElement].
-  ///
-  /// See also:
-  ///
-  ///  * [disableContextMenu], which is like this but is not passed a
-  ///    [DomElement].
-  @protected
-  void disableContextMenuOn(DomEventTarget element) {
-    if (!_contextMenuEnabled) {
-      return;
-    }
-
-    element.addEventListener('contextmenu', _disablingContextMenuListener);
-    _contextMenuEnabled = false;
-  }
-
-  /// Enables the browser's context menu for this part of the DOM.
-  ///
-  /// By default, when a Flutter web app starts, the context menu is already
-  /// enabled. Typically, this method would be used after calling
-  /// [disableContextMenu] to first disable it.
-  ///
-  /// See also:
-  ///
-  ///  * [enableContextMenuOn], which is like this but takes the relevant
-  ///    [DomElement] as a parameter.
-  void enableContextMenu();
-
-  /// Enables the browser's context menu for the given [DomElement].
-  ///
-  /// See also:
-  ///
-  ///  * [enableContextMenu], which is like this but is not passed a
-  ///    [DomElement].
-  @protected
-  void enableContextMenuOn(DomEventTarget element) {
-    if (_contextMenuEnabled) {
-      return;
-    }
-
-    element.removeEventListener('contextmenu', _disablingContextMenuListener);
-    _contextMenuEnabled = true;
   }
 }

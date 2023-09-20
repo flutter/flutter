@@ -17,6 +17,7 @@ import '../engine.dart' show DimensionsProvider, registerHotRestartListener, ren
 import 'display.dart';
 import 'dom.dart';
 import 'embedder.dart';
+import 'mouse/context_menu.dart';
 import 'mouse/cursor.dart';
 import 'navigation/history.dart';
 import 'platform_dispatcher.dart';
@@ -36,6 +37,7 @@ const int kImplicitViewId = 0;
 /// In addition to everything defined in [ui.FlutterView], this class adds
 /// a few web-specific properties.
 abstract interface class EngineFlutterView extends ui.FlutterView {
+  ContextMenu get contextMenu;
   MouseCursor get mouseCursor;
   DomElement get rootElement;
 }
@@ -66,6 +68,9 @@ class EngineFlutterWindow extends ui.SingletonFlutterWindow implements EngineFlu
 
   @override
   late final MouseCursor mouseCursor = MouseCursor(rootElement);
+
+  @override
+  late final ContextMenu contextMenu = ContextMenu(rootElement);
 
   @override
   DomElement get rootElement => flutterViewEmbedder.flutterViewElement;
