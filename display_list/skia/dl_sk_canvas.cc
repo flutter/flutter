@@ -187,7 +187,7 @@ void DlSkCanvasAdapter::DrawPaint(const DlPaint& paint) {
 }
 
 void DlSkCanvasAdapter::DrawColor(DlColor color, DlBlendMode mode) {
-  delegate_->drawColor(color, ToSk(mode));
+  delegate_->drawColor(ToSk(color), ToSk(mode));
 }
 
 void DlSkCanvasAdapter::DrawLine(const SkPoint& p0,

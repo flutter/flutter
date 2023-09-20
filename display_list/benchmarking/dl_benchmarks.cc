@@ -710,15 +710,15 @@ std::shared_ptr<DlVertices> GetTestVertices(SkPoint center,
       // the center point C, this should create a triangle fan with vertices
       // C, O_0, O_1, O_2, O_3, ...
       vertices.push_back(center);
-      colors.push_back(SK_ColorCYAN);
+      colors.push_back(DlColor(SK_ColorCYAN));
       for (size_t i = 0; i <= outer_points.size(); i++) {
         vertices.push_back(outer_points[i % outer_points.size()]);
         if (i % 3 == 0) {
-          colors.push_back(SK_ColorRED);
+          colors.push_back(DlColor(SK_ColorRED));
         } else if (i % 3 == 1) {
-          colors.push_back(SK_ColorGREEN);
+          colors.push_back(DlColor(SK_ColorGREEN));
         } else {
-          colors.push_back(SK_ColorBLUE);
+          colors.push_back(DlColor(SK_ColorBLUE));
         }
       }
       break;
@@ -728,11 +728,11 @@ std::shared_ptr<DlVertices> GetTestVertices(SkPoint center,
       // vertices O_0, O_1, C, O_1, O_2, C, O_2, O_3, C, ...
       for (size_t i = 0; i < outer_vertex_count; i++) {
         vertices.push_back(outer_points[i % outer_points.size()]);
-        colors.push_back(SK_ColorRED);
+        colors.push_back(DlColor(SK_ColorRED));
         vertices.push_back(outer_points[(i + 1) % outer_points.size()]);
-        colors.push_back(SK_ColorGREEN);
+        colors.push_back(DlColor(SK_ColorGREEN));
         vertices.push_back(center);
-        colors.push_back(SK_ColorBLUE);
+        colors.push_back(DlColor(SK_ColorBLUE));
       }
       break;
     case DlVertexMode::kTriangleStrip:
@@ -741,10 +741,10 @@ std::shared_ptr<DlVertices> GetTestVertices(SkPoint center,
       // O_0, O_1, C, O_2, O_3, C, O_4, O_5, C, ...
       for (size_t i = 0; i <= outer_vertex_count; i++) {
         vertices.push_back(outer_points[i % outer_points.size()]);
-        colors.push_back(i % 2 ? SK_ColorRED : SK_ColorGREEN);
+        colors.push_back(i % 2 ? DlColor(SK_ColorRED) : DlColor(SK_ColorGREEN));
         if (i % 2 == 1) {
           vertices.push_back(center);
-          colors.push_back(SK_ColorBLUE);
+          colors.push_back(DlColor(SK_ColorBLUE));
         }
       }
       break;
@@ -1270,7 +1270,8 @@ void BM_DrawShadow(benchmark::State& state,
 
   // We can hardcode dpr to 1.0f as we're varying elevation, and dpr is only
   // ever used in conjunction with elevation.
-  builder.DrawShadow(path, SK_ColorBLUE, elevation, transparent_occluder, 1.0f);
+  builder.DrawShadow(path, DlColor(SK_ColorBLUE), elevation,
+                     transparent_occluder, 1.0f);
   auto display_list = builder.Build();
 
   // We only want to time the actual rasterization.

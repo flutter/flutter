@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 
+#include "display_list/dl_color.h"
 #include "flutter/display_list/dl_sampling_options.h"
 #include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/display_list/effects/dl_runtime_effect.h"
@@ -86,17 +87,17 @@ static constexpr SkPoint kTestPoints2[2] = {
 };
 
 TEST(DisplayListColorSource, ColorConstructor) {
-  DlColorColorSource source(SK_ColorRED);
+  DlColorColorSource source(DlColor::kRed());
 }
 
 TEST(DisplayListColorSource, ColorShared) {
-  DlColorColorSource source(SK_ColorRED);
+  DlColorColorSource source(DlColor::kRed());
   ASSERT_NE(source.shared().get(), &source);
   ASSERT_EQ(*source.shared(), source);
 }
 
 TEST(DisplayListColorSource, ColorAsColor) {
-  DlColorColorSource source(SK_ColorRED);
+  DlColorColorSource source(DlColor::kRed());
   ASSERT_NE(source.asColor(), nullptr);
   ASSERT_EQ(source.asColor(), &source);
 
@@ -109,26 +110,26 @@ TEST(DisplayListColorSource, ColorAsColor) {
 }
 
 TEST(DisplayListColorSource, ColorContents) {
-  DlColorColorSource source(SK_ColorRED);
-  ASSERT_EQ(source.color(), SK_ColorRED);
+  DlColorColorSource source(DlColor::kRed());
+  ASSERT_EQ(source.color(), DlColor::kRed());
   ASSERT_EQ(source.is_opaque(), true);
   for (int i = 0; i < 255; i++) {
     SkColor alpha_color = SkColorSetA(SK_ColorRED, i);
-    DlColorColorSource alpha_source(alpha_color);
+    auto const alpha_source = DlColorColorSource(DlColor(alpha_color));
     ASSERT_EQ(alpha_source.color(), alpha_color);
     ASSERT_EQ(alpha_source.is_opaque(), false);
   }
 }
 
 TEST(DisplayListColorSource, ColorEquals) {
-  DlColorColorSource source1(SK_ColorRED);
-  DlColorColorSource source2(SK_ColorRED);
+  DlColorColorSource source1(DlColor::kRed());
+  DlColorColorSource source2(DlColor::kRed());
   TestEquals(source1, source2);
 }
 
 TEST(DisplayListColorSource, ColorNotEquals) {
-  DlColorColorSource source1(SK_ColorRED);
-  DlColorColorSource source2(SK_ColorBLUE);
+  DlColorColorSource source1(DlColor::kRed());
+  DlColorColorSource source2(DlColor::kBlue());
   TestNotEquals(source1, source2, "Color differs");
 }
 

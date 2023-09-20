@@ -13,8 +13,8 @@ TEST(SkiaConversionsTest, ToColor) {
   // Create a color with alpha, red, green, and blue values that are all
   // trivially divisible by 255 so that we can test the conversion results in
   // correct scalar values.
-  //                               AARRGGBB
-  const flutter::DlColor color = 0x8040C020;
+  //                                                AARRGGBB
+  const flutter::DlColor color = flutter::DlColor(0x8040C020);
   auto converted_color = skia_conversions::ToColor(color);
 
   ASSERT_TRUE(ScalarNearlyEqual(converted_color.alpha, 0x80 * (1.0f / 255)));

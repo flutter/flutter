@@ -260,7 +260,7 @@ std::ostream& operator<<(std::ostream& os, const DlFilterMode& mode) {
 }
 
 std::ostream& operator<<(std::ostream& os, const DlColor& color) {
-  return os << "DlColor(" << std::hex << color.argb << std::dec << ")";
+  return os << "DlColor(" << std::hex << color.argb() << std::dec << ")";
 }
 
 std::ostream& operator<<(std::ostream& os, DlImageSampling sampling) {

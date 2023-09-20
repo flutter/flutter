@@ -22,7 +22,8 @@ class MockDispatchHelper final : public virtual DlOpReceiver,
   void restore() override { DlSkPaintDispatchHelper::restore_opacity(); }
 };
 
-static const DlColor kTestColors[2] = {0xFF000000, 0xFFFFFFFF};
+static const DlColor kTestColors[2] = {DlColor(0xFF000000),
+                                       DlColor(0xFFFFFFFF)};
 static const float kTestStops[2] = {0.0f, 1.0f};
 static const auto kTestLinearGradient =
     DlColorSource::MakeLinear(SkPoint::Make(0.0f, 0.0f),

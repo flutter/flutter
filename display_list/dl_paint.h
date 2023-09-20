@@ -78,11 +78,8 @@ class DlPaint {
     return *this;
   }
 
-  uint8_t getAlpha() const { return color_.argb >> 24; }
-  DlPaint& setAlpha(uint8_t alpha) {
-    color_.argb = alpha << 24 | (color_.argb & 0x00FFFFFF);
-    return *this;
-  }
+  uint8_t getAlpha() const { return color_.argb() >> 24; }
+  DlPaint& setAlpha(uint8_t alpha) { return setColor(color_.withAlpha(alpha)); }
   SkScalar getOpacity() const { return color_.getAlphaF(); }
   DlPaint& setOpacity(SkScalar opacity) {
     setAlpha(SkScalarRoundToInt(opacity * 0xff));
