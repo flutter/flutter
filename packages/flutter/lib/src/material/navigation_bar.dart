@@ -98,6 +98,7 @@ class NavigationBar extends StatelessWidget {
     this.indicatorShape,
     this.height,
     this.labelBehavior,
+    this.useSafeArea = true,
   }) :  assert(destinations.length >= 2),
         assert(0 <= selectedIndex && selectedIndex < destinations.length);
 
@@ -201,6 +202,14 @@ class NavigationBar extends StatelessWidget {
   /// [NavigationDestinationLabelBehavior.alwaysShow].
   final NavigationDestinationLabelBehavior? labelBehavior;
 
+  /// Determines whether the [NavigationBar] should respect the system's safe area.
+  ///
+  /// When set to `true`, the [NavigationBar] will avoid system intrusions such as
+  /// the notch on iPhones or the system navigation area at the bottom of some
+  /// Android devices. This is particularly useful if the [NavigationBar] is used
+  /// in a full-screen context where it might overlap with these system areas.
+  final bool useSafeArea;
+
   VoidCallback _handleTap(int index) {
     return onDestinationSelected != null
       ? () => onDestinationSelected!(index)
@@ -217,15 +226,7 @@ class NavigationBar extends StatelessWidget {
       ?? navigationBarTheme.labelBehavior
       ?? defaults.labelBehavior!;
 
-    return Material(
-      color: backgroundColor
-        ?? navigationBarTheme.backgroundColor
-        ?? defaults.backgroundColor!,
-      elevation: elevation ?? navigationBarTheme.elevation ?? defaults.elevation!,
-      shadowColor: shadowColor ?? navigationBarTheme.shadowColor ?? defaults.shadowColor,
-      surfaceTintColor: surfaceTintColor ?? navigationBarTheme.surfaceTintColor ?? defaults.surfaceTintColor,
-      child: SafeArea(
-        child: SizedBox(
+    Widget content = SizedBox(
           height: effectiveHeight,
           child: Row(
             children: <Widget>[
@@ -251,8 +252,20 @@ class NavigationBar extends StatelessWidget {
                 ),
             ],
           ),
-        ),
-      ),
+        );
+
+    if (useSafeArea) {
+      content = SafeArea(child: content);
+    }
+
+    return Material(
+      color: backgroundColor
+        ?? navigationBarTheme.backgroundColor
+        ?? defaults.backgroundColor!,
+      elevation: elevation ?? navigationBarTheme.elevation ?? defaults.elevation!,
+      shadowColor: shadowColor ?? navigationBarTheme.shadowColor ?? defaults.shadowColor,
+      surfaceTintColor: surfaceTintColor ?? navigationBarTheme.surfaceTintColor ?? defaults.surfaceTintColor,
+      child: content
     );
   }
 }
