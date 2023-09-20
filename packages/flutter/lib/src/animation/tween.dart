@@ -547,8 +547,6 @@ class ConstantTween<T> extends Tween<T> {
 ///    [AnimationController].
 class CurveTween extends Animatable<double> {
   /// Creates a curve tween.
-  ///
-  /// The [curve] argument must not be null.
   CurveTween({ required this.curve });
 
   /// The curve to use when transforming the value of the animation.

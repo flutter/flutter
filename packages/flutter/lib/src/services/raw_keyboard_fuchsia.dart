@@ -22,8 +22,6 @@ export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 ///  * [RawKeyboard], which uses this interface to expose key data.
 class RawKeyEventDataFuchsia extends RawKeyEventData {
   /// Creates a key event data structure specific for Fuchsia.
-  ///
-  /// The [hidUsage], [codePoint], and [modifiers] arguments must not be null.
   const RawKeyEventDataFuchsia({
     this.hidUsage = 0,
     this.codePoint = 0,

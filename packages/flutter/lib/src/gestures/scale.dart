@@ -96,8 +96,6 @@ class _PointerPanZoomData {
 /// Details for [GestureScaleStartCallback].
 class ScaleStartDetails {
   /// Creates details for [GestureScaleStartCallback].
-  ///
-  /// The [focalPoint] argument must not be null.
   ScaleStartDetails({
     this.focalPoint = Offset.zero,
     Offset? localFocalPoint,
@@ -139,9 +137,8 @@ class ScaleStartDetails {
 class ScaleUpdateDetails {
   /// Creates details for [GestureScaleUpdateCallback].
   ///
-  /// The [focalPoint], [scale], [horizontalScale], [verticalScale], [rotation]
-  /// arguments must not be null. The [scale], [horizontalScale], and [verticalScale]
-  /// argument must be greater than or equal to zero.
+  /// The [scale], [horizontalScale], and [verticalScale] arguments must be
+  /// greater than or equal to zero.
   ScaleUpdateDetails({
     this.focalPoint = Offset.zero,
     Offset? localFocalPoint,
@@ -243,8 +240,6 @@ class ScaleUpdateDetails {
 /// Details for [GestureScaleEndCallback].
 class ScaleEndDetails {
   /// Creates details for [GestureScaleEndCallback].
-  ///
-  /// The [velocity] argument must not be null.
   ScaleEndDetails({ this.velocity = Velocity.zero, this.scaleVelocity = 0, this.pointerCount = 0 });
 
   /// The velocity of the last pointer to be lifted off of the screen.

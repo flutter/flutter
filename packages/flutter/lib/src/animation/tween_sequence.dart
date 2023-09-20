@@ -122,7 +122,7 @@ class FlippedTweenSequence extends TweenSequence<double> {
 class TweenSequenceItem<T> {
   /// Construct a TweenSequenceItem.
   ///
-  /// The [tween] must not be null and [weight] must be greater than 0.0.
+  /// The [weight] must be greater than 0.0.
   const TweenSequenceItem({
     required this.tween,
     required this.weight,

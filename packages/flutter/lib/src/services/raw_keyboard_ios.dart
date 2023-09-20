@@ -22,9 +22,6 @@ export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 ///  * [RawKeyboard], which uses this interface to expose key data.
 class RawKeyEventDataIos extends RawKeyEventData {
   /// Creates a key event data structure specific for iOS.
-  ///
-  /// The [characters], [charactersIgnoringModifiers], and [modifiers], arguments
-  /// must not be null.
   const RawKeyEventDataIos({
     this.characters = '',
     this.charactersIgnoringModifiers = '',

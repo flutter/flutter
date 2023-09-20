@@ -670,14 +670,10 @@ class AutofillConfiguration {
   ///
   /// The identifier needs to be unique within the [AutofillScope] for the
   /// [AutofillClient] to receive the correct autofill value.
-  ///
-  /// Must not be null.
   final String uniqueIdentifier;
 
   /// A list of strings that helps the autofill service identify the type of the
   /// [AutofillClient].
-  ///
-  /// Must not be null.
   ///
   /// {@template flutter.services.AutofillConfiguration.autofillHints}
   /// For the best results, hint strings need to be understood by the platform's
@@ -753,7 +749,7 @@ class AutofillConfiguration {
 abstract class AutofillClient {
   /// The unique identifier of this [AutofillClient].
   ///
-  /// Must not be null and the identifier must not be changed.
+  /// The identifier must not be changed.
   String get autofillId;
 
   /// The [TextInputConfiguration] that describes this [AutofillClient].
