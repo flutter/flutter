@@ -917,8 +917,8 @@ void testMain() {
       await createPlatformView(5, 'test-invisible-view');
       await createPlatformView(6, 'test-invisible-view');
 
-      expect(platformViewManager.isInvisible(0), isFalse);
-      expect(platformViewManager.isInvisible(1), isTrue);
+      expect(PlatformViewManager.instance.isInvisible(0), isFalse);
+      expect(PlatformViewManager.instance.isInvisible(1), isTrue);
 
       LayerSceneBuilder sb = LayerSceneBuilder();
       sb.pushOffset(0, 0);
