@@ -975,6 +975,11 @@ void main() {
 
   testWidgetsWithLeakTracking('CustomScrollView dismiss keyboard onDrag test', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+    addTearDown(() {
+      for (final FocusNode node in focusNodes) {
+        node.dispose();
+      }
+    });
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: CustomScrollView(
