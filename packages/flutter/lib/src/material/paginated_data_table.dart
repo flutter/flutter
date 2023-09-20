@@ -116,6 +116,7 @@ class PaginatedDataTable extends StatefulWidget {
     this.controller,
     this.primary,
     this.headingRowColor,
+    this.hideEmptyLastPageRows = false,
   }) : assert(actions == null || (header != null)),
        assert(columns.isNotEmpty),
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
@@ -293,6 +294,9 @@ class PaginatedDataTable extends StatefulWidget {
    /// {@macro flutter.material.dataTable.headingRowColor}
   final MaterialStateProperty<Color?>? headingRowColor;
 
+  /// If true, the last page will not show empty rows.
+  final bool hideEmptyLastPageRows;
+
   @override
   PaginatedDataTableState createState() => PaginatedDataTableState();
 }
@@ -372,6 +376,13 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     }
   }
 
+  DataRow _getBlankRowFor(int index) {
+    return DataRow.byIndex(
+      index: index,
+      cells: widget.columns.map<DataCell>((DataColumn column) => DataCell.empty).toList(),
+    );
+  }
+
   DataRow _getProgressIndicatorRowFor(int index) {
     bool haveProgressIndicator = false;
     final List<DataCell> cells = widget.columns.map<DataCell>((DataColumn column) {
@@ -403,7 +414,14 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
           row ??= _getProgressIndicatorRowFor(index);
           haveProgressIndicator = true;
         }
-      result.add(row!);
+      }
+
+      if(!widget.hideEmptyLastPageRows){
+        row ??= _getBlankRowFor(index);
+      }
+
+      if(row != null){
+        result.add(row);
       }
     }
     return result;
@@ -596,9 +614,9 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                   ),
                 ),
               ),
-              // ignore_clamp_double_lint
-              SizedBox(
-                  height: widget.dataRowMaxHeight * (widget.rowsPerPage - _rowCount + _firstRowIndex).clamp(0, widget.rowsPerPage)), // ignore_clamp_double_lint
+              if(widget.hideEmptyLastPageRows)
+                SizedBox(
+                    height: widget.dataRowMaxHeight * (widget.rowsPerPage - _rowCount + _firstRowIndex).clamp(0, widget.rowsPerPage)), // ignore_clamp_double_lint
               DefaultTextStyle(
                 style: footerTextStyle!,
                 child: IconTheme.merge(
