@@ -20,8 +20,6 @@ import 'package:flutter/scheduler.dart';
 class ImageInfo {
   /// Creates an [ImageInfo] object for the given [image] and [scale].
   ///
-  /// Both the [image] and the [scale] must not be null.
-  ///
   /// The [debugLabel] may be used to identify the source of this image.
   const ImageInfo({ required this.image, this.scale = 1.0, this.debugLabel });
 
@@ -159,8 +157,6 @@ class ImageInfo {
 @immutable
 class ImageStreamListener {
   /// Creates a new [ImageStreamListener].
-  ///
-  /// The [onImage] parameter must not be null.
   const ImageStreamListener(
     this.onImage, {
     this.onChunk,
