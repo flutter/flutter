@@ -60,31 +60,18 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
   }
 
   # `uname -m` may be running in Rosetta mode, instead query sysctl
-  if [ -z "$ARCH" ] && [ "$OS" = 'Darwin' ]; then
+  if [[ -z "$ARCH" ]] && [[ "$OS" = 'Darwin' ]]; then
     # Allow non-zero exit so we can do control flow
     set +e
-    if command -v arch >/dev/null 2>&1; then
-      if ARCH_RESULT=$(arch 2>/dev/null); then
-        case "$ARCH_RESULT" in
-          # For some reason, some x86_64 mac bots on CI return i386
-          i386 | x86_64 | x86_64h)
-            ARCH='x64'
-            ;;
-          arm64 | arm64e)
-            ARCH='arm64'
-            ;;
-        esac
-      fi
-    fi
-    if [ -z "$ARCH" ]; then
+    if [[ -z "$ARCH" ]]; then
       SYSCTL='sysctl'
       if ! command -v "$SYSCTL" >/dev/null 2>&1; then
-        if [ -f /usr/sbin/sysctl ]; then
+        if [[ -x /usr/sbin/sysctl ]]; then
           SYSCTL='/usr/sbin/sysctl'
-        elif [ -f /sbin/sysctl ]; then
+        elif [[ -x /sbin/sysctl ]]; then
           SYSCTL='/sbin/sysctl'
         else
-          >&2 echo "You have neither \"arch\" nor \"sysctl\" on your \$PATH variable."
+          >&2 echo "You not have \"sysctl\" on your \$PATH!"
           exit 1
         fi
       fi
@@ -92,17 +79,24 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
       QUERY="$SYSCTL -n hw.optional.arm64"
       # Do not wrap $QUERY in double quotes, otherwise the args will be treated
       # as part of the command
-      if ! QUERY_RESULT=$($QUERY 2>/dev/null); then
-        # If this command fails, we're certainly not on ARM
-        ARCH='x64'
-      elif [ "$QUERY_RESULT" = '0' ]; then
-        # If this returns 0, we are also not on ARM
-        ARCH='x64'
-      elif [ "$QUERY_RESULT" = '1' ]; then
-        ARCH='arm64'
-      else
-        >&2 echo "'$QUERY' returned unexpected output: '$QUERY_RESULT'"
-        exit 1
+      if QUERY_RESULT=$($QUERY 2>/dev/null); then
+        if [[ "$QUERY_RESULT" == 0 ]]; then
+          ARCH='x64'
+        elif [[ "$QUERY_RESULT" == 1 ]]; then
+          ARCH='arm64'
+        fi
+      fi
+      if [[ -z "$ARCH" ]]; then
+        QUERY2="$SYSCTL -n hw.cpu64bit_capable"
+        # Do not wrap $QUERY in double quotes, otherwise the args will be treated
+        # as part of the command
+        if QUERY_RESULT=$($QUERY2 2>/dev/null); then
+          if [[ "$QUERY_RESULT" == 0 ]]; then
+            ARCH='x64'
+          elif [[ "$QUERY_RESULT" == 1 ]]; then
+            ARCH='arm64'
+          fi
+        fi
       fi
     fi
     set -e
