@@ -17,8 +17,6 @@ import 'colors.dart';
 /// or the entire tab with [TabBarIndicatorSize.tab].
 class UnderlineTabIndicator extends Decoration {
   /// Create an underline style selected tab indicator.
-  ///
-  /// The [borderSide] and [insets] arguments must not be null.
   const UnderlineTabIndicator({
     this.borderRadius,
     this.borderSide = const BorderSide(width: 2.0, color: Colors.white),

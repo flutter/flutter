@@ -470,8 +470,6 @@ class ListTileTheme extends InheritedTheme {
 
   /// Creates a list tile theme that controls the color and style parameters for
   /// [ListTile]s, and merges in the current list tile theme, if any.
-  ///
-  /// The [child] argument must not be null.
   static Widget merge({
     Key? key,
     bool? dense,

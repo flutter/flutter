@@ -39,8 +39,6 @@ const double _kDefaultHorizontalPadding = 12.0;
 /// * [DropdownMenu]
 class DropdownMenuEntry<T> {
   /// Creates an entry that is used with [DropdownMenu.dropdownMenuEntries].
-  ///
-  /// [label] must be non-null.
   const DropdownMenuEntry({
     required this.value,
     required this.label,

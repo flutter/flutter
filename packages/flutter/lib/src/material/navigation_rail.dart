@@ -80,8 +80,8 @@ class NavigationRail extends StatefulWidget {
   /// [minExtendedWidth] is specified, it must be non-negative and greater than
   /// [minWidth].
   ///
-  /// The argument [extended] must not be null. [extended] can only be set to
-  /// true when the [labelType] is null or [NavigationRailLabelType.none].
+  /// The [extended] argument can only be set to true when the [labelType] is
+  /// null or [NavigationRailLabelType.none].
   ///
   /// If [backgroundColor], [elevation], [groupAlignment], [labelType],
   /// [unselectedLabelTextStyle], [selectedLabelTextStyle],
@@ -946,9 +946,9 @@ enum NavigationRailLabelType {
 class NavigationRailDestination {
   /// Creates a destination that is used with [NavigationRail.destinations].
   ///
-  /// [icon] and [label] must be non-null. When the [NavigationRail.labelType]
-  /// is [NavigationRailLabelType.none], the label is still used for semantics,
-  /// and may still be used if [NavigationRail.extended] is true.
+  /// When the [NavigationRail.labelType] is [NavigationRailLabelType.none], the
+  /// label is still used for semantics, and may still be used if
+  /// [NavigationRail.extended] is true.
   const NavigationRailDestination({
     required this.icon,
     Widget? selectedIcon,

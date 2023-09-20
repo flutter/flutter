@@ -45,10 +45,8 @@ class MaterialButton extends StatelessWidget {
   /// To create a custom Material button consider using [TextButton],
   /// [ElevatedButton], or [OutlinedButton].
   ///
-  /// The [autofocus] and [clipBehavior] arguments must not be null.
-  /// Additionally,  [elevation], [hoverElevation], [focusElevation],
-  /// [highlightElevation], and [disabledElevation] must be non-negative, if
-  /// specified.
+  /// The [elevation], [hoverElevation], [focusElevation], [highlightElevation],
+  /// and [disabledElevation] arguments must be non-negative, if specified.
   const MaterialButton({
     super.key,
     required this.onPressed,
@@ -338,7 +336,7 @@ class MaterialButton extends StatelessWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
   /// {@macro flutter.widgets.Focus.focusNode}

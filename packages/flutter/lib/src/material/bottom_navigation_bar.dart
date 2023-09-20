@@ -80,8 +80,8 @@ enum BottomNavigationBarLandscapeLayout {
 /// [BottomNavigationBarType.fixed] when there are less than four items, and
 /// [BottomNavigationBarType.shifting] otherwise.
 ///
-/// The length of [items] must be at least two and each item's icon and title/label
-/// must not be null.
+/// The length of [items] must be at least two and each item's icon and
+/// label must not be null.
 ///
 ///  * [BottomNavigationBarType.fixed], the default when there are less than
 ///    four [items]. The selected item is rendered with the
@@ -188,7 +188,7 @@ class BottomNavigationBar extends StatefulWidget {
   /// are two or three [items], [BottomNavigationBarType.shifting] otherwise.
   ///
   /// The [iconSize], [selectedFontSize], [unselectedFontSize], and [elevation]
-  /// arguments must be non-null and non-negative.
+  /// arguments must be non-negative.
   ///
   /// If [selectedLabelStyle].color and [unselectedLabelStyle].color values
   /// are non-null, they will be used instead of [selectedItemColor] and

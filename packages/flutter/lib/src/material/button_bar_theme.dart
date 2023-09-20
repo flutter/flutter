@@ -233,8 +233,6 @@ class ButtonBarThemeData with Diagnosticable {
 class ButtonBarTheme extends InheritedWidget {
   /// Constructs a button bar theme that configures all descendent [ButtonBar]
   /// widgets.
-  ///
-  /// The [data] must not be null.
   const ButtonBarTheme({
     super.key,
     required this.data,

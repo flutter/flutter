@@ -1143,8 +1143,7 @@ const _DayPickerGridDelegate _dayPickerGridDelegate = _DayPickerGridDelegate();
 class YearPicker extends StatefulWidget {
   /// Creates a year picker.
   ///
-  /// The [firstDate], [lastDate], [selectedDate], and [onChanged]
-  /// arguments must be non-null. The [lastDate] must be after the [firstDate].
+  /// The [lastDate] must be after the [firstDate].
   YearPicker({
     super.key,
     DateTime? currentDate,

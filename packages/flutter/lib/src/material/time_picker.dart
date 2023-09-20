@@ -2108,8 +2108,6 @@ typedef EntryModeChangeCallback = void Function(TimePickerEntryMode);
 /// Use [showTimePicker] to show a dialog already containing a [TimePickerDialog].
 class TimePickerDialog extends StatefulWidget {
   /// Creates a Material Design time picker.
-  ///
-  /// [initialTime] must not be null.
   const TimePickerDialog({
     super.key,
     required this.initialTime,

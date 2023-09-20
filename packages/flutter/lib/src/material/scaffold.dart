@@ -1642,7 +1642,7 @@ class Scaffold extends StatefulWidget {
   /// This is useful if the app bar's [AppBar.backgroundColor] is not
   /// completely opaque.
   ///
-  /// This property is false by default. It must not be null.
+  /// This property is false by default.
   ///
   /// See also:
   ///
@@ -2516,7 +2516,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   double get _floatingActionButtonVisibilityValue => _floatingActionButtonVisibilityController.value;
 
   /// Sets the current value of the visibility animation for the
-  /// [Scaffold.floatingActionButton]. This value must not be null.
+  /// [Scaffold.floatingActionButton].
   set _floatingActionButtonVisibilityValue(double newValue) {
     _floatingActionButtonVisibilityController.value = clampDouble(newValue,
       _floatingActionButtonVisibilityController.lowerBound,
@@ -2752,8 +2752,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   Color _bodyScrimColor = Colors.black;
 
   /// Whether to show a [ModalBarrier] over the body of the scaffold.
-  ///
-  /// The `value` parameter must not be null.
   void showBodyScrim(bool value, double opacity) {
     if (_showBodyScrim == value && _bodyScrimColor.opacity == opacity) {
       return;
@@ -3080,8 +3078,6 @@ class ScaffoldFeatureController<T extends Widget, U> {
 /// curve specified with the [curve] argument, after the finger is released. In
 /// such a case, the value of [startingPoint] would be the progress of the
 /// animation at the time when the finger was released.
-///
-/// The [startingPoint] and [curve] arguments must not be null.
 class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
   /// Creates a suspended curve.
   const _BottomSheetSuspendedCurve(
