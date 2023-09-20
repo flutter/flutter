@@ -7,14 +7,14 @@
 namespace impeller {
 namespace testing {
 
-MetalScreenshot::MetalScreenshot(CGImageRef cgImage) : cgImage_(cgImage) {
+MetalScreenshot::MetalScreenshot(CGImageRef cgImage) : cg_image_(cgImage) {
   CGDataProviderRef data_provider = CGImageGetDataProvider(cgImage);
   pixel_data_ = CGDataProviderCopyData(data_provider);
 }
 
 MetalScreenshot::~MetalScreenshot() {
   CFRelease(pixel_data_);
-  CGImageRelease(cgImage_);
+  CGImageRelease(cg_image_);
 }
 
 const UInt8* MetalScreenshot::GetBytes() const {
@@ -22,11 +22,11 @@ const UInt8* MetalScreenshot::GetBytes() const {
 }
 
 size_t MetalScreenshot::GetHeight() const {
-  return CGImageGetHeight(cgImage_);
+  return CGImageGetHeight(cg_image_);
 }
 
 size_t MetalScreenshot::GetWidth() const {
-  return CGImageGetWidth(cgImage_);
+  return CGImageGetWidth(cg_image_);
 }
 
 bool MetalScreenshot::WriteToPNG(const std::string& path) const {
@@ -36,7 +36,7 @@ bool MetalScreenshot::WriteToPNG(const std::string& path) const {
   CGImageDestinationRef destination = CGImageDestinationCreateWithURL(
       (__bridge CFURLRef)output_url, kUTTypePNG, 1, nullptr);
   if (destination != nullptr) {
-    CGImageDestinationAddImage(destination, cgImage_,
+    CGImageDestinationAddImage(destination, cg_image_,
                                (__bridge CFDictionaryRef) @{});
 
     if (CGImageDestinationFinalize(destination)) {

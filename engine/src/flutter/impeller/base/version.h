@@ -18,7 +18,9 @@ struct Version {
   size_t minor_version;
   size_t patch_version;
 
-  constexpr Version(size_t p_major = 0, size_t p_minor = 0, size_t p_patch = 0)
+  constexpr explicit Version(size_t p_major = 0,
+                             size_t p_minor = 0,
+                             size_t p_patch = 0)
       : major_version(p_major),
         minor_version(p_minor),
         patch_version(p_patch) {}

@@ -102,10 +102,10 @@ TEST(ImporterTest, CanParseSkinnedGLTF) {
   ASSERT_COLOR_NEAR(color, Color(1, 1, 1, 1));
 
   Vector4 joints = ToVector4(vertex.joints());
-  ASSERT_COLOR_NEAR(joints, Vector4(0, 0, 0, 0));
+  ASSERT_VECTOR4_NEAR(joints, Vector4(0, 0, 0, 0));
 
   Vector4 weights = ToVector4(vertex.weights());
-  ASSERT_COLOR_NEAR(weights, Vector4(1, 0, 0, 0));
+  ASSERT_VECTOR4_NEAR(weights, Vector4(1, 0, 0, 0));
 
   ASSERT_EQ(scene.animations.size(), 2u);
   ASSERT_EQ(scene.animations[0]->name, "Idle");

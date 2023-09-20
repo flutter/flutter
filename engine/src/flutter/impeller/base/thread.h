@@ -53,7 +53,9 @@ class IPLR_CAPABILITY("mutex") RWMutex {
 
 class IPLR_SCOPED_CAPABILITY Lock {
  public:
-  Lock(Mutex& mutex) IPLR_ACQUIRE(mutex) : mutex_(mutex) { mutex_.Lock(); }
+  explicit Lock(Mutex& mutex) IPLR_ACQUIRE(mutex) : mutex_(mutex) {
+    mutex_.Lock();
+  }
 
   ~Lock() IPLR_RELEASE() { mutex_.Unlock(); }
 
@@ -65,7 +67,8 @@ class IPLR_SCOPED_CAPABILITY Lock {
 
 class IPLR_SCOPED_CAPABILITY ReaderLock {
  public:
-  ReaderLock(RWMutex& mutex) IPLR_ACQUIRE_SHARED(mutex) : mutex_(mutex) {
+  explicit ReaderLock(RWMutex& mutex) IPLR_ACQUIRE_SHARED(mutex)
+      : mutex_(mutex) {
     mutex_.LockReader();
   }
 
@@ -79,7 +82,7 @@ class IPLR_SCOPED_CAPABILITY ReaderLock {
 
 class IPLR_SCOPED_CAPABILITY WriterLock {
  public:
-  WriterLock(RWMutex& mutex) IPLR_ACQUIRE(mutex) : mutex_(mutex) {
+  explicit WriterLock(RWMutex& mutex) IPLR_ACQUIRE(mutex) : mutex_(mutex) {
     mutex_.LockWriter();
   }
 
