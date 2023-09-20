@@ -37,8 +37,6 @@ constexpr float kStops[] = {
     0.5,
     1.0,
 };
-static std::vector<uint32_t> color_vector(kColors, kColors + 3);
-static std::vector<float> stops_vector(kStops, kStops + 3);
 
 // clang-format off
 constexpr float kRotateColorMatrix[20] = {
@@ -216,7 +214,7 @@ static std::shared_ptr<const DlVertices> TestVertices2 =
 
 static sk_sp<DisplayList> MakeTestDisplayList(int w, int h, SkColor color) {
   DisplayListBuilder builder;
-  builder.DrawRect(SkRect::MakeWH(w, h), DlPaint(color));
+  builder.DrawRect(SkRect::MakeWH(w, h), DlPaint(DlColor(color)));
   return builder.Build();
 }
 static sk_sp<DisplayList> TestDisplayList1 =

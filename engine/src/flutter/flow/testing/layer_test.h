@@ -5,6 +5,7 @@
 #ifndef FLOW_TESTING_LAYER_TEST_H_
 #define FLOW_TESTING_LAYER_TEST_H_
 
+#include "display_list/dl_color.h"
 #include "flutter/flow/layer_snapshot_store.h"
 #include "flutter/flow/layers/layer.h"
 
@@ -40,7 +41,7 @@ template <typename BaseT>
 class LayerTestBase : public CanvasTestBase<BaseT> {
   using TestT = CanvasTestBase<BaseT>;
 
-  const SkRect kDlBounds = SkRect::MakeWH(500, 500);
+  const SkRect k_dl_bounds_ = SkRect::MakeWH(500, 500);
 
  public:
   LayerTestBase()
@@ -72,7 +73,7 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
             .raster_cache                  = nullptr,
             // clang-format on
         },
-        display_list_builder_(kDlBounds),
+        display_list_builder_(k_dl_bounds_),
         display_list_paint_context_{
             // clang-format off
             .state_stack                   = display_list_state_stack_,
@@ -103,7 +104,7 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
     display_list_state_stack_.set_delegate(&display_list_builder_);
     checkerboard_state_stack_.set_delegate(&display_list_builder_);
     checkerboard_state_stack_.set_checkerboard_func(draw_checkerboard);
-    checkerboard_paint_.setColor(checkerboard_color_);
+    checkerboard_paint_.setColor(kCheckerboardColor);
   }
 
   /**
@@ -209,12 +210,12 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
     display_list_paint_context_.raster_cache = raster_cache_.get();
   }
 
-  static constexpr SkColor checkerboard_color_ = 0x42424242;
+  static constexpr DlColor kCheckerboardColor = DlColor(0x42424242);
 
   static void draw_checkerboard(DlCanvas* canvas, const SkRect& rect) {
     if (canvas) {
       DlPaint paint;
-      paint.setColor(checkerboard_color_);
+      paint.setColor(kCheckerboardColor);
       canvas->DrawRect(rect, paint);
     }
   }

@@ -20,7 +20,8 @@ sk_sp<DisplayList> GetSampleNestedDisplayList() {
   DlPaint paint;
   for (int y = 10; y <= 60; y += 10) {
     for (int x = 10; x <= 60; x += 10) {
-      paint.setColor(((x + y) % 20) == 10 ? SK_ColorRED : SK_ColorBLUE);
+      paint.setColor(((x + y) % 20) == 10 ? DlColor(SK_ColorRED)
+                                          : DlColor(SK_ColorBLUE));
       builder.DrawRect(SkRect::MakeXYWH(x, y, 80, 80), paint);
     }
   }
@@ -101,9 +102,12 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
        }},
       {"SetColor",
        {
-           {0, 8, 0, 0, [](DlOpReceiver& r) { r.setColor(SK_ColorGREEN); }},
-           {0, 8, 0, 0, [](DlOpReceiver& r) { r.setColor(SK_ColorBLUE); }},
-           {0, 0, 0, 0, [](DlOpReceiver& r) { r.setColor(SK_ColorBLACK); }},
+           {0, 8, 0, 0,
+            [](DlOpReceiver& r) { r.setColor(DlColor(SK_ColorGREEN)); }},
+           {0, 8, 0, 0,
+            [](DlOpReceiver& r) { r.setColor(DlColor(SK_ColorBLUE)); }},
+           {0, 0, 0, 0,
+            [](DlOpReceiver& r) { r.setColor(DlColor(SK_ColorBLACK)); }},
        }},
       {"SetBlendMode",
        {
@@ -513,15 +517,15 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
            // cv.drawColor becomes cv.drawPaint(paint)
            {1, 16, 1, 24,
             [](DlOpReceiver& r) {
-              r.drawColor(SK_ColorBLUE, DlBlendMode::kSrcIn);
+              r.drawColor(DlColor(SK_ColorBLUE), DlBlendMode::kSrcIn);
             }},
            {1, 16, 1, 24,
             [](DlOpReceiver& r) {
-              r.drawColor(SK_ColorBLUE, DlBlendMode::kDstOut);
+              r.drawColor(DlColor(SK_ColorBLUE), DlBlendMode::kDstOut);
             }},
            {1, 16, 1, 24,
             [](DlOpReceiver& r) {
-              r.drawColor(SK_ColorCYAN, DlBlendMode::kSrcIn);
+              r.drawColor(DlColor(SK_ColorCYAN), DlBlendMode::kSrcIn);
             }},
        }},
       {"DrawLine",
@@ -921,27 +925,27 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
            // exposed
            {1, 32, -1, 32,
             [](DlOpReceiver& r) {
-              r.drawShadow(kTestPath1, SK_ColorGREEN, 1.0, false, 1.0);
+              r.drawShadow(kTestPath1, DlColor(SK_ColorGREEN), 1.0, false, 1.0);
             }},
            {1, 32, -1, 32,
             [](DlOpReceiver& r) {
-              r.drawShadow(kTestPath2, SK_ColorGREEN, 1.0, false, 1.0);
+              r.drawShadow(kTestPath2, DlColor(SK_ColorGREEN), 1.0, false, 1.0);
             }},
            {1, 32, -1, 32,
             [](DlOpReceiver& r) {
-              r.drawShadow(kTestPath1, SK_ColorBLUE, 1.0, false, 1.0);
+              r.drawShadow(kTestPath1, DlColor(SK_ColorBLUE), 1.0, false, 1.0);
             }},
            {1, 32, -1, 32,
             [](DlOpReceiver& r) {
-              r.drawShadow(kTestPath1, SK_ColorGREEN, 2.0, false, 1.0);
+              r.drawShadow(kTestPath1, DlColor(SK_ColorGREEN), 2.0, false, 1.0);
             }},
            {1, 32, -1, 32,
             [](DlOpReceiver& r) {
-              r.drawShadow(kTestPath1, SK_ColorGREEN, 1.0, true, 1.0);
+              r.drawShadow(kTestPath1, DlColor(SK_ColorGREEN), 1.0, true, 1.0);
             }},
            {1, 32, -1, 32,
             [](DlOpReceiver& r) {
-              r.drawShadow(kTestPath1, SK_ColorGREEN, 1.0, false, 2.5);
+              r.drawShadow(kTestPath1, DlColor(SK_ColorGREEN), 1.0, false, 2.5);
             }},
        }},
   };

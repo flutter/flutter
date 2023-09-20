@@ -36,7 +36,7 @@ void DlStopwatchVisualizer::Visualize(DlCanvas* canvas,
   auto const sample_unit_width = (1.0 / kMaxSamples);
 
   // Provide a semi-transparent background for the graph.
-  painter.DrawRect(rect, 0x99FFFFFF);
+  painter.DrawRect(rect, DlColor(0x99FFFFFF));
 
   // Prepare a path for the data; we start at the height of the last point so
   // it looks like we wrap around.
@@ -54,7 +54,7 @@ void DlStopwatchVisualizer::Visualize(DlCanvas* canvas,
                                         /*top=*/y + bar_height,
                                         /*right=*/bar_left + bar_width,
                                         /*bottom=*/bottom),
-                       0xAA0000FF);
+                       DlColor(0xAA0000FF));
     }
   }
 
@@ -79,7 +79,7 @@ void DlStopwatchVisualizer::Visualize(DlCanvas* canvas,
                                           /*top=*/y + frame_height,
                                           /*right=*/width,
                                           /*bottom=*/y + frame_height + 1),
-                         0xCC000000);
+                         DlColor(0xCC000000));
       }
     }
   }

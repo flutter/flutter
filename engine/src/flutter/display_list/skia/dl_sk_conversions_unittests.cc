@@ -26,6 +26,21 @@ TEST(DisplayListImageFilter, LocalImageSkiaNull) {
   ASSERT_EQ(ToSk(dl_local_matrix_filter), nullptr);
 }
 
+TEST(DisplayListSkConversions, ToSkColor) {
+  // Red
+  ASSERT_EQ(ToSk(DlColor::kRed()), SK_ColorRED);
+
+  // Green
+  ASSERT_EQ(ToSk(DlColor::kGreen()), SK_ColorGREEN);
+
+  // Blue
+  ASSERT_EQ(ToSk(DlColor::kBlue()), SK_ColorBLUE);
+
+  // Half transparent grey
+  auto const grey_hex_half_opaque = 0x7F999999;
+  ASSERT_EQ(ToSk(DlColor(grey_hex_half_opaque)), SkColor(grey_hex_half_opaque));
+}
+
 TEST(DisplayListSkConversions, ToSkTileMode) {
   ASSERT_EQ(ToSk(DlTileMode::kClamp), SkTileMode::kClamp);
   ASSERT_EQ(ToSk(DlTileMode::kRepeat), SkTileMode::kRepeat);
@@ -136,7 +151,8 @@ TEST(DisplayListSkConversions, ToSkBlendMode) {
 TEST(DisplayListSkConversions, BlendColorFilterModifiesTransparency) {
   auto test_mode_color = [](DlBlendMode mode, DlColor color) {
     std::stringstream desc_str;
-    desc_str << "blend[" << static_cast<int>(mode) << ", " << color << "]";
+    desc_str << "blend[" << static_cast<int>(mode) << ", " << color.argb()
+             << "]";
     std::string desc = desc_str.str();
     DlBlendColorFilter filter(color, mode);
     if (filter.modifies_transparent_black()) {

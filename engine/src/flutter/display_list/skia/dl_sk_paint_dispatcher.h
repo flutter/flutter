@@ -85,7 +85,7 @@ class DlSkPaintDispatchHelper : public virtual DlOpReceiver {
   void set_opacity(SkScalar opacity) {
     if (opacity_ != opacity) {
       opacity_ = opacity;
-      setColor(current_color_);
+      setColor(DlColor(current_color_));
     }
   }
 

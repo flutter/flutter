@@ -49,7 +49,7 @@ void DrawCheckerboard(DlCanvas* canvas, const SkRect& rect) {
   // Stroke the drawn area
   DlPaint debug_paint;
   debug_paint.setStrokeWidth(8);
-  debug_paint.setColor(SkColorSetA(checkerboard_color, 255));
+  debug_paint.setColor(DlColor(SkColorSetA(checkerboard_color, 255)));
   debug_paint.setDrawStyle(DlDrawStyle::kStroke);
   canvas->DrawRect(rect, debug_paint);
 }
