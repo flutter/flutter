@@ -1021,7 +1021,6 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
       // The width of the menu is set by the first page.
       child.layout(
         BoxConstraints(
-          minWidth: 0.0,
           maxWidth: (currentPage == 0 ? constraints.maxWidth : firstPageWidth) - paginationButtonsWidth,
           minHeight: minHeight,
           maxHeight: constraints.maxHeight,
