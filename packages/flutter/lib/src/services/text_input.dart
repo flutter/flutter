@@ -1445,6 +1445,8 @@ class TextInputConnection {
     required FontWeight? fontWeight,
     required TextDirection textDirection,
     required TextAlign textAlign,
+    required double? lineHeight,
+    required double? letterSpacing,
   }) {
     assert(attached);
 
@@ -1454,6 +1456,20 @@ class TextInputConnection {
       fontWeight: fontWeight,
       textDirection: textDirection,
       textAlign: textAlign,
+      lineHeight: lineHeight,
+      letterSpacing: letterSpacing,
+    );
+  }
+
+  void setScrollState({
+    required double scrollTop,
+    required double scrollLeft,
+  }) {
+    assert(attached);
+
+    TextInput._instance._setScrollState(
+      scrollTop: scrollTop,
+      scrollLeft: scrollLeft
     );
   }
 
@@ -1997,6 +2013,8 @@ class TextInput {
     required FontWeight? fontWeight,
     required TextDirection textDirection,
     required TextAlign textAlign,
+    required double? lineHeight,
+    required double? letterSpacing,
   }) {
     for (final TextInputControl control in _inputControls) {
       control.setStyle(
@@ -2005,6 +2023,20 @@ class TextInput {
         fontWeight: fontWeight,
         textDirection: textDirection,
         textAlign: textAlign,
+        lineHeight: lineHeight,
+        letterSpacing: letterSpacing,
+      );
+    }
+  }
+
+  void _setScrollState({
+    required double scrollTop,
+    required double scrollLeft,
+  }) {
+    for (final TextInputControl control in _inputControls) {
+      control.setScrollState(
+        scrollTop: scrollTop,
+        scrollLeft: scrollLeft
       );
     }
   }
@@ -2202,6 +2234,14 @@ mixin TextInputControl {
     required FontWeight? fontWeight,
     required TextDirection textDirection,
     required TextAlign textAlign,
+    required double? lineHeight,
+    required double? letterSpacing,
+  }) {}
+
+  /// set scroll state
+  void setScrollState({
+    required double scrollTop,
+    required double scrollLeft,
   }) {}
 
   /// Requests autofill from the text input control.
@@ -2339,6 +2379,8 @@ class _PlatformTextInputControl with TextInputControl {
     required FontWeight? fontWeight,
     required TextDirection textDirection,
     required TextAlign textAlign,
+    required double? lineHeight,
+    required double? letterSpacing,
   }) {
     _channel.invokeMethod<void>(
       'TextInput.setStyle',
@@ -2348,6 +2390,22 @@ class _PlatformTextInputControl with TextInputControl {
         'fontWeightIndex': fontWeight?.index,
         'textAlignIndex': textAlign.index,
         'textDirectionIndex': textDirection.index,
+        'lineHeight': lineHeight,
+        'letterSpacing': letterSpacing,
+      },
+    );
+  }
+
+  @override
+  void setScrollState({
+    required double scrollTop,
+    required double scrollLeft,
+  }) {
+    _channel.invokeMethod<void>(
+      'TextInput.setScrollState',
+      <String, dynamic>{
+        'scrollTop': scrollTop,
+        'scrollLeft': scrollLeft,
       },
     );
   }

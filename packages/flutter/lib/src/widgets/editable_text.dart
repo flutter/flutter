@@ -257,6 +257,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
 
     final TextStyle composingStyle = style?.merge(const TextStyle(decoration: TextDecoration.underline))
         ?? const TextStyle(decoration: TextDecoration.underline);
+
+        // print('style ${style}');
     return TextSpan(
       style: style,
       children: <TextSpan>[
@@ -2919,6 +2921,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           fontWeight: _style.fontWeight,
           textDirection: _textDirection,
           textAlign: widget.textAlign,
+          lineHeight: _style.height,
+          letterSpacing: _style.letterSpacing,
         );
       }
     }
@@ -3381,6 +3385,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
     if (!_hasInputConnection) {
       final TextEditingValue localValue = _value;
+      final double scrollOffset = _scrollController.offset;
+      final double scrollTop = widget.keyboardType == TextInputType.multiline ? scrollOffset : 0;
+      final double scrollLeft = widget.keyboardType == TextInputType.multiline ? 0 : scrollOffset;
 
       // When _needsAutofill == true && currentAutofillScope == null, autofill
       // is allowed but saving the user input from the text field is
@@ -3395,6 +3402,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         : TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
       _updateSizeAndTransform();
       _schedulePeriodicPostFrameCallbacks();
+      print('setting scroll state in _openInputConnection ${_scrollController.offset}');
       _textInputConnection!
         ..setStyle(
           fontFamily: _style.fontFamily,
@@ -3402,8 +3410,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           fontWeight: _style.fontWeight,
           textDirection: _textDirection,
           textAlign: widget.textAlign,
+          lineHeight: _style.height,
+          letterSpacing: _style.letterSpacing,
         )
         ..setEditingState(localValue)
+        ..setScrollState(scrollTop: scrollTop, scrollLeft: scrollLeft)
         ..show();
       if (_needsAutofill) {
         // Request autofill AFTER the size and the transform have been sent to
@@ -3461,6 +3472,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final TextInputConnection newConnection = currentAutofillScope?.attach(this, textInputConfiguration)
       ?? TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
     _textInputConnection = newConnection;
+    final double scrollOffset = _scrollController.offset;
+    final double scrollTop = widget.keyboardType == TextInputType.multiline ? scrollOffset : 0;
+    final double scrollLeft = widget.keyboardType == TextInputType.multiline ? 0 : scrollOffset;
 
     newConnection
       ..show()
@@ -3470,8 +3484,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         fontWeight: _style.fontWeight,
         textDirection: _textDirection,
         textAlign: widget.textAlign,
+        lineHeight: _style.height,
+        letterSpacing: _style.letterSpacing,
       )
-      ..setEditingState(_value);
+      ..setEditingState(_value)
+      ..setScrollState(scrollTop: scrollTop, scrollLeft: scrollLeft);
     _lastKnownRemoteTextEditingValue = _value;
   }
 
@@ -3543,6 +3560,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _onEditableScroll() {
+    if(kIsWeb && _hasInputConnection) {
+      print('setting scroll state on scroll ${_scrollController.offset}');
+      print('scrollposition ${_scrollController.position}');
+      final double scrollOffset = _scrollController.offset;
+      final double scrollTop = widget.keyboardType == TextInputType.multiline ? scrollOffset : 0;
+      final double scrollLeft = widget.keyboardType == TextInputType.multiline ? 0 : scrollOffset;
+      _textInputConnection!.setScrollState(scrollTop: scrollTop, scrollLeft: scrollLeft);
+    }
+    
     _selectionOverlay?.updateForScroll();
     _scribbleCacheKey = null;
   }
@@ -4909,7 +4935,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// By default makes text in composing range appear as underlined.
   /// Descendants can override this method to customize appearance of text.
   TextSpan buildTextSpan() {
-
+// print('_style ${_style}');
     if (widget.obscureText) {
       String text = _value.text;
       text = widget.obscuringCharacter * text.length;
