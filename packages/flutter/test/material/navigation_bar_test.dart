@@ -245,6 +245,59 @@ void main() {
     );
   });
 
+  testWidgetsWithLeakTracking('NavigationBar respects useSafeArea parameter', (WidgetTester tester) async {
+    const double bottomPadding = 40.0;
+
+    await tester.pumpWidget(
+      _buildWidget(
+        MediaQuery(
+          data: const MediaQueryData(padding: EdgeInsets.only(bottom: bottomPadding)),
+          child: NavigationBar(
+            destinations: const <Widget>[
+              NavigationDestination(
+                icon: Icon(Icons.ac_unit),
+                label: 'AC',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.access_alarm),
+                label: 'Alarm',
+              ),
+            ],
+            onDestinationSelected: (int i) {},
+          ),
+        ),
+      ),
+    );
+
+    final double defaultSizeWithSafeArea = tester.getSize(find.byType(NavigationBar)).height;
+    expect(defaultSizeWithSafeArea, 80 + bottomPadding);
+
+    await tester.pumpWidget(
+      _buildWidget(
+        MediaQuery(
+          data: const MediaQueryData(padding: EdgeInsets.only(bottom: bottomPadding)),
+          child: NavigationBar(
+            destinations: const <Widget>[
+              NavigationDestination(
+                icon: Icon(Icons.ac_unit),
+                label: 'AC',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.access_alarm),
+                label: 'Alarm',
+              ),
+            ],
+            onDestinationSelected: (int i) {},
+            useSafeArea: false,
+          ),
+        ),
+      ),
+    );
+
+    final double defaultSizeWithoutSafeArea = tester.getSize(find.byType(NavigationBar)).height;
+    expect(defaultSizeWithoutSafeArea, 80);
+  });
+
   testWidgetsWithLeakTracking('Material2 - NavigationBar uses proper defaults when no parameters are given', (WidgetTester tester) async {
     // M2 settings that were hand coded.
     await tester.pumpWidget(
