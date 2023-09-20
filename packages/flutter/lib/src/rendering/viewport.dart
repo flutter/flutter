@@ -110,7 +110,7 @@ abstract interface class RenderAbstractViewport extends RenderObject {
   ///
   /// The optional [axisDirection] is used by [RenderTwoDimensionalViewport] to
   /// determine which [Axis] of the two should reveal. One dimensional
-  /// subclasses like [RenderViewportBase and [RenderListWheelViewport] will
+  /// subclasses like [RenderViewportBase] and [RenderListWheelViewport] will
   /// assert that if an [axisDirection] is provided, that it matches the
   /// [axisDirection] the viewport has been configured for.
   ///
@@ -124,12 +124,16 @@ abstract interface class RenderAbstractViewport extends RenderObject {
     AxisDirection? axisDirection,
   });
 
-  /// Determines which provided leading or trailing [RevealedOffset] will be
-  /// used for [RenderViewportBase.showInViewport] accounting for the size and
-  /// already visible portion of the [RenderObject] that is being revealed.
+  /// Determines which provided leading or trailing edge of the viewport, as
+  /// [RevealedOffset]s, will be used for [RenderViewportBase.showInViewport]
+  /// accounting for the size and already visible portion of the [RenderObject]
+  /// that is being revealed.
   ///
-  /// Also used by [RenderTwoDimensionalViewport.showInViewport] for individual
-  /// axes.
+  /// Also used by [RenderTwoDimensionalViewport.showInViewport] for each
+  /// horizontal and vertical [Axis].
+  ///
+  /// If the target [RenderObject] is already fully visible, this will return
+  /// null.
   static RevealedOffset? applyTargetOffset({
     required RevealedOffset leadingEdgeOffset,
     required RevealedOffset trailingEdgeOffset,
