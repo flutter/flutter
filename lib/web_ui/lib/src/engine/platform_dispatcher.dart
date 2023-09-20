@@ -566,11 +566,11 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         final MethodCall decoded = codec.decodeMethodCall(data);
         switch (decoded.method) {
           case 'enableContextMenu':
-            flutterViewEmbedder.enableContextMenu();
+            implicitView!.contextMenu.enable();
             replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
             return;
           case 'disableContextMenu':
-            flutterViewEmbedder.disableContextMenu();
+            implicitView!.contextMenu.disable();
             replyToPlatformMessage(callback, codec.encodeSuccessEnvelope(true));
             return;
         }

@@ -51,12 +51,6 @@ class CustomElementEmbeddingStrategy extends EmbeddingStrategy {
     registerElementForCleanup(resourceHost);
   }
 
-  @override
-  void disableContextMenu() => disableContextMenuOn(_hostElement);
-
-  @override
-  void enableContextMenu() => enableContextMenuOn(_hostElement);
-
   void _setHostAttribute(String name, String value) {
     _hostElement.setAttribute(name, value);
   }
