@@ -95,7 +95,7 @@ class TextureRegistry {
 
  private:
   std::map<int64_t, std::shared_ptr<Texture>> mapping_;
-  size_t image_counter_;
+  size_t image_counter_ = 0;
   // This map keeps track of registered context listeners by their own
   // externally provided id. It indexes into ordered_images_.
   std::map<uintptr_t, size_t> image_indices_;

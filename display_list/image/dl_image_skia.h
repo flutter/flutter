@@ -12,7 +12,7 @@ namespace flutter {
 
 class DlImageSkia final : public DlImage {
  public:
-  DlImageSkia(sk_sp<SkImage> image);
+  explicit DlImageSkia(sk_sp<SkImage> image);
 
   // |DlImage|
   ~DlImageSkia() override;

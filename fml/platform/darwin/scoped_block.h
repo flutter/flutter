@@ -17,20 +17,20 @@ namespace fml {
 enum class OwnershipPolicy {
   // The scoped object takes ownership of an object by taking over an existing
   // ownership claim.
-  Assume,
+  kAssume,
 
   // The scoped object will retain the object and any initial ownership is
   // not changed.
-  Retain,
+  kRetain,
 };
 
 template <typename B>
 class ScopedBlock {
  public:
   explicit ScopedBlock(B block = nullptr,
-                       OwnershipPolicy policy = OwnershipPolicy::Assume)
+                       OwnershipPolicy policy = OwnershipPolicy::kAssume)
       : block_(block) {
-    if (block_ && policy == OwnershipPolicy::Retain) {
+    if (block_ && policy == OwnershipPolicy::kRetain) {
       block_ = Block_copy(block);
     }
   }
@@ -48,13 +48,13 @@ class ScopedBlock {
   }
 
   ScopedBlock& operator=(const ScopedBlock<B>& that) {
-    reset(that.get(), OwnershipPolicy::Retain);
+    reset(that.get(), OwnershipPolicy::kRetain);
     return *this;
   }
 
   void reset(B block = nullptr,
-             OwnershipPolicy policy = OwnershipPolicy::Assume) {
-    if (block && policy == OwnershipPolicy::Retain) {
+             OwnershipPolicy policy = OwnershipPolicy::kAssume) {
+    if (block && policy == OwnershipPolicy::kRetain) {
       block = Block_copy(block);
     }
     if (block_) {

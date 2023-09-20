@@ -14,7 +14,7 @@ Texture::Texture(int64_t id) : id_(id) {}
 
 Texture::~Texture() = default;
 
-TextureRegistry::TextureRegistry() : image_counter_(0) {}
+TextureRegistry::TextureRegistry() = default;
 
 void TextureRegistry::RegisterTexture(const std::shared_ptr<Texture>& texture) {
   if (!texture) {
