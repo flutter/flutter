@@ -1,8 +1,6 @@
 # A YAML format of https://clang.llvm.org/extra/clang-tidy/.
 
 # Prefix check with "-" to ignore.
-# Note: Some of the checks here are used as errors selectively, see
-# //ci/lint.sh
 Checks: >-
   bugprone-use-after-move,
   bugprone-unchecked-optional-access,
