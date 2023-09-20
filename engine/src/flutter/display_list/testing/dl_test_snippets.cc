@@ -212,11 +212,11 @@ std::vector<DisplayListInvocationGroup> CreateAllAttributesOps() {
             }},
            {0, 16, 0, 0,
             [](DlOpReceiver& r) {
-              r.setColorFilter(DlSrgbToLinearGammaColorFilter::instance.get());
+              r.setColorFilter(DlSrgbToLinearGammaColorFilter::kInstance.get());
             }},
            {0, 16, 0, 0,
             [](DlOpReceiver& r) {
-              r.setColorFilter(DlLinearToSrgbGammaColorFilter::instance.get());
+              r.setColorFilter(DlLinearToSrgbGammaColorFilter::kInstance.get());
             }},
            {0, 0, 0, 0, [](DlOpReceiver& r) { r.setColorFilter(nullptr); }},
        }},

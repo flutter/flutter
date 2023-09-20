@@ -3488,8 +3488,8 @@ TEST_F(DisplayListCanvas, SaveLayerConsolidation) {
                                            DlBlendMode::kSrcATop),
       std::make_shared<DlMatrixColorFilter>(commutable_color_matrix),
       std::make_shared<DlMatrixColorFilter>(non_commutable_color_matrix),
-      DlSrgbToLinearGammaColorFilter::instance,
-      DlLinearToSrgbGammaColorFilter::instance,
+      DlSrgbToLinearGammaColorFilter::kInstance,
+      DlLinearToSrgbGammaColorFilter::kInstance,
   };
   std::vector<std::shared_ptr<DlImageFilter>> image_filters = {
       std::make_shared<DlBlurImageFilter>(5.0f, 5.0f, DlTileMode::kDecal),

@@ -190,11 +190,11 @@ bool DlMatrixColorFilter::can_commute_with_opacity() const {
 }
 
 const std::shared_ptr<DlSrgbToLinearGammaColorFilter>
-    DlSrgbToLinearGammaColorFilter::instance =
+    DlSrgbToLinearGammaColorFilter::kInstance =
         std::make_shared<DlSrgbToLinearGammaColorFilter>();
 
 const std::shared_ptr<DlLinearToSrgbGammaColorFilter>
-    DlLinearToSrgbGammaColorFilter::instance =
+    DlLinearToSrgbGammaColorFilter::kInstance =
         std::make_shared<DlLinearToSrgbGammaColorFilter>();
 
 }  // namespace flutter
