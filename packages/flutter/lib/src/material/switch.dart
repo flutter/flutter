@@ -178,8 +178,6 @@ class Switch extends StatelessWidget {
         _switchType = _SwitchType.adaptive;
 
   /// Whether this switch is on or off.
-  ///
-  /// This property must not be null.
   final bool value;
 
   /// Called when the user toggles the switch on or off.
