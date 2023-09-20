@@ -18,7 +18,7 @@ void main() {
   });
 
   group('RestorationManager', () {
-    testWidgets('root bucket retrieval', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('root bucket retrieval', (WidgetTester tester) async {
       final List<MethodCall> callsToEngine = <MethodCall>[];
       final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call) {
@@ -62,7 +62,11 @@ void main() {
       });
       expect(synchronousBucket, isNotNull);
       expect(synchronousBucket, same(rootBucket));
-    });
+    },
+      // TODO(NobodyForNothing): Remove after fixing and cover remaining file
+      // with leak tests https://github.com/flutter/flutter/issues/134831
+      leakTrackingTestConfig: const LeakTrackingTestConfig(notDisposedAllowList:
+      <String, int?>{'RestorationManager': 1}));
 
     testWidgets('root bucket received from engine before retrieval', (WidgetTester tester) async {
       SystemChannels.restoration.setMethodCallHandler(null);
