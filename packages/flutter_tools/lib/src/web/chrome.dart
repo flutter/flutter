@@ -171,13 +171,22 @@ class ChromiumLauncher {
       throwToolExit('Only one instance of chrome can be started.');
     }
 
+    if (_logger.isVerbose) {
+      _logger.printTrace('Launching Chromium (url = $url, headless = $headless, skipCheck = $skipCheck, debugPort = $debugPort)');
+    }
+
     final String chromeExecutable = _browserFinder(_platform, _fileSystem);
 
-    if (_logger.isVerbose && !_platform.isWindows) {
-      // The "--version" argument is not supported on Windows.
-      final ProcessResult versionResult = await _processManager.run(<String>[chromeExecutable, '--version']);
-      _logger.printTrace('Using ${versionResult.stdout}');
+    if (_logger.isVerbose) {
+      _logger.printTrace('Will use Chromium executable at $chromeExecutable');
+
+      if (!_platform.isWindows) {
+        // The "--version" argument is not supported on Windows.
+        final ProcessResult versionResult = await _processManager.run(<String>[chromeExecutable, '--version']);
+        _logger.printTrace('Using ${versionResult.stdout}');
+      }
     }
+
 
     final Directory userDataDir = _fileSystem.systemTempDirectory
       .createTempSync('flutter_tools_chrome_device.');
