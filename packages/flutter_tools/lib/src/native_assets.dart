@@ -19,6 +19,7 @@ import 'cache.dart';
 import 'features.dart';
 import 'globals.dart' as globals;
 import 'ios/native_assets.dart';
+import 'linux/native_assets.dart';
 import 'macos/native_assets.dart';
 import 'macos/native_assets_host.dart';
 import 'resident_runner.dart';
@@ -167,6 +168,9 @@ class NativeAssetsBuildRunnerImpl implements NativeAssetsBuildRunner {
   late final Future<CCompilerConfig> cCompilerConfig = () {
     if (globals.platform.isMacOS || globals.platform.isIOS) {
       return cCompilerConfigMacOS();
+    }
+    if (globals.platform.isLinux) {
+      return cCompilerConfigLinux();
     }
     throwToolExit(
       'Native assets feature not yet implemented for Linux, Windows and Android.',
@@ -333,6 +337,13 @@ Future<Uri?> dryRunNativeAssets({
           fileSystem: fileSystem,
           buildRunner: buildRunner,
         );
+      } else if (const LocalPlatform().isLinux) {
+        nativeAssetsYaml = await dryRunNativeAssetsLinux(
+          projectUri: projectUri,
+          flutterTester: true,
+          fileSystem: fileSystem,
+          buildRunner: buildRunner,
+        );
       } else {
         await ensureNoNativeAssetsOrOsIsSupported(
           projectUri,
@@ -342,6 +353,13 @@ Future<Uri?> dryRunNativeAssets({
         );
         nativeAssetsYaml = null;
       }
+    case build_info.TargetPlatform.linux_arm64:
+    case build_info.TargetPlatform.linux_x64:
+      nativeAssetsYaml = await dryRunNativeAssetsLinux(
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        buildRunner: buildRunner,
+      );
     case build_info.TargetPlatform.android_arm:
     case build_info.TargetPlatform.android_arm64:
     case build_info.TargetPlatform.android_x64:
@@ -349,8 +367,6 @@ Future<Uri?> dryRunNativeAssets({
     case build_info.TargetPlatform.android:
     case build_info.TargetPlatform.fuchsia_arm64:
     case build_info.TargetPlatform.fuchsia_x64:
-    case build_info.TargetPlatform.linux_arm64:
-    case build_info.TargetPlatform.linux_x64:
     case build_info.TargetPlatform.web_javascript:
     case build_info.TargetPlatform.windows_x64:
       await ensureNoNativeAssetsOrOsIsSupported(
@@ -382,7 +398,12 @@ Future<Uri?> dryRunNativeAssetsMultipeOSes({
     if (targetPlatforms.contains(build_info.TargetPlatform.darwin) ||
         (targetPlatforms.contains(build_info.TargetPlatform.tester) && OS.current == OS.macOS))
       ...await dryRunNativeAssetsMacOSInternal(fileSystem, projectUri, false, buildRunner),
-    if (targetPlatforms.contains(build_info.TargetPlatform.ios)) ...await dryRunNativeAssetsIOSInternal(fileSystem, projectUri, buildRunner)
+    if (targetPlatforms.contains(build_info.TargetPlatform.linux_arm64) ||
+        targetPlatforms.contains(build_info.TargetPlatform.linux_x64) ||
+        (targetPlatforms.contains(build_info.TargetPlatform.tester) && OS.current == OS.linux))
+      ...await dryRunNativeAssetsLinuxInternal(fileSystem, projectUri, false, buildRunner),
+    if (targetPlatforms.contains(build_info.TargetPlatform.ios))
+      ...await dryRunNativeAssetsIOSInternal(fileSystem, projectUri, buildRunner)
   ];
   final Uri nativeAssetsUri = await writeNativeAssetsYaml(nativeAssetPaths, buildUri_, fileSystem);
   return nativeAssetsUri;
