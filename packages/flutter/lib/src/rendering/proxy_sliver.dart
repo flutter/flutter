@@ -118,14 +118,11 @@ class RenderSliverOpacity extends RenderProxySliver {
 
   /// The fraction to scale the child's alpha value.
   ///
-  /// An opacity of 1.0 is fully opaque. An opacity of 0.0 is fully transparent
+  /// An opacity of one is fully opaque. An opacity of zero is fully transparent
   /// (i.e. invisible).
   ///
-  /// The opacity must not be null.
-  ///
-  /// Values 1.0 and 0.0 are painted with a fast path. Other values
-  /// require painting the child into an intermediate buffer, which is
-  /// expensive.
+  /// Values one and zero are painted with a fast path. Other values require
+  /// painting the child into an intermediate buffer, which is expensive.
   double get opacity => _opacity;
   double _opacity;
   set opacity(double value) {
@@ -215,8 +212,6 @@ class RenderSliverOpacity extends RenderProxySliver {
 /// {@macro flutter.widgets.IgnorePointer.ignoringSemantics}
 class RenderSliverIgnorePointer extends RenderProxySliver {
   /// Creates a render object that is invisible to hit testing.
-  ///
-  /// The [ignoring] argument must not be null.
   RenderSliverIgnorePointer({
     RenderSliver? sliver,
     bool ignoring = true,
@@ -410,8 +405,6 @@ class RenderSliverOffstage extends RenderProxySliver {
 /// rather than a [double] to control the opacity.
 class RenderSliverAnimatedOpacity extends RenderProxySliver with RenderAnimatedOpacityMixin<RenderSliver> {
   /// Creates a partially transparent render object.
-  ///
-  /// The [opacity] argument must not be null.
   RenderSliverAnimatedOpacity({
     required Animation<double> opacity,
     bool alwaysIncludeSemantics = false,
@@ -431,7 +424,7 @@ class RenderSliverAnimatedOpacity extends RenderProxySliver with RenderAnimatedO
 class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
   /// Creates a render object that constrains the cross axis extent of its sliver child.
   ///
-  /// The [maxExtent] parameter must not be null and must be nonnegative.
+  /// The [maxExtent] parameter must be nonnegative.
   RenderSliverConstrainedCrossAxis({
     required double maxExtent
   }) : _maxExtent = maxExtent,
