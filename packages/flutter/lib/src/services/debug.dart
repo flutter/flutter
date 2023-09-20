@@ -35,7 +35,7 @@ bool debugAssertAllServicesVarsUnset(String reason) {
     if (debugKeyEventSimulatorTransitModeOverride != null) {
       throw FlutterError(reason);
     }
-    if (profilePlatformChannels || debugPrintKeyboardEvents) {
+    if (debugPrintKeyboardEvents) {
       throw FlutterError(reason);
     }
     return true;

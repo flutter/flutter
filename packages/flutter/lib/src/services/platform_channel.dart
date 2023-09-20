@@ -32,7 +32,7 @@ export 'message_codec.dart' show MessageCodec, MethodCall, MethodCodec;
 /// The statistics include the total bytes transmitted and the average number of
 /// bytes per invocation in the last quantum. "Up" means in the direction of
 /// Flutter to the host platform, "down" is the host platform to flutter.
-bool profilePlatformChannels = false;
+const bool kProfilePlatformChannels = false;
 
 bool _profilePlatformChannelsIsRunning = false;
 const Duration _profilePlatformChannelsRate = Duration(seconds: 1);
@@ -189,7 +189,7 @@ class BasicMessageChannel<T> {
   /// [BackgroundIsolateBinaryMessenger.ensureInitialized].
   BinaryMessenger get binaryMessenger {
     final BinaryMessenger result = _binaryMessenger ?? _findBinaryMessenger();
-    return profilePlatformChannels
+    return kProfilePlatformChannels
         ? _profiledBinaryMessengers[this] ??= _ProfiledBinaryMessenger(
             // ignore: no_runtimetype_tostring
             result, runtimeType.toString(), codec.runtimeType.toString())
@@ -278,7 +278,7 @@ class MethodChannel {
   /// [BackgroundIsolateBinaryMessenger.ensureInitialized].
   BinaryMessenger get binaryMessenger {
     final BinaryMessenger result = _binaryMessenger ?? _findBinaryMessenger();
-    return profilePlatformChannels
+    return kProfilePlatformChannels
         ? _profiledBinaryMessengers[this] ??= _ProfiledBinaryMessenger(
             // ignore: no_runtimetype_tostring
             result, runtimeType.toString(), codec.runtimeType.toString())
@@ -309,7 +309,7 @@ class MethodChannel {
   Future<T?> _invokeMethod<T>(String method, { required bool missingOk, dynamic arguments }) async {
     final ByteData input = codec.encodeMethodCall(MethodCall(method, arguments));
     final ByteData? result =
-      profilePlatformChannels ?
+      kProfilePlatformChannels ?
         await (binaryMessenger as _ProfiledBinaryMessenger).sendWithPostfix(name, '#$method', input) :
         await binaryMessenger.send(name, input);
     if (result == null) {
