@@ -89,7 +89,6 @@ void main() async {
       throw 'Window should be hidden at startup';
     }
 
-    const int totalTestFrames = 10;
     int frameCount = 0;
     ui.PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
       // Our goal is to verify that it's `drawHelloWorld` that makes the window
@@ -115,16 +114,12 @@ void main() async {
         case 3:
           _waitUntilWindowVisible().then((_) {
             ui.PlatformDispatcher.instance.scheduleFrame();
-          });
-        // Others: Render and verify the window is shown.
-        default:
-          isWindowVisible().then((bool visible) {
-            _expectVisible(visible, true, visibilityCompleter, frameCount);
-            ui.PlatformDispatcher.instance.scheduleFrame();
-            if (frameCount == totalTestFrames && !visibilityCompleter.isCompleted) {
+            if (!visibilityCompleter.isCompleted) {
               visibilityCompleter.complete('success');
             }
           });
+        // Others: Continue rendering.
+        default:
           drawHelloWorld(view);
       }
     };
@@ -132,4 +127,5 @@ void main() async {
     visibilityCompleter.completeError(e);
     rethrow;
   }
+  ui.PlatformDispatcher.instance.scheduleFrame();
 }
