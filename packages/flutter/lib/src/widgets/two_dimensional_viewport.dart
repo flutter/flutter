@@ -1046,13 +1046,13 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     AxisDirection? axisDirection;
     switch ((allowHorizontal, allowVertical)) {
       case (true, true):
-        // Both allow implicit scrolling
+        // Both allow implicit scrolling.
         break;
       case (false, true):
-        // Only the vertical Axis allows implicit scrolling
+        // Only the vertical Axis allows implicit scrolling.
         axisDirection = verticalAxisDirection;
       case (true, false):
-        // Only the horizontal Axis allows implicit scrolling
+        // Only the horizontal Axis allows implicit scrolling.
         axisDirection = horizontalAxisDirection;
       case (false, false):
         // Neither axis allows for implicit scrolling.
@@ -1083,6 +1083,10 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   /// Make (a portion of) the given `descendant` of the given `viewport` fully
   /// visible in one or both dimensions of the `viewport` by manipulating the
   /// [ViewportOffset]s.
+  ///
+  /// The `axisDirection` determines from which axes the `descendant` will be
+  /// revealed. When the `axisDirection` is null, both axes will be updated to
+  /// reveal the descendant.
   ///
   /// The optional `rect` parameter describes which area of the `descendant`
   /// should be shown in the viewport. If `rect` is null, the entire
