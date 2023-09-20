@@ -1577,6 +1577,23 @@ TEST_P(AiksTest, CanDrawPaintWithAdvancedBlend) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, DrawPaintWithAdvancedBlendOverFilter) {
+  Paint filtered = {
+      .color = Color::Black(),
+      .mask_blur_descriptor =
+          Paint::MaskBlurDescriptor{
+              .style = FilterContents::BlurStyle::kNormal,
+              .sigma = Sigma(60),
+          },
+  };
+
+  Canvas canvas;
+  canvas.DrawPaint({.color = Color::White()});
+  canvas.DrawCircle({300, 300}, 200, filtered);
+  canvas.DrawPaint({.color = Color::Green(), .blend_mode = BlendMode::kScreen});
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
 #define BLEND_MODE_TUPLE(blend_mode) {#blend_mode, BlendMode::k##blend_mode},
 
 struct BlendModeSelection {
