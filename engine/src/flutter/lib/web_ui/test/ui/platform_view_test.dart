@@ -38,7 +38,7 @@ Future<void> testMain() async {
   });
 
   tearDown(() {
-    platformViewManager.debugClear();
+    PlatformViewManager.instance.debugClear();
   });
 
   test('picture + overlapping platformView', () async {
