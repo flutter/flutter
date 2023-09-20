@@ -5,11 +5,12 @@
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('SystemChrome overlay style test', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SystemChrome overlay style test', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
