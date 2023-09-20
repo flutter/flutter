@@ -612,7 +612,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
               ),
               if(widget.hideEmptyLastPageRows)
                 SizedBox(
-                    height: widget.dataRowMaxHeight * (widget.rowsPerPage - _rowCount + _firstRowIndex).clamp(0, widget.rowsPerPage)), // ignore_clamp_double_lint
+                    height: (widget.dataRowMaxHeight ?? kMinInteractiveDimension) * (widget.rowsPerPage - _rowCount + _firstRowIndex).clamp(0, widget.rowsPerPage)), // ignore_clamp_double_lint
               DefaultTextStyle(
                 style: footerTextStyle!,
                 child: IconTheme.merge(

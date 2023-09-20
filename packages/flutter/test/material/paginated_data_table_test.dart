@@ -307,6 +307,7 @@ void main() {
     final TestDataSource source = TestDataSource();
     int rowsPerPage = 3;
     final int rowCount = source.rowCount;
+    addTearDown(source.dispose);
 
     Widget buildTable(TestDataSource source, int rowsPerPage) {
       return PaginatedDataTable(
@@ -364,7 +365,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.skip_next));
     await tester.pump();
     expect(find.byWidgetPredicate((Widget widget) => widget is SizedBox && widget.height == (rowsPerPage - (rowCount % rowsPerPage)) * 46.0), findsOneWidget);
-    
+
     rowsPerPage = 8;
 
     await tester.pumpWidget(MaterialApp(
