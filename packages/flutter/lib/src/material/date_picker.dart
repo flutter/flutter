@@ -70,7 +70,7 @@ const double _kMaxTextScaleFactor = 1.3;
 /// An optional [initialEntryMode] argument can be used to display the date
 /// picker in the [DatePickerEntryMode.calendar] (a calendar month grid)
 /// or [DatePickerEntryMode.input] (a text input field) mode.
-/// It defaults to [DatePickerEntryMode.calendar] and must be non-null.
+/// It defaults to [DatePickerEntryMode.calendar].
 ///
 /// {@template flutter.material.date_picker.switchToInputEntryModeIcon}
 /// An optional [switchToInputEntryModeIcon] argument can be used to
@@ -117,7 +117,6 @@ const double _kMaxTextScaleFactor = 1.3;
 /// The [context], [barrierDismissible], [barrierColor], [barrierLabel],
 /// [useRootNavigator] and [routeSettings] arguments are passed to [showDialog],
 /// the documentation for which discusses how it is used.
-/// [context], [barrierDismissible] and [useRootNavigator] must be non-null.
 ///
 /// The [builder] parameter can be used to wrap the dialog widget
 /// to add inherited widgets like [Theme].
@@ -415,6 +414,14 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
   late final RestorableDateTimeN _selectedDate = RestorableDateTimeN(widget.initialDate);
   late final _RestorableDatePickerEntryMode _entryMode = _RestorableDatePickerEntryMode(widget.initialEntryMode);
   final _RestorableAutovalidateMode _autovalidateMode = _RestorableAutovalidateMode(AutovalidateMode.disabled);
+
+  @override
+  void dispose() {
+    _selectedDate.dispose();
+    _entryMode.dispose();
+    _autovalidateMode.dispose();
+    super.dispose();
+  }
 
   @override
   String? get restorationId => widget.restorationId;
@@ -935,7 +942,7 @@ class _DatePickerHeader extends StatelessWidget {
 /// before or on `initialDateRange.end`.
 ///
 /// The [firstDate] is the earliest allowable date. The [lastDate] is the latest
-/// allowable date. Both must be non-null.
+/// allowable date.
 ///
 /// If an initial date range is provided, `initialDateRange.start`
 /// and `initialDateRange.end` must both fall between or on [firstDate] and
@@ -949,7 +956,7 @@ class _DatePickerHeader extends StatelessWidget {
 /// An optional [initialEntryMode] argument can be used to display the date
 /// picker in the [DatePickerEntryMode.calendar] (a scrollable calendar month
 /// grid) or [DatePickerEntryMode.input] (two text input fields) mode.
-/// It defaults to [DatePickerEntryMode.calendar] and must be non-null.
+/// It defaults to [DatePickerEntryMode.calendar].
 ///
 /// {@macro flutter.material.date_picker.switchToInputEntryModeIcon}
 ///
@@ -988,7 +995,6 @@ class _DatePickerHeader extends StatelessWidget {
 /// The [context], [barrierDismissible], [barrierColor], [barrierLabel],
 /// [useRootNavigator] and [routeSettings] arguments are passed to [showDialog],
 /// the documentation for which discusses how it is used.
-/// [context], [barrierDismissible] and [useRootNavigator] must be non-null.
 ///
 /// The [builder] parameter can be used to wrap the dialog widget
 /// to add inherited widgets like [Theme].
@@ -1229,7 +1235,7 @@ class DateRangePickerDialog extends StatefulWidget {
   /// scrollable calendar month grid) or [DatePickerEntryMode.input] (two text
   /// input fields) mode.
   ///
-  /// It defaults to [DatePickerEntryMode.calendar] and must be non-null.
+  /// It defaults to [DatePickerEntryMode.calendar].
   final DatePickerEntryMode initialEntryMode;
 
   /// The label on the cancel button for the text input mode.

@@ -90,13 +90,9 @@ class AnnounceSemanticsEvent extends SemanticsEvent {
     : super('announce');
 
   /// The message to announce.
-  ///
-  /// This property must not be null.
   final String message;
 
   /// Text direction for [message].
-  ///
-  /// This property must not be null.
   final TextDirection textDirection;
 
   /// Determines whether the announcement should interrupt any existing announcement,

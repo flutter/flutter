@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class BadWidget extends StatefulWidget {
   const BadWidget({ super.key });
@@ -27,7 +28,7 @@ class BadWidgetState extends State<BadWidget> {
 }
 
 void main() {
-  testWidgets('setState() catches being used inside a constructor', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('setState() catches being used inside a constructor', (WidgetTester tester) async {
     await tester.pumpWidget(const BadWidget());
     expect(tester.takeException(), isFlutterError);
   });

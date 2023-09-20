@@ -230,8 +230,6 @@ class HoldScrollActivity extends ScrollActivity implements ScrollHoldController 
 class ScrollDragController implements Drag {
   /// Creates an object that scrolls a scroll view as the user drags their
   /// finger across the screen.
-  ///
-  /// The [delegate] and `details` arguments must not be null.
   ScrollDragController({
     required ScrollActivityDelegate delegate,
     required DragStartDetails details,
@@ -525,8 +523,6 @@ class DragScrollActivity extends ScrollActivity {
 ///    animation parameters.
 class BallisticScrollActivity extends ScrollActivity {
   /// Creates an activity that animates a scroll view based on a [simulation].
-  ///
-  /// The [delegate], [simulation], and [vsync] arguments must not be null.
   BallisticScrollActivity(
     super.delegate,
     Simulation simulation,
@@ -618,8 +614,6 @@ class BallisticScrollActivity extends ScrollActivity {
 class DrivenScrollActivity extends ScrollActivity {
   /// Creates an activity that animates a scroll view based on animation
   /// parameters.
-  ///
-  /// All of the parameters must be non-null.
   DrivenScrollActivity(
     super.delegate, {
     required double from,

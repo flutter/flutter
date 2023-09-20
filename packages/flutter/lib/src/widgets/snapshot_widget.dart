@@ -482,8 +482,4 @@ class _DefaultSnapshotPainter implements SnapshotPainter {
 
   @override
   bool shouldRepaint(covariant _DefaultSnapshotPainter oldPainter) => false;
-
-  @override
-  @protected
-  void maybeDispatchObjectCreation() { }
 }

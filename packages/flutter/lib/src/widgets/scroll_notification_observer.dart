@@ -82,8 +82,6 @@ final class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
 /// {@end-tool}
 class ScrollNotificationObserver extends StatefulWidget {
   /// Create a [ScrollNotificationObserver].
-  ///
-  /// The [child] parameter must not be null.
   const ScrollNotificationObserver({
     super.key,
     required this.child,
