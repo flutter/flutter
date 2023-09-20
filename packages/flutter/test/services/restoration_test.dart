@@ -63,13 +63,12 @@ void main() {
       expect(synchronousBucket, isNotNull);
       expect(synchronousBucket, same(rootBucket));
     },
-      // TODO(NobodyForNothing): Remove after fixing
-      // https://github.com/flutter/flutter/issues/134831
+      // TODO(NobodyForNothing): Remove after fixing and cover remaining file
+      // with leak tests https://github.com/flutter/flutter/issues/134831
       leakTrackingTestConfig: const LeakTrackingTestConfig(notDisposedAllowList:
-      <String, int?>{'RestorationManager': 1}),
-    );
+      <String, int?>{'RestorationManager': 1}));
 
-    testWidgetsWithLeakTracking('root bucket received from engine before retrieval', (WidgetTester tester) async {
+    testWidgets('root bucket received from engine before retrieval', (WidgetTester tester) async {
       SystemChannels.restoration.setMethodCallHandler(null);
       final List<MethodCall> callsToEngine = <MethodCall>[];
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call) async {
@@ -86,13 +85,9 @@ void main() {
       expect(rootBucket, isNotNull);
       // Engine was never asked.
       expect(callsToEngine, isEmpty);
-    },
-      // TODO(NobodyForNothing): Remove after fixing
-      // https://github.com/flutter/flutter/issues/134831
-      leakTrackingTestConfig: const LeakTrackingTestConfig(notDisposedAllowList:
-      <String, int?>{'RestorationManager': 1}),);
+    });
 
-    testWidgetsWithLeakTracking('root bucket received while engine retrieval is pending', (WidgetTester tester) async {
+    testWidgets('root bucket received while engine retrieval is pending', (WidgetTester tester) async {
       SystemChannels.restoration.setMethodCallHandler(null);
       final List<MethodCall> callsToEngine = <MethodCall>[];
       final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
@@ -120,13 +115,9 @@ void main() {
       expect(rootBucket2, same(rootBucket));
       expect(rootBucket2!.read<int>('value1'), 10);
       expect(rootBucket2!.contains('foo'), isFalse);
-    },
-      // TODO(NobodyForNothing): Remove after fixing
-      // https://github.com/flutter/flutter/issues/134831
-      leakTrackingTestConfig: const LeakTrackingTestConfig(notDisposedAllowList:
-      <String, int?>{'RestorationManager': 1}),);
+    });
 
-    testWidgetsWithLeakTracking('root bucket is properly replaced when new data is available', (WidgetTester tester) async {
+    testWidgets('root bucket is properly replaced when new data is available', (WidgetTester tester) async {
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call) async {
         return _createEncodedRestorationData1();
       });
@@ -164,13 +155,9 @@ void main() {
       expect(newRoot!.read<int>('value1'), null);
       final RestorationBucket newChild = newRoot!.claimChild('childFoo', debugOwner: null);
       expect(newChild.read<String>('bar'), 'Hello');
-    },
-      // TODO(NobodyForNothing): Remove after fixing
-      // https://github.com/flutter/flutter/issues/134831
-      leakTrackingTestConfig: const LeakTrackingTestConfig(notDisposedAllowList:
-      <String, int?>{'RestorationManager': 1}),);
+    });
 
-    testWidgetsWithLeakTracking('returns null as root bucket when restoration is disabled', (WidgetTester tester) async {
+    testWidgets('returns null as root bucket when restoration is disabled', (WidgetTester tester) async {
       final List<MethodCall> callsToEngine = <MethodCall>[];
       final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call)  {
@@ -211,13 +198,9 @@ void main() {
         rootBucket = bucket;
       });
       expect(rootBucket, isNull);
-    },
-      // TODO(NobodyForNothing): Remove after fixing
-      // https://github.com/flutter/flutter/issues/134831
-      leakTrackingTestConfig: const LeakTrackingTestConfig(notDisposedAllowList:
-      <String, int?>{'RestorationManager': 1}),);
+    });
 
-    testWidgetsWithLeakTracking('flushData', (WidgetTester tester) async {
+    testWidgets('flushData', (WidgetTester tester) async {
       final List<MethodCall> callsToEngine = <MethodCall>[];
       final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call) {
@@ -251,13 +234,9 @@ void main() {
       rootBucket!.write('foo', 2);
       manager.flushData();
       expect(callsToEngine, hasLength(1));
-    },
-      // TODO(NobodyForNothing): Remove after fixing
-      // https://github.com/flutter/flutter/issues/134831
-      leakTrackingTestConfig: const LeakTrackingTestConfig(notDisposedAllowList:
-      <String, int?>{'RestorationManager': 1}),);
+    });
 
-    testWidgetsWithLeakTracking('isReplacing', (WidgetTester tester) async {
+    testWidgets('isReplacing', (WidgetTester tester) async {
       final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call) {
         return result.future;
