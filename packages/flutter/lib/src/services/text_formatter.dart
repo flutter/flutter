@@ -271,9 +271,6 @@ class FilteringTextInputFormatter extends TextInputFormatter {
   /// If [allow] is false, then the filter pattern is a deny list,
   /// and characters that match the pattern are rejected. See also
   /// the [FilteringTextInputFormatter.deny] constructor.
-  ///
-  /// The [filterPattern], [allow], and [replacementString] arguments
-  /// must not be null.
   FilteringTextInputFormatter(
     this.filterPattern, {
     required this.allow,
@@ -281,18 +278,12 @@ class FilteringTextInputFormatter extends TextInputFormatter {
   });
 
   /// Creates a formatter that only allows characters matching a pattern.
-  ///
-  /// The [filterPattern] and [replacementString] arguments
-  /// must not be null.
   FilteringTextInputFormatter.allow(
     Pattern filterPattern, {
     String replacementString = '',
   }) : this(filterPattern, allow: true, replacementString: replacementString);
 
   /// Creates a formatter that blocks characters matching a pattern.
-  ///
-  /// The [filterPattern] and [replacementString] arguments
-  /// must not be null.
   FilteringTextInputFormatter.deny(
     Pattern filterPattern, {
     String replacementString = '',
