@@ -109,9 +109,6 @@ void main() async {
         // The 2nd frame: render, which makes the window appear.
         case 2:
           drawHelloWorld(view);
-          ui.PlatformDispatcher.instance.scheduleFrame();
-        // The 3nd frame: render nothing, just wait for the window to appear.
-        case 3:
           _waitUntilWindowVisible().then((_) {
             ui.PlatformDispatcher.instance.scheduleFrame();
             if (!visibilityCompleter.isCompleted) {
