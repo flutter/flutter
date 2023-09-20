@@ -258,7 +258,6 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
     final TextStyle composingStyle = style?.merge(const TextStyle(decoration: TextDecoration.underline))
         ?? const TextStyle(decoration: TextDecoration.underline);
 
-        // print('style ${style}');
     return TextSpan(
       style: style,
       children: <TextSpan>[
@@ -3402,7 +3401,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         : TextInput.attach(this, _effectiveAutofillClient.textInputConfiguration);
       _updateSizeAndTransform();
       _schedulePeriodicPostFrameCallbacks();
-      print('setting scroll state in _openInputConnection ${_scrollController.offset}');
       _textInputConnection!
         ..setStyle(
           fontFamily: _style.fontFamily,
@@ -3561,8 +3559,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   void _onEditableScroll() {
     if(kIsWeb && _hasInputConnection) {
-      print('setting scroll state on scroll ${_scrollController.offset}');
-      print('scrollposition ${_scrollController.position}');
       final double scrollOffset = _scrollController.offset;
       final double scrollTop = widget.keyboardType == TextInputType.multiline ? scrollOffset : 0;
       final double scrollLeft = widget.keyboardType == TextInputType.multiline ? 0 : scrollOffset;
@@ -4935,7 +4931,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// By default makes text in composing range appear as underlined.
   /// Descendants can override this method to customize appearance of text.
   TextSpan buildTextSpan() {
-// print('_style ${_style}');
     if (widget.obscureText) {
       String text = _value.text;
       text = widget.obscuringCharacter * text.length;
