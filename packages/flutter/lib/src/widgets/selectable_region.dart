@@ -502,6 +502,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       case 2:
         _selectWordAt(offset: details.globalPosition);
     }
+    _updateSelectedContentIfNeeded();
   }
 
   void _handleMouseDragStart(TapDragStartDetails details) {
@@ -509,6 +510,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       case 1:
         _selectStartTo(offset: details.globalPosition);
     }
+    _updateSelectedContentIfNeeded();
   }
 
   void _handleMouseDragUpdate(TapDragUpdateDetails details) {
@@ -518,6 +520,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       case 2:
         _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
     }
+    _updateSelectedContentIfNeeded();
   }
 
   void _handleMouseDragEnd(TapDragEndDetails details) {
@@ -543,6 +546,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
 
   void _handleTouchLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
     _selectEndTo(offset: details.globalPosition, textGranularity: TextGranularity.word);
+    _updateSelectedContentIfNeeded();
   }
 
   void _handleTouchLongPressEnd(LongPressEndDetails details) {
@@ -717,6 +721,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       details.globalPosition,
       _selectionDelegate.value.startSelectionPoint!,
     ));
+    _updateSelectedContentIfNeeded();
   }
 
   void _handleSelectionStartHandleDragUpdate(DragUpdateDetails details) {
@@ -730,6 +735,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       details.globalPosition,
       _selectionDelegate.value.startSelectionPoint!,
     ));
+    _updateSelectedContentIfNeeded();
   }
 
   void _handleSelectionEndHandleDragStart(DragStartDetails details) {
@@ -742,6 +748,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       details.globalPosition,
       _selectionDelegate.value.endSelectionPoint!,
     ));
+    _updateSelectedContentIfNeeded();
   }
 
   void _handleSelectionEndHandleDragUpdate(DragUpdateDetails details) {
@@ -755,6 +762,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       details.globalPosition,
       _selectionDelegate.value.endSelectionPoint!,
     ));
+    _updateSelectedContentIfNeeded();
   }
 
   MagnifierInfo _buildInfoForMagnifier(Offset globalGesturePosition, SelectionPoint selectionPoint) {
@@ -1067,6 +1075,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         granularity: granularity,
       ),
     );
+    _updateSelectedContentIfNeeded();
   }
 
   double? _directionalHorizontalBaseline;
@@ -1088,6 +1097,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
         dx: globalSelectionPointOffset.dx,
       ),
     );
+    _updateSelectedContentIfNeeded();
   }
 
   // [TextSelectionDelegate] overrides.
@@ -1570,7 +1580,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   /// Creates an instance of [MultiSelectableSelectionContainerDelegate].
   MultiSelectableSelectionContainerDelegate() {
     if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
   }
 

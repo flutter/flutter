@@ -215,24 +215,23 @@ class IosProject extends XcodeBasedProject {
     return parent.isModule || _editableDirectory.existsSync();
   }
 
-  /// Output universal link related project settings of the iOS sub-project into
+  /// Outputs universal link related project settings of the iOS sub-project into
   /// a json file.
   ///
   /// The return future will resolve to string path to the output file.
-  Future<String> outputUniversalLinkSettings({
+  Future<String> outputsUniversalLinkSettings({
     required String configuration,
-    required String scheme,
     required String target,
   }) async {
     final XcodeProjectBuildContext context = XcodeProjectBuildContext(
       configuration: configuration,
-      scheme: scheme,
       target: target,
     );
     final File file = await parent.buildDirectory
         .childDirectory('deeplink_data')
-        .childFile('universal-link-settings-$configuration-$scheme-$target.json')
+        .childFile('universal-link-settings-$configuration-$target.json')
         .create(recursive: true);
+
     await file.writeAsString(jsonEncode(<String, Object?>{
       'bundleIdentifier': await _productBundleIdentifierWithBuildContext(context),
       'teamIdentifier': await _getTeamIdentifier(context),
