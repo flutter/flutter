@@ -27,9 +27,6 @@ const int _kCombiningCharacterMask = 0x7fffffff;
 ///  * [RawKeyboard], which uses this interface to expose key data.
 class RawKeyEventDataAndroid extends RawKeyEventData {
   /// Creates a key event data structure specific for Android.
-  ///
-  /// The [flags], [codePoint], [keyCode], [scanCode], and [metaState] arguments
-  /// must not be null.
   const RawKeyEventDataAndroid({
     this.flags = 0,
     this.codePoint = 0,
