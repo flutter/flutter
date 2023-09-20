@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestOverlayRoute extends OverlayRoute<void> {
   TestOverlayRoute({ super.settings });
@@ -47,7 +48,7 @@ class PersistentBottomSheetTestState extends State<PersistentBottomSheetTest> {
 }
 
 void main() {
-  testWidgets('Check onstage/offstage handling around transitions', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Check onstage/offstage handling around transitions', (WidgetTester tester) async {
     final GlobalKey containerKey1 = GlobalKey();
     final GlobalKey containerKey2 = GlobalKey();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -129,7 +130,7 @@ void main() {
     expect(Navigator.canPop(containerKey1.currentContext!), isFalse);
   });
 
-  testWidgets('Check back gesture disables Heroes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Check back gesture disables Heroes', (WidgetTester tester) async {
     final GlobalKey containerKey1 = GlobalKey();
     final GlobalKey containerKey2 = GlobalKey();
     const String kHeroTag = 'hero';
@@ -198,7 +199,7 @@ void main() {
     expect(settingsOffset.dy, 100.0);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets("Check back gesture doesn't start during transitions", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Check back gesture doesn't start during transitions", (WidgetTester tester) async {
     final GlobalKey containerKey1 = GlobalKey();
     final GlobalKey containerKey2 = GlobalKey();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -242,7 +243,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   // Tests bug https://github.com/flutter/flutter/issues/6451
-  testWidgets('Check back gesture with a persistent bottom sheet showing', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Check back gesture with a persistent bottom sheet showing', (WidgetTester tester) async {
     final GlobalKey containerKey1 = GlobalKey();
     final GlobalKey containerKey2 = GlobalKey();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -295,7 +296,7 @@ void main() {
     expect(sheet.setStateCalled, isFalse);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('Test completed future', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Test completed future', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (_) => const Center(child: Text('home')),
       '/next': (_) => const Center(child: Text('next')),
