@@ -736,15 +736,15 @@ class _TabBarScrollController extends ScrollController {
 class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a Material Design primary tab bar.
   ///
-  /// The [tabs] argument must not be null and its length must match the [controller]'s
+  /// The length of the [tabs] argument must match the [controller]'s
   /// [TabController.length].
   ///
   /// If a [TabController] is not provided, then there must be a
   /// [DefaultTabController] ancestor.
   ///
-  /// The [indicatorWeight] parameter defaults to 2, and must not be null.
+  /// The [indicatorWeight] parameter defaults to 2.
   ///
-  /// The [indicatorPadding] parameter defaults to [EdgeInsets.zero], and must not be null.
+  /// The [indicatorPadding] parameter defaults to [EdgeInsets.zero].
   ///
   /// If [indicator] is not null or provided from [TabBarTheme],
   /// then [indicatorWeight] and [indicatorColor] are ignored.
@@ -2046,8 +2046,6 @@ class _TabBarViewState extends State<TabBarView> {
 /// Used by [TabPageSelector] to indicate the selected page.
 class TabPageSelectorIndicator extends StatelessWidget {
   /// Creates an indicator used by [TabPageSelector].
-  ///
-  /// The [backgroundColor], [borderColor], and [size] parameters must not be null.
   const TabPageSelectorIndicator({
     super.key,
     required this.backgroundColor,

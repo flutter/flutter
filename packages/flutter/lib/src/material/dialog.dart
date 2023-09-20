@@ -182,7 +182,7 @@ class Dialog extends StatelessWidget {
   /// See the enum [Clip] for details of all possible options and their common
   /// use cases.
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// Defaults to [Clip.none].
   /// {@endtemplate}
   final Clip clipBehavior;
 
@@ -1096,8 +1096,6 @@ class SimpleDialog extends StatelessWidget {
   /// Creates a simple dialog.
   ///
   /// Typically used in conjunction with [showDialog].
-  ///
-  /// The [titlePadding] and [contentPadding] arguments must not be null.
   const SimpleDialog({
     super.key,
     this.title,
