@@ -152,8 +152,9 @@
                 "name": "Upload fuchsia artifacts",
                 "parameters": [
                     "--engine-version",
-                    "HEAD",
-                    "--skip-build"
+                    "${REVISION}",
+                    "--skip-build",
+		    "--upload"
                 ],
                 "script": "flutter/tools/fuchsia/build_fuchsia_artifacts.py",
                 "language": "python3"
@@ -166,7 +167,7 @@
                     "--target-arch",
                     "arm64",
                     "--out-dir",
-                    "/b/s/w/ir/x/w/recipe_cleanup/tmppqs4ecj7",
+                    "${LUCI_CLEANUP}",
                     "--symbol-dirs",
                     "out/fuchsia_debug_arm64/.build-id",
                     "out/fuchsia_profile_arm64/.build-id",
@@ -183,7 +184,7 @@
                     "--target-arch",
                     "x64",
                     "--out-dir",
-                    "/b/s/w/ir/x/w/recipe_cleanup/tmppqs4ecj7",
+                    "${LUCI_CLEANUP}",
                     "--symbol-dirs",
                     "out/fuchsia_debug_x64/.build-id",
                     "out/fuchsia_profile_x64/.build-id",
