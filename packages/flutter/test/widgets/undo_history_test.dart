@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'editable_text_utils.dart';
 
-final FocusNode focusNode = FocusNode(debugLabel: 'UndoHistory Node');
+final FocusNode _focusNode = FocusNode(debugLabel: 'UndoHistory Node');
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -41,7 +41,7 @@ void main() {
             onTriggered: (int newValue) {
               value.value = newValue;
             },
-            focusNode: focusNode,
+            focusNode: _focusNode,
             child: Container(),
           ),
         ),
@@ -57,7 +57,7 @@ void main() {
       controller.redo();
       expect(value.value, 0);
 
-      focusNode.requestFocus();
+      _focusNode.requestFocus();
       await tester.pump();
       expect(controller.value.canUndo, false);
       expect(controller.value.canRedo, false);
@@ -130,9 +130,9 @@ void main() {
             onTriggered: (int newValue) {
               value.value = newValue;
             },
-            focusNode: focusNode,
+            focusNode: _focusNode,
             child: Focus(
-              focusNode: focusNode,
+              focusNode: _focusNode,
               child: Container(),
             ),
           ),
@@ -149,7 +149,7 @@ void main() {
       await sendRedo(tester);
       expect(value.value, 0);
 
-      focusNode.requestFocus();
+      _focusNode.requestFocus();
       await tester.pump();
       expect(controller.value.canUndo, false);
       expect(controller.value.canRedo, false);
@@ -222,13 +222,13 @@ void main() {
             onTriggered: (int newValue) {
               value.value = newValue;
             },
-            focusNode: focusNode,
+            focusNode: _focusNode,
             child: Container(),
           ),
         ),
       );
 
-      focusNode.requestFocus();
+      _focusNode.requestFocus();
 
       // Wait for the throttling.
       await tester.pump(const Duration(milliseconds: 500));
@@ -275,7 +275,7 @@ void main() {
             onTriggered: (int newValue) {
               value.value = valueToUse(newValue);
             },
-            focusNode: focusNode,
+            focusNode: _focusNode,
             child: Container(),
           ),
         ),
@@ -291,7 +291,7 @@ void main() {
       controller.redo();
       expect(value.value, 0);
 
-      focusNode.requestFocus();
+      _focusNode.requestFocus();
       await tester.pump();
       expect(controller.value.canUndo, false);
       expect(controller.value.canRedo, false);
@@ -389,9 +389,9 @@ void main() {
             onTriggered: (int newValue) {
               value.value = newValue;
             },
-            focusNode: focusNode,
+            focusNode: _focusNode,
             child: Focus(
-              focusNode: focusNode,
+              focusNode: _focusNode,
               child: Container(),
             ),
           ),
@@ -399,7 +399,7 @@ void main() {
       );
 
       await tester.pump(const Duration(milliseconds: 500));
-      focusNode.requestFocus();
+      _focusNode.requestFocus();
       await tester.pump();
 
       // Undo/redo have no effect if the value has never changed.
