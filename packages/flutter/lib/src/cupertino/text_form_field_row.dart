@@ -313,6 +313,7 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
   @override
   void dispose() {
     _cupertinoTextFormFieldRow.controller?.removeListener(_handleControllerChanged);
+    _controller?.dispose();
     super.dispose();
   }
 
