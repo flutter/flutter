@@ -150,10 +150,6 @@ buildscript {
         classpath 'com.android.tools.build:gradle:7.3.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
-
-    configurations.classpath {
-        resolutionStrategy.activateDependencyLocking()
-    }
 }
 
 allprojects {
@@ -164,19 +160,11 @@ allprojects {
 }
 
 rootProject.buildDir = '../build'
-
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
 }
 subprojects {
     project.evaluationDependsOn(':app')
-    dependencyLocking {
-        ignoredDependencies.add('io.flutter:*')
-        lockFile = file("${rootProject.projectDir}/project-${project.name}.lockfile")
-        if (!project.hasProperty('local-engine-repo')) {
-          lockAllConfigurations()
-        }
-    }
 }
 
 tasks.register("clean", Delete) {
@@ -193,15 +181,24 @@ const String settingGradleFile = r'''
 // To update all the settings.gradle files in the Flutter repo,
 // See dev/tools/bin/generate_gradle_lockfiles.dart.
 
-include ':app'
+pluginManagement {
+    def flutterSdkPath = {
+        def properties = new Properties()
+        file("local.properties").withInputStream { properties.load(it) }
+        def flutterSdkPath = properties.getProperty("flutter.sdk")
+        assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
+        return flutterSdkPath
+    }
+    settings.ext.flutterSdkPath = flutterSdkPath()
 
-def localPropertiesFile = new File(rootProject.projectDir, "local.properties")
-def properties = new Properties()
+    includeBuild("${settings.ext.flutterSdkPath}/packages/flutter_tools/gradle")
 
-assert localPropertiesFile.exists()
-localPropertiesFile.withReader("UTF-8") { reader -> properties.load(reader) }
+    plugins {
+        id "dev.flutter.flutter-gradle-plugin" version "1.0.0" apply false
+    }
+}
 
-def flutterSdkPath = properties.getProperty("flutter.sdk")
-assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
-apply from: "$flutterSdkPath/packages/flutter_tools/gradle/app_plugin_loader.gradle"
+include ":app"
+
+apply from: "${settings.ext.flutterSdkPath}/packages/flutter_tools/gradle/app_plugin_loader.gradle"
 ''';
