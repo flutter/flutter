@@ -97,8 +97,7 @@ void main() async {
       // before drawing, but since `isWindowVisible` has to be async, and
       // `FlutterView.render` (in `drawHelloWorld`) forbids async before it,
       // this can not be done during a single onBeginFrame. However, we can
-      // verify in two frames to indirectly prove it: The first frame checks
-      // isWindowVisible(), while the subsequent frames draw. This ensures that
+      // verify in separate frames to indirectly prove it, by ensuring that
       // no other mechanism can affect isWindowVisible in the first frame at all.
       frameCount += 1;
       switch (frameCount) {
@@ -110,9 +109,6 @@ void main() async {
           });
         // The 2nd frame: render, meanwhile verify that the window is hidden.
         case 2:
-        // TODO(dkwingsmt): It should be frameCount > 2. Not sure why the window
-        // is still hidden at the beginning of the 3rd frame.
-        // case 3:
           isWindowVisible().then((bool visible) {
             _expectVisible(visible, false, visibilityCompleter, frameCount);
             ui.PlatformDispatcher.instance.scheduleFrame();
