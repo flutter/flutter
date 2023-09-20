@@ -1604,12 +1604,16 @@ class ListView extends BoxScrollView {
   final ItemExtentBuilder? itemExtentBuilder;
 
   /// {@template flutter.widgets.list_view.enableItemExtentsCaching}
-  /// Whether to cache the main axis extents of all laid out children.
+  /// Whether to cache the main axis extents of all laid out children. The
+  /// cached data will be used to calculate which children will be loaded during
+  /// the 'Lazy Loading' phase.
   ///
   /// If true, the main axis extent of child will be cached as
-  /// index/extent pairs when the child first laid out.
+  /// index/(key, extent) pairs when the child first laid out. If the [Key] of
+  /// the item widget changes after caching, the corresponding cached extent
+  /// will be removed and the new extent will be cached after layout.
   ///
-  /// If false, the main axis extents of children will not be cached and
+  /// If false, the main axis extents of children will not be cached and all the
   /// previously cached data will be cleared.
   ///
   /// The default is false.
@@ -1618,11 +1622,11 @@ class ListView extends BoxScrollView {
   /// of children do not change or change infrequently during its life cycle.
   /// Using cached extent dimensions will improve scrolling performance,
   /// especially in scenarios that the scroll position changes drastically,
-  /// as it will significantly reduce the number of layout times if the children
+  /// as it will significantly reduce the layout times if the children
   /// have been laid out before.
   ///
   /// If the main axis extent of child at a certain index changes, the [Key] of
-  /// the item widget needs to be changed to drive the framework to invalidate
+  /// the item widget needs to change to drive the framework to invalidate
   /// this child's cached value.
   ///
   /// All cached data will be cleared automatically if [scrollDirection] or
