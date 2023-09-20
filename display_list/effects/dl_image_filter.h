@@ -5,6 +5,8 @@
 #ifndef FLUTTER_DISPLAY_LIST_EFFECTS_DL_IMAGE_FILTER_H_
 #define FLUTTER_DISPLAY_LIST_EFFECTS_DL_IMAGE_FILTER_H_
 
+#include <utility>
+
 #include "flutter/display_list/dl_attributes.h"
 #include "flutter/display_list/dl_sampling_options.h"
 #include "flutter/display_list/dl_tile_mode.h"
@@ -223,7 +225,7 @@ class DlBlurImageFilter final : public DlImageFilter {
       : DlBlurImageFilter(filter->sigma_x_,
                           filter->sigma_y_,
                           filter->tile_mode_) {}
-  explicit DlBlurImageFilter(const DlBlurImageFilter& filter)
+  DlBlurImageFilter(const DlBlurImageFilter& filter)
       : DlBlurImageFilter(&filter) {}
 
   static std::shared_ptr<DlImageFilter> Make(SkScalar sigma_x,
@@ -295,7 +297,7 @@ class DlDilateImageFilter final : public DlImageFilter {
       : radius_x_(radius_x), radius_y_(radius_y) {}
   explicit DlDilateImageFilter(const DlDilateImageFilter* filter)
       : DlDilateImageFilter(filter->radius_x_, filter->radius_y_) {}
-  explicit DlDilateImageFilter(const DlDilateImageFilter& filter)
+  DlDilateImageFilter(const DlDilateImageFilter& filter)
       : DlDilateImageFilter(&filter) {}
 
   static std::shared_ptr<DlImageFilter> Make(SkScalar radius_x,
@@ -359,7 +361,7 @@ class DlErodeImageFilter final : public DlImageFilter {
       : radius_x_(radius_x), radius_y_(radius_y) {}
   explicit DlErodeImageFilter(const DlErodeImageFilter* filter)
       : DlErodeImageFilter(filter->radius_x_, filter->radius_y_) {}
-  explicit DlErodeImageFilter(const DlErodeImageFilter& filter)
+  DlErodeImageFilter(const DlErodeImageFilter& filter)
       : DlErodeImageFilter(&filter) {}
 
   static std::shared_ptr<DlImageFilter> Make(SkScalar radius_x,
@@ -423,7 +425,7 @@ class DlMatrixImageFilter final : public DlImageFilter {
       : matrix_(matrix), sampling_(sampling) {}
   explicit DlMatrixImageFilter(const DlMatrixImageFilter* filter)
       : DlMatrixImageFilter(filter->matrix_, filter->sampling_) {}
-  explicit DlMatrixImageFilter(const DlMatrixImageFilter& filter)
+  DlMatrixImageFilter(const DlMatrixImageFilter& filter)
       : DlMatrixImageFilter(&filter) {}
 
   static std::shared_ptr<DlImageFilter> Make(const SkMatrix& matrix,
@@ -510,7 +512,7 @@ class DlComposeImageFilter final : public DlImageFilter {
       : DlComposeImageFilter(&outer, &inner) {}
   explicit DlComposeImageFilter(const DlComposeImageFilter* filter)
       : DlComposeImageFilter(filter->outer_, filter->inner_) {}
-  explicit DlComposeImageFilter(const DlComposeImageFilter& filter)
+  DlComposeImageFilter(const DlComposeImageFilter& filter)
       : DlComposeImageFilter(&filter) {}
 
   static std::shared_ptr<const DlImageFilter> Make(
@@ -586,7 +588,7 @@ class DlColorFilterImageFilter final : public DlImageFilter {
       : color_filter_(filter.shared()) {}
   explicit DlColorFilterImageFilter(const DlColorFilterImageFilter* filter)
       : DlColorFilterImageFilter(filter->color_filter_) {}
-  explicit DlColorFilterImageFilter(const DlColorFilterImageFilter& filter)
+  DlColorFilterImageFilter(const DlColorFilterImageFilter& filter)
       : DlColorFilterImageFilter(&filter) {}
 
   static std::shared_ptr<DlImageFilter> Make(
@@ -664,7 +666,7 @@ class DlLocalMatrixImageFilter final : public DlImageFilter {
  public:
   explicit DlLocalMatrixImageFilter(const SkMatrix& matrix,
                                     std::shared_ptr<DlImageFilter> filter)
-      : matrix_(matrix), image_filter_(filter) {}
+      : matrix_(matrix), image_filter_(std::move(filter)) {}
   explicit DlLocalMatrixImageFilter(const DlLocalMatrixImageFilter* filter)
       : DlLocalMatrixImageFilter(filter->matrix_, filter->image_filter_) {}
   DlLocalMatrixImageFilter(const DlLocalMatrixImageFilter& filter)
