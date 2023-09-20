@@ -20,8 +20,6 @@ typedef _SimpleDecoderCallback = Future<ui.Codec> Function(ui.ImmutableBuffer bu
 @immutable
 class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkImage> implements image_provider.NetworkImage {
   /// Creates an object that fetches the image at the given URL.
-  ///
-  /// The arguments [url] and [scale] must not be null.
   const NetworkImage(this.url, { this.scale = 1.0, this.headers });
 
   @override

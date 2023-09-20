@@ -40,9 +40,6 @@ enum ImageRepeat {
 @immutable
 class DecorationImage {
   /// Creates an image to show in a [BoxDecoration].
-  ///
-  /// The [image], [alignment], [repeat], and [matchTextDirection] arguments
-  /// must not be null.
   const DecorationImage({
     required this.image,
     this.onError,
@@ -173,9 +170,9 @@ class DecorationImage {
 
   /// Creates a [DecorationImagePainter] for this [DecorationImage].
   ///
-  /// The `onChanged` argument must not be null. It will be called whenever the
-  /// image needs to be repainted, e.g. because it is loading incrementally or
-  /// because it is animated.
+  /// The `onChanged` argument will be called whenever the image needs to be
+  /// repainted, e.g. because it is loading incrementally or because it is
+  /// animated.
   DecorationImagePainter createPainter(VoidCallback onChanged) {
     return _DecorationImagePainter._(this, onChanged);
   }
@@ -501,9 +498,6 @@ void debugFlushLastFrameImageSizeInfo() {
 ///     Use the [FilterQuality.low] quality setting to scale the image, which corresponds to
 ///     bilinear interpolation, rather than the default [FilterQuality.none] which corresponds
 ///     to nearest-neighbor.
-///
-/// The `canvas`, `rect`, `image`, `scale`, `alignment`, `repeat`, `flipHorizontally` and `filterQuality`
-/// arguments must not be null.
 ///
 /// See also:
 ///

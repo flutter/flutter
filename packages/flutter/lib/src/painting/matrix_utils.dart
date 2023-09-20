@@ -541,8 +541,6 @@ List<String> debugDescribeTransform(Matrix4? transform) {
 /// Property which handles [Matrix4] that represent transforms.
 class TransformProperty extends DiagnosticsProperty<Matrix4> {
   /// Create a diagnostics property for [Matrix4] objects.
-  ///
-  /// The [showName] and [level] arguments must not be null.
   TransformProperty(
     String super.name,
     super.value, {

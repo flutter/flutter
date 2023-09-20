@@ -231,8 +231,7 @@ class ImageCache {
   /// completely discarded by the cache. It should be set to false when calls
   /// to evict are trying to relieve memory pressure, since an image with a
   /// listener will not actually be evicted from memory, and subsequent attempts
-  /// to load it will end up allocating more memory for the image again. The
-  /// argument must not be null.
+  /// to load it will end up allocating more memory for the image again.
   ///
   /// See also:
   ///
@@ -312,8 +311,6 @@ class ImageCache {
   /// Returns the previously cached [ImageStream] for the given key, if available;
   /// if not, calls the given callback to obtain it first. In either case, the
   /// key is moved to the 'most recently used' position.
-  ///
-  /// The arguments must not be null. The `loader` cannot return null.
   ///
   /// In the event that the loader throws an exception, it will be caught only if
   /// `onError` is also provided. When an exception is caught resolving an image,

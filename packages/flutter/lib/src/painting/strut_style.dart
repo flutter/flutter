@@ -318,8 +318,6 @@ class StrutStyle with Diagnosticable {
   /// Builds a StrutStyle that contains values of the equivalent properties in
   /// the provided [textStyle].
   ///
-  /// The [textStyle] parameter must not be null.
-  ///
   /// The named parameters override the [textStyle]'s argument's properties.
   /// Since TextStyle does not contain [leading] or [forceStrutHeight], these
   /// values will take on default values (null and false) unless otherwise

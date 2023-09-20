@@ -303,8 +303,6 @@ abstract class CustomPainter extends Listenable {
 @immutable
 class CustomPainterSemantics {
   /// Creates semantics information describing a rectangle on a canvas.
-  ///
-  /// Arguments `rect` and `properties` must not be null.
   const CustomPainterSemantics({
     this.key,
     required this.rect,

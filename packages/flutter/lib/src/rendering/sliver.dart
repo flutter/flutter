@@ -183,8 +183,6 @@ ScrollDirection applyGrowthDirectionToScrollDirection(ScrollDirection scrollDire
 /// offset.
 class SliverConstraints extends Constraints {
   /// Creates sliver constraints with the given information.
-  ///
-  /// All of the argument must not be null.
   const SliverConstraints({
     required this.axisDirection,
     required this.growthDirection,
@@ -620,8 +618,6 @@ class SliverGeometry with Diagnosticable {
   /// [paintExtent]. If the [hitTestExtent] argument is null, [hitTestExtent]
   /// defaults to the [paintExtent]. If [visible] is null, [visible] defaults to
   /// whether [paintExtent] is greater than zero.
-  ///
-  /// The other arguments must not be null.
   const SliverGeometry({
     this.scrollExtent = 0.0,
     this.paintExtent = 0.0,
@@ -997,8 +993,6 @@ class SliverHitTestResult extends HitTestResult {
 /// [AxisDirection] of the target sliver.
 class SliverHitTestEntry extends HitTestEntry<RenderSliver> {
   /// Creates a sliver hit test entry.
-  ///
-  /// The [mainAxisPosition] and [crossAxisPosition] arguments must not be null.
   SliverHitTestEntry(
     super.target, {
     required this.mainAxisPosition,

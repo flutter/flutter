@@ -122,7 +122,7 @@ class RenderAndroidView extends PlatformViewRenderBox {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.hardEdge], and must not be null.
+  /// Defaults to [Clip.hardEdge].
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.hardEdge;
   set clipBehavior(Clip value) {
@@ -404,8 +404,6 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
 ///  * [PlatformViewsService], which is a service for controlling platform views.
 class RenderUiKitView extends RenderDarwinPlatformView<UiKitViewController> {
   /// Creates a render object for an iOS UIView.
-  ///
-  /// The `viewId`, `hitTestBehavior`, and `gestureRecognizers` parameters must not be null.
   RenderUiKitView({
       required super.viewController,
       required super.hitTestBehavior,
@@ -655,8 +653,6 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
 /// integrates it with the gesture arenas system and adds relevant semantic nodes to the semantics tree.
 class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   /// Creating a render object for a [PlatformViewSurface].
-  ///
-  /// The `controller` parameter must not be null.
   PlatformViewRenderBox({
     required PlatformViewController controller,
     required PlatformViewHitTestBehavior hitTestBehavior,
@@ -670,7 +666,7 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   /// The controller for this render object.
   PlatformViewController get controller => _controller;
   PlatformViewController _controller;
-  /// This value must not be null, and setting it to a new value will result in a repaint.
+  /// Setting this value to a new value will result in a repaint.
   set controller(covariant PlatformViewController controller) {
     assert(controller.viewId > -1);
 
