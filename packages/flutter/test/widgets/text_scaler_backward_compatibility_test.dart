@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   group('TextStyle', () {
@@ -64,7 +65,7 @@ void main() {
       );
     });
 
-    testWidgets('MediaQuery.textScaleFactorOf overriding compatibility', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('MediaQuery.textScaleFactorOf overriding compatibility', (WidgetTester tester) async {
       late final double outsideTextScaleFactor;
       late final TextScaler outsideTextScaler;
       late final double insideTextScaleFactor;
@@ -103,7 +104,7 @@ void main() {
       expect(insideTextScaler, const TextScaler.linear(4.0));
     });
 
-    testWidgets('textScaleFactor overriding backward compatibility', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('textScaleFactor overriding backward compatibility', (WidgetTester tester) async {
       late final double outsideTextScaleFactor;
       late final TextScaler outsideTextScaler;
       late final double insideTextScaleFactor;
@@ -183,7 +184,7 @@ void main() {
   });
 
   group('Widgets backward compatibility', () {
-    testWidgets('RichText', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('RichText', (WidgetTester tester) async {
       await tester.pumpWidget(
         RichText(
           textDirection: TextDirection.ltr,
@@ -199,7 +200,7 @@ void main() {
       expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).textScaleFactor, 2.0);
     });
 
-    testWidgets('Text', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Text', (WidgetTester tester) async {
       await tester.pumpWidget(
         const Text(
           'text',
@@ -214,9 +215,11 @@ void main() {
       );
     });
 
-    testWidgets('EditableText', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('EditableText', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
+      addTearDown(controller.dispose);
       final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Node');
+      addTearDown(focusNode.dispose);
       const TextStyle textStyle = TextStyle();
       const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
       await tester.pumpWidget(

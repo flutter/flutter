@@ -616,8 +616,6 @@ class _ScreenshotPaintingContext extends PaintingContext {
 class _DiagnosticsPathNode {
   /// Creates a full description of a step in a path through a tree of
   /// [DiagnosticsNode] objects.
-  ///
-  /// The [node] and [child] arguments must not be null.
   _DiagnosticsPathNode({
     required this.node,
     required this.children,
@@ -2668,8 +2666,6 @@ class _WidgetForTypeTests extends Widget {
 /// bottom left corner of the application switches back to select mode.
 class WidgetInspector extends StatefulWidget {
   /// Creates a widget that enables inspection for the child.
-  ///
-  /// The [child] argument must not be null.
   const WidgetInspector({
     super.key,
     required this.child,
@@ -3004,7 +3000,6 @@ class _InspectorOverlay extends LeafRenderObjectWidget {
 }
 
 class _RenderInspectorOverlay extends RenderBox {
-  /// The arguments must not be null.
   _RenderInspectorOverlay({ required InspectorSelection selection })
     : _selection = selection;
 
@@ -3546,16 +3541,12 @@ Iterable<DiagnosticsNode> _describeRelevantUserCode(
 ///
 /// The [value] for this property is a string representation of the Flutter
 /// DevTools url.
-///
-/// Properties `description` and `url` must not be null.
 class DevToolsDeepLinkProperty extends DiagnosticsProperty<String> {
   /// Creates a diagnostics property that displays a deep link to Flutter DevTools.
   ///
   /// The [value] of this property will return a map of data for the Flutter
   /// DevTools deep link, including the full `url`, the Flutter DevTools `screenId`,
   /// and the `objectId` in Flutter DevTools that this diagnostic references.
-  ///
-  /// The `description` and `url` arguments must not be null.
   DevToolsDeepLinkProperty(String description, String url)
     : super('', url, description: description, level: DiagnosticLevel.info);
 }
