@@ -38,6 +38,11 @@ class PlatformViewManager {
     );
   }
 
+  /// The shared instance of PlatformViewManager shared across the engine to handle
+  /// rendering of PlatformViews into the web app.
+  // TODO(dit): How to make this overridable from tests?
+  static final PlatformViewManager instance = PlatformViewManager();
+
   // The factory functions, indexed by the viewType
   final Map<String, Function> _factories = <String, Function>{};
 
@@ -49,7 +54,7 @@ class PlatformViewManager {
 
   /// Returns `true` if the passed in `viewType` has been registered before.
   ///
-  /// See [registerViewFactory] to understand how factories are registered.
+  /// See [registerFactory] to understand how factories are registered.
   bool knowsViewType(String viewType) {
     return _factories.containsKey(viewType);
   }

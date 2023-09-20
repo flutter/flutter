@@ -42,7 +42,7 @@ class PlatformViewRegistry {
     Function viewFactory, {
     bool isVisible = true,
   }) {
-    return platformViewManager.registerFactory(
+    return PlatformViewManager.instance.registerFactory(
       viewType,
       viewFactory,
       isVisible: isVisible,
@@ -53,6 +53,6 @@ class PlatformViewRegistry {
   ///
   /// Throws if no view has been created for [viewId].
   Object getViewById(int viewId) {
-    return platformViewManager.getViewById(viewId);
+    return PlatformViewManager.instance.getViewById(viewId);
   }
 }

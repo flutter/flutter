@@ -270,8 +270,3 @@ set debugDisableFontFallbacks(bool value) {
   _debugDisableFontFallbacks = value;
 }
 bool _debugDisableFontFallbacks = false;
-
-/// The shared instance of PlatformViewManager shared across the engine to handle
-/// rendering of PlatformViews into the web app.
-// TODO(dit): How to make this overridable from tests?
-final PlatformViewManager platformViewManager = PlatformViewManager();
