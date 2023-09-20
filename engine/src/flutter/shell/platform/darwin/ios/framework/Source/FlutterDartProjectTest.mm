@@ -89,31 +89,24 @@ FLUTTER_ASSERT_ARC
 
 - (void)testFLTAssetsURLFromBundle {
   {
-    // Found asset path in info.plist (even not reachable)
+    // Found asset path in info.plist
     id mockBundle = OCMClassMock([NSBundle class]);
     OCMStub([mockBundle objectForInfoDictionaryKey:@"FLTAssetsPath"]).andReturn(@"foo/assets");
-    NSURL* mockAssetsURL = OCMClassMock([NSURL class]);
-    OCMStub([mockBundle URLForResource:@"foo/assets" withExtension:nil]).andReturn(mockAssetsURL);
-    OCMStub([mockAssetsURL checkResourceIsReachableAndReturnError:NULL]).andReturn(NO);
-    OCMStub([mockAssetsURL path]).andReturn(@"foo/assets");
-    NSURL* url = FLTAssetsURLFromBundle(mockBundle);
-    XCTAssertEqualObjects(url.path, @"foo/assets");
+    NSString* resultAssetsPath = @"path/to/foo/assets";
+    OCMStub([mockBundle pathForResource:@"foo/assets" ofType:@""]).andReturn(resultAssetsPath);
+    NSString* path = FLTAssetsPathFromBundle(mockBundle);
+    XCTAssertEqualObjects(path, @"path/to/foo/assets");
   }
   {
     // No asset path in info.plist, defaults to main bundle
     id mockBundle = OCMClassMock([NSBundle class]);
     id mockMainBundle = OCMPartialMock([NSBundle mainBundle]);
-    NSURL* mockAssetsURL = OCMClassMock([NSURL class]);
-    OCMStub([mockBundle URLForResource:@"Frameworks/App.framework/flutter_assets"
-                         withExtension:nil])
-        .andReturn(nil);
-    OCMStub([mockAssetsURL checkResourceIsReachableAndReturnError:NULL]).andReturn(NO);
-    OCMStub([mockAssetsURL path]).andReturn(@"path/to/foo/assets");
-    OCMStub([mockMainBundle URLForResource:@"Frameworks/App.framework/flutter_assets"
-                             withExtension:nil])
-        .andReturn(mockAssetsURL);
-    NSURL* url = FLTAssetsURLFromBundle(mockBundle);
-    XCTAssertEqualObjects(url.path, @"path/to/foo/assets");
+    NSString* resultAssetsPath = @"path/to/foo/assets";
+    OCMStub([mockBundle pathForResource:@"flutter_assets" ofType:@""]).andReturn(nil);
+    OCMStub([mockMainBundle pathForResource:@"flutter_assets" ofType:@""])
+        .andReturn(resultAssetsPath);
+    NSString* path = FLTAssetsPathFromBundle(mockBundle);
+    XCTAssertEqualObjects(path, @"path/to/foo/assets");
   }
 }
 

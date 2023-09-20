@@ -48,7 +48,7 @@ NSString* FLTAssetPath(NSBundle* bundle);
 // If the key is not set, `flutter_assets` is used as the raw path value.
 //
 // If no valid asset is found under the raw path, returns nil.
-NSURL* FLTAssetsURLFromBundle(NSBundle* bundle);
+NSString* FLTAssetsPathFromBundle(NSBundle* bundle);
 
 NS_ASSUME_NONNULL_END
 
