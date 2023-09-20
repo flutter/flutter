@@ -32,9 +32,6 @@ typedef AnimatedTransitionBuilder = Widget Function(
 /// any descendant widget is lost when the transition starts or completes.
 class DualTransitionBuilder extends StatefulWidget {
   /// Creates a [DualTransitionBuilder].
-  ///
-  /// The [animation], [forwardBuilder], and [reverseBuilder] arguments are
-  /// required and must not be null.
   const DualTransitionBuilder({
     super.key,
     required this.animation,
