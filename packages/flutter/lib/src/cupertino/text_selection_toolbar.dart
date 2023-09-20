@@ -590,29 +590,47 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
     super.dispose();
   }
 
-  Widget _createChevron({required bool isLeft}) {
-    final Color color = _kToolbarTextColor.resolveFrom(context);
+  @override
+  Widget build(BuildContext context) {
+    final Color chevronColor = _kToolbarTextColor.resolveFrom(context);
 
-    return IgnorePointer(
-      // Use Center with widthFactor and heightFactor of 1.0 so
-      // _CupertinoTextSelectionToolbarItems can get the natural size
-      // of the buttons and then expand vertically as needed i.e. if children
-      // have higher height than that.
-      child: Center(
-        widthFactor: 1.0,
-        heightFactor: 1.0,
-        child: CustomPaint(
-          painter: isLeft
-            ? _LeftCupertinoChevronPainter(color: color)
-            : _RightCupertinoChevronPainter(color: color),
-          size: const Size.square(_kToolbarChevronSize),
+    // Wrap children and chevron painters in Center with widthFactor
+    // and heightFactor of 1.0 so _CupertinoTextSelectionToolbarItems can get
+    // the natural size of the buttons and then expand vertically as needed.
+    final Widget backButton = CupertinoTextSelectionToolbarButton(
+      onPressed: _handlePreviousPage,
+      child: IgnorePointer(
+        child: Center(
+          widthFactor: 1.0,
+          heightFactor: 1.0,
+          child: CustomPaint(
+            painter: _LeftCupertinoChevronPainter(color: chevronColor),
+            size: const Size.square(_kToolbarChevronSize),
+          ),
         ),
       ),
     );
-  }
+    final Widget nextButton = CupertinoTextSelectionToolbarButton(
+      onPressed: _handleNextPage,
+      child: IgnorePointer(
+        child: Center(
+          widthFactor: 1.0,
+          heightFactor: 1.0,
+          child: CustomPaint(
+            painter: _RightCupertinoChevronPainter(color: chevronColor),
+            size: const Size.square(_kToolbarChevronSize),
+          ),
+        ),
+      ),
+    );
+    final List<Widget> children = widget.children.map((Widget child) {
+      return Center(
+        widthFactor: 1.0,
+        heightFactor: 1.0,
+        child: child,
+      );
+    }).toList();
 
-  @override
-  Widget build(BuildContext context) {
     return widget.toolbarBuilder(context, widget.anchorAbove, widget.anchorBelow, FadeTransition(
       opacity: _controller,
       child: AnimatedSize(
@@ -623,17 +641,11 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
           child: _CupertinoTextSelectionToolbarItems(
             key: _toolbarItemsKey,
             page: _page,
-            backButton: CupertinoTextSelectionToolbarButton(
-              onPressed: _handlePreviousPage,
-              child: _createChevron(isLeft: true),
-            ),
+            backButton: backButton,
             dividerColor: _kToolbarDividerColor.resolveFrom(context),
             dividerWidth: 1.0 / MediaQuery.devicePixelRatioOf(context),
-            nextButton: CupertinoTextSelectionToolbarButton(
-              onPressed: _handleNextPage,
-              child: _createChevron(isLeft: false),
-            ),
-            children: widget.children,
+            nextButton: nextButton,
+            children: children,
           ),
         ),
       ),
@@ -923,10 +935,6 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
     return newChild;
   }
 
-  bool _isSlottedChild(RenderBox child) {
-    return child == _backButton || child == _nextButton;
-  }
-
   int _page;
   int get page => _page;
   set page(int value) {
@@ -981,11 +989,9 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
     _nextButton!.layout(constraints.loosen(), parentUsesSize: true);
 
     // Require the children to have at least the height of the nav buttons.
-    final double minHeight =
-        clampDouble(constraints.minHeight, _backButton!.size.height, _nextButton!.size.height);
+    final double minHeight = clampDouble(constraints.minHeight, _backButton!.size.height, _nextButton!.size.height);
 
-    final double subsequentPageButtonsWidth =
-        _backButton!.size.width + _nextButton!.size.width;
+    final double subsequentPageButtonsWidth = _backButton!.size.width + _nextButton!.size.width;
     double currentButtonPosition = 0.0;
     late double toolbarWidth; // The width of the whole widget.
     late double greatestHeight = 0.0;
@@ -999,7 +1005,7 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
       childParentData.shouldPaint = false;
 
       // Skip slotted children and children on pages after the visible page.
-      if (_isSlottedChild(child) || currentPage > _page) {
+      if (child == _backButton || child == _nextButton || currentPage > _page) {
         return;
       }
 
@@ -1054,30 +1060,24 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
       }
     });
 
-    // If needed, re-layout slotted children using max. child height to allow
-    // the back/next buttons to be centered vertically.
-    if (greatestHeight > _backButton!.size.height) {
-      _backButton!.layout(
-        BoxConstraints.tightFor(width: _backButton!.size.width, height: greatestHeight),
-        parentUsesSize: true,
-      );
-    }
-    if (greatestHeight > _nextButton!.size.height) {
-      _nextButton!.layout(
-        BoxConstraints.tightFor(width: _nextButton!.size.width, height: greatestHeight),
-        parentUsesSize: true,
-      );
-    }
+    // Re-layout children using max. child height to allow them to be centered vertically.
+    visitChildren((RenderObject renderObjectChild) {
+      final RenderBox child = renderObjectChild as RenderBox;
+      if (child.hasSize) {
+        child.layout(
+          BoxConstraints.tightFor(width: child.size.width, height: greatestHeight),
+          parentUsesSize: true,
+        );
+      }
+    });
 
     // It shouldn't be possible to navigate beyond the last page.
     assert(page <= currentPage);
 
     // Position page nav buttons.
     if (currentPage > 0) {
-      final ToolbarItemsParentData nextButtonParentData =
-          _nextButton!.parentData! as ToolbarItemsParentData;
-      final ToolbarItemsParentData backButtonParentData =
-          _backButton!.parentData! as ToolbarItemsParentData;
+      final ToolbarItemsParentData nextButtonParentData = _nextButton!.parentData! as ToolbarItemsParentData;
+      final ToolbarItemsParentData backButtonParentData = _backButton!.parentData! as ToolbarItemsParentData;
       // The forward button only shows when there's a page after this one.
       if (page != currentPage) {
         nextButtonParentData.offset = Offset(toolbarWidth, 0.0);
@@ -1141,8 +1141,7 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
     if (child == null) {
       return false;
     }
-    final ToolbarItemsParentData childParentData =
-        child.parentData! as ToolbarItemsParentData;
+    final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
     if (!childParentData.shouldPaint) {
       return false;
     }
