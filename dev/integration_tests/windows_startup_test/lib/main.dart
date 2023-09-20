@@ -107,13 +107,10 @@ void main() async {
             _expectVisible(visible, false, visibilityCompleter, frameCount);
             ui.PlatformDispatcher.instance.scheduleFrame();
           });
-        // The 2nd frame: render, meanwhile verify that the window is hidden.
+        // The 2nd frame: render, which makes the window appear.
         case 2:
-          isWindowVisible().then((bool visible) {
-            _expectVisible(visible, false, visibilityCompleter, frameCount);
-            ui.PlatformDispatcher.instance.scheduleFrame();
-          });
           drawHelloWorld(view);
+          ui.PlatformDispatcher.instance.scheduleFrame();
         // The 3nd frame: render nothing, just wait for the window to appear.
         case 3:
           _waitUntilWindowVisible().then((_) {
