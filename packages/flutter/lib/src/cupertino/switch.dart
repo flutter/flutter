@@ -16,6 +16,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'theme.dart';
 import 'thumb_painter.dart';
+import 'switch_theme.dart';
 
 // Examples can assume:
 // bool _lights = false;
@@ -364,12 +365,18 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   @override
   Widget build(BuildContext context) {
     final CupertinoThemeData theme = CupertinoTheme.of(context);
-    final Color activeColor = CupertinoDynamicColor.resolve(
-      widget.activeColor
-      ?? ((widget.applyTheme ?? theme.applyThemeToAll) ? theme.primaryColor : null)
-      ?? CupertinoColors.systemGreen,
-      context,
-    );
+
+    /// Proirty of color :
+    /// 1. CupertinoSwitch properties
+    /// 2. Closest CupertinoSwitchTheme
+    /// 3. CupertinoTheme's data primary color
+    /// 4. Default System Color
+    final Color activeColor = widget.activeColor ?? (CupertinoSwitchTheme.of(context)?.activeColor
+        ?? ((widget.applyTheme ?? theme.applyThemeToAll) ? theme.primaryColor : null)
+        ?? CupertinoColors.systemGreen);
+    final Color trackColor = (widget.trackColor) ?? CupertinoSwitchTheme.of(context)?.trackColor ?? CupertinoColors.secondarySystemFill;
+    final Color thumbColor = (widget.thumbColor) ?? CupertinoSwitchTheme.of(context)?.thumbColor ?? CupertinoColors.white;
+
     final (Color onLabelColor, Color offLabelColor)? onOffLabelColors =
         MediaQuery.onOffSwitchLabelsOf(context)
             ? (
@@ -399,9 +406,9 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
           autofocus: widget.autofocus,
           child: _CupertinoSwitchRenderObjectWidget(
             value: widget.value,
-            activeColor: activeColor,
-            trackColor: CupertinoDynamicColor.resolve(widget.trackColor ?? CupertinoColors.secondarySystemFill, context),
-            thumbColor: CupertinoDynamicColor.resolve(widget.thumbColor ?? CupertinoColors.white, context),
+            activeColor: CupertinoDynamicColor.resolve(activeColor,context),
+            trackColor: CupertinoDynamicColor.resolve(trackColor, context),
+            thumbColor: CupertinoDynamicColor.resolve(thumbColor,context),
             // Opacity, lightness, and saturation values were approximated with
             // color pickers on the switches in the macOS settings.
             focusColor: CupertinoDynamicColor.resolve(

@@ -50,6 +50,7 @@ void main() {
     final CupertinoThemeData theme = await testTheme(tester, const CupertinoThemeData());
 
     expect(theme.brightness, isNull);
+    expect(theme.switchTheme, isNull);
     expect(theme.primaryColor, CupertinoColors.activeBlue);
     expect(theme.textTheme.textStyle.fontSize, 17.0);
     expect(theme.applyThemeToAll, false);

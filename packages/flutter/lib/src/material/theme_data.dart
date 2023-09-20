@@ -2259,6 +2259,7 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
         _cupertinoOverrideTheme.primaryColor,
         _cupertinoOverrideTheme.primaryContrastingColor,
         _cupertinoOverrideTheme.textTheme,
+        _cupertinoOverrideTheme.switchTheme,
         _cupertinoOverrideTheme.barBackgroundColor,
         _cupertinoOverrideTheme.scaffoldBackgroundColor,
         _cupertinoOverrideTheme.applyThemeToAll,

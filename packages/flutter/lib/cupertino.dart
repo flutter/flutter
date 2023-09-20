@@ -60,6 +60,7 @@ export 'src/cupertino/slider.dart';
 export 'src/cupertino/sliding_segmented_control.dart';
 export 'src/cupertino/spell_check_suggestions_toolbar.dart';
 export 'src/cupertino/switch.dart';
+export 'src/cupertino/switch_theme.dart';
 export 'src/cupertino/tab_scaffold.dart';
 export 'src/cupertino/tab_view.dart';
 export 'src/cupertino/text_field.dart';

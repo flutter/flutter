@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'icon_theme_data.dart';
 import 'text_theme.dart';
+import 'switch_theme.dart';
 
 export 'package:flutter/foundation.dart' show Brightness;
 
@@ -170,6 +171,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
     Color? primaryColor,
     Color? primaryContrastingColor,
     CupertinoTextThemeData? textTheme,
+    CupertinoSwitchThemeData? switchTheme,
     Color? barBackgroundColor,
     Color? scaffoldBackgroundColor,
     bool? applyThemeToAll,
@@ -178,6 +180,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
         primaryColor,
         primaryContrastingColor,
         textTheme,
+        switchTheme,
         barBackgroundColor,
         scaffoldBackgroundColor,
         applyThemeToAll,
@@ -193,6 +196,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
     Color? primaryColor,
     Color? primaryContrastingColor,
     CupertinoTextThemeData? textTheme,
+    CupertinoSwitchThemeData? switchTheme,
     Color? barBackgroundColor,
     Color? scaffoldBackgroundColor,
     bool? applyThemeToAll,
@@ -201,6 +205,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
     primaryColor,
     primaryContrastingColor,
     textTheme,
+    switchTheme,
     barBackgroundColor,
     scaffoldBackgroundColor,
     applyThemeToAll,
@@ -212,6 +217,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
     Color? primaryColor,
     Color? primaryContrastingColor,
     CupertinoTextThemeData? textTheme,
+    CupertinoSwitchThemeData? switchTheme,
     Color? barBackgroundColor,
     Color? scaffoldBackgroundColor,
     bool? applyThemeToAll,
@@ -221,6 +227,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
     primaryColor: primaryColor,
     primaryContrastingColor: primaryContrastingColor,
     textTheme: textTheme,
+    switchTheme: switchTheme,
     barBackgroundColor: barBackgroundColor,
     scaffoldBackgroundColor: scaffoldBackgroundColor,
     applyThemeToAll: applyThemeToAll,
@@ -255,6 +262,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
       primaryColor: super.primaryColor,
       primaryContrastingColor: super.primaryContrastingColor,
       textTheme: super.textTheme,
+      switchTheme: super.switchTheme,
       barBackgroundColor: super.barBackgroundColor,
       scaffoldBackgroundColor: super.scaffoldBackgroundColor,
       applyThemeToAll: super.applyThemeToAll,
@@ -270,6 +278,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
       convertColor(super.primaryColor),
       convertColor(super.primaryContrastingColor),
       super.textTheme?.resolveFrom(context),
+      super.switchTheme?.resolveFrom(context),
       convertColor(super.barBackgroundColor),
       convertColor(super.scaffoldBackgroundColor),
       applyThemeToAll,
@@ -292,6 +301,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
       primaryColor ?? super.primaryColor,
       primaryContrastingColor ?? super.primaryContrastingColor,
       textTheme ?? super.textTheme,
+      switchTheme ?? super.switchTheme,
       barBackgroundColor ?? super.barBackgroundColor,
       scaffoldBackgroundColor ?? super.scaffoldBackgroundColor,
       applyThemeToAll ?? super.applyThemeToAll,
@@ -363,6 +373,7 @@ class NoDefaultCupertinoThemeData {
     this.primaryColor,
     this.primaryContrastingColor,
     this.textTheme,
+    this.switchTheme,
     this.barBackgroundColor,
     this.scaffoldBackgroundColor,
     this.applyThemeToAll,
@@ -421,6 +432,18 @@ class NoDefaultCupertinoThemeData {
   ///
   /// Derived from [primaryColor] if unspecified.
   final CupertinoTextThemeData? textTheme;
+  
+  /// A theme for customizing the appearance and layout of [CupertinoSwitch] widgets.
+  /// 
+  /// The priorty color of track  when the switch is on is :
+  /// [CupertinoSwitch.activeColor] > [CupertinoSwitchThemeData.activeColor] > [CupertinoThemeData.primaryColor] ([CupertinoSwitch.applyTheme] is true) > [CupertinoColors.systemGreen]
+  ///
+  /// The priorty color of track when the switch is off is :
+  /// [CupertinoSwitch.trackColor] > [CupertinoSwitchThemeData.trackColor]> [CupertinoThemeData.primaryContrastingColor] > [CupertinoColors.secondarySystemFill]
+  ///
+  /// The priorty color of thumb is:
+  /// [CupertinoSwitchThemeData.thumbColor] > [CupertinoColors.white]
+  final CupertinoSwitchThemeData? switchTheme;
 
   /// Background color of the top nav bar and bottom tab bar.
   ///
