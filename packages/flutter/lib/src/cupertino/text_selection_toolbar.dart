@@ -135,7 +135,7 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
     Offset anchorBelow,
     Widget child,
   ) {
-    final Widget outputChild = _CupertinoTextSelectionToolbarShape(
+    return _CupertinoTextSelectionToolbarShape(
       anchorAbove: anchorAbove,
       anchorBelow: anchorBelow,
       shadowColor: CupertinoTheme.brightnessOf(context) == Brightness.light
@@ -145,15 +145,6 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
         color: _kToolbarBackgroundColor.resolveFrom(context),
         child: child,
       ),
-    );
-    if (CupertinoTheme.brightnessOf(context) == Brightness.dark) {
-      return outputChild;
-    }
-    return DecoratedBox(
-      decoration: const BoxDecoration(
-        borderRadius: BorderRadius.all(_kToolbarBorderRadius),
-      ),
-      child: outputChild,
     );
   }
 
