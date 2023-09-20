@@ -163,7 +163,7 @@
                 "name": "Upload to CIPD for arch: arm64",
                 "parameters": [
                     "--engine-version",
-                    "HEAD",
+                    "${REVISION}",
                     "--target-arch",
                     "arm64",
                     "--out-dir",
@@ -180,7 +180,7 @@
                 "name": "Upload to CIPD for arch: x64",
                 "parameters": [
                     "--engine-version",
-                    "HEAD",
+                    "${REVISION}",
                     "--target-arch",
                     "x64",
                     "--out-dir",
