@@ -161,7 +161,16 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
       final int index = indexOf(child);
       if (_childrenWithoutLayout.contains(index)) {
         child.layout(_childConstraints, parentUsesSize: true);
-        assert(super.paintExtentOf(child) == _cachedItemExtents[index]!.mainAxisExtent);
+        // Throw if the real extent differs from the cached value.
+        assert(() {
+          if (super.paintExtentOf(child!) != _cachedItemExtents[index]!.mainAxisExtent) {
+            throw FlutterError(
+              'The item(index: $index) main axis extent has changed after caching, if this is '
+              'expected, change its Key to update the cached value.',
+            );
+          }
+          return true;
+        }());
       }
     }
   }
