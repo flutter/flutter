@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:web/web.dart' as web;
 
 extension on web.HTMLCollection {
@@ -59,8 +60,9 @@ void main() {
     expect(foundStyle, isTrue);
   });
 
-  testWidgets('right click can trigger select word', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('right click can trigger select word', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
     final UniqueKey spy = UniqueKey();
     await tester.pumpWidget(
         MaterialApp(

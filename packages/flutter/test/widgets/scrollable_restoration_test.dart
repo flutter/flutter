@@ -5,9 +5,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('CustomScrollView restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('CustomScrollView restoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: CustomScrollView(
@@ -33,7 +34,7 @@ void main() {
     await restoreScrollAndVerify(tester);
   });
 
-  testWidgets('ListView restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListView restoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: ListView(
@@ -53,7 +54,7 @@ void main() {
     await restoreScrollAndVerify(tester);
   });
 
-  testWidgets('ListView.builder restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListView.builder restoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: ListView.builder(
@@ -70,7 +71,7 @@ void main() {
     await restoreScrollAndVerify(tester);
   });
 
-  testWidgets('ListView.separated restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListView.separated restoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: ListView.separated(
@@ -89,7 +90,7 @@ void main() {
     await restoreScrollAndVerify(tester);
   });
 
-  testWidgets('ListView.custom restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListView.custom restoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: ListView.custom(
@@ -111,7 +112,7 @@ void main() {
     await restoreScrollAndVerify(tester);
   });
 
-  testWidgets('GridView restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GridView restoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: GridView(
@@ -132,7 +133,7 @@ void main() {
     await restoreScrollAndVerify(tester);
   });
 
-  testWidgets('GridView.builder restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GridView.builder restoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: GridView.builder(
@@ -150,7 +151,7 @@ void main() {
     await restoreScrollAndVerify(tester);
   });
 
-  testWidgets('GridView.custom restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GridView.custom restoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: GridView.custom(
@@ -173,7 +174,7 @@ void main() {
     await restoreScrollAndVerify(tester);
   });
 
-  testWidgets('GridView.count restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GridView.count restoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: GridView.count(
@@ -194,7 +195,7 @@ void main() {
     await restoreScrollAndVerify(tester);
   });
 
-  testWidgets('GridView.extent restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('GridView.extent restoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: GridView.extent(
@@ -215,7 +216,7 @@ void main() {
     await restoreScrollAndVerify(tester);
   });
 
-  testWidgets('SingleChildScrollView restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('SingleChildScrollView restoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: SingleChildScrollView(
@@ -262,7 +263,7 @@ void main() {
     expect(tester.getTopLeft(find.text('Tile 1')), const Offset(0, -475));
   });
 
-  testWidgets('PageView restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PageView restoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: PageView(
@@ -278,7 +279,7 @@ void main() {
     await pageViewScrollAndRestore(tester);
   });
 
-  testWidgets('PageView.builder restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PageView.builder restoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: PageView.builder(
@@ -294,7 +295,7 @@ void main() {
     await pageViewScrollAndRestore(tester);
   });
 
-  testWidgets('PageView.custom restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('PageView.custom restoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: PageView.custom(
@@ -315,7 +316,7 @@ void main() {
     await pageViewScrollAndRestore(tester);
   });
 
-  testWidgets('ListWheelScrollView restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListWheelScrollView restoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: ListWheelScrollView(
@@ -332,7 +333,7 @@ void main() {
     await restoreScrollAndVerify(tester, secondOffset: 542);
   });
 
-  testWidgets('ListWheelScrollView.useDelegate restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ListWheelScrollView.useDelegate restoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: ListWheelScrollView.useDelegate(
@@ -354,7 +355,7 @@ void main() {
     await restoreScrollAndVerify(tester, secondOffset: 542);
   });
 
-  testWidgets('NestedScrollView restoration', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('NestedScrollView restoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: TestHarness(
@@ -422,7 +423,7 @@ void main() {
     expect(find.text('Tile 10'), findsOneWidget);
   });
 
-  testWidgets('RestorationData is flushed even if no frame is scheduled', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RestorationData is flushed even if no frame is scheduled', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestHarness(
         child: ListView(
