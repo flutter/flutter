@@ -12,6 +12,7 @@
 #include <limits>
 
 #include "flutter/fml/build_config.h"
+#include "flutter/fml/log_level.h"
 #include "flutter/fml/logging.h"
 
 #if defined(OS_FUCHSIA)
@@ -29,7 +30,7 @@ extern LogSettings g_log_settings;
 void SetLogSettings(const LogSettings& settings) {
   // Validate the new settings as we set them.
   state::g_log_settings.min_log_level =
-      std::min(LOG_FATAL, settings.min_log_level);
+      std::min(kLogFatal, settings.min_log_level);
 #if defined(OS_FUCHSIA)
   // Syslog should accept all logs, since filtering by severity is done by fml.
   fx_logger_t* logger = fx_log_get_logger();
@@ -45,7 +46,7 @@ LogSettings GetLogSettings() {
 }
 
 int GetMinLogLevel() {
-  return std::min(state::g_log_settings.min_log_level, LOG_FATAL);
+  return std::min(state::g_log_settings.min_log_level, kLogFatal);
 }
 
 ScopedSetLogSettings::ScopedSetLogSettings(const LogSettings& settings) {
