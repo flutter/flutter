@@ -96,7 +96,7 @@ class DlRTree : public SkRefCnt {
   const SkRect& bounds(int result_index) const {
     return (result_index >= 0 && result_index < leaf_count_)
                ? nodes_[result_index].bounds
-               : empty_;
+               : kEmpty;
   }
 
   /// Returns the bytes used by the object and all of its node data.
@@ -136,7 +136,7 @@ class DlRTree : public SkRefCnt {
   }
 
  private:
-  static constexpr SkRect empty_ = SkRect::MakeEmpty();
+  static constexpr SkRect kEmpty = SkRect::MakeEmpty();
 
   void search(const Node& parent,
               const SkRect& query,

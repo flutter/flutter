@@ -217,7 +217,7 @@ const SkRect& DlRTree::bounds() const {
   if (!nodes_.empty()) {
     return nodes_.back().bounds;
   } else {
-    return empty_;
+    return kEmpty;
   }
 }
 

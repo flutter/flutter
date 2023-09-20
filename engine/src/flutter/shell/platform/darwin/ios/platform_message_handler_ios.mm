@@ -125,7 +125,7 @@ void PlatformMessageHandlerIos::SetMessageHandler(const std::string& channel,
     message_handlers_[channel] = {
         .task_queue = fml::scoped_nsprotocol([task_queue retain]),
         .handler =
-            fml::ScopedBlock<FlutterBinaryMessageHandler>{handler, fml::OwnershipPolicy::Retain},
+            fml::ScopedBlock<FlutterBinaryMessageHandler>{handler, fml::OwnershipPolicy::kRetain},
     };
   }
 }

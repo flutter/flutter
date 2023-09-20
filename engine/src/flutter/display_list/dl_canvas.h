@@ -152,7 +152,7 @@ class DlCanvas {
   virtual void DrawVertices(const DlVertices* vertices,
                             DlBlendMode mode,
                             const DlPaint& paint) = 0;
-  void DrawVertices(const std::shared_ptr<const DlVertices> vertices,
+  void DrawVertices(const std::shared_ptr<const DlVertices>& vertices,
                     DlBlendMode mode,
                     const DlPaint& paint) {
     DrawVertices(vertices.get(), mode, paint);

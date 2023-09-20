@@ -717,7 +717,7 @@ static void SendFakeTouchEvent(UIScreen* screen,
 }
 
 - (void)setFlutterViewDidRenderCallback:(void (^)(void))callback {
-  _flutterViewRenderedCallback.reset(callback, fml::OwnershipPolicy::Retain);
+  _flutterViewRenderedCallback.reset(callback, fml::OwnershipPolicy::kRetain);
 }
 
 #pragma mark - Surface creation and teardown updates

@@ -25,7 +25,7 @@ class BitConverter {
   int Extract() {
     FML_DCHECK(CanExtract());
     int result = Peek();
-    buffer_ = (buffer_ << to_length) & mask_;
+    buffer_ = (buffer_ << to_length) & kMask;
     lower_free_bits_ += to_length;
     return result;
   }
@@ -40,7 +40,7 @@ class BitConverter {
   static_assert(buffer_length >= 2 * to_length);
   static_assert(buffer_length < sizeof(int) * 8);
 
-  static constexpr int mask_ = (1 << buffer_length) - 1;
+  static constexpr int kMask = (1 << buffer_length) - 1;
 
   int buffer_ = 0;
   int lower_free_bits_ = buffer_length;

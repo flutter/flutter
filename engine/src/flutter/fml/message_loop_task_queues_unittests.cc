@@ -338,9 +338,9 @@ TEST(MessageLoopTaskQueue, QueueDoNotOwnItself) {
 
 TEST(MessageLoopTaskQueue, QueueDoNotOwnUnmergedTaskQueueId) {
   auto task_queue = fml::MessageLoopTaskQueues::GetInstance();
-  ASSERT_FALSE(task_queue->Owns(task_queue->CreateTaskQueue(), _kUnmerged));
-  ASSERT_FALSE(task_queue->Owns(_kUnmerged, task_queue->CreateTaskQueue()));
-  ASSERT_FALSE(task_queue->Owns(_kUnmerged, _kUnmerged));
+  ASSERT_FALSE(task_queue->Owns(task_queue->CreateTaskQueue(), kUnmerged));
+  ASSERT_FALSE(task_queue->Owns(kUnmerged, task_queue->CreateTaskQueue()));
+  ASSERT_FALSE(task_queue->Owns(kUnmerged, kUnmerged));
 }
 
 TEST(MessageLoopTaskQueue, QueueOwnsMergedTaskQueueId) {

@@ -12,9 +12,9 @@ namespace testing {
 
 TEST(MathTest, Constants) {
   // Don't use the constants in cmath as those aren't portable.
-  EXPECT_FLOAT_EQ(std::log2(math::kE), math::kLog2_E);
-  EXPECT_FLOAT_EQ(std::log10(math::kE), math::kLog10_E);
-  EXPECT_FLOAT_EQ(std::log(2.0f), math::klogE_2);
+  EXPECT_FLOAT_EQ(std::log2(math::kE), math::kLog2E);
+  EXPECT_FLOAT_EQ(std::log10(math::kE), math::kLog10E);
+  EXPECT_FLOAT_EQ(std::log(2.0f), math::kLogE2);
   EXPECT_FLOAT_EQ(math::kPi / 2.0f, math::kPiOver2);
   EXPECT_FLOAT_EQ(math::kPi / 4.0f, math::kPiOver4);
   EXPECT_FLOAT_EQ(1.0f / math::kPi, math::k1OverPi);
