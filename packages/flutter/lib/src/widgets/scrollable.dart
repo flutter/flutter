@@ -1035,6 +1035,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     RenderObject? targetRenderObject,
     AxisDirection? axisDirection,
   }) {
+    axisDirection ??= this.axisDirection;
     assert(
       axisDirection == this.axisDirection,
       'Scrollable.ensureVisible was called with an AxisDirection for a one '
