@@ -1059,7 +1059,7 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
       }
     });
 
-    // Re-layout children using max. child height to allow them to be centered vertically.
+    // Re-layout the children using max. child height to allow them to be centered vertically.
     visitChildren((RenderObject renderObjectChild) {
       final RenderBox child = renderObjectChild as RenderBox;
       if (child.hasSize) {
