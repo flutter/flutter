@@ -46,7 +46,7 @@ class DlBlurMaskFilter final : public DlMaskFilter {
       : style_(style), sigma_(sigma), respect_ctm_(respect_ctm) {}
   DlBlurMaskFilter(const DlBlurMaskFilter& filter)
       : DlBlurMaskFilter(filter.style_, filter.sigma_, filter.respect_ctm_) {}
-  DlBlurMaskFilter(const DlBlurMaskFilter* filter)
+  explicit DlBlurMaskFilter(const DlBlurMaskFilter* filter)
       : DlBlurMaskFilter(filter->style_, filter->sigma_, filter->respect_ctm_) {
   }
 

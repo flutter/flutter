@@ -104,7 +104,7 @@ class DlDashPathEffect final : public DlPathEffect {
     }
   }
 
-  DlDashPathEffect(const DlDashPathEffect* dash_effect)
+  explicit DlDashPathEffect(const DlDashPathEffect* dash_effect)
       : DlDashPathEffect(dash_effect->intervals(),
                          dash_effect->count_,
                          dash_effect->phase_) {}
