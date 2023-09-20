@@ -7,6 +7,7 @@
 #include <iostream>
 
 #include "flutter/fml/build_config.h"
+#include "flutter/fml/log_level.h"
 #include "flutter/fml/log_settings.h"
 #include "flutter/fml/logging.h"
 
@@ -23,11 +24,11 @@ namespace fml {
 namespace {
 
 #if !defined(OS_FUCHSIA)
-const char* const kLogSeverityNames[LOG_NUM_SEVERITIES] = {"INFO", "WARNING",
-                                                           "ERROR", "FATAL"};
+const char* const kLogSeverityNames[kLogNumSeverities] = {"INFO", "WARNING",
+                                                          "ERROR", "FATAL"};
 
 const char* GetNameForLogSeverity(LogSeverity severity) {
-  if (severity >= LOG_INFO && severity < LOG_NUM_SEVERITIES) {
+  if (severity >= kLogInfo && severity < kLogNumSeverities) {
     return kLogSeverityNames[severity];
   }
   return "UNKNOWN";
@@ -58,12 +59,12 @@ LogMessage::LogMessage(LogSeverity severity,
     : severity_(severity), file_(file), line_(line) {
 #if !defined(OS_FUCHSIA)
   stream_ << "[";
-  if (severity >= LOG_INFO) {
+  if (severity >= kLogInfo) {
     stream_ << GetNameForLogSeverity(severity);
   } else {
     stream_ << "VERBOSE" << -severity;
   }
-  stream_ << ":" << (severity > LOG_INFO ? StripDots(file_) : StripPath(file_))
+  stream_ << ":" << (severity > kLogInfo ? StripDots(file_) : StripPath(file_))
           << "(" << line_ << ")] ";
 #endif
 
@@ -109,16 +110,16 @@ LogMessage::~LogMessage() {
     android_LogPriority priority =
         (severity_ < 0) ? ANDROID_LOG_VERBOSE : ANDROID_LOG_UNKNOWN;
     switch (severity_) {
-      case LOG_INFO:
+      case kLogInfo:
         priority = ANDROID_LOG_INFO;
         break;
-      case LOG_WARNING:
+      case kLogWarning:
         priority = ANDROID_LOG_WARN;
         break;
-      case LOG_ERROR:
+      case kLogError:
         priority = ANDROID_LOG_ERROR;
         break;
-      case LOG_FATAL:
+      case kLogFatal:
         priority = ANDROID_LOG_FATAL;
         break;
     }
@@ -128,16 +129,16 @@ LogMessage::~LogMessage() {
 #elif defined(OS_FUCHSIA)
     fx_log_severity_t fx_severity;
     switch (severity_) {
-      case LOG_INFO:
+      case kLogInfo:
         fx_severity = FX_LOG_INFO;
         break;
-      case LOG_WARNING:
+      case kLogWarning:
         fx_severity = FX_LOG_WARNING;
         break;
-      case LOG_ERROR:
+      case kLogError:
         fx_severity = FX_LOG_ERROR;
         break;
-      case LOG_FATAL:
+      case kLogFatal:
         fx_severity = FX_LOG_FATAL;
         break;
       default:
@@ -157,13 +158,13 @@ LogMessage::~LogMessage() {
 #endif
   }
 
-  if (severity_ >= LOG_FATAL) {
+  if (severity_ >= kLogFatal) {
     KillProcess();
   }
 }
 
 int GetVlogVerbosity() {
-  return std::max(-1, LOG_INFO - GetMinLogLevel());
+  return std::max(-1, kLogInfo - GetMinLogLevel());
 }
 
 bool ShouldCreateLogMessage(LogSeverity severity) {

@@ -104,7 +104,7 @@ void PerformInitializationTasks(Settings& settings) {
   {
     fml::LogSettings log_settings;
     log_settings.min_log_level =
-        settings.verbose_logging ? fml::LOG_INFO : fml::LOG_ERROR;
+        settings.verbose_logging ? fml::kLogInfo : fml::kLogError;
     fml::SetLogSettings(log_settings);
   }
 
