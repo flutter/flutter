@@ -848,11 +848,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     RenderBox? child = _firstChild;
     while (child != null) {
       final TwoDimensionalViewportParentData childParentData = parentDataOf(child);
-      // TODO(Piinks): When ensure visible is supported, remove this isVisible
-      //  condition.
-      if (childParentData.isVisible) {
-        visitor(child);
-      }
+      visitor(child);
       child = childParentData._nextSibling;
     }
     // Do not visit children in [_keepAliveBucket].
@@ -927,7 +923,8 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     Rect? rect,
     AxisDirection? axisDirection,
   }) {
-    // We must know which axis we are revealing for.
+    // We must know which axis we are revealing for, since Offset refers to only
+    // one of two scroll positions.
     assert(axisDirection != null);
 
     // Starting at `target` and walking towards the root:
@@ -1041,42 +1038,40 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
   }) {
-    if (!horizontalOffset.allowImplicitScrolling && !verticalOffset.allowImplicitScrolling) {
-      // Neither axis allows for implicit scrolling.
-      return super.showOnScreen(
-        descendant: descendant,
-        rect: rect,
-        duration: duration,
-        curve: curve,
-      );
-    }
-    assert(horizontalOffset.allowImplicitScrolling || verticalOffset.allowImplicitScrolling);
-    Rect? newRect = rect;
     // It is possible for one and not both axes to allow for implicit scrolling,
-    // so they are handled individually, updating the final rect for each.
-    if (verticalOffset.allowImplicitScrolling) {
-      newRect = RenderTwoDimensionalViewport.showInViewportForAxisDirection(
-        descendant: descendant,
-        viewport: this,
-        offset: verticalOffset,
-        axisDirection: verticalAxisDirection,
-        rect: newRect,
-        duration: duration,
-        curve: curve,
-      );
+    // so handling is split between the options for allowed implicit scrolling.
+    final bool allowHorizontal = horizontalOffset.allowImplicitScrolling;
+    final bool allowVertical = verticalOffset.allowImplicitScrolling;
+    Rect? newRect;
+    AxisDirection? axisDirection;
+    switch ((allowHorizontal, allowVertical)) {
+      case (true, true):
+        // Both allow implicit scrolling
+        break;
+      case (false, true):
+        // Only the vertical Axis allows implicit scrolling
+        axisDirection = verticalAxisDirection;
+      case (true, false):
+        // Only the horizontal Axis allows implicit scrolling
+        axisDirection = horizontalAxisDirection;
+      case (false, false):
+        // Neither axis allows for implicit scrolling.
+        return super.showOnScreen(
+          descendant: descendant,
+          rect: rect,
+          duration: duration,
+          curve: curve,
+        );
     }
 
-    if (horizontalOffset.allowImplicitScrolling) {
-      newRect = RenderTwoDimensionalViewport.showInViewportForAxisDirection(
-        descendant: descendant,
-        viewport: this,
-        offset: horizontalOffset,
-        axisDirection: horizontalAxisDirection,
-        rect: newRect,
-        duration: duration,
-        curve: curve,
-      );
-    }
+    newRect = RenderTwoDimensionalViewport.showInViewport(
+      descendant: descendant,
+      viewport: this,
+      axisDirection: axisDirection,
+      rect: rect,
+      duration: duration,
+      curve: curve,
+    );
 
     super.showOnScreen(
       rect: newRect,
@@ -1086,8 +1081,8 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   }
 
   /// Make (a portion of) the given `descendant` of the given `viewport` fully
-  /// visible in one dimension of the `viewport` by manipulating the provided
-  /// [ViewportOffset]s `offset`.
+  /// visible in one or both dimensions of the `viewport` by manipulating the
+  /// [ViewportOffset]s.
   ///
   /// The optional `rect` parameter describes which area of the `descendant`
   /// should be shown in the viewport. If `rect` is null, the entire
@@ -1098,9 +1093,8 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   /// in the viewport after it has been revealed. See [RevealedOffset.rect]
   /// for a full definition of this [Rect].
   ///
-  /// The parameters `viewport`, `offset`, and `axisDirection` are
-  /// required and cannot be null. If `descendant` is null, this is a no-op and
-  /// `rect` is returned.
+  /// The parameter `viewport` is required and cannot be null. If `descendant`
+  /// is null, this is a no-op and `rect` is returned.
   ///
   /// If both `descendant` and `rect` are null, null is returned because there
   /// is nothing to be shown in the viewport.
@@ -1112,18 +1106,79 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   ///
   /// * [RenderObject.showOnScreen], overridden by
   ///   [RenderTwoDimensionalViewport] to delegate to this method.
-  static Rect? showInViewportForAxisDirection({
+  static Rect? showInViewport({
     RenderObject? descendant,
     Rect? rect,
     required RenderTwoDimensionalViewport viewport,
-    required ViewportOffset offset,
-    required AxisDirection axisDirection,
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
+    AxisDirection? axisDirection,
   }) {
     if (descendant == null) {
       return rect;
     }
+
+    Rect? showVertical() {
+      return RenderTwoDimensionalViewport._showInViewportForAxisDirection(
+        descendant: descendant,
+        viewport: viewport,
+        axisDirection: viewport.verticalAxisDirection,
+        rect: rect,
+        duration: duration,
+        curve: curve,
+      );
+    }
+
+    Rect? showHorizontal() {
+      return RenderTwoDimensionalViewport._showInViewportForAxisDirection(
+        descendant: descendant,
+        viewport: viewport,
+        axisDirection: viewport.horizontalAxisDirection,
+        rect: rect,
+        duration: duration,
+        curve: curve,
+      );
+    }
+
+    switch (axisDirection) {
+      case AxisDirection.left:
+      case AxisDirection.right:
+        return showHorizontal();
+      case AxisDirection.up:
+      case AxisDirection.down:
+        return showVertical();
+      case null:
+        // Update rect after revealing in one axis before revealing in the next.
+        rect = showHorizontal() ?? rect;
+        // We only return the final rect after both have been revealed.
+        rect = showVertical();
+        if (rect == null) {
+          // `descendant` is between leading and trailing edge and hence already
+          //  fully shown on screen.
+          assert(viewport.parent != null);
+          final Matrix4 transform = descendant.getTransformTo(viewport.parent);
+          return MatrixUtils.transformRect(
+            transform,
+            rect ?? descendant.paintBounds,
+          );
+        }
+        return rect;
+    }
+  }
+
+  static Rect? _showInViewportForAxisDirection({
+    required RenderObject descendant,
+    Rect? rect,
+    required RenderTwoDimensionalViewport viewport,
+    required AxisDirection axisDirection,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
+  }) {
+    final ViewportOffset offset = switch(axisDirectionToAxis(axisDirection)) {
+      Axis.vertical => viewport.verticalOffset,
+      Axis.horizontal => viewport.horizontalOffset,
+    };
+
     final RevealedOffset leadingEdgeOffset = viewport.getOffsetToReveal(
       descendant,
       0.0,
@@ -1138,27 +1193,14 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     );
     final double currentOffset = offset.pixels;
 
-    final RevealedOffset targetOffset;
-    if (leadingEdgeOffset.offset < trailingEdgeOffset.offset) {
-      // `descendant` is too big to be visible on screen in its entirety. Let's
-      // align it with the edge that requires the least amount of scrolling.
-      final double leadingEdgeDiff = (offset.pixels - leadingEdgeOffset.offset).abs();
-      final double trailingEdgeDiff = (offset.pixels - trailingEdgeOffset.offset).abs();
-      targetOffset = leadingEdgeDiff < trailingEdgeDiff ? leadingEdgeOffset : trailingEdgeOffset;
-    } else if (currentOffset > leadingEdgeOffset.offset) {
-      // `descendant` currently starts above the leading edge and can be shown
-      // fully on screen by scrolling down (which means: moving viewport up).
-      targetOffset = leadingEdgeOffset;
-    } else if (currentOffset < trailingEdgeOffset.offset) {
-      // `descendant currently ends below the trailing edge and can be shown
-      // fully on screen by scrolling up (which means: moving viewport down)
-      targetOffset = trailingEdgeOffset;
-    } else {
-      // `descendant` is between leading and trailing edge and hence already
-      //  fully shown on screen. No action necessary.
-      assert(viewport.parent != null);
-      final Matrix4 transform = descendant.getTransformTo(viewport.parent);
-      return MatrixUtils.transformRect(transform, rect ?? descendant.paintBounds);
+    final RevealedOffset? targetOffset = RenderAbstractViewport.applyTargetOffset(
+      leadingEdgeOffset: leadingEdgeOffset,
+      trailingEdgeOffset: trailingEdgeOffset,
+      currentOffset: currentOffset,
+    );
+    if (targetOffset == null) {
+      // Already visible in this axis.
+      return null;
     }
 
     offset.moveTo(targetOffset.offset, duration: duration, curve: curve);

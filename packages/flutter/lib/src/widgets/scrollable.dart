@@ -443,14 +443,19 @@ class Scrollable extends StatefulWidget {
   /// given context visible.
   ///
   /// If the [Scrollable] of the provided [BuildContext] is a
-  /// [TwoDimensionalScrollable], both vertical and horizontal axes will ensure
-  /// the target is made visible.
+  /// [TwoDimensionalScrollable] and [axisDirection] is not provided to specify
+  /// one [Axis], both vertical and horizontal axes will ensure
+  /// the target is made visible using the same [alignment] value. Providing
+  /// an [axisDirection] allows different [alignment]s to be specified, but
+  /// will require then that ensureVisible is called for each [Axis] of the
+  /// [TwoDimensionalScrollable].
   static Future<void> ensureVisible(
     BuildContext context, {
     double alignment = 0.0,
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
+    AxisDirection? axisDirection,
   }) {
     final List<Future<void>> futures = <Future<void>>[];
 
@@ -471,6 +476,7 @@ class Scrollable extends StatefulWidget {
         curve: curve,
         alignmentPolicy: alignmentPolicy,
         targetRenderObject: targetRenderObject,
+        axisDirection: axisDirection
       );
       futures.addAll(newFutures);
 
@@ -1017,6 +1023,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     return result;
   }
 
+  // Returns the Future from calling ensureVisible for the ScrollPosition, as
+  // as well as this ScrollableState instance so its context can be used to
+  // check for other ancestor Scrollables in executing ensureVisible.
   (List<Future<void>>, ScrollableState) _performEnsureVisible(
     RenderObject object, {
     double alignment = 0.0,
@@ -1024,7 +1033,15 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     Curve curve = Curves.ease,
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
     RenderObject? targetRenderObject,
+    AxisDirection? axisDirection,
   }) {
+    assert(
+      axisDirection == this.axisDirection,
+      'Scrollable.ensureVisible was called with an AxisDirection for a one '
+      'dimensional Scrollable that does not match. The provided AxisDirection '
+      'was $axisDirection, and this Scrollable has an AxisDirection of '
+      '${this.axisDirection}.',
+    );
     final Future<void> ensureVisibleFuture = position.ensureVisible(
       object,
       alignment: alignment,
@@ -2065,6 +2082,7 @@ class _VerticalOuterDimension extends Scrollable {
 class _VerticalOuterDimensionState extends ScrollableState {
   DiagonalDragBehavior get diagonalDragBehavior => (widget as _VerticalOuterDimension).diagonalDragBehavior;
 
+  // Implemented in the _HorizontalInnerDimension instead.
   @override
   (List<Future<void>>, ScrollableState) _performEnsureVisible(
     RenderObject object, {
@@ -2073,12 +2091,15 @@ class _VerticalOuterDimensionState extends ScrollableState {
     Curve curve = Curves.ease,
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
     RenderObject? targetRenderObject,
+    AxisDirection? axisDirection,
   }) {
-    throw FlutterError(
+    assert(
+      false,
       'The _performEnsureVisible method was called for the vertical scrollable '
       'of a TwoDimensionalScrollable. This should not happen as the horizontal '
       'scrollable handles both axes.'
     );
+    return (<Future<void>>[], this);
   }
 
   @override
@@ -2160,6 +2181,9 @@ class _HorizontalInnerDimensionState extends ScrollableState {
     super.didChangeDependencies();
   }
 
+  // Returns the Future from calling ensureVisible for the ScrollPosition, as
+  // as well as the vertical ScrollableState instance so its context can be
+  // used to check for other ancestor Scrollables in executing ensureVisible.
   @override
   (List<Future<void>>, ScrollableState) _performEnsureVisible(
     RenderObject object, {
@@ -2168,22 +2192,41 @@ class _HorizontalInnerDimensionState extends ScrollableState {
     Curve curve = Curves.ease,
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
     RenderObject? targetRenderObject,
+    AxisDirection? axisDirection,
   }) {
     final List<Future<void>> newFutures = <Future<void>>[];
-    newFutures.add(position.ensureVisible(
-      object,
-      alignment: alignment,
-      duration: duration,
-      curve: curve,
-      alignmentPolicy: alignmentPolicy,
-    ));
-    newFutures.add(verticalScrollable.position.ensureVisible(
-      object,
-      alignment: alignment,
-      duration: duration,
-      curve: curve,
-      alignmentPolicy: alignmentPolicy,
-    ));
+
+    void ensureHorizontal() {
+      newFutures.add(position.ensureVisible(
+        object,
+        alignment: alignment,
+        duration: duration,
+        curve: curve,
+        alignmentPolicy: alignmentPolicy,
+      ));
+    }
+
+    void ensureVertical() {
+      newFutures.add(verticalScrollable.position.ensureVisible(
+        object,
+        alignment: alignment,
+        duration: duration,
+        curve: curve,
+        alignmentPolicy: alignmentPolicy,
+      ));
+    }
+
+    switch (axisDirection) {
+      case AxisDirection.left:
+      case AxisDirection.right:
+        ensureHorizontal();
+      case AxisDirection.up:
+      case AxisDirection.down:
+        ensureVertical();
+      case null:
+        ensureHorizontal();
+        ensureVertical();
+    }
 
     return (newFutures, verticalScrollable);
   }
