@@ -112,8 +112,6 @@ import 'viewport.dart';
 /// {@end-tool}
 class PageController extends ScrollController {
   /// Creates a page controller.
-  ///
-  /// The [initialPage], [keepPage], and [viewportFraction] arguments must not be null.
   PageController({
     this.initialPage = 0,
     this.keepPage = true,
@@ -183,8 +181,6 @@ class PageController extends ScrollController {
   ///
   /// The animation lasts for the given duration and follows the given curve.
   /// The returned [Future] resolves when the animation completes.
-  ///
-  /// The `duration` and `curve` arguments must not be null.
   Future<void> animateToPage(
     int page, {
     required Duration duration,
@@ -221,8 +217,6 @@ class PageController extends ScrollController {
   ///
   /// The animation lasts for the given duration and follows the given curve.
   /// The returned [Future] resolves when the animation completes.
-  ///
-  /// The `duration` and `curve` arguments must not be null.
   Future<void> nextPage({ required Duration duration, required Curve curve }) {
     return animateToPage(page!.round() + 1, duration: duration, curve: curve);
   }
@@ -231,8 +225,6 @@ class PageController extends ScrollController {
   ///
   /// The animation lasts for the given duration and follows the given curve.
   /// The returned [Future] resolves when the animation completes.
-  ///
-  /// The `duration` and `curve` arguments must not be null.
   Future<void> previousPage({ required Duration duration, required Curve curve }) {
     return animateToPage(page!.round() - 1, duration: duration, curve: curve);
   }
@@ -642,10 +634,10 @@ class PageView extends StatefulWidget {
   /// See the documentation at [SliverChildListDelegate.children] for more details.
   ///
   /// {@template flutter.widgets.PageView.allowImplicitScrolling}
-  /// The [allowImplicitScrolling] parameter must not be null. If true, the
-  /// [PageView] will participate in accessibility scrolling more like a
-  /// [ListView], where implicit scroll actions will move to the next page
-  /// rather than into the contents of the [PageView].
+  /// If [allowImplicitScrolling] is true, the [PageView] will participate in
+  /// accessibility scrolling more like a [ListView], where implicit scroll
+  /// actions will move to the next page rather than into the contents of the
+  /// [PageView].
   /// {@endtemplate}
   PageView({
     super.key,
@@ -917,7 +909,7 @@ class PageView extends StatefulWidget {
   ///
   /// If [PageController.viewportFraction] >= 1.0, this property has no effect.
   ///
-  /// This property defaults to true and must not be null.
+  /// This property defaults to true.
   final bool padEnds;
 
   @override

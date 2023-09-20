@@ -295,9 +295,6 @@ class DraggableScrollableController extends ChangeNotifier {
 /// {@end-tool}
 class DraggableScrollableSheet extends StatefulWidget {
   /// Creates a widget that can be dragged and scrolled in a single gesture.
-  ///
-  /// The [builder], [initialChildSize], [minChildSize], [maxChildSize] and
-  /// [expand] parameters must not be null.
   const DraggableScrollableSheet({
     super.key,
     this.initialChildSize = 0.5,
@@ -1031,8 +1028,6 @@ class DraggableScrollableActuator extends StatefulWidget {
 
   /// This child's [DraggableScrollableSheet] descendant will be reset when the
   /// [reset] method is applied to a context that includes it.
-  ///
-  /// Must not be null.
   final Widget child;
 
 
@@ -1098,8 +1093,6 @@ class _ResetNotifier extends ChangeNotifier {
 class _InheritedResetNotifier extends InheritedNotifier<_ResetNotifier> {
   /// Creates an [InheritedNotifier] that the [DraggableScrollableSheet] will
   /// listen to for an indication that it should reset itself back to [DraggableScrollableSheet.initialChildSize].
-  ///
-  /// The [child] and [notifier] properties must not be null.
   const _InheritedResetNotifier({
     required super.child,
     required _ResetNotifier super.notifier,

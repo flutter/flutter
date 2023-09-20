@@ -193,8 +193,6 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   /// traversing forwards (i.e. with [next]), and there is no current focus in
   /// the nearest [FocusScopeNode] that `currentNode` belongs to.
   ///
-  /// The `currentNode` argument must not be null.
-  ///
   /// If `ignoreCurrentFocus` is false or not given, this function returns the
   /// [FocusScopeNode.focusedChild], if set, on the nearest scope of the
   /// `currentNode`, otherwise, returns the first node from [sortDescendants],
@@ -220,8 +218,6 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   /// The node returned is the one that should receive focus if focus is
   /// traversing backwards (i.e. with [previous]), and there is no current focus
   /// in the nearest [FocusScopeNode] that `currentNode` belongs to.
-  ///
-  /// The `currentNode` argument must not be null.
   ///
   /// If `ignoreCurrentFocus` is false or not given, this function returns the
   /// [FocusScopeNode.focusedChild], if set, on the nearest scope of the
@@ -265,8 +261,6 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   ///
   /// This is typically used by [inDirection] to determine which node to focus
   /// if it is called when no node is currently focused.
-  ///
-  /// All arguments must not be null.
   FocusNode? findFirstFocusInDirection(FocusNode currentNode, TraversalDirection direction);
 
   /// Clears the data associated with the given [FocusScopeNode] for this object.
@@ -298,8 +292,6 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   /// the node that has been selected.
   ///
   /// Returns true if it successfully found a node and requested focus.
-  ///
-  /// The [currentNode] argument must not be null.
   bool next(FocusNode currentNode) => _moveFocus(currentNode, forward: true);
 
   /// Focuses the previous widget in the focus scope that contains the given
@@ -310,8 +302,6 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   /// the node that has been selected.
   ///
   /// Returns true if it successfully found a node and requested focus.
-  ///
-  /// The [currentNode] argument must not be null.
   bool previous(FocusNode currentNode) => _moveFocus(currentNode, forward: false);
 
   /// Focuses the next widget in the given [direction] in the focus scope that
@@ -322,8 +312,6 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   /// [FocusNode.requestFocus] on the node that has been selected.
   ///
   /// Returns true if it successfully found a node and requested focus.
-  ///
-  /// All arguments must not be null.
   bool inDirection(FocusNode currentNode, TraversalDirection direction);
 
   /// Sorts the given `descendants` into focus order.
@@ -1628,8 +1616,6 @@ class FocusTraversalOrder extends InheritedWidget {
 ///    focus traversal in a direction.
 class FocusTraversalGroup extends StatefulWidget {
   /// Creates a [FocusTraversalGroup] object.
-  ///
-  /// The [child] and [descendantsAreFocusable] arguments must not be null.
   FocusTraversalGroup({
     super.key,
     FocusTraversalPolicy? policy,
@@ -1839,7 +1825,6 @@ class _FocusTraversalGroupState extends State<FocusTraversalGroup> {
 class RequestFocusIntent extends Intent {
   /// Creates an intent used with [RequestFocusAction].
   ///
-  /// The [focusNode] argument must not be null.
   /// {@macro flutter.widgets.FocusTraversalPolicy.requestFocusCallback}
   const RequestFocusIntent(this.focusNode, {
     TraversalRequestFocusCallback? requestFocusCallback
@@ -2025,10 +2010,6 @@ class DirectionalFocusAction extends Action<DirectionalFocusIntent> {
 ///    `descendantsAreFocusable` attribute.
 class ExcludeFocusTraversal extends StatelessWidget {
   /// Const constructor for [ExcludeFocusTraversal] widget.
-  ///
-  /// The [excluding] argument must not be null.
-  ///
-  /// The [child] argument is required, and must not be null.
   const ExcludeFocusTraversal({
     super.key,
     this.excluding = true,

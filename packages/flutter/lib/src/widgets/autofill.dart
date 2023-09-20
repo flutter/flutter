@@ -64,8 +64,6 @@ enum AutofillContextAction {
 ///   clean up actions to be run when a topmost [AutofillGroup] is disposed.
 class AutofillGroup extends StatefulWidget {
   /// Creates a scope for autofillable input fields.
-  ///
-  /// The [child] argument must not be null.
   const AutofillGroup({
     super.key,
     required this.child,

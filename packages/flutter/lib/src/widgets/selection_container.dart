@@ -41,8 +41,6 @@ class SelectionContainer extends StatefulWidget {
   ///
   /// If [registrar] is not provided, this selection container gets the
   /// [SelectionRegistrar] from the context instead.
-  ///
-  /// The [delegate] and [child] must not be null.
   const SelectionContainer({
     super.key,
     this.registrar,
@@ -59,8 +57,6 @@ class SelectionContainer extends StatefulWidget {
   ///
   /// ** See code in examples/api/lib/material/selection_container/selection_container_disabled.0.dart **
   /// {@end-tool}
-  ///
-  /// The [child] must not be null.
   const SelectionContainer.disabled({
     super.key,
     required this.child,

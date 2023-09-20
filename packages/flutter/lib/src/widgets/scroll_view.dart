@@ -97,9 +97,7 @@ abstract class ScrollView extends StatelessWidget {
   ///
   /// If the [shrinkWrap] argument is true, the [center] argument must be null.
   ///
-  /// The [scrollDirection], [reverse], and [shrinkWrap] arguments must not be null.
-  ///
-  /// The [anchor] argument must be non-null and in the range 0.0 to 1.0.
+  /// The [anchor] argument must be in the range zero to one, inclusive.
   const ScrollView({
     super.key,
     this.scrollDirection = Axis.vertical,
@@ -1907,8 +1905,6 @@ class GridView extends BoxScrollView {
   /// Creates a scrollable, 2D array of widgets with a custom
   /// [SliverGridDelegate].
   ///
-  /// The [gridDelegate] argument must not be null.
-  ///
   /// The `addAutomaticKeepAlives` argument corresponds to the
   /// [SliverChildListDelegate.addAutomaticKeepAlives] property. The
   /// `addRepaintBoundaries` argument corresponds to the
@@ -2007,8 +2003,6 @@ class GridView extends BoxScrollView {
   ///
   /// To use an [IndexedWidgetBuilder] callback to build children, either use
   /// a [SliverChildBuilderDelegate] or use the [GridView.builder] constructor.
-  ///
-  /// The [gridDelegate] and [childrenDelegate] arguments must not be null.
   const GridView.custom({
     super.key,
     super.scrollDirection,

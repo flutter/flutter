@@ -71,10 +71,6 @@ class FadeInImage extends StatefulWidget {
   /// The [placeholder] and [image] may have their own FilterQuality settings via [filterQuality]
   /// and [placeholderFilterQuality].
   ///
-  /// The [placeholder], [image], [fadeOutDuration], [fadeOutCurve],
-  /// [fadeInDuration], [fadeInCurve], [alignment], [repeat], and
-  /// [matchTextDirection] arguments must not be null.
-  ///
   /// If [excludeFromSemantics] is true, then [imageSemanticLabel] will be ignored.
   const FadeInImage({
     super.key,
@@ -177,10 +173,6 @@ class FadeInImage extends StatefulWidget {
   /// The image will be rendered to the constraints of the layout or [width]
   /// and [height] regardless of these parameters. These parameters are primarily
   /// intended to reduce the memory usage of [ImageCache].
-  ///
-  /// The [placeholder], [image], [imageScale], [fadeOutDuration],
-  /// [fadeOutCurve], [fadeInDuration], [fadeInCurve], [alignment], [repeat],
-  /// and [matchTextDirection] arguments must not be null.
   ///
   /// See also:
   ///

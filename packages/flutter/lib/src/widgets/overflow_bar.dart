@@ -54,11 +54,6 @@ enum OverflowBarAlignment {
 /// {@end-tool}
 class OverflowBar extends MultiChildRenderObjectWidget {
   /// Constructs an OverflowBar.
-  ///
-  /// The [spacing], [overflowSpacing], [overflowAlignment],
-  /// [overflowDirection], and [clipBehavior] parameters must not be
-  /// null. The [children] argument must not be null and must not contain
-  /// any null objects.
   const OverflowBar({
     super.key,
     this.spacing = 0.0,
@@ -199,7 +194,7 @@ class OverflowBar extends MultiChildRenderObjectWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.none], and must not be null.
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
   @override
