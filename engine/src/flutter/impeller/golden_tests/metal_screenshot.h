@@ -30,9 +30,9 @@ class MetalScreenshot {
 
  private:
   friend class MetalScreenshoter;
-  MetalScreenshot(CGImageRef cgImage);
+  explicit MetalScreenshot(CGImageRef cgImage);
   FML_DISALLOW_COPY_AND_ASSIGN(MetalScreenshot);
-  CGImageRef cgImage_;
+  CGImageRef cg_image_;
   CFDataRef pixel_data_;
 };
 }  // namespace testing
