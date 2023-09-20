@@ -594,7 +594,7 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
   Widget build(BuildContext context) {
     final Color chevronColor = _kToolbarTextColor.resolveFrom(context);
 
-    // Wrap children and chevron painters in Center with widthFactor
+    // Wrap the children and the chevron painters in Center with widthFactor
     // and heightFactor of 1.0 so _CupertinoTextSelectionToolbarItems can get
     // the natural size of the buttons and then expand vertically as needed.
     final Widget backButton = CupertinoTextSelectionToolbarButton(
