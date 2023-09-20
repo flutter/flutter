@@ -54,15 +54,17 @@ NSBundle* FLTFrameworkBundleWithIdentifier(NSString* flutterFrameworkBundleID) {
 }
 
 NSString* FLTAssetPath(NSBundle* bundle) {
-  return [bundle objectForInfoDictionaryKey:@"FLTAssetsPath"] ?: kDefaultAssetPath;
+  return [bundle objectForInfoDictionaryKey:@"FLTAssetsPath"] ?: @"flutter_assets";
 }
 
-NSURL* FLTAssetsURLFromBundle(NSBundle* bundle) {
+NSString* FLTAssetsPathFromBundle(NSBundle* bundle) {
   NSString* flutterAssetsPath = FLTAssetPath(bundle);
-  NSURL* assets = [bundle URLForResource:flutterAssetsPath withExtension:nil];
+  // Use the raw path solution so that asset path can be returned from unloaded bundles.
+  // See https://github.com/flutter/engine/pull/46073
+  NSString* assetsPath = [bundle pathForResource:flutterAssetsPath ofType:@""];
 
-  if (!assets) {
-    assets = [[NSBundle mainBundle] URLForResource:flutterAssetsPath withExtension:nil];
+  if (assetsPath.length == 0) {
+    assetsPath = [[NSBundle mainBundle] pathForResource:flutterAssetsPath ofType:@""];
   }
-  return assets;
+  return assetsPath;
 }

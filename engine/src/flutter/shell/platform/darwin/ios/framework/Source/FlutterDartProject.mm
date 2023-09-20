@@ -139,19 +139,20 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
 
   // Checks to see if the flutter assets directory is already present.
   if (settings.assets_path.empty()) {
-    NSURL* assetsURL = FLTAssetsURLFromBundle(bundle);
+    NSString* assetsPath = FLTAssetsPathFromBundle(bundle);
 
-    if (!assetsURL) {
+    if (assetsPath.length == 0) {
       NSLog(@"Failed to find assets path for \"%@\"", bundle);
     } else {
-      settings.assets_path = assetsURL.path.UTF8String;
+      settings.assets_path = assetsPath.UTF8String;
 
       // Check if there is an application kernel snapshot in the assets directory we could
       // potentially use.  Looking for the snapshot makes sense only if we have a VM that can use
       // it.
       if (!flutter::DartVM::IsRunningPrecompiledCode()) {
         NSURL* applicationKernelSnapshotURL =
-            [assetsURL URLByAppendingPathComponent:@(kApplicationKernelSnapshotFileName)];
+            [NSURL URLWithString:@(kApplicationKernelSnapshotFileName)
+                   relativeToURL:[NSURL fileURLWithPath:assetsPath]];
         NSError* error;
         if ([applicationKernelSnapshotURL checkResourceIsReachableAndReturnError:&error]) {
           settings.application_kernel_asset = applicationKernelSnapshotURL.path.UTF8String;
