@@ -9,6 +9,7 @@ library;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 Shader createShader(Rect bounds) {
   return const LinearGradient(
@@ -21,12 +22,12 @@ Shader createShader(Rect bounds) {
 
 
 void main() {
-  testWidgets('Can be constructed', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can be constructed', (WidgetTester tester) async {
     const Widget child = SizedBox(width: 100.0, height: 100.0);
     await tester.pumpWidget(const ShaderMask(shaderCallback: createShader, child: child));
   });
 
-  testWidgets('Bounds rect includes offset', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Bounds rect includes offset', (WidgetTester tester) async {
     late Rect shaderBounds;
     Shader recordShaderBounds(Rect bounds) {
       shaderBounds = bounds;
@@ -50,7 +51,7 @@ void main() {
   });
 
 
-  testWidgets('Bounds rect includes offset visual inspection', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Bounds rect includes offset visual inspection', (WidgetTester tester) async {
     final Widget widgetBottomRight = Container(
       width: 400,
       height: 400,
