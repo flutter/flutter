@@ -386,8 +386,6 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   /// strategy is given by [builder].
   ///
   /// The [initialData] is used to create the initial snapshot.
-  ///
-  /// The [builder] must not be null.
   const StreamBuilder({
     super.key,
     this.initialData,
@@ -517,8 +515,6 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 class FutureBuilder<T> extends StatefulWidget {
   /// Creates a widget that builds itself based on the latest snapshot of
   /// interaction with a [Future].
-  ///
-  /// The [builder] must not be null.
   const FutureBuilder({
     super.key,
     required this.future,

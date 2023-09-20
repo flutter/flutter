@@ -103,9 +103,6 @@ typedef AnimatedSwitcherLayoutBuilder = Widget Function(Widget? currentChild, Li
 ///  * [FadeTransition], which [AnimatedSwitcher] uses to perform the transition.
 class AnimatedSwitcher extends StatefulWidget {
   /// Creates an [AnimatedSwitcher].
-  ///
-  /// The [duration], [transitionBuilder], [layoutBuilder], [switchInCurve], and
-  /// [switchOutCurve] parameters must not be null.
   const AnimatedSwitcher({
     super.key,
     this.child,

@@ -2168,8 +2168,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 /// is dimmed with a [ModalBarrier]. The widget returned by the `pageBuilder`
 /// does not share a context with the location that [showGeneralDialog] is
 /// originally called from. Use a [StatefulBuilder] or a custom
-/// [StatefulWidget] if the dialog needs to update dynamically. The
-/// `pageBuilder` argument can not be null.
+/// [StatefulWidget] if the dialog needs to update dynamically.
 ///
 /// The `context` argument is used to look up the [Navigator] for the
 /// dialog. It is only used when the method is called. Its corresponding widget
