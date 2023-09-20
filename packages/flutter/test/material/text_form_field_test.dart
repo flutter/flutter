@@ -818,6 +818,8 @@ void main() {
 
   testWidgetsWithLeakTracking('reset resets the text fields value to the controller initial value', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'initialValue');
+    addTearDown(controller.dispose);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -837,8 +839,6 @@ void main() {
 
     expect(find.text('changedValue'), findsNothing);
     expect(find.text('initialValue'), findsOneWidget);
-
-    controller.dispose();
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/34847.
@@ -1508,7 +1508,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/123009.
     final GlobalKey<FormFieldState<String>> stateKey = GlobalKey<FormFieldState<String>>();
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-    String value='initialValue';
+    String value = 'initialValue';
 
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(

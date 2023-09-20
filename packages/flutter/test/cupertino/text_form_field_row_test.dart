@@ -505,8 +505,8 @@ void main() {
             child: CupertinoTextFormFieldRow(
               key: stateKey,
               initialValue: value,
-              onChanged: (String newValue){
-                value=newValue;
+              onChanged: (String newValue) {
+                value = newValue;
               },
             ),
           ),
