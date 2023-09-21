@@ -49,7 +49,8 @@ Future<void> main() async {
     // See: https://github.com/flutter/flutter/issues/132592
     expect(dartSdkStamp.existsSync(), true);
     expect(output, contains('Downloading Dart SDK from Flutter engine ...'));
-    expect(output, contains('Expanding downloaded archive...'));
+    // Do not assert on the exact unzipping method, as this could change on CI
+    expect(output, contains(RegExp(r'Expanding downloaded archive with (.*)...')));
     expect(output, isNot(contains('Use the -Force parameter' /* Luke */)));
   },
   skip: !platform.isWindows); // [intended] Only Windows uses the batch entrypoint

@@ -6,9 +6,10 @@ import 'dart:ui' as ui show TextHeightBehavior;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
-  testWidgets('DefaultTextStyle changes propagate to Text', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('DefaultTextStyle changes propagate to Text', (WidgetTester tester) async {
     const Text textWidget = Text('Hello', textDirection: TextDirection.ltr);
     const TextStyle s1 = TextStyle(
       fontSize: 10.0,
@@ -43,7 +44,7 @@ void main() {
     expect(text.maxLines, 3);
   });
 
-  testWidgets('AnimatedDefaultTextStyle changes propagate to Text', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('AnimatedDefaultTextStyle changes propagate to Text', (WidgetTester tester) async {
     const Text textWidget = Text('Hello', textDirection: TextDirection.ltr);
     const TextStyle s1 = TextStyle(
       fontSize: 10.0,

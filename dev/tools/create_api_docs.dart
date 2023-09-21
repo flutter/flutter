@@ -23,6 +23,58 @@ import 'dartdoc_checker.dart';
 const String kDummyPackageName = 'Flutter';
 const String kPlatformIntegrationPackageName = 'platform_integration';
 
+class PlatformDocsSection {
+  const PlatformDocsSection({
+    required this.zipName,
+    required this.sectionName,
+    required this.checkFile,
+    required this.subdir,
+  });
+  final String zipName;
+  final String sectionName;
+  final String checkFile;
+  final String subdir;
+}
+
+const Map<String, PlatformDocsSection> kPlatformDocs = <String, PlatformDocsSection>{
+  'android': PlatformDocsSection(
+    zipName: 'android-javadoc.zip',
+    sectionName: 'Android',
+    checkFile: 'io/flutter/view/FlutterView.html',
+    subdir: 'javadoc',
+  ),
+  'ios': PlatformDocsSection(
+    zipName: 'ios-docs.zip',
+    sectionName: 'iOS',
+    checkFile: 'interface_flutter_view.html',
+    subdir: 'ios-embedder',
+  ),
+  'macos': PlatformDocsSection(
+    zipName: 'macos-docs.zip',
+    sectionName: 'macOS',
+    checkFile: 'interface_flutter_view.html',
+    subdir: 'macos-embedder',
+  ),
+  'linux': PlatformDocsSection(
+    zipName: 'linux-docs.zip',
+    sectionName: 'Linux',
+    checkFile: 'struct___fl_view.html',
+    subdir: 'linux-embedder',
+  ),
+  'windows': PlatformDocsSection(
+    zipName: 'windows-docs.zip',
+    sectionName: 'Windows',
+    checkFile: 'classflutter_1_1_flutter_view.html',
+    subdir: 'windows-embedder',
+  ),
+  'impeller': PlatformDocsSection(
+    zipName: 'impeller-docs.zip',
+    sectionName: 'Impeller',
+    checkFile: 'classimpeller_1_1_canvas.html',
+    subdir: 'impeller',
+  ),
+};
+
 /// This script will generate documentation for the packages in `packages/` and
 /// write the documentation to the output directory specified on the command
 /// line.
@@ -43,9 +95,8 @@ Future<void> main(List<String> arguments) async {
 
   // The place to find customization files and configuration files for docs
   // generation.
-  final Directory docsRoot = filesystem
-      .directory(FlutterInformation.instance.getFlutterRoot().childDirectory('dev').childDirectory('docs'))
-      .absolute;
+  final Directory docsRoot =
+      FlutterInformation.instance.getFlutterRoot().childDirectory('dev').childDirectory('docs').absolute;
   final ArgParser argParser = _createArgsParser(
     publishDefault: docsRoot.childDirectory('doc').path,
   );
@@ -187,6 +238,9 @@ class Configurator {
     // Add a fake package for platform integration APIs.
     yield '$kPlatformIntegrationPackageName/android.dart';
     yield '$kPlatformIntegrationPackageName/ios.dart';
+    yield '$kPlatformIntegrationPackageName/macos.dart';
+    yield '$kPlatformIntegrationPackageName/linux.dart';
+    yield '$kPlatformIntegrationPackageName/windows.dart';
   }
 
   void _createDummyPubspec() {
@@ -196,7 +250,7 @@ class Configurator {
       'homepage: https://flutter.dev',
       'version: 0.0.0',
       'environment:',
-      "  sdk: '>=3.0.0-0 <4.0.0'",
+      "  sdk: '>=3.2.0-0 <4.0.0'",
       'dependencies:',
       for (final String package in findPackageNames(filesystem)) '  $package:\n    sdk: flutter',
       '  $kPlatformIntegrationPackageName: 0.0.1',
@@ -732,14 +786,15 @@ class DartdocGenerator {
       '</title>\n',
       '</title>\n  <base href="./flutter/">\n',
     );
-    indexContents = indexContents.replaceAll(
-      'href="Android/Android-library.html"',
-      'href="/javadoc/"',
-    );
-    indexContents = indexContents.replaceAll(
-      'href="iOS/iOS-library.html"',
-      'href="/objcdoc/"',
-    );
+
+    for (final String platform in kPlatformDocs.keys) {
+      final String sectionName = kPlatformDocs[platform]!.sectionName;
+      final String subdir = kPlatformDocs[platform]!.subdir;
+      indexContents = indexContents.replaceAll(
+        'href="$sectionName/$sectionName-library.html"',
+        'href="../$subdir/index.html"',
+      );
+    }
 
     indexFile.writeAsStringSync(indexContents);
   }
@@ -782,13 +837,12 @@ class PlatformDocGenerator {
   Future<void> generatePlatformDocs() async {
     final String realm = engineRealm.isNotEmpty ? '$engineRealm/' : '';
 
-    final String javadocUrl =
-        'https://storage.googleapis.com/${realm}flutter_infra_release/flutter/$engineRevision/android-javadoc.zip';
-    await _extractDocs(javadocUrl, 'javadoc', 'io/flutter/view/FlutterView.html', outputDir);
-
-    final String objcdocUrl =
-        'https://storage.googleapis.com/${realm}flutter_infra_release/flutter/$engineRevision/ios-objcdoc.zip';
-    await _extractDocs(objcdocUrl, 'objcdoc', 'Classes/FlutterViewController.html', outputDir);
+    for (final String platform in kPlatformDocs.keys) {
+      final String zipFile = kPlatformDocs[platform]!.zipName;
+      final String url =
+          'https://storage.googleapis.com/${realm}flutter_infra_release/flutter/$engineRevision/$zipFile';
+      await _extractDocs(url, platform, kPlatformDocs[platform]!, outputDir);
+    }
   }
 
   /// Fetches the zip archive at the specified url.
@@ -812,7 +866,7 @@ class PlatformDocGenerator {
     return responseBytes == null ? null : ZipDecoder().decodeBytes(responseBytes);
   }
 
-  Future<void> _extractDocs(String url, String docName, String checkFile, Directory outputDir) async {
+  Future<void> _extractDocs(String url, String name, PlatformDocsSection platform, Directory outputDir) async {
     const int maxTries = 5;
     final Archive? archive = await _fetchArchive(url, maxTries);
     if (archive == null) {
@@ -820,8 +874,8 @@ class PlatformDocGenerator {
       exit(1);
     }
 
-    final Directory output = outputDir.childDirectory(docName);
-    print('Extracting $docName to ${output.path}');
+    final Directory output = outputDir.childDirectory(platform.subdir);
+    print('Extracting ${platform.zipName} to ${output.path}');
     output.createSync(recursive: true);
 
     for (final ArchiveFile af in archive) {
@@ -832,18 +886,12 @@ class PlatformDocGenerator {
       }
     }
 
-    /// If object then copy files to old location if the archive is using the new location.
-    final Directory objcDocsDir = output.childDirectory('objectc_docs');
-    if (objcDocsDir.existsSync()) {
-      copyDirectorySync(objcDocsDir, output, filesystem: filesystem);
-    }
-
-    final File testFile = output.childFile(checkFile);
+    final File testFile = output.childFile(platform.checkFile);
     if (!testFile.existsSync()) {
       print('Expected file ${testFile.path} not found');
       exit(1);
     }
-    print('$docName ready to go!');
+    print('${platform.sectionName} ready to go!');
   }
 }
 
@@ -955,12 +1003,13 @@ List<Directory> findPackages(FileSystem filesystem) {
         if (entity is! Directory) {
           return false;
         }
-        final File pubspec = filesystem.file('${entity.path}/pubspec.yaml');
+        final File pubspec = entity.childFile('pubspec.yaml');
         if (!pubspec.existsSync()) {
           print("Unexpected package '${entity.path}' found in packages directory");
           return false;
         }
-        // TODO(ianh): Use a real YAML parser here
+        // Would be nice to use a real YAML parser here, but we don't want to
+        // depend on a whole package for it, and this is sufficient.
         return !pubspec.readAsStringSync().contains('nodoc: true');
       })
       .cast<Directory>()
@@ -1058,6 +1107,9 @@ class FlutterInformation {
     if (platform.environment['FLUTTER_VERSION'] != null) {
       flutterVersionJson = platform.environment['FLUTTER_VERSION']!;
     } else {
+      // Determine which flutter command to run, which will determine which
+      // flutter root is eventually used. If the FLUTTER_ROOT is set, then use
+      // that flutter command, otherwise use the first one in the PATH.
       String flutterCommand;
       if (platform.environment['FLUTTER_ROOT'] != null) {
         flutterCommand = filesystem
@@ -1071,15 +1123,21 @@ class FlutterInformation {
       }
       ProcessResult result;
       try {
-        result = processManager.runSync(<String>[flutterCommand, '--version', '--machine'], stdoutEncoding: utf8);
+        result = processManager.runSync(
+          <String>[flutterCommand, '--version', '--machine'],
+          stdoutEncoding: utf8,
+        );
       } on ProcessException catch (e) {
         throw FlutterInformationException(
-            'Unable to determine Flutter information. Either set FLUTTER_ROOT, or place flutter command in your path.\n$e');
+            'Unable to determine Flutter information. Either set FLUTTER_ROOT, or place the '
+            'flutter command in your PATH.\n$e');
       }
       if (result.exitCode != 0) {
         throw FlutterInformationException(
-            'Unable to determine Flutter information, because of abnormal exit to flutter command.');
+            'Unable to determine Flutter information, because of abnormal exit of flutter command.');
       }
+      // Strip out any non-JSON that might be printed along with the command
+      // output.
       flutterVersionJson = (result.stdout as String)
           .replaceAll('Waiting for another flutter command to release the startup lock...', '');
     }
@@ -1139,7 +1197,7 @@ class FlutterInformation {
   String _getFlutterGitRevision() {
     const int kGitRevisionLength = 10;
 
-    final ProcessResult gitResult = Process.runSync('git', <String>['rev-parse', 'HEAD']);
+    final ProcessResult gitResult = processManager.runSync(<String>['git', 'rev-parse', 'HEAD']);
     if (gitResult.exitCode != 0) {
       throw 'git rev-parse exit with non-zero exit code: ${gitResult.exitCode}';
     }

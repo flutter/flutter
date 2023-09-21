@@ -812,8 +812,6 @@ abstract class Constraints {
 /// Signature for a function that is called for each [RenderObject].
 ///
 /// Used by [RenderObject.visitChildren] and [RenderObject.visitChildrenForSemantics].
-///
-/// The `child` argument must not be null.
 typedef RenderObjectVisitor = void Function(RenderObject child);
 
 /// Signature for a function that is called during layout.
@@ -1960,7 +1958,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         final bool mutationsToDirtySubtreesAllowed = activeLayoutRoot.owner?._debugAllowMutationsToDirtySubtrees ?? false;
         final bool doingLayoutWithCallback = activeLayoutRoot._doingThisLayoutWithCallback;
         // Mutations on this subtree is allowed when:
-        // - the subtree is being mutated in a layout callback.
+        // - the "activeLayoutRoot" subtree is being mutated in a layout callback.
         // - a different part of the render tree is doing a layout callback,
         //   and this subtree is being reparented to that subtree, as a result
         //   of global key reparenting.

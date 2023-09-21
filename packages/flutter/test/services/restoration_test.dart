@@ -8,12 +8,17 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'restoration.dart';
 
 void main() {
+  testWidgetsWithLeakTracking('$RestorationManager dispatches memory events', (WidgetTester tester) async {
+    expect(() => RestorationManager().dispose(), dispatchesMemoryEvents(RestorationManager));
+  });
+
   group('RestorationManager', () {
-    testWidgets('root bucket retrieval', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('root bucket retrieval', (WidgetTester tester) async {
       final List<MethodCall> callsToEngine = <MethodCall>[];
       final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call) {
@@ -57,7 +62,11 @@ void main() {
       });
       expect(synchronousBucket, isNotNull);
       expect(synchronousBucket, same(rootBucket));
-    });
+    },
+      // TODO(NobodyForNothing): Remove after fixing and cover remaining file
+      // with leak tests https://github.com/flutter/flutter/issues/134831
+      leakTrackingTestConfig: const LeakTrackingTestConfig(notDisposedAllowList:
+      <String, int?>{'RestorationManager': 1}));
 
     testWidgets('root bucket received from engine before retrieval', (WidgetTester tester) async {
       SystemChannels.restoration.setMethodCallHandler(null);

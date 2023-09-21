@@ -440,7 +440,7 @@ class _DragHandle extends StatelessWidget {
   });
 
   final VoidCallback? onSemanticsTap;
-  final Function(bool) handleHover;
+  final ValueChanged<bool> handleHover;
   final Set<MaterialState> materialState;
   final Color? dragHandleColor;
   final Size? dragHandleSize;
@@ -1005,6 +1005,12 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   final ValueNotifier<EdgeInsets> _clipDetailsNotifier = ValueNotifier<EdgeInsets>(EdgeInsets.zero);
 
+  @override
+  void dispose() {
+    _clipDetailsNotifier.dispose();
+    super.dispose();
+  }
+
   /// Updates the details regarding how the [SemanticsNode.rect] (focus) of
   /// the barrier for this [ModalBottomSheetRoute] should be clipped.
   ///
@@ -1127,8 +1133,6 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
 /// curve specified with the [curve] argument, after the finger is released. In
 /// such a case, the value of [startingPoint] would be the progress of the
 /// animation at the time when the finger was released.
-///
-/// The [startingPoint] and [curve] arguments must not be null.
 class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
   /// Creates a suspended curve.
   const _BottomSheetSuspendedCurve(

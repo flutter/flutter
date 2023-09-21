@@ -7,8 +7,6 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
@@ -23,6 +21,7 @@ void main() {
   testWidgetsWithLeakTracking('recording disposes images',
   (WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
+    addTearDown(builder.dispose);
 
     await tester.pumpFrames(
       builder.record(
@@ -33,13 +32,12 @@ void main() {
     );
   },
     skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
-    // TODO(polina-c): remove after fixing https://github.com/flutter/flutter/issues/133071
-    leakTrackingTestConfig: const LeakTrackingTestConfig(allowAllNotDisposed: true),
   );
 
   testWidgetsWithLeakTracking('correctly records frames using collate',
   (WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
+    addTearDown(builder.dispose);
 
     await tester.pumpFrames(
       builder.record(
@@ -66,18 +64,12 @@ void main() {
       const Duration(milliseconds: 100),
     );
 
-    final ui.Image image = await builder.collate(5);
-
     await expectLater(
-      image,
+      builder.collate(5),
       matchesGoldenFile('test.animation_sheet_builder.collate.png'),
     );
-
-    image.dispose();
   },
     skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
-    // TODO(polina-c): remove after fixing https://github.com/flutter/flutter/issues/133071
-    leakTrackingTestConfig: const LeakTrackingTestConfig(allowAllNotDisposed: true),
   ); // https://github.com/flutter/flutter/issues/56001
 
   testWidgetsWithLeakTracking('use allLayers to record out-of-subtree contents', (WidgetTester tester) async {
@@ -85,6 +77,7 @@ void main() {
       frameSize: const Size(8, 2),
       allLayers: true,
     );
+    addTearDown(builder.dispose);
 
     // The `record` (sized 8, 2) is placed on top of `_DecuplePixels`
     // (sized 12, 3), aligned at its top left.
@@ -105,17 +98,12 @@ void main() {
       const Duration(milliseconds: 100),
     );
 
-    final ui.Image image = await builder.collate(5);
-
     await expectLater(
-      image,
+      builder.collate(5),
       matchesGoldenFile('test.animation_sheet_builder.out_of_tree.png'),
     );
-    image.dispose();
   },
     skip: isBrowser, // [intended] https://github.com/flutter/flutter/issues/56001
-    // TODO(polina-c): remove after fixing https://github.com/flutter/flutter/issues/133071
-    leakTrackingTestConfig: const LeakTrackingTestConfig(allowAllNotDisposed: true),
   );
 }
 

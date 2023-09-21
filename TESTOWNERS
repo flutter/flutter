@@ -89,6 +89,7 @@
 /dev/devicelab/bin/tasks/spell_check_test_ios.dart @camsim99 @flutter/android
 /dev/devicelab/bin/tasks/spell_check_test.dart @camsim99 @flutter/android
 /dev/devicelab/bin/tasks/textfield_perf__e2e_summary.dart @zanderso @flutter/engine
+/dev/devicelab/bin/tasks/very_long_picture_scrolling_perf__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/web_size__compile_test.dart @yjbanov @flutter/web
 /dev/devicelab/bin/tasks/wide_gamut_ios.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/animated_advanced_blend_perf__timeline_summary.dart @gaaclarke @flutter/engine
@@ -134,6 +135,7 @@
 /dev/devicelab/bin/tasks/fullscreen_textfield_perf__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/hello_world__memory.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/hello_world_android__compile.dart @zanderso @flutter/tool
+/dev/devicelab/bin/tasks/hello_world_impeller.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/home_scroll_perf__timeline_summary.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle__benchmark.dart @eliasyishak @flutter/tool
 /dev/devicelab/bin/tasks/hybrid_android_views_integration_test.dart @stuartmorgan @flutter/plugin
@@ -198,6 +200,9 @@
 /dev/devicelab/bin/tasks/large_image_changer_perf_ios.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/macos_chrome_dev_mode.dart @zanderso @flutter/tool
 /dev/devicelab/bin/tasks/microbenchmarks_ios.dart @cyanglaz @flutter/engine
+/dev/devicelab/bin/tasks/microbenchmarks_ios_xcode_debug.dart @vashworth @flutter/engine
+/dev/devicelab/bin/tasks/native_assets_ios_simulator.dart @dacoharkes @flutter/ios
+/dev/devicelab/bin/tasks/native_assets_ios.dart @dacoharkes @flutter/ios
 /dev/devicelab/bin/tasks/native_platform_view_ui_tests_ios.dart @hellohuanlin @flutter/ios
 /dev/devicelab/bin/tasks/new_gallery_ios__transition_perf.dart @zanderso @flutter/engine
 /dev/devicelab/bin/tasks/new_gallery_skia_ios__transition_perf.dart @zanderso @flutter/engine
@@ -212,6 +217,7 @@
 /dev/devicelab/bin/tasks/route_test_ios.dart @vashworth @flutter/tool
 /dev/devicelab/bin/tasks/simple_animation_perf_ios.dart @cyanglaz @flutter/engine
 /dev/devicelab/bin/tasks/tiles_scroll_perf_ios__timeline_summary.dart @cyanglaz @flutter/engine
+/dev/devicelab/bin/tasks/very_long_picture_scrolling_perf_ios__e2e_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/animated_blur_backdrop_filter_perf_ios__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/draw_points_perf_ios__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/draw_vertices_perf_ios__timeline_summary.dart @jonahwilliams @flutter/engine

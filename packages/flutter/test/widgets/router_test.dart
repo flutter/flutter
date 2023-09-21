@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 void main() {
   testWidgets('Simple router basic functionality - synchronized', (WidgetTester tester) async {
@@ -1584,18 +1585,13 @@ testWidgets('ChildBackButtonDispatcher take priority recursively', (WidgetTester
   });
 
   test('$PlatformRouteInformationProvider dispatches object creation in constructor', () {
-    int eventCount = 0;
-    void listener(ObjectEvent event) => eventCount++;
-    MemoryAllocations.instance.addListener(listener);
+    void createAndDispose() {
+      PlatformRouteInformationProvider(
+        initialRouteInformation: RouteInformation(uri: Uri.parse('http://google.com')),
+      ).dispose();
+    }
 
-    final PlatformRouteInformationProvider registry = PlatformRouteInformationProvider(
-      initialRouteInformation: RouteInformation(uri: Uri.parse('http://google.com')),
-    );
-
-    expect(eventCount, 1);
-
-    registry.dispose();
-    MemoryAllocations.instance.removeListener(listener);
+    expect(createAndDispose, dispatchesMemoryEvents(PlatformRouteInformationProvider));
   });
 }
 
@@ -1650,7 +1646,7 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
     this.reportConfiguration = false,
   }) {
     if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
   }
 
@@ -1738,7 +1734,7 @@ class SimpleRouteInformationProvider extends RouteInformationProvider with Chang
     this.onRouterReport,
   }) {
     if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
   }
 
@@ -1798,7 +1794,7 @@ class SimpleAsyncRouterDelegate extends RouterDelegate<RouteInformation> with Ch
     required this.builder,
   }) {
     if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
   }
 

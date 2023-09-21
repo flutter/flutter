@@ -1690,7 +1690,7 @@ class TerminalHandler {
       _addSignalHandler(io.ProcessSignal.sigusr2, _handleSignal);
       if (_pidFile != null) {
         _logger.printTrace('Writing pid to: $_pidFile');
-        _actualPidFile = _processInfo.writePidFile(_pidFile!);
+        _actualPidFile = _processInfo.writePidFile(_pidFile);
       }
     }
   }
