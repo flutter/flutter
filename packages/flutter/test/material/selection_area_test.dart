@@ -71,7 +71,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/111370
-  testWidgetsWithLeakTracking('Show correct handle height when the Text is inside of FittedBox ',(WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Handle is correctly transformed when the text is inside of a FittedBox ',(WidgetTester tester) async {
       final Key textKey = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
