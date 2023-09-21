@@ -377,7 +377,7 @@ void _testEngineSemanticsOwner() {
     expectSemanticsTree('''
 <sem style="$rootSemanticStyle">
   <sem-c>
-    <sem role="text" aria-label="Hello"></sem>
+    <sem aria-label="Hello"></sem>
   </sem-c>
 </sem>''');
 
@@ -387,7 +387,7 @@ void _testEngineSemanticsOwner() {
     expectSemanticsTree('''
 <sem style="$rootSemanticStyle">
   <sem-c>
-    <sem role="text" aria-label="World"></sem>
+    <sem aria-label="World"></sem>
   </sem-c>
 </sem>''');
 
@@ -397,7 +397,7 @@ void _testEngineSemanticsOwner() {
     expectSemanticsTree('''
 <sem style="$rootSemanticStyle">
   <sem-c>
-    <sem role="text"></sem>
+    <sem></sem>
   </sem-c>
 </sem>''');
 
@@ -430,7 +430,7 @@ void _testEngineSemanticsOwner() {
     expectSemanticsTree('''
 <sem style="$rootSemanticStyle">
   <sem-c>
-    <sem role="text" aria-label="tooltip\nHello"></sem>
+    <sem aria-label="tooltip\nHello"></sem>
   </sem-c>
 </sem>''');
 
@@ -440,7 +440,7 @@ void _testEngineSemanticsOwner() {
     expectSemanticsTree('''
 <sem style="$rootSemanticStyle">
   <sem-c>
-    <sem role="text"></sem>
+    <sem></sem>
   </sem-c>
 </sem>''');
 
@@ -1388,7 +1388,7 @@ void _testIncrementables() {
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
 <sem style="$rootSemanticStyle">
-  <input role="slider" aria-valuenow="1" aria-valuetext="d" aria-valuemax="1" aria-valuemin="1">
+  <input aria-valuenow="1" aria-valuetext="d" aria-valuemax="1" aria-valuemin="1">
 </sem>''');
 
     final SemanticsObject node = semantics().debugSemanticsTree![0]!;
@@ -1421,7 +1421,7 @@ void _testIncrementables() {
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
 <sem style="$rootSemanticStyle">
-  <input role="slider" aria-valuenow="1" aria-valuetext="d" aria-valuemax="2" aria-valuemin="1">
+  <input aria-valuenow="1" aria-valuetext="d" aria-valuemax="2" aria-valuemin="1">
 </sem>''');
 
     final DomHTMLInputElement input =
@@ -1454,7 +1454,7 @@ void _testIncrementables() {
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
 <sem style="$rootSemanticStyle">
-  <input role="slider" aria-valuenow="1" aria-valuetext="d" aria-valuemax="1" aria-valuemin="0">
+  <input aria-valuenow="1" aria-valuetext="d" aria-valuemax="1" aria-valuemin="0">
 </sem>''');
 
     final DomHTMLInputElement input =
@@ -1489,7 +1489,7 @@ void _testIncrementables() {
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
 <sem style="$rootSemanticStyle">
-  <input role="slider" aria-valuenow="1" aria-valuetext="d" aria-valuemax="2" aria-valuemin="0">
+  <input aria-valuenow="1" aria-valuetext="d" aria-valuemax="2" aria-valuemin="0">
 </sem>''');
 
     semantics().semanticsEnabled = false;
@@ -1632,7 +1632,7 @@ void _testCheckables() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem aria-label="test label" flt-tappable role="switch" aria-checked="true" style="$rootSemanticStyle"></sem>
+<sem aria-label="test label" role="switch" aria-checked="true" style="$rootSemanticStyle"></sem>
 ''');
 
     final SemanticsObject node = semantics().debugSemanticsTree![0]!;
@@ -1690,7 +1690,7 @@ void _testCheckables() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem role="switch" flt-tappable aria-checked="false" style="$rootSemanticStyle"></sem>
+<sem role="switch" aria-checked="false" style="$rootSemanticStyle"></sem>
 ''');
 
     semantics().semanticsEnabled = false;
@@ -1716,7 +1716,7 @@ void _testCheckables() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem role="checkbox" flt-tappable aria-checked="true" style="$rootSemanticStyle"></sem>
+<sem role="checkbox" aria-checked="true" style="$rootSemanticStyle"></sem>
 ''');
 
     semantics().semanticsEnabled = false;
@@ -1766,7 +1766,7 @@ void _testCheckables() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem role="checkbox" flt-tappable aria-checked="false" style="$rootSemanticStyle"></sem>
+<sem role="checkbox" aria-checked="false" style="$rootSemanticStyle"></sem>
 ''');
 
     semantics().semanticsEnabled = false;
@@ -1793,7 +1793,7 @@ void _testCheckables() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem role="radio" flt-tappable aria-checked="true" style="$rootSemanticStyle"></sem>
+<sem role="radio" aria-checked="true" style="$rootSemanticStyle"></sem>
 ''');
 
     semantics().semanticsEnabled = false;
@@ -1845,7 +1845,7 @@ void _testCheckables() {
 
     semantics().updateSemantics(builder.build());
     expectSemanticsTree('''
-<sem role="radio" flt-tappable aria-checked="false" style="$rootSemanticStyle"></sem>
+<sem role="radio" aria-checked="false" style="$rootSemanticStyle"></sem>
 ''');
 
     semantics().semanticsEnabled = false;
@@ -1918,7 +1918,7 @@ void _testTappable() {
     tester.apply();
 
     expectSemanticsTree('''
-<sem role="button" flt-tappable style="$rootSemanticStyle"></sem>
+<sem role="button" style="$rootSemanticStyle"></sem>
 ''');
 
     final SemanticsObject node = semantics().debugSemanticsTree![0]!;
@@ -1979,14 +1979,14 @@ void _testTappable() {
         '<sem role="button" aria-disabled="true" style="$rootSemanticStyle"></sem>');
 
     updateTappable(enabled: true);
-    expectSemanticsTree('<sem role="button" flt-tappable style="$rootSemanticStyle"></sem>');
+    expectSemanticsTree('<sem role="button" style="$rootSemanticStyle"></sem>');
 
     updateTappable(enabled: false);
     expectSemanticsTree(
         '<sem role="button" aria-disabled="true" style="$rootSemanticStyle"></sem>');
 
     updateTappable(enabled: true);
-    expectSemanticsTree('<sem role="button" flt-tappable style="$rootSemanticStyle"></sem>');
+    expectSemanticsTree('<sem role="button" style="$rootSemanticStyle"></sem>');
 
     semantics().semanticsEnabled = false;
   });
@@ -2623,11 +2623,11 @@ void _testDialog() {
       tester.apply();
 
       expectSemanticsTree('''
-        <sem role="dialog" aria-describedby="flt-semantic-node-2" style="$rootSemanticStyle">
+        <sem aria-describedby="flt-semantic-node-2" style="$rootSemanticStyle">
           <sem-c>
             <sem>
               <sem-c>
-                <sem role="text" aria-label="$label"></sem>
+                <sem aria-label="$label"></sem>
               </sem-c>
             </sem>
           </sem-c>
@@ -2716,7 +2716,7 @@ void _testDialog() {
         <sem-c>
           <sem>
             <sem-c>
-              <sem role="text" aria-label="Hello"></sem>
+              <sem aria-label="Hello"></sem>
             </sem-c>
           </sem>
         </sem-c>
@@ -2853,9 +2853,9 @@ void _testFocusable() {
     }
 
     expectSemanticsTree('''
-<sem style="$rootSemanticStyle">
+<sem role="group" style="$rootSemanticStyle">
   <sem-c>
-    <sem role="text" aria-label="focusable text"></sem>
+    <sem aria-label="focusable text"></sem>
   </sem-c>
 </sem>
 ''');
