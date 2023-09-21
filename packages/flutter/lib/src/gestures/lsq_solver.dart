@@ -95,8 +95,6 @@ class PolynomialFit {
 /// Uses the least-squares algorithm to fit a polynomial to a set of data.
 class LeastSquaresSolver {
   /// Creates a least-squares solver.
-  ///
-  /// The [x], [y], and [w] arguments must not be null.
   LeastSquaresSolver(this.x, this.y, this.w)
     : assert(x.length == y.length),
       assert(y.length == w.length);

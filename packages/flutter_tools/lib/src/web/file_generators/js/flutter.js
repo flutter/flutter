@@ -144,7 +144,7 @@ _flutter.loader = null;
 
       const serviceWorkerActivation = navigator.serviceWorker
         .register(url)
-        .then(this._getNewServiceWorker)
+        .then((serviceWorkerRegistration) => this._getNewServiceWorker(serviceWorkerRegistration, serviceWorkerVersion))
         .then(this._waitForServiceWorkerActivation);
 
       // Timeout race promise
@@ -162,9 +162,10 @@ _flutter.loader = null;
      * awaiting to be installed/updated.
      *
      * @param {ServiceWorkerRegistration} serviceWorkerRegistration
+     * @param {String} serviceWorkerVersion
      * @returns {Promise<ServiceWorker>}
      */
-    async _getNewServiceWorker(serviceWorkerRegistration) {
+    async _getNewServiceWorker(serviceWorkerRegistration, serviceWorkerVersion) {
       if (!serviceWorkerRegistration.active && (serviceWorkerRegistration.installing || serviceWorkerRegistration.waiting)) {
         // No active web worker and we have installed or are installing
         // one for the first time. Simply wait for it to activate.

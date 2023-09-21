@@ -1336,14 +1336,14 @@ void runAllTests({ required bool useMaterial3 }) {
     );
 
     // The hint's opacity animates from 0.0 to 1.0.
-    // The animation's duration is 167ms.
+    // The animation's default duration is 20ms.
     {
-      await tester.pump(const Duration(milliseconds: 50));
-      final double hintOpacity50ms = getOpacity(tester, 'hint');
-      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
-      await tester.pump(const Duration(milliseconds: 50));
-      final double hintOpacity100ms = getOpacity(tester, 'hint');
-      expect(hintOpacity100ms, inExclusiveRange(hintOpacity50ms, 1.0));
+      await tester.pump(const Duration(milliseconds: 9));
+      final double hintOpacity9ms = getOpacity(tester, 'hint');
+      expect(hintOpacity9ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 9));
+      final double hintOpacity18ms = getOpacity(tester, 'hint');
+      expect(hintOpacity18ms, inExclusiveRange(hintOpacity9ms, 1.0));
     }
 
     await tester.pumpAndSettle();
@@ -1370,14 +1370,14 @@ void runAllTests({ required bool useMaterial3 }) {
     );
 
     // The hint's opacity animates from 1.0 to 0.0.
-    // The animation's duration is 167ms.
+    // The animation's default duration is 20ms.
     {
-      await tester.pump(const Duration(milliseconds: 50));
-      final double hintOpacity50ms = getOpacity(tester, 'hint');
-      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
-      await tester.pump(const Duration(milliseconds: 50));
-      final double hintOpacity100ms = getOpacity(tester, 'hint');
-      expect(hintOpacity100ms, inExclusiveRange(0.0, hintOpacity50ms));
+      await tester.pump(const Duration(milliseconds: 9));
+      final double hintOpacity9ms = getOpacity(tester, 'hint');
+      expect(hintOpacity9ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 9));
+      final double hintOpacity18ms = getOpacity(tester, 'hint');
+      expect(hintOpacity18ms, inExclusiveRange(0.0, hintOpacity9ms));
     }
 
     await tester.pumpAndSettle();
@@ -1455,6 +1455,219 @@ void runAllTests({ required bool useMaterial3 }) {
     expect(getOpacity(tester, 'hint'), 1.0);
     expect(getBorderBottom(tester), 48.0);
     expect(getBorderWeight(tester), 2.0);
+  });
+
+  testWidgetsWithLeakTracking('InputDecorator default hint animation duration', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        isEmpty: true,
+        decoration: const InputDecoration(
+          labelText: 'label',
+          hintText: 'hint',
+        ),
+      ),
+    );
+
+    // The hint is not visible (opacity 0.0).
+    expect(getOpacity(tester, 'hint'), 0.0);
+
+    // Focus to show the hint.
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        isEmpty: true,
+        isFocused: true,
+        decoration: const InputDecoration(
+          labelText: 'label',
+          hintText: 'hint',
+        ),
+      ),
+    );
+
+    // The hint's opacity animates from 0.0 to 1.0.
+    // The animation's default duration is 20ms.
+    {
+      await tester.pump(const Duration(milliseconds: 9));
+      final double hintOpacity9ms = getOpacity(tester, 'hint');
+      expect(hintOpacity9ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 9));
+      final double hintOpacity18ms = getOpacity(tester, 'hint');
+      expect(hintOpacity18ms, inExclusiveRange(hintOpacity9ms, 1.0));
+      await tester.pump(const Duration(milliseconds: 9));
+      expect(getOpacity(tester, 'hint'), 1.0);
+    }
+
+    // Unfocus to hide the hint.
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        isEmpty: true,
+        decoration: const InputDecoration(
+          labelText: 'label',
+          hintText: 'hint',
+        ),
+      ),
+    );
+
+    // The hint's opacity animates from 1.0 to 0.0.
+    // The animation's default duration is 20ms.
+    {
+      await tester.pump(const Duration(milliseconds: 9));
+      final double hintOpacity9ms = getOpacity(tester, 'hint');
+      expect(hintOpacity9ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 9));
+      final double hintOpacity18ms = getOpacity(tester, 'hint');
+      expect(hintOpacity18ms, inExclusiveRange(0.0, hintOpacity9ms));
+      await tester.pump(const Duration(milliseconds: 9));
+      expect(getOpacity(tester, 'hint'), 0.0);
+    }
+  });
+
+  testWidgetsWithLeakTracking('InputDecorator custom hint animation duration', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        isEmpty: true,
+        decoration: const InputDecoration(
+          labelText: 'label',
+          hintText: 'hint',
+          hintFadeDuration: Duration(milliseconds: 120),
+        ),
+      ),
+    );
+
+    // The hint is not visible (opacity 0.0).
+    expect(getOpacity(tester, 'hint'), 0.0);
+
+    // Focus to show the hint.
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        isEmpty: true,
+        isFocused: true,
+        decoration: const InputDecoration(
+          labelText: 'label',
+          hintText: 'hint',
+          hintFadeDuration: Duration(milliseconds: 120),
+        ),
+      ),
+    );
+
+    // The hint's opacity animates from 0.0 to 1.0.
+    // The animation's duration is set to 120ms.
+    {
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity50ms = getOpacity(tester, 'hint');
+      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity100ms = getOpacity(tester, 'hint');
+      expect(hintOpacity100ms, inExclusiveRange(hintOpacity50ms, 1.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(getOpacity(tester, 'hint'), 1.0);
+    }
+
+    // Unfocus to hide the hint.
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        isEmpty: true,
+        decoration: const InputDecoration(
+          labelText: 'label',
+          hintText: 'hint',
+          hintFadeDuration: Duration(milliseconds: 120),
+        ),
+      ),
+    );
+
+    // The hint's opacity animates from 1.0 to 0.0.
+    // The animation's default duration is 20ms.
+    {
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity50ms = getOpacity(tester, 'hint');
+      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity100ms = getOpacity(tester, 'hint');
+      expect(hintOpacity100ms, inExclusiveRange(0.0, hintOpacity50ms));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(getOpacity(tester, 'hint'), 0.0);
+    }
+  });
+
+  testWidgetsWithLeakTracking('InputDecorator custom hint animation duration from theme', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        inputDecorationTheme: const InputDecorationTheme(
+          hintFadeDuration: Duration(milliseconds: 120),
+        ),
+        isEmpty: true,
+        decoration: const InputDecoration(
+          labelText: 'label',
+          hintText: 'hint',
+        ),
+      ),
+    );
+
+    // The hint is not visible (opacity 0.0).
+    expect(getOpacity(tester, 'hint'), 0.0);
+
+    // Focus to show the hint.
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        inputDecorationTheme: const InputDecorationTheme(
+          hintFadeDuration: Duration(milliseconds: 120),
+        ),
+        isEmpty: true,
+        isFocused: true,
+        decoration: const InputDecoration(
+          labelText: 'label',
+          hintText: 'hint',
+        ),
+      ),
+    );
+
+    // The hint's opacity animates from 0.0 to 1.0.
+    // The animation's duration is set to 120ms.
+    {
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity50ms = getOpacity(tester, 'hint');
+      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity100ms = getOpacity(tester, 'hint');
+      expect(hintOpacity100ms, inExclusiveRange(hintOpacity50ms, 1.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(getOpacity(tester, 'hint'), 1.0);
+    }
+
+    // Unfocus to hide the hint.
+    await tester.pumpWidget(
+      buildInputDecorator(
+        useMaterial3: useMaterial3,
+        inputDecorationTheme: const InputDecorationTheme(
+          hintFadeDuration: Duration(milliseconds: 120),
+        ),
+        isEmpty: true,
+        decoration: const InputDecoration(
+          labelText: 'label',
+          hintText: 'hint',
+        ),
+      ),
+    );
+
+    // The hint's opacity animates from 1.0 to 0.0.
+    // The animation's duration is set to 160ms.
+    {
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity50ms = getOpacity(tester, 'hint');
+      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 50));
+      final double hintOpacity100ms = getOpacity(tester, 'hint');
+      expect(hintOpacity100ms, inExclusiveRange(0.0, hintOpacity50ms));
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(getOpacity(tester, 'hint'), 0.0);
+    }
   });
 
   testWidgetsWithLeakTracking('InputDecorator with no input border', (WidgetTester tester) async {
@@ -2493,14 +2706,14 @@ void runAllTests({ required bool useMaterial3 }) {
     );
 
     // The hint's opacity animates from 0.0 to 1.0.
-    // The animation's duration is 167ms.
+    // The animation's default duration is 20ms.
     {
-      await tester.pump(const Duration(milliseconds: 50));
-      final double hintOpacity50ms = getOpacity(tester, 'hint');
-      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
-      await tester.pump(const Duration(milliseconds: 50));
-      final double hintOpacity100ms = getOpacity(tester, 'hint');
-      expect(hintOpacity100ms, inExclusiveRange(hintOpacity50ms, 1.0));
+      await tester.pump(const Duration(milliseconds: 9));
+      final double hintOpacity9ms = getOpacity(tester, 'hint');
+      expect(hintOpacity9ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 9));
+      final double hintOpacity18ms = getOpacity(tester, 'hint');
+      expect(hintOpacity18ms, inExclusiveRange(hintOpacity9ms, 1.0));
     }
 
     await tester.pumpAndSettle();
@@ -2528,14 +2741,14 @@ void runAllTests({ required bool useMaterial3 }) {
     );
 
     // The hint's opacity animates from 1.0 to 0.0.
-    // The animation's duration is 167ms.
+    // The animation's default duration is 20ms.
     {
-      await tester.pump(const Duration(milliseconds: 50));
-      final double hintOpacity50ms = getOpacity(tester, 'hint');
-      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
-      await tester.pump(const Duration(milliseconds: 50));
-      final double hintOpacity100ms = getOpacity(tester, 'hint');
-      expect(hintOpacity100ms, inExclusiveRange(0.0, hintOpacity50ms));
+      await tester.pump(const Duration(milliseconds: 9));
+      final double hintOpacity9ms = getOpacity(tester, 'hint');
+      expect(hintOpacity9ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 9));
+      final double hintOpacity18ms = getOpacity(tester, 'hint');
+      expect(hintOpacity18ms, inExclusiveRange(0.0, hintOpacity9ms));
     }
 
     await tester.pumpAndSettle();
@@ -2590,14 +2803,14 @@ void runAllTests({ required bool useMaterial3 }) {
     );
 
     // The hint's opacity animates from 0.0 to 1.0.
-    // The animation's duration is 167ms.
+    // The animation's default duration is 20ms.
     {
-      await tester.pump(const Duration(milliseconds: 50));
-      final double hintOpacity50ms = getOpacity(tester, 'hint');
-      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
-      await tester.pump(const Duration(milliseconds: 50));
-      final double hintOpacity100ms = getOpacity(tester, 'hint');
-      expect(hintOpacity100ms, inExclusiveRange(hintOpacity50ms, 1.0));
+      await tester.pump(const Duration(milliseconds: 9));
+      final double hintOpacity9ms = getOpacity(tester, 'hint');
+      expect(hintOpacity9ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 9));
+      final double hintOpacity18ms = getOpacity(tester, 'hint');
+      expect(hintOpacity18ms, inExclusiveRange(hintOpacity9ms, 1.0));
     }
 
     await tester.pumpAndSettle();
@@ -2625,14 +2838,14 @@ void runAllTests({ required bool useMaterial3 }) {
     );
 
     // The hint's opacity animates from 1.0 to 0.0.
-    // The animation's duration is 167ms.
+    // The animation's default duration is 20ms.
     {
-      await tester.pump(const Duration(milliseconds: 50));
-      final double hintOpacity50ms = getOpacity(tester, 'hint');
-      expect(hintOpacity50ms, inExclusiveRange(0.0, 1.0));
-      await tester.pump(const Duration(milliseconds: 50));
-      final double hintOpacity100ms = getOpacity(tester, 'hint');
-      expect(hintOpacity100ms, inExclusiveRange(0.0, hintOpacity50ms));
+      await tester.pump(const Duration(milliseconds: 9));
+      final double hintOpacity9ms = getOpacity(tester, 'hint');
+      expect(hintOpacity9ms, inExclusiveRange(0.0, 1.0));
+      await tester.pump(const Duration(milliseconds: 9));
+      final double hintOpacity18ms = getOpacity(tester, 'hint');
+      expect(hintOpacity18ms, inExclusiveRange(0.0, hintOpacity9ms));
     }
 
     await tester.pumpAndSettle();

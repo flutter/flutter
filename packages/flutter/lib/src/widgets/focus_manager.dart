@@ -417,9 +417,6 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// The [debugLabel] is ignored on release builds.
   ///
-  /// The [skipTraversal], [descendantsAreFocusable], and [canRequestFocus]
-  /// arguments must not be null.
-  ///
   /// To receive key events that focuses on this node, pass a listener to `onKeyEvent`.
   /// The `onKey` is a legacy API based on [RawKeyEvent] and will be deprecated
   /// in the future.
@@ -439,7 +436,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     this.debugLabel = debugLabel;
 
     if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
   }
 
@@ -1468,7 +1465,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// documentation in that method for caveats to watch out for.
   FocusManager() {
     if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
     rootScope._manager = this;
   }

@@ -1580,7 +1580,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   /// Creates an instance of [MultiSelectableSelectionContainerDelegate].
   MultiSelectableSelectionContainerDelegate() {
     if (kFlutterMemoryAllocationsEnabled) {
-      maybeDispatchObjectCreation();
+      ChangeNotifier.maybeDispatchObjectCreation(this);
     }
   }
 

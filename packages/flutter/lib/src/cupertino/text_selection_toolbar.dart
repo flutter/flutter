@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:collection';
+import 'dart:math' as math show pi;
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart' show Brightness, clampDouble;
@@ -279,87 +280,127 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  // The child is tall enough to have the arrow clipped out of it on both sides
-  // top and bottom. Since _kToolbarHeight includes the height of one arrow, the
-  // total height that the child is given is that plus one more arrow height.
-  // The extra height on the opposite side of the arrow will be clipped out. By
-  // using this approach, the buttons don't need any special padding that
-  // depends on isAbove.
-  final BoxConstraints _heightConstraint = BoxConstraints.tightFor(
-    height: _kToolbarHeight + _kToolbarArrowSize.height,
-  );
-
   @override
   void performLayout() {
+    final RenderBox? child = this.child;
     if (child == null) {
       return;
     }
 
-    final BoxConstraints enforcedConstraint = constraints.loosen();
+    // The child is tall enough to have the arrow clipped out of it on both sides
+    // top and bottom. Since _kToolbarHeight includes the height of one arrow, the
+    // total height that the child is given is that plus one more arrow height.
+    // The extra height on the opposite side of the arrow will be clipped out. By
+    // using this approach, the buttons don't need any special padding that
+    // depends on isAbove.
+    final BoxConstraints heightConstraint = BoxConstraints(
+      minHeight: _kToolbarHeight + _kToolbarArrowSize.height,
+      maxHeight: _kToolbarHeight + _kToolbarArrowSize.height,
+      minWidth: _kToolbarArrowSize.width + _kToolbarBorderRadius.x * 2,
+    ).enforce(constraints.loosen());
 
-    child!.layout(_heightConstraint.enforce(enforcedConstraint), parentUsesSize: true);
+    child.layout(heightConstraint, parentUsesSize: true);
 
     // The height of one arrow will be clipped off of the child, so adjust the
     // size and position to remove that piece from the layout.
-    final BoxParentData childParentData = child!.parentData! as BoxParentData;
+    final BoxParentData childParentData = child.parentData! as BoxParentData;
     childParentData.offset = Offset(
       0.0,
       _isAbove ? -_kToolbarArrowSize.height : 0.0,
     );
     size = Size(
-      child!.size.width,
-      child!.size.height - _kToolbarArrowSize.height,
+      child.size.width,
+      child.size.height - _kToolbarArrowSize.height,
     );
   }
 
+  // Adds the given `rrect` to the current `path`, starting from the last point
+  // in `path` and ends after the last corner of the rrect (closest corner to
+  // `startAngle` in the counterclockwise direction), without closing the path.
+  //
+  // The `startAngle` argument must be a multiple of pi / 2, with 0 being the
+  // positive half of the x-axis, and pi / 2 being the negative half of the
+  // y-axis.
+  //
+  // For instance, if `startAngle` equals pi/2 then this method draws a line
+  // segment to the bottom-left corner of `rrect` from the last point in `path`,
+  // and follows the `rrect` path clockwise until the bottom-right corner is
+  // added, then this method returns the mutated path without closing it.
+  static Path _addRRectToPath(Path path, RRect rrect, { required double startAngle }) {
+    const double halfPI = math.pi / 2;
+    assert(startAngle % halfPI == 0);
+    final Rect rect = rrect.outerRect;
+
+    final List<(Offset, Radius)> rrectCorners = <(Offset, Radius)>[
+      (rect.bottomRight, -rrect.brRadius),
+      (rect.bottomLeft, Radius.elliptical(rrect.blRadiusX, -rrect.blRadiusY)),
+      (rect.topLeft, rrect.tlRadius),
+      (rect.topRight, Radius.elliptical(-rrect.trRadiusX, rrect.trRadiusY)),
+    ];
+
+    // Add the 4 corners to the path clockwise. Convert radians to quadrants
+    // to avoid fp arithmetics. The order is br -> bl -> tl -> tr if the starting
+    // angle is 0.
+    final int startQuadrantIndex = startAngle ~/ halfPI;
+    for (int i = startQuadrantIndex; i < rrectCorners.length + startQuadrantIndex; i += 1) {
+      final (Offset vertex, Radius rectCenterOffset) = rrectCorners[i % rrectCorners.length];
+      final Offset otherVertex = Offset(vertex.dx + 2 * rectCenterOffset.x, vertex.dy + 2 * rectCenterOffset.y);
+      final Rect rect = Rect.fromPoints(vertex, otherVertex);
+      path.arcTo(rect, halfPI * i, halfPI, false);
+    }
+    return path;
+  }
+
   // The path is described in the toolbar's coordinate system.
-  Path _clipPath() {
-    final BoxParentData childParentData = child!.parentData! as BoxParentData;
-    final Path rrect = Path()
-      ..addRRect(
-        RRect.fromRectAndRadius(
-          Offset(0.0, _kToolbarArrowSize.height)
-            & Size(
-                child!.size.width,
-                child!.size.height - _kToolbarArrowSize.height * 2,
-              ),
-          _kToolbarBorderRadius,
-        ),
-      );
+  Path _clipPath(RenderBox child) {
+    final Rect rect = Offset(0.0, _isAbove ? 0 : _kToolbarArrowSize.height)
+                    & Size(size.width, size.height - _kToolbarArrowSize.height);
+    final RRect rrect = RRect.fromRectAndRadius(rect, _kToolbarBorderRadius).scaleRadii();
+
+    final Path path = Path();
+    // If there isn't enough width for the arrow + radii, ignore the arrow.
+    // Because of the constraints we gave children in performLayout, this should
+    // only happen if the parent isn't wide enough which should be very rare, and
+    // when that happens the arrow won't be too useful anyways.
+    if (_kToolbarBorderRadius.x * 2 + _kToolbarArrowSize.width > size.width) {
+      return path..addRRect(rrect);
+    }
 
     final Offset localAnchor = globalToLocal(_anchor);
-    final double centerX = childParentData.offset.dx + child!.size.width / 2;
-    final double arrowXOffsetFromCenter = localAnchor.dx - centerX;
-    final double arrowTipX = child!.size.width / 2 + arrowXOffsetFromCenter;
+    final double arrowTipX = clampDouble(
+      localAnchor.dx,
+      _kToolbarBorderRadius.x + _kToolbarArrowSize.width / 2,
+      size.width - _kToolbarArrowSize.width / 2 - _kToolbarBorderRadius.x,
+    );
 
-    final double arrowBaseY = _isAbove
-      ? child!.size.height - _kToolbarArrowSize.height
-      : _kToolbarArrowSize.height;
-
-    final double arrowTipY = _isAbove ? child!.size.height : 0;
-
-    final Path arrow = Path()
-      ..moveTo(arrowTipX, arrowTipY)
-      ..lineTo(arrowTipX - _kToolbarArrowSize.width / 2, arrowBaseY)
-      ..lineTo(arrowTipX + _kToolbarArrowSize.width / 2, arrowBaseY)
-      ..close();
-
-    return Path.combine(PathOperation.union, rrect, arrow);
+    // Draw the path clockwise, starting from the beginning side of the arrow.
+    if (_isAbove) {
+      path
+        ..moveTo(arrowTipX + _kToolbarArrowSize.width / 2, rect.bottom)  // right side of the arrow triangle
+        ..lineTo(arrowTipX, rect.bottom + _kToolbarArrowSize.height)     // The tip of the arrow
+        ..lineTo(arrowTipX - _kToolbarArrowSize.width / 2, rect.bottom); // left side of the arrow triangle
+    } else {
+      path
+        ..moveTo(arrowTipX - _kToolbarArrowSize.width / 2, rect.top)  // right side of the arrow triangle
+        ..lineTo(arrowTipX, rect.top)                                 // The tip of the arrow
+        ..lineTo(arrowTipX + _kToolbarArrowSize.width / 2, rect.top); // left side of the arrow triangle
+    }
+    final double startAngle = _isAbove ? math.pi / 2 : -math.pi / 2;
+    return _addRRectToPath(path, rrect, startAngle: startAngle)..close();
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    final RenderBox? child = this.child;
     if (child == null) {
       return;
     }
-
-    final BoxParentData childParentData = child!.parentData! as BoxParentData;
     _clipPathLayer.layer = context.pushClipPath(
       needsCompositing,
-      offset + childParentData.offset,
-      Offset.zero & child!.size,
-      _clipPath(),
-      (PaintingContext innerContext, Offset innerOffset) => innerContext.paintChild(child!, innerOffset),
+      offset,
+      Offset.zero & size,
+      _clipPath(child),
+      super.paint,
       oldLayer: _clipPathLayer.layer,
     );
   }
@@ -376,11 +417,12 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
   @override
   void debugPaintSize(PaintingContext context, Offset offset) {
     assert(() {
+      final RenderBox? child = this.child;
       if (child == null) {
         return true;
       }
 
-      _debugPaint ??= Paint()
+      final ui.Paint debugPaint = _debugPaint ??= Paint()
         ..shader = ui.Gradient.linear(
           Offset.zero,
           const Offset(10.0, 10.0),
@@ -391,8 +433,8 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
         ..strokeWidth = 2.0
         ..style = PaintingStyle.stroke;
 
-      final BoxParentData childParentData = child!.parentData! as BoxParentData;
-      context.canvas.drawPath(_clipPath().shift(offset + childParentData.offset), _debugPaint!);
+      final BoxParentData childParentData = child.parentData! as BoxParentData;
+      context.canvas.drawPath(_clipPath(child).shift(offset + childParentData.offset), debugPaint);
       return true;
     }());
   }

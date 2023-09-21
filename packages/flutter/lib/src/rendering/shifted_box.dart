@@ -102,7 +102,7 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
 class RenderPadding extends RenderShiftedBox {
   /// Creates a render object that insets its child.
   ///
-  /// The [padding] argument must not be null and must have non-negative insets.
+  /// The [padding] argument must have non-negative insets.
   RenderPadding({
     required EdgeInsetsGeometry padding,
     TextDirection? textDirection,
@@ -267,8 +267,6 @@ class RenderPadding extends RenderShiftedBox {
 abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   /// Initializes member variables for subclasses.
   ///
-  /// The [alignment] argument must not be null.
-  ///
   /// The [textDirection] must be non-null if the [alignment] is
   /// direction-sensitive.
   RenderAligningShiftedBox({
@@ -308,8 +306,6 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   AlignmentGeometry get alignment => _alignment;
   AlignmentGeometry _alignment;
   /// Sets the alignment to a new value, and triggers a layout update.
-  ///
-  /// The new alignment must not be null.
   set alignment(AlignmentGeometry value) {
     if (_alignment == value) {
       return;
@@ -685,8 +681,6 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
 class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugOverflowIndicatorMixin {
   /// Creates a [RenderBox] that sizes itself to the child and modifies the
   /// [constraints] before passing it down to that child.
-  ///
-  /// The [alignment] and [clipBehavior] must not be null.
   RenderConstraintsTransformBox({
     required super.alignment,
     required super.textDirection,
@@ -877,8 +871,6 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox with DebugO
 class RenderSizedOverflowBox extends RenderAligningShiftedBox {
   /// Creates a render box of a given size that lets its child overflow.
   ///
-  /// The [requestedSize] and [alignment] arguments must not be null.
-  ///
   /// The [textDirection] argument must not be null if the [alignment] is
   /// direction-sensitive.
   RenderSizedOverflowBox({
@@ -958,8 +950,6 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
   ///
   /// If non-null, the [widthFactor] and [heightFactor] arguments must be
   /// non-negative.
-  ///
-  /// The [alignment] must not be null.
   ///
   /// The [textDirection] must be non-null if the [alignment] is
   /// direction-sensitive.
@@ -1313,8 +1303,6 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
 /// and the bottom of the box.
 class RenderBaseline extends RenderShiftedBox {
   /// Creates a [RenderBaseline] object.
-  ///
-  /// The [baseline] and [baselineType] arguments must not be null.
   RenderBaseline({
     RenderBox? child,
     required double baseline,

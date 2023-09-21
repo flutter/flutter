@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 const List<int> items = <int>[0, 1, 2, 3, 4, 5];
 
@@ -28,7 +29,7 @@ Widget buildFrame({ bool reverse = false, required TextDirection textDirection }
 }
 
 void main() {
-  testWidgets('Drag horizontally with scroll anchor at start (LTR)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag horizontally with scroll anchor at start (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(buildFrame(textDirection: TextDirection.ltr));
 
     await tester.pump(const Duration(seconds: 1));
@@ -147,7 +148,7 @@ void main() {
     expect(find.text('5'), findsNothing);
   });
 
-  testWidgets('Drag horizontally with scroll anchor at end (LTR)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag horizontally with scroll anchor at end (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(buildFrame(reverse: true, textDirection: TextDirection.ltr));
 
     await tester.pump(const Duration(seconds: 1));
@@ -247,7 +248,7 @@ void main() {
     expect(find.text('5'), findsOneWidget);
   });
 
-  testWidgets('Drag horizontally with scroll anchor at start (RTL)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag horizontally with scroll anchor at start (RTL)', (WidgetTester tester) async {
     await tester.pumpWidget(buildFrame(textDirection: TextDirection.rtl));
 
     await tester.pump(const Duration(seconds: 1));
@@ -347,7 +348,7 @@ void main() {
     expect(find.text('5'), findsOneWidget);
   });
 
-  testWidgets('Drag horizontally with scroll anchor at end (LTR)', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Drag horizontally with scroll anchor at end (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(buildFrame(reverse: true, textDirection: TextDirection.rtl));
 
     await tester.pump(const Duration(seconds: 1));
