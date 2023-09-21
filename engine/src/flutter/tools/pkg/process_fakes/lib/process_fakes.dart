@@ -9,15 +9,20 @@ import 'package:process/process.dart';
 
 /// A fake implementation of [ProcessManager] that allows control for testing.
 final class FakeProcessManager implements ProcessManager {
+  /// Creates a fake process manager delegates to [onRun] and [onStart].
+  ///
+  /// If either is not provided, it throws an [UnsupportedError] when called.
   FakeProcessManager({
     io.ProcessResult Function(List<String> command) onRun = unhandledRun,
     io.Process Function(List<String> command) onStart = unhandledStart,
   }) : _onRun = onRun, _onStart = onStart;
 
+  /// A default implementation of [onRun] that throws an [UnsupportedError].
   static io.ProcessResult unhandledRun(List<String> command) {
     throw UnsupportedError('Unhandled run: ${command.join(' ')}');
   }
 
+  /// A default implementation of [onStart] that throws an [UnsupportedError].
   static io.Process unhandledStart(List<String> command) {
     throw UnsupportedError('Unhandled start: ${command.join(' ')}');
   }
