@@ -360,12 +360,12 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
       return path..addRRect(rrect);
     }
 
-    final BoxParentData childParentData = child.parentData! as BoxParentData;
     final Offset localAnchor = globalToLocal(isAbove ? _anchorAbove : _anchorBelow);
-
-    final double centerX = childParentData.offset.dx + child.size.width / 2;
-    final double arrowXOffsetFromCenter = localAnchor.dx - centerX;
-    final double arrowTipX = child.size.width / 2 + arrowXOffsetFromCenter;
+    final double arrowTipX = clampDouble(
+      localAnchor.dx,
+      _kToolbarBorderRadius.x + _kToolbarArrowSize.width / 2,
+      size.width - _kToolbarArrowSize.width / 2 - _kToolbarBorderRadius.x,
+    );
 
     // Draw the path clockwise, starting from the beginning side of the arrow.
     if (isAbove) {
