@@ -285,7 +285,9 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
       return;
     }
 
-    final BoxConstraints enforcedConstraint = constraints.loosen();
+    final BoxConstraints enforcedConstraint = BoxConstraints(
+      minWidth: _kToolbarArrowSize.width + _kToolbarBorderRadius.x * 2,
+    ).enforce(constraints.loosen());
     child.layout(enforcedConstraint, parentUsesSize: true);
 
     // The buttons are padded on both top and bottom sufficiently to have
