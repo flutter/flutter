@@ -2097,7 +2097,6 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
   @override
   void dispose() {
     _avatarOpacityLayerHandler.layer = null;
-    _childOpacityLayerHandler.layer = null;
     super.dispose();
   }
 
