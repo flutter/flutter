@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-name: clang_tidy
+name: git_repo_tools
 publish_to: none
 environment:
   sdk: '>=3.2.0-0 <4.0.0'
@@ -17,9 +17,6 @@ environment:
 # relative to this directory into //third_party/dart
 
 dependencies:
-  args: any
-  git_repo_tools: any
-  engine_repo_tools: any
   meta: any
   path: any
   process: any
@@ -34,34 +31,30 @@ dev_dependencies:
 
 dependency_overrides:
   args:
-    path: ../../../third_party/dart/third_party/pkg/args
+    path: ../../../../third_party/dart/third_party/pkg/args
   async:
-    path: ../../../third_party/dart/third_party/pkg/async
+    path: ../../../../third_party/dart/third_party/pkg/async
   async_helper:
-    path: ../../../third_party/dart/pkg/async_helper
+    path: ../../../../third_party/dart/pkg/async_helper
   collection:
-    path: ../../../third_party/dart/third_party/pkg/collection
-  engine_repo_tools:
-    path: ../pkg/engine_repo_tools
+    path: ../../../../third_party/dart/third_party/pkg/collection
   expect:
-    path: ../../../third_party/dart/pkg/expect
+    path: ../../../../third_party/dart/pkg/expect
   file:
-    path: ../../../third_party/pkg/file/packages/file
-  git_repo_tools:
-    path: ../pkg/git_repo_tools
+    path: ../../../../third_party/pkg/file/packages/file
   litetest:
-    path: ../../testing/litetest
+    path: ../../../testing/litetest
   meta:
-    path: ../../../third_party/dart/pkg/meta
+    path: ../../../../third_party/dart/pkg/meta
   path:
-    path: ../../../third_party/dart/third_party/pkg/path
+    path: ../../../../third_party/dart/third_party/pkg/path
   platform:
-    path: ../../../third_party/pkg/platform
+    path: ../../../../third_party/pkg/platform
   process:
-    path: ../../../third_party/pkg/process
+    path: ../../../../third_party/pkg/process
   process_fakes:
-    path: ../pkg/process_fakes
+    path: ../process_fakes
   process_runner:
-    path: ../../../third_party/pkg/process_runner
+    path: ../../../../third_party/pkg/process_runner
   smith:
-    path: ../../../third_party/dart/pkg/smith
+    path: ../../../../third_party/dart/pkg/smith

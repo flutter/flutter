@@ -11,9 +11,9 @@ import 'package:engine_repo_tools/engine_repo_tools.dart';
 import 'package:litetest/litetest.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
+import 'package:process_fakes/process_fakes.dart';
 import 'package:process_runner/process_runner.dart';
 
-import 'process_fakes.dart';
 
 /// A test fixture for the `clang-tidy` tool.
 final class Fixture {
