@@ -193,8 +193,9 @@ class RenderSimpleBuilderTableViewport extends RenderTwoDimensionalViewport {
   RenderBox? testGetChildFor(ChildVicinity vicinity) => getChildFor(vicinity);
 
   @override
-  TestExtendedParentData parentDataOf(RenderBox child) =>
-      child.parentData! as TestExtendedParentData;
+  TestExtendedParentData parentDataOf(RenderBox child) {
+    return child.parentData! as TestExtendedParentData;
+  }
 
   @override
   void setupParentData(RenderBox child) {
@@ -503,10 +504,6 @@ class TestParentDataWidget extends ParentDataWidget<TestExtendedParentData> {
     assert(renderObject.parentData is TestExtendedParentData);
     final TestExtendedParentData parentData = renderObject.parentData! as TestExtendedParentData;
     parentData.testValue = testValue;
-    final RenderObject? targetParent = renderObject.parent;
-    if (targetParent is RenderObject) {
-      targetParent.markNeedsLayout();
-    }
   }
 
   @override

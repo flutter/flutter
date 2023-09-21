@@ -5813,6 +5813,10 @@ class ParentDataElement<T extends ParentData> extends ProxyElement {
   /// Creates an element that uses the given widget as its configuration.
   ParentDataElement(ParentDataWidget<T> super.widget);
 
+  /// Returns tne [Type] of [ParentData] that this element has been configured
+  /// for.
+  Type get parentDataType => T;
+
   void _applyParentData(ParentDataWidget<T> widget) {
     void applyParentDataToChild(Element child) {
       if (child is RenderObjectElement) {
@@ -6282,10 +6286,32 @@ abstract class RenderObjectElement extends Element {
     // debugIsValidRenderObject.
     Element? ancestor = _parent;
     final List<ParentDataElement<ParentData>> result = <ParentDataElement<ParentData>>[];
-    final Set<Type> ancestorTypes = <Type>{};
+    final Set<Type> debugAncestorTypes = <Type>{};
+    final Set<Type> debugParentDataTypes = <Type>{};
+    final List<Type> debugAncestorCulprits = <Type>[];
+    final List<Type> debugParentDataCulprits = <Type>[];
     while (ancestor != null && ancestor is! RenderObjectElement) {
       if (ancestor is ParentDataElement<ParentData>) {
-        ancestorTypes.add(ancestor.runtimeType);
+        assert(() {
+          if (!debugAncestorTypes.add(ancestor.runtimeType)) {
+            if (!debugAncestorCulprits.contains(ancestor.runtimeType)) {
+              // Add the first one we had put in the Set of Types.
+              debugAncestorCulprits.add(ancestor.runtimeType);
+            }
+            debugAncestorCulprits.add(ancestor.runtimeType);
+          }
+
+          if (!debugParentDataTypes.add(
+            (ancestor! as ParentDataElement<ParentData>).parentDataType
+          )) {
+            if (!debugParentDataCulprits.contains((ancestor as ParentDataElement<ParentData>).parentDataType)) {
+              // Add the first one we had put in the Set of Types.
+              debugAncestorCulprits.add(ancestor.parentDataType);
+            }
+            debugAncestorCulprits.add(ancestor.parentDataType);
+          }
+          return true;
+        }());
         result.add(ancestor);
       }
       ancestor = ancestor._parent;
@@ -6296,11 +6322,10 @@ abstract class RenderObjectElement extends Element {
       }
       // Check that no other ParentDataWidgets of the same type want to provide
       // parent data.
-      // The actual type of ParentData is checked in debugIsValidRenderObject.
-      if (ancestorTypes.length != result.length) {
+      if (debugAncestorTypes.length != result.length) {
         // This can only occur if the Set of ancestors was provided a dupe and
         // did not add it.
-        assert(ancestorTypes.length < result.length);
+        assert(debugAncestorTypes.length < result.length);
         try {
           // We explicitly throw here (even though we immediately redirect the
           // exception elsewhere) so that debuggers will notice it when they
@@ -6318,13 +6343,14 @@ abstract class RenderObjectElement extends Element {
                 'widget)'
               ),
             ErrorDescription(
-              'A RenderObject can receive parent data from more than one type '
-              'of ParentDataWidget, but not of the same conflicting type.'
+              'A RenderObject can receive parent data from multiple '
+              'ParentDataWidgets, but they must be all of different types.'
             ),
             ErrorHint(
-              'Alternatively, this can indicate that at least one of the '
-              'offending ParentDataWidgets listed above is not placed directly '
-              'inside a compatible ancestor widget.'
+              'Usually, this indicates that at least one of the offending '
+              "ParentDataWidgets listed above isn't placed inside a dedicated "
+              "compatible ancestor widget that it isn't sharing with another "
+              'ParentDataWidget of the same type.'
             ),
             ErrorDescription(
               'The ownership chain for the RenderObject that received the '
