@@ -325,7 +325,7 @@ void main() {
     expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 6.0);
   });
 
-  testWidgets('Floating Action Button states elevation', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Floating Action Button states elevation', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
@@ -720,7 +720,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('extended FAB hero transitions succeed', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('extended FAB hero transitions succeed', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/18782
 
     await tester.pumpWidget(
@@ -786,7 +786,7 @@ void main() {
   });
 
   // This test prevents https://github.com/flutter/flutter/issues/20483
-  testWidgets('Floating Action Button clips ink splash and highlight', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Floating Action Button clips ink splash and highlight', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -1167,7 +1167,7 @@ void main() {
       expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 6.0);
     });
 
-    testWidgets('Floating Action Button states elevation', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Floating Action Button states elevation', (WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
 
       await tester.pumpWidget(
@@ -1332,7 +1332,7 @@ void main() {
 
 
     // This test prevents https://github.com/flutter/flutter/issues/20483
-    testWidgets('Floating Action Button clips ink splash and highlight', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('Floating Action Button clips ink splash and highlight', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(
         MaterialApp(

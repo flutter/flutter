@@ -10,11 +10,14 @@ import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
 import '../base/file_system.dart';
+import '../base/platform.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../compile.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
+import '../macos/native_assets.dart';
+import '../native_assets.dart';
 import '../project.dart';
 import 'test_time_recorder.dart';
 
@@ -118,6 +121,7 @@ class TestCompiler {
       initializeFromDill: testFilePath,
       dartDefines: buildInfo.dartDefines,
       packagesPath: buildInfo.packagesPath,
+      frontendServerStarterPath: buildInfo.frontendServerStarterPath,
       extraFrontEndOptions: buildInfo.extraFrontEndOptions,
       platform: globals.platform,
       testCompilation: true,
@@ -163,6 +167,31 @@ class TestCompiler {
         invalidatedRegistrantFiles.add(flutterProject!.dartPluginRegistrant.absolute.uri);
       }
 
+      Uri? nativeAssetsYaml;
+      final Uri projectUri = FlutterProject.current().directory.uri;
+      final NativeAssetsBuildRunner buildRunner = NativeAssetsBuildRunnerImpl(
+        projectUri,
+        buildInfo.packageConfig,
+        globals.fs,
+        globals.logger,
+      );
+      if (globals.platform.isMacOS) {
+        (nativeAssetsYaml, _) = await buildNativeAssetsMacOS(
+          buildMode: BuildMode.debug,
+          projectUri: projectUri,
+          flutterTester: true,
+          fileSystem: globals.fs,
+          buildRunner: buildRunner,
+      );
+      } else {
+        await ensureNoNativeAssetsOrOsIsSupported(
+          projectUri,
+          const LocalPlatform().operatingSystem,
+          globals.fs,
+          buildRunner,
+        );
+      }
+
       final CompilerOutput? compilerOutput = await compiler!.recompile(
         request.mainUri,
         <Uri>[request.mainUri, ...invalidatedRegistrantFiles],
@@ -171,6 +200,7 @@ class TestCompiler {
         projectRootPath: flutterProject?.directory.absolute.path,
         checkDartPluginRegistry: true,
         fs: globals.fs,
+        nativeAssetsYaml: nativeAssetsYaml,
       );
       final String? outputPath = compilerOutput?.outputFilename;
 

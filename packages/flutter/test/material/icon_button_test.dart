@@ -4,7 +4,6 @@
 
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -121,7 +120,7 @@ void main() {
     focusNode.dispose();
   });
 
-  testWidgets('when null, iconSize is overridden by closest IconTheme', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('when null, iconSize is overridden by closest IconTheme', (WidgetTester tester) async {
     RenderBox icon;
     final bool material3 = theme.useMaterial3;
 
@@ -331,7 +330,7 @@ void main() {
     expect(box.size, const Size(80.0, 80.0));
   });
 
-  testWidgets('test default icon buttons can be stretched if specified', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('test default icon buttons can be stretched if specified', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -407,7 +406,7 @@ void main() {
     expect(align.alignment, Alignment.center);
   });
 
-  testWidgets('test tooltip', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('test tooltip', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -793,10 +792,6 @@ void main() {
   testWidgetsWithLeakTracking("Disabled IconButton can't be traversed to when disabled.", (WidgetTester tester) async {
     final FocusNode focusNode1 = FocusNode(debugLabel: 'IconButton 1');
     final FocusNode focusNode2 = FocusNode(debugLabel: 'IconButton 2');
-    addTearDown(() {
-      focusNode1.dispose();
-      focusNode2.dispose();
-    });
 
     await tester.pumpWidget(
       wrap(
@@ -826,8 +821,11 @@ void main() {
     expect(focusNode1.nextFocus(), isFalse);
     await tester.pump();
 
-    expect(focusNode1.hasPrimaryFocus, !kIsWeb);
+    expect(focusNode1.hasPrimaryFocus, isTrue);
     expect(focusNode2.hasPrimaryFocus, isFalse);
+
+    focusNode1.dispose();
+    focusNode2.dispose();
   });
 
   group('feedback', () {
@@ -2023,7 +2021,7 @@ void main() {
     expect(iconColor(), colorScheme.onSurface.withOpacity(0.38));
   });
 
-  testWidgets('Default IconButton meets a11y contrast guidelines - M3', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Default IconButton meets a11y contrast guidelines - M3', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
@@ -2588,7 +2586,7 @@ void main() {
   });
 
   group('IconTheme tests in Material 3', () {
-    testWidgets('IconTheme overrides default values in M3', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('IconTheme overrides default values in M3', (WidgetTester tester) async {
       // Theme's IconTheme
       await tester.pumpWidget(
         MaterialApp(

@@ -220,7 +220,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   ///
   /// The scrollbar track consumes this space.
   ///
-  /// Must not be null and defaults to 0.
+  /// Defaults to zero.
   double get crossAxisMargin => _crossAxisMargin;
   double _crossAxisMargin;
   set crossAxisMargin(double value) {
@@ -276,8 +276,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// partial obstructions such as display notches. If you only want additional
   /// margins around the scrollbar, see [mainAxisMargin].
   ///
-  /// Defaults to [EdgeInsets.zero]. Must not be null and offsets from all four
-  /// directions must be greater than or equal to zero.
+  /// Defaults to [EdgeInsets.zero]. Offsets from all four directions must be
+  /// greater than or equal to zero.
   EdgeInsets get padding => _padding;
   EdgeInsets _padding;
   set padding(EdgeInsets value) {
@@ -655,7 +655,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// Convert between a thumb track position and the corresponding scroll
   /// position.
   ///
-  /// thumbOffsetLocal is a position in the thumb track. Cannot be null.
+  /// The `thumbOffsetLocal` argument is a position in the thumb track.
   double getTrackToScroll(double thumbOffsetLocal) {
     final double scrollableExtent = _lastMetrics!.maxScrollExtent - _lastMetrics!.minScrollExtent;
     final double thumbMovableExtent = _traversableTrackExtent - _thumbExtent;
@@ -957,9 +957,6 @@ class RawScrollbar extends StatefulWidget {
   ///
   /// The [child], or a descendant of the [child], should be a source of
   /// [ScrollNotification] notifications, typically a [Scrollable] widget.
-  ///
-  /// The [child], [fadeDuration], [pressDuration], and [timeToFade] arguments
-  /// must not be null.
   const RawScrollbar({
     super.key,
     required this.child,
@@ -1245,18 +1242,18 @@ class RawScrollbar extends StatefulWidget {
 
   /// The [Duration] of the fade animation.
   ///
-  /// Cannot be null, defaults to a [Duration] of 300 milliseconds.
+  /// Defaults to a [Duration] of 300 milliseconds.
   final Duration fadeDuration;
 
   /// The [Duration] of time until the fade animation begins.
   ///
-  /// Cannot be null, defaults to a [Duration] of 600 milliseconds.
+  /// Defaults to a [Duration] of 600 milliseconds.
   final Duration timeToFade;
 
   /// The [Duration] of time that a LongPress will trigger the drag gesture of
   /// the scrollbar thumb.
   ///
-  /// Cannot be null, defaults to [Duration.zero].
+  /// Defaults to [Duration.zero].
   final Duration pressDuration;
 
   /// {@template flutter.widgets.Scrollbar.notificationPredicate}
@@ -1307,7 +1304,7 @@ class RawScrollbar extends StatefulWidget {
   ///
   /// The scrollbar track consumes this space.
   ///
-  /// Must not be null and defaults to 0.
+  /// Defaults to zero.
   final double crossAxisMargin;
 
   /// The insets by which the scrollbar thumb and track should be padded.
