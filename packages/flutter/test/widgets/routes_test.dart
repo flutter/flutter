@@ -8,6 +8,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'semantics_tester.dart';
 
@@ -89,6 +90,9 @@ class TestRoute extends Route<String?> with LocalHistoryRoute<String?> {
   @override
   void dispose() {
     log('dispose');
+    for (final OverlayEntry e in _entries) {
+      e.dispose();
+    }
     _entries.clear();
     routes.remove(this);
     super.dispose();
@@ -113,12 +117,12 @@ Future<void> runNavigatorTest(
 }
 
 void main() {
-  testWidgets('Route settings', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Route settings', (WidgetTester tester) async {
     const RouteSettings settings = RouteSettings(name: 'A');
     expect(settings, hasOneLineDescription);
   });
 
-  testWidgets('Route settings arguments', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Route settings arguments', (WidgetTester tester) async {
     const RouteSettings settings = RouteSettings(name: 'A');
     expect(settings.arguments, isNull);
 
@@ -127,7 +131,7 @@ void main() {
     expect(settings2.arguments, same(arguments));
   });
 
-  testWidgets('Route management - push, replace, pop sequence', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Route management - push, replace, pop sequence', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       Directionality(
@@ -214,7 +218,7 @@ void main() {
     results.clear();
   });
 
-  testWidgets('Route management - push, remove, pop', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Route management - push, remove, pop', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       Directionality(
@@ -329,7 +333,7 @@ void main() {
     results.clear();
   });
 
-  testWidgets('Route management - push, replace, popUntil', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Route management - push, replace, popUntil', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       Directionality(
@@ -406,7 +410,7 @@ void main() {
     results.clear();
   });
 
-  testWidgets('Route localHistory - popUntil', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Route localHistory - popUntil', (WidgetTester tester) async {
     final TestRoute routeA = TestRoute('A');
     routeA.addLocalHistoryEntry(LocalHistoryEntry(
       onRemove: () { routeA.log('onRemove 0'); },
@@ -543,7 +547,7 @@ void main() {
     });
   });
 
-  testWidgets('Can autofocus a TextField nested in a Focus in a route.', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Can autofocus a TextField nested in a Focus in a route.', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
     final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
@@ -573,7 +577,7 @@ void main() {
   });
 
   group('PageRouteBuilder', () {
-    testWidgets('reverseTransitionDuration defaults to 300ms', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('reverseTransitionDuration defaults to 300ms', (WidgetTester tester) async {
       // Default PageRouteBuilder reverse transition duration should be 300ms.
       await tester.pumpWidget(
         MaterialApp(
@@ -624,7 +628,7 @@ void main() {
       expect(find.text('Open page'), findsOneWidget);
     });
 
-    testWidgets('reverseTransitionDuration can be customized', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('reverseTransitionDuration can be customized', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         onGenerateRoute: (RouteSettings settings) {
           return MaterialPageRoute<dynamic>(
@@ -676,7 +680,7 @@ void main() {
   });
 
   group('TransitionRoute', () {
-    testWidgets('secondary animation is kDismissed when next route finishes pop', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('secondary animation is kDismissed when next route finishes pop', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
       await tester.pumpWidget(
         MaterialApp(
@@ -734,7 +738,7 @@ void main() {
       expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
     });
 
-    testWidgets('secondary animation is kDismissed when next route is removed', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('secondary animation is kDismissed when next route is removed', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
       await tester.pumpWidget(
         MaterialApp(
@@ -789,7 +793,7 @@ void main() {
       expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
     });
 
-    testWidgets('secondary animation is kDismissed after train hopping finishes and pop', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('secondary animation is kDismissed after train hopping finishes and pop', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
       await tester.pumpWidget(
         MaterialApp(
@@ -861,7 +865,7 @@ void main() {
       expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
     });
 
-    testWidgets('secondary animation is kDismissed when train hopping is interrupted', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('secondary animation is kDismissed when train hopping is interrupted', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
       await tester.pumpWidget(
         MaterialApp(
@@ -930,7 +934,7 @@ void main() {
       expect(trainHopper2.currentTrain, isNull); // Has been disposed.
     });
 
-    testWidgets('secondary animation is triggered when pop initial route', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('secondary animation is triggered when pop initial route', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
       late Animation<double> secondaryAnimationOfRouteOne;
       late Animation<double> primaryAnimationOfRouteTwo;
@@ -968,7 +972,7 @@ void main() {
       expect(secondaryAnimationOfRouteOne.value, primaryAnimationOfRouteTwo.value);
     });
 
-    testWidgets('showGeneralDialog handles transparent barrier color', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('showGeneralDialog handles transparent barrier color', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Builder(
           builder: (BuildContext context) {
@@ -1002,7 +1006,7 @@ void main() {
       expect(find.byType(ModalBarrier), findsNWidgets(1));
     });
 
-    testWidgets('showGeneralDialog adds non-dismissible barrier when barrierDismissible is false', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('showGeneralDialog adds non-dismissible barrier when barrierDismissible is false', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Builder(
           builder: (BuildContext context) {
@@ -1037,7 +1041,7 @@ void main() {
       expect(find.byType(ModalBarrier), findsNWidgets(1));
     });
 
-    testWidgets('showGeneralDialog uses null as a barrierLabel by default', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('showGeneralDialog uses null as a barrierLabel by default', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Builder(
           builder: (BuildContext context) {
@@ -1072,7 +1076,7 @@ void main() {
       expect(find.byType(ModalBarrier), findsNWidgets(1));
     });
 
-    testWidgets('showGeneralDialog uses root navigator by default', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('showGeneralDialog uses root navigator by default', (WidgetTester tester) async {
       final DialogObserver rootObserver = DialogObserver();
       final DialogObserver nestedObserver = DialogObserver();
 
@@ -1108,7 +1112,7 @@ void main() {
       expect(nestedObserver.dialogCount, 0);
     });
 
-    testWidgets('showGeneralDialog uses nested navigator if useRootNavigator is false', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('showGeneralDialog uses nested navigator if useRootNavigator is false', (WidgetTester tester) async {
       final DialogObserver rootObserver = DialogObserver();
       final DialogObserver nestedObserver = DialogObserver();
 
@@ -1145,7 +1149,7 @@ void main() {
       expect(nestedObserver.dialogCount, 1);
     });
 
-    testWidgets('showGeneralDialog default argument values', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('showGeneralDialog default argument values', (WidgetTester tester) async {
       final DialogObserver rootObserver = DialogObserver();
 
       await tester.pumpWidget(MaterialApp(
@@ -1181,7 +1185,7 @@ void main() {
     });
 
     group('showGeneralDialog avoids overlapping display features', () {
-      testWidgets('positioning with anchorPoint', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('positioning with anchorPoint', (WidgetTester tester) async {
         await tester.pumpWidget(
           MaterialApp(
             builder: (BuildContext context, Widget? child) {
@@ -1219,7 +1223,7 @@ void main() {
         expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 600.0));
       });
 
-      testWidgets('positioning with Directionality', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('positioning with Directionality', (WidgetTester tester) async {
         await tester.pumpWidget(
           MaterialApp(
             builder: (BuildContext context, Widget? child) {
@@ -1259,7 +1263,7 @@ void main() {
         expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 600.0));
       });
 
-      testWidgets('positioning by default', (WidgetTester tester) async {
+      testWidgetsWithLeakTracking('positioning by default', (WidgetTester tester) async {
         await tester.pumpWidget(
           MaterialApp(
             builder: (BuildContext context, Widget? child) {
@@ -1297,7 +1301,7 @@ void main() {
       });
     });
 
-    testWidgets('reverseTransitionDuration defaults to transitionDuration', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('reverseTransitionDuration defaults to transitionDuration', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
 
       // Default MaterialPageRoute transition duration should be 300ms.
@@ -1349,7 +1353,7 @@ void main() {
       expect(find.byKey(containerKey), findsNothing);
     });
 
-    testWidgets('reverseTransitionDuration can be customized', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('reverseTransitionDuration can be customized', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       await tester.pumpWidget(MaterialApp(
         onGenerateRoute: (RouteSettings settings) {
@@ -1401,7 +1405,7 @@ void main() {
       expect(find.byKey(containerKey), findsNothing);
     });
 
-    testWidgets('custom reverseTransitionDuration does not result in interrupted animations', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('custom reverseTransitionDuration does not result in interrupted animations', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(
@@ -1469,7 +1473,7 @@ void main() {
   });
 
   group('ModalRoute', () {
-    testWidgets('default barrierCurve', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('default barrierCurve', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Material(
           child: Builder(
@@ -1531,7 +1535,7 @@ void main() {
       expect(modalBarrierAnimation.value, Colors.black);
     });
 
-    testWidgets('custom barrierCurve', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('custom barrierCurve', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Material(
           child: Builder(
@@ -1594,7 +1598,7 @@ void main() {
       expect(modalBarrierAnimation.value, Colors.black);
     });
 
-    testWidgets('white barrierColor', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('white barrierColor', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Material(
           child: Builder(
@@ -1657,7 +1661,7 @@ void main() {
       expect(modalBarrierAnimation.value, Colors.white);
     });
 
-    testWidgets('modal route semantics order', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('modal route semantics order', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/46625.
       final SemanticsTester semantics = SemanticsTester(tester);
       await tester.pumpWidget(MaterialApp(
@@ -1730,7 +1734,7 @@ void main() {
       semantics.dispose();
     }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}));
 
-    testWidgets('focus traverse correct when pop multiple page simultaneously', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('focus traverse correct when pop multiple page simultaneously', (WidgetTester tester) async {
       // Regression test: https://github.com/flutter/flutter/issues/48903
       final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
       await tester.pumpWidget(MaterialApp(
@@ -1776,7 +1780,7 @@ void main() {
       expect(focusNodeOnPageOne.hasFocus, isTrue);
     });
 
-    testWidgets('focus traversal is correct when popping multiple pages simultaneously - with focused children', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('focus traversal is correct when popping multiple pages simultaneously - with focused children', (WidgetTester tester) async {
       // Regression test: https://github.com/flutter/flutter/issues/48903
       final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
       await tester.pumpWidget(MaterialApp(
@@ -1828,7 +1832,7 @@ void main() {
       expect(focusNodeOnPageOne.hasFocus, isTrue);
     });
 
-    testWidgets('child with local history can be disposed', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('child with local history can be disposed', (WidgetTester tester) async {
       // Regression test: https://github.com/flutter/flutter/issues/52478
       await tester.pumpWidget(const MaterialApp(
         home: WidgetWithLocalHistory(),
@@ -1849,7 +1853,7 @@ void main() {
       expect(tester.takeException(), null);
     });
 
-    testWidgets('child with no local history can be disposed', (WidgetTester tester) async {
+    testWidgetsWithLeakTracking('child with no local history can be disposed', (WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(
         home: WidgetWithNoLocalHistory(),
       ));
@@ -1869,7 +1873,7 @@ void main() {
     });
   });
 
-  testWidgets('can be dismissed with escape keyboard shortcut', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can be dismissed with escape keyboard shortcut', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(MaterialApp(
       navigatorKey: navigatorKey,
@@ -1891,7 +1895,7 @@ void main() {
     expect(find.text('dialog1'), findsNothing);
   });
 
-  testWidgets('can not be dismissed with escape keyboard shortcut if barrier not dismissible', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('can not be dismissed with escape keyboard shortcut if barrier not dismissible', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(MaterialApp(
       navigatorKey: navigatorKey,
@@ -1914,7 +1918,7 @@ void main() {
     expect(find.text('dialog1'), findsOneWidget);
   });
 
-  testWidgets('ModalRoute.of works for void routes', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('ModalRoute.of works for void routes', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(MaterialApp(
       navigatorKey: navigatorKey,
@@ -1936,7 +1940,7 @@ void main() {
     expect(parentRoute, isA<MaterialPageRoute<void>>());
   });
 
-  testWidgets('RawDialogRoute is state restorable', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('RawDialogRoute is state restorable', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         restorationScopeId: 'app',
