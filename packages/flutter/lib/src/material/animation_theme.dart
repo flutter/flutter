@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
 
 /// Overrides the default properties values for descendant [Badge] widgets.
 ///
@@ -40,22 +38,25 @@ class AnimationThemeData with Diagnosticable {
   /// defaults to 250 milliseconds.
   final Duration animationDuration;
 
-
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   AnimationThemeData copyWith({
     Curve? animationCurve,
-    Duration? animationDuration
+    Duration? animationDuration,
   }) {
     return AnimationThemeData(
       animationCurve: animationCurve ?? this.animationCurve,
       animationDuration: animationDuration ?? this.animationDuration,
     );
   }
-//
+
   /// Linearly interpolate between two [Badge] themes.
   /// TODO: work on lerp
-  static AnimationThemeData lerp(AnimationThemeData? a, AnimationThemeData? b, double t) {
+  static AnimationThemeData lerp(
+    AnimationThemeData? a,
+    AnimationThemeData? b,
+    double t,
+  ) {
     if (identical(a, b) && a != null) {
       return a;
     }
@@ -66,10 +67,7 @@ class AnimationThemeData with Diagnosticable {
   }
 
   @override
-  int get hashCode => Object.hash(
-      animationCurve,
-      animationDuration
-  );
+  int get hashCode => Object.hash(animationCurve, animationDuration);
 //
   @override
   bool operator ==(Object other) {
@@ -79,18 +77,27 @@ class AnimationThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is AnimationThemeData
-        && other.animationCurve == animationCurve
-        && other.animationDuration == animationDuration;
+    return other is AnimationThemeData &&
+        other.animationCurve == animationCurve &&
+        other.animationDuration == animationDuration;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Curve>('animationCurve', animationCurve, defaultValue: Curves.easeInOut));
-    properties.add(DiagnosticsProperty<Duration>('animationDuration', animationDuration, defaultValue: const Duration(milliseconds: 250)));
+    properties.add(DiagnosticsProperty<Curve>(
+      'animationCurve',
+      animationCurve,
+      defaultValue: Curves.easeInOut,
+    ));
+    properties.add(DiagnosticsProperty<Duration>(
+      'animationDuration',
+      animationDuration,
+      defaultValue: const Duration(milliseconds: 250),
+    ));
   }
 }
+
 //
 /// An inherited widget that overrides the default animation
 /// parameters for [Animation]s in this widget's subtree.
@@ -119,7 +126,8 @@ class AnimationTheme extends InheritedTheme {
   /// AnimationThemeData theme = AnimationTheme.of(context);
   /// ```
   static AnimationThemeData of(BuildContext context) {
-    final AnimationTheme? animationTheme = context.dependOnInheritedWidgetOfExactType<AnimationTheme>();
+    final AnimationTheme? animationTheme =
+        context.dependOnInheritedWidgetOfExactType<AnimationTheme>();
     return animationTheme?.data ?? Theme.of(context).animationTheme;
   }
 
