@@ -68,7 +68,7 @@ void main() {
   // TODO(LongCatIsLoong): Uncomment once https://github.com/flutter/flutter/issues/44115
   // is fixed.
   /*
-  testWidgets(
+  testWidgetsWithLeakTracking(
     'CupertinoButton.filled default color contrast meets guideline',
     (WidgetTester tester) async {
       // The native color combination systemBlue text over white background fails
@@ -185,7 +185,7 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(1));
   });
 
-  testWidgets("Disabled button doesn't animate", (WidgetTester tester) async {
+  testWidgetsWithLeakTracking("Disabled button doesn't animate", (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(child: const CupertinoButton(
       onPressed: null,
       child: Text('Tap me'),
