@@ -702,19 +702,23 @@ void main() {
 
   testWidgetsWithLeakTracking('LayoutBuilder render object child can be visited', (WidgetTester tester) async {
     bool hasChildBeenVisited = false;
+    final UniqueKey layoutBuilderKey = UniqueKey();
 
     await tester.pumpWidget(
-      _RenderChildVisitorBox(
-        visitor: (RenderObject renderObject) {
-          hasChildBeenVisited = true;
-        },
-        child: LayoutBuilder(
+      LayoutBuilder(
+        key: layoutBuilderKey,
           builder: (BuildContext context, BoxConstraints constraints) {
             return const SizedBox.shrink();
           },
         ),
-      ),
     );
+
+    final Finder finder = find.byKey(layoutBuilderKey);
+    final RenderBox renderBox = tester.firstRenderObject<RenderBox>(finder);
+
+    renderBox.visitChildren((RenderObject child) {
+      hasChildBeenVisited = true;
+    });
 
     assert(hasChildBeenVisited, isTrue);
   });
@@ -755,37 +759,5 @@ class _RenderLayoutSpy extends RenderBox {
   @override
   void performLayout() {
     performLayoutCount += 1;
-  }
-}
-
-final class _RenderChildVisitorBox extends SingleChildRenderObjectWidget {
-  const _RenderChildVisitorBox({
-    required this.visitor,
-    super.child,
-  });
-
-  final RenderObjectVisitor visitor;
-
-  @override
-  RenderObject createRenderObject(BuildContext context) => _RenderChildVisitor(visitor);
-
-  @override
-  void updateRenderObject(BuildContext context, _RenderChildVisitor renderObject) {
-    renderObject.visitor = visitor;
-  }
-}
-
-final class _RenderChildVisitor extends RenderProxyBox {
-  _RenderChildVisitor(this.visitor);
-
-  RenderObjectVisitor visitor;
-
-  @override
-  void performLayout() {
-    super.performLayout();
-
-    if (child case final RenderObject child) {
-      child.visitChildren(visitor);
-    }
   }
 }
