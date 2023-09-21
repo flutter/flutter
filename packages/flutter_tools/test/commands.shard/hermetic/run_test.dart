@@ -1335,7 +1335,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 
 class TestRunCommandForUsageValues extends RunCommand {
   TestRunCommandForUsageValues({
-   List<Device>? devices,
+    List<Device>? devices,
   }) {
     this.devices = devices;
   }
