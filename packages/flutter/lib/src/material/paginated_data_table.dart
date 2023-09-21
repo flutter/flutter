@@ -412,11 +412,11 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
         }
       }
 
-      if(!widget.hideEmptyLastPageRows) {
+      if (!widget.hideEmptyLastPageRows) {
         row ??= _getBlankRowFor(index);
       }
 
-      if(row != null) {
+      if (row != null) {
         result.add(row);
       }
     }
@@ -610,7 +610,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                   ),
                 ),
               ),
-              if(widget.hideEmptyLastPageRows) 
+              if (widget.hideEmptyLastPageRows)
                 SizedBox(
                     height: (widget.dataRowMaxHeight ?? kMinInteractiveDimension) * (widget.rowsPerPage - _rowCount + _firstRowIndex).clamp(0, widget.rowsPerPage)), // ignore_clamp_double_lint
               DefaultTextStyle(
