@@ -110,12 +110,11 @@ void main() async {
         case 2:
           drawHelloWorld(view);
           _waitUntilWindowVisible().then((_) {
-            ui.PlatformDispatcher.instance.scheduleFrame();
             if (!visibilityCompleter.isCompleted) {
               visibilityCompleter.complete('success');
             }
           });
-        // Others: Continue rendering.
+        // Others, in case requested to render.
         default:
           drawHelloWorld(view);
       }
