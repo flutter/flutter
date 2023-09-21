@@ -6,6 +6,7 @@
 #define FLUTTER_DISPLAY_LIST_DL_PAINT_H_
 
 #include <memory>
+#include <utility>
 #include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/dl_color.h"
 #include "flutter/display_list/effects/dl_color_filter.h"
@@ -52,23 +53,23 @@ class DlPaint {
   static const DlPaint kDefault;
 
   DlPaint() : DlPaint(DlColor::kBlack()) {}
-  DlPaint(DlColor color);
+  explicit DlPaint(DlColor color);
 
-  bool isAntiAlias() const { return isAntiAlias_; }
+  bool isAntiAlias() const { return is_anti_alias_; }
   DlPaint& setAntiAlias(bool isAntiAlias) {
-    isAntiAlias_ = isAntiAlias;
+    is_anti_alias_ = isAntiAlias;
     return *this;
   }
 
-  bool isDither() const { return isDither_; }
+  bool isDither() const { return is_dither_; }
   DlPaint& setDither(bool isDither) {
-    isDither_ = isDither;
+    is_dither_ = isDither;
     return *this;
   }
 
-  bool isInvertColors() const { return isInvertColors_; }
+  bool isInvertColors() const { return is_invert_colors_; }
   DlPaint& setInvertColors(bool isInvertColors) {
-    isInvertColors_ = isInvertColors;
+    is_invert_colors_ = isInvertColors;
     return *this;
   }
 
@@ -87,111 +88,111 @@ class DlPaint {
   }
 
   DlBlendMode getBlendMode() const {
-    return static_cast<DlBlendMode>(blendMode_);
+    return static_cast<DlBlendMode>(blend_mode_);
   }
   DlPaint& setBlendMode(DlBlendMode mode) {
-    blendMode_ = static_cast<unsigned>(mode);
+    blend_mode_ = static_cast<unsigned>(mode);
     return *this;
   }
 
   DlDrawStyle getDrawStyle() const {
-    return static_cast<DlDrawStyle>(drawStyle_);
+    return static_cast<DlDrawStyle>(draw_style_);
   }
   DlPaint& setDrawStyle(DlDrawStyle style) {
-    drawStyle_ = static_cast<unsigned>(style);
+    draw_style_ = static_cast<unsigned>(style);
     return *this;
   }
 
   DlStrokeCap getStrokeCap() const {
-    return static_cast<DlStrokeCap>(strokeCap_);
+    return static_cast<DlStrokeCap>(stroke_cap_);
   }
   DlPaint& setStrokeCap(DlStrokeCap cap) {
-    strokeCap_ = static_cast<unsigned>(cap);
+    stroke_cap_ = static_cast<unsigned>(cap);
     return *this;
   }
 
   DlStrokeJoin getStrokeJoin() const {
-    return static_cast<DlStrokeJoin>(strokeJoin_);
+    return static_cast<DlStrokeJoin>(stroke_join_);
   }
   DlPaint& setStrokeJoin(DlStrokeJoin join) {
-    strokeJoin_ = static_cast<unsigned>(join);
+    stroke_join_ = static_cast<unsigned>(join);
     return *this;
   }
 
-  float getStrokeWidth() const { return strokeWidth_; }
+  float getStrokeWidth() const { return stroke_width_; }
   DlPaint& setStrokeWidth(float width) {
-    strokeWidth_ = width;
+    stroke_width_ = width;
     return *this;
   }
 
-  float getStrokeMiter() const { return strokeMiter_; }
+  float getStrokeMiter() const { return stroke_miter_; }
   DlPaint& setStrokeMiter(float miter) {
-    strokeMiter_ = miter;
+    stroke_miter_ = miter;
     return *this;
   }
 
   std::shared_ptr<const DlColorSource> getColorSource() const {
-    return colorSource_;
+    return color_source_;
   }
-  const DlColorSource* getColorSourcePtr() const { return colorSource_.get(); }
+  const DlColorSource* getColorSourcePtr() const { return color_source_.get(); }
   DlPaint& setColorSource(std::shared_ptr<const DlColorSource> source) {
-    colorSource_ = source;
+    color_source_ = std::move(source);
     return *this;
   }
   DlPaint& setColorSource(const DlColorSource* source) {
-    colorSource_ = source ? source->shared() : nullptr;
+    color_source_ = source ? source->shared() : nullptr;
     return *this;
   }
 
   std::shared_ptr<const DlColorFilter> getColorFilter() const {
-    return colorFilter_;
+    return color_filter_;
   }
-  const DlColorFilter* getColorFilterPtr() const { return colorFilter_.get(); }
-  DlPaint& setColorFilter(const std::shared_ptr<const DlColorFilter> filter) {
-    colorFilter_ = filter;
+  const DlColorFilter* getColorFilterPtr() const { return color_filter_.get(); }
+  DlPaint& setColorFilter(const std::shared_ptr<const DlColorFilter>& filter) {
+    color_filter_ = filter;
     return *this;
   }
   DlPaint& setColorFilter(const DlColorFilter* filter) {
-    colorFilter_ = filter ? filter->shared() : nullptr;
+    color_filter_ = filter ? filter->shared() : nullptr;
     return *this;
   }
 
   std::shared_ptr<const DlImageFilter> getImageFilter() const {
-    return imageFilter_;
+    return image_filter_;
   }
-  const DlImageFilter* getImageFilterPtr() const { return imageFilter_.get(); }
-  DlPaint& setImageFilter(const std::shared_ptr<const DlImageFilter> filter) {
-    imageFilter_ = filter;
+  const DlImageFilter* getImageFilterPtr() const { return image_filter_.get(); }
+  DlPaint& setImageFilter(const std::shared_ptr<const DlImageFilter>& filter) {
+    image_filter_ = filter;
     return *this;
   }
   DlPaint& setImageFilter(const DlImageFilter* filter) {
-    imageFilter_ = filter ? filter->shared() : nullptr;
+    image_filter_ = filter ? filter->shared() : nullptr;
     return *this;
   }
 
   std::shared_ptr<const DlMaskFilter> getMaskFilter() const {
-    return maskFilter_;
+    return mask_filter_;
   }
-  const DlMaskFilter* getMaskFilterPtr() const { return maskFilter_.get(); }
-  DlPaint& setMaskFilter(std::shared_ptr<DlMaskFilter> filter) {
-    maskFilter_ = filter;
+  const DlMaskFilter* getMaskFilterPtr() const { return mask_filter_.get(); }
+  DlPaint& setMaskFilter(const std::shared_ptr<DlMaskFilter>& filter) {
+    mask_filter_ = filter;
     return *this;
   }
   DlPaint& setMaskFilter(const DlMaskFilter* filter) {
-    maskFilter_ = filter ? filter->shared() : nullptr;
+    mask_filter_ = filter ? filter->shared() : nullptr;
     return *this;
   }
 
   std::shared_ptr<const DlPathEffect> getPathEffect() const {
-    return pathEffect_;
+    return path_effect_;
   }
-  const DlPathEffect* getPathEffectPtr() const { return pathEffect_.get(); }
-  DlPaint& setPathEffect(std::shared_ptr<DlPathEffect> pathEffect) {
-    pathEffect_ = pathEffect;
+  const DlPathEffect* getPathEffectPtr() const { return path_effect_.get(); }
+  DlPaint& setPathEffect(const std::shared_ptr<DlPathEffect>& pathEffect) {
+    path_effect_ = pathEffect;
     return *this;
   }
   DlPaint& setPathEffect(const DlPathEffect* effect) {
-    pathEffect_ = effect ? effect->shared() : nullptr;
+    path_effect_ = effect ? effect->shared() : nullptr;
     return *this;
   }
 
@@ -216,25 +217,25 @@ class DlPaint {
 
   union {
     struct {
-      unsigned blendMode_ : kBlendModeBits;
-      unsigned drawStyle_ : kDrawStyleBits;
-      unsigned strokeCap_ : kStrokeCapBits;
-      unsigned strokeJoin_ : kStrokeJoinBits;
-      unsigned isAntiAlias_ : 1;
-      unsigned isDither_ : 1;
-      unsigned isInvertColors_ : 1;
+      unsigned blend_mode_ : kBlendModeBits;
+      unsigned draw_style_ : kDrawStyleBits;
+      unsigned stroke_cap_ : kStrokeCapBits;
+      unsigned stroke_join_ : kStrokeJoinBits;
+      unsigned is_anti_alias_ : 1;
+      unsigned is_dither_ : 1;
+      unsigned is_invert_colors_ : 1;
     };
   };
 
   DlColor color_;
-  float strokeWidth_;
-  float strokeMiter_;
+  float stroke_width_;
+  float stroke_miter_;
 
-  std::shared_ptr<const DlColorSource> colorSource_;
-  std::shared_ptr<const DlColorFilter> colorFilter_;
-  std::shared_ptr<const DlImageFilter> imageFilter_;
-  std::shared_ptr<const DlMaskFilter> maskFilter_;
-  std::shared_ptr<const DlPathEffect> pathEffect_;
+  std::shared_ptr<const DlColorSource> color_source_;
+  std::shared_ptr<const DlColorFilter> color_filter_;
+  std::shared_ptr<const DlImageFilter> image_filter_;
+  std::shared_ptr<const DlMaskFilter> mask_filter_;
+  std::shared_ptr<const DlPathEffect> path_effect_;
 };
 
 }  // namespace flutter
