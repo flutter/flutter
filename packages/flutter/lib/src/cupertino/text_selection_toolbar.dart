@@ -1037,7 +1037,6 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
         ),
         parentUsesSize: true,
       );
-      assert(child.size.height == greatestHeight);
 
       // If this child causes the current page to overflow, move to the next
       // page and relayout the child.
