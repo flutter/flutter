@@ -58,6 +58,7 @@ class CupertinoSwitchThemeData with Diagnosticable {
     );
   }
 
+  /// Resolves this [CupertinoSwitchThemeData] using the provided [BuildContext].
   CupertinoSwitchThemeData resolveFrom(BuildContext context) {
     return copyWith(
         activeColor: CupertinoDynamicColor.maybeResolve(
