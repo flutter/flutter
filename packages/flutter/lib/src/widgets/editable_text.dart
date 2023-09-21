@@ -866,15 +866,9 @@ class EditableText extends StatefulWidget {
        showCursor = showCursor ?? !readOnly;
 
   /// Controls the text being edited.
-  ///
-  /// The owner will be responsible for calling [TextEditingController.dispose]
-  /// on the controller when it is no longer needed.
   final TextEditingController controller;
 
   /// Controls whether this widget has keyboard focus.
-  ///
-  /// The owner will be responsible for calling [FocusNode.dispose] on the focus
-  /// node when it is done with it.
   final FocusNode focusNode;
 
   /// {@template flutter.widgets.editableText.obscuringCharacter}
