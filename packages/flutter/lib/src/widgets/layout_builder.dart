@@ -336,8 +336,8 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
   
   @override
   void visitChildren(RenderObjectVisitor visitor) {
-    if (child case child?) {
-      visitor(case);
+    if (child case final RenderObject child) {
+      visitor(child);
     }
   }
 

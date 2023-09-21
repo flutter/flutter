@@ -699,6 +699,25 @@ void main() {
     await pumpTestWidget(const Size(10.0, 10.0));
     expect(childSize, const Size(10.0, 10.0));
   });
+
+  testWidgetsWithLeakTracking('LayoutBuilder render object child can be visited', (WidgetTester tester) async {
+    bool hasChildBeenVisited = false;
+
+    await tester.pumpWidget(
+      _RenderChildVisitorBox(
+        visitor: (RenderObject renderObject) {
+          hasChildBeenVisited = true;
+        },
+        child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return const SizedBox.shrink();
+          },
+        ),
+      ),
+    );
+
+    assert(hasChildBeenVisited, isTrue);
+  });
 }
 
 class _LayoutSpy extends LeafRenderObjectWidget {
@@ -736,5 +755,37 @@ class _RenderLayoutSpy extends RenderBox {
   @override
   void performLayout() {
     performLayoutCount += 1;
+  }
+}
+
+final class _RenderChildVisitorBox extends SingleChildRenderObjectWidget {
+  const _RenderChildVisitorBox({
+    required this.visitor,
+    super.child,
+  });
+
+  final RenderObjectVisitor visitor;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => _RenderChildVisitor(visitor);
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderChildVisitor renderObject) {
+    renderObject.visitor = visitor;
+  }
+}
+
+final class _RenderChildVisitor extends RenderProxyBox {
+  _RenderChildVisitor(this.visitor);
+
+  RenderObjectVisitor visitor;
+
+  @override
+  void performLayout() {
+    super.performLayout();
+
+    if (child case final RenderObject child) {
+      child.visitChildren(visitor);
+    }
   }
 }
