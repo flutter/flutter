@@ -984,16 +984,28 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
       return;
     }
 
+    // First pass: determine the height of the tallest child.
+    double greatestHeight = 0.0;
+    visitChildren((RenderObject renderObjectChild) {
+      final RenderBox child = renderObjectChild as RenderBox;
+      final double childHeight = child.getMaxIntrinsicHeight(constraints.maxWidth);
+      if (childHeight > greatestHeight) {
+        greatestHeight = childHeight;
+      }
+    });
+
     // Layout slotted children.
-    _backButton!.layout(constraints.loosen(), parentUsesSize: true);
-    _nextButton!.layout(constraints.loosen(), parentUsesSize: true);
+    final BoxConstraints slottedConstraints = BoxConstraints(
+      maxWidth: constraints.maxWidth,
+      minHeight: greatestHeight,
+      maxHeight: constraints.maxHeight,
+    );
+    _backButton!.layout(slottedConstraints, parentUsesSize: true);
+    _nextButton!.layout(slottedConstraints, parentUsesSize: true);
 
     final double subsequentPageButtonsWidth = _backButton!.size.width + _nextButton!.size.width;
     double currentButtonPosition = 0.0;
     late double toolbarWidth; // The width of the whole widget.
-    late double greatestHeight = _backButton!.size.height > _nextButton!.size.height
-        ? _backButton!.size.height
-        : _nextButton!.size.height;
     late double firstPageWidth;
     int currentPage = 0;
     int i = -1;
@@ -1021,14 +1033,12 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
       child.layout(
         BoxConstraints(
           maxWidth: (currentPage == 0 ? constraints.maxWidth : firstPageWidth) - paginationButtonsWidth,
+          minHeight: greatestHeight,
           maxHeight: constraints.maxHeight,
         ),
         parentUsesSize: true,
       );
-
-      greatestHeight = child.size.height > greatestHeight
-          ? child.size.height
-          : greatestHeight;
+      assert(child.size.height == greatestHeight);
 
       // If this child causes the current page to overflow, move to the next
       // page and relayout the child.
@@ -1054,17 +1064,6 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
       }
       if (currentPage == page) {
         toolbarWidth = currentButtonPosition;
-      }
-    });
-
-    // Re-layout the children using max. child height to allow them to be centered vertically.
-    visitChildren((RenderObject renderObjectChild) {
-      final RenderBox child = renderObjectChild as RenderBox;
-      if (child.hasSize) {
-        child.layout(
-          BoxConstraints.tightFor(width: child.size.width, height: greatestHeight),
-          parentUsesSize: true,
-        );
       }
     });
 
